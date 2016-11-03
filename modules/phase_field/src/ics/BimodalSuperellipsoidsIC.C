@@ -12,7 +12,7 @@ template<>
 InputParameters validParams<BimodalSuperellipsoidsIC>()
 {
   InputParameters params = validParams<SpecifiedSmoothSuperellipsoidIC>();
-  params.addClassDescription("Bimodal size distribution of large particles (specified in input file) and small particles (placed randomly)");
+  params.addClassDescription("Bimodal size distribution of large particles (specified in input file) and small particles (placed randomly outside the larger particles)");
   params.addRequiredParam<unsigned int>("npart", "The number of random (small) particles to place");
   params.addRequiredParam<Real>("small_spac", "minimum spacing between small particles, measured from closest edge to closest edge");
   params.addRequiredParam<Real>("large_spac", "minimum spacing between large and small particles, measured from closest edge to closest edge");
@@ -38,29 +38,23 @@ BimodalSuperellipsoidsIC::BimodalSuperellipsoidsIC(const InputParameters & param
     _small_n(getParam<Real>("small_n")),
     _size_variation(getParam<Real>("size_variation")),
     _size_variation_type(getParam<MooseEnum>("size_variation_type")),
-    _numtries(getParam<unsigned int>("numtries"))
+    _max_num_tries(getParam<unsigned int>("numtries"))
 {
 }
 
 void
 BimodalSuperellipsoidsIC::initialSetup()
 {
-
-  //Set up domain bounds with mesh tools
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  // Set up domain bounds with mesh tools
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
     _bottom_left(i) = _mesh.getMinInDimension(i);
     _top_right(i) = _mesh.getMaxInDimension(i);
   }
   _range = _top_right - _bottom_left;
 
-  switch (_size_variation_type)
-  {
-    case 2: //No variation
-      if (_size_variation > 0.0)
-        mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalSuperellipsoidsIC");
-      break;
-  }
+  if (_size_variation_type == 2 && _size_variation > 0.0)
+    mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalSuperellipsoidsIC");
 
   SmoothSuperellipsoidBaseIC::initialSetup();
 }
@@ -72,7 +66,7 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidSemiaxes()
   _bs.resize(_input_bs.size() + _npart);
   _cs.resize(_input_cs.size() + _npart);
 
-  //First fill in the specified (large) superellipsoids from the input file
+  // First fill in the specified (large) superellipsoids from the input file
   for (unsigned int i = 0; i < _input_as.size(); ++i)
   {
     _as[i] = _input_as[i];
@@ -80,13 +74,13 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidSemiaxes()
     _cs[i] = _input_cs[i];
   }
 
-  //Then fill in the randomly positioned (small) superellipsoids
-  for (unsigned int i = _input_as.size(); i < _input_as.size() + _npart; i++)
+  // Then fill in the randomly positioned (small) superellipsoids
+  for (unsigned int i = _input_as.size(); i < _input_as.size() + _npart; ++i)
   {
-    //Vary semiaxes
+    // Vary semiaxes
     switch (_size_variation_type)
     {
-      case 0: //Random distrubtion, maintaining constant shape
+      case 0: // Random distrubtion, maintaining constant shape
       {
         Real rand_num = _random.rand(_tid);
         _as[i] = _small_a*(1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
@@ -94,20 +88,23 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidSemiaxes()
         _cs[i] = _small_c*(1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
         break;
       }
-      case 1: //Normal distribution of semiaxis size, maintaining constant shape
+      case 1: // Normal distribution of semiaxis size, maintaining constant shape
         _as[i] = _random.randNormal(_tid, _small_a, _size_variation);
         _bs[i] = _as[i] * _small_b / _small_a;
         _cs[i] = _as[i] * _small_c / _small_a;
         break;
-      case 2: //No variation
+      case 2: // No variation
         _as[i] = _small_a;
         _bs[i] = _small_b;
         _cs[i] = _small_c;
     }
 
-    if (_as[i] < 0.0) _as[i] = 0.0;
-    if (_bs[i] < 0.0) _bs[i] = 0.0;
-    if (_cs[i] < 0.0) _cs[i] = 0.0;
+    if (_as[i] < 0.0)
+      _as[i] = 0.0;
+    if (_bs[i] < 0.0)
+      _bs[i] = 0.0;
+    if (_cs[i] < 0.0)
+      _cs[i] = 0.0;
   }
 }
 
@@ -116,23 +113,22 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidExponents()
 {
   _ns.resize(_input_ns.size() + _npart);
 
-  //First fill in the specified (large) superellipsoids from the input file
+  // First fill in the specified (large) superellipsoids from the input file
   for (unsigned int i = 0; i < _input_ns.size(); ++i)
     _ns[i] = _input_ns[i];
 
-  //Then fill in the randomly positioned (small) superellipsoids
-  //The shape is assumed to stay constant so n does not vary
-  for (unsigned int i = _input_ns.size(); i < _input_ns.size() + _npart; i++)
+  // Then fill in the randomly positioned (small) superellipsoids
+  // The shape is assumed to stay constant so n does not vary
+  for (unsigned int i = _input_ns.size(); i < _input_ns.size() + _npart; ++i)
     _ns[i] = _small_n;
 }
-
 
 void
 BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
 {
   _centers.resize(_x_positions.size() + _npart);
 
-  //First place the specified (large) particles from the input file
+  // First place the specified (large) particles from the input file
   for (unsigned int i = 0; i < _x_positions.size(); ++i)
   {
     _centers[i](0) = _x_positions[i];
@@ -140,90 +136,62 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
     _centers[i](2) = _z_positions[i];
   }
 
-  //Next place the randomly positioned (small) particles
-  for (unsigned int i = _x_positions.size(); i < _x_positions.size() + _npart; i++)
+  // Next place the randomly positioned (small) particles
+  for (unsigned int i = _x_positions.size(); i < _x_positions.size() + _npart; ++i)
   {
     unsigned int num_tries = 0;
 
-    Real dsmall_min = 0.0; //minimum distance from the random particle to another random particle
-    Real dlarge_min = 0.0; //minimum distance from the random particle to specified (large) particle
-
-    Point newcenter = 0.0;
-
-    while ((dsmall_min < _small_spac || dlarge_min < _large_spac) && num_tries < _numtries)
+    while (num_tries < _max_num_tries)
     {
       num_tries++;
 
-      Real ran1 = _random.rand(_tid);
-      Real ran2 = _random.rand(_tid);
-      Real ran3 = _random.rand(_tid);
+      RealTensorValue ran;
+      ran(0,0) = _random.rand(_tid);
+      ran(1,1) = _random.rand(_tid);
+      ran(2,2) = _random.rand(_tid);
 
-      newcenter(0) = _bottom_left(0) + ran1*_range(0);
-      newcenter(1) = _bottom_left(1) + ran2*_range(1);
-      newcenter(2) = _bottom_left(2) + ran3*_range(2);
+      _centers[i] = _bottom_left + ran * _range;
 
-      //First check for collisions with the specified (large) particles
-      for (unsigned int j = 0; j < _x_positions.size(); j++)
+      // check for collisions with the specified (large) and randomly placed small particles
+      for (unsigned int j = 0; j < i; ++j)
       {
-        if (j == 0) dlarge_min = _range.norm();
+        // Compute the distance r1 from the center of each specified superellipsoid to its
+        // outside edge along the vector between the specified superellipsoid and the current
+        // randomly positioned one.
+        // This uses the equation for a superellipse in polar coordinates and substitutes
+        // distances for sin, cos functions.
+        Point dist_vec = _mesh.minPeriodicVector(_var.number(), _centers[i], _centers[j]);
+        const Real dist = dist_vec.norm();
 
-        //Compute the distance r1 from the center of each specified superellipsoid to its outside edge
-        //along the vector between the specified superellipsoid and the current randomly
-        //positioned one
-        //This uses the equation for a superellipse in polar coordinates and substitutes
-        //distances for sin, cos functions
-        Real dist = _mesh.minPeriodicDistance(_var.number(), _centers[j], newcenter);
-        Point dist_vec = _mesh.minPeriodicVector(_var.number(), _centers[j], newcenter);
-
-        //First calculate rmn1 = r1^(-n), replacing sin, cos functions with distances
+        // First calculate rmn1 = r1^(-n), replacing sin, cos functions with distances
         Real rmn1 = (std::pow(std::abs(dist_vec(0) / dist / _as[j]), _ns[j])
-                  + std::pow(std::abs(dist_vec(1) / dist / _bs[j]), _ns[j])
-                  + std::pow(std::abs(dist_vec(2) / dist / _cs[j]), _ns[j]) );
-        //Then calculate r1 from rmn1
-        Real r1 = std::pow(rmn1, (-1.0/_ns[j]));
+                   + std::pow(std::abs(dist_vec(1) / dist / _bs[j]), _ns[j])
+                   + std::pow(std::abs(dist_vec(2) / dist / _cs[j]), _ns[j]));
+        // Then calculate r1 from rmn1
+        const Real r1 = std::pow(rmn1, (-1.0/_ns[j]));
 
-        //Now calculate the distance r2 from the center of the randomly placed superellipsoid
-        //to its outside edge in the same manner
+        // Now calculate the distance r2 from the center of the randomly placed
+        // superellipsoid to its outside edge in the same manner
         Real rmn2 = (std::pow(std::abs(dist_vec(0) / dist / _as[i]), _ns[i])
-                  + std::pow(std::abs(dist_vec(1) / dist / _bs[i]), _ns[i])
-                  + std::pow(std::abs(dist_vec(2) / dist / _cs[i]), _ns[i]) );
-        Real r2 = std::pow(rmn2, (-1.0/_ns[i]));
+                   + std::pow(std::abs(dist_vec(1) / dist / _bs[i]), _ns[i])
+                   + std::pow(std::abs(dist_vec(2) / dist / _cs[i]), _ns[i]));
+        const Real r2 = std::pow(rmn2, (-1.0/_ns[i]));
 
-        //Calculate the distance between the edges
-        Real tmp_dlarge_min = dist - r1 - r2;
-
-        if (tmp_dlarge_min < dlarge_min) dlarge_min = tmp_dlarge_min;
+        // Calculate the distance between the edges (first in the list are the large then come the small)
+        if ((dist - r1 - r2) < (j < _x_positions.size() ? _large_spac : _small_spac))
+          goto fail;
       }
 
-      //Then check for collisions between the randomly placed particles
-      for (unsigned int j = _x_positions.size(); j < i; j++)
-      {
-        if (j == _x_positions.size()) dsmall_min = _range.norm();
+      // accept the position of the new center
+      goto accept;
 
-        Real dist = _mesh.minPeriodicDistance(_var.number(), _centers[j], newcenter);
-        Point dist_vec = _mesh.minPeriodicVector(_var.number(), _centers[j], newcenter);
-
-        Real rmn1 = (std::pow(std::abs(dist_vec(0) / dist / _as[j]), _ns[j])
-                  + std::pow(std::abs(dist_vec(1) / dist / _bs[j]), _ns[j])
-                  + std::pow(std::abs(dist_vec(2) / dist / _cs[j]), _ns[j]) );
-        Real r1 = std::pow(rmn1, (-1.0/_ns[j]));
-
-        Real rmn2 = (std::pow(std::abs(dist_vec(0) / dist / _as[i]), _ns[i])
-                  + std::pow(std::abs(dist_vec(1) / dist / _bs[i]), _ns[i])
-                  + std::pow(std::abs(dist_vec(2) / dist / _cs[i]), _ns[i]) );
-        Real r2 = std::pow(rmn2, (-1.0/_ns[i]));
-
-        //Calculate the distance between the edges
-        Real tmp_dsmall_min = dist - r1 - r2;
-
-        if (tmp_dsmall_min < dsmall_min) dsmall_min = tmp_dsmall_min;
-      }
-      if (i == _x_positions.size()) dsmall_min = _range.norm();
+      // retry a new position until tries are exhausted
+      fail: continue;
     }
 
-    if (num_tries == _numtries)
-      mooseError("Too many tries in BimodalSuperellipsoidsIC");
+    if (num_tries == _max_num_tries)
+      mooseError("Too many tries in MultiSmoothCircleIC");
 
-    _centers[i] = newcenter;
+    accept: continue;
   }
 }

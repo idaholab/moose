@@ -57,27 +57,22 @@ public:
   LineMaterialSamplerBase(const InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~LineMaterialSamplerBase() {}
-
-  /**
    * Initialize
    * Calls through to base class's initialize()
    */
-  virtual void initialize();
+  virtual void initialize() override;
 
   /**
    * Finds all elements along the user-defined line, loops through them, and samples their
    * material properties.
    */
-  virtual void execute();
+  virtual void execute() override;
 
   /**
    * Finalize
    * Calls through to base class's finalize()
    */
-  virtual void finalize();
+  virtual void finalize() override;
 
   /**
    * Reduce the material property to a scalar for output
@@ -85,7 +80,7 @@ public:
    * @param curr_point The point corresponding to this material property
    * @return A scalar value from this material property to be output
    */
-  virtual Real getScalarFromProperty(const T & property, const Point * curr_point) = 0;
+  virtual Real getScalarFromProperty(const T & property, const Point & curr_point) = 0;
 
 protected:
   /// The beginning of the line
@@ -119,7 +114,7 @@ LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & para
     _q_point(_subproblem.assembly(_tid).qPoints())
 {
   std::vector<std::string> material_property_names = getParam<std::vector<std::string> >("property");
-  for (unsigned int i=0; i<material_property_names.size(); ++i)
+  for (unsigned int i = 0; i < material_property_names.size(); ++i)
   {
     if (!hasMaterialProperty<T>(material_property_names[i]))
       mooseError("In LineMaterialSamplerBase material property: " + material_property_names[i] + " does not exist.");
@@ -143,19 +138,16 @@ LineMaterialSamplerBase<T>::execute()
   std::vector<Elem *> intersected_elems;
   std::vector<LineSegment> segments;
 
-  MooseSharedPointer<PointLocatorBase> plb = MooseSharedPointer<PointLocatorBase>(_fe_problem.mesh().getMesh().sub_point_locator().release());
-
-  Moose::elementsIntersectedByLine(_start, _end, _fe_problem.mesh(), plb, intersected_elems, segments);
+  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
+  Moose::elementsIntersectedByLine(_start, _end, _mesh, *pl, intersected_elems, segments);
 
   const RealVectorValue line_vec = _end - _start;
   const Real line_length(line_vec.norm());
   const RealVectorValue line_unit_vec = line_vec / line_length;
   std::vector<Real> values(_material_properties.size());
 
-  for (unsigned int i=0; i<intersected_elems.size(); ++i)
+  for (const auto & elem : intersected_elems)
   {
-    const Elem * elem = intersected_elems[i];
-
     if (elem->processor_id() != processor_id())
       continue;
 
@@ -166,7 +158,7 @@ LineMaterialSamplerBase<T>::execute()
     _subproblem.reinitElem(elem, _tid);
     _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
-    for (unsigned int qp=0; qp<_qrule->n_points(); ++qp)
+    for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     {
       const RealVectorValue qp_pos(_q_point[qp]);
 
@@ -176,8 +168,8 @@ LineMaterialSamplerBase<T>::execute()
       if (qp_proj_dist_along_line < 0 || qp_proj_dist_along_line > line_length)
         continue;
 
-      for (unsigned int j=0; j<_material_properties.size(); ++j)
-        values[j] = getScalarFromProperty((*_material_properties[j])[qp], &_q_point[qp]);
+      for (unsigned int j = 0; j < _material_properties.size(); ++j)
+        values[j] = getScalarFromProperty((*_material_properties[j])[qp], _q_point[qp]);
 
       addSample(_q_point[qp], qp_proj_dist_along_line, values);
     }

@@ -6,7 +6,7 @@
   dim = 2
   nx = 15
   ny = 15
-#  distribution = serial
+#  parallel_type = replicated
 []
 
 [Variables]

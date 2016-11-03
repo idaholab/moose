@@ -21,12 +21,12 @@
 class ComputeNodalAuxBcsThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalAuxBcsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage);
+  ComputeNodalAuxBcsThread(FEProblem & fe_problem, const MooseObjectWarehouse<AuxKernel> & storage);
 
   // Splitting Constructor
   ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split);
 
-  virtual void onNode(ConstBndNodeRange::const_iterator & node_it);
+  virtual void onNode(ConstBndNodeRange::const_iterator & node_it) override;
 
   void join(const ComputeNodalAuxBcsThread & /*y*/);
 

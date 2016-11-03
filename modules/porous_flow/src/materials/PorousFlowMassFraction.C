@@ -12,27 +12,19 @@
 template<>
 InputParameters validParams<PorousFlowMassFraction>()
 {
-  InputParameters params = validParams<Material>();
-
+  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
   params.addCoupledVar("mass_fraction_vars", "List of variables that represent the mass fractions.  Format is 'f_ph0^c0 f_ph0^c1 f_ph0^c2 ... f_ph0^c(N-1) f_ph1^c0 f_ph1^c1 fph1^c2 ... fph1^c(N-1) ... fphP^c0 f_phP^c1 fphP^c2 ... fphP^c(N-1)' where N=num_components and P=num_phases, and it is assumed that f_ph^cN=1-sum(f_ph^c,{c,0,N-1}) so that f_ph^cN need not be given.  If no variables are provided then num_phases=1=num_components.");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addClassDescription("This Material forms a std::vector<std::vector ...> of mass-fractions out of the individual mass fractions");
   return params;
 }
 
 PorousFlowMassFraction::PorousFlowMassFraction(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
-
-    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-    _num_phases(_dictator_UO.numPhases()),
-    _num_components(_dictator_UO.numComponents()),
+    PorousFlowMaterialVectorBase(parameters),
 
     _mass_frac(declareProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
     _mass_frac_old(declarePropertyOld<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
     _grad_mass_frac(declareProperty<std::vector<std::vector<RealGradient> > >("PorousFlow_grad_mass_frac")),
     _dmass_frac_dvar(declareProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar")),
-
-    _yaqi_hacky(false),
 
     _num_passed_mf_vars(coupledComponents("mass_fraction_vars"))
 {
@@ -55,7 +47,6 @@ PorousFlowMassFraction::PorousFlowMassFraction(const InputParameters & parameter
 void
 PorousFlowMassFraction::initQpStatefulProperties()
 {
-  const unsigned int num_var = _dictator_UO.numVariables();
   _mass_frac[_qp].resize(_num_phases);
   _mass_frac_old[_qp].resize(_num_phases);
   _grad_mass_frac[_qp].resize(_num_phases);
@@ -67,7 +58,7 @@ PorousFlowMassFraction::initQpStatefulProperties()
     _grad_mass_frac[_qp][ph].resize(_num_components);
     _dmass_frac_dvar[_qp][ph].resize(_num_components);
     for (unsigned int comp = 0; comp < _num_components; ++comp)
-      _dmass_frac_dvar[_qp][ph][comp].assign(num_var, 0.0);
+      _dmass_frac_dvar[_qp][ph][comp].assign(_num_var, 0.0);
   }
 
   // the derivative matrix is fixed for all time
@@ -77,30 +68,24 @@ PorousFlowMassFraction::initQpStatefulProperties()
   {
     for (unsigned int comp = 0; comp < _num_components - 1; ++comp)
     {
-      if (_dictator_UO.isPorousFlowVariable(_mf_vars_num[i]))
+      if (_dictator.isPorousFlowVariable(_mf_vars_num[i]))
       {
         // _mf_vars[i] is a PorousFlow variable
-        const unsigned int pf_var_num = _dictator_UO.porousFlowVariableNum(_mf_vars_num[i]);
+        const unsigned int pf_var_num = _dictator.porousFlowVariableNum(_mf_vars_num[i]);
         _dmass_frac_dvar[_qp][ph][comp][pf_var_num] = 1.0;
         _dmass_frac_dvar[_qp][ph][_num_components - 1][pf_var_num] = -1.0;
       }
       i++;
     }
   }
-  if (!_yaqi_hacky)
-    build_mass_frac(_qp);
+
+  build_mass_frac(_qp);
 }
 
 void
 PorousFlowMassFraction::computeQpProperties()
 {
   build_mass_frac(_qp);
-
-  if (_yaqi_hacky)
-    if (_t_step == 1)
-      for (unsigned int ph = 0; ph < _num_phases; ++ph)
-        for (unsigned int comp = 0; comp < _num_components; ++comp)
-          _mass_frac_old[_qp][ph][comp] = _mass_frac[_qp][ph][comp];
 }
 
 void
@@ -113,8 +98,8 @@ PorousFlowMassFraction::build_mass_frac(unsigned int qp)
     _grad_mass_frac[_qp][ph][_num_components - 1] = 0.0;
     for (unsigned int comp = 0; comp < _num_components - 1; ++comp)
     {
-      _mass_frac[qp][ph][comp] = (*_mf_vars[i])[qp];
-      total_mass_frac += (*_mf_vars[i])[qp];
+      _mass_frac[qp][ph][comp] = (*_mf_vars[i])[_node_number[qp]];
+      total_mass_frac += (*_mf_vars[i])[_node_number[qp]];
       _grad_mass_frac[qp][ph][comp] = (*_grad_mf_vars[i])[qp];
       _grad_mass_frac[_qp][ph][_num_components - 1] -= (*_grad_mf_vars[i])[qp];
       i++;

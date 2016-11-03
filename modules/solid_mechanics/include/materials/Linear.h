@@ -33,7 +33,7 @@ protected:
   const VariableGradient & _grad_disp_x;
   const VariableGradient & _grad_disp_y;
   const VariableGradient & _grad_disp_z;
-
+  const bool _volumetric_locking_correction;
 };
 
 }

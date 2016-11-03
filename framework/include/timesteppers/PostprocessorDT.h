@@ -34,8 +34,8 @@ public:
   PostprocessorDT(const InputParameters & parameters);
 
 protected:
-  virtual Real computeInitialDT();
-  virtual Real computeDT();
+  virtual Real computeInitialDT() override;
+  virtual Real computeDT() override;
 
   const PostprocessorValue & _pps_value;
   bool _has_initial_dt;

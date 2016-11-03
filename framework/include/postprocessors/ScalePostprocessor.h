@@ -29,9 +29,9 @@ class ScalePostprocessor : public GeneralPostprocessor
 public:
   ScalePostprocessor(const InputParameters & parameters);
 
-  virtual void initialize() {}
-  virtual void execute() {}
-  virtual PostprocessorValue getValue();
+  virtual void initialize() override {}
+  virtual void execute() override {}
+  virtual PostprocessorValue getValue() override;
 
 protected:
   const PostprocessorValue & _value;

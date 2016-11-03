@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "LangmuirMaterial.h"
-
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<LangmuirMaterial>()
@@ -40,12 +40,11 @@ LangmuirMaterial::LangmuirMaterial(const InputParameters & parameters) :
 {
 }
 
-
 void
 LangmuirMaterial::computeQpProperties()
 {
-  Real equilib_conc = _langmuir_dens*((*_pressure)[_qp])/(_langmuir_p + (*_pressure)[_qp]);
-  Real dequilib_conc_dp = _langmuir_dens/(_langmuir_p + (*_pressure)[_qp]) - _langmuir_dens*((*_pressure)[_qp])/std::pow(_langmuir_p + (*_pressure)[_qp], 2);
+  Real equilib_conc = _langmuir_dens * ((*_pressure)[_qp]) / (_langmuir_p + (*_pressure)[_qp]);
+  Real dequilib_conc_dp = _langmuir_dens / (_langmuir_p + (*_pressure)[_qp]) - _langmuir_dens*((*_pressure)[_qp]) / Utility::pow<2>(_langmuir_p + (*_pressure)[_qp]);
 
   // form the base rate and derivs without the appropriate time const
   _mass_rate_from_matrix[_qp] = (*_conc)[_qp] - equilib_conc;
@@ -66,4 +65,3 @@ LangmuirMaterial::computeQpProperties()
     _dmass_rate_from_matrix_dp[_qp] *= (*_one_over_ad_time_const)[_qp];
   }
 }
-

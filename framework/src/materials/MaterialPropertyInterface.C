@@ -127,7 +127,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
 
     // set values for all qpoints to the given default
     for (unsigned int qp = 0; qp < nqp; ++qp)
-    (*default_property)[qp] = real_value;
+      (*default_property)[qp] = real_value;
 
     // add to the default property storage
     _default_real_properties.push_back(default_property);
@@ -167,13 +167,13 @@ MaterialPropertyInterface::checkMaterialProperty(const std::string & name)
 {
   // If the material property is block restrictable, add to the list of materials to check
   if (!_mi_block_ids.empty())
-    for (std::set<SubdomainID>::const_iterator it = _mi_block_ids.begin(); it != _mi_block_ids.end(); ++it)
-      _mi_feproblem.storeDelayedCheckMatProp(_mi_name, *it, name);
+    for (const auto & sbd_id : _mi_block_ids)
+      _mi_feproblem.storeDelayedCheckMatProp(_mi_name, sbd_id, name);
 
   // If the material property is boundary restrictable, add to the list of materials to check
   if (!_mi_boundary_ids.empty())
-    for (std::set<BoundaryID>::const_iterator it = _mi_boundary_ids.begin(); it != _mi_boundary_ids.end(); ++it)
-      _mi_feproblem.storeDelayedCheckMatProp(_mi_name, *it, name);
+    for (const auto & bnd_id : _mi_boundary_ids)
+      _mi_feproblem.storeDelayedCheckMatProp(_mi_name, bnd_id, name);
 }
 
 void
@@ -199,6 +199,12 @@ MaterialPropertyInterface::getMaterial(const std::string & name)
 Material &
 MaterialPropertyInterface::getMaterialByName(const std::string & name)
 {
+  return *getMaterialSharedPointerByName(name);
+}
+
+MooseSharedPointer<Material>
+MaterialPropertyInterface::getMaterialSharedPointerByName(const std::string & name)
+{
   MooseSharedPointer<Material> discrete = _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid);
 
   // Check block compatibility
@@ -207,12 +213,12 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name)
     std::ostringstream oss;
     oss << "The Material object '" << discrete->name() << "' is defined on blocks that are incompatible with the retrieving object '" << _mi_name << "':\n";
     oss << "  " << discrete->name();
-    for (std::set<SubdomainID>::const_iterator it = discrete->blockIDs().begin(); it != discrete->blockIDs().end(); ++it)
-      oss << " " << *it;
+    for (const auto & sbd_id : discrete->blockIDs())
+      oss << " " << sbd_id;
     oss << "\n";
     oss << "  " << _mi_name;
-    for (std::set<SubdomainID>::const_iterator it = _mi_block_ids.begin(); it != _mi_block_ids.end(); ++it)
-      oss << " " << *it;
+    for (const auto & block_id : _mi_block_ids)
+      oss << " " << block_id;
     oss << "\n";
     mooseError(oss.str());
   }
@@ -223,15 +229,22 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name)
     std::ostringstream oss;
     oss << "The Material object '" << discrete->name() << "' is defined on boundaries that are incompatible with the retrieving object '" << _mi_name << "':\n";
     oss << "  " << discrete->name();
-    for (std::set<BoundaryID>::const_iterator it = discrete->boundaryIDs().begin(); it != discrete->boundaryIDs().end(); ++it)
-      oss << " " << *it;
+    for (const auto & bnd_id : discrete->boundaryIDs())
+      oss << " " << bnd_id;
     oss << "\n";
     oss << "  " << _mi_name;
-    for (std::set<BoundaryID>::const_iterator it = _mi_boundary_ids.begin(); it != _mi_boundary_ids.end(); ++it)
-      oss << " " << *it;
+    for (const auto & bnd_id : _mi_boundary_ids)
+      oss << " " << bnd_id;
     oss << "\n";
     mooseError(oss.str());
   }
 
-  return *discrete;
+  return discrete;
+}
+
+void
+MaterialPropertyInterface::checkExecutionStage()
+{
+  if (_mi_feproblem.startedInitialSetup())
+    mooseError("Material properties must be retrieved during object construction to ensure correct problem integrity validation.");
 }

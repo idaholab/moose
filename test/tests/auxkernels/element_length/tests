@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = Exodiff
+    input = element_length.i
+    exodiff = element_length_out.e
+  [../]
+[]

@@ -4,7 +4,7 @@
 []
 
 [GlobalParams]
-  op_num = 9
+  op_num = 7
   var_name_base = gr
 []
 
@@ -18,7 +18,6 @@
   [./PolycrystalICs]
     [./ReconVarIC]
       ebsd_reader = ebsd
-      consider_phase = false
     [../]
   [../]
 []
@@ -32,10 +31,46 @@
   [./bnds]
   [../]
   [./unique_grains]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./var_indices]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./ebsd_grains]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./phi1]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./halo0]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./var_indices]
+  [./halo1]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo2]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo3]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo4]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo5]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halo6]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -56,22 +91,94 @@
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
   [../]
+  [./grain_aux]
+    type = EBSDReaderPointDataAux
+    variable = ebsd_grains
+    ebsd_reader = ebsd
+    data_name = 'feature_id'
+    execute_on = 'initial timestep_end'
+  [../]
+  [./phi1]
+    type = OutputEulerAngles
+    euler_angle_provider = ebsd
+    output_euler_angle = phi1
+    grain_tracker = grain_tracker
+    variable = phi1
+  [../]
+    [./halo0]
+    type = FeatureFloodCountAux
+    variable = halo0
+    map_index = 0
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo1]
+    type = FeatureFloodCountAux
+    variable = halo1
+    map_index = 1
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo2]
+    type = FeatureFloodCountAux
+    variable = halo2
+    map_index = 2
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo3]
+    type = FeatureFloodCountAux
+    variable = halo3
+    map_index = 3
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo4]
+    type = FeatureFloodCountAux
+    variable = halo4
+    map_index = 4
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo5]
+    type = FeatureFloodCountAux
+    variable = halo5
+    map_index = 5
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
+  [./halo6]
+    type = FeatureFloodCountAux
+    variable = halo6
+    map_index = 6
+    field_display = HALOS
+    flood_counter = grain_tracker
+  [../]
 []
+
+#[Modules]
+#  [./PhaseField]
+#    [./EulerAngles2RGB]
+#      crystal_structure = cubic
+#      euler_angle_provider = ebsd
+#      grain_tracker = grain_tracker
+#    [../]
+#  [../]
+#[]
 
 [Materials]
   [./CuGrGr]
     type = GBEvolution
-    block = 0
     T = 500 #K
     wGB = 0.75 #micron
     length_scale = 1.0e-6
@@ -96,16 +203,8 @@
 
   [./grain_tracker]
     type = GrainTracker
-    threshold = 0.2
-    convex_hull_buffer = 5.0
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
-    connecting_threshold = 0.08
-    execute_on = 'initial timestep_end'
-    flood_entity_type = ELEMENTAL
     ebsd_reader = ebsd
-    tracking_step = 0
+    compute_halo_maps = true # For displaying HALO fields
   [../]
 []
 
@@ -127,5 +226,7 @@
 []
 
 [Outputs]
+  execute_on = 'initial'
   exodus = true
+  print_perf_log = true
 []

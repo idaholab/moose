@@ -40,7 +40,7 @@ protected:
    * Necessary override.  This is where the values of the properties
    * are computed.
    */
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
   /// The radius of the balls in the column
   const Real & _ball_radius;

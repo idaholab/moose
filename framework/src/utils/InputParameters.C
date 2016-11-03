@@ -51,10 +51,6 @@ InputParameters::InputParameters(const Parameters &rhs) :
   _moose_object_syntax_visibility = true;
 }
 
-InputParameters::~InputParameters()
-{
-}
-
 void
 InputParameters::clear()
 {
@@ -105,10 +101,7 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
       std::map<std::string, std::string>::const_iterator pos = _deprecated_params.find(name);
       if (pos != _deprecated_params.end())
       {
-        if (Moose::_deprecated_is_error)
-          mooseError("The parameter " << name << " is deprecated.\n" << pos->second);
-        else
-          mooseWarning("The parameter " << name << " is deprecated.\n" << pos->second);
+        mooseDeprecated("The parameter " << name << " is deprecated.\n" << pos->second);
       }
     }
   }
@@ -239,13 +232,12 @@ InputParameters::getDocString(const std::string & name) const
   std::string doc_string;
   std::map<std::string, std::string>::const_iterator doc_string_it = _doc_string.find(name);
   if (doc_string_it != _doc_string.end())
-    for (std::string::const_iterator it = (doc_string_it->second).begin();
-         it != (doc_string_it->second).end(); ++it)
+    for (const auto & ch : doc_string_it->second)
     {
-      if (*it == '\n')
+      if (ch == '\n')
         doc_string += " ... ";
       else
-        doc_string += *it;
+        doc_string += ch;
     }
 
   return doc_string;
@@ -277,8 +269,8 @@ InputParameters::isParamSetByAddParam(const std::string & name) const
 bool
 InputParameters::areAllRequiredParamsValid() const
 {
-  for (Parameters::const_iterator it = this->begin(); it != this->end(); ++it)
-    if (isParamRequired(it->first) && !isParamValid(it->first))
+  for (const auto & it : *this)
+    if (isParamRequired(it.first) && !isParamValid(it.first))
       return false;
   return true;
 }
@@ -368,51 +360,51 @@ InputParameters::checkParams(const std::string & parsing_syntax)
 
   std::ostringstream oss;
   // Required parameters
-  for (InputParameters::const_iterator it = this->begin(); it != this->end(); ++it)
+  for (const auto & it : *this)
   {
-    if (!isParamValid(it->first) && isParamRequired(it->first))
+    if (!isParamValid(it.first) && isParamRequired(it.first))
     {
       // The parameter is required but missing
       if (oss.str().empty())
         oss << "The following required parameters are missing:" << std::endl;
-      oss << l_prefix << "/" << it->first << std::endl;
-      oss << "\tDoc String: \"" + getDocString(it->first) + "\"" << std::endl;
+      oss << l_prefix << "/" << it.first << std::endl;
+      oss << "\tDoc String: \"" + getDocString(it.first) + "\"" << std::endl;
     }
   }
 
   // Range checked parameters
-  for (InputParameters::const_iterator it = this->begin(); it != this->end(); ++it)
+  for (const auto & it : *this)
   {
-    std::string long_name(l_prefix + "/" + it->first);
+    std::string long_name(l_prefix + "/" + it.first);
 
-    dynamicCastRangeCheck(Real, Real,         long_name, it->first, it->second, oss);
-    dynamicCastRangeCheck(int,  long,         long_name, it->first, it->second, oss);
-    dynamicCastRangeCheck(long, long,         long_name, it->first, it->second, oss);
-    dynamicCastRangeCheck(unsigned int, long, long_name, it->first, it->second, oss);
+    dynamicCastRangeCheck(Real, Real,         long_name, it.first, it.second, oss);
+    dynamicCastRangeCheck(int,  long,         long_name, it.first, it.second, oss);
+    dynamicCastRangeCheck(long, long,         long_name, it.first, it.second, oss);
+    dynamicCastRangeCheck(unsigned int, long, long_name, it.first, it.second, oss);
   }
 
   if (!oss.str().empty())
     mooseError(oss.str());
 
   // Controllable parameters
-  for (std::set<std::string>::const_iterator it = _controllable_params.begin(); it != _controllable_params.end(); ++it)
+  for (const auto & param_name : _controllable_params)
   {
     // Check that parameter is valid
-    if (!isParamValid(*it))
-      mooseError("The parameter '" << *it << "' is not a valid parameter for the object " << l_prefix << " thus cannot be marked as controllable.");
+    if (!isParamValid(param_name))
+      mooseError("The parameter '" << param_name << "' is not a valid parameter for the object " << l_prefix << " thus cannot be marked as controllable.");
 
-    if (isPrivate(*it))
-      mooseError("The parameter, '" << *it << "', in " << l_prefix << " is a private parameter and cannot be marked as controllable");
+    if (isPrivate(param_name))
+      mooseError("The parameter, '" << param_name << "', in " << l_prefix << " is a private parameter and cannot be marked as controllable");
 
-    checkMooseType(NonlinearVariableName, *it);
-    checkMooseType(AuxVariableName, *it);
-    checkMooseType(VariableName, *it);
-    checkMooseType(BoundaryName, *it);
-    checkMooseType(SubdomainName, *it);
-    checkMooseType(PostprocessorName, *it);
-    checkMooseType(VectorPostprocessorName, *it);
-    checkMooseType(UserObjectName, *it);
-    checkMooseType(MaterialPropertyName, *it);
+    checkMooseType(NonlinearVariableName, param_name);
+    checkMooseType(AuxVariableName, param_name);
+    checkMooseType(VariableName, param_name);
+    checkMooseType(BoundaryName, param_name);
+    checkMooseType(SubdomainName, param_name);
+    checkMooseType(PostprocessorName, param_name);
+    checkMooseType(VectorPostprocessorName, param_name);
+    checkMooseType(UserObjectName, param_name);
+    checkMooseType(MaterialPropertyName, param_name);
   }
 }
 
@@ -532,14 +524,14 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names, con
   // Since we don't require types (templates) for this method, we need
   // to get a raw list of parameter names to compare against.
   std::set<std::string> param_names;
-  for (InputParameters::iterator it = begin(); it != end(); ++it)
-    param_names.insert(it->first);
+  for (const auto & it : *this)
+    param_names.insert(it.first);
 
-  for (std::vector<std::string>::const_iterator it = elements.begin(); it != elements.end(); ++it)
-    if (param_names.find(*it) != param_names.end())
-      _group[*it] = group_name;
+  for (const auto & param_name : elements)
+    if (param_names.find(param_name) != param_names.end())
+      _group[param_name] = group_name;
     else
-      mooseError("Unable to find a parameter with name: " << *it << " when adding to group " << group_name << '.');
+      mooseError("Unable to find a parameter with name: " << param_name << " when adding to group " << group_name << '.');
 }
 
 std::vector<std::string>
@@ -590,10 +582,10 @@ InputParameters::applyParameters(const InputParameters & common, const std::vect
   _show_deprecated_message = false;
 
   // Loop through the common parameters
-  for (InputParameters::const_iterator it = common.begin(); it != common.end(); ++it)
+  for (const auto & it : common)
   {
     // Common parameter name
-    const std::string & common_name = it->first;
+    const std::string & common_name = it.first;
 
     // Continue to next parameter, if the current is in list of  excluded parameters
     if (std::find(exclude.begin(), exclude.end(), common_name) != exclude.end())
@@ -618,7 +610,7 @@ InputParameters::applyParameters(const InputParameters & common, const std::vect
     if ( local_exist && common_valid && (!local_valid || !local_set) && (!common_priv || !local_priv))
     {
       delete _values[common_name];
-      _values[common_name] = it->second->clone();
+      _values[common_name] = it.second->clone();
       set_attributes(common_name, false);
     }
   }

@@ -42,12 +42,7 @@ public:
    */
   RandomIC(const InputParameters & parameters);
 
-  /**
-   * The value of the variable at a point.
-   *
-   * This must be overridden by derived classes.
-   */
-  virtual Real value(const Point & p);
+  virtual Real value(const Point & p) override;
 
 protected:
   Real _min;

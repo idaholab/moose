@@ -56,6 +56,8 @@
   [./stateful_mat]
     type = StatefulTest
     block = 0
+    output_properties = thermal_conductivity
+    outputs = exodus
   [../]
 []
 

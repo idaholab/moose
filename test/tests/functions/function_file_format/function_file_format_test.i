@@ -21,10 +21,10 @@
 # At time = 0, the variable = 0, at time = 1, variable = 4 and so on.
 [Mesh]
   file = cube.e
-  # This problem only has 1 element, so using ParallelMesh in parallel
-  # isn't really an option, and we don't care that much about ParallelMesh
+  # This problem only has 1 element, so using DistributedMesh in parallel
+  # isn't really an option, and we don't care that much about DistributedMesh
   # in serial.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

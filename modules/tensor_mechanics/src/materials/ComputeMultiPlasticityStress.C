@@ -6,9 +6,12 @@
 /****************************************************************/
 #include "ComputeMultiPlasticityStress.h"
 #include "MultiPlasticityDebugger.h"
+#include "MatrixTools.h"
 
 #include "MooseException.h"
 #include "RotationMatrix.h" // for rotVecToZ
+
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<ComputeMultiPlasticityStress>()
@@ -74,8 +77,18 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters
     _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "elastic_strain")),
 
+    _cosserat(hasMaterialProperty<RankTwoTensor>("curvature") && hasMaterialProperty<RankFourTensor>("elastic_flexural_rigidity_tensor")),
+    _curvature(_cosserat ? &getMaterialPropertyByName<RankTwoTensor>("curvature") : NULL),
+    _elastic_flexural_rigidity_tensor(_cosserat ? &getMaterialPropertyByName<RankFourTensor>("elastic_flexural_rigidity_tensor") : NULL),
+    _couple_stress(_cosserat ? &declareProperty<RankTwoTensor>("couple_stress") : NULL),
+    _couple_stress_old(_cosserat ? &declarePropertyOld<RankTwoTensor>("couple_stress") : NULL),
+    _Jacobian_mult_couple(_cosserat ? &declareProperty<RankFourTensor>("couple_Jacobian_mult") : NULL),
+
     _my_elasticity_tensor(RankFourTensor()),
-    _my_strain_increment(RankTwoTensor())
+    _my_strain_increment(RankTwoTensor()),
+    _my_flexural_rigidity_tensor(RankFourTensor()),
+    _my_curvature(RankTwoTensor()),
+    _step_one(declareRestartableData<bool>("step_one", true))
 {
   if (_epp_tol <= 0)
     mooseError("ComputeMultiPlasticityStress: ep_plastic_tolerance must be positive");
@@ -120,6 +133,12 @@ ComputeMultiPlasticityStress::initQpStatefulProperties()
   _n[_qp] = _n_input;
   _n_old[_qp] = _n_input;
 
+  if (_cosserat)
+  {
+    (*_couple_stress)[_qp].zero();
+    (*_couple_stress_old)[_qp].zero();
+  }
+
   if (_fspb_debug == "jacobian")
   {
     checkDerivatives();
@@ -133,6 +152,11 @@ ComputeMultiPlasticityStress::computeQpStress()
   // the following "_my" variables can get rotated by preReturnMap and postReturnMap
   _my_elasticity_tensor = _elasticity_tensor[_qp];
   _my_strain_increment = _strain_increment[_qp];
+  if (_cosserat)
+  {
+    _my_flexural_rigidity_tensor = (*_elastic_flexural_rigidity_tensor)[_qp];
+    _my_curvature = (*_curvature)[_qp];
+  }
 
   if (_fspb_debug == "jacobian_and_linear_system")
   {
@@ -156,6 +180,12 @@ ComputeMultiPlasticityStress::computeQpStress()
   // if not purely elastic or the customised stuff failed, do some plastic return
   if (!found_solution)
     plasticStep(_stress_old[_qp], _stress[_qp], _intnl_old[_qp], _intnl[_qp], _plastic_strain_old[_qp], _plastic_strain[_qp], _my_elasticity_tensor, _my_strain_increment, _yf[_qp], number_iterations, linesearch_needed, ld_encountered, constraints_added, _Jacobian_mult[_qp]);
+
+  if (_cosserat)
+  {
+    (*_couple_stress)[_qp] =  (*_elastic_flexural_rigidity_tensor)[_qp] * _my_curvature;
+    (*_Jacobian_mult_couple)[_qp] = _my_flexural_rigidity_tensor;
+  }
 
   postReturnMap();  // rotate back from new frame if necessary
 
@@ -190,6 +220,12 @@ ComputeMultiPlasticityStress::preReturnMap()
     _stress_old[_qp].rotate(_rot);
     _plastic_strain_old[_qp].rotate(_rot);
     _my_strain_increment.rotate(_rot);
+    if (_cosserat)
+    {
+      _my_flexural_rigidity_tensor.rotate(_rot);
+      (*_couple_stress_old)[_qp].rotate(_rot);
+      _my_curvature.rotate(_rot);
+    }
   }
 }
 
@@ -209,6 +245,14 @@ ComputeMultiPlasticityStress::postReturnMap()
     _my_strain_increment.rotate(_rot);
     _stress[_qp].rotate(_rot);
     _plastic_strain[_qp].rotate(_rot);
+    if (_cosserat)
+    {
+      _my_flexural_rigidity_tensor.rotate(_rot);
+      (*_Jacobian_mult_couple)[_qp].rotate(_rot);
+      (*_couple_stress_old)[_qp].rotate(_rot);
+      _my_curvature.rotate(_rot);
+      (*_couple_stress)[_qp].rotate(_rot);
+    }
 
     // Rotate n by _rotation_increment
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
@@ -275,7 +319,7 @@ ComputeMultiPlasticityStress::quickStep(const RankTwoTensor & stress_old, RankTw
           std::vector<Real> custom_model_pm;
           for (unsigned surface = 0; surface < _f[custom_model]->numberSurfaces(); ++surface)
             custom_model_pm.push_back(cumulative_pm[_surfaces_given_model[custom_model][surface]]);
-          consistent_tangent_operator = _f[custom_model]->consistentTangentOperator(stress_old, stress, intnl[custom_model], E_ijkl, custom_model_pm);
+          consistent_tangent_operator = _f[custom_model]->consistentTangentOperator(stress_old, intnl_old[custom_model], stress, intnl[custom_model], E_ijkl, custom_model_pm);
         }
       }
       else // cannot necessarily use the custom consistentTangentOperator since different plastic models may have been active during other substeps or the custom model says not to use its custom CTO algorithm
@@ -313,6 +357,9 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old, Rank
   Real step_size = 1.0;
   Real time_simulated = 0.0;
 
+  if (_t_step >= 2)
+    _step_one = false;
+
   // the "good" variables hold the latest admissible stress
   // and internal parameters.
   RankTwoTensor stress_good = stress_old;
@@ -325,7 +372,7 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old, Rank
   // Following is necessary because I want strain_increment to be "const"
   // but I also want to be able to subdivide an initial_stress
   RankTwoTensor this_strain_increment = strain_increment;
-  if (_t_step == 1 && isParamValid("initial_stress"))
+  if (isParamValid("initial_stress") && _step_one)
   {
     RankFourTensor E_inv = E_ijkl.invSymm();
     this_strain_increment += E_inv*stress_old;
@@ -528,7 +575,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
   Real nr_res2 = 0;
   for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     if (act[surface])
-      nr_res2 += 0.5*std::pow(f[surface]/_f[modelNumber(surface)]->_f_tol, 2.0);
+      nr_res2 += 0.5 * Utility::pow<2>(f[surface]/_f[modelNumber(surface)]->_f_tol);
 
   successful_return = false;
 
@@ -716,7 +763,7 @@ ComputeMultiPlasticityStress::returnMap(const RankTwoTensor & stress_old, RankTw
         if (act[surface])
         {
           if (f[ind] > _f[modelNumber(surface)]->_f_tol)
-            nr_res2 += 0.5*std::pow(f[ind]/_f[modelNumber(surface)]->_f_tol, 2);
+            nr_res2 += 0.5 * Utility::pow<2>(f[ind]/_f[modelNumber(surface)]->_f_tol);
           ind++;
         }
     }
@@ -1071,14 +1118,14 @@ ComputeMultiPlasticityStress::residual2(const std::vector<Real> & pm, const std:
       if (!deactivated_due_to_ld[surface])
       {
         if (!(pm[surface] == 0 && f[ind] <= 0) )
-          nr_res2 += 0.5*std::pow( f[ind]/_f[modelNumber(surface)]->_f_tol, 2);
+          nr_res2 += 0.5 * Utility::pow<2>( f[ind]/_f[modelNumber(surface)]->_f_tol);
       }
       else if (deactivated_due_to_ld[surface] && f[ind] > 0)
-        nr_res2 += 0.5*std::pow(f[ind]/_f[modelNumber(surface)]->_f_tol, 2);
+        nr_res2 += 0.5 * Utility::pow<2>(f[ind]/_f[modelNumber(surface)]->_f_tol);
       ind++;
     }
 
-  nr_res2 += 0.5*std::pow(epp.L2norm()/_epp_tol, 2);
+  nr_res2 += 0.5 * Utility::pow<2>(epp.L2norm()/_epp_tol);
 
   std::vector<bool> active_not_deact(_num_surfaces);
   for (unsigned surface = 0; surface < _num_surfaces; ++surface)
@@ -1086,7 +1133,7 @@ ComputeMultiPlasticityStress::residual2(const std::vector<Real> & pm, const std:
   ind = 0;
   for (unsigned model = 0; model < _num_models; ++model)
     if (anyActiveSurfaces(model, active_not_deact))
-      nr_res2 += 0.5*std::pow(ic[ind++]/_f[model]->_ic_tol, 2);
+      nr_res2 += 0.5 * Utility::pow<2>(ic[ind++]/_f[model]->_ic_tol);
 
   return nr_res2;
 }
@@ -1182,26 +1229,26 @@ ComputeMultiPlasticityStress::lineSearch(Real & nr_res2,
       // model as a cubic
       Real rhs1 = nr_res2 - f0 - lam*slope;
       Real rhs2 = f2 - f0 - lam2*slope;
-      Real a = (rhs1/std::pow(lam, 2) - rhs2/std::pow(lam2, 2))/(lam - lam2);
-      Real b = (-lam2*rhs1/std::pow(lam, 2) + lam*rhs2/std::pow(lam2, 2))/(lam - lam2);
+      Real a = (rhs1 / Utility::pow<2>(lam) - rhs2 / Utility::pow<2>(lam2)) / (lam - lam2);
+      Real b = (-lam2 * rhs1 / Utility::pow<2>(lam) + lam * rhs2 / Utility::pow<2>(lam2)) / (lam - lam2);
       if (a == 0)
-        tmp_lam = -slope/2.0/b;
+        tmp_lam = -slope / (2.0 * b);
       else
       {
-        Real disc = std::pow(b, 2) - 3*a*slope;
+        Real disc = Utility::pow<2>(b) - 3 * a * slope;
         if (disc < 0)
-          tmp_lam = 0.5*lam;
+          tmp_lam = 0.5 * lam;
         else if (b <= 0)
-          tmp_lam = (-b + std::sqrt(disc))/3.0/a;
+          tmp_lam = (-b + std::sqrt(disc)) / (3.0 * a);
         else
-          tmp_lam = -slope/(b + std::sqrt(disc));
+          tmp_lam = -slope / (b + std::sqrt(disc));
       }
-      if (tmp_lam > 0.5*lam)
-        tmp_lam = 0.5*lam;
+      if (tmp_lam > 0.5 * lam)
+        tmp_lam = 0.5 * lam;
     }
     lam2 = lam;
     f2 = nr_res2;
-    lam = std::max(tmp_lam, 0.1*lam);
+    lam = std::max(tmp_lam, 0.1 * lam);
   }
 
   if (lam < 1.0)
@@ -1344,7 +1391,7 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
       num_currently_active += 1;
 
   // zzz is a matrix in the form that can be easily
-  // inverted by RankFourTensor::matrixInversion.
+  // inverted by MatrixTools::inverse
   // Eg for num_currently_active = 3
   // (zzz[0] zzz[1] zzz[2])
   // (zzz[3] zzz[4] zzz[5])
@@ -1374,9 +1421,15 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
   if (num_currently_active > 0)
   {
     // invert zzz, in place.  if num_currently_active = 0 then zzz is not needed.
-    const int ierr = RankFourTensor().matrixInversion(zzz, num_currently_active);
-    if (ierr != 0)
-      return E_ijkl; // in the very rare case of zzz being singular, just return the "elastic" tangent operator
+    try
+    {
+      MatrixTools::inverse(zzz, num_currently_active);
+    }
+    catch(const MooseException & e)
+    {
+      // in the very rare case of zzz being singular, just return the "elastic" tangent operator
+      return E_ijkl;
+    }
   }
 
 
@@ -1454,7 +1507,7 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
   {
     s_inv = stress_coeff.invSymm();
   }
-  catch (MooseException & e)
+  catch (const MooseException & e)
   {
     return strain_coeff; // when stress_coeff is singular (perhaps for incompressible plasticity?) return the "linear" tangent operator
   }

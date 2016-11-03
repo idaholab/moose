@@ -22,13 +22,13 @@ public:
 protected:
   virtual void initialSetup();
 
-  /// Computes the current deformation gradient for axisymmetric problems, where
+  /// Computes the current out-of-plane displacement gradient for axisymmetric problems, where
   /// \f$ \epsilon_{\theta} = \frac{u_r}{r} \f$
-  virtual Real computeDeformGradZZ();
+  virtual Real computeGradDispZZ();
 
-  /// Computes the old  deformation gradient for axisymmetric problems, where
+  /// Computes the old out-of-plane displacement gradient for axisymmetric problems, where
   /// \f$ \epsilon_{\theta-old} = \frac{u_{r-old}}{r_{old}} \f$
-  virtual Real computeDeformGradZZold();
+  virtual Real computeGradDispZZold();
 
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;

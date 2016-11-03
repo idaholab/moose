@@ -23,11 +23,10 @@
 #include "libmesh/threads.h"
 
 ComputeIndicatorThread::ComputeIndicatorThread(FEProblem & fe_problem,
-                                               AuxiliarySystem & sys,
                                                bool finalize) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem, sys),
+    ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
-    _aux_sys(sys),
+    _aux_sys(fe_problem.getAuxiliarySystem()),
     _indicator_whs(_fe_problem.getIndicatorWarehouse()),
     _internal_side_indicators(_fe_problem.getInternalSideIndicatorWarehouse()),
     _finalize(finalize)
@@ -68,9 +67,9 @@ ComputeIndicatorThread::subdomainChanged()
 void
 ComputeIndicatorThread::onElement(const Elem *elem)
 {
-  for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
+  for (const auto & it : _aux_sys._elem_vars[_tid])
   {
-    MooseVariable * var = it->second;
+    MooseVariable * var = it.second;
     var->prepareAux();
   }
 
@@ -85,8 +84,8 @@ ComputeIndicatorThread::onElement(const Elem *elem)
     if (_indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
     {
       const std::vector<MooseSharedPointer<Indicator> > & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
-      for (std::vector<MooseSharedPointer<Indicator> >::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
-        (*it)->computeIndicator();
+      for (const auto & indicator : indicators)
+        indicator->computeIndicator();
     }
   }
 
@@ -96,15 +95,15 @@ ComputeIndicatorThread::onElement(const Elem *elem)
     if (_indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
     {
       const std::vector<MooseSharedPointer<Indicator> > & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
-      for (std::vector<MooseSharedPointer<Indicator> >::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
-        (*it)->finalize();
+      for (const auto & indicator : indicators)
+        indicator->finalize();
     }
 
     if (_internal_side_indicators.hasActiveBlockObjects(_subdomain, _tid))
     {
       const std::vector<MooseSharedPointer<InternalSideIndicator> > & internal_indicators = _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
-      for (std::vector<MooseSharedPointer<InternalSideIndicator> >::const_iterator it = internal_indicators.begin(); it != internal_indicators.end(); ++it)
-        (*it)->finalize();
+      for (const auto & internal_indicator : internal_indicators)
+        internal_indicator->finalize();
     }
   }
 
@@ -113,9 +112,9 @@ ComputeIndicatorThread::onElement(const Elem *elem)
   if (!_finalize) // During finalize the Indicators should be setting values in the vectors manually
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
+    for (const auto & it : _aux_sys._elem_vars[_tid])
     {
-      MooseVariable * var = it->second;
+      MooseVariable * var = it.second;
       var->add(_aux_sys.solution());
     }
   }
@@ -142,9 +141,9 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
 
   if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
   {
-    for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
+    for (const auto & it : _aux_sys._elem_vars[_tid])
     {
-      MooseVariable * var = it->second;
+      MooseVariable * var = it.second;
       var->prepareAux();
     }
 
@@ -156,8 +155,8 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       const std::vector<MooseSharedPointer<InternalSideIndicator> > & indicators = _internal_side_indicators.getActiveBlockObjects(block_id, _tid);
-      for (std::vector<MooseSharedPointer<InternalSideIndicator> >::const_iterator it = indicators.begin(); it != indicators.end(); ++it)
-        (*it)->computeIndicator();
+      for (const auto & indicator : indicators)
+        indicator->computeIndicator();
 
       _fe_problem.swapBackMaterialsFace(_tid);
       _fe_problem.swapBackMaterialsNeighbor(_tid);

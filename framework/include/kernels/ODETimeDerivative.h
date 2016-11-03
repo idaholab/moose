@@ -15,7 +15,7 @@
 #ifndef ODETIMEDERIVATIVE_H
 #define ODETIMEDERIVATIVE_H
 
-#include "ODEKernel.h"
+#include "ODETimeKernel.h"
 
 // Forward Declaration
 class ODETimeDerivative;
@@ -23,14 +23,14 @@ class ODETimeDerivative;
 template<>
 InputParameters validParams<ODETimeDerivative>();
 
-class ODETimeDerivative : public ODEKernel
+class ODETimeDerivative : public ODETimeKernel
 {
 public:
   ODETimeDerivative(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
 };
 

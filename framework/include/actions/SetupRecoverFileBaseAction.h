@@ -30,22 +30,13 @@ InputParameters validParams<SetupRecoverFileBaseAction>();
 class SetupRecoverFileBaseAction : public Action
 {
 public:
-
   /**
    * Class constructor
    * @param params Input parameters for this action
    */
   SetupRecoverFileBaseAction(InputParameters params);
 
-  /**
-   * Class destructor
-   */
-  virtual ~SetupRecoverFileBaseAction();
-
-  /**
-   * Sets the recovery file base.
-   */
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif //SETUPRECOVERFILEBASEACTION_H

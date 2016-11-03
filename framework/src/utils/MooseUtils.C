@@ -48,9 +48,9 @@ escape(std::string & str)
   escapes['\v'] = "\\v";
   escapes['\r'] = "\\r";
 
-  for (std::map<char, std::string>::iterator it = escapes.begin(); it != escapes.end(); ++it)
-    for (size_t pos=0; (pos=str.find(it->first, pos)) != std::string::npos; pos+=it->second.size())
-      str.replace(pos, 1, it->second);
+  for (const auto & it : escapes)
+    for (size_t pos=0; (pos=str.find(it.first, pos)) != std::string::npos; pos+=it.second.size())
+      str.replace(pos, 1, it.second);
 }
 
 
@@ -143,6 +143,32 @@ parallelBarrierNotify(const Parallel::Communicator & comm)
   }
 
   comm.barrier();
+}
+
+void serialBegin(const libMesh::Parallel::Communicator & comm)
+{
+  // unless we are the first processor...
+  if (comm.rank() > 0)
+  {
+    // ...wait for the previous processor to finish
+    int dummy = 0;
+    comm.receive(comm.rank() - 1, dummy);
+  }
+  else
+    mooseWarning("Entering serial execution block (use only for debugging)");
+}
+
+void serialEnd(const libMesh::Parallel::Communicator & comm)
+{
+  // unless we are the last processor...
+  if (comm.rank() + 1 < comm.size())
+  {
+    // ...notify the next processor of its turn
+    int dummy = 0;
+    comm.send(comm.rank() + 1, dummy);
+  }
+  else
+    mooseWarning("Leaving serial execution block (use only for debugging)");
 }
 
 bool
@@ -257,7 +283,7 @@ baseName(const std::string & name)
 bool
 absoluteFuzzyEqual(const Real & var1, const Real & var2, const Real & tol)
 {
-  return (std::abs(var1 - var2) < tol);
+  return (std::abs(var1 - var2) <= tol);
 }
 
 bool
@@ -317,26 +343,21 @@ relativeFuzzyLessThan(const Real & var1, const Real & var2, const Real & tol)
 void
 MaterialPropertyStorageDump(const HashMap<const libMesh::Elem *, HashMap<unsigned int, MaterialProperties> > & props)
 {
-  // Define the iterators
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> >::const_iterator elem_it;
-  HashMap<unsigned int, MaterialProperties>::const_iterator side_it;
-  MaterialProperties::const_iterator prop_it;
-
   // Loop through the elements
-  for (elem_it = props.begin(); elem_it != props.end(); ++elem_it)
+  for (const auto & elem_it : props)
   {
-    Moose::out << "Element " << elem_it->first->id() << '\n';
+    Moose::out << "Element " << elem_it.first->id() << '\n';
 
     // Loop through the sides
-    for (side_it = elem_it->second.begin(); side_it != elem_it->second.end(); ++side_it)
+    for (const auto & side_it : elem_it.second)
     {
-      Moose::out << "  Side " << side_it->first << '\n';
+      Moose::out << "  Side " << side_it.first << '\n';
 
       // Loop over properties
       unsigned int cnt = 0;
-      for (prop_it = side_it->second.begin(); prop_it != side_it->second.end(); ++prop_it)
+      for (const auto & mat_prop : side_it.second)
       {
-        MaterialProperty<Real> * mp = dynamic_cast<MaterialProperty<Real> *>(*prop_it);
+        MaterialProperty<Real> * mp = dynamic_cast<MaterialProperty<Real> *>(mat_prop);
         if (mp)
         {
           Moose::out << "    Property " << cnt << '\n';
@@ -370,11 +391,11 @@ getFilesInDirs(const std::list<std::string> & directory_list)
 {
   std::list<std::string> files;
 
-  for (std::list<std::string>::const_iterator it = directory_list.begin(); it != directory_list.end(); ++it)
+  for (const auto & dir_name : directory_list)
   {
     tinydir_dir dir;
     dir.has_next = 0; // Avoid a garbage value in has_next (clang StaticAnalysis)
-    tinydir_open(&dir, it->c_str());
+    tinydir_open(&dir, dir_name.c_str());
 
     while (dir.has_next)
     {
@@ -383,7 +404,7 @@ getFilesInDirs(const std::list<std::string> & directory_list)
       tinydir_readfile(&dir, &file);
 
       if (!file.is_dir)
-        files.push_back(*it + "/" + file.name);
+        files.push_back(dir_name + "/" + file.name);
 
       tinydir_next(&dir);
     }
@@ -404,10 +425,10 @@ getRecoveryFileBase(const std::list<std::string> & checkpoint_files)
   std::list<std::string> newest_restart_files;
 
   // Loop through all possible files and store the newest
-  for (std::list<std::string>::const_iterator it = checkpoint_files.begin(); it != checkpoint_files.end(); ++it)
+  for (const auto & cp_file : checkpoint_files)
   {
       struct stat stats;
-      stat(it->c_str(), &stats);
+      stat(cp_file.c_str(), &stats);
 
       time_t mod_time = stats.st_mtime;
       if (mod_time > newest_time)
@@ -417,7 +438,7 @@ getRecoveryFileBase(const std::list<std::string> & checkpoint_files)
       }
 
       if (mod_time == newest_time)
-        newest_restart_files.push_back(*it);
+        newest_restart_files.push_back(cp_file);
   }
 
   // Loop through all of the newest files according the number in the file name
@@ -426,12 +447,12 @@ getRecoveryFileBase(const std::list<std::string> & checkpoint_files)
   pcrecpp::RE re_base_and_file_num("(.*?(\\d+))\\..*"); // Will pull out the full base and the file number simultaneously
 
   // Now, out of the newest files find the one with the largest number in it
-  for (std::list<std::string>::const_iterator it = newest_restart_files.begin(); it != newest_restart_files.end(); ++it)
+  for (const auto & res_file : newest_restart_files)
   {
     std::string the_base;
     int file_num = 0;
 
-    re_base_and_file_num.FullMatch(*it, &the_base, &file_num);
+    re_base_and_file_num.FullMatch(res_file, &the_base, &file_num);
 
     if (file_num > max_file_num)
     {

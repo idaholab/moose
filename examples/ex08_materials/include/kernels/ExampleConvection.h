@@ -30,9 +30,9 @@ public:
 
 protected:
 
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
 private:
 

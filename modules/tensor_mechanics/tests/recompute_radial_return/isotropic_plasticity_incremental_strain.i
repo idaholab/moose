@@ -162,9 +162,8 @@
     block = 0
   [../]
 
-
-  [./isotropic_plasticity_recompute]
-    type = RecomputeRadialReturnIsotropicPlasticity
+  [./isotropic_plasticity]
+    type = IsotropicPlasticityStressUpdate
     block = 0
     yield_stress = 25.
     hardening_constant = 1000.
@@ -172,13 +171,12 @@
     absolute_tolerance = 1e-12
     max_iterations = 50
     # output_iteration_info_on_error = true
-    compute = false # make this material "discrete"
   [../]
 
   [./radial_return_stress]
     type = ComputeReturnMappingStress
     block = 0
-    return_mapping_stress_model = 'isotropic_plasticity_recompute'
+    return_mapping_models = 'isotropic_plasticity'
   [../]
 []
 

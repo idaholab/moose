@@ -866,7 +866,7 @@ class MemoryPlotter:
     fig.canvas.mpl_connect('pick_event', self)
 
     # Create legend
-    legend = plt.legend(tmp_plot, tmp_legend, loc = 2)
+    legend = plt.legend(tmp_plot, tmp_legend, loc = self.arguments.legend)
     legend.get_frame().set_alpha(0.7)
 
     # More dork mode settings
@@ -1050,6 +1050,22 @@ def which(program):
   sys.exit(1)
 
 def verifyArgs(args):
+  possible_positions = [ 'center',
+                         'center left',
+                         'center right',
+                         'upper center',
+                         'lower center',
+                         'best',
+                         'right',
+                         'left',
+                         'upper right',
+                         'lower right',
+                         'upper left',
+                         'lower left']
+  if args.legend not in possible_positions:
+    print 'Invalid legend position requested. Possible values are:\n\t', '\n\t'.join([x for x in possible_positions])
+    sys.exit(1)
+
   option_count = 0
   if args.read:
     option_count += 1
@@ -1068,6 +1084,9 @@ def verifyArgs(args):
   if args.run:
     if args.run[0].find('--recover') != -1:
       args.recover = True
+    if args.run[0].find('~') != -1:
+      print "You must use absolute paths. Python does not understand the '~' path discriptor.\nYou can use environment vairables (eg: $HOME) so long as they are absolute paths."
+      sys.exit(1)
 
   if args.outfile == None and args.run:
     # Attempt to build the output file based on input file
@@ -1098,7 +1117,7 @@ def parseArguments(args=None):
   parser = argparse.ArgumentParser(description='Track and Display memory usage')
 
   rungroup = parser.add_argument_group('Tracking', 'The following options control how the memory logger tracks memory usage')
-  rungroup.add_argument('--run', nargs=1, metavar='command', help='Run specified command. You must encapsulate the command in quotes\n ')
+  rungroup.add_argument('--run', nargs=1, metavar='command', help='Run specified command using absolute paths. You must encapsulate the command in quotes.')
   rungroup.add_argument('--pbs', dest='pbs', metavar='', action='store_const', const=True, default=False, help='Instruct memory logger to tally all launches on all nodes\n ')
   rungroup.add_argument('--pbs-delay', dest='pbs_delay', metavar='float', nargs=1, type=float, default=[1.0], help='For larger jobs, you may need to increase the delay as to when the memory_logger will launch the tracking agents\n ')
   rungroup.add_argument('--sample-delay', dest='sample_delay', metavar='float', nargs=1, type=float, default=[0.25], help='The time to delay before taking the first sample (when not using pbs)')
@@ -1109,6 +1128,7 @@ def parseArguments(args=None):
   readgroup.add_argument('--read', nargs=1, metavar='file', help='Read a specified memory log file to stdout\n ')
   readgroup.add_argument('--separate', dest='separate', action='store_const', const=True, default=False, help='Display individual node memory usage (read mode only)\n ')
   readgroup.add_argument('--plot', nargs="+", metavar='file', help='Display a graphical representation of memory usage (Requires Matplotlib). Specify a single file or a list of files to plot\n ')
+  readgroup.add_argument('--legend', metavar='"lower left"', default='lower left', help='Place legend in one of the following locations (default --legend "lower left") "center", "center left", "center right", "upper center", "lower center", "best", "right", "left", "upper right", "lower right", "upper left", "lower left"\n ')
 
   commongroup = parser.add_argument_group('Common Options', 'The following options can be used when displaying the results')
   commongroup.add_argument('--pstack', dest='pstack', action='store_const', const=True, default=False, help='Display/Record stack trace information (if available)\n ')

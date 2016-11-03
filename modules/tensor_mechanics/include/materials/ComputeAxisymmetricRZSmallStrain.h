@@ -19,7 +19,8 @@ public:
   ComputeAxisymmetricRZSmallStrain(const InputParameters & parameters);
 
 protected:
-  virtual Real computeStrainZZ();
+  virtual void initialSetup() override;
+  virtual Real computeStrainZZ() override;
 };
 
 #endif //COMPUTEAXISYMMETRICRZSMALLSTRAIN_H

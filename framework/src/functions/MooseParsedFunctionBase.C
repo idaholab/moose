@@ -11,23 +11,9 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*           See COPYRIGHT for full restrictions                */
-/****************************************************************/
 
 #include "MooseError.h"
 #include "MooseParsedFunctionBase.h"
-//#include "MooseParsedFunction.h"
 
 template<>
 InputParameters validParams<MooseParsedFunctionBase>()
@@ -47,8 +33,8 @@ MooseParsedFunctionBase::MooseParsedFunctionBase(const InputParameters & paramet
     mooseError("Number of vars must match the number of vals for a MooseParsedFunction!");
 
   // Loop through the variables assigned by the user and give an error if x,y,z,t are used
-  for (unsigned int i = 0; i < _vars.size(); ++i)
-    if (_vars[i].find_first_of("xyzt") != std::string::npos && _vars[i].size() == 1)
+  for (const auto & var : _vars)
+    if (var.find_first_of("xyzt") != std::string::npos && var.size() == 1)
       mooseError("The variables \"x, y, z, and t\" in the ParsedFunction are pre-declared for use and must not be declared in \"vars\"");
 }
 

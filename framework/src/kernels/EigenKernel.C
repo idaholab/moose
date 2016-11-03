@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "EigenKernel.h"
-#include "EigenSystem.h"
+#include "MooseEigenSystem.h"
 #include "MooseApp.h"
 #include "Executioner.h"
 #include "EigenExecutionerBase.h"
@@ -37,7 +37,7 @@ EigenKernel::EigenKernel(const InputParameters & parameters) :
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _eigen(getParam<bool>("eigen")),
-    _eigen_sys(dynamic_cast<EigenSystem *>(&_fe_problem.getNonlinearSystem())),
+    _eigen_sys(dynamic_cast<MooseEigenSystem *>(&_fe_problem.getNonlinearSystem())),
     _eigenvalue(NULL)
 {
   // The name to the postprocessor storing the eigenvalue
@@ -95,8 +95,8 @@ EigenKernel::computeResidual()
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_save_in.size(); i++)
-      _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
+    for (const auto & var : _save_in)
+      var->sys().solution().add_vector(_local_re, var->dofIndices());
   }
 }
 

@@ -97,6 +97,17 @@ public:
   ///@}
 
   /**
+   * Retrieve pointer to a material property with the mesh blocks where it is defined
+   * The name required by this method is the name defined in the input file.
+   * This function can be thought as the combination of getMaterialPropertyByName and getMaterialPropertyBlocks.
+   * It can be called after the action of all actions.
+   * @param name The name of the material property to retrieve
+   * @return Pointer to the material property with the name 'name' and the set of blocks where the property is valid
+   */
+  template<typename T>
+  std::pair<const MaterialProperty<T> *, std::set<SubdomainID> > getBlockMaterialProperty(const MaterialPropertyName & name);
+
+  /**
    * Return a material property that is initialized to zero by default and does
    * not need to (but can) be declared by another material.
    */
@@ -134,11 +145,11 @@ public:
   ///@{
   /**
    * Return a Material object reference for calling compute directly.
+   * @param The name of the input parameter or explicit material name.
    */
   Material & getMaterial(const std::string & name);
   Material & getMaterialByName(const std::string & name);
   ///@}
-
 
   ///@{
   /**
@@ -208,6 +219,14 @@ protected:
   const MaterialProperty <T> * defaultMaterialProperty(const std::string & name);
 
   /**
+   * A helper method for extracting the Material object from the MaterialWarehouse. In general, this method
+   * should not be used, please use `getMaterial` or `getMaterialByName`.
+   * @param The name of the material to retrieve.
+   * @return A shared pointer to the Material object.
+   */
+   virtual MooseSharedPointer<Material> getMaterialSharedPointerByName(const std::string & name);
+
+  /**
    * True by default. If false, this class throws an error if any of
    * the stateful material properties interfaces are used.
    */
@@ -224,10 +243,11 @@ protected:
   std::vector<MooseSharedPointer<MaterialProperty<Real> > > _default_real_properties;
 
 private:
-  /**
-   * An initialization routine needed for dual constructors
-   */
+  /// An initialization routine needed for dual constructors
   void initializeMaterialPropertyInterface(const InputParameters & parameters);
+
+  /// Check and throw an error if the execution has progerssed past the construction stage
+  void checkExecutionStage();
 
   /// Empty sets for referencing when ids is not included
   const std::set<SubdomainID> _empty_block_ids;
@@ -282,6 +302,10 @@ template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 {
+  if (!_stateful_allowed)
+    mooseError("Stateful material properties not allowed for this object."
+               " Old property for \"" << name << "\" was requested.");
+
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
@@ -297,6 +321,10 @@ template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 {
+  if (!_stateful_allowed)
+    mooseError("Stateful material properties not allowed for this object."
+               " Older property for \"" << name << "\" was requested.");
+
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
@@ -325,10 +353,8 @@ template<typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name)
 {
+  checkExecutionStage();
   checkMaterialProperty(name);
-
-  if (!_stateful_allowed && _material_data->getMaterialPropertyStorage().hasStatefulProperties())
-    mooseError("Error: Stateful material properties not allowed for this object.");
 
   // mark property as requested
   markMatPropRequested(name);
@@ -345,7 +371,8 @@ const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyName & name)
 {
   if (!_stateful_allowed)
-    mooseError("Error: Stateful material properties not allowed for this object.");
+    mooseError("Stateful material properties not allowed for this object."
+               " Old property for \"" << name << "\" was requested.");
 
   // mark property as requested
   markMatPropRequested(name);
@@ -358,12 +385,26 @@ const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialPropertyName & name)
 {
   if (!_stateful_allowed)
-    mooseError("Error: Stateful material properties not allowed for this object.");
+    mooseError("Stateful material properties not allowed for this object."
+               " Older property for \"" << name << "\" was requested.");
 
   // mark property as requested
   markMatPropRequested(name);
 
   return _material_data->getPropertyOlder<T>(name);
+}
+
+template<typename T>
+std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >
+MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName & name)
+{
+  if (_mi_block_ids.empty())
+    mooseError("getBlockMaterialProperty must be called by a block restrictable object");
+
+  if (!hasMaterialPropertyByName<T>(name))
+    return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(NULL, std::set<SubdomainID>());
+
+  return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(&_material_data->getProperty<T>(name), _mi_feproblem.getMaterialPropertyBlocks(name));
 }
 
 template<typename T>

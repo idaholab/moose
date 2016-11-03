@@ -34,8 +34,9 @@
 // AuxiliarySystem ////////
 
 AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & name) :
-    SystemTempl<TransientExplicitSystem>(subproblem, name, Moose::VAR_AUXILIARY),
+    SystemBase(subproblem, name, Moose::VAR_AUXILIARY),
     _fe_problem(subproblem),
+    _sys(subproblem.es().add_system<TransientExplicitSystem>(name)),
     _serialized_solution(*NumericVector<Number>::build(_fe_problem.comm()).release()),
     _u_dot(addVector("u_dot", true, GHOSTED)),
     _need_serialized_solution(false)
@@ -126,7 +127,7 @@ AuxiliarySystem::updateActive(THREAD_ID tid)
 void
 AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
-  SystemTempl<TransientExplicitSystem>::addVariable(var_name, type, scale_factor, active_subdomains);
+  SystemBase::addVariable(var_name, type, scale_factor, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     MooseVariable * var = dynamic_cast<MooseVariable *>(_vars[tid].getVariable(var_name));
@@ -175,15 +176,15 @@ AuxiliarySystem::addScalarKernel(const std::string & kernel_name, const std::str
 void
 AuxiliarySystem::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 {
-  for (std::map<std::string, MooseVariable *>::iterator it = _nodal_vars[tid].begin(); it != _nodal_vars[tid].end(); ++it)
+  for (const auto & it : _nodal_vars[tid])
   {
-    MooseVariable *var = it->second;
+    MooseVariable * var = it.second;
     var->computeElemValues();
   }
 
-  for (std::map<std::string, MooseVariable *>::iterator it = _elem_vars[tid].begin(); it != _elem_vars[tid].end(); ++it)
+  for (const auto & it : _elem_vars[tid])
   {
-    MooseVariable *var = it->second;
+    MooseVariable * var = it.second;
     var->reinitAux();
     var->computeElemValues();
   }
@@ -192,15 +193,15 @@ AuxiliarySystem::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
 void
 AuxiliarySystem::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
-  for (std::map<std::string, MooseVariable *>::iterator it = _nodal_vars[tid].begin(); it != _nodal_vars[tid].end(); ++it)
+  for (const auto & it : _nodal_vars[tid])
   {
-    MooseVariable *var = it->second;
+    MooseVariable * var = it.second;
     var->computeElemValuesFace();
   }
 
-  for (std::map<std::string, MooseVariable *>::iterator it = _elem_vars[tid].begin(); it != _elem_vars[tid].end(); ++it)
+  for (const auto & it : _elem_vars[tid])
   {
-    MooseVariable *var = it->second;
+    MooseVariable * var = it.second;
     var->reinitAux();
     var->reinitAuxNeighbor();
     var->computeElemValuesFace();
@@ -284,9 +285,9 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
   // Elemental AuxKernels
   {
     const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _elemental_aux_storage[type].getActiveObjects();
-    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator it = auxs.begin(); it != auxs.end(); ++it)
+    for (const auto & aux : auxs)
     {
-      const std::set<std::string> & uo = (*it)->getDependObjects();
+      const std::set<std::string> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
@@ -294,9 +295,9 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
   // Nodal AuxKernels
   {
     const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _nodal_aux_storage[type].getActiveObjects();
-    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator it = auxs.begin(); it != auxs.end(); ++it)
+    for (const auto & aux : auxs)
     {
-      const std::set<std::string> & uo = (*it)->getDependObjects();
+      const std::set<std::string> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
@@ -312,9 +313,9 @@ AuxiliarySystem::getDependObjects()
   // Elemental AuxKernels
   {
     const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _elemental_aux_storage.getActiveObjects();
-    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator it = auxs.begin(); it != auxs.end(); ++it)
+    for (const auto & aux : auxs)
     {
-      const std::set<std::string> & uo = (*it)->getDependObjects();
+      const std::set<std::string> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
@@ -322,9 +323,9 @@ AuxiliarySystem::getDependObjects()
   // Nodal AuxKernels
   {
     const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _nodal_aux_storage.getActiveObjects();
-    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator it = auxs.begin(); it != auxs.end(); ++it)
+    for (const auto & aux : auxs)
     {
-      const std::set<std::string> & uo = (*it)->getDependObjects();
+      const std::set<std::string> & uo = aux->getDependObjects();
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
@@ -361,15 +362,12 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
 
       // Call compute() method on all active AuxScalarKernel objects
       const std::vector<MooseSharedPointer<AuxScalarKernel> > & objects = storage.getActiveObjects(tid);
-      for (std::vector<MooseSharedPointer<AuxScalarKernel> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-        (*it)->compute();
+      for (const auto & obj : objects)
+        obj->compute();
 
       const std::vector<MooseVariableScalar *> & scalar_vars = getScalarVariables(tid);
-      for (std::vector<MooseVariableScalar *>::const_iterator it = scalar_vars.begin(); it != scalar_vars.end(); ++it)
-      {
-        MooseVariableScalar * var = *it;
+      for (const auto & var : scalar_vars)
         var->insert(solution());
-      }
     }
   }
   PARALLEL_CATCH;
@@ -392,7 +390,7 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
     if (nodal.hasActiveBlockObjects())
     {
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
-      ComputeNodalAuxVarsThread navt(_fe_problem, *this, nodal);
+      ComputeNodalAuxVarsThread navt(_fe_problem, nodal);
       Threads::parallel_reduce(range, navt);
 
       solution().close();
@@ -408,7 +406,7 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
     if (nodal.hasActiveBoundaryObjects())
     {
       ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-      ComputeNodalAuxBcsThread nabt(_fe_problem, *this, nodal);
+      ComputeNodalAuxBcsThread nabt(_fe_problem, nodal);
       Threads::parallel_reduce(bnd_nodes, nabt);
 
       solution().close();
@@ -433,7 +431,7 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
     if (elemental.hasActiveBlockObjects())
     {
       ConstElemRange & range = *_mesh.getActiveLocalElementRange();
-      ComputeElemAuxVarsThread eavt(_fe_problem, *this, elemental, true);
+      ComputeElemAuxVarsThread eavt(_fe_problem, elemental, true);
       Threads::parallel_reduce(range, eavt);
 
       solution().close();
@@ -444,7 +442,7 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
     if (elemental.hasActiveBoundaryObjects())
     {
       ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
-      ComputeElemAuxBcsThread eabt(_fe_problem, *this, elemental, true);
+      ComputeElemAuxBcsThread eabt(_fe_problem, elemental, true);
       Threads::parallel_reduce(bnd_elems, eabt);
 
       solution().close();
@@ -468,11 +466,11 @@ AuxiliarySystem::getMinQuadratureOrder()
 {
   Order order = CONSTANT;
   std::vector<MooseVariable *> vars = _vars[0].variables();
-  for (std::vector<MooseVariable *>::iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    if (!(*it)->isNodal()) // nodal aux variables do not need quadrature
+    if (!var->isNodal()) // nodal aux variables do not need quadrature
     {
-      FEType fe_type = (*it)->feType();
+      FEType fe_type = var->feType();
       if (fe_type.default_quadrature_order() > order)
         order = fe_type.default_quadrature_order();
     }

@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<ContactAction>()
 {
   MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
-  MooseEnum formulation("DEFAULT KINEMATIC PENALTY AUGMENTED_LAGRANGE", "DEFAULT");
+  MooseEnum formulation("DEFAULT KINEMATIC PENALTY AUGMENTED_LAGRANGE TANGENTIAL_PENALTY", "DEFAULT");
   MooseEnum system("DiracKernel Constraint", "DiracKernel");
 
   InputParameters params = validParams<Action>();
@@ -37,7 +37,7 @@ InputParameters validParams<ContactAction>()
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
-  params.addParam<MooseEnum>("formulation", formulation, "The contact formulation: default, penalty, augmented_lagrange");
+  params.addParam<MooseEnum>("formulation", formulation, "The contact formulation: default, penalty, augmented_lagrange, tangential_penalty");
   params.addParam<MooseEnum>("system", system, "System to use for constraint enforcement.  Options are: " + system.getRawNames());
 
   return params;
@@ -58,6 +58,13 @@ ContactAction::ContactAction(const InputParameters & params) :
   _order(getParam<MooseEnum>("order")),
   _system(getParam<MooseEnum>("system"))
 {
+  if (_formulation == "tangential_penalty")
+  {
+    if (_system != "Constraint")
+      mooseError ("The 'tangential_penalty' formulation can only be used with the 'Constraint' system");
+    if (_model != "coulomb")
+      mooseError ("The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
+  }
 }
 
 void
@@ -75,11 +82,7 @@ ContactAction::act()
     ++numdims;
 
   std::string action_name = MooseUtils::shortName(name());
-
-  std::vector<NonlinearVariableName> vars;
-  vars.push_back(_disp_x);
-  vars.push_back(_disp_y);
-  vars.push_back(_disp_z);
+  std::vector<NonlinearVariableName> vars = {_disp_x, _disp_y, _disp_z};
 
   if ( _current_task == "add_dirac_kernel" )
   {
@@ -105,7 +108,7 @@ ContactAction::act()
       params.set<Real>("friction_coefficient") = _friction_coefficient;
       params.set<Real>("tension_release") = _tension_release;
       params.addRequiredCoupledVar("nodal_area", "The nodal area");
-      params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_" + name());
+      params.set<std::vector<VariableName> >("nodal_area") = {"nodal_area_" + name()};
 
       if (isParamValid("tangential_tolerance"))
         params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
@@ -120,15 +123,15 @@ ContactAction::act()
         params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
 
       params.addCoupledVar("disp_x", "The x displacement");
-      params.set<std::vector<VariableName> >("disp_x") = std::vector<VariableName>(1, _disp_x);
+      params.set<std::vector<VariableName> >("disp_x") = {_disp_x};
 
       params.addCoupledVar("disp_y", "The y displacement");
       if (numdims > 1)
-        params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1, _disp_y);
+        params.set<std::vector<VariableName> >("disp_y") = {_disp_y};
 
       params.addCoupledVar("disp_z", "The z displacement");
       if (numdims == 3)
-        params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1, _disp_z);
+        params.set<std::vector<VariableName> >("disp_z") = {_disp_z};
 
       params.set<bool>("use_displaced_mesh") = true;
 
@@ -138,7 +141,7 @@ ContactAction::act()
 
         params.set<unsigned int>("component") = i;
         params.set<NonlinearVariableName>("variable") = vars[i];
-        params.set<std::vector<VariableName> >("master_variable") = std::vector<VariableName>(1,vars[i]);
+        params.set<std::vector<VariableName> >("master_variable") = {vars[i]};
 
         _problem->addConstraint("MechanicalContactConstraint", name, params);
       }
@@ -166,7 +169,7 @@ ContactAction::act()
         params.set<Real>("friction_coefficient") = _friction_coefficient;
         params.set<Real>("tension_release") = _tension_release;
         params.addRequiredCoupledVar("nodal_area", "The nodal area");
-        params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_" + name());
+        params.set<std::vector<VariableName> >("nodal_area") = {"nodal_area_" + name()};
 
         if (isParamValid("tangential_tolerance"))
           params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
@@ -181,15 +184,15 @@ ContactAction::act()
           params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
 
         params.addCoupledVar("disp_x", "The x displacement");
-        params.set<std::vector<VariableName> >("disp_x") = std::vector<VariableName>(1, _disp_x);
+        params.set<std::vector<VariableName> >("disp_x") = {_disp_x};
 
         params.addCoupledVar("disp_y", "The y displacement");
         if (numdims > 1)
-          params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1, _disp_y);
+          params.set<std::vector<VariableName> >("disp_y") = {_disp_y};
 
         params.addCoupledVar("disp_z", "The z displacement");
         if (numdims == 3)
-          params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1, _disp_z);
+          params.set<std::vector<VariableName> >("disp_z") = {_disp_z};
 
         params.set<bool>("use_displaced_mesh") = true;
 
@@ -222,7 +225,7 @@ ContactAction::act()
         params.set<Real>("penalty") = _penalty;
         params.set<Real>("friction_coefficient") = _friction_coefficient;
         params.addRequiredCoupledVar("nodal_area", "The nodal area");
-        params.set<std::vector<VariableName> >("nodal_area") = std::vector<VariableName>(1, "nodal_area_" +name());
+        params.set<std::vector<VariableName> >("nodal_area") = {"nodal_area_" +name()};
         if (isParamValid("tangential_tolerance"))
           params.set<Real>("tangential_tolerance") = getParam<Real>("tangential_tolerance");
 
@@ -236,15 +239,15 @@ ContactAction::act()
           params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
 
         params.addCoupledVar("disp_x", "The x displacement");
-        params.set<std::vector<VariableName> >("disp_x") = std::vector<VariableName>(1, _disp_x);
+        params.set<std::vector<VariableName> >("disp_x") = {_disp_x};
 
         params.addCoupledVar("disp_y", "The y displacement");
         if (numdims > 1)
-          params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1, _disp_y);
+          params.set<std::vector<VariableName> >("disp_y") = {_disp_y};
 
         params.addCoupledVar("disp_z", "The z displacement");
         if (numdims == 3)
-          params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1, _disp_z);
+          params.set<std::vector<VariableName> >("disp_z") = {_disp_z};
 
         params.set<bool>("use_displaced_mesh") = true;
 

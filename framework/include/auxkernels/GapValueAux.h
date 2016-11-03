@@ -30,10 +30,8 @@ class GapValueAux : public AuxKernel
 public:
   GapValueAux(const InputParameters & parameters);
 
-  virtual ~GapValueAux();
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   PenetrationLocator & _penetration_locator;
 

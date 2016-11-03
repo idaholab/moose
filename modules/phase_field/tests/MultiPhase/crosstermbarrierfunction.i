@@ -63,7 +63,6 @@
 [Materials]
   [./crosstermbarrier_simple]
     type = CrossTermBarrierFunctionMaterial
-    block = 0
     etas = 'eta1 eta2 eta3'
     W_ij = '0   1   2.2
             1   0   3.1
@@ -74,7 +73,6 @@
   [../]
   [./crosstermbarrier_low]
     type = CrossTermBarrierFunctionMaterial
-    block = 0
     etas = 'eta1 eta2 eta3'
     W_ij = '0   1   2.2
             1   0   3.1

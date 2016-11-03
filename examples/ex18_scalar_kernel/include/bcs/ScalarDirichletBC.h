@@ -37,7 +37,7 @@ public:
   ScalarDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /**
    * Holds the values of a coupled scalar variable.

@@ -29,41 +29,50 @@ public:
   FauxGrainTracker(const InputParameters & parameters);
   virtual ~FauxGrainTracker();
 
-  virtual void initialize();
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual Real getValue() override;
+  virtual void execute() override;
 
-  virtual void finalize();
-
-  virtual Real getValue();
-
-  virtual void execute();
-
-  /**
-   * Accessor for retrieving either nodal or elemental information (unique grains or variable indicies)
-   * @param entity_id the node identifier for which to retrieve field data
-   * @param var_idx when using multi-map mode, the map number from which to retrieve data.
-   * @param show_var_coloring pass true to view variable index for a region, false for unique grain information
-   * @return the entity value
-   */
-  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FIELD_TYPE field_type, unsigned int var_idx) const;
-
-  /**
-   * Returns a list of active unique grains for a particular elem based on the node numbering.  The outer vector
-   * holds the ith node with the inner vector holds the list of active unique grains.
-   * (unique_grain_id, variable_idx)
-   */
-  virtual const std::vector<std::pair<unsigned int, unsigned int> > & getElementalValues(dof_id_type elem_id) const;
+  // GrainTrackerInterface methods
+  virtual Real getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType field_type, std::size_t var_idx) const override;
+  virtual const std::vector<unsigned int> & getVarToFeatureVector(dof_id_type elem_id) const override;
+  virtual unsigned int getFeatureVar(unsigned int feature_id) const override;
+  virtual std::size_t getNumberActiveGrains() const override;
+  virtual std::size_t getTotalFeatureCount() const override;
+  virtual Point getGrainCentroid(unsigned int grain_id) const override;
+  virtual bool doesFeatureIntersectBoundary(unsigned int feature_id) const override;
 
 private:
   /// The mapping of entities to grains, in this case always the order parameter
   std::map<dof_id_type, unsigned int> _entity_id_to_var_num;
 
+  std::map<dof_id_type, std::vector<unsigned int> > _entity_var_to_features;
+  std::vector<unsigned int> _empty_var_to_features;
+
   /// Used as the lightweight grain counter
   std::set<unsigned int> _variables_used;
+
+  /// Total Grain Count
+  std::size_t _grain_count;
+
+  // Convenience variable holding the number of variables coupled into this object
+  const std::size_t _n_vars;
 
   /// Used to emulate the tracking step of the real grain tracker object
   const int _tracking_step;
 
-  std::vector<std::pair<unsigned int, unsigned int> > _faux_data;
+  /// Order parameter to grain indices (just a reflexive vector)
+  std::vector<unsigned int > _op_to_grains;
+
+  /// The volume of the feature
+  std::map<unsigned int, Real> _volume;
+
+  /// The count of entities contributing to the volume calculation
+  std::map<unsigned int, unsigned int> _vol_count;
+
+  /// The centroid of the feature (average of coordinates from entities participating in the volume calculation)
+  std::map<unsigned int, Point> _centroid;
 };
 
 #endif

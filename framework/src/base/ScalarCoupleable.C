@@ -36,9 +36,8 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object) :
     if (_sc_parameters.getVecMooseType(*iter) != std::vector<std::string>())
     {
       std::vector<std::string> vars = _sc_parameters.getVecMooseType(*iter);
-      for (unsigned int i = 0; i < vars.size(); i++)
+      for (const auto & coupled_var_name : vars)
       {
-        std::string coupled_var_name = vars[i];
         if (problem.hasScalarVariable(coupled_var_name))
         {
           MooseVariableScalar * scalar_var = &problem.getScalarVariable(tid, coupled_var_name);
@@ -56,10 +55,10 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object) :
 
 ScalarCoupleable::~ScalarCoupleable()
 {
-  for (std::map<std::string, VariableValue *>::iterator it = _default_value.begin(); it != _default_value.end(); ++it)
+  for (auto & it : _default_value)
   {
-    it->second->release();
-    delete it->second;
+    it.second->release();
+    delete it.second;
   }
 }
 

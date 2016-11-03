@@ -30,7 +30,7 @@ class Assembly;
 class ComputeMaterialsObjectThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeMaterialsObjectThread(FEProblem & fe_problem, NonlinearSystem & sys,
+  ComputeMaterialsObjectThread(FEProblem & fe_problem,
                                std::vector<MooseSharedPointer<MaterialData> > & material_data,
                                std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
                                std::vector<MooseSharedPointer<MaterialData> > & neighbor_material_data,
@@ -43,16 +43,17 @@ public:
 
   virtual ~ComputeMaterialsObjectThread();
 
-  virtual void subdomainChanged();
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
+  virtual void post() override;
+  virtual void subdomainChanged() override;
+  virtual void onElement(const Elem * elem) override;
+  virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
+  virtual void onInternalSide(const Elem * elem, unsigned int side) override;
 
   void join(const ComputeMaterialsObjectThread & /*y*/);
 
 protected:
   FEProblem & _fe_problem;
-  NonlinearSystem & _sys;
+  NonlinearSystem & _nl;
   std::vector<MooseSharedPointer<MaterialData> > & _material_data;
   std::vector<MooseSharedPointer<MaterialData> > & _bnd_material_data;
   std::vector<MooseSharedPointer<MaterialData> > & _neighbor_material_data;
@@ -60,7 +61,8 @@ protected:
   MaterialPropertyStorage & _bnd_material_props;
 
   /// Reference to the Material object warehouses
-  const MaterialWarehouse<Material> & _materials;
+  const MaterialWarehouse & _materials;
+  const MaterialWarehouse & _discrete_materials;
 
   std::vector<Assembly *> & _assembly;
   bool _need_internal_side_material;

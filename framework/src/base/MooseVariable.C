@@ -17,7 +17,6 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "NonlinearSystem.h"
-#include "Assembly.h"
 #include "MooseMesh.h"
 
 // libMesh
@@ -290,9 +289,9 @@ void
 MooseVariable::reinitNodes(const std::vector<dof_id_type> & nodes)
 {
   _dof_indices.clear();
-  for (unsigned int i = 0; i < nodes.size(); i++)
+  for (const auto & node_id : nodes)
   {
-    Node * nd = _subproblem.mesh().getMesh().query_node_ptr(nodes[i]);
+    Node * nd = _subproblem.mesh().getMesh().query_node_ptr(node_id);
     if (nd && (_subproblem.mesh().isSemiLocal(nd)))
     {
       if (nd->n_dofs(_sys.number(), _var_num) > 0)
@@ -313,9 +312,9 @@ void
 MooseVariable::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes)
 {
   _dof_indices_neighbor.clear();
-  for (unsigned int i = 0; i < nodes.size(); i++)
+  for (const auto & node_id : nodes)
   {
-    Node * nd = _subproblem.mesh().getMesh().query_node_ptr(nodes[i]);
+    Node * nd = _subproblem.mesh().getMesh().query_node_ptr(node_id);
     if (nd && (_subproblem.mesh().isSemiLocal(nd)))
     {
       if (nd->n_dofs(_sys.number(), _var_num) > 0)
@@ -689,7 +688,10 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
         d2phi_local = &(*_second_phi)[i][qp];
 
         if (_need_second)
+        {
           second_u_qp = &_second_u[qp];
+          second_u_qp->add_scaled(*d2phi_local, soln_local);
+        }
 
         if (is_transient)
         {
@@ -704,9 +706,6 @@ MooseVariable::computePerturbedElemValues(unsigned int perturbation_idx, Real pe
       _u[qp]     += phi_local * soln_local;
 
       grad_u_qp->add_scaled(*dphi_qp, soln_local);
-
-      if (_need_second)
-        second_u_qp->add_scaled(*d2phi_local, soln_local);
 
       if (is_transient)
       {
@@ -926,7 +925,10 @@ MooseVariable::computeElemValues()
         d2phi_local = &(*_second_phi)[i][qp];
 
         if (_need_second)
+        {
           second_u_qp = &_second_u[qp];
+          second_u_qp->add_scaled(*d2phi_local, soln_local);
+        }
 
         if (is_transient)
         {
@@ -941,9 +943,6 @@ MooseVariable::computeElemValues()
       _u[qp] += phi_local * soln_local;
 
       grad_u_qp->add_scaled(*dphi_qp, soln_local);
-
-      if (_need_second)
-        second_u_qp->add_scaled(*d2phi_local, soln_local);
 
       if (is_transient)
       {
@@ -1591,7 +1590,7 @@ MooseVariable::setNodalValueNeighbor(Number value)
 }
 
 void
-MooseVariable::computeIncrement(const NumericVector<Number> & increment_vec)
+MooseVariable::computeIncrementAtQps(const NumericVector<Number> & increment_vec)
 {
   unsigned int nqp = _qrule->n_points();
 
@@ -1604,6 +1603,18 @@ MooseVariable::computeIncrement(const NumericVector<Number> & increment_vec)
     for (unsigned int i=0; i<num_dofs; i++)
       _increment[qp] +=  _phi[i][qp]*increment_vec(_dof_indices[i]);
   }
+}
+
+void
+MooseVariable::computeIncrementAtNode(const NumericVector<Number> & increment_vec)
+{
+  if (!isNodal())
+    mooseError("computeIncrementAtNode can only be called for nodal variables");
+
+  _increment.resize(1);
+
+  // Compute the increment for the current DOF
+  _increment[0] = increment_vec(_dof_indices[0]);
 }
 
 Number

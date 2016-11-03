@@ -86,6 +86,8 @@ protected:
   const CRACKING_RELEASE _cracking_release;
   Real _cracking_stress;
   const Real _cracking_residual_stress;
+  const Real _cracking_beta;
+  const std::string _compute_method;
   Function * const _cracking_stress_function;
 
   Real _cracking_alpha;
@@ -113,6 +115,7 @@ protected:
   MaterialProperty<SymmTensor> & _stress;
 private:
   MaterialProperty<SymmTensor> & _stress_old_prop;
+
 protected:
   SymmTensor _stress_old;
 
@@ -136,6 +139,7 @@ protected:
   ColumnMajorMatrix _principal_strain;
 
   MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
+  MaterialProperty<SymmElasticityTensor> & _elasticity_tensor_old;
   MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
 
   // Accumulate derivatives of strain tensors with respect to Temperature into this
@@ -148,6 +152,7 @@ protected:
   SymmTensor _strain_increment;
 
   const bool _compute_JIntegral;
+  const bool _compute_InteractionIntegral;
   bool _store_stress_older;
 
   //These are used in calculation of the J integral
@@ -155,6 +160,9 @@ protected:
   MaterialProperty<Real> * _SED_old;
   MaterialProperty<ColumnMajorMatrix> * _Eshelby_tensor;
   MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
+
+  //This is used in calculation of the J Integral and Interaction Integral
+  MaterialProperty<Real> * _current_instantaneous_thermal_expansion_coef;
 
   virtual void initQpStatefulProperties();
 
@@ -194,6 +202,9 @@ protected:
 
   // Compute quantity used in thermal term of J Integral
   virtual void computeThermalJvec();
+
+  //Compute current thermal expansion coefficient, used in J Integral and Interaction Integral
+  virtual void computeCurrentInstantaneousThermalExpansionCoefficient();
 
   /*
    * Determine whether new cracks have formed.
@@ -259,6 +270,11 @@ protected:
   virtual void computeConstitutiveModelStress();
 
   void createConstitutiveModel(const std::string & cm_name);
+
+  ///@{ Restartable data to check for the zeroth and first time steps for thermal calculations
+  bool & _step_zero;
+  bool & _step_one;
+  ///@}
 
 
 private:

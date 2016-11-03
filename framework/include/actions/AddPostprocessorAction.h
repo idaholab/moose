@@ -28,7 +28,7 @@ class AddPostprocessorAction: public MooseObjectAction
 public:
   AddPostprocessorAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif //ADDPOSTPROCESSORACTION_H

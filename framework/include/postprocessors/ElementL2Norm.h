@@ -28,14 +28,10 @@ class ElementL2Norm : public ElementIntegralVariablePostprocessor
 public:
   ElementL2Norm(const InputParameters & parameters);
 
+  virtual Real getValue() override;
+
 protected:
-
-  /**
-   * Get the L2 Error.
-   */
-  virtual Real getValue();
-
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 };
 
 #endif //ELEMENTL2NORM_H

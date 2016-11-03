@@ -58,20 +58,15 @@ public:
   Checkpoint(const InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~Checkpoint();
-
-  /**
    * Outputs a checkpoint file.
    * Each call to this function creates various files associated with
    */
-  void output(const ExecFlagType & type);
+  void output(const ExecFlagType & type) override;
 
   /**
    * Returns the base filename for the checkpoint files
    */
-  std::string filename();
+  virtual std::string filename() override;
 
   /**
    * Retrieve the checkpoint output directory

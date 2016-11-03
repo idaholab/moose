@@ -49,10 +49,6 @@ PiecewiseConstant::PiecewiseConstant(const InputParameters & parameters) :
 {
 }
 
-PiecewiseConstant::~PiecewiseConstant()
-{
-}
-
 Real
 PiecewiseConstant::value(Real t, const Point & p)
 {
@@ -110,16 +106,15 @@ Real
 PiecewiseConstant::integral()
 {
   const unsigned len = functionSize();
-  Real sum(0);
+  Real sum = 0;
   unsigned offset = 0;
+
   if (_direction == RIGHT)
-  {
     offset = 1;
-  }
-  for (unsigned i(0); i < len-1; ++i)
-  {
+
+  for (unsigned i = 0; i < len-1; ++i)
     sum += range(i+offset) * (domain(i+1) - domain(i));
-  }
+
   return _scale_factor * sum;
 }
 
@@ -128,4 +123,3 @@ PiecewiseConstant::average()
 {
   return integral()/(domain(functionSize()-1) - domain(0));
 }
-

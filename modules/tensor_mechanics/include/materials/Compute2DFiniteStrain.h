@@ -13,8 +13,8 @@
  * Compute2DFiniteStrain defines a strain increment and a rotation increment
  * for finite strains in 2D geometries, handling the out of plane strains.
  * Compute2DFiniteStrain contains a virtual method to define the strain_zz
- * as a nonzero value in the inherited classes ComputePlaneFiniteStrain
- * ComputeGeneralizedPlaneFiniteStrain and ComputeAxisymmetricRZFiniteStrain.
+ * as a general nonzero value in the inherited classes ComputePlaneFiniteStrain
+ * and ComputeAxisymmetricRZFiniteStrain.
  */
 class Compute2DFiniteStrain : public ComputeFiniteStrain
 {
@@ -24,13 +24,13 @@ public:
 protected:
   virtual void computeProperties();
 
-  /// Computes the current deformation gradient; as a virtual function, this function is
+  /// Computes the current out-of-plane displacement gradient; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeDeformGradZZ() = 0;
+  virtual Real computeGradDispZZ() = 0;
 
-  /// Computes the old deformation gradient; as a virtual function, this function is
+  /// Computes the old out-of-plane displacement gradient; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeDeformGradZZold() = 0;
+  virtual Real computeGradDispZZold() = 0;
 };
 
 #endif //COMPUTE2DFINITESTRAIN_H

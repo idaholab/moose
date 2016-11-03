@@ -40,8 +40,8 @@ TimeNodalKernel::computeResidual()
     if (_has_save_in)
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (unsigned int i=0; i<_save_in.size(); i++)
-        _save_in[i]->sys().solution().add(_save_in[i]->nodalDofIndex(), res);
+      for (const auto & var : _save_in)
+        var->sys().solution().add(var->nodalDofIndex(), res);
     }
   }
 }

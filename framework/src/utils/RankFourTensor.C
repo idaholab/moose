@@ -7,14 +7,12 @@
 #include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 #include "MooseException.h"
+#include "MatrixTools.h"
+#include "MaterialProperty.h"
 
 // Any other includes here
-#include "MaterialProperty.h"
+#include "libmesh/utility.h"
 #include <ostream>
-
-#if PETSC_VERSION_LESS_THAN(3,5,0)
-  extern "C" void FORTRAN_CALL(dgetri) ( ... ); // matrix inversion routine from LAPACK
-#endif
 
 template<>
 void mooseSetToZero<RankFourTensor>(RankFourTensor & v)
@@ -310,7 +308,7 @@ RankFourTensor::L2norm() const
     for (unsigned int j = 0; j < N; ++j)
       for (unsigned int k = 0; k < N; ++k)
         for (unsigned int l = 0; l < N; ++l)
-          l2 += std::pow(a(i,j,k,l), 2);
+          l2 += Utility::pow<2>(a(i,j,k,l));
 
   return std::sqrt(l2);
 }
@@ -319,8 +317,7 @@ RankFourTensor
 RankFourTensor::invSymm() const
 {
   unsigned int ntens = N * (N+1) / 2;
-  int nskip = N-1;
-  int error;
+  int nskip = N - 1;
 
   RankFourTensor result;
   const RankFourTensor & a = *this;
@@ -411,9 +408,7 @@ RankFourTensor::invSymm() const
       mat[i*ntens+j] /= 2.0; // because of double-counting above
 
   // use LAPACK to find the inverse
-  error = matrixInversion(mat, ntens);
-  if (error != 0)
-    throw MooseException("Error in Matrix  Inversion in RankFourTensor");
+  MatrixTools::inverse(mat, ntens);
 
   // build the resulting rank-four tensor
   // using the inverse of the above algorithm
@@ -434,7 +429,7 @@ RankFourTensor::invSymm() const
 }
 
 void
-RankFourTensor::rotate(RealTensorValue & R)
+RankFourTensor::rotate(const RealTensorValue & R)
 {
   RankFourTensor old = *this;
 
@@ -592,33 +587,6 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod 
   }
 }
 
-int
-RankFourTensor::matrixInversion(std::vector<PetscScalar> & A, int n) const
-{
-  int return_value,
-      buffer_size = n * 64;
-  std::vector<PetscBLASInt> ipiv(n);
-  std::vector<PetscScalar> buffer(buffer_size);
-
-  // Following does a LU decomposition of "square matrix A"
-  // upon return "A = P*L*U" if return_value == 0
-  // Here i use quotes because A is actually an array of length n^2, not a matrix of size n-by-n
-  LAPACKgetrf_(&n, &n, &A[0], &n, &ipiv[0], &return_value);
-
-  if (return_value != 0)
-    // couldn't LU decompose because: illegal value in A; or, A singular
-    return return_value;
-
-  // get the inverse of A
-#if PETSC_VERSION_LESS_THAN(3,5,0)
-  FORTRAN_CALL(dgetri)(&n, &A[0], &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
-#else
-  LAPACKgetri_(&n, &A[0], &n, &ipiv[0], &buffer[0], &buffer_size, &return_value);
-#endif
-
-  return return_value;
-}
-
 void
 RankFourTensor::fillSymmetricFromInputVector(const std::vector<Real> & input, bool all)
 {
@@ -750,11 +718,7 @@ RankFourTensor::fillAntisymmetricIsotropicFromInputVector(const std::vector<Real
 {
   if (input.size() != 1)
     mooseError("To use fillAntisymmetricIsotropicFromInputVector, your input must have size 1. Yours has size " << input.size());
-  std::vector<Real> input3(3);
-  input3[0] = 0.0;
-  input3[1] = 0.0;
-  input3[2] = input[0];
-  fillGeneralIsotropicFromInputVector(input3);
+  fillGeneralIsotropicFromInputVector({0.0, 0.0, input[0]});
 }
 
 void
@@ -762,11 +726,7 @@ RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> & 
 {
   if (input.size() != 2)
     mooseError("To use fillSymmetricIsotropicFromInputVector, your input must have size 2. Yours has size " << input.size());
-  std::vector<Real> input3(3);
-  input3[0] = input[0];
-  input3[1] = input[1];
-  input3[2] = 0.0;
-  fillGeneralIsotropicFromInputVector(input3);
+  fillGeneralIsotropicFromInputVector({input[0], input[1], 0.0});
 }
 
 void
@@ -774,17 +734,11 @@ RankFourTensor::fillAxisymmetricRZFromInputVector(const std::vector<Real> & inpu
 {
   if (input.size() != 5)
     mooseError("To use fillAxisymmetricRZFromInputVector, your input must have size 5.  Your vector has size " << input.size());
-  std::vector<Real> input9(9);
-  input9[0] = input[0];  // C1111
-  input9[1] = input[1];  // C1122
-  input9[2] = input[2];  // C1133
-  input9[3] = input[0];  // C2222
-  input9[4] = input[2];  // C2233 = C1133
-  input9[5] = input[3];  // C3333
-  input9[6] = input[4];  // C2323
-  input9[7] = input[4];  // C3131 = C2323
-  input9[8] = (input[0]-input[1])*0.5;  // C1212
-  fillSymmetricFromInputVector(input9, false);
+
+                             // C1111     C1122     C1133     C2222     C2233=C1133
+  fillSymmetricFromInputVector({input[0], input[1], input[2], input[0], input[2],
+                             // C3333     C2323     C3131=C2323   C1212
+                                input[3], input[4], input[4],     (input[0]-input[1])*0.5}, false);
 }
 
 void

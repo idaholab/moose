@@ -20,7 +20,7 @@
  * CHBulk. Use CHMath as an example of how this works.
  */
 template<typename T>
-class CHBulk : public DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >
+class CHBulk : public DerivativeMaterialInterface<JvarMapKernelInterface<KernelGrad> >
 {
 public:
   CHBulk(const InputParameters & parameters);
@@ -54,7 +54,7 @@ protected:
 
 template<typename T>
 CHBulk<T>::CHBulk(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<KernelGrad> >(parameters),
     _M(getMaterialProperty<T>("mob_name")),
     _dMdc(getMaterialPropertyDerivative<T>("mob_name", _var.name()))
 {
@@ -109,9 +109,7 @@ Real
 CHBulk<T>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   return (*_dMdarg[cvar])[_qp] * _phi[_j][_qp] * computeGradDFDCons(Residual) * _grad_test[_i][_qp];
 }

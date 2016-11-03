@@ -29,7 +29,7 @@ public:
    * Retrieve the set of MooseVariables that _this_ object depends on.
    * @return The MooseVariables that MUST be reinited before evaluating this object
    */
-  const std::set<MooseVariable *> & getMooseVariableDependencies() { return _moose_variable_dependencies; }
+  const std::set<MooseVariable *> & getMooseVariableDependencies() const { return _moose_variable_dependencies; }
 
 protected:
 
@@ -37,7 +37,7 @@ protected:
    * Call this function ot add the passed in MooseVariable as a variable that _this_ object depends on.
    */
   void addMooseVariableDependency(MooseVariable * var) { _moose_variable_dependencies.insert(var); }
-
+  void addMooseVariableDependency(std::vector<MooseVariable *> vars) { _moose_variable_dependencies.insert(vars.begin(), vars.end()); }
 private:
   std::set<MooseVariable *> _moose_variable_dependencies;
 };

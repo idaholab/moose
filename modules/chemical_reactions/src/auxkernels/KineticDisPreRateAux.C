@@ -10,14 +10,14 @@ template<>
 InputParameters validParams<KineticDisPreRateAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addParam<Real>("log_k",0.0,"The equilibrium constant of the dissolution reaction");
-  params.addRequiredParam<std::vector<Real> >("sto_v","The stochiometric coefficients of reactant species");
-  params.addParam<Real>("r_area",0.1,"Specific reactive surface area in m^2/L solution");
-  params.addParam<Real>("ref_kconst",6.456542e-8,"Kinetic rate constant in mol/m^2 s");
-  params.addParam<Real>("e_act",2.91e4,"Activation energy, J/mol");
-  params.addParam<Real>("gas_const",8.31434,"Gas constant, in J/mol K");
-  params.addParam<Real>("ref_temp",298.15,"Reference temperature, K");
-  params.addParam<Real>("sys_temp",298.15,"System temperature at simulation, K");
+  params.addParam<Real>("log_k", 0.0, "The equilibrium constant of the dissolution reaction");
+  params.addRequiredParam<std::vector<Real> >("sto_v", "The stochiometric coefficients of reactant species");
+  params.addParam<Real>("r_area", 0.1, "Specific reactive surface area in m^2/L solution");
+  params.addParam<Real>("ref_kconst", 6.456542e-8, "Kinetic rate constant in mol/m^2 s");
+  params.addParam<Real>("e_act", 2.91e4, "Activation energy, J/mol");
+  params.addParam<Real>("gas_const", 8.31434, "Gas constant, in J/mol K");
+  params.addParam<Real>("ref_temp", 298.15, "Reference temperature, K");
+  params.addParam<Real>("sys_temp", 298.15, "System temperature, K");
   params.addCoupledVar("v", "The list of reactant species");
   return params;
 }
@@ -62,5 +62,5 @@ KineticDisPreRateAux::computeValue()
   if (std::abs(kinetic_rate) <= 1.0e-12)
     kinetic_rate = 0.0;
 
-  return -kinetic_rate;
+  return - kinetic_rate;
 }

@@ -185,9 +185,91 @@
     cli_args = '--no-trap-fpe'
   [../]
 
+  [./cto22]
+    type = 'PetscJacobianTester'
+    input = 'cto22.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./cto23]
+    type = 'PetscJacobianTester'
+    input = 'cto23.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    cli_args = '--no-trap-fpe'
+  [../]
+
   [./poro01]
     type = 'PetscJacobianTester'
     input = 'poro01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./cwp01]
+    type = 'PetscJacobianTester'
+    input = 'cwp01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cwp02]
+    type = 'PetscJacobianTester'
+    input = 'cwp02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cwp03]
+    type = 'PetscJacobianTester'
+    input = 'cwp03.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cwp04]
+    type = 'PetscJacobianTester'
+    input = 'cwp04.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cwp05]
+    type = 'PetscJacobianTester'
+    input = 'cwp05.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cwp06]
+    type = 'PetscJacobianTester'
+    input = 'cwp06.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cwp07]
+    type = 'PetscJacobianTester'
+    input = 'cwp07.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cwp08]
+    type = 'PetscJacobianTester'
+    input = 'cwp08.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cwp09]
+    type = 'PetscJacobianTester'
+    input = 'cwp09.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cwp10]
+    type = 'PetscJacobianTester'
+    input = 'cwp10.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cwp11]
+    type = 'PetscJacobianTester'
+    input = 'cwp11.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]

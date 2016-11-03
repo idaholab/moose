@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "FiniteStrainHyperElasticViscoPlastic.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<FiniteStrainHyperElasticViscoPlastic>()
@@ -488,8 +489,8 @@ FiniteStrainHyperElasticViscoPlastic::computeNorm(const std::vector<Real> & var)
 {
   Real val = 0.0;
   for (unsigned int i = 0; i < var.size(); ++i)
-    val += std::pow(var[i], 2.0);
-  return std::pow(val, 0.5);
+    val += Utility::pow<2>(var[i]);
+  return std::sqrt(val);
 }
 
 void

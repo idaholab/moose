@@ -37,9 +37,8 @@ class AddNodalNormalsAction : public Action
 {
 public:
   AddNodalNormalsAction(InputParameters parameters);
-  virtual ~AddNodalNormalsAction();
 
-  virtual void act();
+  virtual void act() override;
 
 protected:
   /// The supplied boundary name from the user

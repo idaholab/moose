@@ -31,8 +31,8 @@ FunctionScalarIC::FunctionScalarIC(const InputParameters & parameters) :
   if (funcs.size() != _ncomp)
     mooseError("number of functions must be equal to the scalar variable order");
 
-  for (unsigned int i = 0; i < funcs.size(); ++i)
-    _func.push_back(&getFunctionByName(funcs[i]));
+  for (const auto & func_name : funcs)
+    _func.push_back(&getFunctionByName(func_name));
 }
 
 Real

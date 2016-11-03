@@ -20,16 +20,14 @@
     order = FIRST
     family = LAGRANGE
   [../]
-[] # Variables
+[]
 
 [AuxVariables]
-
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
-[] # AuxVariables
+[]
 
 [SolidMechanics]
   [./solid]
@@ -48,6 +46,7 @@
     disp_z = disp_z
     penalty = 1e5
     formulation = kinematic
+    system = constraint
   [../]
 []
 
@@ -58,7 +57,7 @@
     variable = stress_xx
     index = 0
   [../]
-[] # AuxKernels
+[]
 
 [BCs]
   [./left_x]
@@ -102,10 +101,9 @@
     boundary = 4
     value = 0.0
   [../]
-[] # BCs
+[]
 
 [Materials]
-
   [./stiffStuff1]
     type = Elastic
     block = 1
@@ -117,6 +115,7 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
+
   [./stiffStuff2]
     type = Elastic
     block = 2
@@ -128,22 +127,17 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.3
   [../]
-[] # Materials
+[]
 
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre    boomeramg      101'
 
-
   line_search = 'none'
-
 
   nl_abs_tol = 1e-8
 
@@ -151,7 +145,7 @@
   nl_max_its = 10
   dt = 1.0
   num_steps = 1
-[] # Executioner
+[]
 
 [Outputs]
   file_base = out
@@ -159,4 +153,4 @@
     type = Exodus
     elemental_as_nodal = true
   [../]
-[] # Outputs
+[]

@@ -78,6 +78,7 @@ class TestHarness:
 
     self.checks = {}
     self.checks['platform'] = getPlatforms()
+    self.checks['submodules'] = getInitializedSubmodules(self.run_tests_dir)
 
     # The TestHarness doesn't strictly require the existence of libMesh in order to run. Here we allow the user
     # to select whether they want to probe for libMesh configuration options.
@@ -116,10 +117,11 @@ class TestHarness:
       self.checks['cxx11'] =  getLibMeshConfigOption(self.libmesh_dir, 'cxx11')
       self.checks['asio'] =  getIfAsioExists(self.moose_dir)
 
-    # Override the MESH_MODE option if using '--parallel-mesh' option
-    if self.options.parallel_mesh == True or \
+    # Override the MESH_MODE option if using the '--distributed-mesh'
+    # or (deprecated) '--parallel-mesh' option.
+    if (self.options.parallel_mesh == True or self.options.distributed_mesh == True) or \
           (self.options.cli_args != None and \
-          self.options.cli_args.find('--parallel-mesh') != -1):
+           (self.options.cli_args.find('--parallel-mesh') != -1 or self.options.cli_args.find('--distributed-mesh') != -1)):
 
       option_set = set(['ALL', 'PARALLEL'])
       self.checks['mesh_mode'] = option_set
@@ -245,8 +247,9 @@ class TestHarness:
 
     self.cleanup()
 
+    # Flags for the parser start at the low bit, flags for the TestHarness start at the high bit
     if self.num_failed:
-      self.error_code = self.error_code | 0x10
+      self.error_code = self.error_code | 0x80
 
     return
 
@@ -667,7 +670,7 @@ class TestHarness:
       summary += ', <b>%d failed</b>'
 
     # Mask off TestHarness error codes to report parser errors
-    if self.error_code & 0x0F:
+    if self.error_code & Parser.getErrorCodeMask():
       summary += ', <r>FATAL PARSER ERROR</r>'
 
     print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
@@ -742,7 +745,8 @@ class TestHarness:
     parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
 
     # Options that pass straight through to the executable
-    parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Pass "--parallel-mesh" to executable')
+    parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
+    parser.add_argument('--distributed-mesh', action='store_true', dest='distributed_mesh', help='Pass "--distributed-mesh" to executable')
     parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors (Pass "--error" to executable)')
     parser.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (Pass "--error-unused" to executable)')
 

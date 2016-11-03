@@ -37,6 +37,9 @@ protected:
   MaterialProperty<Real> & _thermal_conductivity;
   MaterialProperty<Real> & _thermal_conductivity_old;
   MaterialProperty<Real> & _thermal_conductivity_older;
+
+  // optional coupled variable
+  const VariableValue * _coupled_val;
 };
 
 #endif //STATEFULTEST_H

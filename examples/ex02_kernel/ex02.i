@@ -3,8 +3,6 @@
 []
 
 [Variables]
-  active = 'convected'
-
   [./convected]
     order = FIRST
     family = LAGRANGE
@@ -12,8 +10,6 @@
 []
 
 [Kernels]
-  active = 'diff conv'
-
   [./diff]
     type = Diffusion
     variable = convected
@@ -27,8 +23,6 @@
 []
 
 [BCs]
-  active = 'bottom top'
-
   [./bottom]
     type = DirichletBC
     variable = convected

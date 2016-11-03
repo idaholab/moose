@@ -20,7 +20,7 @@ public:
   ComputeVariableEigenstrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpStressFreeStrain();
+  virtual void computeQpEigenstrain();
 
   /// number of variables the prefactor depends on
   const unsigned int _num_args;

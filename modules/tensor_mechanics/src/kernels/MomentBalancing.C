@@ -7,22 +7,18 @@
 #include "MomentBalancing.h"
 
 #include "Material.h"
-#include "RankFourTensor.h"
-#include "ElasticityTensorTools.h"
 #include "RankTwoTensor.h"
+#include "ElasticityTensorTools.h"
+#include "RankFourTensor.h"
 
 template<>
 InputParameters validParams<MomentBalancing>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
+  params.addRequiredRangeCheckedParam<unsigned int>("component", "component<3", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
-  params.addCoupledVar("wc_x", "The Cosserat rotation about x");
-  params.addCoupledVar("wc_y", "The Cosserat rotation about y");
-  params.addCoupledVar("wc_z", "The Cosserat rotation about z");
-  params.addCoupledVar("disp_x", "The x displacement");
-  params.addCoupledVar("disp_y", "The y displacement");
-  params.addCoupledVar("disp_z", "The z displacement");
+  params.addRequiredCoupledVar("Cosserat_rotations", "The 3 Cosserat rotation variables");
+  params.addRequiredCoupledVar("displacements", "The 3 displacement variables");
   params.set<bool>("use_displaced_mesh") = false;
 
   return params;
@@ -33,13 +29,24 @@ MomentBalancing::MomentBalancing(const InputParameters & parameters) :
     _stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),
     _Jacobian_mult(getMaterialProperty<RankFourTensor>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
     _component(getParam<unsigned int>("component")),
-    _wc_x_var(coupled("wc_x")),
-    _wc_y_var(coupled("wc_y")),
-    _wc_z_var(coupled("wc_z")),
-    _xdisp_var(coupled("disp_x")),
-    _ydisp_var(coupled("disp_y")),
-    _zdisp_var(coupled("disp_z"))
+    _nrots(coupledComponents("Cosserat_rotations")),
+    _wc_var(_nrots),
+    _ndisp(coupledComponents("displacements")),
+    _disp_var(_ndisp)
 {
+  if (_nrots != 3)
+    mooseError("MomentBalancing: This Kernel is only defined for 3-dimensional simulations so 3 Cosserat rotation variables are needed");
+  for (unsigned i = 0; i < _nrots; ++i)
+    _wc_var[i] = coupled("Cosserat_rotations", i);
+
+  if (_ndisp != 3)
+    mooseError("MomentBalancing: This Kernel is only defined for 3-dimensional simulations so 3 displacement variables are needed");
+  for (unsigned i = 0; i < _ndisp; ++i)
+    _disp_var[i] = coupled("displacements", i);
+
+  // Following check is necessary to ensure the correct Jacobian is calculated
+  if (_wc_var[_component] != _var.number())
+    mooseError("MomentBalancing: The variable for this Kernel must be equal to the Cosserat rotation variable defined by the \"component\" and the \"Cosserat_rotations\" parameters");
 }
 
 Real
@@ -48,7 +55,7 @@ MomentBalancing::computeQpResidual()
   Real the_sum = 0.0;
   for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
     for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-      the_sum += PermutationTensor::eps(_component, j, k)*_stress[_qp](j, k);
+      the_sum += PermutationTensor::eps(_component, j, k) * _stress[_qp](j, k);
   return _test[_i][_qp] * the_sum;
 }
 
@@ -61,29 +68,15 @@ MomentBalancing::computeQpJacobian()
 Real
 MomentBalancing::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  unsigned int coupled_component = 3;
+  // What does 2D look like here?
+  for (unsigned v = 0; v < _ndisp; ++v)
+    if (jvar == _disp_var[v])
+      return ElasticityTensorTools::momentJacobian(_Jacobian_mult[_qp], _component, v, _test[_i][_qp], _grad_phi[_j][_qp]);
 
   // What does 2D look like here?
-  if (jvar == _xdisp_var)
-    coupled_component = 0;
-  else if (jvar == _ydisp_var)
-    coupled_component = 1;
-  else if (jvar == _zdisp_var)
-    coupled_component = 2;
+  for (unsigned v = 0; v < _nrots; ++v)
+    if (jvar == _wc_var[v])
+      return ElasticityTensorTools::momentJacobianWC(_Jacobian_mult[_qp], _component, v, _test[_i][_qp], _phi[_j][_qp]);
 
-  if (coupled_component < 3)
-    return ElasticityTensorTools::momentJacobian(_Jacobian_mult[_qp], _component, coupled_component, _test[_i][_qp], _grad_phi[_j][_qp]);
-
-  // What does 2D look like here?
-  if (jvar == _wc_x_var)
-    coupled_component = 0;
-  else if (jvar == _wc_y_var)
-    coupled_component = 1;
-  else if (jvar == _wc_z_var)
-    coupled_component = 2;
-
-  if (coupled_component < 3)
-    return ElasticityTensorTools::momentJacobianWC(_Jacobian_mult[_qp], _component, coupled_component, _test[_i][_qp], _phi[_j][_qp]);
-
-  return 0;
+  return 0.0;
 }

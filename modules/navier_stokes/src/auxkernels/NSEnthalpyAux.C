@@ -4,7 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSEnthalpyAux.h"
+#include "NS.h"
 
 template<>
 InputParameters validParams<NSEnthalpyAux>()
@@ -12,22 +15,18 @@ InputParameters validParams<NSEnthalpyAux>()
   InputParameters params = validParams<AuxKernel>();
 
   // Mark variables as required
-  params.addRequiredCoupledVar("rho", "");
-  params.addRequiredCoupledVar("rhoe", "");
-  params.addRequiredCoupledVar("pressure", "");
-
-  // Parameters with default values
-  params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
+  params.addRequiredCoupledVar(NS::density, "density");
+  params.addRequiredCoupledVar(NS::total_energy, "total energy");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
 
   return params;
 }
 
 NSEnthalpyAux::NSEnthalpyAux(const InputParameters & parameters) :
     AuxKernel(parameters),
-    _rho(coupledValue("rho")),
-    _rhoe(coupledValue("rhoe")),
-    _pressure(coupledValue("pressure")),
-    _gamma(getParam<Real>("gamma"))
+    _rho(coupledValue(NS::density)),
+    _rhoE(coupledValue(NS::total_energy)),
+    _pressure(coupledValue(NS::pressure))
 {
 }
 
@@ -35,5 +34,5 @@ Real
 NSEnthalpyAux::computeValue()
 {
   // H = (rho*E + P) / rho
-  return (_rhoe[_qp] + _pressure[_qp]) / _rho[_qp];
+  return (_rhoE[_qp] + _pressure[_qp]) / _rho[_qp];
 }

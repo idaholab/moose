@@ -16,6 +16,9 @@
 #include "NSGravityForce.h"
 #include "NSThermalBC.h"
 #include "NSVelocityAux.h"
+#include "NSMachAux.h"
+#include "NSInternalEnergyAux.h"
+#include "NSSpecificVolumeAux.h"
 #include "NSImposedVelocityBC.h"
 #include "NSTemperatureAux.h"
 #include "NSTemperatureL2.h"
@@ -49,6 +52,19 @@
 #include "NSEnergyWeakStagnationBC.h"
 #include "NSPenalizedNormalFlowBC.h"
 #include "NSMomentumInviscidNoPressureImplicitFlowBC.h"
+#include "NSPressureNeumannBC.h"
+#include "NSEntropyError.h"
+#include "AddNavierStokesVariablesAction.h"
+#include "AddNavierStokesICsAction.h"
+#include "AddNavierStokesKernelsAction.h"
+#include "AddNavierStokesBCsAction.h"
+#include "NSInitialCondition.h"
+#include "NSWeakStagnationInletBC.h"
+#include "NSNoPenetrationBC.h"
+#include "NSStaticPressureOutletBC.h"
+
+// So we can register objects from the fluid_properties module.
+#include "FluidPropertiesApp.h"
 
 //
 // Incompressible
@@ -56,8 +72,12 @@
 
 // Kernels
 #include "INSMass.h"
+#include "INSMassRZ.h"
 #include "INSMomentumTimeDerivative.h"
-#include "INSMomentum.h"
+#include "INSMomentumTractionForm.h"
+#include "INSMomentumTractionFormRZ.h"
+#include "INSMomentumLaplaceForm.h"
+#include "INSMomentumLaplaceFormRZ.h"
 #include "INSTemperatureTimeDerivative.h"
 #include "INSTemperature.h"
 #include "INSSplitMomentum.h"
@@ -66,9 +86,11 @@
 #include "INSChorinPredictor.h"
 #include "INSChorinCorrector.h"
 #include "INSChorinPressurePoisson.h"
+#include "INSCompressibilityPenalty.h"
 
 // BCs
-#include "INSMomentumNoBCBC.h"
+#include "INSMomentumNoBCBCTractionForm.h"
+#include "INSMomentumNoBCBCLaplaceForm.h"
 #include "INSTemperatureNoBCBC.h"
 #include "ImplicitNeumannBC.h"
 
@@ -76,8 +98,14 @@
 #include "INSCourant.h"
 #include "INSDivergenceAux.h"
 
+// Materials - this will eventually be replaced by FluidProperties stuff...
+#include "Air.h"
+
 // Postprocessors
 #include "INSExplicitTimestepSelector.h"
+
+// Functions
+#include "WedgeFunction.h"
 
 template<>
 InputParameters validParams<NavierStokesApp>()
@@ -92,9 +120,11 @@ NavierStokesApp::NavierStokesApp(InputParameters parameters) :
     MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
+  FluidPropertiesApp::registerObjects(_factory);
   NavierStokesApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
+  FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
   NavierStokesApp::associateSyntax(_syntax, _action_factory);
 }
 
@@ -123,6 +153,9 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerKernel(NSTemperatureL2);
   registerBoundaryCondition(NSThermalBC);
   registerAux(NSVelocityAux);
+  registerAux(NSMachAux);
+  registerAux(NSInternalEnergyAux);
+  registerAux(NSSpecificVolumeAux);
   registerBoundaryCondition(NSImposedVelocityBC);
   registerAux(NSTemperatureAux);
   registerAux(NSPressureAux);
@@ -155,6 +188,13 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerBoundaryCondition(NSEnergyWeakStagnationBC);
   registerBoundaryCondition(NSPenalizedNormalFlowBC);
   registerBoundaryCondition(NSMomentumInviscidNoPressureImplicitFlowBC);
+  registerBoundaryCondition(NSPressureNeumannBC);
+  registerPostprocessor(NSEntropyError);
+  registerInitialCondition(NSInitialCondition);
+  // Boundary condition meta-objects
+  registerObject(NSWeakStagnationInletBC);
+  registerObject(NSNoPenetrationBC);
+  registerObject(NSStaticPressureOutletBC);
 
   //
   // Incompressible
@@ -162,8 +202,18 @@ NavierStokesApp::registerObjects(Factory & factory)
 
   // Kernels
   registerKernel(INSMass);
+  registerKernel(INSMassRZ);
   registerKernel(INSMomentumTimeDerivative);
-  registerKernel(INSMomentum);
+  // INSMomentum is now deprecated, convert input files to use
+  // INSMomentumLaplaceForm or INSMomentumTractionForm instead.
+  registerDeprecatedObjectName(INSMomentumTractionForm, "INSMomentum", "10/07/2017 12:00");
+  // INSMomentumRZ has been renamed, convert input files to use
+  // INSMomentumTractionFormRZ.
+  registerDeprecatedObjectName(INSMomentumTractionFormRZ, "INSMomentumRZ", "10/07/2017 12:00");
+  registerKernel(INSMomentumTractionForm);
+  registerKernel(INSMomentumTractionFormRZ);
+  registerKernel(INSMomentumLaplaceForm);
+  registerKernel(INSMomentumLaplaceFormRZ);
   registerKernel(INSTemperatureTimeDerivative);
   registerKernel(INSTemperature);
   registerKernel(INSSplitMomentum);
@@ -172,9 +222,14 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerKernel(INSChorinPredictor);
   registerKernel(INSChorinCorrector);
   registerKernel(INSChorinPressurePoisson);
+  registerKernel(INSCompressibilityPenalty);
 
   // BCs
-  registerBoundaryCondition(INSMomentumNoBCBC);
+  // Register the newly-named class with the old name for a while in
+  // case anyone is using this in their app.
+  registerDeprecatedObjectName(INSMomentumNoBCBCTractionForm, "INSMomentumNoBCBC", "10/07/2017 12:00");
+  registerBoundaryCondition(INSMomentumNoBCBCTractionForm);
+  registerBoundaryCondition(INSMomentumNoBCBCLaplaceForm);
   registerBoundaryCondition(INSTemperatureNoBCBC);
   registerBoundaryCondition(ImplicitNeumannBC);
 
@@ -184,11 +239,51 @@ NavierStokesApp::registerObjects(Factory & factory)
 
   // Postprocessors
   registerPostprocessor(INSExplicitTimestepSelector);
+
+  // Materials
+  registerMaterial(Air);
+
+  // Functions
+  registerFunction(WedgeFunction);
 }
 
 // External entry point for dynamic syntax association
 extern "C" void NavierStokesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { NavierStokesApp::associateSyntax(syntax, action_factory); }
+
 void
-NavierStokesApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+#undef registerAction
+#define registerAction(type, action) action_factory.reg<type>(stringifyName(type), action)
+
+  // Create the syntax
+  syntax.registerActionSyntax("AddNavierStokesVariablesAction", "Modules/NavierStokes/Variables");
+  syntax.registerActionSyntax("AddNavierStokesICsAction", "Modules/NavierStokes/ICs");
+  syntax.registerActionSyntax("AddNavierStokesKernelsAction", "Modules/NavierStokes/Kernels");
+  syntax.registerActionSyntax("AddNavierStokesBCsAction", "Modules/NavierStokes/BCs/*");
+
+  // add variables action
+  registerTask("add_navier_stokes_variables", /*is_required=*/false);
+  addTaskDependency("add_navier_stokes_variables", "add_variable");
+  registerAction(AddNavierStokesVariablesAction, "add_navier_stokes_variables");
+
+  // add ICs action
+  registerTask("add_navier_stokes_ics", /*is_required=*/false);
+  addTaskDependency("add_navier_stokes_ics", "add_ic");
+  registerAction(AddNavierStokesICsAction, "add_navier_stokes_ics");
+
+  // add Kernels action
+  registerTask("add_navier_stokes_kernels", /*is_required=*/false);
+  addTaskDependency("add_navier_stokes_kernels", "add_kernel");
+  registerAction(AddNavierStokesKernelsAction, "add_navier_stokes_kernels");
+
+  // add BCs actions
+  registerMooseObjectTask("add_navier_stokes_bcs", NSWeakStagnationInletBC, /*is_required=*/false);
+  appendMooseObjectTask  ("add_navier_stokes_bcs", NSNoPenetrationBC);
+  appendMooseObjectTask  ("add_navier_stokes_bcs", NSStaticPressureOutletBC);
+  addTaskDependency("add_navier_stokes_bcs", "add_bc");
+  registerAction(AddNavierStokesBCsAction, "add_navier_stokes_bcs");
+
+#undef registerAction
+#define registerAction(type, action) action_factory.regLegacy<type>(stringifyName(type), action)
 }

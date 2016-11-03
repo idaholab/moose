@@ -29,7 +29,7 @@ class Tester(MooseObject):
     params.addParam('platform',      ['ALL'], "A list of platforms for which this test will run on. ('ALL', 'DARWIN', 'LINUX', 'SL', 'LION', 'ML')")
     params.addParam('compiler',      ['ALL'], "A list of compilers for which this test is valid on. ('ALL', 'GCC', 'INTEL', 'CLANG')")
     params.addParam('petsc_version', ['ALL'], "A list of petsc versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-    params.addParam('mesh_mode',     ['ALL'], "A list of mesh modes for which this test will run ('PARALLEL', 'SERIAL')")
+    params.addParam('mesh_mode',     ['ALL'], "A list of mesh modes for which this test will run ('DISTRIBUTED', 'REPLICATED'), PARALLEL and SERIAL are deprecated")
     params.addParam('method',        ['ALL'], "A test that runs under certain executable configurations ('ALL', 'OPT', 'DBG', 'DEVEL', 'OPROF', 'PRO')")
     params.addParam('library_mode',  ['ALL'], "A test that only runs when libraries are built under certain configurations ('ALL', 'STATIC', 'DYNAMIC')")
     params.addParam('dtk',           ['ALL'], "A test that runs only if DTK is detected ('ALL', 'TRUE', 'FALSE')")
@@ -47,12 +47,24 @@ class Tester(MooseObject):
     params.addParam('asio',          ['ALL'], "A test that runs only if ASIO is available ('ALL', 'TRUE', 'FALSE')")
     params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
     params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
+    params.addParam('should_execute', True, 'Whether or not the executeable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation')
+    params.addParam('required_submodule', [], "A list of initialized submodules for which this test requires.")
 
     return params
 
   def __init__(self, name, params):
     MooseObject.__init__(self, name, params)
     self.specs = params
+
+    # mesh_mode has a few deprecated options
+    # TODO: We need to print out a deprecated warning in the future
+    mesh_mode = self.specs['mesh_mode']
+    replacement_list = []
+    for i, item in enumerate(mesh_mode):
+      if item.upper() == 'PARALLEL':
+        mesh_mode[i] = 'DISTRIBUTED'
+      if item.upper() == 'SERIAL':
+        mesh_mode[i] = 'REPLICATED'
 
   # Method to return the input file if applicable to this Tester
   def getInputFile(self):
@@ -74,6 +86,11 @@ class Tester(MooseObject):
   def checkRunnable(self, options):
     return (True, '')
 
+
+  # Whether or not the executeable should be run
+  # Don't override this
+  def shouldExecute(self):
+    return self.specs['should_execute']
 
   # This method is called prior to running the test.  It can be used to cleanup files
   # or do other preparations before the tester is run
@@ -174,10 +191,25 @@ class Tester(MooseObject):
                     'petsc_debug', 'curl', 'tbb', 'superlu', 'cxx11', 'asio', 'unique_id']
     for check in local_checks:
       test_platforms = set()
+      operator_display = '!='
+      inverse_set = False
       for x in self.specs[check]:
+        if x[0] == '!':
+          if inverse_set:
+            return (False, "(Multiple Negation Unsupported)")
+          inverse_set = True
+          operator_display = '=='
+          x = x[1:] # Strip off the !
+        x_upper = x.upper()
+        if x_upper in test_platforms:
+          return (False, "(Duplicate Entry or Negative of Existing Entry)")
         test_platforms.add(x.upper())
-      if not len(test_platforms.intersection(checks[check])):
-        reason = 'skipped (' + re.sub(r'\[|\]', '', check).upper() + '!=' + ', '.join(self.specs[check]) + ')'
+
+      match_found = len(test_platforms.intersection(checks[check])) > 0
+      # Either we didn't find the match when we were using normal "include" logic
+      # or we did find the match when we wanted to exclude it
+      if inverse_set == match_found:
+        reason = 'skipped (' + re.sub(r'\[|\]', '', check).upper() + operator_display + ', '.join(test_platforms) + ')'
         return (False, reason)
 
     # Check for heavy tests
@@ -202,6 +234,12 @@ class Tester(MooseObject):
     for file in self.specs['depend_files']:
       if not os.path.isfile(os.path.join(self.specs['base_dir'], file)):
         reason = 'skipped (DEPEND FILES)'
+        return (False, reason)
+
+    # Check to make sure required submodules are initialized
+    for var in self.specs['required_submodule']:
+      if var not in checks["submodules"]:
+        reason = 'skipped (%s submodule not initialized)' % var
         return (False, reason)
 
     # Check to make sure environment variable exists

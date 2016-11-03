@@ -7,6 +7,8 @@
 
 #include "ComputeRSphericalFiniteStrain.h"
 #include "Assembly.h"
+#include "FEProblem.h"
+#include "MooseMesh.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"
@@ -28,8 +30,10 @@ ComputeRSphericalFiniteStrain::ComputeRSphericalFiniteStrain(const InputParamete
 void
 ComputeRSphericalFiniteStrain::initialSetup()
 {
-  if (_assembly.coordSystem() != Moose::COORD_RSPHERICAL)
-    mooseError("The coordinate system must be set to RSPHERICAL for 1D R spherical simulations.");
+  const auto & subdomainIDs = _mesh.meshSubdomains();
+  for (auto subdomainID : subdomainIDs)
+    if (_fe_problem.getCoordSystem(subdomainID) != Moose::COORD_RSPHERICAL)
+      mooseError("The coordinate system must be set to RSPHERICAL for 1D R spherical simulations.");
 }
 
 void
@@ -41,7 +45,7 @@ ComputeRSphericalFiniteStrain::computeProperties()
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    // Deformation gradient calculation in cylinderical coordinates
+    // Deformation gradient calculation in cylindrical coordinates
     RankTwoTensor A;    // Deformation gradient
     RankTwoTensor Fbar; // Old Deformation gradient
 
@@ -66,7 +70,7 @@ ComputeRSphericalFiniteStrain::computeProperties()
     _deformation_gradient[_qp] = A;
     _deformation_gradient[_qp].addIa(1.0);
 
-    // very nearly A = gradU - gradUold, adapted to cylinderical coords
+    // very nearly A = gradU - gradUold, adapted to cylindrical coords
     A -= Fbar;
 
     // Fbar = ( I + gradUold)
@@ -92,11 +96,11 @@ ComputeRSphericalFiniteStrain::computeProperties()
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     // Finalize volumetric locking correction
-    _Fhat[_qp] *= std::pow( ave_Fhat.det() / _Fhat[_qp].det(), 1.0/3.0);
+    _Fhat[_qp] *= std::cbrt( ave_Fhat.det() / _Fhat[_qp].det());
 
     computeQpStrain();
 
     //Volumetric locking correction
-    _deformation_gradient[_qp] *= std::pow(ave_dfgrd_det / _deformation_gradient[_qp].det(), 1.0/3.0);
+    _deformation_gradient[_qp] *= std::cbrt(ave_dfgrd_det / _deformation_gradient[_qp].det());
   }
 }

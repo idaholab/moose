@@ -4,15 +4,20 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSSUPGBase.h"
+#include "NS.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
 
 template<>
 InputParameters validParams<NSSUPGBase>()
 {
   InputParameters params = validParams<NSKernel>();
-  params.addRequiredCoupledVar("temperature", "");
-  params.addRequiredCoupledVar("enthalpy", "");
+  params.addRequiredCoupledVar(NS::temperature, "temperature");
+  params.addRequiredCoupledVar(NS::enthalpy, "total enthalpy");
   return params;
 }
 
@@ -41,22 +46,22 @@ NSSUPGBase::NSSUPGBase(const InputParameters & parameters) :
     _calE(getMaterialProperty<std::vector<std::vector<RealTensorValue> > >("calE")),
 
     // Old coupled variable values
-    // _rho_old(coupledValueOld("rho")),
-    // _rho_u_old(coupledValueOld("rhou")),
-    // _rho_v_old(coupledValueOld("rhov")),
-    // _rho_w_old( _dim == 3 ? coupledValueOld("rhow") : _zero),
-    // _rho_e_old(coupledValueOld("rhoe")),
+    // _rho_old(coupledValueOld(NS::density)),
+    // _rho_u_old(coupledValueOld(NS::momentum_x)),
+    // _rho_v_old(_mesh.dimension() >= 2 ? coupledValueOld(NS::momentum_y) : _zero),
+    // _rho_w_old(_mesh.dimension() == 3 ? coupledValueOld(NS::momentum_z) : _zero),
+    // _rho_E_old(coupledValueOld(NS::total_energy)),
 
     // Time derivative derivatives (no, that's not a typo).  You can
     // just think of these as 1/dt for simplicity, they usually are...
-    _d_rhodot_du(coupledDotDu("rho")),
-    _d_rhoudot_du(coupledDotDu("rhou")),
-    _d_rhovdot_du(coupledDotDu("rhov")),
-    _d_rhowdot_du(_mesh.dimension() == 3 ? coupledDotDu("rhow") : _zero),
-    _d_rhoedot_du(coupledDotDu("rhoe")),
+    _d_rhodot_du(coupledDotDu(NS::density)),
+    _d_rhoudot_du(coupledDotDu(NS::momentum_x)),
+    _d_rhovdot_du(_mesh.dimension() >= 2 ? coupledDotDu(NS::momentum_y) : _zero),
+    _d_rhowdot_du(_mesh.dimension() == 3 ? coupledDotDu(NS::momentum_z) : _zero),
+    _d_rhoEdot_du(coupledDotDu(NS::total_energy)),
 
     // Coupled aux variables
-    _temperature(coupledValue("temperature")),
+    _temperature(coupledValue(NS::temperature)),
     _enthalpy(coupledValue("enthalpy"))
 {
 }

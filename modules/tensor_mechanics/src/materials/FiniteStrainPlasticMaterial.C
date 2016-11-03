@@ -5,11 +5,12 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "FiniteStrainPlasticMaterial.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<FiniteStrainPlasticMaterial>()
 {
-  InputParameters params = validParams<FiniteStrainMaterial>();
+  InputParameters params = validParams<ComputeStressBase>();
 
   params.addRequiredParam< std::vector<Real> >("yield_stress", "Input data as pairs of equivalent plastic strain and yield stress: Should start with equivalent plastic strain 0");
   params.addParam<Real>("rtol",1e-8,"Plastic strain NR tolerance");
@@ -21,12 +22,16 @@ InputParameters validParams<FiniteStrainPlasticMaterial>()
 }
 
 FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const InputParameters & parameters) :
-    FiniteStrainMaterial(parameters),
+    ComputeStressBase(parameters),
     _yield_stress_vector(getParam< std::vector<Real> >("yield_stress")),//Read from input file
     _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
     _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
     _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
     _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
+    _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
+    _strain_increment(getMaterialProperty<RankTwoTensor>("strain_increment")),
+    _rotation_increment(getMaterialProperty<RankTwoTensor>("rotation_increment")),
+    _elasticity_tensor(getMaterialProperty<RankFourTensor>("elasticity_tensor")),
     _rtol(getParam<Real>("rtol")),
     _ftol(getParam<Real>("ftol")),
     _eptol(getParam<Real>("eptol")),
@@ -37,11 +42,12 @@ FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const InputParameters &
 
 void FiniteStrainPlasticMaterial::initQpStatefulProperties()
 {
-  _total_strain[_qp].zero();
-  _elastic_strain[_qp].zero();
-  _stress[_qp].zero();
+  ComputeStressBase::initQpStatefulProperties();
+  _stress_old[_qp] = _stress[_qp];
+
   _plastic_strain[_qp].zero();
   _plastic_strain_old[_qp].zero();
+
   _eqv_plastic_strain[_qp] = 0.0;
 }
 
@@ -54,24 +60,10 @@ void FiniteStrainPlasticMaterial::computeQpStress()
   //Rotate the stress tensor to the current configuration
   _stress[_qp] = _rotation_increment[_qp]*_stress[_qp]*_rotation_increment[_qp].transpose();
 
-  //Calculate elastic strain increment
-  RankTwoTensor delta_ee = _strain_increment[_qp]-(_plastic_strain[_qp]-_plastic_strain_old[_qp]);
-
-  //Update elastic strain tensor in intermediate configuration
-  _elastic_strain[_qp] = _elastic_strain_old[_qp] + delta_ee;
-
-  //Rotate elastic strain tensor to the current configuration
-  _elastic_strain[_qp] = _rotation_increment[_qp] * _elastic_strain[_qp] * _rotation_increment[_qp].transpose();
-
   //Rotate plastic strain tensor to the current configuration
   _plastic_strain[_qp] = _rotation_increment[_qp] * _plastic_strain[_qp] * _rotation_increment[_qp].transpose();
 
-  //Update strain in intermediate configuration
-  _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
-
-  //Rotate strain to current configuration
-  _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
-
+  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
 }
 
 /**
@@ -280,11 +272,7 @@ FiniteStrainPlasticMaterial::returnMap(const RankTwoTensor & sig_old, const Real
     }
 
     if (iter>=maxiter)
-    {
-      _stress[_qp](2,2) = 1.0e6;
-      _console << "Constitutive Error: Too many iterations " << err1 << ' ' <<  err2 << ' ' << err3 << '\n'; //Convergence failure
-      return;
-    }
+      mooseError("Constitutive failure");
 
     plastic_strain += delta_dp;
   }
@@ -302,7 +290,7 @@ RankTwoTensor
 FiniteStrainPlasticMaterial::dyieldFunction_dstress(const RankTwoTensor & sig)
 {
   RankTwoTensor deriv = sig.dsecondInvariant();
-  deriv *= std::pow(3/sig.secondInvariant(), 0.5)/2;
+  deriv *= std::sqrt(3.0 / sig.secondInvariant()) / 2.0;
   return deriv;
 }
 
@@ -330,7 +318,7 @@ FiniteStrainPlasticMaterial::internalPotential()
 Real
 FiniteStrainPlasticMaterial::getSigEqv(const RankTwoTensor & stress)
 {
-  return std::pow(3*stress.secondInvariant(), 0.5);
+  return std::sqrt(3*stress.secondInvariant());
 }
 
 
@@ -353,7 +341,7 @@ FiniteStrainPlasticMaterial::getJac(const RankTwoTensor & sig, const RankFourTen
 
   f1 = 3.0 / (2.0 * sig_eqv);
   f2 = f1 / 3.0;
-  f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0));
+  f3 = 9.0 / (4.0 * Utility::pow<3>(sig_eqv));
 
   dft_dsig = f1 * _deltaMixed - f2 * _deltaOuter - f3 * sig_dev.outerProduct(sig_dev);
 
@@ -426,4 +414,3 @@ FiniteStrainPlasticMaterial::getdYieldStressdPlasticStrain(const Real eqpe)
 
   return 0.0;
 }
-

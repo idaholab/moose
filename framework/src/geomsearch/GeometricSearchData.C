@@ -32,19 +32,11 @@ GeometricSearchData::GeometricSearchData(SubProblem & subproblem, MooseMesh & me
 
 GeometricSearchData::~GeometricSearchData()
 {
-  for (std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator it = _penetration_locators.begin();
-      it != _penetration_locators.end();
-      ++it)
-  {
-    delete it->second;
-  }
+  for (auto & it : _penetration_locators)
+    delete it.second;
 
-  for (std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator it = _nearest_node_locators.begin();
-      it != _nearest_node_locators.end();
-      ++it)
-  {
-    delete it->second;
-  }
+  for (auto & it : _nearest_node_locators)
+    delete it.second;
 }
 
 void
@@ -56,17 +48,20 @@ GeometricSearchData::update(GeometricSearchType type)
     {
       _first = false;
 
-      for (std::map<unsigned int, unsigned int>::iterator it = _slave_to_qslave.begin();
-          it != _slave_to_qslave.end();
-          ++it)
-        generateQuadratureNodes(it->first, it->second);
+      for (const auto & it : _slave_to_qslave)
+        generateQuadratureNodes(it.first, it.second);
+
+      // reinit on displaced mesh before update
+      for (const auto & epl_it : _element_pair_locators)
+      {
+        ElementPairLocator & epl = *(epl_it.second);
+        epl.reinit();
+      }
     }
 
     // Update the position of quadrature nodes first
-    for (std::set<unsigned int>::iterator qbnd_it = _quadrature_boundaries.begin();
-        qbnd_it != _quadrature_boundaries.end();
-        ++qbnd_it)
-      updateQuadratureNodes(*qbnd_it);
+    for (const auto & qbnd : _quadrature_boundaries)
+      updateQuadratureNodes(qbnd);
   }
 
   if (type == ALL || type == MORTAR)
@@ -75,27 +70,29 @@ GeometricSearchData::update(GeometricSearchType type)
 
   if (type == ALL || type == NEAREST_NODE)
   {
-    std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
-    const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
-
-    for (; nnl_it != nnl_end; ++nnl_it)
+    for (const auto & nnl_it : _nearest_node_locators)
     {
-      NearestNodeLocator * nnl = nnl_it->second;
-
+      NearestNodeLocator * nnl = nnl_it.second;
       nnl->findNodes();
     }
   }
 
   if (type == ALL || type == PENETRATION)
   {
-    std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_it = _penetration_locators.begin();
-    std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_end = _penetration_locators.end();
-
-    for (; pl_it != pl_end; ++pl_it)
+    for (const auto & pl_it : _penetration_locators)
     {
-      PenetrationLocator * pl = pl_it->second;
-
+      PenetrationLocator * pl = pl_it.second;
       pl->detectPenetration();
+    }
+  }
+
+  if (type == ALL || type == PENETRATION)
+  {
+    for (std::map<unsigned int, MooseSharedPointer<ElementPairLocator> >::iterator epl_it = _element_pair_locators.begin();
+         epl_it != _element_pair_locators.end(); ++epl_it)
+    {
+      ElementPairLocator & epl = *epl_it->second;
+      epl.update();
     }
   }
 }
@@ -105,36 +102,25 @@ GeometricSearchData::reinit()
 {
   _mesh.clearQuadratureNodes();
   // Update the position of quadrature nodes first
-  for (std::set<unsigned int>::iterator qbnd_it = _quadrature_boundaries.begin();
-      qbnd_it != _quadrature_boundaries.end();
-      ++qbnd_it)
-    reinitQuadratureNodes(*qbnd_it);
+  for (const auto & qbnd : _quadrature_boundaries)
+    reinitQuadratureNodes(qbnd);
   reinitMortarNodes();
 
-  std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
-  const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
-
-  for (; nnl_it != nnl_end; ++nnl_it)
+  for (const auto & nnl_it : _nearest_node_locators)
   {
-    NearestNodeLocator * nnl = nnl_it->second;
-
+    NearestNodeLocator * nnl = nnl_it.second;
     nnl->reinit();
   }
 
-  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_it = _penetration_locators.begin();
-  std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator pl_end = _penetration_locators.end();
-
-  for (; pl_it != pl_end; ++pl_it)
+  for (const auto & pl_it : _penetration_locators)
   {
-    PenetrationLocator * pl = pl_it->second;
-
+    PenetrationLocator * pl = pl_it.second;
     pl->reinit();
   }
 
-  for (std::map<unsigned int, MooseSharedPointer<ElementPairLocator> >::iterator epl_it = _element_pair_locators.begin();
-       epl_it != _element_pair_locators.end(); ++epl_it)
+  for (const auto & epl_it : _element_pair_locators)
   {
-    ElementPairLocator & epl = *epl_it->second;
+    ElementPairLocator & epl = *(epl_it.second);
     epl.reinit();
   }
 }
@@ -142,13 +128,9 @@ GeometricSearchData::reinit()
 void
 GeometricSearchData::clearNearestNodeLocators()
 {
-  std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
-  const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
-
-  for (; nnl_it != nnl_end; ++nnl_it)
+  for (const auto & nnl_it : _nearest_node_locators)
   {
-    NearestNodeLocator * nnl = nnl_it->second;
-
+    NearestNodeLocator * nnl = nnl_it.second;
     nnl->reinit();
   }
 }
@@ -158,12 +140,9 @@ GeometricSearchData::maxPatchPercentage()
 {
   Real max = 0.0;
 
-  std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_it = _nearest_node_locators.begin();
-  const std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *>::iterator nnl_end = _nearest_node_locators.end();
-
-  for (; nnl_it != nnl_end; ++nnl_it)
+  for (const auto & nnl_it : _nearest_node_locators)
   {
-    NearestNodeLocator * nnl = nnl_it->second;
+    NearestNodeLocator * nnl = nnl_it.second;
 
     if (nnl->_max_patch_percentage > max)
       max = nnl->_max_patch_percentage;
@@ -318,10 +297,8 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
   const MooseArray<Point> & points_face = _subproblem.assembly(0).qPointsFace();
 
   ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
-  for (ConstBndElemRange::const_iterator elem_it = range.begin() ; elem_it != range.end(); ++elem_it)
+  for (const auto & belem : range)
   {
-    const BndElement * belem = *elem_it;
-
     const Elem * elem = belem->_elem;
     unsigned short int side = belem->_side;
     BoundaryID boundary_id = belem->_bnd_id;
@@ -334,9 +311,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int slave_id, unsigned int
         _subproblem.reinitElemFace(elem, side, boundary_id, 0);
 
         for (unsigned int qp=0; qp<points_face.size(); qp++)
-        {
           _mesh.addQuadratureNode(elem, side, qp, qslave_id, points_face[qp]);
-        }
       }
     }
   }
@@ -395,9 +370,8 @@ GeometricSearchData::generateMortarNodes(unsigned int master_id, unsigned int sl
   MooseMesh::MortarInterface * iface = _mesh.getMortarInterface(master_id, slave_id);
 
   const MooseArray<Point> & qpoints = _subproblem.assembly(0).qPoints();
-  for (std::vector<Elem *>::iterator it = iface->_elems.begin(); it != iface->_elems.end(); ++it)
+  for (const auto & elem : iface->_elems)
   {
-    Elem * elem = *it;
     _subproblem.assembly(0).reinit(elem);
 
     for (unsigned int qp = 0; qp < qpoints.size(); qp++)
@@ -412,10 +386,8 @@ GeometricSearchData::updateQuadratureNodes(unsigned int slave_id)
   const MooseArray<Point> & points_face = _subproblem.assembly(0).qPointsFace();
 
   ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
-  for (ConstBndElemRange::const_iterator elem_it = range.begin() ; elem_it != range.end(); ++elem_it)
+  for (const auto & belem : range)
   {
-    const BndElement * belem = *elem_it;
-
     const Elem * elem = belem->_elem;
     unsigned short int side = belem->_side;
     BoundaryID boundary_id = belem->_bnd_id;
@@ -438,10 +410,8 @@ void
 GeometricSearchData::reinitQuadratureNodes(unsigned int /*slave_id*/)
 {
   // Regenerate the quadrature nodes
-  for (std::map<unsigned int, unsigned int>::iterator it = _slave_to_qslave.begin();
-      it != _slave_to_qslave.end();
-      ++it)
-    generateQuadratureNodes(it->first, it->second);
+  for (const auto & it : _slave_to_qslave)
+    generateQuadratureNodes(it.first, it.second);
 }
 
 
@@ -450,20 +420,15 @@ GeometricSearchData::updateMortarNodes()
 {
   const MooseArray<Point> & qpoints = _subproblem.assembly(0).qPoints();
 
-  std::vector<MooseMesh::MortarInterface *> & ifaces = _mesh.getMortarInterfaces();
-  for (std::vector<MooseMesh::MortarInterface *>::iterator iface_it = ifaces.begin(); iface_it != ifaces.end(); ++iface_it)
-  {
-    MooseMesh::MortarInterface * iface = *iface_it;
-
-    for (std::vector<Elem *>::iterator it = iface->_elems.begin(); it != iface->_elems.end(); ++it)
+  auto & ifaces = _mesh.getMortarInterfaces();
+  for (const auto & iface : ifaces)
+    for (const auto & elem : iface->_elems)
     {
-      Elem * elem = *it;
       _subproblem.assembly(0).reinit(elem);
 
       for (unsigned int qp = 0; qp < qpoints.size(); qp++)
         (*_mesh.getQuadratureNode(elem, 0, qp)) = qpoints[qp];
     }
-  }
 }
 
 void
@@ -471,10 +436,9 @@ GeometricSearchData::reinitMortarNodes()
 {
   _mortar_boundaries.clear();
   // Regenerate the quadrature nodes for mortar spaces
-  std::vector<MooseMesh::MortarInterface *> & ifaces = _mesh.getMortarInterfaces();
-  for (std::vector<MooseMesh::MortarInterface *>::iterator it = ifaces.begin(); it != ifaces.end(); ++it)
+  auto & ifaces = _mesh.getMortarInterfaces();
+  for (const auto & iface : ifaces)
   {
-    MooseMesh::MortarInterface * iface = *it;
     unsigned int master_id = _mesh.getBoundaryID(iface->_master);
     unsigned int slave_id  = _mesh.getBoundaryID(iface->_slave);
     generateMortarNodes(master_id, slave_id, 0);

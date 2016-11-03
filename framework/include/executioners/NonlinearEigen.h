@@ -29,8 +29,9 @@ public:
 
   NonlinearEigen(const InputParameters & parameters);
 
-  virtual void init();
-  virtual void execute();
+  virtual void init() override;
+
+  virtual void execute() override;
 
 protected:
   virtual void takeStep();

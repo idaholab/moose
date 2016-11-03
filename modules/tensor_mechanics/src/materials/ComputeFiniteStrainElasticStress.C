@@ -23,21 +23,13 @@ ComputeFiniteStrainElasticStress::ComputeFiniteStrainElasticStress(const InputPa
 }
 
 void
-ComputeFiniteStrainElasticStress::initQpStatefulProperties()
-{
-  ComputeStressBase::initQpStatefulProperties();
-
-    _stress_old[_qp] = _stress[_qp];
-}
-
-void
 ComputeFiniteStrainElasticStress::computeQpStress()
 {
-  // stress = s_old + C * de
-  RankTwoTensor intermediate_stress = _stress_old[_qp] + _elasticity_tensor[_qp]*_strain_increment[_qp]; //Calculate stress in intermediate configruation
+  // Calculate the stress in the intermediate configuration
+  RankTwoTensor intermediate_stress = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
 
-  //Rotate the stress to the current configuration
-  _stress[_qp] = _rotation_increment[_qp]*intermediate_stress*_rotation_increment[_qp].transpose();
+  // Rotate the stress state to the current configuration
+  _stress[_qp] = _rotation_increment[_qp] * intermediate_stress * _rotation_increment[_qp].transpose();
 
   //Assign value for elastic strain, which is equal to the mechanical strain
   _elastic_strain[_qp] = _mechanical_strain[_qp];

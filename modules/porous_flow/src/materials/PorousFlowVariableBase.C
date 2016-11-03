@@ -12,22 +12,20 @@ template<>
 InputParameters validParams<PorousFlowVariableBase>()
 {
   InputParameters params = validParams<Material>();
-  params.addCoupledVar("temperature", 20.0, "Fluid temperature");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names");
-  params.addClassDescription("Base class for thermophysical variable materials. Provides pressure, saturation and temperature material properties for all phases as required");
+  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names");
+  params.addClassDescription("Base class for thermophysical variable materials. Provides pressure and saturation material properties for all phases as required");
   return params;
 }
 
 PorousFlowVariableBase::PorousFlowVariableBase(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
 
-    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-    _num_phases(_dictator_UO.numPhases()),
-    _num_components(_dictator_UO.numComponents()),
-    _num_pf_vars(_dictator_UO.numVariables()),
-    _temperature_nodal_var(coupledNodalValue("temperature")),
-    _temperature_qp_var(coupledValue("temperature")),
-    _temperature_varnum(coupled("temperature")),
+    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _num_phases(_dictator.numPhases()),
+    _num_components(_dictator.numComponents()),
+    _num_pf_vars(_dictator.numVariables()),
+
+    _node_number(getMaterialProperty<unsigned int>("PorousFlow_node_number")),
 
     _porepressure_nodal(declareProperty<std::vector<Real> >("PorousFlow_porepressure_nodal")),
     _porepressure_nodal_old(declarePropertyOld<std::vector<Real> >("PorousFlow_porepressure_nodal")),
@@ -45,19 +43,14 @@ PorousFlowVariableBase::PorousFlowVariableBase(const InputParameters & parameter
     _dsaturation_nodal_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar")),
     _dsaturation_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar")),
     _dgrads_qp_dgradv(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_saturation_qp_dgradvar")),
-    _dgrads_qp_dv(declareProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_saturation_qp_dv")),
-
-    _temperature_nodal(declareProperty<std::vector<Real> >("PorousFlow_temperature_nodal")),
-    _temperature_qp(declareProperty<std::vector<Real> >("PorousFlow_temperature_qp")),
-    _dtemperature_nodal_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_nodal_dvar")),
-    _dtemperature_qp_dvar(declareProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_qp_dvar"))
+    _dgrads_qp_dv(declareProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_saturation_qp_dv"))
 {
 }
 
 void
 PorousFlowVariableBase::initQpStatefulProperties()
 {
-  /// Resize the material properties which constain pressure, saturation and temperature
+  /// Resize the material properties which constain pressure and saturation
   _porepressure_nodal[_qp].resize(_num_phases);
   _porepressure_qp[_qp].resize(_num_phases);
   _porepressure_nodal_old[_qp].resize(_num_phases);
@@ -75,11 +68,6 @@ PorousFlowVariableBase::initQpStatefulProperties()
   _dsaturation_qp_dvar[_qp].resize(_num_phases);
   _dgrads_qp_dgradv[_qp].resize(_num_phases);
   _dgrads_qp_dv[_qp].resize(_num_phases);
-
-  _temperature_nodal[_qp].resize(_num_phases);
-  _temperature_qp[_qp].resize(_num_phases);
-  _dtemperature_nodal_dvar[_qp].resize(_num_phases);
-  _dtemperature_qp_dvar[_qp].resize(_num_phases);
 }
 
 void
@@ -96,7 +84,5 @@ PorousFlowVariableBase::computeQpProperties()
     _dsaturation_qp_dvar[_qp][phase].assign(_num_pf_vars, 0.0);
     _dgrads_qp_dgradv[_qp][phase].assign(_num_pf_vars, 0.0);
     _dgrads_qp_dv[_qp][phase].assign(_num_pf_vars, RealGradient());
-    _dtemperature_nodal_dvar[_qp][phase].assign(_num_pf_vars, 0.0);
-    _dtemperature_qp_dvar[_qp][phase].assign(_num_pf_vars, 0.0);
   }
 }

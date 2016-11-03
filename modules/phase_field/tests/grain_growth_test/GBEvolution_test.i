@@ -61,7 +61,6 @@
 [Materials]
   [./Moly_GB]
     type = GBEvolution
-    block = 0
     time_scale = 1.0
     GBmob0 = 3.986e-6
     T = 500 # K

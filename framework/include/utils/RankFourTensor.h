@@ -22,12 +22,6 @@ class RankFourTensor;
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
 
-#include "petscsys.h"
-#include "petscblaslapack.h"
-
-// system includes
-#include <vector>
-
 /**
  * Helper function template specialization to set an object to zero.
  * Needed by DerivativeMaterialInterface
@@ -156,13 +150,13 @@ public:
    * C_ijkl = R_im R_in R_ko R_lp C_mnop
    */
   template <class T>
-  void rotate(T & R);
+  void rotate(const T & R);
 
   /**
    * Rotate the tensor using
    * C_ijkl = R_im R_in R_ko R_lp C_mnop
    */
-  void rotate(RealTensorValue & R);
+  void rotate(const RealTensorValue & R);
 
   /**
    * Rotate the tensor using
@@ -207,14 +201,6 @@ public:
    *             principal (use fillPrincipalFromInputVector)
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method);
-
-  /**
-   * Inverts the dense matrix A using LAPACK routines
-   * @param A upon input this is a row vector representing an n-by-n matrix.  Upon output it is the inverse (as a row-vector)
-   * @param n size of A
-   * @return if zero then inversion was successful.  Otherwise A contained illegal entries or was singular
-   */
-  int matrixInversion(std::vector<PetscScalar> & A, int n) const;
 
   /// Inner product of the major transposed tensor with a rank two tensor
   RankTwoTensor innerProductTranspose(const RankTwoTensor &) const;
@@ -323,7 +309,7 @@ inline RankFourTensor operator*(Real a, const RankFourTensor & b) { return b * a
 
 template<class T>
 void
-RankFourTensor::rotate(T & R)
+RankFourTensor::rotate(const T & R)
 {
   RankFourTensor old = *this;
 

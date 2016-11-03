@@ -10,24 +10,38 @@
     max_time = 500
   [../]
 
+  [./test_advanced_op_assignment]
+    type = 'CSVDiff'
+    input = 'grain_tracker_advanced_op.i'
+    csvdiff = 'grain_tracker_advanced_op_out.csv'
+    recover = false # No solve
+    max_parallel = 1
+  [../]
+
   [./test_elemental]
     type = 'Exodiff'
     input = 'grain_tracker_test_elemental.i'
     exodiff = 'grain_tracker_test_elemental_out.e-s002'
-    method = 'OPT OPROF' # slow test
+    method = '!DBG' # slow test
     valgrind = 'HEAVY'
     max_time = 500
   [../]
 
-  [./test_elemental_csv]
+  [./test_remapping_parallel]
     type = 'CSVDiff'
-    input = 'grain_tracker_test_elemental.i'
-    csvdiff = 'grain_volumes.csv'
-    method = 'OPT OPROF' # slow test
-    cli_args = 'Outputs/exodus=false'
-    recover = false  # grain tracker CSV output isn't designed to work with recover
+    input = 'grain_tracker_remapping_test.i'
+    csvdiff = 'grain_tracker_remapping_test_out.csv'
+    method = '!DBG' # slow test
     valgrind = 'HEAVY'
-    max_time = 500
+  [../]
+
+  [./remapping_with_reserve]
+    type = 'Exodiff'
+    input = 'grain_tracker_reserve.i'
+    exodiff = 'grain_tracker_reserve_out.e'
+    abs_zero = 1e-6 # Remapping can cause more significant diffs
+    method = '!DBG' # slow test
+    valgrind = 'HEAVY'
   [../]
 
   [./test_recover]
@@ -47,7 +61,17 @@
     type = 'Exodiff'
     input = 'grain_tracker_ebsd.i'
     exodiff = 'grain_tracker_ebsd_out.e'
-    skip = 'ReconVarIC not moved yet'
+  [../]
+
+  [./split_grain]
+    type = 'CSVDiff'
+    # Make sure that this simulation hits the "split grain" logic branch
+    expect_out = 'Split Grain Detected'
+    input = 'split_grain.i'
+    csvdiff = 'split_grain_out.csv'
+    max_time = 500
+    method = '!DBG' # slow test
+    valgrind ='HEAVY'
   [../]
 
   ###################################################
@@ -69,8 +93,32 @@
     cli_args = 'Outputs/file_base=gt_faux_elemental_out Postprocessors/grain_tracker/type=FauxGrainTracker'
 
     exodiff = 'gt_faux_elemental_out.e-s002'
-    method = 'OPT OPROF' # slow test
+    method = '!DBG' # slow test
     valgrind = 'HEAVY'
     max_time = 500
+  [../]
+
+  [./grain_tracker_volume]
+    type = 'CSVDiff'
+    input = 'grain_tracker_volume.i'
+    csvdiff = 'grain_tracker_volume_out_grain_volumes_0000.csv'
+    rel_err = 1.e-3
+  [../]
+
+  [./grain_tracker_volume_single]
+    type = 'CSVDiff'
+    input = 'grain_tracker_volume_single.i'
+    csvdiff = 'grain_tracker_volume_single_out_grain_volumes_0000.csv'
+    rel_err = 1.e-3
+  [../]
+
+  # This test should work the same with the FeatureFloodCount object
+  [./feature_flood_volume]
+    type = 'CSVDiff'
+    input = 'grain_tracker_volume.i'
+    cli_args = 'Postprocessors/grain_tracker/type=FeatureFloodCount'
+    csvdiff = 'grain_tracker_volume_out_grain_volumes_0000.csv'
+    prereq = grain_tracker_volume
+    rel_err = 1.e-3
   [../]
 []

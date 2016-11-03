@@ -134,6 +134,20 @@ MooseEnumTest::withNamesFromTest()
   CPPUNIT_ASSERT( mme1.contains("three") == false );
   CPPUNIT_ASSERT( mme1.contains("four") == false );
 
+  // compare against out-of-range value
+  try
+  {
+    if (me1 == "five")
+      // Unreachable
+      CPPUNIT_ASSERT( false );
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+
+    CPPUNIT_ASSERT( msg.find("Invalid string comparison") != std::string::npos );
+  }
+
   // set out-of-range values
   try
   {

@@ -140,8 +140,7 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
   virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl,
                                  const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const;
 
-  /// Returns the model name (eg "MohrCoulomb")
-  virtual std::string modelName() const;
+  virtual std::string modelName() const = 0;
 
   /// Returns false.  You will want to override this in your derived class if you write a custom returnMap function
   virtual bool useCustomReturnMap() const;
@@ -238,13 +237,14 @@ class TensorMechanicsPlasticModel : public GeneralUserObject
     * it will default to E_ijkl.)
     *
     * @param stress_old trial stress before returning
+    * @param intnl_old internal parameter before returning
     * @param stress current returned stress state
     * @param intnl internal parameter
     * @param E_ijkl elasticity tensor
     * @param cumulative_pm the cumulative plastic multipliers
     * @return the consistent tangent operator: E_ijkl if not over-ridden
     */
-  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, Real intnl,
+  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, Real intnl_old, const RankTwoTensor & stress, Real intnl,
                                                    const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const;
 
   /**

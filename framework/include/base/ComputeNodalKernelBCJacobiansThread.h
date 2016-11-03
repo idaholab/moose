@@ -28,19 +28,19 @@ class NodalKernel;
 class ComputeNodalKernelBCJacobiansThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelBCJacobiansThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<NodalKernel> & nodal_kernels,  SparseMatrix<Number> & jacobian);
+  ComputeNodalKernelBCJacobiansThread(FEProblem & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels,  SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
   ComputeNodalKernelBCJacobiansThread(ComputeNodalKernelBCJacobiansThread & x, Threads::split split);
 
-  virtual void pre();
+  virtual void pre() override;
 
-  virtual void onNode(ConstBndNodeRange::const_iterator & node_it);
+  virtual void onNode(ConstBndNodeRange::const_iterator & node_it) override;
 
   void join(const ComputeNodalKernelBCJacobiansThread & /*y*/);
 
 protected:
-  AuxiliarySystem & _sys;
+  AuxiliarySystem & _aux_sys;
 
   const MooseObjectWarehouse<NodalKernel> & _nodal_kernels;
 

@@ -36,9 +36,9 @@ public:
 
   UpdateDisplacedMeshThread(UpdateDisplacedMeshThread & x, Threads::split split);
 
-  virtual void pre();
+  virtual void pre() override;
 
-  virtual void onNode(SemiLocalNodeRange::const_iterator & nd);
+  virtual void onNode(SemiLocalNodeRange::const_iterator & nd) override;
 
   void join(const UpdateDisplacedMeshThread & /*y*/);
 

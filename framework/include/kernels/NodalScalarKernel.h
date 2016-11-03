@@ -34,10 +34,9 @@ class NodalScalarKernel :
 {
 public:
   NodalScalarKernel(const InputParameters & parameters);
-  virtual ~NodalScalarKernel();
 
-  virtual void reinit();
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void reinit() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
 protected:
   /// List of node IDs

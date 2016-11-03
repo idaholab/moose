@@ -50,9 +50,11 @@ InputParameters validParams<Split>()
   MooseEnum SchurAInvEnum("diag lump", "diag");
   params.addParam<MooseEnum>("schur_ainv", SchurAInvEnum, "Type of approximation to inv(A) used when forming S = D - C inv(A) B");
 
+#if LIBMESH_HAVE_PETSC
   params.addParam<MultiMooseEnum>("petsc_options", Moose::PetscSupport::getCommonPetscFlags(), "PETSc flags for the FieldSplit solver");
-  params.addParam<MultiMooseEnum>("petsc_options_iname", Moose::PetscSupport::getCommonPetscKeys(), "PETSc option names for the FieldSplit solver");
+  params.addParam<std::vector<std::string>>("petsc_options_iname", "PETSc option names for the FieldSplit solver");
   params.addParam<std::vector<std::string> >("petsc_options_value", "PETSc option values for the FieldSplit solver");
+#endif
 
   params.registerBase("Split");
   return params;
@@ -70,15 +72,19 @@ Split::Split (const InputParameters & parameters) :
     _splitting_type(getParam<MooseEnum>("splitting_type")),
     _schur_type(getParam<MooseEnum>("schur_type")),
     _schur_pre(getParam<MooseEnum>("schur_pre")),
-    _schur_ainv(getParam<MooseEnum>("schur_ainv")),
-    _petsc_options(_fe_problem.getPetscOptions())
+    _schur_ainv(getParam<MooseEnum>("schur_ainv"))
 {
+    _petsc_options.flags  = getParam<MultiMooseEnum>("petsc_options");
+    _petsc_options.inames = getParam<std::vector<std::string> >("petsc_options_iname");
+    _petsc_options.values = getParam<std::vector<std::string> >("petsc_options_value");
 }
 
 void
 Split::setup(const std::string& prefix)
 {
-  PetscErrorCode ierr;
+  // A reference to the PetscOptions
+  Moose::PetscSupport::PetscOptions & po = _fe_problem.getPetscOptions();
+  // prefix
   std::string dmprefix = prefix + "dm_moose_", opt, val;
 
   // var options
@@ -87,7 +93,15 @@ Split::setup(const std::string& prefix)
     val="";
     for (unsigned int j = 0; j < _vars.size(); ++j)
       val += (j ? "," : "") + _vars[j];
-    Moose::PetscSupport::setSinglePetscOption(opt, val);
+
+    //push back PETSc options
+    if (val=="")
+      po.flags.push_back(opt);
+    else
+    {
+      po.inames.push_back(opt);
+      po.values.push_back(val);
+    }
   }
 
   // block options
@@ -96,7 +110,15 @@ Split::setup(const std::string& prefix)
     val = "";
     for (unsigned int j = 0; j < _blocks.size(); ++j)
       val += (j ? "," : "") + _blocks[j];
-    Moose::PetscSupport::setSinglePetscOption(opt, val);
+
+    //push back PETSc options
+    if (val=="")
+      po.flags.push_back(opt);
+    else
+    {
+      po.inames.push_back(opt);
+      po.values.push_back(val);
+    }
   }
 
   // side options
@@ -105,7 +127,15 @@ Split::setup(const std::string& prefix)
     val = "";
     for (unsigned int j = 0; j < _sides.size(); ++j)
       val += (j ? "," : "") + _sides[j];
-    Moose::PetscSupport::setSinglePetscOption(opt, val);
+
+    //push back PETSc options
+    if (val=="")
+      po.flags.push_back(opt);
+    else
+    {
+      po.inames.push_back(opt);
+      po.values.push_back(val);
+    }
   }
 
   // unside options
@@ -114,15 +144,32 @@ Split::setup(const std::string& prefix)
     val = "";
     for (unsigned int j = 0; j < _unsides.size(); ++j)
       val += (j ? "," : "") + _unsides[j];
-    Moose::PetscSupport::setSinglePetscOption(opt, val);
+
+    //push back PETSc options
+    if (val=="")
+      po.flags.push_back(opt);
+    else
+    {
+      po.inames.push_back(opt);
+      po.values.push_back(val);
+    }
   }
 
-  if (_splitting.size()) {
+  if (_splitting.size())
+  {
     // If this split has subsplits, it is presumed that the pc_type used to solve this split's subsystem is fieldsplit
     // with the following parameters (unless overridden by the user-specified petsc_options below).
     opt = prefix + "pc_type";
     val = "fieldsplit";
-    Moose::PetscSupport::setSinglePetscOption(opt, val);
+
+    //push back PETSc options
+    if (val=="")
+      po.flags.push_back(opt);
+    else
+    {
+      po.inames.push_back(opt);
+      po.values.push_back(val);
+    }
 
     // set Splitting Type
     const char * petsc_splitting_type[] = {
@@ -132,7 +179,10 @@ Split::setup(const std::string& prefix)
       "schur"
     };
     opt = prefix + "pc_fieldsplit_type";
-    Moose::PetscSupport::setSinglePetscOption(opt, petsc_splitting_type[_splitting_type]);
+
+    //push back PETSc options
+    po.inames.push_back(opt);
+    po.values.push_back(petsc_splitting_type[_splitting_type]);
 
     if (_splitting_type == SplittingTypeSchur)
     {
@@ -144,7 +194,10 @@ Split::setup(const std::string& prefix)
         "full"
       };
       opt = prefix + "pc_fieldsplit_schur_fact_type";
-      Moose::PetscSupport::setSinglePetscOption(opt, petsc_schur_type[_splitting_type]);
+
+      //push back PETSc options
+      po.inames.push_back(opt);
+      po.values.push_back(petsc_schur_type[_splitting_type]);
 
       // set Schur Preconditioner
       const char * petsc_schur_pre[] = {
@@ -157,7 +210,10 @@ Split::setup(const std::string& prefix)
         #endif
       };
       opt = prefix + "pc_fieldsplit_schur_precondition";
-      Moose::PetscSupport::setSinglePetscOption(opt, petsc_schur_pre[_schur_pre]);
+
+      //push back PETSc options
+      po.inames.push_back(opt);
+      po.values.push_back(petsc_schur_pre[_schur_pre]);
 
       // set Schur AInv
       const char * petsc_schur_ainv[] = {
@@ -165,22 +221,40 @@ Split::setup(const std::string& prefix)
         "lump"
       };
       opt = prefix + "mat_schur_complement_ainv_type";
-      Moose::PetscSupport::setSinglePetscOption(opt, petsc_schur_ainv[_schur_ainv]);
+
+      //push back PETSc options
+      po.inames.push_back(opt);
+      po.values.push_back(petsc_schur_ainv[_schur_ainv]);
     }
-    // FIXME: How would we support the user-provided Pmat?
 
     // The DM associated with this split defines the subsplits' geometry.
     opt = dmprefix + "nfieldsplits";
     std::ostringstream sval;
     sval << _splitting.size();
     val = sval.str();
-    Moose::PetscSupport::setSinglePetscOption(opt, val);
+
+    //push back PETSc options
+    if (val=="")
+      po.flags.push_back(opt);
+    else
+    {
+      po.inames.push_back(opt);
+      po.values.push_back(val);
+    }
 
     opt = dmprefix + "fieldsplit_names";
     val = "";
     for (unsigned int i = 0; i < _splitting.size(); ++i)
       val += (i ? "," : "") + _splitting[i];
-    Moose::PetscSupport::setSinglePetscOption(opt, val);
+
+    //push back PETSc options
+    if (val=="")
+      po.flags.push_back(opt);
+    else
+    {
+      po.inames.push_back(opt);
+      po.values.push_back(val);
+    }
 
     // Finally, recursively configure the splits contained within this split.
     for (unsigned int i = 0; i < _splitting.size(); ++i)
@@ -199,8 +273,14 @@ Split::setup(const std::string& prefix)
     if (op[0] != '-')
       mooseError("Invalid petsc option name " << op << " for Split " << _name);
     std::string opt = prefix + op.substr(1);
-    Moose::PetscSupport::setSinglePetscOption(opt);
+
+    //push back PETSc options
+    po.flags.push_back(opt);
   }
+  // check if inames match values
+  if (_petsc_options.values.size() != _petsc_options.inames.size())
+    mooseError("PETSc option values do not match PETSc option names");
+
   for (unsigned j = 0; j < _petsc_options.inames.size(); ++j)
   {
     // Need to prepend the prefix and strip off the leading '-' on the option name.
@@ -208,13 +288,14 @@ Split::setup(const std::string& prefix)
     if (op[0] != '-')
       mooseError("Invalid petsc option name " << op << " for Split " << _name);
     std::string opt = prefix + op.substr(1);
-    Moose::PetscSupport::setSinglePetscOption(opt, _petsc_options.values[j]);
+
+    po.inames.push_back(opt);
+    po.values.push_back(_petsc_options.values[j]);
   }
 }
 
 #else
 // petsc earlier than 3.3.0.
-
 void
 Split::setup(const std::string& prefix)
 {

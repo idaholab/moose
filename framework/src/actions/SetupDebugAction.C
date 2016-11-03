@@ -44,10 +44,6 @@ SetupDebugAction::SetupDebugAction(InputParameters parameters) :
   _action_params.set<ActionWarehouse *>("awh") = &_awh;
 }
 
-SetupDebugAction::~SetupDebugAction()
-{
-}
-
 void
 SetupDebugAction::act()
 {

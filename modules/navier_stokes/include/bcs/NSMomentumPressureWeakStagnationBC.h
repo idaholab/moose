@@ -7,7 +7,7 @@
 #ifndef NSMOMENTUMPRESSUREWEAKSTAGNATIONBC_H
 #define NSMOMENTUMPRESSUREWEAKSTAGNATIONBC_H
 
-#include "NSWeakStagnationBC.h"
+#include "NSWeakStagnationBaseBC.h"
 
 // Forward Declarations
 class NSMomentumPressureWeakStagnationBC;
@@ -20,7 +20,7 @@ InputParameters validParams<NSMomentumPressureWeakStagnationBC>();
  * equation boundary integral for use in weak stagnation
  * boundary conditions.
  */
-class NSMomentumPressureWeakStagnationBC : public NSWeakStagnationBC
+class NSMomentumPressureWeakStagnationBC : public NSWeakStagnationBaseBC
 {
 public:
   NSMomentumPressureWeakStagnationBC(const InputParameters & parameters);

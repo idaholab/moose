@@ -6,6 +6,7 @@
 /****************************************************************/
 #include "Euler2RGB.h"
 #include "MathUtils.h"
+#include "libmesh/utility.h"
 
 /**
  * This function rotates a set of three Bunge Euler angles into
@@ -38,7 +39,7 @@
  *           RGB = red*256^2 + green*256 + blue (where red, green, and blue
  *           are integer values between 0 and 255)
  */
-Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, unsigned int sym)
+Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, unsigned int sym)
 {
   // Define Constants
   const Real pi = libMesh::pi;
@@ -48,7 +49,6 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
   // Preallocate and zero variables
   unsigned int index = 0;
   unsigned int nsym = 1;
-  unsigned int RGBint = 0;
 
   Real blue = 0.0;
   Real chi = 0.0;
@@ -68,7 +68,7 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
   Real S[3][3] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
   const Real (*SymOps)[3][3];
 
-  std::vector<Real> RGB(3, 0.0);
+  Point RGB;
 
   // Assign reference sample direction
   switch (sd)
@@ -180,7 +180,7 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
     eta_min =  0 * (pi / 180);
     eta_max = 45 * (pi / 180);
     chi_min =  0 * (pi / 180);
-    chi_max = std::acos(std::sqrt(1 / (2 + (std::tan(std::pow(eta_max, 2))))));
+    chi_max = std::acos(std::sqrt(1.0 / (2.0 + (std::tan(Utility::pow<2>(eta_max))))));
   }
 
   //  Load hexagonal parameters (class 622)
@@ -258,19 +258,11 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
   // Start of main routine //
   // Assign black RGB values for bad data points (nsym = 0) or voids (phase = 0)
   if (nsym == 0 || phase == 0)
-  {
-    RGB[0] = 0;
-    RGB[1] = 0;
-    RGB[2] = 0;
-  }
+    RGB = 0;
 
   // Assign black RGB value for Euler angles outside of allowable range
   else if (phi1 > pi_x2 || PHI > pi || phi2 > pi_x2)
-  {
-    RGB[0] = 0;
-    RGB[1] = 0;
-    RGB[2] = 0;
-  }
+    RGB = 0;
 
   //  Routine for valid set of Euler angles
   else
@@ -322,7 +314,7 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
 
     //  Adjust maximum chi value to ensure it falls within the SST (cubic materials only)
     if (sym == 43)
-      chi_max2 = std::acos(std::sqrt(1.0 / (2.0 + (std::tan(std::pow(eta, 2))))));
+      chi_max2 = std::acos(std::sqrt(1.0 / (2.0 + (std::tan(Utility::pow<2>(eta))))));
     else
       chi_max2 = pi / 2;
 
@@ -334,21 +326,16 @@ Real Euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int pha
     blue = blue * (chi / chi_max2);
     green = green * (chi / chi_max2);
 
-    RGB[0] = std::sqrt(red);
-    RGB[1] = std::sqrt(green);
-    RGB[2] = std::sqrt(blue);
+    RGB(0) = std::sqrt(red);
+    RGB(1) = std::sqrt(green);
+    RGB(2) = std::sqrt(blue);
 
     // Find maximum value of red, green, or blue
-    maxRGB = std::max(RGB[0], std::max(RGB[1], RGB[2]));
+    maxRGB = std::max(RGB(0), std::max(RGB(1), RGB(2)));
 
     //  Adjust RGB values to enforce white center point instead of black
-    for (unsigned int i = 0; i < 3; i++)
-      RGB[i] /= maxRGB;
-
-    //  Convert RGB tuple to scalar and return integer value
-    for (unsigned int i = 0; i < 3; ++i)
-      RGBint = 256 * RGBint + (RGB[i] >= 1 ? 255 : std::floor(RGB[i] * 256.0));
+    RGB /= maxRGB;
   }
 
-  return RGBint;
+  return RGB;
 }

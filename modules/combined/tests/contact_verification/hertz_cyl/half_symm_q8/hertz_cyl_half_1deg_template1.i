@@ -68,12 +68,12 @@
 [Functions]
   [./disp_ramp_vert]
     type = PiecewiseLinear
-    x = '0. 1. 2.'
+    x = '0. 1. 3.5'
     y = '0. -0.0020 -0.0020'
   [../]
   [./disp_ramp_horz]
     type = PiecewiseLinear
-    x = '0. 1. 2.'
+    x = '0. 1. 3.5'
     y = '0. 0.0 0.0014'
   [../]
 []
@@ -313,14 +313,10 @@
   nl_max_its = 200
 
   start_time = 0.0
-  end_time = 2.0
+  end_time = 3.5
   l_tol = 1e-3
-  [./TimeStepper]
-    type = FunctionDT
-    time_t = ' 0.0 0.9 1.0 2.0'
-    time_dt = '0.1 0.1 0.04 0.04'
-    min_dt = 0.001
-  [../]
+  dt = 0.1
+  dtmin = 0.1
 []
 
 [Preconditioning]

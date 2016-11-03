@@ -57,10 +57,6 @@ MooseEnum::MooseEnum(const MooseEnumBase & other_enum) :
 {
 }
 
-MooseEnum::~MooseEnum()
-{
-}
-
 MooseEnum &
 MooseEnum::operator=(const std::string & name)
 {
@@ -104,6 +100,9 @@ MooseEnum::operator==(const char * name) const
 {
   std::string upper(name);
   std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+  mooseAssert(_out_of_range_index != 0 || std::find(_names.begin(), _names.end(), upper) != _names.end(),
+              std::string("Invalid string comparison \"") + upper + "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + _raw_names + "\".");
 
   return _current_name == upper;
 }

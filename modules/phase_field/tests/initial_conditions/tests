@@ -6,12 +6,18 @@
     exodiff = 'RampIC_out.e'
   [../]
 
+  [./BimodalInverseSuperellipsoidsIC]
+    type = Exodiff
+    input = 'BimodalInverseSuperellipsoidsIC.i'
+    exodiff = 'BimodalInverseSuperellipsoidsIC_out.e'
+    scale_refine = 1
+  [../]
+
   [./BimodalSuperellipsoidsIC]
     type = Exodiff
     input = 'BimodalSuperellipsoidsIC.i'
     exodiff = 'BimodalSuperellipsoidsIC_out.e'
     scale_refine = 1
-    valgrind = 'HEAVY'
   [../]
 
   [./BoundingBoxIC]
@@ -127,5 +133,23 @@
     type = Exodiff
     input = MultiBoundingBoxIC3D.i
     exodiff = MultiBoundingBoxIC3D_out.e
+  [../]
+
+  [./MultiSmoothSuperellipsoidIC_3D]
+    type = Exodiff
+    input = 'MultiSmoothSuperellipsoidIC_3D.i'
+    exodiff = 'MultiSmoothSuperellipsoidIC_3D_out.e'
+  [../]
+
+  [./MultiSmoothSuperellipsoidIC_2D]
+    type = Exodiff
+    input = 'MultiSmoothSuperellipsoidIC_2D.i'
+    exodiff = 'MultiSmoothSuperellipsoidIC_2D_out.e'
+  [../]
+
+  [./TricrystalTripleJunctionIC]
+    type = Exodiff
+    input = 'TricrystalTripleJunctionIC.i'
+    exodiff = 'TricrystalTripleJunctionIC_out.e'
   [../]
 []

@@ -28,7 +28,7 @@ class AddIndicatorAction : public MooseObjectAction
 public:
   AddIndicatorAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 
 private:
 

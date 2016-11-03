@@ -260,13 +260,13 @@
   line_search = 'none'
 
   nl_abs_tol = 1e-10
-  nl_rel_tol = 1e-9
+  nl_rel_tol = 1e-8
   l_max_its = 50
   nl_max_its = 100
   dt = 1.0
   end_time = 1.0
   num_steps = 10
-  dtmin = 0.1
+  dtmin = 1.0
   l_tol = 1e-5
 
 []

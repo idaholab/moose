@@ -48,34 +48,34 @@ protected:
   /**
    * Output the table to a *.csv file
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * The filename for the output file
    * @return A string of output file including the extension
    */
-  virtual std::string filename();
+  virtual std::string filename() override;
 
   /**
    * Setup the CSV output
    * If restarting and the append_restart flag is false, then the output data is cleared here
    */
-  void initialSetup();
+  void initialSetup() override;
 
   /**
    * Sets the write flag and calls TableOutput::outputScalarVariables()
    */
-  virtual void outputScalarVariables();
+  virtual void outputScalarVariables() override;
 
   /**
    * Sets the write flag and calls TableOutput::outputPostprocessors()
    */
-  virtual void outputPostprocessors();
+  virtual void outputPostprocessors() override;
 
   /**
    * Sets the write flag and calls TableOutput::outputVectorPostprocessors()
    */
-  virtual void outputVectorPostprocessors();
+  virtual void outputVectorPostprocessors() override;
 
 private:
 

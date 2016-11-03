@@ -56,7 +56,9 @@ ContactMaster::ContactMaster(const InputParameters & parameters) :
     _model(contactModel(getParam<std::string>("model"))),
     _formulation(contactFormulation(getParam<std::string>("formulation"))),
     _normalize_penalty(getParam<bool>("normalize_penalty")),
-    _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"), getParam<BoundaryName>("slave"), Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
+    _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("boundary"),
+                                               getParam<BoundaryName>("slave"),
+                                               Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
     _penalty(getParam<Real>("penalty")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _tension_release(getParam<Real>("tension_release")),
@@ -73,26 +75,20 @@ ContactMaster::ContactMaster(const InputParameters & parameters) :
     _aux_solution(_aux_system.currentSolution())
 {
   if (parameters.isParamValid("tangential_tolerance"))
-  {
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
-  }
+
   if (parameters.isParamValid("normal_smoothing_distance"))
-  {
     _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
-  }
+
   if (parameters.isParamValid("normal_smoothing_method"))
-  {
     _penetration_locator.setNormalSmoothingMethod(parameters.get<std::string>("normal_smoothing_method"));
-  }
+
   if (_model == CM_GLUED ||
       (_model == CM_COULOMB && _formulation == CF_DEFAULT))
-  {
     _penetration_locator.setUpdate(false);
-  }
+
   if (_friction_coefficient < 0)
-  {
     mooseError("The friction coefficient must be nonnegative");
-  }
 }
 
 void
@@ -101,9 +97,8 @@ ContactMaster::jacobianSetup()
   if (_component == 0)
   {
     if (_updateContactSet)
-    {
       updateContactSet();
-    }
+
     _updateContactSet = true;
   }
 }
@@ -416,6 +411,9 @@ contactFormulation(const std::string & the_name)
 
   else if ("augmented_lagrange" == name)
     formulation = CF_AUGMENTED_LAGRANGE;
+
+  else if ("tangential_penalty" == name)
+    formulation = CF_TANGENTIAL_PENALTY;
 
   if (formulation == CF_INVALID)
   {

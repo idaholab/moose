@@ -4,6 +4,11 @@
     input = 'power_law_creep_test.i'
     exodiff = 'power_law_creep_test_out.e'
   [../]
+  [./test_tm]
+    type = 'Exodiff'
+    input = 'power_law_creep_test_tm.i'
+    exodiff = 'power_law_creep_test_tm_out.e'
+  [../]
   [./testRestart1]
     type = 'RunApp'
     input = 'power_law_creep_restart1.i'

@@ -40,10 +40,7 @@ public:
    */
   CommonOutputAction(InputParameters params);
 
-  /**
-   * Perform the action creation
-   */
-  virtual void act();
+  virtual void act() override;
 
 private:
 

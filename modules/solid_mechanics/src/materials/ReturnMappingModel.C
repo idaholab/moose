@@ -7,6 +7,7 @@
 #include "ReturnMappingModel.h"
 
 #include "SymmIsotropicElasticityTensor.h"
+#include "Conversion.h"
 
 template<>
 InputParameters validParams<ReturnMappingModel>()
@@ -44,7 +45,8 @@ ReturnMappingModel::computeStress(const Elem & current_elem,
 {
   // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
   // stress = stressOld + stressIncrement
-  if (_t_step == 0) return;
+  if (_t_step == 0 && !_app.isRestarting())
+    return;
 
   stress_new = elasticityTensor * strain_increment;
   stress_new += stress_old;
@@ -86,7 +88,7 @@ ReturnMappingModel::computeStress(const Elem & /*current_elem*/, unsigned qp,
   Real norm_residual = 10;
   Real first_norm_residual = 10;
 
-  std::stringstream iter_output;
+  std::string iter_output;
 
   while (it < _max_its &&
         norm_residual > _absolute_tolerance &&
@@ -110,25 +112,22 @@ ReturnMappingModel::computeStress(const Elem & /*current_elem*/, unsigned qp,
     if (_output_iteration_info == true ||
         _output_iteration_info_on_error == true)
     {
-      iter_output
-        << " it="       << it
-        << " trl_strs=" << effective_trial_stress
-        << " scalar="   << scalar
-        << " rel_res="  << norm_residual/first_norm_residual
-        << " rel_tol="  << _relative_tolerance
-        << " abs_res="  << norm_residual
-        << " abs_tol="  << _absolute_tolerance
-        << std::endl;
-    }
-
+        iter_output = "In the element " + Moose::stringify(_current_elem->id()) +
+                         + " and the qp point " + Moose::stringify(qp) + ": \n" +
+                         + " iteration = " + Moose::stringify(it ) + "\n" +
+                         + " effective trial stress = " + Moose::stringify(effective_trial_stress) + "\n" +
+                         + " scalar effective inelastic strain = " + Moose::stringify(scalar) +"\n" +
+                         + " relative residual = " + Moose::stringify(norm_residual/first_norm_residual) + "\n" +
+                         + " relative tolerance = " + Moose::stringify(_relative_tolerance) + "\n" +
+                         + " absolute residual = " + Moose::stringify(norm_residual) + "\n" +
+                         + " absolute tolerance = " + Moose::stringify(_absolute_tolerance) + "\n";
+      }
     iterationFinalize(qp, scalar);
-
     ++it;
   }
 
   if (_output_iteration_info)
-    _console << iter_output.str();
-
+    _console << iter_output;
 
   if (it == _max_its &&
      norm_residual > _absolute_tolerance &&
@@ -136,7 +135,7 @@ ReturnMappingModel::computeStress(const Elem & /*current_elem*/, unsigned qp,
   {
     if (_output_iteration_info_on_error)
     {
-      Moose::err << iter_output.str();
+      Moose::err << iter_output;
     }
     mooseError("Exceeded maximum iterations in ReturnMappingModel solve for material: " << _name << ".  Rerun with  'output_iteration_info_on_error = true' for more information.");
   }

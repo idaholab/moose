@@ -1,4 +1,4 @@
-# checking jacobian for a fully-elastic situation (tensile strength = huge)
+# checking jacobian for a fully-elastic situation
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -44,19 +44,6 @@
   [../]
 []
 
-[UserObjects]
-  [./str]
-    type = TensorMechanicsHardeningConstant
-    value = 1E10
-  [../]
-  [./wpt]
-    type = TensorMechanicsPlasticWeakPlaneTensile
-    tensile_strength = str
-    yield_function_tolerance = 1E-6
-    internal_constraint_tolerance = 1E-5
-  [../]
-[]
-
 [Materials]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
@@ -70,8 +57,6 @@
   [./mc]
     type = ComputeMultiPlasticityStress
     initial_stress = '1 2 3  2 -4 -5  3 -5 2'
-    tangent_operator = elastic
-    plastic_models = wpt
     transverse_direction = '0 0 1'
     ep_plastic_tolerance = 1E-5
   [../]

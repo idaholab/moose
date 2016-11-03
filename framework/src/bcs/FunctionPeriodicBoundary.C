@@ -26,8 +26,8 @@ Threads::spin_mutex parsed_function_mutex;
 FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblem & feproblem, std::vector<std::string> fn_names) :
     _dim(fn_names.size()),
     _tr_x(&feproblem.getFunction(fn_names[0])),
-    _tr_y(fn_names.size() > 1 ? &feproblem.getFunction(fn_names[1]) : NULL),
-    _tr_z(fn_names.size() > 2 ? &feproblem.getFunction(fn_names[2]) : NULL)
+    _tr_y(_dim > 1 ? &feproblem.getFunction(fn_names[1]) : NULL),
+    _tr_z(_dim > 2 ? &feproblem.getFunction(fn_names[2]) : NULL)
 {
 
   // Make certain the the dimensions agree
@@ -79,12 +79,12 @@ FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt) const
   return pt;
 }
 
-UniquePtr<PeriodicBoundaryBase> FunctionPeriodicBoundary::clone(TransformationType t) const
+std::unique_ptr<PeriodicBoundaryBase> FunctionPeriodicBoundary::clone(TransformationType t) const
 {
   if (t==INVERSE)
     mooseError("No way to automatically clone() an inverse FunctionPeriodicBoundary object");
 
-  return UniquePtr<PeriodicBoundaryBase>(new FunctionPeriodicBoundary(*this));
+  return std::unique_ptr<PeriodicBoundaryBase>(new FunctionPeriodicBoundary(*this));
 }
 
 void

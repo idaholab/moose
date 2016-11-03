@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "RankTwoAux.h"
+#include "RankTwoScalarTools.h"
 
 template<>
 InputParameters validParams<RankTwoAux>()
@@ -28,6 +29,5 @@ RankTwoAux::RankTwoAux(const InputParameters & parameters) :
 Real
 RankTwoAux::computeValue()
 {
-  return _tensor[_qp](_i, _j);
+  return RankTwoScalarTools::component(_tensor[_qp], _i, _j);
 }
-

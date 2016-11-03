@@ -10,8 +10,9 @@
 #include "Compute2DSmallStrain.h"
 
 /**
- * ComputePlaneSmallStrain defines small strains under traditional
- * plane strain assumptions, where the out of plane strain is zero.
+ * ComputePlaneSmallStrain defines small strains under generalized
+ * plane strain and plane stress assumptions, where the out of plane strain
+ * can be uniformly or non-uniformly zero or nonzero.
  */
 class ComputePlaneSmallStrain : public Compute2DSmallStrain
 {
@@ -20,6 +21,13 @@ public:
 
 protected:
   virtual Real computeStrainZZ();
+
+private:
+  const bool _scalar_strain_zz_coupled;
+  const VariableValue & _scalar_strain_zz;
+
+  const bool _strain_zz_coupled;
+  const VariableValue & _strain_zz;
 };
 
 #endif //COMPUTEPLANESMALLSTRAIN_H

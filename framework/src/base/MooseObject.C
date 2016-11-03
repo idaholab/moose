@@ -24,6 +24,8 @@ InputParameters validParams<MooseObject>()
   params.addParam<bool>("enable", true, "Set the enabled status of the MooseObject.");
   params.addParam<std::vector<std::string> >("control_tags", "Adds user-defined labels for accessing object parameters via control logic.");
   params.addPrivateParam<std::string>("_object_name"); // the name passed to Factory::create
+  params.addParamNamesToGroup("enable control_tags", "Advanced");
+
   return params;
 }
 

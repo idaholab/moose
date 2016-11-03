@@ -1,0 +1,32 @@
+[Tests]
+  [./PermFromPoro01]
+    type = 'CSVDiff'
+    input = 'PermFromPoro01.i'
+    csvdiff = 'PermFromPoro01.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./PermFromPoro02]
+    type = 'CSVDiff'
+    input = 'PermFromPoro02.i'
+    csvdiff = 'PermFromPoro02.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./PermFromPoro03]
+    type = 'CSVDiff'
+    input = 'PermFromPoro03.i'
+    csvdiff = 'PermFromPoro03.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./PermFromPoro04]
+    type = 'CSVDiff'
+    input = 'PermFromPoro04.i'
+    csvdiff = 'PermFromPoro04.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./PermFromPoro05]
+    type = 'CSVDiff'
+    input = 'PermFromPoro05.i'
+    csvdiff = 'PermFromPoro05.csv'
+    rel_err = 1.0E-5
+  [../]
+[]

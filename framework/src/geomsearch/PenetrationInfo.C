@@ -25,8 +25,10 @@
 
 PenetrationInfo::PenetrationInfo(const Node * node, const Elem * elem, Elem * side, unsigned int side_num,
                                  RealVectorValue norm, Real norm_distance, Real tangential_distance,
-                                 const Point & closest_point, const Point & closest_point_ref, const Point & closest_point_on_face_ref,
-                                 std::vector<Node *> off_edge_nodes,
+                                 const Point & closest_point,
+                                 const Point & closest_point_ref,
+                                 const Point & closest_point_on_face_ref,
+                                 std::vector<const Node *> off_edge_nodes,
                                  const std::vector<std::vector<Real> > & side_phi,
                                  const std::vector<std::vector<RealGradient> > & side_grad_phi,
                                  const std::vector<RealGradient> & dxyzdxi,

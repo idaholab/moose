@@ -3,8 +3,6 @@
 []
 
 [Variables]
-  active = 'diffused forced'
-
   [./diffused]
     order = FIRST
     family = LAGRANGE
@@ -64,8 +62,6 @@
 []
 
 [Kernels]
-  active = 'diff_diffused conv_forced diff_forced'
-
   [./diff_diffused]
     type = Diffusion
     variable = diffused
@@ -84,8 +80,8 @@
 []
 
 [BCs]
+  #Note we have active on and neglect the right_forced BC
   active = 'left_diffused right_diffused left_forced'
-
   [./left_diffused]
     type = DirichletBC
     variable = diffused
@@ -117,9 +113,6 @@
 
 [Executioner]
   type = Steady
-
-
-
 []
 
 [Outputs]

@@ -23,7 +23,7 @@ InputParameters validParams<KKSSplitCHCRes>()
 }
 
 KKSSplitCHCRes::KKSSplitCHCRes(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<SplitCHBase> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHBase> >(parameters),
     // number of coupled variables (ca, args_a[])
     _nvar(_coupled_moose_vars.size()),
     _ca_var(coupled("ca")),
@@ -98,9 +98,7 @@ KKSSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
     return _phi[_j][_qp] * _test[_i][_qp] * _second_derivative_Fa[_qp];
 
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   return _phi[_j][_qp] * _test[_i][_qp] * (*_d2Fadcadarg[cvar])[_qp];
 }

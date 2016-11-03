@@ -52,7 +52,7 @@
     max_parallel = 1
     max_threads = 1
     vtk = true
-    mesh_mode = SERIAL
+    mesh_mode = REPLICATED
   [../]
   [./csv]
     # Test the output of linear and nonlinear iterations to CSV

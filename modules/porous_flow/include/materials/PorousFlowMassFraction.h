@@ -8,10 +8,7 @@
 #ifndef POROUSFLOWMASSFRACTION_H
 #define POROUSFLOWMASSFRACTION_H
 
-#include "DerivativeMaterialInterface.h"
-#include "Material.h"
-
-#include "PorousFlowDictator.h"
+#include "PorousFlowMaterialVectorBase.h"
 
 //Forward Declarations
 class PorousFlowMassFraction;
@@ -23,21 +20,12 @@ InputParameters validParams<PorousFlowMassFraction>();
  * Material designed to form a std::vector<std::vector>
  * of mass fractions from the individual mass fraction variables
  */
-class PorousFlowMassFraction : public DerivativeMaterialInterface<Material>
+class PorousFlowMassFraction : public PorousFlowMaterialVectorBase
 {
 public:
   PorousFlowMassFraction(const InputParameters & parameters);
 
 protected:
-  /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _dictator_UO;
-
-  /// Number of fluid phases
-  const unsigned int _num_phases;
-
-  /// Number of fluid components
-  const unsigned int _num_components;
-
   /// Mass fraction matrix
   MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac;
 
@@ -58,18 +46,6 @@ protected:
    * @param qp the quad point
    */
   void build_mass_frac(unsigned int qp);
-
-  /**
-   * YAQI HACK !!!
-   * Since PR#6763 i can often build_mass_frac(_qp) in
-   * initQpStatefulProperties, but sometimes it causes
-   * MOOSE to crash (see, eg, tests/pressure_pulse/pressure_pulse_1d_2phase)
-   * and i need the YaqiHack to get the simulation
-   * to work.  But then other simulations fail, because
-   * the Yaqi Hack doesn't work, boohoo.
-   * This will be removed when we get to the bottom of why ICs aren't working as I had hoped
-   */
-  const bool _yaqi_hacky;
 
   /**
    * Number of mass-fraction variables provided by the user

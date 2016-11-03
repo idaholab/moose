@@ -91,7 +91,7 @@
 []
 
 [Preconditioning]
-  [./fdp]
+  [./smp]
     type = SMP
     full = true
   [../]

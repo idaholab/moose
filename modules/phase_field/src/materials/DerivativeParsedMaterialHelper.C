@@ -73,8 +73,8 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   if (_tid > 0)
   {
     // get the master object from thread 0
-    const MaterialWarehouse<Material> & material_warehouse = _fe_problem.getMaterialWarehouse();
-    const ExecuteMooseObjectWarehouse<Material> & warehouse = material_warehouse[_material_data_type];
+    const MaterialWarehouse & material_warehouse = _fe_problem.getMaterialWarehouse();
+    const MooseObjectWarehouse<Material> & warehouse = material_warehouse[_material_data_type];
 
     MooseSharedPointer<DerivativeParsedMaterialHelper> master =
       MooseSharedNamespace::dynamic_pointer_cast<DerivativeParsedMaterialHelper>(warehouse.getActiveObject(name()));

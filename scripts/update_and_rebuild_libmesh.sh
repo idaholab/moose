@@ -21,7 +21,7 @@ fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [ ! -z "$LIBMESH_DIR" ]; then
+if [[ -n "$LIBMESH_DIR" ]]; then
   echo "INFO: LIBMESH_DIR set - overriding default installed path"
   echo "INFO: No cleaning will be done in specified path"
   mkdir -p $LIBMESH_DIR
@@ -32,20 +32,16 @@ else
   cd - >/dev/null # Make this quiet
 fi
 
-# If the user sets both METHOD and METHODS, and they are not the same,
-# this is an error.  Neither is treated as being more important than
-# the other currently.
-if [[ -n "$METHOD" && -n "$METHODS" ]]; then
-  if [ "$METHOD" != "$METHODS" ]; then
-    echo "Error: Both METHOD and METHODS are set, but are not equal."
-    echo "Please set one or the other."
-    exit 1
-  fi
+# If the user set METHOD, but not METHODS, we'll let METHOD override
+# METHODS in this script.
+if [[ -n "$METHOD" && -z "$METHODS" ]]; then
+  export METHODS="$METHOD"
 fi
 
-# If the user set METHOD, we'll use that for METHODS in our script
-if [ -n "$METHOD" ]; then
-  export METHODS="$METHOD"
+# If the user has VTK available via our modules, we'll build with VTK
+VTK_OPTIONS=""
+if [[ -n "$VTKLIB_DIR" && -n "$VTKINCLUDE_DIR" ]]; then
+  export VTK_OPTIONS="--with-vtk-lib=$VTKLIB_DIR --with-vtk-include=$VTKINCLUDE_DIR"
 fi
 
 # Finally, if METHODS is still not set, set a default value.
@@ -53,9 +49,9 @@ export METHODS=${METHODS:="opt oprof dbg"}
 
 cd $SCRIPT_DIR/..
 
-# Test for git repository
+# Test for git repository when not using fast
 git_dir=`git rev-parse --show-cdup 2>/dev/null`
-if [[ $? == 0 && "x$git_dir" == "x" ]]; then
+if [[ -z "$go_fast" && $? == 0 && "x$git_dir" == "x" ]]; then
   git submodule init
   git submodule update
   if [[ $? != 0 ]]; then
@@ -87,16 +83,17 @@ if [ -z "$go_fast" ]; then
   mkdir build
   cd build
 
-  ../configure --with-methods="${METHODS}" \
+  ../configure INSTALL="${SCRIPT_DIR}/../libmesh/build-aux/install-sh -C" \
+               --with-methods="${METHODS}" \
                --prefix=$LIBMESH_DIR \
                --enable-silent-rules \
                --enable-unique-id \
                --disable-warnings \
-               --disable-cxx11 \
                --enable-unique-ptr \
                --enable-openmp \
                --disable-maintainer-mode \
-               $DISABLE_TIMESTAMPS $*
+               --enable-petsc-required \
+               $DISABLE_TIMESTAMPS $VTK_OPTIONS $* || exit 1
 else
   # The build directory must already exist: you can't do --fast for
   # an initial build.

@@ -21,53 +21,49 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
-
 template<>
 InputParameters validParams<AddCoupledSolidKinSpeciesKernelsAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<NonlinearVariableName> >("primary_species", "The list of primary species to add");
   params.addRequiredParam<std::vector<std::string> >("kin_reactions", "The list of solid kinetic reactions");
-
   return params;
 }
 
-
 AddCoupledSolidKinSpeciesKernelsAction::AddCoupledSolidKinSpeciesKernelsAction(const InputParameters & params) :
-    Action(params)
+    Action(params),
+    _vars(getParam<std::vector<NonlinearVariableName> >("primary_species")),
+    _reactions(getParam<std::vector<std::string> >("kin_reactions"))
 {
 }
 
 void
 AddCoupledSolidKinSpeciesKernelsAction::act()
 {
-  std::vector<NonlinearVariableName> vars = getParam<std::vector<NonlinearVariableName> >("primary_species");
-  std::vector<std::string> reactions = getParam<std::vector<std::string> >("kin_reactions");
-
   _console << "Solid kinetic reaction list:" << "\n";
-  for (unsigned int i=0; i < reactions.size(); i++)
-    _console << reactions[i] << "\n";
+  for (unsigned int i = 0; i < _reactions.size(); ++i)
+    _console << _reactions[i] << "\n";
 
-  for (unsigned int i=0; i < vars.size(); i++)
+  for (unsigned int i = 0; i < _vars.size(); ++i)
   {
-    _console << "primary species - " << vars[i] << "\n";
-    std::vector<bool> primary_participation(reactions.size(), false);
-    std::vector<std::string> solid_kin_species(reactions.size());
+    _console << "primary species - " << _vars[i] << "\n";
+    std::vector<bool> primary_participation(_reactions.size(), false);
+    std::vector<std::string> solid_kin_species(_reactions.size());
     std::vector<Real> weight;
 
-    for (unsigned int j=0; j < reactions.size(); j++)
+    for (unsigned int j = 0; j < _reactions.size(); ++j)
     {
       std::vector<std::string> tokens;
 
       // Parsing each reaction
-      MooseUtils::tokenize(reactions[j], tokens, 1, "+=");
+      MooseUtils::tokenize(_reactions[j], tokens, 1, "+=");
       if (tokens.size() == 0)
         mooseError("Empty reaction specified.");
 
-      std::vector<Real> stos(tokens.size()-1);
-      std::vector<std::string> rxn_vars(tokens.size()-1);
+      std::vector<Real> stos(tokens.size() - 1);
+      std::vector<std::string> rxn_vars(tokens.size() - 1);
 
-      for (unsigned int k=0; k < tokens.size(); k++)
+      for (unsigned int k = 0; k < tokens.size(); ++k)
       {
         _console << tokens[k] << "\t";
         std::vector<std::string> stos_vars;
@@ -82,44 +78,41 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
           _console << "stochiometric: " << stos[k] << "\t";
           _console << "reactant: " << rxn_vars[k] << "\n";
           // Check the participation of primary species
-          if (rxn_vars[k] == vars[i]) primary_participation[j] = true;
+          if (rxn_vars[k] == _vars[i])
+            primary_participation[j] = true;
         }
         else
-        {
           solid_kin_species[j] = stos_vars[0];
-        }
       }
+
       // Done parsing, recorded stochiometric and variables into separate arrays
       _console << "whether primary present (0 is not): " << primary_participation[j] << "\n";
-
 
       if (primary_participation[j])
       {
         // Assigning the stochiometrics based on parsing
-        for (unsigned int m=0; m < rxn_vars.size(); m++)
+        for (unsigned int m = 0; m < rxn_vars.size(); ++m)
         {
-          if (rxn_vars[m] == vars[i])
+          if (rxn_vars[m] == _vars[i])
           {
             weight.push_back(stos[m]);
-            _console << "weight for " << rxn_vars[m] <<" : " << weight[weight.size()-1] << "\n";
+            _console << "weight for " << rxn_vars[m] <<" : " << weight[weight.size() - 1] << "\n";
           }
         }
-        _console << "solid kinetic species: " << solid_kin_species[j] << "\n";
 
-        std::vector<VariableName> coupled_var(1);
-        coupled_var[0] = solid_kin_species[j];
+        _console << "solid kinetic species: " << solid_kin_species[j] << "\n";
+        std::vector<VariableName> coupled_var = {solid_kin_species[j]};
 
         // Building kernels for solid kinetic species
         InputParameters params_kin = _factory.getValidParams("CoupledBEKinetic");
-        params_kin.set<NonlinearVariableName>("variable") = vars[i];
+        params_kin.set<NonlinearVariableName>("variable") = _vars[i];
         params_kin.set<std::vector<Real> >("weight") = weight;
         params_kin.set<std::vector<VariableName> >("v") = coupled_var;
-        _problem->addKernel("CoupledBEKinetic", vars[i]+"_"+solid_kin_species[j]+"_kin", params_kin);
+        _problem->addKernel("CoupledBEKinetic", _vars[i] + "_" + solid_kin_species[j] + "_kin", params_kin);
 
-        _console << vars[i]+"_"+solid_kin_species[j]+"_kin" << "\n";
-        params_kin.print();
+        _console << _vars[i] << "_" << solid_kin_species[j] << "_kin" << "\n";
       }
     }
-    _console << "\n";
+    _console << '\n';
   }
 }

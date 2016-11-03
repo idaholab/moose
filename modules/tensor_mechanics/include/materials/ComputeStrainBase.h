@@ -29,11 +29,6 @@ protected:
   unsigned int _ndisp;
   std::vector<const VariableValue *> _disp;
   std::vector<const VariableGradient *> _grad_disp;
-  std::vector<const VariableGradient *> _grad_disp_old;
-
-  const VariableValue & _T;
-  const Real _T0;
-  const Real _thermal_expansion_coeff;
 
   std::string _base_name;
 
@@ -41,7 +36,9 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _total_strain;
 
-  const bool _stateful_displacements;
+  const MaterialProperty<RankTwoTensor> & _eigenstrain;
+
+  bool _volumetric_locking_correction;
 };
 
 #endif //COMPUTESTRAINBASE_H

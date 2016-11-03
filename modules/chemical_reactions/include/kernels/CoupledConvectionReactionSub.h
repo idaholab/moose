@@ -9,12 +9,6 @@
 #ifndef COUPLEDCONVECTIONREACTIONSUB_H
 #define COUPLEDCONVECTIONREACTIONSUB_H
 
-/**
- * The forward declaration is so that we can declare the validParams function
- * before we actually define the class... that way the definition isn't lost
- * at the bottom of the file.
- */
-
 //Forward Declarations
 class CoupledConvectionReactionSub;
 
@@ -34,25 +28,7 @@ public:
   CoupledConvectionReactionSub(const InputParameters & parameters);
 
 protected:
-  /**
-   * Responsible for computing the residual at one quadrature point
-   *
-   * This should always be defined in the .C
-   * @return The residual of convection of the coupled equilibrium species.
-   */
   virtual Real computeQpResidual();
-
-  /**
-   * Responsible for computing the diagonal block of the preconditioning matrix.
-   * This is essentially the partial derivative of the residual with respect to
-   * the variable this kernel operates on ("u").
-   *
-   * Note that this can be an approximation or linearization.  In this case it's
-   * not because the Jacobian of this operator is easy to calculate.
-   *
-   * This should always be defined in the .C
-   * @return The diagonal jacobian of convection of the coupled equilibrium species.
-   */
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 

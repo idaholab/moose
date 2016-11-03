@@ -39,6 +39,41 @@
 #endif
 
 /**
+ * Macro for inferring the proper type of a normal loop index compatible
+ * with the "auto" keyword.
+ * Usage:
+ *   for (auto i = beginIndex(v); i < v.size(); ++i)    // default index is zero
+ *   for (auto i = beginIndex(v, 1); i < v.size(); ++i) // index is supplied
+ */
+// The multiple macros that you would need anyway [as per: Crazy Eddie (stack overflow)]
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#endif
+
+#define beginIndex_0()        ERROR --> "beginIndex() requires one or two arguments"
+#define beginIndex_1(A)       decltype(A.size())(0)
+#define beginIndex_2(A,B)     decltype(A.size())(B)
+#define beginIndex_3(A,B,C)   ERROR --> "beginIndex() requires one or two arguments"
+#define beginIndex_4(A,B,C,D) ERROR --> "beginIndex() requires one or two arguments"
+
+// The interim macro that simply strips the excess and ends up with the required macro
+#define beginIndex_X(x,A,B,C,D,FUNC, ...)  FUNC
+
+// The macro that the programmer uses
+#define beginIndex(...)    beginIndex_X(,##__VA_ARGS__,\
+                           beginIndex_4(__VA_ARGS__),\
+                           beginIndex_3(__VA_ARGS__),\
+                           beginIndex_2(__VA_ARGS__),\
+                           beginIndex_1(__VA_ARGS__),\
+                           beginIndex_0(__VA_ARGS__)\
+                           )
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+
+
+/**
  * MOOSE typedefs
  */
 typedef Real                     PostprocessorValue;

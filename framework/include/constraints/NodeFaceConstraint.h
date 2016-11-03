@@ -74,26 +74,6 @@ public:
   virtual void getConnectedDofIndices(unsigned int var_num);
 
   /**
-   * Compute the value the slave node should have at the beginning of a timestep.
-   */
-  virtual Real computeQpSlaveValue() = 0;
-
-  /**
-   * This is the virtual that derived classes should override for computing the residual on neighboring element.
-   */
-  virtual Real computeQpResidual(Moose::ConstraintType type) = 0;
-
-  /**
-   * This is the virtual that derived classes should override for computing the Jacobian on neighboring element.
-   */
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) = 0;
-
-  /**
-   * This is the virtual that derived classes should override for computing the off-diag Jacobian.
-   */
-  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/, unsigned int /*jvar*/) { return 0; }
-
-  /**
    * Whether or not this constraint should be applied.
    *
    * Get's called once per slave node.
@@ -126,8 +106,27 @@ public:
   SparseMatrix<Number> * _jacobian;
 
 protected:
-  /// coupling interface:
+  /**
+   * Compute the value the slave node should have at the beginning of a timestep.
+   */
+  virtual Real computeQpSlaveValue() = 0;
 
+  /**
+   * This is the virtual that derived classes should override for computing the residual on neighboring element.
+   */
+  virtual Real computeQpResidual(Moose::ConstraintType type) = 0;
+
+  /**
+   * This is the virtual that derived classes should override for computing the Jacobian on neighboring element.
+   */
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) = 0;
+
+  /**
+   * This is the virtual that derived classes should override for computing the off-diag Jacobian.
+   */
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType /*type*/, unsigned int /*jvar*/) { return 0; }
+
+  /// coupling interface:
   virtual const VariableValue & coupledSlaveValue(const std::string & var_name, unsigned int comp = 0) { return coupledValue(var_name, comp); }
   virtual const VariableValue & coupledSlaveValueOld(const std::string & var_name, unsigned int comp = 0){ return coupledValueOld(var_name, comp); }
   virtual const VariableValue & coupledSlaveValueOlder(const std::string & var_name, unsigned int comp = 0){ return coupledValueOlder(var_name, comp); }
@@ -198,7 +197,7 @@ protected:
   /// DOF map
   const DofMap & _dof_map;
 
-  std::map<dof_id_type, std::vector<dof_id_type> > & _node_to_elem_map;
+  const std::map<dof_id_type, std::vector<dof_id_type> > & _node_to_elem_map;
 
   /**
    * Whether or not the slave's residual should be overwritten.

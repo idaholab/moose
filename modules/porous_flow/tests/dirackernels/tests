@@ -1,0 +1,22 @@
+[Tests]
+  [./squarepules]
+    type = 'CSVDiff'
+    input = 'squarepulse1.i'
+    csvdiff = 'squarepulse1.csv'
+  [../]
+  [./theis1]
+    type = 'CSVDiff'
+    input = 'theis1.i'
+    csvdiff = 'theis1_pressure_0016.csv'
+  [../]
+  [./theis2]
+    type = 'CSVDiff'
+    input = 'theis2.i'
+    csvdiff = 'theis2_pressure_0018.csv'
+  [../]
+  [./theis3]
+    type = 'CSVDiff'
+    input = 'theis3.i'
+    csvdiff = 'theis3.csv'
+  [../]
+[]

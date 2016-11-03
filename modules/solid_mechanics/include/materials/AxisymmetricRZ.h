@@ -39,6 +39,7 @@ protected:
 
   const VariableGradient & _grad_disp_r;
   const VariableGradient & _grad_disp_z;
+  const bool _volumetric_locking_correction;
 };
 
 }

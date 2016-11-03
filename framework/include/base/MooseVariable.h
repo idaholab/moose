@@ -76,7 +76,7 @@ public:
    * Is this variable nodal
    * @return true if it nodal, otherwise false
    */
-  virtual bool isNodal() const;
+  virtual bool isNodal() const override;
 
   /**
    * Current element this variable is evaluated at
@@ -231,9 +231,14 @@ public:
   void setNodalValueNeighbor(const DenseVector<Number> & value);
 
   /**
-   * Compute and store incremental change based on increment_vec
+   * Compute and store incremental change in solution at QPs based on increment_vec
    */
-  void computeIncrement(const NumericVector<Number> & increment_vec);
+  void computeIncrementAtQps(const NumericVector<Number> & increment_vec);
+
+  /**
+   * Compute and store incremental change at the current node based on increment_vec
+   */
+  void computeIncrementAtNode(const NumericVector<Number> & increment_vec);
 
   /**
    * Get DOF indices for currently selected element
@@ -442,9 +447,6 @@ protected:
 
   // damping
   VariableValue _increment;
-
-  /// scaling factor for this variable
-  Real _scaling_factor;
 
   friend class NodeFaceConstraint;
   friend class ValueThresholdMarker;

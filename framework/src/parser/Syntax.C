@@ -130,13 +130,9 @@ Syntax::getSyntaxByAction(const std::string & action, const std::string & task)
    * is only used by the build full tree routine so it doesn't need to be fast.  We
    * will do a linear search for each call to this routine
    */
-  for (std::multimap<std::string, ActionInfo>::const_iterator iter = _associated_actions.begin();
-       iter != _associated_actions.end(); ++iter)
-  {
-    if (iter->second._action == action &&
-        (iter->second._task == task || iter->second._task == ""))
-      syntax = iter->first;
-  }
+  for (const auto & iter : _associated_actions)
+    if (iter.second._action == action && (iter.second._task == task || iter.second._task == ""))
+      syntax = iter.first;
 
   return syntax;
 }

@@ -40,6 +40,7 @@ InputParameters validParams<DomainIntegralAction>()
   params.addParam<VariableName>("disp_x", "", "The x displacement");
   params.addParam<VariableName>("disp_y", "", "The y displacement");
   params.addParam<VariableName>("disp_z", "", "The z displacement");
+  params.addParam<VariableName>("temp", "", "The temperature");
   MooseEnum position_type("Angle Distance","Distance");
   params.addParam<MooseEnum>("position_type", position_type, "The method used to calculate position along crack front.  Options are: "+position_type.getRawNames());
   MooseEnum q_function_type("Geometry Topology","Geometry");
@@ -149,7 +150,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params):
       _disp_x = getParam<VariableName>("disp_x");
       _disp_y = getParam<VariableName>("disp_y");
       _disp_z = getParam<VariableName>("disp_z");
-
+      if (isParamValid("temp"))
+        _temp = getParam<VariableName>("temp");
     }
 
     _integrals.insert(INTEGRAL(int(integral_moose_enums.get(i))));
@@ -384,10 +386,12 @@ DomainIntegralAction::act()
         params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
       params.set<Real>("poissons_ratio") = _poissons_ratio;
       params.set<Real>("youngs_modulus") = _youngs_modulus;
-      params.set<std::vector<VariableName> >("disp_x") = std::vector<VariableName>(1,_disp_x);
-      params.set<std::vector<VariableName> >("disp_y") = std::vector<VariableName>(1,_disp_y);
+      params.set<std::vector<VariableName> >("disp_x") = {_disp_x};
+      params.set<std::vector<VariableName> >("disp_y") = {_disp_y};
       if (_disp_z !="")
-        params.set<std::vector<VariableName> >("disp_z") = std::vector<VariableName>(1,_disp_z);
+        params.set<std::vector<VariableName> >("disp_z") = {_disp_z};
+      if (_temp != "")
+        params.set<std::vector<VariableName> >("temp") = {_temp};
       if (_has_symmetry_plane)
         params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
 

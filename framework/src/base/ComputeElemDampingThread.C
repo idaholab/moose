@@ -21,12 +21,11 @@
 // libMesh includes
 #include "libmesh/threads.h"
 
-ComputeElemDampingThread::ComputeElemDampingThread(FEProblem & feproblem,
-                                                   NonlinearSystem & sys) :
-    ThreadedElementLoop<ConstElemRange>(feproblem, sys),
+ComputeElemDampingThread::ComputeElemDampingThread(FEProblem & feproblem) :
+    ThreadedElementLoop<ConstElemRange>(feproblem),
     _damping(1.0),
-    _nl(sys),
-    _element_dampers(sys.getElementDamperWarehouse())
+    _nl(feproblem.getNonlinearSystem()),
+    _element_dampers(_nl.getElementDamperWarehouse())
 {
 }
 
@@ -48,12 +47,19 @@ ComputeElemDampingThread::onElement(const Elem *elem)
 {
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
-  _nl.reinitIncrementForDampers(_tid);
+
+  std::set<MooseVariable *> damped_vars;
+
+  const std::vector<MooseSharedPointer<ElementDamper> > & edampers = _nl.getElementDamperWarehouse().getActiveObjects(_tid);
+  for (const auto & damper : edampers)
+    damped_vars.insert(damper->getVariable());
+
+  _nl.reinitIncrementAtQpsForDampers(_tid, damped_vars);
 
   const std::vector<MooseSharedPointer<ElementDamper> > & objects = _element_dampers.getActiveObjects(_tid);
-  for (std::vector<MooseSharedPointer<ElementDamper> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+  for (const auto & obj : objects)
   {
-    Real cur_damping = (*it)->computeDamping();
+    Real cur_damping = obj->computeDamping();
     if (cur_damping < _damping)
       _damping = cur_damping;
   }

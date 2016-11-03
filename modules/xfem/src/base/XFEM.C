@@ -25,13 +25,14 @@
 #include "EFAFragment3D.h"
 #include "EFAFuncs.h"
 
-XFEM::XFEM (MooseApp & app, const MooseSharedPointer<FEProblem> fe_problem) :
-    XFEMInterface(app, fe_problem),
+XFEM::XFEM (const InputParameters & params) :
+    XFEMInterface(params),
     _efa_mesh(Moose::out)
 {
 #ifndef LIBMESH_ENABLE_UNIQUE_ID
   mooseError("MOOSE requires unique ids to be enabled in libmesh (configure with --enable-unique-id) to use XFEM!");
 #endif
+  _has_secondary_cut = false;
 }
 
 XFEM::~XFEM ()
@@ -392,9 +393,13 @@ XFEM::markCutEdgesByGeometry(Real time)
       {
         if (!CEMElem->getFragment(0)->isSecondaryInteriorEdge(frag_cut_edges[i].host_side_id))
         {
-          _efa_mesh.addFragEdgeIntersection(elem->id(), frag_cut_edges[i].host_side_id,
-                                            frag_cut_edges[i].distance);
-          marked_edges = true;
+          if (_efa_mesh.addFragEdgeIntersection(elem->id(), frag_cut_edges[i].host_side_id, frag_cut_edges[i].distance))
+          {
+            marked_edges = true;
+
+            if (!isElemAtCrackTip(elem))
+              _has_secondary_cut = true;
+          }
         }
       }
     }
@@ -572,8 +577,6 @@ XFEM::markCutEdgesByState(Real time)
       {
         orig_edge = CEMElem->getEdge(orig_cut_side_id);
         orig_node = CEMElem->getTipEmbeddedNode();
-        unsigned int emb_id = orig_edge->getEmbeddedNodeIndex(orig_node);
-        orig_cut_distance = orig_edge->getIntersection(emb_id,orig_edge->getNode(0));
       }
       else
         mooseError("element "<<elem->id()<<" has no valid crack-tip edge");
@@ -746,7 +749,6 @@ XFEM::markCutEdgesByState(Real time)
             {
               _efa_mesh.addElemEdgeIntersection(elem->id(), elem_cut_edges[i].host_side_id,
                                                 elem_cut_edges[i].distance);
-              marked_edges = true;
             }
           }
         }
@@ -765,7 +767,9 @@ XFEM::markCutEdgesByState(Real time)
           if (initCutIntersectionEdge(crack_tip_origin,normal,edge_ends[0],edge_ends[1],distance) &&
               (!CEMElem->getFragment(0)->isSecondaryInteriorEdge(i)))
           {
-            _efa_mesh.addFragEdgeIntersection(elem->id(), edge_id_keep, distance_keep);
+            if (_efa_mesh.addFragEdgeIntersection(elem->id(), edge_id_keep, distance_keep))
+              if (!isElemAtCrackTip(elem))
+                _has_secondary_cut = true;
             break;
           }
         }
@@ -1108,6 +1112,20 @@ XFEM::cutMeshWithEFA()
       }
     }
 
+    //Delete any entries in _sibling_displaced_elems for this element.
+    for (ElementPairLocator::ElementPairList::iterator it = _sibling_displaced_elems.begin();
+       it != _sibling_displaced_elems.end(); ++it)
+    {
+      Elem *elem_to_delete2 = _mesh2->elem(DeleteElements[i]->id());
+
+      if (elem_to_delete2 == it->first ||
+          elem_to_delete2 == it->second)
+      {
+        _sibling_displaced_elems.erase(it);
+        break;
+      }
+    }
+
     elem_to_delete->nullify_neighbors();
     _mesh->boundary_info->remove(elem_to_delete);
     unsigned int deleted_elem_id = elem_to_delete->id();
@@ -1131,6 +1149,18 @@ XFEM::cutMeshWithEFA()
     if (sibling_elem_vec.size() != 2)
       mooseError("Must have exactly 2 sibling elements");
     _sibling_elems.push_back(std::make_pair(sibling_elem_vec[0], sibling_elem_vec[1]));
+  }
+
+  // add sibling elems on displaced mesh
+  if (_mesh2)
+  {
+    for (ElementPairLocator::ElementPairList::iterator it = _sibling_elems.begin();
+         it != _sibling_elems.end(); ++it)
+    {
+      Elem * elem =  _mesh2->elem(it->first->id());
+      Elem * elem_pair = _mesh2->elem(it->second->id());
+      _sibling_displaced_elems.push_back(std::make_pair(elem, elem_pair));
+    }
   }
 
   //clear the temporary map

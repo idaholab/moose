@@ -9,7 +9,7 @@
 []
 
 [GlobalParams]
-  PorousFlowDictator_UO = dictator
+  PorousFlowDictator = dictator
 []
 
 [Variables]
@@ -56,12 +56,12 @@
 [Kernels]
   [./mass_sp0]
     type = PorousFlowMassTimeDerivative
-    component_index = 0
+    fluid_component = 0
     variable = ppwater
   [../]
   [./mass_sp1]
     type = PorousFlowMassTimeDerivative
-    component_index = 1
+    fluid_component = 1
     variable = sgas
   [../]
 []
@@ -76,6 +76,13 @@
 []
 
 [Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+  [../]
+  [./nnn]
+    type = PorousFlowNodeNumber
+    on_initial_only = true
+  [../]
   [./ppss]
     type = PorousFlow2PhasePS_VG
     phase0_porepressure = ppwater
@@ -118,7 +125,6 @@
   [./check]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
     petsc_options_iname = '-snes_type'
     petsc_options_value = 'test'
   [../]

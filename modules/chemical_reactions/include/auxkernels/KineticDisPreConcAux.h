@@ -9,14 +9,9 @@
 
 #include "AuxKernel.h"
 
-
 //Forward Declarations
 class KineticDisPreConcAux;
 
-/**
- * validParams returns the parameters that this Kernel accepts / needs
- * The actual body of the function MUST be in the .C file.
- */
 template<>
 InputParameters validParams<KineticDisPreConcAux>();
 
@@ -27,18 +22,13 @@ InputParameters validParams<KineticDisPreConcAux>();
 class KineticDisPreConcAux : public AuxKernel
 {
 public:
-
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   KineticDisPreConcAux(const InputParameters & parameters);
 
   virtual ~KineticDisPreConcAux() {}
 
 protected:
   /**
-   * Conputes the kinetic mineral sepecies concentration.
+   * Computes the kinetic mineral sepecies concentration.
    * @return The concentration of a kinetic mineral species.
    */
   virtual Real computeValue();

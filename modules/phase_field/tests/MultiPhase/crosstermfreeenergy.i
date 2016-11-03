@@ -111,7 +111,6 @@
 [Materials]
   [./consts]
     type = GenericConstantMaterial
-    block = 0
     prop_names  = 'F0   kappa11 kappa12 kappa13 kappa21 kappa22 kappa23 kappa31 kappa32 kappa33'
     prop_values = '0    11      12      13      12      22      23      13      23      33     '
   [../]

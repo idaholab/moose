@@ -16,10 +16,10 @@ public:
 
   virtual void act();
 
-private:
-  unsigned int _op_num;
-  std::string _var_name_base;
-  bool _implicit;
+protected:
+  AuxVariableName _div_var;
+  std::vector<MaterialPropertyName> _prop;
+  MaterialPropertyName _div_prop;
 };
 
 template<>

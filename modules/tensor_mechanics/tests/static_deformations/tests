@@ -11,4 +11,58 @@
     exodiff = 'cosserat_tension_out.e'
     abs_zero = 1e-9
   [../]
+  [./glide]
+    type = 'CSVDiff'
+    input = 'cosserat_glide.i'
+    csvdiff = 'cosserat_glide_out_soln_0001.csv'
+  [../]
+  [./glide_fake_plastic]
+    type = 'CSVDiff'
+    input = 'cosserat_glide_fake_plastic.i'
+    csvdiff = 'cosserat_glide_fake_plastic_out_soln_0001.csv'
+  [../]
+  [./layered_cosserat_01]
+    type = 'CSVDiff'
+    input = 'layered_cosserat_01.i'
+    csvdiff = 'layered_cosserat_01.csv'
+  [../]
+  [./layered_cosserat_02]
+    type = 'CSVDiff'
+    input = 'layered_cosserat_02.i'
+    csvdiff = 'layered_cosserat_02.csv'
+  [../]
+  [./layered_cosserat_03]
+    type = 'CSVDiff'
+    input = 'layered_cosserat_03.i'
+    csvdiff = 'layered_cosserat_03.csv'
+  [../]
+  [./beam_cosserat_01]
+    type = 'CSVDiff'
+    input = 'beam_cosserat_01.i'
+    csvdiff = 'beam_cosserat_01_soln_0001.csv'
+  [../]
+  [./beam_cosserat_01_slippery]
+    type = 'CSVDiff'
+    input = 'beam_cosserat_01_slippery.i'
+    csvdiff = 'beam_cosserat_01_slippery_soln_0001.csv'
+  [../]
+  [./beam_cosserat_02_apply_disps]
+    type = 'Exodiff'
+    input = 'beam_cosserat_02_apply_disps.i'
+    exodiff = 'beam_cosserat_02_apply_disps.e'
+    abs_zero = 1e-9
+  [../]
+  [./beam_cosserat_02_apply_stress]
+    type = 'CSVDiff'
+    input = 'beam_cosserat_02_apply_stress.i'
+    csvdiff = 'beam_cosserat_02_apply_stress_soln_0001.csv'
+  [../]
+
+  [./except01]
+    type = RunException
+    input = cosserat_tension.i
+    cli_args = 'Kernels/x_moment/component=1 Outputs/file_base=except01'
+    expect_err = 'MomentBalancing: The variable for this Kernel must be equal to the Cosserat rotation variable defined by the "component" and the "Cosserat_rotations" parameters'
+    prereq = tension
+  [../]
 []

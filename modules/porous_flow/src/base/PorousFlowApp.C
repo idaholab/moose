@@ -3,9 +3,13 @@
 #include "TensorMechanicsApp.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "FluidPropertiesApp.h"
 
 // UserObjects
 #include "PorousFlowDictator.h"
+
+// DiracKernels
+#include "PorousFlowSquarePulsePointSource.h"
 
 // Postprocessors
 #include "PorousFlowFluidMass.h"
@@ -30,24 +34,45 @@
 #include "PorousFlowEffectiveFluidPressure.h"
 #include "PorousFlowFluidPropertiesBase.h"
 #include "PorousFlowIdealGas.h"
-#include "PorousFlowMethane.h"
 #include "PorousFlowPermeabilityConst.h"
+#include "PorousFlowPermeabilityKozenyCarman.h"
+#include "PorousFlowPermeabilityExponential.h"
 #include "PorousFlowPorosityConst.h"
 #include "PorousFlowPorosityHM.h"
-#include "PorousFlowPorosityUnity.h"
 #include "PorousFlowRelativePermeabilityCorey.h"
-#include "PorousFlowRelativePermeabilityUnity.h"
-#include "PorousFlowSimpleCO2.h"
+#include "PorousFlowRelativePermeabilityConst.h"
+#include "PorousFlowRelativePermeabilityVG.h"
 #include "PorousFlowViscosityConst.h"
 #include "PorousFlowVolumetricStrain.h"
-#include "PorousFlowWater.h"
 #include "PorousFlowJoiner.h"
+#include "PorousFlowNodeNumber.h"
+#include "PorousFlowTemperature.h"
+#include "PorousFlowThermalConductivityIdeal.h"
+#include "PorousFlowMatrixInternalEnergy.h"
+#include "PorousFlowInternalEnergyIdeal.h"
+#include "PorousFlowEnthalpy.h"
+#include "PorousFlowDiffusionCoeffConst.h"
+#include "PorousFlowSingleComponentFluid.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
 #include "PorousFlowMassTimeDerivative.h"
 #include "PorousFlowEffectiveStressCoupling.h"
 #include "PorousFlowMassVolumetricExpansion.h"
+#include "PorousFlowEnergyTimeDerivative.h"
+#include "PorousFlowHeatConduction.h"
+#include "PorousFlowHeatAdvection.h"
+#include "PorousFlowDispersiveFlux.h"
+
+// BoundaryConditions
+#include "PorousFlowSink.h"
+#include "PorousFlowPiecewiseLinearSink.h"
+#include "PorousFlowHalfGaussianSink.h"
+#include "PorousFlowHalfCubicSink.h"
+
+// AuxKernels
+#include "PorousFlowDarcyVelocityComponent.h"
+#include "PorousFlowPropertyAux.h"
 
 template<>
 InputParameters validParams<PorousFlowApp>()
@@ -66,10 +91,12 @@ PorousFlowApp::PorousFlowApp(const InputParameters & parameters) :
 {
   Moose::registerObjects(_factory);
   TensorMechanicsApp::registerObjects(_factory);
+  FluidPropertiesApp::registerObjects(_factory);
   PorousFlowApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
   TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
+  FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
   PorousFlowApp::associateSyntax(_syntax, _action_factory);
 }
 
@@ -92,6 +119,9 @@ PorousFlowApp::registerObjects(Factory & factory)
 {
   // UserObjects
   registerUserObject(PorousFlowDictator);
+
+  // DiracKernels
+  registerDiracKernel(PorousFlowSquarePulsePointSource);
 
   // Postprocessors
   registerPostprocessor(PorousFlowFluidMass);
@@ -116,24 +146,45 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowEffectiveFluidPressure);
   registerMaterial(PorousFlowFluidPropertiesBase);
   registerMaterial(PorousFlowIdealGas);
-  registerMaterial(PorousFlowMethane);
   registerMaterial(PorousFlowPermeabilityConst);
+  registerMaterial(PorousFlowPermeabilityKozenyCarman);
+  registerMaterial(PorousFlowPermeabilityExponential);
   registerMaterial(PorousFlowPorosityConst);
   registerMaterial(PorousFlowPorosityHM);
-  registerMaterial(PorousFlowPorosityUnity);
   registerMaterial(PorousFlowRelativePermeabilityCorey);
-  registerMaterial(PorousFlowRelativePermeabilityUnity);
-  registerMaterial(PorousFlowSimpleCO2);
+  registerMaterial(PorousFlowRelativePermeabilityConst);
+  registerMaterial(PorousFlowRelativePermeabilityVG);
   registerMaterial(PorousFlowViscosityConst);
   registerMaterial(PorousFlowVolumetricStrain);
-  registerMaterial(PorousFlowWater);
   registerMaterial(PorousFlowJoiner);
+  registerMaterial(PorousFlowNodeNumber);
+  registerMaterial(PorousFlowTemperature);
+  registerMaterial(PorousFlowThermalConductivityIdeal);
+  registerMaterial(PorousFlowMatrixInternalEnergy);
+  registerMaterial(PorousFlowInternalEnergyIdeal);
+  registerMaterial(PorousFlowEnthalpy);
+  registerMaterial(PorousFlowDiffusionCoeffConst);
+  registerMaterial(PorousFlowSingleComponentFluid);
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);
   registerKernel(PorousFlowMassTimeDerivative);
   registerKernel(PorousFlowEffectiveStressCoupling);
   registerKernel(PorousFlowMassVolumetricExpansion);
+  registerKernel(PorousFlowEnergyTimeDerivative);
+  registerKernel(PorousFlowHeatConduction);
+  registerKernel(PorousFlowHeatAdvection);
+  registerKernel(PorousFlowDispersiveFlux);
+
+  // BoundaryConditions
+  registerBoundaryCondition(PorousFlowSink);
+  registerBoundaryCondition(PorousFlowPiecewiseLinearSink);
+  registerBoundaryCondition(PorousFlowHalfGaussianSink);
+  registerBoundaryCondition(PorousFlowHalfCubicSink);
+
+  // AuxKernels
+  registerAuxKernel(PorousFlowDarcyVelocityComponent);
+  registerAuxKernel(PorousFlowPropertyAux);
 }
 
 // External entry point for dynamic syntax association

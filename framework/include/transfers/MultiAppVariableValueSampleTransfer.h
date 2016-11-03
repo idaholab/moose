@@ -33,11 +33,10 @@ class MultiAppVariableValueSampleTransfer :
 {
 public:
   MultiAppVariableValueSampleTransfer(const InputParameters & parameters);
-  virtual ~MultiAppVariableValueSampleTransfer() {}
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   AuxVariableName _to_var_name;

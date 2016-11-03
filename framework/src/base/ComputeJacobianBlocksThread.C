@@ -22,7 +22,7 @@
 #include "libmesh/threads.h"
 
 ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(FEProblem & fe_problem, std::vector<JacobianBlock*> & blocks) :
-    ComputeFullJacobianThread(fe_problem, fe_problem.getNonlinearSystem(), blocks[0]->_jacobian /* have to pass something */),
+    ComputeFullJacobianThread(fe_problem, blocks[0]->_jacobian /* have to pass something */),
     _blocks(blocks)
 {
 }
@@ -46,16 +46,11 @@ ComputeJacobianBlocksThread::postElement(const Elem * elem)
 
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-  std::vector<JacobianBlock*>::iterator it = _blocks.begin();
-  std::vector<JacobianBlock*>::iterator end = _blocks.end();
-
-  for (; it != end; ++it)
+  for (const auto & block : _blocks)
   {
-    JacobianBlock & block = *(*it);
-
-    const DofMap & dof_map = block._precond_system.get_dof_map();
+    const DofMap & dof_map = block->_precond_system.get_dof_map();
     dof_map.dof_indices(elem, dof_indices);
 
-    _fe_problem.addJacobianBlock(block._jacobian, block._ivar, block._jvar, dof_map, dof_indices, _tid);
+    _fe_problem.addJacobianBlock(block->_jacobian, block->_ivar, block->_jvar, dof_map, dof_indices, _tid);
   }
 }

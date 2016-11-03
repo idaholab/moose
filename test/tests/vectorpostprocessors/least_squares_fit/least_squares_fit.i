@@ -51,6 +51,14 @@
 []
 
 [VectorPostprocessors]
+  [./line_sample]
+    type = LineValueSampler
+    variable = 'u v'
+    start_point = '0 0.5 0'
+    end_point = '1 0.5 0'
+    num_points = 11
+    sort_by = id
+  [../]
   [./least_squares_fit_sample]
     type = LeastSquaresFit
     vectorpostprocessor = line_sample
@@ -68,13 +76,47 @@
     order = 1
     output = coefficients
   [../]
-  [./line_sample]
-    type = LineValueSampler
-    variable = 'u v'
-    start_point = '0 0.5 0'
-    end_point = '1 0.5 0'
-    num_points = 11
-    sort_by = id
+  [./shift_and_scale_x_least_squares_fit_sample]
+    type = LeastSquaresFit
+    vectorpostprocessor = line_sample
+    x_name = 'id'
+    y_name = 'u'
+    x_shift = 1
+    x_scale = 10
+    order = 1
+    num_samples = 20
+    output = samples
+  [../]
+  [./shift_and_scale_x_least_squares_fit_coeffs]
+    type = LeastSquaresFit
+    vectorpostprocessor = line_sample
+    x_name = 'id'
+    y_name = 'u'
+    x_shift = 1
+    x_scale = 10
+    order = 1
+    output = coefficients
+  [../]
+  [./shift_and_scale_y_least_squares_fit_sample]
+    type = LeastSquaresFit
+    vectorpostprocessor = line_sample
+    x_name = 'id'
+    y_name = 'u'
+    y_shift = 1
+    y_scale = 10
+    order = 1
+    num_samples = 20
+    output = samples
+  [../]
+  [./shift_and_scale_y_least_squares_fit_coeffs]
+    type = LeastSquaresFit
+    vectorpostprocessor = line_sample
+    x_name = 'id'
+    y_name = 'u'
+    y_shift = 1
+    y_scale = 10
+    order = 1
+    output = coefficients
   [../]
 []
 
@@ -87,6 +129,7 @@
 []
 
 [Outputs]
+  file_base = out
   execute_on = 'timestep_end'
   csv = true
 []

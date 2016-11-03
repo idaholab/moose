@@ -28,7 +28,7 @@ class AddBCAction : public MooseObjectAction
 public:
   AddBCAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // ADDBCACTION_H

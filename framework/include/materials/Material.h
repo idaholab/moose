@@ -28,6 +28,7 @@
 #include "TransientInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "PostprocessorInterface.h"
+#include "VectorPostprocessorInterface.h"
 #include "DependencyResolverInterface.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
@@ -61,6 +62,7 @@ class Material :
     public TransientInterface,
     public MaterialPropertyInterface,
     public PostprocessorInterface,
+    public VectorPostprocessorInterface,
     public DependencyResolverInterface,
     public Restartable,
     public ZeroInterface,
@@ -150,7 +152,7 @@ public:
    */
   virtual
   const std::set<std::string> &
-  getRequestedItems() { return _requested_props; }
+  getRequestedItems() override { return _requested_props; }
 
   /**
    * Return a set of properties accessed with declareProperty
@@ -158,7 +160,7 @@ public:
    */
   virtual
   const std::set<std::string> &
-  getSuppliedItems() { return _supplied_props; }
+  getSuppliedItems() override { return _supplied_props; }
 
   void checkStatefulSanity() const;
 
@@ -171,7 +173,7 @@ public:
   /**
    * Returns true of the MaterialData type is not associated with volume data
    */
-  bool isBoundaryMaterial() { return _bnd; }
+  bool isBoundaryMaterial() const { return _bnd; }
 
 protected:
 
@@ -231,7 +233,7 @@ protected:
   std::set<std::string> _supplied_props;
 
   /// If False MOOSE does not compute this property
-  bool _compute;
+  const bool _compute;
 
   enum QP_Data_Type {
     CURR,
@@ -248,10 +250,11 @@ protected:
 
 
 private:
-  /**
-   * Small helper function to call storeMatPropName
-   */
+  /// Small helper function to call storeMatPropName
   void registerPropName(std::string prop_name, bool is_get, Prop_State state);
+
+  /// Check and throw an error if the execution has progerssed past the construction stage
+  void checkExecutionStage();
 
   bool _has_stateful_property;
 };
@@ -305,6 +308,7 @@ template<typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyByName(const std::string & prop_name)
 {
+  checkExecutionStage();
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the same memory)
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::CURRENT);
@@ -361,6 +365,7 @@ template<typename T>
 const MaterialProperty<T> &
 Material::getZeroMaterialProperty(const std::string & prop_name)
 {
+  checkExecutionStage();
   MaterialProperty<T> & preload_with_zero = _material_data->getProperty<T>(prop_name);
 
   _requested_props.insert(prop_name);

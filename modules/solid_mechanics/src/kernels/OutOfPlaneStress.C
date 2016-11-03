@@ -14,7 +14,6 @@ template<>
 InputParameters validParams<OutOfPlaneStress>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addParam<unsigned int>("component", 2, "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("temp", "The temperature");

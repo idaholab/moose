@@ -27,6 +27,7 @@ InputParameters validParams<ValueThresholdMarker>()
   params.addParam<Real>("refine", "The threshold value for refinement.  Elements with variable values beyond this will be marked for refinement.");
   params.addParam<bool>("invert", false, "If this is true then values _below_ 'refine' will be refined and _above_ 'coarsen' will be coarsened.");
   params.addRequiredCoupledVar("variable", "The values of this variable will be compared to 'refine' and 'coarsen' to see what should be done with the element");
+  params.addClassDescription("The the refinement state based on a threshold value compared to the specified variable.");
   return params;
 }
 
@@ -39,7 +40,7 @@ ValueThresholdMarker::ValueThresholdMarker(const InputParameters & parameters) :
     _refine(parameters.get<Real>("refine")),
 
     _invert(parameters.get<bool>("invert")),
-    _third_state((MarkerValue)(int)getParam<MooseEnum>("third_state")),
+    _third_state(getParam<MooseEnum>("third_state").getEnum<MarkerValue>()),
 
     _u(coupledValue("variable"))
 {
@@ -73,4 +74,3 @@ ValueThresholdMarker::computeQpMarker()
 
   return _third_state;
 }
-

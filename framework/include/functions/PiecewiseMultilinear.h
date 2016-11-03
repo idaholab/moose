@@ -41,12 +41,11 @@ public:
    * This calls GriddedData to do most of the work
    */
   PiecewiseMultilinear(const InputParameters & parameters);
-  virtual ~PiecewiseMultilinear();
 
   /**
    * Given t and p, return the interpolated value.
    */
-  virtual Real value(Real t, const Point & pt);
+  virtual Real value(Real t, const Point & pt) override;
 
 private:
 

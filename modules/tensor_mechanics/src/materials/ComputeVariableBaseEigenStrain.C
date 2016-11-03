@@ -9,7 +9,7 @@
 template<>
 InputParameters validParams<ComputeVariableBaseEigenStrain>()
 {
-  InputParameters params = validParams<ComputeStressFreeStrainBase>();
+  InputParameters params = validParams<ComputeEigenstrainBase>();
   params.addClassDescription("Computes Eigenstrain based on material property tensor base");
   params.addRequiredParam<MaterialPropertyName>("base_tensor_property_name", "Name of base tensor property");
   params.addParam<MaterialPropertyName>("prefactor", 1.0, "Name of material defining the variable dependence");
@@ -18,7 +18,7 @@ InputParameters validParams<ComputeVariableBaseEigenStrain>()
 }
 
 ComputeVariableBaseEigenStrain::ComputeVariableBaseEigenStrain(const InputParameters & parameters) :
-    ComputeStressFreeStrainBase(parameters),
+    ComputeEigenstrainBase(parameters),
     _base_tensor(getMaterialProperty<RealTensorValue>("base_tensor_property_name")),
     _prefactor(getMaterialProperty<Real>("prefactor"))
 {
@@ -29,9 +29,9 @@ ComputeVariableBaseEigenStrain::ComputeVariableBaseEigenStrain(const InputParame
 }
 
 void
-ComputeVariableBaseEigenStrain::computeQpStressFreeStrain()
+ComputeVariableBaseEigenStrain::computeQpEigenstrain()
 {
   RankTwoTensor base_rank_two_tensor = _base_tensor[_qp];
-  _stress_free_strain[_qp] = base_rank_two_tensor * _prefactor[_qp] + _offset_tensor;
+  _eigenstrain[_qp] = base_rank_two_tensor * _prefactor[_qp] + _offset_tensor;
 }
 

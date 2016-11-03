@@ -33,24 +33,24 @@ class KernelWarehouse;
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeResidualThread(FEProblem & fe_problem, NonlinearSystem & sys, Moose::KernelType type);
+  ComputeResidualThread(FEProblem & fe_problem, Moose::KernelType type);
   // Splitting Constructor
   ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
 
   virtual ~ComputeResidualThread();
 
-  virtual void subdomainChanged();
-  virtual void onElement(const Elem *elem );
-  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
-  virtual void onInterface(const Elem *elem, unsigned int side, BoundaryID bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
-  virtual void postElement(const Elem * /*elem*/);
-  virtual void post();
+  virtual void subdomainChanged() override;
+  virtual void onElement(const Elem * elem ) override;
+  virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
+  virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
+  virtual void onInternalSide(const Elem * elem, unsigned int side) override;
+  virtual void postElement(const Elem * /*elem*/) override;
+  virtual void post() override;
 
   void join(const ComputeResidualThread & /*y*/);
 
 protected:
-  NonlinearSystem & _sys;
+  NonlinearSystem & _nl;
   Moose::KernelType _kernel_type;
   unsigned int _num_cached;
 

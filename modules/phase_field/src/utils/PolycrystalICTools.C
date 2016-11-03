@@ -8,6 +8,23 @@
 #include "PolycrystalICTools.h"
 #include "MooseMesh.h"
 
+namespace GraphColoring
+{
+const unsigned int INVALID_COLOR = std::numeric_limits<unsigned int>::max();
+}
+
+namespace PolycrystalICTools
+{
+const unsigned int HALO_THICKNESS = 4;
+}
+
+// Forward declarations
+bool colorGraph(const std::vector<std::vector<bool> > & adjacency_matrix, std::vector<unsigned int> & colors, unsigned int n_vertices, unsigned int n_ops, unsigned int vertex);
+bool isGraphValid(const std::vector<std::vector<bool> > & adjacency_matrix, std::vector<unsigned int> & colors, unsigned int n_vertices,
+                  unsigned int vertex, unsigned int color);
+void visitElementalNeighbors(const Elem * elem, std::set<dof_id_type> & halo_ids);
+
+
 std::vector<unsigned int>
 PolycrystalICTools::assignPointsToVariables(const std::vector<Point> & centerpoints, const Real op_num, const MooseMesh & mesh, const MooseVariable & var)
 {
@@ -24,14 +41,14 @@ PolycrystalICTools::assignPointsToVariables(const std::vector<Point> & centerpoi
     if (grain >= op_num)
     {
       // We can set the array to the distances to the grains 0..op_num-1 (see assignment in the else case)
-      for (unsigned int i=0; i<op_num; ++i)
+      for (unsigned int i = 0; i < op_num; ++i)
       {
         min_op_dist[i] = mesh.minPeriodicDistance(var.number(), centerpoints[grain], centerpoints[i]);
         min_op_ind[assigned_op[i]] = i;
       }
 
       // Now check if any of the extra grains are even closer
-      for (unsigned int i=op_num; i<grain; ++i)
+      for (unsigned int i = op_num; i < grain; ++i)
       {
         Real dist = mesh.minPeriodicDistance(var.number(), centerpoints[grain], centerpoints[i]);
         if (min_op_dist[assigned_op[i]] > dist)
@@ -49,7 +66,7 @@ PolycrystalICTools::assignPointsToVariables(const std::vector<Point> & centerpoi
 
     // Assign the current center point to the order parameter that is furthest away.
     unsigned int mx_ind = 0;
-    for (unsigned int i = 1; i < op_num; i++) // Find index of max
+    for (unsigned int i = 1; i < op_num; ++i) // Find index of max
       if (min_op_dist[mx_ind] < min_op_dist[i])
         mx_ind = i;
 
@@ -82,4 +99,251 @@ PolycrystalICTools::assignPointToGrain(const Point & p, const std::vector<Point>
     mooseError("ERROR in PolycrystalVoronoiVoidIC: didn't find minimum values in grain_value_calc");
 
   return min_index;
+}
+
+std::vector<std::vector<bool> >
+PolycrystalICTools::buildGrainAdjacencyGraph(const std::map<dof_id_type, unsigned int> & entity_to_grain, MooseMesh & mesh, unsigned int n_grains, bool is_elemental)
+{
+  if (is_elemental)
+    return buildElementalGrainAdjacencyGraph(entity_to_grain, mesh, n_grains);
+  else
+    return buildNodalGrainAdjacencyGraph(entity_to_grain, mesh, n_grains);
+}
+
+AdjacencyGraph
+PolycrystalICTools::buildElementalGrainAdjacencyGraph(const std::map<dof_id_type, unsigned int> & element_to_grain, MooseMesh & mesh, unsigned int n_grains)
+{
+  std::vector<std::vector<bool> > adjacency_matrix(n_grains);
+
+  // initialize
+  for (unsigned int i = 0; i < n_grains; ++i)
+    adjacency_matrix[i].resize(n_grains, false);
+
+  std::vector<const Elem *> all_active_neighbors;
+
+  std::vector<std::set<dof_id_type> > local_ids(n_grains);
+  std::vector<std::set<dof_id_type> > halo_ids(n_grains);
+
+  const auto end = mesh.getMesh().active_elements_end();
+  for (auto el = mesh.getMesh().active_elements_begin(); el != end; ++el)
+  {
+    const Elem * elem = *el;
+    std::map<dof_id_type, unsigned int>::const_iterator grain_it = element_to_grain.find(elem->id());
+    mooseAssert(grain_it != element_to_grain.end(), "Element not found in map");
+    unsigned int my_grain = grain_it->second;
+
+    all_active_neighbors.clear();
+    // Loop over all neighbors (at the the same level as the current element)
+    for (unsigned int i = 0; i < elem->n_neighbors(); ++i)
+    {
+      const Elem * neighbor_ancestor = elem->neighbor(i);
+      if (neighbor_ancestor)
+        // Retrieve only the active neighbors for each side of this element, append them to the list of active neighbors
+        neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
+    }
+
+    // Loop over all active element neighbors
+    for (std::vector<const Elem *>::const_iterator neighbor_it = all_active_neighbors.begin();
+         neighbor_it != all_active_neighbors.end(); ++neighbor_it)
+    {
+      const Elem * neighbor = *neighbor_it;
+      std::map<dof_id_type, unsigned int>::const_iterator grain_it2 = element_to_grain.find(neighbor->id());
+      mooseAssert(grain_it2 != element_to_grain.end(), "Element not found in map");
+      unsigned int their_grain = grain_it2->second;
+
+      if (my_grain != their_grain)
+      {
+        /**
+         * We've found a grain neighbor interface. In order to assign order parameters though, we need to make
+         * sure that we build out a small buffer region to avoid literal "corner cases" where nodes on opposite
+         * corners of a QUAD end up with the same OP because those nodes are not nodal neighbors.
+         *
+         * To do that we'll build a halo region based on these interface nodes. For now, we need to record
+         * the nodes inside of the grain and those outside of the grain.
+         */
+
+        // First add corresponding element and grain information
+        local_ids[my_grain].insert(elem->id());
+        local_ids[their_grain].insert(neighbor->id());
+
+        // Now add opposing element and grain information
+        halo_ids[my_grain].insert(neighbor->id());
+        halo_ids[their_grain].insert(elem->id());
+      }
+      //  adjacency_matrix[my_grain][their_grain] = 1;
+    }
+  }
+
+  // Build up the halos
+  std::set<dof_id_type> set_difference;
+  for (unsigned int i = 0; i < n_grains; ++i)
+  {
+    std::set<dof_id_type> orig_halo_ids(halo_ids[i]);
+
+    for (unsigned int halo_level = 0; halo_level < PolycrystalICTools::HALO_THICKNESS; ++halo_level)
+    {
+      for (std::set<dof_id_type>::iterator entity_it = orig_halo_ids.begin();
+           entity_it != orig_halo_ids.end(); ++entity_it)
+      {
+        if (true)
+          visitElementalNeighbors(mesh.elemPtr(*entity_it), halo_ids[i]);
+        else
+          mooseError("Unimplemented");
+      }
+
+      set_difference.clear();
+      std::set_difference(halo_ids[i].begin(), halo_ids[i].end(), local_ids[i].begin(), local_ids[i].end(),
+                          std::insert_iterator<std::set<dof_id_type> >(set_difference, set_difference.begin()));
+
+      halo_ids[i].swap(set_difference);
+    }
+  }
+
+  // Finally look at the halo intersections to build the connectivity graph
+  std::set<dof_id_type> set_intersection;
+  for (unsigned int i = 0; i < n_grains; ++i)
+    for (unsigned int j = i + 1; j < n_grains; ++j)
+    {
+      set_intersection.clear();
+      std::set_intersection(halo_ids[i].begin(), halo_ids[i].end(), halo_ids[j].begin(), halo_ids[j].end(),
+                            std::insert_iterator<std::set<dof_id_type> >(set_intersection, set_intersection.begin()));
+
+      if (!set_intersection.empty())
+      {
+        adjacency_matrix[i][j] = true;
+        adjacency_matrix[j][i] = true;
+      }
+    }
+
+  return adjacency_matrix;
+}
+
+
+AdjacencyGraph
+PolycrystalICTools::buildNodalGrainAdjacencyGraph(const std::map<dof_id_type, unsigned int> & node_to_grain, MooseMesh & mesh, unsigned int n_grains)
+{
+  // Build node to elem map
+  std::vector<std::vector<const Elem *> > nodes_to_elem_map;
+  MeshTools::build_nodes_to_elem_map(mesh.getMesh(), nodes_to_elem_map);
+
+  std::vector<std::vector<bool> > adjacency_matrix(n_grains);
+  // initialize
+  for (unsigned int i = 0; i < n_grains; ++i)
+    adjacency_matrix[i].resize(n_grains, false);
+
+  const auto end = mesh.getMesh().active_nodes_end();
+  for (auto nl = mesh.getMesh().active_nodes_begin(); nl != end; ++nl)
+  {
+    const Node * node = *nl;
+    std::map<dof_id_type, unsigned int>::const_iterator grain_it = node_to_grain.find(node->id());
+    mooseAssert(grain_it != node_to_grain.end(), "Node not found in map");
+    unsigned int my_grain = grain_it->second;
+
+    std::vector<const Node *> nodal_neighbors;
+    MeshTools::find_nodal_neighbors(mesh.getMesh(), *node, nodes_to_elem_map, nodal_neighbors);
+
+    // Loop over all nodal neighbors
+    for (unsigned int i = 0; i < nodal_neighbors.size(); ++i)
+    {
+      const Node * neighbor_node = nodal_neighbors[i];
+      std::map<dof_id_type, unsigned int>::const_iterator grain_it2 = node_to_grain.find(neighbor_node->id());
+      mooseAssert(grain_it2 != node_to_grain.end(), "Node not found in map");
+      unsigned int their_grain = grain_it2->second;
+
+      if (my_grain != their_grain)
+        /**
+         * We've found a grain neighbor interface. In order to assign order parameters though, we need to make
+         * sure that we build out a small buffer region to avoid literal "corner cases" where nodes on opposite
+         * corners of a QUAD end up with the same OP because those nodes are not nodal neighbors.
+         *
+         * To do that we'll build a halo region based on these interface nodes. For now, we need to record
+         * the nodes inside of the grain and those outside of the grain.
+         */
+        adjacency_matrix[my_grain][their_grain] = 1;
+    }
+  }
+
+  return adjacency_matrix;
+}
+
+std::vector<unsigned int>
+PolycrystalICTools::assignOpsToGrains(const AdjacencyGraph & adjacency_matrix, unsigned int n_grains, unsigned int n_ops)
+{
+  Moose::perf_log.push("assignOpsToGrains()", "PolycrystalICTools");
+
+  std::vector<unsigned int> grain_to_op(n_grains, GraphColoring::INVALID_COLOR);
+
+  if (!colorGraph(adjacency_matrix, grain_to_op, n_grains, n_ops, 0))
+    mooseError("Unable to find a valid Grain to op configuration, do you have enough op variables?");
+
+  Moose::perf_log.pop("assignOpsToGrains()", "PolycrystalICTools");
+
+  return grain_to_op;
+}
+
+/**
+ * Utility routines
+ */
+void visitElementalNeighbors(const Elem * elem, std::set<dof_id_type> & halo_ids)
+{
+  mooseAssert(elem, "Elem is NULL");
+
+  std::vector<const Elem *> all_active_neighbors;
+
+  // Loop over all neighbors (at the the same level as the current element)
+  for (unsigned int i = 0; i < elem->n_neighbors(); ++i)
+  {
+    const Elem * neighbor_ancestor = elem->neighbor(i);
+    if (neighbor_ancestor)
+      // Retrieve only the active neighbors for each side of this element, append them to the list of active neighbors
+      neighbor_ancestor->active_family_tree_by_neighbor(all_active_neighbors, elem, false);
+  }
+
+  // Loop over all active element neighbors
+  for (std::vector<const Elem *>::const_iterator neighbor_it = all_active_neighbors.begin();
+       neighbor_it != all_active_neighbors.end(); ++neighbor_it)
+    if (*neighbor_it)
+      halo_ids.insert((*neighbor_it)->id());
+}
+
+/**
+ * Backtracking graph coloring routines
+ */
+bool colorGraph(const AdjacencyGraph & adjacency_matrix, std::vector<unsigned int> & colors,
+                unsigned int n_vertices, unsigned int n_colors, unsigned int vertex)
+{
+  // Base case: All grains are assigned
+  if (vertex == n_vertices)
+    return true;
+
+  // Consider this grain and try different ops
+  for (unsigned int color_idx = 0; color_idx < n_colors; ++color_idx)
+  {
+    // We'll try to spread these colors around a bit rather than
+    // packing them all on the first few colors if we have several colors.
+    unsigned int color = (vertex + color_idx) % n_colors;
+
+    if (isGraphValid(adjacency_matrix, colors, n_vertices, vertex, color))
+    {
+      colors[vertex] = color;
+
+      if (colorGraph(adjacency_matrix, colors, n_vertices, n_colors, vertex+1))
+        return true;
+
+      // Backtrack...
+      colors[vertex] = GraphColoring::INVALID_COLOR;
+    }
+  }
+
+  return false;
+}
+
+bool isGraphValid(const AdjacencyGraph & adjacency_matrix, std::vector<unsigned int> & colors, unsigned int n_vertices,
+                  unsigned int vertex, unsigned int color)
+{
+  // See if the proposed color is valid based on the current neighbor colors
+  for (unsigned int neighbor = 0; neighbor < n_vertices; ++neighbor)
+    if (adjacency_matrix[vertex][neighbor] && color == colors[neighbor])
+      return false;
+  return true;
 }

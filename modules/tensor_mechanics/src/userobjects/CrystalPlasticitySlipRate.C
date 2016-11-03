@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "CrystalPlasticitySlipRate.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<CrystalPlasticitySlipRate>()
@@ -64,8 +65,8 @@ CrystalPlasticitySlipRate::getSlipSystems()
 
     // Normalize the vectors
     Real mag;
-    mag = std::pow(vec[0], 2.0) + std::pow(vec[1], 2.0) + std::pow(vec[2], 2.0);
-    mag = std::pow(mag, 0.5);
+    mag = Utility::pow<2>(vec[0]) + Utility::pow<2>(vec[1]) + Utility::pow<2>(vec[2]);
+    mag = std::sqrt(mag);
 
     for (unsigned j = 0; j < LIBMESH_DIM; ++j)
       _no(i * LIBMESH_DIM + j) = vec[j] / mag;
@@ -76,8 +77,8 @@ CrystalPlasticitySlipRate::getSlipSystems()
         mooseError("CrystalPlasticitySlipRate Error: Premature end of file reading slip system file \n");
 
     // Normalize the vectors
-    mag = std::pow(vec[0], 2.0) + std::pow(vec[1], 2.0) + std::pow(vec[2], 2.0);
-    mag = std::pow(mag, 0.5);
+    mag = Utility::pow<2>(vec[0]) + Utility::pow<2>(vec[1]) + Utility::pow<2>(vec[2]);
+    mag = std::sqrt(mag);
 
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       _mo(i * LIBMESH_DIM + j) = vec[j] / mag;

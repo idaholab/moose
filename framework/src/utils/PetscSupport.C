@@ -136,9 +136,12 @@ setSolverOptions(SolverParams & solver_params)
   }
 }
 
-void petscSetupDM (NonlinearSystem & nl) {
+void
+petscSetupDM (NonlinearSystem & nl) {
 #if !PETSC_VERSION_LESS_THAN(3,3,0)
   PetscErrorCode  ierr;
+  PetscBool       ismoose;
+  DM              dm = PETSC_NULL;
 
   // Initialize the part of the DM package that's packaged with Moose; in the PETSc source tree this call would be in DMInitializePackage()
   ierr = DMMooseRegisterAll();
@@ -146,8 +149,16 @@ void petscSetupDM (NonlinearSystem & nl) {
   // Create and set up the DM that will consume the split options and deal with block matrices.
   PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
   SNES snes = petsc_solver->snes();
-  /* FIXME: reset the DM, do not recreate it anew every time? */
-  DM dm = PETSC_NULL;
+  // if there exists a DMMoose object, not to recreate a new one
+  ierr = SNESGetDM(snes, &dm);
+  CHKERRABORT(nl.comm().get(), ierr);
+  if (dm)
+  {
+    ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
+    CHKERRABORT(nl.comm().get(), ierr);
+    if (ismoose)
+      return;
+  }
   ierr = DMCreateMoose(nl.comm().get(), nl, &dm);
   CHKERRABORT(nl.comm().get(),ierr);
   ierr = DMSetFromOptions(dm);
@@ -158,8 +169,14 @@ void petscSetupDM (NonlinearSystem & nl) {
   CHKERRABORT(nl.comm().get(),ierr);
   ierr = DMDestroy(&dm);
   CHKERRABORT(nl.comm().get(),ierr);
-  ierr = SNESSetUpdate(snes,SNESUpdateDMMoose);
-  CHKERRABORT(nl.comm().get(),ierr);
+  // We temporarily comment out this updating function because
+  // we lack an approach to check if the problem
+  // structure has been changed from the last iteration.
+  // The indices will be rebuilt for every timestep.
+  // TODO: figure out a way to check the structure changes of the
+  // matrix
+  // ierr = SNESSetUpdate(snes,SNESUpdateDMMoose);
+  // CHKERRABORT(nl.comm().get(),ierr);
 #endif
 }
 
@@ -179,6 +196,20 @@ petscSetOptions(FEProblem & problem)
   PetscOptionsClear(PETSC_NULL);
 #endif
 
+  setSolverOptions(problem.solverParams());
+
+  // Add any additional options specified in the input file
+  for (const auto & flag : petsc.flags)
+    setSinglePetscOption(flag.c_str());
+  for (unsigned int i=0; i<petsc.inames.size(); ++i)
+    setSinglePetscOption(petsc.inames[i], petsc.values[i]);
+
+  // set up DM which is required if use a field split preconditioner
+  if (problem.getNonlinearSystem().haveFieldSplitPreconditioner())
+    petscSetupDM(problem.getNonlinearSystem());
+
+  // commandline options always win
+  // the options from a user commandline will overwrite the existing ones if any conflicts
   { // Get any options specified on the command-line
     int argc;
     char ** args;
@@ -190,38 +221,10 @@ petscSetOptions(FEProblem & problem)
     PetscOptionsInsert(PETSC_NULL, &argc, &args, NULL);
 #endif
   }
-
-  setSolverOptions(problem.solverParams());
-
-  // Add any additional options specified in the input file
-  for (MooseEnumIterator it = petsc.flags.begin(); it != petsc.flags.end(); ++it)
-    setSinglePetscOption(it->c_str());
-  for (unsigned int i=0; i<petsc.inames.size(); ++i)
-    setSinglePetscOption(petsc.inames[i], petsc.values[i]);
-
-  SolverParams& solver_params = problem.solverParams();
-  if (solver_params._type != Moose::ST_JFNK  &&
-      solver_params._type != Moose::ST_FD &&
-      !problem.getNonlinearSystem().haveFiniteDifferencedPreconditioner() &&
-      problem.getNonlinearSystem().haveDecomposition())
-  {
-    // Set up DM only if have a decomposition. Additionally, turn DM OFF if not using FD-based solvers,
-    // (both -snes_mf and -snes_fd) and FDP. This is all rather crufty, but what's a good generic rule here?
-    // In principle at least, splits should be able to work with ST_FD (-snes_fd) and FDP (a coloring-based
-    // version of -snes_fd), but one has to be careful about the initialization order so as not to override
-    // SNESComputeJacobianDefaultColor() set up by FDP, for instance.  However, it's unlikely that splits
-    // will be used when running an FD solver (debugging).
-    problem.getNonlinearSystem().setupDecomposition();
-    petscSetupDM(problem.getNonlinearSystem());
-  } else {
-    // Otherwise turn off the decomposition
-    std::vector<std::string> nosplits;
-    problem.getNonlinearSystem().setDecomposition(nosplits);
-  }
-
 }
 
-PetscErrorCode petscSetupOutput(CommandLine * cmd_line)
+PetscErrorCode
+petscSetupOutput(CommandLine * cmd_line)
 {
   char code[10] = {45,45,109,111,111,115,101};
   if (cmd_line->getPot()->search(code))
@@ -229,7 +232,8 @@ PetscErrorCode petscSetupOutput(CommandLine * cmd_line)
   return 0;
 }
 
-PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
+PetscErrorCode
+petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
 {
   // Cast the context pointer coming from PETSc to an FEProblem& and
   // get a reference to the System from it.
@@ -303,7 +307,11 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
     *reason = KSP_DIVERGED_NANORINF;
 #endif
     break;
-
+#if !PETSC_VERSION_LESS_THAN(3,6,0) // A new convergence enum in PETSc 3.6
+  case MOOSE_DIVERGED_PCSETUP_FAILED:
+    *reason = KSP_DIVERGED_PCSETUP_FAILED;
+    break;
+#endif
   default:
   {
     // If it's not either of the two specific cases we handle, just go
@@ -315,7 +323,8 @@ PetscErrorCode petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConverged
   return 0;
 }
 
-PetscErrorCode petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm, PetscReal fnorm, SNESConvergedReason * reason, void * ctx)
+PetscErrorCode
+petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm, PetscReal fnorm, SNESConvergedReason * reason, void * ctx)
 {
   FEProblem & problem = *static_cast<FEProblem *>(ctx);
   NonlinearSystem & system = problem.getNonlinearSystem();
@@ -436,7 +445,8 @@ getPetscPCSide(Moose::PCSideType pcs)
   }
 }
 
-void petscSetDefaults(FEProblem & problem)
+void
+petscSetDefaults(FEProblem & problem)
 {
   // dig out Petsc solver
   NonlinearSystem & nl = problem.getNonlinearSystem();
@@ -508,31 +518,31 @@ storePetscOptions(FEProblem & fe_problem, const InputParameters & params)
   Moose::PetscSupport::PetscOptions & po = fe_problem.getPetscOptions();
 
   // Update the PETSc single flags
-  for (MooseEnumIterator it = petsc_options.begin(); it != petsc_options.end(); ++it)
+  for (const auto & option : petsc_options)
   {
     /**
      * "-log_summary" cannot be used in the input file. This option needs to be set when PETSc is initialized
      * which happens before the parser is even created.  We'll throw an error if somebody attempts to add this option later.
      */
-    if (*it == "-log_summary")
+    if (option == "-log_summary")
       mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
 
     // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in their input files)
     else
     {
       std::string help_string;
-      if (*it == "-snes" || *it == "-snes_mf" || *it == "-snes_mf_operator")
+      if (option == "-snes" || option == "-snes_mf" || option == "-snes_mf_operator")
         help_string = "Please set the solver type through \"solve_type\".";
-      else if (*it == "-ksp_monitor")
+      else if (option == "-ksp_monitor")
         help_string = "Please use \"Outputs/print_linear_residuals=true\"";
 
       if (help_string != "")
-        mooseWarning("The PETSc option " << *it << " should not be used directly in a MOOSE input file. " << help_string);
+        mooseWarning("The PETSc option " << option << " should not be used directly in a MOOSE input file. " << help_string);
     }
 
     // Update the stored items, but do not create duplicates
-    if (find(po.flags.begin(), po.flags.end(), *it) == po.flags.end())
-      po.flags.push_back(*it);
+    if (find(po.flags.begin(), po.flags.end(), option) == po.flags.end())
+      po.flags.push_back(option);
   }
 
   // Check that the name value pairs are sized correctly

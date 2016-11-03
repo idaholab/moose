@@ -93,7 +93,7 @@ public:
    * @param input_side Side of the element 'elem' (0 for volumetric material properties)
    */
   void restrictStatefulProps(const std::vector<std::pair<unsigned int, QpMap> > & coarsening_map,
-                             std::vector<const Elem *> & coarsened_element_children,
+                             const std::vector<const Elem *> & coarsened_element_children,
                              QBase & qrule,
                              QBase & qrule_face,
                              MaterialData & material_data,

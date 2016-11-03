@@ -5,7 +5,14 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+// Navier-Stokes includes
 #include "NavierStokesMaterial.h"
+#include "NS.h"
+
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
+// MOOSE includes
 #include "Assembly.h"
 #include "MooseMesh.h"
 
@@ -17,23 +24,19 @@ InputParameters validParams<NavierStokesMaterial>()
 {
   InputParameters params = validParams<Material>();
 
-  // Default is Air
-  params.addRequiredParam<Real>("R", "Gas constant.");
-  params.addRequiredParam<Real>("gamma", "Ratio of specific heats.");
-  params.addRequiredParam<Real>("Pr", "Prandtl number.");
+  params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
+  params.addCoupledVar(NS::velocity_y, "y-velocity"); // only required in >= 2D
+  params.addCoupledVar(NS::velocity_z, "z-velocity"); // only required in 3D
 
-  params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
-  params.addCoupledVar("w", ""); // not required in 2D
+  params.addRequiredCoupledVar(NS::temperature, "temperature");
+  params.addRequiredCoupledVar(NS::enthalpy, "total enthalpy");
 
-  params.addRequiredCoupledVar("temperature", "");
-  params.addRequiredCoupledVar("enthalpy", "");
-
-  params.addRequiredCoupledVar("rho", "density");
-  params.addRequiredCoupledVar("rhou", "x-momentum");
-  params.addRequiredCoupledVar("rhov", "y-momentum");
-  params.addCoupledVar("rhow", "z-momentum"); // only required in 3D
-  params.addRequiredCoupledVar("rhoe", "energy");
+  params.addRequiredCoupledVar(NS::density, "density");
+  params.addRequiredCoupledVar(NS::momentum_x, "x-momentum");
+  params.addCoupledVar(NS::momentum_y, "y-momentum"); // only required in >= 2D
+  params.addCoupledVar(NS::momentum_z, "z-momentum"); // only required in 3D
+  params.addRequiredCoupledVar(NS::total_energy, "energy");
+  params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
 
   return params;
 }
@@ -43,9 +46,9 @@ InputParameters validParams<NavierStokesMaterial>()
 NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
     Material(parameters),
     _mesh_dimension(_mesh.dimension()),
-    _grad_u(coupledGradient("u")),
-    _grad_v(coupledGradient("v")),
-    _grad_w(_mesh_dimension == 3 ? coupledGradient("w") : _grad_zero),
+    _grad_u(coupledGradient(NS::velocity_x)),
+    _grad_v(_mesh_dimension >= 2 ? coupledGradient(NS::velocity_y) : _grad_zero),
+    _grad_w(_mesh_dimension == 3 ? coupledGradient(NS::velocity_z) : _grad_zero),
 
     _viscous_stress_tensor(declareProperty<RealTensorValue>("viscous_stress_tensor")),
     _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
@@ -62,52 +65,45 @@ NavierStokesMaterial::NavierStokesMaterial(const InputParameters & parameters) :
 
     // Energy equation inviscid flux matrices, "cal E_{kl}" in the notes.
     _calE(declareProperty<std::vector<std::vector<RealTensorValue> > >("calE")),
-    _vel_grads(3),
-
-    // Parameter values read in from input file
-    _R(getParam<Real>("R")),
-    _gamma(getParam<Real>("gamma")),
-    _Pr(getParam<Real>("Pr")),
+    _vel_grads({&_grad_u, &_grad_v, &_grad_w}),
 
     // Coupled solution values needed for computing SUPG stabilization terms
-    _u_vel(coupledValue("u")),
-    _v_vel(coupledValue("v")),
-    _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
+    _u_vel(coupledValue(NS::velocity_x)),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue(NS::velocity_y) : _zero),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue(NS::velocity_z) : _zero),
 
-    _temperature(coupledValue("temperature")),
-    _enthalpy(coupledValue("enthalpy")),
+    _temperature(coupledValue(NS::temperature)),
+    _enthalpy(coupledValue(NS::enthalpy)),
 
     // Coupled solution values
-    _rho(coupledValue("rho")),
-    _rho_u(coupledValue("rhou")),
-    _rho_v(coupledValue("rhov")),
-    _rho_w(_mesh.dimension() == 3 ? coupledValue("rhow") : _zero),
-    _rho_e(coupledValue("rhoe")),
+    _rho(coupledValue(NS::density)),
+    _rho_u(coupledValue(NS::momentum_x)),
+    _rho_v(_mesh.dimension() >= 2 ? coupledValue(NS::momentum_y) : _zero),
+    _rho_w(_mesh.dimension() == 3 ? coupledValue(NS::momentum_z) : _zero),
+    _rho_E(coupledValue(NS::total_energy)),
 
     // Time derivative values
-    _drho_dt(coupledDot("rho")),
-    _drhou_dt(coupledDot("rhou")),
-    _drhov_dt(coupledDot("rhov")),
-    _drhow_dt( _mesh.dimension() == 3 ? coupledDot("rhow") : _zero),
-    _drhoe_dt(coupledDot("rhoe")),
+    _drho_dt(coupledDot(NS::density)),
+    _drhou_dt(coupledDot(NS::momentum_x)),
+    _drhov_dt(_mesh.dimension() >= 2 ? coupledDot(NS::momentum_y) : _zero),
+    _drhow_dt(_mesh.dimension() == 3 ? coupledDot(NS::momentum_z) : _zero),
+    _drhoE_dt(coupledDot(NS::total_energy)),
 
     // Gradients
-    _grad_rho(coupledGradient("rho")),
-    _grad_rho_u(coupledGradient("rhou")),
-    _grad_rho_v(coupledGradient("rhov")),
-    _grad_rho_w( _mesh.dimension() == 3 ? coupledGradient("rhow") : _grad_zero),
-    _grad_rho_e(coupledGradient("rhoe")),
+    _grad_rho(coupledGradient(NS::density)),
+    _grad_rho_u(coupledGradient(NS::momentum_x)),
+    _grad_rho_v(_mesh.dimension() >= 2 ? coupledGradient(NS::momentum_y) : _grad_zero),
+    _grad_rho_w(_mesh.dimension() == 3 ? coupledGradient(NS::momentum_z) : _grad_zero),
+    _grad_rho_E(coupledGradient(NS::total_energy)),
 
     // Material properties for stabilization
     _hsupg(declareProperty<Real>("hsupg")),
     _tauc(declareProperty<Real>("tauc")),
     _taum(declareProperty<Real>("taum")),
     _taue(declareProperty<Real>("taue")),
-    _strong_residuals(declareProperty<std::vector<Real> >("strong_residuals"))
+    _strong_residuals(declareProperty<std::vector<Real> >("strong_residuals")),
+    _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
-  _vel_grads[0] = &_grad_u;
-  _vel_grads[1] = &_grad_v;
-  _vel_grads[2] = &_grad_w;
 }
 
 /**
@@ -121,9 +117,9 @@ NavierStokesMaterial::computeProperties()
     /******* Viscous Stress Tensor *******/
     //Technically... this _is_ the transpose (since we are loading these by rows)
     //But it doesn't matter....
-    RealTensorValue grad_outter_u(_grad_u[qp], _grad_v[qp], _grad_w[qp]);
+    RealTensorValue grad_outer_u(_grad_u[qp], _grad_v[qp], _grad_w[qp]);
 
-    grad_outter_u += grad_outter_u.transpose();
+    grad_outer_u += grad_outer_u.transpose();
 
     Real div_vel = 0.0;
     for (unsigned int i = 0; i < 3; ++i)
@@ -131,11 +127,11 @@ NavierStokesMaterial::computeProperties()
 
     //Add diagonal terms
     for (unsigned int i = 0; i < 3; ++i)
-      grad_outter_u(i,i) -= 2.0 / 3.0 * div_vel;
+      grad_outer_u(i, i) -= 2.0 / 3.0 * div_vel;
 
-    grad_outter_u *= _dynamic_viscosity[qp];
+    grad_outer_u *= _dynamic_viscosity[qp];
 
-    _viscous_stress_tensor[qp] = grad_outter_u;
+    _viscous_stress_tensor[qp] = grad_outer_u;
 
     // Tabulated values of thermal conductivity vs. Temperature for air (k increases slightly with T):
     // T (K)    k (W/m-K)
@@ -145,9 +141,13 @@ NavierStokesMaterial::computeProperties()
     // 573      0.0454
     // 673      0.0515
 
-    // Pr = (mu * cp) / k  ==>  k = (mu * cp) / Pr = (mu * gamma * cv) / Pr
-    Real cv = _R / (_gamma - 1.0);
-    _thermal_conductivity[qp] = (_dynamic_viscosity[qp] * _gamma * cv) / _Pr;
+    // Pr = (mu * cp) / k  ==>  k = (mu * cp) / Pr = (mu * gamma * cv) / Pr.
+    // TODO: We are using a fixed value of the Prandtl number which is
+    // valid for air, it may or may not depend on temperature?  Since
+    // this is a property of the fluid, it could possibly be moved to
+    // the FluidProperties module...
+    const Real Pr = 0.71;
+    _thermal_conductivity[qp] = (_dynamic_viscosity[qp] * _fp.cp()) / Pr;
 
     // Compute stabilization parameters:
 
@@ -173,115 +173,113 @@ NavierStokesMaterial::computeProperties()
 void
 NavierStokesMaterial::computeHSUPG(unsigned int qp)
 {
-  // Grab reference to linear Lagrange finite element object pointer,
-  // currently this is always a linear Lagrange element, so this might need to
-  // be generalized if we start working with higher-order elements...
-  FEBase*& fe(_assembly.getFE(FEType(), _current_elem->dim()));
+  // // Grab reference to linear Lagrange finite element object pointer,
+  // // currently this is always a linear Lagrange element, so this might need to
+  // // be generalized if we start working with higher-order elements...
+  // FEBase*& fe(_assembly.getFE(FEType(), _current_elem->dim()));
+  //
+  // // Grab references to FE object's mapping data from the _subproblem's FE object
+  // const std::vector<Real> & dxidx(fe->get_dxidx());
+  // const std::vector<Real> & dxidy(fe->get_dxidy());
+  // const std::vector<Real> & dxidz(fe->get_dxidz());
+  // const std::vector<Real> & detadx(fe->get_detadx());
+  // const std::vector<Real> & detady(fe->get_detady());
+  // const std::vector<Real> & detadz(fe->get_detadz());
+  // const std::vector<Real> & dzetadx(fe->get_dzetadx()); // Empty in 2D
+  // const std::vector<Real> & dzetady(fe->get_dzetady()); // Empty in 2D
+  // const std::vector<Real> & dzetadz(fe->get_dzetadz()); // Empty in 2D
+  //
+  // // Bounds checking on element data
+  // mooseAssert(qp < dxidx.size(), "Insufficient data in dxidx array!");
+  // mooseAssert(qp < dxidy.size(), "Insufficient data in dxidy array!");
+  // mooseAssert(qp < dxidz.size(), "Insufficient data in dxidz array!");
+  //
+  // mooseAssert(qp < detadx.size(), "Insufficient data in detadx array!");
+  // mooseAssert(qp < detady.size(), "Insufficient data in detady array!");
+  // mooseAssert(qp < detadz.size(), "Insufficient data in detadz array!");
+  //
+  // if (_mesh_dimension == 3)
+  // {
+  //   mooseAssert(qp < dzetadx.size(), "Insufficient data in dzetadx array!");
+  //   mooseAssert(qp < dzetady.size(), "Insufficient data in dzetady array!");
+  //   mooseAssert(qp < dzetadz.size(), "Insufficient data in dzetadz array!");
+  // }
+  //
+  // // The velocity vector at this quadrature point.
+  // RealVectorValue U(_u_vel[qp],_v_vel[qp],_w_vel[qp]);
+  //
+  // // Pull out element inverse map values at the current qp into a little dense matrix
+  // Real dxi_dx[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
+  //
+  // dxi_dx[0][0] = dxidx[qp];  dxi_dx[0][1] = dxidy[qp];
+  // dxi_dx[1][0] = detadx[qp]; dxi_dx[1][1] = detady[qp];
+  //
+  // // OK to access third entries on 2D elements if LIBMESH_DIM==3, though they
+  // // may be zero...
+  // if (LIBMESH_DIM == 3)
+  // {
+  //   /**/             /**/               dxi_dx[0][2] = dxidz[qp];
+  //   /**/             /**/               dxi_dx[1][2] = detadz[qp];
+  // }
+  //
+  // // The last row of entries available only for 3D elements.
+  // if (_mesh_dimension == 3)
+  // {
+  //   dxi_dx[2][0] = dzetadx[qp];   dxi_dx[2][1] = dzetady[qp];   dxi_dx[2][2] = dzetadz[qp];
+  // }
+  //
+  // // Construct the g_ij = d(xi_k)/d(x_j) * d(xi_k)/d(x_i) matrix
+  // // from Ben and Bova's paper by summing over k...
+  // Real g[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
+  // for (unsigned int i = 0; i < 3; ++i)
+  //   for (unsigned int j = 0; j < 3; ++j)
+  //     for (unsigned int k = 0; k < 3; ++k)
+  //       g[i][j] += dxi_dx[k][j] * dxi_dx[k][i];
+  //
+  // // Compute the denominator of the h_supg term: U * (g) * U
+  // Real denom = 0.;
+  // for (unsigned int i = 0; i < 3; ++i)
+  //   for (unsigned int j = 0; j < 3; ++j)
+  //     denom += U(j) * g[i][j] * U(i);
+  //
+  // // Compute h_supg.  Some notes:
+  // // .) The 2 coefficient in this term should be a 1 if we are using tets/triangles.
+  // // .) The denominator will be identically zero only if the velocity
+  // //    is identically zero, in which case we can't divide by it.
+  // if (denom != 0.0)
+  //   _hsupg[qp] = 2.* sqrt( U.norm_sq() / denom );
+  // else
+  //   _hsupg[qp] = 0.;
 
-  // Grab references to FE object's mapping data from the _subproblem's FE object
-  const std::vector<Real> & dxidx(fe->get_dxidx());
-  const std::vector<Real> & dxidy(fe->get_dxidy());
-  const std::vector<Real> & dxidz(fe->get_dxidz());
-  const std::vector<Real> & detadx(fe->get_detadx());
-  const std::vector<Real> & detady(fe->get_detady());
-  const std::vector<Real> & detadz(fe->get_detadz());
-  const std::vector<Real> & dzetadx(fe->get_dzetadx()); // Empty in 2D
-  const std::vector<Real> & dzetady(fe->get_dzetady()); // Empty in 2D
-  const std::vector<Real> & dzetadz(fe->get_dzetadz()); // Empty in 2D
-
-  // Bounds checking on element data
-  mooseAssert(qp < dxidx.size(), "Insufficient data in dxidx array!");
-  mooseAssert(qp < dxidy.size(), "Insufficient data in dxidy array!");
-  mooseAssert(qp < dxidz.size(), "Insufficient data in dxidz array!");
-
-  mooseAssert(qp < detadx.size(), "Insufficient data in detadx array!");
-  mooseAssert(qp < detady.size(), "Insufficient data in detady array!");
-  mooseAssert(qp < detadz.size(), "Insufficient data in detadz array!");
-
-  if (_mesh_dimension == 3)
-  {
-    mooseAssert(qp < dzetadx.size(), "Insufficient data in dzetadx array!");
-    mooseAssert(qp < dzetady.size(), "Insufficient data in dzetady array!");
-    mooseAssert(qp < dzetadz.size(), "Insufficient data in dzetadz array!");
-  }
-
-  // The velocity vector at this quadrature point.
-  RealVectorValue U(_u_vel[qp],_v_vel[qp],_w_vel[qp]);
-
-  // Pull out element inverse map values at the current qp into a little dense matrix
-  Real dxi_dx[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
-
-  dxi_dx[0][0] = dxidx[qp];  dxi_dx[0][1] = dxidy[qp];
-  dxi_dx[1][0] = detadx[qp]; dxi_dx[1][1] = detady[qp];
-
-  // OK to access third entries on 2D elements if LIBMESH_DIM==3, though they
-  // may be zero...
-  if (LIBMESH_DIM == 3)
-  {
-    /**/             /**/               dxi_dx[0][2] = dxidz[qp];
-    /**/             /**/               dxi_dx[1][2] = detadz[qp];
-  }
-
-  // The last row of entries available only for 3D elements.
-  if (_mesh_dimension == 3)
-  {
-    dxi_dx[2][0] = dzetadx[qp];   dxi_dx[2][1] = dzetady[qp];   dxi_dx[2][2] = dzetadz[qp];
-  }
-
-  // Construct the g_ij = d(xi_k)/d(x_j) * d(xi_k)/d(x_i) matrix
-  // from Ben and Bova's paper by summing over k...
-  Real g[3][3] = {{0.,0.,0.}, {0.,0.,0.}, {0.,0.,0.}};
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
-      for (unsigned int k = 0; k < 3; ++k)
-        g[i][j] += dxi_dx[k][j] * dxi_dx[k][i];
-
-  // Compute the denominator of the h_supg term: U * (g) * U
-  Real denom = 0.;
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
-      denom += U(j) * g[i][j] * U(i);
-
-  // Compute h_supg.  Some notes:
-  // .) The 2 coefficient in this term should be a 1 if we are using tets/triangles.
-  // .) The denominator will be identically zero only if the velocity
-  //    is identically zero, in which case we can't divide by it.
-  if (denom != 0.0)
-    _hsupg[qp] = 2.* sqrt( U.norm_sq() / denom );
-  else
-    _hsupg[qp] = 0.;
-
-  // Debugging: Just use hmin for the element!
+  // Simple (and fast) implementation: Just use hmin for the element!
   _hsupg[qp] = _current_elem->hmin();
 }
 
 void
 NavierStokesMaterial::computeTau(unsigned int qp)
 {
-  Real velmag = std::sqrt(_u_vel[qp]*_u_vel[qp] +
-                          _v_vel[qp]*_v_vel[qp] +
-                          _w_vel[qp]*_w_vel[qp]);
+  Real velmag = std::sqrt(_u_vel[qp] * _u_vel[qp] +
+                          _v_vel[qp] * _v_vel[qp] +
+                          _w_vel[qp] * _w_vel[qp]);
 
   // Moose::out << "velmag=" << velmag << std::endl;
 
   // Make sure temperature >= 0 before trying to take sqrt
-  // #ifdef DEBUG
-  if (_temperature[qp] < 0.)
-  {
-    Moose::err << "Negative temperature "
-              << _temperature[qp]
-              << " found at quadrature point "
-              << qp
-              << ", element "
-              << _current_elem->id()
-              << std::endl;
-    mooseError("Can't continue, would be nice to throw an exception here?");
-  }
-  // #endif
+  // if (_temperature[qp] < 0.)
+  // {
+  //   Moose::err << "Negative temperature "
+  //             << _temperature[qp]
+  //             << " found at quadrature point "
+  //             << qp
+  //             << ", element "
+  //             << _current_elem->id()
+  //             << std::endl;
+  //   mooseError("Can't continue, would be nice to throw an exception here?");
+  // }
 
   // The speed of sound for an ideal gas, sqrt(gamma * R * T).  Not needed unless
   // we want to use a form of Tau that requires it.
-  // Real soundspeed = std::sqrt(_gamma * _R * _temperature[qp]);
+  // Real soundspeed = _fp.c(_specific_volume[_qp], _internal_energy[_qp]);
 
   // If velmag == 0, then _hsupg should be zero as well.  Then tau
   // will have only the time-derivative contribution (or zero, if we
@@ -302,14 +300,13 @@ NavierStokesMaterial::computeTau(unsigned int qp)
   else
   {
     // The element length parameter, squared
-    Real h2 = _hsupg[qp]*_hsupg[qp];
+    Real h2 = _hsupg[qp] * _hsupg[qp];
 
     // The viscosity-based term
     Real visc_term = _dynamic_viscosity[qp] / _rho[qp] / h2;
 
     // The thermal conductivity-based term, cp = gamma * cv
-    Real cv = _R / (_gamma - 1.0);
-    Real k_term = _thermal_conductivity[qp] / _rho[qp] / (_gamma*cv) / h2;
+    Real k_term = _thermal_conductivity[qp] / _rho[qp] / _fp.cp() / h2;
 
     // 1a.) Standard compressible flow tau.  Does not account for low Mach number
     // limit.
@@ -335,12 +332,12 @@ NavierStokesMaterial::computeTau(unsigned int qp)
     // 2.) Tau with timestep dependence (guarantees stabilization even
     // in zero-velocity limit) incorporated via the "r-switch" method,
     // with r=2.
-    Real sqrt_term = 4./_dt/_dt + velmag*velmag/h2;
+    Real sqrt_term = 4. / _dt / _dt + velmag * velmag / h2;
 
     // For use with option "2", i.e. the option that uses dt in the definition of tau
     _tauc[qp] = 1. / std::sqrt(sqrt_term);
-    _taum[qp] = 1. / std::sqrt(sqrt_term + visc_term*visc_term);
-    _taue[qp] = 1. / std::sqrt(sqrt_term + k_term*k_term);
+    _taum[qp] = 1. / std::sqrt(sqrt_term + visc_term * visc_term);
+    _taue[qp] = 1. / std::sqrt(sqrt_term + k_term * k_term);
   }
 
   // Debugging
@@ -376,7 +373,7 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 //            << ", drhou_dt=" << _drhou_dt
 //            << ", drhov_dt=" << _drhov_dt
 //            << ", drhow_dt=" << _drhow_dt
-//            << ", drhoe_dt=" << _drhoe_dt
+//            << ", drhoE_dt=" << _drhoE_dt
 //            << std::endl;
 
   // Momentum divergence
@@ -391,19 +388,19 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
     _calC[qp][i].zero();
 
   // x-column matrix
-  _calC[qp][0](0,0) = _u_vel[qp];
-  _calC[qp][0](1,0) = _v_vel[qp];
-  _calC[qp][0](2,0) = _w_vel[qp];
+  _calC[qp][0](0, 0) = _u_vel[qp];
+  _calC[qp][0](1, 0) = _v_vel[qp];
+  _calC[qp][0](2, 0) = _w_vel[qp];
 
   // y-column matrix
-  _calC[qp][1](0,1) = _u_vel[qp];
-  _calC[qp][1](1,1) = _v_vel[qp];
-  _calC[qp][1](2,1) = _w_vel[qp];
+  _calC[qp][1](0, 1) = _u_vel[qp];
+  _calC[qp][1](1, 1) = _v_vel[qp];
+  _calC[qp][1](2, 1) = _w_vel[qp];
 
   // z-column matrix (this assumes LIBMESH_DIM==3!)
-  _calC[qp][2](0,2) = _u_vel[qp];
-  _calC[qp][2](1,2) = _v_vel[qp];
-  _calC[qp][2](2,2) = _w_vel[qp];
+  _calC[qp][2](0, 2) = _u_vel[qp];
+  _calC[qp][2](1, 2) = _v_vel[qp];
+  _calC[qp][2](2, 2) = _w_vel[qp];
 
   // The matrix S can be computed from any of the calC via calC_1*calC_1^T
   RealTensorValue calS = _calC[qp][0] * _calC[qp][0].transpose();
@@ -413,7 +410,7 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
   // 0.) _calA_0 = diag( (gam - 1)/2*|u|^2 ) - S
   _calA[qp][0].zero(); // zero this calA entry
-  _calA[qp][0](0,0) = _calA[qp][0](1,1) = _calA[qp][0](2,2) = 0.5*(_gamma - 1.0)*velmag2; // set diag. entries
+  _calA[qp][0](0, 0) = _calA[qp][0](1, 1) = _calA[qp][0](2, 2) = 0.5 * (_fp.gamma() - 1.0) * velmag2; // set diag. entries
   _calA[qp][0] -= calS;
 
   for (unsigned int m = 1; m <= 3; ++m)
@@ -423,14 +420,14 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
     // For m=1,2,3, calA_m = C_m + C_m^T + diag( (1.-gam)*u_m )
     _calA[qp][m].zero(); // zero this calA entry
-    _calA[qp][m](0,0) = _calA[qp][m](1,1) = _calA[qp][m](2,2) = (1.-_gamma)*vel(m_local); // set diag. entries
+    _calA[qp][m](0, 0) = _calA[qp][m](1, 1) = _calA[qp][m](2, 2) = (1. - _fp.gamma()) * vel(m_local); // set diag. entries
     _calA[qp][m] += _calC[qp][m_local];             // Note: use m_local for indexing into _calC!
     _calA[qp][m] += _calC[qp][m_local].transpose(); // Note: use m_local for indexing into _calC!
   }
 
   // 4.) calA_4 = diag(gam - 1)
   _calA[qp][4].zero(); // zero this calA entry
-  _calA[qp][4](0,0) = _calA[qp][4](1,1) = _calA[qp][4](2,2) = (_gamma - 1.0);
+  _calA[qp][4](0, 0) = _calA[qp][4](1, 1) = _calA[qp][4](2, 2) = (_fp.gamma() - 1.0);
 
   // Enough space to hold the 3*5 "cal E" matrices which comprise the inviscid flux term
   // of the energy equation.  See notes for additional details
@@ -447,7 +444,7 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
     // E_{k0} (density gradient term)
     _calE[qp][k][0].zero();
-    _calE[qp][k][0] = (0.5 * (_gamma - 1.0) * velmag2 - _enthalpy[qp]) * Ck_T;
+    _calE[qp][k][0] = (0.5 * (_fp.gamma() - 1.0) * velmag2 - _enthalpy[qp]) * Ck_T;
 
     for (unsigned int m = 1; m <= 3; ++m)
     {
@@ -456,35 +453,35 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
 
       // E_{km} (momentum gradient terms)
       _calE[qp][k][m].zero();
-      _calE[qp][k][m](k,m_local) = _enthalpy[qp];           // H * D_{km}
-      _calE[qp][k][m] += (1.-_gamma) * vel(m_local) * Ck_T; // (1-gam) * u_m * C_k^T
+      _calE[qp][k][m](k, m_local) = _enthalpy[qp];          // H * D_{km}
+      _calE[qp][k][m] += (1. - _fp.gamma()) * vel(m_local) * Ck_T; // (1-gam) * u_m * C_k^T
     }
 
     // E_{k4} (energy gradient term)
     _calE[qp][k][4].zero();
-    _calE[qp][k][4] = _gamma * Ck_T;
+    _calE[qp][k][4] = _fp.gamma() * Ck_T;
   }
 
   // Compute the sum over ell of: A_ell grad(U_ell), store in DenseVector or Gradient object?
   // The gradient object might be more useful, since we are multiplying by VariableGradient
   // (which is a MooseArray of RealGradients) objects?
   RealVectorValue mom_resid =
-    _calA[qp][0]*_grad_rho[qp] +
-    _calA[qp][1]*_grad_rho_u[qp] +
-    _calA[qp][2]*_grad_rho_v[qp] +
-    _calA[qp][3]*_grad_rho_w[qp] +
-    _calA[qp][4]*_grad_rho_e[qp];
+    _calA[qp][0] * _grad_rho[qp] +
+    _calA[qp][1] * _grad_rho_u[qp] +
+    _calA[qp][2] * _grad_rho_v[qp] +
+    _calA[qp][3] * _grad_rho_w[qp] +
+    _calA[qp][4] * _grad_rho_E[qp];
 
   // No matrices/vectors for the energy residual strong form... just write it out like
   // the mass equation residual.  See "Momentum SUPG terms prop. to energy residual"
   // section of the notes.
   Real energy_resid =
-    (0.5*(_gamma - 1.0)*velmag2 - _enthalpy[qp])*(vel * _grad_rho[qp]) +
-    _enthalpy[qp]*divU +
-    (1.-_gamma)*(vel(0)*(vel*_grad_rho_u[qp]) +
-                 vel(1)*(vel*_grad_rho_v[qp]) +
-                 vel(2)*(vel*_grad_rho_w[qp])) +
-    _gamma*(vel*_grad_rho_e[qp])
+    (0.5 * (_fp.gamma() - 1.0) * velmag2 - _enthalpy[qp]) * (vel * _grad_rho[qp]) +
+    _enthalpy[qp] * divU +
+    (1. - _fp.gamma()) * (vel(0) * (vel * _grad_rho_u[qp]) +
+                          vel(1) * (vel * _grad_rho_v[qp]) +
+                          vel(2) * (vel * _grad_rho_w[qp])) +
+    _fp.gamma() * (vel * _grad_rho_E[qp])
     ;
 
   // Now for the actual residual values...
@@ -508,5 +505,5 @@ void NavierStokesMaterial::computeStrongResiduals(unsigned int qp)
     _strong_residuals[qp][3] = 0.;
 
   // The energy equation strong residual
-  _strong_residuals[qp][4] = _drhoe_dt[qp] + energy_resid;
+  _strong_residuals[qp][4] = _drhoE_dt[qp] + energy_resid;
 }

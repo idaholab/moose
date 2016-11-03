@@ -7,15 +7,12 @@
 
 #include "PorousFlowPorosityHM.h"
 
-#include "Conversion.h"
-
 template<>
 InputParameters validParams<PorousFlowPorosityHM>()
 {
-  InputParameters params = validParams<PorousFlowPorosityUnity>();
-
+  InputParameters params = validParams<PorousFlowPorosityBase>();
   params.addRequiredParam<Real>("porosity_zero", "The porosity at zero volumetric strain and zero effective porepressure");
-  params.addRangeCheckedParam<Real>("biot_coefficient", 1, "biot_coefficient>=0&biot_coefficient<=1", "Biot coefficient");
+  params.addRangeCheckedParam<Real>("biot_coefficient", 1, "biot_coefficient>=0 & biot_coefficient<=1", "Biot coefficient");
   params.addRequiredRangeCheckedParam<Real>("solid_bulk", "solid_bulk>0", "Bulk modulus of the drained porous solid skeleton");
   params.addRequiredCoupledVar("displacements", "The solid-mechanics displacement variables");
   params.addClassDescription("This Material calculates the porosity for hydro-mechanical simulations");
@@ -23,13 +20,12 @@ InputParameters validParams<PorousFlowPorosityHM>()
 }
 
 PorousFlowPorosityHM::PorousFlowPorosityHM(const InputParameters & parameters) :
-    PorousFlowPorosityUnity(parameters),
+    PorousFlowPorosityBase(parameters),
 
     _phi0(getParam<Real>("porosity_zero")),
     _biot(getParam<Real>("biot_coefficient")),
     _solid_bulk(getParam<Real>("solid_bulk")),
-    _num_var(_dictator_UO.numVariables()),
-    _coeff((_biot - 1.0)/_solid_bulk),
+    _coeff((_biot - 1.0) / _solid_bulk),
 
     _ndisp(coupledComponents("displacements")),
     _disp_var_num(_ndisp),
@@ -42,7 +38,7 @@ PorousFlowPorosityHM::PorousFlowPorosityHM(const InputParameters & parameters) :
     _pf_qp(getMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_qp")),
     _dpf_qp_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_effective_fluid_pressure_qp_dvar"))
 {
-  for (unsigned i = 0 ; i < _ndisp ; ++i)
+  for (unsigned int i = 0; i < _ndisp; ++i)
     _disp_var_num[i] = coupled("displacements", i);
 }
 
@@ -67,7 +63,7 @@ PorousFlowPorosityHM::computeQpProperties()
 
   _dporosity_qp_dvar[_qp].resize(_num_var);
   _dporosity_nodal_dvar[_qp].resize(_num_var);
-  for (unsigned v = 0; v < _num_var; ++v)
+  for (unsigned int v = 0; v < _num_var; ++v)
   {
     _dporosity_qp_dvar[_qp][v] = _coeff * _dpf_qp_dvar[_qp][v] * (_porosity_qp[_qp] - _biot);
     _dporosity_nodal_dvar[_qp][v] = _coeff * _dpf_nodal_dvar[_qp][v] * (_porosity_nodal[_qp] - _biot);
@@ -75,10 +71,9 @@ PorousFlowPorosityHM::computeQpProperties()
 
   _dporosity_qp_dgradvar[_qp].resize(_num_var);
   _dporosity_nodal_dgradvar[_qp].resize(_num_var);
-  for (unsigned v = 0; v < _num_var; ++v)
+  for (unsigned int v = 0; v < _num_var; ++v)
   {
     _dporosity_qp_dgradvar[_qp][v] = -(_porosity_qp[_qp] - _biot) * _dvol_strain_qp_dvar[_qp][v];
     _dporosity_nodal_dgradvar[_qp][v] = -(_porosity_nodal[_qp] - _biot) * _dvol_strain_qp_dvar[_qp][v];
   }
 }
-

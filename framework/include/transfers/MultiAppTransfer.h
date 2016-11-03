@@ -43,7 +43,6 @@ class MultiAppTransfer : public Transfer
 {
 public:
   MultiAppTransfer(const InputParameters & parameters);
-  virtual ~MultiAppTransfer() {}
 
   enum
   {
@@ -67,7 +66,6 @@ public:
 
   /// Return the execution flags, handling "same_as_multiapp"
   virtual const std::vector<ExecFlagType> & execFlags() const;
-
 
 protected:
   /// The MultiApp this Transfer is transferring data to or from

@@ -57,7 +57,7 @@ class XFEM : public XFEMInterface
 public:
 
   explicit
-  XFEM(MooseApp & app, const MooseSharedPointer<FEProblem> fe_problem);
+  XFEM(const InputParameters & params);
 
   ~XFEM();
 
@@ -142,6 +142,7 @@ public:
   void setCrackGrowthMethod(bool use_crack_growth_increment, Real crack_growth_increment);
   virtual bool getXFEMWeights(MooseArray<Real> &weights, const Elem * elem, QBase * qrule, const MooseArray<Point> & q_points);
   virtual const ElementPairLocator::ElementPairList * getXFEMCutElemPairs() const {return & _sibling_elems;}
+  virtual const ElementPairLocator::ElementPairList * getXFEMDisplacedCutElemPairs() const {return & _sibling_displaced_elems;}
   virtual void getXFEMIntersectionInfo(const Elem * elem,
                                        unsigned int plane_id,
                                        Point & normal, std::vector<Point> & intersectionPoints,
@@ -152,6 +153,8 @@ public:
   virtual void getXFEMqRuleOnSurface(std::vector<Point> & intersection_points,
                                   std::vector<Point> & quad_pts,
                                   std::vector<Real> & quad_wts) const;
+  bool has_secondary_cut(){return _has_secondary_cut;}
+
 private:
 
   void getFragmentEdges(const Elem* elem,
@@ -169,6 +172,8 @@ private:
   std::vector<Real> _XFEM_cut_data;
   std::string _XFEM_cut_type;
 
+  bool _has_secondary_cut;
+
   Xfem::XFEM_QRULE _XFEM_qrule;
 
   bool _use_crack_growth_increment;
@@ -179,6 +184,7 @@ private:
   std::map<unique_id_type, XFEMCutElem*> _cut_elem_map;
   std::set<const Elem*> _crack_tip_elems;
   ElementPairLocator::ElementPairList _sibling_elems;
+  ElementPairLocator::ElementPairList _sibling_displaced_elems;
 
   std::map<const Elem*, std::vector<Point> > _elem_crack_origin_direction_map;
 

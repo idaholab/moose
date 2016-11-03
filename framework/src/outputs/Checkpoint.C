@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// STL includes
+// C POSIX includes
 #include <sys/stat.h>
 
 // Moose includes
@@ -48,16 +48,12 @@ Checkpoint::Checkpoint(const InputParameters & parameters) :
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),
-    _parallel_mesh(_problem_ptr->mesh().isParallelMesh()),
+    _parallel_mesh(_problem_ptr->mesh().isDistributedMesh()),
     _restartable_data(_app.getRestartableData()),
     _recoverable_data(_app.getRecoverableData()),
     _material_property_storage(_problem_ptr->getMaterialPropertyStorage()),
     _bnd_material_property_storage(_problem_ptr->getBndMaterialPropertyStorage()),
     _restartable_data_io(RestartableDataIO(*_problem_ptr))
-{
-}
-
-Checkpoint::~Checkpoint()
 {
 }
 

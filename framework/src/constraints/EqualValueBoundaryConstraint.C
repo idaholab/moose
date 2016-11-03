@@ -37,6 +37,21 @@ EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters
     _slave_node_set_id(getParam<BoundaryName>("slave")),
     _penalty(getParam<Real>("penalty"))
 {
+  updateConstrainedNodes();
+}
+
+void
+EqualValueBoundaryConstraint::meshChanged()
+{
+  updateConstrainedNodes();
+}
+
+void
+EqualValueBoundaryConstraint::updateConstrainedNodes()
+{
+  _master_node_vector.clear();
+  _connected_nodes.clear();
+
   if ((_slave_node_ids.size() == 0) && (_slave_node_set_id == "NaN"))
     mooseError("Please specify slave node ids or boundary id.");
   else if ((_slave_node_ids.size() == 0) && (_slave_node_set_id != "NaN"))
@@ -44,43 +59,43 @@ EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters
     std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_slave_node_set_id));
     std::vector<dof_id_type>::iterator in;
 
-    //Setting master node to first node of the slave node set if no master node id is pprovided
+    //Set master node to first node of the slave node set if no master node id is provided
+    //_master_node_vector defines master nodes in the base class
     if (_master_node_id == std::numeric_limits<unsigned int>::max())
     {
-      in = nodelist.begin();
-      _master_node_id = *in;
+      in = std::min_element(nodelist.begin(), nodelist.end());
+      _master_node_vector.push_back(*in);
     }
-    _master_node_vector.push_back(_master_node_id); //_master_node_vector defines master nodes in the base class
+    else
+      _master_node_vector.push_back(_master_node_id);
 
+    //Fill in _connected_nodes, which defines slave nodes in the base class
     for (in = nodelist.begin(); in != nodelist.end(); ++in)
     {
-      if ((*in != _master_node_id) && (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id()))
-        _connected_nodes.push_back(*in); //_connected_nodes defines slave nodes in the base class
+      if ((*in != _master_node_vector[0]) && (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id()))
+        _connected_nodes.push_back(*in);
     }
   }
   else if ((_slave_node_ids.size() != 0) && (_slave_node_set_id == "NaN"))
   {
     if (_master_node_id == std::numeric_limits<unsigned int>::max())
-      _master_node_id = _slave_node_ids[0];
+      _master_node_vector.push_back(_slave_node_ids[0]); //_master_node_vector defines master nodes in the base class
 
-    _master_node_vector.push_back(_master_node_id); //_master_node_vector defines master nodes in the base class
-
-    std::vector<unsigned int>::iterator its;
-    for (its = _slave_node_ids.begin(); its != _slave_node_ids.end(); ++its)
-    {
-      if ((_mesh.nodeRef(*its).processor_id() == _subproblem.processor_id()) && (*its != _master_node_id))
-        _connected_nodes.push_back(*its);
-    }
+    // Fill in _connected_nodes, which defines slave nodes in the base class
+    for (const auto & dof : _slave_node_ids)
+      if ((_mesh.nodeRef(dof).processor_id() == _subproblem.processor_id()) && (dof != _master_node_vector[0]))
+        _connected_nodes.push_back(dof);
   }
 
   // Add elements connected to master node to Ghosted Elements
-  std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[_master_node_id];
-  for (unsigned int i = 0; i < elems.size(); i++)
-    _subproblem.addGhostedElem(elems[i]);
-}
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
+  auto node_to_elem_pair = node_to_elem_map.find(_master_node_vector[0]);
+  mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
+  const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
 
-EqualValueBoundaryConstraint::~EqualValueBoundaryConstraint()
-{
+  if (elems.size() == 0)
+    mooseError("Couldn't find any elements connected to master node");
+  _subproblem.addGhostedElem(elems[0]);
 }
 
 Real

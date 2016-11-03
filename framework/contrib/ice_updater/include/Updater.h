@@ -43,7 +43,7 @@
 #include "MooseError.h"
 #include "INetworkingTool.h"
 
-#ifdef LIBMESH_HAVE_CXX11
+#if defined(LIBMESH_HAVE_CXX11_THREAD) && defined(LIBMESH_HAVE_CXX11_CONDITION_VARIABLE)
 
 #include <condition_variable>
 #include <mutex>
@@ -414,7 +414,7 @@ public:
 
 
 
-#else // !LIBMESH_HAVE_CXX11
+#else
 
 
 
@@ -445,6 +445,6 @@ public:
   void updateProgress(int) {}
 };
 
-#endif // LIBMESH_HAVE_CXX11
+#endif
 
 #endif

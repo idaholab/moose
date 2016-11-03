@@ -79,8 +79,13 @@ Euler2RGBTest::test()
 
   for (unsigned int i = 0; i < nsamples; ++i)
     for (unsigned int sd = 1; i <= 3; ++i)
-      CPPUNIT_ASSERT_DOUBLES_EQUAL(
-        samples[i].expect[sd-1],
-        Euler2RGB(sd, samples[i].phi1, samples[i].phi, samples[i].phi2, samples[i].phase,  samples[i].sym),
-      0.00001);
+    {
+      Point RGB = euler2RGB(sd, samples[i].phi1, samples[i].phi, samples[i].phi2, samples[i].phase,  samples[i].sym);
+
+      Real RGBint = 0.0;
+      for (unsigned int i = 0; i < 3; ++i)
+        RGBint = 256 * RGBint + (RGB(i) >= 1 ? 255 : std::floor(RGB(i) * 256.0));
+
+      CPPUNIT_ASSERT_DOUBLES_EQUAL(samples[i].expect[sd-1], RGBint, 0.00001);
+    }
 }

@@ -63,7 +63,7 @@ class DiracKernel :
 {
 public:
   DiracKernel(const InputParameters & parameters);
-  virtual ~DiracKernel(){}
+  virtual ~DiracKernel() {}
 
   /**
    * Computes the residual for the current element.
@@ -74,6 +74,11 @@ public:
    * Computes the jacobian for the current element.
    */
   virtual void computeJacobian();
+
+  /**
+   * This gets called by computeOffDiagJacobian() at each quadrature point.
+   */
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /**
    * Computes the off-diagonal Jacobian for variable jvar.
@@ -97,21 +102,6 @@ public:
   virtual void addPoints() = 0;
 
   /**
-   * This is the virtual that derived classes should override for computing the residual.
-   */
-  virtual Real computeQpResidual() = 0;
-
-  /**
-   * This is the virtual that derived classes should override for computing the Jacobian.
-   */
-  virtual Real computeQpJacobian();
-
-  /**
-   * This gets called by computeOffDiagJacobian() at each quadrature point.
-   */
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-
-  /**
    * Whether or not this DiracKernel has something to distribute on this element.
    */
   bool hasPointsOnElem(const Elem * elem);
@@ -127,6 +117,16 @@ public:
   void clearPoints();
 
 protected:
+  /**
+   * This is the virtual that derived classes should override for computing the residual.
+   */
+  virtual Real computeQpResidual() = 0;
+
+  /**
+   * This is the virtual that derived classes should override for computing the Jacobian.
+   */
+  virtual Real computeQpJacobian();
+
   /**
    * Add the physical x,y,z point located in the element "elem" to the list of points
    * this DiracKernel will be asked to evaluate a value at.
@@ -216,6 +216,9 @@ protected:
   /// Derivative of u_dot wrt u
   const VariableValue & _du_dot_du;
 
+  /// drop duplicate points or consider them in residual and Jacobian
+  const bool _drop_duplicate_points;
+
 private:
   /// Data structure for caching user-defined IDs which can be mapped to
   /// specific std::pair<const Elem*, Point> and avoid the PointLocator Elem lookup.
@@ -237,6 +240,10 @@ private:
                     const Elem* new_elem,
                     Point p,
                     unsigned id);
+
+  /// A helper function for addPoint(Point, id) for when
+  /// id != invalid_uint.
+  const Elem * addPointWithValidId(Point p, unsigned id);
 };
 
 #endif

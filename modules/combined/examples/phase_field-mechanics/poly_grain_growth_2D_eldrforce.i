@@ -12,7 +12,7 @@
 []
 
 [GlobalParams]
-  op_num = 15
+  op_num = 8
   var_name_base = gr
   grain_num = 36
   use_displaced_mesh = true
@@ -121,14 +121,14 @@
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = timestep_end
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     execute_on = timestep_end
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
   [../]
   [./C1111]
@@ -146,13 +146,15 @@
     variable = vonmises_stress
     rank_two_tensor = stress
     scalar_type = VonMisesStress
+    execute_on = timestep_end
   [../]
   [./euler_angle]
     type = OutputEulerAngles
     variable = euler_angle
     euler_angle_provider = euler_angle_file
-    GrainTracker_object = grain_tracker
+    grain_tracker = grain_tracker
     output_euler_angle = 'phi1'
+    execute_on = 'initial timestep_end'
   [../]
 []
 
@@ -160,7 +162,7 @@
   [./Periodic]
     [./All]
       auto_direction = 'x'
-      variable = 'gr0 gr1 gr2 gr3 gr4 gr5 gr6 gr7 gr8 gr9 gr10 gr11 gr12 gr13 gr14'
+      variable = 'gr0 gr1 gr2 gr3 gr4 gr5 gr6 gr7'
     [../]
   [../]
   [./top_displacement]
@@ -195,12 +197,7 @@
   [../]
   [./ElasticityTensor]
     type = ComputePolycrystalElasticityTensor
-    block = 0
-    fill_method = symmetric9
-    #reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
-    Elastic_constants = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
-    GrainTracker_object = grain_tracker
-    euler_angle_provider = euler_angle_file
+    grain_tracker = grain_tracker
   [../]
   [./strain]
     type = ComputeSmallStrain
@@ -232,21 +229,20 @@
 []
 
 [UserObjects]
-  [./grain_tracker]
-    type = GrainTracker
-    threshold = 0.2
-    convex_hull_buffer = 5.0
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
-    connecting_threshold = 0.05
-    compute_op_maps = true
-    execute_on = 'initial timestep_begin'
-    flood_entity_type = elemental
-  [../]
   [./euler_angle_file]
     type = EulerAngleFileReader
     file_name = grn_36_rand_2D.tex
+  [../]
+  [./grain_tracker]
+    type = GrainTrackerElasticity
+    threshold = 0.2
+    compute_var_to_feature_map = true
+    execute_on = 'initial timestep_begin'
+    flood_entity_type = ELEMENTAL
+
+    C_ijkl = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
+    fill_method = symmetric9
+    euler_angle_provider = euler_angle_file
   [../]
 []
 

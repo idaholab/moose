@@ -103,10 +103,6 @@ PetscOutput::PetscOutput(const InputParameters & parameters) :
     _linear_end_time = getParam<Real>("linear_residual_end_time");
 }
 
-PetscOutput::~PetscOutput()
-{
-}
-
 void
 PetscOutput::solveSetup()
 {

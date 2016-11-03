@@ -42,4 +42,14 @@
     csvdiff = 'grav02d.csv'
     rel_err = 1.0E-5
   [../]
+  [./grav02e]
+    type = 'Exodiff'
+    input = 'grav02e.i'
+    exodiff = 'grav02e.e'
+  [../]
+  [./grav02f]
+    type = 'Exodiff'
+    input = 'grav02f.i'
+    exodiff = 'grav02f.e'
+  [../]
 []

@@ -1,0 +1,63 @@
+reset
+
+################################################################################
+
+# User can customize the values in this section.
+
+# Half-angle (in degrees) of the wedge.  Note this is not a comment
+# even though it starts with a comment character.
+# {my_alpha = 15}
+
+# Number of cells in the theta-direction.  Default=8.
+# {my_interval_theta = 8}
+
+# Number of cells in the r-direction.  Default=12.
+# {my_interval_r = 12}
+
+################################################################################
+
+# First create annulus
+create surface circle radius 2.0 zplane
+create surface circle radius 1.0 zplane
+subtract body 2 from body 1
+
+# xplane is initially normal to the x-axis so to get an angle of alpha
+# on the x+ side, you rotate by:
+#  pi/2 - my_alpha (bottom cut)
+# -pi/2 + my_alpha (top cut)
+webcut body all plane xplane rotate {90-my_alpha} about z
+webcut body all plane xplane rotate {-90+my_alpha} about z
+
+# Remove everything except body 1
+delete body all except 1
+
+# Set intervals for meshing
+curve 13 interval {my_interval_theta}
+curve 12 interval {my_interval_r}
+
+# The default is "scheme map" which seems to produce a reasonable mesh
+# of 12x8 quadrilateral elements without setting intervals.
+mesh surf 6
+
+# Make named sidesets
+sideset 1 curve 6
+sideset 1 name 'bottom_wall'
+
+sideset 2 curve 14
+sideset 2 name 'outlet'
+
+sideset 3 curve 12
+sideset 3 name 'top_wall'
+
+sideset 4 curve 13
+sideset 4 name 'inlet'
+
+# Export the mesh as QUAD9s.  On OSX, this mesh is written to
+# ~/Documents by default.
+block 1 surf 6
+block 1 element type QUAD9
+export mesh "wedge_{my_interval_theta}x{my_interval_r}.e" dimension 2 block 1 overwrite
+
+# Local Variables:
+# mode: shell-script
+# End:

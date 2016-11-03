@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "ChemicalOutFlowBC.h"
-#include "Material.h"
 
 template<>
 InputParameters validParams<ChemicalOutFlowBC>()
@@ -24,12 +23,11 @@ ChemicalOutFlowBC::ChemicalOutFlowBC(const InputParameters & parameters) :
 Real
 ChemicalOutFlowBC::computeQpResidual()
 {
-  return -_test[_i][_qp] * _porosity[_qp] * _diff[_qp] * _grad_u[_qp] * _normals[_qp];
+  return - _test[_i][_qp] * _porosity[_qp] * _diff[_qp] * _grad_u[_qp] * _normals[_qp];
 }
-
 
 Real
 ChemicalOutFlowBC::computeQpJacobian()
 {
-  return -_test[_i][_qp] * _porosity[_qp] * _diff[_qp] * _grad_phi[_j][_qp] * _normals[_qp];
+  return - _test[_i][_qp] * _porosity[_qp] * _diff[_qp] * _grad_phi[_j][_qp] * _normals[_qp];
 }

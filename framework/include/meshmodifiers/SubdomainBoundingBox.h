@@ -40,18 +40,9 @@ public:
    */
   SubdomainBoundingBox(const InputParameters & parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~SubdomainBoundingBox();
-
-  /**
-   * Perform the actual subdomain modification
-   */
-  virtual void modify();
+  virtual void modify() override;
 
 private:
-
   /// ID location (inside of outside of box)
   MooseEnum _location;
 

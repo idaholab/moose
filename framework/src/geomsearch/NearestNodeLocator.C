@@ -87,7 +87,7 @@ NearestNodeLocator::findNodes()
     // Build a bounding box.  No reason to consider nodes outside of our inflated BB
     MeshTools::BoundingBox * my_inflated_box = NULL;
 
-    std::vector<Real> & inflation = _mesh.getGhostedBoundaryInflation();
+    const std::vector<Real> & inflation = _mesh.getGhostedBoundaryInflation();
 
     // This means there was a user specified inflation... so we can build a BB
     if (inflation.size() > 0)
@@ -116,9 +116,8 @@ NearestNodeLocator::findNodes()
 
     // Data structures to hold the Nodal Boundary conditions
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-    for (ConstBndNodeRange::const_iterator nd = bnd_nodes.begin() ; nd != bnd_nodes.end(); ++nd)
+    for (const auto & bnode : bnd_nodes)
     {
-      const BndNode * bnode = *nd;
       BoundaryID boundary_id = bnode->_bnd_id;
       dof_id_type node_id = bnode->_node->id();
 
@@ -135,7 +134,7 @@ NearestNodeLocator::findNodes()
     // don't need the BB anymore
     delete my_inflated_box;
 
-    std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh.nodeToElemMap();
+    const std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh.nodeToElemMap();
 
     NodeIdRange trial_slave_node_range(trial_slave_nodes.begin(), trial_slave_nodes.end(), 1);
 
@@ -146,10 +145,8 @@ NearestNodeLocator::findNodes()
     _slave_nodes = snt._slave_nodes;
     _neighbor_nodes = snt._neighbor_nodes;
 
-    for (std::set<dof_id_type>::iterator it = snt._ghosted_elems.begin();
-        it != snt._ghosted_elems.end();
-        ++it)
-      _subproblem.addGhostedElem(*it);
+    for (const auto & dof : snt._ghosted_elems)
+      _subproblem.addGhostedElem(dof);
 
     // Cache the slave_node_range so we don't have to build it each time
     _slave_node_range = new NodeIdRange(_slave_nodes.begin(), _slave_nodes.end(), 1);

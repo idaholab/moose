@@ -30,7 +30,7 @@ class AdaptivityAction: public Action
 public:
   AdaptivityAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif //LIBMESH_ENABLE_AMR

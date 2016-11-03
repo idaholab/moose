@@ -43,10 +43,10 @@ public:
 
   virtual ~ProjectMaterialProperties();
 
-  virtual void subdomainChanged();
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
+  virtual void subdomainChanged() override;
+  virtual void onElement(const Elem * elem) override;
+  virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
+  virtual void onInternalSide(const Elem * elem, unsigned int side) override;
 
   void join(const ProjectMaterialProperties & /*y*/);
 

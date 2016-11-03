@@ -32,16 +32,10 @@ class ElementL2Difference :
 public:
   ElementL2Difference(const InputParameters & parameters);
 
-  /**
-   * Get the L2 Difference.
-   */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
 protected:
-  /**
-   * Compute the per Qp difference squared.
-   */
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   /// The variable to compare to
   const VariableValue & _other_var;

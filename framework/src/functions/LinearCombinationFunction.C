@@ -30,8 +30,8 @@ LinearCombinationFunction::LinearCombinationFunction(const InputParameters & par
     _w(getParam<std::vector<Real> >("w"))
 {
 
-  const std::vector<FunctionName> & names(getParam<std::vector<FunctionName> >("functions"));
-  const unsigned len(names.size());
+  const std::vector<FunctionName> & names = getParam<std::vector<FunctionName> >("functions");
+  const unsigned int len = names.size();
   if (len != _w.size())
     mooseError("LinearCombinationFunction: The number of functions must equal the number of w values");
 
@@ -45,10 +45,6 @@ LinearCombinationFunction::LinearCombinationFunction(const InputParameters & par
       mooseError("LinearCombinationFunction: The function " << names[i] << " (referenced by " << name() << ") cannot be found");
     _f[i] = f;
   }
-}
-
-LinearCombinationFunction::~LinearCombinationFunction()
-{
 }
 
 Real

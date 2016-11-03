@@ -32,6 +32,8 @@ class Split :
 {
  public:
   Split(const InputParameters & parameters);
+  virtual ~Split() = default;
+
   virtual void setup(const std::string& prefix = "-");
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
@@ -68,7 +70,7 @@ class Split :
   ///@}
 
   /// Additional PETSc options
-  Moose::PetscSupport::PetscOptions & _petsc_options;
+  Moose::PetscSupport::PetscOptions  _petsc_options;
 
 #endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 };

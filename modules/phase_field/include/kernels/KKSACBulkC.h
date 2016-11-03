@@ -4,8 +4,8 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef KKSACBULK_H
-#define KKSACBULK_H
+#ifndef KKSACBULKC_H
+#define KKSACBULKC_H
 
 #include "KKSACBulkBase.h"
 

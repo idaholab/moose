@@ -1,4 +1,4 @@
-/****************************************************************/
+ /****************************************************************/
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
 /*          All contents are licensed under LGPL V2.1           */
@@ -27,6 +27,7 @@ template<>
 InputParameters validParams<SolidModel>()
 {
   MooseEnum formulation("Nonlinear3D NonlinearRZ AxisymmetricRZ SphericalR Linear PlaneStrain NonlinearPlaneStrain");
+  MooseEnum compute_method("NoShearRetention ShearRetention");
 
   InputParameters params = validParams<Material>();
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
@@ -48,6 +49,8 @@ InputParameters validParams<SolidModel>()
   params.addParam<std::string>("cracking_release", "abrupt", "The cracking release type.  Choices are abrupt (default) and exponential.");
   params.addParam<Real>("cracking_stress", 0.0, "The stress threshold beyond which cracking occurs.  Must be positive.");
   params.addParam<Real>("cracking_residual_stress", 0.0, "The fraction of the cracking stress allowed to be maintained following a crack.");
+  params.addParam<Real>("cracking_beta", 1.0, "The coefficient used in the exponetional model.");
+  params.addParam<MooseEnum>("compute_method", compute_method, "The method  used in the stress calculation.");
   params.addParam<FunctionName>("cracking_stress_function", "", "The cracking stress as a function of time and location" );
   params.addParam<std::vector<unsigned int> >("active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
   params.addParam<unsigned int>("max_cracks", 3, "The maximum number of cracks allowed at a material point.");
@@ -56,6 +59,7 @@ InputParameters validParams<SolidModel>()
   params.addParam<std::string>("increment_calculation", "RashidApprox", "The algorithm to use when computing the incremental strain and rotation (RashidApprox or Eigen). For use with Nonlinear3D/RZ formulation.");
   params.addParam<bool>("large_strain", false, "Whether to include large strain terms in AxisymmetricRZ, SphericalR, and PlaneStrain formulations.");
   params.addParam<bool>("compute_JIntegral", false, "Whether to compute the J Integral.");
+  params.addParam<bool>("compute_InteractionIntegral", false, "Whether to compute the Interaction Integral.");
   params.addParam<bool>("store_stress_older", false, "Parameter which indicates whether the older stress state, required for HHT time integration, needs to be stored");
   params.addCoupledVar("disp_r", "The r displacement");
   params.addCoupledVar("disp_x", "The x displacement");
@@ -65,6 +69,7 @@ InputParameters validParams<SolidModel>()
   params.addCoupledVar("scalar_strain_zz", "The zz strain (scalar variable)");
   params.addParam<std::vector<std::string> >("dep_matl_props", "Names of material properties this material depends on.");
   params.addParam<std::string>("constitutive_model", "ConstitutiveModel to use (optional)");
+  params.addParam<bool>("volumetric_locking_correction", true, "Set to false to turn off volumetric locking correction");
   return params;
 }
 
@@ -107,6 +112,8 @@ SolidModel::SolidModel( const InputParameters & parameters) :
   _cracking_stress( parameters.isParamValid("cracking_stress") ?
                     (getParam<Real>("cracking_stress") > 0 ? getParam<Real>("cracking_stress") : -1) : -1 ),
   _cracking_residual_stress( getParam<Real>("cracking_residual_stress") ),
+  _cracking_beta(getParam<Real>("cracking_beta")),
+  _compute_method(getParam<MooseEnum>("compute_method")),
   _cracking_stress_function( getParam<FunctionName>("cracking_stress_function") != "" ? &getFunction("cracking_stress_function") : NULL),
   _cracking_alpha( 0 ),
   _active_crack_planes(3,1),
@@ -144,19 +151,24 @@ SolidModel::SolidModel( const InputParameters & parameters) :
   _crack_max_strain_old(NULL),
   _principal_strain(3,1),
   _elasticity_tensor(createProperty<SymmElasticityTensor>("elasticity_tensor")),
+  _elasticity_tensor_old(createPropertyOld<SymmElasticityTensor>("elasticity_tensor")),
   _Jacobian_mult(createProperty<SymmElasticityTensor>("Jacobian_mult")),
   _d_strain_dT(),
   _d_stress_dT(createProperty<SymmTensor>("d_stress_dT")),
   _total_strain_increment(0),
   _strain_increment(0),
   _compute_JIntegral(getParam<bool>("compute_JIntegral")),
+  _compute_InteractionIntegral(getParam<bool>("compute_InteractionIntegral")),
   _store_stress_older(getParam<bool>("store_stress_older")),
   _SED(NULL),
   _SED_old(NULL),
   _Eshelby_tensor(NULL),
   _J_thermal_term_vec(NULL),
+  _current_instantaneous_thermal_expansion_coef(NULL),
   _block_id(std::vector<SubdomainID>(blockIDs().begin(), blockIDs().end())),
   _constitutive_active(false),
+  _step_zero(declareRestartableData<bool>("step_zero", true)),
+  _step_one(declareRestartableData<bool>("step_one", true)),
   _element(NULL),
   _local_elasticity_tensor(NULL)
 {
@@ -271,8 +283,11 @@ SolidModel::SolidModel( const InputParameters & parameters) :
     _SED_old = &declarePropertyOld<Real>("strain_energy_density");
     _Eshelby_tensor = &declareProperty<ColumnMajorMatrix>("Eshelby_tensor");
     _J_thermal_term_vec = &declareProperty<RealVectorValue>("J_thermal_term_vec");
+    _current_instantaneous_thermal_expansion_coef = &declareProperty<Real>("current_instantaneous_thermal_expansion_coef");
   }
 
+  if (_compute_InteractionIntegral && !hasMaterialProperty<Real>("current_instantaneous_thermal_expansion_coef"))
+    _current_instantaneous_thermal_expansion_coef = &declareProperty<Real>("current_instantaneous_thermal_expansion_coef");
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -485,13 +500,13 @@ SolidModel::modifyStrainIncrement()
 void
 SolidModel::applyThermalStrain()
 {
-  if ( _has_temp && _t_step != 0 )
+  if ( _has_temp && !_step_zero )
   {
     Real inc_thermal_strain;
     Real d_thermal_strain_d_temp;
 
     Real old_temp;
-    if (_t_step == 1 && _has_stress_free_temp)
+    if (_step_one && _has_stress_free_temp)
       old_temp = _stress_free_temp;
     else
       old_temp = _temperature_old[_qp];
@@ -634,6 +649,11 @@ SolidModel::initQpStatefulProperties()
 void
 SolidModel::computeProperties()
 {
+  if (_t_step >= 1)
+    _step_zero = false;
+
+  if (_t_step >= 2)
+    _step_one = false;
 
   elementInit();
   _element->init();
@@ -669,6 +689,9 @@ SolidModel::computeProperties()
 
     if (_compute_JIntegral && _has_temp)
       computeThermalJvec();
+
+    if (_compute_InteractionIntegral && _has_temp)
+      computeCurrentInstantaneousThermalExpansionCoefficient();
 
     computePreconditioning();
 
@@ -738,7 +761,8 @@ SolidModel::computeConstitutiveModelStress()
   // Given the stretching, compute the stress increment and add it to the old stress. Also update the creep strain
   // stress = stressOld + stressIncrement
 
-  if (_t_step == 0) return;
+  if (_step_zero)
+    return;
 
   const SubdomainID current_block = _current_elem->subdomain_id();
   MooseSharedPointer<ConstitutiveModel> cm = _constitutive_model[current_block];
@@ -755,7 +779,6 @@ SolidModel::computeConstitutiveModelStress()
 }
 
 ////////////////////////////////////////////////////////////////////////
-
 void
 SolidModel::computeElasticityTensor()
 {
@@ -989,7 +1012,10 @@ SolidModel::crackingStrainDirections()
   {
     // Adjust the elasticity matrix for cracking.  This must be used by the
     // constitutive law.
-    _local_elasticity_tensor->adjustForCracking( _crack_flags_local );
+    if (_compute_method == "ShearRetention")
+      _local_elasticity_tensor->adjustForCracking(_crack_flags_local);
+    else
+      _local_elasticity_tensor->adjustForCrackingWithShearRetention(_crack_flags_local);
 
     ColumnMajorMatrix R_9x9(9,9);
     const ColumnMajorMatrix & R( (*_crack_rotation)[_qp] );
@@ -1123,10 +1149,9 @@ void
 SolidModel::crackingStressRotation()
 {
   if (_cracking_stress_function != NULL)
-   {
+  {
      _cracking_stress = _cracking_stress_function->value(_t, _q_point[_qp]);
-   }
-
+  }
 
   if (_cracking_stress > 0)
   {
@@ -1145,6 +1170,7 @@ SolidModel::crackingStressRotation()
     // This must be done in the crack-local coordinate frame.
 
     // Rotate stress to cracked orientation.
+    ColumnMajorMatrix R( (*_crack_rotation)[_qp]);
     ColumnMajorMatrix RT( (*_crack_rotation)[_qp].transpose() );
     SymmTensor sigmaPrime;
     rotateSymmetricTensor( RT, _stress[_qp], sigmaPrime );
@@ -1287,6 +1313,7 @@ SolidModel::crackingStressRotation()
     {
       applyCracksToTensor( _stress[_qp], sigma );
     }
+
   }
 }
 
@@ -1310,8 +1337,8 @@ SolidModel::computeCrackFactor( int i, Real & sigma, Real & flagVal )
     const Real crackMaxStrain( (*_crack_max_strain)[_qp](i) );
     // Compute stress that follows exponental curve
     sigma = _cracking_stress*
-           (_cracking_residual_stress + (1-_cracking_residual_stress)*
-            std::exp(_cracking_alpha/_cracking_stress*(crackMaxStrain-(*_crack_strain)[_qp](i))));
+           (_cracking_residual_stress + (1 - _cracking_residual_stress) *
+            std::exp(_cracking_alpha * _cracking_beta /_cracking_stress * (crackMaxStrain - (*_crack_strain)[_qp](i))));
     // Compute ratio of current stiffness to original stiffness
     flagVal = sigma * (*_crack_strain)[_qp](i) /
         (crackMaxStrain * _cracking_stress);
@@ -1520,8 +1547,22 @@ SolidModel::computeThermalJvec()
 {
   mooseAssert(_J_thermal_term_vec, "_J_thermal_term_vec not initialized");
 
-  Real stress_trace;
-  stress_trace = _stress[_qp].xx() + _stress[_qp].yy() + _stress[_qp].zz();
+  Real stress_trace = _stress[_qp].xx() + _stress[_qp].yy() + _stress[_qp].zz();
+
+  computeCurrentInstantaneousThermalExpansionCoefficient();
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  {
+    Real dthermstrain_dx = _temp_grad[_qp](i) * (*_current_instantaneous_thermal_expansion_coef)[_qp];
+    (*_J_thermal_term_vec)[_qp](i) = stress_trace * dthermstrain_dx;
+  }
+}
+
+void
+SolidModel::computeCurrentInstantaneousThermalExpansionCoefficient()
+{
+  mooseAssert(_current_instantaneous_thermal_expansion_coef, "_current_instantaneous_thermal_expansion_coef not initialized");
+
+  (*_current_instantaneous_thermal_expansion_coef)[_qp] = 0.0;
 
   if (_alpha_function)
   {
@@ -1531,11 +1572,7 @@ SolidModel::computeThermalJvec()
     if (!_mean_alpha_function)
     {
       Real alpha = _alpha_function->value(current_temp,p);
-      for (unsigned int i=0; i<3; ++i)
-      {
-        Real dthermstrain_dx = _temp_grad[_qp](i) * (alpha);
-        (*_J_thermal_term_vec)[_qp](i) = stress_trace*dthermstrain_dx;
-      }
+      (*_current_instantaneous_thermal_expansion_coef)[_qp] = alpha;
     }
     else
     {
@@ -1547,20 +1584,9 @@ SolidModel::computeThermalJvec()
       Real denominator = 1.0 + alphabar_Tsf * (_stress_free_temp - _ref_temp);
       if (denominator < small)
         mooseError("Denominator too small in thermal strain calculation");
-      Real dthermstrain_dT = numerator / denominator;
-      for (unsigned int i=0; i<3; ++i)
-      {
-        Real dthermstrain_dx = _temp_grad[_qp](i) * dthermstrain_dT;
-        (*_J_thermal_term_vec)[_qp](i) = stress_trace*dthermstrain_dx;
-      }
+      (*_current_instantaneous_thermal_expansion_coef)[_qp] = numerator / denominator;
     }
   }
   else
-  {
-    for (unsigned int i=0; i<3; ++i)
-    {
-      Real dthermstrain_dx = _temp_grad[_qp](i) * _alpha;
-      (*_J_thermal_term_vec)[_qp](i) = stress_trace*dthermstrain_dx;
-    }
-  }
+    (*_current_instantaneous_thermal_expansion_coef)[_qp] = _alpha;
 }

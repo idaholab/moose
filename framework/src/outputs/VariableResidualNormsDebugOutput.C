@@ -38,10 +38,6 @@ VariableResidualNormsDebugOutput::VariableResidualNormsDebugOutput(const InputPa
 {
 }
 
-VariableResidualNormsDebugOutput::~VariableResidualNormsDebugOutput()
-{
-}
-
 void
 VariableResidualNormsDebugOutput::output(const ExecFlagType & /*type*/)
 {

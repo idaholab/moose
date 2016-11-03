@@ -60,7 +60,7 @@ protected:
   const VariableValue & _d_rhoudot_du;
   const VariableValue & _d_rhovdot_du;
   const VariableValue & _d_rhowdot_du;
-  const VariableValue & _d_rhoedot_du;
+  const VariableValue & _d_rhoEdot_du;
 
   // Temperature is need to compute speed of sound
   const VariableValue & _temperature;

@@ -15,6 +15,7 @@
 #include "TensorMechanicsRSphericalAction.h"
 #include "PoroMechanicsAction.h"
 #include "PressureAction.h"
+#include "GeneralizedPlaneStrainAction.h"
 
 #include "StressDivergenceTensors.h"
 #include "StressDivergenceTensorsTruss.h"
@@ -26,43 +27,51 @@
 #include "InertialForce.h"
 #include "Gravity.h"
 #include "DynamicStressDivergenceTensors.h"
+#include "OutOfPlanePressure.h"
+#include "GeneralizedPlaneStrain.h"
+#include "GeneralizedPlaneStrainOffDiag.h"
+#include "WeakPlaneStress.h"
 
-#include "LinearElasticMaterial.h"
 #include "LinearElasticTruss.h"
-#include "FiniteStrainElasticMaterial.h"
 #include "FiniteStrainPlasticMaterial.h"
-#include "FiniteStrainRatePlasticMaterial.h"
-#include "FiniteStrainMohrCoulomb.h"
 #include "FiniteStrainCrystalPlasticity.h"
 #include "FiniteStrainCPSlipRateRes.h"
 #include "FiniteStrainUObasedCP.h"
+#include "ComputeCappedWeakPlaneStress.h"
 #include "ComputeMultiPlasticityStress.h"
-#include "CosseratLinearElasticMaterial.h"
-#include "ElementPropertyReadFileTest.h"
+#include "ComputeCosseratLinearElasticStress.h"
+#include "ComputeCosseratSmallStrain.h"
+#include "ComputeCosseratIncrementalSmallStrain.h"
+#include "ComputeCosseratElasticityTensor.h"
+#include "ComputeLayeredCosseratElasticityTensor.h"
 #include "TwoPhaseStressMaterial.h"
 #include "MultiPhaseStressMaterial.h"
-#include "SimpleEigenStrainMaterial.h"
 #include "CompositeEigenstrain.h"
 #include "CompositeElasticityTensor.h"
 #include "ComputeElasticityTensor.h"
 #include "ComputeElasticityTensorCP.h"
 #include "ComputeIsotropicElasticityTensor.h"
+#include "ComputeVariableIsotropicElasticityTensor.h"
 #include "ComputeSmallStrain.h"
 #include "ComputePlaneSmallStrain.h"
+#include "ComputePlaneIncrementalStrain.h"
 #include "ComputePlaneFiniteStrain.h"
 #include "ComputeAxisymmetricRZSmallStrain.h"
 #include "ComputeRSphericalSmallStrain.h"
 #include "ComputeIncrementalSmallStrain.h"
 #include "ComputeAxisymmetricRZIncrementalStrain.h"
+#include "ComputeAxisymmetricRZIncrementalPlaneStrain.h"
 #include "ComputeRSphericalIncrementalStrain.h"
 #include "ComputeFiniteStrain.h"
 #include "ComputeAxisymmetricRZFiniteStrain.h"
 #include "ComputeRSphericalFiniteStrain.h"
 #include "ComputeLinearElasticStress.h"
 #include "ComputeFiniteStrainElasticStress.h"
+#include "ComputeVariableElasticConstantStress.h"
 #include "ComputeEigenstrain.h"
 #include "ComputeVariableBaseEigenStrain.h"
 #include "ComputeVariableEigenstrain.h"
+#include "ComputeThermalExpansionEigenstrain.h"
 #include "ComputeConcentrationDependentElasticityTensor.h"
 #include "FiniteStrainHyperElasticViscoPlastic.h"
 #include "LinearIsoElasticPFDamage.h"
@@ -71,14 +80,19 @@
 #include "ComputeDeformGradBasedStress.h"
 #include "VolumeDeformGradCorrectedStress.h"
 #include "ComputeReturnMappingStress.h"
-#include "RecomputeRadialReturn.h"
-#include "RecomputeRadialReturnIsotropicPlasticity.h"
+#include "RadialReturnStressUpdate.h"
+#include "IsotropicPlasticityStressUpdate.h"
+#include "IsotropicPowerLawHardeningStressUpdate.h"
+#include "PowerLawCreepStressUpdate.h"
+#include "HyperbolicViscoplasticityStressUpdate.h"
+#include "TemperatureDependentHardeningStressUpdate.h"
 #include "StressBasedChemicalPotential.h"
 #include "FluxBasedStrainIncrement.h"
 #include "GBRelaxationStrainIncrement.h"
 #include "SumTensorIncrements.h"
 #include "ComputeStrainIncrementBasedStress.h"
 #include "ComputeElasticSmearedCrackingStress.h"
+#include "InclusionProperties.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -89,11 +103,15 @@
 #include "TensorMechanicsPlasticWeakPlaneTensileN.h"
 #include "TensorMechanicsPlasticWeakPlaneShear.h"
 #include "TensorMechanicsPlasticJ2.h"
+#include "TensorMechanicsPlasticIsotropicSD.h"
+#include "TensorMechanicsPlasticOrthotropic.h"
 #include "TensorMechanicsPlasticMeanCap.h"
+#include "TensorMechanicsPlasticMeanCapTC.h"
 #include "TensorMechanicsPlasticDruckerPragerHyperbolic.h"
 #include "TensorMechanicsHardeningConstant.h"
 #include "TensorMechanicsHardeningGaussian.h"
 #include "TensorMechanicsHardeningExponential.h"
+#include "TensorMechanicsHardeningPowerRule.h"
 #include "TensorMechanicsHardeningCutExponential.h"
 #include "TensorMechanicsHardeningCubic.h"
 #include "ElementPropertyReadFile.h"
@@ -107,12 +125,15 @@
 #include "CylindricalRankTwoAux.h"
 #include "RankTwoAux.h"
 #include "RankFourAux.h"
-#include "TensorElasticEnergyAux.h"
+#include "ElasticEnergyAux.h"
+#include "AccumulateAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
 #include "RankTwoScalarAux.h"
 #include "StressDivergencePFFracTensors.h"
 #include "NewmarkAccelAux.h"
 #include "NewmarkVelAux.h"
+#include "RadialDisplacementCylinderAux.h"
+#include "RadialDisplacementSphereAux.h"
 
 #include "CavityPressureAction.h"
 #include "CavityPressurePostprocessor.h"
@@ -124,6 +145,8 @@
 #include "PresetVelocity.h"
 #include "Pressure.h"
 #include "DisplacementAboutAxis.h"
+#include "PresetDisplacement.h"
+#include "PresetAcceleration.h"
 
 #include "CrystalPlasticitySlipRateGSS.h"
 #include "CrystalPlasticitySlipResistanceGSS.h"
@@ -132,6 +155,12 @@
 
 #include "Mass.h"
 #include "TorqueReaction.h"
+#include "MaterialTensorIntegral.h"
+
+#include "LineMaterialRankTwoSampler.h"
+#include "LineMaterialRankTwoScalarSampler.h"
+
+#include "GeneralizedPlaneStrainUserObject.h"
 
 template<>
 InputParameters validParams<TensorMechanicsApp>()
@@ -180,43 +209,52 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(InertialForce);
   registerKernel(Gravity);
   registerKernel(DynamicStressDivergenceTensors);
+  registerKernel(OutOfPlanePressure);
+  registerKernel(GeneralizedPlaneStrain);
+  registerKernel(GeneralizedPlaneStrainOffDiag);
+  registerKernel(WeakPlaneStress);
 
-  registerMaterial(LinearElasticMaterial);
   registerMaterial(LinearElasticTruss);
-  registerMaterial(FiniteStrainElasticMaterial);
   registerMaterial(FiniteStrainPlasticMaterial);
-  registerMaterial(FiniteStrainMohrCoulomb);
-  registerMaterial(FiniteStrainRatePlasticMaterial);
   registerMaterial(FiniteStrainCrystalPlasticity);
   registerMaterial(FiniteStrainCPSlipRateRes);
   registerMaterial(FiniteStrainUObasedCP);
+  registerMaterial(ComputeCappedWeakPlaneStress);
   registerMaterial(ComputeMultiPlasticityStress);
-  registerMaterial(CosseratLinearElasticMaterial);
-  registerMaterial(ElementPropertyReadFileTest);
+  registerMaterial(ComputeCosseratLinearElasticStress);
+  registerMaterial(ComputeCosseratSmallStrain);
+  registerMaterial(ComputeCosseratIncrementalSmallStrain);
+  registerMaterial(ComputeCosseratElasticityTensor);
+  registerMaterial(ComputeLayeredCosseratElasticityTensor);
   registerMaterial(TwoPhaseStressMaterial);
   registerMaterial(MultiPhaseStressMaterial);
-  registerMaterial(SimpleEigenStrainMaterial);
   registerMaterial(CompositeEigenstrain);
   registerMaterial(CompositeElasticityTensor);
   registerMaterial(ComputeElasticityTensor);
   registerMaterial(ComputeElasticityTensorCP);
   registerMaterial(ComputeIsotropicElasticityTensor);
+  registerMaterial(ComputeVariableIsotropicElasticityTensor);
   registerMaterial(ComputeSmallStrain);
   registerMaterial(ComputePlaneSmallStrain);
+  registerMaterial(ComputePlaneIncrementalStrain);
   registerMaterial(ComputePlaneFiniteStrain);
   registerMaterial(ComputeAxisymmetricRZSmallStrain);
   registerMaterial(ComputeRSphericalSmallStrain);
   registerMaterial(ComputeIncrementalSmallStrain);
   registerMaterial(ComputeAxisymmetricRZIncrementalStrain);
+  registerMaterial(ComputeAxisymmetricRZIncrementalPlaneStrain);
   registerMaterial(ComputeRSphericalIncrementalStrain);
   registerMaterial(ComputeFiniteStrain);
   registerMaterial(ComputeAxisymmetricRZFiniteStrain);
   registerMaterial(ComputeRSphericalFiniteStrain);
   registerMaterial(ComputeLinearElasticStress);
   registerMaterial(ComputeFiniteStrainElasticStress);
+  registerMaterial(ComputeVariableElasticConstantStress);
   registerMaterial(ComputeEigenstrain);
   registerMaterial(ComputeVariableBaseEigenStrain);
   registerMaterial(ComputeVariableEigenstrain);
+  registerDeprecatedObjectName(ComputeThermalExpansionEigenstrain, "ComputeThermalExpansionEigenStrain", "12/19/2016 00:00");
+  registerMaterial(ComputeThermalExpansionEigenstrain);
   registerMaterial(ComputeConcentrationDependentElasticityTensor);
   registerMaterial(FiniteStrainHyperElasticViscoPlastic);
   registerMaterial(LinearIsoElasticPFDamage);
@@ -225,14 +263,19 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeDeformGradBasedStress);
   registerMaterial(VolumeDeformGradCorrectedStress);
   registerMaterial(ComputeReturnMappingStress);
-  registerMaterial(RecomputeRadialReturn);
-  registerMaterial(RecomputeRadialReturnIsotropicPlasticity);
+  registerMaterial(RadialReturnStressUpdate);
+  registerMaterial(IsotropicPlasticityStressUpdate);
+  registerMaterial(IsotropicPowerLawHardeningStressUpdate);
+  registerMaterial(PowerLawCreepStressUpdate);
+  registerMaterial(HyperbolicViscoplasticityStressUpdate);
+  registerMaterial(TemperatureDependentHardeningStressUpdate);
   registerMaterial(StressBasedChemicalPotential);
   registerMaterial(FluxBasedStrainIncrement);
   registerMaterial(GBRelaxationStrainIncrement);
   registerMaterial(SumTensorIncrements);
   registerMaterial(ComputeStrainIncrementBasedStress);
   registerMaterial(ComputeElasticSmearedCrackingStress);
+  registerMaterial(InclusionProperties);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);
@@ -243,11 +286,15 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsPlasticWeakPlaneTensileN);
   registerUserObject(TensorMechanicsPlasticWeakPlaneShear);
   registerUserObject(TensorMechanicsPlasticJ2);
+  registerUserObject(TensorMechanicsPlasticIsotropicSD);
+  registerUserObject(TensorMechanicsPlasticOrthotropic);
   registerUserObject(TensorMechanicsPlasticMeanCap);
+  registerUserObject(TensorMechanicsPlasticMeanCapTC);
   registerUserObject(TensorMechanicsPlasticDruckerPragerHyperbolic);
   registerUserObject(TensorMechanicsHardeningConstant);
   registerUserObject(TensorMechanicsHardeningGaussian);
   registerUserObject(TensorMechanicsHardeningExponential);
+  registerUserObject(TensorMechanicsHardeningPowerRule);
   registerUserObject(TensorMechanicsHardeningCutExponential);
   registerUserObject(TensorMechanicsHardeningCubic);
   registerUserObject(ElementPropertyReadFile);
@@ -262,24 +309,34 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(CrystalPlasticitySlipResistanceGSS);
   registerUserObject(CrystalPlasticityStateVariable);
   registerUserObject(CrystalPlasticityStateVarRateComponentGSS);
+  registerUserObject(GeneralizedPlaneStrainUserObject);
 
   registerAux(CylindricalRankTwoAux);
   registerAux(RankTwoAux);
   registerAux(RankFourAux);
-  registerAux(TensorElasticEnergyAux);
+  registerAux(ElasticEnergyAux);
+  registerAux(AccumulateAux);
   registerAux(CrystalPlasticityRotationOutAux);
   registerAux(RankTwoScalarAux);
   registerAux(NewmarkAccelAux);
   registerAux(NewmarkVelAux);
+  registerAux(RadialDisplacementCylinderAux);
+  registerAux(RadialDisplacementSphereAux);
 
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PresetVelocity);
   registerBoundaryCondition(Pressure);
   registerBoundaryCondition(DisplacementAboutAxis);
+  registerBoundaryCondition(PresetDisplacement);
+  registerBoundaryCondition(PresetAcceleration);
 
   registerPostprocessor(CavityPressurePostprocessor);
   registerPostprocessor(Mass);
   registerPostprocessor(TorqueReaction);
+  registerPostprocessor(MaterialTensorIntegral);
+
+  registerVectorPostprocessor(LineMaterialRankTwoSampler);
+  registerVectorPostprocessor(LineMaterialRankTwoScalarSampler);
 }
 
 // External entry point for dynamic syntax association
@@ -301,6 +358,8 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
+  syntax.registerActionSyntax("GeneralizedPlaneStrainAction", "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
+
   registerAction(CavityPressureAction, "add_bc");
   registerAction(CavityPressurePPAction, "add_postprocessor");
   registerAction(CavityPressureUOAction, "add_user_object");
@@ -310,4 +369,7 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(TensorMechanicsAxisymmetricRZAction, "add_kernel");
   registerAction(TensorMechanicsRSphericalAction, "add_kernel");
   registerAction(PressureAction, "add_bc");
+  registerAction(GeneralizedPlaneStrainAction, "add_kernel");
+  registerAction(GeneralizedPlaneStrainAction, "add_user_object");
+  registerAction(GeneralizedPlaneStrainAction, "add_scalar_kernel");
 }

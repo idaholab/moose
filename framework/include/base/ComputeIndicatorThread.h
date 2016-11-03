@@ -33,19 +33,19 @@ public:
    * @param indicator_whs Warehouse of Indicator objects.
    * @param finalize Whether or not we are just in the "finalize" stage or not.
    */
-  ComputeIndicatorThread(FEProblem & fe_problem, AuxiliarySystem & sys, bool finalize = false);
+  ComputeIndicatorThread(FEProblem & fe_problem, bool finalize = false);
 
   // Splitting Constructor
   ComputeIndicatorThread(ComputeIndicatorThread & x, Threads::split split);
 
   virtual ~ComputeIndicatorThread();
 
-  virtual void subdomainChanged();
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
-  virtual void postElement(const Elem * /*elem*/);
-  virtual void post();
+  virtual void subdomainChanged() override;
+  virtual void onElement(const Elem * elem) override;
+  virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
+  virtual void onInternalSide(const Elem * elem, unsigned int side) override;
+  virtual void postElement(const Elem * /*elem*/) override;
+  virtual void post() override;
 
   void join(const ComputeIndicatorThread & /*y*/);
 

@@ -51,9 +51,7 @@ Real
 KKSACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   // first get dependence of mobility _L on other variables using parent class
   // member function

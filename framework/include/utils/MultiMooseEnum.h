@@ -64,8 +64,6 @@ public:
    */
   static MultiMooseEnum withNamesFrom(const MooseEnumBase & other_enum);
 
-  virtual ~MultiMooseEnum();
-
   ///@{
   /**
    * Comparison operators for comparing with character constants, MultiMooseEnums
@@ -168,7 +166,7 @@ public:
    * IsValid
    * @return - a Boolean indicating whether this Enumeration has been set
    */
-  virtual bool isValid() const { return !_current_ids.empty(); }
+  virtual bool isValid() const override { return !_current_ids.empty(); }
 
 
   // InputParameters and Output is allowed to create an empty enum but is responsible for
@@ -180,7 +178,7 @@ public:
 
 protected:
   /// Check whether any of the current values are deprecated when called
-  virtual void checkDeprecated() const;
+  virtual void checkDeprecated() const override;
 
 private:
 

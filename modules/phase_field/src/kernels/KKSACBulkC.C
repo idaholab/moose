@@ -24,7 +24,7 @@ KKSACBulkC::KKSACBulkC(const InputParameters & parameters) :
     _cb_name(getVar("cb", 0)->name()),
     _cb_var(coupled("cb")),
     _cb(coupledValue("cb")),
-    _prop_h(getMaterialProperty<Real>("h")),
+    _prop_h(getMaterialProperty<Real>("h_name")),
     _prop_dFadca(getMaterialPropertyDerivative<Real>("fa_name", _ca_name)),
     _prop_d2Fadca2(getMaterialPropertyDerivative<Real>("fa_name", _ca_name, _ca_name)),
     _prop_d2Fbdcb2(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _cb_name))
@@ -88,9 +88,7 @@ KKSACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
   }
 
   //  for all other vars get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return res;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   res += _L[_qp] * _prop_dh[_qp] * (*_prop_d2Fadcadarg[cvar])[_qp]
             * (_ca[_qp] - _cb[_qp]) * _phi[_j][_qp]  * _test[_i][_qp];

@@ -5,7 +5,7 @@
     csvdiff = 'ring3_glued_kin_check.csv ring3_glued_kin_check_cont_press_0001.csv ring3_glued_kin_check_x_disp_0001.csv'
     cli_args = 'Contact/leftright/model=glued Contact/leftright/formulation=kinematic Outputs/file_base=ring3_glued_kin_out Outputs/chkfile/file_base=ring3_glued_kin_check'
     rel_err = 1e-5
-    abs_zero = 1e-8
+    abs_zero = 1e-6
     max_parallel = 1
     superlu = true
   [../]

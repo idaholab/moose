@@ -27,14 +27,16 @@
 #include "MooseMesh.h"
 
 /// Free function used for a libMesh callback
-void extraSendList(std::vector<dof_id_type> & send_list, void * context)
+void
+extraSendList(std::vector<dof_id_type> & send_list, void * context)
 {
   SystemBase * sys = static_cast<SystemBase *>(context);
   sys->augmentSendList(send_list);
 }
 
 /// Free function used for a libMesh callback
-void extraSparsity(SparsityPattern::Graph & sparsity,
+void
+extraSparsity(SparsityPattern::Graph & sparsity,
                    std::vector<dof_id_type> & n_nz,
                    std::vector<dof_id_type> & n_oz,
                    void * context)
@@ -77,7 +79,7 @@ dataLoad(std::istream & stream, SystemBase & system_base, void * context)
   system_base.update();
 }
 
-SystemBase::SystemBase(SubProblem & subproblem, const std::string & name) :
+SystemBase::SystemBase(SubProblem & subproblem, const std::string & name, Moose::VarKindType var_kind) :
     libMesh::ParallelObject(subproblem),
     _subproblem(subproblem),
     _app(subproblem.getMooseApp()),
@@ -85,7 +87,11 @@ SystemBase::SystemBase(SubProblem & subproblem, const std::string & name) :
     _mesh(subproblem.mesh()),
     _name(name),
     _vars(libMesh::n_threads()),
-    _var_map()
+    _var_map(),
+    _dummy_vec(NULL),
+    _saved_old(NULL),
+    _saved_older(NULL),
+    _var_kind(var_kind)
 {
 }
 
@@ -162,10 +168,8 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
 
     solution.close();
 
-    for (std::set<dof_id_type>::iterator it = dof_indices_to_zero.begin();
-        it != dof_indices_to_zero.end();
-        ++it)
-      solution.set(*it, 0);
+    for (const auto & dof : dof_indices_to_zero)
+      solution.set(dof, 0);
 
     solution.close();
 
@@ -191,9 +195,9 @@ SystemBase::getMinQuadratureOrder()
 {
   Order order = CONSTANT;
   std::vector<MooseVariable *> vars = _vars[0].variables();
-  for (std::vector<MooseVariable *>::iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    FEType fe_type = (*it)->feType();
+    FEType fe_type = var->feType();
     if (fe_type.default_quadrature_order() > order)
       order = fe_type.default_quadrature_order();
   }
@@ -208,23 +212,18 @@ SystemBase::prepare(THREAD_ID tid)
   {
     const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
     const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-      (*it)->clearDofIndices();
+    for (const auto & var : vars)
+      var->clearDofIndices();
 
-    for (std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
-        it != active_elemental_moose_variables.end();
-        ++it)
-      if (&(*it)->sys() == this)
-        (*it)->prepare();
+    for (const auto & var : active_elemental_moose_variables)
+      if (&(var->sys()) == this)
+        var->prepare();
   }
   else
   {
     const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-    {
-      MooseVariable *var = *it;
+    for (const auto & var : vars)
       var->prepare();
-    }
   }
 }
 
@@ -238,10 +237,9 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
     std::vector<MooseVariable *> newly_prepared_vars;
 
     const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+    for (const auto & var : vars)
     {
-      MooseVariable *var = *it;
-      if (&var->sys() == this && !active_elemental_moose_variables.count(var)) // If it wasnt in the active list we need to prepare it
+      if (&(var->sys()) == this && !active_elemental_moose_variables.count(var)) // If it wasnt in the active list we need to prepare it
       {
         var->prepare();
         newly_prepared_vars.push_back(var);
@@ -251,7 +249,11 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
     // Make sure to resize the residual and jacobian datastructures for all the new variables
     if (resize_data)
       for (unsigned int i=0; i<newly_prepared_vars.size(); i++)
+      {
         _subproblem.assembly(tid).prepareVariable(newly_prepared_vars[i]);
+        if (_subproblem.checkNonlocalCouplingRequirement())
+          _subproblem.assembly(tid).prepareVariableNonlocal(newly_prepared_vars[i]);
+      }
   }
 }
 
@@ -259,11 +261,8 @@ void
 SystemBase::prepareNeighbor(THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-  {
-    MooseVariable *var = *it;
+  for (const auto & var : vars)
     var->prepareNeighbor();
-  }
 }
 
 
@@ -274,20 +273,15 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
     const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
-    for (std::set<MooseVariable *>::iterator it = active_elemental_moose_variables.begin();
-        it != active_elemental_moose_variables.end();
-        ++it)
-      if (&(*it)->sys() == this)
-        (*it)->computeElemValues();
+    for (const auto & var : active_elemental_moose_variables)
+      if (&(var->sys()) == this)
+        var->computeElemValues();
   }
   else
   {
     const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-    for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-    {
-      MooseVariable *var = *it;
+    for (const auto & var : vars)
       var->computeElemValues();
-    }
   }
 }
 
@@ -295,42 +289,32 @@ void
 SystemBase::reinitElemFace(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-  {
-    MooseVariable *var = *it;
+  for (const auto & var : vars)
     var->computeElemValuesFace();
-  }
 }
 
 void
 SystemBase::reinitNeighborFace(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-  {
-    MooseVariable *var = *it;
+  for (const auto & var : vars)
     var->computeNeighborValuesFace();
-  }
 }
 
 void
 SystemBase::reinitNeighbor(const Elem * /*elem*/, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-  {
-    MooseVariable *var = *it;
+  for (const auto & var : vars)
     var->computeNeighborValues();
-  }
 }
 
 void
 SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    MooseVariable *var = *it;
     if (var->isNodal())
     {
       var->reinitNode();
@@ -343,9 +327,8 @@ void
 SystemBase::reinitNodeFace(const Node * /*node*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    MooseVariable *var = *it;
     if (var->isNodal())
     {
       var->reinitNode();
@@ -358,9 +341,8 @@ void
 SystemBase::reinitNodeNeighbor(const Node * /*node*/, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    MooseVariable *var = *it;
     if (var->isNodal())
     {
       var->reinitNodeNeighbor();
@@ -373,9 +355,8 @@ void
 SystemBase::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    MooseVariable *var = *it;
     var->reinitNodes(nodes);
     var->computeNodalValues();
   }
@@ -385,9 +366,8 @@ void
 SystemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
   const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-  for (std::vector<MooseVariable *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
+  for (const auto & var : vars)
   {
-    MooseVariable *var = *it;
     var->reinitNodesNeighbor(nodes);
     var->computeNodalNeighborValues();
   }
@@ -397,11 +377,8 @@ void
 SystemBase::reinitScalars(THREAD_ID tid)
 {
   const std::vector<MooseVariableScalar *> & vars = _vars[tid].scalars();
-  for (std::vector<MooseVariableScalar *>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-  {
-    MooseVariableScalar *var = *it;
+  for (const auto & var : vars)
     var->reinit();
-  }
 }
 
 void
@@ -419,24 +396,18 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
 
   unsigned int n_vars = sys.n_vars();
 
-  for (std::set<dof_id_type>::iterator elem_id = ghosted_elems.begin();
-      elem_id != ghosted_elems.end();
-      ++elem_id)
+  for (const auto & elem_id : ghosted_elems)
   {
-    Elem * elem = _mesh.elemPtr(*elem_id);
+    Elem * elem = _mesh.elemPtr(elem_id);
 
     if (elem->active())
     {
       dof_map.dof_indices(elem, dof_indices);
 
-      for (unsigned int i=0; i<dof_indices.size(); i++)
-      {
-        dof_id_type dof = dof_indices[i];
-
-        // Only need to ghost it if it's actually not on this processor
+      // Only need to ghost it if it's actually not on this processor
+      for (const auto & dof : dof_indices)
         if (dof < dof_map.first_dof() || dof >= dof_map.end_dof())
           send_list.push_back(dof);
-      }
 
       // Now add the DoFs from all of the nodes.  This is necessary because of block
       // restricted variables.  A variable might not live _on_ this element but it
@@ -463,4 +434,242 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
       }
     }
   }
+}
+
+
+/**
+ * Save the old and older solutions.
+ */
+void
+SystemBase::saveOldSolutions()
+{
+  if (!_saved_old)
+    _saved_old = &addVector("save_solution_old", false, PARALLEL);
+  if (!_saved_older)
+    _saved_older = &addVector("save_solution_older", false, PARALLEL);
+  *_saved_old = solutionOld();
+  *_saved_older = solutionOlder();
+}
+
+
+/**
+ * Restore the old and older solutions when the saved solutions present.
+ */
+void
+SystemBase::restoreOldSolutions()
+{
+  if (_saved_old)
+  {
+    solutionOld() = *_saved_old;
+    removeVector("save_solution_old");
+    _saved_old = NULL;
+  }
+  if (_saved_older)
+  {
+    solutionOlder() = *_saved_older;
+    removeVector("save_solution_older");
+    _saved_older = NULL;
+  }
+}
+
+
+
+NumericVector<Number> &
+SystemBase::addVector(const std::string & vector_name, const bool project, const ParallelType type)
+{
+  if (hasVector(vector_name))
+    return getVector(vector_name);
+
+  NumericVector<Number> * vec = &system().add_vector(vector_name, project, type);
+  return *vec;
+}
+
+
+void
+SystemBase::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set<SubdomainID> * const active_subdomains)
+{
+  unsigned int var_num = system().add_variable(var_name, type, active_subdomains);
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    //FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in MooseVariableBase.
+    MooseVariable * var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+    var->scalingFactor(scale_factor);
+    _vars[tid].add(var_name, var);
+  }
+  if (active_subdomains == NULL)
+    _var_map[var_num] = std::set<SubdomainID>();
+  else
+    for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+      _var_map[var_num].insert(*it);
+}
+
+
+void
+SystemBase::addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set<SubdomainID> * const active_subdomains)
+{
+  FEType type(order, SCALAR);
+  unsigned int var_num = system().add_variable(var_name, type, active_subdomains);
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    //FIXME: we cannot refer fetype in libMesh at this point, so we will just make a copy in MooseVariableBase.
+    MooseVariableScalar * var = new MooseVariableScalar(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+    var->scalingFactor(scale_factor);
+    _vars[tid].add(var_name, var);
+  }
+  if (active_subdomains == NULL)
+    _var_map[var_num] = std::set<SubdomainID>();
+  else
+    for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
+      _var_map[var_num].insert(*it);
+}
+
+
+bool
+SystemBase::hasVariable(const std::string & var_name)
+{
+  if (system().has_variable(var_name))
+    return system().variable_type(var_name).family != SCALAR;
+  else
+    return false;
+}
+
+
+bool
+SystemBase::hasScalarVariable(const std::string & var_name)
+{
+  if (system().has_variable(var_name))
+    return system().variable_type(var_name).family == SCALAR;
+  else
+    return false;
+}
+
+
+bool
+SystemBase::isScalarVariable(unsigned int var_num)
+{
+  return (system().variable(var_num).type().family == SCALAR);
+}
+
+unsigned int
+SystemBase::nVariables()
+{
+  return _vars[0].names().size();
+}
+
+/**
+ * Check if the named vector exists in the system.
+ */
+bool
+SystemBase::hasVector(const std::string & name)
+{
+  return system().have_vector(name);
+}
+
+/**
+ * Get a raw NumericVector with the given name.
+ */
+NumericVector<Number> &
+SystemBase::getVector(const std::string & name)
+{
+  return system().get_vector(name);
+}
+
+
+unsigned int
+SystemBase::number()
+{
+  return system().number();
+}
+
+DofMap &
+SystemBase::dofMap()
+{
+  return system().get_dof_map();
+}
+
+void
+SystemBase::addVariableToCopy(const std::string & dest_name, const std::string & source_name, const std::string & timestep)
+{
+  _var_to_copy.push_back(VarCopyInfo(dest_name, source_name, timestep));
+}
+
+
+void
+SystemBase::copyVars(ExodusII_IO & io)
+{
+  int n_steps = io.get_num_time_steps();
+
+  bool did_copy = false;
+  for (std::vector<VarCopyInfo>::iterator it = _var_to_copy.begin();
+      it != _var_to_copy.end();
+      ++it)
+  {
+    VarCopyInfo & vci = *it;
+    int timestep = -1;
+
+    if (vci._timestep == "LATEST")
+      // Use the last time step in the file from which to retrieve the solution
+      timestep = n_steps;
+    else
+    {
+      std::istringstream ss(vci._timestep);
+      if (!(ss >> timestep) || timestep > n_steps)
+        mooseError("Invalid value passed as \"initial_from_file_timestep\". Expected \"LATEST\" or a valid integer between 1 and "
+                   << n_steps << " inclusive, received " << vci._timestep);
+    }
+
+    did_copy = true;
+    if (getVariable(0, vci._dest_name).isNodal())
+      io.copy_nodal_solution(system(), vci._dest_name, vci._source_name, timestep);
+    else
+      io.copy_elemental_solution(system(), vci._dest_name, vci._source_name, timestep);
+  }
+
+  if (did_copy)
+    solution().close();
+}
+
+void
+SystemBase::update()
+{
+  system().update();
+}
+
+void
+SystemBase::solve()
+{
+  system().solve();
+}
+
+/**
+ * Copy current solution into old and older
+ */
+void
+SystemBase::copySolutionsBackwards()
+{
+  system().update();
+  solutionOlder() = *currentSolution();
+  solutionOld()   = *currentSolution();
+}
+
+/**
+ * Shifts the solutions backwards in time
+ */
+void
+SystemBase::copyOldSolutions()
+{
+  solutionOlder() = solutionOld();
+  solutionOld()   = *currentSolution();
+}
+
+
+/**
+ * Restore current solutions (call after your solve failed)
+ */
+void
+SystemBase::restoreSolutions()
+{
+  *(const_cast<NumericVector<Number> * &>(currentSolution())) = solutionOld();
+  solution() = solutionOld();
+  system().update();
 }

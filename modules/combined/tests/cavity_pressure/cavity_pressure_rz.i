@@ -32,6 +32,12 @@
   coord_type = RZ
 []
 
+[GlobalParams]
+  displacements = 'disp_r disp_z'
+  order = FIRST
+  family = LAGRANGE
+[]
+
 [Mesh]
   file = cavity_pressure_rz.e
 []
@@ -46,24 +52,17 @@
 []
 
 [Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
+  [./disp_r]
   [../]
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
+  [./disp_z]
   [../]
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 240.54443866068704
   [../]
 []
 
 [Kernels]
-  [./StressDivergence2DAxisymmetricRZ]
-    displacements = 'disp_x disp_y'
+  [./TensorMechanics]
     use_displaced_mesh = true
   [../]
   [./heat]
@@ -75,13 +74,13 @@
 [BCs]
   [./no_x]
     type = DirichletBC
-    variable = disp_x
+    variable = disp_r
     boundary = '1 2'
     value = 0.0
   [../]
   [./no_y]
     type = DirichletBC
-    variable = disp_y
+    variable = disp_z
     boundary = '1 2'
     value = 0.0
   [../]
@@ -100,7 +99,6 @@
       volume = internalVolume
       startup_time = 0.5
       output = ppress
-      displacements = 'disp_x disp_y'
     [../]
   [../]
 []
@@ -114,8 +112,6 @@
   [../]
   [./strain1]
     type = ComputeAxisymmetricRZFiniteStrain
-    thermal_expansion_coeff = 0.0
-    displacements = 'disp_x disp_y'
     block = 1
   [../]
   [./stress1]
@@ -130,8 +126,6 @@
   [../]
   [./strain2]
     type = ComputeAxisymmetricRZFiniteStrain
-    thermal_expansion_coeff = 0.0
-    displacements = 'disp_x disp_y'
     block = 2
   [../]
   [./stress2]
@@ -148,8 +142,8 @@
     type = Density
     block = '1 2'
     density = 1.0
-    disp_r = disp_x
-    disp_z = disp_y
+    disp_r = disp_r
+    disp_z = disp_z
   [../]
 []
 

@@ -43,7 +43,7 @@ public:
   /**
    * Destruction
    */
-  virtual ~InputParameterWarehouse();
+  virtual ~InputParameterWarehouse() = default;
 
   ///@{
   /**

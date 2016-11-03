@@ -26,8 +26,8 @@ InputParameters validParams<ImageSampler>()
 
   params.addParam<Point>("origin", "Origin of the image (defaults to mesh origin)");
   params.addParam<Point>("dimensions", "x,y,z dimensions of the image (defaults to mesh dimensions)");
-  params.addParam<unsigned int>("component", "The image component to return, leaving this blank will result in a greyscale value "
-                                             "for the image to be created. The component number is zero based, i.e. 0 returns the first component of the image");
+  params.addParam<unsigned int>("component", "The image RGB-component to return, leaving this blank will result in a greyscale value "
+                                             "for the image to be created. The component number is zero based, i.e. 0 returns the first (RED) component of the image.");
 
   // Shift and Scale (application of these occurs prior to threshold)
   params.addParam<double>("shift", 0, "Value to add to all pixels; occurs prior to scaling");
@@ -63,10 +63,6 @@ ImageSampler::ImageSampler(const InputParameters & parameters) :
   // This should be impossible to reach, the registration of ImageSampler is also guarded with LIBMESH_HAVE_VTK
   mooseError("libMesh must be configured with VTK enabled to utilize ImageSampler");
 #endif
-}
-
-ImageSampler::~ImageSampler()
-{
 }
 
 void
@@ -144,8 +140,8 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
   // Storage for the file names
   _files = vtkSmartPointer<vtkStringArray>::New();
 
-  for (unsigned i=0; i<filenames.size(); ++i)
-    _files->InsertNextValue(filenames[i]);
+  for (const auto & filename : filenames)
+    _files->InsertNextValue(filename);
 
   // Error if no files where located
   if (_files->GetNumberOfValues() == 0)
@@ -273,7 +269,7 @@ ImageSampler::vtkShiftAndScale()
   double scale = _is_pars.get<double>("scale");
 
   // Do nothing if shift and scale are not set
-  if (shift == 0 || scale == 1)
+  if (shift == 0 && scale == 1)
     return;
 
 

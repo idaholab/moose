@@ -57,6 +57,11 @@ protected:
   bool _mean_alpha_function;
   Real _ref_temp;
 
+  ///@{ Restartable data to check for the zeroth and first time steps
+  bool & _step_zero_cm;
+  bool & _step_one_cm;
+  ///@}
+
 private:
   using Material::computeProperties;
   using Material::_qp;

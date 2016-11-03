@@ -1,0 +1,112 @@
+###############################################################
+# Configuration for creating MOOSE application documentation. #
+###############################################################
+
+# MkDocs Settings
+# The settings in this section are for MkDocs, asny MkDocs settings can be set via this file.
+site_name: MOOSE
+
+docs_dir: .
+
+site_dir: ../site
+
+repo_url: https://github.com/idaholab/moose/
+
+theme: flatly
+
+extra_css:
+    - css/moose.css
+
+extra_javascript:
+    - http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+    - js/mathjaxconfig.js
+
+markdown_extensions:
+    - toc
+    - smarty
+    - admonition
+    - markdown_include.include           # pip install markdown-include
+    - mdx_math                           # pip install python-markdown-math
+    - MooseDocs.extensions.MooseMarkdown:
+          package: True
+          make: ../modules
+          executable: ../modules/combined/modules-opt
+          repo: https://github.com/idaholab/moose/blob/master
+          hide:
+              - /Bounds # this should not be removed, this is deprecated syntax that we do not want to document
+              - /Adaptivity/Indicators
+              - /AuxKernels
+              - /AuxScalarKernels
+              - /AuxVariables
+              - /BCs
+              - /Constraints
+              - /Controls
+              - /DGKernels
+              - /Dampers
+              - /Debug
+              - /DeprecatedBlock
+              - /DiracKernels
+              - /Executioner
+              - /Functions
+              - /GlobalParams
+              - /ICs
+              - /InterfaceKernels
+              - /Kernels
+              - /Materials
+              - /Mesh
+              - /MeshModifiers
+              - /Modules
+              - /MultiApps
+              - /NodalKernels
+              - /NodalNormals
+              - /Outputs
+              - /Postprocessors
+              - /Preconditioning
+              - /Problem
+              - /ScalarKernels
+              - /Transfers
+              - /Variables
+              - /VectorPostprocessors
+              - /UserObjects
+          links:
+              Tests:
+                  - ../test
+                  - ../modules/phase_field/tests
+                  - ../modules/tensor_mechanics/tests
+              Examples:
+                  - ../examples
+                  - ../modules/phase_field/examples
+                  - ../modules/combined/examples
+              Tutorials:
+                  - ../tutorials
+                  - ../modules/tensor_mechanics/tutorials
+              Source:
+                  - ../modules/heat_conduction/include
+                  - ../modules/tensor_mechanics/include
+          locations:
+              framework:
+                  doxygen: http://mooseframework.com/docs/doxygen/moose/
+                  paths:
+                      - ../framework/src
+                      - ../framework/include
+                  install: content/framework/systems
+              phase_field:
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - ../modules/phase_field/src
+                      - ../modules/phase_field/include
+                  install: content/modules/phase_field/systems
+              tensor_mechanics:
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - ../modules/tensor_mechanics/src
+                      - ../modules/tensor_mechanics/include
+                  install: content/modules/tensor_mechanics/systems
+              heat_conduction:
+                  hide:
+                      - /ThermalContact
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - ../modules/heat_conduction/src
+                      - ../modules/heat_conduction/include
+                  install: content/modules/heat_conduction/systems

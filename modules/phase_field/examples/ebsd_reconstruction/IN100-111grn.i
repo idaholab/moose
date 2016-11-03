@@ -1,7 +1,7 @@
 [Mesh]
-  # uniform_refine = 4
+  uniform_refine = 2
   type = EBSDMesh
-  filename = IN100_128x128.txt
+  filename = IN100_120x120.txt
 []
 
 [GlobalParams]
@@ -39,12 +39,17 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./ebsd_grains]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
 []
 
 [ICs]
   [./PolycrystalICs]
     [./ReconVarIC]
       ebsd_reader = ebsd
+      advanced_op_assignment = true
     [../]
   [../]
 []
@@ -65,28 +70,45 @@
     variable = ghost_elements
     field_display = GHOSTED_ENTITIES
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
   [./halos]
     type = FeatureFloodCountAux
     variable = halos
     field_display = HALOS
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
   [../]
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = UNIQUE_REGION
+  [../]
+  [./grain_aux]
+    type = EBSDReaderPointDataAux
+    variable = ebsd_grains
+    ebsd_reader = ebsd
+    data_name = 'feature_id'
+    execute_on = 'initial timestep_end'
+  [../]
+[]
+
+[Modules]
+  [./PhaseField]
+    [./EulerAngles2RGB]
+      crystal_structure = cubic
+      euler_angle_provider = ebsd
+      grain_tracker = grain_tracker
+    [../]
   [../]
 []
 
@@ -94,7 +116,6 @@
   [./Copper]
     # T = 500 # K
     type = GBEvolution
-    block = 0
     T = 500
     wGB = 0.6               # um
     GBmob0 = 2.5e-6         # m^4/(Js) from Schoenfelder 1997
@@ -123,17 +144,8 @@
   [../]
   [./grain_tracker]
     type = GrainTracker
-    threshold = 0.1
-    convex_hull_buffer = 0.0
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
-    connecting_threshold = 0.05
-    execute_on = 'initial timestep_end'
-    flood_entity_type = ELEMENTAL
-    halo_level = 2
-    bubble_volume_file = IN100-grn-vols.txt
     ebsd_reader = ebsd
+    compute_halo_maps = true # Only necessary for displaying HALOS
   [../]
 []
 
@@ -166,18 +178,11 @@
     refine_fraction = 0.7
     coarsen_fraction = 0.1
     max_h_level = 2
-    print_changed_info = true
   [../]
 []
 
 [Outputs]
   exodus = true
   checkpoint = true
-  csv = true
-  [./console]
-    type = Console
-    max_rows = 20
-    perf_log = true
-    perf_log_interval = 10
-  [../]
+  print_perf_log = true
 []

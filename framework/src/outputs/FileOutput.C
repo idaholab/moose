@@ -12,6 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// C POSIX includes
+#include <sys/stat.h>
+
 // MOOSE includes
 #include "FileOutput.h"
 #include "MooseApp.h"
@@ -74,16 +77,24 @@ FileOutput::FileOutput(const InputParameters & parameters) :
     _file_base += buffer;
   }
 
-  // Check the file directory of file_base
+  // Check the file directory of file_base and create if needed
   std::string base = "./" + _file_base;
   base = base.substr(0, base.find_last_of('/'));
-  if (access(base.c_str(), W_OK) == -1)
-    mooseError("Can not write to directory: " + base + " for file base: " + _file_base);
 
-}
-
-FileOutput::~FileOutput()
-{
+  if (_app.processor_id() == 0 && access(base.c_str(), W_OK) == -1)
+  {
+    //Directory does not exist. Loop through incremental directories and create as needed.
+    std::vector<std::string> path_names;
+    MooseUtils::tokenize(base, path_names);
+    std::string inc_path = path_names[0];
+    for (unsigned int i = 1; i < path_names.size(); ++i)
+    {
+      inc_path += '/' + path_names[i];
+      if (access(inc_path.c_str(), W_OK) == -1)
+        if (mkdir(inc_path.c_str(), S_IRWXU | S_IRGRP) == -1)
+          mooseError("Could not create directory: " + inc_path + " for file base: " + _file_base);
+    }
+  }
 }
 
 std::string
@@ -130,10 +141,10 @@ FileOutput::checkFilename()
   bool output = false;
 
   // Loop through each string in the list
-  for (std::vector<std::string>::const_iterator it = _output_if_base_contains.begin(); it != _output_if_base_contains.end(); ++it)
+  for (const auto & search_string : _output_if_base_contains)
   {
     // Search for the string in the file base, if found set the output to true and break the loop
-    if (_file_base.find(*it) != std::string::npos)
+    if (_file_base.find(search_string) != std::string::npos)
     {
       output = true;
       break;

@@ -65,10 +65,10 @@ IsotropicPowerLawHardening::computeStressInitialize(unsigned qp, Real effectiveT
 }
 
 Real
-IsotropicPowerLawHardening::computeHardening( unsigned /*qp*/, Real scalar )
+IsotropicPowerLawHardening::computeHardeningDerivative(unsigned /*qp*/, Real scalar)
 {
   Real stress = _effectiveTrialStress - 3.0 * _shear_modulus * scalar;
-  Real slope = std::pow(stress, 1.0/_n -1.0)/ _n/ std::pow(_K, 1.0/_n) - 1.0/_youngs_modulus;
+  Real slope = std::pow(stress, 1.0/_n -1.0) / _n  * (1.0 / std::pow(_K, 1.0/_n)) - 1.0/_youngs_modulus;
 
   slope = 1.0/slope;
 

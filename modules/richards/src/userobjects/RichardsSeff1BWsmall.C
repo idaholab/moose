@@ -9,8 +9,7 @@
 //  "Broadbridge-White" form of effective saturation for Kn small (P Broadbridge and I White ``Constant rate rainfall infiltration: A versatile nonlinear model 1. Analytic Solution'', Water Resources Research 24 (1988) 145-154)
 //
 #include "RichardsSeff1BWsmall.h"
-
-#include <cmath>
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<RichardsSeff1BWsmall>()
@@ -65,7 +64,7 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
   mooseAssert(z > 0, "LambertW function in RichardsSeff1BWsmall called with negative argument");
 
   int i;
-  const Real eps=4.0e-16; //, em1=0.3678794411714423215955237701614608;
+  const Real eps = 4.0e-16; //, em1=0.3678794411714423215955237701614608;
   Real p,e,t,w;
 
   /* Uncomment this stuff is you ever need to call with a negative argument
@@ -94,8 +93,8 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
   if (z < 1.0)
   {
     /* series near 0 */
-    p=std::sqrt(2.0*(2.7182818284590452353602874713526625*z+1.0));
-    w=-1.0+p*(1.0+p*(-0.333333333333333333333+p*0.152777777777777777777777));
+    p = std::sqrt(2.0 * (2.7182818284590452353602874713526625 * z  +1.0));
+    w = -1.0 + p * (1.0 + p * (-0.333333333333333333333 + p * 0.152777777777777777777777));
   }
   else
     w=std::log(z); /* asymptotic */
@@ -104,12 +103,12 @@ RichardsSeff1BWsmall::LambertW(const Real z) const
   for (i = 0; i < 10; i++)
   {
     /* Halley iteration */
-    e=std::exp(w);
-    t=w*e-z;
-    p=w+1.0;
-    t/=e*p-0.5*(p+1.0)*t/p;
-    w-=t;
-    if (std::fabs(t) < eps*(1.0+std::fabs(w)))
+    e = std::exp(w);
+    t = w * e - z;
+    p = w + 1.0;
+    t /= e * p - 0.5 * (p + 1.0) * t / p;
+    w -= t;
+    if (std::abs(t) < eps * (1.0 + std::abs(w)))
       return w; /* rel-abs error */
   }
   /* should never get here */
@@ -123,9 +122,9 @@ RichardsSeff1BWsmall::seff(std::vector<const VariableValue *> p, unsigned int qp
   if (pp >= 0)
     return 1.0;
 
-  Real x = (_c - 1)*std::exp(_c - 1 - _c*pp/_las);
-  Real th = _c/(1 + LambertW(x)); // use branch 0 for positive x
-  return _sn + (_ss - _sn)*th;
+  Real x = (_c - 1.0) * std::exp(_c - 1 - _c * pp / _las);
+  Real th = _c/(1.0 + LambertW(x)); // use branch 0 for positive x
+  return _sn + (_ss - _sn) * th;
 }
 
 void
@@ -137,9 +136,9 @@ RichardsSeff1BWsmall::dseff(std::vector<const VariableValue *> p, unsigned int q
   if (pp >= 0)
     return;
 
-  Real x = (_c - 1)*std::exp(_c - 1 - _c*pp/_las);
+  Real x = (_c - 1) * std::exp(_c - 1.0 - _c * pp / _las);
   Real lamw = LambertW(x);
-  result[0] = std::pow(_c, 2)/_las*lamw/std::pow(1 + lamw, 3);
+  result[0] = Utility::pow<2>(_c) / _las * lamw / Utility::pow<3>(1 + lamw);
 }
 
 void
@@ -151,7 +150,7 @@ RichardsSeff1BWsmall::d2seff(std::vector<const VariableValue *> p, unsigned int 
   if (pp >= 0)
     return;
 
-  Real x = (_c - 1)*std::exp(_c - 1 - _c*pp/_las);
+  Real x = (_c - 1) * std::exp(_c - 1 - _c * pp / _las);
   Real lamw = LambertW(x);
-  result[0][0] = -std::pow(_c, 3)/std::pow(_las, 2)*lamw*(1 - 2*lamw)/std::pow(1 + lamw, 5);
+  result[0][0] = -Utility::pow<3>(_c) / Utility::pow<2>(_las) * lamw * (1.0 - 2.0 * lamw)/Utility::pow<5>(1 + lamw);
 }

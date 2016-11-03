@@ -28,7 +28,7 @@ class AddDamperAction: public MooseObjectAction
 public:
   AddDamperAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif //ADDDAMPERACTION_H

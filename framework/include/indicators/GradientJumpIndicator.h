@@ -15,7 +15,7 @@
 #ifndef GRADIENTJUMPINDICATOR_H
 #define GRADIENTJUMPINDICATOR_H
 
-#include "JumpIndicator.h"
+#include "InternalSideIndicator.h"
 
 class GradientJumpIndicator;
 
@@ -23,15 +23,13 @@ template<>
 InputParameters validParams<GradientJumpIndicator>();
 
 class GradientJumpIndicator :
-  public JumpIndicator
+  public InternalSideIndicator
 {
 public:
   GradientJumpIndicator(const InputParameters & parameters);
-  virtual ~GradientJumpIndicator(){};
 
 protected:
-
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 };
 
 #endif /* GRADIENTJUMPINDICATOR_H */

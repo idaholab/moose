@@ -37,7 +37,7 @@ RichardsExcavGeom::RichardsExcavGeom(const InputParameters & parameters) :
   if (_start_time >= _end_time)
     mooseError("Start time for excavation set to " << _start_time << " but this must be less than the end time, which is " << _end_time);
   _retreat_vel /= (_end_time - _start_time); // this is now a velocity
-  _norm_retreat_vel = std::pow(_retreat_vel*_retreat_vel, 0.5);
+  _norm_retreat_vel = _retreat_vel.norm();
 }
 
 
@@ -45,10 +45,8 @@ Real
 RichardsExcavGeom::value(Real t, const Point & p)
 {
   if (t < _start_time || (p - _start_posn)*_retreat_vel < 0)
-  // point is behind start posn - it'll never be active
-  {
+    // point is behind start posn - it'll never be active
     return 0.0;
-  }
 
   if (t >= _deactivation_time)
     return 0.0;
@@ -57,9 +55,9 @@ RichardsExcavGeom::value(Real t, const Point & p)
   if (t >= _end_time)
     current_posn = _end_posn;
   else
-    current_posn = _start_posn + (t - _start_time)*_retreat_vel;
+    current_posn = _start_posn + (t - _start_time) * _retreat_vel;
 
-  Real distance_into_goaf = (current_posn - p)*_retreat_vel/_norm_retreat_vel;
+  Real distance_into_goaf = (current_posn - p) * _retreat_vel / _norm_retreat_vel;
 
   if (distance_into_goaf < 0)
     // point is ahead of current_posn
@@ -71,5 +69,3 @@ RichardsExcavGeom::value(Real t, const Point & p)
 
   return _true_value;
 }
-
-

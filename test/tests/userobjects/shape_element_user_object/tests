@@ -1,0 +1,42 @@
+[Tests]
+  [./shape_element_user_object]
+    type = RunApp
+    input = 'shape_element_user_object.i'
+    recover = false
+    allow_warnings = true
+    mesh_mode = REPLICATED
+  [../]
+
+  [./simple_shape_element_uo]
+    type = PetscJacobianTester
+    input = 'simple_shape_element_uo_test.i'
+    #difference_tol = 5e-8
+    #ratio_tol = 1E-7
+    difference_tol = 1E10
+    recover = false
+    allow_warnings = true
+    mesh_mode = REPLICATED
+  [../]
+
+  [./jacobian_test1]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    #difference_tol = 1.2e-8
+    #ratio_tol = 1E-7
+    difference_tol = 1E10
+    recover = false
+    allow_warnings = true
+    mesh_mode = REPLICATED
+  [../]
+
+  [./jacobian_test2]
+    type = PetscJacobianTester
+    input = 'jacobian_test.i'
+    #difference_tol = 1.2e-8
+    #ratio_tol = 1E-7
+    difference_tol = 1E10
+    recover = false
+    allow_warnings = true
+    mesh_mode = REPLICATED
+  [../]
+[]

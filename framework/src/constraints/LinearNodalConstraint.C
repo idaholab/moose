@@ -40,9 +40,6 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
   if (_master_node_ids.size() != _weights.size())
     mooseError("master and weights should be of equal size.");
 
-  std::vector<unsigned int>::iterator it;
-  std::vector<unsigned int>::iterator its;
-
   if ((_slave_node_ids.size() == 0) && (_slave_node_set_id == "NaN"))
     mooseError("Please specify slave_node_ids or slave_node_set.");
   else if ((_slave_node_ids.size() == 0) && (_slave_node_set_id != "NaN"))
@@ -58,25 +55,26 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
   }
   else if ((_slave_node_ids.size() > 0) && (_slave_node_set_id == "NaN"))
   {
-    for (its = _slave_node_ids.begin(); its != _slave_node_ids.end(); ++its)
-    {
-      if (_mesh.nodeRef(*its).processor_id() == _subproblem.processor_id())
-        _connected_nodes.push_back(*its);
-    }
+    for (const auto & dof : _slave_node_ids)
+      if (_mesh.nodeRef(dof).processor_id() == _subproblem.processor_id())
+        _connected_nodes.push_back(dof);
   }
+
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
 
   // Add elements connected to master node to Ghosted Elements
-  for (it = _master_node_ids.begin(); it != _master_node_ids.end(); ++it)
+  for (const auto & dof : _master_node_ids)
   {
-    _master_node_vector.push_back(*it); //defining master nodes in base class
-    std::vector<dof_id_type> & elems = _mesh.nodeToElemMap()[*it];
-    for (unsigned int i = 0; i < elems.size(); i++)
-      _subproblem.addGhostedElem(elems[i]);
-  }
-}
+    // defining master nodes in base class
+    _master_node_vector.push_back(dof);
 
-LinearNodalConstraint::~LinearNodalConstraint()
-{
+    auto node_to_elem_pair = node_to_elem_map.find(dof);
+    mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
+    const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
+
+    for (const auto & elem_id : elems)
+      _subproblem.addGhostedElem(elem_id);
+  }
 }
 
 Real
@@ -117,4 +115,3 @@ LinearNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
   }
   return 0.;
 }
-

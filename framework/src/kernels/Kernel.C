@@ -40,10 +40,6 @@ Kernel::Kernel(const InputParameters & parameters) :
 {
 }
 
-Kernel::~Kernel()
-{
-}
-
 void
 Kernel::computeResidual()
 {
@@ -61,8 +57,8 @@ Kernel::computeResidual()
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_save_in.size(); i++)
-      _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
+    for (const auto & var : _save_in)
+      var->sys().solution().add_vector(_local_re, var->dofIndices());
   }
 }
 
@@ -73,6 +69,7 @@ Kernel::computeJacobian()
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
+  precalculateJacobian();
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < _phi.size(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -88,8 +85,8 @@ Kernel::computeJacobian()
       diag(i) = _local_ke(i,i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_diag_save_in.size(); i++)
-      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+    for (const auto & var : _diag_save_in)
+      var->sys().solution().add_vector(diag, var->dofIndices());
   }
 }
 
@@ -102,12 +99,11 @@ Kernel::computeOffDiagJacobian(unsigned int jvar)
   {
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
+    precalculateOffDiagJacobian(jvar);
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        {
           ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
-        }
   }
 }
 
@@ -139,4 +135,3 @@ void
 Kernel::precalculateResidual()
 {
 }
-

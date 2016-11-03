@@ -37,7 +37,6 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters) :
     MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     UserObjectInterface(this),
     Coupleable(this, true),
-    ScalarCoupleable(this),
     MooseVariableDependencyInterface(),
     TransientInterface(this),
     PostprocessorInterface(this),
@@ -49,8 +48,8 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters) :
     _unique_node_execute(getParam<bool>("unique_node_execute"))
 {
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (unsigned int i=0; i<coupled_vars.size(); i++)
-    addMooseVariableDependency(coupled_vars[i]);
+  for (const auto & var : coupled_vars)
+    addMooseVariableDependency(var);
 }
 
 

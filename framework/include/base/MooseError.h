@@ -80,7 +80,8 @@
   {                                                                                 \
     if (!(asserted))                                                                \
     {                                                                               \
-      Moose::err                                                                    \
+      std::ostringstream _assert_oss_;                                              \
+      _assert_oss_                                                                  \
         << (Moose::_color_console ? XTERM_RED : "")                                 \
         << "\n\nAssertion `" #asserted "' failed\n"                                 \
         << msg                                                                      \
@@ -88,12 +89,18 @@
         << __FILE__ << ", line " << __LINE__                                        \
         << (Moose::_color_console ? XTERM_DEFAULT : "")                             \
         << std::endl;                                                               \
-      if (libMesh::global_n_processors() == 1)                                      \
-        print_trace();                                                              \
+      if (Moose::_throw_on_error)                                                   \
+        throw std::runtime_error(_assert_oss_.str());                               \
       else                                                                          \
-        libMesh::write_traceout();                                                  \
-      libmesh_here();                                                               \
-      MOOSE_ABORT;                                                                  \
+      {                                                                             \
+        Moose::err << _assert_oss_.str() << std::flush;                             \
+        if (libMesh::global_n_processors() == 1)                                    \
+          print_trace();                                                            \
+        else                                                                        \
+          libMesh::write_traceout();                                                \
+        libmesh_here();                                                             \
+        MOOSE_ABORT;                                                                \
+      }                                                                             \
     }                                                                               \
   } while (0)
 #endif

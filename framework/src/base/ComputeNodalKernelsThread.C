@@ -21,10 +21,9 @@
 #include "libmesh/threads.h"
 
 ComputeNodalKernelsThread::ComputeNodalKernelsThread(FEProblem & fe_problem,
-                                                     AuxiliarySystem & sys,
                                                      const MooseObjectWarehouse<NodalKernel> & nodal_kernels) :
     ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
-    _aux_sys(sys),
+    _aux_sys(fe_problem.getAuxiliarySystem()),
     _nodal_kernels(nodal_kernels),
     _num_cached(0)
 {
@@ -51,21 +50,21 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
   const Node * node = *node_it;
 
   // prepare variables
-  for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._nodal_vars[_tid].begin(); it != _aux_sys._nodal_vars[_tid].end(); ++it)
+  for (const auto & it : _aux_sys._nodal_vars[_tid])
   {
-    MooseVariable * var = it->second;
+    MooseVariable * var = it.second;
     var->prepareAux();
   }
 
   _fe_problem.reinitNode(node, _tid);
 
   const std::set<SubdomainID> & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
-  for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
-    if (_nodal_kernels.hasActiveBlockObjects(*block_it, _tid))
+  for (const auto & block : block_ids)
+    if (_nodal_kernels.hasActiveBlockObjects(block, _tid))
     {
-      const std::vector<MooseSharedPointer<NodalKernel> > & objects = _nodal_kernels.getActiveBlockObjects(*block_it, _tid);
-      for (std::vector<MooseSharedPointer<NodalKernel> >::const_iterator nodal_kernel_it = objects.begin(); nodal_kernel_it != objects.end(); ++nodal_kernel_it)
-         (*nodal_kernel_it)->computeResidual();
+      const std::vector<MooseSharedPointer<NodalKernel> > & objects = _nodal_kernels.getActiveBlockObjects(block, _tid);
+      for (const auto & nodal_kernel : objects)
+        nodal_kernel->computeResidual();
     }
 
   _num_cached++;

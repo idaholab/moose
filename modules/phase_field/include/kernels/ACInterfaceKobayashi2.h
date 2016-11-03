@@ -16,7 +16,13 @@ class ACInterfaceKobayashi2;
 template<>
 InputParameters validParams<ACInterfaceKobayashi2>();
 
-class ACInterfaceKobayashi2 : public DerivativeMaterialInterface<JvarMapInterface<KernelGrad> >
+/**
+ * Kernel 2 of 2 for interfacial energy anisotropy in the Allen-Cahn equation as
+ * implemented in R. Kobayashi, Physica D, 63, 410-423 (1993).
+ * doi:10.1016/0167-2789(93)90120-P
+ * This kernel implements the third term on the right side of eq. (3) of the paper.
+ */
+class ACInterfaceKobayashi2 : public DerivativeMaterialInterface<JvarMapKernelInterface<KernelGrad> >
 {
 public:
  ACInterfaceKobayashi2(const InputParameters & parameters);

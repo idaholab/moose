@@ -31,18 +31,16 @@ class SideValueSampler :
 public:
   SideValueSampler(const InputParameters & parameters);
 
-  virtual ~SideValueSampler() {}
-
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
 
   // Let the SamplerBase version of threadJoin() take part in the
   // overload resolution process, otherwise we get warnings about
   // overloaded virtual functions and "hiding" in debug mode.
   using SamplerBase::threadJoin;
 
-  virtual void threadJoin(const UserObject & y);
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   /// So we don't have to create and destroy this vector over and over again

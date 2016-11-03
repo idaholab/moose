@@ -16,8 +16,7 @@ template<>
 InputParameters validParams<PorousFlowViscosityConst>();
 
 /**
- * Material designed to provide the viscosity
- * which is assumed constant
+ * Material that provides a constant viscosity
  */
 class PorousFlowViscosityConst : public PorousFlowFluidPropertiesBase
 {
@@ -29,12 +28,6 @@ protected:
 
   /// constant value of viscosity
   const Real _input_viscosity;
-
-  /// the phase number
-  unsigned int _phase_num;
-
-  /// The variable names UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _dictator_UO;
 
   /// viscosity
   MaterialProperty<Real> & _viscosity;

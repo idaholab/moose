@@ -84,25 +84,25 @@
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
-    bubble_object = ngrains
+    flood_counter = ngrains
   [../]
   [./ghost_elements]
     type = FeatureFloodCountAux
     variable = ghost_elements
     field_display = GHOSTED_ENTITIES
-    bubble_object = ngrains
+    flood_counter = ngrains
   [../]
   [./halos]
     type = FeatureFloodCountAux
     variable = halos
     field_display = HALOS
-    bubble_object = ngrains
+    flood_counter = ngrains
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     field_display = VARIABLE_COLORING
-    bubble_object = ngrains
+    flood_counter = ngrains
   [../]
 []
 
@@ -119,7 +119,6 @@
   [./CuGrGr]
     # Material properties
     type = GBEvolution # Quantitative material properties for copper grain growth.  Dimensions are nm and ns
-    block = 0 # Block ID (only one block in this problem)
     GBmob0 = 2.5e-6 # Mobility prefactor for Cu from Schonfelder1997
     GBenergy = 0.708 # GB energy for Cu from Schonfelder1997
     Q = 0.23 # Activation energy for grain growth from Schonfelder 1997

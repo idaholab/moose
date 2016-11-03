@@ -50,7 +50,7 @@ TimePeriod::TimePeriod(const InputParameters & parameters) :
   if (isParamValid("start_time"))
     _start_time = getParam<std::vector<Real> >("start_time");
   else
-    _start_time = std::vector<Real>(1, _app.executioner()->getParam<Real>("start_time"));
+    _start_time = {_app.executioner()->getParam<Real>("start_time")};
 
   // Set end time
   if (isParamValid("end_time"))
@@ -83,7 +83,7 @@ void
 TimePeriod::execute()
 {
   // ENABLE
-  for (unsigned int i = 0; i < _enable.size(); ++i)
+  for (auto i = beginIndex(_enable); i < _enable.size(); ++i)
   {
     // If the current time falls between the start and end time, ENABLE the object (_t >= _start_time and _t < _end_time)
     if (MooseUtils::absoluteFuzzyGreaterEqual(_t, _start_time[i]) && MooseUtils::absoluteFuzzyLessThan(_t, _end_time[i]))
@@ -94,7 +94,7 @@ TimePeriod::execute()
   }
 
   // DISABLE
-  for (unsigned int i = 0; i < _disable.size(); ++i)
+  for (auto i = beginIndex(_disable); i < _disable.size(); ++i)
   {
     // If the current time falls between the start and end time, DISABLE the object (_t >= _start_time and _t < _end_time)
     if (MooseUtils::absoluteFuzzyGreaterEqual(_t, _start_time[i]) && MooseUtils::absoluteFuzzyLessThan(_t, _end_time[i]))

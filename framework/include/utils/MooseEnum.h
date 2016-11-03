@@ -59,7 +59,7 @@ public:
    */
   static MooseEnum withNamesFrom(const MooseEnumBase & other_enum);
 
-  virtual ~MooseEnum();
+  virtual ~MooseEnum() = default;
 
   /**
    * Cast operators to make this object behave as value_types and std::string
@@ -98,7 +98,7 @@ public:
    * IsValid
    * @return - a Boolean indicating whether this Enumeration has been set
    */
-  virtual bool isValid() const { return _current_id > INVALID_ID; }
+  virtual bool isValid() const override { return _current_id > INVALID_ID; }
 
   // InputParameters is allowed to create an empty enum but is responsible for
   // filling it in after the fact
@@ -107,9 +107,13 @@ public:
   /// Operator for printing to iostreams
   friend std::ostream & operator<<(std::ostream & out, const MooseEnum & obj) { out << obj._current_name_preserved; return out; }
 
+  /// get the current value cast to the enum type T
+  template <typename T>
+  T getEnum() const;
+
 protected:
   /// Check whether the current value is deprecated when called
-  virtual void checkDeprecated() const;
+  virtual void checkDeprecated() const override;
 
 private:
 
@@ -131,5 +135,16 @@ private:
   std::string _current_name;
   std::string _current_name_preserved;
 };
+
+template <typename T>
+T
+MooseEnum::getEnum() const
+{
+  #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
+    static_assert( std::is_enum<T>::value == true,
+      "The type requested from MooseEnum::getEnum must be an enum type!\n\n");
+  #endif
+  return static_cast<T>(_current_id);
+}
 
 #endif //MOOSEENUM_H

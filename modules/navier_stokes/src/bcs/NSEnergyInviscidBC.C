@@ -4,19 +4,25 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSEnergyInviscidBC.h"
+#include "NS.h"
+
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
 
 template<>
 InputParameters validParams<NSEnergyInviscidBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
-  params.addRequiredCoupledVar("temperature", "");
+  params.addRequiredCoupledVar(NS::temperature, "temperature");
   return params;
 }
 
 NSEnergyInviscidBC::NSEnergyInviscidBC(const InputParameters & parameters) :
     NSIntegratedBC(parameters),
-    _temperature(coupledValue("temperature")),
+    _temperature(coupledValue(NS::temperature)),
     // Object for computing deriviatives of pressure
     _pressure_derivs(*this)
 {
@@ -24,23 +30,22 @@ NSEnergyInviscidBC::NSEnergyInviscidBC(const InputParameters & parameters) :
 
 Real NSEnergyInviscidBC::qpResidualHelper(Real pressure, Real un)
 {
-  return (_rho_e[_qp] + pressure) * un * _test[_i][_qp];
+  return (_rho_E[_qp] + pressure) * un * _test[_i][_qp];
 }
 
 Real NSEnergyInviscidBC::qpResidualHelper(Real rho, RealVectorValue u, Real /*pressure*/)
 {
   // return (rho*(cv*_temperature[_qp] + 0.5*u.norm_sq()) + pressure) * (u*_normals[_qp]) * _test[_i][_qp];
-
   // We can also expand pressure in terms of rho... does this make a difference?
   // Then we don't use the input pressure value.
-  Real cv = _R / (_gamma - 1.0);
-  return rho * (_gamma * cv * _temperature[_qp] + 0.5 * u.norm_sq()) * (u * _normals[_qp]) * _test[_i][_qp];
+  return rho * (_fp.gamma() * _fp.cv() * _temperature[_qp] + 0.5 * u.norm_sq()) * (u * _normals[_qp]) * _test[_i][_qp];
 }
 
 // (U4+p) * d(u.n)/dX
 Real NSEnergyInviscidBC::qpJacobianTermA(unsigned var_number, Real pressure)
 {
   Real result = 0.0;
+
   switch (var_number)
   {
     case 0: // density
@@ -69,7 +74,7 @@ Real NSEnergyInviscidBC::qpJacobianTermA(unsigned var_number, Real pressure)
 
   // Notice the division by _rho[_qp] here.  This comes from taking the
   // derivative wrt to either density or momentum.
-  return (_rho_e[_qp] + pressure) / _rho[_qp] * result * _phi[_j][_qp] * _test[_i][_qp];
+  return (_rho_E[_qp] + pressure) / _rho[_qp] * result * _phi[_j][_qp] * _test[_i][_qp];
 }
 
 // d(U4)/dX * (u.n)

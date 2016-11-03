@@ -30,7 +30,7 @@ class MooseInit : public LibMeshInit
 {
 public:
   MooseInit(int argc, char *argv[], MPI_Comm COMM_WORLD_IN=MPI_COMM_WORLD);
-  virtual ~MooseInit();
+  virtual ~MooseInit() = default;
 };
 
 #endif /* MOOSEINIT_H */

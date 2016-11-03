@@ -39,10 +39,7 @@ protected:
    */
   Real f();
 
-  /**
-   * returns (u - the function)
-   */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /// The function being used for evaluation
   Function & _func;

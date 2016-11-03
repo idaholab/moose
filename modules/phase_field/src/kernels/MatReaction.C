@@ -18,7 +18,7 @@ InputParameters validParams<MatReaction>()
 }
 
 MatReaction::MatReaction(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
+    DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >(parameters),
     _is_coupled(isCoupled("v")),
     _v_name(_is_coupled ? getVar("v", 0)->name() : _var.name()),
     _v(_is_coupled ? coupledValue("v") : _u),
@@ -69,9 +69,7 @@ MatReaction::computeQpOffDiagJacobian(unsigned int jvar)
     return - (_L[_qp] + _dLdv[_qp] * _v[_qp]) * _test[_i][_qp] * _phi[_j][_qp];
 
   //  for all other vars get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   return - (*_dLdarg[cvar])[_qp] * _v[_qp] * _test[_i][_qp] * _phi[_j][_qp];
 }

@@ -46,12 +46,12 @@ class Terminator : public GeneralUserObject
 {
 public:
   Terminator(const InputParameters & parameters);
+  /// The Terminator DEFINITELY needs a destructor!
   virtual ~Terminator();
 
-  virtual void execute();
-  virtual void initialize() {};
-  virtual void finalize() {};
-
+  virtual void initialize() override {}
+  virtual void execute() override;
+  virtual void finalize() override {}
 
 protected:
   /// Postprocessor names

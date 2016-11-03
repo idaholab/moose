@@ -46,15 +46,11 @@ SideSetsFromNormals::SideSetsFromNormals(const InputParameters & parameters) :
     mooseError("normal list and boundary list are not the same length");
 
   // Make sure that the normals are normalized
-  for (std::vector<Point>::iterator normal_it = _normals.begin(); normal_it != _normals.end(); ++normal_it)
+  for (auto & normal : _normals)
   {
-    mooseAssert(normal_it->norm() >= 1e-5, "Normal is zero");
-    *normal_it /= normal_it->norm();
+    mooseAssert(normal.norm() >= 1e-5, "Normal is zero");
+    normal /= normal.norm();
   }
-}
-
-SideSetsFromNormals::~SideSetsFromNormals()
-{
 }
 
 void
@@ -64,7 +60,7 @@ SideSetsFromNormals::modify()
     mooseError("_mesh_ptr must be initialized before calling SideSetsFromNormals::modify()!");
 
   // We can't call this in the constructor, it appears that _mesh_ptr is always NULL there.
-  _mesh_ptr->errorIfParallelDistribution("SideSetsFromNormals");
+  _mesh_ptr->errorIfDistributedMesh("SideSetsFromNormals");
 
   std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs(_boundary_names, true);
 

@@ -134,7 +134,7 @@
     type = FeatureFloodCountAux
     variable = bubble_map0
     execute_on = timestep_end
-    bubble_object = bubbles
+    flood_counter = bubbles
     map_index = 0
   [../]
 
@@ -142,7 +142,7 @@
     type = FeatureFloodCountAux
     variable = bubble_map1
     execute_on = timestep_end
-    bubble_object = bubbles
+    flood_counter = bubbles
     map_index = 1
   [../]
 []
@@ -165,6 +165,7 @@
     use_single_map = false
     use_global_numbering = true
     outputs = none
+    flood_entity_type = NODAL
   [../]
 []
 

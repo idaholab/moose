@@ -24,7 +24,7 @@
 []
 
 [Kernels]
-  [./StressDivergence2DAxisymmetricRZ]
+  [./TensorMechanics]
     use_displaced_mesh = true
   [../]
 []
@@ -55,13 +55,10 @@
     fill_method = axisymmetric_rz
     block = 0
   [../]
-
   [./small_strain_arz]
     type = ComputeAxisymmetricRZSmallStrain
-    thermal_expansion_coeff = 0
     block = 0
   [../]
-
   [./elastic_stress]
     type = ComputeLinearElasticStress
     block = 0

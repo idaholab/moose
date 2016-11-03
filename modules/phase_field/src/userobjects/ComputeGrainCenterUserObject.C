@@ -15,7 +15,7 @@ InputParameters validParams<ComputeGrainCenterUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params.addClassDescription("Userobject for calculating the grain volume and grain center");
-  params.addCoupledVar("etas", "order parameters");
+  params.addRequiredCoupledVarWithAutoBuild("etas", "var_name_base", "op_num", "order parameters");
   return params;
 }
 

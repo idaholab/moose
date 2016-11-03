@@ -8,9 +8,7 @@
 #ifndef POROUSFLOWCAPILLARYPRESSUREBASE_H
 #define POROUSFLOWCAPILLARYPRESSUREBASE_H
 
-#include "DerivativeMaterialInterface.h"
-#include "Material.h"
-#include "PorousFlowDictator.h"
+#include "PorousFlowMaterialBase.h"
 
 class PorousFlowCapillaryPressureBase;
 
@@ -20,19 +18,13 @@ InputParameters validParams<PorousFlowCapillaryPressureBase>();
 /**
  * Base class for capillary pressure
  */
-class PorousFlowCapillaryPressureBase : public DerivativeMaterialInterface<Material>
+class PorousFlowCapillaryPressureBase : public PorousFlowMaterialBase
 {
 public:
   PorousFlowCapillaryPressureBase(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();
-
-  /// Phase number of fluid that this relative permeability relates to
-  const unsigned int _phase_num;
-
-  /// The PorousFlowDictator UserObject
-  const PorousFlowDictator & _dictator_UO;
 
   /// Name of (dummy) saturation primary variable
   VariableName _saturation_variable_name;

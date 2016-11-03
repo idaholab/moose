@@ -1,0 +1,7 @@
+[Tests]
+  [./oneD_elastic]
+    type = 'Exodiff'
+    input = 'axisymm_plane_strain.i'
+    exodiff = 'axisymm_plane_strain_out.e'
+  [../]
+[]

@@ -205,6 +205,9 @@ public:
   /// returns C_ijkl = a_ik * b_jl
   RankFourTensor mixedProductIkJl(const RankTwoTensor & a) const;
 
+  /// returns C_ijkl = a_jk * b_il
+  RankFourTensor mixedProductJkIl(const RankTwoTensor & a) const;
+
   /// returns A_ij - de_ij*tr(A)/3, where A are the _vals
   RankTwoTensor deviatoric() const;
 
@@ -222,6 +225,11 @@ public:
    * S_ij = A_ij - de_ij*tr(A)/3
    * Then this returns (S_ij + S_ji)*(S_ij + S_ji)/8
    * Note the explicit symmeterisation
+   */
+  Real generalSecondInvariant() const;
+
+  /**
+   * Calculates the second invariant (I2) of a tensor
    */
   Real secondInvariant() const;
 

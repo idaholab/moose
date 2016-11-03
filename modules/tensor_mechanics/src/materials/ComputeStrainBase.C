@@ -13,11 +13,8 @@ InputParameters validParams<ComputeStrainBase>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addParam<Real>("temperature_ref", 273, "Reference temperature for thermal expansion in K");
-  params.addCoupledVar("temperature", 273, "temperature in Kelvin");
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
-  params.addParam<Real>("thermal_expansion_coeff", 0, "Thermal expansion coefficient in 1/K");
-  params.addPrivateParam<bool>("stateful_displacements", false);
+  params.addParam<bool>("volumetric_locking_correction", true, "Flag to correct volumetric locking");
   return params;
 }
 
@@ -26,14 +23,11 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
     _ndisp(coupledComponents("displacements")),
     _disp(3),
     _grad_disp(3),
-    _grad_disp_old(3),
-    _T(coupledValue("temperature")),
-    _T0(getParam<Real>("temperature_ref")),
-    _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
     _mechanical_strain(declareProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain")),
-    _stateful_displacements(getParam<bool>("stateful_displacements") && _fe_problem.isTransient())
+    _eigenstrain(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain")),
+    _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
 {
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
@@ -44,11 +38,6 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
   {
     _disp[i] = &coupledValue("displacements", i);
     _grad_disp[i] = &coupledGradient("displacements", i);
-
-    if (_stateful_displacements)
-      _grad_disp_old[i] = &coupledGradientOld("displacements" ,i);
-    else
-      _grad_disp_old[i] = &_grad_zero;
   }
 
   // set unused dimensions to zero
@@ -56,7 +45,6 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
   {
     _disp[i] = &_zero;
     _grad_disp[i] = &_grad_zero;
-    _grad_disp_old[i] = &_grad_zero;
   }
 }
 

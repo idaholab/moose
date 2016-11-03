@@ -19,7 +19,7 @@
 
 //Forward Declarations
 class EigenKernel;
-class EigenSystem;
+class MooseEigenSystem;
 
 template<>
 InputParameters validParams<EigenKernel>();
@@ -33,14 +33,13 @@ InputParameters validParams<EigenKernel>();
 class EigenKernel : public KernelBase
 {
 public:
-  // See KernelBase base for documentation of these overridden methods
-  virtual void computeResidual();
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int /*jvar*/) {}
-  virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) {}
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int /*jvar*/) override {}
+  virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) override {}
 
   EigenKernel(const InputParameters & parameters);
-  virtual bool enabled();
+  virtual bool enabled() override;
 
 protected:
   virtual Real computeQpResidual() = 0;
@@ -56,7 +55,7 @@ protected:
   bool _eigen;
 
   /// EigenKernel always lives in EigenSystem
-  EigenSystem * _eigen_sys;
+  MooseEigenSystem * _eigen_sys;
 
   /**
    * A pointer to the eigenvalue that is stored in a postprocessor

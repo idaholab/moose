@@ -66,18 +66,18 @@ TrackDiracFront::finalize()
 Elem *
 TrackDiracFront::localElementConnectedToCurrentNode()
 {
-  std::map<dof_id_type, std::vector<dof_id_type> > & _node_to_elem_map = _mesh.nodeToElemMap();
+  const std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh.nodeToElemMap();
+  auto node_to_elem_pair = node_to_elem_map.find(_current_node->id());
+  mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Node missing in node to elem map");
+  const std::vector<dof_id_type> & connected_elems = node_to_elem_pair->second;
 
-  dof_id_type id = _current_node->id();
-
-  const std::vector<dof_id_type> & connected_elems = _node_to_elem_map.at(id);
-
-  unsigned int pid = processor_id(); // This processor id
+  auto pid = processor_id(); // This processor id
 
   // Look through all of the elements connected to this node and find one owned by the local processor
-  for (unsigned int i=0; i<connected_elems.size(); i++)
+  for (auto elem_id : connected_elems)
   {
-    Elem * elem = _mesh.elemPtr(connected_elems[i]);
+    Elem * elem = _mesh.elemPtr(elem_id);
+    mooseAssert(elem, "Elem pointer is NULL");
 
     if (elem->processor_id() == pid) // Is this element owned by the local processor?
       return elem;

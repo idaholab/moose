@@ -8,7 +8,7 @@
 #ifndef POROUSFLOWRELATIVEPERMEABILITYCOREY_H
 #define POROUSFLOWRELATIVEPERMEABILITYCOREY_H
 
-#include "PorousFlowRelativePermeabilityUnity.h"
+#include "PorousFlowRelativePermeabilityBase.h"
 
 class PorousFlowRelativePermeabilityCorey;
 
@@ -16,19 +16,23 @@ template<>
 InputParameters validParams<PorousFlowRelativePermeabilityCorey>();
 
 /**
- * Material designed to calculate Corey-type relative permeability
- * of an arbitrary phase given the saturation and
- * Corey exponent of that phase.
+ * Material to calculate Corey-type relative permeability of an arbitrary phase
+ * given the saturation and Corey exponent of that phase.
+ *
+ * From  Corey, A. T., The interrelation between gas and oil relative
+ * permeabilities, Prod. Month. 38-41 (1954)
  */
-class PorousFlowRelativePermeabilityCorey : public PorousFlowRelativePermeabilityUnity
+class PorousFlowRelativePermeabilityCorey : public PorousFlowRelativePermeabilityBase
 {
 public:
   PorousFlowRelativePermeabilityCorey(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual Real relativePermeability(Real seff) const override;
 
-  /// Core exponent n for the phase
+  virtual Real dRelativePermeability_dS(Real seff) const override;
+
+  /// Corey exponent n for the specified phase
   const Real _n;
 };
 

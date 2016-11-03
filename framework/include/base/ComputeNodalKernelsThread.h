@@ -28,14 +28,14 @@ class NodalKernel;
 class ComputeNodalKernelsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
+  ComputeNodalKernelsThread(FEProblem & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
 
   // Splitting Constructor
   ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split split);
 
-  virtual void pre();
+  virtual void pre() override;
 
-  virtual void onNode(ConstNodeRange::const_iterator & node_it);
+  virtual void onNode(ConstNodeRange::const_iterator & node_it) override;
 
   void join(const ComputeNodalKernelsThread & /*y*/);
 

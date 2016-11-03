@@ -32,8 +32,8 @@ public:
 
   virtual const std::vector<RealGradient> & getForceValues() const;
   virtual const std::vector<RealGradient> & getTorqueValues() const;
-  virtual const std::vector<RealGradient> & getForceDerivatives() const;
-  virtual const std::vector<RealGradient> & getTorqueDerivatives() const;
+  virtual const std::vector<Real> & getForceCJacobians() const;
+  virtual const std::vector<std::vector<Real> > & getForceEtaJacobians() const;
 
 protected:
   /// Applied force on particles, size should be 3 times no. of grains
@@ -41,13 +41,15 @@ protected:
   /// Applied torque on particles, size should be 3 times no. of grains
   std::vector<Real> _M;
 
-  unsigned int _ncrys;
+  unsigned int _grain_num;
   unsigned int _ncomp;
 
+  ///@{ providing grain forces, torques and their jacobians w. r. t c
   std::vector<RealGradient> _force_values;
   std::vector<RealGradient> _torque_values;
-  std::vector<RealGradient> _force_derivatives;
-  std::vector<RealGradient> _torque_derivatives;
+  std::vector<Real> _c_jacobians;
+  std::vector<std::vector<Real> > _eta_jacobians;
+  ///@}
 };
 
 #endif //CONSTANTGRAINFORCEANDTORQUE_H

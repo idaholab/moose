@@ -28,7 +28,7 @@ class AddMultiAppAction : public MooseObjectAction
 public:
   AddMultiAppAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // ADDMULTIAPPACTION_H

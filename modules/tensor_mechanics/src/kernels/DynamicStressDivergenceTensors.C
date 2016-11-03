@@ -14,6 +14,7 @@ InputParameters validParams<DynamicStressDivergenceTensors>()
   params.addClassDescription("Residual due to stress related Rayleigh damping and HHT time integration terms ");
   params.addParam<Real>("zeta", 0, "zeta parameter for the Rayleigh damping");
   params.addParam<Real>("alpha", 0, "alpha parameter for HHT time integration");
+  params.addParam<bool>("static_initialization", false, "Set to true to get the system to equillibrium under gravity by running a quasi-static analysis (by solving Ku = F) in the first time step");
   return params;
 }
 
@@ -22,7 +23,8 @@ DynamicStressDivergenceTensors::DynamicStressDivergenceTensors(const InputParame
     _stress_older(getMaterialPropertyOlderByName<RankTwoTensor>(_base_name + "stress")),
     _stress_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "stress")),
     _zeta(getParam<Real>("zeta")),
-    _alpha(getParam<Real>("alpha"))
+    _alpha(getParam<Real>("alpha")),
+    _static_initialization(getParam<bool>("static_initialization"))
 {
 }
 
@@ -40,7 +42,11 @@ DynamicStressDivergenceTensors::computeQpResidual()
   *   + alpha [Div sigma - Div sigma_old] +Div sigma
   * = [(1+_alpha)*_zeta/dt +_alpha+1]* Div sigma - [(1+2_alpha)*_zeta/dt + _alpha] Div sigma_old + _alpha*_zeta/dt Div sigma_older
   */
-  if ((_dt > 0))
+
+  if (_static_initialization && _t == _dt)
+    // If static inialization is true, then in the first step residual is only Ku which is stress.grad(test).
+    return _stress[_qp].row(_component) * _grad_test[_i][_qp];
+  else if (_dt > 0)
     return _stress[_qp].row(_component) * _grad_test[_i][_qp]*(1+_alpha+(1+_alpha)*_zeta/_dt)
       -(_alpha+(1+2*_alpha)*_zeta/_dt)*_stress_old[_qp].row(_component)* _grad_test[_i][_qp]
       + (_alpha*_zeta/_dt)*_stress_older[_qp].row(_component)*_grad_test[_i][_qp];
@@ -51,7 +57,9 @@ DynamicStressDivergenceTensors::computeQpResidual()
 Real
 DynamicStressDivergenceTensors::computeQpJacobian()
 {
-  if (_dt > 0)
+  if (_static_initialization && _t == _dt)
+    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
+  else if (_dt > 0)
     return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp])*(1+_alpha+_zeta/_dt);
   else
     return 0;
@@ -72,7 +80,9 @@ DynamicStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 
   if (active)
   {
-    if (_dt > 0)
+    if (_static_initialization && _t == _dt)
+      return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
+    else if (_dt > 0)
       return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp])*(1+_alpha+_zeta/_dt);
     else
       return 0;

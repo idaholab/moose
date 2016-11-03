@@ -84,7 +84,7 @@
     type = FeatureFloodCountAux
     variable = bubble_map
     execute_on = timestep_end
-    bubble_object = bubbles
+    flood_counter = bubbles
   [../]
 []
 
@@ -103,7 +103,6 @@
     variable = u
     threshold = 0.3
     execute_on = timestep_end
-    flood_entity_type = ELEMENTAL
   [../]
 []
 

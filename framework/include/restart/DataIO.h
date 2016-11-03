@@ -65,6 +65,12 @@ template<typename P>
 inline void storeHelper(std::ostream & stream, MooseSharedPointer<P> & data, void * context);
 
 /**
+ * Unique pointer helper routine
+ */
+template<typename P>
+inline void storeHelper(std::ostream & stream, std::unique_ptr<P> & data, void * context);
+
+/**
  * Set helper routine
  */
 template<typename P>
@@ -95,10 +101,16 @@ template<typename P>
 inline void loadHelper(std::istream & stream, std::vector<P> & data, void * context);
 
 /**
- * SharedPointer helper routine
+ * Shared Pointer helper routine
  */
 template<typename P>
 inline void loadHelper(std::istream & stream, MooseSharedPointer<P> & data, void * context);
+
+/**
+ * Unique Pointer helper routine
+ */
+template<typename P>
+inline void loadHelper(std::istream & stream, std::unique_ptr<P> & data, void * context);
 
 /**
  * Set helper routine
@@ -169,6 +181,15 @@ dataStore(std::ostream & stream, std::vector<T> & v, void * context)
 template<typename T>
 inline void
 dataStore(std::ostream & stream, MooseSharedPointer<T> & v, void * context)
+{
+  T * tmp = v.get();
+
+  storeHelper(stream, tmp, context);
+}
+
+template<typename T>
+inline void
+dataStore(std::ostream & stream, std::unique_ptr<T> & v, void * context)
 {
   T * tmp = v.get();
 
@@ -318,6 +339,15 @@ dataLoad(std::istream & stream, MooseSharedPointer<T> & v, void * context)
 
 template<typename T>
 inline void
+dataLoad(std::istream & stream, std::unique_ptr<T> & v, void * context)
+{
+  T * tmp = v.get();
+
+  loadHelper(stream, tmp, context);
+}
+
+template<typename T>
+inline void
 dataLoad(std::istream & stream, std::set<T> & s, void * context)
 {
   // First read the size of the set
@@ -328,7 +358,7 @@ dataLoad(std::istream & stream, std::set<T> & s, void * context)
   {
     T data;
     loadHelper(stream, data, context);
-    s.insert(data);
+    s.insert(std::move(data));
   }
 }
 
@@ -344,7 +374,7 @@ dataLoad(std::istream & stream, std::list<T> & l, void * context)
   {
     T data;
     loadHelper(stream, data, context);
-    l.push_back(data);
+    l.push_back(std::move(data));
   }
 }
 
@@ -427,6 +457,14 @@ storeHelper(std::ostream & stream, MooseSharedPointer<P> & data, void * context)
   dataStore(stream, data, context);
 }
 
+// std::unique Helper Function
+template<typename P>
+inline void
+storeHelper(std::ostream & stream, std::unique_ptr<P> & data, void * context)
+{
+  dataStore(stream, data, context);
+}
+
 // Set Helper Function
 template<typename P>
 inline void
@@ -471,6 +509,14 @@ loadHelper(std::istream & stream, std::vector<P> & data, void * context)
 template<typename P>
 inline void
 loadHelper(std::istream & stream, MooseSharedPointer<P> & data, void * context)
+{
+  dataLoad(stream, data, context);
+}
+
+// Unique Pointer Helper Function
+template<typename P>
+inline void
+loadHelper(std::istream & stream, std::unique_ptr<P> & data, void * context)
 {
   dataLoad(stream, data, context);
 }
@@ -579,7 +625,7 @@ public:
 
     in += size_bytes + string_len;
 
-    return std::string(oss.str());
+    return oss.str();
   }
 
 };

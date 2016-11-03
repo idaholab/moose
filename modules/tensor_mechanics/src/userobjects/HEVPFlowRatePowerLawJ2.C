@@ -118,5 +118,5 @@ HEVPFlowRatePowerLawJ2::computeEqvStress(const RankTwoTensor & pk2_dev, const Ra
 {
   RankTwoTensor sdev = pk2_dev * ce;
   Real val = sdev.doubleContraction(sdev.transpose());
-  return std::pow(1.5 * val, 0.5);
+  return std::sqrt(1.5 * val);
 }

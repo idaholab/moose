@@ -60,7 +60,6 @@
 [Materials]
   [./Moly_GB]
     type = GBEvolution
-    block = 0
     time_scale = 1.0e-2
     GBMobility = 1.88e-14 #m^4/J*s
     T = 500 # K

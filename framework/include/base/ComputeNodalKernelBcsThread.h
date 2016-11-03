@@ -24,18 +24,18 @@ class NodalKernel;
 class ComputeNodalKernelBcsThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelBcsThread(FEProblem & fe_problem, AuxiliarySystem & sys, const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
+  ComputeNodalKernelBcsThread(FEProblem & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
   // Splitting Constructor
   ComputeNodalKernelBcsThread(ComputeNodalKernelBcsThread & x, Threads::split split);
 
-  virtual void pre();
+  virtual void pre() override;
 
-  virtual void onNode(ConstBndNodeRange::const_iterator & node_it);
+  virtual void onNode(ConstBndNodeRange::const_iterator & node_it) override;
 
   void join(const ComputeNodalKernelBcsThread & /*y*/);
 
 protected:
-  AuxiliarySystem & _sys;
+  AuxiliarySystem & _aux_sys;
 
   const MooseObjectWarehouse<NodalKernel> & _nodal_kernels;
 

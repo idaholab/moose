@@ -27,7 +27,7 @@
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   block = 0
-  PorousFlowDictator_UO = dictator
+  PorousFlowDictator = dictator
 []
 
 [Variables]
@@ -195,6 +195,13 @@
   [../]
 []
 [Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+  [../]
+  [./nnn]
+    type = PorousFlowNodeNumber
+    on_initial_only = true
+  [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     # bulk modulus = 1, poisson ratio = 0.2

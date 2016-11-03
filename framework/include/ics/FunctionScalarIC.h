@@ -30,7 +30,7 @@ public:
   FunctionScalarIC(const InputParameters & parameters);
 
 protected:
-  virtual Real value();
+  virtual Real value() override;
 
   unsigned int _ncomp;
   std::vector<Function *> _func;

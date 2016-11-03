@@ -56,7 +56,7 @@ protected:
    * Responsible for computing the residual at one quadrature point.
    * This function should always be defined in the .C file.
    */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /**
    * Responsible for computing the diagonal block of the preconditioning matrix.
@@ -68,7 +68,7 @@ protected:
    *
    * This function should always be defined in the .C file.
    */
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
 private:
   /**

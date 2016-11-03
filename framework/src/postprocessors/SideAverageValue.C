@@ -37,7 +37,7 @@ void
 SideAverageValue::execute()
 {
   SideIntegralVariablePostprocessor::execute();
-  _volume += _current_side_volume;
+  _volume += volume();
 }
 
 Real
@@ -48,6 +48,11 @@ SideAverageValue::getValue()
   return integral / _volume;
 }
 
+Real
+SideAverageValue::volume()
+{
+  return _current_side_volume;
+}
 
 void
 SideAverageValue::threadJoin(const UserObject & y)

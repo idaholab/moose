@@ -20,8 +20,17 @@ public:
 
   virtual void act();
 
-  std::vector<unsigned int> _op_num;
-  std::vector<std::string> _var_name_base;
+protected:
+  /// number of grains to create
+  unsigned int _grain_num;
+  /// base name for the auxvariables
+  const std::vector<std::string> & _var_name_base;
+  /// number of auxvariables
+  unsigned int _num_var;
+  /// list of material properties to be used
+  const MultiMooseEnum & _data_type;
+  /// number of properties
+  unsigned int _data_size;
 };
 
 template<>

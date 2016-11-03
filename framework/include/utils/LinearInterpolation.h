@@ -39,8 +39,7 @@ public:
     _x(std::vector<Real>()),
     _y(std::vector<Real>()) {}
 
-  virtual ~LinearInterpolation()
-    {}
+  virtual ~LinearInterpolation() = default;
 
   /**
    * Set the x and y values.

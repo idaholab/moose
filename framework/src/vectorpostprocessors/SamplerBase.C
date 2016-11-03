@@ -44,104 +44,102 @@ void
 SamplerBase::setupVariables(const std::vector<std::string> & variable_names)
 {
   _variable_names = variable_names;
+  _values.reserve(variable_names.size());
 
-  _values.resize(variable_names.size());
-  _values_tmp.resize(variable_names.size());
-
-  for (unsigned int i=0; i<variable_names.size(); i++)
-    _values[i] = &_vpp->declareVector(variable_names[i]);
+  for (const auto & variable_name : variable_names)
+    _values.push_back(&_vpp->declareVector(variable_name));
 }
 
 void
 SamplerBase::addSample(const Point & p, const Real & id, const std::vector<Real> & values)
 {
-  _x_tmp.push_back(p(0));
-  _y_tmp.push_back(p(1));
-  _z_tmp.push_back(p(2));
+  _x.push_back(p(0));
+  _y.push_back(p(1));
+  _z.push_back(p(2));
 
-  _id_tmp.push_back(id);
+  _id.push_back(id);
 
-  for (unsigned int i=0; i<_variable_names.size(); i++)
-    _values_tmp[i].push_back(values[i]);
+  mooseAssert(values.size() == _variable_names.size(), "Mismatch of variable names to vector size");
+  for (auto i = beginIndex(values); i < values.size(); ++i)
+    _values[i]->emplace_back(values[i]);
 }
 
 void
 SamplerBase::initialize()
 {
-  _x_tmp.clear();
-  _y_tmp.clear();
-  _z_tmp.clear();
-  _id_tmp.clear();
+  _x.clear();
+  _y.clear();
+  _z.clear();
+  _id.clear();
 
-  for (unsigned int i=0; i<_variable_names.size(); i++)
-    _values_tmp[i].clear();
+  std::for_each(_values.begin(), _values.end(),
+                [](VectorPostprocessorValue * vec)
+                {
+                  vec->clear();
+                });
 }
 
 void
 SamplerBase::finalize()
 {
-  // Get the values from everywhere
-  _comm.allgather(_x_tmp, false);
-  _comm.allgather(_y_tmp, false);
-  _comm.allgather(_z_tmp, false);
-  _comm.allgather(_id_tmp, false);
+  /**
+   * We have several vectors that all need to be processed in the same way.
+   * Rather than enumerate them all, let's just create a vector of pointers
+   * and work on them that way.
+   */
+  constexpr auto NUM_ID_VECTORS = 4;
 
-  for (unsigned int i=0; i<_variable_names.size(); i++)
-    _comm.allgather(_values_tmp[i], false);
+  std::vector<VectorPostprocessorValue *> vec_ptrs;
+  vec_ptrs.reserve(_values.size() + NUM_ID_VECTORS);
+  // Initialize the pointer vector with the position and ID vectors
+  vec_ptrs = { { &_x, &_y, &_z, &_id } };
+  // Now extend the vector by all the remaining values vector before processing
+  vec_ptrs.insert(vec_ptrs.end(), _values.begin(), _values.end());
 
-  // Next... figure out the correct sorted positions of each value
-  std::vector<size_t> sorted_indices;
+  // Gather up each of the partial vectors
+  for (auto vec_ptr : vec_ptrs)
+    _comm.allgather(*vec_ptr, /* identical buffer lengths = */ false);
 
-  switch (_sort_by)
+  // Now create an index vector by using an indirect sort
+  std::vector<std::size_t> sorted_indices;
+  Moose::indirectSort(vec_ptrs[_sort_by]->begin(), vec_ptrs[_sort_by]->end(), sorted_indices);
+
+  /**
+   * We now have one sorted vector. The remaining vectors need to be sorted according to that vector.
+   * We'll need a temporary vector to hold values as we map them according to the sorted indices.
+   * After that, we'll swap the vector contents with the sorted vector to get the values
+   * back into the original vector.
+   */
+  // This vector is used as temp storage to sort each of the remaining vectors according to the first
+  auto vector_length = sorted_indices.size();
+  VectorPostprocessorValue tmp_vector(vector_length);
+
+#ifndef NDEBUG
+  for (const auto vec_ptr : vec_ptrs)
+    if (vec_ptr->size() != vector_length)
+      mooseError("Vector length mismatch");
+#endif
+
+  // Sort each of the vectors using the same sorted indices
+  for (auto i = beginIndex(vec_ptrs); i < vec_ptrs.size(); ++i)
   {
-    case 0: // x
-      Moose::indirectSort(_x_tmp.begin(), _x_tmp.end(), sorted_indices);
-      break;
-    case 1: // y
-      Moose::indirectSort(_y_tmp.begin(), _y_tmp.end(), sorted_indices);
-      break;
-    case 2: // z
-      Moose::indirectSort(_z_tmp.begin(), _z_tmp.end(), sorted_indices);
-      break;
-    case 3: // id
-      Moose::indirectSort(_id_tmp.begin(), _id_tmp.end(), sorted_indices);
-      break;
-  }
+    for (auto j = beginIndex(sorted_indices); j < sorted_indices.size(); ++j)
+      tmp_vector[j] = (*vec_ptrs[i])[sorted_indices[j]];
 
-  // Use the sorted_indices to copy out of the temporary vectors and into the actual output vectors
-  for (unsigned int i=0; i<_variable_names.size(); i++)
-  {
-    _values[i]->resize(sorted_indices.size());
-
-    for (unsigned int j=0; j<sorted_indices.size(); j++)
-      (*_values[i])[j] = _values_tmp[i][sorted_indices[j]];
-  }
-
-  _x.resize(sorted_indices.size());
-  _y.resize(sorted_indices.size());
-  _z.resize(sorted_indices.size());
-  _id.resize(sorted_indices.size());
-
-  for (unsigned int i=0; i<sorted_indices.size(); i++)
-  {
-    size_t index = sorted_indices[i];
-
-    _x[i] = _x_tmp[index];
-    _y[i] = _y_tmp[index];
-    _z[i] = _z_tmp[index];
-    _id[i] = _id_tmp[index];
+    // Swap vector storage with sorted vector
+    vec_ptrs[i]->swap(tmp_vector);
   }
 }
 
 void
 SamplerBase::threadJoin(const SamplerBase & y)
 {
-  _x_tmp.insert(_x_tmp.end(), y._x_tmp.begin(), y._x_tmp.end());
-  _y_tmp.insert(_y_tmp.end(), y._y_tmp.begin(), y._y_tmp.end());
-  _z_tmp.insert(_z_tmp.end(), y._z_tmp.begin(), y._z_tmp.end());
+  _x.insert(_x.end(), y._x.begin(), y._x.end());
+  _y.insert(_y.end(), y._y.begin(), y._y.end());
+  _z.insert(_z.end(), y._z.begin(), y._z.end());
 
-  _id_tmp.insert(_id_tmp.end(), y._id_tmp.begin(), y._id_tmp.end());
+  _id.insert(_id.end(), y._id.begin(), y._id.end());
 
   for (unsigned int i=0; i<_variable_names.size(); i++)
-    _values_tmp[i].insert(_values_tmp[i].end(), y._values_tmp[i].begin(), y._values_tmp[i].end());
+    _values[i]->insert(_values[i]->end(), y._values[i]->begin(), y._values[i]->end());
 }

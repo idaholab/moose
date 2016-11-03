@@ -31,8 +31,3 @@ TestSetupPostprocessorDataActionFunction::TestSetupPostprocessorDataActionFuncti
     mooseError("TestSetupPostprocessorDataActionFunction fail");
 
 }
-
-TestSetupPostprocessorDataActionFunction::~TestSetupPostprocessorDataActionFunction()
-{
-}
-

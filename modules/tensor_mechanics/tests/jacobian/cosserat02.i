@@ -4,12 +4,8 @@
 []
 
 [GlobalParams]
-  disp_z = disp_z
-  disp_y = disp_y
-  disp_x = disp_x
-  wc_z = wc_z
-  wc_y = wc_y
-  wc_x = wc_x
+  displacements = 'disp_x disp_y disp_z'
+  Cosserat_rotations = 'wc_x wc_y wc_z'
 []
 
 [Variables]
@@ -52,21 +48,21 @@
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
     component = 0
-    base_name = coupled
+    base_name = couple
   [../]
   [./y_couple]
     type = StressDivergenceTensors
     variable = wc_y
     component = 1
     displacements = 'wc_x wc_y wc_z'
-    base_name = coupled
+    base_name = couple
   [../]
   [./z_couple]
     type = StressDivergenceTensors
     variable = wc_z
     component = 2
     displacements = 'wc_x wc_y wc_z'
-    base_name = coupled
+    base_name = couple
   [../]
   [./x_moment]
     type = MomentBalancing
@@ -87,13 +83,18 @@
 
 
 [Materials]
-  [./cosserat]
-    type = CosseratLinearElasticMaterial
-    block = 0
+  [./elasticity_tensor]
+    type = ComputeCosseratElasticityTensor
     B_ijkl = '1.3 0.98 1.4'
     fill_method_bending = 'general_isotropic'
-    C_ijkl = '1 2 1.333'
+    E_ijkl = '1 2 1.333'
     fill_method = 'general_isotropic'
+  [../]
+  [./strain]
+    type = ComputeCosseratSmallStrain
+  [../]
+  [./stress]
+    type = ComputeCosseratLinearElasticStress
   [../]
 []
 

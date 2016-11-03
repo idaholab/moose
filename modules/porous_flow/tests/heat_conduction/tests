@@ -1,0 +1,14 @@
+[Tests]
+  [./no_fluid]
+    type = 'CSVDiff'
+    input = 'no_fluid.i'
+    csvdiff = 'no_fluid.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./two_phase]
+    type = 'CSVDiff'
+    input = 'two_phase.i'
+    csvdiff = 'two_phase.csv'
+    rel_err = 1.0E-5
+  [../]
+[]

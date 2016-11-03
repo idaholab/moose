@@ -73,7 +73,7 @@ public:
   /**
    * Executes when the mesh alterted and sets a flag used by oversampling
    */
-  virtual void meshChanged();
+  virtual void meshChanged() override;
 
 protected:
 
@@ -132,7 +132,7 @@ private:
   /* Each of the MeshFunctions keeps a reference to this vector, the vector is updated for the current system
    * and variable before the MeshFunction is applied. This allows for the same MeshFunction object to be
    * re-used, unless the mesh has changed due to adaptivity */
-  UniquePtr<NumericVector<Number> > _serialized_solution;
+  std::unique_ptr<NumericVector<Number> > _serialized_solution;
 };
 
 #endif // OVERSAMPLEOUTPUT_H

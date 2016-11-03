@@ -3,11 +3,11 @@
 ###############################################################################
 #
 # Required Environment variables (one of the following)
-# PACKAGES_DIR  - Location of the MOOSE redistributable package 
+# PACKAGES_DIR  - Location of the MOOSE redistributable package
 # CPPUNIT_DIR   - Location of CPPUNIT
 #
 # Optional Environment variables
-# MOOSE_DIR     - Root directory of the MOOSE project 
+# MOOSE_DIR     - Root directory of the MOOSE project
 # FRAMEWORK_DIR - Location of the MOOSE framework
 #
 ###############################################################################
@@ -18,7 +18,7 @@ FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 # Extra stuff for CPPUNIT
 CPPUNIT_DIR 		?= $(PACKAGES_DIR)/cppunit
 ADDITIONAL_INCLUDES 	:= -I$(CPPUNIT_DIR)/include
-ADDITIONAL_LIBS 	:= -L$(CPPUNIT_DIR)/lib -lcppunit 
+ADDITIONAL_LIBS 	:= -L$(CPPUNIT_DIR)/lib -lcppunit
 
 # framework
 include $(FRAMEWORK_DIR)/build.mk
@@ -30,6 +30,7 @@ TENSOR_MECHANICS  := yes
 PHASE_FIELD       := yes
 XFEM              := yes
 POROUS_FLOW       := yes
+FLUID_PROPERTIES  := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 

@@ -81,10 +81,10 @@ Q2PAction::act()
     kernel_type = "Q2PNodalMass";
     params = _factory.getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _sat_var;
-    params.set<std::vector<VariableName> >("other_var") = std::vector<VariableName>(1, _pp_var);
+    params.set<std::vector<VariableName> >("other_var") = {_pp_var};
     params.set<bool>("var_is_porepressure") = false;
     if (!_no_mass_calculations)
-      params.set<std::vector<AuxVariableName> >("save_in") = std::vector<AuxVariableName>(1, "Q2P_nodal_water_mass_divided_by_dt");
+      params.set<std::vector<AuxVariableName> >("save_in") = {"Q2P_nodal_water_mass_divided_by_dt"};
     params.set<UserObjectName>("fluid_density") = _water_density;
     _problem->addKernel(kernel_type, kernel_name, params);
 
@@ -92,10 +92,10 @@ Q2PAction::act()
     kernel_type = "Q2PNodalMass";
     params = _factory.getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _pp_var;
-    params.set<std::vector<VariableName> >("other_var") = std::vector<VariableName>(1, _sat_var);
+    params.set<std::vector<VariableName> >("other_var") = {_sat_var};
     params.set<bool>("var_is_porepressure") = true;
     if (!_no_mass_calculations)
-      params.set<std::vector<AuxVariableName> >("save_in") = std::vector<AuxVariableName>(1, "Q2P_nodal_gas_mass_divided_by_dt");
+      params.set<std::vector<AuxVariableName> >("save_in") = {"Q2P_nodal_gas_mass_divided_by_dt"};
     params.set<UserObjectName>("fluid_density") = _gas_density;
     _problem->addKernel(kernel_type, kernel_name, params);
 
@@ -103,7 +103,7 @@ Q2PAction::act()
     kernel_type = "Q2PNegativeNodalMassOld";
     params = _factory.getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _sat_var;
-    params.set<std::vector<VariableName> >("other_var") = std::vector<VariableName>(1, _pp_var);
+    params.set<std::vector<VariableName> >("other_var") = {_pp_var};
     params.set<bool>("var_is_porepressure") = false;
     params.set<UserObjectName>("fluid_density") = _water_density;
     _problem->addKernel(kernel_type, kernel_name, params);
@@ -112,7 +112,7 @@ Q2PAction::act()
     kernel_type = "Q2PNegativeNodalMassOld";
     params = _factory.getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _pp_var;
-    params.set<std::vector<VariableName> >("other_var") = std::vector<VariableName>(1, _sat_var);
+    params.set<std::vector<VariableName> >("other_var") = {_sat_var};
     params.set<bool>("var_is_porepressure") = true;
     params.set<UserObjectName>("fluid_density") = _gas_density;
     _problem->addKernel(kernel_type, kernel_name, params);
@@ -121,35 +121,35 @@ Q2PAction::act()
     kernel_type = "Q2PSaturationFlux";
     params = _factory.getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _sat_var;
-    params.set<std::vector<VariableName> >("porepressure_variable") = std::vector<VariableName>(1, _pp_var);
+    params.set<std::vector<VariableName> >("porepressure_variable") = {_pp_var};
     params.set<UserObjectName>("fluid_density") = _water_density;
     params.set<UserObjectName>("fluid_relperm") = _water_relperm;
     params.set<Real>("fluid_viscosity") = _water_viscosity;
     if (_save_water_flux_in_Q2PWaterFluxResidual)
-      params.set<std::vector<AuxVariableName> >("save_in") = std::vector<AuxVariableName>(1, "Q2PWaterFluxResidual");
+      params.set<std::vector<AuxVariableName> >("save_in") = {"Q2PWaterFluxResidual"};
     if (_save_water_Jacobian_in_Q2PWaterJacobian)
-      params.set<std::vector<AuxVariableName> >("diag_save_in") = std::vector<AuxVariableName>(1, "Q2PWaterJacobian");
+      params.set<std::vector<AuxVariableName> >("diag_save_in") = {"Q2PWaterJacobian"};
     _problem->addKernel(kernel_type, kernel_name, params);
 
     kernel_name = "Q2P_gas_flux";
     kernel_type = "Q2PPorepressureFlux";
     params = _factory.getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _pp_var;
-    params.set<std::vector<VariableName> >("saturation_variable") = std::vector<VariableName>(1, _sat_var);
+    params.set<std::vector<VariableName> >("saturation_variable") = {_sat_var};
     params.set<UserObjectName>("fluid_density") = _gas_density;
     params.set<UserObjectName>("fluid_relperm") = _gas_relperm;
     params.set<Real>("fluid_viscosity") = _gas_viscosity;
     if (_save_gas_flux_in_Q2PGasFluxResidual)
-      params.set<std::vector<AuxVariableName> >("save_in") = std::vector<AuxVariableName>(1, "Q2PGasFluxResidual");
+      params.set<std::vector<AuxVariableName> >("save_in") = {"Q2PGasFluxResidual"};
     if (_save_gas_Jacobian_in_Q2PGasJacobian)
-      params.set<std::vector<AuxVariableName> >("diag_save_in") = std::vector<AuxVariableName>(1, "Q2PGasJacobian");
+      params.set<std::vector<AuxVariableName> >("diag_save_in") = {"Q2PGasJacobian"};
     _problem->addKernel(kernel_type, kernel_name, params);
 
     kernel_name = "Q2P_liquid_diffusion";
     kernel_type = "Q2PSaturationDiffusion";
     params = _factory.getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _sat_var;
-    params.set<std::vector<VariableName> >("porepressure_variable") = std::vector<VariableName>(1, _pp_var);
+    params.set<std::vector<VariableName> >("porepressure_variable") = {_pp_var};
     params.set<UserObjectName>("fluid_density") = _water_density;
     params.set<UserObjectName>("fluid_relperm") = _water_relperm_for_diffusivity;
     params.set<Real>("fluid_viscosity") = _water_viscosity;
@@ -220,12 +220,12 @@ Q2PAction::act()
     InputParameters params = _factory.getValidParams("TimestepSize");
 
     params.set<MultiMooseEnum>("execute_on") = "timestep_begin";
-    params.set<std::vector<OutputName> >("outputs") = std::vector<OutputName>(1, "none");
+    params.set<std::vector<OutputName> >("outputs") = {"none"};
     _problem->addPostprocessor("TimestepSize", "Q2P_dt", params);
 
     params = _factory.getValidParams("NodalSum");
-    params.set<std::vector<OutputName> >("outputs") = std::vector<OutputName>(1, "none");
-    params.set<std::vector<VariableName> >("variable") = std::vector<VariableName>(1, "Q2P_nodal_water_mass_divided_by_dt");
+    params.set<std::vector<OutputName> >("outputs") = {"none"};
+    params.set<std::vector<VariableName> >("variable") = {"Q2P_nodal_water_mass_divided_by_dt"};
     _problem->addPostprocessor("NodalSum", "Q2P_mass_water_divided_by_dt", params);
 
     params = _factory.getValidParams("FunctionValuePostprocessor");
@@ -234,8 +234,8 @@ Q2PAction::act()
     _problem->addPostprocessor("FunctionValuePostprocessor", "mass_water", params);
 
     params = _factory.getValidParams("NodalSum");
-    params.set<std::vector<OutputName> >("outputs") = std::vector<OutputName>(1, "none");
-    params.set<std::vector<VariableName> >("variable") = std::vector<VariableName>(1, "Q2P_nodal_gas_mass_divided_by_dt");
+    params.set<std::vector<OutputName> >("outputs") = {"none"};
+    params.set<std::vector<VariableName> >("variable") = {"Q2P_nodal_gas_mass_divided_by_dt"};
     _problem->addPostprocessor("NodalSum", "Q2P_mass_gas_divided_by_dt", params);
 
     params = _factory.getValidParams("FunctionValuePostprocessor");

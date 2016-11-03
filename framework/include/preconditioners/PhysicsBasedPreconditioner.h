@@ -44,10 +44,6 @@ public:
    *  Constructor. Initializes PhysicsBasedPreconditioner data structures
    */
   PhysicsBasedPreconditioner (const InputParameters & params);
-
-  /**
-   * Destructor.
-   */
   virtual ~PhysicsBasedPreconditioner ();
 
   /**
@@ -65,19 +61,19 @@ public:
   /**
    * Release all memory and clear data structures.
    */
-  virtual void clear ();
+  virtual void clear();
 
   /**
    * Initialize data structures if not done so already.
    */
-  virtual void init ();
+  virtual void init();
 
   /**
    * This is called every time the "operator might have changed".
    *
    * This is essentially where you need to fill in your preconditioning matrix.
    */
-  virtual void setup ();
+  virtual void setup();
 
 protected:
   /// The nonlinear system this PBP is associated with (convenience reference)

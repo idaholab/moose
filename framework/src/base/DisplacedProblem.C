@@ -119,10 +119,63 @@ DisplacedProblem::initAdaptivity()
 }
 
 void
+DisplacedProblem::saveOldSolutions()
+{
+  _displaced_nl.saveOldSolutions();
+  _displaced_aux.saveOldSolutions();
+}
+
+void
+DisplacedProblem::restoreOldSolutions()
+{
+  _displaced_nl.restoreOldSolutions();
+  _displaced_aux.restoreOldSolutions();
+}
+
+void
+DisplacedProblem::syncSolutions()
+{
+  (*_displaced_nl.sys().solution) = *_mproblem.getNonlinearSystem().currentSolution();
+  (*_displaced_aux.sys().solution) = *_mproblem.getAuxiliarySystem().currentSolution();
+  _displaced_nl.update();
+  _displaced_aux.update();
+}
+
+void
 DisplacedProblem::syncSolutions(const NumericVector<Number> & soln, const NumericVector<Number> & aux_soln)
 {
   (*_displaced_nl.sys().solution) = soln;
   (*_displaced_aux.sys().solution) = aux_soln;
+  _displaced_nl.update();
+  _displaced_aux.update();
+}
+
+void
+DisplacedProblem::updateMesh()
+{
+  Moose::perf_log.push("updateDisplacedMesh()", "Execution");
+
+  unsigned int n_threads = libMesh::n_threads();
+
+  syncSolutions();
+
+  for (unsigned int i = 0; i < n_threads; ++i)
+    _assembly[i]->invalidateCache();
+
+  _nl_solution = _mproblem.getNonlinearSystem().currentSolution();
+  _aux_solution = _mproblem.getAuxiliarySystem().currentSolution();
+
+  UpdateDisplacedMeshThread udmt(_mproblem, *this);
+
+  Threads::parallel_reduce(*_mesh.getActiveSemiLocalNodeRange(), udmt);
+
+  // Update the geometric searches that depend on the displaced mesh
+  _geometric_search_data.update();
+
+  // Since the Mesh changed, update the PointLocator object used by DiracKernels.
+  _dirac_kernel_info.updatePointLocator(_mesh);
+
+  Moose::perf_log.pop("updateDisplacedMesh()", "Execution");
 }
 
 void
@@ -232,6 +285,12 @@ DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)
 }
 
 void
+DisplacedProblem::prepareNonlocal(THREAD_ID tid)
+{
+  _assembly[tid]->prepareNonlocal();
+}
+
+void
 DisplacedProblem::prepareFace(const Elem * /*elem*/, THREAD_ID tid)
 {
   _displaced_nl.prepareFace(tid, true);
@@ -249,6 +308,12 @@ DisplacedProblem::prepare(const Elem * elem, unsigned int ivar, unsigned int jva
 }
 
 void
+DisplacedProblem::prepareBlockNonlocal(unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices, THREAD_ID tid)
+{
+  _assembly[tid]->prepareBlockNonlocal(ivar, jvar, idof_indices, jdof_indices);
+}
+
+void
 DisplacedProblem::prepareAssembly(THREAD_ID tid)
 {
   _assembly[tid]->prepare();
@@ -263,7 +328,7 @@ DisplacedProblem::prepareAssemblyNeighbor(THREAD_ID tid)
 bool
 DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
 {
-  std::vector<Point> & points = _dirac_kernel_info.getPoints()[elem];
+  std::vector<Point> & points = _dirac_kernel_info.getPoints()[elem].first;
 
   unsigned int n_points = points.size();
 
@@ -415,6 +480,12 @@ DisplacedProblem::reinitScalars(THREAD_ID tid)
 }
 
 void
+DisplacedProblem::reinitOffDiagScalars(THREAD_ID tid)
+{
+  _assembly[tid]->prepareOffDiagScalar();
+}
+
+void
 DisplacedProblem::getDiracElements(std::set<const Elem *> & elems)
 {
   elems = _dirac_kernel_info.getElements();
@@ -485,6 +556,13 @@ DisplacedProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 }
 
 void
+DisplacedProblem::addJacobianNonlocal(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+{
+  _assembly[tid]->addJacobianNonlocal(jacobian);
+}
+
+
+void
 DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
   _assembly[tid]->addJacobianNeighbor(jacobian);
@@ -494,6 +572,12 @@ void
 DisplacedProblem::cacheJacobian(THREAD_ID tid)
 {
   _assembly[tid]->cacheJacobian();
+}
+
+void
+DisplacedProblem::cacheJacobianNonlocal(THREAD_ID tid)
+{
+  _assembly[tid]->cacheJacobianNonlocal();
 }
 
 void
@@ -512,6 +596,12 @@ void
 DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, std::vector<dof_id_type> & dof_indices, THREAD_ID tid)
 {
   _assembly[tid]->addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices);
+}
+
+void
+DisplacedProblem::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar, const DofMap & dof_map, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices, THREAD_ID tid)
+{
+  _assembly[tid]->addJacobianBlockNonlocal(jacobian, ivar, jvar, dof_map, idof_indices, jdof_indices);
 }
 
 void

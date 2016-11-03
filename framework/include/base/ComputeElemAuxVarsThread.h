@@ -30,15 +30,15 @@ class AuxiliarySystem;
 class ComputeElemAuxVarsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
+  ComputeElemAuxVarsThread(FEProblem & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
   // Splitting Constructor
   ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split split);
 
   virtual ~ComputeElemAuxVarsThread();
 
-  virtual void subdomainChanged();
-  virtual void onElement(const Elem *elem);
-  virtual void post();
+  virtual void subdomainChanged() override;
+  virtual void onElement(const Elem * elem) override;
+  virtual void post() override;
 
   void join(const ComputeElemAuxVarsThread & /*y*/);
 

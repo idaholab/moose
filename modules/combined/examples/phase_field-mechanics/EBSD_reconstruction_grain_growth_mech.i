@@ -8,7 +8,7 @@
 []
 
 [GlobalParams]
-  op_num = 30
+  op_num = 8
   var_name_base = gr
   grain_num = 110
 []
@@ -33,11 +33,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./T]
-    order = CONSTANT
-    family = MONOMIAL
-    initial_condition = 500
-  [../]
   [./vonmises_stress]
     order = CONSTANT
     family = MONOMIAL
@@ -58,13 +53,16 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./EBSD_grain]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
 []
 
 [ICs]
   [./PolycrystalICs]
     [./ReconVarIC]
       ebsd_reader = ebsd
-      consider_phase = false
     [../]
   [../]
 []
@@ -89,14 +87,14 @@
     type = FeatureFloodCountAux
     variable = gt_indices
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
   [../]
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./C1111]
@@ -120,7 +118,7 @@
     type = OutputEulerAngles
     variable = phi1
     euler_angle_provider = ebsd
-    GrainTracker_object = grain_tracker
+    grain_tracker = grain_tracker
     output_euler_angle = 'phi1'
     execute_on = 'initial'
   [../]
@@ -128,7 +126,7 @@
     type = OutputEulerAngles
     variable = Phi
     euler_angle_provider = ebsd
-    GrainTracker_object = grain_tracker
+    grain_tracker = grain_tracker
     output_euler_angle = 'Phi'
     execute_on = 'initial'
   [../]
@@ -136,8 +134,15 @@
     type = OutputEulerAngles
     variable = phi2
     euler_angle_provider = ebsd
-    GrainTracker_object = grain_tracker
+    grain_tracker = grain_tracker
     output_euler_angle = 'phi2'
+    execute_on = 'initial'
+  [../]
+  [./grain_aux]
+    type = EBSDReaderPointDataAux
+    variable = EBSD_grain
+    ebsd_reader = ebsd
+    data_name = 'grain'
     execute_on = 'initial'
   [../]
 []
@@ -163,12 +168,22 @@
   [../]
 []
 
+[Modules]
+  [./PhaseField]
+    [./EulerAngles2RGB]
+      crystal_structure = cubic
+      euler_angle_provider = ebsd
+      grain_tracker = grain_tracker
+    [../]
+  [../]
+[]
+
 [Materials]
   [./Copper]
     # T = 500 # K
     type = GBEvolution
     block = 0
-    T = T
+    T = 500
     wGB = 0.6 # um
     GBmob0 = 2.5e-6 # m^4/(Js) from Schoenfelder 1997
     Q = 0.23 # Migration energy in eV
@@ -179,12 +194,7 @@
   [../]
   [./ElasticityTensor]
     type = ComputePolycrystalElasticityTensor
-    block = 0
-    fill_method = symmetric9
-    #reading C_11  C_12  C_13  C_22  C_23  C_33  C_44  C_55  C_66
-    Elastic_constants = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
-    GrainTracker_object = grain_tracker
-    euler_angle_provider = ebsd
+    grain_tracker = grain_tracker
   [../]
   [./strain]
     type = ComputeSmallStrain
@@ -219,24 +229,23 @@
     type = EBSDReader
   [../]
   [./grain_tracker]
-    type = GrainTracker
-    threshold = 0.1
-    convex_hull_buffer = 0
-    use_single_map = false
-    enable_var_coloring = true
-    condense_map_info = true
-    compute_op_maps = true
-    bubble_volume_file = IN100-grn-vols.txt
+    type = GrainTrackerElasticity
+    threshold = 0.2
+    compute_var_to_feature_map = true
     execute_on = 'initial timestep_begin'
     ebsd_reader = ebsd
     flood_entity_type = ELEMENTAL
+
+    fill_method = symmetric9
+    C_ijkl = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'
+    euler_angle_provider = ebsd
   [../]
 []
 
 [Executioner]
   type = Transient
   scheme = bdf2
-  solve_type = PJFNK # Preconditioned JFNK (default)
+  solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_strong_threshold'
   petsc_options_value = '  hypre    boomeramg                   0.7'
   l_tol = 1.0e-4

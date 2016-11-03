@@ -3,7 +3,7 @@
   dim = 2
   nx = 2
   ny = 2
-  distribution = PARALLEL
+  parallel_type = distributed
 []
 
 [Variables]

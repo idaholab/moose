@@ -37,10 +37,8 @@ public:
    */
   SelfAux(const InputParameters & parameters);
 
-  virtual ~SelfAux();
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 };
 
 #endif //SELFAUX_H

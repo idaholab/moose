@@ -57,10 +57,6 @@ ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters) :
 {
 }
 
-ElemElemConstraint::~ElemElemConstraint()
-{
-}
-
 void
 ElemElemConstraint::reinit(const ElementPairInfo & element_pair_info)
 {
@@ -70,13 +66,13 @@ ElemElemConstraint::reinit(const ElementPairInfo & element_pair_info)
 void
 ElemElemConstraint::reinitConstraintQuadrature(const ElementPairInfo & element_pair_info)
 {
-  _constraint_q_point.resize(element_pair_info._constraint_q_point.size());
-  _constraint_weight.resize(element_pair_info._constraint_JxW.size());
-  std::copy(element_pair_info._constraint_q_point.begin(),
-            element_pair_info._constraint_q_point.end(),
+  _constraint_q_point.resize(element_pair_info._elem1_constraint_q_point.size());
+  _constraint_weight.resize(element_pair_info._elem1_constraint_JxW.size());
+  std::copy(element_pair_info._elem1_constraint_q_point.begin(),
+            element_pair_info._elem1_constraint_q_point.end(),
             _constraint_q_point.begin());
-  std::copy(element_pair_info._constraint_JxW.begin(),
-            element_pair_info._constraint_JxW.end(),
+  std::copy(element_pair_info._elem1_constraint_JxW.begin(),
+            element_pair_info._elem1_constraint_JxW.end(),
             _constraint_weight.begin());
 }
 

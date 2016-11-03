@@ -1,4 +1,4 @@
-import re, os, sys
+import re, os, sys, time
 from Tester import Tester
 from RunParallel import RunParallel # For TIMEOUT value
 
@@ -28,10 +28,10 @@ class RunApp(Tester):
     params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
     params.addParam('allow_warnings',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
 
+    params.addParamWithType('allow_deprecated_until', type(time.localtime()), "A test that only runs if current date is less than specified date")
+
     # Valgrind
     params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
-
-    params.addParam('post_command',       "Command to be run after the MOOSE job is run")
 
     return params
 
@@ -44,6 +44,9 @@ class RunApp(Tester):
       self.mpi_command = 'mpiexec -host localhost'
       self.force_mpi = False
 
+    # Handle the special allow_deprecated_until parameter
+    if params.isValid('allow_deprecated_until') and params['allow_deprecated_until'] > time.localtime():
+      self.specs['cli_args'].append('--allow-deprecated')
 
   def getInputFile(self):
     return self.specs['input'].strip()
@@ -89,10 +92,10 @@ class RunApp(Tester):
       print 'Application not found: ' + str(specs['executable'])
       sys.exit(1)
 
-    if options.parallel_mesh and '--parallel-mesh' not in specs['cli_args']:
+    if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in specs['cli_args'] or '--distributed-mesh' not in specs['cli_args']):
       # The user has passed the parallel-mesh option to the test harness
       # and it is NOT supplied already in the cli-args option
-      specs['cli_args'].append('--parallel-mesh')
+      specs['cli_args'].append('--distributed-mesh')
 
     if options.error and '--error' not in specs['cli_args'] and not specs["allow_warnings"]:
       # The user has passed the error option to the test harness
@@ -155,10 +158,6 @@ class RunApp(Tester):
 
     if options.pbs:
       return self.getPBSCommand(options)
-
-    if self.specs.isValid('post_command'):
-      command += ';\n'
-      command += self.specs['post_command']
 
     return command
 
@@ -271,7 +270,7 @@ class RunApp(Tester):
       elif retcode != 0 and specs['should_crash'] == False:
         reason = 'CRASH'
       # Valgrind runs
-      elif retcode == 0 and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
+      elif retcode == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
         reason = 'MEMORY ERROR'
       # PBS runs
       elif retcode == 0 and options.pbs and 'command not found' in output:
@@ -290,3 +289,34 @@ class RunApp(Tester):
       return False
     else:
       return True
+
+  def deleteFilesAndFolders(self, test_dir, paths, delete_folders=True):
+    # First delete the files (at the end of each of the paths)
+    if self.specs['delete_output_before_running'] == True:
+      for file in paths:
+        full_path = os.path.join(test_dir, file)
+        if os.path.exists(full_path):
+          try:
+            os.remove(full_path)
+          except:
+            print "Unable to remove file: " + full_path
+
+      # Now try to delete directories that might have been created
+      if delete_folders:
+        for file in paths:
+          path = os.path.dirname(file)
+          while path != '':
+            (path, tail) = os.path.split(path)
+            try:
+              os.rmdir(os.path.join(test_dir, path, tail))
+            except:
+              # There could definitely be problems with removing the directory
+              # because it might be non-empty due to checkpoint files or other
+              # files being created on different operating systems. We just
+              # don't care for the most part and we don't want to error out.
+              # As long as our test boxes clean before each test, we'll notice
+              # the case where these files aren't being generated for a
+              # particular run.
+              #
+              # TL;DR; Just pass...
+              pass

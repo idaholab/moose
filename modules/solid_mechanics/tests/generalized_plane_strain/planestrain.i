@@ -60,7 +60,7 @@
 
 [Postprocessors]
   [./react_z]
-    type = MaterialTensorIntegral
+    type = MaterialTensorIntegralSM
     tensor = stress
     index = 2
     use_displaced_mesh = true
@@ -73,6 +73,7 @@
     disp_y = disp_y
     save_in_disp_x = saved_x
     save_in_disp_y = saved_y
+    use_displaced_mesh = true
     temp = temp
   [../]
 []
@@ -136,11 +137,6 @@
 []
 
 [Functions]
-  [./pull]
-    type = PiecewiseLinear
-    x='0     1  100'
-    y='0  0.00 0.00'
-  [../]
   [./tempfunc]
     type = ParsedFunction
     value = '(1-x)*t'

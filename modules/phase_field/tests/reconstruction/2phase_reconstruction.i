@@ -12,7 +12,7 @@
 
 [Mesh]
   type = EBSDMesh
-  filename = 'Ti_2Phase_28x28_Sqr_Marmot.txt'
+  filename = 'Ti_2Phase_28x28_ebsd.txt'
 []
 
 [UserObjects]
@@ -93,13 +93,6 @@
     variable = PHASE
     ebsd_reader = ebsd
     data_name = 'phase'
-    execute_on = 'initial'
-  [../]
-  [./avg_phi_aux]
-    type = EBSDReaderAvgDataAux
-    variable = APHI2
-    ebsd_reader = ebsd
-    data_name = 'phi2'
     execute_on = 'initial'
   [../]
 []

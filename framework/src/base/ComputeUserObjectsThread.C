@@ -16,6 +16,7 @@
 #include "Problem.h"
 #include "SystemBase.h"
 #include "ElementUserObject.h"
+#include "ShapeElementUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
 #include "NodalUserObject.h"
@@ -28,7 +29,7 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem,
                                                    const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
                                                    const MooseObjectWarehouse<SideUserObject> & side_user_objects,
                                                    const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects) :
-    ThreadedElementLoop<ConstElemRange>(problem, sys),
+    ThreadedElementLoop<ConstElemRange>(problem),
     _soln(*sys.currentSolution()),
     _elemental_user_objects(elemental_user_objects),
     _side_user_objects(side_user_objects),
@@ -38,7 +39,7 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblem & problem,
 
 // Splitting Constructor
 ComputeUserObjectsThread::ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split) :
-    ThreadedElementLoop<ConstElemRange>(x._fe_problem, x._system),
+    ThreadedElementLoop<ConstElemRange>(x._fe_problem),
     _soln(x._soln),
     _elemental_user_objects(x._elemental_user_objects),
     _side_user_objects(x._side_user_objects),
@@ -76,9 +77,34 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
   if (_elemental_user_objects.hasActiveBlockObjects(_subdomain, _tid))
   {
     const std::vector<MooseSharedPointer<ElementUserObject> > & objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
-    for (std::vector<MooseSharedPointer<ElementUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-      (*it)->execute();
+    for (const auto & uo : objects)
+      uo->execute();
   }
+
+  // UserObject Jacobians
+  if (_fe_problem.currentlyComputingJacobian())
+    if (_elemental_user_objects.hasActiveBlockObjects(_subdomain, _tid))
+    {
+      // Prepare shape functions for ShapeElementUserObjects
+      std::vector<MooseVariable *> jacobian_moose_vars = _fe_problem.getUserObjectJacobianVariables(_tid);
+      for (auto jvar_it = jacobian_moose_vars.begin();
+           jvar_it != jacobian_moose_vars.end();
+           ++jvar_it)
+      {
+        unsigned int jvar = (*jvar_it)->number();
+        std::vector<dof_id_type> & dof_indices = (*jvar_it)->dofIndices();
+
+        _fe_problem.prepareShapes(jvar, _tid);
+
+        const std::vector<MooseSharedPointer<ElementUserObject> > & e_objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
+        for (const auto & uo : e_objects)
+        {
+          MooseSharedPointer<ShapeElementUserObject> shape_element_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeElementUserObject>(uo);
+          if (shape_element_uo)
+            shape_element_uo->executeJacobianWrapper(jvar, dof_indices);
+        }
+      }
+    }
 
   _fe_problem.swapBackMaterials(_tid);
 }
@@ -94,8 +120,8 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
     _fe_problem.setCurrentBoundaryID(bnd_id);
 
     const std::vector<MooseSharedPointer<SideUserObject> > & objects = _side_user_objects.getActiveBoundaryObjects(bnd_id, _tid);
-    for (std::vector<MooseSharedPointer<SideUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-      (*it)->execute();
+    for (const auto & uo : objects)
+      uo->execute();
 
     _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
     _fe_problem.swapBackMaterialsFace(_tid);
@@ -123,13 +149,13 @@ ComputeUserObjectsThread::onInternalSide(const Elem *elem, unsigned int side)
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       const std::vector<MooseSharedPointer<InternalSideUserObject> > & objects = _internal_side_user_objects.getActiveBlockObjects(_subdomain, _tid);
-      for (std::vector<MooseSharedPointer<InternalSideUserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+      for (const auto & uo : objects)
       {
-        if ( !(*it)->blockRestricted())
-          (*it)->execute();
+        if (!uo->blockRestricted())
+          uo->execute();
 
-        else if ( (*it)->hasBlocks(neighbor->subdomain_id()) )
-          (*it)->execute();
+        else if (uo->hasBlocks(neighbor->subdomain_id()))
+          uo->execute();
       }
       _fe_problem.swapBackMaterialsFace(_tid);
       _fe_problem.swapBackMaterialsNeighbor(_tid);

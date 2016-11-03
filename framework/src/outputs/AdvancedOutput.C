@@ -184,12 +184,12 @@ AdvancedOutput<T>::initialSetup()
   }
 
   // Initialize the show/hide/output lists for each of the types of output
-  for (std::map<std::string, OutputData>::iterator it = _execute_data.begin(); it != _execute_data.end(); ++it)
-    initOutputList(it->second);
+  for (auto & it : _execute_data)
+    initOutputList(it.second);
 
   // Initialize the execution flags
-  for (std::map<std::string, MultiMooseEnum>::iterator it = T::_advanced_execute_on.begin(); it != T::_advanced_execute_on.end(); ++it)
-    initExecutionTypes(it->first, it->second);
+  for (auto & it : T::_advanced_execute_on)
+    initExecutionTypes(it.first, it.second);
 
   // Set the initialization flag
   T::_initialized = true;
@@ -416,8 +416,8 @@ bool
 AdvancedOutput<T>::hasOutput(const ExecFlagType & type)
 {
   // If any of the component outputs are true, then there is some output to perform
-  for (std::map<std::string, MultiMooseEnum>::const_iterator it = T::_advanced_execute_on.begin(); it != T::_advanced_execute_on.end(); ++it)
-    if (shouldOutput(it->first, type))
+  for (const auto & it : T::_advanced_execute_on)
+    if (shouldOutput(it.first, type))
       return true;
 
   // There is nothing to output
@@ -429,10 +429,10 @@ bool
 AdvancedOutput<T>::hasOutput()
 {
   // Test that variables exist for output AND that output execution flags are valid
-  for (std::map<std::string, OutputData>::const_iterator it = _execute_data.begin(); it != _execute_data.end(); ++it)
-    if (!(it->second).output.empty() &&
-        T::_advanced_execute_on.contains(it->first) &&
-        T::_advanced_execute_on[it->first].isValid())
+  for (const auto & it : _execute_data)
+    if (!(it.second).output.empty() &&
+        T::_advanced_execute_on.contains(it.first) &&
+        T::_advanced_execute_on[it.first].isValid())
       return true;
 
   // Test execution flags for non-variable output
@@ -462,20 +462,20 @@ AdvancedOutput<T>::initAvailableLists()
   std::vector<VariableName> variables = T::_problem_ptr->getVariableNames();
 
   // Loop through the variables and store the names in the correct available lists
-  for (std::vector<VariableName>::const_iterator it = variables.begin(); it != variables.end(); ++it)
+  for (const auto & var_name : variables)
   {
-    if (T::_problem_ptr->hasVariable(*it))
+    if (T::_problem_ptr->hasVariable(var_name))
     {
-      MooseVariable & var = T::_problem_ptr->getVariable(0, *it);
+      MooseVariable & var = T::_problem_ptr->getVariable(0, var_name);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
-        _execute_data["elemental"].available.insert(*it);
+        _execute_data["elemental"].available.insert(var_name);
       else
-        _execute_data["nodal"].available.insert(*it);
+        _execute_data["nodal"].available.insert(var_name);
     }
 
-    else if (T::_problem_ptr->hasScalarVariable(*it))
-      _execute_data["scalars"].available.insert(*it);
+    else if (T::_problem_ptr->hasScalarVariable(var_name))
+      _execute_data["scalars"].available.insert(var_name);
   }
 }
 
@@ -511,47 +511,47 @@ AdvancedOutput<T>::initShowHideLists(const std::vector<VariableName> & show, con
     _execute_data.setHasShowList(true);
 
   // Populate the show lists
-  for (std::vector<VariableName>::const_iterator it = show.begin(); it != show.end(); ++it)
+  for (const auto & var_name : show)
   {
-    if (T::_problem_ptr->hasVariable(*it))
+    if (T::_problem_ptr->hasVariable(var_name))
     {
-      MooseVariable & var = T::_problem_ptr->getVariable(0, *it);
+      MooseVariable & var = T::_problem_ptr->getVariable(0, var_name);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
-        _execute_data["elemental"].show.insert(*it);
+        _execute_data["elemental"].show.insert(var_name);
       else
-        _execute_data["nodal"].show.insert(*it);
+        _execute_data["nodal"].show.insert(var_name);
     }
-    else if (T::_problem_ptr->hasScalarVariable(*it))
-      _execute_data["scalars"].show.insert(*it);
-    else if (T::_problem_ptr->hasPostprocessor(*it))
-      _execute_data["postprocessors"].show.insert(*it);
-    else if (T::_problem_ptr->hasVectorPostprocessor(*it))
-      _execute_data["vector_postprocessors"].show.insert(*it);
+    else if (T::_problem_ptr->hasScalarVariable(var_name))
+      _execute_data["scalars"].show.insert(var_name);
+    else if (T::_problem_ptr->hasPostprocessor(var_name))
+      _execute_data["postprocessors"].show.insert(var_name);
+    else if (T::_problem_ptr->hasVectorPostprocessor(var_name))
+      _execute_data["vector_postprocessors"].show.insert(var_name);
     else
-      unknown.insert(*it);
+      unknown.insert(var_name);
   }
 
   // Populate the hide lists
-  for (std::vector<VariableName>::const_iterator it = hide.begin(); it != hide.end(); ++it)
+  for (const auto & var_name : hide)
   {
-    if (T::_problem_ptr->hasVariable(*it))
+    if (T::_problem_ptr->hasVariable(var_name))
     {
-      MooseVariable & var = T::_problem_ptr->getVariable(0, *it);
+      MooseVariable & var = T::_problem_ptr->getVariable(0, var_name);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
-        _execute_data["elemental"].hide.insert(*it);
+        _execute_data["elemental"].hide.insert(var_name);
       else
-        _execute_data["nodal"].hide.insert(*it);
+        _execute_data["nodal"].hide.insert(var_name);
     }
-    else if (T::_problem_ptr->hasScalarVariable(*it))
-      _execute_data["scalars"].hide.insert(*it);
-    else if (T::_problem_ptr->hasPostprocessor(*it))
-      _execute_data["postprocessors"].hide.insert(*it);
-    else if (T::_problem_ptr->hasVectorPostprocessor(*it))
-      _execute_data["vector_postprocessors"].hide.insert(*it);
+    else if (T::_problem_ptr->hasScalarVariable(var_name))
+      _execute_data["scalars"].hide.insert(var_name);
+    else if (T::_problem_ptr->hasPostprocessor(var_name))
+      _execute_data["postprocessors"].hide.insert(var_name);
+    else if (T::_problem_ptr->hasVectorPostprocessor(var_name))
+      _execute_data["vector_postprocessors"].hide.insert(var_name);
     else
-      unknown.insert(*it);
+      unknown.insert(var_name);
   }
 
   // Error if an unknown variable or postprocessor is found

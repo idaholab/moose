@@ -1,0 +1,32 @@
+[Tests]
+  [./test_jthermal]
+    type = 'Exodiff'
+    input = 'j_integral_2d.i'
+    exodiff = 'j_integral_2d_out.e'
+  [../]
+  [./test_jthermal_ctefunc]
+    type = 'Exodiff'
+    input = 'j_integral_2d_ctefunc.i'
+    exodiff = 'j_integral_2d_ctefunc_out.e'
+  [../]
+  [./test_jthermal_mean_ctefunc]
+    type = 'CSVDiff'
+    input = 'j_integral_2d_mean_ctefunc.i'
+    csvdiff = 'mean_out.csv'
+  [../]
+  [./test_jthermal_inst_ctefunc]
+    type = 'CSVDiff'
+    input = 'j_integral_2d_inst_ctefunc.i'
+    csvdiff = 'inst_out.csv'
+  [../]
+  [./test_iithermal]
+    type = 'Exodiff'
+    input = 'interaction_integral_2d.i'
+    exodiff = 'interaction_integral_2d_out.e'
+  [../]
+  [./test_iithermal_rot]
+    type = 'Exodiff'
+    input = 'interaction_integral_2d_rot.i'
+    exodiff = 'interaction_integral_2d_rot_out.e'
+  [../]
+[]

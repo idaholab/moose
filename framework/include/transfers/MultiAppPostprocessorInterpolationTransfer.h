@@ -32,9 +32,8 @@ class MultiAppPostprocessorInterpolationTransfer :
 {
 public:
   MultiAppPostprocessorInterpolationTransfer(const InputParameters & parameters);
-  virtual ~MultiAppPostprocessorInterpolationTransfer() {}
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   PostprocessorName _postprocessor;

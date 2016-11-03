@@ -10,6 +10,8 @@
  ny = 8
 
  uniform_refine = 0
+
+ displacements = 'x_disp y_disp'
 []
 
 #The minimum eigenvalue for this problem is 2*(pi/a)^2 + 2 with a = 100.
@@ -25,23 +27,57 @@
   [../]
 []
 
+[AuxVariables]
+  [./x_disp]
+  [../]
+  [./y_disp]
+  [../]
+[]
+
+[AuxKernels]
+  [./x_disp]
+    type = FunctionAux
+    variable = x_disp
+    function = x_disp_func
+  [../]
+  [./y_disp]
+    type = FunctionAux
+    variable = y_disp
+    function = y_disp_func
+  [../]
+[]
+
+[Functions]
+  [./x_disp_func]
+    type = ParsedFunction
+    value = 0
+  [../]
+  [./y_disp_func]
+    type = ParsedFunction
+    value = 0
+  [../]
+[]
+
 [Kernels]
   active = 'diff rea rhs'
 
   [./diff]
     type = Diffusion
     variable = u
+    use_displaced_mesh = true
   [../]
 
   [./rea]
     type = CoefReaction
     variable = u
     coefficient = 2.0
+    use_displaced_mesh = true
   [../]
 
   [./rhs]
     type = MassEigenKernel
     variable = u
+    use_displaced_mesh = true
   [../]
 []
 
@@ -53,6 +89,7 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
+    use_displaced_mesh = true
   [../]
 []
 
@@ -80,16 +117,19 @@
     type = ElementIntegralVariablePostprocessor
     variable = u
     execute_on = linear
+    use_displaced_mesh = true
   [../]
 
   [./udiff]
     type = ElementL2Diff
     variable = u
     execute_on = 'linear timestep_end'
+    use_displaced_mesh = true
   [../]
 []
 
 [Outputs]
   file_base = ipm
   exodus = true
+  hide = 'x_disp y_disp'
 []

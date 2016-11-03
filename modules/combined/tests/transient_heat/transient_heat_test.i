@@ -16,7 +16,7 @@
   [../]
 
   [./ie]
-    type = HeatConductionTimeDerivative
+    type = SpecificHeatConductionTimeDerivative
     variable = u
   [../]
 []

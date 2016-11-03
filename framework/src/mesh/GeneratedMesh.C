@@ -35,9 +35,9 @@ InputParameters validParams<GeneratedMesh>()
   MooseEnum dims("1=1 2 3");
   params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated"); // Make this parameter required
 
-  params.addRangeCheckedParam<int>("nx", 1, "nx>0", "Number of elements in the X direction");
-  params.addRangeCheckedParam<int>("ny", 1, "ny>=0", "Number of elements in the Y direction");
-  params.addRangeCheckedParam<int>("nz", 1, "nz>=0", "Number of elements in the Z direction");
+  params.addParam<unsigned int>("nx", 1, "Number of elements in the X direction");
+  params.addParam<unsigned int>("ny", 1, "Number of elements in the Y direction");
+  params.addParam<unsigned int>("nz", 1, "Number of elements in the Z direction");
   params.addParam<Real>("xmin", 0.0, "Lower X Coordinate of the generated mesh");
   params.addParam<Real>("ymin", 0.0, "Lower Y Coordinate of the generated mesh");
   params.addParam<Real>("zmin", 0.0, "Lower Z Coordinate of the generated mesh");
@@ -45,7 +45,7 @@ InputParameters validParams<GeneratedMesh>()
   params.addParam<Real>("ymax", 1.0, "Upper Y Coordinate of the generated mesh");
   params.addParam<Real>("zmax", 1.0, "Upper Z Coordinate of the generated mesh");
   params.addParam<MooseEnum>("elem_type", elem_types, "The type of element from libMesh to generate (default: linear element for requested dimension)");
-
+  params.addParam<bool>("gauss_lobatto_grid", false, "Grade mesh into boundaries according to Gauss-Lobatto quadrature spacing.");
   params.addRangeCheckedParam<Real>("bias_x", 1., "bias_x>=0.5 & bias_x<=2", "The amount by which to grow (or shrink) the cells in the x-direction.");
   params.addRangeCheckedParam<Real>("bias_y", 1., "bias_y>=0.5 & bias_y<=2", "The amount by which to grow (or shrink) the cells in the y-direction.");
   params.addRangeCheckedParam<Real>("bias_z", 1., "bias_z>=0.5 & bias_z<=2", "The amount by which to grow (or shrink) the cells in the z-direction.");
@@ -58,41 +58,22 @@ InputParameters validParams<GeneratedMesh>()
 GeneratedMesh::GeneratedMesh(const InputParameters & parameters) :
     MooseMesh(parameters),
     _dim(getParam<MooseEnum>("dim")),
-    _nx(getParam<int>("nx")),
-    _ny(getParam<int>("ny")),
-    _nz(getParam<int>("nz")),
+    _nx(getParam<unsigned int>("nx")),
+    _ny(getParam<unsigned int>("ny")),
+    _nz(getParam<unsigned int>("nz")),
     _xmin(getParam<Real>("xmin")),
     _xmax(getParam<Real>("xmax")),
     _ymin(getParam<Real>("ymin")),
     _ymax(getParam<Real>("ymax")),
     _zmin(getParam<Real>("zmin")),
     _zmax(getParam<Real>("zmax")),
+    _gauss_lobatto_grid(getParam<bool>("gauss_lobatto_grid")),
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y")),
     _bias_z(getParam<Real>("bias_z"))
 {
-}
-
-GeneratedMesh::GeneratedMesh(const GeneratedMesh & other_mesh) :
-    MooseMesh(other_mesh),
-    _dim(other_mesh._dim),
-    _nx(other_mesh._nx),
-    _ny(other_mesh._ny),
-    _nz(other_mesh._nz),
-    _xmin(getParam<Real>("xmin")),
-    _xmax(getParam<Real>("xmax")),
-    _ymin(getParam<Real>("ymin")),
-    _ymax(getParam<Real>("ymax")),
-    _zmin(getParam<Real>("zmin")),
-    _zmax(getParam<Real>("zmax")),
-    _bias_x(getParam<Real>("bias_x")),
-    _bias_y(getParam<Real>("bias_y")),
-    _bias_z(getParam<Real>("bias_z"))
-{
-}
-
-GeneratedMesh::~GeneratedMesh()
-{
+  if (_gauss_lobatto_grid && (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0))
+    mooseError("Cannot apply both Gauss-Lobatto mesh grading and biasing at the same time.");
 }
 
 MooseMesh &
@@ -128,14 +109,16 @@ GeneratedMesh::buildMesh()
     MeshTools::Generation::build_line(dynamic_cast<UnstructuredMesh&>(getMesh()),
                                       _nx,
                                       _xmin, _xmax,
-                                      elem_type);
+                                      elem_type,
+                                      _gauss_lobatto_grid);
     break;
   case 2:
     MeshTools::Generation::build_square(dynamic_cast<UnstructuredMesh&>(getMesh()),
                                         _nx, _ny,
                                         _xmin, _xmax,
                                         _ymin, _ymax,
-                                        elem_type);
+                                        elem_type,
+                                        _gauss_lobatto_grid);
     break;
   case 3:
     MeshTools::Generation::build_cube(dynamic_cast<UnstructuredMesh&>(getMesh()),
@@ -143,7 +126,8 @@ GeneratedMesh::buildMesh()
                                       _xmin, _xmax,
                                       _ymin, _ymax,
                                       _zmin, _zmax,
-                                      elem_type);
+                                      elem_type,
+                                      _gauss_lobatto_grid);
     break;
   }
 
@@ -163,7 +147,7 @@ GeneratedMesh::buildMesh()
     Real mins[3] = {_xmin, _ymin, _zmin};
 
     // Number of elements in each direction.
-    int nelem[3] = {_nx, _ny, _nz};
+    unsigned int nelem[3] = {_nx, _ny, _nz};
 
     // We will need the biases raised to integer powers in each
     // direction, so let's pre-compute those...
@@ -171,7 +155,7 @@ GeneratedMesh::buildMesh()
     for (unsigned int dir = 0; dir < LIBMESH_DIM; ++dir)
     {
       pows[dir].resize(nelem[dir] + 1);
-      for (unsigned int i=0; i<pows[dir].size(); ++i)
+      for (unsigned int i = 0; i < pows[dir].size(); ++i)
         pows[dir][i] = std::pow(bias[dir], static_cast<int>(i));
     }
 

@@ -4,4 +4,18 @@
     input = 'elastic_patch.i'
     exodiff = 'elastic_patch_out.e'
   [../]
+
+  [./elastic_patch_2Procs]
+    type = Exodiff
+    input = 'elastic_patch.i'
+    exodiff = 'elastic_patch_out.e'
+    min_parallel = '2'
+    prereq = 'elastic_patch'
+  [../]
+
+  [./elastic_patch_quadratic]
+    type = Exodiff
+    input = 'elastic_patch_quadratic.i'
+    exodiff = 'elastic_patch_quadratic_out.e'
+  [../]
 []

@@ -28,11 +28,8 @@ class SideSetsFromNormals :
 public:
   SideSetsFromNormals(const InputParameters & parameters);
 
-  virtual ~SideSetsFromNormals();
-
-  virtual void modify();
-
 protected:
+  virtual void modify() override;
 
   std::vector<BoundaryName> _boundary_names;
 

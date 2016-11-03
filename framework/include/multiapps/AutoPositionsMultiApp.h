@@ -32,13 +32,11 @@ class AutoPositionsMultiApp :
 public:
   AutoPositionsMultiApp(const InputParameters & parameters);
 
-  virtual ~AutoPositionsMultiApp();
-
 protected:
   /**
    * _must_ fill in _positions with the positions of the sub-aps
    */
-  virtual void fillPositions();
+  virtual void fillPositions() override;
 };
 
 #endif // AUTOPOSITIONSMULTIAPP_H

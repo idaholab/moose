@@ -1,19 +1,19 @@
 [Mesh]
-  # This MeshModifier currently only works with SerialMesh.
+  # This MeshModifier currently only works with ReplicatedMesh.
   # For more information, refer to #2129.
   type = GeneratedMesh
   dim = 2
   nx = 2
   ny = 2
-  distribution = serial
+  parallel_type = replicated
 []
 
 [MeshModifiers]
   [./middle_node]
     type = BoundingBoxNodeSet
     new_boundary = middle_node
-    top_right = '1 1 0'
-    bottom_left = '0.5 0.5 0'
+    top_right = '1.1 1.1 0'
+    bottom_left = '0.51 0.51 0'
     location = OUTSIDE
   [../]
 []
@@ -63,4 +63,3 @@
   file_base = boundingbox_nodeset_outside_out
   exodus = true
 []
-

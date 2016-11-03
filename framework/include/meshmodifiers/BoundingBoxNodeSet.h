@@ -37,17 +37,15 @@ class BoundingBoxNodeSet :
 public:
   BoundingBoxNodeSet(const InputParameters & parameters);
 
-  virtual void modify();
+protected:
+  virtual void modify() override;
 
 private:
-
-  /// ID location (inside of outside of box)
+  /// Select nodes on the 'inside' or the 'outside' of the bounding box
   MooseEnum _location;
 
   /// Bounding box for testing element centroids against. Note that
-  /// the box includes nodes based on the element centroids and not
-  /// the actual nodes itself.
   MeshTools::BoundingBox _bounding_box;
 };
 
-#endif // BOUNDINGBOXNODESET_H
+#endif //BOUNDINGBOXNODESET_H

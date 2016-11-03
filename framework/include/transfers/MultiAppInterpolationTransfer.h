@@ -32,11 +32,10 @@ class MultiAppInterpolationTransfer :
 {
 public:
   MultiAppInterpolationTransfer(const InputParameters & parameters);
-  virtual ~MultiAppInterpolationTransfer() {}
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   /**

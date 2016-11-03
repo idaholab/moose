@@ -17,10 +17,10 @@ InputParameters validParams<BndsCalcAux>()
 
 BndsCalcAux::BndsCalcAux(const InputParameters & parameters) :
     AuxKernel(parameters),
-    _ncrys(coupledComponents("v")),
-    _vals(_ncrys)
+    _op_num(coupledComponents("v")),
+    _vals(_op_num)
 {
-  for (unsigned int i = 0; i < _ncrys; ++i)
+  for (unsigned int i = 0; i < _op_num; ++i)
     _vals[i] = &coupledValue("v", i);
 }
 
@@ -29,7 +29,7 @@ BndsCalcAux::computeValue()
 {
   Real value = 0.0;
 
-  for (unsigned int i = 0; i < _ncrys; ++i)
+  for (unsigned int i = 0; i < _op_num; ++i)
     value += (*_vals[i])[_qp] * (*_vals[i])[_qp];
 
   return value;

@@ -26,9 +26,6 @@ class RankFourTensorTest : public CppUnit::TestFixture
 
   CPPUNIT_TEST_SUITE( RankFourTensorTest );
 
-  CPPUNIT_TEST( matrixInversionTest1 );
-  CPPUNIT_TEST( matrixInversionTest2 );
-  CPPUNIT_TEST( matrixInversionTest3 );
   CPPUNIT_TEST( invSymmTest1 );
   CPPUNIT_TEST( invSymmTest2 );
 
@@ -38,9 +35,6 @@ public:
   RankFourTensorTest();
   ~RankFourTensorTest();
 
-  void matrixInversionTest1();
-  void matrixInversionTest2();
-  void matrixInversionTest3();
   void invSymmTest1();
   void invSymmTest2();
 

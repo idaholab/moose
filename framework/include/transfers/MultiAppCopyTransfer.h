@@ -19,6 +19,7 @@
 
 // Forward declarations
 class MultiAppCopyTransfer;
+class MooseVariable;
 
 template<>
 InputParameters validParams<MultiAppCopyTransfer>();
@@ -31,15 +32,35 @@ class MultiAppCopyTransfer :
 {
 public:
   MultiAppCopyTransfer(const InputParameters & parameters);
-  virtual ~MultiAppCopyTransfer() {}
 
-  virtual void initialSetup();
+  /**
+   * Performs basic error checking that the variable exists on MultiApp.
+   */
+  virtual void initialSetup() override;
 
-  virtual void execute();
+  /**
+   * Performs the transfer of a variable (Nonlinear or Auxiliary) to/from the Multiapp.
+   */
+  virtual void execute() override;
 
 protected:
-  AuxVariableName _to_var_name;
-  VariableName _from_var_name;
+
+  /**
+   * Performs the transfer of a variable between two problems.
+   */
+  void transfer(FEProblem & to_problem, FEProblem & from_problem);
+
+  /**
+   * Performs the transfer of values between a node or element.
+   */
+  void transferDofObject(libMesh::DofObject * to_object, libMesh::DofObject * from_object,
+                         MooseVariable & to_var, MooseVariable & from_var);
+
+  /// The name of the variable to transfer to
+  const VariableName & _to_var_name;
+
+  /// Name of variable transfering from
+  const VariableName & _from_var_name;
 };
 
 #endif // MULTIAPPCOPYTRANSFER_H

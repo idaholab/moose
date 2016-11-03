@@ -19,8 +19,8 @@
 #include <sstream>
 #include "MooseTypes.h"
 
-// Currently the ICE Updater requires TBB
-#ifdef LIBMESH_HAVE_CXX11
+// Currently the ICE Updater requires std::thread and std::condition_variable.
+#if defined(LIBMESH_HAVE_CXX11_THREAD) && defined(LIBMESH_HAVE_CXX11_CONDITION_VARIABLE)
 
 template<>
 InputParameters validParams<ICEUpdater>()
@@ -105,21 +105,21 @@ void ICEUpdater::outputPostprocessors()
 
   // Get the list of Postprocessors
   const std::set<std::string> & pps = getPostprocessorOutput();
-  for (std::set<std::string>::const_iterator it = pps.begin(); it != pps.end(); ++it)
+  for (const auto & name : pps)
   {
 
     // Grab the value at the current time
-    PostprocessorValue value = _problem_ptr->getPostprocessorValue(*it);
+    PostprocessorValue value = _problem_ptr->getPostprocessorValue(name);
 
     // Create a string stream to use in posting the message
     std::stringstream ss;
 
     // Create the message as PPName:time:value
-    ss << *it << ":" << _time << ":" << value;
+    ss << name << ":" << _time << ":" << value;
 
     // Post the message
     _updater->postMessage(ss.str());
   }
 }
 
-#endif // LIBMESH_HAVE_CXX11
+#endif

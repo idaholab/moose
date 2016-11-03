@@ -34,7 +34,7 @@ public:
   LayeredSideFluxAverage(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   std::string _diffusivity;
   const MaterialProperty<Real> & _diffusion_coef;

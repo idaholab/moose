@@ -139,11 +139,37 @@ protected:
   /// Old value of elastic strain
   MaterialProperty<RankTwoTensor> & _elastic_strain_old;
 
+  /// whether Cosserat mechanics should be used
+  bool _cosserat;
+
+  /// The Cosserat curvature strain
+  const MaterialProperty<RankTwoTensor> * _curvature;
+
+  /// The Cosserat elastic flexural rigidity tensor
+  const MaterialProperty<RankFourTensor> * _elastic_flexural_rigidity_tensor;
+
+  /// the Cosserat couple-stress
+  MaterialProperty<RankTwoTensor> * _couple_stress;
+
+  /// the old value of Cosserat couple-stress
+  MaterialProperty<RankTwoTensor> * _couple_stress_old;
+
+  /// derivative of couple-stress w.r.t. curvature
+  MaterialProperty<RankFourTensor> * _Jacobian_mult_couple;
+
   /// Elasticity tensor that can be rotated by this class (ie, its not const)
   RankFourTensor _my_elasticity_tensor;
 
   /// Strain increment that can be rotated by this class, and split into multiple increments (ie, its not const)
   RankTwoTensor _my_strain_increment;
+
+  /// Flexual rigidity tensor that can be rotated by this class (ie, its not const)
+  RankFourTensor _my_flexural_rigidity_tensor;
+
+  /// Curvature that can be rotated by this class, and split into multiple increments (ie, its not const)
+  RankTwoTensor _my_curvature;
+
+
 
   /**
    * makes all deactivated_due_to_ld false, and if >0 of them were initially true, returns true
@@ -417,6 +443,14 @@ protected:
    * @param cumulative_pm The plastic multipliers needed for this current Return (this is the sum of the plastic multipliers over all substeps if the strain increment was applied in small substeps)
    */
   RankFourTensor consistentTangentOperator(const RankTwoTensor & stress, const std::vector<Real> & intnl, const RankFourTensor & E_ijkl, const std::vector<Real> & pm_this_step, const std::vector<Real> & cumulative_pm);
+
+private:
+  /// True if this is the first timestep (timestep < 2). In the first timestep,
+  /// an initial stress is needed to subdivide.  This boolean variable
+  /// eliminates the use of the _app.isRestarting() in this class.
+  /// This boolean is delcared as a reference so that the variable is restartable
+  /// data:  if we restart, the code will not think it is the first timestep again.
+  bool & _step_one;
 };
 
 #endif //COMPUTEMULTIPLASTICITYSTRESS_H

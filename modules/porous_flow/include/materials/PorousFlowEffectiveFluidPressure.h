@@ -8,10 +8,7 @@
 #ifndef POROUSFLOWEFFECTIVEFLUIDPRESSURE_H
 #define POROUSFLOWEFFECTIVEFLUIDPRESSURE_H
 
-#include "DerivativeMaterialInterface.h"
-#include "Material.h"
-
-#include "PorousFlowDictator.h"
+#include "PorousFlowMaterialVectorBase.h"
 
 //Forward Declarations
 class PorousFlowEffectiveFluidPressure;
@@ -25,20 +22,13 @@ InputParameters validParams<PorousFlowEffectiveFluidPressure>();
  * and other similar places.  This class computes
  * effective fluid pressure = sum_{phases}Saturation_{phase}*Porepressure_{phase}
  */
-class PorousFlowEffectiveFluidPressure : public DerivativeMaterialInterface<Material>
+class PorousFlowEffectiveFluidPressure : public PorousFlowMaterialVectorBase
 {
 public:
   PorousFlowEffectiveFluidPressure(const InputParameters & parameters);
 
 protected:
-  /// The dictator UserObject for the Porous-Flow variables
-  const PorousFlowDictator & _dictator_UO;
-
-  /// number of phases in this simulation
-  const unsigned int _num_ph;
-
-  /// number of porous-flow variables in this simulation
-  const unsigned int _num_var;
+  virtual void computeQpProperties();
 
   /// quadpoint porepressure of each phase
   const MaterialProperty<std::vector<Real> > & _porepressure_qp;
@@ -75,8 +65,6 @@ protected:
 
   /// d(_pf_nodal)/d(PorousFlow variable)
   MaterialProperty<std::vector<Real> > & _dpf_nodal_dvar;
-
-  virtual void computeQpProperties();
 };
 
 #endif //POROUSFLOWEFFECTIVEFLUIDPRESSURE_H

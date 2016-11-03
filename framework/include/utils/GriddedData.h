@@ -44,8 +44,7 @@ public:
    */
   GriddedData(std::string file_name);
 
-  virtual ~GriddedData()
-    {}
+  virtual ~GriddedData() = default;
 
   /**
    * Returns the dimensionality of the grid.
@@ -95,7 +94,3 @@ private:
 };
 
 #endif //GRIDDEDDATA_H
-
-
-
-

@@ -6,6 +6,8 @@
 /****************************************************************/
 #include "ComputeRSphericalIncrementalStrain.h"
 #include "Assembly.h"
+#include "FEProblem.h"
+#include "MooseMesh.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"
@@ -27,14 +29,16 @@ ComputeRSphericalIncrementalStrain::ComputeRSphericalIncrementalStrain(const Inp
 void
 ComputeRSphericalIncrementalStrain::initialSetup()
 {
-  if (_assembly.coordSystem() != Moose::COORD_RSPHERICAL)
-    mooseError("The coordinate system must be set to RSPHERICAL for 1D R spherical simulations.");
+  const auto & subdomainIDs = _mesh.meshSubdomains();
+  for (auto subdomainID : subdomainIDs)
+    if (_fe_problem.getCoordSystem(subdomainID) != Moose::COORD_RSPHERICAL)
+      mooseError("The coordinate system must be set to RSPHERICAL for 1D R spherical simulations.");
 }
 
 void
 ComputeRSphericalIncrementalStrain::computeTotalStrainIncrement(RankTwoTensor & total_strain_increment)
 {
-  // Deformation gradient calculation in cylinderical coordinates
+  // Deformation gradient calculation in cylindrical coordinates
   RankTwoTensor A;    // Deformation gradient
   RankTwoTensor Fbar; // Old Deformation gradient
 
@@ -59,7 +63,7 @@ ComputeRSphericalIncrementalStrain::computeTotalStrainIncrement(RankTwoTensor & 
   _deformation_gradient[_qp] = A;
   _deformation_gradient[_qp].addIa(1.0);
 
-  // very nearly A = gradU - gradUold, adapted to cylinderical coords
+  // very nearly A = gradU - gradUold, adapted to cylindrical coords
   A -= Fbar;
 
   total_strain_increment = 0.5 * (A + A.transpose());

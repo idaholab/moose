@@ -46,7 +46,6 @@ class InternalSideUserObject :
 {
 public:
   InternalSideUserObject(const InputParameters & parameters);
-  virtual ~InternalSideUserObject();
 
 protected:
   MooseMesh & _mesh;
@@ -66,8 +65,9 @@ protected:
 
   /// The neighboring element
   const Elem * & _neighbor_elem;
+
   /// The volume (or length) of the current neighbor
-  const Real & _neighbor_elem_volume;
+  const Real & getNeighborElemVolume();
 };
 
 

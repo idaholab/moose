@@ -160,5 +160,16 @@ framework/contrib/asio/
 # phase_field/tests/solution_rasterizer
 out.xyz
 
-#Jit output
+# JIT and automatic differentiation cache files
+.jitcache/
 .jitdir/
+
+# Documentation Generation
+*.moose.md
+*.moose.yml
+*.moose.svg
+docs/.moosedocs
+site
+
+# Do not ignore files in docs/media
+!docs/media/*.png

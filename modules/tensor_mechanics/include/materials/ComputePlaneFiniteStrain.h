@@ -10,9 +10,8 @@
 #include "Compute2DFiniteStrain.h"
 
 /**
- * ComputePlaneFiniteStrain defines a strain increment and rotation
- * increment for finite strains in an Axisymmetric simulation.
- * The COORD_TYPE in the Problem block must be set to RZ.
+ * ComputePlaneFiniteStrain defines strain increment and rotation
+ * increment for finite strain under 2D planar assumptions.
  */
 class ComputePlaneFiniteStrain : public Compute2DFiniteStrain
 {
@@ -20,8 +19,16 @@ public:
   ComputePlaneFiniteStrain(const InputParameters & parameters);
 
 protected:
-  virtual Real computeDeformGradZZ();
-  virtual Real computeDeformGradZZold();
+  virtual Real computeGradDispZZ();
+  virtual Real computeGradDispZZold();
+
+  const bool _scalar_strain_zz_coupled;
+  const VariableValue & _scalar_strain_zz;
+  const VariableValue & _scalar_strain_zz_old;
+
+  const bool _strain_zz_coupled;
+  const VariableValue & _strain_zz;
+  const VariableValue & _strain_zz_old;
 };
 
 #endif //COMPUTEPLANEFINITESTRAIN_H

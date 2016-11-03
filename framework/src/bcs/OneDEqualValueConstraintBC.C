@@ -34,10 +34,6 @@ OneDEqualValueConstraintBC::OneDEqualValueConstraintBC(const InputParameters & p
 {
 }
 
-OneDEqualValueConstraintBC::~OneDEqualValueConstraintBC()
-{
-}
-
 Real
 OneDEqualValueConstraintBC::computeQpResidual()
 {
@@ -63,4 +59,3 @@ OneDEqualValueConstraintBC::computeQpOffDiagJacobian(unsigned jvar)
   else
     return 0.;
 }
-

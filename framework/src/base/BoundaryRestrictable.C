@@ -104,7 +104,7 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const InputParameters & par
   if (_bnd_ids.empty())
   {
     _bnd_ids.insert(Moose::ANY_BOUNDARY_ID);
-    _boundary_names = std::vector<BoundaryName>(1, "ANY_BOUNDARY_ID");
+    _boundary_names = {"ANY_BOUNDARY_ID"};
   }
 
   // If this object is block restricted, check that defined blocks exist on the mesh
@@ -125,8 +125,8 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const InputParameters & par
     {
       std::ostringstream msg;
       msg << "The object '" << name << "' contains the following boundary ids that do no exist on the mesh:";
-      for (std::vector<BoundaryID>::iterator it = diff.begin(); it != diff.end(); ++it)
-        msg << " " << *it;
+      for (const auto & id : diff)
+        msg << " " << id;
       mooseError(msg.str());
     }
   }
@@ -167,9 +167,7 @@ BoundaryRestrictable::hasBoundary(BoundaryName name) const
 {
   // Create a vector and utilize the getBoundaryIDs function, which
   // handles the ANY_BOUNDARY_ID (getBoundaryID does not)
-  std::vector<BoundaryName> names(1);
-  names[0] = name;
-  return hasBoundary(_bnd_mesh->getBoundaryIDs(names));
+  return hasBoundary(_bnd_mesh->getBoundaryIDs({name}));
 }
 
 bool
@@ -213,10 +211,10 @@ BoundaryRestrictable::hasBoundary(std::set<BoundaryID> ids, TEST_TYPE type) cons
   else
   {
     // Loop through the supplied ids
-    for (std::set<BoundaryID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
+    for (const auto & id : ids)
     {
       // Test the current supplied id
-      bool test = hasBoundary(*it);
+      bool test = hasBoundary(id);
 
       // If the id exists in the stored ids, then return true, otherwise
       if (test)
@@ -256,24 +254,24 @@ bool
 BoundaryRestrictable::hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const
 {
   // Reference to MaterialWarehouse for testing and retrieving boundary ids
-  const MaterialWarehouse<Material> & warehouse = _bnd_feproblem->getMaterialWarehouse();
+  const MaterialWarehouse & warehouse = _bnd_feproblem->getMaterialWarehouse();
 
   // Complete set of BoundaryIDs that this object is defined
   const std::set<BoundaryID> & ids = hasBoundary(Moose::ANY_BOUNDARY_ID) ? meshBoundaryIDs() : boundaryIDs();
 
   // Loop over each BoundaryID for this object
-  for (std::set<BoundaryID>::const_iterator id_it = ids.begin(); id_it != ids.end(); ++id_it)
+  for (const auto & id : ids)
   {
     // Storage of material properties that have been DECLARED on this BoundaryID
     std::set<std::string> declared_props;
 
     // If boundary materials exist, populated the set of properties that were declared
-    if (warehouse.hasActiveBoundaryObjects(*id_it))
+    if (warehouse.hasActiveBoundaryObjects(id))
     {
-      const std::vector<MooseSharedPointer<Material> > & mats = warehouse.getActiveBoundaryObjects(*id_it);
-      for (std::vector<MooseSharedPointer<Material> >::const_iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
+      const std::vector<MooseSharedPointer<Material> > & mats = warehouse.getActiveBoundaryObjects(id);
+      for (const auto & mat : mats)
       {
-        const std::set<std::string> & mat_props = (*mat_it)->getSuppliedItems();
+        const std::set<std::string> & mat_props = mat->getSuppliedItems();
         declared_props.insert(mat_props.begin(), mat_props.end());
       }
     }

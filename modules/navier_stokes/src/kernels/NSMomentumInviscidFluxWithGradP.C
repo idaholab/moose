@@ -4,20 +4,23 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes inclues
 #include "NSMomentumInviscidFluxWithGradP.h"
+#include "NS.h"
 
 template<>
 InputParameters validParams<NSMomentumInviscidFluxWithGradP>()
 {
   InputParameters params = validParams<NSKernel>();
-  params.addRequiredCoupledVar("pressure", "");
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
   params.addRequiredParam<unsigned int>("component", "");
   return params;
 }
 
 NSMomentumInviscidFluxWithGradP::NSMomentumInviscidFluxWithGradP(const InputParameters & parameters) :
     NSKernel(parameters),
-    _grad_p(coupledGradient("pressure")),
+    _grad_p(coupledGradient(NS::pressure)),
     _component(getParam<unsigned int>("component")),
     _pressure_derivs(*this)
 {
@@ -29,7 +32,7 @@ NSMomentumInviscidFluxWithGradP::NSMomentumInviscidFluxWithGradP(const InputPara
   _gradU[1] = &_grad_rho_u;
   _gradU[2] = &_grad_rho_v;
   _gradU[3] = &_grad_rho_w;
-  _gradU[4] = &_grad_rho_e;
+  _gradU[4] = &_grad_rho_E;
 }
 
 Real
@@ -118,7 +121,7 @@ NSMomentumInviscidFluxWithGradP::computeQpOffDiagJacobian(unsigned int jvar)
       + dFdp*_test[_i][_qp];
   }
 
-  else if (jvar == _rhoe_var_number)
+  else if (jvar == _rhoE_var_number)
   {
     // Pressure term Jacobian
     return dFdp * _test[_i][_qp];

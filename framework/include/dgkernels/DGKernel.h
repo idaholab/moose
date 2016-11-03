@@ -27,6 +27,7 @@
 #include "FunctionInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "Restartable.h"
+#include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 
 // Forward Declarations
@@ -55,6 +56,7 @@ class DGKernel :
   public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
   protected TwoMaterialPropertyInterface,
   public Restartable,
+  public ZeroInterface,
   public MeshChangedInterface
 {
 public:
@@ -128,9 +130,6 @@ protected:
   /// The neighboring element
   const Elem * & _neighbor_elem;
 
-  /// The volume (or length) of the current neighbor
-  const Real & _neighbor_elem_volume;
-
   /// Current side
   unsigned int & _current_side;
   /// Current side element
@@ -197,6 +196,9 @@ protected:
    * This is the virtual that derived classes should override for computing the off-diag Jacobian.
    */
   virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar);
+
+  /// The volume (or length) of the current neighbor
+  const Real & getNeighborElemVolume();
 
 public:
   // boundary id used for internal edges (all DG kernels lives on this boundary id -- a made-up number)

@@ -1,0 +1,8 @@
+[Tests]
+  [./run]
+    # This makes sure that cyclic dependency errors are not triggered for objects that depend on each other but have
+    # differing execution flags.
+    type = RunApp
+    input = execute_on_cyclic.i
+  [../]
+[]

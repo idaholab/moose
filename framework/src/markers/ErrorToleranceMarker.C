@@ -23,6 +23,7 @@ InputParameters validParams<ErrorToleranceMarker>()
   InputParameters params = validParams<IndicatorMarker>();
   params.addParam<Real>("coarsen", 0, "Elements with error less than this will be coarsened.");
   params.addParam<Real>("refine", std::numeric_limits<Real>::max(), "Elements with error more than this will be refined.");
+  params.addClassDescription("Coarsen or refine elements based on an absolute tolerance allowed from the supplied indicator.");
   return params;
 }
 
@@ -46,5 +47,3 @@ ErrorToleranceMarker::computeElementMarker()
 
   return DO_NOTHING;
 }
-
-

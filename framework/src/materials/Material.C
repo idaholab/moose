@@ -32,11 +32,13 @@ InputParameters validParams<Material>()
   params += validParams<MaterialPropertyInterface>();
 
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
-  params.addParam<bool>("compute", true, "When false MOOSE will not call compute methods on this material, compute then must be called retrieving the Material object via MaterialPropertyInterface::getMaterial and calling the computeProerties method.");
+  params.addParam<bool>("compute", true, "When false MOOSE will not call compute methods on this material, compute then "
+                                         "must be called retrieving the Material object via MaterialPropertyInterface::getMaterial "
+                                         "and calling the computeProerties method. Non-computed Materials are not sorted for dependencies.");
 
   // Outputs
   params += validParams<OutputInterface>();
-  params.set<std::vector<OutputName> >("outputs") =  std::vector<OutputName>(1, "none");
+  params.set<std::vector<OutputName> >("outputs") =  {"none"};
   params.addParam<std::vector<std::string> >("output_properties", "List of material properties, from this material, to output (outputs must also be defined to an output type)");
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
@@ -60,6 +62,7 @@ Material::Material(const InputParameters & parameters) :
     TransientInterface(this),
     MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     PostprocessorInterface(this),
+    VectorPostprocessorInterface(this),
     DependencyResolverInterface(),
     Restartable(parameters, "Materials"),
     ZeroInterface(parameters),
@@ -90,10 +93,9 @@ Material::Material(const InputParameters & parameters) :
 {
   // Fill in the MooseVariable dependencies
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (unsigned int i=0; i<coupled_vars.size(); i++)
-    addMooseVariableDependency(coupled_vars[i]);
+  for (const auto & var : coupled_vars)
+    addMooseVariableDependency(var);
 }
-
 
 void
 Material::initStatefulProperties(unsigned int n_points)
@@ -102,7 +104,6 @@ Material::initStatefulProperties(unsigned int n_points)
     for (_qp = 0; _qp < n_points; ++_qp)
       initQpStatefulProperties();
 }
-
 
 void
 Material::initQpStatefulProperties()
@@ -113,13 +114,10 @@ Material::initQpStatefulProperties()
 void
 Material::checkStatefulSanity() const
 {
-  for (std::map<std::string, int>::const_iterator it = _props_to_flags.begin(); it != _props_to_flags.end(); ++it)
-  {
-    if (static_cast<int>(it->second) % 2 == 0) // Only Stateful properties declared!
-      mooseError("Material '" << name() << "' has stateful properties declared but not associated \"current\" properties." << it->second);
-  }
+  for (const auto & it : _props_to_flags)
+    if (static_cast<int>(it.second) % 2 == 0) // Only Stateful properties declared!
+      mooseError("Material '" << name() << "' has stateful properties declared but not associated \"current\" properties." << it.second);
 }
-
 
 void
 Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_State state)
@@ -132,21 +130,21 @@ Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_St
   }
 
   // Store material properties for block ids
-  for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
+  for (const auto & block_id : blockIDs())
   {
     // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
     if (!is_get)
       _supplied_props.insert(prop_name);
-    _fe_problem.storeMatPropName(*it, prop_name);
+    _fe_problem.storeMatPropName(block_id, prop_name);
   }
 
   // Store material properties for the boundary ids
-  for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end(); ++it)
+  for (const auto & boundary_id : boundaryIDs())
   {
     // Only save this prop as a "supplied" prop is it was registered as a result of a call to declareProperty not getMaterialProperty
     if (!is_get)
       _supplied_props.insert(prop_name);
-    _fe_problem.storeMatPropName(*it, prop_name);
+    _fe_problem.storeMatPropName(boundary_id, prop_name);
   }
 }
 
@@ -192,4 +190,11 @@ Material::computePropertiesAtQp(unsigned int qp)
 {
   _qp = qp;
   computeQpProperties();
+}
+
+void
+Material::checkExecutionStage()
+{
+  if (_fe_problem.startedInitialSetup())
+    mooseError("Material properties must be retrieved during material object construction to ensure correct dependency resolution.");
 }

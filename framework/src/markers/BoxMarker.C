@@ -26,6 +26,7 @@ InputParameters validParams<BoxMarker>()
   params.addRequiredParam<MooseEnum>("inside", marker_states, "How to mark elements inside the box.");
   params.addRequiredParam<MooseEnum>("outside", marker_states, "How to mark elements outside the box.");
 
+  params.addClassDescription("Marks the region inside and outside of a 'box' domain for refinement or coarsening.");
   return params;
 }
 
@@ -48,5 +49,3 @@ BoxMarker::computeElementMarker()
 
   return _outside;
 }
-
-

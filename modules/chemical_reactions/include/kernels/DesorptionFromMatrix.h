@@ -28,12 +28,10 @@ public:
 
 protected:
   virtual Real computeQpResidual();
-
   virtual Real computeQpJacobian();
-
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// moose internal variable number corresponding to the porepressure (need this of OffDiagJacobian)
+  /// MOOSE internal variable number corresponding to the porepressure (need this of OffDiagJacobian)
   unsigned int _pressure_var;
 
   /// mass flow rate from matrix = mass flow rate to porespace

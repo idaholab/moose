@@ -36,10 +36,6 @@ Adaptivity::Adaptivity(FEProblem & subproblem) :
     _subproblem(subproblem),
     _mesh(_subproblem.mesh()),
     _mesh_refinement_on(false),
-    _mesh_refinement(NULL),
-    _error_estimator(NULL),
-    _error(NULL),
-    _displaced_mesh_refinement(NULL),
     _initial_steps(0),
     _steps(0),
     _print_mesh_changed(false),
@@ -57,17 +53,6 @@ Adaptivity::Adaptivity(FEProblem & subproblem) :
 
 Adaptivity::~Adaptivity()
 {
-  std::map<std::string, ErrorVector *>::iterator it = _indicator_field_to_error_vector.begin();
-  std::map<std::string, ErrorVector *>::iterator end = _indicator_field_to_error_vector.end();
-
-  for (; it != end; ++it)
-    delete it->second;
-
-  delete _mesh_refinement;
-  delete _error;
-  delete _error_estimator;
-
-  delete _displaced_mesh_refinement;
 }
 
 void
@@ -77,8 +62,8 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
   // does not exist at that point.
   _displaced_problem = _subproblem.getDisplacedProblem();
 
-  if (!_mesh_refinement)
-    _mesh_refinement = new MeshRefinement(_mesh);
+  _mesh_refinement = libmesh_make_unique<MeshRefinement>(_mesh);
+  _error = libmesh_make_unique<ErrorVector>();
 
   EquationSystems & es = _subproblem.es();
   es.parameters.set<bool>("adaptivity") = true;
@@ -87,18 +72,16 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
   _steps = steps;
   _mesh_refinement_on = true;
 
-  _error = new ErrorVector;
-
   _mesh_refinement->set_periodic_boundaries_ptr(_subproblem.getNonlinearSystem().dofMap().get_periodic_boundaries());
 
   // displaced problem
-  if (_displaced_problem != NULL)
+  if (_displaced_problem != nullptr)
   {
     EquationSystems & displaced_es = _displaced_problem->es();
     displaced_es.parameters.set<bool>("adaptivity") = true;
 
     if (!_displaced_mesh_refinement)
-      _displaced_mesh_refinement = new MeshRefinement(_displaced_problem->mesh());
+      _displaced_mesh_refinement = libmesh_make_unique<MeshRefinement>(_displaced_problem->mesh());
 
     // The periodic boundaries pointer allows the MeshRefinement
     // object to determine elements which are "topological" neighbors,
@@ -115,11 +98,11 @@ void
 Adaptivity::setErrorEstimator(const MooseEnum & error_estimator_name)
 {
   if (error_estimator_name == "KellyErrorEstimator")
-    _error_estimator = new KellyErrorEstimator;
+    _error_estimator = libmesh_make_unique<KellyErrorEstimator>();
   else if (error_estimator_name == "LaplacianErrorEstimator")
-    _error_estimator = new LaplacianErrorEstimator;
+    _error_estimator = libmesh_make_unique<LaplacianErrorEstimator>();
   else if (error_estimator_name == "PatchRecoveryErrorEstimator")
-    _error_estimator = new PatchRecoveryErrorEstimator;
+    _error_estimator = libmesh_make_unique<PatchRecoveryErrorEstimator>();
   else
     mooseError(std::string("Unknown error_estimator selection: ") + std::string(error_estimator_name));
 }
@@ -127,18 +110,22 @@ Adaptivity::setErrorEstimator(const MooseEnum & error_estimator_name)
 void
 Adaptivity::setErrorNorm(SystemNorm & sys_norm)
 {
-  mooseAssert(_error_estimator != NULL, "error_estimator not initialized. Did you call init_adaptivity()?");
+  mooseAssert(_error_estimator, "error_estimator not initialized. Did you call init_adaptivity()?");
   _error_estimator->error_norm = sys_norm;
 }
 
 bool
-Adaptivity::adaptMesh()
+Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 {
-  bool meshChanged = false;
+  // If the marker name is supplied, use it. Otherwise, use the one in _marker_variable_name
+  if (marker_name.empty())
+    marker_name = _marker_variable_name;
+
+  bool mesh_changed = false;
 
   if (_use_new_system)
   {
-    if (_marker_variable_name != "") // Only flag if a marker variable name has been set
+    if (!marker_name.empty()) // Only flag if a marker variable name has been set
     {
       _mesh_refinement->clean_refinement_flags();
 
@@ -146,7 +133,7 @@ Adaptivity::adaptMesh()
       _subproblem.getAuxiliarySystem().solution().close();
       _subproblem.getAuxiliarySystem().solution().localize(serialized_solution);
 
-      FlagElementsThread fet(_subproblem, serialized_solution, _max_h_level);
+      FlagElementsThread fet(_subproblem, serialized_solution, _max_h_level, marker_name);
       ConstElemRange all_elems(_subproblem.mesh().getMesh().active_elements_begin(),
                                _subproblem.mesh().getMesh().active_elements_end(), 1);
       Threads::parallel_reduce(all_elems, fet);
@@ -177,40 +164,30 @@ Adaptivity::adaptMesh()
     _displaced_problem->undisplaceMesh();
 
   // Perform refinement and coarsening
-  meshChanged = _mesh_refinement->refine_and_coarsen_elements();
+  mesh_changed = _mesh_refinement->refine_and_coarsen_elements();
 
-  if (_displaced_problem && meshChanged)
+  if (_displaced_problem && mesh_changed)
   {
     // Now do refinement/coarsening
-    bool dispMeshChanged = _displaced_mesh_refinement->refine_and_coarsen_elements();
+    bool displaced_mesh_changed = _displaced_mesh_refinement->refine_and_coarsen_elements();
 
     // Since the undisplaced mesh changed, the displaced mesh better have changed!
-    mooseAssert(dispMeshChanged, "Undisplaced mesh changed, but displaced mesh did not!");
+    mooseAssert(displaced_mesh_changed, "Undisplaced mesh changed, but displaced mesh did not!");
   }
 
-  if (meshChanged && _print_mesh_changed)
+  if (mesh_changed && _print_mesh_changed)
   {
     _console << "\nMesh Changed:\n";
     _mesh.printInfo();
   }
 
-  return meshChanged;
+  return mesh_changed;
 }
 
-void
+bool
 Adaptivity::initialAdaptMesh()
 {
-  if (_initial_marker_variable_name != "")
-  {
-    std::string temp = _marker_variable_name;
-    _marker_variable_name = _initial_marker_variable_name;
-
-    adaptMesh();
-
-    _marker_variable_name = temp;
-  }
-  else
-    adaptMesh();
+  return adaptMesh(_initial_marker_variable_name);
 }
 
 void
@@ -272,38 +249,25 @@ Adaptivity::setInitialMarkerVariableName(std::string marker_field)
   _initial_marker_variable_name = marker_field;
 }
 
-MooseVariable &
-Adaptivity::getMarkerVariable()
-{
-  return _subproblem.getVariable(0, _marker_variable_name);
-}
-
 ErrorVector &
-Adaptivity::getErrorVector(std::string indicator_field)
+Adaptivity::getErrorVector(const std::string & indicator_field)
 {
-  ErrorVector * ev = _indicator_field_to_error_vector[indicator_field];
+  // Insert or retrieve error vector
+  auto ev_pair_it = _indicator_field_to_error_vector.lower_bound(indicator_field);
+  if (ev_pair_it == _indicator_field_to_error_vector.end() || ev_pair_it->first != indicator_field)
+    ev_pair_it = _indicator_field_to_error_vector.emplace_hint(ev_pair_it, indicator_field, libmesh_make_unique<ErrorVector>());
 
-  if (!ev)
-  {
-    ev = new ErrorVector;
-    _indicator_field_to_error_vector[indicator_field] = ev;
-  }
-
-  return *ev;
+  return *ev_pair_it->second;
 }
 
 void
 Adaptivity::updateErrorVectors()
 {
   // Resize all of the ErrorVectors in case the mesh has changed
-  for (std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
-      it != _indicator_field_to_error_vector.end();
-      ++it)
+  for (const auto & it : _indicator_field_to_error_vector)
   {
-    ErrorVector & vec = *(it->second);
-    vec.resize(_mesh.getMesh().max_elem_id());
-    for (unsigned int i=0; i<vec.size(); i++)
-      vec[i] = 0.0;
+    ErrorVector & vec = *(it.second);
+    vec.assign(_mesh.getMesh().max_elem_id(), 0);
   }
 
   // Fill the vectors with the local contributions
@@ -311,10 +275,8 @@ Adaptivity::updateErrorVectors()
   Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), uevt);
 
   // Now sum across all processors
-  for (std::map<std::string, ErrorVector *>::iterator it=_indicator_field_to_error_vector.begin();
-      it != _indicator_field_to_error_vector.end();
-      ++it)
-    _subproblem.comm().sum((std::vector<float>&)*(it->second));
+  for (const auto & it : _indicator_field_to_error_vector)
+    _subproblem.comm().sum((std::vector<float>&)*(it.second));
 }
 
 bool

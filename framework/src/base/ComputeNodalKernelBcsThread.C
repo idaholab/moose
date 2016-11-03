@@ -22,10 +22,9 @@
 #include "libmesh/threads.h"
 
 ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(FEProblem & fe_problem,
-                                                         AuxiliarySystem & sys,
                                                          const MooseObjectWarehouse<NodalKernel> & nodal_kernels) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
-    _sys(sys),
+    _aux_sys(fe_problem.getAuxiliarySystem()),
     _nodal_kernels(nodal_kernels),
     _num_cached(0)
 {
@@ -34,7 +33,7 @@ ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(FEProblem & fe_problem,
 // Splitting Constructor
 ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(ComputeNodalKernelBcsThread & x, Threads::split split) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
-    _sys(x._sys),
+    _aux_sys(x._aux_sys),
     _nodal_kernels(x._nodal_kernels),
     _num_cached(0)
 {
@@ -54,9 +53,9 @@ ComputeNodalKernelBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   BoundaryID boundary_id = bnode->_bnd_id;
 
   // prepare variables
-  for (std::map<std::string, MooseVariable *>::iterator it = _sys._nodal_vars[_tid].begin(); it != _sys._nodal_vars[_tid].end(); ++it)
+  for (const auto & it : _aux_sys._nodal_vars[_tid])
   {
-    MooseVariable * var = it->second;
+    MooseVariable * var = it.second;
     var->prepareAux();
   }
 
@@ -67,8 +66,8 @@ ComputeNodalKernelBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
     {
       _fe_problem.reinitNodeFace(node, boundary_id, _tid);
       const std::vector<MooseSharedPointer<NodalKernel> > & objects = _nodal_kernels.getActiveBoundaryObjects(boundary_id, _tid);
-      for (std::vector<MooseSharedPointer<NodalKernel> >::const_iterator nodal_kernel_it = objects.begin(); nodal_kernel_it != objects.end(); ++nodal_kernel_it)
-        (*nodal_kernel_it)->computeResidual();
+      for (const auto & nodal_kernel : objects)
+        nodal_kernel->computeResidual();
 
       _num_cached++;
     }

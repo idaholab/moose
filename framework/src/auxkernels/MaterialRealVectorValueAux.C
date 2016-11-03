@@ -31,10 +31,6 @@ MaterialRealVectorValueAux::MaterialRealVectorValueAux(const InputParameters & p
     mooseError("The component " << _component << " does not exist for " << LIBMESH_DIM << " dimensional problems");
 }
 
-MaterialRealVectorValueAux::~MaterialRealVectorValueAux()
-{
-}
-
 Real
 MaterialRealVectorValueAux::getRealValue()
 {

@@ -43,7 +43,7 @@ public:
   /**
    * Destructor.
    */
-  virtual ~RestartableDataValue() {};
+  virtual ~RestartableDataValue() = default;
 
   /**
    * String identifying the type of parameter stored.
@@ -109,22 +109,22 @@ public:
   /**
    * String identifying the type of parameter stored.
    */
-  virtual std::string type ();
+  virtual std::string type() override;
 
   /**
    * Swap
    */
-  virtual void swap (RestartableDataValue *rhs);
+  virtual void swap (RestartableDataValue *rhs) override;
 
   /**
    * Store the RestartableData into a binary stream
    */
-  virtual void store(std::ostream & stream);
+  virtual void store(std::ostream & stream) override;
 
   /**
    * Load the RestartableData from a binary stream
    */
-  virtual void load(std::istream & stream);
+  virtual void load(std::istream & stream) override;
 
 private:
 
@@ -144,7 +144,7 @@ RestartableData<T>::type ()
 
 template <typename T>
 inline void
-RestartableData<T>::swap (RestartableDataValue *rhs)
+RestartableData<T>::swap (RestartableDataValue * libmesh_dbg_var(rhs))
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
 //  _value.swap(cast_ptr<RestartableData<T>*>(rhs)->_value);

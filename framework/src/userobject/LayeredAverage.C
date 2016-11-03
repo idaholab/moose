@@ -33,8 +33,8 @@ LayeredAverage::initialize()
 {
   LayeredIntegral::initialize();
 
-  for (unsigned int i=0; i<_layer_volumes.size(); i++)
-    _layer_volumes[i] = 0.0;
+  for (auto & vol : _layer_volumes)
+    vol = 0.0;
 }
 
 void

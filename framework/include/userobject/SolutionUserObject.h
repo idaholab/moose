@@ -42,16 +42,12 @@ class SolutionUserObject : public GeneralUserObject
 {
 public:
   SolutionUserObject(const InputParameters & parameters);
-
-  /**
-   * Empty desctructor
-   */
-  virtual ~SolutionUserObject();
+  virtual ~SolutionUserObject(); // empty dtor required for unique_ptr with forward declarations
 
   /**
    * When reading ExodusII files, this will update the interpolation times
    */
-  virtual void timestepSetup();
+  virtual void timestepSetup() override;
 
   /**
    * Returns the local index for a given variable name
@@ -95,16 +91,16 @@ public:
   Real directValue(const Elem * elem, const std::string & var_name) const;
 
   // Required pure virtual function (not used)
-  virtual void initialize();
+  virtual void initialize() override;
 
   // Required pure virtual function (not used)
-  virtual void finalize();
+  virtual void finalize() override;
 
   // Required pure virtual function (not used)
-  virtual void execute();
+  virtual void execute() override;
 
   /// Initialize the System and Mesh objects for the solution being read
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
 
   const std::vector<std::string> & variableNames() const;
@@ -189,34 +185,34 @@ protected:
   bool _interpolate_times;
 
   /// Pointer the libmesh::mesh object
-  MeshBase * _mesh;
+  std::unique_ptr<MeshBase> _mesh;
 
   /// Pointer to the libmesh::EquationSystems object
-  EquationSystems * _es;
+  std::unique_ptr<EquationSystems> _es;
 
   /// Pointer libMesh::System class storing the read solution
   System * _system;
 
   /// Pointer the libMesh::MeshFunction object that the read data is stored
-  MeshFunction * _mesh_function;
+  std::unique_ptr<MeshFunction> _mesh_function;
 
   /// Pointer to the libMesh::ExodusII used to read the files
-  ExodusII_IO *_exodusII_io;
+  std::unique_ptr<ExodusII_IO> _exodusII_io;
 
   /// Pointer to the serial solution vector
-  NumericVector<Number> * _serialized_solution;
+  std::unique_ptr<NumericVector<Number> > _serialized_solution;
 
   /// Pointer to second libMesh::EquationSystems object, used for interpolation
-  EquationSystems * _es2;
+  std::unique_ptr<EquationSystems> _es2;
 
   /// Pointer to a second libMesh::System object, used for interpolation
   System * _system2;
 
   /// Pointer to second libMesh::MeshFuntion, used for interpolation
-  MeshFunction * _mesh_function2;
+  std::unique_ptr<MeshFunction> _mesh_function2;
 
   /// Pointer to second serial solution, used for interpolation
-  NumericVector<Number> * _serialized_solution2;
+  std::unique_ptr<NumericVector<Number> > _serialized_solution2;
 
   /// Interpolation time
   Real _interpolation_time;
@@ -265,6 +261,9 @@ protected:
 
   /// True if initial_setup has executed
   bool _initialized;
+
+private:
+  static Threads::spin_mutex _solution_user_object_mutex;
 };
 
 #endif //SOLUTIONUSEROBJECT_H

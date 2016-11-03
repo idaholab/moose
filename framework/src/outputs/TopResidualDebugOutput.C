@@ -46,10 +46,6 @@ TopResidualDebugOutput::TopResidualDebugOutput(const InputParameters & parameter
 {
 }
 
-TopResidualDebugOutput::~TopResidualDebugOutput()
-{
-}
-
 void
 TopResidualDebugOutput::output(const ExecFlagType & /*type*/)
 {
@@ -87,22 +83,20 @@ TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual
   // Loop over all scalar variables
   std::vector<unsigned int> var_nums;
   _sys.get_all_variable_numbers(var_nums);
-  const DofMap &dof_map(_sys.get_dof_map());
-  for (std::vector<unsigned int>::const_iterator it = var_nums.begin(); it != var_nums.end(); ++it)
-  {
-    if (_sys.variable_type(*it).family == SCALAR)
+  const DofMap & dof_map = _sys.get_dof_map();
+  for (const auto & var_num : var_nums)
+    if (_sys.variable_type(var_num).family == SCALAR)
     {
       std::vector<dof_id_type> dof_indices;
-      dof_map.SCALAR_dof_indices(dof_indices, *it);
-      for (std::vector<dof_id_type>::const_iterator dof_it = dof_indices.begin(); dof_it != dof_indices.end(); ++dof_it)
-        if (*dof_it >= dof_map.first_dof() && *it < dof_map.end_dof())
+      dof_map.SCALAR_dof_indices(dof_indices, var_num);
+
+      for (const auto & dof : dof_indices)
+        if (dof >= dof_map.first_dof() && dof < dof_map.end_dof())
         {
-          vec[j] = TopResidualDebugOutputTopResidualData(*it, 0, residual(*dof_it), true);
+          vec[j] = TopResidualDebugOutputTopResidualData(var_num, 0, residual(dof), true);
           j++;
         }
     }
-
-  }
 
   // Sort vec by residuals
   std::sort(vec.begin(), vec.end(), sortTopResidualData);

@@ -9,7 +9,7 @@
 []
 
 [GlobalParams]
-  PorousFlowDictator_UO = dictator
+  PorousFlowDictator = dictator
 []
 
 [Variables]
@@ -73,17 +73,17 @@
 [Kernels]
   [./mass_sp0]
     type = PorousFlowMassTimeDerivative
-    component_index = 0
+    fluid_component = 0
     variable = ppwater
   [../]
   [./mass_sp1]
     type = PorousFlowMassTimeDerivative
-    component_index = 1
+    fluid_component = 1
     variable = ppgas
   [../]
   [./mass_sp2]
     type = PorousFlowMassTimeDerivative
-    component_index = 2
+    fluid_component = 2
     variable = massfrac_ph0_sp0
   [../]
 []
@@ -99,6 +99,13 @@
 []
 
 [Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+  [../]
+  [./nnn]
+    type = PorousFlowNodeNumber
+    on_initial_only = true
+  [../]
   [./ppss]
     type = PorousFlow2PhasePP_VG
     phase0_porepressure = ppwater
@@ -144,7 +151,6 @@
   [./check]
     type = SMP
     full = true
-    #petsc_options = '-snes_test_display'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -snes_type'
     petsc_options_value = 'bcgs bjacobi 1E-15 1E-10 10000 test'
   [../]

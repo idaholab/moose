@@ -4,19 +4,22 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
 #include "NSEnergyThermalFlux.h"
+#include "NS.h"
 
 template<>
 InputParameters validParams<NSEnergyThermalFlux>()
 {
   InputParameters params = validParams<NSKernel>();
-  params.addRequiredCoupledVar("temperature", "");
+  params.addRequiredCoupledVar(NS::temperature, "temperature");
   return params;
 }
 
 NSEnergyThermalFlux::NSEnergyThermalFlux(const InputParameters & parameters) :
     NSKernel(parameters),
-    _grad_temp(coupledGradient("temperature")),
+    _grad_temp(coupledGradient(NS::temperature)),
     _thermal_conductivity(getMaterialProperty<Real>("thermal_conductivity")),
     // Temperature derivative computing object
     _temp_derivs(*this)
@@ -27,7 +30,7 @@ NSEnergyThermalFlux::NSEnergyThermalFlux(const InputParameters & parameters) :
   _gradU[1] = &_grad_rho_u;
   _gradU[2] = &_grad_rho_v;
   _gradU[3] = &_grad_rho_w;
-  _gradU[4] = &_grad_rho_e;
+  _gradU[4] = &_grad_rho_E;
 }
 
 Real

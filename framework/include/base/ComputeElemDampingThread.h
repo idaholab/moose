@@ -29,16 +29,16 @@ class ElementDamper;
 class ComputeElemDampingThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeElemDampingThread(FEProblem & feproblem, NonlinearSystem & sys);
+  ComputeElemDampingThread(FEProblem & feproblem);
 
   // Splitting Constructor
   ComputeElemDampingThread(ComputeElemDampingThread & x, Threads::split split);
 
   virtual ~ComputeElemDampingThread();
 
-  virtual void onElement(const Elem *elem);
+  virtual void onElement(const Elem * elem) override;
 
-  void join(const ComputeElemDampingThread & /*y*/);
+  void join(const ComputeElemDampingThread & y);
 
   Real damping();
 

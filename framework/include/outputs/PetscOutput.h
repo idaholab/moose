@@ -38,17 +38,12 @@ public:
   PetscOutput(const InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~PetscOutput();
-
-  /**
    * Get the output time.
    * This outputter enables the ability to perform output on the nonlinear and linear iterations performed
    * by PETSc. To separate theses outputs within the output a pseudo time is defined, this function provides
    * this time and it should be used in place of _time from Outputter.
    */
-  virtual Real time();
+  virtual Real time() override;
 
 protected:
 
@@ -66,7 +61,7 @@ private:
   /**
    * Internal setup function that executes at the beginning of the time step
    */
-  void solveSetup();
+  void solveSetup() override;
 
 #ifdef LIBMESH_HAVE_PETSC
   /**

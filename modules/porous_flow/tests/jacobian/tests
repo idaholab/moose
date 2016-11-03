@@ -50,7 +50,7 @@
   [./mass09]
     type = 'PetscJacobianTester'
     input = 'mass09.i'
-    ratio_tol = 1E-6 # lots of chain rules here
+    ratio_tol = 5E-6 # lots of chain rules here
     difference_tol = 1E10
   [../]
   [./fflux01]
@@ -116,6 +116,107 @@
   [./mass_vol_exp02]
     type = 'PetscJacobianTester'
     input = 'mass_vol_exp02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./pls01]
+    type = 'PetscJacobianTester'
+    input = 'pls01.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./pls02]
+    type = 'PetscJacobianTester'
+    input = 'pls02.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./pls03]
+    type = 'PetscJacobianTester'
+    input = 'pls03.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./hgs01]
+    type = 'PetscJacobianTester'
+    input = 'hgs01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./hcs01]
+    type = 'PetscJacobianTester'
+    input = 'hcs01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./hcond01]
+    type = 'PetscJacobianTester'
+    input = 'hcond01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./hcond02]
+    type = 'PetscJacobianTester'
+    input = 'hcond02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./denergy01]
+    type = 'PetscJacobianTester'
+    input = 'denergy01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./denergy02]
+    type = 'PetscJacobianTester'
+    input = 'denergy02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./heat_advection01]
+    type = 'PetscJacobianTester'
+    input = 'heat_advection01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./heat_advection02]
+    type = 'PetscJacobianTester'
+    input = 'heat_advection02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
+  [./diff01]
+    type = 'PetscJacobianTester'
+    input = 'diff01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./disp01]
+    type = 'PetscJacobianTester'
+    input = 'disp01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./disp02]
+    type = 'PetscJacobianTester'
+    input = 'disp02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./disp03]
+    type = 'PetscJacobianTester'
+    input = 'disp03.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./disp04]
+    type = 'PetscJacobianTester'
+    input = 'disp04.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]

@@ -43,17 +43,10 @@ public:
    * @return Whether or not the solve was successful.
    */
   Transient(const InputParameters & parameters);
-  virtual ~Transient();
 
-  /**
-   * Initialize executioner
-   */
-  virtual void init();
+  virtual void init() override;
 
-  /**
-   * This will call solve() on the NonlinearSystem.
-   */
-  virtual void execute();
+  virtual void execute() override;
 
   /**
    * Do whatever is necessary to advance one step.
@@ -79,11 +72,11 @@ public:
   /**
    * Whether or not the last solve converged.
    */
-  virtual bool lastSolveConverged();
+  virtual bool lastSolveConverged() override;
 
-  virtual void preExecute();
+  virtual void preExecute() override;
 
-  virtual void postExecute();
+  virtual void postExecute() override;
 
   virtual void computeDT();
 
@@ -140,7 +133,7 @@ public:
   /**
    * Get the timestepper.
    */
-  virtual std::string getTimeStepperName();
+  virtual std::string getTimeStepperName() override;
 
   /**
    * Get the time scheme used
@@ -202,7 +195,7 @@ public:
    */
   Real unconstrainedDT() { return _unconstrained_dt; }
 
-  void parentOutputPositionChanged() { _fe_problem.parentOutputPositionChanged(); }
+  void parentOutputPositionChanged() override { _fe_problem.parentOutputPositionChanged(); }
 
   /**
    * Get the number of Picard iterations performed
@@ -265,6 +258,7 @@ protected:
   bool _trans_ss_check;
   Real _ss_check_tol;
   Real _ss_tmin;
+  Real & _sln_diff_norm;
   Real & _old_time_solution_norm;
 
   std::set<Real> & _sync_times;

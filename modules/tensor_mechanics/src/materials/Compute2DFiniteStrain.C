@@ -37,15 +37,15 @@ Compute2DFiniteStrain::computeProperties()
     RankTwoTensor A((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]); //Deformation gradient
     RankTwoTensor Fbar((*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]); //Old Deformation gradient
 
-    // Compute the deformation gradient (2,*) value for plane strain, generalized plane strain, or axisymmetric problems
-    A(2,2) = computeDeformGradZZ();
-    Fbar(2,2) = computeDeformGradZZold();
+    // Compute the displacement gradient (2,2) value for plane strain, generalized plane strain, or axisymmetric problems
+    A(2,2) = computeGradDispZZ();
+    Fbar(2,2) = computeGradDispZZold();
 
     // Gauss point deformation gradient
     _deformation_gradient[_qp] = A;
     _deformation_gradient[_qp].addIa(1.0);
 
-    A -= Fbar; //very nearly A = gradU - gradUold, adapted to cylinderical coords
+    A -= Fbar; //very nearly A = gradU - gradUold, adapted to cylindrical coords
 
     Fbar.addIa(1.0); //Fbar = ( I + gradUold)
 
@@ -68,11 +68,11 @@ Compute2DFiniteStrain::computeProperties()
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     // Finalize volumetric locking correction
-    _Fhat[_qp] *= std::pow(ave_Fhat.det() / _Fhat[_qp].det(), 1.0/3.0);
+    _Fhat[_qp] *= std::cbrt(ave_Fhat.det() / _Fhat[_qp].det());
 
     computeQpStrain();
 
     // Volumetric locking correction
-    _deformation_gradient[_qp] *= std::pow(ave_dfgrd_det / _deformation_gradient[_qp].det(), 1.0/3.0);
+    _deformation_gradient[_qp] *= std::cbrt(ave_dfgrd_det / _deformation_gradient[_qp].det());
   }
 }

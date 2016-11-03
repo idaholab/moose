@@ -1,13 +1,19 @@
 # example showing grain motion due to applied force density on grains
+[GlobalParams]
+  var_name_base = eta
+  op_num = 2
+[]
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 25
-  ny = 15
+  nx = 40
+  ny = 20
   nz = 0
-  xmax = 50
-  ymax = 25
+  xmin = 0.0
+  xmax = 40.0
+  ymin = 0.0
+  ymax = 20.0
   zmax = 0
   elem_type = QUAD4
 []
@@ -27,7 +33,6 @@
       radii = '14.0 14.0'
       3D_spheres = false
       variable = c
-      block = 0
     [../]
   [../]
   [./w]
@@ -66,19 +71,20 @@
     variable = w
     c = c
     v = 'eta0 eta1'
+    grain_tracker_object = grain_center
+    grain_force = grain_force
+    grain_volumes = grain_volumes
   [../]
 []
 
 [Materials]
   [./pfmobility]
     type = GenericConstantMaterial
-    block = 0
     prop_names = 'M    kappa_c  kappa_eta'
     prop_values = '1.0  2.0      0.1'
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = F
     args = c
     constant_names = 'barr_height  cv_eq'
@@ -88,24 +94,14 @@
   [../]
   [./force_density]
     type = ExternalForceDensityMaterial
-    block = 0
     c = c
     etas = 'eta0 eta1'
     k = 1.0
     force_y = load
   [../]
-  [./advection_vel]
-    type = GrainAdvectionVelocity
-    block = 0
-    grain_force = grain_force
-    etas = 'eta0 eta1'
-    c = c
-    grain_data = grain_center
-  [../]
 []
 
 [AuxVariables]
-  active = 'bnds eta0 eta1 df11 df10 df00 df01'
   [./eta0]
   [../]
   [./eta1]
@@ -128,41 +124,15 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vadv00]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv01]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv10]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv11]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv0_div]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vadv1_div]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [AuxKernels]
-  active = 'bnds df11 df10 df01 df00'
   [./bnds]
     type = BndsCalcAux
     variable = bnds
     var_name_base = eta
     op_num = 2.0
     v = 'eta0 eta1'
-    block = 0
   [../]
   [./df01]
     type = MaterialStdVectorRealGradientAux
@@ -187,41 +157,6 @@
     variable = df10
     index = 1
     property = force_density_ext
-  [../]
-  [./vadv00]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv00
-    property = advection_velocity
-  [../]
-  [./vadv01]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv01
-    property = advection_velocity
-    component = 1
-  [../]
-  [./vadv10]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv10
-    index = 1
-    property = advection_velocity
-  [../]
-  [./vadv11]
-    type = MaterialStdVectorRealGradientAux
-    variable = vadv11
-    property = advection_velocity
-    index = 1
-    component = 1
-  [../]
-  [./vadv0_div]
-    type = MaterialStdVectorAux
-    variable = vadv0_div
-    property = advection_velocity_divergence
-  [../]
-  [./vadv1_div]
-    type = MaterialStdVectorAux
-    variable = vadv1_div
-    property = advection_velocity_divergence
-    index = 1
   [../]
 []
 
@@ -249,33 +184,35 @@
 []
 
 [VectorPostprocessors]
-  [./centers]
-    type = GrainCentersPostprocessor
-    grain_data = grain_center
-  [../]
   [./forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
+  [../]
+  [./grain_volumes]
+    type = FeatureVolumeVectorPostprocessor
+    flood_counter = grain_center
+    execute_on = 'initial timestep_begin'
   [../]
 []
 
 [UserObjects]
   [./grain_center]
-    type = ComputeGrainCenterUserObject
-    etas = 'eta0 eta1'
-    execute_on = 'initial linear'
+    type = GrainTracker
+    outputs = none
+    compute_var_to_feature_map = true
+    execute_on = 'initial timestep_begin'
   [../]
   [./grain_force]
-    type = ComputeGrainForceAndTorque
-    execute_on = 'initial linear'
-    grain_data = grain_center
+    type = ComputeExternalGrainForceAndTorque
     c = c
+    etas = 'eta0 eta1'
+    grain_data = grain_center
     force_density = force_density_ext
+    execute_on = 'initial linear nonlinear'
   [../]
 []
 
 [Preconditioning]
-  # active = ' '
   [./SMP]
     type = SMP
     full = true
@@ -285,7 +222,7 @@
 [Executioner]
   type = Transient
   scheme = bdf2
-  solve_type = PJFNK
+  solve_type = NEWTON
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm         31   preonly   lu      1'
   l_max_its = 30
@@ -294,9 +231,14 @@
   start_time = 0.0
   num_steps = 5
   dt = 0.1
+  [./Adaptivity]
+    refine_fraction = 0.7
+    coarsen_fraction = 0.1
+    max_h_level = 2
+    initial_adaptivity = 1
+  [../]
 []
 
 [Outputs]
   exodus = true
-  csv = true
 []

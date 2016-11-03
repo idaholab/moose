@@ -1,18 +1,10 @@
 [GlobalParams]
-  # rho = 1000    # kg/m^3
-  # mu = 0.798e-3 # Pa-s at 30C
-  # cp = 4.179e3  # J/kg-K at 30C
-  # k = 0.58      # W/m-K at ?C
   gravity = '0 0 0'
-
-  # Dummy parameters
   rho = 1
   mu = 1
   cp = 1
-  k = 1
+  k = .01
 []
-
-
 
 [Mesh]
   type = GeneratedMesh
@@ -29,106 +21,79 @@
 [MeshModifiers]
   [./corner_node]
     type = AddExtraNodeset
-    new_boundary = 99
+    new_boundary = 'pinned_node'
     nodes = '0'
   [../]
 []
 
 [Variables]
-  # x-velocity
-  [./u]
+  [./vel_x]
+    order = SECOND
+    family = LAGRANGE
+  [../]
+
+  [./vel_y]
+    order = SECOND
+    family = LAGRANGE
+  [../]
+
+  [./T]
     order = SECOND
     family = LAGRANGE
 
     [./InitialCondition]
       type = ConstantIC
-      value = 0.0
+      value = 1.0
     [../]
   [../]
 
-  # y-velocity
-  [./v]
-    order = SECOND
-    family = LAGRANGE
-
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0.0
-    [../]
-  [../]
-
- # Temperature
- [./T]
-   order = SECOND
-   family = LAGRANGE
-
-   [./InitialCondition]
-     type = ConstantIC
-     value = 1.0
-   [../]
- [../]
-
-  # Pressure
   [./p]
     order = FIRST
     family = LAGRANGE
-
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0 # This number is arbitrary for NS...
-    [../]
   [../]
 []
-
-
 
 [Kernels]
   # mass
   [./mass]
     type = INSMass
     variable = p
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     p = p
   [../]
-
-
 
   # x-momentum, time
   [./x_momentum_time]
     type = INSMomentumTimeDerivative
-    variable = u
+    variable = vel_x
   [../]
 
   # x-momentum, space
   [./x_momentum_space]
-    type = INSMomentum
-    variable = u
-    u = u
-    v = v
+    type = INSMomentumLaplaceForm
+    variable = vel_x
+    u = vel_x
+    v = vel_y
     p = p
     component = 0
   [../]
 
-
-
   # y-momentum, time
   [./y_momentum_time]
     type = INSMomentumTimeDerivative
-    variable = v
+    variable = vel_y
   [../]
 
   # y-momentum, space
   [./y_momentum_space]
-    type = INSMomentum
-    variable = v
-    u = u
-    v = v
+    type = INSMomentumLaplaceForm
+    variable = vel_y
+    u = vel_x
+    v = vel_y
     p = p
     component = 1
   [../]
-
-
 
  # temperature
  [./temperature_time]
@@ -139,109 +104,88 @@
  [./temperature_space]
    type = INSTemperature
    variable = T
-   u = u
-   v = v
+   u = vel_x
+   v = vel_y
  [../]
 []
-
-
-
 
 [BCs]
   [./x_no_slip]
     type = DirichletBC
-    variable = u
-    # boundary = '0 1 3'
+    variable = vel_x
     boundary = 'bottom right left'
     value = 0.0
   [../]
 
   [./lid]
-    type = DirichletBC
-    variable = u
-    # boundary = '2'
+    type = FunctionDirichletBC
+    variable = vel_x
     boundary = 'top'
-    value = 10.0
+    function = 'lid_function'
   [../]
 
   [./y_no_slip]
     type = DirichletBC
-    variable = v
-    # boundary = '0 1 2 3'
+    variable = vel_y
     boundary = 'bottom right top left'
     value = 0.0
+  [../]
+
+  [./T_hot]
+    type = DirichletBC
+    variable = T
+    boundary = 'bottom'
+    value = 1
+  [../]
+
+  [./T_cold]
+    type = DirichletBC
+    variable = T
+    boundary = 'top'
+    value = 0
   [../]
 
   [./pressure_pin]
     type = DirichletBC
     variable = p
-    boundary = '99'
+    boundary = 'pinned_node'
     value = 0
   [../]
-
- [./T_hot]
-   type = DirichletBC
-   variable = T
-   #boundary = '0'
-   boundary = 'bottom'
-   value = 1
- [../]
-
- [./T_cold]
-   type = DirichletBC
-   variable = T
-   #boundary = '2'
-   boundary = 'top'
-   value = 0
- [../]
 []
 
-
-
-[Preconditioning]
-  [./SMP_PJFNK]
-    type = SMP
-    full = true
-
-    # Preconditioned JFNK (default)
-    solve_type = 'PJFNK'
+[Functions]
+  [./lid_function]
+    # We pick a function that is exactly represented in the velocity
+    # space so that the Dirichlet conditions are the same regardless
+    # of the mesh spacing.
+    type = ParsedFunction
+    value = '4*x*(1-x)'
   [../]
 []
 
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+    solve_type = 'NEWTON'
+  [../]
+[]
 
 [Executioner]
   type = Transient
-  dt = 1.e-2
-  dtmin = 1.e-2
-
-  # Basic GMRES/linesearch options only
-  petsc_options_iname = '-ksp_gmres_restart '
-  petsc_options_value = '300                '
+  # Run for 100+ timesteps to reach steady state.
+  num_steps = 5
+  dt = .5
+  dtmin = .5
+  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
+  petsc_options_value = 'asm      2               ilu          4'
   line_search = 'none'
-
-  # MOOSE does not correctly read these options!! Always run with actual command line arguments if
-  # you want to guarantee you are getting pilut!  Also, even though there are pilut defaults,
-  # i'm not sure that petsc actually passes them through, so always specify them!.
-  #
-  # PILUT options:
-  # -pc_type hypre -pc_hypre_type pilut -pc_hypre_pilut_factorrowsize 20 -pc_hypre_pilut_tol 1.e-4
-  #
-  # PETSc ILU options (parallel):
-  # -sub_pc_type ilu -sub_pc_factor_levels 2
-  #
-  # ASM options (to be used in conjunction with ILU sub_pc)
-  # -pc_type asm -pc_asm_overlap 2
-
-  nl_rel_tol = 1e-9
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-13
   nl_max_its = 6
   l_tol = 1e-6
   l_max_its = 500
-  start_time = 0.0
-  num_steps = 2
 []
-
-
-
 
 [Outputs]
   file_base = lid_driven_out

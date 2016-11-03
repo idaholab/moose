@@ -26,5 +26,10 @@ InputParameters validParams<TimeSequenceStepper>()
 TimeSequenceStepper::TimeSequenceStepper(const InputParameters & parameters) :
     TimeSequenceStepperBase(parameters)
 {
+}
+
+void
+TimeSequenceStepper::init()
+{
   setupSequence(getParam<std::vector<Real> >("time_sequence"));
 }

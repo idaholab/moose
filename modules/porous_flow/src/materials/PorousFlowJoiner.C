@@ -12,9 +12,7 @@
 template<>
 InputParameters validParams<PorousFlowJoiner>()
 {
-  InputParameters params = validParams<Material>();
-
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
+  InputParameters params = validParams<PorousFlowMaterialVectorBase>();
   params.addRequiredParam<std::string>("material_property", "The property that you want joined into a std::vector");
   params.addParam<bool>("at_qps", false, "If true then join quadpoint properties, otherwise join nodal properties");
   params.addParam<bool>("include_old", false, "Join old properties into vectors as well as the current properties");
@@ -23,22 +21,19 @@ InputParameters validParams<PorousFlowJoiner>()
 }
 
 PorousFlowJoiner::PorousFlowJoiner(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+    PorousFlowMaterialVectorBase(parameters),
 
-    _dictator_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-    _pressure_variable_name(_dictator_UO.pressureVariableNameDummy()),
-    _saturation_variable_name(_dictator_UO.saturationVariableNameDummy()),
-    _temperature_variable_name(_dictator_UO.temperatureVariableNameDummy()),
-    _mass_fraction_variable_name(_dictator_UO.massFractionVariableNameDummy()),
-    _num_phases(_dictator_UO.numPhases()),
-    _num_var(_dictator_UO.numVariables()),
+    _pressure_variable_name(_dictator.pressureVariableNameDummy()),
+    _saturation_variable_name(_dictator.saturationVariableNameDummy()),
+    _temperature_variable_name(_dictator.temperatureVariableNameDummy()),
+    _mass_fraction_variable_name(_dictator.massFractionVariableNameDummy()),
     _pf_prop(getParam<std::string>("material_property")),
     _include_old(getParam<bool>("include_old")),
     _at_qps(getParam<bool>("at_qps")),
 
     _dporepressure_dvar(_at_qps ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar")),
     _dsaturation_dvar(_at_qps ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar")),
-    _dtemperature_dvar(_at_qps ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_temperature_nodal_dvar")),
+    _dtemperature_dvar(_at_qps ? getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_qp_dvar") : getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar")),
 
     _property(declareProperty<std::vector<Real> >(_pf_prop)),
     _property_old(_include_old ? &declarePropertyOld<std::vector<Real> >(_pf_prop) : NULL),
@@ -85,7 +80,7 @@ PorousFlowJoiner::computeQpProperties()
     {
       _dproperty_dvar[_qp][ph][v] = (*_dphase_property_dp[ph])[_qp] * _dporepressure_dvar[_qp][ph][v];
       _dproperty_dvar[_qp][ph][v] += (*_dphase_property_ds[ph])[_qp] * _dsaturation_dvar[_qp][ph][v];
-      _dproperty_dvar[_qp][ph][v] += (*_dphase_property_dt[ph])[_qp] * _dtemperature_dvar[_qp][ph][v];
+      _dproperty_dvar[_qp][ph][v] += (*_dphase_property_dt[ph])[_qp] * _dtemperature_dvar[_qp][v];
     }
   }
 }

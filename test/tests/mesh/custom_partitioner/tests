@@ -7,6 +7,14 @@
     max_parallel = 4
     group = 'requirements'
   [../]
+  [./custom_linear_partitioner_displacement]
+    type = 'Exodiff'
+    input = 'custom_linear_partitioner_test_displacement.i'
+    exodiff = 'custom_linear_partitioner_test_displacement.e'
+    min_parallel = 2
+    max_parallel = 2
+    group = 'requirements'
+  [../]
   [./custom_linear_partitioner_restart]
     type = 'Exodiff'
     input = 'custom_linear_partitioner_restart_test.i'

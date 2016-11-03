@@ -21,11 +21,6 @@ InputParameters validParams<KineticDisPreRateAux>();
 class KineticDisPreRateAux : public AuxKernel
 {
 public:
-
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   KineticDisPreRateAux(const InputParameters & parameters);
 
   virtual ~KineticDisPreRateAux() {}

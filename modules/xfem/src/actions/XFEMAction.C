@@ -8,6 +8,7 @@
 #include "XFEMAction.h"
 
 #include "FEProblem.h"
+#include "DisplacedProblem.h"
 #include "NonlinearSystem.h"
 #include "XFEM.h"
 #include "Executioner.h"
@@ -62,7 +63,8 @@ XFEMAction::act()
   MooseSharedPointer<XFEMInterface> xfem_interface = _problem->getXFEM();
   if (xfem_interface == NULL)
   {
-    MooseSharedPointer<XFEM> new_xfem (new XFEM(_problem->getMooseApp(), _problem));
+    _pars.set<FEProblem *>("_fe_problem") = &*_problem;
+    MooseSharedPointer<XFEM> new_xfem (new XFEM(_pars));
     _problem->initXFEM(new_xfem);
     xfem_interface = _problem->getXFEM();
   }
@@ -81,6 +83,12 @@ XFEMAction::act()
 
     MooseSharedPointer<XFEMElementPairLocator> new_xfem_epl (new XFEMElementPairLocator(xfem, 0));
     _problem->geomSearchData().addElementPairLocator(0, new_xfem_epl);
+
+    if (_problem->getDisplacedProblem() != NULL)
+    {
+      MooseSharedPointer<XFEMElementPairLocator> new_xfem_epl2 (new XFEMElementPairLocator(xfem, 0, true));
+      _problem->getDisplacedProblem()->geomSearchData().addElementPairLocator(0, new_xfem_epl2);
+    }
 
     if (_xfem_cut_type == "line_segment_2d")
     {

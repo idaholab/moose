@@ -1,0 +1,8 @@
+[Tests]
+  [./cumulative_value_postprocessor]
+    type = 'CSVDiff'
+    input = 'cumulative_value_postprocessor.i'
+    csvdiff = 'cumulative_value_postprocessor_out.csv'
+    max_parallel = 1 # LU is used
+  [../]
+[]

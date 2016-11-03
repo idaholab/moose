@@ -19,7 +19,7 @@
   inc_slip_x = inc_slip_x
   inc_slip_y = inc_slip_y
   contact_slip_tolerance_factor = 100
-  target_relative_contact_residual = 1.e-4
+  target_relative_contact_residual = 1.e-6
   maximum_slip_iterations = 500
   minimum_slip_iterations = 1
   slip_updates_per_iteration = 5
@@ -183,13 +183,13 @@
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-7
   l_max_its = 100
   nl_max_its = 1000
   dt = 0.01
   end_time = 0.05
   num_steps = 1000
-  nl_rel_tol = 1e-4
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-7
   dtmin = 0.01
   l_tol = 1e-3
 

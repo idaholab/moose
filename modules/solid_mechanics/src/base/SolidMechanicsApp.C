@@ -17,12 +17,11 @@
 #include "CombinedCreepPlasticity.h"
 #include "Elastic.h"
 #include "ElasticModel.h"
-#include "ElasticEnergyAux.h"
-#include "ElementsOnLineAux.h"
 #include "HomogenizationKernel.h"
 #include "HomogenizedElasticConstants.h"
 #include "IsotropicPlasticity.h"
 #include "IsotropicPowerLawHardening.h"
+#include "IsotropicTempDepHardening.h"
 #include "LinearAnisotropicMaterial.h"
 #include "LinearGeneralAnisotropicMaterial.h"
 #include "LinearIsotropicMaterial.h"
@@ -36,17 +35,15 @@
 #include "MixedModeEquivalentK.h"
 #include "MaterialSymmElasticityTensorAux.h"
 #include "MaterialTensorAux.h"
-#include "MaterialTensorOnLine.h"
-#include "AccumulateAux.h"
 #include "DomainIntegralQFunction.h"
 #include "DomainIntegralTopologicalQFunction.h"
 #include "PLC_LSH.h"
 #include "PowerLawCreep.h"
 #include "PowerLawCreepModel.h"
-#include "LineMaterialSymmTensorSampler.h"
 #include "InteractionIntegralBenchmarkBC.h"
-#include "MaterialTensorIntegral.h"
+#include "MaterialTensorIntegralSM.h"
 #include "CrackDataSampler.h"
+#include "LineMaterialSymmTensorSampler.h"
 #include "SolidMechanicsAction.h"
 #include "DomainIntegralAction.h"
 #include "SolidMechImplicitEuler.h"
@@ -97,13 +94,10 @@ extern "C" void SolidMechanicsApp__registerObjects(Factory & factory) { SolidMec
 void
 SolidMechanicsApp::registerObjects(Factory & factory)
 {
-  registerAux(ElasticEnergyAux);
   registerAux(MaterialSymmElasticityTensorAux);
   registerAux(MaterialTensorAux);
-  registerAux(AccumulateAux);
   registerAux(DomainIntegralQFunction);
   registerAux(DomainIntegralTopologicalQFunction);
-  registerAux(ElementsOnLineAux);
 
   registerBoundaryCondition(InteractionIntegralBenchmarkBC);
 
@@ -117,6 +111,7 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(InteractionIntegralAuxFields);
   registerMaterial(IsotropicPlasticity);
   registerMaterial(IsotropicPowerLawHardening);
+  registerMaterial(IsotropicTempDepHardening);
   registerMaterial(LinearAnisotropicMaterial);
   registerMaterial(LinearGeneralAnisotropicMaterial);
   registerMaterial(LinearIsotropicMaterial);
@@ -140,13 +135,12 @@ SolidMechanicsApp::registerObjects(Factory & factory)
   registerPostprocessor(JIntegral);
   registerPostprocessor(CrackFrontData);
   registerPostprocessor(InteractionIntegral);
-  registerPostprocessor(MaterialTensorIntegral);
+  registerPostprocessor(MaterialTensorIntegralSM);
   registerPostprocessor(MixedModeEquivalentK);
 
   registerVectorPostprocessor(CrackDataSampler);
   registerVectorPostprocessor(LineMaterialSymmTensorSampler);
 
-  registerUserObject(MaterialTensorOnLine);
   registerUserObject(CrackFrontDefinition);
 }
 

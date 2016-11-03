@@ -1,0 +1,44 @@
+# This journal file creates a 2x2x2 mesh for the auto_dir_repeated_id test.
+reset
+
+# Create the volume
+create brick width 1 depth 1 height 1
+
+# Mesh it
+vol 1 interval 2
+vol 1 scheme auto
+mesh vol 1
+
+# Create sidesets
+
+# All the z surfaces are in a single sideset.  The repeated id needs
+# to have a lower value than periodic boundaries in order to
+# demonstrate the bug.
+sideset 2 surf 1 2
+sideset 2 name 'z_all'
+
+# x-
+sideset 5 surf 4
+sideset 5 name 'x_minus'
+
+# x+
+sideset 6 surf 6
+sideset 6 name 'x_plus'
+
+# y-
+sideset 3 surf 3
+sideset 3 name 'y_minus'
+
+# y+
+sideset 4 surf 5
+sideset 4 name 'y_plus'
+
+
+# Export mesh to file
+block 1 vol all
+block 1 element type HEX8
+export mesh "auto_dir_repeated_id.e" dimension 3 block 1 overwrite
+
+# Local Variables:
+# mode: shell-script
+# End:

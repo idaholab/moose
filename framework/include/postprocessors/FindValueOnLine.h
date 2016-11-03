@@ -35,11 +35,10 @@ class FindValueOnLine : public GeneralPostprocessor, public Coupleable
 public:
   FindValueOnLine(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize() {}
+  virtual void initialize() override;
+  virtual void execute() override;
 
-  virtual PostprocessorValue getValue();
+  virtual PostprocessorValue getValue() override;
 
 protected:
   Real getValueAtPoint(const Point & p);
@@ -72,7 +71,7 @@ protected:
   std::vector<Point> _point_vec;
 
   /// helper object to locate elements containing points
-  UniquePtr<PointLocatorBase> _pl;
+  std::unique_ptr<PointLocatorBase> _pl;
 };
 
 #endif // FINDVALUEONLINE_H

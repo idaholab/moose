@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "EigenExecutionerBase.h"
-#include "EigenSystem.h"
+#include "MooseEigenSystem.h"
 
 #include "MooseApp.h"
 #include "DisplacedProblem.h"
@@ -35,7 +35,6 @@ InputParameters validParams<EigenExecutionerBase>()
   params.addParamNamesToGroup("normalization normal_factor output_before_normalization", "Normalization");
   params.addParamNamesToGroup("auto_initialization time", "Advanced");
 
-  params.addParam<bool>("output_on_final", false, "True to disable all the intemediate exodus outputs");
   params.addPrivateParam<bool>("_eigen", true);
 
   return params;
@@ -50,12 +49,12 @@ EigenExecutionerBase::eigenvalueOld()
 EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters) :
     Executioner(parameters),
     _problem(_fe_problem),
-     _eigen_sys(static_cast<EigenSystem &>(_problem.getNonlinearSystem())),
-     _eigenvalue(declareRestartableData("eigenvalue", 1.0)),
-     _source_integral(getPostprocessorValue("bx_norm")),
-     _source_integral_old(1),
-     _normalization(isParamValid("normalization") ? getPostprocessorValue("normalization")
-                    : getPostprocessorValue("bx_norm")) // use |Bx| for normalization by default
+    _eigen_sys(static_cast<MooseEigenSystem &>(_problem.getNonlinearSystem())),
+    _eigenvalue(declareRestartableData("eigenvalue", 1.0)),
+    _source_integral(getPostprocessorValue("bx_norm")),
+    _source_integral_old(1),
+    _normalization(isParamValid("normalization") ? getPostprocessorValue("normalization")
+                   : getPostprocessorValue("bx_norm")) // use |Bx| for normalization by default
 {
   //FIXME: currently we have to use old and older solution vectors for power iteration.
   //       We will need 'step' in the future.
@@ -81,24 +80,20 @@ EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters) :
   _problem.dt() = 1.0;
 }
 
-EigenExecutionerBase::~EigenExecutionerBase()
-{
-}
-
 void
 EigenExecutionerBase::init()
 {
   checkIntegrity();
-  _eigen_sys.buildSystemDoFIndices(EigenSystem::EIGEN);
+  _eigen_sys.buildSystemDoFIndices(MooseEigenSystem::EIGEN);
 
   if (getParam<bool>("auto_initialization"))
   {
     // Initialize the solution of the eigen variables
     // Note: initial conditions will override this if there is any by _problem.initialSetup()
-    _eigen_sys.initSystemSolution(EigenSystem::EIGEN, 1.0);
+    _eigen_sys.initSystemSolution(MooseEigenSystem::EIGEN, 1.0);
   }
   _problem.initialSetup();
-  _eigen_sys.initSystemSolutionOld(EigenSystem::EIGEN, 0.0);
+  _eigen_sys.initSystemSolutionOld(MooseEigenSystem::EIGEN, 0.0);
 
   // check when the postprocessors are evaluated
   ExecFlagType bx_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).execBitFlags();
@@ -119,6 +114,9 @@ EigenExecutionerBase::init()
 
   // normalize solution to make |Bx|=_eigenvalue, _eigenvalue at this point has the initialized value
   makeBXConsistent(_eigenvalue);
+
+  if (_problem.getDisplacedProblem() != NULL)
+    _problem.getDisplacedProblem()->syncSolutions();
 
   /* a time step check point */
   _problem.onTimestepEnd();
@@ -144,7 +142,7 @@ EigenExecutionerBase::makeBXConsistent(Real k)
   while (std::fabs(k-_source_integral)>consistency_tolerance*std::fabs(k))
   {
     // On the first time entering, the _source_integral has been updated properly in FEProblem::initialSetup()
-    _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, k/_source_integral);
+    _eigen_sys.scaleSystemSolution(MooseEigenSystem::EIGEN, k/_source_integral);
     _problem.execute(EXEC_LINEAR);
     std::stringstream ss;
     ss << std::fixed << std::setprecision(10) << _source_integral;
@@ -197,7 +195,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   // FIXME: currently power iteration use old and older solutions,
   // so save old and older solutions before they are changed by the power iteration
-  _eigen_sys.saveOldSolutions();
+  _problem.saveOldSolutions();
+  if (_problem.getDisplacedProblem() != NULL)
+    _problem.getDisplacedProblem()->saveOldSolutions();
 
   // save solver control parameters to be modified by the power iteration
   Real tol1 = _problem.es().parameters.get<Real> ("linear solver tolerance");
@@ -238,7 +238,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     // properties in stateful materials.
     _problem.getNonlinearSystem().copyOldSolutions();
     _problem.getAuxiliarySystem().copyOldSolutions();
-    if ( _problem.getDisplacedProblem() != NULL )
+    if (_problem.getDisplacedProblem() != NULL)
     {
       _problem.getDisplacedProblem()->nlSys().copyOldSolutions();
       _problem.getDisplacedProblem()->auxSys().copyOldSolutions();
@@ -344,7 +344,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   _problem.es().parameters.set<Real> ("nonlinear solver relative residual tolerance") = tol2;
 
   //FIXME: currently power iteration use old and older solutions, so restore them
-  _eigen_sys.restoreOldSolutions();
+  _problem.restoreOldSolutions();
+  if (_problem.getDisplacedProblem() != NULL)
+    _problem.getDisplacedProblem()->restoreOldSolutions();
 }
 
 void
@@ -408,7 +410,7 @@ EigenExecutionerBase::normalizeSolution(bool force)
   if (scaling != 1.0)
   {
     //FIXME: we assume linear scaling here!
-    _eigen_sys.scaleSystemSolution(EigenSystem::EIGEN, scaling);
+    _eigen_sys.scaleSystemSolution(MooseEigenSystem::EIGEN, scaling);
     // update all aux variables and user objects
     for (unsigned int i=0; i<Moose::exec_types.size(); i++)
     {
@@ -482,7 +484,7 @@ EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, uns
       std::vector<double> coef(2);
       coef[0] = alp;
       coef[1] = 1-alp;
-      _eigen_sys.combineSystemSolution(EigenSystem::EIGEN, coef);
+      _eigen_sys.combineSystemSolution(MooseEigenSystem::EIGEN, coef);
       _problem.execute(EXEC_LINEAR);
       _eigenvalue = _source_integral;
     }
@@ -533,7 +535,7 @@ EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, uns
         coef[0] = alp;
         coef[1] = 1-alp+beta;
         coef[2] = -beta;
-        _eigen_sys.combineSystemSolution(EigenSystem::EIGEN, coef);
+        _eigen_sys.combineSystemSolution(MooseEigenSystem::EIGEN, coef);
         _problem.execute(EXEC_LINEAR);
         _eigenvalue = _source_integral;
       }

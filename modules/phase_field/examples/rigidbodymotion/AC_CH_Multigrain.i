@@ -13,19 +13,18 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 25
-  ny = 25
+  nx = 15
+  ny = 15
   xmin = 0
   xmax = 600
   ymin = 0
   ymax = 600
   elem_type = QUAD4
-  uniform_refine = 2
+  uniform_refine = 1
 []
 
 [Variables]
   [./c]
-    scaling = 100
   [../]
   [./w]
   [../]
@@ -36,17 +35,23 @@
 [AuxVariables]
   [./bnds]
   [../]
-  [./MultiAuxVariables]
-    order = CONSTANT
-    family = MONOMIAL
-    var_name_base = 'dfx dfy' # Names of force density variables
-    op_num = '4 4' # Should both be equal to global op_num
-  [../]
   [./force]
     order = CONSTANT
     family = MONOMIAL
   [../]
   [./free_energy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./unique_grains]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./var_indices]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./centroids]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -72,6 +77,9 @@
     f_name = f_loc
     mob_name = L
     kappa_name = kappa_gr
+    grain_force = grain_force
+    grain_volumes = grain_volumes
+    grain_tracker_object = grain_center
   [../]
   # Cahn Hilliard kernels
   [./dt_w]
@@ -96,7 +104,10 @@
     type = MultiGrainRigidBodyMotion
     variable = w
     c = c
-    v = 'gr0 gr1 gr2 gr3' # Must be changed as op_num changes. Copy/Paste from line 4
+    v = 'gr0 gr1 gr2 gr3'
+    grain_force = grain_force
+    grain_volumes = grain_volumes
+    grain_tracker_object = grain_center
   [../]
 []
 
@@ -111,11 +122,6 @@
     variable = force
     function = load_y
   [../]
-  [./MatVecRealGradAuxKernel]
-    var_name_base = 'dfx dfy'    # Names of force density variables
-    op_num = '4 4'               # Should both be equal to global op_num
-    property = force_density_ext
-  [../]
   [./energy_density]
     type = TotalFreeEnergy
     variable = free_energy
@@ -126,7 +132,6 @@
   [./bnds]
     type = BndsCalcAux
     variable = bnds
-    v = 'gr0 gr1 gr2 gr3' # Must be changed as op_num changes. Copy/Paste from line 4
   [../]
 []
 
@@ -143,13 +148,11 @@
 [Materials]
   [./constants]
     type = GenericConstantMaterial
-    block = 0
     prop_names = 'kappa_gr kappa_c M L'
-    prop_values = '50 3000 4.5 60'
+    prop_values = '250 4000 4.5 60'
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = f_loc
     constant_names = 'A B'
     constant_expressions = '450 1.5'
@@ -158,20 +161,11 @@
                 -4*(2-c)*(gr0^3+gr1^3+gr2^3+gr3^3)
                 +3*(gr0^2+gr1^2+gr2^2+gr3^2)^2)'
                                  #Copy/paste from lines 5-6
-  [../]
-  [./advection_vel]
-    type = GrainAdvectionVelocity
-    block = 0
-    grain_force = grain_force
-    grain_data = grain_center
-    etas = 'gr0 gr1 gr2 gr3'     #Must be changed as op_num changes. Copy/paste from line 4
-    c = c
+    derivative_order = 2
   [../]
   [./force_density]
     type = ExternalForceDensityMaterial
-    block = 0
     c = c
-    etas = 'gr0 gr1 gr2 gr3'     #Must be changed as op_num changes. Copy/paste from line 4
     k = 10.0
     force_x = load_x
     force_y = load_y
@@ -187,30 +181,31 @@
 []
 
 [VectorPostprocessors]
-  [./centers]
-    type = GrainCentersPostprocessor
-    grain_data = grain_center
-    outputs = ''
-  [../]
   [./forces]
     type = GrainForcesPostprocessor
     grain_force = grain_force
-    outputs = ''
+  [../]
+  [./grain_volumes]
+    type = FeatureVolumeVectorPostprocessor
+    flood_counter = grain_center
+    execute_on = 'initial timestep_begin'
   [../]
 []
 
 [UserObjects]
   [./grain_center]
-    type = ComputeGrainCenterUserObject
-    etas = 'gr0 gr1 gr2 gr3'
-    execute_on = 'initial timestep_end'
+    type = GrainTracker
+    outputs = none
+    compute_var_to_feature_map = true
+    execute_on = 'initial timestep_begin'
   [../]
   [./grain_force]
-    type = ComputeGrainForceAndTorque
+    type = ComputeExternalGrainForceAndTorque
     grain_data = grain_center
     c = c
+    etas = 'gr0 gr1 gr2 gr3'
     force_density = force_density_ext
-    execute_on = 'initial timestep_end'
+    execute_on = 'linear nonlinear'
   [../]
 []
 
@@ -228,20 +223,19 @@
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type
                          -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      31                  preonly
-                         lu          2'
+                         ilu          2'
   l_tol = 1e-05
   nl_max_its = 30
-  l_max_its = 15
+  l_max_its = 30
   nl_rel_tol = 1e-07
   nl_abs_tol = 1e-09
   start_time = 0.0
-  num_steps = 20
+  end_time = 4
   dt = 0.05
 []
 
 [Outputs]
   exodus = true
-  csv = true
   print_perf_log = true
   [./display]
     type = Console
@@ -259,6 +253,7 @@
     variable = c
     invalue = 1.0
     outvalue = 0.0
+    int_width = 25
   [../]
   [./gr0_IC]
     type = SmoothCircleIC
@@ -268,6 +263,7 @@
     radius = 120
     invalue = 1.0
     outvalue = 0.0
+    int_width = 25
   [../]
   [./gr1_IC]
     type = SmoothCircleIC
@@ -277,6 +273,7 @@
     radius = 120
     invalue = 1.0
     outvalue = 0.0
+    int_width = 25
   [../]
   [./gr2_IC]
     type = SmoothCircleIC
@@ -286,6 +283,7 @@
     radius = 120
     invalue = 1.0
     outvalue = 0.0
+    int_width = 25
   [../]
   [./gr3_IC]
     type = SmoothCircleIC
@@ -295,5 +293,6 @@
     radius = 120
     invalue = 1.0
     outvalue = 0.0
+    int_width = 25
   [../]
 []

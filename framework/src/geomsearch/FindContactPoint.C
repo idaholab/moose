@@ -66,13 +66,13 @@ findContactPoint(PenetrationInfo & p_info,
 
   if (dim == 1)
   {
-    Node * left(master_elem->node_ptr(0));
-    Node * right(left);
-    Real leftCoor((*left)(0));
-    Real rightCoor(leftCoor);
-    for (unsigned i(1); i < master_elem->n_nodes(); ++i)
+    const Node * left = master_elem->node_ptr(0);
+    const Node * right = left;
+    Real leftCoor = (*left)(0);
+    Real rightCoor = leftCoor;
+    for (unsigned i = 1; i < master_elem->n_nodes(); ++i)
     {
-      Node * curr = master_elem->node_ptr(i);
+      const Node * curr = master_elem->node_ptr(i);
       Real coor = (*curr)(0);
       if (coor < leftCoor)
       {
@@ -85,7 +85,7 @@ findContactPoint(PenetrationInfo & p_info,
         rightCoor = coor;
       }
     }
-    Node * nearestNode(left);
+    const Node * nearestNode = left;
     Point nearestPoint(leftCoor, 0, 0);
     if (side->node(0) == right->id())
     {
@@ -116,17 +116,15 @@ findContactPoint(PenetrationInfo & p_info,
   else
     ref_point = p_info._closest_point_ref;
 
-  std::vector<Point> points(1);
-  points[0] = ref_point;
+  std::vector<Point> points = {ref_point};
   _fe->reinit(side, &points);
   RealGradient d = slave_point - phys_point[0];
 
   Real update_size = std::numeric_limits<Real>::max();
 
   //Least squares
-  for (unsigned int it=0; it<3 && update_size > TOLERANCE*1e3; ++it)
+  for (unsigned int it = 0; it < 3 && update_size > TOLERANCE*1e3; ++it)
   {
-
     DenseMatrix<Real> jac(dim-1, dim-1);
 
     jac(0,0) = -(dxyz_dxi[0] * dxyz_dxi[0]);
@@ -167,7 +165,7 @@ findContactPoint(PenetrationInfo & p_info,
   unsigned nit=0;
 
   // Newton Loop
-  for (; nit<12 && update_size > TOLERANCE*TOLERANCE; nit++)
+  for (; nit < 12 && update_size > TOLERANCE*TOLERANCE; nit++)
   {
     d = slave_point - phys_point[0];
 
@@ -270,7 +268,7 @@ findContactPoint(PenetrationInfo & p_info,
 
 void restrictPointToFace(Point& p,
                          const Elem* side,
-                         std::vector<Node*> &off_edge_nodes)
+                         std::vector<const Node *> & off_edge_nodes)
 {
   const ElemType t(side->type());
   off_edge_nodes.clear();

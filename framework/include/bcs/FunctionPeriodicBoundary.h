@@ -50,12 +50,12 @@ public:
    * @param pt - point on the 'source' boundary
    * @return point on the paired boundary
    */
-  virtual Point get_corresponding_pos(const Point & pt) const;
+  virtual Point get_corresponding_pos(const Point & pt) const override;
 
   /**
    * Required interface, this class must be able to clone itself
    */
-  virtual UniquePtr<PeriodicBoundaryBase> clone(TransformationType t) const;
+  virtual std::unique_ptr<PeriodicBoundaryBase> clone(TransformationType t) const override;
 
 protected:
 //  /// The dimension of the problem (says which _tr_XYZ member variables are active)

@@ -152,8 +152,8 @@
   [../]
 
 
-  [./isotropic_plasticity_recompute]
-    type = RecomputeRadialReturnIsotropicPlasticity
+  [./isotropic_plasticity]
+    type = IsotropicPlasticityStressUpdate
     block = 0
     relative_tolerance = 1e-25
     absolute_tolerance = 1e-5
@@ -162,7 +162,7 @@
   [./radial_return_stress]
     type = ComputeReturnMappingStress
     block = 0
-    return_mapping_stress_model = 'isotropic_plasticity_recompute'
+    return_mapping_models = 'isotropic_plasticity'
   [../]
 []
 

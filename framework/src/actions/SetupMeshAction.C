@@ -63,8 +63,8 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
 {
   std::vector<BoundaryName> ghosted_boundaries = getParam<std::vector<BoundaryName> >("ghosted_boundaries");
 
-  for (unsigned int i=0; i<ghosted_boundaries.size(); i++)
-    mesh->addGhostedBoundary(mesh->getBoundaryID(ghosted_boundaries[i]));
+  for (const auto & bnd_name : ghosted_boundaries)
+    mesh->addGhostedBoundary(mesh->getBoundaryID(bnd_name));
 
   mesh->setPatchSize(getParam<unsigned int>("patch_size"));
 
@@ -138,15 +138,18 @@ SetupMeshAction::act()
 {
   // Create the mesh object and tell it to build itself
   if (_current_task == "setup_mesh")
+  {
     _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
+    if (isParamValid("displacements"))
+      _displaced_mesh = _factory.create<MooseMesh>(_type, "displaced_mesh", _moose_object_pars);
+  }
   else if (_current_task == "init_mesh")
   {
     _mesh->init();
 
     if (isParamValid("displacements"))
     {
-      // Create the displaced mesh
-      _displaced_mesh = _factory.create<MooseMesh>(_type, "displaced_mesh", _moose_object_pars);
+      // Initialize the displaced mesh
       _displaced_mesh->init();
 
       std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");

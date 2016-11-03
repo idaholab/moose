@@ -13,8 +13,8 @@
  * Compute2DIncrementalStrain defines a strain increment only for
  * incremental strains in 2D geometries, handling the out of plane strains.
  * Compute2DIncrementalStrain contains a virtual method to define the strain_zz
- * as a nonzero value in the inherited classes ComputePlaneIncrementalStrain
- * ComputeGeneralizedPlaneIncrementalStrain and ComputeAxisymmetricRZIncrementalStrain.
+ * as a general nonzero value in the inherited classes ComputePlaneIncrementalStrain
+ * and ComputeAxisymmetricRZIncrementalStrain.
  */
 class Compute2DIncrementalStrain : public ComputeIncrementalSmallStrain
 {
@@ -27,13 +27,13 @@ protected:
   /// and returns the total strain increment tensor
   virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment);
 
-  /// Computes the current deformation gradient; as a virtual function, this function is
+  /// Computes the current out-of-plane displacement gradient; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeDeformGradZZ() = 0;
+  virtual Real computeGradDispZZ() = 0;
 
-  /// Computes the old deformation gradient; as a virtual function, this function is
+  /// Computes the old out-of-plane displacement gradient; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeDeformGradZZold() = 0;
+  virtual Real computeGradDispZZold() = 0;
 };
 
 #endif //COMPUTE2DINCREMENTALSTRAIN_H

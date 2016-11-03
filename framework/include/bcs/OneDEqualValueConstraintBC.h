@@ -33,12 +33,11 @@ class OneDEqualValueConstraintBC : public IntegratedBC
 {
 public:
   OneDEqualValueConstraintBC(const InputParameters & parameters);
-  virtual ~OneDEqualValueConstraintBC();
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
   VariableValue & _lambda;
   unsigned int _lambda_var_number;

@@ -37,12 +37,9 @@ public:
    */
   MaterialRealDenseMatrixAux(const InputParameters & parameters);
 
-  virtual ~MaterialRealDenseMatrixAux();
-
 protected:
-
   /// Returns the component of the tensor for output
-  virtual Real getRealValue();
+  virtual Real getRealValue() override;
 
   /// The row index to output
   unsigned int _row;

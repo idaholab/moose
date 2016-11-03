@@ -25,19 +25,19 @@ class AuxiliarySystem;
 class ComputeMarkerThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeMarkerThread(FEProblem & fe_problem, AuxiliarySystem & sys);
+  ComputeMarkerThread(FEProblem & fe_problem);
 
   // Splitting Constructor
   ComputeMarkerThread(ComputeMarkerThread & x, Threads::split split);
 
   virtual ~ComputeMarkerThread();
 
-  virtual void subdomainChanged();
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
-  virtual void postElement(const Elem * /*elem*/);
-  virtual void post();
+  virtual void subdomainChanged() override;
+  virtual void onElement(const Elem * elem) override;
+  virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
+  virtual void onInternalSide(const Elem * elem, unsigned int side) override;
+  virtual void postElement(const Elem * /*elem*/) override;
+  virtual void post() override;
 
   void join(const ComputeMarkerThread & /*y*/);
 

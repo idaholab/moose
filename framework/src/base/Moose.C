@@ -47,6 +47,9 @@
 #include "AssignElementSubdomainID.h"
 #include "ImageSubdomain.h"
 #include "BlockDeleter.h"
+#include "ParsedSubdomainMeshModifier.h"
+#include "BreakBoundaryOnSubdomain.h"
+#include "ParsedAddSideset.h"
 
 // problems
 #include "FEProblem.h"
@@ -111,6 +114,10 @@
 #include "VariableGradientComponent.h"
 #include "ParsedAux.h"
 #include "VariableTimeIntegrationAux.h"
+#include "ElementLengthAux.h"
+#include "ElementLpNormAux.h"
+#include "ElementL2ErrorFunctionAux.h"
+#include "ElementH1ErrorFunctionAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -158,6 +165,7 @@
 // PPS
 #include "AverageElementSize.h"
 #include "AverageNodalVariableValue.h"
+#include "CumulativeValuePostprocessor.h"
 #include "NodalSum.h"
 #include "ElementAverageValue.h"
 #include "ElementAverageTimeDerivative.h"
@@ -210,6 +218,9 @@
 #include "PercentChangePostprocessor.h"
 #include "ElementL2Difference.h"
 #include "TimeExtremeValue.h"
+#include "RelativeSolutionDifferenceNorm.h"
+#include "AxisymmetricCenterlineAverageValue.h"
+#include "VariableInnerProduct.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -224,6 +235,8 @@
 #include "IntersectionPointsAlongLine.h"
 #include "LineMaterialRealSampler.h"
 #include "LineFunctionSampler.h"
+#include "VolumeHistogram.h"
+#include "SphericalAverage.h"
 
 // user objects
 #include "LayeredIntegral.h"
@@ -246,14 +259,15 @@
 #include "FiniteDifferencePreconditioner.h"
 #include "SingleMatrixPreconditioner.h"
 
-#include "SplitBasedPreconditioner.h"
+#include "FieldSplitPreconditioner.h"
 #include "Split.h"
-#include "ContactSplit.h"
-#include "AddSplitAction.h"
+#include "AddFieldSplitAction.h"
 
 // dampers
 #include "ConstantDamper.h"
 #include "MaxIncrement.h"
+#include "BoundingValueNodalDamper.h"
+#include "BoundingValueElementDamper.h"
 
 // Constraints
 #include "TiedValueConstraint.h"
@@ -416,7 +430,7 @@
 #include "TopResidualDebugOutput.h"
 #include "DOFMapOutput.h"
 #include "ControlOutput.h"
-#ifdef LIBMESH_HAVE_CXX11
+#if defined(LIBMESH_HAVE_CXX11_THREAD) && defined(LIBMESH_HAVE_CXX11_CONDITION_VARIABLE)
 #include "ICEUpdater.h"
 #endif
 
@@ -462,6 +476,9 @@ registerObjects(Factory & factory)
   registerMeshModifier(AssignElementSubdomainID);
   registerMeshModifier(ImageSubdomain);
   registerMeshModifier(BlockDeleter);
+  registerMeshModifier(ParsedSubdomainMeshModifier);
+  registerMeshModifier(BreakBoundaryOnSubdomain);
+  registerMeshModifier(ParsedAddSideset);
 
   // problems
   registerProblem(FEProblem);
@@ -531,6 +548,10 @@ registerObjects(Factory & factory)
   registerAux(VariableGradientComponent);
   registerAux(ParsedAux);
   registerAux(VariableTimeIntegrationAux);
+  registerAux(ElementLengthAux);
+  registerAux(ElementLpNormAux);
+  registerAux(ElementL2ErrorFunctionAux);
+  registerAux(ElementH1ErrorFunctionAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
@@ -571,6 +592,7 @@ registerObjects(Factory & factory)
   // PPS
   registerPostprocessor(AverageElementSize);
   registerPostprocessor(AverageNodalVariableValue);
+  registerPostprocessor(CumulativeValuePostprocessor);
   registerPostprocessor(NodalSum);
   registerPostprocessor(ElementAverageValue);
   registerPostprocessor(ElementAverageTimeDerivative);
@@ -623,6 +645,9 @@ registerObjects(Factory & factory)
   registerPostprocessor(PercentChangePostprocessor);
   registerPostprocessor(ElementL2Difference);
   registerPostprocessor(TimeExtremeValue);
+  registerPostprocessor(RelativeSolutionDifferenceNorm);
+  registerPostprocessor(AxisymmetricCenterlineAverageValue);
+  registerPostprocessor(VariableInnerProduct);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
@@ -637,6 +662,8 @@ registerObjects(Factory & factory)
   registerVectorPostprocessor(IntersectionPointsAlongLine);
   registerVectorPostprocessor(LineMaterialRealSampler);
   registerVectorPostprocessor(LineFunctionSampler);
+  registerVectorPostprocessor(VolumeHistogram);
+  registerVectorPostprocessor(SphericalAverage);
 
   // user objects
   registerUserObject(LayeredIntegral);
@@ -659,11 +686,13 @@ registerObjects(Factory & factory)
   registerNamedPreconditioner(FiniteDifferencePreconditioner, "FDP");
   registerNamedPreconditioner(SingleMatrixPreconditioner, "SMP");
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-  registerNamedPreconditioner(SplitBasedPreconditioner, "SBP");
+  registerNamedPreconditioner(FieldSplitPreconditioner, "FSP");
 #endif
   // dampers
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
+  registerDamper(BoundingValueNodalDamper);
+  registerDamper(BoundingValueElementDamper);
   // DG
   registerDGKernel(DGDiffusion);
   registerBoundaryCondition(DGFunctionDiffusionDirichletBC);
@@ -699,7 +728,6 @@ registerObjects(Factory & factory)
 
   // splits
   registerSplit(Split);
-  registerSplit(ContactSplit);
 
   // MultiApps
   registerMultiApp(TransientMultiApp);
@@ -778,7 +806,7 @@ registerObjects(Factory & factory)
   registerOutput(ControlOutput);
 
   // Currently the ICE Updater requires TBB
-  #ifdef LIBMESH_HAVE_CXX11
+  #if defined(LIBMESH_HAVE_CXX11_THREAD) && defined(LIBMESH_HAVE_CXX11_CONDITION_VARIABLE)
   registerOutput(ICEUpdater);
   #endif
 
@@ -852,7 +880,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("setup_time_integrator",        TimeIntegrator,         false);
 
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,    false);
-  registerMooseObjectTask("add_split",                    Split,                  false);
+  registerMooseObjectTask("add_field_split",              Split,                  false);
 
   registerMooseObjectTask("add_user_object",              UserObject,             false);
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
@@ -963,7 +991,7 @@ addActionTypes(Syntax & syntax)
 "(setup_adaptivity)"
 "(set_adaptivity_options)"
 "(add_ic)"
-"(add_preconditioning, add_constraint, add_split)"
+"(add_preconditioning, add_constraint, add_field_split)"
 "(ready_to_init)"
 "(setup_dampers)"
 "(setup_residual_debug)"
@@ -1073,7 +1101,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddPostprocessorAction, "add_postprocessor");
   registerAction(AddVectorPostprocessorAction, "add_vector_postprocessor");
   registerAction(AddDamperAction, "add_damper");
-  registerAction(AddSplitAction, "add_split");
+  registerAction(AddFieldSplitAction, "add_field_split");
   registerAction(SetupPreconditionerAction, "add_preconditioning");
   registerAction(SetupQuadratureAction, "setup_quadrature");
   registerAction(DeprecatedBlockAction, "deprecated_block");

@@ -44,10 +44,10 @@ DynamicObjectRegistrationAction::DynamicObjectRegistrationAction(InputParameters
 
 
     std::vector<std::string> application_names = getParam<std::vector<std::string> >("register_objects_from");
-    for (unsigned int i = 0; i < application_names.size(); ++i)
+    for (const auto & app_name : application_names)
     {
-      _app.dynamicObjectRegistration(application_names[i], &_factory, getParam<std::string>("library_path"));
-      _app.dynamicSyntaxAssociation(application_names[i], &_awh.syntax(), &_action_factory, getParam<std::string>("library_path"));
+      _app.dynamicObjectRegistration(app_name, &_factory, getParam<std::string>("library_path"));
+      _app.dynamicSyntaxAssociation(app_name, &_awh.syntax(), &_action_factory, getParam<std::string>("library_path"));
     }
   }
 }

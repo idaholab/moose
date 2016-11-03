@@ -48,10 +48,9 @@ class SimplePredictor : public Predictor
 {
 public:
   SimplePredictor(const InputParameters & parameters);
-  virtual ~SimplePredictor();
 
-  virtual bool shouldApply();
-  virtual void apply(NumericVector<Number> & sln);
+  virtual bool shouldApply() override;
+  virtual void apply(NumericVector<Number> & sln) override;
 };
 
 #endif /* SIMPLEPREDICTOR_H */

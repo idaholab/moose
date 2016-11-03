@@ -32,7 +32,7 @@ ProjectMaterialProperties::ProjectMaterialProperties(bool refine,
                                                      std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
                                                      MaterialPropertyStorage & material_props,
                                                      MaterialPropertyStorage & bnd_material_props, std::vector<Assembly *> & assembly) :
-    ThreadedElementLoop<ConstElemPointerRange>(fe_problem, sys),
+    ThreadedElementLoop<ConstElemPointerRange>(fe_problem),
     _refine(refine),
     _fe_problem(fe_problem),
     _sys(sys),

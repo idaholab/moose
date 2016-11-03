@@ -5,13 +5,14 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "SingleGrainRigidBodyMotion.h"
+#include "GrainTrackerInterface.h"
 
 template<>
 InputParameters validParams<SingleGrainRigidBodyMotion>()
 {
   InputParameters params = validParams<GrainRigidBodyMotionBase>();
   params.addClassDescription("Adds rigid mody motion to a single grain");
-  params.addParam<unsigned int>("op_index",0, "Grain number for the kernel to be applied");
+  params.addParam<unsigned int>("op_index", 0, "Grain number for the kernel to be applied");
   return params;
 }
 
@@ -24,33 +25,92 @@ SingleGrainRigidBodyMotion::SingleGrainRigidBodyMotion(const InputParameters & p
 Real
 SingleGrainRigidBodyMotion::computeQpResidual()
 {
-  return _velocity_advection[_qp][_op_index] * _grad_u[_qp] * _test[_i][_qp]
-         + _div_velocity_advection[_qp][_op_index] * _u[_qp] * _test[_i][_qp];
+  return _velocity_advection * _grad_u[_qp] * _test[_i][_qp];
 }
 
 Real
 SingleGrainRigidBodyMotion::computeQpJacobian()
 {
-  return _velocity_advection[_qp][_op_index] * _grad_phi[_j][_qp] * _test[_i][_qp]
-         + _velocity_advection_derivative_eta[_qp][_op_index] * _grad_u[_qp] * _phi[_j][_qp] *  _test[_i][_qp]
-         + _div_velocity_advection[_qp][_op_index] * _phi[_j][_qp] * _test[_i][_qp];
+  return _velocity_advection * _grad_phi[_j][_qp] * _test[_i][_qp]
+         + _velocity_advection_jacobian * _grad_u[_qp] * _test[_i][_qp];
 }
 
 Real
-SingleGrainRigidBodyMotion::computeQpOffDiagJacobian(unsigned int jvar)
+SingleGrainRigidBodyMotion::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
-  if (jvar == _c_var)
-    return _velocity_advection_derivative_c[_qp][_op_index] * _grad_u[_qp] * _phi[_j][_qp] * _test[_i][_qp]
-           + _div_velocity_advection_derivative_c[_qp][_op_index] * _u[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  return _velocity_advection_jacobian * _grad_u[_qp] * _test[_i][_qp];
+}
 
-  for (unsigned int i=0; i<_ncrys; ++i)
+Real
+SingleGrainRigidBodyMotion::computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
+{
+  return _velocity_advection_jacobian * _grad_u[_qp] * _test[_i][_qp];
+}
+
+Real
+SingleGrainRigidBodyMotion::computeQpNonlocalOffDiagJacobian(unsigned int /*jvar*/, dof_id_type /*dof_index*/)
+{
+  return _velocity_advection_jacobian * _grad_u[_qp] * _test[_i][_qp];
+}
+
+void
+SingleGrainRigidBodyMotion::getUserObjectJacobian(unsigned int jvar, dof_id_type dof_index)
+{
+  _velocity_advection_jacobian = 0.0;
+
+  auto grain_id = _grain_ids[_op_index];
+  if (grain_id != FeatureFloodCount::invalid_id)
   {
-    if (i != _op_index)
-    {
-      if (jvar == _vals_var[i])
-        return _velocity_advection_derivative_eta[_qp][_op_index] * _grad_u[_qp] * _phi[_j][_qp] * _test[_i][_qp];
-    }
-  }
+    mooseAssert(grain_id < _grain_volumes.size(), "grain_id out of bounds");
+    const auto volume = _grain_volumes[grain_id];
+    const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
+    RealGradient force_jacobian;
+    RealGradient torque_jacobian;
 
-  return 0.0;
+    if (jvar == _c_var)
+    {
+      force_jacobian(0) = _grain_force_c_jacobians[(6*grain_id+0)*_total_dofs+dof_index];
+      force_jacobian(1) = _grain_force_c_jacobians[(6*grain_id+1)*_total_dofs+dof_index];
+      force_jacobian(2) = _grain_force_c_jacobians[(6*grain_id+2)*_total_dofs+dof_index];
+      torque_jacobian(0) = _grain_force_c_jacobians[(6*grain_id+3)*_total_dofs+dof_index];
+      torque_jacobian(1) = _grain_force_c_jacobians[(6*grain_id+4)*_total_dofs+dof_index];
+      torque_jacobian(2) = _grain_force_c_jacobians[(6*grain_id+5)*_total_dofs+dof_index];
+    }
+
+    for (unsigned int jvar_index = 0; jvar_index < _op_num; ++jvar_index)
+      if (jvar == _vals_var[jvar_index])
+      {
+        force_jacobian(0) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+0)*_total_dofs+dof_index];
+        force_jacobian(1) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+1)*_total_dofs+dof_index];
+        force_jacobian(2) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+2)*_total_dofs+dof_index];
+        torque_jacobian(0) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+3)*_total_dofs+dof_index];
+        torque_jacobian(1) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+4)*_total_dofs+dof_index];
+        torque_jacobian(2) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+5)*_total_dofs+dof_index];
+      }
+
+    const auto force_jac = _mt / volume * force_jacobian;
+    const auto torque_jac = _mr / volume * torque_jacobian.cross(_current_elem->centroid() - centroid);
+
+    _velocity_advection_jacobian = (force_jac + torque_jac);
+  }
+}
+
+
+void
+SingleGrainRigidBodyMotion::calculateAdvectionVelocity()
+{
+  _velocity_advection = 0.0;
+  _grain_ids = _grain_tracker.getVarToFeatureVector(_current_elem->id());
+
+  auto grain_id = _grain_ids[_op_index];
+  if (grain_id != FeatureFloodCount::invalid_id)
+  {
+    mooseAssert(grain_id < _grain_volumes.size(), "grain_id out of bounds");
+    const auto volume = _grain_volumes[grain_id];
+    const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
+    const auto force = _mt / volume * _grain_forces[grain_id];
+    const auto torque = _mr / volume * (_grain_torques[grain_id].cross(_current_elem->centroid() - centroid));
+
+    _velocity_advection = (force + torque);
+  }
 }

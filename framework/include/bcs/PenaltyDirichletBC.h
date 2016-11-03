@@ -35,11 +35,9 @@ public:
 
   PenaltyDirichletBC(const InputParameters & parameters);
 
-  virtual ~PenaltyDirichletBC() {}
-
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
 private:
   Real _p;

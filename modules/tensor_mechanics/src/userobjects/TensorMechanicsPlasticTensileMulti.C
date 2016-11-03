@@ -504,11 +504,11 @@ TensorMechanicsPlasticTensileMulti::KuhnTuckerOK(const RankTwoTensor & returned_
 }
 
 RankFourTensor
-TensorMechanicsPlasticTensileMulti::consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, Real intnl,
+TensorMechanicsPlasticTensileMulti::consistentTangentOperator(const RankTwoTensor & trial_stress, Real intnl_old, const RankTwoTensor & stress, Real intnl,
                                                               const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const
 {
   if (!_use_custom_cto)
-    return TensorMechanicsPlasticModel::consistentTangentOperator(trial_stress, stress, intnl, E_ijkl, cumulative_pm);
+    return TensorMechanicsPlasticModel::consistentTangentOperator(trial_stress, intnl_old, stress, intnl, E_ijkl, cumulative_pm);
 
   mooseAssert(cumulative_pm.size() == 3, "TensorMechanicsPlasticTensileMulti size of cumulative_pm should be 3 but it is " << cumulative_pm.size());
 

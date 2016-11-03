@@ -1,17 +1,27 @@
 [Tests]
-  [./old]
-    type = 'Exodiff'
-    input = 'finite_strain_elastic_test.i'
-    exodiff = 'finite_strain_elastic_test_out.e'
-  [../]
   [./new]
     type = 'Exodiff'
     input = 'finite_strain_elastic_new_test.i'
     exodiff = 'finite_strain_elastic_new_test_out.e'
   [../]
+  [./fake_plastic]
+    type = 'Exodiff'
+    input = 'finite_strain_fake_plastic.i'
+    exodiff = 'finite_strain_fake_plastic_out.e'
+  [../]
   [./rotation_new]
     type = 'Exodiff'
     input = 'elastic_rotation_test.i'
     exodiff = 'elastic_rotation_test_out.e'
+  [../]
+  [./eigen_sol]
+    type = 'Exodiff'
+    input = 'finite_strain_elastic_eigen_sol.i'
+    exodiff = 'finite_strain_elastic_eigen_sol_out.e'
+  [../]
+  [./stress_errorcheck]
+    type = 'RunException'
+    input = 'finite_strain_stress_errorcheck.i'
+    expect_err = 'This linear elastic stress calculation only works for small strains; use ComputeFiniteStrainElasticStress for simulations using incremental and finite strains.'
   [../]
 []

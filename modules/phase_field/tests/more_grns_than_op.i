@@ -63,21 +63,21 @@
     type = FeatureFloodCountAux
     variable = unique_grains
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = UNIQUE_REGION
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
   [../]
   [./centroids]
     type = FeatureFloodCountAux
     variable = centroids
     execute_on = 'initial timestep_end'
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = CENTROID
   [../]
 []
@@ -94,7 +94,6 @@
   [./CuGrGr]
     # Material properties
     type = GBEvolution
-    block = 0 # Block ID (only one block in this problem)
     T = 500 # Constant temperature of the simulation (for mobility calculation)
     wGB = 90 # Width of the diffuse GB
     GBmob0 = 2.5e-6 #m^4(Js) for copper from Schoenfelder1997

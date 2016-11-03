@@ -78,20 +78,20 @@ LibmeshPartitioner::~LibmeshPartitioner()
   delete _partitioner;
 }
 
-UniquePtr<Partitioner>
+std::unique_ptr<Partitioner>
 LibmeshPartitioner::clone() const
 {
   switch (_partitioner_name)
   {
   case -2: // metis
-    return UniquePtr<Partitioner>(new MetisPartitioner);
+    return std::unique_ptr<Partitioner>(new MetisPartitioner);
     break;
   case -1: // parmetis
-    return UniquePtr<Partitioner>(new ParmetisPartitioner);
+    return std::unique_ptr<Partitioner>(new ParmetisPartitioner);
     break;
 
   case 0: // linear
-    return UniquePtr<Partitioner>(new LinearPartitioner);
+    return std::unique_ptr<Partitioner>(new LinearPartitioner);
     break;
   case 1: // centroid
   {
@@ -101,26 +101,26 @@ LibmeshPartitioner::clone() const
     MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
     if (direction == "x")
-      return UniquePtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
+      return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
     else if (direction == "y")
-      return UniquePtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
+      return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
     else if (direction == "z")
-      return UniquePtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
+      return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
     else if (direction == "radial")
-      return UniquePtr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+      return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
     break;
   }
   case 2: // hilbert_sfc
-    return UniquePtr<Partitioner>(new HilbertSFCPartitioner);
+    return std::unique_ptr<Partitioner>(new HilbertSFCPartitioner);
     break;
   case 3: // morton_sfc
-    return UniquePtr<Partitioner>(new MortonSFCPartitioner);
+    return std::unique_ptr<Partitioner>(new MortonSFCPartitioner);
     break;
   }
   // this cannot happen but I need to trick the compiler into
   // believing me
   mooseError("Error in LibmeshPartitioner: Supplied partitioner option causes error in clone()");
-  return UniquePtr<Partitioner>(new MetisPartitioner);
+  return std::unique_ptr<Partitioner>(new MetisPartitioner);
 }
 
 void

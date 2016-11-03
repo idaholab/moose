@@ -34,8 +34,10 @@ InputParameters validParams<DGKernel>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TwoMaterialPropertyInterface>();
+  params += validParams<TransientInterface>();
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
+  params += validParams<MeshChangedInterface>();
   params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this boundary condition applies to");
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation. Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
@@ -58,6 +60,7 @@ DGKernel::DGKernel(const InputParameters & parameters) :
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
     TwoMaterialPropertyInterface(this),
     Restartable(parameters, "DGKernels"),
+    ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
@@ -70,7 +73,6 @@ DGKernel::DGKernel(const InputParameters & parameters) :
     _current_elem_volume(_assembly.elemVolume()),
 
     _neighbor_elem(_assembly.neighbor()),
-    _neighbor_elem_volume(_assembly.neighborVolume()),
 
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),
@@ -82,8 +84,8 @@ DGKernel::DGKernel(const InputParameters & parameters) :
     _JxW(_assembly.JxWFace()),
     _coord(_assembly.coordTransformation()),
 
-    _u(_var.sln()),
-    _grad_u(_var.gradSln()),
+    _u(_is_implicit ? _var.sln() : _var.slnOld()),
+    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
 
     _phi(_assembly.phiFace()),
     _grad_phi(_assembly.gradPhiFace()),
@@ -99,8 +101,8 @@ DGKernel::DGKernel(const InputParameters & parameters) :
     _test_neighbor(_var.phiFaceNeighbor()),
     _grad_test_neighbor(_var.gradPhiFaceNeighbor()),
 
-    _u_neighbor(_var.slnNeighbor()),
-    _grad_u_neighbor(_var.gradSlnNeighbor())
+    _u_neighbor(_is_implicit ? _var.slnNeighbor() : _var.slnOldNeighbor()),
+    _grad_u_neighbor(_is_implicit ? _var.gradSlnNeighbor() : _var.gradSlnOldNeighbor())
 {
 }
 
@@ -228,4 +230,10 @@ SubProblem &
 DGKernel::subProblem()
 {
   return _subproblem;
+}
+
+const Real &
+DGKernel::getNeighborElemVolume()
+{
+  return _assembly.neighborVolume();
 }

@@ -1,0 +1,32 @@
+[Tests]
+  [./unity]
+    type = 'CSVDiff'
+    input = 'unity.i'
+    csvdiff = 'unity_out_vpp_0001.csv'
+  [../]
+  [./corey1]
+    type = 'CSVDiff'
+    input = 'corey1.i'
+    csvdiff = 'corey1_out_vpp_0001.csv'
+  [../]
+  [./corey2]
+    type = 'CSVDiff'
+    input = 'corey2.i'
+    csvdiff = 'corey2_out_vpp_0001.csv'
+  [../]
+  [./corey3]
+    type = 'CSVDiff'
+    input = 'corey3.i'
+    csvdiff = 'corey3_out_vpp_0001.csv'
+  [../]
+  [./vangenuchten1]
+    type = 'CSVDiff'
+    input = 'vangenuchten1.i'
+    csvdiff = 'vangenuchten1_out_vpp_0001.csv'
+  [../]
+  [./vangenuchten2]
+    type = 'CSVDiff'
+    input = 'vangenuchten2.i'
+    csvdiff = 'vangenuchten2_out_vpp_0001.csv'
+  [../]
+[]

@@ -154,7 +154,7 @@ void Factory::deprecatedMessage(const std::string obj_name)
       msg << "Replaced " << obj_name << " with " <<  name_it->second;
 
     // Produce the error message
-    mooseDoOnce(mooseWarning(msg.str()));
+    mooseDeprecated(msg.str());
   }
 }
 
@@ -179,7 +179,7 @@ std::vector<std::string>
 Factory::getConstructedObjects() const
 {
   std::vector<std::string> list;
-  for (std::set<std::string>::iterator i = _constructed_types.begin(); i != _constructed_types.end(); ++i)
-    list.push_back(*i);
+  for (const auto & name : _constructed_types)
+    list.push_back(name);
   return list;
 }

@@ -28,13 +28,10 @@ class Kernel :
 public:
   Kernel(const InputParameters & parameters);
 
-  virtual ~Kernel();
-
-  // See KernelBase base for documentation of these overridden methods
-  virtual void computeResidual();
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int jvar);
-  virtual void computeOffDiagJacobianScalar(unsigned int jvar);
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
 protected:
   /// Compute this Kernel's contribution to the residual at the current quadrature point
@@ -46,8 +43,10 @@ protected:
   /// This is the virtual that derived classes should override for computing an off-diagonal Jacobian component.
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  /// This callback is used for Kernels that need to perturb residual calculations
+  /// Following methods are used for Kernels that need to perform a per-element calculation
   virtual void precalculateResidual();
+  virtual void precalculateJacobian() {}
+  virtual void precalculateOffDiagJacobian(unsigned int /* jvar */) {}
 
   /// Holds the solution at current quadrature points
   const VariableValue & _u;

@@ -35,7 +35,6 @@
 [Materials]
   [./D]
     type = ConstantAnisotropicMobility
-    block = 0
     tensor = '0.1 0 0
               0   1 0
               0   0 0'

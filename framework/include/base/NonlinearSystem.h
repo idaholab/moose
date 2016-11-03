@@ -31,6 +31,7 @@ class JacobianBlock;
 class TimeIntegrator;
 class Predictor;
 class ElementDamper;
+class NodalDamper;
 class GeneralDamper;
 class IntegratedBC;
 class NodalBC;
@@ -54,16 +55,16 @@ template <typename T> class SparseMatrix;
  *
  * It is a part of FEProblem ;-)
  */
-class NonlinearSystem : public SystemTempl<TransientNonlinearImplicitSystem>,
+class NonlinearSystem : public SystemBase,
                         public ConsoleStreamInterface
 {
 public:
   NonlinearSystem(FEProblem & problem, const std::string & name);
   virtual ~NonlinearSystem();
 
-  virtual void init();
-  virtual void solve();
-  virtual void restoreSolutions();
+  virtual void init() override;
+  virtual void solve() override;
+  virtual void restoreSolutions() override;
 
   /**
    * Quit the current solve as soon as possible.
@@ -81,12 +82,10 @@ public:
   virtual void timestepSetup();
 
   void setupFiniteDifferencedPreconditioner();
-  void setupDecomposition();
-  void setupSplitBasedPreconditioner();
+  void setupFieldDecomposition();
 
   bool haveFiniteDifferencedPreconditioner() {return _use_finite_differenced_preconditioner;}
-  bool haveSplitBasedPreconditioner()        {return _use_split_based_preconditioner;}
-  bool haveDecomposition()                   {return _have_decomposition;}
+  bool haveFieldSplitPreconditioner()        {return _use_field_split_preconditioner;}
 
   /**
    * Returns the convergence state
@@ -188,20 +187,7 @@ public:
    */
   MooseSharedPointer<Split> getSplit(const std::string & name);
 
-
-  /**
-   * Adds a solution length vector to the system.
-   *
-   * @param vector_name The name of the vector.
-   * @param project Whether or not to project this vector when doing mesh refinement.
-   *                If the vector is just going to be recomputed then there is no need to project it.
-   * @param type What type of parallel vector.  This is usually either PARALLEL or GHOSTED.
-   *                                            GHOSTED is needed if you are going to be accessing off-processor entries.
-   *                                            The ghosting pattern is the same as the solution vector.
-   * @param zero_for_residual Whether or not to zero this vector at the beginning of computeResidual.  Useful when
-   *                          you are going to accumulate something into this vector during computeResidual
-   */
-  NumericVector<Number>& addVector(const std::string & vector_name, const bool project, const ParallelType type, bool zero_for_residual = false);
+  void zeroVectorForResidual(const std::string & vector_name);
 
   void setInitialSolution();
 
@@ -244,6 +230,10 @@ public:
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
    */
   void constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced);
+
+  /// set all the global dof indices for a nonlinear variable
+  void setVariableGlobalDoFs(const std::string & var_name);
+  const std::vector<dof_id_type> & getVariableGlobalDoFs() { return _var_all_dof_indices; }
 
   /**
    * Computes Jacobian
@@ -301,20 +291,20 @@ public:
    */
   virtual void setSolutionUDot(const NumericVector<Number> & udot);
 
-  virtual NumericVector<Number> & solutionUDot();
-  virtual NumericVector<Number> & residualVector(Moose::KernelType type);
+  virtual NumericVector<Number> & solutionUDot() override;
+  virtual NumericVector<Number> & residualVector(Moose::KernelType type) override;
 
-  virtual const NumericVector<Number> * & currentSolution() { return _current_solution; }
+  virtual const NumericVector<Number> * & currentSolution() override { return _current_solution; }
 
   virtual void serializeSolution();
-  virtual NumericVector<Number> & serializedSolution();
+  virtual NumericVector<Number> & serializedSolution() override;
 
-  virtual NumericVector<Number> & residualCopy();
-  virtual NumericVector<Number> & residualGhosted();
+  virtual NumericVector<Number> & residualCopy() override;
+  virtual NumericVector<Number> & residualGhosted() override;
 
   virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
                                std::vector<dof_id_type> & n_nz,
-                               std::vector<dof_id_type> & n_oz);
+                               std::vector<dof_id_type> & n_oz) override;
 
   /**
    * Sets a preconditioner
@@ -336,9 +326,9 @@ public:
   void setDecomposition(const std::vector<std::string>& decomposition);
 
   /**
-   * If called with true this system will use a split-based preconditioner matrix.
+   * If called with true this system will use a field split preconditioner matrix.
    */
-  void useSplitBasedPreconditioner(bool use = true) { _use_split_based_preconditioner = use; }
+  void useFieldSplitPreconditioner(bool use = true) { _use_field_split_preconditioner = use; }
 
   /**
    * If called with true this will add entries into the jacobian to link together degrees of freedom that are found to
@@ -359,10 +349,18 @@ public:
    */
   void setupDampers();
   /**
-   * Compute the incremental change in variables for dampers. Called before we use damping
+   * Compute the incremental change in variables at QPs for dampers. Called before we use damping
    * @param tid Thread ID
+   * @param damped_vars Set of variables for which increment is to be computed
    */
-  void reinitIncrementForDampers(THREAD_ID tid);
+  void reinitIncrementAtQpsForDampers(THREAD_ID tid, const std::set<MooseVariable *> & damped_vars);
+
+  /**
+   * Compute the incremental change in variables at nodes for dampers. Called before we use damping
+   * @param tid Thread ID
+   * @param damped_vars Set of variables for which increment is to be computed
+   */
+  void reinitIncrementAtNodeForDampers(THREAD_ID tid, const std::set<MooseVariable *> & damped_vars);
 
   ///@{
   /// System Integrity Checks
@@ -451,6 +449,7 @@ public:
   const MooseObjectWarehouse<NodalKernel> & getNodalKernelWarehouse(THREAD_ID tid);
   const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() { return _element_dampers; }
+  const MooseObjectWarehouse<NodalDamper> & getNodalDamperWarehouse() { return _nodal_dampers; }
   //@}
 
   /**
@@ -463,8 +462,24 @@ public:
    */
   bool hasDiagSaveIn() const { return _has_diag_save_in || _has_nodalbc_diag_save_in; }
 
+  /**
+   * The relative L2 norm of the difference between solution and old solution vector.
+   */
+  virtual Real relativeSolutionDifferenceNorm();
+
+  virtual NumericVector<Number> & solution() override { return *_sys.solution; }
+
+  virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
+
+  virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
+
+  virtual TransientNonlinearImplicitSystem & sys() { return _sys; }
+
+  virtual System & system() override { return _sys; }
+
 public:
   FEProblem & _fe_problem;
+  TransientNonlinearImplicitSystem & _sys;
   // FIXME: make these protected and create getters/setters
   Real _last_rnorm;
   Real _last_nl_rnorm;
@@ -527,6 +542,8 @@ protected:
   /// Kernel Storage
   KernelWarehouse _kernels;
   MooseObjectWarehouse<ScalarKernel> _scalar_kernels;
+  MooseObjectWarehouse<ScalarKernel> _time_scalar_kernels;
+  MooseObjectWarehouse<ScalarKernel> _non_time_scalar_kernels;
   MooseObjectWarehouse<DGKernel> _dg_kernels;
   MooseObjectWarehouse<InterfaceKernel> _interface_kernels;
   MooseObjectWarehouse<KernelBase> _time_kernels;
@@ -547,6 +564,9 @@ protected:
   /// Element Dampers for each thread
   MooseObjectWarehouse<ElementDamper> _element_dampers;
 
+  /// Nodal Dampers for each thread
+  MooseObjectWarehouse<NodalDamper> _nodal_dampers;
+
   /// General Dampers
   MooseObjectWarehouse<GeneralDamper> _general_dampers;
 
@@ -563,6 +583,8 @@ protected:
 protected:
   /// increment vector
   NumericVector<Number> * _increment_vec;
+  /// The difference of current and old solutions
+  NumericVector<Number> & _sln_diff;
   /// Preconditioner
   MooseSharedPointer<MoosePreconditioner> _preconditioner;
   /// Preconditioning side
@@ -578,7 +600,7 @@ protected:
   /// Name of the top-level split of the decomposition
   std::string _decomposition_split;
   /// Whether or not to use a FieldSplitPreconditioner matrix based on the decomposition
-  bool _use_split_based_preconditioner;
+  bool _use_field_split_preconditioner;
 
   /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
   bool _add_implicit_geometric_coupling_entries_to_jacobian;
@@ -599,8 +621,8 @@ protected:
   /// true if DG is active (optimization reasons)
   bool _doing_dg;
 
-  /// NumericVectors that will be zeroed before a residual computation
-  std::vector<NumericVector<Number> *> _vecs_to_zero_for_residual;
+  /// vectors that will be zeroed before a residual computation
+  std::vector<std::string> _vecs_to_zero_for_residual;
 
   unsigned int _n_iters;
   unsigned int _n_linear_iters;
@@ -630,6 +652,8 @@ protected:
   bool _has_nodalbc_diag_save_in;
 
   void getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs);
+
+  std::vector<dof_id_type> _var_all_dof_indices;
 };
 
 #endif /* NONLINEARSYSTEM_H */

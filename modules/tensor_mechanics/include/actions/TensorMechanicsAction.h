@@ -20,7 +20,20 @@ public:
   TensorMechanicsAction(const InputParameters & params);
 
   virtual void act();
-  virtual void addkernel(const std::string & name, InputParameters & params);
+
+protected:
+  virtual std::string getKernelType();
+  virtual InputParameters getParameters(std::string type);
+
+  std::vector<NonlinearVariableName> _displacements;
+  unsigned int _ndisp;
+
+  std::vector<VariableName> _coupled_displacements;
+
+  std::vector<AuxVariableName> _save_in;
+  std::vector<AuxVariableName> _diag_save_in;
+
+  Moose::CoordinateSystemType _coord_system;
 };
 
 #endif //TENSORMECHANICSACTION_H

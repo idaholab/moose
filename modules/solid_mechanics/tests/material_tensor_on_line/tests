@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'material_tensor_on_line_test.i'
-    exodiff = 'out.e'
-  [../]
-[]

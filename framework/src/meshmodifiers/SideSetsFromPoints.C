@@ -42,10 +42,6 @@ SideSetsFromPoints::SideSetsFromPoints(const InputParameters & parameters) :
     mooseError("point list and boundary list are not the same length");
 }
 
-SideSetsFromPoints::~SideSetsFromPoints()
-{
-}
-
 void
 SideSetsFromPoints::modify()
 {
@@ -53,7 +49,7 @@ SideSetsFromPoints::modify()
     mooseError("_mesh_ptr must be initialized before calling SideSetsFromPoints::modify()!");
 
   // We can't call this in the constructor, it appears that _mesh_ptr is always NULL there.
-  _mesh_ptr->errorIfParallelDistribution("SideSetsFromPoints");
+  _mesh_ptr->errorIfDistributedMesh("SideSetsFromPoints");
 
   // Get the BoundaryIDs from the mesh
   std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs(_boundary_names, true);
@@ -62,7 +58,7 @@ SideSetsFromPoints::modify()
 
   _visited.clear();
 
-  UniquePtr<PointLocatorBase> pl = PointLocatorBase::build(TREE, *_mesh_ptr);
+  std::unique_ptr<PointLocatorBase> pl = PointLocatorBase::build(TREE, *_mesh_ptr);
 
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)
   {
@@ -74,7 +70,7 @@ SideSetsFromPoints::modify()
         continue;
 
       // See if this point is on this side
-      UniquePtr<Elem> elem_side = elem->side(side);
+      std::unique_ptr<Elem> elem_side = elem->side(side);
 
       if (elem_side->contains_point(_points[i]))
       {

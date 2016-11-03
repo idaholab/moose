@@ -29,22 +29,31 @@ class GeneratedMesh : public MooseMesh
 {
 public:
   GeneratedMesh(const InputParameters & parameters);
-  GeneratedMesh(const GeneratedMesh & other_mesh);
-  virtual ~GeneratedMesh();
+  GeneratedMesh(const GeneratedMesh & other_mesh) = default;
 
-  virtual MooseMesh & clone() const;
+  // No copy
+  GeneratedMesh & operator=(const GeneratedMesh & other_mesh) = delete;
 
-  virtual void buildMesh();
+  virtual MooseMesh & clone() const override;
+
+  virtual void buildMesh() override;
 
 protected:
   /// The dimension of the mesh
   MooseEnum _dim;
 
   /// Number of elements in x, y, z direction
-  int _nx, _ny, _nz;
+  unsigned int _nx, _ny, _nz;
 
   /// The min/max values for x,y,z component
   Real _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
+
+  /// All of the libmesh build_line/square/cube routines support an
+  /// option to grade the mesh into the boundaries according to the
+  /// spacing of the Gauss-Lobatto quadrature points.  Defaults to
+  /// false, and cannot be used in conjunction with x, y, and z
+  /// biasing.
+  bool _gauss_lobatto_grid;
 
   /// The amount by which to bias the cells in the x,y,z directions.
   /// Must be in the range 0.5 <= _bias_x <= 2.0.

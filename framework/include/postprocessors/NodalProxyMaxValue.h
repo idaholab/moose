@@ -32,12 +32,17 @@ class NodalProxyMaxValue : public NodalVariablePostprocessor
 public:
   NodalProxyMaxValue(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual Real computeValue();
-  virtual void execute();
-  virtual Real getValue();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual Real getValue() override;
 
-  void threadJoin(const UserObject & y);
+  /**
+   * The method called to compute the value that will be returned
+   * by the proxy value.
+   */
+  virtual Real computeValue();
+
+  void threadJoin(const UserObject & y) override;
 
 protected:
 

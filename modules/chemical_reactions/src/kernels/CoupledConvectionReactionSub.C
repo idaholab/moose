@@ -6,18 +6,14 @@
 /****************************************************************/
 #include "CoupledConvectionReactionSub.h"
 
-#include "Material.h"
-
 template<>
 InputParameters validParams<CoupledConvectionReactionSub>()
 {
   InputParameters params = validParams<Kernel>();
-
-  params.addParam<Real>("weight",1.0,"Weight of the equilibrium species");
-  params.addParam<Real>("log_k",0.0,"Equilibrium constant of dissociation equilibrium reaction");
-
-  params.addParam<Real>("sto_u",1.0,"Stochiometric coef of the primary spceices the kernel operates on in the equilibrium reaction");
-  params.addRequiredParam<std::vector<Real> >("sto_v","The stochiometric coefficients of coupled primary species in equilibrium reaction");
+  params.addParam<Real>("weight", 1.0, "Weight of the equilibrium species");
+  params.addParam<Real>("log_k", 0.0, "Equilibrium constant of dissociation equilibrium reaction");
+  params.addParam<Real>("sto_u", 1.0, "Stochiometric coef of the primary spceices the kernel operates on in the equilibrium reaction");
+  params.addRequiredParam<std::vector<Real> >("sto_v", "The stochiometric coefficients of coupled primary species in equilibrium reaction");
   params.addRequiredCoupledVar("p", "Pressure");
   params.addCoupledVar("v", "List of coupled primary species");
   return params;
@@ -126,9 +122,9 @@ Real CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
     }
 
   RealGradient diff3;
-  RealGradient diff3_sum(0.0,0.0,0.0);
+  RealGradient diff3_sum(0.0, 0.0, 0.0);
   Real val_jvar;
-  unsigned int var;
+  unsigned int var = 0;
   for (unsigned int i = 0; i < _vals.size(); ++i)
     if (jvar == _vars[i])
     {

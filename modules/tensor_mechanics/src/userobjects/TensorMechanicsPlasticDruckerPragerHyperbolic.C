@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "TensorMechanicsPlasticDruckerPragerHyperbolic.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<TensorMechanicsPlasticDruckerPragerHyperbolic>()
@@ -21,7 +22,7 @@ InputParameters validParams<TensorMechanicsPlasticDruckerPragerHyperbolic>()
 
 TensorMechanicsPlasticDruckerPragerHyperbolic::TensorMechanicsPlasticDruckerPragerHyperbolic(const InputParameters & parameters) :
     TensorMechanicsPlasticDruckerPrager(parameters),
-    _smoother2(std::pow(getParam<Real>("smoother"), 2)),
+    _smoother2(Utility::pow<2>(getParam<Real>("smoother"))),
     _use_custom_returnMap(getParam<bool>("use_custom_returnMap")),
     _use_custom_cto(getParam<bool>("use_custom_cto")),
     _max_iters(getParam<unsigned>("max_iterations"))
@@ -109,8 +110,8 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::returnMap(const RankTwoTensor & t
     donlyB(intnl_old + dpm[0], dilation, dbbb_flow);
     ll = aaa - bbb * (Tr_trial - dpm[0] * bulky * 3 * bbb_flow);
     dll = daaa - dbbb * (Tr_trial - dpm[0] * bulky * 3 * bbb_flow) + bbb * bulky * 3 * (bbb_flow + dpm[0] * dbbb_flow);
-    residual = bbb * (Tr_trial - dpm[0] * bulky * 3 * bbb_flow) - aaa + std::sqrt(J2trial / std::pow(1 + dpm[0] * mu / ll, 2) + _smoother2);
-    jac = dbbb * (Tr_trial - dpm[0] * bulky * 3 * bbb_flow) - bbb * bulky * 3 * (bbb_flow + dpm[0] * dbbb_flow) - daaa + 0.5 * J2trial * (-2.0) * (mu / ll - dpm[0] * mu * dll / ll / ll) / std::pow(1 + dpm[0] * mu / ll, 3) / std::sqrt(J2trial / std::pow(1.0 + dpm[0] * mu / ll, 2) + _smoother2);
+    residual = bbb * (Tr_trial - dpm[0] * bulky * 3 * bbb_flow) - aaa + std::sqrt(J2trial / Utility::pow<2>(1 + dpm[0] * mu / ll) + _smoother2);
+    jac = dbbb * (Tr_trial - dpm[0] * bulky * 3 * bbb_flow) - bbb * bulky * 3 * (bbb_flow + dpm[0] * dbbb_flow) - daaa + 0.5 * J2trial * (-2.0) * (mu / ll - dpm[0] * mu * dll / ll / ll) / Utility::pow<3>(1 + dpm[0] * mu / ll) / std::sqrt(J2trial / Utility::pow<2>(1.0 + dpm[0] * mu / ll) + _smoother2);
     dpm[0] += -residual / jac;
     if (iter > _max_iters) // not converging
       return false;
@@ -142,11 +143,11 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::returnMap(const RankTwoTensor & t
 }
 
 RankFourTensor
-TensorMechanicsPlasticDruckerPragerHyperbolic::consistentTangentOperator(const RankTwoTensor & trial_stress, const RankTwoTensor & stress, Real intnl,
+TensorMechanicsPlasticDruckerPragerHyperbolic::consistentTangentOperator(const RankTwoTensor & trial_stress, Real intnl_old, const RankTwoTensor & stress, Real intnl,
                                                     const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const
 {
   if (!_use_custom_cto)
-    return TensorMechanicsPlasticModel::consistentTangentOperator(trial_stress, stress, intnl, E_ijkl, cumulative_pm);
+    return TensorMechanicsPlasticModel::consistentTangentOperator(trial_stress, intnl_old, stress, intnl, E_ijkl, cumulative_pm);
 
   const Real mu = E_ijkl(0,1,0,1);
   const Real la = E_ijkl(0,0,0,0) - 2.0 * mu;
@@ -162,15 +163,15 @@ TensorMechanicsPlasticDruckerPragerHyperbolic::consistentTangentOperator(const R
   const RankTwoTensor sij = stress.deviatoric();
   const Real sq = std::sqrt(J2 + _smoother2);
 
-  const Real one_over_h = 1.0/(-dyieldFunction_dintnl(stress, intnl) + mu * J2 / std::pow(sq, 2.0) + 3.0 * bbb * bbb_flow_mod * bulky); // correct up to hard
+  const Real one_over_h = 1.0/(-dyieldFunction_dintnl(stress, intnl) + mu * J2 / Utility::pow<2>(sq) + 3.0 * bbb * bbb_flow_mod * bulky); // correct up to hard
 
   const RankTwoTensor df_dsig_timesE = mu * sij / sq + bulky * bbb * RankTwoTensor(RankTwoTensor::initIdentity); // correct
   const RankTwoTensor rmod_timesE = mu * sij / sq + bulky * bbb_flow_mod * RankTwoTensor(RankTwoTensor::initIdentity); // correct up to hard
 
   const RankFourTensor coeff_ep = E_ijkl - one_over_h * rmod_timesE.outerProduct(df_dsig_timesE); // correct
 
-  const RankFourTensor dr_dsig_timesE = -0.5 * mu * sij.outerProduct(sij) / std::pow(sq, 3.0) + mu * stress.d2secondInvariant() / sq; //correct
-  const RankTwoTensor df_dsig_E_dr_dsig = 0.5 * mu * _smoother2 * sij / std::pow(sq, 4.0); //correct
+  const RankFourTensor dr_dsig_timesE = -0.5 * mu * sij.outerProduct(sij) / Utility::pow<3>(sq) + mu * stress.d2secondInvariant() / sq; //correct
+  const RankTwoTensor df_dsig_E_dr_dsig = 0.5 * mu * _smoother2 * sij / Utility::pow<4>(sq); //correct
 
   const RankFourTensor coeff_si = RankFourTensor(RankFourTensor::initIdentitySymmetricFour) + cumulative_pm[0] * (dr_dsig_timesE - one_over_h * rmod_timesE.outerProduct(df_dsig_E_dr_dsig));
 

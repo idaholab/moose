@@ -35,12 +35,11 @@ public:
   ConstantDamper(const InputParameters & parameters);
 
 protected:
-
   /**
    * Return the constant damping value.
    */
   virtual Real computeDamping(const NumericVector<Number> & solution,
-                              const NumericVector<Number> & update);
+                              const NumericVector<Number> & update) override;
 
   /// The constant amount of the Newton update to take.
   Real _damping;

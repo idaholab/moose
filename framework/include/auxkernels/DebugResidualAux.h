@@ -29,10 +29,9 @@ class DebugResidualAux : public AuxKernel
 {
 public:
   DebugResidualAux(const InputParameters & parameters);
-  virtual ~DebugResidualAux();
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   MooseVariable & _debug_var;
   NumericVector<Number> & _residual_copy;

@@ -9,18 +9,14 @@
 ExpressionBuilder::EBTermList
 operator, (const ExpressionBuilder::EBTerm & larg, const ExpressionBuilder::EBTerm & rarg)
 {
-  ExpressionBuilder::EBTermList list(2);
-  list[0] = larg;
-  list[1] = rarg;
-  return list;
+  return {larg, rarg};
 }
 
 ExpressionBuilder::EBTermList
 operator, (const ExpressionBuilder::EBTerm & larg, const ExpressionBuilder::EBTermList & rargs)
 {
-  ExpressionBuilder::EBTermList list(1);
-  list[0] = larg;
-  list.insert( list.end(), rargs.begin(), rargs.end() );
+  ExpressionBuilder::EBTermList list = {larg};
+  list.insert(list.end(), rargs.begin(), rargs.end());
   return list;
 }
 
@@ -149,8 +145,7 @@ ExpressionBuilder::EBTernaryFuncTermNode::stringify() const
 ExpressionBuilder::EBFunction &
 ExpressionBuilder::EBFunction::operator() (const ExpressionBuilder::EBTerm & arg)
 {
-  this->_eval_arguments.resize(1);
-  this->_eval_arguments[0] = arg;
+  this->_eval_arguments = {arg};
   return *this;
 }
 

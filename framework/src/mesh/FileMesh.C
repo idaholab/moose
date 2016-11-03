@@ -34,22 +34,19 @@ InputParameters validParams<FileMesh>()
 
 FileMesh::FileMesh(const InputParameters & parameters) :
     MooseMesh(parameters),
-    _file_name(getParam<MeshFileName>("file")),
-    _exreader(NULL)
+    _file_name(getParam<MeshFileName>("file"))
 {
   getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
 }
 
 FileMesh::FileMesh(const FileMesh & other_mesh) :
     MooseMesh(other_mesh),
-    _file_name(other_mesh._file_name),
-    _exreader(NULL)
+    _file_name(other_mesh._file_name)
 {
 }
 
 FileMesh::~FileMesh()
 {
-  delete _exreader;
 }
 
 MooseMesh &
@@ -66,8 +63,8 @@ FileMesh::buildMesh()
   Moose::perf_log.push("Read Mesh", "Setup");
   if (_is_nemesis)
   {
-    // Nemesis_IO only takes a reference to ParallelMesh, so we can't be quite so short here.
-    ParallelMesh& pmesh = cast_ref<ParallelMesh&>(getMesh());
+    // Nemesis_IO only takes a reference to DistributedMesh, so we can't be quite so short here.
+    DistributedMesh & pmesh = cast_ref<DistributedMesh &>(getMesh());
     Nemesis_IO(pmesh).read(_file_name);
 
     getMesh().allow_renumbering(false);
@@ -90,7 +87,7 @@ FileMesh::buildMesh()
 
     if (_app.setFileRestart() && (_file_name.rfind(".exd") < _file_name.size() || _file_name.rfind(".e") < _file_name.size()))
     {
-      _exreader = new ExodusII_IO(getMesh());
+      _exreader = libmesh_make_unique<ExodusII_IO>(getMesh());
       _exreader->read(_file_name);
 
       getMesh().allow_renumbering(false);
@@ -106,7 +103,7 @@ FileMesh::buildMesh()
 void
 FileMesh::read(const std::string & file_name)
 {
-  if (dynamic_cast<ParallelMesh *>(&getMesh()) && !_is_nemesis)
+  if (dynamic_cast<DistributedMesh *>(&getMesh()) && !_is_nemesis)
     getMesh().read(file_name, /*mesh_data=*/NULL, /*skip_renumber=*/false);
   else
     getMesh().read(file_name, /*mesh_data=*/NULL, /*skip_renumber=*/true);

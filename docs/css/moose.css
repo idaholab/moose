@@ -1,0 +1,207 @@
+/* Collapse Nav-bar correctly */
+@media(min-width: 768px) {
+    .bs-sidebar.affix {
+	top: 110px;
+    }
+    div.col-md-3 {
+	margin-top: 60px;
+    }
+}
+@media(min-width:992px) {
+    .bs-sidebar.affix {
+	top: 140px;
+}
+    div.col-md-9 {
+	margin-top: 50px;
+    }
+}
+@media(min-width:1200px) {
+    .bs-sidebar.affix {
+	top: 90px;
+}
+    div.col-md-9 {
+	margin-top: 5px;
+    }
+}
+/* End Collapse Nav-bar correctly */
+
+/* Get rid of the Previous and Next buttons */
+ul.nav.navbar-right > li:nth-of-type(2), ul.nav.navbar-right > li:nth-of-type(3){
+    display: none;
+}
+/* Get rid of the Previous and Next buttons */
+
+p {
+    text-align: justify;
+}
+a {
+    color: #0333a5;
+    text-decoration: none;
+}
+
+a:hover, a:focus {
+    color: #0333a5;
+    text-decoration: underline;
+}
+
+/* NavBar hover color modification (bluish to more closely match our </a> links color) */
+.navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus , .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+    color: #b7c0ff;
+}
+
+pre {
+    overflow: auto;
+}
+
+hr {
+    border-bottom-style: groove;
+    border-bottom-width: 2px;
+}
+/* NavBar submenu font color */
+.dropdown-menu>li>a {
+    color: #383d3e;
+}
+
+/* Slideshows with white backgrounds and captions, need a black drop text shadow */
+.carousel-caption {
+    text-shadow: 1px 1px 9px rgba(0, 0, 0, 1);
+}
+
+.admonition-title {
+    font-weight: bold;
+    display: block;
+    padding: 6px 12px;
+    color: #fff;
+    margin-bottom: 12px;
+    border: 0px solid transparent;
+}
+
+.admonition {
+    padding: 0px;
+    overflow: auto;
+    margin-bottom: 20px;
+}
+
+.info .admonition-title {
+    background: #528452;
+}
+
+.admonition > p{
+    padding: 6px;
+    text-align: left;
+}
+
+.admonition.info {
+    background: #82e0aa;
+    color: #000;
+    border: 0px solid transparent;
+}
+
+.note .admonition-title {
+    background: #3a7296;
+}
+.admonition.note {
+    background: #85c1e9;
+    color: #000;
+    border: 0px solid transparent;
+}
+
+.important .admonition-title {
+    background: #b100b0;
+}
+.admonition.important {
+    background: #FF00FF;
+    color: #000;
+    border: 0px solid transparent;
+}
+
+.warning .admonition-title {
+    background: #968b2b;
+}
+.admonition.warning {
+    background: #ffec46;
+    color: #000;
+    border: 0px solid transparent;
+}
+
+.danger .admonition-title {
+    background: #b14d00;
+}
+.admonition.danger {
+    background: #f75e1d;
+    color: #000;
+    border: 0px solid transparent;
+}
+
+.error .admonition-title {
+    background: #940000;
+}
+.admonition.error {
+    background: #ffb4b4;
+    color: #000;
+    border: 0px solid transparent;
+}
+/*
+Slide style
+*/
+.reveal h1 {
+    font-size: 2em;
+}
+
+.reveal h2 {
+    font-size: 1.5em;
+}
+
+.reveal .slides > section {
+  text-align: left;
+}
+/* MOOSE Build status CSS */
+.boxed_job_status_Passed {
+    vertical-align: middle;
+    text-align: center;
+    width: 60px;
+    background-color:#A9F5A9;
+    box-shadow: 2px 2px 3px #888888;
+    display: inline-block
+}
+.boxed_job_status_Failed {
+    vertical-align: middle;
+    text-align: center;
+    width: 60px;
+    background-color:#F5A9A9;
+    box-shadow: 2px 2px 3px #888888;
+    display: inline-block
+}
+.boxed_job_status_Running {
+    vertical-align: middle;
+    text-align: center;
+    width: 60px;
+    background-color:#F2F5A9;
+    box-shadow: 2px 2px 3px #888888;
+    display: inline-block
+}
+.boxed_job_status_Failed_OK {
+    vertical-align: middle;
+    text-align: center;
+    width: 60px;
+    background-color:#FAAC58;
+    box-shadow: 2px 2px 3px #888888;
+    display: inline-block
+}
+.boxed_job_status_Not_Started {
+    vertical-align: middle;
+    text-align: center;
+    width: 60px;
+    background-color:#FFFFFF;
+    box-shadow: 2px 2px 3px #888888;
+    display: inline-block;
+}
+.boxed_job_status_Canceled {
+    vertical-align: middle;
+    text-align: center;
+    width: 60px;
+    background-color:#CCCCCC;
+    box-shadow: 2px 2px 3px #888888;
+    display: inline-block;
+}
+/* MOOSE Build status CSS */

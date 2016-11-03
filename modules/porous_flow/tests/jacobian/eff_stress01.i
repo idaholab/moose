@@ -9,7 +9,7 @@
 []
 
 [GlobalParams]
-  PorousFlowDictator_UO = dictator
+  PorousFlowDictator = dictator
 []
 
 [Variables]
@@ -80,6 +80,13 @@
 []
 
 [Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+  [../]
+  [./nnn]
+    type = PorousFlowNodeNumber
+    on_initial_only = true
+  [../]
   [./ppss]
     type = PorousFlow2PhasePP_VG
     phase0_porepressure = ppwater

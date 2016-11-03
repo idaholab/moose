@@ -31,9 +31,8 @@ class MultiAppPostprocessorTransfer :
 {
 public:
   MultiAppPostprocessorTransfer(const InputParameters & parameters);
-  virtual ~MultiAppPostprocessorTransfer() {}
 
-  virtual void execute();
+  virtual void execute() override;
 
   enum
   {

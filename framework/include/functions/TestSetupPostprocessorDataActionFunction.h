@@ -37,11 +37,6 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    */
   TestSetupPostprocessorDataActionFunction(const InputParameters & parameters);
-
-  /**
-   * Class destructor
-   */
-  virtual ~TestSetupPostprocessorDataActionFunction();
 };
 
 #endif //TESTSETUPPOSTPROCESSORDATAACTIONFUNCTION_H

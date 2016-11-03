@@ -25,6 +25,8 @@ InputParameters validParams<ErrorFractionMarker>()
                                     "Elements within this percentage of the min error will be coarsened.  Must be between 0 and 1!");
   params.addRangeCheckedParam<Real>("refine", 0, "refine>=0 & refine<=1",
                                     "Elements within this percentage of the max error will be refined.  Must be between 0 and 1!");
+
+  params.addClassDescription("Marks elements for refinement or coarsening based on the fraction of the total error from the supplied indicator.");
   return params;
 }
 
@@ -43,10 +45,10 @@ ErrorFractionMarker::markerSetup()
   _max = 0;
 
   // First find the max and min error
-  for (unsigned int i=0; i<_error_vector.size(); i++)
+  for (const auto & val : _error_vector)
   {
-    _min = std::min(_min, static_cast<Real>(_error_vector[i]));
-    _max = std::max(_max, static_cast<Real>(_error_vector[i]));
+    _min = std::min(_min, static_cast<Real>(val));
+    _max = std::max(_max, static_cast<Real>(val));
   }
 
   _delta = _max-_min;

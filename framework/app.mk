@@ -2,10 +2,31 @@
 # Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE and its modules.
 #       This can be overridden by using the MOOSE_DIR environment variable
 
-# list of application-wise excluded source files
+# list of application-wide excluded source files
 excluded_srcfiles :=
 
+#
+# Save off parameters for possible app.mk recursion
+#
+STACK ?= stack
+STACK := $(STACK).X
+$APPLICATION_DIR$(STACK) := $(APPLICATION_DIR)
+$APPLICATION_NAME$(STACK) := $(APPLICATION_NAME)
+$DEPEND_MODULES$(STACK) := $(DEPEND_MODULES)
+$BUILD_EXEC$(STACK) := $(BUILD_EXEC)
+$DEP_APPS$(STACK) := $(DEP_APPS)
+
 -include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
+
+#
+# Restore parameters
+#
+APPLICATION_DIR := $($APPLICATION_DIR$(STACK))
+APPLICATION_NAME := $($APPLICATION_NAME$(STACK))
+DEPEND_MODULES := $($DEPEND_MODULES$(STACK))
+BUILD_EXEC := $($BUILD_EXEC$(STACK))
+DEP_APPS := $($DEP_APPS$(STACK))
+STACK := $(basename $(STACK))
 
 ##############################################################################
 ######################### Application Variables ##############################
@@ -42,7 +63,8 @@ plugins	    += $(patsubst %.f, %-$(METHOD).plugin, $(fplugfiles))
 plugins	    += $(patsubst %.f90, %-$(METHOD).plugin, $(f90plugfiles))
 
 # main
-main_src    := $(APPLICATION_DIR)/src/main.C    # Main must be located here!
+MAIN_DIR    ?= $(APPLICATION_DIR)/src
+main_src    := $(MAIN_DIR)/main.C
 main_object := $(patsubst %.C, %.$(obj-suffix), $(main_src))
 
 # dependency files
@@ -96,6 +118,9 @@ app_LIBS_other := $(filter-out $(app_LIB),$(app_LIBS))
 app_HEADERS    := $(app_HEADER) $(app_HEADERS)
 app_INCLUDES   += $(app_INCLUDE)
 app_DIRS       += $(APPLICATION_DIR)
+
+# WARNING: the += operator does NOT work here!
+ADDITIONAL_CPPFLAGS := $(ADDITIONAL_CPPFLAGS) -D$(shell echo $(APPLICATION_NAME) | perl -pe 'y/a-z/A-Z/' | perl -pe 's/-//g')_ENABLED
 
 # dependencies
 -include $(app_deps)

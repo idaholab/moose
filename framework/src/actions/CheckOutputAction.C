@@ -50,10 +50,10 @@ CheckOutputAction::checkVariableOutput(const std::string & task)
   {
     // Loop through the actions for the given task
     const std::vector<Action *> & actions = _awh.getActionsByName(task);
-    for (std::vector<Action *>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+    for (const auto & act : actions)
     {
       // Cast the object to AddVariableAction so that that OutputInterface::buildOutputHideVariableList may be called
-      AddVariableAction * ptr = dynamic_cast<AddVariableAction*>(*it);
+      AddVariableAction * ptr = dynamic_cast<AddVariableAction*>(act);
 
       // If the cast fails move to the next action, this is the case with NodalNormals which is also associated with
       // the "add_aux_variable" task.
@@ -82,10 +82,10 @@ CheckOutputAction::checkMaterialOutput()
   // TODO include boundary materials
 
   // Loop through each material object
-  for (std::vector<MooseSharedPointer<Material> >::const_iterator material_iter = materials.begin(); material_iter != materials.end(); ++material_iter)
+  for (const auto & mat : materials)
   {
     // Extract the names of the output objects to which the material properties will be exported
-    std::set<OutputName> outputs = (*material_iter)->getOutputs();
+    std::set<OutputName> outputs = mat->getOutputs();
 
     // Check that the outputs exist
     _app.getOutputWarehouse().checkOutputs(outputs);
@@ -98,8 +98,8 @@ CheckOutputAction::checkConsoleOutput()
   // Warning if multiple Console objects are added with 'output_screen=true' in the input file
   std::vector<Console *> console_ptrs = _app.getOutputWarehouse().getOutputs<Console>();
   unsigned int num_screen_outputs = 0;
-  for (std::vector<Console *>::iterator it = console_ptrs.begin(); it != console_ptrs.end(); ++it)
-    if ((*it)->getParam<bool>("output_screen"))
+  for (const auto & console : console_ptrs)
+    if (console->getParam<bool>("output_screen"))
       num_screen_outputs++;
 
   if (num_screen_outputs > 1)
@@ -113,8 +113,8 @@ CheckOutputAction::checkPerfLogOutput()
   // Search for the existence of a Console output object
   bool has_console = false;
   std::vector<Console *> ptrs = _app.getOutputWarehouse().getOutputs<Console>();
-  for (std::vector<Console *>::const_iterator it = ptrs.begin(); it != ptrs.end(); ++it)
-    if ((*it)->getParam<bool>("output_screen"))
+  for (const auto & console : ptrs)
+    if (console->getParam<bool>("output_screen"))
     {
       has_console = true;
       break;

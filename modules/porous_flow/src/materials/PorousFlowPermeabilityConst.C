@@ -10,37 +10,21 @@
 template<>
 InputParameters validParams<PorousFlowPermeabilityConst>()
 {
-  InputParameters params = validParams<Material>();
-
+  InputParameters params = validParams<PorousFlowPermeabilityBase>();
   params.addRequiredParam<RealTensorValue>("permeability", "The permeability tensor (usually in m^2), which is assumed constant for this material");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator_UO", "The UserObject that holds the list of Porous-Flow variable names.");
   params.addClassDescription("This Material calculates the permeability tensor assuming it is constant");
   return params;
 }
 
 PorousFlowPermeabilityConst::PorousFlowPermeabilityConst(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
-
-    _input_permeability(getParam<RealTensorValue>("permeability")),
-    _PorousFlow_name_UO(getUserObject<PorousFlowDictator>("PorousFlowDictator_UO")),
-
-    _permeability(declareProperty<RealTensorValue>("PorousFlow_permeability")),
-    _dpermeability_dvar(declareProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_dvar"))
+    PorousFlowPermeabilityBase(parameters),
+    _input_permeability(getParam<RealTensorValue>("permeability"))
 {
-}
-
-void
-PorousFlowPermeabilityConst::initQpStatefulProperties()
-{
-  _permeability[_qp] = _input_permeability;
 }
 
 void
 PorousFlowPermeabilityConst::computeQpProperties()
 {
-  _permeability[_qp] = _input_permeability;
-
-  const unsigned int num_var = _PorousFlow_name_UO.numVariables();
-  _dpermeability_dvar[_qp].resize(num_var, RealTensorValue());
+  _permeability_qp[_qp] = _input_permeability;
+  _dpermeability_qp_dvar[_qp].resize(_num_var, RealTensorValue());
 }
-

@@ -41,10 +41,6 @@ AdamsPredictor::AdamsPredictor(const InputParameters & parameters) :
 {
 }
 
-AdamsPredictor::~AdamsPredictor()
-{
-}
-
 void
 AdamsPredictor::timestepSetup()
 {

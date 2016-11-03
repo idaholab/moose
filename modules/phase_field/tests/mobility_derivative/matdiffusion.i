@@ -58,7 +58,6 @@
 [Materials]
   [./Dc]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Dc
     function = '0.01+c^2+d'
     args = 'c d'
@@ -66,7 +65,6 @@
   [../]
   [./Dd]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = Dd
     function = 'd^2+c+1.5'
     args = 'c d'

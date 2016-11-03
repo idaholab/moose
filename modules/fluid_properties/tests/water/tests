@@ -1,0 +1,7 @@
+[Tests]
+  [./water]
+    type = CSVDiff
+    input = 'water.i'
+    csvdiff = 'water_out.csv'
+  [../]
+[]

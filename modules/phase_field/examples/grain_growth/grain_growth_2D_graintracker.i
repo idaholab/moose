@@ -33,6 +33,8 @@
   [./PolycrystalICs]
     [./PolycrystalVoronoiIC]
       grain_num = 100 #Number of grains
+      advanced_op_assignment = true
+      rand_seed = 10
     [../]
   [../]
 []
@@ -51,6 +53,10 @@
     family = MONOMIAL
   [../]
   [./ghost_regions]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./halos]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -74,22 +80,29 @@
   [./unique_grains]
     type = FeatureFloodCountAux
     variable = unique_grains
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = UNIQUE_REGION
     execute_on = 'initial timestep_end'
   [../]
   [./var_indices]
     type = FeatureFloodCountAux
     variable = var_indices
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = VARIABLE_COLORING
     execute_on = 'initial timestep_end'
   [../]
   [./ghosted_entities]
     type = FeatureFloodCountAux
     variable = ghost_regions
-    bubble_object = grain_tracker
+    flood_counter = grain_tracker
     field_display = GHOSTED_ENTITIES
+    execute_on = 'initial timestep_end'
+  [../]
+  [./halos]
+    type = FeatureFloodCountAux
+    variable = halos
+    flood_counter = grain_tracker
+    field_display = HALOS
     execute_on = 'initial timestep_end'
   [../]
 []
@@ -107,7 +120,6 @@
   [./CuGrGr]
     # Material properties
     type = GBEvolution
-    block = 0 # Block ID (only one block in this problem)
     T = 450 # Constant temperature of the simulation (for mobility calculation)
     wGB = 14 # Width of the diffuse GB
     GBmob0 = 2.5e-6 #m^4(Js) for copper from Schoenfelder1997
@@ -123,6 +135,7 @@
     threshold = 0.2
     connecting_threshold = 0.08
     flood_entity_type = ELEMENTAL
+    compute_halo_maps = true # Only necessary for displaying HALOS
   [../]
   [./dt]
     # Outputs the current time step

@@ -43,10 +43,6 @@ AddNodalNormalsAction::AddNodalNormalsAction(InputParameters parameters) :
 {
 }
 
-AddNodalNormalsAction::~AddNodalNormalsAction()
-{
-}
-
 void
 AddNodalNormalsAction::act()
 {

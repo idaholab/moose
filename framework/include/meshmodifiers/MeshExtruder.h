@@ -28,13 +28,14 @@ class MeshExtruder : public MeshModifier
 public:
   MeshExtruder(const InputParameters & parameters);
 
-  virtual ~MeshExtruder();
-
-  virtual void modify();
-
 protected:
-  const unsigned int _num_layers;
+  virtual void modify() override;
+
   const RealVectorValue _extrusion_vector;
+  unsigned int _num_layers;
+  std::vector<SubdomainID> _existing_subdomains;
+  std::vector<unsigned int> _layers;
+  std::vector<unsigned int> _new_ids;
 
   /**
    * This class is used during the mesh construction (extrusion) to set element ids as they are created.
@@ -60,9 +61,6 @@ protected:
 
 private:
   void changeID(const std::vector<BoundaryName> & names, BoundaryID old_id);
-
-//  MooseSharedPointer<QueryElemSubdomainID> _elem_subdomain_id;
-  bool _map_custom_ids;
 };
 
 #endif /* MESHEXTRUDER_H */

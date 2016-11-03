@@ -31,17 +31,12 @@ class ElementsAlongPlane : public GeneralVectorPostprocessor
 public:
   ElementsAlongPlane(const InputParameters & parameters);
 
-  virtual ~ElementsAlongPlane() {}
-
-  /**
-   * Clear it out.
-   */
-  virtual void initialize();
+  virtual void initialize() override;
 
   /**
    * Find the elements
    */
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   /// Point in the plane

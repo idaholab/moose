@@ -37,10 +37,7 @@ public:
    */
   CheckOutputAction(InputParameters params);
 
-  /**
-   * Preforms a set of checks on various Output objects
-   */
-  virtual void act();
+  virtual void act() override;
 
 private:
 

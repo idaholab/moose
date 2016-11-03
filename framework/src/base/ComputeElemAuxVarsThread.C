@@ -20,9 +20,9 @@
 #include "libmesh/threads.h"
 
 
-ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials) :
-    ThreadedElementLoop<ConstElemRange>(problem, sys),
-    _aux_sys(sys),
+ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials) :
+    ThreadedElementLoop<ConstElemRange>(problem),
+    _aux_sys(problem.getAuxiliarySystem()),
     _aux_kernels(storage),
     _need_materials(need_materials)
 {
@@ -30,7 +30,7 @@ ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, Auxiliar
 
 // Splitting Constructor
 ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split /*split*/) :
-    ThreadedElementLoop<ConstElemRange>(x._fe_problem, x._system),
+    ThreadedElementLoop<ConstElemRange>(x._fe_problem),
     _aux_sys(x._aux_sys),
     _aux_kernels(x._aux_kernels),
     _need_materials(x._need_materials)
@@ -45,9 +45,9 @@ void
 ComputeElemAuxVarsThread::subdomainChanged()
 {
   // prepare variables
-  for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
+  for (const auto & it : _aux_sys._elem_vars[_tid])
   {
-    MooseVariable * var = it->second;
+    MooseVariable * var = it.second;
     var->prepareAux();
   }
 
@@ -56,10 +56,10 @@ ComputeElemAuxVarsThread::subdomainChanged()
   if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
     const std::vector<MooseSharedPointer<AuxKernel> > & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
-    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = kernels.begin(); aux_it != kernels.end(); ++aux_it)
+    for (const auto & aux : kernels)
     {
-      (*aux_it)->subdomainSetup();
-      const std::set<MooseVariable *> & mv_deps = (*aux_it)->getMooseVariableDependencies();
+      aux->subdomainSetup();
+      const std::set<MooseVariable *> & mv_deps = aux->getMooseVariableDependencies();
       needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
@@ -81,8 +81,8 @@ ComputeElemAuxVarsThread::onElement(const Elem * elem)
     if (_need_materials)
       _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
-    for (std::vector<MooseSharedPointer<AuxKernel> >::const_iterator aux_it = kernels.begin(); aux_it != kernels.end(); ++aux_it)
-      (*aux_it)->compute();
+    for (const auto & aux : kernels)
+      aux->compute();
 
     if (_need_materials)
       _fe_problem.swapBackMaterials(_tid);
@@ -90,10 +90,10 @@ ComputeElemAuxVarsThread::onElement(const Elem * elem)
     // update the solution vector
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
+      for (const auto & it : _aux_sys._elem_vars[_tid])
       {
-        MooseVariable * var = it->second;
-        var->insert(_system.solution());
+        MooseVariable * var = it.second;
+        var->insert(_aux_sys.solution());
       }
     }
   }

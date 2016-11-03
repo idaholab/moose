@@ -40,10 +40,7 @@ public:
   BoundsAux(const InputParameters & parameters);
 
 protected:
-  /**
-   * Will store both the upper and lower bound into their respective vectors.
-   */
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   NumericVector<Number> & _upper_vector;
   NumericVector<Number> & _lower_vector;
@@ -52,8 +49,6 @@ protected:
   bool _lower_valid;
   Real _upper;
   Real _lower;
-
-
 };
 
 #endif //BOUNDSAUX_H

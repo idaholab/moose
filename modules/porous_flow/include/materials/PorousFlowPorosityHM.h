@@ -8,8 +8,7 @@
 #ifndef POROUSFLOWPOROSITYHM_H
 #define POROUSFLOWPOROSITYHM_H
 
-#include "PorousFlowPorosityUnity.h"
-#include "RankTwoTensor.h"
+#include "PorousFlowPorosityBase.h"
 
 //Forward Declarations
 class PorousFlowPorosityHM;
@@ -21,12 +20,16 @@ InputParameters validParams<PorousFlowPorosityHM>();
  * Material designed to provide the porosity in hydro-mechanical simulations
  * biot + (phi0 - biot)*exp(-vol_strain + (biot-1)effective_porepressure/solid_bulk)
  */
-class PorousFlowPorosityHM : public PorousFlowPorosityUnity
+class PorousFlowPorosityHM : public PorousFlowPorosityBase
 {
 public:
   PorousFlowPorosityHM(const InputParameters & parameters);
 
 protected:
+  virtual void initQpStatefulProperties() override;
+
+  virtual void computeQpProperties() override;
+
   /// porosity at zero strain and zero porepressure
   const Real _phi0;
 
@@ -35,9 +38,6 @@ protected:
 
   /// drained bulk modulus of the porous skeleton
   const Real _solid_bulk;
-
-  /// number of porous-flow variables
-  const unsigned int _num_var;
 
   /// short-hand number (biot-1)/solid_bulk
   const Real _coeff;
@@ -65,10 +65,6 @@ protected:
 
   /// d(effective qp porepressure)/(d porflow variable)
   const MaterialProperty<std::vector<Real> > & _dpf_qp_dvar;
-
-  virtual void initQpStatefulProperties();
-
-  virtual void computeQpProperties();
 };
 
 #endif //POROUSFLOWPOROSITYHM_H

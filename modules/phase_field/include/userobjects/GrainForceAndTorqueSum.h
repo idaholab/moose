@@ -33,23 +33,23 @@ public:
 
   virtual const std::vector<RealGradient> & getForceValues() const;
   virtual const std::vector<RealGradient> & getTorqueValues() const;
-  virtual const std::vector<RealGradient> & getForceDerivatives() const;
-  virtual const std::vector<RealGradient> & getTorqueDerivatives() const;
+  virtual const std::vector<Real> & getForceCJacobians() const;
+  virtual const std::vector<std::vector<Real> > & getForceEtaJacobians() const;
 
 protected:
   /// Vector of userobjects providing forces and torques acting on grains
   std::vector<UserObjectName> _sum_objects;
   /// Total no. of userobjects that provides forces and torques acting on grains
   unsigned int _num_forces;
-  unsigned int _ncrys;
+  unsigned int _grain_num;
 
   std::vector<const GrainForceAndTorqueInterface *> _sum_forces;
 
-  ///@{ providing sum of all grain forces, torques & their derivatives
+  ///@{ providing grain forces, torques and their jacobians w. r. t c
   std::vector<RealGradient> _force_values;
   std::vector<RealGradient> _torque_values;
-  std::vector<RealGradient> _force_derivatives;
-  std::vector<RealGradient> _torque_derivatives;
+  std::vector<Real> _c_jacobians;
+  std::vector<std::vector<Real> > _eta_jacobians;
   ///@}
 };
 

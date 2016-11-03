@@ -41,22 +41,23 @@ class AB2PredictorCorrector : public TimeStepper
 {
 public:
   AB2PredictorCorrector(const InputParameters & parameters);
-  virtual ~AB2PredictorCorrector();
 
-  virtual Real computeDT();
-  virtual Real computeInitialDT();
-  virtual void step();
-  virtual void preExecute();
-  virtual void preSolve();
-  virtual bool converged();
+  virtual void step() override;
+  virtual void preExecute() override;
+  virtual void preSolve() override;
+  virtual bool converged() override;
 
 protected:
+  virtual Real computeDT() override;
+  virtual Real computeInitialDT() override;
+
   virtual Real estimateTimeError(NumericVector<Number> & sol);
 
-  virtual int stringtoint(std::string string);
+  int stringtoint(std::string string);
   ///
   NumericVector<Number> & _u1;
   NumericVector<Number> & _aux1;
+  NumericVector<Number> & _pred1;
 
   /// dt of the big step
   Real & _dt_full;

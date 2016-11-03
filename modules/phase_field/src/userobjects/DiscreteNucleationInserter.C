@@ -4,6 +4,7 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
 #include "DiscreteNucleationInserter.h"
 #include "libmesh/parallel_algebra.h"
 
@@ -14,6 +15,7 @@ template<>
 InputParameters validParams<DiscreteNucleationInserter>()
 {
   InputParameters params = validParams<ElementUserObject>();
+  params.addClassDescription("Manages the list of currently active nucleation sites and adds new sites according to a given probability function.");
   params.addRequiredParam<MaterialPropertyName>("probability", "Probability density for inserting a discrete nucleus");
   params.addRequiredParam<Real>("hold_time", "Time to keep each nucleus active");
   params.addParam<Point>("test", "Insert a fixed nucleus at a point in the simulation cell");

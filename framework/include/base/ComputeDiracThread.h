@@ -32,24 +32,24 @@ typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistEl
 class ComputeDiracThread : public ThreadedElementLoop<DistElemRange>
 {
 public:
-  ComputeDiracThread(FEProblem & feproblem, NonlinearSystem & system, SparseMatrix<Number> * jacobian = NULL);
+  ComputeDiracThread(FEProblem & feproblem, SparseMatrix<Number> * jacobian = NULL);
 
   // Splitting Constructor
   ComputeDiracThread(ComputeDiracThread & x, Threads::split);
 
   virtual ~ComputeDiracThread();
 
-  virtual void subdomainChanged();
-  virtual void pre();
-  virtual void onElement(const Elem *elem);
-  virtual void postElement(const Elem * /*elem*/);
-  virtual void post();
+  virtual void subdomainChanged() override;
+  virtual void pre() override;
+  virtual void onElement(const Elem * elem) override;
+  virtual void postElement(const Elem * /*elem*/) override;
+  virtual void post() override;
 
   void join(const ComputeDiracThread & /*y*/);
 
 protected:
   SparseMatrix<Number> * _jacobian;
-  NonlinearSystem & _sys;
+  NonlinearSystem & _nl;
 
   /// Storage for DiracKernel objects
   const MooseObjectWarehouse<DiracKernel> & _dirac_kernels;

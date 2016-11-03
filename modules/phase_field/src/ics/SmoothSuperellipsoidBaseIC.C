@@ -14,6 +14,7 @@ InputParameters validParams<SmoothSuperellipsoidBaseIC>()
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<Real>("invalue", "The variable value inside the superellipsoid");
   params.addRequiredParam<Real>("outvalue", "The variable value outside the superellipsoid");
+  params.addParam<Real>("nestedvalue", "The variable value for nested particles inside the superellipsoid in inverse configuration");
   params.addParam<Real>("int_width", 0.0, "The interfacial width of the void surface.  Defaults to sharp interface");
   params.addParam<bool>("zero_gradient", false, "Set the gradient DOFs to zero. This can avoid numerical problems with higher order shape functions.");
   params.addParam<unsigned int>("rand_seed", 12345, "Seed value for the random number generator");
@@ -25,6 +26,7 @@ SmoothSuperellipsoidBaseIC::SmoothSuperellipsoidBaseIC(const InputParameters & p
     _mesh(_fe_problem.mesh()),
     _invalue(parameters.get<Real>("invalue")),
     _outvalue(parameters.get<Real>("outvalue")),
+    _nestedvalue(isParamValid("nestedvalue") ? parameters.get<Real>("nestedvalue") : parameters.get<Real>("outvalue")),
     _int_width(parameters.get<Real>("int_width")),
     _zero_gradient(parameters.get<bool>("zero_gradient"))
 {
@@ -92,7 +94,7 @@ SmoothSuperellipsoidBaseIC::gradient(const Point & p)
 }
 
 Real
-SmoothSuperellipsoidBaseIC::computeSuperellipsoidValue(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n)
+SmoothSuperellipsoidBaseIC::computeSuperellipsoidValue(const Point & p, const Point & center, Real a, Real b, Real c, Real n)
 {
   Point l_center = center;
   Point l_p = p;
@@ -101,7 +103,8 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidValue(const Point & p, const Po
 
   //When dist is 0 we are exactly at the center of the superellipsoid so return _invalue
   //Handle this case independently because we cannot calculate polar angles at this point
-  if (dist == 0.0) return _invalue;
+  if (dist == 0.0)
+    return _invalue;
 
   //Compute the distance r from the center of the superellipsoid to its outside edge
   //along the vector from the center to the current point
@@ -129,8 +132,49 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidValue(const Point & p, const Po
   return value;
 }
 
+//Following function does the same as computeSuperellipsoidValue but reverses invalue and outvalue
+Real
+SmoothSuperellipsoidBaseIC::computeSuperellipsoidInverseValue(const Point & p, const Point & center, Real a, Real b, Real c, Real n)
+{
+  Point l_center = center;
+  Point l_p = p;
+  //Compute the distance between the current point and the center
+  Real dist = _mesh.minPeriodicDistance(_var.number(), l_p, l_center);
+
+  //When dist is 0 we are exactly at the center of the superellipsoid so return _invalue
+  //Handle this case independently because we cannot calculate polar angles at this point
+  if (dist == 0.0)
+    return _nestedvalue;
+
+  //Compute the distance r from the center of the superellipsoid to its outside edge
+  //along the vector from the center to the current point
+  //This uses the equation for a superellipse in polar coordinates and substitutes
+  //distances for sin, cos functions
+  Point dist_vec = _mesh.minPeriodicVector(_var.number(), center, p);
+
+  //First calculate rmn = r^(-n), replacing sin, cos functions with distances
+  Real rmn = (std::pow(std::abs(dist_vec(0) / dist / a), n)
+            + std::pow(std::abs(dist_vec(1) / dist / b), n)
+            + std::pow(std::abs(dist_vec(2) / dist / c), n) );
+  //Then calculate r from rmn
+  Real r = std::pow(rmn, (-1.0/n));
+
+  Real value = _invalue;
+
+  if (dist <= r - _int_width/2.0) //Reversing inside and outside values
+    value = _nestedvalue;
+  else if (dist < r + _int_width/2.0) //Smooth interface
+  {
+    Real int_pos = (dist - r + _int_width/2.0)/_int_width;
+    value = _invalue + (_nestedvalue - _invalue) * (1.0 + std::cos(int_pos * libMesh::pi)) / 2.0;
+  }
+
+  return value;
+}
+
+
 RealGradient
-SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const Point & center, const Real & a, const Real & b, const Real & c, const Real & n)
+SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const Point & center, Real a, Real b, Real c, Real n)
 {
   Point l_center = center;
   Point l_p = p;
@@ -139,7 +183,8 @@ SmoothSuperellipsoidBaseIC::computeSuperellipsoidGradient(const Point & p, const
 
   //When dist is 0 we are exactly at the center of the superellipsoid so return 0
   //Handle this case independently because we cannot calculate polar angles at this point
-  if (dist == 0.0) return 0.0;
+  if (dist == 0.0)
+    return 0.0;
 
   //Compute the distance r from the center of the superellipsoid to its outside edge
   //along the vector from the center to the current point

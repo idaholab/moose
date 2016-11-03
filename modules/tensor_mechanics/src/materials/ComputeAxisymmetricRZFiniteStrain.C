@@ -7,6 +7,8 @@
 
 #include "ComputeAxisymmetricRZFiniteStrain.h"
 #include "Assembly.h"
+#include "FEProblem.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<ComputeAxisymmetricRZFiniteStrain>()
@@ -25,12 +27,14 @@ ComputeAxisymmetricRZFiniteStrain::ComputeAxisymmetricRZFiniteStrain(const Input
 void
 ComputeAxisymmetricRZFiniteStrain::initialSetup()
 {
-  if (_assembly.coordSystem() != Moose::COORD_RZ)
-    mooseError("The coordinate system must be set to RZ for Axisymmetric simulations.");
+  const auto & subdomainIDs = _mesh.meshSubdomains();
+  for (auto subdomainID : subdomainIDs)
+    if (_fe_problem.getCoordSystem(subdomainID) != Moose::COORD_RZ)
+      mooseError("The coordinate system must be set to RZ for Axisymmetric simulations.");
 }
 
 Real
-ComputeAxisymmetricRZFiniteStrain::computeDeformGradZZ()
+ComputeAxisymmetricRZFiniteStrain::computeGradDispZZ()
 {
   if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
     return (*_disp[0])[_qp] / _q_point[_qp](0);
@@ -39,7 +43,7 @@ ComputeAxisymmetricRZFiniteStrain::computeDeformGradZZ()
 }
 
 Real
-ComputeAxisymmetricRZFiniteStrain::computeDeformGradZZold()
+ComputeAxisymmetricRZFiniteStrain::computeGradDispZZold()
 {
   if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
     return _disp_old_0[_qp] / _q_point[_qp](0);

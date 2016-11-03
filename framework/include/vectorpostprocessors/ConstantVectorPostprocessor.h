@@ -28,10 +28,8 @@ class ConstantVectorPostprocessor : public GeneralVectorPostprocessor
 public:
   ConstantVectorPostprocessor(const InputParameters & parameters);
 
-  virtual ~ConstantVectorPostprocessor() {}
-
-  virtual void initialize();
-  virtual void execute();
+  virtual void initialize() override;
+  virtual void execute() override;
 
 protected:
   VectorPostprocessorValue & _value;

@@ -43,10 +43,6 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters) :
     mooseError("Formulation must be either Penalty or Kinematic");
 }
 
-NodalConstraint::~NodalConstraint()
-{
-}
-
 void
 NodalConstraint::computeResidual(NumericVector<Number> & residual)
 {

@@ -30,12 +30,9 @@ FunctionScalarAux::FunctionScalarAux(const InputParameters & parameters) :
   std::vector<FunctionName> funcs = getParam<std::vector<FunctionName> >("function");
   if (funcs.size() != _var.order())
     mooseError("number of functions is not equal to the number of scalar variable components");
-  for (unsigned int i = 0; i < funcs.size(); ++i)
-    _functions.push_back(&getFunctionByName(funcs[i]));
-}
 
-FunctionScalarAux::~FunctionScalarAux()
-{
+  for (const auto & func : funcs)
+    _functions.push_back(&getFunctionByName(func));
 }
 
 Real
@@ -43,4 +40,3 @@ FunctionScalarAux::computeValue()
 {
   return _functions[_i]->value(_t, Point(0, 0, 0));
 }
-

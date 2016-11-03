@@ -140,22 +140,27 @@
 []
 
 [Materials]
-  active = 'crysp'
   [./crysp]
     type = FiniteStrainCrystalPlasticity
     block = 0
-    disp_y = disp_y
-    disp_x = disp_x
-    disp_z = disp_z
     gtol = 1e-2
     slip_sys_file_name = input_slip_sys.txt
     slip_sys_res_prop_file_name = input_slip_sys_res.txt
     slip_sys_flow_prop_file_name = input_slip_sys_flow_prop.txt
     hprops = '1.0 541.5 60.8 109.8 2.5'
-    C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     nss = 12
-    fill_method = symmetric9
     intvar_read_type = slip_sys_res_file
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensorCP
+    block = 0
+    C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
+    fill_method = symmetric9
+  [../]
+  [./strain]
+    type = ComputeFiniteStrain
+    block = 0
+    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
@@ -191,22 +196,21 @@
 
 [Executioner]
   type = Transient
-  dt = 0.05
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options_iname = -pc_hypre_type
-  petsc_options_value = boomerang
-  nl_abs_tol = 1e-10
-  nl_rel_step_tol = 1e-10
-  dtmax = 10.0
+  petsc_options_iname = 'pc_type'
+  petsc_options_value = 'lu'
+
   nl_rel_tol = 1e-10
-  ss_check_tol = 1e-10
-  end_time = 10.0
+  nl_abs_tol = 1e-10
+
+  dt = 0.05
+  dtmax = 10.0
   dtmin = 0.05
+
   num_steps = 10
-  nl_abs_step_tol = 1e-10
 []
 
 [Outputs]

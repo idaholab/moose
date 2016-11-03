@@ -85,6 +85,8 @@ SlaveConstraint::addPoints()
   std::map<dof_id_type, PenetrationInfo *>::iterator
     it  = _penetration_locator._penetration_info.begin(),
     end = _penetration_locator._penetration_info.end();
+
+  const auto & node_to_elem_map = _mesh.nodeToElemMap();
   for (; it!=end; ++it)
   {
     PenetrationInfo * pinfo = it->second;
@@ -99,8 +101,9 @@ SlaveConstraint::addPoints()
     if (pinfo->isCaptured() && node->processor_id() == processor_id())
     {
       // Find an element that is connected to this node that and that is also on this processor
-
-      std::vector<dof_id_type> & connected_elems = _mesh.nodeToElemMap()[slave_node_num];
+      auto node_to_elem_pair = node_to_elem_map.find(slave_node_num);
+      mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing node in node to elem map");
+      const std::vector<dof_id_type> & connected_elems = node_to_elem_pair->second;
 
       Elem * elem = NULL;
 
@@ -291,4 +294,3 @@ SlaveConstraint::nodalArea(PenetrationInfo & pinfo)
   }
   return area;
 }
-

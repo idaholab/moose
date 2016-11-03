@@ -51,7 +51,7 @@ int sideIntersectedByLine(const Elem * elem, std::vector<int> & not_side, const 
       continue;
 
     // Get a simplified side element
-    UniquePtr<Elem> side_elem = elem->side(i);
+    std::unique_ptr<Elem> side_elem = elem->side(i);
 
     if (dim == 3)
     {
@@ -176,13 +176,13 @@ void recursivelyFindElementsIntersectedByLine(const LineSegment & line_segment, 
   return;
 }
 
-void elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBase & /*mesh*/, MooseSharedPointer<PointLocatorBase> & point_locator, std::vector<Elem *> & intersected_elems, std::vector<LineSegment> & segments)
+void elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBase & /*mesh*/, const PointLocatorBase & point_locator, std::vector<Elem *> & intersected_elems, std::vector<LineSegment> & segments)
 {
   // Make sure our list is clear
   intersected_elems.clear();
 
   // Find the starting element
-  const Elem * first_elem = (*point_locator)(p0);
+  const Elem * first_elem = point_locator(p0);
 
   // Quick return if can't even locate the first element.
   if (!first_elem)

@@ -24,19 +24,18 @@ template<>
 InputParameters validParams<VectorPostprocessor>()
 {
   InputParameters params = validParams<UserObject>();
-
-  params.addParam<std::vector<OutputName> >("outputs", "Vector of output names were you would like to restrict the output of this VectorPostprocessor (empty outputs to all)");
+  params += validParams<OutputInterface>();
 
   params.addParamNamesToGroup("outputs", "Advanced");
-
   params.registerBase("VectorPostprocessor");
   return params;
 }
 
 VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters) :
+    OutputInterface(parameters),
     _vpp_name(MooseUtils::shortName(parameters.get<std::string>("_object_name"))),
-    _outputs(parameters.get<std::vector<OutputName> >("outputs")),
-    _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblem *>("_fe_problem"))
+    _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _vpp_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
 {
 }
 
@@ -49,5 +48,8 @@ VectorPostprocessor::getVector(const std::string & vector_name)
 VectorPostprocessorValue &
 VectorPostprocessor::declareVector(const std::string & vector_name)
 {
-  return _vpp_fe_problem->declareVectorPostprocessorVector(_vpp_name, vector_name);
+  if (_vpp_tid)
+    return _thread_local_vectors.emplace(vector_name, VectorPostprocessorValue()).first->second;
+  else
+    return _vpp_fe_problem->declareVectorPostprocessorVector(_vpp_name, vector_name);
 }
