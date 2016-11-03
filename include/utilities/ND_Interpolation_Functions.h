@@ -22,7 +22,7 @@
 
 bool checkUpperBound(double upper_bound, std::vector<double> values);
 bool checkLowerBound(double lower_bound, std::vector<double> values);
-std::vector<double> int2binary(int value, int size);
+std::vector<double> intToBinary(int value, int size);
 
 class NDInterpolation
 {
@@ -31,24 +31,24 @@ public:
   virtual double getGradientAt(std::vector<double> point_coordinate);
   virtual void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
   //std::vector<double> NDinverseFunction(double F_min, double F_max);
-  std::vector<double> NDinverseFunctionGrid(double F, double g);
+  std::vector<double> ndInverseFunctionGrid(double F, double g);
 
   double averageCellValue(std::vector<double> center, std::vector<double> dx);
 
-  void updateRNGparameters(double tolerance, double initial_divisions);
+  void updateRNGParameters(double tolerance, double initial_divisions);
 
-  double NDderivative(std::vector<double> coordinate);
+  double ndDerivative(std::vector<double> coordinate);
 
   int returnDimensionality(){return _dimensions;};
 
-  double returnUpperBound(int dimension){return _upperBound.at(dimension);};
-  double returnLowerBound(int dimension){return _lowerBound.at(dimension);};
+  double returnUpperBound(int dimension){return _upper_bound.at(dimension);};
+  double returnLowerBound(int dimension){return _lower_bound.at(dimension);};
 
   NDInterpolation();
   virtual ~NDInterpolation();
 
 protected:
-  RandomClass * _randomDouble;
+  RandomClass * _random_double;
   std::string _data_filename;
   bool _completed_init;
   int _dimensions;
@@ -56,11 +56,11 @@ protected:
   double _tolerance;
   int _initial_divisions;
 
-  std::vector<double> _cellPoint0;
-  std::vector<double> _cellDxs;
+  std::vector<double> _cell_point_0;
+  std::vector<double> _cell_dxs;
 
-  std::vector<double> _upperBound;
-  std::vector<double> _lowerBound;
+  std::vector<double> _upper_bound;
+  std::vector<double> _lower_bound;
 
   double minkowskiDistance(std::vector<double> point1, std::vector<double> point2, double p);
   double vectorNorm(std::vector<double> point, double p);
@@ -68,16 +68,16 @@ protected:
   bool pivotCellCheck(std::vector<std::vector<double> >& cell, double F);
   int vertexOutcome(std::vector<double>& vertex, double F);
   void cellsFilter(std::vector<std::vector<std::vector<double> > >& vertices, double F);
-  void refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refinedCell, std::vector<std::vector<double> > & cell, int divisions);
-  std::vector<int> arrayConverter(int oneDcoordinate, int divisions, int n_dimensions);
-  std::vector<std::vector<double> > generateNewCell(std::vector<int> NDcoordinate, std::vector<double> coordinateOfPointZero, std::vector<double> dxs, int n_dimensions);
-  std::vector<std::vector<double> > pickNewCell(std::vector<std::vector<std::vector<double> > > & cellsSet, double g);
+  void refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refined_cell, std::vector<std::vector<double> > & cell, int divisions);
+  std::vector<int> arrayConverter(int one_d_coordinate, int divisions, int n_dimensions);
+  std::vector<std::vector<double> > generateNewCell(std::vector<int> nd_coordinate, std::vector<double> coordinate_of_point_zero, std::vector<double> dxs, int n_dimensions);
+  std::vector<std::vector<double> > pickNewCell(std::vector<std::vector<std::vector<double> > > & cells_set, double g);
   std::vector<double> getCellCenter(std::vector<std::vector<double> > & cell);
 
-  double OneDderivative(double fxph, double fx, double fxmh);
+  double oneDDerivative(double fxph, double fx, double fxmh);
   double derivativeStep(std::vector<double> coordinate, int loop);
 
-  int CDFweightedPicking(std::vector<std::vector<std::vector<double> > >& vertices, double g);
+  int cdfWeightedPicking(std::vector<std::vector<std::vector<double> > >& vertices, double g);
   double integralCellValue(std::vector<std::vector<double> > cell);
 };
 
@@ -86,8 +86,8 @@ class genericNDSpline: public NDInterpolation{
 public:
   double interpolateAt(std::vector<double> point_coordinate);
   double integralSpline(std::vector<double> point_coordinate);
-  double spline_cartesian_marginal_integration(double coordinate,int marginal_variable);
-  double spline_cartesian_inverse_marginal(double CDF,int marginal_variable, double precision);
+  double splineCartesianMarginalIntegration(double coordinate,int marginal_variable);
+  double splineCartesianInverseMarginal(double CDF,int marginal_variable, double precision);
 
   genericNDSpline(std::string filename);
   genericNDSpline(std::string filename, std::vector<double> alpha, std::vector<double> beta);
@@ -111,17 +111,17 @@ public:
   double interpolateAt(std::vector<double> point_coordinate);
   double getGradientAt(std::vector<double> point_coordinate);
   double integralSpline(std::vector<double> point_coordinate);
-  double spline_cartesian_marginal_integration(double coordinate,int marginal_variable);
-  double spline_cartesian_inverse_marginal(double CDF,int marginal_variable, double precision);
+  double splineCartesianMarginalIntegration(double coordinate,int marginal_variable);
+  double splineCartesianInverseMarginal(double cdf,int marginal_variable, double precision);
 
-  // std::vector<double> NDinverseFunctionGrid(double F, double g);
+  // std::vector<double> ndInverseFunctionGrid(double F, double g);
 
   void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
 
   NDSpline(std::string filename);
   NDSpline(std::string filename, std::vector<double> alpha, std::vector<double> beta);
   NDSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta);
-  void NDSpline_init(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta);
+  void ndSplineInit(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta);
 
   //std::vector< std::vector<double> > getDiscretizations(){
   //      std::cout<<"but why!"<< std::endl;
@@ -166,23 +166,23 @@ private:
   void saveCoefficient(double value, std::vector<int> coefficient_coordinate);
   double retrieveCoefficient(std::vector<int> coefficient_coordinate);
 
-  double spline_cartesian_interpolation(std::vector<double> point_coordinate);
-  double spline_cartesian_integration(std::vector<double> point_coordinate);
+  double splineCartesianInterpolation(std::vector<double> point_coordinate);
+  double splineCartesianIntegration(std::vector<double> point_coordinate);
   double getPointAtCoordinate(std::vector<int> coordinates);
 
-  int fromNDto1Dconverter(std::vector<int> coordinate);
-  std::vector<int> from1DtoNDconverter(int oneDcoordinate, std::vector<int> indexes);
+  int fromNDTo1DConverter(std::vector<int> coordinate);
+  std::vector<int> from1DToNDConverter(int one_d_coordinate, std::vector<int> indexes);
 
   void calculateCoefficients();
   std::vector<double> fillArrayCoefficient(int n_dimensions, std::vector<double> & data, std::vector<int> & loop_locator);
 
-  void from2Dto1Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata);
-  void from1Dto2Drestructuring(std::vector<std::vector<double> > & twoDdata, std::vector<double> & oneDdata, int spacing);
+  void from2DTo1DRestructuring(std::vector<std::vector<double> > & two_d_data, std::vector<double> & one_d_data);
+  void from1DTo2DRestructuring(std::vector<std::vector<double> > & two_d_data, std::vector<double> & one_d_data, int spacing);
 
   double phi(double t);
-  double PHI(double t);
-  double u_k(double x, std::vector<double> & discretizations, double k);
-  double U_K(double x, std::vector<double> & discretizations, double k);
+  double phiDeriv(double t);
+  double uk(double x, std::vector<double> & discretizations, double k);
+  double ukDeriv(double x, std::vector<double> & discretizations, double k);
   void tridag(std::vector<double> & a, std::vector<double> & b, std::vector<double> & c, std::vector<double> & r, std::vector<double> & u);
   std::vector<double> getCoefficients(std::vector<double> & y, double h, double alpha, double beta);
   //void iterationStep(int nDim, std::vector<double> & coefficients, std::vector<double> & data);
@@ -221,15 +221,15 @@ public:
   bool checkUB(double upper_bound);
   bool checkLB(double lower_bound);
 
-  std::vector<double> get_cellPoint0(){return _cellPoint0;};
-  std::vector<double> get_cellDxs(){return _cellDxs;};
+  std::vector<double> getCellPoint0(){return _cell_point_0;};
+  std::vector<double> getCellDxs(){return _cell_dxs;};
 
 private:
   int _number_of_points;
   double _p;
   std::vector<double> _values;
-  //std::vector<double> _cellPoint0;
-  //std::vector<double> _cellDxs;
+  //std::vector<double> _cell_point_0;
+  //std::vector<double> _cell_dxs;
   std::vector< std::vector<double> > _point_coordinates;
 };
 
@@ -242,9 +242,9 @@ private:
 //  ~NDlinear();
 //  double linear_interpolation(std::vector<double> point_coordinate);
 //  std::vector<double> getValues(std::vector<int> & loopLocator);
-//  int fromNDto1Dconverter(std::vector<int> coordinate);
+//  int fromNDTo1DConverter(std::vector<int> coordinate);
 //  bool checkBoundaries(std::vector<double> point);
-//  std::vector<int> from1DtoNDconverter(int oneDcoordinate, std::vector<int> indexes);
+//  std::vector<int> from1DToNDConverter(int one_d_coordinate, std::vector<int> indexes);
 //
 //  bool checkUB(double upper_bound);
 //  bool checkLB(double lower_bound);
@@ -276,7 +276,7 @@ private:
   std::vector< std::vector<double> > _point_coordinates;
   int _precision;
   std::vector< std::vector<double> > _unit_vector;
-  void MSinitialization();
+  void msInitialization();
   double cosValueBetweenVectors(std::vector<double> point1, std::vector<double> point2);
 };
 

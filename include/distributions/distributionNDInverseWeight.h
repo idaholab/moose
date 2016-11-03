@@ -67,8 +67,8 @@ public:
       int numberDiscretization = 15;
 
       std::vector<std::vector<double> > discretizations;
-      std::vector<double> cellPoint0 = _interpolator.get_cellPoint0();
-      std::vector<double> cellDxs = _interpolator.get_cellDxs();
+      std::vector<double> cellPoint0 = _interpolator.getCellPoint0();
+      std::vector<double> cellDxs = _interpolator.getCellDxs();
 
       std::cout<<"Discretization points for ND spline for inverseWeight"<< std::endl;
       for(int i=0; i<n_dimensions; i++){
@@ -91,12 +91,12 @@ public:
       std::vector<double> PDFvalues (totalNumberOfValues);
 
       for (int i=0; i<totalNumberOfValues; i++){
-        std::vector<int> NDcoordinateIndex = oneDtoNDconverter(i, discretizationSizes);
-        std::vector<double> NDcoordinate(n_dimensions);
+        std::vector<int> nd_coordinateIndex = oneDtoNDconverter(i, discretizationSizes);
+        std::vector<double> nd_coordinate(n_dimensions);
         for (int j=0; j<n_dimensions; j++){
-          NDcoordinate.at(j) = discretizations.at(j)[NDcoordinateIndex.at(j)];
+          nd_coordinate.at(j) = discretizations.at(j)[nd_coordinateIndex.at(j)];
         }
-        PDFvalues.at(i) = _interpolator.interpolateAt(NDcoordinate);
+        PDFvalues.at(i) = _interpolator.interpolateAt(nd_coordinate);
       }
       _CDFspline = BasicMultiDimensionalCartesianSpline(discretizations, PDFvalues, alpha, beta, false);
     }
@@ -110,7 +110,7 @@ public:
   Pdf(std::vector<double> x)
   {
     if (_CDFprovided){
-      return _interpolator.NDderivative(x);
+      return _interpolator.ndDerivative(x);
     }
     else
       return _interpolator.interpolateAt(x);
@@ -136,7 +136,7 @@ public:
     _tolerance = tolerance;
     _initial_divisions = (int)initial_divisions;
 
-    _interpolator.updateRNGparameters(_tolerance,_initial_divisions);
+    _interpolator.updateRNGParameters(_tolerance,_initial_divisions);
 
     _CDFspline.updateRNGparameter(_tolerance,_initial_divisions);
 
@@ -148,7 +148,7 @@ public:
   InverseCdf(double F, double g)
   {
     if (_CDFprovided)
-      return _interpolator.NDinverseFunctionGrid(F,g);
+      return _interpolator.ndInverseFunctionGrid(F,g);
     else{
       return _CDFspline.InverseCdf(F,g);
     }

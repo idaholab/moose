@@ -120,8 +120,8 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
        discretization_temp.push_back(disc_value);
      }
      discretizations.push_back(discretization_temp);
-     _lowerBounds.push_back(discretization_temp.at(0));
-     _upperBounds.push_back(discretization_temp.back());
+     _lower_bounds.push_back(discretization_temp.at(0));
+     _upper_bounds.push_back(discretization_temp.back());
    }
 
    std::vector< double > values (numberValues);
@@ -129,7 +129,7 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
      std::vector<int> intCoordinates;
      base10tobaseN(i,10,intCoordinates);
 
-     std::vector<double> pointCoordinates(dimensions);
+     std::vector<double> point_coordinates(dimensions);
      std::vector<int> intCoordinatesFormatted(dimensions);
 
      for(unsigned int j=0; j<dimensions; j++)
@@ -138,9 +138,9 @@ void BasicMultivariateNormal::BasicMultivariateNormal_init(unsigned int &rows, u
        intCoordinatesFormatted.at(j) = intCoordinates.at(j);
 
      for(unsigned int j=0; j<intCoordinates.size(); j++)
-       pointCoordinates.at(j) = discretizations.at(j).at(intCoordinatesFormatted.at(j));
+       point_coordinates.at(j) = discretizations.at(j).at(intCoordinatesFormatted.at(j));
 
-     values.at(i) = getPdf(pointCoordinates, _mu, _inverse_cov_matrix);
+     values.at(i) = getPdf(point_coordinates, _mu, _inverse_cov_matrix);
    }
 
    _cartesianDistribution = BasicMultiDimensionalCartesianSpline(discretizations,values,alpha,beta,false);
@@ -264,8 +264,8 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vecCovMatri
       double disc_value = mu.at(i) - 6.0 * sigma + deltaSigma * (double)n;
       discretization_temp.push_back(disc_value);
     }
-    _lowerBounds.push_back(discretization_temp.at(0));
-    _upperBounds.push_back(discretization_temp.back());
+    _lower_bounds.push_back(discretization_temp.at(0));
+    _upper_bounds.push_back(discretization_temp.back());
   }
 
 }

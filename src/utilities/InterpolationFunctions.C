@@ -16,9 +16,9 @@ InterpolationFunctions::InterpolationFunctions()
 {
 }
 
-InterpolationFunctions::InterpolationFunctions(std::vector<double> x_cordinates, std::vector<double> y_cordinates, custom_dist_fit_type type):
-  _x_coordinates(x_cordinates),
-  _y_coordinates(y_cordinates),
+InterpolationFunctions::InterpolationFunctions(std::vector<double> x_coordinates, std::vector<double> y_coordinates, custom_dist_fit_type type):
+  _x_coordinates(x_coordinates),
+  _y_coordinates(y_coordinates),
   _type(type)
 {
   if(_type == CUBIC_SPLINE){
@@ -40,10 +40,10 @@ InterpolationFunctions::interpolation(double x_point){
 
     switch (_type) {
       case STEP_LEFT:
-        interp_value = interpolation_Step_Left(x_point);
+        interp_value = interpolationStepLeft(x_point);
         break;
       case STEP_RIGHT:
-        interp_value = interpolation_Step_Right(x_point);
+        interp_value = interpolationStepRight(x_point);
         break;
       case LINEAR:
           interp_value = _linear.sample(x_point);
@@ -59,7 +59,7 @@ InterpolationFunctions::interpolation(double x_point){
 }
 
 double
-InterpolationFunctions::interpolation_Step_Left (double x_point){
+InterpolationFunctions::interpolationStepLeft (double x_point){
 
   int pivotPoint=0;
 
@@ -73,7 +73,7 @@ InterpolationFunctions::interpolation_Step_Left (double x_point){
 }
 
 double
-InterpolationFunctions::interpolation_Step_Right (double x_point){
+InterpolationFunctions::interpolationStepRight (double x_point){
   int pivotPoint=0;
 
   for (unsigned int i=0; i<_x_coordinates.size()-1; i++){
@@ -91,13 +91,13 @@ InterpolationFunctions::cumulativeInterpolation(double x_point){
 
     switch (_type) {
       case STEP_LEFT:
-        interp_value = cumulativeInterpolation_Step_Left(x_point);
+        interp_value = cumulativeInterpolationStepLeft(x_point);
         break;
       case STEP_RIGHT:
-        interp_value = cumulativeInterpolation_Step_Right(x_point);
+        interp_value = cumulativeInterpolationStepRight(x_point);
         break;
       case LINEAR:
-          interp_value = cumulativeInterpolation_Linear(x_point);
+          interp_value = cumulativeInterpolationLinear(x_point);
         break;
       default:
           interp_value = -10000000000;
@@ -107,7 +107,7 @@ InterpolationFunctions::cumulativeInterpolation(double x_point){
 }
 
 double
-InterpolationFunctions::cumulativeInterpolation_Step_Left(double x_point){
+InterpolationFunctions::cumulativeInterpolationStepLeft(double x_point){
   double value;
 
   std::vector<double> CDF (_x_coordinates.size());
@@ -130,7 +130,7 @@ InterpolationFunctions::cumulativeInterpolation_Step_Left(double x_point){
 }
 
 double
-InterpolationFunctions::cumulativeInterpolation_Step_Right(double x_point){
+InterpolationFunctions::cumulativeInterpolationStepRight(double x_point){
   double value;
 
   std::vector<double> CDF (_x_coordinates.size());
@@ -153,7 +153,7 @@ InterpolationFunctions::cumulativeInterpolation_Step_Right(double x_point){
 }
 
 double
-InterpolationFunctions::cumulativeInterpolation_Linear(double x_point){
+InterpolationFunctions::cumulativeInterpolationLinear(double x_point){
   double value;
 
   std::vector<double> CDF (_x_coordinates.size());

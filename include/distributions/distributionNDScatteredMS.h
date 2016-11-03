@@ -50,7 +50,7 @@ public:
   std::vector<double>
   InverseCdf(double F, double g)
   {
-   return _interpolator.NDinverseFunctionGrid(F,g);
+   return _interpolator.ndInverseFunctionGrid(F,g);
    //return _interpolator.NDinverseFunction(min, max);
   };
 

@@ -26,7 +26,7 @@ bool checkIfdoubleIsInt(double value){
                 return false;
 }
 
-void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::vector< std::vector<double> > & discretizationValues, std::vector<double> & values){
+void readOrderedNDArray(std::string & filename, int & number_of_dimensions, std::vector< std::vector<double> > & discretization_values, std::vector<double> & values){
     //FILE* pFile = fopen("filename", "rb");
     // file structure
     // - int number of dimensions                                   1
@@ -36,32 +36,32 @@ void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::v
 
     // location of first CDF value point = 1 + N + sum (N_i*d_i)
 
- std::cerr << "readOrderedNDarray" << std::endl;
+ std::cerr << "readOrderedNDArray" << std::endl;
 
  std::vector<double> data;
- data = read1Darray(filename);
+ data = read1DArray(filename);
 
  int startingPoint = 0;
  if (checkIfdoubleIsInt(data[startingPoint]))
-         numberOfDimensions = (int)data[startingPoint];
+         number_of_dimensions = (int)data[startingPoint];
  else
-         throwError("readOrderedNDarray: error in" << filename << "; number of dimensions must be integer");
- //std::cerr << "numberOfDimensions: " << numberOfDimensions << std::endl;
+         throwError("readOrderedNDArray: error in" << filename << "; number of dimensions must be integer");
+ //std::cerr << "number_of_dimensions: " << number_of_dimensions << std::endl;
 
-    std::vector<int> discretizations (numberOfDimensions);
+    std::vector<int> discretizations (number_of_dimensions);
 
     startingPoint++;
     //std::cerr << "discretizations" << std::endl;
-    for (int i=0; i<numberOfDimensions; i++){
+    for (int i=0; i<number_of_dimensions; i++){
         if (checkIfdoubleIsInt(data[startingPoint]))
                 discretizations[i] = (int)data[startingPoint];
         else
-                 throwError("readOrderedNDarray: error in" << filename << "; number of discretizaions must be integer");
+                 throwError("readOrderedNDArray: error in" << filename << "; number of discretizaions must be integer");
         //std::cerr << "discretizations["<< i << "]: " << discretizations[i] << std::endl;
         startingPoint++;
     }
 
-    for (int i=0; i<numberOfDimensions; i++){
+    for (int i=0; i<number_of_dimensions; i++){
      //std::cerr << "Dimension: " << i << std::endl;
         std::vector<double> tempDiscretization;
         for (int j=0; j<discretizations[i]; j++){
@@ -70,11 +70,11 @@ void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::v
             startingPoint++;
         }
         //std::cerr << " - " <<  tempDiscretization.size() << std::endl;
-        discretizationValues.push_back(tempDiscretization);
+        discretization_values.push_back(tempDiscretization);
     }
 
     int numberofValues = 1;
-    for (int i=0; i<numberOfDimensions; i++)
+    for (int i=0; i<number_of_dimensions; i++)
      numberofValues *= discretizations[i];
 
     for (int n=0; n<numberofValues; n++){
@@ -82,57 +82,57 @@ void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::v
      startingPoint++;
     }
 
-    std::cerr << "Completed readOrderedNDarray" << std::endl;
+    std::cerr << "Completed readOrderedNDArray" << std::endl;
 }
 
-void readScatteredNDarray(std::string & filename, int & numberOfDimensions, unsigned int & numberOfPoints, std::vector< std::vector<double> > & pointcoordinates, std::vector<double> & values){
+void readScatteredNDArray(std::string & filename, int & number_of_dimensions, unsigned int & number_of_points, std::vector< std::vector<double> > & point_coordinates, std::vector<double> & values){
  // int - number of dimensions d
  // int - number of points n
  // [[double]]  - point coordinates
  // [double]  - point values
 
  std::vector<double> data;
- data = read1Darray(filename);
+ data = read1DArray(filename);
 
  if (checkIfdoubleIsInt(data[0]))
-         numberOfDimensions = (int)data[0];
+         number_of_dimensions = (int)data[0];
  else
-         throwError("readScatteredNDarray: error in" << filename << "; number of dimensions must be integer");
- numberOfDimensions = (int)data[0];
+         throwError("readScatteredNDArray: error in" << filename << "; number of dimensions must be integer");
+ number_of_dimensions = (int)data[0];
 
  if (checkIfdoubleIsInt(data[1]))
-         numberOfPoints = (int)data[1];
+         number_of_points = (int)data[1];
  else
-         throwError("readScatteredNDarray: error in" << filename << "; number of points must be integer");
+         throwError("readScatteredNDArray: error in" << filename << "; number of points must be integer");
 
  int startingPoint = 2;
 
- for (unsigned int n=0; n<numberOfPoints; n++){
-  std::vector<double> tempVector (numberOfDimensions);
-  for (int nDim=0; nDim<numberOfDimensions; nDim++){
+ for (unsigned int n=0; n<number_of_points; n++){
+  std::vector<double> tempVector (number_of_dimensions);
+  for (int nDim=0; nDim<number_of_dimensions; nDim++){
    tempVector[nDim] = data[startingPoint];
    startingPoint += 1;
   }
-  pointcoordinates.push_back(tempVector);
+  point_coordinates.push_back(tempVector);
  }
 
- //startingPoint += numberOfPoints * numberOfDimensions;
+ //startingPoint += number_of_points * number_of_dimensions;
 
- for (unsigned int n=0; n<numberOfPoints; n++){
+ for (unsigned int n=0; n<number_of_points; n++){
   values.push_back(data[startingPoint]);
   startingPoint += 1;
  }
 
- std::cerr << "Completed readScatteredNDarray" << std::endl;
+ std::cerr << "Completed readScatteredNDArray" << std::endl;
 
  //check that data info is consistent
- if (values.size() != pointcoordinates.size())
+ if (values.size() != point_coordinates.size())
   throwError("Data contained in " << filename << " is not complete: point coordinates and values do not match.");
- if (numberOfPoints != pointcoordinates.size())
+ if (number_of_points != point_coordinates.size())
   throwError("Data contained in " << filename << " is not complete: expected number of points and point coordinates do not match.");
 
-//for (int n=0; n<numberOfPoints; n++){
-//       std::cout<< pointcoordinates[n][0] << " ; " << pointcoordinates[n][1] << " : " << values[n] << std::endl;
+//for (int n=0; n<number_of_points; n++){
+//       std::cout<< point_coordinates[n][0] << " ; " << point_coordinates[n][1] << " : " << values[n] << std::endl;
 // }
 
 }
@@ -144,7 +144,7 @@ void readMatrix(const std::string filename, unsigned int & rows, unsigned int & 
 
     std::vector <double> v;
 
-    import_matrix_from_txt_file(filename,v,rows,columns);
+    importMatrixFromTxtFile(filename,v,rows,columns);
 
     for (unsigned int i=0;i<rows;i++){
      std::vector<double> temp;
@@ -155,7 +155,7 @@ void readMatrix(const std::string filename, unsigned int & rows, unsigned int & 
 }
 
 
-unsigned int ReadNumbers(const std::string & s, std::vector <double> & v ) {
+unsigned int readNumbers(const std::string & s, std::vector <double> & v ) {
     std::istringstream is( s );
     double n;
     while( is >> n )
@@ -167,22 +167,22 @@ unsigned int ReadNumbers(const std::string & s, std::vector <double> & v ) {
 
 
 
-void import_matrix_from_txt_file(const std::string filename_X, std::vector <double>& v, unsigned int& rows, unsigned int& cols){
+void importMatrixFromTxtFile(const std::string filename_x, std::vector <double>& v, unsigned int& rows, unsigned int& cols){
     std::ifstream file_X;
     std::string line;
 
-    file_X.open(filename_X.c_str());
+    file_X.open(filename_x.c_str());
     if (file_X.is_open())
     {
         unsigned int i=0;
         getline(file_X, line);
 
-        cols =ReadNumbers( line, v );
+        cols =readNumbers( line, v );
         //std::cout << "cols:" << cols << std::endl;
 
         for ( i=1;i<32767;i++){
             if (!getline(file_X, line) ) break;
-            ReadNumbers( line, v );
+            readNumbers( line, v );
         }
 
         rows=i;
@@ -192,7 +192,7 @@ void import_matrix_from_txt_file(const std::string filename_X, std::vector <doub
         file_X.close();
     }
     else{
-     throwError("Failure to open file:" << filename_X);
+     throwError("Failure to open file:" << filename_x);
     }
 //    for (int i=0;i<rows;i++){
 //        for (int j=0;j<cols;j++)
@@ -203,7 +203,7 @@ void import_matrix_from_txt_file(const std::string filename_X, std::vector <doub
 
 
 
-std::vector<double> read1Darray(std::string filename){
+std::vector<double> read1DArray(std::string filename){
  //numbers are separated by newlines
 
         std::vector<double> data;

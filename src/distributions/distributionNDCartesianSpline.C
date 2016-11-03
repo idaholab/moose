@@ -73,10 +73,10 @@
       std::vector< std::vector<double> > discretizations;
       _interpolator.getDiscretizations(discretizations);
       int numberofValues = 1;
-      int numberOfDimensions = discretizations.size();
-      std::vector<int> discretizationSizes(numberOfDimensions);
+      int number_of_dimensions = discretizations.size();
+      std::vector<int> discretizationSizes(number_of_dimensions);
 
-      for (int i=0; i<numberOfDimensions; i++){
+      for (int i=0; i<number_of_dimensions; i++){
         numberofValues *= discretizations.at(i).size();
         discretizationSizes.at(i) = discretizations.at(i).size();
       }
@@ -84,12 +84,12 @@
       std::vector<double> CDFvalues(numberofValues);
 
       for (int i=0; i<numberofValues; i++){
-        std::vector<int> NDcoordinateIndex = oneDtoNDconverter(i, discretizationSizes);
-        std::vector<double> NDcoordinate(numberOfDimensions);
-        for (int j=0; j<numberOfDimensions; j++)
-          NDcoordinate.at(j) = discretizations.at(j)[NDcoordinateIndex.at(j)];
-        CDFvalues.at(i) = _interpolator.integralSpline(NDcoordinate);
-        //std::cout<< NDcoordinate.at(0) << " " << NDcoordinate.at(1) << " : " << CDFvalues.at(i) << std::endl;
+        std::vector<int> nd_coordinateIndex = oneDtoNDconverter(i, discretizationSizes);
+        std::vector<double> nd_coordinate(number_of_dimensions);
+        for (int j=0; j<number_of_dimensions; j++)
+          nd_coordinate.at(j) = discretizations.at(j)[nd_coordinateIndex.at(j)];
+        CDFvalues.at(i) = _interpolator.integralSpline(nd_coordinate);
+        //std::cout<< nd_coordinate.at(0) << " " << nd_coordinate.at(1) << " : " << CDFvalues.at(i) << std::endl;
       }
       _CDFinterpolator = NDSpline(discretizations,CDFvalues,alpha,beta);
     }
@@ -100,7 +100,7 @@
   BasicMultiDimensionalCartesianSpline::Pdf(std::vector<double> x)
   {
     if (_CDFprovided)
-      return _interpolator.NDderivative(x);
+      return _interpolator.ndDerivative(x);
     else
       return _interpolator.interpolateAt(x);
   }
@@ -128,9 +128,9 @@
   BasicMultiDimensionalCartesianSpline::InverseCdf(double F, double g)
   {
     if (_CDFprovided == true)
-      return _interpolator.NDinverseFunctionGrid(F,g);
+      return _interpolator.ndInverseFunctionGrid(F,g);
     else{
-      return _CDFinterpolator.NDinverseFunctionGrid(F,g);
+      return _CDFinterpolator.ndInverseFunctionGrid(F,g);
     }
   }
 
@@ -141,7 +141,7 @@
       if (_CDFprovided){
         throwError("BasicMultiDimensionalCartesianSpline Distribution error: inverseMarginal calculation not available if CDF provided");
       }else{
-        value = _interpolator.spline_cartesian_inverse_marginal(F, dimension, 0.01);
+        value = _interpolator.splineCartesianInverseMarginal(F, dimension, 0.01);
       }
     }else
       throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF value for inverse marginal distribution is above 1.0");
@@ -168,10 +168,10 @@
     _initial_divisions = (int)initial_divisions;
 
     if (_CDFprovided)
-      _interpolator.updateRNGparameters(_tolerance,_initial_divisions);
+      _interpolator.updateRNGParameters(_tolerance,_initial_divisions);
     else{
-      _interpolator.updateRNGparameters(_tolerance,_initial_divisions);
-      _CDFinterpolator.updateRNGparameters(_tolerance,_initial_divisions);
+      _interpolator.updateRNGParameters(_tolerance,_initial_divisions);
+      _CDFinterpolator.updateRNGParameters(_tolerance,_initial_divisions);
     }
   }
 
@@ -180,7 +180,7 @@
     if (_CDFprovided){
       throwError("BasicMultiDimensionalCartesianSpline Distribution error: Marginal calculation not available if CDF provided");
     }else{
-      value = _interpolator.spline_cartesian_marginal_integration(x, dimension);
+      value = _interpolator.splineCartesianMarginalIntegration(x, dimension);
     }
     return value;
   }

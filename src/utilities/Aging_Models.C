@@ -10,6 +10,6 @@
 
 
 
-void Aging_Models(std::vector<double> /* input_1 */, std::vector<double> /* input_2 */, std::vector<std::vector<double> > /* output */){
+void agingModels(std::vector<double> /* input_1 */, std::vector<double> /* input_2 */, std::vector<std::vector<double> > /* output */){
     // To be added
 }

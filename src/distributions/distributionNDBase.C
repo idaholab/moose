@@ -87,16 +87,16 @@ double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector
   int counter=1;
 
   for(int i=numberOfVerteces; i>0; i--){
-    std::vector<double> index = int2binary(i-1,center.size());
-    std::vector<double> NDcoordinate(center.size());
+    std::vector<double> index = intToBinary(i-1,center.size());
+    std::vector<double> nd_coordinate(center.size());
 
     for(unsigned int j=0; j<center.size(); j++){
       if (index.at(j)==0)
-        NDcoordinate.at(j) = center.at(j) - dx.at(j)/2.0;
+        nd_coordinate.at(j) = center.at(j) - dx.at(j)/2.0;
       else
-        NDcoordinate.at(j) = center.at(j) + dx.at(j)/2.0;
+        nd_coordinate.at(j) = center.at(j) + dx.at(j)/2.0;
     }
-    value += Cdf(NDcoordinate) * sign;
+    value += Cdf(nd_coordinate) * sign;
 
     sign = sign * (-1.0);
     counter++;
@@ -107,14 +107,14 @@ double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector
   return value;
 }
 
-std::vector<int> BasicDistributionND::oneDtoNDconverter(int oneDcoordinate, std::vector<int> indexes){
+std::vector<int> BasicDistributionND::oneDtoNDconverter(int one_d_coordinate, std::vector<int> indexes){
   /**
    *  This function makes a conversion of a 1D array into an ND array.
    *  The objective it to determine the coordinates of an ND point from its coordinate in a 1D vector.
    *  The weights are needed since I do not know a priori the range of ND component.
    */
     int n_dimensions = indexes.size();
-    std::vector<int> NDcoordinates (n_dimensions);
+    std::vector<int> nd_coordinates (n_dimensions);
     std::vector<int> weights (n_dimensions);
 
     weights.at(0)=1;
@@ -123,13 +123,13 @@ std::vector<int> BasicDistributionND::oneDtoNDconverter(int oneDcoordinate, std:
 
     for (int nDim=(n_dimensions-1); nDim>=0; nDim--){
  if (nDim>0){
-   NDcoordinates.at(nDim) = oneDcoordinate/weights.at(nDim);
-   oneDcoordinate -= NDcoordinates.at(nDim)*weights.at(nDim);
+   nd_coordinates.at(nDim) = one_d_coordinate/weights.at(nDim);
+   one_d_coordinate -= nd_coordinates.at(nDim)*weights.at(nDim);
  }
  else
-   NDcoordinates.at(0) = oneDcoordinate;
+   nd_coordinates.at(0) = one_d_coordinate;
     }
-    return NDcoordinates;
+    return nd_coordinates;
 }
 
 

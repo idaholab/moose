@@ -10,9 +10,9 @@ MicroSphere::MicroSphere(std::string filename, double p, int precision){
  _p = p;
  _precision = precision;
 
- readScatteredNDarray(_data_filename, _dimensions, _number_of_points, _point_coordinates, _values);
+ readScatteredNDArray(_data_filename, _dimensions, _number_of_points, _point_coordinates, _values);
 
- MSinitialization();
+ msInitialization();
  _completed_init = true;
 }
 
@@ -25,7 +25,7 @@ MicroSphere::MicroSphere(double p, int precision)
     _dimensions=0;
 }
 
-void MicroSphere::MSinitialization(){
+void MicroSphere::msInitialization(){
   std::srand (time(NULL));
 
  for (int j=0; j<_precision; j++){
@@ -51,7 +51,7 @@ MicroSphere::fit(std::vector< std::vector<double> > coordinates, std::vector<dou
   _number_of_points = coordinates.size();
   _point_coordinates = coordinates;
   _values = values;
-  MSinitialization();
+  msInitialization();
   _completed_init = true;
 }
 

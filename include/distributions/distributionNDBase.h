@@ -40,7 +40,7 @@ public:
 
    std::string & getType();
 
-   std::vector<int> oneDtoNDconverter(int oneDcoordinate, std::vector<int> indexes);
+   std::vector<int> oneDtoNDconverter(int one_d_coordinate, std::vector<int> indexes);
 
 protected:
    std::string _type; ///< Distribution type

@@ -85,11 +85,11 @@ public:
   double pdfInTransformedSpace(std::vector<double> x);
 
   double returnLowerBound(int dimension){
-    return _lowerBounds.at(dimension);
+    return _lower_bounds.at(dimension);
   }
 
   double returnUpperBound(int dimension){
-    return _upperBounds.at(dimension);
+    return _upper_bounds.at(dimension);
   }
 
 private:
@@ -107,8 +107,8 @@ private:
   std::string _covarianceType;
   double _determinant_cov_matrix;
 
-  std::vector<double> _upperBounds;
-  std::vector<double> _lowerBounds;
+  std::vector<double> _upper_bounds;
+  std::vector<double> _lower_bounds;
 
   BasicMultiDimensionalCartesianSpline _cartesianDistribution;
 
