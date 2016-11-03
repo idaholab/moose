@@ -14,6 +14,7 @@
 
 
 #include "libmesh/petsc_macro.h"
+#include "libmesh/libmesh_config.h"
 
 #include "Moose.h"
 #include "Factory.h"
@@ -54,6 +55,9 @@
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "EquationProblem.h"
+#if LIBMESH_HAVE_SLEPC
+#include "EigenProblem.h"
+#endif
 
 // kernels
 #include "TimeDerivative.h"
@@ -484,7 +488,9 @@ registerObjects(Factory & factory)
   registerProblem(FEProblem);
   registerProblem(DisplacedProblem);
   registerProblem(EquationProblem);
-
+#if LIBMESH_HAVE_SLEPC
+  registerProblem(EigenProblem);
+#endif
 
   // kernels
   registerKernel(TimeDerivative);

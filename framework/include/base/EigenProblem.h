@@ -37,6 +37,13 @@ public:
   EigenProblem(const InputParameters & parameters);
 
   virtual ~EigenProblem();
+
+  virtual void solve() override;
+  virtual bool converged() override;
+  virtual void outputStep(ExecFlagType type) override;
+
+private:
+  NonlinearEigenSystem *_nl_eigen;
 };
 
 #endif /* LIBMESH_HAVE_SLEPC */

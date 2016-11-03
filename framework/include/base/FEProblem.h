@@ -406,7 +406,7 @@ public:
    * Then tell the OutputWarehouse to do its thing
    * @param type The type execution flag (see Moose.h)
    */
-  void outputStep(ExecFlagType type);
+  virtual void outputStep(ExecFlagType type);
 
   ///@{
   /**

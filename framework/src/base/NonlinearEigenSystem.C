@@ -25,13 +25,26 @@
 // libmesh includes
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/petsc_matrix.h"
+#include "libmesh/eigen_system.h"
+
+namespace Moose {
+  void assemble_matrix(EquationSystems & es, const std::string & system_name)
+  {
+    FEProblem * p = es.parameters.get<FEProblem *>("_fe_problem");
+    EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
+
+    p->computeJacobian(*eigen_system.solution.get(), *eigen_system.matrix_A);
+  }
+}
 
 
 NonlinearEigenSystem::NonlinearEigenSystem(FEProblem & fe_problem, const std::string & name) :
   NonlinearSystemBase(fe_problem, fe_problem.es().add_system<TransientEigenSystem>(name), name),
   _transient_sys(fe_problem.es().get_system<TransientEigenSystem>(name))
 {
-
+  // Give the system a pointer to the matrix assembly
+  // function defined below.
+  sys().attach_assemble_function(Moose::assemble_matrix);
 }
 
 NonlinearEigenSystem::~NonlinearEigenSystem()
@@ -96,6 +109,5 @@ NonlinearEigenSystem::nonlinearSolver()
   mooseError("did not implement yet \n");
   return NULL;
 }
-
 
 #endif /* LIBMESH_HAVE_SLEPC */
