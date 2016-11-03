@@ -494,7 +494,9 @@ NonlinearSystem::setDecomposition(const std::vector<std::string>& splits)
 void
 NonlinearSystem::setupFieldDecomposition()
 {
-  if (!_have_decomposition) return;
+  if (!_have_decomposition)
+    return;
+
   MooseSharedPointer<Split> top_split = getSplit(_decomposition_split);
   top_split->setup();
 }
