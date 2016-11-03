@@ -51,7 +51,7 @@ EquationProblem::EquationProblem(const InputParameters & parameters) :
     std::ostringstream oss;
     oss << "_" << i;
     // do not project, since this will be recomputed, but make it ghosted, since the near nullspace builder might march over all nodes
-    _nl.addVector("TransposeNullSpace" + oss.str(), false, GHOSTED);
+    _nl->addVector("TransposeNullSpace" + oss.str(), false, GHOSTED);
   }
   _subspace_dim["TransposeNullSpace"] = dimTransposeNullSpace;
   for (unsigned int i = 0; i < dimNearNullSpace; ++i)

@@ -171,7 +171,7 @@ NonlinearSystemBase::init()
 
 
 void
-NonlinearSystem::restoreSolutions()
+NonlinearSystemBase::restoreSolutions()
 {
   // call parent
   SystemBase::restoreSolutions();
@@ -181,7 +181,7 @@ NonlinearSystem::restoreSolutions()
 
 
 void
-NonlinearSystem::initialSetup()
+NonlinearSystemBase::initialSetup()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -202,7 +202,7 @@ NonlinearSystem::initialSetup()
 }
 
 void
-NonlinearSystem::timestepSetup()
+NonlinearSystemBase::timestepSetup()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -244,7 +244,7 @@ NonlinearSystemBase::setDecomposition(const std::vector<std::string>& splits)
 
 
 void
-NonlinearSystem::setupFieldDecomposition()
+NonlinearSystemBase::setupFieldDecomposition()
 {
   if (!_have_decomposition)
     return;
@@ -255,7 +255,7 @@ NonlinearSystem::setupFieldDecomposition()
 
 
 void
-NonlinearSystem::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
+NonlinearSystemBase::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
 {
   parameters.set<SystemBase *>("_sys") = this;
 
@@ -264,7 +264,7 @@ NonlinearSystem::addTimeIntegrator(const std::string & type, const std::string &
 }
 
 void
-NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+NonlinearSystemBase::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -287,7 +287,7 @@ NonlinearSystem::addKernel(const std::string & kernel_name, const std::string & 
 }
 
 void
-NonlinearSystem::addNodalKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+NonlinearSystemBase::addNodalKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -303,7 +303,7 @@ NonlinearSystem::addNodalKernel(const std::string & kernel_name, const std::stri
 }
 
 void
-NonlinearSystem::addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+NonlinearSystemBase::addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   MooseSharedPointer<ScalarKernel> kernel =
     _factory.create<ScalarKernel>(kernel_name, name, parameters);
@@ -319,7 +319,7 @@ NonlinearSystem::addScalarKernel(const std::string & kernel_name, const std::str
 }
 
 void
-NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
+NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
   // ThreadID
   THREAD_ID tid = 0;
@@ -384,7 +384,7 @@ NonlinearSystem::addBoundaryCondition(const std::string & bc_name, const std::st
 }
 
 void
-NonlinearSystem::addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters)
+NonlinearSystemBase::addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters)
 {
   MooseSharedPointer<Constraint> constraint = _factory.create<Constraint>(c_name, name, parameters);
   _constraints.addObject(constraint);
@@ -394,7 +394,7 @@ NonlinearSystem::addConstraint(const std::string & c_name, const std::string & n
 }
 
 void
-NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
+NonlinearSystemBase::addDiracKernel(const  std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -404,7 +404,7 @@ NonlinearSystem::addDiracKernel(const  std::string & kernel_name, const std::str
 }
 
 void
-NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & name, InputParameters parameters)
+NonlinearSystemBase::addDGKernel(std::string dg_kernel_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
@@ -416,7 +416,7 @@ NonlinearSystem::addDGKernel(std::string dg_kernel_name, const std::string & nam
 }
 
 void
-NonlinearSystem::addInterfaceKernel(std::string interface_kernel_name, const std::string & name, InputParameters parameters)
+NonlinearSystemBase::addInterfaceKernel(std::string interface_kernel_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
@@ -433,7 +433,7 @@ NonlinearSystem::addInterfaceKernel(std::string interface_kernel_name, const std
 }
 
 void
-NonlinearSystem::addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters)
+NonlinearSystemBase::addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters)
 {
   for (THREAD_ID tid=0; tid < libMesh::n_threads(); ++tid)
   {
@@ -459,20 +459,20 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
 }
 
 void
-NonlinearSystem::addSplit(const  std::string & split_name, const std::string & name, InputParameters parameters)
+NonlinearSystemBase::addSplit(const  std::string & split_name, const std::string & name, InputParameters parameters)
 {
   MooseSharedPointer<Split> split = _factory.create<Split>(split_name, name, parameters);
   _splits.addObject(split);
 }
 
 MooseSharedPointer<Split>
-NonlinearSystem::getSplit(const std::string & name)
+NonlinearSystemBase::getSplit(const std::string & name)
 {
   return _splits.getActiveObject(name);
 }
 
 void
-NonlinearSystem::zeroVectorForResidual(const std::string & vector_name)
+NonlinearSystemBase::zeroVectorForResidual(const std::string & vector_name)
 {
   for (unsigned int i = 0; i < _vecs_to_zero_for_residual.size(); ++i)
     if (vector_name == _vecs_to_zero_for_residual[i])
@@ -482,7 +482,7 @@ NonlinearSystem::zeroVectorForResidual(const std::string & vector_name)
 }
 
 void
-NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::KernelType type)
+NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::KernelType type)
 {
   Moose::perf_log.push("compute_residual()", "Execution");
 
@@ -538,7 +538,7 @@ NonlinearSystem::computeResidual(NumericVector<Number> & residual, Moose::Kernel
 
 
 void
-NonlinearSystem::onTimestepBegin()
+NonlinearSystemBase::onTimestepBegin()
 {
   _time_integrator->preSolve();
   if (_predictor.get())
@@ -546,7 +546,7 @@ NonlinearSystem::onTimestepBegin()
 }
 
 void
-NonlinearSystem::setInitialSolution()
+NonlinearSystemBase::setInitialSolution()
 {
   NumericVector<Number> & initial_solution(solution());
   if (_predictor.get() && _predictor->shouldApply())
@@ -586,13 +586,13 @@ NonlinearSystem::setInitialSolution()
     setConstraintSlaveValues(initial_solution, true);
 }
 
-void NonlinearSystem::setPredictor(MooseSharedPointer<Predictor> predictor)
+void NonlinearSystemBase::setPredictor(MooseSharedPointer<Predictor> predictor)
 {
   _predictor = predictor;
 }
 
 void
-NonlinearSystem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
+NonlinearSystemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 {
   _kernels.subdomainSetup(subdomain, tid);
   _nodal_kernels.subdomainSetup(subdomain, tid);
@@ -601,13 +601,13 @@ NonlinearSystem::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 }
 
 NumericVector<Number> &
-NonlinearSystem::solutionUDot()
+NonlinearSystemBase::solutionUDot()
 {
   return _u_dot;
 }
 
 NumericVector<Number> &
-NonlinearSystem::residualVector(Moose::KernelType type)
+NonlinearSystemBase::residualVector(Moose::KernelType type)
 {
   switch (type)
   {
@@ -620,14 +620,14 @@ NonlinearSystem::residualVector(Moose::KernelType type)
 }
 
 void
-NonlinearSystem::computeTimeDerivatives()
+NonlinearSystemBase::computeTimeDerivatives()
 {
   _time_integrator->preStep();
   _time_integrator->computeTimeDerivatives();
 }
 
 void
-NonlinearSystem::enforceNodalConstraintsResidual(NumericVector<Number> & residual)
+NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & residual)
 {
   THREAD_ID tid = 0; // constraints are going to be done single-threaded
   residual.close();
@@ -652,7 +652,7 @@ NonlinearSystem::enforceNodalConstraintsResidual(NumericVector<Number> & residua
 }
 
 void
-NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian)
+NonlinearSystemBase::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian)
 {
   THREAD_ID tid = 0;    // constraints are going to be done single-threaded
   jacobian.close();
@@ -677,7 +677,7 @@ NonlinearSystem::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian
 }
 
 void
-NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced)
+NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced)
 {
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators = NULL;
 
@@ -754,7 +754,7 @@ NonlinearSystem::setConstraintSlaveValues(NumericVector<Number> & solution, bool
 }
 
 void
-NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool displaced)
+NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool displaced)
 {
   // Make sure the residual is in a good state
   residual.close();
@@ -983,7 +983,7 @@ NonlinearSystem::constraintResiduals(NumericVector<Number> & residual, bool disp
 
 
 void
-NonlinearSystem::computeResidualInternal(Moose::KernelType type)
+NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -1137,7 +1137,7 @@ NonlinearSystem::computeResidualInternal(Moose::KernelType type)
 }
 
 void
-NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
+NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual)
 {
   // We need to close the diag_save_in variables on the aux system before NodalBCs clear the dofs on boundary nodes
   if (_has_save_in)
@@ -1174,7 +1174,7 @@ NonlinearSystem::computeNodalBCs(NumericVector<Number> & residual)
 }
 
 void
-NonlinearSystem::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs)
+NonlinearSystemBase::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs)
 {
   const Node & node = _mesh.nodeRef(node_id);
   unsigned int s = number();
@@ -1187,7 +1187,7 @@ NonlinearSystem::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & do
 }
 
 void
-NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<dof_id_type, std::vector<dof_id_type> > & graph)
+NonlinearSystemBase::findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data, std::map<dof_id_type, std::vector<dof_id_type> > & graph)
 {
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> & nearest_node_locators = geom_search_data._nearest_node_locators;
 
@@ -1280,7 +1280,7 @@ NonlinearSystem::findImplicitGeometricCouplingEntries(GeometricSearchData & geom
 
 
 void
-NonlinearSystem::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jacobian, GeometricSearchData & geom_search_data)
+NonlinearSystemBase::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jacobian, GeometricSearchData & geom_search_data)
 {
   std::map<dof_id_type, std::vector<dof_id_type> > graph;
 
@@ -1297,7 +1297,7 @@ NonlinearSystem::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jaco
 }
 
 void
-NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced)
+NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced)
 {
 #if PETSC_VERSION_LESS_THAN(3,3,0)
 #else
@@ -1591,7 +1591,7 @@ NonlinearSystem::constraintJacobians(SparseMatrix<Number> & jacobian, bool displ
 }
 
 void
-NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
+NonlinearSystemBase::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
 {
   // Compute the diagonal block for scalar variables
   if (_scalar_kernels.hasActiveObjects())
@@ -1610,7 +1610,7 @@ NonlinearSystem::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
 }
 
 void
-NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
+NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 {
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
@@ -1861,7 +1861,7 @@ NonlinearSystem::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
 }
 
 void
-NonlinearSystem::setVariableGlobalDoFs(const std::string & var_name)
+NonlinearSystemBase::setVariableGlobalDoFs(const std::string & var_name)
 {
   AllLocalDofIndicesThread aldit(_sys.system(), { var_name });
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
@@ -1871,7 +1871,7 @@ NonlinearSystem::setVariableGlobalDoFs(const std::string & var_name)
 }
 
 void
-NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
+NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian)
 {
   Moose::perf_log.push("compute_jacobian()", "Execution");
 
@@ -1894,7 +1894,7 @@ NonlinearSystem::computeJacobian(SparseMatrix<Number> & jacobian)
 }
 
 void
-NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
+NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 {
   Moose::perf_log.push("compute_jacobian_block()", "Execution");
 
@@ -1999,7 +1999,7 @@ NonlinearSystem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 }
 
 void
-NonlinearSystem::updateActive(THREAD_ID tid)
+NonlinearSystemBase::updateActive(THREAD_ID tid)
 {
   _element_dampers.updateActive(tid);
   _nodal_dampers.updateActive(tid);
@@ -2020,7 +2020,7 @@ NonlinearSystem::updateActive(THREAD_ID tid)
 }
 
 Real
-NonlinearSystem::computeDamping(const NumericVector<Number> & solution,
+NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
                                 const NumericVector<Number> & update)
 {
   Moose::perf_log.push("compute_dampers()", "Execution");
@@ -2070,7 +2070,7 @@ NonlinearSystem::computeDamping(const NumericVector<Number> & solution,
 }
 
 void
-NonlinearSystem::computeDiracContributions(SparseMatrix<Number> * jacobian)
+NonlinearSystemBase::computeDiracContributions(SparseMatrix<Number> * jacobian)
 {
   Moose::perf_log.push("computeDiracContributions()", "Execution");
 
@@ -2112,21 +2112,21 @@ NonlinearSystem::computeDiracContributions(SparseMatrix<Number> * jacobian)
 }
 
 NumericVector<Number> &
-NonlinearSystem::residualCopy()
+NonlinearSystemBase::residualCopy()
 {
   _need_residual_copy = true;
   return _residual_copy;
 }
 
 NumericVector<Number> &
-NonlinearSystem::residualGhosted()
+NonlinearSystemBase::residualGhosted()
 {
   _need_residual_ghosted = true;
   return _residual_ghosted;
 }
 
 void
-NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
+NonlinearSystemBase::augmentSparsity(SparsityPattern::Graph & sparsity,
                                  std::vector<dof_id_type> & n_nz,
                                  std::vector<dof_id_type> & n_oz)
 {
@@ -2192,7 +2192,7 @@ NonlinearSystem::augmentSparsity(SparsityPattern::Graph & sparsity,
 }
 
 void
-NonlinearSystem::serializeSolution()
+NonlinearSystemBase::serializeSolution()
 {
   if (_need_serialized_solution)
   {
@@ -2207,7 +2207,7 @@ NonlinearSystem::serializeSolution()
  }
 
 void
-NonlinearSystem::setSolution(const NumericVector<Number> & soln)
+NonlinearSystemBase::setSolution(const NumericVector<Number> & soln)
 {
   _current_solution = &soln;
 
@@ -2216,13 +2216,13 @@ NonlinearSystem::setSolution(const NumericVector<Number> & soln)
 }
 
 void
-NonlinearSystem::setSolutionUDot(const NumericVector<Number> & udot)
+NonlinearSystemBase::setSolutionUDot(const NumericVector<Number> & udot)
 {
   _u_dot = udot;
 }
 
 NumericVector<Number> &
-NonlinearSystem::serializedSolution()
+NonlinearSystemBase::serializedSolution()
 {
   if (!_serialized_solution.initialized())
     _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
@@ -2232,7 +2232,7 @@ NonlinearSystem::serializedSolution()
 }
 
 void
-NonlinearSystem::setPreconditioner(MooseSharedPointer<MoosePreconditioner> pc)
+NonlinearSystemBase::setPreconditioner(MooseSharedPointer<MoosePreconditioner> pc)
 {
   if (_preconditioner.get() != NULL)
     mooseError("More than one active Preconditioner detected");
@@ -2241,27 +2241,27 @@ NonlinearSystem::setPreconditioner(MooseSharedPointer<MoosePreconditioner> pc)
 }
 
 void
-NonlinearSystem::setupDampers()
+NonlinearSystemBase::setupDampers()
 {
   _increment_vec = &_sys.add_vector("u_increment", true, GHOSTED);
 }
 
 void
-NonlinearSystem::reinitIncrementAtQpsForDampers(THREAD_ID /*tid*/, const std::set<MooseVariable *> & damped_vars)
+NonlinearSystemBase::reinitIncrementAtQpsForDampers(THREAD_ID /*tid*/, const std::set<MooseVariable *> & damped_vars)
 {
   for (const auto & var : damped_vars)
     var->computeIncrementAtQps(*_increment_vec);
 }
 
 void
-NonlinearSystem::reinitIncrementAtNodeForDampers(THREAD_ID /*tid*/, const std::set<MooseVariable *> & damped_vars)
+NonlinearSystemBase::reinitIncrementAtNodeForDampers(THREAD_ID /*tid*/, const std::set<MooseVariable *> & damped_vars)
 {
   for (const auto & var : damped_vars)
     var->computeIncrementAtNode(*_increment_vec);
 }
 
 void
-NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const
+NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomains) const
 {
   // Check kernel coverage of subdomains (blocks) in your mesh
   std::set<SubdomainID> input_subdomains;
@@ -2309,13 +2309,13 @@ NonlinearSystem::checkKernelCoverage(const std::set<SubdomainID> & mesh_subdomai
 }
 
 bool
-NonlinearSystem::containsTimeKernel()
+NonlinearSystemBase::containsTimeKernel()
 {
   return _time_kernels.hasActiveObjects();
 }
 
 void
-NonlinearSystem::setPCSide(MooseEnum pcs)
+NonlinearSystemBase::setPCSide(MooseEnum pcs)
 {
   if (pcs == "left")
     _pc_side = Moose::PCS_LEFT;
@@ -2328,25 +2328,25 @@ NonlinearSystem::setPCSide(MooseEnum pcs)
 }
 
 bool
-NonlinearSystem::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
+NonlinearSystemBase::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 {
   return _integrated_bcs.hasActiveBoundaryObjects(bnd_id, tid);
 }
 
 bool
-NonlinearSystem::needMaterialOnSide(SubdomainID /*subdomain_id*/, THREAD_ID /*tid*/) const
+NonlinearSystemBase::needMaterialOnSide(SubdomainID /*subdomain_id*/, THREAD_ID /*tid*/) const
 {
   return _doing_dg;
 }
 
 bool
-NonlinearSystem::doingDG() const
+NonlinearSystemBase::doingDG() const
 {
   return _doing_dg;
 }
 
 Real
-NonlinearSystem::relativeSolutionDifferenceNorm()
+NonlinearSystemBase::relativeSolutionDifferenceNorm()
 {
   const NumericVector<Number> & current_solution  = *currentSolution();
   const NumericVector<Number> & old_solution = solutionOld();

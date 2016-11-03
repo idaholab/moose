@@ -40,7 +40,7 @@ public:
 
 private:
   bool _use_nonlinear;
-  
+
 };
 
 #endif /* EQUATIONPROBLEM_H */

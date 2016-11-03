@@ -68,7 +68,7 @@ CreateProblemAction::act()
       _moose_object_pars.set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
       _moose_object_pars.set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
 #endif
-      if(_type == "FEProblem")
+      if (_type == "FEProblem")
         _type = "EquationProblem";
       _problem = _factory.create<FEProblem>(_type, getParam<std::string>("name"), _moose_object_pars);
       if (!_problem.get())

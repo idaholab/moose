@@ -3674,7 +3674,7 @@ FEProblem::computeTransposeNullSpace(NonlinearImplicitSystem & /*sys*/, std::vec
   for (unsigned int i = 0; i < subspaceDim("TransposeNullSpace"); ++i) {
     std::stringstream postfix;
     postfix << "_" << i;
-    sp.push_back(&_nl.getVector("TransposeNullSpace"+postfix.str()));
+    sp.push_back(&_nl->getVector("TransposeNullSpace"+postfix.str()));
   }
 }
 

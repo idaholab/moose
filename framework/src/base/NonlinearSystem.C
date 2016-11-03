@@ -80,12 +80,12 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
   NonlinearSystemBase(fe_problem, fe_problem.es().add_system<TransientNonlinearImplicitSystem>(name), name),
   _transient_sys(fe_problem.es().get_system<TransientNonlinearImplicitSystem>(name))
 {
-  _sys.nonlinear_solver->residual            = Moose::compute_residual;
-  _sys.nonlinear_solver->jacobian            = Moose::compute_jacobian;
-  _sys.nonlinear_solver->bounds              = Moose::compute_bounds;
-  _sys.nonlinear_solver->nullspace           = Moose::compute_nullspace;
-  _sys.nonlinear_solver->transpose_nullspace = Moose::compute_transpose_nullspace;
-  _sys.nonlinear_solver->nearnullspace       = Moose::compute_nearnullspace;
+  nonlinearSolver()->residual            = Moose::compute_residual;
+  nonlinearSolver()->jacobian            = Moose::compute_jacobian;
+  nonlinearSolver()->bounds              = Moose::compute_bounds;
+  nonlinearSolver()->nullspace           = Moose::compute_nullspace;
+  nonlinearSolver()->transpose_nullspace = Moose::compute_transpose_nullspace;
+  nonlinearSolver()->nearnullspace       = Moose::compute_nearnullspace;
 
 #ifdef LIBMESH_HAVE_PETSC
   PetscNonlinearSolver<Real> * petsc_solver = static_cast<PetscNonlinearSolver<Real> *>(_transient_sys.nonlinear_solver.get());
