@@ -408,7 +408,7 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
 #if PETSC_VERSION_LESS_THAN(3,2,0)
   // PETSc 3.2.x
   ierr = MatGetColoring(petsc_mat->mat(), MATCOLORING_LF, &iscoloring);
-  CHKERRABORT(libMesh::COMM_WORLD,ierr);
+  CHKERRABORT(_communicator.get(),ierr);
 #elif PETSC_VERSION_LESS_THAN(3,5,0)
   // PETSc 3.3.x, 3.4.x
   ierr = MatGetColoring(petsc_mat->mat(), MATCOLORINGLF, &iscoloring);
