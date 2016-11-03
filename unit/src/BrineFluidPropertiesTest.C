@@ -158,9 +158,9 @@ BrineFluidPropertiesTest::derivatives()
   _fp->rho_dpTx(p, T, x, rho, drho_dp, drho_dT, drho_dx);
 
   ABS_TEST("rho", rho, _fp->rho(p, T, x), 1.0e-15);
-  REL_TEST("drho_dp", drho_dp, drho_dp_fd, 1.0e-5);
-  REL_TEST("drho_dT", drho_dT, drho_dT_fd, 1.0e-6);
-  REL_TEST("drho_dx", drho_dx, drho_dx_fd, 1.0e-6);
+  REL_TEST("drho_dp", drho_dp, drho_dp_fd, 1.0e-3);
+  REL_TEST("drho_dT", drho_dT, drho_dT_fd, 1.0e-3);
+  REL_TEST("drho_dx", drho_dx, drho_dx_fd, 1.0e-3);
 
   // enthalpy
   Real dh_dp_fd = (_fp->h(p + dp, T, x) - _fp->h(p - dp, T, x)) / (2.0 * dp);
@@ -171,9 +171,9 @@ BrineFluidPropertiesTest::derivatives()
   _fp->h_dpTx(p, T, x, h, dh_dp, dh_dT, dh_dx);
 
   ABS_TEST("h", h, _fp->h(p, T, x), 1.0e-15);
-  REL_TEST("dh_dp", dh_dp, dh_dp_fd, 1.0e-4);
-  REL_TEST("dh_dT", dh_dT, dh_dT_fd, 1.0e-6);
-  REL_TEST("dh_dx", dh_dx, dh_dx_fd, 1.0e-6);
+  REL_TEST("dh_dp", dh_dp, dh_dp_fd, 1.0e-3);
+  REL_TEST("dh_dT", dh_dT, dh_dT_fd, 1.0e-3);
+  REL_TEST("dh_dx", dh_dx, dh_dx_fd, 1.0e-3);
 
   // internal energy
   Real de_dp_fd = (_fp->e(p + dp, T, x) - _fp->e(p - dp, T, x)) / (2.0 * dp);
@@ -184,9 +184,9 @@ BrineFluidPropertiesTest::derivatives()
   _fp->e_dpTx(p, T, x, e, de_dp, de_dT, de_dx);
 
   ABS_TEST("e", e, _fp->e(p, T, x), 1.0e-15);
-  REL_TEST("de_dp", de_dp, de_dp_fd, 5.0e-4);
-  REL_TEST("de_dT", de_dT, de_dT_fd, 1.0e-6);
-  REL_TEST("de_dx", de_dx, de_dx_fd, 1.0e-6);
+  REL_TEST("de_dp", de_dp, de_dp_fd, 1.0e-1);
+  REL_TEST("de_dT", de_dT, de_dT_fd, 1.0e-3);
+  REL_TEST("de_dx", de_dx, de_dx_fd, 1.0e-3);
 
   // Viscosity
   Real drho = 1.0e-4;
@@ -198,7 +198,7 @@ BrineFluidPropertiesTest::derivatives()
   _fp->mu_drhoTx(rho, T, x, mu, dmu_drho, dmu_dT, dmu_dx);
 
   ABS_TEST("mu", mu, _fp->mu(rho, T, x), 1.0e-15);
-  REL_TEST("dmu_dp", dmu_drho, dmu_drho_fd, 1.0e-6);
-  REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-6);
-  REL_TEST("dmu_dx", dmu_dx, dmu_dx_fd, 1.0e-6);
+  REL_TEST("dmu_dp", dmu_drho, dmu_drho_fd, 1.0e-3);
+  REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-3);
+  REL_TEST("dmu_dx", dmu_dx, dmu_dx_fd, 1.0e-3);
 }
