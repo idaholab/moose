@@ -19,9 +19,6 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 
-// petsc 3.3.0 or later needed
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-
 template<>
 InputParameters validParams<Split>()
 {
@@ -82,6 +79,15 @@ Split::Split (const InputParameters & parameters) :
 void
 Split::setup(const std::string& prefix)
 {
+// petsc 3.3.0 or later needed
+#if !defined(LIBMESH_HAVE_PETSC) || PETSC_VERSION_LESS_THAN(3,3,0)
+  mooseError("The Splits functionality requires PETSc 3.3.0 or later.");
+#endif
+
+  // The Split::setup() implementation does not actually depend on any
+  // specific version of PETSc, so there's no need to wrap the entire
+  // function.
+
   // A reference to the PetscOptions
   Moose::PetscSupport::PetscOptions & po = _fe_problem.getPetscOptions();
   // prefix
@@ -293,5 +299,3 @@ Split::setup(const std::string& prefix)
     po.values.push_back(_petsc_options.values[j]);
   }
 }
-
-#endif // #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)

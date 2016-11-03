@@ -20,9 +20,6 @@
 #include "MooseObject.h"
 #include "PetscSupport.h"
 
-// Fieldsplit preconditioner requires EPTSc >= 3.3.0
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-
 // Forward declarations
 class FEProblem;
 
@@ -76,5 +73,4 @@ class Split :
 
 };
 
-#endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 #endif // SPLIT_H
