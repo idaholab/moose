@@ -62,11 +62,11 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
-  [./viscosity]
+  [./enthalpy]
     family = MONOMIAL
     order = CONSTANT
   [../]
-  [./k]
+  [./internal_energy]
     family = MONOMIAL
     order = CONSTANT
   [../]
@@ -111,15 +111,15 @@
      variable = density
      property = density
   [../]
-  [./viscosity]
+  [./enthalpy]
     type = MaterialRealAux
-     variable = viscosity
-     property = viscosity
+     variable = enthalpy
+     property = enthalpy
   [../]
-  [./k]
+  [./internal_energy]
     type = MaterialRealAux
-     variable = k
-     property = k
+     variable = internal_energy
+     property = e
   [../]
 []
 
@@ -133,7 +133,7 @@
 
 [Materials]
   [./fp_mat]
-    type = BrineFluidPropertiesTestMaterial
+    type = MultiComponentFluidPropertiesMaterialPT
     pressure = pressure
     temperature = temperature
     xnacl = xnacl
@@ -169,34 +169,34 @@
     variable = density
     elementid = 2
   [../]
-  [./viscosity0]
+  [./enthalpy0]
     type = ElementalVariableValue
-    variable = viscosity
+    variable = enthalpy
     elementid = 0
   [../]
-  [./viscosity1]
+  [./enthalpy1]
     type = ElementalVariableValue
-    variable = viscosity
+    variable = enthalpy
     elementid = 1
   [../]
-  [./viscosity2]
+  [./enthalpy2]
     type = ElementalVariableValue
-    variable = viscosity
+    variable = enthalpy
     elementid = 2
   [../]
-  [./k0]
+  [./e0]
     type = ElementalVariableValue
-    variable = k
+    variable = internal_energy
     elementid = 0
   [../]
-  [./k1]
+  [./e1]
     type = ElementalVariableValue
-    variable = k
+    variable = internal_energy
     elementid = 1
   [../]
-  [./k2]
+  [./e2]
     type = ElementalVariableValue
-    variable = k
+    variable = internal_energy
     elementid = 2
   [../]
 []
