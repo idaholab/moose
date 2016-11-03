@@ -17,5 +17,8 @@
     exodiff = 'sliding_elastic_blocks_2d_fcp_out.e'
     custom_cmp = 'sliding_elastic_blocks_2d.cmp'
     max_parallel = 1
+    # This test has been known to timeout in debug mode, so it's
+    # probably just a bit too expensive to be a regression test.
+    method = 'OPT'
   [../]
 []
