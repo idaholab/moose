@@ -666,7 +666,7 @@ void FEProblemBase::timestepSetup()
   _app.getOutputWarehouse().timestepSetup();
 
   if (_requires_nonlocal_coupling)
-    if (_nonlocal_kernels.hasActiveObjects())
+    if (_nonlocal_kernels.hasActiveObjects() || _nonlocal_integrated_bcs.hasActiveObjects())
       _has_nonlocal_coupling = true;
 }
 
@@ -697,7 +697,7 @@ FEProblemBase::checkNonlocalCoupling()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    const KernelWarehouse & all_kernels = _nl->getKernelWarehouse();
+    const KernelWarehouse & all_kernels = _nl.getKernelWarehouse();
     const std::vector<MooseSharedPointer<KernelBase> > & kernels = all_kernels.getObjects(tid);
     for (const auto & kernel : kernels)
     {
@@ -709,8 +709,21 @@ FEProblemBase::checkNonlocalCoupling()
         _nonlocal_kernels.addObject(kernel, tid);
       }
     }
+    const MooseObjectWarehouse<IntegratedBC> & all_integrated_bcs = _nl.getIntegratedBCWarehouse();
+    const std::vector<MooseSharedPointer<IntegratedBC> > & integrated_bcs = all_integrated_bcs.getObjects(tid);
+    for (const auto & integrated_bc : integrated_bcs)
+    {
+      MooseSharedPointer<NonlocalIntegratedBC> nonlocal_integrated_bc = MooseSharedNamespace::dynamic_pointer_cast<NonlocalIntegratedBC>(integrated_bc);
+      if (nonlocal_integrated_bc)
+      {
+        if (_calculate_jacobian_in_uo)
+          _requires_nonlocal_coupling = true;
+        _nonlocal_integrated_bcs.addObject(integrated_bc, tid);
+      }
+    }
   }
 }
+
 
 void
 FEProblem::checkUserObjectJacobianRequirement(THREAD_ID tid)
@@ -3083,11 +3096,13 @@ FEProblemBase::setCouplingMatrix(CouplingMatrix * cm)
 void
 FEProblemBase::setNonlocalCouplingMatrix()
 {
-  unsigned int n_vars = _nl->nVariables();
+  unsigned int n_vars = _nl.nVariables();
   _nonlocal_cm.resize(n_vars);
-  const std::vector<MooseVariable *> & vars = _nl->getVariables(0);
+  const std::vector<MooseVariable *> & vars = _nl.getVariables(0);
   const std::vector<MooseSharedPointer<KernelBase> > & nonlocal_kernel = _nonlocal_kernels.getObjects();
+  const std::vector<MooseSharedPointer<IntegratedBC> > & nonlocal_integrated_bc = _nonlocal_integrated_bcs.getObjects();
   for (const auto & ivar : vars)
+  {
     for (const auto & kernel : nonlocal_kernel)
     {
       unsigned int i = ivar->number();
@@ -3102,6 +3117,21 @@ FEProblemBase::setNonlocalCouplingMatrix()
           }
         }
     }
+    for (const auto & integrated_bc : nonlocal_integrated_bc)
+    {
+      unsigned int i = ivar->number();
+      if (i == integrated_bc->variable().number())
+        for (const auto & jvar : vars)
+        {
+          const auto it = _var_dof_map.find(jvar->name());
+          if (it != _var_dof_map.end())
+          {
+            unsigned int j = jvar->number();
+            _nonlocal_cm(i,j) = 1;
+          }
+        }
+    }
+  }
 }
 
 bool

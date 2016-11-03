@@ -53,6 +53,18 @@ public:
    */
   void computeJacobianBlockScalar(unsigned int jvar);
 
+  /**
+   * Compute this IntegratedBC's contribution to the diagonal Jacobian entries
+   * corresponding to nonlocal dofs of the variable
+   */
+  virtual void computeNonlocalJacobian() {}
+
+  /**
+   * Computes d-residual / d-jvar... corresponding to nonlocal dofs of the jvar
+   * and stores the result in nonlocal ke
+   */
+  virtual void computeNonlocalOffDiagJacobian(unsigned int /* jvar */) {}
+
 protected:
   /// current element
   const Elem * & _current_elem;
