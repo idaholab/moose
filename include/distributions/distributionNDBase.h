@@ -29,7 +29,7 @@ public:
    void updateVariable(const std::string & variableName, double & newValue);
    virtual double  Pdf(std::vector<double> x) = 0;                              ///< Pdf function at coordinate x
    virtual double  Cdf(std::vector<double> x) = 0;                              ///< Cdf function at coordinate x
-   virtual std::vector<double> InverseCdf(double F, double g) = 0;
+   virtual std::vector<double> inverseCdf(double F, double g) = 0;
 
    virtual double inverseMarginal(double F, int dimension) = 0;
    virtual int returnDimensionality() = 0;
@@ -91,12 +91,12 @@ protected:
 //     return value;
 //  };
 //  double
-//  InverseCdf(std::vector<double> /*x*/)
+//  inverseCdf(std::vector<double> /*x*/)
 //  {
 //    return -1.0;
 //  };
 //  std::vector<double>
-//  InverseCdf(double /*min*/, double /*max*/)
+//  inverseCdf(double /*min*/, double /*max*/)
 //  {
 //    return std::vector<double>(2,-1.0);
 //  };

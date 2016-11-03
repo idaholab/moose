@@ -160,7 +160,7 @@ double DistributionCdf(BasicDistributionND & dist, std::vector<double> & x)
 
 //std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & min, double & max){
 std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & F, double & g){
-  return dist.InverseCdf(F,g);
+  return dist.inverseCdf(F,g);
 }
 
 double returnUpperBound(BasicDistributionND & dist, int dimension){

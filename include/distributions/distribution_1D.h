@@ -15,7 +15,7 @@ public:
   BasicTruncatedDistribution(){};
   virtual double Pdf(double x);        ///< Pdf function at coordinate x
   virtual double Cdf(double x);        ///< Cdf function at coordinate x
-  virtual double InverseCdf(double x); ///< x
+  virtual double inverseCdf(double x); ///< x
 
   virtual double untrPdf(double x);
   virtual double untrCdf(double x);
@@ -35,7 +35,7 @@ class BasicDiscreteDistribution : public virtual BasicDistribution
 public:
   virtual double Pdf(double x);           ///< Pdf function at coordinate x
   virtual double Cdf(double x);           ///< Cdf function at coordinate x
-  virtual double InverseCdf(double x);    ///< x
+  virtual double inverseCdf(double x);    ///< x
 
   virtual double untrPdf(double x);
   virtual double untrCdf(double x);
@@ -65,7 +65,7 @@ public:
   virtual ~BasicUniformDistribution();
   double  Pdf(double x);                ///< Pdf function at coordinate x
   double  Cdf(double x);                ///< Cdf function at coordinate x
-  double  InverseCdf(double x);        ///< x
+  double  inverseCdf(double x);        ///< x
 };
 
 
@@ -84,7 +84,7 @@ public:
   BasicNormalDistribution(double mu, double sigma, double x_min, double x_max);
   virtual ~BasicNormalDistribution();
 
-  double  InverseCdf(double x);        ///< x
+  double  inverseCdf(double x);        ///< x
 };
 
 
@@ -102,7 +102,7 @@ public:
   BasicLogNormalDistribution(double mu, double sigma, double x_min, double x_max, double low);
   virtual ~BasicLogNormalDistribution();
 
-  double  InverseCdf(double x);        ///< x
+  double  inverseCdf(double x);        ///< x
 
   double untrPdf(double x);
   double untrCdf(double x);
@@ -160,7 +160,7 @@ public:
   double untrPdf(double x);
   double untrCdf(double x);
   double Cdf(double x);
-  double InverseCdf(double x);
+  double inverseCdf(double x);
 };
 
 /*
@@ -180,7 +180,7 @@ public:
 
   double  untrPdf(double x);
   double  untrCdf(double x);
-  double InverseCdf(double x);
+  double inverseCdf(double x);
 };
 
 /*
@@ -217,7 +217,7 @@ public:
 
   double  Pdf(double x);                ///< Pdf function at coordinate x
   double  Cdf(double x);                ///< Cdf function at coordinate x
-  double  InverseCdf(double x);        ///< x
+  double  inverseCdf(double x);        ///< x
 
   double  untrCdf(double x);
   double  untrPdf(double x);
@@ -237,7 +237,7 @@ public:
 
   double  Pdf(double x);                ///< Pdf function at coordinate x
   double  Cdf(double x);                ///< Cdf function at coordinate x
-  double  InverseCdf(double x);        ///< x
+  double  inverseCdf(double x);        ///< x
 
   double  untrCdf(double x);
 };
@@ -278,7 +278,7 @@ public:
   virtual ~BasicConstantDistribution();
   double  Pdf(double x);           ///< Pdf function at coordinate x
   double  Cdf(double x);           ///< Cdf function at coordinate x
-  double  InverseCdf(double);    ///< x
+  double  inverseCdf(double);    ///< x
 
   double untrPdf(double x);
   double untrCdf(double x);

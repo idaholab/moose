@@ -324,7 +324,7 @@ double
 DistributionContainer::inverseCdf(const std::string dist_alias, double rng) {
     if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
       MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
-      return dist->InverseCdf(rng);
+      return dist->inverseCdf(rng);
      }
      throwError("inverseCdf: Distribution " + dist_alias + " was not found in distribution container.");
      return -1.0;
@@ -342,7 +342,7 @@ DistributionContainer::getDistributionRandom(const std::string dist_alias){
 
     if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
       MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
-        //return dist->InverseCdf(rng);
+        //return dist->inverseCdf(rng);
       return dist->getRandom(random());
      }
      throwError("getDistributionRandom: Distribution " + dist_alias + " was not found in distribution container.");
@@ -360,7 +360,7 @@ DistributionContainer::inverseCdf(const std::string dist_alias, double F, double
 
    if(_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end()){
      MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
-     return dist->InverseCdf(F,g);
+     return dist->inverseCdf(F,g);
     }
     throwError("inverseCdf: Distribution ND" + dist_alias + " was not found in distribution container.");
     std::vector<double> value (2,-1.0);

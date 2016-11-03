@@ -72,11 +72,11 @@ BasicDistribution::getRandom(double x)
 {
   if(forcingMethod() == NO_FORCING) {
     return windowProcessing(x);
-    //return InverseCdf(x);
+    //return inverseCdf(x);
   } else if(forcingMethod() == FORCED_VALUE) {
     return forcedConstant();
   } else if(forcingMethod() == FORCED_PROBABILITY) {
-    return InverseCdf(forcedConstant());
+    return inverseCdf(forcedConstant());
   } else {
     throwError("Invalid forcing method " << forcingMethod());
   }
@@ -119,17 +119,17 @@ double BasicDistribution::windowProcessing(double rng){
                 double pbLOW = getVariable(std::string("PB_window_Low"));
                 double pbUP  = getVariable(std::string("PB_window_Up"));
                 double pb = pbLOW + (pbUP-pbLOW) * rng;
-                value = InverseCdf(pb);
+                value = inverseCdf(pb);
                 //std::cerr << " pbLOW " << pbLOW << " pbUP " << pbUP << " pb " << pb << " value " << value << std::endl;
         }else if(getVariable(std::string("V_window_Low")) != -std::numeric_limits<double>::max() && getVariable(std::string("V_window_Up")) != std::numeric_limits<double>::max( )){ // interval V window
                 double pbLOW = Cdf(getVariable(std::string("V_window_Low")));
                 double pbUP  = Cdf(getVariable(std::string("V_window_Up")));
                 double pb = pbLOW + (pbUP-pbLOW) * rng;
-                value = InverseCdf(pb);
+                value = inverseCdf(pb);
                 //std::cerr << " valLOW " << valLOW << " valUP " << valUP << " value " << value << std::endl;
         }
         else // DEFAULT
-                value = InverseCdf(rng);
+                value = inverseCdf(rng);
 
         return value;
 }

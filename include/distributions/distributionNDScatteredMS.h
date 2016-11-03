@@ -42,13 +42,13 @@ public:
   };
 
 //  std::vector<double>
-//  InverseCdf(double /*min*/, double /*max*/)
+//  inverseCdf(double /*min*/, double /*max*/)
 //  {
 //    return std::vector<double>(2,-1.0);
 //  };
 
   std::vector<double>
-  InverseCdf(double F, double g)
+  inverseCdf(double F, double g)
   {
    return _interpolator.ndInverseFunctionGrid(F,g);
    //return _interpolator.NDinverseFunction(min, max);

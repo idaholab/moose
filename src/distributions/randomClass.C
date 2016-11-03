@@ -6,20 +6,20 @@ class RandomClassImpl {
    * This class create the instance of a mersenne-twister random number generator (BOOST)
    */
 public:
-  boost::random::mt19937 backend;
+  boost::random::mt19937 _backend;
 };
 
-RandomClass::RandomClass() : rng(new RandomClassImpl()), range(rng->backend.max() - rng->backend.min()) {
+RandomClass::RandomClass() : _rng(new RandomClassImpl()), _range(_rng->_backend.max() - _rng->_backend.min()) {
 }
 
 void RandomClass::seed(unsigned int seed) {
-    rng->backend.seed(seed);
+    _rng->_backend.seed(seed);
   }
 
 double RandomClass::random() {
-    return (rng->backend()-rng->backend.min())/range;
+    return (_rng->_backend()-_rng->_backend.min())/_range;
   }
 
 RandomClass::~RandomClass(){
-  delete rng;
+  delete _rng;
 }

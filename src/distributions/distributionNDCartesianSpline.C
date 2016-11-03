@@ -125,7 +125,7 @@
 
 
   std::vector<double>
-  BasicMultiDimensionalCartesianSpline::InverseCdf(double F, double g)
+  BasicMultiDimensionalCartesianSpline::inverseCdf(double F, double g)
   {
     if (_CDFprovided == true)
       return _interpolator.ndInverseFunctionGrid(F,g);

@@ -4,7 +4,7 @@
 #include <string>
 
 
-void LoadData(double** data, int dimensionality, int cardinality, std::string filename);
+//void loadData(double** data, int dimensionality, int cardinality, std::string filename);
 
 
 #endif /* INPUTFILE_H */

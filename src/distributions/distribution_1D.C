@@ -107,7 +107,7 @@ BasicTruncatedDistribution::Cdf(double x){
 }
 
 double
-BasicTruncatedDistribution::InverseCdf(double x){
+BasicTruncatedDistribution::inverseCdf(double x){
   double value;
   double x_min = _dist_parameters.find("xMin") ->second;
   double x_max = _dist_parameters.find("xMax") ->second;
@@ -230,7 +230,7 @@ double BasicDiscreteDistribution::Cdf(double x) {
   return untrCdf(x);
 }
 
-double BasicDiscreteDistribution::InverseCdf(double x) {
+double BasicDiscreteDistribution::inverseCdf(double x) {
   return untrInverseCdf(x);
 }
 
@@ -297,7 +297,7 @@ BasicUniformDistribution::Cdf(double x){
 }
 
 double
-BasicUniformDistribution::InverseCdf(double x){
+BasicUniformDistribution::inverseCdf(double x){
   return untrInverseCdf(x);
 }
 
@@ -359,8 +359,8 @@ BasicNormalDistribution::~BasicNormalDistribution(){
 
 
 double
-BasicNormalDistribution::InverseCdf(double x){
-  return BasicTruncatedDistribution::InverseCdf(x);
+BasicNormalDistribution::inverseCdf(double x){
+  return BasicTruncatedDistribution::inverseCdf(x);
 }
 
 class LogNormalDistributionBackend : public DistributionBackendTemplate<boost::math::lognormal> {
@@ -437,9 +437,9 @@ BasicLogNormalDistribution::untrCdf(double x){
 
 
 double
-BasicLogNormalDistribution::InverseCdf(double x){
+BasicLogNormalDistribution::inverseCdf(double x){
   double low = _dist_parameters.find("low") ->second;
-  return BasicTruncatedDistribution::InverseCdf(x)+low;
+  return BasicTruncatedDistribution::inverseCdf(x)+low;
 }
 
 /*
@@ -623,9 +623,9 @@ BasicExponentialDistribution::Cdf(double x){
 }
 
 double
-BasicExponentialDistribution::InverseCdf(double x){
+BasicExponentialDistribution::inverseCdf(double x){
   double low = _dist_parameters.find("low") ->second;
-  return BasicTruncatedDistribution::InverseCdf(x) + low;
+  return BasicTruncatedDistribution::inverseCdf(x) + low;
 }
 
 /*
@@ -705,9 +705,9 @@ BasicWeibullDistribution::untrCdf(double x){
 }
 
 double
-BasicWeibullDistribution::InverseCdf(double x){
+BasicWeibullDistribution::inverseCdf(double x){
   double low = _dist_parameters.find("low") ->second;
-  return BasicTruncatedDistribution::InverseCdf(x) + low;
+  return BasicTruncatedDistribution::inverseCdf(x) + low;
 }
 
 /*
@@ -888,10 +888,10 @@ BasicBetaDistribution::Cdf(double x){
 }
 
 double
-BasicBetaDistribution::InverseCdf(double x){
+BasicBetaDistribution::inverseCdf(double x){
   double scale = _dist_parameters.find("scale") ->second;
   double low   = _dist_parameters.find("low"  ) ->second;
-  return BasicTruncatedDistribution::InverseCdf( x )*scale+low;
+  return BasicTruncatedDistribution::inverseCdf( x )*scale+low;
 }
 
 /*
@@ -986,7 +986,7 @@ BasicPoissonDistribution::Cdf(double x){
 }
 
 double
-BasicPoissonDistribution::InverseCdf(double x){
+BasicPoissonDistribution::inverseCdf(double x){
    double value;
    double x_min = _dist_parameters.find("xMin") ->second;
    double x_max = _dist_parameters.find("xMax") ->second;
@@ -1085,7 +1085,7 @@ double  BasicConstantDistribution::Pdf(double x){
 double  BasicConstantDistribution::Cdf(double x){
   return untrCdf(x);
 }
-double  BasicConstantDistribution::InverseCdf(double x){
+double  BasicConstantDistribution::inverseCdf(double x){
   return untrInverseCdf(x);
 }
 
@@ -1176,7 +1176,7 @@ double BasicConstantDistribution::untrHazard(double /*x*/){
 // }
 
 // double
-// BasicCustomDistribution::InverseCdf(double & ){
+// BasicCustomDistribution::inverseCdf(double & ){
 //   //XXX implement
 //    double value=-1;
 //    return value;

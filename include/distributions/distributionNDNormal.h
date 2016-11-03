@@ -26,17 +26,17 @@ class BasicMultivariateNormal: public virtual BasicDistributionND
 public:
   BasicMultivariateNormal(const char * data_filename, std::vector<double> mu);
   BasicMultivariateNormal(std::string data_filename, std::vector<double> mu);
-  BasicMultivariateNormal(std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
-  BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu);
-  BasicMultivariateNormal(std::vector<double> vecCovMatrix, std::vector<double> mu, const char * type, int rank);
+  BasicMultivariateNormal(std::vector<std::vector<double> > cov_matrix, std::vector<double> mu);
+  BasicMultivariateNormal(std::vector<double> vec_cov_matrix, std::vector<double> mu);
+  BasicMultivariateNormal(std::vector<double> vec_cov_matrix, std::vector<double> mu, const char * type, int rank);
 
-  //void BasicMultivariateNormal_init(std::string data_filename, std::vector<double> mu);
-  void BasicMultivariateNormal_init(unsigned int & rows, unsigned int &columns, std::vector<std::vector<double> > covMatrix, std::vector<double> mu);
+  //void basicMultivariateNormalInit(std::string data_filename, std::vector<double> mu);
+  void basicMultivariateNormalInit(unsigned int & rows, unsigned int &columns, std::vector<std::vector<double> > cov_matrix, std::vector<double> mu);
 
   virtual ~BasicMultivariateNormal();
   double  Pdf(std::vector<double> x);
   double  Cdf(std::vector<double> x);
-  std::vector<double> InverseCdf(double F, double g);
+  std::vector<double> inverseCdf(double F, double g);
   double inverseMarginal(double F, int dimension);
   void updateRNGparameter(double tolerance, double initial_divisions);
   double Marginal(double x, int dimension);
@@ -98,9 +98,9 @@ private:
   std::vector<std::vector<double> > _inverse_cov_matrix;
   std::vector<std::vector<double> > _cholesky_C;
   // parameters for singular value decomposition
-  std::vector<std::vector<double> > _leftSingularVectors;
-  std::vector<double> _singularValues;
-  std::vector<std::vector<double> > _rightSingularVectors;
+  std::vector<std::vector<double> > _left_singular_vectors;
+  std::vector<double> _singular_values;
+  std::vector<std::vector<double> > _right_singular_vectors;
   unsigned int _rank; // used for dimensionality reduction
   // store U*sqrt(S), where U, S, V = svd(A)
   std::vector<std::vector<double> > _svdTransformedMatrix;

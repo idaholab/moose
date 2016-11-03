@@ -26,7 +26,7 @@ public:
 
    virtual double  Pdf(double x) = 0; ///< Pdf function at coordinate x
    virtual double  Cdf(double x) = 0; ///< Cdf function at coordinate x
-   virtual double  InverseCdf(double x) = 0; ///< x
+   virtual double  inverseCdf(double x) = 0; ///< x
 
    virtual double untrPdf(double x) = 0;
    virtual double untrCdf(double x) = 0;

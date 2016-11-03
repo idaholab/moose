@@ -145,12 +145,12 @@ public:
 
 
   std::vector<double>
-  InverseCdf(double F, double g)
+  inverseCdf(double F, double g)
   {
     if (_CDFprovided)
       return _interpolator.ndInverseFunctionGrid(F,g);
     else{
-      return _CDFspline.InverseCdf(F,g);
+      return _CDFspline.inverseCdf(F,g);
     }
   };
 

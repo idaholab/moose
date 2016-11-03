@@ -43,7 +43,7 @@ public:
 
   double Cdf(std::vector<double> x);
 
-  std::vector<double> InverseCdf(double F, double g);
+  std::vector<double> inverseCdf(double F, double g);
 
   double inverseMarginal(double F, int dimension);
 
