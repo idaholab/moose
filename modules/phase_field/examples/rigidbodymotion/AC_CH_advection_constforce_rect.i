@@ -71,6 +71,7 @@
     v = eta
     grain_tracker_object = grain_center
     grain_force = grain_force
+    grain_volumes = grain_volumes
   [../]
   [./eta_dot]
     type = TimeDerivative
@@ -84,6 +85,7 @@
     v = eta
     grain_tracker_object = grain_center
     grain_force = grain_force
+    grain_volumes = grain_volumes
   [../]
   [./acint_eta]
     type = ACInterface
@@ -150,7 +152,6 @@
     variable = eta
     outputs = none
     compute_var_to_feature_map = true
-    calculate_feature_volumes = true
     execute_on = 'initial timestep_begin'
   [../]
   [./grain_force]
