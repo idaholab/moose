@@ -74,6 +74,7 @@
 #include "XFEMInterface.h"
 #include "ConsoleUtils.h"
 #include "NonlocalKernel.h"
+#include "NonlocalIntegratedBC.h"
 #include "ShapeElementUserObject.h"
 #include "ShapeSideUserObject.h"
 
@@ -701,7 +702,7 @@ void FEProblem::timestepSetup()
   _app.getOutputWarehouse().timestepSetup();
 
   if (_requires_nonlocal_coupling)
-    if (_nonlocal_kernels.hasActiveObjects())
+    if (_nonlocal_kernels.hasActiveObjects() || _nonlocal_integrated_bcs.hasActiveObjects())
       _has_nonlocal_coupling = true;
 }
 
@@ -742,6 +743,18 @@ FEProblem::checkNonlocalCoupling()
         if (_calculate_jacobian_in_uo)
           _requires_nonlocal_coupling = true;
         _nonlocal_kernels.addObject(kernel, tid);
+      }
+    }
+    const MooseObjectWarehouse<IntegratedBC> & all_integrated_bcs = _nl.getIntegratedBCWarehouse();
+    const std::vector<MooseSharedPointer<IntegratedBC> > & integrated_bcs = all_integrated_bcs.getObjects(tid);
+    for (const auto & integrated_bc : integrated_bcs)
+    {
+      MooseSharedPointer<NonlocalIntegratedBC> nonlocal_integrated_bc = MooseSharedNamespace::dynamic_pointer_cast<NonlocalIntegratedBC>(integrated_bc);
+      if (nonlocal_integrated_bc)
+      {
+        if (_calculate_jacobian_in_uo)
+          _requires_nonlocal_coupling = true;
+        _nonlocal_integrated_bcs.addObject(integrated_bc, tid);
       }
     }
   }
@@ -3122,7 +3135,9 @@ FEProblem::setNonlocalCouplingMatrix()
   _nonlocal_cm.resize(n_vars);
   const std::vector<MooseVariable *> & vars = _nl.getVariables(0);
   const std::vector<MooseSharedPointer<KernelBase> > & nonlocal_kernel = _nonlocal_kernels.getObjects();
+  const std::vector<MooseSharedPointer<IntegratedBC> > & nonlocal_integrated_bc = _nonlocal_integrated_bcs.getObjects();
   for (const auto & ivar : vars)
+  {
     for (const auto & kernel : nonlocal_kernel)
     {
       unsigned int i = ivar->number();
@@ -3137,6 +3152,21 @@ FEProblem::setNonlocalCouplingMatrix()
           }
         }
     }
+    for (const auto & integrated_bc : nonlocal_integrated_bc)
+    {
+      unsigned int i = ivar->number();
+      if (i == integrated_bc->variable().number())
+        for (const auto & jvar : vars)
+        {
+          const auto it = _var_dof_map.find(jvar->name());
+          if (it != _var_dof_map.end())
+          {
+            unsigned int j = jvar->number();
+            _nonlocal_cm(i,j) = 1;
+          }
+        }
+    }
+  }
 }
 
 bool

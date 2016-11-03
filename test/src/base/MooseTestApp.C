@@ -116,6 +116,7 @@
 #include "MatDivergenceBC.h"
 #include "CoupledDirichletBC.h"
 #include "TestLapBC.h"
+#include "ExampleShapeSideIntegratedBC.h"
 
 // ICs
 #include "TEIC.h"
@@ -188,6 +189,8 @@
 #include "TestShapeElementUserObject.h"
 #include "ExampleShapeElementUserObject.h"
 #include "SimpleTestShapeElementUserObject.h"
+#include "NumShapeSideUserObject.h"
+#include "DenomShapeSideUserObject.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -386,6 +389,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerInterfaceKernel(InterfaceDiffusion);
 
   // Boundary Conditions
+  registerBoundaryCondition(ExampleShapeSideIntegratedBC);
   registerBoundaryCondition(RobinBC);
   registerBoundaryCondition(InflowBC);
   registerBoundaryCondition(OutflowBC);
@@ -498,6 +502,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(TestShapeElementUserObject);
   registerUserObject(ExampleShapeElementUserObject);
   registerUserObject(SimpleTestShapeElementUserObject);
+  registerUserObject(NumShapeSideUserObject);
+  registerUserObject(DenomShapeSideUserObject);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
