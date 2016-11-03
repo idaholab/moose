@@ -21,6 +21,7 @@
 #include "InterfaceKernel.h"
 #include "KernelWarehouse.h"
 #include "NonlocalKernel.h"
+#include "SwapBackSentinel.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -140,13 +141,15 @@ ComputeJacobianThread::onElement(const Elem *elem)
 
   _fe_problem.reinitElem(elem, _tid);
 
+  // Set up Sentinel class so that, even if reinitMaterials() throws, we
+  // still remember to swap back during stack unwinding.
+  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
+
   if (_nl.getScalarVariables(_tid).size() > 0)
     _fe_problem.reinitOffDiagScalars(_tid);
 
   computeJacobian();
-
-  _fe_problem.swapBackMaterials(_tid);
 }
 
 void
@@ -155,6 +158,10 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
   if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
+
+    // Set up Sentinel class so that, even if reinitMaterials() throws, we
+    // still remember to swap back during stack unwinding.
+    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
 
     _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
@@ -166,8 +173,6 @@ ComputeJacobianThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 
     // Set the active boundary to invalid
     _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
-
-    _fe_problem.swapBackMaterialsFace(_tid);
   }
 }
 
@@ -188,13 +193,15 @@ ComputeJacobianThread::onInternalSide(const Elem *elem, unsigned int side)
     {
       _fe_problem.reinitNeighbor(elem, side, _tid);
 
+      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+      // still remember to swap back during stack unwinding.
+      SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+
+      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       computeInternalFaceJacobian(neighbor);
-
-      _fe_problem.swapBackMaterialsFace(_tid);
-      _fe_problem.swapBackMaterialsNeighbor(_tid);
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
@@ -216,13 +223,15 @@ ComputeJacobianThread::onInterface(const Elem *elem, unsigned int side, Boundary
     {
       _fe_problem.reinitNeighbor(elem, side, _tid);
 
+      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+      // still remember to swap back during stack unwinding.
+      SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+
+      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       computeInternalInterFaceJacobian(bnd_id);
-
-      _fe_problem.swapBackMaterialsFace(_tid);
-      _fe_problem.swapBackMaterialsNeighbor(_tid);
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);

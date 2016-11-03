@@ -23,6 +23,7 @@
 #include "RayTracing.h" // Moose::elementsIntersectedByLine()
 #include "Assembly.h" // Assembly::qRule()
 #include "MooseMesh.h" // MooseMesh::getMesh()
+#include "SwapBackSentinel.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h" // _qrule->n_points()
@@ -156,6 +157,10 @@ LineMaterialSamplerBase<T>::execute()
 
     _subproblem.prepare(elem, _tid);
     _subproblem.reinitElem(elem, _tid);
+
+    // Set up Sentinel class so that, even if reinitMaterials() throws, we
+    // still remember to swap back during stack unwinding.
+    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
     _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
@@ -173,7 +178,6 @@ LineMaterialSamplerBase<T>::execute()
 
       addSample(_q_point[qp], qp_proj_dist_along_line, values);
     }
-    _fe_problem.swapBackMaterials(_tid);
   }
 }
 

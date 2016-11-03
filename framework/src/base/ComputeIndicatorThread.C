@@ -18,6 +18,7 @@
 #include "FEProblem.h"
 #include "Indicator.h"
 #include "InternalSideIndicator.h"
+#include "SwapBackSentinel.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -75,8 +76,12 @@ ComputeIndicatorThread::onElement(const Elem *elem)
 
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
-  _fe_problem.reinitMaterials(_subdomain, _tid);
 
+  // Set up Sentinel class so that, even if reinitMaterials() throws, we
+  // still remember to swap back during stack unwinding.
+  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
+
+  _fe_problem.reinitMaterials(_subdomain, _tid);
 
   // Compute
   if (!_finalize)
@@ -106,8 +111,6 @@ ComputeIndicatorThread::onElement(const Elem *elem)
         internal_indicator->finalize();
     }
   }
-
-  _fe_problem.swapBackMaterials(_tid);
 
   if (!_finalize) // During finalize the Indicators should be setting values in the vectors manually
   {
@@ -151,15 +154,18 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
     if (_internal_side_indicators.hasActiveBlockObjects(block_id, _tid))
     {
       _fe_problem.reinitNeighbor(elem, side, _tid);
+
+      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+      // still remember to swap back during stack unwinding.
+      SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
       _fe_problem.reinitMaterialsFace(block_id, _tid);
+
+      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       const std::vector<MooseSharedPointer<InternalSideIndicator> > & indicators = _internal_side_indicators.getActiveBlockObjects(block_id, _tid);
       for (const auto & indicator : indicators)
         indicator->computeIndicator();
-
-      _fe_problem.swapBackMaterialsFace(_tid);
-      _fe_problem.swapBackMaterialsNeighbor(_tid);
     }
   }
 }

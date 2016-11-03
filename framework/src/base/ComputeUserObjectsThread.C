@@ -20,6 +20,7 @@
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
 #include "NodalUserObject.h"
+#include "SwapBackSentinel.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -72,6 +73,10 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
 {
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
+
+  // Set up Sentinel class so that, even if reinitMaterials() throws, we
+  // still remember to swap back during stack unwinding.
+  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
   if (_elemental_user_objects.hasActiveBlockObjects(_subdomain, _tid))
@@ -105,8 +110,6 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
         }
       }
     }
-
-  _fe_problem.swapBackMaterials(_tid);
 }
 
 void
@@ -115,8 +118,13 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
   if (_side_user_objects.hasActiveBoundaryObjects(bnd_id, _tid))
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
+
+    // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
+    // still remember to swap back during stack unwinding.
+    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
     _fe_problem.reinitMaterialsFace(_subdomain, _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
+
     _fe_problem.setCurrentBoundaryID(bnd_id);
 
     const std::vector<MooseSharedPointer<SideUserObject> > & objects = _side_user_objects.getActiveBoundaryObjects(bnd_id, _tid);
@@ -124,7 +132,6 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
       uo->execute();
 
     _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
-    _fe_problem.swapBackMaterialsFace(_tid);
   }
 }
 
@@ -145,7 +152,13 @@ ComputeUserObjectsThread::onInternalSide(const Elem *elem, unsigned int side)
     {
       _fe_problem.prepareFace(elem, _tid);
       _fe_problem.reinitNeighbor(elem, side, _tid);
+
+      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+      // still remember to swap back during stack unwinding.
+      SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+
+      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       const std::vector<MooseSharedPointer<InternalSideUserObject> > & objects = _internal_side_user_objects.getActiveBlockObjects(_subdomain, _tid);
@@ -157,8 +170,6 @@ ComputeUserObjectsThread::onInternalSide(const Elem *elem, unsigned int side)
         else if (uo->hasBlocks(neighbor->subdomain_id()))
           uo->execute();
       }
-      _fe_problem.swapBackMaterialsFace(_tid);
-      _fe_problem.swapBackMaterialsNeighbor(_tid);
     }
   }
 }
