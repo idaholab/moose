@@ -42,7 +42,7 @@ public:
    * jocobians of the integral term from userobject once per dof
    */
   virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void computeJacobianBlock(unsigned int jvar);
 
   /**
    * computeNonlocalJacobian and computeNonlocalOffDiagJacobian methods are

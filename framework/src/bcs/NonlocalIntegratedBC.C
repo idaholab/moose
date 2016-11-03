@@ -69,7 +69,7 @@ NonlocalIntegratedBC::computeJacobian()
 }
 
 void
-NonlocalIntegratedBC::computeOffDiagJacobian(unsigned int jvar)
+NonlocalIntegratedBC::computeJacobianBlock(unsigned int jvar)
 {
   if (jvar == _var.number())
     computeJacobian();
@@ -84,7 +84,7 @@ NonlocalIntegratedBC::computeOffDiagJacobian(unsigned int jvar)
       for (_i = 0; _i < _test.size(); _i++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
-      }
+    }
   }
 }
 

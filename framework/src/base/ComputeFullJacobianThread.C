@@ -170,7 +170,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
           if (nonlocal_integrated_bc)
             if ((integrated_bc->variable().number() == ivar) && integrated_bc->isImplicit())
             {
-              integrated_bc->subProblem().prepareShapes(jvar, _tid);
+              integrated_bc->subProblem().prepareFaceShapes(jvar, _tid);
               integrated_bc->computeNonlocalOffDiagJacobian(jvar);
             }
         }

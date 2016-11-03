@@ -39,4 +39,20 @@
     allow_warnings = true
     mesh_mode = REPLICATED
   [../]
+
+  [./shape_side_uo_jac_test]
+    type = PetscJacobianTester
+    input = 'shape_side_uo_jac_test.i'
+    difference_tol = 1.3e-7
+    ratio_tol = 3e-8
+    recover = false
+    allow_warnings = true
+    mesh_mode = REPLICATED
+  [../]
+  [./shape_side_uo_physics_test]
+    type = 'Exodiff'
+    input = 'shape_side_uo_physics_test.i'
+    exodiff = 'shape_side_uo_physics_test_out.e'
+    allow_warnings = true
+  [../]
 []

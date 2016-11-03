@@ -132,9 +132,8 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
     for (const auto & uo : objects)
       uo->execute();
 
-  // UserObject Jacobians
-  if (_fe_problem.currentlyComputingJacobian())
-    if (_side_user_objects.hasActiveBlockObjects(_subdomain, _tid))
+    // UserObject Jacobians
+    if (_fe_problem.currentlyComputingJacobian())
     {
       // Prepare shape functions for ShapeSideUserObjects
       std::vector<MooseVariable *> jacobian_moose_vars = _fe_problem.getUserObjectJacobianVariables(_tid);
@@ -145,10 +144,9 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
         unsigned int jvar = (*jvar_it)->number();
         std::vector<dof_id_type> & dof_indices = (*jvar_it)->dofIndices();
 
-        _fe_problem.prepareShapes(jvar, _tid);
-
-        const std::vector<MooseSharedPointer<SideUserObject> > & e_objects = _side_user_objects.getActiveBlockObjects(_subdomain, _tid);
-        for (const auto & uo : e_objects)
+        _fe_problem.prepareFaceShapes(jvar, _tid);
+;
+        for (const auto & uo : objects)
         {
           MooseSharedPointer<ShapeSideUserObject> shape_side_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeSideUserObject>(uo);
           if (shape_side_uo)
