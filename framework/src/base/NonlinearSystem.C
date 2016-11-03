@@ -172,7 +172,9 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
     _scalar_kernels(/*threaded=*/false),
     _nodal_bcs(/*threaded=*/false),
     _preset_nodal_bcs(/*threaded=*/false),
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
     _splits(/*threaded=*/false),
+#endif
     _increment_vec(NULL),
     _sln_diff(addVector("sln_diff", false, PARALLEL)),
     _pc_side(Moose::PCS_RIGHT),
@@ -494,9 +496,13 @@ NonlinearSystem::setDecomposition(const std::vector<std::string>& splits)
 void
 NonlinearSystem::setupFieldDecomposition()
 {
-  if (!_have_decomposition) return;
+  if (!_have_decomposition)
+    return;
+
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
   MooseSharedPointer<Split> top_split = getSplit(_decomposition_split);
   top_split->setup();
+#endif
 }
 
 bool
@@ -715,15 +721,19 @@ NonlinearSystem::addDamper(const std::string & damper_name, const std::string & 
 void
 NonlinearSystem::addSplit(const  std::string & split_name, const std::string & name, InputParameters parameters)
 {
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
   MooseSharedPointer<Split> split = _factory.create<Split>(split_name, name, parameters);
   _splits.addObject(split);
+#endif
 }
 
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 MooseSharedPointer<Split>
 NonlinearSystem::getSplit(const std::string & name)
 {
   return _splits.getActiveObject(name);
 }
+#endif
 
 void
 NonlinearSystem::zeroVectorForResidual(const std::string & vector_name)

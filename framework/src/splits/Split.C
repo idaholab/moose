@@ -294,11 +294,4 @@ Split::setup(const std::string& prefix)
   }
 }
 
-#else
-// petsc earlier than 3.3.0.
-void
-Split::setup(const std::string& prefix)
-{
-}
-
-#endif
+#endif // #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)

@@ -727,7 +727,9 @@ registerObjects(Factory & factory)
   registerMarker(ValueRangeMarker);
 
   // splits
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
   registerSplit(Split);
+#endif
 
   // MultiApps
   registerMultiApp(TransientMultiApp);

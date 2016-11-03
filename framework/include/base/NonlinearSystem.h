@@ -41,7 +41,9 @@ class InterfaceKernel;
 class ScalarKernel;
 class DiracKernel;
 class NodalKernel;
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 class Split;
+#endif
 
 // libMesh forward declarations
 namespace libMesh
@@ -185,7 +187,9 @@ public:
    * Retrieves a split by name
    * @param name The name of the split
    */
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
   MooseSharedPointer<Split> getSplit(const std::string & name);
+#endif
 
   void zeroVectorForResidual(const std::string & vector_name);
 
@@ -574,7 +578,9 @@ protected:
   MooseObjectWarehouse<NodalKernel> _nodal_kernels;
 
   /// Decomposition splits
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
   MooseObjectWarehouseBase<Split> _splits; // use base b/c there are no setup methods
+#endif
 
   /// Constraints storage object
   ConstraintWarehouse _constraints;
