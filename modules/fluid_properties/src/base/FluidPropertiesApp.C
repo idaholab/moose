@@ -13,7 +13,6 @@
 #include "FluidPropertiesMaterial.h"
 #include "FluidPropertiesMaterialPT.h"
 #include "MultiComponentFluidPropertiesMaterialPT.h"
-#include "FluidPropertiesDerivativeTestMaterial.h"
 
 #include "IdealGasFluidProperties.h"
 #include "StiffenedGasFluidProperties.h"
@@ -78,7 +77,6 @@ FluidPropertiesApp::registerObjects(Factory & factory)
   registerMaterial(FluidPropertiesMaterial);
   registerMaterial(FluidPropertiesMaterialPT);
   registerMaterial(MultiComponentFluidPropertiesMaterialPT);
-  registerMaterial(FluidPropertiesDerivativeTestMaterial);
 
   registerUserObject(IdealGasFluidProperties);
   registerUserObject(StiffenedGasFluidProperties);
