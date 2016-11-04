@@ -41,7 +41,7 @@ public:
 
   double pdf(std::vector<double> x);
 
-  double Cdf(std::vector<double> x);
+  double cdf(std::vector<double> x);
 
   std::vector<double> inverseCdf(double F, double g);
 

@@ -106,7 +106,7 @@
   }
 
   double
-  BasicMultiDimensionalCartesianSpline::Cdf(std::vector<double> x)
+  BasicMultiDimensionalCartesianSpline::cdf(std::vector<double> x)
   {
     double value;
 

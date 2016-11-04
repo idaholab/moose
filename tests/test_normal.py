@@ -12,9 +12,9 @@ normal_distribution = distribution1D.BasicNormalDistribution(1.0,2.0,-sys.float_
 
 results = {"pass":0,"fail":0}
 
-utils.checkAnswer("normal cdf(0.0)",normal_distribution.Cdf(0.0),0.308537538726,results)
-utils.checkAnswer("normal cdf(1.0)",normal_distribution.Cdf(1.0),0.5,results)
-utils.checkAnswer("normal cdf(2.0)",normal_distribution.Cdf(2.0),0.691462461274,results)
+utils.checkAnswer("normal cdf(0.0)",normal_distribution.cdf(0.0),0.308537538726,results)
+utils.checkAnswer("normal cdf(1.0)",normal_distribution.cdf(1.0),0.5,results)
+utils.checkAnswer("normal cdf(2.0)",normal_distribution.cdf(2.0),0.691462461274,results)
 
 utils.checkAnswer("normal mean",normal_distribution.untrMean(),1.0,results)
 utils.checkAnswer("normal stddev",normal_distribution.untrStdDev(),2.0,results)

@@ -117,14 +117,14 @@ public:
   };
 
   double
-  Cdf(std::vector<double> x)
+  cdf(std::vector<double> x)
   {
     double value;
     if (_CDFprovided){
       value = _interpolator.interpolateAt(x);
     }
     else
-      value = _CDFspline.Cdf(x);
+      value = _CDFspline.cdf(x);
 
      if (value > 1.0)
    throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF value calculated is above 1.0");

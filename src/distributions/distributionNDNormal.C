@@ -680,7 +680,7 @@ double BasicMultivariateNormal::cellProbabilityWeight(std::vector<double> center
   for (unsigned int i = 0; i < center.size(); ++i) {
     upperBound = center.at(i) + dx.at(i)/2.0;
     lowerBound = center.at(i) - dx.at(i)/2.0;
-    cdfValue = normalDistribution->Cdf(upperBound) - normalDistribution->Cdf(lowerBound);
+    cdfValue = normalDistribution->cdf(upperBound) - normalDistribution->cdf(lowerBound);
     value *= cdfValue;
   }
   return value;
@@ -704,7 +704,7 @@ double BasicMultivariateNormal::marginalCdfForPCA(double x){
      * @ Out, normalDistribution->cdf(x), double, the marginal cdf value at x
      */
   BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
-  return normalDistribution->Cdf(x);
+  return normalDistribution->cdf(x);
 }
 
 double BasicMultivariateNormal::getPdf(std::vector<double> x, std::vector<double> mu, std::vector<std::vector<double> > inverse_cov_matrix){
@@ -752,11 +752,11 @@ double BasicMultivariateNormal::pdf(std::vector<double> x){
   return getPdf(x, _mu, _inverse_cov_matrix);
 }
 
-double BasicMultivariateNormal::Cdf(std::vector<double> x){
+double BasicMultivariateNormal::cdf(std::vector<double> x){
     /**
      * This function calculates the cdf values at x of a MVN distribution
      */
-  return _cartesianDistribution.Cdf(x);
+  return _cartesianDistribution.cdf(x);
 }
 
 std::vector<double> BasicMultivariateNormal::inverseCdf(double F, double g){
@@ -794,7 +794,7 @@ double BasicMultivariateNormal::Marginal(double x, int dimension){
   return _cartesianDistribution.Marginal(x,dimension);
 }
 
-//double BasicMultivariateNormal::Cdf_(std::vector<double> x){
+//double BasicMultivariateNormal::cdf_(std::vector<double> x){
 //// if(_mu.size() == x.size()){
 ////  int dimensions = _mu.size();
 ////  //boost::math::chi_squared chiDistribution(dimensions);

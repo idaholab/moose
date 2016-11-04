@@ -36,7 +36,7 @@ public:
     return _interpolator.interpolateAt(x);
   };
   double
-  Cdf(std::vector<double> x)
+  cdf(std::vector<double> x)
   {
     return _interpolator.interpolateAt(x);
   };

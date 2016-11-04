@@ -96,7 +96,7 @@ double BasicDistributionND::cellIntegral(std::vector<double> center, std::vector
       else
         nd_coordinate.at(j) = center.at(j) + dx.at(j)/2.0;
     }
-    value += Cdf(nd_coordinate) * sign;
+    value += cdf(nd_coordinate) * sign;
 
     sign = sign * (-1.0);
     counter++;
@@ -155,7 +155,7 @@ double DistributionPdf(BasicDistributionND & dist, std::vector<double> & x)
 
 double DistributionCdf(BasicDistributionND & dist, std::vector<double> & x)
 {
-  return dist.Cdf(x);
+  return dist.cdf(x);
 }
 
 //std::vector<double> DistributionInverseCdf(BasicDistributionND & dist, double & min, double & max){

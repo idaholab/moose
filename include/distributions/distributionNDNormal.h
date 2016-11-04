@@ -35,7 +35,7 @@ public:
 
   virtual ~BasicMultivariateNormal();
   double  pdf(std::vector<double> x);
-  double  Cdf(std::vector<double> x);
+  double  cdf(std::vector<double> x);
   std::vector<double> inverseCdf(double F, double g);
   double inverseMarginal(double F, int dimension);
   void updateRNGparameter(double tolerance, double initial_divisions);

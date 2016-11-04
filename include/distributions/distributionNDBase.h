@@ -28,7 +28,7 @@ public:
    double  getVariable(const std::string & variableName);                       ///< getVariable from mapping
    void updateVariable(const std::string & variableName, double & newValue);
    virtual double  pdf(std::vector<double> x) = 0;                              ///< pdf function at coordinate x
-   virtual double  Cdf(std::vector<double> x) = 0;                              ///< Cdf function at coordinate x
+   virtual double  cdf(std::vector<double> x) = 0;                              ///< cdf function at coordinate x
    virtual std::vector<double> inverseCdf(double F, double g) = 0;
 
    virtual double inverseMarginal(double F, int dimension) = 0;
@@ -81,7 +81,7 @@ protected:
 //    return _interpolator.interpolateAt(x);
 //  };
 //  double
-//  Cdf(std::vector<double> x)
+//  cdf(std::vector<double> x)
 //  {
 //     double value = _interpolator.interpolateAt(x);
 //

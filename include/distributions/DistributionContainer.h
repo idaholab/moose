@@ -59,10 +59,10 @@ public:
    * @param dist_alias, alias of the distribution from which retrieving the parameter
    * @param x, position
    */
-  double Cdf(const char * dist_alias, double x);
-  double Cdf(const std::string dist_alias, double x);     // return cdf value of the distribution _type as function of the position x within [_xMin , xMax]
-  double Cdf(const char * dist_alias, std::vector<double> x);
-  double Cdf(const std::string dist_alias, std::vector<double> x);     // return cdf value of the distribution _type as function of the position x within [_xMin , xMax]
+  double cdf(const char * dist_alias, double x);
+  double cdf(const std::string dist_alias, double x);     // return cdf value of the distribution _type as function of the position x within [_xMin , xMax]
+  double cdf(const char * dist_alias, std::vector<double> x);
+  double cdf(const std::string dist_alias, std::vector<double> x);     // return cdf value of the distribution _type as function of the position x within [_xMin , xMax]
 
 
   /**

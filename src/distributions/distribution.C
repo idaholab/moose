@@ -122,8 +122,8 @@ double BasicDistribution::windowProcessing(double rng){
                 value = inverseCdf(pb);
                 //std::cerr << " pbLOW " << pbLOW << " pbUP " << pbUP << " pb " << pb << " value " << value << std::endl;
         }else if(getVariable(std::string("V_window_Low")) != -std::numeric_limits<double>::max() && getVariable(std::string("V_window_Up")) != std::numeric_limits<double>::max( )){ // interval V window
-                double pbLOW = Cdf(getVariable(std::string("V_window_Low")));
-                double pbUP  = Cdf(getVariable(std::string("V_window_Up")));
+                double pbLOW = cdf(getVariable(std::string("V_window_Low")));
+                double pbUP  = cdf(getVariable(std::string("V_window_Up")));
                 double pb = pbLOW + (pbUP-pbLOW) * rng;
                 value = inverseCdf(pb);
                 //std::cerr << " valLOW " << valLOW << " valUP " << valUP << " value " << value << std::endl;
