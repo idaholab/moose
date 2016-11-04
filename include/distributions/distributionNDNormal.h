@@ -34,7 +34,7 @@ public:
   void basicMultivariateNormalInit(unsigned int & rows, unsigned int &columns, std::vector<std::vector<double> > cov_matrix, std::vector<double> mu);
 
   virtual ~BasicMultivariateNormal();
-  double  Pdf(std::vector<double> x);
+  double  pdf(std::vector<double> x);
   double  Cdf(std::vector<double> x);
   std::vector<double> inverseCdf(double F, double g);
   double inverseMarginal(double F, int dimension);

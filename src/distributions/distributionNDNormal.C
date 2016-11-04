@@ -739,13 +739,13 @@ double BasicMultivariateNormal::pdfInTransformedSpace(std::vector<double> x){
   double value = 1.0;
   BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
   for (unsigned int i = 0; i < x.size(); ++i) {
-    value *=  normalDistribution->Pdf(x.at(i));
+    value *=  normalDistribution->pdf(x.at(i));
   }
   delete normalDistribution;
   return value;
 }
 
-double BasicMultivariateNormal::Pdf(std::vector<double> x){
+double BasicMultivariateNormal::pdf(std::vector<double> x){
     /**
      * This function calculates the pdf values at x of a MVN distribution
      */

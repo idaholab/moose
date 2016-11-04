@@ -97,7 +97,7 @@
 
 
   double
-  BasicMultiDimensionalCartesianSpline::Pdf(std::vector<double> x)
+  BasicMultiDimensionalCartesianSpline::pdf(std::vector<double> x)
   {
     if (_CDFprovided)
       return _interpolator.ndDerivative(x);

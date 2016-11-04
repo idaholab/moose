@@ -24,7 +24,7 @@ public:
 
    virtual double getRandom(double x);  //Same as inverseCdf, except it can be forced.
 
-   virtual double  Pdf(double x) = 0; ///< Pdf function at coordinate x
+   virtual double  pdf(double x) = 0; ///< pdf function at coordinate x
    virtual double  Cdf(double x) = 0; ///< Cdf function at coordinate x
    virtual double  inverseCdf(double x) = 0; ///< x
 

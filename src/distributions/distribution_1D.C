@@ -67,7 +67,7 @@ BasicTruncatedDistribution::BasicTruncatedDistribution(double x_min, double x_ma
 }
 
 double
-BasicTruncatedDistribution::Pdf(double x){
+BasicTruncatedDistribution::pdf(double x){
   double value;
   double x_min = _dist_parameters.find("xMin") ->second;
   double x_max = _dist_parameters.find("xMax") ->second;
@@ -222,7 +222,7 @@ double BasicDiscreteDistribution::untrHazard(double x) {
   return _backend->hazard(x);
 }
 
-double BasicDiscreteDistribution::Pdf(double x) {
+double BasicDiscreteDistribution::pdf(double x) {
   return untrPdf(x);
 }
 
@@ -287,7 +287,7 @@ BasicUniformDistribution::~BasicUniformDistribution()
 }
 
 double
-BasicUniformDistribution::Pdf(double x){
+BasicUniformDistribution::pdf(double x){
   return untrPdf(x);
 }
 
@@ -875,9 +875,9 @@ BasicBetaDistribution::untrCdf(double x){
 }
 
 double
-BasicBetaDistribution::Pdf(double x){
+BasicBetaDistribution::pdf(double x){
   double scale   = _dist_parameters.find("scale"  ) ->second;
-  return BasicTruncatedDistribution::Pdf( x )/scale;// scaling happens in untrPdf
+  return BasicTruncatedDistribution::pdf( x )/scale;// scaling happens in untrPdf
 }
 
 double
@@ -946,7 +946,7 @@ BasicPoissonDistribution::untrCdf(double x){
 }
 
 double
-BasicPoissonDistribution::Pdf(double x){
+BasicPoissonDistribution::pdf(double x){
    double x_min = _dist_parameters.find("xMin") ->second;
    double x_max = _dist_parameters.find("xMax") ->second;
 
@@ -1079,7 +1079,7 @@ BasicConstantDistribution::BasicConstantDistribution(double value){
   _value = value;
 }
 BasicConstantDistribution::~BasicConstantDistribution(){}
-double  BasicConstantDistribution::Pdf(double x){
+double  BasicConstantDistribution::pdf(double x){
   return untrPdf(x);
 }
 double  BasicConstantDistribution::Cdf(double x){
@@ -1161,7 +1161,7 @@ double BasicConstantDistribution::untrHazard(double /*x*/){
 // }
 
 // double
-// BasicCustomDistribution::Pdf(double & x){
+// BasicCustomDistribution::pdf(double & x){
 //    double value=_interpolation.interpolation(x);
 
 //    return value;

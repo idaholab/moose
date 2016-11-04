@@ -249,35 +249,35 @@ DistributionContainer::getDistributionVariableNames(const std::string dist_alias
 }
 
 double
-DistributionContainer::Pdf(const char * dist_alias, double x){
-   return Pdf(std::string(dist_alias),x);
+DistributionContainer::pdf(const char * dist_alias, double x){
+   return pdf(std::string(dist_alias),x);
 }
 
 double
-DistributionContainer::Pdf(const std::string dist_alias, double x){
+DistributionContainer::pdf(const std::string dist_alias, double x){
 
     if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
       MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
-      return dist->Pdf(x);
+      return dist->pdf(x);
     }
-    throwError("Pdf: Distribution " + dist_alias + " was not found in distribution container.");
+    throwError("pdf: Distribution " + dist_alias + " was not found in distribution container.");
     return -1.0;
 }
 
 double
-DistributionContainer::Pdf(const char * dist_alias, std::vector<double> x)
+DistributionContainer::pdf(const char * dist_alias, std::vector<double> x)
 {
-   return Pdf(std::string(dist_alias),x);
+   return pdf(std::string(dist_alias),x);
 }
 
 double
-DistributionContainer::Pdf(const std::string dist_alias, std::vector<double> x){
+DistributionContainer::pdf(const std::string dist_alias, std::vector<double> x){
 
     if(_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end()){
       MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
-      return dist->Pdf(x);
+      return dist->pdf(x);
     }
-    throwError("Pdf: Distribution ND" + dist_alias + " was not found in distribution container.");
+    throwError("pdf: Distribution ND" + dist_alias + " was not found in distribution container.");
     return -1.0;
 }
 

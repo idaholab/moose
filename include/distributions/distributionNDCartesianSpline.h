@@ -39,7 +39,7 @@ public:
   {
   };
 
-  double Pdf(std::vector<double> x);
+  double pdf(std::vector<double> x);
 
   double Cdf(std::vector<double> x);
 

@@ -31,7 +31,7 @@ public:
   {
   };
   double
-  Pdf(std::vector<double> x)
+  pdf(std::vector<double> x)
   {
     return _interpolator.interpolateAt(x);
   };

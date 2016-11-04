@@ -48,10 +48,10 @@ public:
   std::vector<std::string> getDistributionVariableNames(const std::string dist_alias);
   std::vector<std::string> getDistributionNames();
 
-  double Pdf(const char * dist_alias, double x);
-  double Pdf(const std::string dist_alias, double x);     // return pdf value of the distribution _type as function of the position x within [_xMin , xMax]
-  double Pdf(const char * dist_alias, std::vector<double> x);
-  double Pdf(const std::string dist_alias, std::vector<double> x);     // return pdf value of the distribution _type as function of the position x within [_xMin , xMax]
+  double pdf(const char * dist_alias, double x);
+  double pdf(const std::string dist_alias, double x);     // return pdf value of the distribution _type as function of the position x within [_xMin , xMax]
+  double pdf(const char * dist_alias, std::vector<double> x);
+  double pdf(const std::string dist_alias, std::vector<double> x);     // return pdf value of the distribution _type as function of the position x within [_xMin , xMax]
 
   /*
    * Function to get the cdf value of the distribution called "dist_alias"

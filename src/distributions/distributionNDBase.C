@@ -150,7 +150,7 @@ getDistributionType(BasicDistributionND & dist) {
 
 double DistributionPdf(BasicDistributionND & dist, std::vector<double> & x)
 {
-  return dist.Pdf(x);
+  return dist.pdf(x);
 }
 
 double DistributionCdf(BasicDistributionND & dist, std::vector<double> & x)
