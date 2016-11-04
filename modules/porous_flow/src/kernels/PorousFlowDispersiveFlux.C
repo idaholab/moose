@@ -43,6 +43,7 @@ PorousFlowDispersiveFlux::PorousFlowDispersiveFlux(const InputParameters & param
     _dfluid_viscosity_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_viscosity_dvar")),
     _permeability(getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")),
     _dpermeability_dvar(getMaterialProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_qp_dvar")),
+    _dpermeability_dgradvar(getMaterialProperty<std::vector<std::vector<RealTensorValue> > >("dPorousFlow_permeability_qp_dgradvar")),
     _grad_p(getMaterialProperty<std::vector<RealGradient> >("PorousFlow_grad_porepressure_qp")),
     _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_porepressure_qp_dgradvar")),
     _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_porepressure_qp_dvar")),
@@ -143,7 +144,9 @@ PorousFlowDispersiveFlux::computeQpJac(unsigned int jvar) const
     }
 
     // Derivative of Darcy velocity
-    RealVectorValue dvelocity = _dpermeability_dvar[_qp][pvar] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph]*_gravity);
+    RealVectorValue dvelocity = _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph]*_gravity);
+    for (unsigned i = 0; i < LIBMESH_DIM; ++i)
+      dvelocity += _dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
     dvelocity += _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] - _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity);
     dvelocity += _permeability[_qp] * (_dgrad_p_dvar[_qp][ph][pvar] * _phi[_j][_qp]);
 

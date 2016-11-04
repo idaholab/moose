@@ -95,6 +95,12 @@
     ratio_tol = 1E-6 # lots of chain rules here
     difference_tol = 1E10
   [../]
+  [./fflux08]
+    type = 'PetscJacobianTester'
+    input = 'fflux08.i'
+    ratio_tol = 1E-7 # lots of chain rules here
+    difference_tol = 1E10
+  [../]
   [./eff_stress01]
     type = 'PetscJacobianTester'
     input = 'eff_stress01.i'
@@ -173,6 +179,18 @@
   [./denergy02]
     type = 'PetscJacobianTester'
     input = 'denergy02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./denergy03]
+    type = 'PetscJacobianTester'
+    input = 'denergy03.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./denergy04]
+    type = 'PetscJacobianTester'
+    input = 'denergy04.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]

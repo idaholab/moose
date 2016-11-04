@@ -102,6 +102,9 @@ protected:
   /// Derivative of permeability wrt PorousFlow variables
   const MaterialProperty<std::vector<RealTensorValue> > & _dpermeability_dvar;
 
+  /// d(permeabiity)/d(grad(porous-flow variable))
+  const MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dpermeability_dgradvar;
+
   /// Gradient of the pore pressure in each phase
   const MaterialProperty<std::vector<RealGradient> > & _grad_p;
 
