@@ -7,13 +7,17 @@
 
 // UserObjects
 #include "PorousFlowDictator.h"
+#include "PorousFlowSumQuantity.h"
 
 // DiracKernels
 #include "PorousFlowSquarePulsePointSource.h"
+#include "PorousFlowPeacemanBorehole.h"
+#include "PorousFlowPolyLineSink.h"
 
 // Postprocessors
 #include "PorousFlowFluidMass.h"
 #include "PorousFlowHeatEnergy.h"
+#include "PorousFlowPlotQuantity.h"
 
 // Materials
 #include "PorousFlow1PhaseMD_Gaussian.h"
@@ -128,13 +132,17 @@ PorousFlowApp::registerObjects(Factory & factory)
 {
   // UserObjects
   registerUserObject(PorousFlowDictator);
+  registerUserObject(PorousFlowSumQuantity);
 
   // DiracKernels
   registerDiracKernel(PorousFlowSquarePulsePointSource);
+  registerDiracKernel(PorousFlowPeacemanBorehole);
+  registerDiracKernel(PorousFlowPolyLineSink);
 
   // Postprocessors
   registerPostprocessor(PorousFlowFluidMass);
   registerPostprocessor(PorousFlowHeatEnergy);
+  registerPostprocessor(PorousFlowPlotQuantity);
 
   // Materials
   registerMaterial(PorousFlow1PhaseMD_Gaussian);
