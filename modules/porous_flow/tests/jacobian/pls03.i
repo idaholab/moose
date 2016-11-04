@@ -185,7 +185,7 @@
   [./flux_w]
     type = PorousFlowPiecewiseLinearSink
     boundary = 'left'
-    pressures = '-1 -0.5 0'
+    pt_vals = '-1 -0.5 0'
     multipliers = '1 2 4'
     variable = ppwater
     mass_fraction_component = 0
@@ -197,7 +197,7 @@
   [./flux_g]
     type = PorousFlowPiecewiseLinearSink
     boundary = 'top'
-    pressures = '0 0.5 1'
+    pt_vals = '0 0.5 1'
     multipliers = '1 -2 4'
     mass_fraction_component = 0
     variable = ppgas
@@ -209,7 +209,7 @@
   [./flux_1]
     type = PorousFlowPiecewiseLinearSink
     boundary = 'right'
-    pressures = '0 0.5 1'
+    pt_vals = '0 0.5 1'
     multipliers = '1 3 4'
     mass_fraction_component = 1
     variable = massfrac_ph0_sp0
@@ -220,7 +220,7 @@
   [./flux_2]
     type = PorousFlowPiecewiseLinearSink
     boundary = 'back top'
-    pressures = '0 0.5 1'
+    pt_vals = '0 0.5 1'
     multipliers = '0 1 -3'
     mass_fraction_component = 1
     variable = massfrac_ph1_sp0
@@ -232,7 +232,7 @@
   [./flux_3]
     type = PorousFlowPiecewiseLinearSink
     boundary = 'right'
-    pressures = '0 0.5 1'
+    pt_vals = '0 0.5 1'
     multipliers = '1 3 4'
     mass_fraction_component = 2
     variable = ppwater
@@ -243,7 +243,7 @@
   [./flux_4]
     type = PorousFlowPiecewiseLinearSink
     boundary = 'back top'
-    pressures = '0 0.5 1'
+    pt_vals = '0 0.5 1'
     multipliers = '0 1 -3'
     mass_fraction_component = 2
     variable = massfrac_ph1_sp0

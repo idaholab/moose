@@ -160,7 +160,7 @@
   [./flux0]
     type = PorousFlowPiecewiseLinearSink
     boundary = 'right'
-    pressures = '-100 100'
+    pt_vals = '-100 100'
     multipliers = '-1 1'
     variable = frac # the zeroth comonent
     mass_fraction_component = 0
@@ -172,7 +172,7 @@
   [./flux1]
     type = PorousFlowPiecewiseLinearSink
     boundary = 'right'
-    pressures = '-100 100'
+    pt_vals = '-100 100'
     multipliers = '-1 1'
     variable = pp # comonent 1
     mass_fraction_component = 1
