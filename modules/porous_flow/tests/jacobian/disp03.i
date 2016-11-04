@@ -97,7 +97,7 @@
     porosity = 0.1
   [../]
   [./diff]
-    type = PorousFlowDiffusionCoeffConst
+    type = PorousFlowDiffusivityConst
      diffusion_coeff = '1e-2 1e-1'
      tortuosity = '0'
   [../]
