@@ -21,7 +21,7 @@
 class RelativeSolutionDifferenceNorm;
 class Transient;
 
-template<>
+template <>
 InputParameters validParams<RelativeSolutionDifferenceNorm>();
 
 /**
@@ -40,8 +40,12 @@ public:
   /**
    * No action taken
    */
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
   ///@}
 
   /**

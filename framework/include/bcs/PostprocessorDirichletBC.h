@@ -19,7 +19,7 @@
 
 class PostprocessorDirichletBC;
 
-template<>
+template <>
 InputParameters validParams<PostprocessorDirichletBC>();
 
 /**

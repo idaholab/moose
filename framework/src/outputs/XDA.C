@@ -18,11 +18,12 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<XDA>()
+template <>
+InputParameters
+validParams<XDA>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<BasicOutput<OversampleOutput> >();
+  InputParameters params = validParams<BasicOutput<OversampleOutput>>();
 
   // Add description for the XDA class
   params.addClassDescription("Object for outputting data in the XDA/XDR format");
@@ -35,8 +36,8 @@ InputParameters validParams<XDA>()
   return params;
 }
 
-XDA::XDA(const InputParameters & parameters) :
-    BasicOutput<OversampleOutput> (parameters),
+XDA::XDA(const InputParameters & parameters)
+  : BasicOutput<OversampleOutput>(parameters),
     _binary(getParam<bool>("_binary"))
 {
 }
@@ -53,7 +54,7 @@ XDA::output(const ExecFlagType & /*type*/)
     mooseError("Unacceptable filename, you must include an extension (.xda or .xdr).");
 
   // Insert the mesh suffix
-  mesh_name.insert(mesh_name.size()-4, "_mesh");
+  mesh_name.insert(mesh_name.size() - 4, "_mesh");
 
   // Set the binary flag
   XdrMODE mode = _binary ? ENCODE : WRITE;

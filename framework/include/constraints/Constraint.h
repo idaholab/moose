@@ -33,22 +33,21 @@ class MooseVariable;
 class SubProblem;
 class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<Constraint>();
 
 /**
  * Base class for all Constraint types
  */
-class Constraint :
-  public MooseObject,
-  public SetupInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public TransientInterface,
-  protected GeometricSearchInterface,
-  public Restartable,
-  public ZeroInterface,
-  public MeshChangedInterface
+class Constraint : public MooseObject,
+                   public SetupInterface,
+                   public FunctionInterface,
+                   public UserObjectInterface,
+                   public TransientInterface,
+                   protected GeometricSearchInterface,
+                   public Restartable,
+                   public ZeroInterface,
+                   public MeshChangedInterface
 {
 public:
   Constraint(const InputParameters & parameters);
@@ -58,14 +57,23 @@ public:
    * Subproblem this constraint is part of
    * @return The reference to the subproblem
    */
-  SubProblem & subProblem() { return _subproblem; }
+  SubProblem & subProblem()
+  {
+    return _subproblem;
+  }
 
   /**
    * The variable number that this object operates on.
    */
-  MooseVariable & variable() { return _var; }
+  MooseVariable & variable()
+  {
+    return _var;
+  }
 
-  virtual bool addCouplingEntriesToJacobian() { return true; }
+  virtual bool addCouplingEntriesToJacobian()
+  {
+    return true;
+  }
 
 protected:
   SubProblem & _subproblem;

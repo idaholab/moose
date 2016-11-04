@@ -24,7 +24,6 @@
 // Forward declarations
 class DisplacedProblem;
 
-
 class DisplacedSystem : public SystemBase
 {
 public:
@@ -35,23 +34,47 @@ public:
 
   virtual NumericVector<Number> & getVector(const std::string & name) override;
 
-  virtual NumericVector<Number> & serializedSolution() override { return _undisplaced_system.serializedSolution(); }
+  virtual NumericVector<Number> & serializedSolution() override
+  {
+    return _undisplaced_system.serializedSolution();
+  }
 
-  virtual const NumericVector<Number> * & currentSolution() override { return _undisplaced_system.currentSolution(); }
+  virtual const NumericVector<Number> *& currentSolution() override
+  {
+    return _undisplaced_system.currentSolution();
+  }
 
-  virtual NumericVector<Number> & solution() override { return _undisplaced_system.solution(); }
+  virtual NumericVector<Number> & solution() override
+  {
+    return _undisplaced_system.solution();
+  }
 
-  virtual NumericVector<Number> & solutionUDot() override { return _undisplaced_system.solutionUDot(); }
-  virtual Number & duDotDu() override { return _undisplaced_system.duDotDu(); }
+  virtual NumericVector<Number> & solutionUDot() override
+  {
+    return _undisplaced_system.solutionUDot();
+  }
+  virtual Number & duDotDu() override
+  {
+    return _undisplaced_system.duDotDu();
+  }
 
   /**
    * Return the residual copy from the NonlinearSystem
    * @return Residual copy
    */
-  virtual NumericVector<Number> & residualCopy() override { return _undisplaced_system.residualCopy(); }
-  virtual NumericVector<Number> & residualGhosted() override { return _undisplaced_system.residualGhosted(); }
+  virtual NumericVector<Number> & residualCopy() override
+  {
+    return _undisplaced_system.residualCopy();
+  }
+  virtual NumericVector<Number> & residualGhosted() override
+  {
+    return _undisplaced_system.residualGhosted();
+  }
 
-  virtual void augmentSendList(std::vector<dof_id_type> & send_list) override { _undisplaced_system.augmentSendList(send_list); }
+  virtual void augmentSendList(std::vector<dof_id_type> & send_list) override
+  {
+    _undisplaced_system.augmentSendList(send_list);
+  }
 
   /**
    * This is an empty function since the displaced system doesn't have a matrix!
@@ -59,32 +82,55 @@ public:
    */
   virtual void augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
                                std::vector<dof_id_type> & /*n_nz*/,
-                               std::vector<dof_id_type> & /*n_oz*/) override {}
+                               std::vector<dof_id_type> & /*n_oz*/) override
+  {
+  }
 
   /**
    * Adds this variable to the list of variables to be zeroed during each residual evaluation.
    * @param var_name The name of the variable to be zeroed.
    */
-  virtual void addVariableToZeroOnResidual(std::string var_name) override { _undisplaced_system.addVariableToZeroOnResidual(var_name); }
+  virtual void addVariableToZeroOnResidual(std::string var_name) override
+  {
+    _undisplaced_system.addVariableToZeroOnResidual(var_name);
+  }
 
   /**
    * Adds this variable to the list of variables to be zeroed during each jacobian evaluation.
    * @param var_name The name of the variable to be zeroed.
    */
-  virtual void addVariableToZeroOnJacobian(std::string var_name) override { _undisplaced_system.addVariableToZeroOnJacobian(var_name); }
+  virtual void addVariableToZeroOnJacobian(std::string var_name) override
+  {
+    _undisplaced_system.addVariableToZeroOnJacobian(var_name);
+  }
 
   /**
    * Zero out the solution for the list of variables passed in.
    */
-  virtual void zeroVariables(std::vector<std::string> & vars_to_be_zeroed) override { _undisplaced_system.zeroVariables(vars_to_be_zeroed); }
+  virtual void zeroVariables(std::vector<std::string> & vars_to_be_zeroed) override
+  {
+    _undisplaced_system.zeroVariables(vars_to_be_zeroed);
+  }
 
-  virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
+  virtual NumericVector<Number> & solutionOld() override
+  {
+    return *_sys.old_local_solution;
+  }
 
-  virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
+  virtual NumericVector<Number> & solutionOlder() override
+  {
+    return *_sys.older_local_solution;
+  }
 
-  virtual TransientExplicitSystem & sys() { return _sys; }
+  virtual TransientExplicitSystem & sys()
+  {
+    return _sys;
+  }
 
-  virtual System & system() override { return _sys; }
+  virtual System & system() override
+  {
+    return _sys;
+  }
 
 protected:
   SystemBase & _undisplaced_system;

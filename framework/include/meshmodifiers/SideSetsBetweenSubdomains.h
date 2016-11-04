@@ -19,11 +19,10 @@
 
 class SideSetsBetweenSubdomains;
 
-template<>
+template <>
 InputParameters validParams<SideSetsBetweenSubdomains>();
 
-class SideSetsBetweenSubdomains :
-  public MeshModifier
+class SideSetsBetweenSubdomains : public MeshModifier
 {
 public:
   SideSetsBetweenSubdomains(const InputParameters & parameters);

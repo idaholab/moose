@@ -21,8 +21,9 @@
 
 #include "libmesh/string_to_enum.h"
 
-template<>
-InputParameters validParams<GapValueAux>()
+template <>
+InputParameters
+validParams<GapValueAux>()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
@@ -33,15 +34,15 @@ InputParameters validParams<GapValueAux>()
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
+  params.addParam<std::string>("normal_smoothing_method", "Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
   return params;
 }
 
-GapValueAux::GapValueAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _penetration_locator(_nodal ?  getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))) : getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
+GapValueAux::GapValueAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _penetration_locator(_nodal ? getPenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))) : getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0], Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
     _moose_var(_subproblem.getVariable(_tid, getParam<VariableName>("paired_variable"))),
     _serialized_solution(_moose_var.sys().currentSolution()),
     _dof_map(_moose_var.dofMap()),
@@ -59,10 +60,9 @@ GapValueAux::GapValueAux(const InputParameters & parameters) :
   Order pairedVarOrder(_moose_var.order());
   Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
   if (pairedVarOrder != gvaOrder && pairedVarOrder != CONSTANT)
-    mooseError("ERROR: specified order for GapValueAux ("<<Utility::enum_to_string<Order>(gvaOrder)
-               <<") does not match order for paired_variable \""<< _moose_var.name() << "\" ("
-               <<Utility::enum_to_string<Order>(pairedVarOrder)<<")");
-
+    mooseError("ERROR: specified order for GapValueAux (" << Utility::enum_to_string<Order>(gvaOrder)
+                                                          << ") does not match order for paired_variable \"" << _moose_var.name() << "\" ("
+                                                          << Utility::enum_to_string<Order>(pairedVarOrder) << ")");
 }
 
 Real
@@ -81,7 +81,7 @@ GapValueAux::computeValue()
 
   if (pinfo)
   {
-    std::vector<std::vector<Real> > & side_phi = pinfo->_side_phi;
+    std::vector<std::vector<Real>> & side_phi = pinfo->_side_phi;
     if (_moose_var.feType().order != CONSTANT)
       gap_value = _moose_var.getValue(pinfo->_side, side_phi);
     else
@@ -96,7 +96,7 @@ GapValueAux::computeValue()
       msg << current_node->id();
       msg << " on processor ";
       msg << processor_id();
-      mooseWarning( msg.str() );
+      mooseWarning(msg.str());
     }
   }
   return gap_value;

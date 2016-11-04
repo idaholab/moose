@@ -21,7 +21,7 @@
 //Forward Declarations
 class BoundingValueElementDamper;
 
-template<>
+template <>
 InputParameters validParams<BoundingValueElementDamper>();
 
 /**

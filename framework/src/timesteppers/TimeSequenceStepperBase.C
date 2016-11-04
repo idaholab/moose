@@ -16,17 +16,18 @@
 #include "FEProblem.h"
 #include "Transient.h"
 
-template<>
-InputParameters validParams<TimeSequenceStepperBase>()
+template <>
+InputParameters
+validParams<TimeSequenceStepperBase>()
 {
   InputParameters params = validParams<TimeStepper>();
   return params;
 }
 
-TimeSequenceStepperBase::TimeSequenceStepperBase(const InputParameters & parameters) :
-    TimeStepper(parameters),
-    _current_step(declareRestartableData("current_step", (unsigned int) 0)),
-    _time_sequence(declareRestartableData<std::vector<Real> >("time_sequence"))
+TimeSequenceStepperBase::TimeSequenceStepperBase(const InputParameters & parameters)
+  : TimeStepper(parameters),
+    _current_step(declareRestartableData("current_step", (unsigned int)0)),
+    _time_sequence(declareRestartableData<std::vector<Real>>("time_sequence"))
 {
 }
 
@@ -88,7 +89,8 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
       {
         if (!MooseUtils::absoluteFuzzyEqual(times[j], saved_time_sequence[j]))
           mooseError("The timesequence provided in the restart file must be identical to "
-                     "the one in the old file up to entry number " << _current_step + 1 << " = "
+                     "the one in the old file up to entry number "
+                     << _current_step + 1 << " = "
                      << saved_time_sequence[_current_step]);
 
         _time_sequence.push_back(saved_time_sequence[j]);

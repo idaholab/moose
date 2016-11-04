@@ -49,21 +49,21 @@ escape(std::string & str)
   escapes['\r'] = "\\r";
 
   for (const auto & it : escapes)
-    for (size_t pos=0; (pos=str.find(it.first, pos)) != std::string::npos; pos+=it.second.size())
+    for (size_t pos = 0; (pos = str.find(it.first, pos)) != std::string::npos; pos += it.second.size())
       str.replace(pos, 1, it.second);
 }
-
 
 std::string
 trim(std::string str, const std::string & white_space)
 {
-  std::string r = str.erase(str.find_last_not_of(white_space)+1);
-  return r.erase(0,r.find_first_not_of(white_space));
+  std::string r = str.erase(str.find_last_not_of(white_space) + 1);
+  return r.erase(0, r.find_first_not_of(white_space));
 }
 
-bool pathContains(const std::string & expression,
-                  const std::string & string_to_find,
-                  const std::string & delims)
+bool
+pathContains(const std::string & expression,
+             const std::string & string_to_find,
+             const std::string & delims)
 {
   std::vector<std::string> elements;
   tokenize(expression, elements, 0, delims);
@@ -82,8 +82,7 @@ checkFileReadable(const std::string & filename, bool check_line_endings, bool th
   if (in.fail())
   {
     if (throw_on_unreadable)
-      mooseError((std::string("Unable to open file \"") + filename
-                  + std::string("\". Check to make sure that it exists and that you have read permission.")).c_str());
+      mooseError((std::string("Unable to open file \"") + filename + std::string("\". Check to make sure that it exists and that you have read permission.")).c_str());
     else
       return false;
   }
@@ -110,8 +109,7 @@ checkFileWriteable(const std::string & filename, bool throw_on_unwritable)
   if (out.fail())
   {
     if (throw_on_unwritable)
-      mooseError((std::string("Unable to open file \"") + filename
-                  + std::string("\". Check to make sure that it exists and that you have write permission.")).c_str());
+      mooseError((std::string("Unable to open file \"") + filename + std::string("\". Check to make sure that it exists and that you have write permission.")).c_str());
     else
       return false;
   }
@@ -130,7 +128,7 @@ parallelBarrierNotify(const Parallel::Communicator & comm)
   {
     // The master process is already through, so report it
     Moose::out << "Jobs complete: 1/" << comm.size() << (1 == comm.size() ? "\n" : "\r") << std::flush;
-    for (unsigned int i=2; i<=comm.size(); ++i)
+    for (unsigned int i = 2; i <= comm.size(); ++i)
     {
       comm.receive(MPI_ANY_SOURCE, slave_processor_id);
       Moose::out << "Jobs complete: " << i << "/" << comm.size() << (i == comm.size() ? "\n" : "\r") << std::flush;
@@ -145,7 +143,8 @@ parallelBarrierNotify(const Parallel::Communicator & comm)
   comm.barrier();
 }
 
-void serialBegin(const libMesh::Parallel::Communicator & comm)
+void
+serialBegin(const libMesh::Parallel::Communicator & comm)
 {
   // unless we are the first processor...
   if (comm.rank() > 0)
@@ -158,7 +157,8 @@ void serialBegin(const libMesh::Parallel::Communicator & comm)
     mooseWarning("Entering serial execution block (use only for debugging)");
 }
 
-void serialEnd(const libMesh::Parallel::Communicator & comm)
+void
+serialEnd(const libMesh::Parallel::Communicator & comm)
 {
   // unless we are the last processor...
   if (comm.rank() + 1 < comm.size())
@@ -217,7 +217,7 @@ splitFileName(std::string full_file)
   else
   {
     path = full_file.substr(0, found);
-    file = full_file.substr(found+1);
+    file = full_file.substr(found + 1);
   }
 
   // Return the path and file as a pair
@@ -277,7 +277,7 @@ shortName(const std::string & name)
 std::string
 baseName(const std::string & name)
 {
- return name.substr(0, name.find_last_of('/') != std::string::npos ? name.find_last_of('/') : 0);
+  return name.substr(0, name.find_last_of('/') != std::string::npos ? name.find_last_of('/') : 0);
 }
 
 bool
@@ -313,35 +313,35 @@ absoluteFuzzyLessThan(const Real & var1, const Real & var2, const Real & tol)
 bool
 relativeFuzzyEqual(const Real & var1, const Real & var2, const Real & tol)
 {
-  return (absoluteFuzzyEqual(var1, var2, tol*(std::abs(var1)+std::abs(var2))));
+  return (absoluteFuzzyEqual(var1, var2, tol * (std::abs(var1) + std::abs(var2))));
 }
 
 bool
 relativeFuzzyGreaterEqual(const Real & var1, const Real & var2, const Real & tol)
 {
-  return (absoluteFuzzyGreaterEqual(var1, var2, tol*(std::abs(var1)+std::abs(var2))));
+  return (absoluteFuzzyGreaterEqual(var1, var2, tol * (std::abs(var1) + std::abs(var2))));
 }
 
 bool
 relativeFuzzyGreaterThan(const Real & var1, const Real & var2, const Real & tol)
 {
-  return (absoluteFuzzyGreaterThan(var1, var2, tol*(std::abs(var1)+std::abs(var2))));
+  return (absoluteFuzzyGreaterThan(var1, var2, tol * (std::abs(var1) + std::abs(var2))));
 }
 
 bool
 relativeFuzzyLessEqual(const Real & var1, const Real & var2, const Real & tol)
 {
-  return (absoluteFuzzyLessEqual(var1, var2, tol*(std::abs(var1)+std::abs(var2))));
+  return (absoluteFuzzyLessEqual(var1, var2, tol * (std::abs(var1) + std::abs(var2))));
 }
 
 bool
 relativeFuzzyLessThan(const Real & var1, const Real & var2, const Real & tol)
 {
-  return (absoluteFuzzyLessThan(var1, var2, tol*(std::abs(var1)+std::abs(var2))));
+  return (absoluteFuzzyLessThan(var1, var2, tol * (std::abs(var1) + std::abs(var2))));
 }
 
 void
-MaterialPropertyStorageDump(const HashMap<const libMesh::Elem *, HashMap<unsigned int, MaterialProperties> > & props)
+MaterialPropertyStorageDump(const HashMap<const libMesh::Elem *, HashMap<unsigned int, MaterialProperties>> & props)
 {
   // Loop through the elements
   for (const auto & elem_it : props)
@@ -373,7 +373,7 @@ MaterialPropertyStorageDump(const HashMap<const libMesh::Elem *, HashMap<unsigne
 }
 
 void
-indentMessage(const std::string & prefix, std::string & message, const char* color/*= COLOR_CYAN*/)
+indentMessage(const std::string & prefix, std::string & message, const char * color /*= COLOR_CYAN*/)
 {
   // The colored prefix
   std::string indent = color + prefix + ": " + COLOR_DEFAULT;
@@ -427,18 +427,18 @@ getRecoveryFileBase(const std::list<std::string> & checkpoint_files)
   // Loop through all possible files and store the newest
   for (const auto & cp_file : checkpoint_files)
   {
-      struct stat stats;
-      stat(cp_file.c_str(), &stats);
+    struct stat stats;
+    stat(cp_file.c_str(), &stats);
 
-      time_t mod_time = stats.st_mtime;
-      if (mod_time > newest_time)
-      {
-        newest_restart_files.clear(); // If the modification time is greater, clear the list
-        newest_time = mod_time;
-      }
+    time_t mod_time = stats.st_mtime;
+    if (mod_time > newest_time)
+    {
+      newest_restart_files.clear(); // If the modification time is greater, clear the list
+      newest_time = mod_time;
+    }
 
-      if (mod_time == newest_time)
-        newest_restart_files.push_back(cp_file);
+    if (mod_time == newest_time)
+      newest_restart_files.push_back(cp_file);
   }
 
   // Loop through all of the newest files according the number in the file name

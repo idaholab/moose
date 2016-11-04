@@ -19,11 +19,10 @@
 
 class ElementIntegralIndicator;
 
-template<>
+template <>
 InputParameters validParams<ElementIntegralIndicator>();
 
-class ElementIntegralIndicator :
-  public ElementIndicator
+class ElementIntegralIndicator : public ElementIndicator
 {
 public:
   ElementIntegralIndicator(const InputParameters & parameters);

@@ -28,7 +28,7 @@ namespace libMesh
 class ExodusII_IO;
 }
 
-template<>
+template <>
 InputParameters validParams<Exodus>();
 
 /**
@@ -37,7 +37,6 @@ InputParameters validParams<Exodus>();
 class Exodus : public AdvancedOutput<OversampleOutput>
 {
 public:
-
   /**
    * Class constructor
    */
@@ -80,7 +79,6 @@ public:
   virtual void sequence(bool state);
 
 protected:
-
   /**
    * Outputs nodal, nonlinear variables
    */
@@ -133,9 +131,7 @@ protected:
    */
   bool _exodus_initialized;
 
-
 private:
-
   /**
    * A helper function for 'initializing' the ExodusII output file, see the comments for the _initialized
    * member variable.

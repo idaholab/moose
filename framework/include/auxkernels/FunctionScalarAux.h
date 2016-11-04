@@ -20,7 +20,7 @@
 class FunctionScalarAux;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionScalarAux>();
 
 /**
@@ -36,6 +36,5 @@ protected:
 
   std::vector<Function *> _functions;
 };
-
 
 #endif /* FUNCTIONSCALARAUX_H */

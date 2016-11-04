@@ -27,7 +27,7 @@ class MultiAppTransfer;
 class MooseMesh;
 class MultiApp;
 
-template<>
+template <>
 InputParameters validParams<MultiAppTransfer>();
 
 /**
@@ -51,10 +51,16 @@ public:
   };
 
   /// Used to construct InputParameters
-  static MooseEnum directions() { return MooseEnum("to_multiapp from_multiapp"); }
+  static MooseEnum directions()
+  {
+    return MooseEnum("to_multiapp from_multiapp");
+  }
 
   /// The direction this Transfer is going in
-  int direction() { return _direction; }
+  int direction()
+  {
+    return _direction;
+  }
 
   /**
    * Utility to verify that the vEariable in the destination system exists.
@@ -62,7 +68,10 @@ public:
   void variableIntegrityCheck(const AuxVariableName & var_name) const;
 
   /// Return the MultiApp that this transfer belongs to
-  const MooseSharedPointer<MultiApp> getMultiApp() const { return _multi_app; }
+  const MooseSharedPointer<MultiApp> getMultiApp() const
+  {
+    return _multi_app;
+  }
 
   /// Return the execution flags, handling "same_as_multiapp"
   virtual const std::vector<ExecFlagType> & execFlags() const;

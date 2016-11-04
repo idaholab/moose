@@ -26,17 +26,16 @@ class Damper;
 class SubProblem;
 class SystemBase;
 
-template<>
+template <>
 InputParameters validParams<Damper>();
 
 /**
  * Base class for deriving dampers
  */
-class Damper :
-  public MooseObject,
-  public SetupInterface,
-  public Restartable,
-  public MeshChangedInterface
+class Damper : public MooseObject,
+               public SetupInterface,
+               public Restartable,
+               public MeshChangedInterface
 {
 public:
   Damper(const InputParameters & parameters);

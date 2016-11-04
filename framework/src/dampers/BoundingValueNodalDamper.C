@@ -14,8 +14,9 @@
 
 #include "BoundingValueNodalDamper.h"
 
-template<>
-InputParameters validParams<BoundingValueNodalDamper>()
+template <>
+InputParameters
+validParams<BoundingValueNodalDamper>()
 {
   InputParameters params = validParams<NodalDamper>();
   params.addParam<Real>("max_value", std::numeric_limits<Real>::max(), "The maximum permissible iterative value for the variable.");
@@ -23,8 +24,8 @@ InputParameters validParams<BoundingValueNodalDamper>()
   return params;
 }
 
-BoundingValueNodalDamper::BoundingValueNodalDamper(const InputParameters & parameters) :
-    NodalDamper(parameters),
+BoundingValueNodalDamper::BoundingValueNodalDamper(const InputParameters & parameters)
+  : NodalDamper(parameters),
     _max_value(parameters.get<Real>("max_value")),
     _min_value(parameters.get<Real>("min_value"))
 {

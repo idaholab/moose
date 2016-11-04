@@ -50,12 +50,11 @@
 
 #endif
 
-
 // Forward declarations
 class ImageSampler;
 class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<ImageSampler>();
 
 /**
@@ -64,7 +63,6 @@ InputParameters validParams<ImageSampler>();
 class ImageSampler : public FileRangeBuilder
 {
 public:
-
   /**
    * Constructor.
    *
@@ -87,7 +85,6 @@ public:
   virtual void setupImageSampler(MooseMesh & mesh);
 
 protected:
-
   /**
    * Apply image re-scaling using the vtkImageShiftAndRescale object
    */
@@ -113,7 +110,6 @@ protected:
   void vtkFlip();
 
 private:
-
 #ifdef LIBMESH_HAVE_VTK
 
   /// List of file names to extract data
@@ -141,7 +137,7 @@ private:
   vtkSmartPointer<vtkImageFlip> _flip_filter;
 #endif
 
-  /**
+/**
    * Helper method for flipping image
    * @param axis Flag for determing the flip axis: "x=0", "y=1", "z=2"
    * @return A smart pointer the flipping filter
@@ -162,7 +158,7 @@ private:
   /// Physical pixel size
   std::vector<double> _voxel;
 
-  /// Component to extract
+/// Component to extract
 #ifdef LIBMESH_HAVE_VTK
   unsigned int _component;
 #endif

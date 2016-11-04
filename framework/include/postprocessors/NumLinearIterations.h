@@ -20,7 +20,7 @@
 //Forward Declarations
 class NumLinearIterations;
 
-template<>
+template <>
 InputParameters validParams<NumLinearIterations>();
 
 class NumLinearIterations : public GeneralPostprocessor
@@ -28,8 +28,12 @@ class NumLinearIterations : public GeneralPostprocessor
 public:
   NumLinearIterations(const InputParameters & parameters);
 
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
 
   virtual Real getValue() override;
 };

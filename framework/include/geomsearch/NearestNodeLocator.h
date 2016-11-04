@@ -56,13 +56,19 @@ public:
   /**
    * Returns the list of slave nodes this Locator is tracking.
    */
-  std::vector<dof_id_type> & slaveNodes() { return _slave_nodes; }
+  std::vector<dof_id_type> & slaveNodes()
+  {
+    return _slave_nodes;
+  }
 
   /**
    * Returns the NodeIdRange of slave nodes to be used for calling threaded
    * functions operating on the slave nodes.
    */
-  NodeIdRange & slaveNodeRange() { return *_slave_node_range; }
+  NodeIdRange & slaveNodeRange()
+  {
+    return *_slave_node_range;
+  }
 
   /**
    * Data structure used to hold nearest node info.
@@ -92,7 +98,7 @@ public:
   bool _first;
   std::vector<dof_id_type> _slave_nodes;
 
-  std::map<dof_id_type, std::vector<dof_id_type> > _neighbor_nodes;
+  std::map<dof_id_type, std::vector<dof_id_type>> _neighbor_nodes;
 
   // The following parameter controls the patch size that is searched for each nearest neighbor
   static const unsigned int _patch_size;

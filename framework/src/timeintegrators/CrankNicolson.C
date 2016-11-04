@@ -16,16 +16,17 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<CrankNicolson>()
+template <>
+InputParameters
+validParams<CrankNicolson>()
 {
   InputParameters params = validParams<TimeIntegrator>();
 
   return params;
 }
 
-CrankNicolson::CrankNicolson(const InputParameters & parameters) :
-    TimeIntegrator(parameters),
+CrankNicolson::CrankNicolson(const InputParameters & parameters)
+  : TimeIntegrator(parameters),
     _residual_old(_nl.addVector("residual_old", false, GHOSTED))
 {
 }
@@ -37,7 +38,7 @@ CrankNicolson::~CrankNicolson()
 void
 CrankNicolson::computeTimeDerivatives()
 {
-  _u_dot  = *_solution;
+  _u_dot = *_solution;
   _u_dot -= _solution_old;
   _u_dot *= 2. / _dt;
   _u_dot.close();

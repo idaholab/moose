@@ -20,25 +20,25 @@
 #include "Material.h"
 
 // Declare the output helper specializations
-template<>
+template <>
 void MaterialOutputAction::materialOutputHelper<Real>(const std::string & material_name, MooseSharedPointer<Material> material);
 
-template<>
+template <>
 void MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & material_name, MooseSharedPointer<Material> material);
 
-template<>
+template <>
 void MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & material_name, MooseSharedPointer<Material> material);
 
-
-template<>
-InputParameters validParams<MaterialOutputAction>()
+template <>
+InputParameters
+validParams<MaterialOutputAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-MaterialOutputAction::MaterialOutputAction(InputParameters params) :
-    Action(params),
+MaterialOutputAction::MaterialOutputAction(InputParameters params)
+  : Action(params),
     _output_warehouse(_app.getOutputWarehouse())
 {
 }
@@ -65,7 +65,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
   _boundary_material_data = problem_ptr->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA);
 
   // A complete list of all Material objects
-  const std::vector<MooseSharedPointer<Material> > & materials = problem_ptr->getMaterialWarehouse().getObjects();
+  const std::vector<MooseSharedPointer<Material>> & materials = problem_ptr->getMaterialWarehouse().getObjects();
 
   // Handle setting of material property output in [Outputs] sub-blocks
   // Output objects can enable material property output, the following code examines the parameters
@@ -74,7 +74,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
   bool outputs_has_properties = false;
   std::set<std::string> output_object_properties;
 
-  std::vector<Action *> output_actions =  _app.actionWarehouse().getActionsByName("add_output");
+  std::vector<Action *> output_actions = _app.actionWarehouse().getActionsByName("add_output");
   for (const auto & act : output_actions)
   {
     // Extract the Output action
@@ -86,7 +86,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
     if (params.isParamValid("output_material_properties") && params.get<bool>("output_material_properties"))
     {
       outputs_has_properties = true;
-      std::vector<std::string> prop_names = params.get<std::vector<std::string> >("show_material_properties");
+      std::vector<std::string> prop_names = params.get<std::vector<std::string>>("show_material_properties");
       output_object_properties.insert(prop_names.begin(), prop_names.end());
     }
   }
@@ -98,7 +98,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
     std::set<OutputName> outputs = mat->getOutputs();
 
     // Extract the property names that will actually be output
-    std::vector<std::string> output_properties = mat->getParam<std::vector<std::string> >("output_properties");
+    std::vector<std::string> output_properties = mat->getParam<std::vector<std::string>>("output_properties");
 
     // Append the properties listed in the Outputs block
     if (outputs_has_properties)
@@ -174,7 +174,7 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
 
   // Generate the name
   std::ostringstream name;
-  name <<  material->name() << "_" << variable_name;
+  name << material->name() << "_" << variable_name;
 
   // Set the action parameters
   InputParameters action_params = _action_factory.getValidParams("AddKernelAction");
@@ -192,26 +192,26 @@ MaterialOutputAction::createAction(const std::string & type, const std::string &
   object_params.set<MultiMooseEnum>("execute_on") = "timestep_end";
 
   if (material->boundaryRestricted())
-    object_params.set<std::vector<BoundaryName> >("boundary") = material->boundaryNames();
+    object_params.set<std::vector<BoundaryName>>("boundary") = material->boundaryNames();
   else
-    object_params.set<std::vector<SubdomainName> >("block") = material->blocks();
+    object_params.set<std::vector<SubdomainName>>("block") = material->blocks();
 
   // Return the created action
   return action;
 }
 
-template<>
+template <>
 void
 MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_name, MooseSharedPointer<Material> material)
 {
   _awh.addActionBlock(createAction("MaterialRealAux", property_name, property_name, material));
 }
 
-template<>
+template <>
 void
 MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & property_name, MooseSharedPointer<Material> material)
 {
-  char suffix[3] = {'x','y','z'};
+  char suffix[3] = {'x', 'y', 'z'};
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
@@ -224,8 +224,7 @@ MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & 
   }
 }
 
-
-template<>
+template <>
 void
 MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & property_name, MooseSharedPointer<Material> material)
 {

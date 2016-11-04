@@ -15,16 +15,17 @@
 #include "NodalEqualValueConstraint.h"
 #include "Assembly.h"
 
-template<>
-InputParameters validParams<NodalEqualValueConstraint>()
+template <>
+InputParameters
+validParams<NodalEqualValueConstraint>()
 {
   InputParameters params = validParams<NodalScalarKernel>();
   params.addRequiredCoupledVar("var", "Variable(s) to put the constraint on");
   return params;
 }
 
-NodalEqualValueConstraint::NodalEqualValueConstraint(const InputParameters & parameters) :
-    NodalScalarKernel(parameters)
+NodalEqualValueConstraint::NodalEqualValueConstraint(const InputParameters & parameters)
+  : NodalScalarKernel(parameters)
 {
   if (_node_ids.size() != 2)
     mooseError(name() << ": The number of nodes has to be 2, but it is " << _node_ids.size() << ".");
@@ -63,7 +64,7 @@ NodalEqualValueConstraint::computeJacobian()
   {
     DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), _val_number[k]);
 
-    ken(k, 0) =  1.;
+    ken(k, 0) = 1.;
     ken(k, 1) = -1.;
   }
 }

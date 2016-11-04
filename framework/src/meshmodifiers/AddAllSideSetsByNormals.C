@@ -24,15 +24,16 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/point_locator_base.h"
 
-template<>
-InputParameters validParams<AddAllSideSetsByNormals>()
+template <>
+InputParameters
+validParams<AddAllSideSetsByNormals>()
 {
   InputParameters params = validParams<AddSideSetsBase>();
   return params;
 }
 
-AddAllSideSetsByNormals::AddAllSideSetsByNormals(const InputParameters & parameters) :
-    AddSideSetsBase(parameters)
+AddAllSideSetsByNormals::AddAllSideSetsByNormals(const InputParameters & parameters)
+  : AddSideSetsBase(parameters)
 {
 }
 
@@ -57,9 +58,9 @@ AddAllSideSetsByNormals::modify()
 
   // We'll need to loop over all of the elements to find ones that match this normal.
   // We can't rely on flood catching them all here...
-  MeshBase::const_element_iterator       el     = _mesh_ptr->getMesh().elements_begin();
+  MeshBase::const_element_iterator el = _mesh_ptr->getMesh().elements_begin();
   const MeshBase::const_element_iterator end_el = _mesh_ptr->getMesh().elements_end();
-  for (; el != end_el ; ++el)
+  for (; el != end_el; ++el)
   {
     const Elem * elem = *el;
 
@@ -76,12 +77,12 @@ AddAllSideSetsByNormals::modify()
         std::map<BoundaryID, RealVectorValue>::iterator it = boundary_map->begin();
         while (it != boundary_map->end())
         {
-          if (std::abs(1.0 - it->second*normals[0]) < 1e-5)
+          if (std::abs(1.0 - it->second * normals[0]) < 1e-5)
             break;
           ++it;
         }
 
-        if (it != boundary_map->end())  // Found it!
+        if (it != boundary_map->end()) // Found it!
           flood(*el, normals[0], it->first);
         else
         {

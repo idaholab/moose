@@ -28,23 +28,21 @@
 // Forward Declarations
 class GeneralUserObject;
 
-template<>
+template <>
 InputParameters validParams<GeneralUserObject>();
 
 /* This class is here to combine the Postprocessor interface and the
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
-class GeneralUserObject :
-  public UserObject,
-  public MaterialPropertyInterface,
-  public TransientInterface,
-  public DependencyResolverInterface,
-  public UserObjectInterface,
-  protected PostprocessorInterface,
-  protected VectorPostprocessorInterface
+class GeneralUserObject : public UserObject,
+                          public MaterialPropertyInterface,
+                          public TransientInterface,
+                          public DependencyResolverInterface,
+                          public UserObjectInterface,
+                          protected PostprocessorInterface,
+                          protected VectorPostprocessorInterface
 {
 public:
   GeneralUserObject(const InputParameters & parameters);
-
 
   const std::set<std::string> & getRequestedItems() override;
 
@@ -55,7 +53,7 @@ public:
    * This method is not used and should not be used in a custom GeneralUserObject.
    */
   virtual void threadJoin(const UserObject &) override; /*final*/
-  virtual void subdomainSetup() override; /*final*/
+  virtual void subdomainSetup() override;               /*final*/
   ///@}
 
   ///@{

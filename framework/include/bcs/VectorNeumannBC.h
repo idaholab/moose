@@ -20,11 +20,10 @@
 //libMesh includes
 #include "libmesh/vector_value.h"
 
-
 //Forward Declarations
 class VectorNeumannBC;
 
-template<>
+template <>
 InputParameters validParams<VectorNeumannBC>();
 
 /**
@@ -34,7 +33,6 @@ InputParameters validParams<VectorNeumannBC>();
 class VectorNeumannBC : public IntegratedBC
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.

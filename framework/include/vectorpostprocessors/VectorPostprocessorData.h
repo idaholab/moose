@@ -70,7 +70,7 @@ public:
   /**
    * Get the map of names -> VectorPostprocessor values. Exposed for error checking.
    */
-//  const std::map<std::string, std::map<std::string, VectorPostprocessorValue*> > & values() const { return _values; }
+  //  const std::map<std::string, std::map<std::string, VectorPostprocessorValue*> > & values() const { return _values; }
 
   /**
    * Get the map of vectors for a particular VectorPostprocessor
@@ -87,7 +87,7 @@ private:
   VectorPostprocessorValue & getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name, const std::string & vector_name, bool get_current);
 
   /// Values of the vector post-processor
-  std::map<std::string, std::map<std::string, VectorPostprocessorState> > _values;
+  std::map<std::string, std::map<std::string, VectorPostprocessorState>> _values;
 
   std::set<std::string> _requested_items;
   std::set<std::string> _supplied_items;

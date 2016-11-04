@@ -21,8 +21,9 @@
 // libMesh includes
 #include "libmesh/numeric_vector.h"
 
-template<>
-InputParameters validParams<MoosePreconditioner>()
+template <>
+InputParameters
+validParams<MoosePreconditioner>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addPrivateParam<FEProblem *>("_fe_problem");
@@ -38,9 +39,8 @@ InputParameters validParams<MoosePreconditioner>()
   return params;
 }
 
-
-MoosePreconditioner::MoosePreconditioner(const InputParameters & params) :
-    MooseObject(params),
+MoosePreconditioner::MoosePreconditioner(const InputParameters & params)
+  : MooseObject(params),
     Restartable(params, "Preconditioners"),
     _fe_problem(*params.getCheckedPointerParam<FEProblem *>("_fe_problem"))
 {
@@ -65,12 +65,12 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
       mooseAssert(node->n_comp(from_system, from_var) == node->n_comp(to_system, to_var),
                   "Number of components does not match in each system");
 
-      for (unsigned int i=0; i<n_comp; i++)
+      for (unsigned int i = 0; i < n_comp; i++)
       {
-        dof_id_type from_dof = node->dof_number(from_system,from_var,i);
-        dof_id_type to_dof = node->dof_number(to_system,to_var,i);
+        dof_id_type from_dof = node->dof_number(from_system, from_var, i);
+        dof_id_type to_dof = node->dof_number(to_system, to_var, i);
 
-        to_vector.set(to_dof,from_vector(from_dof));
+        to_vector.set(to_dof, from_vector(from_dof));
       }
     }
   }
@@ -87,12 +87,12 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
       mooseAssert(elem->n_comp(from_system, from_var) == elem->n_comp(to_system, to_var),
                   "Number of components does not match in each system");
 
-      for (unsigned int i=0; i<n_comp; i++)
+      for (unsigned int i = 0; i < n_comp; i++)
       {
-        dof_id_type from_dof = elem->dof_number(from_system,from_var,i);
-        dof_id_type to_dof = elem->dof_number(to_system,to_var,i);
+        dof_id_type from_dof = elem->dof_number(from_system, from_var, i);
+        dof_id_type to_dof = elem->dof_number(to_system, to_var, i);
 
-        to_vector.set(to_dof,from_vector(from_dof));
+        to_vector.set(to_dof, from_vector(from_dof));
       }
     }
   }

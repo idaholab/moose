@@ -14,19 +14,20 @@
 
 #include "ConstantPointSource.h"
 
-template<>
-InputParameters validParams<ConstantPointSource>()
+template <>
+InputParameters
+validParams<ConstantPointSource>()
 {
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<Real>("value", "The value of the point source");
-  params.addRequiredParam<std::vector<Real> >("point", "The x,y,z coordinates of the point");
+  params.addRequiredParam<std::vector<Real>>("point", "The x,y,z coordinates of the point");
   return params;
 }
 
-ConstantPointSource::ConstantPointSource(const InputParameters & parameters) :
-    DiracKernel(parameters),
+ConstantPointSource::ConstantPointSource(const InputParameters & parameters)
+  : DiracKernel(parameters),
     _value(getParam<Real>("value")),
-    _point_param(getParam<std::vector<Real> >("point"))
+    _point_param(getParam<std::vector<Real>>("point"))
 {
   _p(0) = _point_param[0];
 
@@ -50,8 +51,6 @@ ConstantPointSource::addPoints()
 Real
 ConstantPointSource::computeQpResidual()
 {
-//  This is negative because it's a forcing function that has been brought over to the left side
-  return -_test[_i][_qp]*_value;
+  //  This is negative because it's a forcing function that has been brought over to the left side
+  return -_test[_i][_qp] * _value;
 }
-
-

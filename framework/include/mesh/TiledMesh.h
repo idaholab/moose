@@ -19,7 +19,7 @@
 
 class TiledMesh;
 
-template<>
+template <>
 InputParameters validParams<TiledMesh>();
 
 class TiledMesh : public MooseMesh

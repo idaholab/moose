@@ -21,7 +21,7 @@
 //Forward Declarations
 class ConstantPointSource;
 
-template<>
+template <>
 InputParameters validParams<ConstantPointSource>();
 
 /**

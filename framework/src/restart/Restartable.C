@@ -16,22 +16,21 @@
 #include "Restartable.h"
 #include "SubProblem.h"
 
-Restartable::Restartable(const InputParameters & parameters, std::string system_name, SubProblem * subproblem) :
-    _restartable_name(parameters.get<std::string>("_object_name")),
+Restartable::Restartable(const InputParameters & parameters, std::string system_name, SubProblem * subproblem)
+  : _restartable_name(parameters.get<std::string>("_object_name")),
     _restartable_params(&parameters),
     _restartable_system_name(system_name),
     _restartable_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
-    _restartable_subproblem(parameters.isParamValid("_subproblem") ? parameters.get<SubProblem *>("_subproblem") : (parameters.isParamValid("_fe_problem") ? (SubProblem*)parameters.get<FEProblem *>("_fe_problem") : subproblem) )
+    _restartable_subproblem(parameters.isParamValid("_subproblem") ? parameters.get<SubProblem *>("_subproblem") : (parameters.isParamValid("_fe_problem") ? (SubProblem *)parameters.get<FEProblem *>("_fe_problem") : subproblem))
 {
 }
 
-Restartable::Restartable(const std::string & name, std::string system_name, SubProblem & fe_problem, THREAD_ID tid) :
-    _restartable_name(name),
+Restartable::Restartable(const std::string & name, std::string system_name, SubProblem & fe_problem, THREAD_ID tid)
+  : _restartable_name(name),
     _restartable_system_name(system_name),
     _restartable_tid(tid),
     _restartable_subproblem(&fe_problem)
 {
-
 }
 
 void

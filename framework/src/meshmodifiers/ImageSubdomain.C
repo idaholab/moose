@@ -19,16 +19,17 @@
 #include "ImageSubdomain.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ImageSubdomain>()
+template <>
+InputParameters
+validParams<ImageSubdomain>()
 {
   InputParameters params = validParams<MeshModifier>();
   params += validParams<ImageSampler>();
   return params;
 }
 
-ImageSubdomain::ImageSubdomain(const InputParameters & parameters) :
-    MeshModifier(parameters),
+ImageSubdomain::ImageSubdomain(const InputParameters & parameters)
+  : MeshModifier(parameters),
     ImageSampler(parameters)
 {
 }

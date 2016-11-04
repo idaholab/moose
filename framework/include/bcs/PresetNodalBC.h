@@ -19,7 +19,7 @@
 
 class PresetNodalBC;
 
-template<>
+template <>
 InputParameters validParams<PresetNodalBC>();
 
 /**
@@ -35,7 +35,6 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpValue() = 0;
-
 };
 
 #endif /* PRESETBC_H */

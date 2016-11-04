@@ -17,8 +17,9 @@
 #include "RayTracing.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ElementsAlongLine>()
+template <>
+InputParameters
+validParams<ElementsAlongLine>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
 
@@ -27,8 +28,8 @@ InputParameters validParams<ElementsAlongLine>()
   return params;
 }
 
-ElementsAlongLine::ElementsAlongLine(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
+ElementsAlongLine::ElementsAlongLine(const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters),
     _start(getParam<Point>("start")),
     _end(getParam<Point>("end")),
     _elem_ids(declareVector("elem_ids"))
@@ -54,6 +55,6 @@ ElementsAlongLine::execute()
 
   _elem_ids.resize(num_elems);
 
-  for (unsigned int i=0; i<num_elems; i++)
+  for (unsigned int i = 0; i < num_elems; i++)
     _elem_ids[i] = intersected_elems[i]->id();
 }

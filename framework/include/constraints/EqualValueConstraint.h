@@ -19,7 +19,7 @@
 
 class EqualValueConstraint;
 
-template<>
+template <>
 InputParameters validParams<EqualValueConstraint>();
 
 /**

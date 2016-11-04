@@ -42,7 +42,7 @@ public:
   void addDependencySets(const std::string & action_sets);
 
   const std::vector<std::string> & getSortedTask();
-  const std::vector<std::set<std::string> > & getSortedTaskSet();
+  const std::vector<std::set<std::string>> & getSortedTaskSet();
 
   bool hasTask(const std::string & task);
 
@@ -71,7 +71,10 @@ public:
   std::pair<std::multimap<std::string, ActionInfo>::iterator, std::multimap<std::string, ActionInfo>::iterator>
   getActions(const std::string & name);
 
-  const std::multimap<std::string, ActionInfo> & getAssociatedActions() const { return _associated_actions; }
+  const std::multimap<std::string, ActionInfo> & getAssociatedActions() const
+  {
+    return _associated_actions;
+  }
 
   bool verifyMooseObjectTask(const std::string & base, const std::string & task) const;
 
@@ -88,6 +91,5 @@ protected:
   /// Actions/Syntax association
   std::multimap<std::string, ActionInfo> _associated_actions;
 };
-
 
 #endif // MOOSESYNTAX_H

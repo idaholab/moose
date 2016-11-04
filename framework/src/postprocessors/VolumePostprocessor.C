@@ -14,19 +14,21 @@
 
 #include "VolumePostprocessor.h"
 
-template<>
-InputParameters validParams<VolumePostprocessor>()
+template <>
+InputParameters
+validParams<VolumePostprocessor>()
 {
-InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = validParams<ElementIntegralPostprocessor>();
   return params;
 }
 
-VolumePostprocessor::VolumePostprocessor(const InputParameters & parameters) :
-    ElementIntegralPostprocessor(parameters)
-{}
+VolumePostprocessor::VolumePostprocessor(const InputParameters & parameters)
+  : ElementIntegralPostprocessor(parameters)
+{
+}
 
 void
-VolumePostprocessor::threadJoin(const UserObject &y)
+VolumePostprocessor::threadJoin(const UserObject & y)
 {
   const VolumePostprocessor & pps = static_cast<const VolumePostprocessor &>(y);
   _integral_value += pps._integral_value;
@@ -37,4 +39,3 @@ VolumePostprocessor::computeQpIntegral()
 {
   return 1.0;
 }
-

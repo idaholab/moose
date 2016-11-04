@@ -24,7 +24,8 @@
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
 /**
@@ -52,7 +53,7 @@ public:
   void join(const ComputeUserObjectsThread & /*y*/);
 
 protected:
-  const NumericVector<Number>& _soln;
+  const NumericVector<Number> & _soln;
 
   ///@{
   /// Storage for UserObjects (see FEProblem::computeUserObjects)

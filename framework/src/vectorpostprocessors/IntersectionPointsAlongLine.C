@@ -17,8 +17,9 @@
 #include "RayTracing.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<IntersectionPointsAlongLine>()
+template <>
+InputParameters
+validParams<IntersectionPointsAlongLine>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
   params.addRequiredParam<Point>("start", "The beginning of the line");
@@ -26,8 +27,8 @@ InputParameters validParams<IntersectionPointsAlongLine>()
   return params;
 }
 
-IntersectionPointsAlongLine::IntersectionPointsAlongLine(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
+IntersectionPointsAlongLine::IntersectionPointsAlongLine(const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters),
     _start(getParam<Point>("start")),
     _end(getParam<Point>("end")),
     _x_intersections(declareVector("x"))
@@ -52,7 +53,7 @@ IntersectionPointsAlongLine::IntersectionPointsAlongLine(const InputParameters &
 void
 IntersectionPointsAlongLine::initialize()
 {
-  for (unsigned int i=0; i<_intersections.size(); i++)
+  for (unsigned int i = 0; i < _intersections.size(); i++)
     _intersections[i]->clear();
 }
 
@@ -72,7 +73,7 @@ IntersectionPointsAlongLine::execute()
     return;
 
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    _intersections[i]->resize(num_elems+1);
+    _intersections[i]->resize(num_elems + 1);
 
   // Add the beginning point
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
@@ -86,6 +87,6 @@ IntersectionPointsAlongLine::execute()
     const Point & end_point = segment.end();
 
     for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-      (*_intersections[j])[i+1] = end_point(j);
+      (*_intersections[j])[i + 1] = end_point(j);
   }
 }

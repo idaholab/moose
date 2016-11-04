@@ -17,8 +17,9 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<VolumeHistogram>()
+template <>
+InputParameters
+validParams<VolumeHistogram>()
 {
   InputParameters params = validParams<ElementVectorPostprocessor>();
   params.addParam<unsigned int>("bin_number", 50, "Number of histogram bins");
@@ -28,8 +29,8 @@ InputParameters validParams<VolumeHistogram>()
   return params;
 }
 
-VolumeHistogram::VolumeHistogram(const InputParameters & parameters) :
-    ElementVectorPostprocessor(parameters),
+VolumeHistogram::VolumeHistogram(const InputParameters & parameters)
+  : ElementVectorPostprocessor(parameters),
     _nbins(getParam<unsigned int>("bin_number")),
     _min_value(getParam<Real>("min_value")),
     _max_value(getParam<Real>("max_value")),

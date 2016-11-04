@@ -21,7 +21,7 @@ namespace MatrixTools
  * @ param[out] m_inv The inverse of m, which must be of the same size as m.
  * @ return if zero then the inversion was successful.  Otherwise m was not square, contained illegal entries or was singular
  */
-void inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<Real> > & m_inv);
+void inverse(const std::vector<std::vector<Real>> & m, std::vector<std::vector<Real>> & m_inv);
 
 /**
  * Inverts the dense "matrix" A using LAPACK routines

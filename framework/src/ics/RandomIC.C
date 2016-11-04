@@ -17,8 +17,9 @@
 
 #include "libmesh/point.h"
 
-template<>
-InputParameters validParams<RandomIC>()
+template <>
+InputParameters
+validParams<RandomIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addParam<Real>("min", 0.0, "Lower bound of the randomly generated values");
@@ -27,8 +28,8 @@ InputParameters validParams<RandomIC>()
   return params;
 }
 
-RandomIC::RandomIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+RandomIC::RandomIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _min(getParam<Real>("min")),
     _max(getParam<Real>("max")),
     _range(_max - _min)

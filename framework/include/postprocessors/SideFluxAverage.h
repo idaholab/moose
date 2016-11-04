@@ -20,7 +20,7 @@
 //Forward Declarations
 class SideFluxAverage;
 
-template<>
+template <>
 InputParameters validParams<SideFluxAverage>();
 
 class SideFluxAverage : public SideFluxIntegral

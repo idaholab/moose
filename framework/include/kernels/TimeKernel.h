@@ -20,7 +20,7 @@
 // Forward Declaration
 class TimeKernel;
 
-template<>
+template <>
 InputParameters validParams<TimeKernel>();
 
 /**

@@ -26,7 +26,7 @@ namespace libMesh
 class Node;
 }
 
-template<>
+template <>
 InputParameters validParams<NodalVariableValue>();
 
 /**
@@ -38,8 +38,12 @@ class NodalVariableValue : public GeneralPostprocessor
 public:
   NodalVariableValue(const InputParameters & parameters);
 
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
   virtual Real getValue() override;
 
 protected:

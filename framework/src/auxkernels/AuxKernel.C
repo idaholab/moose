@@ -26,8 +26,9 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<AuxKernel>()
+template <>
+InputParameters
+validParams<AuxKernel>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
@@ -53,8 +54,8 @@ InputParameters validParams<AuxKernel>()
   return params;
 }
 
-AuxKernel::AuxKernel(const InputParameters & parameters) :
-    MooseObject(parameters),
+AuxKernel::AuxKernel(const InputParameters & parameters)
+  : MooseObject(parameters),
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters, parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
     SetupInterface(this),
@@ -105,7 +106,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters) :
 {
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
-  std::map<std::string, std::vector<MooseVariable *> > coupled_vars = getCoupledVars();
+  std::map<std::string, std::vector<MooseVariable *>> coupled_vars = getCoupledVars();
   for (const auto & it : coupled_vars)
     for (const auto & var : it.second)
       _depend_vars.insert(var->name());
@@ -153,7 +154,7 @@ AuxKernel::coupledCallback(const std::string & var_name, bool is_old)
 {
   if (is_old)
   {
-    std::vector<VariableName> var_names = getParam<std::vector<VariableName> >(var_name);
+    std::vector<VariableName> var_names = getParam<std::vector<VariableName>>(var_name);
     for (const auto & name : var_names)
       _depend_vars.erase(name);
   }
@@ -164,7 +165,7 @@ AuxKernel::compute()
 {
   precalculateValue();
 
-  if (isNodal())           /* nodal variables */
+  if (isNodal()) /* nodal variables */
   {
     if (_var.isNodalDefined())
     {
@@ -174,22 +175,22 @@ AuxKernel::compute()
       _var.setNodalValue(value);
     }
   }
-  else                     /* elemental variables */
+  else /* elemental variables */
   {
     _n_local_dofs = _var.numberOfDofs();
 
-    if (_n_local_dofs==1)  /* p0 */
+    if (_n_local_dofs == 1) /* p0 */
     {
       Real value = 0;
-      for (_qp=0; _qp<_qrule->n_points(); _qp++)
-        value += _JxW[_qp]*_coord[_qp]*computeValue();
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+        value += _JxW[_qp] * _coord[_qp] * computeValue();
       value /= (_bnd ? _current_side_volume : _current_elem_volume);
       // update the variable data refernced by other kernels.
       // Note that this will update the values at the quadrature points too
       // (because this is an Elemental variable)
       _var.setNodalValue(value);
     }
-    else                   /* high-order */
+    else /* high-order */
     {
       _local_re.resize(_n_local_dofs);
       _local_re.zero();

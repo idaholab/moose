@@ -25,8 +25,9 @@
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/mesh_tools.h"
 
-template<>
-InputParameters validParams<MultiAppTransfer>()
+template <>
+InputParameters
+validParams<MultiAppTransfer>()
 {
   InputParameters params = validParams<Transfer>();
   params.addRequiredParam<MultiAppName>("multi_app", "The name of the MultiApp to use.");
@@ -44,15 +45,16 @@ InputParameters validParams<MultiAppTransfer>()
 }
 
 // Free function to clear special execute_on option before initializing SetupInterface
-const InputParameters & removeSpecialOption(const InputParameters & parameters)
+const InputParameters &
+removeSpecialOption(const InputParameters & parameters)
 {
-  InputParameters * params = const_cast<InputParameters*>(&parameters);
+  InputParameters * params = const_cast<InputParameters *>(&parameters);
   params->set<MultiMooseEnum>("execute_on").erase("SAME_AS_MULTIAPP");
   return *params;
 }
 
-MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters) :
-    /**
+MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
+  : /**
      * Here we need to remove the special option that indicates to the user that this object will follow it's associated
      * Multiapp execute_on. This non-standard option is not understood by SetupInterface. In the absence of any execute_on
      * parameters, will populate the execute_on MultiMooseEnum with the values from the associated MultiApp (see execFlags).
@@ -64,7 +66,7 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters) :
     _displaced_target_mesh(false)
 {
   if (execFlags() != _multi_app->execFlags())
-      mooseDoOnce(mooseWarning("MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"));
+    mooseDoOnce(mooseWarning("MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"));
 }
 
 void
@@ -74,7 +76,6 @@ MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
     if (_multi_app->hasLocalApp(i) && !find_sys(_multi_app->appProblem(i).es(), var_name))
       mooseError("Cannot find variable " << var_name << " for " << name() << " Transfer");
 }
-
 
 const std::vector<ExecFlagType> &
 MultiAppTransfer::execFlags() const
@@ -110,7 +111,8 @@ MultiAppTransfer::getAppInfo()
       _from_positions.push_back(Point(0., 0., 0.));
       for (unsigned int i_app = 0; i_app < _multi_app->numGlobalApps(); i_app++)
       {
-        if (!_multi_app->hasLocalApp(i_app)) continue;
+        if (!_multi_app->hasLocalApp(i_app))
+          continue;
         _local2global_map.push_back(i_app);
         _to_problems.push_back(&_multi_app->appProblem(i_app));
         _to_positions.push_back(_multi_app->position(i_app));
@@ -122,7 +124,8 @@ MultiAppTransfer::getAppInfo()
       _to_positions.push_back(Point(0., 0., 0.));
       for (unsigned int i_app = 0; i_app < _multi_app->numGlobalApps(); i_app++)
       {
-        if (!_multi_app->hasLocalApp(i_app)) continue;
+        if (!_multi_app->hasLocalApp(i_app))
+          continue;
         _local2global_map.push_back(i_app);
         _from_problems.push_back(&_multi_app->appProblem(i_app));
         _from_positions.push_back(_multi_app->position(i_app));
@@ -134,31 +137,31 @@ MultiAppTransfer::getAppInfo()
   for (unsigned int i = 0; i < _to_problems.size(); i++)
   {
     //TODO: Do I actually want es or displaced es?
-    _to_es.push_back(& _to_problems[i]->es());
+    _to_es.push_back(&_to_problems[i]->es());
     if (_displaced_target_mesh && _to_problems[i]->getDisplacedProblem())
-      _to_meshes.push_back(& _to_problems[i]->getDisplacedProblem()->mesh());
+      _to_meshes.push_back(&_to_problems[i]->getDisplacedProblem()->mesh());
     else
-      _to_meshes.push_back(& _to_problems[i]->mesh());
+      _to_meshes.push_back(&_to_problems[i]->mesh());
   }
   for (unsigned int i = 0; i < _from_problems.size(); i++)
   {
-    _from_es.push_back(& _from_problems[i]->es());
+    _from_es.push_back(&_from_problems[i]->es());
     if (_displaced_source_mesh && _from_problems[i]->getDisplacedProblem())
-      _from_meshes.push_back(& _from_problems[i]->getDisplacedProblem()->mesh());
+      _from_meshes.push_back(&_from_problems[i]->getDisplacedProblem()->mesh());
     else
-      _from_meshes.push_back(& _from_problems[i]->mesh());
+      _from_meshes.push_back(&_from_problems[i]->mesh());
   }
 }
 
 std::vector<MeshTools::BoundingBox>
 MultiAppTransfer::getFromBoundingBoxes()
 {
-  std::vector<std::pair<Point, Point> > bb_points(_from_meshes.size());
-  for (unsigned int i = 0; i <  _from_meshes.size(); i++)
+  std::vector<std::pair<Point, Point>> bb_points(_from_meshes.size());
+  for (unsigned int i = 0; i < _from_meshes.size(); i++)
   {
     // Get a bounding box around the mesh elements that are local to the current
     // processor.
-    MeshTools::BoundingBox bbox = MeshTools::processor_bounding_box(* _from_meshes[i], _from_meshes[i]->comm().rank());
+    MeshTools::BoundingBox bbox = MeshTools::processor_bounding_box(*_from_meshes[i], _from_meshes[i]->comm().rank());
 
     // Translate the bounding box to the from domain's position.
     bbox.first += _from_positions[i];
@@ -166,7 +169,7 @@ MultiAppTransfer::getFromBoundingBoxes()
 
     // Cast the bounding box into a pair of points (so it can be put through
     // MPI communication).
-    bb_points[i] = static_cast<std::pair<Point, Point> >(bbox);
+    bb_points[i] = static_cast<std::pair<Point, Point>>(bbox);
   }
 
   // Serialize the bounding box points.
@@ -174,7 +177,7 @@ MultiAppTransfer::getFromBoundingBoxes()
 
   // Recast the points back into bounding boxes and return.
   std::vector<MeshTools::BoundingBox> bboxes(bb_points.size());
-  for (unsigned int i = 0; i <  bb_points.size(); i++)
+  for (unsigned int i = 0; i < bb_points.size(); i++)
     bboxes[i] = static_cast<MeshTools::BoundingBox>(bb_points[i]);
 
   return bboxes;
@@ -196,7 +199,6 @@ MultiAppTransfer::getFromsPerProc()
   }
   return froms_per_proc;
 }
-
 
 NumericVector<Real> &
 MultiAppTransfer::getTransferVector(unsigned int i_local, std::string var_name)

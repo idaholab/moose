@@ -21,7 +21,7 @@
 // Forward declarations
 class Gnuplot;
 
-template<>
+template <>
 InputParameters validParams<Gnuplot>();
 
 /**
@@ -32,7 +32,6 @@ InputParameters validParams<Gnuplot>();
 class Gnuplot : public TableOutput
 {
 public:
-
   /**
    * Class constructor
    *
@@ -55,7 +54,6 @@ public:
   virtual std::string filename() override;
 
 private:
-
   /// Desired file extension
   std::string _extension;
 };

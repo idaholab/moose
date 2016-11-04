@@ -71,7 +71,7 @@ public:
    * @param input_child - the number of the child
    * @param input_child_side - the side on the child where material properties will be prolonged
    */
-  void prolongStatefulProps(const std::vector<std::vector<QpMap> > & refinement_map,
+  void prolongStatefulProps(const std::vector<std::vector<QpMap>> & refinement_map,
                             QBase & qrule,
                             QBase & qrule_face,
                             MaterialPropertyStorage & parent_material_props,
@@ -92,13 +92,13 @@ public:
    * @param elem The parent element that was just refined
    * @param input_side Side of the element 'elem' (0 for volumetric material properties)
    */
-  void restrictStatefulProps(const std::vector<std::pair<unsigned int, QpMap> > & coarsening_map,
+  void restrictStatefulProps(const std::vector<std::pair<unsigned int, QpMap>> & coarsening_map,
                              const std::vector<const Elem *> & coarsened_element_children,
                              QBase & qrule,
                              QBase & qrule_face,
                              MaterialData & material_data,
                              const Elem & elem,
-                             int input_side=-1);
+                             int input_side = -1);
 
   /**
    * Initialize stateful material properties
@@ -108,7 +108,7 @@ public:
    * @param elem Element we are on
    * @param side Side of the element 'elem' (0 for volumetric material properties)
    */
-  void initStatefulProps(MaterialData & material_data, const std::vector<MooseSharedPointer<Material> > & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side = 0);
+  void initStatefulProps(MaterialData & material_data, const std::vector<MooseSharedPointer<Material>> & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side = 0);
 
   /**
    * Shift the material properties in time.
@@ -149,24 +149,48 @@ public:
   /**
    * @return a Boolean indicating whether stateful properties exist on this material
    */
-  bool hasStatefulProperties() const { return _has_stateful_props; }
+  bool hasStatefulProperties() const
+  {
+    return _has_stateful_props;
+  }
 
   /**
    * @return a Boolean indicating whether or not this material has older properties declared
    */
-  bool hasOlderProperties() const { return _has_older_prop; }
+  bool hasOlderProperties() const
+  {
+    return _has_older_prop;
+  }
 
   ///@{
   /**
    * Access methods to the stored material property data
    *
    */
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props() { return *_props_elem; }
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld() { return *_props_elem_old; }
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOlder() { return *_props_elem_older; }
-  const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props() const { return *_props_elem; }
-  const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld() const { return *_props_elem_old; }
-  const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOlder() const { return *_props_elem_older; }
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> & props()
+  {
+    return *_props_elem;
+  }
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> & propsOld()
+  {
+    return *_props_elem_old;
+  }
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> & propsOlder()
+  {
+    return *_props_elem_older;
+  }
+  const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> & props() const
+  {
+    return *_props_elem;
+  }
+  const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> & propsOld() const
+  {
+    return *_props_elem_old;
+  }
+  const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> & propsOlder() const
+  {
+    return *_props_elem_older;
+  }
   ///@}
 
   bool hasProperty(const std::string & prop_name) const;
@@ -174,16 +198,22 @@ public:
   unsigned int addPropertyOld(const std::string & prop_name);
   unsigned int addPropertyOlder(const std::string & prop_name);
 
-  std::vector<unsigned int> & statefulProps() { return _stateful_prop_id_to_prop_id; }
-  std::map<unsigned int, std::string> statefulPropNames() { return _prop_names; }
+  std::vector<unsigned int> & statefulProps()
+  {
+    return _stateful_prop_id_to_prop_id;
+  }
+  std::map<unsigned int, std::string> statefulPropNames()
+  {
+    return _prop_names;
+  }
 
-  unsigned int getPropertyId (const std::string & prop_name);
+  unsigned int getPropertyId(const std::string & prop_name);
 
 protected:
   // indexing: [element][side]->material_properties
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > * _props_elem;
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > * _props_elem_old;
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > * _props_elem_older;
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> * _props_elem;
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> * _props_elem_old;
+  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> * _props_elem_older;
 
   /// mapping from property name to property ID
   /// NOTE: this is static so the property numbering is global within the simulation (not just FEProblem - should be useful when we will use material properties from
@@ -207,12 +237,12 @@ protected:
   /// the vector of stateful property ids (the vector index is the map to stateful prop_id)
   std::vector<unsigned int> _stateful_prop_id_to_prop_id;
 
-  unsigned int addPropertyId (const std::string & prop_name);
+  unsigned int addPropertyId(const std::string & prop_name);
 
   void sizeProps(MaterialProperties & mp, unsigned int size);
 };
 
-template<>
+template <>
 inline void
 dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
 {
@@ -223,7 +253,7 @@ dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * conte
     dataStore(stream, storage.propsOlder(), context);
 }
 
-template<>
+template <>
 inline void
 dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
 {
@@ -233,6 +263,5 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
   if (storage.hasOlderProperties())
     dataLoad(stream, storage.propsOlder(), context);
 }
-
 
 #endif /* MATERIALPROPERTYSTORAGE_H */

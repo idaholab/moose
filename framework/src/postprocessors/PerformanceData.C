@@ -17,8 +17,9 @@
 #include "FEProblem.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<PerformanceData>()
+template <>
+InputParameters
+validParams<PerformanceData>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
@@ -31,12 +32,13 @@ InputParameters validParams<PerformanceData>()
   return params;
 }
 
-PerformanceData::PerformanceData(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+PerformanceData::PerformanceData(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _column(getParam<MooseEnum>("column").getEnum<PerfLogCols>()),
     _category(getParam<std::string>("category")),
     _event(getParam<std::string>("event"))
-{}
+{
+}
 
 Real
 PerformanceData::getValue()

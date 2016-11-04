@@ -19,7 +19,7 @@
 
 class SteadyState;
 
-template<>
+template <>
 InputParameters validParams<SteadyState>();
 
 /**
@@ -31,14 +31,15 @@ public:
   SteadyState(const InputParameters & parameters);
   virtual ~SteadyState();
 
-  virtual int order() { return 0; }
+  virtual int order()
+  {
+    return 0;
+  }
 
   virtual void computeTimeDerivatives();
   virtual void postStep(NumericVector<Number> & residual);
 
 protected:
-
 };
-
 
 #endif /* STEADYSTATE_H */

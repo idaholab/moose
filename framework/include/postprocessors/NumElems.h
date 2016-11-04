@@ -20,7 +20,7 @@
 //Forward Declarations
 class NumElems;
 
-template<>
+template <>
 InputParameters validParams<NumElems>();
 
 class NumElems : public GeneralPostprocessor
@@ -28,8 +28,12 @@ class NumElems : public GeneralPostprocessor
 public:
   NumElems(const InputParameters & parameters);
 
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
 
   virtual Real getValue() override;
 };

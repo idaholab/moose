@@ -22,8 +22,9 @@
 
 Threads::spin_mutex nodal_normals_preprocessor_mutex;
 
-template<>
-InputParameters validParams<NodalNormalsPreprocessor>()
+template <>
+InputParameters
+validParams<NodalNormalsPreprocessor>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params += validParams<BoundaryRestrictable>();
@@ -34,8 +35,8 @@ InputParameters validParams<NodalNormalsPreprocessor>()
   return params;
 }
 
-NodalNormalsPreprocessor::NodalNormalsPreprocessor(const InputParameters & parameters) :
-    ElementUserObject(parameters),
+NodalNormalsPreprocessor::NodalNormalsPreprocessor(const InputParameters & parameters)
+  : ElementUserObject(parameters),
     BoundaryRestrictable(parameters, true), // true for applying to nodesets
     _aux(_fe_problem.getAuxiliarySystem()),
     _fe_type(getParam<Order>("fe_order"), getParam<FEFamily>("fe_family")),
@@ -80,8 +81,7 @@ NodalNormalsPreprocessor::execute()
       // Perform the calculation, the node must be:
       //    (1) On a boundary to which the object is restricted
       //    (2) Not on a corner of the boundary
-      if (hasBoundary(node_boundary_ids, ANY)
-          && (!_has_corners || !boundary_info.has_boundary_id(node, _corner_boundary_id)))
+      if (hasBoundary(node_boundary_ids, ANY) && (!_has_corners || !boundary_info.has_boundary_id(node, _corner_boundary_id)))
       {
         // Perform the caluation of the normal
         if (node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) > 0)

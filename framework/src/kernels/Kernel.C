@@ -23,16 +23,17 @@
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<Kernel>()
+template <>
+InputParameters
+validParams<Kernel>()
 {
   InputParameters params = validParams<KernelBase>();
   params.registerBase("Kernel");
   return params;
 }
 
-Kernel::Kernel(const InputParameters & parameters) :
-    KernelBase(parameters),
+Kernel::Kernel(const InputParameters & parameters)
+  : KernelBase(parameters),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _u_dot(_var.uDot()),
@@ -81,8 +82,8 @@ Kernel::computeJacobian()
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i=0; i<rows; i++)
-      diag(i) = _local_ke(i,i);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)

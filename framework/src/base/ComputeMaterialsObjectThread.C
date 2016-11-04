@@ -28,32 +28,32 @@
 #include "libmesh/quadrature.h"
 
 ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(FEProblem & fe_problem,
-                                                           std::vector<MooseSharedPointer<MaterialData> > & material_data,
-                                                           std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
-                                                           std::vector<MooseSharedPointer<MaterialData> > & neighbor_material_data,
+                                                           std::vector<MooseSharedPointer<MaterialData>> & material_data,
+                                                           std::vector<MooseSharedPointer<MaterialData>> & bnd_material_data,
+                                                           std::vector<MooseSharedPointer<MaterialData>> & neighbor_material_data,
                                                            MaterialPropertyStorage & material_props,
                                                            MaterialPropertyStorage & bnd_material_props,
-                                                           std::vector<Assembly *> & assembly) :
-ThreadedElementLoop<ConstElemRange>(fe_problem),
-  _fe_problem(fe_problem),
-  _nl(fe_problem.getNonlinearSystem()),
-  _material_data(material_data),
-  _bnd_material_data(bnd_material_data),
-  _neighbor_material_data(neighbor_material_data),
-  _material_props(material_props),
-  _bnd_material_props(bnd_material_props),
-  _materials(_fe_problem.getComputeMaterialWarehouse()),
-  _discrete_materials(_fe_problem.getDiscreteMaterialWarehouse()),
-  _assembly(assembly),
-  _need_internal_side_material(false),
-  _has_stateful_props(_material_props.hasStatefulProperties()),
-  _has_bnd_stateful_props(_bnd_material_props.hasStatefulProperties())
+                                                           std::vector<Assembly *> & assembly)
+  : ThreadedElementLoop<ConstElemRange>(fe_problem),
+    _fe_problem(fe_problem),
+    _nl(fe_problem.getNonlinearSystem()),
+    _material_data(material_data),
+    _bnd_material_data(bnd_material_data),
+    _neighbor_material_data(neighbor_material_data),
+    _material_props(material_props),
+    _bnd_material_props(bnd_material_props),
+    _materials(_fe_problem.getComputeMaterialWarehouse()),
+    _discrete_materials(_fe_problem.getDiscreteMaterialWarehouse()),
+    _assembly(assembly),
+    _need_internal_side_material(false),
+    _has_stateful_props(_material_props.hasStatefulProperties()),
+    _has_bnd_stateful_props(_bnd_material_props.hasStatefulProperties())
 {
 }
 
 // Splitting Constructor
-ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjectThread & x, Threads::split split) :
-    ThreadedElementLoop<ConstElemRange>(x, split),
+ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(ComputeMaterialsObjectThread & x, Threads::split split)
+  : ThreadedElementLoop<ConstElemRange>(x, split),
     _fe_problem(x._fe_problem),
     _nl(x._nl),
     _material_data(x._material_data),
@@ -86,7 +86,7 @@ ComputeMaterialsObjectThread::subdomainChanged()
 }
 
 void
-ComputeMaterialsObjectThread::onElement(const Elem *elem)
+ComputeMaterialsObjectThread::onElement(const Elem * elem)
 {
   if (_materials.hasActiveBlockObjects(_subdomain, _tid) || _discrete_materials.hasActiveBlockObjects(_subdomain, _tid))
   {
@@ -108,7 +108,7 @@ ComputeMaterialsObjectThread::onElement(const Elem *elem)
 }
 
 void
-ComputeMaterialsObjectThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+ComputeMaterialsObjectThread::onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
   if (_fe_problem.needMaterialOnSide(bnd_id, _tid))
   {
@@ -138,7 +138,7 @@ ComputeMaterialsObjectThread::onBoundary(const Elem *elem, unsigned int side, Bo
 }
 
 void
-ComputeMaterialsObjectThread::onInternalSide(const Elem *elem, unsigned int side)
+ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int side)
 {
   if (_need_internal_side_material)
   {
@@ -160,8 +160,8 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem *elem, unsigned int side
     const Elem * neighbor = elem->neighbor(side);
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
     const dof_id_type
-      elem_id = elem->id(),
-      neighbor_id = neighbor->id();
+        elem_id = elem->id(),
+        neighbor_id = neighbor->id();
 
     if (_has_bnd_stateful_props && ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level())))
     {

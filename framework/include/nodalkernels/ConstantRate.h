@@ -20,7 +20,7 @@
 //Forward Declarations
 class ConstantRate;
 
-template<>
+template <>
 InputParameters validParams<ConstantRate>();
 
 /**

@@ -29,38 +29,36 @@
 // Forward Declarations
 class SideUserObject;
 
-template<>
+template <>
 InputParameters validParams<SideUserObject>();
 
-class SideUserObject :
-  public UserObject,
-  public BoundaryRestrictableRequired,
-  public MaterialPropertyInterface,
-  public Coupleable,
-  public MooseVariableDependencyInterface,
-  public UserObjectInterface,
-  public TransientInterface,
-  protected PostprocessorInterface,
-  public ZeroInterface
+class SideUserObject : public UserObject,
+                       public BoundaryRestrictableRequired,
+                       public MaterialPropertyInterface,
+                       public Coupleable,
+                       public MooseVariableDependencyInterface,
+                       public UserObjectInterface,
+                       public TransientInterface,
+                       protected PostprocessorInterface,
+                       public ZeroInterface
 {
 public:
   SideUserObject(const InputParameters & parameters);
 
 protected:
-
   MooseMesh & _mesh;
 
-  const MooseArray< Point > & _q_point;
-  QBase * & _qrule;
+  const MooseArray<Point> & _q_point;
+  QBase *& _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
   const MooseArray<Point> & _normals;
 
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
   /// current side of the current element
   unsigned int & _current_side;
 
-  const Elem * & _current_side_elem;
+  const Elem *& _current_side_elem;
   const Real & _current_side_volume;
 };
 

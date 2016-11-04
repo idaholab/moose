@@ -15,21 +15,22 @@
 #include "ScalarComponentIC.h"
 #include "MooseVariableScalar.h"
 
-template<>
-InputParameters validParams<ScalarComponentIC>()
+template <>
+InputParameters
+validParams<ScalarComponentIC>()
 {
   InputParameters params = validParams<ScalarInitialCondition>();
-  params.addRequiredParam<std::vector<Real> >("values", "Initial values to initialize the scalar variable.");
+  params.addRequiredParam<std::vector<Real>>("values", "Initial values to initialize the scalar variable.");
 
   return params;
 }
 
-ScalarComponentIC::ScalarComponentIC(const InputParameters & parameters) :
-    ScalarInitialCondition(parameters),
-    _initial_values(getParam<std::vector<Real> >("values"))
+ScalarComponentIC::ScalarComponentIC(const InputParameters & parameters)
+  : ScalarInitialCondition(parameters),
+    _initial_values(getParam<std::vector<Real>>("values"))
 {
   if (_initial_values.size() < _var.order())
-    mooseError("The initial vector values size given to the scalar variable '" << name() << "' has wrong size." );
+    mooseError("The initial vector values size given to the scalar variable '" << name() << "' has wrong size.");
 }
 
 Real

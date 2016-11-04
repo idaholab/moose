@@ -19,7 +19,7 @@
 
 class DetermineSystemType;
 
-template<>
+template <>
 InputParameters validParams<DetermineSystemType>();
 
 class DetermineSystemType : public MooseObjectAction

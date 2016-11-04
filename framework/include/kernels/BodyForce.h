@@ -21,7 +21,7 @@
 class BodyForce;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<BodyForce>();
 
 /**

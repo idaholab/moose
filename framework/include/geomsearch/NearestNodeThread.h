@@ -21,12 +21,12 @@ class NearestNodeThread
 {
 public:
   NearestNodeThread(const MooseMesh & mesh,
-                    std::map<dof_id_type, std::vector<dof_id_type> > & neighbor_nodes);
+                    std::map<dof_id_type, std::vector<dof_id_type>> & neighbor_nodes);
 
   // Splitting Constructor
   NearestNodeThread(NearestNodeThread & x, Threads::split split);
 
-  void operator() (const NodeIdRange & range);
+  void operator()(const NodeIdRange & range);
 
   void join(const NearestNodeThread & other);
 
@@ -41,7 +41,7 @@ protected:
   const MooseMesh & _mesh;
 
   // The neighborhood nodes associated with each node
-  std::map<dof_id_type, std::vector<dof_id_type> > & _neighbor_nodes;
+  std::map<dof_id_type, std::vector<dof_id_type>> & _neighbor_nodes;
 };
 
 #endif //NEARESTNODETHREAD_H

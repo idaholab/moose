@@ -21,15 +21,16 @@
 // libmesh includes
 #include "libmesh/mesh_tools.h"
 
-template<>
-InputParameters validParams<LayeredBase>()
+template <>
+InputParameters
+validParams<LayeredBase>()
 {
   InputParameters params = emptyInputParameters();
   MooseEnum directions("x y z");
 
   params.addRequiredParam<MooseEnum>("direction", directions, "The direction of the layers.");
   params.addParam<unsigned int>("num_layers", "The number of layers.");
-  params.addParam<std::vector<Real> >("bounds", "The 'bounding' positions of the layers i.e.: '0, 1.2, 3.7, 4.2' will mean 3 layers between those positions.");
+  params.addParam<std::vector<Real>>("bounds", "The 'bounding' positions of the layers i.e.: '0, 1.2, 3.7, 4.2' will mean 3 layers between those positions.");
 
   MooseEnum sample_options("direct interpolate average", "direct");
   params.addParam<MooseEnum>("sample_type", sample_options, "How to sample the layers.  'direct' means get the value of the layer the point falls in directly (or average if that layer has no value).  'interpolate' does a linear interpolation between the two closest layers.  'average' averages the two closest layers.");
@@ -41,8 +42,8 @@ InputParameters validParams<LayeredBase>()
   return params;
 }
 
-LayeredBase::LayeredBase(const InputParameters & parameters) :
-    _layered_base_name(parameters.get<std::string>("_object_name")),
+LayeredBase::LayeredBase(const InputParameters & parameters)
+  : _layered_base_name(parameters.get<std::string>("_object_name")),
     _layered_base_params(parameters),
     _direction_enum(parameters.get<MooseEnum>("direction")),
     _direction(_direction_enum),
@@ -63,12 +64,12 @@ LayeredBase::LayeredBase(const InputParameters & parameters) :
   {
     _interval_based = false;
 
-    _layer_bounds = _layered_base_params.get<std::vector<Real> >("bounds");
+    _layer_bounds = _layered_base_params.get<std::vector<Real>>("bounds");
 
     // Make sure the bounds are sorted - we're going to depend on this
     std::sort(_layer_bounds.begin(), _layer_bounds.end());
 
-    _num_layers = _layer_bounds.size() - 1;  // Layers are only in-between the bounds
+    _num_layers = _layer_bounds.size() - 1; // Layers are only in-between the bounds
   }
   else
     mooseError("One of 'bounds' or 'num_layers' must be specified for " << _layered_base_name);
@@ -92,7 +93,7 @@ LayeredBase::integralValue(Point p) const
   int higher_layer = -1;
   int lower_layer = -1;
 
-  for (unsigned int i=layer; i<_layer_values.size(); i++)
+  for (unsigned int i = layer; i < _layer_values.size(); i++)
   {
     if (_layer_has_value[i])
     {
@@ -101,7 +102,7 @@ LayeredBase::integralValue(Point p) const
     }
   }
 
-  for (int i=layer-1; i>=0; i--)
+  for (int i = layer - 1; i >= 0; i--)
   {
     if (_layer_has_value[i])
     {
@@ -133,12 +134,12 @@ LayeredBase::integralValue(Point p) const
       if (higher_layer == -1) // Didn't find a higher layer
         return _layer_values[lower_layer];
 
-      Real layer_length = (_direction_max-_direction_min)/_num_layers;
+      Real layer_length = (_direction_max - _direction_min) / _num_layers;
       Real lower_coor = _direction_min;
       Real lower_value = 0;
       if (lower_layer != -1)
       {
-        lower_coor += (lower_layer+1) * layer_length;
+        lower_coor += (lower_layer + 1) * layer_length;
         lower_value = _layer_values[lower_layer];
       }
 
@@ -146,7 +147,7 @@ LayeredBase::integralValue(Point p) const
       Real higher_value = _layer_values[higher_layer];
 
       // Linear interpolation
-      return lower_value + (higher_value - lower_value) * ( p(_direction) - lower_coor ) / layer_length;
+      return lower_value + (higher_value - lower_value) * (p(_direction) - lower_coor) / layer_length;
     }
     case 2: // average
     {
@@ -155,7 +156,7 @@ LayeredBase::integralValue(Point p) const
 
       if (higher_layer != -1)
       {
-        for (unsigned int i=0; i<_average_radius; i++)
+        for (unsigned int i = 0; i < _average_radius; i++)
         {
           int current_layer = higher_layer + i;
 
@@ -172,7 +173,7 @@ LayeredBase::integralValue(Point p) const
 
       if (lower_layer != -1)
       {
-        for (unsigned int i=0; i<_average_radius; i++)
+        for (unsigned int i = 0; i < _average_radius; i++)
         {
           int current_layer = lower_layer - i;
 
@@ -194,7 +195,6 @@ LayeredBase::integralValue(Point p) const
   }
 }
 
-
 Real
 LayeredBase::getLayerValue(unsigned int layer) const
 {
@@ -206,7 +206,7 @@ LayeredBase::getLayerValue(unsigned int layer) const
 void
 LayeredBase::initialize()
 {
-  for (unsigned int i=0; i<_layer_values.size(); i++)
+  for (unsigned int i = 0; i < _layer_values.size(); i++)
   {
     _layer_values[i] = 0.0;
     _layer_has_value[i] = false;
@@ -235,7 +235,7 @@ void
 LayeredBase::threadJoin(const UserObject & y)
 {
   const LayeredBase & lb = dynamic_cast<const LayeredBase &>(y);
-  for (unsigned int i=0; i<_layer_values.size(); i++)
+  for (unsigned int i = 0; i < _layer_values.size(); i++)
     if (lb.layerHasValue(i))
       setLayerValue(i, getLayerValue(i) + lb._layer_values[i]);
 }
@@ -253,7 +253,7 @@ LayeredBase::getLayer(Point p) const
     unsigned int layer = std::floor(((direction_x - _direction_min) / (_direction_max - _direction_min)) * static_cast<Real>(_num_layers));
 
     if (layer >= _num_layers)
-      layer = _num_layers-1;
+      layer = _num_layers - 1;
 
     return layer;
   }
@@ -270,7 +270,7 @@ LayeredBase::getLayer(Point p) const
       return 0; // Return the first layer
     else
       // The -1 is because the interval that we fall in is just _before_ the number that is bigger (which is what we found
-      return static_cast<unsigned int>(std::distance(_layer_bounds.begin(), one_higher-1));
+      return static_cast<unsigned int>(std::distance(_layer_bounds.begin(), one_higher - 1));
   }
 }
 

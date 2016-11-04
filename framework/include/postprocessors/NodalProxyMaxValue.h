@@ -20,7 +20,7 @@
 // Forward Declarations
 class NodalProxyMaxValue;
 
-template<>
+template <>
 InputParameters validParams<NodalProxyMaxValue>();
 
 /**
@@ -45,7 +45,6 @@ public:
   void threadJoin(const UserObject & y) override;
 
 protected:
-
   Real _value;
   dof_id_type _node_id;
 };

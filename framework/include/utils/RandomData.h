@@ -40,7 +40,10 @@ public:
   /**
    * Return the underlying MooseRandom generator object for this data instance.
    */
-  MooseRandom & getGenerator() { return _generator; }
+  MooseRandom & getGenerator()
+  {
+    return _generator;
+  }
 
   /**
    * Get the seed for the passed in elem/node id.
@@ -52,7 +55,7 @@ public:
 private:
   void updateGenerators();
 
-  template<typename T>
+  template <typename T>
   void updateGeneratorHelper(T it, T end_it);
 
   FEProblem & _rd_problem;

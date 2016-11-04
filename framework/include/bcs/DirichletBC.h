@@ -19,7 +19,7 @@
 
 class DirichletBC;
 
-template<>
+template <>
 InputParameters validParams<DirichletBC>();
 
 /**

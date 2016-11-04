@@ -19,7 +19,7 @@
 
 class DeprecatedBlockAction;
 
-template<>
+template <>
 InputParameters validParams<DeprecatedBlockAction>();
 
 /**

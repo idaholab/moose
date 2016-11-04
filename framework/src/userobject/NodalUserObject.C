@@ -18,8 +18,9 @@
 #include "MooseTypes.h"
 #include "Assembly.h"
 
-template<>
-InputParameters validParams<NodalUserObject>()
+template <>
+InputParameters
+validParams<NodalUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params.addParam<bool>("unique_node_execute", false, "When false (default), block restricted objects will have the execute method called multiple times on a single node if the node lies on a interface between two subdomains.");
@@ -30,8 +31,8 @@ InputParameters validParams<NodalUserObject>()
   return params;
 }
 
-NodalUserObject::NodalUserObject(const InputParameters & parameters) :
-    UserObject(parameters),
+NodalUserObject::NodalUserObject(const InputParameters & parameters)
+  : UserObject(parameters),
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters, blockIDs(), true), // true for applying to nodesets
     MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
@@ -51,7 +52,6 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters) :
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 }
-
 
 void
 NodalUserObject::subdomainSetup()

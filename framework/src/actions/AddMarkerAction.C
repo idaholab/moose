@@ -15,14 +15,15 @@
 #include "AddMarkerAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddMarkerAction>()
+template <>
+InputParameters
+validParams<AddMarkerAction>()
 {
   return validParams<MooseObjectAction>();
 }
 
-AddMarkerAction::AddMarkerAction(InputParameters params) :
-    MooseObjectAction(params)
+AddMarkerAction::AddMarkerAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

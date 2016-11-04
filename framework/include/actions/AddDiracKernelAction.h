@@ -19,9 +19,8 @@
 
 class AddDiracKernelAction;
 
-template<>
+template <>
 InputParameters validParams<AddDiracKernelAction>();
-
 
 class AddDiracKernelAction : public MooseObjectAction
 {

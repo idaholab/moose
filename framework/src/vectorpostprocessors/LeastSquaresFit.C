@@ -16,8 +16,9 @@
 #include "VectorPostprocessorInterface.h"
 #include "PolynomialFit.h"
 
-template<>
-InputParameters validParams<LeastSquaresFit>()
+template <>
+InputParameters
+validParams<LeastSquaresFit>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
 
@@ -32,15 +33,15 @@ InputParameters validParams<LeastSquaresFit>()
   params.addParam<Real>("y_shift", 0.0, "Value used to shift y values (shifting is done before scaling)");
   params.addParam<Real>("sample_x_min", "The minimum x value of the of samples to be output");
   params.addParam<Real>("sample_x_max", "The maximum x value of the of samples to be output");
-  MooseEnum output_type("Coefficients Samples","Coefficients");
+  MooseEnum output_type("Coefficients Samples", "Coefficients");
   params.addParam<MooseEnum>("output", output_type, "The quantity to output.  Options are: " + output_type.getRawNames());
   params.addClassDescription("Performs a polynomial least squares fit on the data contained in another VectorPostprocessor");
 
   return params;
 }
 
-LeastSquaresFit::LeastSquaresFit(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
+LeastSquaresFit::LeastSquaresFit(const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters),
     _vpp_name(getParam<VectorPostprocessorName>("vectorpostprocessor")),
     _order(parameters.get<unsigned int>("order")),
     _x_name(getParam<std::string>("x_name")),
@@ -87,7 +88,7 @@ LeastSquaresFit::LeastSquaresFit(const InputParameters & parameters) :
     _sample_y->resize(_num_samples);
   }
   else
-    _coeffs->resize(_order+1);
+    _coeffs->resize(_order + 1);
 }
 
 void
@@ -139,7 +140,7 @@ LeastSquaresFit::execute()
 
     Real x_span = x_max - x_min;
 
-    for (unsigned int i=0; i<_num_samples; ++i)
+    for (unsigned int i = 0; i < _num_samples; ++i)
     {
       Real x = x_min + static_cast<Real>(i) / _num_samples * x_span;
       _sample_x->push_back(x);

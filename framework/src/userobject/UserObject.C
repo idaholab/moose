@@ -19,8 +19,9 @@
 // libMesh includes
 #include "libmesh/sparse_matrix.h"
 
-template<>
-InputParameters validParams<UserObject>()
+template <>
+InputParameters
+validParams<UserObject>()
 {
   InputParameters params = validParams<MooseObject>();
 
@@ -38,8 +39,8 @@ InputParameters validParams<UserObject>()
   return params;
 }
 
-UserObject::UserObject(const InputParameters & parameters) :
-    MooseObject(parameters),
+UserObject::UserObject(const InputParameters & parameters)
+  : MooseObject(parameters),
     SetupInterface(this),
     FunctionInterface(this),
     Restartable(parameters, "UserObjects"),

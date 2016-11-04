@@ -24,8 +24,9 @@
 #include "MooseTypes.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<MultiAppDTKUserObjectTransfer>()
+template <>
+InputParameters
+validParams<MultiAppDTKUserObjectTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
@@ -33,8 +34,8 @@ InputParameters validParams<MultiAppDTKUserObjectTransfer>()
   return params;
 }
 
-MultiAppDTKUserObjectTransfer::MultiAppDTKUserObjectTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppDTKUserObjectTransfer::MultiAppDTKUserObjectTransfer(const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     MooseVariableInterface(this, true),
     _user_object_name(getParam<UserObjectName>("user_object")),
     _setup(false)
@@ -58,7 +59,7 @@ MultiAppDTKUserObjectTransfer::execute()
 
     _to_adapter = new DTKInterpolationAdapter(_comm_default, _multi_app->problem().es(), Point(), 3);
 
-    _src_to_tgt_map = new DataTransferKit::VolumeSourceMap<DataTransferKit::Box, GlobalOrdinal, DataTransferKit::MeshContainer<GlobalOrdinal> >(_comm_default, 3, true);
+    _src_to_tgt_map = new DataTransferKit::VolumeSourceMap<DataTransferKit::Box, GlobalOrdinal, DataTransferKit::MeshContainer<GlobalOrdinal>>(_comm_default, 3, true);
 
     _console << "--Setting Up Transfer--" << std::endl;
     if (_variable->isNodal())
@@ -69,7 +70,6 @@ MultiAppDTKUserObjectTransfer::execute()
     _console << "--Transfer Setup Complete--" << std::endl;
 
     _to_values = _to_adapter->get_values_to_fill(_variable->name());
-
   }
 
   _console << "--Mapping Values--" << std::endl;

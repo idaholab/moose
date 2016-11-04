@@ -26,20 +26,20 @@
  */
 namespace PermutationTensor
 {
-  /**
+/**
    * 2D version
    */
-  int eps(unsigned int i, unsigned int j);
+int eps(unsigned int i, unsigned int j);
 
-  /**
+/**
    * 3D version
    */
-  int eps(unsigned int i, unsigned int j, unsigned int k);
+int eps(unsigned int i, unsigned int j, unsigned int k);
 
-  /**
+/**
    * 4D version
    */
-  int eps(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
+int eps(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
 }
 
 #endif // PERMUTATIONTENSOR_H

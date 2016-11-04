@@ -20,7 +20,7 @@
 //Forward Declarations
 class PerformanceData;
 
-template<>
+template <>
 InputParameters validParams<PerformanceData>();
 
 class PerformanceData : public GeneralPostprocessor
@@ -28,8 +28,12 @@ class PerformanceData : public GeneralPostprocessor
 public:
   PerformanceData(const InputParameters & parameters);
 
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
 
   /**
    * This will return the elapsed wall time.

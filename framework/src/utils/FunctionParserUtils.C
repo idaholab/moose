@@ -14,8 +14,9 @@
 
 #include "FunctionParserUtils.h"
 
-template<>
-InputParameters validParams<FunctionParserUtils>()
+template <>
+InputParameters
+validParams<FunctionParserUtils>()
 {
   InputParameters params = emptyInputParameters();
 
@@ -36,16 +37,15 @@ InputParameters validParams<FunctionParserUtils>()
 }
 
 const char * FunctionParserUtils::_eval_error_msg[] = {
-  "Unknown",
-  "Division by zero",
-  "Square root of a negative value",
-  "Logarithm of negative value",
-  "Trigonometric error (asin or acos of illegal value)",
-  "Maximum recursion level reached"
-};
+    "Unknown",
+    "Division by zero",
+    "Square root of a negative value",
+    "Logarithm of negative value",
+    "Trigonometric error (asin or acos of illegal value)",
+    "Maximum recursion level reached"};
 
-FunctionParserUtils::FunctionParserUtils(const InputParameters & parameters) :
-    _enable_jit(parameters.isParamValid("enable_jit") &&
+FunctionParserUtils::FunctionParserUtils(const InputParameters & parameters)
+  : _enable_jit(parameters.isParamValid("enable_jit") &&
                 parameters.get<bool>("enable_jit")),
     _enable_ad_cache(parameters.get<bool>("enable_ad_cache")),
     _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer")),
@@ -66,7 +66,8 @@ Real
 FunctionParserUtils::evaluate(ADFunctionPtr & parser)
 {
   // null pointer is a shortcut for vanishing derivatives, see functionsOptimize()
-  if (parser == NULL) return 0.0;
+  if (parser == NULL)
+    return 0.0;
 
   // evaluate expression
   Real result = parser->Eval(&_func_params[0]);
@@ -113,7 +114,7 @@ FunctionParserUtils::addFParserConstants(ADFunctionPtr & parser,
 
     // build the temporary comnstant expression function
     if (expression->Parse(constant_expressions[i], "") >= 0)
-       mooseError("Invalid constant expression\n" << constant_expressions[i] << "\n in parsed function object.\n" <<  expression->ErrorMsg());
+      mooseError("Invalid constant expression\n" << constant_expressions[i] << "\n in parsed function object.\n" << expression->ErrorMsg());
 
     constant_values[i] = expression->Eval(NULL);
 

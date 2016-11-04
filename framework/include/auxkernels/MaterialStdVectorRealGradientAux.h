@@ -21,7 +21,7 @@
 // Forward declarations
 class MaterialStdVectorRealGradientAux;
 
-template<>
+template <>
 InputParameters validParams<MaterialStdVectorRealGradientAux>();
 
 /**

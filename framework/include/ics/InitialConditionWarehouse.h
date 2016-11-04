@@ -37,13 +37,11 @@ public:
    */
   void addObject(MooseSharedPointer<InitialCondition> object, THREAD_ID tid);
 
-
 protected:
-
   ///@{
   /// Variable name to block/boundary IDs for error checking
-  std::vector<std::map<std::string, std::set<BoundaryID> > > _boundary_ics;
-  std::vector<std::map<std::string, std::set<SubdomainID> > > _block_ics;
+  std::vector<std::map<std::string, std::set<BoundaryID>>> _boundary_ics;
+  std::vector<std::map<std::string, std::set<SubdomainID>>> _block_ics;
   ///@}
 };
 

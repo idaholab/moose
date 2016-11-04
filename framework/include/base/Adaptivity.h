@@ -65,7 +65,7 @@ public:
    * @param param_name the name of the parameter
    * @param param_value the value of parameter
    */
-  template<typename T>
+  template <typename T>
   void setParam(const std::string & param_name, const T & param_value);
 
   /**
@@ -78,52 +78,73 @@ public:
   /**
    * Set the error norm (FIXME: improve description)
    */
-  void setErrorNorm(SystemNorm &sys_norm);
+  void setErrorNorm(SystemNorm & sys_norm);
 
   /**
    *
    */
-  void setPrintMeshChanged(bool state = true) { _print_mesh_changed = state; }
+  void setPrintMeshChanged(bool state = true)
+  {
+    _print_mesh_changed = state;
+  }
 
   /**
    * Pull out the number of initial steps previously set by calling init()
    *
    * @return the number of initial steps
    */
-  unsigned int getInitialSteps() const { return _initial_steps; }
+  unsigned int getInitialSteps() const
+  {
+    return _initial_steps;
+  }
 
   /**
    * Pull out the number of steps previously set by calling init()
    *
    * @return the number of steps
    */
-  unsigned int getSteps() const { return _steps; }
+  unsigned int getSteps() const
+  {
+    return _steps;
+  }
 
   /**
    * Pull out the number of cycles_per_step previously set through the AdaptivityAction
    *
    * @return the number of cycles per step
    */
-  unsigned int getCyclesPerStep() const { return _cycles_per_step; }
+  unsigned int getCyclesPerStep() const
+  {
+    return _cycles_per_step;
+  }
 
   /**
    * Set the number of cycles_per_step
    * @param num The number of cycles per step to execute
    */
-  void setCyclesPerStep(const unsigned int & num){ _cycles_per_step = num; }
+  void setCyclesPerStep(const unsigned int & num)
+  {
+    _cycles_per_step = num;
+  }
 
   /**
    * Pull out the _recompute_markers_during_cycles flag previously set through the AdaptivityAction
    *
    * @return the flag to recompute markers during adaptivity cycles
    */
-  bool getRecomputeMarkersFlag() const { return _recompute_markers_during_cycles; }
+  bool getRecomputeMarkersFlag() const
+  {
+    return _recompute_markers_during_cycles;
+  }
 
   /**
    * Set the flag to recompute markers during adaptivity cycles
    * @param flag The flag to recompute markers
    */
-  void setRecomputeMarkersFlag(const bool flag){ _recompute_markers_during_cycles = flag; }
+  void setRecomputeMarkersFlag(const bool flag)
+  {
+    _recompute_markers_during_cycles = flag;
+  }
 
   /**
    * Adapts the mesh based on the error estimator used
@@ -145,7 +166,7 @@ public:
    * MooseMesh object. No solution projection is performed in this
    * version.
    */
-  static void uniformRefine(MooseMesh *mesh);
+  static void uniformRefine(MooseMesh * mesh);
 
   /**
    * Performs uniform refinement on the meshes in the current
@@ -158,7 +179,10 @@ public:
    *
    * @return true if we do mesh adaptivity, otherwise false
    */
-  bool isOn() { return _mesh_refinement_on; }
+  bool isOn()
+  {
+    return _mesh_refinement_on;
+  }
 
   /**
    * Sets the time when the adaptivity is active
@@ -193,12 +217,18 @@ public:
   /**
    * Set the maximum refinement level (for the new Adaptivity system).
    */
-  void setMaxHLevel(unsigned int level) { _max_h_level = level; }
+  void setMaxHLevel(unsigned int level)
+  {
+    _max_h_level = level;
+  }
 
   /**
    * Set the interval (number of timesteps) between refinement steps.
    */
-  void setInterval(unsigned int interval) { _interval = interval; }
+  void setInterval(unsigned int interval)
+  {
+    _interval = interval;
+  }
 
   /**
    * Get an ErrorVector that will be filled up with values corresponding to the
@@ -275,12 +305,12 @@ protected:
   bool _recompute_markers_during_cycles;
 
   /// Stores pointers to ErrorVectors associated with indicator field names
-  std::map<std::string, std::unique_ptr<ErrorVector> > _indicator_field_to_error_vector;
+  std::map<std::string, std::unique_ptr<ErrorVector>> _indicator_field_to_error_vector;
 };
 
-template<typename T>
+template <typename T>
 void
-Adaptivity::setParam(const std::string &param_name, const T &param_value)
+Adaptivity::setParam(const std::string & param_name, const T & param_value)
 {
   if (param_name == "refine fraction")
   {

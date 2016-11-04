@@ -17,20 +17,21 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<NumElems>()
+template <>
+InputParameters
+validParams<NumElems>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-NumElems::NumElems(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters)
-{}
+NumElems::NumElems(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters)
+{
+}
 
 Real
 NumElems::getValue()
 {
   return _subproblem.mesh().nElem();
 }
-

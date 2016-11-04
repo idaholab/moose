@@ -20,7 +20,7 @@
 //Forward Declarations
 class TimeDerivativeNodalKernel;
 
-template<>
+template <>
 InputParameters validParams<TimeDerivativeNodalKernel>();
 
 /**

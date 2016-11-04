@@ -17,11 +17,10 @@
 // MOOSE includes
 #include "AuxKernel.h"
 
-
 // Forward Declarations
 class ElementLengthAux;
 
-template<>
+template <>
 InputParameters validParams<ElementLengthAux>();
 
 /**
@@ -33,7 +32,6 @@ public:
   ElementLengthAux(const InputParameters & parameters);
 
 protected:
-
   /**
    * Returns the min/max of the current element.
    */

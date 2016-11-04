@@ -14,8 +14,9 @@
 
 #include "QuotientAux.h"
 
-template<>
-InputParameters validParams<QuotientAux>()
+template <>
+InputParameters
+validParams<QuotientAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addCoupledVar("numerator", "The upstairs of the quotient variable");
@@ -23,19 +24,15 @@ InputParameters validParams<QuotientAux>()
   return params;
 }
 
-
-
-QuotientAux::QuotientAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-   _numerator(coupledValue("numerator")),
-   _denominator(coupledValue("denominator"))
-{}
-
-
+QuotientAux::QuotientAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _numerator(coupledValue("numerator")),
+    _denominator(coupledValue("denominator"))
+{
+}
 
 Real
 QuotientAux::computeValue()
 {
   return _numerator[_qp] / _denominator[_qp];
 }
-

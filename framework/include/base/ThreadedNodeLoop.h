@@ -19,7 +19,7 @@
 #include "MooseMesh.h"
 #include "FEProblem.h"
 
-template<typename RangeType, typename IteratorType>
+template <typename RangeType, typename IteratorType>
 class ThreadedNodeLoop
 {
 public:
@@ -28,9 +28,9 @@ public:
   // Splitting Constructor
   ThreadedNodeLoop(ThreadedNodeLoop & x, Threads::split split);
 
-  virtual ~ThreadedNodeLoop() {};
+  virtual ~ThreadedNodeLoop(){};
 
-  void operator() (const RangeType & range);
+  void operator()(const RangeType & range);
 
   /**
    * Called before the node range loop
@@ -58,35 +58,43 @@ public:
    * Called if a MooseException is caught anywhere during the computation.
    * The single input parameter taken is a MooseException object.
    */
-  virtual void caughtMooseException(MooseException & e) { std::string what(e.what()); _fe_problem.setException(what); };
+  virtual void caughtMooseException(MooseException & e)
+  {
+    std::string what(e.what());
+    _fe_problem.setException(what);
+  };
 
   /**
    * Whether or not the loop should continue.
    *
    * @return true to keep going, false to stop.
    */
-  virtual bool keepGoing() { return !_fe_problem.hasException(); }
+  virtual bool keepGoing()
+  {
+    return !_fe_problem.hasException();
+  }
 
 protected:
   FEProblem & _fe_problem;
   THREAD_ID _tid;
 };
 
-template<typename RangeType, typename IteratorType>
-ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(FEProblem & fe_problem) :
-    _fe_problem(fe_problem)
+template <typename RangeType, typename IteratorType>
+ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(FEProblem & fe_problem)
+  : _fe_problem(fe_problem)
 {
 }
 
-template<typename RangeType, typename IteratorType>
-ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(ThreadedNodeLoop & x, Threads::split /*split*/) :
-    _fe_problem(x._fe_problem)
+template <typename RangeType, typename IteratorType>
+ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(ThreadedNodeLoop & x, Threads::split /*split*/)
+  : _fe_problem(x._fe_problem)
 {
 }
 
-template<typename RangeType, typename IteratorType>
+template <typename RangeType, typename IteratorType>
 void
-ThreadedNodeLoop<RangeType, IteratorType>::operator () (const RangeType & range)
+    ThreadedNodeLoop<RangeType, IteratorType>::
+    operator()(const RangeType & range)
 {
   try
   {
@@ -95,7 +103,7 @@ ThreadedNodeLoop<RangeType, IteratorType>::operator () (const RangeType & range)
 
     pre();
 
-    for (IteratorType nd = range.begin() ; nd != range.end(); ++nd)
+    for (IteratorType nd = range.begin(); nd != range.end(); ++nd)
     {
       if (!keepGoing())
         break;
@@ -113,27 +121,25 @@ ThreadedNodeLoop<RangeType, IteratorType>::operator () (const RangeType & range)
   }
 }
 
-template<typename RangeType, typename IteratorType>
+template <typename RangeType, typename IteratorType>
 void
 ThreadedNodeLoop<RangeType, IteratorType>::pre()
 {
-
 }
 
-template<typename RangeType, typename IteratorType>
+template <typename RangeType, typename IteratorType>
 void
 ThreadedNodeLoop<RangeType, IteratorType>::post()
 {
-
 }
 
-template<typename RangeType, typename IteratorType>
+template <typename RangeType, typename IteratorType>
 void
 ThreadedNodeLoop<RangeType, IteratorType>::onNode(IteratorType & /*node_it*/)
 {
 }
 
-template<typename RangeType, typename IteratorType>
+template <typename RangeType, typename IteratorType>
 void
 ThreadedNodeLoop<RangeType, IteratorType>::postNode(IteratorType & /*node_it*/)
 {

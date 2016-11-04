@@ -16,8 +16,9 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<SetupInterface>()
+template <>
+InputParameters
+validParams<SetupInterface>()
 {
   InputParameters params = emptyInputParameters();
 
@@ -34,8 +35,8 @@ InputParameters validParams<SetupInterface>()
   return params;
 }
 
-SetupInterface::SetupInterface(const MooseObject * moose_object) :
-    _current_execute_flag((moose_object->parameters().getCheckedPointerParam<FEProblem *>("_fe_problem"))->getCurrentExecuteOnFlag())
+SetupInterface::SetupInterface(const MooseObject * moose_object)
+  : _current_execute_flag((moose_object->parameters().getCheckedPointerParam<FEProblem *>("_fe_problem"))->getCurrentExecuteOnFlag())
 {
   const InputParameters & params = moose_object->parameters();
 
@@ -59,19 +60,29 @@ SetupInterface::~SetupInterface()
 }
 
 void
-SetupInterface::initialSetup() {}
+SetupInterface::initialSetup()
+{
+}
 
 void
-SetupInterface::timestepSetup() {}
+SetupInterface::timestepSetup()
+{
+}
 
 void
-SetupInterface::jacobianSetup() {}
+SetupInterface::jacobianSetup()
+{
+}
 
 void
-SetupInterface::residualSetup() {}
+SetupInterface::residualSetup()
+{
+}
 
 void
-SetupInterface::subdomainSetup() {}
+SetupInterface::subdomainSetup()
+{
+}
 
 const std::vector<ExecFlagType> &
 SetupInterface::execFlags() const
@@ -83,7 +94,7 @@ ExecFlagType
 SetupInterface::execBitFlags() const
 {
   unsigned int exec_bit_field = EXEC_NONE;
-  for (unsigned int i=0; i<_exec_flags.size(); ++i)
+  for (unsigned int i = 0; i < _exec_flags.size(); ++i)
     exec_bit_field |= _exec_flags[i];
 
   return static_cast<ExecFlagType>(exec_bit_field);

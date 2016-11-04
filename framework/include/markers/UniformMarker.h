@@ -19,7 +19,7 @@
 
 class UniformMarker;
 
-template<>
+template <>
 InputParameters validParams<UniformMarker>();
 
 class UniformMarker : public Marker

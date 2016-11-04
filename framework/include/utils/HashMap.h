@@ -30,23 +30,22 @@
 // thread-safe container
 #include "tbb/concurrent_hash_map.h"
 
-template<typename Key, typename T, typename HashCompare = tbb::tbb_hash_compare<Key>, typename Allocator = tbb::tbb_allocator<std::pair<Key, T> > >
-class HashMap : public tbb::concurrent_hash_map< Key, T, HashCompare, Allocator >
+template <typename Key, typename T, typename HashCompare = tbb::tbb_hash_compare<Key>, typename Allocator = tbb::tbb_allocator<std::pair<Key, T>>>
+class HashMap : public tbb::concurrent_hash_map<Key, T, HashCompare, Allocator>
 {
 public:
+  inline T & operator[](const Key & key)
+  {
+    typename tbb::concurrent_hash_map<Key, T, HashCompare, Allocator>::accessor accessor;
+    this->insert(accessor, std::make_pair(key, T()));
+    return accessor->second;
+  }
 
-    inline T & operator[](const Key & key)
-    {
-      typename tbb::concurrent_hash_map< Key, T, HashCompare, Allocator >::accessor accessor;
-      this->insert(accessor, std::make_pair(key,T()));
-      return accessor->second;
-    }
-
-    inline bool contains(const Key & key)
-    {
-      typename tbb::concurrent_hash_map< Key, T, HashCompare, Allocator >::accessor accessor;
-      return this->find(accessor, key);
-    }
+  inline bool contains(const Key & key)
+  {
+    typename tbb::concurrent_hash_map<Key, T, HashCompare, Allocator>::accessor accessor;
+    return this->find(accessor, key);
+  }
 };
 
 #else
@@ -55,8 +54,8 @@ public:
 #include "libmesh/libmesh_common.h"
 #include LIBMESH_INCLUDE_UNORDERED_MAP
 
-template<typename Key, typename T> /*, typename Hash = std::tr1::hash<Key>, class Pred = std::equal_to<Key>, typename Allocator = std::allocator<std::pair<const Key,T> > >*/
-class HashMap : public LIBMESH_BEST_UNORDERED_MAP< Key, T > /*, Hash, Pred, Allocator >*/
+template <typename Key, typename T>                       /*, typename Hash = std::tr1::hash<Key>, class Pred = std::equal_to<Key>, typename Allocator = std::allocator<std::pair<const Key,T> > >*/
+class HashMap : public LIBMESH_BEST_UNORDERED_MAP<Key, T> /*, Hash, Pred, Allocator >*/
 {
 
 #ifdef LIBMESH_HAVE_PTHREAD
@@ -66,7 +65,7 @@ public:
   {
     libMesh::Threads::spin_mutex::scoped_lock lock(spin_mutex);
 
-    return LIBMESH_BEST_UNORDERED_MAP< Key, T > /*, Hash, Pred, Allocator >*/::operator[](k);
+    return LIBMESH_BEST_UNORDERED_MAP<Key, T> /*, Hash, Pred, Allocator >*/ ::operator[](k);
   }
 
   inline bool contains(const Key & key)
@@ -76,19 +75,15 @@ public:
     return this->find(key) != this->end();
   }
 
-
-
 private:
   libMesh::Threads::spin_mutex spin_mutex;
 
 #endif
-
 };
 
 #endif
 
 #endif /* HASHMAP_H */
-
 
 /**
  * Note: We might decide to use the unordered map instead.  It has a operator[] defined on it.

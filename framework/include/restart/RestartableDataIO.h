@@ -91,7 +91,7 @@ private:
   FEProblem & _fe_problem;
 
   /// A vector of file handles, one per thread
-  std::vector<MooseSharedPointer<std::ifstream> > _in_file_handles;
+  std::vector<MooseSharedPointer<std::ifstream>> _in_file_handles;
 };
 
 #endif /* RESTARTABLEDATAIO_H */

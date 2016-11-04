@@ -15,14 +15,15 @@
 #include "AddIndicatorAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddIndicatorAction>()
+template <>
+InputParameters
+validParams<AddIndicatorAction>()
 {
   return validParams<MooseObjectAction>();
 }
 
-AddIndicatorAction::AddIndicatorAction(InputParameters params) :
-    MooseObjectAction(params)
+AddIndicatorAction::AddIndicatorAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

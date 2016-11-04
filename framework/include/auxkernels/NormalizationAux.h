@@ -20,7 +20,7 @@
 // Forward Declarations
 class NormalizationAux;
 
-template<>
+template <>
 InputParameters validParams<NormalizationAux>();
 
 /**

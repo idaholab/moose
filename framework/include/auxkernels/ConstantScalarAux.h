@@ -19,7 +19,7 @@
 
 class ConstantScalarAux;
 
-template<>
+template <>
 InputParameters validParams<ConstantScalarAux>();
 
 /**
@@ -35,6 +35,5 @@ protected:
 
   const Real & _value;
 };
-
 
 #endif /* CONSTANTSCALARAUX_H */

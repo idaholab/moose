@@ -20,7 +20,7 @@
 //Forward Declarations
 class RunTime;
 
-template<>
+template <>
 InputParameters validParams<RunTime>();
 
 class RunTime : public GeneralPostprocessor
@@ -28,8 +28,12 @@ class RunTime : public GeneralPostprocessor
 public:
   RunTime(const InputParameters & parameters);
 
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
 
   /**
    * This will return the elapsed wall time.

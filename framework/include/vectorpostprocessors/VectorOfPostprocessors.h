@@ -20,7 +20,7 @@
 //Forward Declarations
 class VectorOfPostprocessors;
 
-template<>
+template <>
 InputParameters validParams<VectorOfPostprocessors>();
 
 /**
@@ -28,8 +28,7 @@ InputParameters validParams<VectorOfPostprocessors>();
  *  values of an arbitrary user-specified set of postprocessors as a vector in the order specified by the user.
  */
 
-class VectorOfPostprocessors :
-  public GeneralVectorPostprocessor
+class VectorOfPostprocessors : public GeneralVectorPostprocessor
 {
 public:
   /**

@@ -39,13 +39,19 @@ public:
   // Splitting Constructor
   MaxQpsThread(MaxQpsThread & x, Threads::split split);
 
-  void operator() (const ConstElemRange & range);
+  void operator()(const ConstElemRange & range);
 
   void join(const MaxQpsThread & y);
 
-  unsigned int max() const { return _max; }
+  unsigned int max() const
+  {
+    return _max;
+  }
 
-  unsigned int max_shape_funcs() const { return _max_shape_funcs; }
+  unsigned int max_shape_funcs() const
+  {
+    return _max_shape_funcs;
+  }
 
 protected:
   FEProblem & _fe_problem;

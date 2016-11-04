@@ -36,24 +36,25 @@ class MooseVariable;
 class Marker;
 class Adaptivity;
 
-template<>
+template <>
 InputParameters validParams<Marker>();
 
-class Marker :
-  public MooseObject,
-  public BlockRestrictable,
-  public SetupInterface,
-  public DependencyResolverInterface,
-  public MooseVariableDependencyInterface,
-  public UserObjectInterface,
-  public Restartable,
-  public PostprocessorInterface,
-  public MeshChangedInterface,
-  public OutputInterface
+class Marker : public MooseObject,
+               public BlockRestrictable,
+               public SetupInterface,
+               public DependencyResolverInterface,
+               public MooseVariableDependencyInterface,
+               public UserObjectInterface,
+               public Restartable,
+               public PostprocessorInterface,
+               public MeshChangedInterface,
+               public OutputInterface
 {
 public:
   Marker(const InputParameters & parameters);
-  virtual ~Marker() {}
+  virtual ~Marker()
+  {
+  }
 
   /// This mirrors the main refinement flag values in libMesh in Elem::RefinementState but adds "dont_mark"
   enum MarkerValue
@@ -84,7 +85,6 @@ public:
   virtual const std::set<std::string> & getSuppliedItems() override;
 
 protected:
-
   virtual MarkerValue computeElementMarker() = 0;
 
   /**
@@ -115,7 +115,7 @@ protected:
   Assembly & _assembly;
 
   MooseVariable & _field_var;
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
 
   MooseMesh & _mesh;
 

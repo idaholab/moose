@@ -21,7 +21,7 @@
 class FunctionNeumannBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionNeumannBC>();
 
 /**

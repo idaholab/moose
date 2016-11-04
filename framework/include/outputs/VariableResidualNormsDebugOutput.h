@@ -25,7 +25,7 @@
 // Forward declerations
 class VariableResidualNormsDebugOutput;
 
-template<>
+template <>
 InputParameters validParams<VariableResidualNormsDebugOutput>();
 
 /**
@@ -36,7 +36,6 @@ InputParameters validParams<VariableResidualNormsDebugOutput>();
 class VariableResidualNormsDebugOutput : public BasicOutput<PetscOutput>
 {
 public:
-
   /**
    * Class constructor
    * @param parameters Object input parameters
@@ -44,7 +43,6 @@ public:
   VariableResidualNormsDebugOutput(const InputParameters & parameters);
 
 protected:
-
   /**
    * Perform the debugging output
    */

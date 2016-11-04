@@ -15,8 +15,9 @@
 #include "ImageFunction.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ImageFunction>()
+template <>
+InputParameters
+validParams<ImageFunction>()
 {
   // Define the general parameters
   InputParameters params = validParams<Function>();
@@ -25,8 +26,8 @@ InputParameters validParams<ImageFunction>()
   return params;
 }
 
-ImageFunction::ImageFunction(const InputParameters & parameters) :
-    ImageSampler(parameters),
+ImageFunction::ImageFunction(const InputParameters & parameters)
+  : ImageSampler(parameters),
     Function(parameters)
 {
 }

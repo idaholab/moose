@@ -31,7 +31,7 @@ namespace libMesh
 class EquationSystems;
 }
 
-template<>
+template <>
 InputParameters validParams<Output>();
 
 /**
@@ -42,14 +42,12 @@ InputParameters validParams<Output>();
  *
  * @see Exodus Console CSV
  */
-class Output :
-  public MooseObject,
-  public Restartable,
-  public MeshChangedInterface,
-  public SetupInterface
+class Output : public MooseObject,
+               public Restartable,
+               public MeshChangedInterface,
+               public SetupInterface
 {
 public:
-
   /**
    * Class constructor
    *
@@ -68,7 +66,7 @@ public:
    */
   virtual Real time();
 
-   /**
+  /**
    * Get the old output time.
    * @return The old output time, which may be different than the simulation time
    *
@@ -123,16 +121,17 @@ public:
    * Method for controlling the allow output state
    * @param state The state to set the allow flag to
    */
-  void allowOutput(bool state) { _allow_output = state; }
+  void allowOutput(bool state)
+  {
+    _allow_output = state;
+  }
 
   /**
    * A static helper for injecting deprecated parameters
    */
   static void addDeprecatedInputParameters(InputParameters & params);
 
-
 protected:
-
   /**
    * A single call to this function should output all the necessary data for a single timestep.
    * @param type The type execution flag (see Moose.h)

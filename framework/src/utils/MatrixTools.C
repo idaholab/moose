@@ -7,14 +7,14 @@
 
 #include "MatrixTools.h"
 
-#if PETSC_VERSION_LESS_THAN(3,5,0)
-  extern "C" void FORTRAN_CALL(dgetri) ( ... ); // matrix inversion routine from LAPACK
+#if PETSC_VERSION_LESS_THAN(3, 5, 0)
+extern "C" void FORTRAN_CALL(dgetri)(...); // matrix inversion routine from LAPACK
 #endif
 
 namespace MatrixTools
 {
 void
-inverse(const std::vector<std::vector<Real> > & m, std::vector<std::vector<Real> > & m_inv)
+inverse(const std::vector<std::vector<Real>> & m, std::vector<std::vector<Real>> & m_inv)
 {
   unsigned int n = m.size();
 
@@ -60,8 +60,9 @@ inverse(std::vector<PetscScalar> & A, unsigned int n)
 
   // get the inverse of A
   int buffer_size = buffer.size();
-#if PETSC_VERSION_LESS_THAN(3,5,0)
-  FORTRAN_CALL(dgetri)(reinterpret_cast<int *>(&n), &A[0], reinterpret_cast<int *>(&n), &ipiv[0], &buffer[0], &buffer_size, &return_value);
+#if PETSC_VERSION_LESS_THAN(3, 5, 0)
+  FORTRAN_CALL(dgetri)
+  (reinterpret_cast<int *>(&n), &A[0], reinterpret_cast<int *>(&n), &ipiv[0], &buffer[0], &buffer_size, &return_value);
 #else
   LAPACKgetri_(reinterpret_cast<int *>(&n), &A[0], reinterpret_cast<int *>(&n), &ipiv[0], &buffer[0], &buffer_size, &return_value);
 #endif
@@ -70,5 +71,4 @@ inverse(std::vector<PetscScalar> & A, unsigned int n)
     throw MooseException(return_value < 0 ? "Argument " + Moose::stringify(-return_value) + " was invalid during invert in MatrixTools::inverse."
                                           : "Matrix on-diagonal entry " + Moose::stringify(return_value) + " was exactly zero during invert in MatrixTools::inverse.");
 }
-
 }

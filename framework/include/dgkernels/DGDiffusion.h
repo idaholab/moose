@@ -20,7 +20,7 @@
 //Forward Declarations
 class DGDiffusion;
 
-template<>
+template <>
 InputParameters validParams<DGDiffusion>();
 
 /**

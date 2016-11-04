@@ -19,21 +19,22 @@
 // C++ includes
 #include <limits.h>
 
-template<>
-InputParameters validParams<EqualValueBoundaryConstraint>()
+template <>
+InputParameters
+validParams<EqualValueBoundaryConstraint>()
 {
   InputParameters params = validParams<NodalConstraint>();
   params.addParam<unsigned int>("master", std::numeric_limits<unsigned int>::max(), "The ID of the master node. If no ID is provided, first node of slave set is chosen.");
-  params.addParam<std::vector<unsigned int> >("slave_node_ids", "The IDs of the slave node");
+  params.addParam<std::vector<unsigned int>>("slave_node_ids", "The IDs of the slave node");
   params.addParam<BoundaryName>("slave", "NaN", "The boundary ID associated with the slave side");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
 }
 
-EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters) :
-    NodalConstraint(parameters),
+EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters)
+  : NodalConstraint(parameters),
     _master_node_id(getParam<unsigned int>("master")),
-    _slave_node_ids(getParam<std::vector<unsigned int> >("slave_node_ids")),
+    _slave_node_ids(getParam<std::vector<unsigned int>>("slave_node_ids")),
     _slave_node_set_id(getParam<BoundaryName>("slave")),
     _penalty(getParam<Real>("penalty"))
 {

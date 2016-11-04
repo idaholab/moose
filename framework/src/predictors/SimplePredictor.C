@@ -15,16 +15,17 @@
 #include "SimplePredictor.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<SimplePredictor>()
+template <>
+InputParameters
+validParams<SimplePredictor>()
 {
   InputParameters params = validParams<Predictor>();
 
   return params;
 }
 
-SimplePredictor::SimplePredictor(const InputParameters & parameters) :
-    Predictor(parameters)
+SimplePredictor::SimplePredictor(const InputParameters & parameters)
+  : Predictor(parameters)
 {
 }
 

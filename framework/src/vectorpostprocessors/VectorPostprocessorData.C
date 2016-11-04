@@ -15,8 +15,8 @@
 #include "VectorPostprocessorData.h"
 #include "FEProblem.h"
 
-VectorPostprocessorData::VectorPostprocessorData(FEProblem & fe_problem) :
-    Restartable("values", "VectorPostprocessorData", fe_problem, 0)
+VectorPostprocessorData::VectorPostprocessorData(FEProblem & fe_problem)
+  : Restartable("values", "VectorPostprocessorData", fe_problem, 0)
 {
 }
 
@@ -41,7 +41,6 @@ VectorPostprocessorData::getVectorPostprocessorValueOld(const VectorPostprocesso
 
   return getVectorPostprocessorHelper(vpp_name, vector_name, false);
 }
-
 
 VectorPostprocessorValue &
 VectorPostprocessorData::declareVector(const std::string & vpp_name, const std::string & vector_name)

@@ -25,14 +25,13 @@ class SystemBase;
 class MooseVariable;
 class Assembly;
 
-template<>
+template <>
 InputParameters validParams<GeneralDamper>();
 
 /**
  * Base class for deriving general dampers
  */
-class GeneralDamper :
-  public Damper
+class GeneralDamper : public Damper
 {
 public:
   GeneralDamper(const InputParameters & parameters);

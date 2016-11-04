@@ -23,11 +23,12 @@
 // libMesh includes
 #include "libmesh/exodusII_io.h"
 
-template<>
-InputParameters validParams<Exodus>()
+template <>
+InputParameters
+validParams<Exodus>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<AdvancedOutput<OversampleOutput> >();
+  InputParameters params = validParams<AdvancedOutput<OversampleOutput>>();
   params += AdvancedOutput<OversampleOutput>::enableOutputTypes("nodal elemental scalar postprocessor input");
 
   // Enable sequential file output (do not set default, the use_displace criteria relies on isParamValid, see Constructor)
@@ -52,8 +53,8 @@ InputParameters validParams<Exodus>()
   return params;
 }
 
-Exodus::Exodus(const InputParameters & parameters) :
-    AdvancedOutput<OversampleOutput>(parameters),
+Exodus::Exodus(const InputParameters & parameters)
+  : AdvancedOutput<OversampleOutput>(parameters),
     _exodus_initialized(false),
     _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
     _recovering(_app.isRecovering()),
@@ -178,7 +179,6 @@ Exodus::outputSetup()
   }
 }
 
-
 void
 Exodus::outputNodalVariables()
 {
@@ -269,7 +269,6 @@ Exodus::outputInput()
   _input_record = syntax_formatter.getInputFileRecord();
 }
 
-
 void
 Exodus::output(const ExecFlagType & type)
 {
@@ -305,7 +304,7 @@ Exodus::output(const ExecFlagType & type)
   // Write the input file record if it exists and the output file is initialized
   if (!_input_record.empty() && _exodus_initialized)
   {
-     _exodus_io_ptr->write_information_records(_input_record);
+    _exodus_io_ptr->write_information_records(_input_record);
     _input_record.clear();
   }
 

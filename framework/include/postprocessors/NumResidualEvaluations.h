@@ -20,7 +20,7 @@
 //Forward Declarations
 class NumResidualEvaluations;
 
-template<>
+template <>
 InputParameters validParams<NumResidualEvaluations>();
 
 /**
@@ -31,8 +31,12 @@ class NumResidualEvaluations : public GeneralPostprocessor
 public:
   NumResidualEvaluations(const InputParameters & parameters);
 
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
 
   virtual Real getValue() override;
 };

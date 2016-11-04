@@ -21,12 +21,11 @@
 //Forward Declarations
 class NodalValueSampler;
 
-template<>
+template <>
 InputParameters validParams<NodalValueSampler>();
 
-class NodalValueSampler :
-  public NodalVariableVectorPostprocessor,
-  protected SamplerBase
+class NodalValueSampler : public NodalVariableVectorPostprocessor,
+                          protected SamplerBase
 {
 public:
   NodalValueSampler(const InputParameters & parameters);

@@ -12,7 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-
 // MOOSE includes
 #include "CommandLine.h"
 #include "MooseInit.h"
@@ -22,9 +21,8 @@
 // C++ includes
 #include <iomanip>
 
-
-CommandLine::CommandLine(int argc, char *argv[]) :
-    _get_pot(new GetPot(argc, argv)),
+CommandLine::CommandLine(int argc, char * argv[])
+  : _get_pot(new GetPot(argc, argv)),
     _has_prefix(false)
 {
 }
@@ -47,7 +45,7 @@ CommandLine::addCommandLineOptionsFromParams(InputParameters & params)
     syntax = params.getSyntax(orig_name);
     cli_opt.cli_syntax = syntax;
     cli_opt.required = false;
-    InputParameters::Parameter<bool> * bool_type = dynamic_cast<InputParameters::Parameter<bool>*>(it.second);
+    InputParameters::Parameter<bool> * bool_type = dynamic_cast<InputParameters::Parameter<bool> *>(it.second);
     if (bool_type)
       cli_opt.argument_type = CommandLine::NONE;
     else
@@ -66,35 +64,35 @@ CommandLine::populateInputParams(InputParameters & params)
     if (search(orig_name))
     {
       {
-        InputParameters::Parameter<std::string> * string_type = dynamic_cast<InputParameters::Parameter<std::string>*>(it.second);
+        InputParameters::Parameter<std::string> * string_type = dynamic_cast<InputParameters::Parameter<std::string> *>(it.second);
         if (string_type)
         {
           search(orig_name, params.set<std::string>(orig_name));
           continue;
         }
 
-        InputParameters::Parameter<Real> * real_type = dynamic_cast<InputParameters::Parameter<Real>*>(it.second);
+        InputParameters::Parameter<Real> * real_type = dynamic_cast<InputParameters::Parameter<Real> *>(it.second);
         if (real_type)
         {
           search(orig_name, params.set<Real>(orig_name));
           continue;
         }
 
-        InputParameters::Parameter<unsigned int> * uint_type = dynamic_cast<InputParameters::Parameter<unsigned int>*>(it.second);
+        InputParameters::Parameter<unsigned int> * uint_type = dynamic_cast<InputParameters::Parameter<unsigned int> *>(it.second);
         if (uint_type)
         {
           search(orig_name, params.set<unsigned int>(orig_name));
           continue;
         }
 
-        InputParameters::Parameter<int> * int_type = dynamic_cast<InputParameters::Parameter<int>*>(it.second);
+        InputParameters::Parameter<int> * int_type = dynamic_cast<InputParameters::Parameter<int> *>(it.second);
         if (int_type)
         {
           search(orig_name, params.set<int>(orig_name));
           continue;
         }
 
-        InputParameters::Parameter<bool> * bool_type = dynamic_cast<InputParameters::Parameter<bool>*>(it.second);
+        InputParameters::Parameter<bool> * bool_type = dynamic_cast<InputParameters::Parameter<bool> *>(it.second);
         if (bool_type)
         {
           search(orig_name, params.set<bool>(orig_name));
@@ -103,7 +101,8 @@ CommandLine::populateInputParams(InputParameters & params)
       }
     }
     else if (params.isParamRequired(orig_name))
-      mooseError("Missing required command-line parameter: " << orig_name << std::endl << "Doc String: " << params.getDocString(orig_name));
+      mooseError("Missing required command-line parameter: " << orig_name << std::endl
+                                                             << "Doc String: " << params.getDocString(orig_name));
   }
 }
 
@@ -143,7 +142,7 @@ CommandLine::printUsage() const
 {
   // Grab the first item out of argv
   std::string command((*_get_pot)[0]);
-  command.substr(command.find_last_of("/\\")+1);
+  command.substr(command.find_last_of("/\\") + 1);
 
   Moose::out << "Usage: " << command << " [<options>]\n\n"
              << "Options:\n" << std::left;
@@ -170,7 +169,7 @@ CommandLine::printUsage() const
 void
 CommandLine::buildVarsSet()
 {
-  for (const char* var; (var = _get_pot->next_nominus()) != NULL; )
+  for (const char * var; (var = _get_pot->next_nominus()) != NULL;)
   {
     std::vector<std::string> name_value_pairs;
     MooseUtils::tokenize(var, name_value_pairs, 0, "=");
@@ -179,7 +178,7 @@ CommandLine::buildVarsSet()
 }
 
 bool
-CommandLine::isVariableOnCommandLine(const std::string &name) const
+CommandLine::isVariableOnCommandLine(const std::string & name) const
 {
   return _command_line_vars.find(name) != _command_line_vars.end();
 }

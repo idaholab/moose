@@ -21,7 +21,7 @@
 class FunctionDirichletBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionDirichletBC>();
 
 /**

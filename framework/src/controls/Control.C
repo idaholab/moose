@@ -15,8 +15,9 @@
 // MOOSE includes
 #include "Control.h"
 
-template<>
-InputParameters validParams<Control>()
+template <>
+InputParameters
+validParams<Control>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
@@ -29,8 +30,8 @@ InputParameters validParams<Control>()
   return params;
 }
 
-Control::Control(const InputParameters & parameters) :
-    MooseObject(parameters),
+Control::Control(const InputParameters & parameters)
+  : MooseObject(parameters),
     TransientInterface(this),
     SetupInterface(this),
     FunctionInterface(this),

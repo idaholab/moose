@@ -14,17 +14,18 @@
 
 #include "MaterialStdVectorRealGradientAux.h"
 
-template<>
-InputParameters validParams<MaterialStdVectorRealGradientAux>()
+template <>
+InputParameters
+validParams<MaterialStdVectorRealGradientAux>()
 {
-  InputParameters params = validParams<MaterialStdVectorAuxBase<> >();
+  InputParameters params = validParams<MaterialStdVectorAuxBase<>>();
   params.addClassDescription("Extracts a component of a material's std::vector<RealGradient> to an aux variable.  If the std::vector is not of sufficient size then zero is returned");
   params.addParam<unsigned int>("component", 0, "The gradient component to be extracted for this kernel");
   return params;
 }
 
-MaterialStdVectorRealGradientAux::MaterialStdVectorRealGradientAux(const InputParameters & parameters) :
-    MaterialStdVectorAuxBase<RealGradient>(parameters),
+MaterialStdVectorRealGradientAux::MaterialStdVectorRealGradientAux(const InputParameters & parameters)
+  : MaterialStdVectorAuxBase<RealGradient>(parameters),
     _component(getParam<unsigned int>("component"))
 {
   if (_component > LIBMESH_DIM)

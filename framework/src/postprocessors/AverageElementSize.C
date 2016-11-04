@@ -14,16 +14,18 @@
 
 #include "AverageElementSize.h"
 
-template<>
-InputParameters validParams<AverageElementSize>()
+template <>
+InputParameters
+validParams<AverageElementSize>()
 {
   InputParameters params = validParams<ElementAverageValue>();
   return params;
 }
 
-AverageElementSize::AverageElementSize(const InputParameters & parameters) :
-    ElementAverageValue(parameters)
-{}
+AverageElementSize::AverageElementSize(const InputParameters & parameters)
+  : ElementAverageValue(parameters)
+{
+}
 
 void
 AverageElementSize::initialize()
@@ -36,7 +38,7 @@ void
 AverageElementSize::execute()
 {
   ElementIntegralPostprocessor::execute();
-  _elems ++;
+  _elems++;
 }
 
 Real
@@ -62,4 +64,3 @@ AverageElementSize::threadJoin(const UserObject & y)
   const AverageElementSize & pps = static_cast<const AverageElementSize &>(y);
   _elems += pps._elems;
 }
-

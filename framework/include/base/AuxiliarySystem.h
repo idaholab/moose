@@ -33,7 +33,8 @@ class AuxKernel;
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
 /**
@@ -84,7 +85,11 @@ public:
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) override;
   virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
 
-  virtual const NumericVector<Number> * & currentSolution() override { _current_solution = _sys.current_local_solution.get(); return _current_solution; }
+  virtual const NumericVector<Number> *& currentSolution() override
+  {
+    _current_solution = _sys.current_local_solution.get();
+    return _current_solution;
+  }
 
   virtual NumericVector<Number> & solutionUDot() override;
 
@@ -132,15 +137,30 @@ public:
    */
   bool needMaterialOnSide(BoundaryID bnd_id);
 
-  virtual NumericVector<Number> & solution() override { return *_sys.solution; }
+  virtual NumericVector<Number> & solution() override
+  {
+    return *_sys.solution;
+  }
 
-  virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
+  virtual NumericVector<Number> & solutionOld() override
+  {
+    return *_sys.old_local_solution;
+  }
 
-  virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
+  virtual NumericVector<Number> & solutionOlder() override
+  {
+    return *_sys.older_local_solution;
+  }
 
-  virtual TransientExplicitSystem & sys() { return _sys; }
+  virtual TransientExplicitSystem & sys()
+  {
+    return _sys;
+  }
 
-  virtual System & system() override { return _sys; }
+  virtual System & system() override
+  {
+    return _sys;
+  }
 
 protected:
   void computeScalarVars(ExecFlagType type);
@@ -164,8 +184,8 @@ protected:
   bool _need_serialized_solution;
 
   // Variables
-  std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;
-  std::vector<std::map<std::string, MooseVariable *> > _elem_vars;
+  std::vector<std::map<std::string, MooseVariable *>> _nodal_vars;
+  std::vector<std::map<std::string, MooseVariable *>> _elem_vars;
 
   // Storage for AuxScalarKernel objects
   ExecuteMooseObjectWarehouse<AuxScalarKernel> _aux_scalar_storage;

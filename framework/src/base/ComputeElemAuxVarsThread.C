@@ -19,9 +19,8 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-
-ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials) :
-    ThreadedElementLoop<ConstElemRange>(problem),
+ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials)
+  : ThreadedElementLoop<ConstElemRange>(problem),
     _aux_sys(problem.getAuxiliarySystem()),
     _aux_kernels(storage),
     _need_materials(need_materials)
@@ -29,8 +28,8 @@ ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, const Mo
 }
 
 // Splitting Constructor
-ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split /*split*/) :
-    ThreadedElementLoop<ConstElemRange>(x._fe_problem),
+ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split /*split*/)
+  : ThreadedElementLoop<ConstElemRange>(x._fe_problem),
     _aux_sys(x._aux_sys),
     _aux_kernels(x._aux_kernels),
     _need_materials(x._need_materials)
@@ -55,7 +54,7 @@ ComputeElemAuxVarsThread::subdomainChanged()
 
   if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
+    const std::vector<MooseSharedPointer<AuxKernel>> & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
     for (const auto & aux : kernels)
     {
       aux->subdomainSetup();
@@ -68,13 +67,12 @@ ComputeElemAuxVarsThread::subdomainChanged()
   _fe_problem.prepareMaterials(_subdomain, _tid);
 }
 
-
 void
 ComputeElemAuxVarsThread::onElement(const Elem * elem)
 {
   if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
+    const std::vector<MooseSharedPointer<AuxKernel>> & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
 

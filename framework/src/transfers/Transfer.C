@@ -26,8 +26,9 @@
 
 const Number Transfer::OutOfMeshValue = -999999;
 
-template<>
-InputParameters validParams<Transfer>()
+template <>
+InputParameters
+validParams<Transfer>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
@@ -43,8 +44,8 @@ InputParameters validParams<Transfer>()
   return params;
 }
 
-Transfer::Transfer(const InputParameters & parameters) :
-    MooseObject(parameters),
+Transfer::Transfer(const InputParameters & parameters)
+  : MooseObject(parameters),
     SetupInterface(this),
     Restartable(parameters, "Transfers"),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
@@ -63,7 +64,7 @@ System *
 Transfer::find_sys(EquationSystems & es, const std::string & var_name)
 {
   // Find the system this variable is from
-  for (unsigned int i=0; i<es.n_systems(); i++)
+  for (unsigned int i = 0; i < es.n_systems(); i++)
     if (es.get_system(i).has_variable(var_name))
       return &es.get_system(i);
 

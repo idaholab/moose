@@ -19,16 +19,17 @@
 #include "Factory.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<SetupPredictorAction>()
+template <>
+InputParameters
+validParams<SetupPredictorAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
 
   return params;
 }
 
-SetupPredictorAction::SetupPredictorAction(InputParameters parameters) :
-    MooseObjectAction(parameters)
+SetupPredictorAction::SetupPredictorAction(InputParameters parameters)
+  : MooseObjectAction(parameters)
 {
 }
 

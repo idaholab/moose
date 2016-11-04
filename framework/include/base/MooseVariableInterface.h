@@ -167,5 +167,4 @@ protected:
   Assembly * _mvi_assembly;
 };
 
-
 #endif /* MOOSEVARIABLEINTERFACE_H */

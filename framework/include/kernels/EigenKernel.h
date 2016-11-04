@@ -21,7 +21,7 @@
 class EigenKernel;
 class MooseEigenSystem;
 
-template<>
+template <>
 InputParameters validParams<EigenKernel>();
 
 /**
@@ -35,8 +35,12 @@ class EigenKernel : public KernelBase
 public:
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(unsigned int /*jvar*/) override {}
-  virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) override {}
+  virtual void computeOffDiagJacobian(unsigned int /*jvar*/) override
+  {
+  }
+  virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) override
+  {
+  }
 
   EigenKernel(const InputParameters & parameters);
   virtual bool enabled() override;

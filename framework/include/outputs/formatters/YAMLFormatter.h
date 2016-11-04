@@ -31,13 +31,12 @@ public:
   virtual std::string postscript() const override;
 
   virtual std::string preTraverse(short depth) const override;
-  virtual std::string printBlockOpen(const std::string &name, short depth, const std::string & doc) const override;
-  virtual std::string printBlockClose(const std::string &name, short depth) const override;
-  virtual std::string printParams(const std::string &prefix, const std::string &fully_qualified_name, InputParameters &params, short depth, const std::string &search_string, bool &found) override;
+  virtual std::string printBlockOpen(const std::string & name, short depth, const std::string & doc) const override;
+  virtual std::string printBlockClose(const std::string & name, short depth) const override;
+  virtual std::string printParams(const std::string & prefix, const std::string & fully_qualified_name, InputParameters & params, short depth, const std::string & search_string, bool & found) override;
 
 protected:
   bool _dump_mode;
-
 
   /**
    * Method for building an output string that accounts for specific types (e.g., Point)

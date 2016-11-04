@@ -42,7 +42,7 @@ public:
    * @param name The name of the parameter key of the user object to retrieve
    * @return The user object with name associated with the parameter 'name'
    */
-  template<class T>
+  template <class T>
   const T & getUserObject(const std::string & name);
 
   /**
@@ -50,7 +50,7 @@ public:
    * @param name The name of the user object to retrieve
    * @return The user object with the name
    */
-  template<class T>
+  template <class T>
   const T & getUserObjectByName(const std::string & name);
 
   /**
@@ -81,8 +81,7 @@ private:
   bool isDiscreteUserObject(const UserObject & uo) const;
 };
 
-
-template<class T>
+template <class T>
 const T &
 UserObjectInterface::getUserObject(const std::string & name)
 {
@@ -90,7 +89,7 @@ UserObjectInterface::getUserObject(const std::string & name)
   return _uoi_feproblem.getUserObject<T>(_uoi_params.get<UserObjectName>(name), tid);
 }
 
-template<class T>
+template <class T>
 const T &
 UserObjectInterface::getUserObjectByName(const std::string & name)
 {

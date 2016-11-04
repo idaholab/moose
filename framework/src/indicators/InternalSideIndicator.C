@@ -29,8 +29,9 @@
 
 const BoundaryID InternalSideIndicator::InternalBndId = 12345;
 
-template<>
-InputParameters validParams<InternalSideIndicator>()
+template <>
+InputParameters
+validParams<InternalSideIndicator>()
 {
   InputParameters params = validParams<Indicator>();
   params.addRequiredParam<VariableName>("variable", "The name of the variable that this side indicator applies to");
@@ -40,9 +41,8 @@ InputParameters validParams<InternalSideIndicator>()
   return params;
 }
 
-
-InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters) :
-    Indicator(parameters),
+InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
+  : Indicator(parameters),
     NeighborCoupleable(this, false, false),
     ScalarCoupleable(this),
     NeighborMooseVariableInterface(this, false),
@@ -85,14 +85,14 @@ InternalSideIndicator::computeIndicator()
 {
   Real sum = 0;
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
 
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-    _solution.add(_field_var.nodalDofIndex(), sum*_current_elem->hmax());
-    _solution.add(_field_var.nodalDofIndexNeighbor(), sum*_neighbor_elem->hmax());
+    _solution.add(_field_var.nodalDofIndex(), sum * _current_elem->hmax());
+    _solution.add(_field_var.nodalDofIndexNeighbor(), sum * _neighbor_elem->hmax());
   }
 }
 
@@ -105,7 +105,7 @@ InternalSideIndicator::finalize()
   {
     // Figure out the total number of sides contributing to the error.
     // We'll scale by this so boundary elements are less penalized
-    for (unsigned int side=0; side<_current_elem->n_sides(); side++)
+    for (unsigned int side = 0; side < _current_elem->n_sides(); side++)
       if (_current_elem->neighbor(side) != NULL)
         n_flux_faces++;
   }
@@ -117,6 +117,6 @@ InternalSideIndicator::finalize()
 
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _solution.set(_field_var.nodalDofIndex(), std::sqrt(value)/static_cast<Real>(n_flux_faces));
+    _solution.set(_field_var.nodalDofIndex(), std::sqrt(value) / static_cast<Real>(n_flux_faces));
   }
 }

@@ -19,7 +19,7 @@
 
 class ExplicitEuler;
 
-template<>
+template <>
 InputParameters validParams<ExplicitEuler>();
 
 /**
@@ -32,12 +32,14 @@ public:
   virtual ~ExplicitEuler();
 
   virtual void preSolve();
-  virtual int order() { return 1; }
+  virtual int order()
+  {
+    return 1;
+  }
   virtual void computeTimeDerivatives();
   virtual void postStep(NumericVector<Number> & residual);
 
 protected:
 };
-
 
 #endif /* EXPLICITEULER_H */

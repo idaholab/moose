@@ -19,23 +19,23 @@
 #include "ActionWarehouse.h"
 
 // Define input parameters
-template<>
-InputParameters validParams<OutputInterface>()
+template <>
+InputParameters
+validParams<OutputInterface>()
 {
   InputParameters params = emptyInputParameters();
-  params.addParam<std::vector<OutputName> >("outputs", "Vector of output names were you would like to restrict the output of variables(s) associated with this object");
+  params.addParam<std::vector<OutputName>>("outputs", "Vector of output names were you would like to restrict the output of variables(s) associated with this object");
 
   params.addParamNamesToGroup("outputs", "Advanced");
 
   return params;
 }
 
-
-OutputInterface::OutputInterface(const InputParameters & parameters, bool build_list) :
-    _oi_moose_app(*parameters.get<MooseApp *>("_moose_app")),
+OutputInterface::OutputInterface(const InputParameters & parameters, bool build_list)
+  : _oi_moose_app(*parameters.get<MooseApp *>("_moose_app")),
     _oi_output_warehouse(_oi_moose_app.getOutputWarehouse()),
-    _oi_outputs(parameters.get<std::vector<OutputName> >("outputs").begin(),
-                parameters.get<std::vector<OutputName> >("outputs").end())
+    _oi_outputs(parameters.get<std::vector<OutputName>>("outputs").begin(),
+                parameters.get<std::vector<OutputName>>("outputs").end())
 {
 
   // By default it is assumed that the variable name associated with 'outputs' is the name

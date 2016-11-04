@@ -21,7 +21,7 @@
 class TimeExtremeValue;
 
 // Input parameters
-template<>
+template <>
 InputParameters validParams<TimeExtremeValue>();
 
 /// A postprocessor for reporting the max/min value of another postprocessor over time
@@ -42,7 +42,9 @@ public:
    * @param parameters The input parameters
    */
   TimeExtremeValue(const InputParameters & parameters);
-  virtual void initialize() override {}
+  virtual void initialize() override
+  {
+  }
   virtual void execute() override;
   virtual Real getValue() override;
 

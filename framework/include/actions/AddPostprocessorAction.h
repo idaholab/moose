@@ -19,11 +19,10 @@
 
 class AddPostprocessorAction;
 
-template<>
+template <>
 InputParameters validParams<AddPostprocessorAction>();
 
-
-class AddPostprocessorAction: public MooseObjectAction
+class AddPostprocessorAction : public MooseObjectAction
 {
 public:
   AddPostprocessorAction(InputParameters params);

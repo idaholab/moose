@@ -27,7 +27,6 @@
 class MooseObjectName
 {
 public:
-
   /**
    * Construct the name object.
    * @param tag The tag to apply the object
@@ -40,7 +39,6 @@ public:
    */
   MooseObjectName(std::string name);
 
-
   /**
    * Copy constructor.
    */
@@ -49,12 +47,18 @@ public:
   /**
    * Return the name.
    */
-  const std::string & name() const { return _name; }
+  const std::string & name() const
+  {
+    return _name;
+  }
 
   /**
    * Return the tag.
    */
-  const std::string & tag() const { return _tag; }
+  const std::string & tag() const
+  {
+    return _tag;
+  }
 
   ///@{
   /**
@@ -76,7 +80,6 @@ public:
   friend class MooseObjectParameterName;
 
 protected:
-
   /**
    * A constructor for use by MooseObjectParameterName
    */

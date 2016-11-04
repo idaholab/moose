@@ -14,8 +14,9 @@
 #include "FunctionValuePostprocessor.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<FunctionValuePostprocessor>()
+template <>
+InputParameters
+validParams<FunctionValuePostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<FunctionName>("function", "The function which supplies the postprocessor value.");
@@ -27,8 +28,8 @@ InputParameters validParams<FunctionValuePostprocessor>()
   return params;
 }
 
-FunctionValuePostprocessor::FunctionValuePostprocessor(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+FunctionValuePostprocessor::FunctionValuePostprocessor(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _function(getFunction("function")),
     _point(getParam<Point>("point")),
     _scale_factor(getParam<Real>("scale_factor"))

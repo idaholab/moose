@@ -16,7 +16,7 @@
 #include "ConsoleStreamInterface.h"
 #include "MooseApp.h"
 
-ConsoleStreamInterface::ConsoleStreamInterface(MooseApp & app) :
-    _console(app.getOutputWarehouse())
+ConsoleStreamInterface::ConsoleStreamInterface(MooseApp & app)
+  : _console(app.getOutputWarehouse())
 {
 }

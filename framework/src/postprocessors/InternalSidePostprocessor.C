@@ -14,17 +14,17 @@
 
 #include "InternalSidePostprocessor.h"
 
-template<>
-InputParameters validParams<InternalSidePostprocessor>()
+template <>
+InputParameters
+validParams<InternalSidePostprocessor>()
 {
   InputParameters params = validParams<InternalSideUserObject>();
   params += validParams<Postprocessor>();
   return params;
 }
 
-InternalSidePostprocessor::InternalSidePostprocessor(const InputParameters & parameters) :
-    InternalSideUserObject(parameters),
+InternalSidePostprocessor::InternalSidePostprocessor(const InputParameters & parameters)
+  : InternalSideUserObject(parameters),
     Postprocessor(parameters)
 {
 }
-

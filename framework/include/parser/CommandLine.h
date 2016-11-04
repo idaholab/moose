@@ -38,7 +38,8 @@ class CommandLine
 {
 public:
   /// Type of argument for a given option
-  enum ARGUMENT {
+  enum ARGUMENT
+  {
     NONE,
     OPTIONAL,
     REQUIRED
@@ -92,7 +93,10 @@ public:
    * Get the GetPot object
    * @return Pointer to the GetPot object
    */
-  GetPot * getPot() { return _get_pot; }
+  GetPot * getPot()
+  {
+    return _get_pot;
+  }
 
   /**
    * Check if we have a variable on the command line. Note that a call to this
@@ -101,13 +105,13 @@ public:
    * @param name The name of the variable
    * @return True if the variable was defined on the command line
    */
-  bool haveVariable(const std::string & name, bool allow_prefix_change=true);
+  bool haveVariable(const std::string & name, bool allow_prefix_change = true);
 
   /**
    * Sets the prefix for the CommandLine object. This is used for passing
    * parameters to Multiapps
    */
-  void setPrefix(const std::string & name, const std::string & num="");
+  void setPrefix(const std::string & name, const std::string & num = "");
 
   /**
    * Resets the prefix to the value set with the last call to setPrefix.
@@ -137,12 +141,13 @@ protected:
 };
 
 template <typename T>
-bool CommandLine::search(const std::string &option_name, T & argument)
+bool
+CommandLine::search(const std::string & option_name, T & argument)
 {
   std::map<std::string, Option>::iterator pos = _cli_options.find(option_name);
   if (pos != _cli_options.end())
   {
-    for (unsigned int i=0; i<pos->second.cli_switch.size(); ++i)
+    for (unsigned int i = 0; i < pos->second.cli_switch.size(); ++i)
     {
       if (_get_pot->search(pos->second.cli_switch[i]))
       {
@@ -167,7 +172,5 @@ bool CommandLine::search(const std::string &option_name, T & argument)
 
   return false;
 }
-
-
 
 #endif //COMMANDLINE_H

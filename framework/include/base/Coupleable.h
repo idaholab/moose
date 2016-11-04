@@ -46,13 +46,19 @@ public:
    * Get the list of coupled variables
    * @return The list of coupled variables
    */
-  const std::map<std::string, std::vector<MooseVariable *> > & getCoupledVars() { return _coupled_vars; }
+  const std::map<std::string, std::vector<MooseVariable *>> & getCoupledVars()
+  {
+    return _coupled_vars;
+  }
 
   /**
    * Get the list of coupled variables
    * @return The list of coupled variables
    */
-  const std::vector<MooseVariable *> & getCoupledMooseVars() const { return _coupled_moose_vars; }
+  const std::vector<MooseVariable *> & getCoupledMooseVars() const
+  {
+    return _coupled_moose_vars;
+  }
 
 protected:
   /**
@@ -231,7 +237,7 @@ protected:
   FEProblem & _c_fe_problem;
 
   /// Coupled vars whose values we provide
-  std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;
+  std::map<std::string, std::vector<MooseVariable *>> _coupled_vars;
 
   /// Vector of coupled variables
   std::vector<MooseVariable *> _coupled_moose_vars;
@@ -263,7 +269,7 @@ protected:
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  MooseVariable *getVar(const std::string & var_name, unsigned int comp);
+  MooseVariable * getVar(const std::string & var_name, unsigned int comp);
 
   /**
    * Checks to make sure that the current Executioner has set "_it_transient" when old/older values
@@ -274,8 +280,8 @@ protected:
 
   /// Whether or not this object is a "neighbor" object: ie all of it's coupled values should be neighbor values
   bool _coupleable_neighbor;
-private:
 
+private:
   /**
    * Helper method to return (and insert if necessary) the default value
    * for an uncoupled variable.

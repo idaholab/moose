@@ -17,8 +17,9 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<SphericalAverage>()
+template <>
+InputParameters
+validParams<SphericalAverage>()
 {
   InputParameters params = validParams<ElementVectorPostprocessor>();
   params.addParam<unsigned int>("bin_number", 50, "Number of histogram bins");
@@ -28,8 +29,8 @@ InputParameters validParams<SphericalAverage>()
   return params;
 }
 
-SphericalAverage::SphericalAverage(const InputParameters & parameters) :
-    ElementVectorPostprocessor(parameters),
+SphericalAverage::SphericalAverage(const InputParameters & parameters)
+  : ElementVectorPostprocessor(parameters),
     _nbins(getParam<unsigned int>("bin_number")),
     _radius(getParam<Real>("radius")),
     _deltaR(_radius / _nbins),

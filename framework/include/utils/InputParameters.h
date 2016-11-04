@@ -27,11 +27,12 @@
 #include "libmesh/parsed_function.h"
 
 #ifdef LIBMESH_HAVE_FPARSER
-#  include "libmesh/fparser.hh"
+#include "libmesh/fparser.hh"
 #else
 template <typename T>
 class FunctionParserBase
-{};
+{
+};
 #endif
 
 // Forward declarations
@@ -45,7 +46,7 @@ class InputParameters;
  * This is the templated validParams() function that every
  * MooseObject-derived class is required to specialize.
  */
-template<class T>
+template <class T>
 InputParameters validParams();
 
 /**
@@ -66,7 +67,7 @@ public:
    * This method adds a description of the class that will be displayed
    * in the input file syntax dump
    */
-  void addClassDescription(const std::string &doc_string);
+  void addClassDescription(const std::string & doc_string);
 
   /**
    * Returns the class description
@@ -76,7 +77,7 @@ public:
   /**
    * Override from libMesh to set user-defined attributes on our parameter
    */
-  virtual void set_attributes(const std::string &name, bool inserted_only) override;
+  virtual void set_attributes(const std::string & name, bool inserted_only) override;
 
   /**
    * Returns a writable reference to the named parameters.  Note: This is not a virtual
@@ -93,23 +94,27 @@ public:
    * on whether the user modified the parameters.
    *
    */
-  template <typename T> T & set (const std::string & name, bool quiet_mode = false);
+  template <typename T>
+  T & set(const std::string & name, bool quiet_mode = false);
 
   /**
    * Runs a range on the supplied parameter if it exists and throws an error if that check fails.
    * @returns Boolean indicating whether range check exists
    */
-  template <typename T, typename UP_T> void rangeCheck(const std::string & full_name, const std::string & short_name,
-                                                       InputParameters::Parameter<T> * param, std::ostream & oss=Moose::out);
-  template <typename T, typename UP_T> void rangeCheck(const std::string & full_name, const std::string & short_name,
-                                                       InputParameters::Parameter<std::vector<T> > * param,
-                                                       std::ostream & oss=Moose::out);
+  template <typename T, typename UP_T>
+  void rangeCheck(const std::string & full_name, const std::string & short_name,
+                  InputParameters::Parameter<T> * param, std::ostream & oss = Moose::out);
+  template <typename T, typename UP_T>
+  void rangeCheck(const std::string & full_name, const std::string & short_name,
+                  InputParameters::Parameter<std::vector<T>> * param,
+                  std::ostream & oss = Moose::out);
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
    * The template parameter must be a pointer or an error will be thrown.
    */
-  template <typename T> T getCheckedPointerParam(const std::string &name, const std::string &error_string="") const;
+  template <typename T>
+  T getCheckedPointerParam(const std::string & name, const std::string & error_string = "") const;
 
   /**
    * This method adds a parameter and documentation string to the InputParameters
@@ -117,14 +122,14 @@ public:
    * missing in the input file, and error will be thrown
    */
   template <typename T>
-  void addRequiredParam(const std::string &name, const std::string &doc_string);
+  void addRequiredParam(const std::string & name, const std::string & doc_string);
 
   /**
    * This version of addRequiredParam is here for a consistent use with MooseEnums.  Use of
    * this function for any other type will throw an error.
    */
   template <typename T>
-  void addRequiredParam(const std::string &name, const T &moose_enum, const std::string &doc_string);
+  void addRequiredParam(const std::string & name, const T & moose_enum, const std::string & doc_string);
 
   /**
    * These methods add an option parameter and a documentation string to the InputParameters object.
@@ -133,31 +138,31 @@ public:
    * but can be checked with "isParamValid" before use
    */
   template <typename T, typename S>
-  void addParam(const std::string &name, const S & value, const std::string &doc_string);
+  void addParam(const std::string & name, const S & value, const std::string & doc_string);
   template <typename T>
-  void addParam(const std::string &name, const std::string &doc_string);
+  void addParam(const std::string & name, const std::string & doc_string);
 
   /**
    * These methods add an range checked parameters. A lower and upper bound can be supplied and the
    * supplied parameter will be checked to fall within that range.
    */
   template <typename T>
-  void addRequiredRangeCheckedParam(const std::string &name, const std::string &parsed_function, const std::string &doc_string);
+  void addRequiredRangeCheckedParam(const std::string & name, const std::string & parsed_function, const std::string & doc_string);
   template <typename T>
-  void addRangeCheckedParam(const std::string &name, const T & value, const std::string &parsed_function, const std::string &doc_string);
+  void addRangeCheckedParam(const std::string & name, const T & value, const std::string & parsed_function, const std::string & doc_string);
   template <typename T>
-  void addRangeCheckedParam(const std::string &name, const std::string &parsed_function, const std::string &doc_string);
+  void addRangeCheckedParam(const std::string & name, const std::string & parsed_function, const std::string & doc_string);
 
   /**
    * These methods add an option parameter and with a customer type to the InputParameters object.  The custom
    * type will be output in YAML dumps and can be used within the GUI application.
    */
   template <typename T>
-  void addRequiredCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string);
+  void addRequiredCustomTypeParam(const std::string & name, const std::string & custom_type, const std::string & doc_string);
   template <typename T>
-  void addCustomTypeParam(const std::string &name, const T &value, const std::string &custom_type, const std::string &doc_string);
+  void addCustomTypeParam(const std::string & name, const T & value, const std::string & custom_type, const std::string & doc_string);
   template <typename T>
-  void addCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string);
+  void addCustomTypeParam(const std::string & name, const std::string & custom_type, const std::string & doc_string);
 
   /**
    * These method add a parameter to the InputParameters object which can be retrieved
@@ -166,9 +171,9 @@ public:
    * of this function takes an optional default value.
    */
   template <typename T>
-  void addPrivateParam(const std::string &name, const T &value);
+  void addPrivateParam(const std::string & name, const T & value);
   template <typename T>
-  void addPrivateParam(const std::string &name);
+  void addPrivateParam(const std::string & name);
 
   /**
    * Add parameters for retrieval from the command line.
@@ -180,11 +185,11 @@ public:
    * @param doc_string Documentation.  This will be shown for --help
    */
   template <typename T>
-  void addRequiredCommandLineParam(const std::string &name, const std::string &syntax, const std::string &doc_string);
+  void addRequiredCommandLineParam(const std::string & name, const std::string & syntax, const std::string & doc_string);
   template <typename T>
-  void addCommandLineParam(const std::string &name, const std::string &syntax, const std::string &doc_string);
+  void addCommandLineParam(const std::string & name, const std::string & syntax, const std::string & doc_string);
   template <typename T>
-  void addCommandLineParam(const std::string &name, const std::string &syntax, const T &value, const std::string &doc_string);
+  void addCommandLineParam(const std::string & name, const std::string & syntax, const T & value, const std::string & doc_string);
 
   /**
    * Add and mark a parameter for deprecation.  This will allow us to assist users as API changes are made.  If the user
@@ -195,7 +200,7 @@ public:
    * @param deprecation_message The message that will will print about why this param was deprecated.  It might mention the "new way".
    */
   template <typename T>
-  void addRequiredDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message);
+  void addRequiredDeprecatedParam(const std::string & name, const std::string & doc_string, const std::string & deprecation_message);
 
   /**
    * @param name The name of the parameter
@@ -204,10 +209,10 @@ public:
    * @param deprecation_message The message that will will print about why this param was deprecated.  It might mention the "new way".
    */
   template <typename T>
-  void addDeprecatedParam(const std::string &name, const T &value, const std::string &doc_string, const std::string &deprecation_message);
+  void addDeprecatedParam(const std::string & name, const T & value, const std::string & doc_string, const std::string & deprecation_message);
 
   template <typename T>
-  void addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message);
+  void addDeprecatedParam(const std::string & name, const std::string & doc_string, const std::string & deprecation_message);
 
   /**
    * This method checks to make sure that we aren't adding a parameter with the same name but a different type.  It
@@ -217,12 +222,12 @@ public:
    * @param name the name of the parameter
    */
   template <typename T>
-  void checkConsistentType(const std::string &name) const;
+  void checkConsistentType(const std::string & name) const;
 
   /**
    * Get the syntax for a command-line parameter
    */
-  std::vector<std::string> getSyntax(const std::string &name);
+  std::vector<std::string> getSyntax(const std::string & name);
 
   /**
    * Get the documentation string for a parameter
@@ -233,15 +238,13 @@ public:
    * This method takes a space delimited list of parameter names and adds them to the specified group name.
    * This information is used in the GUI to group parameters into logical sections.
    */
-  void addParamNamesToGroup(const std::string &space_delim_names, const std::string group_name);
-
+  void addParamNamesToGroup(const std::string & space_delim_names, const std::string group_name);
 
   /**
    * This method retrieves the group name for the passed parameter name if one exists.  Otherwise an
    * empty string is returned.
    */
-  std::string getGroupName(const std::string &param_name) const;
-
+  std::string getGroupName(const std::string & param_name) const;
 
   /**
    * This method suppresses an inherited parameter so that it isn't required or valid
@@ -250,21 +253,21 @@ public:
    * Use at your own risk!
    */
   template <typename T>
-  void suppressParameter(const std::string &name);
+  void suppressParameter(const std::string & name);
 
   /**
    * Changes the parameter to be required.
    * @param name The parameter name
    */
   template <typename T>
-  void makeParamRequired(const std::string &name);
+  void makeParamRequired(const std::string & name);
 
   /**
    * This method adds a coupled variable name pair.  The parser will look for variable
    * name pair in the input file and can return a reference to the storage location
    * for the coupled variable if found
    */
-  void addCoupledVar(const std::string &name, const std::string &doc_string);
+  void addCoupledVar(const std::string & name, const std::string & doc_string);
 
   /**
    * This method adds a coupled variable name pair.  The parser will look for variable
@@ -273,7 +276,7 @@ public:
    *
    * Also - you can provide a default value for this variable in the case that an actual variable is not provided.
    */
-  void addCoupledVar(const std::string &name, const Real value, const std::string &doc_string);
+  void addCoupledVar(const std::string & name, const Real value, const std::string & doc_string);
 
   ///@{
   /**
@@ -292,16 +295,16 @@ public:
    *
    *   # The coupling parameter will be passed this vector: "base_0 base_1 base_2 base_3 base_4"
    */
-  void addCoupledVarWithAutoBuild(const std::string &name, const std::string &base_name, const std::string &num_name, const std::string &doc_string);
-  void addRequiredCoupledVarWithAutoBuild(const std::string &name, const std::string &base_name, const std::string &num_name, const std::string &doc_string);
+  void addCoupledVarWithAutoBuild(const std::string & name, const std::string & base_name, const std::string & num_name, const std::string & doc_string);
+  void addRequiredCoupledVarWithAutoBuild(const std::string & name, const std::string & base_name, const std::string & num_name, const std::string & doc_string);
   ///@}
 
   /**
    * Utility functions for retrieving one of the MooseTypes variables into the common "string" base class.
    * Scalar and Vector versions are supplied
    */
-  std::string getMooseType(const std::string &name) const;
-  std::vector<std::string> getVecMooseType(const std::string &name) const;
+  std::string getMooseType(const std::string & name) const;
+  std::vector<std::string> getVecMooseType(const std::string & name) const;
 
   /**
    * This method adds a coupled variable name pair.  The parser will look for variable
@@ -311,30 +314,30 @@ public:
    *
    * Version 2: An auto built vector will be built from the base_name and num_name param. See addCoupledVar for an example
    */
-  void addRequiredCoupledVar(const std::string &name, const std::string &doc_string);
+  void addRequiredCoupledVar(const std::string & name, const std::string & doc_string);
 
   /**
    * Returns the documentation string for the specified parameter name
    */
-  std::string getDocString(const std::string &name) const;
+  std::string getDocString(const std::string & name) const;
 
   /**
    * Returns a boolean indicating whether the specified parameter is required or not
    */
-  bool isParamRequired(const std::string &name) const;
+  bool isParamRequired(const std::string & name) const;
 
   /**
    * This method returns parameters that have been initialized in one fashion or another,
    * i.e. The value was supplied as a default argument or read and properly converted from
    * the input file
    */
-  bool isParamValid(const std::string &name) const;
+  bool isParamValid(const std::string & name) const;
 
   /**
    * Returns whether or not the parameter was set due to addParam. If not then it was either set programmatically
    * or was read through the input file.
    */
-  bool isParamSetByAddParam(const std::string &name) const;
+  bool isParamSetByAddParam(const std::string & name) const;
 
   /**
    * This method returns true if all of the parameters in this object are valid
@@ -345,12 +348,12 @@ public:
   /**
    * Prints the type of the requested parameter by name
    */
-  std::string type(const std::string &name);
+  std::string type(const std::string & name);
 
   /**
    * Returns a Boolean indicating whether the specified parameter is private or not
    */
-  bool isPrivate(const std::string &name) const;
+  bool isPrivate(const std::string & name) const;
 
   /**
    * Declare the given parameters as controllable
@@ -371,7 +374,7 @@ public:
    * This method must be called from every base "Moose System" to create linkage with the Action System.
    * See "Moose.C" for the registerMooseObjectTask() calls.
    */
-  void registerBase(const std::string &value);
+  void registerBase(const std::string & value);
 
   /**
    * This method is here to indicate which Moose types a particular Action may build. It takes a space
@@ -379,7 +382,7 @@ public:
    * when we build objects. Since individual actions can do whatever they want it's not exactly trivial
    * to check this without changing the user API.  This function properly restricts the syntax and yaml dumps.
    */
-  void registerBuildableTypes(const std::string &names);
+  void registerBuildableTypes(const std::string & names);
 
   /**
    * Returns the list of buildable types as a std::vector<std::string>
@@ -403,8 +406,8 @@ public:
    */
   using Parameters::operator=;
   using Parameters::operator+=;
-  InputParameters & operator=(const InputParameters &rhs);
-  InputParameters & operator+=(const InputParameters &rhs);
+  InputParameters & operator=(const InputParameters & rhs);
+  InputParameters & operator+=(const InputParameters & rhs);
 
   /**
    * This function checks parameters stored in the object to make sure they are in the correct
@@ -459,7 +462,7 @@ public:
   /**
   * Returns the auto build vectors for all parameters.
   */
-  const std::map<std::string, std::pair<std::string, std::string> > & getAutoBuildVectors() const;
+  const std::map<std::string, std::pair<std::string, std::string>> & getAutoBuildVectors() const;
 
   /**
    * Get the default value for a postprocessor added with addPostprocessor
@@ -467,7 +470,7 @@ public:
    * @param suppress_error If true, the error check is suppressed
    * @return The default value for the postprocessor
    */
-  const PostprocessorValue & getDefaultPostprocessorValue(const std::string & name, bool suppress_error=false) const;
+  const PostprocessorValue & getDefaultPostprocessorValue(const std::string & name, bool suppress_error = false) const;
 
   /**
    * Set the default value for a postprocessor added with addPostprocessor
@@ -519,19 +522,19 @@ public:
    * when returning most scalar types, but will allow retrieving empty vectors.
    */
   template <typename T>
-  static
-  const T & getParamHelper(const std::string & name, const InputParameters & pars, const T* the_type);
+  static const T & getParamHelper(const std::string & name, const InputParameters & pars, const T * the_type);
 
   template <typename T>
-  static
-  const std::vector<T> & getParamHelper(const std::string & name, const InputParameters & pars, const std::vector<T>* the_type);
+  static const std::vector<T> & getParamHelper(const std::string & name, const InputParameters & pars, const std::vector<T> * the_type);
   ///@}
 
   /**
    * Return list of controllable parameters
    */
-  const std::set<std::string> & getControllableParameters() { return _controllable_params; }
-
+  const std::set<std::string> & getControllableParameters()
+  {
+    return _controllable_params;
+  }
 
 private:
   // Private constructor so that InputParameters can only be created in certain places.
@@ -544,11 +547,14 @@ private:
    * the constructor is not a const reference an error is produced. This method allows the InputParameterWarehouse
    * to disable copying.
    */
-  void allowCopy(bool status){ _allow_copy = status; }
+  void allowCopy(bool status)
+  {
+    _allow_copy = status;
+  }
 
   /// This method is called when adding a Parameter with a default value, can be specialized for non-matching types
   template <typename T, typename S>
-  void setParamHelper(const std::string &name, T &l_value, const S &r_value);
+  void setParamHelper(const std::string & name, T & l_value, const S & r_value);
 
   /// The documentation strings for each parameter
   std::map<std::string, std::string> _doc_string;
@@ -557,7 +563,7 @@ private:
   std::map<std::string, std::string> _custom_type;
 
   /// Syntax for command-line parameters
-  std::map<std::string, std::vector<std::string> > _syntax;
+  std::map<std::string, std::vector<std::string>> _syntax;
 
   /// The names of the parameters organized into groups
   std::map<std::string, std::string> _group;
@@ -566,7 +572,7 @@ private:
   std::map<std::string, std::string> _range_functions;
 
   /// The map of auto build vectors (base_, 5 -> "base_0 base_1 base_2 base_3 base_4")
-  std::map<std::string, std::pair<std::string, std::string> > _auto_build_vectors;
+  std::map<std::string, std::pair<std::string, std::string>> _auto_build_vectors;
 
   /// The parameter is used to restrict types that can be built.  Typically this
   /// is used for MooseObjectAction derived Actions.
@@ -628,7 +634,7 @@ private:
 // Template and inline function implementations
 template <typename T>
 T &
-InputParameters::set (const std::string& name, bool quiet_mode)
+InputParameters::set(const std::string & name, bool quiet_mode)
 {
   checkConsistentType<T>(name);
 
@@ -640,12 +646,12 @@ InputParameters::set (const std::string& name, bool quiet_mode)
   if (quiet_mode)
     _set_by_add_param.insert(name);
 
-  return cast_ptr<Parameter<T>*>(_values[name])->set();
+  return cast_ptr<Parameter<T> *>(_values[name])->set();
 }
 
 template <typename T, typename UP_T>
 void
-InputParameters::rangeCheck(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T> > * param, std::ostream & oss)
+InputParameters::rangeCheck(const std::string & full_name, const std::string & short_name, InputParameters::Parameter<std::vector<T>> * param, std::ostream & oss)
 {
   mooseAssert(param, "Parameter is NULL");
 
@@ -680,7 +686,8 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
   // iterate over all vector values (maybe ;)
   bool need_to_iterate = false;
   unsigned int i = 0;
-  do {
+  do
+  {
     // set parameters
     for (unsigned int j = 0; j < vars.size(); j++)
     {
@@ -740,7 +747,6 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
         oss << "\t Component: " << i << '\n';
     }
 
-
   } while (need_to_iterate && ++i < value.size());
 }
 
@@ -777,7 +783,7 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
 
 template <typename T>
 T
-InputParameters::getCheckedPointerParam(const std::string &name, const std::string &error_string) const
+InputParameters::getCheckedPointerParam(const std::string & name, const std::string & error_string) const
 {
   T param = this->get<T>(name);
 
@@ -789,7 +795,7 @@ InputParameters::getCheckedPointerParam(const std::string &name, const std::stri
 
 template <typename T>
 void
-InputParameters::addRequiredParam(const std::string &name, const std::string &doc_string)
+InputParameters::addRequiredParam(const std::string & name, const std::string & doc_string)
 {
   checkConsistentType<T>(name);
 
@@ -807,7 +813,7 @@ InputParameters::addRequiredParam(const std::string & /*name*/, const T & /*valu
 
 template <typename T, typename S>
 void
-InputParameters::addParam(const std::string &name, const S &value, const std::string &doc_string)
+InputParameters::addParam(const std::string & name, const S & value, const std::string & doc_string)
 {
   checkConsistentType<T>(name);
 
@@ -824,7 +830,7 @@ InputParameters::addParam(const std::string &name, const S &value, const std::st
 
 template <typename T>
 void
-InputParameters::addParam(const std::string &name, const std::string &doc_string)
+InputParameters::addParam(const std::string & name, const std::string & doc_string)
 {
   checkConsistentType<T>(name);
 
@@ -834,14 +840,14 @@ InputParameters::addParam(const std::string &name, const std::string &doc_string
 
 template <typename T, typename S>
 void
-InputParameters::setParamHelper(const std::string & /*name*/, T &l_value, const S &r_value)
+InputParameters::setParamHelper(const std::string & /*name*/, T & l_value, const S & r_value)
 {
   l_value = r_value;
 }
 
 template <typename T>
 void
-InputParameters::addRequiredRangeCheckedParam(const std::string &name, const std::string &parsed_function, const std::string &doc_string)
+InputParameters::addRequiredRangeCheckedParam(const std::string & name, const std::string & parsed_function, const std::string & doc_string)
 {
   addRequiredParam<T>(name, doc_string);
   _range_functions[name] = parsed_function;
@@ -849,7 +855,7 @@ InputParameters::addRequiredRangeCheckedParam(const std::string &name, const std
 
 template <typename T>
 void
-InputParameters::addRangeCheckedParam(const std::string &name, const T & value, const std::string &parsed_function, const std::string &doc_string)
+InputParameters::addRangeCheckedParam(const std::string & name, const T & value, const std::string & parsed_function, const std::string & doc_string)
 {
   addParam<T>(name, value, doc_string);
   _range_functions[name] = parsed_function;
@@ -857,7 +863,7 @@ InputParameters::addRangeCheckedParam(const std::string &name, const T & value, 
 
 template <typename T>
 void
-InputParameters::addRangeCheckedParam(const std::string &name, const std::string &parsed_function, const std::string &doc_string)
+InputParameters::addRangeCheckedParam(const std::string & name, const std::string & parsed_function, const std::string & doc_string)
 {
   addParam<T>(name, doc_string);
   _range_functions[name] = parsed_function;
@@ -865,7 +871,7 @@ InputParameters::addRangeCheckedParam(const std::string &name, const std::string
 
 template <typename T>
 void
-InputParameters::addRequiredCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string)
+InputParameters::addRequiredCustomTypeParam(const std::string & name, const std::string & custom_type, const std::string & doc_string)
 {
   addRequiredParam<T>(name, doc_string);
   _custom_type[name] = custom_type;
@@ -873,7 +879,7 @@ InputParameters::addRequiredCustomTypeParam(const std::string &name, const std::
 
 template <typename T>
 void
-InputParameters::addCustomTypeParam(const std::string &name, const T &value, const std::string &custom_type, const std::string &doc_string)
+InputParameters::addCustomTypeParam(const std::string & name, const T & value, const std::string & custom_type, const std::string & doc_string)
 {
   addParam<T>(name, value, doc_string);
   _custom_type[name] = custom_type;
@@ -881,7 +887,7 @@ InputParameters::addCustomTypeParam(const std::string &name, const T &value, con
 
 template <typename T>
 void
-InputParameters::addCustomTypeParam(const std::string &name, const std::string &custom_type, const std::string &doc_string)
+InputParameters::addCustomTypeParam(const std::string & name, const std::string & custom_type, const std::string & doc_string)
 {
   addParam<T>(name, doc_string);
   _custom_type[name] = custom_type;
@@ -889,7 +895,7 @@ InputParameters::addCustomTypeParam(const std::string &name, const std::string &
 
 template <typename T>
 void
-InputParameters::addPrivateParam(const std::string &name)
+InputParameters::addPrivateParam(const std::string & name)
 {
   checkConsistentType<T>(name);
 
@@ -899,7 +905,7 @@ InputParameters::addPrivateParam(const std::string &name)
 
 template <typename T>
 void
-InputParameters::addPrivateParam(const std::string &name, const T &value)
+InputParameters::addPrivateParam(const std::string & name, const T & value)
 {
   checkConsistentType<T>(name);
 
@@ -910,7 +916,7 @@ InputParameters::addPrivateParam(const std::string &name, const T &value)
 
 template <typename T>
 void
-InputParameters::addRequiredCommandLineParam(const std::string &name, const std::string &syntax, const std::string &doc_string)
+InputParameters::addRequiredCommandLineParam(const std::string & name, const std::string & syntax, const std::string & doc_string)
 {
   addRequiredParam<T>(name, doc_string);
   MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
@@ -918,7 +924,7 @@ InputParameters::addRequiredCommandLineParam(const std::string &name, const std:
 
 template <typename T>
 void
-InputParameters::addCommandLineParam(const std::string &name, const std::string &syntax, const std::string &doc_string)
+InputParameters::addCommandLineParam(const std::string & name, const std::string & syntax, const std::string & doc_string)
 {
   addParam<T>(name, doc_string);
   MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
@@ -926,7 +932,7 @@ InputParameters::addCommandLineParam(const std::string &name, const std::string 
 
 template <typename T>
 void
-InputParameters::addCommandLineParam(const std::string &name, const std::string &syntax, const T &value, const std::string &doc_string)
+InputParameters::addCommandLineParam(const std::string & name, const std::string & syntax, const T & value, const std::string & doc_string)
 {
   addParam<T>(name, value, doc_string);
   MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
@@ -934,17 +940,17 @@ InputParameters::addCommandLineParam(const std::string &name, const std::string 
 
 template <typename T>
 void
-InputParameters::checkConsistentType(const std::string &name) const
+InputParameters::checkConsistentType(const std::string & name) const
 {
   // Do we have a paremeter with the same name but a different type?
   InputParameters::const_iterator it = _values.find(name);
-  if (it != _values.end() && dynamic_cast<const Parameter<T>*>(it->second) == NULL)
+  if (it != _values.end() && dynamic_cast<const Parameter<T> *>(it->second) == NULL)
     mooseError("Attempting to set parameter \"" << name << "\" with type (" << demangle(typeid(T).name()) << ")\nbut the parameter already exists as type (" << it->second->type() << ")");
 }
 
 template <typename T>
 void
-InputParameters::suppressParameter(const std::string &name)
+InputParameters::suppressParameter(const std::string & name)
 {
   if (!this->have_parameter<T>(name))
     mooseError("Unable to suppress nonexistent parameter: " << name);
@@ -955,7 +961,7 @@ InputParameters::suppressParameter(const std::string &name)
 
 template <typename T>
 void
-InputParameters::addRequiredDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
+InputParameters::addRequiredDeprecatedParam(const std::string & name, const std::string & doc_string, const std::string & deprecation_message)
 {
   _show_deprecated_message = false;
   addRequiredParam<T>(name, doc_string);
@@ -966,7 +972,7 @@ InputParameters::addRequiredDeprecatedParam(const std::string &name, const std::
 
 template <typename T>
 void
-InputParameters::addDeprecatedParam(const std::string &name, const T &value, const std::string &doc_string, const std::string &deprecation_message)
+InputParameters::addDeprecatedParam(const std::string & name, const T & value, const std::string & doc_string, const std::string & deprecation_message)
 {
   _show_deprecated_message = false;
   addParam<T>(name, value, doc_string);
@@ -977,7 +983,7 @@ InputParameters::addDeprecatedParam(const std::string &name, const T &value, con
 
 template <typename T>
 void
-InputParameters::addDeprecatedParam(const std::string &name, const std::string &doc_string, const std::string &deprecation_message)
+InputParameters::addDeprecatedParam(const std::string & name, const std::string & doc_string, const std::string & deprecation_message)
 {
   _show_deprecated_message = false;
   addParam<T>(name, doc_string);
@@ -986,19 +992,18 @@ InputParameters::addDeprecatedParam(const std::string &name, const std::string &
   _show_deprecated_message = true;
 }
 
-
 // Forward declare MooseEnum specializations for add*Param
 template <>
 void
-InputParameters::addRequiredParam<MooseEnum>(const std::string &name, const MooseEnum &moose_enum, const std::string &doc_string);
+InputParameters::addRequiredParam<MooseEnum>(const std::string & name, const MooseEnum & moose_enum, const std::string & doc_string);
 
 template <>
 void
-InputParameters::addRequiredParam<MultiMooseEnum>(const std::string &name, const MultiMooseEnum &moose_enum, const std::string &doc_string);
+InputParameters::addRequiredParam<MultiMooseEnum>(const std::string & name, const MultiMooseEnum & moose_enum, const std::string & doc_string);
 
 template <>
 void
-InputParameters::addRequiredParam<std::vector<MooseEnum> >(const std::string &name, const std::vector<MooseEnum> &moose_enums, const std::string &doc_string);
+InputParameters::addRequiredParam<std::vector<MooseEnum>>(const std::string & name, const std::vector<MooseEnum> & moose_enums, const std::string & doc_string);
 
 template <>
 void
@@ -1010,49 +1015,48 @@ InputParameters::addParam<MultiMooseEnum>(const std::string & /*name*/, const st
 
 template <>
 void
-InputParameters::addParam<std::vector<MooseEnum> >(const std::string & /*name*/, const std::string & /*doc_string*/);
+InputParameters::addParam<std::vector<MooseEnum>>(const std::string & /*name*/, const std::string & /*doc_string*/);
 
 template <>
 void
-InputParameters::addDeprecatedParam<MooseEnum>(const std::string &name, const std::string &doc_string, const std::string &deprecation_message);
+InputParameters::addDeprecatedParam<MooseEnum>(const std::string & name, const std::string & doc_string, const std::string & deprecation_message);
 
 template <>
 void
-InputParameters::addDeprecatedParam<MultiMooseEnum>(const std::string &name, const std::string &doc_string, const std::string &deprecation_message);
+InputParameters::addDeprecatedParam<MultiMooseEnum>(const std::string & name, const std::string & doc_string, const std::string & deprecation_message);
 
 template <>
 void
-InputParameters::addDeprecatedParam<std::vector<MooseEnum> >(const std::string &name, const std::string &doc_string, const std::string &deprecation_message);
+InputParameters::addDeprecatedParam<std::vector<MooseEnum>>(const std::string & name, const std::string & doc_string, const std::string & deprecation_message);
 
 // Forward declare specializations for setParamHelper
-template<>
+template <>
 void
-InputParameters::setParamHelper<PostprocessorName, Real>(const std::string &name, PostprocessorName & l_value, const Real &r_value);
+InputParameters::setParamHelper<PostprocessorName, Real>(const std::string & name, PostprocessorName & l_value, const Real & r_value);
 
-template<>
+template <>
 void
-InputParameters::setParamHelper<PostprocessorName, int>(const std::string &name, PostprocessorName & l_value, const int &r_value);
+InputParameters::setParamHelper<PostprocessorName, int>(const std::string & name, PostprocessorName & l_value, const int & r_value);
 
-template<>
+template <>
 void
-InputParameters::setParamHelper<FunctionName, Real>(const std::string & /*name*/, FunctionName & l_value, const Real &r_value);
+InputParameters::setParamHelper<FunctionName, Real>(const std::string & /*name*/, FunctionName & l_value, const Real & r_value);
 
-template<>
+template <>
 void
-InputParameters::setParamHelper<FunctionName, int>(const std::string & /*name*/, FunctionName & l_value, const int &r_value);
+InputParameters::setParamHelper<FunctionName, int>(const std::string & /*name*/, FunctionName & l_value, const int & r_value);
 
-template<>
+template <>
 void
-InputParameters::setParamHelper<MaterialPropertyName, Real>(const std::string & /*name*/, MaterialPropertyName & l_value, const Real &r_value);
+InputParameters::setParamHelper<MaterialPropertyName, Real>(const std::string & /*name*/, MaterialPropertyName & l_value, const Real & r_value);
 
-template<>
+template <>
 void
-InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /*name*/, MaterialPropertyName & l_value, const int &r_value);
-
+InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /*name*/, MaterialPropertyName & l_value, const int & r_value);
 
 template <typename T>
 const T &
-InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const T*)
+InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const T *)
 {
   if (!pars.isParamValid(name))
     mooseError("The parameter \"" << name << "\" is being retrieved before being set.\n");
@@ -1061,27 +1065,24 @@ InputParameters::getParamHelper(const std::string & name, const InputParameters 
 
 template <typename T>
 const std::vector<T> &
-InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const std::vector<T>*)
+InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const std::vector<T> *)
 {
-  return pars.get<std::vector<T> >(name);
+  return pars.get<std::vector<T>>(name);
 }
 
 template <>
-inline
-const MooseEnum &
-InputParameters::getParamHelper<MooseEnum>(const std::string & name, const InputParameters & pars, const MooseEnum*)
+inline const MooseEnum &
+InputParameters::getParamHelper<MooseEnum>(const std::string & name, const InputParameters & pars, const MooseEnum *)
 {
   return pars.get<MooseEnum>(name);
 }
 
 template <>
-inline
-const MultiMooseEnum &
-InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name, const InputParameters & pars, const MultiMooseEnum*)
+inline const MultiMooseEnum &
+InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name, const InputParameters & pars, const MultiMooseEnum *)
 {
   return pars.get<MultiMooseEnum>(name);
 }
-
 
 InputParameters emptyInputParameters();
 

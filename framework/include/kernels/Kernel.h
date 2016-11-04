@@ -19,11 +19,10 @@
 
 class Kernel;
 
-template<>
+template <>
 InputParameters validParams<Kernel>();
 
-class Kernel :
-  public KernelBase
+class Kernel : public KernelBase
 {
 public:
   Kernel(const InputParameters & parameters);
@@ -45,8 +44,12 @@ protected:
 
   /// Following methods are used for Kernels that need to perform a per-element calculation
   virtual void precalculateResidual();
-  virtual void precalculateJacobian() {}
-  virtual void precalculateOffDiagJacobian(unsigned int /* jvar */) {}
+  virtual void precalculateJacobian()
+  {
+  }
+  virtual void precalculateOffDiagJacobian(unsigned int /* jvar */)
+  {
+  }
 
   /// Holds the solution at current quadrature points
   const VariableValue & _u;

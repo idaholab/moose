@@ -28,7 +28,6 @@ class System;
 class DofMap;
 }
 
-
 /**
  * Grab all the local dof indices for the variables passed in, in the system passed in.
  */
@@ -39,7 +38,7 @@ public:
   // Splitting Constructor
   AllLocalDofIndicesThread(AllLocalDofIndicesThread & x, Threads::split split);
 
-  void operator() (const ConstElemRange & range);
+  void operator()(const ConstElemRange & range);
 
   void join(const AllLocalDofIndicesThread & y);
 

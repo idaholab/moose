@@ -21,11 +21,10 @@
 
 class AdaptivityAction;
 
-template<>
+template <>
 InputParameters validParams<AdaptivityAction>();
 
-
-class AdaptivityAction: public Action
+class AdaptivityAction : public Action
 {
 public:
   AdaptivityAction(InputParameters params);

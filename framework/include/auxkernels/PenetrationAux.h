@@ -18,11 +18,10 @@
 #include "AuxKernel.h"
 #include "PenetrationLocator.h"
 
-
 //Forward Declarations
 class PenetrationAux;
 
-template<>
+template <>
 InputParameters validParams<PenetrationAux>();
 
 /**
@@ -31,7 +30,6 @@ InputParameters validParams<PenetrationAux>();
 class PenetrationAux : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.

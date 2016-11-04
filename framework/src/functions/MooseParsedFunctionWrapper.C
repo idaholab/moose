@@ -16,11 +16,11 @@
 #include "FEProblem.h"
 
 MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblem & feproblem,
-                                                     const std::string & function_str,
-                                                     const std::vector<std::string> & vars,
-                                                     const std::vector<std::string> & vals,
-                                                     const THREAD_ID tid) :
-    _feproblem(feproblem),
+                                                       const std::string & function_str,
+                                                       const std::vector<std::string> & vars,
+                                                       const std::vector<std::string> & vals,
+                                                       const THREAD_ID tid)
+  : _feproblem(feproblem),
     _function_str(function_str),
     _vars(vars),
     _vals_input(vals),
@@ -30,7 +30,7 @@ MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblem & feproblem,
   initialize();
 
   // Create the libMesh::ParsedFunction
-  _function_ptr = new ParsedFunction<Real,RealGradient>(_function_str, &_vars, &_vals);
+  _function_ptr = new ParsedFunction<Real, RealGradient>(_function_str, &_vars, &_vals);
 
   // Loop through the Postprocessor and Scalar variables and point the libMesh::ParsedFunction to the PostprocessorValue
   for (const auto & index : _pp_index)
@@ -45,7 +45,7 @@ MooseParsedFunctionWrapper::~MooseParsedFunctionWrapper()
   delete _function_ptr;
 }
 
-template<>
+template <>
 Real
 MooseParsedFunctionWrapper::evaluate(Real t, const Point & p)
 {
@@ -56,7 +56,7 @@ MooseParsedFunctionWrapper::evaluate(Real t, const Point & p)
   return (*_function_ptr)(p, t);
 }
 
-template<>
+template <>
 DenseVector<Real>
 MooseParsedFunctionWrapper::evaluate(Real t, const Point & p)
 {
@@ -66,20 +66,22 @@ MooseParsedFunctionWrapper::evaluate(Real t, const Point & p)
   return output;
 }
 
-template<>
+template <>
 RealVectorValue
 MooseParsedFunctionWrapper::evaluate(Real t, const Point & p)
 {
-  DenseVector<Real> output = evaluate<DenseVector<Real> >(t, p);
+  DenseVector<Real> output = evaluate<DenseVector<Real>>(t, p);
 
   return RealVectorValue(output(0)
 #if LIBMESH_DIM > 1
-                      , output(1)
+                             ,
+                         output(1)
 #endif
 #if LIBMESH_DIM > 2
-                      , output(2)
+                             ,
+                         output(2)
 #endif
-    );
+                             );
 }
 
 RealGradient
@@ -106,9 +108,9 @@ void
 MooseParsedFunctionWrapper::initialize()
 {
   // Loop through all the input values supplied by the users.
-  for (unsigned int i=0; i < _vals_input.size(); ++i)
+  for (unsigned int i = 0; i < _vals_input.size(); ++i)
   {
-    Real tmp; // desired type
+    Real tmp;                              // desired type
     std::istringstream ss(_vals_input[i]); // istringstream object for conversion from std::string to Real
 
     // Case when a Postprocessor is found by the name given in the input values

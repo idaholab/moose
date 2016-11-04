@@ -16,8 +16,9 @@
 #include "Conversion.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<SubdomainBoundingBox>()
+template <>
+InputParameters
+validParams<SubdomainBoundingBox>()
 {
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 
@@ -31,8 +32,8 @@ InputParameters validParams<SubdomainBoundingBox>()
   return params;
 }
 
-SubdomainBoundingBox::SubdomainBoundingBox(const InputParameters & parameters) :
-    MeshModifier(parameters),
+SubdomainBoundingBox::SubdomainBoundingBox(const InputParameters & parameters)
+  : MeshModifier(parameters),
     _location(parameters.get<MooseEnum>("location")),
     _block_id(parameters.get<SubdomainID>("block_id")),
     _bounding_box(parameters.get<RealVectorValue>("bottom_left"), parameters.get<RealVectorValue>("top_right"))

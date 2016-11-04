@@ -26,11 +26,10 @@
  * This class is used within Control objects for returning sets
  * of InputParaemeters.
  */
-template<typename T>
+template <typename T>
 class ControllableParameter
 {
 public:
-
   /**
    * Constructor.
    *
@@ -44,7 +43,10 @@ public:
   /**
    * The number of parameters contained in the class.
    */
-  std::size_t size() const { return _parameter_values.size(); }
+  std::size_t size() const
+  {
+    return _parameter_values.size();
+  }
 
   /**
    * Set the value(s) of the controlled parameters stored in this class.
@@ -55,7 +57,7 @@ public:
   /**
    * Retrieve a copy of the parameter values controlled by this class.
    */
-  const std::vector<T*> & get() const;
+  const std::vector<T *> & get() const;
 
   /**
    * Return a string that lists the parameters stored by this object.
@@ -73,55 +75,53 @@ public:
   void insert(const MooseObjectParameterName & name, MooseSharedPointer<InputParameters> param_object);
 
 private:
-
   /// Vector of pointers to the parameters stored in this object for control.
-  std::vector<T*> _parameter_values;
+  std::vector<T *> _parameter_values;
 
   /// Map of the possible names associated with the parameters stored for control.
-  std::multimap<T*, MooseObjectParameterName> _parameter_names;
-
+  std::multimap<T *, MooseObjectParameterName> _parameter_names;
 };
 
-template<typename T>
+template <typename T>
 ControllableParameter<T>::ControllableParameter()
 {
 }
 
-template<typename T>
+template <typename T>
 void
 ControllableParameter<T>::insert(const MooseObjectParameterName & name, MooseSharedPointer<InputParameters> param_object)
 {
   // Get a pointer to the Parameter
-  T* param_ptr = &param_object-> template set<T>(name.parameter());
+  T * param_ptr = &param_object->template set<T>(name.parameter());
 
   // Search for the pointer in the existing multimap
-  typename std::multimap<T*, MooseObjectParameterName>::iterator iter = _parameter_names.find(param_ptr);
+  typename std::multimap<T *, MooseObjectParameterName>::iterator iter = _parameter_names.find(param_ptr);
 
   // If the pointer does not exist, add it
   if (iter == _parameter_names.end())
     _parameter_values.push_back(param_ptr);
 
   // Update the object names
-  _parameter_names.insert(std::pair<T*, MooseObjectParameterName>(param_ptr, name));
+  _parameter_names.insert(std::pair<T *, MooseObjectParameterName>(param_ptr, name));
 }
 
-template<typename T>
+template <typename T>
 void
 ControllableParameter<T>::set(const T & value)
 {
-  typename std::vector<T*>::iterator iter;
+  typename std::vector<T *>::iterator iter;
   for (unsigned int i = 0; i < _parameter_values.size(); i++)
     *_parameter_values[i] = value;
 }
 
-template<typename T>
-const std::vector<T*> &
+template <typename T>
+const std::vector<T *> &
 ControllableParameter<T>::get() const
 {
   return _parameter_values;
 }
 
-template<typename T>
+template <typename T>
 std::string
 ControllableParameter<T>::dump()
 {
@@ -132,7 +132,7 @@ ControllableParameter<T>::dump()
   std::ostringstream oss;
 
   // Loop through each pointer
-  typename std::vector<T*>::iterator iter;
+  typename std::vector<T *>::iterator iter;
   for (iter = _parameter_values.begin(); iter != _parameter_values.end(); iter++)
   {
     // Get the list of names associated with the parameter

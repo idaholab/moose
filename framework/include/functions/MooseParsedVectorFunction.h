@@ -23,16 +23,15 @@
 class MooseParsedVectorFunction;
 class MooseParsedFunctionWrapper;
 
-template<>
+template <>
 InputParameters validParams<MooseParsedVectorFunction>();
 
 /**
  * This class is similar to ParsedFunction except it returns a vector function
  *
  */
-class MooseParsedVectorFunction :
-  public Function,
-  public MooseParsedFunctionBase
+class MooseParsedVectorFunction : public Function,
+                                  public MooseParsedFunctionBase
 {
 public:
   /**
@@ -49,7 +48,6 @@ public:
   virtual void initialSetup() override;
 
 protected:
-
   /// Storage for gradient input function(s), in format ready for libMesh
   std::string _vector_value;
 

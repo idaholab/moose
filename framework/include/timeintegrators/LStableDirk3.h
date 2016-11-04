@@ -19,7 +19,7 @@
 
 class LStableDirk3;
 
-template<>
+template <>
 InputParameters validParams<LStableDirk3>();
 
 /**
@@ -53,7 +53,10 @@ public:
   LStableDirk3(const InputParameters & parameters);
   virtual ~LStableDirk3();
 
-  virtual int order() { return 3; }
+  virtual int order()
+  {
+    return 3;
+  }
   virtual void computeTimeDerivatives();
   virtual void solve();
   virtual void postStep(NumericVector<Number> & residual);
@@ -79,6 +82,5 @@ protected:
   // 1.2084966491760099, -0.6443631706844688, 0.4358665215084589
   Real _a[3][3];
 };
-
 
 #endif /* LSTABLEDIRK3_H */

@@ -19,16 +19,16 @@
 #include <vector>
 #include <iomanip>
 
-InputFileFormatter::InputFileFormatter(bool dump_mode) :
-    SyntaxTree(),
+InputFileFormatter::InputFileFormatter(bool dump_mode)
+  : SyntaxTree(),
     _dump_mode(dump_mode)
 {
 }
 
 std::string
-InputFileFormatter::printBlockOpen(const std::string &name, short depth, const std::string & /*doc*/) const
+InputFileFormatter::printBlockOpen(const std::string & name, short depth, const std::string & /*doc*/) const
 {
-  std::string indent(depth*2, ' ');
+  std::string indent(depth * 2, ' ');
   std::string opening_string;
 
   if (depth)
@@ -40,7 +40,7 @@ InputFileFormatter::printBlockOpen(const std::string &name, short depth, const s
 std::string
 InputFileFormatter::printBlockClose(const std::string & /*name*/, short depth) const
 {
-  std::string indent(depth*2, ' ');
+  std::string indent(depth * 2, ' ');
   std::string closing_string;
 
   if (depth)
@@ -59,11 +59,11 @@ InputFileFormatter::printParams(const std::string & /*prefix*/,
 {
   std::stringstream oss;
 
-  std::string quotes   = "";
-  std::string spacing  = "";
-  std::string forward  = "";
+  std::string quotes = "";
+  std::string spacing = "";
+  std::string forward = "";
   std::string backdots = "";
-  int         offset   = 30;
+  int offset = 30;
   for (int i = 0; i < depth; ++i)
   {
     spacing += "  ";
@@ -98,7 +98,7 @@ InputFileFormatter::printParams(const std::string & /*prefix*/,
       // Don't print active if it is the default all, that means it's not in the input file - unless of course we are in dump mode
       if (!_dump_mode && iter.first == "active")
       {
-        libMesh::Parameters::Parameter<std::vector<std::string> > * val = dynamic_cast<libMesh::Parameters::Parameter<std::vector<std::string> >*>(iter.second);
+        libMesh::Parameters::Parameter<std::vector<std::string>> * val = dynamic_cast<libMesh::Parameters::Parameter<std::vector<std::string>> *>(iter.second);
         const std::vector<std::string> & active = val->get();
         if (val != NULL && active.size() == 1 && active[0] == "__all__")
           continue;
@@ -110,7 +110,7 @@ InputFileFormatter::printParams(const std::string & /*prefix*/,
       // Don't print type if it is blank
       if (iter.first == "type")
       {
-        libMesh::Parameters::Parameter<std::string> * val = dynamic_cast<libMesh::Parameters::Parameter<std::string>*>(iter.second);
+        libMesh::Parameters::Parameter<std::string> * val = dynamic_cast<libMesh::Parameters::Parameter<std::string> *>(iter.second);
         const std::string & active = val->get();
         if (val != NULL && active == "")
           continue;
@@ -153,8 +153,9 @@ InputFileFormatter::printParams(const std::string & /*prefix*/,
             MooseUtils::escape(element);
 
           oss << std::right << std::setw(l_offset) << "# " << elements[0];
-          for (unsigned int i=1; i<elements.size(); ++i)
-            oss << " ...\n" << "  " << std::setw(63) << "# " << elements[i];
+          for (unsigned int i = 1; i < elements.size(); ++i)
+            oss << " ...\n"
+                << "  " << std::setw(63) << "# " << elements[i];
         }
       }
       oss << "\n";

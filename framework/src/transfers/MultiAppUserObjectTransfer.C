@@ -27,8 +27,9 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/mesh_tools.h"
 
-template<>
-InputParameters validParams<MultiAppUserObjectTransfer>()
+template <>
+InputParameters
+validParams<MultiAppUserObjectTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
@@ -39,8 +40,8 @@ InputParameters validParams<MultiAppUserObjectTransfer>()
   return params;
 }
 
-MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _user_object_name(getParam<UserObjectName>("user_object")),
     _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
@@ -65,7 +66,7 @@ MultiAppUserObjectTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         if (_multi_app->hasLocalApp(i))
         {
@@ -108,7 +109,7 @@ MultiAppUserObjectTransfer::execute()
 
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
-                Real from_value = user_object.spatialValue(*node+_multi_app->position(i));
+                Real from_value = user_object.spatialValue(*node + _multi_app->position(i));
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
@@ -134,7 +135,7 @@ MultiAppUserObjectTransfer::execute()
 
                 // Swap back
                 Moose::swapLibMeshComm(swapped);
-                Real from_value = user_object.spatialValue(centroid+_multi_app->position(i));
+                Real from_value = user_object.spatialValue(centroid + _multi_app->position(i));
                 // Swap again
                 swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
@@ -184,7 +185,7 @@ MultiAppUserObjectTransfer::execute()
 
       bool is_nodal = to_sys.variable_type(to_var_num).family == LAGRANGE;
 
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         if (!_multi_app->hasLocalApp(i))
           continue;
@@ -210,7 +211,7 @@ MultiAppUserObjectTransfer::execute()
                 dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
 
                 MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-                Real from_value = user_object.spatialValue(*node-app_position);
+                Real from_value = user_object.spatialValue(*node - app_position);
                 Moose::swapLibMeshComm(swapped);
 
                 to_solution->set(dof, from_value);
@@ -237,7 +238,7 @@ MultiAppUserObjectTransfer::execute()
                 dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, 0);
 
                 MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
-                Real from_value = user_object.spatialValue(centroid-app_position);
+                Real from_value = user_object.spatialValue(centroid - app_position);
                 Moose::swapLibMeshComm(swapped);
 
                 to_solution->set(dof, from_value);

@@ -29,13 +29,13 @@
 #include <vector>
 
 #ifdef LIBMESH_HAVE_CXX11_SHARED_PTR
-#  include <memory>
-#  define MooseSharedPointer std::shared_ptr
-#  define MooseSharedNamespace std
+#include <memory>
+#define MooseSharedPointer std::shared_ptr
+#define MooseSharedNamespace std
 #else
-#  include "boost/shared_ptr.hpp"
-#  define MooseSharedPointer boost::shared_ptr
-#  define MooseSharedNamespace boost
+#include "boost/shared_ptr.hpp"
+#define MooseSharedPointer boost::shared_ptr
+#define MooseSharedNamespace boost
 #endif
 
 /**
@@ -51,39 +51,36 @@
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 #endif
 
-#define beginIndex_0()        ERROR --> "beginIndex() requires one or two arguments"
-#define beginIndex_1(A)       decltype(A.size())(0)
-#define beginIndex_2(A,B)     decltype(A.size())(B)
-#define beginIndex_3(A,B,C)   ERROR --> "beginIndex() requires one or two arguments"
-#define beginIndex_4(A,B,C,D) ERROR --> "beginIndex() requires one or two arguments"
+#define beginIndex_0() ERROR-- > "beginIndex() requires one or two arguments"
+#define beginIndex_1(A) decltype(A.size())(0)
+#define beginIndex_2(A, B) decltype(A.size())(B)
+#define beginIndex_3(A, B, C) ERROR-- > "beginIndex() requires one or two arguments"
+#define beginIndex_4(A, B, C, D) ERROR-- > "beginIndex() requires one or two arguments"
 
 // The interim macro that simply strips the excess and ends up with the required macro
-#define beginIndex_X(x,A,B,C,D,FUNC, ...)  FUNC
+#define beginIndex_X(x, A, B, C, D, FUNC, ...) FUNC
 
 // The macro that the programmer uses
-#define beginIndex(...)    beginIndex_X(,##__VA_ARGS__,\
-                           beginIndex_4(__VA_ARGS__),\
-                           beginIndex_3(__VA_ARGS__),\
-                           beginIndex_2(__VA_ARGS__),\
-                           beginIndex_1(__VA_ARGS__),\
-                           beginIndex_0(__VA_ARGS__)\
-                           )
+#define beginIndex(...) beginIndex_X(, ##__VA_ARGS__,           \
+                                     beginIndex_4(__VA_ARGS__), \
+                                     beginIndex_3(__VA_ARGS__), \
+                                     beginIndex_2(__VA_ARGS__), \
+                                     beginIndex_1(__VA_ARGS__), \
+                                     beginIndex_0(__VA_ARGS__))
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
 
-
 /**
  * MOOSE typedefs
  */
-typedef Real                     PostprocessorValue;
-typedef std::vector<Real>        VectorPostprocessorValue;
-typedef boundary_id_type         BoundaryID;
-typedef unsigned int             InterfaceID;
-typedef subdomain_id_type        SubdomainID;
-typedef unsigned int             MooseObjectID;
-typedef unsigned int             THREAD_ID;
-
+typedef Real PostprocessorValue;
+typedef std::vector<Real> VectorPostprocessorValue;
+typedef boundary_id_type BoundaryID;
+typedef unsigned int InterfaceID;
+typedef subdomain_id_type SubdomainID;
+typedef unsigned int MooseObjectID;
+typedef unsigned int THREAD_ID;
 
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
 typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
@@ -94,30 +91,30 @@ typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElem
 //   (2) the function in Conversion.C: initExecStoreType()
 //   (3) the method SetupInterface::getExecuteOptions
 //   (4) the function Output::getExecuteOptions
-enum ExecFlagType {
-  EXEC_NONE              = 0x00, // 0
+enum ExecFlagType
+{
+  EXEC_NONE = 0x00, // 0
   /// Object is evaluated only once at the beginning of the simulation
-  EXEC_INITIAL           = 0x01, // 1
+  EXEC_INITIAL = 0x01, // 1
   /// Object is evaluated in every residual computation
-  EXEC_LINEAR            = 0x02, // 2
+  EXEC_LINEAR = 0x02, // 2
   /// Object is evaluated in every jacobian computation
-  EXEC_NONLINEAR         = 0x04, // 4
+  EXEC_NONLINEAR = 0x04, // 4
   /// Object is evaluated at the end of every time step
-  EXEC_TIMESTEP_END      = 0x08, // 8
+  EXEC_TIMESTEP_END = 0x08, // 8
   /// Object is evaluated at the beginning of every time step
-  EXEC_TIMESTEP_BEGIN    = 0x10, // 16
+  EXEC_TIMESTEP_BEGIN = 0x10, // 16
   /// Object is evaluated at the end of the simulations (output only)
-  EXEC_FINAL             = 0x20, // 32
+  EXEC_FINAL = 0x20, // 32
   /// Forces execution to occur (output only)
-  EXEC_FORCED            = 0x40, // 64
+  EXEC_FORCED = 0x40, // 64
   /// Forces execution on failed solve (output only)
-  EXEC_FAILED            = 0x80, // 128
+  EXEC_FAILED = 0x80, // 128
   /// For use with custom executioners that want to fire objects at a specific time
-  EXEC_CUSTOM            = 0x100, // 256
+  EXEC_CUSTOM = 0x100, // 256
   /// Objects is evaluated on subdomain
-  EXEC_SUBDOMAIN         = 0x200  // 512
+  EXEC_SUBDOMAIN = 0x200 // 512
 };
-
 
 namespace Moose
 {
@@ -131,7 +128,8 @@ const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
  *
  * @see FEProblem, MaterialPropertyInterface
  */
-enum MaterialDataType {
+enum MaterialDataType
+{
   BLOCK_MATERIAL_DATA,
   BOUNDARY_MATERIAL_DATA,
   FACE_MATERIAL_DATA,
@@ -232,11 +230,11 @@ enum PCSideType
  */
 enum SolveType
 {
-  ST_PJFNK,            ///< Preconditioned Jacobian-Free Newton Krylov
-  ST_JFNK,             ///< Jacobian-Free Newton Krylov
-  ST_NEWTON,           ///< Full Newton Solve
-  ST_FD,               ///< Use finite differences to compute Jacobian
-  ST_LINEAR            ///< Solving a linear problem
+  ST_PJFNK,  ///< Preconditioned Jacobian-Free Newton Krylov
+  ST_JFNK,   ///< Jacobian-Free Newton Krylov
+  ST_NEWTON, ///< Full Newton Solve
+  ST_FD,     ///< Use finite differences to compute Jacobian
+  ST_LINEAR  ///< Solving a linear problem
 };
 
 /**
@@ -252,12 +250,12 @@ enum ConstraintFormulationType
  */
 enum LineSearchType
 {
-  LS_INVALID,           ///< means not set
+  LS_INVALID, ///< means not set
   LS_DEFAULT,
   LS_NONE,
   LS_BASIC,
 #ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3,3,0)
+#if PETSC_VERSION_LESS_THAN(3, 3, 0)
   LS_CUBIC,
   LS_QUADRATIC,
   LS_BASICNONORMS,
@@ -269,7 +267,6 @@ enum LineSearchType
 #endif
 #endif
 };
-
 }
 
 /**
@@ -277,17 +274,34 @@ enum LineSearchType
  * strong type checking and special handling in the GUI.  It does not
  * extend std::string in any way so it is generally "safe"
  */
-#define DerivativeStringClass(TheName)                                  \
-  class TheName : public std::string                                    \
-  {                                                                     \
-  public:                                                               \
-    TheName(): std::string() {}                                         \
-    TheName(const std::string& str): std::string(str) {}                \
-    TheName(const std::string& str, size_t pos, size_t n = npos):       \
-      std::string(str, pos, n) {}                                       \
-    TheName(const char * s, size_t n): std::string(s,n) {}              \
-    TheName(const char * s): std::string(s) {}                          \
-    TheName(size_t n, char c): std::string(n, c) {}                     \
+#define DerivativeStringClass(TheName)                            \
+  class TheName : public std::string                              \
+  {                                                               \
+  public:                                                         \
+    TheName()                                                     \
+      : std::string()                                             \
+    {                                                             \
+    }                                                             \
+    TheName(const std::string & str)                              \
+      : std::string(str)                                          \
+    {                                                             \
+    }                                                             \
+    TheName(const std::string & str, size_t pos, size_t n = npos) \
+      : std::string(str, pos, n)                                  \
+    {                                                             \
+    }                                                             \
+    TheName(const char * s, size_t n)                             \
+      : std::string(s, n)                                         \
+    {                                                             \
+    }                                                             \
+    TheName(const char * s)                                       \
+      : std::string(s)                                            \
+    {                                                             \
+    }                                                             \
+    TheName(size_t n, char c)                                     \
+      : std::string(n, c)                                         \
+    {                                                             \
+    }                                                             \
   } /* No semicolon here because this is a macro */
 
 // Instantiate new Types

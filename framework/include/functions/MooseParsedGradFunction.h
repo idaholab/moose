@@ -23,7 +23,7 @@
 class MooseParsedGradFunction;
 class MooseParsedFunctionWrapper;
 
-template<>
+template <>
 InputParameters validParams<MooseParsedGradFunction>();
 
 /**
@@ -33,9 +33,8 @@ InputParameters validParams<MooseParsedGradFunction>();
  * Documentation for the Function Parser can be found at:
  * http://warp.povusers.org/FunctionParser/fparser.html
  */
-class MooseParsedGradFunction :
-  public Function,
-  public MooseParsedFunctionBase
+class MooseParsedGradFunction : public Function,
+                                public MooseParsedFunctionBase
 {
 public:
   /**
@@ -77,7 +76,6 @@ public:
   virtual void initialSetup() override;
 
 protected:
-
   /// String for the scalar function string
   std::string _value;
 

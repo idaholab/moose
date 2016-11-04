@@ -19,9 +19,8 @@
 
 class AddMultiAppAction;
 
-template<>
+template <>
 InputParameters validParams<AddMultiAppAction>();
-
 
 class AddMultiAppAction : public MooseObjectAction
 {

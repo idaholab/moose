@@ -22,8 +22,9 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<EigenKernel>()
+template <>
+InputParameters
+validParams<EigenKernel>()
 {
   InputParameters params = validParams<KernelBase>();
   params.addParam<bool>("eigen", true, "Use for eigenvalue problem (true) or source problem (false)");
@@ -32,8 +33,8 @@ InputParameters validParams<EigenKernel>()
   return params;
 }
 
-EigenKernel::EigenKernel(const InputParameters & parameters) :
-    KernelBase(parameters),
+EigenKernel::EigenKernel(const InputParameters & parameters)
+  : KernelBase(parameters),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _eigen(getParam<bool>("eigen")),
@@ -103,7 +104,8 @@ EigenKernel::computeResidual()
 void
 EigenKernel::computeJacobian()
 {
-  if (!_is_implicit) return;
+  if (!_is_implicit)
+    return;
 
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   _local_ke.resize(ke.m(), ke.n());
@@ -122,11 +124,11 @@ EigenKernel::computeJacobian()
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i=0; i<rows; i++)
-      diag(i) = _local_ke(i,i);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_diag_save_in.size(); i++)
+    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }
 }

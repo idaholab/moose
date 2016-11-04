@@ -25,15 +25,15 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-OutputWarehouse::OutputWarehouse(MooseApp & app) :
-    _app(app),
+OutputWarehouse::OutputWarehouse(MooseApp & app)
+  : _app(app),
     _buffer_action_console_outputs(true),
     _output_exec_flag(EXEC_CUSTOM),
     _force_output(false)
 {
   // Set the reserved names
-  _reserved.insert("none");                  // allows 'none' to be used as a keyword in 'outputs' parameter
-  _reserved.insert("all");                   // allows 'all' to be used as a keyword in 'outputs' parameter
+  _reserved.insert("none"); // allows 'none' to be used as a keyword in 'outputs' parameter
+  _reserved.insert("all");  // allows 'all' to be used as a keyword in 'outputs' parameter
 }
 
 OutputWarehouse::~OutputWarehouse()
@@ -109,7 +109,7 @@ OutputWarehouse::addOutput(MooseSharedPointer<Output> & output)
   // Insert object sync times to the global set
   if (output->parameters().isParamValid("sync_times"))
   {
-    std::vector<Real> sync_times = output->parameters().get<std::vector<Real> >("sync_times");
+    std::vector<Real> sync_times = output->parameters().get<std::vector<Real>>("sync_times");
     _sync_times.insert(sync_times.begin(), sync_times.end());
   }
 }
@@ -125,7 +125,7 @@ OutputWarehouse::getOutputNames()
 {
   if (_object_names.empty())
   {
-    std::vector<Action *> actions =  _app.actionWarehouse().getActionsByName("add_output");
+    std::vector<Action *> actions = _app.actionWarehouse().getActionsByName("add_output");
     for (const auto & act : actions)
       _object_names.insert(act->name());
   }
@@ -269,7 +269,7 @@ OutputWarehouse::addInterfaceHideVariables(const std::string & output_name, cons
 void
 OutputWarehouse::buildInterfaceHideVariables(const std::string & output_name, std::set<std::string> & hide)
 {
-  std::map<std::string, std::set<std::string> >::const_iterator it = _interface_map.find(output_name);
+  std::map<std::string, std::set<std::string>>::const_iterator it = _interface_map.find(output_name);
   if (it != _interface_map.end())
     hide = it->second;
 }
@@ -281,7 +281,6 @@ OutputWarehouse::checkOutputs(const std::set<OutputName> & names)
     if (!isReservedName(name) && !hasOutput(name))
       mooseError("The output object '" << name << "' is not a defined output object");
 }
-
 
 const std::set<std::string> &
 OutputWarehouse::getReservedNames() const

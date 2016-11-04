@@ -33,7 +33,7 @@ public:
   // Splitting Constructor
   ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
 
-  void operator() (const ConstBndElemRange & range);
+  void operator()(const ConstBndElemRange & range);
 
   void join(const ComputeElemAuxBcsThread & /*y*/);
 

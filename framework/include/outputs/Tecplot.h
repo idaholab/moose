@@ -22,7 +22,7 @@
 // Forward declarations
 class Tecplot;
 
-template<>
+template <>
 InputParameters validParams<Tecplot>();
 
 /**
@@ -31,14 +31,12 @@ InputParameters validParams<Tecplot>();
 class Tecplot : public BasicOutput<OversampleOutput>
 {
 public:
-
   /**
    * Class constructor
    */
   Tecplot(const InputParameters & parameters);
 
 protected:
-
   /**
    * Overload the Output::output method, this is required for Tecplot
    * output due to the method utilized for outputing single/global parameters
@@ -52,7 +50,6 @@ protected:
   virtual std::string filename() override;
 
 private:
-
   /// Flag for binary output
   bool _binary;
 

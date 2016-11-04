@@ -15,14 +15,15 @@
 #include "AddMultiAppAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddMultiAppAction>()
+template <>
+InputParameters
+validParams<AddMultiAppAction>()
 {
   return validParams<MooseObjectAction>();
 }
 
-AddMultiAppAction::AddMultiAppAction(InputParameters params) :
-    MooseObjectAction(params)
+AddMultiAppAction::AddMultiAppAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

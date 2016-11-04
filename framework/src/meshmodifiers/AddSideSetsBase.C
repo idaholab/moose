@@ -24,8 +24,9 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/point_locator_base.h"
 
-template<>
-InputParameters validParams<AddSideSetsBase>()
+template <>
+InputParameters
+validParams<AddSideSetsBase>()
 {
   InputParameters params = validParams<MeshModifier>();
   params.addParam<Real>("variance", 0.10, "The variance [0.0 - 1.0] allowed when comparing normals");
@@ -34,8 +35,8 @@ InputParameters validParams<AddSideSetsBase>()
   return params;
 }
 
-AddSideSetsBase::AddSideSetsBase(const InputParameters & parameters) :
-    MeshModifier(parameters),
+AddSideSetsBase::AddSideSetsBase(const InputParameters & parameters)
+  : MeshModifier(parameters),
     _variance(getParam<Real>("variance")),
     _fixed_normal(getParam<bool>("fixed_normal"))
 {
@@ -56,7 +57,7 @@ AddSideSetsBase::setup()
   // Setup the FE Object so we can calculate normals
   FEType fe_type(Utility::string_to_enum<Order>("CONSTANT"), Utility::string_to_enum<FEFamily>("MONOMIAL"));
   _fe_face = FEBase::build(dim, fe_type);
-  _qface = libmesh_make_unique<QGauss>(dim-1, FIRST);
+  _qface = libmesh_make_unique<QGauss>(dim - 1, FIRST);
   _fe_face->attach_quadrature_rule(_qface.get());
 }
 
@@ -68,7 +69,7 @@ AddSideSetsBase::finalize()
 }
 
 void
-AddSideSetsBase::flood(const Elem *elem, Point normal, BoundaryID side_id)
+AddSideSetsBase::flood(const Elem * elem, Point normal, BoundaryID side_id)
 {
   if (elem == nullptr || (_visited[side_id].find(elem) != _visited[side_id].end()))
     return;

@@ -15,8 +15,9 @@
 #include "ShapeElementUserObject.h"
 #include "Assembly.h"
 
-template<>
-InputParameters validParams<ShapeElementUserObject>()
+template <>
+InputParameters
+validParams<ShapeElementUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params.addParam<bool>("compute_jacobians", true, "Compute Jacobians for coupled variables");
@@ -24,8 +25,8 @@ InputParameters validParams<ShapeElementUserObject>()
   return params;
 }
 
-ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameters) :
-    ElementUserObject(parameters),
+ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameters)
+  : ElementUserObject(parameters),
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi()),
     _compute_jacobians(getParam<bool>("compute_jacobians"))

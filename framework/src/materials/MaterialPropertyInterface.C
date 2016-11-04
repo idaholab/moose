@@ -17,18 +17,18 @@
 #include "MooseApp.h"
 #include "Material.h"
 
-template<>
-InputParameters validParams<MaterialPropertyInterface>()
+template <>
+InputParameters
+validParams<MaterialPropertyInterface>()
 {
   InputParameters params = emptyInputParameters();
   params.addPrivateParam<Moose::MaterialDataType>("_material_data_type"); // optionally force the type of MaterialData to utilize
   return params;
 }
 
-
 // Standard construction
-MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object) :
-    _mi_params(moose_object->parameters()),
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object)
+  : _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
     _mi_feproblem(*_mi_params.get<FEProblem *>("_fe_problem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
@@ -41,8 +41,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 }
 
 // Block restricted
-MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object, const std::set<SubdomainID> & block_ids) :
-    _mi_params(moose_object->parameters()),
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object, const std::set<SubdomainID> & block_ids)
+  : _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
     _mi_feproblem(*_mi_params.get<FEProblem *>("_fe_problem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
@@ -55,8 +55,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 }
 
 // Boundary restricted
-MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object, const std::set<BoundaryID> & boundary_ids) :
-    _mi_params(moose_object->parameters()),
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object, const std::set<BoundaryID> & boundary_ids)
+  : _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
     _mi_feproblem(*_mi_params.get<FEProblem *>("_fe_problem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
@@ -71,8 +71,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 // Dual restricted
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
                                                      const std::set<SubdomainID> & block_ids,
-                                                     const std::set<BoundaryID> & boundary_ids) :
-    _mi_params(moose_object->parameters()),
+                                                     const std::set<BoundaryID> & boundary_ids)
+  : _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
     _mi_feproblem(*_mi_params.get<FEProblem *>("_fe_problem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
@@ -109,7 +109,7 @@ MaterialPropertyInterface::deducePropertyName(const std::string & name)
     return name;
 }
 
-template<>
+template <>
 const MaterialProperty<Real> *
 MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
 {
@@ -119,7 +119,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
   // check if the string parsed cleanly into a Real number
   if (ss >> real_value && ss.eof())
   {
-    MooseSharedPointer<MaterialProperty<Real> > default_property(new MaterialProperty<Real>);
+    MooseSharedPointer<MaterialProperty<Real>> default_property(new MaterialProperty<Real>);
 
     // resize to accomodate maximum number of qpoints
     unsigned int nqp = _mi_feproblem.getMaxQps();
@@ -157,7 +157,8 @@ MaterialPropertyInterface::getMaterialPropertyBoundaryIDs(const std::string & na
   return _mi_feproblem.getMaterialPropertyBoundaryIDs(name);
 }
 
-std::vector<BoundaryName>MaterialPropertyInterface::getMaterialPropertyBoundaryNames(const std::string & name)
+std::vector<BoundaryName>
+MaterialPropertyInterface::getMaterialPropertyBoundaryNames(const std::string & name)
 {
   return _mi_feproblem.getMaterialPropertyBoundaryNames(name);
 }
@@ -188,13 +189,11 @@ MaterialPropertyInterface::statefulPropertiesAllowed(bool stateful_allowed)
   _stateful_allowed = stateful_allowed;
 }
 
-
 Material &
 MaterialPropertyInterface::getMaterial(const std::string & name)
 {
   return getMaterialByName(_mi_params.get<MaterialName>(name));
 }
-
 
 Material &
 MaterialPropertyInterface::getMaterialByName(const std::string & name)

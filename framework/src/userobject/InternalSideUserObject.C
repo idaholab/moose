@@ -15,8 +15,9 @@
 #include "InternalSideUserObject.h"
 #include "Assembly.h"
 
-template<>
-InputParameters validParams<InternalSideUserObject>()
+template <>
+InputParameters
+validParams<InternalSideUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<BlockRestrictable>();
@@ -24,8 +25,8 @@ InputParameters validParams<InternalSideUserObject>()
   return params;
 }
 
-InternalSideUserObject::InternalSideUserObject(const InputParameters & parameters) :
-    UserObject(parameters),
+InternalSideUserObject::InternalSideUserObject(const InputParameters & parameters)
+  : UserObject(parameters),
     BlockRestrictable(parameters),
     TwoMaterialPropertyInterface(this, blockIDs()),
     NeighborCoupleable(this, false, false),
@@ -51,7 +52,6 @@ InternalSideUserObject::InternalSideUserObject(const InputParameters & parameter
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 }
-
 
 const Real &
 InternalSideUserObject::getNeighborElemVolume()

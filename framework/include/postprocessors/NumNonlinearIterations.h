@@ -20,7 +20,7 @@
 //Forward Declarations
 class NumNonlinearIterations;
 
-template<>
+template <>
 InputParameters validParams<NumNonlinearIterations>();
 
 /**
@@ -37,8 +37,12 @@ public:
    */
   virtual void timestepSetup() override;
 
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
 
   /**
    * Get the numer of nonlinear iterations

@@ -33,23 +33,22 @@ class SubProblem;
 class Assembly;
 class AuxScalarKernel;
 
-template<>
+template <>
 InputParameters validParams<AuxScalarKernel>();
 
 /**
  * Base class for making kernels that work on auxiliary scalar variables
  */
-class AuxScalarKernel :
-  public MooseObject,
-  public ScalarCoupleable,
-  public SetupInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public PostprocessorInterface,
-  public DependencyResolverInterface,
-  public TransientInterface,
-  public ZeroInterface,
-  public MeshChangedInterface
+class AuxScalarKernel : public MooseObject,
+                        public ScalarCoupleable,
+                        public SetupInterface,
+                        public FunctionInterface,
+                        public UserObjectInterface,
+                        public PostprocessorInterface,
+                        public DependencyResolverInterface,
+                        public TransientInterface,
+                        public ZeroInterface,
+                        public MeshChangedInterface
 {
 public:
   AuxScalarKernel(const InputParameters & parameters);
@@ -64,9 +63,15 @@ public:
   /**
    * The variable that this kernel operates on.
    */
-  MooseVariableScalar & variable() { return _var; }
+  MooseVariableScalar & variable()
+  {
+    return _var;
+  }
 
-  SubProblem & subProblem() { return _subproblem; }
+  SubProblem & subProblem()
+  {
+    return _subproblem;
+  }
 
   virtual const std::set<std::string> & getRequestedItems() override;
 

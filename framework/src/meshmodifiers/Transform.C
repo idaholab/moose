@@ -17,8 +17,9 @@
 
 #include "libmesh/mesh_modification.h"
 
-template<>
-InputParameters validParams<Transform>()
+template <>
+InputParameters
+validParams<Transform>()
 {
   MooseEnum transforms("TRANSLATE=1 ROTATE=2 SCALE=3");
 
@@ -29,8 +30,8 @@ InputParameters validParams<Transform>()
   return params;
 }
 
-Transform::Transform(const InputParameters & parameters) :
-    MeshModifier(parameters),
+Transform::Transform(const InputParameters & parameters)
+  : MeshModifier(parameters),
     _transform(getParam<MooseEnum>("transform")),
     _vector_value(getParam<RealVectorValue>("vector_value"))
 {
@@ -41,11 +42,14 @@ Transform::modify()
 {
   switch (_transform)
   {
-  case 1:
-    MeshTools::Modification::translate(*_mesh_ptr, _vector_value(0), _vector_value(1), _vector_value(2)); break;
-  case 2:
-    MeshTools::Modification::rotate(*_mesh_ptr, _vector_value(0), _vector_value(1), _vector_value(2)); break;
-  case 3:
-    MeshTools::Modification::scale(*_mesh_ptr, _vector_value(0), _vector_value(1), _vector_value(2)); break;
+    case 1:
+      MeshTools::Modification::translate(*_mesh_ptr, _vector_value(0), _vector_value(1), _vector_value(2));
+      break;
+    case 2:
+      MeshTools::Modification::rotate(*_mesh_ptr, _vector_value(0), _vector_value(1), _vector_value(2));
+      break;
+    case 3:
+      MeshTools::Modification::scale(*_mesh_ptr, _vector_value(0), _vector_value(1), _vector_value(2));
+      break;
   }
 }

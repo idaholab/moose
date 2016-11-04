@@ -19,7 +19,7 @@
 
 class ValueRangeMarker;
 
-template<>
+template <>
 InputParameters validParams<ValueRangeMarker>();
 
 class ValueRangeMarker : public QuadraturePointMarker

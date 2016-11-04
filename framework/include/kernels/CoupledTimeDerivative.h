@@ -20,7 +20,7 @@
 // Forward Declaration
 class CoupledTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<CoupledTimeDerivative>();
 
 /**

@@ -23,8 +23,9 @@
 #include "OrientedBoxMarker.h"
 #include "OrientedBoxInterface.h"
 
-template<>
-InputParameters validParams<OrientedBoxMarker>()
+template <>
+InputParameters
+validParams<OrientedBoxMarker>()
 {
   InputParameters params = validParams<Marker>();
   params += validParams<OrientedBoxInterface>();
@@ -38,12 +39,11 @@ InputParameters validParams<OrientedBoxMarker>()
   return params;
 }
 
-
-OrientedBoxMarker::OrientedBoxMarker(const InputParameters & parameters) :
-  Marker(parameters),
-  OrientedBoxInterface(parameters),
-  _inside((MarkerValue)(int)parameters.get<MooseEnum>("inside")),
-  _outside((MarkerValue)(int)parameters.get<MooseEnum>("outside"))
+OrientedBoxMarker::OrientedBoxMarker(const InputParameters & parameters)
+  : Marker(parameters),
+    OrientedBoxInterface(parameters),
+    _inside((MarkerValue)(int)parameters.get<MooseEnum>("inside")),
+    _outside((MarkerValue)(int)parameters.get<MooseEnum>("outside"))
 {
 }
 

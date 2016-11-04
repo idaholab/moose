@@ -17,16 +17,17 @@
 #include "Factory.h"
 #include "TimeStepper.h"
 
-template<>
-InputParameters validParams<SetupTimeStepperAction>()
+template <>
+InputParameters
+validParams<SetupTimeStepperAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
 
   return params;
 }
 
-SetupTimeStepperAction::SetupTimeStepperAction(InputParameters parameters) :
-    MooseObjectAction(parameters)
+SetupTimeStepperAction::SetupTimeStepperAction(InputParameters parameters)
+  : MooseObjectAction(parameters)
 {
 }
 

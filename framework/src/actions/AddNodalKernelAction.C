@@ -15,14 +15,15 @@
 #include "AddNodalKernelAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddNodalKernelAction>()
+template <>
+InputParameters
+validParams<AddNodalKernelAction>()
 {
   return validParams<MooseObjectAction>();
 }
 
-AddNodalKernelAction::AddNodalKernelAction(InputParameters params) :
-    MooseObjectAction(params)
+AddNodalKernelAction::AddNodalKernelAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

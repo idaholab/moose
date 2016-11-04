@@ -14,16 +14,17 @@
 
 #include "ConstantDamper.h"
 
-template<>
-InputParameters validParams<ConstantDamper>()
+template <>
+InputParameters
+validParams<ConstantDamper>()
 {
   InputParameters params = validParams<GeneralDamper>();
   params.addRequiredParam<Real>("damping", "The percentage (between 0 and 1) of the newton update to take.");
   return params;
 }
 
-ConstantDamper::ConstantDamper(const InputParameters & parameters) :
-    GeneralDamper(parameters),
+ConstantDamper::ConstantDamper(const InputParameters & parameters)
+  : GeneralDamper(parameters),
     _damping(getParam<Real>("damping"))
 {
 }

@@ -23,8 +23,9 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-template<>
-InputParameters validParams<KernelBase>()
+template <>
+InputParameters
+validParams<KernelBase>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
@@ -34,8 +35,8 @@ InputParameters validParams<KernelBase>()
   params += validParams<MaterialPropertyInterface>();
 
   params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this Kernel operates on");
-  params.addParam<std::vector<AuxVariableName> >("save_in", "The name of auxiliary variables to save this Kernel's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
-  params.addParam<std::vector<AuxVariableName> >("diag_save_in", "The name of auxiliary variables to save this Kernel's diagonal Jacobian contributions to. Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
+  params.addParam<std::vector<AuxVariableName>>("save_in", "The name of auxiliary variables to save this Kernel's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
+  params.addParam<std::vector<AuxVariableName>>("diag_save_in", "The name of auxiliary variables to save this Kernel's diagonal Jacobian contributions to. Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
 
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation. Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
@@ -46,8 +47,8 @@ InputParameters validParams<KernelBase>()
   return params;
 }
 
-KernelBase::KernelBase(const InputParameters & parameters) :
-    MooseObject(parameters),
+KernelBase::KernelBase(const InputParameters & parameters)
+  : MooseObject(parameters),
     BlockRestrictable(parameters),
     SetupInterface(this),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
@@ -82,18 +83,18 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi()),
 
-    _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),
-    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in"))
+    _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
 
-  for (unsigned int i=0; i<_save_in_strings.size(); i++)
+  for (unsigned int i = 0; i < _save_in_strings.size(); i++)
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
     if (_fe_problem.getNonlinearSystem().hasVariable(_save_in_strings[i]))
-      mooseError("Trying to use solution variable "+_save_in_strings[i]+" as a save_in variable in "+name());
+      mooseError("Trying to use solution variable " + _save_in_strings[i] + " as a save_in variable in " + name());
 
     if (var->feType() != _var.feType())
       mooseError("Error in " + name() + ". When saving residual values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
@@ -105,13 +106,12 @@ KernelBase::KernelBase(const InputParameters & parameters) :
 
   _has_save_in = _save_in.size() > 0;
 
-
-  for (unsigned int i=0; i<_diag_save_in_strings.size(); i++)
+  for (unsigned int i = 0; i < _diag_save_in_strings.size(); i++)
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
 
     if (_fe_problem.getNonlinearSystem().hasVariable(_diag_save_in_strings[i]))
-      mooseError("Trying to use solution variable "+_diag_save_in_strings[i]+" as a diag_save_in variable in "+name());
+      mooseError("Trying to use solution variable " + _diag_save_in_strings[i] + " as a diag_save_in variable in " + name());
 
     if (var->feType() != _var.feType())
       mooseError("Error in " + name() + ". When saving diagonal Jacobian values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");

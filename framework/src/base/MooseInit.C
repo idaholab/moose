@@ -28,14 +28,14 @@
 #include <omp.h>
 #endif
 
-MooseInit::MooseInit(int argc, char *argv[], MPI_Comm COMM_WORLD_IN) :
-    LibMeshInit(argc, argv, COMM_WORLD_IN)
+MooseInit::MooseInit(int argc, char * argv[], MPI_Comm COMM_WORLD_IN)
+  : LibMeshInit(argc, argv, COMM_WORLD_IN)
 {
 #ifdef LIBMESH_HAVE_PETSC
-  PetscPopSignalHandler();           // get rid of Petsc error handler
+  PetscPopSignalHandler(); // get rid of Petsc error handler
 #endif
 
-  // Set the number of OpenMP threads to the same as the number of threads libMesh is going to use
+// Set the number of OpenMP threads to the same as the number of threads libMesh is going to use
 #ifdef LIBMESH_HAVE_OPENMP
   omp_set_num_threads(libMesh::n_threads());
 #endif

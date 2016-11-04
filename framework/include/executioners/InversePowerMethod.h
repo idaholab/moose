@@ -20,13 +20,12 @@
 // Forward Declarations
 class InversePowerMethod;
 
-template<>
+template <>
 InputParameters validParams<InversePowerMethod>();
 
 class InversePowerMethod : public EigenExecutionerBase
 {
 public:
-
   InversePowerMethod(const InputParameters & parameters);
 
   virtual void init() override;

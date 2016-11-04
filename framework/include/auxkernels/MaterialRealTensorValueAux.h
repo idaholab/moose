@@ -21,7 +21,7 @@
 // Forward declerations
 class MaterialRealTensorValueAux;
 
-template<>
+template <>
 InputParameters validParams<MaterialRealTensorValueAux>();
 
 /**
@@ -30,7 +30,6 @@ InputParameters validParams<MaterialRealTensorValueAux>();
 class MaterialRealTensorValueAux : public MaterialAuxBase<RealTensorValue>
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters for this AuxKernel

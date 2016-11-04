@@ -19,7 +19,7 @@
 
 class BDF2;
 
-template<>
+template <>
 InputParameters validParams<BDF2>();
 
 /**
@@ -31,7 +31,10 @@ public:
   BDF2(const InputParameters & parameters);
   virtual ~BDF2();
 
-  virtual int order() { return 2; }
+  virtual int order()
+  {
+    return 2;
+  }
   virtual void preStep();
   virtual void computeTimeDerivatives();
   virtual void postStep(NumericVector<Number> & residual);
@@ -39,6 +42,5 @@ public:
 protected:
   std::vector<Real> & _weight;
 };
-
 
 #endif /* BDF2_H_ */

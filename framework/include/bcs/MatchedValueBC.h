@@ -20,7 +20,7 @@
 //Forward Declarations
 class MatchedValueBC;
 
-template<>
+template <>
 InputParameters validParams<MatchedValueBC>();
 
 /**

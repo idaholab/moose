@@ -22,9 +22,11 @@
 
 #include <unistd.h>
 
-namespace Moose {
+namespace Moose
+{
 
-std::string getExecutablePath()
+std::string
+getExecutablePath()
 {
   std::string exec_path;
   char path[1024];
@@ -54,4 +56,3 @@ std::string getExecutablePath()
 }
 
 } // Namespace MOOSE
-

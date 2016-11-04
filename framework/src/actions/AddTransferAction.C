@@ -15,14 +15,15 @@
 #include "AddTransferAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddTransferAction>()
+template <>
+InputParameters
+validParams<AddTransferAction>()
 {
   return validParams<MooseObjectAction>();
 }
 
-AddTransferAction::AddTransferAction(InputParameters params) :
-    MooseObjectAction(params)
+AddTransferAction::AddTransferAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

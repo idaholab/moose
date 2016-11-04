@@ -15,16 +15,17 @@
 #include "ConstantIC.h"
 #include "libmesh/point.h"
 
-template<>
-InputParameters validParams<ConstantIC>()
+template <>
+InputParameters
+validParams<ConstantIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<Real>("value", "The value to be set in IC");
   return params;
 }
 
-ConstantIC::ConstantIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+ConstantIC::ConstantIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _value(getParam<Real>("value"))
 {
 }
@@ -34,4 +35,3 @@ ConstantIC::value(const Point & /*p*/)
 {
   return _value;
 }
-

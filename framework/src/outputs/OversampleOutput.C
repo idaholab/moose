@@ -23,9 +23,9 @@
 #include "libmesh/equation_systems.h"
 #include "libmesh/mesh_function.h"
 
-
-template<>
-InputParameters validParams<OversampleOutput>()
+template <>
+InputParameters
+validParams<OversampleOutput>()
 {
 
   // Get the parameters from the parent object
@@ -46,10 +46,9 @@ InputParameters validParams<OversampleOutput>()
   return params;
 }
 
-OversampleOutput::OversampleOutput(const InputParameters & parameters) :
-    FileOutput(parameters),
-    _mesh_ptr(getParam<bool>("use_displaced") ?
-              &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
+OversampleOutput::OversampleOutput(const InputParameters & parameters)
+  : FileOutput(parameters),
+    _mesh_ptr(getParam<bool>("use_displaced") ? &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
     _refinements(getParam<unsigned int>("refinements")),
     _oversample(_refinements > 0 || isParamValid("file")),
     _change_position(isParamValid("position")),
@@ -74,8 +73,8 @@ OversampleOutput::~OversampleOutput()
   if (_oversample || _change_position)
   {
     // Delete the mesh functions
-    for (unsigned int sys_num=0; sys_num < _mesh_functions.size(); ++sys_num)
-      for (unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
+    for (unsigned int sys_num = 0; sys_num < _mesh_functions.size(); ++sys_num)
+      for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
         delete _mesh_functions[sys_num][var_num];
 
     // Delete the mesh and equation system pointers, in the correct
@@ -238,6 +237,6 @@ OversampleOutput::cloneMesh()
     if (_app.isRecovering())
       mooseWarning("Recovering or Restarting with Oversampling may not work (especially with adapted meshes)!!  Refs #2295");
 
-    _mesh_ptr= &(_problem_ptr->mesh().clone());
+    _mesh_ptr = &(_problem_ptr->mesh().clone());
   }
 }

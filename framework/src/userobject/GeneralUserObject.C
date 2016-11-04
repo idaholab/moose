@@ -14,16 +14,17 @@
 
 #include "GeneralUserObject.h"
 
-template<>
-InputParameters validParams<GeneralUserObject>()
+template <>
+InputParameters
+validParams<GeneralUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<MaterialPropertyInterface>();
   return params;
 }
 
-GeneralUserObject::GeneralUserObject(const InputParameters & parameters) :
-    UserObject(parameters),
+GeneralUserObject::GeneralUserObject(const InputParameters & parameters)
+  : UserObject(parameters),
     MaterialPropertyInterface(this),
     TransientInterface(this),
     DependencyResolverInterface(),

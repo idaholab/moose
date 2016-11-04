@@ -38,22 +38,21 @@ class SystemBase;
 class Assembly;
 class MooseVariable;
 
-template<>
+template <>
 InputParameters validParams<InitialCondition>();
 
 /**
  * InitialConditions are objects that set the initial value of variables.
  */
-class InitialCondition :
-  public MooseObject,
-  public Coupleable,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public BlockRestrictable,
-  public BoundaryRestrictable,
-  public DependencyResolverInterface,
-  public Restartable,
-  public ZeroInterface
+class InitialCondition : public MooseObject,
+                         public Coupleable,
+                         public FunctionInterface,
+                         public UserObjectInterface,
+                         public BlockRestrictable,
+                         public BoundaryRestrictable,
+                         public DependencyResolverInterface,
+                         public Restartable,
+                         public ZeroInterface
 {
 public:
   /**
@@ -65,7 +64,10 @@ public:
 
   virtual ~InitialCondition();
 
-  MooseVariable & variable() { return _var; }
+  MooseVariable & variable()
+  {
+    return _var;
+  }
 
   virtual void compute();
 
@@ -82,7 +84,10 @@ public:
    * This is optional.  Note that if you are using C1 continuous elements you will
    * want to use an initial condition that defines this!
    */
-  virtual RealGradient gradient(const Point & /*p*/) { return RealGradient(); };
+  virtual RealGradient gradient(const Point & /*p*/)
+  {
+    return RealGradient();
+  };
 
   /**
    * Gets called at the beginning of the simulation before this object is asked to do its job.
@@ -90,7 +95,9 @@ public:
    * no sense to inherit the other virtuals available in that class so we are adding this virtual
    * directly to this class with out the extra inheritance.
    */
-  virtual void initialSetup() {}
+  virtual void initialSetup()
+  {
+  }
 
   virtual const std::set<std::string> & getRequestedItems() override;
 
@@ -116,7 +123,7 @@ protected:
    * The current element we are on will retrieving values at specific points in the domain. Note that this _IS_
    * valid even for nodes shared among several elements.
    */
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
 
   /**
    * The current node if the point we are evaluating at also happens to be a node.

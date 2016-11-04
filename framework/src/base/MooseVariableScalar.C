@@ -24,8 +24,8 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
 
-MooseVariableScalar::MooseVariableScalar(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
-    MooseVariableBase(var_num, fe_type, sys, assembly, var_kind)
+MooseVariableScalar::MooseVariableScalar(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind)
+  : MooseVariableBase(var_num, fe_type, sys, assembly, var_kind)
 {
 }
 
@@ -43,10 +43,10 @@ void
 MooseVariableScalar::reinit()
 {
   const NumericVector<Real> & current_solution = *_sys.currentSolution();
-  const NumericVector<Real> & solution_old     = _sys.solutionOld();
-  const NumericVector<Real> & solution_older   = _sys.solutionOlder();
-  const NumericVector<Real> & u_dot            = _sys.solutionUDot();
-  const Real & du_dot_du                       = _sys.duDotDu();
+  const NumericVector<Real> & solution_old = _sys.solutionOld();
+  const NumericVector<Real> & solution_older = _sys.solutionOlder();
+  const NumericVector<Real> & u_dot = _sys.solutionUDot();
+  const Real & du_dot_du = _sys.duDotDu();
 
   _dof_map.SCALAR_dof_indices(_dof_indices, _var_num);
 
@@ -75,14 +75,14 @@ MooseVariableScalar::isNodal() const
 void
 MooseVariableScalar::setValue(unsigned int i, Number value)
 {
-  _u[i] = value;                  // update variable value
+  _u[i] = value; // update variable value
 }
 
 void
 MooseVariableScalar::setValues(Number value)
 {
   unsigned int n = _dof_indices.size();
-  for (unsigned int i=0; i<n; i++)
+  for (unsigned int i = 0; i < n; i++)
     _u[i] = value;
 }
 

@@ -21,7 +21,7 @@
 class UserForcingFunction;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<UserForcingFunction>();
 
 /**
@@ -32,7 +32,6 @@ InputParameters validParams<UserForcingFunction>();
 class UserForcingFunction : public Kernel
 {
 public:
-
   UserForcingFunction(const InputParameters & parameters);
 
 protected:

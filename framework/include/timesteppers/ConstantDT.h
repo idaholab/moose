@@ -19,7 +19,7 @@
 
 class ConstantDT;
 
-template<>
+template <>
 InputParameters validParams<ConstantDT>();
 
 class ConstantDT : public TimeStepper

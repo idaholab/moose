@@ -20,7 +20,7 @@
 class NodalNormalsCorner;
 class AuxiliarySystem;
 
-template<>
+template <>
 InputParameters validParams<NodalNormalsCorner>();
 
 /**
@@ -40,6 +40,5 @@ protected:
   AuxiliarySystem & _aux;
   BoundaryID _corner_boundary_id;
 };
-
 
 #endif /* NODALNORMALSCORNER_H */

@@ -17,8 +17,9 @@
 #include "ElementsIntersectedByPlane.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ElementsAlongPlane>()
+template <>
+InputParameters
+validParams<ElementsAlongPlane>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
 
@@ -27,8 +28,8 @@ InputParameters validParams<ElementsAlongPlane>()
   return params;
 }
 
-ElementsAlongPlane::ElementsAlongPlane(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
+ElementsAlongPlane::ElementsAlongPlane(const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters),
     _p0(getParam<Point>("point")),
     _normal(getParam<Point>("normal")),
     _elem_ids(declareVector("elem_ids"))
@@ -52,6 +53,6 @@ ElementsAlongPlane::execute()
 
   _elem_ids.resize(num_elems);
 
-  for (unsigned int i=0; i<num_elems; i++)
+  for (unsigned int i = 0; i < num_elems; i++)
     _elem_ids[i] = intersected_elems[i]->id();
 }

@@ -21,7 +21,7 @@
 //Forward Declarations
 class KernelValue;
 
-template<>
+template <>
 InputParameters validParams<KernelValue>();
 
 /**

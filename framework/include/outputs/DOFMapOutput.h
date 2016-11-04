@@ -23,7 +23,7 @@
 class DOFMapOutput;
 class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<DOFMapOutput>();
 
 /**
@@ -47,15 +47,14 @@ public:
   void output(const ExecFlagType & type) override;
 
 protected:
-
   /**
    * A helper method for joining items with a delimeter
    * @param begin Beginning iterator
    * @param end Ending iterator
    * @param delim The delimiter character to insert
    */
-  template<typename T>
-  std::string join(const T & begin, const T & end, const char* const delim);
+  template <typename T>
+  std::string join(const T & begin, const T & end, const char * const delim);
 
   /**
    * Write the file stream to the file

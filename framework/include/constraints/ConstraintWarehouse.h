@@ -44,10 +44,10 @@ public:
   /**
    * Access methods for active objects.
    */
-  const std::vector<MooseSharedPointer<NodalConstraint> > & getActiveNodalConstraints() const;
-  const std::vector<MooseSharedPointer<FaceFaceConstraint> > & getActiveFaceFaceConstraints(const std::string & interface) const;
-  const std::vector<MooseSharedPointer<ElemElemConstraint> > & getActiveElemElemConstraints(InterfaceID interface_id) const;
-  const std::vector<MooseSharedPointer<NodeFaceConstraint> > & getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced);
+  const std::vector<MooseSharedPointer<NodalConstraint>> & getActiveNodalConstraints() const;
+  const std::vector<MooseSharedPointer<FaceFaceConstraint>> & getActiveFaceFaceConstraints(const std::string & interface) const;
+  const std::vector<MooseSharedPointer<ElemElemConstraint>> & getActiveElemElemConstraints(InterfaceID interface_id) const;
+  const std::vector<MooseSharedPointer<NodeFaceConstraint>> & getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced);
   ///@}
 
   ///@{
@@ -71,21 +71,20 @@ public:
   void updateActive(THREAD_ID tid = 0);
 
 protected:
-
   /// NodalConstraint objects
   MooseObjectWarehouse<NodalConstraint> _nodal_constraints;
 
   /// NodeFaceConstraint objects (non-displaced)
-  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint> > _node_face_constraints;
+  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>> _node_face_constraints;
 
   /// NodeFaceConstraint objects (displaced)
-  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint> > _displaced_node_face_constraints;
+  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>> _displaced_node_face_constraints;
 
   /// FaceFaceConstraints
-  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint> > _face_face_constraints;
+  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint>> _face_face_constraints;
 
   /// ElemElemConstraints
-  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint> > _element_constraints;
+  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>> _element_constraints;
 };
 
 #endif // CONSTRAINTWAREHOUSE_H

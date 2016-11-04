@@ -17,8 +17,9 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<CreateProblemAction>()
+template <>
+InputParameters
+validParams<CreateProblemAction>()
 {
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
   MooseEnum rz_coord_axis("X=0 Y=1", "Y");
@@ -26,7 +27,7 @@ InputParameters validParams<CreateProblemAction>()
   InputParameters params = validParams<MooseObjectAction>();
   params.set<std::string>("type") = "FEProblem";
   params.addParam<std::string>("name", "MOOSE Problem", "The name the problem");
-  params.addParam<std::vector<SubdomainName> >("block", "Block IDs for the coordinate systems");
+  params.addParam<std::vector<SubdomainName>>("block", "Block IDs for the coordinate systems");
   params.addParam<MultiMooseEnum>("coord_type", coord_types, "Type of the coordinate system per block param");
   params.addParam<MooseEnum>("rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
 
@@ -43,10 +44,9 @@ InputParameters validParams<CreateProblemAction>()
   return params;
 }
 
-
-CreateProblemAction::CreateProblemAction(InputParameters parameters) :
-    MooseObjectAction(parameters),
-    _blocks(getParam<std::vector<SubdomainName> >("block")),
+CreateProblemAction::CreateProblemAction(InputParameters parameters)
+  : MooseObjectAction(parameters),
+    _blocks(getParam<std::vector<SubdomainName>>("block")),
     _coord_sys(getParam<MultiMooseEnum>("coord_type")),
     _fe_cache(getParam<bool>("fe_cache"))
 {
@@ -65,8 +65,8 @@ CreateProblemAction::act()
 #ifdef LIBMESH_HAVE_PETSC
       // put in empty arrays for PETSc options
       _moose_object_pars.set<MultiMooseEnum>("petsc_options") = MultiMooseEnum("", "", true);
-      _moose_object_pars.set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
-      _moose_object_pars.set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
+      _moose_object_pars.set<std::vector<std::string>>("petsc_inames") = std::vector<std::string>();
+      _moose_object_pars.set<std::vector<std::string>>("petsc_values") = std::vector<std::string>();
 #endif
       _problem = _factory.create<FEProblem>(_type, getParam<std::string>("name"), _moose_object_pars);
       if (!_problem.get())
@@ -106,9 +106,7 @@ CreateProblemAction::act()
     }
 
     // input file specific legacy overrides (takes precedence over application level settings)
-    _problem->legacyUoAuxComputation() = _pars.isParamValid("use_legacy_uo_aux_computation") ?
-      getParam<bool>("use_legacy_uo_aux_computation") : _app.legacyUoAuxComputationDefault();
-    _problem->legacyUoInitialization() = _pars.isParamValid("use_legacy_uo_initialization") ?
-      getParam<bool>("use_legacy_uo_initialization") : _app.legacyUoInitializationDefault();
+    _problem->legacyUoAuxComputation() = _pars.isParamValid("use_legacy_uo_aux_computation") ? getParam<bool>("use_legacy_uo_aux_computation") : _app.legacyUoAuxComputationDefault();
+    _problem->legacyUoInitialization() = _pars.isParamValid("use_legacy_uo_initialization") ? getParam<bool>("use_legacy_uo_initialization") : _app.legacyUoInitializationDefault();
   }
 }

@@ -21,16 +21,15 @@
 // Forward declerations
 class AddOutputAction;
 
-template<>
+template <>
 InputParameters validParams<AddOutputAction>();
 
 /**
  * Action for creating output objects
  */
-class AddOutputAction: public MooseObjectAction
+class AddOutputAction : public MooseObjectAction
 {
 public:
-
   /**
    * Class constructor
    */

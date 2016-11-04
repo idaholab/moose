@@ -21,8 +21,9 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<FaceFaceConstraint>()
+template <>
+InputParameters
+validParams<FaceFaceConstraint>()
 {
   InputParameters params = validParams<Constraint>();
   params.addRequiredParam<std::string>("interface", "The name of the interface.");
@@ -31,8 +32,8 @@ InputParameters validParams<FaceFaceConstraint>()
   return params;
 }
 
-FaceFaceConstraint::FaceFaceConstraint(const InputParameters & parameters) :
-    Constraint(parameters),
+FaceFaceConstraint::FaceFaceConstraint(const InputParameters & parameters)
+  : Constraint(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _dim(_mesh.dimension()),
@@ -72,8 +73,8 @@ FaceFaceConstraint::reinit()
   _u_slave.resize(nqp);
   _grad_u_slave.resize(nqp);
   _phys_points_slave.resize(nqp);
-  _test = _assembly.getFE(_var.feType(), _dim-1)->get_phi();                     // yes we need to do a copy here
-  _JxW_lm = _assembly.getFE(_var.feType(), _dim-1)->get_JxW();                   // another copy here to preserve the right JxW
+  _test = _assembly.getFE(_var.feType(), _dim - 1)->get_phi();   // yes we need to do a copy here
+  _JxW_lm = _assembly.getFE(_var.feType(), _dim - 1)->get_JxW(); // another copy here to preserve the right JxW
 
   for (_qp = 0; _qp < nqp; _qp++)
   {
@@ -86,8 +87,8 @@ FaceFaceConstraint::reinit()
     {
       Elem * master_side = master_pinfo->_elem->build_side(master_pinfo->_side_num, true).release();
 
-      std::vector<std::vector<Real> > & master_side_phi = master_pinfo->_side_phi;
-      std::vector<std::vector<RealGradient> > & master_side_grad_phi = master_pinfo->_side_grad_phi;
+      std::vector<std::vector<Real>> & master_side_phi = master_pinfo->_side_phi;
+      std::vector<std::vector<RealGradient>> & master_side_grad_phi = master_pinfo->_side_grad_phi;
       mooseAssert(master_side_phi.size() == master_side_grad_phi.size(), "phi and grad phi size are different");
       _u_master[_qp] = _master_var.getValue(master_side, master_side_phi);
       _grad_u_master[_qp] = _master_var.getGradient(master_side, master_side_grad_phi);
@@ -96,8 +97,8 @@ FaceFaceConstraint::reinit()
       delete master_side;
 
       Elem * slave_side = slave_pinfo->_elem->build_side(slave_pinfo->_side_num, true).release();
-      std::vector<std::vector<Real> > & slave_side_phi = slave_pinfo->_side_phi;
-      std::vector<std::vector<RealGradient> > & slave_side_grad_phi = slave_pinfo->_side_grad_phi;
+      std::vector<std::vector<Real>> & slave_side_phi = slave_pinfo->_side_phi;
+      std::vector<std::vector<RealGradient>> & slave_side_grad_phi = slave_pinfo->_side_grad_phi;
       mooseAssert(slave_side_phi.size() == slave_side_grad_phi.size(), "phi and grad phi size are different");
       _u_slave[_qp] = _slave_var.getValue(slave_side, slave_side_phi);
       _grad_u_slave[_qp] = _slave_var.getGradient(slave_side, slave_side_grad_phi);
@@ -113,19 +114,19 @@ FaceFaceConstraint::reinitSide(Moose::ConstraintType res_type)
 {
   switch (res_type)
   {
-  case Moose::Master:
-    _assembly.reinit(_elem_master);
-    _master_var.prepare();
-    _assembly.prepare();
-    _assembly.reinitAtPhysical(_elem_master, _phys_points_master);
-    break;
+    case Moose::Master:
+      _assembly.reinit(_elem_master);
+      _master_var.prepare();
+      _assembly.prepare();
+      _assembly.reinitAtPhysical(_elem_master, _phys_points_master);
+      break;
 
-  case Moose::Slave:
-    _assembly.reinit(_elem_slave);
-    _slave_var.prepare();
-    _assembly.prepare();
-    _assembly.reinitAtPhysical(_elem_slave, _phys_points_slave);
-    break;
+    case Moose::Slave:
+      _assembly.reinit(_elem_slave);
+      _slave_var.prepare();
+      _assembly.prepare();
+      _assembly.reinitAtPhysical(_elem_slave, _phys_points_slave);
+      break;
   }
 }
 
@@ -143,7 +144,7 @@ FaceFaceConstraint::computeResidualSide(Moose::ConstraintType side)
 {
   switch (side)
   {
-  case Moose::Master:
+    case Moose::Master:
     {
       DenseVector<Number> & re_master = _assembly.residualBlock(_master_var.number());
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -154,7 +155,7 @@ FaceFaceConstraint::computeResidualSide(Moose::ConstraintType side)
     }
     break;
 
-  case Moose::Slave:
+    case Moose::Slave:
     {
       DenseVector<Number> & re_slave = _assembly.residualBlock(_slave_var.number());
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -170,9 +171,9 @@ FaceFaceConstraint::computeResidualSide(Moose::ConstraintType side)
 void
 FaceFaceConstraint::computeJacobian()
 {
-  _phi = _assembly.getFE(_var.feType(), _dim-1)->get_phi();                // yes we need to do a copy here
-  std::vector<std::vector<Real> > phi_master;
-  std::vector<std::vector<Real> > phi_slave;
+  _phi = _assembly.getFE(_var.feType(), _dim - 1)->get_phi(); // yes we need to do a copy here
+  std::vector<std::vector<Real>> phi_master;
+  std::vector<std::vector<Real>> phi_slave;
 
   DenseMatrix<Number> & Kee = _assembly.jacobianBlock(_var.number(), _var.number());
 
@@ -187,7 +188,7 @@ FaceFaceConstraint::computeJacobianSide(Moose::ConstraintType side)
 {
   switch (side)
   {
-  case Moose::Master:
+    case Moose::Master:
     {
       DenseMatrix<Number> & Ken_master = _assembly.jacobianBlock(_var.number(), _master_var.number());
       DenseMatrix<Number> & Kne_master = _assembly.jacobianBlock(_master_var.number(), _var.number());
@@ -204,7 +205,7 @@ FaceFaceConstraint::computeJacobianSide(Moose::ConstraintType side)
     }
     break;
 
-  case Moose::Slave:
+    case Moose::Slave:
     {
       DenseMatrix<Number> & Ken_slave = _assembly.jacobianBlock(_var.number(), _slave_var.number());
       DenseMatrix<Number> & Kne_slave = _assembly.jacobianBlock(_slave_var.number(), _var.number());
@@ -229,7 +230,7 @@ FaceFaceConstraint::computeQpJacobian()
 }
 
 Real
-FaceFaceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType /*side_type*/)
+    FaceFaceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType /*side_type*/)
 {
   return 0.;
 }

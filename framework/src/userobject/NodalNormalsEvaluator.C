@@ -16,16 +16,17 @@
 
 Threads::spin_mutex nodal_normals_evaluator_mutex;
 
-template<>
-InputParameters validParams<NodalNormalsEvaluator>()
+template <>
+InputParameters
+validParams<NodalNormalsEvaluator>()
 {
   InputParameters params = validParams<NodalUserObject>();
   params.set<bool>("_dual_restrictable") = true;
   return params;
 }
 
-NodalNormalsEvaluator::NodalNormalsEvaluator(const InputParameters & parameters) :
-    NodalUserObject(parameters),
+NodalNormalsEvaluator::NodalNormalsEvaluator(const InputParameters & parameters)
+  : NodalUserObject(parameters),
     _aux(_fe_problem.getAuxiliarySystem())
 {
 }

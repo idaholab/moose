@@ -19,9 +19,8 @@
 
 class AddInterfaceKernelAction;
 
-template<>
+template <>
 InputParameters validParams<AddInterfaceKernelAction>();
-
 
 class AddInterfaceKernelAction : public MooseObjectAction
 {

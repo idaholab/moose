@@ -19,11 +19,10 @@
 
 class SideSetsFromPoints;
 
-template<>
+template <>
 InputParameters validParams<SideSetsFromPoints>();
 
-class SideSetsFromPoints :
-  public AddSideSetsBase
+class SideSetsFromPoints : public AddSideSetsBase
 {
 public:
   SideSetsFromPoints(const InputParameters & parameters);

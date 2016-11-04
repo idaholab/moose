@@ -17,8 +17,9 @@
 // libMesh includes
 #include "libmesh/error_vector.h"
 
-template<>
-InputParameters validParams<ErrorToleranceMarker>()
+template <>
+InputParameters
+validParams<ErrorToleranceMarker>()
 {
   InputParameters params = validParams<IndicatorMarker>();
   params.addParam<Real>("coarsen", 0, "Elements with error less than this will be coarsened.");
@@ -27,9 +28,8 @@ InputParameters validParams<ErrorToleranceMarker>()
   return params;
 }
 
-
-ErrorToleranceMarker::ErrorToleranceMarker(const InputParameters & parameters) :
-    IndicatorMarker(parameters),
+ErrorToleranceMarker::ErrorToleranceMarker(const InputParameters & parameters)
+  : IndicatorMarker(parameters),
     _coarsen(parameters.get<Real>("coarsen")),
     _refine(parameters.get<Real>("refine"))
 {

@@ -23,8 +23,9 @@
 #include "libmesh/nemesis_io.h"
 #include "libmesh/parallel_mesh.h"
 
-template<>
-InputParameters validParams<FileMesh>()
+template <>
+InputParameters
+validParams<FileMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
 
@@ -32,15 +33,15 @@ InputParameters validParams<FileMesh>()
   return params;
 }
 
-FileMesh::FileMesh(const InputParameters & parameters) :
-    MooseMesh(parameters),
+FileMesh::FileMesh(const InputParameters & parameters)
+  : MooseMesh(parameters),
     _file_name(getParam<MeshFileName>("file"))
 {
   getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
 }
 
-FileMesh::FileMesh(const FileMesh & other_mesh) :
-    MooseMesh(other_mesh),
+FileMesh::FileMesh(const FileMesh & other_mesh)
+  : MooseMesh(other_mesh),
     _file_name(other_mesh._file_name)
 {
 }

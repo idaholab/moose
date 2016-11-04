@@ -95,7 +95,10 @@ public:
   /**
    * Get variable names of the eigen system
    */
-  const std::set<VariableName> & getEigenVariableNames() const { return _eigen_var_names; }
+  const std::set<VariableName> & getEigenVariableNames() const
+  {
+    return _eigen_var_names;
+  }
 
   /**
    * Weather or not the system contains eigen kernels
@@ -103,7 +106,6 @@ public:
   bool containsEigenKernel() const;
 
 protected:
-
   std::set<VariableName> _eigen_var_names;
   bool _all_eigen_vars;
   std::set<dof_id_type> _eigen_var_indices;

@@ -33,19 +33,18 @@ class FEProblem;
 class SubProblem;
 class Assembly;
 
-template<>
+template <>
 InputParameters validParams<UserObject>();
 
 /**
  * Base class for user-specific data
  */
-class UserObject :
-  public MooseObject,
-  public SetupInterface,
-  public FunctionInterface,
-  public Restartable,
-  public MeshChangedInterface,
-  public ScalarCoupleable
+class UserObject : public MooseObject,
+                   public SetupInterface,
+                   public FunctionInterface,
+                   public Restartable,
+                   public MeshChangedInterface,
+                   public ScalarCoupleable
 {
 public:
   UserObject(const InputParameters & params);
@@ -82,14 +81,20 @@ public:
    * Returns a reference to the subproblem that
    * this postprocessor is tied to
    */
-  SubProblem & getSubProblem() const { return _subproblem; }
+  SubProblem & getSubProblem() const
+  {
+    return _subproblem;
+  }
 
   /**
    * Optional interface function for "evaluating" a UserObject at a spatial position.
    * If a UserObject overrides this function that UserObject can then be used in a
    * Transfer to transfer information from one domain to another.
    */
-  virtual Real spatialValue(const Point & /*p*/) const { mooseError(name() << " does not satisfy the Spatial UserObject interface!"); }
+  virtual Real spatialValue(const Point & /*p*/) const
+  {
+    mooseError(name() << " does not satisfy the Spatial UserObject interface!");
+  }
 
   /**
    * Must override.
@@ -143,6 +148,5 @@ protected:
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
 };
-
 
 #endif /* USEROBJECT_H */

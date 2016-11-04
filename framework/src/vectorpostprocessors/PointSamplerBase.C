@@ -19,8 +19,9 @@
 // libMesh includes
 #include "libmesh/mesh_tools.h"
 
-template<>
-InputParameters validParams<PointSamplerBase>()
+template <>
+InputParameters
+validParams<PointSamplerBase>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
 
@@ -31,15 +32,15 @@ InputParameters validParams<PointSamplerBase>()
   return params;
 }
 
-PointSamplerBase::PointSamplerBase(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
+PointSamplerBase::PointSamplerBase(const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     SamplerBase(parameters, this, _communicator),
     _mesh(_subproblem.mesh())
 {
   std::vector<std::string> var_names(_coupled_moose_vars.size());
 
-  for (unsigned int i=0; i<_coupled_moose_vars.size(); i++)
+  for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
     var_names[i] = _coupled_moose_vars[i]->name();
 
   // Initialize the datastructions in SamplerBase

@@ -22,7 +22,7 @@ class Function;
 // Forward Declarations
 class ElementW1pError;
 
-template<>
+template <>
 InputParameters validParams<ElementW1pError>();
 
 /**
@@ -39,8 +39,7 @@ InputParameters validParams<ElementW1pError>();
  * in case 1, while it is on every term in case 2.  We use definition
  * 1 here for consistency with the original ElementH1Error class.
  */
-class ElementW1pError :
-  public ElementIntegralVariablePostprocessor
+class ElementW1pError : public ElementIntegralVariablePostprocessor
 {
 public:
   ElementW1pError(const InputParameters & parameters);

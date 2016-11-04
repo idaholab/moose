@@ -22,18 +22,16 @@
 #include "Action.h"
 #include "InputParameters.h"
 
-
 /**
  * Macros
  */
 #define stringifyName(name) #name
 #define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
 
-
-#define registerTask(name, is_required)                            syntax.registerTaskName(name, is_required)
-#define registerMooseObjectTask(name, moose_system, is_required)   syntax.registerTaskName(name, stringifyName(moose_system), is_required)
-#define appendMooseObjectTask(name, moose_system)                  syntax.appendTaskName(name, stringifyName(moose_system))
-#define addTaskDependency(action, depends_on)                      syntax.addDependency(action, depends_on)
+#define registerTask(name, is_required) syntax.registerTaskName(name, is_required)
+#define registerMooseObjectTask(name, moose_system, is_required) syntax.registerTaskName(name, stringifyName(moose_system), is_required)
+#define appendMooseObjectTask(name, moose_system) syntax.appendTaskName(name, stringifyName(moose_system))
+#define addTaskDependency(action, depends_on) syntax.addDependency(action, depends_on)
 
 // Forward Declaration
 class MooseApp;
@@ -43,18 +41,17 @@ class MooseApp;
  */
 typedef MooseSharedPointer<Action> (*buildActionPtr)(InputParameters parameters);
 
-
 /**
  * Typedef for validParams
  */
 typedef InputParameters (*paramsActionPtr)();
 
-
 /**
  * Build an object of type T
  */
-template<class T>
-MooseSharedPointer<Action> buildAction(InputParameters parameters)
+template <class T>
+MooseSharedPointer<Action>
+buildAction(InputParameters parameters)
 {
   return MooseSharedPointer<Action>(new T(parameters));
 }
@@ -69,7 +66,7 @@ public:
 
   virtual ~ActionFactory();
 
-  template<typename T>
+  template <typename T>
   void reg(const std::string & name, const std::string & task)
   {
     BuildInfo build_info;
@@ -118,7 +115,7 @@ protected:
   std::multimap<std::string, std::string> _task_to_action_map;
 
   // TODO: I don't think we need this anymore
-  static unsigned int _unique_id;        ///< Unique ID for identifying multiple registrations
+  static unsigned int _unique_id; ///< Unique ID for identifying multiple registrations
 };
 
 #endif /* ACTIONFACTORY_H */

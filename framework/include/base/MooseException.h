@@ -26,9 +26,10 @@ public:
   /**
    * @param message The message to display
    */
-  MooseException(std::string message):
-    _message(message)
-  {}
+  MooseException(std::string message)
+    : _message(message)
+  {
+  }
 
   /**
    * For some reason, on GCC 4.6.3, I get 'error: looser throw
@@ -37,14 +38,16 @@ public:
    * specification.  Clang doesn't seem to care about this line of
    * code.
    */
-  ~MooseException() throw() {}
+  ~MooseException() throw()
+  {
+  }
 
   /**
    * Get out the error message.
    *
    * Satisfies the interface of std::exception
    */
-  virtual const char* what() const throw()
+  virtual const char * what() const throw()
   {
     return _message.c_str();
   }

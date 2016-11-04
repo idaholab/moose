@@ -20,7 +20,7 @@
 // Forward Declarations
 class NodalSum;
 
-template<>
+template <>
 InputParameters validParams<NodalSum>();
 
 /**

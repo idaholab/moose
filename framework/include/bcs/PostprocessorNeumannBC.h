@@ -17,10 +17,9 @@
 
 #include "IntegratedBC.h"
 
-
 class PostprocessorNeumannBC;
 
-template<>
+template <>
 InputParameters validParams<PostprocessorNeumannBC>();
 
 /**
@@ -36,13 +35,11 @@ public:
    */
   PostprocessorNeumannBC(const InputParameters & parameters);
 
-
 protected:
   virtual Real computeQpResidual() override;
 
   /// Value of grad(u) on the boundary.
   const PostprocessorValue & _value;
 };
-
 
 #endif //POSTPROCESSORNEUMANNBC_H

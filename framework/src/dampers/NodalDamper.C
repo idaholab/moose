@@ -21,8 +21,9 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<NodalDamper>()
+template <>
+InputParameters
+validParams<NodalDamper>()
 {
   InputParameters params = validParams<Damper>();
   params += validParams<MaterialPropertyInterface>();
@@ -30,8 +31,8 @@ InputParameters validParams<NodalDamper>()
   return params;
 }
 
-NodalDamper::NodalDamper(const InputParameters & parameters) :
-    Damper(parameters),
+NodalDamper::NodalDamper(const InputParameters & parameters)
+  : Damper(parameters),
     MaterialPropertyInterface(this),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),

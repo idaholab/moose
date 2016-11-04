@@ -30,14 +30,14 @@ class PropertyValue;
 /**
  * Scalar Init helper routine so that specialization isn't needed for basic scalar MaterialProperty types
  */
-template<typename P>
-PropertyValue *_init_helper(int size, PropertyValue *prop, const P* the_type);
+template <typename P>
+PropertyValue * _init_helper(int size, PropertyValue * prop, const P * the_type);
 
 /**
  * Vector Init helper routine so that specialization isn't needed for basic vector MaterialProperty types
  */
-template<typename P>
-PropertyValue *_init_helper(int size, PropertyValue *prop, const std::vector<P>* the_type);
+template <typename P>
+PropertyValue * _init_helper(int size, PropertyValue * prop, const std::vector<P> * the_type);
 
 /**
  * Abstract definition of a property value.
@@ -48,29 +48,29 @@ public:
   /**
    * Destructor.
    */
-  virtual ~PropertyValue() {};
+  virtual ~PropertyValue(){};
 
   /**
    * String identifying the type of parameter stored.
    * Must be reimplemented in derived classes.
    */
-  virtual std::string type () = 0;
+  virtual std::string type() = 0;
 
   /**
    * Clone this value.  Useful in copy-construction.
    * Must be reimplemented in derived classes.
    */
-  virtual PropertyValue *init (int size) = 0;
+  virtual PropertyValue * init(int size) = 0;
 
-  virtual unsigned int size () const = 0;
+  virtual unsigned int size() const = 0;
 
   /**
    * Resizes the property to the size n
    * Must be reimplemented in derived classes.
    */
-  virtual void resize (int n) = 0;
+  virtual void resize(int n) = 0;
 
-  virtual void swap (PropertyValue *rhs) = 0;
+  virtual void swap(PropertyValue * rhs) = 0;
 
   /**
    * Copy the value of a Property from one specific to a specific qp in this Property.
@@ -79,27 +79,26 @@ public:
    * @param rhs The Property you want to copy _from_.
    * @param from_qp The quadrature point in rhs you want to copy _from_.
    */
-  virtual void qpCopy (const unsigned int to_qp, PropertyValue *rhs, const unsigned int from_qp) = 0;
+  virtual void qpCopy(const unsigned int to_qp, PropertyValue * rhs, const unsigned int from_qp) = 0;
 
   // save/restore in a file
   virtual void store(std::ostream & stream) = 0;
   virtual void load(std::istream & stream) = 0;
 };
 
-template<>
+template <>
 inline void
-dataStore(std::ostream & stream, PropertyValue * & p, void * /*context*/)
+dataStore(std::ostream & stream, PropertyValue *& p, void * /*context*/)
 {
   p->store(stream);
 }
 
-template<>
+template <>
 inline void
-dataLoad(std::istream & stream, PropertyValue * & p, void * /*context*/)
+dataLoad(std::istream & stream, PropertyValue *& p, void * /*context*/)
 {
   p->load(stream);
 }
-
 
 /**
  * Concrete definition of a parameter value
@@ -110,7 +109,10 @@ class MaterialProperty : public PropertyValue
 {
 public:
   /// Explicitly declare a public constructor because we made the copy constructor private
-  MaterialProperty() : PropertyValue() { /* */ }
+  MaterialProperty()
+    : PropertyValue()
+  { /* */
+  }
 
   virtual ~MaterialProperty()
   {
@@ -120,44 +122,59 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  MooseArray<T> & get () { return _value; }
+  MooseArray<T> & get()
+  {
+    return _value;
+  }
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  MooseArray<T> & set () { return _value; }
+  MooseArray<T> & set()
+  {
+    return _value;
+  }
 
   /**
    * String identifying the type of parameter stored.
    */
-  virtual std::string type ();
+  virtual std::string type();
 
   /**
    * Clone this value.  Useful in copy-construction.
    */
-  virtual PropertyValue *init (int size);
+  virtual PropertyValue * init(int size);
 
   /**
    * Resizes the property to the size n
    */
-  virtual void resize (int n);
+  virtual void resize(int n);
 
   /**
    * Get element i out of the array.
    */
-  T & operator[](const unsigned int i) { return _value[i]; }
+  T & operator[](const unsigned int i)
+  {
+    return _value[i];
+  }
 
-  unsigned int size() const { return _value.size(); }
+  unsigned int size() const
+  {
+    return _value.size();
+  }
 
   /**
    * Get element i out of the array.
    */
-  const T & operator[](const unsigned int i) const { return _value[i]; }
+  const T & operator[](const unsigned int i) const
+  {
+    return _value[i];
+  }
 
   /**
    *
    */
-  virtual void swap (PropertyValue *rhs);
+  virtual void swap(PropertyValue * rhs);
 
   /**
    * Copy the value of a Property from one specific to a specific qp in this Property.
@@ -166,7 +183,7 @@ public:
    * @param rhs The Property you want to copy _from_.
    * @param from_qp The quadrature point in rhs you want to copy _from_.
    */
-  virtual void qpCopy (const unsigned int to_qp, PropertyValue *rhs, const unsigned int from_qp);
+  virtual void qpCopy(const unsigned int to_qp, PropertyValue * rhs, const unsigned int from_qp);
 
   /**
    * Store the property into a binary stream
@@ -185,70 +202,73 @@ public:
    * @param the_type - This is just a template parameter used to identify the
    *                   difference between the scalar and vector template functions
    */
-  template<typename P>
-  friend
-  PropertyValue *_init_helper(int size, PropertyValue *prop, const P* the_type);
+  template <typename P>
+  friend PropertyValue * _init_helper(int size, PropertyValue * prop, const P * the_type);
 
   /**
    * Friend helper function to handle vector material property initializations
    * This function is an overload for the vector version
    */
-  template<typename P>
-  friend
-  PropertyValue *_init_helper(int size, PropertyValue *prop, const std::vector<P>* the_type);
+  template <typename P>
+  friend PropertyValue * _init_helper(int size, PropertyValue * prop, const std::vector<P> * the_type);
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
-  MaterialProperty(const MaterialProperty<T> & /*src*/) { mooseError("Material properties must be assigned to references (missing '&')"); }
+  MaterialProperty(const MaterialProperty<T> & /*src*/)
+  {
+    mooseError("Material properties must be assigned to references (missing '&')");
+  }
 
   /// private assignment operator to avoid shallow copying of material properties
-  MaterialProperty<T> & operator = (const MaterialProperty<T> & /*rhs*/) { mooseError("Material properties must be assigned to references (missing '&')"); }
+  MaterialProperty<T> & operator=(const MaterialProperty<T> & /*rhs*/)
+  {
+    mooseError("Material properties must be assigned to references (missing '&')");
+  }
 
   /// Stored parameter value.
   MooseArray<T> _value;
 };
 
-
 // ------------------------------------------------------------
 // Material::Property<> class inline methods
 template <typename T>
 inline std::string
-MaterialProperty<T>::type ()
+MaterialProperty<T>::type()
 {
   return typeid(T).name();
 }
 
 template <typename T>
 inline PropertyValue *
-MaterialProperty<T>::init (int size)
+MaterialProperty<T>::init(int size)
 {
   return _init_helper(size, this, static_cast<T *>(0));
 }
 
 template <typename T>
 inline void
-MaterialProperty<T>::resize (int n)
+MaterialProperty<T>::resize(int n)
 {
   _value.resize(n);
 }
 
 template <typename T>
 inline void
-MaterialProperty<T>::swap (PropertyValue *rhs)
+MaterialProperty<T>::swap(PropertyValue * rhs)
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
-  _value.swap(cast_ptr<MaterialProperty<T>*>(rhs)->_value);
+  _value.swap(cast_ptr<MaterialProperty<T> *>(rhs)->_value);
 }
 
 template <typename T>
 inline void
-MaterialProperty<T>::qpCopy (const unsigned int to_qp, PropertyValue *rhs, const unsigned int from_qp)
+MaterialProperty<T>::qpCopy(const unsigned int to_qp, PropertyValue * rhs, const unsigned int from_qp)
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
-  _value[to_qp] = cast_ptr<const MaterialProperty<T>*>(rhs)->_value[from_qp];
+  _value[to_qp] = cast_ptr<const MaterialProperty<T> *>(rhs)->_value[from_qp];
 }
 
-template<typename T>
+template <typename T>
 inline void
 MaterialProperty<T>::store(std::ostream & stream)
 {
@@ -256,7 +276,7 @@ MaterialProperty<T>::store(std::ostream & stream)
     storeHelper(stream, _value[i], NULL);
 }
 
-template<typename T>
+template <typename T>
 inline void
 MaterialProperty<T>::load(std::istream & stream)
 {
@@ -270,9 +290,13 @@ MaterialProperty<T>::load(std::istream & stream)
 class MaterialProperties : public std::vector<PropertyValue *>
 {
 public:
-  MaterialProperties() { }
+  MaterialProperties()
+  {
+  }
 
-  virtual ~MaterialProperties() { }
+  virtual ~MaterialProperties()
+  {
+  }
 
   /**
    * Parameter map iterator.
@@ -305,7 +329,7 @@ public:
   }
 };
 
-template<>
+template <>
 inline void
 dataStore(std::ostream & stream, MaterialProperties & v, void * context)
 {
@@ -315,7 +339,7 @@ dataStore(std::ostream & stream, MaterialProperties & v, void * context)
   storeHelper(stream, mat_props, context);
 }
 
-template<>
+template <>
 inline void
 dataLoad(std::istream & stream, MaterialProperties & v, void * context)
 {
@@ -326,20 +350,22 @@ dataLoad(std::istream & stream, MaterialProperties & v, void * context)
 }
 
 // Scalar Init Helper Function
-template<typename P>
-PropertyValue *_init_helper(int size, PropertyValue * /*prop*/, const P*)
+template <typename P>
+PropertyValue *
+_init_helper(int size, PropertyValue * /*prop*/, const P *)
 {
-  MaterialProperty<P> *copy = new MaterialProperty<P>;
+  MaterialProperty<P> * copy = new MaterialProperty<P>;
   copy->_value.resize(size);
   return copy;
 }
 
 // Vector Init Helper Function
-template<typename P>
-PropertyValue *_init_helper(int size, PropertyValue * /*prop*/, const std::vector<P>*)
+template <typename P>
+PropertyValue *
+_init_helper(int size, PropertyValue * /*prop*/, const std::vector<P> *)
 {
-  typedef MaterialProperty<std::vector<P> > PropType;
-  PropType *copy = new PropType;
+  typedef MaterialProperty<std::vector<P>> PropType;
+  PropType * copy = new PropType;
   copy->_value.resize(size);
 
   // We don't know the size of the underlying vector at each

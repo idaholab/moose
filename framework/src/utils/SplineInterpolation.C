@@ -22,8 +22,8 @@ SplineInterpolation::SplineInterpolation()
 {
 }
 
-SplineInterpolation::SplineInterpolation(const std::vector<double> & x, const std::vector<double> & y, double yp1/* = 1e30*/, double ypn/* = 1e30*/) :
-    _x(x),
+SplineInterpolation::SplineInterpolation(const std::vector<double> & x, const std::vector<double> & y, double yp1 /* = 1e30*/, double ypn /* = 1e30*/)
+  : _x(x),
     _y(y),
     _yp1(yp1),
     _ypn(ypn)
@@ -33,7 +33,7 @@ SplineInterpolation::SplineInterpolation(const std::vector<double> & x, const st
 }
 
 void
-SplineInterpolation::setData(const std::vector<double> & x, const std::vector<double> & y, double yp1/* = 1e30*/, double ypn/* = 1e30*/)
+SplineInterpolation::setData(const std::vector<double> & x, const std::vector<double> & y, double yp1 /* = 1e30*/, double ypn /* = 1e30*/)
 {
   _x = x;
   _y = y;
@@ -51,11 +51,11 @@ SplineInterpolation::errorCheck()
 
   bool error = false;
   for (unsigned i = 0; !error && i + 1 < _x.size(); ++i)
-    if (_x[i] >= _x[i+1])
+    if (_x[i] >= _x[i + 1])
       error = true;
 
   if (error)
-    mooseError( "x-values are not strictly increasing" );
+    mooseError("x-values are not strictly increasing");
 }
 
 void
@@ -82,7 +82,7 @@ SplineInterpolation::solve()
     double p = sig * _y2[i - 1] + 2.0;
     _y2[i] = (sig - 1.0) / p;
     u[i] = (_y[i + 1] - _y[i]) / (_x[i + 1] - _x[i]) - (_y[i] - _y[i - 1]) / (_x[i] - _x[i - 1]);
-    u[i] = (6.0 * u[i] / (_x[i+1] - _x[i - 1]) - sig * u[i - 1]) / p;
+    u[i] = (6.0 * u[i] / (_x[i + 1] - _x[i - 1]) - sig * u[i - 1]) / p;
   }
 
   double qn, un;
@@ -134,7 +134,7 @@ SplineInterpolation::sample(double x) const
   double h, a, b;
   computeCoeffs(klo, khi, x, h, a, b);
 
-  return a * _y[klo] + b * _y[khi] + ((a*a*a - a) * _y2[klo] + (b*b*b - b) * _y2[khi]) * (h*h) / 6.0;
+  return a * _y[klo] + b * _y[khi] + ((a * a * a - a) * _y2[klo] + (b * b * b - b) * _y2[khi]) * (h * h) / 6.0;
 }
 
 double
@@ -146,7 +146,7 @@ SplineInterpolation::sampleDerivative(double x) const
   double h, a, b;
   computeCoeffs(klo, khi, x, h, a, b);
 
-  return (_y[khi] - _y[klo]) / h - (((3.0 * a*a - 1.0) * _y2[klo] + (3.0 * b*b - 1.0) * -_y2[khi]) * h / 6.0);
+  return (_y[khi] - _y[klo]) / h - (((3.0 * a * a - 1.0) * _y2[klo] + (3.0 * b * b - 1.0) * -_y2[khi]) * h / 6.0);
 }
 
 double
@@ -208,14 +208,14 @@ SplineInterpolation::dumpSampleFile(std::string base_name, std::string x_label, 
   out << "set key left top\n"
       << "f(x)=";
 
-   for (unsigned int i=1; i<_x.size(); ++i)
-   {
-     Real m = (_y[i] - _y[i-1])/(_x[i] - _x[i-1]);
-     Real b = (_y[i] - m*_x[i]);
+  for (unsigned int i = 1; i < _x.size(); ++i)
+  {
+    Real m = (_y[i] - _y[i - 1]) / (_x[i] - _x[i - 1]);
+    Real b = (_y[i] - m * _x[i]);
 
-     out << _x[i-1] << "<=x && x<" << _x[i] << " ? " << m << "*x+(" << b << ") : ";
-   }
-   out << " 1/0\n";
+    out << _x[i - 1] << "<=x && x<" << _x[i] << " ? " << m << "*x+(" << b << ") : ";
+  }
+  out << " 1/0\n";
 
   out << "\nplot f(x) with lines, '" << filename_pts.str() << "' using 1:2 title \"Points\"\n";
   out.close();
@@ -224,7 +224,7 @@ SplineInterpolation::dumpSampleFile(std::string base_name, std::string x_label, 
 
   out.open(filename_pts.str().c_str());
   /* Next dump the data points into a seperate file */
-  for (unsigned int i = 0; i<_x.size(); ++i)
+  for (unsigned int i = 0; i < _x.size(); ++i)
     out << _x[i] << " " << _y[i] << "\n";
   out << std::endl;
 

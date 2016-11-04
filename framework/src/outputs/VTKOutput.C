@@ -18,10 +18,11 @@
 #include "libmesh/vtk_io.h"
 #include "libmesh/equation_systems.h"
 
-template<>
-InputParameters validParams<VTKOutput>()
+template <>
+InputParameters
+validParams<VTKOutput>()
 {
-  InputParameters params = validParams<BasicOutput<OversampleOutput> >();
+  InputParameters params = validParams<BasicOutput<OversampleOutput>>();
 
   // Set default padding to 3
   params.set<unsigned int>("padding") = 3;
@@ -33,8 +34,8 @@ InputParameters validParams<VTKOutput>()
   return params;
 }
 
-VTKOutput::VTKOutput(const InputParameters & parameters) :
-    BasicOutput<OversampleOutput>(parameters),
+VTKOutput::VTKOutput(const InputParameters & parameters)
+  : BasicOutput<OversampleOutput>(parameters),
     _binary(getParam<bool>("binary"))
 {
 }

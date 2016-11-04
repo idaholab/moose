@@ -14,8 +14,9 @@
 
 #include "Function.h"
 
-template<>
-InputParameters validParams<Function>()
+template <>
+InputParameters
+validParams<Function>()
 {
   InputParameters params = validParams<MooseObject>();
 
@@ -24,8 +25,8 @@ InputParameters validParams<Function>()
   return params;
 }
 
-Function::Function(const InputParameters & parameters) :
-    MooseObject(parameters),
+Function::Function(const InputParameters & parameters)
+  : MooseObject(parameters),
     SetupInterface(this),
     TransientInterface(this),
     PostprocessorInterface(this),

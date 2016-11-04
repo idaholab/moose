@@ -19,9 +19,8 @@
 
 class AddBCAction;
 
-template<>
+template <>
 InputParameters validParams<AddBCAction>();
-
 
 class AddBCAction : public MooseObjectAction
 {

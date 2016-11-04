@@ -23,7 +23,7 @@ class LayeredBase;
 class UserObject;
 class SubProblem;
 
-template<>
+template <>
 InputParameters validParams<LayeredBase>();
 
 /**
@@ -72,7 +72,10 @@ protected:
   /**
    * Whether or not a layer has a value.
    */
-  bool layerHasValue(unsigned int layer) const { return _layer_has_value[layer]; }
+  bool layerHasValue(unsigned int layer) const
+  {
+    return _layer_has_value[layer];
+  }
 
   /// Name of this object
   std::string _layered_base_name;

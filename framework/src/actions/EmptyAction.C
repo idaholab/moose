@@ -14,16 +14,16 @@
 
 #include "EmptyAction.h"
 
-template<>
-InputParameters validParams<EmptyAction>()
+template <>
+InputParameters
+validParams<EmptyAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-
-EmptyAction::EmptyAction(InputParameters params) :
-    Action(params)
+EmptyAction::EmptyAction(InputParameters params)
+  : Action(params)
 {
 }
 
@@ -31,4 +31,3 @@ void
 EmptyAction::act()
 {
 }
-

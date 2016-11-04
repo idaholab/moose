@@ -19,9 +19,8 @@
 
 class AddFieldSplitAction;
 
-template<>
+template <>
 InputParameters validParams<AddFieldSplitAction>();
-
 
 class AddFieldSplitAction : public MooseObjectAction
 {
@@ -31,8 +30,5 @@ public:
   // prepare PETSc options
   void act();
 };
-
-
-
 
 #endif /* ADDFIELDSPLITACTION_H_ */

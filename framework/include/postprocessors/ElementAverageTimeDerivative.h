@@ -20,7 +20,7 @@
 //Forward Declarations
 class ElementAverageTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<ElementAverageTimeDerivative>();
 
 /**

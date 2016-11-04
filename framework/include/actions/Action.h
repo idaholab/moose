@@ -30,7 +30,7 @@ class Executioner;
 class MooseApp;
 class Factory;
 
-template<>
+template <>
 InputParameters validParams<Action>();
 
 /**
@@ -41,14 +41,19 @@ class Action : public ConsoleStreamInterface
 public:
   Action(InputParameters parameters);
 
-  virtual ~Action() {}
+  virtual ~Action()
+  {
+  }
 
   virtual void act() = 0;
 
   /**
    * The name of the action
    */
-  const std::string & name() const { return _name; }
+  const std::string & name() const
+  {
+    return _name;
+  }
 
   ///@{
   /**
@@ -58,14 +63,29 @@ public:
   std::string getShortName() const;
   ///@}
 
-  const std::string & type() const { return _action_type; }
+  const std::string & type() const
+  {
+    return _action_type;
+  }
 
-  InputParameters & parameters() { return _pars; }
-  const InputParameters & parameters() const { return _pars; }
+  InputParameters & parameters()
+  {
+    return _pars;
+  }
+  const InputParameters & parameters() const
+  {
+    return _pars;
+  }
 
-  const std::string & specificTaskName() const { return _specific_task_name; }
+  const std::string & specificTaskName() const
+  {
+    return _specific_task_name;
+  }
 
-  const std::set<std::string> & getAllTasks() const { return _all_tasks; }
+  const std::set<std::string> & getAllTasks() const
+  {
+    return _all_tasks;
+  }
 
   ///@{
   /**
@@ -77,13 +97,17 @@ public:
   const T & getParam(const std::string & name) const;
   ///@}
 
-  inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
+  inline bool isParamValid(const std::string & name) const
+  {
+    return _pars.isParamValid(name);
+  }
 
-  void appendTask(const std::string & task) { _all_tasks.insert(task); }
-
+  void appendTask(const std::string & task)
+  {
+    _all_tasks.insert(task);
+  }
 
 protected:
-
   /// Input parameters for the action
   InputParameters _pars;
 
@@ -134,7 +158,6 @@ protected:
 
   /// Convenience reference to an executioner
   MooseSharedPointer<Executioner> & _executioner;
-
 };
 
 template <typename T>

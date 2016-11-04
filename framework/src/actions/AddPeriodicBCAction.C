@@ -24,24 +24,25 @@
 // LibMesh includes
 #include "libmesh/periodic_boundary.h" // translation PBCs provided by libmesh
 
-template<>
-InputParameters validParams<AddPeriodicBCAction>()
+template <>
+InputParameters
+validParams<AddPeriodicBCAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::vector<std::string> >("auto_direction", "If using a generated mesh, you can specifiy just the dimension(s) you want to mark as periodic");
+  params.addParam<std::vector<std::string>>("auto_direction", "If using a generated mesh, you can specifiy just the dimension(s) you want to mark as periodic");
 
   params.addParam<BoundaryName>("primary", "Boundary ID associated with the primary boundary.");
   params.addParam<BoundaryName>("secondary", "Boundary ID associated with the secondary boundary.");
   params.addParam<RealVectorValue>("translation", "Vector that translates coordinates on the primary boundary to coordinates on the secondary boundary.");
-  params.addParam<std::vector<std::string> >("transform_func", "Functions that specify the transformation");
-  params.addParam<std::vector<std::string> >("inv_transform_func", "Functions that specify the inverse transformation");
+  params.addParam<std::vector<std::string>>("transform_func", "Functions that specify the transformation");
+  params.addParam<std::vector<std::string>>("inv_transform_func", "Functions that specify the inverse transformation");
 
-  params.addParam<std::vector<VariableName> >("variable", "Variable for the periodic boundary");
+  params.addParam<std::vector<VariableName>>("variable", "Variable for the periodic boundary");
   return params;
 }
 
-AddPeriodicBCAction::AddPeriodicBCAction(InputParameters params) :
-    Action(params)
+AddPeriodicBCAction::AddPeriodicBCAction(InputParameters params)
+  : Action(params)
 {
 }
 
@@ -91,7 +92,7 @@ AddPeriodicBCAction::autoTranslationBoundaries()
     }
 
     NonlinearSystem & nl = _problem->getNonlinearSystem();
-    std::vector<std::string> auto_dirs = getParam<std::vector<std::string> >("auto_direction");
+    std::vector<std::string> auto_dirs = getParam<std::vector<std::string>>("auto_direction");
 
     int dim_offset = _mesh->dimension() - 2;
     for (const auto & dir : auto_dirs)
@@ -124,7 +125,7 @@ AddPeriodicBCAction::autoTranslationBoundaries()
 
         p.myboundary = boundary_ids->first;
         p.pairedboundary = boundary_ids->second;
-        setPeriodicVars(p, getParam<std::vector<VariableName> >("variable"));
+        setPeriodicVars(p, getParam<std::vector<VariableName>>("variable"));
         nl.dofMap().add_periodic_boundary(p);
         if (displaced_problem)
           displaced_problem->nlSys().dofMap().add_periodic_boundary(p);
@@ -152,19 +153,19 @@ AddPeriodicBCAction::act()
     PeriodicBoundary p(translation);
     p.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary"));
     p.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));
-    setPeriodicVars(p, getParam<std::vector<VariableName> >("variable"));
+    setPeriodicVars(p, getParam<std::vector<VariableName>>("variable"));
 
     _problem->addGhostedBoundary(p.myboundary);
     _problem->addGhostedBoundary(p.pairedboundary);
 
     nl.dofMap().add_periodic_boundary(p);
     if (displaced_problem)
-       displaced_problem->nlSys().dofMap().add_periodic_boundary(p);
+      displaced_problem->nlSys().dofMap().add_periodic_boundary(p);
   }
-  else if (getParam<std::vector<std::string> >("transform_func") != std::vector<std::string>())
+  else if (getParam<std::vector<std::string>>("transform_func") != std::vector<std::string>())
   {
-    std::vector<std::string> inv_fn_names = getParam<std::vector<std::string> >("inv_transform_func");
-    std::vector<std::string> fn_names = getParam<std::vector<std::string> >("transform_func");
+    std::vector<std::string> inv_fn_names = getParam<std::vector<std::string>>("inv_transform_func");
+    std::vector<std::string> fn_names = getParam<std::vector<std::string>>("transform_func");
 
     // If the user provided a forward transformation, he must also provide an inverse -- we can't
     // form the inverse of an arbitrary function automatically...
@@ -174,12 +175,12 @@ AddPeriodicBCAction::act()
     FunctionPeriodicBoundary pb(*_problem, fn_names);
     pb.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary"));
     pb.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));
-    setPeriodicVars(pb, getParam<std::vector<VariableName> >("variable"));
+    setPeriodicVars(pb, getParam<std::vector<VariableName>>("variable"));
 
     FunctionPeriodicBoundary ipb(*_problem, inv_fn_names);
     ipb.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("secondary"));   // these are swapped
     ipb.pairedboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary")); // these are swapped
-    setPeriodicVars(ipb, getParam<std::vector<VariableName> >("variable"));
+    setPeriodicVars(ipb, getParam<std::vector<VariableName>>("variable"));
 
     _problem->addGhostedBoundary(ipb.myboundary);
     _problem->addGhostedBoundary(ipb.pairedboundary);
@@ -187,7 +188,7 @@ AddPeriodicBCAction::act()
     // Add the pair of periodic boundaries to the dof map
     nl.dofMap().add_periodic_boundary(pb, ipb);
     if (displaced_problem)
-       displaced_problem->nlSys().dofMap().add_periodic_boundary(pb, ipb);
+      displaced_problem->nlSys().dofMap().add_periodic_boundary(pb, ipb);
   }
   else
   {

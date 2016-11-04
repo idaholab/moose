@@ -17,8 +17,9 @@
 
 #include "libmesh/system.h"
 
-template<>
-InputParameters validParams<NumDOFs>()
+template <>
+InputParameters
+validParams<NumDOFs>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   MooseEnum system_enum("NL AUX ALL", "ALL");
@@ -26,8 +27,8 @@ InputParameters validParams<NumDOFs>()
   return params;
 }
 
-NumDOFs::NumDOFs(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+NumDOFs::NumDOFs(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _system_enum(parameters.get<MooseEnum>("system").getEnum<SystemEnum>()),
     _system_pointer(NULL),
     _es_pointer(NULL)

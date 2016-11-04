@@ -28,18 +28,23 @@ class Backup;
 // libMesh forward declarations
 namespace libMesh
 {
-namespace MeshTools { class BoundingBox; }
-template <typename T> class NumericVector;
+namespace MeshTools
+{
+class BoundingBox;
+}
+template <typename T>
+class NumericVector;
 }
 
-template<>
+template <>
 InputParameters validParams<MultiApp>();
 
 /**
  * Helper class for holding Sub-app backups
  */
-class SubAppBackups : public std::vector<MooseSharedPointer<Backup> >
-{};
+class SubAppBackups : public std::vector<MooseSharedPointer<Backup>>
+{
+};
 
 /**
  * A MultiApp represents one or more MOOSE applications that are running simultaneously.
@@ -49,10 +54,9 @@ class SubAppBackups : public std::vector<MooseSharedPointer<Backup> >
  * path using "MOOSE_LIBRARY_PATH" or by specifying a single input file library path
  * in Multiapps InputParameters object.
  */
-class MultiApp :
-  public MooseObject,
-  public SetupInterface,
-  public Restartable
+class MultiApp : public MooseObject,
+                 public SetupInterface,
+                 public Restartable
 {
 public:
   MultiApp(const InputParameters & parameters);
@@ -78,7 +82,7 @@ public:
    *
    * @return Whether or not all of the solves were successful (i.e. all solves made it to the target_time)
    */
-  virtual bool solveStep(Real dt, Real target_time, bool auto_advance=true) = 0;
+  virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) = 0;
 
   /**
    * Actually advances time and causes output.
@@ -106,7 +110,10 @@ public:
    * Whether or not this MultiApp should be restored at the beginning of
    * each Picard iteration.
    */
-  virtual bool needsRestoration() { return true; }
+  virtual bool needsRestoration()
+  {
+    return true;
+  }
 
   /**
    * @param app The global app number to get the Executioner for
@@ -128,7 +135,10 @@ public:
   /**
    * Get the FEProblem this MultiApp is part of.
    */
-  FEProblem & problem() { return _fe_problem; }
+  FEProblem & problem()
+  {
+    return _fe_problem;
+  }
 
   /**
    * Get the FEProblem for the global app is part of.
@@ -163,22 +173,34 @@ public:
   /**
    * @return Number of Global Apps in this MultiApp
    */
-  unsigned int numGlobalApps() { return _total_num_apps; }
+  unsigned int numGlobalApps()
+  {
+    return _total_num_apps;
+  }
 
   /**
    * @return Number of Apps on local processor.
    */
-  unsigned int numLocalApps() { return _my_num_apps; }
+  unsigned int numLocalApps()
+  {
+    return _my_num_apps;
+  }
 
   /**
    * @return The global number of the first app on the local processor.
    */
-  unsigned int firstLocalApp() { return _first_local_app; }
+  unsigned int firstLocalApp()
+  {
+    return _first_local_app;
+  }
 
   /**
    * Whether or not this MultiApp has an app on this processor.
    */
-  bool hasApp() { return _has_an_app; }
+  bool hasApp()
+  {
+    return _has_an_app;
+  }
 
   /**
    * Whether or not the given global app number is on this processor.
@@ -198,7 +220,10 @@ public:
    * @param app The global app number you want the position for.
    * @return the position
    */
-  Point position(unsigned int app) { return _positions[app]; }
+  Point position(unsigned int app)
+  {
+    return _positions[app];
+  }
 
   /**
    * "Reset" the App corresponding to the global App number
@@ -231,13 +256,19 @@ public:
    * Get the MPI communicator this MultiApp is operating on.
    * @return The MPI comm for this MultiApp
    */
-  MPI_Comm & comm() { return _my_comm; }
+  MPI_Comm & comm()
+  {
+    return _my_comm;
+  }
 
   /**
    * Whether or not this processor is the "root" processor for the sub communicator.
    * The "root" processor has rank 0 in the sub communicator
    */
-  bool isRootProcessor() { return _my_rank == 0; }
+  bool isRootProcessor()
+  {
+    return _my_rank == 0;
+  }
 
 protected:
   /**
@@ -354,7 +385,7 @@ protected:
   SubAppBackups & _backups;
 };
 
-template<>
+template <>
 inline void
 dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
 {
@@ -365,11 +396,11 @@ dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
   if (!multi_app)
     mooseError("Error storing std::vector<Backup*>");
 
-  for (unsigned int i=0; i<backups.size(); i++)
+  for (unsigned int i = 0; i < backups.size(); i++)
     dataStore(stream, backups[i], context);
 }
 
-template<>
+template <>
 inline void
 dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
 {
@@ -378,7 +409,7 @@ dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
   if (!multi_app)
     mooseError("Error loading std::vector<Backup*>");
 
-  for (unsigned int i=0; i<backups.size(); i++)
+  for (unsigned int i = 0; i < backups.size(); i++)
     dataLoad(stream, backups[i], context);
 
   multi_app->restore();

@@ -22,18 +22,19 @@
 // libMesh includes
 #include "libmesh/transient_system.h"
 
-template<>
-InputParameters validParams<VariableResidualNormsDebugOutput>()
+template <>
+InputParameters
+validParams<VariableResidualNormsDebugOutput>()
 {
-  InputParameters params = validParams<BasicOutput<PetscOutput> >();
+  InputParameters params = validParams<BasicOutput<PetscOutput>>();
 
   // By default this outputs on every nonlinear iteration
   params.set<MultiMooseEnum>("execute_on") = "nonlinear";
   return params;
 }
 
-VariableResidualNormsDebugOutput::VariableResidualNormsDebugOutput(const InputParameters & parameters) :
-    BasicOutput<PetscOutput>(parameters),
+VariableResidualNormsDebugOutput::VariableResidualNormsDebugOutput(const InputParameters & parameters)
+  : BasicOutput<PetscOutput>(parameters),
     _sys(_problem_ptr->getNonlinearSystem().sys())
 {
 }
@@ -57,8 +58,8 @@ VariableResidualNormsDebugOutput::output(const ExecFlagType & /*type*/)
   oss << "    |residual|_2 of individual variables:\n";
   for (unsigned int var_num = 0; var_num < _sys.n_vars(); var_num++)
   {
-    Real var_res_id = _sys.calculate_norm(*_sys.rhs,var_num,DISCRETE_L2);
-    oss << std::setw(27-max_name_size) << " " << std::setw(max_name_size+2) //match position of overall NL residual
+    Real var_res_id = _sys.calculate_norm(*_sys.rhs, var_num, DISCRETE_L2);
+    oss << std::setw(27 - max_name_size) << " " << std::setw(max_name_size + 2) //match position of overall NL residual
         << std::left << _sys.variable_name(var_num) + ":" << var_res_id << "\n";
   }
 

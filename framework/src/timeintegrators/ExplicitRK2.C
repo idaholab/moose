@@ -17,16 +17,17 @@
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
-template<>
-InputParameters validParams<ExplicitRK2>()
+template <>
+InputParameters
+validParams<ExplicitRK2>()
 {
   InputParameters params = validParams<TimeIntegrator>();
 
   return params;
 }
 
-ExplicitRK2::ExplicitRK2(const InputParameters & parameters) :
-    TimeIntegrator(parameters),
+ExplicitRK2::ExplicitRK2(const InputParameters & parameters)
+  : TimeIntegrator(parameters),
     _stage(1),
     _residual_old(_nl.addVector("residual_old", false, GHOSTED))
 {
@@ -35,8 +36,6 @@ ExplicitRK2::ExplicitRK2(const InputParameters & parameters) :
 ExplicitRK2::~ExplicitRK2()
 {
 }
-
-
 
 void
 ExplicitRK2::preSolve()
@@ -64,14 +63,12 @@ ExplicitRK2::computeTimeDerivatives()
   _u_dot.close();
 }
 
-
-
 void
 ExplicitRK2::solve()
 {
   Real time_new = _fe_problem.time();
   Real time_old = _fe_problem.timeOld();
-  Real time_stage2 = time_old + a()*_dt;
+  Real time_stage2 = time_old + a() * _dt;
 
   // There is no work to do for the first stage (Y_1 = y_n).  The
   // first solve therefore happens in the second stage.  Note that the
@@ -100,8 +97,6 @@ ExplicitRK2::solve()
   // Reset time at beginning of step to its original value
   _fe_problem.timeOld() = time_old;
 }
-
-
 
 void
 ExplicitRK2::postStep(NumericVector<Number> & residual)

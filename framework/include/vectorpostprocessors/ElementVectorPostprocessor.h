@@ -21,12 +21,11 @@
 //Forward Declarations
 class ElementVectorPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ElementVectorPostprocessor>();
 
-class ElementVectorPostprocessor :
-  public ElementUserObject,
-  public VectorPostprocessor
+class ElementVectorPostprocessor : public ElementUserObject,
+                                   public VectorPostprocessor
 {
 public:
   ElementVectorPostprocessor(const InputParameters & parameters);
@@ -34,7 +33,9 @@ public:
   /**
    * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
    */
-  virtual void finalize() override {}
+  virtual void finalize() override
+  {
+  }
 };
 
 #endif

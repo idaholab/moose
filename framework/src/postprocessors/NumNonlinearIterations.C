@@ -17,16 +17,17 @@
 #include "FEProblem.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<NumNonlinearIterations>()
+template <>
+InputParameters
+validParams<NumNonlinearIterations>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addParam<bool>("accumulate_over_step", false, "When set to true, accumulates to count the total over all Picard iterations for each step");
   return params;
 }
 
-NumNonlinearIterations::NumNonlinearIterations(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+NumNonlinearIterations::NumNonlinearIterations(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _fe_problem(dynamic_cast<FEProblem *>(&_subproblem)),
     _accumulate_over_step(getParam<bool>("accumulate_over_step")),
     _num_iters(0),
@@ -56,4 +57,3 @@ NumNonlinearIterations::getValue()
 
   return _num_iters;
 }
-

@@ -21,7 +21,7 @@
 // Forward declerations
 class CheckOutputAction;
 
-template<>
+template <>
 InputParameters validParams<CheckOutputAction>();
 
 /**
@@ -30,7 +30,6 @@ InputParameters validParams<CheckOutputAction>();
 class CheckOutputAction : public Action
 {
 public:
-
   /**
    * Class constructor
    * @param params Input parameters for this object
@@ -40,7 +39,6 @@ public:
   virtual void act() override;
 
 private:
-
   /**
    * Performs check for "outputs" option for Variables and AuxVariables blocks
    * @param task The name of the task to extract names from (add_variable or add_aux_variable)

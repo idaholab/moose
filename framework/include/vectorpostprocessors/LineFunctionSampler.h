@@ -22,12 +22,11 @@
 //Forward Declarations
 class LineFunctionSampler;
 
-template<>
+template <>
 InputParameters validParams<LineFunctionSampler>();
 
-class LineFunctionSampler :
-  public GeneralVectorPostprocessor,
-  protected SamplerBase
+class LineFunctionSampler : public GeneralVectorPostprocessor,
+                            protected SamplerBase
 {
 public:
   LineFunctionSampler(const InputParameters & parameters);

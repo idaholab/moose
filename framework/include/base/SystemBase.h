@@ -60,14 +60,14 @@ void extraSparsity(SparsityPattern::Graph & sparsity,
 /**
  * IO Methods for restart, backup and restore.
  */
-template<>
+template <>
 void
 dataStore(std::ostream & stream, SystemBase & system_base, void * context);
 
 /**
  * IO Methods for restart, backup and restore.
  */
-template<>
+template <>
 void
 dataLoad(std::istream & stream, SystemBase & system_base, void * context);
 
@@ -76,11 +76,12 @@ dataLoad(std::istream & stream, SystemBase & system_base, void * context);
  */
 struct VarCopyInfo
 {
-  VarCopyInfo(const std::string & dest_name, const std::string & source_name, const std::string & timestep) :
-    _dest_name(dest_name),
-    _source_name(source_name),
-    _timestep(timestep)
-  {}
+  VarCopyInfo(const std::string & dest_name, const std::string & source_name, const std::string & timestep)
+    : _dest_name(dest_name),
+      _source_name(source_name),
+      _timestep(timestep)
+  {
+  }
 
   std::string _dest_name;
   std::string _source_name;
@@ -95,15 +96,23 @@ class SystemBase : public libMesh::ParallelObject
 {
 public:
   SystemBase(SubProblem & subproblem, const std::string & name, Moose::VarKindType var_kind);
-  virtual ~SystemBase() {}
+  virtual ~SystemBase()
+  {
+  }
 
   /**
    * Gets the number of this system
    * @return The number of this system
    */
   virtual unsigned int number();
-  virtual MooseMesh & mesh() { return _mesh; }
-  virtual SubProblem & subproblem() { return _subproblem; }
+  virtual MooseMesh & mesh()
+  {
+    return _mesh;
+  }
+  virtual SubProblem & subproblem()
+  {
+    return _subproblem;
+  }
 
   /**
    * Gets the dof map
@@ -118,12 +127,12 @@ public:
   /**
    * Initialize the system
    */
-  virtual void init() {};
+  virtual void init(){};
 
   /**
    * Called only once, just before the solve begins so objects can do some precalculations
    */
-  virtual void initializeObjects() {};
+  virtual void initializeObjects(){};
 
   /**
    * Update the system (doing libMesh magic)
@@ -142,15 +151,24 @@ public:
    * The solution vector that is currently being operated on.
    * This is typically a ghosted vector that comes in from the Nonlinear solver.
    */
-  virtual const NumericVector<Number> * & currentSolution() = 0;
+  virtual const NumericVector<Number> *& currentSolution() = 0;
 
   virtual NumericVector<Number> & solution() = 0;
   virtual NumericVector<Number> & solutionOld() = 0;
   virtual NumericVector<Number> & solutionOlder() = 0;
 
-  virtual Number & duDotDu() { return _du_dot_du; }
-  virtual NumericVector<Number> & solutionUDot() { return *_dummy_vec; }
-  virtual NumericVector<Number> & residualVector(Moose::KernelType /*type*/) { return *_dummy_vec; }
+  virtual Number & duDotDu()
+  {
+    return _du_dot_du;
+  }
+  virtual NumericVector<Number> & solutionUDot()
+  {
+    return *_dummy_vec;
+  }
+  virtual NumericVector<Number> & residualVector(Moose::KernelType /*type*/)
+  {
+    return *_dummy_vec;
+  }
 
   virtual void saveOldSolutions();
   virtual void restoreOldSolutions();
@@ -170,8 +188,14 @@ public:
    */
   virtual NumericVector<Number> & serializedSolution() = 0;
 
-  virtual NumericVector<Number> & residualCopy() { mooseError("This system does not support getting a copy of the residual"); }
-  virtual NumericVector<Number> & residualGhosted() { mooseError("This system does not support getting a ghosted copy of the residual"); }
+  virtual NumericVector<Number> & residualCopy()
+  {
+    mooseError("This system does not support getting a copy of the residual");
+  }
+  virtual NumericVector<Number> & residualGhosted()
+  {
+    mooseError("This system does not support getting a ghosted copy of the residual");
+  }
 
   /**
    * Will modify the send_list to add all of the extra ghosted dofs for this system
@@ -392,15 +416,27 @@ public:
    */
   virtual void addVariableToCopy(const std::string & dest_name, const std::string & source_name, const std::string & timestep);
 
-  const std::vector<MooseVariable *> & getVariables(THREAD_ID tid) { return _vars[tid].variables(); }
-  const std::vector<MooseVariableScalar *> & getScalarVariables(THREAD_ID tid) { return _vars[tid].scalars(); }
+  const std::vector<MooseVariable *> & getVariables(THREAD_ID tid)
+  {
+    return _vars[tid].variables();
+  }
+  const std::vector<MooseVariableScalar *> & getScalarVariables(THREAD_ID tid)
+  {
+    return _vars[tid].scalars();
+  }
 
-  const std::set<SubdomainID> & getSubdomainsForVar(unsigned int var_number) const { return _var_map.at(var_number); }
+  const std::set<SubdomainID> & getSubdomainsForVar(unsigned int var_number) const
+  {
+    return _var_map.at(var_number);
+  }
 
   /**
    * Remove a vector from the system with the given name.
    */
-  virtual void removeVector(const std::string & name) { system().remove_vector(name); }
+  virtual void removeVector(const std::string & name)
+  {
+    system().remove_vector(name);
+  }
 
   /**
    * Adds a solution length vector to the system.
@@ -414,7 +450,10 @@ public:
    */
   virtual NumericVector<Number> & addVector(const std::string & vector_name, const bool project, const ParallelType type);
 
-  virtual const std::string & name() { return system().name(); }
+  virtual const std::string & name()
+  {
+    return system().name();
+  }
 
   /**
    * Adds a scalar variable
@@ -424,9 +463,12 @@ public:
    */
   virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set<SubdomainID> * const active_subdomains = NULL);
 
-  const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); };
+  const std::vector<VariableName> & getVariableNames() const
+  {
+    return _vars[0].names();
+  };
 
-  virtual void computeVariables(const NumericVector<Number> & /*soln*/) { };
+  virtual void computeVariables(const NumericVector<Number> & /*soln*/){};
 
   void copyVars(ExodusII_IO & io);
 
@@ -448,14 +490,14 @@ protected:
   /// Variable warehouses (one for each thread)
   std::vector<VariableWarehouse> _vars;
   /// Map of variables (variable id -> array of subdomains where it lives)
-  std::map<unsigned int, std::set<SubdomainID> > _var_map;
+  std::map<unsigned int, std::set<SubdomainID>> _var_map;
 
   std::vector<std::string> _vars_to_be_zeroed_on_residual;
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
 
   Real _du_dot_du;
 
-  NumericVector<Number> * _dummy_vec;                     // to satisfy the interface
+  NumericVector<Number> * _dummy_vec; // to satisfy the interface
 
   // Used for saving old solutions so that they wont be accidentally changed
   NumericVector<Real> * _saved_old;
@@ -470,6 +512,5 @@ protected:
 #define PARALLEL_TRY
 
 #define PARALLEL_CATCH _fe_problem.checkExceptionAndStopSolve();
-
 
 #endif /* SYSTEMBASE_H */

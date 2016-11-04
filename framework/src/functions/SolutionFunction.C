@@ -16,9 +16,9 @@
 #include "SolutionFunction.h"
 #include "SolutionUserObject.h"
 
-
-template<>
-InputParameters validParams<SolutionFunction>()
+template <>
+InputParameters
+validParams<SolutionFunction>()
 {
   // Get the Function input parameters
   InputParameters params = validParams<Function>();
@@ -35,8 +35,8 @@ InputParameters validParams<SolutionFunction>()
   return params;
 }
 
-SolutionFunction::SolutionFunction(const InputParameters & parameters) :
-    Function(parameters),
+SolutionFunction::SolutionFunction(const InputParameters & parameters)
+  : Function(parameters),
     _solution_object_ptr(NULL),
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))
@@ -75,5 +75,5 @@ SolutionFunction::initialSetup()
 Real
 SolutionFunction::value(Real t, const Point & p)
 {
-  return _scale_factor*(_solution_object_ptr->pointValue(t, p, _solution_object_var_index)) + _add_factor;
+  return _scale_factor * (_solution_object_ptr->pointValue(t, p, _solution_object_var_index)) + _add_factor;
 }

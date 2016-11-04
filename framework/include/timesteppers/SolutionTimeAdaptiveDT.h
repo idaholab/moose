@@ -21,7 +21,7 @@
 
 class SolutionTimeAdaptiveDT;
 
-template<>
+template <>
 InputParameters validParams<SolutionTimeAdaptiveDT>();
 
 /**
@@ -57,7 +57,6 @@ protected:
   bool _adapt_log;
 
   std::ofstream _adaptive_log;
-
 };
 
 #endif /* SOLUTIONTIMEADAPTIVEDT_H */

@@ -21,14 +21,13 @@
 // Forward declarations
 class MultiAppInterpolationTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppInterpolationTransfer>();
 
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
  */
-class MultiAppInterpolationTransfer :
-  public MultiAppTransfer
+class MultiAppInterpolationTransfer : public MultiAppTransfer
 {
 public:
   MultiAppInterpolationTransfer(const InputParameters & parameters);

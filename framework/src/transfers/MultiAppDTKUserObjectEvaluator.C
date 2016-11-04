@@ -28,8 +28,8 @@
 // libMesh includes
 #include "libmesh/mesh_tools.h"
 
-MultiAppDTKUserObjectEvaluator::MultiAppDTKUserObjectEvaluator(MultiApp & multi_app, const std::string & user_object_name):
-    _multi_app(multi_app),
+MultiAppDTKUserObjectEvaluator::MultiAppDTKUserObjectEvaluator(MultiApp & multi_app, const std::string & user_object_name)
+  : _multi_app(multi_app),
     _user_object_name(user_object_name)
 {
 }
@@ -39,17 +39,17 @@ MultiAppDTKUserObjectEvaluator::~MultiAppDTKUserObjectEvaluator()
 }
 
 DataTransferKit::FieldContainer<double>
-MultiAppDTKUserObjectEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>& bids, const Teuchos::ArrayRCP<double>& coords)
+MultiAppDTKUserObjectEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal> & bids, const Teuchos::ArrayRCP<double> & coords)
 {
-  Teuchos::RCP<const Teuchos::Comm<int> > comm = Teuchos::rcp(new Teuchos::MpiComm<int>(Teuchos::rcp(new Teuchos::OpaqueWrapper<MPI_Comm>(_multi_app.comm()))));
+  Teuchos::RCP<const Teuchos::Comm<int>> comm = Teuchos::rcp(new Teuchos::MpiComm<int>(Teuchos::rcp(new Teuchos::OpaqueWrapper<MPI_Comm>(_multi_app.comm()))));
 
   int num_values = bids.size();
 
   Teuchos::ArrayRCP<double> evaluated_data(num_values);
 
-  unsigned int dim = 3;  // TODO: REPLACE ME!!!!!!!!!
+  unsigned int dim = 3; // TODO: REPLACE ME!!!!!!!!!
 
-  for (GlobalOrdinal i=0; i<static_cast<GlobalOrdinal>(num_values); i++)
+  for (GlobalOrdinal i = 0; i < static_cast<GlobalOrdinal>(num_values); i++)
   {
     // See if this app is on this processor
     if (std::binary_search(_box_ids.begin(), _box_ids.end(), bids[i]))
@@ -57,8 +57,8 @@ MultiAppDTKUserObjectEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>&
       GlobalOrdinal app = bids[i];
 
       Point p;
-      for (unsigned int j=0; j<dim; j++)
-        p(j) = coords[(j*num_values)+i];
+      for (unsigned int j = 0; j < dim; j++)
+        p(j) = coords[(j * num_values) + i];
 
       evaluated_data[i] = _multi_app.appUserObjectBase(app, _user_object_name).spatialValue(p - _multi_app.position(app));
     }
@@ -69,15 +69,15 @@ MultiAppDTKUserObjectEvaluator::evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>&
   return DataTransferKit::FieldContainer<double>(evaluated_data, 1);
 }
 
-Teuchos::RCP<DataTransferKit::GeometryManager<DataTransferKit::Box,long unsigned int> >
-MultiAppDTKUserObjectEvaluator::createSourceGeometry( const Teuchos::RCP<const Teuchos::Comm<int> >& comm )
+Teuchos::RCP<DataTransferKit::GeometryManager<DataTransferKit::Box, long unsigned int>>
+MultiAppDTKUserObjectEvaluator::createSourceGeometry(const Teuchos::RCP<const Teuchos::Comm<int>> & comm)
 {
   _boxes.resize(_multi_app.numLocalApps());
   _box_ids.resize(_multi_app.numLocalApps());
 
   comm->barrier();
 
-  for (unsigned int app=0; app<_multi_app.numLocalApps(); app++)
+  for (unsigned int app = 0; app < _multi_app.numLocalApps(); app++)
   {
     unsigned int global_app = _multi_app.firstLocalApp() + app;
 
@@ -89,7 +89,7 @@ MultiAppDTKUserObjectEvaluator::createSourceGeometry( const Teuchos::RCP<const T
     _box_ids[app] = global_app;
   }
 
-  return Teuchos::rcp(new DataTransferKit::GeometryManager<DataTransferKit::Box,GlobalOrdinal>(_boxes, _box_ids, comm, 3));
+  return Teuchos::rcp(new DataTransferKit::GeometryManager<DataTransferKit::Box, GlobalOrdinal>(_boxes, _box_ids, comm, 3));
 }
 
 #endif //LIBMESH_TRILINOS_HAVE_DTK

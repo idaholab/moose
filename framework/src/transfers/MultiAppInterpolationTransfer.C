@@ -25,8 +25,9 @@
 #include "libmesh/system.h"
 #include "libmesh/radial_basis_interpolation.h"
 
-template<>
-InputParameters validParams<MultiAppInterpolationTransfer>()
+template <>
+InputParameters
+validParams<MultiAppInterpolationTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
 
@@ -46,8 +47,8 @@ InputParameters validParams<MultiAppInterpolationTransfer>()
   return params;
 }
 
-MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable")),
     _num_points(getParam<unsigned int>("num_points")),
@@ -115,8 +116,8 @@ MultiAppInterpolationTransfer::execute()
           mooseError("Unknown interpolation type!");
       }
 
-      std::vector<Point>  &src_pts  (idi->get_source_points());
-      std::vector<Number> &src_vals (idi->get_source_vals());
+      std::vector<Point> & src_pts(idi->get_source_points());
+      std::vector<Number> & src_vals(idi->get_source_vals());
 
       std::vector<std::string> field_vars;
       field_vars.push_back(_to_var_name);
@@ -127,8 +128,8 @@ MultiAppInterpolationTransfer::execute()
 
       if (from_is_nodal)
       {
-        MeshBase::const_node_iterator from_nodes_it    = from_mesh->local_nodes_begin();
-        MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
+        MeshBase::const_node_iterator from_nodes_it = from_mesh->local_nodes_begin();
+        MeshBase::const_node_iterator from_nodes_end = from_mesh->local_nodes_end();
 
         for (; from_nodes_it != from_nodes_end; ++from_nodes_it)
         {
@@ -143,8 +144,8 @@ MultiAppInterpolationTransfer::execute()
       }
       else
       {
-        MeshBase::const_element_iterator from_elements_it    = from_mesh->local_elements_begin();
-        MeshBase::const_element_iterator from_elements_end   = from_mesh->local_elements_end();
+        MeshBase::const_element_iterator from_elements_it = from_mesh->local_elements_begin();
+        MeshBase::const_element_iterator from_elements_end = from_mesh->local_elements_end();
 
         for (; from_elements_it != from_elements_end; ++from_elements_it)
         {
@@ -161,7 +162,7 @@ MultiAppInterpolationTransfer::execute()
       // We have only set local values - prepare for use by gathering remote gata
       idi->prepare_for_use();
 
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         if (_multi_app->hasLocalApp(i))
         {
@@ -192,7 +193,7 @@ MultiAppInterpolationTransfer::execute()
             {
               Node * node = *node_it;
 
-              Point actual_position = *node+_multi_app->position(i);
+              Point actual_position = *node + _multi_app->position(i);
 
               if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
               {
@@ -223,7 +224,7 @@ MultiAppInterpolationTransfer::execute()
               Elem * elem = *elem_it;
 
               Point centroid = elem->centroid();
-              Point actual_position = centroid+_multi_app->position(i);
+              Point actual_position = centroid + _multi_app->position(i);
 
               if (elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
               {
@@ -298,8 +299,8 @@ MultiAppInterpolationTransfer::execute()
           mooseError("Unknown interpolation type!");
       }
 
-      std::vector<Point>  &src_pts  (idi->get_source_points());
-      std::vector<Number> &src_vals (idi->get_source_vals());
+      std::vector<Point> & src_pts(idi->get_source_points());
+      std::vector<Number> & src_vals(idi->get_source_vals());
 
       std::vector<std::string> field_vars;
       field_vars.push_back(_to_var_name);
@@ -308,7 +309,7 @@ MultiAppInterpolationTransfer::execute()
       std::vector<std::string> vars;
       vars.push_back(_to_var_name);
 
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         if (!_multi_app->hasLocalApp(i))
           continue;
@@ -341,8 +342,8 @@ MultiAppInterpolationTransfer::execute()
 
         if (from_is_nodal)
         {
-          MeshBase::const_node_iterator from_nodes_it    = from_mesh->local_nodes_begin();
-          MeshBase::const_node_iterator from_nodes_end   = from_mesh->local_nodes_end();
+          MeshBase::const_node_iterator from_nodes_it = from_mesh->local_nodes_begin();
+          MeshBase::const_node_iterator from_nodes_end = from_mesh->local_nodes_end();
 
           for (; from_nodes_it != from_nodes_end; ++from_nodes_it)
           {
@@ -351,14 +352,14 @@ MultiAppInterpolationTransfer::execute()
             // Assuming LAGRANGE!
             dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
 
-            src_pts.push_back(*from_node+app_position);
+            src_pts.push_back(*from_node + app_position);
             src_vals.push_back(from_solution(from_dof));
           }
         }
         else
         {
-          MeshBase::const_element_iterator from_elements_it    = from_mesh->local_elements_begin();
-          MeshBase::const_element_iterator from_elements_end   = from_mesh->local_elements_end();
+          MeshBase::const_element_iterator from_elements_it = from_mesh->local_elements_begin();
+          MeshBase::const_element_iterator from_elements_end = from_mesh->local_elements_end();
 
           for (; from_elements_it != from_elements_end; ++from_elements_it)
           {
@@ -367,7 +368,7 @@ MultiAppInterpolationTransfer::execute()
             // Assuming LAGRANGE!
             dof_id_type from_dof = from_element->dof_number(from_sys_num, from_var_num, 0);
 
-            src_pts.push_back(from_element->centroid()+app_position);
+            src_pts.push_back(from_element->centroid() + app_position);
             src_vals.push_back(from_solution(from_dof));
           }
         }
@@ -449,14 +450,15 @@ MultiAppInterpolationTransfer::execute()
   _console << "Finished InterpolationTransfer " << name() << std::endl;
 }
 
-Node * MultiAppInterpolationTransfer::getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end)
+Node *
+MultiAppInterpolationTransfer::getNearestNode(const Point & p, Real & distance, const MeshBase::const_node_iterator & nodes_begin, const MeshBase::const_node_iterator & nodes_end)
 {
   distance = std::numeric_limits<Real>::max();
   Node * nearest = NULL;
 
   for (MeshBase::const_node_iterator node_it = nodes_begin; node_it != nodes_end; ++node_it)
   {
-    Real current_distance = (p-*(*node_it)).norm();
+    Real current_distance = (p - *(*node_it)).norm();
 
     if (current_distance < distance)
     {

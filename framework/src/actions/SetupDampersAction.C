@@ -16,16 +16,16 @@
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 
-template<>
-InputParameters validParams<SetupDampersAction>()
+template <>
+InputParameters
+validParams<SetupDampersAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-
-SetupDampersAction::SetupDampersAction(InputParameters params) :
-    Action(params)
+SetupDampersAction::SetupDampersAction(InputParameters params)
+  : Action(params)
 {
 }
 
@@ -38,4 +38,3 @@ SetupDampersAction::act()
   if (it_beg != it_end)
     _problem->setupDampers();
 }
-

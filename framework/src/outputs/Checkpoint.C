@@ -27,11 +27,12 @@
 #include "libmesh/checkpoint_io.h"
 #include "libmesh/enum_xdr_mode.h"
 
-template<>
-InputParameters validParams<Checkpoint>()
+template <>
+InputParameters
+validParams<Checkpoint>()
 {
   // Get the parameters from the base classes
-  InputParameters params = validParams<BasicOutput<FileOutput> >();
+  InputParameters params = validParams<BasicOutput<FileOutput>>();
 
   // Typical checkpoint options
   params.addParam<unsigned int>("num_files", 2, "Number of the restart files to save");
@@ -43,8 +44,8 @@ InputParameters validParams<Checkpoint>()
   return params;
 }
 
-Checkpoint::Checkpoint(const InputParameters & parameters) :
-    BasicOutput<FileOutput>(parameters),
+Checkpoint::Checkpoint(const InputParameters & parameters)
+  : BasicOutput<FileOutput>(parameters),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),
@@ -86,7 +87,7 @@ Checkpoint::output(const ExecFlagType & /*type*/)
 
   // Create the output directory
   std::string cp_dir = directory();
-  mkdir(cp_dir.c_str(),  S_IRWXU | S_IRGRP);
+  mkdir(cp_dir.c_str(), S_IRWXU | S_IRGRP);
 
   // Create the output filename
   std::string current_file = filename();
@@ -133,7 +134,7 @@ Checkpoint::output(const ExecFlagType & /*type*/)
 void
 Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
 {
-  int ret = 0;          // return code for file operations
+  int ret = 0; // return code for file operations
 
   // Update the list of stored files
   _file_names.push_back(file_struct);

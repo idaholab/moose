@@ -26,26 +26,26 @@ class FEProblem;
 /**
  * Base class for split-based preconditioners.
  */
-class Split :
-  public MooseObject,
-  public Restartable
+class Split : public MooseObject,
+              public Restartable
 {
- public:
+public:
   Split(const InputParameters & parameters);
   virtual ~Split() = default;
 
-  virtual void setup(const std::string& prefix = "-");
+  virtual void setup(const std::string & prefix = "-");
 
- protected:
+protected:
   /// Which splitting to use
-  enum SplittingType {
+  enum SplittingType
+  {
     SplittingTypeAdditive,
     SplittingTypeMultiplicative,
     SplittingTypeSymmetricMultiplicative,
     SplittingTypeSchur
   };
 
-  FEProblem& _fe_problem;
+  FEProblem & _fe_problem;
 
   /// "Variables Split operates on
   std::vector<NonlinearVariableName> _vars;
@@ -69,8 +69,7 @@ class Split :
   ///@}
 
   /// Additional PETSc options
-  Moose::PetscSupport::PetscOptions  _petsc_options;
-
+  Moose::PetscSupport::PetscOptions _petsc_options;
 };
 
 #endif // SPLIT_H

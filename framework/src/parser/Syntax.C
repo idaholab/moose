@@ -15,7 +15,6 @@
 #include "Syntax.h"
 #include "MooseUtils.h"
 
-
 Syntax::Syntax()
 {
 }
@@ -65,14 +64,14 @@ Syntax::addDependencySets(const std::string & action_sets)
   std::vector<std::string> sets, prev_names, tasks;
   MooseUtils::tokenize(action_sets, sets, 1, "()");
 
-  for (unsigned int i=0; i<sets.size(); ++i)
+  for (unsigned int i = 0; i < sets.size(); ++i)
   {
     tasks.clear();
     MooseUtils::tokenize(sets[i], tasks, 0, ", ");
-    for (unsigned int j=0; j<tasks.size(); ++j)
+    for (unsigned int j = 0; j < tasks.size(); ++j)
     {
       // Each line should depend on each item in the previous line
-      for (unsigned int k=0; k<prev_names.size(); ++k)
+      for (unsigned int k = 0; k < prev_names.size(); ++k)
         addDependency(tasks[j], prev_names[k]);
     }
     // Copy the the current items to the previous items for the next iteration
@@ -86,7 +85,7 @@ Syntax::getSortedTask()
   return _tasks.getSortedValues();
 }
 
-const std::vector<std::set<std::string> > &
+const std::vector<std::set<std::string>> &
 Syntax::getSortedTaskSet()
 {
   return _tasks.getSortedValuesSets();
@@ -148,7 +147,7 @@ Syntax::isAssociated(const std::string & real_id, bool * is_parent)
    */
   bool local_is_parent;
   if (is_parent == NULL)
-   is_parent = &local_is_parent;  // Just so we don't have to keep checking below when we want to set the value
+    is_parent = &local_is_parent; // Just so we don't have to keep checking below when we want to set the value
   std::multimap<std::string, ActionInfo>::reverse_iterator it;
   std::vector<std::string> real_elements, reg_elements;
   std::string return_value;
@@ -156,7 +155,7 @@ Syntax::isAssociated(const std::string & real_id, bool * is_parent)
   MooseUtils::tokenize(real_id, real_elements);
 
   *is_parent = false;
-  for (it=_associated_actions.rbegin(); it != _associated_actions.rend(); ++it)
+  for (it = _associated_actions.rbegin(); it != _associated_actions.rend(); ++it)
   {
     std::string reg_id = it->first;
     if (reg_id == real_id)
@@ -169,7 +168,7 @@ Syntax::isAssociated(const std::string & real_id, bool * is_parent)
     if (real_elements.size() <= reg_elements.size())
     {
       bool keep_going = true;
-      for (unsigned int j=0; keep_going && j<real_elements.size(); ++j)
+      for (unsigned int j = 0; keep_going && j < real_elements.size(); ++j)
       {
         if (real_elements[j] != reg_elements[j] && reg_elements[j] != std::string("*"))
           keep_going = false;
@@ -208,7 +207,7 @@ bool
 Syntax::verifyMooseObjectTask(const std::string & base, const std::string & task) const
 {
   std::pair<std::multimap<std::string, std::string>::const_iterator, std::multimap<std::string, std::string>::const_iterator> iters =
-    _moose_systems_to_tasks.equal_range(base);
+      _moose_systems_to_tasks.equal_range(base);
 
   for (std::multimap<std::string, std::string>::const_iterator it = iters.first; it != iters.second; ++it)
     if (task == it->second)

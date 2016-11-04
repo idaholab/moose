@@ -17,8 +17,9 @@
 #include "SubProblem.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<NumVars>()
+template <>
+InputParameters
+validParams<NumVars>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
@@ -28,10 +29,11 @@ InputParameters validParams<NumVars>()
   return params;
 }
 
-NumVars::NumVars(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+NumVars::NumVars(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _system(getParam<MooseEnum>("system"))
-{}
+{
+}
 
 Real
 NumVars::getValue()
@@ -46,4 +48,3 @@ NumVars::getValue()
 
   mooseError("Unknown system type!");
 }
-

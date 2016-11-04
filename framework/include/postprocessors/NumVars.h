@@ -20,7 +20,7 @@
 //Forward Declarations
 class NumVars;
 
-template<>
+template <>
 InputParameters validParams<NumVars>();
 
 class NumVars : public GeneralPostprocessor
@@ -28,9 +28,13 @@ class NumVars : public GeneralPostprocessor
 public:
   NumVars(const InputParameters & parameters);
 
-  virtual void initialize() override {}
+  virtual void initialize() override
+  {
+  }
 
-  virtual void execute() override {}
+  virtual void execute() override
+  {
+  }
 
   virtual Real getValue() override;
 

@@ -24,20 +24,20 @@ MaterialWarehouse::addObjects(MooseSharedPointer<Material> block, MooseSharedPoi
   _face_materials.addObject(face, tid);
 }
 
-
 const MooseObjectWarehouse<Material> &
-MaterialWarehouse::operator[](Moose::MaterialDataType data_type) const
+    MaterialWarehouse::
+    operator[](Moose::MaterialDataType data_type) const
 {
   switch (data_type)
   {
-  case Moose::NEIGHBOR_MATERIAL_DATA:
-    return _neighbor_materials;
-    break;
-  case Moose::FACE_MATERIAL_DATA:
-    return _face_materials;
-    break;
-  default:
-    return *this;
+    case Moose::NEIGHBOR_MATERIAL_DATA:
+      return _neighbor_materials;
+      break;
+    case Moose::FACE_MATERIAL_DATA:
+      return _face_materials;
+      break;
+    default:
+      return *this;
   }
 }
 

@@ -18,7 +18,7 @@
 
 class ScalePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ScalePostprocessor>();
 
 /**
@@ -29,8 +29,12 @@ class ScalePostprocessor : public GeneralPostprocessor
 public:
   ScalePostprocessor(const InputParameters & parameters);
 
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
   virtual PostprocessorValue getValue() override;
 
 protected:

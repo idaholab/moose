@@ -21,7 +21,7 @@
 class FunctionSideIntegral;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionSideIntegral>();
 
 /**

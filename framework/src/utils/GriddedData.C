@@ -61,7 +61,6 @@ GriddedData::GriddedData(std::string file_name)
   parse(_dim, _axes, _grid, _fcn, _step, file_name);
 }
 
-
 /**
  * Returns the dimensionality of the grid.
  * This may have nothing to do with the dimensionality of
@@ -94,7 +93,7 @@ GriddedData::getAxes(std::vector<int> & axes)
  * grid[i] = a vector of Reals that define the i_th axis of the grid
  */
 void
-GriddedData::getGrid(std::vector<std::vector<Real> > & grid)
+GriddedData::getGrid(std::vector<std::vector<Real>> & grid)
 {
   grid.resize(_dim);
   for (unsigned int i = 0; i < _dim; ++i)
@@ -133,8 +132,6 @@ GriddedData::evaluateFcn(const std::vector<unsigned int> & ijk)
   return _fcn[index];
 }
 
-
-
 /**
  * parse the file_name extracting information.
  * Here is an example file:
@@ -162,7 +159,7 @@ GriddedData::evaluateFcn(const std::vector<unsigned int> & ijk)
  * # end of file
  */
 void
-GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std::vector<Real> > & grid, std::vector<Real> & f, std::vector<unsigned int> & step, std::string file_name)
+GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std::vector<Real>> & grid, std::vector<Real> & f, std::vector<unsigned int> & step, std::string file_name)
 {
   // initialize
   dim = 0;
@@ -179,7 +176,7 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
   bool reading_value_data = false;
 
   // read file line-by-line extracting data
-  while (getSignificantLine (file, line))
+  while (getSignificantLine(file, line))
   {
     // look for AXIS keywords
     reading_grid_data = false;
@@ -212,7 +209,7 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
     if (reading_grid_data)
     {
       grid.resize(dim); // add another dimension to the grid
-      grid[dim-1].resize(0);
+      grid[dim - 1].resize(0);
       if (getSignificantLine(file, line))
         splitToRealVec(line, grid[dim - 1]);
       continue; // read next line from file
@@ -239,7 +236,6 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
   for (unsigned int i = 1; i < dim; ++i)
     step[i] = step[i - 1] * grid[i - 1].size();
 
-
   // perform some checks
   unsigned int num_data_points = 1;
   for (unsigned int i = 0; i < dim; ++i)
@@ -250,9 +246,7 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
   }
   if (num_data_points != f.size())
     mooseError("According to AXIS statements in GriddedData, number of data points is " << num_data_points << " but " << f.size() << " function values were read from file");
-
 }
-
 
 /**
  * Extracts the next line from file_stream that is:
@@ -277,8 +271,6 @@ GriddedData::getSignificantLine(std::ifstream & file_stream, std::string & line)
   return false;
 }
 
-
-
 /**
  * Splits an input_string using space as the separator
  * Converts the resulting items to Real, and adds these
@@ -297,7 +289,3 @@ GriddedData::splitToRealVec(const std::string & input_string, std::vector<Real> 
     output_vec.push_back(d);
   }
 }
-
-
-
-

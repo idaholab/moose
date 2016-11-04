@@ -22,7 +22,7 @@
 class OutputInterface;
 class OutputWarehouse;
 
-template<>
+template <>
 InputParameters validParams<OutputInterface>();
 
 /**
@@ -34,7 +34,6 @@ InputParameters validParams<OutputInterface>();
 class OutputInterface
 {
 public:
-
   /**
    * Handles 'outputs' parameter for objects that desire control of variable outputs
    * @param parameters The parameters object holding data for the class to use.
@@ -61,7 +60,6 @@ public:
   const std::set<OutputName> & getOutputs();
 
 private:
-
   /// Reference the the MooseApp; neede for access to the OutputWarehouse
   MooseApp & _oi_moose_app;
 

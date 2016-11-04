@@ -19,7 +19,7 @@
 
 class SetupPredictorAction;
 
-template<>
+template <>
 InputParameters validParams<SetupPredictorAction>();
 
 /**
@@ -32,6 +32,5 @@ public:
 
   virtual void act() override;
 };
-
 
 #endif /* SETUPPREDICTORACTION_H_ */

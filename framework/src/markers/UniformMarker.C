@@ -14,8 +14,9 @@
 
 #include "UniformMarker.h"
 
-template<>
-InputParameters validParams<UniformMarker>()
+template <>
+InputParameters
+validParams<UniformMarker>()
 {
   InputParameters params = validParams<Marker>();
   MooseEnum marker_states = Marker::markerStates();
@@ -25,9 +26,8 @@ InputParameters validParams<UniformMarker>()
   return params;
 }
 
-
-UniformMarker::UniformMarker(const InputParameters & parameters) :
-    Marker(parameters),
+UniformMarker::UniformMarker(const InputParameters & parameters)
+  : Marker(parameters),
     _mark((MarkerValue)(int)parameters.get<MooseEnum>("mark"))
 {
 }

@@ -17,8 +17,9 @@
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"
 
-template<>
-InputParameters validParams<ExodusTimeSequenceStepper>()
+template <>
+InputParameters
+validParams<ExodusTimeSequenceStepper>()
 {
   InputParameters params = validParams<TimeSequenceStepperBase>();
   params.addRequiredParam<MeshFileName>("mesh", "The name of the mesh file to extract the time sequence from (must be an exodusII file).");
@@ -26,8 +27,8 @@ InputParameters validParams<ExodusTimeSequenceStepper>()
   return params;
 }
 
-ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & parameters) :
-    TimeSequenceStepperBase(parameters),
+ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & parameters)
+  : TimeSequenceStepperBase(parameters),
     _mesh_file(getParam<MeshFileName>("mesh"))
 {
   // Read the Exodus file on processor 0

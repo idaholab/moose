@@ -21,7 +21,7 @@
 // Forward declerations
 class SetupRecoverFileBaseAction;
 
-template<>
+template <>
 InputParameters validParams<SetupRecoverFileBaseAction>();
 
 /**

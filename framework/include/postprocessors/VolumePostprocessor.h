@@ -20,7 +20,7 @@
 //Forward Declarations
 class VolumePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<VolumePostprocessor>();
 
 /**

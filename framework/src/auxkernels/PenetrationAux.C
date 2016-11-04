@@ -23,8 +23,9 @@
 
 const Real PenetrationAux::NotPenetrated = -999999;
 
-template<>
-InputParameters validParams<PenetrationAux>()
+template <>
+InputParameters
+validParams<PenetrationAux>()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
@@ -32,7 +33,7 @@ InputParameters validParams<PenetrationAux>()
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
+  params.addParam<std::string>("normal_smoothing_method", "Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 
   params.set<bool>("use_displaced_mesh") = true;
@@ -40,31 +41,32 @@ InputParameters validParams<PenetrationAux>()
   // To avoid creating a conversion routine we will list the enumeration options in the same order as the class-based enum.
   // Care must be taken to ensure that this list stays in sync with the enum in the .h file.
   MooseEnum quantity(
-    "distance tangential_distance normal_x normal_y normal_z closest_point_x closest_point_y "
-    "closest_point_z element_id side incremental_slip_magnitude incremental_slip_x "
-    "incremental_slip_y incremental_slip_z accumulated_slip force_x force_y force_z "
-    "normal_force_magnitude normal_force_x normal_force_y normal_force_z tangential_force_magnitude "
-    "tangential_force_x tangential_force_y tangential_force_z frictional_energy lagrange_multiplier "
-    "mechanical_status", "distance");
+      "distance tangential_distance normal_x normal_y normal_z closest_point_x closest_point_y "
+      "closest_point_z element_id side incremental_slip_magnitude incremental_slip_x "
+      "incremental_slip_y incremental_slip_z accumulated_slip force_x force_y force_z "
+      "normal_force_magnitude normal_force_x normal_force_y normal_force_z tangential_force_magnitude "
+      "tangential_force_x tangential_force_y tangential_force_z frictional_energy lagrange_multiplier "
+      "mechanical_status",
+      "distance");
 
   params.addParam<MooseEnum>("quantity", quantity, "The quantity to recover from the available penetration information");
   return params;
 }
 
-PenetrationAux::PenetrationAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+PenetrationAux::PenetrationAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
 
     // Here we cast the value of the MOOSE enum to an integer to the class-based enum.
     _quantity(getParam<MooseEnum>("quantity").getEnum<PenetrationAux::PA_ENUM>()),
     _penetration_locator(_nodal
-      ? getPenetrationLocator(
-          parameters.get<BoundaryName>("paired_boundary"),
-          boundaryNames()[0],
-          Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))
-      : getQuadraturePenetrationLocator(
-          parameters.get<BoundaryName>("paired_boundary"),
-          boundaryNames()[0],
-          Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))))
+                             ? getPenetrationLocator(
+                                   parameters.get<BoundaryName>("paired_boundary"),
+                                   boundaryNames()[0],
+                                   Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))
+                             : getQuadraturePenetrationLocator(
+                                   parameters.get<BoundaryName>("paired_boundary"),
+                                   boundaryNames()[0],
+                                   Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))))
 {
   if (parameters.isParamValid("tangential_tolerance"))
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
@@ -94,68 +96,96 @@ PenetrationAux::computeValue()
     switch (_quantity)
     {
       case PA_DISTANCE:
-        retVal = pinfo->_distance; break;
+        retVal = pinfo->_distance;
+        break;
       case PA_TANG_DISTANCE:
-        retVal = pinfo->_tangential_distance; break;
+        retVal = pinfo->_tangential_distance;
+        break;
       case PA_NORMAL_X:
-        retVal = pinfo->_normal(0); break;
+        retVal = pinfo->_normal(0);
+        break;
       case PA_NORMAL_Y:
-        retVal = pinfo->_normal(1); break;
+        retVal = pinfo->_normal(1);
+        break;
       case PA_NORMAL_Z:
-        retVal = pinfo->_normal(2); break;
+        retVal = pinfo->_normal(2);
+        break;
       case PA_CLOSEST_POINT_X:
-        retVal = pinfo->_closest_point(0); break;
+        retVal = pinfo->_closest_point(0);
+        break;
       case PA_CLOSEST_POINT_Y:
-        retVal = pinfo->_closest_point(1); break;
+        retVal = pinfo->_closest_point(1);
+        break;
       case PA_CLOSEST_POINT_Z:
-        retVal = pinfo->_closest_point(2); break;
+        retVal = pinfo->_closest_point(2);
+        break;
       case PA_ELEM_ID:
-        retVal = static_cast<Real>(pinfo->_elem->id()+1); break;
+        retVal = static_cast<Real>(pinfo->_elem->id() + 1);
+        break;
       case PA_SIDE:
-        retVal = static_cast<Real>(pinfo->_side_num); break;
+        retVal = static_cast<Real>(pinfo->_side_num);
+        break;
       case PA_INCREMENTAL_SLIP_MAG:
-        retVal = pinfo->isCaptured() ? pinfo->_incremental_slip.norm() : 0; break;
+        retVal = pinfo->isCaptured() ? pinfo->_incremental_slip.norm() : 0;
+        break;
       case PA_INCREMENTAL_SLIP_X:
-        retVal = pinfo->isCaptured() ? pinfo->_incremental_slip(0) : 0; break;
+        retVal = pinfo->isCaptured() ? pinfo->_incremental_slip(0) : 0;
+        break;
       case PA_INCREMENTAL_SLIP_Y:
-        retVal = pinfo->isCaptured() ? pinfo->_incremental_slip(1) : 0; break;
+        retVal = pinfo->isCaptured() ? pinfo->_incremental_slip(1) : 0;
+        break;
       case PA_INCREMENTAL_SLIP_Z:
-        retVal = pinfo->isCaptured() ? pinfo->_incremental_slip(2) : 0; break;
+        retVal = pinfo->isCaptured() ? pinfo->_incremental_slip(2) : 0;
+        break;
       case PA_ACCUMULATED_SLIP:
-        retVal = pinfo->_accumulated_slip; break;
+        retVal = pinfo->_accumulated_slip;
+        break;
       case PA_FORCE_X:
-        retVal = pinfo->_contact_force(0); break;
+        retVal = pinfo->_contact_force(0);
+        break;
       case PA_FORCE_Y:
-        retVal = pinfo->_contact_force(1); break;
+        retVal = pinfo->_contact_force(1);
+        break;
       case PA_FORCE_Z:
-        retVal = pinfo->_contact_force(2); break;
+        retVal = pinfo->_contact_force(2);
+        break;
       case PA_NORMAL_FORCE_MAG:
-        retVal = -pinfo->_contact_force*pinfo->_normal; break;
+        retVal = -pinfo->_contact_force * pinfo->_normal;
+        break;
       case PA_NORMAL_FORCE_X:
-        retVal = (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(0); break;
+        retVal = (pinfo->_contact_force * pinfo->_normal) * pinfo->_normal(0);
+        break;
       case PA_NORMAL_FORCE_Y:
-        retVal = (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(1); break;
+        retVal = (pinfo->_contact_force * pinfo->_normal) * pinfo->_normal(1);
+        break;
       case PA_NORMAL_FORCE_Z:
-        retVal = (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(2); break;
+        retVal = (pinfo->_contact_force * pinfo->_normal) * pinfo->_normal(2);
+        break;
       case PA_TANGENTIAL_FORCE_MAG:
       {
-        RealVectorValue contact_force_normal( (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal );
-        RealVectorValue contact_force_tangential( pinfo->_contact_force - contact_force_normal );
+        RealVectorValue contact_force_normal((pinfo->_contact_force * pinfo->_normal) * pinfo->_normal);
+        RealVectorValue contact_force_tangential(pinfo->_contact_force - contact_force_normal);
         retVal = contact_force_tangential.norm();
         break;
       }
       case PA_TANGENTIAL_FORCE_X:
-        retVal = pinfo->_contact_force(0) - (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(0); break;
+        retVal = pinfo->_contact_force(0) - (pinfo->_contact_force * pinfo->_normal) * pinfo->_normal(0);
+        break;
       case PA_TANGENTIAL_FORCE_Y:
-        retVal = pinfo->_contact_force(1) - (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(1); break;
+        retVal = pinfo->_contact_force(1) - (pinfo->_contact_force * pinfo->_normal) * pinfo->_normal(1);
+        break;
       case PA_TANGENTIAL_FORCE_Z:
-        retVal = pinfo->_contact_force(2) - (pinfo->_contact_force*pinfo->_normal) * pinfo->_normal(2); break;
+        retVal = pinfo->_contact_force(2) - (pinfo->_contact_force * pinfo->_normal) * pinfo->_normal(2);
+        break;
       case PA_FRICTIONAL_ENERGY:
-        retVal = pinfo->_frictional_energy; break;
+        retVal = pinfo->_frictional_energy;
+        break;
       case PA_LAGRANGE_MULTIPLIER:
-        retVal = pinfo->_lagrange_multiplier; break;
+        retVal = pinfo->_lagrange_multiplier;
+        break;
       case PA_MECH_STATUS:
-        retVal = pinfo->_mech_status; break;
+        retVal = pinfo->_mech_status;
+        break;
       default:
         mooseError("Unknown PA_ENUM");
     } // switch

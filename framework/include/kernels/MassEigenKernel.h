@@ -20,7 +20,7 @@
 //Forward Declarations
 class MassEigenKernel;
 
-template<>
+template <>
 InputParameters validParams<MassEigenKernel>();
 
 class MassEigenKernel : public EigenKernel

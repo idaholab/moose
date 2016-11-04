@@ -20,7 +20,7 @@
 class FEProblem;
 class TransientInterface;
 
-template<>
+template <>
 InputParameters validParams<TransientInterface>();
 
 /**
@@ -32,7 +32,10 @@ public:
   TransientInterface(const MooseObject * moose_object);
   virtual ~TransientInterface();
 
-  bool isImplicit() { return _is_implicit; }
+  bool isImplicit()
+  {
+    return _is_implicit;
+  }
 
 protected:
   const InputParameters & _ti_params;

@@ -21,14 +21,13 @@
 // Forward declarations
 class MultiAppPostprocessorInterpolationTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppPostprocessorInterpolationTransfer>();
 
 /**
  * Transfers from spatially varying PostprocessorInterpolations in a MultiApp to the "master" system.
  */
-class MultiAppPostprocessorInterpolationTransfer :
-  public MultiAppTransfer
+class MultiAppPostprocessorInterpolationTransfer : public MultiAppTransfer
 {
 public:
   MultiAppPostprocessorInterpolationTransfer(const InputParameters & parameters);

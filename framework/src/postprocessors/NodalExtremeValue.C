@@ -17,8 +17,9 @@
 #include <algorithm>
 #include <limits>
 
-template<>
-InputParameters validParams<NodalExtremeValue>()
+template <>
+InputParameters
+validParams<NodalExtremeValue>()
 {
   // Define the min/max enumeration
   MooseEnum type_options("max=0 min=1", "max");
@@ -29,11 +30,12 @@ InputParameters validParams<NodalExtremeValue>()
   return params;
 }
 
-NodalExtremeValue::NodalExtremeValue(const InputParameters & parameters) :
-  NodalVariablePostprocessor(parameters),
-  _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
-  _value(_type == 0 ? -std::numeric_limits<Real>::max() : std::numeric_limits<Real>::max())
-{}
+NodalExtremeValue::NodalExtremeValue(const InputParameters & parameters)
+  : NodalVariablePostprocessor(parameters),
+    _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
+    _value(_type == 0 ? -std::numeric_limits<Real>::max() : std::numeric_limits<Real>::max())
+{
+}
 
 void
 NodalExtremeValue::initialize()
@@ -96,4 +98,3 @@ NodalExtremeValue::threadJoin(const UserObject & y)
       break;
   }
 }
-

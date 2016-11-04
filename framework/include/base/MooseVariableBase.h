@@ -30,17 +30,17 @@ class DofMap;
 class Variable;
 }
 
-typedef MooseArray<Real>               VariableValue;
-typedef MooseArray<RealGradient>       VariableGradient;
-typedef MooseArray<RealTensor>         VariableSecond;
+typedef MooseArray<Real> VariableValue;
+typedef MooseArray<RealGradient> VariableGradient;
+typedef MooseArray<RealTensor> VariableSecond;
 
-typedef MooseArray<std::vector<Real> >         VariableTestValue;
-typedef MooseArray<std::vector<RealGradient> > VariableTestGradient;
-typedef MooseArray<std::vector<RealTensor> >   VariableTestSecond;
+typedef MooseArray<std::vector<Real>> VariableTestValue;
+typedef MooseArray<std::vector<RealGradient>> VariableTestGradient;
+typedef MooseArray<std::vector<RealTensor>> VariableTestSecond;
 
-typedef MooseArray<std::vector<Real> >         VariablePhiValue;
-typedef MooseArray<std::vector<RealGradient> > VariablePhiGradient;
-typedef MooseArray<std::vector<RealTensor> >   VariablePhiSecond;
+typedef MooseArray<std::vector<Real>> VariablePhiValue;
+typedef MooseArray<std::vector<RealGradient>> VariablePhiGradient;
+typedef MooseArray<std::vector<RealTensor>> VariablePhiSecond;
 
 class Assembly;
 class SubProblem;
@@ -57,17 +57,26 @@ public:
    * Get variable number coming from libMesh
    * @return the libmesh variable number
    */
-  unsigned int number() const { return _var_num; }
+  unsigned int number() const
+  {
+    return _var_num;
+  }
 
   /**
    * Get the type of finite element object
    */
-  const FEType & feType() const { return _fe_type; }
+  const FEType & feType() const
+  {
+    return _fe_type;
+  }
 
   /**
    * Get the system this variable is part of.
    */
-  SystemBase & sys() { return _sys; }
+  SystemBase & sys()
+  {
+    return _sys;
+  }
 
   /**
    * Get the variable name
@@ -78,22 +87,34 @@ public:
    * Get all global dofindices for the variable
    */
   const std::vector<dof_id_type> & allDofIndices() const;
-  unsigned int totalVarDofs() { return allDofIndices().size(); }
+  unsigned int totalVarDofs()
+  {
+    return allDofIndices().size();
+  }
 
   /**
    * Kind of the variable (Nonlinear, Auxiliary, ...)
    */
-  Moose::VarKindType kind() const { return _var_kind; }
+  Moose::VarKindType kind() const
+  {
+    return _var_kind;
+  }
 
   /**
    * Set the scaling factor for this variable
    */
-  void scalingFactor(Real factor) { _scaling_factor = factor; }
+  void scalingFactor(Real factor)
+  {
+    _scaling_factor = factor;
+  }
 
   /**
    * Get the scaling factor for this variable
    */
-  Real scalingFactor() const { return _scaling_factor; }
+  Real scalingFactor() const
+  {
+    return _scaling_factor;
+  }
 
   /**
    * Get the order of this variable
@@ -104,11 +125,20 @@ public:
   /**
    * The DofMap associated with the system this variable is in.
    */
-  const DofMap & dofMap() { return _dof_map; }
+  const DofMap & dofMap()
+  {
+    return _dof_map;
+  }
 
-  std::vector<dof_id_type> & dofIndices() { return _dof_indices; }
+  std::vector<dof_id_type> & dofIndices()
+  {
+    return _dof_indices;
+  }
 
-  unsigned int numberOfDofs() { return _dof_indices.size(); }
+  unsigned int numberOfDofs()
+  {
+    return _dof_indices.size();
+  }
 
   /**
    * Is this variable nodal

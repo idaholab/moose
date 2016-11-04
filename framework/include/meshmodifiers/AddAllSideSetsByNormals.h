@@ -20,7 +20,7 @@
 
 class AddAllSideSetsByNormals;
 
-template<>
+template <>
 InputParameters validParams<AddAllSideSetsByNormals>();
 
 /**

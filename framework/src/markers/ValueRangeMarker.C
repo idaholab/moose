@@ -16,8 +16,9 @@
 #include "FEProblem.h"
 #include "MooseEnum.h"
 
-template<>
-InputParameters validParams<ValueRangeMarker>()
+template <>
+InputParameters
+validParams<ValueRangeMarker>()
 {
   InputParameters params = validParams<Marker>();
 
@@ -32,9 +33,8 @@ InputParameters validParams<ValueRangeMarker>()
   return params;
 }
 
-
-ValueRangeMarker::ValueRangeMarker(const InputParameters & parameters) :
-    QuadraturePointMarker(parameters),
+ValueRangeMarker::ValueRangeMarker(const InputParameters & parameters)
+  : QuadraturePointMarker(parameters),
     _lower_bound(parameters.get<Real>("lower_bound")),
     _upper_bound(parameters.get<Real>("upper_bound")),
     _buffer_size(parameters.get<Real>("buffer_size")),
@@ -60,7 +60,7 @@ ValueRangeMarker::computeQpMarker()
     return _inside;
 
   // How about the buffer zone?
-  if (_u[_qp] >= _lower_bound-_buffer_size && _u[_qp] <= _upper_bound+_buffer_size)
+  if (_u[_qp] >= _lower_bound - _buffer_size && _u[_qp] <= _upper_bound + _buffer_size)
     return _third_state;
 
   // Must be outside the range

@@ -17,8 +17,9 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<SideValueSampler>()
+template <>
+InputParameters
+validParams<SideValueSampler>()
 {
   InputParameters params = validParams<SideVectorPostprocessor>();
 
@@ -29,14 +30,14 @@ InputParameters validParams<SideValueSampler>()
   return params;
 }
 
-SideValueSampler::SideValueSampler(const InputParameters & parameters) :
-    SideVectorPostprocessor(parameters),
+SideValueSampler::SideValueSampler(const InputParameters & parameters)
+  : SideVectorPostprocessor(parameters),
     SamplerBase(parameters, this, _communicator)
 {
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());
 
-  for (unsigned int i=0; i<_coupled_moose_vars.size(); i++)
+  for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
     var_names[i] = _coupled_moose_vars[i]->name();
 
   // Initialize the datastructions in SamplerBase
@@ -52,9 +53,9 @@ SideValueSampler::initialize()
 void
 SideValueSampler::execute()
 {
-  for (unsigned int _qp=0; _qp<_qrule->n_points(); _qp++)
+  for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    for (unsigned int i=0; i<_coupled_moose_vars.size(); i++)
+    for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
       _values[i] = _coupled_moose_vars[i]->sln()[_qp];
 
     SamplerBase::addSample(_q_point[_qp], _current_elem->id(), _values);
@@ -74,4 +75,3 @@ SideValueSampler::threadJoin(const UserObject & y)
 
   SamplerBase::threadJoin(vpp);
 }
-

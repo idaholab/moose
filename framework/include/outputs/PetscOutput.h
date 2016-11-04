@@ -21,7 +21,7 @@
 // Forward declerations
 class PetscOutput;
 
-template<>
+template <>
 InputParameters validParams<PetscOutput>();
 
 /**
@@ -30,7 +30,6 @@ InputParameters validParams<PetscOutput>();
 class PetscOutput : public Output
 {
 public:
-
   /**
    * Class constructor
    * @param parameters Outputter input file parameters
@@ -46,7 +45,6 @@ public:
   virtual Real time() override;
 
 protected:
-
   /// Current norm returned from PETSc
   Real _norm;
 
@@ -57,7 +55,6 @@ protected:
   PetscInt _linear_iter;
 
 private:
-
   /**
    * Internal setup function that executes at the beginning of the time step
    */

@@ -25,7 +25,6 @@
 // External library includes
 #include "randistrs.h"
 
-
 /**
  * This class encapsulates a useful, consistent, cross-platform random number generator
  * with multiple utilities.
@@ -44,7 +43,6 @@
 class MooseRandom
 {
 public:
-
   /**
    * The method seeds the random number generator
    * @param seed  the seed number
@@ -152,7 +150,7 @@ public:
    */
   void saveState()
   {
-    for (LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> >::iterator it = _states.begin();
+    for (LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state>>::iterator it = _states.begin();
          it != _states.end(); ++it)
       it->second.second = it->second.first;
   }
@@ -162,19 +160,18 @@ public:
    */
   void restoreState()
   {
-    for (LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> >::iterator it = _states.begin();
+    for (LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state>>::iterator it = _states.begin();
          it != _states.end(); ++it)
       it->second.first = it->second.second;
   }
 
 private:
-
   /**
    * We store a pair of states in this map. The first one is the active state, the
    * second is the backup state. It is used to restore state at a later time
    * to the active state.
    */
-  LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> > _states;
+  LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state>> _states;
 };
 
 #endif // MOOSERANDOM_H

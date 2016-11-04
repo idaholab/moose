@@ -19,7 +19,7 @@
 
 class NodalEqualValueConstraint;
 
-template<>
+template <>
 InputParameters validParams<NodalEqualValueConstraint>();
 
 /**
@@ -42,6 +42,5 @@ protected:
   std::vector<unsigned int> _val_number;
   std::vector<const VariableValue *> _value;
 };
-
 
 #endif /* NODALEQUALVALUECONSTRAINT_H */

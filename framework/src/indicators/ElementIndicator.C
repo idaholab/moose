@@ -19,23 +19,23 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-template<>
-InputParameters validParams<ElementIndicator>()
+template <>
+InputParameters
+validParams<ElementIndicator>()
 {
   InputParameters params = validParams<Indicator>();
   params += validParams<MaterialPropertyInterface>();
   params.addRequiredParam<VariableName>("variable", "The name of the variable that this Indicator operates on");
 
   std::vector<SubdomainName> everywhere(1, "ANY_BLOCK_ID");
-  params.addParam<std::vector<SubdomainName> >("block", everywhere, "block ID or name where the object works");
+  params.addParam<std::vector<SubdomainName>>("block", everywhere, "block ID or name where the object works");
 
   params += validParams<TransientInterface>();
   return params;
 }
 
-
-ElementIndicator::ElementIndicator(const InputParameters & parameters) :
-    Indicator(parameters),
+ElementIndicator::ElementIndicator(const InputParameters & parameters)
+  : Indicator(parameters),
     TransientInterface(this),
     PostprocessorInterface(this),
     Coupleable(this, false),

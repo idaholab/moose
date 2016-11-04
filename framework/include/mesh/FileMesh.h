@@ -20,7 +20,7 @@
 //forward declaration
 class FileMesh;
 
-template<>
+template <>
 InputParameters validParams<FileMesh>();
 
 class FileMesh : public MooseMesh
@@ -35,11 +35,20 @@ public:
   virtual void buildMesh() override;
 
   void read(const std::string & file_name);
-  virtual ExodusII_IO * exReader() const override { return _exreader.get(); }
+  virtual ExodusII_IO * exReader() const override
+  {
+    return _exreader.get();
+  }
 
   // Get/Set Filename (for meshes read from a file)
-  void setFileName(const std::string & file_name) { _file_name = file_name; }
-  const std::string & getFileName() const { return _file_name; }
+  void setFileName(const std::string & file_name)
+  {
+    _file_name = file_name;
+  }
+  const std::string & getFileName() const
+  {
+    return _file_name;
+  }
 
 protected:
   /// the file_name from whence this mesh came

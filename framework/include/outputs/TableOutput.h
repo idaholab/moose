@@ -22,7 +22,7 @@
 
 class TableOutput;
 
-template<>
+template <>
 InputParameters validParams<TableOutput>();
 
 /**
@@ -39,14 +39,12 @@ InputParameters validParams<TableOutput>();
 class TableOutput : public AdvancedOutput<FileOutput>
 {
 public:
-
   /**
    * Class constructor.
    */
   TableOutput(const InputParameters & parameters);
 
 protected:
-
   /**
    * Populates the tables with scalar aux variables
    *

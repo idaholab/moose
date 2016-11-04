@@ -21,7 +21,7 @@
 class SpatialUserObjectAux;
 class UserObject;
 
-template<>
+template <>
 InputParameters validParams<SpatialUserObjectAux>();
 
 /**

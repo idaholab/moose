@@ -26,9 +26,8 @@
 #include <sstream>
 #include <vector>
 
-
-ExodusFormatter::ExodusFormatter() :
-    InputFileFormatter(false)
+ExodusFormatter::ExodusFormatter()
+  : InputFileFormatter(false)
 {
 }
 

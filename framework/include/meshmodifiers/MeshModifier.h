@@ -22,15 +22,14 @@
 class MeshModifier;
 class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<MeshModifier>();
 
 /**
  * MeshModifiers are objects that can modify or add to an existing mesh.
  */
-class MeshModifier :
-  public MooseObject,
-  public Restartable
+class MeshModifier : public MooseObject,
+                     public Restartable
 {
 public:
   /**
@@ -51,15 +50,19 @@ public:
   /**
    * Return the MeshModifiers that must run before this MeshModifier
    */
-  std::vector<std::string> & getDependencies() { return _depends_on; }
+  std::vector<std::string> & getDependencies()
+  {
+    return _depends_on;
+  }
 
 protected:
-
   /**
    * This method is called _immediatly_ before modify to perform any necessary
    * initialization on the modififer before it runs.
    */
-  virtual void initialize() {}
+  virtual void initialize()
+  {
+  }
 
   /**
    * Pure virtual modify function MUST be overridden by children classes.
@@ -74,7 +77,7 @@ protected:
   void modifyMeshHelper(MooseMesh * mesh);
 
   /// Pointer to the mesh
-  MooseMesh *_mesh_ptr;
+  MooseMesh * _mesh_ptr;
 
 private:
   /// A list of modifiers that are required to run before this modifier may run

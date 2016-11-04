@@ -30,7 +30,6 @@
 class MooseObjectParameterName : public MooseObjectName
 {
 public:
-
   /**
    * Build an object given a raw parameter name (e.g., from an input file parameter)
    */
@@ -44,7 +43,10 @@ public:
   /**
    * Return the parameter name.
    */
-  const std::string & parameter() const { return _parameter; }
+  const std::string & parameter() const
+  {
+    return _parameter;
+  }
 
   ///@{
   /**
@@ -70,10 +72,8 @@ public:
   friend std::ostream & operator<<(std::ostream & stream, const MooseObjectParameterName & obj);
 
 protected:
-
   /// The name of the input parameter
   std::string _parameter;
-
 };
 
 #endif // MOOSEOBJECTPARAMETERNAME_H

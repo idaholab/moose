@@ -19,7 +19,7 @@
 
 class CreateDisplacedProblemAction;
 
-template<>
+template <>
 InputParameters validParams<CreateDisplacedProblemAction>();
 
 /**

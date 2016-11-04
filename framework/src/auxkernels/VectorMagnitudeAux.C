@@ -16,8 +16,9 @@
 #include "VectorMagnitudeAux.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<VectorMagnitudeAux>()
+template <>
+InputParameters
+validParams<VectorMagnitudeAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("x", "x-component of the vector");
@@ -27,8 +28,8 @@ InputParameters validParams<VectorMagnitudeAux>()
   return params;
 }
 
-VectorMagnitudeAux::VectorMagnitudeAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+VectorMagnitudeAux::VectorMagnitudeAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _x(coupledValue("x")),
     _y(_mesh.dimension() >= 2 ? coupledValue("y") : _zero),
     _z(_mesh.dimension() >= 3 ? coupledValue("z") : _zero)

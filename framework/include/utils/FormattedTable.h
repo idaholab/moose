@@ -1,4 +1,4 @@
- /****************************************************************/
+/****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
@@ -30,8 +30,10 @@ namespace libMesh
 class ExodusII_IO;
 }
 
-template<> void dataStore(std::ostream & stream, FormattedTable & table, void * context);
-template<> void dataLoad(std::istream & stream, FormattedTable & v, void * context);
+template <>
+void dataStore(std::ostream & stream, FormattedTable & table, void * context);
+template <>
+void dataLoad(std::istream & stream, FormattedTable & v, void * context);
 
 /**
  * This class is used for building, formatting, and outputting tables of numbers.
@@ -41,7 +43,7 @@ class FormattedTable
 public:
   FormattedTable();
 
-  FormattedTable(const FormattedTable &o);
+  FormattedTable(const FormattedTable & o);
 
   /**
    * The destructor is used to close the file handle
@@ -68,9 +70,15 @@ public:
   /**
    * Set whether or not to output time column.
    */
-  void outputTimeColumn(bool output_time) { _output_time = output_time; }
+  void outputTimeColumn(bool output_time)
+  {
+    _output_time = output_time;
+  }
 
-  const std::map<Real, std::map<std::string, Real> > & getData() const { return _data; }
+  const std::map<Real, std::map<std::string, Real>> & getData() const
+  {
+    return _data;
+  }
 
   /**
    * Methods for dumping the table to the stream - either by filename or by stream handle.  If
@@ -80,7 +88,7 @@ public:
    *
    * Note: Only call these from processor 0!
    */
-  void printTable(std::ostream & out, unsigned int last_n_entries=0);
+  void printTable(std::ostream & out, unsigned int last_n_entries = 0);
   void printTable(std::ostream & out, unsigned int last_n_entries, const MooseEnum & suggested_term_width);
   void printTable(const std::string & file_name);
 
@@ -89,7 +97,7 @@ public:
    *
    * Note: Only call this on processor 0!
    */
-  void printCSV(const std::string & file_name, int interval=1, bool align = false);
+  void printCSV(const std::string & file_name, int interval = 1, bool align = false);
 
   void printEnsight(const std::string & file_name);
   void writeExodus(ExodusII_IO * ex_out, Real time);
@@ -100,13 +108,18 @@ public:
   /**
    * By default printCSV places "," between each entry, this allows this to be changed
    */
-  void setDelimiter(std::string delimiter){ _csv_delimiter = delimiter; }
+  void setDelimiter(std::string delimiter)
+  {
+    _csv_delimiter = delimiter;
+  }
 
   /**
    * By default printCSV prints output to a precision of 14, this allows this to be changed
    */
-  void setPrecision(unsigned int precision){ _csv_precision = precision; }
-
+  void setPrecision(unsigned int precision)
+  {
+    _csv_precision = precision;
+  }
 
 protected:
   void printTablePiece(std::ostream & out, unsigned int last_n_entries, std::map<std::string, unsigned short> & col_widths,
@@ -121,7 +134,6 @@ protected:
                       std::ostream & out, std::map<std::string, unsigned short> & col_widths,
                       std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end) const;
 
-
   /**
    * Returns the width of the terminal using sys/ioctl
    */
@@ -132,7 +144,7 @@ protected:
    * The first map creates an association from the independent variable (normally time)
    * to a map of dependent variables and their associated values if they exist
    */
-  std::map<Real, std::map<std::string, Real> > _data;
+  std::map<Real, std::map<std::string, Real>> _data;
 
   /// The set of column names updated when data is inserted through the setter methods
   std::set<std::string> _column_names;
@@ -155,7 +167,6 @@ protected:
   bool _output_time;
 
 private:
-
   /// *.csv file delimiter, defaults to ","
   std::string _csv_delimiter;
 
@@ -166,7 +177,9 @@ private:
   friend void dataLoad<FormattedTable>(std::istream & stream, FormattedTable & v, void * context);
 };
 
-template<> void dataStore(std::ostream & stream, FormattedTable & table, void * context);
-template<> void dataLoad(std::istream & stream, FormattedTable & v, void * context);
+template <>
+void dataStore(std::ostream & stream, FormattedTable & table, void * context);
+template <>
+void dataLoad(std::istream & stream, FormattedTable & v, void * context);
 
 #endif //FORMATTEDTABLE_H

@@ -20,8 +20,8 @@
 
 struct BndNode
 {
-  BndNode(Node * node, BoundaryID bnd_id) :
-      _node(node),
+  BndNode(Node * node, BoundaryID bnd_id)
+    : _node(node),
       _bnd_id(bnd_id)
   {
   }

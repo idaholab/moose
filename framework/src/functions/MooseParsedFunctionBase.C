@@ -15,19 +15,20 @@
 #include "MooseError.h"
 #include "MooseParsedFunctionBase.h"
 
-template<>
-InputParameters validParams<MooseParsedFunctionBase>()
+template <>
+InputParameters
+validParams<MooseParsedFunctionBase>()
 {
   InputParameters params = emptyInputParameters();
-  params.addParam<std::vector<std::string> >("vars", "The constant variables (excluding t,x,y,z) in the forcing function.");
-  params.addParam<std::vector<std::string> >("vals", "Constant numeric values or postprocessor names for vars.");
+  params.addParam<std::vector<std::string>>("vars", "The constant variables (excluding t,x,y,z) in the forcing function.");
+  params.addParam<std::vector<std::string>>("vals", "Constant numeric values or postprocessor names for vars.");
   return params;
 }
 
-MooseParsedFunctionBase::MooseParsedFunctionBase(const InputParameters & parameters) :
-    _pfb_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
-    _vars(parameters.get<std::vector<std::string> >("vars")),
-    _vals(parameters.get<std::vector<std::string> >("vals"))
+MooseParsedFunctionBase::MooseParsedFunctionBase(const InputParameters & parameters)
+  : _pfb_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
+    _vars(parameters.get<std::vector<std::string>>("vars")),
+    _vals(parameters.get<std::vector<std::string>>("vals"))
 {
   if (_vars.size() != _vals.size())
     mooseError("Number of vars must match the number of vals for a MooseParsedFunction!");

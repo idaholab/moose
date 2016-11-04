@@ -39,21 +39,21 @@ public:
 
 SlaveNeighborhoodThread::SlaveNeighborhoodThread(const MooseMesh & mesh,
                                                  const std::vector<dof_id_type> & trial_master_nodes,
-                                                 const std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
-                                                 const unsigned int patch_size) :
-  _mesh(mesh),
-  _trial_master_nodes(trial_master_nodes),
-  _node_to_elem_map(node_to_elem_map),
-  _patch_size(patch_size)
+                                                 const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+                                                 const unsigned int patch_size)
+  : _mesh(mesh),
+    _trial_master_nodes(trial_master_nodes),
+    _node_to_elem_map(node_to_elem_map),
+    _patch_size(patch_size)
 {
 }
 
 // Splitting Constructor
-SlaveNeighborhoodThread::SlaveNeighborhoodThread(SlaveNeighborhoodThread & x, Threads::split /*split*/) :
-  _mesh(x._mesh),
-  _trial_master_nodes(x._trial_master_nodes),
-  _node_to_elem_map(x._node_to_elem_map),
-  _patch_size(x._patch_size)
+SlaveNeighborhoodThread::SlaveNeighborhoodThread(SlaveNeighborhoodThread & x, Threads::split /*split*/)
+  : _mesh(x._mesh),
+    _trial_master_nodes(x._trial_master_nodes),
+    _node_to_elem_map(x._node_to_elem_map),
+    _patch_size(x._patch_size)
 {
 }
 
@@ -63,7 +63,8 @@ SlaveNeighborhoodThread::SlaveNeighborhoodThread(SlaveNeighborhoodThread & x, Th
  * then it may be time to update
  */
 void
-SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
+    SlaveNeighborhoodThread::
+    operator()(const NodeIdRange & range)
 {
   processor_id_type processor_id = _mesh.processor_id();
 
@@ -71,12 +72,12 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
   {
     const Node & node = *_mesh.nodePtr(node_id);
 
-    std::priority_queue<std::pair<unsigned int, Real>, std::vector<std::pair<unsigned int, Real> >, ComparePair> neighbors;
+    std::priority_queue<std::pair<unsigned int, Real>, std::vector<std::pair<unsigned int, Real>>, ComparePair> neighbors;
 
     unsigned int n_master_nodes = _trial_master_nodes.size();
 
     // Get a list, in descending order of distance, of master nodes in relation to this node
-    for (unsigned int k=0; k<n_master_nodes; k++)
+    for (unsigned int k = 0; k < n_master_nodes; k++)
     {
       dof_id_type master_id = _trial_master_nodes[k];
       const Node * cur_node = _mesh.nodePtr(master_id);
@@ -91,7 +92,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
     neighbor_nodes.resize(patch_size);
 
     // Grab the closest "patch_size" worth of nodes to save off
-    for (unsigned int t=0; t<patch_size; t++)
+    for (unsigned int t = 0; t < patch_size; t++)
     {
       std::pair<unsigned int, Real> neighbor_info = neighbors.top();
       neighbors.pop();
@@ -176,7 +177,7 @@ SlaveNeighborhoodThread::operator() (const NodeIdRange & range)
       }
 
       // Now add elements connected to the neighbor nodes to the ghosted list
-      for (unsigned int neighbor_it=0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
+      for (unsigned int neighbor_it = 0; neighbor_it < neighbor_nodes.size(); neighbor_it++)
       {
         auto node_to_elem_pair = _node_to_elem_map.find(neighbor_nodes[neighbor_it]);
         mooseAssert(node_to_elem_pair != _node_to_elem_map.end(), "Missing entry in node to elem map");

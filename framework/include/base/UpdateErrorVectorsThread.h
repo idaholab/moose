@@ -27,7 +27,7 @@ class UpdateErrorVectorsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
   UpdateErrorVectorsThread(FEProblem & fe_problem,
-                           const std::map<std::string, std::unique_ptr<ErrorVector> > & indicator_field_to_error_vector);
+                           const std::map<std::string, std::unique_ptr<ErrorVector>> & indicator_field_to_error_vector);
 
   // Splitting Constructor
   UpdateErrorVectorsThread(UpdateErrorVectorsThread & x, Threads::split split);
@@ -37,7 +37,7 @@ public:
   void join(const UpdateErrorVectorsThread & /*y*/);
 
 protected:
-  const std::map<std::string, std::unique_ptr<ErrorVector> > & _indicator_field_to_error_vector;
+  const std::map<std::string, std::unique_ptr<ErrorVector>> & _indicator_field_to_error_vector;
   AuxiliarySystem & _aux_sys;
   unsigned int _system_number;
   Adaptivity & _adaptivity;

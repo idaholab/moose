@@ -22,8 +22,8 @@
 #include "libmesh/variable.h"
 #include "libmesh/dof_map.h"
 
-MooseVariableBase::MooseVariableBase(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind) :
-    _var_num(var_num),
+MooseVariableBase::MooseVariableBase(unsigned int var_num, const FEType & fe_type, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind)
+  : _var_num(var_num),
     _fe_type(fe_type),
     _var_kind(var_kind),
     _subproblem(sys.subproblem()),
@@ -53,7 +53,7 @@ MooseVariableBase::allDofIndices() const
   if (it != _sys.subproblem()._var_dof_map.end())
     return it->second;
   else
-   mooseError("VariableAllDoFMap not prepared for " << name() << " . Check nonlocal coupling requirement for the variable.");
+    mooseError("VariableAllDoFMap not prepared for " << name() << " . Check nonlocal coupling requirement for the variable.");
 }
 
 Order

@@ -22,15 +22,15 @@
 // libMesh includes
 #include "libmesh/equation_systems.h"
 
-template<>
-InputParameters validParams<Steady>()
+template <>
+InputParameters
+validParams<Steady>()
 {
   return validParams<Executioner>();
 }
 
-
-Steady::Steady(const InputParameters & parameters) :
-    Executioner(parameters),
+Steady::Steady(const InputParameters & parameters)
+  : Executioner(parameters),
     _problem(_fe_problem),
     _time_step(_problem.timeStep()),
     _time(_problem.time())
@@ -74,13 +74,13 @@ Steady::execute()
 
   // first step in any steady state solve is always 1 (preserving backwards compatibility)
   _time_step = 1;
-  _time = _time_step;                 // need to keep _time in sync with _time_step to get correct output
+  _time = _time_step; // need to keep _time in sync with _time_step to get correct output
 
 #ifdef LIBMESH_ENABLE_AMR
 
   // Define the refinement loop
   unsigned int steps = _problem.adaptivity().getSteps();
-  for (unsigned int r_step=0; r_step<=steps; r_step++)
+  for (unsigned int r_step = 0; r_step <= steps; r_step++)
   {
 #endif //LIBMESH_ENABLE_AMR
     preSolve();
@@ -115,7 +115,7 @@ Steady::execute()
     }
 
     _time_step++;
-    _time = _time_step;                 // need to keep _time in sync with _time_step to get correct output
+    _time = _time_step; // need to keep _time in sync with _time_step to get correct output
   }
 #endif
 

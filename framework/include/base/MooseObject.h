@@ -25,16 +25,14 @@
 class MooseApp;
 class MooseObject;
 
-template<>
+template <>
 InputParameters validParams<MooseObject>();
-
 
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
-class MooseObject :
-  public ConsoleStreamInterface,
-  public libMesh::ParallelObject
+class MooseObject : public ConsoleStreamInterface,
+                    public libMesh::ParallelObject
 {
 public:
   MooseObject(const InputParameters & parameters);
@@ -45,13 +43,19 @@ public:
    * Get the name of the object
    * @return The name of the object
    */
-  const std::string & name() const { return _name; }
+  const std::string & name() const
+  {
+    return _name;
+  }
 
   /**
    * Get the parameters of the object
    * @return The parameters of the object
    */
-  const InputParameters & parameters() const { return _pars; }
+  const InputParameters & parameters() const
+  {
+    return _pars;
+  }
 
   /**
    * Retrieve a parameter for the object
@@ -65,21 +69,28 @@ public:
    * Test if the supplied parameter is valid
    * @param name The name of the parameter to test
    */
-  inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
+  inline bool isParamValid(const std::string & name) const
+  {
+    return _pars.isParamValid(name);
+  }
 
   /**
    * Get the MooseApp this object is associated with.
    */
-  MooseApp & getMooseApp() { return _app; }
+  MooseApp & getMooseApp()
+  {
+    return _app;
+  }
 
   /**
    * Return the enabled status of the object.
    */
-  virtual bool enabled() { return _enabled; }
-
+  virtual bool enabled()
+  {
+    return _enabled;
+  }
 
 protected:
-
   /// The MooseApp this object is associated with
   MooseApp & _app;
 
@@ -91,7 +102,6 @@ protected:
 
   /// Reference to the "enable" InputParaemters, used by Controls for toggling on/off MooseObjects
   const bool & _enabled;
-
 };
 
 template <typename T>
@@ -100,6 +110,5 @@ MooseObject::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }
-
 
 #endif /* MOOSEOBJECT_H*/

@@ -37,11 +37,10 @@ class TransientMultiApp;
  *
  * @see Exodus Console CSV
  */
-template<class T>
+template <class T>
 class AdvancedOutput : public T
 {
 public:
-
   // A typedef
   typedef const T OutputBase;
 
@@ -184,7 +183,6 @@ public:
   const OutputOnWarehouse & advancedExecuteOn() const;
 
 protected:
-
   /**
    * Initialization method.
    * This populates the various data structures needed to control the output
@@ -254,9 +252,7 @@ protected:
    */
   virtual void outputSystemInformation();
 
-
 private:
-
   /**
    * Initializes the available lists for each of the output types
    */
@@ -361,8 +357,8 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
   bool has_limited_pps = false;
 
   // Loop through each of the execution flags
-  const std::vector<MooseSharedPointer<UserObject> > & objects = warehouse.getActiveObjects();
-  for (std::vector<MooseSharedPointer<UserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++ it)
+  const std::vector<MooseSharedPointer<UserObject>> & objects = warehouse.getActiveObjects();
+  for (std::vector<MooseSharedPointer<UserObject>>::const_iterator it = objects.begin(); it != objects.end(); ++it)
   {
     // Store the name in the available postprocessors, if it does not already exist in the list
     MooseSharedPointer<postprocessor_type> pps = MooseSharedNamespace::dynamic_pointer_cast<postprocessor_type>(*it);
@@ -384,8 +380,8 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
       if (!T::_advanced_execute_on.contains(execute_data_name) ||
           (T::_advanced_execute_on[execute_data_name].isValid() && T::_advanced_execute_on[execute_data_name].contains("none")))
         mooseWarning("Postprocessor '" << pps->PPName()
-                     << "' has requested to be output by the '" << T::name()
-                     << "' output, but postprocessor output is not support by this type of output object.");
+                                       << "' has requested to be output by the '" << T::name()
+                                       << "' output, but postprocessor output is not support by this type of output object.");
     }
 
     // Set the flag state for postprocessors that utilize 'outputs' parameter

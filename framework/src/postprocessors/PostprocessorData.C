@@ -15,8 +15,8 @@
 #include "PostprocessorData.h"
 #include "FEProblem.h"
 
-PostprocessorData::PostprocessorData(FEProblem & fe_problem) :
-    Restartable("values", "PostprocessorData", fe_problem, 0)
+PostprocessorData::PostprocessorData(FEProblem & fe_problem)
+  : Restartable("values", "PostprocessorData", fe_problem, 0)
 {
 }
 
@@ -29,7 +29,7 @@ PostprocessorData::hasPostprocessor(const std::string & name)
 PostprocessorValue &
 PostprocessorData::getPostprocessorValue(const PostprocessorName & name)
 {
-  PostprocessorValue * & pp_val = _values[name];
+  PostprocessorValue *& pp_val = _values[name];
 
   if (pp_val == NULL)
     pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values");
@@ -40,7 +40,7 @@ PostprocessorData::getPostprocessorValue(const PostprocessorName & name)
 PostprocessorValue &
 PostprocessorData::getPostprocessorValueOld(const PostprocessorName & name)
 {
-  PostprocessorValue * & pp_val = _values_old[name];
+  PostprocessorValue *& pp_val = _values_old[name];
 
   if (pp_val == NULL)
     pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values_old");
@@ -51,7 +51,7 @@ PostprocessorData::getPostprocessorValueOld(const PostprocessorName & name)
 PostprocessorValue &
 PostprocessorData::getPostprocessorValueOlder(const PostprocessorName & name)
 {
-  PostprocessorValue * & pp_val = _values_older[name];
+  PostprocessorValue *& pp_val = _values_older[name];
 
   if (pp_val == NULL)
     pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values_older");

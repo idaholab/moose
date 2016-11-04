@@ -68,7 +68,7 @@ public:
    * Yields the grid.
    * grid[i] = a vector of Reals that define the i_th axis of the grid.
    */
-  void getGrid(std::vector<std::vector<Real> > & grid);
+  void getGrid(std::vector<std::vector<Real>> & grid);
 
   /**
    * Yields the values defined at the grid points.
@@ -84,11 +84,11 @@ public:
 private:
   unsigned int _dim;
   std::vector<int> _axes;
-  std::vector<std::vector<Real> > _grid;
+  std::vector<std::vector<Real>> _grid;
   std::vector<Real> _fcn;
   std::vector<unsigned int> _step;
 
-  void parse(unsigned int & dim, std::vector<int> & axes, std::vector<std::vector<Real> > & grid, std::vector<Real> & f, std::vector<unsigned int> & step, std::string file_name);
+  void parse(unsigned int & dim, std::vector<int> & axes, std::vector<std::vector<Real>> & grid, std::vector<Real> & f, std::vector<unsigned int> & step, std::string file_name);
   bool getSignificantLine(std::ifstream & file_stream, std::string & line);
   void splitToRealVec(const std::string & input_string, std::vector<Real> & output_vec);
 };

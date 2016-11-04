@@ -19,7 +19,7 @@
 
 class ExplicitTVDRK2;
 
-template<>
+template <>
 InputParameters validParams<ExplicitTVDRK2>();
 
 /**
@@ -60,7 +60,10 @@ public:
   virtual ~ExplicitTVDRK2();
 
   virtual void preSolve();
-  virtual int order() { return 2; }
+  virtual int order()
+  {
+    return 2;
+  }
 
   virtual void computeTimeDerivatives();
   virtual void solve();
@@ -72,6 +75,5 @@ protected:
   /// Buffer to store non-time residual from the first stage.
   NumericVector<Number> & _residual_old;
 };
-
 
 #endif /* EXPLICITTVDRK2_H */

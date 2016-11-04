@@ -21,7 +21,7 @@
 // Forward Declarations
 class VerifyNodalUniqueID;
 
-template<>
+template <>
 InputParameters validParams<VerifyNodalUniqueID>();
 
 class VerifyNodalUniqueID : public NodalUserObject

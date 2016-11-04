@@ -20,7 +20,7 @@
 
 class Piecewise;
 
-template<>
+template <>
 InputParameters validParams<Piecewise>();
 
 /**
@@ -42,14 +42,15 @@ protected:
   MooseSharedPointer<LinearInterpolation> _linear_interp;
   int _axis;
   bool _has_axis;
+
 private:
   const std::string _data_file_name;
   unsigned int _x_index;
   unsigned int _y_index;
   bool _xy_only;
-  bool parseNextLineReals( std::ifstream & ifs, std::vector<Real> & myvec);
-  void parseRows( std::vector<Real> & x, std::vector<Real> & y );
-  void parseColumns( std::vector<Real> & x, std::vector<Real> & y);
+  bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
+  void parseRows(std::vector<Real> & x, std::vector<Real> & y);
+  void parseColumns(std::vector<Real> & x, std::vector<Real> & y);
 };
 
 #endif

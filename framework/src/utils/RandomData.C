@@ -19,8 +19,8 @@
 
 const unsigned int MASTER = std::numeric_limits<unsigned int>::max();
 
-RandomData::RandomData(FEProblem &problem, const RandomInterface & random_interface) :
-    _rd_problem(problem),
+RandomData::RandomData(FEProblem & problem, const RandomInterface & random_interface)
+  : _rd_problem(problem),
     _rd_mesh(problem.mesh()),
     _is_nodal(random_interface.isNodal()),
     _reset_on(random_interface.getResetOnTime()),
@@ -62,11 +62,11 @@ RandomData::updateSeeds(ExecFlagType exec_flag)
   {
     _current_master_seed = _new_seed;
     updateGenerators();
-    _generator.saveState();       // Save states so that we can reset on demand
+    _generator.saveState(); // Save states so that we can reset on demand
   }
 
   if (_reset_on == exec_flag)
-    _generator.restoreState();    // Restore states here
+    _generator.restoreState(); // Restore states here
 }
 
 void
@@ -98,10 +98,10 @@ RandomData::updateGenerators()
   if (_is_nodal)
     updateGeneratorHelper(_rd_mesh.getMesh().active_nodes_begin(), _rd_mesh.getMesh().active_nodes_end());
   else
-    updateGeneratorHelper(_rd_mesh.getMesh().active_elements_begin(),_rd_mesh.getMesh().active_elements_end());
+    updateGeneratorHelper(_rd_mesh.getMesh().active_elements_begin(), _rd_mesh.getMesh().active_elements_end());
 }
 
-template<typename T>
+template <typename T>
 void
 RandomData::updateGeneratorHelper(T it, T end_it)
 {

@@ -14,8 +14,8 @@
 
 #include "SolverParams.h"
 
-SolverParams::SolverParams() :
-    _type(Moose::ST_PJFNK),
+SolverParams::SolverParams()
+  : _type(Moose::ST_PJFNK),
     _line_search(Moose::LS_INVALID)
 {
 }

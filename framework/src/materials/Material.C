@@ -21,8 +21,9 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<Material>()
+template <>
+InputParameters
+validParams<Material>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
@@ -38,8 +39,8 @@ InputParameters validParams<Material>()
 
   // Outputs
   params += validParams<OutputInterface>();
-  params.set<std::vector<OutputName> >("outputs") =  {"none"};
-  params.addParam<std::vector<std::string> >("output_properties", "List of material properties, from this material, to output (outputs must also be defined to an output type)");
+  params.set<std::vector<OutputName>>("outputs") = {"none"};
+  params.addParam<std::vector<std::string>>("output_properties", "List of material properties, from this material, to output (outputs must also be defined to an output type)");
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
@@ -48,9 +49,8 @@ InputParameters validParams<Material>()
   return params;
 }
 
-
-Material::Material(const InputParameters & parameters) :
-    MooseObject(parameters),
+Material::Material(const InputParameters & parameters)
+  : MooseObject(parameters),
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters, blockIDs(), false), // false for being _not_ nodal
     SetupInterface(this),
@@ -148,11 +148,10 @@ Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_St
   }
 }
 
-
 std::set<OutputName>
 Material::getOutputs()
 {
-  const std::vector<OutputName> & out = getParam<std::vector<OutputName> >("outputs");
+  const std::vector<OutputName> & out = getParam<std::vector<OutputName>>("outputs");
   return std::set<OutputName>(out.begin(), out.end());
 }
 
@@ -163,12 +162,10 @@ Material::computeProperties()
     computeQpProperties();
 }
 
-
 void
 Material::computeQpProperties()
 {
 }
-
 
 void
 Material::resetProperties()
@@ -176,7 +173,6 @@ Material::resetProperties()
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     resetQpProperties();
 }
-
 
 void
 Material::resetQpProperties()

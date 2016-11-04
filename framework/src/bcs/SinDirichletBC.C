@@ -14,19 +14,20 @@
 
 #include "SinDirichletBC.h"
 
-template<>
-InputParameters validParams<SinDirichletBC>()
+template <>
+InputParameters
+validParams<SinDirichletBC>()
 {
   InputParameters params = validParams<NodalBC>();
-  params.set<Real>("initial")=0.0;
-  params.set<Real>("final")=0.0;
-  params.set<Real>("duration")=0.0;
+  params.set<Real>("initial") = 0.0;
+  params.set<Real>("final") = 0.0;
+  params.set<Real>("duration") = 0.0;
 
   return params;
 }
 
-SinDirichletBC::SinDirichletBC(const InputParameters & parameters) :
-    NodalBC(parameters),
+SinDirichletBC::SinDirichletBC(const InputParameters & parameters)
+  : NodalBC(parameters),
     _initial(getParam<Real>("initial")),
     _final(getParam<Real>("final")),
     _duration(getParam<Real>("duration"))
@@ -39,10 +40,9 @@ SinDirichletBC::computeQpResidual()
   Real value;
 
   if (_t < _duration)
-    value = _initial + (_final-_initial) * std::sin((0.5/_duration) * libMesh::pi * _t);
+    value = _initial + (_final - _initial) * std::sin((0.5 / _duration) * libMesh::pi * _t);
   else
     value = _final;
 
-  return _u[_qp]- value;
+  return _u[_qp] - value;
 }
-

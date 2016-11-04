@@ -19,7 +19,7 @@
 
 class EmptyAction;
 
-template<>
+template <>
 InputParameters validParams<EmptyAction>();
 
 /**

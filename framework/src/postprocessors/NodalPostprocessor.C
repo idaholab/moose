@@ -17,17 +17,17 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-template<>
-InputParameters validParams<NodalPostprocessor>()
+template <>
+InputParameters
+validParams<NodalPostprocessor>()
 {
   InputParameters params = validParams<NodalUserObject>();
   params += validParams<Postprocessor>();
   return params;
 }
 
-NodalPostprocessor::NodalPostprocessor(const InputParameters & parameters) :
-    NodalUserObject(parameters),
+NodalPostprocessor::NodalPostprocessor(const InputParameters & parameters)
+  : NodalUserObject(parameters),
     Postprocessor(parameters)
 {
 }
-

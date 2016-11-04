@@ -22,7 +22,7 @@
 
 class SetupQuadratureAction;
 
-template<>
+template <>
 InputParameters validParams<SetupQuadratureAction>();
 
 /**
@@ -41,6 +41,5 @@ protected:
   Order _element_order;
   Order _side_order;
 };
-
 
 #endif /* SETUPQUADRATUREACTION_H_ */

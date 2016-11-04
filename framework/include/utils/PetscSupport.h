@@ -43,9 +43,10 @@ namespace PetscSupport
 class PetscOptions
 {
 public:
-  PetscOptions() :
-      flags("", "", true)
-  {}
+  PetscOptions()
+    : flags("", "", true)
+  {
+  }
 
   /// Keys for PETSc key-value pairs
   std::vector<std::string> inames;
@@ -82,7 +83,7 @@ void outputNorm(libMesh::Real old_norm, libMesh::Real norm, bool use_color = fal
 /**
  * Helper function for displaying the linear residual during PETSC solve
  */
-PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void *void_ptr);
+PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, void * void_ptr);
 
 /**
  * Stores the PETSc options supplied from the InputParameters with MOOSE
@@ -111,7 +112,6 @@ MultiMooseEnum getCommonPetscKeys();
  * MOOSE::PetscSupport.
  */
 void setSinglePetscOption(const std::string & name, const std::string & value = "");
-
 }
 }
 

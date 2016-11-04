@@ -23,9 +23,12 @@
 
 // Forward Declarations
 class BoundingBoxIC;
-namespace libMesh { class Point; }
+namespace libMesh
+{
+class Point;
+}
 
-template<>
+template <>
 InputParameters validParams<BoundingBoxIC>();
 
 /**
@@ -40,7 +43,6 @@ InputParameters validParams<BoundingBoxIC>();
 class BoundingBoxIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *

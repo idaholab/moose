@@ -20,7 +20,7 @@
 //Forward Declarations
 class ElementAverageValue;
 
-template<>
+template <>
 InputParameters validParams<ElementAverageValue>();
 
 /**

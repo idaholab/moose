@@ -20,7 +20,7 @@
 class TimePeriodOld;
 class Problem;
 
-template<>
+template <>
 InputParameters validParams<Problem>();
 
 /**
@@ -37,21 +37,29 @@ public:
   /**
    * For Internal Use
    */
-  void _setCLIOption() { _cli_option_found = true; }
+  void _setCLIOption()
+  {
+    _cli_option_found = true;
+  }
 
   /**
    * Allow objects to request clean termination of the solve
    */
-  virtual void terminateSolve() { _termination_requested = true; };
+  virtual void terminateSolve()
+  {
+    _termination_requested = true;
+  };
 
   /**
    * Check of termination has been requested. This should be called by
    * transient Executioners in the keepGoing() member.
    */
-  virtual bool isSolveTerminationRequested() { return _termination_requested; };
+  virtual bool isSolveTerminationRequested()
+  {
+    return _termination_requested;
+  };
 
 protected:
-
   /// True if the CLI option is found
   bool _cli_option_found;
 

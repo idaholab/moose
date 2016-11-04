@@ -15,14 +15,15 @@
 #include "AddKernelAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddKernelAction>()
+template <>
+InputParameters
+validParams<AddKernelAction>()
 {
   return validParams<MooseObjectAction>();
 }
 
-AddKernelAction::AddKernelAction(InputParameters params) :
-    MooseObjectAction(params)
+AddKernelAction::AddKernelAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

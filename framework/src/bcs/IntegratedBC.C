@@ -21,15 +21,16 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<IntegratedBC>()
+template <>
+InputParameters
+validParams<IntegratedBC>()
 {
   InputParameters params = validParams<BoundaryCondition>();
   params += validParams<RandomInterface>();
   params += validParams<MaterialPropertyInterface>();
 
-  params.addParam<std::vector<AuxVariableName> >("save_in", "The name of auxiliary variables to save this BC's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
-  params.addParam<std::vector<AuxVariableName> >("diag_save_in", "The name of auxiliary variables to save this BC's diagonal jacobian contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
+  params.addParam<std::vector<AuxVariableName>>("save_in", "The name of auxiliary variables to save this BC's residual contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
+  params.addParam<std::vector<AuxVariableName>>("diag_save_in", "The name of auxiliary variables to save this BC's diagonal jacobian contributions to.  Everything about that variable must match everything about this variable (the type, what blocks it's on, etc.)");
 
   params.addParamNamesToGroup("diag_save_in save_in", "Advanced");
 
@@ -39,8 +40,8 @@ InputParameters validParams<IntegratedBC>()
   return params;
 }
 
-IntegratedBC::IntegratedBC(const InputParameters & parameters) :
-    BoundaryCondition(parameters, false), // False is because this is NOT nodal
+IntegratedBC::IntegratedBC(const InputParameters & parameters)
+  : BoundaryCondition(parameters, false), // False is because this is NOT nodal
     RandomInterface(parameters, _fe_problem, _tid, false),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     MaterialPropertyInterface(this),
@@ -66,13 +67,13 @@ IntegratedBC::IntegratedBC(const InputParameters & parameters) :
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
 
-    _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),
-    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in"))
+    _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
 
-  for (unsigned int i=0; i<_save_in_strings.size(); i++)
+  for (unsigned int i = 0; i < _save_in_strings.size(); i++)
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
@@ -86,7 +87,7 @@ IntegratedBC::IntegratedBC(const InputParameters & parameters) :
 
   _has_save_in = _save_in.size() > 0;
 
-  for (unsigned int i=0; i<_diag_save_in_strings.size(); i++)
+  for (unsigned int i = 0; i < _diag_save_in_strings.size(); i++)
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
 
@@ -114,14 +115,14 @@ IntegratedBC::computeResidual()
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
-      _local_re(_i) += _JxW[_qp]*_coord[_qp]*computeQpResidual();
+      _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
   re += _local_re;
 
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_save_in.size(); i++)
+    for (unsigned int i = 0; i < _save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
 }
@@ -136,7 +137,7 @@ IntegratedBC::computeJacobian()
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
-        _local_ke(_i, _j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian();
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 
   ke += _local_ke;
 
@@ -144,11 +145,11 @@ IntegratedBC::computeJacobian()
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i=0; i<rows; i++)
-      diag(i) = _local_ke(i,i);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_diag_save_in.size(); i++)
+    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }
 }
@@ -158,14 +159,14 @@ IntegratedBC::computeJacobianBlock(unsigned int jvar)
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    for (_i=0; _i<_test.size(); _i++)
-      for (_j=0; _j<_phi.size(); _j++)
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < _phi.size(); _j++)
       {
         if (_var.number() == jvar)
-          ke(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian();
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
         else
-          ke(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(jvar);
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
       }
 }
 

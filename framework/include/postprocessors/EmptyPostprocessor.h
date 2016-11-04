@@ -20,7 +20,7 @@
 //Forward Declarations
 class EmptyPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<EmptyPostprocessor>();
 
 class EmptyPostprocessor : public GeneralPostprocessor
@@ -28,9 +28,16 @@ class EmptyPostprocessor : public GeneralPostprocessor
 public:
   EmptyPostprocessor(const InputParameters & parameters);
 
-  virtual void initialize() override {}
-  virtual void execute() override {}
-  virtual Real getValue() override { return 0; }
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
+  virtual Real getValue() override
+  {
+    return 0;
+  }
 };
 
 #endif

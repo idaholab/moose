@@ -26,29 +26,35 @@ class NonlinearSystem;
 
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
-template<>
+template <>
 InputParameters validParams<Predictor>();
 
 /**
  * Base class for predictors.
  */
-class Predictor :
-  public MooseObject,
-  public Restartable
+class Predictor : public MooseObject,
+                  public Restartable
 {
 public:
   Predictor(const InputParameters & parameters);
   virtual ~Predictor();
 
-  virtual int order() { return 0; }
+  virtual int order()
+  {
+    return 0;
+  }
   virtual void timestepSetup();
   virtual bool shouldApply();
   virtual void apply(NumericVector<Number> & sln) = 0;
 
-  virtual NumericVector<Number> & solutionPredictor() { return _solution_predictor; }
+  virtual NumericVector<Number> & solutionPredictor()
+  {
+    return _solution_predictor;
+  }
 
 protected:
   FEProblem & _fe_problem;

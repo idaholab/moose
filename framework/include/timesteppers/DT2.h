@@ -23,11 +23,11 @@ class DT2;
 
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
-
-template<>
+template <>
 InputParameters validParams<DT2>();
 
 /**
@@ -52,9 +52,9 @@ protected:
   virtual Real computeDT() override;
 
   ///
-  NumericVector<Number> * _u_diff, * _u1, * _u2;
-  NumericVector<Number> * _u_saved, * _u_older_saved;
-  NumericVector<Number> * _aux1, * _aux_saved, * _aux_older_saved;
+  NumericVector<Number> *_u_diff, *_u1, *_u2;
+  NumericVector<Number> *_u_saved, *_u_older_saved;
+  NumericVector<Number> *_aux1, *_aux_saved, *_aux_older_saved;
 
   /// global relative time discretization error estimate
   Real _error;
@@ -65,6 +65,5 @@ protected:
   /// maximum increase ratio
   Real _max_increase;
 };
-
 
 #endif /* DT2_H_ */
