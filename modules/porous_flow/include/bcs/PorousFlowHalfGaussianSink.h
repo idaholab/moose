@@ -9,7 +9,7 @@
 #ifndef POROUSFLOWHALFGAUSSIANSINK_H
 #define POROUSFLOWHALFGAUSSIANSINK_H
 
-#include "PorousFlowSink.h"
+#include "PorousFlowSinkPTDefiner.h"
 
 // Forward Declarations
 class PorousFlowHalfGaussianSink;
@@ -22,10 +22,11 @@ InputParameters validParams<PorousFlowHalfGaussianSink>();
  * defined by PorousFlowSink is multiplied by a
  * _maximum*exp(-(0.5*(p - c)/_sd)^2)*_m_func for p<c
  * _maximum*_m_func for p>=c
+ * Here p = porepressure for fluid fluxes, or p = temperature for heat fluxes.
  * This is typically used for modelling evapotranspiration
  * from the top of a groundwater model
  */
-class PorousFlowHalfGaussianSink : public PorousFlowSink
+class PorousFlowHalfGaussianSink : public PorousFlowSinkPTDefiner
 {
 public:
 
@@ -41,15 +42,9 @@ protected:
   /// center of the Gaussian sink
   const Real _center;
 
-  /// Nodal pore pressure in each phase
-  const MaterialProperty<std::vector<Real> > & _pp;
+  virtual Real multiplier() override;
 
-  /// d(Nodal pore pressure in each phase)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dvar;
-
-  virtual Real multiplier();
-
-  virtual Real dmultiplier_dvar(unsigned int pvar);
+  virtual Real dmultiplier_dvar(unsigned int pvar) override;
 };
 
 #endif //POROUSFLOWHALFGAUSSIANSINK_H
