@@ -26,6 +26,7 @@ PorousFlowDarcyBase::PorousFlowDarcyBase(const InputParameters & parameters) :
     Kernel(parameters),
     _permeability(getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")),
     _dpermeability_dvar(getMaterialProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_qp_dvar")),
+    _dpermeability_dgradvar(getMaterialProperty<std::vector<std::vector<RealTensorValue> > >("dPorousFlow_permeability_qp_dgradvar")),
     _fluid_density_node(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
     _dfluid_density_node_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar")),
     _fluid_density_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_qp")),
@@ -55,7 +56,12 @@ PorousFlowDarcyBase::darcyQpJacobian(unsigned int jvar, unsigned int ph)
     return 0.0;
 
   const unsigned int pvar = _porousflow_dictator.porousFlowVariableNum(jvar);
-  return _grad_test[_i][_qp] * (_dpermeability_dvar[_qp][pvar] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph]*_gravity) + _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] - _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity) + _permeability[_qp] * (_dgrad_p_dvar[_qp][ph][pvar] * _phi[_j][_qp]) );
+  RealVectorValue deriv = _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
+  for (unsigned i = 0; i < LIBMESH_DIM; ++i)
+    deriv += _dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
+  deriv += _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] - _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity);
+  deriv += _permeability[_qp] * (_dgrad_p_dvar[_qp][ph][pvar] * _phi[_j][_qp]);
+  return _grad_test[_i][_qp] * deriv;
 }
 
 Real

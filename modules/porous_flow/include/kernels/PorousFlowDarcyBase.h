@@ -80,6 +80,9 @@ protected:
   /// d(permeabiity)/d(porous-flow variable)
   const MaterialProperty<std::vector<RealTensorValue> > & _dpermeability_dvar;
 
+  /// d(permeabiity)/d(grad(porous-flow variable))
+  const MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dpermeability_dgradvar;
+
   /// Fluid density for each phase (at the node)
   const MaterialProperty<std::vector<Real> > & _fluid_density_node;
 
