@@ -21,19 +21,13 @@ InputParameters validParams<AccumulateAux>();
 class AccumulateAux : public AuxKernel
 {
 public:
-
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   AccumulateAux(const InputParameters & parameters);
-
-  virtual ~AccumulateAux() {}
 
 protected:
   virtual Real computeValue();
 
-  const VariableValue & _accumulate_from;
+  // coupled variable values to be aggregated
+  std::vector<const VariableValue *> _values;
 };
 
 #endif //ACCUMULATEAUX_H
