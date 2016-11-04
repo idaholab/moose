@@ -65,6 +65,9 @@ protected:
   /// d(quadpoint porosity)/d(PorousFlow variable)
   const MaterialProperty<std::vector<Real> > & _dporosity_qp_dvar;
 
+  /// d(quadpoint porosity)/d(grad(PorousFlow variable))
+  const MaterialProperty<std::vector<RealGradient> > & _dporosity_qp_dgradvar;
+
   /// Name of porosity-permeability relationship
   const MooseEnum _poroperm_function;
 
