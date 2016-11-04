@@ -39,6 +39,8 @@
 #include "PorousFlowPermeabilityExponential.h"
 #include "PorousFlowPorosityConst.h"
 #include "PorousFlowPorosityHM.h"
+#include "PorousFlowPorosityTM.h"
+#include "PorousFlowPorosityTHM.h"
 #include "PorousFlowRelativePermeabilityCorey.h"
 #include "PorousFlowRelativePermeabilityConst.h"
 #include "PorousFlowRelativePermeabilityVG.h"
@@ -151,6 +153,8 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowPermeabilityExponential);
   registerMaterial(PorousFlowPorosityConst);
   registerMaterial(PorousFlowPorosityHM);
+  registerMaterial(PorousFlowPorosityTM);
+  registerMaterial(PorousFlowPorosityTHM);
   registerMaterial(PorousFlowRelativePermeabilityCorey);
   registerMaterial(PorousFlowRelativePermeabilityConst);
   registerMaterial(PorousFlowRelativePermeabilityVG);

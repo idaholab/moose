@@ -182,6 +182,18 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
+  [./denergy03]
+    type = 'PetscJacobianTester'
+    input = 'denergy03.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./denergy04]
+    type = 'PetscJacobianTester'
+    input = 'denergy04.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
 
   [./heat_advection01]
     type = 'PetscJacobianTester'
