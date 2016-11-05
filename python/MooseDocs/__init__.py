@@ -23,7 +23,7 @@ from MooseApplicationSyntax import MooseApplicationSyntax
 import logging
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), 'moose'))
+MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), '..', 'moose'))
 if not os.path.exists(MOOSE_DIR):
   MOOSE_DIR = os.path.join(os.getenv('HOME'), 'projects', 'moose')
 
@@ -148,6 +148,7 @@ def command_line_options():
   subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
 
   # Add the sub-commands
+  test_parser = commands.test_options(parser, subparser)
   check_parser = subparser.add_parser('check', help="Perform error checking on documentation.")
   generate_parser = commands.generate_options(parser, subparser)
   serve_parser = commands.serve_options(parser, subparser)
@@ -175,7 +176,9 @@ def moosedocs():
 
   # Execute command
   cmd = options.pop('command')
-  if cmd == 'check':
+  if cmd == 'test':
+    commands.test(**options)
+  elif cmd == 'check':
     commands.generate(stubs=False, pages_stubs=False, **options)
   elif cmd == 'generate':
     commands.generate(**options)

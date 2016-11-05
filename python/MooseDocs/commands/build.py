@@ -66,7 +66,7 @@ def get_markdown_extensions(config):
         extension_configs[k] = v
 
         # Utilize the top-level 'docs_dir' by default
-        extension_configs.setdefault('docs_dir', config['docs_dir'])
+        extension_configs.setdefault('docs_dir', config.get('docs_dir', 'docs'))
 
     else:
       extensions.append(extension)
