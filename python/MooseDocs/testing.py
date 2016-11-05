@@ -40,7 +40,7 @@ class MarkdownTestCase(unittest.TestCase):
     text = text.splitlines()
     result = list(difflib.ndiff(gold, text))
     n =  len(max(result, key=len))
-    msg = "\nThe supplied text differs from the gold ({}) as follows:\n{}\n{}\n{}".format(gold_name, '~'*n, '\n'.join(result), '~'*n)
+    msg = "\nThe supplied text differs from the gold ({}) as follows:\n{}\n{}\n{}".format(gold_name, '~'*n, '\n'.join(result).encode('utf-8'), '~'*n)
     self.assertTrue(text==gold, msg)
 
   def assertConvert(self, gold_name, md):
