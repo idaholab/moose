@@ -13,4 +13,22 @@
     csvdiff = 'nc02_porepressure_0001.csv'
     rel_err = 1E-5
   [../]
+  [./nc04]
+    type = 'CSVDiff'
+    input = 'nc04.i'
+    csvdiff = 'nc04_temp_0001.csv'
+    rel_err = 1E-5
+  [../]
+  [./nc06]
+    type = 'CSVDiff'
+    input = 'nc06.i'
+    csvdiff = 'nc06_porepressure_0001.csv nc06_temperature_0001.csv'
+    rel_err = 1E-5
+  [../]
+  [./nc08]
+    type = 'CSVDiff'
+    input = 'nc08.i'
+    csvdiff = 'nc08_porepressure_0001.csv nc08_temperature_0001.csv'
+    rel_err = 1E-5
+  [../]
 []

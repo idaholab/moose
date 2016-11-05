@@ -28,6 +28,8 @@ InputParameters validParams<PorousFlowSink>();
  *      to the normal direction.
  *  (3) the mass_fraction of a component at the nodes
  *  (4) the enthalpy of the phase
+ *  (5) the internal energy of the phase
+ *  (6) the thermal conductivity of the medium
  */
 class PorousFlowSink : public IntegratedBC
 {
@@ -84,6 +86,18 @@ protected:
   /// whether there is an "enthalpy" Material.  This is just for error checking
   const bool _has_enthalpy;
 
+  /// whether to multiply the sink flux by internal_energy
+  const bool _use_internal_energy;
+
+  /// whether there is an "internal_energy" Material.  This is just for error checking
+  const bool _has_internal_energy;
+
+  /// whether to multiply the sink flux by thermal_conductivity
+  const bool _use_thermal_conductivity;
+
+  /// whether there is an "thermal_conductivity" Material.  This is just for error checking
+  const bool _has_thermal_conductivity;
+
   /// The flux
   Function & _m_func;
 
@@ -125,6 +139,18 @@ protected:
 
   /// d(enthalpy of each phase)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real> > > * _denthalpy_dvar;
+
+  /// Internal_Energy of each phase
+  const MaterialProperty<std::vector<Real> > * _internal_energy;
+
+  /// d(internal_energy of each phase)/d(PorousFlow variable)
+  const MaterialProperty<std::vector<std::vector<Real> > > * _dinternal_energy_dvar;
+
+  /// Thermal_Conductivity of porous material
+  const MaterialProperty<RealTensorValue> * _thermal_conductivity;
+
+  /// d(Thermal_Conductivity)/d(PorousFlow variable)
+  const MaterialProperty<std::vector<RealTensorValue> > * _dthermal_conductivity_dvar;
 
   /// Node Number information held in the quadpoints of the Materials
   const MaterialProperty<unsigned int> & _node_number;

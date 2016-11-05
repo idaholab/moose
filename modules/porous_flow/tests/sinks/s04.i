@@ -242,7 +242,7 @@
   [./flux]
     type = PorousFlowPiecewiseLinearSink
     boundary = 'right'
-    pressures = '0.3 0.8'
+    pt_vals = '0.3 0.8'
     multipliers = '0.5 1'
     variable = pp
     use_mobility = false

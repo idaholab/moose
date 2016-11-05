@@ -12,7 +12,7 @@ template<>
 InputParameters validParams<PorousFlowEnthalpy>()
 {
   InputParameters params = validParams<PorousFlowFluidPropertiesBase>();
-  params.addParam<Real>("porepressure_coefficient", 1.0, "The enthalpy is internal_energy + P / density * porepressure_contribution.  Physically this should be 1.0, but analytic solutions are simplified when it is zero"); 
+  params.addParam<Real>("porepressure_coefficient", 1.0, "The enthalpy is internal_energy + P / density * porepressure_contribution.  Physically this should be 1.0, but analytic solutions are simplified when it is zero");
   params.addClassDescription("This Material calculates fluid specific enthalpy (J/kg)");
   return params;
 }

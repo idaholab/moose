@@ -215,6 +215,18 @@ def expected_nc02():
         [100, 693147.1805599453]]
     return zip(*data)
 
+def expected_nc04():
+    data = [[x, 2 - x / 200.0] for x in range(0, 110, 10)]
+    return zip(*data)
+
+def expected_nc08_pp():
+    data = [[x, 200 * np.sqrt(1.0 - x / 200.0)] for x in range(0, 110, 10)]
+    return zip(*data)
+
+def expected_nc08_t():
+    data = [[x, 180] for x in range(0, 110, 10)]
+    return zip(*data)
+
 def nc01():
     f = open("../../tests/newton_cooling/gold/nc01_porepressure_0101.csv")
     data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
@@ -228,6 +240,47 @@ def nc02():
     p = [d[1] for d in data]
     x = [d[2] for d in data]
     return (x, p)
+
+def nc04():
+    f = open("../../tests/newton_cooling/gold/nc04_temp_0001.csv")
+    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    t = [d[1] for d in data]
+    x = [d[2] for d in data]
+    return (x, t)
+
+def nc08_pp():
+    f = open("../../tests/newton_cooling/gold/nc08_porepressure_0001.csv")
+    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    p = [d[1] for d in data]
+    x = [d[2] for d in data]
+    return (x, p)
+
+def nc08_t():
+    f = open("../../tests/newton_cooling/gold/nc08_temperature_0001.csv")
+    data = [map(float, line.strip().split(",")) for line in f.readlines()[1:] if line.strip()]
+    t = [d[1] for d in data]
+    x = [d[2] for d in data]
+    return (x, t)
+
+plt.figure()
+plt.plot(expected_nc08_pp()[0], expected_nc08_pp()[1], 'k-', linewidth = 3.0, label = 'expected (P)')
+plt.plot(nc08_pp()[0], nc08_pp()[1], 'rs', markersize = 10.0, label = 'MOOSE (P)')
+plt.plot(expected_nc08_t()[0], expected_nc08_t()[1], 'b-', linewidth = 3.0, label = 'expected (T)')
+plt.plot(nc08_t()[0], nc08_t()[1], 'ro', markersize = 10.0, label = 'MOOSE (T)')
+plt.legend(loc = 'lower left')
+plt.xlabel("x (m)")
+plt.ylabel("Porepressure and Temperature")
+plt.title("Steady-state hot ideal-gas results")
+plt.savefig("nc08.pdf")
+
+plt.figure()
+plt.plot(expected_nc04()[0], expected_nc04()[1], 'k-', linewidth = 3.0, label = 'expected')
+plt.plot(nc04()[0], nc04()[1], 'rs', markersize = 10.0, label = 'MOOSE')
+plt.legend(loc = 'lower left')
+plt.xlabel("x (m)")
+plt.ylabel("Temperature (K)")
+plt.title("Steady-state temperature distriution in bar")
+plt.savefig("nc_temp.pdf")
 
 plt.figure()
 plt.plot(expected_nc01()[0], expected_nc01()[1], 'k-', linewidth = 3.0, label = 'expected, t=1E8')
