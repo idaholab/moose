@@ -30,6 +30,9 @@ protected:
 
   virtual void computeQpProperties();
 
+  /// enthalpy = internal_energy + porepressure / density * _pp_coeff
+  const Real _pp_coeff;
+
   /// Fluid energy at the nodes
   const MaterialProperty<Real> & _energy_nodal;
 

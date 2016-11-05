@@ -11,28 +11,26 @@
 template<>
 InputParameters validParams<PorousFlowPiecewiseLinearSink>()
 {
-  InputParameters params = validParams<PorousFlowSink>();
-  params.addRequiredParam<std::vector<Real> >("pressures", "Tuple of pressure values (for the fluid_phase specified).  Must be monotonically increasing.");
+  InputParameters params = validParams<PorousFlowSinkPTDefiner>();
+  params.addRequiredParam<std::vector<Real> >("pt_vals", "Tuple of pressure values (for the fluid_phase specified).  Must be monotonically increasing.  For heat fluxes that don't involve fluids, these are temperature values");
   params.addRequiredParam<std::vector<Real> >("multipliers", "Tuple of multiplying values.  The flux values are multiplied by these.");
   return params;
 }
 
 PorousFlowPiecewiseLinearSink::PorousFlowPiecewiseLinearSink(const InputParameters & parameters) :
-    PorousFlowSink(parameters),
-    _sink_func(getParam<std::vector<Real> >("pressures"), getParam<std::vector<Real> >("multipliers")),
-    _pp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_nodal")),
-    _dpp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar"))
+    PorousFlowSinkPTDefiner(parameters),
+    _sink_func(getParam<std::vector<Real> >("pt_vals"), getParam<std::vector<Real> >("multipliers"))
 {
 }
 
 Real
 PorousFlowPiecewiseLinearSink::multiplier()
 {
-  return PorousFlowSink::multiplier() * _sink_func.sample(_pp[_qp_map[_i]][_ph]);
+  return PorousFlowSink::multiplier() * _sink_func.sample(ptVar());
 }
 
 Real
 PorousFlowPiecewiseLinearSink::dmultiplier_dvar(unsigned int pvar)
 {
-  return PorousFlowSink::dmultiplier_dvar(pvar) * _sink_func.sample(_pp[_qp_map[_i]][_ph]) + PorousFlowSink::multiplier() * _sink_func.sampleDerivative(_pp[_qp_map[_i]][_ph]) * _dpp_dvar[_qp_map[_i]][_ph][pvar];
+  return PorousFlowSink::dmultiplier_dvar(pvar) * _sink_func.sample(ptVar()) + PorousFlowSink::multiplier() * _sink_func.sampleDerivative(ptVar()) * dptVar(pvar);
 }
