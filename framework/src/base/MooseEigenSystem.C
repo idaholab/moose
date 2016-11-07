@@ -17,8 +17,8 @@
 #include "Factory.h"
 #include "EigenKernel.h"
 
-MooseEigenSystem::MooseEigenSystem(FEProblem & fe_problem, const std::string & name) :
-    NonlinearSystem(fe_problem, name),
+MooseEigenSystem::MooseEigenSystem(FEProblem & fe_problem, const std::string & name)
+  : NonlinearSystem(fe_problem, name),
     _all_eigen_vars(false),
     _active_on_old(false),
     _eigen_kernel_counter(0)
@@ -65,9 +65,9 @@ MooseEigenSystem::addKernel(const std::string & kernel_name, const std::string &
     }
   }
 
-  if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0)
+  if (parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
     _has_save_in = true;
-  if (parameters.get<std::vector<AuxVariableName> >("diag_save_in").size() > 0)
+  if (parameters.get<std::vector<AuxVariableName>>("diag_save_in").size() > 0)
     _has_diag_save_in = true;
 }
 
@@ -80,11 +80,11 @@ MooseEigenSystem::markEigenVariable(const VariableName & var_name)
 void
 MooseEigenSystem::scaleSystemSolution(SYSTEMTAG tag, Real scaling_factor)
 {
-  if (tag==ALL)
+  if (tag == ALL)
   {
     solution().scale(scaling_factor);
   }
-  else if (tag==EIGEN)
+  else if (tag == EIGEN)
   {
     if (_all_eigen_vars)
     {
@@ -103,24 +103,28 @@ MooseEigenSystem::scaleSystemSolution(SYSTEMTAG tag, Real scaling_factor)
 void
 MooseEigenSystem::combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> & coefficients)
 {
-  mooseAssert(coefficients.size()>0 && coefficients.size()<=3, "Size error on coefficients");
-  if (tag==ALL)
+  mooseAssert(coefficients.size() > 0 && coefficients.size() <= 3, "Size error on coefficients");
+  if (tag == ALL)
   {
     solution().scale(coefficients[0]);
-    if (coefficients.size()>1) solution().add(coefficients[1], solutionOld());
-    if (coefficients.size()>2) solution().add(coefficients[2], solutionOlder());
+    if (coefficients.size() > 1)
+      solution().add(coefficients[1], solutionOld());
+    if (coefficients.size() > 2)
+      solution().add(coefficients[2], solutionOlder());
   }
-  else if (tag==EIGEN)
+  else if (tag == EIGEN)
   {
     if (_all_eigen_vars)
     {
       solution().scale(coefficients[0]);
-      if (coefficients.size()>1) solution().add(coefficients[1], solutionOld());
-      if (coefficients.size()>2) solution().add(coefficients[2], solutionOlder());
+      if (coefficients.size() > 1)
+        solution().add(coefficients[1], solutionOld());
+      if (coefficients.size() > 2)
+        solution().add(coefficients[2], solutionOlder());
     }
     else
     {
-      if (coefficients.size()>2)
+      if (coefficients.size() > 2)
       {
         for (const auto & dof : _eigen_var_indices)
         {
@@ -130,7 +134,7 @@ MooseEigenSystem::combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> &
           solution().set(dof, t);
         }
       }
-      else if (coefficients.size()>1)
+      else if (coefficients.size() > 1)
       {
         for (const auto & dof : _eigen_var_indices)
         {
@@ -156,11 +160,11 @@ MooseEigenSystem::combineSystemSolution(SYSTEMTAG tag, const std::vector<Real> &
 void
 MooseEigenSystem::initSystemSolution(SYSTEMTAG tag, Real v)
 {
-  if (tag==ALL)
+  if (tag == ALL)
   {
     solution() = v;
   }
-  else if (tag==EIGEN)
+  else if (tag == EIGEN)
   {
     if (_all_eigen_vars)
     {
@@ -179,11 +183,11 @@ MooseEigenSystem::initSystemSolution(SYSTEMTAG tag, Real v)
 void
 MooseEigenSystem::initSystemSolutionOld(SYSTEMTAG tag, Real v)
 {
-  if (tag==ALL)
+  if (tag == ALL)
   {
     solutionOld() = v;
   }
-  else if (tag==EIGEN)
+  else if (tag == EIGEN)
   {
     if (_all_eigen_vars)
     {
@@ -203,14 +207,14 @@ void
 MooseEigenSystem::eigenKernelOnOld()
 {
   _active_on_old = true;
-  _fe_problem.updateActiveObjects();   // update warehouse active objects
+  _fe_problem.updateActiveObjects(); // update warehouse active objects
 }
 
 void
 MooseEigenSystem::eigenKernelOnCurrent()
 {
   _active_on_old = false;
-  _fe_problem.updateActiveObjects();   // update warehouse active objects
+  _fe_problem.updateActiveObjects(); // update warehouse active objects
 }
 
 bool
@@ -222,18 +226,18 @@ MooseEigenSystem::activeOnOld()
 void
 MooseEigenSystem::buildSystemDoFIndices(SYSTEMTAG tag)
 {
-  if (tag==ALL)
+  if (tag == ALL)
   {
   }
-  else if (tag==EIGEN)
+  else if (tag == EIGEN)
   {
     // build DoF indices for the eigen system
     _eigen_var_indices.clear();
-    _all_eigen_vars = getEigenVariableNames().size()==getVariableNames().size();
+    _all_eigen_vars = getEigenVariableNames().size() == getVariableNames().size();
     if (!_all_eigen_vars)
     {
-      for (std::set<VariableName>::const_iterator it=getEigenVariableNames().begin();
-           it!=getEigenVariableNames().end(); it++)
+      for (std::set<VariableName>::const_iterator it = getEigenVariableNames().begin();
+           it != getEigenVariableNames().end(); it++)
       {
         unsigned int i = sys().variable_number(*it);
         std::set<dof_id_type> var_indices;
@@ -247,5 +251,5 @@ MooseEigenSystem::buildSystemDoFIndices(SYSTEMTAG tag)
 bool
 MooseEigenSystem::containsEigenKernel() const
 {
-  return _eigen_kernel_counter>0;
+  return _eigen_kernel_counter > 0;
 }

@@ -19,7 +19,7 @@
 
 class TimeSequenceStepper;
 
-template<>
+template <>
 InputParameters validParams<TimeSequenceStepper>();
 
 /**

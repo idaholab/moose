@@ -14,16 +14,17 @@
 
 #include "GeneralPostprocessor.h"
 
-template<>
-InputParameters validParams<GeneralPostprocessor>()
+template <>
+InputParameters
+validParams<GeneralPostprocessor>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params += validParams<Postprocessor>();
   return params;
 }
 
-GeneralPostprocessor::GeneralPostprocessor(const InputParameters & parameters) :
-    GeneralUserObject(parameters),
+GeneralPostprocessor::GeneralPostprocessor(const InputParameters & parameters)
+  : GeneralUserObject(parameters),
     Postprocessor(parameters)
-{}
-
+{
+}

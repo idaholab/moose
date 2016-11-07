@@ -27,7 +27,6 @@ class MooseApp;
 class ConsoleStreamInterface
 {
 public:
-
   /**
    * A class for providing a helper stream object for writting message to
    * all the Output objects.
@@ -36,7 +35,6 @@ public:
 
   /// An instance of helper class to write streams to the Console objects
   const ConsoleStream _console;
-
 };
 
 #endif // CONSOLESTREAMINTERFACE_H

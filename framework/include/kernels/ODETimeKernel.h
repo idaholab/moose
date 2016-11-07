@@ -20,7 +20,7 @@
 // Forward Declarations
 class ODETimeKernel;
 
-template<>
+template <>
 InputParameters validParams<ODETimeKernel>();
 
 /**
@@ -34,6 +34,5 @@ public:
 
   virtual void computeResidual() override;
 };
-
 
 #endif

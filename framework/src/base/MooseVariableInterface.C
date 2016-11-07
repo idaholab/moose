@@ -19,8 +19,8 @@
 #include "Assembly.h"
 #include "MooseError.h" // mooseDeprecated
 
-MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object, bool nodal, std::string var_param_name) :
-    _nodal(nodal)
+MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object, bool nodal, std::string var_param_name)
+  : _nodal(nodal)
 {
   const InputParameters & parameters = moose_object->parameters();
 
@@ -94,7 +94,6 @@ MooseVariableInterface::dotDu()
     return _variable->duDotDu();
 }
 
-
 const VariableGradient &
 MooseVariableInterface::gradient()
 {
@@ -166,7 +165,6 @@ MooseVariableInterface::secondTestFace()
 
   return _variable->secondPhiFace();
 }
-
 
 const VariablePhiSecond &
 MooseVariableInterface::secondPhi()

@@ -20,7 +20,7 @@
 //Forward Declarations
 class ElementsAlongPlane;
 
-template<>
+template <>
 InputParameters validParams<ElementsAlongPlane>();
 
 /**

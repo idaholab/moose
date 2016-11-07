@@ -16,8 +16,9 @@
 #include "MooseParsedFunction.h"
 #include "MooseParsedFunctionWrapper.h"
 
-template<>
-InputParameters validParams<MooseParsedFunction>()
+template <>
+InputParameters
+validParams<MooseParsedFunction>()
 {
   InputParameters params = validParams<Function>();
   params += validParams<MooseParsedFunctionBase>();
@@ -25,8 +26,8 @@ InputParameters validParams<MooseParsedFunction>()
   return params;
 }
 
-MooseParsedFunction::MooseParsedFunction(const InputParameters & parameters) :
-    Function(parameters),
+MooseParsedFunction::MooseParsedFunction(const InputParameters & parameters)
+  : Function(parameters),
     MooseParsedFunctionBase(parameters),
     _value(verifyFunction(getParam<std::string>("value"))),
     _function_ptr(NULL)
@@ -74,4 +75,3 @@ MooseParsedFunction::initialSetup()
     _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _value, _vars, _vals, tid);
   }
 }
-

@@ -27,8 +27,8 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, Moose::KernelType type) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem),
+ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, Moose::KernelType type)
+  : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _nl(fe_problem.getNonlinearSystem()),
     _kernel_type(type),
     _num_cached(0),
@@ -42,8 +42,8 @@ ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, Moose::Kern
 }
 
 // Splitting Constructor
-ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
-    ThreadedElementLoop<ConstElemRange>(x, split),
+ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split)
+  : ThreadedElementLoop<ConstElemRange>(x, split),
     _nl(x._nl),
     _kernel_type(x._kernel_type),
     _num_cached(0),
@@ -77,32 +77,31 @@ ComputeResidualThread::subdomainChanged()
 }
 
 void
-ComputeResidualThread::onElement(const Elem *elem)
+ComputeResidualThread::onElement(const Elem * elem)
 {
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
-
   const MooseObjectWarehouse<KernelBase> * warehouse;
   switch (_kernel_type)
   {
-  case Moose::KT_ALL:
-    warehouse = &_kernels;
-    break;
+    case Moose::KT_ALL:
+      warehouse = &_kernels;
+      break;
 
-  case Moose::KT_TIME:
-    warehouse = &_time_kernels;
-    break;
+    case Moose::KT_TIME:
+      warehouse = &_time_kernels;
+      break;
 
-  case Moose::KT_NONTIME:
-    warehouse = &_non_time_kernels;
-    break;
+    case Moose::KT_NONTIME:
+      warehouse = &_non_time_kernels;
+      break;
   }
 
   if (warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<MooseSharedPointer<KernelBase> > & kernels = warehouse->getActiveBlockObjects(_subdomain, _tid);
+    const std::vector<MooseSharedPointer<KernelBase>> & kernels = warehouse->getActiveBlockObjects(_subdomain, _tid);
     for (const auto & kernel : kernels)
       kernel->computeResidual();
   }
@@ -111,14 +110,13 @@ ComputeResidualThread::onElement(const Elem *elem)
 }
 
 void
-ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+ComputeResidualThread::onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
   if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
   {
-    const std::vector<MooseSharedPointer<IntegratedBC> > & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
+    const std::vector<MooseSharedPointer<IntegratedBC>> & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
 
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
-
 
     _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
@@ -139,7 +137,7 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 }
 
 void
-ComputeResidualThread::onInterface(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+ComputeResidualThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
   if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, _tid))
   {
@@ -157,7 +155,7 @@ ComputeResidualThread::onInterface(const Elem *elem, unsigned int side, Boundary
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-      const std::vector<MooseSharedPointer<InterfaceKernel> > & int_ks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
+      const std::vector<MooseSharedPointer<InterfaceKernel>> & int_ks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & interface_kernel : int_ks)
         interface_kernel->computeResidual();
 
@@ -173,7 +171,7 @@ ComputeResidualThread::onInterface(const Elem *elem, unsigned int side, Boundary
 }
 
 void
-ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
+ComputeResidualThread::onInternalSide(const Elem * elem, unsigned int side)
 {
   if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
@@ -182,8 +180,8 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
 
     // Get the global id of the element and the neighbor
     const dof_id_type
-      elem_id = elem->id(),
-      neighbor_id = neighbor->id();
+        elem_id = elem->id(),
+        neighbor_id = neighbor->id();
 
     if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
     {
@@ -192,7 +190,7 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-      const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
+      const std::vector<MooseSharedPointer<DGKernel>> & dgks = _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & dg_kernel : dgks)
         if (dg_kernel->hasBlocks(neighbor->subdomain_id()))
           dg_kernel->computeResidual();
@@ -226,7 +224,6 @@ ComputeResidualThread::post()
 {
   _fe_problem.clearActiveElementalMooseVariables(_tid);
 }
-
 
 void
 ComputeResidualThread::join(const ComputeResidualThread & /*y*/)

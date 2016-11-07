@@ -19,7 +19,7 @@
 
 class ImplicitMidpoint;
 
-template<>
+template <>
 InputParameters validParams<ImplicitMidpoint>();
 
 /**
@@ -55,7 +55,10 @@ public:
   ImplicitMidpoint(const InputParameters & parameters);
   virtual ~ImplicitMidpoint();
 
-  virtual int order() { return 2; }
+  virtual int order()
+  {
+    return 2;
+  }
 
   virtual void computeTimeDerivatives();
   virtual void solve();
@@ -67,6 +70,5 @@ protected:
   /// Buffer to store non-time residual from the first stage.
   NumericVector<Number> & _residual_stage1;
 };
-
 
 #endif /* IMPLICITMIDPOINT_H */

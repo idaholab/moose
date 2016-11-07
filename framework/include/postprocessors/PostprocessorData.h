@@ -66,7 +66,10 @@ public:
   /**
    * Get the map of names -> Postprocessor values. Exposed for error checking.
    */
-  const std::map<std::string, PostprocessorValue*> & values() const { return _values; }
+  const std::map<std::string, PostprocessorValue *> & values() const
+  {
+    return _values;
+  }
 
   /**
    * Copy the current Postprocessor values into old (i.e. shift it "back in time")
@@ -74,15 +77,14 @@ public:
   void copyValuesBack();
 
 protected:
-
   /// Values of the Postprocessor at the current time
-  std::map<std::string, PostprocessorValue*> _values;
+  std::map<std::string, PostprocessorValue *> _values;
 
   /// Values of the Postprocessors at the time t-1
-  std::map<std::string, PostprocessorValue*> _values_old;
+  std::map<std::string, PostprocessorValue *> _values_old;
 
   /// Values of the Postprocessors at the time t-2
-  std::map<std::string, PostprocessorValue*> _values_older;
+  std::map<std::string, PostprocessorValue *> _values_older;
 };
 
 #endif //POSTPROCESSORDATA_H

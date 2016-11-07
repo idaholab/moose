@@ -33,7 +33,7 @@ public:
    * @param allow_out_of_range - determines whether this enumeration will accept values outside of it's range of
    *                       defined values.
    */
-  MooseEnumBase(std::string names, bool allow_out_of_range=false);
+  MooseEnumBase(std::string names, bool allow_out_of_range = false);
 
   /**
    * Copy Constructor for use when creating vectors of MooseEnumBases
@@ -51,20 +51,26 @@ public:
    * you may supply an option new option that will be used in a message telling
    * the user which new option replaces the old one.
    */
-  void deprecate(const std::string & name, const std::string & new_name="");
+  void deprecate(const std::string & name, const std::string & new_name = "");
 
   /**
    * Method for returning a vector of all valid enumeration names for this instance
    * @return a vector of names
    */
   /// TODO: This should probably be turn into a set to avoid duplicate entries
-  const std::vector<std::string> & getNames() const { return _names; }
+  const std::vector<std::string> & getNames() const
+  {
+    return _names;
+  }
 
   /**
    * Method for returning the raw name strings for this instance
    * @return a space separated list of names
    */
-  const std::string & getRawNames() const { return _raw_names; }
+  const std::string & getRawNames() const
+  {
+    return _raw_names;
+  }
 
   /**
    * IsValid
@@ -79,7 +85,7 @@ protected:
    * Populates the _names vector
    * @param names - a space separated list of names used to populate the internal names vector
    */
-  void fillNames(std::string names, std::string option_delim=" ");
+  void fillNames(std::string names, std::string option_delim = " ");
 
   // The method that must be implemented to check derived class values against the _deprecated_names list
   virtual void checkDeprecated() const = 0;

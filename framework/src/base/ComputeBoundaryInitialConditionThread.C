@@ -16,13 +16,13 @@
 #include "InitialCondition.h"
 #include "Assembly.h"
 
-ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(FEProblem & fe_problem) :
-    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem)
+ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(FEProblem & fe_problem)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem)
 {
 }
 
-ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(ComputeBoundaryInitialConditionThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split)
+ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(ComputeBoundaryInitialConditionThread & x, Threads::split split)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split)
 {
 }
 
@@ -40,17 +40,17 @@ ComputeBoundaryInitialConditionThread::onNode(ConstBndNodeRange::const_iterator 
 
   if (warehouse.hasActiveBoundaryObjects(boundary_id, _tid))
   {
-    const std::vector<MooseSharedPointer<InitialCondition> > & ics = warehouse.getActiveBoundaryObjects(boundary_id, _tid);
+    const std::vector<MooseSharedPointer<InitialCondition>> & ics = warehouse.getActiveBoundaryObjects(boundary_id, _tid);
     for (const auto & ic : ics)
     {
       if (node->processor_id() == _fe_problem.processor_id())
       {
         MooseVariable & var = ic->variable();
         var.reinitNode();
-        var.computeNodalValues();                   // has to call this to resize the internal array
+        var.computeNodalValues(); // has to call this to resize the internal array
         Real value = ic->value(*node);
 
-        var.setNodalValue(value);                  // update variable data, which is referenced by others, so the value is up-to-date
+        var.setNodalValue(value); // update variable data, which is referenced by others, so the value is up-to-date
 
         // We are done, so update the solution vector
         {

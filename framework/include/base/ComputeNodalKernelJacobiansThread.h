@@ -28,9 +28,9 @@ class NodalKernel;
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class SparseMatrix;
+template <typename T>
+class SparseMatrix;
 }
-
 
 class ComputeNodalKernelJacobiansThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {

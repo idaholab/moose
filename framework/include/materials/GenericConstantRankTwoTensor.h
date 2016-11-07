@@ -13,7 +13,7 @@
 
 class GenericConstantRankTwoTensor;
 
-template<>
+template <>
 InputParameters validParams<GenericConstantRankTwoTensor>();
 
 /**

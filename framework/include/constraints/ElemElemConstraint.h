@@ -25,12 +25,11 @@
 class ElemElemConstraint;
 class FEProblem;
 
-template<>
+template <>
 InputParameters validParams<ElemElemConstraint>();
 
-class ElemElemConstraint :
-  public Constraint,
-  public NeighborCoupleableMooseVariableDependencyIntermediateInterface
+class ElemElemConstraint : public Constraint,
+                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   ElemElemConstraint(const InputParameters & parameters);
@@ -69,10 +68,10 @@ protected:
   FEProblem & _fe_problem;
   unsigned int _dim;
 
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
 
   /// The neighboring element
-  const Elem * & _neighbor_elem;
+  const Elem *& _neighbor_elem;
 
   /// Quadrature points used in integration of constraint
   std::vector<Point> _constraint_q_point;

@@ -22,7 +22,7 @@
 class TimePeriod;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<TimePeriod>();
 
 /**
@@ -31,7 +31,6 @@ InputParameters validParams<TimePeriod>();
 class TimePeriod : public Control
 {
 public:
-
   /**
    * Class constructor
    * @param parameters Input parameters for this Control object
@@ -41,14 +40,12 @@ public:
   virtual void execute() override;
 
 protected:
-
   /**
    * If enabled, this injects the start/end times into the TimeStepper sync times.
    */
   void initialSetup() override;
 
 private:
-
   /// List of objects to enable
   const std::vector<std::string> & _enable;
 

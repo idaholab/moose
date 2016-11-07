@@ -21,12 +21,11 @@
 //Forward Declarations
 class SideValueSampler;
 
-template<>
+template <>
 InputParameters validParams<SideValueSampler>();
 
-class SideValueSampler :
-  public SideVectorPostprocessor,
-  protected SamplerBase
+class SideValueSampler : public SideVectorPostprocessor,
+                         protected SamplerBase
 {
 public:
   SideValueSampler(const InputParameters & parameters);

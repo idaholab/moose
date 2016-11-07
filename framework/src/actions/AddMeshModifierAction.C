@@ -18,15 +18,16 @@
 #include "Factory.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<AddMeshModifierAction>()
+template <>
+InputParameters
+validParams<AddMeshModifierAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   return params;
 }
 
-AddMeshModifierAction::AddMeshModifierAction(InputParameters params) :
-    MooseObjectAction(params)
+AddMeshModifierAction::AddMeshModifierAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

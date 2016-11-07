@@ -24,16 +24,15 @@
 class Steady;
 class FEProblem;
 
-template<>
+template <>
 InputParameters validParams<Steady>();
 
 /**
  * Steady executioners usually only call "solve()" on the NonlinearSystem once.
  */
-class Steady: public Executioner
+class Steady : public Executioner
 {
 public:
-
   /**
    * Constructor
    *

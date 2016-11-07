@@ -19,9 +19,8 @@
 
 class AddFunctionAction;
 
-template<>
+template <>
 InputParameters validParams<AddFunctionAction>();
-
 
 /**
  * This class parses functions in the [Functions] block and creates them.

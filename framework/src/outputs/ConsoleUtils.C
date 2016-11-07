@@ -35,7 +35,6 @@ indent(unsigned int spaces)
   return std::string(spaces, ' ');
 }
 
-
 std::string
 outputFrameworkInformation(MooseApp & app)
 {
@@ -53,7 +52,6 @@ outputFrameworkInformation(MooseApp & app)
 
   return oss.str();
 }
-
 
 std::string
 outputMeshInformation(FEProblem & problem, bool verbose)
@@ -83,10 +81,10 @@ outputMeshInformation(FEProblem & problem, bool verbose)
   if (verbose)
   {
 
-    oss << std::setw(console_field_width) << "  Num Subdomains: "       << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
-        << std::setw(console_field_width) << "  Num Partitions: "       << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
+    oss << std::setw(console_field_width) << "  Num Subdomains: " << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
+        << std::setw(console_field_width) << "  Num Partitions: " << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
     if (problem.n_processors() > 1)
-      oss << std::setw(console_field_width) << "  Partitioner: "       << moose_mesh.partitionerName()
+      oss << std::setw(console_field_width) << "  Partitioner: " << moose_mesh.partitionerName()
           << (moose_mesh.isPartitionerForced() ? " (forced) " : "")
           << '\n';
   }
@@ -96,20 +94,17 @@ outputMeshInformation(FEProblem & problem, bool verbose)
   return oss.str();
 }
 
-
 std::string
 outputAuxiliarySystemInformation(FEProblem & problem)
 {
   return outputSystemInformationHelper(problem.getAuxiliarySystem().system());
 }
 
-
 std::string
 outputNonlinearSystemInformation(FEProblem & problem)
 {
   return outputSystemInformationHelper(problem.getNonlinearSystem().system());
 }
-
 
 std::string
 outputSystemInformationHelper(const System & system)
@@ -125,19 +120,21 @@ outputSystemInformationHelper(const System & system)
     std::streampos begin_string_pos = oss.tellp();
     std::streampos curr_string_pos = begin_string_pos;
     oss << std::setw(console_field_width) << "  Variables: ";
-    for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+    for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
-      const VariableGroup &vg_description (system.variable_group(vg));
+      const VariableGroup & vg_description(system.variable_group(vg));
 
-      if (vg_description.n_variables() > 1) oss << "{ ";
-      for (unsigned int vn=0; vn<vg_description.n_variables(); vn++)
+      if (vg_description.n_variables() > 1)
+        oss << "{ ";
+      for (unsigned int vn = 0; vn < vg_description.n_variables(); vn++)
       {
         oss << "\"" << vg_description.name(vn) << "\" ";
         curr_string_pos = oss.tellp();
         insertNewline(oss, begin_string_pos, curr_string_pos);
       }
 
-      if (vg_description.n_variables() > 1) oss << "} ";
+      if (vg_description.n_variables() > 1)
+        oss << "} ";
     }
     oss << '\n';
 
@@ -145,7 +142,7 @@ outputSystemInformationHelper(const System & system)
     curr_string_pos = begin_string_pos;
     oss << std::setw(console_field_width) << "  Finite Element Types: ";
 #ifndef LIBMESH_ENABLE_INFINITE_ELEMENTS
-    for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+    for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
       oss << "\""
           << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().family)
@@ -155,7 +152,7 @@ outputSystemInformationHelper(const System & system)
     }
     oss << '\n';
 #else
-    for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+    for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
       oss << "\""
           << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().family)
@@ -170,7 +167,7 @@ outputSystemInformationHelper(const System & system)
     begin_string_pos = oss.tellp();
     curr_string_pos = begin_string_pos;
     oss << std::setw(console_field_width) << "  Infinite Element Mapping: ";
-    for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+    for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
       oss << "\""
           << libMesh::Utility::enum_to_string<InfMapType>(system.get_dof_map().variable_group(vg).type().inf_map)
@@ -184,7 +181,7 @@ outputSystemInformationHelper(const System & system)
     begin_string_pos = oss.tellp();
     curr_string_pos = begin_string_pos;
     oss << std::setw(console_field_width) << "  Approximation Orders: ";
-    for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+    for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
 #ifndef LIBMESH_ENABLE_INFINITE_ELEMENTS
       oss << "\""
@@ -205,7 +202,6 @@ outputSystemInformationHelper(const System & system)
 
   return oss.str();
 }
-
 
 std::string
 outputExecutionInformation(MooseApp & app, FEProblem & problem)
@@ -233,7 +229,6 @@ outputExecutionInformation(MooseApp & app, FEProblem & problem)
   return oss.str();
 }
 
-
 std::string
 outputOutputInformation(MooseApp & app)
 {
@@ -246,7 +241,7 @@ outputOutputInformation(MooseApp & app)
   {
     // Display the "execute_on" settings
     const MultiMooseEnum & execute_on = out->executeOn();
-    oss << "  " << std::setw(console_field_width-2) << out->name() <<  "\"" << execute_on << "\"\n";
+    oss << "  " << std::setw(console_field_width - 2) << out->name() << "\"" << execute_on << "\"\n";
 
     // Display the advanced "execute_on" settings, only if they are different from "execute_on"
     if (out->isAdvanced())
@@ -254,15 +249,16 @@ outputOutputInformation(MooseApp & app)
       const OutputOnWarehouse & adv_on = out->advancedExecuteOn();
       for (const auto & adv_it : adv_on)
         if (execute_on != adv_it.second)
-          oss << "    " << std::setw(console_field_width-4) << adv_it.first + ":" <<  "\"" << adv_it.second << "\"\n";
+          oss << "    " << std::setw(console_field_width - 4) << adv_it.first + ":"
+              << "\"" << adv_it.second << "\"\n";
     }
   }
 
   return oss.str();
 }
 
-
-std::string outputLegacyInformation(MooseApp & /*app*/, FEProblem & problem)
+std::string
+outputLegacyInformation(MooseApp & /*app*/, FEProblem & problem)
 {
   std::stringstream oss;
   oss << std::left;
@@ -280,14 +276,14 @@ std::string outputLegacyInformation(MooseApp & /*app*/, FEProblem & problem)
 }
 
 void
-insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr)
+insertNewline(std::stringstream & oss, std::streampos & begin, std::streampos & curr)
 {
-   if (curr - begin > console_line_length)
-   {
-     oss << "\n";
-     begin = oss.tellp();
-     oss << std::setw(console_field_width + 2) << "";  // "{ "
-   }
+  if (curr - begin > console_line_length)
+  {
+    oss << "\n";
+    begin = oss.tellp();
+    oss << std::setw(console_field_width + 2) << ""; // "{ "
+  }
 }
 
 } // ConsoleUtils namespace

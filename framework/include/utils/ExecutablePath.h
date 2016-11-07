@@ -17,7 +17,8 @@
 
 #include <string>
 
-namespace Moose {
+namespace Moose
+{
 
 /**
  * This function returns the PATH of the running executable.

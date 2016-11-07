@@ -28,11 +28,12 @@
 // compiler includes (for type demangling)
 #include <cxxabi.h>
 
-template<>
-InputParameters validParams<DOFMapOutput>()
+template <>
+InputParameters
+validParams<DOFMapOutput>()
 {
   // Get the parameters from the base class
-  InputParameters params = validParams<BasicOutput<FileOutput> >();
+  InputParameters params = validParams<BasicOutput<FileOutput>>();
 
   // Screen and file output toggles
   params.addParam<bool>("output_screen", false, "Output to the screen");
@@ -45,8 +46,8 @@ InputParameters validParams<DOFMapOutput>()
   return params;
 }
 
-DOFMapOutput::DOFMapOutput(const InputParameters & parameters) :
-    BasicOutput<FileOutput>(parameters),
+DOFMapOutput::DOFMapOutput(const InputParameters & parameters)
+  : BasicOutput<FileOutput>(parameters),
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
     _system_name(getParam<std::string>("system_name")),
@@ -83,7 +84,7 @@ DOFMapOutput::demangle(const std::string & name)
   // at least remove leading digits
   std::string demangled(name);
   while (demangled.length() && demangled[0] >= '0' && demangled[0] <= '9')
-    demangled.erase(0,1);
+    demangled.erase(0, 1);
 
   return demangled;
 #endif
@@ -105,9 +106,9 @@ DOFMapOutput::writeStreamToFile(bool /*append*/)
   _file_num++;
 }
 
-template<typename T>
+template <typename T>
 std::string
-DOFMapOutput::join(const T & begin, const T & end, const char* const delim)
+DOFMapOutput::join(const T & begin, const T & end, const char * const delim)
 {
   std::ostringstream os;
   for (T it = begin; it != end; ++it)
@@ -145,7 +146,7 @@ DOFMapOutput::output(const ExecFlagType & /*type*/)
   oss << ", \"vars\": [";
   for (unsigned int vg = 0; vg < dof_map.n_variable_groups(); ++vg)
   {
-    const VariableGroup &vg_description (dof_map.variable_group(vg));
+    const VariableGroup & vg_description(dof_map.variable_group(vg));
     for (unsigned int vn = 0; vn < vg_description.n_variables(); ++vn)
     {
       unsigned int var = vg_description.number(vn);
@@ -162,11 +163,11 @@ DOFMapOutput::output(const ExecFlagType & /*type*/)
         // if this variable has active kernels output them
         if (kernels.hasActiveVariableBlockObjects(var, *sd))
         {
-          const std::vector<MooseSharedPointer<KernelBase> > & active_kernels = kernels.getActiveVariableBlockObjects(var, *sd);
-          for (unsigned i = 0; i<active_kernels.size(); ++i)
+          const std::vector<MooseSharedPointer<KernelBase>> & active_kernels = kernels.getActiveVariableBlockObjects(var, *sd);
+          for (unsigned i = 0; i < active_kernels.size(); ++i)
           {
             KernelBase & kb = *(active_kernels[i].get());
-            oss << (i>0 ? ", " : "")
+            oss << (i > 0 ? ", " : "")
                 << "{\"name\": \"" << kb.name()
                 << "\", \"type\": \"" << demangle(typeid(kb).name())
                 << "\"}";

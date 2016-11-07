@@ -14,17 +14,19 @@
 
 #include "ElementAverageValue.h"
 
-template<>
-InputParameters validParams<ElementAverageValue>()
+template <>
+InputParameters
+validParams<ElementAverageValue>()
 {
   InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
   return params;
 }
 
-ElementAverageValue::ElementAverageValue(const InputParameters & parameters) :
-    ElementIntegralVariablePostprocessor(parameters),
+ElementAverageValue::ElementAverageValue(const InputParameters & parameters)
+  : ElementIntegralVariablePostprocessor(parameters),
     _volume(0)
-{}
+{
+}
 
 void
 ElementAverageValue::initialize()
@@ -58,4 +60,3 @@ ElementAverageValue::threadJoin(const UserObject & y)
   const ElementAverageValue & pps = static_cast<const ElementAverageValue &>(y);
   _volume += pps._volume;
 }
-

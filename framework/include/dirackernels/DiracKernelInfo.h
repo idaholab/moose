@@ -66,26 +66,32 @@ public:
   /**
    * Returns a writeable reference to the _elements container.
    */
-  std::set<const Elem *> & getElements() { return _elements; }
+  std::set<const Elem *> & getElements()
+  {
+    return _elements;
+  }
 
-  typedef std::map<const Elem *, std::pair<std::vector<Point>, std::vector<unsigned int> > > MultiPointMap;
+  typedef std::map<const Elem *, std::pair<std::vector<Point>, std::vector<unsigned int>>> MultiPointMap;
 
   /**
    * Returns a writeable reference to the _points container.
    */
-  MultiPointMap & getPoints() { return _points; }
+  MultiPointMap & getPoints()
+  {
+    return _points;
+  }
 
   /**
    * Called during FEProblem::meshChanged() to update the PointLocator
    * object used by the DiracKernels.
    */
-  void updatePointLocator(const MooseMesh& mesh);
+  void updatePointLocator(const MooseMesh & mesh);
 
   /**
    * Used by client DiracKernel classes to determine the Elem in which
    * the Point p resides.  Uses the PointLocator owned by this object.
    */
-  const Elem * findPoint(Point p, const MooseMesh& mesh);
+  const Elem * findPoint(Point p, const MooseMesh & mesh);
 
 protected:
   /**

@@ -25,14 +25,13 @@
 // Forward declarations
 class MultiAppDTKInterpolationTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppDTKInterpolationTransfer>();
 
 /**
  * Transfers from spatially varying Interpolations in a MultiApp to the "master" system.
  */
-class MultiAppDTKInterpolationTransfer :
-  public MultiAppTransfer
+class MultiAppDTKInterpolationTransfer : public MultiAppTransfer
 {
 public:
   MultiAppDTKInterpolationTransfer(const InputParameters & parameters);

@@ -17,11 +17,10 @@
 
 #include "Material.h"
 
-
 //Forward Declarations
 class GenericConstantMaterial;
 
-template<>
+template <>
 InputParameters validParams<GenericConstantMaterial>();
 
 /**

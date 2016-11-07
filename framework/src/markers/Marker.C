@@ -18,9 +18,9 @@
 #include "Assembly.h"
 #include "MooseVariable.h"
 
-
-template<>
-InputParameters validParams<Marker>()
+template <>
+InputParameters
+validParams<Marker>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
@@ -34,8 +34,8 @@ InputParameters validParams<Marker>()
   return params;
 }
 
-Marker::Marker(const InputParameters & parameters) :
-    MooseObject(parameters),
+Marker::Marker(const InputParameters & parameters)
+  : MooseObject(parameters),
     BlockRestrictable(parameters),
     SetupInterface(this),
     DependencyResolverInterface(),

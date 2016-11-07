@@ -19,15 +19,16 @@
 #include "MooseEnum.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<PartitionerAction>()
+template <>
+InputParameters
+validParams<PartitionerAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   return params;
 }
 
-PartitionerAction::PartitionerAction(InputParameters params) :
-    MooseObjectAction(params)
+PartitionerAction::PartitionerAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

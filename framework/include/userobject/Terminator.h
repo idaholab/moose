@@ -20,7 +20,7 @@
 //Forward Declarations
 class Terminator;
 
-template<>
+template <>
 InputParameters validParams<Terminator>();
 
 /**
@@ -49,9 +49,13 @@ public:
   /// The Terminator DEFINITELY needs a destructor!
   virtual ~Terminator();
 
-  virtual void initialize() override {}
+  virtual void initialize() override
+  {
+  }
   virtual void execute() override;
-  virtual void finalize() override {}
+  virtual void finalize() override
+  {
+  }
 
 protected:
   /// Postprocessor names

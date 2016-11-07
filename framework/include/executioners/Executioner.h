@@ -26,7 +26,7 @@
 class Problem;
 class Executioner;
 
-template<>
+template <>
 InputParameters validParams<Executioner>();
 
 /**
@@ -38,11 +38,10 @@ InputParameters validParams<Executioner>();
  * for the NonlinearSystem once... where Transient Executioners call solve()
  * multiple times... i.e. once per timestep.
  */
-class Executioner :
-  public MooseObject,
-  public UserObjectInterface,
-  public PostprocessorInterface,
-  public Restartable
+class Executioner : public MooseObject,
+                    public UserObjectInterface,
+                    public PostprocessorInterface,
+                    public Restartable
 {
 public:
   /**
@@ -106,7 +105,9 @@ public:
    * Can be used by subsclasses to call parentOutputPositionChanged()
    * on the underlying FEProblem.
    */
-  virtual void parentOutputPositionChanged() {}
+  virtual void parentOutputPositionChanged()
+  {
+  }
 
   /**
    * Whether or not the last solve converged.
@@ -114,7 +115,6 @@ public:
   virtual bool lastSolveConverged();
 
 protected:
-
   /**
    * Adds a postprocessor to report a Real class attribute
    * @param name The name of the postprocessor to create

@@ -15,16 +15,17 @@
 #include "UserForcingFunction.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<UserForcingFunction>()
+template <>
+InputParameters
+validParams<UserForcingFunction>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<FunctionName>("function", "The forcing function");
   return params;
 }
 
-UserForcingFunction::UserForcingFunction(const InputParameters & parameters) :
-    Kernel(parameters),
+UserForcingFunction::UserForcingFunction(const InputParameters & parameters)
+  : Kernel(parameters),
     _func(getFunction("function"))
 {
 }
@@ -40,4 +41,3 @@ UserForcingFunction::computeQpResidual()
 {
   return -_test[_i][_qp] * f();
 }
-

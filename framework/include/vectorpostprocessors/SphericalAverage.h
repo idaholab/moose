@@ -19,7 +19,7 @@
 
 class SphericalAverage;
 
-template<>
+template <>
 InputParameters validParams<SphericalAverage>();
 
 /**

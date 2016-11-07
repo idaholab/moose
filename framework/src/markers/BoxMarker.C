@@ -14,8 +14,9 @@
 
 #include "BoxMarker.h"
 
-template<>
-InputParameters validParams<BoxMarker>()
+template <>
+InputParameters
+validParams<BoxMarker>()
 {
   InputParameters params = validParams<Marker>();
   params.addRequiredParam<RealVectorValue>("bottom_left", "The bottom left point (in x,y,z with spaces in-between).");
@@ -30,9 +31,8 @@ InputParameters validParams<BoxMarker>()
   return params;
 }
 
-
-BoxMarker::BoxMarker(const InputParameters & parameters) :
-    Marker(parameters),
+BoxMarker::BoxMarker(const InputParameters & parameters)
+  : Marker(parameters),
     _inside((MarkerValue)(int)parameters.get<MooseEnum>("inside")),
     _outside((MarkerValue)(int)parameters.get<MooseEnum>("outside")),
     _bounding_box(parameters.get<RealVectorValue>("bottom_left"), parameters.get<RealVectorValue>("top_right"))

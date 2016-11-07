@@ -37,15 +37,15 @@ extraSendList(std::vector<dof_id_type> & send_list, void * context)
 /// Free function used for a libMesh callback
 void
 extraSparsity(SparsityPattern::Graph & sparsity,
-                   std::vector<dof_id_type> & n_nz,
-                   std::vector<dof_id_type> & n_oz,
-                   void * context)
+              std::vector<dof_id_type> & n_nz,
+              std::vector<dof_id_type> & n_oz,
+              void * context)
 {
   SystemBase * sys = static_cast<SystemBase *>(context);
   sys->augmentSparsity(sparsity, n_nz, n_oz);
 }
 
-template<>
+template <>
 void
 dataStore(std::ostream & stream, SystemBase & system_base, void * context)
 {
@@ -61,7 +61,7 @@ dataStore(std::ostream & stream, SystemBase & system_base, void * context)
     dataStore(stream, *(it->second), context);
 }
 
-template<>
+template <>
 void
 dataLoad(std::istream & stream, SystemBase & system_base, void * context)
 {
@@ -79,8 +79,8 @@ dataLoad(std::istream & stream, SystemBase & system_base, void * context)
   system_base.update();
 }
 
-SystemBase::SystemBase(SubProblem & subproblem, const std::string & name, Moose::VarKindType var_kind) :
-    libMesh::ParallelObject(subproblem),
+SystemBase::SystemBase(SubProblem & subproblem, const std::string & name, Moose::VarKindType var_kind)
+  : libMesh::ParallelObject(subproblem),
     _subproblem(subproblem),
     _app(subproblem.getMooseApp()),
     _factory(_app.getFactory()),
@@ -138,7 +138,7 @@ SystemBase::getVariableBlocks(unsigned int var_number)
   if (_var_map[var_number].empty())
     return NULL;
   else
-    return & _var_map[var_number];
+    return &_var_map[var_number];
 }
 
 void
@@ -248,7 +248,7 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
 
     // Make sure to resize the residual and jacobian datastructures for all the new variables
     if (resize_data)
-      for (unsigned int i=0; i<newly_prepared_vars.size(); i++)
+      for (unsigned int i = 0; i < newly_prepared_vars.size(); i++)
       {
         _subproblem.assembly(tid).prepareVariable(newly_prepared_vars[i]);
         if (_subproblem.checkNonlocalCouplingRequirement())
@@ -264,7 +264,6 @@ SystemBase::prepareNeighbor(THREAD_ID tid)
   for (const auto & var : vars)
     var->prepareNeighbor();
 }
-
 
 void
 SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
@@ -412,12 +411,12 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
       // Now add the DoFs from all of the nodes.  This is necessary because of block
       // restricted variables.  A variable might not live _on_ this element but it
       // might live on nodes connected to this element.
-      for (unsigned int n=0; n<elem->n_nodes(); n++)
+      for (unsigned int n = 0; n < elem->n_nodes(); n++)
       {
         Node * node = elem->node_ptr(n);
 
         // Have to get each variable's dofs
-        for (unsigned int v=0; v<n_vars; v++)
+        for (unsigned int v = 0; v < n_vars; v++)
         {
           const Variable & var = sys.variable(v);
           unsigned int var_num = var.number();
@@ -427,7 +426,7 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
           if (node->n_dofs(sys_num, var_num) > 0)
           {
             // Loop over components of the variable
-            for (unsigned int c=0; c<n_comp; c++)
+            for (unsigned int c = 0; c < n_comp; c++)
               send_list.push_back(node->dof_number(sys_num, var_num, c));
           }
         }
@@ -435,7 +434,6 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
     }
   }
 }
-
 
 /**
  * Save the old and older solutions.
@@ -450,7 +448,6 @@ SystemBase::saveOldSolutions()
   *_saved_old = solutionOld();
   *_saved_older = solutionOlder();
 }
-
 
 /**
  * Restore the old and older solutions when the saved solutions present.
@@ -472,8 +469,6 @@ SystemBase::restoreOldSolutions()
   }
 }
 
-
-
 NumericVector<Number> &
 SystemBase::addVector(const std::string & vector_name, const bool project, const ParallelType type)
 {
@@ -483,7 +478,6 @@ SystemBase::addVector(const std::string & vector_name, const bool project, const
   NumericVector<Number> * vec = &system().add_vector(vector_name, project, type);
   return *vec;
 }
-
 
 void
 SystemBase::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set<SubdomainID> * const active_subdomains)
@@ -502,7 +496,6 @@ SystemBase::addVariable(const std::string & var_name, const FEType & type, Real 
     for (std::set<SubdomainID>::iterator it = active_subdomains->begin(); it != active_subdomains->end(); ++it)
       _var_map[var_num].insert(*it);
 }
-
 
 void
 SystemBase::addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set<SubdomainID> * const active_subdomains)
@@ -523,7 +516,6 @@ SystemBase::addScalarVariable(const std::string & var_name, Order order, Real sc
       _var_map[var_num].insert(*it);
 }
 
-
 bool
 SystemBase::hasVariable(const std::string & var_name)
 {
@@ -533,7 +525,6 @@ SystemBase::hasVariable(const std::string & var_name)
     return false;
 }
 
-
 bool
 SystemBase::hasScalarVariable(const std::string & var_name)
 {
@@ -542,7 +533,6 @@ SystemBase::hasScalarVariable(const std::string & var_name)
   else
     return false;
 }
-
 
 bool
 SystemBase::isScalarVariable(unsigned int var_num)
@@ -574,7 +564,6 @@ SystemBase::getVector(const std::string & name)
   return system().get_vector(name);
 }
 
-
 unsigned int
 SystemBase::number()
 {
@@ -593,7 +582,6 @@ SystemBase::addVariableToCopy(const std::string & dest_name, const std::string &
   _var_to_copy.push_back(VarCopyInfo(dest_name, source_name, timestep));
 }
 
-
 void
 SystemBase::copyVars(ExodusII_IO & io)
 {
@@ -601,8 +589,8 @@ SystemBase::copyVars(ExodusII_IO & io)
 
   bool did_copy = false;
   for (std::vector<VarCopyInfo>::iterator it = _var_to_copy.begin();
-      it != _var_to_copy.end();
-      ++it)
+       it != _var_to_copy.end();
+       ++it)
   {
     VarCopyInfo & vci = *it;
     int timestep = -1;
@@ -649,7 +637,7 @@ SystemBase::copySolutionsBackwards()
 {
   system().update();
   solutionOlder() = *currentSolution();
-  solutionOld()   = *currentSolution();
+  solutionOld() = *currentSolution();
 }
 
 /**
@@ -659,9 +647,8 @@ void
 SystemBase::copyOldSolutions()
 {
   solutionOlder() = solutionOld();
-  solutionOld()   = *currentSolution();
+  solutionOld() = *currentSolution();
 }
-
 
 /**
  * Restore current solutions (call after your solve failed)
@@ -669,7 +656,7 @@ SystemBase::copyOldSolutions()
 void
 SystemBase::restoreSolutions()
 {
-  *(const_cast<NumericVector<Number> * &>(currentSolution())) = solutionOld();
+  *(const_cast<NumericVector<Number> *&>(currentSolution())) = solutionOld();
   solution() = solutionOld();
   system().update();
 }

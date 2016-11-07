@@ -38,8 +38,9 @@
 #include <sstream>
 #include <iomanip>
 
-template<>
-InputParameters validParams<Transient>()
+template <>
+InputParameters
+validParams<Transient>()
 {
   InputParameters params = validParams<Executioner>();
   std::vector<Real> sync_times(1);
@@ -51,23 +52,23 @@ InputParameters validParams<Transient>()
    */
   MooseEnum schemes("implicit-euler explicit-euler crank-nicolson bdf2 rk-2 dirk explicit-tvd-rk-2");
 
-  params.addParam<Real>("start_time",      0.0,    "The start time of the simulation");
-  params.addParam<Real>("end_time",        1.0e30, "The end time of the simulation");
-  params.addParam<Real>("dt",              1.,     "The timestep size between solves");
-  params.addParam<Real>("dtmin",           2.0e-14,    "The minimum timestep size in an adaptive run");
-  params.addParam<Real>("dtmax",           1.0e30, "The maximum timestep size in an adaptive run");
+  params.addParam<Real>("start_time", 0.0, "The start time of the simulation");
+  params.addParam<Real>("end_time", 1.0e30, "The end time of the simulation");
+  params.addParam<Real>("dt", 1., "The timestep size between solves");
+  params.addParam<Real>("dtmin", 2.0e-14, "The minimum timestep size in an adaptive run");
+  params.addParam<Real>("dtmax", 1.0e30, "The maximum timestep size in an adaptive run");
   params.addParam<bool>("reset_dt", false, "Use when restarting a calculation to force a change in dt.");
-  params.addParam<unsigned int>("num_steps",       std::numeric_limits<unsigned int>::max(),     "The number of timesteps in a transient run");
-  params.addParam<int> ("n_startup_steps", 0,      "The number of timesteps during startup");
-  params.addParam<bool>("trans_ss_check",  false,  "Whether or not to check for steady state conditions");
-  params.addParam<Real>("ss_check_tol",    1.0e-08,"Whenever the relative residual changes by less than this the solution will be considered to be at steady state.");
-  params.addParam<Real>("ss_tmin",         0.0,    "Minimum number of timesteps to take before checking for steady state conditions.");
+  params.addParam<unsigned int>("num_steps", std::numeric_limits<unsigned int>::max(), "The number of timesteps in a transient run");
+  params.addParam<int>("n_startup_steps", 0, "The number of timesteps during startup");
+  params.addParam<bool>("trans_ss_check", false, "Whether or not to check for steady state conditions");
+  params.addParam<Real>("ss_check_tol", 1.0e-08, "Whenever the relative residual changes by less than this the solution will be considered to be at steady state.");
+  params.addParam<Real>("ss_tmin", 0.0, "Minimum number of timesteps to take before checking for steady state conditions.");
 
-  params.addParam<std::vector<std::string> >("time_periods", "The names of periods");
-  params.addParam<std::vector<Real> >("time_period_starts", "The start times of time periods");
-  params.addParam<std::vector<Real> >("time_period_ends", "The end times of time periods");
+  params.addParam<std::vector<std::string>>("time_periods", "The names of periods");
+  params.addParam<std::vector<Real>>("time_period_starts", "The start times of time periods");
+  params.addParam<std::vector<Real>>("time_period_ends", "The end times of time periods");
   params.addParam<bool>("abort_on_solve_fail", false, "abort if solve not converged rather than cut timestep");
-  params.addParam<MooseEnum>("scheme",          schemes,  "Time integration scheme used.");
+  params.addParam<MooseEnum>("scheme", schemes, "Time integration scheme used.");
   params.addParam<Real>("timestep_tolerance", 2.0e-14, "the tolerance setting for final timestep size and sync times");
 
   params.addParam<bool>("use_multiapp_dt", false, "If true then the dt for the simulation will be chosen by the MultiApps.  If false (the default) then the minimum over the master dt and the MultiApps is used");
@@ -88,8 +89,8 @@ InputParameters validParams<Transient>()
   return params;
 }
 
-Transient::Transient(const InputParameters & parameters) :
-    Executioner(parameters),
+Transient::Transient(const InputParameters & parameters)
+  : Executioner(parameters),
     _problem(_fe_problem),
     _time_scheme(getParam<MooseEnum>("scheme")),
     _t_step(_problem.timeStep()),
@@ -203,11 +204,9 @@ Transient::init()
   else
   {
     computeDT();
-//  _dt = computeConstrainedDT();
+    //  _dt = computeConstrainedDT();
     _dt = getDT();
   }
-
-
 }
 
 void
@@ -304,7 +303,6 @@ Transient::incrementStepOrReject()
   }
 
   _first = false;
-
 }
 
 void
@@ -315,7 +313,7 @@ Transient::takeStep(Real input_dt)
   _problem.backupMultiApps(EXEC_TIMESTEP_BEGIN);
   _problem.backupMultiApps(EXEC_TIMESTEP_END);
 
-  while (_picard_it<_picard_max_its && _picard_converged == false)
+  while (_picard_it < _picard_max_its && _picard_converged == false)
   {
     // For every iteration other than the first, we need to restore the state of the MultiApps
     if (_picard_it > 0)
@@ -396,11 +394,11 @@ Transient::solveStep(Real input_dt)
   {
     _console << COLOR_GREEN << " Solve Converged!" << COLOR_DEFAULT << std::endl;
 
-    if ( _problem.haveXFEM() &&
-         _problem.updateMeshXFEM() &&
-         (_xfem_update_count < _max_xfem_update))
+    if (_problem.haveXFEM() &&
+        _problem.updateMeshXFEM() &&
+        (_xfem_update_count < _max_xfem_update))
     {
-      _console << "XFEM modifying mesh, repeating step"<<std::endl;
+      _console << "XFEM modifying mesh, repeating step" << std::endl;
       _xfem_repeat_step = true;
       ++_xfem_update_count;
     }
@@ -410,7 +408,7 @@ Transient::solveStep(Real input_dt)
       {
         _xfem_repeat_step = false;
         _xfem_update_count = 0;
-        _console << "XFEM not modifying mesh, continuing"<<std::endl;
+        _console << "XFEM not modifying mesh, continuing" << std::endl;
       }
 
       if (_picard_max_its <= 1)
@@ -427,7 +425,6 @@ Transient::solveStep(Real input_dt)
 
       if (!_multiapps_converged)
         return;
-
     }
   }
   else
@@ -472,7 +469,7 @@ Transient::endStep(Real input_time)
   else
     _time = input_time;
 
-  _picard_converged=false;
+  _picard_converged = false;
 
   _last_solve_converged = lastSolveConverged();
 
@@ -494,11 +491,11 @@ Transient::endStep(Real input_time)
 Real
 Transient::computeConstrainedDT()
 {
-//  // If start up steps are needed
-//  if (_t_step == 1 && _n_startup_steps > 1)
-//    _dt = _input_dt/(double)(_n_startup_steps);
-//  else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
-//    _dt = _input_dt;
+  //  // If start up steps are needed
+  //  if (_t_step == 1 && _n_startup_steps > 1)
+  //    _dt = _input_dt/(double)(_n_startup_steps);
+  //  else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
+  //    _dt = _input_dt;
 
   Real dt_cur = _dt;
   std::ostringstream diag;
@@ -652,7 +649,7 @@ Transient::keepGoing()
   if (static_cast<unsigned int>(_t_step) > _num_steps)
     keep_going = false;
 
-  if ((_time>_end_time) || (fabs(_time-_end_time)<=_timestep_tolerance))
+  if ((_time > _end_time) || (fabs(_time - _end_time) <= _timestep_tolerance))
     keep_going = false;
 
   if (!lastSolveConverged() && _abort)
@@ -723,14 +720,30 @@ Transient::setupTimeIntegrator()
 
     switch (_time_scheme)
     {
-    case 0: ti_str = "ImplicitEuler"; break;
-    case 1: ti_str = "ExplicitEuler"; break;
-    case 2: ti_str = "CrankNicolson"; break;
-    case 3: ti_str = "BDF2"; break;
-    case 4: ti_str = "ExplicitMidpoint"; break;
-    case 5: ti_str = "LStableDirk2"; break;
-    case 6: ti_str = "ExplicitTVDRK2"; break;
-    default: mooseError("Unknown scheme"); break;
+      case 0:
+        ti_str = "ImplicitEuler";
+        break;
+      case 1:
+        ti_str = "ExplicitEuler";
+        break;
+      case 2:
+        ti_str = "CrankNicolson";
+        break;
+      case 3:
+        ti_str = "BDF2";
+        break;
+      case 4:
+        ti_str = "ExplicitMidpoint";
+        break;
+      case 5:
+        ti_str = "LStableDirk2";
+        break;
+      case 6:
+        ti_str = "ExplicitTVDRK2";
+        break;
+      default:
+        mooseError("Unknown scheme");
+        break;
     }
 
     InputParameters params = _app.getFactory().getValidParams(ti_str);

@@ -15,8 +15,9 @@
 // MOOSE includes
 #include "MaterialAuxBase.h"
 
-template<>
-InputParameters validParams<MaterialAuxBase<> >()
+template <>
+InputParameters
+validParams<MaterialAuxBase<>>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<MaterialPropertyName>("property", "The scalar material property name");

@@ -17,12 +17,11 @@
 
 #include "AuxKernel.h"
 
-
 //Forward Declarations
 class NearestNodeDistanceAux;
 class NearestNodeLocator;
 
-template<>
+template <>
 InputParameters validParams<NearestNodeDistanceAux>();
 
 /**

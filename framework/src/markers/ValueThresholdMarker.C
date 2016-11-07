@@ -16,8 +16,9 @@
 #include "FEProblem.h"
 #include "MooseEnum.h"
 
-template<>
-InputParameters validParams<ValueThresholdMarker>()
+template <>
+InputParameters
+validParams<ValueThresholdMarker>()
 {
   InputParameters params = validParams<Marker>();
 
@@ -31,9 +32,8 @@ InputParameters validParams<ValueThresholdMarker>()
   return params;
 }
 
-
-ValueThresholdMarker::ValueThresholdMarker(const InputParameters & parameters) :
-    QuadraturePointMarker(parameters),
+ValueThresholdMarker::ValueThresholdMarker(const InputParameters & parameters)
+  : QuadraturePointMarker(parameters),
     _coarsen_set(parameters.isParamValid("coarsen")),
     _coarsen(parameters.get<Real>("coarsen")),
     _refine_set(parameters.isParamValid("refine")),

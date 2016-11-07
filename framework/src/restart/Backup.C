@@ -18,7 +18,6 @@
 
 #include "libmesh/parallel.h"
 
-
 // Backup Definitions
 Backup::Backup()
 {

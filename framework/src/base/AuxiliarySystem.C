@@ -33,8 +33,8 @@
 
 // AuxiliarySystem ////////
 
-AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & name) :
-    SystemBase(subproblem, name, Moose::VAR_AUXILIARY),
+AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & name)
+  : SystemBase(subproblem, name, Moose::VAR_AUXILIARY),
     _fe_problem(subproblem),
     _sys(subproblem.es().add_system<TransientExplicitSystem>(name)),
     _serialized_solution(*NumericVector<Number>::build(_fe_problem.comm()).release()),
@@ -123,9 +123,8 @@ AuxiliarySystem::updateActive(THREAD_ID tid)
   _elemental_aux_storage.updateActive(tid);
 }
 
-
 void
-AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
+AuxiliarySystem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set<SubdomainID> * const active_subdomains /* = NULL*/)
 {
   SystemBase::addVariable(var_name, type, scale_factor, active_subdomains);
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -224,7 +223,7 @@ AuxiliarySystem::serializedSolution()
 void
 AuxiliarySystem::serializeSolution()
 {
-  if (_need_serialized_solution && _sys.n_dofs() > 0)            // libMesh does not like serializing of empty vectors
+  if (_need_serialized_solution && _sys.n_dofs() > 0) // libMesh does not like serializing of empty vectors
   {
     if (!_serialized_solution.initialized() || _serialized_solution.size() != _sys.n_dofs())
     {
@@ -284,7 +283,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
 
   // Elemental AuxKernels
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _elemental_aux_storage[type].getActiveObjects();
+    const std::vector<MooseSharedPointer<AuxKernel>> & auxs = _elemental_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -294,7 +293,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
 
   // Nodal AuxKernels
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _nodal_aux_storage[type].getActiveObjects();
+    const std::vector<MooseSharedPointer<AuxKernel>> & auxs = _nodal_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -312,7 +311,7 @@ AuxiliarySystem::getDependObjects()
 
   // Elemental AuxKernels
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _elemental_aux_storage.getActiveObjects();
+    const std::vector<MooseSharedPointer<AuxKernel>> & auxs = _elemental_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -322,7 +321,7 @@ AuxiliarySystem::getDependObjects()
 
   // Nodal AuxKernels
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _nodal_aux_storage.getActiveObjects();
+    const std::vector<MooseSharedPointer<AuxKernel>> & auxs = _nodal_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -332,7 +331,6 @@ AuxiliarySystem::getDependObjects()
 
   return depend_objects;
 }
-
 
 NumericVector<Number> &
 AuxiliarySystem::addVector(const std::string & vector_name, const bool project, const ParallelType type)
@@ -353,7 +351,8 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
   // Reference to the current storage container
   const MooseObjectWarehouse<AuxScalarKernel> & storage = _aux_scalar_storage[type];
 
-  PARALLEL_TRY {
+  PARALLEL_TRY
+  {
     // FIXME: run multi-threaded
     THREAD_ID tid = 0;
     if (storage.hasActiveObjects())
@@ -361,7 +360,7 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
       _fe_problem.reinitScalars(tid);
 
       // Call compute() method on all active AuxScalarKernel objects
-      const std::vector<MooseSharedPointer<AuxScalarKernel> > & objects = storage.getActiveObjects(tid);
+      const std::vector<MooseSharedPointer<AuxScalarKernel>> & objects = storage.getActiveObjects(tid);
       for (const auto & obj : objects)
         obj->compute();
 
@@ -386,7 +385,8 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
   const MooseObjectWarehouse<AuxKernel> & nodal = _nodal_aux_storage[type];
 
   // Block Nodal AuxKernels
-  PARALLEL_TRY {
+  PARALLEL_TRY
+  {
     if (nodal.hasActiveBlockObjects())
     {
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
@@ -402,7 +402,8 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
 
   // Boundary Nodal AuxKernels
   Moose::perf_log.push("update_aux_vars_nodal_bcs()", "Execution");
-  PARALLEL_TRY {
+  PARALLEL_TRY
+  {
     if (nodal.hasActiveBoundaryObjects())
     {
       ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
@@ -427,7 +428,8 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
   const MooseObjectWarehouse<AuxKernel> & elemental = _elemental_aux_storage[type];
 
   // Block Elemental AuxKernels
-  PARALLEL_TRY {
+  PARALLEL_TRY
+  {
     if (elemental.hasActiveBlockObjects())
     {
       ConstElemRange & range = *_mesh.getActiveLocalElementRange();
@@ -448,7 +450,6 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
       solution().close();
       _sys.update();
     }
-
   }
   PARALLEL_CATCH;
   Moose::perf_log.pop("update_aux_vars_elemental()", "Execution");

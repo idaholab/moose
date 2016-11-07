@@ -19,11 +19,10 @@
 
 class AddDamperAction;
 
-template<>
+template <>
 InputParameters validParams<AddDamperAction>();
 
-
-class AddDamperAction: public MooseObjectAction
+class AddDamperAction : public MooseObjectAction
 {
 public:
   AddDamperAction(InputParameters params);

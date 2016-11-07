@@ -24,7 +24,7 @@
 // Forward declarations
 class Postprocessor;
 
-template<>
+template <>
 InputParameters validParams<Postprocessor>();
 
 /**
@@ -45,7 +45,10 @@ public:
   /**
    * Returns the name of the Postprocessor.
    */
-  std::string PPName() { return _pp_name; }
+  std::string PPName()
+  {
+    return _pp_name;
+  }
 
 protected:
   std::string _pp_name;

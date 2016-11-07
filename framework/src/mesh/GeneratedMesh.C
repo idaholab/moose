@@ -25,8 +25,9 @@
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 
-template<>
-InputParameters validParams<GeneratedMesh>()
+template <>
+InputParameters
+validParams<GeneratedMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
 
@@ -55,8 +56,8 @@ InputParameters validParams<GeneratedMesh>()
   return params;
 }
 
-GeneratedMesh::GeneratedMesh(const InputParameters & parameters) :
-    MooseMesh(parameters),
+GeneratedMesh::GeneratedMesh(const InputParameters & parameters)
+  : MooseMesh(parameters),
     _dim(getParam<MooseEnum>("dim")),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
@@ -92,9 +93,15 @@ GeneratedMesh::buildMesh()
     // Switching on MooseEnum
     switch (_dim)
     {
-    case 1: elem_type_enum = "EDGE2"; break;
-    case 2: elem_type_enum = "QUAD4"; break;
-    case 3: elem_type_enum = "HEX8"; break;
+      case 1:
+        elem_type_enum = "EDGE2";
+        break;
+      case 2:
+        elem_type_enum = "QUAD4";
+        break;
+      case 3:
+        elem_type_enum = "HEX8";
+        break;
     }
   }
 
@@ -105,30 +112,30 @@ GeneratedMesh::buildMesh()
   {
     // The build_XYZ mesh generation functions take an
     // UnstructuredMesh& as the first argument, hence the dynamic_cast.
-  case 1:
-    MeshTools::Generation::build_line(dynamic_cast<UnstructuredMesh&>(getMesh()),
-                                      _nx,
-                                      _xmin, _xmax,
-                                      elem_type,
-                                      _gauss_lobatto_grid);
-    break;
-  case 2:
-    MeshTools::Generation::build_square(dynamic_cast<UnstructuredMesh&>(getMesh()),
-                                        _nx, _ny,
+    case 1:
+      MeshTools::Generation::build_line(dynamic_cast<UnstructuredMesh &>(getMesh()),
+                                        _nx,
                                         _xmin, _xmax,
-                                        _ymin, _ymax,
                                         elem_type,
                                         _gauss_lobatto_grid);
-    break;
-  case 3:
-    MeshTools::Generation::build_cube(dynamic_cast<UnstructuredMesh&>(getMesh()),
-                                      _nx, _ny, _nz,
-                                      _xmin, _xmax,
-                                      _ymin, _ymax,
-                                      _zmin, _zmax,
-                                      elem_type,
-                                      _gauss_lobatto_grid);
-    break;
+      break;
+    case 2:
+      MeshTools::Generation::build_square(dynamic_cast<UnstructuredMesh &>(getMesh()),
+                                          _nx, _ny,
+                                          _xmin, _xmax,
+                                          _ymin, _ymax,
+                                          elem_type,
+                                          _gauss_lobatto_grid);
+      break;
+    case 3:
+      MeshTools::Generation::build_cube(dynamic_cast<UnstructuredMesh &>(getMesh()),
+                                        _nx, _ny, _nz,
+                                        _xmin, _xmax,
+                                        _ymin, _ymax,
+                                        _zmin, _zmax,
+                                        elem_type,
+                                        _gauss_lobatto_grid);
+      break;
   }
 
   // Apply the bias if any exists
@@ -151,7 +158,7 @@ GeneratedMesh::buildMesh()
 
     // We will need the biases raised to integer powers in each
     // direction, so let's pre-compute those...
-    std::vector<std::vector<Real> > pows(LIBMESH_DIM);
+    std::vector<std::vector<Real>> pows(LIBMESH_DIM);
     for (unsigned int dir = 0; dir < LIBMESH_DIM; ++dir)
     {
       pows[dir].resize(nelem[dir] + 1);
@@ -160,7 +167,7 @@ GeneratedMesh::buildMesh()
     }
 
     // Loop over the nodes and move them to the desired location
-    MeshBase::node_iterator       node_it  = mesh.nodes_begin();
+    MeshBase::node_iterator node_it = mesh.nodes_begin();
     const MeshBase::node_iterator node_end = mesh.nodes_end();
 
     for (; node_it != node_end; ++node_it)
@@ -205,7 +212,7 @@ GeneratedMesh::buildMesh()
             // the integer_part will be the index of the vertex to the
             // left, and integer_part+1 will be the index of the
             // vertex to the right.
-            node(dir) = mins[dir] + width[dir] * (1. - 0.5 * (pows[dir][integer_part] + pows[dir][integer_part+1])) / (1. - pows[dir][nelem[dir]]);
+            node(dir) = mins[dir] + width[dir] * (1. - 0.5 * (pows[dir][integer_part] + pows[dir][integer_part + 1])) / (1. - pows[dir][nelem[dir]]);
           }
           else
           {

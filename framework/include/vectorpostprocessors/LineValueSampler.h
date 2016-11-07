@@ -21,7 +21,7 @@
 // Forward Declarations
 class LineValueSampler;
 
-template<>
+template <>
 InputParameters validParams<LineValueSampler>();
 
 class LineValueSampler : public PointSamplerBase

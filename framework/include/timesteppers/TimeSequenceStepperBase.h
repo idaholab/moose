@@ -19,7 +19,7 @@
 
 class TimeSequenceStepperBase;
 
-template<>
+template <>
 InputParameters validParams<TimeSequenceStepperBase>();
 
 /**
@@ -33,7 +33,9 @@ public:
 
   void setupSequence(const std::vector<Real> & times);
 
-  virtual void init() override {}
+  virtual void init() override
+  {
+  }
   virtual void step() override;
 
 protected:

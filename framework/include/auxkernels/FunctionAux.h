@@ -21,7 +21,7 @@
 class FunctionAux;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionAux>();
 
 /**

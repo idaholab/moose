@@ -15,15 +15,16 @@
 #include "RelativeSolutionDifferenceNorm.h"
 #include "Transient.h"
 
-template<>
-InputParameters validParams<RelativeSolutionDifferenceNorm>()
+template <>
+InputParameters
+validParams<RelativeSolutionDifferenceNorm>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-RelativeSolutionDifferenceNorm::RelativeSolutionDifferenceNorm(const InputParameters & params) :
-    GeneralPostprocessor(params)
+RelativeSolutionDifferenceNorm::RelativeSolutionDifferenceNorm(const InputParameters & params)
+  : GeneralPostprocessor(params)
 {
 }
 

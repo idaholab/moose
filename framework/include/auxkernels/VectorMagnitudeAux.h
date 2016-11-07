@@ -18,7 +18,7 @@
 
 class VectorMagnitudeAux;
 
-template<>
+template <>
 InputParameters validParams<VectorMagnitudeAux>();
 
 /**

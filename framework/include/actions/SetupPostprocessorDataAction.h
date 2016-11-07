@@ -21,7 +21,7 @@
 // Forward declerations
 class SetupPostprocessorDataAction;
 
-template<>
+template <>
 InputParameters validParams<SetupPostprocessorDataAction>();
 
 /**
@@ -34,7 +34,6 @@ InputParameters validParams<SetupPostprocessorDataAction>();
 class SetupPostprocessorDataAction : public Action
 {
 public:
-
   /**
    * Class constructor
    * @param params Input parameters for the action

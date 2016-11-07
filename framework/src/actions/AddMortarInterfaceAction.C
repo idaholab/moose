@@ -17,8 +17,9 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<AddMortarInterfaceAction>()
+template <>
+InputParameters
+validParams<AddMortarInterfaceAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<BoundaryName>("master", "Master side ID");
@@ -28,8 +29,8 @@ InputParameters validParams<AddMortarInterfaceAction>()
   return params;
 }
 
-AddMortarInterfaceAction::AddMortarInterfaceAction(InputParameters parameters) :
-    Action(parameters)
+AddMortarInterfaceAction::AddMortarInterfaceAction(InputParameters parameters)
+  : Action(parameters)
 {
 }
 

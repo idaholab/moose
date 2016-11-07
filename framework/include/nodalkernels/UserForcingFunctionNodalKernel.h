@@ -21,7 +21,7 @@
 class UserForcingFunctionNodalKernel;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<UserForcingFunctionNodalKernel>();
 
 /**

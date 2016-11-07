@@ -19,7 +19,7 @@
 
 class ImplicitEuler;
 
-template<>
+template <>
 InputParameters validParams<ImplicitEuler>();
 
 /**
@@ -31,13 +31,14 @@ public:
   ImplicitEuler(const InputParameters & parameters);
   virtual ~ImplicitEuler();
 
-  virtual int order() { return 1; }
+  virtual int order()
+  {
+    return 1;
+  }
   virtual void computeTimeDerivatives();
   virtual void postStep(NumericVector<Number> & residual);
 
 protected:
-
 };
-
 
 #endif /* IMPLICITEULER_H */

@@ -17,8 +17,8 @@
 #include "SubProblem.h"
 #include "FEProblem.h"
 
-ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object) :
-    _sc_parameters(moose_object->parameters()),
+ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
+  : _sc_parameters(moose_object->parameters()),
     _sc_fe_problem(*_sc_parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _sc_is_implicit(_sc_parameters.have_parameter<bool>("implicit") ? _sc_parameters.get<bool>("implicit") : true),
     _coupleable_params(_sc_parameters)
@@ -71,7 +71,7 @@ ScalarCoupleable::getCoupledMooseScalarVars()
 bool
 ScalarCoupleable::isCoupledScalar(const std::string & var_name, unsigned int i)
 {
-  std::map<std::string, std::vector<MooseVariableScalar *> >::iterator it = _coupled_scalar_vars.find(var_name);
+  std::map<std::string, std::vector<MooseVariableScalar *>>::iterator it = _coupled_scalar_vars.find(var_name);
   if (it != _coupled_scalar_vars.end())
     return (i < it->second.size());
   else
@@ -145,7 +145,6 @@ ScalarCoupleable::coupledScalarDotDu(const std::string & var_name, unsigned int 
   MooseVariableScalar * var = getScalarVar(var_name, comp);
   return var->duDotDu();
 }
-
 
 MooseVariableScalar *
 ScalarCoupleable::getScalarVar(const std::string & var_name, unsigned int comp)

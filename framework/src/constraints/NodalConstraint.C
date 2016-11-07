@@ -19,17 +19,18 @@
 // libMesh includes
 #include "libmesh/sparse_matrix.h"
 
-template<>
-InputParameters validParams<NodalConstraint>()
+template <>
+InputParameters
+validParams<NodalConstraint>()
 {
   InputParameters params = validParams<Constraint>();
-  MooseEnum formulationtype ("penalty kinematic", "penalty");
+  MooseEnum formulationtype("penalty kinematic", "penalty");
   params.addParam<MooseEnum>("formulation", formulationtype, "Formulation used to calculate constraint - penalty or kinematic.");
   return params;
 }
 
-NodalConstraint::NodalConstraint(const InputParameters & parameters) :
-    Constraint(parameters),
+NodalConstraint::NodalConstraint(const InputParameters & parameters)
+  : Constraint(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, true),
     _u_slave(_var.nodalSlnNeighbor()),
     _u_master(_var.nodalSln())

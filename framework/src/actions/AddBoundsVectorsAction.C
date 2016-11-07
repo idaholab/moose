@@ -17,14 +17,15 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<AddBoundsVectorsAction>()
+template <>
+InputParameters
+validParams<AddBoundsVectorsAction>()
 {
   return validParams<Action>();
 }
 
-AddBoundsVectorsAction::AddBoundsVectorsAction(InputParameters params) :
-    Action(params)
+AddBoundsVectorsAction::AddBoundsVectorsAction(InputParameters params)
+  : Action(params)
 {
 }
 
@@ -34,4 +35,3 @@ AddBoundsVectorsAction::act()
   _problem->getNonlinearSystem().addVector("lower_bound", false, GHOSTED);
   _problem->getNonlinearSystem().addVector("upper_bound", false, GHOSTED);
 }
-

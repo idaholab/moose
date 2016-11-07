@@ -16,14 +16,15 @@
 #include "ColumnMajorMatrix.h"
 #include "BilinearInterpolation.h"
 
-template<>
-InputParameters validParams<PiecewiseBilinear>()
+template <>
+InputParameters
+validParams<PiecewiseBilinear>()
 {
   InputParameters params = validParams<Function>();
   params.addParam<FileName>("data_file", "", "File holding csv data for use with PiecewiseBilinear");
-  params.addParam<std::vector<Real> >("x", "The x abscissa values");
-  params.addParam<std::vector<Real> >("y", "The y abscissa values");
-  params.addParam<std::vector<Real> >("z", "The ordinate values");
+  params.addParam<std::vector<Real>>("x", "The x abscissa values");
+  params.addParam<std::vector<Real>>("y", "The y abscissa values");
+  params.addParam<std::vector<Real>>("z", "The ordinate values");
   params.addParam<int>("axis", -1, "The axis used (0, 1, or 2 for x, y, or z).");
   params.addParam<int>("xaxis", -1, "The coordinate used for x-axis data (0, 1, or 2 for x, y, or z).");
   params.addParam<int>("yaxis", -1, "The coordinate used for y-axis data (0, 1, or 2 for x, y, or z).");
@@ -32,16 +33,16 @@ InputParameters validParams<PiecewiseBilinear>()
   return params;
 }
 
-PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters) :
-    Function(parameters),
+PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters)
+  : Function(parameters),
     _data_file_name(getParam<FileName>("data_file")),
     _axis(getParam<int>("axis")),
     _yaxis(getParam<int>("yaxis")),
     _xaxis(getParam<int>("xaxis")),
-    _axisValid( _axis > -1 && _axis < 3 ),
-    _yaxisValid( _yaxis > -1 && _yaxis < 3 ),
-    _xaxisValid( _xaxis > -1 && _xaxis < 3 ),
-    _scale_factor( getParam<Real>("scale_factor") ),
+    _axisValid(_axis > -1 && _axis < 3),
+    _yaxisValid(_yaxis > -1 && _yaxis < 3),
+    _xaxisValid(_xaxis > -1 && _xaxis < 3),
+    _scale_factor(getParam<Real>("scale_factor")),
     _radial(getParam<bool>("radial"))
 {
 
@@ -61,32 +62,32 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters) :
 
   if (!_data_file_name.empty())
   {
-    if ( parameters.isParamValid("x") || parameters.isParamValid("y") || parameters.isParamValid("z") )
+    if (parameters.isParamValid("x") || parameters.isParamValid("y") || parameters.isParamValid("z"))
       mooseError("In PiecewiseBilinear: Cannot specify 'data_file' and 'x', 'y', or 'z' together.");
     else
-      parse( x, y, z );
+      parse(x, y, z);
   }
 
-  else if ( !(parameters.isParamValid("x") && parameters.isParamValid("y") && parameters.isParamValid("z")) )
-      mooseError("In PiecewiseBilinear: 'x' and 'y' and 'z' must be specified if any one is specified.");
+  else if (!(parameters.isParamValid("x") && parameters.isParamValid("y") && parameters.isParamValid("z")))
+    mooseError("In PiecewiseBilinear: 'x' and 'y' and 'z' must be specified if any one is specified.");
 
   else
   {
-    x = getParam<std::vector<Real> >("x");
-    y = getParam<std::vector<Real> >("y");
-    z_vec = getParam<std::vector<Real> >("z");
+    x = getParam<std::vector<Real>>("x");
+    y = getParam<std::vector<Real>>("y");
+    z_vec = getParam<std::vector<Real>>("z");
 
     //check that size of z = (size of x)*(size of y)
-    if (z_vec.size() != x.size()*y.size())
+    if (z_vec.size() != x.size() * y.size())
       mooseError("In PiecewiseBilinear: Size of z should be the size of x times the size of y.");
 
     //reshape and populate z matrix
-    z.reshape(y.size(),x.size());
+    z.reshape(y.size(), x.size());
     int idx = 0;
     for (unsigned int i = 0; i < y.size(); i++)
       for (unsigned int j = 0; j < x.size(); j++)
       {
-        z(i,j) = z_vec[idx];
+        z(i, j) = z_vec[idx];
         idx += 1;
       }
   }
@@ -100,48 +101,48 @@ PiecewiseBilinear::value(Real t, const Point & p)
   Real retVal(0);
   if (_yaxisValid && _xaxisValid && _radial)
   {
-    Real rx = p(_xaxis)*p(_xaxis);
-    Real ry = p(_yaxis)*p(_yaxis);
+    Real rx = p(_xaxis) * p(_xaxis);
+    Real ry = p(_yaxis) * p(_yaxis);
     Real r = std::sqrt(rx + ry);
-    retVal = _bilinear_interp->sample( r, t );
+    retVal = _bilinear_interp->sample(r, t);
   }
   else if (_axisValid)
-    retVal = _bilinear_interp->sample( p(_axis), t );
+    retVal = _bilinear_interp->sample(p(_axis), t);
   else if (_yaxisValid && !_radial)
   {
     if (_xaxisValid)
-      retVal = _bilinear_interp->sample( p(_xaxis), p(_yaxis) );
+      retVal = _bilinear_interp->sample(p(_xaxis), p(_yaxis));
     else
-      retVal = _bilinear_interp->sample( t, p(_yaxis) );
+      retVal = _bilinear_interp->sample(t, p(_yaxis));
   }
   else
-    retVal = _bilinear_interp->sample( p(_xaxis), t );
+    retVal = _bilinear_interp->sample(p(_xaxis), t);
 
   return retVal * _scale_factor;
 }
 
 void
-PiecewiseBilinear::parse( std::vector<Real> & x,
-                          std::vector<Real> & y,
-                          ColumnMajorMatrix & z)
+PiecewiseBilinear::parse(std::vector<Real> & x,
+                         std::vector<Real> & y,
+                         ColumnMajorMatrix & z)
 {
   std::ifstream file(_data_file_name.c_str());
   if (!file.good())
     mooseError("In PiecewiseBilinear " << _name << ": Error opening file '" + _data_file_name + "'.");
   std::string line;
-  unsigned int linenum= 0;
+  unsigned int linenum = 0;
   unsigned int itemnum = 0;
   unsigned int num_cols = 0;
   std::vector<Real> data;
 
-  while (getline (file, line))
+  while (getline(file, line))
   {
     linenum++;
     std::istringstream linestream(line);
     std::string item;
     itemnum = 0;
 
-    while (getline (linestream, item, ','))
+    while (getline(linestream, item, ','))
     {
       itemnum++;
       std::istringstream i(item);
@@ -152,31 +153,31 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
 
     if (linenum == 1)
       num_cols = itemnum;
-    else if (num_cols+1 != itemnum)
-      mooseError("In PiecewiseBilinear " << _name << ": Read " << itemnum << " columns of data but expected " << num_cols+1
-                 << " columns while reading line " << linenum << " of '" << _data_file_name << "'.");
+    else if (num_cols + 1 != itemnum)
+      mooseError("In PiecewiseBilinear " << _name << ": Read " << itemnum << " columns of data but expected " << num_cols + 1
+                                         << " columns while reading line " << linenum << " of '" << _data_file_name << "'.");
   }
 
-  x.resize(itemnum-1);
-  y.resize(linenum-1);
-  z.reshape(linenum-1,itemnum-1);
+  x.resize(itemnum - 1);
+  y.resize(linenum - 1);
+  z.reshape(linenum - 1, itemnum - 1);
   unsigned int offset(0);
   // Extract the first line's data (the x axis data)
-  for (unsigned int j = 0; j < itemnum-1; ++j)
+  for (unsigned int j = 0; j < itemnum - 1; ++j)
   {
     x[j] = data[offset];
     ++offset;
   }
-  for (unsigned int i = 0; i < linenum-1; ++i)
+  for (unsigned int i = 0; i < linenum - 1; ++i)
   {
     // Extract the y axis entry for this line
     y[i] = data[offset];
     ++offset;
 
     // Extract the function values for this row in the matrix
-    for (unsigned int j = 0; j < itemnum-1; ++j)
+    for (unsigned int j = 0; j < itemnum - 1; ++j)
     {
-      z(i,j) = data[offset];
+      z(i, j) = data[offset];
       ++offset;
     }
   }

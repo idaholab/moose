@@ -21,7 +21,7 @@
 //Forward Declarations
 class MaxIncrement;
 
-template<>
+template <>
 InputParameters validParams<MaxIncrement>();
 
 /**

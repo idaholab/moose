@@ -19,7 +19,7 @@
 
 class CrankNicolson;
 
-template<>
+template <>
 InputParameters validParams<CrankNicolson>();
 
 /**
@@ -36,7 +36,10 @@ public:
   CrankNicolson(const InputParameters & parameters);
   virtual ~CrankNicolson();
 
-  virtual int order() { return 2; }
+  virtual int order()
+  {
+    return 2;
+  }
   virtual void computeTimeDerivatives();
   virtual void preSolve();
   virtual void postStep(NumericVector<Number> & residual);

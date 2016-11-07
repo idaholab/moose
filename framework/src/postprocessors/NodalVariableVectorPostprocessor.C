@@ -17,15 +17,16 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-template<>
-InputParameters validParams<NodalVariableVectorPostprocessor>()
+template <>
+InputParameters
+validParams<NodalVariableVectorPostprocessor>()
 {
   InputParameters params = validParams<NodalVectorPostprocessor>();
   params.addRequiredCoupledVar("variable", "The names of the variables that this VectorPostprocessor operates on");
   return params;
 }
 
-NodalVariableVectorPostprocessor::NodalVariableVectorPostprocessor(const InputParameters & parameters) :
-    NodalVectorPostprocessor(parameters)
-{}
-
+NodalVariableVectorPostprocessor::NodalVariableVectorPostprocessor(const InputParameters & parameters)
+  : NodalVectorPostprocessor(parameters)
+{
+}

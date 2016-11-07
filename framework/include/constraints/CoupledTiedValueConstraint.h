@@ -21,14 +21,13 @@
 //Forward Declarations
 class CoupledTiedValueConstraint;
 
-template<>
+template <>
 InputParameters validParams<CoupledTiedValueConstraint>();
 
 /**
  * A CoupledTiedValueConstraint forces the value of a variable to be the same on both sides of an interface.
  */
-class CoupledTiedValueConstraint :
-  public NodeFaceConstraint
+class CoupledTiedValueConstraint : public NodeFaceConstraint
 {
 public:
   CoupledTiedValueConstraint(const InputParameters & parameters);

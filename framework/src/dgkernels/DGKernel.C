@@ -29,8 +29,9 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<DGKernel>()
+template <>
+InputParameters
+validParams<DGKernel>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TwoMaterialPropertyInterface>();
@@ -48,9 +49,8 @@ InputParameters validParams<DGKernel>()
   return params;
 }
 
-
-DGKernel::DGKernel(const InputParameters & parameters) :
-    MooseObject(parameters),
+DGKernel::DGKernel(const InputParameters & parameters)
+  : MooseObject(parameters),
     BlockRestrictable(parameters),
     BoundaryRestrictable(parameters, false), // false for _not_ nodal
     SetupInterface(this),
@@ -120,13 +120,11 @@ DGKernel::computeElemNeighResidual(Moose::DGResidualType type)
     is_elem = false;
 
   const VariableTestValue & test_space = is_elem ? _test : _test_neighbor;
-  DenseVector<Number> & re = is_elem ? _assembly.residualBlock(_var.number()) :
-                                       _assembly.residualBlockNeighbor(_var.number());
+  DenseVector<Number> & re = is_elem ? _assembly.residualBlock(_var.number()) : _assembly.residualBlockNeighbor(_var.number());
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-      for (_i=0; _i< test_space.size(); _i++)
-        re(_i) += _JxW[_qp]*_coord[_qp]*computeQpResidual(type);
-
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < test_space.size(); _i++)
+      re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
 }
 
 void
@@ -142,20 +140,14 @@ DGKernel::computeResidual()
 void
 DGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
 {
-  const VariableTestValue & test_space = ( type == Moose::ElementElement || type == Moose::ElementNeighbor ) ?
-                                         _test : _test_neighbor;
-  const VariableTestValue & loc_phi = ( type == Moose::ElementElement || type == Moose::NeighborElement ) ?
-                                       _phi : _phi_neighbor;
-  DenseMatrix<Number> & Kxx = type == Moose::ElementElement ? _assembly.jacobianBlock(_var.number(), _var.number()) :
-                              type == Moose::ElementNeighbor ? _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number()) :
-                              type == Moose::NeighborElement ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number()) :
-                              _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
+  const VariableTestValue & test_space = (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
+  const VariableTestValue & loc_phi = (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
+  DenseMatrix<Number> & Kxx = type == Moose::ElementElement ? _assembly.jacobianBlock(_var.number(), _var.number()) : type == Moose::ElementNeighbor ? _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number()) : type == Moose::NeighborElement ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number()) : _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    for (_i=0; _i<test_space.size(); _i++)
-      for (_j=0; _j<loc_phi.size(); _j++)
-        Kxx(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpJacobian(type);
-
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < test_space.size(); _i++)
+      for (_j = 0; _j < loc_phi.size(); _j++)
+        Kxx(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian(type);
 }
 
 void
@@ -175,23 +167,17 @@ DGKernel::computeJacobian()
 }
 
 void
-DGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,unsigned int jvar)
+DGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar)
 {
-  const VariableTestValue & test_space = ( type == Moose::ElementElement || type == Moose::ElementNeighbor ) ?
-                                         _test : _test_neighbor;
-  const VariableTestValue & loc_phi = ( type == Moose::ElementElement || type == Moose::NeighborElement ) ?
-                                       _phi : _phi_neighbor;
-  DenseMatrix<Number> & Kxx = type == Moose::ElementElement ? _assembly.jacobianBlock(_var.number(), jvar) :
-                              type == Moose::ElementNeighbor ? _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar) :
-                              type == Moose::NeighborElement ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), jvar) :
-                              _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), jvar);
+  const VariableTestValue & test_space = (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
+  const VariableTestValue & loc_phi = (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
+  DenseMatrix<Number> & Kxx = type == Moose::ElementElement ? _assembly.jacobianBlock(_var.number(), jvar) : type == Moose::ElementNeighbor ? _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar) : type == Moose::NeighborElement ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), jvar) : _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), jvar);
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    for (_i=0; _i<test_space.size(); _i++)
-      for (_j=0; _j<loc_phi.size(); _j++)
-        Kxx(_i,_j) += _JxW[_qp]*_coord[_qp]*computeQpOffDiagJacobian(type, jvar);
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    for (_i = 0; _i < test_space.size(); _i++)
+      for (_j = 0; _j < loc_phi.size(); _j++)
+        Kxx(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(type, jvar);
 }
-
 
 void
 DGKernel::computeOffDiagJacobian(unsigned int jvar)
@@ -201,16 +187,16 @@ DGKernel::computeOffDiagJacobian(unsigned int jvar)
   else
   {
     // Compute element-element Jacobian
-    computeOffDiagElemNeighJacobian(Moose::ElementElement,jvar);
+    computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
 
     // Compute element-neighbor Jacobian
-    computeOffDiagElemNeighJacobian(Moose::ElementNeighbor,jvar);
+    computeOffDiagElemNeighJacobian(Moose::ElementNeighbor, jvar);
 
     // Compute neighbor-element Jacobian
-    computeOffDiagElemNeighJacobian(Moose::NeighborElement,jvar);
+    computeOffDiagElemNeighJacobian(Moose::NeighborElement, jvar);
 
     // Compute neighbor-neighbor Jacobian
-    computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor,jvar);
+    computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor, jvar);
   }
 }
 

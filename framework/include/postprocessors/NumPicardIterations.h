@@ -22,7 +22,7 @@
 class NumPicardIterations;
 class Transient;
 
-template<>
+template <>
 InputParameters validParams<NumPicardIterations>();
 
 /**
@@ -35,7 +35,9 @@ public:
   NumPicardIterations(const InputParameters & parameters);
 
   virtual void initialize() override;
-  virtual void execute() override {}
+  virtual void execute() override
+  {
+  }
 
   virtual Real getValue() override;
 

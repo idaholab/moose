@@ -19,9 +19,8 @@
 
 class InitProblemAction;
 
-template<>
+template <>
 InputParameters validParams<InitProblemAction>();
-
 
 class InitProblemAction : public Action
 {

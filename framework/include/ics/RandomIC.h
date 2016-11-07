@@ -23,9 +23,12 @@
 
 // Forward Declarations
 class RandomIC;
-namespace libMesh { class Point; }
+namespace libMesh
+{
+class Point;
+}
 
-template<>
+template <>
 InputParameters validParams<RandomIC>();
 
 /**
@@ -34,7 +37,6 @@ InputParameters validParams<RandomIC>();
 class RandomIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *

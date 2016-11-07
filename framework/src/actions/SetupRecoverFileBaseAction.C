@@ -19,15 +19,16 @@
 #include "Checkpoint.h"
 #include "MooseObjectAction.h"
 
-template<>
-InputParameters validParams<SetupRecoverFileBaseAction>()
+template <>
+InputParameters
+validParams<SetupRecoverFileBaseAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(InputParameters params) :
-  Action(params)
+SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(InputParameters params)
+  : Action(params)
 {
 }
 

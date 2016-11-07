@@ -14,15 +14,17 @@
 
 #include "ConstantFunction.h"
 
-template<> InputParameters validParams<ConstantFunction>()
+template <>
+InputParameters
+validParams<ConstantFunction>()
 {
-   InputParameters params = validParams<Function>();
-   params.addParam<Real>("value", 0.0, "The constant value");
-   return params;
+  InputParameters params = validParams<Function>();
+  params.addParam<Real>("value", 0.0, "The constant value");
+  return params;
 }
 
-ConstantFunction::ConstantFunction(const InputParameters & parameters) :
-    Function(parameters),
+ConstantFunction::ConstantFunction(const InputParameters & parameters)
+  : Function(parameters),
     _value(getParam<Real>("value"))
 {
 }
@@ -32,4 +34,3 @@ ConstantFunction::value(Real, const Point &)
 {
   return _value;
 }
-

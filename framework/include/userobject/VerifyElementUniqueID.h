@@ -21,7 +21,7 @@
 // Forward Declarations
 class VerifyElementUniqueID;
 
-template<>
+template <>
 InputParameters validParams<VerifyElementUniqueID>();
 
 class VerifyElementUniqueID : public ElementUserObject

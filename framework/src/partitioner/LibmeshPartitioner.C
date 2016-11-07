@@ -20,8 +20,9 @@
 #include "libmesh/hilbert_sfc_partitioner.h"
 #include "libmesh/morton_sfc_partitioner.h"
 
-template<>
-InputParameters validParams<LibmeshPartitioner>()
+template <>
+InputParameters
+validParams<LibmeshPartitioner>()
 {
   InputParameters params = validParams<MoosePartitioner>();
   MooseEnum partitioning("metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc");
@@ -31,45 +32,45 @@ InputParameters validParams<LibmeshPartitioner>()
   return params;
 }
 
-LibmeshPartitioner::LibmeshPartitioner(const InputParameters & params) :
-    MoosePartitioner(params),
+LibmeshPartitioner::LibmeshPartitioner(const InputParameters & params)
+  : MoosePartitioner(params),
     _partitioner_name(getParam<MooseEnum>("partitioner"))
 {
   switch (_partitioner_name)
   {
-  case -2: // metis
-    _partitioner = new MetisPartitioner;
-    break;
-  case -1: // parmetis
-    _partitioner = new ParmetisPartitioner;
-    break;
+    case -2: // metis
+      _partitioner = new MetisPartitioner;
+      break;
+    case -1: // parmetis
+      _partitioner = new ParmetisPartitioner;
+      break;
 
-  case 0: // linear
-    _partitioner = new LinearPartitioner;
-    break;
-  case 1: // centroid
-  {
-    if (!isParamValid("centroid_partitioner_direction"))
-      mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+    case 0: // linear
+      _partitioner = new LinearPartitioner;
+      break;
+    case 1: // centroid
+    {
+      if (!isParamValid("centroid_partitioner_direction"))
+        mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
 
-    MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
+      MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
-    if (direction == "x")
-      _partitioner = new CentroidPartitioner(CentroidPartitioner::X);
-    else if (direction == "y")
-      _partitioner = new CentroidPartitioner(CentroidPartitioner::Y);
-    else if (direction == "z")
-      _partitioner = new CentroidPartitioner(CentroidPartitioner::Z);
-    else if (direction == "radial")
-      _partitioner = new CentroidPartitioner(CentroidPartitioner::RADIAL);
-    break;
-  }
-  case 2: // hilbert_sfc
-    _partitioner = new HilbertSFCPartitioner;
-    break;
-  case 3: // morton_sfc
-    _partitioner = new MortonSFCPartitioner;
-    break;
+      if (direction == "x")
+        _partitioner = new CentroidPartitioner(CentroidPartitioner::X);
+      else if (direction == "y")
+        _partitioner = new CentroidPartitioner(CentroidPartitioner::Y);
+      else if (direction == "z")
+        _partitioner = new CentroidPartitioner(CentroidPartitioner::Z);
+      else if (direction == "radial")
+        _partitioner = new CentroidPartitioner(CentroidPartitioner::RADIAL);
+      break;
+    }
+    case 2: // hilbert_sfc
+      _partitioner = new HilbertSFCPartitioner;
+      break;
+    case 3: // morton_sfc
+      _partitioner = new MortonSFCPartitioner;
+      break;
   }
 }
 
@@ -83,39 +84,39 @@ LibmeshPartitioner::clone() const
 {
   switch (_partitioner_name)
   {
-  case -2: // metis
-    return std::unique_ptr<Partitioner>(new MetisPartitioner);
-    break;
-  case -1: // parmetis
-    return std::unique_ptr<Partitioner>(new ParmetisPartitioner);
-    break;
+    case -2: // metis
+      return std::unique_ptr<Partitioner>(new MetisPartitioner);
+      break;
+    case -1: // parmetis
+      return std::unique_ptr<Partitioner>(new ParmetisPartitioner);
+      break;
 
-  case 0: // linear
-    return std::unique_ptr<Partitioner>(new LinearPartitioner);
-    break;
-  case 1: // centroid
-  {
-    if (!isParamValid("centroid_partitioner_direction"))
-      mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+    case 0: // linear
+      return std::unique_ptr<Partitioner>(new LinearPartitioner);
+      break;
+    case 1: // centroid
+    {
+      if (!isParamValid("centroid_partitioner_direction"))
+        mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
 
-    MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
+      MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
-    if (direction == "x")
-      return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
-    else if (direction == "y")
-      return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
-    else if (direction == "z")
-      return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
-    else if (direction == "radial")
-      return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
-    break;
-  }
-  case 2: // hilbert_sfc
-    return std::unique_ptr<Partitioner>(new HilbertSFCPartitioner);
-    break;
-  case 3: // morton_sfc
-    return std::unique_ptr<Partitioner>(new MortonSFCPartitioner);
-    break;
+      if (direction == "x")
+        return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
+      else if (direction == "y")
+        return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
+      else if (direction == "z")
+        return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
+      else if (direction == "radial")
+        return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+      break;
+    }
+    case 2: // hilbert_sfc
+      return std::unique_ptr<Partitioner>(new HilbertSFCPartitioner);
+      break;
+    case 3: // morton_sfc
+      return std::unique_ptr<Partitioner>(new MortonSFCPartitioner);
+      break;
   }
   // this cannot happen but I need to trick the compiler into
   // believing me
@@ -124,13 +125,13 @@ LibmeshPartitioner::clone() const
 }
 
 void
-LibmeshPartitioner::partition(MeshBase &mesh, const unsigned int n)
+LibmeshPartitioner::partition(MeshBase & mesh, const unsigned int n)
 {
   _partitioner->partition(mesh, n);
 }
 
 void
-LibmeshPartitioner::partition(MeshBase &mesh)
+LibmeshPartitioner::partition(MeshBase & mesh)
 {
   _partitioner->partition(mesh);
 }

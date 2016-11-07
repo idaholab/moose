@@ -32,9 +32,8 @@ class Piecewise;
  * This time stepper allows the user to specify a function that limits the maximal time step change.
  * This time stepper allows the user to specify a limiting time step length through a postprocessor.
  */
-class IterationAdaptiveDT :
-  public TimeStepper,
-  public PostprocessorInterface
+class IterationAdaptiveDT : public TimeStepper,
+                            public PostprocessorInterface
 {
 public:
   IterationAdaptiveDT(const InputParameters & parameters);
@@ -45,7 +44,7 @@ public:
   virtual void rejectStep() override;
   virtual void acceptStep() override;
 
-  virtual bool constrainStep(Real &dt) override;
+  virtual bool constrainStep(Real & dt) override;
 
 protected:
   virtual Real computeInitialDT() override;
@@ -107,7 +106,7 @@ protected:
   bool _at_function_point;
 };
 
-template<>
+template <>
 InputParameters validParams<IterationAdaptiveDT>();
 
 #endif /* ITERATIONADAPTIVEDT_H */

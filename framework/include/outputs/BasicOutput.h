@@ -32,11 +32,10 @@ class InputParameters;
  *
  * @see Exodus Console CSV
  */
-template<class T>
+template <class T>
 class BasicOutput : public T
 {
 public:
-
   /**
    * Class constructor
    *
@@ -45,11 +44,12 @@ public:
    *
    * @see initAvailable init separate
    */
-  BasicOutput(const InputParameters & parameters) : T(parameters) {}
-
+  BasicOutput(const InputParameters & parameters)
+    : T(parameters)
+  {
+  }
 
 protected:
-
   /**
    * Overload to call the output() method at the correct time
    */

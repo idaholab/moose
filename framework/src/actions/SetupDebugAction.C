@@ -21,8 +21,9 @@
 #include "MooseObjectAction.h"
 #include "ActionFactory.h"
 
-template<>
-InputParameters validParams<SetupDebugAction>()
+template <>
+InputParameters
+validParams<SetupDebugAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<unsigned int>("show_top_residuals", 0, "The number of top residuals to print out (0 = no output)");
@@ -33,8 +34,8 @@ InputParameters validParams<SetupDebugAction>()
   return params;
 }
 
-SetupDebugAction::SetupDebugAction(InputParameters parameters) :
-    Action(parameters),
+SetupDebugAction::SetupDebugAction(InputParameters parameters)
+  : Action(parameters),
     _action_params(_action_factory.getValidParams("AddOutputAction"))
 {
   _awh.showActions(getParam<bool>("show_actions"));
@@ -62,7 +63,6 @@ SetupDebugAction::act()
     action->getObjectParams().set<unsigned int>("num_residuals") = _pars.get<unsigned int>("show_top_residuals");
   }
 }
-
 
 MooseObjectAction *
 SetupDebugAction::createOutputAction(const std::string & type, const std::string & name)

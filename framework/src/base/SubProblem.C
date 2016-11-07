@@ -21,8 +21,9 @@
 #include "MooseVariable.h"
 #include "MooseArray.h"
 
-template<>
-InputParameters validParams<SubProblem>()
+template <>
+InputParameters
+validParams<SubProblem>()
 {
   InputParameters params = validParams<Problem>();
   return params;
@@ -30,8 +31,8 @@ InputParameters validParams<SubProblem>()
 
 // SubProblem /////
 
-SubProblem::SubProblem(const InputParameters & parameters) :
-    Problem(parameters),
+SubProblem::SubProblem(const InputParameters & parameters)
+  : Problem(parameters),
     _factory(_app.getFactory()),
     _nonlocal_cm(),
     _requires_nonlocal_coupling(false),
@@ -284,9 +285,9 @@ SubProblem::restrictionCheckName(BoundaryID check_id)
 
 template <typename T>
 void
-SubProblem::checkMatProps(std::map<T, std::set<std::string> > & props,
-                          std::map<T, std::multimap<std::string, std::string> > & check_props,
-                          std::map<T, std::set<MaterialPropertyName> > & zero_props)
+SubProblem::checkMatProps(std::map<T, std::set<std::string>> & props,
+                          std::map<T, std::multimap<std::string, std::string>> & check_props,
+                          std::map<T, std::set<MaterialPropertyName>> & zero_props)
 {
   // Variable for storing the value for ANY_BLOCK_ID/ANY_BOUNDARY_ID
   T any_id = mesh().getAnyID<T>();

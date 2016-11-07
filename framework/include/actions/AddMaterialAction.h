@@ -19,9 +19,8 @@
 
 class AddMaterialAction;
 
-template<>
+template <>
 InputParameters validParams<AddMaterialAction>();
-
 
 class AddMaterialAction : public MooseObjectAction
 {

@@ -19,11 +19,12 @@
 #include "libmesh/equation_systems.h"
 #include "libmesh/gmv_io.h"
 
-template<>
-InputParameters validParams<GMVOutput>()
+template <>
+InputParameters
+validParams<GMVOutput>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<BasicOutput<OversampleOutput> >();
+  InputParameters params = validParams<BasicOutput<OversampleOutput>>();
 
   // Advanced file options
   params.addParam<bool>("binary", true, "Output the file in binary format");
@@ -36,8 +37,8 @@ InputParameters validParams<GMVOutput>()
   return params;
 }
 
-GMVOutput::GMVOutput(const InputParameters & parameters) :
-    BasicOutput<OversampleOutput>(parameters),
+GMVOutput::GMVOutput(const InputParameters & parameters)
+  : BasicOutput<OversampleOutput>(parameters),
     _binary(getParam<bool>("binary"))
 {
 }

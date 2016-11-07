@@ -22,12 +22,11 @@
 //Forward Declarations
 class NodalConstraint;
 
-template<>
+template <>
 InputParameters validParams<NodalConstraint>();
 
-class NodalConstraint :
-  public Constraint,
-  public NeighborCoupleableMooseVariableDependencyIntermediateInterface
+class NodalConstraint : public Constraint,
+                        public NeighborCoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   NodalConstraint(const InputParameters & parameters);
@@ -36,13 +35,19 @@ public:
    * Get the list of master nodes
    * @return list of master nodes IDs
    */
-  std::vector<dof_id_type> &  getMasterNodeId() { return _master_node_vector; }
+  std::vector<dof_id_type> & getMasterNodeId()
+  {
+    return _master_node_vector;
+  }
 
   /**
    * Get the list of connected slave nodes
    * @return list of slave node IDs
    */
-  std::vector<dof_id_type> & getSlaveNodeId() { return _connected_nodes; }
+  std::vector<dof_id_type> & getSlaveNodeId()
+  {
+    return _connected_nodes;
+  }
 
   /**
    * Built the connectivity for this constraint

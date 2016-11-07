@@ -22,7 +22,7 @@ class Function;
 //Forward Declarations
 class ElementH1SemiError;
 
-template<>
+template <>
 InputParameters validParams<ElementH1SemiError>();
 
 /**
@@ -30,8 +30,7 @@ InputParameters validParams<ElementH1SemiError>();
  * solution and the passed function.
  * ||u-f||_{H^1} = sqrt( \int |grad u - grad f|^2 dx )
  */
-class ElementH1SemiError :
-  public ElementIntegralVariablePostprocessor
+class ElementH1SemiError : public ElementIntegralVariablePostprocessor
 {
 public:
   ElementH1SemiError(const InputParameters & parameters);

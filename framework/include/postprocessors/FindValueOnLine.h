@@ -20,7 +20,7 @@
 
 class FindValueOnLine;
 
-template<>
+template <>
 InputParameters validParams<FindValueOnLine>();
 
 /**

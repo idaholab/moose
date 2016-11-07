@@ -15,8 +15,9 @@
 #include "ParsedODEKernel.h"
 #include "libmesh/fparser_ad.hh"
 
-template<>
-InputParameters validParams<ParsedODEKernel>()
+template <>
+InputParameters
+validParams<ParsedODEKernel>()
 {
   InputParameters params = validParams<ODEKernel>();
   params += validParams<FunctionParserUtils>();
@@ -24,14 +25,14 @@ InputParameters validParams<ParsedODEKernel>()
 
   params.addRequiredParam<std::string>("function", "function expression");
   params.addCoupledVar("args", "additional coupled variables");
-  params.addParam<std::vector<std::string> >("constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
-  params.addParam<std::vector<std::string> >("constant_expressions", "Vector of values for the constants in constant_names (can be an FParser expression)");
+  params.addParam<std::vector<std::string>>("constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
+  params.addParam<std::vector<std::string>>("constant_expressions", "Vector of values for the constants in constant_names (can be an FParser expression)");
 
   return params;
 }
 
-ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters) :
-    ODEKernel(parameters),
+ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
+  : ODEKernel(parameters),
     FunctionParserUtils(parameters),
     _function(getParam<std::string>("function")),
     _nargs(coupledScalarComponents("args")),
@@ -58,15 +59,15 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters) :
   }
 
   // base function object
-  _func_F =  ADFunctionPtr(new ADFunction());
+  _func_F = ADFunctionPtr(new ADFunction());
 
   // set FParser interneal feature flags
   setParserFeatureFlags(_func_F);
 
   // add the constant expressions
   addFParserConstants(_func_F,
-                      getParam<std::vector<std::string> >("constant_names"),
-                      getParam<std::vector<std::string> >("constant_expressions"));
+                      getParam<std::vector<std::string>>("constant_names"),
+                      getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
   if (_func_F->Parse(_function, variables) >= 0)

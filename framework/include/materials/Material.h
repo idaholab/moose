@@ -43,35 +43,33 @@ class MooseMesh;
 class MaterialData;
 class SubProblem;
 
-template<>
+template <>
 InputParameters validParams<Material>();
 
 /**
  * Materials compute MaterialProperties.
  */
-class Material :
-    public MooseObject,
-    public BlockRestrictable,
-    public BoundaryRestrictable,
-    public SetupInterface,
-    public Coupleable,
-    public MooseVariableDependencyInterface,
-    public ScalarCoupleable,
-    public FunctionInterface,
-    public UserObjectInterface,
-    public TransientInterface,
-    public MaterialPropertyInterface,
-    public PostprocessorInterface,
-    public VectorPostprocessorInterface,
-    public DependencyResolverInterface,
-    public Restartable,
-    public ZeroInterface,
-    public MeshChangedInterface,
-    public OutputInterface,
-    public RandomInterface
+class Material : public MooseObject,
+                 public BlockRestrictable,
+                 public BoundaryRestrictable,
+                 public SetupInterface,
+                 public Coupleable,
+                 public MooseVariableDependencyInterface,
+                 public ScalarCoupleable,
+                 public FunctionInterface,
+                 public UserObjectInterface,
+                 public TransientInterface,
+                 public MaterialPropertyInterface,
+                 public PostprocessorInterface,
+                 public VectorPostprocessorInterface,
+                 public DependencyResolverInterface,
+                 public Restartable,
+                 public ZeroInterface,
+                 public MeshChangedInterface,
+                 public OutputInterface,
+                 public RandomInterface
 {
 public:
-
   /**
    * Constructor
    */
@@ -107,11 +105,11 @@ public:
    * Retrieve the property through a given input parameter key with a fallback
    * to getting it by name
    */
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
   ///@}
 
@@ -119,11 +117,11 @@ public:
   /**
    * Retrieve the property named "name"
    */
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const std::string & prop_name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByName(const std::string & prop_name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const std::string & prop_name);
   ///@}
 
@@ -131,11 +129,11 @@ public:
   /**
    * Declare the property named "name"
    */
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & declareProperty(const std::string & prop_name);
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
   ///@}
 
@@ -143,24 +141,28 @@ public:
    * Return a material property that is initialized to zero by default and does
    * not need to (but can) be declared by another material.
    */
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getZeroMaterialProperty(const std::string & prop_name);
 
   /**
    * Return a set of properties accessed with getMaterialProperty
    * @return A reference to the set of properties with calls to getMaterialProperty
    */
-  virtual
-  const std::set<std::string> &
-  getRequestedItems() override { return _requested_props; }
+  virtual const std::set<std::string> &
+  getRequestedItems() override
+  {
+    return _requested_props;
+  }
 
   /**
    * Return a set of properties accessed with declareProperty
    * @return A reference to the set of properties with calls to declareProperty
    */
-  virtual
-  const std::set<std::string> &
-  getSuppliedItems() override { return _supplied_props; }
+  virtual const std::set<std::string> &
+  getSuppliedItems() override
+  {
+    return _supplied_props;
+  }
 
   void checkStatefulSanity() const;
 
@@ -173,10 +175,12 @@ public:
   /**
    * Returns true of the MaterialData type is not associated with volume data
    */
-  bool isBoundaryMaterial() const { return _bnd; }
+  bool isBoundaryMaterial() const
+  {
+    return _bnd;
+  }
 
 protected:
-
   /**
    * Users must override this method.
    */
@@ -209,14 +213,14 @@ protected:
 
   unsigned int _qp;
 
-  QBase * & _qrule;
+  QBase *& _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
   const MooseArray<Point> & _q_point;
   /// normals at quadrature points (valid only in boundary materials)
   const MooseArray<Point> & _normals;
 
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
 
   /// current side of the current element
   unsigned int & _current_side;
@@ -235,7 +239,8 @@ protected:
   /// If False MOOSE does not compute this property
   const bool _compute;
 
-  enum QP_Data_Type {
+  enum QP_Data_Type
+  {
     CURR,
     PREV
   };
@@ -248,7 +253,6 @@ protected:
   };
   std::map<std::string, int> _props_to_flags;
 
-
 private:
   /// Small helper function to call storeMatPropName
   void registerPropName(std::string prop_name, bool is_get, Prop_State state);
@@ -259,7 +263,7 @@ private:
   bool _has_stateful_property;
 };
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialProperty(const std::string & name)
 {
@@ -274,7 +278,7 @@ Material::getMaterialProperty(const std::string & name)
   return getMaterialPropertyByName<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOld(const std::string & name)
 {
@@ -289,7 +293,7 @@ Material::getMaterialPropertyOld(const std::string & name)
   return getMaterialPropertyOldByName<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOlder(const std::string & name)
 {
@@ -304,7 +308,7 @@ Material::getMaterialPropertyOlder(const std::string & name)
   return getMaterialPropertyOlderByName<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyByName(const std::string & prop_name)
 {
@@ -316,7 +320,7 @@ Material::getMaterialPropertyByName(const std::string & prop_name)
   return _material_data->getProperty<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOldByName(const std::string & prop_name)
 {
@@ -326,7 +330,7 @@ Material::getMaterialPropertyOldByName(const std::string & prop_name)
   return _material_data->getPropertyOld<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOlderByName(const std::string & prop_name)
 {
@@ -336,8 +340,7 @@ Material::getMaterialPropertyOlderByName(const std::string & prop_name)
   return _material_data->getPropertyOlder<T>(prop_name);
 }
 
-
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
 Material::declareProperty(const std::string & prop_name)
 {
@@ -345,7 +348,7 @@ Material::declareProperty(const std::string & prop_name)
   return _material_data->declareProperty<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
 Material::declarePropertyOld(const std::string & prop_name)
 {
@@ -353,7 +356,7 @@ Material::declarePropertyOld(const std::string & prop_name)
   return _material_data->declarePropertyOld<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 MaterialProperty<T> &
 Material::declarePropertyOlder(const std::string & prop_name)
 {
@@ -361,7 +364,7 @@ Material::declarePropertyOlder(const std::string & prop_name)
   return _material_data->declarePropertyOlder<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 Material::getZeroMaterialProperty(const std::string & prop_name)
 {

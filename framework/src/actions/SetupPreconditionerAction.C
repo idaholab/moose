@@ -23,16 +23,17 @@
 
 unsigned int SetupPreconditionerAction::_count = 0;
 
-template<>
-InputParameters validParams<SetupPreconditionerAction>()
+template <>
+InputParameters
+validParams<SetupPreconditionerAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
 
   return params;
 }
 
-SetupPreconditionerAction::SetupPreconditionerAction(InputParameters params) :
-    MooseObjectAction(params)
+SetupPreconditionerAction::SetupPreconditionerAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 
@@ -47,7 +48,7 @@ SetupPreconditionerAction::act()
 
     _problem->getNonlinearSystem().setPreconditioner(pc);
 
-    /**
+/**
      * Go ahead and set common precondition options here.  The child classes will still be called
      * through the action warehouse
      */

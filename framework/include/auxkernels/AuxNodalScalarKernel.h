@@ -21,16 +21,15 @@
 
 class NodalScalarKernel;
 
-template<>
+template <>
 InputParameters validParams<NodalScalarKernel>();
 
 /**
  *
  */
-class AuxNodalScalarKernel :
-  public AuxScalarKernel,
-  public Coupleable,
-  public MooseVariableDependencyInterface
+class AuxNodalScalarKernel : public AuxScalarKernel,
+                             public Coupleable,
+                             public MooseVariableDependencyInterface
 {
 public:
   AuxNodalScalarKernel(const InputParameters & parameters);

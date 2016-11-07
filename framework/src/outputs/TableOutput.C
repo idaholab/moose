@@ -24,14 +24,15 @@
 // libMesh includes
 #include "libmesh/string_to_enum.h"
 
-template<>
-InputParameters validParams<TableOutput>()
+template <>
+InputParameters
+validParams<TableOutput>()
 {
   // Fit mode selection Enum
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
 
   // Base class parameters
-  InputParameters params = validParams<AdvancedOutput<FileOutput> >();
+  InputParameters params = validParams<AdvancedOutput<FileOutput>>();
   params += AdvancedOutput<FileOutput>::enableOutputTypes("postprocessor scalar vector_postprocessor");
 
   // Option for writing vector_postprocessor time file
@@ -45,11 +46,11 @@ InputParameters validParams<TableOutput>()
   return params;
 }
 
-TableOutput::TableOutput(const InputParameters & parameters) :
-    AdvancedOutput<FileOutput>(parameters),
+TableOutput::TableOutput(const InputParameters & parameters)
+  : AdvancedOutput<FileOutput>(parameters),
     _tables_restartable(getParam<bool>("append_restart")),
     _postprocessor_table(_tables_restartable ? declareRestartableData<FormattedTable>("postprocessor_table") : declareRecoverableData<FormattedTable>("postprocessor_table")),
-    _vector_postprocessor_time_tables(_tables_restartable ? declareRestartableData<std::map<std::string, FormattedTable> >("vector_postprocessor_time_table") : declareRecoverableData<std::map<std::string, FormattedTable> >("vector_postprocessor_time_table")),
+    _vector_postprocessor_time_tables(_tables_restartable ? declareRestartableData<std::map<std::string, FormattedTable>>("vector_postprocessor_time_table") : declareRecoverableData<std::map<std::string, FormattedTable>>("vector_postprocessor_time_table")),
     _scalar_table(_tables_restartable ? declareRestartableData<FormattedTable>("scalar_table") : declareRecoverableData<FormattedTable>("scalar_table")),
     _all_data_table(_tables_restartable ? declareRestartableData<FormattedTable>("all_data_table") : declareRecoverableData<FormattedTable>("all_data_table")),
     _time_data(getParam<bool>("time_data")),
@@ -89,7 +90,7 @@ TableOutput::outputVectorPostprocessors()
 
     auto table_it = _vector_postprocessor_tables.lower_bound(vpp_name);
     if (table_it == _vector_postprocessor_tables.end() || table_it->first != vpp_name)
-      table_it =  _vector_postprocessor_tables.emplace_hint(table_it, vpp_name, FormattedTable());
+      table_it = _vector_postprocessor_tables.emplace_hint(table_it, vpp_name, FormattedTable());
 
     FormattedTable & table = table_it->second;
 

@@ -21,18 +21,19 @@
 #include "BlockRestrictable.h"
 #include "LineSegment.h"
 #include "RayTracing.h" // Moose::elementsIntersectedByLine()
-#include "Assembly.h" // Assembly::qRule()
-#include "MooseMesh.h" // MooseMesh::getMesh()
+#include "Assembly.h"   // Assembly::qRule()
+#include "MooseMesh.h"  // MooseMesh::getMesh()
 
 // libMesh includes
 #include "libmesh/quadrature.h" // _qrule->n_points()
 
 // Forward Declarations
 class MooseMesh;
-template<typename T> class LineMaterialSamplerBase;
+template <typename T>
+class LineMaterialSamplerBase;
 
-template<>
-InputParameters validParams<LineMaterialSamplerBase<Real> >();
+template <>
+InputParameters validParams<LineMaterialSamplerBase<Real>>();
 
 /**
  * This is a base class for sampling material properties for the
@@ -42,11 +43,10 @@ InputParameters validParams<LineMaterialSamplerBase<Real> >();
  * those points along the line.  Derived classes can be created to
  * sample arbitrary types of material properties.
  */
-template<typename T>
-class LineMaterialSamplerBase :
-  public GeneralVectorPostprocessor,
-  public SamplerBase,
-  public BlockRestrictable
+template <typename T>
+class LineMaterialSamplerBase : public GeneralVectorPostprocessor,
+                                public SamplerBase,
+                                public BlockRestrictable
 {
 public:
   /**
@@ -96,15 +96,15 @@ protected:
   MooseMesh & _mesh;
 
   /// The quadrature rule
-  QBase * & _qrule;
+  QBase *& _qrule;
 
   /// The quadrature points
   const MooseArray<Point> & _q_point;
 };
 
 template <typename T>
-LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
+LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters),
     SamplerBase(parameters, this, _communicator),
     BlockRestrictable(parameters),
     _start(getParam<Point>("start")),
@@ -113,7 +113,7 @@ LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & para
     _qrule(_subproblem.assembly(_tid).qRule()),
     _q_point(_subproblem.assembly(_tid).qPoints())
 {
-  std::vector<std::string> material_property_names = getParam<std::vector<std::string> >("property");
+  std::vector<std::string> material_property_names = getParam<std::vector<std::string>>("property");
   for (unsigned int i = 0; i < material_property_names.size(); ++i)
   {
     if (!hasMaterialProperty<T>(material_property_names[i]))

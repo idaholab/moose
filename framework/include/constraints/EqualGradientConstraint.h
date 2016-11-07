@@ -19,7 +19,7 @@
 
 class EqualGradientConstraint;
 
-template<>
+template <>
 InputParameters validParams<EqualGradientConstraint>();
 
 /**

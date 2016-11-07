@@ -20,8 +20,9 @@
 #include "SubProblem.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<ScalarKernel>()
+template <>
+InputParameters
+validParams<ScalarKernel>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
@@ -35,9 +36,8 @@ InputParameters validParams<ScalarKernel>()
   return params;
 }
 
-
-ScalarKernel::ScalarKernel(const InputParameters & parameters) :
-    MooseObject(parameters),
+ScalarKernel::ScalarKernel(const InputParameters & parameters)
+  : MooseObject(parameters),
     ScalarCoupleable(this),
     SetupInterface(this),
     FunctionInterface(this),

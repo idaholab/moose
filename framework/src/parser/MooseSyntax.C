@@ -16,11 +16,11 @@
 #include "Syntax.h"
 #include "Moose.h"
 
-
 namespace Moose
 {
 
-void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+void
+associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   /**
    * Note: the optional third parameter is used to differentiate which task is
@@ -46,8 +46,8 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("DynamicObjectRegistrationAction", "Problem");
   syntax.registerActionSyntax("SetupMeshAction", "Mesh");
   syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh");
-//  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "prepare_mesh");
-//  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "setup_mesh_complete");
+  //  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "prepare_mesh");
+  //  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "setup_mesh_complete");
   syntax.registerActionSyntax("CreateDisplacedProblemAction", "Mesh");
   syntax.registerActionSyntax("AddMeshModifierAction", "MeshModifiers/*");
   syntax.registerActionSyntax("AddMortarInterfaceAction", "Mesh/MortarInterfaces/*");
@@ -61,18 +61,18 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   /// Variable/AuxVariable Actions
   syntax.registerActionSyntax("AddVariableAction", "Variables/*");
-//  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_variable");
-//  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_ic");
+  //  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_variable");
+  //  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_ic");
 
   syntax.registerActionSyntax("AddICAction", "Variables/*/InitialCondition");
 
   syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*");
-//  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_aux_variable");
-//  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_ic");
+  //  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_aux_variable");
+  //  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_ic");
 
   syntax.registerActionSyntax("AddICAction", "AuxVariables/*/InitialCondition");
 
-  syntax.registerActionSyntax("EmptyAction", "BCs/Periodic", "no_action");  // placeholder
+  syntax.registerActionSyntax("EmptyAction", "BCs/Periodic", "no_action"); // placeholder
   syntax.registerActionSyntax("AddPeriodicBCAction", "BCs/Periodic/*");
 
   syntax.registerActionSyntax("AddInitialConditionAction", "ICs/*", "add_ic");
@@ -119,9 +119,9 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("AddBoundsVectorsAction", "Bounds");
 
   syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals");
-//  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_aux_variable");
-//  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_postprocessor");
-//  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_user_object");
+  //  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_aux_variable");
+  //  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_postprocessor");
+  //  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_user_object");
 
   // Indicator
   syntax.registerActionSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");
@@ -146,6 +146,5 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   addActionTypes(syntax);
   registerActions(syntax, action_factory);
 }
-
 
 } // namespace

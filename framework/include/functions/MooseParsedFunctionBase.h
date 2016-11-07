@@ -31,7 +31,7 @@ class MooseParsedFunctionBase;
  * for the class using the += operator.
  * @see MooseParsedFunction,  MooseParsedGradFunction, MooseParsedVectorFunction
  */
-template<>
+template <>
 InputParameters validParams<MooseParsedFunctionBase>();
 
 /**
@@ -41,7 +41,6 @@ InputParameters validParams<MooseParsedFunctionBase>();
 class MooseParsedFunctionBase
 {
 public:
-
   /**
    * Class constructor for the interface.  The first parameter, 'name' is not currently used.
    * @param parameters Input parameters from the object, it must contain '_fe_problem'
@@ -54,16 +53,14 @@ public:
   virtual ~MooseParsedFunctionBase();
 
 protected:
-
-   /**
+  /**
    * A helper method to check if the function value contains quotes. This method should
    * be called from within the initialization list of the object inheriting the MooseParsedFunctionInterface
    * @param function_str The name of the ParsedFunction
    * @return The vector of strings, if the input function is valid
    * @see ParsedFunction
    */
-   const std::string verifyFunction(const std::string & function_str);
-
+  const std::string verifyFunction(const std::string & function_str);
 
   /// Reference to the FEProblem class for this object
   FEProblem & _pfb_feproblem;

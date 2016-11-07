@@ -22,13 +22,13 @@
 class NonlinearSystem;
 class FieldSplitPreconditioner;
 
-template<>
+template <>
 InputParameters validParams<FieldSplitPreconditioner>();
 
 /**
  * Implements a preconditioner designed to map onto PETSc's PCFieldSplit.
  */
-class FieldSplitPreconditioner :  public MoosePreconditioner
+class FieldSplitPreconditioner : public MoosePreconditioner
 {
 public:
   /**

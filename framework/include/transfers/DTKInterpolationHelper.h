@@ -64,13 +64,13 @@ public:
                           MPI_Comm * to_mpi_comm);
 
 protected:
-  typedef DataTransferKit::SharedDomainMap<DTKInterpolationAdapter::MeshContainerType,DTKInterpolationAdapter::MeshContainerType> shared_domain_map_type;
+  typedef DataTransferKit::SharedDomainMap<DTKInterpolationAdapter::MeshContainerType, DTKInterpolationAdapter::MeshContainerType> shared_domain_map_type;
 
   /// The DTKAdapter associated with each EquationSystems
   std::map<EquationSystems *, DTKInterpolationAdapter *> adapters;
 
   /// The dtk shared domain maps for pairs of EquationSystems (from, to)
-  std::map<std::pair<unsigned int, unsigned int>, shared_domain_map_type * > dtk_maps;
+  std::map<std::pair<unsigned int, unsigned int>, shared_domain_map_type *> dtk_maps;
 };
 
 } // namespace libMesh

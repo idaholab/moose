@@ -37,7 +37,7 @@ class Assembly;
 
 class DGKernel;
 
-template<>
+template <>
 InputParameters validParams<DGKernel>();
 
 /**
@@ -45,22 +45,20 @@ InputParameters validParams<DGKernel>();
  * physics on internal sides (edges/faces).
  *
  */
-class DGKernel :
-  public MooseObject,
-  public BlockRestrictable,
-  public BoundaryRestrictable,
-  public SetupInterface,
-  public TransientInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-  protected TwoMaterialPropertyInterface,
-  public Restartable,
-  public ZeroInterface,
-  public MeshChangedInterface
+class DGKernel : public MooseObject,
+                 public BlockRestrictable,
+                 public BoundaryRestrictable,
+                 public SetupInterface,
+                 public TransientInterface,
+                 public FunctionInterface,
+                 public UserObjectInterface,
+                 public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+                 protected TwoMaterialPropertyInterface,
+                 public Restartable,
+                 public ZeroInterface,
+                 public MeshChangedInterface
 {
 public:
-
   /**
    * Factory constructor initializes all internal references needed for residual computation.
    *
@@ -104,7 +102,7 @@ public:
   /**
    * Computes the element-element off-diagonal Jacobian
    */
-  virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,unsigned int jvar);
+  virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar);
 
   /**
    * Computes d-residual / d-jvar...
@@ -120,20 +118,20 @@ protected:
   Assembly & _assembly;
   MooseVariable & _var;
   MooseMesh & _mesh;
-//  unsigned int _dim;
+  //  unsigned int _dim;
 
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
 
   /// The volume (or length) of the current element
   const Real & _current_elem_volume;
 
   /// The neighboring element
-  const Elem * & _neighbor_elem;
+  const Elem *& _neighbor_elem;
 
   /// Current side
   unsigned int & _current_side;
   /// Current side element
-  const Elem * & _current_side_elem;
+  const Elem *& _current_side_elem;
 
   /// The volume (or length) of the current side
   const Real & _current_side_volume;
@@ -141,8 +139,8 @@ protected:
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
   unsigned int _qp;
-  const MooseArray< Point > & _q_point;
-  QBase * & _qrule;
+  const MooseArray<Point> & _q_point;
+  QBase *& _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 
@@ -165,7 +163,7 @@ protected:
   /// Gradient of side shape function
   const VariableTestGradient & _grad_test;
   /// Normal vectors at the quadrature points
-  const MooseArray<Point>& _normals;
+  const MooseArray<Point> & _normals;
 
   /// Side shape function.
   const VariablePhiValue & _phi_neighbor;

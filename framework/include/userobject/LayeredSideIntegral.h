@@ -22,7 +22,7 @@
 // Forward Declarations
 class LayeredSideIntegral;
 
-template<>
+template <>
 InputParameters validParams<LayeredSideIntegral>();
 
 /**
@@ -40,7 +40,10 @@ public:
    *
    * @param p The point to look for in the layers.
    */
-  virtual Real spatialValue(const Point & p) const override { return integralValue(p); }
+  virtual Real spatialValue(const Point & p) const override
+  {
+    return integralValue(p);
+  }
 
   virtual void initialize() override;
   virtual void execute() override;

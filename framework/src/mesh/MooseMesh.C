@@ -55,10 +55,11 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/point_locator_base.h"
 
-static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
+static const int GRAIN_SIZE = 1; // the grain_size does not have much influence on our execution speed
 
-template<>
-InputParameters validParams<MooseMesh>()
+template <>
+InputParameters
+validParams<MooseMesh>()
 {
   InputParameters params = validParams<MooseObject>();
 
@@ -93,7 +94,7 @@ InputParameters validParams<MooseMesh>()
   params.addParam<MooseEnum>("centroid_partitioner_direction", direction, "Specifies the sort direction if using the centroid partitioner. Available options: x, y, z, radial");
 
   MooseEnum patch_update_strategy("never always auto", "never");
-  params.addParam<MooseEnum>("patch_update_strategy", patch_update_strategy,  "How often to update the geometric search 'patch'.  The default is to never update it (which is the most efficient but could be a problem with lots of relative motion).  'always' will update the patch every timestep which might be time consuming.  'auto' will attempt to determine when the patch size needs to be updated automatically.");
+  params.addParam<MooseEnum>("patch_update_strategy", patch_update_strategy, "How often to update the geometric search 'patch'.  The default is to never update it (which is the most efficient but could be a problem with lots of relative motion).  'always' will update the patch every timestep which might be time consuming.  'auto' will attempt to determine when the patch size needs to be updated automatically.");
 
   // Note: This parameter is named to match 'construct_side_list_from_node_list' in SetupMeshAction
   params.addParam<bool>("construct_node_list_from_side_list", true, "Whether or not to generate nodesets from the sidesets (usually a good idea).");
@@ -107,9 +108,8 @@ InputParameters validParams<MooseMesh>()
   return params;
 }
 
-
-MooseMesh::MooseMesh(const InputParameters & parameters) :
-    MooseObject(parameters),
+MooseMesh::MooseMesh(const InputParameters & parameters)
+  : MooseObject(parameters),
     Restartable(parameters, "Mesh"),
     _mesh_distribution_type(getParam<MooseEnum>("distribution")),
     _mesh_parallel_type(getParam<MooseEnum>("parallel_type")),
@@ -137,43 +137,43 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
   // print a deprecated message.
   switch (_mesh_distribution_type)
   {
-  case 0: // PARALLEL
-    mooseDeprecated("Using 'distribution = PARALLEL' in the Mesh block is deprecated, use 'parallel_type = DISTRIBUTED' instead.");
-    _use_distributed_mesh = true;
-    break;
+    case 0: // PARALLEL
+      mooseDeprecated("Using 'distribution = PARALLEL' in the Mesh block is deprecated, use 'parallel_type = DISTRIBUTED' instead.");
+      _use_distributed_mesh = true;
+      break;
 
-  case 1: // SERIAL
-    mooseDeprecated("Using 'distribution = SERIAL' in the Mesh block is deprecated, use 'parallel_type = REPLICATED' instead.");
-    if (_app.getDistributedMeshOnCommandLine() || _is_nemesis)
-      _distribution_overridden = true;
-    break;
+    case 1: // SERIAL
+      mooseDeprecated("Using 'distribution = SERIAL' in the Mesh block is deprecated, use 'parallel_type = REPLICATED' instead.");
+      if (_app.getDistributedMeshOnCommandLine() || _is_nemesis)
+        _distribution_overridden = true;
+      break;
 
-  case 2: // DEFAULT
-    // If the user did not specify any 'distribution = foo' in his
-    // input file, there's nothing to do.  In particular, we do not
-    // want to allow the command line to override the default mesh
-    // type in this case.
-    break;
+    case 2: // DEFAULT
+      // If the user did not specify any 'distribution = foo' in his
+      // input file, there's nothing to do.  In particular, we do not
+      // want to allow the command line to override the default mesh
+      // type in this case.
+      break;
   }
 
   switch (_mesh_parallel_type)
   {
-  case 0: // PARALLEL
-    _use_distributed_mesh = true;
-    break;
-  case 1: // SERIAL
-    if (_app.getDistributedMeshOnCommandLine() || _is_nemesis)
-      _parallel_type_overridden = true;
-    break;
-  case 2: // DEFAULT
-    // The user did not specify 'distribution = XYZ' in the input file,
-    // so we allow the --distributed-mesh command line arg to possibly turn
-    // on DistributedMesh.  If the command line arg is not present, we pick ReplicatedMesh.
-    if (_app.getDistributedMeshOnCommandLine())
+    case 0: // PARALLEL
       _use_distributed_mesh = true;
+      break;
+    case 1: // SERIAL
+      if (_app.getDistributedMeshOnCommandLine() || _is_nemesis)
+        _parallel_type_overridden = true;
+      break;
+    case 2: // DEFAULT
+      // The user did not specify 'distribution = XYZ' in the input file,
+      // so we allow the --distributed-mesh command line arg to possibly turn
+      // on DistributedMesh.  If the command line arg is not present, we pick ReplicatedMesh.
+      if (_app.getDistributedMeshOnCommandLine())
+        _use_distributed_mesh = true;
 
-    break;
-    // No default switch needed for MooseEnum
+      break;
+      // No default switch needed for MooseEnum
   }
 
   // If the user specifies 'nemesis = true' in the Mesh block, we
@@ -196,8 +196,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     _mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, dim);
 }
 
-MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
-    MooseObject(other_mesh._pars),
+MooseMesh::MooseMesh(const MooseMesh & other_mesh)
+  : MooseObject(other_mesh._pars),
     Restartable(_pars, "Mesh"),
     _mesh_distribution_type(other_mesh._mesh_distribution_type),
     _mesh_parallel_type(other_mesh._mesh_parallel_type),
@@ -388,7 +388,7 @@ MooseMesh::nodeRef(const dof_id_type i)
   return getMesh().node_ref(i);
 }
 
-const Node*
+const Node *
 MooseMesh::nodePtr(const dof_id_type i) const
 {
   if (i > getMesh().max_node_id())
@@ -397,7 +397,7 @@ MooseMesh::nodePtr(const dof_id_type i) const
   return getMesh().node_ptr(i);
 }
 
-Node*
+Node *
 MooseMesh::nodePtr(const dof_id_type i)
 {
   if (i > getMesh().max_node_id())
@@ -437,7 +437,6 @@ void
 MooseMesh::onMeshChanged()
 {
 }
-
 
 void
 MooseMesh::cacheChangedLists()
@@ -524,7 +523,9 @@ MooseMesh::isSemiLocal(Node * node)
 class BndNodeCompare
 {
 public:
-  BndNodeCompare(){}
+  BndNodeCompare()
+  {
+  }
 
   bool operator()(const BndNode * const & lhs, const BndNode * const & rhs)
   {
@@ -597,7 +598,7 @@ MooseMesh::buildBndElemList()
   }
 }
 
-const std::map<dof_id_type, std::vector<dof_id_type> > &
+const std::map<dof_id_type, std::vector<dof_id_type>> &
 MooseMesh::nodeToElemMap()
 {
   if (!_node_to_elem_map_built) // Guard the creation with a double checked lock
@@ -605,7 +606,7 @@ MooseMesh::nodeToElemMap()
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     if (!_node_to_elem_map_built)
     {
-      MeshBase::const_element_iterator       el  = getMesh().elements_begin();
+      MeshBase::const_element_iterator el = getMesh().elements_begin();
       const MeshBase::const_element_iterator end = getMesh().elements_end();
 
       for (; el != end; ++el)
@@ -619,7 +620,7 @@ MooseMesh::nodeToElemMap()
   return _node_to_elem_map;
 }
 
-const std::map<dof_id_type, std::vector<dof_id_type> > &
+const std::map<dof_id_type, std::vector<dof_id_type>> &
 MooseMesh::nodeToActiveSemilocalElemMap()
 {
   if (!_node_to_active_semilocal_elem_map_built) // Guard the creation with a double checked lock
@@ -627,7 +628,7 @@ MooseMesh::nodeToActiveSemilocalElemMap()
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     if (!_node_to_active_semilocal_elem_map_built)
     {
-      MeshBase::const_element_iterator       el  = getMesh().semilocal_elements_begin();
+      MeshBase::const_element_iterator el = getMesh().semilocal_elements_begin();
       const MeshBase::const_element_iterator end = getMesh().semilocal_elements_end();
 
       for (; el != end; ++el)
@@ -641,7 +642,6 @@ MooseMesh::nodeToActiveSemilocalElemMap()
 
   return _node_to_active_semilocal_elem_map;
 }
-
 
 ConstElemRange *
 MooseMesh::getActiveLocalElementRange()
@@ -733,7 +733,7 @@ MooseMesh::cacheInfo()
 const std::set<SubdomainID> &
 MooseMesh::getNodeBlockIds(const Node & node) const
 {
-  std::map<dof_id_type, std::set<SubdomainID> >::const_iterator it = _block_node_list.find(node.id());
+  std::map<dof_id_type, std::set<SubdomainID>>::const_iterator it = _block_node_list.find(node.id());
 
   if (it == _block_node_list.end())
     mooseError("Unable to find node: " << node.id() << " in any block list.");
@@ -743,7 +743,7 @@ MooseMesh::getNodeBlockIds(const Node & node) const
 
 // default begin() accessor
 MooseMesh::bnd_node_iterator
-MooseMesh::bndNodesBegin ()
+MooseMesh::bndNodesBegin()
 {
   Predicates::NotNull<bnd_node_iterator_imp> p;
   return bnd_node_iterator(_bnd_nodes.begin(), _bnd_nodes.end(), p);
@@ -751,7 +751,7 @@ MooseMesh::bndNodesBegin ()
 
 // default end() accessor
 MooseMesh::bnd_node_iterator
-MooseMesh::bndNodesEnd ()
+MooseMesh::bndNodesEnd()
 {
   Predicates::NotNull<bnd_node_iterator_imp> p;
   return bnd_node_iterator(_bnd_nodes.end(), _bnd_nodes.end(), p);
@@ -759,7 +759,7 @@ MooseMesh::bndNodesEnd ()
 
 // default begin() accessor
 MooseMesh::bnd_elem_iterator
-MooseMesh::bndElemsBegin ()
+MooseMesh::bndElemsBegin()
 {
   Predicates::NotNull<bnd_elem_iterator_imp> p;
   return bnd_elem_iterator(_bnd_elems.begin(), _bnd_elems.end(), p);
@@ -767,7 +767,7 @@ MooseMesh::bndElemsBegin ()
 
 // default end() accessor
 MooseMesh::bnd_elem_iterator
-MooseMesh::bndElemsEnd ()
+MooseMesh::bndElemsEnd()
 {
   Predicates::NotNull<bnd_elem_iterator_imp> p;
   return bnd_elem_iterator(_bnd_elems.end(), _bnd_elems.end(), p);
@@ -791,7 +791,7 @@ MooseMesh::addUniqueNode(const Point & p, Real tol)
     }
   }
 
-  Node *node = nullptr;
+  Node * node = nullptr;
   for (unsigned int i = 0; i < _node_map.size(); ++i)
   {
     if (p.relative_fuzzy_equals(*_node_map[i], tol))
@@ -824,7 +824,7 @@ MooseMesh::addQuadratureNode(const Elem * elem, const unsigned short int side, c
     // numeric_limits<dof_id_type>::max and it broke several tests in
     // MOOSE.  So, this is some kind of a magic number that we will
     // just continue to use...
-    dof_id_type max_id = std::numeric_limits<unsigned int>::max()-100;
+    dof_id_type max_id = std::numeric_limits<unsigned int>::max() - 100;
     dof_id_type new_id = max_id - _quadrature_nodes.size();
 
     if (new_id <= getMesh().max_node_id())
@@ -923,9 +923,7 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name, bool 
        * boundary.  We will look in the complete map for this sideset and create a new name/ID pair
        * if requested.
        */
-      if (generate_unknown
-          && !MooseUtils::doesMapContainValue(sideset_map, std::string(boundary_name[i]))
-          && !MooseUtils::doesMapContainValue(nodeset_map, std::string(boundary_name[i])))
+      if (generate_unknown && !MooseUtils::doesMapContainValue(sideset_map, std::string(boundary_name[i])) && !MooseUtils::doesMapContainValue(nodeset_map, std::string(boundary_name[i])))
         id = ++max_boundary_id;
       else
         id = boundary_info.get_id_by_name(boundary_name[i]);
@@ -1001,7 +999,7 @@ MooseMesh::setBoundaryName(BoundaryID boundary_id, BoundaryName name)
 }
 
 void
-MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & periodic_node_map, unsigned int var_number, PeriodicBoundaries *pbs) const
+MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & periodic_node_map, unsigned int var_number, PeriodicBoundaries * pbs) const
 {
   mooseAssert(!Threads::in_threads, "This function should only be called outside of a threaded region due to the use of PointLocator");
 
@@ -1022,20 +1020,20 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
 
   for (; it != it_end; ++it)
   {
-    const Elem *elem = *it;
+    const Elem * elem = *it;
     for (unsigned int s = 0; s < elem->n_sides(); ++s)
     {
       if (elem->neighbor(s))
         continue;
 
-      boundary_info.boundary_ids (elem, s, bc_ids);
+      boundary_info.boundary_ids(elem, s, bc_ids);
       for (const auto & boundary_id : bc_ids)
       {
         const PeriodicBoundaryBase * periodic = pbs->boundary(boundary_id);
         if (periodic && periodic->is_my_variable(var_number))
         {
           const Elem * neigh = pbs->neighbor(boundary_id, *point_locator, elem, s);
-          unsigned int s_neigh = boundary_info.side_with_boundary_id (neigh, periodic->pairedboundary);
+          unsigned int s_neigh = boundary_info.side_with_boundary_id(neigh, periodic->pairedboundary);
 
           std::unique_ptr<Elem> elem_side = elem->build_side(s);
           std::unique_ptr<Elem> neigh_side = neigh->build_side(s_neigh);
@@ -1047,12 +1045,12 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
             Point master_point = periodic->get_corresponding_pos(*master_node);
             for (unsigned int j = 0; j < neigh_side->n_nodes(); ++j)
             {
-              Node *slave_node = neigh_side->node_ptr(j);
+              Node * slave_node = neigh_side->node_ptr(j);
               if (master_point.absolute_fuzzy_equals(*slave_node))
               {
                 // Avoid inserting any duplicates
                 std::pair<IterType, IterType> iters =
-                  periodic_node_map.equal_range(master_node->id());
+                    periodic_node_map.equal_range(master_node->id());
                 bool found = false;
                 for (IterType map_it = iters.first; map_it != iters.second; ++map_it)
                   if (map_it->second == slave_node->id())
@@ -1072,9 +1070,9 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
 }
 
 void
-MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<dof_id_type> > & periodic_node_sets,
+MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<dof_id_type>> & periodic_node_sets,
                                  unsigned int var_number,
-                                 PeriodicBoundaries *pbs) const
+                                 PeriodicBoundaries * pbs) const
 {
   periodic_node_sets.clear();
 
@@ -1119,7 +1117,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
     }
   }
 
-  _extreme_nodes.resize(8);  // 2^LIBMESH_DIM
+  _extreme_nodes.resize(8); // 2^LIBMESH_DIM
   // Now make sure that there are actual nodes at all of the extremes
   unsigned int extreme_matches = 0;
   std::vector<unsigned int> comp_map(3);
@@ -1143,7 +1141,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
       }
     }
 
-    if (coord_match == dim)  // Found a coordinate at one of the extremes
+    if (coord_match == dim) // Found a coordinate at one of the extremes
     {
       _extreme_nodes[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = &node;
       ++extreme_matches;
@@ -1152,7 +1150,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 
   // See if we matched all of the extremes for the mesh dimension
   if (extreme_matches != std::pow(2.0, (int)dim))
-    return false;                    // This is not a regular orthogonal mesh
+    return false; // This is not a regular orthogonal mesh
 
   // This is a regular orthogonal mesh, so set the bounds
   _regular_orthogonal_mesh = true;
@@ -1187,21 +1185,21 @@ MooseMesh::detectPairedSidesets()
 
   // Points used for direction comparison
   const Point
-    minus_x(-1,  0,  0),
-    plus_x ( 1,  0,  0),
-    minus_y( 0, -1,  0),
-    plus_y ( 0,  1,  0),
-    minus_z( 0,  0, -1),
-    plus_z ( 0,  0,  1);
+      minus_x(-1, 0, 0),
+      plus_x(1, 0, 0),
+      minus_y(0, -1, 0),
+      plus_y(0, 1, 0),
+      minus_z(0, 0, -1),
+      plus_z(0, 0, 1);
 
   // we need to test all element dimensions from dim down to 1
   const unsigned int dim = getMesh().mesh_dimension();
 
   // boundary id sets for elements of different dimensions
   std::vector<std::set<BoundaryID>>
-    minus_x_ids(dim), plus_x_ids(dim),
-    minus_y_ids(dim), plus_y_ids(dim),
-    minus_z_ids(dim), plus_z_ids(dim);
+      minus_x_ids(dim), plus_x_ids(dim),
+      minus_y_ids(dim), plus_y_ids(dim),
+      minus_z_ids(dim), plus_z_ids(dim);
 
   std::vector<std::unique_ptr<FEBase>> fe_faces(dim);
   std::vector<std::unique_ptr<QGauss>> qfaces(dim);
@@ -1221,9 +1219,9 @@ MooseMesh::detectPairedSidesets()
   BoundaryInfo & boundary_info = getMesh().get_boundary_info();
   std::vector<boundary_id_type> face_ids;
 
-  MeshBase::const_element_iterator       el     = getMesh().level_elements_begin(0);
+  MeshBase::const_element_iterator el = getMesh().level_elements_begin(0);
   const MeshBase::const_element_iterator end_el = getMesh().level_elements_end(0);
-  for (; el != end_el ; ++el)
+  for (; el != end_el; ++el)
   {
     Elem * elem = *el;
 
@@ -1334,7 +1332,6 @@ MooseMesh::addPeriodicVariable(unsigned int var_num, BoundaryID primary, Boundar
   }
 }
 
-
 bool
 MooseMesh::isTranslatedPeriodic(unsigned int nonlinear_var_num, unsigned int component) const
 {
@@ -1369,7 +1366,7 @@ MooseMesh::minPeriodicVector(unsigned int nonlinear_var_num, Point p, Point q) c
     }
   }
 
-  return q-p;
+  return q - p;
 }
 
 Real
@@ -1398,14 +1395,14 @@ MooseMesh::getPairedBoundaryMapping(unsigned int component)
 void
 MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
 {
-  MeshBase::const_element_iterator       el     = getMesh().elements_begin();
+  MeshBase::const_element_iterator el = getMesh().elements_begin();
   const MeshBase::const_element_iterator end_el = getMesh().elements_end();
 
   std::map<ElemType, Elem *> canonical_elems;
 
   // First, loop over all elements and find a canonical element for each type
   // Doing it this way guarantees that this is going to work in parallel
-  for (; el != end_el ; ++el) // TODO: Thread this
+  for (; el != end_el; ++el) // TODO: Thread this
   {
     Elem * elem = *el;
     ElemType type = elem->type();
@@ -1432,7 +1429,7 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
     QBase * qrule_face = assembly->qRuleFace();
 
     // Volume to volume projection for refinement
-    buildRefinementMap(*elem, *qrule, *qrule_face, -1,-1,-1);
+    buildRefinementMap(*elem, *qrule, *qrule_face, -1, -1, -1);
 
     // Volume to volume projection for coarsening
     buildCoarseningMap(*elem, *qrule, *qrule_face, -1);
@@ -1448,7 +1445,7 @@ MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
     // Child side to parent volume mapping for "internal" child sides
     for (unsigned int child = 0; child < elem->n_children(); ++child)
       for (unsigned int side = 0; side < elem->n_sides(); ++side) // Assume children have the same number of sides!
-        if (!elem->is_child_on_side(child, side)) // Otherwise we already computed that map
+        if (!elem->is_child_on_side(child, side))                 // Otherwise we already computed that map
           buildRefinementMap(*elem, *qrule, *qrule_face, -1, child, side);
   }
 }
@@ -1465,8 +1462,8 @@ MooseMesh::buildRefinementMap(const Elem & elem, QBase & qrule, QBase & qrule_fa
     if (_elem_type_to_refinement_map.find(the_pair) != _elem_type_to_refinement_map.end())
       mooseError("Already built a qp refinement map!");
 
-    std::vector<std::pair<unsigned int, QpMap> > coarsen_map;
-    std::vector<std::vector<QpMap> > & refinement_map = _elem_type_to_refinement_map[the_pair];
+    std::vector<std::pair<unsigned int, QpMap>> coarsen_map;
+    std::vector<std::vector<QpMap>> & refinement_map = _elem_type_to_refinement_map[the_pair];
     findAdaptivityQpMaps(&elem, qrule, qrule_face, refinement_map, coarsen_map, parent_side, child, child_side);
   }
   else // Need to map a child side to parent volume qps
@@ -1474,17 +1471,16 @@ MooseMesh::buildRefinementMap(const Elem & elem, QBase & qrule, QBase & qrule_fa
     std::pair<int, int> child_pair(child, child_side);
 
     if (_elem_type_to_child_side_refinement_map.find(elem.type()) != _elem_type_to_child_side_refinement_map.end() &&
-       _elem_type_to_child_side_refinement_map[elem.type()].find(child_pair) != _elem_type_to_child_side_refinement_map[elem.type()].end())
+        _elem_type_to_child_side_refinement_map[elem.type()].find(child_pair) != _elem_type_to_child_side_refinement_map[elem.type()].end())
       mooseError("Already built a qp refinement map!");
 
-    std::vector<std::pair<unsigned int, QpMap> > coarsen_map;
-    std::vector<std::vector<QpMap> > & refinement_map = _elem_type_to_child_side_refinement_map[elem.type()][child_pair];
+    std::vector<std::pair<unsigned int, QpMap>> coarsen_map;
+    std::vector<std::vector<QpMap>> & refinement_map = _elem_type_to_child_side_refinement_map[elem.type()][child_pair];
     findAdaptivityQpMaps(&elem, qrule, qrule_face, refinement_map, coarsen_map, parent_side, child, child_side);
   }
-
 }
 
-const std::vector<std::vector<QpMap> > &
+const std::vector<std::vector<QpMap>> &
 MooseMesh::getRefinementMap(const Elem & elem, int parent_side, int child, int child_side)
 {
   if (child == -1) // Doing volume mapping or parent side mapping
@@ -1503,7 +1499,7 @@ MooseMesh::getRefinementMap(const Elem & elem, int parent_side, int child, int c
     std::pair<int, int> child_pair(child, child_side);
 
     if (_elem_type_to_child_side_refinement_map.find(elem.type()) == _elem_type_to_child_side_refinement_map.end() ||
-       _elem_type_to_child_side_refinement_map[elem.type()].find(child_pair) == _elem_type_to_child_side_refinement_map[elem.type()].end())
+        _elem_type_to_child_side_refinement_map[elem.type()].find(child_pair) == _elem_type_to_child_side_refinement_map[elem.type()].end())
       mooseError("Could not find a suitable qp refinement map!");
 
     return _elem_type_to_child_side_refinement_map[elem.type()][child_pair];
@@ -1524,8 +1520,8 @@ MooseMesh::buildCoarseningMap(const Elem & elem, QBase & qrule, QBase & qrule_fa
   if (_elem_type_to_coarsening_map.find(the_pair) != _elem_type_to_coarsening_map.end())
     mooseError("Already built a qp coarsening map!");
 
-  std::vector<std::vector<QpMap> > refinement_map;
-  std::vector<std::pair<unsigned int, QpMap> > & coarsen_map = _elem_type_to_coarsening_map[the_pair];
+  std::vector<std::vector<QpMap>> refinement_map;
+  std::vector<std::pair<unsigned int, QpMap>> & coarsen_map = _elem_type_to_coarsening_map[the_pair];
 
   // The -1 here is for a specific child.  We don't do that for coarsening maps
   // Also note that we're always mapping the same side to the same side (which is guaranteed by libMesh).
@@ -1538,7 +1534,7 @@ MooseMesh::buildCoarseningMap(const Elem & elem, QBase & qrule, QBase & qrule_fa
    */
 }
 
-const std::vector<std::pair<unsigned int, QpMap> > &
+const std::vector<std::pair<unsigned int, QpMap>> &
 MooseMesh::getCoarseningMap(const Elem & elem, int input_side)
 {
   std::pair<int, ElemType> the_pair(input_side, elem.type());
@@ -1582,8 +1578,8 @@ void
 MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
                                 QBase & qrule,
                                 QBase & qrule_face,
-                                std::vector<std::vector<QpMap> > & refinement_map,
-                                std::vector<std::pair<unsigned int, QpMap> > & coarsen_map,
+                                std::vector<std::vector<QpMap>> & refinement_map,
+                                std::vector<std::pair<unsigned int, QpMap>> & coarsen_map,
                                 int parent_side,
                                 int child,
                                 int child_side)
@@ -1602,16 +1598,16 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   for (unsigned int i = 0; i < template_elem->n_nodes(); ++i)
     elem->set_node(i) = mesh.node_ptr(i);
 
-  std::unique_ptr<FEBase> fe (FEBase::build(dim, FEType()));
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType()));
   fe->get_phi();
   const std::vector<Point> & q_points_volume = fe->get_xyz();
 
-  std::unique_ptr<FEBase> fe_face (FEBase::build(dim, FEType()));
+  std::unique_ptr<FEBase> fe_face(FEBase::build(dim, FEType()));
   fe_face->get_phi();
   const std::vector<Point> & q_points_face = fe_face->get_xyz();
 
-  fe->attach_quadrature_rule (&qrule);
-  fe_face->attach_quadrature_rule (&qrule_face);
+  fe->attach_quadrature_rule(&qrule);
+  fe_face->attach_quadrature_rule(&qrule_face);
 
   // The current q_points
   const std::vector<Point> * q_points;
@@ -1633,7 +1629,7 @@ MooseMesh::findAdaptivityQpMaps(const Elem * template_elem,
   MeshRefinement mesh_refinement(mesh);
   mesh_refinement.uniformly_refine(1);
 
-  std::map<unsigned int, std::vector<Point> > child_to_ref_points;
+  std::map<unsigned int, std::vector<Point>> child_to_ref_points;
 
   unsigned int n_children = elem->n_children();
 
@@ -1724,7 +1720,7 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id, const boundary_id_typ
   std::vector<boundary_id_type> old_ids;
 
   // Only level-0 elements store BCs.  Loop over them.
-  MeshBase::element_iterator           el = getMesh().level_elements_begin(0);
+  MeshBase::element_iterator el = getMesh().level_elements_begin(0);
   const MeshBase::element_iterator end_el = getMesh().level_elements_end(0);
   for (; el != end_el; ++el)
   {
@@ -1784,46 +1780,46 @@ MooseMesh::init()
     // Set the partitioner based on partitioner name
     switch (_partitioner_name)
     {
-    case -3: // default
-      // We'll use the default partitioner, but notify the user of which one is being used...
-      if (_use_distributed_mesh)
-        _partitioner_name = "parmetis";
-      else
-        _partitioner_name = "metis";
-      break;
+      case -3: // default
+        // We'll use the default partitioner, but notify the user of which one is being used...
+        if (_use_distributed_mesh)
+          _partitioner_name = "parmetis";
+        else
+          _partitioner_name = "metis";
+        break;
 
-    // No need to explicitily create the metis or parmetis partitioners,
-    // They are the default for serial and parallel mesh respectively
-    case -2: // metis
-    case -1: // parmetis
-      break;
+      // No need to explicitily create the metis or parmetis partitioners,
+      // They are the default for serial and parallel mesh respectively
+      case -2: // metis
+      case -1: // parmetis
+        break;
 
-    case 0: // linear
-      getMesh().partitioner().reset(new LinearPartitioner);
-      break;
-    case 1: // centroid
-    {
-      if (!isParamValid("centroid_partitioner_direction"))
-        mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+      case 0: // linear
+        getMesh().partitioner().reset(new LinearPartitioner);
+        break;
+      case 1: // centroid
+      {
+        if (!isParamValid("centroid_partitioner_direction"))
+          mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
 
-      MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
+        MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
-      if (direction == "x")
-        getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
-      else if (direction == "y")
-        getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Y));
-      else if (direction == "z")
-        getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Z));
-      else if (direction == "radial")
-        getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::RADIAL));
-      break;
-    }
-    case 2: // hilbert_sfc
-      getMesh().partitioner().reset(new HilbertSFCPartitioner);
-      break;
-    case 3: // morton_sfc
-      getMesh().partitioner().reset(new MortonSFCPartitioner);
-      break;
+        if (direction == "x")
+          getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::X));
+        else if (direction == "y")
+          getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Y));
+        else if (direction == "z")
+          getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::Z));
+        else if (direction == "radial")
+          getMesh().partitioner().reset(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+        break;
+      }
+      case 2: // hilbert_sfc
+        getMesh().partitioner().reset(new HilbertSFCPartitioner);
+        break;
+      case 3: // morton_sfc
+        getMesh().partitioner().reset(new MortonSFCPartitioner);
+        break;
     }
   }
 
@@ -1841,7 +1837,7 @@ MooseMesh::dimension() const
 }
 
 std::vector<BoundaryID>
-MooseMesh::getBoundaryIDs(const Elem *const elem, const unsigned short int side) const
+MooseMesh::getBoundaryIDs(const Elem * const elem, const unsigned short int side) const
 {
   std::vector<BoundaryID> ids;
   getMesh().get_boundary_info().boundary_ids(elem, side, ids);
@@ -2067,39 +2063,59 @@ MooseMesh::getGhostedBoundaryInflation() const
 
 namespace // Anonymous namespace for helper
 {
-  // A class for templated methods that expect output iterator
-  // arguments, which adds objects to the Mesh.
-  // Although any mesh_inserter_iterator can add any object, we
-  // template it around object type so that type inference and
-  // iterator_traits will work.
-  // This object specifically is used to insert extra ghost elems into the mesh
-  template <typename T>
-  struct extra_ghost_elem_inserter : std::iterator<std::output_iterator_tag, T>
+// A class for templated methods that expect output iterator
+// arguments, which adds objects to the Mesh.
+// Although any mesh_inserter_iterator can add any object, we
+// template it around object type so that type inference and
+// iterator_traits will work.
+// This object specifically is used to insert extra ghost elems into the mesh
+template <typename T>
+struct extra_ghost_elem_inserter : std::iterator<std::output_iterator_tag, T>
+{
+  extra_ghost_elem_inserter(DistributedMesh & m)
+    : mesh(m)
   {
-    extra_ghost_elem_inserter(DistributedMesh & m) : mesh(m) {}
+  }
 
-    void operator=(const Elem * e) { mesh.add_extra_ghost_elem(const_cast<Elem *>(e)); }
+  void operator=(const Elem * e)
+  {
+    mesh.add_extra_ghost_elem(const_cast<Elem *>(e));
+  }
 
-    void operator=(Node * n) { mesh.add_node(n); }
+  void operator=(Node * n)
+  {
+    mesh.add_node(n);
+  }
 
-    void operator=(Point * p) { mesh.add_point(*p); }
+  void operator=(Point * p)
+  {
+    mesh.add_point(*p);
+  }
 
-    extra_ghost_elem_inserter & operator++() { return *this; }
+  extra_ghost_elem_inserter & operator++()
+  {
+    return *this;
+  }
 
-    extra_ghost_elem_inserter operator++(int) { return extra_ghost_elem_inserter(*this); }
+  extra_ghost_elem_inserter operator++(int)
+  {
+    return extra_ghost_elem_inserter(*this);
+  }
 
-    // We don't return a reference-to-T here because we don't want to
-    // construct one or have any of its methods called.  We just want
-    // to allow the returned object to be able to do mesh insertions
-    // with operator=().
-    extra_ghost_elem_inserter & operator*() { return *this; }
-  private:
+  // We don't return a reference-to-T here because we don't want to
+  // construct one or have any of its methods called.  We just want
+  // to allow the returned object to be able to do mesh insertions
+  // with operator=().
+  extra_ghost_elem_inserter & operator*()
+  {
+    return *this;
+  }
 
-    DistributedMesh & mesh;
-  };
+private:
+  DistributedMesh & mesh;
+};
 
 } // anonymous namespace
-
 
 void
 MooseMesh::ghostGhostedBoundaries()
@@ -2121,7 +2137,7 @@ MooseMesh::ghostGhostedBoundaries()
   std::set<const Elem *> boundary_elems_to_ghost;
   std::set<Node *> connected_nodes_to_ghost;
 
-  std::vector<const Elem*> family_tree;
+  std::vector<const Elem *> family_tree;
 
   for (unsigned int i = 0; i < elems.size(); ++i)
   {
@@ -2145,7 +2161,7 @@ MooseMesh::ghostGhostedBoundaries()
         // "old" interface to get a non-const Node pointer from a
         // constant Elem.
         for (unsigned int n = 0; n < felem->n_nodes(); ++n)
-          connected_nodes_to_ghost.insert (felem->get_node(n));
+          connected_nodes_to_ghost.insert(felem->get_node(n));
       }
     }
   }
@@ -2189,18 +2205,18 @@ MooseMesh::getInflatedProcessorBoundingBox(Real inflation_multiplier) const
   Real inflation_amount = inflation_multiplier * (bbox.max() - bbox.min()).norm();
   Point inflation(inflation_amount, inflation_amount, inflation_amount);
 
-  bbox.first -= inflation; // min
+  bbox.first -= inflation;  // min
   bbox.second += inflation; // max
 
   return bbox;
 }
 
-MooseMesh::operator libMesh::MeshBase & ()
+MooseMesh::operator libMesh::MeshBase &()
 {
   return getMesh();
 }
 
-MooseMesh::operator const libMesh::MeshBase & () const
+MooseMesh::operator const libMesh::MeshBase &() const
 {
   return getMesh();
 }
@@ -2226,7 +2242,8 @@ MooseMesh::exReader() const
   return nullptr;
 }
 
-void MooseMesh::printInfo(std::ostream &os) const
+void
+MooseMesh::printInfo(std::ostream & os) const
 {
   getMesh().print_info(os);
 }
@@ -2234,7 +2251,7 @@ void MooseMesh::printInfo(std::ostream &os) const
 const std::vector<dof_id_type> &
 MooseMesh::getNodeList(boundary_id_type nodeset_id) const
 {
-  std::map<boundary_id_type, std::vector<dof_id_type> >::const_iterator it = _node_set_nodes.find(nodeset_id);
+  std::map<boundary_id_type, std::vector<dof_id_type>>::const_iterator it = _node_set_nodes.find(nodeset_id);
 
   if (it == _node_set_nodes.end())
     mooseError("Unable to nodeset ID: " << nodeset_id << '.');
@@ -2245,7 +2262,7 @@ MooseMesh::getNodeList(boundary_id_type nodeset_id) const
 const std::set<BoundaryID> &
 MooseMesh::getSubdomainBoundaryIds(SubdomainID subdomain_id) const
 {
-  std::map<SubdomainID, std::set<BoundaryID> >::const_iterator it = _subdomain_boundary_ids.find(subdomain_id);
+  std::map<SubdomainID, std::set<BoundaryID>>::const_iterator it = _subdomain_boundary_ids.find(subdomain_id);
 
   if (it == _subdomain_boundary_ids.end())
     mooseError("Unable to find subdomain ID: " << subdomain_id << '.');
@@ -2272,7 +2289,7 @@ bool
 MooseMesh::isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id) const
 {
   bool found_node = false;
-  std::map<boundary_id_type, std::set<dof_id_type> >::const_iterator it = _bnd_node_ids.find(bnd_id);
+  std::map<boundary_id_type, std::set<dof_id_type>>::const_iterator it = _bnd_node_ids.find(bnd_id);
   if (it != _bnd_node_ids.end())
     if (it->second.find(node_id) != it->second.end())
       found_node = true;
@@ -2298,7 +2315,7 @@ bool
 MooseMesh::isBoundaryElem(dof_id_type elem_id, BoundaryID bnd_id) const
 {
   bool found_elem = false;
-  std::map<boundary_id_type, std::set<dof_id_type> >::const_iterator it = _bnd_elem_ids.find(bnd_id);
+  std::map<boundary_id_type, std::set<dof_id_type>>::const_iterator it = _bnd_elem_ids.find(bnd_id);
   if (it != _bnd_elem_ids.end())
     if (it->second.find(elem_id) != it->second.end())
       found_elem = true;
@@ -2310,8 +2327,8 @@ MooseMesh::errorIfDistributedMesh(std::string name) const
 {
   if (_use_distributed_mesh)
     mooseError("Cannot use " << name << " with DistributedMesh!\n"
-               << "Consider specifying parallel_type = 'replicated' in your input file\n"
-               << "to prevent it from being run with DistributedMesh.");
+                             << "Consider specifying parallel_type = 'replicated' in your input file\n"
+                             << "to prevent it from being run with DistributedMesh.");
 }
 
 void
@@ -2320,7 +2337,6 @@ MooseMesh::errorIfParallelDistribution(std::string name) const
   mooseDeprecated("errorIfParallelDistribution() is deprecated, call errorIfDistributedMesh() instead.");
   errorIfDistributedMesh(name);
 }
-
 
 MooseMesh::MortarInterface *
 MooseMesh::getMortarInterfaceByName(const std::string name)
@@ -2380,7 +2396,7 @@ MooseMesh::addMortarInterface(const std::string & name, BoundaryName master, Bou
   iface->_slave = slave;
   iface->_name = name;
 
-  MeshBase::element_iterator           el = _mesh->level_elements_begin(0);
+  MeshBase::element_iterator el = _mesh->level_elements_begin(0);
   const MeshBase::element_iterator end_el = _mesh->level_elements_end(0);
   for (; el != end_el; ++el)
   {

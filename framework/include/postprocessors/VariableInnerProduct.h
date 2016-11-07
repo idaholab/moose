@@ -20,7 +20,7 @@
 //Forward Declarations
 class VariableInnerProduct;
 
-template<>
+template <>
 InputParameters validParams<VariableInnerProduct>();
 
 class VariableInnerProduct : public ElementIntegralVariablePostprocessor

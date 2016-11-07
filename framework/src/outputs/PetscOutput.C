@@ -21,12 +21,13 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_nonlinear_solver.h"
 
-template<>
-InputParameters validParams<PetscOutput>()
+template <>
+InputParameters
+validParams<PetscOutput>()
 {
   InputParameters params = validParams<Output>();
 
-  // Toggled for outputting nonlinear and linear residuals, only if we have PETSc
+// Toggled for outputting nonlinear and linear residuals, only if we have PETSc
 #ifdef LIBMESH_HAVE_PETSC
   params.addParam<bool>("output_linear", false, "Specifies whether output occurs on each linear residual evaluation");
   params.addParam<bool>("output_nonlinear", false, "Specifies whether output occurs on each nonlinear residual evaluation");
@@ -55,8 +56,8 @@ InputParameters validParams<PetscOutput>()
   return params;
 }
 
-PetscOutput::PetscOutput(const InputParameters & parameters) :
-    Output(parameters),
+PetscOutput::PetscOutput(const InputParameters & parameters)
+  : Output(parameters),
     _nonlinear_iter(0),
     _linear_iter(0),
     _on_linear_residual(false),
@@ -117,25 +118,25 @@ PetscOutput::solveSetup()
   SNESGetKSP(snes, &ksp);
 
   // Update the pseudo times
-  _nonlinear_time = _time_old;                   // non-linear time starts with the previous time step
+  _nonlinear_time = _time_old; // non-linear time starts with the previous time step
   if (_dt != 0)
-    _nonlinear_dt = _dt/_nonlinear_dt_divisor;     // set the pseudo non-linear timestep as fraction of real timestep for transient executioners
+    _nonlinear_dt = _dt / _nonlinear_dt_divisor; // set the pseudo non-linear timestep as fraction of real timestep for transient executioners
   else
-    _nonlinear_dt = 1./_nonlinear_dt_divisor;     // set the pseudo non-linear timestep for steady executioners (here _dt==0)
+    _nonlinear_dt = 1. / _nonlinear_dt_divisor; // set the pseudo non-linear timestep for steady executioners (here _dt==0)
 
-  _linear_dt = _nonlinear_dt/_linear_dt_divisor; // set the pseudo linear timestep
+  _linear_dt = _nonlinear_dt / _linear_dt_divisor; // set the pseudo linear timestep
 
   // Set the PETSc monitor functions
-  if (_execute_on.contains(EXEC_NONLINEAR) && (_time >= _nonlinear_start_time - _t_tol && _time <= _nonlinear_end_time + _t_tol) )
+  if (_execute_on.contains(EXEC_NONLINEAR) && (_time >= _nonlinear_start_time - _t_tol && _time <= _nonlinear_end_time + _t_tol))
   {
     PetscErrorCode ierr = SNESMonitorSet(snes, petscNonlinearOutput, this, PETSC_NULL);
-    CHKERRABORT(_communicator.get(),ierr);
+    CHKERRABORT(_communicator.get(), ierr);
   }
 
-  if (_execute_on.contains(EXEC_LINEAR) && (_time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol) )
+  if (_execute_on.contains(EXEC_LINEAR) && (_time >= _linear_start_time - _t_tol && _time <= _linear_end_time + _t_tol))
   {
     PetscErrorCode ierr = KSPMonitorSet(ksp, petscLinearOutput, this, PETSC_NULL);
-    CHKERRABORT(_communicator.get(),ierr);
+    CHKERRABORT(_communicator.get(), ierr);
   }
 #endif
 }

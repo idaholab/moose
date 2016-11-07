@@ -17,8 +17,9 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<CSV>()
+template <>
+InputParameters
+validParams<CSV>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<TableOutput>();
@@ -35,8 +36,8 @@ InputParameters validParams<CSV>()
   return params;
 }
 
-CSV::CSV(const InputParameters & parameters) :
-    TableOutput(parameters),
+CSV::CSV(const InputParameters & parameters)
+  : TableOutput(parameters),
     _align(getParam<bool>("align")),
     _precision(getParam<unsigned int>("precision")),
     _set_delimiter(isParamValid("delimiter")),

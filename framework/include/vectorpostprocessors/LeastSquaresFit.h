@@ -20,7 +20,7 @@
 //Forward Declarations
 class LeastSquaresFit;
 
-template<>
+template <>
 InputParameters validParams<LeastSquaresFit>();
 
 /**
@@ -28,8 +28,7 @@ InputParameters validParams<LeastSquaresFit>();
  *  fit on data calculated in another VectorPostprocessor.
  */
 
-class LeastSquaresFit :
-  public GeneralVectorPostprocessor
+class LeastSquaresFit : public GeneralVectorPostprocessor
 {
 public:
   /**
@@ -69,7 +68,6 @@ protected:
   /// The number of samples to be taken
   unsigned int _num_samples;
 
-
   ///@{ Values used to scale and or shift x and y data
   const Real _x_scale;
   const Real _x_shift;
@@ -91,7 +89,6 @@ protected:
 
   /// The variable used to write out the coefficients of the fit
   VectorPostprocessorValue * _coeffs;
-
 };
 
 #endif

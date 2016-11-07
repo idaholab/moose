@@ -14,8 +14,9 @@
 
 #include "LineValueSampler.h"
 
-template<>
-InputParameters validParams<LineValueSampler>()
+template <>
+InputParameters
+validParams<LineValueSampler>()
 {
   InputParameters params = validParams<PointSamplerBase>();
 
@@ -27,8 +28,8 @@ InputParameters validParams<LineValueSampler>()
   return params;
 }
 
-LineValueSampler::LineValueSampler(const InputParameters & parameters) :
-    PointSamplerBase(parameters)
+LineValueSampler::LineValueSampler(const InputParameters & parameters)
+  : PointSamplerBase(parameters)
 {
   Point start_point = getParam<Point>("start_point");
   Point end_point = getParam<Point>("end_point");
@@ -38,17 +39,18 @@ LineValueSampler::LineValueSampler(const InputParameters & parameters) :
   generatePointsAndIDs(start_point, end_point, num_points, _points, _ids);
 }
 
-void LineValueSampler::generatePointsAndIDs(const Point & start_point, const Point & end_point, unsigned int num_points, std::vector<Point> & points, std::vector<Real> & ids)
+void
+LineValueSampler::generatePointsAndIDs(const Point & start_point, const Point & end_point, unsigned int num_points, std::vector<Point> & points, std::vector<Real> & ids)
 {
 
   Point difference = end_point - start_point;
 
-  Point delta = difference / Real(num_points-1);
+  Point delta = difference / Real(num_points - 1);
 
   points.resize(num_points);
   ids.resize(num_points);
 
-  for (unsigned int i=0; i<num_points-1; i++) // -1 so that we can manually put in the end point to get it perfect
+  for (unsigned int i = 0; i < num_points - 1; i++) // -1 so that we can manually put in the end point to get it perfect
   {
     Point p = start_point + (i * delta);
 
@@ -57,6 +59,6 @@ void LineValueSampler::generatePointsAndIDs(const Point & start_point, const Poi
   }
 
   // Add the end point explicitly
-  points[num_points-1] = end_point;
-  ids[num_points-1] = (end_point - start_point).norm();
+  points[num_points - 1] = end_point;
+  ids[num_points - 1] = (end_point - start_point).norm();
 }

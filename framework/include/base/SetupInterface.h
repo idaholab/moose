@@ -22,7 +22,7 @@
 // Forward declarations
 class SetupInterface;
 
-template<>
+template <>
 InputParameters validParams<SetupInterface>();
 
 class SetupInterface

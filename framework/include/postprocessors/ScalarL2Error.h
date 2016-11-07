@@ -23,7 +23,7 @@ class Function;
 class ScalarL2Error;
 class MooseVariableScalar;
 
-template<>
+template <>
 InputParameters validParams<ScalarL2Error>();
 
 /**

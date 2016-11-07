@@ -21,7 +21,7 @@
 // Forward declerations
 class RenameBlock;
 
-template<>
+template <>
 InputParameters validParams<RenameBlock>();
 
 /**

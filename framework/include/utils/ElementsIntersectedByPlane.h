@@ -23,11 +23,12 @@
 // forward declares
 class MooseMesh;
 
-namespace libMesh {
-  class Point;
-  class Plane;
-  class MeshBase;
-  class Elem;
+namespace libMesh
+{
+class Point;
+class Plane;
+class MeshBase;
+class Elem;
 }
 
 namespace Moose
@@ -51,6 +52,5 @@ void elementsIntersectedByPlane(const Point & p0, const Point & normal, const Me
  */
 void elementsIntersectedByPlane(const Point & p0, const Point & p1, const Point & p2, const MeshBase & mesh, std::vector<const Elem *> & intersected_elems);
 }
-
 
 #endif // ELEMENTSINTERSECTEDBYPLANE_H

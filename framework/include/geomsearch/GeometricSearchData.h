@@ -45,8 +45,8 @@ public:
   GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh);
   virtual ~GeometricSearchData();
 
-  PenetrationLocator & getPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order=FIRST);
-  PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order=FIRST);
+  PenetrationLocator & getPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order = FIRST);
+  PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order = FIRST);
   PenetrationLocator & getMortarPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Moose::ConstraintType side_type, Order order = FIRST);
 
   NearestNodeLocator & getNearestNodeLocator(const BoundaryName & master, const BoundaryName & slave);
@@ -82,15 +82,14 @@ public:
    */
   Real maxPatchPercentage();
 
-//protected:
+  //protected:
   SubProblem & _subproblem;
   MooseMesh & _mesh;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> _penetration_locators;
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> _nearest_node_locators;
-  std::map<unsigned int, MooseSharedPointer<ElementPairLocator> > _element_pair_locators;
+  std::map<unsigned int, MooseSharedPointer<ElementPairLocator>> _element_pair_locators;
 
 protected:
-
   /// These are _real_ boundaries that have quadrature nodes on them.
   std::set<unsigned int> _quadrature_boundaries;
 
@@ -98,7 +97,7 @@ protected:
   std::map<unsigned int, unsigned int> _slave_to_qslave;
 
   /// These are _real_ boundaries that have quadrature nodes on them.
-  std::set<std::pair<unsigned int, unsigned int> > _mortar_boundaries;
+  std::set<std::pair<unsigned int, unsigned int>> _mortar_boundaries;
 
   /// A mapping of the real boundary id to the slave boundary ids for mortar spaces
   std::map<unsigned int, unsigned int> _boundary_to_mortarboundary;

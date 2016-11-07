@@ -23,7 +23,7 @@
 //Forward Declaration
 class BoundingBoxNodeSet;
 
-template<>
+template <>
 InputParameters validParams<BoundingBoxNodeSet>();
 
 /**
@@ -31,8 +31,7 @@ InputParameters validParams<BoundingBoxNodeSet>();
  * the bounding box specified. Can select nodes "inside" or "outside"
  * the bounding box.
  */
-class BoundingBoxNodeSet :
-  public MeshModifier
+class BoundingBoxNodeSet : public MeshModifier
 {
 public:
   BoundingBoxNodeSet(const InputParameters & parameters);

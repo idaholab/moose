@@ -17,8 +17,9 @@
 #include "MooseApp.h"
 #include "ImageMesh.h"
 
-template<>
-InputParameters validParams<ImageSampler>()
+template <>
+InputParameters
+validParams<ImageSampler>()
 {
   // Define the general parameters
   InputParameters params = emptyInputParameters();
@@ -49,8 +50,8 @@ InputParameters validParams<ImageSampler>()
   return params;
 }
 
-ImageSampler::ImageSampler(const InputParameters & parameters) :
-    FileRangeBuilder(parameters),
+ImageSampler::ImageSampler(const InputParameters & parameters)
+  : FileRangeBuilder(parameters),
 #ifdef LIBMESH_HAVE_VTK
     _data(NULL),
     _algorithm(NULL),
@@ -121,7 +122,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
   if (_status != 0)
   {
     // We don't have parameters, so see if we can get them from ImageMesh
-    ImageMesh * image_mesh = dynamic_cast<ImageMesh*>(&mesh);
+    ImageMesh * image_mesh = dynamic_cast<ImageMesh *>(&mesh);
     if (!image_mesh)
       mooseError("No file range parameters were provided and the Mesh is not an ImageMesh.");
 
@@ -146,7 +147,6 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
   // Error if no files where located
   if (_files->GetNumberOfValues() == 0)
     mooseError("No image file(s) located");
-
 
   // Read the image stack.  Hurray for VTK not using polymorphism in a
   // smart way... we actually have to explicitly create the type of
@@ -173,7 +173,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
   for (unsigned int i = 0; i < 3; ++i)
   {
     _dims.push_back(dims[i]);
-    _voxel.push_back(_physical_dims(i)/_dims[i]);
+    _voxel.push_back(_physical_dims(i) / _dims[i]);
   }
 
   // Set the dimensions of the image and bounding box
@@ -192,7 +192,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
     unsigned int n = _data->GetNumberOfScalarComponents();
     _component = _is_pars.get<unsigned int>("component");
     if (_component >= n)
-      mooseError("'component' parameter must be empty or have a value of 0 to " << n-1);
+      mooseError("'component' parameter must be empty or have a value of 0 to " << n - 1);
   }
   else
     _component = 0;
@@ -215,7 +215,7 @@ ImageSampler::sample(const Point & p)
     return 0.0;
 
   // Determine pixel coordinates
-  std::vector<int> x(3,0);
+  std::vector<int> x(3, 0);
   for (int i = 0; i < LIBMESH_DIM; ++i)
   {
     // Compute position, only if voxel size is greater than zero
@@ -224,7 +224,7 @@ ImageSampler::sample(const Point & p)
 
     else
     {
-      x[i] = std::floor((p(i) - _origin(i))/_voxel[i]);
+      x[i] = std::floor((p(i) - _origin(i)) / _voxel[i]);
 
       // If the point falls on the mesh extents the index needs to be decreased by one
       if (x[i] == _dims[i])
@@ -271,7 +271,6 @@ ImageSampler::vtkShiftAndScale()
   // Do nothing if shift and scale are not set
   if (shift == 0 && scale == 1)
     return;
-
 
   // Perform the scaling and offset actions
   _shift_scale_filter = vtkSmartPointer<vtkImageShiftScale>::New();
@@ -332,7 +331,7 @@ ImageSampler::vtkFlip()
                  _is_pars.get<bool>("flip_y"),
                  _is_pars.get<bool>("flip_z")};
 
-  for (int dim=0; dim<3; ++dim)
+  for (int dim = 0; dim < 3; ++dim)
   {
     if (mask[dim])
     {

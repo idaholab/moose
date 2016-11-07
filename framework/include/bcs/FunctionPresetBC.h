@@ -21,7 +21,7 @@
 class FunctionPresetBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionPresetBC>();
 
 /**

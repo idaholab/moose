@@ -17,19 +17,19 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<SolutionHistory>()
+template <>
+InputParameters
+validParams<SolutionHistory>()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<BasicOutput<FileOutput> >();
+  InputParameters params = validParams<BasicOutput<FileOutput>>();
 
   // Return the parameters
   return params;
-
 }
 
-SolutionHistory::SolutionHistory(const InputParameters & parameters) :
-    BasicOutput<FileOutput>(parameters)
+SolutionHistory::SolutionHistory(const InputParameters & parameters)
+  : BasicOutput<FileOutput>(parameters)
 {
 }
 

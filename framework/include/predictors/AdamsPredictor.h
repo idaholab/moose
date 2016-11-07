@@ -23,10 +23,11 @@ class AdamsPredictor;
 
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
-template<>
+template <>
 InputParameters validParams<AdamsPredictor>();
 
 /**
@@ -38,11 +39,17 @@ class AdamsPredictor : public Predictor
 public:
   AdamsPredictor(const InputParameters & parameters);
 
-  virtual int order() override { return _order; }
+  virtual int order() override
+  {
+    return _order;
+  }
   virtual void timestepSetup() override;
   virtual bool shouldApply() override;
   virtual void apply(NumericVector<Number> & sln) override;
-  virtual NumericVector<Number> & solutionPredictor() override { return _solution_predictor; }
+  virtual NumericVector<Number> & solutionPredictor() override
+  {
+    return _solution_predictor;
+  }
 
 protected:
   int _order;

@@ -19,7 +19,7 @@
 
 class SetupTimeStepperAction;
 
-template<>
+template <>
 InputParameters validParams<SetupTimeStepperAction>();
 
 /**
@@ -32,6 +32,5 @@ public:
 
   virtual void act() override;
 };
-
 
 #endif /* SETUPTIMESTEPPERACTION_H */

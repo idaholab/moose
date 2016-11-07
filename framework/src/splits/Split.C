@@ -19,15 +19,16 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<Split>()
+template <>
+InputParameters
+validParams<Split>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<std::vector<NonlinearVariableName> >("vars", "Variables Split operates on (omitting this implies \"all variables\"");
-  params.addParam<std::vector<SubdomainName> >("blocks", "Mesh blocks Split operates on (omitting this implies \"all blocks\"");
-  params.addParam<std::vector<BoundaryName> >("sides", "Sidesets Split operates on (omitting this implies \"no sidesets\"");
-  params.addParam<std::vector<BoundaryName> >("unsides", "Sidesets Split excludes (omitting this implies \"do not exclude any sidesets\"");
-  params.addParam<std::vector<std::string> >("splitting", "The names of the splits (subsystems) in the decomposition of this split");
+  params.addParam<std::vector<NonlinearVariableName>>("vars", "Variables Split operates on (omitting this implies \"all variables\"");
+  params.addParam<std::vector<SubdomainName>>("blocks", "Mesh blocks Split operates on (omitting this implies \"all blocks\"");
+  params.addParam<std::vector<BoundaryName>>("sides", "Sidesets Split operates on (omitting this implies \"no sidesets\"");
+  params.addParam<std::vector<BoundaryName>>("unsides", "Sidesets Split excludes (omitting this implies \"do not exclude any sidesets\"");
+  params.addParam<std::vector<std::string>>("splitting", "The names of the splits (subsystems) in the decomposition of this split");
 
   MooseEnum SplittingTypeEnum("additive multiplicative symmetric_multiplicative schur", "additive");
   params.addParam<MooseEnum>("splitting_type", SplittingTypeEnum, "Split decomposition type");
@@ -50,37 +51,37 @@ InputParameters validParams<Split>()
 #if LIBMESH_HAVE_PETSC
   params.addParam<MultiMooseEnum>("petsc_options", Moose::PetscSupport::getCommonPetscFlags(), "PETSc flags for the FieldSplit solver");
   params.addParam<std::vector<std::string>>("petsc_options_iname", "PETSc option names for the FieldSplit solver");
-  params.addParam<std::vector<std::string> >("petsc_options_value", "PETSc option values for the FieldSplit solver");
+  params.addParam<std::vector<std::string>>("petsc_options_value", "PETSc option values for the FieldSplit solver");
 #endif
 
   params.registerBase("Split");
   return params;
 }
 
-Split::Split (const InputParameters & parameters) :
-    MooseObject(parameters),
+Split::Split(const InputParameters & parameters)
+  : MooseObject(parameters),
     Restartable(parameters, "Splits"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
-    _vars(getParam<std::vector<NonlinearVariableName> >("vars")),
-    _blocks(getParam<std::vector<SubdomainName> >("blocks")),
-    _sides(getParam<std::vector<BoundaryName> >("sides")),
-    _unsides(getParam<std::vector<BoundaryName> >("unsides")),
-    _splitting(getParam<std::vector<std::string> >("splitting")),
+    _vars(getParam<std::vector<NonlinearVariableName>>("vars")),
+    _blocks(getParam<std::vector<SubdomainName>>("blocks")),
+    _sides(getParam<std::vector<BoundaryName>>("sides")),
+    _unsides(getParam<std::vector<BoundaryName>>("unsides")),
+    _splitting(getParam<std::vector<std::string>>("splitting")),
     _splitting_type(getParam<MooseEnum>("splitting_type")),
     _schur_type(getParam<MooseEnum>("schur_type")),
     _schur_pre(getParam<MooseEnum>("schur_pre")),
     _schur_ainv(getParam<MooseEnum>("schur_ainv"))
 {
-    _petsc_options.flags  = getParam<MultiMooseEnum>("petsc_options");
-    _petsc_options.inames = getParam<std::vector<std::string> >("petsc_options_iname");
-    _petsc_options.values = getParam<std::vector<std::string> >("petsc_options_value");
+  _petsc_options.flags = getParam<MultiMooseEnum>("petsc_options");
+  _petsc_options.inames = getParam<std::vector<std::string>>("petsc_options_iname");
+  _petsc_options.values = getParam<std::vector<std::string>>("petsc_options_value");
 }
 
 void
-Split::setup(const std::string& prefix)
+Split::setup(const std::string & prefix)
 {
 // petsc 3.3.0 or later needed
-#if !defined(LIBMESH_HAVE_PETSC) || PETSC_VERSION_LESS_THAN(3,3,0)
+#if !defined(LIBMESH_HAVE_PETSC) || PETSC_VERSION_LESS_THAN(3, 3, 0)
   mooseError("The Splits functionality requires PETSc 3.3.0 or later.");
 #endif
 
@@ -94,14 +95,15 @@ Split::setup(const std::string& prefix)
   std::string dmprefix = prefix + "dm_moose_", opt, val;
 
   // var options
-  if (_vars.size()) {
+  if (_vars.size())
+  {
     opt = dmprefix + "vars";
-    val="";
+    val = "";
     for (unsigned int j = 0; j < _vars.size(); ++j)
       val += (j ? "," : "") + _vars[j];
 
     //push back PETSc options
-    if (val=="")
+    if (val == "")
       po.flags.push_back(opt);
     else
     {
@@ -111,14 +113,15 @@ Split::setup(const std::string& prefix)
   }
 
   // block options
-  if (_blocks.size()) {
+  if (_blocks.size())
+  {
     opt = dmprefix + "blocks";
     val = "";
     for (unsigned int j = 0; j < _blocks.size(); ++j)
       val += (j ? "," : "") + _blocks[j];
 
     //push back PETSc options
-    if (val=="")
+    if (val == "")
       po.flags.push_back(opt);
     else
     {
@@ -128,14 +131,15 @@ Split::setup(const std::string& prefix)
   }
 
   // side options
-  if (_sides.size()) {
+  if (_sides.size())
+  {
     opt = dmprefix + "sides";
     val = "";
     for (unsigned int j = 0; j < _sides.size(); ++j)
       val += (j ? "," : "") + _sides[j];
 
     //push back PETSc options
-    if (val=="")
+    if (val == "")
       po.flags.push_back(opt);
     else
     {
@@ -145,14 +149,15 @@ Split::setup(const std::string& prefix)
   }
 
   // unside options
-  if (_unsides.size()) {
+  if (_unsides.size())
+  {
     opt = dmprefix + "unsides";
     val = "";
     for (unsigned int j = 0; j < _unsides.size(); ++j)
       val += (j ? "," : "") + _unsides[j];
 
     //push back PETSc options
-    if (val=="")
+    if (val == "")
       po.flags.push_back(opt);
     else
     {
@@ -169,7 +174,7 @@ Split::setup(const std::string& prefix)
     val = "fieldsplit";
 
     //push back PETSc options
-    if (val=="")
+    if (val == "")
       po.flags.push_back(opt);
     else
     {
@@ -179,11 +184,10 @@ Split::setup(const std::string& prefix)
 
     // set Splitting Type
     const char * petsc_splitting_type[] = {
-      "additive",
-      "multiplicative",
-      "symmetric_multiplicative",
-      "schur"
-    };
+        "additive",
+        "multiplicative",
+        "symmetric_multiplicative",
+        "schur"};
     opt = prefix + "pc_fieldsplit_type";
 
     //push back PETSc options
@@ -194,11 +198,10 @@ Split::setup(const std::string& prefix)
     {
       // set Schur Type
       const char * petsc_schur_type[] = {
-        "diag",
-        "upper",
-        "lower",
-        "full"
-      };
+          "diag",
+          "upper",
+          "lower",
+          "full"};
       opt = prefix + "pc_fieldsplit_schur_fact_type";
 
       //push back PETSc options
@@ -206,14 +209,15 @@ Split::setup(const std::string& prefix)
       po.values.push_back(petsc_schur_type[_splitting_type]);
 
       // set Schur Preconditioner
-      const char * petsc_schur_pre[] = {
+      const char * petsc_schur_pre[] =
+      {
         "self",
         "selfp",
-        #if PETSC_VERSION_LESS_THAN(3,4,0)
-          "diag"
-        #else
-          "a11"
-        #endif
+#if PETSC_VERSION_LESS_THAN(3, 4, 0)
+        "diag"
+#else
+        "a11"
+#endif
       };
       opt = prefix + "pc_fieldsplit_schur_precondition";
 
@@ -223,9 +227,8 @@ Split::setup(const std::string& prefix)
 
       // set Schur AInv
       const char * petsc_schur_ainv[] = {
-        "diag",
-        "lump"
-      };
+          "diag",
+          "lump"};
       opt = prefix + "mat_schur_complement_ainv_type";
 
       //push back PETSc options
@@ -240,7 +243,7 @@ Split::setup(const std::string& prefix)
     val = sval.str();
 
     //push back PETSc options
-    if (val=="")
+    if (val == "")
       po.flags.push_back(opt);
     else
     {
@@ -254,7 +257,7 @@ Split::setup(const std::string& prefix)
       val += (i ? "," : "") + _splitting[i];
 
     //push back PETSc options
-    if (val=="")
+    if (val == "")
       po.flags.push_back(opt);
     else
     {

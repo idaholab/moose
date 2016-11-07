@@ -16,14 +16,16 @@
 #include "NearestPointLayeredAverage.h"
 #include "LayeredAverage.h"
 
-template<>
-InputParameters validParams<NearestPointLayeredAverage>()
+template <>
+InputParameters
+validParams<NearestPointLayeredAverage>()
 {
   InputParameters params = nearestPointBaseValidParams<LayeredAverage>();
 
   return params;
 }
 
-NearestPointLayeredAverage::NearestPointLayeredAverage(const InputParameters & parameters) :
-    NearestPointBase<LayeredAverage>(parameters)
-{}
+NearestPointLayeredAverage::NearestPointLayeredAverage(const InputParameters & parameters)
+  : NearestPointBase<LayeredAverage>(parameters)
+{
+}

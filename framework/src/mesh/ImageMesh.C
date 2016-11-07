@@ -20,8 +20,9 @@
 // libMesh includes
 #include "libmesh/mesh_generation.h"
 
-template<>
-InputParameters validParams<ImageMesh>()
+template <>
+InputParameters
+validParams<ImageMesh>()
 {
   InputParameters params = validParams<GeneratedMesh>();
   params += validParams<FileRangeBuilder>();
@@ -34,8 +35,8 @@ InputParameters validParams<ImageMesh>()
   return params;
 }
 
-ImageMesh::ImageMesh(const InputParameters & parameters) :
-    GeneratedMesh(parameters),
+ImageMesh::ImageMesh(const InputParameters & parameters)
+  : GeneratedMesh(parameters),
     FileRangeBuilder(parameters),
     _scale_to_one(getParam<bool>("scale_to_one")),
     _cells_per_pixel(getParam<Real>("cells_per_pixel"))
@@ -44,8 +45,8 @@ ImageMesh::ImageMesh(const InputParameters & parameters) :
   errorCheck();
 }
 
-ImageMesh::ImageMesh(const ImageMesh & other_mesh) :
-    GeneratedMesh(other_mesh),
+ImageMesh::ImageMesh(const ImageMesh & other_mesh)
+  : GeneratedMesh(other_mesh),
     FileRangeBuilder(other_mesh.parameters()),
     _scale_to_one(getParam<bool>("scale_to_one")),
     _cells_per_pixel(getParam<Real>("cells_per_pixel"))
@@ -62,7 +63,7 @@ void
 ImageMesh::buildMesh()
 {
   // A list of filenames of length 1 means we are building a 2D mesh
-  if (_filenames.size()==1)
+  if (_filenames.size() == 1)
     buildMesh2D(_filenames[0]);
 
   else
@@ -81,9 +82,9 @@ ImageMesh::buildMesh3D(const std::vector<std::string> & filenames)
   // We want to be sure that all the images in the stack are the same
   // size, for example...
   int
-    xpixels = 0,
-    ypixels = 0,
-    zpixels = filenames.size();
+      xpixels = 0,
+      ypixels = 0,
+      zpixels = filenames.size();
 
   // Take pixel info from the first image in the stack to determine the aspect ratio
   GetPixelInfo(filenames[0], xpixels, ypixels);
@@ -126,24 +127,20 @@ ImageMesh::buildMesh3D(const std::vector<std::string> & filenames)
   _nz = static_cast<int>(_cells_per_pixel * zpixels);
 
   // Actually build the Mesh
-  MeshTools::Generation::build_cube(dynamic_cast<UnstructuredMesh&>(getMesh()),
+  MeshTools::Generation::build_cube(dynamic_cast<UnstructuredMesh &>(getMesh()),
                                     _nx, _ny, _nz,
                                     /*xmin=*/0., /*xmax=*/_xmax,
                                     /*ymin=*/0., /*ymax=*/_ymax,
                                     /*zmin=*/0., /*zmax=*/_zmax,
                                     HEX8);
-
-
 }
-
-
 
 void
 ImageMesh::buildMesh2D(const std::string & filename)
 {
   int
-    xpixels = 0,
-    ypixels = 0;
+      xpixels = 0,
+      ypixels = 0;
 
   // Extract the number of pixels from the image using the file command
   GetPixelInfo(filename, xpixels, ypixels);
@@ -167,7 +164,7 @@ ImageMesh::buildMesh2D(const std::string & filename)
   _ny = static_cast<int>(_cells_per_pixel * ypixels);
 
   // Actually build the Mesh
-  MeshTools::Generation::build_square(dynamic_cast<UnstructuredMesh&>(getMesh()),
+  MeshTools::Generation::build_square(dynamic_cast<UnstructuredMesh &>(getMesh()),
                                       _nx, _ny,
                                       /*xmin=*/0., /*xmax=*/_xmax,
                                       /*ymin=*/0., /*ymax=*/_ymax,
@@ -230,7 +227,7 @@ ImageMesh::GetPixelInfo(std::string filename, int & xpixels, int & ypixels)
     re.PartialMatch(command_result, &xpixels, &ypixels);
 
     // Detect failure of the regex
-    if ((xpixels==0) || (ypixels==0))
+    if ((xpixels == 0) || (ypixels == 0))
     {
       error_message = "Regex failed to find a match in " + command_result;
       break;

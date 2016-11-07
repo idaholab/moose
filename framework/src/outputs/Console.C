@@ -24,8 +24,9 @@
 #include "FormattedTable.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<Console>()
+template <>
+InputParameters
+validParams<Console>()
 {
   // Enum for selecting the fit mode for the table when printed to the screen
   MooseEnum pps_fit_mode(FormattedTable::getWidthModes());
@@ -53,7 +54,12 @@ InputParameters validParams<Console>()
   // Performance Logging
   params.addParam<bool>("perf_log", false, "If true, all performance logs will be printed. The individual log settings will override this option.");
   params.addParam<unsigned int>("perf_log_interval", 0, "If set, the performance log will be printed every n time steps");
-  params.addDeprecatedParam<bool>("setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if ""perf_log"" is also enabled and likewise disabled if ""perf_log"" is false", "This parameter is being removed due to lack of usage.");
+  params.addDeprecatedParam<bool>("setup_log_early", false, "Specifies whether or not the Setup Performance log should be printed before the first time step.  It will still be printed at the end if "
+                                                            "perf_log"
+                                                            " is also enabled and likewise disabled if "
+                                                            "perf_log"
+                                                            " is false",
+                                  "This parameter is being removed due to lack of usage.");
   params.addDeprecatedParam<bool>("setup_log", "Toggles the printing of the 'Setup Performance' log", "This parameter is being removed due to lack of usage.");
   params.addParam<bool>("solve_log", "Toggles the printing of the 'Moose Test Performance' log");
   params.addParam<bool>("perf_header", "Print the libMesh performance log header (requires that 'perf_log = true')");
@@ -73,7 +79,7 @@ InputParameters validParams<Console>()
   std::vector<Real> multiplier;
   multiplier.push_back(0.8);
   multiplier.push_back(2);
-  params.addParam<std::vector<Real> >("outlier_multiplier", multiplier, "Multiplier utilized to determine if a residual norm is an outlier. If the variable residual is less than multiplier[0] times the total residual it is colored red. If the variable residual is less than multiplier[1] times the average residual it is colored yellow.");
+  params.addParam<std::vector<Real>>("outlier_multiplier", multiplier, "Multiplier utilized to determine if a residual norm is an outlier. If the variable residual is less than multiplier[0] times the total residual it is colored red. If the variable residual is less than multiplier[1] times the average residual it is colored yellow.");
 
   // System information controls
   MultiMooseEnum info("framework mesh aux nonlinear execution output", "framework mesh aux nonlinear execution");
@@ -110,8 +116,8 @@ InputParameters validParams<Console>()
   return params;
 }
 
-Console::Console(const InputParameters & parameters) :
-    TableOutput(parameters),
+Console::Console(const InputParameters & parameters)
+  : TableOutput(parameters),
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
     _scientific_time(getParam<bool>("scientific_time")),
@@ -129,7 +135,7 @@ Console::Console(const InputParameters & parameters) :
     _perf_header(isParamValid("perf_header") ? getParam<bool>("perf_header") : _perf_log),
     _all_variable_norms(getParam<bool>("all_variable_norms")),
     _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
-    _outlier_multiplier(getParam<std::vector<Real> >("outlier_multiplier")),
+    _outlier_multiplier(getParam<std::vector<Real>>("outlier_multiplier")),
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
     _timing(_app.getParam<bool>("timing")),
     _console_buffer(_app.getOutputWarehouse().consoleBuffer()),
@@ -175,7 +181,7 @@ Console::Console(const InputParameters & parameters) :
     if (!_perf_log && !_setup_log && !_solve_log && !_perf_header && !_setup_log_early)
       Moose::perf_log.disable_logging();
 
-    // Disable libMesh log
+// Disable libMesh log
 #ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
     if (!_libmesh_log)
       libMesh::perflog.disable_logging();
@@ -209,7 +215,7 @@ Console::~Console()
   if (_solve_log)
     write(Moose::perf_log.get_perf_info(), false);
 
-  // Write the libMesh log
+// Write the libMesh log
 #ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
   if (_libmesh_log)
     write(libMesh::perflog.get_perf_info(), false);
@@ -231,7 +237,6 @@ Console::~Console()
 #endif
   }
 }
-
 
 void
 Console::initialSetup()
@@ -314,7 +319,7 @@ Console::output(const ExecFlagType & type)
     if (_linear_iter == 0)
       _old_linear_norm = std::numeric_limits<Real>::max();
 
-    _console << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << '\n';
+    _console << std::setw(7) << _linear_iter << " Linear |R| = " << outputNorm(_old_linear_norm, _norm) << '\n';
 
     _old_linear_norm = _norm;
   }
@@ -326,7 +331,6 @@ Console::output(const ExecFlagType & type)
       write(Moose::perf_log.get_perf_info(), false);
     writeVariableNorms();
   }
-
 
   // Write Postprocessors and Scalars
   if (shouldOutput("postprocessors", type))
@@ -379,7 +383,8 @@ Console::writeTimestepInformation()
       n = 2;
 
     // Write time step and time information
-    oss << std::endl << "Time Step " << std::setw(n) << timeStep();
+    oss << std::endl
+        << "Time Step " << std::setw(n) << timeStep();
 
     // Set precision
     if (_precision > 0)
@@ -397,7 +402,7 @@ Console::writeTimestepInformation()
       oss << std::right << std::setw(21) << std::setfill(' ') << "old time = " << std::left << timeOld() << '\n';
 
     // Show the time delta information
-    oss << std::right << std::setw(21) << std::setfill(' ') << "dt = "<< std::left << dt() << '\n';
+    oss << std::right << std::setw(21) << std::setfill(' ') << "dt = " << std::left << dt() << '\n';
 
     // Show the old time delta information, if desired
     if (_verbose)
@@ -442,7 +447,7 @@ Console::writeVariableNorms()
     std::string var_name = sys.variable_name(i);
 
     // Outlier if the variable norm is greater than twice (default) of the average norm
-    if (_outlier_variable_norms && (var_norm > _outlier_multiplier[1] * avg_norm) )
+    if (_outlier_variable_norms && (var_norm > _outlier_multiplier[1] * avg_norm))
     {
       // Print the header
       if (!header)
@@ -453,7 +458,7 @@ Console::writeVariableNorms()
 
       // Set the color, RED if the variable norm is 0.8 (default) of the total norm
       std::string color = COLOR_YELLOW;
-      if (_outlier_variable_norms && (var_norm > _outlier_multiplier[0] * avg_norm * n_vars) )
+      if (_outlier_variable_norms && (var_norm > _outlier_multiplier[0] * avg_norm * n_vars))
         color = COLOR_RED;
 
       // Display the residual
@@ -577,7 +582,7 @@ Console::meshChanged()
 {
   if (_print_mesh_changed_info)
   {
-    _console << ConsoleUtils::outputMeshInformation(*_problem_ptr, /*verbose = */ false );
+    _console << ConsoleUtils::outputMeshInformation(*_problem_ptr, /*verbose = */ false);
 
     std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr);
     if (!output.empty())
@@ -622,6 +627,7 @@ Console::mooseConsole(const std::string & message)
 void
 Console::petscSetupOutput()
 {
-  char c[] =  {32,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,13,10,124,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,124,13,10,124,32,32,32,32,32,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,32,32,32,32,32,124,13,10,32,92,32,32,32,32,32,32,32,32,32,32,32,32,92,95,47,94,92,32,32,32,32,32,32,32,32,32,32,32,47,94,92,95,47,32,32,32,32,32,32,32,32,32,32,32,32,47,13,10,32,32,92,95,95,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,95,95,95,45,45,45,95,95,95,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,95,95,47,13,10,32,32,32,32,32,45,45,45,95,95,95,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,32,32,92,32,32,32,32,32,32,32,32,32,95,95,95,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,45,45,45,95,95,95,32,32,124,32,32,32,32,32,32,32,32,32,124,32,32,95,95,95,45,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,45,45,124,32,32,95,32,32,32,95,32,32,124,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,124,111,124,32,124,111,124,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,45,32,32,32,45,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,32,95,95,95,32,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,45,45,32,32,32,45,45,32,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,32,32,47,92,32,32,32,32,32,47,92,32,32,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,92,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,47,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,47,92,32,32,92,95,95,95,95,95,95,95,95,95,95,95,95,32,47,32,32,47,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,92,32,32,32,32,32,39,95,95,95,39,32,32,32,32,32,47,32,32,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,47,92,32,32,32,32,32,92,32,45,45,95,95,45,45,45,95,95,45,45,32,47,32,32,32,32,32,47,92,13,10,32,32,32,32,32,32,32,32,32,47,32,32,92,47,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,92,47,32,32,92,13,10,32,32,32,32,32,32,32,32,47,32,32,32,47,32,32,32,32,32,32,32,77,46,79,46,79,46,83,46,69,32,32,32,32,32,32,32,92,32,32,32,92,13,10,32,32,32,32,32,32,32,47,32,32,32,124,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,92,13,10,32,32,32,32,32,32,124,32,32,32,32,124,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,124,32,32,32,32,124,13,10,32,32,32,32,32,32,32,92,32,32,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,32,32,47,13,10,32,32,32,32,32,32,32,32,32,92,92,32,92,95,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,95,47,32,47,47,13,10,32,32,32,32,32,32,32,32,32,32,32,45,45,32,32,92,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,32,45,45,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,45,45,45,95,95,95,95,95,45,45,45,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,124,32,32,32,124,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,32,32,32,32,32,124,32,32,32,124,32,32,32,32,32,124,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,47,32,86,32,32,32,32,32,92,32,47,32,32,32,32,86,32,32,92,13,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,124,95,124,95,95,95,95,95,124,32,124,95,95,95,95,124,95,95,124};
-  Moose::out << std::string(c) << std::endl << std::endl;
+  char c[] = {32, 47, 94, 92, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 94, 92, 13, 10, 124, 32, 32, 32, 92, 95, 47, 94, 92, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 94, 92, 95, 47, 32, 32, 32, 124, 13, 10, 124, 32, 32, 32, 32, 32, 32, 32, 32, 92, 95, 47, 94, 92, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 94, 92, 95, 47, 32, 32, 32, 32, 32, 32, 32, 32, 124, 13, 10, 32, 92, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 92, 95, 47, 94, 92, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 94, 92, 95, 47, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 13, 10, 32, 32, 92, 95, 95, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 92, 95, 95, 95, 45, 45, 45, 95, 95, 95, 47, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 95, 95, 47, 13, 10, 32, 32, 32, 32, 32, 45, 45, 45, 95, 95, 95, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 32, 32, 32, 32, 32, 92, 32, 32, 32, 32, 32, 32, 32, 32, 32, 95, 95, 95, 45, 45, 45, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 45, 45, 45, 95, 95, 95, 32, 32, 124, 32, 32, 32, 32, 32, 32, 32, 32, 32, 124, 32, 32, 95, 95, 95, 45, 45, 45, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 45, 45, 124, 32, 32, 95, 32, 32, 32, 95, 32, 32, 124, 45, 45, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 124, 32, 32, 124, 111, 124, 32, 124, 111, 124, 32, 32, 124, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 32, 32, 45, 32, 32, 32, 45, 32, 32, 32, 32, 92, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 124, 32, 32, 32, 32, 32, 32, 95, 95, 95, 32, 32, 32, 32, 32, 32, 124, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 32, 32, 32, 45, 45, 32, 32, 32, 45, 45, 32, 32, 32, 32, 32, 92, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 92, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 124, 32, 32, 32, 32, 32, 32, 32, 47, 92, 32, 32, 32, 32, 32, 47, 92, 32, 32, 32, 32, 32, 32, 32, 124, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 92, 32, 32, 92, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 47, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 92, 32, 32, 92, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 32, 47, 32, 32, 47, 92, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 92, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 92, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 32, 32, 92, 32, 32, 32, 32, 32, 39, 95, 95, 95, 39, 32, 32, 32, 32, 32, 47, 32, 32, 32, 32, 92, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 92, 32, 32, 32, 32, 32, 92, 32, 45, 45, 95, 95, 45, 45, 45, 95, 95, 45, 45, 32, 47, 32, 32, 32, 32, 32, 47, 92, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 92, 47, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 92, 47, 32, 32, 92, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 32, 47, 32, 32, 32, 32, 32, 32, 32, 77, 46, 79, 46, 79, 46, 83, 46, 69, 32, 32, 32, 32, 32, 32, 32, 92, 32, 32, 32, 92, 13, 10, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 32, 124, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 124, 32, 32, 32, 92, 13, 10, 32, 32, 32, 32, 32, 32, 124, 32, 32, 32, 32, 124, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 124, 32, 32, 32, 32, 124, 13, 10, 32, 32, 32, 32, 32, 32, 32, 92, 32, 32, 32, 32, 92, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 32, 32, 47, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 92, 92, 32, 92, 95, 92, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 95, 47, 32, 47, 47, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 45, 45, 32, 32, 92, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 32, 45, 45, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 124, 32, 32, 45, 45, 45, 95, 95, 95, 95, 95, 45, 45, 45, 32, 32, 124, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 124, 32, 32, 32, 32, 32, 124, 32, 32, 32, 124, 32, 32, 32, 32, 32, 124, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 124, 32, 32, 32, 32, 32, 124, 32, 32, 32, 124, 32, 32, 32, 32, 32, 124, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 32, 86, 32, 32, 32, 32, 32, 92, 32, 47, 32, 32, 32, 32, 86, 32, 32, 92, 13, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 124, 95, 124, 95, 95, 95, 95, 95, 124, 32, 124, 95, 95, 95, 95, 124, 95, 95, 124};
+  Moose::out << std::string(c) << std::endl
+             << std::endl;
 }

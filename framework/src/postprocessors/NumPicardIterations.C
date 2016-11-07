@@ -17,15 +17,16 @@
 #include "Transient.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<NumPicardIterations>()
+template <>
+InputParameters
+validParams<NumPicardIterations>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-NumPicardIterations::NumPicardIterations(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+NumPicardIterations::NumPicardIterations(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _transient_executioner(NULL)
 {
 }
@@ -45,4 +46,3 @@ NumPicardIterations::getValue()
 {
   return _transient_executioner->numPicardIts();
 }
-

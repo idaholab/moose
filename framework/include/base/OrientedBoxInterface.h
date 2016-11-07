@@ -28,7 +28,7 @@
 // Forward declarations
 class OrientedBoxInterface;
 
-template<>
+template <>
 InputParameters validParams<OrientedBoxInterface>();
 
 /*
@@ -47,7 +47,6 @@ InputParameters validParams<OrientedBoxInterface>();
 class OrientedBoxInterface
 {
 public:
-
   /**
    * Class constructor
    */
@@ -59,7 +58,6 @@ public:
   virtual ~OrientedBoxInterface();
 
 protected:
-
   /**
    * Test if the supplied point is within the defined oriented bounding box
    * @param point The point to test
@@ -67,9 +65,7 @@ protected:
    */
   bool containsPoint(const Point & point);
 
-
 private:
-
   /// Center of the defined bounding box
   Point _center;
 

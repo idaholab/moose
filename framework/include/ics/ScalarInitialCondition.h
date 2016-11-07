@@ -29,17 +29,16 @@ class SystemBase;
 class Assembly;
 class MooseVariableScalar;
 
-template<>
+template <>
 InputParameters validParams<ScalarInitialCondition>();
 
 /**
  * InitialConditions are objects that set the initial value of variables.
  */
-class ScalarInitialCondition :
-  public MooseObject,
-  public ScalarCoupleable,
-  public FunctionInterface,
-  public DependencyResolverInterface
+class ScalarInitialCondition : public MooseObject,
+                               public ScalarCoupleable,
+                               public FunctionInterface,
+                               public DependencyResolverInterface
 {
 public:
   /**
@@ -51,7 +50,10 @@ public:
 
   virtual ~ScalarInitialCondition();
 
-  MooseVariableScalar & variable() { return _var; }
+  MooseVariableScalar & variable()
+  {
+    return _var;
+  }
 
   /**
    * Compute the initial condition

@@ -19,7 +19,7 @@
 
 class SingleMatrixPreconditioner;
 
-template<>
+template <>
 InputParameters validParams<SingleMatrixPreconditioner>();
 
 /**

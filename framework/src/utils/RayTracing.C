@@ -34,7 +34,8 @@ namespace Moose
  * @param intersection_point If an intersection is found this will be filled with the x,y,z position of that intersection
  * @return The side that is intersected by the line.  Will return -1 if it doesn't intersect any side
  */
-int sideIntersectedByLine(const Elem * elem, std::vector<int> & not_side, const LineSegment & line_segment, Point & intersection_point)
+int
+sideIntersectedByLine(const Elem * elem, std::vector<int> & not_side, const LineSegment & line_segment, Point & intersection_point)
 {
   unsigned int n_sides = elem->n_sides();
 
@@ -43,7 +44,7 @@ int sideIntersectedByLine(const Elem * elem, std::vector<int> & not_side, const 
 
   unsigned int dim = elem->dim();
 
-  for (unsigned int i=0; i<n_sides; i++)
+  for (unsigned int i = 0; i < n_sides; i++)
   {
     // Don't search the "not_side"
     // Note: A linear search is fine here because this vector is going to be < n_sides
@@ -110,11 +111,12 @@ int sideIntersectedByLine(const Elem * elem, std::vector<int> & not_side, const 
  *
  * Returns -1 if the neighbor can't be found to be a neighbor
  */
-int sideNeighborIsOn(const Elem * elem, const Elem * neighbor)
+int
+sideNeighborIsOn(const Elem * elem, const Elem * neighbor)
 {
   unsigned int n_sides = elem->n_sides();
 
-  for (unsigned int i=0; i<n_sides; i++)
+  for (unsigned int i = 0; i < n_sides; i++)
   {
     if (elem->neighbor(i) == neighbor)
       return i;
@@ -122,7 +124,6 @@ int sideNeighborIsOn(const Elem * elem, const Elem * neighbor)
 
   return -1;
 }
-
 
 /**
  * Recursively find all elements intersected by a line segment
@@ -138,7 +139,8 @@ int sideNeighborIsOn(const Elem * elem, const Elem * neighbor)
  * @param intersected_elems The output
  * @param segments Line segments for the path across each element
  */
-void recursivelyFindElementsIntersectedByLine(const LineSegment & line_segment, const Elem * current_elem, int incoming_side, const Point & incoming_point, std::vector<Elem *> & intersected_elems, std::vector<LineSegment> & segments)
+void
+recursivelyFindElementsIntersectedByLine(const LineSegment & line_segment, const Elem * current_elem, int incoming_side, const Point & incoming_point, std::vector<Elem *> & intersected_elems, std::vector<LineSegment> & segments)
 {
   Point intersection_point;
 
@@ -176,7 +178,8 @@ void recursivelyFindElementsIntersectedByLine(const LineSegment & line_segment, 
   return;
 }
 
-void elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBase & /*mesh*/, const PointLocatorBase & point_locator, std::vector<Elem *> & intersected_elems, std::vector<LineSegment> & segments)
+void
+elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBase & /*mesh*/, const PointLocatorBase & point_locator, std::vector<Elem *> & intersected_elems, std::vector<LineSegment> & segments)
 {
   // Make sure our list is clear
   intersected_elems.clear();
@@ -196,5 +199,4 @@ void elementsIntersectedByLine(const Point & p0, const Point & p1, const MeshBas
   // Find 'em!
   recursivelyFindElementsIntersectedByLine(line_segment, first_elem, -1, p0, intersected_elems, segments);
 }
-
 }

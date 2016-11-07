@@ -21,7 +21,7 @@ class PiecewiseBilinear;
 class ColumnMajorMatrix;
 class BilinearInterpolation;
 
-template<>
+template <>
 InputParameters validParams<PiecewiseBilinear>();
 
 /**
@@ -72,10 +72,9 @@ private:
   const Real _scale_factor;
   const bool _radial;
 
-
-  void parse( std::vector<Real> & x,
-              std::vector<Real> & y,
-              ColumnMajorMatrix & z);
+  void parse(std::vector<Real> & x,
+             std::vector<Real> & y,
+             ColumnMajorMatrix & z);
 };
 
 #endif //PIECEWISEBILINEAR_H

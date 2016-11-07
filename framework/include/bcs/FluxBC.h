@@ -19,7 +19,7 @@
 
 class FluxBC;
 
-template<>
+template <>
 InputParameters validParams<FluxBC>();
 
 /**

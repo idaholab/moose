@@ -19,8 +19,8 @@
 #include "libmesh/point_locator_base.h"
 #include "libmesh/elem.h"
 
-DiracKernelInfo::DiracKernelInfo() :
-    _point_locator(),
+DiracKernelInfo::DiracKernelInfo()
+  : _point_locator(),
     _point_equal_distance_sq(libMesh::TOLERANCE * libMesh::TOLERANCE)
 {
 }
@@ -34,7 +34,7 @@ DiracKernelInfo::addPoint(const Elem * elem, Point p)
 {
   _elements.insert(elem);
 
-  std::pair<std::vector<Point>, std::vector<unsigned int> > & multi_point_list = _points[elem];
+  std::pair<std::vector<Point>, std::vector<unsigned int>> & multi_point_list = _points[elem];
 
   const unsigned int npoint = multi_point_list.first.size();
   mooseAssert(npoint == multi_point_list.second.size(), "Different sizes for location and multiplicity data");
@@ -59,8 +59,6 @@ DiracKernelInfo::clearPoints()
   _points.clear();
 }
 
-
-
 bool
 DiracKernelInfo::hasPoint(const Elem * elem, Point p)
 {
@@ -74,10 +72,8 @@ DiracKernelInfo::hasPoint(const Elem * elem, Point p)
   return false;
 }
 
-
-
 void
-DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
+DiracKernelInfo::updatePointLocator(const MooseMesh & mesh)
 {
   // Note: we could update the PointLocator *every* time we call this
   // function, but that may introduce an unacceptable overhead in
@@ -113,7 +109,7 @@ DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
 }
 
 const Elem *
-DiracKernelInfo::findPoint(Point p, const MooseMesh& mesh)
+DiracKernelInfo::findPoint(Point p, const MooseMesh & mesh)
 {
   // If the PointLocator has never been created, do so now.  NOTE - WE
   // CAN'T DO THIS if findPoint() is only called on some processors,

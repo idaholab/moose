@@ -16,26 +16,27 @@
 #include "LinearNodalConstraint.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<LinearNodalConstraint>()
+template <>
+InputParameters
+validParams<LinearNodalConstraint>()
 {
   InputParameters params = validParams<NodalConstraint>();
-  params.addRequiredParam<std::vector<unsigned int> >("master", "The master node IDs.");
-  params.addParam<std::vector<unsigned int> >("slave_node_ids", "The list of slave node ids");
+  params.addRequiredParam<std::vector<unsigned int>>("master", "The master node IDs.");
+  params.addParam<std::vector<unsigned int>>("slave_node_ids", "The list of slave node ids");
   params.addParam<BoundaryName>("slave_node_set", "NaN", "The boundary ID associated with the slave side");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
-  params.addRequiredParam<std::vector<Real> >("weights", "The weights associated with the master node ids. Must be of the same size as master nodes");
+  params.addRequiredParam<std::vector<Real>>("weights", "The weights associated with the master node ids. Must be of the same size as master nodes");
   return params;
 }
 
-LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters) :
-    NodalConstraint(parameters),
-    _master_node_ids(getParam<std::vector<unsigned int> >("master")),
-    _slave_node_ids(getParam<std::vector<unsigned int> >("slave_node_ids")),
+LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
+  : NodalConstraint(parameters),
+    _master_node_ids(getParam<std::vector<unsigned int>>("master")),
+    _slave_node_ids(getParam<std::vector<unsigned int>>("slave_node_ids")),
     _slave_node_set_id(getParam<BoundaryName>("slave_node_set")),
     _penalty(getParam<Real>("penalty"))
 {
-  _weights = getParam<std::vector<Real> >("weights");
+  _weights = getParam<std::vector<Real>>("weights");
 
   if (_master_node_ids.size() != _weights.size())
     mooseError("master and weights should be of equal size.");
@@ -104,7 +105,8 @@ LinearNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
   unsigned int master_size = _master_node_ids.size();
 
   switch (type)
-  {  case Moose::MasterMaster:
+  {
+    case Moose::MasterMaster:
       return _penalty * _weights[_j];
     case Moose::MasterSlave:
       return -_penalty / master_size;

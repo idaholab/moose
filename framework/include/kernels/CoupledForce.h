@@ -20,7 +20,7 @@
 // Forward Declaration
 class CoupledForce;
 
-template<>
+template <>
 InputParameters validParams<CoupledForce>();
 
 /**

@@ -23,8 +23,8 @@
 #include "libmesh/threads.h"
 
 ComputeIndicatorThread::ComputeIndicatorThread(FEProblem & fe_problem,
-                                               bool finalize) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem),
+                                               bool finalize)
+  : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _indicator_whs(_fe_problem.getIndicatorWarehouse()),
@@ -34,8 +34,8 @@ ComputeIndicatorThread::ComputeIndicatorThread(FEProblem & fe_problem,
 }
 
 // Splitting Constructor
-ComputeIndicatorThread::ComputeIndicatorThread(ComputeIndicatorThread & x, Threads::split split) :
-    ThreadedElementLoop<ConstElemRange>(x, split),
+ComputeIndicatorThread::ComputeIndicatorThread(ComputeIndicatorThread & x, Threads::split split)
+  : ThreadedElementLoop<ConstElemRange>(x, split),
     _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
     _indicator_whs(x._indicator_whs),
@@ -65,7 +65,7 @@ ComputeIndicatorThread::subdomainChanged()
 }
 
 void
-ComputeIndicatorThread::onElement(const Elem *elem)
+ComputeIndicatorThread::onElement(const Elem * elem)
 {
   for (const auto & it : _aux_sys._elem_vars[_tid])
   {
@@ -77,13 +77,12 @@ ComputeIndicatorThread::onElement(const Elem *elem)
   _fe_problem.reinitElem(elem, _tid);
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
-
   // Compute
   if (!_finalize)
   {
     if (_indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
     {
-      const std::vector<MooseSharedPointer<Indicator> > & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
+      const std::vector<MooseSharedPointer<Indicator>> & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & indicator : indicators)
         indicator->computeIndicator();
     }
@@ -94,14 +93,14 @@ ComputeIndicatorThread::onElement(const Elem *elem)
   {
     if (_indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
     {
-      const std::vector<MooseSharedPointer<Indicator> > & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
+      const std::vector<MooseSharedPointer<Indicator>> & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & indicator : indicators)
         indicator->finalize();
     }
 
     if (_internal_side_indicators.hasActiveBlockObjects(_subdomain, _tid))
     {
-      const std::vector<MooseSharedPointer<InternalSideIndicator> > & internal_indicators = _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
+      const std::vector<MooseSharedPointer<InternalSideIndicator>> & internal_indicators = _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & internal_indicator : internal_indicators)
         internal_indicator->finalize();
     }
@@ -126,7 +125,7 @@ ComputeIndicatorThread::onBoundary(const Elem * /*elem*/, unsigned int /*side*/,
 }
 
 void
-ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
+ComputeIndicatorThread::onInternalSide(const Elem * elem, unsigned int side)
 {
   if (_finalize) // If finalizing we only do something on the elements
     return;
@@ -136,8 +135,8 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
 
   // Get the global id of the element and the neighbor
   const dof_id_type
-    elem_id = elem->id(),
-    neighbor_id = neighbor->id();
+      elem_id = elem->id(),
+      neighbor_id = neighbor->id();
 
   if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
   {
@@ -154,7 +153,7 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
       _fe_problem.reinitMaterialsFace(block_id, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-      const std::vector<MooseSharedPointer<InternalSideIndicator> > & indicators = _internal_side_indicators.getActiveBlockObjects(block_id, _tid);
+      const std::vector<MooseSharedPointer<InternalSideIndicator>> & indicators = _internal_side_indicators.getActiveBlockObjects(block_id, _tid);
       for (const auto & indicator : indicators)
         indicator->computeIndicator();
 

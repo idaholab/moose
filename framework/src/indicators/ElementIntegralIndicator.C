@@ -17,16 +17,16 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ElementIntegralIndicator>()
+template <>
+InputParameters
+validParams<ElementIntegralIndicator>()
 {
   InputParameters params = validParams<ElementIndicator>();
   return params;
 }
 
-
-ElementIntegralIndicator::ElementIntegralIndicator(const InputParameters & parameters) :
-    ElementIndicator(parameters)
+ElementIntegralIndicator::ElementIntegralIndicator(const InputParameters & parameters)
+  : ElementIndicator(parameters)
 {
 }
 
@@ -34,10 +34,10 @@ void
 ElementIntegralIndicator::computeIndicator()
 {
   Real sum = 0;
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
 
-//  sum = std::sqrt(sum);
+  //  sum = std::sqrt(sum);
 
   _field_var.setNodalValue(sum);
 }
@@ -47,5 +47,3 @@ ElementIntegralIndicator::computeQpIntegral()
 {
   return _u[_qp];
 }
-
-

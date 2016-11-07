@@ -19,7 +19,7 @@
 
 class SetupPreconditionerAction;
 
-template<>
+template <>
 InputParameters validParams<SetupPreconditionerAction>();
 
 /**

@@ -17,17 +17,18 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 
-template<>
-InputParameters validParams<BreakBoundaryOnSubdomain>()
+template <>
+InputParameters
+validParams<BreakBoundaryOnSubdomain>()
 {
   InputParameters params = validParams<MeshModifier>();
   params.addClassDescription("Break boundaries based on the subdomains to which their sides are attached. Naming convention for the new boundaries will be the old boundary name plus \"_to_\" plus the subdomain name");
-  params.addParam<std::vector<BoundaryName> >("boundaries", "Boundaries to be broken. Default means to break all boundaries");
+  params.addParam<std::vector<BoundaryName>>("boundaries", "Boundaries to be broken. Default means to break all boundaries");
   return params;
 }
 
-BreakBoundaryOnSubdomain::BreakBoundaryOnSubdomain(const InputParameters & parameters) :
-    MeshModifier(parameters)
+BreakBoundaryOnSubdomain::BreakBoundaryOnSubdomain(const InputParameters & parameters)
+  : MeshModifier(parameters)
 {
 }
 
@@ -45,7 +46,7 @@ BreakBoundaryOnSubdomain::modify()
   std::set<BoundaryID> breaking_boundary_ids;
   if (isParamValid("boundaries"))
   {
-    auto & boundary_names = getParam<std::vector<BoundaryName> >("boundaries");
+    auto & boundary_names = getParam<std::vector<BoundaryName>>("boundaries");
     for (auto i = beginIndex(boundary_names); i < boundary_names.size(); ++i)
       breaking_boundary_ids.insert(_mesh_ptr->getBoundaryID(boundary_names[i]));
   }

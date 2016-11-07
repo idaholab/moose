@@ -15,8 +15,9 @@
 #include "NearestNodeValueAux.h"
 #include "NearestNodeLocator.h"
 
-template<>
-InputParameters validParams<NearestNodeValueAux>()
+template <>
+InputParameters
+validParams<NearestNodeValueAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.set<bool>("_dual_restrictable") = true;
@@ -26,8 +27,8 @@ InputParameters validParams<NearestNodeValueAux>()
   return params;
 }
 
-NearestNodeValueAux::NearestNodeValueAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+NearestNodeValueAux::NearestNodeValueAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _nearest_node(getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"),
                                         boundaryNames()[0])),
     _serialized_solution(_nl_sys.currentSolution()),

@@ -22,10 +22,11 @@
 // Currently the ICE Updater requires std::thread and std::condition_variable.
 #if defined(LIBMESH_HAVE_CXX11_THREAD) && defined(LIBMESH_HAVE_CXX11_CONDITION_VARIABLE)
 
-template<>
-InputParameters validParams<ICEUpdater>()
+template <>
+InputParameters
+validParams<ICEUpdater>()
 {
-  InputParameters params = validParams<AdvancedOutput<Output> >();
+  InputParameters params = validParams<AdvancedOutput<Output>>();
   params += AdvancedOutput<Output>::enableOutputTypes("postprocessor");
 
   // Get an MooseEnum of the available networkingTools
@@ -41,8 +42,8 @@ InputParameters validParams<ICEUpdater>()
   return params;
 }
 
-ICEUpdater::ICEUpdater(const InputParameters & parameters) :
-    AdvancedOutput<Output>(parameters),
+ICEUpdater::ICEUpdater(const InputParameters & parameters)
+  : AdvancedOutput<Output>(parameters),
     _noproxy(getParam<bool>("noproxy"))
 {
   if (_communicator.rank() != 0)
@@ -65,7 +66,6 @@ ICEUpdater::ICEUpdater(const InputParameters & parameters) :
 
   // Start the Updater.
   _updater->start();
-
 }
 
 ICEUpdater::~ICEUpdater()
@@ -77,7 +77,8 @@ ICEUpdater::~ICEUpdater()
   _updater->stop();
 }
 
-void ICEUpdater::initialSetup()
+void
+ICEUpdater::initialSetup()
 {
   if (_communicator.rank() != 0)
     return;
@@ -91,14 +92,15 @@ void ICEUpdater::initialSetup()
     mooseError("The current settings result in nothing being output to the file.");
 
   // Test that some sort of variable output exists (case when all variables are disabled but input output is still enabled
-  if (!hasNodalVariableOutput()     &&
+  if (!hasNodalVariableOutput() &&
       !hasElementalVariableOutput() &&
-      !hasPostprocessorOutput()     &&
+      !hasPostprocessorOutput() &&
       !hasScalarOutput())
     mooseError("The current settings results in only the input file and no variables being output to the file, this is not supported.");
 }
 
-void ICEUpdater::outputPostprocessors()
+void
+ICEUpdater::outputPostprocessors()
 {
   if (_communicator.rank() != 0)
     return;

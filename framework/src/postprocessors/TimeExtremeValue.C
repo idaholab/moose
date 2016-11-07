@@ -17,8 +17,9 @@
 #include <algorithm>
 #include <limits>
 
-template<>
-InputParameters validParams<TimeExtremeValue>()
+template <>
+InputParameters
+validParams<TimeExtremeValue>()
 {
   // Define the min/max enumeration
   MooseEnum type_options("max=0 min=1 abs_max=2 abs_min=3", "max");
@@ -37,8 +38,8 @@ InputParameters validParams<TimeExtremeValue>()
   return params;
 }
 
-TimeExtremeValue::TimeExtremeValue(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+TimeExtremeValue::TimeExtremeValue(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _postprocessor(getPostprocessorValue("postprocessor")),
     _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
     _value(declareRestartableData<Real>("value"))
@@ -56,7 +57,7 @@ TimeExtremeValue::TimeExtremeValue(const InputParameters & parameters) :
         break;
 
       case ABS_MAX:
-         // the max absolute value of anything is greater than or equal to 0
+        // the max absolute value of anything is greater than or equal to 0
         _value = 0;
         break;
 

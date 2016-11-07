@@ -14,8 +14,9 @@
 
 #include "BoundingValueElementDamper.h"
 
-template<>
-InputParameters validParams<BoundingValueElementDamper>()
+template <>
+InputParameters
+validParams<BoundingValueElementDamper>()
 {
   InputParameters params = validParams<ElementDamper>();
   params.addParam<Real>("max_value", std::numeric_limits<Real>::max(), "The maximum permissible iterative value for the variable.");
@@ -23,8 +24,8 @@ InputParameters validParams<BoundingValueElementDamper>()
   return params;
 }
 
-BoundingValueElementDamper::BoundingValueElementDamper(const InputParameters & parameters) :
-    ElementDamper(parameters),
+BoundingValueElementDamper::BoundingValueElementDamper(const InputParameters & parameters)
+  : ElementDamper(parameters),
     _max_value(parameters.get<Real>("max_value")),
     _min_value(parameters.get<Real>("min_value"))
 {

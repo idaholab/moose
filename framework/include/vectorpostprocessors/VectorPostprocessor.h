@@ -29,7 +29,7 @@ class VectorPostprocessor;
 class VectorPostprocessorData;
 class FEProblem;
 
-template<>
+template <>
 InputParameters validParams<VectorPostprocessor>();
 
 /**
@@ -50,7 +50,10 @@ public:
   /**
    * Returns the name of the VectorPostprocessor.
    */
-  std::string PPName() { return _vpp_name; }
+  std::string PPName()
+  {
+    return _vpp_name;
+  }
 
 protected:
   /**

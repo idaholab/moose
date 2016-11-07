@@ -25,13 +25,14 @@ class ExodusII_IO;
 class EquationSystems;
 class System;
 class MeshFunction;
-template<class T> class NumericVector;
+template <class T>
+class NumericVector;
 }
 
 // Forward declarations
 class SolutionUserObject;
 
-template<>
+template <>
 InputParameters validParams<SolutionUserObject>();
 
 /**
@@ -102,11 +103,9 @@ public:
   /// Initialize the System and Mesh objects for the solution being read
   virtual void initialSetup() override;
 
-
   const std::vector<std::string> & variableNames() const;
 
   bool isVariableNodal(const std::string & var_name) const;
-
 
 protected:
   /**
@@ -200,7 +199,7 @@ protected:
   std::unique_ptr<ExodusII_IO> _exodusII_io;
 
   /// Pointer to the serial solution vector
-  std::unique_ptr<NumericVector<Number> > _serialized_solution;
+  std::unique_ptr<NumericVector<Number>> _serialized_solution;
 
   /// Pointer to second libMesh::EquationSystems object, used for interpolation
   std::unique_ptr<EquationSystems> _es2;
@@ -212,7 +211,7 @@ protected:
   std::unique_ptr<MeshFunction> _mesh_function2;
 
   /// Pointer to second serial solution, used for interpolation
-  std::unique_ptr<NumericVector<Number> > _serialized_solution2;
+  std::unique_ptr<NumericVector<Number>> _serialized_solution2;
 
   /// Interpolation time
   Real _interpolation_time;
@@ -239,7 +238,7 @@ protected:
   std::vector<Real> _translation;
 
   /// vector about which to rotate
-  RealVectorValue  _rotation0_vector;
+  RealVectorValue _rotation0_vector;
 
   /// angle (in degrees) which to rotate through about vector _rotation0_vector
   Real _rotation0_angle;
@@ -248,7 +247,7 @@ protected:
   RealTensorValue _r0;
 
   /// vector about which to rotate
-  RealVectorValue  _rotation1_vector;
+  RealVectorValue _rotation1_vector;
 
   /// angle (in degrees) which to rotate through about vector _rotation1_vector
   Real _rotation1_angle;

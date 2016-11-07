@@ -18,16 +18,17 @@
 #include "MooseApp.h"
 #include "MooseUtils.h" // remove when getBaseName is removed
 
-template<>
-InputParameters validParams<Action>()
+template <>
+InputParameters
+validParams<Action>()
 {
   InputParameters params;
   std::vector<std::string> blocks = {"__all__"};
   // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
-  params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active");
+  params.addParam<std::vector<std::string>>("active", blocks, "If specified only the blocks named will be visited and made active");
 
   params.addPrivateParam<std::string>("_moose_docs_type", "action"); // the type of syntax for documentation system
-  params.addPrivateParam<std::string>("_action_name"); // the name passed to ActionFactory::create
+  params.addPrivateParam<std::string>("_action_name");               // the name passed to ActionFactory::create
   params.addPrivateParam<std::string>("task");
   params.addPrivateParam<std::string>("registered_identifier");
   params.addPrivateParam<std::string>("action_type");
@@ -36,8 +37,8 @@ InputParameters validParams<Action>()
   return params;
 }
 
-Action::Action(InputParameters parameters) :
-    ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
+Action::Action(InputParameters parameters)
+  : ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _pars(parameters),
     _registered_identifier(isParamValid("registered_identifier") ? getParam<std::string>("registered_identifier") : ""),
     _name(getParam<std::string>("_action_name")),

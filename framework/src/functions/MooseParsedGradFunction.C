@@ -15,8 +15,9 @@
 #include "MooseParsedGradFunction.h"
 #include "MooseParsedFunctionWrapper.h"
 
-template<>
-InputParameters validParams<MooseParsedGradFunction>()
+template <>
+InputParameters
+validParams<MooseParsedGradFunction>()
 {
   InputParameters params = validParams<Function>();
   params += validParams<MooseParsedFunctionBase>();
@@ -27,13 +28,13 @@ InputParameters validParams<MooseParsedGradFunction>()
   return params;
 }
 
-MooseParsedGradFunction::MooseParsedGradFunction(const InputParameters & parameters) :
-    Function(parameters),
+MooseParsedGradFunction::MooseParsedGradFunction(const InputParameters & parameters)
+  : Function(parameters),
     MooseParsedFunctionBase(parameters),
     _value(verifyFunction(getParam<std::string>("value"))),
     _grad_value(verifyFunction(std::string("{") + getParam<std::string>("grad_x") + "}{" +
-                                 getParam<std::string>("grad_y") + "}{" +
-                                 getParam<std::string>("grad_z") + "}")),
+                               getParam<std::string>("grad_y") + "}{" +
+                               getParam<std::string>("grad_z") + "}")),
     _function_ptr(NULL),
     _grad_function_ptr(NULL)
 {
@@ -79,4 +80,3 @@ MooseParsedGradFunction::initialSetup()
   if (_grad_function_ptr == NULL)
     _grad_function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _grad_value, _vars, _vals, tid);
 }
-

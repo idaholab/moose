@@ -22,7 +22,7 @@
 class SamplerBase;
 class VectorPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<SamplerBase>();
 
 /**
@@ -41,7 +41,6 @@ public:
   virtual ~SamplerBase() = default;
 
 protected:
-
   /**
    * You MUST call this in the constructor of the child class and pass down the name
    * of the variables.

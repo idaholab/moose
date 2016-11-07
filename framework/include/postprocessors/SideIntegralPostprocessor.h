@@ -20,7 +20,7 @@
 //Forward Declarations
 class SideIntegralPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<SideIntegralPostprocessor>();
 
 /**

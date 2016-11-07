@@ -14,19 +14,19 @@
 
 #include "ComboMarker.h"
 
-template<>
-InputParameters validParams<ComboMarker>()
+template <>
+InputParameters
+validParams<ComboMarker>()
 {
   InputParameters params = validParams<Marker>();
-  params.addRequiredParam<std::vector<MarkerName> >("markers", "A list of marker names to combine into a single marker.");
+  params.addRequiredParam<std::vector<MarkerName>>("markers", "A list of marker names to combine into a single marker.");
   params.addClassDescription("A marker that converts many markers into a single marker by considering the maximum value of the listed markers (i.e., refinement takes precedent).");
   return params;
 }
 
-
-ComboMarker::ComboMarker(const InputParameters & parameters) :
-    Marker(parameters),
-    _names(parameters.get<std::vector<MarkerName> >("markers"))
+ComboMarker::ComboMarker(const InputParameters & parameters)
+  : Marker(parameters),
+    _names(parameters.get<std::vector<MarkerName>>("markers"))
 {
   for (const auto & marker_name : _names)
     _markers.push_back(&getMarkerValue(marker_name));

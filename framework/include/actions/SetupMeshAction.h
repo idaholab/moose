@@ -21,9 +21,8 @@
 class SetupMeshAction;
 class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<SetupMeshAction>();
-
 
 class SetupMeshAction : public MooseObjectAction
 {
@@ -33,8 +32,7 @@ public:
   virtual void act() override;
 
 private:
-
-  void setupMesh(MooseMesh *mesh);
+  void setupMesh(MooseMesh * mesh);
 };
 
 #endif // SETUPMESHACTION_H

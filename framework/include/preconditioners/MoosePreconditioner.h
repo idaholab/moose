@@ -26,18 +26,18 @@ class MoosePreconditioner;
 namespace libMesh
 {
 class MeshBase;
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
-template<>
+template <>
 InputParameters validParams<MoosePreconditioner>();
 
 /**
  * Base class for MOOSE preconditioners.
  */
-class MoosePreconditioner :
-  public MooseObject,
-  public Restartable
+class MoosePreconditioner : public MooseObject,
+                            public Restartable
 {
 public:
   MoosePreconditioner(const InputParameters & params);

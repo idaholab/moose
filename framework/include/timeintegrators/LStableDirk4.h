@@ -19,7 +19,7 @@
 
 class LStableDirk4;
 
-template<>
+template <>
 InputParameters validParams<LStableDirk4>();
 
 /**
@@ -65,7 +65,10 @@ public:
   LStableDirk4(const InputParameters & parameters);
   virtual ~LStableDirk4();
 
-  virtual int order() { return 4; }
+  virtual int order()
+  {
+    return 4;
+  }
   virtual void computeTimeDerivatives();
   virtual void solve();
   virtual void postStep(NumericVector<Number> & residual);
@@ -90,6 +93,5 @@ protected:
   // lower triangle of this.
   static const Real _a[_n_stages][_n_stages];
 };
-
 
 #endif // LSTABLEDIRK4_H

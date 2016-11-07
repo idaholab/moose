@@ -28,9 +28,9 @@
 // libMesh includes
 #include "libmesh/equation_systems.h"
 
-
-template<>
-InputParameters validParams<Output>()
+template <>
+InputParameters
+validParams<Output>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<MooseObject>();
@@ -40,7 +40,7 @@ InputParameters validParams<Output>()
 
   // Output intervals and timing
   params.addParam<unsigned int>("interval", 1, "The interval at which time steps are output to the solution file");
-  params.addParam<std::vector<Real> >("sync_times", "Times at which the output and solution is forced to occur");
+  params.addParam<std::vector<Real>>("sync_times", "Times at which the output and solution is forced to occur");
   params.addParam<bool>("sync_only", false, "Only export results at sync times");
   params.addParam<Real>("start_time", "Time at which this output object begins to operate");
   params.addParam<Real>("end_time", "Time at which this output object stop operating");
@@ -74,8 +74,8 @@ Output::getExecuteOptions(std::string default_type)
   return MultiMooseEnum(options, default_type);
 }
 
-Output::Output(const InputParameters & parameters) :
-    MooseObject(parameters),
+Output::Output(const InputParameters & parameters)
+  : MooseObject(parameters),
     Restartable(parameters, "Output"),
     MeshChangedInterface(parameters),
     SetupInterface(this),
@@ -91,7 +91,7 @@ Output::Output(const InputParameters & parameters) :
     _dt_old(_problem_ptr->dtOld()),
     _num(0),
     _interval(getParam<unsigned int>("interval")),
-    _sync_times(std::set<Real>(getParam<std::vector<Real> >("sync_times").begin(), getParam<std::vector<Real> >("sync_times").end())),
+    _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(), getParam<std::vector<Real>>("sync_times").end())),
     _start_time(isParamValid("start_time") ? getParam<Real>("start_time") : -std::numeric_limits<Real>::max()),
     _end_time(isParamValid("end_time") ? getParam<Real>("end_time") : std::numeric_limits<Real>::max()),
     _t_tol(getParam<Real>("time_tolerance")),
@@ -136,7 +136,7 @@ Output::onInterval()
   bool output = false;
 
   // Return true if the current step on the current output interval and within the output time range
-  if (_time >= _start_time && _time <= _end_time && (_t_step % _interval) == 0 )
+  if (_time >= _start_time && _time <= _end_time && (_t_step % _interval) == 0)
     output = true;
 
   // Return false if 'sync_only' is set to true

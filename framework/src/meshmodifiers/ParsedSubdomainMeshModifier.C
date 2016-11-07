@@ -20,28 +20,29 @@
 // libmesh includes
 #include "libmesh/fparser_ad.hh"
 
-template<>
-InputParameters validParams<ParsedSubdomainMeshModifier>()
+template <>
+InputParameters
+validParams<ParsedSubdomainMeshModifier>()
 {
   InputParameters params = validParams<MeshModifier>();
   params += validParams<FunctionParserUtils>();
   params.addRequiredParam<std::string>("combinatorial_geometry", "Function expression encoding a combinatorial geometry");
   params.addRequiredParam<SubdomainID>("block_id", "Subdomain id to set for inside of the combinatorial");
   params.addParam<SubdomainName>("block_name", "Subdomain name to set for inside of the combinatorial");
-  params.addParam<std::vector<SubdomainID> >("excluded_subdomain_ids", "A set of subdomain ids that will not changed even if they are inside/outside the combinatorial geometry");
-  params.addParam<std::vector<std::string> >("constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
-  params.addParam<std::vector<std::string> >("constant_expressions", "Vector of values for the constants in constant_names (can be an FParser expression)");
+  params.addParam<std::vector<SubdomainID>>("excluded_subdomain_ids", "A set of subdomain ids that will not changed even if they are inside/outside the combinatorial geometry");
+  params.addParam<std::vector<std::string>>("constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
+  params.addParam<std::vector<std::string>>("constant_expressions", "Vector of values for the constants in constant_names (can be an FParser expression)");
   params.addClassDescription("MeshModifier that uses a parsed expression (combinatorial_geometry) to determine if an element (aka its centroid) is inside the combinatorial geometry and "
                              "assigns a new block id.");
   return params;
 }
 
-ParsedSubdomainMeshModifier::ParsedSubdomainMeshModifier(const InputParameters & parameters) :
-    MeshModifier(parameters),
+ParsedSubdomainMeshModifier::ParsedSubdomainMeshModifier(const InputParameters & parameters)
+  : MeshModifier(parameters),
     FunctionParserUtils(parameters),
     _function(parameters.get<std::string>("combinatorial_geometry")),
     _block_id(parameters.get<SubdomainID>("block_id")),
-    _excluded_ids(parameters.get<std::vector<SubdomainID> >("excluded_subdomain_ids"))
+    _excluded_ids(parameters.get<std::vector<SubdomainID>>("excluded_subdomain_ids"))
 {
   // base function object
   _func_F = ADFunctionPtr(new ADFunction());
@@ -51,8 +52,8 @@ ParsedSubdomainMeshModifier::ParsedSubdomainMeshModifier(const InputParameters &
 
   // add the constant expressions
   addFParserConstants(_func_F,
-                      getParam<std::vector<std::string> >("constant_names"),
-                      getParam<std::vector<std::string> >("constant_expressions"));
+                      getParam<std::vector<std::string>>("constant_names"),
+                      getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
   if (_func_F->Parse(_function, "x,y,z") >= 0)

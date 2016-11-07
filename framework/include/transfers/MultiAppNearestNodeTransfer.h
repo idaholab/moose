@@ -21,14 +21,13 @@
 // Forward declarations
 class MultiAppNearestNodeTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppNearestNodeTransfer>();
 
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
  */
-class MultiAppNearestNodeTransfer :
-  public MultiAppTransfer
+class MultiAppNearestNodeTransfer : public MultiAppTransfer
 {
 public:
   MultiAppNearestNodeTransfer(const InputParameters & parameters);
@@ -84,8 +83,8 @@ protected:
 
   // These variables allow us to cache nearest node info
   bool & _neighbors_cached;
-  std::vector< std::vector<unsigned int> > & _cached_froms;
-  std::vector< std::vector<dof_id_type> > & _cached_dof_ids;
+  std::vector<std::vector<unsigned int>> & _cached_froms;
+  std::vector<std::vector<dof_id_type>> & _cached_dof_ids;
   std::map<unsigned int, unsigned int> & _cached_from_inds;
   std::map<unsigned int, unsigned int> & _cached_qp_inds;
 };

@@ -46,8 +46,10 @@ class Split;
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
-template <typename T> class SparseMatrix;
+template <typename T>
+class NumericVector;
+template <typename T>
+class SparseMatrix;
 }
 
 /**
@@ -75,7 +77,10 @@ public:
    * Returns true if this system is currently computing the initial residual for a solve.
    * @return Whether or not we are currently computing the initial residual.
    */
-  virtual bool computingInitialResidual() { return _computing_initial_residual; }
+  virtual bool computingInitialResidual()
+  {
+    return _computing_initial_residual;
+  }
 
   // Setup Functions ////
   virtual void initialSetup();
@@ -84,8 +89,14 @@ public:
   void setupFiniteDifferencedPreconditioner();
   void setupFieldDecomposition();
 
-  bool haveFiniteDifferencedPreconditioner() {return _use_finite_differenced_preconditioner;}
-  bool haveFieldSplitPreconditioner()        {return _use_field_split_preconditioner;}
+  bool haveFiniteDifferencedPreconditioner()
+  {
+    return _use_finite_differenced_preconditioner;
+  }
+  bool haveFieldSplitPreconditioner()
+  {
+    return _use_field_split_preconditioner;
+  }
 
   /**
    * Returns the convergence state
@@ -215,7 +226,7 @@ public:
    * Finds the implicit sparsity graph between geometrically related dofs.
    */
   void findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data,
-                                            std::map<dof_id_type, std::vector<dof_id_type> > & graph);
+                                            std::map<dof_id_type, std::vector<dof_id_type>> & graph);
 
   /**
    * Adds entries to the Jacobian in the correct positions for couplings coming from dofs being coupled that
@@ -233,13 +244,16 @@ public:
 
   /// set all the global dof indices for a nonlinear variable
   void setVariableGlobalDoFs(const std::string & var_name);
-  const std::vector<dof_id_type> & getVariableGlobalDoFs() { return _var_all_dof_indices; }
+  const std::vector<dof_id_type> & getVariableGlobalDoFs()
+  {
+    return _var_all_dof_indices;
+  }
 
   /**
    * Computes Jacobian
    * @param jacobian Jacobian is formed in here
    */
-  void computeJacobian(SparseMatrix<Number> &  jacobian);
+  void computeJacobian(SparseMatrix<Number> & jacobian);
 
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller preconditioning matrices.
@@ -278,7 +292,6 @@ public:
 
   virtual void setSolution(const NumericVector<Number> & soln);
 
-
   /**
    * Update active objects of Warehouses owned by NonlinearSystem
    */
@@ -294,7 +307,10 @@ public:
   virtual NumericVector<Number> & solutionUDot() override;
   virtual NumericVector<Number> & residualVector(Moose::KernelType type) override;
 
-  virtual const NumericVector<Number> * & currentSolution() override { return _current_solution; }
+  virtual const NumericVector<Number> *& currentSolution() override
+  {
+    return _current_solution;
+  }
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution() override;
@@ -316,19 +332,25 @@ public:
    * If called with true this system will use a finite differenced form of
    * the Jacobian as the preconditioner
    */
-  void useFiniteDifferencedPreconditioner(bool use = true) { _use_finite_differenced_preconditioner = use; }
+  void useFiniteDifferencedPreconditioner(bool use = true)
+  {
+    _use_finite_differenced_preconditioner = use;
+  }
 
   /**
    * If called with a single string, it is used as the name of a the top-level decomposition split.
    * If the array is empty, no decomposition is used.
    * In all other cases an error occurs.
    */
-  void setDecomposition(const std::vector<std::string>& decomposition);
+  void setDecomposition(const std::vector<std::string> & decomposition);
 
   /**
    * If called with true this system will use a field split preconditioner matrix.
    */
-  void useFieldSplitPreconditioner(bool use = true) { _use_field_split_preconditioner = use; }
+  void useFieldSplitPreconditioner(bool use = true)
+  {
+    _use_field_split_preconditioner = use;
+  }
 
   /**
    * If called with true this will add entries into the jacobian to link together degrees of freedom that are found to
@@ -336,13 +358,19 @@ public:
    *
    * These entries are really only used by the Finite Difference Preconditioner and the constraint system right now.
    */
-  void addImplicitGeometricCouplingEntriesToJacobian(bool add=true) { _add_implicit_geometric_coupling_entries_to_jacobian = add; }
+  void addImplicitGeometricCouplingEntriesToJacobian(bool add = true)
+  {
+    _add_implicit_geometric_coupling_entries_to_jacobian = add;
+  }
 
   /**
    * Indicates whether to assemble residual and Jacobian after each constraint application.
    * When true, enables "transitive" constraint application: subsequent constraints can use prior constraints' results.
    */
-  void assembleConstraintsSeparately(bool separately=true) {_assemble_constraints_separately = separately;}
+  void assembleConstraintsSeparately(bool separately = true)
+  {
+    _assemble_constraints_separately = separately;
+  }
 
   /**
    * Setup damping stuff (called before we actually start)
@@ -371,53 +399,86 @@ public:
   /**
    * Return the number of non-linear iterations
    */
-  unsigned int nNonlinearIterations() { return _n_iters; }
+  unsigned int nNonlinearIterations()
+  {
+    return _n_iters;
+  }
 
   /**
    * Returns the current nonlinear iteration number.  In libmesh, this is
    * updated during the nonlinear solve, so it should be up-to-date.
    */
-  unsigned int getCurrentNonlinearIterationNumber() { return _sys.get_current_nonlinear_iteration_number(); }
+  unsigned int getCurrentNonlinearIterationNumber()
+  {
+    return _sys.get_current_nonlinear_iteration_number();
+  }
 
   /**
    * Return the number of linear iterations
    */
-  unsigned int nLinearIterations() { return _n_linear_iters; }
+  unsigned int nLinearIterations()
+  {
+    return _n_linear_iters;
+  }
 
   /**
    * Return the total number of residual evaluations done so far in this calculation
    */
-  unsigned int nResidualEvaluations() { return _n_residual_evaluations; }
+  unsigned int nResidualEvaluations()
+  {
+    return _n_residual_evaluations;
+  }
 
   /**
    * Return the final nonlinear residual
    */
-  Real finalNonlinearResidual() { return _final_residual; }
+  Real finalNonlinearResidual()
+  {
+    return _final_residual;
+  }
 
   /**
    * Return the last nonlinear norm
    * @return A Real containing the last computed residual norm
    */
-  Real nonlinearNorm() { return _last_nl_rnorm; }
+  Real nonlinearNorm()
+  {
+    return _last_nl_rnorm;
+  }
 
   /**
    * Force the printing of all variable norms after each solve.
    * \todo{Remove after output update
    */
-  void printAllVariableNorms(bool state) { _print_all_var_norms = state; }
+  void printAllVariableNorms(bool state)
+  {
+    _print_all_var_norms = state;
+  }
 
-  void debuggingResiduals(bool state) { _debugging_residuals = state; }
+  void debuggingResiduals(bool state)
+  {
+    _debugging_residuals = state;
+  }
 
   unsigned int _num_residual_evaluations;
 
   void setPredictor(MooseSharedPointer<Predictor> predictor);
-  Predictor * getPredictor() { return _predictor.get(); }
+  Predictor * getPredictor()
+  {
+    return _predictor.get();
+  }
 
-  TimeIntegrator * getTimeIntegrator() { return _time_integrator.get(); }
+  TimeIntegrator * getTimeIntegrator()
+  {
+    return _time_integrator.get();
+  }
 
   void setPCSide(MooseEnum pcs);
 
-  Moose::PCSideType getPCSide() { return _pc_side; }
+  Moose::PCSideType getPCSide()
+  {
+    return _pc_side;
+  }
 
   /**
    * Indicated whether this system needs material properties on boundaries.
@@ -440,42 +501,90 @@ public:
   /**
    * Access functions to Warehouses from outside NonlinearSystem
    */
-  const KernelWarehouse & getKernelWarehouse() { return _kernels; }
-  const MooseObjectWarehouse<KernelBase> & getTimeKernelWarehouse() { return _time_kernels; }
-  const MooseObjectWarehouse<KernelBase> & getNonTimeKernelWarehouse() { return _non_time_kernels; }
-  const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
-  const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse() { return _interface_kernels; }
-  const MooseObjectWarehouse<DiracKernel> & getDiracKernelWarehouse() { return _dirac_kernels; }
+  const KernelWarehouse & getKernelWarehouse()
+  {
+    return _kernels;
+  }
+  const MooseObjectWarehouse<KernelBase> & getTimeKernelWarehouse()
+  {
+    return _time_kernels;
+  }
+  const MooseObjectWarehouse<KernelBase> & getNonTimeKernelWarehouse()
+  {
+    return _non_time_kernels;
+  }
+  const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse()
+  {
+    return _dg_kernels;
+  }
+  const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
+  {
+    return _interface_kernels;
+  }
+  const MooseObjectWarehouse<DiracKernel> & getDiracKernelWarehouse()
+  {
+    return _dirac_kernels;
+  }
   const MooseObjectWarehouse<NodalKernel> & getNodalKernelWarehouse(THREAD_ID tid);
-  const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
-  const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() { return _element_dampers; }
-  const MooseObjectWarehouse<NodalDamper> & getNodalDamperWarehouse() { return _nodal_dampers; }
+  const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse()
+  {
+    return _integrated_bcs;
+  }
+  const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse()
+  {
+    return _element_dampers;
+  }
+  const MooseObjectWarehouse<NodalDamper> & getNodalDamperWarehouse()
+  {
+    return _nodal_dampers;
+  }
   //@}
 
   /**
    * Weather or not the nonlinear system has save-ins
    */
-  bool hasSaveIn() const { return _has_save_in || _has_nodalbc_save_in; }
+  bool hasSaveIn() const
+  {
+    return _has_save_in || _has_nodalbc_save_in;
+  }
 
   /**
    * Weather or not the nonlinear system has diagonal Jacobian save-ins
    */
-  bool hasDiagSaveIn() const { return _has_diag_save_in || _has_nodalbc_diag_save_in; }
+  bool hasDiagSaveIn() const
+  {
+    return _has_diag_save_in || _has_nodalbc_diag_save_in;
+  }
 
   /**
    * The relative L2 norm of the difference between solution and old solution vector.
    */
   virtual Real relativeSolutionDifferenceNorm();
 
-  virtual NumericVector<Number> & solution() override { return *_sys.solution; }
+  virtual NumericVector<Number> & solution() override
+  {
+    return *_sys.solution;
+  }
 
-  virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
+  virtual NumericVector<Number> & solutionOld() override
+  {
+    return *_sys.old_local_solution;
+  }
 
-  virtual NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
+  virtual NumericVector<Number> & solutionOlder() override
+  {
+    return *_sys.older_local_solution;
+  }
 
-  virtual TransientNonlinearImplicitSystem & sys() { return _sys; }
+  virtual TransientNonlinearImplicitSystem & sys()
+  {
+    return _sys;
+  }
 
-  virtual System & system() override { return _sys; }
+  virtual System & system() override
+  {
+    return _sys;
+  }
 
 public:
   FEProblem & _fe_problem;
@@ -503,7 +612,7 @@ protected:
    */
   void computeNodalBCs(NumericVector<Number> & residual);
 
-  void computeJacobianInternal(SparseMatrix<Number> &  jacobian);
+  void computeJacobianInternal(SparseMatrix<Number> & jacobian);
 
   void computeDiracContributions(SparseMatrix<Number> * jacobian = NULL);
 
@@ -514,7 +623,6 @@ protected:
    */
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
   void enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian);
-
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
@@ -578,7 +686,6 @@ protected:
 
   /// Constraints storage object
   ConstraintWarehouse _constraints;
-
 
 protected:
   /// increment vector

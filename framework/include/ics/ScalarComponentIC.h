@@ -19,7 +19,7 @@
 
 class ScalarComponentIC;
 
-template<>
+template <>
 InputParameters validParams<ScalarComponentIC>();
 
 /**

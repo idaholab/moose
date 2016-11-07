@@ -23,8 +23,9 @@
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 
-template<>
-InputParameters validParams<MultiAppPostprocessorTransfer>()
+template <>
+InputParameters
+validParams<MultiAppPostprocessorTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<PostprocessorName>("from_postprocessor", "The name of the Postprocessor in the Master to transfer the value from.");
@@ -34,8 +35,8 @@ InputParameters validParams<MultiAppPostprocessorTransfer>()
   return params;
 }
 
-MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     _from_pp_name(getParam<PostprocessorName>("from_postprocessor")),
     _to_pp_name(getParam<PostprocessorName>("to_postprocessor")),
     _reduction_type(getParam<MooseEnum>("reduction_type"))
@@ -58,7 +59,7 @@ MultiAppPostprocessorTransfer::execute()
 
       Real pp_value = from_problem.getPostprocessorValue(_from_pp_name);
 
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
         if (_multi_app->hasLocalApp(i))
           _multi_app->appProblem(i).getPostprocessorValue(_to_pp_name) = pp_value;
       break;
@@ -84,7 +85,7 @@ MultiAppPostprocessorTransfer::execute()
           mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
       }
 
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
         {
@@ -96,13 +97,13 @@ MultiAppPostprocessorTransfer::execute()
               reduced_pp_value += curr_pp_value;
               break;
             case MAXIMUM:
-              reduced_pp_value = std::max(curr_pp_value,reduced_pp_value);
+              reduced_pp_value = std::max(curr_pp_value, reduced_pp_value);
               break;
             case MINIMUM:
-              reduced_pp_value = std::min(curr_pp_value,reduced_pp_value);
+              reduced_pp_value = std::min(curr_pp_value, reduced_pp_value);
               break;
-          default:
-            mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
+            default:
+              mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
           }
         }
       }
@@ -122,8 +123,8 @@ MultiAppPostprocessorTransfer::execute()
         case MINIMUM:
           _communicator.min(reduced_pp_value);
           break;
-      default:
-        mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
+        default:
+          mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
       }
 
       to_problem.getPostprocessorValue(_to_pp_name) = reduced_pp_value;

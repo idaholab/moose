@@ -20,7 +20,7 @@
 
 class MeshExtruder;
 
-template<>
+template <>
 InputParameters validParams<MeshExtruder>();
 
 class MeshExtruder : public MeshModifier
@@ -53,7 +53,7 @@ protected:
 
   private:
     /// Data structure for holding the old -> new id mapping based on the layer number
-    std::map<unsigned int, std::map<SubdomainID, unsigned int> > _layer_data;
+    std::map<unsigned int, std::map<SubdomainID, unsigned int>> _layer_data;
 
     /// The total number of layers in the extrusion
     unsigned int _num_layers;

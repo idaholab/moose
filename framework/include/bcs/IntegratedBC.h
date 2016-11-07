@@ -24,17 +24,16 @@
 class IntegratedBC;
 class MooseVariable;
 
-template<>
+template <>
 InputParameters validParams<IntegratedBC>();
 
 /**
  * Base class for deriving any boundary condition of a integrated type
  */
-class IntegratedBC :
-  public BoundaryCondition,
-  public RandomInterface,
-  public CoupleableMooseVariableDependencyIntermediateInterface,
-  public MaterialPropertyInterface
+class IntegratedBC : public BoundaryCondition,
+                     public RandomInterface,
+                     public CoupleableMooseVariableDependencyIntermediateInterface,
+                     public MaterialPropertyInterface
 {
 public:
   IntegratedBC(const InputParameters & parameters);
@@ -55,13 +54,13 @@ public:
 
 protected:
   /// current element
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
   /// Volume of the current element
   const Real & _current_elem_volume;
   /// current side of the current element
   unsigned int & _current_side;
   /// current side element
-  const Elem * & _current_side_elem;
+  const Elem *& _current_side_elem;
   /// Volume of the current side
   const Real & _current_side_volume;
 
@@ -71,9 +70,9 @@ protected:
   /// quadrature point index
   unsigned int _qp;
   /// active quadrature rule
-  QBase * & _qrule;
+  QBase *& _qrule;
   /// active quadrature points
-  const MooseArray< Point > & _q_point;
+  const MooseArray<Point> & _q_point;
   /// transformed Jacobian weights
   const MooseArray<Real> & _JxW;
   /// coordinate transformation
@@ -110,12 +109,12 @@ protected:
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
-  std::vector<MooseVariable*> _save_in;
+  std::vector<MooseVariable *> _save_in;
   std::vector<AuxVariableName> _save_in_strings;
 
   /// The aux variables to save the diagonal Jacobian contributions to
   bool _has_diag_save_in;
-  std::vector<MooseVariable*> _diag_save_in;
+  std::vector<MooseVariable *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
 
   virtual Real computeQpResidual() = 0;
@@ -124,7 +123,6 @@ protected:
    * This is the virtual that derived classes should override for computing an off-diagonal jacobian component.
    */
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-
 };
 
 #endif /* INTEGRATEDBC_H */

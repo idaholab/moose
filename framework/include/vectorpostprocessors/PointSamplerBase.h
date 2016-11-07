@@ -23,18 +23,19 @@
 // Forward Declarations
 class PointSamplerBase;
 
-template<>
+template <>
 InputParameters validParams<PointSamplerBase>();
 
-class PointSamplerBase :
-  public GeneralVectorPostprocessor,
-  public CoupleableMooseVariableDependencyIntermediateInterface,
-  protected SamplerBase
+class PointSamplerBase : public GeneralVectorPostprocessor,
+                         public CoupleableMooseVariableDependencyIntermediateInterface,
+                         protected SamplerBase
 {
 public:
   PointSamplerBase(const InputParameters & parameters);
 
-  virtual ~PointSamplerBase() {}
+  virtual ~PointSamplerBase()
+  {
+  }
 
   virtual void initialize();
   virtual void execute();
@@ -59,7 +60,7 @@ protected:
   std::vector<Real> _ids;
 
   /// Vector of values per point
-  std::vector<std::vector<Real> > _point_values;
+  std::vector<std::vector<Real>> _point_values;
 
   /// Whether or not the Point was found on this processor (short because bool and char don't work with MPI wrappers)
   std::vector<short> _found_points;

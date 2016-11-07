@@ -21,15 +21,15 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(FEProblem & fe_problem, std::vector<JacobianBlock*> & blocks) :
-    ComputeFullJacobianThread(fe_problem, blocks[0]->_jacobian /* have to pass something */),
+ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(FEProblem & fe_problem, std::vector<JacobianBlock *> & blocks)
+  : ComputeFullJacobianThread(fe_problem, blocks[0]->_jacobian /* have to pass something */),
     _blocks(blocks)
 {
 }
 
 // Splitting Constructor
-ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(ComputeJacobianBlocksThread & x, Threads::split split) :
-    ComputeFullJacobianThread(x, split),
+ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(ComputeJacobianBlocksThread & x, Threads::split split)
+  : ComputeFullJacobianThread(x, split),
     _blocks(x._blocks)
 {
 }
@@ -37,7 +37,6 @@ ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(ComputeJacobianBlocksTh
 ComputeJacobianBlocksThread::~ComputeJacobianBlocksThread()
 {
 }
-
 
 void
 ComputeJacobianBlocksThread::postElement(const Elem * elem)

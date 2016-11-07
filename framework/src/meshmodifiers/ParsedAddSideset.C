@@ -20,30 +20,31 @@
 // libmesh includes
 #include "libmesh/fparser_ad.hh"
 
-template<>
-InputParameters validParams<ParsedAddSideset>()
+template <>
+InputParameters
+validParams<ParsedAddSideset>()
 {
   InputParameters params = validParams<AddSideSetsBase>();
   params += validParams<FunctionParserUtils>();
   params.addRequiredParam<std::string>("combinatorial_geometry", "Function expression encoding a combinatorial geometry");
   params.addRequiredParam<BoundaryName>("new_sideset_name", "The name of the new sideset");
-  params.addParam<std::vector<SubdomainID> >("included_subdomain_ids", "A set of subdomain ids whose sides will be included in the new sidesets");
+  params.addParam<std::vector<SubdomainID>>("included_subdomain_ids", "A set of subdomain ids whose sides will be included in the new sidesets");
   params.addParam<Point>("normal", Point(), "If provided specifies the normal vector on sides that are added to the new ");
-  params.addParam<std::vector<std::string> >("constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
-  params.addParam<std::vector<std::string> >("constant_expressions", "Vector of values for the constants in constant_names (can be an FParser expression)");
+  params.addParam<std::vector<std::string>>("constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
+  params.addParam<std::vector<std::string>>("constant_expressions", "Vector of values for the constants in constant_names (can be an FParser expression)");
   params.addClassDescription("A MeshModifier that adds element's sides to a sideset if the centroid satisfies the combinatorial_geometry expression, (and optionally) "
                              "if one of the side's elements is in included_subdomain_ids and if it features the correct normal.");
   return params;
 }
 
-ParsedAddSideset::ParsedAddSideset(const InputParameters & parameters) :
-    AddSideSetsBase(parameters),
+ParsedAddSideset::ParsedAddSideset(const InputParameters & parameters)
+  : AddSideSetsBase(parameters),
     FunctionParserUtils(parameters),
     _function(parameters.get<std::string>("combinatorial_geometry")),
     _sideset_name(getParam<BoundaryName>("new_sideset_name")),
     _check_subdomains(isParamValid("included_subdomain_ids")),
     _check_normal(parameters.isParamSetByUser("normal")),
-    _included_ids(_check_subdomains ? parameters.get<std::vector<SubdomainID> >("included_subdomain_ids") : std::vector<SubdomainID>()),
+    _included_ids(_check_subdomains ? parameters.get<std::vector<SubdomainID>>("included_subdomain_ids") : std::vector<SubdomainID>()),
     _normal(getParam<Point>("normal"))
 {
   // base function object
@@ -54,8 +55,8 @@ ParsedAddSideset::ParsedAddSideset(const InputParameters & parameters) :
 
   // add the constant expressions
   addFParserConstants(_func_F,
-                      getParam<std::vector<std::string> >("constant_names"),
-                      getParam<std::vector<std::string> >("constant_expressions"));
+                      getParam<std::vector<std::string>>("constant_names"),
+                      getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
   if (_func_F->Parse(_function, "x,y,z") >= 0)
@@ -81,12 +82,12 @@ ParsedAddSideset::modify()
   std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs({_sideset_name}, true);
   mooseAssert(boundary_ids.size() == 1, "Length of boundary_ids should be one");
 
-  MeshBase::const_element_iterator el  = mesh.active_elements_begin();
+  MeshBase::const_element_iterator el = mesh.active_elements_begin();
   const MeshBase::const_element_iterator end_el = mesh.active_elements_end();
 
-  for (; el != end_el ; ++el)
+  for (; el != end_el; ++el)
   {
-    const Elem* elem = *el;
+    const Elem * elem = *el;
     SubdomainID curr_subdomain = elem->subdomain_id();
 
     // check if the element is included

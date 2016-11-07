@@ -17,8 +17,9 @@
 #include "Transient.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<TimeStepper>()
+template <>
+InputParameters
+validParams<TimeStepper>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addParam<bool>("reset_dt", false, "Use when restarting a calculation to force a change in dt.");
@@ -28,8 +29,8 @@ InputParameters validParams<TimeStepper>()
   return params;
 }
 
-TimeStepper::TimeStepper(const InputParameters & parameters) :
-    MooseObject(parameters),
+TimeStepper::TimeStepper(const InputParameters & parameters)
+  : MooseObject(parameters),
     Restartable(parameters, "TimeSteppers"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _executioner(*parameters.getCheckedPointerParam<Transient *>("_executioner")),
@@ -89,7 +90,7 @@ TimeStepper::computeStep()
 }
 
 bool
-TimeStepper::constrainStep(Real &dt)
+TimeStepper::constrainStep(Real & dt)
 {
   bool at_sync_point = false;
 
@@ -168,7 +169,7 @@ TimeStepper::constrainStep(Real &dt)
     {
       _console << diag.str();
       mooseError("Adjusting to sync_time resulted in a non-positive time step.  dt: "
-                 <<dt<<" sync_time: "<<*_sync_times.begin()<<" time: "<<_time);
+                 << dt << " sync_time: " << *_sync_times.begin() << " time: " << _time);
     }
 
     at_sync_point = true;
@@ -197,7 +198,6 @@ TimeStepper::acceptStep()
   {
     _sync_times.erase(_sync_times.begin());
   }
-
 }
 
 void

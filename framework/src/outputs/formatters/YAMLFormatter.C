@@ -19,8 +19,8 @@
 #include <sstream>
 #include <vector>
 
-YAMLFormatter::YAMLFormatter(bool dump_mode) :
-    SyntaxTree(true),
+YAMLFormatter::YAMLFormatter(bool dump_mode)
+  : SyntaxTree(true),
     _dump_mode(dump_mode)
 {
 }
@@ -39,11 +39,11 @@ YAMLFormatter::postscript() const
 }
 
 std::string
-YAMLFormatter::printParams(const std::string &prefix, const std::string & /*fully_qualified_name*/,
-                           InputParameters &params, short depth, const std::string &search_string, bool &found)
+YAMLFormatter::printParams(const std::string & prefix, const std::string & /*fully_qualified_name*/,
+                           InputParameters & params, short depth, const std::string & search_string, bool & found)
 {
   std::ostringstream oss;
-  std::string indent(depth*2, ' ');
+  std::string indent(depth * 2, ' ');
 
   for (auto & iter : params)
   {
@@ -82,7 +82,7 @@ YAMLFormatter::printParams(const std::string &prefix, const std::string & /*full
       oss << tmp_str;
     }
     else if (params.hasDefaultCoupledValue(iter.first))
-      oss <<  params.defaultCoupledValue(iter.first);
+      oss << params.defaultCoupledValue(iter.first);
 
     std::string doc = params.getDocString(iter.first);
     MooseUtils::escape(doc);
@@ -91,23 +91,23 @@ YAMLFormatter::printParams(const std::string &prefix, const std::string & /*full
         << "\n" << indent << "    group_name: " << params.getGroupName(iter.first);
 
     {
-      InputParameters::Parameter<MooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(iter.second);
+      InputParameters::Parameter<MooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MooseEnum> *>(iter.second);
       if (enum_type)
         oss << "\n" << indent << "    options: " << enum_type->get().getRawNames();
     }
     {
-      InputParameters::Parameter<MultiMooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MultiMooseEnum>*>(iter.second);
+      InputParameters::Parameter<MultiMooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MultiMooseEnum> *>(iter.second);
       if (enum_type)
         oss << "\n" << indent << "    options: " << enum_type->get().getRawNames();
     }
     {
-      InputParameters::Parameter<std::vector<MooseEnum> > * enum_type = dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum> >*>(iter.second);
+      InputParameters::Parameter<std::vector<MooseEnum>> * enum_type = dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum>> *>(iter.second);
       if (enum_type)
         oss << "\n" << indent << "    options: " << (enum_type->get())[0].getRawNames();
     }
 
     oss << "\n" << indent << "    description: |\n      " << indent
-         << doc << "\n";
+        << doc << "\n";
   }
 
   return oss.str();
@@ -116,17 +116,16 @@ YAMLFormatter::printParams(const std::string &prefix, const std::string & /*full
 std::string
 YAMLFormatter::preTraverse(short depth) const
 {
-  std::string indent(depth*2, ' ');
+  std::string indent(depth * 2, ' ');
 
   return indent + "  subblocks:\n";
 }
 
-
 std::string
-YAMLFormatter::printBlockOpen(const std::string &name, short depth, const std::string & doc) const
+YAMLFormatter::printBlockOpen(const std::string & name, short depth, const std::string & doc) const
 {
   std::ostringstream oss;
-  std::string indent(depth*2, ' ');
+  std::string indent(depth * 2, ' ');
 
   std::string docEscaped = doc;
   MooseUtils::escape(docEscaped);
@@ -140,7 +139,7 @@ YAMLFormatter::printBlockOpen(const std::string &name, short depth, const std::s
 }
 
 std::string
-YAMLFormatter::printBlockClose(const std::string &/*name*/, short /*depth*/) const
+YAMLFormatter::printBlockClose(const std::string & /*name*/, short /*depth*/) const
 {
   return std::string();
 }
@@ -149,10 +148,10 @@ void
 YAMLFormatter::buildOutputString(std::ostringstream & output, const std::iterator_traits<InputParameters::iterator>::value_type & p)
 {
   // Account for Point
-  InputParameters::Parameter<Point> * ptr0 = dynamic_cast<InputParameters::Parameter<Point>*>(p.second);
+  InputParameters::Parameter<Point> * ptr0 = dynamic_cast<InputParameters::Parameter<Point> *>(p.second);
 
   // Account for RealVectorValues
-  InputParameters::Parameter<RealVectorValue> * ptr1  = dynamic_cast<InputParameters::Parameter<RealVectorValue>*>(p.second);
+  InputParameters::Parameter<RealVectorValue> * ptr1 = dynamic_cast<InputParameters::Parameter<RealVectorValue> *>(p.second);
 
   // Output the Point components
   if (ptr0)

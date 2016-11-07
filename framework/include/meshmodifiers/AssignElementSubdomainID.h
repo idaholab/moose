@@ -21,7 +21,7 @@
 // Forward declerations
 class AssignElementSubdomainID;
 
-template<>
+template <>
 InputParameters validParams<AssignElementSubdomainID>();
 
 /**

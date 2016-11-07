@@ -14,8 +14,9 @@
 
 #include "NonlinearEigen.h"
 
-template<>
-InputParameters validParams<NonlinearEigen>()
+template <>
+InputParameters
+validParams<NonlinearEigen>()
 {
   InputParameters params = validParams<EigenExecutionerBase>();
   params.addParam<unsigned int>("free_power_iterations", 4, "The number of free power iterations");
@@ -27,15 +28,15 @@ InputParameters validParams<NonlinearEigen>()
   return params;
 }
 
-NonlinearEigen::NonlinearEigen(const InputParameters & parameters) :
-    EigenExecutionerBase(parameters),
-     _free_iter(getParam<unsigned int>("free_power_iterations")),
-     _abs_tol(getParam<Real>("source_abs_tol")),
-     _rel_tol(getParam<Real>("source_rel_tol")),
-     _pfactor(getParam<Real>("pfactor")),
-     _output_after_pi(getParam<bool>("output_after_power_iterations"))
+NonlinearEigen::NonlinearEigen(const InputParameters & parameters)
+  : EigenExecutionerBase(parameters),
+    _free_iter(getParam<unsigned int>("free_power_iterations")),
+    _abs_tol(getParam<Real>("source_abs_tol")),
+    _rel_tol(getParam<Real>("source_rel_tol")),
+    _pfactor(getParam<Real>("pfactor")),
+    _output_after_pi(getParam<bool>("output_after_power_iterations"))
 {
-  if (!_app.isRecovering() && ! _app.isRestarting())
+  if (!_app.isRecovering() && !_app.isRestarting())
     _eigenvalue = getParam<Real>("k0");
 
   addAttributeReporter("eigenvalue", _eigenvalue, "initial timestep_end");
@@ -52,20 +53,19 @@ NonlinearEigen::init()
 
   EigenExecutionerBase::init();
 
-  if (_free_iter>0)
+  if (_free_iter > 0)
   {
     // save the initial guess
     _problem.advanceState();
 
     // free power iterations
-    _console << " Free power iteration starts"  << std::endl;
+    _console << " Free power iteration starts" << std::endl;
 
     Real initial_res;
     inversePowerIteration(_free_iter, _free_iter, _pfactor, false,
                           std::numeric_limits<Real>::min(), true,
                           "", std::numeric_limits<Real>::max(),
                           _eigenvalue, initial_res);
-
 
     _problem.onTimestepEnd();
     _problem.execute(EXEC_TIMESTEP_END);
@@ -98,7 +98,7 @@ NonlinearEigen::execute()
 void
 NonlinearEigen::takeStep()
 {
-  _console << " Nonlinear iteration starts"  << std::endl;
+  _console << " Nonlinear iteration starts" << std::endl;
 
   preSolve();
   _problem.timestepSetup();

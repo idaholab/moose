@@ -21,7 +21,7 @@
 // Forward declarations
 class BoundaryRestrictableRequired;
 
-template<>
+template <>
 InputParameters validParams<BoundaryRestrictableRequired>();
 
 /**

@@ -15,8 +15,9 @@
 #include "AddAuxVariableAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddAuxVariableAction>()
+template <>
+InputParameters
+validParams<AddAuxVariableAction>()
 {
   MooseEnum families(AddAuxVariableAction::getAuxVariableFamilies());
   MooseEnum orders(AddAuxVariableAction::getAuxVariableOrders());
@@ -25,15 +26,15 @@ InputParameters validParams<AddAuxVariableAction>()
   params += validParams<OutputInterface>();
 
   params.addParam<MooseEnum>("family", families, "Specifies the family of FE shape functions to use for this variable");
-  params.addParam<MooseEnum>("order", orders,  "Specifies the order of the FE shape function to use for this variable (additional orders not listed are allowed)");
+  params.addParam<MooseEnum>("order", orders, "Specifies the order of the FE shape function to use for this variable (additional orders not listed are allowed)");
   params.addParam<Real>("initial_condition", "Specifies the initial condition for this variable");
-  params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
+  params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
 
   return params;
 }
 
-AddAuxVariableAction::AddAuxVariableAction(InputParameters params) :
-    AddVariableAction(params)
+AddAuxVariableAction::AddAuxVariableAction(InputParameters params)
+  : AddVariableAction(params)
 {
 }
 

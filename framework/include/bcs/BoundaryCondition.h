@@ -38,27 +38,25 @@ class SystemBase;
 class BoundaryCondition;
 class Assembly;
 
-template<>
+template <>
 InputParameters validParams<BoundaryCondition>();
 
 /**
  * Base class for creating new types of boundary conditions.
  */
-class BoundaryCondition :
-  public MooseObject,
-  public BoundaryRestrictableRequired,
-  public SetupInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public TransientInterface,
-  public PostprocessorInterface,
-  public GeometricSearchInterface,
-  public Restartable,
-  public ZeroInterface,
-  public MeshChangedInterface
+class BoundaryCondition : public MooseObject,
+                          public BoundaryRestrictableRequired,
+                          public SetupInterface,
+                          public FunctionInterface,
+                          public UserObjectInterface,
+                          public TransientInterface,
+                          public PostprocessorInterface,
+                          public GeometricSearchInterface,
+                          public Restartable,
+                          public ZeroInterface,
+                          public MeshChangedInterface
 {
 public:
-
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
@@ -90,7 +88,6 @@ public:
   virtual bool shouldApply();
 
 protected:
-
   /// Reference to SubProblem
   SubProblem & _subproblem;
 

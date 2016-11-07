@@ -15,8 +15,8 @@
 #include "MaterialData.h"
 #include "Material.h"
 
-MaterialData::MaterialData(MaterialPropertyStorage & storage) :
-    _storage(storage),
+MaterialData::MaterialData(MaterialPropertyStorage & storage)
+  : _storage(storage),
     _n_qpoints(0),
     _swapped(false)
 {
@@ -64,7 +64,7 @@ MaterialData::copy(const Elem & elem_to, const Elem & elem_from, unsigned int si
 }
 
 void
-MaterialData::swap(const Elem & elem, unsigned int side/* = 0*/)
+MaterialData::swap(const Elem & elem, unsigned int side /* = 0*/)
 {
   if (_storage.hasStatefulProperties())
   {
@@ -74,21 +74,21 @@ MaterialData::swap(const Elem & elem, unsigned int side/* = 0*/)
 }
 
 void
-MaterialData::reinit(const std::vector<MooseSharedPointer<Material> > & mats)
+MaterialData::reinit(const std::vector<MooseSharedPointer<Material>> & mats)
 {
   for (const auto & mat : mats)
     mat->computeProperties();
 }
 
 void
-MaterialData::reset(const std::vector<MooseSharedPointer<Material> > & mats)
+MaterialData::reset(const std::vector<MooseSharedPointer<Material>> & mats)
 {
   for (const auto & mat : mats)
     mat->resetProperties();
 }
 
 void
-MaterialData::swapBack(const Elem & elem, unsigned int side/* = 0*/)
+MaterialData::swapBack(const Elem & elem, unsigned int side /* = 0*/)
 {
   if (_swapped && _storage.hasStatefulProperties())
   {

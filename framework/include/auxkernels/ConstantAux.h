@@ -17,11 +17,10 @@
 
 #include "AuxKernel.h"
 
-
 //Forward Declarations
 class ConstantAux;
 
-template<>
+template <>
 InputParameters validParams<ConstantAux>();
 
 /**
@@ -30,7 +29,6 @@ InputParameters validParams<ConstantAux>();
 class ConstantAux : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.

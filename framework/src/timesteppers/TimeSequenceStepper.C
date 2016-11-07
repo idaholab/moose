@@ -14,22 +14,23 @@
 
 #include "TimeSequenceStepper.h"
 
-template<>
-InputParameters validParams<TimeSequenceStepper>()
+template <>
+InputParameters
+validParams<TimeSequenceStepper>()
 {
   InputParameters params = validParams<TimeSequenceStepperBase>();
-  params.addRequiredParam<std::vector<Real> >("time_sequence", "The values of t");
+  params.addRequiredParam<std::vector<Real>>("time_sequence", "The values of t");
   params.addClassDescription("Solves the Transient problem at a sequence of given time points.");
   return params;
 }
 
-TimeSequenceStepper::TimeSequenceStepper(const InputParameters & parameters) :
-    TimeSequenceStepperBase(parameters)
+TimeSequenceStepper::TimeSequenceStepper(const InputParameters & parameters)
+  : TimeSequenceStepperBase(parameters)
 {
 }
 
 void
 TimeSequenceStepper::init()
 {
-  setupSequence(getParam<std::vector<Real> >("time_sequence"));
+  setupSequence(getParam<std::vector<Real>>("time_sequence"));
 }

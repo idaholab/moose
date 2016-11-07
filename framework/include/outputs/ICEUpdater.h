@@ -29,7 +29,7 @@ class Updater;
 // Forward declarations
 class ICEUpdater;
 
-template<>
+template <>
 InputParameters validParams<ICEUpdater>();
 
 /**
@@ -38,7 +38,7 @@ InputParameters validParams<ICEUpdater>();
  * time step over a web socket back to the Eclipse Integrated
  * Computational Environment (ICE) for real-time plot updates.
  */
-class ICEUpdater: public AdvancedOutput<Output>
+class ICEUpdater : public AdvancedOutput<Output>
 {
 public:
   /**

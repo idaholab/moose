@@ -21,7 +21,7 @@
 class AStableDirk4;
 class LStableDirk4;
 
-template<>
+template <>
 InputParameters validParams<AStableDirk4>();
 
 /**
@@ -65,7 +65,10 @@ public:
   AStableDirk4(const InputParameters & parameters);
   virtual ~AStableDirk4();
 
-  virtual int order() { return 4; }
+  virtual int order()
+  {
+    return 4;
+  }
   virtual void computeTimeDerivatives();
   virtual void solve();
   virtual void postStep(NumericVector<Number> & residual);
@@ -103,6 +106,5 @@ protected:
   // A pointer to the "bootstrapping" method to use if _safe_start==true.
   MooseSharedPointer<LStableDirk4> _bootstrap_method;
 };
-
 
 #endif // ASTABLEDIRK4_H

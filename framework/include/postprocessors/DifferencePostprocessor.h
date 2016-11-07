@@ -18,7 +18,7 @@
 
 class DifferencePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<DifferencePostprocessor>();
 
 /**
@@ -40,6 +40,5 @@ protected:
   const PostprocessorValue & _value1;
   const PostprocessorValue & _value2;
 };
-
 
 #endif /* DIFFERENCEPOSTPROCESSOR_H */

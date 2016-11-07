@@ -20,7 +20,7 @@
 //Forward Declarations
 class Residual;
 
-template<>
+template <>
 InputParameters validParams<Residual>();
 
 class Residual : public GeneralPostprocessor
@@ -28,8 +28,12 @@ class Residual : public GeneralPostprocessor
 public:
   Residual(const InputParameters & parameters);
 
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
 
   /**
    * This will return the final nonlinear residual.

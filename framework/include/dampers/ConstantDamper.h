@@ -21,7 +21,7 @@
 //Forward Declarations
 class ConstantDamper;
 
-template<>
+template <>
 InputParameters validParams<ConstantDamper>();
 
 /**

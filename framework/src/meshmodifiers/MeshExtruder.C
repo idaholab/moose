@@ -21,29 +21,30 @@
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
 
-template<>
-InputParameters validParams<MeshExtruder>()
+template <>
+InputParameters
+validParams<MeshExtruder>()
 {
   InputParameters params = validParams<MeshModifier>();
   params.addRequiredParam<RealVectorValue>("extrusion_vector", "The direction and length of the extrusion");
   params.addParam<unsigned int>("num_layers", 1, "The number of layers in the extruded mesh");
-  params.addParam<std::vector<BoundaryName> >("bottom_sideset", "The boundary that will be applied to the bottom of the extruded mesh");
-  params.addParam<std::vector<BoundaryName> >("top_sideset", "The boundary that will be to the top of the extruded mesh");
+  params.addParam<std::vector<BoundaryName>>("bottom_sideset", "The boundary that will be applied to the bottom of the extruded mesh");
+  params.addParam<std::vector<BoundaryName>>("top_sideset", "The boundary that will be to the top of the extruded mesh");
 
-  params.addParam<std::vector<SubdomainID> >("existing_subdomains", std::vector<SubdomainID>(), "The subdomains that will be remapped for specific layers");
-  params.addParam<std::vector<unsigned int> >("layers", std::vector<unsigned int>(), "The layers where the \"existing_subdomain\" will be remapped to new ids");
-  params.addParam<std::vector<unsigned int> >("new_ids", std::vector<unsigned int>(), "The list of new ids, This list should be either length \"existing_subdomains\" or "
-                                            "\"existing_subdomains\" * layers");
+  params.addParam<std::vector<SubdomainID>>("existing_subdomains", std::vector<SubdomainID>(), "The subdomains that will be remapped for specific layers");
+  params.addParam<std::vector<unsigned int>>("layers", std::vector<unsigned int>(), "The layers where the \"existing_subdomain\" will be remapped to new ids");
+  params.addParam<std::vector<unsigned int>>("new_ids", std::vector<unsigned int>(), "The list of new ids, This list should be either length \"existing_subdomains\" or "
+                                                                                     "\"existing_subdomains\" * layers");
   return params;
 }
 
-MeshExtruder::MeshExtruder(const InputParameters & parameters) :
-    MeshModifier(parameters),
+MeshExtruder::MeshExtruder(const InputParameters & parameters)
+  : MeshModifier(parameters),
     _extrusion_vector(getParam<RealVectorValue>("extrusion_vector")),
     _num_layers(getParam<unsigned int>("num_layers")),
-    _existing_subdomains(getParam<std::vector<SubdomainID> >("existing_subdomains")),
-    _layers(getParam<std::vector<unsigned int> >("layers")),
-    _new_ids(getParam<std::vector<unsigned int> >("new_ids"))
+    _existing_subdomains(getParam<std::vector<SubdomainID>>("existing_subdomains")),
+    _layers(getParam<std::vector<unsigned int>>("layers")),
+    _new_ids(getParam<std::vector<unsigned int>>("new_ids"))
 {
   // Check the length of the vectors
   if (_existing_subdomains.size() != _new_ids.size() && _existing_subdomains.size() * _layers.size() != _new_ids.size())
@@ -55,7 +56,7 @@ MeshExtruder::modify()
 {
   // When we clone, we're responsible to clean up after ourselves!
   // TODO: traditionally clone() methods return pointers...
-  MooseMesh * source_mesh =  &(_mesh_ptr->clone());
+  MooseMesh * source_mesh = &(_mesh_ptr->clone());
 
   if (source_mesh->getMesh().mesh_dimension() == 3)
     mooseError("You cannot extrude a 3D mesh!");
@@ -68,7 +69,7 @@ MeshExtruder::modify()
 
   // The first argument to build_extrusion() is required to be UnstructuredMesh&, a common
   // base class of both ReplicatedMesh and DistributedMesh, hence the dynamic_cast...
-  MeshTools::Generation::build_extrusion(dynamic_cast<libMesh::UnstructuredMesh&>(_mesh_ptr->getMesh()),
+  MeshTools::Generation::build_extrusion(dynamic_cast<libMesh::UnstructuredMesh &>(_mesh_ptr->getMesh()),
                                          source_mesh->getMesh(),
                                          _num_layers,
                                          _extrusion_vector,
@@ -84,9 +85,9 @@ MeshExtruder::modify()
 
   // Update the IDs
   if (isParamValid("bottom_sideset"))
-    changeID(getParam<std::vector<BoundaryName> >("bottom_sideset"), old_bottom);
+    changeID(getParam<std::vector<BoundaryName>>("bottom_sideset"), old_bottom);
   if (isParamValid("top_sideset"))
-    changeID(getParam<std::vector<BoundaryName> >("top_sideset"), old_top);
+    changeID(getParam<std::vector<BoundaryName>>("top_sideset"), old_top);
 
   // Update the dimension
   _mesh_ptr->getMesh().set_mesh_dimension(source_mesh->getMesh().mesh_dimension() + 1);
@@ -94,7 +95,6 @@ MeshExtruder::modify()
   // Clean up the source mesh we allocated
   delete source_mesh;
 }
-
 
 void
 MeshExtruder::changeID(const std::vector<BoundaryName> & names, BoundaryID old_id)
@@ -114,8 +114,8 @@ MeshExtruder::changeID(const std::vector<BoundaryName> & names, BoundaryID old_i
 MeshExtruder::QueryElemSubdomainID::QueryElemSubdomainID(std::vector<SubdomainID> existing_subdomains,
                                                          std::vector<unsigned int> layers,
                                                          std::vector<unsigned int> new_ids,
-                                                         unsigned int num_layers) :
-    QueryElemSubdomainIDBase(),
+                                                         unsigned int num_layers)
+  : QueryElemSubdomainIDBase(),
     _num_layers(num_layers)
 {
   // Setup our stride depending on whether the user passed unique sets in new ids or just a single set of new ids
@@ -134,7 +134,7 @@ MeshExtruder::QueryElemSubdomainID::get_subdomain_for_layer(const Elem * old_ele
   mooseAssert(layer < _num_layers, "Access out of bounds: " << layer);
 
   // First locate the layer if it exists
-  std::map<unsigned int, std::map<SubdomainID, unsigned int> >::const_iterator layer_it = _layer_data.find(layer);
+  std::map<unsigned int, std::map<SubdomainID, unsigned int>>::const_iterator layer_it = _layer_data.find(layer);
 
   if (layer_it == _layer_data.end())
     // If the layer wasn't found, there is no mapping so just return the original subdomain id

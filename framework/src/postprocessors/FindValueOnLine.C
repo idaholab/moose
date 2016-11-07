@@ -16,8 +16,9 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 
-template<>
-InputParameters validParams<FindValueOnLine>()
+template <>
+InputParameters
+validParams<FindValueOnLine>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addClassDescription("Find a specific target value along a sampling line. The variable values along the line should change monotonically. The target value is searched using a bisection algorithm.");
@@ -30,8 +31,8 @@ InputParameters validParams<FindValueOnLine>()
   return params;
 }
 
-FindValueOnLine::FindValueOnLine(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+FindValueOnLine::FindValueOnLine(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     Coupleable(this, false),
     _start_point(getParam<Point>("start_point")),
     _end_point(getParam<Point>("end_point")),

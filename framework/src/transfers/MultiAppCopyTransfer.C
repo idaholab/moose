@@ -26,8 +26,9 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/id_types.h"
 
-template<>
-InputParameters validParams<MultiAppCopyTransfer>()
+template <>
+InputParameters
+validParams<MultiAppCopyTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<VariableName>("variable", "The variable to store the transferred values in.");
@@ -36,8 +37,8 @@ InputParameters validParams<MultiAppCopyTransfer>()
   return params;
 }
 
-MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     _to_var_name(getParam<VariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
@@ -77,7 +78,7 @@ MultiAppCopyTransfer::transfer(FEProblem & to_problem, FEProblem & from_problem)
   if (to_var.feType() != from_var.feType())
     mooseError("The variables must be the same type (order and family).");
 
-  if ( (to_mesh.n_nodes() != from_mesh.n_nodes()) || (to_mesh.n_elem() != from_mesh.n_elem()))
+  if ((to_mesh.n_nodes() != from_mesh.n_nodes()) || (to_mesh.n_elem() != from_mesh.n_elem()))
     mooseError("The meshes must be identical to utilize MultiAppCopyTransfer.");
 
   // Transfer node dofs
@@ -95,7 +96,7 @@ MultiAppCopyTransfer::transfer(FEProblem & to_problem, FEProblem & from_problem)
   {
     to_elem = *elem_it;
     from_elem = from_mesh.elem_ptr(to_elem->id());
-    mooseAssert( to_elem->type() == from_elem->type(), "The elements must be the same type.");
+    mooseAssert(to_elem->type() == from_elem->type(), "The elements must be the same type.");
     transferDofObject(to_elem, from_elem, to_var, from_var);
   }
 

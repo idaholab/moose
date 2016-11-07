@@ -21,7 +21,7 @@
 //Forward Declarations
 class KernelGrad;
 
-template<>
+template <>
 InputParameters validParams<KernelGrad>();
 
 /**

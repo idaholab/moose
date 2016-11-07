@@ -20,7 +20,7 @@
 //Forward Declarations
 class IntersectionPointsAlongLine;
 
-template<>
+template <>
 InputParameters validParams<IntersectionPointsAlongLine>();
 
 /**

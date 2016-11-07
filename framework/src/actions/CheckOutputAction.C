@@ -20,15 +20,16 @@
 #include "CommonOutputAction.h"
 #include "AddVariableAction.h"
 
-template<>
-InputParameters validParams<CheckOutputAction>()
+template <>
+InputParameters
+validParams<CheckOutputAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-CheckOutputAction::CheckOutputAction(InputParameters params) :
-  Action(params)
+CheckOutputAction::CheckOutputAction(InputParameters params)
+  : Action(params)
 {
 }
 
@@ -53,7 +54,7 @@ CheckOutputAction::checkVariableOutput(const std::string & task)
     for (const auto & act : actions)
     {
       // Cast the object to AddVariableAction so that that OutputInterface::buildOutputHideVariableList may be called
-      AddVariableAction * ptr = dynamic_cast<AddVariableAction*>(act);
+      AddVariableAction * ptr = dynamic_cast<AddVariableAction *>(act);
 
       // If the cast fails move to the next action, this is the case with NodalNormals which is also associated with
       // the "add_aux_variable" task.
@@ -77,7 +78,7 @@ CheckOutputAction::checkMaterialOutput()
     return;
 
   // A complete list of all Material objects
-  const std::vector<MooseSharedPointer<Material> > & materials = _problem->getMaterialWarehouse().getActiveObjects();
+  const std::vector<MooseSharedPointer<Material>> & materials = _problem->getMaterialWarehouse().getActiveObjects();
 
   // TODO include boundary materials
 

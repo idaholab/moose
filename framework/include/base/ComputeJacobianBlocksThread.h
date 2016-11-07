@@ -27,12 +27,13 @@ class NonlinearSystem;
 class JacobianBlock
 {
 public:
-  JacobianBlock(libMesh::System & precond_system, SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar) :
-      _precond_system(precond_system),
+  JacobianBlock(libMesh::System & precond_system, SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar)
+    : _precond_system(precond_system),
       _jacobian(jacobian),
       _ivar(ivar),
       _jvar(jvar)
-    {}
+  {
+  }
 
   libMesh::System & _precond_system;
   SparseMatrix<Number> & _jacobian;
@@ -45,7 +46,7 @@ public:
 class ComputeJacobianBlocksThread : public ComputeFullJacobianThread
 {
 public:
-  ComputeJacobianBlocksThread(FEProblem & fe_problem, std::vector<JacobianBlock*> & blocks);
+  ComputeJacobianBlocksThread(FEProblem & fe_problem, std::vector<JacobianBlock *> & blocks);
 
   // Splitting Constructor
   ComputeJacobianBlocksThread(ComputeJacobianBlocksThread & x, Threads::split split);
@@ -53,12 +54,13 @@ public:
   virtual ~ComputeJacobianBlocksThread();
 
   void join(const ComputeJacobianThread & /*y*/)
-  {}
+  {
+  }
 
 protected:
   virtual void postElement(const Elem * elem) override;
 
-  std::vector<JacobianBlock*> _blocks;
+  std::vector<JacobianBlock *> _blocks;
 };
 
 #endif //COMPUTEJACOBIANBLOCKSTHREAD_H

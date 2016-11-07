@@ -14,13 +14,12 @@
 #include "InitialConditionWarehouse.h"
 #include "InitialCondition.h"
 
-InitialConditionWarehouse::InitialConditionWarehouse() :
-    MooseObjectWarehouseBase<InitialCondition>(),
+InitialConditionWarehouse::InitialConditionWarehouse()
+  : MooseObjectWarehouseBase<InitialCondition>(),
     _boundary_ics(libMesh::n_threads()),
     _block_ics(libMesh::n_threads())
 {
 }
-
 
 void
 InitialConditionWarehouse::initialSetup(THREAD_ID tid)
@@ -29,7 +28,6 @@ InitialConditionWarehouse::initialSetup(THREAD_ID tid)
   for (const auto & ic : _active_objects[tid])
     ic->initialSetup();
 }
-
 
 void
 InitialConditionWarehouse::addObject(MooseSharedPointer<InitialCondition> object, THREAD_ID tid)
@@ -43,7 +41,7 @@ InitialConditionWarehouse::addObject(MooseSharedPointer<InitialCondition> object
     if (!var.isNodal())
       mooseError("You are trying to set a boundary restricted variable on non-nodal variable. That is not allowed.");
 
-    std::map<std::string, std::set<BoundaryID> >::const_iterator iter = _boundary_ics[tid].find(var.name());
+    std::map<std::string, std::set<BoundaryID>>::const_iterator iter = _boundary_ics[tid].find(var.name());
     if (iter != _boundary_ics[tid].end() && object->hasBoundary(iter->second))
       mooseError("The initial condition '" << object->name() << "' is being defined on a boundary that already has an initial condition defined.");
     else
@@ -53,7 +51,7 @@ InitialConditionWarehouse::addObject(MooseSharedPointer<InitialCondition> object
   // Block Restricted
   else if (object->blockRestricted())
   {
-    std::map<std::string, std::set<SubdomainID> >::const_iterator iter = _block_ics[tid].find(var.name());
+    std::map<std::string, std::set<SubdomainID>>::const_iterator iter = _block_ics[tid].find(var.name());
     if (iter != _block_ics[tid].end() && (object->hasBlocks(iter->second) || (iter->second.find(Moose::ANY_BLOCK_ID) != iter->second.end())))
       mooseError("The initial condition '" << object->name() << "' is being defined on a block that already has an initial condition defined.");
     else
@@ -63,7 +61,7 @@ InitialConditionWarehouse::addObject(MooseSharedPointer<InitialCondition> object
   // Non-restricted
   else
   {
-    std::map<std::string, std::set<SubdomainID> >::const_iterator iter = _block_ics[tid].find(var.name());
+    std::map<std::string, std::set<SubdomainID>>::const_iterator iter = _block_ics[tid].find(var.name());
     if (iter != _block_ics[tid].end())
       mooseError("The initial condition '" << object->name() << "' is being defined on a block that already has an initial condition defined.");
     else

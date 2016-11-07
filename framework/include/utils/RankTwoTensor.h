@@ -30,7 +30,7 @@ class RankTwoTensor;
  * Helper function template specialization to set an object to zero.
  * Needed by DerivativeMaterialInterface
  */
-template<>
+template <>
 void mooseSetToZero<RankTwoTensor>(RankTwoTensor & v);
 
 /**
@@ -67,9 +67,9 @@ public:
   {
     autodetect = 0,
     isotropic1 = 1,
-    diagonal3  = 3,
+    diagonal3 = 3,
     symmetric6 = 6,
-    general    = 9
+    general = 9
   };
 
   /**
@@ -79,7 +79,10 @@ public:
   RankTwoTensor(const TypeVector<Real> & row1, const TypeVector<Real> & row2, const TypeVector<Real> & row3);
 
   /// Constructor that proxies the fillFromInputVector method
-  RankTwoTensor(const std::vector<Real> & input) { this->fillFromInputVector(input); };
+  RankTwoTensor(const std::vector<Real> & input)
+  {
+    this->fillFromInputVector(input);
+  };
 
   /// Initialization list replacement constructors, 6 arguments
   RankTwoTensor(Real S11, Real S22, Real S33, Real S23, Real S13, Real S12);
@@ -91,7 +94,10 @@ public:
   RankTwoTensor(const TypeTensor<Real> & a);
 
   // Named constructors
-  static RankTwoTensor Identity() { return RankTwoTensor(initIdentity); }
+  static RankTwoTensor Identity()
+  {
+    return RankTwoTensor(initIdentity);
+  }
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
   Real & operator()(unsigned int i, unsigned int j);
@@ -152,49 +158,49 @@ public:
   RankTwoTensor transpose() const;
 
   /// sets _vals to a, and returns _vals
-  RankTwoTensor & operator= (const RankTwoTensor & a);
+  RankTwoTensor & operator=(const RankTwoTensor & a);
 
   /// adds a to _vals
-  RankTwoTensor & operator+= (const RankTwoTensor & a);
+  RankTwoTensor & operator+=(const RankTwoTensor & a);
 
   /// returns _vals + a
-  RankTwoTensor operator+ (const RankTwoTensor & a) const;
+  RankTwoTensor operator+(const RankTwoTensor & a) const;
 
   /// sets _vals -= a and returns vals
-  RankTwoTensor & operator-= (const RankTwoTensor & a);
+  RankTwoTensor & operator-=(const RankTwoTensor & a);
 
   /// returns _vals - a
-  RankTwoTensor operator- (const RankTwoTensor & a) const;
+  RankTwoTensor operator-(const RankTwoTensor & a) const;
 
   /// returns -_vals
-  RankTwoTensor operator - () const;
+  RankTwoTensor operator-() const;
 
   /// performs _vals *= a
-  RankTwoTensor & operator*= (const Real a);
+  RankTwoTensor & operator*=(const Real a);
 
   /// returns _vals*a
-  RankTwoTensor operator* (const Real a) const;
+  RankTwoTensor operator*(const Real a) const;
 
   /// performs _vals /= a
-  RankTwoTensor & operator/= (const Real a);
+  RankTwoTensor & operator/=(const Real a);
 
   /// returns _vals/a
-  RankTwoTensor operator/ (const Real a) const;
+  RankTwoTensor operator/(const Real a) const;
 
   /// Defines multiplication with a vector to get a vector
-  TypeVector<Real> operator* (const TypeVector<Real> & a) const;
+  TypeVector<Real> operator*(const TypeVector<Real> & a) const;
 
   /// performs _vals *= a (component by component) and returns the result
-  RankTwoTensor & operator*= (const RankTwoTensor & a);
+  RankTwoTensor & operator*=(const RankTwoTensor & a);
 
   /// Defines multiplication with another RankTwoTensor
-  RankTwoTensor operator* (const RankTwoTensor & a) const;
+  RankTwoTensor operator*(const RankTwoTensor & a) const;
 
   /// Defines multiplication with a TypeTensor<Real>
-  RankTwoTensor operator* (const TypeTensor<Real> & a) const;
+  RankTwoTensor operator*(const TypeTensor<Real> & a) const;
 
   /// Defines logical equality with another RankTwoTensor
-  bool operator== (const RankTwoTensor & a) const;
+  bool operator==(const RankTwoTensor & a) const;
 
   /// returns _vals_ij * a_ij (sum on i, j)
   Real doubleContraction(const RankTwoTensor & a) const;
@@ -298,7 +304,6 @@ public:
    */
   RankTwoTensor ddet() const;
 
-
   /// Calculate the inverse of the tensor
   RankTwoTensor inverse() const;
 
@@ -368,21 +373,21 @@ public:
   /**
    * This function initializes random seed based on a user-defined number.
    */
-  static void initRandom( unsigned int );
+  static void initRandom(unsigned int);
 
   /**
    * This function generates a random unsymmetric rank two tensor.
    * The first real scales the random number.
    * The second real offsets the uniform random number
    */
-  static RankTwoTensor genRandomTensor( Real, Real );
+  static RankTwoTensor genRandomTensor(Real, Real);
 
   /**
    * This function generates a random symmetric rank two tensor.
    * The first real scales the random number.
    * The second real offsets the uniform random number
    */
-  static RankTwoTensor genRandomSymmTensor( Real, Real );
+  static RankTwoTensor genRandomSymmTensor(Real, Real);
 
   /// RankTwoTensor from outer product of vectors
   void vectorOuterProduct(const TypeVector<Real> &, const TypeVector<Real> &);
@@ -400,19 +405,22 @@ private:
   static const unsigned int N = LIBMESH_DIM;
   Real _vals[N][N];
 
-  template<class T>
+  template <class T>
   friend void dataStore(std::ostream &, T &, void *);
 
-  template<class T>
+  template <class T>
   friend void dataLoad(std::istream &, T &, void *);
 };
 
-inline RankTwoTensor operator*(Real a, const RankTwoTensor & b) { return b * a; }
+inline RankTwoTensor operator*(Real a, const RankTwoTensor & b)
+{
+  return b * a;
+}
 
-template<>
+template <>
 void dataStore(std::ostream & stream, RankTwoTensor &, void *);
 
-template<>
+template <>
 void dataLoad(std::istream & stream, RankTwoTensor &, void *);
 
 #endif //RANKTWOTENSOR_H

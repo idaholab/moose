@@ -18,8 +18,9 @@
 #include "SystemBase.h"
 #include "MooseVariable.h"
 
-template<>
-InputParameters validParams<BoundaryCondition>()
+template <>
+InputParameters
+validParams<BoundaryCondition>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
@@ -35,8 +36,8 @@ InputParameters validParams<BoundaryCondition>()
   return params;
 }
 
-BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool nodal) :
-    MooseObject(parameters),
+BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool nodal)
+  : MooseObject(parameters),
     BoundaryRestrictableRequired(parameters, nodal),
     SetupInterface(this),
     FunctionInterface(this),

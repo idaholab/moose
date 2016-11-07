@@ -18,8 +18,9 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<PointValue>()
+template <>
+InputParameters
+validParams<PointValue>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<VariableName>("variable", "The name of the variable that this postprocessor operates on.");
@@ -27,8 +28,8 @@ InputParameters validParams<PointValue>()
   return params;
 }
 
-PointValue::PointValue(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+PointValue::PointValue(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),
     _mesh(_subproblem.mesh()),

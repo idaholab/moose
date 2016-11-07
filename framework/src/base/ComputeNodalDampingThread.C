@@ -21,8 +21,8 @@
 // libMesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblem & feproblem) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(feproblem),
+ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblem & feproblem)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(feproblem),
     _damping(1.0),
     _nl(feproblem.getNonlinearSystem()),
     _nodal_dampers(_nl.getNodalDamperWarehouse())
@@ -30,8 +30,8 @@ ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblem & feproblem) :
 }
 
 // Splitting Constructor
-ComputeNodalDampingThread::ComputeNodalDampingThread(ComputeNodalDampingThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+ComputeNodalDampingThread::ComputeNodalDampingThread(ComputeNodalDampingThread & x, Threads::split split)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _damping(1.0),
     _nl(x._nl),
     _nodal_dampers(x._nodal_dampers)
@@ -50,13 +50,13 @@ ComputeNodalDampingThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   std::set<MooseVariable *> damped_vars;
 
-  const std::vector<MooseSharedPointer<NodalDamper> > & ndampers = _nl.getNodalDamperWarehouse().getActiveObjects(_tid);
+  const std::vector<MooseSharedPointer<NodalDamper>> & ndampers = _nl.getNodalDamperWarehouse().getActiveObjects(_tid);
   for (const auto & damper : ndampers)
     damped_vars.insert(damper->getVariable());
 
   _nl.reinitIncrementAtNodeForDampers(_tid, damped_vars);
 
-  const std::vector<MooseSharedPointer<NodalDamper> > & objects = _nodal_dampers.getActiveObjects(_tid);
+  const std::vector<MooseSharedPointer<NodalDamper>> & objects = _nodal_dampers.getActiveObjects(_tid);
   for (const auto & obj : objects)
   {
     Real cur_damping = obj->computeDamping();

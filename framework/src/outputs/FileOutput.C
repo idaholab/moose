@@ -23,8 +23,9 @@
 #include <unistd.h>
 #include <time.h>
 
-template<>
-InputParameters validParams<FileOutput>()
+template <>
+InputParameters
+validParams<FileOutput>()
 {
   // Create InputParameters object for this stand-alone object
   InputParameters params = validParams<PetscOutput>();
@@ -33,17 +34,17 @@ InputParameters validParams<FileOutput>()
   params.addParam<std::string>("append_date_format", "The format of the date/time to append, if not given UTC format used (see http://www.cplusplus.com/reference/ctime/strftime).");
   // Add the padding option and list it as 'Advanced'
   params.addParam<unsigned int>("padding", 4, "The number of for extension suffix (e.g., out.e-s002)");
-  params.addParam<std::vector<std::string> >("output_if_base_contains", std::vector<std::string>(), "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputting only a subset of outputs when using MultiApps.");
+  params.addParam<std::vector<std::string>>("output_if_base_contains", std::vector<std::string>(), "If this is supplied then output will only be done in the case that the output base contains one of these strings.  This is helpful in outputting only a subset of outputs when using MultiApps.");
   params.addParamNamesToGroup("padding output_if_base_contains", "Advanced");
 
   return params;
 }
 
-FileOutput::FileOutput(const InputParameters & parameters) :
-    PetscOutput(parameters),
+FileOutput::FileOutput(const InputParameters & parameters)
+  : PetscOutput(parameters),
     _file_num(declareRecoverableData<unsigned int>("file_num", 0)),
     _padding(getParam<unsigned int>("padding")),
-    _output_if_base_contains(parameters.get<std::vector<std::string> >("output_if_base_contains"))
+    _output_if_base_contains(parameters.get<std::vector<std::string>>("output_if_base_contains"))
 {
   // If restarting reset the file number
   if (_app.isRestarting())

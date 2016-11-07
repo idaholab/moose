@@ -15,15 +15,16 @@
 #include "AddDiracKernelAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddDiracKernelAction>()
+template <>
+InputParameters
+validParams<AddDiracKernelAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   return params;
 }
 
-AddDiracKernelAction::AddDiracKernelAction(InputParameters params) :
-    MooseObjectAction(params)
+AddDiracKernelAction::AddDiracKernelAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

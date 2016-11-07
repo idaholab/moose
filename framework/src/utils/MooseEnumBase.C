@@ -25,8 +25,8 @@
 
 const int MooseEnumBase::INVALID_ID = std::numeric_limits<int>::min();
 
-MooseEnumBase::MooseEnumBase(std::string names, bool allow_out_of_range) :
-    _out_of_range_index(allow_out_of_range ? INVALID_ID + 1 : 0)
+MooseEnumBase::MooseEnumBase(std::string names, bool allow_out_of_range)
+  : _out_of_range_index(allow_out_of_range ? INVALID_ID + 1 : 0)
 {
   if (names.find(',') != std::string::npos)
   {
@@ -37,8 +37,8 @@ MooseEnumBase::MooseEnumBase(std::string names, bool allow_out_of_range) :
     fillNames(names);
 }
 
-MooseEnumBase::MooseEnumBase(const MooseEnumBase & other_enum) :
-    _names(other_enum._names),
+MooseEnumBase::MooseEnumBase(const MooseEnumBase & other_enum)
+  : _names(other_enum._names),
     _raw_names(other_enum._raw_names),
     _name_to_id(other_enum._name_to_id),
     _deprecated_names(other_enum._deprecated_names),
@@ -75,13 +75,13 @@ MooseEnumBase::fillNames(std::string names, std::string option_delim)
   MooseUtils::tokenize(names, elements, 1, option_delim);
 
   _names.resize(elements.size());
-  int value=0;
-  for (unsigned int i=0; i<elements.size(); ++i)
+  int value = 0;
+  for (unsigned int i = 0; i < elements.size(); ++i)
   {
     std::vector<std::string> name_value;
 
     // Make sure the option is not malformed
-    if (elements[i].find_first_of('=') == 0 || elements[i].find_last_of('=') == elements[i].length()-1)
+    if (elements[i].find_first_of('=') == 0 || elements[i].find_last_of('=') == elements[i].length() - 1)
       mooseError("You cannot place whitespace around the '=' character in MooseEnumBase");
 
     // split on equals sign

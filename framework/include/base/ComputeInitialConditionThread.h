@@ -29,7 +29,7 @@ public:
   // Splitting Constructor
   ComputeInitialConditionThread(ComputeInitialConditionThread & x, Threads::split split);
 
-  void operator() (const ConstElemRange & range);
+  void operator()(const ConstElemRange & range);
   void join(const ComputeInitialConditionThread & /*y*/);
 
 protected:

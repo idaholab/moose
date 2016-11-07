@@ -27,16 +27,17 @@
 #include "libmesh/threads.h"
 
 ComputeDiracThread::ComputeDiracThread(FEProblem & feproblem,
-                                       SparseMatrix<Number> * jacobian) :
-    ThreadedElementLoop<DistElemRange>(feproblem),
+                                       SparseMatrix<Number> * jacobian)
+  : ThreadedElementLoop<DistElemRange>(feproblem),
     _jacobian(jacobian),
     _nl(feproblem.getNonlinearSystem()),
     _dirac_kernels(_nl.getDiracKernelWarehouse())
-{}
+{
+}
 
 // Splitting Constructor
-ComputeDiracThread::ComputeDiracThread(ComputeDiracThread & x, Threads::split split) :
-    ThreadedElementLoop<DistElemRange>(x, split),
+ComputeDiracThread::ComputeDiracThread(ComputeDiracThread & x, Threads::split split)
+  : ThreadedElementLoop<DistElemRange>(x, split),
     _jacobian(x._jacobian),
     _nl(x._nl),
     _dirac_kernels(x._dirac_kernels)
@@ -63,7 +64,6 @@ ComputeDiracThread::subdomainChanged()
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
 }
 
-
 void
 ComputeDiracThread::onElement(const Elem * elem)
 {
@@ -72,7 +72,7 @@ ComputeDiracThread::onElement(const Elem * elem)
     return;
 
   std::set<MooseVariable *> needed_moose_vars;
-  const std::vector<MooseSharedPointer<DiracKernel> > & dkernels = _dirac_kernels.getActiveObjects(_tid);
+  const std::vector<MooseSharedPointer<DiracKernel>> & dkernels = _dirac_kernels.getActiveObjects(_tid);
 
   // Only call reinitMaterials() if one or more DiracKernels has
   // actually called getMaterialProperty().  Loop over all the
@@ -103,14 +103,14 @@ ComputeDiracThread::onElement(const Elem * elem)
       else
       {
         // Get a list of coupled variables from the SubProblem
-        std::vector<std::pair<MooseVariable *, MooseVariable *> > & coupling_entries =
-          dirac_kernel->subProblem().assembly(_tid).couplingEntries();
+        std::vector<std::pair<MooseVariable *, MooseVariable *>> & coupling_entries =
+            dirac_kernel->subProblem().assembly(_tid).couplingEntries();
 
         // Loop over the list of coupled variable pairs
         {
-          std::vector<std::pair<MooseVariable *, MooseVariable *> >::iterator
-            var_pair_iter = coupling_entries.begin(),
-            var_pair_end = coupling_entries.end();
+          std::vector<std::pair<MooseVariable *, MooseVariable *>>::iterator
+              var_pair_iter = coupling_entries.begin(),
+              var_pair_end = coupling_entries.end();
 
           for (; var_pair_iter != var_pair_end; ++var_pair_iter)
           {
@@ -122,10 +122,7 @@ ComputeDiracThread::onElement(const Elem * elem)
             // only want to call computeOffDiagJacobian() if both
             // variables are active on this subdomain, and the
             // off-diagonal variable actually has dofs.
-            if (dirac_kernel->variable().number() == ivariable->number()
-                && ivariable->activeOnSubdomain(_subdomain)
-                && jvariable->activeOnSubdomain(_subdomain)
-                && (jvariable->numberOfDofs() > 0))
+            if (dirac_kernel->variable().number() == ivariable->number() && ivariable->activeOnSubdomain(_subdomain) && jvariable->activeOnSubdomain(_subdomain) && (jvariable->numberOfDofs() > 0))
             {
               dirac_kernel->subProblem().prepareShapes(jvariable->number(), _tid);
               dirac_kernel->computeOffDiagJacobian(jvariable->number());

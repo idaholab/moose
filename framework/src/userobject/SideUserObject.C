@@ -17,8 +17,9 @@
 #include "MooseTypes.h"
 #include "Assembly.h"
 
-template<>
-InputParameters validParams<SideUserObject>()
+template <>
+InputParameters
+validParams<SideUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<BoundaryRestrictableRequired>();
@@ -26,8 +27,8 @@ InputParameters validParams<SideUserObject>()
   return params;
 }
 
-SideUserObject::SideUserObject(const InputParameters & parameters) :
-    UserObject(parameters),
+SideUserObject::SideUserObject(const InputParameters & parameters)
+  : UserObject(parameters),
     BoundaryRestrictableRequired(parameters, false), // false for applying to sidesets
     MaterialPropertyInterface(this, boundaryIDs()),
     Coupleable(this, false),

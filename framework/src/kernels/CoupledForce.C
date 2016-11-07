@@ -14,8 +14,9 @@
 
 #include "CoupledForce.h"
 
-template<>
-InputParameters validParams<CoupledForce>()
+template <>
+InputParameters
+validParams<CoupledForce>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -24,8 +25,8 @@ InputParameters validParams<CoupledForce>()
   return params;
 }
 
-CoupledForce::CoupledForce(const InputParameters & parameters) :
-    Kernel(parameters),
+CoupledForce::CoupledForce(const InputParameters & parameters)
+  : Kernel(parameters),
     _v_var(coupled("v")),
     _v(coupledValue("v"))
 {
@@ -34,7 +35,7 @@ CoupledForce::CoupledForce(const InputParameters & parameters) :
 Real
 CoupledForce::computeQpResidual()
 {
-  return -_v[_qp]*_test[_i][_qp];
+  return -_v[_qp] * _test[_i][_qp];
 }
 
 Real
@@ -47,7 +48,6 @@ Real
 CoupledForce::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_var)
-    return -_phi[_j][_qp]*_test[_i][_qp];
+    return -_phi[_j][_qp] * _test[_i][_qp];
   return 0.0;
 }
-

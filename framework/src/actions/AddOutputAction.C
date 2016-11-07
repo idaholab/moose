@@ -27,15 +27,16 @@
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/explicit_system.h"
 
-template<>
-InputParameters validParams<AddOutputAction>()
+template <>
+InputParameters
+validParams<AddOutputAction>()
 {
-   InputParameters params = validParams<MooseObjectAction>();
-   return params;
+  InputParameters params = validParams<MooseObjectAction>();
+  return params;
 }
 
-AddOutputAction::AddOutputAction(InputParameters params) :
-    MooseObjectAction(params)
+AddOutputAction::AddOutputAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 
@@ -59,7 +60,7 @@ AddOutputAction::act()
     mooseError("An output object named '" << _name << "' already exists");
 
   // Add a pointer to the FEProblem class
-  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem",  _problem.get());
+  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem", _problem.get());
 
   // Create common parameter exclude list
   std::vector<std::string> exclude;

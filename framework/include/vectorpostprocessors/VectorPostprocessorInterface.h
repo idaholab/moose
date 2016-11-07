@@ -105,7 +105,6 @@ public:
    */
   bool hasVectorPostprocessorByName(const VectorPostprocessorName & name) const;
 
-
 private:
   /// VectorPostprocessorInterface Parameters
   const InputParameters & _vpi_params;

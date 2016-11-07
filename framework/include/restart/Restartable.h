@@ -58,7 +58,6 @@ public:
   virtual ~Restartable() = default;
 
 protected:
-
   /**
    * Declare a piece of data as "restartable".
    * This means that in the event of a restart this piece of data
@@ -68,7 +67,7 @@ protected:
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
    */
-  template<typename T>
+  template <typename T>
   T & declareRestartableData(std::string data_name);
 
   /**
@@ -81,7 +80,7 @@ protected:
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param init_value The initial value of the data
    */
-  template<typename T>
+  template <typename T>
   T & declareRestartableData(std::string data_name, const T & init_value);
 
   /**
@@ -94,7 +93,7 @@ protected:
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param context Context pointer that will be passed to the load and store functions
    */
-  template<typename T>
+  template <typename T>
   T & declareRestartableDataWithContext(std::string data_name, void * context);
 
   /**
@@ -108,9 +107,8 @@ protected:
    * @param init_value The initial value of the data
    * @param context Context pointer that will be passed to the load and store functions
    */
-  template<typename T>
+  template <typename T>
   T & declareRestartableDataWithContext(std::string data_name, const T & init_value, void * context);
-
 
 private:
   /**
@@ -125,7 +123,7 @@ private:
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param object_name A supplied name for the object that is declaring this data.
    */
-  template<typename T>
+  template <typename T>
   T & declareRestartableDataWithObjectName(std::string data_name, std::string object_name);
 
   /**
@@ -141,7 +139,7 @@ private:
    * @param object_name A supplied name for the object that is declaring this data.
    * @param context Context pointer that will be passed to the load and store functions
    */
-  template<typename T>
+  template <typename T>
   T & declareRestartableDataWithObjectNameWithContext(std::string data_name, std::string object_name, void * context);
 
   /**
@@ -157,7 +155,7 @@ private:
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
    */
-  template<typename T>
+  template <typename T>
   T & declareRecoverableData(std::string data_name);
 
   /**
@@ -174,7 +172,7 @@ private:
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param init_value The initial value of the data
    */
-  template<typename T>
+  template <typename T>
   T & declareRecoverableData(std::string data_name, const T & init_value);
 
   /// Helper function so we don't have to include SubProblem in the header
@@ -210,21 +208,21 @@ private:
   friend class TransientMultiApp;
 };
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRestartableData(std::string data_name)
 {
   return declareRestartableDataWithContext<T>(data_name, NULL);
 }
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRestartableData(std::string data_name, const T & init_value)
 {
   return declareRestartableDataWithContext<T>(data_name, init_value, NULL);
 }
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRestartableDataWithContext(std::string data_name, void * context)
 {
@@ -239,7 +237,7 @@ Restartable::declareRestartableDataWithContext(std::string data_name, void * con
   return data_ptr->get();
 }
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRestartableDataWithContext(std::string data_name, const T & init_value, void * context)
 {
@@ -256,14 +254,14 @@ Restartable::declareRestartableDataWithContext(std::string data_name, const T & 
   return data_ptr->get();
 }
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRestartableDataWithObjectName(std::string data_name, std::string object_name)
 {
   return declareRestartableDataWithObjectNameWithContext<T>(data_name, object_name, NULL);
 }
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRestartableDataWithObjectNameWithContext(std::string data_name, std::string object_name, void * context)
 {
@@ -278,7 +276,7 @@ Restartable::declareRestartableDataWithObjectNameWithContext(std::string data_na
   return value;
 }
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRecoverableData(std::string data_name)
 {
@@ -292,7 +290,7 @@ Restartable::declareRecoverableData(std::string data_name)
   return declareRestartableDataWithContext<T>(data_name, NULL);
 }
 
-template<typename T>
+template <typename T>
 T &
 Restartable::declareRecoverableData(std::string data_name, const T & init_value)
 {
@@ -305,6 +303,5 @@ Restartable::declareRecoverableData(std::string data_name, const T & init_value)
 
   return declareRestartableDataWithContext<T>(data_name, init_value, NULL);
 }
-
 
 #endif // RESTARTABLE

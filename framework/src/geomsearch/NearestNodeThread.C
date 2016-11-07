@@ -19,18 +19,18 @@
 #include "libmesh/threads.h"
 
 NearestNodeThread::NearestNodeThread(const MooseMesh & mesh,
-                                     std::map<dof_id_type, std::vector<dof_id_type> > & neighbor_nodes) :
-  _max_patch_percentage(0.0),
-  _mesh(mesh),
-  _neighbor_nodes(neighbor_nodes)
+                                     std::map<dof_id_type, std::vector<dof_id_type>> & neighbor_nodes)
+  : _max_patch_percentage(0.0),
+    _mesh(mesh),
+    _neighbor_nodes(neighbor_nodes)
 {
 }
 
 // Splitting Constructor
-NearestNodeThread::NearestNodeThread(NearestNodeThread & x, Threads::split /*split*/) :
-  _max_patch_percentage(x._max_patch_percentage),
-  _mesh(x._mesh),
-  _neighbor_nodes(x._neighbor_nodes)
+NearestNodeThread::NearestNodeThread(NearestNodeThread & x, Threads::split /*split*/)
+  : _max_patch_percentage(x._max_patch_percentage),
+    _mesh(x._mesh),
+    _neighbor_nodes(x._neighbor_nodes)
 {
 }
 
@@ -40,7 +40,8 @@ NearestNodeThread::NearestNodeThread(NearestNodeThread & x, Threads::split /*spl
  * then it may be time to update
  */
 void
-NearestNodeThread::operator() (const NodeIdRange & range)
+    NearestNodeThread::
+    operator()(const NodeIdRange & range)
 {
   for (const auto & node_id : range)
   {
@@ -53,7 +54,7 @@ NearestNodeThread::operator() (const NodeIdRange & range)
 
     unsigned int n_neighbor_nodes = neighbor_nodes.size();
 
-    for (unsigned int k=0; k<n_neighbor_nodes; k++)
+    for (unsigned int k = 0; k < n_neighbor_nodes; k++)
     {
       const Node * cur_node = &_mesh.nodeRef(neighbor_nodes[k]);
       Real distance = ((*cur_node) - node).norm();

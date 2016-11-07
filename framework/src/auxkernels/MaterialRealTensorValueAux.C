@@ -14,17 +14,18 @@
 
 #include "MaterialRealTensorValueAux.h"
 
-template<>
-InputParameters validParams<MaterialRealTensorValueAux>()
+template <>
+InputParameters
+validParams<MaterialRealTensorValueAux>()
 {
-  InputParameters params = validParams<MaterialAuxBase<> >();
+  InputParameters params = validParams<MaterialAuxBase<>>();
   params.addParam<unsigned int>("row", 0, "The row component to consider for this kernel");
   params.addParam<unsigned int>("column", 0, "The column component to consider for this kernel");
   return params;
 }
 
-MaterialRealTensorValueAux::MaterialRealTensorValueAux(const InputParameters & parameters) :
-    MaterialAuxBase<RealTensorValue>(parameters),
+MaterialRealTensorValueAux::MaterialRealTensorValueAux(const InputParameters & parameters)
+  : MaterialAuxBase<RealTensorValue>(parameters),
     _row(getParam<unsigned int>("row")),
     _col(getParam<unsigned int>("column"))
 {

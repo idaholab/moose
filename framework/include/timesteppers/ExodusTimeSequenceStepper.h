@@ -19,7 +19,7 @@
 
 class ExodusTimeSequenceStepper;
 
-template<>
+template <>
 InputParameters validParams<ExodusTimeSequenceStepper>();
 
 /**

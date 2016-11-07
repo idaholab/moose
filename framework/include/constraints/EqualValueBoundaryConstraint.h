@@ -19,7 +19,7 @@
 
 class EqualValueBoundaryConstraint;
 
-template<>
+template <>
 InputParameters validParams<EqualValueBoundaryConstraint>();
 
 class EqualValueBoundaryConstraint : public NodalConstraint

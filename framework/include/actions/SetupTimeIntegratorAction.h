@@ -19,7 +19,7 @@
 
 class SetupTimeIntegratorAction;
 
-template<>
+template <>
 InputParameters validParams<SetupTimeIntegratorAction>();
 
 /**
@@ -32,6 +32,5 @@ public:
 
   virtual void act() override;
 };
-
 
 #endif /* SETUPTIMEINTEGRATORACTION_H */

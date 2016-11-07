@@ -16,8 +16,9 @@
 #include "RealFunctionControl.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<RealFunctionControl>()
+template <>
+InputParameters
+validParams<RealFunctionControl>()
 {
   InputParameters params = validParams<Control>();
 
@@ -26,8 +27,8 @@ InputParameters validParams<RealFunctionControl>()
   return params;
 }
 
-RealFunctionControl::RealFunctionControl(const InputParameters & parameters) :
-    Control(parameters),
+RealFunctionControl::RealFunctionControl(const InputParameters & parameters)
+  : Control(parameters),
     _function(getFunction("function"))
 {
 }

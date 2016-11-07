@@ -19,7 +19,7 @@
 
 class QuotientScalarAux;
 
-template<>
+template <>
 InputParameters validParams<QuotientScalarAux>();
 
 /**

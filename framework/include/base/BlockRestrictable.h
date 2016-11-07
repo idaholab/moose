@@ -26,7 +26,7 @@ class BlockRestrictable;
 class FEProblem;
 class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<BlockRestrictable>();
 
 /**
@@ -61,7 +61,6 @@ InputParameters validParams<BlockRestrictable>();
 class BlockRestrictable
 {
 public:
-
   /**
    * Class constructor
    * Populates the 'block' input parameters, see the general class documentation for details.
@@ -82,7 +81,9 @@ public:
    * Destructor: does nothing but needs to be marked as virtual since
    * this class defines virtual functions.
    */
-  virtual ~BlockRestrictable() {}
+  virtual ~BlockRestrictable()
+  {
+  }
 
   /**
    * Return the block names for this object
@@ -171,7 +172,8 @@ public:
    *
    * @see Material::hasBlockMaterialProperty
    */
-  template<typename T> bool hasBlockMaterialProperty(const std::string & prop_name);
+  template <typename T>
+  bool hasBlockMaterialProperty(const std::string & prop_name);
 
   /**
    * Return all of the SubdomainIDs for the mesh
@@ -186,7 +188,6 @@ public:
   virtual bool blockRestricted();
 
 protected:
-
   /// Pointer to the MaterialData class for this object
   MooseSharedPointer<MaterialData> _blk_material_data;
 
@@ -203,7 +204,6 @@ protected:
   void initializeBlockRestrictable(const InputParameters & parameters);
 
 private:
-
   /// Set of block ids supplied by the user via the input file
   std::set<SubdomainID> _blk_ids;
 
@@ -235,10 +235,9 @@ private:
    * @param parameters A reference to the input parameters supplied to the object
    */
   std::set<SubdomainID> variableSubdomainIDs(const InputParameters & parameters) const;
-
 };
 
-template<typename T>
+template <typename T>
 bool
 BlockRestrictable::hasBlockMaterialProperty(const std::string & prop_name)
 {

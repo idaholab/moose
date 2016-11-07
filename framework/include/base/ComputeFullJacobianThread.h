@@ -31,7 +31,9 @@ public:
 
   virtual ~ComputeFullJacobianThread();
 
-  void join(const ComputeJacobianThread & /*y*/) {}
+  void join(const ComputeJacobianThread & /*y*/)
+  {
+  }
 
 protected:
   virtual void computeJacobian() override;

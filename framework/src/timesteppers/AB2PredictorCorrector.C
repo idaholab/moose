@@ -30,22 +30,23 @@
 #include <iostream>
 #include <fstream>
 
-template<>
-InputParameters validParams<AB2PredictorCorrector>()
+template <>
+InputParameters
+validParams<AB2PredictorCorrector>()
 {
   InputParameters params = validParams<TimeStepper>();
-  params.addRequiredParam<Real>("e_tol","Target error tolerance.");
-  params.addRequiredParam<Real>("e_max","Maximum acceptable error.");
+  params.addRequiredParam<Real>("e_tol", "Target error tolerance.");
+  params.addRequiredParam<Real>("e_max", "Maximum acceptable error.");
   params.addRequiredParam<Real>("dt", "Initial time step size");
-  params.addParam<Real>("max_increase", 1.0e9,    "Maximum ratio that the time step can increase.");
-  params.addParam<int>("steps_between_increase",1,"the number of time steps before recalculating dt");
-  params.addParam<int>("start_adapting",2, "when to start taking adaptive time steps");
+  params.addParam<Real>("max_increase", 1.0e9, "Maximum ratio that the time step can increase.");
+  params.addParam<int>("steps_between_increase", 1, "the number of time steps before recalculating dt");
+  params.addParam<int>("start_adapting", 2, "when to start taking adaptive time steps");
   params.addParam<Real>("scaling_parameter", .8, "scaling parameter for dt selection");
   return params;
 }
 
-AB2PredictorCorrector::AB2PredictorCorrector(const InputParameters & parameters) :
-    TimeStepper(parameters),
+AB2PredictorCorrector::AB2PredictorCorrector(const InputParameters & parameters)
+  : TimeStepper(parameters),
     _u1(_fe_problem.getNonlinearSystem().addVector("u1", true, GHOSTED)),
     _aux1(_fe_problem.getAuxiliarySystem().addVector("aux1", true, GHOSTED)),
     _pred1(_fe_problem.getNonlinearSystem().addVector("pred1", true, GHOSTED)),
@@ -65,7 +66,6 @@ AB2PredictorCorrector::AB2PredictorCorrector(const InputParameters & parameters)
   InputParameters params = _app.getFactory().getValidParams("AdamsPredictor");
   params.set<Real>("scale") = predscale;
   _fe_problem.addPredictor("AdamsPredictor", "adamspredictor", params);
-
 }
 
 void
@@ -148,7 +148,7 @@ AB2PredictorCorrector::computeDT()
     Real new_dt = _dt_full * _scaling_parameter * std::pow(_infnorm * _e_tol / _error, 1.0 / 3.0);
 
     if (new_dt / _dt_full > _max_increase)
-      new_dt = _dt_full*_max_increase;
+      new_dt = _dt_full * _max_increase;
     _dt_steps_taken = 0;
     return new_dt;
   }
@@ -177,7 +177,7 @@ AB2PredictorCorrector::stringtoint(std::string string)
 Real
 AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
 {
- _pred1 = _fe_problem.getNonlinearSystem().getPredictor()->solutionPredictor();
+  _pred1 = _fe_problem.getNonlinearSystem().getPredictor()->solutionPredictor();
   TimeIntegrator * ti = _fe_problem.getNonlinearSystem().getTimeIntegrator();
   std::string scheme = ti->name();
   Real dt_old = _my_dt_old;
@@ -186,37 +186,36 @@ AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
 
   switch (stringtoint(scheme))
   {
-  case 1:
-  {
-    // NOTE: this is never called, since stringtoint does not return 1 - EVER!
-    //I am not sure this is actually correct.
-    _pred1 *= -1;
-    _pred1 += solution;
-    Real calc = _dt * _dt * .5;
-    _pred1 *= calc;
-    return _pred1.l2_norm();
-  }
-  case 2:
-  {
-    // Crank Nicolson
-    _pred1 -= solution;
-    _pred1 *= (_dt) / (3.0 * (_dt + dt_old));
-    return _pred1.l2_norm();
-  }
-  case 3:
-  {
-    // BDF2
-    _pred1 *= -1.0;
-    _pred1 += solution;
-    Real topcalc = 2.0 * (_dt + dt_old) * (_dt + dt_old);
-    Real bottomcalc = 6.0 * _dt * _dt + 12.0 * _dt * dt_old + 5.0 * dt_old * dt_old;
-    _pred1 *= topcalc / bottomcalc;
+    case 1:
+    {
+      // NOTE: this is never called, since stringtoint does not return 1 - EVER!
+      //I am not sure this is actually correct.
+      _pred1 *= -1;
+      _pred1 += solution;
+      Real calc = _dt * _dt * .5;
+      _pred1 *= calc;
+      return _pred1.l2_norm();
+    }
+    case 2:
+    {
+      // Crank Nicolson
+      _pred1 -= solution;
+      _pred1 *= (_dt) / (3.0 * (_dt + dt_old));
+      return _pred1.l2_norm();
+    }
+    case 3:
+    {
+      // BDF2
+      _pred1 *= -1.0;
+      _pred1 += solution;
+      Real topcalc = 2.0 * (_dt + dt_old) * (_dt + dt_old);
+      Real bottomcalc = 6.0 * _dt * _dt + 12.0 * _dt * dt_old + 5.0 * dt_old * dt_old;
+      _pred1 *= topcalc / bottomcalc;
 
-    return _pred1.l2_norm();
-  }
-  default:
-    break;
+      return _pred1.l2_norm();
+    }
+    default:
+      break;
   }
   return -1;
 }
-

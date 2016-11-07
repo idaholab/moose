@@ -23,8 +23,8 @@
 #include "libmesh/error_vector.h"
 
 UpdateErrorVectorsThread::UpdateErrorVectorsThread(FEProblem & fe_problem,
-                                                   const std::map<std::string, std::unique_ptr<ErrorVector> > & indicator_field_to_error_vector) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem),
+                                                   const std::map<std::string, std::unique_ptr<ErrorVector>> & indicator_field_to_error_vector)
+  : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _indicator_field_to_error_vector(indicator_field_to_error_vector),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _system_number(_aux_sys.number()),
@@ -40,8 +40,8 @@ UpdateErrorVectorsThread::UpdateErrorVectorsThread(FEProblem & fe_problem,
 }
 
 // Splitting Constructor
-UpdateErrorVectorsThread::UpdateErrorVectorsThread(UpdateErrorVectorsThread & x, Threads::split split) :
-    ThreadedElementLoop<ConstElemRange>(x, split),
+UpdateErrorVectorsThread::UpdateErrorVectorsThread(UpdateErrorVectorsThread & x, Threads::split split)
+  : ThreadedElementLoop<ConstElemRange>(x, split),
     _indicator_field_to_error_vector(x._indicator_field_to_error_vector),
     _aux_sys(x._aux_sys),
     _system_number(x._system_number),

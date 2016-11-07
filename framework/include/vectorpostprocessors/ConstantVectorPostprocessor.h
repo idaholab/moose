@@ -20,7 +20,7 @@
 //Forward Declarations
 class ConstantVectorPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ConstantVectorPostprocessor>();
 
 class ConstantVectorPostprocessor : public GeneralVectorPostprocessor

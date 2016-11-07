@@ -24,8 +24,8 @@
 #include "XTermConstants.h"
 #include "InfixIterator.h"
 
-ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory) :
-    ConsoleStreamInterface(app),
+ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory)
+  : ConsoleStreamInterface(app),
     _app(app),
     _syntax(syntax),
     _action_factory(factory),
@@ -79,10 +79,10 @@ ActionWarehouse::addActionBlock(MooseSharedPointer<Action> action)
   std::set<std::string> tasks;
 
   if (_show_parser)
-    Moose::err << COLOR_DEFAULT << "Parsing Syntax:        " << COLOR_GREEN   << action->name() << '\n'
+    Moose::err << COLOR_DEFAULT << "Parsing Syntax:        " << COLOR_GREEN << action->name() << '\n'
                << COLOR_DEFAULT << "Building Action:       " << COLOR_DEFAULT << action->type() << '\n'
-               << COLOR_DEFAULT << "Registered Identifier: " << COLOR_GREEN   << registered_identifier << '\n'
-               << COLOR_DEFAULT << "Specific Task:         " << COLOR_CYAN    << action->specificTaskName() << '\n';
+               << COLOR_DEFAULT << "Registered Identifier: " << COLOR_GREEN << registered_identifier << '\n'
+               << COLOR_DEFAULT << "Specific Task:         " << COLOR_CYAN << action->specificTaskName() << '\n';
 
   /**
    * We need to see if the current Action satisfies multiple tasks. There are a few cases to consider:
@@ -101,17 +101,16 @@ ActionWarehouse::addActionBlock(MooseSharedPointer<Action> action)
    *    case where we have a Parser-built Action that does not have a specific task name to satisfy.
    *    We will use the Action "type" to retrieve the list of tasks that this Action may satisfy.
    */
-  if (action->specificTaskName() != "")           // Case 1
+  if (action->specificTaskName() != "") // Case 1
     tasks.insert(action->specificTaskName());
-  else if (registered_identifier == "")           // Case 2
+  else if (registered_identifier == "") // Case 2
   {
     std::set<std::string> local_tasks = action->getAllTasks();
     mooseAssert(local_tasks.size() == 1, "More than one task inside of the " << action->name());
     tasks.insert(*local_tasks.begin());
   }
-  else                                            // Case 3
+  else // Case 3
     tasks = _action_factory.getTasksByAction(action->type());
-
 
   //TODO: Now we need to weed out the double registrations!
   for (const auto & task : tasks)
@@ -168,7 +167,7 @@ ActionWarehouse::actionBlocksWithActionEnd(const std::string & task)
 const std::vector<Action *> &
 ActionWarehouse::getActionsByName(const std::string & task) const
 {
-  std::map<std::string, std::vector<Action *> >::const_iterator it = _action_blocks.find(task);
+  std::map<std::string, std::vector<Action *>>::const_iterator it = _action_blocks.find(task);
   if (it == _action_blocks.end())
     mooseError("The task " << task << " does not exist.");
   return it->second;
@@ -181,7 +180,7 @@ ActionWarehouse::hasActions(const std::string & task) const
 }
 
 void
-ActionWarehouse::buildBuildableActions(const std::string &task)
+ActionWarehouse::buildBuildableActions(const std::string & task)
 {
   if (_syntax.isActionRequired(task) && _action_blocks[task].empty())
   {
@@ -226,8 +225,7 @@ ActionWarehouse::checkUnsatisfiedActions() const
   }
 
   if (!empty)
-    mooseError(std::string("The following unsatisfied actions where found while setting up the MOOSE problem:\n")
-               + oss.str() + "\n");
+    mooseError(std::string("The following unsatisfied actions where found while setting up the MOOSE problem:\n") + oss.str() + "\n");
 }
 
 void
@@ -241,7 +239,7 @@ ActionWarehouse::printActionDependencySets() const
    */
   std::ostringstream oss;
 
-  const std::vector<std::set<std::string> > & ordered_names = _syntax.getSortedTaskSet();
+  const std::vector<std::set<std::string>> & ordered_names = _syntax.getSortedTaskSet();
   for (const auto & task_set : ordered_names)
   {
     oss << "[DBG][ACT] (" << COLOR_YELLOW;
@@ -315,9 +313,9 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
     if (_show_actions)
     {
       _console << "[DBG][ACT] "
-               << "TASK (" << COLOR_YELLOW << std::setw (24) << task << COLOR_DEFAULT << ") "
-               << "TYPE (" << COLOR_YELLOW << std::setw (32) << (*act_iter)->type() << COLOR_DEFAULT << ") "
-               << "NAME (" << COLOR_YELLOW << std::setw (16) << (*act_iter)->name() << COLOR_DEFAULT << ") \n";
+               << "TASK (" << COLOR_YELLOW << std::setw(24) << task << COLOR_DEFAULT << ") "
+               << "TYPE (" << COLOR_YELLOW << std::setw(32) << (*act_iter)->type() << COLOR_DEFAULT << ") "
+               << "NAME (" << COLOR_YELLOW << std::setw(16) << (*act_iter)->name() << COLOR_DEFAULT << ") \n";
 
       (*act_iter)->act();
     }
@@ -331,7 +329,7 @@ ActionWarehouse::printInputFile(std::ostream & out)
 {
   InputFileFormatter tree(false);
 
-  std::map<std::string, std::vector<Action *> >::iterator iter;
+  std::map<std::string, std::vector<Action *>>::iterator iter;
 
   std::vector<Action *> ordered_actions;
   for (const auto & block : _action_blocks)
@@ -350,7 +348,7 @@ ActionWarehouse::printInputFile(std::ostream & out)
 
     bool is_parent;
     if (_syntax.isAssociated(name, &is_parent) != "")
-     {
+    {
       InputParameters params = act->parameters();
 
       // TODO: Do we need to insert more nodes for each task?
@@ -358,11 +356,11 @@ ActionWarehouse::printInputFile(std::ostream & out)
 
       MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(act);
       if (moose_object_action)
-       {
+      {
         InputParameters obj_params = moose_object_action->getObjectParams();
         tree.insertNode(name, *tasks.begin(), false, &obj_params);
-       }
-     }
+      }
+    }
   }
 
   out << tree.print("");

@@ -21,8 +21,9 @@
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"
 
-template<>
-InputParameters validParams<TiledMesh>()
+template <>
+InputParameters
+validParams<TiledMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
   params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
@@ -53,8 +54,8 @@ InputParameters validParams<TiledMesh>()
   return params;
 }
 
-TiledMesh::TiledMesh(const InputParameters & parameters) :
-    MooseMesh(parameters),
+TiledMesh::TiledMesh(const InputParameters & parameters)
+  : MooseMesh(parameters),
     _x_width(getParam<Real>("x_width")),
     _y_width(getParam<Real>("y_width")),
     _z_width(getParam<Real>("z_width"))
@@ -63,8 +64,8 @@ TiledMesh::TiledMesh(const InputParameters & parameters) :
   errorIfDistributedMesh("TiledMesh");
 }
 
-TiledMesh::TiledMesh(const TiledMesh & other_mesh) :
-    MooseMesh(other_mesh),
+TiledMesh::TiledMesh(const TiledMesh & other_mesh)
+  : MooseMesh(other_mesh),
     _x_width(other_mesh._x_width),
     _y_width(other_mesh._y_width),
     _z_width(other_mesh._z_width)
@@ -82,7 +83,7 @@ TiledMesh::buildMesh()
 {
   // stitch_meshes() is only implemented for ReplicatedMesh.  So make sure
   // we have one here before continuing.
-  ReplicatedMesh * serial_mesh = dynamic_cast<ReplicatedMesh *>( &getMesh() );
+  ReplicatedMesh * serial_mesh = dynamic_cast<ReplicatedMesh *>(&getMesh());
 
   if (!serial_mesh)
     mooseError("Error, TiledMesh calls stitch_meshes() which only works on ReplicatedMesh.");

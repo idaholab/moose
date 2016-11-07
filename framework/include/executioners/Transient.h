@@ -26,14 +26,14 @@ class Transient;
 class TimeStepper;
 class FEProblem;
 
-template<>
+template <>
 InputParameters validParams<Transient>();
 
 /**
  * Transient executioners usually loop through a number of timesteps... calling solve()
  * for each timestep.
  */
-class Transient: public Executioner
+class Transient : public Executioner
 {
 public:
   /**
@@ -100,17 +100,26 @@ public:
   /**
    * Get the current time.
    */
-  virtual Real getTime() { return _time; };
+  virtual Real getTime()
+  {
+    return _time;
+  };
 
   /**
    * Set the current time.
    */
-  virtual void setTime(Real t) { _time = t; };
+  virtual void setTime(Real t)
+  {
+    _time = t;
+  };
 
   /**
    * Set the old time.
    */
-  virtual void setTimeOld(Real t){ _time_old = t; };
+  virtual void setTimeOld(Real t)
+  {
+    _time_old = t;
+  };
 
   /**
    * Get the Relative L2 norm of the change in the solution.
@@ -121,14 +130,20 @@ public:
    * Pointer to the TimeStepper
    * @return Pointer to the time stepper for this Executioner
    */
-  TimeStepper * getTimeStepper(){ return _time_stepper.get(); }
+  TimeStepper * getTimeStepper()
+  {
+    return _time_stepper.get();
+  }
 
   /**
    * Set the timestepper to use.
    *
    * @param ts The TimeStepper to use
    */
-  void setTimeStepper(MooseSharedPointer<TimeStepper> ts) { _time_stepper = ts; }
+  void setTimeStepper(MooseSharedPointer<TimeStepper> ts)
+  {
+    _time_stepper = ts;
+  }
 
   /**
    * Get the timestepper.
@@ -139,63 +154,96 @@ public:
    * Get the time scheme used
    * @return MooseEnum with the time scheme
    */
-  MooseEnum getTimeScheme() { return _time_scheme; }
+  MooseEnum getTimeScheme()
+  {
+    return _time_scheme;
+  }
 
   /**
    * Get the set of sync times
    * @return The reference to the set of sync times
    */
-  std::set<Real> & syncTimes() { return _sync_times; }
+  std::set<Real> & syncTimes()
+  {
+    return _sync_times;
+  }
 
   /**
    * Get the maximum dt
    * @return The maximum dt
    */
-  Real & dtMax() { return _dtmax; }
+  Real & dtMax()
+  {
+    return _dtmax;
+  }
 
   /**
    * Get the minimal dt
    * @return The minimal dt
    */
-  Real & dtMin() { return _dtmin; }
+  Real & dtMin()
+  {
+    return _dtmin;
+  }
 
   /**
    * Return the start time
    * @return The start time
    */
-  Real getStartTime() { return _start_time; }
+  Real getStartTime()
+  {
+    return _start_time;
+  }
 
   /**
    * Get the end time
    * @return The end time
    */
-  Real & endTime() { return _end_time; }
+  Real & endTime()
+  {
+    return _end_time;
+  }
 
   /**
    * Get the timestep tolerance
    * @return The timestep tolerance
    */
-  Real & timestepTol() { return _timestep_tolerance; }
+  Real & timestepTol()
+  {
+    return _timestep_tolerance;
+  }
 
   /**
    * Get the verbose output flag
    * @return The verbose output flag
    */
-  bool & verbose() { return _verbose; }
+  bool & verbose()
+  {
+    return _verbose;
+  }
 
   /**
    * Is the current step at a sync point (sync times, time interval, target time, etc)?
    * @return Bool indicataing whether we are at a sync point
    */
-  bool atSyncPoint() { return _at_sync_point; }
+  bool atSyncPoint()
+  {
+    return _at_sync_point;
+  }
 
   /**
    * Get the unconstrained dt
    * @return Value of dt before constraints were applied
    */
-  Real unconstrainedDT() { return _unconstrained_dt; }
+  Real unconstrainedDT()
+  {
+    return _unconstrained_dt;
+  }
 
-  void parentOutputPositionChanged() override { _fe_problem.parentOutputPositionChanged(); }
+  void parentOutputPositionChanged() override
+  {
+    _fe_problem.parentOutputPositionChanged();
+  }
 
   /**
    * Get the number of Picard iterations performed
@@ -203,8 +251,10 @@ public:
    */
   //Because this returns the number of Picard iterations, rather than the current
   //iteration count (which starts at 0), increment by 1.
-  Real numPicardIts() { return _picard_it+1; }
-
+  Real numPicardIts()
+  {
+    return _picard_it + 1;
+  }
 
 protected:
   /**
@@ -279,7 +329,7 @@ protected:
    * Picard Related
    */
   /// Number of Picard iterations to perform
-  int  & _picard_it;
+  int & _picard_it;
   Real _picard_max_its;
   bool & _picard_converged;
   Real & _picard_initial_norm;

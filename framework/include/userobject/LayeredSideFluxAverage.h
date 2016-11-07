@@ -21,7 +21,7 @@
 // Forward Declarations
 class LayeredSideFluxAverage;
 
-template<>
+template <>
 InputParameters validParams<LayeredSideFluxAverage>();
 
 /**

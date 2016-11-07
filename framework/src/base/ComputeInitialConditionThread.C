@@ -16,18 +16,19 @@
 #include "FEProblem.h"
 #include "InitialCondition.h"
 
-ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblem & fe_problem) :
-    _fe_problem(fe_problem)
+ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblem & fe_problem)
+  : _fe_problem(fe_problem)
 {
 }
 
-ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialConditionThread & x, Threads::split /*split*/) :
-    _fe_problem(x._fe_problem)
+ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialConditionThread & x, Threads::split /*split*/)
+  : _fe_problem(x._fe_problem)
 {
 }
 
 void
-ComputeInitialConditionThread::operator() (const ConstElemRange & range)
+    ComputeInitialConditionThread::
+    operator()(const ConstElemRange & range)
 {
   ParallelUniqueId puid;
   _tid = puid.id;
@@ -43,13 +44,12 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
 
     if (warehouse.hasActiveBlockObjects(subdomain, _tid))
     {
-      const std::vector<MooseSharedPointer<InitialCondition> > & ics = warehouse.getActiveBlockObjects(subdomain, _tid);
-      for (std::vector<MooseSharedPointer<InitialCondition> >::const_iterator it = ics.begin(); it != ics.end(); ++it)
+      const std::vector<MooseSharedPointer<InitialCondition>> & ics = warehouse.getActiveBlockObjects(subdomain, _tid);
+      for (std::vector<MooseSharedPointer<InitialCondition>>::const_iterator it = ics.begin(); it != ics.end(); ++it)
         (*it)->compute();
     }
   }
 }
-
 
 void
 ComputeInitialConditionThread::join(const ComputeInitialConditionThread & /*y*/)

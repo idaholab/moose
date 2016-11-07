@@ -14,8 +14,9 @@
 
 #include "DiscreteElementUserObject.h"
 
-template<>
-InputParameters validParams<DiscreteElementUserObject>()
+template <>
+InputParameters
+validParams<DiscreteElementUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
 
@@ -26,8 +27,8 @@ InputParameters validParams<DiscreteElementUserObject>()
   return params;
 }
 
-DiscreteElementUserObject::DiscreteElementUserObject(const InputParameters & parameters) :
-    ElementUserObject(parameters)
+DiscreteElementUserObject::DiscreteElementUserObject(const InputParameters & parameters)
+  : ElementUserObject(parameters)
 {
 }
 

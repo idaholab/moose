@@ -19,7 +19,7 @@
 
 class NonlocalKernel;
 
-template<>
+template <>
 InputParameters validParams<NonlocalKernel>();
 
 /**
@@ -57,13 +57,24 @@ public:
 
 protected:
   /// Compute this Kernel's contribution to the Jacobian corresponding to nolocal dof at the current quadrature point
-  virtual Real computeQpNonlocalJacobian(dof_id_type /*dof_index*/) { return 0; }
-  virtual Real computeQpNonlocalOffDiagJacobian(unsigned int /*jvar*/, dof_id_type /*dof_index*/) { return 0; }
+  virtual Real computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
+  {
+    return 0;
+  }
+  virtual Real computeQpNonlocalOffDiagJacobian(unsigned int /*jvar*/, dof_id_type /*dof_index*/)
+  {
+    return 0;
+  }
 
   /// Optimization option for getting jocobinas from userobject once per dof
-  virtual void getUserObjectJacobian(unsigned int /*jvar*/, dof_id_type /*dof_index*/) {}
+  virtual void getUserObjectJacobian(unsigned int /*jvar*/, dof_id_type /*dof_index*/)
+  {
+  }
   /// optimization option for executing nonlocal jacobian calculation only for nonzero elements
-  virtual bool globalDoFEnabled(MooseVariable & /*var*/, dof_id_type /*dof_index*/) { return true; }
+  virtual bool globalDoFEnabled(MooseVariable & /*var*/, dof_id_type /*dof_index*/)
+  {
+    return true;
+  }
 
   unsigned int _k;
 };

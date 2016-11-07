@@ -18,7 +18,7 @@
 
 class PercentChangePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<PercentChangePostprocessor>();
 
 /**
@@ -26,16 +26,16 @@ InputParameters validParams<PercentChangePostprocessor>();
  * adjacent timesteps
  */
 
- class PercentChangePostprocessor : public GeneralPostprocessor
- {
- public:
-   PercentChangePostprocessor(const InputParameters & parameters);
-   virtual void initialize() override;
-   virtual void execute() override;
-   virtual Real getValue() override;
+class PercentChangePostprocessor : public GeneralPostprocessor
+{
+public:
+  PercentChangePostprocessor(const InputParameters & parameters);
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual Real getValue() override;
 
- protected:
-   const PostprocessorValue & _postprocessor, & _postprocessor_old;
- };
+protected:
+  const PostprocessorValue &_postprocessor, &_postprocessor_old;
+};
 
 #endif /* PERCENTCHANGEPOSTPROCESSOR_H */

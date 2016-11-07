@@ -17,17 +17,18 @@
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 
-template<>
-InputParameters validParams<CreateDisplacedProblemAction>()
+template <>
+InputParameters
+validParams<CreateDisplacedProblemAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::vector<std::string> >("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
+  params.addParam<std::vector<std::string>>("displacements", "The variables corresponding to the x y z displacements of the mesh.  If this is provided then the displacements will be taken into account during the computation.");
 
   return params;
 }
 
-CreateDisplacedProblemAction::CreateDisplacedProblemAction(InputParameters parameters) :
-    Action(parameters)
+CreateDisplacedProblemAction::CreateDisplacedProblemAction(InputParameters parameters)
+  : Action(parameters)
 {
 }
 
@@ -41,7 +42,7 @@ CreateDisplacedProblemAction::act()
 
     // Define the parameters
     InputParameters object_params = _factory.getValidParams("DisplacedProblem");
-    object_params.set<std::vector<std::string> >("displacements") = getParam<std::vector<std::string> >("displacements");
+    object_params.set<std::vector<std::string>>("displacements") = getParam<std::vector<std::string>>("displacements");
     object_params.set<MooseMesh *>("mesh") = _displaced_mesh.get();
     object_params.set<FEProblem *>("_fe_problem") = _problem.get();
 

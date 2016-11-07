@@ -19,7 +19,7 @@
 
 class DebugResidualAux;
 
-template<>
+template <>
 InputParameters validParams<DebugResidualAux>();
 
 /**

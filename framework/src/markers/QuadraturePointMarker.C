@@ -20,8 +20,9 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<QuadraturePointMarker>()
+template <>
+InputParameters
+validParams<QuadraturePointMarker>()
 {
   InputParameters params = validParams<Marker>();
   params += validParams<MaterialPropertyInterface>();
@@ -34,9 +35,8 @@ InputParameters validParams<QuadraturePointMarker>()
   return params;
 }
 
-
-QuadraturePointMarker::QuadraturePointMarker(const InputParameters & parameters) :
-    Marker(parameters),
+QuadraturePointMarker::QuadraturePointMarker(const InputParameters & parameters)
+  : Marker(parameters),
     Coupleable(this, false),
     MaterialPropertyInterface(this),
     _qrule(_assembly.qRule()),

@@ -36,8 +36,9 @@
 // class static initialization
 const Real AddVariableAction::_abs_zero_tol = 1e-12;
 
-template<>
-InputParameters validParams<AddVariableAction>()
+template <>
+InputParameters
+validParams<AddVariableAction>()
 {
   // Get MooseEnums for the possible order/family options for this variable
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
@@ -47,9 +48,9 @@ InputParameters validParams<AddVariableAction>()
   InputParameters params = validParams<Action>();
   params += validParams<OutputInterface>();
   params.addParam<MooseEnum>("family", families, "Specifies the family of FE shape functions to use for this variable");
-  params.addParam<MooseEnum>("order", orders,  "Specifies the order of the FE shape function to use for this variable (additional orders not listed are allowed)");
+  params.addParam<MooseEnum>("order", orders, "Specifies the order of the FE shape function to use for this variable (additional orders not listed are allowed)");
   params.addParam<Real>("initial_condition", "Specifies the initial condition for this variable");
-  params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
+  params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
   params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
 
   // Advanced input options
@@ -59,8 +60,8 @@ InputParameters validParams<AddVariableAction>()
   return params;
 }
 
-AddVariableAction::AddVariableAction(InputParameters params) :
-    Action(params),
+AddVariableAction::AddVariableAction(InputParameters params)
+  : Action(params),
     OutputInterface(params, false),
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
              Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
@@ -153,7 +154,7 @@ AddVariableAction::getSubdomainIDs()
 {
   // Extract and return the block ids supplied in the input
   std::set<SubdomainID> blocks;
-  std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName> >("block");
+  std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName>>("block");
   for (const auto & subdomain_name : block_param)
   {
     SubdomainID blk_id = _problem->mesh().getSubdomainID(subdomain_name);

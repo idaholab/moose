@@ -35,10 +35,11 @@ public:
    * @param name The full (unique) name for this piece of data.
    * @param context 'typeless' pointer to user-specific data.
    */
-  RestartableDataValue(std::string name, void * context) :
-      _name(name),
+  RestartableDataValue(std::string name, void * context)
+    : _name(name),
       _context(context)
-    {}
+  {
+  }
 
   /**
    * Destructor.
@@ -49,19 +50,25 @@ public:
    * String identifying the type of parameter stored.
    * Must be reimplemented in derived classes.
    */
-  virtual std::string type () = 0;
+  virtual std::string type() = 0;
 
   /**
    * The full (unique) name of this particular piece of data.
    */
-  std::string name() { return _name; }
+  std::string name()
+  {
+    return _name;
+  }
 
   /**
    * A context pointer for helping with load / store.
    */
-  void * context() { return _context; }
+  void * context()
+  {
+    return _context;
+  }
 
-  virtual void swap (RestartableDataValue *rhs) = 0;
+  virtual void swap(RestartableDataValue * rhs) = 0;
 
   // save/restore in a file
   virtual void store(std::ostream & stream) = 0;
@@ -88,23 +95,32 @@ public:
    * @param name The full (unique) name for this piece of data.
    * @param context 'typeless' pointer to user-specific data.
    */
-  RestartableData(std::string name, void * context) :
-      RestartableDataValue(name, context)
+  RestartableData(std::string name, void * context)
+    : RestartableDataValue(name, context)
   {
     _value_ptr = new T;
   }
 
-  virtual ~RestartableData() { delete _value_ptr; }
+  virtual ~RestartableData()
+  {
+    delete _value_ptr;
+  }
 
   /**
    * @returns a read-only reference to the parameter value.
    */
-  T & get () { return *_value_ptr; }
+  T & get()
+  {
+    return *_value_ptr;
+  }
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  T & set () { return *_value_ptr; }
+  T & set()
+  {
+    return *_value_ptr;
+  }
 
   /**
    * String identifying the type of parameter stored.
@@ -114,7 +130,7 @@ public:
   /**
    * Swap
    */
-  virtual void swap (RestartableDataValue *rhs) override;
+  virtual void swap(RestartableDataValue * rhs) override;
 
   /**
    * Store the RestartableData into a binary stream
@@ -127,30 +143,28 @@ public:
   virtual void load(std::istream & stream) override;
 
 private:
-
   /// Stored value.
   T * _value_ptr;
 };
-
 
 // ------------------------------------------------------------
 // RestartableData<> class inline methods
 template <typename T>
 inline std::string
-RestartableData<T>::type ()
+RestartableData<T>::type()
 {
   return typeid(T).name();
 }
 
 template <typename T>
 inline void
-RestartableData<T>::swap (RestartableDataValue * libmesh_dbg_var(rhs))
+RestartableData<T>::swap(RestartableDataValue * libmesh_dbg_var(rhs))
 {
   mooseAssert(rhs != NULL, "Assigning NULL?");
-//  _value.swap(cast_ptr<RestartableData<T>*>(rhs)->_value);
+  //  _value.swap(cast_ptr<RestartableData<T>*>(rhs)->_value);
 }
 
-template<typename T>
+template <typename T>
 inline void
 RestartableData<T>::store(std::ostream & stream)
 {
@@ -158,7 +172,7 @@ RestartableData<T>::store(std::ostream & stream)
   storeHelper(stream, tmp, _context);
 }
 
-template<typename T>
+template <typename T>
 inline void
 RestartableData<T>::load(std::istream & stream)
 {
@@ -168,18 +182,18 @@ RestartableData<T>::load(std::istream & stream)
 /**
  * Container for storing material properties
  */
-class RestartableDatas : public std::vector<std::map<std::string, RestartableDataValue *> >
+class RestartableDatas : public std::vector<std::map<std::string, RestartableDataValue *>>
 {
 public:
-  RestartableDatas(size_type n) :
-      std::vector<std::map<std::string, RestartableDataValue *> >(n)
-  {}
-
+  RestartableDatas(size_type n)
+    : std::vector<std::map<std::string, RestartableDataValue *>>(n)
+  {
+  }
 
   virtual ~RestartableDatas()
   {
-    for (std::vector<std::map<std::string, RestartableDataValue *> >::iterator i = begin(); i != end(); ++i)
-      for (std::map<std::string, RestartableDataValue *>::iterator j=(*i).begin();
+    for (std::vector<std::map<std::string, RestartableDataValue *>>::iterator i = begin(); i != end(); ++i)
+      for (std::map<std::string, RestartableDataValue *>::iterator j = (*i).begin();
            j != (*i).end();
            ++j)
         delete j->second;

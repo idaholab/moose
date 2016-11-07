@@ -25,7 +25,7 @@
 // Forward declerations
 class ParsedAddSideset;
 
-template<>
+template <>
 InputParameters validParams<ParsedAddSideset>();
 
 /**

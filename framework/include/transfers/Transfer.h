@@ -33,7 +33,7 @@ class System;
 class EquationSystems;
 }
 
-template<>
+template <>
 InputParameters validParams<Transfer>();
 
 /**
@@ -42,10 +42,9 @@ InputParameters validParams<Transfer>();
  * Transfers are objects that take values from one Application
  * or System and put them in another Application or System.
  */
-class Transfer :
-  public MooseObject,
-  public SetupInterface,
-  public Restartable
+class Transfer : public MooseObject,
+                 public SetupInterface,
+                 public Restartable
 {
 public:
   Transfer(const InputParameters & parameters);
@@ -60,7 +59,9 @@ public:
    * Method called at the beginning of the simulation for checking integrity or doing
    * one-time setup.
    */
-  virtual void initialSetup() {}
+  virtual void initialSetup()
+  {
+  }
 
   /**
    * Small helper function for finding the system containing the variable.
@@ -73,7 +74,6 @@ public:
   static System * find_sys(EquationSystems & es, const std::string & var_name);
 
 protected:
-
   SubProblem & _subproblem;
   FEProblem & _fe_problem;
   SystemBase & _sys;

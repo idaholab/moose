@@ -20,7 +20,7 @@
 //Forward Declarations
 class PointValue;
 
-template<>
+template <>
 InputParameters validParams<PointValue>();
 
 /**
@@ -41,7 +41,9 @@ public:
   /**
    * Empty method, no initialization needed
    */
-  virtual void initialize() override {}
+  virtual void initialize() override
+  {
+  }
 
   /**
    * Determines what element contains the specified point
@@ -60,7 +62,6 @@ public:
   virtual void finalize() override;
 
 protected:
-
   /// The variable from which a values is to be extracted
   MooseVariable & _var;
 

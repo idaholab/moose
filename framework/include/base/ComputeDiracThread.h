@@ -28,7 +28,6 @@ class DiracKernel;
 
 typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistElemRange;
 
-
 class ComputeDiracThread : public ThreadedElementLoop<DistElemRange>
 {
 public:

@@ -19,8 +19,9 @@
 #include "DisplacedProblem.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<EigenExecutionerBase>()
+template <>
+InputParameters
+validParams<EigenExecutionerBase>()
 {
   InputParameters params = validParams<Executioner>();
   params.addRequiredParam<PostprocessorName>("bx_norm", "To evaluate |Bx| for the eigenvalue");
@@ -46,15 +47,15 @@ EigenExecutionerBase::eigenvalueOld()
   return _source_integral_old;
 }
 
-EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters) :
-    Executioner(parameters),
+EigenExecutionerBase::EigenExecutionerBase(const InputParameters & parameters)
+  : Executioner(parameters),
     _problem(_fe_problem),
     _eigen_sys(static_cast<MooseEigenSystem &>(_problem.getNonlinearSystem())),
     _eigenvalue(declareRestartableData("eigenvalue", 1.0)),
     _source_integral(getPostprocessorValue("bx_norm")),
     _source_integral_old(1),
     _normalization(isParamValid("normalization") ? getPostprocessorValue("normalization")
-                   : getPostprocessorValue("bx_norm")) // use |Bx| for normalization by default
+                                                 : getPostprocessorValue("bx_norm")) // use |Bx| for normalization by default
 {
   //FIXME: currently we have to use old and older solution vectors for power iteration.
   //       We will need 'step' in the future.
@@ -98,7 +99,7 @@ EigenExecutionerBase::init()
   // check when the postprocessors are evaluated
   ExecFlagType bx_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).execBitFlags();
   if ((bx_execflag & EXEC_LINEAR) == EXEC_NONE)
-    mooseError("Postprocessor "+getParam<PostprocessorName>("bx_norm")+" requires execute_on = 'linear'");
+    mooseError("Postprocessor " + getParam<PostprocessorName>("bx_norm") + " requires execute_on = 'linear'");
 
   if (isParamValid("normalization"))
     _norm_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization")).execBitFlags();
@@ -109,7 +110,7 @@ EigenExecutionerBase::init()
   if ((bx_execflag & EXEC_INITIAL) == EXEC_NONE)
     _problem.execute(EXEC_LINEAR);
 
-  if (_source_integral==0.0)
+  if (_source_integral == 0.0)
     mooseError("|Bx| = 0!");
 
   // normalize solution to make |Bx|=_eigenvalue, _eigenvalue at this point has the initialized value
@@ -139,10 +140,10 @@ EigenExecutionerBase::makeBXConsistent(Real k)
   // Note: all dependent objects of k must be evaluated on linear!
   // We have a fix point loop here, in case the postprocessor is a nonlinear function of the scaling factor.
   // FIXME: We have assumed this loop always converges.
-  while (std::fabs(k-_source_integral)>consistency_tolerance*std::fabs(k))
+  while (std::fabs(k - _source_integral) > consistency_tolerance * std::fabs(k))
   {
     // On the first time entering, the _source_integral has been updated properly in FEProblem::initialSetup()
-    _eigen_sys.scaleSystemSolution(MooseEigenSystem::EIGEN, k/_source_integral);
+    _eigen_sys.scaleSystemSolution(MooseEigenSystem::EIGEN, k / _source_integral);
     _problem.execute(EXEC_LINEAR);
     std::stringstream ss;
     ss << std::fixed << std::setprecision(10) << _source_integral;
@@ -172,10 +173,10 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
                                             Real & k,
                                             Real & initial_res)
 {
-  mooseAssert(max_iter>=min_iter, "Maximum number of power iterations must be greater than or equal to its minimum");
-  mooseAssert(pfactor>0.0, "Invaid linear convergence tolerance");
-  mooseAssert(tol_eig>0.0, "Invalid eigenvalue tolerance");
-  mooseAssert(tol_x>0.0, "Invalid solution norm tolerance");
+  mooseAssert(max_iter >= min_iter, "Maximum number of power iterations must be greater than or equal to its minimum");
+  mooseAssert(pfactor > 0.0, "Invaid linear convergence tolerance");
+  mooseAssert(tol_eig > 0.0, "Invalid eigenvalue tolerance");
+  mooseAssert(tol_x > 0.0, "Invalid solution norm tolerance");
 
   // obtain the solution diff
   const PostprocessorValue * solution_diff = NULL;
@@ -184,11 +185,12 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     solution_diff = &getPostprocessorValueByName(xdiff);
     ExecFlagType xdiff_execflag = _problem.getUserObject<UserObject>(xdiff).execBitFlags();
     if ((xdiff_execflag & EXEC_LINEAR) == EXEC_NONE)
-      mooseError("Postprocessor "+xdiff+" requires execute_on = 'linear'");
+      mooseError("Postprocessor " + xdiff + " requires execute_on = 'linear'");
   }
 
   // not perform any iteration when max_iter==0
-  if (max_iter==0) return;
+  if (max_iter == 0)
+    return;
 
   // turn off nonlinear flag so that RHS kernels opterate on previous solutions
   _eigen_sys.eigenKernelOnOld();
@@ -200,15 +202,15 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     _problem.getDisplacedProblem()->saveOldSolutions();
 
   // save solver control parameters to be modified by the power iteration
-  Real tol1 = _problem.es().parameters.get<Real> ("linear solver tolerance");
+  Real tol1 = _problem.es().parameters.get<Real>("linear solver tolerance");
   unsigned int num1 = _problem.es().parameters.get<unsigned int>("nonlinear solver maximum iterations");
-  Real tol2 = _problem.es().parameters.get<Real> ("nonlinear solver relative residual tolerance");
+  Real tol2 = _problem.es().parameters.get<Real>("nonlinear solver relative residual tolerance");
 
   // every power iteration is a linear solve, so set nonlinear iteration number to one
-  _problem.es().parameters.set<Real> ("linear solver tolerance") = pfactor;
+  _problem.es().parameters.set<Real>("linear solver tolerance") = pfactor;
   // disable nonlinear convergence check
   _problem.es().parameters.set<unsigned int>("nonlinear solver maximum iterations") = 1;
-  _problem.es().parameters.set<Real> ("nonlinear solver relative residual tolerance") = 1-1e-8;
+  _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = 1 - 1e-8;
 
   if (echo)
   {
@@ -231,7 +233,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   while (true)
   {
     if (echo)
-      _console << " Power iteration= "<< iter << std::endl;
+      _console << " Power iteration= " << iter << std::endl;
 
     // Important: we do not call _problem.advanceState() because we do not
     // want to overwrite the old postprocessor values and old material
@@ -252,7 +254,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     postIteration();
 
     // save the initial residual
-    if (iter==0) initial_res = _eigen_sys._initial_residual_before_preset_bcs;
+    if (iter == 0)
+      initial_res = _eigen_sys._initial_residual_before_preset_bcs;
 
     // update eigenvalue
     k = k_old * _source_integral / _source_integral_old;
@@ -262,7 +265,8 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     {
       // output on screen the convergence history only when we want to and MOOSE output system is not used
       keff_history.push_back(k);
-      if (solution_diff) diff_history.push_back(*solution_diff);
+      if (solution_diff)
+        diff_history.push_back(*solution_diff);
 
       std::stringstream ss;
       if (solution_diff)
@@ -272,12 +276,12 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
         ss << " | iteration      | eigenvalue          | solution_difference |\n";
         ss << " +================+=====================+=====================+\n";
         unsigned int j = 0;
-        if (keff_history.size()>10)
+        if (keff_history.size() > 10)
         {
           ss << " :                :                     :                     :\n";
-          j = keff_history.size()-10;
+          j = keff_history.size() - 10;
         }
-        for (; j<keff_history.size(); j++)
+        for (; j < keff_history.size(); j++)
           ss << " | " << std::setw(14) << j
              << " | " << std::setw(19) << std::scientific << std::setprecision(8) << keff_history[j]
              << " | " << std::setw(19) << std::scientific << std::setprecision(8) << diff_history[j]
@@ -291,12 +295,12 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
         ss << " | iteration      | eigenvalue          |\n";
         ss << " +================+=====================+\n";
         unsigned int j = 0;
-        if (keff_history.size()>10)
+        if (keff_history.size() > 10)
         {
           ss << " :                :                     :\n";
-          j = keff_history.size()-10;
+          j = keff_history.size() - 10;
         }
-        for (; j<keff_history.size(); j++)
+        for (; j < keff_history.size(); j++)
           ss << " | " << std::setw(14) << j
              << " | " << std::setw(19) << std::scientific << std::setprecision(8) << keff_history[j]
              << " |\n";
@@ -321,17 +325,20 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
                << std::endl;
 
     // not perform any convergence check when number of iterations is less than min_iter
-    if (iter>=min_iter)
+    if (iter >= min_iter)
     {
       // no need to check convergence of the last iteration
-      if (iter!=max_iter)
+      if (iter != max_iter)
       {
         bool converged = true;
-        Real keff_error = fabs(k_old-k)/k;
-        if (keff_error>tol_eig) converged = false;
+        Real keff_error = fabs(k_old - k) / k;
+        if (keff_error > tol_eig)
+          converged = false;
         if (solution_diff)
-          if (*solution_diff > tol_x) converged = false;
-        if (converged) break;
+          if (*solution_diff > tol_x)
+            converged = false;
+        if (converged)
+          break;
       }
       else
         break;
@@ -339,9 +346,9 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
   }
 
   // restore parameters changed by the executioner
-  _problem.es().parameters.set<Real> ("linear solver tolerance") = tol1;
+  _problem.es().parameters.set<Real>("linear solver tolerance") = tol1;
   _problem.es().parameters.set<unsigned int>("nonlinear solver maximum iterations") = num1;
-  _problem.es().parameters.set<Real> ("nonlinear solver relative residual tolerance") = tol2;
+  _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = tol2;
 
   //FIXME: currently power iteration use old and older solutions, so restore them
   _problem.restoreOldSolutions();
@@ -380,11 +387,11 @@ EigenExecutionerBase::postExecute()
   else
   {
     s = normalizeSolution(_norm_execflag & (EXEC_TIMESTEP_END | EXEC_LINEAR));
-    if (std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
+    if (std::fabs(s - 1.0) > std::numeric_limits<Real>::epsilon())
       _console << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
   }
 
-  if ((!getParam<bool>("output_before_normalization")) || std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
+  if ((!getParam<bool>("output_before_normalization")) || std::fabs(s - 1.0) > std::numeric_limits<Real>::epsilon())
   {
     _problem.timeStep()++;
     Real t = _problem.time();
@@ -405,17 +412,17 @@ EigenExecutionerBase::normalizeSolution(bool force)
     factor = getParam<Real>("normal_factor");
   else
     factor = _eigenvalue;
-  Real scaling = factor/_normalization;
+  Real scaling = factor / _normalization;
 
   if (scaling != 1.0)
   {
     //FIXME: we assume linear scaling here!
     _eigen_sys.scaleSystemSolution(MooseEigenSystem::EIGEN, scaling);
     // update all aux variables and user objects
-    for (unsigned int i=0; i<Moose::exec_types.size(); i++)
+    for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
     {
       // EXEC_CUSTOM is special, should be treated only by specifically designed executioners.
-      if (Moose::exec_types[i]==EXEC_CUSTOM)
+      if (Moose::exec_types[i] == EXEC_CUSTOM)
         continue;
 
       _problem.execute(Moose::exec_types[i]);
@@ -437,34 +444,35 @@ EigenExecutionerBase::printEigenvalue()
 }
 
 EigenExecutionerBase::Chebyshev_Parameters::Chebyshev_Parameters()
-  :
-  n_iter(50),
-  fsmooth(2),
-  finit(6),
-  lgac(0),
-  icheb(0),
-  flux_error_norm_old(1),
-  icho(0)
-{}
+  : n_iter(50),
+    fsmooth(2),
+    finit(6),
+    lgac(0),
+    icheb(0),
+    flux_error_norm_old(1),
+    icho(0)
+{
+}
 
 void
 EigenExecutionerBase::Chebyshev_Parameters::reinit()
 {
-  finit   = 6;
-  lgac    = 0;
-  icheb   = 0;
+  finit = 6;
+  lgac = 0;
+  icheb = 0;
   flux_error_norm_old = 1;
-  icho    = 0;
+  icho = 0;
 }
 
 void
 EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, unsigned int iter, const PostprocessorValue * solution_diff)
 {
-  if (!solution_diff) mooseError("solution diff is required for Chebyshev acceleration");
+  if (!solution_diff)
+    mooseError("solution diff is required for Chebyshev acceleration");
 
-  if (chebyshev_parameters.lgac==0)
+  if (chebyshev_parameters.lgac == 0)
   {
-    if (chebyshev_parameters.icho==0)
+    if (chebyshev_parameters.icho == 0)
       chebyshev_parameters.ratio = *solution_diff / chebyshev_parameters.flux_error_norm_old;
     else
     {
@@ -473,17 +481,17 @@ EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, uns
     }
 
     if (iter > chebyshev_parameters.finit &&
-        chebyshev_parameters.ratio>=0.4 &&
-        chebyshev_parameters.ratio<=1)
+        chebyshev_parameters.ratio >= 0.4 &&
+        chebyshev_parameters.ratio <= 1)
     {
       chebyshev_parameters.lgac = 1;
       chebyshev_parameters.icheb = 1;
       chebyshev_parameters.error_begin = *solution_diff;
       chebyshev_parameters.iter_begin = iter;
-      double alp = 2/(2-chebyshev_parameters.ratio);
+      double alp = 2 / (2 - chebyshev_parameters.ratio);
       std::vector<double> coef(2);
       coef[0] = alp;
-      coef[1] = 1-alp;
+      coef[1] = 1 - alp;
       _eigen_sys.combineSystemSolution(MooseEigenSystem::EIGEN, coef);
       _problem.execute(EXEC_LINEAR);
       _eigenvalue = _source_integral;
@@ -492,11 +500,10 @@ EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, uns
   else
   {
     chebyshev_parameters.icheb++;
-    double gamma = acosh(2/chebyshev_parameters.ratio-1);
-    double alp = 4/chebyshev_parameters.ratio*std::cosh((chebyshev_parameters.icheb-1)*gamma)
-      /std::cosh(chebyshev_parameters.icheb*gamma);
-    double beta = (1-chebyshev_parameters.ratio/2)*alp - 1;
-/*  if (iter<int(chebyshev_parameters.iter_begin+chebyshev_parameters.n_iter))
+    double gamma = acosh(2 / chebyshev_parameters.ratio - 1);
+    double alp = 4 / chebyshev_parameters.ratio * std::cosh((chebyshev_parameters.icheb - 1) * gamma) / std::cosh(chebyshev_parameters.icheb * gamma);
+    double beta = (1 - chebyshev_parameters.ratio / 2) * alp - 1;
+    /*  if (iter<int(chebyshev_parameters.iter_begin+chebyshev_parameters.n_iter))
     {
       std::vector<double> coef(3);
       coef[0] = alp;
@@ -506,40 +513,41 @@ EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, uns
     }
     else
     {*/
-      double gamma_new = (*solution_diff/chebyshev_parameters.error_begin)*
-        (std::cosh((chebyshev_parameters.icheb-1)*acosh(2/chebyshev_parameters.ratio-1)));
-      if (gamma_new<1.0) gamma_new = 1.0;
+    double gamma_new = (*solution_diff / chebyshev_parameters.error_begin) *
+                       (std::cosh((chebyshev_parameters.icheb - 1) * acosh(2 / chebyshev_parameters.ratio - 1)));
+    if (gamma_new < 1.0)
+      gamma_new = 1.0;
 
-      chebyshev_parameters.ratio_new = chebyshev_parameters.ratio/2*
-        (std::cosh(acosh(gamma_new) / (chebyshev_parameters.icheb-1))+1);
-      if (gamma_new>1.01)
+    chebyshev_parameters.ratio_new = chebyshev_parameters.ratio / 2 *
+                                     (std::cosh(acosh(gamma_new) / (chebyshev_parameters.icheb - 1)) + 1);
+    if (gamma_new > 1.01)
+    {
+      chebyshev_parameters.lgac = 0;
+      //      chebyshev_parameters.icheb = 0;
+      //      if (chebyshev_parameters.icheb>30)
+      //      {
+      if (chebyshev_parameters.icheb > 0)
       {
-        chebyshev_parameters.lgac = 0;
-//      chebyshev_parameters.icheb = 0;
-//      if (chebyshev_parameters.icheb>30)
-//      {
-        if (chebyshev_parameters.icheb>0)
-        {
-          chebyshev_parameters.icho = 1;
-          chebyshev_parameters.finit = iter;
-        }
-        else
-        {
-          chebyshev_parameters.icho = 0;
-          chebyshev_parameters.finit = iter + chebyshev_parameters.fsmooth;
-        }
+        chebyshev_parameters.icho = 1;
+        chebyshev_parameters.finit = iter;
       }
       else
       {
-        std::vector<double> coef(3);
-        coef[0] = alp;
-        coef[1] = 1-alp+beta;
-        coef[2] = -beta;
-        _eigen_sys.combineSystemSolution(MooseEigenSystem::EIGEN, coef);
-        _problem.execute(EXEC_LINEAR);
-        _eigenvalue = _source_integral;
+        chebyshev_parameters.icho = 0;
+        chebyshev_parameters.finit = iter + chebyshev_parameters.fsmooth;
       }
-//    }
+    }
+    else
+    {
+      std::vector<double> coef(3);
+      coef[0] = alp;
+      coef[1] = 1 - alp + beta;
+      coef[2] = -beta;
+      _eigen_sys.combineSystemSolution(MooseEigenSystem::EIGEN, coef);
+      _problem.execute(EXEC_LINEAR);
+      _eigenvalue = _source_integral;
+    }
+    //    }
   }
   chebyshev_parameters.flux_error_norm_old = *solution_diff;
 }
@@ -553,13 +561,13 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   _eigen_sys.eigenKernelOnCurrent();
 
   // set nonlinear solver controls
-  Real tol1 = _problem.es().parameters.get<Real> ("nonlinear solver absolute residual tolerance");
-  Real tol2 = _problem.es().parameters.get<Real> ("linear solver tolerance");
-  Real tol3 = _problem.es().parameters.get<Real> ("nonlinear solver relative residual tolerance");
+  Real tol1 = _problem.es().parameters.get<Real>("nonlinear solver absolute residual tolerance");
+  Real tol2 = _problem.es().parameters.get<Real>("linear solver tolerance");
+  Real tol3 = _problem.es().parameters.get<Real>("nonlinear solver relative residual tolerance");
 
-  _problem.es().parameters.set<Real> ("nonlinear solver absolute residual tolerance") = abs_tol;
-  _problem.es().parameters.set<Real> ("nonlinear solver relative residual tolerance") = rel_tol;
-  _problem.es().parameters.set<Real> ("linear solver tolerance") = pfactor;
+  _problem.es().parameters.set<Real>("nonlinear solver absolute residual tolerance") = abs_tol;
+  _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = rel_tol;
+  _problem.es().parameters.set<Real>("linear solver tolerance") = pfactor;
 
   // call nonlinear solve
   _problem.solve();
@@ -567,7 +575,7 @@ EigenExecutionerBase::nonlinearSolve(Real rel_tol, Real abs_tol, Real pfactor, R
   k = _source_integral;
   _eigenvalue = k;
 
-  _problem.es().parameters.set<Real> ("nonlinear solver absolute residual tolerance") = tol1;
-  _problem.es().parameters.set<Real> ("linear solver tolerance") = tol2;
-  _problem.es().parameters.set<Real> ("nonlinear solver relative residual tolerance") = tol3;
+  _problem.es().parameters.set<Real>("nonlinear solver absolute residual tolerance") = tol1;
+  _problem.es().parameters.set<Real>("linear solver tolerance") = tol2;
+  _problem.es().parameters.set<Real>("nonlinear solver relative residual tolerance") = tol3;
 }

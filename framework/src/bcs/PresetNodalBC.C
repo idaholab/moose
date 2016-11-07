@@ -14,18 +14,17 @@
 
 #include "PresetNodalBC.h"
 
-template<>
-InputParameters validParams<PresetNodalBC>()
+template <>
+InputParameters
+validParams<PresetNodalBC>()
 {
   InputParameters p = validParams<NodalBC>();
   return p;
 }
 
-
-PresetNodalBC::PresetNodalBC(const InputParameters & parameters) :
-  NodalBC(parameters)
+PresetNodalBC::PresetNodalBC(const InputParameters & parameters)
+  : NodalBC(parameters)
 {
-
 }
 
 void

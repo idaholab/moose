@@ -16,8 +16,9 @@
 #include "SystemBase.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<Damper>()
+template <>
+InputParameters
+validParams<Damper>()
 {
   InputParameters params = validParams<MooseObject>();
   params.declareControllable("enable"); // allows Control to enable/disable this type of object
@@ -25,8 +26,8 @@ InputParameters validParams<Damper>()
   return params;
 }
 
-Damper::Damper(const InputParameters & parameters) :
-    MooseObject(parameters),
+Damper::Damper(const InputParameters & parameters)
+  : MooseObject(parameters),
     SetupInterface(this),
     Restartable(parameters, "Dampers"),
     MeshChangedInterface(parameters),

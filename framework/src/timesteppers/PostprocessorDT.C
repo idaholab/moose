@@ -14,8 +14,9 @@
 
 #include "PostprocessorDT.h"
 
-template<>
-InputParameters validParams<PostprocessorDT>()
+template <>
+InputParameters
+validParams<PostprocessorDT>()
 {
   InputParameters params = validParams<TimeStepper>();
   params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor that computes the dt");
@@ -23,8 +24,8 @@ InputParameters validParams<PostprocessorDT>()
   return params;
 }
 
-PostprocessorDT::PostprocessorDT(const InputParameters & parameters) :
-    TimeStepper(parameters),
+PostprocessorDT::PostprocessorDT(const InputParameters & parameters)
+  : TimeStepper(parameters),
     PostprocessorInterface(this),
     _pps_value(getPostprocessorValue("postprocessor")),
     _has_initial_dt(isParamValid("dt")),

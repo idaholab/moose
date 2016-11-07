@@ -22,11 +22,10 @@ class Function;
 //Forward Declarations
 class ElementL2Error;
 
-template<>
+template <>
 InputParameters validParams<ElementL2Error>();
 
-class ElementL2Error :
-  public ElementIntegralVariablePostprocessor
+class ElementL2Error : public ElementIntegralVariablePostprocessor
 {
 public:
   ElementL2Error(const InputParameters & parameters);

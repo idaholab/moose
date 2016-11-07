@@ -26,26 +26,27 @@
 #include "libmesh/transient_system.h"
 #include "libmesh/system_norm.h"
 
-template<>
-InputParameters validParams<AdaptivityAction>()
+template <>
+InputParameters
+validParams<AdaptivityAction>()
 {
   InputParameters params = validParams<Action>();
   MooseEnum estimators("KellyErrorEstimator LaplacianErrorEstimator PatchRecoveryErrorEstimator", "KellyErrorEstimator");
 
-  params.addParam<unsigned int>("steps",                       0, "The number of adaptivity steps to perform at any one time for steady state");
-  params.addRangeCheckedParam<unsigned int>("interval",        1, "interval>0", "The number of time steps betweeen each adaptivity phase");
-  params.addParam<unsigned int>("initial_adaptivity",          0, "The number of adaptivity steps to perform using the initial conditions");
-  params.addParam<Real> ("refine_fraction",                    0.0, "The fraction of elements or error to refine. Should be between 0 and 1.");
-  params.addParam<Real> ("coarsen_fraction",                   0.0, "The fraction of elements or error to coarsen. Should be between 0 and 1.");
-  params.addParam<unsigned int> ("max_h_level",                0, "Maximum number of times a single element can be refined. If 0 then infinite.");
-  params.addParam<MooseEnum> ("error_estimator",               estimators, "The class name of the error estimator you want to use.");
-  params.addDeprecatedParam<bool> ("print_changed_info", false,
-                                   "Determines whether information about the mesh is printed when adaptivity occurs",
-                                   "Use the Console output parameter 'print_mesh_changed_info'");
+  params.addParam<unsigned int>("steps", 0, "The number of adaptivity steps to perform at any one time for steady state");
+  params.addRangeCheckedParam<unsigned int>("interval", 1, "interval>0", "The number of time steps betweeen each adaptivity phase");
+  params.addParam<unsigned int>("initial_adaptivity", 0, "The number of adaptivity steps to perform using the initial conditions");
+  params.addParam<Real>("refine_fraction", 0.0, "The fraction of elements or error to refine. Should be between 0 and 1.");
+  params.addParam<Real>("coarsen_fraction", 0.0, "The fraction of elements or error to coarsen. Should be between 0 and 1.");
+  params.addParam<unsigned int>("max_h_level", 0, "Maximum number of times a single element can be refined. If 0 then infinite.");
+  params.addParam<MooseEnum>("error_estimator", estimators, "The class name of the error estimator you want to use.");
+  params.addDeprecatedParam<bool>("print_changed_info", false,
+                                  "Determines whether information about the mesh is printed when adaptivity occurs",
+                                  "Use the Console output parameter 'print_mesh_changed_info'");
   params.addParam<Real>("start_time", -std::numeric_limits<Real>::max(), "The time that adaptivity will be active after.");
   params.addParam<Real>("stop_time", std::numeric_limits<Real>::max(), "The time after which adaptivity will no longer be active.");
-  params.addParam<std::vector<std::string> > ("weight_names", "List of names of variables that will be associated with weight_values");
-  params.addParam<std::vector<Real> > ("weight_values", "List of values between 0 and 1 to weight the associated weight_names error by");
+  params.addParam<std::vector<std::string>>("weight_names", "List of names of variables that will be associated with weight_values");
+  params.addParam<std::vector<Real>>("weight_values", "List of values between 0 and 1 to weight the associated weight_names error by");
   params.addParam<unsigned int>("cycles_per_step", 1, "The number of adaptivity cycles per step");
 
   params.addParam<bool>("show_initial_progress", true, "Show the progress of the initial adaptivity");
@@ -53,8 +54,8 @@ InputParameters validParams<AdaptivityAction>()
   return params;
 }
 
-AdaptivityAction::AdaptivityAction(InputParameters params) :
-    Action(params)
+AdaptivityAction::AdaptivityAction(InputParameters params)
+  : Action(params)
 {
 }
 
@@ -77,10 +78,10 @@ AdaptivityAction::act()
 
   adapt.setPrintMeshChanged(getParam<bool>("print_changed_info"));
 
-  const std::vector<std::string> & weight_names = getParam<std::vector<std::string> >("weight_names");
-  const std::vector<Real> & weight_values = getParam<std::vector<Real> >("weight_values");
+  const std::vector<std::string> & weight_names = getParam<std::vector<std::string>>("weight_names");
+  const std::vector<Real> & weight_values = getParam<std::vector<Real>>("weight_values");
 
-  int num_weight_names  = weight_names.size();
+  int num_weight_names = weight_names.size();
   int num_weight_values = weight_values.size();
 
   if (num_weight_names)
@@ -89,9 +90,9 @@ AdaptivityAction::act()
       mooseError("Number of weight_names must be equal to number of weight_values in Execution/Adaptivity");
 
     // If weights have been specified then set the default weight to zero
-    std::vector<Real> weights(system.nVariables(),0);
+    std::vector<Real> weights(system.nVariables(), 0);
 
-    for (int i=0;i<num_weight_names;i++)
+    for (int i = 0; i < num_weight_names; i++)
     {
       std::string name = weight_names[i];
       double value = weight_values[i];

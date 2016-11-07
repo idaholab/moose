@@ -22,8 +22,8 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeMarkerThread::ComputeMarkerThread(FEProblem & fe_problem) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem),
+ComputeMarkerThread::ComputeMarkerThread(FEProblem & fe_problem)
+  : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _marker_whs(_fe_problem.getMarkerWarehouse())
@@ -31,8 +31,8 @@ ComputeMarkerThread::ComputeMarkerThread(FEProblem & fe_problem) :
 }
 
 // Splitting Constructor
-ComputeMarkerThread::ComputeMarkerThread(ComputeMarkerThread & x, Threads::split split) :
-    ThreadedElementLoop<ConstElemRange>(x, split),
+ComputeMarkerThread::ComputeMarkerThread(ComputeMarkerThread & x, Threads::split split)
+  : ThreadedElementLoop<ConstElemRange>(x, split),
     _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
     _marker_whs(x._marker_whs)
@@ -63,7 +63,7 @@ ComputeMarkerThread::subdomainChanged()
 }
 
 void
-ComputeMarkerThread::onElement(const Elem *elem)
+ComputeMarkerThread::onElement(const Elem * elem)
 {
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
@@ -71,7 +71,7 @@ ComputeMarkerThread::onElement(const Elem *elem)
 
   if (_marker_whs.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<MooseSharedPointer<Marker> > & markers = _marker_whs.getActiveBlockObjects(_subdomain, _tid);
+    const std::vector<MooseSharedPointer<Marker>> & markers = _marker_whs.getActiveBlockObjects(_subdomain, _tid);
     for (const auto & marker : markers)
       marker->computeMarker();
   }

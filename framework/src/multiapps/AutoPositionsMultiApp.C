@@ -17,22 +17,22 @@
 #include "MooseMesh.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AutoPositionsMultiApp>()
+template <>
+InputParameters
+validParams<AutoPositionsMultiApp>()
 {
   InputParameters params = validParams<TransientMultiApp>();
 
   params += validParams<BoundaryRestrictable>();
 
-  params.suppressParameter<std::vector<Point> >("positions");
-  params.suppressParameter<std::vector<FileName> >("positions_file");
+  params.suppressParameter<std::vector<Point>>("positions");
+  params.suppressParameter<std::vector<FileName>>("positions_file");
 
   return params;
 }
 
-
-AutoPositionsMultiApp::AutoPositionsMultiApp(const InputParameters & parameters):
-    TransientMultiApp(parameters),
+AutoPositionsMultiApp::AutoPositionsMultiApp(const InputParameters & parameters)
+  : TransientMultiApp(parameters),
     BoundaryRestrictable(parameters, true) // true for applying to nodesets
 {
 }

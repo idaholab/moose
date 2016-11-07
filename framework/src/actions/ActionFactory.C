@@ -18,8 +18,8 @@
 
 unsigned int ActionFactory::_unique_id = 0;
 
-ActionFactory::ActionFactory(MooseApp & app):
-    _app(app)
+ActionFactory::ActionFactory(MooseApp & app)
+  : _app(app)
 {
 }
 
@@ -33,7 +33,7 @@ ActionFactory::create(const std::string & action, const std::string & action_nam
   parameters.addPrivateParam("_moose_app", &_app);
   parameters.addPrivateParam("action_type", action);
   std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
-  BuildInfo *build_info = NULL;
+  BuildInfo * build_info = NULL;
 
   // Check to make sure that all required parameters are supplied
   parameters.checkParams(action_name);
@@ -102,22 +102,26 @@ ActionFactory::getTaskName(const std::string & action)
     return "";
 }
 
-ActionFactory::iterator ActionFactory::begin()
+ActionFactory::iterator
+ActionFactory::begin()
 {
   return _name_to_build_info.begin();
 }
 
-ActionFactory::const_iterator ActionFactory::begin() const
+ActionFactory::const_iterator
+ActionFactory::begin() const
 {
   return _name_to_build_info.begin();
 }
 
-ActionFactory::iterator ActionFactory::end()
+ActionFactory::iterator
+ActionFactory::end()
 {
   return _name_to_build_info.end();
 }
 
-ActionFactory::const_iterator ActionFactory::end() const
+ActionFactory::const_iterator
+ActionFactory::end() const
 {
   return _name_to_build_info.end();
 }
@@ -134,7 +138,7 @@ ActionFactory::getTasksByAction(const std::string & action) const
   std::set<std::string> tasks;
 
   std::pair<std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator, std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator>
-    iters = _name_to_build_info.equal_range(action);
+      iters = _name_to_build_info.equal_range(action);
   for (std::multimap<std::string, ActionFactory::BuildInfo>::const_iterator it = iters.first; it != iters.second; ++it)
     tasks.insert(it->second._task);
 

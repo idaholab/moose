@@ -32,7 +32,6 @@ class Function;
 class FunctionPeriodicBoundary : public PeriodicBoundaryBase
 {
 public:
-
   /**
    * Initialize the periodic boundary with three functions
    */
@@ -58,7 +57,7 @@ public:
   virtual std::unique_ptr<PeriodicBoundaryBase> clone(TransformationType t) const override;
 
 protected:
-//  /// The dimension of the problem (says which _tr_XYZ member variables are active)
+  //  /// The dimension of the problem (says which _tr_XYZ member variables are active)
   unsigned int _dim;
 
   /// Pointer to Function for x-component of the boundary

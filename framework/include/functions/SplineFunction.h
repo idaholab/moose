@@ -20,7 +20,7 @@
 
 class SplineFunction;
 
-template<>
+template <>
 InputParameters validParams<SplineFunction>();
 
 /**
@@ -40,6 +40,5 @@ public:
 protected:
   SplineInterpolation _ipol;
 };
-
 
 #endif /* SPLINEFUNCTION_H */

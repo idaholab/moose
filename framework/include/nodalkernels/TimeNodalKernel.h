@@ -21,7 +21,7 @@
 class TimeNodalKernel;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<TimeNodalKernel>();
 
 /**
@@ -36,7 +36,6 @@ public:
   TimeNodalKernel(const InputParameters & parameters);
 
 protected:
-
   virtual void computeResidual() override;
 };
 

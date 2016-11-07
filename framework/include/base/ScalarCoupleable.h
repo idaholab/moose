@@ -113,7 +113,7 @@ protected:
   FEProblem & _sc_fe_problem;
 
   /// Coupled vars whose values we provide
-  std::map<std::string, std::vector<MooseVariableScalar *> > _coupled_scalar_vars;
+  std::map<std::string, std::vector<MooseVariableScalar *>> _coupled_scalar_vars;
 
   /// Will hold the default value for optional coupled scalar variables.
   std::map<std::string, VariableValue *> _default_value;
@@ -141,7 +141,7 @@ protected:
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  MooseVariableScalar *getScalarVar(const std::string & var_name, unsigned int comp);
+  MooseVariableScalar * getScalarVar(const std::string & var_name, unsigned int comp);
 };
 
 #endif // SCALARCOUPLEABLE_H

@@ -19,9 +19,8 @@
 
 class AddIndicatorAction;
 
-template<>
+template <>
 InputParameters validParams<AddIndicatorAction>();
-
 
 class AddIndicatorAction : public MooseObjectAction
 {
@@ -31,7 +30,6 @@ public:
   virtual void act() override;
 
 private:
-
 };
 
 #endif // ADDINDICATORACTION_H

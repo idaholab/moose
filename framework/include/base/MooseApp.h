@@ -43,7 +43,7 @@ class InputParameterWarehouse;
 class SystemInfo;
 class CommandLine;
 
-template<>
+template <>
 InputParameters validParams<MooseApp>();
 
 /**
@@ -56,9 +56,8 @@ InputParameters validParams<MooseApp>();
  *
  * Each application should register its own objects and register its own special syntax
  */
-class MooseApp :
-  public ConsoleStreamInterface,
-  public libMesh::ParallelObject
+class MooseApp : public ConsoleStreamInterface,
+                 public libMesh::ParallelObject
 {
 public:
   virtual ~MooseApp();
@@ -67,19 +66,28 @@ public:
    * Get the name of the object
    * @return The name of the object
    */
-  const std::string & name() { return _name; }
+  const std::string & name()
+  {
+    return _name;
+  }
 
   /**
    * Get the parameters of the object
    * @return The parameters of the object
    */
-  InputParameters & parameters() { return _pars; }
+  InputParameters & parameters()
+  {
+    return _pars;
+  }
 
   /**
    * Get the type of this object as a string
    * @return The the type of the object
    */
-  const std::string & type() const { return _type; }
+  const std::string & type() const
+  {
+    return _type;
+  }
 
   ///@{
   /**
@@ -94,7 +102,10 @@ public:
   const T & getParam(const std::string & name) const;
   ///@}
 
-  inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
+  inline bool isParamValid(const std::string & name) const
+  {
+    return _pars.isParamValid(name);
+  }
 
   /**
    * Run the application
@@ -106,11 +117,20 @@ public:
    */
   virtual void setupOptions();
 
-  ActionWarehouse & actionWarehouse() { return _action_warehouse; }
+  ActionWarehouse & actionWarehouse()
+  {
+    return _action_warehouse;
+  }
 
-  Parser & parser() { return _parser; }
+  Parser & parser()
+  {
+    return _parser;
+  }
 
-  Syntax & syntax() { return _syntax; }
+  Syntax & syntax()
+  {
+    return _syntax;
+  }
 
   /**
    * Set the input file name.
@@ -120,12 +140,18 @@ public:
   /**
    * Returns the input file name that was set with setInputFileName
    */
-  std::string getInputFileName(){ return _input_filename; }
+  std::string getInputFileName()
+  {
+    return _input_filename;
+  }
 
   /**
    * Override the selection of the output file base name.
    */
-  void setOutputFileBase(std::string output_file_base) { _output_file_base = output_file_base; }
+  void setOutputFileBase(std::string output_file_base)
+  {
+    _output_file_base = output_file_base;
+  }
 
   /**
    * Override the selection of the output file base name.
@@ -147,13 +173,19 @@ public:
    * Whether or not an output position has been set.
    * @return True if it has
    */
-  bool hasOutputPosition() { return _output_position_set; }
+  bool hasOutputPosition()
+  {
+    return _output_position_set;
+  }
 
   /**
    * Get the output position.
    * @return The position offset for the output.
    */
-  Point getOutputPosition() { return _output_position; }
+  Point getOutputPosition()
+  {
+    return _output_position;
+  }
 
   /**
    * Set the starting time for the simulation.  This will override any choice
@@ -166,24 +198,36 @@ public:
   /**
    * @return Whether or not a start time has been programmatically set using setStartTime()
    */
-  bool hasStartTime() { return _start_time_set; }
+  bool hasStartTime()
+  {
+    return _start_time_set;
+  }
 
   /**
    * @return The start time
    */
-  Real getStartTime() { return _start_time; }
+  Real getStartTime()
+  {
+    return _start_time;
+  }
 
   /**
    * Each App has it's own local time.  The "global" time of the whole problem might be
    * different.  This offset is how far off the local App time is from the global time.
    */
-  void setGlobalTimeOffset(const Real offset) { _global_time_offset = offset; }
+  void setGlobalTimeOffset(const Real offset)
+  {
+    _global_time_offset = offset;
+  }
 
   /**
    * Each App has it's own local time.  The "global" time of the whole problem might be
    * different.  This offset is how far off the local App time is from the global time.
    */
-  Real getGlobalTimeOffset() { return _global_time_offset; }
+  Real getGlobalTimeOffset()
+  {
+    return _global_time_offset;
+  }
 
   /**
    * Return the filename that was parsed
@@ -219,40 +263,61 @@ public:
   /**
    * Retrieve the Executioner for this App
    */
-  Executioner * getExecutioner() { return _executioner.get(); }
+  Executioner * getExecutioner()
+  {
+    return _executioner.get();
+  }
 
   /**
    * Retrieve the Executioner shared pointer for this App
    */
-  MooseSharedPointer<Executioner> & executioner() { return _executioner; }
+  MooseSharedPointer<Executioner> & executioner()
+  {
+    return _executioner;
+  }
 
   /**
    * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.
    */
-  bool & useNonlinear() { return _use_nonlinear; }
+  bool & useNonlinear()
+  {
+    return _use_nonlinear;
+  }
 
   /**
    * Retrieve the Factory associated with this App.
    */
-  Factory & getFactory() { return _factory; }
+  Factory & getFactory()
+  {
+    return _factory;
+  }
 
   /**
    * Retrieve the ActionFactory associated with this App.
    */
-  ActionFactory & getActionFactory() { return _action_factory; }
+  ActionFactory & getActionFactory()
+  {
+    return _action_factory;
+  }
 
   /**
    * Get the command line
    * @return The reference to the command line object
    * Setup options based on InputParameters.
    */
-  MooseSharedPointer<CommandLine> commandLine() { return _command_line; }
+  MooseSharedPointer<CommandLine> commandLine()
+  {
+    return _command_line;
+  }
 
   /**
    * This method is here so we can determine whether or not we need to
    * use a separate reader to read the mesh BEFORE we create the mesh.
    */
-  bool & setFileRestart() { return _initial_from_file; }
+  bool & setFileRestart()
+  {
+    return _initial_from_file;
+  }
 
   /**
    * Actually build everything in the input file.
@@ -269,7 +334,10 @@ public:
    * --parallel-mesh, for backwards compatibility) on the command line
    * and false otherwise.
    */
-  bool getDistributedMeshOnCommandLine() const { return _distributed_mesh_on_command_line; }
+  bool getDistributedMeshOnCommandLine() const
+  {
+    return _distributed_mesh_on_command_line;
+  }
 
   /**
    * Deprecated.  Call getDistributedMeshOnCommandLine() instead.
@@ -298,17 +366,26 @@ public:
   /**
    * The file_base for the recovery file.
    */
-  std::string getRecoverFileBase() { return _recover_base; }
+  std::string getRecoverFileBase()
+  {
+    return _recover_base;
+  }
 
   /**
    * mutator for recover_base (set by RecoverBaseAction)
    */
-  void setRecoverFileBase(std::string recover_base) { _recover_base = recover_base; }
+  void setRecoverFileBase(std::string recover_base)
+  {
+    _recover_base = recover_base;
+  }
 
   /**
    *  Whether or not this simulation should only run half its transient (useful for testing recovery)
    */
-  bool halfTransient() { return _half_transient; }
+  bool halfTransient()
+  {
+    return _half_transient;
+  }
 
   /**
    * Store a map of outputter names and file numbers
@@ -317,7 +394,10 @@ public:
    *
    * @see MultiApp TransientMultiApp OutputWarehouse
    */
-  void setOutputFileNumbers(std::map<std::string, unsigned int> numbers) { _output_file_numbers = numbers; }
+  void setOutputFileNumbers(std::map<std::string, unsigned int> numbers)
+  {
+    _output_file_numbers = numbers;
+  }
 
   /**
    * Store a map of outputter names and file numbers
@@ -326,12 +406,18 @@ public:
    *
    * @see MultiApp TransientMultiApp
    */
-  std::map<std::string, unsigned int> & getOutputFileNumbers() { return _output_file_numbers; }
+  std::map<std::string, unsigned int> & getOutputFileNumbers()
+  {
+    return _output_file_numbers;
+  }
 
   /**
    * Return true if the output position has been set
    */
-  bool hasOutputWarehouse(){ return _output_position_set; }
+  bool hasOutputWarehouse()
+  {
+    return _output_position_set;
+  }
 
   /**
    * Get the OutputWarehouse objects
@@ -342,7 +428,10 @@ public:
    * Get SystemInfo object
    * @return A pointer to the SystemInformation object
    */
-  SystemInfo * getSystemInfo() { return _sys_info.get(); }
+  SystemInfo * getSystemInfo()
+  {
+    return _sys_info.get();
+  }
 
   ///@{
   /**
@@ -392,13 +481,19 @@ public:
    * Return reference to the restatable data object
    * @return A const reference to the restatable data object
    */
-  const RestartableDatas & getRestartableData() { return _restartable_data; }
+  const RestartableDatas & getRestartableData()
+  {
+    return _restartable_data;
+  }
 
   /**
    * Return a reference to the recoverable data object
    * @return A const reference to the recoverable data
    */
-  std::set<std::string> & getRecoverableData() { return _recoverable_data; }
+  std::set<std::string> & getRecoverableData()
+  {
+    return _recoverable_data;
+  }
 
   /**
    * Create a Backup from the current App.  A Backup contains all the data necessary to be able
@@ -423,18 +518,27 @@ public:
    * The MultiApp Level
    * @return The current number of levels from the master app
    */
-  unsigned int multiAppLevel() const { return _multiapp_level; }
+  unsigned int multiAppLevel() const
+  {
+    return _multiapp_level;
+  }
 
   /**
    * Set the MultiApp Level
    * @param level The level to assign to this app.
    */
-  void setMultiAppLevel(const unsigned int level) { _multiapp_level = level; }
+  void setMultiAppLevel(const unsigned int level)
+  {
+    _multiapp_level = level;
+  }
 
   /**
    * Whether or not this app is the ultimate master app. (ie level == 0)
    */
-  bool isUltimateMaster() { return !_multiapp_level; }
+  bool isUltimateMaster()
+  {
+    return !_multiapp_level;
+  }
 
   /**
    * Add a mesh modifier that will act on the meshes in the system
@@ -468,7 +572,10 @@ public:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
    */
-  bool hasCachedBackup() { return _cached_backup.get(); }
+  bool hasCachedBackup()
+  {
+    return _cached_backup.get();
+  }
 
   /**
    * Restore from a cached backup
@@ -568,10 +675,14 @@ public:
   MooseSharedPointer<SystemInfo> _sys_info;
 
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
-  enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
+  enum UNUSED_CHECK
+  {
+    OFF,
+    WARN_UNUSED,
+    ERROR_UNUSED
+  } _enable_unused_check;
 
   Factory _factory;
-
 
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
@@ -611,7 +722,6 @@ public:
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;
 
 private:
-
   /** Method for creating the minimum required actions for an application (no input file)
    *
    * Mimics the following input file:
@@ -645,13 +755,18 @@ private:
   std::set<std::string> _recoverable_data;
 
   /// Enumeration for holding the valid types of dynamic registrations allowed
-  enum RegistrationType { APPLICATION, OBJECT, SYNTAX };
+  enum RegistrationType
+  {
+    APPLICATION,
+    OBJECT,
+    SYNTAX
+  };
 
   /// Level of multiapp, the master is level 0. This used by the Console to indent output
   unsigned int _multiapp_level;
 
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
-  std::map<std::string, MooseSharedPointer<MeshModifier> > _mesh_modifiers;
+  std::map<std::string, MooseSharedPointer<MeshModifier>> _mesh_modifiers;
 
   /// Cache for a Backup to use for restart / recovery
   MooseSharedPointer<Backup> _cached_backup;

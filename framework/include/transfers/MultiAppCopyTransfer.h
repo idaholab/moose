@@ -21,14 +21,13 @@
 class MultiAppCopyTransfer;
 class MooseVariable;
 
-template<>
+template <>
 InputParameters validParams<MultiAppCopyTransfer>();
 
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
  */
-class MultiAppCopyTransfer :
-  public MultiAppTransfer
+class MultiAppCopyTransfer : public MultiAppTransfer
 {
 public:
   MultiAppCopyTransfer(const InputParameters & parameters);
@@ -44,7 +43,6 @@ public:
   virtual void execute() override;
 
 protected:
-
   /**
    * Performs the transfer of a variable between two problems.
    */

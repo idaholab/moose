@@ -16,8 +16,9 @@
 #include "SolutionAux.h"
 #include "SolutionUserObject.h"
 
-template<>
-InputParameters validParams<SolutionAux>()
+template <>
+InputParameters
+validParams<SolutionAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<UserObjectName>("solution", "The name of the SolutionUserObject");
@@ -29,8 +30,8 @@ InputParameters validParams<SolutionAux>()
   return params;
 }
 
-SolutionAux::SolutionAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+SolutionAux::SolutionAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _solution_object(getUserObject<SolutionUserObject>("solution")),
     _direct(getParam<bool>("direct")),
     _scale_factor(getParam<Real>("scale_factor")),
@@ -91,5 +92,5 @@ SolutionAux::computeValue()
   }
 
   // Apply factors and return the value
-  return _scale_factor*output + _add_factor;
+  return _scale_factor * output + _add_factor;
 }

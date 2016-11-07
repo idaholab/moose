@@ -21,11 +21,12 @@
 // libMesh includes
 #include "libmesh/tecplot_io.h"
 
-template<>
-InputParameters validParams<Tecplot>()
+template <>
+InputParameters
+validParams<Tecplot>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<BasicOutput<OversampleOutput> >();
+  InputParameters params = validParams<BasicOutput<OversampleOutput>>();
 
   // Add binary toggle
   params.addParam<bool>("binary", false, "Set Tecplot files to output in binary format");
@@ -41,8 +42,8 @@ InputParameters validParams<Tecplot>()
   return params;
 }
 
-Tecplot::Tecplot(const InputParameters & parameters) :
-    BasicOutput<OversampleOutput>(parameters),
+Tecplot::Tecplot(const InputParameters & parameters)
+  : BasicOutput<OversampleOutput>(parameters),
     _binary(getParam<bool>("binary")),
     _ascii_append(getParam<bool>("ascii_append")),
     _first_time(declareRestartableData<bool>("first_time", true))
@@ -55,8 +56,6 @@ Tecplot::Tecplot(const InputParameters & parameters) :
   }
 #endif
 }
-
-
 
 void
 Tecplot::output(const ExecFlagType & /*type*/)

@@ -23,8 +23,9 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-template<>
-InputParameters validParams<Indicator>()
+template <>
+InputParameters
+validParams<Indicator>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
@@ -38,9 +39,8 @@ InputParameters validParams<Indicator>()
   return params;
 }
 
-
-Indicator::Indicator(const InputParameters & parameters) :
-    MooseObject(parameters),
+Indicator::Indicator(const InputParameters & parameters)
+  : MooseObject(parameters),
     BlockRestrictable(parameters),
     SetupInterface(this),
     FunctionInterface(this),

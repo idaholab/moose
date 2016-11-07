@@ -20,7 +20,7 @@
 // Forward declarations
 class MaterialStdVectorAux;
 
-template<>
+template <>
 InputParameters validParams<MaterialStdVectorAux>();
 
 /**
@@ -29,7 +29,6 @@ InputParameters validParams<MaterialStdVectorAux>();
 class MaterialStdVectorAux : public MaterialStdVectorAuxBase<Real>
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters for this object

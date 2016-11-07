@@ -20,8 +20,8 @@
 #include "InputParameters.h"
 #include "MooseObject.h"
 
-Coupleable::Coupleable(const MooseObject * moose_object, bool nodal) :
-    _c_parameters(moose_object->parameters()),
+Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
+  : _c_parameters(moose_object->parameters()),
     _c_fe_problem(*_c_parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _nodal(nodal),
     _c_is_implicit(_c_parameters.have_parameter<bool>("implicit") ? _c_parameters.get<bool>("implicit") : true),
@@ -85,7 +85,7 @@ Coupleable::coupledCallback(const std::string & /*var_name*/, bool /*is_old*/)
 bool
 Coupleable::isCoupled(const std::string & var_name, unsigned int i)
 {
-  std::map<std::string, std::vector<MooseVariable *> >::iterator it = _coupled_vars.find(var_name);
+  std::map<std::string, std::vector<MooseVariable *>>::iterator it = _coupled_vars.find(var_name);
   if (it != _coupled_vars.end())
     return (i < it->second.size());
   else
@@ -254,7 +254,6 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
         mooseError("Older values not available for explicit schemes");
     }
   }
-
 }
 
 const VariableValue &
@@ -264,7 +263,6 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
     return _default_value_zero;
 
   MooseVariable * var = getVar(var_name, comp);
-
 
   if (!_coupleable_neighbor)
   {
@@ -305,7 +303,6 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
       return var->duDotDu();
   }
 }
-
 
 const VariableGradient &
 Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)

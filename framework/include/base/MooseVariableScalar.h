@@ -21,7 +21,8 @@
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
 /**
@@ -38,12 +39,27 @@ public:
   virtual bool isNodal() const override;
 
   //
-  VariableValue & sln() { return _u; }
-  VariableValue & slnOld() { return _u_old; }
-  VariableValue & slnOlder() { return _u_older; }
+  VariableValue & sln()
+  {
+    return _u;
+  }
+  VariableValue & slnOld()
+  {
+    return _u_old;
+  }
+  VariableValue & slnOlder()
+  {
+    return _u_older;
+  }
 
-  VariableValue & uDot() { return _u_dot; }
-  VariableValue & duDotDu() { return _du_dot_du; }
+  VariableValue & uDot()
+  {
+    return _u_dot;
+  }
+  VariableValue & duDotDu()
+  {
+    return _du_dot_du;
+  }
 
   /**
    * Set the nodal value for this variable (to keep everything up to date

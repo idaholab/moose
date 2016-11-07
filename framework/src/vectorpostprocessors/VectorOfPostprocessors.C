@@ -15,22 +15,23 @@
 #include "VectorOfPostprocessors.h"
 #include "PostprocessorInterface.h"
 
-template<>
-InputParameters validParams<VectorOfPostprocessors>()
+template <>
+InputParameters
+validParams<VectorOfPostprocessors>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
 
-  params.addRequiredParam<std::vector<PostprocessorName> >("postprocessors", "The postprocessors whose values are to be reported");
+  params.addRequiredParam<std::vector<PostprocessorName>>("postprocessors", "The postprocessors whose values are to be reported");
   params.addClassDescription("Outputs the values of an arbitrary user-specified set of postprocessors as a vector in the order specified by the user");
 
   return params;
 }
 
-VectorOfPostprocessors::VectorOfPostprocessors(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
+VectorOfPostprocessors::VectorOfPostprocessors(const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters),
     _pp_vec(declareVector(MooseUtils::shortName(parameters.get<std::string>("_object_name"))))
 {
-  std::vector<PostprocessorName> pps_names(getParam<std::vector<PostprocessorName> >("postprocessors"));
+  std::vector<PostprocessorName> pps_names(getParam<std::vector<PostprocessorName>>("postprocessors"));
   _pp_vec.resize(pps_names.size());
   for (const auto & pps_name : pps_names)
   {

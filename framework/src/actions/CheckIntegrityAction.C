@@ -16,16 +16,16 @@
 #include "ActionWarehouse.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<CheckIntegrityAction>()
+template <>
+InputParameters
+validParams<CheckIntegrityAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-
-CheckIntegrityAction::CheckIntegrityAction(InputParameters params) :
-    Action(params)
+CheckIntegrityAction::CheckIntegrityAction(InputParameters params)
+  : Action(params)
 {
 }
 
@@ -36,4 +36,3 @@ CheckIntegrityAction::act()
   if (_problem.get() != NULL)
     _problem->checkProblemIntegrity();
 }
-

@@ -34,13 +34,12 @@ class FEProblem;
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
-
-template<>
+template <>
 InputParameters validParams<DisplacedProblem>();
-
 
 class DisplacedProblem : public SubProblem
 {
@@ -48,15 +47,30 @@ public:
   DisplacedProblem(const InputParameters & parameters);
   virtual ~DisplacedProblem();
 
-  virtual EquationSystems & es() override { return _eq; }
-  virtual MooseMesh & mesh() override { return _mesh; }
+  virtual EquationSystems & es() override
+  {
+    return _eq;
+  }
+  virtual MooseMesh & mesh() override
+  {
+    return _mesh;
+  }
   MooseMesh & refMesh();
 
-  DisplacedSystem & nlSys() { return _displaced_nl; }
-  DisplacedSystem & auxSys() { return _displaced_aux; }
+  DisplacedSystem & nlSys()
+  {
+    return _displaced_nl;
+  }
+  DisplacedSystem & auxSys()
+  {
+    return _displaced_aux;
+  }
 
   // Return a constant reference to the vector of variable names.
-  const std::vector<std::string> & getDisplacementVarNames() const { return _displacements; }
+  const std::vector<std::string> & getDisplacementVarNames() const
+  {
+    return _displacements;
+  }
 
   virtual void createQRules(QuadratureType type, Order order, Order volume_order, Order face_order);
 
@@ -111,10 +125,10 @@ public:
   virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual bool hasScalarVariable(const std::string & var_name) override;
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) override;
-  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
-  virtual void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains = NULL);
-  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
-  virtual void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
+  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set<SubdomainID> * const active_subdomains = NULL);
+  virtual void addAuxVariable(const std::string & var_name, const FEType & type, const std::set<SubdomainID> * const active_subdomains = NULL);
+  virtual void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set<SubdomainID> * const active_subdomains = NULL);
+  virtual void addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set<SubdomainID> * const active_subdomains = NULL);
 
   // Adaptivity /////
   virtual void initAdaptivity();
@@ -176,11 +190,17 @@ public:
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) override;
 
-  virtual Assembly & assembly(THREAD_ID tid) override { return *_assembly[tid]; }
+  virtual Assembly & assembly(THREAD_ID tid) override
+  {
+    return *_assembly[tid];
+  }
 
   // Geom Search /////
   virtual void updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
-  virtual GeometricSearchData & geomSearchData() override { return _geometric_search_data; }
+  virtual GeometricSearchData & geomSearchData() override
+  {
+    return _geometric_search_data;
+  }
 
   virtual bool computingInitialResidual() override;
 

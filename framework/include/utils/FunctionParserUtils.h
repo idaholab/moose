@@ -20,7 +20,7 @@
 // Forward declartions
 class FunctionParserUtils;
 
-template<>
+template <>
 InputParameters validParams<FunctionParserUtils>();
 
 class FunctionParserUtils

@@ -20,8 +20,9 @@
 #include "VectorPostprocessorData.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<VectorPostprocessor>()
+template <>
+InputParameters
+validParams<VectorPostprocessor>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<OutputInterface>();
@@ -31,8 +32,8 @@ InputParameters validParams<VectorPostprocessor>()
   return params;
 }
 
-VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters) :
-    OutputInterface(parameters),
+VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters)
+  : OutputInterface(parameters),
     _vpp_name(MooseUtils::shortName(parameters.get<std::string>("_object_name"))),
     _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _vpp_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)

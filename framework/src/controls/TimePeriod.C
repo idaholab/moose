@@ -18,24 +18,24 @@
 #include "Transient.h"
 #include "MooseUtils.h"
 
-template<>
-InputParameters validParams<TimePeriod>()
+template <>
+InputParameters
+validParams<TimePeriod>()
 {
   InputParameters params = validParams<Control>();
-  params.addParam<std::vector<std::string> >("disable_objects", std::vector<std::string>(), "A list of object tags to disable.");
-  params.addParam<std::vector<std::string> >("enable_objects", std::vector<std::string>(), "A list of object tags to enable.");
-  params.addParam<std::vector<Real> >("start_time", "The time at which the objects are to be enabled/disabled.");
-  params.addParam<std::vector<Real> >("end_time", "The time at which the objects are to be enable/disabled.");
+  params.addParam<std::vector<std::string>>("disable_objects", std::vector<std::string>(), "A list of object tags to disable.");
+  params.addParam<std::vector<std::string>>("enable_objects", std::vector<std::string>(), "A list of object tags to enable.");
+  params.addParam<std::vector<Real>>("start_time", "The time at which the objects are to be enabled/disabled.");
+  params.addParam<std::vector<Real>>("end_time", "The time at which the objects are to be enable/disabled.");
   params.addParam<bool>("set_sync_times", false, "Set the start and end time as execute sync times.");
   params.addParam<bool>("set_outside_of_range", true, "When true the disable/enable lists are set to opposite values when outside of the given time range.");
   return params;
 }
 
-
-TimePeriod::TimePeriod(const InputParameters & parameters) :
-    Control(parameters),
-    _enable(getParam<std::vector<std::string> >("enable_objects")),
-    _disable(getParam<std::vector<std::string> >("disable_objects")),
+TimePeriod::TimePeriod(const InputParameters & parameters)
+  : Control(parameters),
+    _enable(getParam<std::vector<std::string>>("enable_objects")),
+    _disable(getParam<std::vector<std::string>>("disable_objects")),
     _set_outside_of_range(getParam<bool>("set_outside_of_range"))
 {
   // Error if not a transient problem
@@ -48,13 +48,13 @@ TimePeriod::TimePeriod(const InputParameters & parameters) :
 
   // Set start time
   if (isParamValid("start_time"))
-    _start_time = getParam<std::vector<Real> >("start_time");
+    _start_time = getParam<std::vector<Real>>("start_time");
   else
     _start_time = {_app.executioner()->getParam<Real>("start_time")};
 
   // Set end time
   if (isParamValid("end_time"))
-    _end_time = getParam<std::vector<Real> >("end_time");
+    _end_time = getParam<std::vector<Real>>("end_time");
   else
     _end_time = std::vector<Real>(_start_time.size(), std::numeric_limits<Real>::max());
 
@@ -63,7 +63,7 @@ TimePeriod::TimePeriod(const InputParameters & parameters) :
     mooseError("The end time and start time vectors must be the same length.");
 
   // Resize the start/end times if only a single value given
-  if (_end_time.size() == 1 && (_disable.size() > 1 || _enable.size() > 1) )
+  if (_end_time.size() == 1 && (_disable.size() > 1 || _enable.size() > 1))
   {
     unsigned int size = std::max(_disable.size(), _enable.size());
     _end_time = std::vector<Real>(size, _end_time[0]);
@@ -77,7 +77,6 @@ TimePeriod::TimePeriod(const InputParameters & parameters) :
     if (_start_time[i] >= _end_time[i])
       mooseError("The start time(s) must be less than the end time(s).");
 }
-
 
 void
 TimePeriod::execute()
@@ -104,7 +103,6 @@ TimePeriod::execute()
       setControllableValueByName<bool>(_disable[i], std::string("enable"), true);
   }
 }
-
 
 void
 TimePeriod::initialSetup()

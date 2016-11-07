@@ -20,9 +20,8 @@
 //Forward Declaration
 class AddMeshModifierAction;
 
-template<>
+template <>
 InputParameters validParams<AddMeshModifierAction>();
-
 
 class AddMeshModifierAction : public MooseObjectAction
 {

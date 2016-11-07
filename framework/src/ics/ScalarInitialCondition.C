@@ -17,8 +17,9 @@
 #include "FEProblem.h"
 #include "SystemBase.h"
 
-template<>
-InputParameters validParams<ScalarInitialCondition>()
+template <>
+InputParameters
+validParams<ScalarInitialCondition>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addParam<VariableName>("variable", "The variable this initial condition is supposed to provide values for.");
@@ -28,8 +29,8 @@ InputParameters validParams<ScalarInitialCondition>()
   return params;
 }
 
-ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameters) :
-    MooseObject(parameters),
+ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameters)
+  : MooseObject(parameters),
     ScalarCoupleable(this),
     FunctionInterface(this),
     DependencyResolverInterface(),

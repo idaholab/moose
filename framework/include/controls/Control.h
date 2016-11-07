@@ -30,7 +30,7 @@
 class Control;
 class FEProblem;
 
-template<>
+template <>
 InputParameters validParams<Control>();
 
 /**
@@ -40,17 +40,15 @@ InputParameters validParams<Control>();
  * all other MooseObjects are created, so they have access to parameters
  * in all other MooseObjects.
  */
-class Control :
-  public MooseObject,
-  public TransientInterface,
-  public SetupInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  protected PostprocessorInterface,
-  protected VectorPostprocessorInterface
+class Control : public MooseObject,
+                public TransientInterface,
+                public SetupInterface,
+                public FunctionInterface,
+                public UserObjectInterface,
+                protected PostprocessorInterface,
+                protected VectorPostprocessorInterface
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters for this control object
@@ -60,7 +58,9 @@ public:
   /**
    * Class destructor
    */
-  virtual ~Control() {}
+  virtual ~Control()
+  {
+  }
 
   /**
    * Execute the control. This must be overridden.
@@ -72,9 +72,7 @@ public:
    */
   static MultiMooseEnum getExecuteOptions();
 
-
 protected:
-
   /// Reference to the FEProblem for this object
   FEProblem & _fe_problem;
 
@@ -86,13 +84,13 @@ protected:
    *                              name but have varying values.
    * @return A constant reference to the first parameter that matches the given name.
    */
-  template<typename T>
+  template <typename T>
   const T & getControllableValue(const std::string & name, bool warn_when_values_differ = true);
 
-  template<typename T>
+  template <typename T>
   const T & getControllableValueByName(const std::string & name, bool warn_when_values_differ = true);
 
-  template<typename T>
+  template <typename T>
   const T & getControllableValueByName(const std::string & tag, const std::string & param_name, bool warn_when_values_differ = true);
   ///@}
 
@@ -104,65 +102,58 @@ protected:
    * @param warn_when_values_diff When true, produce a warning if multiple controllable values share the given
    *                              name but have varying values.
    */
-  template<typename T>
+  template <typename T>
   void setControllableValue(const std::string & name, const T & value, bool warn_when_values_differ = false);
 
-  template<typename T>
+  template <typename T>
   void setControllableValueByName(const std::string & name, const T & value, bool warn_when_values_differ = false);
 
-  template<typename T>
+  template <typename T>
   void setControllableValueByName(const std::string & tag, const std::string & param_name, const T & value, bool warn_when_values_differ = false);
   ///@}
 
 private:
-
   /// A reference to the InputParameterWarehouse which is used for access the parameter objects
   InputParameterWarehouse & _input_parameter_warehouse;
 
   /// Helper method for retrieving controllable parameters
-  template<typename T>
+  template <typename T>
   ControllableParameter<T> getControllableParameterHelper(const MooseObjectParameterName & desired, bool warn_when_values_differ, bool mark_as_set = false);
-
 };
 
-
-template<typename T>
+template <typename T>
 const T &
 Control::getControllableValue(const std::string & name, bool warn_when_values_differ)
 {
   return getControllableValueByName<T>(getParam<std::string>(name), warn_when_values_differ);
 }
 
-
-template<typename T>
+template <typename T>
 const T &
 Control::getControllableValueByName(const std::string & name, bool warn_when_values_differ)
 {
   MooseObjectParameterName desired(name);
   ControllableParameter<T> helper = getControllableParameterHelper<T>(desired, warn_when_values_differ);
-  return  *(helper.get()[0]);
+  return *(helper.get()[0]);
 }
 
-
-template<typename T>
+template <typename T>
 const T &
 Control::getControllableValueByName(const std::string & tag, const std::string & param_name, bool warn_when_values_differ)
 {
   MooseObjectParameterName desired(tag, param_name);
   ControllableParameter<T> helper = getControllableParameterHelper<T>(desired, warn_when_values_differ);
-  return  *(helper.get()[0]);
+  return *(helper.get()[0]);
 }
 
-
-template<typename T>
+template <typename T>
 void
 Control::setControllableValue(const std::string & name, const T & value, bool warn_when_values_differ)
 {
   setControllableValueByName<T>(getParam<std::string>(name), value, warn_when_values_differ);
 }
 
-
-template<typename T>
+template <typename T>
 void
 Control::setControllableValueByName(const std::string & name, const T & value, bool warn_when_values_differ)
 {
@@ -171,8 +162,7 @@ Control::setControllableValueByName(const std::string & name, const T & value, b
   helper.set(value);
 }
 
-
-template<typename T>
+template <typename T>
 void
 Control::setControllableValueByName(const std::string & tag, const std::string & param_name, const T & value, bool warn_when_values_differ)
 {
@@ -181,8 +171,7 @@ Control::setControllableValueByName(const std::string & tag, const std::string &
   helper.set(value);
 }
 
-
-template<typename T>
+template <typename T>
 ControllableParameter<T>
 Control::getControllableParameterHelper(const MooseObjectParameterName & desired, bool warn_when_values_differ, bool mark_as_set)
 {
@@ -194,13 +183,13 @@ Control::getControllableParameterHelper(const MooseObjectParameterName & desired
   if (warn_when_values_differ)
   {
     // Inspect the values for differing values
-    const std::vector<T*> & values = output.get();
+    const std::vector<T *> & values = output.get();
 
     // The first parameter to test against
     const T & value0 = *values[0];
 
     // Loop over all other parameter values
-    for (typename std::vector<T*>::const_iterator it = values.begin() + 1; it != values.end(); ++it)
+    for (typename std::vector<T *>::const_iterator it = values.begin() + 1; it != values.end(); ++it)
     {
       if (value0 != **it)
       {

@@ -21,7 +21,7 @@
 class ElementExtremeValue;
 
 // Input parameters
-template<>
+template <>
 InputParameters validParams<ElementExtremeValue>();
 
 /// A postprocessor for collecting the nodal min or max value

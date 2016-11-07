@@ -17,10 +17,9 @@
 
 #include "Action.h"
 
-
 class AddNodalNormalsAction;
 
-template<>
+template <>
 InputParameters validParams<AddNodalNormalsAction>();
 
 /**

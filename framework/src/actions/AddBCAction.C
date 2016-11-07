@@ -16,16 +16,17 @@
 #include "FEProblem.h"
 #include "BoundaryCondition.h"
 
-template<>
-InputParameters validParams<AddBCAction>()
+template <>
+InputParameters
+validParams<AddBCAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   params += validParams<BoundaryCondition>();
   return params;
 }
 
-AddBCAction::AddBCAction(InputParameters params) :
-    MooseObjectAction(params)
+AddBCAction::AddBCAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

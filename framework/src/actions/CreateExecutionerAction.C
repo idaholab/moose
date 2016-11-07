@@ -18,17 +18,17 @@
 #include "MooseApp.h"
 #include "Executioner.h"
 
-template<>
-InputParameters validParams<CreateExecutionerAction>()
+template <>
+InputParameters
+validParams<CreateExecutionerAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
 
   return params;
 }
 
-
-CreateExecutionerAction::CreateExecutionerAction(InputParameters params) :
-    MooseObjectAction(params)
+CreateExecutionerAction::CreateExecutionerAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

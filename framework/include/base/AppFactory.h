@@ -23,7 +23,7 @@
 /**
  * Macros
  */
-#define registerApp(name)                        AppFactory::instance().reg<name>(#name)
+#define registerApp(name) AppFactory::instance().reg<name>(#name)
 
 /**
  * Typedef for function to build objects
@@ -43,8 +43,9 @@ typedef std::map<std::string, paramsPtr>::iterator registeredMooseAppIterator;
 /**
  * Build an object of type T
  */
-template<class T>
-MooseApp * buildApp(InputParameters parameters)
+template <class T>
+MooseApp *
+buildApp(InputParameters parameters)
 {
   return new T(parameters);
 }
@@ -72,7 +73,7 @@ public:
    * Register a new object
    * @param name Name of the object to register
    */
-  template<typename T>
+  template <typename T>
   void reg(const std::string & name)
   {
     if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
@@ -96,14 +97,20 @@ public:
    * @param parameters Parameters this object should have
    * @return The created object
    */
-  MooseApp *create(const std::string & app_type, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN);
+  MooseApp * create(const std::string & app_type, const std::string & name, InputParameters parameters, MPI_Comm COMM_WORLD_IN);
 
   ///@{
   /**
    * Returns iterators to the begin/end of the registered objects data structure: a name -> validParams function pointer.
    */
-  registeredMooseAppIterator registeredObjectsBegin() { return _name_to_params_pointer.begin(); }
-  registeredMooseAppIterator registeredObjectsEnd() { return _name_to_params_pointer.end(); }
+  registeredMooseAppIterator registeredObjectsBegin()
+  {
+    return _name_to_params_pointer.begin();
+  }
+  registeredMooseAppIterator registeredObjectsEnd()
+  {
+    return _name_to_params_pointer.end();
+  }
   ///@}
 
   /**
@@ -112,7 +119,7 @@ public:
   bool isRegistered(const std::string & app_name) const;
 
 protected:
-  std::map<std::string, appBuildPtr>  _name_to_build_pointer;
+  std::map<std::string, appBuildPtr> _name_to_build_pointer;
 
   std::map<std::string, paramsPtr> _name_to_params_pointer;
 
@@ -120,7 +127,9 @@ protected:
 
 private:
   // Private constructor for singleton pattern
-  AppFactory() {}
+  AppFactory()
+  {
+  }
 };
 
 #endif /* APPFACTORY_H */

@@ -35,20 +35,19 @@ class Assembly;
 class MooseVariableScalar;
 class SubProblem;
 
-template<>
+template <>
 InputParameters validParams<ScalarKernel>();
 
-class ScalarKernel :
-  public MooseObject,
-  public ScalarCoupleable,
-  public SetupInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public PostprocessorInterface,
-  public TransientInterface,
-  public ZeroInterface,
-  public MeshChangedInterface,
-  protected VectorPostprocessorInterface
+class ScalarKernel : public MooseObject,
+                     public ScalarCoupleable,
+                     public SetupInterface,
+                     public FunctionInterface,
+                     public UserObjectInterface,
+                     public PostprocessorInterface,
+                     public TransientInterface,
+                     public ZeroInterface,
+                     public MeshChangedInterface,
+                     protected VectorPostprocessorInterface
 {
 public:
   ScalarKernel(const InputParameters & parameters);

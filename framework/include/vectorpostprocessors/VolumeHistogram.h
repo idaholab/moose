@@ -19,7 +19,7 @@
 
 class VolumeHistogram;
 
-template<>
+template <>
 InputParameters validParams<VolumeHistogram>();
 
 /**

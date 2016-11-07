@@ -19,7 +19,7 @@
 
 class NodalNormalBC;
 
-template<>
+template <>
 InputParameters validParams<NodalNormalBC>();
 
 /**
@@ -41,6 +41,5 @@ protected:
   /// Normal at the node (it is pre-computed by user object subsystem)
   Point _normal;
 };
-
 
 #endif /* NODALNORMALBC_H */

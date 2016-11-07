@@ -27,11 +27,12 @@
 class LineSegment;
 class MooseMesh;
 
-namespace libMesh {
-  class Point;
-  class Plane;
-  class MeshBase;
-  class Elem;
+namespace libMesh
+{
+class Point;
+class Plane;
+class MeshBase;
+class Elem;
 }
 
 namespace Moose

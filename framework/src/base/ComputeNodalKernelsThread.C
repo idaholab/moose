@@ -21,8 +21,8 @@
 #include "libmesh/threads.h"
 
 ComputeNodalKernelsThread::ComputeNodalKernelsThread(FEProblem & fe_problem,
-                                                     const MooseObjectWarehouse<NodalKernel> & nodal_kernels) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+                                                     const MooseObjectWarehouse<NodalKernel> & nodal_kernels)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _nodal_kernels(nodal_kernels),
     _num_cached(0)
@@ -30,8 +30,8 @@ ComputeNodalKernelsThread::ComputeNodalKernelsThread(FEProblem & fe_problem,
 }
 
 // Splitting Constructor
-ComputeNodalKernelsThread::ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+ComputeNodalKernelsThread::ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split split)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
     _nodal_kernels(x._nodal_kernels),
     _num_cached(0)
@@ -62,7 +62,7 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
   for (const auto & block : block_ids)
     if (_nodal_kernels.hasActiveBlockObjects(block, _tid))
     {
-      const std::vector<MooseSharedPointer<NodalKernel> > & objects = _nodal_kernels.getActiveBlockObjects(block, _tid);
+      const std::vector<MooseSharedPointer<NodalKernel>> & objects = _nodal_kernels.getActiveBlockObjects(block, _tid);
       for (const auto & nodal_kernel : objects)
         nodal_kernel->computeResidual();
     }

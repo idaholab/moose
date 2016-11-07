@@ -34,8 +34,7 @@ class ActionFactory;
 /**
  * Storage for action instances.
  */
-class ActionWarehouse :
-  public ConsoleStreamInterface
+class ActionWarehouse : public ConsoleStreamInterface
 {
 public:
   ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory);
@@ -55,7 +54,10 @@ public:
   /**
    * \p returns a Boolean indicating whether the warehouse is empty or not.
    */
-  bool empty() const { return _action_blocks.empty(); }
+  bool empty() const
+  {
+    return _action_blocks.empty();
+  }
 
   /**
    * This method add an \p Action instance to the warehouse.
@@ -104,45 +106,45 @@ public:
    */
   template <class T>
   const T & getAction(const std::string & name)
+  {
+    T * p = NULL;
+    for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
     {
-      T* p = NULL;
-      for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
+      auto act = _all_ptrs[i].get();
+      if (act->name() == name)
       {
-        auto act = _all_ptrs[i].get();
-        if (act->name() == name)
-        {
-          p = dynamic_cast<T*>(act);
-          if (p)
-            break;
-        }
+        p = dynamic_cast<T *>(act);
+        if (p)
+          break;
       }
-      if (!p)
-        mooseError("Action with name being "+name+" does not exist");
-      return *p;
     }
+    if (!p)
+      mooseError("Action with name being " + name + " does not exist");
+    return *p;
+  }
 
   /**
    * Retrieve all actions in a specific type ordered by their names.
    */
   template <class T>
   std::vector<const T *> getActions()
+  {
+    // we need to create the map first to ensure that all actions in the map are unique
+    // and the actions are sorted by their names
+    std::map<std::string, const T *> actions;
+    for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
     {
-      // we need to create the map first to ensure that all actions in the map are unique
-      // and the actions are sorted by their names
-      std::map<std::string, const T*> actions;
-      for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
-      {
-        auto act = _all_ptrs[i].get();
-        T* p = dynamic_cast<T*>(act);
-        if (p)
-          actions.insert(std::pair<std::string, const T*>(act->name(), p));
-      }
-      // construct the vector from the map entries
-      std::vector<const T*> action_vector;
-      for (auto & pair : actions)
-        action_vector.push_back(pair.second);
-      return action_vector;
+      auto act = _all_ptrs[i].get();
+      T * p = dynamic_cast<T *>(act);
+      if (p)
+        actions.insert(std::pair<std::string, const T *>(act->name(), p));
     }
+    // construct the vector from the map entries
+    std::vector<const T *> action_vector;
+    for (auto & pair : actions)
+      action_vector.push_back(pair.second);
+    return action_vector;
+  }
 
   /**
    * Check if Actions associated with passed in task exist.
@@ -166,24 +168,48 @@ public:
    * various warehouse operations during the problem setup phase.
    * @param state Flag indicating whether to show action information.
    */
-  void showActions(bool state = true) { _show_actions = state; }
+  void showActions(bool state = true)
+  {
+    _show_actions = state;
+  }
 
-  void showParser(bool state = true) { _show_parser = state; }
+  void showParser(bool state = true)
+  {
+    _show_parser = state;
+  }
 
   //// Getters
-  Syntax & syntax() { return _syntax; }
+  Syntax & syntax()
+  {
+    return _syntax;
+  }
 
   // We are not really using the reference counting capabilities of
   // shared pointers here, just their memory management capability.
   // Therefore, _mesh is actually being used more like a unique_ptr in
   // this context.  Since full support for unique_ptr is not quite
   // available yet, we've implemented it as a MooseSharedPointer.
-  MooseSharedPointer<MooseMesh> & mesh() { return _mesh; }
-  MooseSharedPointer<MooseMesh> & displacedMesh() { return _displaced_mesh; }
+  MooseSharedPointer<MooseMesh> & mesh()
+  {
+    return _mesh;
+  }
+  MooseSharedPointer<MooseMesh> & displacedMesh()
+  {
+    return _displaced_mesh;
+  }
 
-  MooseSharedPointer<FEProblem> & problem() { return _problem; }
-  MooseApp & mooseApp() { return _app; }
-  const std::string & getCurrentTaskName() const { return _current_task; }
+  MooseSharedPointer<FEProblem> & problem()
+  {
+    return _problem;
+  }
+  MooseApp & mooseApp()
+  {
+    return _app;
+  }
+  const std::string & getCurrentTaskName() const
+  {
+    return _current_task;
+  }
 
 protected:
   /**
@@ -193,9 +219,9 @@ protected:
    *
    * @param task The name of the task to find and build Actions for.
    */
-  void buildBuildableActions(const std::string &task);
+  void buildBuildableActions(const std::string & task);
 
-  std::vector<MooseSharedPointer<Action> > _all_ptrs;
+  std::vector<MooseSharedPointer<Action>> _all_ptrs;
 
   /// The MooseApp this Warehouse is associated with
   MooseApp & _app;
@@ -204,7 +230,7 @@ protected:
   /// The Factory that builds Actions
   ActionFactory & _action_factory;
   /// Pointers to the actual parsed input file blocks
-  std::map<std::string, std::vector<Action *> > _action_blocks;
+  std::map<std::string, std::vector<Action *>> _action_blocks;
   /// The container that holds the sorted action names from the DependencyResolver
   std::vector<std::string> _ordered_names;
   /// Use to store the current list of unsatisfied dependencies

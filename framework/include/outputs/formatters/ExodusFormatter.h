@@ -26,7 +26,10 @@ public:
 
   void format();
 
-  std::vector<std::string> & getInputFileRecord() { return _input_file_record; }
+  std::vector<std::string> & getInputFileRecord()
+  {
+    return _input_file_record;
+  }
 
 protected:
   std::stringstream _ss;

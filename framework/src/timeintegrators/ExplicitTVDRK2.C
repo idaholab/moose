@@ -17,16 +17,17 @@
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
-template<>
-InputParameters validParams<ExplicitTVDRK2>()
+template <>
+InputParameters
+validParams<ExplicitTVDRK2>()
 {
   InputParameters params = validParams<TimeIntegrator>();
 
   return params;
 }
 
-ExplicitTVDRK2::ExplicitTVDRK2(const InputParameters & parameters) :
-    TimeIntegrator(parameters),
+ExplicitTVDRK2::ExplicitTVDRK2(const InputParameters & parameters)
+  : TimeIntegrator(parameters),
     _stage(1),
     _residual_old(_nl.addVector("residual_old", false, GHOSTED))
 {

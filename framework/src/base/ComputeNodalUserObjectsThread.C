@@ -20,15 +20,15 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(FEProblem & fe_problem, const MooseObjectWarehouse<NodalUserObject> & user_objects) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(FEProblem & fe_problem, const MooseObjectWarehouse<NodalUserObject> & user_objects)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _user_objects(user_objects)
 {
 }
 
 // Splitting Constructor
-ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split split)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _user_objects(x._user_objects)
 {
 }
@@ -50,7 +50,7 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   {
     if (_user_objects.hasActiveBoundaryObjects(bnd, _tid))
     {
-      const std::vector<MooseSharedPointer<NodalUserObject> > & objects = _user_objects.getActiveBoundaryObjects(bnd, _tid);
+      const std::vector<MooseSharedPointer<NodalUserObject>> & objects = _user_objects.getActiveBoundaryObjects(bnd, _tid);
       for (const auto & uo : objects)
         uo->execute();
     }
@@ -62,13 +62,13 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   // "unique_node_execute = true".
 
   // To inforce the unique execution this vector is populated and checked if the unique flag is enabled.
-  std::vector<MooseSharedPointer<NodalUserObject> > computed;
+  std::vector<MooseSharedPointer<NodalUserObject>> computed;
 
   const std::set<SubdomainID> & block_ids = _fe_problem.mesh().getNodeBlockIds(*node);
   for (const auto & block : block_ids)
     if (_user_objects.hasActiveBlockObjects(block, _tid))
     {
-      const std::vector<MooseSharedPointer<NodalUserObject> > & objects = _user_objects.getActiveBlockObjects(block, _tid);
+      const std::vector<MooseSharedPointer<NodalUserObject>> & objects = _user_objects.getActiveBlockObjects(block, _tid);
       for (const auto & uo : objects)
         if (!uo->isUniqueNodeExecute() || std::count(computed.begin(), computed.end(), uo) == 0)
         {

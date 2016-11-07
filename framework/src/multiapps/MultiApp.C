@@ -39,9 +39,9 @@
 // Call to "uname"
 #include <sys/utsname.h>
 
-
-template<>
-InputParameters validParams<MultiApp>()
+template <>
+InputParameters
+validParams<MultiApp>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<SetupInterface>();
@@ -51,16 +51,16 @@ InputParameters validParams<MultiApp>()
 
   std::ostringstream app_types_strings;
   registeredMooseAppIterator it = AppFactory::instance().registeredObjectsBegin();
-  for ( ; it != AppFactory::instance().registeredObjectsEnd(); ++it)
+  for (; it != AppFactory::instance().registeredObjectsEnd(); ++it)
     app_types_strings << it->first << " ";
   MooseEnum app_types_options(app_types_strings.str(), "", true);
 
   params.addParam<MooseEnum>("app_type", app_types_options, "The type of application to build (applications not registered can be loaded with dynamic libraries. Master application type will be used if not provided.");
   params.addParam<std::string>("library_path", "", "Path to search for dynamic libraries (please avoid committing absolute paths in addition to MOOSE_LIBRARY_PATH)");
-  params.addParam<std::vector<Point> >("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.  This and 'positions_file' cannot be both supplied. If this and 'positions_file' are not supplied, a single position (0,0,0) will be used");
-  params.addParam<std::vector<FileName> >("positions_file", "A filename that should be looked in for positions. Each set of 3 values in that file will represent a Point.  This and 'positions' cannot be both supplied");
+  params.addParam<std::vector<Point>>("positions", "The positions of the App locations.  Each set of 3 values will represent a Point.  This and 'positions_file' cannot be both supplied. If this and 'positions_file' are not supplied, a single position (0,0,0) will be used");
+  params.addParam<std::vector<FileName>>("positions_file", "A filename that should be looked in for positions. Each set of 3 values in that file will represent a Point.  This and 'positions' cannot be both supplied");
 
-  params.addRequiredParam<std::vector<FileName> >("input_files", "The input file for each App.  If this parameter only contains one input file it will be used for all of the Apps.  When using 'positions_from_file' it is also admissable to provide one input_file per file.");
+  params.addRequiredParam<std::vector<FileName>>("input_files", "The input file for each App.  If this parameter only contains one input file it will be used for all of the Apps.  When using 'positions_from_file' it is also admissable to provide one input_file per file.");
   params.addParam<Real>("bounding_box_inflation", 0.01, "Relative amount to 'inflate' the bounding box of this MultiApp.");
 
   params.addPrivateParam<MPI_Comm>("_mpi_comm");
@@ -74,13 +74,13 @@ InputParameters validParams<MultiApp>()
 
   params.addParam<Real>("reset_time", std::numeric_limits<Real>::max(), "The time at which to reset Apps given by the 'reset_apps' parameter.  Resetting an App means that it is destroyed and recreated, possibly modeling the insertion of 'new' material for that app.");
 
-  params.addParam<std::vector<unsigned int> >("reset_apps", "The Apps that will be reset when 'reset_time' is hit.  These are the App 'numbers' starting with 0 corresponding to the order of the App positions.  Resetting an App means that it is destroyed and recreated, possibly modeling the insertion of 'new' material for that app.");
+  params.addParam<std::vector<unsigned int>>("reset_apps", "The Apps that will be reset when 'reset_time' is hit.  These are the App 'numbers' starting with 0 corresponding to the order of the App positions.  Resetting an App means that it is destroyed and recreated, possibly modeling the insertion of 'new' material for that app.");
 
   params.addParam<Real>("move_time", std::numeric_limits<Real>::max(), "The time at which Apps designated by move_apps are moved to move_positions.");
 
-  params.addParam<std::vector<unsigned int> >("move_apps", "Apps, designated by their 'numbers' starting with 0 corresponding to the order of the App positions, to be moved at move_time to move_positions");
+  params.addParam<std::vector<unsigned int>>("move_apps", "Apps, designated by their 'numbers' starting with 0 corresponding to the order of the App positions, to be moved at move_time to move_positions");
 
-  params.addParam<std::vector<Point> >("move_positions", "The positions corresponding to each move_app.");
+  params.addParam<std::vector<Point>>("move_positions", "The positions corresponding to each move_app.");
 
   params.declareControllable("enable");
   params.registerBase("MultiApp");
@@ -88,13 +88,13 @@ InputParameters validParams<MultiApp>()
   return params;
 }
 
-MultiApp::MultiApp(const InputParameters & parameters):
-    MooseObject(parameters),
+MultiApp::MultiApp(const InputParameters & parameters)
+  : MooseObject(parameters),
     SetupInterface(this),
     Restartable(parameters, "MultiApps"),
     _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type")) : _fe_problem.getMooseApp().type()),
-    _input_files(getParam<std::vector<FileName> >("input_files")),
+    _input_files(getParam<std::vector<FileName>>("input_files")),
     _total_num_apps(0),
     _my_num_apps(0),
     _first_local_app(0),
@@ -105,11 +105,11 @@ MultiApp::MultiApp(const InputParameters & parameters):
     _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
     _output_in_position(getParam<bool>("output_in_position")),
     _reset_time(getParam<Real>("reset_time")),
-    _reset_apps(getParam<std::vector<unsigned int> >("reset_apps")),
+    _reset_apps(getParam<std::vector<unsigned int>>("reset_apps")),
     _reset_happened(false),
     _move_time(getParam<Real>("move_time")),
-    _move_apps(getParam<std::vector<unsigned int> >("move_apps")),
-    _move_positions(getParam<std::vector<Point> >("move_positions")),
+    _move_apps(getParam<std::vector<unsigned int>>("move_apps")),
+    _move_positions(getParam<std::vector<Point>>("move_positions")),
     _move_happened(false),
     _has_an_app(true),
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this))
@@ -130,7 +130,7 @@ MultiApp::MultiApp(const InputParameters & parameters):
   _backups.resize(_my_num_apps);
 
   // Initialize the backups
-  for (unsigned int i=0; i<_my_num_apps; i++)
+  for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups[i] = MooseSharedPointer<Backup>(new Backup);
 }
 
@@ -139,7 +139,7 @@ MultiApp::~MultiApp()
   if (!_has_an_app)
     return;
 
-  for (unsigned int i=0; i<_my_num_apps; i++)
+  for (unsigned int i = 0; i < _my_num_apps; i++)
   {
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
     delete _apps[i];
@@ -161,7 +161,7 @@ MultiApp::initialSetup()
   if (!AppFactory::instance().isRegistered(_app_type))
     _app.dynamicAppRegistration(_app_type, getParam<std::string>("library_path"));
 
-  for (unsigned int i=0; i<_my_num_apps; i++)
+  for (unsigned int i = 0; i < _my_num_apps; i++)
     createApp(i, _app.getGlobalTimeOffset());
 
   // Swap back
@@ -176,15 +176,15 @@ MultiApp::fillPositions()
 
   if (isParamValid("positions"))
   {
-    _positions = getParam<std::vector<Point> >("positions");
+    _positions = getParam<std::vector<Point>>("positions");
 
     if (_positions.size() < _input_files.size())
       mooseError("Not enough positions for the number of input files provided in MultiApp " << name());
   }
   else if (isParamValid("positions_file"))
   {
-    std::vector<FileName> positions_files = getParam<std::vector<FileName> >("positions_file");
-    std::vector<FileName> input_files = getParam<std::vector<FileName> >("input_files");
+    std::vector<FileName> positions_files = getParam<std::vector<FileName>>("positions_file");
+    std::vector<FileName> input_files = getParam<std::vector<FileName>>("input_files");
 
     if (input_files.size() != 1 && positions_files.size() != input_files.size())
       mooseError("Number of input_files for MultiApp " << name() << " must either be only one or match the number of positions_file files");
@@ -242,7 +242,6 @@ MultiApp::fillPositions()
   }
 }
 
-
 void
 MultiApp::preTransfer(Real /*dt*/, Real target_time)
 {
@@ -258,7 +257,7 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
   if (!_move_happened && target_time + 1e-14 >= _move_time)
   {
     _move_happened = true;
-    for (unsigned int i=0; i<_move_apps.size(); i++)
+    for (unsigned int i = 0; i < _move_apps.size(); i++)
       moveApp(_move_apps[i], _move_positions[i]);
   }
 }
@@ -275,7 +274,7 @@ MultiApp::getExecutioner(unsigned int app)
 void
 MultiApp::backup()
 {
-  for (unsigned int i=0; i<_my_num_apps; i++)
+  for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups[i] = _apps[i]->backup();
 }
 
@@ -288,7 +287,7 @@ MultiApp::restore()
   if (_apps.empty())
     return;
 
-  for (unsigned int i=0; i<_my_num_apps; i++)
+  for (unsigned int i = 0; i < _my_num_apps; i++)
     _apps[i]->restore(_backups[i]);
 }
 
@@ -310,7 +309,7 @@ MultiApp::getBoundingBox(unsigned int app)
   Point min = bbox.min();
   Point max = bbox.max();
 
-  Point inflation_amount = (max-min)*_inflation;
+  Point inflation_amount = (max - min) * _inflation;
 
   Point inflated_min = min - inflation_amount;
   Point inflated_max = max + inflation_amount;
@@ -379,7 +378,7 @@ MultiApp::appTransferVector(unsigned int app, std::string /*var_name*/)
 bool
 MultiApp::hasLocalApp(unsigned int global_app)
 {
-  if (_has_an_app && global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps-1))
+  if (_has_an_app && global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps - 1))
     return true;
 
   return false;
@@ -445,8 +444,8 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // Define the app name
   std::ostringstream multiapp_name;
   std::string full_name;
-  multiapp_name << name() <<  std::setw(std::ceil(std::log10(_total_num_apps)))
-           << std::setprecision(0) << std::setfill('0') << std::right << _first_local_app + i;
+  multiapp_name << name() << std::setw(std::ceil(std::log10(_total_num_apps)))
+                << std::setprecision(0) << std::setfill('0') << std::right << _first_local_app + i;
 
   // Only add parent name if it the parent is not the main app
   if (_app.multiAppLevel() > 0)
@@ -456,7 +455,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblem *>("_parent_fep") = &_fe_problem;
-  app_params.set<MooseSharedPointer<CommandLine> >("_command_line") = _app.commandLine();
+  app_params.set<MooseSharedPointer<CommandLine>>("_command_line") = _app.commandLine();
   MooseApp * app = AppFactory::instance().create(_app_type, full_name, app_params, _my_comm);
   _apps[i] = app;
 
@@ -464,7 +463,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   if (_input_files.size() == 1) // If only one input file was provided, use it for all the solves
     input_file = _input_files[0];
   else
-    input_file = _input_files[_first_local_app+i];
+    input_file = _input_files[_first_local_app + i];
 
   std::ostringstream output_base;
 
@@ -510,8 +509,10 @@ MultiApp::buildComm()
 {
   int ierr;
 
-  ierr = MPI_Comm_size(_orig_comm, &_orig_num_procs); mooseCheckMPIErr(ierr);
-  ierr = MPI_Comm_rank(_orig_comm, &_orig_rank); mooseCheckMPIErr(ierr);
+  ierr = MPI_Comm_size(_orig_comm, &_orig_num_procs);
+  mooseCheckMPIErr(ierr);
+  ierr = MPI_Comm_rank(_orig_comm, &_orig_rank);
+  mooseCheckMPIErr(ierr);
 
   struct utsname sysInfo;
   uname(&sysInfo);
@@ -524,13 +525,13 @@ MultiApp::buildComm()
     _my_comm = MPI_COMM_SELF;
     _my_rank = 0;
 
-    _my_num_apps = _total_num_apps/_orig_num_procs;
+    _my_num_apps = _total_num_apps / _orig_num_procs;
     unsigned int jobs_left = _total_num_apps - (_my_num_apps * _orig_num_procs);
 
     if (jobs_left != 0)
     {
       // Spread the remaining jobs out over the first set of processors
-      if ((unsigned)_orig_rank < jobs_left)  // (these are the "jobs_left_pids" ie the pids that are snatching up extra jobs)
+      if ((unsigned)_orig_rank < jobs_left) // (these are the "jobs_left_pids" ie the pids that are snatching up extra jobs)
       {
         _my_num_apps += 1;
         _first_local_app = _my_num_apps * _orig_rank;
@@ -551,7 +552,8 @@ MultiApp::buildComm()
 
   // In this case we need to divide up the processors that are going to work on each app
   int rank;
-  ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
+  ierr = MPI_Comm_rank(_orig_comm, &rank);
+  mooseCheckMPIErr(ierr);
 
   unsigned int procs_per_app = _orig_num_procs / _total_num_apps;
 
@@ -561,17 +563,17 @@ MultiApp::buildComm()
   int my_app = rank / procs_per_app;
   unsigned int procs_for_my_app = procs_per_app;
 
-  if ((unsigned int) my_app > _total_num_apps-1 && procs_for_my_app == _max_procs_per_app)
+  if ((unsigned int)my_app > _total_num_apps - 1 && procs_for_my_app == _max_procs_per_app)
   {
     // If we've already hit the max number of procs per app then this processor
     // won't have an app at all
     _my_num_apps = 0;
     _has_an_app = false;
   }
-  else if ((unsigned int) my_app >= _total_num_apps-1) // The last app will gain any left-over procs
+  else if ((unsigned int)my_app >= _total_num_apps - 1) // The last app will gain any left-over procs
   {
     my_app = _total_num_apps - 1;
-//    procs_for_my_app += _orig_num_procs % _total_num_apps;
+    //    procs_for_my_app += _orig_num_procs % _total_num_apps;
     _first_local_app = my_app;
     _my_num_apps = 1;
   }
@@ -583,12 +585,15 @@ MultiApp::buildComm()
 
   if (_has_an_app)
   {
-    ierr = MPI_Comm_split(_orig_comm, _first_local_app, rank, &_my_comm); mooseCheckMPIErr(ierr);
-    ierr = MPI_Comm_rank(_my_comm, &_my_rank); mooseCheckMPIErr(ierr);
+    ierr = MPI_Comm_split(_orig_comm, _first_local_app, rank, &_my_comm);
+    mooseCheckMPIErr(ierr);
+    ierr = MPI_Comm_rank(_my_comm, &_my_rank);
+    mooseCheckMPIErr(ierr);
   }
   else
   {
-    ierr = MPI_Comm_split(_orig_comm, MPI_UNDEFINED, rank, &_my_comm); mooseCheckMPIErr(ierr);
+    ierr = MPI_Comm_split(_orig_comm, MPI_UNDEFINED, rank, &_my_comm);
+    mooseCheckMPIErr(ierr);
     _my_rank = 0;
   }
 }
@@ -596,8 +601,8 @@ MultiApp::buildComm()
 unsigned int
 MultiApp::globalAppToLocal(unsigned int global_app)
 {
-  if (global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps-1))
-    return global_app-_first_local_app;
+  if (global_app >= _first_local_app && global_app <= _first_local_app + (_my_num_apps - 1))
+    return global_app - _first_local_app;
 
   _console << _first_local_app << " " << global_app << '\n';
   mooseError("Invalid global_app!");

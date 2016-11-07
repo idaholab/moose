@@ -20,7 +20,7 @@
 //Forward Declarations
 class ElementIntegralPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ElementIntegralPostprocessor>();
 
 /**

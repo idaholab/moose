@@ -15,17 +15,17 @@
 #include "AnalyticalIndicator.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<AnalyticalIndicator>()
+template <>
+InputParameters
+validParams<AnalyticalIndicator>()
 {
   InputParameters params = validParams<ElementIntegralIndicator>();
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;
 }
 
-
-AnalyticalIndicator::AnalyticalIndicator(const InputParameters & parameters) :
-    ElementIntegralIndicator(parameters),
+AnalyticalIndicator::AnalyticalIndicator(const InputParameters & parameters)
+  : ElementIntegralIndicator(parameters),
     _func(getFunction("function"))
 {
 }
@@ -33,8 +33,6 @@ AnalyticalIndicator::AnalyticalIndicator(const InputParameters & parameters) :
 Real
 AnalyticalIndicator::computeQpIntegral()
 {
-  Real diff = _u[_qp]-_func.value(_t, _q_point[_qp]);
-  return diff*diff;
+  Real diff = _u[_qp] - _func.value(_t, _q_point[_qp]);
+  return diff * diff;
 }
-
-

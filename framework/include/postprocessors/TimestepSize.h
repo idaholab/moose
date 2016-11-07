@@ -20,7 +20,7 @@
 //Forward Declarations
 class TimestepSize;
 
-template<>
+template <>
 InputParameters validParams<TimestepSize>();
 
 class TimestepSize : public GeneralPostprocessor
@@ -28,8 +28,12 @@ class TimestepSize : public GeneralPostprocessor
 public:
   TimestepSize(const InputParameters & parameters);
 
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
 
   /**
    * This will return the current time step size.

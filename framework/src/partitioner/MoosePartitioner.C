@@ -15,17 +15,17 @@
 #include "MoosePartitioner.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<MoosePartitioner>()
+template <>
+InputParameters
+validParams<MoosePartitioner>()
 {
   InputParameters params = validParams<MooseObject>();
   params.registerBase("MoosePartitioner");
   return params;
 }
 
-
-MoosePartitioner::MoosePartitioner(const InputParameters & params) :
-    Partitioner(),
+MoosePartitioner::MoosePartitioner(const InputParameters & params)
+  : Partitioner(),
     MooseObject(params),
     Restartable(params, "Partitioners")
 {

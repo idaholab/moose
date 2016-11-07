@@ -23,8 +23,9 @@
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 
-template<>
-InputParameters validParams<MultiAppVariableValueSampleTransfer>()
+template <>
+InputParameters
+validParams<MultiAppVariableValueSampleTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
@@ -32,8 +33,8 @@ InputParameters validParams<MultiAppVariableValueSampleTransfer>()
   return params;
 }
 
-MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
@@ -63,7 +64,7 @@ MultiAppVariableValueSampleTransfer::execute()
 
       std::unique_ptr<PointLocatorBase> pl = from_mesh.getPointLocator();
 
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         Real value = -std::numeric_limits<Real>::max();
 

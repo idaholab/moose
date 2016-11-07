@@ -19,7 +19,7 @@
 
 class LinearNodalConstraint;
 
-template<>
+template <>
 InputParameters validParams<LinearNodalConstraint>();
 
 /**
@@ -35,7 +35,6 @@ public:
   LinearNodalConstraint(const InputParameters & parameters);
 
 protected:
-
   /**
    * Computes the residual for the current slave node
    */

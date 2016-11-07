@@ -23,8 +23,9 @@
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 
-template<>
-InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>()
+template <>
+InputParameters
+validParams<MultiAppVariableValueSamplePostprocessorTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor in the MultiApp to transfer the value to.  This should most likely be a Reporter Postprocessor.");
@@ -32,8 +33,8 @@ InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>()
   return params;
 }
 
-MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     _postprocessor_name(getParam<PostprocessorName>("postprocessor")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
@@ -57,7 +58,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
 
       std::unique_ptr<PointLocatorBase> pl = from_mesh.getPointLocator();
 
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         Real value = -std::numeric_limits<Real>::max();
 

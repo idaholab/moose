@@ -24,14 +24,14 @@
 #include <string>
 #include <iostream>
 
-MultiMooseEnum::MultiMooseEnum(std::string names, std::string default_names, bool allow_out_of_range) :
-    MooseEnumBase(names, allow_out_of_range)
+MultiMooseEnum::MultiMooseEnum(std::string names, std::string default_names, bool allow_out_of_range)
+  : MooseEnumBase(names, allow_out_of_range)
 {
   *this = default_names;
 }
 
-MultiMooseEnum::MultiMooseEnum(const MultiMooseEnum & other_enum) :
-    MooseEnumBase(other_enum),
+MultiMooseEnum::MultiMooseEnum(const MultiMooseEnum & other_enum)
+  : MooseEnumBase(other_enum),
     _current_ids(other_enum._current_ids),
     _current_names(other_enum._current_names),
     _current_names_preserved(other_enum._current_names_preserved)
@@ -51,13 +51,14 @@ MultiMooseEnum::MultiMooseEnum()
 {
 }
 
-MultiMooseEnum::MultiMooseEnum(const MooseEnumBase & other_enum) :
-    MooseEnumBase(other_enum)
+MultiMooseEnum::MultiMooseEnum(const MooseEnumBase & other_enum)
+  : MooseEnumBase(other_enum)
 {
 }
 
 bool
-MultiMooseEnum::operator==(const MultiMooseEnum & value) const
+    MultiMooseEnum::
+    operator==(const MultiMooseEnum & value) const
 {
   // Not the same if the lengths are different
   if (value.size() != size())
@@ -73,7 +74,8 @@ MultiMooseEnum::operator==(const MultiMooseEnum & value) const
 }
 
 bool
-MultiMooseEnum::operator!=(const MultiMooseEnum & value) const
+    MultiMooseEnum::
+    operator!=(const MultiMooseEnum & value) const
 {
   return !(*this == value);
 }
@@ -112,7 +114,8 @@ MultiMooseEnum::contains(const MultiMooseEnum & value) const
 }
 
 MultiMooseEnum &
-MultiMooseEnum::operator=(const std::string & names)
+    MultiMooseEnum::
+    operator=(const std::string & names)
 {
   std::vector<std::string> names_vector;
   MooseUtils::tokenize(names, names_vector, 1, " ");
@@ -120,13 +123,15 @@ MultiMooseEnum::operator=(const std::string & names)
 }
 
 MultiMooseEnum &
-MultiMooseEnum::operator=(const std::vector<std::string> & names)
+    MultiMooseEnum::
+    operator=(const std::vector<std::string> & names)
 {
   return assign(names.begin(), names.end(), false);
 }
 
 MultiMooseEnum &
-MultiMooseEnum::operator=(const std::set<std::string> & names)
+    MultiMooseEnum::
+    operator=(const std::set<std::string> & names)
 {
   return assign(names.begin(), names.end(), false);
 }
@@ -172,7 +177,8 @@ MultiMooseEnum::push_back(const std::set<std::string> & names)
 }
 
 const std::string &
-MultiMooseEnum::operator[](unsigned int i) const
+    MultiMooseEnum::
+    operator[](unsigned int i) const
 {
   mooseAssert(i < _current_names_preserved.size(), "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current_names_preserved.size() << ")");
 
@@ -187,7 +193,7 @@ MultiMooseEnum::get(unsigned int i) const
   return _current_ids[i];
 }
 
-template<typename InputIterator>
+template <typename InputIterator>
 MultiMooseEnum &
 MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
 {
@@ -206,7 +212,7 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
 
     if (std::find(_names.begin(), _names.end(), upper) == _names.end())
     {
-      if (_out_of_range_index == 0)     // Are out of range values allowed?
+      if (_out_of_range_index == 0) // Are out of range values allowed?
         mooseError("Invalid option \"" << upper << "\" in MultiMooseEnum.  Valid options (not case-sensitive) are \"" << _raw_names << "\".");
       else
       {
@@ -225,7 +231,7 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
   return *this;
 }
 
-template<typename InputIterator>
+template <typename InputIterator>
 void
 MultiMooseEnum::remove(InputIterator first, InputIterator last)
 {

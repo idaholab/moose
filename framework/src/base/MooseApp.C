@@ -52,8 +52,9 @@
 
 #define QUOTE(macro) stringifyName(macro)
 
-template<>
-InputParameters validParams<MooseApp>()
+template <>
+InputParameters
+validParams<MooseApp>()
 {
   InputParameters params;
 
@@ -108,24 +109,23 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<bool>("keep_cout", "--keep-cout", false, "Keep standard output from all processors when running in parallel");
   params.addCommandLineParam<bool>("redirect_stdout", "--redirect-stdout", false, "Keep standard output from all processors when running in parallel");
 
-
   params.addPrivateParam<std::string>("_app_name"); // the name passed to AppFactory::create
   params.addPrivateParam<std::string>("_type");
   params.addPrivateParam<int>("_argc");
-  params.addPrivateParam<char**>("_argv");
-  params.addPrivateParam<MooseSharedPointer<CommandLine> >("_command_line");
-  params.addPrivateParam<MooseSharedPointer<Parallel::Communicator> >("_comm");
+  params.addPrivateParam<char **>("_argv");
+  params.addPrivateParam<MooseSharedPointer<CommandLine>>("_command_line");
+  params.addPrivateParam<MooseSharedPointer<Parallel::Communicator>>("_comm");
 
   return params;
 }
 
-MooseApp::MooseApp(InputParameters parameters) :
-    ConsoleStreamInterface(*this),
-    ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
+MooseApp::MooseApp(InputParameters parameters)
+  : ConsoleStreamInterface(*this),
+    ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator>>("_comm")), // Can't call getParam() before pars is set
     _name(parameters.get<std::string>("_app_name")),
     _pars(parameters),
     _type(getParam<std::string>("_type")),
-    _comm(getParam<MooseSharedPointer<Parallel::Communicator> >("_comm")),
+    _comm(getParam<MooseSharedPointer<Parallel::Communicator>>("_comm")),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
@@ -154,12 +154,12 @@ MooseApp::MooseApp(InputParameters parameters) :
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
     int argc = getParam<int>("_argc");
-    char ** argv = getParam<char**>("_argv");
+    char ** argv = getParam<char **>("_argv");
 
     _sys_info = MooseSharedPointer<SystemInfo>(new SystemInfo(argc, argv));
   }
   if (isParamValid("_command_line"))
-    _command_line = getParam<MooseSharedPointer<CommandLine> >("_command_line");
+    _command_line = getParam<MooseSharedPointer<CommandLine>>("_command_line");
   else
     mooseError("Valid CommandLine object required");
 
@@ -234,14 +234,14 @@ MooseApp::setupOptions()
   // Toggle the color console off
   Moose::_color_console = !getParam<bool>("no_color");
 
-  // If there's no threading model active, but the user asked for
-  // --n-threads > 1 on the command line, throw a mooseError.  This is
-  // intended to prevent situations where the user has potentially
-  // built MOOSE incorrectly (neither TBB nor pthreads found) and is
-  // asking for multiple threads, not knowing that there will never be
-  // any threads launched.
+// If there's no threading model active, but the user asked for
+// --n-threads > 1 on the command line, throw a mooseError.  This is
+// intended to prevent situations where the user has potentially
+// built MOOSE incorrectly (neither TBB nor pthreads found) and is
+// asking for multiple threads, not knowing that there will never be
+// any threads launched.
 #if !LIBMESH_USING_THREADS
-  if (libMesh::command_line_value ("--n-threads", 1) > 1)
+  if (libMesh::command_line_value("--n-threads", 1) > 1)
     mooseError("You specified --n-threads > 1, but there is no threading model active!");
 #endif
 
@@ -380,13 +380,12 @@ MooseApp::runInputFile()
     return;
   }
 
-
   bool error_unused = getParam<bool>("error_unused") || _enable_unused_check == ERROR_UNUSED;
   bool warn_unused = getParam<bool>("warn_unused") || _enable_unused_check == WARN_UNUSED;
 
   if (error_unused || warn_unused)
   {
-    MooseSharedPointer<FEProblem> fe_problem= _action_warehouse.problem();
+    MooseSharedPointer<FEProblem> fe_problem = _action_warehouse.problem();
     if (fe_problem.get() && name() == "main" && !getParam<bool>("minimal"))
     {
       // Check the CLI parameters
@@ -594,7 +593,7 @@ std::list<std::string>
 MooseApp::getCheckpointFiles()
 {
   // Extract the CommonOutputAction
-  const Action* common = _action_warehouse.getActionsByName("common_output")[0];
+  const Action * common = _action_warehouse.getActionsByName("common_output")[0];
 
   // Storage for the directory names
   std::list<std::string> checkpoint_dirs;
@@ -679,7 +678,6 @@ MooseApp::libNameToAppName(const std::string & library_name) const
 
   return MooseUtils::underscoreToCamelCase(app_name, true);
 }
-
 
 void
 MooseApp::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
@@ -799,7 +797,7 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename, const
       // Look for the system dependent dynamic library filename to open
       if (line.find("dlname=") != std::string::npos)
         // Magic numbers are computed from length of this string "dlname=' and line minus that string plus quotes"
-        dl_lib_filename = line.substr(8, line.size()-9);
+        dl_lib_filename = line.substr(8, line.size() - 9);
 
       if (line.find("dependency_libs=") != std::string::npos)
       {
@@ -835,10 +833,10 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename, const
     if (!handle)
       mooseError("Cannot open library: " << dl_lib_full_path.c_str() << "\n");
 
-    // get the pointer to the method in the library.  The dlsym()
-    // function returns a null pointer if the symbol cannot be found,
-    // we also explicitly set the pointer to NULL if dlsym is not
-    // available.
+// get the pointer to the method in the library.  The dlsym()
+// function returns a null pointer if the symbol cannot be found,
+// we also explicitly set the pointer to NULL if dlsym is not
+// available.
 #ifdef LIBMESH_HAVE_DLOPEN
     void * registration_method = dlsym(handle, registration_method_name.c_str());
 #else
@@ -847,13 +845,13 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename, const
 
     if (!registration_method)
     {
-      // We found a dynamic library that doesn't have a dynamic
-      // registration method in it. This shouldn't be an error, so
-      // we'll just move on.
+// We found a dynamic library that doesn't have a dynamic
+// registration method in it. This shouldn't be an error, so
+// we'll just move on.
 #ifdef DEBUG
-      mooseWarning("Unable to find extern \"C\" method \"" << registration_method_name \
-                   << "\" in library: " << dl_lib_full_path << ".\n" \
-                   << "This doesn't necessarily indicate an error condition unless you believe that the method should exist in that library.\n");
+      mooseWarning("Unable to find extern \"C\" method \"" << registration_method_name
+                                                           << "\" in library: " << dl_lib_full_path << ".\n"
+                                                           << "This doesn't necessarily indicate an error condition unless you believe that the method should exist in that library.\n");
 #endif
 
 #ifdef LIBMESH_HAVE_DLOPEN
@@ -865,29 +863,29 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename, const
       // TODO: Look into cleaning this up
       switch (params.get<RegistrationType>("reg_type"))
       {
-      case APPLICATION:
-      {
-        typedef void (*register_app_t)();
-        register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
-        (*reg_ptr)();
-        break;
-      }
-      case OBJECT:
-      {
-        typedef void (*register_app_t)(Factory *);
-        register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
-        (*reg_ptr)(params.get<Factory *>("factory"));
-        break;
-      }
-      case SYNTAX:
-      {
-        typedef void (*register_app_t)(Syntax *, ActionFactory *);
-        register_app_t *reg_ptr = reinterpret_cast<register_app_t *>( &registration_method );
-        (*reg_ptr)(params.get<Syntax *>("syntax"), params.get<ActionFactory *>("action_factory"));
-        break;
-      }
-      default:
-        mooseError("Unhandled RegistrationType");
+        case APPLICATION:
+        {
+          typedef void (*register_app_t)();
+          register_app_t * reg_ptr = reinterpret_cast<register_app_t *>(&registration_method);
+          (*reg_ptr)();
+          break;
+        }
+        case OBJECT:
+        {
+          typedef void (*register_app_t)(Factory *);
+          register_app_t * reg_ptr = reinterpret_cast<register_app_t *>(&registration_method);
+          (*reg_ptr)(params.get<Factory *>("factory"));
+          break;
+        }
+        case SYNTAX:
+        {
+          typedef void (*register_app_t)(Syntax *, ActionFactory *);
+          register_app_t * reg_ptr = reinterpret_cast<register_app_t *>(&registration_method);
+          (*reg_ptr)(params.get<Syntax *>("syntax"), params.get<ActionFactory *>("action_factory"));
+          break;
+        }
+        default:
+          mooseError("Unhandled RegistrationType");
       }
 
       // Store the handle so we can close it later
@@ -936,7 +934,7 @@ MooseApp::getMeshModifier(const std::string & name) const
 void
 MooseApp::executeMeshModifiers()
 {
-  DependencyResolver<MooseSharedPointer<MeshModifier> > resolver;
+  DependencyResolver<MooseSharedPointer<MeshModifier>> resolver;
 
   // Add all of the dependencies into the resolver and sort them
   for (const auto & it : _mesh_modifiers)
@@ -947,7 +945,7 @@ MooseApp::executeMeshModifiers()
     std::vector<std::string> & modifiers = it.second->getDependencies();
     for (const auto & depend_name : modifiers)
     {
-      std::map<std::string, MooseSharedPointer<MeshModifier> >::const_iterator depend_it = _mesh_modifiers.find(depend_name);
+      std::map<std::string, MooseSharedPointer<MeshModifier>>::const_iterator depend_it = _mesh_modifiers.find(depend_name);
 
       if (depend_it == _mesh_modifiers.end())
         mooseError("The MeshModifier \"" << depend_name << "\" was not created, did you make a spelling mistake or forget to include it in your input file?");
@@ -956,7 +954,7 @@ MooseApp::executeMeshModifiers()
     }
   }
 
-  const std::vector<MooseSharedPointer<MeshModifier> > & ordered_modifiers = resolver.getSortedValues();
+  const std::vector<MooseSharedPointer<MeshModifier>> & ordered_modifiers = resolver.getSortedValues();
 
   if (ordered_modifiers.size())
   {
@@ -997,7 +995,6 @@ MooseApp::setRecover(const bool & value)
   _recover = value;
 }
 
-
 void
 MooseApp::restoreCachedBackup()
 {
@@ -1009,7 +1006,6 @@ MooseApp::restoreCachedBackup()
   // Release our hold on this Backup
   _cached_backup.reset();
 }
-
 
 void
 MooseApp::createMinimalApp()

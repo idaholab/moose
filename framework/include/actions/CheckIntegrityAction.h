@@ -19,9 +19,8 @@
 
 class CheckIntegrityAction;
 
-template<>
+template <>
 InputParameters validParams<CheckIntegrityAction>();
-
 
 class CheckIntegrityAction : public Action
 {

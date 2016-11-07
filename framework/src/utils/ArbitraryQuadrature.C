@@ -14,10 +14,10 @@
 
 #include "ArbitraryQuadrature.h"
 
-
-ArbitraryQuadrature::ArbitraryQuadrature(const unsigned int d, const Order o) :
-    QBase(d,o)
-{}
+ArbitraryQuadrature::ArbitraryQuadrature(const unsigned int d, const Order o)
+  : QBase(d, o)
+{
+}
 
 QuadratureType
 ArbitraryQuadrature::type() const

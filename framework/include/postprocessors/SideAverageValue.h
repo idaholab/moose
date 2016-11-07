@@ -20,7 +20,7 @@
 //Forward Declarations
 class SideAverageValue;
 
-template<>
+template <>
 InputParameters validParams<SideAverageValue>();
 
 /**

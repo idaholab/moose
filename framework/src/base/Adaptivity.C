@@ -31,8 +31,8 @@
 
 #ifdef LIBMESH_ENABLE_AMR
 
-Adaptivity::Adaptivity(FEProblem & subproblem) :
-    ConsoleStreamInterface(subproblem.getMooseApp()),
+Adaptivity::Adaptivity(FEProblem & subproblem)
+  : ConsoleStreamInterface(subproblem.getMooseApp()),
     _subproblem(subproblem),
     _mesh(_subproblem.mesh()),
     _mesh_refinement_on(false),
@@ -146,11 +146,11 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     _error_estimator->estimate_error(_subproblem.getNonlinearSystem().sys(), *_error);
 
     // Flag elements to be refined and coarsened
-    _mesh_refinement->flag_elements_by_error_fraction (*_error);
+    _mesh_refinement->flag_elements_by_error_fraction(*_error);
 
     if (_displaced_problem)
       // Reuse the error vector and refine the displaced mesh
-      _displaced_mesh_refinement->flag_elements_by_error_fraction (*_error);
+      _displaced_mesh_refinement->flag_elements_by_error_fraction(*_error);
   }
 
   // If the DisplacedProblem is active, undisplace the DisplacedMesh
@@ -191,7 +191,7 @@ Adaptivity::initialAdaptMesh()
 }
 
 void
-Adaptivity::uniformRefine(MooseMesh *mesh)
+Adaptivity::uniformRefine(MooseMesh * mesh)
 {
   mooseAssert(mesh, "Mesh pointer must not be NULL");
 
@@ -276,15 +276,13 @@ Adaptivity::updateErrorVectors()
 
   // Now sum across all processors
   for (const auto & it : _indicator_field_to_error_vector)
-    _subproblem.comm().sum((std::vector<float>&)*(it.second));
+    _subproblem.comm().sum((std::vector<float> &)*(it.second));
 }
 
 bool
 Adaptivity::isAdaptivityDue()
 {
-  return    _mesh_refinement_on
-         && (_start_time <= _t && _t < _stop_time)
-         && _step % _interval == 0;
+  return _mesh_refinement_on && (_start_time <= _t && _t < _stop_time) && _step % _interval == 0;
 }
 
 #endif //LIBMESH_ENABLE_AMR

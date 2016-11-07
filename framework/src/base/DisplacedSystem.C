@@ -15,8 +15,8 @@
 #include "DisplacedSystem.h"
 #include "DisplacedProblem.h"
 
-DisplacedSystem::DisplacedSystem(DisplacedProblem & problem, SystemBase & undisplaced_system, const std::string & name, Moose::VarKindType var_kind) :
-    SystemBase(problem, name, var_kind),
+DisplacedSystem::DisplacedSystem(DisplacedProblem & problem, SystemBase & undisplaced_system, const std::string & name, Moose::VarKindType var_kind)
+  : SystemBase(problem, name, var_kind),
     _undisplaced_system(undisplaced_system),
     _sys(problem.es().add_system<TransientExplicitSystem>(name))
 {

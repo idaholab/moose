@@ -19,9 +19,8 @@
 
 class AddMarkerAction;
 
-template<>
+template <>
 InputParameters validParams<AddMarkerAction>();
-
 
 class AddMarkerAction : public MooseObjectAction
 {

@@ -19,7 +19,7 @@
 
 class Heun;
 
-template<>
+template <>
 InputParameters validParams<Heun>();
 
 /**
@@ -37,14 +37,24 @@ class Heun : public ExplicitRK2
 {
 public:
   Heun(const InputParameters & parameters);
-  virtual ~Heun() {}
+  virtual ~Heun()
+  {
+  }
 
 protected:
   /// Method coefficient overrides
-  virtual Real a() const  { return 1.; }
-  virtual Real b1() const { return .5; }
-  virtual Real b2() const { return .5; }
+  virtual Real a() const
+  {
+    return 1.;
+  }
+  virtual Real b1() const
+  {
+    return .5;
+  }
+  virtual Real b2() const
+  {
+    return .5;
+  }
 };
-
 
 #endif /* HEUN_H */

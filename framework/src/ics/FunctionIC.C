@@ -15,16 +15,17 @@
 #include "FunctionIC.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<FunctionIC>()
+template <>
+InputParameters
+validParams<FunctionIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<FunctionName>("function", "The initial condition function.");
   return params;
 }
 
-FunctionIC::FunctionIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+FunctionIC::FunctionIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _func(getFunction("function"))
 {
 }
@@ -40,4 +41,3 @@ FunctionIC::gradient(const Point & p)
 {
   return _func.gradient(_t, p);
 }
-

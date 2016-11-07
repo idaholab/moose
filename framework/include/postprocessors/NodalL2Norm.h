@@ -20,7 +20,7 @@
 // Forward Declarations
 class NodalL2Norm;
 
-template<>
+template <>
 InputParameters validParams<NodalL2Norm>();
 
 /**

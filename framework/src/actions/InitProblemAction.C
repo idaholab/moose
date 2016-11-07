@@ -15,16 +15,16 @@
 #include "InitProblemAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<InitProblemAction>()
+template <>
+InputParameters
+validParams<InitProblemAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-
-InitProblemAction::InitProblemAction(InputParameters params) :
-    Action(params)
+InitProblemAction::InitProblemAction(InputParameters params)
+  : Action(params)
 {
 }
 
@@ -36,4 +36,3 @@ InitProblemAction::act()
   else
     mooseError("Problem doesn't exist in InitProblemAction!");
 }
-

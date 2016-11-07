@@ -20,7 +20,7 @@
 //Forward Declarations
 class Receiver;
 
-template<>
+template <>
 InputParameters validParams<Receiver>();
 
 /**
@@ -40,8 +40,12 @@ public:
   /**
    * No action taken
    */
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
   ///@}
 
   /**
@@ -56,7 +60,6 @@ public:
   virtual void initialSetup() override;
 
 private:
-
   /// Flag for initializing the old value
   bool _initialize_old;
 

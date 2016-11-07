@@ -19,7 +19,7 @@
 
 class ErrorToleranceMarker;
 
-template<>
+template <>
 InputParameters validParams<ErrorToleranceMarker>();
 
 class ErrorToleranceMarker : public IndicatorMarker

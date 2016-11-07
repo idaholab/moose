@@ -14,15 +14,16 @@
 
 #include "MassEigenKernel.h"
 
-template<>
-InputParameters validParams<MassEigenKernel>()
+template <>
+InputParameters
+validParams<MassEigenKernel>()
 {
   InputParameters params = validParams<EigenKernel>();
   return params;
 }
 
-MassEigenKernel::MassEigenKernel(const InputParameters & parameters) :
-    EigenKernel(parameters)
+MassEigenKernel::MassEigenKernel(const InputParameters & parameters)
+  : EigenKernel(parameters)
 {
 }
 
@@ -37,4 +38,3 @@ MassEigenKernel::computeQpJacobian()
 {
   return -_phi[_j][_qp] * _test[_i][_qp];
 }
-

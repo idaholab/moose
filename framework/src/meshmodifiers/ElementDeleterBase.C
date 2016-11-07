@@ -15,16 +15,18 @@
 #include "ElementDeleterBase.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ElementDeleterBase>()
+template <>
+InputParameters
+validParams<ElementDeleterBase>()
 {
   InputParameters params = validParams<MeshModifier>();
   return params;
 }
 
-ElementDeleterBase::ElementDeleterBase(const InputParameters & parameters) :
-    MeshModifier(parameters)
-{}
+ElementDeleterBase::ElementDeleterBase(const InputParameters & parameters)
+  : MeshModifier(parameters)
+{
+}
 
 void
 ElementDeleterBase::modify()

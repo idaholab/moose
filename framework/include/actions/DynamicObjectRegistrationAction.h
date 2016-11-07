@@ -19,7 +19,7 @@
 
 class DynamicObjectRegistrationAction;
 
-template<>
+template <>
 InputParameters validParams<DynamicObjectRegistrationAction>();
 
 class DynamicObjectRegistrationAction : public Action

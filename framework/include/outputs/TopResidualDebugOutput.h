@@ -25,9 +25,8 @@
 // Forward declerations
 class TopResidualDebugOutput;
 
-template<>
+template <>
 InputParameters validParams<TopResidualDebugOutput>();
-
 
 /**
  * A structure for storing data related to top residuals
@@ -40,19 +39,21 @@ struct TopResidualDebugOutputTopResidualData
   Real _residual;
   bool _is_scalar;
 
-  TopResidualDebugOutputTopResidualData() :
-      _var(0),
+  TopResidualDebugOutputTopResidualData()
+    : _var(0),
       _nd(0),
       _residual(0.),
       _is_scalar(false)
-    {}
+  {
+  }
 
-  TopResidualDebugOutputTopResidualData(unsigned int var, dof_id_type nd, Real residual, bool is_scalar = false) :
-      _var(var),
+  TopResidualDebugOutputTopResidualData(unsigned int var, dof_id_type nd, Real residual, bool is_scalar = false)
+    : _var(var),
       _nd(nd),
       _residual(residual),
       _is_scalar(is_scalar)
-    {}
+  {
+  }
 };
 
 /**
@@ -63,7 +64,6 @@ struct TopResidualDebugOutputTopResidualData
 class TopResidualDebugOutput : public BasicOutput<PetscOutput>
 {
 public:
-
   /**
    * Class constructor
    * @param parameters Object input parameters
@@ -71,7 +71,6 @@ public:
   TopResidualDebugOutput(const InputParameters & parameters);
 
 protected:
-
   /**
    * Perform the debugging output
    */
@@ -88,7 +87,10 @@ protected:
    * Method for sorting the residuals data from TopResidualDebugOutputTopResidualData structs
    * @see printTopResiduals
    */
-  static bool sortTopResidualData(TopResidualDebugOutputTopResidualData i, TopResidualDebugOutputTopResidualData j) { return (fabs(i._residual) > fabs(j._residual)); }
+  static bool sortTopResidualData(TopResidualDebugOutputTopResidualData i, TopResidualDebugOutputTopResidualData j)
+  {
+    return (fabs(i._residual) > fabs(j._residual));
+  }
 
   /// Number of residuals to display
   unsigned int _num_residuals;

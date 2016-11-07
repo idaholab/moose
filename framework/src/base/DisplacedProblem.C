@@ -27,21 +27,22 @@
 // libMesh includes
 #include "libmesh/numeric_vector.h"
 
-template<>
-InputParameters validParams<DisplacedProblem>()
+template <>
+InputParameters
+validParams<DisplacedProblem>()
 {
   InputParameters params = validParams<SubProblem>();
-  params.addPrivateParam<std::vector<std::string> >("displacements");
+  params.addPrivateParam<std::vector<std::string>>("displacements");
   return params;
 }
 
-DisplacedProblem::DisplacedProblem(const InputParameters & parameters) :
-    SubProblem(parameters),
+DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
+  : SubProblem(parameters),
     _mproblem(*getParam<FEProblem *>("_fe_problem")),
     _mesh(*getParam<MooseMesh *>("mesh")),
     _eq(_mesh),
     _ref_mesh(_mproblem.mesh()),
-    _displacements(getParam<std::vector<std::string> >("displacements")),
+    _displacements(getParam<std::vector<std::string>>("displacements")),
     _displaced_nl(*this, _mproblem.getNonlinearSystem(), _mproblem.getNonlinearSystem().name() + "_displaced", Moose::VAR_NONLINEAR),
     _displaced_aux(*this, _mproblem.getAuxiliarySystem(), _mproblem.getAuxiliarySystem().name() + "_displaced", Moose::VAR_AUXILIARY),
     _geometric_search_data(_mproblem, _mesh)
@@ -251,25 +252,25 @@ DisplacedProblem::getScalarVariable(THREAD_ID tid, const std::string & var_name)
 }
 
 void
-DisplacedProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
+DisplacedProblem::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set<SubdomainID> * const active_subdomains)
 {
   _displaced_nl.addVariable(var_name, type, scale_factor, active_subdomains);
 }
 
 void
-DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains)
+DisplacedProblem::addAuxVariable(const std::string & var_name, const FEType & type, const std::set<SubdomainID> * const active_subdomains)
 {
   _displaced_aux.addVariable(var_name, type, 1.0, active_subdomains);
 }
 
 void
-DisplacedProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
+DisplacedProblem::addScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set<SubdomainID> * const active_subdomains)
 {
   _displaced_nl.addScalarVariable(var_name, order, scale_factor, active_subdomains);
 }
 
 void
-DisplacedProblem::addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set< SubdomainID > * const active_subdomains)
+DisplacedProblem::addAuxScalarVariable(const std::string & var_name, Order order, Real scale_factor, const std::set<SubdomainID> * const active_subdomains)
 {
   _displaced_aux.addScalarVariable(var_name, order, scale_factor, active_subdomains);
 }
@@ -347,7 +348,6 @@ DisplacedProblem::reinitDirac(const Elem * elem, THREAD_ID tid)
   return n_points > 0;
 }
 
-
 void
 DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 {
@@ -369,7 +369,6 @@ DisplacedProblem::reinitElemPhys(const Elem * elem, std::vector<Point> phys_poin
 
   reinitElem(elem, tid);
 }
-
 
 void
 DisplacedProblem::reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid)
@@ -422,7 +421,7 @@ DisplacedProblem::reinitNeighbor(const Elem * elem, unsigned int side, THREAD_ID
 
   _assembly[tid]->prepareNeighbor();
 
-  BoundaryID bnd_id = 0;              // some dummy number (it is not really used for anything, right now)
+  BoundaryID bnd_id = 0; // some dummy number (it is not really used for anything, right now)
   _displaced_nl.reinitElemFace(elem, side, bnd_id, tid);
   _displaced_aux.reinitElemFace(elem, side, bnd_id, tid);
 
@@ -560,7 +559,6 @@ DisplacedProblem::addJacobianNonlocal(SparseMatrix<Number> & jacobian, THREAD_ID
 {
   _assembly[tid]->addJacobianNonlocal(jacobian);
 }
-
 
 void
 DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
@@ -729,5 +727,5 @@ DisplacedProblem::undisplaceMesh()
   ResetDisplacedMeshThread rdmt(_mproblem, *this);
 
   // Undisplace the mesh using threads.
-  Threads::parallel_reduce (node_range, rdmt);
+  Threads::parallel_reduce(node_range, rdmt);
 }

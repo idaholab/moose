@@ -20,7 +20,7 @@
 // Forward Declaration
 class TimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<TimeDerivative>();
 
 class TimeDerivative : public TimeKernel

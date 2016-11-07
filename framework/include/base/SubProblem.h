@@ -38,11 +38,13 @@ namespace libMesh
 class EquationSystems;
 class DofMap;
 class CouplingMatrix;
-template <typename T> class SparseMatrix;
-template <typename T> class NumericVector;
+template <typename T>
+class SparseMatrix;
+template <typename T>
+class NumericVector;
 }
 
-template<>
+template <>
 InputParameters validParams<SubProblem>();
 
 /**
@@ -58,7 +60,10 @@ public:
   virtual EquationSystems & es() = 0;
   virtual MooseMesh & mesh() = 0;
 
-  virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
+  virtual bool checkNonlocalCouplingRequirement()
+  {
+    return _requires_nonlocal_coupling;
+  }
 
   /**
    * Whether or not this problem should utilize FE shape function caching.
@@ -312,7 +317,10 @@ public:
    * Return the list of elements that should have their DoFs ghosted to this processor.
    * @return The list
    */
-  virtual std::set<dof_id_type> & ghostedElems() { return _ghosted_elems; }
+  virtual std::set<dof_id_type> & ghostedElems()
+  {
+    return _ghosted_elems;
+  }
 
   /**
    * Register a piece of restartable data.  This is data that will get
@@ -324,8 +332,11 @@ public:
    */
   virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
-  std::map<std::string, std::vector<dof_id_type> > _var_dof_map;
-  const CouplingMatrix & nonlocalCouplingMatrix() const { return _nonlocal_cm; }
+  std::map<std::string, std::vector<dof_id_type>> _var_dof_map;
+  const CouplingMatrix & nonlocalCouplingMatrix() const
+  {
+    return _nonlocal_cm;
+  }
 
 protected:
   /// The Factory for building objects
@@ -339,14 +350,14 @@ protected:
   DiracKernelInfo _dirac_kernel_info;
 
   /// Map of material properties (block_id -> list of properties)
-  std::map<SubdomainID, std::set<std::string> > _map_block_material_props;
+  std::map<SubdomainID, std::set<std::string>> _map_block_material_props;
 
   /// Map for boundary material properties (boundary_id -> list of properties)
-  std::map<BoundaryID, std::set<std::string> > _map_boundary_material_props;
+  std::map<BoundaryID, std::set<std::string>> _map_boundary_material_props;
 
   /// Set of properties returned as zero properties
-  std::map<SubdomainID, std::set<MaterialPropertyName> > _zero_block_material_props;
-  std::map<BoundaryID, std::set<MaterialPropertyName> > _zero_boundary_material_props;
+  std::map<SubdomainID, std::set<MaterialPropertyName>> _zero_block_material_props;
+  std::map<BoundaryID, std::set<MaterialPropertyName>> _zero_boundary_material_props;
 
   /// set containing all material property names that have been requested by getMaterialProperty*
   std::set<std::string> _material_property_requested;
@@ -357,12 +368,12 @@ protected:
    * from boudnary/block id to multimap.  Each of the multimaps is a list of
    * requestor object names to material property names.
    */
-  std::map<SubdomainID, std::multimap<std::string, std::string> > _map_block_material_props_check;
-  std::map<BoundaryID, std::multimap<std::string, std::string> > _map_boundary_material_props_check;
+  std::map<SubdomainID, std::multimap<std::string, std::string>> _map_block_material_props_check;
+  std::map<BoundaryID, std::multimap<std::string, std::string>> _map_boundary_material_props_check;
   ///@}
 
   /// This is the set of MooseVariables that will actually get reinited by a call to reinit(elem)
-  std::vector<std::set<MooseVariable *> > _active_elemental_moose_variables;
+  std::vector<std::set<MooseVariable *>> _active_elemental_moose_variables;
 
   /// Whether or not there is currently a list of active elemental moose variables
   /* This needs to remain <unsigned int> for threading purposes */
@@ -378,7 +389,6 @@ protected:
   unsigned int _rz_coord_axis;
 
 private:
-
   /**
    * Helper method for performing material property checks
    * @param props Reference to the map of properties known
@@ -388,9 +398,9 @@ private:
    * \see checkBoundaryMatProps
    */
   template <typename T>
-  void checkMatProps(std::map<T, std::set<std::string> > & props,
-                     std::map<T, std::multimap<std::string, std::string> > & check_props,
-                     std::map<T, std::set<MaterialPropertyName> > & zero_props);
+  void checkMatProps(std::map<T, std::set<std::string>> & props,
+                     std::map<T, std::multimap<std::string, std::string>> & check_props,
+                     std::map<T, std::set<MaterialPropertyName>> & zero_props);
 
   /**
    * NOTE: This is an internal function meant for MOOSE use only!

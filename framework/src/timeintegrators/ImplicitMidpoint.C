@@ -17,16 +17,17 @@
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
-template<>
-InputParameters validParams<ImplicitMidpoint>()
+template <>
+InputParameters
+validParams<ImplicitMidpoint>()
 {
   InputParameters params = validParams<TimeIntegrator>();
 
   return params;
 }
 
-ImplicitMidpoint::ImplicitMidpoint(const InputParameters & parameters) :
-    TimeIntegrator(parameters),
+ImplicitMidpoint::ImplicitMidpoint(const InputParameters & parameters)
+  : TimeIntegrator(parameters),
     _stage(1),
     _residual_stage1(_nl.addVector("residual_stage1", false, GHOSTED))
 {
@@ -42,14 +43,12 @@ ImplicitMidpoint::computeTimeDerivatives()
   // We are multiplying by the method coefficients in postStep(), so
   // the time derivatives are of the same form at every stage although
   // the current solution varies depending on the stage.
-  _u_dot  = *_solution;
+  _u_dot = *_solution;
   _u_dot -= _solution_old;
   _u_dot *= 1. / _dt;
   _u_dot.close();
   _du_dot_du = 1. / _dt;
 }
-
-
 
 void
 ImplicitMidpoint::solve()
@@ -72,8 +71,6 @@ ImplicitMidpoint::solve()
   _fe_problem.time() = time_new;
   _fe_problem.getNonlinearSystem().sys().solve();
 }
-
-
 
 void
 ImplicitMidpoint::postStep(NumericVector<Number> & residual)
@@ -115,6 +112,3 @@ ImplicitMidpoint::postStep(NumericVector<Number> & residual)
   else
     mooseError("ImplicitMidpoint::postStep(): _stage = " << _stage << ", only _stage = 1, 2 is allowed.");
 }
-
-
-

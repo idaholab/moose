@@ -19,7 +19,7 @@
 
 class BlockDeleter;
 
-template<>
+template <>
 InputParameters validParams<BlockDeleter>();
 
 class BlockDeleter : public ElementDeleterBase

@@ -19,7 +19,7 @@
 
 class Ralston;
 
-template<>
+template <>
 InputParameters validParams<Ralston>();
 
 /**
@@ -37,14 +37,24 @@ class Ralston : public ExplicitRK2
 {
 public:
   Ralston(const InputParameters & parameters);
-  virtual ~Ralston() {}
+  virtual ~Ralston()
+  {
+  }
 
 protected:
   /// Method coefficient overrides
-  virtual Real a() const  { return 2./3.; }
-  virtual Real b1() const { return .25; }
-  virtual Real b2() const { return .75; }
+  virtual Real a() const
+  {
+    return 2. / 3.;
+  }
+  virtual Real b1() const
+  {
+    return .25;
+  }
+  virtual Real b2() const
+  {
+    return .75;
+  }
 };
-
 
 #endif /* RALSTON_H */

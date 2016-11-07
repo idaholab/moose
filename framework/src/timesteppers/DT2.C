@@ -28,9 +28,9 @@
 // C++ Includes
 #include <iomanip>
 
-
-template<>
-InputParameters validParams<DT2>()
+template <>
+InputParameters
+validParams<DT2>()
 {
   InputParameters params = validParams<TimeStepper>();
   params.addParam<Real>("dt", 1., "The initial time step size.");
@@ -41,8 +41,8 @@ InputParameters validParams<DT2>()
   return params;
 }
 
-DT2::DT2(const InputParameters & parameters) :
-    TimeStepper(parameters),
+DT2::DT2(const InputParameters & parameters)
+  : TimeStepper(parameters),
     _u_diff(NULL),
     _u1(NULL),
     _u2(NULL),
@@ -55,7 +55,8 @@ DT2::DT2(const InputParameters & parameters) :
     _e_tol(getParam<Real>("e_tol")),
     _e_max(getParam<Real>("e_max")),
     _max_increase(getParam<Real>("max_increase"))
-{}
+{
+}
 
 void
 DT2::preExecute()
@@ -121,7 +122,7 @@ DT2::step()
     nl_sys.current_local_solution->close();
     aux_sys.current_local_solution->close();
 
-    _dt = getCurrentDT() / 2;                 // cut the time step in half
+    _dt = getCurrentDT() / 2; // cut the time step in half
     _time = _time_old + _dt;
 
     // 1. step
@@ -180,7 +181,7 @@ DT2::step()
 
     if (!_converged)
     {
-      *nl_sys.current_local_solution= *_u1;
+      *nl_sys.current_local_solution = *_u1;
       *nl_sys.old_local_solution = *_u1;
       *nl_sys.older_local_solution = *_u_saved;
 
@@ -220,7 +221,7 @@ DT2::rejectStep()
 {
   if (_error >= _e_max)
     _console << "DT2Transient: Marking last solve not converged since |U2-U1|/max(|U2|,|U1|) = "
-               << _error << " >= e_max." << std::endl;
+             << _error << " >= e_max." << std::endl;
 
   TransientNonlinearImplicitSystem & nl_sys = _fe_problem.getNonlinearSystem().sys();
   TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();

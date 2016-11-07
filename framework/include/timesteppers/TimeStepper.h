@@ -22,15 +22,14 @@ class TimeStepper;
 class FEProblem;
 class Transient;
 
-template<>
+template <>
 InputParameters validParams<TimeStepper>();
 
 /**
  * Base class for time stepping
  */
-class TimeStepper :
-  public MooseObject,
-  public Restartable
+class TimeStepper : public MooseObject,
+                    public Restartable
 {
 public:
   TimeStepper(const InputParameters & parameters);
@@ -42,11 +41,21 @@ public:
   virtual void init();
 
   virtual void preExecute();
-  virtual void preSolve() {}
-  virtual void postSolve() {}
-  virtual void postExecute() {}
-  virtual void preStep() {}
-  virtual void postStep() {}
+  virtual void preSolve()
+  {
+  }
+  virtual void postSolve()
+  {
+  }
+  virtual void postExecute()
+  {
+  }
+  virtual void preStep()
+  {
+  }
+  virtual void postStep()
+  {
+  }
 
   /**
    * Called before a new step is started.
@@ -62,7 +71,7 @@ public:
    * Called after computeStep() is called.
    * @return true if any type of sync point was hit, false otherwise
    */
-  virtual bool constrainStep(Real &dt);
+  virtual bool constrainStep(Real & dt);
 
   /**
    * Take a time step
@@ -88,7 +97,10 @@ public:
   /**
    * Get the current_dt
    */
-  Real getCurrentDT() { return _current_dt; }
+  Real getCurrentDT()
+  {
+    return _current_dt;
+  }
 
   virtual void forceTimeStep(Real dt);
 

@@ -17,8 +17,9 @@
 #include "IndirectSort.h"
 #include "VectorPostprocessor.h"
 
-template<>
-InputParameters validParams<SamplerBase>()
+template <>
+InputParameters
+validParams<SamplerBase>()
 {
   InputParameters params = emptyInputParameters();
 
@@ -28,8 +29,8 @@ InputParameters validParams<SamplerBase>()
   return params;
 }
 
-SamplerBase::SamplerBase(const InputParameters & parameters, VectorPostprocessor * vpp, const libMesh::Parallel::Communicator & comm) :
-    _sampler_params(parameters),
+SamplerBase::SamplerBase(const InputParameters & parameters, VectorPostprocessor * vpp, const libMesh::Parallel::Communicator & comm)
+  : _sampler_params(parameters),
     _vpp(vpp),
     _comm(comm),
     _sort_by(parameters.get<MooseEnum>("sort_by")),
@@ -92,7 +93,7 @@ SamplerBase::finalize()
   std::vector<VectorPostprocessorValue *> vec_ptrs;
   vec_ptrs.reserve(_values.size() + NUM_ID_VECTORS);
   // Initialize the pointer vector with the position and ID vectors
-  vec_ptrs = { { &_x, &_y, &_z, &_id } };
+  vec_ptrs = {{&_x, &_y, &_z, &_id}};
   // Now extend the vector by all the remaining values vector before processing
   vec_ptrs.insert(vec_ptrs.end(), _values.begin(), _values.end());
 
@@ -140,6 +141,6 @@ SamplerBase::threadJoin(const SamplerBase & y)
 
   _id.insert(_id.end(), y._id.begin(), y._id.end());
 
-  for (unsigned int i=0; i<_variable_names.size(); i++)
+  for (unsigned int i = 0; i < _variable_names.size(); i++)
     _values[i]->insert(_values[i]->end(), y._values[i]->begin(), y._values[i]->end());
 }

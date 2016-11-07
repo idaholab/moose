@@ -27,7 +27,7 @@ class System;
 class EquationSystems;
 }
 
-template<>
+template <>
 InputParameters validParams<NumDOFs>();
 
 class NumDOFs : public GeneralPostprocessor
@@ -35,8 +35,12 @@ class NumDOFs : public GeneralPostprocessor
 public:
   NumDOFs(const InputParameters & parameters);
 
-  virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void initialize() override
+  {
+  }
+  virtual void execute() override
+  {
+  }
   virtual Real getValue() override;
 
 protected:

@@ -34,8 +34,8 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/equation_systems.h"
 
-Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
-    _sys(sys),
+Assembly::Assembly(SystemBase & sys, CouplingMatrix *& cm, THREAD_ID tid)
+  : _sys(sys),
     _cm(cm),
     _nonlocal_cm(_sys.subproblem().nonlocalCouplingMatrix()),
     _dof_map(_sys.dofMap()),
@@ -68,7 +68,7 @@ Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _currently_fe_caching(true),
 
     _cached_residual_values(2), // The 2 is for TIME and NONTIME
-    _cached_residual_rows(2), // The 2 is for TIME and NONTIME
+    _cached_residual_rows(2),   // The 2 is for TIME and NONTIME
 
     _max_cached_residuals(0),
     _max_cached_jacobians(0),
@@ -237,21 +237,21 @@ Assembly::buildFaceNeighborFE(FEType type)
   }
 }
 
-FEBase * &
+FEBase *&
 Assembly::getFE(FEType type, unsigned int dim)
 {
   buildFE(type);
   return _fe[dim][type];
 }
 
-FEBase * &
+FEBase *&
 Assembly::getFEFace(FEType type, unsigned int dim)
 {
   buildFaceFE(type);
   return _fe_face[dim][type];
 }
 
-FEBase * &
+FEBase *&
 Assembly::getFEFaceNeighbor(FEType type, unsigned int dim)
 {
   buildFaceNeighborFE(type);
@@ -448,10 +448,10 @@ Assembly::reinitFE(const Elem * elem)
     {
       fe->reinit(elem);
 
-      fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe->get_phi()));
-      fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe->get_dphi()));
+      fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe->get_phi()));
+      fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient>> &>(fe->get_dphi()));
       if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
-        fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe->get_d2phi()));
+        fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor>> &>(fe->get_d2phi()));
 
       if (do_caching)
       {
@@ -512,10 +512,10 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
     fe_face->reinit(elem, side);
     _current_fe_face[fe_type] = fe_face;
 
-    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_face->get_phi()));
-    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_face->get_dphi()));
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_face->get_phi()));
+    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient>> &>(fe_face->get_dphi()));
     if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
-      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_face->get_d2phi()));
+      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor>> &>(fe_face->get_d2phi()));
   }
 
   // During that last loop the helper objects will have been reinitialized as well
@@ -541,10 +541,10 @@ Assembly::reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> &
 
     _current_fe_face_neighbor[fe_type] = fe_face_neighbor;
 
-    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_face_neighbor->get_phi()));
-    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_face_neighbor->get_dphi()));
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_face_neighbor->get_phi()));
+    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient>> &>(fe_face_neighbor->get_dphi()));
     if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
-      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_face_neighbor->get_d2phi()));
+      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor>> &>(fe_face_neighbor->get_d2phi()));
   }
 }
 
@@ -564,10 +564,10 @@ Assembly::reinitFENeighbor(const Elem * neighbor, const std::vector<Point> & ref
 
     _current_fe_neighbor[fe_type] = fe_neighbor;
 
-    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real> > &>(fe_neighbor->get_phi()));
-    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient> > &>(fe_neighbor->get_dphi()));
+    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_neighbor->get_phi()));
+    fesd->_grad_phi.shallowCopy(const_cast<std::vector<std::vector<RealGradient>> &>(fe_neighbor->get_dphi()));
     if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
-      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor> > &>(fe_neighbor->get_d2phi()));
+      fesd->_second_phi.shallowCopy(const_cast<std::vector<std::vector<RealTensor>> &>(fe_neighbor->get_d2phi()));
   }
 }
 
@@ -658,24 +658,24 @@ Assembly::setCoordinateTransformation(const QBase * qrule, const MooseArray<Poin
 
   switch (_coord_type)
   {
-  case Moose::COORD_XYZ:
-    for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-      _coord[qp] = 1.;
-    break;
+    case Moose::COORD_XYZ:
+      for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+        _coord[qp] = 1.;
+      break;
 
-  case Moose::COORD_RZ:
-    for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-      _coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
-    break;
+    case Moose::COORD_RZ:
+      for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+        _coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
+      break;
 
-  case Moose::COORD_RSPHERICAL:
-    for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
-      _coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
-    break;
+    case Moose::COORD_RSPHERICAL:
+      for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
+        _coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
+      break;
 
-  default:
-    mooseError("Unknown coordinate system");
-    break;
+    default:
+      mooseError("Unknown coordinate system");
+      break;
   }
 }
 
@@ -870,22 +870,30 @@ Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, u
   {
     switch (type)
     {
-    default:
-    case Moose::ElementElement: return _sub_Kee[ivar][0];
-    case Moose::ElementNeighbor: return _sub_Ken[ivar][0];
-    case Moose::NeighborElement: return _sub_Kne[ivar][0];
-    case Moose::NeighborNeighbor: return _sub_Knn[ivar][0];
+      default:
+      case Moose::ElementElement:
+        return _sub_Kee[ivar][0];
+      case Moose::ElementNeighbor:
+        return _sub_Ken[ivar][0];
+      case Moose::NeighborElement:
+        return _sub_Kne[ivar][0];
+      case Moose::NeighborNeighbor:
+        return _sub_Knn[ivar][0];
     }
   }
   else
   {
     switch (type)
     {
-    default:
-    case Moose::ElementElement: return _sub_Kee[ivar][jvar];
-    case Moose::ElementNeighbor: return _sub_Ken[ivar][jvar];
-    case Moose::NeighborElement: return _sub_Kne[ivar][jvar];
-    case Moose::NeighborNeighbor: return _sub_Knn[ivar][jvar];
+      default:
+      case Moose::ElementElement:
+        return _sub_Kee[ivar][jvar];
+      case Moose::ElementNeighbor:
+        return _sub_Ken[ivar][jvar];
+      case Moose::NeighborElement:
+        return _sub_Kne[ivar][jvar];
+      case Moose::NeighborNeighbor:
+        return _sub_Knn[ivar][jvar];
     }
   }
 }
@@ -909,7 +917,7 @@ Assembly::init()
     }
   }
 
-  unsigned int max_rows_per_column = 0;  // If this is 1 then we are using a block-diagonal preconditioner and we can save a bunch of memory.
+  unsigned int max_rows_per_column = 0; // If this is 1 then we are using a block-diagonal preconditioner and we can save a bunch of memory.
   for (unsigned int i = 0; i < n_vars; i++)
   {
     unsigned int max_rows_per_this_column = 0;
@@ -1019,8 +1027,8 @@ Assembly::prepareNonlocal()
     unsigned int vi = ivar.number();
     unsigned int vj = jvar.number();
 
-    jacobianBlockNonlocal(vi,vj).resize(ivar.dofIndices().size(), jvar.allDofIndices().size());
-    jacobianBlockNonlocal(vi,vj).zero();
+    jacobianBlockNonlocal(vi, vj).resize(ivar.dofIndices().size(), jvar.allDofIndices().size());
+    jacobianBlockNonlocal(vi, vj).zero();
     _jacobian_block_nonlocal_used[vi][vj] = 0;
   }
 }
@@ -1037,7 +1045,7 @@ Assembly::prepareVariable(MooseVariable * var)
     unsigned int vj = jvar.number();
 
     if (vi == var->number() || vj == var->number())
-      jacobianBlock(vi,vj).resize(ivar.dofIndices().size(), jvar.dofIndices().size());
+      jacobianBlock(vi, vj).resize(ivar.dofIndices().size(), jvar.dofIndices().size());
   }
 
   for (unsigned int i = 0; i < _sub_Re.size(); i++)
@@ -1059,7 +1067,7 @@ Assembly::prepareVariableNonlocal(MooseVariable * var)
     unsigned int vj = jvar.number();
 
     if (vi == var->number() || vj == var->number())
-      jacobianBlockNonlocal(vi,vj).resize(ivar.dofIndices().size(), jvar.allDofIndices().size());
+      jacobianBlockNonlocal(vi, vj).resize(ivar.dofIndices().size(), jvar.allDofIndices().size());
   }
 }
 
@@ -1098,8 +1106,8 @@ Assembly::prepareNeighbor()
 void
 Assembly::prepareBlock(unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & dof_indices)
 {
-  jacobianBlock(ivar,jvar).resize(dof_indices.size(), dof_indices.size());
-  jacobianBlock(ivar,jvar).zero();
+  jacobianBlock(ivar, jvar).resize(dof_indices.size(), dof_indices.size());
+  jacobianBlock(ivar, jvar).zero();
   _jacobian_block_used[ivar][jvar] = 0;
 
   for (unsigned int i = 0; i < _sub_Re.size(); i++)
@@ -1112,8 +1120,8 @@ Assembly::prepareBlock(unsigned int ivar, unsigned int jvar, const std::vector<d
 void
 Assembly::prepareBlockNonlocal(unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & idof_indices, const std::vector<dof_id_type> & jdof_indices)
 {
-  jacobianBlockNonlocal(ivar,jvar).resize(idof_indices.size(), jdof_indices.size());
-  jacobianBlockNonlocal(ivar,jvar).zero();
+  jacobianBlockNonlocal(ivar, jvar).resize(idof_indices.size(), jdof_indices.size());
+  jacobianBlockNonlocal(ivar, jvar).zero();
   _jacobian_block_nonlocal_used[ivar][jvar] = 0;
 }
 
@@ -1249,7 +1257,7 @@ Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values,
       _tmp_Re = res_block;
       _tmp_Re *= scaling_factor;
 
-      for (unsigned int i=0; i<_tmp_Re.size(); i++)
+      for (unsigned int i = 0; i < _tmp_Re.size(); i++)
       {
         cached_residual_values.push_back(_tmp_Re(i));
         cached_residual_rows.push_back(_temp_dof_indices[i]);
@@ -1257,7 +1265,7 @@ Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values,
     }
     else
     {
-      for (unsigned int i=0; i<res_block.size(); i++)
+      for (unsigned int i = 0; i < res_block.size(); i++)
       {
         cached_residual_values.push_back(res_block(i));
         cached_residual_rows.push_back(_temp_dof_indices[i]);
@@ -1269,7 +1277,7 @@ Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values,
 }
 
 void
-Assembly::addResidual(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
+Assembly::addResidual(NumericVector<Number> & residual, Moose::KernelType type /* = Moose::KT_NONTIME*/)
 {
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
@@ -1277,7 +1285,7 @@ Assembly::addResidual(NumericVector<Number> & residual, Moose::KernelType type/*
 }
 
 void
-Assembly::addResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
+Assembly::addResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type /* = Moose::KT_NONTIME*/)
 {
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
@@ -1285,14 +1293,13 @@ Assembly::addResidualNeighbor(NumericVector<Number> & residual, Moose::KernelTyp
 }
 
 void
-Assembly::addResidualScalar(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
+Assembly::addResidualScalar(NumericVector<Number> & residual, Moose::KernelType type /* = Moose::KT_NONTIME*/)
 {
   // add the scalar variables residuals
   const std::vector<MooseVariableScalar *> & vars = _sys.getScalarVariables(_tid);
   for (const auto & var : vars)
     addResidualBlock(residual, _sub_Re[type][var->number()], var->dofIndices(), var->scalingFactor());
 }
-
 
 void
 Assembly::cacheResidual()
@@ -1309,7 +1316,6 @@ Assembly::cacheResidualContribution(dof_id_type dof, Real value, Moose::KernelTy
   _cached_residual_values[type].push_back(value);
   _cached_residual_rows[type].push_back(dof);
 }
-
 
 void
 Assembly::cacheResidualNeighbor()
@@ -1349,12 +1355,11 @@ Assembly::addCachedResidual(NumericVector<Number> & residual, Moose::KernelType 
   // Try to be more efficient from now on
   // The 2 is just a fudge factor to keep us from having to grow the vector during assembly
   cached_residual_values.clear();
-  cached_residual_values.reserve(_max_cached_residuals*2);
+  cached_residual_values.reserve(_max_cached_residuals * 2);
 
   cached_residual_rows.clear();
-  cached_residual_rows.reserve(_max_cached_residuals*2);
+  cached_residual_rows.reserve(_max_cached_residuals * 2);
 }
-
 
 void
 Assembly::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number> & res_block, std::vector<dof_id_type> & dof_indices, Real scaling_factor)
@@ -1376,7 +1381,7 @@ Assembly::setResidualBlock(NumericVector<Number> & residual, DenseVector<Number>
 }
 
 void
-Assembly::setResidual(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
+Assembly::setResidual(NumericVector<Number> & residual, Moose::KernelType type /* = Moose::KT_NONTIME*/)
 {
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
@@ -1384,13 +1389,12 @@ Assembly::setResidual(NumericVector<Number> & residual, Moose::KernelType type/*
 }
 
 void
-Assembly::setResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type/* = Moose::KT_NONTIME*/)
+Assembly::setResidualNeighbor(NumericVector<Number> & residual, Moose::KernelType type /* = Moose::KT_NONTIME*/)
 {
   const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     setResidualBlock(residual, _sub_Rn[type][var->number()], var->dofIndicesNeighbor(), var->scalingFactor());
 }
-
 
 void
 Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
@@ -1428,8 +1432,8 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block, std::vector<dof_id
     if (scaling_factor != 1.0)
       jac_block *= scaling_factor;
 
-    for (unsigned int i=0; i<di.size(); i++)
-      for (unsigned int j=0; j<dj.size(); j++)
+    for (unsigned int i = 0; i < di.size(); i++)
+      for (unsigned int j = 0; j < dj.size(); j++)
       {
         _cached_jacobian_values.push_back(jac_block(i, j));
         _cached_jacobian_rows.push_back(di[i]);
@@ -1451,8 +1455,8 @@ Assembly::cacheJacobianBlockNonlocal(DenseMatrix<Number> & jac_block, const std:
     if (scaling_factor != 1.0)
       jac_block *= scaling_factor;
 
-    for (unsigned int i=0; i<di.size(); i++)
-      for (unsigned int j=0; j<dj.size(); j++)
+    for (unsigned int i = 0; i < di.size(); i++)
+      for (unsigned int j = 0; j < dj.size(); j++)
         if (jac_block(i, j) != 0.0) // no storage allocated for unimplemented jacobian terms, maintaining maximum sparsity possible
         {
           _cached_jacobian_values.push_back(jac_block(i, j));
@@ -1470,7 +1474,7 @@ Assembly::addCachedJacobian(SparseMatrix<Number> & jacobian)
     mooseAssert(_cached_jacobian_rows.size() == _cached_jacobian_cols.size(),
                 "Error: Cached data sizes MUST be the same!");
 
-  for (unsigned int i=0; i<_cached_jacobian_rows.size(); i++)
+  for (unsigned int i = 0; i < _cached_jacobian_rows.size(); i++)
     jacobian.add(_cached_jacobian_rows[i], _cached_jacobian_cols[i], _cached_jacobian_values[i]);
 
   if (_max_cached_jacobians < _cached_jacobian_values.size())
@@ -1479,13 +1483,13 @@ Assembly::addCachedJacobian(SparseMatrix<Number> & jacobian)
   // Try to be more efficient from now on
   // The 2 is just a fudge factor to keep us from having to grow the vector during assembly
   _cached_jacobian_values.clear();
-  _cached_jacobian_values.reserve(_max_cached_jacobians*2);
+  _cached_jacobian_values.reserve(_max_cached_jacobians * 2);
 
   _cached_jacobian_rows.clear();
-  _cached_jacobian_rows.reserve(_max_cached_jacobians*2);
+  _cached_jacobian_rows.reserve(_max_cached_jacobians * 2);
 
   _cached_jacobian_cols.clear();
-  _cached_jacobian_cols.reserve(_max_cached_jacobians*2);
+  _cached_jacobian_cols.reserve(_max_cached_jacobians * 2);
 }
 
 void
@@ -1761,13 +1765,13 @@ Assembly::clearCachedJacobianContributions()
   // original size that was cached to account for variations in the
   // number of BCs assigned to each thread (for when the Jacobian
   // contributions are computed threaded).
-  _cached_jacobian_contribution_rows.reserve(1.2*orig_size);
-  _cached_jacobian_contribution_cols.reserve(1.2*orig_size);
-  _cached_jacobian_contribution_vals.reserve(1.2*orig_size);
+  _cached_jacobian_contribution_rows.reserve(1.2 * orig_size);
+  _cached_jacobian_contribution_cols.reserve(1.2 * orig_size);
+  _cached_jacobian_contribution_vals.reserve(1.2 * orig_size);
 }
 
 void
-Assembly::modifyWeightsDueToXFEM(const Elem *elem)
+Assembly::modifyWeightsDueToXFEM(const Elem * elem)
 {
   mooseAssert(_xfem != NULL, "This function should not be called if xfem is inactive");
 
@@ -1775,9 +1779,9 @@ Assembly::modifyWeightsDueToXFEM(const Elem *elem)
     return;
 
   MooseArray<Real> xfem_weight_multipliers;
-  if (_xfem->getXFEMWeights(xfem_weight_multipliers, elem, _current_qrule,_current_q_points))
+  if (_xfem->getXFEMWeights(xfem_weight_multipliers, elem, _current_qrule, _current_q_points))
   {
-    mooseAssert(xfem_weight_multipliers.size() == _current_JxW.size(),"Size of weight multipliers in xfem doesn't match number of quadrature points");
+    mooseAssert(xfem_weight_multipliers.size() == _current_JxW.size(), "Size of weight multipliers in xfem doesn't match number of quadrature points");
     for (unsigned i = 0; i < xfem_weight_multipliers.size(); i++)
     {
       _current_JxW[i] = _current_JxW[i] * xfem_weight_multipliers[i];

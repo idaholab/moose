@@ -21,9 +21,8 @@
 class MaterialData;
 class TwoMaterialPropertyInterface;
 
-template<>
+template <>
 InputParameters validParams<TwoMaterialPropertyInterface>();
-
 
 class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 {
@@ -46,21 +45,20 @@ public:
   /**
    * Retrieve the property named "name"
    */
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name);
 
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
 
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOlder(const std::string & name);
 
 protected:
   MooseSharedPointer<MaterialData> _neighbor_material_data;
 };
 
-
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborMaterialProperty(const std::string & name)
 {
@@ -75,7 +73,7 @@ TwoMaterialPropertyInterface::getNeighborMaterialProperty(const std::string & na
     return _neighbor_material_data->getProperty<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborMaterialPropertyOld(const std::string & name)
 {
@@ -90,7 +88,7 @@ TwoMaterialPropertyInterface::getNeighborMaterialPropertyOld(const std::string &
     return _neighbor_material_data->getPropertyOld<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborMaterialPropertyOlder(const std::string & name)
 {

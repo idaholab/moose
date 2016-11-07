@@ -16,8 +16,9 @@
 #include "ElementLengthAux.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ElementLengthAux>()
+template <>
+InputParameters
+validParams<ElementLengthAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam("method", MooseEnum("min max"), "The size calculation to perform ('min' or 'max').");
@@ -25,8 +26,8 @@ InputParameters validParams<ElementLengthAux>()
   return params;
 }
 
-ElementLengthAux::ElementLengthAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+ElementLengthAux::ElementLengthAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _use_min(getParam<MooseEnum>("method") == "min")
 {
 }
