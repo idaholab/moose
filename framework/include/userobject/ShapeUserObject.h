@@ -20,6 +20,13 @@
 #include "MooseObject.h"
 #include "Coupleable.h"
 #include "InputParameters.h"
+#include "Assembly.h"
+
+enum ShapeType
+{
+  Element,
+  Side
+};
 
 /**
  * UserObject template class in which the _phi and _grad_phi shape function data
@@ -33,8 +40,7 @@ template<typename T>
 class ShapeUserObject : public T
 {
 public:
-  ShapeUserObject(const InputParameters & parameters, const VariablePhiValue & phi,
-                  const VariablePhiGradient & grad_phi);
+  ShapeUserObject(const InputParameters & parameters, ShapeType type);
 
   /// check if jacobian is to be computed in user objects
   const bool & computeJacobianFlag() const { return _compute_jacobians; }
@@ -67,12 +73,6 @@ protected:
    */
   virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
 
-  enum ShapeType
-  {
-    Element,
-    Side
-  };
-
   /// shape function values
   const VariablePhiValue & _phi;
 
@@ -93,8 +93,8 @@ private:
 template<typename T>
 ShapeUserObject<T>::ShapeUserObject(const InputParameters & parameters, ShapeType type) :
 T(parameters),
-  _phi((type == ShapeType::Element) ? _assembly.phi() : ((type == ShapeType::Side) ? _assembly.phiFace() : mooseError("Shape type specified does not match current options: Element or Side"))),
-  _grad_phi((type == ShapeType::Element) ? _assembly.gradPhi() : ((type == ShapeType::Side) ? _assembly.gradPhiFace() : mooseError("Shape type specified does not match current options: Element or Side"))),
+  _phi((type == ShapeType::Element) ? this->_assembly.phi() : this->_assembly.phiFace()),
+  _grad_phi((type == ShapeType::Element) ? this->_assembly.gradPhi() : this->_assembly.gradPhiFace()),
   _compute_jacobians(MooseObject::getParam<bool>("compute_jacobians"))
 {
   mooseWarning("Jacobian calculation in UserObjects is an experimental capability with a potentially unstable interface.");
