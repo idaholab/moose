@@ -53,7 +53,8 @@
 #include "PorousFlowMatrixInternalEnergy.h"
 #include "PorousFlowInternalEnergyIdeal.h"
 #include "PorousFlowEnthalpy.h"
-#include "PorousFlowDiffusionCoeffConst.h"
+#include "PorousFlowDiffusivityConst.h"
+#include "PorousFlowDiffusivityMillingtonQuirk.h"
 #include "PorousFlowSingleComponentFluid.h"
 
 // Kernels
@@ -167,7 +168,8 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowMatrixInternalEnergy);
   registerMaterial(PorousFlowInternalEnergyIdeal);
   registerMaterial(PorousFlowEnthalpy);
-  registerMaterial(PorousFlowDiffusionCoeffConst);
+  registerMaterial(PorousFlowDiffusivityConst);
+  registerMaterial(PorousFlowDiffusivityMillingtonQuirk);
   registerMaterial(PorousFlowSingleComponentFluid);
 
   // Kernels
