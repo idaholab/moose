@@ -67,6 +67,12 @@ protected:
    */
   virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
 
+  enum ShapeType
+  {
+    Element,
+    Side
+  };
+
   /// shape function values
   const VariablePhiValue & _phi;
 
@@ -85,11 +91,10 @@ private:
 };
 
 template<typename T>
-ShapeUserObject<T>::ShapeUserObject(const InputParameters & parameters, const VariablePhiValue & phi,
-                  const VariablePhiGradient & grad_phi) :
+ShapeUserObject<T>::ShapeUserObject(const InputParameters & parameters, ShapeType type) :
 T(parameters),
-  _phi(phi),
-  _grad_phi(grad_phi),
+  _phi((type == ShapeType::Element) ? _assembly.phi() : ((type == ShapeType::Side) ? _assembly.phiFace() : mooseError("Shape type specified does not match current options: Element or Side"))),
+  _grad_phi((type == ShapeType::Element) ? _assembly.gradPhi() : ((type == ShapeType::Side) ? _assembly.gradPhiFace() : mooseError("Shape type specified does not match current options: Element or Side"))),
   _compute_jacobians(MooseObject::getParam<bool>("compute_jacobians"))
 {
   mooseWarning("Jacobian calculation in UserObjects is an experimental capability with a potentially unstable interface.");

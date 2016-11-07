@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "ShapeSideUserObject.h"
-#include "Assembly.h"
 
 template<>
 InputParameters validParams<ShapeSideUserObject>()
@@ -25,6 +24,6 @@ InputParameters validParams<ShapeSideUserObject>()
 
 ShapeSideUserObject::ShapeSideUserObject(const InputParameters & parameters) :
     // SideUserObject(parameters),
-    ShapeUserObject<SideUserObject>(parameters, _assembly.phiFace(), _assembly.gradPhiFace())
+    ShapeUserObject<SideUserObject>(parameters, ShapeType::Side)
 {
 }

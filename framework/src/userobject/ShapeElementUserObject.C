@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "ShapeElementUserObject.h"
-#include "Assembly.h"
 
 template<>
 InputParameters validParams<ShapeElementUserObject>()
@@ -24,6 +23,6 @@ InputParameters validParams<ShapeElementUserObject>()
 }
 
 ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameters) :
-    ShapeUserObject<ElementUserObject>(parameters, _assembly.phi(), _assembly.gradPhi())
+    ShapeUserObject<ElementUserObject>(parameters, ShapeType::Element)
 {
 }
