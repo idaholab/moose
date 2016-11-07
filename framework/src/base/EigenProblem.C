@@ -14,8 +14,6 @@
 
 #include "libmesh/libmesh_config.h"
 
-#if LIBMESH_HAVE_SLEPC
-
 #include "EigenProblem.h"
 #include "DisplacedProblem.h"
 #include "Assembly.h"
@@ -33,7 +31,10 @@ EigenProblem::EigenProblem(const InputParameters & parameters) :
     FEProblem(parameters),
     _nl_eigen(new NonlinearEigenSystem(*this, "eigen0"))
 {
-  _nl =  _nl_eigen;
+#ifndef LIBMESH_HAVE_SLEPC
+  mooseError("You need to install SLEPc to solve eigenvalue problems, please reconfigure system \n");
+#endif /* LIBMESH_HAVE_SLEPC */
+  _nl = _nl_eigen;
   _aux = new AuxiliarySystem(*this, "aux0");
 
   // Set necessary parametrs used in EigenSystem::solve(),
@@ -87,7 +88,6 @@ EigenProblem::~EigenProblem()
   }
 
   delete _nl;
-
   delete _aux;
 }
 
@@ -102,10 +102,10 @@ EigenProblem::solve()
 #endif
 
   if (_solve)
-    _nl->solve();
-
-  if (_solve)
-    _nl->update();
+  {
+     _nl->solve();
+     _nl->update();
+  }
 
   // sync solutions in displaced problem
   if (_displaced_problem)
@@ -118,7 +118,7 @@ EigenProblem::solve()
 bool
 EigenProblem::converged()
 {
-  _console<<"WARNING: did not implement yet \n";
+  _console << "WARNING: did not implement yet \n";
   return true;
 }
 
@@ -129,7 +129,3 @@ EigenProblem::outputStep(ExecFlagType /*type*/)
   _nl->update();
   _aux->update();
 }
-
-
-
-#endif /* LIBMESH_HAVE_SLEPC */

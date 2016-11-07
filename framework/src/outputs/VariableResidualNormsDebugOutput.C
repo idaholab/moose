@@ -57,7 +57,7 @@ VariableResidualNormsDebugOutput::output(const ExecFlagType & /*type*/)
   oss << "    |residual|_2 of individual variables:\n";
   for (unsigned int var_num = 0; var_num < _sys.n_vars(); var_num++)
   {
-    Real var_res_id = _sys.calculate_norm(_problem_ptr->getNonlinearSystemBase().RHS(),var_num,DISCRETE_L2);
+    Real var_res_id = _sys.calculate_norm(_problem_ptr->getNonlinearSystemBase().RHS(), var_num,DISCRETE_L2);
     oss << std::setw(27-max_name_size) << " " << std::setw(max_name_size+2) //match position of overall NL residual
         << std::left << _sys.variable_name(var_num) + ":" << var_res_id << "\n";
   }

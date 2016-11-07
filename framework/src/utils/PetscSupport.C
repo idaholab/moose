@@ -137,7 +137,8 @@ setSolverOptions(SolverParams & solver_params)
 }
 
 void
-petscSetupDM (NonlinearSystemBase & nl) {
+petscSetupDM (NonlinearSystemBase & nl)
+{
 #if !PETSC_VERSION_LESS_THAN(3,3,0)
   PetscErrorCode  ierr;
   PetscBool       ismoose;

@@ -61,7 +61,7 @@ public:
   virtual TransientNonlinearImplicitSystem & sys() { return _transient_sys; }
 
 private:
- TransientNonlinearImplicitSystem & _transient_sys;
+  TransientNonlinearImplicitSystem & _transient_sys;
 };
 
 #endif /* NONLINEARSYSTEM_H */

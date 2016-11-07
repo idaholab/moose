@@ -254,8 +254,8 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
 
     //Copy rhs from the big system into the small one
     MoosePreconditioner::copyVarValues(mesh,
-        _nl.system().number(),system_var,x,
-        u_system.number(),0,*u_system.rhs);
+        _nl.system().number(), system_var, x,
+        u_system.number(), 0, *u_system.rhs);
 
     //Modify the RHS by subtracting off the matvecs of the solutions for the other preconditioning
     //systems with the off diagonal blocks in this system.
@@ -290,8 +290,8 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
     LinearImplicitSystem & u_system = *_systems[system_var];
 
     MoosePreconditioner::copyVarValues(mesh,
-        u_system.number(),0,*u_system.solution,
-        _nl.system().number(),system_var,y);
+        u_system.number(), 0, *u_system.solution,
+        _nl.system().number(), system_var, y);
   }
 
   y.close();

@@ -62,17 +62,17 @@ DT2::preExecute()
 {
   TimeStepper::preExecute();
   System & nl_sys = _fe_problem.getNonlinearSystemBase().system();
-  _u1 = & nl_sys.add_vector("u1", true, GHOSTED);
-  _u2 = & nl_sys.add_vector("u2", false, GHOSTED);
-  _u_diff = & nl_sys.add_vector("u_diff", false, GHOSTED);
+  _u1 = &nl_sys.add_vector("u1", true, GHOSTED);
+  _u2 = &nl_sys.add_vector("u2", false, GHOSTED);
+  _u_diff = &nl_sys.add_vector("u_diff", false, GHOSTED);
 
-  _u_saved = & nl_sys.add_vector("u_saved", false, GHOSTED);
-  _u_older_saved = & nl_sys.add_vector("u_older_saved", false, GHOSTED);
+  _u_saved = &nl_sys.add_vector("u_saved", false, GHOSTED);
+  _u_older_saved = &nl_sys.add_vector("u_older_saved", false, GHOSTED);
 
   TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
-  _aux1 = & aux_sys.add_vector("aux1", true, GHOSTED);
-  _aux_saved = & aux_sys.add_vector("aux_saved", false, GHOSTED);
-  _aux_older_saved = & aux_sys.add_vector("aux_older_saved", false, GHOSTED);
+  _aux1 = &aux_sys.add_vector("aux1", true, GHOSTED);
+  _aux_saved = &aux_sys.add_vector("aux_saved", false, GHOSTED);
+  _aux_older_saved = &aux_sys.add_vector("aux_older_saved", false, GHOSTED);
 }
 
 void
@@ -82,7 +82,7 @@ DT2::preSolve()
   TransientExplicitSystem & aux_sys = _fe_problem.getAuxiliarySystem().sys();
 
   // save solution vectors
-  *_u_saved = * nl_sys.currentSolution();
+  *_u_saved = *nl_sys.currentSolution();
   *_u_older_saved = nl_sys.solutionOlder();
 
   *_aux_saved = *aux_sys.current_local_solution;

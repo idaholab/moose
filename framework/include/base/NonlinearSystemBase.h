@@ -56,7 +56,7 @@ template <typename T> class SparseMatrix;
  * It is a part of FEProblem ;-)
  */
 class NonlinearSystemBase : public SystemBase,
-                        public ConsoleStreamInterface
+                            public ConsoleStreamInterface
 {
 public:
   NonlinearSystemBase(FEProblem & problem, System & sys, const std::string & name);
@@ -88,8 +88,8 @@ public:
   virtual void setupFiniteDifferencedPreconditioner() = 0;
   void setupFieldDecomposition();
 
-  bool haveFiniteDifferencedPreconditioner() {return _use_finite_differenced_preconditioner;}
-  bool haveFieldSplitPreconditioner()        {return _use_field_split_preconditioner;}
+  bool haveFiniteDifferencedPreconditioner() { return _use_finite_differenced_preconditioner; }
+  bool haveFieldSplitPreconditioner() { return _use_field_split_preconditioner; }
 
   /**
    * Returns the convergence state
@@ -329,7 +329,7 @@ public:
    * If the array is empty, no decomposition is used.
    * In all other cases an error occurs.
    */
-  void setDecomposition(const std::vector<std::string>& decomposition);
+  void setDecomposition(const std::vector<std::string> & decomposition);
 
   /**
    * If called with true this system will use a field split preconditioner matrix.
@@ -342,13 +342,13 @@ public:
    *
    * These entries are really only used by the Finite Difference Preconditioner and the constraint system right now.
    */
-  void addImplicitGeometricCouplingEntriesToJacobian(bool add=true) { _add_implicit_geometric_coupling_entries_to_jacobian = add; }
+  void addImplicitGeometricCouplingEntriesToJacobian(bool add = true) { _add_implicit_geometric_coupling_entries_to_jacobian = add; }
 
   /**
    * Indicates whether to assemble residual and Jacobian after each constraint application.
    * When true, enables "transitive" constraint application: subsequent constraints can use prior constraints' results.
    */
-  void assembleConstraintsSeparately(bool separately=true) {_assemble_constraints_separately = separately;}
+  void assembleConstraintsSeparately(bool separately = true) { _assemble_constraints_separately = separately; }
 
   /**
    * Setup damping stuff (called before we actually start)

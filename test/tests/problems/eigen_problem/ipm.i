@@ -1,25 +1,23 @@
 [Mesh]
- type = GeneratedMesh
- dim = 2
- xmin = 0
- xmax = 100
- ymin = 0
- ymax = 100
- elem_type = QUAD4
- nx = 8
- ny = 8
+  type = GeneratedMesh
+  dim = 2
+  xmin = 0
+  xmax = 100
+  ymin = 0
+  ymax = 100
+  elem_type = QUAD4
+  nx = 8
+  ny = 8
 
- uniform_refine = 0
+  uniform_refine = 0
 
- displacements = 'x_disp y_disp'
+  displacements = 'x_disp y_disp'
 []
 
 #The minimum eigenvalue for this problem is 2*(pi/a)^2 + 2 with a = 100.
 #Its inverse will be 0.49950700634518.
 
 [Variables]
-  active = 'u'
-
   [./u]
     # second order is way better than first order
     order = FIRST
@@ -59,8 +57,6 @@
 []
 
 [Kernels]
-  active = 'diff rea'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -76,8 +72,6 @@
 []
 
 [BCs]
-  active = 'homogeneous'
-
   [./homogeneous]
     type = DirichletBC
     variable = u
@@ -89,8 +83,8 @@
 
 [Problem]
   type = EigenProblem
-  n_eigen_pairs = 5;
-  n_basis_vectors = 15;
+  n_eigen_pairs = 5
+  n_basis_vectors = 15
 []
 
 [Executioner]

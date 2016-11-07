@@ -42,7 +42,7 @@ public:
   virtual bool converged() override;
   virtual void outputStep(ExecFlagType type) override;
 
-private:
+protected:
   NonlinearEigenSystem *_nl_eigen;
 };
 

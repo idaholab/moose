@@ -35,10 +35,10 @@ public:
 
   virtual ~EquationProblem();
 
-  virtual bool useNonlinear() const { return _use_nonlinear; }
-  virtual void useNonlinear(bool use_nonlinear) { _use_nonlinear = use_nonlinear; }
+  virtual bool getUseNonlinear() const { return _use_nonlinear; }
+  virtual void setUseNonlinear(bool use_nonlinear) { _use_nonlinear = use_nonlinear; }
 
-private:
+protected:
   bool _use_nonlinear;
 
 };
