@@ -22,26 +22,26 @@
 class BasicMultiDimensionalInverseWeight: public virtual BasicDistributionND
 {
 public:
-  BasicMultiDimensionalInverseWeight(const char * data_filename,double p, bool CDFprovided):  _interpolator(data_filename,p)
+  BasicMultiDimensionalInverseWeight(const char * data_filename,double p, bool cdf_provided):  _interpolator(data_filename,p)
   {
-    _CDFprovided = CDFprovided;
-    BasicMultiDimensionalInverseWeight_init();
+    _cdf_provided = cdf_provided;
+    basicMultiDimensionalInverseWeightInit();
   };
 
-  BasicMultiDimensionalInverseWeight(std::string data_filename,double p, bool CDFprovided):  _interpolator(data_filename,p)
+  BasicMultiDimensionalInverseWeight(std::string data_filename,double p, bool cdf_provided):  _interpolator(data_filename,p)
   {
-    _CDFprovided = CDFprovided;
-    BasicMultiDimensionalInverseWeight_init();
+    _cdf_provided = cdf_provided;
+    basicMultiDimensionalInverseWeightInit();
   };
 
   BasicMultiDimensionalInverseWeight(double p):  _interpolator(InverseDistanceWeighting(p))
   {
   };
 
-  void BasicMultiDimensionalInverseWeight_init(){
+  void basicMultiDimensionalInverseWeightInit(){
     std::cout<<"Initialize BasicMultiDimensionalInverseWeight"<< std::endl;
 
-    if (_CDFprovided) {
+    if (_cdf_provided) {
       bool LBcheck = _interpolator.checkLB(0.0);
       if (LBcheck == false)
         throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF values given as input contain element below 0.0");
@@ -52,7 +52,7 @@ public:
     }
     else{  // PDF is provided
       // Create ND spline for the CDF
-      //BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta, bool CDFprovided)
+      //BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta, bool cdf_provided)
       std::cout<<"Creating ND spline for inverseWeight"<< std::endl;
       int n_dimensions = _interpolator.returnDimensionality();
       std::vector<double> alpha (n_dimensions);
@@ -98,7 +98,7 @@ public:
         }
         PDFvalues.at(i) = _interpolator.interpolateAt(nd_coordinate);
       }
-      _CDFspline = BasicMultiDimensionalCartesianSpline(discretizations, PDFvalues, alpha, beta, false);
+      _cdf_spline = BasicMultiDimensionalCartesianSpline(discretizations, PDFvalues, alpha, beta, false);
     }
   }
 
@@ -109,7 +109,7 @@ public:
   double
   pdf(std::vector<double> x)
   {
-    if (_CDFprovided){
+    if (_cdf_provided){
       return _interpolator.ndDerivative(x);
     }
     else
@@ -120,11 +120,11 @@ public:
   cdf(std::vector<double> x)
   {
     double value;
-    if (_CDFprovided){
+    if (_cdf_provided){
       value = _interpolator.interpolateAt(x);
     }
     else
-      value = _CDFspline.cdf(x);
+      value = _cdf_spline.cdf(x);
 
      if (value > 1.0)
    throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF value calculated is above 1.0");
@@ -138,30 +138,30 @@ public:
 
     _interpolator.updateRNGParameters(_tolerance,_initial_divisions);
 
-    _CDFspline.updateRNGparameter(_tolerance,_initial_divisions);
+    _cdf_spline.updateRNGparameter(_tolerance,_initial_divisions);
 
     //std::cout<<"Distribution updateRNGparameter" << _tolerance <<  _initial_divisions << std::endl;
   };
 
 
   std::vector<double>
-  inverseCdf(double F, double g)
+  inverseCdf(double f, double g)
   {
-    if (_CDFprovided)
-      return _interpolator.ndInverseFunctionGrid(F,g);
+    if (_cdf_provided)
+      return _interpolator.ndInverseFunctionGrid(f,g);
     else{
-      return _CDFspline.inverseCdf(F,g);
+      return _cdf_spline.inverseCdf(f,g);
     }
   };
 
-  double inverseMarginal(double F, int dimension){
+  double inverseMarginal(double f, int dimension){
     double value=0.0;
 
-    if ((F<1.0) and (F>0.0)){
-      if (_CDFprovided){
+    if ((f<1.0) and (f>0.0)){
+      if (_cdf_provided){
         throwError("BasicMultiDimensionalInverseWeight Distribution error: inverseMarginal calculation not available if CDF provided");
       }else{
-        value = _CDFspline.inverseMarginal(F, dimension);
+        value = _cdf_spline.inverseMarginal(f, dimension);
       }
     }else
       throwError("BasicMultiDimensionalInverseWeight Distribution error: CDF value for inverse marginal distribution is above 1.0");
@@ -192,8 +192,8 @@ public:
 
 protected:
   InverseDistanceWeighting  _interpolator;
-  BasicMultiDimensionalCartesianSpline  _CDFspline;
-  bool _CDFprovided;
+  BasicMultiDimensionalCartesianSpline  _cdf_spline;
+  bool _cdf_provided;
 };
 
 #endif /* DISTRIBUTION_ND_INVERSE_WEIGHT_H */

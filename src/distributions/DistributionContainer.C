@@ -351,16 +351,16 @@ DistributionContainer::getDistributionRandom(const std::string dist_alias){
 }
 
 std::vector<double>
-DistributionContainer::inverseCdf(const char * dist_alias, double F, double g){
-   return inverseCdf(std::string(dist_alias),F,g);
+DistributionContainer::inverseCdf(const char * dist_alias, double f, double g){
+   return inverseCdf(std::string(dist_alias),f,g);
 }
 
 std::vector<double>
-DistributionContainer::inverseCdf(const std::string dist_alias, double F, double g){
+DistributionContainer::inverseCdf(const std::string dist_alias, double f, double g){
 
    if(_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end()){
      MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
-     return dist->inverseCdf(F,g);
+     return dist->inverseCdf(f,g);
     }
     throwError("inverseCdf: Distribution ND" + dist_alias + " was not found in distribution container.");
     std::vector<double> value (2,-1.0);
@@ -392,7 +392,7 @@ int DistributionContainer::returnDimensionality(const char * dist_alias){
         return returnDimensionality(std::string(dist_alias));
 }
 
-DistributionContainer & DistributionContainer::Instance() {
+DistributionContainer & DistributionContainer::instance() {
   if(_instance == NULL){
     _instance = new DistributionContainer();
   }
@@ -401,16 +401,16 @@ DistributionContainer & DistributionContainer::Instance() {
 
 DistributionContainer * DistributionContainer::_instance = NULL;
 
-/* the str_to_string_p and free_string_p are for python use */
+/* the strToStringP and freeStringP are for python use */
 
-std::string * str_to_string_p(char *s) {
+std::string * strToStringP(char *s) {
   return new std::string(s);
 }
 
-const char * string_p_to_str(const std::string * s) {
+const char * stringPToSt(const std::string * s) {
   return s->c_str();
 }
 
-void free_string_p(std::string * s) {
+void freeStringP(std::string * s) {
   delete s;
 }

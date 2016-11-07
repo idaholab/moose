@@ -67,7 +67,7 @@ protected:
   std::map <std::string,std::vector<double> > _dist_vector_parameters;
   unsigned int _seed;                             ///< seed
 
-  bool _checkStatus;
+  bool _check_status;
 };
 
 

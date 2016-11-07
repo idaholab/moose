@@ -94,7 +94,7 @@ Distribution::Distribution(const InputParameters & parameters):
       if (getParam<double>("ProbabilityThreshold") > 1.0 || getParam<double>("ProbabilityThreshold") < 0.0)
         throwError("Distribution 1D " << name() << " - ProbabilityThreshold is not correct: it must be between 0.0 and 1.0 ");
 
-      _checkStatus = false;
+      _check_status = false;
 }
 
 Distribution::~Distribution(){

@@ -30,8 +30,8 @@ public:
   virtual double interpolateAt(std::vector<double> point_coordinate);
   virtual double getGradientAt(std::vector<double> point_coordinate);
   virtual void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
-  //std::vector<double> NDinverseFunction(double F_min, double F_max);
-  std::vector<double> ndInverseFunctionGrid(double F, double g);
+  //std::vector<double> NDinverseFunction(double f_min, double f_max);
+  std::vector<double> ndInverseFunctionGrid(double f, double g);
 
   double averageCellValue(std::vector<double> center, std::vector<double> dx);
 
@@ -65,9 +65,9 @@ protected:
   double minkowskiDistance(std::vector<double> point1, std::vector<double> point2, double p);
   double vectorNorm(std::vector<double> point, double p);
 
-  bool pivotCellCheck(std::vector<std::vector<double> >& cell, double F);
-  int vertexOutcome(std::vector<double>& vertex, double F);
-  void cellsFilter(std::vector<std::vector<std::vector<double> > >& vertices, double F);
+  bool pivotCellCheck(std::vector<std::vector<double> >& cell, double f);
+  int vertexOutcome(std::vector<double>& vertex, double f);
+  void cellsFilter(std::vector<std::vector<std::vector<double> > >& vertices, double f);
   void refinedCellDivision(std::vector<std::vector<std::vector<double> > >& refined_cell, std::vector<std::vector<double> > & cell, int divisions);
   std::vector<int> arrayConverter(int one_d_coordinate, int divisions, int n_dimensions);
   std::vector<std::vector<double> > generateNewCell(std::vector<int> nd_coordinate, std::vector<double> coordinate_of_point_zero, std::vector<double> dxs, int n_dimensions);
@@ -114,7 +114,7 @@ public:
   double splineCartesianMarginalIntegration(double coordinate,int marginal_variable);
   double splineCartesianInverseMarginal(double cdf,int marginal_variable, double precision);
 
-  // std::vector<double> ndInverseFunctionGrid(double F, double g);
+  // std::vector<double> ndInverseFunctionGrid(double f, double g);
 
   void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
 
@@ -214,7 +214,7 @@ public:
   double interpolateAt(std::vector<double> point_coordinate);
   double getGradientAt(std::vector<double> point_coordinate);
   void   fit(std::vector< std::vector<double> > coordinates, std::vector<double> values);
-  //std::vector<double> NDinverseFunction(double F_min, double F_max);
+  //std::vector<double> NDinverseFunction(double f_min, double f_max);
   InverseDistanceWeighting(std::string filename, double p);
   InverseDistanceWeighting(double p);
   virtual ~InverseDistanceWeighting() {};

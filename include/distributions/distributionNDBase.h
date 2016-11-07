@@ -25,13 +25,13 @@ public:
 
    BasicDistributionND();
    virtual ~BasicDistributionND();
-   double  getVariable(const std::string & variableName);                       ///< getVariable from mapping
-   void updateVariable(const std::string & variableName, double & newValue);
+   double  getVariable(const std::string & variable_name);                       ///< getVariable from mapping
+   void updateVariable(const std::string & variable_name, double & new_value);
    virtual double  pdf(std::vector<double> x) = 0;                              ///< pdf function at coordinate x
    virtual double  cdf(std::vector<double> x) = 0;                              ///< cdf function at coordinate x
-   virtual std::vector<double> inverseCdf(double F, double g) = 0;
+   virtual std::vector<double> inverseCdf(double f, double g) = 0;
 
-   virtual double inverseMarginal(double F, int dimension) = 0;
+   virtual double inverseMarginal(double f, int dimension) = 0;
    virtual int returnDimensionality() = 0;
    double cellIntegral(std::vector<double> center, std::vector<double> dx);
 
@@ -47,12 +47,12 @@ protected:
    std::string _data_filename;
    EPbFunctionType _function_type;
    std::map <std::string,double> _dis_parameters;
-   bool _checkStatus;
+   bool _check_status;
 
    double _tolerance;
    int _initial_divisions;
 
-   //Marginal distribution functions
+   //marginal distribution functions
    //std::vector<NDInterpolation> marginalDistributions;
 };
 

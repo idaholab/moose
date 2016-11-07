@@ -39,7 +39,7 @@ DistributionND::DistributionND(const InputParameters & parameters):
    _dis_parameters["PB_window_Low"] = getParam<double>("PB_window_Low");
    _dis_parameters["PB_window_Up"]  = getParam<double>("PB_window_Up");
 
-   _checkStatus   = false;
+   _check_status   = false;
 }
 
 DistributionND::~DistributionND(){

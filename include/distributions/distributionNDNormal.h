@@ -36,20 +36,20 @@ public:
   virtual ~BasicMultivariateNormal();
   double  pdf(std::vector<double> x);
   double  cdf(std::vector<double> x);
-  std::vector<double> inverseCdf(double F, double g);
-  double inverseMarginal(double F, int dimension);
+  std::vector<double> inverseCdf(double f, double g);
+  double inverseMarginal(double f, int dimension);
   void updateRNGparameter(double tolerance, double initial_divisions);
-  double Marginal(double x, int dimension);
+  double marginal(double x, int dimension);
 
   int returnDimensionality();
 
   //double MVNDST(std::vector<double> a, std::vector<double> b, double alpha, double epsilon, int Nmax);
   double phi(double x);
-  double phi_inv(double x);
+  double phiInv(double x);
   //double rn();
   double * cholesky(double *A, int n);
   std::vector<std::vector<double> > choleskyDecomposition(std::vector<std::vector<double> > matrix);
-  void show_matrix(double *A, int n);
+  void showMatrix(double *A, int n);
   // used to obtain the information from the svd decomposition
   std::vector<double> getSingularValues();
   std::vector<double> getSingularValues(std::vector<int> index);
@@ -77,7 +77,7 @@ public:
   std::vector<double> coordinateInverseTransformed(std::vector<double> &coordinate,std::vector<int> index);
 
   double cellProbabilityWeight(std::vector<double> center, std::vector<double> dx);
-  double inverseMarginalForPCA(double F);
+  double inverseMarginalForPCA(double f);
   double marginalCdfForPCA(double x);
 
   void computeSVD();
@@ -103,16 +103,16 @@ private:
   std::vector<std::vector<double> > _right_singular_vectors;
   unsigned int _rank; // used for dimensionality reduction
   // store U*sqrt(S), where U, S, V = svd(A)
-  std::vector<std::vector<double> > _svdTransformedMatrix;
-  std::string _covarianceType;
+  std::vector<std::vector<double> > _svd_transformed_matrix;
+  std::string _covariance_type;
   double _determinant_cov_matrix;
 
   std::vector<double> _upper_bounds;
   std::vector<double> _lower_bounds;
 
-  BasicMultiDimensionalCartesianSpline _cartesianDistribution;
+  BasicMultiDimensionalCartesianSpline _cartesian_distribution;
 
-  void base10tobaseN(int value_base10, int base, std::vector<int> & value_baseN);
+  void base10ToBaseN(int value_base10, int base, std::vector<int> & value_base_n);
   double getPdf(std::vector<double> x, std::vector<double> mu, std::vector<std::vector<double> > inverse_cov_matrix);
 };
 

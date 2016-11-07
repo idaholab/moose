@@ -13,34 +13,34 @@
 
 #define throwError(msg) { std::cerr << "\n\n" << msg << "\n\n"; throw std::runtime_error("Error"); }
 
-  BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(const char * data_filename,std::vector<double> alpha, std::vector<double> beta, bool CDFprovided):  _interpolator(data_filename,alpha, beta)
+  BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(const char * data_filename,std::vector<double> alpha, std::vector<double> beta, bool cdf_provided):  _interpolator(data_filename,alpha, beta)
   {
-    _CDFprovided = CDFprovided;
-    BasicMultiDimensionalCartesianSpline_init();
+    _cdf_provided = cdf_provided;
+    basicMultiDimensionalCartesianSplineInit();
   }
 
-  BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(std::string data_filename, bool CDFprovided):  _interpolator(data_filename)
+  BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(std::string data_filename, bool cdf_provided):  _interpolator(data_filename)
   {
-    _CDFprovided = CDFprovided;
-    BasicMultiDimensionalCartesianSpline_init();
+    _cdf_provided = cdf_provided;
+    basicMultiDimensionalCartesianSplineInit();
   }
 
-  BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(const char * data_filename, bool CDFprovided):  _interpolator(data_filename)
+  BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(const char * data_filename, bool cdf_provided):  _interpolator(data_filename)
   {
-    _CDFprovided = CDFprovided;
-    BasicMultiDimensionalCartesianSpline_init();
+    _cdf_provided = cdf_provided;
+    basicMultiDimensionalCartesianSplineInit();
   }
 
-  BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool CDFprovided):  _interpolator(discretizations, values, alpha, beta)
+  BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool cdf_provided):  _interpolator(discretizations, values, alpha, beta)
   {
-    _CDFprovided = CDFprovided;
-    BasicMultiDimensionalCartesianSpline_init();
+    _cdf_provided = cdf_provided;
+    basicMultiDimensionalCartesianSplineInit();
   }
 
-  BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta, bool CDFprovided): _interpolator(data_filename, alpha, beta)
+  BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta, bool cdf_provided): _interpolator(data_filename, alpha, beta)
   {
-    _CDFprovided = CDFprovided;
-    BasicMultiDimensionalCartesianSpline_init();
+    _cdf_provided = cdf_provided;
+    basicMultiDimensionalCartesianSplineInit();
   }
 
   BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline():_interpolator()
@@ -48,7 +48,7 @@
     }
 
 
-  void BasicMultiDimensionalCartesianSpline::BasicMultiDimensionalCartesianSpline_init(){
+  void BasicMultiDimensionalCartesianSpline::basicMultiDimensionalCartesianSplineInit(){
     std::vector<double> alpha(_interpolator.returnDimensionality());
     std::vector<double> beta(_interpolator.returnDimensionality());
 
@@ -57,7 +57,7 @@
       beta[i] = 0.0;
     }
 
-    if (_CDFprovided){
+    if (_cdf_provided){
      bool LBcheck = _interpolator.checkLB(0.0);
      if (LBcheck == false)
     throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element below 0.0");
@@ -67,7 +67,7 @@
     throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF values given as input contain element above 1.0");
     }
 
-    if (_CDFprovided == false){    // PDF provided ---> create grid for CDF
+    if (_cdf_provided == false){    // PDF provided ---> create grid for CDF
 
       std::cout<<"Creation of CDF interpolator for cartesian spline"<< std::endl;
       std::vector< std::vector<double> > discretizations;
@@ -99,7 +99,7 @@
   double
   BasicMultiDimensionalCartesianSpline::pdf(std::vector<double> x)
   {
-    if (_CDFprovided)
+    if (_cdf_provided)
       return _interpolator.ndDerivative(x);
     else
       return _interpolator.interpolateAt(x);
@@ -110,7 +110,7 @@
   {
     double value;
 
-    if (_CDFprovided)
+    if (_cdf_provided)
       value = _interpolator.interpolateAt(x);
     else
       value = _CDFinterpolator.interpolateAt(x);
@@ -125,23 +125,23 @@
 
 
   std::vector<double>
-  BasicMultiDimensionalCartesianSpline::inverseCdf(double F, double g)
+  BasicMultiDimensionalCartesianSpline::inverseCdf(double f, double g)
   {
-    if (_CDFprovided == true)
-      return _interpolator.ndInverseFunctionGrid(F,g);
+    if (_cdf_provided == true)
+      return _interpolator.ndInverseFunctionGrid(f,g);
     else{
-      return _CDFinterpolator.ndInverseFunctionGrid(F,g);
+      return _CDFinterpolator.ndInverseFunctionGrid(f,g);
     }
   }
 
-  double BasicMultiDimensionalCartesianSpline::inverseMarginal(double F, int dimension){
+  double BasicMultiDimensionalCartesianSpline::inverseMarginal(double f, int dimension){
     double value=0.0;
 
-    if ((F<1.0) and (F>0.0)){
-      if (_CDFprovided){
+    if ((f<1.0) and (f>0.0)){
+      if (_cdf_provided){
         throwError("BasicMultiDimensionalCartesianSpline Distribution error: inverseMarginal calculation not available if CDF provided");
       }else{
-        value = _interpolator.splineCartesianInverseMarginal(F, dimension, 0.01);
+        value = _interpolator.splineCartesianInverseMarginal(f, dimension, 0.01);
       }
     }else
       throwError("BasicMultiDimensionalCartesianSpline Distribution error: CDF value for inverse marginal distribution is above 1.0");
@@ -156,7 +156,7 @@
   }
 
 //  double cellIntegral(std::vector<double> center, std::vector<double> dx){
-//    if (_CDFprovided){
+//    if (_cdf_provided){
 //      return _interpolator.averageCellValue(center,dx);
 //    }else{
 //      return _CDFinterpolator.averageCellValue(center,dx);
@@ -167,7 +167,7 @@
     _tolerance = tolerance;
     _initial_divisions = (int)initial_divisions;
 
-    if (_CDFprovided)
+    if (_cdf_provided)
       _interpolator.updateRNGParameters(_tolerance,_initial_divisions);
     else{
       _interpolator.updateRNGParameters(_tolerance,_initial_divisions);
@@ -175,10 +175,10 @@
     }
   }
 
-  double BasicMultiDimensionalCartesianSpline::Marginal(double x, int dimension){
+  double BasicMultiDimensionalCartesianSpline::marginal(double x, int dimension){
     double value=0.0;
-    if (_CDFprovided){
-      throwError("BasicMultiDimensionalCartesianSpline Distribution error: Marginal calculation not available if CDF provided");
+    if (_cdf_provided){
+      throwError("BasicMultiDimensionalCartesianSpline Distribution error: marginal calculation not available if CDF provided");
     }else{
       value = _interpolator.splineCartesianMarginalIntegration(x, dimension);
     }

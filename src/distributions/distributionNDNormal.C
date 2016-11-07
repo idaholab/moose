@@ -41,7 +41,7 @@ using boost::math::normal;
 #define M_PI 3.14159265358979323846
 #endif
 
-void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vector<int> & value_baseN){
+void BasicMultivariateNormal::base10ToBaseN(int value_base10, int base, std::vector<int> & value_base_n){
     /**
      * This function convert a number in base 10 to a new number in any base N
      */
@@ -49,12 +49,12 @@ void BasicMultivariateNormal::base10tobaseN(int value_base10, int base, std::vec
      int index = 0 ;
 
      if (value_base10 == 0)
-       value_baseN.push_back(0);
+       value_base_n.push_back(0);
      else{
        while ( value_base10 != 0 ){
          int remainder = value_base10 % base ;  // assume K > 1
          value_base10  = value_base10 / base ;  // integer division
-         value_baseN.push_back(remainder);
+         value_base_n.push_back(remainder);
          index++ ;
       }
      }
@@ -97,7 +97,7 @@ void BasicMultivariateNormal::basicMultivariateNormalInit(unsigned int &rows, un
    if(rows != columns)
      throwError("MultivariateNormal error: covariance matrix in is not a square matrix.");
 
-   // Creation BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool CDFprovided)
+   // Creation BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool cdf_provided)
 
    int numberValues=1;
    std::vector< std::vector<double> > discretizations;
@@ -127,7 +127,7 @@ void BasicMultivariateNormal::basicMultivariateNormalInit(unsigned int &rows, un
    std::vector< double > values (numberValues);
    for(int i=0; i<numberValues; i++){
      std::vector<int> intCoordinates;
-     base10tobaseN(i,10,intCoordinates);
+     base10ToBaseN(i,10,intCoordinates);
 
      std::vector<double> point_coordinates(dimensions);
      std::vector<int> intCoordinatesFormatted(dimensions);
@@ -143,7 +143,7 @@ void BasicMultivariateNormal::basicMultivariateNormalInit(unsigned int &rows, un
      values.at(i) = getPdf(point_coordinates, _mu, _inverse_cov_matrix);
    }
 
-   _cartesianDistribution = BasicMultiDimensionalCartesianSpline(discretizations,values,alpha,beta,false);
+   _cartesian_distribution = BasicMultiDimensionalCartesianSpline(discretizations,values,alpha,beta,false);
 
 }
 
@@ -233,7 +233,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vec_cov_mat
   _mu = mu;
   _cov_matrix = symmetricCovMatrix;
   _rank = (unsigned int) rank;
-  _covarianceType = std::string(type);
+  _covariance_type = std::string(type);
   if(_rank > _mu.size()) {
     throwError("The  provided rank  is larger than the given problem's dimension, it should be less or equal!" );
   }
@@ -252,7 +252,7 @@ BasicMultivariateNormal::BasicMultivariateNormal(std::vector<double> vec_cov_mat
   //compute the svd
   computeSVD(_rank);
   //setup the nearest symmetric semi-positive definite covariance matrix
-  resetSingularValues(_left_singular_vectors, _right_singular_vectors, _singular_values,_svdTransformedMatrix);
+  resetSingularValues(_left_singular_vectors, _right_singular_vectors, _singular_values,_svd_transformed_matrix);
 
   int numberOfDiscretizations = 10;
   unsigned int dimensions = _mu.size();
@@ -274,24 +274,24 @@ void BasicMultivariateNormal::computeSVD() {
   /**
    * This function will compute the svd for the covariance matrix stored in _cov_matrix
    * and store the left singular vectors in _left_singular_vectors, right singular vectors in _right_singular_vectors
-   * singular values in _singular_values, and the transform matrix in _svdTransformedMatrix
+   * singular values in _singular_values, and the transform matrix in _svd_transformed_matrix
    * The transform matrix is defined as: _left_singular_vectors*sqrt(diag(_singular_values))
    * @ In, None
    * @ Out, None
    */
-  svdDecomposition(_cov_matrix,_left_singular_vectors,_right_singular_vectors,_singular_values,_svdTransformedMatrix);
+  svdDecomposition(_cov_matrix,_left_singular_vectors,_right_singular_vectors,_singular_values,_svd_transformed_matrix);
 }
 
 void BasicMultivariateNormal::computeSVD(int rank) {
   /**
    * This function will compute the truncated svd for the covariance matrix stored in _cov_matrix
    * and store the left singular vectors in _left_singular_vectors, right singular vectors in _right_singular_vectors
-   * singular values in _singular_values, and the transform matrix in _svdTransformedMatrix
+   * singular values in _singular_values, and the transform matrix in _svd_transformed_matrix
    * The transform matrix is defined as: _left_singular_vectors*sqrt(diag(_singular_values))
    * @ In, rank, int, the number of singular values that will be kept for the truncated svd
    * @ Out, None
    */
-  svdDecomposition(_cov_matrix,_left_singular_vectors,_right_singular_vectors,_singular_values,_svdTransformedMatrix, rank);
+  svdDecomposition(_cov_matrix,_left_singular_vectors,_right_singular_vectors,_singular_values,_svd_transformed_matrix, rank);
 }
 
 std::vector<double> BasicMultivariateNormal::getTransformationMatrix() {
@@ -301,9 +301,9 @@ std::vector<double> BasicMultivariateNormal::getTransformationMatrix() {
    * @ Out, returnVectors,std::vector<double>, the vector stores the left singular vectors
    */
   std::vector<double> returnVectors;
-  for(unsigned int i = 0; i < _svdTransformedMatrix.size(); ++i) {
-    for(unsigned int j = 0; j < _svdTransformedMatrix.at(0).size(); ++j) {
-      returnVectors.push_back(_svdTransformedMatrix.at(i).at(j));
+  for(unsigned int i = 0; i < _svd_transformed_matrix.size(); ++i) {
+    for(unsigned int j = 0; j < _svd_transformed_matrix.at(0).size(); ++j) {
+      returnVectors.push_back(_svd_transformed_matrix.at(i).at(j));
     }
   }
   return returnVectors;
@@ -316,12 +316,12 @@ std::vector<double> BasicMultivariateNormal::getTransformationMatrix(std::vector
    * @ Out, returnVectors,std::vector<double>, the vector stores the left singular vectors associated with the provided index
    */
   std::vector<double> returnVectors;
-  for(unsigned int i = 0; i < _svdTransformedMatrix.size(); ++i) {
+  for(unsigned int i = 0; i < _svd_transformed_matrix.size(); ++i) {
     for(unsigned int j = 0; j < index.size(); ++j) {
       if (index.at(j) < 0) {
         throwError("Negative value is not allowed in the provided column index vector");
       }
-      returnVectors.push_back(_svdTransformedMatrix.at(i).at(index.at(j)));
+      returnVectors.push_back(_svd_transformed_matrix.at(i).at(index.at(j)));
     }
   }
   return returnVectors;
@@ -334,8 +334,8 @@ std::vector<int> BasicMultivariateNormal::getTransformationMatrixDimensions() {
    * @ Out, returnVector, std::vector<int>, row stored in returnVector.at(0), and column stored in returnVector.at(1)
    */
   std::vector<int> returnVector;
-  returnVector.push_back(_svdTransformedMatrix.size());
-  returnVector.push_back(_svdTransformedMatrix.at(0).size());
+  returnVector.push_back(_svd_transformed_matrix.size());
+  returnVector.push_back(_svd_transformed_matrix.at(0).size());
   return returnVector;
 }
 
@@ -346,7 +346,7 @@ std::vector<int> BasicMultivariateNormal::getTransformationMatrixDimensions(std:
    * @ Out,returnVector, std::vector<int>, row stored in returnVector.at(0), and column stored in returnVector.at(1).
    */
   std::vector<int> returnVector;
-  returnVector.push_back(_svdTransformedMatrix.size());
+  returnVector.push_back(_svd_transformed_matrix.size());
   returnVector.push_back(index.size());
   return returnVector;
 }
@@ -588,7 +588,7 @@ std::vector<double> BasicMultivariateNormal::coordinateInTransformedSpace(int ra
   //std::cout << "BasicMultivariateNormal::coordinateInTransformedSpace" << std::endl;
   std::vector<double> coordinate;
   BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
-  DistributionContainer *distributionInstance = & DistributionContainer::Instance();
+  DistributionContainer *distributionInstance = & DistributionContainer::instance();
   double randValue = 0.0;
   for(int i = 0; i < rank; ++i) {
     randValue = distributionInstance->random();
@@ -608,18 +608,18 @@ std::vector<double> BasicMultivariateNormal::coordinateInverseTransformed(std::v
    */
   //std::cout << "BasicMultivariateNormal::coordinateInverseTransformed" << std::endl;
   std::vector<double> originalCoordinate;
-  for(unsigned int irow = 0; irow < _svdTransformedMatrix.size(); ++irow) {
+  for(unsigned int irow = 0; irow < _svd_transformed_matrix.size(); ++irow) {
     double tempSum = 0.0;
-    for(unsigned int icol = 0; icol < _svdTransformedMatrix.at(0).size(); ++icol) {
-      tempSum = tempSum + _svdTransformedMatrix.at(irow).at(icol) * coordinate.at(icol);
+    for(unsigned int icol = 0; icol < _svd_transformed_matrix.at(0).size(); ++icol) {
+      tempSum = tempSum + _svd_transformed_matrix.at(irow).at(icol) * coordinate.at(icol);
     }
     originalCoordinate.push_back(tempSum);
   }
-  if(_covarianceType == "abs") {
+  if(_covariance_type == "abs") {
     for(unsigned int idim = 0; idim < originalCoordinate.size(); ++idim) {
       originalCoordinate.at(idim) += _mu.at(idim);
     }
-  } else if (_covarianceType == "rel") {
+  } else if (_covariance_type == "rel") {
     for(unsigned int idim = 0; idim < originalCoordinate.size(); ++idim) {
       originalCoordinate.at(idim) = _mu.at(idim)*(1.0 + originalCoordinate.at(idim));
     }
@@ -637,21 +637,21 @@ std::vector<double> BasicMultivariateNormal::coordinateInverseTransformed(std::v
    * @ Out, originalCoordinate, std::vector<double>, and the coordinate in the full space.
    */
   std::vector<double> originalCoordinate;
-  for(unsigned int irow = 0; irow < _svdTransformedMatrix.size(); ++irow) {
+  for(unsigned int irow = 0; irow < _svd_transformed_matrix.size(); ++irow) {
     double tempSum = 0.0;
     for(unsigned int icol = 0; icol < index.size(); ++icol) {
       if (index[icol] < 0) {
         throwError("Negative value is not allowed for the index set.");
       }
-      tempSum = tempSum + _svdTransformedMatrix.at(irow).at(index.at(icol)) * coordinate.at(icol);
+      tempSum = tempSum + _svd_transformed_matrix.at(irow).at(index.at(icol)) * coordinate.at(icol);
     }
     originalCoordinate.push_back(tempSum);
   }
-  if(_covarianceType == "abs") {
+  if(_covariance_type == "abs") {
     for(unsigned int idim = 0; idim < originalCoordinate.size(); ++idim) {
       originalCoordinate.at(idim) += _mu.at(idim);
     }
-  } else if (_covarianceType == "rel") {
+  } else if (_covariance_type == "rel") {
     for(unsigned int idim = 0; idim < originalCoordinate.size(); ++idim) {
       originalCoordinate.at(idim) = _mu.at(idim)*(1.0 + originalCoordinate.at(idim));
     }
@@ -686,14 +686,14 @@ double BasicMultivariateNormal::cellProbabilityWeight(std::vector<double> center
   return value;
 }
 
-double BasicMultivariateNormal::inverseMarginalForPCA(double F){
+double BasicMultivariateNormal::inverseMarginalForPCA(double f){
     /**
-     * This function calculates the inverse marginal distribution at F of a MVN distribution when using pca decomposition
-     * @ In, F, double, the value picked in the marginal cdf distribution
-     * @ Out, normalDistribution->inverseCdf(F), double, the variable value corresponding to the marginal cdf distribution at F
+     * This function calculates the inverse marginal distribution at f of a MVN distribution when using pca decomposition
+     * @ In, f, double, the value picked in the marginal cdf distribution
+     * @ Out, normalDistribution->inverseCdf(f), double, the variable value corresponding to the marginal cdf distribution at f
      */
   BasicNormalDistribution * normalDistribution = new BasicNormalDistribution(0,1);
-  return normalDistribution->inverseCdf(F);
+  return normalDistribution->inverseCdf(f);
 }
 
 double BasicMultivariateNormal::marginalCdfForPCA(double x){
@@ -756,21 +756,21 @@ double BasicMultivariateNormal::cdf(std::vector<double> x){
     /**
      * This function calculates the cdf values at x of a MVN distribution
      */
-  return _cartesianDistribution.cdf(x);
+  return _cartesian_distribution.cdf(x);
 }
 
-std::vector<double> BasicMultivariateNormal::inverseCdf(double F, double g){
+std::vector<double> BasicMultivariateNormal::inverseCdf(double f, double g){
     /**
-     * This function calculates the inverse CDF values at F of a MVN distribution
+     * This function calculates the inverse CDF values at f of a MVN distribution
      */
-  return _cartesianDistribution.inverseCdf(F,g);
+  return _cartesian_distribution.inverseCdf(f,g);
 }
 
-double BasicMultivariateNormal::inverseMarginal(double F, int dimension){
+double BasicMultivariateNormal::inverseMarginal(double f, int dimension){
     /**
-     * This function calculates the inverse marginal distribution at F for a specific dimension of a MVN distribution
+     * This function calculates the inverse marginal distribution at f for a specific dimension of a MVN distribution
      */
-  return _cartesianDistribution.inverseMarginal(F,dimension);
+  return _cartesian_distribution.inverseMarginal(f,dimension);
 }
 
 int BasicMultivariateNormal::returnDimensionality(){
@@ -784,14 +784,14 @@ void BasicMultivariateNormal::updateRNGparameter(double tolerance, double initia
     /**
      * This function updates the random number generator parameters of a MVN distribution
      */
-  return _cartesianDistribution.updateRNGparameter(tolerance,initial_divisions);
+  return _cartesian_distribution.updateRNGparameter(tolerance,initial_divisions);
 }
 
-double BasicMultivariateNormal::Marginal(double x, int dimension){
+double BasicMultivariateNormal::marginal(double x, int dimension){
     /**
      * This function calculates the marginal distribution at x for a specific dimension of a MVN distribution
      */
-  return _cartesianDistribution.Marginal(x,dimension);
+  return _cartesian_distribution.marginal(x,dimension);
 }
 
 //double BasicMultivariateNormal::cdf_(std::vector<double> x){
@@ -849,7 +849,7 @@ double BasicMultivariateNormal::Marginal(double x, int dimension){
 //  for (int i=1; i<dimensions; i++){
 //   double tempY = d.at(i-1) + w.at(i-1) * (e.at(i-1)-d.at(i-1));
 //
-//   y.at(i-1) = phi_inv(tempY);
+//   y.at(i-1) = phiInv(tempY);
 //
 //   double tempE = x.at(i);
 //
@@ -883,7 +883,7 @@ double BasicMultivariateNormal::phi(double x){
  return value;
 }
 
-double BasicMultivariateNormal::phi_inv(double x){
+double BasicMultivariateNormal::phiInv(double x){
  normal s;
  double value = quantile(s,x);
  return value;
@@ -928,7 +928,7 @@ double BasicMultivariateNormal::phi_inv(double x){
 //  std::vector<double> y (dimensions-1);
 //  for (int i=1; i<dimensions; i++){
 //   double tempY = d.at(i-1) + w.at(i-1)*(e.at(i-1)-d.at(i-1));
-//   y.at(i-1) = phi_inv(tempY);
+//   y.at(i-1) = phiInv(tempY);
 //
 //   double tempD = a.at(i);
 //   double tempE = b.at(i);
@@ -985,7 +985,7 @@ std::vector<std::vector<double> > BasicMultivariateNormal::choleskyDecomposition
 
  double *c1 = cholesky(m1, dimensions);
  //std::cout << "choleskyDecomposition" << std::endl;
- //show_matrix(c1,dimensions);
+ //showMatrix(c1,dimensions);
 
  for (int r=0; r<dimensions; r++){
   std::vector<double> temp;
@@ -996,7 +996,7 @@ std::vector<std::vector<double> > BasicMultivariateNormal::choleskyDecomposition
  return cholesky_C;
 }
 
-void BasicMultivariateNormal::show_matrix(double *A, int n) {
+void BasicMultivariateNormal::showMatrix(double *A, int n) {
     for (int i = 0; i < n; i++) {
   for (int j = 0; j < n; j++)
       printf("%2.5f ", A[i * n + j]);

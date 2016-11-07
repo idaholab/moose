@@ -18,7 +18,7 @@ class BasicDistributionND;
 class DistributionContainer
 {
 public:
-  static DistributionContainer & Instance();
+  static DistributionContainer & instance();
   /**
    * Function to construct on the fly this class through the action system
    */
@@ -91,8 +91,8 @@ public:
    */
   double inverseCdf(const char * dist_alias, double rng);
 
-  std::vector<double> inverseCdf(const char * dist_alias, double F, double g);
-  std::vector<double> inverseCdf(const std::string dist_alias, double F, double g);
+  std::vector<double> inverseCdf(const char * dist_alias, double f, double g);
+  std::vector<double> inverseCdf(const std::string dist_alias, double f, double g);
 
   double random(); // return a random number
 
@@ -139,8 +139,8 @@ protected:
   static DistributionContainer * _instance; // = NULL
 };
 
-std::string * str_to_string_p(char *s);
-const char * string_p_to_str(const std::string * s);
-void free_string_p(std::string * s);
+std::string * strToStringP(char *s);
+const char * stringPToSt(const std::string * s);
+void freeStringP(std::string * s);
 
 #endif /* DISTRIBUTIONCONTAINER_H */

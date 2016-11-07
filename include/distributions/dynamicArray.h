@@ -3,14 +3,14 @@
 
 template <typename T>
 T **
-AllocateDynamicArray(int nRows, int nCols)
+allocateDynamicArray(int n_rows, int n_cols)
 {
   T **dynamicArray;
 
-  dynamicArray = new T*[nRows];
-  for ( int i = 0 ; i < nRows ; i++ )
+  dynamicArray = new T*[n_rows];
+  for ( int i = 0 ; i < n_rows ; i++ )
   {
-    dynamicArray[i] = new T [nCols];
+    dynamicArray[i] = new T [n_cols];
   }
 
   return dynamicArray;
@@ -18,10 +18,10 @@ AllocateDynamicArray(int nRows, int nCols)
 
 template <typename T>
 void
-FreeDynamicArray(T** dArray)
+freeDynamicArray(T** d_array)
 {
-  delete [] *dArray;
-  delete [] dArray;
+  delete [] *d_array;
+  delete [] d_array;
 }
 
 #endif /* DYNAMICARRAY_H */
