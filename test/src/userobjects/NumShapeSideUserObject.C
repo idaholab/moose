@@ -19,7 +19,7 @@ template<>
 InputParameters validParams<NumShapeSideUserObject>()
 {
   InputParameters params = validParams<ShapeSideUserObject>();
-  params.addRequiredCoupledVar("u", "Charged specie density.");
+  params.addRequiredCoupledVar("u", "Charged species density.");
   return params;
 }
 
