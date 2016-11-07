@@ -93,12 +93,10 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
     {
       // Prepare shape functions for ShapeElementUserObjects
       std::vector<MooseVariable *> jacobian_moose_vars = _fe_problem.getUserObjectJacobianVariables(_tid);
-      for (auto jvar_it = jacobian_moose_vars.begin();
-           jvar_it != jacobian_moose_vars.end();
-           ++jvar_it)
+      for (auto & jvar_it : jacobian_moose_vars)
       {
-        unsigned int jvar = (*jvar_it)->number();
-        std::vector<dof_id_type> & dof_indices = (*jvar_it)->dofIndices();
+        unsigned int jvar = (*jvar_it).number();
+        std::vector<dof_id_type> & dof_indices = (*jvar_it).dofIndices();
 
         _fe_problem.prepareShapes(jvar, _tid);
 
@@ -137,12 +135,10 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
     {
       // Prepare shape functions for ShapeSideUserObjects
       std::vector<MooseVariable *> jacobian_moose_vars = _fe_problem.getUserObjectJacobianVariables(_tid);
-      for (auto jvar_it = jacobian_moose_vars.begin();
-           jvar_it != jacobian_moose_vars.end();
-           ++jvar_it)
+      for (auto & jvar_it : jacobian_moose_vars)
       {
-        unsigned int jvar = (*jvar_it)->number();
-        std::vector<dof_id_type> & dof_indices = (*jvar_it)->dofIndices();
+        unsigned int jvar = (*jvar_it).number();
+        std::vector<dof_id_type> & dof_indices = (*jvar_it).dofIndices();
 
         _fe_problem.prepareFaceShapes(jvar, _tid);
 ;

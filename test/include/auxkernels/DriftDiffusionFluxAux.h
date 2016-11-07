@@ -30,11 +30,11 @@ protected:
   virtual Real computeValue();
 
 private:
-  Real _sgn;
+  const Real _sgn;
   const VariableGradient & _grad_potential;
   const VariableValue & _u;
   const VariableGradient & _grad_u;
-  int _component;
+  const int _component;
 };
 
 #endif //DRIFTDIFFUSIONFLUXAUX_H
