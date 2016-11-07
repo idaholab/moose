@@ -1,4 +1,4 @@
-# PorousFlowPiecewiseLinearSink with 2-phase, 3-components
+# PorousFlowPiecewiseLinearSink with 2-phase, 3-components, with enthalpy, internal_energy, and thermal_conductivity
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -28,19 +28,27 @@
   [../]
   [./massfrac_ph1_sp1]
   [../]
+  [./temp]
+  [../]
 []
 
 
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'ppwater ppgas massfrac_ph0_sp0 massfrac_ph0_sp1 massfrac_ph1_sp0 massfrac_ph1_sp1'
+    porous_flow_vars = 'temp ppwater ppgas massfrac_ph0_sp0 massfrac_ph0_sp1 massfrac_ph1_sp0 massfrac_ph1_sp1'
     number_fluid_phases = 2
     number_fluid_components = 3
   [../]
 []
 
 [ICs]
+  [./temp]
+    type = RandomIC
+    variable = temp
+    min = 1
+    max = 2
+  [../]
   [./ppwater]
     type = RandomIC
     variable = ppwater
@@ -80,6 +88,10 @@
 []
 
 [Kernels]
+  [./dummy_temp]
+    type = TimeDerivative
+    variable = temp
+  [../]
   [./dummy_ppwater]
     type = TimeDerivative
     variable = ppwater
@@ -109,6 +121,7 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
+    temperature = temp
   [../]
   [./nnn]
     type = PorousFlowNodeNumber
@@ -179,6 +192,38 @@
     type = PorousFlowJoiner
     material_property = PorousFlow_relative_permeability
   [../]
+  [./enthalpy0]
+    type = PorousFlowEnthalpy
+    phase = 0
+  [../]
+  [./enthalpy1]
+    type = PorousFlowEnthalpy
+    phase = 1
+  [../]
+  [./enthalpy_all]
+    type = PorousFlowJoiner
+    material_property = PorousFlow_fluid_phase_enthalpy_nodal
+  [../]
+  [./fluid_energy0]
+    type = PorousFlowInternalEnergyIdeal
+    specific_heat_capacity = 1.1
+    phase = 0
+  [../]
+  [./fluid_energy1]
+    type = PorousFlowInternalEnergyIdeal
+    specific_heat_capacity = 1.8
+    phase = 1
+  [../]
+  [./energy_all]
+    type = PorousFlowJoiner
+    material_property = PorousFlow_fluid_phase_internal_energy_nodal
+  [../]
+  [./thermal_conductivity]
+    type = PorousFlowThermalConductivityIdeal
+    dry_thermal_conductivity = '0.1 0.2 0.3 0.2 0 0.1 0.3 0.1 0.1'
+    wet_thermal_conductivity = '10 2 31 2 40 1 31 1 10'
+    exponent = 0.5
+  [../]
 []
 
 [BCs]
@@ -192,6 +237,7 @@
     fluid_phase = 0
     use_relperm = true
     use_mobility = true
+    use_enthalpy = true
     flux_function = 'x*y'
   [../]
   [./flux_g]
@@ -204,6 +250,7 @@
     fluid_phase = 1
     use_relperm = true
     use_mobility = true
+    use_internal_energy = true
     flux_function = '-x*y'
   [../]
   [./flux_1]
@@ -216,6 +263,7 @@
     fluid_phase = 0
     use_relperm = true
     use_mobility = true
+    use_internal_energy = true
   [../]
   [./flux_2]
     type = PorousFlowPiecewiseLinearSink
@@ -227,6 +275,7 @@
     fluid_phase = 1
     use_relperm = true
     use_mobility = true
+    use_enthalpy = true
     flux_function = '0.5*x*y'
   [../]
   [./flux_3]
@@ -238,6 +287,7 @@
     variable = ppwater
     fluid_phase = 0
     use_relperm = true
+    use_enthalpy = true
     use_mobility = true
   [../]
   [./flux_4]
@@ -251,6 +301,8 @@
     use_relperm = true
     use_mobility = true
     flux_function = '-0.5*x*y'
+    use_enthalpy = true
+    use_thermal_conductivity = true
   [../]
 []
 
@@ -268,9 +320,9 @@
   type = Transient
   solve_type = Newton
   dt = 1
-  end_time = 2
+  end_time = 1
 []
 
 [Outputs]
-  file_base = pls03
+  file_base = pls04
 []

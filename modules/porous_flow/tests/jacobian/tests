@@ -144,6 +144,12 @@
     ratio_tol = 1E-6
     difference_tol = 1E10
   [../]
+  [./pls04]
+    type = 'PetscJacobianTester'
+    input = 'pls04.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
   [./hgs01]
     type = 'PetscJacobianTester'
     input = 'hgs01.i'
@@ -153,6 +159,12 @@
   [./hcs01]
     type = 'PetscJacobianTester'
     input = 'hcs01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./hcs02]
+    type = 'PetscJacobianTester'
+    input = 'hcs02.i'
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
