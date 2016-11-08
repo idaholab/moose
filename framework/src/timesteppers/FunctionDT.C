@@ -44,12 +44,12 @@ StepperBlock *
 FunctionDT::buildStepper()
 {
   StepperBlock* s = new PiecewiseBlock(_time_t, _time_dt, _interpolate);
-  s = new MinOfBlock(RootBlock::fixedTimes(_time_t, _executioner.timestepTol()), s, 0);
-  s = ModBlock::dtLimit(s, _min_dt, 1e100);
+  s = BaseStepper::min(BaseStepper::fixedTimes(_time_t, _executioner.timestepTol()), s, 0);
+  s = BaseStepper::dtLimit(s, _min_dt, 1e100);
 
   StepperBlock* s2 = new PiecewiseBlock(_time_t, _time_dt, _interpolate);
-  s = new MinOfBlock(RootBlock::fixedTimes(_time_t, _executioner.timestepTol()), s, 0);
-  s = ModBlock::dtLimit(s, _min_dt, 1e100);
+  s = BaseStepper::min(BaseStepper::fixedTimes(_time_t, _executioner.timestepTol()), s, 0);
+  s = BaseStepper::dtLimit(s, _min_dt, 1e100);
 
-  return IfBlock::converged(s, new MinOfBlock(s2, ModBlock::mult(0.5)));
+  return BaseStepper::converged(s, BaseStepper::min(s2, BaseStepper::mult(0.5)));
 }

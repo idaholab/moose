@@ -197,13 +197,13 @@ buildStepper(StepperNode n) {
   std::string name = n.args[0].val;
   if (name == "FixedPointStepper") {
     if (n.args.size() < 3) throw Err("FixedPointStepper needs 2 args");
-    return RootBlock::fixedTimes(n.args[1].getVec<double>(), n.args[2].get<double>());
+    return BaseStepper::fixedTimes(n.args[1].getVec<double>(), n.args[2].get<double>());
   } else if (name == "MinOfStepper") {
     if (n.args.size() < 4) throw Err("MinOfStepper needs 3 args");
     return new MinOfBlock(buildStepper(n.args[1]), buildStepper(n.args[2]), n.args[3].get<double>());
   } else if (name == "ConstStepper") {
     if (n.args.size() < 2) throw Err("ConstStepper needs 1 args");
-    return RootBlock::constant(n.args[1].get<double>());
+    return BaseStepper::constant(n.args[1].get<double>());
   }
   throw Err("unsupported stepper type");
 }

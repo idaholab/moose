@@ -139,7 +139,7 @@ StepperTest::fixedPoint()
     double tol = tests[i].tol;
     std::vector<double> times = tests[i].times;
     std::vector<double> want = tests[i].want;
-    StepperBlock::Ptr stepper(RootBlock::fixedTimes(times, tol));
+    StepperBlock::Ptr stepper(BaseStepper::fixedTimes(times, tol));
     StepperInfo si = blankInfo();
 
     for (int j = 0; j < times.size(); j++)
@@ -199,8 +199,8 @@ StepperTest::maxRatio()
     double max_ratio = tests[i].max_ratio;
     std::vector<double> times = tests[i].times;
     std::vector<double> want = tests[i].want;
-    StepperBlock * s = RootBlock::fixedTimes(times, tol);
-    StepperBlock::Ptr stepper(ModBlock::maxRatio(s, max_ratio));
+    StepperBlock * s = BaseStepper::fixedTimes(times, tol);
+    StepperBlock::Ptr stepper(BaseStepper::maxRatio(s, max_ratio));
     StepperInfo si = blankInfo();
 
     for (int j = 0; j < times.size(); j++)
@@ -250,8 +250,8 @@ StepperTest::everyN()
     double dt = 0;
     std::vector<double> times = tests[i].times;
     std::vector<double> want = tests[i].want;
-    StepperBlock * s = RootBlock::fixedTimes(times, tol);
-    StepperBlock::Ptr stepper(IfBlock::everyN(s, RootBlock::prevdt(), tests[i].every_n));
+    StepperBlock * s = BaseStepper::fixedTimes(times, tol);
+    StepperBlock::Ptr stepper(BaseStepper::everyN(s, BaseStepper::prevdt(), tests[i].every_n));
     StepperInfo si = blankInfo();
 
     for (int j = 0; j < times.size(); j++)

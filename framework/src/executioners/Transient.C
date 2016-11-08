@@ -326,11 +326,11 @@ Transient::computeDT(bool first)
         sync_times.push_back(val);
 
       // these are global/sim constraints for *EVERY* time inner:
-      inner = ModBlock::dtLimit(inner, dtMin(), dtMax());
+      inner = BaseStepper::dtLimit(inner, dtMin(), dtMax());
       if (sync_times.size() > 0)
-        inner = new MinOfBlock(RootBlock::fixedTimes(sync_times, timestepTol()), inner, timestepTol());
+        inner = BaseStepper::min(BaseStepper::fixedTimes(sync_times, timestepTol()), inner, timestepTol());
       if (!_app.halfTransient())
-        inner = ModBlock::bounds(inner, getStartTime(), endTime());
+        inner = BaseStepper::bounds(inner, getStartTime(), endTime());
       _stepper.reset(inner);
     }
   }

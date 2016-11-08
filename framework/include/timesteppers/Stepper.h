@@ -79,16 +79,27 @@ public:
   virtual double advance(const StepperInfo * si, StepperFeedback * sf) = 0;
 };
 
+namespace BaseStepper {
+StepperBlock * constant(double dt);
+StepperBlock * prevdt();
+StepperBlock * fixedTimes(std::vector<double> times, double tol);
+StepperBlock * ptr(const double * dt_store);
+StepperBlock * maxRatio(StepperBlock * s, double max_ratio);
+StepperBlock * dtLimit(StepperBlock * s, double min, double max);
+StepperBlock * bounds(StepperBlock * s, double t_min, double t_max);
+StepperBlock * mult(double mult, StepperBlock * s = nullptr);
+StepperBlock * between(StepperBlock * on, StepperBlock * between, std::vector<double> times, double tol);
+StepperBlock * everyN(StepperBlock * nth, StepperBlock * between, int every_n, int offset = 0);
+StepperBlock * initialN(StepperBlock * initial, StepperBlock * primary, int n);
+StepperBlock * converged(StepperBlock  * converged, StepperBlock * not_converged, bool delay = false);
+StepperBlock * min(StepperBlock  * a, StepperBlock * b, double tol = 0);
+} // namespace BaseStepper
+
 class RootBlock : public StepperBlock
 {
 public:
   RootBlock(std::function<double(const StepperInfo * si)> func);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-
-  static StepperBlock * constant(double dt);
-  static StepperBlock * prevdt();
-  static StepperBlock * fixedTimes(std::vector<double> times, double tol);
-  static StepperBlock * ptr(const double * dt_store);
 
 private:
   std::function<double(const StepperInfo * si)> _func;
@@ -100,11 +111,6 @@ public:
   ModBlock(StepperBlock * s, std::function<double(const StepperInfo * si, double dt)> func);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
-  static StepperBlock * maxRatio(StepperBlock * s, double max_ratio);
-  static StepperBlock * dtLimit(StepperBlock * s, double min, double max);
-  static StepperBlock * bounds(StepperBlock * s, double t_min, double t_max);
-  static StepperBlock * mult(double mult, StepperBlock * s = nullptr);
-
 private:
   Ptr _stepper;
   std::function<double(const StepperInfo * si, double dt)> _func;
@@ -114,11 +120,6 @@ class IfBlock : public StepperBlock {
 public:
   IfBlock(StepperBlock * on_true, StepperBlock * on_false, std::function<bool(const StepperInfo *)> func);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-
-  static StepperBlock * between(StepperBlock * on, StepperBlock * between, std::vector<double> times, double tol);
-  static StepperBlock * everyN(StepperBlock * nth, StepperBlock * between, int every_n, int offset = 0);
-  static StepperBlock * initialN(StepperBlock * initial, StepperBlock * primary, int n);
-  static StepperBlock * converged(StepperBlock  * converged, StepperBlock * not_converged, bool delay = false);
 
 private:
   Ptr _ontrue;
@@ -202,7 +203,7 @@ private:
   LinearInterpolation _lin;
 };
 
-/// MinOfStepper returns the smaller of two dt's from two underlying steppers
+/// Returns the smaller of two dt's from two underlying steppers
 /// (one of them preferred).
 /// It returns the preferred stepper's dt if "dt_preferred - tolerance <
 /// dt_alternate".
@@ -211,7 +212,7 @@ class MinOfBlock : public StepperBlock
 {
 public:
   /// Stepper "a" is preferred.
-  MinOfBlock(StepperBlock * a, StepperBlock * b, double tol = 0);
+  MinOfBlock(StepperBlock * a, StepperBlock * b, double tol);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
 private:

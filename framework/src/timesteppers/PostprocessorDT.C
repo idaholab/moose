@@ -56,7 +56,7 @@ PostprocessorDT::buildStepper()
   if (_has_initial_dt)
     dt_init = _initial_dt;
 
-  StepperBlock * s = RootBlock::ptr(&_pps_value);
-  s = IfBlock::initialN(RootBlock::constant(dt_init), s, _executioner.n_startup_steps());
+  StepperBlock * s = BaseStepper::ptr(&_pps_value);
+  s = BaseStepper::initialN(BaseStepper::constant(dt_init), s, _executioner.n_startup_steps());
   return s;
 }

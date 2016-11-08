@@ -37,7 +37,7 @@ StepperBlock *
 SolutionTimeAdaptiveDT::buildStepper()
 {
   StepperBlock * s = new SolveTimeAdaptiveBlock(_direction, _percent_change);
-  s = IfBlock::converged(s, ModBlock::mult(0.5));
-  s = IfBlock::initialN(RootBlock::constant(getParam<Real>("dt")), s, _executioner.n_startup_steps());
+  s = BaseStepper::converged(s, BaseStepper::mult(0.5));
+  s = BaseStepper::initialN(BaseStepper::constant(getParam<Real>("dt")), s, _executioner.n_startup_steps());
   return s;
 }

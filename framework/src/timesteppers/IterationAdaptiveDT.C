@@ -140,18 +140,18 @@ IterationAdaptiveDT::buildStepper()
           _growth_factor
         );
     if (use_time_ipol)
-      stepper = IfBlock::between(new PiecewiseBlock(time_list, dt_list), stepper, time_list, tol);
+      stepper = BaseStepper::between(new PiecewiseBlock(time_list, dt_list), stepper, time_list, tol);
   }
   else if (use_time_ipol)
       stepper = new PiecewiseBlock(time_list, dt_list);
   else
     // this should cover the final else clause in IterationAdaptiveDT::computeDT combined with
     // the no growth if _cutback_occurred - from the first if clause body.
-    stepper = IfBlock::converged(ModBlock::mult(_growth_factor), RootBlock::prevdt(), true);
+    stepper = BaseStepper::converged(BaseStepper::mult(_growth_factor), BaseStepper::prevdt(), true);
 
-  stepper = IfBlock::converged(stepper, ModBlock::mult(0.5));
+  stepper = BaseStepper::converged(stepper, BaseStepper::mult(0.5));
 
-  stepper = IfBlock::initialN(RootBlock::constant(_input_dt), stepper, std::max(1, n_startup_steps));
+  stepper = BaseStepper::initialN(BaseStepper::constant(_input_dt), stepper, std::max(1, n_startup_steps));
   // Original IterationAdaptiveDT stepper constrains to simulation end time
   // *before* applying other constraints - sometimes resulting in an
   // over-constrained dt - for example a dt divide-by-two algo to satisfy
@@ -161,7 +161,7 @@ IterationAdaptiveDT::buildStepper()
   // explicitly.  This behavior is undesirable.  The simulation end constraint should
   // be the last constraint enforced.
   if (!half_transient)
-    stepper = ModBlock::bounds(stepper, start_time, end_time); // This is stupid.
+    stepper = BaseStepper::bounds(stepper, start_time, end_time); // This is stupid.
   if (t_limit_func)
   {
     stepper = new ConstrFuncBlock(
@@ -174,22 +174,22 @@ IterationAdaptiveDT::buildStepper()
   // Original IterationAdaptiveDT stepper does not retry prior dt if last dt
   // was constrained by dt min/max - whatever - so we need this stepper to be
   // inside the Retry stepper to reproduce that behavior
-  stepper = ModBlock::dtLimit(stepper, dtmin, dtmax);
+  stepper = BaseStepper::dtLimit(stepper, dtmin, dtmax);
   // this needs to go before RetryUnused
   if (_pps_value)
   {
-    StepperBlock * s = RootBlock::ptr(_pps_value);
+    StepperBlock * s = BaseStepper::ptr(_pps_value);
     // startup stepper needed for initial case where pps_value hasn't been set
     // to anything yet.
-    s = IfBlock::initialN(RootBlock::constant(1e100), s, n_startup_steps);
-    stepper = new MinOfBlock(stepper, s);
+    s = BaseStepper::initialN(BaseStepper::constant(1e100), s, n_startup_steps);
+    stepper = BaseStepper::min(stepper, s);
   }
 
   if (time_list.size() > 0)
-    stepper = new MinOfBlock(RootBlock::fixedTimes(time_list, tol), stepper, tol);
+    stepper = BaseStepper::min(BaseStepper::fixedTimes(time_list, tol), stepper, tol);
   stepper = new RetryUnusedBlock(stepper, tol, true);
   if (_force_step_every_function_point && piecewise_list.size() > 0)
-    stepper = new MinOfBlock(RootBlock::fixedTimes(piecewise_list, tol), stepper, tol);
+    stepper = BaseStepper::min(BaseStepper::fixedTimes(piecewise_list, tol), stepper, tol);
 
   return stepper;
 }

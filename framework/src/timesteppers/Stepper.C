@@ -390,43 +390,6 @@ IfBlock::advance(const StepperInfo * si, StepperFeedback * sf)
   return l.val(_onfalse->advance(si, sf));
 }
 
-StepperBlock *
-IfBlock::between(StepperBlock * on, StepperBlock * between, std::vector<double> times,
-                   double tol)
-{
-  return new IfBlock(on, between, [=](const StepperInfo * si) {
-    for (int i = 0; i < times.size(); i++)
-    {
-      if (std::abs(si->time - times[i]) < tol)
-        return true;
-    }
-    return false;
-  });
-}
-
-StepperBlock *
-IfBlock::everyN(StepperBlock * nth, StepperBlock * between, int every_n, int offset)
-{
-  return new IfBlock(nth, between, [=](const StepperInfo * si) {
-    return (si->step_count + (every_n - offset) - 1) % every_n == 0;
-  });
-}
-
-StepperBlock *
-IfBlock::initialN(StepperBlock * initial, StepperBlock * primary, int n)
-{
-  return new IfBlock(initial, primary, [=](const StepperInfo * si) {
-    return si->step_count <= n;
-  });
-}
-
-StepperBlock *
-IfBlock::converged(StepperBlock * converged, StepperBlock * not_converged, bool delay)
-{
-  return new IfBlock(converged, not_converged, [=](const StepperInfo * si) {
-    return si->converged && (!delay || si->prev_converged);
-  });
-}
 
 ModBlock::ModBlock(StepperBlock * s,
                        std::function <
@@ -442,50 +405,6 @@ ModBlock::advance(const StepperInfo * si, StepperFeedback * sf)
   return l.val(_func(si, _stepper->advance(si, sf)));
 }
 
-StepperBlock *
-ModBlock::dtLimit(StepperBlock * s, double dt_min, double dt_max)
-{
-  return new ModBlock(s, [=](const StepperInfo * si, double dt) {
-    if (dt < dt_min)
-      return dt_min;
-    else if (dt > dt_max)
-      return dt_max;
-    return dt;
-  });
-}
-
-StepperBlock *
-ModBlock::bounds(StepperBlock * s, double t_min, double t_max)
-{
-  return new ModBlock(s, [=](const StepperInfo * si, double dt) {
-    double t = si->time + dt;
-    if (t < t_min)
-      return t_min - si->time;
-    else if (t > t_max)
-      return t_max - si->time;
-    return dt;
-  });
-}
-
-StepperBlock *
-ModBlock::maxRatio(StepperBlock * s, double max_ratio)
-{
-  return new ModBlock(s, [=](const StepperInfo * si, double dt) {
-    if (si->prev_dt > 0 && dt / si->prev_dt > max_ratio)
-      dt = si->prev_dt * max_ratio;
-    return dt;
-  });
-}
-
-StepperBlock *
-ModBlock::mult(double mult, StepperBlock * s)
-{
-  if (!s)
-    s = RootBlock::prevdt();
-  return new ModBlock(
-      s, [=](const StepperInfo * si, double dt) { return dt * mult; });
-}
-
 RootBlock::RootBlock(std::function<double(const StepperInfo * si)> func)
     : _func(func)
 {
@@ -498,19 +417,19 @@ RootBlock::advance(const StepperInfo * si, StepperFeedback *)
 }
 
 StepperBlock *
-RootBlock::constant(double dt)
+BaseStepper::constant(double dt)
 {
   return new RootBlock([=](const StepperInfo * si) { return dt; });
 }
 
 StepperBlock *
-RootBlock::prevdt()
+BaseStepper::prevdt()
 {
   return new RootBlock([=](const StepperInfo * si) { return si->prev_dt; });
 }
 
 StepperBlock *
-RootBlock::fixedTimes(std::vector<double> times, double tol)
+BaseStepper::fixedTimes(std::vector<double> times, double tol)
 {
   return new RootBlock([=](const StepperInfo * si) {
     if (times.size() == 0)
@@ -527,7 +446,95 @@ RootBlock::fixedTimes(std::vector<double> times, double tol)
 }
 
 StepperBlock *
-RootBlock::ptr(const double * dt_store)
+BaseStepper::ptr(const double * dt_store)
 {
   return new RootBlock([=](const StepperInfo * si) { return *dt_store; });
+}
+
+StepperBlock *
+BaseStepper::dtLimit(StepperBlock * s, double dt_min, double dt_max)
+{
+  return new ModBlock(s, [=](const StepperInfo * si, double dt) {
+    if (dt < dt_min)
+      return dt_min;
+    else if (dt > dt_max)
+      return dt_max;
+    return dt;
+  });
+}
+
+StepperBlock *
+BaseStepper::bounds(StepperBlock * s, double t_min, double t_max)
+{
+  return new ModBlock(s, [=](const StepperInfo * si, double dt) {
+    double t = si->time + dt;
+    if (t < t_min)
+      return t_min - si->time;
+    else if (t > t_max)
+      return t_max - si->time;
+    return dt;
+  });
+}
+
+StepperBlock *
+BaseStepper::maxRatio(StepperBlock * s, double max_ratio)
+{
+  return new ModBlock(s, [=](const StepperInfo * si, double dt) {
+    if (si->prev_dt > 0 && dt / si->prev_dt > max_ratio)
+      dt = si->prev_dt * max_ratio;
+    return dt;
+  });
+}
+
+StepperBlock *
+BaseStepper::mult(double mult, StepperBlock * s)
+{
+  if (!s)
+    s = prevdt();
+  return new ModBlock(
+      s, [=](const StepperInfo * si, double dt) { return dt * mult; });
+}
+
+StepperBlock *
+BaseStepper::between(StepperBlock * on, StepperBlock * between, std::vector<double> times,
+                   double tol)
+{
+  return new IfBlock(on, between, [=](const StepperInfo * si) {
+    for (int i = 0; i < times.size(); i++)
+    {
+      if (std::abs(si->time - times[i]) < tol)
+        return true;
+    }
+    return false;
+  });
+}
+
+StepperBlock *
+BaseStepper::everyN(StepperBlock * nth, StepperBlock * between, int every_n, int offset)
+{
+  return new IfBlock(nth, between, [=](const StepperInfo * si) {
+    return (si->step_count + (every_n - offset) - 1) % every_n == 0;
+  });
+}
+
+StepperBlock *
+BaseStepper::initialN(StepperBlock * initial, StepperBlock * primary, int n)
+{
+  return new IfBlock(initial, primary, [=](const StepperInfo * si) {
+    return si->step_count <= n;
+  });
+}
+
+StepperBlock *
+BaseStepper::converged(StepperBlock * converged, StepperBlock * not_converged, bool delay)
+{
+  return new IfBlock(converged, not_converged, [=](const StepperInfo * si) {
+    return si->converged && (!delay || si->prev_converged);
+  });
+}
+
+StepperBlock *
+BaseStepper::min(StepperBlock * a, StepperBlock * b, double tol)
+{
+  return new MinOfBlock(a, b, tol);
 }

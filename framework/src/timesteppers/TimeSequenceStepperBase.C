@@ -96,5 +96,5 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
 StepperBlock *
 TimeSequenceStepperBase::buildStepper()
 {
-  return IfBlock::converged(RootBlock::fixedTimes(_time_sequence, 0), ModBlock::mult(0.5));
+  return BaseStepper::converged(BaseStepper::fixedTimes(_time_sequence, 0), BaseStepper::mult(0.5));
 }
