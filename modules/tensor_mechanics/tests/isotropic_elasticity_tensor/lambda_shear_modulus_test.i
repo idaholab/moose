@@ -19,6 +19,7 @@
     [./Master]
       [./all]
         add_variables = true
+        strain = SMALL
       [../]
     [../]
   [../]
@@ -62,11 +63,6 @@
 []
 
 [Materials]
-  [./strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y disp_z'
-    block = 0
-  [../]
   [./stress]
     type = ComputeLinearElasticStress
     block = 0

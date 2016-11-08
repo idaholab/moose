@@ -76,7 +76,7 @@
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
-    temp = temp
+    temperature = temp
     save_in = 'saved_x saved_y'
   [../]
 []
