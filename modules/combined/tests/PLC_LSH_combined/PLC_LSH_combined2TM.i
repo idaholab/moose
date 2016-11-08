@@ -54,8 +54,8 @@
 #
 #   The numerically computed solution is:
 #
-#    e_tot(1) = 2.39826         (~0.04% error)
-#    e_tot(1.5) = 3.15663       (~0.36% error)
+#    e_tot(1) = 2.39718         (~0.006% error)
+#    e_tot(1.5) = 3.15555       (~0.40% error)
 #
 #
 #   Note that this test is not a completely correct representation of the analytical problem
@@ -96,7 +96,6 @@
 []
 
 [AuxVariables]
-
   [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
@@ -116,6 +115,11 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+
+  [./total_strain_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Functions]
@@ -130,16 +134,17 @@
   [./TensorMechanics]
     use_displaced_mesh = true
   [../]
+
   [./heat]
     type = HeatConduction
     variable = temp
   [../]
+
   [./heat_ie]
     type = HeatConductionTimeDerivative
     variable = temp
   [../]
 []
-
 
 [AuxKernels]
   [./stress_yy]
@@ -173,8 +178,15 @@
     index_i = 1
     index_j = 1
   [../]
-[]
 
+  [./total_strain_yy]
+    type = RankTwoAux
+    variable = total_strain_yy
+    rank_two_tensor = total_strain
+    index_i = 1
+    index_j = 1
+  [../]
+[]
 
 [BCs]
   [./u_top_pull]
@@ -185,18 +197,21 @@
     factor = 1
     function = top_pull
   [../]
+
   [./u_bottom_fix]
     type = PresetBC
     variable = disp_y
     boundary = 3
     value = 0.0
   [../]
+
   [./u_yz_fix]
     type = PresetBC
     variable = disp_x
     boundary = 4
     value = 0.0
   [../]
+
   [./u_xy_fix]
     type = PresetBC
     variable = disp_z
@@ -235,8 +250,9 @@
     type = ComputeReturnMappingStress
     block = 1
     return_mapping_models = 'creep plas'
-    absolute_tolerance = 1e-5
-    max_iterations = 30
+    absolute_tolerance = 1e-8
+    output_iteration_info = false
+    max_iterations = 50
   [../]
 
   [./creep]
@@ -276,6 +292,32 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
+  [../]
+[]
+
+[Postprocessors]
+  [./elem_plastic_strain_yy]
+    type = ElementalVariableValue
+    variable = plastic_strain_yy
+    elementid = 0
+  [../]
+
+  [./elem_creep_strain_yy]
+    type = ElementalVariableValue
+    variable = creep_strain_yy
+    elementid = 0
+  [../]
+
+  [./elem_elastic_strain_yy]
+    type = ElementalVariableValue
+    variable = elastic_strain_yy
+    elementid = 0
+  [../]
+
+  [./elem_total_strain_yy]
+    type = ElementalVariableValue
+    variable = total_strain_yy
+    elementid = 0
   [../]
 []
 
