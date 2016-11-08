@@ -143,3 +143,7 @@ ifeq ($(ALL_MODULES),yes)
     include $(FRAMEWORK_DIR)/app.mk
   endif
 endif
+
+APPLICATION_DIR    := $(MOOSE_DIR)/modules/module_loader
+APPLICATION_NAME   := module_loader
+include $(FRAMEWORK_DIR)/app.mk
