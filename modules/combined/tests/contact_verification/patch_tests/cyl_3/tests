@@ -54,7 +54,7 @@
     input = 'cyl3_mu_0_2_kin.i'
     csvdiff = 'cyl3_mu_0_2_kin_check.csv cyl3_mu_0_2_kin_check_x_disp_0001.csv'
     rel_err = 1e-5
-    abs_zero = 2e-6
+    abs_zero = 3e-6
     max_parallel = 1
     superlu = true
   [../]
