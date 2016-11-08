@@ -4,102 +4,6 @@
 int Logger::level = 0;
 bool Logger::on = true;
 
-ConstStepper::ConstStepper(double dt) : _dt(dt)
-{
-}
-
-double
-ConstStepper::advance(const StepperInfo *, StepperFeedback *)
-{
-  Logger l("Const");
-  return l.val(_dt);
-}
-
-DTLimitStepper::DTLimitStepper(Stepper * s, double dt_min, double dt_max, bool throw_err)
-    : _stepper(s), _min(dt_min), _max(dt_max), _err(throw_err)
-{
-}
-
-double
-DTLimitStepper::advance(const StepperInfo * si, StepperFeedback * sf)
-{
-  Logger l("DTLimit");
-  double dt = _stepper->advance(si, sf);
-  if (_err && (dt < _min || dt > _max))
-    throw "time step is out of bounds";
-  else if (dt < _min)
-    return l.val(_min);
-  else if (dt > _max)
-    return l.val(_max);
-  return l.val(dt);
-}
-
-BoundsStepper::BoundsStepper(Stepper * s, double t_min, double t_max, bool throw_err)
-    : _stepper(s), _min(t_min), _max(t_max), _err(throw_err)
-{
-}
-
-double
-BoundsStepper::advance(const StepperInfo * si, StepperFeedback * sf)
-{
-  Logger l("Bounds");
-  double dt = _stepper->advance(si, sf);
-  double t = si->time + dt;
-  if (_err && (t < _min || t > _max))
-    throw "time step is out of bounds";
-  else if (t < _min)
-    return l.val(_min - si->time);
-  else if (t > _max)
-    return l.val(_max - si->time);
-  return l.val(dt);
-}
-
-FixedPointStepper::FixedPointStepper(std::vector<double> times, double tol)
-    : _times(times), _time_tol(tol)
-{
-}
-
-double
-FixedPointStepper::advance(const StepperInfo * si, StepperFeedback *)
-{
-  Logger l("FixedPoint");
-  if (_times.size() == 0)
-    return l.val(std::numeric_limits<double>::infinity());
-
-  for (int i = 0; i < _times.size(); i++)
-  {
-    double t0 = _times[i];
-    if (si->time < t0 - _time_tol)
-      return l.val(t0 - si->time);
-  }
-  return l.val(std::numeric_limits<double>::infinity());
-}
-
-MaxRatioStepper::MaxRatioStepper(Stepper * s, double max_ratio) : _stepper(s), _max_ratio(max_ratio)
-{
-}
-
-double
-MaxRatioStepper::advance(const StepperInfo * si, StepperFeedback * sf)
-{
-  Logger l("MaxRatio");
-  double dt = _stepper->advance(si, sf);
-  if (si->prev_dt > 0 && dt / si->prev_dt > _max_ratio)
-    dt = si->prev_dt * _max_ratio;
-  return l.val(dt);
-}
-
-ReturnPtrStepper::ReturnPtrStepper(const double * dt_store) : _dt_store(dt_store)
-{
-}
-
-double
-ReturnPtrStepper::advance(const StepperInfo * si, StepperFeedback *)
-{
-  Logger l("ReturnPtr");
-  return l.val(*_dt_store);
-}
-
 InstrumentedStepper::InstrumentedStepper(double * dt_store)
     : _stepper(nullptr), _dt_store(dt_store), _own(!dt_store)
 {
@@ -439,27 +343,9 @@ DT2Stepper::calcErr(const StepperInfo * si)
   return err;
 }
 
-double
-PrevDTStepper::advance(const StepperInfo * si, StepperFeedback *)
-{
-  Logger l("PrevDT");
-  return l.val(si->prev_dt);
-}
-
-MultStepper::MultStepper(double mult, Stepper * s) : _stepper(s), _mult(mult)
-{
-  if (!_stepper)
-    _stepper.reset(new PrevDTStepper());
-}
-
-double
-MultStepper::advance(const StepperInfo * si, StepperFeedback * sf)
-{
-  Logger l("Mult");
-  return l.val(_stepper->advance(si, sf) * _mult);
-}
-
-StepperIf::StepperIf(Stepper * on_true, Stepper * on_false, std::function<bool(const StepperInfo *)> func) : _ontrue(on_true), _onfalse(on_false), _func(func)
+StepperIf::StepperIf(Stepper * on_true, Stepper * on_false,
+                     std::function<bool(const StepperInfo *)> func)
+    : _ontrue(on_true), _onfalse(on_false), _func(func)
 {
 }
 
@@ -474,9 +360,10 @@ StepperIf::advance(const StepperInfo * si, StepperFeedback * sf)
 }
 
 Stepper *
-StepperIf::between(Stepper * on, Stepper * between, std::vector<double> times, double tol)
+StepperIf::between(Stepper * on, Stepper * between, std::vector<double> times,
+                   double tol)
 {
-  return new StepperIf(on, between, [=](const StepperInfo * si){
+  return new StepperIf(on, between, [=](const StepperInfo * si) {
     for (int i = 0; i < times.size(); i++)
     {
       if (std::abs(si->time - times[i]) < tol)
@@ -503,9 +390,113 @@ StepperIf::initialN(Stepper * initial, Stepper * primary, int n)
 }
 
 Stepper *
-StepperIf::converged(Stepper  * converged, Stepper * not_converged, bool delay)
+StepperIf::converged(Stepper * converged, Stepper * not_converged, bool delay)
 {
   return new StepperIf(converged, not_converged, [=](const StepperInfo * si) {
     return si->converged && (!delay || si->prev_converged);
   });
+}
+
+ModStepper::ModStepper(Stepper * s,
+                       std::function <
+                           double(const StepperInfo * si, double dt))
+    : _stepper(s), _func(func)
+{
+}
+
+double
+ModStepper::advance(const StepperInfo * si, StepperFeedback * sf)
+{
+  Logger l("Constr");
+  return l.val(_func(si, _stepper->advance(si, sf)));
+}
+
+Stepper *
+ModStepper::dtLimit(Stepper * s, double dt_min, double dt_max)
+{
+  return new ModStepper(s, [=](const StepperInfo * si, double dt) {
+    if (dt < dt_min)
+      return dt_min;
+    else if (dt > dt_max)
+      return dt_max;
+    return dt;
+  });
+}
+
+Stepper *
+ModStepper::bounds(Stepper * s, double t_min, double t_max)
+{
+  return new ModStepper(s, [=](const StepperInfo * si, double dt) {
+    double t = si->time + dt;
+    if (t < t_min)
+      return t_min - si->time;
+    else if (t > t_max)
+      return t_max - si->time;
+    return dt;
+  });
+}
+
+Stepper *
+ModStepper::maxRatio(Stepper * s, double max_ratio)
+{
+  return new ModStepper(s, [=](const StepperInfo * si, double dt) {
+    if (si->prev_dt > 0 && dt / si->prev_dt > max_ratio)
+      dt = si->prev_dt * max_ratio;
+    return dt;
+  });
+}
+
+Stepper *
+ModStepper::mult(double mult, Stepper * s)
+{
+  if (!s)
+    s = RootStepper::prevdt();
+  return new ModStepper(
+      s, [=](const StepperInfo * si, double dt) { return dt * mult; });
+}
+
+RootStepper::RootStepper(std::function<double(const StepperInfo * si)> func)
+    : _func(func)
+{
+}
+
+double
+RootStepper::advance(const StepperInfo * si, StepperFeedback *)
+{
+  return _func(si);
+}
+
+Stepper *
+ModStepper::constant(double dt)
+{
+  return new ModStepper(s, [=](const StepperInfo * si) { return dt; });
+}
+
+Stepper *
+ModStepper::prevdt()
+{
+  return new ModStepper(s, [=](const StepperInfo * si) { return si->prev_dt; });
+}
+
+Stepper *
+ModStepper::fixedTimes(std::vector<double> times, double tol)
+{
+  return new ModStepper(s, [=](const StepperInfo * si) {
+    if (times.size() == 0)
+      return std::numeric_limits<double>::infinity();
+
+    for (int i = 0; i < times.size(); i++)
+    {
+      double t0 = times[i];
+      if (si->time < t0 - tol)
+        return t0 - si->time;
+    }
+    return std::numeric_limits<double>::infinity();
+  });
+}
+
+Stepper *
+ModStepper::retPtr(const double * dt_store)
+{
+  return new ModStepper(s, [=](const StepperInfo * si) { return *dt_store; });
 }

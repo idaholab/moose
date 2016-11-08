@@ -110,95 +110,50 @@ public:
   virtual double advance(const StepperInfo * si, StepperFeedback * sf) = 0;
 };
 
-/// Always returns a single, unchanging, user-specified dt.
-class ConstStepper : public Stepper
+class RootStepper : public Stepper
 {
 public:
-  ConstStepper(double dt);
+  RootStepper(std::function<double(const StepperInfo * si)> func);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
+  static Stepper * constant(double dt);
+  static Stepper * prevdt();
+  static Stepper * fixedTimes();
+  static Stepper * retPtr(const double * dt_store);
+
 private:
-  double _dt;
+  std::function<double(const StepperInfo * si)> _func;
 };
 
-/// Calls an underlying stepper to compute dt. Modifies this dt to be within
-/// specified fixed lower and upper bounds (or throws an error - depending on
-/// configuration).
-class DTLimitStepper : public Stepper
+class ModStepper : public Stepper
 {
 public:
-  /// If throw_err is true, an exception is thrown if the underlying stepper's
-  /// advance function returns an out of bounds dt.  Otherwise, out-of-bounds
-  /// cases result in dt being set to the corresponding min or max bound.
-  DTLimitStepper(Stepper * s, double dt_min, double dt_max, bool throw_err);
+  ModStepper(Stepper * s, std::function<double(const StepperInfo * si, double dt));
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
+  static Stepper * maxRatio(Stepper * s, double max_ratio);
+  static Stepper * dtLimit(Stepper * s, double min, double max);
+  static Stepper * bounds(Stepper * s, double t_min, double t_max);
+  static Stepper * mult(double mult, Stepper * s = nullptr);
+
 private:
-  Ptr _stepper;
-  double _min;
-  double _max;
-  bool _err;
+  std::function<double(const StepperInfo * si, double dt)> _func;
 };
 
-/// Calls an underlying stepper to compute dt. Modifies this dt to maintain the
-/// simulation time within specified fixed lower and upper bounds (or throws an
-/// error - depending on configuration).
-class BoundsStepper : public Stepper
-{
+class StepperIf : public Stepper {
 public:
-  /// If throw_err is true, an exception is thrown if the underlying stepper's
-  /// advance function returns a dt that would cause an out of bounds simulation
-  /// time.  Otherwise, out-of-bounds cases result in dt being set to hit the
-  /// corresponding time bound.
-  BoundsStepper(Stepper * s, double t_min, double t_max, bool throw_err);
+  StepperIf(Stepper * on_true, Stepper * on_false, std::function<bool(const StepperInfo *)> func);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
-private:
-  Ptr _stepper;
-  double _min;
-  double _max;
-  bool _err;
-};
-
-/// Calculates dt in order to hit specified fixed times. This is robust if the
-/// dt used to evolve the actual simulation ended up being changed from this
-/// dt.  Returns infinity after the simulation time is beyond the last
-/// user-specified time.
-class FixedPointStepper : public Stepper
-{
-public:
-  FixedPointStepper(std::vector<double> times, double tol);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  static Stepper * between(Stepper * on, Stepper * between, std::vector<double> times, double tol);
+  static Stepper * everyN(Stepper * nth, Stepper * between, int every_n, int offset = 0);
+  static Stepper * initialN(Stepper * initial, Stepper * primary, int n);
+  static Stepper * converged(Stepper  * converged, Stepper * not_converged, bool delay = false);
 
 private:
-  std::vector<double> _times;
-  double _time_tol;
-};
-
-/// Calls an underlying stepper to compute dt.  If this dt
-/// violates the expression  "dt / prev_dt <= max_ratio", then
-/// this stepper returns dt modified to be equal to "prev_dt * max_ratio".
-class MaxRatioStepper : public Stepper
-{
-public:
-  MaxRatioStepper(Stepper * s, double max_ratio);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-
-private:
-  Ptr _stepper;
-  double _max_ratio;
-};
-
-/// Returns the dt value stored in the address it was initialized with.
-class ReturnPtrStepper : public Stepper
-{
-public:
-  /// dt_store must not be null.
-  ReturnPtrStepper(const double * dt_store);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-
-private:
-  const double * _dt_store;
+  Ptr _ontrue;
+  Ptr _onfalse;
+  std::function<bool(const StepperInfo * si)> _func;
 };
 
 /// Returns the dt of the underlying stepper unmodified.  Stores/remembers this
@@ -376,35 +331,5 @@ private:
   double _start_time;
   double _end_time;
   std::unique_ptr<NumericVector<Number>> _big_soln;
-};
-
-class PrevDTStepper : public Stepper {
-public:
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-};
-
-class MultStepper : public Stepper {
-public:
-  MultStepper(double mult, Stepper * s = nullptr);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-private:
-  Ptr _stepper;
-  double _mult;
-};
-
-class StepperIf : public Stepper {
-public:
-  StepperIf(Stepper * on_true, Stepper * on_false, std::function<bool(const StepperInfo *)> func);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-
-  static Stepper * between(Stepper * on, Stepper * between, std::vector<double> times, double tol);
-  static Stepper * everyN(Stepper * nth, Stepper * between, int every_n, int offset = 0);
-  static Stepper * initialN(Stepper * initial, Stepper * primary, int n);
-  static Stepper * converged(Stepper  * converged, Stepper * not_converged, bool delay = false);
-  
-private:
-  Ptr _ontrue;
-  Ptr _onfalse;
-  std::function<bool(const StepperInfo * si)> _func;
 };
 
