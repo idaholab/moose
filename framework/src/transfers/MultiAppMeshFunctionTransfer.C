@@ -241,6 +241,11 @@ MultiAppMeshFunctionTransfer::execute()
   // points, and send the values back.
   std::vector<Parallel::Request> send_evals(n_processors());
   std::vector<Parallel::Request> send_ids(n_processors());
+
+  // Create these here so that they live the entire life of this function
+  // and are NOT reused per processor.
+  std::vector<std::vector<Real> > processor_outgoing_evals(n_processors());
+
   for (processor_id_type i_proc = 0; i_proc < n_processors(); i_proc++)
   {
     std::vector<Point> incoming_points;
@@ -249,7 +254,9 @@ MultiAppMeshFunctionTransfer::execute()
     else
       _communicator.receive(i_proc, incoming_points);
 
-    std::vector<Real> outgoing_evals(incoming_points.size(), OutOfMeshValue);
+    std::vector<Real> & outgoing_evals = processor_outgoing_evals[i_proc];
+    outgoing_evals.resize(incoming_points.size(), OutOfMeshValue);
+
     std::vector<unsigned int> outgoing_ids(incoming_points.size(), -1); // -1 = largest unsigned int
     for (unsigned int i_pt = 0; i_pt < incoming_points.size(); i_pt++)
     {
