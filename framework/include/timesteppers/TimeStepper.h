@@ -21,7 +21,7 @@
 class TimeStepper;
 class FEProblem;
 class Transient;
-class Stepper;
+class StepperBlock;
 
 template<>
 InputParameters validParams<TimeStepper>();
@@ -44,7 +44,7 @@ public:
 
   // converted steppers *MUST* use _executioner->n_startup_steps() to return
   // the result of what used to be computeInitialDT.
-  virtual Stepper * buildStepper() {return nullptr;};
+  virtual StepperBlock * buildStepper() {return nullptr;};
 
   virtual void preExecute();
   virtual void preSolve() {}

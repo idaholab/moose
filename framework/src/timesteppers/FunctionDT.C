@@ -40,16 +40,16 @@ FunctionDT::FunctionDT(const InputParameters & parameters) :
 {
 }
 
-Stepper *
+StepperBlock *
 FunctionDT::buildStepper()
 {
-  Stepper* s = new PiecewiseStepper(_time_t, _time_dt, _interpolate);
-  s = new MinOfStepper(new FixedPointStepper(_time_t, _executioner.timestepTol()), s, 0);
-  s = new DTLimitStepper(s, _min_dt, 1e100, false);
+  StepperBlock* s = new PiecewiseBlock(_time_t, _time_dt, _interpolate);
+  s = new MinOfBlock(RootBlock::fixedTimes(_time_t, _executioner.timestepTol()), s, 0);
+  s = ModBlock::dtLimit(s, _min_dt, 1e100);
 
-  Stepper* s2 = new PiecewiseStepper(_time_t, _time_dt, _interpolate);
-  s = new MinOfStepper(new FixedPointStepper(_time_t, _executioner.timestepTol()), s, 0);
-  s = new DTLimitStepper(s, _min_dt, 1e100, false);
+  StepperBlock* s2 = new PiecewiseBlock(_time_t, _time_dt, _interpolate);
+  s = new MinOfBlock(RootBlock::fixedTimes(_time_t, _executioner.timestepTol()), s, 0);
+  s = ModBlock::dtLimit(s, _min_dt, 1e100);
 
-  return StepperIf::converged(s, new MinOfStepper(s2, new MultStepper(0.5), 0));
+  return IfBlock::converged(s, new MinOfBlock(s2, ModBlock::mult(0.5)));
 }

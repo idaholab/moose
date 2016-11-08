@@ -28,7 +28,7 @@ class FunctionDT : public TimeStepper
 public:
   FunctionDT(const InputParameters & parameters);
 
-  virtual Stepper * buildStepper() override;
+  virtual StepperBlock * buildStepper() override;
 
 private:
   const std::vector<Real> & _time_t;

@@ -33,11 +33,11 @@ SolutionTimeAdaptiveDT::SolutionTimeAdaptiveDT(const InputParameters & parameter
 {
 }
 
-Stepper *
+StepperBlock *
 SolutionTimeAdaptiveDT::buildStepper()
 {
-  Stepper* s = new SolveTimeAdaptiveStepper(_direction, _percent_change);
-  s = StepperIf::converged(s, new MultStepper(0.5));
-  s = StepperIf::initialN(new ConstStepper(getParam<Real>("dt")), s, _executioner.n_startup_steps());
+  StepperBlock * s = new SolveTimeAdaptiveBlock(_direction, _percent_change);
+  s = IfBlock::converged(s, ModBlock::mult(0.5));
+  s = IfBlock::initialN(RootBlock::constant(getParam<Real>("dt")), s, _executioner.n_startup_steps());
   return s;
 }

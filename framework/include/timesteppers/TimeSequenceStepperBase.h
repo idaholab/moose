@@ -33,7 +33,7 @@ public:
 
   void setupSequence(const std::vector<Real> & times);
 
-  virtual Stepper* buildStepper();
+  virtual StepperBlock * buildStepper();
 
 protected:
   /// stores the sequence of time points

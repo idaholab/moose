@@ -35,14 +35,14 @@ ConstantDT::ConstantDT(const InputParameters & parameters) :
 {
 }
 
-Stepper*
+StepperBlock *
 ConstantDT::buildStepper()
 {
-  Stepper * inner = StepperIf::converged(new MultStepper(_growth_factor, new ReturnPtrStepper(&_last_dt)), new MultStepper(0.5, new ReturnPtrStepper(&_last_dt)));
-  inner = new MinOfStepper(new ConstStepper(_constant_dt), inner, 0);
-  inner = StepperIf::initialN(new ConstStepper(_constant_dt), inner, _executioner.n_startup_steps());
-  inner = StepperIf::converged(inner, new MultStepper(0.5));
-  InstrumentedStepper* s = new InstrumentedStepper(&_last_dt);
+  StepperBlock * inner = IfBlock::converged(ModBlock::mult(_growth_factor, RootBlock::ptr(&_last_dt)), ModBlock::mult(0.5, RootBlock::ptr(&_last_dt)));
+  inner = new MinOfBlock(RootBlock::constant(_constant_dt), inner);
+  inner = IfBlock::initialN(RootBlock::constant(_constant_dt), inner, _executioner.n_startup_steps());
+  inner = IfBlock::converged(inner, ModBlock::mult(0.5));
+  InstrumentedBlock * s = new InstrumentedBlock(&_last_dt);
   s->setStepper(inner);
   return s;
 }

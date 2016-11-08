@@ -15,7 +15,6 @@
 #include "StepperTest.h"
 #include "Stepper.h"
 #include "libmesh/parallel.h"
-#include "DynStepper.h"
 
 #include <cmath>
 #include <cstdio>
@@ -140,12 +139,12 @@ StepperTest::fixedPoint()
     double tol = tests[i].tol;
     std::vector<double> times = tests[i].times;
     std::vector<double> want = tests[i].want;
-    FixedPointStepper stepper(times, tol);
+    StepperBlock::Ptr stepper(RootBlock::fixedTimes(times, tol));
     StepperInfo si = blankInfo();
 
     for (int j = 0; j < times.size(); j++)
     {
-      dt = stepper.advance(&si, nullptr);
+      dt = stepper->advance(&si, nullptr);
       if (j == 0 && tests[i].violate_dt > 0)
         dt *= 2;
       else if (j == 0 && tests[i].violate_dt < 0)
@@ -158,7 +157,7 @@ StepperTest::fixedPoint()
         CPPUNIT_ASSERT(false);
       }
     }
-    dt = stepper.advance(&si, nullptr);
+    dt = stepper->advance(&si, nullptr);
     updateInfo(&si, nullptr, dt);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
   }
@@ -200,13 +199,13 @@ StepperTest::maxRatio()
     double max_ratio = tests[i].max_ratio;
     std::vector<double> times = tests[i].times;
     std::vector<double> want = tests[i].want;
-    Stepper * s = new FixedPointStepper(times, tol);
-    MaxRatioStepper stepper(s, max_ratio);
+    StepperBlock * s = RootBlock::fixedTimes(times, tol);
+    StepperBlock::Ptr stepper(ModBlock::maxRatio(s, max_ratio));
     StepperInfo si = blankInfo();
 
     for (int j = 0; j < times.size(); j++)
     {
-      dt = stepper.advance(&si, nullptr);
+      dt = stepper->advance(&si, nullptr);
       updateInfo(&si, nullptr, dt);
       if (std::abs(want[j] - si.time) > tol)
       {
@@ -215,7 +214,7 @@ StepperTest::maxRatio()
         CPPUNIT_ASSERT(false);
       }
     }
-    dt = stepper.advance(&si, nullptr);
+    dt = stepper->advance(&si, nullptr);
     updateInfo(&si, nullptr, dt);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
   }
@@ -251,8 +250,8 @@ StepperTest::everyN()
     double dt = 0;
     std::vector<double> times = tests[i].times;
     std::vector<double> want = tests[i].want;
-    Stepper * s = new FixedPointStepper(times, tol);
-    Stepper::Ptr stepper(StepperIf::everyN(s, new PrevDTStepper(), tests[i].every_n));
+    StepperBlock * s = RootBlock::fixedTimes(times, tol);
+    StepperBlock::Ptr stepper(IfBlock::everyN(s, RootBlock::prevdt(), tests[i].every_n));
     StepperInfo si = blankInfo();
 
     for (int j = 0; j < times.size(); j++)
@@ -351,7 +350,7 @@ StepperTest::DT2()
     std::vector<double> want_times = tests[i].want_times;
 
     std::map<double, StepperInfo> snaps;
-    DT2Stepper s(tol, tests[i].e_tol, tests[i].e_max, integrator_order);
+    DT2Block s(tol, tests[i].e_tol, tests[i].e_max, integrator_order);
     StepperInfo si = blankInfo();
     si.prev_dt = 1; // initial dt
 
@@ -397,7 +396,7 @@ StepperTest::scratch()
   StepperNode nd = parseStepper(lexStepper(str));
   //std::c out << nd.str();
 
-  std::unique_ptr<Stepper> s(buildStepper(nd));
+  StepperBlock::Ptr s(buildStepper(nd));
   if (!s)
     throw Err("got nullptr from buildStepper");
   StepperInfo si = blankInfo();
@@ -433,3 +432,4 @@ StepperTest::scratch()
   //std::c out << vec(1) << "\n";
   //std::c out << vec(2) << "\n";
 }
+

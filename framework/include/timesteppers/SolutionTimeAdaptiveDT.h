@@ -32,7 +32,7 @@ class SolutionTimeAdaptiveDT : public TimeStepper
 public:
   SolutionTimeAdaptiveDT(const InputParameters & parameters);
 
-  virtual Stepper* buildStepper() override;
+  virtual StepperBlock * buildStepper() override;
 
 private:
 

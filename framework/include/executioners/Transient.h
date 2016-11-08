@@ -26,7 +26,7 @@
 class Transient;
 class TimeStepper;
 class FEProblem;
-class Stepper;
+class StepperBlock;
 
 template<>
 InputParameters validParams<Transient>();
@@ -302,7 +302,7 @@ protected:
   void setupTimeIntegrator();
 
   Real _new_dt;
-  std::unique_ptr<Stepper> _stepper;
+  std::unique_ptr<StepperBlock> _stepper;
 
   /// TODO: the following two member vars are only here because FEProblem/NonlinearSystem do not save the
   /// state of these values themselves.  If that gets fixed, these vars can be

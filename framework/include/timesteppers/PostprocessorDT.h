@@ -33,7 +33,7 @@ class PostprocessorDT :
 public:
   PostprocessorDT(const InputParameters & parameters);
 
-  virtual Stepper * buildStepper() override;
+  virtual StepperBlock * buildStepper() override;
 
 protected:
   virtual Real computeInitialDT() override;

@@ -49,14 +49,14 @@ PostprocessorDT::computeDT()
   return _pps_value;
 }
 
-Stepper *
+StepperBlock *
 PostprocessorDT::buildStepper()
 {
   double dt_init = _pps_value;
   if (_has_initial_dt)
     dt_init = _initial_dt;
 
-  Stepper * s = new ReturnPtrStepper(&_pps_value);
-  s = StepperIf::initialN(new ConstStepper(dt_init), s, _executioner.n_startup_steps());
+  StepperBlock * s = RootBlock::ptr(&_pps_value);
+  s = IfBlock::initialN(RootBlock::constant(dt_init), s, _executioner.n_startup_steps());
   return s;
 }

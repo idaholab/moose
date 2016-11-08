@@ -37,7 +37,7 @@ class AB2PredictorCorrector : public TimeStepper
 public:
   AB2PredictorCorrector(const InputParameters & parameters);
 
-  virtual Stepper * buildStepper() override;
+  virtual StepperBlock * buildStepper() override;
 
 protected:
   /// error tolerance

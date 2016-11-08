@@ -318,7 +318,7 @@ Transient::computeDT(bool first)
   // (I'm looking at you Yak!) and overridden functions like init().
   if (!_stepper)
   {
-    Stepper* inner = _time_stepper->buildStepper();
+    StepperBlock * inner = _time_stepper->buildStepper();
     if (inner)
     {
       std::vector<double> sync_times;
@@ -326,11 +326,11 @@ Transient::computeDT(bool first)
         sync_times.push_back(val);
 
       // these are global/sim constraints for *EVERY* time inner:
-      inner = new DTLimitStepper(inner, dtMin(), dtMax(), false);
+      inner = ModBlock::dtLimit(inner, dtMin(), dtMax());
       if (sync_times.size() > 0)
-        inner = new MinOfStepper(new FixedPointStepper(sync_times, timestepTol()), inner, timestepTol());
+        inner = new MinOfBlock(RootBlock::fixedTimes(sync_times, timestepTol()), inner, timestepTol());
       if (!_app.halfTransient())
-        inner = new BoundsStepper(inner, getStartTime(), endTime(), false);
+        inner = ModBlock::bounds(inner, getStartTime(), endTime());
       _stepper.reset(inner);
     }
   }

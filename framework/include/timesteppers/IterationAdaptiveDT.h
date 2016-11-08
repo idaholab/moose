@@ -41,7 +41,7 @@ public:
 
   virtual void init() override;
 
-  virtual Stepper * buildStepper() override;
+  virtual StepperBlock * buildStepper() override;
 
 private:
   /// The dt from the input file.

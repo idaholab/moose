@@ -95,14 +95,14 @@ struct StepperInfo
 /// A base class for time stepping algorithms for use in determining dt between
 /// time steps of a transient problem solution.  Implementations should strive
 /// to be immutable - facilitating easier restart/recovery and testing.  Some of
-/// the provided steppers, take Stepper* as arguments in their constructors -
+/// the provided steppers, take StepperBlock* as arguments in their constructors -
 /// such steppers take ownership of the passed-in steppers' memory.
-class Stepper
+class StepperBlock
 {
 public:
-  typedef std::unique_ptr<Stepper> Ptr;
+  typedef std::unique_ptr<StepperBlock> Ptr;
 
-  virtual ~Stepper() = default;
+  virtual ~StepperBlock() = default;
 
   /// Returns a value for dt to calculate the next time step.  Implementations
   /// can assume si is not NULL.  Implementations of advance should strive to be
@@ -110,45 +110,46 @@ public:
   virtual double advance(const StepperInfo * si, StepperFeedback * sf) = 0;
 };
 
-class RootStepper : public Stepper
+class RootBlock : public StepperBlock
 {
 public:
-  RootStepper(std::function<double(const StepperInfo * si)> func);
+  RootBlock(std::function<double(const StepperInfo * si)> func);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
-  static Stepper * constant(double dt);
-  static Stepper * prevdt();
-  static Stepper * fixedTimes();
-  static Stepper * retPtr(const double * dt_store);
+  static StepperBlock * constant(double dt);
+  static StepperBlock * prevdt();
+  static StepperBlock * fixedTimes(std::vector<double> times, double tol);
+  static StepperBlock * ptr(const double * dt_store);
 
 private:
   std::function<double(const StepperInfo * si)> _func;
 };
 
-class ModStepper : public Stepper
+class ModBlock : public StepperBlock
 {
 public:
-  ModStepper(Stepper * s, std::function<double(const StepperInfo * si, double dt));
+  ModBlock(StepperBlock * s, std::function<double(const StepperInfo * si, double dt)> func);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
-  static Stepper * maxRatio(Stepper * s, double max_ratio);
-  static Stepper * dtLimit(Stepper * s, double min, double max);
-  static Stepper * bounds(Stepper * s, double t_min, double t_max);
-  static Stepper * mult(double mult, Stepper * s = nullptr);
+  static StepperBlock * maxRatio(StepperBlock * s, double max_ratio);
+  static StepperBlock * dtLimit(StepperBlock * s, double min, double max);
+  static StepperBlock * bounds(StepperBlock * s, double t_min, double t_max);
+  static StepperBlock * mult(double mult, StepperBlock * s = nullptr);
 
 private:
+  Ptr _stepper;
   std::function<double(const StepperInfo * si, double dt)> _func;
 };
 
-class StepperIf : public Stepper {
+class IfBlock : public StepperBlock {
 public:
-  StepperIf(Stepper * on_true, Stepper * on_false, std::function<bool(const StepperInfo *)> func);
+  IfBlock(StepperBlock * on_true, StepperBlock * on_false, std::function<bool(const StepperInfo *)> func);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
-  static Stepper * between(Stepper * on, Stepper * between, std::vector<double> times, double tol);
-  static Stepper * everyN(Stepper * nth, Stepper * between, int every_n, int offset = 0);
-  static Stepper * initialN(Stepper * initial, Stepper * primary, int n);
-  static Stepper * converged(Stepper  * converged, Stepper * not_converged, bool delay = false);
+  static StepperBlock * between(StepperBlock * on, StepperBlock * between, std::vector<double> times, double tol);
+  static StepperBlock * everyN(StepperBlock * nth, StepperBlock * between, int every_n, int offset = 0);
+  static StepperBlock * initialN(StepperBlock * initial, StepperBlock * primary, int n);
+  static StepperBlock * converged(StepperBlock  * converged, StepperBlock * not_converged, bool delay = false);
 
 private:
   Ptr _ontrue;
@@ -163,13 +164,13 @@ private:
 /// use the dt_store pointer.  This stepper enables steppers at one layer of
 /// nesting to base their dt calculations on dt values computed at a different
 /// layer of nesting.
-class InstrumentedStepper : public Stepper
+class InstrumentedBlock : public StepperBlock
 {
 public:
-  InstrumentedStepper(double * dt_store = nullptr);
-  virtual ~InstrumentedStepper();
+  InstrumentedBlock(double * dt_store = nullptr);
+  virtual ~InstrumentedBlock();
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-  void setStepper(Stepper * s);
+  void setStepper(StepperBlock * s);
   double * dtPtr();
 
 private:
@@ -182,13 +183,13 @@ private:
 /// previous dt was not what the underlying stepper returned on the prior call
 /// to advance and the current sim time is different than on the prior call to advance,
 /// this stepper returns/retries that dt value.
-class RetryUnusedStepper : public Stepper
+class RetryUnusedBlock : public StepperBlock
 {
 public:
   /// If prev_prev is true, on retry cases, "advance" will return the last
   /// returned dt that was used (i.e. prev_prev_dt) instead of the last returned
   /// dt that was not used.
-  RetryUnusedStepper(Stepper * s, double tol, bool prev_prev);
+  RetryUnusedBlock(StepperBlock * s, double tol, bool prev_prev);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
 private:
@@ -202,10 +203,10 @@ private:
 /// ConstrFuncStepper reduces the returned dt of an underlying stepper by
 /// factors of two until the difference between a given limiting function
 /// evaluated at t_curr and t_next is less than a specified maximum difference.
-class ConstrFuncStepper : public Stepper
+class ConstrFuncBlock : public StepperBlock
 {
 public:
-  ConstrFuncStepper(Stepper * s, std::function<double(double)> func, double max_diff);
+  ConstrFuncBlock(StepperBlock * s, std::function<double(double)> func, double max_diff);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
 private:
@@ -216,13 +217,13 @@ private:
 
 /// Uses user-specified (time,dt) points to do a piece-wise linear interpolation
 /// to calculate dt.
-class PiecewiseStepper : public Stepper
+class PiecewiseBlock : public StepperBlock
 {
 public:
   /// If interpolate is false, then this finds the pair of values in the times
   /// vector that the current simulation time resides between and returns the dt
   /// at the index of the lower bound.
-  PiecewiseStepper(std::vector<double> times, std::vector<double> dts, bool interpolate = true);
+  PiecewiseBlock(std::vector<double> times, std::vector<double> dts, bool interpolate = true);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
 private:
@@ -237,11 +238,11 @@ private:
 /// It returns the preferred stepper's dt if "dt_preferred - tolerance <
 /// dt_alternate".
 /// Otherwise it returns the alternate stepper's dt.
-class MinOfStepper : public Stepper
+class MinOfBlock : public StepperBlock
 {
 public:
   /// Stepper "a" is preferred.
-  MinOfStepper(Stepper * a, Stepper * b, double tol);
+  MinOfBlock(StepperBlock * a, StepperBlock * b, double tol = 0);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
 private:
@@ -255,12 +256,12 @@ private:
 /// many iterations results in dt contraction, too few iterations results in dt
 /// growth.
 /// For algorithm details, read the code.
-class AdaptiveStepper : public Stepper
+class AdaptiveBlock : public StepperBlock
 {
 public:
   /// shrink_factor must be between 0 and 1.0.  growth_factor must be greater
   /// than or equal to 1.0.
-  AdaptiveStepper(unsigned int optimal_iters, unsigned int iter_window, double lin_iter_ratio,
+  AdaptiveBlock(unsigned int optimal_iters, unsigned int iter_window, double lin_iter_ratio,
                   double shrink_factor, double growth_factor);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
@@ -275,13 +276,13 @@ private:
 /// Adjusts dt in order to minimize the quantity "solve_time / prev_dt" by
 /// multiplying dt by "1 +/- frac_change" if the ratio increases on consecutive
 /// time steps.
-class SolveTimeAdaptiveStepper : public Stepper
+class SolveTimeAdaptiveBlock : public StepperBlock
 {
 public:
   /// initial_direc must be either +1.0 or -1.0 indicating whether initial
   /// adjustments to dt should be an increase or decrease.  frac_change should
   /// generally be between 0.0 and 1.0.
-  SolveTimeAdaptiveStepper(int initial_direc, double frac_change);
+  SolveTimeAdaptiveBlock(int initial_direc, double frac_change);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
 private:
@@ -294,13 +295,13 @@ private:
 /// to compute adjustments to dt.
 /// In order to use this stepper, an appropriate predictor must have been added
 /// to the simulation problem.
-class PredictorCorrectorStepper : public Stepper
+class PredictorCorrectorBlock : public StepperBlock
 {
 public:
   /// start_adapting is the first si.step_count to start doing dt corrector
   /// calculations for - otherwise, prev_dt is returned by "advance".  For
   /// details on e_tol and scaling_param usage - divine it from the code.
-  PredictorCorrectorStepper(int start_adapting, double e_tol, double scaling_param,
+  PredictorCorrectorBlock(int start_adapting, double e_tol, double scaling_param,
                             std::string time_integrator);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
@@ -314,10 +315,10 @@ private:
 };
 
 // TODO: need mechanism for telling executioner to not output data for "intermediate" solve/time steps
-class DT2Stepper : public Stepper
+class DT2Block : public StepperBlock
 {
 public:
-  DT2Stepper(double time_tol, double e_tol, double e_max, int integrator_order);
+  DT2Block(double time_tol, double e_tol, double e_max, int integrator_order);
   virtual double advance(const StepperInfo * si, StepperFeedback * sf);
 
 private:

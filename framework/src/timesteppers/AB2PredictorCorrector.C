@@ -61,16 +61,16 @@ AB2PredictorCorrector::AB2PredictorCorrector(const InputParameters & parameters)
 
 }
 
-Stepper *
+StepperBlock *
 AB2PredictorCorrector::buildStepper()
 {
   std::string integrator = _fe_problem.getNonlinearSystem().getTimeIntegrator()->name();
 
-  Stepper * s = new PredictorCorrectorStepper(_start_adapting, _e_tol, _scaling_parameter, integrator);
-  s = new MaxRatioStepper(s, _max_increase);
-  s = StepperIf::everyN(s, new PrevDTStepper(), _steps_between_increase, _start_adapting);
-  s = StepperIf::converged(s, new MultStepper(0.5));
-  s = StepperIf::initialN(new ConstStepper(getParam<Real>("dt")), s, _start_adapting);
+  StepperBlock * s = new PredictorCorrectorBlock(_start_adapting, _e_tol, _scaling_parameter, integrator);
+  s = ModBlock::maxRatio(s, _max_increase);
+  s = IfBlock::everyN(s, RootBlock::prevdt(), _steps_between_increase, _start_adapting);
+  s = IfBlock::converged(s, ModBlock::mult(0.5));
+  s = IfBlock::initialN(RootBlock::constant(getParam<Real>("dt")), s, _start_adapting);
   return s;
 }
 

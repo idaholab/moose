@@ -105,7 +105,7 @@ IterationAdaptiveDT::init()
   }
 }
 
-Stepper*
+StepperBlock *
 IterationAdaptiveDT::buildStepper()
 {
   double tol = _executioner.timestepTol();
@@ -117,7 +117,7 @@ IterationAdaptiveDT::buildStepper()
   bool half_transient = _app.halfTransient();
   bool use_time_ipol = _time_ipol.getSampleSize() > 0;
 
-  Stepper* stepper = nullptr;
+  StepperBlock * stepper = nullptr;
 
   std::vector<double> time_list;
   std::vector<double> dt_list;
@@ -132,7 +132,7 @@ IterationAdaptiveDT::buildStepper()
 
   if (_adaptive_timestepping)
   {
-    stepper = new AdaptiveStepper(
+    stepper = new AdaptiveBlock(
           _optimal_iterations,
           _iteration_window,
           _linear_iteration_ratio,
@@ -140,18 +140,18 @@ IterationAdaptiveDT::buildStepper()
           _growth_factor
         );
     if (use_time_ipol)
-      stepper = StepperIf::between(new PiecewiseStepper(time_list, dt_list), stepper, time_list, tol);
+      stepper = IfBlock::between(new PiecewiseBlock(time_list, dt_list), stepper, time_list, tol);
   }
   else if (use_time_ipol)
-      stepper = new PiecewiseStepper(time_list, dt_list);
+      stepper = new PiecewiseBlock(time_list, dt_list);
   else
     // this should cover the final else clause in IterationAdaptiveDT::computeDT combined with
     // the no growth if _cutback_occurred - from the first if clause body.
-    stepper = StepperIf::converged(new MultStepper(_growth_factor), new PrevDTStepper(), true);
+    stepper = IfBlock::converged(ModBlock::mult(_growth_factor), RootBlock::prevdt(), true);
 
-  stepper = StepperIf::converged(stepper, new MultStepper(0.5));
+  stepper = IfBlock::converged(stepper, ModBlock::mult(0.5));
 
-  stepper = StepperIf::initialN(new ConstStepper(_input_dt), stepper, std::max(1, n_startup_steps));
+  stepper = IfBlock::initialN(RootBlock::constant(_input_dt), stepper, std::max(1, n_startup_steps));
   // Original IterationAdaptiveDT stepper constrains to simulation end time
   // *before* applying other constraints - sometimes resulting in an
   // over-constrained dt - for example a dt divide-by-two algo to satisfy
@@ -161,10 +161,10 @@ IterationAdaptiveDT::buildStepper()
   // explicitly.  This behavior is undesirable.  The simulation end constraint should
   // be the last constraint enforced.
   if (!half_transient)
-    stepper = new BoundsStepper(stepper, start_time, end_time, false); // This is stupid.
+    stepper = ModBlock::bounds(stepper, start_time, end_time); // This is stupid.
   if (t_limit_func)
   {
-    stepper = new ConstrFuncStepper(
+    stepper = new ConstrFuncBlock(
           stepper,
           // must capture pointer by value - not ref because scope
           [=](double x)->double{return t_limit_func->value(x, Point());},
@@ -174,22 +174,22 @@ IterationAdaptiveDT::buildStepper()
   // Original IterationAdaptiveDT stepper does not retry prior dt if last dt
   // was constrained by dt min/max - whatever - so we need this stepper to be
   // inside the Retry stepper to reproduce that behavior
-  stepper = new DTLimitStepper(stepper, dtmin, dtmax, false);
-  // this needs to go before RetryUnused stepper
+  stepper = ModBlock::dtLimit(stepper, dtmin, dtmax);
+  // this needs to go before RetryUnused
   if (_pps_value)
   {
-    Stepper * s = new ReturnPtrStepper(_pps_value);
+    StepperBlock * s = RootBlock::ptr(_pps_value);
     // startup stepper needed for initial case where pps_value hasn't been set
     // to anything yet.
-    s = StepperIf::initialN(new ConstStepper(1e100), s, n_startup_steps);
-    stepper = new MinOfStepper(stepper, s, 0);
+    s = IfBlock::initialN(RootBlock::constant(1e100), s, n_startup_steps);
+    stepper = new MinOfBlock(stepper, s);
   }
 
   if (time_list.size() > 0)
-    stepper = new MinOfStepper(new FixedPointStepper(time_list, tol), stepper, tol);
-  stepper = new RetryUnusedStepper(stepper, tol, true);
+    stepper = new MinOfBlock(RootBlock::fixedTimes(time_list, tol), stepper, tol);
+  stepper = new RetryUnusedBlock(stepper, tol, true);
   if (_force_step_every_function_point && piecewise_list.size() > 0)
-    stepper = new MinOfStepper(new FixedPointStepper(piecewise_list, tol), stepper, tol);
+    stepper = new MinOfBlock(RootBlock::fixedTimes(piecewise_list, tol), stepper, tol);
 
   return stepper;
 }

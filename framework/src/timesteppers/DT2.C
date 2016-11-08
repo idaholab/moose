@@ -258,11 +258,11 @@ DT2::converged()
     return false;
 }
 
-Stepper *
+StepperBlock *
 DT2::buildStepper()
 {
-  Stepper * s = new DT2Stepper(_executioner.timestepTol(), _e_tol, _e_max, _fe_problem.getNonlinearSystem().getTimeIntegrator()->order());
-  s = new MaxRatioStepper(s, _max_increase);
-  s = StepperIf::initialN(new ConstStepper(getParam<Real>("dt")), s, _executioner.n_startup_steps());
+  StepperBlock * s = new DT2Block(_executioner.timestepTol(), _e_tol, _e_max, _fe_problem.getNonlinearSystem().getTimeIntegrator()->order());
+  s = ModBlock::maxRatio(s, _max_increase);
+  s = IfBlock::initialN(RootBlock::constant(getParam<Real>("dt")), s, _executioner.n_startup_steps());
   return s;
 }
