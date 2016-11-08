@@ -175,22 +175,6 @@ private:
   double _time_tol;
 };
 
-/// Alternating stepper calls one stepper between the specified simulation
-/// times and the other stepper on the specified simulation times.
-class AlternatingStepper : public Stepper
-{
-public:
-  AlternatingStepper(Stepper * on_steps, Stepper * between_steps, std::vector<double> times,
-                     double tol);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-
-private:
-  Ptr _on_steps;
-  Ptr _between_steps;
-  std::vector<double> _times;
-  double _time_tol;
-};
-
 /// Calls an underlying stepper to compute dt.  If this dt
 /// violates the expression  "dt / prev_dt <= max_ratio", then
 /// this stepper returns dt modified to be equal to "prev_dt * max_ratio".
@@ -203,23 +187,6 @@ public:
 private:
   Ptr _stepper;
   double _max_ratio;
-};
-
-/// Delegates dt calculations to an underlying stepper only every N steps (not
-/// every n calls to advance).
-/// Otherwise, it returns the previous dt.  If an offset is provided, the first
-/// call to advance will occur on the offset'th step.
-class EveryNStepper : public Stepper
-{
-public:
-  // offset must be smaller than every_n.
-  EveryNStepper(Stepper * s, int every_n, int offset = 0);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-
-private:
-  Ptr _stepper;
-  int _n;
-  int _offset;
 };
 
 /// Returns the dt value stored in the address it was initialized with.
@@ -368,57 +335,6 @@ private:
   int _n_steps;
 };
 
-/// Returns an initial, user-specified dt until the si.step_count exceeds a
-/// specified number (not a number of calls to "advance") after which it returns
-/// the dt calculated by an underlying stepper.
-class StartupStepper : public Stepper
-{
-public:
-  /// n_steps is the number of steps to return initial_dt before defaulting to
-  /// returning dt from s.
-  StartupStepper(Stepper * s, double initial_dt, int n_steps = 1);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-
-private:
-  Ptr _stepper;
-  double _dt;
-  int _n;
-};
-
-/// Calls one underlying stepper to calculate dt if the last solve converged,
-/// and another otherwise.
-class IfConvergedStepper : public Stepper
-{
-public:
-  /// if_converged and if_not_converged must not be NULL.  If delay is true, then if_converged will only be called if the most recent *two* solves converged.
-  IfConvergedStepper(Stepper * if_converged, Stepper * if_not_converged, bool delay = false);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-
-private:
-  Ptr _converged;
-  Ptr _not_converged;
-  bool _delay;
-};
-
-/// If the solve converged, multiply the previous dt by a growth factor,
-/// otherwise multiply it by a shrink factor.
-class GrowShrinkStepper : public Stepper
-{
-public:
-  /// shrink_factor must be between 0.0 and 1.0.  growth_factor must be greater
-  /// than or equal to 1.0.
-  /// If source_dt != nullptr, the dt returned by source_dt is used to grow or
-  /// shrink
-  /// on instead of the previous dt.
-  GrowShrinkStepper(double shrink_factor, double growth_factor, Stepper * source_dt = nullptr);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
-
-private:
-  double _grow_fac;
-  double _shrink_fac;
-  Ptr _source_dt;
-};
-
 /// Uses the error between a predictor's solution and the actual last solution
 /// to compute adjustments to dt.
 /// In order to use this stepper, an appropriate predictor must have been added
@@ -461,3 +377,34 @@ private:
   double _end_time;
   std::unique_ptr<NumericVector<Number>> _big_soln;
 };
+
+class PrevDTStepper : public Stepper {
+public:
+  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+};
+
+class MultStepper : public Stepper {
+public:
+  MultStepper(double mult, Stepper * s = nullptr);
+  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+private:
+  Ptr _stepper;
+  double _mult;
+};
+
+class StepperIf : public Stepper {
+public:
+  StepperIf(Stepper * on_true, Stepper * on_false, std::function<bool(const StepperInfo *)> func);
+  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+
+  static Stepper * between(Stepper * on, Stepper * between, std::vector<double> times, double tol);
+  static Stepper * everyN(Stepper * nth, Stepper * between, int every_n, int offset = 0);
+  static Stepper * initialN(Stepper * initial, Stepper * primary, int n);
+  static Stepper * converged(Stepper  * converged, Stepper * not_converged, bool delay = false);
+  
+private:
+  Ptr _ontrue;
+  Ptr _onfalse;
+  std::function<bool(const StepperInfo * si)> _func;
+};
+

@@ -263,6 +263,6 @@ DT2::buildStepper()
 {
   Stepper * s = new DT2Stepper(_executioner.timestepTol(), _e_tol, _e_max, _fe_problem.getNonlinearSystem().getTimeIntegrator()->order());
   s = new MaxRatioStepper(s, _max_increase);
-  s = new StartupStepper(s, getParam<Real>("dt"), _executioner.n_startup_steps());
+  s = StepperIf::initialN(new ConstStepper(getParam<Real>("dt")), s, _executioner.n_startup_steps());
   return s;
 }

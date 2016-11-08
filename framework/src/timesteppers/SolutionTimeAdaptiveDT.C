@@ -37,7 +37,7 @@ Stepper *
 SolutionTimeAdaptiveDT::buildStepper()
 {
   Stepper* s = new SolveTimeAdaptiveStepper(_direction, _percent_change);
-  s = new IfConvergedStepper(s, new GrowShrinkStepper(0.5, 1.0));
-  s = new StartupStepper(s, getParam<Real>("dt"), _executioner.n_startup_steps());
+  s = StepperIf::converged(s, new MultStepper(0.5));
+  s = StepperIf::initialN(new ConstStepper(getParam<Real>("dt")), s, _executioner.n_startup_steps());
   return s;
 }

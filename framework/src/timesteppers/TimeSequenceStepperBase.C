@@ -96,5 +96,5 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
 Stepper*
 TimeSequenceStepperBase::buildStepper()
 {
-  return new IfConvergedStepper(new FixedPointStepper(_time_sequence, 0), new GrowShrinkStepper(0.5, 1.0));
+  return StepperIf::converged(new FixedPointStepper(_time_sequence, 0), new MultStepper(0.5));
 }

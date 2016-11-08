@@ -51,5 +51,5 @@ FunctionDT::buildStepper()
   s = new MinOfStepper(new FixedPointStepper(_time_t, _executioner.timestepTol()), s, 0);
   s = new DTLimitStepper(s, _min_dt, 1e100, false);
 
-  return new IfConvergedStepper(s, new MinOfStepper(s2, new GrowShrinkStepper(0.5, _growth_factor), 0));
+  return StepperIf::converged(s, new MinOfStepper(s2, new MultStepper(0.5), 0));
 }

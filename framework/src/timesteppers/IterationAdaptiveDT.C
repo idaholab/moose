@@ -140,18 +140,18 @@ IterationAdaptiveDT::buildStepper()
           _growth_factor
         );
     if (use_time_ipol)
-      stepper = new AlternatingStepper(new PiecewiseStepper(time_list, dt_list), stepper, time_list, tol);
+      stepper = StepperIf::between(new PiecewiseStepper(time_list, dt_list), stepper, time_list, tol);
   }
   else if (use_time_ipol)
       stepper = new PiecewiseStepper(time_list, dt_list);
   else
     // this should cover the final else clause in IterationAdaptiveDT::computeDT combined with
     // the no growth if _cutback_occurred - from the first if clause body.
-    stepper = new IfConvergedStepper(new GrowShrinkStepper(0.5, _growth_factor), new GrowShrinkStepper(1.0, 1.0), true);
+    stepper = StepperIf::converged(new MultStepper(_growth_factor), new PrevDTStepper(), true);
 
-  stepper = new IfConvergedStepper(stepper, new GrowShrinkStepper(0.5, 1.0));
+  stepper = StepperIf::converged(stepper, new MultStepper(0.5));
 
-  stepper = new StartupStepper(stepper, _input_dt, std::max(1, n_startup_steps));
+  stepper = StepperIf::initialN(new ConstStepper(_input_dt), stepper, std::max(1, n_startup_steps));
   // Original IterationAdaptiveDT stepper constrains to simulation end time
   // *before* applying other constraints - sometimes resulting in an
   // over-constrained dt - for example a dt divide-by-two algo to satisfy
@@ -181,7 +181,7 @@ IterationAdaptiveDT::buildStepper()
     Stepper * s = new ReturnPtrStepper(_pps_value);
     // startup stepper needed for initial case where pps_value hasn't been set
     // to anything yet.
-    s = new StartupStepper(s, 1e100, n_startup_steps);
+    s = StepperIf::initialN(new ConstStepper(1e100), s, n_startup_steps);
     stepper = new MinOfStepper(stepper, s, 0);
   }
 

@@ -75,24 +75,6 @@ FixedPointStepper::advance(const StepperInfo * si, StepperFeedback *)
   return l.val(std::numeric_limits<double>::infinity());
 }
 
-AlternatingStepper::AlternatingStepper(Stepper * on_steps, Stepper * between_steps,
-                                       std::vector<double> times, double tol)
-    : _on_steps(on_steps), _between_steps(between_steps), _times(times), _time_tol(tol)
-{
-}
-
-double
-AlternatingStepper::advance(const StepperInfo * si, StepperFeedback * sf)
-{
-  Logger l("Alternating");
-  for (int i = 0; i < _times.size(); i++)
-  {
-    if (std::abs(si->time - _times[i]) < _time_tol)
-      return l.val(_on_steps->advance(si, sf));
-  }
-  return l.val(_between_steps->advance(si, sf));
-}
-
 MaxRatioStepper::MaxRatioStepper(Stepper * s, double max_ratio) : _stepper(s), _max_ratio(max_ratio)
 {
 }
@@ -105,22 +87,6 @@ MaxRatioStepper::advance(const StepperInfo * si, StepperFeedback * sf)
   if (si->prev_dt > 0 && dt / si->prev_dt > _max_ratio)
     dt = si->prev_dt * _max_ratio;
   return l.val(dt);
-}
-
-// offset must be smaller than every_n.
-EveryNStepper::EveryNStepper(Stepper * s, int every_n, int offset)
-    : _stepper(s), _n(every_n), _offset(offset)
-{
-}
-
-double
-EveryNStepper::advance(const StepperInfo * si, StepperFeedback * sf)
-{
-  Logger l("EveryN");
-  if ((si->step_count + (_n - _offset) - 1) % _n == 0)
-    return l.val(_stepper->advance(si, sf));
-  else
-    return l.val(si->prev_dt);
 }
 
 ReturnPtrStepper::ReturnPtrStepper(const double * dt_store) : _dt_store(dt_store)
@@ -314,56 +280,6 @@ SolveTimeAdaptiveStepper::advance(const StepperInfo * si, StepperFeedback *)
   return l.val(si->prev_dt + si->prev_dt * _percent_change * _direc);
 }
 
-StartupStepper::StartupStepper(Stepper * s, double initial_dt, int n_steps)
-    : _stepper(s), _dt(initial_dt), _n(n_steps)
-{
-}
-
-double
-StartupStepper::advance(const StepperInfo * si, StepperFeedback * sf)
-{
-  Logger l("Startup");
-  if (si->step_count <= _n)
-    return l.val(_dt);
-  return l.val(_stepper->advance(si, sf));
-}
-
-IfConvergedStepper::IfConvergedStepper(Stepper * if_converged, Stepper * if_not_converged,
-                                       bool delay)
-    : _converged(if_converged), _not_converged(if_not_converged), _delay(delay)
-{
-}
-
-double
-IfConvergedStepper::advance(const StepperInfo * si, StepperFeedback * sf)
-{
-  Logger l("IfConverged");
-  if (si->converged && (!_delay || si->prev_converged))
-    return l.val(_converged->advance(si, sf));
-  else
-    return l.val(_not_converged->advance(si, sf));
-}
-
-GrowShrinkStepper::GrowShrinkStepper(double shrink_factor, double growth_factor,
-                                     Stepper * source_dt)
-    : _grow_fac(growth_factor), _shrink_fac(shrink_factor), _source_dt(source_dt)
-{
-}
-
-double
-GrowShrinkStepper::advance(const StepperInfo * si, StepperFeedback * sf)
-{
-  Logger l("GrowShrink");
-  double dt_init = si->prev_dt;
-  if (_source_dt)
-    dt_init = _source_dt->advance(si, sf);
-
-  if (!si->converged)
-    return l.val(dt_init * _shrink_fac);
-  else
-    return l.val(dt_init * _grow_fac);
-}
-
 PredictorCorrectorStepper::PredictorCorrectorStepper(int start_adapting, double e_tol,
                                                      double scaling_param,
                                                      std::string time_integrator)
@@ -521,4 +437,75 @@ DT2Stepper::calcErr(const StepperInfo * si)
   double err = (diff->l2_norm() / std::max(_big_soln->l2_norm(), small_soln->l2_norm())) / dt();
   //std::c out << "DT2:inner: error=" << err << ", e_tol=" << _e_tol << "\n";
   return err;
+}
+
+double
+PrevDTStepper::advance(const StepperInfo * si, StepperFeedback *)
+{
+  Logger l("PrevDT");
+  return l.val(si->prev_dt);
+}
+
+MultStepper::MultStepper(double mult, Stepper * s) : _stepper(s), _mult(mult)
+{
+  if (!_stepper)
+    _stepper.reset(new PrevDTStepper());
+}
+
+double
+MultStepper::advance(const StepperInfo * si, StepperFeedback * sf)
+{
+  Logger l("Mult");
+  return l.val(_stepper->advance(si, sf) * _mult);
+}
+
+StepperIf::StepperIf(Stepper * on_true, Stepper * on_false, std::function<bool(const StepperInfo *)> func) : _ontrue(on_true), _onfalse(on_false), _func(func)
+{
+}
+
+double
+StepperIf::advance(const StepperInfo * si, StepperFeedback * sf)
+{
+  Logger l("OnFunc");
+  bool val = _func(si);
+  if (val)
+    return l.val(_ontrue->advance(si, sf));
+  return l.val(_onfalse->advance(si, sf));
+}
+
+Stepper *
+StepperIf::between(Stepper * on, Stepper * between, std::vector<double> times, double tol)
+{
+  return new StepperIf(on, between, [=](const StepperInfo * si){
+    for (int i = 0; i < times.size(); i++)
+    {
+      if (std::abs(si->time - times[i]) < tol)
+        return true;
+    }
+    return false;
+  });
+}
+
+Stepper *
+StepperIf::everyN(Stepper * nth, Stepper * between, int every_n, int offset)
+{
+  return new StepperIf(nth, between, [=](const StepperInfo * si) {
+    return (si->step_count + (every_n - offset) - 1) % every_n == 0;
+  });
+}
+
+Stepper *
+StepperIf::initialN(Stepper * initial, Stepper * primary, int n)
+{
+  return new StepperIf(initial, primary, [=](const StepperInfo * si) {
+    return si->step_count <= n;
+  });
+}
+
+Stepper *
+StepperIf::converged(Stepper  * converged, Stepper * not_converged, bool delay)
+{
+  return new StepperIf(converged, not_converged, [=](const StepperInfo * si) {
+    return si->converged && (!delay || si->prev_converged);
+  });
 }

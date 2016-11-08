@@ -252,12 +252,12 @@ StepperTest::everyN()
     std::vector<double> times = tests[i].times;
     std::vector<double> want = tests[i].want;
     Stepper * s = new FixedPointStepper(times, tol);
-    EveryNStepper stepper(s, tests[i].every_n);
+    Stepper::Ptr stepper(StepperIf::everyN(s, new PrevDTStepper(), tests[i].every_n));
     StepperInfo si = blankInfo();
 
     for (int j = 0; j < times.size(); j++)
     {
-      dt = stepper.advance(&si, nullptr);
+      dt = stepper->advance(&si, nullptr);
       updateInfo(&si, nullptr, dt);
       if (std::abs(want[j] - si.time) > tol)
       {
@@ -266,7 +266,7 @@ StepperTest::everyN()
         CPPUNIT_ASSERT(false);
       }
     }
-    dt = stepper.advance(&si, nullptr);
+    dt = stepper->advance(&si, nullptr);
     updateInfo(&si, nullptr, dt);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
   }

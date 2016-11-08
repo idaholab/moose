@@ -57,6 +57,6 @@ PostprocessorDT::buildStepper()
     dt_init = _initial_dt;
 
   Stepper * s = new ReturnPtrStepper(&_pps_value);
-  s = new StartupStepper(s, dt_init, _executioner.n_startup_steps());
+  s = StepperIf::initialN(new ConstStepper(dt_init), s, _executioner.n_startup_steps());
   return s;
 }
