@@ -127,12 +127,15 @@ TensorMechanicsAction::act()
   //
   if (_current_task == "add_variable" && getParam<bool>("add_variables"))
   {
+    // determine necessary order
+    const bool second = _problem->mesh().hasSecondOrderElements();
+
     // Loop through the displacement variables
     for (const auto & disp :  _displacements)
     {
       // Create displacement variables
       _problem->addVariable(disp,
-                            FEType(Utility::string_to_enum<Order>("FIRST"),
+                            FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
                                    Utility::string_to_enum<FEFamily>("LAGRANGE")),
                             1.0, subdomain_ids.empty() ? nullptr : &subdomain_ids);
     }

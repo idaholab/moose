@@ -2354,6 +2354,22 @@ MooseMesh::isCustomPartitionerRequested() const
   return _custom_partitioner_requested;
 }
 
+bool
+MooseMesh::hasSecondOrderElements()
+{
+  bool mesh_has_second_order_elements = false;
+  for (auto it = activeLocalElementsBegin(), end = activeLocalElementsEnd(); it != end; ++it)
+    if ((*it)->default_order() == SECOND)
+    {
+      mesh_has_second_order_elements = true;
+      break;
+    }
+
+  // We checked our local elements, so take the max over all processors.
+  comm().max(mesh_has_second_order_elements);
+  return mesh_has_second_order_elements;
+}
+
 void
 MooseMesh::setIsCustomPartitionerRequested(bool cpr)
 {
