@@ -10,44 +10,6 @@
 #define DBG MAKETOGETHER(std::c, out)
 #define STEPPER_LOGGING true
 
-class Logger
-{
-public:
-  Logger(std::string loc) : _loc(loc), _dt(-1)
-  {
-    if (on)
-    {
-      DBG << "[LOG] " << std::string(level * 4, ' ') << "- entering " << _loc << "\n";
-      level++;
-    }
-  }
-  ~Logger()
-  {
-    if (on)
-    {
-      level--;
-      DBG << "[LOG] " << std::string(level * 4, ' ') << "- leaving " << _loc << " (dt=" << _dt
-          << ")\n";
-    }
-  }
-  double val(double dt)
-  {
-    _dt = dt;
-    return dt;
-  }
-  static int level;
-  static bool on;
-  std::string _loc;
-  double _dt;
-};
-
-struct StepperFeedback
-{
-  bool snapshot;
-  bool rewind;
-  double rewind_time;
-};
-
 /// Holds all information used by Steppers to calculate dt via the "advance"
 /// function.
 struct StepperInfo
@@ -90,6 +52,13 @@ struct StepperInfo
   /// If no predictor was used, this is a zero vector with the same length as
   /// soln_nonlin.
   std::unique_ptr<NumericVector<Number>> soln_predicted;
+};
+
+struct StepperFeedback
+{
+  bool snapshot;
+  bool rewind;
+  double rewind_time;
 };
 
 /// A base class for time stepping algorithms for use in determining dt between
