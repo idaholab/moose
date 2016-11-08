@@ -23,10 +23,10 @@ InputParameters validParams<PotentialAdvection>()
 }
 
 PotentialAdvection::PotentialAdvection(const InputParameters & parameters) :
-  Kernel(parameters),
-  _potential_id(coupled("potential")),
-  _sgn(getParam<bool>("positive_charge") ? 1 : -1),
-  _grad_potential(isCoupled("potential") ? coupledGradient("potential") : _default)
+    Kernel(parameters),
+    _potential_id(coupled("potential")),
+    _sgn(getParam<bool>("positive_charge") ? 1 : -1),
+    _grad_potential(isCoupled("potential") ? coupledGradient("potential") : _default)
 {
   _default.resize(_fe_problem.getMaxQps(), RealGradient(-1.));
 }

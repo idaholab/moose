@@ -25,12 +25,12 @@ InputParameters validParams<DriftDiffusionFluxAux>()
 }
 
 DriftDiffusionFluxAux::DriftDiffusionFluxAux(const InputParameters & parameters) :
-  AuxKernel(parameters),
-  _sgn(getParam<bool>("positive_charge") ? 1 : -1),
-  _grad_potential(coupledGradient("potential")),
-  _u(coupledValue("u")),
-  _grad_u(coupledGradient("u")),
-  _component(getParam<int>("component"))
+    AuxKernel(parameters),
+    _sgn(getParam<bool>("positive_charge") ? 1 : -1),
+    _grad_potential(coupledGradient("potential")),
+    _u(coupledValue("u")),
+    _grad_u(coupledGradient("u")),
+    _component(getParam<int>("component"))
 {
 }
 
