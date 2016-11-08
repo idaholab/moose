@@ -15,22 +15,16 @@
   zmax = .5
 []
 
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
   [../]
 []
-
 
 [BCs]
   [./xdisp]
@@ -344,11 +338,6 @@
     fill_method = symmetric_isotropic
     C_ijkl = '121e3 80e3'
   [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./mc]
     type = ComputeMultiPlasticityStress
     block = 0
@@ -361,9 +350,10 @@
 
 
 [Executioner]
+  type = Transient
+
   num_steps = 3
   dt = .25
-  type = Transient
 
   nl_rel_tol = 1e-6
   nl_max_its = 10
@@ -375,15 +365,14 @@
   petsc_options_value = 'lu'
 []
 
+[Preconditioning]
+  [./fdp]
+    type = FDP
+    full = true
+  [../]
+[]
 
 [Outputs]
   print_perf_log = false
   csv = true
-[]
-
-[Preconditioning]
- [./fdp]
-   type = FDP
-   full = true
- [../]
 []

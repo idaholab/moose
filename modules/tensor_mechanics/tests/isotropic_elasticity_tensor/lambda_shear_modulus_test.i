@@ -14,14 +14,10 @@
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
-        add_variables = true
-        strain = SMALL
-      [../]
-    [../]
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = SMALL
+    add_variables = true
   [../]
 []
 
@@ -65,11 +61,9 @@
 [Materials]
   [./stress]
     type = ComputeLinearElasticStress
-    block = 0
   [../]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = 0
     lambda = 113636
     shear_modulus = 454545
   [../]

@@ -11,67 +11,32 @@
 
 [Mesh]
   file = cracking_test.e
-  displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+  order = CONSTANT
+  family = MONOMIAL
 []
 
 [AuxVariables]
-
   [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
-
   [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
-
   [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
-
   [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
-
   [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
-
   [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
-
 []
 
 [Functions]
   [./displx]
     type = PiecewiseLinear
-#   x = '0 1'
-#   y = '0 .0035'
     x = '0 1       2  3      4 5       6'
     y = '0 0.00175 0 -0.0001 0 0.00175 0.0035'
   [../]
@@ -87,16 +52,14 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
-#    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = SMALL
+    add_variables = true
   [../]
 []
 
-
 [AuxKernels]
-
   [./stress_xx]
     type = RankTwoAux
     variable = stress_xx
@@ -104,7 +67,6 @@
     index_j = 0
     index_i = 0
     execute_on = timestep_end
-    block = 1
   [../]
 
   [./stress_yy]
@@ -114,7 +76,6 @@
     index_j = 1
     index_i = 1
     execute_on = timestep_end
-    block = 1
   [../]
 
   [./stress_zz]
@@ -124,7 +85,6 @@
     index_j = 2
     index_i = 2
     execute_on = timestep_end
-    block = 1
   [../]
 
   [./stress_xy]
@@ -134,7 +94,6 @@
     index_j = 1
     index_i = 0
     execute_on = timestep_end
-    block = 1
   [../]
 
   [./stress_yz]
@@ -144,7 +103,6 @@
     index_j = 2
     index_i = 1
     execute_on = timestep_end
-    block = 1
   [../]
 
   [./stress_zx]
@@ -154,10 +112,8 @@
     index_j = 2
     index_i = 0
     execute_on = timestep_end
-    block = 1
   [../]
 []
-
 
 [BCs]
   [./pullx]
@@ -199,19 +155,11 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = 1
     youngs_modulus = 186.5e9
     poissons_ratio = .316
   [../]
-
-  [./strain]
-    type = ComputeSmallStrain
-    block = 1
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./elastic_stress]
     type = ComputeElasticSmearedCrackingStress
-    block = 1
     cracking_release = exponential
     cracking_stress = 119.3e6
   [../]

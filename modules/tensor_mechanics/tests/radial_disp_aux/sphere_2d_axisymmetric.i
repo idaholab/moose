@@ -20,13 +20,6 @@
   coord_type = RZ
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-[]
-
 [AuxVariables]
   [./temp]
   [../]
@@ -41,9 +34,10 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
   [../]
 []
 

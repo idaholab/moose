@@ -16,17 +16,10 @@
 
 [GlobalParams]
   displacements = 'disp_x'
-  order = SECOND
-  family = LAGRANGE
 []
 
 [Problem]
   coord_type = RSPHERICAL
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
 []
 
 [AuxVariables]
@@ -43,9 +36,10 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
   [../]
 []
 
@@ -74,21 +68,14 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = 0
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
-  [./finite_strain]
-    type = ComputeRSphericalFiniteStrain
-    block = 0
-  [../]
   [./small_stress]
     type = ComputeFiniteStrainElasticStress
-    block = 0
   [../]
   [./thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
-    block = 0
     stress_free_temperature = 300
     thermal_expansion_coeff = 1.3e-5
     temperature = temp
@@ -118,14 +105,6 @@
 []
 
 [Outputs]
- csv = true
- exodus = true
+  csv = true
+  exodus = true
 []
-
-#[Postprocessors]
-#  [./strain_xx]
-#    type = SideAverageValue
-#    variable =
-#    block = 0
-#  [../]
-#[]

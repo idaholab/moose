@@ -18,21 +18,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  order = FIRST
-  family = LAGRANGE
 []
-
-[Variables]
-  [./disp_x]
-  [../]
-
-  [./disp_y]
-  [../]
-
-  [./disp_z]
-  [../]
-[]
-
 
 [AuxVariables]
   [./stress_yy]
@@ -54,9 +40,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-
 []
-
 
 [Functions]
   [./top_pull]
@@ -70,12 +54,12 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = INCREMENTAL
+    add_variables = true
   [../]
 []
-
 
 [AuxKernels]
   [./stress_yy]
@@ -144,24 +128,14 @@
 
 [Materials]
   [./elasticity_tensor]
-    block = 0
   [../]
-  [./small_strain]
-    type = ComputeIncrementalSmallStrain
-    block = 0
-  [../]
-
-
   [./isotropic_plasticity]
     type = IsotropicPlasticityStressUpdate
-    block = 0
     relative_tolerance = 1e-25
     absolute_tolerance = 1e-5
   [../]
-
   [./radial_return_stress]
     type = ComputeReturnMappingStress
-    block = 0
     return_mapping_models = 'isotropic_plasticity'
   [../]
 []
@@ -189,7 +163,6 @@
   dt = 0.00125
   dtmin = 0.0001
 []
-
 
 [Outputs]
   [./out]

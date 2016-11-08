@@ -12,20 +12,10 @@
   coord_type = RZ
 []
 
-[Variables]
-  [./disp_r]
-    order = SECOND
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = SECOND
-    family = LAGRANGE
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = SMALL
+    add_variables = true
   [../]
 []
 
@@ -53,15 +43,9 @@
     type = ComputeElasticityTensor
     C_ijkl = '1022726 113636 113636 1022726 454545'
     fill_method = axisymmetric_rz
-    block = 0
-  [../]
-  [./small_strain_arz]
-    type = ComputeAxisymmetricRZSmallStrain
-    block = 0
   [../]
   [./elastic_stress]
     type = ComputeLinearElasticStress
-    block = 0
   [../]
 []
 
@@ -89,11 +73,10 @@
     component = 0
     factor = 200000
   [../]
-
 []
 
 [Debug]
-    show_var_residual_norms = true
+  show_var_residual_norms = true
 []
 
 [Executioner]

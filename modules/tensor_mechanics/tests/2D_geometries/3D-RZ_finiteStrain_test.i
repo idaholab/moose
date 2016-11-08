@@ -41,24 +41,11 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-    order = SECOND
-    family = LAGRANGE
-  [../]
-  [./disp_y]
-    order = SECOND
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = SECOND
-    family = LAGRANGE
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
+    block = 1
   [../]
 []
 
@@ -97,11 +84,6 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
-    block = 1
-  [../]
-
-  [./strain]
-    type = ComputeFiniteStrain
     block = 1
   [../]
 

@@ -15,22 +15,16 @@
   zmax = .5
 []
 
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
   [../]
 []
-
 
 [BCs]
   [./xdisp]
@@ -343,18 +337,11 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '121e3 80e3'
   [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./mc]
     type = ComputeMultiPlasticityStress
-    block = 0
     ep_plastic_tolerance = 1e-9
     plastic_models = Orthotropic
     debug_fspb = crash
@@ -362,6 +349,12 @@
   [../]
 []
 
+[Preconditioning]
+  [./fdp]
+    type = FDP
+    full = true
+  [../]
+[]
 
 [Executioner]
   num_steps = 3
@@ -382,11 +375,4 @@
 [Outputs]
   print_perf_log = false
   csv = true
-[]
-
-[Preconditioning]
- [./fdp]
-   type = FDP
-   full = true
- [../]
 []
