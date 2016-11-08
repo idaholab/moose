@@ -37,7 +37,7 @@ public:
   /// the computeInelasticStrainIncrement method.
   virtual void updateStress(RankTwoTensor & strain_increment,
                             RankTwoTensor & inelastic_strain_increment,
-                            RankTwoTensor & stress_new);
+                            RankTwoTensor & stress_new) override;
 
 protected:
   virtual void computeStressInitialize(Real /*effectiveTrialStress*/){}

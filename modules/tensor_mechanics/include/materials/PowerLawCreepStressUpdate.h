@@ -28,14 +28,13 @@ public:
   PowerLawCreepStressUpdate(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  void resetQpProperties();
+  virtual void initQpStatefulProperties() override;
 
-  virtual void computeStressInitialize(Real effectiveTrialStress);
-  virtual void computeStressFinalize(const RankTwoTensor & plasticStrainIncrement);
+  virtual void computeStressInitialize(Real effectiveTrialStress) override;
+  virtual void computeStressFinalize(const RankTwoTensor & plasticStrainIncrement) override;
 
-  virtual Real computeResidual(Real effectiveTrialStress, Real scalar);
-  virtual Real computeDerivative(Real effectiveTrialStress, Real scalar);
+  virtual Real computeResidual(Real effectiveTrialStress, Real scalar) override;
+  virtual Real computeDerivative(Real effectiveTrialStress, Real scalar) override;
 
   const Real _coefficient;
   const Real _n_exponent;

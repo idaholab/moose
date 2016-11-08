@@ -33,9 +33,9 @@ public:
   IsotropicPowerLawHardeningStressUpdate(const InputParameters & parameters);
 
 protected:
-  virtual void computeStressInitialize(Real effectiveTrialStress);
-  virtual void computeYieldStress();
-  virtual Real computeHardeningDerivative(Real scalar);
+  virtual void computeStressInitialize(Real effectiveTrialStress) override;
+  virtual void computeYieldStress() override;
+  virtual Real computeHardeningDerivative(Real scalar) override;
 
   ///@{ Power law hardening coefficients
   Real _K;

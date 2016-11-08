@@ -51,12 +51,6 @@ PowerLawCreepStressUpdate::initQpStatefulProperties()
 }
 
 void
-PowerLawCreepStressUpdate::resetQpProperties()
-{
-  _creep_strain[_qp] = _creep_strain_old[_qp];
-}
-
-void
 PowerLawCreepStressUpdate::computeStressInitialize(Real /*effectiveTrialStress*/)
 {
   _shear_modulus = getIsotropicShearModulus();

@@ -51,12 +51,6 @@ HyperbolicViscoplasticityStressUpdate::initQpStatefulProperties()
 }
 
 void
-HyperbolicViscoplasticityStressUpdate::resetQpProperties()
-{
-  _plastic_strain[_qp] = _plastic_strain_old[_qp];
-}
-
-void
 HyperbolicViscoplasticityStressUpdate::computeStressInitialize(Real effectiveTrialStress)
 {
   _shear_modulus = getIsotropicShearModulus();
