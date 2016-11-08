@@ -23,7 +23,6 @@ InputParameters validParams<ShapeSideUserObject>()
 }
 
 ShapeSideUserObject::ShapeSideUserObject(const InputParameters & parameters) :
-    // SideUserObject(parameters),
     ShapeUserObject<SideUserObject>(parameters, ShapeType::Side)
 {
 }

@@ -22,6 +22,14 @@
 #include "InputParameters.h"
 #include "Assembly.h"
 
+/**
+ * Users of this template class must specify the type of shape functions that
+ * will be used in the Jacobian calculation. Current options are for volume
+ * shape functions (specified with ShapeType::Element, accessed with _assembly.phi())
+ * and for surface shape functions (specified with ShapeType::Side, accessed with
+ * _assembly.phiFace())
+ */
+
 enum ShapeType
 {
   Element,
@@ -92,10 +100,10 @@ private:
 
 template<typename T>
 ShapeUserObject<T>::ShapeUserObject(const InputParameters & parameters, ShapeType type) :
-T(parameters),
-  _phi((type == ShapeType::Element) ? this->_assembly.phi() : this->_assembly.phiFace()),
-  _grad_phi((type == ShapeType::Element) ? this->_assembly.gradPhi() : this->_assembly.gradPhiFace()),
-  _compute_jacobians(MooseObject::getParam<bool>("compute_jacobians"))
+    T(parameters),
+    _phi((type == ShapeType::Element) ? this->_assembly.phi() : this->_assembly.phiFace()),
+    _grad_phi((type == ShapeType::Element) ? this->_assembly.gradPhi() : this->_assembly.gradPhiFace()),
+    _compute_jacobians(MooseObject::getParam<bool>("compute_jacobians"))
 {
   mooseWarning("Jacobian calculation in UserObjects is an experimental capability with a potentially unstable interface.");
 }
