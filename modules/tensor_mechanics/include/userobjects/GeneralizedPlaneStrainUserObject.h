@@ -21,12 +21,11 @@ class GeneralizedPlaneStrainUserObject : public ElementUserObject
 {
 public:
   GeneralizedPlaneStrainUserObject(const InputParameters & parameters);
-  virtual ~GeneralizedPlaneStrainUserObject() {}
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void threadJoin(const UserObject & uo);
-  virtual void finalize();
+  void initialize() override;
+  void execute() override;
+  void threadJoin(const UserObject & uo) override;
+  void finalize() override;
   virtual Real returnResidual() const;
   virtual Real returnJacobian() const;
 
@@ -36,10 +35,11 @@ protected:
   const MaterialProperty<RankFourTensor> & _Cijkl;
   const MaterialProperty<RankTwoTensor> & _stress;
 
-  Function & _traction_zz;
+  Function & _traction;
   const Real _factor;
 
 private:
+  unsigned int _index;
   Real _residual;
   Real _jacobian;
 };

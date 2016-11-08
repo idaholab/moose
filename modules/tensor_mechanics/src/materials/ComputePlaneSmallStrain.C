@@ -24,6 +24,8 @@ ComputePlaneSmallStrain::ComputePlaneSmallStrain(const InputParameters & paramet
     _strain_zz_coupled(isCoupled("strain_zz")),
     _strain_zz(_strain_zz_coupled ? coupledValue("strain_zz") : _zero)
 {
+  if (_strain_zz_coupled && _scalar_strain_zz_coupled)
+    mooseError("Must define only one of strain_zz or scalar_strain_zz");
 }
 
 Real

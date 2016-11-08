@@ -14,7 +14,8 @@ template<>
 InputParameters validParams<Compute1DIncrementalStrain>()
 {
   InputParameters params = validParams<ComputeIncrementalSmallStrain>();
-  params.addClassDescription("Compute a strain increment and rotation increment for finite strains in 2D geometries.");
+  params.addClassDescription("Compute strain increment for small strains in 1D problems.");
+
   return params;
 }
 
@@ -27,15 +28,15 @@ void
 Compute1DIncrementalStrain::computeTotalStrainIncrement(RankTwoTensor & total_strain_increment)
 {
   // Deformation gradient calculation for 1D problems
-  // Note: x_disp is the radial displacement
   RankTwoTensor A((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]); //Deformation gradient
   RankTwoTensor Fbar((*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]); //Old Deformation gradient
 
-  // Compute the deformation gradient value for plane strain, generalized plane strain, or axisymmetric problems
-  A(1,1) = computeDUYDY();
-  Fbar(1,1) = computeDUYDYOld();
-  A(2,2) = computeDUZDZ();
-  Fbar(2,2) = computeDUZDZOld();
+  // Compute the displacement gradient dUy/dy and dUz/dz value for 1D problems
+  A(1,1) = computeGradDispYY();
+  A(2,2) = computeGradDispZZ();
+
+  Fbar(1,1) = computeGradDispYYOld();
+  Fbar(2,2) = computeGradDispZZOld();
 
   // Gauss point deformation gradient
   _deformation_gradient[_qp] = A;

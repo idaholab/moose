@@ -5,26 +5,27 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "Compute2DFiniteStrain.h"
+#include "Compute1DFiniteStrain.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"
 
 template<>
-InputParameters validParams<Compute2DFiniteStrain>()
+InputParameters validParams<Compute1DFiniteStrain>()
 {
   InputParameters params = validParams<ComputeFiniteStrain>();
-  params.addClassDescription("Compute a strain increment and rotation increment for finite strains in 2D geometries.");
+  params.addClassDescription("Compute strain increment and rotation increment for finite strains in 1D problem");
+
   return params;
 }
 
-Compute2DFiniteStrain::Compute2DFiniteStrain(const InputParameters & parameters) :
+Compute1DFiniteStrain::Compute1DFiniteStrain(const InputParameters & parameters) :
     ComputeFiniteStrain(parameters)
 {
 }
 
 void
-Compute2DFiniteStrain::computeProperties()
+Compute1DFiniteStrain::computeProperties()
 {
   // Method from Rashid, 1993
   RankTwoTensor ave_Fhat;
@@ -37,8 +38,11 @@ Compute2DFiniteStrain::computeProperties()
     RankTwoTensor A((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]); //Deformation gradient
     RankTwoTensor Fbar((*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]); //Old Deformation gradient
 
-    // Compute the displacement gradient (2,2) value for plane strain, generalized plane strain, or axisymmetric problems
+    // Compute the displacement gradient dUy/dy and dUz/dz value for 1D problems
+    A(1,1) = computeGradDispYY();
     A(2,2) = computeGradDispZZ();
+
+    Fbar(1,1) = computeGradDispYYOld();
     Fbar(2,2) = computeGradDispZZOld();
 
     // Gauss point deformation gradient

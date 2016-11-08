@@ -20,7 +20,7 @@ public:
 
 protected:
   virtual Real computeGradDispZZ();
-  virtual Real computeGradDispZZold();
+  virtual Real computeGradDispZZOld();
 
   const bool _scalar_strain_zz_coupled;
   const VariableValue & _scalar_strain_zz;

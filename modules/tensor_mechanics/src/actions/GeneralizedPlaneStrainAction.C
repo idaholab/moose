@@ -8,6 +8,7 @@
 
 #include "FEProblem.h"
 #include "Conversion.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<GeneralizedPlaneStrainAction>()
@@ -15,9 +16,10 @@ InputParameters validParams<GeneralizedPlaneStrainAction>()
   InputParameters params = validParams<Action>();
   params.addClassDescription("Set up the GeneralizedPlaneStrain environment");
   params.addRequiredParam<std::vector<NonlinearVariableName> >("displacements", "The displacement variables");
-  params.addRequiredParam<NonlinearVariableName>("scalar_strain_zz", "The scalar_strain_zz variable");
+  params.addParam<NonlinearVariableName>("scalar_strain_yy", "Scalar variable scalar_strain_yy for 1D Axisymmetric problem");
+  params.addParam<NonlinearVariableName>("scalar_strain_zz", "Scalar variable scalar_strain_zz for 2D GeneralizedPlaneStrain problem");
   params.addParam<NonlinearVariableName>("temperature", "The temperature variable");
-  params.addParam<FunctionName>("traction_zz", "0", "Function used to prescribe traction in the out-of-plane Z direction");
+  params.addParam<FunctionName>("traction", "0", "Function used to prescribe traction in the out-of-plane Z direction");
   params.addParam<Real>("factor", 1.0, "Scale factor applied to prescribed traction");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh");
   params.addParam<std::string>("base_name", "Material property base name");
@@ -30,21 +32,46 @@ GeneralizedPlaneStrainAction::GeneralizedPlaneStrainAction(const InputParameters
     Action(params),
     _displacements(getParam<std::vector<NonlinearVariableName> >("displacements")),
     _ndisp(_displacements.size()),
-    _scalar_strain_zz(getParam<NonlinearVariableName>("scalar_strain_zz"))
+    _has_scalar_strain_yy(isParamValid("scalar_strain_yy")),
+    _has_scalar_strain_zz(isParamValid("scalar_strain_zz"))
 {
-  if (_ndisp != 2)
-    mooseError("GeneralizedPlaneStrain only works for two dimensional case!");
+  if (_ndisp > 2)
+    mooseError("GeneralizedPlaneStrain only works for 1D axisymmetric and 2D generalized plane strain case!");
+
+  if (_has_scalar_strain_yy && _has_scalar_strain_zz)
+    mooseError("Must specify only scalar_strain_yy or scalar_strain_zz");
 }
 
 void
 GeneralizedPlaneStrainAction::act()
 {
+  // get a list of all subdomains first
+  const auto & subdomain_set = _problem->mesh().meshSubdomains();
+  std::vector<SubdomainID> subdomains(subdomain_set.begin(), subdomain_set.end());
+
+  // make sure all subdomains are using the same coordinate system
+  Moose::CoordinateSystemType coord_system = _problem->getCoordSystem(subdomains[0]);
+  for (auto s : subdomains)
+    if (_problem->getCoordSystem(s) != coord_system)
+      mooseError("The GeneralizedPlaneStrain action requires all subdomains to have the same coordinate system");
+
+  if (_has_scalar_strain_zz && coord_system != Moose::COORD_XYZ)
+    mooseError("scalar_strain_zz is for 2D generalized plane strain problems in XYZ coordinate system");
+  else if (_has_scalar_strain_yy && coord_system != Moose::COORD_RZ)
+    mooseError("scalar_strain_yy is for axisymmetric 1D problems in RZ coordinate system");
+
   if (_current_task == "add_kernel")
   {
     std::string k_type = "GeneralizedPlaneStrainOffDiag";
     InputParameters params = _factory.getValidParams(k_type);
     params.set<std::vector<NonlinearVariableName> >("displacements") = _displacements;
-    params.set<std::vector<VariableName> >("scalar_strain_zz") = { _scalar_strain_zz };
+
+    if (_has_scalar_strain_yy)
+      params.set<std::vector<VariableName> >("scalar_strain_yy") = {getParam<NonlinearVariableName>("scalar_strain_yy")};
+    else if (_has_scalar_strain_zz)
+      params.set<std::vector<VariableName> >("scalar_strain_zz") = {getParam<NonlinearVariableName>("scalar_strain_zz")};
+    else
+      mooseError("Must specify only scalar_strain_yy (1D Axisymmetric) or scalar_strain_zz (2D GeneralizedPlaneStrain)");
 
     if (isParamValid("base_name"))
       params.set<std::string>("base_name") = getParam<std::string>("base_name");
@@ -82,7 +109,7 @@ GeneralizedPlaneStrainAction::act()
     if (isParamValid("base_name"))
       params.set<std::string>("base_name") = getParam<std::string>("base_name");
 
-    params.set<FunctionName>("traction_zz") = getParam<FunctionName>("traction_zz");
+    params.set<FunctionName>("traction") = getParam<FunctionName>("traction");
     params.set<Real>("factor") = getParam<Real>("factor");
 
     if (isParamValid("block"))
@@ -97,7 +124,13 @@ GeneralizedPlaneStrainAction::act()
   {
     std::string sk_type = "GeneralizedPlaneStrain";
     InputParameters params = _factory.getValidParams(sk_type);
-    params.set<NonlinearVariableName>("variable") = _scalar_strain_zz;
+
+    if (_has_scalar_strain_yy)
+      params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("scalar_strain_yy");
+    else if (_has_scalar_strain_zz)
+      params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("scalar_strain_zz");
+    else
+      mooseError("Must specify only scalar_strain_yy (1D Axisymmetric) or scalar_strain_zz (2D GeneralizedPlaneStrain)");
 
     // set the UserObjectName from previously added UserObject
     params.set<UserObjectName>("generalized_plane_strain") = _name + "_GeneralizedPlaneStrainUserObject";

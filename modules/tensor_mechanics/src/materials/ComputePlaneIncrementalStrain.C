@@ -26,6 +26,8 @@ ComputePlaneIncrementalStrain::ComputePlaneIncrementalStrain(const InputParamete
     _strain_zz(_strain_zz_coupled ? coupledValue("strain_zz") : _zero),
     _strain_zz_old(_strain_zz_coupled ? coupledValueOld("strain_zz") : _zero)
 {
+  if (_strain_zz_coupled && _scalar_strain_zz_coupled)
+    mooseError("Must define only one of strain_zz or scalar_strain_zz");
 }
 
 Real
@@ -38,7 +40,7 @@ ComputePlaneIncrementalStrain::computeGradDispZZ()
 }
 
 Real
-ComputePlaneIncrementalStrain::computeGradDispZZold()
+ComputePlaneIncrementalStrain::computeGradDispZZOld()
 {
   if (_scalar_strain_zz_coupled)
     return _scalar_strain_zz_old[0];

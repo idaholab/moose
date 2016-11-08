@@ -4,26 +4,24 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTE1DINCREMENTALSTRAIN_H
-#define COMPUTE1DINCREMENTALSTRAIN_H
+#ifndef COMPUTE1DFINITESTRAIN_H
+#define COMPUTE1DFINITESTRAIN_H
 
-#include "ComputeIncrementalSmallStrain.h"
+#include "ComputeFiniteStrain.h"
 
 /**
- * Compute1DIncrementalStrain defines a strain increment only for incremental
- * small strains in 1D problems, handling strains in other two directions.
- * Compute1DIncrementalStrain contains virtual methods to define the displacement gradients
- * as a general nonzero value in the inherited class ComputeAxisymmetric1DIncrementalStrain.
+ * Compute1DFiniteStrain defines a strain increment and a rotation increment
+ * for finite strains in 1D problems, handling strains in other two directions.
+ * Compute1DFiniteStrain contains virtual methods to define the displacement gradients
+ * as a general nonzero value in the inherited class ComputeAxisymmetric1DFiniteStrain.
  */
-class Compute1DIncrementalStrain : public ComputeIncrementalSmallStrain
+class Compute1DFiniteStrain : public ComputeFiniteStrain
 {
 public:
-  Compute1DIncrementalStrain(const InputParameters & parameters);
+  Compute1DFiniteStrain(const InputParameters & parameters);
 
 protected:
-  /// Computes the current and old deformation gradients with the assumptions for
-  /// axisymmetric 1D problems, and returns the total strain increment tensor
-  void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment) override;
+  void computeProperties() override;
 
   /// Computes the current dUy/dY; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
@@ -33,13 +31,13 @@ protected:
   /// overwritten for the specific geometries defined by inheriting classes
   virtual Real computeGradDispYYOld() = 0;
 
-  /// Computes the current dUz/dZ; as a virtual function, this function is
+  /// Computes the current dUz/dz; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
   virtual Real computeGradDispZZ() = 0;
 
-  /// Computes the old dUz/dZ; as a virtual function, this function is
+  /// Computes the old dUz/dz; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
   virtual Real computeGradDispZZOld() = 0;
 };
 
-#endif //COMPUTE1DINCREMENTALSTRAIN_H
+#endif //COMPUTE1DFINITESTRAIN_H

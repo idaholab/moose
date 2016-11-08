@@ -43,7 +43,7 @@ ComputeAxisymmetricRZFiniteStrain::computeGradDispZZ()
 }
 
 Real
-ComputeAxisymmetricRZFiniteStrain::computeGradDispZZold()
+ComputeAxisymmetricRZFiniteStrain::computeGradDispZZOld()
 {
   if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
     return _disp_old_0[_qp] / _q_point[_qp](0);

@@ -26,6 +26,8 @@ ComputePlaneFiniteStrain::ComputePlaneFiniteStrain(const InputParameters & param
     _strain_zz(_strain_zz_coupled ? coupledValue("strain_zz") : _zero),
     _strain_zz_old(_strain_zz_coupled ? coupledValueOld("strain_zz") : _zero)
 {
+  if (_strain_zz_coupled && _scalar_strain_zz_coupled)
+    mooseError("Must define only one of strain_zz or scalar_strain_zz");
 }
 
 Real
@@ -42,7 +44,7 @@ ComputePlaneFiniteStrain::computeGradDispZZ()
 }
 
 Real
-ComputePlaneFiniteStrain::computeGradDispZZold()
+ComputePlaneFiniteStrain::computeGradDispZZOld()
 {
   if (_scalar_strain_zz_coupled)
     return std::exp(_scalar_strain_zz_old[0]) - 1.0;

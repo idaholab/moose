@@ -4,23 +4,29 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTEAXISYMMETRICRZFINITESTRAIN_H
-#define COMPUTEAXISYMMETRICRZFINITESTRAIN_H
+#ifndef COMPUTEAXISYMMETRIC1DFINITESTRAIN_H
+#define COMPUTEAXISYMMETRIC1DFINITESTRAIN_H
 
-#include "Compute2DFiniteStrain.h"
+#include "Compute1DFiniteStrain.h"
 
 /**
- * ComputeAxisymmetricRZFiniteStrain defines a strain increment and rotation
- * increment for finite strains in an Axisymmetric simulation.
+ * ComputeAxisymmetric1DFiniteStrain defines a strain increment and rotation
+ * increment for finite strains in an Axisymmetric 1D problem.
  * The COORD_TYPE in the Problem block must be set to RZ.
  */
-class ComputeAxisymmetricRZFiniteStrain : public Compute2DFiniteStrain
+class ComputeAxisymmetric1DFiniteStrain : public Compute1DFiniteStrain
 {
 public:
-  ComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters);
+  ComputeAxisymmetric1DFiniteStrain(const InputParameters & parameters);
 
 protected:
   void initialSetup() override;
+
+  /// Computes the current dUy/dy for axisymmetric problems
+  Real computeGradDispYY() override;
+
+  /// Computes the old dUy/dy for axisymmetric problems
+  Real computeGradDispYYOld() override;
 
   /// Computes the current dUz/dz for axisymmetric problems, where
   /// \f$ \epsilon_{\theta} = \frac{u_r}{r} \f$
@@ -32,6 +38,14 @@ protected:
 
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
+
+  bool _strain_yy_coupled;
+  const VariableValue & _strain_yy;
+  const VariableValue & _strain_yy_old;
+
+  bool _scalar_strain_yy_coupled;
+  const VariableValue & _scalar_strain_yy;
+  const VariableValue & _scalar_strain_yy_old;
 };
 
-#endif //COMPUTEAXISYMMETRICRZFINITESTRAIN_H
+#endif //COMPUTEAXISYMMETRIC1DFINITESTRAIN_H

@@ -81,7 +81,7 @@
         use_displaced_mesh = true
         displacements = 'disp_x disp_y'
         scalar_strain_zz = scalar_strain_zz
-        traction_zz = traction_function
+        traction = traction_function
         factor = 1e5
       [../]
     [../]
