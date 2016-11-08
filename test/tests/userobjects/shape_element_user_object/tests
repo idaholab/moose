@@ -54,5 +54,7 @@
     input = 'shape_side_uo_physics_test.i'
     exodiff = 'shape_side_uo_physics_test_out.e'
     allow_warnings = true
+    mesh_mode = REPLICATED
+    recover = false
   [../]
 []
