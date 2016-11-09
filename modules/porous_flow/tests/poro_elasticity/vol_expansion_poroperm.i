@@ -246,7 +246,7 @@
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
-    n_j = 0 # unimportant in this fully-saturated situation
+    n = 0 # unimportant in this fully-saturated situation
     phase = 0
   [../]
   [./relperm_all]

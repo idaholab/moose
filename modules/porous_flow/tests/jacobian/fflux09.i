@@ -1,5 +1,5 @@
 # 2phase (PP), 3components (that exist in both phases), constant viscosity, constant insitu permeability
-# density with constant bulk, Corey relative perm, nonzero gravity, unsaturated with vanGenuchten
+# density with constant bulk, Corey relative perm, nonzero gravity, unsaturated with RSC capillary
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -112,11 +112,12 @@
     on_initial_only = true
   [../]
   [./ppss]
-    type = PorousFlow2PhasePP_VG
+    type = PorousFlow2PhasePP_RSC
     phase0_porepressure = ppwater
     phase1_porepressure = ppgas
-    m = 0.5
-    al = 1
+    shift = -0.1
+    scale_ratio = 3
+    oil_viscosity = 2
   [../]
   [./massfrac]
     type = PorousFlowMassFraction

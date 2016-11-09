@@ -1,14 +1,14 @@
-# Checking that gravity head is established
-# 1phase, vanGenuchten, constant and large fluid-bulk, constant viscosity, constant permeability, Corey relperm
-# fully saturated
-# For better agreement with the analytical solution (ana_pp), just increase nx
-
+# 1phase, 3components, constant viscosity, constant insitu permeability
+# density with constant bulk, VG relative perm with a cubic, nonzero gravity, unsaturated with VG
 [Mesh]
   type = GeneratedMesh
-  dim = 1
-  nx = 100
-  xmin = -1
-  xmax = 0
+  dim = 2
+  nx = 2
+  xmin = 0
+  xmax = 1
+  ny = 1
+  ymin = 0
+  ymax = 1
 []
 
 [GlobalParams]
@@ -17,47 +17,62 @@
 
 [Variables]
   [./pp]
-    [./InitialCondition]
-      type = RandomIC
-      min = 0
-      max = 1
-    [../]
+  [../]
+  [./massfrac0]
+  [../]
+  [./massfrac1]
   [../]
 []
+
+[ICs]
+  [./pp]
+    type = RandomIC
+    variable = pp
+    min = -1.0
+    max = 0.0
+  [../]
+  [./massfrac0]
+    type = RandomIC
+    variable = massfrac0
+    min = 0
+    max = 0.3
+  [../]
+  [./massfrac1]
+    type = RandomIC
+    variable = massfrac1
+    min = 0
+    max = 0.4
+  [../]
+[]
+
 
 [Kernels]
   [./flux0]
     type = PorousFlowAdvectiveFlux
     fluid_component = 0
     variable = pp
-    gravity = '-1 0 0'
+    gravity = '-1 -0.1 0'
   [../]
-[]
-
-[Functions]
-  [./ana_pp]
-    type = ParsedFunction
-    vars = 'g B p0 rho0'
-    vals = '1 1E3 0 1'
-    value = '-B*log(exp(-p0/B)+g*rho0*x/B)' # expected pp at base
+  [./flux1]
+    type = PorousFlowAdvectiveFlux
+    fluid_component = 1
+    variable = massfrac0
+    gravity = '-1 -0.1 0'
   [../]
-[]
-
-[BCs]
-  [./z]
-    type = PresetBC
-    variable = pp
-    boundary = right
-    value = 0
+  [./flux2]
+    type = PorousFlowAdvectiveFlux
+    fluid_component = 2
+    variable = massfrac1
+    gravity = '-1 -0.1 0'
   [../]
 []
 
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'pp'
+    porous_flow_vars = 'pp massfrac0 massfrac1'
     number_fluid_phases = 1
-    number_fluid_components = 1
+    number_fluid_components = 3
   [../]
 []
 
@@ -72,16 +87,17 @@
   [./ppss]
     type = PorousFlow1PhaseP_VG
     porepressure = pp
-    al = 1
-    m = 0.5
+    al = 1 # small so that most effective saturations are close to 1
+    m = 0.6
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
+    mass_fraction_vars = 'massfrac0 massfrac1'
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
     density_P0 = 1
-    bulk_modulus = 1E3
+    bulk_modulus = 1.5
     phase = 0
   [../]
   [./dens_all]
@@ -105,11 +121,12 @@
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
-    permeability = '1 0 0  0 2 0  0 0 3'
+    permeability = '1 0 0 0 2 0 0 0 3'
   [../]
   [./relperm]
-    type = PorousFlowRelativePermeabilityCorey
-    n = 1
+    type = PorousFlowRelativePermeabilityVG
+    m = 0.6
+    seff_turnover = 0.8
     phase = 0
   [../]
   [./relperm_all]
@@ -118,21 +135,8 @@
   [../]
 []
 
-[Postprocessors]
-  [./pp_base]
-    type = PointValue
-    variable = pp
-    point = '-1 0 0'
-  [../]
-  [./pp_analytical]
-    type = FunctionValuePostprocessor
-    function = ana_pp
-    point = '-1 0 0'
-  [../]
-[]
-
 [Preconditioning]
-  active = andy
+  active = check
   [./andy]
     type = SMP
     full = true
@@ -148,14 +152,12 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = Newton
+  dt = 1
+  end_time = 1
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
-  file_base = grav01b
-  [./csv]
-    type = CSV
-  [../]
+  exodus = false
 []

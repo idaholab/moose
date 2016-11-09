@@ -32,19 +32,19 @@
   [../]
   [./ppgas]
     family = MONOMIAL
-    order = FIRST
+    order = CONSTANT
   [../]
   [./swater]
     family = MONOMIAL
-    order = FIRST
+    order = CONSTANT
   [../]
   [./relpermwater]
     family = MONOMIAL
-    order = FIRST
+    order = CONSTANT
   [../]
   [./relpermgas]
     family = MONOMIAL
-    order = FIRST
+    order = CONSTANT
   [../]
 []
 
@@ -85,9 +85,9 @@
     variable = swater
   [../]
   [./relpermwater]
-    type = PorousFlowPropertyAux
-    property = relperm
-    phase = 0
+    type = MaterialStdVectorAux
+    property = PorousFlow_relative_permeability
+    index = 0
     variable = relpermwater
   [../]
   [./relpermgas]
@@ -175,17 +175,17 @@
   [../]
   [./relperm_water]
     type = PorousFlowRelativePermeabilityCorey
-    n_j = 2
+    n = 2
     phase = 0
-    s_jr = 0.25
-    sum_s_r = 0.35
+    s_res = 0.25
+    sum_s_res = 0.35
   [../]
   [./relperm_gas]
     type = PorousFlowRelativePermeabilityCorey
-    n_j = 2
+    n = 2
     phase = 1
-    s_jr = 0.1
-    sum_s_r = 0.35
+    s_res = 0.1
+    sum_s_res = 0.35
   [../]
   [./relperm_all]
     type = PorousFlowJoiner
