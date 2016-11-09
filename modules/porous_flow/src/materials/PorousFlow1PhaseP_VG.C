@@ -28,17 +28,17 @@ PorousFlow1PhaseP_VG::PorousFlow1PhaseP_VG(const InputParameters & parameters) :
 Real
 PorousFlow1PhaseP_VG::effectiveSaturation(Real pressure) const
 {
-  return PorousFlowEffectiveSaturationVG::seff(pressure, _al, _m);
+  return PorousFlowVanGenuchten::seff(pressure, _al, _m);
 }
 
 Real
 PorousFlow1PhaseP_VG::dEffectiveSaturation_dP(Real pressure) const
 {
-  return PorousFlowEffectiveSaturationVG::dseff(pressure, _al, _m);
+  return PorousFlowVanGenuchten::dseff(pressure, _al, _m);
 }
 
 Real
 PorousFlow1PhaseP_VG::d2EffectiveSaturation_dP2(Real pressure) const
 {
-  return PorousFlowEffectiveSaturationVG::d2seff(pressure, _al, _m);
+  return PorousFlowVanGenuchten::d2seff(pressure, _al, _m);
 }

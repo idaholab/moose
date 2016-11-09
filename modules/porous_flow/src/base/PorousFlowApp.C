@@ -20,8 +20,10 @@
 #include "PorousFlow2PhasePS_VG.h"
 #include "PorousFlow1PhaseP.h"
 #include "PorousFlow2PhasePP_VG.h"
+#include "PorousFlow2PhasePP_RSC.h"
 #include "PorousFlowMassFraction.h"
 #include "PorousFlow1PhaseP_VG.h"
+#include "PorousFlow1PhaseP_BW.h"
 #include "PorousFlow2PhasePS.h"
 #include "PorousFlowVariableBase.h"
 #include "PorousFlowBrine.h"
@@ -44,6 +46,7 @@
 #include "PorousFlowRelativePermeabilityCorey.h"
 #include "PorousFlowRelativePermeabilityConst.h"
 #include "PorousFlowRelativePermeabilityVG.h"
+#include "PorousFlowRelativePermeabilityBW.h"
 #include "PorousFlowViscosityConst.h"
 #include "PorousFlowVolumetricStrain.h"
 #include "PorousFlowJoiner.h"
@@ -135,8 +138,10 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlow2PhasePS_VG);
   registerMaterial(PorousFlow1PhaseP);
   registerMaterial(PorousFlow2PhasePP_VG);
+  registerMaterial(PorousFlow2PhasePP_RSC);
   registerMaterial(PorousFlowMassFraction);
   registerMaterial(PorousFlow1PhaseP_VG);
+  registerMaterial(PorousFlow1PhaseP_BW);
   registerMaterial(PorousFlow2PhasePS);
   registerMaterial(PorousFlowVariableBase);
   registerMaterial(PorousFlowBrine);
@@ -159,6 +164,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowRelativePermeabilityCorey);
   registerMaterial(PorousFlowRelativePermeabilityConst);
   registerMaterial(PorousFlowRelativePermeabilityVG);
+  registerMaterial(PorousFlowRelativePermeabilityBW);
   registerMaterial(PorousFlowViscosityConst);
   registerMaterial(PorousFlowVolumetricStrain);
   registerMaterial(PorousFlowJoiner);

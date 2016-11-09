@@ -29,7 +29,7 @@ PorousFlowRelativePermeabilityConst::relativePermeability(Real /*seff*/) const
 }
 
 Real
-PorousFlowRelativePermeabilityConst::dRelativePermeability_dS(Real /*seff*/) const
+PorousFlowRelativePermeabilityConst::dRelativePermeability(Real /*seff*/) const
 {
   return 0.0;
 }

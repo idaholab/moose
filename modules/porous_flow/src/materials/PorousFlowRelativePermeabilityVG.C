@@ -6,47 +6,44 @@
 /****************************************************************/
 
 #include "PorousFlowRelativePermeabilityVG.h"
+#include "libmesh/utility.h"
 
 template<>
 InputParameters validParams<PorousFlowRelativePermeabilityVG>()
 {
   InputParameters params = validParams<PorousFlowRelativePermeabilityBase>();
-  params.addRequiredRangeCheckedParam<Real>("m_j", "m_j > 0 & m_j < 1", "The van Genuchten exponent of phase j");
-  params.addRangeCheckedParam<Real>("s_ls", 1.0, "s_ls > 0 & s_ls <= 1", "The fully saturated phase saturation. Default is 1");
-  params.addClassDescription("This Material calculates relative permeability of a phase Sj using the van Genuchten model");
+  params.addRequiredRangeCheckedParam<Real>("m", "m > 0 & m < 1", "The van Genuchten exponent of the phase");
+  params.addRangeCheckedParam<Real>("seff_turnover", 1.0, "seff_turnover > 0 & seff_turnover <= 1", "The relative permeability will be a cubic for seff > seff_turnover.  The cubic is chosen so that its derivative and value matche the VG function at seff=seff_turnover");
+  params.addParam<bool>("zero_derivative", false, "Employ a cubic for seff>seff_turnover that has zero derivative at seff=1");
+  params.addClassDescription("This Material calculates relative permeability of a phase using the van Genuchten model");
   return params;
 }
 
 PorousFlowRelativePermeabilityVG::PorousFlowRelativePermeabilityVG(const InputParameters & parameters) :
     PorousFlowRelativePermeabilityBase(parameters),
-    _m(getParam<Real>("m_j")),
-    _s_ls(getParam<Real>("s_ls"))
+    _m(getParam<Real>("m")),
+    _cut(getParam<Real>("seff_turnover")),
+    _cub0(PorousFlowVanGenuchten::relativePermeability(_cut, _m)),
+    _cub1(PorousFlowVanGenuchten::drelativePermeability(_cut, _m)),
+    _cub2(_cut < 1.0 ? (getParam<bool>("zero_derivative") ? 3.0 * (1 - _cub0 - _cub1 * (1 - _cut)) / Utility::pow<2>(1.0 - _cut) + _cub1 / (1.0 - _cut) : PorousFlowVanGenuchten::d2relativePermeability(_cut, _m)) : 0.0),
+    _cub3(_cut < 1.0 ? (getParam<bool>("zero_derivative") ? - 2.0 * (1 - _cub0 - _cub1 * (1 - _cut)) / Utility::pow<3>(1.0 - _cut) - _cub1 / Utility::pow<2>(1.0 - _cut) : (1.0 - _cub0 - _cub1 * (1 - _cut) - _cub2 * Utility::pow<2>(1 - _cut)) / Utility::pow<3>(1 - _cut)) : 0.0)
 {
-}
-
-Real
-PorousFlowRelativePermeabilityVG::effectiveSaturation(Real saturation) const
-{
-  return (saturation - _s_res) / (_s_ls - _s_res);
 }
 
 Real
 PorousFlowRelativePermeabilityVG::relativePermeability(Real seff) const
 {
-  return std::sqrt(seff) * std::pow(1.0 - std::pow(1.0 - std::pow(seff, 1.0 / _m), _m), 2.0);
+  if (seff < _cut)
+    return PorousFlowVanGenuchten::relativePermeability(seff, _m);
+
+  return _cub0 + _cub1 * (seff - _cut) + _cub2 * Utility::pow<2>(seff - _cut) + _cub3 * Utility::pow<3>(seff - _cut);
 }
 
 Real
-PorousFlowRelativePermeabilityVG::dRelativePermeability_dS(Real seff) const
+PorousFlowRelativePermeabilityVG::dRelativePermeability(Real seff) const
 {
-  // Guard against division by zero
-  if (seff <= 0.0 || seff >= 1.0)
-   return 0.0;
+  if (seff < _cut)
+    return PorousFlowVanGenuchten::drelativePermeability(seff, _m);
 
-  Real a = 1.0 - std::pow(seff, 1.0 / _m);
-  Real a2 = 1.0 - std::pow(a, _m);
-  Real dkrel = (0.5 * std::pow(seff, -0.5) * a2 * a2 + 2.0 * std::pow(seff, 1.0 / _m - 0.5) *
-    std::pow(a, _m - 1.0) * a2) / (_s_ls - _s_res);
-
-  return dkrel;
+  return _cub1 + 2 * _cub2 * (seff - _cut) + 3 * _cub3 * Utility::pow<2>(seff - _cut);
 }

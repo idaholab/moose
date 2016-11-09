@@ -38,21 +38,21 @@ protected:
   void buildQpPPSS();
 
   /**
-   * Effective saturation as a function of porepressure.
+   * Effective saturation as a function of porepressure (a negative quantity).
    * Default is constant saturation = 1.
    * Over-ride in derived classes to implement other effective saturation forulations
    *
-   * @param pressure porepressure (Pa)
+   * @param pressure porepressure (Pa): a negative quantity
    * @return effective saturation
    */
   virtual Real effectiveSaturation(Real pressure) const;
 
   /**
-   * Derivative of effective saturation wrt to porepressure.
+   * Derivative of effective saturation wrt to p.
    * Default = 0 for constant saturation.
    * Over-ride in derived classes to implement other effective saturation forulations
    *
-   * @param pressure porepressure (Pa)
+   * @param pressure porepressure (Pa): a negative quantity
    * @return derivative of effective saturation wrt porepressure
    */
   virtual Real dEffectiveSaturation_dP(Real pressure) const;
@@ -62,7 +62,7 @@ protected:
    * Default = 0 for constant saturation.
    * Over-ride in derived classes to implement other effective saturation forulations
    *
-   * @param pressure porepressure (Pa)
+   * @param pressure porepressure (Pa): a negative quantity
    * @return second derivative of effective saturation wrt porepressure
    */
   virtual Real d2EffectiveSaturation_dP2(Real pressure) const;
