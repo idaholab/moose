@@ -1,4 +1,19 @@
-#pragma once
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#ifndef STEPPERBLOCK_H
+#define STEPPERBLOCK_H
 
 #include <functional>
 
@@ -15,7 +30,7 @@
 struct StepperInfo
 {
   /// The number of times the simulation has requested a dt.
-  /// This is generally equal to one on the first call fo advance(...).
+  /// This is generally equal to one on the first call fo next(...).
   int step_count;
 
   /// Current simulation time.
@@ -76,7 +91,7 @@ public:
   /// Returns a value for dt to calculate the next time step.  Implementations
   /// can assume si is not NULL.  Implementations of advance should strive to be
   /// idempotent.
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf) = 0;
+  virtual double next(const StepperInfo & si, StepperFeedback & sf) = 0;
 };
 
 namespace BaseStepper {
@@ -98,33 +113,33 @@ StepperBlock * min(StepperBlock  * a, StepperBlock * b, double tol = 0);
 class RootBlock : public StepperBlock
 {
 public:
-  RootBlock(std::function<double(const StepperInfo * si)> func);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  RootBlock(std::function<double(const StepperInfo & si)> func);
+  virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
-  std::function<double(const StepperInfo * si)> _func;
+  std::function<double(const StepperInfo & si)> _func;
 };
 
 class ModBlock : public StepperBlock
 {
 public:
-  ModBlock(StepperBlock * s, std::function<double(const StepperInfo * si, double dt)> func);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  ModBlock(StepperBlock * s, std::function<double(const StepperInfo & si, double dt)> func);
+  virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
   Ptr _stepper;
-  std::function<double(const StepperInfo * si, double dt)> _func;
+  std::function<double(const StepperInfo & si, double dt)> _func;
 };
 
 class IfBlock : public StepperBlock {
 public:
-  IfBlock(StepperBlock * on_true, StepperBlock * on_false, std::function<bool(const StepperInfo *)> func);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  IfBlock(StepperBlock * on_true, StepperBlock * on_false, std::function<bool(const StepperInfo &)> func);
+  virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
   Ptr _ontrue;
   Ptr _onfalse;
-  std::function<bool(const StepperInfo * si)> _func;
+  std::function<bool(const StepperInfo & si)> _func;
 };
 
 /// Returns the dt of the underlying stepper unmodified.  Stores/remembers this
@@ -139,7 +154,7 @@ class InstrumentedBlock : public StepperBlock
 public:
   InstrumentedBlock(double * dt_store = nullptr);
   virtual ~InstrumentedBlock();
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  virtual double next(const StepperInfo & si, StepperFeedback & sf);
   void setStepper(StepperBlock * s);
   double * dtPtr();
 
@@ -160,7 +175,7 @@ public:
   /// returned dt that was used (i.e. prev_prev_dt) instead of the last returned
   /// dt that was not used.
   RetryUnusedBlock(StepperBlock * s, double tol, bool prev_prev);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
   Ptr _stepper;
@@ -177,7 +192,7 @@ class ConstrFuncBlock : public StepperBlock
 {
 public:
   ConstrFuncBlock(StepperBlock * s, std::function<double(double)> func, double max_diff);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
   Ptr _stepper;
@@ -194,7 +209,7 @@ public:
   /// vector that the current simulation time resides between and returns the dt
   /// at the index of the lower bound.
   PiecewiseBlock(std::vector<double> times, std::vector<double> dts, bool interpolate = true);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
   std::vector<double> _times;
@@ -213,7 +228,7 @@ class MinOfBlock : public StepperBlock
 public:
   /// Stepper "a" is preferred.
   MinOfBlock(StepperBlock * a, StepperBlock * b, double tol);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
   Ptr _a;
@@ -233,7 +248,7 @@ public:
   /// than or equal to 1.0.
   AdaptiveBlock(unsigned int optimal_iters, unsigned int iter_window, double lin_iter_ratio,
                   double shrink_factor, double growth_factor);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
   unsigned int _optimal_iters;
@@ -253,7 +268,7 @@ public:
   /// adjustments to dt should be an increase or decrease.  frac_change should
   /// generally be between 0.0 and 1.0.
   SolveTimeAdaptiveBlock(int initial_direc, double frac_change);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
   double _percent_change;
@@ -273,10 +288,10 @@ public:
   /// details on e_tol and scaling_param usage - divine it from the code.
   PredictorCorrectorBlock(int start_adapting, double e_tol, double scaling_param,
                             std::string time_integrator);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
-  double estimateTimeError(const StepperInfo * si);
+  double estimateTimeError(const StepperInfo & si);
 
   int _start_adapting;
   double _e_tol;
@@ -289,12 +304,12 @@ class DT2Block : public StepperBlock
 {
 public:
   DT2Block(double time_tol, double e_tol, double e_max, int integrator_order);
-  virtual double advance(const StepperInfo * si, StepperFeedback * sf);
+  virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
   double dt();
   double resetWindow(double start, double dt);
-  double calcErr(const StepperInfo * si);
+  double calcErr(const StepperInfo & si);
   double _tol;
   double _e_tol;
   double _e_max;
@@ -304,3 +319,4 @@ private:
   std::unique_ptr<NumericVector<Number>> _big_soln;
 };
 
+#endif //STEPPERBLOCK_H

@@ -368,7 +368,7 @@ Transient::computeDT(bool first)
   if (_stepper)
   {
     StepperFeedback sf = {};
-    _new_dt = _stepper->advance(&_si, &sf);
+    _new_dt = _stepper->next(_si, sf);
     //std::c out << "DT2: t=" << _time << ", new_dt=" << _new_dt << "\n";
     if (sf.snapshot)
     {

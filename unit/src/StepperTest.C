@@ -71,7 +71,7 @@ StepperTest::fixedPoint()
   struct testcase {
     std::string title;
     double tol;
-    // For the first call to advance, positive causes returned dt to be
+    // For the first call to next, positive causes returned dt to be
     // doubled and used.  Negative causes halved.  Zero means to use the
     // stepper's returned dt.
     int violate_dt;
@@ -79,7 +79,7 @@ StepperTest::fixedPoint()
     std::vector<double> times;
     // The expected time sequence from the stepper. This sequence should be
     // exactly one longer than the times sequence to check what the stepper does
-    // after an extra call to advance.
+    // after an extra call to next.
     std::vector<double> want;
   };
 
@@ -141,10 +141,11 @@ StepperTest::fixedPoint()
     std::vector<double> want = tests[i].want;
     StepperBlock::Ptr stepper(BaseStepper::fixedTimes(times, tol));
     StepperInfo si = blankInfo();
+    StepperFeedback sf = {};
 
     for (int j = 0; j < times.size(); j++)
     {
-      dt = stepper->advance(&si, nullptr);
+      dt = stepper->next(si, sf);
       if (j == 0 && tests[i].violate_dt > 0)
         dt *= 2;
       else if (j == 0 && tests[i].violate_dt < 0)
@@ -157,7 +158,7 @@ StepperTest::fixedPoint()
         CPPUNIT_ASSERT(false);
       }
     }
-    dt = stepper->advance(&si, nullptr);
+    dt = stepper->next(si, sf);
     updateInfo(&si, nullptr, dt);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
   }
@@ -173,7 +174,7 @@ StepperTest::maxRatio()
     std::vector<double> times;
     // The expected time sequence from the stepper. This sequence should be
     // exactly one longer than the times sequence to check what the stepper does
-    // after an extra call to advance.
+    // after an extra call to next.
     std::vector<double> want;
   };
 
@@ -202,10 +203,11 @@ StepperTest::maxRatio()
     StepperBlock * s = BaseStepper::fixedTimes(times, tol);
     StepperBlock::Ptr stepper(BaseStepper::maxRatio(s, max_ratio));
     StepperInfo si = blankInfo();
+    StepperFeedback sf = {};
 
     for (int j = 0; j < times.size(); j++)
     {
-      dt = stepper->advance(&si, nullptr);
+      dt = stepper->next(si, sf);
       updateInfo(&si, nullptr, dt);
       if (std::abs(want[j] - si.time) > tol)
       {
@@ -214,7 +216,7 @@ StepperTest::maxRatio()
         CPPUNIT_ASSERT(false);
       }
     }
-    dt = stepper->advance(&si, nullptr);
+    dt = stepper->next(si, sf);
     updateInfo(&si, nullptr, dt);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
   }
@@ -230,7 +232,7 @@ StepperTest::everyN()
     std::vector<double> times;
     // The expected time sequence from the stepper. This sequence should be
     // exactly one longer than the times sequence to check what the stepper does
-    // after an extra call to advance.
+    // after an extra call to next.
     std::vector<double> want;
   };
 
@@ -253,10 +255,11 @@ StepperTest::everyN()
     StepperBlock * s = BaseStepper::fixedTimes(times, tol);
     StepperBlock::Ptr stepper(BaseStepper::everyN(s, BaseStepper::prevdt(), tests[i].every_n));
     StepperInfo si = blankInfo();
-
+    StepperFeedback sf = {};
+    
     for (int j = 0; j < times.size(); j++)
     {
-      dt = stepper->advance(&si, nullptr);
+      dt = stepper->next(si, sf);
       updateInfo(&si, nullptr, dt);
       if (std::abs(want[j] - si.time) > tol)
       {
@@ -265,7 +268,7 @@ StepperTest::everyN()
         CPPUNIT_ASSERT(false);
       }
     }
-    dt = stepper->advance(&si, nullptr);
+    dt = stepper->next(si, sf);
     updateInfo(&si, nullptr, dt);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
   }
@@ -364,7 +367,7 @@ StepperTest::DT2()
     for (int j = 0; j < solns.size(); j++)
     {
       StepperFeedback sf = {};
-      dt = s.advance(&si, &sf);
+      dt = s.next(si, sf);
       si.converged = tests[i].convergeds[j];
       updateInfo(&si, &sf, dt, &snaps);
       *si.soln_nonlin = solns[j];
@@ -400,10 +403,11 @@ StepperTest::scratch()
   if (!s)
     throw Err("got nullptr from buildStepper");
   StepperInfo si = blankInfo();
+  StepperFeedback sf = {};
 
   for (int j = 0; j < 10; j++)
   {
-    double dt = s->advance(&si, nullptr);
+    double dt = s->next(si, sf);
     //std::c out << "time=" << si.time << ", dt=" << dt << "\n";
     updateInfo(&si, nullptr, dt);
   }
