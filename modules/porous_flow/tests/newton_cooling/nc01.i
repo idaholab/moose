@@ -86,7 +86,7 @@
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey # irrelevant in this fully-saturated situation
-    n_j = 2
+    n = 2
     phase = 0
   [../]
   [./relperm_all]

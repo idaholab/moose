@@ -18,7 +18,7 @@ InputParameters validParams<PorousFlowRelativePermeabilityBase>();
 /**
  * Base class for PorousFlow relative permeability materials. All materials
  * that derive from this class must override relativePermeability() and
- * dRelativePermeability_dS() (and optionally effectiveSaturation())
+ * dRelativePermeability()
  */
 class PorousFlowRelativePermeabilityBase : public PorousFlowMaterialBase
 {
@@ -30,7 +30,7 @@ protected:
 
   /**
    * Effective saturation of fluid phase
-   * @param saturation real saturation
+   * @param saturation true saturation
    * @return effective saturation
    */
   virtual Real effectiveSaturation(Real saturation) const;
@@ -43,11 +43,11 @@ protected:
   virtual Real relativePermeability(Real seff) const = 0;
 
   /**
-   * Derivative of relative permeability equation (must be overriden in derived class)
+   * Derivative of relative permeability with respect to effective saturation
    * @param seff effective saturation
-   * @return derivative of relative permeability wrt saturation
+   * @return derivative of relative permeability wrt effective saturation
    */
-  virtual Real dRelativePermeability_dS(Real seff) const = 0;
+  virtual Real dRelativePermeability(Real seff) const = 0;
 
   /// Name of (dummy) saturation primary variable
   VariableName _saturation_variable_name;
@@ -66,6 +66,9 @@ protected:
 
   /// Sum of residual saturations over all phases
   const Real _sum_s_res;
+
+  /// Derivative of effective saturation with respect to saturation
+  const Real _dseff_ds;
 };
 
 #endif //POROUSFLOWRELATIVEPERMEABILITYBASE_H

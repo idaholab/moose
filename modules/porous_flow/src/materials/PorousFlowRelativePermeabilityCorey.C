@@ -11,14 +11,14 @@ template<>
 InputParameters validParams<PorousFlowRelativePermeabilityCorey>()
 {
   InputParameters params = validParams<PorousFlowRelativePermeabilityBase>();
-  params.addRequiredParam<Real>("n_j", "The Corey exponent of phase j.");
-  params.addClassDescription("This Material calculates relative permeability of either phase Sj, using the simple Corey model ((Sj-Sjr)/(1-S1r-S2r))^n");
+  params.addRequiredParam<Real>("n", "The Corey exponent of the phase.");
+  params.addClassDescription("This Material calculates relative permeability of the fluid phase, using the simple Corey model ((S-S_res)/(1-sum(S_res)))^n");
   return params;
 }
 
 PorousFlowRelativePermeabilityCorey::PorousFlowRelativePermeabilityCorey(const InputParameters & parameters) :
     PorousFlowRelativePermeabilityBase(parameters),
-    _n(getParam<Real>("n_j"))
+    _n(getParam<Real>("n"))
 {
 }
 
@@ -29,7 +29,7 @@ PorousFlowRelativePermeabilityCorey::relativePermeability(Real seff) const
 }
 
 Real
-PorousFlowRelativePermeabilityCorey::dRelativePermeability_dS(Real seff) const
+PorousFlowRelativePermeabilityCorey::dRelativePermeability(Real seff) const
 {
   return _n * std::pow(seff, _n - 1.0);
 }

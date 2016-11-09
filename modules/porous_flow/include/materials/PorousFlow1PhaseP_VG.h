@@ -9,7 +9,7 @@
 #define POROUSFLOW1PHASEP_VG_H
 
 #include "PorousFlow1PhaseP.h"
-#include "PorousFlowEffectiveSaturationVG.h"
+#include "PorousFlowVanGenuchten.h"
 
 //Forward Declarations
 class PorousFlow1PhaseP_VG;

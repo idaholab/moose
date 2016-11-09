@@ -117,12 +117,12 @@
   [./kr0]
     type = PorousFlowRelativePermeabilityVG
     phase = 0
-    m_j = 0.5
+    m = 0.5
   [../]
   [./kr1]
     type = PorousFlowRelativePermeabilityCorey
     phase = 1
-    n_j = 2
+    n = 2
   [../]
   [./kr_all]
     type = PorousFlowJoiner

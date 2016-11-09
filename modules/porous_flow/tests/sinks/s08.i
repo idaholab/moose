@@ -118,12 +118,12 @@
   [../]
   [./relperm0]
     type = PorousFlowRelativePermeabilityCorey
-    n_j = 1
+    n = 1
     phase = 0
   [../]
   [./relperm1]
     type = PorousFlowRelativePermeabilityCorey
-    n_j = 2
+    n = 2
     phase = 1
   [../]
   [./relperm_all]

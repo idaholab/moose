@@ -12,35 +12,41 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef POROUSFLOWEFFECTIVESATURATIONVGTEST_H
-#define POROUSFLOWEFFECTIVESATURATIONVGTEST_H
+#ifndef POROUSFLOWVANGENUCHTENTEST_H
+#define POROUSFLOWVANGENUCHTENTEST_H
 
 //CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
-#include "PorousFlowEffectiveSaturationVG.h"
+#include "PorousFlowVanGenuchten.h"
 
-class PorousFlowEffectiveSaturationVGTest : public CppUnit::TestFixture
+class PorousFlowVanGenuchtenTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( PorousFlowEffectiveSaturationVGTest );
+  CPPUNIT_TEST_SUITE( PorousFlowVanGenuchtenTest );
 
   CPPUNIT_TEST( satTest );
   CPPUNIT_TEST( dsatTest );
   CPPUNIT_TEST( d2satTest );
+  CPPUNIT_TEST( relpermTest );
+  CPPUNIT_TEST( drelpermTest );
+  CPPUNIT_TEST( d2relpermTest );
 
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  PorousFlowEffectiveSaturationVGTest();
+  PorousFlowVanGenuchtenTest();
 
   void satTest();
   void dsatTest();
   void d2satTest();
+  void relpermTest();
+  void drelpermTest();
+  void d2relpermTest();
 
  private:
   Real _ep;
 };
 
-#endif  // POROUSFLOWEFFECTIVESATURATIONVGTEST_H
+#endif  // POROUSFLOWVANGENUCHTENTEST_H
