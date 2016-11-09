@@ -20,11 +20,16 @@ The enables the use of [MathJax](http://www.mathjax.org) within markdown, refer 
 details: [python-markdown-math](https://github.com/mitya57/python-markdown-math).
 
 Inline math may be specified by enclosing the latex in single `$`: $y=a\cdot x + b$. Additionally, stand-alone math may
-be enclosed in `$$`:
+be enclosed in `$$` as shown in Equation \eqref{eqn:foobar}.
 
 $$
+\begin{equation}
+\label{eqn:foobar}
 x=\frac{1+y}{1+2z^2}.
+\end{equation}
 $$
+
+Notice, that this equation is numbered. You can utilize `\ref` and `\eqref` to reference equations on the current page.
 
 ### Admonition
 The [admonition](https://pythonhosted.org/Markdown/extensions/admonition.html) package enables for important and critical
@@ -63,9 +68,7 @@ Moose Flavored Markdown is capable of automatically creating links based on Mark
 especially useful when linking to generated pages. The syntax is identical to creating links as
 defined by [mkdocs], however the markdown path may be incomplete.
 
-* `[/Kernels/Diffusion.md]`: [/Kernels/Diffusion.md]
-* `[framework/systems/Kernels/Overview.md]`: [framework/systems/Kernels/Overview.md]
-* `[Diffusion](/Kernels/Diffusion)`: [Diffusion](/Kernels/Diffusion.md)
+* `[Diffusion](/Kernels/Diffusion.md)`: [Diffusion](/Kernels/Diffusion.md)
 
 ---
 
@@ -326,9 +329,10 @@ It is possible to include citations using latex commands, the following commands
 * `\citep{gaston2015physics}`: \citep{gaston2015physics}
 
 The bibliography style may be set within a page using the latex command
-`\bibliographystyle{unsrt}`. Three styles are currently available: 'unsrt', 'plain', 'alpha', and 'unsrtalpha'.
+`\bibliographystyle`. Three styles are currently available: 'unsrt', 'plain',
+'alpha', and 'unsrtalpha'.
 
 The references are displayed by using the latex `\bibliography{docs/moose.bib}` command. This command accepts a comma separated list of bibtex files (*.bib) to use to build citations and references. The files specified in this list must be given as a relative path to the root directory (e.g., `~/projects/moose`) of the repository.
 
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/moose.bib}
+\bibliography{bib/moose.bib}

@@ -2,30 +2,34 @@
 /* Materialize */
 html {
     font-family: GillSans, Calibri, Trebuchet, sans-serif;
+    line-height: 1.75rem;
+    color: rgba(0,0,0,1.0);
+    font-size: large;
 }
 
 h1 {
-    font-size:250%;
+    font-size:260%;
     font-weight:300;
 }
 
 h2 {
-    font-size:220%;
+    font-size:230%;
     font-weight:300;
 }
 
 h3 {
-    font-size:150%;
+    font-size:160%;
     font-weight:300;
 }
 
 h4 {
-    font-size:120%;
+    font-size:140%;
     font-weight:300;
 }
 
-p {
-    line-height:1rem;
+moose-caption {
+    padding: 5px;
+    margin: 0px;
 }
 
 #logo-container {
@@ -37,7 +41,7 @@ p {
     border-left: 2px solid #005897;
 }
 
-.collapsible-body p{
+.collapsible-body .p{
     padding:0px;
     padding-left: 30px;
     padding-top: 5px;
@@ -74,7 +78,7 @@ p {
     text-align:right;
 }
 
-.moose-parameter-table-inner th, p{
+.moose-parameter-table-inner .th, .p{
     margin: 0px;
     font-weight:100;
     color: #757575;
@@ -208,11 +212,7 @@ header, main, footer {
 
 nav ul a,
 nav .brand-logo {
-  color: #444;
-}
-
-p {
-  line-height: 2rem;
+    color: #444;
 }
 
 .button-collapse {
@@ -221,34 +221,36 @@ p {
 }
 
 .parallax-container {
-  min-height: 380px;
-  line-height: 0;
-  height: auto;
-  color: rgba(255,255,255,.9);
+    min-height: 380px;
+    line-height: 0;
+    height: auto;
+    color: rgba(255,255,255,.9);
 }
-  .parallax-container .section {
+
+.parallax-container .section {
     width: 100%;
-  }
+}
 
 @media only screen and (max-width : 992px) {
-  .parallax-container .section {
-    position: absolute;
-    top: 40%;
-  }
-  #index-banner .section {
-    top: 10%;
-  }
+    .parallax-container .section {
+        position: absolute;
+        top: 40%;
+    }
+    #index-banner .section {
+        top: 10%;
+    }
 }
 
 @media only screen and (max-width : 600px) {
-  #index-banner .section {
-    top: 0;
-  }
+    #index-banner .section {
+        top: 0;
+    }
 }
 
 .icon-block {
-  padding: 0 15px;
+    padding: 0 15px;
 }
+
 .icon-block .material-icons {
   font-size: inherit;
 }
@@ -272,7 +274,7 @@ footer.page-footer {
     margin-top:0px;
     font-weight: bold;
     display: block;
-    padding: 6px 12px;
+    padding: 6px 6px;
     color: #fff;
     margin-bottom: 12px;
     border: 0px solid transparent;
@@ -289,6 +291,7 @@ footer.page-footer {
 }
 
 .admonition > p{
+    margin: 0px;
     padding: 6px;
     text-align: left;
 }

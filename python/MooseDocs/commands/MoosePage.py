@@ -80,23 +80,46 @@ class MoosePage(NavigationNode):
     if not os.path.exists(os.path.dirname(destination)):
       os.makedirs(os.path.dirname(destination))
 
+    # Finalize the html
+    soup = self.finalize(bs4.BeautifulSoup(complete, 'html.parser'))
+
     # Write the file
     with open(destination, 'w') as fid:
       log.info('Creating {}: {}'.format(destination, self._template))
-      soup = bs4.BeautifulSoup(complete, 'html.parser')
       fid.write(soup.prettify().encode('utf-8'))
 
 
-  def relpath(self, input):
+  def finalize(self, soup):
     """
-    Returns the relative path to the supplied path compared to the current page.
 
-    Args:
-      input[tuple]: The os.path.relpath arguments.
     """
-    if input.startswith('http'):
-      return input
-    return os.path.relpath(os.path.join(self.site_dir, input), os.path.join(self.site_dir, os.path.dirname(self.url())))
+
+    def flatten(node, pages=[]):
+      """
+      Helper for creating a flat list of pages.
+      """
+      if node.filename:
+        pages.append(node)
+      for child in node.children:
+        flatten(child, pages)
+      return pages
+    pages = flatten(self.root())
+
+    for link in soup('a'):
+      href = link.get('href')
+      if href and (not href.startswith('http')) and href.endswith('.md'):
+
+        for page in pages:
+          if page.filename.endswith(href):
+            url = self.relpath(page.url())
+            log.debug('Converting link: {} --> {}'.format(href, url))
+            link['href'] = url
+            break
+          #else:
+          #  log.error('Failed to locate link {} in {}.'.format(href, self.filename))
+
+    return soup
+
 
 
   def edit(self, repo_url):

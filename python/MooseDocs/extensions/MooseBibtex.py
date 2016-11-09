@@ -35,7 +35,7 @@ class MooseBibtex(MooseCommonExtension, Preprocessor):
     content = '\n'.join(lines)
 
     # Build the database of bibtex data
-    self._citations = []              # member b/c it is used in subtitution function
+    self._citations = []              # member b/c it is used in substitution function
     self._bibtex = BibliographyData() # ""
     bibfiles = []
     match = re.search(self.RE_BIBLIOGRAPHY, content)

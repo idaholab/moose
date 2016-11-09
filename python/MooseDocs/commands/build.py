@@ -115,7 +115,7 @@ class Builder(object):
     self._pages.append(page)
 
 
-  def build(self, use_threads=True, **kwargs):
+  def build(self, use_threads=True):
     """
     Build all the pages in parallel.
     """

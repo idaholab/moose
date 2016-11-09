@@ -20,10 +20,9 @@
 
 // Setup MathJax
 MathJax.Hub.Config({
-    tex2jax: {
-        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-        inlineMath: [['$','$'], ['\\(','\\)']]
-    }
+  config: ["MMLorHTML.js"],
+  jax: ["input/TeX", "output/HTML-CSS", "output/NativeMML"],
+  extensions: ["MathMenu.js", "MathZoom.js"]
 });
 
 // The prism package for highlighting code requires the class

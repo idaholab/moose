@@ -3,6 +3,9 @@ import unittest
 from MooseDocs.testing import MarkdownTestCase
 
 class TestBibtexExtension(MarkdownTestCase):
+  """
+  Tests that Bibtex is working correctly.
+  """
 
   def testCite(self):
     md = r'\cite{testkey}\n\bibliography{bib/moose.bib}'

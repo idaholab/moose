@@ -1,8 +1,8 @@
 # Documentation Setup and Configuration
 
-!!!warning
-   This system is currently experimental, under development, and subject to change. This page is being written as
-   the various components become available.
+!!! warning
+    This system is currently experimental, under development, and subject to change. This page is being written as
+    the various components become available.
 
 MOOSE contains a single-source documentation system for creating websites, slideshows, and pdfs (coming soon)
 using [markdown](https://en.wikipedia.org/wiki/Markdown) syntax, including a custom syntax aimed to simply the

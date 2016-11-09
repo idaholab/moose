@@ -17,7 +17,8 @@ markdown_extensions:
     - admonition
     - extra
     - markdown_include.include           # pip install markdown-include
-    - mdx_math                           # pip install python-markdown-math
+    - mdx_math:                          # pip install python-markdown-math
+          enable_dollar_delimiter: True
     - MooseDocs.extensions.MooseMarkdown:
           package: True
           make: ../modules

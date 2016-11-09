@@ -8,9 +8,10 @@ class NavigationNode(object):
     name[str]: The name of the node.
     parent[NavigationNode]: The parent node in tree.
   """
-  def __init__(self, name='', parent=None, site_dir='', template=None, **kwargs):
+  def __init__(self, name='', parent=None, site_dir='', template=None, filename=None, **kwargs):
 
     # Public member variables, these are accessed by the Jinja2 template.
+    self.filename = filename
     self.name = name
     self.parent = parent
     self.children = []
@@ -18,7 +19,7 @@ class NavigationNode(object):
 
     self._config = kwargs
     self._template = template
-
+    self._pages = [] # A flat list of NavigationNode objects (see initialize)
 
   def __eq__(self, other):
     """
@@ -46,6 +47,18 @@ class NavigationNode(object):
     return helper(self)
 
 
+  def relpath(self, input):
+    """
+    Returns the relative path to the supplied path compared to the current page.
+
+    Args:
+      input[tuple]: The os.path.relpath arguments.
+    """
+    if input.startswith('http'):
+      return input
+    return os.path.relpath(os.path.join(self.site_dir, input), os.path.join(self.site_dir, os.path.dirname(self.url())))
+
+
   def build(self, **kwargs):
     """
     Method for constructing state (e.g., converting markdown).
@@ -54,7 +67,6 @@ class NavigationNode(object):
           should be avoided.
     """
     pass
-
 
   def url(self):
     """
