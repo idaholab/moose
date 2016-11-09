@@ -41,6 +41,7 @@ protected:
   /**
    * Effective saturation as a function of porepressure.
    * Default is constant saturation = 1.
+   * If porepressure < 0 then saturation < 1.
    * Over-ride in derived classes to implement other effective saturation forulations
    *
    * @param pressure porepressure (Pa)
