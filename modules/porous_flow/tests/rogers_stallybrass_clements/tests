@@ -1,0 +1,18 @@
+[Tests]
+  [./rsc01]
+    type = 'Exodiff'
+    input = 'rsc01.i'
+    exodiff = 'rsc01.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+  [../]
+  [./rsc02]
+    type = 'Exodiff'
+    input = 'rsc02.i'
+    exodiff = 'rsc02.e'
+    rel_err = 1E-5
+    use_old_floor = True
+  [../]
+[]
