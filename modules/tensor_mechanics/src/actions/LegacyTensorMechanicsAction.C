@@ -6,14 +6,15 @@
 /****************************************************************/
 #include "LegacyTensorMechanicsAction.h"
 
-template<>
-InputParameters validParams<LegacyTensorMechanicsAction>()
+template <>
+InputParameters
+validParams<LegacyTensorMechanicsAction>()
 {
   return validParams<TensorMechanicsAction>();
 }
 
-LegacyTensorMechanicsAction::LegacyTensorMechanicsAction(const InputParameters & params) :
-    TensorMechanicsAction(params)
+LegacyTensorMechanicsAction::LegacyTensorMechanicsAction(const InputParameters & params)
+  : TensorMechanicsAction(params)
 {
 }
 

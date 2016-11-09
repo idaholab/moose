@@ -6,21 +6,22 @@
 /****************************************************************/
 #include "TensorMechanicsAction.h"
 
-#include "Factory.h"
-#include "FEProblem.h"
+#include "ActionFactory.h"
 #include "Conversion.h"
+#include "FEProblem.h"
+#include "Factory.h"
 #include "MooseMesh.h"
 #include "MooseObjectAction.h"
-#include "ActionFactory.h"
 
 #include "libmesh/string_to_enum.h"
 
-template<>
-InputParameters validParams<TensorMechanicsAction>()
+template <>
+InputParameters
+validParams<TensorMechanicsAction>()
 {
   InputParameters params = validParams<Action>();
   params.addClassDescription("Set up stress divergence kernels with coordinate system aware logic");
-  params.addRequiredParam<std::vector<NonlinearVariableName> >("displacements", "The nonlinear displacement variables for the problem");
+  params.addRequiredParam<std::vector<NonlinearVariableName>>("displacements", "The nonlinear displacement variables for the problem");
   params.addParam<NonlinearVariableName>("temp", "The temperature"); // Deprecated
   params.addParam<NonlinearVariableName>("temperature", "The temperature");
 
@@ -38,17 +39,17 @@ InputParameters validParams<TensorMechanicsAction>()
   params.addParam<bool>("add_variables", false, "Add the displacement variables");
 
   // Advanced
-  params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that the stress divergence kernels will be applied to");
-  params.addParam<std::vector<AuxVariableName> >("save_in", "The displacement residuals");
-  params.addParam<std::vector<AuxVariableName> >("diag_save_in", "The displacement diagonal preconditioner terms");
+  params.addParam<std::vector<SubdomainName>>("block", "The list of ids of the blocks (subdomain) that the stress divergence kernels will be applied to");
+  params.addParam<std::vector<AuxVariableName>>("save_in", "The displacement residuals");
+  params.addParam<std::vector<AuxVariableName>>("diag_save_in", "The displacement diagonal preconditioner terms");
   params.addParamNamesToGroup("block save_in diag_save_in", "Advanced");
 
   return params;
 }
 
-TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params) :
-    Action(params),
-    _displacements(getParam<std::vector<NonlinearVariableName> >("displacements")),
+TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
+  : Action(params),
+    _displacements(getParam<std::vector<NonlinearVariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _coupled_displacements(_ndisp),
     _save_in(getParam<std::vector<AuxVariableName>>("save_in")),
@@ -131,7 +132,6 @@ TensorMechanicsAction::act()
     if (_problem->getCoordSystem(subdomain) != _coord_system)
       mooseError("The TensorMechanics action requires all subdomains to have the same coordinate system");
 
-
   //
   // Meta action which optionally spawns other actions
   //
@@ -158,7 +158,7 @@ TensorMechanicsAction::act()
     const bool second = _problem->mesh().hasSecondOrderElements();
 
     // Loop through the displacement variables
-    for (const auto & disp :  _displacements)
+    for (const auto & disp : _displacements)
     {
       // Create displacement variables
       _problem->addVariable(disp,
@@ -181,16 +181,15 @@ TensorMechanicsAction::act()
     if (_out_of_plane == OutOfPlane::None)
     {
       std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
-        { { Moose::COORD_XYZ, StrainAndIncrement::SmallTotal },               "ComputeSmallStrain" },
-        { { Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental },         "ComputeIncrementalSmallStrain" },
-        { { Moose::COORD_XYZ, StrainAndIncrement::FiniteIncremental },        "ComputeFiniteStrain" },
-        { { Moose::COORD_RZ, StrainAndIncrement::SmallTotal },                "ComputeAxisymmetricRZSmallStrain" },
-        { { Moose::COORD_RZ, StrainAndIncrement::SmallIncremental },          "ComputeAxisymmetricRZIncrementalStrain" },
-        { { Moose::COORD_RZ, StrainAndIncrement::FiniteIncremental },         "ComputeAxisymmetricRZFiniteStrain" },
-        { { Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallTotal },        "ComputeRSphericalSmallStrain" },
-        { { Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallIncremental },  "ComputeRSphericalIncrementalStrain" },
-        { { Moose::COORD_RSPHERICAL, StrainAndIncrement::FiniteIncremental }, "ComputeRSphericalFiniteStrain" }
-      };
+          {{Moose::COORD_XYZ, StrainAndIncrement::SmallTotal}, "ComputeSmallStrain"},
+          {{Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental}, "ComputeIncrementalSmallStrain"},
+          {{Moose::COORD_XYZ, StrainAndIncrement::FiniteIncremental}, "ComputeFiniteStrain"},
+          {{Moose::COORD_RZ, StrainAndIncrement::SmallTotal}, "ComputeAxisymmetricRZSmallStrain"},
+          {{Moose::COORD_RZ, StrainAndIncrement::SmallIncremental}, "ComputeAxisymmetricRZIncrementalStrain"},
+          {{Moose::COORD_RZ, StrainAndIncrement::FiniteIncremental}, "ComputeAxisymmetricRZFiniteStrain"},
+          {{Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallTotal}, "ComputeRSphericalSmallStrain"},
+          {{Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallIncremental}, "ComputeRSphericalIncrementalStrain"},
+          {{Moose::COORD_RSPHERICAL, StrainAndIncrement::FiniteIncremental}, "ComputeRSphericalFiniteStrain"}};
 
       auto type_it = type_map.find(std::make_pair(_coord_system, _strain_and_increment));
       if (type_it != type_map.end())
@@ -201,10 +200,9 @@ TensorMechanicsAction::act()
     else
     {
       std::map<StrainAndIncrement, std::string> type_map = {
-        { StrainAndIncrement::SmallTotal,        "ComputePlaneSmallStrain" },
-        { StrainAndIncrement::SmallIncremental,  "ComputePlaneIncrementalStrain" },
-        { StrainAndIncrement::FiniteIncremental, "ComputePlaneFiniteStrain" }
-      };
+          {StrainAndIncrement::SmallTotal, "ComputePlaneSmallStrain"},
+          {StrainAndIncrement::SmallIncremental, "ComputePlaneIncrementalStrain"},
+          {StrainAndIncrement::FiniteIncremental, "ComputePlaneFiniteStrain"}};
 
       // choose kernel type based on coordinate system
       auto type_it = type_map.find(_strain_and_increment);
@@ -216,9 +214,9 @@ TensorMechanicsAction::act()
 
     // set material parameters
     auto params = _factory.getValidParams(type);
-    params.applyParameters(parameters(), { "displacements", "use_displaced_mesh" });
+    params.applyParameters(parameters(), {"displacements", "use_displaced_mesh"});
 
-    params.set<std::vector<VariableName> >("displacements") = _coupled_displacements;
+    params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
     params.set<bool>("use_displaced_mesh") = false;
 
     _problem->addMaterial(type, name() + "_strain", params);
@@ -240,9 +238,9 @@ TensorMechanicsAction::act()
       params.set<NonlinearVariableName>("variable") = _displacements[i];
 
       if (_save_in.size() == _ndisp)
-        params.set<std::vector<AuxVariableName> >("save_in") = { _save_in[i] };
+        params.set<std::vector<AuxVariableName>>("save_in") = {_save_in[i]};
       if (_diag_save_in.size() == _ndisp)
-        params.set<std::vector<AuxVariableName> >("diag_save_in") = { _diag_save_in[i] };
+        params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
 
       _problem->addKernel(tensor_kernel_type, kernel_name, params);
     }
@@ -253,10 +251,9 @@ std::string
 TensorMechanicsAction::getKernelType()
 {
   std::map<Moose::CoordinateSystemType, std::string> type_map = {
-    { Moose::COORD_XYZ,        "StressDivergenceTensors" },
-    { Moose::COORD_RZ,         "StressDivergenceRZTensors" },
-    { Moose::COORD_RSPHERICAL, "StressDivergenceRSphericalTensors" }
-  };
+      {Moose::COORD_XYZ, "StressDivergenceTensors"},
+      {Moose::COORD_RZ, "StressDivergenceRZTensors"},
+      {Moose::COORD_RSPHERICAL, "StressDivergenceRSphericalTensors"}};
 
   // choose kernel type based on coordinate system
   auto type_it = type_map.find(_coord_system);
@@ -270,9 +267,9 @@ InputParameters
 TensorMechanicsAction::getKernelParameters(std::string type)
 {
   InputParameters params = _factory.getValidParams(type);
-  params.applyParameters(parameters(), { "displacements", "use_displaced_mesh", "save_in", "diag_save_in" });
+  params.applyParameters(parameters(), {"displacements", "use_displaced_mesh", "save_in", "diag_save_in"});
 
-  params.set<std::vector<VariableName> >("displacements") = _coupled_displacements;
+  params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
   params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
   // deprecated

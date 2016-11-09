@@ -11,7 +11,7 @@
 
 class TensorMechanicsAction;
 
-template<>
+template <>
 InputParameters validParams<TensorMechanicsAction>();
 
 class TensorMechanicsAction : public Action
@@ -42,13 +42,29 @@ protected:
   std::vector<SubdomainName> _subdomain_names;
 
   /// strain formulation
-  enum class Strain { Small, Finite } _strain;
+  enum class Strain
+  {
+    Small,
+    Finite
+  } _strain;
 
   /// strain formulation
-  enum class StrainAndIncrement { SmallTotal, FiniteTotal, SmallIncremental, FiniteIncremental } _strain_and_increment;
+  enum class StrainAndIncrement
+  {
+    SmallTotal,
+    FiniteTotal,
+    SmallIncremental,
+    FiniteIncremental
+  } _strain_and_increment;
 
   /// use an out of plane stress/strain formulation
-  enum class OutOfPlane { None, PlaneStress PlaneStrain Axisymmetric GeneralizedPlaneStrain } _out_of_plane;
+  enum class OutOfPlane
+  {
+    None,
+    PlaneStress,
+    PlaneStrain,
+    GeneralizedPlaneStrain
+  } _out_of_plane;
 
   /// use displaced mesh (true unless _strain is SMALL)
   bool _use_displaced_mesh;
