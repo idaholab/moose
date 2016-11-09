@@ -321,7 +321,7 @@ DT2Block::resetWindow(double start, double dt)
 {
   _start_time = start;
   _end_time = _start_time + dt;
-  _big_soln.release();
+  _big_soln.reset(nullptr);
   return dt;
 }
 
