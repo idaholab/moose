@@ -766,7 +766,7 @@ public:
   /// Getter to query if the mesh was detected to be regular and orthogonal
   bool isRegularOrthogonal() { return _regular_orthogonal_mesh; }
 
-  /// check if teh mesh has SECOND order elements
+  /// check if the mesh has SECOND order elements
   bool hasSecondOrderElements();
 
   /**

@@ -34,6 +34,7 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
+    strain = SMALL
     add_variables = true
     save_in = residual_r
   [../]

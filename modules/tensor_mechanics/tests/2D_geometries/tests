@@ -17,14 +17,14 @@
     type = Exodiff
     input = '2D-RZ_test.i'
     exodiff = '2D-RZ_test_out.e'
-    cli_args = 'Modules/TensorMechanics/Master/all/strain=SMALL
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
                 Materials/stress/type=ComputeLinearElasticStress'
   [../]
   [./axisym_incremental_strain]
     type = Exodiff
     input = '2D-RZ_test.i'
     exodiff = '2D-RZ_test_out.e'
-    cli_args = 'Modules/TensorMechanics/Master/all/strain=INCREMENTAL
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     prereq = 'axisym_smallstrain'
   [../]

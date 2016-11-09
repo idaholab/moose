@@ -55,7 +55,8 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
-    strain = INCREMENTAL
+    strain = SMALL
+    incremental = true
     add_variables = true
   [../]
 []

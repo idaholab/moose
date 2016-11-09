@@ -24,10 +24,12 @@ InputParameters validParams<TensorMechanicsAction>()
   params.addParam<NonlinearVariableName>("temp", "The temperature"); // Deprecated
   params.addParam<NonlinearVariableName>("temperature", "The temperature");
 
-  MooseEnum strainType("SMALL INCREMENTAL FINITE", "SMALL");
+  MooseEnum strainType("SMALL FINITE", "SMALL");
   params.addParam<MooseEnum>("strain", strainType, "Strain formulation");
-  MooseEnum planeStrainType("NONE WEAK GENERALIZED", "NONE");
-  params.addParam<MooseEnum>("plane_strain", planeStrainType, "Plane strain formulation");
+  params.addParam<bool>("incremental", "Use incremental or total strain");
+
+  MooseEnum outOfPlaneType("NONE PLANE_STRESS PLANE_STRAIN GENERALIZED_PLANE_STRAIN", "NONE");
+  params.addParam<MooseEnum>("out_of_plane", outOfPlaneType, "Out-of-plane stress/strain formulation");
 
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<bool>("volumetric_locking_correction", true, "Flag to correct volumetric locking");
@@ -53,8 +55,33 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params) :
     _diag_save_in(getParam<std::vector<AuxVariableName>>("diag_save_in")),
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _strain(getParam<MooseEnum>("strain").getEnum<Strain>()),
-    _plane_strain(getParam<MooseEnum>("plane_strain").getEnum<PlaneStrain>())
+    _out_of_plane(getParam<MooseEnum>("out_of_plane").getEnum<OutOfPlane>())
 {
+  // determine if incremental strains are to be used
+  if (isParamValid("incremental"))
+  {
+    const bool incremental = getParam<bool>("incremental");
+    if (!incremental && _strain == Strain::Small)
+      _strain_and_increment = StrainAndIncrement::SmallTotal;
+    else if (!incremental && _strain == Strain::Finite)
+      _strain_and_increment = StrainAndIncrement::FiniteTotal;
+    else if (incremental && _strain == Strain::Small)
+      _strain_and_increment = StrainAndIncrement::SmallIncremental;
+    else if (incremental && _strain == Strain::Finite)
+      _strain_and_increment = StrainAndIncrement::FiniteIncremental;
+    else
+      mooseError("Internal error");
+  }
+  else
+  {
+    if (_strain == Strain::Small)
+      _strain_and_increment = StrainAndIncrement::SmallTotal;
+    else if (_strain == Strain::Finite)
+      _strain_and_increment = StrainAndIncrement::FiniteIncremental;
+    else
+      mooseError("Internal error");
+  }
+
   // determine if displaced mesh is to be used
   _use_displaced_mesh = (_strain == Strain::Finite);
   if (params.isParamSetByUser("use_displaced_mesh"))
@@ -76,10 +103,10 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params) :
     mooseError("Number of diag_save_in variables should equal to the number of displacement variables " << _ndisp);
 
   // plane strain consistency check
-  if (_plane_strain != PlaneStrain::None && _ndisp != 2)
+  if (_out_of_plane != OutOfPlane::None && _ndisp != 2)
     mooseError("Plane strain only works in 2 dimensions");
 
-  if (_plane_strain != PlaneStrain::None)
+  if (_out_of_plane != OutOfPlane::None)
     mooseError("Not implemented");
 }
 
@@ -151,21 +178,21 @@ TensorMechanicsAction::act()
     //
     // no plane strain
     //
-    if (_plane_strain == PlaneStrain::None)
+    if (_out_of_plane == OutOfPlane::None)
     {
-      std::map<std::pair<Moose::CoordinateSystemType, Strain>, std::string> type_map = {
-        { { Moose::COORD_XYZ, Strain::Small },       "ComputeSmallStrain" },
-        { { Moose::COORD_XYZ, Strain::Incremental }, "ComputeIncrementalSmallStrain" },
-        { { Moose::COORD_XYZ, Strain::Finite },      "ComputeFiniteStrain" },
-        { { Moose::COORD_RZ, Strain::Small },        "ComputeAxisymmetricRZSmallStrain" },
-        { { Moose::COORD_RZ, Strain::Incremental },  "ComputeAxisymmetricRZIncrementalStrain" },
-        { { Moose::COORD_RZ, Strain::Finite },       "ComputeAxisymmetricRZFiniteStrain" },
-        { { Moose::COORD_RSPHERICAL, Strain::Small },        "ComputeRSphericalSmallStrain" },
-        { { Moose::COORD_RSPHERICAL, Strain::Incremental },  "ComputeRSphericalIncrementalStrain" },
-        { { Moose::COORD_RSPHERICAL, Strain::Finite },       "ComputeRSphericalFiniteStrain" }
+      std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
+        { { Moose::COORD_XYZ, StrainAndIncrement::SmallTotal },               "ComputeSmallStrain" },
+        { { Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental },         "ComputeIncrementalSmallStrain" },
+        { { Moose::COORD_XYZ, StrainAndIncrement::FiniteIncremental },        "ComputeFiniteStrain" },
+        { { Moose::COORD_RZ, StrainAndIncrement::SmallTotal },                "ComputeAxisymmetricRZSmallStrain" },
+        { { Moose::COORD_RZ, StrainAndIncrement::SmallIncremental },          "ComputeAxisymmetricRZIncrementalStrain" },
+        { { Moose::COORD_RZ, StrainAndIncrement::FiniteIncremental },         "ComputeAxisymmetricRZFiniteStrain" },
+        { { Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallTotal },        "ComputeRSphericalSmallStrain" },
+        { { Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallIncremental },  "ComputeRSphericalIncrementalStrain" },
+        { { Moose::COORD_RSPHERICAL, StrainAndIncrement::FiniteIncremental }, "ComputeRSphericalFiniteStrain" }
       };
 
-      auto type_it = type_map.find(std::make_pair(_coord_system, _strain));
+      auto type_it = type_map.find(std::make_pair(_coord_system, _strain_and_increment));
       if (type_it != type_map.end())
         type = type_it->second;
       else
@@ -173,14 +200,14 @@ TensorMechanicsAction::act()
     }
     else
     {
-      std::map<Strain, std::string> type_map = {
-        { Strain::Small,       "ComputePlaneSmallStrain" },
-        { Strain::Incremental, "ComputePlaneIncrementalStrain" },
-        { Strain::Finite,      "ComputePlaneFiniteStrain" }
+      std::map<StrainAndIncrement, std::string> type_map = {
+        { StrainAndIncrement::SmallTotal,        "ComputePlaneSmallStrain" },
+        { StrainAndIncrement::SmallIncremental,  "ComputePlaneIncrementalStrain" },
+        { StrainAndIncrement::FiniteIncremental, "ComputePlaneFiniteStrain" }
       };
 
       // choose kernel type based on coordinate system
-      auto type_it = type_map.find(_strain);
+      auto type_it = type_map.find(_strain_and_increment);
       if (type_it != type_map.end())
         type = type_it->second;
       else

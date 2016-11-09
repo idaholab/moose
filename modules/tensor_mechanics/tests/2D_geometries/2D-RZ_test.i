@@ -31,8 +31,8 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
+    strain = SMALL
     add_variables = true
-    block = 1
   [../]
 []
 
@@ -59,10 +59,8 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
-    block = 1
   [../]
   [./stress]
-    block = 1
   [../]
 []
 

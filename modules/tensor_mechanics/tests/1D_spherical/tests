@@ -4,7 +4,7 @@
     input = 'smallStrain_1DSphere.i'
     exodiff = 'smallStrain_1DSphere_out.e'
     compiler = 'CLANG GCC'
-    cli_args = 'Modules/TensorMechanics/Master/all/strain=SMALL
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
                 Materials/stress/type=ComputeLinearElasticStress'
   [../]
   [./smallStrain_1DSphere_incremental]
@@ -12,7 +12,7 @@
     input = 'smallStrain_1DSphere.i'
     exodiff = 'smallStrain_1DSphere_out.e'
     compiler = 'CLANG GCC'
-    cli_args = 'Modules/TensorMechanics/Master/all/strain=INCREMENTAL
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
                 Materials/stress/type=ComputeFiniteStrainElasticStress'
     prereq = 'smallStrain_1DSphere'
   [../]
