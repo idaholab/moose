@@ -68,7 +68,7 @@ AB2PredictorCorrector::buildStepper()
 
   StepperBlock * s = new PredictorCorrectorBlock(_start_adapting, _e_tol, _scaling_parameter, integrator);
   s = BaseStepper::maxRatio(s, _max_increase);
-  s = BaseStepper::everyN(s, BaseStepper::prevdt(), _steps_between_increase, _start_adapting);
+  s = BaseStepper::everyN(s, _steps_between_increase, _start_adapting);
   s = BaseStepper::converged(s, BaseStepper::mult(0.5));
   s = BaseStepper::initialN(BaseStepper::constant(getParam<Real>("dt")), s, _start_adapting);
   return s;

@@ -48,6 +48,18 @@ public:
 int Logger::level = 0;
 bool Logger::on = true;
 
+bool
+StepperBlock::logging()
+{
+  return Logger::on;
+}
+
+void
+StepperBlock::logging(bool on)
+{
+  Logger::on = on;
+}
+
 InstrumentedBlock::InstrumentedBlock(double * dt_store)
     : _stepper(nullptr), _dt_store(dt_store), _own(!dt_store)
 {
@@ -396,7 +408,7 @@ IfBlock::IfBlock(StepperBlock * on_true, StepperBlock * on_false,
 double
 IfBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
-  Logger l("OnFunc");
+  Logger l("If");
   bool val = _func(si);
   if (val)
     return l.val(_ontrue->next(si, sf));
@@ -414,7 +426,7 @@ ModBlock::ModBlock(StepperBlock * s,
 double
 ModBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
-  Logger l("Constr");
+  Logger l("Mod");
   return l.val(_func(si, _stepper->next(si, sf)));
 }
 
@@ -426,7 +438,8 @@ RootBlock::RootBlock(std::function<double(const StepperInfo & si)> func)
 double
 RootBlock::next(const StepperInfo & si, StepperFeedback &)
 {
-  return _func(si);
+  Logger l("Root");
+  return l.val(_func(si));
 }
 
 StepperBlock *
@@ -523,8 +536,10 @@ BaseStepper::between(StepperBlock * on, StepperBlock * between, std::vector<doub
 }
 
 StepperBlock *
-BaseStepper::everyN(StepperBlock * nth, StepperBlock * between, int every_n, int offset)
+BaseStepper::everyN(StepperBlock * nth, int every_n, int offset, StepperBlock * between)
 {
+  if (!between)
+    between = BaseStepper::prevdt();
   return new IfBlock(nth, between, [=](const StepperInfo & si) {
     return (si.step_count + (every_n - offset) - 1) % every_n == 0;
   });

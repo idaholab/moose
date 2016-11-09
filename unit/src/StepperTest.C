@@ -19,9 +19,249 @@
 #include <cmath>
 #include <cstdio>
 
-CPPUNIT_TEST_SUITE_REGISTRATION( StepperTest );
+CPPUNIT_TEST_SUITE_REGISTRATION(StepperTest);
 
-void cloneStepperInfo(StepperInfo* src, StepperInfo* dst) {
+StepperInfo blankInfo();
+void updateInfo(StepperInfo * si, StepperFeedback * sf, double dt, std::map<double, StepperInfo> * snaps = nullptr);
+void cloneStepperInfo(StepperInfo * src, StepperInfo * dst);
+
+struct BasicTest
+{
+  std::string title;
+  double tol;
+  // time step on which actual used dt is half (negative) double (positive) what was returned
+  int wrong_dt;
+  StepperBlock * stepper;
+  std::vector<bool> convergeds;
+  std::vector<double> want_dts;
+};
+
+void
+StepperTest::baseSteppers()
+{
+  StepperBlock::logging(false);
+
+  double tol = 1e-10;
+  double inf = std::numeric_limits<double>::infinity();
+
+  BasicTest tests[] = {
+      {"fixedTimes zero-len-seq",
+       tol,
+       0,
+       BaseStepper::fixedTimes({}, tol),
+       {true},
+       {inf}},
+      {"fixedTimes normal-seq",
+       1e-10,
+       false,
+       BaseStepper::fixedTimes({1, 2, 5}, tol),
+       {true, true, true, true},
+       {1, 1, 3, inf}},
+      {// checks that the stepper doesn't repeat time t0 with a dt=0 if a
+       // fixed-point time is equal to the initial time.
+       "fixedTimes want-point-t0-on-same",
+       tol,
+       0,
+       BaseStepper::fixedTimes({0, 1, 3}, tol),
+       {true, true, true, true},
+       {1, 2, inf, inf}},
+      {"fixedTimes under-tolerance",
+       tol,
+       0,
+       BaseStepper::fixedTimes({1e-11, 1, 3}, tol),
+       {true, true, true, true},
+       {1, 2, inf, inf}},
+      {"fixedTimes over-tolerance",
+       tol,
+       0,
+       BaseStepper::fixedTimes({1e-9, 1, 3}, tol),
+       {true, true, true, true},
+       {1e-9, 1 - 1e-9, 2, inf}},
+      {"fixedTimes violate-dt-under",
+       tol,
+       -1,
+       BaseStepper::fixedTimes({1, 2, 5}, tol),
+       {true, true, true, true},
+       {0.5, 0.5, 1, 3}},
+      {"fixedTimes violate-dt-over",
+       tol,
+       +1,
+       BaseStepper::fixedTimes({1, 2, 5}, tol),
+       {true, true, true, true},
+       {2, 3, inf, inf}},
+      {"everyN  const",
+       tol,
+       0,
+       BaseStepper::everyN(BaseStepper::fixedTimes({1, 3, 5}, tol), 2),
+       {true, true, true, true},
+       {1, 1, 1, 1}},
+      {"maxRatio constrained",
+       tol,
+       0,
+       BaseStepper::maxRatio(BaseStepper::fixedTimes({1, 2, 5}, tol), 2),
+       {true, true, true, true},
+       {1, 1, 2, 1}},
+      {"maxRatio unconstrained",
+       tol,
+       0,
+       BaseStepper::maxRatio(BaseStepper::fixedTimes({1, 2, 5}, tol), 3),
+       {true, true, true, true},
+       {1, 1, 3, 9}}};
+
+  tableTestBasic(tests);
+}
+
+void
+StepperTest::DT2()
+{
+  StepperBlock::logging(false);
+
+  struct testcase
+  {
+    std::string title;
+    double e_tol;
+    double e_max;
+    std::vector<std::vector<double>> solns;
+    std::vector<double> want_dts;
+    std::vector<bool> convergeds;
+    std::vector<double> want_times;
+  };
+
+  // Initial prev_dt is set to one - which DT2 will use for its first returned dt.
+  // The first solution vector is set *after* the first dt and time step.
+  // the times are compared after applying the most recent dt.
+  testcase tests[] = {
+      {
+          "testConvergeAll",
+          1e-10,
+          1.0,
+          {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
+          {1, 1, 0.5, 0.5},
+          {true, true, true, true},
+          {1, 0, 0.5, 1.0},
+      },
+      {
+          "testConvergeFailBeforeRewind",
+          1e-10,
+          1.0,
+          {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
+          {1, 1, 1, 0.5, 0.5},
+          {false, true, true, true, true},
+          {0, 1, 0, 0.5, 1.0},
+      },
+      {
+          "testConvergeFailOnRewind",
+          1e-10,
+          1.0,
+          {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
+          {1, 1, 1, 1, 0.5, 0.5},
+          {true, false, true, true, true, true},
+          {1, 0, 1, 0, 0.5, 1},
+      },
+      {
+          "testConvergeFailAfterRewind",
+          1e-10,
+          1.0,
+          {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
+          {1, 1, 0.5, 1, 0.5, 0.5, 0.5},
+          {true, true, false, true, true, true, true},
+          {1, 0, 0, 1, 0, 0.5, 1},
+      },
+      {
+          "testConvergeFailBeforeFinal",
+          1e-10,
+          1.0,
+          {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
+          {1, 1, 0.5, 0.5, 1, 0.5, 0.5, 0.5},
+          {true, true, true, false, true, true, true, true},
+          {1, 0, 0.5, 0.5, 1.5, 0.5, 1.0, 1.5},
+      },
+      {
+          "testConvergeAll-more",
+          1e-2,
+          1.0,
+          {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.85, .85, .85}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
+          {1, 1, 0.5, 0.5, .18, .5, .09, .09},
+          {true, true, true, true, true, true, true, true},
+          {1, 0, 0.5, 1, 1.18, 1, 1.09, 1.18},
+      }};
+
+  double tol = 1e-10;
+  double integrator_order = 1;
+
+  for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
+  {
+    double dt = 0;
+    std::vector<std::vector<double>> solns = tests[i].solns;
+    std::vector<double> want_dts = tests[i].want_dts;
+    std::vector<double> want_times = tests[i].want_times;
+
+    std::map<double, StepperInfo> snaps;
+    DT2Block s(tol, tests[i].e_tol, tests[i].e_max, integrator_order);
+    StepperInfo si = blankInfo();
+    si.prev_dt = 1; // initial dt
+
+    libMesh::Parallel::Communicator dummy_comm;
+    int n = tests[i].solns[0].size();
+    si.soln_nonlin = NumericVector<Number>::build(dummy_comm);
+    si.soln_nonlin->init(n, n, false, SERIAL);
+    si.converged = true;
+    std::stringstream ss;
+    ss << "case " << i + 1 << " (" << tests[i].title << "):\n";
+    for (int j = 0; j < solns.size(); j++)
+    {
+      StepperFeedback sf = {};
+      dt = s.next(si, sf);
+      si.converged = tests[i].convergeds[j];
+      updateInfo(&si, &sf, dt, &snaps);
+      *si.soln_nonlin = solns[j];
+      ss << "    step " << j + 1 << "\n";
+      if (std::abs(want_times[j] - si.time) > tol || std::abs(want_dts[j] - si.prev_dt) > tol)
+      {
+        ss << "        time: want " << want_times[j] << ", got " << si.time << "\n";
+        ss << "        dt  : want " << want_dts[j] << ", got " << si.prev_dt << "\n";
+        printf(ss.str().c_str());
+        CPPUNIT_ASSERT(false);
+      }
+      else
+      {
+        ss << "        time: got " << si.time << "\n";
+        ss << "        dt  : got " << si.prev_dt << "\n";
+      }
+    }
+  }
+}
+
+void
+StepperTest::scratch()
+{
+  std::string str = "(MinOfStepper (ConstStepper 4.2) (FixedPointStepper (2 4 10 12) 1e-10) 1e-10)";
+  std::vector<StepperToken> toks = lexStepper(str);
+  for (auto & tok : toks)
+  {
+    //std::c out << tok.str() << "\n";
+  }
+  StepperNode nd = parseStepper(lexStepper(str));
+  //std::c out << nd.str();
+
+  StepperBlock::Ptr s(buildStepper(nd));
+  if (!s)
+    throw Err("got nullptr from buildStepper");
+  StepperInfo si = blankInfo();
+  StepperFeedback sf = {};
+
+  for (int j = 0; j < 10; j++)
+  {
+    double dt = s->next(si, sf);
+    //std::c out << "time=" << si.time << ", dt=" << dt << "\n";
+    updateInfo(&si, nullptr, dt);
+  }
+  return;
+}
+
+void
+cloneStepperInfo(StepperInfo * src, StepperInfo * dst)
+{
   dst->step_count = src->step_count;
   dst->time = src->time;
   dst->prev_dt = src->prev_dt;
@@ -42,14 +282,15 @@ void cloneStepperInfo(StepperInfo* src, StepperInfo* dst) {
 };
 
 void
-updateInfo(StepperInfo * si, StepperFeedback * sf, double dt, std::map<double, StepperInfo>* snaps = nullptr)
+updateInfo(StepperInfo * si, StepperFeedback * sf, double dt, std::map<double, StepperInfo> * snaps)
 {
-  if (sf && sf->rewind) {
-    printf("[REWINDING...]\n");
+  if (sf && sf->rewind)
+  {
     cloneStepperInfo(&(*snaps)[sf->rewind_time], si);
     return;
-  } else if (sf && snaps && sf->snapshot) {
-    printf("[SNAPSHOTTING...]\n");
+  }
+  else if (sf && snaps && sf->snapshot)
+  {
     cloneStepperInfo(si, &(*snaps)[si->time]);
   }
   if (si->converged)
@@ -60,380 +301,49 @@ updateInfo(StepperInfo * si, StepperFeedback * sf, double dt, std::map<double, S
   si->step_count++;
 }
 
-StepperInfo blankInfo()
+StepperInfo
+blankInfo()
 {
-    return {1, 0, 0, 0, 0, 0, 0, true, true, 0, 0, 0, nullptr, nullptr, nullptr};
+  return {1, 0, 0, 0, 0, 0, 0, true, true, 0, 0, 0, nullptr, nullptr, nullptr};
 }
 
 void
-StepperTest::fixedPoint()
+StepperTest::tableTestBasic(BasicTest * tests)
 {
-  struct testcase {
-    std::string title;
-    double tol;
-    // For the first call to next, positive causes returned dt to be
-    // doubled and used.  Negative causes halved.  Zero means to use the
-    // stepper's returned dt.
-    int violate_dt;
-    // The fixed point times to hit.
-    std::vector<double> times;
-    // The expected time sequence from the stepper. This sequence should be
-    // exactly one longer than the times sequence to check what the stepper does
-    // after an extra call to next.
-    std::vector<double> want;
-  };
-
-  double inf = std::numeric_limits<double>::infinity();
-
-  testcase tests[] = {
-    {
-      "zero-len-seq",
-      1e-10,
-      0,
-      {},
-      {inf}
-    },{
-      "normal-seq",
-      1e-10,
-      0,
-      {1, 2, 5},
-      {1, 2, 5, inf}
-    },{
-      // checks that the stepper doesn't repeat time t0 with a dt=0 if a
-      // fixed-point time is equal to the initial time.
-      "want-point-t0-on-same",
-      1e-10,
-      0,
-      {0, 1, 3},
-      {1, 3, inf, inf}
-    },{
-      "under-tolerance",
-      1e-10,
-      0,
-      {1e-11, 1, 3},
-      {1, 3, inf, inf}
-    },{
-      "over-tolerance",
-      1e-10,
-      0,
-      {1e-9, 1, 3},
-      {1e-9, 1, 3, inf}
-    },{
-      "violate-dt-under",
-      1e-10,
-      -1,
-      {1, 2, 5},
-      {0.5,1, 2, 5}
-    },{
-      "violate-dt-over",
-      1e-10,
-      +1,
-      {1, 2, 5},
-      {2, 5, inf, inf}
-    }
-  };
-
   for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
   {
     double dt = 0;
-    double tol = tests[i].tol;
-    std::vector<double> times = tests[i].times;
-    std::vector<double> want = tests[i].want;
-    StepperBlock::Ptr stepper(BaseStepper::fixedTimes(times, tol));
-    StepperInfo si = blankInfo();
-    StepperFeedback sf = {};
-
-    for (int j = 0; j < times.size(); j++)
-    {
-      dt = stepper->next(si, sf);
-      if (j == 0 && tests[i].violate_dt > 0)
-        dt *= 2;
-      else if (j == 0 && tests[i].violate_dt < 0)
-        dt /= 2;
-      updateInfo(&si, nullptr, dt);
-      if (std::abs(want[j] - si.time) > tol)
-      {
-        printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
-        printf("    time_step %d: want %f, got %f\n", j+1, want[j], si.time);
-        CPPUNIT_ASSERT(false);
-      }
-    }
-    dt = stepper->next(si, sf);
-    updateInfo(&si, nullptr, dt);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
-  }
-}
-
-void
-StepperTest::maxRatio()
-{
-  struct testcase {
-    std::string title;
-    double max_ratio;
-    // The fixed point times to hit - for underlying FixedPointStepper.
-    std::vector<double> times;
-    // The expected time sequence from the stepper. This sequence should be
-    // exactly one longer than the times sequence to check what the stepper does
-    // after an extra call to next.
-    std::vector<double> want;
-  };
-
-  testcase tests[] = {
-    {
-      "constr",
-      2,
-      {1, 2, 5},
-      {1, 2, 4, 5}
-    },{
-      "no-constr",
-      3,
-      {1, 2, 5},
-      {1, 2, 5, 14}
-    }
-  };
-
-  double tol = 1e-10;
-
-  for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
-  {
-    double dt = 0;
-    double max_ratio = tests[i].max_ratio;
-    std::vector<double> times = tests[i].times;
-    std::vector<double> want = tests[i].want;
-    StepperBlock * s = BaseStepper::fixedTimes(times, tol);
-    StepperBlock::Ptr stepper(BaseStepper::maxRatio(s, max_ratio));
-    StepperInfo si = blankInfo();
-    StepperFeedback sf = {};
-
-    for (int j = 0; j < times.size(); j++)
-    {
-      dt = stepper->next(si, sf);
-      updateInfo(&si, nullptr, dt);
-      if (std::abs(want[j] - si.time) > tol)
-      {
-        printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
-        printf("    time_step %d: want %f, got %f\n", j+1, want[j], si.time);
-        CPPUNIT_ASSERT(false);
-      }
-    }
-    dt = stepper->next(si, sf);
-    updateInfo(&si, nullptr, dt);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
-  }
-}
-
-void
-StepperTest::everyN()
-{
-  struct testcase {
-    std::string title;
-    int every_n;
-    // The fixed point times to hit - for underlying FixedPointStepper.
-    std::vector<double> times;
-    // The expected time sequence from the stepper. This sequence should be
-    // exactly one longer than the times sequence to check what the stepper does
-    // after an extra call to next.
-    std::vector<double> want;
-  };
-
-  testcase tests[] = {
-    {
-      "constr",
-      2,
-      {1, 3, 5},
-      {1, 2, 3, 4}
-    }
-  };
-
-  double tol = 1e-10;
-
-  for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
-  {
-    double dt = 0;
-    std::vector<double> times = tests[i].times;
-    std::vector<double> want = tests[i].want;
-    StepperBlock * s = BaseStepper::fixedTimes(times, tol);
-    StepperBlock::Ptr stepper(BaseStepper::everyN(s, BaseStepper::prevdt(), tests[i].every_n));
-    StepperInfo si = blankInfo();
-    StepperFeedback sf = {};
-    
-    for (int j = 0; j < times.size(); j++)
-    {
-      dt = stepper->next(si, sf);
-      updateInfo(&si, nullptr, dt);
-      if (std::abs(want[j] - si.time) > tol)
-      {
-        printf("case %d (%s) failed:\n", i+1, tests[i].title.c_str());
-        printf("    time_step %d: want %f, got %f\n", j+1, want[j], si.time);
-        CPPUNIT_ASSERT(false);
-      }
-    }
-    dt = stepper->next(si, sf);
-    updateInfo(&si, nullptr, dt);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(want[want.size()-1], si.time, tol);
-  }
-}
-
-void
-StepperTest::DT2()
-{
-  struct testcase {
-    std::string title;
-    double e_tol;
-    double e_max;
-    std::vector<std::vector<double> > solns;
-    std::vector<double> want_dts;
-    std::vector<bool> convergeds;
-    std::vector<double> want_times;
-  };
-
-  // Initial prev_dt is set to one - which DT2 will use for its first returned dt.
-  // The first solution vector is set *after* the first dt and time step.
-  // the times are compared after applying the most recent dt.
-  testcase tests[] = {
-    {
-      "testConvergeAll",
-      1e-10,
-      1.0,
-      {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
-      {1   , 1   , 0.5 , 0.5 },
-      {true, true, true, true},
-      {1   , 0   , 0.5 , 1.0 },
-    }, {
-      "testConvergeFailBeforeRewind",
-      1e-10,
-      1.0,
-      {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
-      {1    , 1   , 1   , 0.5 , 0.5 },
-      {false, true, true, true, true},
-      {0    , 1   , 0   , 0.5 , 1.0 },
-     }, {
-      "testConvergeFailOnRewind",
-      1e-10,
-      1.0,
-      {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
-      {1   , 1    , 1   , 1   , 0.5 , 0.5 },
-      {true, false, true, true, true, true},
-      {1   , 0    , 1   , 0   , 0.5 , 1   },
-     }, {
-      "testConvergeFailAfterRewind",
-      1e-10,
-      1.0,
-      {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
-      {1   , 1   , 0.5  , 1   , 0.5 , 0.5 , 0.5 },
-      {true, true, false, true, true, true, true},
-      {1   , 0   , 0    , 1   , 0   , 0.5 , 1   },
-    }, {
-      "testConvergeFailBeforeFinal",
-      1e-10,
-      1.0,
-      {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
-      {1   , 1   , 0.5 , 0.5  , 1   , 0.5 , 0.5 , 0.5 },
-      {true, true, true, false, true, true, true, true},
-      {1   , 0   , 0.5 , 0.5  , 1.5 , 0.5 , 1.0 , 1.5 },
-    }, {
-      "testConvergeAll-more",
-      1e-2,
-      1.0,
-      {{.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.85, .85, .85}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}, {.9, .9, .9}},
-      {1   , 1   , 0.5 , 0.5 , .18 , .5  , .09 , .09 },
-      {true, true, true, true, true, true, true, true},
-      {1   , 0   , 0.5 , 1   , 1.18, 1   , 1.09, 1.18},
-    }
-  };
-
-  double tol = 1e-10;
-  double integrator_order = 1;
-
-  for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
-  {
-    double dt = 0;
-    std::vector<std::vector<double> > solns = tests[i].solns;
     std::vector<double> want_dts = tests[i].want_dts;
-    std::vector<double> want_times = tests[i].want_times;
+    StepperBlock * s = tests[i].stepper;
+    double tol = tests[i].tol;
+    int wrong_dt = tests[i].wrong_dt;
 
-    std::map<double, StepperInfo> snaps;
-    DT2Block s(tol, tests[i].e_tol, tests[i].e_max, integrator_order);
     StepperInfo si = blankInfo();
-    si.prev_dt = 1; // initial dt
-
-    libMesh::Parallel::Communicator dummy_comm;
-    int n = tests[i].solns[0].size();
-    si.soln_nonlin = NumericVector<Number>::build(dummy_comm);
-    si.soln_nonlin->init(n, n, false, SERIAL);
     si.converged = true;
     std::stringstream ss;
-    ss << "case " << i+1 << " (" << tests[i].title << "):\n";
-    for (int j = 0; j < solns.size(); j++)
+    ss << "case " << i + 1 << " (" << tests[i].title << "):\n";
+    for (int j = 0; j < want_dts.size(); j++)
     {
       StepperFeedback sf = {};
-      dt = s.next(si, sf);
+      dt = s->next(si, sf);
+      if (j == std::abs(wrong_dt) - 1 && wrong_dt > 0)
+        dt *= 2;
+      else if (j == std::abs(wrong_dt) - 1 && wrong_dt < 0)
+        dt /= 2;
       si.converged = tests[i].convergeds[j];
-      updateInfo(&si, &sf, dt, &snaps);
-      *si.soln_nonlin = solns[j];
-      ss << "    step " << j+1 << "\n";
-      if (std::abs(want_times[j] - si.time) > tol || std::abs(want_dts[j] - si.prev_dt) > tol)
+      updateInfo(&si, &sf, dt, nullptr);
+      ss << "    step " << j + 1 << "\n";
+      if (std::abs(want_dts[j] - si.prev_dt) > tol)
       {
-        ss << "        time: want " << want_times[j] << ", got " << si.time << "\n";
         ss << "        dt  : want " << want_dts[j] << ", got " << si.prev_dt << "\n";
         printf(ss.str().c_str());
         CPPUNIT_ASSERT(false);
       }
       else
       {
-        ss << "        time: got "  << si.time << "\n";
         ss << "        dt  : got " << si.prev_dt << "\n";
       }
     }
+    delete s;
   }
 }
-
-void
-StepperTest::scratch()
-{
-  std::string str = "(MinOfStepper (ConstStepper 4.2) (FixedPointStepper (2 4 10 12) 1e-10) 1e-10)";
-  std::vector<StepperToken> toks = lexStepper(str);
-  for (auto& tok : toks) {
-    //std::c out << tok.str() << "\n";
-  }
-  StepperNode nd = parseStepper(lexStepper(str));
-  //std::c out << nd.str();
-
-  StepperBlock::Ptr s(buildStepper(nd));
-  if (!s)
-    throw Err("got nullptr from buildStepper");
-  StepperInfo si = blankInfo();
-  StepperFeedback sf = {};
-
-  for (int j = 0; j < 10; j++)
-  {
-    double dt = s->next(si, sf);
-    //std::c out << "time=" << si.time << ", dt=" << dt << "\n";
-    updateInfo(&si, nullptr, dt);
-  }
-  return;
-
-  libMesh::Parallel::Communicator dummy_comm;
-
-  int n = 5;
-  auto tmp = NumericVector<Number>::build(dummy_comm);
-  tmp->init(n, n, false, SERIAL);
-  NumericVector<Number>& vec = *tmp.get();
-  vec.set(0, 1);
-  vec.set(1, 2);
-  vec.set(2, 5);
-
-  auto tmp2 = tmp->clone();
-  NumericVector<Number>& vec2 = *tmp2.get();
-
-  //std::c out << vec(0) << "\n";
-  //std::c out << vec(1) << "\n";
-  //std::c out << vec(2) << "\n";
-
-  //vec += vec2;
-
-  //std::c out << vec(0) << "\n";
-  //std::c out << vec(1) << "\n";
-  //std::c out << vec(2) << "\n";
-}
-

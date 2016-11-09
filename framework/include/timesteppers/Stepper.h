@@ -92,9 +92,13 @@ public:
   /// can assume si is not NULL.  Implementations of advance should strive to be
   /// idempotent.
   virtual double next(const StepperInfo & si, StepperFeedback & sf) = 0;
+
+  static void logging(bool on);
+  static bool logging();
 };
 
-namespace BaseStepper {
+namespace BaseStepper
+{
 StepperBlock * constant(double dt);
 StepperBlock * prevdt();
 StepperBlock * fixedTimes(std::vector<double> times, double tol);
@@ -104,10 +108,10 @@ StepperBlock * dtLimit(StepperBlock * s, double min, double max);
 StepperBlock * bounds(StepperBlock * s, double t_min, double t_max);
 StepperBlock * mult(double mult, StepperBlock * s = nullptr);
 StepperBlock * between(StepperBlock * on, StepperBlock * between, std::vector<double> times, double tol);
-StepperBlock * everyN(StepperBlock * nth, StepperBlock * between, int every_n, int offset = 0);
+StepperBlock * everyN(StepperBlock * nth, int every_n, int offset = 0, StepperBlock * between = nullptr);
 StepperBlock * initialN(StepperBlock * initial, StepperBlock * primary, int n);
-StepperBlock * converged(StepperBlock  * converged, StepperBlock * not_converged, bool delay = false);
-StepperBlock * min(StepperBlock  * a, StepperBlock * b, double tol = 0);
+StepperBlock * converged(StepperBlock * converged, StepperBlock * not_converged, bool delay = false);
+StepperBlock * min(StepperBlock * a, StepperBlock * b, double tol = 0);
 } // namespace BaseStepper
 
 class RootBlock : public StepperBlock
@@ -131,7 +135,8 @@ private:
   std::function<double(const StepperInfo & si, double dt)> _func;
 };
 
-class IfBlock : public StepperBlock {
+class IfBlock : public StepperBlock
+{
 public:
   IfBlock(StepperBlock * on_true, StepperBlock * on_false, std::function<bool(const StepperInfo &)> func);
   virtual double next(const StepperInfo & si, StepperFeedback & sf);
@@ -247,7 +252,7 @@ public:
   /// shrink_factor must be between 0 and 1.0.  growth_factor must be greater
   /// than or equal to 1.0.
   AdaptiveBlock(unsigned int optimal_iters, unsigned int iter_window, double lin_iter_ratio,
-                  double shrink_factor, double growth_factor);
+                double shrink_factor, double growth_factor);
   virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
@@ -287,7 +292,7 @@ public:
   /// calculations for - otherwise, prev_dt is returned by "advance".  For
   /// details on e_tol and scaling_param usage - divine it from the code.
   PredictorCorrectorBlock(int start_adapting, double e_tol, double scaling_param,
-                            std::string time_integrator);
+                          std::string time_integrator);
   virtual double next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
