@@ -1,0 +1,52 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
+#ifndef AEFVUpwindINTERNALSIDEFLUX_H
+#define AEFVUpwindINTERNALSIDEFLUX_H
+
+#include "InternalSideFluxBase.h"
+
+// Forward Declarations
+class AEFVUpwindInternalSideFlux;
+
+template<>
+InputParameters validParams<AEFVUpwindInternalSideFlux>();
+
+/**
+ * Upwind numerical flux scheme
+ * for the advection equation
+ * using a cell-centered finite volume method
+ */
+class AEFVUpwindInternalSideFlux : public InternalSideFluxBase
+{
+public:
+
+  AEFVUpwindInternalSideFlux(const InputParameters & parameters);
+  virtual ~AEFVUpwindInternalSideFlux();
+
+  virtual void calcFlux(unsigned int iside,
+                        unsigned int ielem,
+                        unsigned int ineig,
+                        const std::vector<Real> & uvec1,
+                        const std::vector<Real> & uvec2,
+                        const std::vector<Real> & dwave,
+                        std::vector<Real> & flux) const override;
+
+  virtual void calcJacobian(unsigned int iside,
+                            unsigned int ielem,
+                            unsigned int ineig,
+                            const std::vector<Real> & uvec1,
+                            const std::vector<Real> & uvec2,
+                            const std::vector<Real> & dwave,
+                            DenseMatrix<Real> & jac1,
+                            DenseMatrix<Real> & jac2) const override;
+
+protected:
+
+};
+
+#endif
