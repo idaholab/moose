@@ -73,7 +73,7 @@ class MooseApplicationSyntax(object):
     doxygen[str]: The URL to the doxygen page.
 
   Optional Args (only needed when check() method is called, see generate.py)
-    pages[list]: The .yml file containing the website layout (mkdocs 'pages' configuration option)
+    pages[list]: The .yml file containing the website layout
     name[str]: The name of the syntax group (i.e., the key used in the 'locations' configuration for MooseMarkdown)
     install[str]: The install directory for the markdown (see MooseMarkdown config)
     generate[bool]: When True stub pages are generated if they do not exist

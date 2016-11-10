@@ -21,4 +21,4 @@ This class is based on the implicit integration algorithm in \cite{dunne2005intr
 
 ## References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/tensor_mechanics.bib}
+\bibliography{bib/tensor_mechanics.bib}

@@ -3,6 +3,7 @@ import sys
 import argparse
 import argparse
 import logging
+import multiprocessing
 
 import extensions
 import database
@@ -11,13 +12,10 @@ import html2latex
 import utils
 
 # Check for the necessary packages, this does a load so they should all get loaded.
-if utils.check_configuration(['yaml', 'mkdocs', 'markdown', 'markdown_include', 'mdx_math']):
+if utils.check_configuration(['yaml', 'jinja2', 'markdown', 'markdown_include', 'mdx_math', 'bs4']):
   sys.exit(1)
 
 import yaml
-import mkdocs
-from mkdocs.commands import serve, build
-
 from MarkdownTable import MarkdownTable
 from MooseObjectParameterTable import MooseObjectParameterTable
 from MooseApplicationSyntax import MooseApplicationSyntax
@@ -25,9 +23,10 @@ from MooseApplicationSyntax import MooseApplicationSyntax
 import logging
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), 'moose'))
+MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), '..', 'moose'))
 if not os.path.exists(MOOSE_DIR):
   MOOSE_DIR = os.path.join(os.getenv('HOME'), 'projects', 'moose')
+
 
 class MkMooseDocsFormatter(logging.Formatter):
   """
@@ -36,32 +35,21 @@ class MkMooseDocsFormatter(logging.Formatter):
   Call the init_logging function to initialize the use of this custom formatter.
   """
   COLOR = {'DEBUG':'CYAN', 'INFO':'RESET', 'WARNING':'YELLOW', 'ERROR':'RED', 'CRITICAL':'MAGENTA'}
-  COUNTS = {'DEBUG':0, 'INFO':0, 'WARNING':0, 'ERROR':0, 'CRITICAL':0}
+  COUNTS = {'ERROR': multiprocessing.Value('I', 0, lock=True), 'WARNING': multiprocessing.Value('I', 0, lock=True)}
 
   def format(self, record):
     msg = logging.Formatter.format(self, record)
-
-    if record.name.endswith('Item'):
-      level = 3
-    elif record.name.endswith('Database'):
-      level = 2
-    elif record.name.endswith('MooseApplicationSyntax') or record.name.endswith('MooseCommonFunctions'):
-      level = 1
-    else:
-      level = 0
-
-    if record.levelname in ['DEBUG', 'WARNING', 'ERROR', 'CRITICAL']:
-      msg = '{}{}: {}'.format(' '*4*level, record.levelname, msg)
-    else:
-      msg = '{}{}'.format(' '*4*level, msg)
-
     if record.levelname in self.COLOR:
       msg = utils.colorText(msg, self.COLOR[record.levelname])
 
-    # Increment counts
-    self.COUNTS[record.levelname] += 1
+    if record.levelname in self.COUNTS:
+      with self.COUNTS[record.levelname].get_lock():
+        self.COUNTS[record.levelname].value += 1
 
     return msg
+
+  def counts(self):
+    return self.COUNTS['WARNING'].value, self.COUNTS['ERROR'].value
 
 def init_logging(verbose=False):
   """
@@ -74,23 +62,23 @@ def init_logging(verbose=False):
   else:
     level = logging.INFO
 
-  # The markdown package dumps way too much information in debug mode (so always set it to INFO)
-  log = logging.getLogger('MARKDOWN')
-  log.setLevel(logging.INFO)
-
-  # Setup the custom formatter
-  log = logging.getLogger('MooseDocs')
+  # Custom format that colors and counts errors/warnings
   formatter = MkMooseDocsFormatter()
   handler = logging.StreamHandler()
   handler.setFormatter(formatter)
-  log.addHandler(handler)
-  log.setLevel(level)
 
-  log = logging.getLogger('mkdocs')
+  # The markdown package dumps way too much information in debug mode (so always set it to INFO)
+  log = logging.getLogger('MARKDOWN')
+  log.setLevel(logging.INFO)
+  #log.addHandler(handler)
+
+  # Setup the custom formatter
+  log = logging.getLogger('MooseDocs')
   log.addHandler(handler)
   log.setLevel(level)
 
   return formatter
+
 
 class Loader(yaml.Loader):
   """
@@ -107,6 +95,7 @@ class Loader(yaml.Loader):
     if os.path.exists(filename):
       with open(filename, 'r') as f:
         return yaml.load(f, Loader)
+
 
 def yaml_load(filename, loader=Loader):
   """
@@ -125,29 +114,6 @@ def yaml_load(filename, loader=Loader):
 
   return yml
 
-def load_pages(filename, keys=[], **kwargs):
-  """
-  A YAML loader for reading the pages file.
-
-  Args:
-    filename[str]: The name for the file to load. This is normally a '.yml' file that contains the complete
-            website layout. It may also be a markdown file, in this case only that single file will be
-            served with the "home" page.
-    keys[list]: A list of top-level keys to include.
-    kwargs: key, value pairs passed to yaml_load function.
-  """
-
-  if filename.endswith('.md'):
-    pages = [{'Home':'index.md'}, {os.path.basename(filename):filename}]
-
-  else:
-    pages = yaml_load(filename, **kwargs)
-
-  # Restrict the top-level keys to those provided in the 'include' argument
-  if keys:
-    pages = [page for page in pages if page.keys()[0] in keys]
-
-  return pages
 
 def purge(extensions):
   """
@@ -168,6 +134,7 @@ def purge(extensions):
         log.debug('Removing: {}'.format(full_file))
         os.remove(full_file)
 
+
 def command_line_options():
   """
   Return the command line options for the moosedocs script.
@@ -181,6 +148,7 @@ def command_line_options():
   subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
 
   # Add the sub-commands
+  test_parser = commands.test_options(parser, subparser)
   check_parser = subparser.add_parser('check', help="Perform error checking on documentation.")
   generate_parser = commands.generate_options(parser, subparser)
   serve_parser = commands.serve_options(parser, subparser)
@@ -188,18 +156,8 @@ def command_line_options():
   latex_parser = commands.latex_options(parser, subparser)
   presentation_parser = commands.presentation_options(parser, subparser)
 
-  # Both build and serve need config file
-  for p in [serve_parser, build_parser]:
-    p.add_argument('--theme', help="Build documentation using specified theme. The available themes are: cosmo, cyborg, readthedocs, yeti, journal, bootstrap, readable, united, simplex, flatly, spacelab, amelia, cerulean, slate, mkdocs")
-    p.add_argument('--pages', default='pages.yml', help="YAML file containing the pages that are supplied to the mkdocs 'pages' configuration item. It also supports passing the name of a single markdown file, in this case only this file will be served with the 'Home' page.")
-    p.add_argument('--page-keys', default=[], nargs='+', help='A list of top-level keys from the "pages" file to include. This is a tool to help speed up the serving for development of documentation.')
-
   # Parse the arguments
   options = parser.parse_args()
-
-  # Set livereload default
-  if options.command == 'serve' and not options.livereload:
-    options.livereload = 'dirtyreload'
 
   return options
 
@@ -218,7 +176,9 @@ def moosedocs():
 
   # Execute command
   cmd = options.pop('command')
-  if cmd == 'check':
+  if cmd == 'test':
+    commands.test(**options)
+  elif cmd == 'check':
     commands.generate(stubs=False, pages_stubs=False, **options)
   elif cmd == 'generate':
     commands.generate(**options)
@@ -230,5 +190,6 @@ def moosedocs():
     commands.latex(**options)
 
   # Display logging results
-  print 'WARNINGS: {}  ERRORS: {}'.format(formatter.COUNTS['WARNING'], formatter.COUNTS['ERROR'])
-  return formatter.COUNTS['ERROR'] > 0
+  warn, err = formatter.counts()
+  print 'WARNINGS: {}  ERRORS: {}'.format(warn, err)
+  return err > 0

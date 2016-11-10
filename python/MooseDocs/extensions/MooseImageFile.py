@@ -49,18 +49,25 @@ class MooseImageFile(MooseCommonExtension, Pattern):
       return self.createErrorElement('File not found: {}'.format(rel_filename))
 
     # Create the figure element
-    fig = etree.Element('figure')
-    self.addStyle(fig, **styles)
+    el = etree.Element('div')
+    self.addStyle(el, **styles)
 
-    # Add the image
-    img = etree.SubElement(fig, 'img')
+    card = etree.SubElement(el, 'div')
+    card.set('class', 'card')
+
+    img_card = etree.SubElement(card, 'div')
+    img_card.set('class', 'card-image')
+
+    img = etree.SubElement(img_card, 'img')
     img.set('src', rel_filename)
+    img.set('class', 'materialboxed')
 
     # Add caption
     if settings['caption']:
-      caption = etree.SubElement(fig, 'figcaption')
+      caption = etree.SubElement(card, 'div')
       p = etree.SubElement(caption, 'p')
+      p.set('class', 'moose-caption')
       p.set('align', "justify")
       p.text = settings['caption']
 
-    return fig
+    return el
