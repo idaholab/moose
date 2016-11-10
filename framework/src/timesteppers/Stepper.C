@@ -79,7 +79,7 @@ InstrumentedBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
   Logger l("Instrumented");
   if (!_stepper)
-    throw "InstrumentedStepper's inner stepper not set";
+    mooseError("InstrumentedStepper's inner stepper not set");
 
   *_dt_store = _stepper->next(si, sf);
   return l.val(*_dt_store);

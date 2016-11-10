@@ -369,20 +369,15 @@ Transient::computeDT(bool first)
   {
     StepperFeedback sf = {};
     _new_dt = _stepper->next(_si, sf);
-    //std::c out << "DT2: t=" << _time << ", new_dt=" << _new_dt << "\n";
     if (sf.snapshot)
-    {
-      _snapshots[_time] = _app.backup();
-      //std::c out << "    DT2: snapshot\n";
-    }
+      // the time used in this key must be *exactly* that on the stepper just saw in StepperInfo
+      _snapshots[_si.time] = _app.backup();
     if (sf.rewind)
     {
-      //std::c out << "    DT2: rewind to t=" << sf.rewind_time << "\n";
       if (_snapshots.count(sf.rewind_time) == 0)
         mooseError("no snapshot available for requested rewind time");
       _app.restore(_snapshots[sf.rewind_time]);
       computeDT(); // recursive call necessary because rewind modifies state _si depends on
-      //std::c out << "    DT2: rewind complete\n";
     }
   }
 }
