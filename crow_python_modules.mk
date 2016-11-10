@@ -1,6 +1,6 @@
 
 DISTRIBUTION_COMPILE_COMMAND=$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -I$(CROW_LIB_INCLUDE_DIR) -I$(CROW_DIR)/include/distributions/ -I$(CROW_DIR)/include/utilities/  -MMD -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) -I$(CROW_LIB_INCLUDE_DIR) $(EIGEN_INCLUDE) -I$(CROW_DIR)/include/distributions/ -I$(CROW_DIR)/include/utilities/  -MMD -MF $@.d -MT $@ -c $< -o $@
 
 #from setup.py
 DISTRIBUTION_SOURCE=$(CROW_DIR)/src/distributions/distribution.C $(CROW_DIR)/src/utilities/MDreader.C $(CROW_DIR)/src/utilities/inverseDistanceWeigthing.C $(CROW_DIR)/src/utilities/microSphere.C $(CROW_DIR)/src/utilities/NDspline.C $(CROW_DIR)/src/utilities/ND_Interpolation_Functions.C  $(CROW_DIR)/src/distributions/distributionNDBase.C $(CROW_DIR)/src/distributions/distributionNDNormal.C $(CROW_DIR)/src/distributions/distributionFunctions.C $(CROW_DIR)/src/distributions/DistributionContainer.C $(CROW_DIR)/src/distributions/distribution_1D.C

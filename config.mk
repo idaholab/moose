@@ -71,6 +71,7 @@ PYTHON_INCLUDE += $(COVERAGE_COMPILE_EXTRA)
 PYTHON_LIB += $(COVERAGE_LINK_EXTRA)
 
 CROW_LIB_INCLUDE_DIR := $(CROW_DIR)/contrib/include
+EIGEN_INCLUDE := $(shell ./scripts/find_eigen.py)
 
 python_crow_modules :: $(PYTHON_MODULES)
 
