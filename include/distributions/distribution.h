@@ -11,8 +11,6 @@ const int _defaultSeed = 1256955321;
 
 enum truncation {MULTIPLICATIVE=1, SUM=2};
 
-class distribution;
-
 class DistributionContainer;
 
 class BasicDistribution
@@ -26,9 +24,9 @@ public:
 
    virtual double getRandom(double x);  //Same as inverseCdf, except it can be forced.
 
-   virtual double  Pdf(double x) = 0; ///< Pdf function at coordinate x
-   virtual double  Cdf(double x) = 0; ///< Cdf function at coordinate x
-   virtual double  InverseCdf(double x) = 0; ///< x
+   virtual double  pdf(double x) = 0; ///< pdf function at coordinate x
+   virtual double  cdf(double x) = 0; ///< cdf function at coordinate x
+   virtual double  inverseCdf(double x) = 0; ///< x
 
    virtual double untrPdf(double x) = 0;
    virtual double untrCdf(double x) = 0;
@@ -69,7 +67,7 @@ protected:
   std::map <std::string,std::vector<double> > _dist_vector_parameters;
   unsigned int _seed;                             ///< seed
 
-  bool _checkStatus;
+  bool _check_status;
 };
 
 

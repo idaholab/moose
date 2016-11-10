@@ -13,7 +13,7 @@ class InputParameters;
 class CrowToolsContainer
 {
 public:
-  static CrowToolsContainer & Instance();
+  static CrowToolsContainer & instance();
   /*
    * Function to construct on the fly this class through the action system
    */

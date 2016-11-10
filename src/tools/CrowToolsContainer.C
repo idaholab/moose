@@ -11,7 +11,6 @@
 #include <vector>
 #include <map>
 #include <iostream>
-#include <stdio.h>
 
 #ifndef mooseError
 #define mooseError(msg) { std::cerr << "\n\n" << msg << "\n\n"; }
@@ -133,7 +132,7 @@ CrowToolsContainer::compute(const std::string tool_alias, double value){
     return -1;
 }
 
-CrowToolsContainer & CrowToolsContainer::Instance() {
+CrowToolsContainer & CrowToolsContainer::instance() {
   if(_instance == NULL){
     _instance = new CrowToolsContainer();
   }

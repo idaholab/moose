@@ -2,7 +2,6 @@
 #define BETA_GAMMA_FUNC_H
 
 #include <iostream>
-#include <stdio.h>
 #include <cmath> // to use erfc error function
 
 /*

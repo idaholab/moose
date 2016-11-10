@@ -117,7 +117,7 @@ DistributionContainer::random(){
 bool
 DistributionContainer::checkCdf(const std::string dist_alias, double value){
   bool result;
-  if (Cdf(std::string(dist_alias),value) >= getVariable(dist_alias,"ProbabilityThreshold")){
+  if (cdf(std::string(dist_alias),value) >= getVariable(dist_alias,"ProbabilityThreshold")){
     result=true;
     _dist_by_trigger_status[dist_alias] = true;
     _last_dist_triggered = dist_alias;
@@ -132,7 +132,7 @@ DistributionContainer::checkCdf(const std::string dist_alias, double value){
 
 bool DistributionContainer::checkCdf(const std::string dist_alias, std::vector<double> value){
   bool result;
-  if (Cdf(std::string(dist_alias),value) >= getVariable(dist_alias,"ProbabilityThreshold")){
+  if (cdf(std::string(dist_alias),value) >= getVariable(dist_alias,"ProbabilityThreshold")){
     result=true;
     _dist_by_trigger_status[dist_alias] = true;
     _last_dist_triggered = dist_alias;
@@ -249,67 +249,67 @@ DistributionContainer::getDistributionVariableNames(const std::string dist_alias
 }
 
 double
-DistributionContainer::Pdf(const char * dist_alias, double x){
-   return Pdf(std::string(dist_alias),x);
+DistributionContainer::pdf(const char * dist_alias, double x){
+   return pdf(std::string(dist_alias),x);
 }
 
 double
-DistributionContainer::Pdf(const std::string dist_alias, double x){
+DistributionContainer::pdf(const std::string dist_alias, double x){
 
     if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
       MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
-      return dist->Pdf(x);
+      return dist->pdf(x);
     }
-    throwError("Pdf: Distribution " + dist_alias + " was not found in distribution container.");
+    throwError("pdf: Distribution " + dist_alias + " was not found in distribution container.");
     return -1.0;
 }
 
 double
-DistributionContainer::Pdf(const char * dist_alias, std::vector<double> x)
+DistributionContainer::pdf(const char * dist_alias, std::vector<double> x)
 {
-   return Pdf(std::string(dist_alias),x);
+   return pdf(std::string(dist_alias),x);
 }
 
 double
-DistributionContainer::Pdf(const std::string dist_alias, std::vector<double> x){
+DistributionContainer::pdf(const std::string dist_alias, std::vector<double> x){
 
     if(_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end()){
       MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
-      return dist->Pdf(x);
+      return dist->pdf(x);
     }
-    throwError("Pdf: Distribution ND" + dist_alias + " was not found in distribution container.");
+    throwError("pdf: Distribution ND" + dist_alias + " was not found in distribution container.");
     return -1.0;
 }
 
 double
-DistributionContainer::Cdf(const char * dist_alias, double x){
-   return Cdf(std::string(dist_alias),x);
+DistributionContainer::cdf(const char * dist_alias, double x){
+   return cdf(std::string(dist_alias),x);
 }
 
 double
-DistributionContainer::Cdf(const std::string dist_alias, double x){
+DistributionContainer::cdf(const std::string dist_alias, double x){
 
    if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
      MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
-     return dist->Cdf(x);
+     return dist->cdf(x);
     }
-    throwError("Cdf: Distribution " + dist_alias + " was not found in distribution container.");
+    throwError("cdf: Distribution " + dist_alias + " was not found in distribution container.");
     return -1.0;
 }
 
 double
-DistributionContainer::Cdf(const char * dist_alias, std::vector<double> x){
-  return Cdf(std::string(dist_alias),x);
+DistributionContainer::cdf(const char * dist_alias, std::vector<double> x){
+  return cdf(std::string(dist_alias),x);
 }
 
 double
-DistributionContainer::Cdf(const std::string dist_alias, std::vector<double> x){
+DistributionContainer::cdf(const std::string dist_alias, std::vector<double> x){
 
    if(_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end()){
      MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
-     return dist->Cdf(x);
+     return dist->cdf(x);
     }
-    throwError("Cdf: Distribution ND" + dist_alias + " was not found in distribution container.");
+    throwError("cdf: Distribution ND" + dist_alias + " was not found in distribution container.");
     return -1.0;
 
 }
@@ -324,7 +324,7 @@ double
 DistributionContainer::inverseCdf(const std::string dist_alias, double rng) {
     if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
       MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
-      return dist->InverseCdf(rng);
+      return dist->inverseCdf(rng);
      }
      throwError("inverseCdf: Distribution " + dist_alias + " was not found in distribution container.");
      return -1.0;
@@ -342,7 +342,7 @@ DistributionContainer::getDistributionRandom(const std::string dist_alias){
 
     if(_dist_by_name.find(dist_alias) != _dist_by_name.end()){
       MooseSharedPointer<BasicDistribution> dist = _dist_by_name.find(dist_alias)->second;
-        //return dist->InverseCdf(rng);
+        //return dist->inverseCdf(rng);
       return dist->getRandom(random());
      }
      throwError("getDistributionRandom: Distribution " + dist_alias + " was not found in distribution container.");
@@ -351,16 +351,16 @@ DistributionContainer::getDistributionRandom(const std::string dist_alias){
 }
 
 std::vector<double>
-DistributionContainer::inverseCdf(const char * dist_alias, double F, double g){
-   return inverseCdf(std::string(dist_alias),F,g);
+DistributionContainer::inverseCdf(const char * dist_alias, double f, double g){
+   return inverseCdf(std::string(dist_alias),f,g);
 }
 
 std::vector<double>
-DistributionContainer::inverseCdf(const std::string dist_alias, double F, double g){
+DistributionContainer::inverseCdf(const std::string dist_alias, double f, double g){
 
    if(_dist_nd_by_name.find(dist_alias) != _dist_nd_by_name.end()){
      MooseSharedPointer<BasicDistributionND> dist = _dist_nd_by_name.find(dist_alias)->second;
-     return dist->InverseCdf(F,g);
+     return dist->inverseCdf(f,g);
     }
     throwError("inverseCdf: Distribution ND" + dist_alias + " was not found in distribution container.");
     std::vector<double> value (2,-1.0);
@@ -392,7 +392,7 @@ int DistributionContainer::returnDimensionality(const char * dist_alias){
         return returnDimensionality(std::string(dist_alias));
 }
 
-DistributionContainer & DistributionContainer::Instance() {
+DistributionContainer & DistributionContainer::instance() {
   if(_instance == NULL){
     _instance = new DistributionContainer();
   }
@@ -401,16 +401,16 @@ DistributionContainer & DistributionContainer::Instance() {
 
 DistributionContainer * DistributionContainer::_instance = NULL;
 
-/* the str_to_string_p and free_string_p are for python use */
+/* the strToStringP and freeStringP are for python use */
 
-std::string * str_to_string_p(char *s) {
+std::string * strToStringP(char *s) {
   return new std::string(s);
 }
 
-const char * string_p_to_str(const std::string * s) {
+const char * stringPToSt(const std::string * s) {
   return s->c_str();
 }
 
-void free_string_p(std::string * s) {
+void freeStringP(std::string * s) {
   delete s;
 }

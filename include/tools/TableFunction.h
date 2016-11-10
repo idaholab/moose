@@ -2,7 +2,7 @@
 #define TABLEFUNCTION_H
 
 #include "CrowTools.h"
-#include "Interpolation_Functions.h"
+#include "InterpolationFunctions.h"
 
 class TableFunction;
 
@@ -18,7 +18,7 @@ public:
   double compute(double time);
 
 protected:
-  Interpolation_Functions _interpolation;         ///< Interpolation class
+  InterpolationFunctions _interpolation;         ///< Interpolation class
 };
 
 

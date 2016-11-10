@@ -3,16 +3,16 @@
 
 #include "CrowTools.h"
 
-class decayHeat;
+class DecayHeat;
 
 template<>
-InputParameters validParams<decayHeat>();
+InputParameters validParams<DecayHeat>();
 
-class decayHeat : public CrowTools
+class DecayHeat : public CrowTools
 {
 public:
-  decayHeat(const InputParameters & parameters);
-  virtual ~decayHeat();
+  DecayHeat(const InputParameters & parameters);
+  virtual ~DecayHeat();
   double compute(double time);
 
 protected:

@@ -1,7 +1,7 @@
 #ifndef CROWTOOLS_H
 #define CROWTOOLS_H
 
-#include "Interpolation_Functions.h"
+#include "InterpolationFunctions.h"
 #include "MooseObject.h"
 
 class CrowTools;

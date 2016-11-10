@@ -10,8 +10,8 @@ class RandomClassImpl;
  */
 
 class RandomClass {
-  RandomClassImpl *rng;
-  const double range;
+  RandomClassImpl *_rng;
+  const double _range;
 public:
   RandomClass();
   ~RandomClass();

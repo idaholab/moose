@@ -1,5 +1,5 @@
 /*
- * Interpolation_Functions.h
+ * InterpolationFunctions.h
  *
  *  Created on: Jul 10, 2012
  *      Author: alfoa
@@ -14,14 +14,12 @@
 
 enum custom_dist_fit_type {STEP_LEFT, STEP_RIGHT, LINEAR, CUBIC_SPLINE};
 
-class Interpolation_Functions;
-
-class Interpolation_Functions{
+class InterpolationFunctions{
 public:
-  Interpolation_Functions();
-  Interpolation_Functions(std::vector<double> x_coordinates, std::vector<double> y_cordinates, custom_dist_fit_type type);
+  InterpolationFunctions();
+  InterpolationFunctions(std::vector<double> x_coordinates, std::vector<double> y_coordinates, custom_dist_fit_type type);
 
-  virtual ~Interpolation_Functions();
+  virtual ~InterpolationFunctions();
 
   double interpolation (double x_point);
   double cumulativeInterpolation (double x_point);
@@ -33,12 +31,12 @@ protected:
   std::vector<double>  _y_coordinates;
   custom_dist_fit_type _type;
 
-  double interpolation_Step_Left (double x_point);
-  double interpolation_Step_Right (double x_point);
+  double interpolationStepLeft (double x_point);
+  double interpolationStepRight (double x_point);
 
-  double cumulativeInterpolation_Step_Left (double x_point);
-  double cumulativeInterpolation_Step_Right (double x_point);
-  double cumulativeInterpolation_Linear (double x_point);
+  double cumulativeInterpolationStepLeft (double x_point);
+  double cumulativeInterpolationStepRight (double x_point);
+  double cumulativeInterpolationLinear (double x_point);
 };
 
 

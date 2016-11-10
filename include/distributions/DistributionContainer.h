@@ -18,7 +18,7 @@ class BasicDistributionND;
 class DistributionContainer
 {
 public:
-  static DistributionContainer & Instance();
+  static DistributionContainer & instance();
   /**
    * Function to construct on the fly this class through the action system
    */
@@ -48,10 +48,10 @@ public:
   std::vector<std::string> getDistributionVariableNames(const std::string dist_alias);
   std::vector<std::string> getDistributionNames();
 
-  double Pdf(const char * dist_alias, double x);
-  double Pdf(const std::string dist_alias, double x);     // return pdf value of the distribution _type as function of the position x within [_xMin , xMax]
-  double Pdf(const char * dist_alias, std::vector<double> x);
-  double Pdf(const std::string dist_alias, std::vector<double> x);     // return pdf value of the distribution _type as function of the position x within [_xMin , xMax]
+  double pdf(const char * dist_alias, double x);
+  double pdf(const std::string dist_alias, double x);     // return pdf value of the distribution _type as function of the position x within [_xMin , xMax]
+  double pdf(const char * dist_alias, std::vector<double> x);
+  double pdf(const std::string dist_alias, std::vector<double> x);     // return pdf value of the distribution _type as function of the position x within [_xMin , xMax]
 
   /*
    * Function to get the cdf value of the distribution called "dist_alias"
@@ -59,10 +59,10 @@ public:
    * @param dist_alias, alias of the distribution from which retrieving the parameter
    * @param x, position
    */
-  double Cdf(const char * dist_alias, double x);
-  double Cdf(const std::string dist_alias, double x);     // return cdf value of the distribution _type as function of the position x within [_xMin , xMax]
-  double Cdf(const char * dist_alias, std::vector<double> x);
-  double Cdf(const std::string dist_alias, std::vector<double> x);     // return cdf value of the distribution _type as function of the position x within [_xMin , xMax]
+  double cdf(const char * dist_alias, double x);
+  double cdf(const std::string dist_alias, double x);     // return cdf value of the distribution _type as function of the position x within [_xMin , xMax]
+  double cdf(const char * dist_alias, std::vector<double> x);
+  double cdf(const std::string dist_alias, std::vector<double> x);     // return cdf value of the distribution _type as function of the position x within [_xMin , xMax]
 
 
   /**
@@ -91,8 +91,8 @@ public:
    */
   double inverseCdf(const char * dist_alias, double rng);
 
-  std::vector<double> inverseCdf(const char * dist_alias, double F, double g);
-  std::vector<double> inverseCdf(const std::string dist_alias, double F, double g);
+  std::vector<double> inverseCdf(const char * dist_alias, double f, double g);
+  std::vector<double> inverseCdf(const std::string dist_alias, double f, double g);
 
   double random(); // return a random number
 
@@ -139,8 +139,8 @@ protected:
   static DistributionContainer * _instance; // = NULL
 };
 
-std::string * str_to_string_p(char *s);
-const char * string_p_to_str(const std::string * s);
-void free_string_p(std::string * s);
+std::string * strToStringP(char *s);
+const char * stringPToSt(const std::string * s);
+void freeStringP(std::string * s);
 
 #endif /* DISTRIBUTIONCONTAINER_H */

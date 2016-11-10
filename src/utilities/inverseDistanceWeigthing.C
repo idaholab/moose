@@ -8,46 +8,46 @@
 InverseDistanceWeighting::InverseDistanceWeighting(std::string filename, double p){
  _data_filename = filename;
  int dimensions;
- unsigned int numberOfPoints;
+ unsigned int number_of_points;
  std::vector<double> values;
- std::vector< std::vector<double> > pointCoordinates;
+ std::vector< std::vector<double> > point_coordinates;
 
- readScatteredNDarray(_data_filename, dimensions, numberOfPoints, pointCoordinates, values);
+ readScatteredNDArray(_data_filename, dimensions, number_of_points, point_coordinates, values);
  _dimensions = dimensions;
- _number_of_points = numberOfPoints;
+ _number_of_points = number_of_points;
  _values = values;
- _point_coordinates = pointCoordinates;
+ _point_coordinates = point_coordinates;
  _p = p;
  _completed_init = true;
- _cellPoint0.resize(dimensions);
- _cellDxs.resize(dimensions);
+ _cell_point_0.resize(dimensions);
+ _cell_dxs.resize(dimensions);
 
  // Functions do determine:
-    //   * std::vector<double> _cellPoint0;
-    //   * std::vector<double> _cellDxs;
+    //   * std::vector<double> _cell_point_0;
+    //   * std::vector<double> _cell_dxs;
 
  std::vector<double> cellPointInf;
  cellPointInf.resize(dimensions);
 
  for (int d=0; d<_dimensions; d++){
-  _cellPoint0[d]  = _point_coordinates[0][d];
+  _cell_point_0[d]  = _point_coordinates[0][d];
   cellPointInf[d] = _point_coordinates[0][d];
  }
 
  for (int n=1; n<_number_of_points; n++)
   for (int d=0; d<_dimensions; d++){
-   if (_point_coordinates[n][d] < _cellPoint0[d])
-    _cellPoint0[d] = _point_coordinates[n][d];
+   if (_point_coordinates[n][d] < _cell_point_0[d])
+    _cell_point_0[d] = _point_coordinates[n][d];
    if (_point_coordinates[n][d] > cellPointInf[d])
     cellPointInf[d] = _point_coordinates[n][d];
   }
 
  for (int d=0; d<_dimensions; d++)
-  _cellDxs[d] = cellPointInf[d]-_cellPoint0[d];
+  _cell_dxs[d] = cellPointInf[d]-_cell_point_0[d];
 
  for (int i=0; i<_dimensions; i++){
-     _lowerBound.push_back(_cellPoint0.at(i));
-     _upperBound.push_back(_cellPoint0.at(i) + _cellDxs.at(i));
+     _lower_bound.push_back(_cell_point_0.at(i));
+     _upper_bound.push_back(_cell_point_0.at(i) + _cell_dxs.at(i));
  }
 
  //std::cerr << "_dimensions " << _dimensions << std::endl;
@@ -89,7 +89,7 @@ double InverseDistanceWeighting::interpolateAt(std::vector<double> point){
  return value;
 }
 
-double InverseDistanceWeighting::getGradientAt(std::vector<double> point){
+double InverseDistanceWeighting::getGradientAt(std::vector<double> /* point */){
  // TO BE COMPLETED
   if (not _completed_init)
   {
