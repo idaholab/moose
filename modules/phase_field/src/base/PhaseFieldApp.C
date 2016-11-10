@@ -240,6 +240,7 @@
 /*
  * VectorPostprocessors
  */
+#include "EulerAngleUpdaterCheck.h"
 #include "FeatureVolumeFraction.h"
 #include "FeatureVolumeVectorPostprocessor.h"
 #include "GrainCentersPostprocessor.h"
@@ -450,6 +451,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(RandomEulerAngleProvider);
   registerUserObject(SolutionRasterizer);
 
+  registerVectorPostprocessor(EulerAngleUpdaterCheck);
   registerVectorPostprocessor(FeatureVolumeVectorPostprocessor);
   registerVectorPostprocessor(GrainForcesPostprocessor);
   registerVectorPostprocessor(GrainTextureVectorPostprocessor);
