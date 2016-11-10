@@ -41,8 +41,6 @@ struct BasicTest
 void
 StepperTest::baseSteppers()
 {
-  StepperBlock::logging(false);
-
   Real tol = 1e-10;
   Real inf = std::numeric_limits<Real>::infinity();
 
@@ -129,8 +127,6 @@ StepperTest::baseSteppers()
 void
 StepperTest::DT2()
 {
-  StepperBlock::logging(false);
-
   struct testcase
   {
     std::string title;

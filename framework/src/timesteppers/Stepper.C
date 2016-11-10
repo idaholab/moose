@@ -14,53 +14,6 @@
 
 #include "Stepper.h"
 
-class Logger
-{
-public:
-  Logger(std::string loc)
-    : _loc(loc), _dt(-1)
-  {
-    if (on)
-    {
-      DBG << "[LOG] " << std::string(level * 4, ' ') << "- entering " << _loc << "\n";
-      level++;
-    }
-  }
-  ~Logger()
-  {
-    if (on)
-    {
-      level--;
-      DBG << "[LOG] " << std::string(level * 4, ' ') << "- leaving " << _loc << " (dt=" << _dt
-          << ")\n";
-    }
-  }
-  Real val(Real dt)
-  {
-    _dt = dt;
-    return dt;
-  }
-  static int level;
-  static bool on;
-  std::string _loc;
-  Real _dt;
-};
-
-int Logger::level = 0;
-bool Logger::on = true;
-
-bool
-StepperBlock::logging()
-{
-  return Logger::on;
-}
-
-void
-StepperBlock::logging(bool on)
-{
-  Logger::on = on;
-}
-
 InstrumentedBlock::InstrumentedBlock(Real * dt_store)
   : _stepper(nullptr), _dt_store(dt_store), _own(!dt_store)
 {
@@ -77,12 +30,11 @@ InstrumentedBlock::~InstrumentedBlock()
 Real
 InstrumentedBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
-  Logger l("Instrumented");
   if (!_stepper)
     mooseError("InstrumentedStepper's inner stepper not set");
 
   *_dt_store = _stepper->next(si, sf);
-  return l.val(*_dt_store);
+  return *_dt_store;
 }
 
 void
@@ -105,20 +57,19 @@ RetryUnusedBlock::RetryUnusedBlock(StepperBlock * s, Real tol, bool prev_prev)
 Real
 RetryUnusedBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
-  Logger l("RetryUnused");
   if (_prev_dt != 0 && std::abs(si.prev_dt - _prev_dt) > _tol && std::abs(si.time - _prev_time) > _tol)
   {
     if (_prev_prev)
     {
       _prev_dt = si.prev_prev_dt;
-      return l.val(si.prev_prev_dt);
+      return si.prev_prev_dt;
     }
     else
-      return l.val(_prev_dt);
+      return _prev_dt;
   }
   _prev_time = si.time;
   _prev_dt = _stepper->next(si, sf);
-  return l.val(_prev_dt);
+  return _prev_dt;
 }
 
 ConstrFuncBlock::ConstrFuncBlock(StepperBlock * s, std::function<Real(Real)> func,
@@ -130,7 +81,6 @@ ConstrFuncBlock::ConstrFuncBlock(StepperBlock * s, std::function<Real(Real)> fun
 Real
 ConstrFuncBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
-  Logger l("ConstrFunc");
   Real dt = _stepper->next(si, sf);
   Real f_curr = _func(si.time);
   Real df = std::abs(_func(si.time + dt) - f_curr);
@@ -139,7 +89,7 @@ ConstrFuncBlock::next(const StepperInfo & si, StepperFeedback & sf)
     dt /= 2.0;
     df = std::abs(_func(si.time + dt) - f_curr);
   }
-  return l.val(dt);
+  return dt;
 }
 
 PiecewiseBlock::PiecewiseBlock(std::vector<Real> times, std::vector<Real> dts,
@@ -151,17 +101,16 @@ PiecewiseBlock::PiecewiseBlock(std::vector<Real> times, std::vector<Real> dts,
 Real
 PiecewiseBlock::next(const StepperInfo & si, StepperFeedback &)
 {
-  Logger l("Piecewise");
   if (_interp)
-    return l.val(_lin.sample(si.time));
+    return _lin.sample(si.time);
 
   if (MooseUtils::relativeFuzzyGreaterEqual(si.time, _times.back()))
-    return l.val(_times.back());
+    return _times.back();
 
   for (int i = 0; i < _times.size() - 1; i++)
     if (MooseUtils::relativeFuzzyLessThan(si.time, _times[i + 1]))
-      return l.val(_dts[i]);
-  return l.val(_dts.back());
+      return _dts[i];
+  return _dts.back();
 }
 
 MinOfBlock::MinOfBlock(StepperBlock * a, StepperBlock * b, Real tol)
@@ -172,12 +121,11 @@ MinOfBlock::MinOfBlock(StepperBlock * a, StepperBlock * b, Real tol)
 Real
 MinOfBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
-  Logger l("MinOf");
   Real dta = _a->next(si, sf);
   Real dtb = _b->next(si, sf);
   if (dta - _tol < dtb)
-    return l.val(dta);
-  return l.val(dtb);
+    return dta;
+  return dtb;
 }
 
 AdaptiveBlock::AdaptiveBlock(unsigned int optimal_iters, unsigned int iter_window,
@@ -193,7 +141,6 @@ AdaptiveBlock::AdaptiveBlock(unsigned int optimal_iters, unsigned int iter_windo
 Real
 AdaptiveBlock::next(const StepperInfo & si, StepperFeedback &)
 {
-  Logger l("Adaptive");
   bool can_shrink = true;
   bool can_grow = si.converged && si.prev_converged;
 
@@ -208,12 +155,12 @@ AdaptiveBlock::next(const StepperInfo & si, StepperFeedback &)
   }
 
   if (can_grow && (si.nonlin_iters < growth_nl_its && si.lin_iters < growth_l_its))
-    return l.val(si.prev_dt * _growth_factor);
+    return si.prev_dt * _growth_factor;
   else if (can_shrink &&
            (!si.converged || si.nonlin_iters > shrink_nl_its || si.lin_iters > shrink_l_its))
-    return l.val(si.prev_dt * _shrink_factor);
+    return si.prev_dt * _shrink_factor;
   else
-    return l.val(si.prev_dt);
+    return si.prev_dt;
 };
 
 SolveTimeAdaptiveBlock::SolveTimeAdaptiveBlock(int initial_direc, Real percent_change)
@@ -224,7 +171,6 @@ SolveTimeAdaptiveBlock::SolveTimeAdaptiveBlock(int initial_direc, Real percent_c
 Real
 SolveTimeAdaptiveBlock::next(const StepperInfo & si, StepperFeedback &)
 {
-  Logger l("SolveTimeAdaptive");
   Real ratio = si.prev_solve_time_secs / si.prev_dt;
   Real prev_ratio = si.prev_prev_solve_time_secs / si.prev_prev_dt;
   Real prev_prev_ratio = si.prev_prev_prev_solve_time_secs / si.prev_prev_prev_dt;
@@ -239,7 +185,7 @@ SolveTimeAdaptiveBlock::next(const StepperInfo & si, StepperFeedback &)
     _n_steps = 0;
   }
 
-  return l.val(si.prev_dt + si.prev_dt * _percent_change * _direc);
+  return si.prev_dt + si.prev_dt * _percent_change * _direc;
 }
 
 PredictorCorrectorBlock::PredictorCorrectorBlock(int start_adapting, Real e_tol,
@@ -255,9 +201,8 @@ PredictorCorrectorBlock::PredictorCorrectorBlock(int start_adapting, Real e_tol,
 Real
 PredictorCorrectorBlock::next(const StepperInfo & si, StepperFeedback &)
 {
-  Logger l("PredictorCorrector");
   if (!si.converged)
-    return l.val(si.prev_dt);
+    return si.prev_dt;
   // original Predictor stepper actually used the Real valued time step
   // instead of step_count which is used here - which doesn't make sense for
   // this check since if t_0 != 0 or dt != 1 would make it so the predictor
@@ -265,7 +210,7 @@ PredictorCorrectorBlock::next(const StepperInfo & si, StepperFeedback &)
   // this could be changed back like the original, but then, start_adapting
   // needs to be carefully documented.
   if (si.step_count < _start_adapting)
-    return l.val(si.prev_dt);
+    return si.prev_dt;
   if (si.soln_nonlin == nullptr || si.soln_predicted == nullptr)
     mooseError("no predicted solution available");
 
@@ -274,8 +219,8 @@ PredictorCorrectorBlock::next(const StepperInfo & si, StepperFeedback &)
   Real e_max = 1.1 * _e_tol * infnorm;
 
   if (error > e_max)
-    return l.val(si.prev_dt * 0.5);
-  return l.val(si.prev_dt * _scale_param * std::pow(infnorm * _e_tol / error, 1.0 / 3.0));
+    return si.prev_dt * 0.5;
+  return si.prev_dt * _scale_param * std::pow(infnorm * _e_tol / error, 1.0 / 3.0);
 }
 
 Real
@@ -336,56 +281,48 @@ DT2Block::dt()
 Real
 DT2Block::next(const StepperInfo & si, StepperFeedback & sf)
 {
-  Logger l("DT2");
-
   if (std::abs(si.time - _end_time) < _tol && _big_soln && si.converged)
   {
-    //std::c out << "DT2:inner: set complete - calcing error\n";
     // we just finished the second of the two smaller dt steps and are ready for error calc
     Real err = calcErr(si);
     if (err > _e_max)
     {
-      //std::c out << "DT2:inner: error too large, rewinding and start over with dt/2\n";
       sf.rewind = true;
       sf.rewind_time = _start_time;
-      return l.val(resetWindow(sf.rewind_time, dt() / 2));
+      return resetWindow(sf.rewind_time, dt() / 2);
     }
 
     Real new_dt = dt() * std::pow(_e_tol / err, 1.0 / _order);
     sf.snapshot = true;
-    return l.val(resetWindow(si.time, new_dt));
+    return resetWindow(si.time, new_dt);
   }
   else if (std::abs(si.time - _end_time) < _tol && !_big_soln && si.converged)
   {
-    //std::c out << "DT2:inner: got big soln, rewinding\n";
     // collect big dt soln and rewind to collect small dt solns
     _big_soln.reset(si.soln_nonlin->clone().release());
     _big_soln->close();
     sf.rewind = true;
     sf.rewind_time = _start_time;
-    return l.val(dt() / 2.0); // doesn't actually matter what we return here because rewind
+    return dt() / 2.0; // doesn't actually matter what we return here because rewind
   }
   else if (std::abs(si.time - _start_time) < _tol && _big_soln && si.converged)
   {
-    //std::c out << "DT2:inner: just rewound - starting small steps\n";
     // we just rewound and need to do small steps
-    return l.val(dt() / 2);
+    return dt() / 2;
   }
   else if (std::abs(_start_time + dt() / 2 - si.time) < _tol && _big_soln && si.converged)
   {
-    //std::c out << "DT2:inner: finished 1st small step, doing second\n";
     // we just finished the first of the smaller dt steps
-    return l.val(dt() / 2);
+    return dt() / 2;
   }
   else
   {
-    //std::c out << "DT2:inner: starting solve sequence over\n";
     // something went wrong or this is initial call of simulation - start over
     sf.snapshot = true;
     Real ddt = dt();
     if (ddt == 0)
       ddt = si.prev_dt;
-    return l.val(resetWindow(si.time, ddt));
+    return resetWindow(si.time, ddt);
   }
 }
 
@@ -398,7 +335,6 @@ DT2Block::calcErr(const StepperInfo & si)
   diff->close();
   *diff -= *_big_soln;
   Real err = (diff->l2_norm() / std::max(_big_soln->l2_norm(), small_soln->l2_norm())) / dt();
-  //std::c out << "DT2:inner: error=" << err << ", e_tol=" << _e_tol << "\n";
   return err;
 }
 
@@ -411,11 +347,10 @@ IfBlock::IfBlock(StepperBlock * on_true, StepperBlock * on_false,
 Real
 IfBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
-  Logger l("If");
   bool val = _func(si);
   if (val)
-    return l.val(_ontrue->next(si, sf));
-  return l.val(_onfalse->next(si, sf));
+    return _ontrue->next(si, sf);
+  return _onfalse->next(si, sf);
 }
 
 ModBlock::ModBlock(StepperBlock * s,
@@ -428,8 +363,7 @@ ModBlock::ModBlock(StepperBlock * s,
 Real
 ModBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
-  Logger l("Mod");
-  return l.val(_func(si, _stepper->next(si, sf)));
+  return _func(si, _stepper->next(si, sf));
 }
 
 RootBlock::RootBlock(std::function<Real(const StepperInfo & si)> func)
@@ -440,8 +374,7 @@ RootBlock::RootBlock(std::function<Real(const StepperInfo & si)> func)
 Real
 RootBlock::next(const StepperInfo & si, StepperFeedback &)
 {
-  Logger l("Root");
-  return l.val(_func(si));
+  return _func(si);
 }
 
 StepperBlock *

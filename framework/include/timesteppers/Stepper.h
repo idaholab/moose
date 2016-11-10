@@ -21,10 +21,6 @@
 #include "MooseUtils.h"
 #include "libmesh/numeric_vector.h"
 
-#define MAKETOGETHER(a, b) a##b
-#define DBG MAKETOGETHER(std::c, out)
-#define STEPPER_LOGGING true
-
 /// Holds all information used by Steppers to calculate dt via the "advance"
 /// function.
 struct StepperInfo
@@ -92,9 +88,6 @@ public:
   /// can assume si is not NULL.  Implementations of advance should strive to be
   /// idempotent.
   virtual Real next(const StepperInfo & si, StepperFeedback & sf) = 0;
-
-  static void logging(bool on);
-  static bool logging();
 };
 
 namespace BaseStepper
