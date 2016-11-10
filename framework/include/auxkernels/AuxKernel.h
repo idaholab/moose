@@ -116,6 +116,9 @@ public:
   virtual const PostprocessorValue & getPostprocessorValue(const std::string & name);
   virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 
+  virtual const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & name, const std::string & vector_name) override;
+  virtual const VectorPostprocessorValue & getVectorPostprocessorValueByName(const VectorPostprocessorName & , const std::string & vector_name) override;
+
 protected:
   virtual const VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0) override;
 
