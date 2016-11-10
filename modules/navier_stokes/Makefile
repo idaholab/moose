@@ -3,7 +3,7 @@
 ###############################################################################
 #
 # Optional Environment variables
-# MOOSE_DIR        - Root directory of the MOOSE project 
+# MOOSE_DIR        - Root directory of the MOOSE project
 # MODULE_DIR       - Location of the MOOSE modules directory
 # FRAMEWORK_DIR    - Location of the MOOSE framework
 #
@@ -19,6 +19,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 
 # dependency on fluid_properties module
 FLUID_PROPERTIES := yes
+SKIP_LOADER      := yes
 include $(MODULE_DIR)/modules.mk
 
 # dep apps

@@ -20,6 +20,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 # dependency on tensor_mechanics and fluid_properties
 TENSOR_MECHANICS := yes
 FLUID_PROPERTIES := yes
+SKIP_LOADER      := yes
 include $(MODULE_DIR)/modules.mk
 
 # dep apps

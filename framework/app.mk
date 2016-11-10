@@ -157,6 +157,8 @@ ifeq ($(BUILD_EXEC),yes)
   all:: $(app_EXEC)
 endif
 
+BUILD_EXEC :=
+
 $(app_objects): $(app_HEADER)
 
 # Target-specific Variable Values (See GNU-make manual)

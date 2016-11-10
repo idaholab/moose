@@ -170,7 +170,11 @@ ifeq ($(ALL_MODULES),yes)
   endif
 endif
 
-APPLICATION_DIR    := $(MOOSE_DIR)/modules/module_loader
-APPLICATION_NAME   := module_loader
-LIBRARY_SUFFIX     := yes
-include $(FRAMEWORK_DIR)/app.mk
+# The loader should be used for all applications. We
+# only skip it when compiling individual modules
+ifneq ($(SKIP_LOADER),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/module_loader
+  APPLICATION_NAME   := module_loader
+  LIBRARY_SUFFIX     := yes
+  include $(FRAMEWORK_DIR)/app.mk
+endif
