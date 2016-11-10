@@ -148,6 +148,20 @@ AuxKernel::getPostprocessorValueByName(const PostprocessorName & name)
   return PostprocessorInterface::getPostprocessorValueByName(name);
 }
 
+const VectorPostprocessorValue &
+AuxKernel::getVectorPostprocessorValue(const std::string & name, const std::string & vector_name)
+{
+  _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
+  return VectorPostprocessorInterface::getVectorPostprocessorValue(name, vector_name);
+}
+
+const VectorPostprocessorValue &
+AuxKernel::getVectorPostprocessorValueByName(const VectorPostprocessorName & name, const std::string & vector_name)
+{
+  _depend_uo.insert(name);
+  return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
+}
+
 void
 AuxKernel::coupledCallback(const std::string & var_name, bool is_old)
 {
