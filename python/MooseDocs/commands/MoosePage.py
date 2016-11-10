@@ -91,32 +91,44 @@ class MoosePage(NavigationNode):
 
   def finalize(self, soup):
     """
+    Finalize the html:
 
+      1. Converts *.md links to link to the correct html file.
     """
 
-    def flatten(node, pages=[]):
+    def finder(node, desired, pages):
       """
-      Helper for creating a flat list of pages.
+      Locate nodes for the 'desired' filename
       """
-      if node.filename:
+      if node.filename and node.filename.endswith(desired):
         pages.append(node)
       for child in node.children:
-        flatten(child, pages)
+        finder(child, desired, pages)
       return pages
-    pages = flatten(self.root())
 
+    # Loop over <a> tags and update links containing .md to point to .html
     for link in soup('a'):
       href = link.get('href')
       if href and (not href.startswith('http')) and href.endswith('.md'):
+        found = []
+        finder(self.root(), href, found)
 
-        for page in pages:
-          if page.filename.endswith(href):
-            url = self.relpath(page.url())
-            log.debug('Converting link: {} --> {}'.format(href, url))
-            link['href'] = url
-            break
-          #else:
-          #  log.error('Failed to locate link {} in {}.'.format(href, self.filename))
+        # Error if file not found or if multiple files found
+        if not found:
+          log.error('Failed to locate page for markdown file {} in {}'.format(href, self.filename))
+          continue
+
+        elif len(found) > 1:
+          msg = 'Found multiple pages matching the supplied markdown file {} in {}:'.format(href, self.filename)
+          for f in found:
+            msg += '\n    {}'.format(f.filename)
+          log.error(msg)
+
+        # Update the link with the located page
+        url = self.relpath(found[0].url())
+        log.debug('Converting link: {} --> {}'.format(href, url))
+        link['href'] = url
+
 
     return soup
 

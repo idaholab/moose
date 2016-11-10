@@ -1,6 +1,6 @@
 # Documenting MOOSE Code
 
-MOOSE and MOOSE-based applications generally focus on creating C++ objects (e.g., Kernels, BCs, etc.), so it is important that these object are documented to allow other developers and users to understand the purpose of these objects. The [MOOSE documentation system](documentation/overview.md) aims to make documenting objects straightforward and natural. Moreover, accessing the object documentation is simple and allows for documentation to remain up-to-date as the code continues to advance.
+MOOSE and MOOSE-based applications generally focus on creating C++ objects (e.g., Kernels, BCs, etc.), so it is important that these object are documented to allow other developers and users to understand the purpose of these objects. The [MOOSE documentation system](documentation/index.md) aims to make documenting objects straightforward and natural. Moreover, accessing the object documentation is simple and allows for documentation to remain up-to-date as the code continues to advance.
 
 There are two primary locations that documentation should be added for code: in the source code itself and in markdown detailed description files.
 
