@@ -33,14 +33,13 @@ public:
   IsotropicPlasticityStressUpdate(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  void resetQpProperties();
+  virtual void initQpStatefulProperties() override;
 
-  virtual void computeStressInitialize(Real effectiveTrialStress);
-  virtual Real computeResidual(Real effectiveTrialStress, Real scalar);
-  virtual Real computeDerivative(Real effectiveTrialStress, Real scalar);
-  virtual void iterationFinalize(Real scalar);
-  virtual void computeStressFinalize(const RankTwoTensor & plasticStrainIncrement);
+  virtual void computeStressInitialize(Real effectiveTrialStress) override;
+  virtual Real computeResidual(Real effectiveTrialStress, Real scalar) override;
+  virtual Real computeDerivative(Real effectiveTrialStress, Real scalar) override;
+  virtual void iterationFinalize(Real scalar) override;
+  virtual void computeStressFinalize(const RankTwoTensor & plasticStrainIncrement) override;
 
   virtual void computeYieldStress();
   virtual Real computeHardeningValue(Real scalar);

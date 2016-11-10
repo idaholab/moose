@@ -36,9 +36,15 @@ public:
   /// overwrite this method.
   virtual void updateStress(RankTwoTensor & strain_increment,
                             RankTwoTensor & inelastic_strain_increment,
-                            RankTwoTensor & stress_new);
+                            RankTwoTensor & stress_new) = 0;
 
+  /// Sets the value of the global variable _qp for inheriting classes
   void setQp(unsigned int qp);
+
+  ///@{ Retained as empty methods to avoid a warning from Material.C in framework. These methods are unused in all inheriting classes and should not be overwritten.
+  void resetQpProperties();
+  void resetProperties();
+  ///@}
 
 protected:
   const std::string _base_name;
