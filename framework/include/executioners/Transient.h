@@ -313,7 +313,7 @@ protected:
   /// Number of linear iterations in previous solve
   unsigned int & _l_its;
 
-  double _solve_time;
+  Real _solve_time;
   std::vector<Real> & _soln_nonlin;
   std::vector<Real> & _soln_aux;
   std::vector<Real> & _soln_predicted;
@@ -325,7 +325,7 @@ protected:
   // want to rewind, and they will need to specify the rewind time from this "saved".  There are no
   // operations on the time between the stepper requesting a snapshot and it being used as a key
   // in this map.
-  std::map<double, MooseSharedPointer<Backup>> _snapshots;
+  std::map<Real, MooseSharedPointer<Backup>> _snapshots;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

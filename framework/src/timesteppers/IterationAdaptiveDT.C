@@ -108,19 +108,19 @@ IterationAdaptiveDT::init()
 StepperBlock *
 IterationAdaptiveDT::buildStepper()
 {
-  double tol = _executioner.timestepTol();
+  Real tol = _executioner.timestepTol();
   int n_startup_steps = _executioner.n_startup_steps();
-  double end_time = _executioner.endTime();
-  double start_time = _executioner.getStartTime();
-  double dtmin = _executioner.dtMin();
-  double dtmax = _executioner.dtMax();
+  Real end_time = _executioner.endTime();
+  Real start_time = _executioner.getStartTime();
+  Real dtmin = _executioner.dtMin();
+  Real dtmax = _executioner.dtMax();
   bool half_transient = _app.halfTransient();
   bool use_time_ipol = _time_ipol.getSampleSize() > 0;
 
   StepperBlock * stepper = nullptr;
 
-  std::vector<double> time_list;
-  std::vector<double> dt_list;
+  std::vector<Real> time_list;
+  std::vector<Real> dt_list;
   // this needs to occur before preExecute() is called on old-timestepper because that method modifies the original tfunc_times
   for (auto val : _tfunc_times)
     time_list.push_back(val);
@@ -128,7 +128,7 @@ IterationAdaptiveDT::buildStepper()
     dt_list.push_back(val);
 
   Function* t_limit_func = _timestep_limiting_function;
-  std::vector<double> piecewise_list = _times;
+  std::vector<Real> piecewise_list = _times;
 
   if (_adaptive_timestepping)
   {
@@ -167,7 +167,7 @@ IterationAdaptiveDT::buildStepper()
     stepper = new ConstrFuncBlock(
           stepper,
           // must capture pointer by value - not ref because scope
-          [=](double x)->double{return t_limit_func->value(x, Point());},
+          [=](Real x)->Real{return t_limit_func->value(x, Point());},
           _max_function_change
         );
   }

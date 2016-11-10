@@ -78,11 +78,11 @@ StepperNode::get<int>()
 }
 
 template <>
-double
-StepperNode::get<double>()
+Real
+StepperNode::get<Real>()
 {
   char * endptr;
-  double v = strtod(val.c_str(), &endptr);
+  Real v = strtod(val.c_str(), &endptr);
   if (*endptr)
     return 0;
   return v;
@@ -245,19 +245,19 @@ buildStepper(StepperNode n)
   {
     if (n.args.size() < 3)
       throw Err("FixedPointStepper needs 2 args");
-    return BaseStepper::fixedTimes(n.args[1].getVec<double>(), n.args[2].get<double>());
+    return BaseStepper::fixedTimes(n.args[1].getVec<Real>(), n.args[2].get<Real>());
   }
   else if (name == "MinOfStepper")
   {
     if (n.args.size() < 4)
       throw Err("MinOfStepper needs 3 args");
-    return new MinOfBlock(buildStepper(n.args[1]), buildStepper(n.args[2]), n.args[3].get<double>());
+    return new MinOfBlock(buildStepper(n.args[1]), buildStepper(n.args[2]), n.args[3].get<Real>());
   }
   else if (name == "ConstStepper")
   {
     if (n.args.size() < 2)
       throw Err("ConstStepper needs 1 args");
-    return BaseStepper::constant(n.args[1].get<double>());
+    return BaseStepper::constant(n.args[1].get<Real>());
   }
   throw Err("unsupported stepper type");
 }

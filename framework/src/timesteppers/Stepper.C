@@ -35,7 +35,7 @@ public:
           << ")\n";
     }
   }
-  double val(double dt)
+  Real val(Real dt)
   {
     _dt = dt;
     return dt;
@@ -43,7 +43,7 @@ public:
   static int level;
   static bool on;
   std::string _loc;
-  double _dt;
+  Real _dt;
 };
 
 int Logger::level = 0;
@@ -61,11 +61,11 @@ StepperBlock::logging(bool on)
   Logger::on = on;
 }
 
-InstrumentedBlock::InstrumentedBlock(double * dt_store)
+InstrumentedBlock::InstrumentedBlock(Real * dt_store)
   : _stepper(nullptr), _dt_store(dt_store), _own(!dt_store)
 {
   if (!_dt_store)
-    _dt_store = new double(0);
+    _dt_store = new Real(0);
 }
 
 InstrumentedBlock::~InstrumentedBlock()
@@ -74,7 +74,7 @@ InstrumentedBlock::~InstrumentedBlock()
     delete _dt_store;
 }
 
-double
+Real
 InstrumentedBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
   Logger l("Instrumented");
@@ -91,18 +91,18 @@ InstrumentedBlock::setStepper(StepperBlock * s)
   _stepper.reset(s);
 }
 
-double *
+Real *
 InstrumentedBlock::dtPtr()
 {
   return _dt_store;
 }
 
-RetryUnusedBlock::RetryUnusedBlock(StepperBlock * s, double tol, bool prev_prev)
+RetryUnusedBlock::RetryUnusedBlock(StepperBlock * s, Real tol, bool prev_prev)
   : _stepper(s), _tol(tol), _prev_prev(prev_prev), _prev_dt(0), _prev_time(0)
 {
 }
 
-double
+Real
 RetryUnusedBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
   Logger l("RetryUnused");
@@ -121,19 +121,19 @@ RetryUnusedBlock::next(const StepperInfo & si, StepperFeedback & sf)
   return l.val(_prev_dt);
 }
 
-ConstrFuncBlock::ConstrFuncBlock(StepperBlock * s, std::function<double(double)> func,
-                                 double max_diff)
+ConstrFuncBlock::ConstrFuncBlock(StepperBlock * s, std::function<Real(Real)> func,
+                                 Real max_diff)
   : _stepper(s), _func(func), _max_diff(max_diff)
 {
 }
 
-double
+Real
 ConstrFuncBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
   Logger l("ConstrFunc");
-  double dt = _stepper->next(si, sf);
-  double f_curr = _func(si.time);
-  double df = std::abs(_func(si.time + dt) - f_curr);
+  Real dt = _stepper->next(si, sf);
+  Real f_curr = _func(si.time);
+  Real df = std::abs(_func(si.time + dt) - f_curr);
   while (_max_diff > 0 && df > _max_diff)
   {
     dt /= 2.0;
@@ -142,13 +142,13 @@ ConstrFuncBlock::next(const StepperInfo & si, StepperFeedback & sf)
   return l.val(dt);
 }
 
-PiecewiseBlock::PiecewiseBlock(std::vector<double> times, std::vector<double> dts,
+PiecewiseBlock::PiecewiseBlock(std::vector<Real> times, std::vector<Real> dts,
                                bool interpolate)
   : _times(times), _dts(dts), _interp(interpolate), _lin(times, dts)
 {
 }
 
-double
+Real
 PiecewiseBlock::next(const StepperInfo & si, StepperFeedback &)
 {
   Logger l("Piecewise");
@@ -164,24 +164,24 @@ PiecewiseBlock::next(const StepperInfo & si, StepperFeedback &)
   return l.val(_dts.back());
 }
 
-MinOfBlock::MinOfBlock(StepperBlock * a, StepperBlock * b, double tol)
+MinOfBlock::MinOfBlock(StepperBlock * a, StepperBlock * b, Real tol)
   : _a(a), _b(b), _tol(tol)
 {
 }
 
-double
+Real
 MinOfBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
   Logger l("MinOf");
-  double dta = _a->next(si, sf);
-  double dtb = _b->next(si, sf);
+  Real dta = _a->next(si, sf);
+  Real dtb = _b->next(si, sf);
   if (dta - _tol < dtb)
     return l.val(dta);
   return l.val(dtb);
 }
 
 AdaptiveBlock::AdaptiveBlock(unsigned int optimal_iters, unsigned int iter_window,
-                             double lin_iter_ratio, double shrink_factor, double growth_factor)
+                             Real lin_iter_ratio, Real shrink_factor, Real growth_factor)
   : _optimal_iters(optimal_iters),
     _iter_window(iter_window),
     _lin_iter_ratio(lin_iter_ratio),
@@ -190,7 +190,7 @@ AdaptiveBlock::AdaptiveBlock(unsigned int optimal_iters, unsigned int iter_windo
 {
 }
 
-double
+Real
 AdaptiveBlock::next(const StepperInfo & si, StepperFeedback &)
 {
   Logger l("Adaptive");
@@ -216,18 +216,18 @@ AdaptiveBlock::next(const StepperInfo & si, StepperFeedback &)
     return l.val(si.prev_dt);
 };
 
-SolveTimeAdaptiveBlock::SolveTimeAdaptiveBlock(int initial_direc, double percent_change)
+SolveTimeAdaptiveBlock::SolveTimeAdaptiveBlock(int initial_direc, Real percent_change)
   : _percent_change(percent_change), _direc(initial_direc), _n_steps(0)
 {
 }
 
-double
+Real
 SolveTimeAdaptiveBlock::next(const StepperInfo & si, StepperFeedback &)
 {
   Logger l("SolveTimeAdaptive");
-  double ratio = si.prev_solve_time_secs / si.prev_dt;
-  double prev_ratio = si.prev_prev_solve_time_secs / si.prev_prev_dt;
-  double prev_prev_ratio = si.prev_prev_prev_solve_time_secs / si.prev_prev_prev_dt;
+  Real ratio = si.prev_solve_time_secs / si.prev_dt;
+  Real prev_ratio = si.prev_prev_solve_time_secs / si.prev_prev_dt;
+  Real prev_prev_ratio = si.prev_prev_prev_solve_time_secs / si.prev_prev_prev_dt;
 
   _n_steps++;
   // this is this way in order to mirror original SolutionTimeAdaptiveDT
@@ -242,8 +242,8 @@ SolveTimeAdaptiveBlock::next(const StepperInfo & si, StepperFeedback &)
   return l.val(si.prev_dt + si.prev_dt * _percent_change * _direc);
 }
 
-PredictorCorrectorBlock::PredictorCorrectorBlock(int start_adapting, double e_tol,
-                                                 double scaling_param,
+PredictorCorrectorBlock::PredictorCorrectorBlock(int start_adapting, Real e_tol,
+                                                 Real scaling_param,
                                                  std::string time_integrator)
   : _start_adapting(start_adapting),
     _e_tol(e_tol),
@@ -252,7 +252,7 @@ PredictorCorrectorBlock::PredictorCorrectorBlock(int start_adapting, double e_to
 {
 }
 
-double
+Real
 PredictorCorrectorBlock::next(const StepperInfo & si, StepperFeedback &)
 {
   Logger l("PredictorCorrector");
@@ -269,16 +269,16 @@ PredictorCorrectorBlock::next(const StepperInfo & si, StepperFeedback &)
   if (si.soln_nonlin == nullptr || si.soln_predicted == nullptr)
     mooseError("no predicted solution available");
 
-  double error = estimateTimeError(si);
-  double infnorm = si.soln_nonlin->linfty_norm();
-  double e_max = 1.1 * _e_tol * infnorm;
+  Real error = estimateTimeError(si);
+  Real infnorm = si.soln_nonlin->linfty_norm();
+  Real e_max = 1.1 * _e_tol * infnorm;
 
   if (error > e_max)
     return l.val(si.prev_dt * 0.5);
   return l.val(si.prev_dt * _scale_param * std::pow(infnorm * _e_tol / error, 1.0 / 3.0));
 }
 
-double
+Real
 PredictorCorrectorBlock::estimateTimeError(const StepperInfo & si)
 {
   NumericVector<Number> & soln = *si.soln_nonlin;
@@ -286,8 +286,8 @@ PredictorCorrectorBlock::estimateTimeError(const StepperInfo & si)
   soln.close();
   predicted.close();
 
-  double dtprev = si.prev_prev_dt;
-  double dt = si.prev_dt;
+  Real dtprev = si.prev_prev_dt;
+  Real dt = si.prev_dt;
   if (_time_integrator == "CrankNicolson")
   {
     predicted -= soln;
@@ -298,8 +298,8 @@ PredictorCorrectorBlock::estimateTimeError(const StepperInfo & si)
   {
     predicted *= -1.0;
     predicted += soln;
-    double topcalc = 2.0 * (dt + dtprev) * (dt + dtprev);
-    double bottomcalc = 6.0 * dt * dt + 12.0 * dt * dtprev + 5.0 * dtprev * dtprev;
+    Real topcalc = 2.0 * (dt + dtprev) * (dt + dtprev);
+    Real bottomcalc = 6.0 * dt * dt + 12.0 * dt * dtprev + 5.0 * dtprev * dtprev;
     predicted *= topcalc / bottomcalc;
     return predicted.l2_norm();
   }
@@ -307,7 +307,7 @@ PredictorCorrectorBlock::estimateTimeError(const StepperInfo & si)
   mooseError("unsupported time integration scheme '" + _time_integrator + "'");
 }
 
-DT2Block::DT2Block(double time_tol, double e_tol, double e_max, int integrator_order)
+DT2Block::DT2Block(Real time_tol, Real e_tol, Real e_max, int integrator_order)
   : _tol(time_tol),
     _e_tol(e_tol),
     _e_max(e_max),
@@ -318,8 +318,8 @@ DT2Block::DT2Block(double time_tol, double e_tol, double e_max, int integrator_o
 {
 }
 
-double
-DT2Block::resetWindow(double start, double dt)
+Real
+DT2Block::resetWindow(Real start, Real dt)
 {
   _start_time = start;
   _end_time = _start_time + dt;
@@ -327,13 +327,13 @@ DT2Block::resetWindow(double start, double dt)
   return dt;
 }
 
-double
+Real
 DT2Block::dt()
 {
   return _end_time - _start_time;
 }
 
-double
+Real
 DT2Block::next(const StepperInfo & si, StepperFeedback & sf)
 {
   Logger l("DT2");
@@ -342,7 +342,7 @@ DT2Block::next(const StepperInfo & si, StepperFeedback & sf)
   {
     //std::c out << "DT2:inner: set complete - calcing error\n";
     // we just finished the second of the two smaller dt steps and are ready for error calc
-    double err = calcErr(si);
+    Real err = calcErr(si);
     if (err > _e_max)
     {
       //std::c out << "DT2:inner: error too large, rewinding and start over with dt/2\n";
@@ -351,7 +351,7 @@ DT2Block::next(const StepperInfo & si, StepperFeedback & sf)
       return l.val(resetWindow(sf.rewind_time, dt() / 2));
     }
 
-    double new_dt = dt() * std::pow(_e_tol / err, 1.0 / _order);
+    Real new_dt = dt() * std::pow(_e_tol / err, 1.0 / _order);
     sf.snapshot = true;
     return l.val(resetWindow(si.time, new_dt));
   }
@@ -382,14 +382,14 @@ DT2Block::next(const StepperInfo & si, StepperFeedback & sf)
     //std::c out << "DT2:inner: starting solve sequence over\n";
     // something went wrong or this is initial call of simulation - start over
     sf.snapshot = true;
-    double ddt = dt();
+    Real ddt = dt();
     if (ddt == 0)
       ddt = si.prev_dt;
     return l.val(resetWindow(si.time, ddt));
   }
 }
 
-double
+Real
 DT2Block::calcErr(const StepperInfo & si)
 {
   std::unique_ptr<NumericVector<Number>> small_soln(si.soln_nonlin->clone().release());
@@ -397,7 +397,7 @@ DT2Block::calcErr(const StepperInfo & si)
   small_soln->close();
   diff->close();
   *diff -= *_big_soln;
-  double err = (diff->l2_norm() / std::max(_big_soln->l2_norm(), small_soln->l2_norm())) / dt();
+  Real err = (diff->l2_norm() / std::max(_big_soln->l2_norm(), small_soln->l2_norm())) / dt();
   //std::c out << "DT2:inner: error=" << err << ", e_tol=" << _e_tol << "\n";
   return err;
 }
@@ -408,7 +408,7 @@ IfBlock::IfBlock(StepperBlock * on_true, StepperBlock * on_false,
 {
 }
 
-double
+Real
 IfBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
   Logger l("If");
@@ -420,24 +420,24 @@ IfBlock::next(const StepperInfo & si, StepperFeedback & sf)
 
 ModBlock::ModBlock(StepperBlock * s,
                    std::function<
-                       double(const StepperInfo & si, double dt)> func)
+                       Real(const StepperInfo & si, Real dt)> func)
   : _stepper(s), _func(func)
 {
 }
 
-double
+Real
 ModBlock::next(const StepperInfo & si, StepperFeedback & sf)
 {
   Logger l("Mod");
   return l.val(_func(si, _stepper->next(si, sf)));
 }
 
-RootBlock::RootBlock(std::function<double(const StepperInfo & si)> func)
+RootBlock::RootBlock(std::function<Real(const StepperInfo & si)> func)
   : _func(func)
 {
 }
 
-double
+Real
 RootBlock::next(const StepperInfo & si, StepperFeedback &)
 {
   Logger l("Root");
@@ -445,7 +445,7 @@ RootBlock::next(const StepperInfo & si, StepperFeedback &)
 }
 
 StepperBlock *
-BaseStepper::constant(double dt)
+BaseStepper::constant(Real dt)
 {
   return new RootBlock([=](const StepperInfo & si)
                        {
@@ -463,25 +463,25 @@ BaseStepper::prevdt()
 }
 
 StepperBlock *
-BaseStepper::fixedTimes(std::vector<double> times, double tol)
+BaseStepper::fixedTimes(std::vector<Real> times, Real tol)
 {
   return new RootBlock([=](const StepperInfo & si)
                        {
                          if (times.size() == 0)
-                           return std::numeric_limits<double>::infinity();
+                           return std::numeric_limits<Real>::infinity();
 
                          for (int i = 0; i < times.size(); i++)
                          {
-                           double t0 = times[i];
+                           Real t0 = times[i];
                            if (si.time < t0 - tol)
                              return t0 - si.time;
                          }
-                         return std::numeric_limits<double>::infinity();
+                         return std::numeric_limits<Real>::infinity();
                        });
 }
 
 StepperBlock *
-BaseStepper::ptr(const double * dt_store)
+BaseStepper::ptr(const Real * dt_store)
 {
   return new RootBlock([=](const StepperInfo & si)
                        {
@@ -490,9 +490,9 @@ BaseStepper::ptr(const double * dt_store)
 }
 
 StepperBlock *
-BaseStepper::dtLimit(StepperBlock * s, double dt_min, double dt_max)
+BaseStepper::dtLimit(StepperBlock * s, Real dt_min, Real dt_max)
 {
-  return new ModBlock(s, [=](const StepperInfo & si, double dt)
+  return new ModBlock(s, [=](const StepperInfo & si, Real dt)
                       {
                         if (dt < dt_min)
                           return dt_min;
@@ -503,11 +503,11 @@ BaseStepper::dtLimit(StepperBlock * s, double dt_min, double dt_max)
 }
 
 StepperBlock *
-BaseStepper::bounds(StepperBlock * s, double t_min, double t_max)
+BaseStepper::bounds(StepperBlock * s, Real t_min, Real t_max)
 {
-  return new ModBlock(s, [=](const StepperInfo & si, double dt)
+  return new ModBlock(s, [=](const StepperInfo & si, Real dt)
                       {
-                        double t = si.time + dt;
+                        Real t = si.time + dt;
                         if (t < t_min)
                           return t_min - si.time;
                         else if (t > t_max)
@@ -517,9 +517,9 @@ BaseStepper::bounds(StepperBlock * s, double t_min, double t_max)
 }
 
 StepperBlock *
-BaseStepper::maxRatio(StepperBlock * s, double max_ratio)
+BaseStepper::maxRatio(StepperBlock * s, Real max_ratio)
 {
-  return new ModBlock(s, [=](const StepperInfo & si, double dt)
+  return new ModBlock(s, [=](const StepperInfo & si, Real dt)
                       {
                         if (si.prev_dt > 0 && dt / si.prev_dt > max_ratio)
                           dt = si.prev_dt * max_ratio;
@@ -528,20 +528,20 @@ BaseStepper::maxRatio(StepperBlock * s, double max_ratio)
 }
 
 StepperBlock *
-BaseStepper::mult(double mult, StepperBlock * s)
+BaseStepper::mult(Real mult, StepperBlock * s)
 {
   if (!s)
     s = prevdt();
   return new ModBlock(
-      s, [=](const StepperInfo & si, double dt)
+      s, [=](const StepperInfo & si, Real dt)
       {
         return dt * mult;
       });
 }
 
 StepperBlock *
-BaseStepper::between(StepperBlock * on, StepperBlock * between, std::vector<double> times,
-                     double tol)
+BaseStepper::between(StepperBlock * on, StepperBlock * between, std::vector<Real> times,
+                     Real tol)
 {
   return new IfBlock(on, between, [=](const StepperInfo & si)
                      {
@@ -584,7 +584,7 @@ BaseStepper::converged(StepperBlock * converged, StepperBlock * not_converged, b
 }
 
 StepperBlock *
-BaseStepper::min(StepperBlock * a, StepperBlock * b, double tol)
+BaseStepper::min(StepperBlock * a, StepperBlock * b, Real tol)
 {
   return new MinOfBlock(a, b, tol);
 }

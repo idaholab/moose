@@ -279,7 +279,6 @@ Transient::execute()
       break;
     preStep();
     computeDT(first);
-    double legacy_dt = _time_stepper->getCurrentDT();
     takeStep();
     _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
     _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
@@ -294,10 +293,6 @@ Transient::execute()
       _soln_predicted.resize(p->solutionPredictor().size());
       p->solutionPredictor().localize(_soln_predicted);
     }
-
-    double constr_legacy_dt = _dt;
-    if (_stepper)
-      printf("[STEPPER] step %3d (t=%f): dt = %f   legacy = %f   constr = %f )\n", _steps_taken, _time, _new_dt, legacy_dt, constr_legacy_dt);
 
     endStep();
     postStep();
@@ -321,7 +316,7 @@ Transient::computeDT(bool first)
     StepperBlock * inner = _time_stepper->buildStepper();
     if (inner)
     {
-      std::vector<double> sync_times;
+      std::vector<Real> sync_times;
       for (auto val : _app.getOutputWarehouse().getSyncTimes())
         sync_times.push_back(val);
 
@@ -514,8 +509,8 @@ Transient::solveStep(Real input_dt)
 
   _time_stepper->step();
   gettimeofday(&solve_end, NULL);
-  _solve_time = (static_cast<double>(solve_end.tv_sec  - solve_start.tv_sec) +
-                                             static_cast<double>(solve_end.tv_usec - solve_start.tv_usec)*1.e-6);
+  _solve_time = (static_cast<Real>(solve_end.tv_sec  - solve_start.tv_sec) +
+                                             static_cast<Real>(solve_end.tv_usec - solve_start.tv_usec)*1.e-6);
   _last_solve_converged = lastSolveConverged(); // this here because endStep is not called (e.g. multiapps)
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
   if (lastSolveConverged())

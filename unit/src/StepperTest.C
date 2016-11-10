@@ -22,20 +22,20 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(StepperTest);
 
 StepperInfo blankInfo();
-void updateInfo(StepperInfo * si, StepperFeedback * sf, double dt,
-                std::map<double, StepperInfo> * snaps = nullptr);
+void updateInfo(StepperInfo * si, StepperFeedback * sf, Real dt,
+                std::map<Real, StepperInfo> * snaps = nullptr);
 void cloneStepperInfo(StepperInfo * src, StepperInfo * dst);
 
 struct BasicTest
 {
   std::string title;
-  double tol;
-  // time step on which actual used dt is half (negative) double (positive) what
+  Real tol;
+  // time step on which actual used dt is half (negative) Real (positive) what
   // was returned
   int wrong_dt;
   StepperBlock * stepper;
   std::vector<bool> convergeds;
-  std::vector<double> want_dts;
+  std::vector<Real> want_dts;
 };
 
 void
@@ -43,8 +43,8 @@ StepperTest::baseSteppers()
 {
   StepperBlock::logging(false);
 
-  double tol = 1e-10;
-  double inf = std::numeric_limits<double>::infinity();
+  Real tol = 1e-10;
+  Real inf = std::numeric_limits<Real>::infinity();
 
   // clang-format off
   BasicTest tests[] = {
@@ -134,12 +134,12 @@ StepperTest::DT2()
   struct testcase
   {
     std::string title;
-    double e_tol;
-    double e_max;
-    std::vector<std::vector<double>> solns;
-    std::vector<double> want_dts;
+    Real e_tol;
+    Real e_max;
+    std::vector<std::vector<Real>> solns;
+    std::vector<Real> want_dts;
     std::vector<bool> convergeds;
-    std::vector<double> want_times;
+    std::vector<Real> want_times;
   };
   // clang-format off
 
@@ -199,17 +199,17 @@ StepperTest::DT2()
   };
   // clang-format on
 
-  double tol = 1e-10;
-  double integrator_order = 1;
+  Real tol = 1e-10;
+  Real integrator_order = 1;
 
   for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
   {
-    double dt = 0;
-    std::vector<std::vector<double>> solns = tests[i].solns;
-    std::vector<double> want_dts = tests[i].want_dts;
-    std::vector<double> want_times = tests[i].want_times;
+    Real dt = 0;
+    std::vector<std::vector<Real>> solns = tests[i].solns;
+    std::vector<Real> want_dts = tests[i].want_dts;
+    std::vector<Real> want_times = tests[i].want_times;
 
-    std::map<double, StepperInfo> snaps;
+    std::map<Real, StepperInfo> snaps;
     DT2Block s(tol, tests[i].e_tol, tests[i].e_max, integrator_order);
     StepperInfo si = blankInfo();
     si.prev_dt = 1; // initial dt
@@ -270,7 +270,7 @@ StepperTest::scratch()
 
   for (int j = 0; j < 10; j++)
   {
-    double dt = s->next(si, sf);
+    Real dt = s->next(si, sf);
     // std::c out << "time=" << si.time << ", dt=" << dt << "\n";
     updateInfo(&si, nullptr, dt);
   }
@@ -300,8 +300,8 @@ cloneStepperInfo(StepperInfo * src, StepperInfo * dst)
 };
 
 void
-updateInfo(StepperInfo * si, StepperFeedback * sf, double dt,
-           std::map<double, StepperInfo> * snaps)
+updateInfo(StepperInfo * si, StepperFeedback * sf, Real dt,
+           std::map<Real, StepperInfo> * snaps)
 {
   if (sf && sf->rewind)
   {
@@ -332,10 +332,10 @@ StepperTest::tableTestBasic(BasicTest tests[])
   for (int i = 0; i < sizeof(tests); i++)
   {
     BasicTest test = tests[i];
-    double dt = 0;
-    std::vector<double> want_dts = test.want_dts;
+    Real dt = 0;
+    std::vector<Real> want_dts = test.want_dts;
     StepperBlock * s = test.stepper;
-    double tol = test.tol;
+    Real tol = test.tol;
     int wrong_dt = test.wrong_dt;
 
     StepperInfo si = blankInfo();
