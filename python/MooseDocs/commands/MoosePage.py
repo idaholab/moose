@@ -129,9 +129,27 @@ class MoosePage(NavigationNode):
         log.debug('Converting link: {} --> {}'.format(href, url))
         link['href'] = url
 
+    # Fix <pre><code class="python"> to be <pre class="language-python"><code>
+    for pre in soup('pre'):
+      code = pre.find('code')
+      if code and 'class' in code.attrs:
+        pre['class'] = 'language-{}'.format(code['class'])
+
+    # Add materialize sections for table-of-contents
+    div = soup.find('div', id="moose-markdown-content")
+    if div:
+      current = div
+      for tag in div.children:
+        #if tag.name == 'h2':
+        #  current = bs4.BeautifulSoup('<div id="{}" class="section scrollspy">'.format(tag['id']), 'html.parser')
+        #  div.append(current)
+
+        #if tag.parent != current:
+        current.append(tag.extract())
+
+
 
     return soup
-
 
 
   def edit(self, repo_url):

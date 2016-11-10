@@ -24,20 +24,3 @@ MathJax.Hub.Config({
   jax: ["input/TeX", "output/HTML-CSS", "output/NativeMML"],
   extensions: ["MathMenu.js", "MathZoom.js"]
 });
-
-// The prism package for highlighting code requires the class
-// "language-*" be defined in the <pre> tag, which the fenced
-// code blocks of python markdown do not do, this little script
-// adds this class.
-function prism() {
-   var code = document.getElementsByTagName("CODE");
-   for (var i = 0; i < code.length; ++i)
-   {
-     var parent = code[i].parentNode
-     if (parent.nodeName == 'PRE')
-     {
-     	parent.className = "language-" + code[i].className;
-     }
-   }
-}
-prism();
