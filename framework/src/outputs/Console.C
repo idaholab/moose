@@ -415,6 +415,10 @@ Console::writeVariableNorms()
   if (_all_variable_norms)
     _outlier_variable_norms = true;
 
+  // if we are not priting anything, let's not waste time computing the norms below and just exit this call
+  if ((_all_variable_norms == false) && (_outlier_variable_norms == false))
+    return;
+
   // Flag set when header prints
   bool header = false;
 
