@@ -21,7 +21,7 @@ InputParameters validParams<PorousFlowDarcyVelocityComponent>()
   params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addParam<unsigned int>("fluid_phase", 0, "The index corresponding to the fluid phase");
   MooseEnum component("x=0 y=1 z=2");
-  params.addParam<MooseEnum>("component", component, "The spatial component of the Darcy flux to return");
+  params.addRequiredParam<MooseEnum>("component", component, "The spatial component of the Darcy flux to return");
   params.addClassDescription("Darcy velocity (in m^3.s^-1.m^-2, or m.s^-1)  -(k_ij * krel /mu (nabla_j P - w_j)), where k_ij is the permeability tensor, krel is the relative permeability, mu is the fluid viscosity, P is the fluid pressure, and w_j is the fluid weight.");
   return params;
 }
