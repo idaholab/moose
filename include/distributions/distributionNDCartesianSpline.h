@@ -21,17 +21,17 @@
 class BasicMultiDimensionalCartesianSpline: public virtual BasicDistributionND
 {
 public:
-  BasicMultiDimensionalCartesianSpline(const char * data_filename,std::vector<double> alpha, std::vector<double> beta, bool CDFprovided);
+  BasicMultiDimensionalCartesianSpline(const char * data_filename,std::vector<double> alpha, std::vector<double> beta, bool cdf_provided);
 
-  BasicMultiDimensionalCartesianSpline(std::string data_filename, bool CDFprovided);
+  BasicMultiDimensionalCartesianSpline(std::string data_filename, bool cdf_provided);
 
-  BasicMultiDimensionalCartesianSpline(const char * data_filename, bool CDFprovided);
+  BasicMultiDimensionalCartesianSpline(const char * data_filename, bool cdf_provided);
 
-  BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool CDFprovided);
+  BasicMultiDimensionalCartesianSpline(std::vector< std::vector<double> > & discretizations, std::vector<double> & values, std::vector<double> alpha, std::vector<double> beta, bool cdf_provided);
 
-  BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta, bool CDFprovided);
+  BasicMultiDimensionalCartesianSpline(std::string data_filename,std::vector<double> alpha, std::vector<double> beta, bool cdf_provided);
 
-  void BasicMultiDimensionalCartesianSpline_init();
+  void basicMultiDimensionalCartesianSplineInit();
 
   BasicMultiDimensionalCartesianSpline();
 
@@ -39,26 +39,26 @@ public:
   {
   };
 
-  double Pdf(std::vector<double> x);
+  double pdf(std::vector<double> x);
 
-  double Cdf(std::vector<double> x);
+  double cdf(std::vector<double> x);
 
-  std::vector<double> InverseCdf(double F, double g);
+  std::vector<double> inverseCdf(double f, double g);
 
-  double inverseMarginal(double F, int dimension);
+  double inverseMarginal(double f, int dimension);
 
   int returnDimensionality();
 
   void updateRNGparameter(double tolerance, double initial_divisions);
 
-  double Marginal(double x, int dimension);
+  double marginal(double x, int dimension);
 
   double returnUpperBound(int dimension);
 
   double returnLowerBound(int dimension);
 
 protected:
-  bool _CDFprovided;
+  bool _cdf_provided;
   NDSpline _interpolator;
   NDSpline _CDFinterpolator;
 };

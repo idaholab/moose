@@ -5,15 +5,15 @@
 #include <string>
 
 
-void readOrderedNDarray(std::string & filename, int & numberOfDimensions, std::vector< std::vector<double> > & discretizationValues, std::vector<double> & values);
-void readScatteredNDarray(std::string & filename, int & numberOfDimensions,unsigned int & numberOfPoints, std::vector< std::vector<double> > & pointcoordinates, std::vector<double> & values);
+void readOrderedNDArray(std::string & filename, int & number_of_dimensions, std::vector< std::vector<double> > & discretization_values, std::vector<double> & values);
+void readScatteredNDArray(std::string & filename, int & number_of_dimensions,unsigned int & number_of_points, std::vector< std::vector<double> > & point_coordinates, std::vector<double> & values);
 //double returnCDFvalue(std::vector<double> coordinates);
 //int findIndex(double pivot, std::vector<double> discretizations);
-std::vector<double> read1Darray(std::string filename);
+std::vector<double> read1DArray(std::string filename);
 double getPointAtCoordinate(std::vector<double> coordinates);
 void readMatrix(const std::string filename, unsigned int & rows, unsigned int & columns, std::vector< std::vector<double> > & matrix);
-void import_matrix_from_txt_file(const std::string filename_X, std::vector <double>& v, unsigned int& rows, unsigned int& cols);
-unsigned int ReadNumbers(const std::string & s, std::vector <double> & v );
+void importMatrixFromTxtFile(const std::string filename_x, std::vector <double>& v, unsigned int& rows, unsigned int& cols);
+unsigned int readNumbers(const std::string & s, std::vector <double> & v );
 
 
 #endif

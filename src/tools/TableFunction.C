@@ -7,7 +7,7 @@
 
 #include "TableFunction.h"
 #include "CrowTools.h"
-#include "Interpolation_Functions.h"
+#include "InterpolationFunctions.h"
 
 template<>
 InputParameters validParams<TableFunction>(){
@@ -28,7 +28,7 @@ TableFunction::TableFunction(const InputParameters & parameters):
   CrowTools(parameters)
 {
   _tool_parameters["scaling_factor"] = getParam<double>("scaling_factor");
-  _interpolation=Interpolation_Functions(getParam<std::vector<double> >("x_coordinates"),
+  _interpolation=InterpolationFunctions(getParam<std::vector<double> >("x_coordinates"),
                  getParam<std::vector<double> >("y_coordinates"),
        static_cast<ECustomDistFitType>((int)getParam<MooseEnum>("fitting_type")));
 }

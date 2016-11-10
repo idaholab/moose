@@ -1,18 +1,18 @@
 /*
- * decayHeat.C
+ * DecayHeat.C
  *
  *  Created on: Aug 8, 2012
  *      Author: mandd
  */
 
-#include "decayHeat.h"
+#include "DecayHeat.h"
 #include <cmath>
 #include "CrowTools.h"
 
 //enum{}
 
 template<>
-InputParameters validParams<decayHeat>(){
+InputParameters validParams<DecayHeat>(){
 
    InputParameters params = validParams<CrowTools>();
 
@@ -24,7 +24,7 @@ InputParameters validParams<decayHeat>(){
    return params;
 }
 
-decayHeat::decayHeat(const InputParameters & parameters):
+DecayHeat::DecayHeat(const InputParameters & parameters):
   CrowTools(parameters)
 {
   _tool_parameters["initial_pow"      ] = getParam<double>("initial_pow");
@@ -35,12 +35,12 @@ decayHeat::decayHeat(const InputParameters & parameters):
   if(_equation_type != 1 and _equation_type != 2)  throw("DecayHeat supports only equation type 1 or 2 so far.");
 }
 
-decayHeat::~decayHeat()
+DecayHeat::~DecayHeat()
 {
 }
 
 double
-decayHeat::compute(double time)
+DecayHeat::compute(double time)
 {
   double powerValue;
   double real_time = time + getVariable(std::string("start_time"));

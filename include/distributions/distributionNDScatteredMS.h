@@ -31,31 +31,31 @@ public:
   {
   };
   double
-  Pdf(std::vector<double> x)
+  pdf(std::vector<double> x)
   {
     return _interpolator.interpolateAt(x);
   };
   double
-  Cdf(std::vector<double> x)
+  cdf(std::vector<double> x)
   {
     return _interpolator.interpolateAt(x);
   };
 
 //  std::vector<double>
-//  InverseCdf(double /*min*/, double /*max*/)
+//  inverseCdf(double /*min*/, double /*max*/)
 //  {
 //    return std::vector<double>(2,-1.0);
 //  };
 
   std::vector<double>
-  InverseCdf(double F, double g)
+  inverseCdf(double f, double g)
   {
-   return _interpolator.NDinverseFunctionGrid(F,g);
+   return _interpolator.ndInverseFunctionGrid(f,g);
    //return _interpolator.NDinverseFunction(min, max);
   };
 
   double
-    inverseMarginal(double /* F */, int /* dimension */)
+    inverseMarginal(double /* f */, int /* dimension */)
   {
           throwError("BasicMultiDimensionalScatteredMS: inverseMarginal not available");
           return 0.0;

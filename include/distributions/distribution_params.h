@@ -6,23 +6,25 @@
 #include "distribution.h"
 #include "distribution_1D.h"
 
-template<>
-InputParameters validParams<distribution>();
+class Distribution;
 
-class distribution : public MooseObject, public virtual BasicDistribution
+template<>
+InputParameters validParams<Distribution>();
+
+class Distribution : public MooseObject, public virtual BasicDistribution
 {
 public:
   //> constructor for built-in distributions
-  distribution(const InputParameters & parameters);
+  Distribution(const InputParameters & parameters);
 
-  virtual ~distribution();
+  virtual ~Distribution();
 
 };
 
 template<>
 InputParameters validParams<UniformDistribution>();
 
-class UniformDistribution : public distribution, public BasicUniformDistribution
+class UniformDistribution : public Distribution, public BasicUniformDistribution
 {
 public:
   UniformDistribution(const InputParameters & parameters);
@@ -32,7 +34,7 @@ public:
 template<>
 InputParameters validParams<NormalDistribution>();
 
-class NormalDistribution : public distribution, public BasicNormalDistribution
+class NormalDistribution : public Distribution, public BasicNormalDistribution
 {
 public:
   NormalDistribution(const InputParameters & parameters);
@@ -42,7 +44,7 @@ public:
 template<>
 InputParameters validParams<LogNormalDistribution>();
 
-class LogNormalDistribution : public distribution, public BasicLogNormalDistribution
+class LogNormalDistribution : public Distribution, public BasicLogNormalDistribution
 {
 public:
   LogNormalDistribution(const InputParameters & parameters);
@@ -52,7 +54,7 @@ public:
 template<>
 InputParameters validParams<LogisticDistribution>();
 
-class LogisticDistribution : public distribution, public BasicLogisticDistribution
+class LogisticDistribution : public Distribution, public BasicLogisticDistribution
 {
 public:
   LogisticDistribution(const InputParameters & parameters);
@@ -62,7 +64,7 @@ public:
 template<>
 InputParameters validParams<TriangularDistribution>();
 
-class TriangularDistribution : public distribution, public BasicTriangularDistribution
+class TriangularDistribution : public Distribution, public BasicTriangularDistribution
 {
 public:
   TriangularDistribution(const InputParameters & parameters);
@@ -72,7 +74,7 @@ public:
 template<>
 InputParameters validParams<ExponentialDistribution>();
 
-class ExponentialDistribution : public distribution, public BasicExponentialDistribution
+class ExponentialDistribution : public Distribution, public BasicExponentialDistribution
 {
 public:
   ExponentialDistribution(const InputParameters & parameters);
@@ -82,7 +84,7 @@ public:
 template<>
 InputParameters validParams<WeibullDistribution>();
 
-class WeibullDistribution : public distribution, public BasicWeibullDistribution
+class WeibullDistribution : public Distribution, public BasicWeibullDistribution
 {
 public:
   WeibullDistribution(const InputParameters & parameters);
@@ -94,7 +96,7 @@ class GammaDistribution;
 template<>
 InputParameters validParams<GammaDistribution>();
 
-class GammaDistribution : public distribution, public BasicGammaDistribution
+class GammaDistribution : public Distribution, public BasicGammaDistribution
 {
 public:
   GammaDistribution(const InputParameters & parameters);
@@ -106,7 +108,7 @@ class BetaDistribution;
 template<>
 InputParameters validParams<BetaDistribution>();
 
-class BetaDistribution : public distribution, public BasicBetaDistribution
+class BetaDistribution : public Distribution, public BasicBetaDistribution
 {
 public:
   BetaDistribution(const InputParameters & parameters);
@@ -118,7 +120,7 @@ class PoissonDistribution;
 template<>
 InputParameters validParams<PoissonDistribution>();
 
-class PoissonDistribution : public distribution, public BasicPoissonDistribution
+class PoissonDistribution : public Distribution, public BasicPoissonDistribution
 {
 public:
   PoissonDistribution(const InputParameters & parameters);
@@ -130,7 +132,7 @@ class BinomialDistribution;
 template<>
 InputParameters validParams<BinomialDistribution>();
 
-class BinomialDistribution : public distribution, public BasicBinomialDistribution
+class BinomialDistribution : public Distribution, public BasicBinomialDistribution
 {
 public:
   BinomialDistribution(const InputParameters & parameters);
@@ -142,7 +144,7 @@ class BernoulliDistribution;
 template<>
 InputParameters validParams<BernoulliDistribution>();
 
-class BernoulliDistribution : public distribution, public BasicBernoulliDistribution
+class BernoulliDistribution : public Distribution, public BasicBernoulliDistribution
 {
 public:
   BernoulliDistribution(const InputParameters & parameters);
@@ -154,7 +156,7 @@ class ConstantDistribution;
 template<>
 InputParameters validParams<ConstantDistribution>();
 
-class ConstantDistribution : public distribution, public BasicConstantDistribution
+class ConstantDistribution : public Distribution, public BasicConstantDistribution
 {
 public:
   ConstantDistribution(const InputParameters & parameters);

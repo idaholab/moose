@@ -19,21 +19,19 @@
 
 enum EPbFunctionType{PDF,CDF};
 
-class distributionND;
-
 class BasicDistributionND
 {
 public:
 
    BasicDistributionND();
    virtual ~BasicDistributionND();
-   double  getVariable(const std::string & variableName);                       ///< getVariable from mapping
-   void updateVariable(const std::string & variableName, double & newValue);
-   virtual double  Pdf(std::vector<double> x) = 0;                              ///< Pdf function at coordinate x
-   virtual double  Cdf(std::vector<double> x) = 0;                              ///< Cdf function at coordinate x
-   virtual std::vector<double> InverseCdf(double F, double g) = 0;
+   double  getVariable(const std::string & variable_name);                       ///< getVariable from mapping
+   void updateVariable(const std::string & variable_name, double & new_value);
+   virtual double  pdf(std::vector<double> x) = 0;                              ///< pdf function at coordinate x
+   virtual double  cdf(std::vector<double> x) = 0;                              ///< cdf function at coordinate x
+   virtual std::vector<double> inverseCdf(double f, double g) = 0;
 
-   virtual double inverseMarginal(double F, int dimension) = 0;
+   virtual double inverseMarginal(double f, int dimension) = 0;
    virtual int returnDimensionality() = 0;
    double cellIntegral(std::vector<double> center, std::vector<double> dx);
 
@@ -42,19 +40,19 @@ public:
 
    std::string & getType();
 
-   std::vector<int> oneDtoNDconverter(int oneDcoordinate, std::vector<int> indexes);
+   std::vector<int> oneDtoNDconverter(int one_d_coordinate, std::vector<int> indexes);
 
 protected:
    std::string _type; ///< Distribution type
    std::string _data_filename;
    EPbFunctionType _function_type;
    std::map <std::string,double> _dis_parameters;
-   bool _checkStatus;
+   bool _check_status;
 
    double _tolerance;
    int _initial_divisions;
 
-   //Marginal distribution functions
+   //marginal distribution functions
    //std::vector<NDInterpolation> marginalDistributions;
 };
 
@@ -78,12 +76,12 @@ protected:
 //  {
 //  };
 //  double
-//  Pdf(std::vector<double> x)
+//  pdf(std::vector<double> x)
 //  {
 //    return _interpolator.interpolateAt(x);
 //  };
 //  double
-//  Cdf(std::vector<double> x)
+//  cdf(std::vector<double> x)
 //  {
 //     double value = _interpolator.interpolateAt(x);
 //
@@ -93,12 +91,12 @@ protected:
 //     return value;
 //  };
 //  double
-//  InverseCdf(std::vector<double> /*x*/)
+//  inverseCdf(std::vector<double> /*x*/)
 //  {
 //    return -1.0;
 //  };
 //  std::vector<double>
-//  InverseCdf(double /*min*/, double /*max*/)
+//  inverseCdf(double /*min*/, double /*max*/)
 //  {
 //    return std::vector<double>(2,-1.0);
 //  };
