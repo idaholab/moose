@@ -27,9 +27,7 @@ if [[ -n "$LIBMESH_DIR" ]]; then
   mkdir -p $LIBMESH_DIR
 else
   export LIBMESH_DIR=$SCRIPT_DIR/../libmesh/installed
-  cd $SCRIPT_DIR/../libmesh
-  rm -rf installed
-  cd - >/dev/null # Make this quiet
+  rm -rf $SCRIPT_DIR/../libmesh/installed
 fi
 
 # If the user set METHOD, but not METHODS, we'll let METHOD override
@@ -56,6 +54,10 @@ if [[ -z "$go_fast" && $? == 0 && "x$git_dir" == "x" ]]; then
   git submodule update
   if [[ $? != 0 ]]; then
     echo "git submodule command failed, are your proxy settings correct?"
+    # TODO: is this a git bug?
+    # failed attempts with `git submodule update` deletes the submodule directory.
+    # So re-create it to prevent a diff.
+    mkdir libmesh
     exit 1
   fi
 fi

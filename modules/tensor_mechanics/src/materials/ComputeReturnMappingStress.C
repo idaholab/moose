@@ -77,58 +77,86 @@ ComputeReturnMappingStress::updateQpStress(RankTwoTensor & strain_increment,
       << std::endl;
   }
 
-  // compute trial stress
-  RankTwoTensor stress_last_iteration = _elasticity_tensor[_qp] * (strain_increment + _elastic_strain_old[_qp]);
+  RankTwoTensor elastic_strain_increment;
 
-  RankTwoTensor inelastic_strain_increment, elastic_strain_increment;
-  inelastic_strain_increment.zero();
-
-  Real equivalent_delta_stress, first_equivalent_delta_stress;
+  Real l2norm_delta_stress, first_l2norm_delta_stress;
   unsigned int counter = 0;
+
+  std::vector<RankTwoTensor> inelastic_strain_increment;
+  inelastic_strain_increment.resize(_models.size());
+
+  for (unsigned i_rmm = 0; i_rmm < _models.size(); ++i_rmm)
+    inelastic_strain_increment[i_rmm].zero();
+
+  RankTwoTensor stress_max, stress_min;
 
   do
   {
-    elastic_strain_increment = strain_increment;
-    stress_new = _elasticity_tensor[_qp] * (elastic_strain_increment - inelastic_strain_increment + _elastic_strain_old[_qp]);
-
-    for (unsigned i_rmm =0; i_rmm < _models.size(); ++i_rmm)
+    for (unsigned i_rmm = 0; i_rmm < _models.size(); ++i_rmm)
     {
       _models[i_rmm]->setQp(_qp);
+
+      elastic_strain_increment = strain_increment;
+
+      for (unsigned j_rmm = 0; j_rmm < _models.size(); ++j_rmm)
+        if (i_rmm != j_rmm)
+          elastic_strain_increment -= inelastic_strain_increment[j_rmm];
+
+      stress_new = _elasticity_tensor[_qp] * (elastic_strain_increment + _elastic_strain_old[_qp]);
+
       _models[i_rmm]->updateStress(elastic_strain_increment,
-                                    inelastic_strain_increment,
-                                    stress_new);
+                                   inelastic_strain_increment[i_rmm],
+                                   stress_new);
+
+      if (i_rmm == 0)
+      {
+        stress_max = stress_new;
+        stress_min = stress_new;
+      }
+      else
+      {
+        for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        {
+          for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+          {
+            if (stress_new(i,j) > stress_max(i,j))
+              stress_max(i,j) = stress_new(i,j);
+            else if (stress_min(i,j) > stress_new(i,j))
+              stress_min(i,j) = stress_new(i,j);
+          }
+        }
+      }
+
     }
 
     // now check convergence in the stress:
-    // once the change in stress is within tolerance between two iterations through all the Recompute materials
+    // once the change in stress is within tolerance after each recompute material
     // consider the stress to be converged
-    RankTwoTensor delta_stress(stress_last_iteration - stress_new);
-    equivalent_delta_stress = std::sqrt(delta_stress.doubleContraction(delta_stress));
+    RankTwoTensor delta_stress(stress_max - stress_min);
+    l2norm_delta_stress = delta_stress.L2norm();
     if (counter == 0)
-      first_equivalent_delta_stress = equivalent_delta_stress;
-
-    stress_last_iteration = stress_new;
+      first_l2norm_delta_stress = l2norm_delta_stress;
 
     if (_output_iteration_info == true)
     {
       _console
         << "stress iteration number = " << counter << "\n"
-        << " relative equivalent delta stress = " << (0 == first_equivalent_delta_stress ? 0 : equivalent_delta_stress/first_equivalent_delta_stress) << "\n"
+        << " relative l2 norm delta stress = " << (0 == first_l2norm_delta_stress ? 0 : l2norm_delta_stress/first_l2norm_delta_stress) << "\n"
         << " stress convergence relative tolerance = "  << _relative_tolerance <<"\n"
-        << " absolute equivalent delta stress = " << equivalent_delta_stress << "\n"
+        << " absolute l2 norm delta stress = " << l2norm_delta_stress << "\n"
         << " stress converengen absolute tolerance = "  << _absolute_tolerance
         << std::endl;
     }
     ++counter;
   }
   while (counter < _max_its &&
-          equivalent_delta_stress > _absolute_tolerance &&
-          (equivalent_delta_stress / first_equivalent_delta_stress) > _relative_tolerance &&
+          l2norm_delta_stress > _absolute_tolerance &&
+          (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance &&
           _models.size() != 1);
 
   if (counter == _max_its &&
-      equivalent_delta_stress > _absolute_tolerance &&
-      (equivalent_delta_stress / first_equivalent_delta_stress) > _relative_tolerance)
+      l2norm_delta_stress > _absolute_tolerance &&
+      (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance)
     mooseError("Max stress iteration hit during ComputeReturnMappingStress solve!");
 
   strain_increment = elastic_strain_increment;
