@@ -1,7 +1,6 @@
 #RadialReturnStressUpdate
 !description /Materials/RadialReturnStressUpdate
 
-!devel /Materials/RadialReturnStressUpdate float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
 ###Algorithm References
 The radial return mapping method, introduced by Simo and Taylor (1985), uses a von Mises yield surface to determine the increment of plastic strain necessary to return the stress state to the yield surface after a trial stress increment takes the computed stress state across the yield surface.  Because the von Mises yield surface in the deviatoric stress space has the shape of a circle, the _plastic correction stress_ is always directed towards the center of the yield surface circle.

@@ -1,7 +1,6 @@
 #Stress Divergence RZ Tensors
 !description /Kernels/StressDivergenceRZTensors
 
-!devel /Kernels/StressDivergenceRZTensors float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
 
 ##Description
