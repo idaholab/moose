@@ -93,19 +93,19 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
     {
       // Prepare shape functions for ShapeElementUserObjects
       std::vector<MooseVariable *> jacobian_moose_vars = _fe_problem.getUserObjectJacobianVariables(_tid);
-      for (auto & jvar_it : jacobian_moose_vars)
+      for (auto & jvar : jacobian_moose_vars)
       {
-        unsigned int jvar = (*jvar_it).number();
-        std::vector<dof_id_type> & dof_indices = (*jvar_it).dofIndices();
+        unsigned int jvar_id = jvar->number();
+        std::vector<dof_id_type> & dof_indices = jvar->dofIndices();
 
-        _fe_problem.prepareShapes(jvar, _tid);
+        _fe_problem.prepareShapes(jvar_id, _tid);
 
         const std::vector<MooseSharedPointer<ElementUserObject> > & e_objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
         for (const auto & uo : e_objects)
         {
           MooseSharedPointer<ShapeElementUserObject> shape_element_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeElementUserObject>(uo);
           if (shape_element_uo)
-            shape_element_uo->executeJacobianWrapper(jvar, dof_indices);
+            shape_element_uo->executeJacobianWrapper(jvar_id, dof_indices);
         }
       }
     }
@@ -135,18 +135,18 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
     {
       // Prepare shape functions for ShapeSideUserObjects
       std::vector<MooseVariable *> jacobian_moose_vars = _fe_problem.getUserObjectJacobianVariables(_tid);
-      for (auto & jvar_it : jacobian_moose_vars)
+      for (auto & jvar : jacobian_moose_vars)
       {
-        unsigned int jvar = (*jvar_it).number();
-        std::vector<dof_id_type> & dof_indices = (*jvar_it).dofIndices();
+        unsigned int jvar_id = jvar->number();
+        std::vector<dof_id_type> & dof_indices = jvar->dofIndices();
 
-        _fe_problem.prepareFaceShapes(jvar, _tid);
+        _fe_problem.prepareFaceShapes(jvar_id, _tid);
 ;
         for (const auto & uo : objects)
         {
           MooseSharedPointer<ShapeSideUserObject> shape_side_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeSideUserObject>(uo);
           if (shape_side_uo)
-            shape_side_uo->executeJacobianWrapper(jvar, dof_indices);
+            shape_side_uo->executeJacobianWrapper(jvar_id, dof_indices);
         }
       }
     }

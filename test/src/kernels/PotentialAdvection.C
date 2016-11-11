@@ -48,7 +48,6 @@ PotentialAdvection::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _potential_id)
       return -_grad_test[_i][_qp] * _sgn * -_grad_phi[_j][_qp] * _u[_qp];
-
   else
     return 0;
 }
