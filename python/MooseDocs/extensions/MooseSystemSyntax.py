@@ -69,7 +69,7 @@ class MooseSystemSyntax(MooseSyntaxBase):
       name = name.split('/')[-1].strip()
       if self._syntax[group].hasObject(name):
         a = etree.Element('a')
-        a.set('href', '{}/index.html'.format(name))
+        a.set('href', '../{}/index.html'.format(name.lower()))
         a.text = name
         table.addRow(a, child['description'])
 
@@ -79,7 +79,9 @@ class MooseSystemSyntax(MooseSyntaxBase):
     el = etree.Element('div', styles)
     h2 = etree.SubElement(el, 'h2')
     h2.text = settings['title'] if settings['title'] else 'Available Sub-Objects'
-    el.append(table.html())
+    t = table.html()
+    t.set('class', 'moose-subobjects-table')
+    el.append(t)
     return el
 
   def subsystemsElement(self, group, syntax, styles, settings):
@@ -98,7 +100,7 @@ class MooseSystemSyntax(MooseSyntaxBase):
         if self._syntax[group].hasSystem(name):
           name = name.split('/')[-1].strip()
           a = etree.Element('a')
-          a.set('href', '{}/Overview'.format(name))
+          a.set('href', '../{}/Overview'.format(name.lower()))
           a.text = name
           table.addRow(a, child['description'])
 
@@ -108,5 +110,7 @@ class MooseSystemSyntax(MooseSyntaxBase):
     el = etree.Element('div', styles)
     h2 = etree.SubElement(el, 'h2')
     h2.text = settings['title'] if settings['title'] else 'Available Sub-Systems'
-    el.append(table.html())
-    return table.html()
+    t = table.html()
+    t.set('class', 'moose-subsystems-table')
+    el.append(t)
+    return el
