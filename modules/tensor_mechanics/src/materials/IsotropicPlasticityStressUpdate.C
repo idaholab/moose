@@ -71,12 +71,6 @@ IsotropicPlasticityStressUpdate::initQpStatefulProperties()
 }
 
 void
-IsotropicPlasticityStressUpdate::resetQpProperties()
-{
-  _scalar_plastic_strain[_qp] = 0.;
-}
-
-void
 IsotropicPlasticityStressUpdate::computeStressInitialize(Real effectiveTrialStress)
 {
   _shear_modulus = getIsotropicShearModulus();

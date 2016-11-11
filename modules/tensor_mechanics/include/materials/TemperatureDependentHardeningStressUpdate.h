@@ -24,11 +24,11 @@ public:
   TemperatureDependentHardeningStressUpdate(const InputParameters & parameters);
 
 protected:
-  virtual void computeStressInitialize(Real effectiveTrialStress);
+  virtual void computeStressInitialize(Real effectiveTrialStress) override;
 
-  virtual void computeYieldStress();
-  virtual Real computeHardeningValue(Real scalar);
-  virtual Real computeHardeningDerivative(Real scalar);
+  virtual void computeYieldStress() override;
+  virtual Real computeHardeningValue(Real scalar) override;
+  virtual Real computeHardeningDerivative(Real scalar) override;
 
   void initializeHardeningFunctions();
 
