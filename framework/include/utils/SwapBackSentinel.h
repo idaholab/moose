@@ -40,7 +40,7 @@ public:
    * member function taking a THREAD_ID and returning void.  All the
    * FEProblem::swapBackMaterialXXX() members have this signature.
    */
-  typedef void (FEProblem::*SwapBackFunction)(THREAD_ID);
+  using SwapBackFunction = void (FEProblem::*)(THREAD_ID);
 
   /**
    * Constructor taking an FEProblem reference, a function to call,
