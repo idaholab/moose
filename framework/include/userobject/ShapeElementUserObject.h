@@ -36,14 +36,6 @@ class ShapeElementUserObject : public ShapeUserObject<ElementUserObject>
 {
 public:
   ShapeElementUserObject(const InputParameters & parameters);
-
-/* protected: */
-/*   /\** */
-/*    * Implement this function to compute Jacobian terms for this UserObject. The */
-/*    * shape function index _j and its corrsponding global DOF index _j_global */
-/*    * will be provided. */
-/*    *\/ */
-/*   virtual void executeJacobian(unsigned int /\*jvar*\/) = 0; */
 };
 
 #endif //SHAPEELEMENTUSEROBJECT_H

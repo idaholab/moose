@@ -32,9 +32,7 @@ InputParameters validParams<ShapeSideUserObject>();
  * \warning It is up to the user to ensure _fe_problem.currentlyComputingJacobian()
  *          returns true before utilizing the shape functions.
  */
-class ShapeSideUserObject :
-  /* public SideUserObject, */
-  public ShapeUserObject<SideUserObject>
+class ShapeSideUserObject : public ShapeUserObject<SideUserObject>
 {
 public:
   ShapeSideUserObject(const InputParameters & parameters);

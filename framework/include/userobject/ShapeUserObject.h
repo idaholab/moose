@@ -15,7 +15,6 @@
 #ifndef SHAPEUSEROBJECT_H
 #define SHAPEUSEROBJECT_H
 
-/* #include "ElementUserObject.h" */
 #include "MooseVariable.h"
 #include "MooseObject.h"
 #include "Coupleable.h"
@@ -30,7 +29,7 @@
  * _assembly.phiFace())
  */
 
-enum ShapeType
+enum class ShapeType
 {
   Element,
   Side
@@ -101,8 +100,8 @@ private:
 template<typename T>
 ShapeUserObject<T>::ShapeUserObject(const InputParameters & parameters, ShapeType type) :
     T(parameters),
-    _phi((type == ShapeType::Element) ? this->_assembly.phi() : this->_assembly.phiFace()),
-    _grad_phi((type == ShapeType::Element) ? this->_assembly.gradPhi() : this->_assembly.gradPhiFace()),
+    _phi(type == ShapeType::Element ? this->_assembly.phi() : this->_assembly.phiFace()),
+    _grad_phi(type == ShapeType::Element ? this->_assembly.gradPhi() : this->_assembly.gradPhiFace()),
     _compute_jacobians(MooseObject::getParam<bool>("compute_jacobians"))
 {
   mooseWarning("Jacobian calculation in UserObjects is an experimental capability with a potentially unstable interface.");
