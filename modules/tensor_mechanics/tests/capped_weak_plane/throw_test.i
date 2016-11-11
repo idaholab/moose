@@ -1,4 +1,9 @@
-# Illustrates the SEGFAULT problem.
+# Illustrates throwing an Exception from a Material.  In this case we
+# don't actually recover from the segfault (so it is a RunException
+# test) but in practice one could do so.  The purpose of this test is
+# to ensure that exceptions can be thrown from Materials with stateful
+# material properties without reading/writing to/from uninitialized
+# memory.
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -122,6 +127,7 @@
 [Executioner]
   end_time = 1
   dt = 1
+  dtmin = 1
   type = Transient
 []
 
