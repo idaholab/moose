@@ -614,6 +614,11 @@ public:
   VectorPostprocessorValue & declareVectorPostprocessorVector(const VectorPostprocessorName & name, const std::string & vector_name);
 
   /**
+   * Whether or not the specified VectorPostprocessor has declared any vectors
+   */
+  bool vectorPostprocessorHasVectors(const std::string & vpp_name) { return _vpps_data.hasVectors(vpp_name); }
+
+  /**
    * Get the vectors for a specific VectorPostprocessor.
    * @param vpp_name The name of the VectorPostprocessor
    */

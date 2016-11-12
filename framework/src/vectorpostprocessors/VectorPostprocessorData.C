@@ -67,6 +67,12 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
   return get_current ? *vec_struct.current : *vec_struct.old;
 }
 
+bool
+VectorPostprocessorData::hasVectors(const std::string & vpp_name) const
+{
+  return _values.find(vpp_name) != _values.end();
+}
+
 const std::map<std::string, VectorPostprocessorData::VectorPostprocessorState> &
 VectorPostprocessorData::vectors(const std::string & vpp_name) const
 {
