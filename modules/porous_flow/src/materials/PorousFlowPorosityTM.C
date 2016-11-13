@@ -11,7 +11,7 @@ template<>
 InputParameters validParams<PorousFlowPorosityTM>()
 {
   InputParameters params = validParams<PorousFlowPorosityBase>();
-  params.addRequiredParam<Real>("porosity_zero", "The porosity at zero volumetric strain and zero temperature");
+  params.addRequiredCoupledVar("porosity_zero", "The porosity at zero volumetric strain and zero temperature");
   params.addRequiredParam<Real>("thermal_expansion_coeff", "Thermal expansion coefficient of the drained porous solid skeleton");
   params.addRequiredRangeCheckedParam<Real>("solid_bulk", "solid_bulk>0", "Bulk modulus of the drained porous solid skeleton");
   params.addRequiredCoupledVar("displacements", "The solid-mechanics displacement variables");
@@ -22,7 +22,7 @@ InputParameters validParams<PorousFlowPorosityTM>()
 PorousFlowPorosityTM::PorousFlowPorosityTM(const InputParameters & parameters) :
     PorousFlowPorosityBase(parameters),
 
-    _phi0(getParam<Real>("porosity_zero")),
+    _phi0(coupledValue("porosity_zero")),
     _exp_coeff(getParam<Real>("thermal_expansion_coeff")),
     _solid_bulk(getParam<Real>("solid_bulk")),
 
@@ -44,8 +44,8 @@ PorousFlowPorosityTM::PorousFlowPorosityTM(const InputParameters & parameters) :
 void
 PorousFlowPorosityTM::initQpStatefulProperties()
 {
-  _porosity_nodal[_qp] = _phi0;
-  _porosity_qp[_qp] = _phi0;
+  _porosity_nodal[_qp] = _phi0[_qp];
+  _porosity_qp[_qp] = _phi0[_qp];
 }
 
 void
@@ -56,8 +56,8 @@ PorousFlowPorosityTM::computeQpProperties()
   // So _porosity_nodal[_qp], which should be the nodal value of porosity (but
   // stored at the quadpoint) actually uses the strain at the quadpoint.  This
   // is OK for LINEAR elements, as strain is constant over the element anyway.
-  _porosity_nodal[_qp] = 1.0 + (_phi0 - 1.0) * std::exp(-_vol_strain_qp[_qp] + _exp_coeff * _temperature_nodal[_qp]);
-  _porosity_qp[_qp] = 1.0 + (_phi0 - 1.0) * std::exp(-_vol_strain_qp[_qp] + _exp_coeff * _temperature_qp[_qp]);
+  _porosity_nodal[_qp] = 1.0 + (_phi0[_qp] - 1.0) * std::exp(-_vol_strain_qp[_qp] + _exp_coeff * _temperature_nodal[_qp]);
+  _porosity_qp[_qp] = 1.0 + (_phi0[_qp] - 1.0) * std::exp(-_vol_strain_qp[_qp] + _exp_coeff * _temperature_qp[_qp]);
 
   _dporosity_qp_dvar[_qp].resize(_num_var);
   _dporosity_nodal_dvar[_qp].resize(_num_var);
