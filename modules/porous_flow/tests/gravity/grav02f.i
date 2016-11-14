@@ -120,10 +120,8 @@
     phase0_porepressure = ppwater
     phase1_saturation = sgas
     p0 = 1e4
-    pc_max = 2e5
+    pc_max = -2e5
     m = 0.5
-    sat_ls = 1
-    sat_lr = 0
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
