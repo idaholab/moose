@@ -58,13 +58,13 @@ protected:
   } _strain_and_increment;
 
   /// use an out of plane stress/strain formulation
-  enum class OutOfPlane
+  enum class PlanarFormulation
   {
     None,
     PlaneStress,
     PlaneStrain,
     GeneralizedPlaneStrain
-  } _out_of_plane;
+  } _planar_formulation;
 
   /// use displaced mesh (true unless _strain is SMALL)
   bool _use_displaced_mesh;

@@ -29,8 +29,8 @@ validParams<TensorMechanicsAction>()
   params.addParam<MooseEnum>("strain", strainType, "Strain formulation");
   params.addParam<bool>("incremental", "Use incremental or total strain");
 
-  MooseEnum outOfPlaneType("NONE PLANE_STRESS PLANE_STRAIN GENERALIZED_PLANE_STRAIN", "NONE");
-  params.addParam<MooseEnum>("out_of_plane", outOfPlaneType, "Out-of-plane stress/strain formulation");
+  MooseEnum PlanarFormulationType("NONE PLANE_STRESS PLANE_STRAIN GENERALIZED_PLANE_STRAIN", "NONE");
+  params.addParam<MooseEnum>("planar_formulation", PlanarFormulationType, "Out-of-plane stress/strain formulation");
 
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<bool>("volumetric_locking_correction", true, "Flag to correct volumetric locking");
@@ -56,7 +56,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _diag_save_in(getParam<std::vector<AuxVariableName>>("diag_save_in")),
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _strain(getParam<MooseEnum>("strain").getEnum<Strain>()),
-    _out_of_plane(getParam<MooseEnum>("out_of_plane").getEnum<OutOfPlane>())
+    _planar_formulation(getParam<MooseEnum>("planar_formulation").getEnum<PlanarFormulation>())
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -104,10 +104,10 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     mooseError("Number of diag_save_in variables should equal to the number of displacement variables " << _ndisp);
 
   // plane strain consistency check
-  if (_out_of_plane != OutOfPlane::None && _ndisp != 2)
+  if (_planar_formulation != PlanarFormulation::None && _ndisp != 2)
     mooseError("Plane strain only works in 2 dimensions");
 
-  if (_out_of_plane != OutOfPlane::None)
+  if (_planar_formulation != PlanarFormulation::None)
     mooseError("Not implemented");
 }
 
@@ -139,14 +139,18 @@ TensorMechanicsAction::act()
   {
     const std::string type = "GeneralizedPlaneStrainAction";
     auto params = _action_factory.getValidParams(type);
-    // auto action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("type", name() + "_gps", params));
-    //
-    // // Set the object parameters
-    // InputParameters & object_params = action->getObjectParams();
-    // object_params.set<bool>("_built_by_moose") = true;
-    //
-    // // Add the action to the warehouse
-    // _awh.addActionBlock(action);
+
+    if (_planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
+    {
+      auto action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("type", name() + "_gps", params));
+
+      // Set the object parameters
+      InputParameters & object_params = action->getObjectParams();
+      object_params.set<bool>("_built_by_moose") = true;
+
+      // Add the action to the warehouse
+      _awh.addActionBlock(action);
+    }
   }
 
   //
@@ -178,7 +182,7 @@ TensorMechanicsAction::act()
     //
     // no plane strain
     //
-    if (_out_of_plane == OutOfPlane::None)
+    if (_planar_formulation == PlanarFormulation::None)
     {
       std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
           {{Moose::COORD_XYZ, StrainAndIncrement::SmallTotal}, "ComputeSmallStrain"},

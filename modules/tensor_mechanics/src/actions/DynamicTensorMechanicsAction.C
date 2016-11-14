@@ -6,12 +6,13 @@
 /****************************************************************/
 #include "DynamicTensorMechanicsAction.h"
 
-#include "Factory.h"
 #include "FEProblem.h"
+#include "Factory.h"
 #include "Parser.h"
 
-template<>
-InputParameters validParams<DynamicTensorMechanicsAction>()
+template <>
+InputParameters
+validParams<DynamicTensorMechanicsAction>()
 {
   InputParameters params = validParams<TensorMechanicsAction>();
   params.addClassDescription("Set up dynamic stress divergence kernels");
@@ -21,8 +22,8 @@ InputParameters validParams<DynamicTensorMechanicsAction>()
   return params;
 }
 
-DynamicTensorMechanicsAction::DynamicTensorMechanicsAction(const InputParameters & params) :
-  TensorMechanicsAction(params)
+DynamicTensorMechanicsAction::DynamicTensorMechanicsAction(const InputParameters & params)
+  : TensorMechanicsAction(params)
 {
 }
 
@@ -30,7 +31,7 @@ std::string
 DynamicTensorMechanicsAction::getKernelType()
 {
   // choose kernel type based on coordinate system
-  if (_coord_system ==  Moose::COORD_XYZ)
+  if (_coord_system == Moose::COORD_XYZ)
     return "DynamicStressDivergenceTensors";
   else
     mooseError("Unsupported coordinate system");
