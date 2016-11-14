@@ -73,7 +73,7 @@ LambertW(Real z)
     w = std::log(z); /* asymptotic */
   if (z > 3.0)
     w -= std::log(w); /* useful? */
-  for (unsigned i = 0; i < 10; i++)
+  for (unsigned int i = 0; i < 10; ++i)
   {
     /* Halley iteration */
     e = std::exp(w);
@@ -89,37 +89,37 @@ LambertW(Real z)
 }
 
 Real
-seff(Real pressure, Real c, Real sn, Real ss, Real las)
+effectiveSaturation(Real pressure, Real c, Real sn, Real ss, Real las)
 {
-  if (pressure >= 0)
+  if (pressure >= 0.0)
     return 1.0;
-  const Real x = (c - 1.0) * std::exp(c - 1 - c * pressure / las);
-  const Real th = c/(1.0 + LambertW(x)); // use branch 0 for positive x
+  const Real x = (c - 1.0) * std::exp(c - 1.0 - c * pressure / las);
+  const Real th = c / (1.0 + LambertW(x)); // use branch 0 for positive x
   return sn + (ss - sn) * th;
 }
 
 Real
-dseff(Real pressure, Real c, Real sn, Real ss, Real las)
+dEffectiveSaturation(Real pressure, Real c, Real sn, Real ss, Real las)
 {
-  if (pressure >= 0)
+  if (pressure >= 0.0)
     return 0.0;
-  const Real x = (c - 1) * std::exp(c - 1.0 - c * pressure / las);
+  const Real x = (c - 1.0) * std::exp(c - 1.0 - c * pressure / las);
   const Real lamw = LambertW(x);
-  return (ss - sn) * Utility::pow<2>(c) / las * lamw / Utility::pow<3>(1 + lamw);
+  return (ss - sn) * Utility::pow<2>(c) / las * lamw / Utility::pow<3>(1.0 + lamw);
 }
 
 Real
-d2seff(Real pressure, Real c, Real sn, Real ss, Real las)
+d2EffectiveSaturation(Real pressure, Real c, Real sn, Real ss, Real las)
 {
-  if (pressure >= 0)
+  if (pressure >= 0.0)
     return 0.0;
-  const Real x = (c - 1) * std::exp(c - 1 - c * pressure / las);
+  const Real x = (c - 1.0) * std::exp(c - 1.0 - c * pressure / las);
   const Real lamw = LambertW(x);
-  return - (ss - sn) * Utility::pow<3>(c) / Utility::pow<2>(las) * lamw * (1.0 - 2.0 * lamw)/Utility::pow<5>(1 + lamw);
+  return - (ss - sn) * Utility::pow<3>(c) / Utility::pow<2>(las) * lamw * (1.0 - 2.0 * lamw)/Utility::pow<5>(1.0 + lamw);
 }
 
 Real
-relperm(Real s, Real c, Real sn, Real ss, Real kn, Real ks)
+relativePermeability(Real s, Real c, Real sn, Real ss, Real kn, Real ks)
 {
   if (s <= sn)
     return kn;
@@ -127,14 +127,14 @@ relperm(Real s, Real c, Real sn, Real ss, Real kn, Real ks)
   if (s >= ss)
     return ks;
 
-  const Real coef = (ks - kn) * (c - 1);
+  const Real coef = (ks - kn) * (c - 1.0);
   const Real th = (s - sn) / (ss - sn);
   const Real krel = kn + coef * Utility::pow<2>(th) / (c - th);
   return krel;
 }
 
 Real
-drelperm(Real s, Real c, Real sn, Real ss, Real kn, Real ks)
+dRelativePermeability(Real s, Real c, Real sn, Real ss, Real kn, Real ks)
 {
   if (s <= sn)
     return 0.0;
@@ -142,14 +142,14 @@ drelperm(Real s, Real c, Real sn, Real ss, Real kn, Real ks)
   if (s >= ss)
     return 0.0;
 
-  const Real coef = (ks - kn) * (c - 1);
+  const Real coef = (ks - kn) * (c - 1.0);
   const Real th = (s - sn) / (ss - sn);
   const Real krelp = coef * (2.0 * th / (c - th) + Utility::pow<2>(th) / Utility::pow<2>(c - th));
   return krelp / (ss - sn);
 }
 
 Real
-d2relperm(Real s, Real c, Real sn, Real ss, Real kn, Real ks)
+d2RelativePermeability(Real s, Real c, Real sn, Real ss, Real kn, Real ks)
 {
   if (s <= sn)
     return 0.0;
@@ -157,7 +157,7 @@ d2relperm(Real s, Real c, Real sn, Real ss, Real kn, Real ks)
   if (s >= ss)
     return 0.0;
 
-  const Real coef = (ks - kn) * (c - 1);
+  const Real coef = (ks - kn) * (c - 1.0);
   const Real th = (s - sn)/(ss - sn);
   const Real krelpp = coef * (2.0 / (c - th) + 4.0 * th / Utility::pow<2>(c - th) + 2.0 * Utility::pow<2>(th) / Utility::pow<3>(c - th));
   return krelpp / Utility::pow<2>(ss - sn);
