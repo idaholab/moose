@@ -14,6 +14,275 @@
 
 #include "Stepper.h"
 
+StepperInfo::StepperInfo()
+  : _step_count(1),
+    _time(0),
+    _dt(),
+    _nonlin_iters(0),
+    _lin_iters(0),
+    _converged(),
+    _solve_time_secs(),
+    _soln_nonlin(nullptr),
+    _soln_aux(nullptr),
+    _soln_predicted(nullptr),
+    _snapshot(false),
+    _rewind(false),
+    _rewind_time(-1),
+    _dummy_comm()
+{
+  for (int i = 0; i < 3; i++)
+  {
+    _dt.push_front(0);
+    _converged.push_front(true);
+    _solve_time_secs.push_front(0);
+  }
+  _soln_nonlin.reset(NumericVector<Number>::build(_dummy_comm).release());
+  _soln_nonlin->init(0, 0, false, SERIAL);
+  _soln_aux.reset(NumericVector<Number>::build(_dummy_comm).release());
+  _soln_aux->init(0, 0, false, SERIAL);
+  _soln_predicted.reset(NumericVector<Number>::build(_dummy_comm).release());
+  _soln_predicted->init(0, 0, false, SERIAL);
+}
+
+StepperInfo::StepperInfo(const StepperInfo& si)
+{
+  _step_count = si._step_count;
+  _time = si._time;
+  _dt = si._dt;
+  _nonlin_iters = si._nonlin_iters;
+  _lin_iters = si._lin_iters;
+  _converged = si._converged;
+  _solve_time_secs = si._solve_time_secs;
+  
+  _soln_nonlin.reset(si._soln_nonlin->clone().release());
+  _soln_aux.reset(si._soln_aux->clone().release());
+  _soln_predicted.reset(si._soln_predicted->clone().release());
+
+  _snapshot = false;
+  _rewind = false;
+  _rewind_time = -1;
+}
+
+StepperInfo&
+StepperInfo::operator=(const StepperInfo& si)
+{
+  _step_count = si._step_count;
+  _time = si._time;
+  _dt = si._dt;
+  _nonlin_iters = si._nonlin_iters;
+  _lin_iters = si._lin_iters;
+  _converged = si._converged;
+  _solve_time_secs = si._solve_time_secs;
+  
+  _soln_nonlin.reset(si._soln_nonlin->clone().release());
+  _soln_aux.reset(si._soln_aux->clone().release());
+  _soln_predicted.reset(si._soln_predicted->clone().release());
+
+  _snapshot = false;
+  _rewind = false;
+  _rewind_time = -1;
+  return *this;
+}
+
+void
+StepperInfo::pushHistory(Real dt, bool converged, Real solve_time)
+{
+    _dt.push_front(dt);
+    _dt.pop_back();
+    _converged.push_front(converged);
+    _converged.pop_back();
+    _solve_time_secs.push_front(solve_time);
+    _solve_time_secs.pop_back();
+}
+
+void
+StepperInfo::update(
+    int step_count,
+    Real time,
+    Real dt,
+    unsigned int nonlin_iters,
+    unsigned int lin_iters,
+    bool converged,
+    Real solve_time_secs,
+    std::vector<Real> soln_nonlin,
+    std::vector<Real> soln_aux,
+    std::vector<Real> soln_predicted
+    )
+{
+  _step_count = step_count;
+  _time = time;
+  _dt.push_front(dt);
+  _dt.pop_back();
+  _nonlin_iters = nonlin_iters;
+  _lin_iters = lin_iters;
+  _converged.push_front(converged);
+  _converged.pop_back();
+  _solve_time_secs.push_front(solve_time_secs);
+  _solve_time_secs.pop_back();
+
+  _snapshot = false;
+  _rewind = false;
+  _rewind_time = -1;
+  
+  if (_soln_nonlin->size() != soln_nonlin.size())
+  {
+    _soln_nonlin.reset(NumericVector<Number>::build(_dummy_comm).release());
+    _soln_nonlin->init(soln_nonlin.size(), soln_nonlin.size(), false, SERIAL);
+  }
+  if (_soln_aux->size() != soln_aux.size())
+  {
+    _soln_aux.reset(NumericVector<Number>::build(_dummy_comm).release());
+    _soln_aux->init(soln_aux.size(), soln_aux.size(), false, SERIAL);
+  }
+  if (_soln_predicted->size() != soln_predicted.size())
+  {
+    _soln_predicted.reset(NumericVector<Number>::build(_dummy_comm).release());
+    _soln_predicted->init(soln_predicted.size(), soln_predicted.size(), false, SERIAL);
+  }
+  
+  *_soln_nonlin = soln_nonlin;
+  *_soln_aux = soln_aux;
+  *_soln_predicted = soln_predicted;
+}
+
+int
+StepperInfo::stepCount()
+{
+  return _step_count;
+}
+
+Real
+StepperInfo::time()
+{
+  return _time;
+}
+
+template <typename T>
+T nth_elem(std::list<T>& lst, int n)
+{
+  int i = 0;
+  for (auto it = lst.begin(); it != lst.end(); ++it)
+  {
+    if (i == n)
+      return *it;
+    i++;
+  }
+  mooseError("too old history value requested from StepperInfo");
+}
+
+Real
+StepperInfo::dt(int n)
+{
+  return nth_elem(_dt, n);
+}
+
+bool
+StepperInfo::converged(int n)
+{
+  return nth_elem(_converged, n);
+}
+
+Real
+StepperInfo::solveTimeSecs(int n)
+{
+  return nth_elem(_solve_time_secs, n);
+}
+
+int
+StepperInfo::nonlinIters()
+{
+  return _nonlin_iters;
+}
+
+int
+StepperInfo::linIters()
+{
+  return _lin_iters;
+}
+
+NumericVector<Number>*
+StepperInfo::solnNonlin()
+{
+  return _soln_nonlin.get();
+}
+
+NumericVector<Number>*
+StepperInfo::solnAux()
+{
+  return _soln_aux.get();
+}
+
+NumericVector<Number>*
+StepperInfo::solnPredicted()
+{
+  return _soln_predicted.get();
+}
+
+void
+StepperInfo::snapshot()
+{
+  _snapshot = true;
+}
+
+bool
+StepperInfo::wantSnapshot()
+{
+  return _snapshot;
+}
+
+void
+StepperInfo::rewind(Real target_time)
+{
+  _rewind = true;
+  _rewind_time = target_time;
+}
+
+Real
+StepperInfo::rewindTime()
+{
+  return _rewind_time;
+}
+
+RootBlock::RootBlock(std::function<Real(StepperInfo & si)> func)
+  : _func(func)
+{
+}
+
+Real
+RootBlock::next(StepperInfo & si)
+{
+  return _func(si);
+}
+
+ModBlock::ModBlock(StepperBlock * s,
+                   std::function<
+                       Real(StepperInfo & si, Real dt)> func)
+  : _stepper(s), _func(func)
+{
+}
+
+Real
+ModBlock::next(StepperInfo & si)
+{
+  return _func(si, _stepper->next(si));
+}
+
+IfBlock::IfBlock(StepperBlock * on_true, StepperBlock * on_false,
+                 std::function<bool(StepperInfo &)> func)
+  : _ontrue(on_true), _onfalse(on_false), _func(func)
+{
+}
+
+Real
+IfBlock::next(StepperInfo & si)
+{
+  bool val = _func(si);
+  if (val)
+    return _ontrue->next(si);
+  return _onfalse->next(si);
+}
+
+
 InstrumentedBlock::InstrumentedBlock(Real * dt_store)
   : _stepper(nullptr), _dt_store(dt_store), _own(!dt_store)
 {
@@ -28,12 +297,12 @@ InstrumentedBlock::~InstrumentedBlock()
 }
 
 Real
-InstrumentedBlock::next(const StepperInfo & si, StepperFeedback & sf)
+InstrumentedBlock::next(StepperInfo & si)
 {
   if (!_stepper)
     mooseError("InstrumentedStepper's inner stepper not set");
 
-  *_dt_store = _stepper->next(si, sf);
+  *_dt_store = _stepper->next(si);
   return *_dt_store;
 }
 
@@ -55,20 +324,20 @@ RetryUnusedBlock::RetryUnusedBlock(StepperBlock * s, Real tol, bool prev_prev)
 }
 
 Real
-RetryUnusedBlock::next(const StepperInfo & si, StepperFeedback & sf)
+RetryUnusedBlock::next(StepperInfo & si)
 {
-  if (_prev_dt != 0 && std::abs(si.prev_dt - _prev_dt) > _tol && std::abs(si.time - _prev_time) > _tol)
+  if (_prev_dt != 0 && std::abs(si.dt() - _prev_dt) > _tol && std::abs(si.time() - _prev_time) > _tol)
   {
     if (_prev_prev)
     {
-      _prev_dt = si.prev_prev_dt;
-      return si.prev_prev_dt;
+      _prev_dt = si.dt(1);
+      return si.dt(1);
     }
     else
       return _prev_dt;
   }
-  _prev_time = si.time;
-  _prev_dt = _stepper->next(si, sf);
+  _prev_time = si.time();
+  _prev_dt = _stepper->next(si);
   return _prev_dt;
 }
 
@@ -79,15 +348,15 @@ ConstrFuncBlock::ConstrFuncBlock(StepperBlock * s, std::function<Real(Real)> fun
 }
 
 Real
-ConstrFuncBlock::next(const StepperInfo & si, StepperFeedback & sf)
+ConstrFuncBlock::next(StepperInfo & si)
 {
-  Real dt = _stepper->next(si, sf);
-  Real f_curr = _func(si.time);
-  Real df = std::abs(_func(si.time + dt) - f_curr);
+  Real dt = _stepper->next(si);
+  Real f_curr = _func(si.time());
+  Real df = std::abs(_func(si.time() + dt) - f_curr);
   while (_max_diff > 0 && df > _max_diff)
   {
     dt /= 2.0;
-    df = std::abs(_func(si.time + dt) - f_curr);
+    df = std::abs(_func(si.time() + dt) - f_curr);
   }
   return dt;
 }
@@ -99,16 +368,16 @@ PiecewiseBlock::PiecewiseBlock(std::vector<Real> times, std::vector<Real> dts,
 }
 
 Real
-PiecewiseBlock::next(const StepperInfo & si, StepperFeedback &)
+PiecewiseBlock::next(StepperInfo & si)
 {
   if (_interp)
-    return _lin.sample(si.time);
+    return _lin.sample(si.time());
 
-  if (MooseUtils::relativeFuzzyGreaterEqual(si.time, _times.back()))
+  if (MooseUtils::relativeFuzzyGreaterEqual(si.time(), _times.back()))
     return _times.back();
 
   for (int i = 0; i < _times.size() - 1; i++)
-    if (MooseUtils::relativeFuzzyLessThan(si.time, _times[i + 1]))
+    if (MooseUtils::relativeFuzzyLessThan(si.time(), _times[i + 1]))
       return _dts[i];
   return _dts.back();
 }
@@ -119,10 +388,10 @@ MinOfBlock::MinOfBlock(StepperBlock * a, StepperBlock * b, Real tol)
 }
 
 Real
-MinOfBlock::next(const StepperInfo & si, StepperFeedback & sf)
+MinOfBlock::next(StepperInfo & si)
 {
-  Real dta = _a->next(si, sf);
-  Real dtb = _b->next(si, sf);
+  Real dta = _a->next(si);
+  Real dtb = _b->next(si);
   if (dta - _tol < dtb)
     return dta;
   return dtb;
@@ -139,10 +408,10 @@ AdaptiveBlock::AdaptiveBlock(unsigned int optimal_iters, unsigned int iter_windo
 }
 
 Real
-AdaptiveBlock::next(const StepperInfo & si, StepperFeedback &)
+AdaptiveBlock::next(StepperInfo & si)
 {
   bool can_shrink = true;
-  bool can_grow = si.converged && si.prev_converged;
+  bool can_grow = si.converged() && si.converged(1);
 
   unsigned int growth_nl_its = 0;
   unsigned int growth_l_its = 0;
@@ -154,13 +423,13 @@ AdaptiveBlock::next(const StepperInfo & si, StepperFeedback &)
     growth_l_its = _lin_iter_ratio * (_optimal_iters - _iter_window);
   }
 
-  if (can_grow && (si.nonlin_iters < growth_nl_its && si.lin_iters < growth_l_its))
-    return si.prev_dt * _growth_factor;
+  if (can_grow && (si.nonlinIters() < growth_nl_its && si.linIters() < growth_l_its))
+    return si.dt() * _growth_factor;
   else if (can_shrink &&
-           (!si.converged || si.nonlin_iters > shrink_nl_its || si.lin_iters > shrink_l_its))
-    return si.prev_dt * _shrink_factor;
+           (!si.converged() || si.nonlinIters() > shrink_nl_its || si.linIters() > shrink_l_its))
+    return si.dt() * _shrink_factor;
   else
-    return si.prev_dt;
+    return si.dt();
 };
 
 SolveTimeAdaptiveBlock::SolveTimeAdaptiveBlock(int initial_direc, Real percent_change)
@@ -169,11 +438,11 @@ SolveTimeAdaptiveBlock::SolveTimeAdaptiveBlock(int initial_direc, Real percent_c
 }
 
 Real
-SolveTimeAdaptiveBlock::next(const StepperInfo & si, StepperFeedback &)
+SolveTimeAdaptiveBlock::next(StepperInfo & si)
 {
-  Real ratio = si.prev_solve_time_secs / si.prev_dt;
-  Real prev_ratio = si.prev_prev_solve_time_secs / si.prev_prev_dt;
-  Real prev_prev_ratio = si.prev_prev_prev_solve_time_secs / si.prev_prev_prev_dt;
+  Real ratio = si.solveTimeSecs() / si.dt();
+  Real prev_ratio = si.solveTimeSecs(1) / si.dt(1);
+  Real prev_prev_ratio = si.solveTimeSecs(2) / si.dt(2);
 
   _n_steps++;
   // this is this way in order to mirror original SolutionTimeAdaptiveDT
@@ -185,7 +454,7 @@ SolveTimeAdaptiveBlock::next(const StepperInfo & si, StepperFeedback &)
     _n_steps = 0;
   }
 
-  return si.prev_dt + si.prev_dt * _percent_change * _direc;
+  return si.dt() + si.dt() * _percent_change * _direc;
 }
 
 PredictorCorrectorBlock::PredictorCorrectorBlock(int start_adapting, Real e_tol,
@@ -199,40 +468,38 @@ PredictorCorrectorBlock::PredictorCorrectorBlock(int start_adapting, Real e_tol,
 }
 
 Real
-PredictorCorrectorBlock::next(const StepperInfo & si, StepperFeedback &)
+PredictorCorrectorBlock::next(StepperInfo & si)
 {
-  if (!si.converged)
-    return si.prev_dt;
+  if (!si.converged())
+    return si.dt();
   // original Predictor stepper actually used the Real valued time step
   // instead of step_count which is used here - which doesn't make sense for
   // this check since if t_0 != 0 or dt != 1 would make it so the predictor
   // might not have a prediction by the time _start_adapting was called -
   // this could be changed back like the original, but then, start_adapting
   // needs to be carefully documented.
-  if (si.step_count < _start_adapting)
-    return si.prev_dt;
-  if (si.soln_nonlin == nullptr || si.soln_predicted == nullptr)
+  if (si.stepCount() < _start_adapting)
+    return si.dt();
+  if (si.solnNonlin() == nullptr || si.solnPredicted() == nullptr)
     mooseError("no predicted solution available");
 
   Real error = estimateTimeError(si);
-  Real infnorm = si.soln_nonlin->linfty_norm();
+  Real infnorm = si.solnNonlin()->linfty_norm();
   Real e_max = 1.1 * _e_tol * infnorm;
 
   if (error > e_max)
-    return si.prev_dt * 0.5;
-  return si.prev_dt * _scale_param * std::pow(infnorm * _e_tol / error, 1.0 / 3.0);
+    return si.dt() * 0.5;
+  return si.dt() * _scale_param * std::pow(infnorm * _e_tol / error, 1.0 / 3.0);
 }
 
 Real
-PredictorCorrectorBlock::estimateTimeError(const StepperInfo & si)
+PredictorCorrectorBlock::estimateTimeError(StepperInfo & si)
 {
-  NumericVector<Number> & soln = *si.soln_nonlin;
-  NumericVector<Number> & predicted = *si.soln_predicted;
-  soln.close();
-  predicted.close();
+  NumericVector<Number> & soln = *si.solnNonlin();
+  NumericVector<Number> & predicted = *si.solnPredicted();
 
-  Real dtprev = si.prev_prev_dt;
-  Real dt = si.prev_dt;
+  Real dtprev = si.dt(1);
+  Real dt = si.dt();
   if (_time_integrator == "CrankNicolson")
   {
     predicted -= soln;
@@ -279,38 +546,36 @@ DT2Block::dt()
 }
 
 Real
-DT2Block::next(const StepperInfo & si, StepperFeedback & sf)
+DT2Block::next(StepperInfo & si)
 {
-  if (std::abs(si.time - _end_time) < _tol && _big_soln && si.converged)
+  if (std::abs(si.time() - _end_time) < _tol && _big_soln && si.converged())
   {
     // we just finished the second of the two smaller dt steps and are ready for error calc
     Real err = calcErr(si);
     if (err > _e_max)
     {
-      sf.rewind = true;
-      sf.rewind_time = _start_time;
-      return resetWindow(sf.rewind_time, dt() / 2);
+      si.rewind(_start_time);
+      return resetWindow(si.rewindTime(), dt() / 2);
     }
 
     Real new_dt = dt() * std::pow(_e_tol / err, 1.0 / _order);
-    sf.snapshot = true;
-    return resetWindow(si.time, new_dt);
+    si.snapshot();
+    return resetWindow(si.time(), new_dt);
   }
-  else if (std::abs(si.time - _end_time) < _tol && !_big_soln && si.converged)
+  else if (std::abs(si.time() - _end_time) < _tol && !_big_soln && si.converged())
   {
     // collect big dt soln and rewind to collect small dt solns
-    _big_soln.reset(si.soln_nonlin->clone().release());
+    _big_soln.reset(si.solnNonlin()->clone().release());
     _big_soln->close();
-    sf.rewind = true;
-    sf.rewind_time = _start_time;
+    si.rewind(_start_time);
     return dt() / 2.0; // doesn't actually matter what we return here because rewind
   }
-  else if (std::abs(si.time - _start_time) < _tol && _big_soln && si.converged)
+  else if (std::abs(si.time() - _start_time) < _tol && _big_soln && si.converged())
   {
     // we just rewound and need to do small steps
     return dt() / 2;
   }
-  else if (std::abs(_start_time + dt() / 2 - si.time) < _tol && _big_soln && si.converged)
+  else if (std::abs(_start_time + dt() / 2 - si.time()) < _tol && _big_soln && si.converged())
   {
     // we just finished the first of the smaller dt steps
     return dt() / 2;
@@ -318,69 +583,28 @@ DT2Block::next(const StepperInfo & si, StepperFeedback & sf)
   else
   {
     // something went wrong or this is initial call of simulation - start over
-    sf.snapshot = true;
+    si.snapshot();
     Real ddt = dt();
     if (ddt == 0)
-      ddt = si.prev_dt;
-    return resetWindow(si.time, ddt);
+      ddt = si.dt();
+    return resetWindow(si.time(), ddt);
   }
 }
 
 Real
-DT2Block::calcErr(const StepperInfo & si)
+DT2Block::calcErr(StepperInfo & si)
 {
-  std::unique_ptr<NumericVector<Number>> small_soln(si.soln_nonlin->clone().release());
-  std::unique_ptr<NumericVector<Number>> diff(si.soln_nonlin->clone().release());
-  small_soln->close();
-  diff->close();
+  std::unique_ptr<NumericVector<Number>> small_soln(si.solnNonlin()->clone().release());
+  std::unique_ptr<NumericVector<Number>> diff(si.solnNonlin()->clone().release());
   *diff -= *_big_soln;
   Real err = (diff->l2_norm() / std::max(_big_soln->l2_norm(), small_soln->l2_norm())) / dt();
   return err;
 }
 
-IfBlock::IfBlock(StepperBlock * on_true, StepperBlock * on_false,
-                 std::function<bool(const StepperInfo &)> func)
-  : _ontrue(on_true), _onfalse(on_false), _func(func)
-{
-}
-
-Real
-IfBlock::next(const StepperInfo & si, StepperFeedback & sf)
-{
-  bool val = _func(si);
-  if (val)
-    return _ontrue->next(si, sf);
-  return _onfalse->next(si, sf);
-}
-
-ModBlock::ModBlock(StepperBlock * s,
-                   std::function<
-                       Real(const StepperInfo & si, Real dt)> func)
-  : _stepper(s), _func(func)
-{
-}
-
-Real
-ModBlock::next(const StepperInfo & si, StepperFeedback & sf)
-{
-  return _func(si, _stepper->next(si, sf));
-}
-
-RootBlock::RootBlock(std::function<Real(const StepperInfo & si)> func)
-  : _func(func)
-{
-}
-
-Real
-RootBlock::next(const StepperInfo & si, StepperFeedback &)
-{
-  return _func(si);
-}
-
 StepperBlock *
 BaseStepper::constant(Real dt)
 {
-  return new RootBlock([=](const StepperInfo & si)
+  return new RootBlock([=](StepperInfo & si)
                        {
                          return dt;
                        });
@@ -389,16 +613,16 @@ BaseStepper::constant(Real dt)
 StepperBlock *
 BaseStepper::prevdt()
 {
-  return new RootBlock([=](const StepperInfo & si)
+  return new RootBlock([=](StepperInfo & si)
                        {
-                         return si.prev_dt;
+                         return si.dt();
                        });
 }
 
 StepperBlock *
 BaseStepper::fixedTimes(std::vector<Real> times, Real tol)
 {
-  return new RootBlock([=](const StepperInfo & si)
+  return new RootBlock([=](StepperInfo & si)
                        {
                          if (times.size() == 0)
                            return std::numeric_limits<Real>::infinity();
@@ -406,8 +630,8 @@ BaseStepper::fixedTimes(std::vector<Real> times, Real tol)
                          for (int i = 0; i < times.size(); i++)
                          {
                            Real t0 = times[i];
-                           if (si.time < t0 - tol)
-                             return t0 - si.time;
+                           if (si.time() < t0 - tol)
+                             return t0 - si.time();
                          }
                          return std::numeric_limits<Real>::infinity();
                        });
@@ -416,7 +640,7 @@ BaseStepper::fixedTimes(std::vector<Real> times, Real tol)
 StepperBlock *
 BaseStepper::ptr(const Real * dt_store)
 {
-  return new RootBlock([=](const StepperInfo & si)
+  return new RootBlock([=](StepperInfo & si)
                        {
                          return *dt_store;
                        });
@@ -425,7 +649,7 @@ BaseStepper::ptr(const Real * dt_store)
 StepperBlock *
 BaseStepper::dtLimit(StepperBlock * s, Real dt_min, Real dt_max)
 {
-  return new ModBlock(s, [=](const StepperInfo & si, Real dt)
+  return new ModBlock(s, [=](StepperInfo & si, Real dt)
                       {
                         if (dt < dt_min)
                           return dt_min;
@@ -438,13 +662,13 @@ BaseStepper::dtLimit(StepperBlock * s, Real dt_min, Real dt_max)
 StepperBlock *
 BaseStepper::bounds(StepperBlock * s, Real t_min, Real t_max)
 {
-  return new ModBlock(s, [=](const StepperInfo & si, Real dt)
+  return new ModBlock(s, [=](StepperInfo & si, Real dt)
                       {
-                        Real t = si.time + dt;
+                        Real t = si.time() + dt;
                         if (t < t_min)
-                          return t_min - si.time;
+                          return t_min - si.time();
                         else if (t > t_max)
-                          return t_max - si.time;
+                          return t_max - si.time();
                         return dt;
                       });
 }
@@ -452,10 +676,10 @@ BaseStepper::bounds(StepperBlock * s, Real t_min, Real t_max)
 StepperBlock *
 BaseStepper::maxRatio(StepperBlock * s, Real max_ratio)
 {
-  return new ModBlock(s, [=](const StepperInfo & si, Real dt)
+  return new ModBlock(s, [=](StepperInfo & si, Real dt)
                       {
-                        if (si.prev_dt > 0 && dt / si.prev_dt > max_ratio)
-                          dt = si.prev_dt * max_ratio;
+                        if (si.dt() > 0 && dt / si.dt() > max_ratio)
+                          dt = si.dt() * max_ratio;
                         return dt;
                       });
 }
@@ -466,7 +690,7 @@ BaseStepper::mult(Real mult, StepperBlock * s)
   if (!s)
     s = prevdt();
   return new ModBlock(
-      s, [=](const StepperInfo & si, Real dt)
+      s, [=](StepperInfo & si, Real dt)
       {
         return dt * mult;
       });
@@ -476,11 +700,11 @@ StepperBlock *
 BaseStepper::between(StepperBlock * on, StepperBlock * between, std::vector<Real> times,
                      Real tol)
 {
-  return new IfBlock(on, between, [=](const StepperInfo & si)
+  return new IfBlock(on, between, [=](StepperInfo & si)
                      {
                        for (int i = 0; i < times.size(); i++)
                        {
-                         if (std::abs(si.time - times[i]) < tol)
+                         if (std::abs(si.time() - times[i]) < tol)
                            return true;
                        }
                        return false;
@@ -492,27 +716,27 @@ BaseStepper::everyN(StepperBlock * nth, int every_n, int offset, StepperBlock * 
 {
   if (!between)
     between = BaseStepper::prevdt();
-  return new IfBlock(nth, between, [=](const StepperInfo & si)
+  return new IfBlock(nth, between, [=](StepperInfo & si)
                      {
-                       return (si.step_count + (every_n - offset) - 1) % every_n == 0;
+                       return (si.stepCount() + (every_n - offset) - 1) % every_n == 0;
                      });
 }
 
 StepperBlock *
 BaseStepper::initialN(StepperBlock * initial, StepperBlock * primary, int n)
 {
-  return new IfBlock(initial, primary, [=](const StepperInfo & si)
+  return new IfBlock(initial, primary, [=](StepperInfo & si)
                      {
-                       return si.step_count <= n;
+                       return si.stepCount() <= n;
                      });
 }
 
 StepperBlock *
 BaseStepper::converged(StepperBlock * converged, StepperBlock * not_converged, bool delay)
 {
-  return new IfBlock(converged, not_converged, [=](const StepperInfo & si)
+  return new IfBlock(converged, not_converged, [=](StepperInfo & si)
                      {
-                       return si.converged && (!delay || si.prev_converged);
+                       return si.converged() && (!delay || si.converged(1));
                      });
 }
 

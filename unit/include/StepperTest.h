@@ -34,7 +34,7 @@ public:
   void DT2();
 
   void scratch();
-  void tableTestBasic(BasicTest tests[]);
+  void tableTestBasic(BasicTest tests[], int n);
 };
 
 class StepperNode

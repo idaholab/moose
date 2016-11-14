@@ -305,6 +305,31 @@ Transient::execute()
 }
 
 void
+Transient::updateStepperInfo(bool first)
+{
+  _soln_nonlin.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
+  _soln_aux.resize(_fe_problem.getAuxiliarySystem().currentSolution()->size());
+  _soln_predicted.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
+  
+  if (first)
+    _si.pushHistory(_prev_dt, true, 0);
+  _si.update(
+    _steps_taken,
+    _time,
+    _dt,
+    _nl_its,
+    _l_its,
+    _last_solve_converged,
+    _solve_time,
+    _soln_nonlin,
+    _soln_aux,
+    _soln_predicted
+  );
+
+  _prev_dt = _si.dt(); // for restart
+};
+
+void
 Transient::computeDT(bool first)
 {
   _time_stepper->computeStep(); // This is actually when DT gets computed
@@ -329,49 +354,20 @@ Transient::computeDT(bool first)
       _stepper.reset(inner);
     }
   }
-
-  if (!_si.soln_nonlin || _si.soln_nonlin->size() != _fe_problem.getNonlinearSystem().currentSolution()->size())
-    _si.soln_nonlin.reset(_fe_problem.getNonlinearSystem().currentSolution()->clone().release());
-  if (!_si.soln_aux || _si.soln_aux->size() != _fe_problem.getAuxiliarySystem().currentSolution()->size())
-    _si.soln_aux.reset(_fe_problem.getAuxiliarySystem().currentSolution()->clone().release());
-  if (!_si.soln_predicted || _si.soln_predicted->size() != _fe_problem.getNonlinearSystem().currentSolution()->size())
-    _si.soln_predicted.reset(_fe_problem.getNonlinearSystem().currentSolution()->clone().release());
-  _soln_nonlin.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
-  _soln_aux.resize(_fe_problem.getAuxiliarySystem().currentSolution()->size());
-  _soln_predicted.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
-
-  *_si.soln_nonlin = _soln_nonlin;
-  *_si.soln_aux = _soln_aux;
-  *_si.soln_predicted = _soln_predicted;
-
-  _si.time = _time;
-  _si.prev_prev_prev_dt = _si.prev_prev_dt;
-  _si.prev_prev_dt = _prev_dt;
-  _si.prev_dt = _dt;
-  _si.prev_prev_prev_solve_time_secs = _si.prev_prev_solve_time_secs;
-  _si.prev_prev_solve_time_secs = _si.prev_solve_time_secs;
-  _si.prev_solve_time_secs = _solve_time;
-  _si.step_count = _steps_taken;
-  _si.nonlin_iters = _nl_its;
-  _si.lin_iters = _l_its;
-  _si.prev_converged = _si.converged || first;
-  // A step_count == 1 condition is not sufficient to account for
-  // restart/recover cases where step_count is already something else.
-  _si.converged = _last_solve_converged || first;
-  _prev_dt = _si.prev_dt; // for restart
+  
+  updateStepperInfo(first);
 
   if (_stepper)
   {
-    StepperFeedback sf = {};
-    _new_dt = _stepper->next(_si, sf);
-    if (sf.snapshot)
+    _new_dt = _stepper->next(_si);
+    if (_si.wantSnapshot())
       // the time used in this key must be *exactly* that on the stepper just saw in StepperInfo
-      _snapshots[_si.time] = _app.backup();
-    if (sf.rewind)
+      _snapshots[_si.time()] = _app.backup();
+    if (_si.rewindTime() != -1)
     {
-      if (_snapshots.count(sf.rewind_time) == 0)
+      if (_snapshots.count(_si.rewindTime()) == 0)
         mooseError("no snapshot available for requested rewind time");
-      _app.restore(_snapshots[sf.rewind_time]);
+      _app.restore(_snapshots[_si.rewindTime()]);
       computeDT(); // recursive call necessary because rewind modifies state _si depends on
     }
   }

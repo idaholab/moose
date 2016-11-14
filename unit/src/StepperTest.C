@@ -21,16 +21,13 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION(StepperTest);
 
-StepperInfo blankInfo();
-void updateInfo(StepperInfo * si, StepperFeedback * sf, Real dt,
-                std::map<Real, StepperInfo> * snaps = nullptr);
-void cloneStepperInfo(StepperInfo * src, StepperInfo * dst);
+void updateInfo(StepperInfo * si, Real dt, bool next_converged, std::map<Real, StepperInfo> * snaps = nullptr);
 
 struct BasicTest
 {
   std::string title;
   Real tol;
-  // time step on which actual used dt is half (negative) Real (positive) what
+  // time step on which actual used dt is half (negative) or twice (positive) what
   // was returned
   int wrong_dt;
   StepperBlock * stepper;
@@ -121,7 +118,7 @@ StepperTest::baseSteppers()
   };
   // clang-format on
 
-  tableTestBasic(tests);
+  tableTestBasic(tests, sizeof(tests) / sizeof(*tests));
 }
 
 void
@@ -207,41 +204,33 @@ StepperTest::DT2()
 
     std::map<Real, StepperInfo> snaps;
     DT2Block s(tol, tests[i].e_tol, tests[i].e_max, integrator_order);
-    StepperInfo si = blankInfo();
-    si.prev_dt = 1; // initial dt
+    StepperInfo si;
+    si.update(1, 0, 1, 0, 0, true, 0, solns[0], std::vector<Real>(), std::vector<Real>()); // initial dt
 
-    libMesh::Parallel::Communicator dummy_comm;
-    int n = tests[i].solns[0].size();
-    si.soln_nonlin.reset(NumericVector<Number>::build(dummy_comm).release());
-    si.soln_nonlin->init(n, n, false, SERIAL);
-    si.converged = true;
     std::stringstream ss;
     ss << "case " << i + 1 << " (" << tests[i].title << "):\n";
     for (int j = 0; j < solns.size(); j++)
     {
-      StepperFeedback sf = {};
-      dt = s.next(si, sf);
-      si.converged = tests[i].convergeds[j];
-      updateInfo(&si, &sf, dt, &snaps);
-      *si.soln_nonlin = solns[j];
+      dt = s.next(si);
+      updateInfo(&si, dt, tests[i].convergeds[j], &snaps);
+      *si.solnNonlin() = solns[j];
       ss << "    step " << j + 1 << "\n";
-      if (std::abs(want_times[j] - si.time) > tol ||
-          std::abs(want_dts[j] - si.prev_dt) > tol)
+      if (std::abs(want_times[j] - si.time()) > tol ||
+          std::abs(want_dts[j] - si.dt()) > tol)
       {
-        ss << "        time: want " << want_times[j] << ", got " << si.time
+        ss << "        time: want " << want_times[j] << ", got " << si.time()
            << "\n";
-        ss << "        dt  : want " << want_dts[j] << ", got " << si.prev_dt
+        ss << "        dt  : want " << want_dts[j] << ", got " << si.dt()
            << "\n";
         printf(ss.str().c_str());
         CPPUNIT_ASSERT(false);
       }
       else
       {
-        ss << "        time: got " << si.time << "\n";
-        ss << "        dt  : got " << si.prev_dt << "\n";
+        ss << "        time: got " << si.time() << "\n";
+        ss << "        dt  : got " << si.dt() << "\n";
       }
     }
-    printf(ss.str().c_str());
   }
 }
 
@@ -261,71 +250,43 @@ StepperTest::scratch()
   StepperBlock::Ptr s(buildStepper(nd));
   if (!s)
     throw Err("got nullptr from buildStepper");
-  StepperInfo si = blankInfo();
-  StepperFeedback sf = {};
+  StepperInfo si;
 
   for (int j = 0; j < 10; j++)
   {
-    Real dt = s->next(si, sf);
-    // std::c out << "time=" << si.time << ", dt=" << dt << "\n";
-    updateInfo(&si, nullptr, dt);
+    Real dt = s->next(si);
+    // std::c out << "time=" << si.time() << ", dt=" << dt << "\n";
+    updateInfo(&si, dt, true);
   }
   return;
 }
 
 void
-cloneStepperInfo(StepperInfo * src, StepperInfo * dst)
+updateInfo(StepperInfo * si, Real dt, bool next_converged, std::map<Real, StepperInfo> * snaps)
 {
-  dst->step_count = src->step_count;
-  dst->time = src->time;
-  dst->prev_dt = src->prev_dt;
-  dst->prev_prev_dt = src->prev_prev_dt;
-  dst->prev_prev_prev_dt = src->prev_prev_prev_dt;
-  dst->nonlin_iters = src->nonlin_iters;
-  dst->lin_iters = src->lin_iters;
-  dst->prev_converged = src->prev_converged;
-  dst->prev_solve_time_secs = src->prev_solve_time_secs;
-  dst->prev_prev_solve_time_secs = src->prev_prev_solve_time_secs;
-  dst->prev_prev_prev_solve_time_secs = src->prev_prev_prev_solve_time_secs;
-  if (src->soln_nonlin)
-    dst->soln_nonlin.reset(src->soln_nonlin->clone().release());
-  if (src->soln_aux)
-    dst->soln_aux.reset(src->soln_aux->clone().release());
-  if (src->soln_predicted)
-    dst->soln_predicted.reset(src->soln_predicted->clone().release());
-};
+  std::vector<Real> vec;
+  vec.resize(si->solnNonlin()->size());
+  si->solnNonlin()->localize(vec);
 
-void
-updateInfo(StepperInfo * si, StepperFeedback * sf, Real dt,
-           std::map<Real, StepperInfo> * snaps)
-{
-  if (sf && sf->rewind)
+  if (si->rewindTime() != -1)
   {
-    cloneStepperInfo(&(*snaps)[sf->rewind_time], si);
+    *si = (*snaps)[si->rewindTime()];
+    si->update(si->stepCount(), si->time(), si->dt(), 0, 0, next_converged, 0, vec, vec, vec);
     return;
   }
-  else if (sf && snaps && sf->snapshot)
-  {
-    cloneStepperInfo(si, &(*snaps)[si->time]);
-  }
-  if (si->converged)
-    si->time += dt;
-  si->prev_prev_prev_dt = si->prev_prev_dt;
-  si->prev_prev_dt = si->prev_dt;
-  si->prev_dt = dt;
-  si->step_count++;
-}
+  else if (snaps && si->wantSnapshot())
+    (*snaps)[si->time()] = *si;
 
-StepperInfo
-blankInfo()
-{
-  return {1, 0, 0, 0, 0, 0, 0, true, true, 0, 0, 0, nullptr, nullptr, nullptr};
+  Real new_t = si->time();
+  if (next_converged)
+    new_t += dt;
+  si->update(si->stepCount()+1, new_t, dt, 0, 0, next_converged, 0, vec, vec, vec);
 }
 
 void
-StepperTest::tableTestBasic(BasicTest tests[])
+StepperTest::tableTestBasic(BasicTest tests[], int n)
 {
-  for (int i = 0; i < sizeof(tests); i++)
+  for (int i = 0; i < n; i++)
   {
     BasicTest test = tests[i];
     Real dt = 0;
@@ -334,34 +295,30 @@ StepperTest::tableTestBasic(BasicTest tests[])
     Real tol = test.tol;
     int wrong_dt = test.wrong_dt;
 
-    StepperInfo si = blankInfo();
-    si.converged = true;
+    StepperInfo si;
     std::stringstream ss;
     ss << "case " << i + 1 << " (" << test.title << "):\n";
     for (int j = 0; j < want_dts.size(); j++)
     {
-      StepperFeedback sf = {};
-      dt = s->next(si, sf);
+      dt = s->next(si);
       if (j == std::abs(wrong_dt) - 1 && wrong_dt > 0)
         dt *= 2;
       else if (j == std::abs(wrong_dt) - 1 && wrong_dt < 0)
         dt /= 2;
-      si.converged = test.convergeds[j];
-      updateInfo(&si, &sf, dt, nullptr);
+      updateInfo(&si, dt, test.convergeds[j], nullptr);
       ss << "    step " << j + 1 << "\n";
-      if (std::abs(want_dts[j] - si.prev_dt) > tol)
+      if (std::abs(want_dts[j] - si.dt()) > tol)
       {
-        ss << "        dt  : want " << want_dts[j] << ", got " << si.prev_dt
+        ss << "        dt  : want " << want_dts[j] << ", got " << si.dt()
            << "\n";
         printf(ss.str().c_str());
         CPPUNIT_ASSERT(false);
       }
       else
       {
-        ss << "        dt  : got " << si.prev_dt << "\n";
+        ss << "        dt  : got " << si.dt() << "\n";
       }
     }
-    printf(ss.str().c_str());
     delete s;
   }
 }

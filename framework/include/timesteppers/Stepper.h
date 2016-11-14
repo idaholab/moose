@@ -23,53 +23,94 @@
 
 /// Holds all information used by Steppers to calculate dt via the "advance"
 /// function.
-struct StepperInfo
+class StepperInfo
 {
-  /// The number of times the simulation has requested a dt.
-  /// This is generally equal to one on the first call fo next(...).
-  int step_count;
+public:
+  StepperInfo();
+  StepperInfo(const StepperInfo& si);
+  StepperInfo& operator=(const StepperInfo& si);
+  
+  void pushHistory(Real dt, bool converged, Real solve_time);
+
+  /// Updates internal state to match new changes to the simulation state (i.e. for a new time step).
+  /// Flags relating to snapshotting/rewind, etc. are all reset.
+  void update(
+    int step_count,
+    Real time,
+    Real dt,
+    unsigned int nonlin_iters,
+    unsigned int lin_iters,
+    bool converged,
+    Real solve_time_secs,
+    std::vector<Real> soln_nonlin,
+    std::vector<Real> soln_aux,
+    std::vector<Real> soln_predicted
+    );
+
+  /// The number of times the simulation has performed a time step iteration.
+  /// This starts off equal to one.
+  int stepCount();
 
   /// Current simulation time.
-  Real time;
-  /// dt used between solves for the most and second most recent time steps.
-  Real prev_dt;
-  /// dt used between solves for the second most and third most recent time
-  /// steps.
-  Real prev_prev_dt;
-  /// dt used between solves for the third most and fourth most recent time
-  /// steps.
-  Real prev_prev_prev_dt;
+  Real time();
+
+  /// Returns the dt used between the most recent and immediately prior solves.  If n > 0, the dt used between the nth most recent and immediately prior solves is returned. n > 2 is currently not supported.
+  Real dt(int n = 0);
+
+  /// Returns the converged state of the most recent solve.  If n > 0, returns the converged state of the nth most recent solve.  n > 2 is currently not supported.
+  bool converged(int n = 0);
+
+  /// Returns the wall time taken for the most recent solve.  If n > 0, returns the wall time taken for the nth most recent solve.  n > 2 is currently not supported.
+  Real solveTimeSecs(int n = 0);
 
   /// Number of nonlinear iterations performed for the most recent solve.
-  unsigned int nonlin_iters;
+  int nonlinIters();
+
   /// Number of linear iterations performed for the most recent solve.
-  unsigned int lin_iters;
-  /// Whether or not the solve for the most recent time step converged.
-  bool converged;
-  /// Whether or not the solve for the second most recent time step converged.
-  bool prev_converged;
-  /// Clock time used in the most recent time step/solve.
-  Real prev_solve_time_secs;
-  /// Clock time used in the second most recent time step/solve.
-  Real prev_prev_solve_time_secs;
-  /// Clock time used in the third most recent time step/solve.
-  Real prev_prev_prev_solve_time_secs;
+  int linIters();
 
   /// Nonlinear solution vector for the most recent solve.
-  std::unique_ptr<NumericVector<Number>> soln_nonlin;
+  NumericVector<Number>* solnNonlin();
+
   /// Auxiliary solution vector for the most recent solve.
-  std::unique_ptr<NumericVector<Number>> soln_aux;
+  NumericVector<Number>* solnAux();
+
   /// Predicted solution vector (if any used) for the most recent solve.
   /// If no predictor was used, this is a zero vector with the same length as
   /// soln_nonlin.
-  std::unique_ptr<NumericVector<Number>> soln_predicted;
-};
+  NumericVector<Number>* solnPredicted();
 
-struct StepperFeedback
-{
-  bool snapshot;
-  bool rewind;
-  Real rewind_time;
+  /// Instructs the executioner to snapshot the current simulation state *before* any upcomming dt is applied.  Save the current simulation time as the key for rewinding.
+  void snapshot();
+  
+  /// Returns true if a snapshot has been requested.
+  bool wantSnapshot();
+
+  /// Instructs the executioner to rewind the simulation to the specified target_time.  snapshot() must have been previously called for the target_time.  The rewind does not occur when this function is called - instead it occurs when the executioner inspects the StepperInfo object.
+  void rewind(Real target_time);
+
+  /// Returns the requested rewind time if any has been set.  Otherwise, it returns -1.
+  Real rewindTime();
+  
+private:
+  int _step_count;
+  Real _time;
+  std::list<Real> _dt;
+
+  unsigned int _nonlin_iters;
+  unsigned int _lin_iters;
+  std::list<bool> _converged;
+  std::list<Real> _solve_time_secs;
+
+  std::unique_ptr<NumericVector<Number>> _soln_nonlin;
+  std::unique_ptr<NumericVector<Number>> _soln_aux;
+  std::unique_ptr<NumericVector<Number>> _soln_predicted;
+  
+  bool _snapshot;
+  bool _rewind;
+  Real _rewind_time;
+  
+  libMesh::Parallel::Communicator _dummy_comm;
 };
 
 /// A base class for time stepping algorithms for use in determining dt between
@@ -88,7 +129,7 @@ public:
   /// Returns a value for dt to calculate the next time step.  Implementations
   /// can assume si is not NULL.  Implementations of advance should strive to be
   /// idempotent.
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf) = 0;
+  virtual Real next(StepperInfo & si) = 0;
 };
 
 /// Holds a collection of functions for generating common, pre-configured
@@ -158,11 +199,11 @@ class RootBlock : public StepperBlock
 public:
   /// func is a (lambda) function that returns a dt using the StepperInfo object
   /// passed into a call to next.
-  RootBlock(std::function<Real(const StepperInfo & si)> func);
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf);
+  RootBlock(std::function<Real(StepperInfo & si)> func);
+  virtual Real next(StepperInfo & si);
 
 private:
-  std::function<Real(const StepperInfo & si)> _func;
+  std::function<Real(StepperInfo & si)> _func;
 };
 
 /// Generic building block for representing steppers that return a (potentially)
@@ -173,12 +214,12 @@ public:
   /// func is a (lambda) function that modifies the passed in dt suitably before
   /// returning it.
   ModBlock(StepperBlock * s,
-           std::function<Real(const StepperInfo & si, Real dt)> func);
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf);
+           std::function<Real(StepperInfo & si, Real dt)> func);
+  virtual Real next(StepperInfo & si);
 
 private:
   Ptr _stepper;
-  std::function<Real(const StepperInfo & si, Real dt)> _func;
+  std::function<Real(StepperInfo & si, Real dt)> _func;
 };
 
 /// Generic building block for representing steppers that call one of two
@@ -190,13 +231,13 @@ public:
   /// Otherwise the dt from calling on_false->next is returned.  Only one of
   /// on_true or on_false is queried for dt each time step (never both).
   IfBlock(StepperBlock * on_true, StepperBlock * on_false,
-          std::function<bool(const StepperInfo &)> func);
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf);
+          std::function<bool(StepperInfo &)> func);
+  virtual Real next(StepperInfo & si);
 
 private:
   Ptr _ontrue;
   Ptr _onfalse;
-  std::function<bool(const StepperInfo & si)> _func;
+  std::function<bool(StepperInfo & si)> _func;
 };
 
 /// Returns the dt of the underlying stepper unmodified.  Stores/remembers this
@@ -215,7 +256,7 @@ public:
   /// fetched via a call to dtPtr.
   InstrumentedBlock(Real * dt_store = nullptr);
   virtual ~InstrumentedBlock();
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf);
+  virtual Real next(StepperInfo & si);
   void setStepper(StepperBlock * s);
   Real * dtPtr();
 
@@ -236,7 +277,7 @@ public:
   /// returned dt that was used (i.e. prev_prev_dt) instead of the last returned
   /// dt that was not used.
   RetryUnusedBlock(StepperBlock * s, Real tol, bool prev_prev);
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf);
+  virtual Real next(StepperInfo & si);
 
 private:
   Ptr _stepper;
@@ -256,7 +297,7 @@ public:
   /// "func(t_curr + dt) - func(t_curr) <= max_diff".
   ConstrFuncBlock(StepperBlock * s, std::function<Real(Real)> func,
                   Real max_diff);
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf);
+  virtual Real next(StepperInfo & si);
 
 private:
   Ptr _stepper;
@@ -274,7 +315,7 @@ public:
   /// at the index of the lower bound.
   PiecewiseBlock(std::vector<Real> times, std::vector<Real> dts,
                  bool interpolate = true);
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf);
+  virtual Real next(StepperInfo & si);
 
 private:
   std::vector<Real> _times;
@@ -292,7 +333,7 @@ class MinOfBlock : public StepperBlock
 public:
   /// Stepper "a" is preferred.
   MinOfBlock(StepperBlock * a, StepperBlock * b, Real tol);
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf);
+  virtual Real next(StepperInfo & si);
 
 private:
   Ptr _a;
@@ -311,7 +352,7 @@ public:
   /// than or equal to 1.0.
   AdaptiveBlock(unsigned int optimal_iters, unsigned int iter_window,
                 Real lin_iter_ratio, Real shrink_factor, Real growth_factor);
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf);
+  virtual Real next(StepperInfo & si);
 
 private:
   unsigned int _optimal_iters;
@@ -331,7 +372,7 @@ public:
   /// adjustments to dt should be an increase or decrease.  frac_change should
   /// generally be between 0.0 and 1.0.
   SolveTimeAdaptiveBlock(int initial_direc, Real frac_change);
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf);
+  virtual Real next(StepperInfo & si);
 
 private:
   Real _percent_change;
@@ -350,10 +391,10 @@ public:
   /// details on e_tol and scaling_param usage - divine it from the code.
   PredictorCorrectorBlock(int start_adapting, Real e_tol, Real scaling_param,
                           std::string time_integrator);
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf);
+  virtual Real next(StepperInfo & si);
 
 private:
-  Real estimateTimeError(const StepperInfo & si);
+  Real estimateTimeError(StepperInfo & si);
 
   int _start_adapting;
   Real _e_tol;
@@ -377,12 +418,12 @@ public:
   /// start of the window and the b endpoint of the window is shrunk by a factor
   /// of two.
   DT2Block(Real time_tol, Real e_tol, Real e_max, int integrator_order);
-  virtual Real next(const StepperInfo & si, StepperFeedback & sf);
+  virtual Real next(StepperInfo & si);
 
 private:
   Real dt();
   Real resetWindow(Real start, Real dt);
-  Real calcErr(const StepperInfo & si);
+  Real calcErr(StepperInfo & si);
   Real _tol;
   Real _e_tol;
   Real _e_max;
