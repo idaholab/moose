@@ -1,14 +1,17 @@
 [Mesh]
- type = GeneratedMesh
- dim = 2
- xmin = 0
- xmax = 10
- ymin = 0
- ymax = 2
- nx = 10
- ny = 2
- elem_type = QUAD4
- displacements = 'disp_x disp_y'
+  type = GeneratedMesh
+  dim = 2
+  xmin = 0
+  xmax = 10
+  ymin = 0
+  ymax = 2
+  nx = 10
+  ny = 2
+  elem_type = QUAD4
+[]
+
+[GlobalParams]
+  displacements = 'disp_x disp_y'
 []
 
 [MeshModifiers]
@@ -29,27 +32,16 @@
   [../]
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y'
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
     use_finite_deform_jacobian = true
+    volumetric_locking_correction = false
   [../]
 []
 
 [Materials]
-  [./strain]
-    type = ComputeFiniteStrain
-    displacements = 'disp_x disp_y'
-    volumetric_locking_correction = false
-  [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
   [../]

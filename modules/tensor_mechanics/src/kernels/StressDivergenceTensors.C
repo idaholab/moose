@@ -18,7 +18,8 @@ InputParameters validParams<StressDivergenceTensors>()
   params.addClassDescription("Stress divergence kernel for the Cartesian coordinate system");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addRequiredCoupledVar("displacements", "The string of displacements suitable for the problem statement");
-  params.addCoupledVar("temp", "The temperature");
+  params.addCoupledVar("temp", "The temperature"); // Deprecated
+  params.addCoupledVar("temperature", "The temperature");
   params.addParam<std::string>("base_name", "Material property base name");
   params.set<bool>("use_displaced_mesh") = false;
   params.addParam<bool>("use_finite_deform_jacobian", false, "Jacobian for corotational finite strain");
@@ -35,8 +36,8 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(3),
-    _temp_coupled(isCoupled("temp")),
-    _temp_var(_temp_coupled ? coupled("temp") : 0)
+    _temp_coupled(isCoupled("temp") || isCoupled("temperature")),
+    _temp_var(_temp_coupled ? (isCoupled("temp") ? coupled("temp") : coupled("temperature")) : 0)
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
     _disp_var[i] = coupled("displacements", i);
@@ -51,6 +52,10 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     _deformation_gradient_old = &getMaterialPropertyOld<RankTwoTensor>(_base_name + "deformation_gradient");
     _rotation_increment = &getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment");
   }
+
+  // deprecate temp in favor of temperature
+  if (isCoupled("temp"))
+    mooseDeprecated("Use 'temperature' instead of 'temp'");
 }
 
 Real

@@ -19,6 +19,9 @@
 
 [Mesh]
   file = 2D-RZ_mesh.e
+[]
+
+[GlobalParams]
   displacements = 'disp_r disp_z'
 []
 
@@ -26,21 +29,10 @@
   coord_type = RZ
 []
 
-[Variables]
-  [./disp_r]
-    order = SECOND
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = SECOND
-    family = LAGRANGE
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_r disp_z'
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = SMALL
+    add_variables = true
   [../]
 []
 
@@ -67,14 +59,8 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
-    block = 1
-  [../]
-  [./strain]
-    displacements = 'disp_r disp_z'
-    block = 1
   [../]
   [./stress]
-    block = 1
   [../]
 []
 

@@ -45,20 +45,11 @@
   coord_type = RZ
 []
 
-[Variables]
-  [./disp_r]
-    order = SECOND
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = SECOND
-    family = LAGRANGE
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
+    block = 1
   [../]
 []
 
@@ -97,12 +88,6 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
-    block = 1
-  [../]
-
-  [./small_strain_arz]
-    type = ComputeAxisymmetricRZFiniteStrain
-#    thermal_expansion_coeff = 0
     block = 1
   [../]
 

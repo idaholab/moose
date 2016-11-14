@@ -23,19 +23,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  order = FIRST
-  family = LAGRANGE
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-
-  [./disp_y]
-  [../]
-
-  [./disp_z]
-  [../]
 []
 
 [AuxVariables]
@@ -65,9 +52,11 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = SMALL
+    incremental = true
+    add_variables = true
   [../]
 []
 
@@ -126,21 +115,14 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = 0
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
-  [./small_strain]
-    type = ComputeIncrementalSmallStrain
-    block = 0
-  [../]
   [./small_stress]
     type = ComputeFiniteStrainElasticStress
-    block = 0
   [../]
   [./thermal_expansion_strain]
     type = ComputeThermalExpansionEigenstrain
-    block = 0
     stress_free_temperature = 298
     thermal_expansion_coeff = 1.3e-5
     temperature = temp

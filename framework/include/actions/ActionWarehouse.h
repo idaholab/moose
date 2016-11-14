@@ -104,45 +104,45 @@ public:
    */
   template <class T>
   const T & getAction(const std::string & name)
+  {
+    T* p = NULL;
+    for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
     {
-      T* p = NULL;
-      for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
+      auto act = _all_ptrs[i].get();
+      if (act->name() == name)
       {
-        auto act = _all_ptrs[i].get();
-        if (act->name() == name)
-        {
-          p = dynamic_cast<T*>(act);
-          if (p)
-            break;
-        }
+        p = dynamic_cast<T*>(act);
+        if (p)
+          break;
       }
-      if (!p)
-        mooseError("Action with name being "+name+" does not exist");
-      return *p;
     }
+    if (!p)
+      mooseError("Action with name being " << name << " does not exist");
+    return *p;
+  }
 
   /**
    * Retrieve all actions in a specific type ordered by their names.
    */
   template <class T>
   std::vector<const T *> getActions()
+  {
+    // we need to create the map first to ensure that all actions in the map are unique
+    // and the actions are sorted by their names
+    std::map<std::string, const T*> actions;
+    for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
     {
-      // we need to create the map first to ensure that all actions in the map are unique
-      // and the actions are sorted by their names
-      std::map<std::string, const T*> actions;
-      for (auto i = beginIndex(_all_ptrs); i < _all_ptrs.size(); ++i)
-      {
-        auto act = _all_ptrs[i].get();
-        T* p = dynamic_cast<T*>(act);
-        if (p)
-          actions.insert(std::pair<std::string, const T*>(act->name(), p));
-      }
-      // construct the vector from the map entries
-      std::vector<const T*> action_vector;
-      for (auto & pair : actions)
-        action_vector.push_back(pair.second);
-      return action_vector;
+      auto act = _all_ptrs[i].get();
+      T* p = dynamic_cast<T*>(act);
+      if (p)
+        actions.insert(std::pair<std::string, const T*>(act->name(), p));
     }
+    // construct the vector from the map entries
+    std::vector<const T*> action_vector;
+    for (auto & pair : actions)
+      action_vector.push_back(pair.second);
+    return action_vector;
+  }
 
   /**
    * Check if Actions associated with passed in task exist.

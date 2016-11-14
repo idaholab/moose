@@ -81,7 +81,6 @@
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
-    temp = temp
   [../]
 
   [./solid_z]

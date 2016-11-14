@@ -16,17 +16,6 @@
 # The test assumes a radius of 4, zero displacement at r = 0mm, and an applied
 # outer pressure of 1MPa.  Under these conditions in a solid sphere, the radial
 # stress is constant and has a value of -1 MPa.
-
-[GlobalParams]
-  order = FIRST
-  family = LAGRANGE
-  displacements = 'disp_r'
-[]
-
-[Problem]
-  coord_type = RSPHERICAL
-[]
-
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -35,14 +24,18 @@
   nx = 4
 []
 
-[Variables]
-  [./disp_r]
-  [../]
+[GlobalParams]
+  displacements = 'disp_r'
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Problem]
+  coord_type = RSPHERICAL
+[]
+
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = SMALL
+    add_variables = true
     save_in = residual_r
   [../]
 []
@@ -100,8 +93,6 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.345
     youngs_modulus = 1e4
-  [../]
-  [./strain]
   [../]
   [./stress]
   [../]

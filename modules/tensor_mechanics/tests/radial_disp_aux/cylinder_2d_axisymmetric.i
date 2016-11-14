@@ -19,19 +19,10 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
-  order = SECOND
-  family = LAGRANGE
 []
 
 [Problem]
   coord_type = RZ
-[]
-
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
 []
 
 [AuxVariables]
@@ -48,9 +39,10 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
   [../]
 []
 
@@ -85,21 +77,14 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = 0
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
-  [./finite_strain]
-    type = ComputeAxisymmetricRZFiniteStrain
-    block = 0
-  [../]
   [./small_stress]
     type = ComputeFiniteStrainElasticStress
-    block = 0
   [../]
   [./thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
-    block = 0
     stress_free_temperature = 300
     thermal_expansion_coeff = 1.3e-5
     temperature = temp

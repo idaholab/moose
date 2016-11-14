@@ -4,23 +4,22 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef DYNAMICTENSORMECHANICSACTION_H
-#define DYNAMICTENSORMECHANICSACTION_H
+#ifndef LEGACYTENSORMECHANICSACTION_H
+#define LEGACYTENSORMECHANICSACTION_H
 
 #include "TensorMechanicsAction.h"
 
-class DynamicTensorMechanicsAction;
+class LegacyTensorMechanicsAction;
 
-template<>
-InputParameters validParams<DynamicTensorMechanicsAction>();
+template <>
+InputParameters validParams<LegacyTensorMechanicsAction>();
 
-class DynamicTensorMechanicsAction : public TensorMechanicsAction
+class LegacyTensorMechanicsAction : public TensorMechanicsAction
 {
 public:
-  DynamicTensorMechanicsAction(const InputParameters & params);
+  LegacyTensorMechanicsAction(const InputParameters & params);
 
-protected:
-  virtual std::string getKernelType();
+  virtual void act();
 };
 
-#endif //DYNAMICTENSORMECHANICSACTION_H
+#endif //LEGACYTENSORMECHANICSACTION_H
