@@ -10,6 +10,7 @@
 #include "MooseSyntax.h"
 
 #include "TensorMechanicsAction.h"
+#include "LegacyTensorMechanicsAction.h"
 #include "DynamicTensorMechanicsAction.h"
 #include "TensorMechanicsAxisymmetricRZAction.h"
 #include "TensorMechanicsRSphericalAction.h"
@@ -349,7 +350,7 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
   syntax.registerActionSyntax("CavityPressureUOAction", "BCs/CavityPressure/*");
 
-  syntax.registerActionSyntax("TensorMechanicsAction", "Kernels/TensorMechanics");
+  syntax.registerActionSyntax("LegacyTensorMechanicsAction", "Kernels/TensorMechanics");
   syntax.registerActionSyntax("DynamicTensorMechanicsAction", "Kernels/DynamicTensorMechanics");
   syntax.registerActionSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
   syntax.registerActionSyntax("TensorMechanicsAxisymmetricRZAction", "Kernels/StressDivergence2DAxisymmetricRZ");
@@ -359,11 +360,15 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
   syntax.registerActionSyntax("GeneralizedPlaneStrainAction", "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
+  syntax.registerActionSyntax("TensorMechanicsAction", "Modules/TensorMechanics/Master/*");
 
   registerAction(CavityPressureAction, "add_bc");
   registerAction(CavityPressurePPAction, "add_postprocessor");
   registerAction(CavityPressureUOAction, "add_user_object");
+  registerAction(LegacyTensorMechanicsAction, "add_kernel");
   registerAction(TensorMechanicsAction, "add_kernel");
+  registerAction(TensorMechanicsAction, "add_variable");
+  registerAction(TensorMechanicsAction, "add_material");
   registerAction(DynamicTensorMechanicsAction, "add_kernel");
   registerAction(PoroMechanicsAction, "add_kernel");
   registerAction(TensorMechanicsAxisymmetricRZAction, "add_kernel");

@@ -14,14 +14,10 @@
   periodic_directions = 'x y'
 []
 
-[Modules]
-  [./PhaseField]
-    [./MortarPeriodicity]
-      [./strain]
-        variable = 'disp_x disp_y'
-        periodicity = gradient
-      [../]
-    [../]
+[Modules/PhaseField/MortarPeriodicity]
+  [./strain]
+    variable = 'disp_x disp_y'
+    periodicity = gradient
   [../]
 []
 

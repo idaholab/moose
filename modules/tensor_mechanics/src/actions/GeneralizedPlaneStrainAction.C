@@ -41,12 +41,10 @@ GeneralizedPlaneStrainAction::act()
 {
   if (_current_task == "add_kernel")
   {
-    std::string k_type("GeneralizedPlaneStrainOffDiag");
+    std::string k_type = "GeneralizedPlaneStrainOffDiag";
     InputParameters params = _factory.getValidParams(k_type);
-
     params.set<std::vector<NonlinearVariableName> >("displacements") = _displacements;
-
-    params.set<std::vector<VariableName> >("scalar_strain_zz") = {_scalar_strain_zz};
+    params.set<std::vector<VariableName> >("scalar_strain_zz") = { _scalar_strain_zz };
 
     if (isParamValid("base_name"))
       params.set<std::string>("base_name") = getParam<std::string>("base_name");
@@ -76,7 +74,7 @@ GeneralizedPlaneStrainAction::act()
   }
   else if (_current_task == "add_user_object")
   {
-    std::string uo_type("GeneralizedPlaneStrainUserObject");
+    std::string uo_type = "GeneralizedPlaneStrainUserObject";
     InputParameters params = _factory.getValidParams(uo_type);
 
     std::string uo_name = _name + "_GeneralizedPlaneStrainUserObject";
@@ -97,16 +95,14 @@ GeneralizedPlaneStrainAction::act()
   }
   else if (_current_task == "add_scalar_kernel")
   {
-    std::string sk_type("GeneralizedPlaneStrain");
+    std::string sk_type = "GeneralizedPlaneStrain";
     InputParameters params = _factory.getValidParams(sk_type);
-
-    std::string sk_name = _name + "_GeneralizedPlaneStrain";
-
     params.set<NonlinearVariableName>("variable") = _scalar_strain_zz;
 
     // set the UserObjectName from previously added UserObject
     params.set<UserObjectName>("generalized_plane_strain") = _name + "_GeneralizedPlaneStrainUserObject";
 
+    std::string sk_name = _name + "_GeneralizedPlaneStrain";
     _problem->addScalarKernel(sk_type, sk_name, params);
   }
 }

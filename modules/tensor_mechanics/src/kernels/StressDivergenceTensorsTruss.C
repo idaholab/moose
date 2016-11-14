@@ -16,7 +16,8 @@ InputParameters validParams<StressDivergenceTensorsTruss>()
   params.addClassDescription("Kernel for truss element");
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addCoupledVar("displacements", "The string of displacements suitable for the problem statement");
-  params.addCoupledVar("temp", "The temperature");
+  params.addCoupledVar("temp", "The temperature"); // Deprecated
+  params.addCoupledVar("temperature", "The temperature");
   params.addCoupledVar("area", "Cross-sectional area of truss element");
   params.addParam<std::string>("base_name", "Material property base name");
   params.set<bool>("use_displaced_mesh") = true;
@@ -30,13 +31,17 @@ StressDivergenceTensorsTruss::StressDivergenceTensorsTruss(const InputParameters
     _e_over_l(getMaterialPropertyByName<Real>(_base_name + "e_over_l")),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
-    _temp_coupled(isCoupled("temp")),
-    _temp_var(_temp_coupled ? coupled("temp") : 0),
+    _temp_coupled(isCoupled("temp") || isCoupled("temperature")),
+    _temp_var(_temp_coupled ? (isCoupled("temp") ? coupled("temp") : coupled("temperature")) : 0),
     _area(coupledValue("area")),
     _orientation(NULL)
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
     _disp_var.push_back(coupled("displacements", i));
+
+  // deprecate temp in favor of temperature
+  if (isCoupled("temp"))
+    mooseDeprecated("Use 'temperature' instead of 'temp'");
 }
 
 void

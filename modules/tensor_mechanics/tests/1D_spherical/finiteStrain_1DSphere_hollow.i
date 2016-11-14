@@ -21,17 +21,6 @@
 # zero displacement at r = 4mm, and an applied outer pressure of 2MPa.
 # The radial stress is largest in the inner most element and, at an assumed
 # mid element coordinate of 4.5mm, is equal to -2.545MPa.
-
-[GlobalParams]
-  order = FIRST
-  family = LAGRANGE
-  displacements = 'disp_r'
-[]
-
-[Problem]
-  coord_type = RSPHERICAL
-[]
-
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -40,16 +29,18 @@
   nx = 5
 []
 
-[Variables]
-  [./disp_r]
-  [../]
+[GlobalParams]
+  displacements = 'disp_r'
 []
 
-[Kernels]
-  [./StressDivergenceRSphericalTensors]
-    type = StressDivergenceRSphericalTensors
-    component = 0
-    variable = disp_r
+[Problem]
+  coord_type = RSPHERICAL
+[]
+
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
   [../]
 []
 
@@ -99,9 +90,6 @@
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.345
     youngs_modulus = 1e4
-  [../]
-  [./strain]
-    type = ComputeRSphericalFiniteStrain
   [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress

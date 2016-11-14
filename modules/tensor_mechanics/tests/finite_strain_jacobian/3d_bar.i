@@ -1,17 +1,20 @@
 [Mesh]
- type = GeneratedMesh
- dim = 3
- xmin = 0
- xmax = 2
- ymin = 0
- ymax = 2
- zmin = 0
- zmax = 10
- nx = 10
- ny = 2
- nz = 2
- elem_type = HEX8
- displacements = 'disp_x disp_y disp_z'
+  type = GeneratedMesh
+  dim = 3
+  xmin = 0
+  xmax = 2
+  ymin = 0
+  ymax = 2
+  zmin = 0
+  zmax = 10
+  nx = 10
+  ny = 2
+  nz = 2
+  elem_type = HEX8
+[]
+
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [MeshModifiers]
@@ -27,29 +30,16 @@
   [../]
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
     use_finite_deform_jacobian = true
+    volumetric_locking_correction = false
   [../]
 []
 
 [Materials]
-  [./strain]
-    type = ComputeFiniteStrain
-    displacements = 'disp_x disp_y disp_z'
-    volumetric_locking_correction = false
-  [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
   [../]

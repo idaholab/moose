@@ -92,7 +92,7 @@
   [./TensorMechanics]
     use_displaced_mesh = true
     displacements = 'disp_x disp_y'
-    temp = temp
+    temperature = temp
     save_in = 'saved_x saved_y'
   [../]
 []
