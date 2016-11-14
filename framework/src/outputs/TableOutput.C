@@ -85,29 +85,32 @@ TableOutput::outputVectorPostprocessors()
   // Loop through the postprocessor names and extract the values from the VectorPostprocessorData storage
   for (const auto & vpp_name : out)
   {
-    const auto & vectors = _problem_ptr->getVectorPostprocessorVectors(vpp_name);
-
-    auto table_it = _vector_postprocessor_tables.lower_bound(vpp_name);
-    if (table_it == _vector_postprocessor_tables.end() || table_it->first != vpp_name)
-      table_it =  _vector_postprocessor_tables.emplace_hint(table_it, vpp_name, FormattedTable());
-
-    FormattedTable & table = table_it->second;
-
-    table.clear();
-    table.outputTimeColumn(false);
-
-    for (const auto & vec_it : vectors)
+    if (_problem_ptr->vectorPostprocessorHasVectors(vpp_name))
     {
-      const auto & vector = *vec_it.second.current;
+      const auto & vectors = _problem_ptr->getVectorPostprocessorVectors(vpp_name);
 
-      for (auto i = beginIndex(vector); i < vector.size(); ++i)
-        table.addData(vec_it.first, vector[i], i);
-    }
+      auto table_it = _vector_postprocessor_tables.lower_bound(vpp_name);
+      if (table_it == _vector_postprocessor_tables.end() || table_it->first != vpp_name)
+        table_it =  _vector_postprocessor_tables.emplace_hint(table_it, vpp_name, FormattedTable());
 
-    if (_time_data)
-    {
-      FormattedTable & t_table = _vector_postprocessor_time_tables[vpp_name];
-      t_table.addData("timestep", _t_step, _time);
+      FormattedTable & table = table_it->second;
+
+      table.clear();
+      table.outputTimeColumn(false);
+
+      for (const auto & vec_it : vectors)
+      {
+        const auto & vector = *vec_it.second.current;
+
+        for (auto i = beginIndex(vector); i < vector.size(); ++i)
+          table.addData(vec_it.first, vector[i], i);
+      }
+
+      if (_time_data)
+      {
+        FormattedTable & t_table = _vector_postprocessor_time_tables[vpp_name];
+        t_table.addData("timestep", _t_step, _time);
+      }
     }
   }
 }
