@@ -96,6 +96,7 @@
 #include "ExampleShapeElementKernel.h"
 #include "ExampleShapeElementKernel2.h"
 #include "SimpleTestShapeElementKernel.h"
+#include "LateDeclarationVectorPostprocessor.h"
 
 #include "RobinBC.h"
 #include "InflowBC.h"
@@ -509,6 +510,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(RealControlParameterReporter);
   registerPostprocessor(ScalarCoupledPostprocessor);
   registerPostprocessor(NumAdaptivityCycles);
+
+  registerVectorPostprocessor(LateDeclarationVectorPostprocessor);
 
   registerMarker(RandomHitMarker);
   registerMarker(QPointMarker);

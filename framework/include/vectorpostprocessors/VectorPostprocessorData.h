@@ -73,6 +73,11 @@ public:
 //  const std::map<std::string, std::map<std::string, VectorPostprocessorValue*> > & values() const { return _values; }
 
   /**
+   * Check to see if a VPP has any vectors at all
+   */
+  bool hasVectors(const std::string & vpp_name) const;
+
+  /**
    * Get the map of vectors for a particular VectorPostprocessor
    * @param vpp_name The name of the VectorPostprocessor
    */
