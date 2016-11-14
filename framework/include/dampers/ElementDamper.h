@@ -38,7 +38,7 @@ InputParameters validParams<ElementDamper>();
 class ElementDamper :
   public Damper,
   public MooseVariableDependencyInterface,
-  protected MaterialPropertyInterface
+  public MaterialPropertyInterface
 {
 public:
   ElementDamper(const InputParameters & parameters);

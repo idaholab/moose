@@ -19,12 +19,14 @@
 #include "MooseTypes.h"
 #include "MaterialProperty.h"
 #include "MaterialData.h"
-#include "FEProblem.h"
 #include "InputParameters.h"
 
 // Forward declarations
 class MaterialPropertyInterface;
+class MooseVariable;
+
 class MooseObject;
+class FEProblem;
 
 template<>
 InputParameters validParams<MaterialPropertyInterface>();
@@ -136,11 +138,16 @@ public:
   std::set<BoundaryID> getMaterialPropertyBoundaryIDs(const std::string & name);
 
   /**
-   * Retrieve the boundary namess that the material property is defined
+   * Retrieve the boundary names that the material property is defined
    * @param name The name of the material property
    * @return A vector the the boundary names for the property
    */
   std::vector<BoundaryName> getMaterialPropertyBoundaryNames(const std::string & name);
+
+  /**
+   * Set of block ids that the provided property is defined.
+   */
+  std::set<SubdomainID> getMaterialPropertyBlock(const std::string & name);
 
   ///@{
   /**
@@ -150,6 +157,12 @@ public:
   Material & getMaterial(const std::string & name);
   Material & getMaterialByName(const std::string & name);
   ///@}
+
+  /**
+   * Return a set of all variables coupled via materials.
+   * @see MooseObjectWarehouseBase::updateVariableDependencyHelper
+   */
+  std::set<MooseVariable *> getMaterialMooseVariableDependencies();
 
   ///@{
   /**
@@ -238,8 +251,13 @@ private:
   /// An initialization routine needed for dual constructors
   void initializeMaterialPropertyInterface(const InputParameters & parameters);
 
-  /// Check and throw an error if the execution has progerssed past the construction stage
+  /// Check and throw an error if the execution has progressed past the construction stage
   void checkExecutionStage();
+
+  /// Maximum number of qps.
+  /// This is needed to avoid requiring FEProblem.h to be included in the header to allow for
+  /// MooseObjectWarehouseBase to compile.
+  unsigned int getMaxQps();
 
   /// Empty sets for referencing when ids is not included
   const std::set<SubdomainID> _empty_block_ids;
@@ -252,6 +270,7 @@ private:
 
   /// Storage for the boundary ids created by BoundaryRestrictable
   const std::set<BoundaryID> _mi_boundary_ids;
+
 };
 
 /**
@@ -396,7 +415,7 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
   if (!hasMaterialPropertyByName<T>(name))
     return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(NULL, std::set<SubdomainID>());
 
-  return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(&_material_data->getProperty<T>(name), _mi_feproblem.getMaterialPropertyBlocks(name));
+  return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(&_material_data->getProperty<T>(name), getMaterialPropertyBlocks(name));
 }
 
 template<typename T>
@@ -423,7 +442,7 @@ MaterialPropertyInterface::getZeroMaterialProperty(const std::string & /*prop_na
   static MaterialProperty<T> zero;
 
   // resize to accomodate maximum number of qpoints
-  unsigned int nqp = _mi_feproblem.getMaxQps();
+  unsigned int nqp = getMaxQps();
   zero.resize(nqp);
 
   // set values for all qpoints to zero

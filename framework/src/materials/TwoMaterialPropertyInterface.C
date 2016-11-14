@@ -15,6 +15,7 @@
 #include "TwoMaterialPropertyInterface.h"
 #include "MaterialData.h"
 #include "InputParameters.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<TwoMaterialPropertyInterface>()

@@ -14,6 +14,7 @@
 
 // MOOSE includes
 #include "MaterialPropertyInterface.h"
+#include "FEProblem.h"
 #include "MooseApp.h"
 #include "Material.h"
 
@@ -239,4 +240,33 @@ MaterialPropertyInterface::checkExecutionStage()
 {
   if (_mi_feproblem.startedInitialSetup())
     mooseError("Material properties must be retrieved during object construction to ensure correct problem integrity validation.");
+}
+
+std::set<MooseVariable *>
+MaterialPropertyInterface::getMaterialMooseVariableDependencies()
+{
+  // Set of variables coupled via Material objects
+  std::set<MooseVariable *> output;
+
+  // Loop through all Material objects in the warehouse and add their couple variables to the list. Ideally, this would
+  // only include variables that are coupled to the properties need by this object, but since materials can rely on other
+  // materials figuring that out is non trivial. So, just include all variables used by Materials.
+  const MaterialWarehouse & warehouse = _mi_feproblem.getMaterialWarehouse();
+  if (warehouse.hasActiveObjects() )
+  {
+    const std::vector<std::shared_ptr<Material>> & objects = warehouse.getActiveObjects(_mi_tid);
+    for (const auto & obj : objects)
+    {
+      const std::vector<MooseVariable *> & vars = obj->getCoupledMooseVars();
+      output.insert(vars.begin(), vars.end());
+    }
+  }
+
+  return output;
+}
+
+unsigned int
+MaterialPropertyInterface::getMaxQps()
+{
+  return _mi_feproblem.getMaxQps();
 }
