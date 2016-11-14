@@ -23,6 +23,7 @@
 #include "Material.h"
 #include "TimeKernel.h"
 #include "KernelWarehouse.h"
+#include "SwapBackSentinel.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -81,8 +82,12 @@ ComputeResidualThread::onElement(const Elem *elem)
 {
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
-  _fe_problem.reinitMaterials(_subdomain, _tid);
 
+  // Set up Sentinel class so that, even if reinitMaterials() throws, we
+  // still remember to swap back during stack unwinding.
+  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
+
+  _fe_problem.reinitMaterials(_subdomain, _tid);
 
   const MooseObjectWarehouse<KernelBase> * warehouse;
   switch (_kernel_type)
@@ -106,8 +111,6 @@ ComputeResidualThread::onElement(const Elem *elem)
     for (const auto & kernel : kernels)
       kernel->computeResidual();
   }
-
-  _fe_problem.swapBackMaterials(_tid);
 }
 
 void
@@ -119,6 +122,9 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
+    // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
+    // still remember to swap back during stack unwinding.
+    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
 
     _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
@@ -131,7 +137,6 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
       if (bc->shouldApply())
         bc->computeResidual();
     }
-    _fe_problem.swapBackMaterialsFace(_tid);
 
     // Set active boundary id to invalid
     _fe_problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);
@@ -154,15 +159,17 @@ ComputeResidualThread::onInterface(const Elem *elem, unsigned int side, Boundary
     {
       _fe_problem.reinitNeighbor(elem, side, _tid);
 
+      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+      // still remember to swap back during stack unwinding.
+      SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+
+      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       const std::vector<MooseSharedPointer<InterfaceKernel> > & int_ks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & interface_kernel : int_ks)
         interface_kernel->computeResidual();
-
-      _fe_problem.swapBackMaterialsFace(_tid);
-      _fe_problem.swapBackMaterialsNeighbor(_tid);
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
@@ -189,16 +196,18 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
     {
       _fe_problem.reinitNeighbor(elem, side, _tid);
 
+      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+      // still remember to swap back during stack unwinding.
+      SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
       _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+
+      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & dg_kernel : dgks)
         if (dg_kernel->hasBlocks(neighbor->subdomain_id()))
           dg_kernel->computeResidual();
-
-      _fe_problem.swapBackMaterialsFace(_tid);
-      _fe_problem.swapBackMaterialsNeighbor(_tid);
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);

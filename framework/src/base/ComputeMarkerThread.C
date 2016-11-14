@@ -18,6 +18,7 @@
 #include "Problem.h"
 #include "FEProblem.h"
 #include "Marker.h"
+#include "SwapBackSentinel.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -67,6 +68,11 @@ ComputeMarkerThread::onElement(const Elem *elem)
 {
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
+
+  // Set up Sentinel class so that, even if reinitMaterials() throws, we
+  // still remember to swap back during stack unwinding.
+  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
+
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
   if (_marker_whs.hasActiveBlockObjects(_subdomain, _tid))
@@ -75,8 +81,6 @@ ComputeMarkerThread::onElement(const Elem *elem)
     for (const auto & marker : markers)
       marker->computeMarker();
   }
-
-  _fe_problem.swapBackMaterials(_tid);
 
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
