@@ -12,19 +12,19 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef POROUSFLOWEFFECTIVESATURATIONRSCTEST_H
-#define POROUSFLOWEFFECTIVESATURATIONRSCTEST_H
+#ifndef POROUSFLOWROGERSSTALLYBRASSCLEMENTSTEST_H
+#define POROUSFLOWROGERSSTALLYBRASSCLEMENTSTEST_H
 
 //CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
-#include "PorousFlowEffectiveSaturationRSC.h"
+#include "PorousFlowRogersStallybrassClements.h"
 
-class PorousFlowEffectiveSaturationRSCTest : public CppUnit::TestFixture
+class PorousFlowRogersStallybrassClementsTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( PorousFlowEffectiveSaturationRSCTest );
+  CPPUNIT_TEST_SUITE( PorousFlowRogersStallybrassClementsTest );
 
   CPPUNIT_TEST( satTest );
   CPPUNIT_TEST( dsatTest );
@@ -33,7 +33,7 @@ class PorousFlowEffectiveSaturationRSCTest : public CppUnit::TestFixture
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  PorousFlowEffectiveSaturationRSCTest();
+  PorousFlowRogersStallybrassClementsTest();
 
   void satTest();
   void dsatTest();
@@ -43,4 +43,4 @@ public:
   Real _ep;
 };
 
-#endif  // POROUSFLOWEFFECTIVESATURATIONRSCTEST_H
+#endif  // POROUSFLOWROGERSSTALLYBRASSCLEMENTSTEST_H
