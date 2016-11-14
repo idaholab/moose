@@ -1209,7 +1209,7 @@ FEProblem::execMultiApps(ExecFlagType type, bool auto_advance)
     MooseUtils::parallelBarrierNotify(_communicator);
 
     clearActiveElementalMooseVariables(0);
-    _console << COLOR_CYAN << "Transfers on " <<  Moose::stringify(type) << " Are Finished\m" << COLOR_DEFAULT << std::endl;
+    _console << COLOR_CYAN << "Transfers on " <<  Moose::stringify(type) << " Are Finished\n" << COLOR_DEFAULT << std::endl;
   }
   else if (multi_apps.size())
     _console << COLOR_CYAN << "\nNo Transfers on " <<  Moose::stringify(type) << " To MultiApps\n" << COLOR_DEFAULT << std::endl;
