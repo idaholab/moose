@@ -15,7 +15,7 @@
 #ifndef STEPPERTEST_H
 #define STEPPERTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 #include "Stepper.h"
 
@@ -162,8 +162,7 @@ lexStepper(std::string & s)
 
 struct Err : std::exception
 {
-  Err(std::string s)
-    : _msg(s)
+  Err(std::string s) : _msg(s)
   {
   }
   const char * what() const noexcept
@@ -245,13 +244,15 @@ buildStepper(StepperNode n)
   {
     if (n.args.size() < 3)
       throw Err("FixedPointStepper needs 2 args");
-    return BaseStepper::fixedTimes(n.args[1].getVec<Real>(), n.args[2].get<Real>());
+    return BaseStepper::fixedTimes(n.args[1].getVec<Real>(),
+                                   n.args[2].get<Real>());
   }
   else if (name == "MinOfStepper")
   {
     if (n.args.size() < 4)
       throw Err("MinOfStepper needs 3 args");
-    return new MinOfBlock(buildStepper(n.args[1]), buildStepper(n.args[2]), n.args[3].get<Real>());
+    return new MinOfBlock(buildStepper(n.args[1]), buildStepper(n.args[2]),
+                          n.args[3].get<Real>());
   }
   else if (name == "ConstStepper")
   {

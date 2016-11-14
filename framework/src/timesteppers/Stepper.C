@@ -53,7 +53,7 @@ StepperInfo::StepperInfo(const StepperInfo& si)
   _lin_iters = si._lin_iters;
   _converged = si._converged;
   _solve_time_secs = si._solve_time_secs;
-  
+
   _soln_nonlin.reset(si._soln_nonlin->clone().release());
   _soln_aux.reset(si._soln_aux->clone().release());
   _soln_predicted.reset(si._soln_predicted->clone().release());
@@ -73,7 +73,7 @@ StepperInfo::operator=(const StepperInfo& si)
   _lin_iters = si._lin_iters;
   _converged = si._converged;
   _solve_time_secs = si._solve_time_secs;
-  
+
   _soln_nonlin.reset(si._soln_nonlin->clone().release());
   _soln_aux.reset(si._soln_aux->clone().release());
   _soln_predicted.reset(si._soln_predicted->clone().release());
@@ -123,7 +123,7 @@ StepperInfo::update(
   _snapshot = false;
   _rewind = false;
   _rewind_time = -1;
-  
+
   if (_soln_nonlin->size() != soln_nonlin.size())
   {
     _soln_nonlin.reset(NumericVector<Number>::build(_dummy_comm).release());
@@ -139,7 +139,7 @@ StepperInfo::update(
     _soln_predicted.reset(NumericVector<Number>::build(_dummy_comm).release());
     _soln_predicted->init(soln_predicted.size(), soln_predicted.size(), false, SERIAL);
   }
-  
+
   *_soln_nonlin = soln_nonlin;
   *_soln_aux = soln_aux;
   *_soln_predicted = soln_predicted;

@@ -310,7 +310,7 @@ Transient::updateStepperInfo(bool first)
   _soln_nonlin.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
   _soln_aux.resize(_fe_problem.getAuxiliarySystem().currentSolution()->size());
   _soln_predicted.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
-  
+
   if (first)
     _si.pushHistory(_prev_dt, true, 0);
   _si.update(
@@ -354,7 +354,7 @@ Transient::computeDT(bool first)
       _stepper.reset(inner);
     }
   }
-  
+
   updateStepperInfo(first);
 
   if (_stepper)

@@ -27,25 +27,18 @@ class StepperInfo
 {
 public:
   StepperInfo();
-  StepperInfo(const StepperInfo& si);
-  StepperInfo& operator=(const StepperInfo& si);
-  
+  StepperInfo(const StepperInfo & si);
+  StepperInfo & operator=(const StepperInfo & si);
+
   void pushHistory(Real dt, bool converged, Real solve_time);
 
-  /// Updates internal state to match new changes to the simulation state (i.e. for a new time step).
+  /// Updates internal state to match new changes to the simulation state (i.e.
+  /// for a new time step).
   /// Flags relating to snapshotting/rewind, etc. are all reset.
-  void update(
-    int step_count,
-    Real time,
-    Real dt,
-    unsigned int nonlin_iters,
-    unsigned int lin_iters,
-    bool converged,
-    Real solve_time_secs,
-    std::vector<Real> soln_nonlin,
-    std::vector<Real> soln_aux,
-    std::vector<Real> soln_predicted
-    );
+  void update(int step_count, Real time, Real dt, unsigned int nonlin_iters,
+              unsigned int lin_iters, bool converged, Real solve_time_secs,
+              std::vector<Real> soln_nonlin, std::vector<Real> soln_aux,
+              std::vector<Real> soln_predicted);
 
   /// The number of times the simulation has performed a time step iteration.
   /// This starts off equal to one.
@@ -54,13 +47,19 @@ public:
   /// Current simulation time.
   Real time();
 
-  /// Returns the dt used between the most recent and immediately prior solves.  If n > 0, the dt used between the nth most recent and immediately prior solves is returned. n > 2 is currently not supported.
+  /// Returns the dt used between the most recent and immediately prior solves.
+  /// If n > 0, the dt used between the nth most recent and immediately prior
+  /// solves is returned. n > 2 is currently not supported.
   Real dt(int n = 0);
 
-  /// Returns the converged state of the most recent solve.  If n > 0, returns the converged state of the nth most recent solve.  n > 2 is currently not supported.
+  /// Returns the converged state of the most recent solve.  If n > 0, returns
+  /// the converged state of the nth most recent solve.  n > 2 is currently not
+  /// supported.
   bool converged(int n = 0);
 
-  /// Returns the wall time taken for the most recent solve.  If n > 0, returns the wall time taken for the nth most recent solve.  n > 2 is currently not supported.
+  /// Returns the wall time taken for the most recent solve.  If n > 0, returns
+  /// the wall time taken for the nth most recent solve.  n > 2 is currently not
+  /// supported.
   Real solveTimeSecs(int n = 0);
 
   /// Number of nonlinear iterations performed for the most recent solve.
@@ -70,28 +69,34 @@ public:
   int linIters();
 
   /// Nonlinear solution vector for the most recent solve.
-  NumericVector<Number>* solnNonlin();
+  NumericVector<Number> * solnNonlin();
 
   /// Auxiliary solution vector for the most recent solve.
-  NumericVector<Number>* solnAux();
+  NumericVector<Number> * solnAux();
 
   /// Predicted solution vector (if any used) for the most recent solve.
   /// If no predictor was used, this is a zero vector with the same length as
   /// soln_nonlin.
-  NumericVector<Number>* solnPredicted();
+  NumericVector<Number> * solnPredicted();
 
-  /// Instructs the executioner to snapshot the current simulation state *before* any upcomming dt is applied.  Save the current simulation time as the key for rewinding.
+  /// Instructs the executioner to snapshot the current simulation state
+  /// *before* any upcomming dt is applied.  Save the current simulation time as
+  /// the key for rewinding.
   void snapshot();
-  
+
   /// Returns true if a snapshot has been requested.
   bool wantSnapshot();
 
-  /// Instructs the executioner to rewind the simulation to the specified target_time.  snapshot() must have been previously called for the target_time.  The rewind does not occur when this function is called - instead it occurs when the executioner inspects the StepperInfo object.
+  /// Instructs the executioner to rewind the simulation to the specified
+  /// target_time.  snapshot() must have been previously called for the
+  /// target_time.  The rewind does not occur when this function is called -
+  /// instead it occurs when the executioner inspects the StepperInfo object.
   void rewind(Real target_time);
 
-  /// Returns the requested rewind time if any has been set.  Otherwise, it returns -1.
+  /// Returns the requested rewind time if any has been set.  Otherwise, it
+  /// returns -1.
   Real rewindTime();
-  
+
 private:
   int _step_count;
   Real _time;
@@ -105,11 +110,11 @@ private:
   std::unique_ptr<NumericVector<Number>> _soln_nonlin;
   std::unique_ptr<NumericVector<Number>> _soln_aux;
   std::unique_ptr<NumericVector<Number>> _soln_predicted;
-  
+
   bool _snapshot;
   bool _rewind;
   Real _rewind_time;
-  
+
   libMesh::Parallel::Communicator _dummy_comm;
 };
 
@@ -245,7 +250,8 @@ private:
 /// The underlying stepper must be set via setStepper - this allows
 /// InstrumentedStepper to be created before other steppers which may want to
 /// use the dt_store pointer.  InstrumentedStepper enables steppers at one layer
-/// of nesting to base their dt calculations on dt values computed at a different
+/// of nesting to base their dt calculations on dt values computed at a
+/// different
 /// layer of nesting.
 class InstrumentedBlock : public StepperBlock
 {

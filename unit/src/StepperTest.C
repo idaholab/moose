@@ -21,13 +21,15 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION(StepperTest);
 
-void updateInfo(StepperInfo * si, Real dt, bool next_converged, std::map<Real, StepperInfo> * snaps = nullptr);
+void updateInfo(StepperInfo * si, Real dt, bool next_converged,
+                std::map<Real, StepperInfo> * snaps = nullptr);
 
 struct BasicTest
 {
   std::string title;
   Real tol;
-  // time step on which actual used dt is half (negative) or twice (positive) what
+  // time step on which actual used dt is half (negative) or twice (positive)
+  // what
   // was returned
   int wrong_dt;
   StepperBlock * stepper;
@@ -205,7 +207,8 @@ StepperTest::DT2()
     std::map<Real, StepperInfo> snaps;
     DT2Block s(tol, tests[i].e_tol, tests[i].e_max, integrator_order);
     StepperInfo si;
-    si.update(1, 0, 1, 0, 0, true, 0, solns[0], std::vector<Real>(), std::vector<Real>()); // initial dt
+    si.update(1, 0, 1, 0, 0, true, 0, solns[0], std::vector<Real>(),
+              std::vector<Real>()); // initial dt
 
     std::stringstream ss;
     ss << "case " << i + 1 << " (" << tests[i].title << "):\n";
@@ -262,7 +265,8 @@ StepperTest::scratch()
 }
 
 void
-updateInfo(StepperInfo * si, Real dt, bool next_converged, std::map<Real, StepperInfo> * snaps)
+updateInfo(StepperInfo * si, Real dt, bool next_converged,
+           std::map<Real, StepperInfo> * snaps)
 {
   std::vector<Real> vec;
   vec.resize(si->solnNonlin()->size());
@@ -271,7 +275,8 @@ updateInfo(StepperInfo * si, Real dt, bool next_converged, std::map<Real, Steppe
   if (si->rewindTime() != -1)
   {
     *si = (*snaps)[si->rewindTime()];
-    si->update(si->stepCount(), si->time(), si->dt(), 0, 0, next_converged, 0, vec, vec, vec);
+    si->update(si->stepCount(), si->time(), si->dt(), 0, 0, next_converged, 0,
+               vec, vec, vec);
     return;
   }
   else if (snaps && si->wantSnapshot())
@@ -280,7 +285,8 @@ updateInfo(StepperInfo * si, Real dt, bool next_converged, std::map<Real, Steppe
   Real new_t = si->time();
   if (next_converged)
     new_t += dt;
-  si->update(si->stepCount()+1, new_t, dt, 0, 0, next_converged, 0, vec, vec, vec);
+  si->update(si->stepCount() + 1, new_t, dt, 0, 0, next_converged, 0, vec, vec,
+             vec);
 }
 
 void

@@ -300,7 +300,7 @@ protected:
   Real _solution_change_norm;
 
   void setupTimeIntegrator();
-  
+
   void updateStepperInfo(bool first);
 
   Real _new_dt;
