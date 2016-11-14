@@ -119,4 +119,10 @@
     exodiff = 'push_and_shear.e'
     abs_zero = 1E-4
   [../]
+  [./throw_test]
+    type = 'RunException'
+    input = 'throw_test.i'
+    expect_err = "Solve failed and timestep already at or below dtmin"
+    recover = false
+  [../]
 []

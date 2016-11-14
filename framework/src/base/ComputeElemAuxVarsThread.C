@@ -16,6 +16,8 @@
 #include "AuxiliarySystem.h"
 #include "AuxKernel.h"
 #include "FEProblem.h"
+#include "SwapBackSentinel.h"
+
 // libmesh includes
 #include "libmesh/threads.h"
 
@@ -68,7 +70,6 @@ ComputeElemAuxVarsThread::subdomainChanged()
   _fe_problem.prepareMaterials(_subdomain, _tid);
 }
 
-
 void
 ComputeElemAuxVarsThread::onElement(const Elem * elem)
 {
@@ -78,14 +79,15 @@ ComputeElemAuxVarsThread::onElement(const Elem * elem)
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
 
+    // Set up the sentinel so that, even if reinitMaterials() throws, we
+    // still remember to swap back.
+    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid, _need_materials);
+
     if (_need_materials)
       _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
     for (const auto & aux : kernels)
       aux->compute();
-
-    if (_need_materials)
-      _fe_problem.swapBackMaterials(_tid);
 
     // update the solution vector
     {
