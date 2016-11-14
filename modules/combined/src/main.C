@@ -8,7 +8,7 @@
  * Modules Application
  */
 
-#include "ModulesApp.h"
+#include "CombinedApp.h"
 //Moose Includes
 #include "MooseInit.h"
 #include "Moose.h"
@@ -25,10 +25,10 @@ int main(int argc, char *argv[])
   MooseInit init(argc, argv);
 
   // Register this application's MooseApp and any it depends on
-  ModulesApp::registerApps();
+  CombinedApp::registerApps();
 
   // This creates dynamic memory that we're responsible for deleting
-  MooseApp * app = AppFactory::createApp("ModulesApp", argc, argv);
+  MooseApp * app = AppFactory::createApp("CombinedApp", argc, argv);
 
   app->setCheckUnusedFlag(true);
   app->setErrorOverridden();
