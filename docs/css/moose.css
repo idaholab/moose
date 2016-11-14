@@ -1,29 +1,30 @@
 /* Collapse Nav-bar correctly */
 @media(min-width: 768px) {
     .bs-sidebar.affix {
-	top: 110px;
+        top: 110px;
     }
     div.col-md-3 {
-	margin-top: 60px;
+        margin-top: 60px;
     }
 }
 @media(min-width:992px) {
     .bs-sidebar.affix {
-	top: 140px;
+        top: 140px;
 }
     div.col-md-9 {
-	margin-top: 50px;
+        margin-top: 50px;
     }
 }
 @media(min-width:1200px) {
     .bs-sidebar.affix {
-	top: 90px;
+        top: 90px;
 }
     div.col-md-9 {
-	margin-top: 5px;
+        margin-top: 5px;
     }
 }
 /* End Collapse Nav-bar correctly */
+
 
 /* Get rid of the Previous and Next buttons */
 ul.nav.navbar-right > li:nth-of-type(2), ul.nav.navbar-right > li:nth-of-type(3){
@@ -38,14 +39,27 @@ a {
     color: #0333a5;
     text-decoration: none;
 }
-
-a:hover, a:focus {
+a:hover,
+a:focus {
     color: #0333a5;
     text-decoration: underline;
 }
 
+a:focus {
+    outline: thin dotted;
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px
+}
+
+code {
+    color: #333d3e;
+}
+
 /* NavBar hover color modification (bluish to more closely match our </a> links color) */
-.navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus , .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-brand:focus,
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
     color: #b7c0ff;
 }
 
@@ -155,7 +169,99 @@ Slide style
 .reveal .slides > section {
   text-align: left;
 }
-/* MOOSE Build status CSS */
+
+/* start Param div-table */
+.moose-object-param-table:nth-of-type(1) {
+    margin-top: 60px;
+}
+.moose-object-param-table >.param-header {
+    background-color: rgba(0,0,0,.2);
+    width: 100%;
+    height: 30px;
+    font-size: larger;
+    padding-left: 10px;
+    padding-bottom: 34px;
+}
+.moose-object-param-table >.param-header >.param-header-information {
+    float: left;
+    width: 45%;
+    line-height: 0;
+    padding-top: 15px;
+}
+.moose-object-param-table >.param-header >.param-header-description {
+    float: left;
+    width: 55%;
+    line-height: 0;
+    padding-top: 15px;
+    position: absolute;
+    right: 0%;
+}
+.moose-object-param-table > .param-detailed-even {
+    overflow: auto;
+    background-color: rgba(0,0,0,.1);
+    width: 100%;
+    padding-top: 5px;
+}
+.moose-object-param-table > .param-detailed-even > .param-detailed-identifier {
+    width: 45%;
+    float: left;
+    padding-left: 5px;
+    line-height: 1.1;
+}
+.moose-object-param-table > .param-detailed-even > .param-detailed-description {
+    width: 55%;
+    float: right;
+    padding-right: 5px;
+}
+
+.moose-object-param-table > .param-detailed-odd {
+    overflow: auto;
+    background-color: rgba(0,0,0,0.02);
+    width: 100%;
+    padding-top: 5px;
+}
+.moose-object-param-table > .param-detailed-odd > .param-detailed-identifier {
+    width: 45%;
+    float: left;
+    padding-left: 5px;
+    line-height: 1.1;
+}
+.moose-object-param-table > .param-detailed-odd > .param-detailed-description {
+    width: 55%;
+    float: right;
+    padding-right: 5px;
+}
+.param-sub-detailed-name {
+    width: 100%;
+}
+.param-sub-id-name {
+    width: 20%;
+    float: left;
+    font-style: italic;
+}
+.param-sub-detailed-type {
+    width: 100%;
+}
+.param-sub-id-type {
+    width: 20%;
+    float: left;
+    font-style: italic;
+}
+.param-sub-detailed-default {
+    width: 100%;
+}
+.param-sub-id-default {
+    width: 20%;
+    float: left;
+    font-style: italic;
+}
+
+.param-sub-id-description {
+    display: none;
+}
+/* end Param div-Table */
+
+/* Moose Build status CSS */
 .boxed_job_status_Passed {
     vertical-align: middle;
     text-align: center;

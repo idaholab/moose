@@ -166,7 +166,7 @@ the syntax for the system or object being documented.
 ---
 
 ## Images and Slideshows
-!image media/memory_logger-plot_multi.png width=30% padding-left=20px float=right caption=The [memory_logger](/memory_logger.md) is a utility that allows the user to track the memory use of a simulation.
+!image media/memory_logger-plot_multi.png width=200px padding-left=20px float=right caption=The [memory_logger](/memory_logger.md) is a utility that allows the user to track the memory use of a simulation. font-size=smaller
 
 It is possible to include images and slideshows of images with more flexibility than standard markdown.
 

@@ -5,21 +5,21 @@
 link: http://mooseframework.org/static/media/uploads/files/
 
 osx10.11:
-    name: moose-environment-42_elcapitan-10.11_x86_64.pkg
+    name: moose-environment-57_elcapitan-10.11_x86_64.pkg
 osx10.10:
-    name: moose-environment-74_yosemite-10.10_x86_64.pkg
+    name: moose-environment-76_yosemite-10.10_x86_64.pkg
 ubuntu12.04:
     name: moose-environment-2_Ubuntu-12.04_x86_64.deb
 ubuntu14.04:
-    name: moose-environment-40_Ubuntu-14.04_x86_64.deb
+    name: moose-environment-45_Ubuntu-14.04_x86_64.deb
 ubuntu16.04:
-    name: moose-environment-5_Ubuntu-16.04_x86_64.deb
+    name: moose-environment-6_Ubuntu-16.04_x86_64.deb
 mint17.1:
     name: moose-environment_mint-1.1-8.x86_64.deb
 mint17.3:
     name: moose-environment-4_LinuxMint-17.3_x86_64.deb
 mint18:
-    name: moose-environment-1_LinuxMint-18_x86_64.deb
+    name: moose-environment-3_LinuxMint-18_x86_64.deb
 opensuse42.1:
     name: moose-environment-59_openSUSE-42.1_x86_64.rpm
 fedora23:
