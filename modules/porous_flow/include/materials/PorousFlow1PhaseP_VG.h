@@ -27,30 +27,11 @@ public:
   PorousFlow1PhaseP_VG(const InputParameters & parameters);
 
 protected:
-  /**
-   * Effective saturation as a function of porepressure using van Genuchten
-   * formulation.
-   *
-   * @param pressure porepressure (Pa)
-   * @return effective saturation
-   */
-  Real effectiveSaturation(Real pressure) const;
+  Real effectiveSaturation(Real pressure) const override;
 
-  /**
-   * Derivative of effective saturation wrt to porepressure.
-   *
-   * @param pressure porepressure (Pa)
-   * @return derivative of effective saturation wrt porepressure
-   */
-  Real dEffectiveSaturation_dP(Real pressure) const;
+  Real dEffectiveSaturation_dP(Real pressure) const override;
 
-  /**
-   * Second derivative of effective saturation wrt to porepressure.
-   *
-   * @param pressure porepressure (Pa)
-   * @return second derivative of effective saturation wrt porepressure
-   */
-  Real d2EffectiveSaturation_dP2(Real pressure) const;
+  Real d2EffectiveSaturation_dP2(Real pressure) const override;
 
   /// van-Genuchten alpha parameter
   const Real _al;
