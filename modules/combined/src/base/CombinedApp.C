@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "ModulesApp.h"
+#include "CombinedApp.h"
 #include "Factory.h"
 #include "ActionFactory.h"
 #include "AppFactory.h"
@@ -27,7 +27,7 @@
 #include "PorousFlowApp.h"
 
 template<>
-InputParameters validParams<ModulesApp>()
+InputParameters validParams<CombinedApp>()
 {
   InputParameters params = validParams<MooseApp>();
   params.set<bool>("use_legacy_uo_initialization") = false;
@@ -35,32 +35,32 @@ InputParameters validParams<ModulesApp>()
   return params;
 }
 
-ModulesApp::ModulesApp(const InputParameters & parameters) :
+CombinedApp::CombinedApp(const InputParameters & parameters) :
     MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
-  ModulesApp::registerObjects(_factory);
+  CombinedApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
-  ModulesApp::associateSyntax(_syntax, _action_factory);
+  CombinedApp::associateSyntax(_syntax, _action_factory);
 }
 
-ModulesApp::~ModulesApp()
+CombinedApp::~CombinedApp()
 {
 }
 
 // External entry point for dynamic application loading
-extern "C" void ModulesApp__registerApps() { ModulesApp::registerApps(); }
+extern "C" void CombinedApp__registerApps() { CombinedApp::registerApps(); }
 void
-ModulesApp::registerApps()
+CombinedApp::registerApps()
 {
-  registerApp(ModulesApp);
+  registerApp(CombinedApp);
 }
 
 // External entry point for dynamic object registration
-extern "C" void ModulesApp__registerObjects(Factory & factory) { ModulesApp::registerObjects(factory); }
+extern "C" void CombinedApp__registerObjects(Factory & factory) { CombinedApp::registerObjects(factory); }
 void
-ModulesApp::registerObjects(Factory & factory)
+CombinedApp::registerObjects(Factory & factory)
 {
   ChemicalReactionsApp::registerObjects(factory);
   ContactApp::registerObjects(factory);
@@ -79,9 +79,9 @@ ModulesApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void ModulesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { ModulesApp::associateSyntax(syntax, action_factory); }
+extern "C" void CombinedApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { CombinedApp::associateSyntax(syntax, action_factory); }
 void
-ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   ChemicalReactionsApp::associateSyntax(syntax, action_factory);
   ContactApp::associateSyntax(syntax, action_factory);

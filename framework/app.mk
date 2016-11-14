@@ -28,6 +28,10 @@ BUILD_EXEC := $($BUILD_EXEC$(STACK))
 DEP_APPS := $($DEP_APPS$(STACK))
 STACK := $(basename $(STACK))
 
+ifneq ($(SUFFIX),)
+  app_LIB_SUFFIX := $(app_LIB_SUFFIX)_$(SUFFIX)
+endif
+
 ##############################################################################
 ######################### Application Variables ##############################
 ##############################################################################
@@ -44,7 +48,11 @@ fsrcfiles   := $(shell find $(SRC_DIRS) -name "*.f")
 f90srcfiles := $(shell find $(SRC_DIRS) -name "*.f90")
 
 # object files
+ifeq ($(LIBRARY_SUFFIX),yes)
+objects	    := $(patsubst %.C, %_with$(app_LIB_SUFFIX).$(obj-suffix), $(srcfiles))
+else
 objects	    := $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
+endif
 cobjects    := $(patsubst %.c, %.$(obj-suffix), $(csrcfiles))
 fobjects    := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
 f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
@@ -68,10 +76,10 @@ main_src    := $(MAIN_DIR)/main.C
 main_object := $(patsubst %.C, %.$(obj-suffix), $(main_src))
 
 # dependency files
-app_deps    := $(patsubst %.C, %.$(obj-suffix).d, $(srcfiles)) \
-               $(patsubst %.c, %.$(obj-suffix).d, $(csrcfiles)) \
-               $(patsubst %.C, %.$(obj-suffix).d, $(main_src)) \
-               $(ADDITIONAL_APP_DEPS)
+app_deps     := $(patsubst %.$(obj-suffix), %.$(obj-suffix).d, $(objects)) \
+                $(patsubst %.c, %.$(obj-suffix).d, $(csrcfiles)) \
+                $(patsubst %.C, %.$(obj-suffix).d, $(main_src)) \
+                $(ADDITIONAL_APP_DEPS)
 
 depend_dirs := $(foreach i, $(DEPEND_MODULES), $(MOOSE_DIR)/modules/$(i)/include)
 depend_dirs += $(APPLICATION_DIR)/include
@@ -84,9 +92,15 @@ app_INCLUDE     := $(foreach i, $(include_dirs), -I$(i)) $(ADDITIONAL_INCLUDES)
 app_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(srcfiles))
 
 # library
-app_LIB     := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)-$(METHOD).la
+ifeq ($(LIBRARY_SUFFIX),yes)
+  app_LIB     := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)_with$(app_LIB_SUFFIX)-$(METHOD).la
+else
+  app_LIB     := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)-$(METHOD).la
+endif
+
 # application
 app_EXEC    := $(APPLICATION_DIR)/$(APPLICATION_NAME)-$(METHOD)
+
 # revision header
 CAMEL_CASE_NAME := $(shell echo $(APPLICATION_NAME) | perl -pe 's/(?:^|_)([a-z])/\u$$1/g')
 app_BASE_DIR    ?= base/
@@ -125,16 +139,25 @@ ADDITIONAL_CPPFLAGS := $(ADDITIONAL_CPPFLAGS) -D$(shell echo $(APPLICATION_NAME)
 # dependencies
 -include $(app_deps)
 
-# Rest the DEPEND_MODULES variable in case this file is sourced again
+# Rest the certain variables in case this file is sourced again
 DEPEND_MODULES :=
+SUFFIX :=
+LIBRARY_SUFFIX :=
+
 
 ###############################################################################
 # Build Rules:
 #
 ###############################################################################
+
+# Instantiate a new suffix rule for the module loader
+$(eval $(call CXX_RULE_TEMPLATE,_with$(app_LIB_SUFFIX)))
+
 ifeq ($(BUILD_EXEC),yes)
   all:: $(app_EXEC)
 endif
+
+BUILD_EXEC :=
 
 $(app_objects): $(app_HEADER)
 

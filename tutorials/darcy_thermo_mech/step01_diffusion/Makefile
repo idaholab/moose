@@ -20,7 +20,22 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
-ALL_MODULES := yes
+ALL_MODULES               := no
+
+CHEMICAL_REACTIONS        := no
+CONTACT                   := no
+FLUID_PROPERTIES          := no
+HEAT_CONDUCTION           := yes
+LINEAR_ELASTICITY         := no
+MISC                      := no
+NAVIER_STOKES             := no
+PHASE_FIELD               := yes
+POROUS_FLOW               := no
+RICHARDS                  := no
+SOLID_MECHANICS           := yes
+TENSOR_MECHANICS          := yes
+WATER_STEAM_EOS           := no
+XFEM                      := no
 include $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 

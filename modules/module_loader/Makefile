@@ -17,16 +17,9 @@ FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-# dependency on tensor_mechanics and fluid_properties
-TENSOR_MECHANICS := yes
-FLUID_PROPERTIES := yes
-SKIP_LOADER      := yes
-include $(MODULE_DIR)/modules.mk
-
 # dep apps
-APPLICATION_DIR    := $(MODULE_DIR)/porous_flow
-APPLICATION_NAME   := porous_flow
-BUILD_EXEC         := yes
+APPLICATION_DIR    := $(MODULE_DIR)/phase_field
+APPLICATION_NAME   := module_loader
 DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 include            $(FRAMEWORK_DIR)/app.mk
 
