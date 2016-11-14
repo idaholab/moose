@@ -26,7 +26,7 @@
         - Systems: !include content/modules/tensor_mechanics/systems/pages.yml
 - Utilites:
     - Documentation:
-        - Overview: 'content/utilities/documentation/index.md'
+        - Overview: 'content/utilities/documentation/overview.md'
         - Setup and Configuration: 'content/utilities/documentation/setup.md'
         - Documenting Code: 'content/utilities/documentation/code.md'
         - Creating a Website: 'content/utilities/documentation/website.md'

@@ -19,7 +19,7 @@ the MOOSE website includes the following.
 !text docs/pages.yml
 
 Notice, that the framework and the modules each have include statements pointing to another "pages.yml" files. This
-file is generated for object in the application and is placed in the "install" directory (see [Setup](/content/utilities/documentation/setup.md)).
+file is generated for object in the application and is placed in the "install" directory (see [Setup](documentation/setup.md)).
 
 ## Viewing your Web-site
 When you want to view your documentation website, you must serve the site to a local server. This is done as:

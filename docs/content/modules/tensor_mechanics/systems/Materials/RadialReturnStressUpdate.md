@@ -44,7 +44,7 @@ Users can print out any of these strains and stresses using the `RankTwoAux` as 
 [Introduction/Visualizing Tensors](auto::/introduction/VisualizingTensors) page.
 
 ##Writing a New Stress Update Material
-New radial return models must inherit from `RadialReturnStressUpdate` and must overwrite the six virtual methods.  
+New radial return models must inherit from `RadialReturnStressUpdate` and must overwrite the six virtual methods.
 
   - **initQpStatefulProperties**: Set the initial values for all new material properties that are not initialized by an input parameter; generally the material properties initialized in this method are all set to zero.
   - **computeStressInitialize**: Calculate the initial trial stress state, the yield surface value, and any hardening or softening parameters at the start of the simulation time increment.
@@ -65,4 +65,4 @@ More details on how to write the equivalent yield surface equation for a creep m
 
 ## References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/tensor_mechanics.bib}
+\bibliography{bib/tensor_mechanics.bib}

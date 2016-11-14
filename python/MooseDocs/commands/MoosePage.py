@@ -87,7 +87,7 @@ class MoosePage(NavigationNode):
 
     # Write the file
     with open(destination, 'w') as fid:
-      log.info('Creating {}: {}'.format(destination, self._template))
+      log.debug('Creating {}: using template {}'.format(destination, self._template))
       fid.write(soup.prettify().encode('utf-8'))
 
 

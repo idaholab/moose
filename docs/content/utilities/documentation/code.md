@@ -34,9 +34,9 @@ listed; the table includes the class description from the source code.
 
 A detailed description should be provided in addition to the generated, in-code documentation for an object by creating a markdown file using
 [MOOSE Flavored Markdown](moose_flavored_markdown.md). The created file must be stored in a file named according to the
-registered MOOSE syntax within the "install" directory explained in the [Configuration](/content/utilities/documentation/setup.md#configuration) section. For example, the details for the [Diffision](/Kernels/Diffusion.md) are in the `framework/docs/content/framework/systems/Kernels/Diffusion.md` file.
+registered MOOSE syntax within the "install" directory explained in the [Configuration](documentation/setup.md#configuration) section. For example, the details for the [Diffision](/Kernels/Diffusion.md) are in the `framework/docs/content/framework/systems/Kernels/Diffusion.md` file.
 
-Stubs (minimal markdown files) for the systems and objects in MOOSE-based applications can be generated using the "moosedocs.py" script. Once created these files should be modified with additional details and are then available for use when generating a [web-site](documentation/website.md), [slideshows](documentation/slideshow.md), or [PDFs](documentation/pdf.md).
+Stubs (minimal markdown files) for the systems and objects in MOOSE-based applications can be generated using the "moosedocs.py" script. Once created these files should be modified with additional details and are then available for use when generating a [web-site](documentation/website.md), [slideshows](documentation/presentation.md), or [PDFs](documentation/pdf.md).
 
 To generate the stub files run the "generate" command as follows:
 

@@ -165,11 +165,12 @@ out.xyz
 .jitdir/
 
 # Documentation Generation
+site
 *.moose.md
 *.moose.yml
 *.moose.svg
 docs/.moosedocs
-site
-
-# Do not ignore files in docs/media
+!docs/index.html
+!docs/templates/*.html
 !docs/media/*.png
+!docs/tests/**/gold/*.html
