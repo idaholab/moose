@@ -75,7 +75,8 @@ struct StepperFeedback
 /// A base class for time stepping algorithms for use in determining dt between
 /// time steps of a transient problem solution.  Implementations should strive
 /// to be immutable - facilitating easier restart/recovery and testing.  Some of
-/// the provided steppers, take StepperBlock* as arguments in their constructors -
+/// the provided steppers, take StepperBlock* as arguments in their constructors
+/// -
 /// such steppers take ownership of the passed-in steppers' memory.
 class StepperBlock
 {
@@ -90,26 +91,73 @@ public:
   virtual Real next(const StepperInfo & si, StepperFeedback & sf) = 0;
 };
 
+/// Holds a collection of functions for generating common, pre-configured
+/// stepper block algorithms.
 namespace BaseStepper
 {
+/// Builds a stepper that always returns the same given dt.
 StepperBlock * constant(Real dt);
+/// Builds a stepper that always returns the previously used simulation dt.
 StepperBlock * prevdt();
+/// Builds a stepper that returns dt in order to hit consecutive simulation
+/// times specified in times (in ascending order).  tol is an absolute time
+/// tolerance within which a time in the times vector is considered "satisfied"
+/// by the current simulation time resulting in a dt to hit the next entry in
+/// times.
 StepperBlock * fixedTimes(std::vector<Real> times, Real tol);
+/// Builds a stepper that returns the dt stored in the dt_store pointer.
 StepperBlock * ptr(const Real * dt_store);
+/// Builds a stepper that returns the dt from calling s->next, reducing it if
+/// necessary to ensure "dt/prevdt" is less than or equal to max_ratio.
 StepperBlock * maxRatio(StepperBlock * s, Real max_ratio);
+/// Builds a stepper that returns the dt from calling s->next, modifying it if
+/// necessary to ensure dt is between min and max.
 StepperBlock * dtLimit(StepperBlock * s, Real min, Real max);
+/// Builds a stepper that returns the dt from calling s->next, modifying it if
+/// necessary to keep the simulation time within t_min and t_max.
 StepperBlock * bounds(StepperBlock * s, Real t_min, Real t_max);
+/// Builds a stepper that returns the dt from calling s->next multiplied by
+/// mult.
+/// If s is null, then mult is applied to the previous simulation dt.
 StepperBlock * mult(Real mult, StepperBlock * s = nullptr);
-StepperBlock * between(StepperBlock * on, StepperBlock * between, std::vector<Real> times, Real tol);
-StepperBlock * everyN(StepperBlock * nth, int every_n, int offset = 0, StepperBlock * between = nullptr);
+/// Builds a stepper that returns the dt from calling on->next when the
+/// simulation time is within tol of an entry in the times vector and returns dt
+/// from calling between->next otherwise.
+StepperBlock * between(StepperBlock * on, StepperBlock * between,
+                       std::vector<Real> times, Real tol);
+/// Builds a stepper that returns the dt from calling nth->next every every_n
+/// steps and the dt val.  If between is null, then the previous simulation dt
+/// is used instead.  The first call to nth->next will occur when the step count
+/// is equal to offset+1.  Note that every_n is for the StepperInfo step count -
+/// not for the number of calls to next.
+StepperBlock * everyN(StepperBlock * nth, int every_n, int offset = 0,
+                      StepperBlock * between = nullptr);
+/// Builds a stepper that returns the dt from calling initial->next for the
+/// first
+/// n time steps (i.e. StepperInfo.step_count) and the dt from calling
+/// primary->next after that.
 StepperBlock * initialN(StepperBlock * initial, StepperBlock * primary, int n);
-StepperBlock * converged(StepperBlock * converged, StepperBlock * not_converged, bool delay = false);
+/// Builds a stepper that returns the dt from calling converged->next if the
+/// last
+/// solve converged and returns the dt from calling not_converged->next
+/// otherwise.  If delay is true, then the solve prior to the last solve must
+/// have converged as well in order to call converged->next.
+StepperBlock * converged(StepperBlock * converged, StepperBlock * not_converged,
+                         bool delay = false);
+/// Builds a stepper that calls a->next and b->next returning the smaller dt of
+/// the two.  If a and b are within absolute tol of each other, then the dt from
+/// a->next is always returned.
 StepperBlock * min(StepperBlock * a, StepperBlock * b, Real tol = 0);
 } // namespace BaseStepper
 
+/// Generic building block for representing steppers that calculate their own dt
+/// without using other StepperBlocks - i.e. they only use StepperInfo and their
+/// internal configuration.
 class RootBlock : public StepperBlock
 {
 public:
+  /// func is a (lambda) function that returns a dt using the StepperInfo object
+  /// passed into a call to next.
   RootBlock(std::function<Real(const StepperInfo & si)> func);
   virtual Real next(const StepperInfo & si, StepperFeedback & sf);
 
@@ -117,10 +165,15 @@ private:
   std::function<Real(const StepperInfo & si)> _func;
 };
 
+/// Generic building block for representing steppers that return a (potentially)
+/// modified version of the dt from calling next on an underlying stepper.
 class ModBlock : public StepperBlock
 {
 public:
-  ModBlock(StepperBlock * s, std::function<Real(const StepperInfo & si, Real dt)> func);
+  /// func is a (lambda) function that modifies the passed in dt suitably before
+  /// returning it.
+  ModBlock(StepperBlock * s,
+           std::function<Real(const StepperInfo & si, Real dt)> func);
   virtual Real next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
@@ -128,10 +181,16 @@ private:
   std::function<Real(const StepperInfo & si, Real dt)> _func;
 };
 
+/// Generic building block for representing steppers that call one of two
+/// underlying steppers based on some condition.
 class IfBlock : public StepperBlock
 {
 public:
-  IfBlock(StepperBlock * on_true, StepperBlock * on_false, std::function<bool(const StepperInfo &)> func);
+  /// If func returns true, the dt from calling on_true->next is returned.
+  /// Otherwise the dt from calling on_false->next is returned.  Only one of
+  /// on_true or on_false is queried for dt each time step (never both).
+  IfBlock(StepperBlock * on_true, StepperBlock * on_false,
+          std::function<bool(const StepperInfo &)> func);
   virtual Real next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
@@ -144,12 +203,16 @@ private:
 /// dt which can be viewed/connected to via the pointer returned by dtPtr().
 /// The underlying stepper must be set via setStepper - this allows
 /// InstrumentedStepper to be created before other steppers which may want to
-/// use the dt_store pointer.  This stepper enables steppers at one layer of
-/// nesting to base their dt calculations on dt values computed at a different
+/// use the dt_store pointer.  InstrumentedStepper enables steppers at one layer
+/// of nesting to base their dt calculations on dt values computed at a different
 /// layer of nesting.
 class InstrumentedBlock : public StepperBlock
 {
 public:
+  /// dt_store is an address at which the stepper will store the dt value
+  /// returned by the underlying stepper (as set by setStepper).  If null, the
+  /// stepper will allocate its own storage internally and the address can be
+  /// fetched via a call to dtPtr.
   InstrumentedBlock(Real * dt_store = nullptr);
   virtual ~InstrumentedBlock();
   virtual Real next(const StepperInfo & si, StepperFeedback & sf);
@@ -164,8 +227,8 @@ private:
 
 /// Uses an underlying stepper to compute dt.  If the actuall simulation-used
 /// previous dt was not what the underlying stepper returned on the prior call
-/// to advance and the current sim time is different than on the prior call to advance,
-/// this stepper returns/retries that dt value.
+/// to advance and the current sim time is different than on the prior call to
+/// advance, this stepper returns/retries that dt value.
 class RetryUnusedBlock : public StepperBlock
 {
 public:
@@ -189,7 +252,10 @@ private:
 class ConstrFuncBlock : public StepperBlock
 {
 public:
-  ConstrFuncBlock(StepperBlock * s, std::function<Real(Real)> func, Real max_diff);
+  /// The dt from calling s->next is repeatedly divided by two until
+  /// "func(t_curr + dt) - func(t_curr) <= max_diff".
+  ConstrFuncBlock(StepperBlock * s, std::function<Real(Real)> func,
+                  Real max_diff);
   virtual Real next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
@@ -206,7 +272,8 @@ public:
   /// If interpolate is false, then this finds the pair of values in the times
   /// vector that the current simulation time resides between and returns the dt
   /// at the index of the lower bound.
-  PiecewiseBlock(std::vector<Real> times, std::vector<Real> dts, bool interpolate = true);
+  PiecewiseBlock(std::vector<Real> times, std::vector<Real> dts,
+                 bool interpolate = true);
   virtual Real next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
@@ -216,11 +283,10 @@ private:
   LinearInterpolation _lin;
 };
 
-/// Returns the smaller of two dt's from two underlying steppers
-/// (one of them preferred).
-/// It returns the preferred stepper's dt if "dt_preferred - tolerance <
-/// dt_alternate".
-/// Otherwise it returns the alternate stepper's dt.
+/// Returns the smaller of two dt's from two underlying steppers (one of
+/// them preferred).  It returns the preferred stepper's dt if
+/// "dt_preferred - tolerance < dt_alternate". Otherwise it returns the
+/// alternate stepper's dt.
 class MinOfBlock : public StepperBlock
 {
 public:
@@ -237,15 +303,14 @@ private:
 /// Computes dt adaptively based on the number of linear and non-linear
 /// iterations that were required to converge on the most recent solve.  Too
 /// many iterations results in dt contraction, too few iterations results in dt
-/// growth.
-/// For algorithm details, read the code.
+/// growth.  For algorithm details, read the code.
 class AdaptiveBlock : public StepperBlock
 {
 public:
   /// shrink_factor must be between 0 and 1.0.  growth_factor must be greater
   /// than or equal to 1.0.
-  AdaptiveBlock(unsigned int optimal_iters, unsigned int iter_window, Real lin_iter_ratio,
-                Real shrink_factor, Real growth_factor);
+  AdaptiveBlock(unsigned int optimal_iters, unsigned int iter_window,
+                Real lin_iter_ratio, Real shrink_factor, Real growth_factor);
   virtual Real next(const StepperInfo & si, StepperFeedback & sf);
 
 private:
@@ -275,9 +340,8 @@ private:
 };
 
 /// Uses the error between a predictor's solution and the actual last solution
-/// to compute adjustments to dt.
-/// In order to use this stepper, an appropriate predictor must have been added
-/// to the simulation problem.
+/// to compute adjustments to dt.  In order to use this stepper, an
+/// appropriate predictor must have been added to the simulation problem.
 class PredictorCorrectorBlock : public StepperBlock
 {
 public:
@@ -297,10 +361,21 @@ private:
   std::string _time_integrator;
 };
 
-// TODO: need mechanism for telling executioner to not output data for "intermediate" solve/time steps
+/// Calculates dt by directing a sequence of solves that divide the region
+/// between times a and b into first one time step starting at t=a (dt=b-a) and
+/// then two time steps starting at t=a (dt=(b-a)/2).  The norm of the
+/// difference between the two resulting solutions at t=b is used to adjust the
+/// time step to determine a new a/b time window.
 class DT2Block : public StepperBlock
 {
 public:
+  /// Simulation time is considered at the a/b time window end/mid points if it
+  /// is within time_tol of the calculated values for those times.  e_tol is the
+  /// target error between the smaller and larger time step solutions.  e_max is
+  /// the error between the smaller and larger time step solutions above which
+  /// the solution is considered not converged and a rewind is performed to the
+  /// start of the window and the b endpoint of the window is shrunk by a factor
+  /// of two.
   DT2Block(Real time_tol, Real e_tol, Real e_max, int integrator_order);
   virtual Real next(const StepperInfo & si, StepperFeedback & sf);
 
@@ -317,4 +392,4 @@ private:
   std::unique_ptr<NumericVector<Number>> _big_soln;
 };
 
-#endif //STEPPERBLOCK_H
+#endif // STEPPERBLOCK_H
