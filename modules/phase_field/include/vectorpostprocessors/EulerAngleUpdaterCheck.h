@@ -21,7 +21,9 @@ template<>
 InputParameters validParams<EulerAngleUpdaterCheck>();
 
 /**
- * Update Euler angles of each grains after rigid body rotation
+ * This is a unit test to check the correctness of the updated euler angles
+ * An unit vector is rotated as per old euler angles first and then due to the applied torque
+ * The final rotated vector is cross checked with the rotated vector as per updated euler angles
  */
 class EulerAngleUpdaterCheck : public GeneralVectorPostprocessor
 {
