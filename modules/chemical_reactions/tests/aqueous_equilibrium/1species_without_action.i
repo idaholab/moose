@@ -1,3 +1,7 @@
+# Simple equilibrium reaction example.
+# This simulation is identical to 1species.i, but explicitly includes the AuxVariables,
+# AuxKernels, and Kernels that the action in 1species.i adds
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -26,6 +30,18 @@
     order = FIRST
     family = LAGRANGE
   [../]
+  [./pa2]
+  [../]
+[]
+
+[AuxKernels]
+  [./pa2eq]
+    type = AqueousEquilibriumRxnAux
+    variable = pa2
+    v = a
+    sto_v = 2
+    log_k = 1
+  [../]
 []
 
 [ICs]
@@ -33,16 +49,6 @@
     type = FunctionIC
     variable = pressure
     function = 2-x
-  [../]
-[]
-
-[ReactionNetwork]
-  primary_species = a
-  [./AqueousEquilibriumReactions]
-    primary_species = a
-    reactions = '2a = pa2 1'
-    secondary_species = pa2
-    pressure = pressure
   [../]
 []
 
@@ -58,6 +64,34 @@
   [./a_conv]
     type = PrimaryConvection
     variable = a
+    p = pressure
+  [../]
+  [./aeq]
+    type = CoupledBEEquilibriumSub
+    variable = a
+    v = ''
+    log_k = 1
+    weight = 2
+    sto_v = ''
+    sto_u = 2
+  [../]
+  [./adiff]
+    type = CoupledDiffusionReactionSub
+    variable = a
+    v = ''
+    log_k = 1
+    weight = 2
+    sto_v = ''
+    sto_u = 2
+  [../]
+  [./aconv]
+    type = CoupledConvectionReactionSub
+    variable = a
+    v = ''
+    log_k = 1
+    weight = 2
+    sto_v = ''
+    sto_u = 2
     p = pressure
   [../]
 []

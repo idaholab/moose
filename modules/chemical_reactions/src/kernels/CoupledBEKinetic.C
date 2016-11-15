@@ -39,8 +39,3 @@ Real CoupledBEKinetic::computeQpResidual()
 
   return _porosity[_qp] * _test[_i][_qp] * assemble_conc;
 }
-
-Real CoupledBEKinetic::computeQpJacobian()
-{
-  return 0.0;
-}

@@ -12,8 +12,8 @@ InputParameters validParams<CoupledDiffusionReactionSub>()
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("weight", 1.0, "Weight of equilibrium species concentration in the primary species concentration");
   params.addParam<Real>("log_k", 0.0, "Equilibrium constant of the equilbrium reaction in dissociation form");
-  params.addParam<Real>("sto_u", 1.0, "Stochiometric coef of the primary species this kernel operates on in the equilibrium reaction");
-  params.addRequiredParam<std::vector<Real> >("sto_v", "The stochiometric coefficients of coupled primary species");
+  params.addParam<Real>("sto_u", 1.0, "Stoichiometric coef of the primary species this kernel operates on in the equilibrium reaction");
+  params.addRequiredParam<std::vector<Real> >("sto_v", "The stoichiometric coefficients of coupled primary species");
   params.addCoupledVar("v", "List of coupled primary species in this equilibrium species");
   return params;
 }
@@ -45,7 +45,7 @@ Real CoupledDiffusionReactionSub::computeQpResidual()
   for (unsigned int i = 0; i < _vals.size(); ++i)
     diff1 *= std::pow((*_vals[i])[_qp], _sto_v[i]);
 
-  RealGradient diff2_sum;
+  RealGradient diff2_sum = 0.0;
   const Real d_val = std::pow(_u[_qp],_sto_u);
   for (unsigned int i = 0; i < _vals.size(); ++i)
   {
@@ -58,7 +58,7 @@ Real CoupledDiffusionReactionSub::computeQpResidual()
     diff2_sum += diff2;
   }
 
-  return  _weight*std::pow(10.0, _log_k) * _diffusivity[_qp] * _grad_test[_i][_qp] * (diff1 + diff2_sum);
+  return  _weight * std::pow(10.0, _log_k) * _diffusivity[_qp] * _grad_test[_i][_qp] * (diff1 + diff2_sum);
 }
 
 Real CoupledDiffusionReactionSub::computeQpJacobian()
@@ -73,11 +73,11 @@ Real CoupledDiffusionReactionSub::computeQpJacobian()
 
   RealGradient diff1 = diff1_1 + diff1_2;
   Real d_val = _sto_u * std::pow(_u[_qp], _sto_u - 1.0) * _phi[_j][_qp];
-  RealGradient diff2_sum;
+  RealGradient diff2_sum = 0.0;
   for (unsigned int i = 0; i < _vals.size(); ++i)
   {
     RealGradient diff2 = d_val * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
-    for (unsigned int j=0; j<_vals.size(); ++j)
+    for (unsigned int j = 0; j < _vals.size(); ++j)
       if (j != i)
         diff2 *= std::pow((*_vals[j])[_qp], _sto_v[j]);
 
@@ -120,20 +120,20 @@ Real CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
       diff2 *= std::pow((*_vals[i])[_qp], _sto_v[i]);
 
   RealGradient diff3;
-  RealGradient diff3_sum;
+  RealGradient diff3_sum = 0.0;
   Real val_jvar;
   unsigned int var = 0;
   for (unsigned int i = 0; i < _vals.size(); ++i)
     if (jvar == _vars[i])
     {
       var = i;
-      val_jvar = val_u*_sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * _phi[_j][_qp];
+      val_jvar = val_u * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * _phi[_j][_qp];
     }
 
   for (unsigned int i = 0; i < _vals.size(); ++i)
     if (i != var)
     {
-      diff3 = val_jvar*_sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
+      diff3 = val_jvar * _sto_v[i] * std::pow((*_vals[i])[_qp], _sto_v[i] - 1.0) * (*_grad_vals[i])[_qp];
 
       for (unsigned int j = 0; j < _vals.size(); ++j)
         if (j != var && j != i)
