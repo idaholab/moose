@@ -11,7 +11,7 @@ template<>
 InputParameters validParams<PorousFlowPorosityHM>()
 {
   InputParameters params = validParams<PorousFlowPorosityBase>();
-  params.addRequiredParam<Real>("porosity_zero", "The porosity at zero volumetric strain and zero effective porepressure");
+  params.addRequiredCoupledVar("porosity_zero", "The porosity at zero volumetric strain and zero effective porepressure");
   params.addRangeCheckedParam<Real>("biot_coefficient", 1, "biot_coefficient>=0 & biot_coefficient<=1", "Biot coefficient");
   params.addRequiredRangeCheckedParam<Real>("solid_bulk", "solid_bulk>0", "Bulk modulus of the drained porous solid skeleton");
   params.addRequiredCoupledVar("displacements", "The solid-mechanics displacement variables");
@@ -22,7 +22,7 @@ InputParameters validParams<PorousFlowPorosityHM>()
 PorousFlowPorosityHM::PorousFlowPorosityHM(const InputParameters & parameters) :
     PorousFlowPorosityBase(parameters),
 
-    _phi0(getParam<Real>("porosity_zero")),
+    _phi0(coupledValue("porosity_zero")),
     _biot(getParam<Real>("biot_coefficient")),
     _solid_bulk(getParam<Real>("solid_bulk")),
     _coeff((_biot - 1.0) / _solid_bulk),
@@ -45,8 +45,8 @@ PorousFlowPorosityHM::PorousFlowPorosityHM(const InputParameters & parameters) :
 void
 PorousFlowPorosityHM::initQpStatefulProperties()
 {
-  _porosity_nodal[_qp] = _phi0;
-  _porosity_qp[_qp] = _phi0;
+  _porosity_nodal[_qp] = _phi0[_qp];
+  _porosity_qp[_qp] = _phi0[_qp];
 }
 
 void
@@ -58,8 +58,8 @@ PorousFlowPorosityHM::computeQpProperties()
   // stored at the quadpoint) actually uses the strain at the quadpoint.  This
   // is OK for LINEAR elements, as strain is constant over the element anyway.
 
-  _porosity_nodal[_qp] = _biot + (_phi0 - _biot) * std::exp(-_vol_strain_qp[_qp] + _coeff * _pf_nodal[_qp]);
-  _porosity_qp[_qp] = _biot + (_phi0 - _biot) * std::exp(-_vol_strain_qp[_qp] + _coeff * _pf_qp[_qp]);
+  _porosity_nodal[_qp] = _biot + (_phi0[_qp] - _biot) * std::exp(-_vol_strain_qp[_qp] + _coeff * _pf_nodal[_qp]);
+  _porosity_qp[_qp] = _biot + (_phi0[_qp] - _biot) * std::exp(-_vol_strain_qp[_qp] + _coeff * _pf_qp[_qp]);
 
   _dporosity_qp_dvar[_qp].resize(_num_var);
   _dporosity_nodal_dvar[_qp].resize(_num_var);

@@ -31,7 +31,7 @@ protected:
   virtual void computeQpProperties() override;
 
   /// porosity at zero strain and zero porepressure
-  const Real _phi0;
+  const VariableValue & _phi0;
 
   /// biot coefficient
   const Real _biot;

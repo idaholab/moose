@@ -31,7 +31,7 @@ protected:
   virtual void computeQpProperties() override;
 
   /// porosity at zero strain and zero temperature
-  const Real _phi0;
+  const VariableValue & _phi0;
 
   /// thermal expansion coefficient of the solid porous skeleton
   const Real _exp_coeff;
