@@ -333,13 +333,17 @@ Transient::computeDT(bool first)
       for (auto val : _app.getOutputWarehouse().getSyncTimes())
         sync_times.push_back(val);
 
-      // these are global/sim constraints for *EVERY* time inner:
+      // these are global/sim constraints for *every* time stepper:
       inner = BaseStepper::dtLimit(inner, dtMin(), dtMax());
       if (sync_times.size() > 0)
         inner = BaseStepper::min(BaseStepper::fixedTimes(sync_times, timestepTol()), inner, timestepTol());
       if (!_app.halfTransient())
         inner = BaseStepper::bounds(inner, getStartTime(), endTime());
       _stepper.reset(inner);
+    }
+    else
+    {
+      mooseDoOnce(mooseWarning("the time stepper used is based on deprecated functionality"));
     }
   }
 
