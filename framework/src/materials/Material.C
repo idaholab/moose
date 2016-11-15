@@ -60,7 +60,7 @@ Material::Material(const InputParameters & parameters) :
     BoundaryRestrictable(parameters, blockIDs(), false), // false for being _not_ nodal
     SetupInterface(this),
     Coupleable(this, false),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     ScalarCoupleable(this),
     FunctionInterface(this),
     UserObjectInterface(this),

@@ -34,7 +34,7 @@ InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>()
 
 MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters) :
     MultiAppTransfer(parameters),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     _postprocessor_name(getParam<PostprocessorName>("postprocessor")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {

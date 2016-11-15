@@ -17,14 +17,19 @@
 
 #include <set>
 #include <vector>
+#include <string>
 
 // Forward declarations
 class MooseVariable;
+class MooseObject;
+
 
 class MooseVariableDependencyInterface
 {
 public:
   MooseVariableDependencyInterface();
+  MooseVariableDependencyInterface(const MooseObject * moose_object);
+
 
   /**
    * Retrieve the set of MooseVariables that _this_ object depends on.
@@ -43,6 +48,9 @@ protected:
   ///@}
 
 private:
+
+  /// Name of the object (for error messages)
+  const std::string _mvdi_name;
 
   /// The set of variables that this object depends on.
   std::set<MooseVariable *> _moose_variable_dependencies;

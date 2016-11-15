@@ -40,7 +40,7 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters) :
     PostprocessorInterface(this),
     Coupleable(this, false),
     ScalarCoupleable(this),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     MooseVariableInterface(this, false),
     MaterialPropertyInterface(this),
     ZeroInterface(parameters),

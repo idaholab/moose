@@ -26,7 +26,7 @@ InputParameters validParams<FeatureVolumeVectorPostprocessor>()
 
 FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(const InputParameters & parameters) :
     GeneralVectorPostprocessor(parameters),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     _single_feature_per_elem(getParam<bool>("single_feature_per_element")),
     _feature_counter(getUserObject<FeatureFloodCount>("flood_counter")),
     _var_num(declareVector("var_num")),

@@ -13,9 +13,17 @@
 /****************************************************************/
 
 #include "MooseVariableDependencyInterface.h"
+#include "MooseObject.h"
 #include "MooseError.h"
 
 MooseVariableDependencyInterface::MooseVariableDependencyInterface() :
+    _variable_dependency_added(false)
+{
+  mooseDeprecated("The constructor for MooseVariableDependencyInterface has been updated to accept the MooseObject as an argument.");
+}
+
+MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject * moose_object) :
+    _mvdi_name(moose_object->name()),
     _variable_dependency_added(false)
 {
 }
@@ -24,7 +32,7 @@ const std::set<MooseVariable *> &
 MooseVariableDependencyInterface::getMooseVariableDependencies()
 {
   if (!_variable_dependency_added)
-    mooseError("An object inheriting from MooseVariableDependencyInterface failed to add any variable dependencies, the 'addMooseVariableDependency' method must be called.");
+    mooseError("The object " << _mvdi_name << " is inheriting from MooseVariableDependencyInterface failed to add any variable dependencies, the 'addMooseVariableDependency' method must be called.");
 
   return _moose_variable_dependencies;
 }

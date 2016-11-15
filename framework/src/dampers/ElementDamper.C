@@ -32,7 +32,7 @@ InputParameters validParams<ElementDamper>()
 
 ElementDamper::ElementDamper(const InputParameters & parameters) :
     Damper(parameters),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     MaterialPropertyInterface(this),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),

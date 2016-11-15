@@ -39,6 +39,7 @@ Marker::Marker(const InputParameters & parameters) :
     BlockRestrictable(parameters),
     SetupInterface(this),
     DependencyResolverInterface(),
+    MooseVariableDependencyInterface(this),
     UserObjectInterface(this),
     Restartable(parameters, "Markers"),
     PostprocessorInterface(this),

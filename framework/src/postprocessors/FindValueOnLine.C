@@ -33,7 +33,7 @@ InputParameters validParams<FindValueOnLine>()
 FindValueOnLine::FindValueOnLine(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
     Coupleable(this, false),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     _start_point(getParam<Point>("start_point")),
     _end_point(getParam<Point>("end_point")),
     _length((_end_point - _start_point).norm()),

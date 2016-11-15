@@ -29,7 +29,7 @@ InternalSideUserObject::InternalSideUserObject(const InputParameters & parameter
     BlockRestrictable(parameters),
     TwoMaterialPropertyInterface(this, blockIDs()),
     NeighborCoupleable(this, false, false),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
     PostprocessorInterface(this),

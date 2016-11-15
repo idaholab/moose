@@ -36,7 +36,7 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters) :
     MaterialPropertyInterface(this, blockIDs()),
     UserObjectInterface(this),
     Coupleable(this, false),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     TransientInterface(this),
     PostprocessorInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, false),

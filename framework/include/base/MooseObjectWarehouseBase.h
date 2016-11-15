@@ -525,7 +525,7 @@ MooseObjectWarehouseBase<T>::sortHelper(std::vector<std::shared_ptr<T>> & object
     return;
 
   // Make sure the object is sortable
-  mooseAssert(std::dynamic_pointer_cast<DependencyResolverInterface>(objects[0]), "Objects must inhert from DependencyResolverInterface to be sorted.");
+  mooseAssert(std::dynamic_pointer_cast<DependencyResolverInterface>(objects[0]), "Objects must inherit from DependencyResolverInterface to be sorted.");
 
   try
   {

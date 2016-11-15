@@ -27,7 +27,7 @@ InputParameters validParams<ElementalVariableValue>()
 
 ElementalVariableValue::ElementalVariableValue(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
     _element(_mesh.getMesh().query_elem_ptr(parameters.get<unsigned int>("elementid")))
