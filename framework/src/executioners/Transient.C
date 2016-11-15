@@ -12,8 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#define USE_NEW_STEPPER true
-
 #include "Transient.h"
 
 // MOOSE includes
@@ -149,7 +147,7 @@ Transient::Transient(const InputParameters & parameters) :
     _soln_aux(declareRestartableData<std::vector<Real> >("soln_aux", std::vector<Real>())),
     _soln_predicted(declareRestartableData<std::vector<Real> >("soln_predicted", std::vector<Real>())),
     _prev_dt(declareRestartableData<Real>("prev_dt", 0)),
-    _si({})
+    _si()
 {
   _problem.getNonlinearSystem().setDecomposition(_splitting);
   _t_step = 0;
@@ -313,18 +311,8 @@ Transient::updateStepperInfo(bool first)
 
   if (first)
     _si.pushHistory(_prev_dt, true, 0);
-  _si.update(
-    _steps_taken,
-    _time,
-    _dt,
-    _nl_its,
-    _l_its,
-    _last_solve_converged,
-    _solve_time,
-    _soln_nonlin,
-    _soln_aux,
-    _soln_predicted
-  );
+  _si.update(_steps_taken, _time, _dt, _nl_its, _l_its, _last_solve_converged,
+             _solve_time, _soln_nonlin, _soln_aux, _soln_predicted);
 
   _prev_dt = _si.dt(); // for restart
 };
@@ -501,10 +489,10 @@ Transient::solveStep(Real input_dt)
 
   timeval solve_start;
   timeval solve_end;
-  gettimeofday(&solve_start, NULL);
+  gettimeofday(&solve_start, nullptr);
 
   _time_stepper->step();
-  gettimeofday(&solve_end, NULL);
+  gettimeofday(&solve_end, nullptr);
   _solve_time = (static_cast<Real>(solve_end.tv_sec  - solve_start.tv_sec) +
                                              static_cast<Real>(solve_end.tv_usec - solve_start.tv_usec)*1.e-6);
   _last_solve_converged = lastSolveConverged(); // this here because endStep is not called (e.g. multiapps)
@@ -617,7 +605,7 @@ Transient::computeConstrainedDT()
   std::ostringstream diag;
 
   //After startup steps, compute new dt
-  if (_t_step > _n_startup_steps || (_stepper && USE_NEW_STEPPER))
+  if (_t_step > _n_startup_steps || _stepper)
     dt_cur = getDT();
   else
   {
@@ -732,7 +720,7 @@ Transient::computeConstrainedDT()
 Real
 Transient::getDT()
 {
-  if (_stepper && USE_NEW_STEPPER)
+  if (_stepper)
     return _new_dt;
   return _time_stepper->getCurrentDT();
 }

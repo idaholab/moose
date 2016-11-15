@@ -30,7 +30,8 @@ StepperInfo::StepperInfo()
     _rewind_time(-1),
     _dummy_comm()
 {
-  for (int i = 0; i < 3; i++)
+  const unsigned int max_history = 3;
+  for (unsigned int i = 0; i < max_history; i++)
   {
     _dt.push_front(0);
     _converged.push_front(true);
@@ -157,35 +158,22 @@ StepperInfo::time()
   return _time;
 }
 
-template <typename T>
-T nth_elem(std::list<T>& lst, int n)
-{
-  int i = 0;
-  for (auto it = lst.begin(); it != lst.end(); ++it)
-  {
-    if (i == n)
-      return *it;
-    i++;
-  }
-  mooseError("too old history value requested from StepperInfo");
-}
-
 Real
 StepperInfo::dt(int n)
 {
-  return nth_elem(_dt, n);
+  return _dt[n];
 }
 
 bool
 StepperInfo::converged(int n)
 {
-  return nth_elem(_converged, n);
+  return _converged[n];
 }
 
 Real
 StepperInfo::solveTimeSecs(int n)
 {
-  return nth_elem(_solve_time_secs, n);
+  return _solve_time_secs[n];
 }
 
 int
@@ -402,7 +390,8 @@ RootBlock::next(StepperInfo & si)
 ModBlock::ModBlock(StepperBlock * s,
                    std::function<
                        Real(StepperInfo & si, Real dt)> func)
-  : _stepper(s), _func(func)
+  : _stepper(s),
+    _func(func)
 {
 }
 
@@ -414,7 +403,9 @@ ModBlock::next(StepperInfo & si)
 
 IfBlock::IfBlock(StepperBlock * on_true, StepperBlock * on_false,
                  std::function<bool(StepperInfo &)> func)
-  : _ontrue(on_true), _onfalse(on_false), _func(func)
+  : _ontrue(on_true),
+    _onfalse(on_false),
+    _func(func)
 {
 }
 
@@ -429,7 +420,9 @@ IfBlock::next(StepperInfo & si)
 
 
 InstrumentedBlock::InstrumentedBlock(Real * dt_store)
-  : _stepper(nullptr), _dt_store(dt_store), _own(!dt_store)
+  : _stepper(nullptr),
+    _dt_store(dt_store),
+    _own(!dt_store)
 {
   if (!_dt_store)
     _dt_store = new Real(0);
@@ -486,9 +479,11 @@ RetryUnusedBlock::next(StepperInfo & si)
   return _prev_dt;
 }
 
-ConstrFuncBlock::ConstrFuncBlock(StepperBlock * s, std::function<Real(Real)> func,
-                                 Real max_diff)
-  : _stepper(s), _func(func), _max_diff(max_diff)
+ConstrFuncBlock::ConstrFuncBlock(StepperBlock * s,
+                                 std::function<Real(Real)> func, Real max_diff)
+  : _stepper(s),
+    _func(func),
+    _max_diff(max_diff)
 {
 }
 
@@ -508,7 +503,10 @@ ConstrFuncBlock::next(StepperInfo & si)
 
 PiecewiseBlock::PiecewiseBlock(std::vector<Real> times, std::vector<Real> dts,
                                bool interpolate)
-  : _times(times), _dts(dts), _interp(interpolate), _lin(times, dts)
+  : _times(times),
+    _dts(dts),
+    _interp(interpolate),
+    _lin(times, dts)
 {
 }
 
@@ -528,7 +526,9 @@ PiecewiseBlock::next(StepperInfo & si)
 }
 
 MinOfBlock::MinOfBlock(StepperBlock * a, StepperBlock * b, Real tol)
-  : _a(a), _b(b), _tol(tol)
+  : _a(a),
+    _b(b),
+    _tol(tol)
 {
 }
 
@@ -578,7 +578,9 @@ AdaptiveBlock::next(StepperInfo & si)
 };
 
 SolveTimeAdaptiveBlock::SolveTimeAdaptiveBlock(int initial_direc, Real percent_change)
-  : _percent_change(percent_change), _direc(initial_direc), _n_steps(0)
+  : _percent_change(percent_change),
+    _direc(initial_direc),
+    _n_steps(0)
 {
 }
 

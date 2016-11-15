@@ -132,13 +132,8 @@ IterationAdaptiveDT::buildStepper()
 
   if (_adaptive_timestepping)
   {
-    stepper = new AdaptiveBlock(
-          _optimal_iterations,
-          _iteration_window,
-          _linear_iteration_ratio,
-          _cutback_factor, // shrink_factor
-          _growth_factor
-        );
+    stepper = new AdaptiveBlock(_optimal_iterations, _iteration_window, _linear_iteration_ratio,
+                                _cutback_factor, _growth_factor);
     if (use_time_ipol)
       stepper = BaseStepper::between(new PiecewiseBlock(time_list, dt_list), stepper, time_list, tol);
   }

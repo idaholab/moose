@@ -3572,9 +3572,7 @@ FEProblem::computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Nu
     _currently_computing_jacobian = true;
 
     execTransfers(EXEC_NONLINEAR);
-    printf("start exec multiapp\n");
     execMultiApps(EXEC_NONLINEAR);
-    printf("end exec multiapp\n");
 
     for (unsigned int tid = 0; tid < n_threads; tid++)
       reinitScalars(tid);
