@@ -110,6 +110,7 @@
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y'
     block = 1
+    eigenstrain_names = eigenstrain
   [../]
   [./stress] #We use linear elasticity
     type = ComputeLinearElasticStress
@@ -121,6 +122,7 @@
     temperature = T
     stress_free_temperature = 273
     block = 1
+    eigenstrain_name = eigenstrain
   [../]
 []
 

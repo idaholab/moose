@@ -21,7 +21,7 @@ public:
   Compute2DSmallStrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void computeQpProperties() override;
   virtual Real computeStrainZZ() = 0;
 };
 

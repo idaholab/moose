@@ -21,7 +21,7 @@ public:
   ComputeRSphericalSmallStrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void computeQpProperties() override;
 };
 
 #endif //COMPUTERSPHERICALSMALLSTRAIN_H

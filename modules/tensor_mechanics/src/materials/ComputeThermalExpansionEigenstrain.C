@@ -21,10 +21,10 @@ InputParameters validParams<ComputeThermalExpansionEigenstrain>()
 }
 
 ComputeThermalExpansionEigenstrain::ComputeThermalExpansionEigenstrain(const InputParameters & parameters) :
-    ComputeEigenstrainBase(parameters),
+    DerivativeMaterialInterface<ComputeEigenstrainBase>(parameters),
     _temperature(coupledValue("temperature")),
-    _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
-    _thermal_expansion_tensor(declareProperty<RankTwoTensor>(_base_name + "_thermal_expansion_tensor"))
+    _deigenstrain_dT(declarePropertyDerivative<RankTwoTensor>(_base_name + "d" + _eigenstrain_name + "_dtemperature",getVar("temperature",0)->name())),
+    _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff"))
 {
   if (isParamValid("stress_free_temperature"))
     _stress_free_temperature = getParam<Real>("stress_free_temperature");
@@ -40,6 +40,6 @@ ComputeThermalExpansionEigenstrain::computeQpEigenstrain()
   _eigenstrain[_qp].zero();
   _eigenstrain[_qp].addIa(_thermal_expansion_coeff * (_temperature[_qp] - _stress_free_temperature));
 
-  _thermal_expansion_tensor[_qp].zero();
-  _thermal_expansion_tensor[_qp].addIa(-_thermal_expansion_coeff);
+  _deigenstrain_dT[_qp].zero();
+  _deigenstrain_dT[_qp].addIa(-_thermal_expansion_coeff);
 }

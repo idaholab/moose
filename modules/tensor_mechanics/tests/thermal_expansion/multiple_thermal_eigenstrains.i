@@ -1,3 +1,9 @@
+# The primary purpose of this test is to verify that the ability to combine
+# multiple eigenstrains works correctly.  It should behave identically to the
+# constant_expansion_coeff.i model in this directory. Instead of applying the
+# thermal expansion in one eigenstrain, it splits that into two eigenstrains
+# that get added together.
+
 # This test involves only thermal expansion strains on a 2x2x2 cube of approximate
 # steel material.  An initial temperature of 25 degrees C is given for the material,
 # and an auxkernel is used to calculate the temperature in the entire cube to
@@ -5,8 +11,6 @@
 # temperature jumps, the temperature increases by 6.25C each timestep.
 # The thermal strain increment should therefore be
 #     6.25 C * 1.3e-5 1/C = 8.125e-5 m/m.
-
-# This test is also designed to be used to identify problems with restart files
 
 [Mesh]
   type = GeneratedMesh
@@ -16,13 +20,22 @@
   nz = 2
 []
 
-[Problem]
-  restart_file_base = constant_thermal_expan_only_cp/LATEST
-  force_restart = true
-[]
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
+  order = FIRST
+  family = LAGRANGE
+[]
+
+[Variables]
+  [./disp_x]
+  [../]
+
+  [./disp_y]
+  [../]
+
+  [./disp_z]
+  [../]
 []
 
 [AuxVariables]
@@ -33,12 +46,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./strain_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./strain_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -52,12 +63,9 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    strain = SMALL
-    incremental = true
-    add_variables = true
-    eigenstrain_names = eigenstrain
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
   [../]
 []
 
@@ -116,19 +124,36 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
+    block = 0
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
+  [./small_strain]
+    type = ComputeIncrementalSmallStrain
+    block = 0
+    eigenstrain_names = 'eigenstrain1 eigenstrain2'
+  [../]
   [./small_stress]
     type = ComputeFiniteStrainElasticStress
+    block = 0
   [../]
-  [./thermal_expansion_strain]
+  [./thermal_expansion_strain1]
     type = ComputeThermalExpansionEigenstrain
+    block = 0
     stress_free_temperature = 298
-    thermal_expansion_coeff = 1.3e-5
+    thermal_expansion_coeff = 1.0e-5
     temperature = temp
     incremental_form = true
-    eigenstrain_name = eigenstrain
+    eigenstrain_name = eigenstrain1
+  [../]
+  [./thermal_expansion_strain2]
+    type = ComputeThermalExpansionEigenstrain
+    block = 0
+    stress_free_temperature = 298
+    thermal_expansion_coeff = 0.3e-5
+    temperature = temp
+    incremental_form = true
+    eigenstrain_name = eigenstrain2
   [../]
 []
 
@@ -151,7 +176,7 @@
   l_tol = 1e-9
 
   start_time = 0.0
-  end_time = 0.1
+  end_time = 0.075
   dt = 0.0125
   dtmin = 0.0001
 []
@@ -160,7 +185,7 @@
  csv = true
  exodus = true
  checkpoint = true
- file_base = constant_thermal_expan_restart
+ file_base = multiple_thermal_eigenstrains
 []
 
 [Postprocessors]

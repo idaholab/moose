@@ -11,11 +11,8 @@
 template<>
 InputParameters validParams<ComputeIncrementalStrainBase>()
 {
-  InputParameters params = validParams<Material>();
-  params.addRequiredCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
+  InputParameters params = validParams<ComputeStrainBase>();
   params.addPrivateParam<bool>("stateful_deformation_gradient", false);
-  params.addParam<bool>("volumetric_locking_correction", true, "Flag to correct volumetric locking");
   return params;
 }
 
@@ -31,8 +28,11 @@ ComputeIncrementalStrainBase::ComputeIncrementalStrainBase(const InputParameters
     _deformation_gradient_old(_stateful_deformation_gradient ? &declarePropertyOld<RankTwoTensor>(_base_name + "deformation_gradient") : NULL),
     _mechanical_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "mechanical_strain")),
     _total_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "total_strain")),
-    _eigenstrain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment"))
+    _eigenstrains_old(_eigenstrain_names.size())
 {
+  for (unsigned int i = 0; i < _eigenstrains_old.size(); ++i)
+    _eigenstrains_old[i] = &getMaterialPropertyOld<RankTwoTensor>(_eigenstrain_names[i]);
+
   // fetch coupled variables and gradients (as stateful properties if necessary)
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
@@ -61,4 +61,14 @@ ComputeIncrementalStrainBase::initQpStatefulProperties()
   // setting it again when properties get computed.
   _rotation_increment[_qp].zero();
   _rotation_increment[_qp].addIa(1.0);
+}
+
+void
+ComputeIncrementalStrainBase::subtractEigenstrainIncrementFromStrain(RankTwoTensor & strain)
+{
+  for (unsigned int i = 0; i < _eigenstrains.size(); ++i)
+  {
+    strain -= (*_eigenstrains[i])[_qp];
+    strain += (*_eigenstrains_old[i])[_qp];
+  }
 }

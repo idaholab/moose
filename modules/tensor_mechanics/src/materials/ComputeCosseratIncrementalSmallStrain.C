@@ -71,7 +71,9 @@ ComputeCosseratIncrementalSmallStrain::computeQpProperties()
   const RankTwoTensor total_strain_increment = strain - strain_old;
 
   _strain_increment[_qp] = total_strain_increment;
-  _strain_increment[_qp] -= _eigenstrain_increment[_qp];
+
+  //Remove the eigenstrain increment
+  subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
 
   _strain_rate[_qp] = _strain_increment[_qp]/_dt;
 

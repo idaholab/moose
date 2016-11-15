@@ -24,19 +24,17 @@ Compute2DSmallStrain::Compute2DSmallStrain(const InputParameters & parameters) :
 }
 
 void
-Compute2DSmallStrain::computeProperties()
+Compute2DSmallStrain::computeQpProperties()
 {
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-  {
-    _total_strain[_qp](0,0) = (*_grad_disp[0])[_qp](0);
-    _total_strain[_qp](1,1) = (*_grad_disp[1])[_qp](1);
-    _total_strain[_qp](0,1) = ((*_grad_disp[0])[_qp](1) + (*_grad_disp[1])[_qp](0)) / 2.0;
-    _total_strain[_qp](1,0) = _total_strain[_qp](0,1);  //force the symmetrical strain tensor
-    _total_strain[_qp](2,2) = computeStrainZZ();
+  _total_strain[_qp](0,0) = (*_grad_disp[0])[_qp](0);
+  _total_strain[_qp](1,1) = (*_grad_disp[1])[_qp](1);
+  _total_strain[_qp](0,1) = ((*_grad_disp[0])[_qp](1) + (*_grad_disp[1])[_qp](0)) / 2.0;
+  _total_strain[_qp](1,0) = _total_strain[_qp](0,1);  //force the symmetrical strain tensor
+  _total_strain[_qp](2,2) = computeStrainZZ();
 
-    _mechanical_strain[_qp] = _total_strain[_qp];
+  _mechanical_strain[_qp] = _total_strain[_qp];
 
-    //Remove the eigenstrain
-    _mechanical_strain[_qp] -= _eigenstrain[_qp];
-  }
+  //Remove the eigenstrains
+  for (auto es : _eigenstrains)
+    _mechanical_strain[_qp] -= (*es)[_qp];
 }

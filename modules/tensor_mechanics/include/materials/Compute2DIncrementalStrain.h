@@ -25,7 +25,7 @@ protected:
   /// Computes the current and old deformation gradients with the assumptions for
   /// 2D geometries, including plane strain, generalized plane strain, and axisymmetric,
   /// and returns the total strain increment tensor
-  virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment);
+  virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment) override;
 
   /// Computes the current out-of-plane displacement gradient; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes

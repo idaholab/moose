@@ -68,6 +68,9 @@ protected:
 
   /// use displaced mesh (true unless _strain is SMALL)
   bool _use_displaced_mesh;
+
+  /// names of properties containing eigenstrain tensors to be applied in strain model
+  const std::vector<MaterialPropertyName> _eigenstrain_names;
 };
 
 #endif //TENSORMECHANICSACTION_H

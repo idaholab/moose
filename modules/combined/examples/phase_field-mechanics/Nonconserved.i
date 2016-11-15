@@ -123,11 +123,13 @@
     block = 0
     displacements = 'disp_x disp_y'
     base_name = phaseb
+    eigenstrain_names = eigenstrain
   [../]
   [./eigenstrain_b]
     type = ComputeEigenstrain
     base_name = phaseb
     eigen_base = '0.1 0.1 0.1'
+    eigenstrain_name = eigenstrain
   [../]
   [./stress_b]
     type = ComputeLinearElasticStress

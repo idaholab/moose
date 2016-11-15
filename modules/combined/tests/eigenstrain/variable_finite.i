@@ -34,7 +34,7 @@
   [../]
   [./c]
   [../]
-  [./eigen_strain_incr00]
+  [./eigenstrain00]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -73,10 +73,10 @@
     index_j = 1
     variable = stress11
   [../]
-  [./eigen_strain_incr00]
+  [./eigenstrain00]
     type = RankTwoAux
-    variable = eigen_strain_incr00
-    rank_two_tensor = stress_free_strain_increment
+    variable = eigenstrain00
+    rank_two_tensor = eigenstrain
     index_j = 0
     index_i = 0
   [../]
@@ -100,18 +100,20 @@
     enable_jit = true
     derivative_order = 2
   [../]
-  [./eigen_strain]
+  [./eigenstrain]
     type = ComputeVariableEigenstrain
     block = 0
     eigen_base = '1 1 1 0 0 0'
     args = c
     incremental_form = true
     prefactor = var_dep
+    eigenstrain_name = eigenstrain
   [../]
   [./strain]
     type = ComputeFiniteStrain
     block = 0
     displacements = 'disp_x disp_y'
+    eigenstrain_names = eigenstrain
   [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress

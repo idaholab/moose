@@ -35,7 +35,7 @@
     type = RankTwoAux
     execute_on = initial
     variable = s11
-    rank_two_tensor = stress_free_strain
+    rank_two_tensor = eigenstrain
     index_i = 0
     index_j = 0
   [../]
@@ -43,7 +43,7 @@
     type = RankTwoAux
     execute_on = initial
     variable = s22
-    rank_two_tensor = stress_free_strain
+    rank_two_tensor = eigenstrain
     index_i = 1
     index_j = 1
   [../]
@@ -95,6 +95,7 @@
     weights = 'weight1 weight2'
     args = c
     block = 0
+    eigenstrain_name = eigenstrain
   [../]
 []
 

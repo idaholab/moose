@@ -75,17 +75,17 @@
     variable = gb
     function = 'x0:=5.0;thk:=0.5;m:=2;r:=abs(x-x0);v:=exp(-(r/thk)^m);v'
   [../]
-  [./eigen_strain_xx]
+  [./eigenstrain_xx]
     type = RankTwoAux
     variable = eigen_strain_xx
-    rank_two_tensor = stress_free_strain
+    rank_two_tensor = eigenstrain
     index_i = 0
     index_j = 0
   [../]
-  [./eigen_strain_yy]
+  [./eigenstrain_yy]
     type = RankTwoAux
     variable = eigen_strain_yy
-    rank_two_tensor = stress_free_strain
+    rank_two_tensor = eigenstrain
     index_i = 1
     index_j = 1
   [../]
@@ -151,23 +151,25 @@
     gb_normal_tensor_name = gb_normal
     gb_tensor_prop_name = diffusivity
   [../]
-  [./eigen_strain_prefactor]
+  [./eigenstrain_prefactor]
     type = DerivativeParsedMaterial
     block = 0
     function = 'c-0.1'
     args = c
-    f_name = eigen_strain_prefactor
+    f_name = eigenstrain_prefactor
     derivative_order = 1
   [../]
-  [./eigen_strain]
+  [./eigenstrain]
     type = ComputeVariableBaseEigenStrain
     base_tensor_property_name = aniso_tensor
-    prefactor = eigen_strain_prefactor
+    prefactor = eigenstrain_prefactor
     incremental_form = true
+    eigenstrain_name = eigenstrain
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y'
+    eigenstrain_names = eigenstrain
   [../]
   [./stress]
     type = ComputeStrainIncrementBasedStress

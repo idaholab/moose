@@ -19,7 +19,9 @@ public:
   virtual ~ComputeIncrementalStrainBase() {}
 
 protected:
-  virtual void initQpStatefulProperties();
+  virtual void initQpStatefulProperties() override;
+
+  void subtractEigenstrainIncrementFromStrain(RankTwoTensor & strain);
 
   const bool _stateful_displacements;
   const bool _stateful_deformation_gradient;
@@ -36,7 +38,7 @@ protected:
   const MaterialProperty<RankTwoTensor> & _mechanical_strain_old;
   const MaterialProperty<RankTwoTensor> & _total_strain_old;
 
-  const MaterialProperty<RankTwoTensor> & _eigenstrain_increment;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains_old;
 };
 
 #endif //COMPUTEINCREMENTALSTRAINBASE_H

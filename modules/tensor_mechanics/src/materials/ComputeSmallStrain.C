@@ -33,6 +33,7 @@ ComputeSmallStrain::computeQpProperties()
 
   _mechanical_strain[_qp] = _total_strain[_qp];
 
-  //Remove the Eigen strain
-  _mechanical_strain[_qp] -= _eigenstrain[_qp];
+  //Remove the eigenstrains
+  for (auto es : _eigenstrains)
+    _mechanical_strain[_qp] -= (*es)[_qp];
 }

@@ -15,10 +15,10 @@
  */
 class ComputeCosseratIncrementalSmallStrain : public ComputeIncrementalStrainBase
 {
- public:
+public:
   ComputeCosseratIncrementalSmallStrain(const InputParameters & parameters);
 
- protected:
+protected:
   virtual void computeQpProperties();
 
   virtual void initQpStatefulProperties();
