@@ -11,22 +11,22 @@ template<>
 InputParameters validParams<PorousFlowPorosityConst>()
 {
   InputParameters params = validParams<PorousFlowPorosityBase>();
-  params.addRequiredParam<Real>("porosity", "The porosity, which is assumed constant for this material");
+  params.addRequiredCoupledVar("porosity", "The porosity (assumed constant for this material)");
   params.addClassDescription("This Material calculates the porosity assuming it is constant");
   return params;
 }
 
 PorousFlowPorosityConst::PorousFlowPorosityConst(const InputParameters & parameters) :
     PorousFlowPorosityBase(parameters),
-    _input_porosity(getParam<Real>("porosity"))
+    _input_porosity(coupledValue("porosity"))
 {
 }
 
 void
 PorousFlowPorosityConst::initQpStatefulProperties()
 {
-  _porosity_nodal[_qp] = _input_porosity;
-  _porosity_qp[_qp] = _input_porosity;
+  _porosity_nodal[_qp] = _input_porosity[_qp];
+  _porosity_qp[_qp] = _input_porosity[_qp];
 
   // The derivatives are zero for all time
   _dporosity_nodal_dvar[_qp].assign(_num_var, 0.0);
@@ -38,6 +38,6 @@ PorousFlowPorosityConst::initQpStatefulProperties()
 void
 PorousFlowPorosityConst::computeQpProperties()
 {
-  _porosity_nodal[_qp] = _input_porosity;
-  _porosity_qp[_qp] = _input_porosity;
+  _porosity_nodal[_qp] = _input_porosity[_qp];
+  _porosity_qp[_qp] = _input_porosity[_qp];
 }
