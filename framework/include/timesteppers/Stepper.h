@@ -125,9 +125,8 @@ private:
 /// A base class for time stepping algorithms for use in determining dt between
 /// time steps of a transient problem solution.  Implementations should strive
 /// to be immutable - facilitating easier restart/recovery and testing.  Some of
-/// the provided steppers, take StepperBlock* as arguments in their constructors
-/// -
-/// such steppers take ownership of the passed-in steppers' memory.
+/// the provided steppers take StepperBlock* as arguments in their constructors
+/// Such steppers take ownership of the passed-in steppers' memory.
 class StepperBlock
 {
 public:
@@ -135,9 +134,8 @@ public:
 
   virtual ~StepperBlock() = default;
 
-  /// Returns a value for dt to calculate the next time step.  Implementations
-  /// can assume si is not NULL.  Implementations of advance should strive to be
-  /// idempotent.
+  /// Returns a value for dt to calculate the next simulation time.  Implementations
+  /// of advance should strive to be idempotent.
   virtual Real next(StepperInfo & si) = 0;
 };
 
@@ -148,7 +146,8 @@ namespace BaseStepper
 /// Builds a stepper that always returns the same given dt.
 StepperBlock * constant(Real dt);
 /// Builds a stepper that always returns the previously used simulation dt.
-StepperBlock * prevdt();
+/// If n > 0, returns the nth dt before the previously used dt.
+StepperBlock * prevdt(int n = 0);
 /// Builds a stepper that returns dt in order to hit consecutive simulation
 /// times specified in times (in ascending order).  tol is an absolute time
 /// tolerance within which a time in the times vector is considered "satisfied"
@@ -166,8 +165,7 @@ StepperBlock * dtLimit(StepperBlock * s, Real min, Real max);
 /// Builds a stepper that returns the dt from calling s->next, modifying it if
 /// necessary to keep the simulation time within t_min and t_max.
 StepperBlock * bounds(StepperBlock * s, Real t_min, Real t_max);
-/// Builds a stepper that returns the dt from calling s->next multiplied by
-/// mult.
+/// Builds a stepper that returns the dt from calling s->next multiplied by mult.
 /// If s is null, then mult is applied to the previous simulation dt.
 StepperBlock * mult(Real mult, StepperBlock * s = nullptr);
 /// Builds a stepper that returns the dt from calling on->next when the
@@ -183,12 +181,10 @@ StepperBlock * between(StepperBlock * on, StepperBlock * between,
 StepperBlock * everyN(StepperBlock * nth, int every_n, int offset = 0,
                       StepperBlock * between = nullptr);
 /// Builds a stepper that returns the dt from calling initial->next for the
-/// first
-/// n time steps (i.e. StepperInfo.step_count) and the dt from calling
+/// first n time steps (i.e. StepperInfo.step_count) and the dt from calling
 /// primary->next after that.
 StepperBlock * initialN(StepperBlock * initial, StepperBlock * primary, int n);
-/// Builds a stepper that returns the dt from calling converged->next if the
-/// last
+/// Builds a stepper that returns the dt from calling converged->next if the last
 /// solve converged and returns the dt from calling not_converged->next
 /// otherwise.  If delay is true, then the solve prior to the last solve must
 /// have converged as well in order to call converged->next.
@@ -220,8 +216,8 @@ private:
 class ModBlock : public StepperBlock
 {
 public:
-  /// func is a (lambda) function that modifies the passed in dt suitably before
-  /// returning it.
+  /// func is a (lambda) function that modifies a passed in dt (generated
+  /// from calling s->next)  suitably before returning it.
   ModBlock(StepperBlock * s,
            std::function<Real(StepperInfo & si, Real dt)> func);
   virtual Real next(StepperInfo & si);
@@ -232,7 +228,9 @@ private:
 };
 
 /// Generic building block for representing steppers that call one of two
-/// underlying steppers based on some condition.
+/// underlying steppers based on some condition.  A condition function
+/// is queried on each call to next.  If it returns true, then one stepper is
+/// called, otherwise it calls an alternative stepper.
 class IfBlock : public StepperBlock
 {
 public:
@@ -254,8 +252,7 @@ private:
 /// The underlying stepper must be set via setStepper - this allows
 /// InstrumentedStepper to be created before other steppers which may want to
 /// use the dt_store pointer.  InstrumentedStepper enables steppers at one layer
-/// of nesting to base their dt calculations on dt values computed at a
-/// different
+/// of nesting to base their dt calculations on dt values computed at a different
 /// layer of nesting.
 class InstrumentedBlock : public StepperBlock
 {

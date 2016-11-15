@@ -241,11 +241,11 @@ BaseStepper::constant(Real dt)
 }
 
 StepperBlock *
-BaseStepper::prevdt()
+BaseStepper::prevdt(int n)
 {
   return new RootBlock([=](StepperInfo & si)
                        {
-                         return si.dt();
+                         return si.dt(n);
                        });
 }
 
