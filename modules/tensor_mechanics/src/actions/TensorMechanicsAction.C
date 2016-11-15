@@ -29,8 +29,8 @@ validParams<TensorMechanicsAction>()
   params.addParam<MooseEnum>("strain", strainType, "Strain formulation");
   params.addParam<bool>("incremental", "Use incremental or total strain");
 
-  MooseEnum PlanarFormulationType("NONE PLANE_STRESS PLANE_STRAIN GENERALIZED_PLANE_STRAIN", "NONE");
-  params.addParam<MooseEnum>("planar_formulation", PlanarFormulationType, "Out-of-plane stress/strain formulation");
+  MooseEnum planarFormulationType("NONE PLANE_STRESS PLANE_STRAIN GENERALIZED_PLANE_STRAIN", "NONE");
+  params.addParam<MooseEnum>("planar_formulation", planarFormulationType, "Out-of-plane stress/strain formulation");
 
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<bool>("volumetric_locking_correction", true, "Flag to correct volumetric locking");
@@ -45,6 +45,11 @@ validParams<TensorMechanicsAction>()
   params.addParam<std::vector<AuxVariableName>>("diag_save_in", "The displacement diagonal preconditioner terms");
   params.addParamNamesToGroup("block save_in diag_save_in", "Advanced");
 
+  // Output
+  MultiMooseEnum outputPropertiesType("strain_xx strain_yy strain_zz strain_xy strain_yz strain_zx "
+                                      "stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx");
+  params.addParam<MultiMooseEnum>("generate_output", outputPropertiesType, "Add scalar quantity output for stress and/or strain");
+
   return params;
 }
 
@@ -56,6 +61,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _save_in(getParam<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in(getParam<std::vector<AuxVariableName>>("diag_save_in")),
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
+    _subdomain_ids(),
     _strain(getParam<MooseEnum>("strain").getEnum<Strain>()),
     _planar_formulation(getParam<MooseEnum>("planar_formulation").getEnum<PlanarFormulation>()),
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names"))
@@ -111,6 +117,11 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
 
   if (_planar_formulation != PlanarFormulation::None)
     mooseError("Not implemented");
+
+  // generate output
+  auto go = getParam<MultiMooseEnum>("generate_output");
+  for (auto i = decltype(go.size())(0); i < go.size(); ++i)
+    _generate_output.push_back(go.get(i));
 }
 
 void
@@ -121,18 +132,23 @@ TensorMechanicsAction::act()
   //
 
   // get subdomain IDs
-  std::set<SubdomainID> subdomain_ids;
+  _subdomain_ids.clear();
   for (auto & name : _subdomain_names)
-    subdomain_ids.insert(_mesh->getSubdomainID(name));
+    _subdomain_ids.insert(_mesh->getSubdomainID(name));
 
   // use either block restriction list or list of all subdomains in the mesh
-  const auto & check_subdomains = subdomain_ids.empty() ? _problem->mesh().meshSubdomains() : subdomain_ids;
+  const auto & check_subdomains = _subdomain_ids.empty() ? _problem->mesh().meshSubdomains() : _subdomain_ids;
 
   // make sure all subdomains are using the same coordinate system
   _coord_system = _problem->getCoordSystem(*check_subdomains.begin());
   for (auto subdomain : check_subdomains)
     if (_problem->getCoordSystem(subdomain) != _coord_system)
       mooseError("The TensorMechanics action requires all subdomains to have the same coordinate system");
+
+  //
+  // Deal with the optional AuxVariable based tensor quantity output
+  //
+  actOutputGeneration();
 
   //
   // Meta action which optionally spawns other actions
@@ -158,7 +174,7 @@ TensorMechanicsAction::act()
   //
   // Add variables (optional)
   //
-  if (_current_task == "add_variable" && getParam<bool>("add_variables"))
+  else if (_current_task == "add_variable" && getParam<bool>("add_variables"))
   {
     // determine necessary order
     const bool second = _problem->mesh().hasSecondOrderElements();
@@ -170,7 +186,7 @@ TensorMechanicsAction::act()
       _problem->addVariable(disp,
                             FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
                                    Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                            1.0, subdomain_ids.empty() ? nullptr : &subdomain_ids);
+                            1.0, _subdomain_ids.empty() ? nullptr : &_subdomain_ids);
     }
   }
 
@@ -250,6 +266,68 @@ TensorMechanicsAction::act()
         params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
 
       _problem->addKernel(tensor_kernel_type, kernel_name, params);
+    }
+  }
+}
+
+void
+TensorMechanicsAction::actOutputGeneration()
+{
+  // table data for output generation
+  struct OutputData
+  {
+    std::string _variable, _auxkernel, _tensor;
+    std::pair<unsigned int, unsigned int> _index;
+  };
+  const std::vector<OutputData> data = {
+      {"strain_xx", "RankTwoAux", "total_strain", {0, 0}},
+      {"strain_yy", "RankTwoAux", "total_strain", {1, 1}},
+      {"strain_zz", "RankTwoAux", "total_strain", {2, 2}},
+      {"strain_xy", "RankTwoAux", "total_strain", {0, 1}},
+      {"strain_yz", "RankTwoAux", "total_strain", {1, 2}},
+      {"strain_zx", "RankTwoAux", "total_strain", {2, 0}},
+      {"stress_xx", "RankTwoAux", "stress", {0, 0}},
+      {"stress_yy", "RankTwoAux", "stress", {1, 1}},
+      {"stress_zz", "RankTwoAux", "stress", {2, 2}},
+      {"stress_xy", "RankTwoAux", "stress", {0, 1}},
+      {"stress_yz", "RankTwoAux", "stress", {1, 2}},
+      {"stress_zx", "RankTwoAux", "stress", {2, 0}}};
+
+  //
+  // Add variables (optional)
+  //
+  if (_current_task == "add_variable" && getParam<bool>("add_variables"))
+  {
+    // Loop through output aux variables
+    for (auto out : _generate_output)
+    {
+      // Create displacement variables
+      _problem->addAuxVariable(data[out]._variable,
+                               FEType(Utility::string_to_enum<Order>("CONSTANT"),
+                                      Utility::string_to_enum<FEFamily>("MONOMIAL")),
+                               _subdomain_ids.empty() ? nullptr : &_subdomain_ids);
+    }
+  }
+
+  //
+  // Add output AuxKernels
+  //
+  else if (_current_task == "add_aux_kernel")
+  {
+    // Loop through output aux variables
+    for (auto out : _generate_output)
+    {
+      auto type = data[out]._auxkernel;
+      auto variable = data[out]._variable;
+
+      InputParameters params = _factory.getValidParams(type);
+      params.set<AuxVariableName>("variable") = variable;
+      params.set<MaterialPropertyName>("rank_two_tensor") = data[out]._tensor;
+      params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+      params.set<unsigned int>("index_i") = data[out]._index.first;
+      params.set<unsigned int>("index_j") = data[out]._index.second;
+
+      _problem->addAuxKernel(type, variable, params);
     }
   }
 }

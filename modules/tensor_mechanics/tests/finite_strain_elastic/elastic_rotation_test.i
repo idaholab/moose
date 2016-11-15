@@ -13,8 +13,11 @@
   file = rotation_test.e
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Functions]
-  # Functions
   [./x_200]
     type = ParsedFunction
     vars = 'delta t0'
@@ -53,89 +56,11 @@
   [../]
 []
 
-[Variables]
-  # Variables
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-[AuxVariables]
-  active = ''
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
-  [../]
-[]
-
-[AuxKernels]
-  active = ''
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yz
-    index_i = 1
-    index_j = 2
-  [../]
-  [./stress_zx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zx
-    index_i = 2
-    index_j = 0
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
+    #generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
   [../]
 []
 
@@ -198,19 +123,11 @@
 []
 
 [Materials]
-  # Materials
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 1
-    displacements = 'disp_x disp_y disp_z'
-  [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
-    block = 1
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 1
     fill_method = symmetric9
     C_ijkl = '10.0e6  0.0   0.0 10.0e6  0.0  10.0e6 5e6 5e6 5e6'
   [../]
@@ -224,7 +141,6 @@
 []
 
 [Executioner]
-  # Executioner
   type = Transient
   solve_type = NEWTON
   petsc_options_iname = '-pc_type '
@@ -237,19 +153,6 @@
   end_time = 2.0
 []
 
-[Postprocessors]
-active = ''
-  [./stress_xx]
-    type = ElementAverageValue
-    variable = stress_xx
-  [../]
-  [./stress_yy]
-    type = ElementAverageValue
-    variable = stress_yy
-  [../]
-[]
-
 [Outputs]
   exodus = true
 []
-

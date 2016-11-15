@@ -12,18 +12,6 @@
   [../]
   [./resid_y]
   [../]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [Functions]
@@ -38,33 +26,7 @@
     strain = SMALL
     add_variables = true
     save_in = 'resid_x resid_y'
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    variable = stress_xx
-    rank_two_tensor = stress
-    index_j = 0
-    index_i = 0
-    execute_on = timestep_end
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    variable = stress_yy
-    rank_two_tensor = stress
-    index_j = 1
-    index_i = 1
-    execute_on = timestep_end
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    variable = stress_zz
-    rank_two_tensor = stress
-    index_j = 2
-    index_i = 2
-    execute_on = timestep_end
+    generate_output = 'stress_xx stress_yy stress_zz'
   [../]
 []
 
