@@ -3,7 +3,6 @@
     type = 'RunException'
     input = 'except1.i'
     expect_err = "LinearCombinationFunction: The number of functions must equal the number of w values"
-    max_parallel = 1
   [../]
   [./lcf1]
     type = 'CSVDiff'
