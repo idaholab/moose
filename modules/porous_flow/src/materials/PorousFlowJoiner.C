@@ -40,15 +40,13 @@ PorousFlowJoiner::PorousFlowJoiner(const InputParameters & parameters) :
     _dproperty_dvar(declareProperty<std::vector<std::vector<Real> > >("d" + _pf_prop + "_dvar"))
 {
   _phase_property.resize(_num_phases);
-  for (unsigned int ph = 0; ph < _num_phases; ++ph)
-    _phase_property[ph] = &getMaterialProperty<Real>(_pf_prop + Moose::stringify(ph));
-
-    _dphase_property_dp.resize(_num_phases);
-    _dphase_property_ds.resize(_num_phases);
-    _dphase_property_dt.resize(_num_phases);
+  _dphase_property_dp.resize(_num_phases);
+  _dphase_property_ds.resize(_num_phases);
+  _dphase_property_dt.resize(_num_phases);
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
+    _phase_property[ph] = &getMaterialProperty<Real>(_pf_prop + Moose::stringify(ph));
     _dphase_property_dp[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph), _pressure_variable_name);
     _dphase_property_ds[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph), _saturation_variable_name);
     _dphase_property_dt[ph] = &getMaterialPropertyDerivative<Real>(_pf_prop + Moose::stringify(ph), _temperature_variable_name);
@@ -59,12 +57,13 @@ void
 PorousFlowJoiner::initQpStatefulProperties()
 {
   _property[_qp].resize(_num_phases);
-  for (unsigned int ph = 0; ph < _num_phases; ++ph)
-    _property[_qp][ph] = (*_phase_property[ph])[_qp];
-
   _dproperty_dvar[_qp].resize(_num_phases);
+
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
+  {
+    _property[_qp][ph] = (*_phase_property[ph])[_qp];
     _dproperty_dvar[_qp][ph].resize(_num_var);
+  }
 }
 
 void
