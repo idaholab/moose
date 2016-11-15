@@ -20,15 +20,15 @@
 
 /**
  * The "SwapBackSentinel" class's destructor guarantees that
- * FEProblem::swapBackMaterials{Face,Neighbor}() is called even when
- * an exception is thrown from FEProblem::reinitMaterials{Face,Neighbor}.
+ * FEProblemBase::swapBackMaterials{Face,Neighbor}() is called even when
+ * an exception is thrown from FEProblemBase::reinitMaterials{Face,Neighbor}.
  * This is because stack unwinding (for caught exceptions) guarantees
  * that object destructors are called.  The typical way of using this
  * object is to construct it in the same scope where reinitMaterials
  * is called:
  *
  * {
- *   SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
+ *   SwapBackSentinel sentinel(_fe_problem, &FEProblemBase::swapBackMaterials, _tid);
  *   _fe_problem.reinitMaterials(_subdomain, _tid);
  * }
  */
@@ -36,17 +36,17 @@ class SwapBackSentinel
 {
 public:
   /**
-   * SwapBackFunction is a typedef for a pointer to an FEProblem
+   * SwapBackFunction is a typedef for a pointer to an FEProblemBase
    * member function taking a THREAD_ID and returning void.  All the
-   * FEProblem::swapBackMaterialXXX() members have this signature.
+   * FEProblemBase::swapBackMaterialXXX() members have this signature.
    */
-  using SwapBackFunction = void (FEProblem::*)(THREAD_ID);
+  using SwapBackFunction = void (FEProblemBase::*)(THREAD_ID);
 
   /**
-   * Constructor taking an FEProblem reference, a function to call,
+   * Constructor taking an FEProblemBase reference, a function to call,
    * and the THREAD_ID argument.
    */
-  SwapBackSentinel(FEProblem & fe_problem, SwapBackFunction func, THREAD_ID tid, bool predicate=true) :
+  SwapBackSentinel(FEProblemBase & fe_problem, SwapBackFunction func, THREAD_ID tid, bool predicate=true) :
       _fe_problem(fe_problem),
       _func(func),
       _thread_id(tid),
@@ -63,7 +63,7 @@ public:
   }
 
 private:
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   SwapBackFunction _func;
   THREAD_ID _thread_id;
   bool _predicate;

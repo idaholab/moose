@@ -79,7 +79,7 @@ ComputeIndicatorThread::onElement(const Elem *elem)
 
   // Set up Sentinel class so that, even if reinitMaterials() throws, we
   // still remember to swap back during stack unwinding.
-  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
+  SwapBackSentinel sentinel(_fe_problem, &FEProblemBase::swapBackMaterials, _tid);
 
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
@@ -157,10 +157,10 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
 
       // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
       // still remember to swap back during stack unwinding.
-      SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
+      SwapBackSentinel face_sentinel(_fe_problem, &FEProblemBase::swapBackMaterialsFace, _tid);
       _fe_problem.reinitMaterialsFace(block_id, _tid);
 
-      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
+      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblemBase::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
       const std::vector<MooseSharedPointer<InternalSideIndicator> > & indicators = _internal_side_indicators.getActiveBlockObjects(block_id, _tid);
