@@ -34,8 +34,3 @@ Real PrimaryConvection::computeQpJacobian()
 
   return _test[_i][_qp] * (_Darcy_vel * _grad_phi[_j][_qp]);
 }
-
-Real PrimaryConvection::computeQpOffDiagJacobian(unsigned int /*jvar*/)
-{
-  return 0.0;
-}

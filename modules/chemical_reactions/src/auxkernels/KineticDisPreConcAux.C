@@ -11,7 +11,7 @@ InputParameters validParams<KineticDisPreConcAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addParam<Real>("log_k", 0.0, "The equilibrium constant of the dissolution reaction");
-  params.addRequiredParam<std::vector<Real> >("sto_v", "The stochiometric coefficients of reactant species");
+  params.addRequiredParam<std::vector<Real> >("sto_v", "The stoichiometric coefficients of reactant species");
   params.addParam<Real>("r_area", 0.1, "Specific reactive surface area in m^2/L solution");
   params.addParam<Real>("ref_kconst", 6.456542e-8, "Kinetic rate constant in mol/m^2 s");
   params.addParam<Real>("e_act", 2.91e4, "Activation energy, J/mol");
@@ -47,7 +47,7 @@ KineticDisPreConcAux::computeValue()
 
   if (_vals.size())
   {
-    for (unsigned int i = 0; i<_vals.size(); ++i)
+    for (unsigned int i = 0; i < _vals.size(); ++i)
     {
       if ((*_vals[i])[_qp] < 0.0)
         omega *= std::pow(0.0, _sto_v[i]);

@@ -24,16 +24,15 @@ InputParameters validParams<DesorptionToPorespace>();
 class DesorptionToPorespace : public Kernel
 {
 public:
-
   DesorptionToPorespace(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// MOOSE internal variable number corresponding to the concentration in the matrix (needed for OffDiagJacobian)
-  unsigned int _conc_var;
+  const unsigned int _conc_var;
 
   /// mass flow rate from matrix = mass flow rate to porespace
   const MaterialProperty<Real> & _mass_rate_from_matrix;
