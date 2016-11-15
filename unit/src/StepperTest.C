@@ -225,7 +225,7 @@ StepperTest::DT2()
            << "\n";
         ss << "        dt  : want " << want_dts[j] << ", got " << si.dt()
            << "\n";
-        printf(ss.str().c_str());
+        Moose::out << ss.str();
         CPPUNIT_ASSERT(false);
       }
       else
@@ -317,7 +317,7 @@ StepperTest::tableTestBasic(BasicTest tests[], int n)
       {
         ss << "        dt  : want " << want_dts[j] << ", got " << si.dt()
            << "\n";
-        printf(ss.str().c_str());
+        Moose::out << ss.str();
         CPPUNIT_ASSERT(false);
       }
       else
