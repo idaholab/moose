@@ -29,8 +29,3 @@ PrimaryTimeDerivative::computeQpJacobian()
 {
   return _porosity[_qp] * TimeDerivative::computeQpJacobian();
 }
-
-Real PrimaryTimeDerivative::computeQpOffDiagJacobian(unsigned int /*jvar*/)
-{
-  return 0.0;
-}

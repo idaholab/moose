@@ -1,7 +1,0 @@
-[Tests]
-  [./2species]
-    type = 'Exodiff'
-    input = '2species.i'
-    exodiff = '2species_out.e'
-  [../]
-[]

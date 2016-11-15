@@ -14,7 +14,6 @@ class AddPrimarySpeciesAction;
 template<>
 InputParameters validParams<AddPrimarySpeciesAction>();
 
-
 class AddPrimarySpeciesAction : public Action
 {
 public:

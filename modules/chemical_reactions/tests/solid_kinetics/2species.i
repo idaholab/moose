@@ -7,7 +7,7 @@
 # kin_reactions = '(1.0)a+(1.0)b=mineral'
 #
 # where a and b are the primary species (reactants), mineral is the precipitate,
-# and the values in the parentheses are the stochiometric coefficients for each
+# and the values in the parentheses are the stoichiometric coefficients for each
 # species in the kinetic reaction.
 #
 # The SolidKineticReactions action creates all the required kernels and auxkernels

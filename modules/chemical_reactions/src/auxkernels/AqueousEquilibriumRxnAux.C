@@ -11,7 +11,7 @@ InputParameters validParams<AqueousEquilibriumRxnAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addParam< Real >("log_k", 0.0, "The equilibrium constant in dissociation form");
-  params.addRequiredParam<std::vector<Real> >("sto_v", "The stochiometric coefficient of reactants");
+  params.addRequiredParam<std::vector<Real> >("sto_v", "The stoichiometric coefficient of reactants");
   params.addCoupledVar("v", "The list of primary species participating in this equilibrium species");
   return params;
 }

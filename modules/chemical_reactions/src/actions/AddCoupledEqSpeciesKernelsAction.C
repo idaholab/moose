@@ -170,7 +170,7 @@ AddCoupledEqSpeciesKernelsAction::act()
     primary_participation[i].resize(n_reactions, false);
     for (unsigned int j = 0; j < n_reactions; ++j)
     {
-      for (unsigned int k=0; k < primary_species_involved[j].size(); ++k)
+      for (unsigned int k = 0; k < primary_species_involved[j].size(); ++k)
         if (primary_species_involved[j][k] == vars[i])
           primary_participation[i][j] = true;
 
@@ -178,7 +178,7 @@ AddCoupledEqSpeciesKernelsAction::act()
 
       if (primary_participation[i][j])
       {
-        for (unsigned int k=0; k < primary_species_involved[j].size(); ++k)
+        for (unsigned int k = 0; k < primary_species_involved[j].size(); ++k)
         {
           if (primary_species_involved[j][k] == vars[i])
           {
@@ -206,7 +206,7 @@ AddCoupledEqSpeciesKernelsAction::act()
   for (unsigned int i = 0; i < vars.size(); ++i)
   {
     //  Adding the coupled kernels if the primary species participates in this equilibrium reaction
-    for (unsigned int j=0; j < eq_const.size(); ++j)
+    for (unsigned int j = 0; j < eq_const.size(); ++j)
     {
       if (primary_participation[i][j])
       {
@@ -220,7 +220,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         params_sub.set<std::vector<VariableName> >("v") = coupled_v[i][j];
         _problem->addKernel("CoupledBEEquilibriumSub", vars[i] + "_" + eq_species[j] + "_sub", params_sub);
 
-        oss << vars[i]+"_"+eq_species[j]+"_sub" << "\n";
+        oss << vars[i] + "_" + eq_species[j] + "_sub" << "\n";
 
         InputParameters params_cd = _factory.getValidParams("CoupledDiffusionReactionSub");
         params_cd.set<NonlinearVariableName>("variable") = vars[i];
@@ -231,7 +231,7 @@ AddCoupledEqSpeciesKernelsAction::act()
         params_cd.set<std::vector<VariableName> >("v") = coupled_v[i][j];
         _problem->addKernel("CoupledDiffusionReactionSub", vars[i] + "_" + eq_species[j] + "_cd", params_cd);
 
-        oss << vars[i] + "_"+eq_species[j] + "_diff" << "\n";
+        oss << vars[i] + "_" + eq_species[j] + "_diff" << "\n";
 
         oss << "whether pressure is present" << _pars.isParamValid("pressure") << "\n";
 
@@ -253,7 +253,7 @@ AddCoupledEqSpeciesKernelsAction::act()
           params_conv.set<std::vector<VariableName> >("p") = press;
           _problem->addKernel("CoupledConvectionReactionSub", vars[i] + "_" + eq_species[j] + "_conv", params_conv);
 
-          oss << vars[i]+"_"+eq_species[j]+"_conv" << "\n";
+          oss << vars[i]  +"_" + eq_species[j] + "_conv" << "\n";
         }
       }
     }

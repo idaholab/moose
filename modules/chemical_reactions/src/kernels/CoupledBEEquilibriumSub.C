@@ -11,9 +11,9 @@ InputParameters validParams<CoupledBEEquilibriumSub>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("weight", 1.0, "The weight of the equilibrium species");
-  params.addParam<Real>("log_k", 0.0, "The equilibrium constaant of this equilibrium species in the dissociation reaction");
-  params.addParam<Real>("sto_u", 1.0, "The stochiometric coefficient of the primary variable this kernel operates on");
-  params.addRequiredParam<std::vector<Real> >("sto_v", "The stochiometric coefficients of coupled primary species");
+  params.addParam<Real>("log_k", 0.0, "The equilibrium constant of this equilibrium species in the dissociation reaction");
+  params.addParam<Real>("sto_u", 1.0, "The stoichiometric coefficient of the primary variable this kernel operates on");
+  params.addRequiredParam<std::vector<Real> >("sto_v", "The stoichiometric coefficients of coupled primary species");
   params.addCoupledVar("v", "Coupled primary species constituting the equilibrium species");
   return params;
 }

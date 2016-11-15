@@ -75,7 +75,7 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
           iss >> coef;
           stos[k] = coef;
           rxn_vars[k] = stos_vars[1];
-          _console << "stochiometric: " << stos[k] << "\t";
+          _console << "stoichiometric: " << stos[k] << "\t";
           _console << "reactant: " << rxn_vars[k] << "\n";
           // Check the participation of primary species
           if (rxn_vars[k] == _vars[i])
@@ -85,12 +85,12 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
           solid_kin_species[j] = stos_vars[0];
       }
 
-      // Done parsing, recorded stochiometric and variables into separate arrays
+      // Done parsing, recorded stoichiometric and variables into separate arrays
       _console << "whether primary present (0 is not): " << primary_participation[j] << "\n";
 
       if (primary_participation[j])
       {
-        // Assigning the stochiometrics based on parsing
+        // Assigning the stoichiometrics based on parsing
         for (unsigned int m = 0; m < rxn_vars.size(); ++m)
         {
           if (rxn_vars[m] == _vars[i])
