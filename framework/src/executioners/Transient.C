@@ -278,9 +278,9 @@ Transient::execute()
     preStep();
     computeDT(first);
     takeStep();
+
     _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
     _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
-
     _soln_nonlin.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
     _soln_aux.resize(_fe_problem.getAuxiliarySystem().currentSolution()->size());
     _fe_problem.getNonlinearSystem().currentSolution()->localize(_soln_nonlin);
@@ -462,7 +462,7 @@ Transient::solveStep(Real input_dt)
 
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_BEGIN, _picard_max_its == 1);
-  _last_solve_converged = lastSolveConverged(); // this here because endStep is not called (e.g. multiapps) and the early-return just below
+  _last_solve_converged = lastSolveConverged(); // this here because endStep is not always called (e.g. multiapps) and the early-return just below
 
   if (!_multiapps_converged)
     return;
