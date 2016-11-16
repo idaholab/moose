@@ -74,6 +74,8 @@
 #include "XFEMInterface.h"
 #include "ConsoleUtils.h"
 #include "NonlocalKernel.h"
+#include "NonlocalIntegratedBC.h"
+#include "ShapeElementUserObject.h"
 #include "ShapeSideUserObject.h"
 
 #include "libmesh/exodusII_io.h"
@@ -697,7 +699,7 @@ FEProblemBase::checkNonlocalCoupling()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    const KernelWarehouse & all_kernels = _nl.getKernelWarehouse();
+    const KernelWarehouse & all_kernels = _nl->getKernelWarehouse();
     const std::vector<MooseSharedPointer<KernelBase> > & kernels = all_kernels.getObjects(tid);
     for (const auto & kernel : kernels)
     {
@@ -709,7 +711,7 @@ FEProblemBase::checkNonlocalCoupling()
         _nonlocal_kernels.addObject(kernel, tid);
       }
     }
-    const MooseObjectWarehouse<IntegratedBC> & all_integrated_bcs = _nl.getIntegratedBCWarehouse();
+    const MooseObjectWarehouse<IntegratedBC> & all_integrated_bcs = _nl->getIntegratedBCWarehouse();
     const std::vector<MooseSharedPointer<IntegratedBC> > & integrated_bcs = all_integrated_bcs.getObjects(tid);
     for (const auto & integrated_bc : integrated_bcs)
     {
@@ -724,9 +726,8 @@ FEProblemBase::checkNonlocalCoupling()
   }
 }
 
-
 void
-FEProblem::checkUserObjectJacobianRequirement(THREAD_ID tid)
+FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
 {
   std::set<MooseVariable *> uo_jacobian_moose_vars;
   const std::vector<MooseSharedPointer<ElementUserObject> > & e_objects = _elemental_user_objects.getActiveObjects(tid);
@@ -3096,9 +3097,9 @@ FEProblemBase::setCouplingMatrix(CouplingMatrix * cm)
 void
 FEProblemBase::setNonlocalCouplingMatrix()
 {
-  unsigned int n_vars = _nl.nVariables();
+  unsigned int n_vars = _nl->nVariables();
   _nonlocal_cm.resize(n_vars);
-  const std::vector<MooseVariable *> & vars = _nl.getVariables(0);
+  const std::vector<MooseVariable *> & vars = _nl->getVariables(0);
   const std::vector<MooseSharedPointer<KernelBase> > & nonlocal_kernel = _nonlocal_kernels.getObjects();
   const std::vector<MooseSharedPointer<IntegratedBC> > & nonlocal_integrated_bc = _nonlocal_integrated_bcs.getObjects();
   for (const auto & ivar : vars)

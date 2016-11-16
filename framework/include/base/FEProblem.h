@@ -22,7 +22,6 @@
 class FEProblem;
 class NonlinearSystem;
 
-
 template<>
 InputParameters validParams<FEProblem>();
 

@@ -70,7 +70,6 @@ class Function;
 class KernelBase;
 class IntegratedBC;
 
-
 // libMesh forward declarations
 namespace libMesh
 {

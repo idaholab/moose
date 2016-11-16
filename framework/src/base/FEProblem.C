@@ -15,7 +15,6 @@
 #include "FEProblem.h"
 #include "Assembly.h"
 
-
 template<>
 InputParameters validParams<FEProblem>()
 {
