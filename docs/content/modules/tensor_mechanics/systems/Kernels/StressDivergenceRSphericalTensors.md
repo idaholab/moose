@@ -1,7 +1,6 @@
 #StressDivergenceRSphericalTensors
 !description /Kernels/StressDivergenceRSphericalTensors
 
-!devel /Kernels/StressDivergenceRSphericalTensors float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
 ##Description
 This kernel solves the steady state stress divergence equation in polar coordinates on a 1D mesh.

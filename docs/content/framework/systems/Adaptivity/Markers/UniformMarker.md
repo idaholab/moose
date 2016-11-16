@@ -1,4 +1,3 @@
-!devel /Adaptivity/Markers/UniformMarker float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
 # UniformMarker
 !description /Adaptivity/Markers/UniformMarker

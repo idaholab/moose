@@ -1,7 +1,6 @@
 #HyperbolicViscoplasticityStressUpdate
 !description /Materials/HyperbolicViscoplasticityStressUpdate
 
-!devel /Materials/HyperbolicViscoplasticityStressUpdate float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
 ## Description
 {!content/modules/tensor_mechanics/common_documentation/supplementalRadialReturnStressUpdate.md!}
@@ -21,4 +20,4 @@ This class is based on the implicit integration algorithm in \cite{dunne2005intr
 
 ## References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/tensor_mechanics.bib}
+\bibliography{bib/tensor_mechanics.bib}

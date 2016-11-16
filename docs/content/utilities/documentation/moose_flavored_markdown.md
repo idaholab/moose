@@ -331,4 +331,4 @@ The bibliography style may be set within a page using the latex command
 The references are displayed by using the latex `\bibliography{docs/moose.bib}` command. This command accepts a comma separated list of bibtex files (*.bib) to use to build citations and references. The files specified in this list must be given as a relative path to the root directory (e.g., `~/projects/moose`) of the repository.
 
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/moose.bib}
+\bibliography{bib/moose.bib}

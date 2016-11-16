@@ -1,4 +1,3 @@
-!devel /Adaptivity/Markers/ErrorToleranceMarker float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
 # ErrorToleranceMarker
 !description /Adaptivity/Markers/ErrorToleranceMarker

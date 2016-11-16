@@ -12,11 +12,7 @@ class MarkdownTable(object):
 
   def __init__(self, *args):
     self._column_headers = args
-    self._column_widths = []
     self._rows = []
-
-    for col in self._column_headers:
-      self._column_widths.append(len(col))
 
   def size(self):
     """
@@ -35,9 +31,6 @@ class MarkdownTable(object):
     if len(args) != len(self._column_headers):
       msg = "The number of supplied items ({}) does not match the number of columns ({}).".format(len(args), len(self._column_headers))
       raise Exception(msg)
-
-    for i in range(len(self._column_headers)):
-      self._column_widths[i] = max(self._column_widths[i], len(args[i]))
 
     self._rows.append(args)
 
@@ -59,13 +52,3 @@ class MarkdownTable(object):
         else:
           td.append(d)
     return table
-
-  def _buildFormatString(self, text):
-    """
-    A helper method for building format strings. (protected)
-    """
-    output = []
-    for i in range(len(text)):
-      output.append(text[i].strip())
-      output.append(self._column_widths[i])
-    return output

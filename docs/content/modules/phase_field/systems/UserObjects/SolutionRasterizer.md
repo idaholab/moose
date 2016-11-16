@@ -1,4 +1,3 @@
-!devel /UserObjects/SolutionRasterizer float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
 # SolutionRasterizer
 !description /UserObjects/SolutionRasterizer
