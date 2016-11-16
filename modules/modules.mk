@@ -13,6 +13,7 @@ ifeq ($(ALL_MODULES),yes)
         PHASE_FIELD               := yes
         RICHARDS                  := yes
         SOLID_MECHANICS           := yes
+        STOCHASTIC_TOOLS          := yes
         TENSOR_MECHANICS          := yes
         WATER_STEAM_EOS           := yes
         XFEM                      := yes
@@ -131,6 +132,13 @@ ifeq ($(SOLID_MECHANICS),yes)
   #Dependency on tensor mechanics
   DEPEND_MODULES     := tensor_mechanics
   SUFFIX             := sm
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(STOCHASTIC_TOOLS),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/stochastic_tools
+  APPLICATION_NAME   := stochastic_tools
+  SUFFIX             := st
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
