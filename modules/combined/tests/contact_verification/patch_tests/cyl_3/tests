@@ -57,7 +57,6 @@
     abs_zero = 2e-6
     max_parallel = 1
     superlu = true
-    compiler = 'GCC CLANG'
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'

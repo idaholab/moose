@@ -377,7 +377,7 @@
   [../]
   [./chkfile2]
     type = CSV
-    show = 'bot_react_x bot_react_y disp_x226 disp_y226 ref_resid_x ref_resid_y top_react_x top_react_y'
+    show = 'bot_react_x bot_react_y disp_x226 disp_y226 top_react_x top_react_y'
     start_time = 0.9
     execute_vector_postprocessors_on = timestep_end
   [../]

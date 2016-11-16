@@ -383,7 +383,7 @@
   [./chkfile]
     type = CSV
     file_base = brick4_mu_0_2_kin_check
-    show = 'bot_react_x bot_react_y disp_x59 disp_y59 disp_x64 disp_y64 ref_resid_x ref_resid_y stress_yy stress_zz top_react_x top_react_y x_disp y_disp cont_press'
+    show = 'bot_react_x bot_react_y disp_x59 disp_y59 disp_x64 disp_y64 stress_yy stress_zz top_react_x top_react_y x_disp y_disp cont_press'
     execute_vector_postprocessors_on = timestep_end
   [../]
   [./outfile]
