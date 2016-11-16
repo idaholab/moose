@@ -26,7 +26,7 @@ InputParameters validParams<DenomShapeSideUserObject>();
 /**
  * Test and proof of concept class for computing UserObject Jacobians using the
  * ShapeSideUserObject base class. This object computes the integral
- * \f$ \int_\Omega u^2v dr \f$
+ * \f$ \int_\Omega u dr \f$
  * and builds a vector of all derivatives of the integral w.r.t. the DOFs of u and v.
  * These Jacobian terms can be utilized by a Kernel that uses the integral in the
  * calculation of its residual.
