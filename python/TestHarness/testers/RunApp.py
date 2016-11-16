@@ -16,6 +16,8 @@ class RunApp(Tester):
     params.addParam('absent_out',         "A regular expression that must be *absent* from the output for the test to pass.")
     params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
     params.addParam('executable_pattern', "A test that only runs if the exectuable name matches the given pattern")
+    params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
+    params.addParam('delete_output_folders', True, "Delete output folders before running")
 
     params.addParam('walltime',           "The max time as pbs understands it")
     params.addParam('job_name',           "The test name as pbs understands it")
@@ -27,6 +29,7 @@ class RunApp(Tester):
     params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
     params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
     params.addParam('allow_warnings',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
+    params.addParam('redirect_output',  False, "Redirect stdout to files. Neccessary when expecting an error when using parallel options")
 
     params.addParamWithType('allow_deprecated_until', type(time.localtime()), "A test that only runs if current date is less than specified date")
 
@@ -134,6 +137,9 @@ class RunApp(Tester):
       default_ncpus = 1
     else:
       default_ncpus = options.parallel
+
+    if specs['redirect_output'] and ncpus > 1:
+      specs['cli_args'].append('--redirect-output ' + self.name())
 
     caveats = []
     if nthreads > options.nthreads:

@@ -10,8 +10,8 @@ class RunException(RunApp):
     params.addParam('expect_assert', "DEBUG MODE ONLY: A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
     params.addParam('should_crash', True, "Inidicates that the test is expected to crash or otherwise terminate early")
 
-    # Printing errors in parallel often intertwine when multiple processors receive the same error.  We will set max_parallel = 1 by default, but it can be overridden
-    params['max_parallel'] = 1
+    # RunException tests executed in parallel need to have their output redirected to a file, and examined individually
+    params['redirect_output'] = True
 
     return params
 
@@ -23,6 +23,13 @@ class RunException(RunApp):
       reason = 'skipped (RunException RECOVER)'
       return (False, reason)
     return RunApp.checkRunnable(self, options)
+
+  def prepare(self, options):
+    if self.getProcs(options) > 1:
+      file_paths = []
+      for processor_id in xrange(self.getProcs(options)):
+        file_paths.append(self.name() + '.processor.{}'.format(processor_id))
+      self.deleteFilesAndFolders(self.specs['test_dir'], file_paths, False)
 
   def processResults(self, moose_dir, retcode, options, output):
     reason = ''

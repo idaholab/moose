@@ -12,7 +12,6 @@ class VTKDiff(RunApp):
     params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
     params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exodiff comparisons.")
     params.addParam('rel_err',       5.5e-6, "Relative error value used in exodiff comparisons.")
-    params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
     params.addParam('ignored_attributes',  [], "Ignore e.g. type and/or version in sample XML block <VTKFile type=\"Foo\" version=\"0.1\">")
 
     return params
@@ -20,7 +19,7 @@ class VTKDiff(RunApp):
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)
 
-  def prepare(self):
+  def prepare(self, options):
     if self.specs['delete_output_before_running'] == True:
       self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['vtkdiff'])
 
