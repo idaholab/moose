@@ -355,12 +355,14 @@ MultiApp::appProblemBase(unsigned int app)
 FEProblem &
 MultiApp::problem()
 {
+  mooseDeprecated("MultiApp::problem() is deprecated, call MultiApp::problemBase() instead.\n");
   return dynamic_cast<FEProblem&>(_fe_problem);
 }
 
 FEProblem &
 MultiApp::appProblem(unsigned int app)
 {
+  mooseDeprecated("MultiApp::appProblem() is deprecated, call MultiApp::appProblemBase() instead.\n");
   if (!_has_an_app)
     mooseError("No app for " << name() << " on processor " << _orig_rank);
 

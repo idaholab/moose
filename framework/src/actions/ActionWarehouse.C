@@ -372,6 +372,6 @@ ActionWarehouse::printInputFile(std::ostream & out)
 MooseSharedPointer<FEProblem>
 ActionWarehouse::problem()
 {
-
+  mooseDeprecated("ActionWarehouse::problem() is deprecated, please use ActionWarehouse::problemBase() \n");
   return std::dynamic_pointer_cast<FEProblem >(_problem);
 }

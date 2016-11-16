@@ -449,7 +449,7 @@ public:
 
   // NL /////
   NonlinearSystemBase & getNonlinearSystemBase() { return *_nl; }
-  virtual NonlinearSystem & getNonlinearSystem() { return *(dynamic_cast<NonlinearSystem *>(_nl)); }
+  virtual NonlinearSystem & getNonlinearSystem() { mooseDeprecated("FEProblemBase::getNonlinearSystem() is deprecated, please use FEProblemBase::getNonlinearSystemBase() \n"); return *(dynamic_cast<NonlinearSystem *>(_nl)); }
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
   void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
