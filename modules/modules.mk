@@ -7,7 +7,6 @@ ifeq ($(ALL_MODULES),yes)
         CONTACT                   := yes
         FLUID_PROPERTIES          := yes
         HEAT_CONDUCTION           := yes
-        LINEAR_ELASTICITY         := yes
         MISC                      := yes
         NAVIER_STOKES             := yes
         PHASE_FIELD               := yes
@@ -73,13 +72,6 @@ ifeq ($(HEAT_CONDUCTION),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/heat_conduction
   APPLICATION_NAME   := heat_conduction
   SUFFIX             := hc
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(LINEAR_ELASTICITY),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/linear_elasticity
-  APPLICATION_NAME   := linear_elasticity
-  SUFFIX             := le
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
