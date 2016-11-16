@@ -2,31 +2,30 @@
   type = GeneratedMesh
   dim = 3
   elem_type = HEX8
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
   [./disp_x]
-    block = 0
   [../]
   [./disp_y]
-    block = 0
   [../]
   [./disp_z]
-    block = 0
   [../]
 []
 
 [Functions]
   [./tdisp]
     type = ParsedFunction
-    value = '0.01*t'
+    value = '0.01 * t'
   [../]
 []
 
 [Kernels]
   [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
     use_displaced_mesh = true
   [../]
 []
@@ -61,19 +60,15 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
   [../]
   [./strain]
     type = ComputeFiniteStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
     decomposition_method = EigenSolution
   [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
-    block = 0
   [../]
 []
 

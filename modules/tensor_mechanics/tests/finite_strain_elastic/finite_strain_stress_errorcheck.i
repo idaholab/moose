@@ -1,22 +1,16 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
+[]
+
+[GlobalParams]
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
   [../]
 []
 
@@ -52,10 +46,6 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1.0e10
     poissons_ratio = 0.3
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./stress]
     type = ComputeLinearElasticStress

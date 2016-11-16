@@ -15,23 +15,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  order = CONSTANT
-  family = MONOMIAL
-[]
-
-[AuxVariables]
-  [./stress_xx]
-  [../]
-  [./stress_yy]
-  [../]
-  [./stress_zz]
-  [../]
-  [./stress_xy]
-  [../]
-  [./stress_yz]
-  [../]
-  [./stress_zx]
-  [../]
 []
 
 [Functions]
@@ -56,62 +39,7 @@
   [./all]
     strain = SMALL
     add_variables = true
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    variable = stress_xx
-    rank_two_tensor = stress
-    index_j = 0
-    index_i = 0
-    execute_on = timestep_end
-  [../]
-
-  [./stress_yy]
-    type = RankTwoAux
-    variable = stress_yy
-    rank_two_tensor = stress
-    index_j = 1
-    index_i = 1
-    execute_on = timestep_end
-  [../]
-
-  [./stress_zz]
-    type = RankTwoAux
-    variable = stress_zz
-    rank_two_tensor = stress
-    index_j = 2
-    index_i = 2
-    execute_on = timestep_end
-  [../]
-
-  [./stress_xy]
-    type = RankTwoAux
-    variable = stress_xy
-    rank_two_tensor = stress
-    index_j = 1
-    index_i = 0
-    execute_on = timestep_end
-  [../]
-
-  [./stress_yz]
-    type = RankTwoAux
-    variable = stress_yz
-    rank_two_tensor = stress
-    index_j = 2
-    index_i = 1
-    execute_on = timestep_end
-  [../]
-
-  [./stress_zx]
-    type = RankTwoAux
-    variable = stress_zx
-    rank_two_tensor = stress
-    index_j = 2
-    index_i = 0
-    execute_on = timestep_end
+    generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
   [../]
 []
 
