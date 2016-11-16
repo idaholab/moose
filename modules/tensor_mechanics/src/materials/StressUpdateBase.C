@@ -40,13 +40,3 @@ StressUpdateBase::setQp(unsigned int qp)
 {
   _qp = qp;
 }
-
-void
-StressUpdateBase::resetQpProperties()
-{
-}
-
-void
-StressUpdateBase::resetProperties()
-{
-}
