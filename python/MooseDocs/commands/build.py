@@ -157,16 +157,14 @@ class Builder(object):
     def helper(src, dst):
       if not os.path.exists(dst):
         os.makedirs(dst)
-      copy_tree(src, dst)
+      if os.path.exists(src):
+        copy_tree(src, dst)
 
-    # Copy js/css/fonts from MOOSE and current projects
+    # Copy js/css/media from MOOSE and current projects
     for from_dir in [os.path.join(MooseDocs.MOOSE_DIR, 'docs'), os.getcwd()]:
       helper(os.path.join(from_dir, 'js'), os.path.join(self._site_dir, 'js'))
       helper(os.path.join(from_dir, 'css'), os.path.join(self._site_dir, 'css'))
-      #helper(os.path.join(from_dir, 'fonts'), os.path.join(self._site_dir, 'fonts'))
-
-    # Copy local media
-    helper(os.path.join(os.getcwd(), 'media'), os.path.join(self._site_dir, 'media'))
+      helper(os.path.join(from_dir, 'media'), os.path.join(self._site_dir, 'media'))
 
 
 def build(config_file='moosedocs.yml', disable_threads=False, **kwargs):
