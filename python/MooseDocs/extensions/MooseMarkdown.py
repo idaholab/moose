@@ -46,7 +46,7 @@ class MooseMarkdown(markdown.Extension):
     self.config['locations']    = [dict(), "The locations to parse for syntax."]
     self.config['repo']         = ['', "The remote repository to create hyperlinks."]
     self.config['links']        = [dict(), "The set of paths for generating input file and source code links to objects."]
-    self.config['docs_dir']     = ['docs', "The location of the documentation directory."]
+    self.config['docs_dir']     = [os.path.basename(os.getcwd()), "The location of the documentation directory, relative to the 'root'"]
     self.config['slides']       = [False, "Enable the parsing for creating reveal.js slides."]
     self.config['package']      = [False, "Enable the use of the MoosePackageParser."]
     self.config['graphviz']     = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
