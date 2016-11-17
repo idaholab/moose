@@ -6,10 +6,6 @@
 /****************************************************************/
 
 #include "GBAnisotropy.h"
-#include "MooseMesh.h" //TODO: Do we need this?
-
-// libmesh includes
-#include "libmesh/quadrature.h" //TODO: Do we need this?
 
 template<>
 InputParameters validParams<GBAnisotropy>()
@@ -88,67 +84,7 @@ GBAnisotropy::GBAnisotropy(const InputParameters & parameters) :
 }
 
 void
-GBAnisotropy::computeProperties()
+GBAnisotropy::computeQpProperties()
 {
-  GBAnisotropyBase::computeProperties();
-
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-  {
-    std::vector<std::vector<Real> > MOB = _mob;
-
-    Real sum_kappa = 0.0;
-    Real sum_gamma = 0.0;
-    Real sum_L = 0.0;
-    Real Val = 0.0;
-    Real sum_val = 0.0;
-    Real f_sigma = 1.0;
-    Real f_mob = 1.0;
-    Real gamma_value = 0.0;
-
-    for (unsigned int m = 0; m < _op_num - 1; ++m)
-    {
-      for (unsigned int n = m + 1; n < _op_num; ++n) // m<n
-      {
-        MOB[m][n] *= std::exp(-_Q[m][n] / (_kb * _T[_qp])); // Arrhenius relation
-
-        gamma_value = _kappa_gamma[n][m];
-
-        if (_inclination_anisotropy)
-        {
-          if (_mesh_dimension == 3)
-            mooseError("This material doesn't support inclination dependence for 3D for now!");
-
-          Real phi_ave = libMesh::pi * n / (2.0 * _op_num);
-          Real sin_phi = std::sin(2.0 * phi_ave);
-          Real cos_phi = std::cos(2.0 * phi_ave);
-
-          Real a = (*_grad_vals[m])[_qp](0) - (*_grad_vals[n])[_qp](0);
-          Real b = (*_grad_vals[m])[_qp](1) - (*_grad_vals[n])[_qp](1);
-          Real ab = a*a + b*b + 1.0e-7; // for the sake of numerical convergence, the smaller the more accurate, but more difficult to converge
-
-          Real cos_2phi = cos_phi*(a*a - b*b) / ab + sin_phi * 2.0 * a * b / ab;
-          Real cos_4phi = 2.0 * cos_2phi * cos_2phi - 1.0;
-
-          f_sigma = 1.0 + _delta_sigma * cos_4phi;
-          f_mob = 1.0 + _delta_mob * cos_4phi;
-
-          Real g2 = _a_g2[n][m] * f_sigma;
-          Real y = -5.288 * g2*g2*g2*g2 - 0.09364 * g2*g2*g2 + 9.965 * g2*g2 - 8.183 * g2 + 2.007;
-          gamma_value = 1.0 / y;
-        }
-
-        Val = (100000.0 * ((*_vals[m])[_qp]) * ((*_vals[m])[_qp]) + 0.01) * (100000.0 * ((*_vals[n])[_qp]) * ((*_vals[n])[_qp]) + 0.01);
-
-        sum_val += Val;
-        sum_kappa += _kappa_gamma[m][n] * f_sigma*Val;
-        sum_gamma += gamma_value * Val;
-        sum_L += Val * MOB[m][n] * f_mob / (_wGB * _a_g2[m][n]);
-      }
-    }
-
-    _kappa[_qp] = sum_kappa / sum_val;
-    _gamma[_qp] = sum_gamma / sum_val;
-    _L[_qp] = sum_L / sum_val;
-    _mu[_qp] = _mu_qp;
-  }
+  GBAnisotropyBase::computeQpProperties();
 }

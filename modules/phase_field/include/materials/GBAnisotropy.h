@@ -18,7 +18,7 @@ InputParameters validParams<GBAnisotropy>();
 /**
  * Function[kappa, gamma, m, L] = parameters (sigma, mob, w_GB, sigma0)
  * Parameter determination method is elaborated in Phys. Rev. B, 78(2), 024113, 2008, by N. Moelans
- * Thank Prof. Moelans for the explanation of her paper.
+ * This material uses Algorithm 1 from the paper to determine parameters for constant GB width
  */
 class GBAnisotropy : public GBAnisotropyBase
 {
@@ -26,7 +26,7 @@ public:
   GBAnisotropy(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void computeQpProperties();
 
 private:
   Real _wGB;

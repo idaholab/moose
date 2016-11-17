@@ -26,7 +26,7 @@ public:
   GBAnisotropyBase(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void computeQpProperties();
 
   const unsigned int _mesh_dimension;
 
