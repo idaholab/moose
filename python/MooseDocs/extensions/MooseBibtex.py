@@ -43,10 +43,10 @@ class MooseBibtex(MooseCommonExtension, Preprocessor):
       bib_string = match.group(0)
       for bfile in match.group(1).split(','):
         try:
-          bibfiles.append(os.path.join(self._docs_dir, bfile))
+          bibfiles.append(os.path.join(self._docs_dir, bfile.strip()))
           data = parse_file(bibfiles[-1])
         except Exception as e:
-          log.error('Failed to parse bibtex file: {}'.format(bfile))
+          log.error('Failed to parse bibtex file: {}'.format(bfile.strip()))
           traceback.print_exc(e)
           return lines
         self._bibtex.add_entries(data.entries.iteritems())
