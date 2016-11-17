@@ -1,0 +1,28 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "NonlinearSystem.h"
+#include "FEProblem.h"
+
+
+NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & name) :
+  NonlinearSystemBase(fe_problem, fe_problem.es().add_system<TransientNonlinearImplicitSystem>(name), name)
+{
+
+}
+
+NonlinearSystem::~NonlinearSystem()
+{
+
+}
