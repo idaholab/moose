@@ -12,35 +12,38 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EQUATIONPROBLEM_H
-#define EQUATIONPROBLEM_H
+#ifndef FEPROBLEM_H
+#define FEPROBLEM_H
 
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "NonlinearSystem.h"
 #include "MooseEigenSystem.h"
 
-class EquationProblem;
+class FEProblem;
+class NonlinearSystem;
 
 template<>
-InputParameters validParams<EquationProblem>();
+InputParameters validParams<FEProblem>();
 
 /**
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
  */
-class EquationProblem : public FEProblem
+class FEProblem : public FEProblemBase
 {
 public:
-  EquationProblem(const InputParameters & parameters);
+  FEProblem(const InputParameters & parameters);
 
-  virtual ~EquationProblem();
+  virtual ~FEProblem();
 
   virtual bool getUseNonlinear() const { return _use_nonlinear; }
   virtual void setUseNonlinear(bool use_nonlinear) { _use_nonlinear = use_nonlinear; }
 
+  NonlinearSystem & getNonlinearSystem() { return *_nl_sys; }
+
 protected:
   bool _use_nonlinear;
-
+  NonlinearSystem * _nl_sys;
 };
 
-#endif /* EQUATIONPROBLEM_H */
+#endif /* FEPROBLEM_H */

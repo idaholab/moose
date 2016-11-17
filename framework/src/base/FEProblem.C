@@ -12,21 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "EquationProblem.h"
+#include "FEProblem.h"
 #include "Assembly.h"
 
 template<>
-InputParameters validParams<EquationProblem>()
+InputParameters validParams<FEProblem>()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = validParams<FEProblemBase>();
   return params;
 }
 
-EquationProblem::EquationProblem(const InputParameters & parameters) :
-    FEProblem(parameters),
-    _use_nonlinear(getParam<bool>("use_nonlinear"))
+FEProblem::FEProblem(const InputParameters & parameters) :
+    FEProblemBase(parameters),
+    _use_nonlinear(getParam<bool>("use_nonlinear")),
+    _nl_sys(_use_nonlinear ? (new NonlinearSystem(*this, "nl0")) : (new MooseEigenSystem(*this, "eigen0")))
 {
-  _nl = _use_nonlinear ? (new NonlinearSystem(*this, "nl0")) : (new MooseEigenSystem(*this, "eigen0"));
+  _nl = _nl_sys;
   _aux = new AuxiliarySystem(*this, "aux0");
 
   unsigned int n_threads = libMesh::n_threads();
@@ -64,7 +65,7 @@ EquationProblem::EquationProblem(const InputParameters & parameters) :
   _subspace_dim["NearNullSpace"] = dimNearNullSpace;
 }
 
-EquationProblem::~EquationProblem()
+FEProblem::~FEProblem()
 {
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; i++)
