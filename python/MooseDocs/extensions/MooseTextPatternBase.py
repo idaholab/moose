@@ -97,7 +97,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
     pre = etree.SubElement(el, 'pre')
     code = self.addStyle(etree.SubElement(pre, 'code'), **styles)
     if settings['language']:
-      code.set('class', 'hljs ' + settings['language'])
+      code.set('class', 'moose-code language-{}'.format(settings['language']))
     code.text = content
 
     return el

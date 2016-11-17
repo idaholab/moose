@@ -1,7 +1,6 @@
 #ComputeAxisymmetricRZIncrementalStrain
 !description /Materials/ComputeAxisymmetricRZIncrementalStrain
 
-!devel /Materials/ComputeAxisymmetricRZIncrementalStrain float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
 ## Description
 {!content/modules/tensor_mechanics/common_documentation/supplementalAxisymmetricRZStrain.md!}

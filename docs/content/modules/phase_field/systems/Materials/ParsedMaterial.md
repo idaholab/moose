@@ -1,4 +1,3 @@
-!devel /Materials/ParsedMaterial float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
 # ParsedMaterial
 !description /Materials/ParsedMaterial

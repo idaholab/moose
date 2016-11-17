@@ -62,7 +62,7 @@ AxisymmetricRZ::computeStrain( const unsigned qp,
     for (unsigned int qp_loop = 0; qp_loop < _solid_model.qrule()->n_points(); ++qp_loop)
     {
       if (_solid_model.q_point(qp)(0) != 0.0)
-        volumetric_strain += (_grad_disp_r[qp_loop](0) + _grad_disp_z[qp_loop](1) + _disp_r[qp]/_solid_model.q_point(qp)(0)) / dim * _solid_model.JxW(qp_loop) * _solid_model.q_point(qp_loop)(0);
+        volumetric_strain += (_grad_disp_r[qp_loop](0) + _grad_disp_z[qp_loop](1) + _disp_r[qp_loop]/_solid_model.q_point(qp_loop)(0)) / dim * _solid_model.JxW(qp_loop) * _solid_model.q_point(qp_loop)(0);
       else
         volumetric_strain += (_grad_disp_r[qp_loop](0) + _grad_disp_z[qp_loop](1)) / dim * _solid_model.JxW(qp_loop) * _solid_model.q_point(qp_loop)(0);
 
@@ -70,10 +70,10 @@ AxisymmetricRZ::computeStrain( const unsigned qp,
 
       if (_large_strain)
       {
-        volumetric_strain += 0.5 * (_grad_disp_r[qp](0) * _grad_disp_r[qp](0) +
-                                    _grad_disp_z[qp](0) * _grad_disp_z[qp](0)) / dim * _solid_model.JxW(qp_loop) * _solid_model.q_point(qp_loop)(0);
-        volumetric_strain += 0.5 * (_grad_disp_r[qp](1) * _grad_disp_r[qp](1) +
-                                    _grad_disp_z[qp](1) * _grad_disp_z[qp](1)) / dim * _solid_model.JxW(qp_loop) * _solid_model.q_point(qp_loop)(0);
+        volumetric_strain += 0.5 * (_grad_disp_r[qp_loop](0) * _grad_disp_r[qp_loop](0) +
+                                    _grad_disp_z[qp_loop](0) * _grad_disp_z[qp_loop](0)) / dim * _solid_model.JxW(qp_loop) * _solid_model.q_point(qp_loop)(0);
+        volumetric_strain += 0.5 * (_grad_disp_r[qp_loop](1) * _grad_disp_r[qp_loop](1) +
+                                    _grad_disp_z[qp_loop](1) * _grad_disp_z[qp_loop](1)) / dim * _solid_model.JxW(qp_loop) * _solid_model.q_point(qp_loop)(0);
       }
     }
 

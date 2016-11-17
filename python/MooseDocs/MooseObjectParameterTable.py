@@ -1,18 +1,18 @@
 import re
+from markdown.util import etree
 
-from MarkdownTable import MarkdownTable
-
-class MooseObjectParameterTable(MarkdownTable):
+class MooseObjectParameterTable(object):
   """
   A class for creating markdown tables from parameter data parsed from MOOSE yaml data.
   """
 
-  PARAMETER_TABLE_COLUMNS = ['name', 'cpp_type', 'default', 'description']
-  PARAMETER_TABLE_COLUMN_NAMES = ['Name', 'Type', 'Default', 'Description']
+  INNER = [('name', 'Name:'), ('cpp_type', 'Type:'), ('default', 'Default:')]
 
   def __init__(self, **kwargs):
-    super(MooseObjectParameterTable, self).__init__(*self.PARAMETER_TABLE_COLUMN_NAMES)
     self._parameters = []
+
+  def __nonzero__(self):
+    return len(self._parameters) > 0
 
   def addParam(self, param):
     """
@@ -24,20 +24,56 @@ class MooseObjectParameterTable(MarkdownTable):
 
     self._parameters.append(param)
 
-    items = []
-    for key in self.PARAMETER_TABLE_COLUMNS:
-      items.append(self._formatParam(param[key], key, param['cpp_type']))
-    self.addRow(*items)
-
   def html(self):
     """
-    Return html for the table including special class name indicating that this is a parameter table.
+    Return html containing collapsible items.
     """
-    el = super(MooseObjectParameterTable, self).html()
-    el.set('class', 'moose-object-param-table')
-    return el
 
-  def _formatParam(self, param, key, ptype):
+    ul = etree.Element('ul')
+    ul.set('class', "collapsible")
+    ul.set('data-collapsible', "expandable")
+    for param in self._parameters:
+      li = etree.SubElement(ul, 'li')
+      header = etree.SubElement(li, 'div')
+      header.set('class', "collapsible-header")
+
+      div = etree.SubElement(header, 'div')
+      div.set('class', 'moose-parameter-name')
+      div.text = param['name']
+
+      default = self._formatParam(param, 'default').strip()
+      if default:
+        div = etree.SubElement(header, 'div')
+        div.set('class', 'moose-parameter-header-default')
+        div.text = default#'(Default: {})'.format(default)
+
+      description = param['description']
+      div = etree.SubElement(header, 'div')
+      div.set('class', 'moose-parameter-header-description')
+      div.text = description
+
+
+      body = etree.SubElement(li, 'div')
+      body.set('class', "collapsible-body")
+
+      div = etree.SubElement(body, 'div')
+      div.set('class', 'moose-parameter-description')
+      div.text = description
+
+      div = etree.SubElement(body, 'div')
+      div.set('class', 'moose-parameter-default')
+      if default:
+        div.text = 'Default: {}'.format(default)
+      else:
+        div.text = 'Default: None'
+
+      div = etree.SubElement(body, 'div')
+      div.set('class', 'moose-parameter-type')
+      div.text = 'Type: {}'.format(self._formatParam(param, 'cpp_type'))
+
+    return ul
+
+  def _formatParam(self, parameter, key):
     """
     Convert the supplied parameter into a format suitable for output.
 
@@ -48,7 +84,8 @@ class MooseObjectParameterTable(MarkdownTable):
     """
 
     # Make sure that supplied parameter is a string
-    param = str(param).strip()
+    ptype = parameter['cpp_type']
+    param = str(parameter[key]).strip()
 
     # The c++ types returned by the yaml dump are raw and contain "allocator" stuff. This script attempts
     # to present the types in a more readable fashion.

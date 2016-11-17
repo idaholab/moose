@@ -1,7 +1,6 @@
 #RadialReturnStressUpdate
 !description /Materials/RadialReturnStressUpdate
 
-!devel /Materials/RadialReturnStressUpdate float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
 ###Algorithm References
 The radial return mapping method, introduced by Simo and Taylor (1985), uses a von Mises yield surface to determine the increment of plastic strain necessary to return the stress state to the yield surface after a trial stress increment takes the computed stress state across the yield surface.  Because the von Mises yield surface in the deviatoric stress space has the shape of a circle, the _plastic correction stress_ is always directed towards the center of the yield surface circle.
@@ -45,7 +44,7 @@ Users can print out any of these strains and stresses using the `RankTwoAux` as 
 [Introduction/Visualizing Tensors](auto::/introduction/VisualizingTensors) page.
 
 ##Writing a New Stress Update Material
-New radial return models must inherit from `RadialReturnStressUpdate` and must overwrite the six virtual methods.  
+New radial return models must inherit from `RadialReturnStressUpdate` and must overwrite the six virtual methods.
 
   - **initQpStatefulProperties**: Set the initial values for all new material properties that are not initialized by an input parameter; generally the material properties initialized in this method are all set to zero.
   - **computeStressInitialize**: Calculate the initial trial stress state, the yield surface value, and any hardening or softening parameters at the start of the simulation time increment.
@@ -66,4 +65,4 @@ More details on how to write the equivalent yield surface equation for a creep m
 
 ## References
 \bibliographystyle{unsrt}
-\bibliography{docs/bib/tensor_mechanics.bib}
+\bibliography{bib/tensor_mechanics.bib}

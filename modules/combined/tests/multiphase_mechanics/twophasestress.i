@@ -64,6 +64,7 @@
     type = ComputeSmallStrain
     base_name = A
     displacements = 'disp_x disp_y'
+    eigenstrain_names = eigenstrain
   [../]
   [./stress_A]
     type = ComputeLinearElasticStress
@@ -74,6 +75,7 @@
     base_name = A
     eigen_base = '0.1 0.05 0 0 0 0.01'
     prefactor = -1
+    eigenstrain_name = eigenstrain
   [../]
 
   [./elasticity_tensor_B]
@@ -86,6 +88,7 @@
     type = ComputeSmallStrain
     base_name = B
     displacements = 'disp_x disp_y'
+    eigenstrain_names = 'B_eigenstrain'
   [../]
   [./stress_B]
     type = ComputeLinearElasticStress
@@ -96,6 +99,7 @@
     base_name = B
     eigen_base = '0.1 0.05 0 0 0 0.01'
     prefactor = -1
+    eigenstrain_name = 'B_eigenstrain'
   [../]
 
   [./switching]

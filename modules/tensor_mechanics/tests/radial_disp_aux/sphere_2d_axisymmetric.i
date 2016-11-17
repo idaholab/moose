@@ -38,6 +38,7 @@
   [./all]
     strain = FINITE
     add_variables = true
+    eigenstrain_names = eigenstrain
   [../]
 []
 
@@ -85,6 +86,7 @@
     thermal_expansion_coeff = 1.3e-5
     temperature = temp
     incremental_form = true
+    eigenstrain_name = eigenstrain
   [../]
 []
 

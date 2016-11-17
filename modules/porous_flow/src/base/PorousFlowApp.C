@@ -27,11 +27,6 @@
 #include "PorousFlow2PhasePS.h"
 #include "PorousFlowVariableBase.h"
 #include "PorousFlowBrine.h"
-#include "PorousFlowCapillaryPressureBase.h"
-#include "PorousFlowCapillaryPressureConstant.h"
-#include "PorousFlowCapillaryPressureLinear.h"
-#include "PorousFlowCapillaryPressureVGS.h"
-#include "PorousFlowCapillaryPressureVGP.h"
 #include "PorousFlowDensityConstBulk.h"
 #include "PorousFlowEffectiveFluidPressure.h"
 #include "PorousFlowFluidPropertiesBase.h"
@@ -146,11 +141,6 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlow2PhasePS);
   registerMaterial(PorousFlowVariableBase);
   registerMaterial(PorousFlowBrine);
-  registerMaterial(PorousFlowCapillaryPressureBase);
-  registerMaterial(PorousFlowCapillaryPressureConstant);
-  registerMaterial(PorousFlowCapillaryPressureLinear);
-  registerMaterial(PorousFlowCapillaryPressureVGS);
-  registerMaterial(PorousFlowCapillaryPressureVGP);
   registerMaterial(PorousFlowDensityConstBulk);
   registerMaterial(PorousFlowEffectiveFluidPressure);
   registerMaterial(PorousFlowFluidPropertiesBase);

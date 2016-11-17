@@ -29,6 +29,9 @@ protected:
   ///Base name prepended to material property name
   std::string _base_name;
 
+  ///Material property name for the eigenstrain tensor
+  std::string _eigenstrain_name;
+
   ///Whether the eigenstrain model should compute the total or incremental eigenstrain
   bool _incremental_form;
 
@@ -37,9 +40,6 @@ protected:
 
   ///Stores the total eigenstrain in the previous step (only for incremental form)
   MaterialProperty<RankTwoTensor> * _eigenstrain_old;
-
-  ///Stores the increment of the eigenstrain from the previous to current step (only for incremental form)
-  MaterialProperty<RankTwoTensor> * _eigenstrain_increment;
 };
 
 #endif //COMPUTEEIGENSTRAINBASE_H

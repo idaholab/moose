@@ -1,7 +1,6 @@
 #StressDivergenceTensors
 !description /Kernels/StressDivergenceTensors
 
-!devel /Kernels/StressDivergenceTensors float=right width=auto margin=20px padding=20px background-color=#F8F8F8
 
 ##Description
 {!content/modules/tensor_mechanics/common_documentation/supplementalStressDivergenceKernels.md!}

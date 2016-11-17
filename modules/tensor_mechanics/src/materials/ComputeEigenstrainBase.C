@@ -13,6 +13,7 @@ InputParameters validParams<ComputeEigenstrainBase>()
 {
   InputParameters params = validParams<Material>();
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
+  params.addRequiredParam<std::string>("eigenstrain_name", "Material property name for the eigenstrain tensor computed by this model. IMPORTANT: The name of this property must also be provided to the strain calculator.");
   params.addParam<bool>("incremental_form", false, "Should the eigenstrain be in incremental form (for incremental models)?");
   return params;
 }
@@ -20,10 +21,10 @@ InputParameters validParams<ComputeEigenstrainBase>()
 ComputeEigenstrainBase::ComputeEigenstrainBase(const InputParameters & parameters) :
     Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+    _eigenstrain_name(_base_name + getParam<std::string>("eigenstrain_name")),
     _incremental_form(getParam<bool>("incremental_form")),
-    _eigenstrain(declareProperty<RankTwoTensor>(_base_name + "stress_free_strain")),
-    _eigenstrain_old(_incremental_form ? &declarePropertyOld<RankTwoTensor>(_base_name + "stress_free_strain") : NULL),
-    _eigenstrain_increment(_incremental_form ? &declareProperty<RankTwoTensor>(_base_name + "stress_free_strain_increment") : NULL)
+    _eigenstrain(declareProperty<RankTwoTensor>(_eigenstrain_name)),
+    _eigenstrain_old(_incremental_form ? &declarePropertyOld<RankTwoTensor>(_eigenstrain_name) : NULL)
 {
 }
 
@@ -38,7 +39,4 @@ void
 ComputeEigenstrainBase::computeQpProperties()
 {
   computeQpEigenstrain();
-
-  if (_incremental_form)
-    (*_eigenstrain_increment)[_qp] = _eigenstrain[_qp] - (*_eigenstrain_old)[_qp];
 }

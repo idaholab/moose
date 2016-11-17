@@ -281,6 +281,7 @@
     type = ComputeSmallStrain
     base_name = phase2
     displacements = 'disp_x disp_y'
+    eigenstrain_names = eigenstrain
   [../]
   [./stress_2]
     type = ComputeLinearElasticStress
@@ -290,6 +291,7 @@
     type = ComputeEigenstrain
     base_name = phase2
     eigen_base = '0.02'
+    eigenstrain_name = eigenstrain
   [../]
 
   # undersized phase
@@ -303,6 +305,7 @@
     type = ComputeSmallStrain
     base_name = phase3
     displacements = 'disp_x disp_y'
+    eigenstrain_names = eigenstrain
   [../]
   [./stress_3]
     type = ComputeLinearElasticStress
@@ -312,6 +315,7 @@
     type = ComputeEigenstrain
     base_name = phase3
     eigen_base = '-0.05'
+    eigenstrain_name = eigenstrain
   [../]
 
   # switching functions

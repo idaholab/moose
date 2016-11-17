@@ -23,22 +23,21 @@ class MooseObjectSyntax(MooseSyntaxBase):
     !parameters - Returns a set of tables containing the input parameters
     !inputfiles - Returns a set of lists containing links to the input files that use the syntax
     !childobjects - Returns a set of lists containing links to objects that inherit from this class
-    !devel - Returns links to the source code in the repository and doxygen page.
 
-  "devel" Settings:
-    title[str]: The developer link box title (default: Developer Links)
+  "paramaters" Settings:
+    display[str]: "table" or "collapsible" to toggle the display type (default: "collapsible"
 
   """
 
-  RE = r'^!(description|parameters|inputfiles|childobjects|devel)\s+(.*?)(?:$|\s+)(.*)'
+  RE = r'^!(description|parameters|inputfiles|childobjects)\s+(.*?)(?:$|\s+)(.*)'
 
-  def __init__(self, input_files=dict(), child_objects=dict(), repo=None, **kwargs):
+  def __init__(self, database=None, repo=None, **kwargs):
     super(MooseObjectSyntax, self).__init__(self.RE, **kwargs)
 
 
     # Input arguments
-    self._input_files = input_files
-    self._child_objects = child_objects
+    self._input_files = database.inputs
+    self._child_objects = database.children
     self._repo = repo
     self._name = None
 
@@ -52,8 +51,8 @@ class MooseObjectSyntax(MooseSyntaxBase):
     syntax = match.group(3)
 
     # Default Settings
-    if action == 'devel':
-      self._settings['title'] = 'Developer Links'
+    if action == 'parameters':
+      self._settings['display'] = "collapsible"
 
     # Extract Settings
     settings, styles = self.getSettings(match.group(4))
@@ -74,8 +73,6 @@ class MooseObjectSyntax(MooseSyntaxBase):
       el = self.inputfilesElement(node, settings, styles)
     elif action == 'childobjects':
       el = self.childobjectsElement(node, settings, styles)
-    elif action == 'devel':
-      el = self.develElement(node, settings, styles)
     elif action == 'subobjects':
       el = self.subobjectsElement(node, settings, styles)
     return el
@@ -109,8 +106,8 @@ class MooseObjectSyntax(MooseSyntaxBase):
 
     # Create the tables (generate 'Required' and 'Optional' initially so that they come out in the proper order)
     tables = collections.OrderedDict()
-    tables['Required'] = MooseDocs.MooseObjectParameterTable()
-    tables['Optional'] = MooseDocs.MooseObjectParameterTable()
+    tables['Required'] = MooseDocs.MooseObjectParameterTable(display_type = settings['display'])
+    tables['Optional'] = MooseDocs.MooseObjectParameterTable(display_type = settings['display'])
 
     # Loop through the parameters in yaml object
     for param in node['parameters'] or []:
@@ -121,17 +118,23 @@ class MooseObjectSyntax(MooseSyntaxBase):
         name = 'Optional'
 
       if name not in tables:
-        tables[name] = MooseDocs.MooseObjectParameterTable()
+        tables[name] = MooseDocs.MooseObjectParameterTable(display_type = settings['display'])
       tables[name].addParam(param)
 
     el = self.addStyle(etree.Element('div'), **styles)
-    title = etree.SubElement(el, 'h2')
-    title.text = 'Input Parameters'
-    for key, table in tables.iteritems():
-      subtitle = etree.SubElement(el, 'h3')
-      subtitle.text = '{} {}'.format(key, 'Parameters')
-      el.append(table.html())
+    el.set('id', '#input-parameters')
+    el.set('class', 'section scrollspy')
+    if any(tables.values()):
+      title = etree.SubElement(el, 'h2')
+      title.text = 'Input Parameters'
+      for key, table in tables.iteritems():
+        if table:
+          subtitle = etree.SubElement(el, 'h3')
+          subtitle.text = '{} {}'.format(key, 'Parameters')
+          el.append(table.html())
+
     return el
+
 
   def inputfilesElement(self, node, settings, styles):
     """
@@ -143,6 +146,8 @@ class MooseObjectSyntax(MooseSyntaxBase):
     """
     # Print the item information
     el = self.addStyle(etree.Element('div'), **styles)
+    el.set('id', '#input-files')
+    el.set('class', 'section scrollspy')
     self._listhelper(node, 'Input Files', el, self._input_files)
     return el
 
@@ -156,58 +161,10 @@ class MooseObjectSyntax(MooseSyntaxBase):
     """
     # Print the item information
     el = self.addStyle(etree.Element('div'), **styles)
+    el.set('id', '#child-objects')
+    el.set('class', 'section scrollspy')
     self._listhelper(node, 'Child Objects', el, self._child_objects)
     return el
-
-  def develElement(self, node, settings, styles):
-    """
-    Return the developer doxygen, github links.
-
-    Args:
-      node[dict]: YAML data node.
-      styles[dict]: Styles from markdown.
-    """
-
-    if not self._repo:
-      el = createErrorElement("Attempting to create source links to repository, but the 'repo' configuration option was not supplied.")
-
-    el = self.addStyle(etree.Element('div'), **styles)
-    title = etree.SubElement(el, 'h4')
-    title.text = settings['title']
-    ul = etree.SubElement(el, 'ul')
-
-    for key, syntax in self._syntax.iteritems():
-      if syntax.hasObject(self._name):
-        include_names = syntax.filenames(self._name)
-        if not include_names:
-          continue
-        include = include_names[0]
-        rel_include = os.path.relpath(include, self._root)
-
-        p = etree.SubElement(ul, 'li')
-        a = etree.SubElement(p, 'a')
-        a.set('href', os.path.join(self._repo, rel_include))
-        a.text = os.path.basename(rel_include)
-
-        source = include.replace('/include/', '/src/').replace('.h', '.C')
-        if os.path.exists(source):
-
-          p = etree.SubElement(ul, 'li')
-
-          rel_source = os.path.relpath(source, self._root)
-          a = etree.SubElement(p, 'a')
-          a.set('href', os.path.join(self._repo, rel_source))
-          a.text = os.path.basename(rel_source)
-
-          if syntax.doxygen:
-            p = etree.SubElement(ul, 'li')
-            p.text = 'Doxygen:&nbsp;'
-            a = etree.SubElement(p, 'a')
-            a.set('href', "{}class{}.html".format(syntax.doxygen, self._name))
-            a.text = self._name
-
-    return el
-
 
   def _listhelper(self, node, title, parent, items):
     """
@@ -217,7 +174,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
       node[dict]: YAML data node.
       title[str]: The level two header to apply to lists.
       parent[etree.Element]: The parent element the headers and lists are to be applied
-      items[dict]: Dictionary of databases containg link information
+      items[dict]: Dictionary of databases containing link information
     """
 
     has_items = False

@@ -37,6 +37,7 @@ validParams<TensorMechanicsAction>()
   params.addParam<bool>("use_finite_deform_jacobian", false, "Jacobian for corrotational finite strain");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   params.addParam<bool>("add_variables", false, "Add the displacement variables");
+  params.addParam<std::vector<MaterialPropertyName>>("eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
 
   // Advanced
   params.addParam<std::vector<SubdomainName>>("block", "The list of ids of the blocks (subdomain) that the stress divergence kernels will be applied to");
@@ -56,7 +57,8 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _diag_save_in(getParam<std::vector<AuxVariableName>>("diag_save_in")),
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _strain(getParam<MooseEnum>("strain").getEnum<Strain>()),
-    _planar_formulation(getParam<MooseEnum>("planar_formulation").getEnum<PlanarFormulation>())
+    _planar_formulation(getParam<MooseEnum>("planar_formulation").getEnum<PlanarFormulation>()),
+    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names"))
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -218,10 +220,11 @@ TensorMechanicsAction::act()
 
     // set material parameters
     auto params = _factory.getValidParams(type);
-    params.applyParameters(parameters(), {"displacements", "use_displaced_mesh"});
+    params.applyParameters(parameters(), {"displacements", "use_displaced_mesh", "eigenstrain_names"});
 
     params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
     params.set<bool>("use_displaced_mesh") = false;
+    params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") = _eigenstrain_names;
 
     _problem->addMaterial(type, name() + "_strain", params);
   }

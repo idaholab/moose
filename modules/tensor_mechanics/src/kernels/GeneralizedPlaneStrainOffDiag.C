@@ -23,6 +23,7 @@ InputParameters validParams<GeneralizedPlaneStrainOffDiag>()
   params.addParam<NonlinearVariableName>("temperature", "Variable for the temperature");
   params.addCoupledVar("scalar_strain_zz", "Scalar variable for the strain_zz");
   params.addParam<std::string>("base_name", "Material property base name");
+  params.addParam<std::vector<MaterialPropertyName>>("eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
   params.set<bool>("use_displaced_mesh") = true;
 
   return params;
@@ -32,7 +33,8 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
    DerivativeMaterialInterface<Kernel>(parameters),
    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
    _Jacobian_mult(getMaterialProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
-   _thermal_expansion_tensor(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "_thermal_expansion_tensor")),
+   _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
+   _deigenstrain_dT(_eigenstrain_names.size()),
    _scalar_strain_zz_var(coupledScalar("scalar_strain_zz")),
    _temp_var(isParamValid("temperature") ? &_fe_problem.getVariable(_tid, getParam<NonlinearVariableName>("temperature")) : NULL)
 {
@@ -42,6 +44,12 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
 
   for (unsigned int i = 0; i < nl_vnames.size(); ++i)
     _disp_var.push_back(&_fe_problem.getVariable(_tid, nl_vnames[i]));
+
+  for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
+  {
+    MaterialPropertyName deriv_prop_name = _base_name + "d" + _eigenstrain_names[i] + "_dtemperature";
+    _deigenstrain_dT[i] = &getMaterialPropertyDerivative<RankTwoTensor>(deriv_prop_name, _temp_var->name());
+  }
 }
 
 void
@@ -81,10 +89,12 @@ GeneralizedPlaneStrainOffDiag::computeTempOffDiagJacobianScalar(unsigned int jva
   {
     DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar, _var.number());
     MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
+    unsigned int n_eigenstrains = _deigenstrain_dT.size();
 
     for (_i = 0; _i < _test.size(); ++_i)
       for (_j = 0; _j < jv.order(); ++_j)
         for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-          kne(_j, _i) += _JxW[_qp] * _coord[_qp] * (_Jacobian_mult[_qp] * _thermal_expansion_tensor[_qp])(2, 2) * _test[_i][_qp];
+          for (unsigned int ies = 0; ies < n_eigenstrains; ++ies)
+            kne(_j, _i) += _JxW[_qp] * _coord[_qp] * (_Jacobian_mult[_qp] * (*_deigenstrain_dT[ies])[_qp])(2, 2) * _test[_i][_qp];
   }
 }

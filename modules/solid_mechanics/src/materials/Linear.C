@@ -77,15 +77,15 @@ Linear::computeStrain( const unsigned qp,
 
       if (_large_strain)
       {
-        volumetric_strain += 0.5 * (_grad_disp_x[qp](0) * _grad_disp_x[qp](0) +
-                                    _grad_disp_y[qp](0) * _grad_disp_y[qp](0) +
-                                    _grad_disp_z[qp](0) * _grad_disp_z[qp](0)) / 3.0 * _solid_model.JxW(qp_loop);
-        volumetric_strain += 0.5 * (_grad_disp_x[qp](1) * _grad_disp_x[qp](1) +
-                                    _grad_disp_y[qp](1) * _grad_disp_y[qp](1) +
-                                    _grad_disp_z[qp](1) * _grad_disp_z[qp](1)) / 3.0 * _solid_model.JxW(qp_loop);
-        volumetric_strain += 0.5 * (_grad_disp_x[qp](2) * _grad_disp_x[qp](2) +
-                                    _grad_disp_y[qp](2) * _grad_disp_y[qp](2) +
-                                    _grad_disp_z[qp](2) * _grad_disp_z[qp](2)) / 3.0 * _solid_model.JxW(qp_loop);
+        volumetric_strain += 0.5 * (_grad_disp_x[qp_loop](0) * _grad_disp_x[qp_loop](0) +
+                                    _grad_disp_y[qp_loop](0) * _grad_disp_y[qp_loop](0) +
+                                    _grad_disp_z[qp_loop](0) * _grad_disp_z[qp_loop](0)) / 3.0 * _solid_model.JxW(qp_loop);
+        volumetric_strain += 0.5 * (_grad_disp_x[qp_loop](1) * _grad_disp_x[qp_loop](1) +
+                                    _grad_disp_y[qp_loop](1) * _grad_disp_y[qp_loop](1) +
+                                    _grad_disp_z[qp_loop](1) * _grad_disp_z[qp_loop](1)) / 3.0 * _solid_model.JxW(qp_loop);
+        volumetric_strain += 0.5 * (_grad_disp_x[qp_loop](2) * _grad_disp_x[qp_loop](2) +
+                                    _grad_disp_y[qp_loop](2) * _grad_disp_y[qp_loop](2) +
+                                    _grad_disp_z[qp_loop](2) * _grad_disp_z[qp_loop](2)) / 3.0 * _solid_model.JxW(qp_loop);
       }
     }
 

@@ -157,10 +157,12 @@
     type = ComputeAxisymmetricRZIncrementalPlaneStrain
     block = 1
     strain_yy = strain_yy
+    eigenstrain_names = thermal_eigenstrain
   [../]
 
   [./thermal_strain]
     type = ComputeThermalExpansionEigenstrain
+    eigenstrain_name = thermal_eigenstrain
     block = 1
     thermal_expansion_coeff = 1e-8
     temperature = temp

@@ -93,7 +93,7 @@ ComputeFiniteStrain::computeQpStrain()
   _strain_increment[_qp] = total_strain_increment;
 
   // Remove the eigenstrain increment
-  _strain_increment[_qp] -= _eigenstrain_increment[_qp];
+  subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
 
   RankTwoTensor D = _strain_increment[_qp] / _dt;
   _strain_rate[_qp] = D;

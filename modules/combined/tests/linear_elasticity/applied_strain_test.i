@@ -84,6 +84,7 @@
   [./strain]
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y'
+    eigenstrain_names = eigenstrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress
@@ -92,6 +93,7 @@
     type = ComputeEigenstrain
     eigen_base = '0.1 0.05 0 0 0 0.01'
     prefactor = -1
+    eigenstrain_name = eigenstrain
   [../]
 []
 
