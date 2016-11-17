@@ -3,6 +3,7 @@ import copy
 import bs4
 import jinja2
 import logging
+import MooseDocs
 log = logging.getLogger(__name__)
 
 from NavigationNode import NavigationNode
@@ -32,6 +33,7 @@ class MoosePage(NavigationNode):
     self._parser = parser
     self._syntax = syntax
     self._root_dir = root_dir
+    self._doc_dir = os.path.relpath(os.getcwd(), self._root_dir)
     self._html = None
 
     # Populate the list of parent nodes (i.e., "breadcrumbs")
@@ -70,7 +72,8 @@ class MoosePage(NavigationNode):
         self._html = content
 
     # Create the template object
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'))
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader([os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'templates'),
+                                                             os.path.join(os.getcwd(), 'templates')]))
     template = env.get_template(self._template)
 
     # Render the html via template
@@ -160,7 +163,7 @@ class MoosePage(NavigationNode):
     Args:
       repo_url[str]: Web address to use as the base for creating the edit link
     """
-    output = [('Edit Markdown', os.path.join(repo_url, 'edit', 'devel', 'docs', self.filename))]
+    output = [('Edit Markdown', os.path.join(repo_url, 'edit', 'devel', self._doc_dir, self.filename))]
 
     name = self._breadcrumbs[-1].name
 
@@ -175,7 +178,7 @@ class MoosePage(NavigationNode):
           rel_source = os.path.relpath(source, self._root_dir)
           output.append( ('Source', os.path.join(repo_url, 'blob', 'master', rel_source)) )
 
-        output.append( ('Doxygen', "{}class{}.html".format(syntax.doxygen, name)) )
+        output.append( ('Doxygen', syntax.doxygen(name)) )
 
     return output
 
@@ -186,7 +189,11 @@ class MoosePage(NavigationNode):
     """
     soup = bs4.BeautifulSoup(self._html, 'html.parser')
     for tag in soup.find_all(level):
-      yield (tag.contents[0], tag.attrs['id'])
+      if 'id' in tag.attrs:
+        yield (tag.contents[0], tag.attrs['id'])
+      else:
+        yield (tag.contents[0], tag.contents[0].lower().replace(' ', '-'))
+
 
 
   def breadcrumbs(self):

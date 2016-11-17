@@ -79,7 +79,7 @@ class MooseApplicationSyntax(object):
     generate[bool]: When True stub pages are generated if they do not exist
   """
 
-  def __init__(self, yaml_data, paths=[], doxygen=None, pages='pages.yml', name=None, install=None, stubs=False, pages_stubs=False, hide=[], **kwargs):
+  def __init__(self, yaml_data, paths=[], doxygen=None, doxygen_name_style='upper', pages='pages.yml', name=None, install=None, stubs=False, pages_stubs=False, hide=[], **kwargs):
 
     # Store the input variables
     self._yaml_data = yaml_data
@@ -87,7 +87,6 @@ class MooseApplicationSyntax(object):
     self.install = install
     self.stubs = stubs
     self.pages_stubs = pages_stubs
-    self.doxygen = doxygen
     self.name = name
     self.hide = hide
 
@@ -100,6 +99,8 @@ class MooseApplicationSyntax(object):
     self._filenames = dict()
     self._syntax = set()
     self._markdown = list() # A list of markdown files, used for updating pages.yml
+    self._doxygen = doxygen
+    self._doxygen_name_style = doxygen_name_style
 
     # Update the syntax maps
     for path in paths:
@@ -120,6 +121,14 @@ class MooseApplicationSyntax(object):
         else:
           name = node['name'].rsplit('/', 1)[0]
           self._systems.add(name)
+
+  def doxygen(self, name):
+    if self._doxygen_name_style == 'lower':
+      convert = lambda str: re.sub('(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))', '_\\1', str).lower().strip('_')
+      return os.path.join(self._doxygen, "class_{}.html".format(convert(name)))
+    else:
+      return os.path.join(self._doxygen, "class{}.html".format(name))
+
 
   def systems(self):
     """
