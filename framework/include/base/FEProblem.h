@@ -1290,7 +1290,7 @@ private:
   bool _started_initial_setup;
 
   friend class AuxiliarySystem;
-  friend class NonlinearSystem;
+  friend class NonlinearSystemBase;
   friend class MooseEigenSystem;
   friend class Resurrector;
   friend class RestartableDataIO;

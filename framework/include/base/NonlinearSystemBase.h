@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef NONLINEARSYSTEM_H
-#define NONLINEARSYSTEM_H
+#ifndef NONLINEARSYSTEMBASE_H
+#define NONLINEARSYSTEMBASE_H
 
 #include "SystemBase.h"
 #include "KernelWarehouse.h"
@@ -55,12 +55,12 @@ template <typename T> class SparseMatrix;
  *
  * It is a part of FEProblem ;-)
  */
-class NonlinearSystem : public SystemBase,
+class NonlinearSystemBase : public SystemBase,
                         public ConsoleStreamInterface
 {
 public:
-  NonlinearSystem(FEProblem & problem, const std::string & name);
-  virtual ~NonlinearSystem();
+  NonlinearSystemBase(FEProblem & problem, TransientNonlinearImplicitSystem & sys, const std::string & name);
+  virtual ~NonlinearSystemBase();
 
   virtual void init() override;
   virtual void solve() override;
@@ -280,7 +280,7 @@ public:
 
 
   /**
-   * Update active objects of Warehouses owned by NonlinearSystem
+   * Update active objects of Warehouses owned by NonlinearSystemBase
    */
   void updateActive(THREAD_ID tid);
 
@@ -438,7 +438,7 @@ public:
 
   //@{
   /**
-   * Access functions to Warehouses from outside NonlinearSystem
+   * Access functions to Warehouses from outside NonlinearSystemBase
    */
   const KernelWarehouse & getKernelWarehouse() { return _kernels; }
   const MooseObjectWarehouse<KernelBase> & getTimeKernelWarehouse() { return _time_kernels; }
@@ -656,4 +656,4 @@ protected:
   std::vector<dof_id_type> _var_all_dof_indices;
 };
 
-#endif /* NONLINEARSYSTEM_H */
+#endif /* NONLINEARSYSTEMBASE_H */

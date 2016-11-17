@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 #include "Problem.h"
 #include "FEProblem.h"
@@ -150,11 +150,11 @@ namespace Moose {
 } // namespace Moose
 
 
-NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & name) :
+NonlinearSystemBase::NonlinearSystemBase(FEProblem & fe_problem, TransientNonlinearImplicitSystem & sys, const std::string & name) :
     SystemBase(fe_problem, name, Moose::VAR_NONLINEAR),
     ConsoleStreamInterface(fe_problem.getMooseApp()),
     _fe_problem(fe_problem),
-    _sys(fe_problem.es().add_system<TransientNonlinearImplicitSystem>(name)),
+    _sys(sys),
     _last_rnorm(0.),
     _last_nl_rnorm(0.),
     _l_abs_step_tol(1e-10),
@@ -215,14 +215,14 @@ NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & nam
 #endif
 }
 
-NonlinearSystem::~NonlinearSystem()
+NonlinearSystemBase::~NonlinearSystemBase()
 {
   delete &_serialized_solution;
   delete &_residual_copy;
 }
 
 void
-NonlinearSystem::init()
+NonlinearSystemBase::init()
 {
   Moose::setup_perf_log.push("NonlinerSystem::init()", "Setup");
 
@@ -238,6 +238,7 @@ NonlinearSystem::init()
 
   Moose::setup_perf_log.pop("NonlinerSystem::init()", "Setup");
 }
+
 
 void
 NonlinearSystem::solve()
