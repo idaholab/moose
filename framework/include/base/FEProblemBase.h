@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef FEPROBLEM_H
-#define FEPROBLEM_H
+#ifndef FEPROBLEMBASE_H
+#define FEPROBLEMBASE_H
 
 // MOOSE includes
 #include "SubProblem.h"
@@ -36,7 +36,7 @@
 
 // Forward declarations
 class DisplacedProblem;
-class FEProblem;
+class FEProblemBase;
 class MooseMesh;
 class NonlinearSystemBase;
 class RandomInterface;
@@ -75,7 +75,7 @@ class CouplingMatrix;
 }
 
 template<>
-InputParameters validParams<FEProblem>();
+InputParameters validParams<FEProblemBase>();
 
 enum MooseNonlinearConvergenceReason
 {
@@ -122,13 +122,13 @@ enum MooseLinearConvergenceReason
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
  */
-class FEProblem :
+class FEProblemBase :
   public SubProblem,
   public Restartable
 {
 public:
-  FEProblem(const InputParameters & parameters);
-  virtual ~FEProblem();
+  FEProblemBase(const InputParameters & parameters);
+  virtual ~FEProblemBase();
 
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
@@ -992,7 +992,7 @@ public:
    * Return the current execution flag.
    *
    * Returns EXEC_NONE when not being executed.
-   * @see FEProblem::execute
+   * @see FEProblemBase::execute
    */
   const ExecFlagType & getCurrentExecuteOnFlag() const;
 
@@ -1301,7 +1301,7 @@ private:
 
 template<typename T>
 void
-FEProblem::allowOutput(bool state)
+FEProblemBase::allowOutput(bool state)
 {
   _app.getOutputWarehouse().allowOutput<T>(state);
 }
@@ -1309,7 +1309,7 @@ FEProblem::allowOutput(bool state)
 
 template<typename T>
 void
-FEProblem::initializeUserObjects(const MooseObjectWarehouse<T> & warehouse)
+FEProblemBase::initializeUserObjects(const MooseObjectWarehouse<T> & warehouse)
 {
   if (warehouse.hasActiveObjects())
   {
@@ -1325,7 +1325,7 @@ FEProblem::initializeUserObjects(const MooseObjectWarehouse<T> & warehouse)
 
 template<typename T>
 void
-FEProblem::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
+FEProblemBase::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
 {
   if (warehouse.hasActiveObjects())
   {
@@ -1354,4 +1354,4 @@ FEProblem::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
 }
 
 
-#endif /* FEPROBLEM_H */
+#endif /* FEPROBLEMBASE_H */
