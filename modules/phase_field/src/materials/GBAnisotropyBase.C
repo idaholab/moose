@@ -153,7 +153,7 @@ GBAnisotropyBase::computeQpProperties()
       sum_val += Val;
       sum_kappa += _kappa_gamma[m][n] * f_sigma*Val;
       sum_gamma += gamma_value * Val;
-      // Following comes from substituting Eq. (36c) from paper into (36b)
+      // Following comes from substituting Eq. (36c) from the paper into (36b)
       sum_L += Val * MOB[m][n] * f_mob * _mu_qp * _a_g2[n][m] / _sigma[m][n];
     }
   }

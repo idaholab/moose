@@ -75,8 +75,8 @@ GBAnisotropy::GBAnisotropy(const InputParameters & parameters) :
         a_star = std::sqrt(f_interf / g2);
       }
 
-      _kappa_gamma[m][n] = kappa_star; // upper triangle stores the discrete set of kappa value
-      _kappa_gamma[n][m] = gamma_star; // lower triangle stores the discrete set of gamma value
+      _kappa_gamma[m][n] = kappa_star; // upper triangle stores the discrete set of kappa values
+      _kappa_gamma[n][m] = gamma_star; // lower triangle stores the discrete set of gamma values
 
       _a_g2[m][n] = a_star; // upper triangle stores "a" data.
       _a_g2[n][m] = g2; // lower triangle stores "g2" data.
