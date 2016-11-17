@@ -22,6 +22,8 @@ public:
   virtual void act();
 
 protected:
+  void actOutputGeneration();
+
   virtual std::string getKernelType();
   virtual InputParameters getKernelParameters(std::string type);
 
@@ -40,6 +42,9 @@ protected:
 
   /// if this vector is not empty the variables, kernels and materials are restricted to these subdomains
   std::vector<SubdomainName> _subdomain_names;
+
+  /// set generated from the passed in vector of subdomain names
+  std::set<SubdomainID> _subdomain_ids;
 
   /// strain formulation
   enum class Strain
@@ -65,6 +70,9 @@ protected:
     PlaneStrain,
     GeneralizedPlaneStrain
   } _planar_formulation;
+
+  /// generate output for sclar stress/strain tensor quantities
+  std::vector<unsigned int> _generate_output;
 
   /// use displaced mesh (true unless _strain is SMALL)
   bool _use_displaced_mesh;

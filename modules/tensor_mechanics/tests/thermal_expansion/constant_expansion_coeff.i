@@ -23,19 +23,6 @@
 [AuxVariables]
   [./temp]
   [../]
-
-  [./strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [Functions]
@@ -51,6 +38,7 @@
     incremental = true
     add_variables = true
     eigenstrain_names = eigenstrain
+    generate_output = 'strain_xx strain_yy strain_zz'
   [../]
 []
 
@@ -59,28 +47,6 @@
     type = FunctionAux
     variable = temp
     function = temperature_load
-  [../]
-
-  [./strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_zz
-    index_i = 2
-    index_j = 2
   [../]
 []
 
@@ -159,21 +125,17 @@
   [./strain_xx]
     type = ElementAverageValue
     variable = strain_xx
-    block = 0
   [../]
   [./strain_yy]
     type = ElementAverageValue
     variable = strain_yy
-    block = 0
   [../]
   [./strain_zz]
     type = ElementAverageValue
     variable = strain_zz
-    block = 0
   [../]
   [./temperature]
     type = AverageNodalVariableValue
     variable = temp
-    block = 0
   [../]
 []

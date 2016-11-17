@@ -367,6 +367,7 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(CavityPressureUOAction, "add_user_object");
   registerAction(LegacyTensorMechanicsAction, "add_kernel");
   registerAction(TensorMechanicsAction, "add_kernel");
+  registerAction(TensorMechanicsAction, "add_aux_kernel");
   registerAction(TensorMechanicsAction, "add_variable");
   registerAction(TensorMechanicsAction, "add_material");
   registerAction(DynamicTensorMechanicsAction, "add_kernel");

@@ -15,7 +15,6 @@
 #include "ContactApp.h"
 #include "FluidPropertiesApp.h"
 #include "HeatConductionApp.h"
-#include "LinearElasticityApp.h"
 #include "MiscApp.h"
 #include "NavierStokesApp.h"
 #include "PhaseFieldApp.h"
@@ -67,7 +66,6 @@ CombinedApp::registerObjects(Factory & factory)
   ContactApp::registerObjects(factory);
   FluidPropertiesApp::registerObjects(factory);
   HeatConductionApp::registerObjects(factory);
-  LinearElasticityApp::registerObjects(factory);
   MiscApp::registerObjects(factory);
   NavierStokesApp::registerObjects(factory);
   PhaseFieldApp::registerObjects(factory);
@@ -89,7 +87,6 @@ CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   ContactApp::associateSyntax(syntax, action_factory);
   FluidPropertiesApp::associateSyntax(syntax, action_factory);
   HeatConductionApp::associateSyntax(syntax, action_factory);
-  LinearElasticityApp::associateSyntax(syntax, action_factory);
   MiscApp::associateSyntax(syntax, action_factory);
   NavierStokesApp::associateSyntax(syntax, action_factory);
   PhaseFieldApp::associateSyntax(syntax, action_factory);
