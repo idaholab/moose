@@ -42,8 +42,8 @@ public:
   void setQp(unsigned int qp);
 
   ///@{ Retained as empty methods to avoid a warning from Material.C in framework. These methods are unused in all inheriting classes and should not be overwritten.
-  void resetQpProperties();
-  void resetProperties();
+  void resetQpProperties() final {}
+  void resetProperties() final {}
   ///@}
 
 protected:
