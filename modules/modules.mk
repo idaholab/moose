@@ -10,6 +10,7 @@ ifeq ($(ALL_MODULES),yes)
         MISC                      := yes
         NAVIER_STOKES             := yes
         PHASE_FIELD               := yes
+        RDG                       := yes
         RICHARDS                  := yes
         SOLID_MECHANICS           := yes
         STOCHASTIC_TOOLS          := yes
@@ -107,6 +108,13 @@ ifeq ($(PHASE_FIELD),yes)
   DEPEND_MODULES     := tensor_mechanics
 
   SUFFIX             := pf
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(RDG),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/rdg
+  APPLICATION_NAME   := rdg
+  SUFFIX             := rdg
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
