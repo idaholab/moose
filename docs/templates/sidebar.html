@@ -7,11 +7,13 @@ contains all MoosePage objects for the website.
 {% else %}
   <ul id="nav-mobile" class="side-nav">
 {% endif %}
+{% if logo %}
   <li class="logo">
     <a id="logo-container" href="{{current.relpath(site_url)}}">
       <img width="80%" align="middle" src="{{current.relpath(logo)}}">
     </a>
   </li>
+{% endif %}
   <li>
     <ul class="collapsible" data-collapsible="accoridon">
       {% for child in tree.children recursive %}
