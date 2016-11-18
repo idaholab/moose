@@ -23,6 +23,7 @@
 #include "AddAuxVariableAction.h"
 #include "XTermConstants.h"
 #include "InfixIterator.h"
+#include "FEProblem.h"
 
 ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory) :
     ConsoleStreamInterface(app),
@@ -366,4 +367,11 @@ ActionWarehouse::printInputFile(std::ostream & out)
   }
 
   out << tree.print("");
+}
+
+MooseSharedPointer<FEProblem>
+ActionWarehouse::problem()
+{
+
+  return std::dynamic_pointer_cast<FEProblem >(_problem);
 }

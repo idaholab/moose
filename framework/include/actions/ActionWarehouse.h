@@ -30,6 +30,7 @@ typedef std::vector<Action *>::iterator ActionIterator;
 class MooseMesh;
 class Syntax;
 class ActionFactory;
+class FEProblem;
 
 /**
  * Storage for action instances.
@@ -181,7 +182,8 @@ public:
   MooseSharedPointer<MooseMesh> & mesh() { return _mesh; }
   MooseSharedPointer<MooseMesh> & displacedMesh() { return _displaced_mesh; }
 
-  MooseSharedPointer<FEProblemBase> & problem() { return _problem; }
+  MooseSharedPointer<FEProblemBase> & problemBase() { return _problem; }
+  MooseSharedPointer<FEProblem>  problem();
   MooseApp & mooseApp() { return _app; }
   const std::string & getCurrentTaskName() const { return _current_task; }
 
