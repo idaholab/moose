@@ -34,10 +34,10 @@ protected:
 
   Real d2EffectiveSaturation_dP2(Real pressure) const override;
 
-  /// vanGenuchten alpha
+  /// van Genuchten parameter alpha
   const Real _al;
 
-  /// vanGenuchten m
+  /// van Genuchten exponent m
   const Real _m;
 };
 

@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef POROUSFLOWEFFECTIVESATURATIONRSC_H
-#define POROUSFLOWEFFECTIVESATURATIONRSC_H
+#ifndef POROUSFLOWROGERSSTALLYBRASSCLEMENTS_H
+#define POROUSFLOWROGERSSTALLYBRASSCLEMENTS_H
 
 #include "MooseTypes.h"
 
@@ -15,31 +15,34 @@
  * valid for residual saturations = 0, and viscosityOil = 2*viscosityWater.  (the "2" is important here!).
  * C Rogers, MP Stallybrass and DL Clements "On two phase filtration under gravity and with boundary infiltration: application of a Backlund transformation" Nonlinear Analysis Theory Methods and Applications 7 (1983) 785--799.
  */
-namespace PorousFlowEffectiveSaturationRSC
+namespace PorousFlowRogersStallybrassClements
 {
 /**
- * effective saturation as a function of capillary pressure
+ * Effective saturation as a function of capillary pressure
  * @param pc capillary pressure
  * @param shift RSC's shift parameter
  * @param scale RSC's scale parameter
+ * @return effective saturation
  */
-Real seff(Real pc, Real shift, Real scale);
+Real effectiveSaturation(Real pc, Real shift, Real scale);
 
 /**
- * derivative of effective saturation wrt capillary pressure
+ * Derivative of effective saturation wrt capillary pressure
  * @param pc capillary pressure
  * @param shift RSC's shift parameter
  * @param scale RSC's scale parameter
+ * @return derivative of effective saturation wrt capillary pressure
  */
-Real dseff(Real pc, Real shift, Real scale);
+Real dEffectiveSaturation(Real pc, Real shift, Real scale);
 
 /**
- * 2nd derivative of effective saturation wrt capillary pressure
+ * Second derivative of effective saturation wrt capillary pressure
  * @param pc capillary pressure
  * @param shift RSC's shift parameter
  * @param scale RSC's scale parameter
+ * @return second derivative of effective saturation wrt capillary pressure
  */
-Real d2seff(Real pc, Real shift, Real scale);
-};
+Real d2EffectiveSaturation(Real pc, Real shift, Real scale);
+}
 
-#endif // POROUSFLOWEFFECTIVESATURATIONRSC_H
+#endif // POROUSFLOWROGERSSTALLYBRASSCLEMENTS_H

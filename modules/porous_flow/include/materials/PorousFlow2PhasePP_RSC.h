@@ -9,7 +9,7 @@
 #define POROUSFLOW2PHASEPP_RSC_H
 
 #include "PorousFlow2PhasePP.h"
-#include "PorousFlowEffectiveSaturationRSC.h"
+#include "PorousFlowRogersStallybrassClements.h"
 
 //Forward Declarations
 class PorousFlow2PhasePP_RSC;

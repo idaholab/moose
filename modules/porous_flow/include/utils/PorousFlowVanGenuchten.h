@@ -11,61 +11,108 @@
 #include "MooseTypes.h"
 
 /**
- * Utility functions for van-genuchten effective saturation,
- * as a function of porepressure (not capillary pressure),
- * and first and second derivs wrt porepressure.
- * So seff = 1 for p >= 0
- *    seff = (1 + (-al*p)^(1/(1-m)))^(-m) < 1 for p < 0
+ * van Genuchten effective saturation, capillary pressure and relative
+ * permeability functions.
+ * Note: effective saturation is provided as a function of porepressure, not
+ * capillary pressure.
+ * Note: capillary pressure and relative permeability are functions of effective
+ * saturation. The derivatives are therefore given wrt effective saturation. These
+ * derivatives must be multiplied by the derivative of effective saturation wrt
+ * the true saturation in objects using these relations.
  *
- * Also, van-genuchten relative permeability as a function
- * of saturation
+ * Based on van Genuchten, M. Th., A closed for equation for
+ * predicting the hydraulic conductivity of unsaturated soils,
+ * Soil Sci. Soc., 44, 892-898 (1980).
  */
+
 namespace PorousFlowVanGenuchten
 {
 /**
- * effective saturation as a fcn of porepressure
+ * Effective saturation as a function of porepressure.
+ * Note: seff = 1 for p >= 0
  * @param p porepressure
- * @param al van-genuchten alpha parameter
- * @param m van-genuchten m parameter
+ * @param alpha van Genuchten parameter
+ * @param m van Genuchten exponent
+ * @return effective saturation
  */
-Real seff(Real p, Real al, Real m);
+Real effectiveSaturation(Real p, Real alpha, Real m);
 
 /**
- * derivative of effective saturation wrt porepressure
+ * Derivative of effective saturation wrt porepressure
  * @param p porepressure
- * @param al van-genuchten alpha parameter
- * @param m van-genuchten m parameter
+ * @param alpha van Genuchten parameter
+ * @param m van Genuchten exponent
+ * @return derivative of effective saturation wrt porepressure
  */
-Real dseff(Real p, Real al, Real m);
+Real dEffectiveSaturation(Real p, Real alpha, Real m);
 
 /**
- * 2nd derivative of effective saturation wrt porepressure
+ * Second derivative of effective saturation wrt porepressure
  * @param p porepressure
- * @param al van-genuchten alpha parameter
- * @param m van-genuchten m parameter
+ * @param alpha van Genuchten parameter
+ * @param m van Genuchten exponent
+ * @return second derivative of effective saturation wrt porepressure
  */
-Real d2seff(Real p, Real al, Real m);
+Real d2EffectiveSaturation(Real p, Real alpha, Real m);
+
+/**
+ * Capillary pressure as a function of effective saturation
+ * Note: the parameter p0 is the inverse of the alpha parameter
+ * in effectiveSaturation
+ *
+ * @param seff effective saturation
+ * @param m van Genuchten exponent
+ * @param p0 capillary pressure strength factor (Pa)
+ * @param pc_max maximum capillary pressure (Pa)
+ * @return capillary pressure (Pa)
+ */
+Real capillaryPressure(Real seff, Real m, Real p0, Real pc_max);
+
+/**
+ * Derivative of capillary pressure wrt effective saturation
+ *
+ * @param seff effective saturation
+ * @param m van Genuchten exponent
+ * @param p0 capillary pressure strength factor (Pa)
+ * @param pc_max maximum capillary pressure (Pa)
+ * @return derivative of capillary pressure wrt effective saturation
+ */
+Real dCapillaryPressure(Real seff, Real m, Real p0, Real pc_max);
+
+/**
+ * Second derivative of capillary pressure wrt effective saturation
+ *
+ * @param seff effective saturation
+ * @param m van Genuchten exponent
+ * @param p0 capillary pressure strength factor (Pa)
+ * @param pc_max maximum capillary pressure (Pa)
+ * @return second derivative of capillary pressure wrt effective saturation
+ */
+Real d2CapillaryPressure(Real seff, Real m, Real p0, Real pc_max);
 
 /**
  * Relative permeability as a function of effective saturation
  * @param seff effective saturation
- * @param m Van-Genuchten m index
+ * @param m van Genuchten exponent
+ * @return relative permeability
  */
 Real relativePermeability(Real seff, Real m);
 
 /**
  * Derivative of relative permeability with respect to effective saturation
  * @param seff effective saturation
- * @param m Van-Genuchten m index
+ * @param m van Genuchten exponent
+ * @return derivative of relative permeability wrt effective saturation
  */
-Real drelativePermeability(Real seff, Real m);
+Real dRelativePermeability(Real seff, Real m);
 
 /**
  * Second derivative of relative permeability with respect to effective saturation
  * @param seff effective saturation
- * @param m Van-Genuchten m index
+ * @param m van Genuchten exponent
+ * @return second derivative of relative permeability wrt effective saturation
  */
-Real d2relativePermeability(Real seff, Real m);
+Real d2RelativePermeability(Real seff, Real m);
 }
 
 #endif // POROUSFLOWVANGENUCHTEN_H

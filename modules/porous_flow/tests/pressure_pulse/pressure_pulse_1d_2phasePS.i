@@ -88,7 +88,7 @@
     type = PorousFlow2PhasePS
     phase0_porepressure = ppwater
     phase1_saturation = sgas
-    pc = 1e5
+    pc = -1e5
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
