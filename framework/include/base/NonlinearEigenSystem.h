@@ -17,7 +17,6 @@
 
 #include "libmesh/libmesh_config.h"
 
-#if LIBMESH_HAVE_SLEPC
 
 #include "SystemBase.h"
 #include "NonlinearSystemBase.h"
@@ -29,12 +28,12 @@
 /**
  * Nonlinear system to be solved
  *
- * It is a part of FEProblem ;-)
+ * It is a part of FEProblemBase ;-)
  */
 class NonlinearEigenSystem : public NonlinearSystemBase
 {
 public:
-  NonlinearEigenSystem(FEProblem & problem, const std::string & name);
+  NonlinearEigenSystem(FEProblemBase & problem, const std::string & name);
   virtual ~NonlinearEigenSystem();
 
   virtual void solve() override;
@@ -66,12 +65,19 @@ public:
 
   virtual NumericVector<Number> & solutionOlder() override { return *_transient_sys.older_local_solution; }
 
+#if LIBMESH_HAVE_SLEPC
   virtual TransientEigenSystem & sys() { return _transient_sys; }
-
+#else
+  virtual TransientBaseSystem & sys() { return _transient_sys; }
+#endif /* LIBMESH_HAVE_SLEPC */
 private:
- TransientEigenSystem & _transient_sys;
+#if LIBMESH_HAVE_SLEPC
+  TransientEigenSystem & _transient_sys;
+#else
+  TransientBaseSystem & _transient_sys;
+#endif /* LIBMESH_HAVE_SLEPC */
 };
 
-#endif /* LIBMESH_HAVE_SLEPC */
+
 
 #endif /* NONLINEAREIGENSYSTEM_H */
