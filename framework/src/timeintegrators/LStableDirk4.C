@@ -14,7 +14,7 @@
 
 #include "LStableDirk4.h"
 #include "NonlinearSystemBase.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "PetscSupport.h"
 
 template<>

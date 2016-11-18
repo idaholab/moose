@@ -16,7 +16,7 @@
 #include "RestartableDataIO.h"
 #include "MooseUtils.h"
 #include "RestartableData.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseApp.h"
 #include "NonlinearSystem.h"
 

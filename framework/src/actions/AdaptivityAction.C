@@ -16,7 +16,7 @@
 
 #ifdef LIBMESH_ENABLE_AMR
 
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 #include "Adaptivity.h"
 #include "Executioner.h"

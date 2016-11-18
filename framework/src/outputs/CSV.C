@@ -14,7 +14,7 @@
 
 // Moose includes
 #include "CSV.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseApp.h"
 
 template<>

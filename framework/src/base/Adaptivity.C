@@ -15,7 +15,7 @@
 #include "Adaptivity.h"
 
 #include "MooseMesh.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 #include "DisplacedProblem.h"
 #include "FlagElementsThread.h"

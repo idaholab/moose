@@ -7,7 +7,7 @@
 #include "PolycrystalVariablesAction.h"
 #include "Factory.h"
 #include "Parser.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 #include <sstream>
 #include <stdexcept>

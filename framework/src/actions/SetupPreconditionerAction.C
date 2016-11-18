@@ -17,7 +17,7 @@
 #include "Factory.h"
 #include "PetscSupport.h"
 #include "MoosePreconditioner.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "CreateExecutionerAction.h"
 #include "NonlinearSystemBase.h"
 
@@ -42,7 +42,7 @@ SetupPreconditionerAction::act()
   if (_problem.get() != NULL)
   {
     // build the preconditioner
-    _moose_object_pars.set<FEProblemBase *>("_fe_problem") = _problem.get();
+    _moose_object_pars.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
     MooseSharedPointer<MoosePreconditioner> pc = _factory.create<MoosePreconditioner>(_type, _name, _moose_object_pars);
 
     _problem->getNonlinearSystemBase().setPreconditioner(pc);

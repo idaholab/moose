@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "ValueRangeMarker.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseEnum.h"
 
 template<>

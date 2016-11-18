@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "TableOutput.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Postprocessor.h"
 #include "PetscSupport.h"
 #include "Executioner.h"

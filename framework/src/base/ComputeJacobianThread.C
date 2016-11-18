@@ -14,7 +14,7 @@
 
 #include "ComputeJacobianThread.h"
 #include "NonlinearSystem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "TimeDerivative.h"
 #include "IntegratedBC.h"
 #include "DGKernel.h"

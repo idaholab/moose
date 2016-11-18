@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "DT2.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "TimeIntegrator.h"
 #include "NonlinearSystemBase.h"
 

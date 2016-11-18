@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "NumResidualEvaluations.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "SubProblem.h"
 #include "NonlinearSystem.h"
 

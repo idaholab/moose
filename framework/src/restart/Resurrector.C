@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "Resurrector.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
 #include "NonlinearSystem.h"

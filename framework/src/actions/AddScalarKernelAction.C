@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddScalarKernelAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddScalarKernelAction>()

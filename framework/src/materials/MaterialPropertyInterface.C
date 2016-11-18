@@ -30,7 +30,7 @@ InputParameters validParams<MaterialPropertyInterface>()
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object) :
     _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
-    _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem")),
+    _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem_base")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
@@ -44,7 +44,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object, const std::set<SubdomainID> & block_ids) :
     _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
-    _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem")),
+    _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem_base")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
@@ -58,7 +58,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object, const std::set<BoundaryID> & boundary_ids) :
     _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
-    _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem")),
+    _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem_base")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),
@@ -74,7 +74,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
                                                      const std::set<BoundaryID> & boundary_ids) :
     _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
-    _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem")),
+    _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem_base")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
     _stateful_allowed(true),
     _get_material_property_called(false),

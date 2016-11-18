@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "PostprocessorInterface.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Postprocessor.h"
 #include "MooseTypes.h"
 #include "MooseObject.h"
@@ -21,7 +21,7 @@
 PostprocessorInterface::PostprocessorInterface(const MooseObject * moose_object) :
     _ppi_params(moose_object->parameters()),
     // TODO: Retrieve using checked pointer method
-    _pi_feproblem(*_ppi_params.get<FEProblemBase *>("_fe_problem"))
+    _pi_feproblem(*_ppi_params.get<FEProblemBase *>("_fe_problem_base"))
 {
 }
 

@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "SetAdaptivityOptionsAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 // libmesh includes
 #include "libmesh/fe.h"

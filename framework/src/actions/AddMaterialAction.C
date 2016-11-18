@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddMaterialAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddMaterialAction>()

@@ -14,7 +14,7 @@
 
 #include "ExplicitEuler.h"
 #include "NonlinearSystem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<ExplicitEuler>()

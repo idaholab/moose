@@ -18,7 +18,7 @@
 #include "Conversion.h"
 #include "UserObject.h"
 #include "VectorPostprocessorData.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<VectorPostprocessor>()
@@ -34,7 +34,7 @@ InputParameters validParams<VectorPostprocessor>()
 VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters) :
     OutputInterface(parameters),
     _vpp_name(MooseUtils::shortName(parameters.get<std::string>("_object_name"))),
-    _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem")),
+    _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _vpp_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
 {
 }

@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddDamperAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddDamperAction>()

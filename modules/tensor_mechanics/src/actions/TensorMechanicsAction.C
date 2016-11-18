@@ -5,10 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "TensorMechanicsAction.h"
-
-#include "ActionFactory.h"
-#include "FEProblemBase.h"
-
+#include "Factory.h"
+#include "FEProblem.h"
 #include "Conversion.h"
 #include "FEProblem.h"
 #include "Factory.h"

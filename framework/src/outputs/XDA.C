@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "XDA.h"
 #include "MooseApp.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
 
 template<>

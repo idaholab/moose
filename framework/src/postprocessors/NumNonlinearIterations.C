@@ -14,7 +14,7 @@
 
 #include "NumNonlinearIterations.h"
 
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "SubProblem.h"
 
 template<>

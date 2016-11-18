@@ -5,10 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "DynamicTensorMechanicsAction.h"
-
 #include "Factory.h"
-#include "FEProblemBase.h"
-
+#include "FEProblem.h"
 #include "Parser.h"
 
 template <>

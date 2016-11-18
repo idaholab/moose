@@ -16,7 +16,7 @@
 #define RANDOMINTERFACE_H
 
 #include "InputParameters.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "ParallelUniqueId.h"
 
 class RandomInterface;

@@ -19,7 +19,7 @@
 #include "MooseTypes.h"
 #include "MaterialProperty.h"
 #include "MaterialData.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "InputParameters.h"
 
 // Forward declarations

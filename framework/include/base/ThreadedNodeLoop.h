@@ -17,7 +17,7 @@
 
 #include "ParallelUniqueId.h"
 #include "MooseMesh.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<typename RangeType, typename IteratorType>
 class ThreadedNodeLoop

@@ -14,7 +14,7 @@
 
 #include "CreateProblemAction.h"
 #include "Factory.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseApp.h"
 
 template<>

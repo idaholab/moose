@@ -15,7 +15,7 @@
 #include "ComputeResidualThread.h"
 #include "NonlinearSystem.h"
 #include "Problem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "KernelBase.h"
 #include "IntegratedBC.h"
 #include "DGKernel.h"

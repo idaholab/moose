@@ -16,7 +16,7 @@
 #include "ComputeMarkerThread.h"
 #include "AuxiliarySystem.h"
 #include "Problem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Marker.h"
 #include "SwapBackSentinel.h"
 

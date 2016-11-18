@@ -1,7 +1,7 @@
 #include "PFCRFFVariablesAction.h"
 #include "Factory.h"
 #include "Parser.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "AddVariableAction.h"
 
 #include <sstream>

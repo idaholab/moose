@@ -17,7 +17,7 @@
 
 // MOOSE includes
 #include "ParallelUniqueId.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "UserObject.h"
 
 // Forward declarations

@@ -14,7 +14,7 @@
 
 // moose includes
 #include "NonlinearSystem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "TimeIntegrator.h"
 
 // libmesh includes
@@ -24,37 +24,37 @@
 namespace Moose {
   void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys)
   {
-    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem_base");
     p->computeJacobian(sys, soln, jacobian);
   }
 
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
   {
-    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem_base");
     p->computeResidual(sys, soln, residual);
   }
 
   void compute_bounds (NumericVector<Number>& lower, NumericVector<Number>& upper, NonlinearImplicitSystem& sys)
   {
-    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem_base");
     p->computeBounds(sys, lower, upper);
   }
 
   void compute_nullspace (std::vector<NumericVector<Number>*>& sp, NonlinearImplicitSystem& sys)
   {
-    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem_base");
     p->computeNullSpace(sys, sp);
   }
 
   void compute_transpose_nullspace (std::vector<NumericVector<Number>*>& sp, NonlinearImplicitSystem& sys)
   {
-    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem_base");
     p->computeTransposeNullSpace(sys, sp);
   }
 
   void compute_nearnullspace (std::vector<NumericVector<Number>*>& sp, NonlinearImplicitSystem& sys)
   {
-    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem_base");
     p->computeNearNullSpace(sys, sp);
   }
 
@@ -65,7 +65,7 @@ namespace Moose {
                           bool & changed_new_soln,
                           NonlinearImplicitSystem & sys)
   {
-    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem_base");
     p->computePostCheck(sys,
                         old_soln,
                         search_direction,

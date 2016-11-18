@@ -51,7 +51,7 @@ public:
   explicit
   XFEMInterface(const InputParameters & params) :
     ConsoleStreamInterface(*params.getCheckedPointerParam<MooseApp *>("_moose_app")),
-    _fe_problem(params.getCheckedPointerParam<FEProblemBase *>("_fe_problem")),
+    _fe_problem(params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _material_data(NULL),
     _bnd_material_data(NULL),
     _mesh(NULL),

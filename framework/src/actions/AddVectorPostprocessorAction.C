@@ -14,7 +14,7 @@
 
 #include "AddVectorPostprocessorAction.h"
 #include "Factory.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddVectorPostprocessorAction>()

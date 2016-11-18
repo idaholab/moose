@@ -71,9 +71,9 @@ Material::Material(const InputParameters & parameters) :
     // The false flag disables the automatic call buildOutputVariableHideList;
     // for Material objects the hide lists are handled by MaterialOutputAction
     OutputInterface(parameters, false),
-    RandomInterface(parameters, *parameters.get<FEProblemBase *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
+    RandomInterface(parameters, *parameters.get<FEProblemBase *>("_fe_problem_base"), parameters.get<THREAD_ID>("_tid"), false),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem")),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _bnd(_material_data_type != Moose::BLOCK_MATERIAL_DATA),

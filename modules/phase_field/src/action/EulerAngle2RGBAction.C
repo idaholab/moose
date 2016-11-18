@@ -6,7 +6,7 @@
 /****************************************************************/
 #include "EulerAngle2RGBAction.h"
 #include "Factory.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 #include "libmesh/string_to_enum.h"
 

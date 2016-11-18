@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddFunctionAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddFunctionAction>()

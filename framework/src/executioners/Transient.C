@@ -20,7 +20,7 @@
 #include "TimeStepper.h"
 #include "MooseApp.h"
 #include "Conversion.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "Control.h"
 #include "TimePeriod.h"
@@ -168,7 +168,7 @@ Transient::init()
   if (!_time_stepper.get())
   {
     InputParameters pars = _app.getFactory().getValidParams("ConstantDT");
-    pars.set<FEProblemBase *>("_fe_problem") = &_problem;
+    pars.set<FEProblemBase *>("_fe_problem_base") = &_problem;
     pars.set<Transient *>("_executioner") = this;
 
     /**

@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddAuxVariableAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddAuxVariableAction>()

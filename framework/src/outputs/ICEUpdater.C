@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "ICEUpdater.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Postprocessor.h"
 #include "Updater.h"
 #include <sstream>

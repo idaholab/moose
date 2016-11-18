@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "MultiAppProjectionTransfer.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "AddVariableAction.h"
 #include "MooseMesh.h"
 

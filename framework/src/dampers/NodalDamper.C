@@ -16,7 +16,7 @@
 #include "SystemBase.h"
 #include "SubProblem.h"
 #include "Assembly.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"

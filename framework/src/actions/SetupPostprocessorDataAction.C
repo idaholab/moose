@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "SetupPostprocessorDataAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<SetupPostprocessorDataAction>()

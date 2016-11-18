@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "MultiAuxVariablesAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Conversion.h"
 #include "MooseMesh.h"
 

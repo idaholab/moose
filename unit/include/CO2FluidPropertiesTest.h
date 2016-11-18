@@ -19,7 +19,7 @@
 #include "GuardedHelperMacros.h"
 
 class MooseMesh;
-class FEProblemBase;
+class FEProblem;
 class CO2FluidProperties;
 
 class CO2FluidPropertiesTest : public CppUnit::TestFixture
@@ -125,7 +125,7 @@ private:
   MooseApp * _app;
   Factory * _factory;
   MooseMesh * _mesh;
-  FEProblemBase * _fe_problem;
+  FEProblem * _fe_problem;
   const CO2FluidProperties * _fp;
 };
 

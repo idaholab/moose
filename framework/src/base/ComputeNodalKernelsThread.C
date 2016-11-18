@@ -14,7 +14,7 @@
 
 #include "ComputeNodalKernelsThread.h"
 #include "AuxiliarySystem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "NodalKernel.h"
 
 // libmesh includes

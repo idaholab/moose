@@ -10,7 +10,7 @@
 #include "NS.h"
 
 // MOOSE includes
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddNavierStokesKernelsAction>()

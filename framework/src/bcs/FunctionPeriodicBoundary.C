@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "FunctionPeriodicBoundary.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Function.h"
 #include "MooseMesh.h"
 

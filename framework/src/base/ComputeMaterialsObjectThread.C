@@ -16,7 +16,7 @@
 #include "ComputeMaterialsObjectThread.h"
 #include "NonlinearSystem.h"
 #include "Problem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MaterialPropertyStorage.h"
 #include "MaterialData.h"
 #include "Assembly.h"

@@ -14,7 +14,7 @@
 
 #include "EqualGradientConstraint.h"
 #include "SubProblem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<EqualGradientConstraint>()

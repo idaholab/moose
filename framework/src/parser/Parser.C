@@ -22,7 +22,7 @@
 #include "MooseObjectAction.h"
 #include "ActionWarehouse.h"
 #include "EmptyAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
 #include "Executioner.h"
 #include "MooseApp.h"

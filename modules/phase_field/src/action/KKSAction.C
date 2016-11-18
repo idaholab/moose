@@ -7,7 +7,7 @@
 #include "KKSAction.h"
 #include "Factory.h"
 #include "Parser.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<KKSAction>()

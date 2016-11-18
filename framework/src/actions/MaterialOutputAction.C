@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "MaterialOutputAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseApp.h"
 #include "AddOutputAction.h"
 #include "Material.h"

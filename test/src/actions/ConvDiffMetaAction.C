@@ -17,7 +17,7 @@
 #include "ActionFactory.h"
 #include "MooseObjectAction.h"
 #include "MooseApp.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 #include "libmesh/vector_value.h"
 

@@ -25,6 +25,7 @@
 class Transfer;
 class SubProblem;
 class FEProblemBase;
+class FEProblem;
 class SystemBase;
 
 namespace libMesh

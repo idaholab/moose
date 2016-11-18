@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "SolutionTimeAdaptiveDT.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Transient.h"
 
 template<>

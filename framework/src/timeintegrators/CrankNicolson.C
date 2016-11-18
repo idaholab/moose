@@ -14,7 +14,7 @@
 
 #include "CrankNicolson.h"
 #include "NonlinearSystem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<CrankNicolson>()

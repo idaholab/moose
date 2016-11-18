@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "Transfer.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
 #include "Assembly.h"
 #include "MooseVariable.h"
@@ -48,7 +48,7 @@ Transfer::Transfer(const InputParameters & parameters) :
     SetupInterface(this),
     Restartable(parameters, "Transfers"),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem")),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid"))
 {

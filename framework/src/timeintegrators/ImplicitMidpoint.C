@@ -14,7 +14,7 @@
 
 #include "ImplicitMidpoint.h"
 #include "NonlinearSystem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "PetscSupport.h"
 
 template<>

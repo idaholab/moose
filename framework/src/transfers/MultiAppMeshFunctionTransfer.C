@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "MultiAppMeshFunctionTransfer.h"
 #include "MooseTypes.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "MooseTypes.h" // for MooseSharedPointer
 #include "MooseMesh.h"

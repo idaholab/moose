@@ -15,7 +15,7 @@
 // Moose includes
 #include "Exodus.h"
 #include "MooseApp.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "ExodusFormatter.h"
 #include "FileMesh.h"

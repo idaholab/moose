@@ -6,7 +6,7 @@
 /****************************************************************/
 #include "GeneralizedPlaneStrainAction.h"
 
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Conversion.h"
 
 template<>

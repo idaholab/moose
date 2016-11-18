@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddMarkerAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddMarkerAction>()

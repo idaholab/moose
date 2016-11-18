@@ -15,8 +15,8 @@
 #include "ComputeElemAuxVarsThread.h"
 #include "AuxiliarySystem.h"
 #include "AuxKernel.h"
-#include "FEProblemBase.h"
 #include "SwapBackSentinel.h"
+#include "FEProblem.h"
 
 // libmesh includes
 #include "libmesh/threads.h"

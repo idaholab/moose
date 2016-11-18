@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "QuadraturePointMarker.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseEnum.h"
 #include "Assembly.h"
 

@@ -8,7 +8,7 @@
 // MOOSE includes
 #include "DomainIntegralAction.h"
 #include "Factory.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Parser.h"
 #include "CrackFrontDefinition.h"
 #include "InteractionIntegralAuxFields.h"

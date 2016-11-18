@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "ConsoleUtils.h"
 #include "MooseApp.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "SystemInfo.h"
 #include "Executioner.h"
 #include "Conversion.h"

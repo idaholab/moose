@@ -15,7 +15,7 @@
 #include "AddExtraNodeset.h"
 #include "MooseApp.h"
 #include "MooseMesh.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "ActionWarehouse.h"
 
 template<>

@@ -6,7 +6,7 @@
 /****************************************************************/
 
 #include "RampIC.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
 
 template<>

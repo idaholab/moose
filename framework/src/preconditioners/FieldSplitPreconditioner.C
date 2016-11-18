@@ -15,7 +15,7 @@
 #include "libmesh/petsc_macro.h"
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
 #include "FieldSplitPreconditioner.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
 #include "MooseEnum.h"

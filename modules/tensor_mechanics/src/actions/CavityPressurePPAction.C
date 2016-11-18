@@ -7,7 +7,7 @@
 #include "CavityPressurePPAction.h"
 
 #include "Factory.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Parser.h"
 
 template<>

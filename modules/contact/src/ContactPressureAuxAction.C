@@ -7,7 +7,7 @@
 #include "ContactPressureAuxAction.h"
 
 #include "Factory.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Parser.h"
 #include "MooseApp.h"
 #include "Conversion.h"

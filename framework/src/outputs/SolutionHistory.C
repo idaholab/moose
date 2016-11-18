@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "SolutionHistory.h"
 #include "NonlinearSystemBase.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<SolutionHistory>()

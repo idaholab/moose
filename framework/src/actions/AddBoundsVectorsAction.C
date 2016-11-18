@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "AddBoundsVectorsAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 
 template<>

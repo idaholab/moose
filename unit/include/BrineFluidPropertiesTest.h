@@ -19,7 +19,7 @@
 #include "GuardedHelperMacros.h"
 
 class MooseMesh;
-class FEProblemBase;
+class FEProblem;
 class BrineFluidProperties;
 class SinglePhaseFluidPropertiesPT;
 
@@ -88,7 +88,7 @@ private:
   MooseApp * _app;
   Factory * _factory;
   MooseMesh * _mesh;
-  FEProblemBase * _fe_problem;
+  FEProblem * _fe_problem;
   const BrineFluidProperties * _fp;
   const SinglePhaseFluidPropertiesPT * _water_fp;
 };

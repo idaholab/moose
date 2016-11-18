@@ -6,7 +6,7 @@
 /****************************************************************/
 #include "ThermalContactDiracKernelsAction.h"
 #include "Factory.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<ThermalContactDiracKernelsAction>()

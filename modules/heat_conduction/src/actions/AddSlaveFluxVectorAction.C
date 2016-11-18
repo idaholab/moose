@@ -7,7 +7,7 @@
 
 #include "AddSlaveFluxVectorAction.h"
 #include "Parser.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "NonlinearSystem.h"
 
 template<>

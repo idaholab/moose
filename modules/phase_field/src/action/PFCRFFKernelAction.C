@@ -1,7 +1,7 @@
 #include "PFCRFFKernelAction.h"
 #include "Factory.h"
 #include "Parser.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<PFCRFFKernelAction>()

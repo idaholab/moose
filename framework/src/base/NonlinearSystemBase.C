@@ -15,7 +15,7 @@
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 #include "Problem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseVariable.h"
 #include "PetscSupport.h"
 #include "Factory.h"

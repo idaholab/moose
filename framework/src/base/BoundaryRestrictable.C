@@ -37,7 +37,7 @@ InputParameters validParams<BoundaryRestrictable>()
 
 // Standard constructor
 BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, bool nodal) :
-    _bnd_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblemBase *>("_fe_problem") : NULL),
+    _bnd_feproblem(parameters.isParamValid("_fe_problem_base") ? parameters.get<FEProblemBase *>("_fe_problem_base") : NULL),
     _bnd_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _invalid_boundary_id(Moose::INVALID_BOUNDARY_ID),
@@ -52,7 +52,7 @@ BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, b
 
 // Dual restricted constructor
 BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, const std::set<SubdomainID> & block_ids, bool nodal) :
-    _bnd_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblemBase *>("_fe_problem") : NULL),
+    _bnd_feproblem(parameters.isParamValid("_fe_problem_base") ? parameters.get<FEProblemBase *>("_fe_problem_base") : NULL),
     _bnd_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _invalid_boundary_id(Moose::INVALID_BOUNDARY_ID),

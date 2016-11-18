@@ -14,7 +14,7 @@
 
 #include "ComputeNodalKernelJacobiansThread.h"
 #include "AuxiliarySystem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "NodalKernel.h"
 #include "Assembly.h"
 

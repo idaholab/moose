@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "SetupDebugAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
 #include "Output.h"

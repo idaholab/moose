@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "ValueThresholdMarker.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseEnum.h"
 
 template<>

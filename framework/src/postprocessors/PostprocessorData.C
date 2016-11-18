@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "PostprocessorData.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 PostprocessorData::PostprocessorData(FEProblemBase & fe_problem) :
     Restartable("values", "PostprocessorData", fe_problem, 0)

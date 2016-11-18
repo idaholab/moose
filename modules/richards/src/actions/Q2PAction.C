@@ -7,7 +7,7 @@
 #include "Q2PAction.h"
 
 #include "Factory.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Parser.h"
 #include "libmesh/string_to_enum.h"
 

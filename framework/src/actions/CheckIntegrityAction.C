@@ -14,7 +14,7 @@
 
 #include "CheckIntegrityAction.h"
 #include "ActionWarehouse.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<CheckIntegrityAction>()

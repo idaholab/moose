@@ -15,7 +15,7 @@
 // Moose includes
 #include "Executioner.h"
 #include "MooseMesh.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseApp.h"
 #include "NonlinearSystem.h"
 
@@ -64,7 +64,7 @@ Executioner::Executioner(const InputParameters & parameters) :
     UserObjectInterface(this),
     PostprocessorInterface(this),
     Restartable(parameters, "Executioners"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem", "This might happen if you don't have a mesh")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base", "This might happen if you don't have a mesh")),
     _initial_residual_norm(std::numeric_limits<Real>::max()),
     _old_initial_residual_norm(std::numeric_limits<Real>::max()),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
@@ -166,7 +166,7 @@ Executioner::lastSolveConverged()
 void
 Executioner::addAttributeReporter(const std::string & name, Real & attribute, const std::string execute_on)
 {
-  FEProblemBase * problem = parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem", "Failed to retrieve FEProblemBase when adding a attribute reporter in Executioner");
+  FEProblemBase * problem = parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base", "Failed to retrieve FEProblemBase when adding a attribute reporter in Executioner");
   InputParameters params = _app.getFactory().getValidParams("ExecutionerAttributeReporter");
   params.set<Real *>("value") = &attribute;
   if (!execute_on.empty())

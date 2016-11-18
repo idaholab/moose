@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "MoosePartitioner.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<MoosePartitioner>()

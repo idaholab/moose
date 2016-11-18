@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "TimeStepper.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Transient.h"
 #include "MooseApp.h"
 
@@ -31,7 +31,7 @@ InputParameters validParams<TimeStepper>()
 TimeStepper::TimeStepper(const InputParameters & parameters) :
     MooseObject(parameters),
     Restartable(parameters, "TimeSteppers"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem")),
+    _fe_problem(parameters.have_parameter<FEProblemBase *>("_fe_problem_base") ? *getParam<FEProblemBase *>("_fe_problem_base") : *getParam<FEProblem *>("_fe_problem")),
     _executioner(*parameters.getCheckedPointerParam<Transient *>("_executioner")),
     _time(_fe_problem.time()),
     _time_old(_fe_problem.timeOld()),

@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddMultiAppAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddMultiAppAction>()

@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "RandomData.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
 #include "RandomInterface.h"
 

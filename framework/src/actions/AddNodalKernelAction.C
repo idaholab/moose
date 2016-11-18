@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddNodalKernelAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddNodalKernelAction>()

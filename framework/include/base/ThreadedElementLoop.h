@@ -16,7 +16,7 @@
 #define THREADEDELEMENTLOOP_H
 
 #include "ParallelUniqueId.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "ThreadedElementLoopBase.h"
 
 // Forward declarations

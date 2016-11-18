@@ -12,7 +12,7 @@
 #include "NSAction.h"
 
 // MOOSE includes
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
 
 // libMesh includes

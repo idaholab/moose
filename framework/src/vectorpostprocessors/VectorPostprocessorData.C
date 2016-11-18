@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "VectorPostprocessorData.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 VectorPostprocessorData::VectorPostprocessorData(FEProblemBase & fe_problem) :
     Restartable("values", "VectorPostprocessorData", fe_problem, 0)

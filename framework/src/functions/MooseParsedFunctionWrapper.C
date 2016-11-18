@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "MooseParsedFunctionWrapper.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblemBase & feproblem,
                                                      const std::string & function_str,

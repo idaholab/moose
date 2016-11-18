@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddUserObjectAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<AddUserObjectAction>()

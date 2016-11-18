@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "ComputeNodalUserObjectsThread.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "NodalUserObject.h"
 
 // libmesh includes

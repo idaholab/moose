@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "AddMortarInterfaceAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
 
 template<>

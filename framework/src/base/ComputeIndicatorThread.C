@@ -15,7 +15,7 @@
 
 #include "AuxiliarySystem.h"
 #include "Problem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Indicator.h"
 #include "InternalSideIndicator.h"
 #include "SwapBackSentinel.h"

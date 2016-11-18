@@ -14,7 +14,7 @@
 
 #include "SetupQuadratureAction.h"
 #include "Conversion.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseEnum.h"
 
 template<>

@@ -8,7 +8,7 @@
 
 // MOOSE includes
 #include "AddVariableAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"

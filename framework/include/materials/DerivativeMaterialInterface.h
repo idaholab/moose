@@ -133,7 +133,7 @@ private:
 template<class T>
 DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const InputParameters & parameters) :
     T(parameters),
-    _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem"))
+    _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
 }
 

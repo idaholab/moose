@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddICAction.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseTypes.h"
 #include "MooseUtils.h"
 

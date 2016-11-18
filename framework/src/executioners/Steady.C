@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "Steady.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Factory.h"
 #include "MooseApp.h"
 #include "NonlinearSystem.h"

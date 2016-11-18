@@ -7,7 +7,7 @@
 #include "PolycrystalHexGrainICAction.h"
 #include "Factory.h"
 #include "Parser.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "Conversion.h"
 
 #include <sstream>

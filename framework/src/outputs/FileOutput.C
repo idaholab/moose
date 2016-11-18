@@ -18,7 +18,7 @@
 // MOOSE includes
 #include "FileOutput.h"
 #include "MooseApp.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
 #include <unistd.h>
 #include <time.h>

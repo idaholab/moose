@@ -25,7 +25,7 @@ InputParameters validParams<FunctionInterface>()
 
 FunctionInterface::FunctionInterface(const MooseObject * moose_object) :
     _fni_params(moose_object->parameters()),
-    _fni_feproblem(*_fni_params.get<FEProblemBase *>("_fe_problem")),
+    _fni_feproblem(*_fni_params.get<FEProblemBase *>("_fe_problem_base")),
     _fni_tid(_fni_params.have_parameter<THREAD_ID>("_tid") ? _fni_params.get<THREAD_ID>("_tid") : 0)
 {
 }

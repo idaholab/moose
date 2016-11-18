@@ -19,7 +19,7 @@
 #include "cppunit/extensions/HelperMacros.h"
 
 class MooseMesh;
-class FEProblemBase;
+class FEProblem;
 class IdealGasFluidProperties;
 
 
@@ -44,7 +44,7 @@ protected:
   MooseApp * _app;
   Factory * _factory;
   MooseMesh * _mesh;
-  FEProblemBase * _fe_problem;
+  FEProblem * _fe_problem;
   const IdealGasFluidProperties * _fp;
 };
 

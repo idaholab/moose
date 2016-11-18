@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "QPointMarker.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MooseEnum.h"
 
 template<>

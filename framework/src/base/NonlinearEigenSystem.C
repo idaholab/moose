@@ -18,7 +18,7 @@
 
 // moose includes
 #include "NonlinearEigenSystem.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "TimeIntegrator.h"
 
 // libmesh includes
@@ -30,7 +30,7 @@ namespace Moose {
   void assemble_matrix(EquationSystems & es, const std::string & system_name)
   {
 #if LIBMESH_HAVE_SLEPC
-    FEProblemBase * p = es.parameters.get<FEProblemBase *>("_fe_problem");
+    FEProblemBase * p = es.parameters.get<FEProblemBase *>("_fe_problem_base");
     EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
 
     p->computeJacobian(*eigen_system.solution.get(), *eigen_system.matrix_A);

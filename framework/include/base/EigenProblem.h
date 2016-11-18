@@ -18,7 +18,7 @@
 #include "libmesh/libmesh_config.h"
 
 
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "NonlinearEigenSystem.h"
 
 class EigenProblem;
