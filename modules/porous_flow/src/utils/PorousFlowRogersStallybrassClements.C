@@ -5,12 +5,12 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "PorousFlowEffectiveSaturationRSC.h"
+#include "PorousFlowRogersStallybrassClements.h"
 
-namespace PorousFlowEffectiveSaturationRSC
+namespace PorousFlowRogersStallybrassClements
 {
 Real
-seff(Real pc, Real shift, Real scale)
+effectiveSaturation(Real pc, Real shift, Real scale)
 {
   Real x = (pc - shift) / scale;
   Real ex = std::exp(x);
@@ -18,18 +18,18 @@ seff(Real pc, Real shift, Real scale)
 }
 
 Real
-dseff(Real pc, Real shift, Real scale)
+dEffectiveSaturation(Real pc, Real shift, Real scale)
 {
   Real x = (pc - shift) / scale;
   Real ex = std::exp(x);
-  return -0.5 * ex * std::pow(1.0 + ex, -1.5)/scale;
+  return -0.5 * ex * std::pow(1.0 + ex, -1.5) / scale;
 }
 
 Real
-d2seff(Real pc, Real shift, Real scale)
+d2EffectiveSaturation(Real pc, Real shift, Real scale)
 {
   Real x = (pc - shift) / scale;
   Real ex = std::exp(x);
-  return (0.75 * ex * ex * std::pow(1.0 + ex, -2.5) - 0.5 * ex * std::pow(1.0 + ex, -1.5))/scale/scale;
+  return (0.75 * ex * ex * std::pow(1.0 + ex, -2.5) - 0.5 * ex * std::pow(1.0 + ex, -1.5)) / scale / scale;
 }
 }

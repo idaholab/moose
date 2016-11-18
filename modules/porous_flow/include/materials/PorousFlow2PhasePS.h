@@ -17,7 +17,8 @@ template<>
 InputParameters validParams<PorousFlow2PhasePS>();
 
 /**
- * Material designed to calculate fluid-phase porepressures at nodes
+ * Material designed to calculate fluid-phase porepressures and saturations at nodes
+ * and qps using a specified capillary pressure formulation
  */
 class PorousFlow2PhasePS : public PorousFlowVariableBase
 {
@@ -32,37 +33,44 @@ protected:
   void buildQpPPSS();
 
   /**
+   * Effective saturation of liquid phase
+   * @param saturation true saturation
+   * @return effective saturation
+   */
+  virtual Real effectiveSaturation(Real saturation) const;
+
+  /**
    * Capillary pressure as a function of saturation.
    * Default is constant capillary pressure = 0.0.
-   * Over-ride in derived classes to implement other capillary pressure forulations
+   * Override in derived classes to implement other capillary pressure forulations
    *
-   * @param saturation saturation
-   * @return capillary pressure
+   * @param seff effective saturation
+   * @return capillary pressure (Pa)
    */
-  virtual Real capillaryPressure(Real saturation) const;
+  virtual Real capillaryPressure(Real seff) const;
 
   /**
    * Derivative of capillary pressure wrt to saturation.
    * Default = 0 for constant capillary pressure.
-   * Over-ride in derived classes to implement other capillary pressure forulations
+   * Override in derived classes to implement other capillary pressure forulations
    *
-   * @param saturation saturation (Pa)
-   * @return derivative of capillary pressure wrt saturation
+   * @param seff effective saturation
+   * @return derivative of capillary pressure wrt effective saturation
    */
-  virtual Real dCapillaryPressure_dS(Real pressure) const;
+  virtual Real dCapillaryPressure_dS(Real seff) const;
 
   /**
    * Second derivative of capillary pressure wrt to saturation.
    * Default = 0 for constant capillary pressure.
-   * Over-ride in derived classes to implement other capillary pressure forulations
+   * Override in derived classes to implement other capillary pressure forulations
    *
-   * @param saturation saturation (Pa)
-   * @return second derivative of capillary pressure wrt saturation
+   * @param seff effective saturation (Pa)
+   * @return second derivative of capillary pressure wrt effective saturation
    */
-  virtual Real d2CapillaryPressure_dS2(Real pressure) const;
+  virtual Real d2CapillaryPressure_dS2(Real seff) const;
 
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /// Nodal value of porepressure of the zero phase (eg, the gas phase)
   const VariableValue & _phase0_porepressure_nodal;
@@ -96,6 +104,12 @@ protected:
 
   /// Constant capillary pressure (Pa)
   const Real _pc;
+
+  /// Liquid residual saturation
+  const Real _sat_lr;
+
+  /// Derivative of effective saturation with respect to saturation
+  const Real _dseff_ds;
 };
 
 #endif //POROUSFLOW2PHASEPS_H

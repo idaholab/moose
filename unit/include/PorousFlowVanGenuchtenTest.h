@@ -29,6 +29,9 @@ class PorousFlowVanGenuchtenTest : public CppUnit::TestFixture
   CPPUNIT_TEST( satTest );
   CPPUNIT_TEST( dsatTest );
   CPPUNIT_TEST( d2satTest );
+  CPPUNIT_TEST( capTest );
+  CPPUNIT_TEST( dcapTest );
+  CPPUNIT_TEST( d2capTest );
   CPPUNIT_TEST( relpermTest );
   CPPUNIT_TEST( drelpermTest );
   CPPUNIT_TEST( d2relpermTest );
@@ -41,6 +44,9 @@ public:
   void satTest();
   void dsatTest();
   void d2satTest();
+  void capTest();
+  void dcapTest();
+  void d2capTest();
   void relpermTest();
   void drelpermTest();
   void d2relpermTest();

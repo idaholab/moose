@@ -250,9 +250,8 @@
     phase1_saturation = sgas
     m = 0.5
     p0 = 1e5
-    pc_max = 1e7
+    pc_max = -1e7
     sat_lr = 0.1
-    sat_ls = 1
   [../]
   [./massfrac]
     type = PorousFlowMassFraction

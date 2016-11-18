@@ -12,37 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef POROUSFLOWCAPILARYPRESSUREVGTEST_H
-#define POROUSFLOWCAPILARYPRESSUREVGTEST_H
+#ifndef POROUSFLOWROGERSSTALLYBRASSCLEMENTSTEST_H
+#define POROUSFLOWROGERSSTALLYBRASSCLEMENTSTEST_H
 
 //CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 // Moose includes
-#include "PorousFlowCapillaryPressureVG.h"
+#include "PorousFlowRogersStallybrassClements.h"
 
-class PorousFlowCapillaryPressureVGTest : public CppUnit::TestFixture
+class PorousFlowRogersStallybrassClementsTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( PorousFlowCapillaryPressureVGTest );
+  CPPUNIT_TEST_SUITE( PorousFlowRogersStallybrassClementsTest );
 
-  CPPUNIT_TEST( effTest );
-  CPPUNIT_TEST( capTest );
-  CPPUNIT_TEST( dcapTest );
-  CPPUNIT_TEST( d2capTest );
+  CPPUNIT_TEST( satTest );
+  CPPUNIT_TEST( dsatTest );
+  CPPUNIT_TEST( d2satTest );
 
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  PorousFlowCapillaryPressureVGTest();
+  PorousFlowRogersStallybrassClementsTest();
 
-  void effTest();
-  void capTest();
-  void dcapTest();
-  void d2capTest();
+  void satTest();
+  void dsatTest();
+  void d2satTest();
 
  private:
   Real _ep;
 };
 
-#endif  // POROUSFLOWCAPILARYPRESSUREVGTEST_H
+#endif  // POROUSFLOWROGERSSTALLYBRASSCLEMENTSTEST_H

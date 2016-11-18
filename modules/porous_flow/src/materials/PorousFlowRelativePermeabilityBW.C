@@ -37,11 +37,11 @@ PorousFlowRelativePermeabilityBW::PorousFlowRelativePermeabilityBW(const InputPa
 Real
 PorousFlowRelativePermeabilityBW::relativePermeability(Real seff) const
 {
-  return PorousFlowBroadbridgeWhite::relperm(seff, _c, _sn, _ss, _kn, _ks);
+  return PorousFlowBroadbridgeWhite::relativePermeability(seff, _c, _sn, _ss, _kn, _ks);
 }
 
 Real
 PorousFlowRelativePermeabilityBW::dRelativePermeability(Real seff) const
 {
-  return PorousFlowBroadbridgeWhite::drelperm(seff, _c, _sn, _ss, _kn, _ks);
+  return PorousFlowBroadbridgeWhite::dRelativePermeability(seff, _c, _sn, _ss, _kn, _ks);
 }
