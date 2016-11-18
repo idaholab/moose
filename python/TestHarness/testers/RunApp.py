@@ -41,7 +41,7 @@ class RunApp(Tester):
       self.mpi_command = os.environ['MOOSE_MPI_COMMAND']
       self.force_mpi = True
     else:
-      self.mpi_command = 'mpiexec -host localhost'
+      self.mpi_command = 'mpiexec'
       self.force_mpi = False
 
     # Handle the special allow_deprecated_until parameter
