@@ -7,4 +7,14 @@
     # Splits require PETSc >= 3.3.0
     petsc_version = '>=3.3.0'
   [../]
+  [./fsp_image]
+    type = 'Exodiff'
+    input = 'fsp_test_image.i'
+    exodiff = 'kitten_out.e'
+    max_parallel = 4
+    min_parallel = 4
+    # Splits require PETSc >= 3.3.0
+    petsc_version = '>=3.3.0'
+    vtk = true
+  [../]
 []
