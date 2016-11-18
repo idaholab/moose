@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "MultiAppInterpolationTransfer.h"
 #include "MooseTypes.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
@@ -79,7 +79,7 @@ MultiAppInterpolationTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      FEProblemBase & from_problem = _multi_app->problem();
+      FEProblemBase & from_problem = _multi_app->problemBase();
       MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
 
       MeshBase * from_mesh = NULL;
@@ -168,7 +168,7 @@ MultiAppInterpolationTransfer::execute()
           MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
           // Loop over the master nodes and set the value of the variable
-          System * to_sys = find_sys(_multi_app->appProblem(i).es(), _to_var_name);
+          System * to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name);
 
           unsigned int sys_num = to_sys->number();
           unsigned int var_num = to_sys->variable_number(_to_var_name);
@@ -176,10 +176,10 @@ MultiAppInterpolationTransfer::execute()
 
           MeshBase * mesh = NULL;
 
-          if (_displaced_target_mesh && _multi_app->appProblem(i).getDisplacedProblem())
-            mesh = &_multi_app->appProblem(i).getDisplacedProblem()->mesh().getMesh();
+          if (_displaced_target_mesh && _multi_app->appProblemBase(i).getDisplacedProblem())
+            mesh = &_multi_app->appProblemBase(i).getDisplacedProblem()->mesh().getMesh();
           else
-            mesh = &_multi_app->appProblem(i).mesh().getMesh();
+            mesh = &_multi_app->appProblemBase(i).mesh().getMesh();
 
           bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
@@ -258,7 +258,7 @@ MultiAppInterpolationTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      FEProblemBase & to_problem = _multi_app->problem();
+      FEProblemBase & to_problem = _multi_app->problemBase();
       MooseVariable & to_var = to_problem.getVariable(0, _to_var_name);
       SystemBase & to_system_base = to_var.sys();
 
@@ -315,7 +315,7 @@ MultiAppInterpolationTransfer::execute()
 
         MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
-        FEProblemBase & from_problem = _multi_app->appProblem(i);
+        FEProblemBase & from_problem = _multi_app->appProblemBase(i);
         MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
         SystemBase & from_system_base = from_var.sys();
 

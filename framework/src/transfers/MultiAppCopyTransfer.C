@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "MultiAppCopyTransfer.h"
 #include "MooseTypes.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
@@ -110,18 +110,18 @@ MultiAppCopyTransfer::execute()
 
   if (_direction == TO_MULTIAPP)
   {
-    FEProblemBase & from_problem = _multi_app->problem();
+    FEProblemBase & from_problem = _multi_app->problemBase();
     for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       if (_multi_app->hasLocalApp(i))
-        transfer(_multi_app->appProblem(i), from_problem);
+        transfer(_multi_app->appProblemBase(i), from_problem);
   }
 
   else if (_direction == FROM_MULTIAPP)
   {
-    FEProblemBase & to_problem = _multi_app->problem();
+    FEProblemBase & to_problem = _multi_app->problemBase();
     for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       if (_multi_app->hasLocalApp(i))
-        transfer(to_problem, _multi_app->appProblem(i));
+        transfer(to_problem, _multi_app->appProblemBase(i));
   }
 
   _console << "Finished MultiAppCopyTransfer " << name() << std::endl;

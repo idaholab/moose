@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "MultiAppVariableValueSamplePostprocessorTransfer.h"
 #include "MooseTypes.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
 
@@ -48,7 +48,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      FEProblemBase & from_problem = _multi_app->problem();
+      FEProblemBase & from_problem = _multi_app->problemBase();
       MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
       SystemBase & from_system_base = from_var.sys();
       SubProblem & from_sub_problem = from_system_base.subproblem();
@@ -82,7 +82,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
         }
 
         if (_multi_app->hasLocalApp(i))
-          _multi_app->appProblem(i).getPostprocessorValue(_postprocessor_name) = value;
+          _multi_app->appProblemBase(i).getPostprocessorValue(_postprocessor_name) = value;
       }
 
       break;

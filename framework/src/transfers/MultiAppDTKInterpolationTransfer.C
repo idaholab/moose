@@ -19,7 +19,7 @@
 // MOOSE includes
 #include "MultiAppDTKInterpolationTransfer.h"
 #include "MooseTypes.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
 
@@ -51,11 +51,11 @@ MultiAppDTKInterpolationTransfer::execute()
     {
       case TO_MULTIAPP:
       {
-        System * from_sys = find_sys(_multi_app->problem().es(), _from_var_name);
+        System * from_sys = find_sys(_multi_app->problemBase().es(), _from_var_name);
         System * to_sys = NULL;
 
         if (_multi_app->hasLocalApp(i))
-          to_sys = find_sys(_multi_app->appProblem(i).es(), _to_var_name);
+          to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name);
 
         _helper.transferWithOffset(0, i, &from_sys->variable(from_sys->variable_number(_from_var_name)),
                                    to_sys ? &to_sys->variable(to_sys->variable_number(_to_var_name)) : NULL,
@@ -67,10 +67,10 @@ MultiAppDTKInterpolationTransfer::execute()
       case FROM_MULTIAPP:
       {
         System * from_sys = NULL;
-        System * to_sys = find_sys(_multi_app->problem().es(), _to_var_name);
+        System * to_sys = find_sys(_multi_app->problemBase().es(), _to_var_name);
 
         if (_multi_app->hasLocalApp(i))
-          from_sys = find_sys(_multi_app->appProblem(i).es(), _from_var_name);
+          from_sys = find_sys(_multi_app->appProblemBase(i).es(), _from_var_name);
 
         _helper.transferWithOffset(i, 0, from_sys ? &from_sys->variable(from_sys->variable_number(_from_var_name)) : NULL,
                                    &to_sys->variable(to_sys->variable_number(_to_var_name)),
@@ -79,10 +79,10 @@ MultiAppDTKInterpolationTransfer::execute()
         break;
       }
 
-      _multi_app->problem().es().update();
+      _multi_app->problemBase().es().update();
 
       if (_multi_app->hasLocalApp(i))
-        _multi_app->appProblem(i).es().update();
+        _multi_app->appProblemBase(i).es().update();
     }
   }
 }
