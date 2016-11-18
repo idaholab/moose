@@ -320,7 +320,7 @@
   [./chkfile]
     type = CSV
     file_base = plane4_mu_0_2_pen_check
-    show = 'bot_react_x bot_react_y disp_x9 disp_y9 disp_x16 disp_y16 ref_resid_x ref_resid_y sigma_yy sigma_zz top_react_x top_react_y x_disp cont_press'
+    show = 'bot_react_x bot_react_y disp_x9 disp_y9 disp_x16 disp_y16 sigma_yy sigma_zz top_react_x top_react_y x_disp cont_press'
     execute_vector_postprocessors_on = timestep_end
   [../]
   [./outfile]
