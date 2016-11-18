@@ -313,7 +313,7 @@
   [./chkfile]
     type = CSV
     file_base = plane1_mu_0_2_pen_check
-    show = 'bot_react_x bot_react_y disp_x2 disp_y2 disp_x7 disp_y7 ref_resid_x ref_resid_y sigma_yy sigma_zz top_react_x top_react_y x_disp cont_press'
+    show = 'bot_react_x bot_react_y disp_x2 disp_y2 disp_x7 disp_y7 sigma_yy sigma_zz top_react_x top_react_y x_disp cont_press'
     execute_vector_postprocessors_on = timestep_end
   [../]
   [./outfile]

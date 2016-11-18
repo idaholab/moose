@@ -342,7 +342,7 @@
   [./chkfile]
     type = CSV
     file_base = hertz_cyl_qsym_1deg_mu_1_0_kin_q8_check
-    show = 'bot_react_x bot_react_y disp_x281 ref_resid_x ref_resid_y top_react_x top_react_y x_disp y_disp cont_press'
+    show = 'bot_react_x bot_react_y disp_x281 top_react_x top_react_y x_disp y_disp cont_press'
     start_time = 0.9
     execute_vector_postprocessors_on = timestep_end
   [../]
