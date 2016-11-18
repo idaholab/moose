@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "DOFMapOutput.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "KernelBase.h"
 #include "MooseApp.h"
 #include "Moose.h"

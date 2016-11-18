@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "TransientInterface.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 template<>
 InputParameters validParams<TransientInterface>()
@@ -28,7 +28,7 @@ InputParameters validParams<TransientInterface>()
 
 TransientInterface::TransientInterface(const MooseObject * moose_object) :
     _ti_params(moose_object->parameters()),
-    _ti_feproblem(*_ti_params.get<FEProblem *>("_fe_problem")),
+    _ti_feproblem(*_ti_params.get<FEProblemBase *>("_fe_problem")),
     _is_implicit(_ti_params.have_parameter<bool>("implicit") ? _ti_params.get<bool>("implicit") : true),
     _t(_is_implicit ? _ti_feproblem.time() : _ti_feproblem.timeOld()),
     _t_step(_ti_feproblem.timeStep()),

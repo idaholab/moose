@@ -7,7 +7,7 @@
 
 #include "ComputeAxisymmetricRZFiniteStrain.h"
 #include "Assembly.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 
 template<>

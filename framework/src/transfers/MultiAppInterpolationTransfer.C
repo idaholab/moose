@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "MultiAppInterpolationTransfer.h"
 #include "MooseTypes.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
@@ -79,7 +79,7 @@ MultiAppInterpolationTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      FEProblem & from_problem = _multi_app->problem();
+      FEProblemBase & from_problem = _multi_app->problem();
       MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
 
       MeshBase * from_mesh = NULL;
@@ -258,7 +258,7 @@ MultiAppInterpolationTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      FEProblem & to_problem = _multi_app->problem();
+      FEProblemBase & to_problem = _multi_app->problem();
       MooseVariable & to_var = to_problem.getVariable(0, _to_var_name);
       SystemBase & to_system_base = to_var.sys();
 
@@ -315,7 +315,7 @@ MultiAppInterpolationTransfer::execute()
 
         MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
-        FEProblem & from_problem = _multi_app->appProblem(i);
+        FEProblemBase & from_problem = _multi_app->appProblem(i);
         MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
         SystemBase & from_system_base = from_var.sys();
 

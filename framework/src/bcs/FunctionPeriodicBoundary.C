@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "FunctionPeriodicBoundary.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Function.h"
 #include "MooseMesh.h"
 
@@ -23,7 +23,7 @@
 // currently not thread-safe.
 Threads::spin_mutex parsed_function_mutex;
 
-FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblem & feproblem, std::vector<std::string> fn_names) :
+FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblemBase & feproblem, std::vector<std::string> fn_names) :
     _dim(fn_names.size()),
     _tr_x(&feproblem.getFunction(fn_names[0])),
     _tr_y(_dim > 1 ? &feproblem.getFunction(fn_names[1]) : NULL),

@@ -14,7 +14,7 @@
 
 #include "EqualValueConstraint.h"
 #include "SubProblem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 template<>
 InputParameters validParams<EqualValueConstraint>()

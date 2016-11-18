@@ -35,7 +35,7 @@ public:
 protected:
   virtual Real computeQpIntegral();
 
-  FEProblem & _feproblem;
+  FEProblemBase & _feproblem;
 
   /// flux out = max*exp((-0.5*(p - centre)/sd)^2) for p<centre, and flux out = max otherwise
   Real _maximum;

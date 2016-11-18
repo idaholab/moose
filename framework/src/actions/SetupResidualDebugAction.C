@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "SetupResidualDebugAction.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
 #include "NonlinearSystemBase.h"

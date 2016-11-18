@@ -21,18 +21,18 @@
 template<>
 InputParameters validParams<EigenProblem>()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = validParams<FEProblemBase>();
   params.addParam<unsigned int>("n_eigen_pairs", 1, "The dimension of the nullspace");
   params.addParam<unsigned int>("n_basis_vectors", 3, "The dimension of the nullspace");
   return params;
 }
 
 EigenProblem::EigenProblem(const InputParameters & parameters) :
-    FEProblem(parameters),
+    FEProblemBase(parameters),
     _nl_eigen(new NonlinearEigenSystem(*this, "eigen0"))
 {
 #ifndef LIBMESH_HAVE_SLEPC
-  mooseError("You need to install SLEPc to solve eigenvalue problems, please reconfigure system \n");
+  mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
 #endif /* LIBMESH_HAVE_SLEPC */
   _nl = _nl_eigen;
   _aux = new AuxiliarySystem(*this, "aux0");

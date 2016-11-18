@@ -16,7 +16,7 @@
 #include "Split.h"
 #include "InputParameters.h"
 #include "PetscSupport.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "NonlinearSystem.h"
 
 template<>
@@ -60,7 +60,7 @@ InputParameters validParams<Split>()
 Split::Split (const InputParameters & parameters) :
     MooseObject(parameters),
     Restartable(parameters, "Splits"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem")),
     _vars(getParam<std::vector<NonlinearVariableName> >("vars")),
     _blocks(getParam<std::vector<SubdomainName> >("blocks")),
     _sides(getParam<std::vector<BoundaryName> >("sides")),

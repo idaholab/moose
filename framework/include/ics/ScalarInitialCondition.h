@@ -70,7 +70,7 @@ public:
   virtual const std::set<std::string> & getSuppliedItems();
 
 protected:
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   SystemBase & _sys;
   THREAD_ID _tid;
 

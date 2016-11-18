@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "MultiAppMeshFunctionTransfer.h"
 #include "MooseTypes.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "MooseTypes.h" // for MooseSharedPointer
 #include "MooseMesh.h"
@@ -194,7 +194,7 @@ MultiAppMeshFunctionTransfer::execute()
   std::vector<MooseSharedPointer<MeshFunction> > local_meshfuns;
   for (unsigned int i_from = 0; i_from < _from_problems.size(); i_from++)
   {
-    FEProblem & from_problem = *_from_problems[i_from];
+    FEProblemBase & from_problem = *_from_problems[i_from];
     MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());

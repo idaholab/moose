@@ -48,7 +48,7 @@ Indicator::Indicator(const InputParameters & parameters) :
     Restartable(parameters, "Indicators"),
     OutputInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _solution(_sys.solution()),
     _tid(parameters.get<THREAD_ID>("_tid")),

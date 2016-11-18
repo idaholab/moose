@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "AStableDirk4.h"
 #include "NonlinearSystem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "PetscSupport.h"
 #include "LStableDirk4.h"
 
@@ -65,10 +65,10 @@ AStableDirk4::AStableDirk4(const InputParameters & parameters) :
     InputParameters params = factory.getValidParams("LStableDirk4");
 
     // We need to set some parameters that are normally set in
-    // FEProblem::addTimeIntegrator() to ensure that the
+    // FEProblemBase::addTimeIntegrator() to ensure that the
     // getCheckedPointerParam() sanity checking is happy.  This is why
     // constructing MOOSE objects "manually" is generally frowned upon.
-    params.set<FEProblem *>("_fe_problem") = &_fe_problem;
+    params.set<FEProblemBase *>("_fe_problem") = &_fe_problem;
     params.set<SystemBase *>("_sys") = &_sys;
 
     _bootstrap_method = factory.create<LStableDirk4>("LStableDirk4", name() + "_bootstrap", params);

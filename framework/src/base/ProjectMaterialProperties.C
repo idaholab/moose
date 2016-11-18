@@ -16,7 +16,7 @@
 #include "ProjectMaterialProperties.h"
 #include "NonlinearSystem.h"
 #include "Problem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MaterialPropertyStorage.h"
 #include "MaterialData.h"
 #include "Assembly.h"
@@ -27,7 +27,7 @@
 #include "libmesh/elem.h"
 
 ProjectMaterialProperties::ProjectMaterialProperties(bool refine,
-                                                     FEProblem & fe_problem, NonlinearSystemBase & sys,
+                                                     FEProblemBase & fe_problem, NonlinearSystemBase & sys,
                                                      std::vector<MooseSharedPointer<MaterialData> > & material_data,
                                                      std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
                                                      MaterialPropertyStorage & material_props,

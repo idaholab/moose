@@ -14,7 +14,7 @@
 
 #include "Residual.h"
 
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "SubProblem.h"
 #include "NonlinearSystem.h"
 
@@ -41,9 +41,9 @@ Residual::getValue()
     residual = _subproblem.finalNonlinearResidual();
   else
   {
-    FEProblem * fe_problem = dynamic_cast<FEProblem *> (&_subproblem);
+    FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *> (&_subproblem);
     if (!fe_problem)
-      mooseError("Dynamic cast to FEProblem failed in Residual Postprocessor");
+      mooseError("Dynamic cast to FEProblemBase failed in Residual Postprocessor");
     if (_residual_type == "INITIAL_BEFORE_PRESET")
       residual = fe_problem->getNonlinearSystemBase()._initial_residual_before_preset_bcs;
     else if (_residual_type == "INITIAL_AFTER_PRESET")

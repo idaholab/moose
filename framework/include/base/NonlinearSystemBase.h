@@ -25,7 +25,7 @@
 #include "libmesh/nonlinear_implicit_system.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class MoosePreconditioner;
 class JacobianBlock;
 class TimeIntegrator;
@@ -53,13 +53,13 @@ template <typename T> class SparseMatrix;
 /**
  * Nonlinear system to be solved
  *
- * It is a part of FEProblem ;-)
+ * It is a part of FEProblemBase ;-)
  */
 class NonlinearSystemBase : public SystemBase,
                             public ConsoleStreamInterface
 {
 public:
-  NonlinearSystemBase(FEProblem & problem, System & sys, const std::string & name);
+  NonlinearSystemBase(FEProblemBase & problem, System & sys, const std::string & name);
   virtual ~NonlinearSystemBase();
 
   virtual void init() override;
@@ -472,7 +472,7 @@ public:
   virtual System & system() override { return _sys; }
 
 public:
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   System & _sys;
   // FIXME: make these protected and create getters/setters
   Real _last_rnorm;

@@ -17,7 +17,7 @@
 
 #include "MooseApp.h"
 #include "DisplacedProblem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 template<>
 InputParameters validParams<EigenExecutionerBase>()
@@ -141,7 +141,7 @@ EigenExecutionerBase::makeBXConsistent(Real k)
   // FIXME: We have assumed this loop always converges.
   while (std::fabs(k-_source_integral)>consistency_tolerance*std::fabs(k))
   {
-    // On the first time entering, the _source_integral has been updated properly in FEProblem::initialSetup()
+    // On the first time entering, the _source_integral has been updated properly in FEProblemBase::initialSetup()
     _eigen_sys.scaleSystemSolution(MooseEigenSystem::EIGEN, k/_source_integral);
     _problem.execute(EXEC_LINEAR);
     std::stringstream ss;

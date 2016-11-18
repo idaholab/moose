@@ -24,13 +24,13 @@
 #include "AuxKernel.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class AuxiliarySystem;
 
 class ComputeElemAuxVarsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeElemAuxVarsThread(FEProblem & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
+  ComputeElemAuxVarsThread(FEProblemBase & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
   // Splitting Constructor
   ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split split);
 

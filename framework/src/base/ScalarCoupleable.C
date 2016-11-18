@@ -15,11 +15,11 @@
 #include "ScalarCoupleable.h"
 #include "Problem.h"
 #include "SubProblem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object) :
     _sc_parameters(moose_object->parameters()),
-    _sc_fe_problem(*_sc_parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _sc_fe_problem(*_sc_parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem")),
     _sc_is_implicit(_sc_parameters.have_parameter<bool>("implicit") ? _sc_parameters.get<bool>("implicit") : true),
     _coupleable_params(_sc_parameters)
 {

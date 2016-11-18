@@ -18,7 +18,7 @@
 
 // MOOSE includes
 #include "AddVariableAction.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Factory.h"
 #include "MooseEnum.h"
 #include "MooseEigenSystem.h"

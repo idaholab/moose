@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "FunctionDT.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Transient.h"
 #include <limits>
 

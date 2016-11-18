@@ -37,7 +37,7 @@ public:
   virtual Real getValue() override;
 
 protected:
-  FEProblem & _feproblem;
+  FEProblemBase & _feproblem;
 };
 
 #endif // TIMESTEPSIZE_H

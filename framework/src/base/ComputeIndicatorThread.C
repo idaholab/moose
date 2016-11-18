@@ -15,7 +15,7 @@
 
 #include "AuxiliarySystem.h"
 #include "Problem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Indicator.h"
 #include "InternalSideIndicator.h"
 #include "SwapBackSentinel.h"
@@ -23,7 +23,7 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeIndicatorThread::ComputeIndicatorThread(FEProblem & fe_problem,
+ComputeIndicatorThread::ComputeIndicatorThread(FEProblemBase & fe_problem,
                                                bool finalize) :
     ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),

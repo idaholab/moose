@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AuxiliarySystem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Factory.h"
 #include "AuxKernel.h"
 #include "AuxScalarKernel.h"
@@ -33,7 +33,7 @@
 
 // AuxiliarySystem ////////
 
-AuxiliarySystem::AuxiliarySystem(FEProblem & subproblem, const std::string & name) :
+AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name) :
     SystemBase(subproblem, name, Moose::VAR_AUXILIARY),
     _fe_problem(subproblem),
     _sys(subproblem.es().add_system<TransientExplicitSystem>(name)),

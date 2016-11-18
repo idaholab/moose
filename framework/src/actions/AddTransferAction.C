@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddTransferAction.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 template<>
 InputParameters validParams<AddTransferAction>()

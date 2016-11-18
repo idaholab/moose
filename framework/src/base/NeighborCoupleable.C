@@ -15,7 +15,7 @@
 #include "NeighborCoupleable.h"
 #include "Problem.h"
 #include "SubProblem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseError.h" // mooseDeprecated
 
 NeighborCoupleable::NeighborCoupleable(const MooseObject * moose_object, bool nodal, bool neighbor_nodal) :

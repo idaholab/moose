@@ -14,7 +14,7 @@
 
 #include "SetupInterface.h"
 #include "Conversion.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 template<>
 InputParameters validParams<SetupInterface>()
@@ -35,7 +35,7 @@ InputParameters validParams<SetupInterface>()
 }
 
 SetupInterface::SetupInterface(const MooseObject * moose_object) :
-    _current_execute_flag((moose_object->parameters().getCheckedPointerParam<FEProblem *>("_fe_problem"))->getCurrentExecuteOnFlag())
+    _current_execute_flag((moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem"))->getCurrentExecuteOnFlag())
 {
   const InputParameters & params = moose_object->parameters();
 

@@ -29,7 +29,7 @@ class ElementDamper;
 class ComputeElemDampingThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeElemDampingThread(FEProblem & feproblem);
+  ComputeElemDampingThread(FEProblemBase & feproblem);
 
   // Splitting Constructor
   ComputeElemDampingThread(ComputeElemDampingThread & x, Threads::split split);

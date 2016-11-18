@@ -12,7 +12,7 @@
 template<>
 InputParameters validParams<RichardsMultiphaseProblem>()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = validParams<FEProblemBase>();
   params.addRequiredParam<NonlinearVariableName>("bounded_var", "Variable whose value will be constrained to be greater than lower_var");
   params.addRequiredParam<NonlinearVariableName>("lower_var", "Variable that acts as a lower bound to bounded_var.  It will not be constrained during the solution procedure");
   return params;
@@ -20,7 +20,7 @@ InputParameters validParams<RichardsMultiphaseProblem>()
 
 
 RichardsMultiphaseProblem::RichardsMultiphaseProblem(const InputParameters & params) :
-    EquationProblem(params),
+    FEProblem(params),
     // in the following have to get the names of the variables, and then find their numbers in initialSetup,
     // as their numbers won't be defined at the moment of instantiation of this class
     _bounded_var_name(params.get<NonlinearVariableName>("bounded_var")),
@@ -52,7 +52,7 @@ RichardsMultiphaseProblem::initialSetup()
   _bounded_var_num = bounded.number();
   _lower_var_num = lower.number();
 
-  FEProblem::initialSetup();
+  FEProblemBase::initialSetup();
 }
 
 

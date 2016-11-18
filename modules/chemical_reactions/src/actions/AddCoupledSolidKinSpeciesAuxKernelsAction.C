@@ -6,7 +6,7 @@
 /****************************************************************/
 #include "AddCoupledSolidKinSpeciesAuxKernelsAction.h"
 #include "MooseUtils.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Factory.h"
 
 #include <sstream>

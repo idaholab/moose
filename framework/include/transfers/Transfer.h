@@ -24,7 +24,7 @@
 // Forward declarations
 class Transfer;
 class SubProblem;
-class FEProblem;
+class FEProblemBase;
 class SystemBase;
 
 namespace libMesh
@@ -75,7 +75,7 @@ public:
 protected:
 
   SubProblem & _subproblem;
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   SystemBase & _sys;
 
   THREAD_ID _tid;

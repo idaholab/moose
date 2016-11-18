@@ -13,7 +13,7 @@
 #include "IndirectSort.h"
 
 #include "NonlinearSystem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Assembly.h"
 
 //libMesh includes

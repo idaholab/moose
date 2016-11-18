@@ -16,7 +16,7 @@ template<>
 InputParameters validParams<FrictionalContactProblem>();
 
 /**
- * FEProblem derived class for frictional contact-specific callbacks
+ * FEProblemBase derived class for frictional contact-specific callbacks
  */
 class FrictionalContactProblem : public ReferenceResidualProblem
 {

@@ -19,7 +19,7 @@
 #include "MooseTypes.h"
 #include "MaterialProperty.h"
 #include "MaterialData.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "InputParameters.h"
 
 // Forward declarations
@@ -188,8 +188,8 @@ protected:
   /// Pointer to the material data class that stores properties
   MooseSharedPointer<MaterialData> _material_data;
 
-  /// Reference to the FEProblem class
-  FEProblem & _mi_feproblem;
+  /// Reference to the FEProblemBase class
+  FEProblemBase & _mi_feproblem;
 
   /// Current threaded it
   const THREAD_ID _mi_tid;

@@ -28,7 +28,7 @@
 #include "libmesh/petsc_macro.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class NonlinearSystemBase;
 class CommandLine;
 
@@ -63,12 +63,12 @@ public:
 /**
  * A function for setting the PETSc options in PETSc from the options supplied to MOOSE
  */
-void petscSetOptions(FEProblem & problem);
+void petscSetOptions(FEProblemBase & problem);
 
 /**
  * Sets the default options for PETSc
  */
-void petscSetDefaults(FEProblem & problem);
+void petscSetDefaults(FEProblemBase & problem);
 
 void petscSetupDM(NonlinearSystemBase & nl);
 
@@ -87,7 +87,7 @@ PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, vo
 /**
  * Stores the PETSc options supplied from the InputParameters with MOOSE
  */
-void storePetscOptions(FEProblem & fe_problem, const InputParameters & params);
+void storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params);
 
 /**
  * Returns the PETSc options that are common between Executioners and Preconditioners

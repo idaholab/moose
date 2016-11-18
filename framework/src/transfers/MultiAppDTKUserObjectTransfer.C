@@ -22,7 +22,7 @@
 
 // Moose Includes
 #include "MooseTypes.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 template<>
 InputParameters validParams<MultiAppDTKUserObjectTransfer>()

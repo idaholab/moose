@@ -17,13 +17,13 @@
 
 #include "ParallelUniqueId.h"
 #include "MooseMesh.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 template<typename RangeType, typename IteratorType>
 class ThreadedNodeLoop
 {
 public:
-  ThreadedNodeLoop(FEProblem & fe_problem);
+  ThreadedNodeLoop(FEProblemBase & fe_problem);
 
   // Splitting Constructor
   ThreadedNodeLoop(ThreadedNodeLoop & x, Threads::split split);
@@ -68,12 +68,12 @@ public:
   virtual bool keepGoing() { return !_fe_problem.hasException(); }
 
 protected:
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   THREAD_ID _tid;
 };
 
 template<typename RangeType, typename IteratorType>
-ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(FEProblem & fe_problem) :
+ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(FEProblemBase & fe_problem) :
     _fe_problem(fe_problem)
 {
 }

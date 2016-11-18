@@ -38,7 +38,7 @@ ImageFunction::~ImageFunction()
 void
 ImageFunction::initialSetup()
 {
-  FEProblem * fe_problem = this->getParam<FEProblem *>("_fe_problem");
+  FEProblemBase * fe_problem = this->getParam<FEProblemBase *>("_fe_problem");
   MooseMesh & mesh = fe_problem->mesh();
   setupImageSampler(mesh);
 }

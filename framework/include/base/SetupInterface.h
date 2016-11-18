@@ -76,11 +76,11 @@ protected:
   /// execution flag (when is the object executed/evaluated)
   std::vector<ExecFlagType> _exec_flags;
 
-  /// Reference to FEProblem
+  /// Reference to FEProblemBase
   const ExecFlagType & _current_execute_flag;
 
-  // FEProblem::addMultiApp needs to reset the execution flags
-  friend class FEProblem;
+  // FEProblemBase::addMultiApp needs to reset the execution flags
+  friend class FEProblemBase;
 };
 
 #endif /* SETUPINTERFACE_H */

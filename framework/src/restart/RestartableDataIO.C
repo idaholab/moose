@@ -16,13 +16,13 @@
 #include "RestartableDataIO.h"
 #include "MooseUtils.h"
 #include "RestartableData.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseApp.h"
 #include "NonlinearSystem.h"
 
 #include <stdio.h>
 
-RestartableDataIO::RestartableDataIO(FEProblem & fe_problem) :
+RestartableDataIO::RestartableDataIO(FEProblemBase & fe_problem) :
     _fe_problem(fe_problem)
 {
   _in_file_handles.resize(libMesh::n_threads());

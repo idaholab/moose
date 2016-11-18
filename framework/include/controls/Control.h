@@ -28,7 +28,7 @@
 
 // Forward declarations
 class Control;
-class FEProblem;
+class FEProblemBase;
 
 template<>
 InputParameters validParams<Control>();
@@ -75,8 +75,8 @@ public:
 
 protected:
 
-  /// Reference to the FEProblem for this object
-  FEProblem & _fe_problem;
+  /// Reference to the FEProblemBase for this object
+  FEProblemBase & _fe_problem;
 
   ///@{
   /**

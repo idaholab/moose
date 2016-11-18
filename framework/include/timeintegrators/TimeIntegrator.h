@@ -21,7 +21,7 @@
 
 // Forward declarations
 class TimeIntegrator;
-class FEProblem;
+class FEProblemBase;
 class SystemBase;
 class NonlinearSystemBase;
 
@@ -79,7 +79,7 @@ public:
 
 protected:
 
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   SystemBase & _sys;
   NonlinearSystemBase & _nl;
 

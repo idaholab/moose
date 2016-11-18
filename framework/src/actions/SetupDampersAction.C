@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "SetupDampersAction.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "ActionWarehouse.h"
 
 template<>

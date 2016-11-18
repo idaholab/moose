@@ -14,7 +14,7 @@
 
 #include "AllLocalDofIndicesThread.h"
 
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 // libmesh includes
 #include "libmesh/threads.h"

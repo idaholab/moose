@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "PetscOutput.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "NonlinearSystem.h"
 
 // libMesh includes

@@ -22,7 +22,7 @@
 // libMesh includes
 #include "libmesh/threads.h"
 
-ComputeElemDampingThread::ComputeElemDampingThread(FEProblem & feproblem) :
+ComputeElemDampingThread::ComputeElemDampingThread(FEProblemBase & feproblem) :
     ThreadedElementLoop<ConstElemRange>(feproblem),
     _damping(1.0),
     _nl(feproblem.getNonlinearSystemBase()),

@@ -54,7 +54,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _reserve_op_index(_n_reserve_ops <= _n_vars ? _n_vars - _n_reserve_ops : 0),
     _reserve_op_threshold(getParam<Real>("reserve_op_threshold")),
     _remap(getParam<bool>("remap_grains")),
-    _nl(static_cast<FEProblem &>(_subproblem).getNonlinearSystemBase()),
+    _nl(static_cast<FEProblemBase &>(_subproblem).getNonlinearSystemBase()),
     _feature_sets_old(declareRestartableData<std::vector<FeatureData> >("unique_grains")),
     _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : nullptr),
     _ebsd_op_var(_ebsd_reader ? &_fe_problem.getVariable(0, getParam<std::string>("var_name_base") + "_op") : nullptr),

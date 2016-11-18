@@ -17,7 +17,7 @@
 
 // MOOSE includes
 #include "AdvancedOutput.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "Postprocessor.h"
 #include "Restartable.h"

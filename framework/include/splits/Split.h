@@ -21,7 +21,7 @@
 #include "PetscSupport.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 
 /**
  * Base class for split-based preconditioners.
@@ -45,7 +45,7 @@ class Split :
     SplittingTypeSchur
   };
 
-  FEProblem& _fe_problem;
+  FEProblemBase& _fe_problem;
 
   /// "Variables Split operates on
   std::vector<NonlinearVariableName> _vars;

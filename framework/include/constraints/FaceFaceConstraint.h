@@ -22,7 +22,7 @@
 
 // Forward Declarations
 class FaceFaceConstraint;
-class FEProblem;
+class FEProblemBase;
 
 template<>
 InputParameters validParams<FaceFaceConstraint>();
@@ -81,7 +81,7 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type);
 
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   unsigned int _dim;
 
   /// Boundary ID for the slave surface

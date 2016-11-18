@@ -14,7 +14,7 @@
 
 #include "CreateDisplacedProblemAction.h"
 #include "MooseApp.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 
 template<>
@@ -43,12 +43,12 @@ CreateDisplacedProblemAction::act()
     InputParameters object_params = _factory.getValidParams("DisplacedProblem");
     object_params.set<std::vector<std::string> >("displacements") = getParam<std::vector<std::string> >("displacements");
     object_params.set<MooseMesh *>("mesh") = _displaced_mesh.get();
-    object_params.set<FEProblem *>("_fe_problem") = _problem.get();
+    object_params.set<FEProblemBase *>("_fe_problem") = _problem.get();
 
     // Create the object
     MooseSharedPointer<DisplacedProblem> disp_problem = _factory.create<DisplacedProblem>("DisplacedProblem", "DisplacedProblem", object_params);
 
-    // Add the Displaced Problem to FEProblem
+    // Add the Displaced Problem to FEProblemBase
     _problem->addDisplacedProblem(disp_problem);
   }
 }

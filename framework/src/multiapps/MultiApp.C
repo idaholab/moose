@@ -18,7 +18,7 @@
 #include "SetupInterface.h"
 #include "Executioner.h"
 #include "UserObject.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "OutputWarehouse.h"
 #include "AppFactory.h"
 #include "MooseUtils.h"
@@ -92,7 +92,7 @@ MultiApp::MultiApp(const InputParameters & parameters):
     MooseObject(parameters),
     SetupInterface(this),
     Restartable(parameters, "MultiApps"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem")),
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type")) : _fe_problem.getMooseApp().type()),
     _input_files(getParam<std::vector<FileName> >("input_files")),
     _total_num_apps(0),
@@ -298,7 +298,7 @@ MultiApp::getBoundingBox(unsigned int app)
   if (!_has_an_app)
     mooseError("No app for " << name() << " on processor " << _orig_rank);
 
-  FEProblem & problem = appProblem(app);
+  FEProblemBase & problem = appProblem(app);
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
@@ -341,7 +341,7 @@ MultiApp::getBoundingBox(unsigned int app)
   return MeshTools::BoundingBox(shifted_min, shifted_max);
 }
 
-FEProblem &
+FEProblemBase &
 MultiApp::appProblem(unsigned int app)
 {
   if (!_has_an_app)
@@ -455,7 +455,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
     full_name = multiapp_name.str();
 
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
-  app_params.set<FEProblem *>("_parent_fep") = &_fe_problem;
+  app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
   app_params.set<MooseSharedPointer<CommandLine> >("_command_line") = _app.commandLine();
   MooseApp * app = AppFactory::instance().create(_app_type, full_name, app_params, _my_comm);
   _apps[i] = app;
@@ -491,7 +491,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // This means we have a backup of this app that we need to give to it
   // Note: This won't do the restoration immediately.  The Backup
   // will be cached by the MooseApp object so that it can be used
-  // during FEProblem::initialSetup() during runInputFile()
+  // during FEProblemBase::initialSetup() during runInputFile()
   if (_app.isRestarting() || _app.isRecovering())
     app->restore(_backups[i]);
 

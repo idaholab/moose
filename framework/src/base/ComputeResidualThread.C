@@ -15,7 +15,7 @@
 #include "ComputeResidualThread.h"
 #include "NonlinearSystem.h"
 #include "Problem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "KernelBase.h"
 #include "IntegratedBC.h"
 #include "DGKernel.h"
@@ -28,7 +28,7 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeResidualThread::ComputeResidualThread(FEProblem & fe_problem, Moose::KernelType type) :
+ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem, Moose::KernelType type) :
     ThreadedElementLoop<ConstElemRange>(fe_problem),
     _nl(fe_problem.getNonlinearSystemBase()),
     _kernel_type(type),

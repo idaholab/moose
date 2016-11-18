@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "NumAdaptivityCycles.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 template<>
 InputParameters validParams<NumAdaptivityCycles>()

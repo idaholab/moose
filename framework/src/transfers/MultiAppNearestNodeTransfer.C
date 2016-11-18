@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "MultiAppNearestNodeTransfer.h"
 #include "MooseTypes.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "MooseMesh.h"
 

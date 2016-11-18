@@ -21,7 +21,7 @@
 #include "MooseApp.h"
 #include "MooseMesh.h"
 #include "Assembly.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "NonlinearSystem.h"
 
 // libMesh includes
@@ -37,7 +37,7 @@ InputParameters validParams<DisplacedProblem>()
 
 DisplacedProblem::DisplacedProblem(const InputParameters & parameters) :
     SubProblem(parameters),
-    _mproblem(*getParam<FEProblem *>("_fe_problem")),
+    _mproblem(*getParam<FEProblemBase *>("_fe_problem")),
     _mesh(*getParam<MooseMesh *>("mesh")),
     _eq(_mesh),
     _ref_mesh(_mproblem.mesh()),

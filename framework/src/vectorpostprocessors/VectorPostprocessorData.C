@@ -13,9 +13,9 @@
 /****************************************************************/
 
 #include "VectorPostprocessorData.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
-VectorPostprocessorData::VectorPostprocessorData(FEProblem & fe_problem) :
+VectorPostprocessorData::VectorPostprocessorData(FEProblemBase & fe_problem) :
     Restartable("values", "VectorPostprocessorData", fe_problem, 0)
 {
 }

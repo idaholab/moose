@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "MaxQpsThread.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 // libmesh includes
 #include "libmesh/fe_base.h"
@@ -22,7 +22,7 @@
 LIBMESH_DEFINE_HASH_POINTERS
 #include "libmesh/quadrature.h"
 
-MaxQpsThread::MaxQpsThread(FEProblem & fe_problem, QuadratureType qtype, Order order, Order face_order) :
+MaxQpsThread::MaxQpsThread(FEProblemBase & fe_problem, QuadratureType qtype, Order order, Order face_order) :
     _fe_problem(fe_problem),
     _qtype(qtype),
     _order(order),

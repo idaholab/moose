@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddNodalNormalsAction.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Factory.h"
 
 #include "libmesh/fe.h"

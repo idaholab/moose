@@ -19,13 +19,13 @@
 template<>
 InputParameters validParams<FailingProblem>()
 {
-  InputParameters params = validParams<EquationProblem>();
+  InputParameters params = validParams<FEProblem>();
   params.addRequiredParam<unsigned int>("fail_step", "The timestep to fail");
   return params;
 }
 
 FailingProblem::FailingProblem(const InputParameters & params) :
-    EquationProblem(params),
+    FEProblem(params),
     _failed(false),
     _fail_step(getParam<unsigned int>("fail_step"))
 {}
@@ -39,5 +39,5 @@ FailingProblem::converged()
     return false;
   }
 
-  return FEProblem::converged();
+  return FEProblemBase::converged();
 }

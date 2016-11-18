@@ -52,9 +52,8 @@
 #include "ParsedAddSideset.h"
 
 // problems
-#include "FEProblem.h"
 #include "DisplacedProblem.h"
-#include "EquationProblem.h"
+#include "FEProblem.h"
 #if LIBMESH_HAVE_SLEPC
 #include "EigenProblem.h"
 #endif
@@ -485,9 +484,8 @@ registerObjects(Factory & factory)
   registerMeshModifier(ParsedAddSideset);
 
   // problems
-  registerProblem(FEProblem);
   registerProblem(DisplacedProblem);
-  registerProblem(EquationProblem);
+  registerProblem(FEProblem);
 #if LIBMESH_HAVE_SLEPC
   registerProblem(EigenProblem);
 #endif
@@ -1154,7 +1152,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 }
 
 void
-setSolverDefaults(FEProblem & problem)
+setSolverDefaults(FEProblemBase & problem)
 {
 #ifdef LIBMESH_HAVE_PETSC
   // May be a touch expensive to create a new DM every time, but probably safer to do it this way

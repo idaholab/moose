@@ -200,7 +200,7 @@ protected:
 
   SubProblem & _subproblem;
 
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   THREAD_ID _tid;
   Assembly & _assembly;
 

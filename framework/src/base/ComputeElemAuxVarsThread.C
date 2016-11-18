@@ -15,14 +15,14 @@
 #include "ComputeElemAuxVarsThread.h"
 #include "AuxiliarySystem.h"
 #include "AuxKernel.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "SwapBackSentinel.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
 
 
-ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials) :
+ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblemBase & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials) :
     ThreadedElementLoop<ConstElemRange>(problem),
     _aux_sys(problem.getAuxiliarySystem()),
     _aux_kernels(storage),

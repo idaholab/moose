@@ -30,8 +30,8 @@ InputParameters & modifyParams(const InputParameters & parameters)
   // This is only a test, so hack it up
   InputParameters & params = const_cast<InputParameters &>(parameters);
 
-  // Get the FEProblem pointer
-  FEProblem* fe_ptr = params.get<FEProblem*>("_fe_problem");
+  // Get the FEProblemBase pointer
+  FEProblemBase* fe_ptr = params.get<FEProblemBase*>("_fe_problem");
 
   // Get the test enum
   MooseEnum test = params.get<MooseEnum>("test");
@@ -40,20 +40,20 @@ InputParameters & modifyParams(const InputParameters & parameters)
   switch (test)
   {
   case 1: // null fe_problem pointer
-    params.set<FEProblem*>("_fe_problem") = NULL;
+    params.set<FEProblemBase*>("_fe_problem") = NULL;
     break;
 
   case 2: // null mesh pointer
     params.suppressParameter<std::vector<SubdomainName> >("block");
-    params.suppressParameter<FEProblem*>("_fe_problem");
+    params.suppressParameter<FEProblemBase*>("_fe_problem");
     params.suppressParameter<NonlinearVariableName>("variable");
-    params.set<FEProblem*>("_fe_problem") = NULL;
+    params.set<FEProblemBase*>("_fe_problem") = NULL;
     params.set<MooseMesh*>("_mesh") = NULL;
     break;
 
   case 3: // use _mesh
     params.suppressParameter<std::vector<SubdomainName> >("block");
-    params.suppressParameter<FEProblem*>("_fe_problem");
+    params.suppressParameter<FEProblemBase*>("_fe_problem");
     params.suppressParameter<NonlinearVariableName>("variable");
     params.set<MooseMesh*>("_mesh") = &fe_ptr->mesh();
     break;

@@ -15,14 +15,14 @@
 #include "Coupleable.h"
 #include "Problem.h"
 #include "SubProblem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseVariable.h"
 #include "InputParameters.h"
 #include "MooseObject.h"
 
 Coupleable::Coupleable(const MooseObject * moose_object, bool nodal) :
     _c_parameters(moose_object->parameters()),
-    _c_fe_problem(*_c_parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _c_fe_problem(*_c_parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem")),
     _nodal(nodal),
     _c_is_implicit(_c_parameters.have_parameter<bool>("implicit") ? _c_parameters.get<bool>("implicit") : true),
     _coupleable_params(_c_parameters),

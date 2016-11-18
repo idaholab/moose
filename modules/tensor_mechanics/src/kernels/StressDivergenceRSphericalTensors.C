@@ -7,7 +7,7 @@
 
 #include "StressDivergenceRSphericalTensors.h"
 #include "ElasticityTensorTools.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 
 

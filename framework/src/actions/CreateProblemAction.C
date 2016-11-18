@@ -14,7 +14,7 @@
 
 #include "CreateProblemAction.h"
 #include "Factory.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseApp.h"
 
 template<>
@@ -24,7 +24,7 @@ InputParameters validParams<CreateProblemAction>()
   MooseEnum rz_coord_axis("X=0 Y=1", "Y");
 
   InputParameters params = validParams<MooseObjectAction>();
-  params.set<std::string>("type") = "EquationProblem";
+  params.set<std::string>("type") = "FEProblem";
   params.addParam<std::string>("name", "MOOSE Problem", "The name the problem");
   params.addParam<std::vector<SubdomainName> >("block", "Block IDs for the coordinate systems");
   params.addParam<MultiMooseEnum>("coord_type", coord_types, "Type of the coordinate system per block param");
@@ -68,11 +68,9 @@ CreateProblemAction::act()
       _moose_object_pars.set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
       _moose_object_pars.set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
 #endif
-      if (_type == "FEProblem")
-        _type = "EquationProblem";
-      _problem = _factory.create<FEProblem>(_type, getParam<std::string>("name"), _moose_object_pars);
+      _problem = _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);
       if (!_problem.get())
-        mooseError("Problem has to be of a FEProblem type");
+        mooseError("Problem has to be of a FEProblemBase type");
     }
     // set up the problem
     _problem->setCoordSystem(_blocks, _coord_sys);

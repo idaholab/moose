@@ -25,7 +25,7 @@ class DisplacedProblem;
 class ResetDisplacedMeshThread : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>
 {
 public:
-  ResetDisplacedMeshThread(FEProblem & fe_problem, DisplacedProblem & displaced_problem);
+  ResetDisplacedMeshThread(FEProblemBase & fe_problem, DisplacedProblem & displaced_problem);
 
   ResetDisplacedMeshThread(ResetDisplacedMeshThread & x, Threads::split split);
 

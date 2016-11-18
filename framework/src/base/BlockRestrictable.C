@@ -15,7 +15,7 @@
 // MOOSE Includes
 #include "BlockRestrictable.h"
 #include "Material.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 
 template<>
@@ -42,7 +42,7 @@ InputParameters validParams<BlockRestrictable>()
 BlockRestrictable::BlockRestrictable(const InputParameters & parameters) :
     _initialized(false),
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
-    _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
+    _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblemBase *>("_fe_problem") : NULL),
     _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _boundary_ids(_empty_boundary_ids),
     _blk_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
@@ -55,7 +55,7 @@ BlockRestrictable::BlockRestrictable(const InputParameters & parameters) :
 BlockRestrictable::BlockRestrictable(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids) :
     _initialized(false),
     _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
-    _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
+    _blk_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblemBase *>("_fe_problem") : NULL),
     _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _boundary_ids(boundary_ids),
     _blk_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
@@ -72,7 +72,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
   // The name and id of the object
   const std::string name = parameters.get<std::string>("_object_name");
 
-  // If the mesh pointer is not defined, but FEProblem is, get it from there
+  // If the mesh pointer is not defined, but FEProblemBase is, get it from there
   if (_blk_feproblem != NULL && _blk_mesh == NULL)
     _blk_mesh = &_blk_feproblem->mesh();
 

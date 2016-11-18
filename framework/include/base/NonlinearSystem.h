@@ -21,12 +21,12 @@
 /**
  * Nonlinear system to be solved
  *
- * It is a part of FEProblem ;-)
+ * It is a part of FEProblemBase ;-)
  */
 class NonlinearSystem : public NonlinearSystemBase
 {
 public:
-  NonlinearSystem(FEProblem & problem, const std::string & name);
+  NonlinearSystem(FEProblemBase & problem, const std::string & name);
   virtual ~NonlinearSystem();
 
   virtual void solve() override;
@@ -60,7 +60,7 @@ public:
 
   virtual TransientNonlinearImplicitSystem & sys() { return _transient_sys; }
 
-private:
+protected:
   TransientNonlinearImplicitSystem & _transient_sys;
 };
 

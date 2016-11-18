@@ -35,7 +35,7 @@ CreateExecutionerAction::CreateExecutionerAction(InputParameters params) :
 void
 CreateExecutionerAction::act()
 {
-  _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
+  _moose_object_pars.set<FEProblemBase *>("_fe_problem") = _problem.get();
   MooseSharedPointer<Executioner> executioner = _factory.create<Executioner>(_type, "Executioner", _moose_object_pars);
 
   _app.executioner() = executioner;

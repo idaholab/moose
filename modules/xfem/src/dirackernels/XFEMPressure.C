@@ -8,7 +8,7 @@
 #include "Function.h"
 #include "GeometricSearchData.h"
 #include "ElementPairLocator.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 template<>
 InputParameters validParams<XFEMPressure>()

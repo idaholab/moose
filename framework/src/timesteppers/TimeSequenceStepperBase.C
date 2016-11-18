@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "TimeSequenceStepperBase.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Transient.h"
 
 template<>

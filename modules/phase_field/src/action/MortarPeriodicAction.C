@@ -7,7 +7,7 @@
 #include "MortarPeriodicAction.h"
 #include "MortarPeriodicMesh.h"
 #include "Conversion.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Factory.h"
 
 #include "libmesh/string_to_enum.h"

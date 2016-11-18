@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "CommonOutputAction.h"
 #include "MooseApp.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseObjectAction.h"
 #include "ActionFactory.h"
 #include "Output.h"

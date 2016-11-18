@@ -21,7 +21,7 @@
 #include "libmesh/elem_range.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class NonlinearSystemBase;
 class IntegratedBC;
 class DGKernel;
@@ -33,7 +33,7 @@ class KernelWarehouse;
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeResidualThread(FEProblem & fe_problem, Moose::KernelType type);
+  ComputeResidualThread(FEProblemBase & fe_problem, Moose::KernelType type);
   // Splitting Constructor
   ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
 

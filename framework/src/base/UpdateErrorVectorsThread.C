@@ -15,14 +15,14 @@
 
 #include "AuxiliarySystem.h"
 #include "Problem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Marker.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
 #include "libmesh/error_vector.h"
 
-UpdateErrorVectorsThread::UpdateErrorVectorsThread(FEProblem & fe_problem,
+UpdateErrorVectorsThread::UpdateErrorVectorsThread(FEProblemBase & fe_problem,
                                                    const std::map<std::string, std::unique_ptr<ErrorVector> > & indicator_field_to_error_vector) :
     ThreadedElementLoop<ConstElemRange>(fe_problem),
     _indicator_field_to_error_vector(indicator_field_to_error_vector),

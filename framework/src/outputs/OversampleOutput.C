@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "OversampleOutput.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "FileMesh.h"
 #include "MooseApp.h"

@@ -40,7 +40,7 @@ ConstraintWarehouse::addObject(MooseSharedPointer<Constraint> object, THREAD_ID 
   // NodeFaceConstraint
   if (nfc)
   {
-    MooseMesh & mesh = nfc->getParam<FEProblem *>("_fe_problem")->mesh();
+    MooseMesh & mesh = nfc->getParam<FEProblemBase *>("_fe_problem")->mesh();
     unsigned int slave = mesh.getBoundaryID(nfc->getParam<BoundaryName>("slave"));
     bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") && nfc->getParam<bool>("use_displaced_mesh");
 

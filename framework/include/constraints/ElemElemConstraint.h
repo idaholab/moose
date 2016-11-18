@@ -23,7 +23,7 @@
 
 // Forward Declarations
 class ElemElemConstraint;
-class FEProblem;
+class FEProblemBase;
 
 template<>
 InputParameters validParams<ElemElemConstraint>();
@@ -66,7 +66,7 @@ public:
   virtual void computeJacobian();
 
 protected:
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   unsigned int _dim;
 
   const Elem * & _current_elem;

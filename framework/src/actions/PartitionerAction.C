@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "PartitionerAction.h"
 #include "MoosePartitioner.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseEnum.h"
 #include "MooseMesh.h"
 

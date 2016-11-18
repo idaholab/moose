@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "Resurrector.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
 #include "NonlinearSystem.h"
@@ -25,7 +25,7 @@
 const std::string Resurrector::MAT_PROP_EXT(".msmp");
 const std::string Resurrector::RESTARTABLE_DATA_EXT(".rd");
 
-Resurrector::Resurrector(FEProblem & fe_problem) :
+Resurrector::Resurrector(FEProblemBase & fe_problem) :
     _fe_problem(fe_problem),
     _restartable(_fe_problem)
 {

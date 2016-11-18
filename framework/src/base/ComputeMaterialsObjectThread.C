@@ -16,7 +16,7 @@
 #include "ComputeMaterialsObjectThread.h"
 #include "NonlinearSystem.h"
 #include "Problem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MaterialPropertyStorage.h"
 #include "MaterialData.h"
 #include "Assembly.h"
@@ -27,7 +27,7 @@
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 
-ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(FEProblem & fe_problem,
+ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(FEProblemBase & fe_problem,
                                                            std::vector<MooseSharedPointer<MaterialData> > & material_data,
                                                            std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
                                                            std::vector<MooseSharedPointer<MaterialData> > & neighbor_material_data,

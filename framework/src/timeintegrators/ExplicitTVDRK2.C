@@ -14,7 +14,7 @@
 
 #include "ExplicitTVDRK2.h"
 #include "NonlinearSystemBase.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "PetscSupport.h"
 
 template<>

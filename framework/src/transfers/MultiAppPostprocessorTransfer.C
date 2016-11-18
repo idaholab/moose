@@ -16,7 +16,7 @@
 
 // MOOSE includes
 #include "MooseTypes.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MultiApp.h"
 
 // libMesh
@@ -54,7 +54,7 @@ MultiAppPostprocessorTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      FEProblem & from_problem = _multi_app->problem();
+      FEProblemBase & from_problem = _multi_app->problem();
 
       Real pp_value = from_problem.getPostprocessorValue(_from_pp_name);
 
@@ -65,7 +65,7 @@ MultiAppPostprocessorTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      FEProblem & to_problem = _multi_app->problem();
+      FEProblemBase & to_problem = _multi_app->problem();
 
       Real reduced_pp_value;
       switch (_reduction_type)

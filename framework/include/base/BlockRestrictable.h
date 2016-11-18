@@ -23,7 +23,7 @@
 
 // Forward declarations
 class BlockRestrictable;
-class FEProblem;
+class FEProblemBase;
 class MooseMesh;
 
 template<>
@@ -42,13 +42,13 @@ InputParameters validParams<BlockRestrictable>();
  *
  * When using with an object with a 'variable' parameter (e.g., Kernel), the following must also exist within
  * the input parameters for the class to operate correctly
- * - '_fe_problem' = pointer to FEProblem
+ * - '_fe_problem' = pointer to FEProblemBase
  * - '_tid' = THREAD_ID for the class
  * - '_sys' = pointer to the SystemBase
  *
  * In the general case (i.e., no 'variable') \b either \b one of the following must also exist within the
  * input parameters for proper operation of the class:
- * - '_fe_problem' = a pointer to FEProblem
+ * - '_fe_problem' = a pointer to FEProblemBase
  * - '_mesh' = a pointer to MooseMesh
  *
  * When creating a new object, generally, this class should be inherited following MooseObject.
@@ -215,8 +215,8 @@ private:
   /// Flag for allowing dual restriction
   const bool _blk_dual_restrictable;
 
-  /// Pointer to FEProblem
-  FEProblem * _blk_feproblem;
+  /// Pointer to FEProblemBase
+  FEProblemBase * _blk_feproblem;
 
   /// Pointer to Mesh
   MooseMesh * _blk_mesh;

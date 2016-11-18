@@ -9,7 +9,7 @@
 
 #include "AuxiliarySystem.h"
 #include "NonlinearSystem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/mesh_communication.h"
 

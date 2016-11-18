@@ -33,7 +33,7 @@
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
 #include "GeometricSearchData.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "MooseMesh.h"
 #include "NonlinearSystem.h"

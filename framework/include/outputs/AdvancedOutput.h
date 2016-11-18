@@ -18,7 +18,7 @@
 // MOOSE includes
 #include "AdvancedOutputUtils.h" // OutputDataWarehouse
 #include "MooseTypes.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "UserObject.h"
 
 // Forward declarations

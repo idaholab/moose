@@ -14,7 +14,7 @@
 
 // moose includes
 #include "NonlinearSystem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "TimeIntegrator.h"
 
 // libmesh includes
@@ -24,37 +24,37 @@
 namespace Moose {
   void compute_jacobian (const NumericVector<Number>& soln, SparseMatrix<Number>&  jacobian, NonlinearImplicitSystem& sys)
   {
-    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
     p->computeJacobian(sys, soln, jacobian);
   }
 
   void compute_residual (const NumericVector<Number>& soln, NumericVector<Number>& residual, NonlinearImplicitSystem& sys)
   {
-    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
     p->computeResidual(sys, soln, residual);
   }
 
   void compute_bounds (NumericVector<Number>& lower, NumericVector<Number>& upper, NonlinearImplicitSystem& sys)
   {
-    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
     p->computeBounds(sys, lower, upper);
   }
 
   void compute_nullspace (std::vector<NumericVector<Number>*>& sp, NonlinearImplicitSystem& sys)
   {
-    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
     p->computeNullSpace(sys, sp);
   }
 
   void compute_transpose_nullspace (std::vector<NumericVector<Number>*>& sp, NonlinearImplicitSystem& sys)
   {
-    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
     p->computeTransposeNullSpace(sys, sp);
   }
 
   void compute_nearnullspace (std::vector<NumericVector<Number>*>& sp, NonlinearImplicitSystem& sys)
   {
-    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
     p->computeNearNullSpace(sys, sp);
   }
 
@@ -65,7 +65,7 @@ namespace Moose {
                           bool & changed_new_soln,
                           NonlinearImplicitSystem & sys)
   {
-    FEProblem * p = sys.get_equation_systems().parameters.get<FEProblem *>("_fe_problem");
+    FEProblemBase * p = sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem");
     p->computePostCheck(sys,
                         old_soln,
                         search_direction,
@@ -76,7 +76,7 @@ namespace Moose {
 } // namespace Moose
 
 
-NonlinearSystem::NonlinearSystem(FEProblem & fe_problem, const std::string & name) :
+NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string & name) :
     NonlinearSystemBase(fe_problem, fe_problem.es().add_system<TransientNonlinearImplicitSystem>(name), name),
     _transient_sys(fe_problem.es().get_system<TransientNonlinearImplicitSystem>(name))
 {
@@ -108,7 +108,7 @@ void
 NonlinearSystem::solve()
 {
   // Only attach the postcheck function to the solver if we actually
-  // have dampers or if the FEProblem needs to update the solution,
+  // have dampers or if the FEProblemBase needs to update the solution,
   // which is also done during the linesearch postcheck.  It doesn't
   // hurt to do this multiple times, it is just setting a pointer.
   if (_fe_problem.hasDampers() || _fe_problem.shouldUpdateSolution())

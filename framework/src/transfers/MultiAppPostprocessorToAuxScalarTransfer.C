@@ -16,7 +16,7 @@
 
 // MOOSE includes
 #include "MooseTypes.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MultiApp.h"
 
 // libMesh includes
@@ -52,7 +52,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
     case TO_MULTIAPP:
     {
       // Extract the postprocessor that is being transferd
-      FEProblem & from_problem = _multi_app->problem();
+      FEProblemBase & from_problem = _multi_app->problem();
       Real pp_value = from_problem.getPostprocessorValue(_from_pp_name);
 
       // Loop through each of the sub apps

@@ -50,7 +50,7 @@ public:
   /**
    * Call this inorder to separate the stored objects into the various AuxGroup catagories.
    *
-   * @see FEProblem::initialSetup()
+   * @see FEProblemBase::initialSetup()
    */
   void updateDependObjects(const std::set<std::string> & depend_uo, THREAD_ID tid = 0);
 

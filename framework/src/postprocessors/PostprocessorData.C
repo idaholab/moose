@@ -13,9 +13,9 @@
 /****************************************************************/
 
 #include "PostprocessorData.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
-PostprocessorData::PostprocessorData(FEProblem & fe_problem) :
+PostprocessorData::PostprocessorData(FEProblemBase & fe_problem) :
     Restartable("values", "PostprocessorData", fe_problem, 0)
 {
 }

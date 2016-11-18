@@ -16,7 +16,7 @@
 
 #include "AuxiliarySystem.h"
 #include "Problem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 
 // libmesh includes

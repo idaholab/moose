@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "PhysicsBasedPreconditioner.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
 #include "MooseEnum.h"
@@ -62,7 +62,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const InputParameters & 
     NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
     unsigned int n_vars = nl.nVariables();
 
-    // The coupling matrix is held and released by FEProblem, so it is not released in this object
+    // The coupling matrix is held and released by FEProblemBase, so it is not released in this object
     CouplingMatrix * cm = new CouplingMatrix(n_vars);
 
     bool full = false; //getParam<bool>("full"); // TODO: add a FULL option for PBP

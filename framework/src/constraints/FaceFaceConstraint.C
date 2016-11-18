@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "FaceFaceConstraint.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "NearestNodeLocator.h"
 #include "PenetrationLocator.h"
 #include "Assembly.h"
@@ -34,7 +34,7 @@ InputParameters validParams<FaceFaceConstraint>()
 FaceFaceConstraint::FaceFaceConstraint(const InputParameters & parameters) :
     Constraint(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem")),
     _dim(_mesh.dimension()),
 
     _q_point(_assembly.qPoints()),

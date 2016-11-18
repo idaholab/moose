@@ -14,7 +14,7 @@
 
 #include "DynamicObjectRegistrationAction.h"
 #include "Factory.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseApp.h"
 
 template<>

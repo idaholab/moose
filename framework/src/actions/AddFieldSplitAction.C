@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "AddFieldSplitAction.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
 
 template<>
@@ -39,6 +39,6 @@ AddFieldSplitAction::AddFieldSplitAction(InputParameters params) :
 void
 AddFieldSplitAction::act()
 {
-  _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
+  _moose_object_pars.set<FEProblemBase *>("_fe_problem") = _problem.get();
   _problem->getNonlinearSystemBase().addSplit(_type, _name, _moose_object_pars);
 }

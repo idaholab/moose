@@ -26,7 +26,7 @@ class NodalDamper;
 class ComputeNodalDampingThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalDampingThread(FEProblem & feproblem);
+  ComputeNodalDampingThread(FEProblemBase & feproblem);
 
   // Splitting Constructor
   ComputeNodalDampingThread(ComputeNodalDampingThread & x, Threads::split split);

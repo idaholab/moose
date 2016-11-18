@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "VariableResidualNormsDebugOutput.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseApp.h"
 #include "Material.h"
 #include "NonlinearSystemBase.h"

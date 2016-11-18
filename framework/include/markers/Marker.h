@@ -29,7 +29,7 @@
 // Forward declarations
 class MooseMesh;
 class SubProblem;
-class FEProblem;
+class FEProblemBase;
 class SystemBase;
 class Assembly;
 class MooseVariable;
@@ -106,7 +106,7 @@ protected:
   const VariableValue & getMarkerValue(std::string name);
 
   SubProblem & _subproblem;
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   Adaptivity & _adaptivity;
   SystemBase & _sys;
 

@@ -18,13 +18,13 @@
 #include "ComputeJacobianThread.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class NonlinearSystemBase;
 
 class ComputeFullJacobianThread : public ComputeJacobianThread
 {
 public:
-  ComputeFullJacobianThread(FEProblem & fe_problem, SparseMatrix<Number> & jacobian);
+  ComputeFullJacobianThread(FEProblemBase & fe_problem, SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
   ComputeFullJacobianThread(ComputeFullJacobianThread & x, Threads::split split);

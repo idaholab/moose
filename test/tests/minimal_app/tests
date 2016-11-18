@@ -3,7 +3,7 @@
     # Make sure --minimal flag is working
     type = RunApp
     cli_args = '--minimal --list-constructed-objects'
-    expect_out = "EquationProblem\nGeneratedMesh"
+    expect_out = "FEProblem\nGeneratedMesh"
     input = 'IGNORED'
     input_switch = ''
   [../]

@@ -21,7 +21,7 @@
 #include "libmesh/elem_range.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class NonlinearSystemBase;
 class IntegratedBC;
 class DGKernel;
@@ -31,7 +31,7 @@ class KernelWarehouse;
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeJacobianThread(FEProblem & fe_problem, SparseMatrix<Number> & jacobian);
+  ComputeJacobianThread(FEProblemBase & fe_problem, SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
   ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split);

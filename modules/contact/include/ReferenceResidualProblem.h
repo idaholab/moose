@@ -9,7 +9,7 @@
 #ifndef REFERENCERESIDUALPROBLEM_H
 #define REFERENCERESIDUALPROBLEM_H
 
-#include "EquationProblem.h"
+#include "FEProblem.h"
 
 class ReferenceResidualProblem;
 
@@ -17,9 +17,9 @@ template<>
 InputParameters validParams<ReferenceResidualProblem>();
 
 /**
- * FEProblem derived class to enable convergence checking relative to a user-specified postprocessor
+ * FEProblemBase derived class to enable convergence checking relative to a user-specified postprocessor
  */
-class ReferenceResidualProblem : public EquationProblem
+class ReferenceResidualProblem : public FEProblem
 {
 public:
   ReferenceResidualProblem(const InputParameters & params);

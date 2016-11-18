@@ -22,14 +22,14 @@
 #include "MooseMesh.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class AuxiliarySystem;
 class AuxKernel;
 
 class ComputeElemAuxBcsThread
 {
 public:
-  ComputeElemAuxBcsThread(FEProblem & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
+  ComputeElemAuxBcsThread(FEProblemBase & problem, const MooseObjectWarehouse<AuxKernel> & storage, bool need_materials);
   // Splitting Constructor
   ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split split);
 
@@ -38,7 +38,7 @@ public:
   void join(const ComputeElemAuxBcsThread & /*y*/);
 
 protected:
-  FEProblem & _problem;
+  FEProblemBase & _problem;
   AuxiliarySystem & _aux_sys;
   THREAD_ID _tid;
 

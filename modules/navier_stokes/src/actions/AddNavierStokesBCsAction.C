@@ -10,7 +10,7 @@
 #include "AddNavierStokesBCsAction.h"
 
 // MOOSE includes
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 
 template<>

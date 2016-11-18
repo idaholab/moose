@@ -14,7 +14,7 @@
 
 #include "ScalarInitialCondition.h"
 #include "MooseVariableScalar.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "SystemBase.h"
 
 template<>
@@ -33,7 +33,7 @@ ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameter
     ScalarCoupleable(this),
     FunctionInterface(this),
     DependencyResolverInterface(),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem")),
     _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_fe_problem.assembly(_tid)),

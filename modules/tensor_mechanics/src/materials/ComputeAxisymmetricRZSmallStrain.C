@@ -6,7 +6,7 @@
 /****************************************************************/
 
 #include "ComputeAxisymmetricRZSmallStrain.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 
 template<>

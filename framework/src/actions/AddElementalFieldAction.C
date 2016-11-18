@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "AddElementalFieldAction.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 
 // libmesh includes

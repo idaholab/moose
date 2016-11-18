@@ -15,7 +15,7 @@
 #include "Adaptivity.h"
 
 #include "MooseMesh.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "NonlinearSystemBase.h"
 #include "DisplacedProblem.h"
 #include "FlagElementsThread.h"
@@ -31,7 +31,7 @@
 
 #ifdef LIBMESH_ENABLE_AMR
 
-Adaptivity::Adaptivity(FEProblem & subproblem) :
+Adaptivity::Adaptivity(FEProblemBase & subproblem) :
     ConsoleStreamInterface(subproblem.getMooseApp()),
     _subproblem(subproblem),
     _mesh(_subproblem.mesh()),

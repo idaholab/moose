@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "Predictor.h"
 #include "NonlinearSystem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 // libMesh includes
 #include "libmesh/numeric_vector.h"
@@ -36,7 +36,7 @@ InputParameters validParams<Predictor>()
 Predictor::Predictor(const InputParameters & parameters) :
     MooseObject(parameters),
     Restartable(parameters, "Predictors"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem")),
     _nl(_fe_problem.getNonlinearSystemBase()),
 
     _t_step(_fe_problem.timeStep()),

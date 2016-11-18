@@ -165,8 +165,8 @@ protected:
    */
   virtual void initialSetup();
 
-  /// Pointer the the FEProblem object for output object (use this)
-  FEProblem * _problem_ptr;
+  /// Pointer the the FEProblemBase object for output object (use this)
+  FEProblemBase * _problem_ptr;
 
   /// Transient flag (true = transient)
   bool _transient;

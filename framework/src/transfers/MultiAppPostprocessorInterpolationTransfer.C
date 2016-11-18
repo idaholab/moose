@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "MultiAppPostprocessorInterpolationTransfer.h"
 #include "MooseTypes.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
 

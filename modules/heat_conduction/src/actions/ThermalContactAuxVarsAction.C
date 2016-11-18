@@ -5,10 +5,10 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "ThermalContactAuxVarsAction.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "libmesh/string_to_enum.h"
 
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/string_to_enum.h"
 

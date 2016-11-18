@@ -16,7 +16,7 @@
 #include "InitialCondition.h"
 #include "Assembly.h"
 
-ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(FEProblem & fe_problem) :
+ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(FEProblemBase & fe_problem) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem)
 {
 }

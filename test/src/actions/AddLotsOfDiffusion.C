@@ -14,7 +14,7 @@
 
 #include "AddLotsOfDiffusion.h"
 #include "Parser.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Factory.h"
 #include "MooseEnum.h"
 #include "AddVariableAction.h"

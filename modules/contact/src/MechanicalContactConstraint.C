@@ -96,7 +96,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
   // are solved where the constraints are treated as glued during the nonlinear
   // iterations, and then slip is updated after convergence. This is done using
   // FrictionalContactProblem. Use this option if FrictionalContactProblem is used.
-  FEProblem * fe_problem = getParam<FEProblem *>("_fe_problem");
+  FEProblemBase * fe_problem = getParam<FEProblemBase *>("_fe_problem");
   if (dynamic_cast<FrictionalContactProblem *>(fe_problem) != NULL)
   {
     if (_model == CM_COULOMB &&

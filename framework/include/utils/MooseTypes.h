@@ -129,7 +129,7 @@ const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
 /**
  * MaterialData types
  *
- * @see FEProblem, MaterialPropertyInterface
+ * @see FEProblemBase, MaterialPropertyInterface
  */
 enum MaterialDataType {
   BLOCK_MATERIAL_DATA,

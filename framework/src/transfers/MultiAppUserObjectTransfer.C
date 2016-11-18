@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "MultiAppUserObjectTransfer.h"
 #include "MooseTypes.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
@@ -155,7 +155,7 @@ MultiAppUserObjectTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      FEProblem & to_problem = _multi_app->problem();
+      FEProblemBase & to_problem = _multi_app->problem();
       MooseVariable & to_var = to_problem.getVariable(0, _to_var_name);
       SystemBase & to_system_base = to_var.sys();
 

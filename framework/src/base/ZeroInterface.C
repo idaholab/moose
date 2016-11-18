@@ -13,10 +13,10 @@
 /****************************************************************/
 
 #include "ZeroInterface.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 ZeroInterface::ZeroInterface(const InputParameters & parameters) :
-    _zi_feproblem(*parameters.get<FEProblem *>("_fe_problem")),
+    _zi_feproblem(*parameters.get<FEProblemBase *>("_fe_problem")),
     _zi_tid(parameters.get<THREAD_ID>("_tid")),
     _real_zero(_zi_feproblem._real_zero[_zi_tid]),
     _zero(_zi_feproblem._zero[_zi_tid]),

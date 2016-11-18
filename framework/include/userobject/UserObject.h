@@ -29,7 +29,7 @@
 
 // Forward declarations
 class UserObject;
-class FEProblem;
+class FEProblemBase;
 class SubProblem;
 class Assembly;
 
@@ -133,8 +133,8 @@ protected:
   /// Reference to the Subproblem for this user object
   SubProblem & _subproblem;
 
-  /// Reference to the FEProblem for this user object
-  FEProblem & _fe_problem;
+  /// Reference to the FEProblemBase for this user object
+  FEProblemBase & _fe_problem;
 
   /// Thread ID of this postprocessor
   THREAD_ID _tid;

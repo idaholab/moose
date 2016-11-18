@@ -25,7 +25,7 @@ InputParameters validParams<RichardsHalfGaussianSinkFlux>()
 
 RichardsHalfGaussianSinkFlux::RichardsHalfGaussianSinkFlux(const InputParameters & parameters) :
     SideIntegralVariablePostprocessor(parameters),
-    _feproblem(dynamic_cast<FEProblem &>(_subproblem)),
+    _feproblem(dynamic_cast<FEProblemBase &>(_subproblem)),
     _maximum(getParam<Real>("max")),
     _sd(getParam<Real>("sd")),
     _centre(getParam<Real>("centre")),

@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddBCAction.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "BoundaryCondition.h"
 
 template<>

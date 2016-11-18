@@ -16,7 +16,7 @@
 #include "MultiAppTransfer.h"
 #include "Transfer.h"
 #include "MooseTypes.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
@@ -33,7 +33,7 @@ InputParameters validParams<MultiAppTransfer>()
 
   params.addRequiredParam<MooseEnum>("direction", MultiAppTransfer::directions(), "Whether this Transfer will be 'to' or 'from' a MultiApp.");
 
-  // MultiAppTransfers by default will execute with their associated MultiApp. These flags will be added by FEProblem when the transfer is added.
+  // MultiAppTransfers by default will execute with their associated MultiApp. These flags will be added by FEProblemBase when the transfer is added.
   MultiMooseEnum multi_transfer_execute_on(params.get<MultiMooseEnum>("execute_on").getRawNames() + " same_as_multiapp", "same_as_multiapp");
   params.set<MultiMooseEnum>("execute_on") = multi_transfer_execute_on;
 

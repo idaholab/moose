@@ -14,14 +14,14 @@
 
 #include "ComputeNodalKernelJacobiansThread.h"
 #include "AuxiliarySystem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "NodalKernel.h"
 #include "Assembly.h"
 
 // libmesh includes
 #include "libmesh/sparse_matrix.h"
 
-ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(FEProblem & fe_problem,
+ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(FEProblemBase & fe_problem,
                                                                      const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
                                                                      SparseMatrix<Number> & jacobian) :
     ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),

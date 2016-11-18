@@ -14,7 +14,7 @@
 template<>
 InputParameters validParams<ReferenceResidualProblem>()
 {
-  InputParameters params = validParams<EquationProblem>();
+  InputParameters params = validParams<FEProblem>();
   params.addParam<std::vector<std::string> >("solution_variables","Set of solution variables to be checked for relative convergence");
   params.addParam<std::vector<std::string> >("reference_residual_variables","Set of variables that provide reference residuals for relative convergence check");
   params.addParam<Real>("acceptable_multiplier",1.0,"Multiplier applied to relative tolerance for acceptable limit");
@@ -23,7 +23,7 @@ InputParameters validParams<ReferenceResidualProblem>()
 }
 
 ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & params) :
-    EquationProblem(params)
+    FEProblem(params)
 {
   if (params.isParamValid("solution_variables"))
     _solnVarNames = params.get<std::vector<std::string> >("solution_variables");
@@ -94,7 +94,7 @@ ReferenceResidualProblem::initialSetup()
       mooseError("Could not find variable '" << _refResidVarNames[i] << "' in auxiliary system");
   }
 
-  FEProblem::initialSetup();
+  FEProblemBase::initialSetup();
 }
 
 void
@@ -105,7 +105,7 @@ ReferenceResidualProblem::timestepSetup()
     _refResid[i] = 0.0;
     _resid[i] = 0.0;
   }
-  FEProblem::timestepSetup();
+  FEProblemBase::timestepSetup();
 }
 
 void

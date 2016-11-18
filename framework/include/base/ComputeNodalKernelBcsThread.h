@@ -24,7 +24,7 @@ class NodalKernel;
 class ComputeNodalKernelBcsThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelBcsThread(FEProblem & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
+  ComputeNodalKernelBcsThread(FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
   // Splitting Constructor
   ComputeNodalKernelBcsThread(ComputeNodalKernelBcsThread & x, Threads::split split);
 

@@ -41,8 +41,8 @@ public:
 
 protected:
 
-  /// Reference to FEProblem instance
-  FEProblem & _mci_feproblem;
+  /// Reference to FEProblemBase instance
+  FEProblemBase & _mci_feproblem;
 };
 
 #endif /* MESHCHANGEDINTERFACE_H */

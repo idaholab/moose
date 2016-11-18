@@ -18,7 +18,7 @@
 
 // MOOSE includes
 #include "MooseApp.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "NonlinearSystem.h"
 #include "DisplacedProblem.h"
@@ -183,7 +183,7 @@ petscSetupDM (NonlinearSystemBase & nl)
 
 
 void
-petscSetOptions(FEProblem & problem)
+petscSetOptions(FEProblemBase & problem)
 {
   // Reference to the options stored in FEPRoblem
   PetscOptions & petsc = problem.getPetscOptions();
@@ -236,9 +236,9 @@ petscSetupOutput(CommandLine * cmd_line)
 PetscErrorCode
 petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
 {
-  // Cast the context pointer coming from PETSc to an FEProblem& and
+  // Cast the context pointer coming from PETSc to an FEProblemBase& and
   // get a reference to the System from it.
-  FEProblem & problem = *static_cast<FEProblem *>(ctx);
+  FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
 
   // Let's be nice and always check PETSc error codes.
   PetscErrorCode ierr = 0;
@@ -327,7 +327,7 @@ petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason
 PetscErrorCode
 petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm, PetscReal fnorm, SNESConvergedReason * reason, void * ctx)
 {
-  FEProblem & problem = *static_cast<FEProblem *>(ctx);
+  FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
   NonlinearSystemBase & system = problem.getNonlinearSystemBase();
 
   // Let's be nice and always check PETSc error codes.
@@ -369,7 +369,7 @@ petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm
     }
 #endif
 
-  // Error message that will be set by the FEProblem.
+  // Error message that will be set by the FEProblemBase.
   std::string msg;
 
   // xnorm: 2-norm of current iterate
@@ -447,7 +447,7 @@ getPetscPCSide(Moose::PCSideType pcs)
 }
 
 void
-petscSetDefaults(FEProblem & problem)
+petscSetDefaults(FEProblemBase & problem)
 {
   // dig out Petsc solver
   NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
@@ -493,7 +493,7 @@ petscSetDefaults(FEProblem & problem)
 }
 
 void
-storePetscOptions(FEProblem & fe_problem, const InputParameters & params)
+storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
 {
   // Note: Options set in the Preconditioner block will override those set in the Executioner block
   if (params.isParamValid("solve_type"))

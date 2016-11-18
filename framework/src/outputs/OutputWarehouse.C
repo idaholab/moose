@@ -18,7 +18,7 @@
 #include "Console.h"
 #include "FileOutput.h"
 #include "Checkpoint.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 #include <libgen.h>
 #include <sys/types.h>

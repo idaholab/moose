@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "MultiAppProjectionTransfer.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "AddVariableAction.h"
 #include "MooseMesh.h"
 
@@ -70,7 +70,7 @@ MultiAppProjectionTransfer::initialSetup()
 
   for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
   {
-    FEProblem & to_problem = *_to_problems[i_to];
+    FEProblemBase & to_problem = *_to_problems[i_to];
     EquationSystems & to_es = to_problem.es();
 
     // Add the projection system.
@@ -313,7 +313,7 @@ MultiAppProjectionTransfer::execute()
   std::vector<MeshFunction *> local_meshfuns(froms_per_proc[processor_id()], NULL);
   for (unsigned int i_from = 0; i_from < _from_problems.size(); i_from++)
   {
-    FEProblem & from_problem = *_from_problems[i_from];
+    FEProblemBase & from_problem = *_from_problems[i_from];
     MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
@@ -506,7 +506,7 @@ MultiAppProjectionTransfer::execute()
 void
 MultiAppProjectionTransfer::projectSolution(unsigned int i_to)
 {
-  FEProblem & to_problem = *_to_problems[i_to];
+  FEProblemBase & to_problem = *_to_problems[i_to];
   EquationSystems & proj_es = to_problem.es();
   LinearImplicitSystem & ls = *_proj_sys[i_to];
   // activate the current transfer

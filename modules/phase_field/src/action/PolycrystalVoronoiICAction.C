@@ -7,7 +7,7 @@
 #include "PolycrystalVoronoiICAction.h"
 #include "Factory.h"
 #include "Parser.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Conversion.h"
 
 #include <sstream>

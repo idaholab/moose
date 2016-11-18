@@ -18,7 +18,7 @@
 #include "ComputeFullJacobianThread.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 
 /**
  * Helper class for holding the preconditioning blocks to fill.
@@ -44,7 +44,7 @@ public:
 class ComputeJacobianBlocksThread : public ComputeFullJacobianThread
 {
 public:
-  ComputeJacobianBlocksThread(FEProblem & fe_problem, std::vector<JacobianBlock*> & blocks);
+  ComputeJacobianBlocksThread(FEProblemBase & fe_problem, std::vector<JacobianBlock*> & blocks);
 
   // Splitting Constructor
   ComputeJacobianBlocksThread(ComputeJacobianBlocksThread & x, Threads::split split);

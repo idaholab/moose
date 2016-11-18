@@ -13,10 +13,10 @@
 /****************************************************************/
 
 #include "ComputeInitialConditionThread.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "InitialCondition.h"
 
-ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblem & fe_problem) :
+ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblemBase & fe_problem) :
     _fe_problem(fe_problem)
 {
 }

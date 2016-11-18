@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "Nemesis.h"
 #include "MooseApp.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 
 // libMesh includes

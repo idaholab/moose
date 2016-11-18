@@ -20,7 +20,7 @@
 // Forward Declarations
 class EigenExecutionerBase;
 class MooseEigenSystem;
-class FEProblem;
+class FEProblemBase;
 
 template<>
 InputParameters validParams<EigenExecutionerBase>();
@@ -122,7 +122,7 @@ protected:
   virtual void printEigenvalue();
 
   // the fe problem
-  FEProblem & _problem;
+  FEProblemBase & _problem;
   MooseEigenSystem & _eigen_sys;
 
   /// Storage for the eigenvalue computed by the executioner

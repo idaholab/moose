@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "AutoPositionsMultiApp.h"
 #include "MooseMesh.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 template<>
 InputParameters validParams<AutoPositionsMultiApp>()

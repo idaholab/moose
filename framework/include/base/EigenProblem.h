@@ -17,9 +17,8 @@
 
 #include "libmesh/libmesh_config.h"
 
-#if LIBMESH_HAVE_SLEPC
 
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "NonlinearEigenSystem.h"
 
 class EigenProblem;
@@ -31,7 +30,7 @@ InputParameters validParams<EigenProblem>();
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
  */
-class EigenProblem : public FEProblem
+class EigenProblem : public FEProblemBase
 {
 public:
   EigenProblem(const InputParameters & parameters);
@@ -45,7 +44,5 @@ public:
 protected:
   NonlinearEigenSystem *_nl_eigen;
 };
-
-#endif /* LIBMESH_HAVE_SLEPC */
 
 #endif /* EIGENPROBLEM_H */

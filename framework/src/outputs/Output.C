@@ -17,7 +17,7 @@
 
 // MOOSE includes
 #include "Output.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 #include "MooseApp.h"
 #include "Postprocessor.h"
@@ -79,7 +79,7 @@ Output::Output(const InputParameters & parameters) :
     Restartable(parameters, "Output"),
     MeshChangedInterface(parameters),
     SetupInterface(this),
-    _problem_ptr(getParam<FEProblem *>("_fe_problem")),
+    _problem_ptr(getParam<FEProblemBase *>("_fe_problem")),
     _transient(_problem_ptr->isTransient()),
     _use_displaced(getParam<bool>("use_displaced")),
     _es_ptr(_use_displaced ? &_problem_ptr->getDisplacedProblem()->es() : &_problem_ptr->es()),

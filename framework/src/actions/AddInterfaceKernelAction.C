@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "AddInterfaceKernelAction.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 template<>
 InputParameters validParams<AddInterfaceKernelAction>()

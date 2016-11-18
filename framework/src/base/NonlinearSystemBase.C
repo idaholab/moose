@@ -15,7 +15,7 @@
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 #include "Problem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseVariable.h"
 #include "PetscSupport.h"
 #include "Factory.h"
@@ -95,7 +95,7 @@ EXTERN_C_END
 #endif
 
 
-NonlinearSystemBase::NonlinearSystemBase(FEProblem & fe_problem, System & sys, const std::string & name) :
+NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem, System & sys, const std::string & name) :
     SystemBase(fe_problem, name, Moose::VAR_NONLINEAR),
     ConsoleStreamInterface(fe_problem.getMooseApp()),
     _fe_problem(fe_problem),

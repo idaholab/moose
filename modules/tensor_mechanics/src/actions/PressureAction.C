@@ -7,7 +7,7 @@
 #include "PressureAction.h"
 
 #include "Factory.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Parser.h"
 #include "Conversion.h"
 

@@ -21,7 +21,7 @@
 
 #include <map>
 
-class FEProblem;
+class FEProblemBase;
 
 class PostprocessorData : public Restartable
 {
@@ -29,7 +29,7 @@ public:
   /**
    * Class constructor
    */
-  PostprocessorData(FEProblem & fe_problem);
+  PostprocessorData(FEProblemBase & fe_problem);
 
   /**
    * Initialization method, sets the current and old value to 0.0 for this

@@ -6,7 +6,7 @@
 /****************************************************************/
 
 #include "XFEMSingleVariableConstraint.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Assembly.h"
 
 // libMesh includes

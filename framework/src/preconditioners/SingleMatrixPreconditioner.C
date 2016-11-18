@@ -15,7 +15,7 @@
 #include "SingleMatrixPreconditioner.h"
 #include "NonlinearSystem.h"
 #include "MooseUtils.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 // libMesh includes
 #include "libmesh/coupling_matrix.h"

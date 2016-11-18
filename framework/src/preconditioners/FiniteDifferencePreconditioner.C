@@ -14,7 +14,7 @@
 
 #include "FiniteDifferencePreconditioner.h"
 #include "NonlinearSystem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 // libMesh includes
 #include "libmesh/coupling_matrix.h"

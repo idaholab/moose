@@ -8,7 +8,7 @@
 #include "Factory.h"
 #include "Parser.h"
 #include "Conversion.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 
 template<>

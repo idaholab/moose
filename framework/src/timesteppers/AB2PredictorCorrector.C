@@ -15,7 +15,7 @@
 #include "AB2PredictorCorrector.h"
 #include "AdamsPredictor.h"
 #include "Problem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseApp.h"
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"

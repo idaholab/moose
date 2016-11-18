@@ -6,7 +6,7 @@
 /****************************************************************/
 #include "AddSecondarySpeciesAction.h"
 #include "MooseUtils.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Factory.h"
 #include "MooseError.h"
 

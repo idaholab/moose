@@ -246,14 +246,14 @@ public:
   /**
    * Checks block material properties integrity
    *
-   * \see FEProblem::checkProblemIntegrity
+   * \see FEProblemBase::checkProblemIntegrity
    */
   virtual void checkBlockMatProps();
 
   /**
    * Checks boundary material properties integrity
    *
-   * \see FEProblem::checkProblemIntegrity
+   * \see FEProblemBase::checkProblemIntegrity
    */
   virtual void checkBoundaryMatProps();
 

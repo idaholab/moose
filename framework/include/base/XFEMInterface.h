@@ -24,7 +24,7 @@ class MooseApp;
 class AuxiliarySystem;
 class NonlinearSystemBase;
 class MaterialData;
-class FEProblem;
+class FEProblemBase;
 
 namespace libMesh
 {
@@ -51,7 +51,7 @@ public:
   explicit
   XFEMInterface(const InputParameters & params) :
     ConsoleStreamInterface(*params.getCheckedPointerParam<MooseApp *>("_moose_app")),
-    _fe_problem(params.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _fe_problem(params.getCheckedPointerParam<FEProblemBase *>("_fe_problem")),
     _material_data(NULL),
     _bnd_material_data(NULL),
     _mesh(NULL),
@@ -115,7 +115,7 @@ public:
   virtual bool getXFEMWeights(MooseArray<Real> &weights, const Elem * elem, QBase * qrule, const MooseArray<Point> & q_points) = 0;
 
 protected:
-  FEProblem * _fe_problem;
+  FEProblemBase * _fe_problem;
   std::vector<MooseSharedPointer<MaterialData> > * _material_data;
   std::vector<MooseSharedPointer<MaterialData> > * _bnd_material_data;
 

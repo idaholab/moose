@@ -6,7 +6,7 @@
 /****************************************************************/
 #include "AddCoupledEqSpeciesKernelsAction.h"
 #include "Parser.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Factory.h"
 
 #include <sstream>

@@ -37,7 +37,7 @@
 class Executioner;
 class MooseApp;
 class Backup;
-class FEProblem;
+class FEProblemBase;
 class MeshModifier;
 class InputParameterWarehouse;
 class SystemInfo;
@@ -656,8 +656,8 @@ private:
   /// Cache for a Backup to use for restart / recovery
   MooseSharedPointer<Backup> _cached_backup;
 
-  // Allow FEProblem to set the recover/restart state, so make it a friend
-  friend class FEProblem;
+  // Allow FEProblemBase to set the recover/restart state, so make it a friend
+  friend class FEProblemBase;
   friend class Restartable;
   friend class SubProblem;
 };

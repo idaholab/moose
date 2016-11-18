@@ -33,7 +33,7 @@
 
 //forward declarations
 class InitialCondition;
-class FEProblem;
+class FEProblemBase;
 class SystemBase;
 class Assembly;
 class MooseVariable;
@@ -97,7 +97,7 @@ public:
   virtual const std::set<std::string> & getSuppliedItems() override;
 
 protected:
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   SystemBase & _sys;
   THREAD_ID _tid;
 

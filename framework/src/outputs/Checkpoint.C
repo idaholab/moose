@@ -17,7 +17,7 @@
 
 // Moose includes
 #include "Checkpoint.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MooseApp.h"
 #include "MaterialPropertyStorage.h"
 #include "RestartableData.h"

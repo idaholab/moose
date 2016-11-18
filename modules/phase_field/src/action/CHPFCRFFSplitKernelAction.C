@@ -1,7 +1,7 @@
 #include "CHPFCRFFSplitKernelAction.h"
 #include "Factory.h"
 #include "Parser.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 template<>
 InputParameters validParams<CHPFCRFFSplitKernelAction>()

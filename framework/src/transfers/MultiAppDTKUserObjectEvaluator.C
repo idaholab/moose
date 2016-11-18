@@ -20,7 +20,7 @@
 #include "MultiAppDTKUserObjectEvaluator.h"
 #include "UserObject.h"
 #include "Executioner.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "MultiApp.h"
 #include "MooseTypes.h"
 #include "MooseMesh.h"

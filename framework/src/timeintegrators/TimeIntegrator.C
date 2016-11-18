@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "TimeIntegrator.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "SystemBase.h"
 #include "NonlinearSystem.h"
 
@@ -28,7 +28,7 @@ InputParameters validParams<TimeIntegrator>()
 TimeIntegrator::TimeIntegrator(const InputParameters & parameters) :
     MooseObject(parameters),
     Restartable(parameters, "TimeIntegrators"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem")),
     _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
     _nl(_fe_problem.getNonlinearSystemBase()),
     _u_dot(_sys.solutionUDot()),

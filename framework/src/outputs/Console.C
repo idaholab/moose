@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "Console.h"
 #include "ConsoleUtils.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "Postprocessor.h"
 #include "PetscSupport.h"
 #include "Executioner.h"

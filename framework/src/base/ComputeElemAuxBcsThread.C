@@ -15,13 +15,13 @@
 // MOOSE includes
 #include "ComputeElemAuxBcsThread.h"
 #include "AuxiliarySystem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "AuxKernel.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblem & problem,
+ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblemBase & problem,
                                                  const MooseObjectWarehouse<AuxKernel> & storage,
                                                  bool need_materials) :
     _problem(problem),

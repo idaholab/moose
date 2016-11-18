@@ -37,7 +37,7 @@ InputParameters validParams<BoundaryRestrictable>()
 
 // Standard constructor
 BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, bool nodal) :
-    _bnd_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
+    _bnd_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblemBase *>("_fe_problem") : NULL),
     _bnd_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _invalid_boundary_id(Moose::INVALID_BOUNDARY_ID),
@@ -52,7 +52,7 @@ BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, b
 
 // Dual restricted constructor
 BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, const std::set<SubdomainID> & block_ids, bool nodal) :
-    _bnd_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
+    _bnd_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblemBase *>("_fe_problem") : NULL),
     _bnd_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
     _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
     _invalid_boundary_id(Moose::INVALID_BOUNDARY_ID),
@@ -71,13 +71,13 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const InputParameters & par
   // The name and id of the object
   const std::string & name = parameters.get<std::string>("_object_name");
 
-  // If the mesh pointer is not defined, but FEProblem is, get it from there
+  // If the mesh pointer is not defined, but FEProblemBase is, get it from there
   if (_bnd_feproblem != NULL && _bnd_mesh == NULL)
     _bnd_mesh = &_bnd_feproblem->mesh();
 
   // Check that the mesh pointer was defined, it is required for this class to operate
   if (_bnd_mesh == NULL)
-    mooseError("The input parameters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
+    mooseError("The input parameters must contain a pointer to FEProblemBase via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
 
   // If the user supplies boundary IDs
   if (parameters.isParamValid("boundary"))

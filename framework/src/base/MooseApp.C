@@ -386,7 +386,7 @@ MooseApp::runInputFile()
 
   if (error_unused || warn_unused)
   {
-    MooseSharedPointer<FEProblem> fe_problem= _action_warehouse.problem();
+    MooseSharedPointer<FEProblemBase> fe_problem= _action_warehouse.problem();
     if (fe_problem.get() && name() == "main" && !getParam<bool>("minimal"))
     {
       // Check the CLI parameters
@@ -510,7 +510,7 @@ MooseApp::registerRecoverableData(std::string name)
 MooseSharedPointer<Backup>
 MooseApp::backup()
 {
-  FEProblem & fe_problem = _executioner->feProblem();
+  FEProblemBase & fe_problem = _executioner->feProblem();
 
   RestartableDataIO rdio(fe_problem);
 
@@ -528,7 +528,7 @@ MooseApp::restore(MooseSharedPointer<Backup> backup, bool for_restart)
     return;
   }
 
-  FEProblem & fe_problem = _executioner->feProblem();
+  FEProblemBase & fe_problem = _executioner->feProblem();
 
   RestartableDataIO rdio(fe_problem);
 
@@ -988,7 +988,7 @@ MooseApp::setRestart(const bool & value)
 {
   _restart = value;
 
-  MooseSharedPointer<FEProblem> fe_problem = _action_warehouse.problem();
+  MooseSharedPointer<FEProblemBase> fe_problem = _action_warehouse.problem();
 }
 
 void

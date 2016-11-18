@@ -16,7 +16,7 @@
 #include "InputParameters.h"
 #include "FunctionPeriodicBoundary.h"
 #include "NonlinearSystem.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "GeneratedMesh.h"
 #include "MooseMesh.h"
 #include "DisplacedProblem.h"
