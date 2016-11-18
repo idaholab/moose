@@ -1,0 +1,1 @@
+petsc-3.7.x has been released for a couple of months. It is time to make petsc-3.7.x as the default solver.
