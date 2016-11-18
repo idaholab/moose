@@ -4,7 +4,7 @@
 !description /Materials/TemperatureDependentHardeningStressUpdate
 
 ## Description
-{!content/modules/tensor_mechanics/common_documentation/supplementalRadialReturnStressUpdate.md!}
+{!docs/content/modules/tensor_mechanics/common_documentation/supplementalRadialReturnStressUpdate.md!}
 
 !parameters /Materials/TemperatureDependentHardeningStressUpdate
 

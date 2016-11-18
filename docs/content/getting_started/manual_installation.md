@@ -1,5 +1,5 @@
 # Manual Installation
-{!content/getting_started/minimum_requirements.md!}
+{!docs/content/getting_started/minimum_requirements.md!}
 
 ---
 ## Pre-Reqs
@@ -49,7 +49,7 @@ Copyright (C) 2015 Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```
-Looks like I need to build a newer version of GCC. Lets get started! 
+Looks like I need to build a newer version of GCC. Lets get started!
 
 ```bash
 cd $STACK_SRC

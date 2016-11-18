@@ -1,7 +1,6 @@
 import os
 import sys
 import re
-import subprocess
 import markdown
 import collections
 import yaml
@@ -35,18 +34,12 @@ class MooseMarkdown(markdown.Extension):
     # Storage for the MooseLinkDatabase object
     self.syntax = None
 
-    # Determine the root directory via git
-    root = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], stderr=subprocess.STDOUT).strip('\n')
-
     # Define the configuration options
     self.config = dict()
-    self.config['root']         = [root, "The root directory of the repository, if not provided the root is found using git."]
-    self.config['make']         = [root, "The location of the Makefile responsible for building the application."]
     self.config['executable']   = ['', "The executable to utilize for generating application syntax."]
     self.config['locations']    = [dict(), "The locations to parse for syntax."]
     self.config['repo']         = ['', "The remote repository to create hyperlinks."]
     self.config['links']        = [dict(), "The set of paths for generating input file and source code links to objects."]
-    self.config['docs_dir']     = [os.path.basename(os.getcwd()), "The location of the documentation directory, relative to the 'root'"]
     self.config['slides']       = [False, "Enable the parsing for creating reveal.js slides."]
     self.config['package']      = [False, "Enable the use of the MoosePackageParser."]
     self.config['graphviz']     = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
@@ -56,23 +49,27 @@ class MooseMarkdown(markdown.Extension):
     # Construct the extension object
     super(MooseMarkdown, self).__init__(**kwargs)
 
-  def execute(self, exe):
+    # Create the absolute path to the executable
+    self.setConfig('executable', MooseDocs.abspath(self.getConfig('executable')))
+
+  def execute(self):
     """
     Execute the supplied MOOSE application and return the YAML.
-
-    Args:
-      exe[str]: The MOOSE executable.
     """
+
+    exe = self.getConfig('executable')
     if not (exe or os.path.exists(exe)):
-      log.error('The executable does not exist: {}'.format(exe))
+      log.critical('The executable does not exist: {}'.format(exe))
+      raise Exception('Critical Error')
+
     else:
       log.debug("Executing {} to extract syntax.".format(exe))
       try:
         raw = utils.runExe(exe, '--yaml')
         return utils.MooseYaml(raw)
       except:
-        log.error('Failed to read YAML file, MOOSE and modules are likely not compiled correctly.')
-        sys.exit(1);
+        log.critical('Failed to read YAML file, MOOSE and modules are likely not compiled correctly.')
+        raise Exception('Critical Error')
 
 
   def extendMarkdown(self, md, md_globals):
@@ -85,7 +82,7 @@ class MooseMarkdown(markdown.Extension):
     config = self.getConfigs()
 
     # Extract YAML
-    exe_yaml = self.execute(config.pop('executable', None))
+    exe_yaml = self.execute()
 
     # Generate YAML data from application
     # Populate the database for input file and children objects

@@ -1,8 +1,7 @@
 import os
 import sys
 import argparse
-import argparse
-import logging
+import subprocess
 import multiprocessing
 
 import extensions
@@ -27,6 +26,7 @@ MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), '..', 'moose'))
 if not os.path.exists(MOOSE_DIR):
   MOOSE_DIR = os.path.join(os.getenv('HOME'), 'projects', 'moose')
 
+ROOT_DIR = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], stderr=subprocess.STDOUT).strip('\n')
 
 class MkMooseDocsFormatter(logging.Formatter):
   """
@@ -50,6 +50,27 @@ class MkMooseDocsFormatter(logging.Formatter):
 
   def counts(self):
     return self.COUNTS['WARNING'].value, self.COUNTS['ERROR'].value
+
+
+def abspath(*args):
+  """
+  Create an absolute path from paths that are given relative to the ROOT_DIR.
+
+  Inputs:
+    *args: Path(s) that are defined relative to the git repository root directory as defined in ROOT_DIR
+  """
+  return os.path.abspath(os.path.join(ROOT_DIR, *args))
+
+
+def relpath(abs_path):
+  """
+  Create a relative path from the absolute path given relative to the ROOT_DIR.
+
+  Inputs:
+    abs_path[str]: Absolute path that to be converted to a relative path to the git repository root directory as defined in ROOT_DIR
+  """
+  return os.path.relpath(abs_path, ROOT_DIR)
+
 
 def init_logging(verbose=False):
   """

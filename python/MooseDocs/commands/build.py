@@ -25,18 +25,18 @@ def build_options(parser, subparser):
   return build_parser
 
 
-def make_tree(pages, node, parser, syntax, site_dir, root_dir, template, config):
+def make_tree(pages, node, parser, syntax, site_dir, template, config):
   """
   Create the tree structure of NavigationNode/MoosePage objects
   """
   for p in pages:
     for k, v in p.iteritems():
       if isinstance(v, list):
-        child = NavigationNode(name=k, parent=node, site_dir=site_dir, root_dir=root_dir, template=template, **config)
+        child = NavigationNode(name=k, parent=node, site_dir=site_dir, template=template, **config)
         node.children.append(child)
-        make_tree(v, child, parser, syntax, site_dir, root_dir, template, config)
+        make_tree(v, child, parser, syntax, site_dir, template, config)
       else:
-        page = MoosePage(name=k, parent=node, filename=v, parser=parser, syntax=syntax, site_dir=site_dir, root_dir=root_dir, template=template, **config)
+        page = MoosePage(name=k, parent=node, filename=v, parser=parser, syntax=syntax, site_dir=site_dir, template=template, **config)
         node.children.append(page)
 
 
@@ -61,14 +61,11 @@ def get_markdown_extensions(config):
   extensions = []
   extension_configs = dict()
   for extension in config['markdown_extensions']:
+
     if isinstance(extension, dict):
       for k, v in extension.iteritems(): # there should only be one entry, but just in case
         extensions.append(k)
         extension_configs[k] = v
-
-        # Utilize the top-level 'docs_dir' by default
-        extension_configs.setdefault('docs_dir', config.get('docs_dir', 'docs'))
-
     else:
       extensions.append(extension)
 
@@ -88,16 +85,14 @@ class Builder(object):
     self._config = config
 
     # Extract the MooseLinkDatabase for creating source and doxygen links
-    self._root_dir = None
     self._syntax = dict()
     for ext in parser.registeredExtensions:
       if isinstance(ext, MooseMarkdown):
         self._syntax = ext.syntax
-        self._root_dir = ext.getConfig('root')
         break
 
     self._root = NavigationNode(name='root')
-    make_tree(self._sitemap, self._root, self._parser, self._syntax, self._site_dir, self._root_dir, self._template, self._config)
+    make_tree(self._sitemap, self._root, self._parser, self._syntax, self._site_dir, self._template, self._config)
 
     self._pages = []
     for page in flat(self._root):
@@ -121,8 +116,7 @@ class Builder(object):
     config = copy.copy(self._config)
     config.update(kwargs)
 
-    page = MoosePage(name=name, filename=filename, parser=self._parser, syntax=self._syntax,
-                     site_dir=self._site_dir, root_dir=self._root_dir, template=template, **config)
+    page = MoosePage(name=name, filename=filename, parser=self._parser, syntax=self._syntax, site_dir=self._site_dir, template=template, **config)
     page.parent = self._root
     self._pages.append(page)
 
@@ -177,12 +171,12 @@ def build(config_file='moosedocs.yml', disable_threads=False, **kwargs):
   config.update(kwargs)
 
   # Set the default arguments
-  config.setdefault('docs_dir', os.getcwd())
-  config.setdefault('site_dir', os.path.join('..', 'site'))
+  config.setdefault('site_dir', 'site')
   config.setdefault('pages', 'pages.yml')
   config.setdefault('template', 'materialize.html')
   config.setdefault('template_arguments', dict())
   config.setdefault('extra_pages', [])
+  config.setdefault('markdown_extensions', [])
 
   # Load the site map
   sitemap = MooseDocs.yaml_load(config['pages'])

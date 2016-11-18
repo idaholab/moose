@@ -22,19 +22,16 @@ class MoosePage(NavigationNode):
   NOTE: This class can also handle pure html pages as well, the markdown
         conversion step is simply skipped if the file ends with .html.
   """
-
-  def __init__(self, filename=None, parser=None, syntax=dict(), root_dir=None, **kwargs):
+  def __init__(self, parser=None, syntax=dict(), filename=None, **kwargs):
     super(MoosePage, self).__init__(**kwargs)
-
-    # Public members
-    self.filename = filename
 
     # Storage for the Markdown parser and the html to be generated
     self._parser = parser
     self._syntax = syntax
-    self._root_dir = root_dir
-    self._doc_dir = os.path.relpath(os.getcwd(), self._root_dir)
     self._html = None
+
+    # Public members
+    self.filename = MooseDocs.abspath(filename)
 
     # Populate the list of parent nodes (i.e., "breadcrumbs")
     self._breadcrumbs = []
@@ -163,19 +160,20 @@ class MoosePage(NavigationNode):
     Args:
       repo_url[str]: Web address to use as the base for creating the edit link
     """
-    output = [('Edit Markdown', os.path.join(repo_url, 'edit', 'devel', self._doc_dir, self.filename))]
+
+    output = [('Edit Markdown', os.path.join(repo_url, 'edit', 'devel', MooseDocs.relpath(self.filename)))]
 
     name = self._breadcrumbs[-1].name
 
     for key, syntax in self._syntax.iteritems():
       if syntax.hasObject(name):
         include = syntax.filenames(name)[0]
-        rel_include = os.path.relpath(include, self._root_dir)
+        rel_include = MooseDocs.relpath(include)
         output.append( ('Header', os.path.join(repo_url, 'blob', 'master', rel_include)) )
 
         source = include.replace('/include/', '/src/').replace('.h', '.C')
         if os.path.exists(source):
-          rel_source = os.path.relpath(source, self._root_dir)
+          rel_source = MooseDocs.relpath(source)
           output.append( ('Source', os.path.join(repo_url, 'blob', 'master', rel_source)) )
 
         output.append( ('Doxygen', syntax.doxygen(name)) )

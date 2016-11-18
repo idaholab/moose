@@ -9,7 +9,7 @@ contains all MoosePage objects for the website.
 {% endif %}
 {% if logo %}
   <li class="logo">
-    <a id="logo-container" href="{{current.relpath(site_url)}}">
+    <a id="logo-container" href="{{current.relpath('index.html')}}">
       <img style="max-width:236px;max-height:57px" align="middle" src="{{current.relpath(logo)}}">
     </a>
   </li>

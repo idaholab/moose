@@ -1,6 +1,6 @@
 # Mint
 
-{!content/getting_started/minimum_requirements.md!}
+{!docs/content/getting_started/minimum_requirements.md!}
 
 ---
 ## Pre-Reqs
@@ -23,7 +23,7 @@ m4
     * Mint 17.3: !MOOSEPACKAGE arch=mint17.3 return=link!
     * Mint 17.1: !MOOSEPACKAGE arch=mint17.1 return=link!
 
-{!content/getting_started/install_redistributable_deb.md!}
-{!content/getting_started/clone_moose.md!}
-{!content/getting_started/build_libmesh.md!}
-{!content/getting_started/conclusion.md!}
+{!docs/content/getting_started/install_redistributable_deb.md!}
+{!docs/content/getting_started/clone_moose.md!}
+{!docs/content/getting_started/build_libmesh.md!}
+{!docs/content/getting_started/conclusion.md!}

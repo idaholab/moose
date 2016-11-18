@@ -38,6 +38,6 @@
         - Moose Flavored Markdown: 'content/utilities/documentation/moose_flavored_markdown.md'
     - Memory Logger: 'content/utilities/memory_logger/memory_logger.md'
 - Help:
-    - Frequently Asked Questions: 'content/help/faq.md'
-    - INL HPC Connectivity: 'content/help/inlhpcconnectivity.md'
-    - Contact Us: 'content/help/contact_us.md'
+    - Frequently Asked Questions: docs/content/help/faq.md
+    - INL HPC Connectivity: docs/content/help/inlhpcconnectivity.md
+    - Contact Us: docs/content/help/contact_us.md

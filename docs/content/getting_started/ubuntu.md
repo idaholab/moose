@@ -1,6 +1,6 @@
 # Ubuntu
 
-{!content/getting_started/minimum_requirements.md!}
+{!docs/content/getting_started/minimum_requirements.md!}
 
 ---
 ## Pre-Reqs
@@ -29,7 +29,7 @@ libhwloc-dev
     * Ubuntu 14.04: !MOOSEPACKAGE arch=ubuntu14.04 return=link!
     * Ubuntu 12.04: !MOOSEPACKAGE arch=ubuntu12.04 return=link!
 
-{!content/getting_started/install_redistributable_deb.md!}
-{!content/getting_started/clone_moose.md!}
-{!content/getting_started/build_libmesh.md!}
-{!content/getting_started/conclusion.md!}
+{!docs/content/getting_started/install_redistributable_deb.md!}
+{!docs/content/getting_started/clone_moose.md!}
+{!docs/content/getting_started/build_libmesh.md!}
+{!docs/content/getting_started/conclusion.md!}

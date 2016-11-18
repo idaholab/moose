@@ -12,13 +12,7 @@ class MooseCommonExtension(object):
   """
   Class containing commonly used routines.
   """
-  def __init__(self, root=None, docs_dir=None, **kwargs):
-
-    # 'root' and 'docs_dir' are required
-    if not root:
-      log.error("The 'root' keyword argument is required for {}".format(self.__class__.__name__))
-    if not docs_dir:
-      log.error("The 'docs_dir' keyword argument is required for {}".format(self.__class__.__name__))
+  def __init__(self, **kwargs):
 
     # The default settings should be stored here
     self._settings = dict()
@@ -26,12 +20,6 @@ class MooseCommonExtension(object):
     # Any CSS you wish not to be set should be stored here
     # { element.tag : [attribute,] }
     self._invalid_css = dict()
-
-    # Set the directories
-    self._root = root
-    if not os.path.isabs(docs_dir):
-      docs_dir = os.path.join(self._root, docs_dir)
-    self._docs_dir = docs_dir
 
   def getSettings(self, settings_line):
    """

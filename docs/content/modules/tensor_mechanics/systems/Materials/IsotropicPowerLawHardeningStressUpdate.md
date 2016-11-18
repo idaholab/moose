@@ -3,7 +3,7 @@
 
 
 ## Description
-{!content/modules/tensor_mechanics/common_documentation/supplementalRadialReturnStressUpdate.md!}
+{!docs/content/modules/tensor_mechanics/common_documentation/supplementalRadialReturnStressUpdate.md!}
 
 This class models power law hardening by using the relation
 $$

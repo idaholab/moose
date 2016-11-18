@@ -1,14 +1,9 @@
 import os
 import re
-import copy
-import collections
-import logging
-import MooseDocs
-import collections
-import subprocess
 import yaml
-
+import logging
 log = logging.getLogger(__name__)
+import MooseDocs
 
 class PagesHelper(object):
   """
@@ -69,14 +64,15 @@ class MooseApplicationSyntax(object):
 
   Args:
     yaml[MooseYaml]: The MooseYaml object obtained by running the application with --yaml option.
+    root[str]: The root directory.
+
+  Optional Args:
     paths[list]: Valid source directory to extract syntax.
     doxygen[str]: The URL to the doxygen page.
-
-  Optional Args (only needed when check() method is called, see generate.py)
+    doxygen_name_style[str]: 'upper' (classMyClassName) and 'lower' (class_my_class_name) Doxygen html class format switch.
     pages[list]: The .yml file containing the website layout
     name[str]: The name of the syntax group (i.e., the key used in the 'locations' configuration for MooseMarkdown)
     install[str]: The install directory for the markdown (see MooseMarkdown config)
-    generate[bool]: When True stub pages are generated if they do not exist
   """
 
   def __init__(self, yaml_data, paths=[], doxygen=None, doxygen_name_style='upper', pages='pages.yml', name=None, install=None, stubs=False, pages_stubs=False, hide=[], **kwargs):
@@ -104,12 +100,10 @@ class MooseApplicationSyntax(object):
 
     # Update the syntax maps
     for path in paths:
-      if (not path):
-        log.critical("Missing or invalid source/include directory.")
-        raise Exception("A directory with a value of None was supplied, which is not allowed.")
-      elif not os.path.exists(path):
-        log.critical("Unknown source directory supplied: {}".format(os.path.abspath(path)))
-        raise IOError(os.path.abspath(path))
+      full_path = MooseDocs.abspath(path)
+      if not os.path.exists(full_path):
+        log.critical("Unknown source directory supplied: {}".format(full_path))
+        raise IOError(full_path)
       self._updateSyntax(path)
 
     for s in self._syntax:
@@ -123,6 +117,9 @@ class MooseApplicationSyntax(object):
           self._systems.add(name)
 
   def doxygen(self, name):
+    """
+    Returns the complete Doxygen website path for the supplied C++ object name.
+    """
     if self._doxygen_name_style == 'lower':
       convert = lambda str: re.sub('(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))', '_\\1', str).lower().strip('_')
       return os.path.join(self._doxygen, "class_{}.html".format(convert(name)))

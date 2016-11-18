@@ -27,7 +27,7 @@ cd $CLUSTER_TEMP
 ```bash
 umask 0022
 ```
-    
+
 
 #### Choose a base path
 * Export a base path variable which will be the home location for the compiler stack. All files related to MOOSE will be stored in this location (so choose carefully now):
@@ -66,7 +66,7 @@ setenv F90      mpif90
 setenv F77      mpif77
 setenv FC       mpif90
 
-setenv          PETSC_DIR       $base_path/petsc/petsc-{!content/getting_started/petsc_default_version.md!}/gcc-opt
+setenv          PETSC_DIR       $base_path/petsc/petsc-{!docs/content/getting_started/petsc_default_version.md!}/gcc-opt
 ```
 
 !!! note
@@ -119,17 +119,17 @@ echo $PETSC_DIR
 ```
 
 !!! note
-    Verify that the environment variable 'PETSC_DIR' is available and returning $PACKAGES_DIR/petsc/petsc-{!content/getting_started/petsc_default_version.md!}. If not, something went wrong with creating the moose-dev-gcc module above.
+    Verify that the environment variable 'PETSC_DIR' is available and returning $PACKAGES_DIR/petsc/petsc-{!docs/content/getting_started/petsc_default_version.md!}. If not, something went wrong with creating the moose-dev-gcc module above.
 
 * Download and extract PETSc:
 ```bash
-curl -L -O http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-{!content/getting_started/petsc_default_version.md!}.tar.gz
-tar -xf petsc-{!content/getting_started/petsc_default_version.md!}.tar.gz
-cd petsc-{!content/getting_started/petsc_default_version.md!}
+curl -L -O http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-{!docs/content/getting_started/petsc_default_version.md!}.tar.gz
+tar -xf petsc-{!docs/content/getting_started/petsc_default_version.md!}.tar.gz
+cd petsc-{!docs/content/getting_started/petsc_default_version.md!}
 ```
 * Configure PETSc using the following options (see Info admonition below):
 
-{!content/getting_started/petsc_default.md!}
+{!docs/content/getting_started/petsc_default.md!}
 
 During the configure/build process, you will be prompted to enter proper make commands. This can be different from system to system, so I leave that task to the reader.
 
@@ -141,6 +141,5 @@ During the configure/build process, you will be prompted to enter proper make co
 rm -rf $CLUSTER_TEMP
 ```
 
-{!content/getting_started/clone_moose.md!}
-{!content/getting_started/build_libmesh.md!}
-
+{!docs/content/getting_started/clone_moose.md!}
+{!docs/content/getting_started/build_libmesh.md!}

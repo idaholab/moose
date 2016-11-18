@@ -5,16 +5,18 @@ from markdown.util import etree
 import logging
 log = logging.getLogger(__name__)
 
+import MooseDocs
+
 class Item(object):
   """
   List item object.
 
   Args:
-    filename[str]: The relative path to the file.
+    filename[str]: The absoulte path to the file.
     repo[str]: The repository url to append the relative path.
   """
   def __init__(self, filename, repo):
-    self.filename = filename
+    self.filename = MooseDocs.relpath(filename)
     self.remote = os.path.join(repo, filename)
 
   def html(self):
@@ -39,9 +41,8 @@ class MooseLinkDatabase(object):
   INPUT_RE = re.compile(r'type\s*=\s*(?P<key>\w+)\b')
   HEADER_RE = re.compile(r'public\s*(?P<key>\w+)\b')
 
-  def __init__(self, root=None, repo=None, links=None, **kwargs):
+  def __init__(self, repo=None, links=None, **kwargs):
 
-    self._root = root
     self._repo = repo
     self.inputs = collections.OrderedDict()
     self.children = collections.OrderedDict()
@@ -51,10 +52,10 @@ class MooseLinkDatabase(object):
       self.children[key] = dict()
 
       for path in paths:
-        for base, _, files in os.walk(os.path.abspath(path), topdown=False):
+        for base, _, files in os.walk(MooseDocs.abspath(path), topdown=False):
           for filename in files:
             full_name = os.path.join(base, filename)
-            rel_name = os.path.relpath(root, full_name)
+            rel_name = MooseDocs.relpath(full_name)
             if filename.endswith('.i'):
               self.search(full_name, self.INPUT_RE, self.inputs[key])
 
@@ -78,4 +79,4 @@ class MooseLinkDatabase(object):
       key = match.group('key')
       if key not in database:
         database[key] = []
-      database[key].append(Item(os.path.relpath(filename, self._root), self._repo))
+      database[key].append(Item(filename, self._repo))

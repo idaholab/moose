@@ -28,7 +28,7 @@ class MooseTextFile(MooseTextPatternBase):
 
     # Read the file
     rel_filename = match.group(2).lstrip('/')
-    filename = os.path.join(self._root, rel_filename)
+    filename = MooseDocs.abspath(rel_filename)
     if not os.path.exists(filename):
       return self.createErrorElement("Unable to locate file: {}".format(rel_filename))
     if settings['line']:

@@ -2,13 +2,12 @@ template: materialize.html
 
 template_arguments:
     title: MOOSE
-    logo: media/moose_logo_small.png
+    logo: ../media/moose_logo_small.png
     repo_url: https://github.com/idaholab/moose/
-    site_url: /index.html
 
 extra_pages:
     - MOOSE:
-        filename: index.html
+        filename: docs/content/index.html
         template: materialize-home.html
 
 markdown_extensions:
@@ -16,12 +15,12 @@ markdown_extensions:
     - smarty
     - admonition
     - extra
-    - markdown_include.include           # pip install markdown-include
+    - markdown_include.include:          # pip install markdown-include
+          base_path: ..
     - mdx_math:                          # pip install python-markdown-math
           enable_dollar_delimiter: True
     - MooseDocs.extensions.MooseMarkdown:
           package: True
-          make: ../modules
           executable: ../modules/combined/combined-opt
           repo: https://github.com/idaholab/moose/blob/master
           hide:
@@ -62,38 +61,38 @@ markdown_extensions:
               - /UserObjects
           links:
               Tests:
-                  - ../test
-                  - ../modules/phase_field/tests
-                  - ../modules/tensor_mechanics/tests
+                  - test
+                  - modules/phase_field/tests
+                  - modules/tensor_mechanics/tests
               Examples:
-                  - ../examples
-                  - ../modules/phase_field/examples
-                  - ../modules/combined/examples
+                  - examples
+                  - modules/phase_field/examples
+                  - modules/combined/examples
               Tutorials:
-                  - ../tutorials
-                  - ../modules/tensor_mechanics/tutorials
+                  - tutorials
+                  - modules/tensor_mechanics/tutorials
               Source:
-                  - ../modules/heat_conduction/include
-                  - ../modules/tensor_mechanics/include
+                  - modules/heat_conduction/include
+                  - modules/tensor_mechanics/include
           locations:
               framework:
                   doxygen: http://mooseframework.com/docs/doxygen/moose/
                   paths:
-                      - ../framework/src
-                      - ../framework/include
-                  install: content/framework/systems
+                      - framework/src
+                      - framework/include
+                  install: docs/content/framework/systems
               phase_field:
                   doxygen: http://mooseframework.org/docs/doxygen/modules/
                   paths:
-                      - ../modules/phase_field/src
-                      - ../modules/phase_field/include
-                  install: content/modules/phase_field/systems
+                      - modules/phase_field/src
+                      - modules/phase_field/include
+                  install: docs/content/modules/phase_field/systems
               tensor_mechanics:
                   doxygen: http://mooseframework.org/docs/doxygen/modules/
                   paths:
-                      - ../modules/tensor_mechanics/src
-                      - ../modules/tensor_mechanics/include
-                  install: content/modules/tensor_mechanics/systems
+                      - modules/tensor_mechanics/src
+                      - modules/tensor_mechanics/include
+                  install: docs/content/modules/tensor_mechanics/systems
               heat_conduction:
                   hide:
                       - /ThermalContact
@@ -107,4 +106,4 @@ markdown_extensions:
                   paths:
                       - ../modules/rdg/src
                       - ../modules/rdg/include
-                  install: content/modules/rdg/systems
+                  install: docs/content/modules/rdg/systems

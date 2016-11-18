@@ -26,7 +26,7 @@ git rebase origin/master
 ---
 ## Create an App
 Creating your very own MOOSE application is a cinch: you do it by "Forking the Stork!"... which is our application template,
-just follow the instructions for [creating an application](content/application_development/create_an_app.md), and check out our list of tutorials.
+just follow the instructions for [creating an application](application_development/create_an_app.md), and check out our list of tutorials.
 
 ---
 ## Get Social!

@@ -8,7 +8,7 @@ This kernel solves the steady state stress divergence equation in polar coordina
 !!! info
     The `COORD_TYPE` in the Problem block of the input file must be set to RSPHERICAL.
 
-{!content/modules/tensor_mechanics/common_documentation/supplementalStressDivergenceKernels.md!}
+{!docs/content/modules/tensor_mechanics/common_documentation/supplementalStressDivergenceKernels.md!}
 
 For a detailed explanation of the settings for `use_displaced_mesh` in mechanics problems, see the [Introduction/StressDivergence](/introduction/StressDivergence.md) page.
 

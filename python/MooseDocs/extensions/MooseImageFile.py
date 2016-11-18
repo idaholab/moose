@@ -43,8 +43,8 @@ class MooseImageFile(MooseCommonExtension, Pattern):
     settings, styles = self.getSettings(match.group(3))
 
     # Read the file and create element
-    filename = os.path.join(self._root, self._docs_dir, match.group(2))
-    rel_filename = '/' + os.path.relpath(filename, os.path.join(self._root, self._docs_dir))
+    rel_filename = match.group(2)
+    filename = MooseDocs.abspath(match.group(2))
     if not os.path.exists(filename):
       return self.createErrorElement('File not found: {}'.format(rel_filename))
 

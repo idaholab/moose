@@ -1,6 +1,6 @@
 # Virtual Machine
 
-{!content/getting_started/minimum_requirements.md!}
+{!docs/content/getting_started/minimum_requirements.md!}
 
 ---
 ## Pre-Reqs
@@ -24,6 +24,6 @@
 !!! Info
     This image does not have any server daemons installed (SSH, Apache etc).
 
-{!content/getting_started/clone_moose.md!}
-{!content/getting_started/build_libmesh.md!}
-{!content/getting_started/conclusion.md!}
+{!docs/content/getting_started/clone_moose.md!}
+{!docs/content/getting_started/build_libmesh.md!}
+{!docs/content/getting_started/conclusion.md!}

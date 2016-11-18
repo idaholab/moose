@@ -13,7 +13,7 @@ The stress update materials are not called by MOOSE directly but instead only by
 ##Radial Return Algorithm Overview
 !image media/tensor_mechanics-RadialReturnStressSpace.png width=350 float=right caption=Figure 1: A trial stress is shown outside of the deviatoric yield surface and the radial return stress which is normal to the yield surface.
 
-{!content/modules/tensor_mechanics/common_documentation/supplementalRadialReturnStressUpdate.md!}
+{!docs/content/modules/tensor_mechanics/common_documentation/supplementalRadialReturnStressUpdate.md!}
 
 In the case of isotropic linear hardening plasticity, with the hardening function $ r = hp$, the effective plastic strain increment has the form:
 $$

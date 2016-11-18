@@ -1,6 +1,6 @@
 # Fedora
 
-{!content/getting_started/minimum_requirements.md!}
+{!docs/content/getting_started/minimum_requirements.md!}
 
 ---
 ## Pre-Reqs
@@ -27,7 +27,7 @@ git
 
     * Fedora Core 23: !MOOSEPACKAGE arch=fedora23 return=link!
 
-{!content/getting_started/install_redistributable_rpm.md!}
-{!content/getting_started/clone_moose.md!}
-{!content/getting_started/build_libmesh.md!}
-{!content/getting_started/conclusion.md!}
+{!docs/content/getting_started/install_redistributable_rpm.md!}
+{!docs/content/getting_started/clone_moose.md!}
+{!docs/content/getting_started/build_libmesh.md!}
+{!docs/content/getting_started/conclusion.md!}
