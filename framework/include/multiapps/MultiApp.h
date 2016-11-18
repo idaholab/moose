@@ -21,6 +21,7 @@
 class MultiApp;
 class UserObject;
 class FEProblemBase;
+class FEProblem;
 class Executioner;
 class MooseApp;
 class Backup;
@@ -128,13 +129,24 @@ public:
   /**
    * Get the FEProblemBase this MultiApp is part of.
    */
-  FEProblemBase & problem() { return _fe_problem; }
+  FEProblemBase & problemBase() { return _fe_problem; }
+
+  /**
+   * Get the FEProblem this MultiApp is part of.
+   */
+  FEProblem & problem();
 
   /**
    * Get the FEProblemBase for the global app is part of.
    * @param app The global app number
    */
-  FEProblemBase & appProblem(unsigned int app);
+  FEProblemBase & appProblemBase(unsigned int app);
+
+  /**
+   * Get the FEProblem for the global app is part of.
+   * @param app The global app number
+   */
+  FEProblem & appProblem(unsigned int app);
 
   /**
    * Get a UserObject base for a specific global app

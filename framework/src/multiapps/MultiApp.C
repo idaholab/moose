@@ -18,7 +18,7 @@
 #include "SetupInterface.h"
 #include "Executioner.h"
 #include "UserObject.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "OutputWarehouse.h"
 #include "AppFactory.h"
 #include "MooseUtils.h"
@@ -92,7 +92,7 @@ MultiApp::MultiApp(const InputParameters & parameters):
     MooseObject(parameters),
     SetupInterface(this),
     Restartable(parameters, "MultiApps"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type")) : _fe_problem.getMooseApp().type()),
     _input_files(getParam<std::vector<FileName> >("input_files")),
     _total_num_apps(0),
@@ -298,7 +298,7 @@ MultiApp::getBoundingBox(unsigned int app)
   if (!_has_an_app)
     mooseError("No app for " << name() << " on processor " << _orig_rank);
 
-  FEProblemBase & problem = appProblem(app);
+  FEProblemBase & problem = appProblemBase(app);
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
@@ -342,7 +342,7 @@ MultiApp::getBoundingBox(unsigned int app)
 }
 
 FEProblemBase &
-MultiApp::appProblem(unsigned int app)
+MultiApp::appProblemBase(unsigned int app)
 {
   if (!_has_an_app)
     mooseError("No app for " << name() << " on processor " << _orig_rank);
@@ -352,13 +352,30 @@ MultiApp::appProblem(unsigned int app)
   return _apps[local_app]->getExecutioner()->feProblem();
 }
 
+FEProblem &
+MultiApp::problem()
+{
+  return dynamic_cast<FEProblem&>(_fe_problem);
+}
+
+FEProblem &
+MultiApp::appProblem(unsigned int app)
+{
+  if (!_has_an_app)
+    mooseError("No app for " << name() << " on processor " << _orig_rank);
+
+  unsigned int local_app = globalAppToLocal(app);
+
+  return dynamic_cast<FEProblem&>(_apps[local_app]->getExecutioner()->feProblem());
+}
+
 const UserObject &
 MultiApp::appUserObjectBase(unsigned int app, const std::string & name)
 {
   if (!_has_an_app)
     mooseError("No app for " << MultiApp::name() << " on processor " << _orig_rank);
 
-  return appProblem(app).getUserObjectBase(name);
+  return appProblemBase(app).getUserObjectBase(name);
 }
 
 Real
@@ -367,13 +384,13 @@ MultiApp::appPostprocessorValue(unsigned int app, const std::string & name)
   if (!_has_an_app)
     mooseError("No app for " << MultiApp::name() << " on processor " << _orig_rank);
 
-  return appProblem(app).getPostprocessorValue(name);
+  return appProblemBase(app).getPostprocessorValue(name);
 }
 
 NumericVector<Number> &
 MultiApp::appTransferVector(unsigned int app, std::string /*var_name*/)
 {
-  return appProblem(app).getAuxiliarySystem().solution();
+  return appProblemBase(app).getAuxiliarySystem().solution();
 }
 
 bool
