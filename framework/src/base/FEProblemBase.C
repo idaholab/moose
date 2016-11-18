@@ -12,7 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 #include "MaterialPropertyStorage.h"
 #include "MooseEnum.h"
 #include "Resurrector.h"
@@ -195,8 +195,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters) :
 
   _resurrector = new Resurrector(*this);
 
-  _eq.parameters.set<FEProblemBase *>("_fe_problem") = this;
+  _eq.parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 }
+
 
 FEProblemBase::~FEProblemBase()
 {
@@ -1326,7 +1327,7 @@ FEProblemBase::subdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 void
 FEProblemBase::addFunction(std::string type, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   parameters.set<SubProblem *>("_subproblem") = this;
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -1417,7 +1418,7 @@ FEProblemBase::addScalarVariable(const std::string & var_name, Order order, Real
 void
 FEProblemBase::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -1446,7 +1447,7 @@ FEProblemBase::addKernel(const std::string & kernel_name, const std::string & na
 void
 FEProblemBase::addNodalKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -1474,7 +1475,7 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name, const std::string
 void
 FEProblemBase::addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -1501,7 +1502,7 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name, const std::strin
 void
 FEProblemBase::addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -1531,7 +1532,7 @@ FEProblemBase::addConstraint(const std::string & c_name, const std::string & nam
 {
   _has_constraints = true;
 
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -1581,7 +1582,7 @@ FEProblemBase::addAuxScalarVariable(const std::string & var_name, Order order, R
 void
 FEProblemBase::addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -1614,7 +1615,7 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name, const std::string &
 void
 FEProblemBase::addAuxScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -1641,7 +1642,7 @@ FEProblemBase::addAuxScalarKernel(const std::string & kernel_name, const std::st
 void
 FEProblemBase::addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -1671,7 +1672,7 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name, const std::string
 void
 FEProblemBase::addDGKernel(const std::string & dg_kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -1701,7 +1702,7 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name, const std::string
 void
 FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -1733,7 +1734,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name, const std::strin
   // before we start to mess with the initial condition, we need to check parameters for errors.
   parameters.checkParams(name);
 
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   parameters.set<SubProblem *>("_subproblem") = this;
 
   const std::string & var_name = parameters.get<VariableName>("variable");
@@ -1868,7 +1869,7 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
 void
 FEProblemBase::addMaterial(const std::string & mat_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2160,7 +2161,7 @@ FEProblemBase::addVectorPostprocessor(std::string pp_name, const std::string & n
 void
 FEProblemBase::addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
   else
@@ -2595,7 +2596,7 @@ FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
 void
 FEProblemBase::addDamper(std::string damper_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   parameters.set<SubProblem *>("_subproblem") = this;
   parameters.set<SystemBase *>("_sys") = _nl;
 
@@ -2612,7 +2613,7 @@ FEProblemBase::setupDampers()
 void
 FEProblemBase::addIndicator(std::string indicator_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2651,7 +2652,7 @@ FEProblemBase::addIndicator(std::string indicator_name, const std::string & name
 void
 FEProblemBase::addMarker(std::string marker_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -2684,7 +2685,7 @@ FEProblemBase::addMarker(std::string marker_name, const std::string & name, Inpu
 void
 FEProblemBase::addMultiApp(const std::string & multi_app_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
   parameters.set<MooseSharedPointer<CommandLine> >("_command_line") = _app.commandLine();
 
@@ -2902,7 +2903,7 @@ FEProblemBase::execTransfers(ExecFlagType type)
 void
 FEProblemBase::addTransfer(const std::string & transfer_name, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
@@ -3403,7 +3404,7 @@ FEProblemBase::onTimestepEnd()
 void
 FEProblemBase::addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   parameters.set<SubProblem *>("_subproblem") = this;
   _aux->addTimeIntegrator(type, name + ":aux", parameters);
   _nl->addTimeIntegrator(type, name, parameters);
@@ -3413,7 +3414,7 @@ FEProblemBase::addTimeIntegrator(const std::string & type, const std::string & n
 void
 FEProblemBase::addPredictor(const std::string & type, const std::string & name, InputParameters parameters)
 {
-  parameters.set<FEProblemBase *>("_fe_problem") = this;
+  setInputParametersFEProblem(parameters);
   parameters.set<SubProblem *>("_subproblem") = this;
   MooseSharedPointer<Predictor> predictor = _factory.create<Predictor>(type, name, parameters);
   _nl->setPredictor(predictor);

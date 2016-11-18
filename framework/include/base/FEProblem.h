@@ -39,7 +39,9 @@ public:
   virtual bool getUseNonlinear() const { return _use_nonlinear; }
   virtual void setUseNonlinear(bool use_nonlinear) { _use_nonlinear = use_nonlinear; }
 
-  NonlinearSystem & getNonlinearSystem() { return *_nl_sys; }
+  virtual void setInputParametersFEProblem(InputParameters & parameters) override;
+
+  NonlinearSystem & getNonlinearSystem() override { return *_nl_sys; }
 
 protected:
   bool _use_nonlinear;

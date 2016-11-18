@@ -63,6 +63,8 @@ FEProblem::FEProblem(const InputParameters & parameters) :
     _nl->addVector("NearNullSpace" + oss.str(), false, GHOSTED);
   }
   _subspace_dim["NearNullSpace"] = dimNearNullSpace;
+
+  _eq.parameters.set<FEProblem *>("_fe_problem") = this;
 }
 
 FEProblem::~FEProblem()
@@ -76,4 +78,13 @@ FEProblem::~FEProblem()
   delete _nl;
 
   delete _aux;
+}
+
+void
+FEProblem::setInputParametersFEProblem(InputParameters & parameters)
+{
+  // set _fe_problem
+  FEProblemBase::setInputParametersFEProblem(parameters);
+  // set _fe_problem
+  parameters.set<FEProblem *>("_fe_problem") = this;
 }

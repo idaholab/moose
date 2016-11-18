@@ -30,6 +30,7 @@
 #include "ExecuteMooseObjectWarehouse.h"
 #include "AuxGroupExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
+#include "NonlinearSystem.h"
 
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
@@ -448,6 +449,7 @@ public:
 
   // NL /////
   NonlinearSystemBase & getNonlinearSystemBase() { return *_nl; }
+  virtual NonlinearSystem & getNonlinearSystem() { return *(dynamic_cast<NonlinearSystem *>(_nl)); }
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
   void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
@@ -456,6 +458,7 @@ public:
   void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
   void addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
 
+  virtual void setInputParametersFEProblem(InputParameters & parameters) { parameters.set<FEProblemBase *>("_fe_problem_base") = this; }
 
   // Aux /////
   void addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains = NULL);
