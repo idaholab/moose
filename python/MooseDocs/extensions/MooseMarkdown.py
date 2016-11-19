@@ -20,6 +20,7 @@ from MooseCSS import MooseCSS
 from MooseSlidePreprocessor import MooseSlidePreprocessor
 from MooseBuildStatus import MooseBuildStatus
 from MooseBibtex import MooseBibtex
+from MooseSystemList import MooseSystemList
 import MooseDocs
 import utils
 
@@ -44,7 +45,6 @@ class MooseMarkdown(markdown.Extension):
     self.config['package']      = [False, "Enable the use of the MoosePackageParser."]
     self.config['graphviz']     = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
     self.config['dot_ext']      = ['svg', "The graphviz/dot output file extension (default: svg)."]
-    self.config['hide']         = [[], "A list of input file syntax to hide from system."]
 
     # Construct the extension object
     super(MooseMarkdown, self).__init__(**kwargs)
@@ -90,13 +90,12 @@ class MooseMarkdown(markdown.Extension):
     database = MooseDocs.MooseLinkDatabase(**config)
 
     # Populate the syntax
-    self.syntax = dict()
-    for key, value in config['locations'].iteritems():
-      if 'hide' in value:
-        value['hide'] += config['hide']
-      else:
-        value['hide'] = config['hide']
-      self.syntax[key] = MooseDocs.MooseApplicationSyntax(exe_yaml, **value)
+    self.syntax = collections.OrderedDict()
+    for item in config['locations']:
+      key = item.keys()[0]
+      options = item.values()[0]
+      options.setdefault('name', key.replace('_', ' ').title())
+      self.syntax[key] = MooseDocs.MooseApplicationSyntax(exe_yaml, **options)
 
     # Preprocessors
     md.preprocessors.add('moose_bibtex', MooseBibtex(markdown_instance=md, **config), '_end')
@@ -109,18 +108,14 @@ class MooseMarkdown(markdown.Extension):
     md.parser.blockprocessors.add('css', MooseCSS(md.parser, **config), '_begin')
 
     # Inline Patterns
-    object_markdown = MooseObjectSyntax(markdown_instance=md,
-                                        yaml=exe_yaml,
-                                        syntax=self.syntax,
-                                        database=database,
-                                        **config)
+    object_markdown = MooseObjectSyntax(markdown_instance=md, yaml=exe_yaml, syntax=self.syntax, database=database, **config)
     md.inlinePatterns.add('moose_object_syntax', object_markdown, '_begin')
 
-    system_markdown = MooseSystemSyntax(markdown_instance=md,
-                                        yaml=exe_yaml,
-                                        syntax=self.syntax,
-                                        **config)
+    system_markdown = MooseSystemSyntax(markdown_instance=md, yaml=exe_yaml, syntax=self.syntax, **config)
     md.inlinePatterns.add('moose_system_syntax', system_markdown, '_begin')
+
+    system_list = MooseSystemList(markdown_instance=md, yaml=exe_yaml, syntax=self.syntax, **config)
+    md.inlinePatterns.add('moose_system_list', system_list, '_begin')
 
     md.inlinePatterns.add('moose_input_block', MooseInputBlock(markdown_instance=md, **config), '<image_link')
     md.inlinePatterns.add('moose_cpp_method', MooseCppMethod(markdown_instance=md, **config), '<image_link')

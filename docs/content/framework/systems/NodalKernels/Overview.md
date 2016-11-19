@@ -1,6 +1,0 @@
-<!-- MOOSE System Documentation Stub: Remove this when content is added. -->
-#NodalKernels System
-!parameters /NodalKernels
-
-!subobjects framework /NodalKernels
-

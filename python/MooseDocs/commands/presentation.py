@@ -8,7 +8,7 @@ def presentation_options(parser, subparser):
   """
   reveal_default = os.path.join(os.getenv('HOME'), 'projects', 'reveal.js')
 
-  presentation = subparser.add_parser('presentation', help="Markdown to html presentation slides conversion.")
+  presentation = subparser.add_parser('presentation', help="Convert a markdown file to an html presentation.")
   presentation.add_argument('input', type=str, help="The markdown file to convert to slides.")
   presentation.add_argument('--reveal', '-r', default=reveal_default, help="The name of the reveal.js location where this presentation is to be installed (default: %(default)s).")
   presentation.add_argument('--output', '-o', default='index.html', help="The default html file to create within the revel directory (default: %(default)s).")

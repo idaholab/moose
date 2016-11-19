@@ -26,7 +26,7 @@ memory_logger.py  --repeat-rate .01 \
 Okay... A bit too accurate, as several samples remained unchanged during tracking. However sometimes more is desirable, though just not printed in this fashion. For data dumps like this, using Matplotlib is far more efficient.
 
 ## Using Matplotlib
-!image media/memory_logger-plot_multi.png width=300 float=right caption=Figure 1
+!image docs/media/memory_logger-plot_multi.png width=300 float=right caption=Figure 1
 
 We can visualize the results by plotting the data with Matplotlib (Figure 1):
 ```text
@@ -65,7 +65,7 @@ You can also display stdout along the Matplotlib graph:
 ```text
 memory_logger.py --pstack --stdout --plot simple_diffusion_memory.log
 ```
-!image media/memory_logger-darkmode.png width=300 float=right caption=--darkmode
+!image docs/media/memory_logger-darkmode.png width=300 float=right caption=--darkmode
 
 That white back ground to bright for you? Try dark mode:
 ```text

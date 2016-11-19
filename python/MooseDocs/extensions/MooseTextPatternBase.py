@@ -26,17 +26,11 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
     self._repo = repo
 
     # The default settings
-    self._settings = {'strip_header'        : True,
-             'repo_link'           : True,
-             'label'               : True,
-             'method'              : True,
-             'language'            : 'text',
-             'block'               : True,
-             'strip-extra-newlines': False}
-
-    # Applying overflow/max-height CSS to <div> and <code> causes multiple scroll bars
-    # do not let code float, the div will do this for us
-    self._invalid_css = { 'div' : ['overflow-y', 'overflow-x', 'max-height'], 'code' : ['float'] }
+    self._settings['strip_header'] = True
+    self._settings['repo_link'] = True
+    self._settings['label'] = True
+    self._settings['language'] = 'text'
+    self._settings['strip-extra-newlines'] = False
 
   def prepareContent(self, content, settings):
     """
@@ -62,7 +56,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
 
     return content
 
-  def createElement(self, label, content, filename, rel_filename, settings, styles):
+  def createElement(self, label, content, filename, rel_filename, settings):
     """
     Create the code element from the supplied source code content.
 
@@ -80,7 +74,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
     content = self.prepareContent(content, settings)
 
     # Build outer div container
-    el = self.addStyle(etree.Element('div'), **styles)
+    el = self.applyElementSettings(etree.Element('div'), settings)
     el.set('class', 'moosedocs-code-div')
 
     # Build label
@@ -95,9 +89,9 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
 
     # Build the code
     pre = etree.SubElement(el, 'pre')
-    code = self.addStyle(etree.SubElement(pre, 'code'), **styles)
+    code = etree.SubElement(pre, 'code')
     if settings['language']:
-      code.set('class', 'moose-code language-{}'.format(settings['language']))
-    code.text = content
+      code.set('class', settings['language'])
+    code.text = content.strip('\n')
 
     return el

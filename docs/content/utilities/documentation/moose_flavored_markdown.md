@@ -63,9 +63,9 @@ Moose Flavored Markdown is capable of automatically creating links based on Mark
 especially useful when linking to generated pages. The syntax is identical to creating links as
 defined by [mkdocs], however the markdown path may be incomplete.
 
-* `[/Kernels/Diffusion.md]`: [/Kernels/Diffusion.md]
-* `[framework/systems/Kernels/Overview.md]`: [framework/systems/Kernels/Overview.md]
-* `[Diffusion](/Kernels/Diffusion)`: [Diffusion](/Kernels/Diffusion.md)
+* `[/Diffusion.md]`: [/Diffusion.md]
+* `[/Kernels/index..md]`: [/Kernels/index.md]
+* `[Diffusion](/Diffusion.md)`: [Diffusion](/Diffusion.md)
 
 ---
 
@@ -118,7 +118,9 @@ the following limits the included code to the `computeQpResidual` method.
 !clang framework/src/kernels/Diffusion.C method=computeQpResidual
 ```
 
+<!--
 !clang framework/src/kernels/Diffusion.C method=computeQpResidual
+-->
 
 !!! warning "Warning"
     This method uses the clang parser directly, which can be slow. Thus, in general source code should be
@@ -160,19 +162,15 @@ the syntax for the system or object being documented.
 * `!inputfiles /Kernels/Diffusion`: Creates a list of input files that use the object or action.
 * `!childobjects /Kernels/Diffusion`: Create a list of objects that inherit from the supplied object.
 * `!devel /Kernels/Diffusion`: Creates links to the repository source code and Doxygen page for the object.
-* `!subobjects framework /Kernels`: Creates a table of objects within the supplied system, the second argument corresponds to the name of the "location" as specified in the configuration yaml file.
-* `!subsystems framework /Adaptivity`: Creates a table of sub-systems within the supplied system, , the second argument corresponds to the name of the "location" as specified in the configuration yaml file.
+* `!subobjects /Kernels`: Creates a table of objects within the supplied system.
+* `!subsystems /Adaptivity`: Creates a table of sub-systems within the supplied system.
 
 ---
 
 ## Images and Slideshows
-!image media/memory_logger-plot_multi.png width=30% padding-left=20px float=right caption=The [memory_logger](/memory_logger.md) is a utility that allows the user to track the memory use of a simulation.
+!image docs/media/memory_logger-plot_multi.png width=30% padding-left=20px float=right caption=The [memory_logger](/memory_logger.md) is a utility that allows the user to track the memory use of a simulation.
 
 It is possible to include images and slideshows of images with more flexibility than standard markdown.
-
-!!! note
-    Images paths should be specified relative to the "doc_dir", which by default is the "docs" directory
-    at the top-level of the repository.
 
 ### Single Images
 The markdown keyword for MOOSE images is `!image` followed by the filename as shown below. This command, like most of the other
@@ -180,7 +178,7 @@ special MOOSE markdown commands except arbitrary html attributes. Therefore, any
 automatically applied to the `<figure>` tag of the image. For example, the following syntax was used to include the image on the right.
 
 ```markdown
-!image media/memory_logger-plot_multi.png width=30% padding-left=20px float=right caption=The [memory_logger](/memory_logger.md) is a utility that allows the user to track the memory use of a simulation.
+!image docs/media/memory_logger-plot_multi.png width=30% padding-left=20px float=right caption=The [memory_logger](/memory_logger.md) is a utility that allows the user to track the memory use of a simulation.
 ```
 
 ### Slideshows
@@ -211,15 +209,15 @@ line.
 A full slideshow example might be:
 ```markdown
 !slideshow caption=My caption with spaces interval=5000 pause=null wrap=false keyboard=false width=500px
-    media/memory_logger-plot_multi.png caption=Memory Logger plotting two results
-    media/memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
-    media/memory_*.png
+    docs/media/memory_logger-plot_multi.png caption=Memory Logger plotting two results
+    docs/media/memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
+    docs/media/memory_*.png
 ```
 
 !slideshow caption=My caption with spaces interval=5000 pause=null wrap=false keyboard=false width=500px
-    media/memory_logger-plot_multi.png caption=Memory Logger plotting two results
-    media/memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
-    media/memory_*.png
+    docs/media/memory_logger-plot_multi.png caption=Memory Logger plotting two results
+    docs/media/memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
+    docs/media/memory_*.png
 
 ---
 
@@ -328,7 +326,7 @@ It is possible to include citations using latex commands, the following commands
 The bibliography style may be set within a page using the latex command
 `\bibliographystyle{unsrt}`. Three styles are currently available: 'unsrt', 'plain', 'alpha', and 'unsrtalpha'.
 
-The references are displayed by using the latex `\bibliography{docs/moose.bib}` command. This command accepts a comma separated list of bibtex files (*.bib) to use to build citations and references. The files specified in this list must be given as a relative path to the root directory (e.g., `~/projects/moose`) of the repository.
+The references are displayed by using the latex `\bibliography{docs/bib/moose.bib}` command. This command accepts a comma separated list of bibtex files (*.bib) to use to build citations and references. The files specified in this list must be given as a relative path to the root directory (e.g., `~/projects/moose`) of the repository.
 
 \bibliographystyle{unsrt}
-\bibliography{bib/moose.bib}
+\bibliography{docs/bib/moose.bib}

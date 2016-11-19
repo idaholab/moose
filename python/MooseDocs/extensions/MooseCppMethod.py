@@ -29,6 +29,8 @@ class MooseCppMethod(MooseTextPatternBase):
 
   def __init__(self, executable=None, **kwargs):
     super(MooseCppMethod, self).__init__(self.CPP_RE, language='cpp', **kwargs)
+    self._settings['method'] = None
+
 
     # The executable path is required
     if not executable:
@@ -46,7 +48,7 @@ class MooseCppMethod(MooseTextPatternBase):
     Process the C++ file provided using clang.
     """
     # Update the settings from regex match
-    settings, styles = self.getSettings(match.group(3))
+    settings = self.getSettings(match.group(3))
 
     # Extract relative filename
     rel_filename = match.group(2).lstrip('/')
@@ -72,7 +74,7 @@ class MooseCppMethod(MooseTextPatternBase):
         parser = utils.MooseSourceParser(self._make_dir)
         parser.parse(filename)
         decl, defn = parser.method(settings['method'])
-        el = self.createElement(match.group(2), defn, filename, rel_filename, settings, styles)
+        el = self.createElement(match.group(2), defn, filename, rel_filename, settings)
       except:
         el = self.createErrorElement('Failed to parse method using clang, check that you have the make file option passed to the MooseMarkdown object.')
 

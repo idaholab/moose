@@ -16,10 +16,13 @@ class Item(object):
     repo[str]: The repository url to append the relative path.
   """
   def __init__(self, filename, repo):
-    self.filename = MooseDocs.relpath(filename)
-    self.remote = os.path.join(repo, filename)
+    self.filename = MooseDocs.relpath(filename).lstrip('/')
+    self.remote = '{}/{}'.format(repo.rstrip('/'), self.filename)
 
   def html(self):
+    """
+    Returns an html li tag.
+    """
     el = etree.Element('li')
     a = etree.SubElement(el, 'a')
     a.set('href', self.remote)
@@ -42,7 +45,6 @@ class MooseLinkDatabase(object):
   HEADER_RE = re.compile(r'public\s*(?P<key>\w+)\b')
 
   def __init__(self, repo=None, links=None, **kwargs):
-
     self._repo = repo
     self.inputs = collections.OrderedDict()
     self.children = collections.OrderedDict()

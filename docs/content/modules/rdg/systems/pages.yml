@@ -1,4 +1,0 @@
-- BCs: !include content/modules/rdg/systems/BCs/pages.yml
-- DGKernels: !include content/modules/rdg/systems/DGKernels/pages.yml
-- Materials: !include content/modules/rdg/systems/Materials/pages.yml
-- UserObjects: !include content/modules/rdg/systems/UserObjects/pages.yml

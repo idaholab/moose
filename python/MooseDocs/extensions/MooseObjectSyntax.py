@@ -8,8 +8,8 @@ log = logging.getLogger(__name__)
 from markdown.inlinepatterns import Pattern
 from markdown.util import etree
 from MooseSyntaxBase import MooseSyntaxBase
+from MooseObjectParameterTable import MooseObjectParameterTable
 import utils
-import MooseDocs
 
 class MooseObjectSyntax(MooseSyntaxBase):
   """
@@ -33,7 +33,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
 
   def __init__(self, database=None, repo=None, **kwargs):
     super(MooseObjectSyntax, self).__init__(self.RE, **kwargs)
-
+    self._settings['display'] = "collapsible"
 
     # Input arguments
     self._input_files = database.inputs
@@ -50,12 +50,8 @@ class MooseObjectSyntax(MooseSyntaxBase):
     action = match.group(2)
     syntax = match.group(3)
 
-    # Default Settings
-    if action == 'parameters':
-      self._settings['display'] = "collapsible"
-
     # Extract Settings
-    settings, styles = self.getSettings(match.group(4))
+    settings = self.getSettings(match.group(4))
 
     # Locate description
     node = self._yaml.find(syntax)
@@ -66,18 +62,18 @@ class MooseObjectSyntax(MooseSyntaxBase):
     self._name = node['name'].split('/')[-1]
 
     if action == 'description':
-      el = self.descriptionElement(node, settings, styles)
+      el = self.descriptionElement(node, settings)
     elif action == 'parameters':
-      el = self.parametersElement(node, settings, styles)
+      el = self.parametersElement(node, settings)
     elif action == 'inputfiles':
-      el = self.inputfilesElement(node, settings, styles)
+      el = self.inputfilesElement(node, settings)
     elif action == 'childobjects':
-      el = self.childobjectsElement(node, settings, styles)
+      el = self.childobjectsElement(node, settings)
     elif action == 'subobjects':
-      el = self.subobjectsElement(node, settings, styles)
+      el = self.subobjectsElement(node, settings)
     return el
 
-  def descriptionElement(self, node, settings, styles):
+  def descriptionElement(self, node, settings):
     """
     Return the class description html element.
 
@@ -91,11 +87,11 @@ class MooseObjectSyntax(MooseSyntaxBase):
       return self.createErrorElement('Failed to locate class description for {} syntax.'.format(node['name']),warning=hidden)
 
     # Create the html element with supplied styles
-    el = self.addStyle(etree.Element('p'), **styles)
+    el = self.applyElementSettings(etree.Element('p'), settings)
     el.text = node['description']
     return el
 
-  def parametersElement(self, node, settings, styles):
+  def parametersElement(self, node, settings):
     """
     Return table(s) of input parameters.
 
@@ -106,8 +102,8 @@ class MooseObjectSyntax(MooseSyntaxBase):
 
     # Create the tables (generate 'Required' and 'Optional' initially so that they come out in the proper order)
     tables = collections.OrderedDict()
-    tables['Required'] = MooseDocs.MooseObjectParameterTable(display_type = settings['display'])
-    tables['Optional'] = MooseDocs.MooseObjectParameterTable(display_type = settings['display'])
+    tables['Required'] = MooseObjectParameterTable(display_type = settings['display'])
+    tables['Optional'] = MooseObjectParameterTable(display_type = settings['display'])
 
     # Loop through the parameters in yaml object
     for param in node['parameters'] or []:
@@ -118,10 +114,10 @@ class MooseObjectSyntax(MooseSyntaxBase):
         name = 'Optional'
 
       if name not in tables:
-        tables[name] = MooseDocs.MooseObjectParameterTable(display_type = settings['display'])
+        tables[name] = MooseObjectParameterTable(display_type = settings['display'])
       tables[name].addParam(param)
 
-    el = self.addStyle(etree.Element('div'), **styles)
+    el = self.applyElementSettings(etree.Element('div'), settings)
     el.set('id', '#input-parameters')
     el.set('class', 'section scrollspy')
     if any(tables.values()):
@@ -136,7 +132,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
     return el
 
 
-  def inputfilesElement(self, node, settings, styles):
+  def inputfilesElement(self, node, settings):
     """
     Return the links to input files and child objects.
 
@@ -145,13 +141,13 @@ class MooseObjectSyntax(MooseSyntaxBase):
       styles[dict]: Styles from markdown.
     """
     # Print the item information
-    el = self.addStyle(etree.Element('div'), **styles)
+    el = self.applyElementSettings(etree.Element('div'), settings)
     el.set('id', '#input-files')
     el.set('class', 'section scrollspy')
     self._listhelper(node, 'Input Files', el, self._input_files)
     return el
 
-  def childobjectsElement(self, node, settings, styles):
+  def childobjectsElement(self, node, settings):
     """
     Return the links to input files and child objects.
 
@@ -160,7 +156,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
       styles[dict]: Styles from markdown.
     """
     # Print the item information
-    el = self.addStyle(etree.Element('div'), **styles)
+    el = self.applyElementSettings(etree.Element('div'), settings)
     el.set('id', '#child-objects')
     el.set('class', 'section scrollspy')
     self._listhelper(node, 'Child Objects', el, self._child_objects)

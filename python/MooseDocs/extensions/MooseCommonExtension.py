@@ -15,42 +15,40 @@ class MooseCommonExtension(object):
   def __init__(self, **kwargs):
 
     # The default settings should be stored here
-    self._settings = dict()
-
-    # Any CSS you wish not to be set should be stored here
-    # { element.tag : [attribute,] }
-    self._invalid_css = dict()
+    self._settings = {'id': None, 'class': None, 'style': ''}
 
   def getSettings(self, settings_line):
-   """
-   Parses a string of space separated key=value pairs.
-   This supports having values with spaces in them.
-   So something like "key0=foo bar key1=value1"
-   is supported.
-   Input:
-    settings_line[str]: Line to parse
-   Returns:
-    dict of values that were parsed
-   """
+    """
+    Parses a string of space separated key=value pairs.
+    This supports having values with spaces in them.
+    So something like "key0=foo bar key1=value1"
+    is supported.
 
-   # Crazy RE capable of many things
-   # like understanding key=value pairs with spaces in them!
-   SETTINGS_RE = re.compile("([^\s=]+)=(.*?)(?=(?:\s[^\s=]+=|$))")
-   matches = SETTINGS_RE.findall(settings_line.strip())
+    Input:
+      settings_line[str]: Line to parse
+    Returns:
+      dict of values that were parsed
+    """
 
-   options = copy.copy(self._settings)
-   styles = {}
-   if len(matches) == 0:
-     return options, styles
+    # Crazy RE capable of many things
+    # like understanding key=value pairs with spaces in them!
+    SETTINGS_RE = re.compile("([^\s=]+)=(.*?)(?=(?:\s[^\s=]+=|$))")
+    matches = SETTINGS_RE.findall(settings_line.strip())
 
-   for entry in matches:
-    if entry[0] in options.keys():
-      options[entry[0].strip()] = entry[1].strip()
-    else:
-      styles[entry[0].strip()] = entry[1].strip()
-   return options, styles
+    options = copy.copy(self._settings)
+    if len(matches) == 0:
+      return options
+    for entry in matches:
+     if entry[0] in options.keys():
+       options[entry[0].strip()] = entry[1].strip()
+     else:
+      # log.warning('The style should be specified in the style argument (e.g., style="{}:{};")'.format(entry[0].strip(), entry[1].strip()))
+       options['style'] += '{}:{};'.format(entry[0].strip(), entry[1].strip())
+    return options
 
-  def addStyle(self, element, **kwargs):
+
+  @staticmethod
+  def applyElementSettings(element, settings):
     """
     Returns supplied element with style attributes.
 
@@ -58,23 +56,14 @@ class MooseCommonExtension(object):
     padding, margins, etc to any element.
 
     Usage:
-    addStyle(etree.Element, width='300px')
-
-    returns your element with style="width=300px;" along
-    with any pre-existing styles set.
-
+      settings = self.getSettings(settings_string)
+      div = self.appyElementSettings(etree.Element('div'), settings)
     """
-    if kwargs == {}:
-      return element
-    else:
-      for attribute, value in kwargs.iteritems():
-        if self._invalid_css.has_key(element.tag) and (attribute in self._invalid_css[element.tag]):
-          continue
-        if element.get('style') is not None:
-          element.set('style', ';'.join([':'.join([attribute,value]), element.get('style')]))
-        else:
-          element.set('style', ':'.join([attribute,value]) + ';')
-      return element
+    for attr in ['id', 'class', 'style']:
+      if settings[attr] != None:
+        element.set(attr, settings[attr])
+    return element
+
 
   def createErrorElement(self, message, title='Markdown Parsing Error', parent=None, warning=False):
     """

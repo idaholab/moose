@@ -5,51 +5,6 @@ import logging
 log = logging.getLogger(__name__)
 import MooseDocs
 
-class PagesHelper(object):
-  """
-  A helper class for checking if a markdown file is include in the 'pages.yml' file.
-  """
-  def __init__(self, pages):
-    self.pages = MooseDocs.yaml_load(pages)
-    self.raw = yaml.dump(self.pages, default_flow_style=False)
-
-  def check(self, filename):
-    return filename in self.raw
-
-  @staticmethod
-  def create(root):
-    """
-    Generated nested 'pages.yml' files.
-    """
-
-    # Define the pages.yml file
-    pages = os.path.join(root, 'pages.yml')
-    content = []
-    if not os.path.exists(root):
-      os.makedirs(root)
-
-    # Loop through the contents of the directory
-    for item in os.listdir(root):
-      full = os.path.join(root, item)
-      txt = None
-      if os.path.isdir(full):
-        txt = '- {}: !include {}\n'.format(item, os.path.join(full, 'pages.yml'))
-        PagesHelper.create(full)
-      elif full.endswith('.md'):
-        txt = '- {}: {}\n'.format(item[:-3], full)
-
-      if txt:
-        if txt.startswith('- Overview:'):
-          content.insert(0, txt)
-        else:
-          content.append(txt)
-
-    # Write the contents
-    with open(pages, 'w') as fid:
-      log.info('Writing pages file: {}'.format(pages))
-      for line in content:
-        fid.write(line)
-
 
 class MooseApplicationSyntax(object):
   """
@@ -63,40 +18,36 @@ class MooseApplicationSyntax(object):
   the registered objects and syntax specific to the application.
 
   Args:
-    yaml[MooseYaml]: The MooseYaml object obtained by running the application with --yaml option.
-    root[str]: The root directory.
-
-  Optional Args:
+    yaml_data[MooseYaml]: The MooseYaml object obtained by running the application with --yaml option.
     paths[list]: Valid source directory to extract syntax.
     doxygen[str]: The URL to the doxygen page.
     doxygen_name_style[str]: 'upper' (classMyClassName) and 'lower' (class_my_class_name) Doxygen html class format switch.
-    pages[list]: The .yml file containing the website layout
     name[str]: The name of the syntax group (i.e., the key used in the 'locations' configuration for MooseMarkdown)
-    install[str]: The install directory for the markdown (see MooseMarkdown config)
+    install[str]: The install directory for the generating stub markdown files
+    generate[bool]: When True the call to 'check' will generate stub markdown pages.
+    hide[list]: A list of syntax to ignore for error checking and generation.
+
   """
 
-  def __init__(self, yaml_data, paths=[], doxygen=None, doxygen_name_style='upper', pages='pages.yml', name=None, install=None, stubs=False, pages_stubs=False, hide=[], **kwargs):
+  def __init__(self, yaml_data, paths=[], doxygen=None, doxygen_name_style='upper', name=None, install=None, generate=False, hide=[]):
 
-    # Store the input variables
+    # Public member for syntax object name (i.e., the location name in the configuration file)
+    self._name = name
+
     self._yaml_data = yaml_data
-    self.paths = paths
-    self.install = install
-    self.stubs = stubs
-    self.pages_stubs = pages_stubs
-    self.name = name
-    self.hide = hide
+    self._hide = hide
+    self._install = MooseDocs.abspath(install)
+    self._doxygen = doxygen
+    self._doxygen_name_style = doxygen_name_style
+    self._generate = generate
 
-    if pages:
-      self.pages = PagesHelper(pages)
-
-    # The databases containing the system/object/markdown/source information for this directory
     self._systems = set()
     self._objects = dict()
     self._filenames = dict()
     self._syntax = set()
     self._markdown = list() # A list of markdown files, used for updating pages.yml
-    self._doxygen = doxygen
-    self._doxygen_name_style = doxygen_name_style
+
+    self._stub_header = '<!-- MOOSE Documentation Stub: Remove this when content is added. -->\n'
 
     # Update the syntax maps
     for path in paths:
@@ -116,6 +67,12 @@ class MooseApplicationSyntax(object):
           name = node['name'].rsplit('/', 1)[0]
           self._systems.add(name)
 
+  def name(self):
+    """
+    Return the name of the syntax.
+    """
+    return self._name
+
   def doxygen(self, name):
     """
     Returns the complete Doxygen website path for the supplied C++ object name.
@@ -125,7 +82,6 @@ class MooseApplicationSyntax(object):
       return os.path.join(self._doxygen, "class_{}.html".format(convert(name)))
     else:
       return os.path.join(self._doxygen, "class{}.html".format(name))
-
 
   def systems(self):
     """
@@ -171,18 +127,11 @@ class MooseApplicationSyntax(object):
     for node in self._yaml_data.get():
       self._checkNode(node)
 
-    if self.pages_stubs:
-      self.pages.create(self.install)
-
-    for md in self._markdown:
-      if not self.pages.check(md):
-        log.error('The markdown file {} was not found in the pages.yml'.format(md))
-
   def hidden(self, name):
     """
     Return True if the syntax is hidden.
     """
-    return any([name.startswith(h) for h in self.hide])
+    return any([h in name for h in self._hide])
 
   def _checkNode(self, node):
     """
@@ -191,125 +140,127 @@ class MooseApplicationSyntax(object):
     Args:
       node[str]: The syntax connected to this object.
     """
-
     full_name = node['name']
     obj_name = node['name'].split('/')[-1]
-    if full_name.endswith('*') or full_name.endswith('<type>'):
+    log.debug('Checking syntax node: {}'.format(full_name))
+    if full_name.endswith('*') or full_name.endswith('<type>') or self.hidden(full_name):
       return
 
     if self.hasSystem(full_name):
-      self._checkSystem(node)
+      self._checkSystem(node, full_name)
 
     if self.hasObject(obj_name):
-      self._checkObject(node, obj_name)
+      self._checkObject(node, full_name, obj_name)
 
     if node['subblocks']:
       for child in node['subblocks']:
         self._checkNode(child)
 
-  def _checkSystem(self, node):
+  def _checkSystem(self, node, full_name):
     """
     Check the status of the documentation for a system.
 
     Args:
-      node[str]: The syntax connected to this system.
+      node: The yaml node connected to this system.
+      full_name[str]: The full name of the object (node['name'])
     """
-    # The full name of the object
-    name = node['name']
-    if self.hidden(name):
-      return
 
-    stub = '<!-- MOOSE System Documentation Stub: Remove this when content is added. -->\n'
-
-    # Determine the filename
-    if node['subblocks']:
-      filename = os.path.join(self.install, name.rstrip('*').strip('/'), 'Overview.md')
-    else:
-      filename = os.path.join(self.install, name.rstrip('*').strip('/') + '.md')
-
+    filename = os.path.join(self._install, full_name.rstrip('*').strip('/'), 'index.md')
     if not os.path.exists(filename):
-      log.error("No documentation for {}. Documentation for this system should be created in: {}".format(name, os.path.abspath(filename)))
+      log.error("No documentation for {}. Documentation for this system should be created in: {}".format(full_name, os.path.abspath(filename)))
+      if self._generate:
+        self._generateSystem(node, full_name, filename)
 
-      if self.stubs:
-        self._markdown.append(filename)
-        stub += '\n# {} System\n'.format(name.split('/')[-1])
-        stub += '!parameters {}\n\n'.format(name)
-
-        has_subobjects = False
-        has_subsystems = False
-        if node['subblocks']:
-          for child in node['subblocks']:
-            if self.hasObject(child['name'].split('/')[-1]):
-              has_subobjects = True
-            if self.hasSystem(child['name']):
-              has_subsystems = True
-
-        if has_subobjects:
-          stub += '!subobjects {} {}\n\n'.format(self.name, name)
-        if has_subsystems:
-          stub += '!subsystems {} {}\n\n'.format(self.name, name)
-
-        # Write the stub file
-        if not os.path.exists(os.path.dirname(filename)):
-          os.makedirs(os.path.dirname(filename))
-        with open(filename, 'w') as fid:
-          log.info('Creating stub page for MOOSE system {}: {}'.format(name, filename))
-          fid.write(stub)
-
-    # If the file does exist, check that isn't just a stub
     else:
       self._markdown.append(filename)
-      with open(filename, 'r') as fid:
-        content = fid.read()
-      if stub in content:
-        log.error("MOOSE generated a stub page for {} system, but no content was added. Add documentation content to {}.".format(name, filename))
+      self._checkStub(full_name, filename)
 
-  def _checkObject(self, node, object_name):
+  def _checkObject(self, node, full_name, object_name):
     """
     Check the status of the documentation for a object.
 
     Args:
-      node[str]: The syntax connected to this object.
+      node: The yaml node connected to this system.
+      full_name[str]: The full name of the object (node['name'])
       object_name[str]: The name of the object.
     """
-    # The full name of the object
-    name = node['name']
-    if self.hidden(name):
-      return
-
-    stub = '<!-- MOOSE Object Documentation Stub: Remove this when content is added. -->'
 
     # Test for class description
     if not node['description']:
-      log.error("No class description for {}. The 'addClassDescription' method should be used in the objects validParams function.".format(name))
+      log.error("No class description for {}. The 'addClassDescription' method should be used in the objects validParams function.".format(full_name))
 
     # Error if the filename does not exist and create a stub if desired
-    filename = os.path.join(self.install, name.strip('/').replace('<type>', '') + '.md')
+    filename = os.path.join(self._install, full_name.strip('/').replace('<type>', '') + '.md')
+    filename = os.path.join(os.path.dirname(filename), self.name(), os.path.basename(filename))
     if not os.path.exists(filename):
-      log.error("No documentation for {}. Documentation for this object should be created in: {}".format(name, os.path.abspath(filename)))
-
-      if self.stubs:
-        self._markdown.append(filename)
-        stub += '\n# {}\n'.format(object_name)
-        stub += '!description {}\n\n'.format(name)
-        stub += '!parameters {}\n\n'.format(name)
-        stub += '!inputfiles {}\n\n'.format(name)
-        stub += '!childobjects {}\n'.format(name)
-
-        # Write the stub file
-        if not os.path.exists(os.path.dirname(filename)):
-          os.makedirs(os.path.dirname(filename))
-        with open(filename, 'w') as fid:
-          log.info('Creating stub page for MOOSE object {}: {}'.format(name, filename))
-          fid.write(stub)
+      log.error("No documentation for {}. Documentation for this object should be created in: {}".format(full_name, os.path.abspath(filename)))
+      if self._generate:
+        self._generateObject(node, full_name, object_name, filename)
 
     # If the file does exist, check that isn't just a stub
     else:
       self._markdown.append(filename)
-      with open(filename, 'r') as fid:
-        content = fid.read()
-      if stub in content:
-        log.error("MOOSE generated a stub page for {} object, but no content was added. Add documentation content to {}.".format(name, filename))
+      self._checkStub(full_name, filename)
+
+  def _checkStub(self, full_name, filename):
+    """
+    Logs an error if a stub file exists, but content was not added.
+    """
+    with open(filename, 'r') as fid:
+      lines = fid.readlines()
+    if self._stub_header in lines[0]:
+      log.error("A MOOSE generated stub page for {} exists, but no content was added. Add documentation content to {}.".format(full_name, filename))
+
+  def _generateSystem(self, node, full_name, filename):
+    """
+    Creates a stub system page.
+    """
+
+    self._markdown.append(filename)
+    stub = self._stub_header
+    stub += '\n# {} System\n'.format(full_name.split('/')[-1])
+    stub += '!parameters {}\n\n'.format(full_name)
+
+    has_subobjects = False
+    has_subsystems = False
+    if node['subblocks']:
+      for child in node['subblocks']:
+        if self.hasObject(child['name'].split('/')[-1]):
+          has_subobjects = True
+        if self.hasSystem(child['name']):
+          has_subsystems = True
+
+    if has_subobjects:
+      stub += '!subobjects {}\n\n'.format(full_name)
+    if has_subsystems:
+      stub += '!subsystems {}\n\n'.format(full_name)
+
+    # Write the stub file
+    if not os.path.exists(os.path.dirname(filename)):
+      os.makedirs(os.path.dirname(filename))
+    with open(filename, 'w') as fid:
+      log.info('Creating stub page for MOOSE system {}: {}'.format(full_name, filename))
+      fid.write(stub)
+
+  def _generateObject(self, node, full_name, object_name, filename):
+    """
+    Creates a stub MooseObject page.
+    """
+
+    self._markdown.append(filename)
+    stub = self._stub_header
+    stub += '\n# {}\n'.format(object_name)
+    stub += '!description {}\n\n'.format(full_name)
+    stub += '!parameters {}\n\n'.format(full_name)
+    stub += '!inputfiles {}\n\n'.format(full_name)
+    stub += '!childobjects {}\n'.format(full_name)
+
+    # Write the stub file
+    if not os.path.exists(os.path.dirname(filename)):
+      os.makedirs(os.path.dirname(filename))
+    with open(filename, 'w') as fid:
+      log.info('Creating stub page for MOOSE object {}: {}'.format(full_name, filename))
+      fid.write(stub)
 
   def _updateSyntax(self, path):
     """
@@ -325,7 +276,7 @@ class MooseApplicationSyntax(object):
         self._syntax.add(node['name'])
 
     # Walk the directory, looking for files with the supplied extension.
-    for root, dirs, files in os.walk(path, topdown=False):
+    for root, dirs, files in os.walk(MooseDocs.abspath(path), topdown=False):
       for filename in files:
         fullfile = os.path.join(root, filename)
 

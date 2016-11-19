@@ -1,9 +1,13 @@
-from markdown.blockprocessors import BlockProcessor
-from MooseCommonExtension import MooseCommonExtension
 import glob
 import re
 import os
+
+from markdown.blockprocessors import BlockProcessor
 from markdown.util import etree
+
+import MooseDocs
+from MooseCommonExtension import MooseCommonExtension
+
 
 class MooseSlider(BlockProcessor, MooseCommonExtension):
   """
@@ -32,11 +36,11 @@ class MooseSlider(BlockProcessor, MooseCommonExtension):
     BlockProcessor.__init__(self, parser)
 
     # The default settings
-    self._settings = {'caption'  : None,
-                      'interval' : None,
-                      'pause'    : None,
-                      'wrap'     : None,
-                      'keyboard' : None}
+    self._settings['caption'] =  None
+    self._settings['interval'] = None
+    self._settings['pause'] = None
+    self._settings['wrap'] = None
+    self._settings['keyboard'] = None
 
   def parseFilenames(self, filenames_block):
     """
@@ -64,14 +68,14 @@ class MooseSlider(BlockProcessor, MooseCommonExtension):
         caption = ""
         fname = sline
 
-      new_files = glob.glob(os.path.join(self._docs_dir, fname))
+      new_files = glob.glob(MooseDocs.abspath(fname))
       if not new_files:
         # If one of the paths is broken then
         # we return an empty list to indicate
         # an error state
         return []
       for f in new_files:
-        files.append({"path": os.path.relpath(f, self._docs_dir), "caption": caption})
+        files.append({"path": os.path.relpath(f, os.getcwd()), "caption": caption})
     return files
 
   def test(self, parent, block):
@@ -90,7 +94,7 @@ class MooseSlider(BlockProcessor, MooseCommonExtension):
     block = blocks.pop(0)
     match = self.RE.search(block)
     options = match.group(1)
-    settings, styles = self.getSettings(options)
+    settings = self.getSettings(options)
 
 
     slider = etree.SubElement(parent, 'div')

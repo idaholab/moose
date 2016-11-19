@@ -1,3 +1,5 @@
+name:PDF
+
 # Generating PDFs
 
 The MOOSE documentation system is capable of creating latex (*.tex) files or PDFs from

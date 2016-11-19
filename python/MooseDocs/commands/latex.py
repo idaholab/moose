@@ -17,7 +17,7 @@ def latex_options(parser, subparser):
     subparser: The main argparse subparser object.
   """
 
-  tex = subparser.add_parser('latex', help='Generate a tex of pdf document from a markdown file.')
+  tex = subparser.add_parser('latex', help='Generate a .tex or .pdf document from a markdown file.')
   tex.add_argument('input', type=str, help="The markdown file to convert to slides.")
   tex.add_argument('--template', type=str, default='basic.tex', help="The template tex file to utilize (default: %(default)s).")
   tex.add_argument('--output', '-o', default=None, help="The 'tex/pdf' file to create, if a .tex extension is provide only the latex will be created. If a pdf extension is provide than the pdf will be generated and all supporting files will be cleaned-up.")

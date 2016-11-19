@@ -20,24 +20,37 @@ def build_options(parser, subparser):
   """
   Command-line options for build command.
   """
-  build_parser = subparser.add_parser('build', help='Generate and Build the documentation for serving.')
+  build_parser = subparser.add_parser('build', help='Build the documentation for serving on another system.')
   build_parser.add_argument('--disable-threads', action='store_true', help="Disable threaded building.")
   return build_parser
 
 
-def make_tree(pages, node, parser, syntax, site_dir, template, config):
+def make_tree(directory, node, **kwargs):
   """
   Create the tree structure of NavigationNode/MoosePage objects
   """
-  for p in pages:
-    for k, v in p.iteritems():
-      if isinstance(v, list):
-        child = NavigationNode(name=k, parent=node, site_dir=site_dir, template=template, **config)
-        node.children.append(child)
-        make_tree(v, child, parser, syntax, site_dir, template, config)
+  for p in os.listdir(directory):
+
+    path = os.path.join(directory, p)
+    if p in ['index.md', 'index.html']:
+      continue
+
+    if os.path.isfile(path) and (path.endswith('.md') or path.endswith('.html')):
+      child = MoosePage(path, node, **kwargs)
+      node.children.append(child)
+
+    elif os.path.isdir(path) and (p not in ['.', '..']):
+      md = os.path.join(path, 'index.md')
+      html = os.path.join(path, 'index.html')
+      if os.path.exists(md):
+        child = MoosePage(md, node, **kwargs)
+      elif os.path.exists(html):
+        child = MoosePage(html, node, **kwargs)
       else:
-        page = MoosePage(name=k, parent=node, filename=v, parser=parser, syntax=syntax, site_dir=site_dir, template=template, **config)
-        node.children.append(page)
+        child = NavigationNode(path, node, **kwargs)
+
+      make_tree(path, child, **kwargs)
+      node.children.append(child)
 
 
 def flat(node):
@@ -54,35 +67,13 @@ def flat(node):
       yield c
 
 
-def get_markdown_extensions(config):
-  """
-  Extract the markdown extensions and associated configurations from the yaml configuration.
-  """
-  extensions = []
-  extension_configs = dict()
-  for extension in config['markdown_extensions']:
-
-    if isinstance(extension, dict):
-      for k, v in extension.iteritems(): # there should only be one entry, but just in case
-        extensions.append(k)
-        extension_configs[k] = v
-    else:
-      extensions.append(extension)
-
-  return extensions, extension_configs
-
-
 class Builder(object):
   """
   Object for building
   """
-  def __init__(self, sitemap, parser, site_dir, template, **config):
+  def __init__(self, parser, site_dir, template, template_args, navigation):
 
-    self._sitemap = sitemap
-    self._parser = parser
     self._site_dir = site_dir
-    self._template = template
-    self._config = config
 
     # Extract the MooseLinkDatabase for creating source and doxygen links
     self._syntax = dict()
@@ -91,13 +82,17 @@ class Builder(object):
         self._syntax = ext.syntax
         break
 
-    self._root = NavigationNode(name='root')
-    make_tree(self._sitemap, self._root, self._parser, self._syntax, self._site_dir, self._template, self._config)
+    content_dir = os.path.join(os.getcwd(), 'content')
+    kwargs = {'parser': parser,
+              'site_dir': self._site_dir,
+              'syntax': self._syntax,
+              'navigation': MooseDocs.yaml_load(navigation),
+              'template': template,
+              'template_args': template_args}
+    self._root = MoosePage(path=os.path.join(content_dir, 'index.md'), **kwargs)
+    make_tree(content_dir, self._root, **kwargs)
 
-    self._pages = []
-    for page in flat(self._root):
-      self._pages.append(page)
-
+    self._pages = [self._root] + list(flat(self._root))
 
   def __iter__(self):
     """
@@ -106,27 +101,12 @@ class Builder(object):
     return self._pages.__iter__()
 
 
-  def add(self, filename, template, name='', **kwargs):
-    """
-    Add additional stand-alone pages.
-
-    This is utilized to create a home page that looks different.
-    """
-
-    config = copy.copy(self._config)
-    config.update(kwargs)
-
-    page = MoosePage(name=name, filename=filename, parser=self._parser, syntax=self._syntax, site_dir=self._site_dir, template=template, **config)
-    page.parent = self._root
-    self._pages.append(page)
-
-
-  def build(self, use_threads=True):
+  def build(self, disable_threads=False):
     """
     Build all the pages in parallel.
     """
 
-    if not use_threads:
+    if disable_threads:
       for page in self._pages:
         page.build()
 
@@ -167,34 +147,15 @@ def build(config_file='moosedocs.yml', disable_threads=False, **kwargs):
   """
 
   # Load the YAML configuration file
-  config = MooseDocs.yaml_load(config_file)
-  config.update(kwargs)
-
-  # Set the default arguments
-  config.setdefault('site_dir', 'site')
-  config.setdefault('pages', 'pages.yml')
-  config.setdefault('template', 'materialize.html')
-  config.setdefault('template_arguments', dict())
-  config.setdefault('extra_pages', [])
-  config.setdefault('markdown_extensions', [])
-
-  # Load the site map
-  sitemap = MooseDocs.yaml_load(config['pages'])
+  config = MooseDocs.load_config(config_file, **kwargs)
 
   # Create the markdown parser
-  extensions, extension_configs = get_markdown_extensions(config)
+  extensions, extension_configs = MooseDocs.get_markdown_extensions(config)
   parser = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
 
   # Create object for storing pages to be generated
-  builder = Builder(sitemap, parser, config['site_dir'], config['template'], **config['template_arguments'])
-
-  # Build "extra" pages (i.e., the home page)
-  if 'extra_pages' in config:
-    for extra in config['extra_pages']:
-      for name, kwargs in extra.iteritems():
-        kwargs.setdefault('template_arguments', dict())
-        builder.add(kwargs.pop('filename'), kwargs['template'], name=name, **kwargs['template_arguments'])
+  builder = Builder(parser, config['site_dir'], config['template'], config['template_arguments'], config['navigation'])
 
   # Create the html
-  builder.build(use_threads=not disable_threads)
+  builder.build(disable_threads=disable_threads)
   return config, parser, builder

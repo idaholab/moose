@@ -28,11 +28,7 @@ class MooseImageFile(MooseCommonExtension, Pattern):
   def __init__(self, markdown_instance=None, **kwargs):
     MooseCommonExtension.__init__(self, **kwargs)
     Pattern.__init__(self, self.RE, markdown_instance)
-
-    # Valid settings for MOOSE specific documentation features
-    # All other markdown 'attributes' will be treated as HTML
-    # style settings for the figure tag.
-    self._settings = {'caption' : None}
+    self._settings['caption'] = None
 
   def handleMatch(self, match):
     """
@@ -40,7 +36,7 @@ class MooseImageFile(MooseCommonExtension, Pattern):
     """
 
     # A tuple separating specific MOOSE documentation features (self._settings) from HTML styles
-    settings, styles = self.getSettings(match.group(3))
+    settings = self.getSettings(match.group(3))
 
     # Read the file and create element
     rel_filename = match.group(2)
@@ -49,8 +45,7 @@ class MooseImageFile(MooseCommonExtension, Pattern):
       return self.createErrorElement('File not found: {}'.format(rel_filename))
 
     # Create the figure element
-    el = etree.Element('div')
-    self.addStyle(el, **styles)
+    el = self.applyElementSettings(etree.Element('div'), settings)
 
     card = etree.SubElement(el, 'div')
     card.set('class', 'card')
@@ -59,7 +54,7 @@ class MooseImageFile(MooseCommonExtension, Pattern):
     img_card.set('class', 'card-image')
 
     img = etree.SubElement(img_card, 'img')
-    img.set('src', rel_filename)
+    img.set('src', os.path.relpath(filename, os.getcwd()))
     img.set('class', 'materialboxed')
 
     # Add caption
