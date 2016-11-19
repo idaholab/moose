@@ -24,8 +24,5 @@ public:
 protected:
   std::vector<NonlinearVariableName> _displacements;
   unsigned int _ndisp;
-
-  const bool _has_scalar_strain_yy;
-  const bool _has_scalar_strain_zz;
 };
 #endif //GENERALIZEDPLANESTRAINACTION_H

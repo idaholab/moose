@@ -11,28 +11,28 @@ InputParameters validParams<ComputePlaneSmallStrain>()
 {
   InputParameters params = validParams<Compute2DSmallStrain>();
   params.addClassDescription("Compute a small strain under generalized plane strain assumptions where the out of plane strain is generally nonzero.");
-  params.addCoupledVar("scalar_strain_zz", "Scalar variable containing the out-of-plane strain for generalized plane strain");
-  params.addCoupledVar("strain_zz", "Nonlinear variable containing the out-of-plane strain for plane stress");
+  params.addCoupledVar("scalar_strain", "Scalar variable for generalized plane strain");
+  params.addCoupledVar("variable_strain", "Nonlinear variable for plane stress");
 
   return params;
 }
 
 ComputePlaneSmallStrain::ComputePlaneSmallStrain(const InputParameters & parameters) :
     Compute2DSmallStrain(parameters),
-    _scalar_strain_zz_coupled(isCoupledScalar("scalar_strain_zz")),
-    _scalar_strain_zz(_scalar_strain_zz_coupled ? coupledScalarValue("scalar_strain_zz") : _zero),
-    _strain_zz_coupled(isCoupled("strain_zz")),
-    _strain_zz(_strain_zz_coupled ? coupledValue("strain_zz") : _zero)
+    _scalar_strain_coupled(isCoupledScalar("scalar_strain")),
+    _scalar_strain(_scalar_strain_coupled ? coupledScalarValue("scalar_strain") : _zero),
+    _variable_strain_coupled(isCoupled("variable_strain")),
+    _variable_strain(_variable_strain_coupled ? coupledValue("variable_strain") : _zero)
 {
-  if (_strain_zz_coupled && _scalar_strain_zz_coupled)
-    mooseError("Must define only one of strain_zz or scalar_strain_zz");
+  if (_variable_strain_coupled && _scalar_strain_coupled)
+    mooseError("Must define only one of variable_strain or scalar_strain");
 }
 
 Real
 ComputePlaneSmallStrain::computeStrainZZ()
 {
-  if (_scalar_strain_zz_coupled)
-    return _scalar_strain_zz[0];
+  if (_scalar_strain_coupled)
+    return _scalar_strain[0];
   else
-    return _strain_zz[_qp];
+    return _variable_strain[_qp];
 }

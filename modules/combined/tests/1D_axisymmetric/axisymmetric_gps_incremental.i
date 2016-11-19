@@ -16,7 +16,7 @@
 
 [GlobalParams]
   displacements = disp_x
-  scalar_strain_yy = scalar_strain_yy
+  scalar_strain = scalar_strain_yy
 []
 
 [Problem]
@@ -29,12 +29,8 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 580.0
   [../]
   [./scalar_strain_yy]

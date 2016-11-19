@@ -39,13 +39,13 @@ protected:
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
 
-  bool _strain_yy_coupled;
-  const VariableValue & _strain_yy;
-  const VariableValue & _strain_yy_old;
+  bool _variable_strain_coupled;
+  const VariableValue & _variable_strain;
+  const VariableValue & _variable_strain_old;
 
-  bool _scalar_strain_yy_coupled;
-  const VariableValue & _scalar_strain_yy;
-  const VariableValue & _scalar_strain_yy_old;
+  bool _scalar_strain_coupled;
+  const VariableValue & _scalar_strain;
+  const VariableValue & _scalar_strain_old;
 };
 
 #endif //COMPUTEAXISYMMETRIC1DINCREMENTALSTRAIN_H

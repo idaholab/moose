@@ -2,7 +2,7 @@
   order = FIRST
   family = LAGRANGE
   displacements = 'disp_x disp_y'
-  scalar_strain_zz = scalar_strain_zz
+  scalar_strain = scalar_strain_zz
   temp = temp
 []
 

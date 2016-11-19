@@ -81,7 +81,7 @@
     [./GeneralizedPlaneStrain]
       [./gps]
         displacements = 'disp_x disp_y'
-        scalar_strain_zz = scalar_strain_zz
+        scalar_strain = scalar_strain_zz
         use_displaced_mesh = true
       [../]
     [../]
@@ -194,7 +194,7 @@
   [./strain]
     type = ComputePlaneSmallStrain
     displacements = 'disp_x disp_y'
-    scalar_strain_zz = scalar_strain_zz
+    scalar_strain = scalar_strain_zz
     eigenstrain_names = eigenstrain
   [../]
   [./thermal_strain]

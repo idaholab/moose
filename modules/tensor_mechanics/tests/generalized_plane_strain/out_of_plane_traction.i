@@ -7,12 +7,8 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./scalar_strain_zz]
     order = FIRST
@@ -80,7 +76,7 @@
       [./gps]
         use_displaced_mesh = true
         displacements = 'disp_x disp_y'
-        scalar_strain_zz = scalar_strain_zz
+        scalar_strain = scalar_strain_zz
         traction = traction_function
         factor = 1e5
       [../]
@@ -188,7 +184,7 @@
   [./strain]
     type = ComputePlaneSmallStrain
     displacements = 'disp_x disp_y'
-    scalar_strain_zz = scalar_strain_zz
+    scalar_strain = scalar_strain_zz
   [../]
   [./stress]
     type = ComputeLinearElasticStress

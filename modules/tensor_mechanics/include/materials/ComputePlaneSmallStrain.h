@@ -23,11 +23,11 @@ protected:
   virtual Real computeStrainZZ();
 
 private:
-  const bool _scalar_strain_zz_coupled;
-  const VariableValue & _scalar_strain_zz;
+  const bool _scalar_strain_coupled;
+  const VariableValue & _scalar_strain;
 
-  const bool _strain_zz_coupled;
-  const VariableValue & _strain_zz;
+  const bool _variable_strain_coupled;
+  const VariableValue & _variable_strain;
 };
 
 #endif //COMPUTEPLANESMALLSTRAIN_H

@@ -43,11 +43,7 @@ protected:
   const std::vector<MaterialPropertyName> _eigenstrain_names;
   std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
 
-  const bool _scalar_strain_yy_coupled;
-  unsigned int _scalar_strain_yy_var;
-
-  const bool _scalar_strain_zz_coupled;
-  unsigned int _scalar_strain_zz_var;
+  unsigned int _scalar_strain_var;
 
   MooseVariable * _temp_var;
 

@@ -15,8 +15,8 @@ InputParameters validParams<ComputeAxisymmetric1DFiniteStrain>()
 {
   InputParameters params = validParams<Compute1DFiniteStrain>();
   params.addClassDescription("Compute a strain increment and rotation increment for finite strains in an axisymmetric 1D problem");
-  params.addCoupledVar("scalar_strain_yy", "Scalar variable scalar_strain_yy for axisymmetric 1D problem");
-  params.addCoupledVar("strain_yy", "Nonlinear variable strain_yy for axisymmetric 1D problem");
+  params.addCoupledVar("scalar_strain", "Scalar variable for axisymmetric 1D problem");
+  params.addCoupledVar("variable_strain", "Nonlinear variable for axisymmetric 1D problem");
 
   return params;
 }
@@ -24,15 +24,15 @@ InputParameters validParams<ComputeAxisymmetric1DFiniteStrain>()
 ComputeAxisymmetric1DFiniteStrain::ComputeAxisymmetric1DFiniteStrain(const InputParameters & parameters) :
     Compute1DFiniteStrain(parameters),
     _disp_old_0(coupledValueOld("displacements", 0)),
-    _strain_yy_coupled(isCoupled("strain_yy")),
-    _strain_yy(_strain_yy_coupled ? coupledValue("strain_yy") : _zero),
-    _strain_yy_old(_strain_yy_coupled ? coupledValueOld("strain_yy") : _zero),
-    _scalar_strain_yy_coupled(isCoupledScalar("scalar_strain_yy")),
-    _scalar_strain_yy(_scalar_strain_yy_coupled ? coupledScalarValue("scalar_strain_yy") : _zero),
-    _scalar_strain_yy_old(_scalar_strain_yy_coupled ? coupledScalarValueOld("scalar_strain_yy") : _zero)
+    _variable_strain_coupled(isCoupled("variable_strain")),
+    _variable_strain(_variable_strain_coupled ? coupledValue("variable_strain") : _zero),
+    _variable_strain_old(_variable_strain_coupled ? coupledValueOld("variable_strain") : _zero),
+    _scalar_strain_coupled(isCoupledScalar("scalar_strain")),
+    _scalar_strain(_scalar_strain_coupled ? coupledScalarValue("scalar_strain") : _zero),
+    _scalar_strain_old(_scalar_strain_coupled ? coupledScalarValueOld("scalar_strain") : _zero)
 {
-  if (_strain_yy_coupled && _scalar_strain_yy_coupled)
-    mooseError("Must define only one of strain_yy or scalar_strain_yy");
+  if (_variable_strain_coupled && _scalar_strain_coupled)
+    mooseError("Must define only one of variable_strain or scalar_strain");
 }
 
 void
@@ -47,19 +47,19 @@ ComputeAxisymmetric1DFiniteStrain::initialSetup()
 Real
 ComputeAxisymmetric1DFiniteStrain::computeGradDispYY()
 {
-  if (_scalar_strain_yy_coupled)
-    return std::exp(_scalar_strain_yy[0]) - 1.0;
+  if (_scalar_strain_coupled)
+    return std::exp(_scalar_strain[0]) - 1.0;
   else
-    return std::exp(_strain_yy[_qp]) - 1.0;
+    return std::exp(_variable_strain[_qp]) - 1.0;
 }
 
 Real
 ComputeAxisymmetric1DFiniteStrain::computeGradDispYYOld()
 {
-  if (_scalar_strain_yy_coupled)
-    return std::exp(_scalar_strain_yy_old[0]) - 1.0;
+  if (_scalar_strain_coupled)
+    return std::exp(_scalar_strain_old[0]) - 1.0;
   else
-    return std::exp(_strain_yy_old[_qp]) - 1.0;
+    return std::exp(_variable_strain_old[_qp]) - 1.0;
 }
 
 Real

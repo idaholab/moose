@@ -14,21 +14,21 @@ InputParameters validParams<ComputeAxisymmetric1DSmallStrain>()
 {
   InputParameters params = validParams<Compute1DSmallStrain>();
   params.addClassDescription("Compute a small strain in an Axisymmetric 1D problem");
-  params.addCoupledVar("scalar_strain_yy", "Scalar variable scalar_strain_yy for axisymmetric 1D problem");
-  params.addCoupledVar("strain_yy", "Nonlinear variable strain_yy for axisymmetric 1D problem");
+  params.addCoupledVar("scalar_strain", "Scalar variable for axisymmetric 1D problem");
+  params.addCoupledVar("variable_strain", "Nonlinear variable for axisymmetric 1D problem");
 
   return params;
 }
 
 ComputeAxisymmetric1DSmallStrain::ComputeAxisymmetric1DSmallStrain(const InputParameters & parameters) :
     Compute1DSmallStrain(parameters),
-    _scalar_strain_yy_coupled(isCoupledScalar("scalar_strain_yy")),
-    _scalar_strain_yy(_scalar_strain_yy_coupled ? coupledScalarValue("scalar_strain_yy") : _zero),
-    _strain_yy_coupled(isCoupled("strain_yy")),
-    _strain_yy(_strain_yy_coupled ? coupledValue("strain_yy") : _zero)
+    _scalar_strain_coupled(isCoupledScalar("scalar_strain")),
+    _scalar_strain(_scalar_strain_coupled ? coupledScalarValue("scalar_strain") : _zero),
+    _variable_strain_coupled(isCoupled("variable_strain")),
+    _variable_strain(_variable_strain_coupled ? coupledValue("variable_strain") : _zero)
 {
-  if (_strain_yy_coupled && _scalar_strain_yy_coupled)
-    mooseError("Must define only one of strain_yy or scalar_strain_yy");
+  if (_variable_strain_coupled && _scalar_strain_coupled)
+    mooseError("Must define only one of variable_strain or scalar_strain");
 }
 
 void
@@ -43,10 +43,10 @@ ComputeAxisymmetric1DSmallStrain::initialSetup()
 Real
 ComputeAxisymmetric1DSmallStrain::computeStrainYY()
 {
-  if (_scalar_strain_yy_coupled)
-    return _scalar_strain_yy[0];
+  if (_scalar_strain_coupled)
+    return _scalar_strain[0];
   else
-    return _strain_yy[_qp];
+    return _variable_strain[_qp];
 }
 
 Real
