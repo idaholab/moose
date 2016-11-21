@@ -5,8 +5,8 @@ template<>
 InputParameters validParams<SoundSpeedAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredCoupledVar("v", "density");
-  params.addRequiredCoupledVar("e", "momentum");
+  params.addRequiredCoupledVar("v", "specific volume");
+  params.addRequiredCoupledVar("e", "specific internal energy");
   params.addRequiredParam<UserObjectName>("fp", "The name of fluid properties object to use.");
 
   return params;
