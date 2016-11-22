@@ -703,7 +703,6 @@ public:
    * Returns the final Mesh distribution type.
    */
   bool isDistributedMesh() const { return _use_distributed_mesh; }
-  bool isParallelMesh() const { mooseDeprecated("isParallelMesh() is deprecated, call isDistributedMesh() instead."); return isDistributedMesh(); }
 
   /**
    * Tell the user if the distribution was overriden for any reason
