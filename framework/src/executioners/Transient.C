@@ -24,6 +24,12 @@
 #include "NonlinearSystem.h"
 #include "Control.h"
 #include "TimePeriod.h"
+#include "Stepper.h"
+#include "IterationAdaptiveDT.h"
+#include "FunctionDT.h"
+#include "Function.h"
+#include "Predictor.h"
+#include "TimeIntegrator.h"
 
 // libMesh includes
 #include "libmesh/implicit_system.h"
@@ -93,6 +99,7 @@ Transient::Transient(const InputParameters & parameters) :
     _problem(_fe_problem),
     _time_scheme(getParam<MooseEnum>("scheme")),
     _t_step(_problem.timeStep()),
+    _t_step_backup(declareRestartableData("t_step_backup", 0)),
     _time(_problem.time()),
     _time_old(_problem.timeOld()),
     _dt(_problem.dt()),
@@ -110,7 +117,7 @@ Transient::Transient(const InputParameters & parameters) :
     _dtmax(getParam<Real>("dtmax")),
     _num_steps(getParam<unsigned int>("num_steps")),
     _n_startup_steps(getParam<int>("n_startup_steps")),
-    _steps_taken(0),
+    _steps_taken(declareRecoverableData<unsigned int>("steps_taken", 0)),
     _trans_ss_check(getParam<bool>("trans_ss_check")),
     _ss_check_tol(getParam<Real>("ss_check_tol")),
     _ss_tmin(getParam<Real>("ss_tmin")),
@@ -131,10 +138,21 @@ Transient::Transient(const InputParameters & parameters) :
     _picard_timestep_end_norm(declareRecoverableData<Real>("picard_timestep_end_norm", 0.0)),
     _picard_rel_tol(getParam<Real>("picard_rel_tol")),
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
-    _verbose(getParam<bool>("verbose"))
+    _verbose(getParam<bool>("verbose")),
+    _new_dt(0),
+    _stepper(nullptr),
+    _nl_its(declareRestartableData<unsigned int>("nl_its", 0)),
+    _l_its(declareRestartableData<unsigned int>("l_its", 0)),
+    _soln_nonlin(declareRestartableData<std::vector<Real> >("soln_nonlin", std::vector<Real>())),
+    _soln_aux(declareRestartableData<std::vector<Real> >("soln_aux", std::vector<Real>())),
+    _soln_predicted(declareRestartableData<std::vector<Real> >("soln_predicted", std::vector<Real>())),
+    _prev_dt(declareRestartableData<Real>("prev_dt", 0)),
+    _si()
 {
   _problem.getNonlinearSystem().setDecomposition(_splitting);
   _t_step = 0;
+  _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
+  _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
   _dt = 0;
   _next_interval_output_time = 0.0;
 
@@ -198,16 +216,17 @@ Transient::init()
     _t_step = 1;
 
   if (_t_step > 1) //Recover case
+  {
     _dt_old = _dt;
-
+    _new_dt = _dt;
+  }
   else
   {
-    computeDT();
-//  _dt = computeConstrainedDT();
+    computeDT(true);
     _dt = getDT();
   }
 
-
+  _t_step_backup = _t_step;
 }
 
 void
@@ -222,10 +241,19 @@ Transient::postStep()
   _time_stepper->postStep();
 }
 
+int Transient::n_startup_steps()
+{
+  return std::max(1, _n_startup_steps);
+}
+
+int Transient::timeStep()
+{
+  return _t_step_backup;
+}
+
 void
 Transient::execute()
 {
-
   preExecute();
 
   // NOTE: if you remove this line, you will see a subset of tests failing. Those tests might have a wrong answer and might need to be regolded.
@@ -236,23 +264,37 @@ Transient::execute()
     _problem.advanceState();
 
   // Start time loop...
+  bool first = true; // needs to not be restartable data
   while (true)
   {
+    _steps_taken++;
+
     if (_first != true)
       incrementStepOrReject();
-
     _first = false;
 
     if (!keepGoing())
       break;
-
     preStep();
-    computeDT();
+    computeDT(first);
     takeStep();
+
+    _nl_its = _fe_problem.getNonlinearSystem().nNonlinearIterations();
+    _l_its = _fe_problem.getNonlinearSystem().nLinearIterations();
+    _soln_nonlin.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
+    _soln_aux.resize(_fe_problem.getAuxiliarySystem().currentSolution()->size());
+    _fe_problem.getNonlinearSystem().currentSolution()->localize(_soln_nonlin);
+    _fe_problem.getAuxiliarySystem().currentSolution()->localize(_soln_aux);
+    Predictor* p = _fe_problem.getNonlinearSystem().getPredictor();
+    if (p)
+    {
+      _soln_predicted.resize(p->solutionPredictor().size());
+      p->solutionPredictor().localize(_soln_predicted);
+    }
+
     endStep();
     postStep();
-
-    _steps_taken++;
+    first = false;
   }
 
   if (!_app.halfTransient())
@@ -261,9 +303,66 @@ Transient::execute()
 }
 
 void
-Transient::computeDT()
+Transient::updateStepperInfo(bool first)
+{
+  _soln_nonlin.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
+  _soln_aux.resize(_fe_problem.getAuxiliarySystem().currentSolution()->size());
+  _soln_predicted.resize(_fe_problem.getNonlinearSystem().currentSolution()->size());
+
+  if (first)
+    _si.pushHistory(_prev_dt, true, 0);
+  _si.update(_steps_taken, _time, _dt, _nl_its, _l_its, _last_solve_converged,
+             _solve_time, _soln_nonlin, _soln_aux, _soln_predicted);
+
+  _prev_dt = _si.dt(); // for restart
+};
+
+void
+Transient::computeDT(bool first)
 {
   _time_stepper->computeStep(); // This is actually when DT gets computed
+
+  // initialize new-style stepper here because users of moose may have subclassed Transient
+  // (I'm looking at you Yak!) and overridden functions like init().
+  if (!_stepper)
+  {
+    StepperBlock * inner = _time_stepper->buildStepper();
+    if (inner)
+    {
+      std::vector<Real> sync_times;
+      for (auto val : _app.getOutputWarehouse().getSyncTimes())
+        sync_times.push_back(val);
+
+      // these are global/sim constraints for *every* time stepper:
+      inner = BaseStepper::dtLimit(inner, dtMin(), dtMax());
+      if (sync_times.size() > 0)
+        inner = BaseStepper::min(BaseStepper::fixedTimes(sync_times, timestepTol()), inner, timestepTol());
+      if (!_app.halfTransient())
+        inner = BaseStepper::bounds(inner, getStartTime(), endTime());
+      _stepper.reset(inner);
+    }
+    else
+    {
+      mooseDoOnce(mooseWarning("the time stepper used is based on deprecated functionality"));
+    }
+  }
+
+  updateStepperInfo(first);
+
+  if (_stepper)
+  {
+    _new_dt = _stepper->next(_si);
+    if (_si.wantSnapshot())
+      // the time used in this key must be *exactly* that on the stepper just saw in StepperInfo
+      _snapshots[_si.time()] = _app.backup();
+    if (_si.rewindTime() != -1)
+    {
+      if (_snapshots.count(_si.rewindTime()) == 0)
+        mooseError("no snapshot available for requested rewind time");
+      _app.restore(_snapshots[_si.rewindTime()]);
+      computeDT(); // recursive call necessary because rewind modifies state _si depends on
+    }
+  }
 }
 
 void
@@ -284,6 +383,7 @@ Transient::incrementStepOrReject()
 
       _time_old = _time; // = _time_old + _dt;
       _t_step++;
+      _t_step_backup = _t_step;
 
       _problem.advanceState();
 
@@ -300,6 +400,7 @@ Transient::incrementStepOrReject()
     _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN, true);
     _problem.restoreMultiApps(EXEC_TIMESTEP_END, true);
     _time_stepper->rejectStep();
+    _last_solve_converged = false; // TODO: discover why this is not already correctly set...
     _time = _time_old;
   }
 
@@ -365,6 +466,7 @@ Transient::solveStep(Real input_dt)
 
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   _multiapps_converged = _problem.execMultiApps(EXEC_TIMESTEP_BEGIN, _picard_max_its == 1);
+  _last_solve_converged = lastSolveConverged(); // this here because endStep is not always called (e.g. multiapps) and the early-return just below
 
   if (!_multiapps_converged)
     return;
@@ -389,8 +491,15 @@ Transient::solveStep(Real input_dt)
   // Update warehouse active objects
   _problem.updateActiveObjects();
 
-  _time_stepper->step();
+  timeval solve_start;
+  timeval solve_end;
+  gettimeofday(&solve_start, nullptr);
 
+  _time_stepper->step();
+  gettimeofday(&solve_end, nullptr);
+  _solve_time = (static_cast<Real>(solve_end.tv_sec  - solve_start.tv_sec) +
+                                             static_cast<Real>(solve_end.tv_usec - solve_start.tv_usec)*1.e-6);
+  _last_solve_converged = lastSolveConverged(); // this here because endStep is not called (e.g. multiapps)
   // We know whether or not the nonlinear solver thinks it converged, but we need to see if the executioner concurs
   if (lastSolveConverged())
   {
@@ -486,6 +595,8 @@ Transient::endStep(Real input_time)
     _problem.outputStep(EXEC_TIMESTEP_END);
 
     //output
+    // TODO: this is dead code - _time_interval is always false and
+    // _time_interval_output_interval and friends are never used.
     if (_time_interval && (_time + _timestep_tolerance >= _next_interval_output_time))
       _next_interval_output_time += _time_interval_output_interval;
   }
@@ -494,19 +605,12 @@ Transient::endStep(Real input_time)
 Real
 Transient::computeConstrainedDT()
 {
-//  // If start up steps are needed
-//  if (_t_step == 1 && _n_startup_steps > 1)
-//    _dt = _input_dt/(double)(_n_startup_steps);
-//  else if (_t_step == 1+_n_startup_steps && _n_startup_steps > 1)
-//    _dt = _input_dt;
-
   Real dt_cur = _dt;
   std::ostringstream diag;
 
   //After startup steps, compute new dt
-  if (_t_step > _n_startup_steps)
+  if (_t_step > _n_startup_steps || _stepper)
     dt_cur = getDT();
-
   else
   {
     diag << "Timestep < n_startup_steps, using old dt: "
@@ -534,6 +638,7 @@ Transient::computeConstrainedDT()
   _at_sync_point = _time_stepper->constrainStep(dt_cur);
 
   // Don't let time go beyond next time interval output if specified
+  // TODO: delete this dead code - _time_interval is always false
   if ((_time_interval) &&
       (_time + dt_cur + _timestep_tolerance >= _next_interval_output_time))
   {
@@ -619,6 +724,8 @@ Transient::computeConstrainedDT()
 Real
 Transient::getDT()
 {
+  if (_stepper)
+    return _new_dt;
   return _time_stepper->getCurrentDT();
 }
 

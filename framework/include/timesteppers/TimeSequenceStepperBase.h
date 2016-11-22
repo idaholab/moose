@@ -33,19 +33,11 @@ public:
 
   void setupSequence(const std::vector<Real> & times);
 
-  virtual void init() override {}
-  virtual void step() override;
+  virtual StepperBlock * buildStepper();
 
 protected:
-  virtual Real computeInitialDT() override;
-  virtual Real computeDT() override;
-  virtual Real computeFailedDT() override;
-
-  /// the step that the time stepper is currently at
-  unsigned int & _current_step;
-
   /// stores the sequence of time points
-  std::vector<Real> & _time_sequence;
+  std::vector<Real> &  _time_sequence;
 };
 
 #endif //TIMESEQUENCESTEPPERBASE_H
