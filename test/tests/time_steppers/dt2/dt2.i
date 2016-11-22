@@ -96,11 +96,13 @@
   num_steps = 500000
   dtmax = 0.25
 
-  [./TimeStepper]
-    type = DT2
-    dt = 0.1
-    e_max = 3e-1
-    e_tol = 1e-1
+  [./Steppers]
+    [./dt2]
+      type = DT2Stepper
+      dt = 0.1
+      e_max = 3e-1
+      e_tol = 1e-1
+    [../]
   [../]
 []
 

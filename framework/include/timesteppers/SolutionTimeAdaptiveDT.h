@@ -31,10 +31,15 @@ class SolutionTimeAdaptiveDT : public TimeStepper
 {
 public:
   SolutionTimeAdaptiveDT(const InputParameters & parameters);
+  virtual ~SolutionTimeAdaptiveDT();
 
-  virtual StepperBlock * buildStepper() override;
+  virtual void step() override;
 
-private:
+  virtual void rejectStep() override;
+
+protected:
+  virtual Real computeInitialDT() override;
+  virtual Real computeDT() override;
 
   /**
    * Multiplier specifying the direction the timestep is currently going.

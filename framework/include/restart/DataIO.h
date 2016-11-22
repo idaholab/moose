@@ -312,6 +312,7 @@ dataStore(std::ostream & stream, HashMap<T,U> & m, void * context)
 // Specializations (defined in .C)
 template<> void dataStore(std::ostream & stream, Real & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, std::string & v, void * /*context*/);
+template<> void dataStore(std::ostream & stream, StepperName & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, NumericVector<Real> & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, DenseVector<Real> & v, void * /*context*/);
 template<> void dataStore(std::ostream & stream, DenseMatrix<Real> & v, void * /*context*/);
@@ -474,6 +475,7 @@ dataLoad(std::istream & stream, HashMap<T,U> & m, void * context)
 // Specializations (defined in .C)
 template<> void dataLoad(std::istream & stream, Real & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, std::string & v, void * /*context*/);
+template<> void dataLoad(std::istream & stream, StepperName & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, NumericVector<Real> & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, DenseVector<Real> & v, void * /*context*/);
 template<> void dataLoad(std::istream & stream, DenseMatrix<Real> & v, void * /*context*/);

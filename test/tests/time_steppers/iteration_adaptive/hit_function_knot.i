@@ -13,13 +13,13 @@
   [../]
 []
 
-[Functions]
-  [./knot]
-    type = PiecewiseLinear
-    x = '0 1 2'
-    y = '0 0 0'
-  [../]
-[]
+#[Functions]
+#  [./knot]
+#    type = PiecewiseLinear
+#    x = '0 1 2'
+#    y = '0 0 0'
+#  [../]
+#[]
 
 [Kernels]
   [./diff]
@@ -54,13 +54,12 @@
   end_time = 2.0
   timestep_tolerance = 0.3
   verbose = true
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 0.9
-    optimal_iterations = 10
-    force_step_every_function_point = true
-    max_function_change = 1e20
-    timestep_limiting_function = knot
+
+  [./Steppers]
+    [./fixed]
+      type = FixedTimesStepper
+      times = '0 1 2' # Ensures that these times are hit _exactly_
+    [../]
   [../]
 []
 

@@ -1,0 +1,22 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'postprocessor_stepper.i'
+    exodiff = 'postprocessor_stepper_out.e'
+    scale_refine = 3
+  [../]
+
+  [./fail]
+    type = 'Exodiff'
+    input = 'postprocessor_stepper_fail.i'
+    exodiff = 'postprocessor_stepper_fail_out.e'
+    scale_refine = 3
+  [../]
+
+  [./filter]
+    type = 'Exodiff'
+    input = 'postprocessor_stepper_filter.i'
+    exodiff = 'postprocessor_stepper_filter_out.e'
+    scale_refine = 3
+  [../]
+[]

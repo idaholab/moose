@@ -46,10 +46,12 @@
   end_time = 20.0
   n_startup_steps = 2
   dtmax = 6.0
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    optimal_iterations = 10
-    dt = 1.0
+  [./Steppers]
+    [./adapt]
+      type = IterationAdaptiveStepper
+      dt = 1.0
+      optimal_iterations = 10
+    [../]
   [../]
 []
 

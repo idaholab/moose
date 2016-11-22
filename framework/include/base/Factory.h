@@ -35,6 +35,7 @@
 #define registerDeprecatedObjectName(obj, name, time) factory.regReplaced<obj>(stringifyName(obj), name, time)
 
 // for backward compatibility
+#define registerStepper(name)                       registerObject(name)
 #define registerKernel(name)                        registerObject(name)
 #define registerNodalKernel(name)                   registerObject(name)
 #define registerBoundaryCondition(name)             registerObject(name)
@@ -69,6 +70,7 @@
 #define registerControl(name)                       registerObject(name)
 #define registerPartitioner(name)                   registerObject(name)
 
+#define registerNamedStepper(obj, name)             registerNamedObject(obj, name)
 #define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
 #define registerNamedNodalKernel(obj, name)         registerNamedObject(obj, name)
 #define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)

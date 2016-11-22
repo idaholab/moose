@@ -109,6 +109,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters) :
     _kernel_type(Moose::KT_ALL),
     _current_boundary_id(Moose::INVALID_BOUNDARY_ID),
     _solve(getParam<bool>("solve")),
+    _converged(true),
 
     _transient(false),
     _time(declareRestartableData<Real>("time")),
@@ -120,6 +121,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters) :
     _nl(NULL),
     _aux(NULL),
     _coupling(Moose::COUPLING_DIAG),
+    _steppers(/*threaded=*/false),
     _scalar_ics(/*threaded=*/false),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
@@ -2011,6 +2013,28 @@ FEProblemBase::addMaterial(const std::string & mat_name, const std::string & nam
   }
 }
 
+void
+FEProblemBase::addStepper(const std::string & stepper_name, const std::string & name, InputParameters parameters)
+{
+  // Check parameters for errors.
+  parameters.checkParams(name);
+
+  parameters.set<FEProblemBase *>("_fe_problem_base") = this;
+  parameters.set<SubProblem *>("_subproblem") = this;
+
+  MooseSharedPointer<Stepper> ns = _factory.create<Stepper>(stepper_name, name, parameters, /*tid=*/0);
+  _steppers.addObject(ns, /*tid=*/0);
+}
+
+Real &
+FEProblemBase::getStepperDT(const StepperName & stepper_name)
+{
+  // Can't error check here because objects might still be being built
+
+  // Using side-effect insertion here on purpose
+  // We'll have another round later where we double-check couplings and throw errors if stuff didn't exist
+  return _stepper_dt_values[stepper_name];
+}
 
 void
 FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
@@ -3319,7 +3343,12 @@ FEProblemBase::solve()
   _fail_next_linear_convergence_check = false;
 
   if (_solve)
+  {
     _nl->solve();
+    _converged = _nl->converged();
+  }
+  else
+    _converged = true;
 
   if (_solve)
     _nl->update();
@@ -3378,10 +3407,7 @@ FEProblemBase::checkExceptionAndStopSolve()
 bool
 FEProblemBase::converged()
 {
-  if (_solve)
-    return _nl->converged();
-  else
-    return true;
+  return _converged;
 }
 
 unsigned int
@@ -3508,6 +3534,26 @@ FEProblemBase::onTimestepBegin()
 void
 FEProblemBase::onTimestepEnd()
 {
+}
+
+Real
+FEProblemBase::computeDT()
+{
+  Real dt = 0.;
+
+  auto & steppers = _steppers.getActiveObjects();
+
+  for (auto & stepper : steppers)
+  {
+    if (_t_step < 2 && _stepper_info.converged())
+      _stepper_dt_values[stepper->outputName()] = dt = stepper->computeInitialDT();
+    else if (_stepper_info.converged())
+      _stepper_dt_values[stepper->outputName()] = dt = stepper->computeDT();
+    else
+      _stepper_dt_values[stepper->outputName()] = dt = stepper->computeFailedDT();
+  }
+
+  return dt;
 }
 
 void

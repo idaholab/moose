@@ -30,10 +30,12 @@ class FailingProblem : public FEProblem
 {
 public:
   FailingProblem(const InputParameters & params);
-  virtual bool converged();
+
+  virtual void solve() override;
+  virtual bool converged() override;
 
 protected:
-  bool _failed;
+  unsigned int _solves_at_fail_step;
   unsigned int _fail_step;
 };
 

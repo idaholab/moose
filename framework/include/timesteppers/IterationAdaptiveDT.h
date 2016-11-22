@@ -40,12 +40,30 @@ public:
   IterationAdaptiveDT(const InputParameters & parameters);
 
   virtual void init() override;
+  virtual void preExecute() override;
 
-  virtual StepperBlock * buildStepper() override;
+  virtual void rejectStep() override;
+  virtual void acceptStep() override;
 
-private:
+  virtual bool constrainStep(Real &dt) override;
+
+protected:
+  virtual Real computeInitialDT() override;
+  virtual Real computeDT() override;
+  virtual Real computeFailedDT() override;
+
+  void computeAdaptiveDT(Real & dt, bool allowToGrow = true, bool allowToShrink = true);
+  Real computeInterpolationDT();
+  void limitDTByFunction(Real & limitedDT);
+  void limitDTToPostprocessorValue(Real & limitedDT);
+
+  Real & _dt_old;
+
   /// The dt from the input file.
   const Real _input_dt;
+
+  bool _tfunc_last_step;
+  bool _sync_last_step;
 
   /// Adapt the timestep to maintain this non-linear iteration count...
   int _optimal_iterations;
@@ -72,13 +90,21 @@ private:
 
   /// Piecewise linear definition of time stepping
   LinearInterpolation _time_ipol;
+  /// true if we want to use piecewise-defined time stepping
+  const bool _use_time_ipol;
 
   /// grow the timestep by this factor
   const Real _growth_factor;
   /// cut the timestep by by this factor
   const Real _cutback_factor;
 
-  std::vector<Real> _tfunc_dts;
+  /// Number of nonlinear iterations in previous solve
+  unsigned int & _nl_its;
+  /// Number of linear iterations in previous solve
+  unsigned int & _l_its;
+
+  bool & _cutback_occurred;
+  bool _at_function_point;
 };
 
 template<>

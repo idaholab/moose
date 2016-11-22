@@ -1,0 +1,15 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'simple_stepper.i'
+    exodiff = 'simple_stepper_out.e'
+    scale_refine = 3
+  [../]
+
+  [./fail]
+    type = 'Exodiff'
+    input = 'simple_stepper_fail.i'
+    exodiff = 'simple_stepper_fail_out.e'
+    scale_refine = 3
+  [../]
+[]
