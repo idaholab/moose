@@ -25,6 +25,7 @@ InputParameters validParams<TimeSequenceStepperBase>()
 
 TimeSequenceStepperBase::TimeSequenceStepperBase(const InputParameters & parameters) :
     TimeStepper(parameters),
+    _current_step(declareRestartableData("current_step", (unsigned int) 0)),
     _time_sequence(declareRestartableData<std::vector<Real> >("time_sequence"))
 {
 }
@@ -32,10 +33,10 @@ TimeSequenceStepperBase::TimeSequenceStepperBase(const InputParameters & paramet
 void
 TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
 {
-  Real start_time = _executioner.getStartTime();
-  Real end_time = _executioner.endTime();
+  // In case of half transient, transient's end time needs to be reset to
+  // be able to imprint TimeSequenceStepperBase's end time
   if (_app.halfTransient())
-    end_time *= 2.0;
+    _executioner.endTime() *= 2.0;
 
   // only set up _time_sequence if the app is _not_ recovering
   if (!_app.isRecovering())
@@ -43,6 +44,15 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
     // also we need to do something different when restarting
     if (!_app.isRestarting())
     {
+      // sync _executioner.startTime and endTime with _time_sequence
+      Real start_time = _executioner.getStartTime();
+      Real end_time = _executioner.endTime();
+
+      // make sure time sequence is in ascending order
+      for (unsigned int j = 0; j < times.size() - 1; ++j)
+        if (times[j + 1] <= times[j])
+          mooseError("time_sequence must be in ascending order.");
+
       _time_sequence.push_back(start_time);
       for (unsigned int j = 0; j < times.size(); ++j)
       {
@@ -54,30 +64,38 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
     else
     {
       // in case of restart it should be allowed to modify _time_sequence if it follows the following rule:
-      // all times up to current_step are identical
+      // all times up to _current_step are identical
       // 1. start time cannot be modified
-      // 2. the entries in _time_sequence and times must be equal up to entry with index current_step
+      // 2. the entries in _time_sequence and times must be equal up to entry with index _current_step
 
       if (!MooseUtils::absoluteFuzzyEqual(_executioner.getStartTime(), _time_sequence[0]))
         mooseError("Timesequencestepper does not allow the start time to be modified.");
+
+      // sync _executioner.endTime with _time_sequence
+      Real end_time = _executioner.endTime();
+
+      // make sure time sequence is in ascending order
+      for (unsigned int j = 0; j < times.size() - 1; ++j)
+        if (times[j + 1] <= times[j])
+          mooseError("time_sequence must be in ascending order.");
 
       // save the restarted time_sequence
       std::vector<Real> saved_time_sequence = _time_sequence;
       _time_sequence.clear();
 
-      // step 1: fill in the entries up to current_step
-      int current_step = _executioner.timeStep();
-      for (unsigned int j = 0; j <= current_step; ++j)
+      // step 1: fill in the entries up to _current_step
+      for (unsigned int j = 0; j <= _current_step; ++j)
       {
         if (!MooseUtils::absoluteFuzzyEqual(times[j], saved_time_sequence[j]))
           mooseError("The timesequence provided in the restart file must be identical to "
-                     "the one in the old file up to entry number " << current_step + 1 << " = "
-                     << saved_time_sequence[current_step]);
+                     "the one in the old file up to entry number " << _current_step + 1 << " = "
+                     << saved_time_sequence[_current_step]);
+
         _time_sequence.push_back(saved_time_sequence[j]);
       }
 
-      // step 2: fill in the entries up after current_step
-      for (unsigned int j = current_step + 1; j < times.size(); ++j)
+      // step 2: fill in the entries up after _current_step
+      for (unsigned int j = _current_step + 1; j < times.size(); ++j)
       {
         if (times[j] < end_time)
           _time_sequence.push_back(times[j]);
@@ -93,8 +111,36 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
   }
 }
 
-StepperBlock *
-TimeSequenceStepperBase::buildStepper()
+void
+TimeSequenceStepperBase::step()
 {
-  return BaseStepper::converged(BaseStepper::fixedTimes(_time_sequence, 0), BaseStepper::mult(0.5));
+  TimeStepper::step();
+  if (converged())
+    _current_step++;
+}
+
+Real
+TimeSequenceStepperBase::computeInitialDT()
+{
+  return computeDT();
+}
+
+Real
+TimeSequenceStepperBase::computeDT()
+{
+  return _time_sequence[_current_step + 1] - _time_sequence[_current_step];
+}
+
+Real
+TimeSequenceStepperBase::computeFailedDT()
+{
+  if (computeDT() <= _dt_min)
+    mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
+
+  // cut the time step in a half if possible
+  Real dt = 0.5 * computeDT();
+  if (dt < _dt_min)
+    dt = _dt_min;
+  _time_sequence.insert(_time_sequence.begin() + _current_step + 1, _time_sequence[_current_step] + dt);
+  return computeDT();
 }

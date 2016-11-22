@@ -69,11 +69,14 @@
 
   start_time = 0
   end_time = 20
-  [./TimeStepper]
-    type = FunctionDT
-    time_t  = '0  4  8 12'
-    time_dt = '1  2  4  8'
-    interpolate = false
+
+  [./Steppers]
+    [./piecewise]
+      type = PiecewiseStepper
+      times  = '0  4  8 12'
+      dts    = '1  2  4  8'
+      interpolate = false
+    [../]
   [../]
 []
 

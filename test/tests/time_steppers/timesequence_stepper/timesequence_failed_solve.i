@@ -64,16 +64,25 @@
   [../]
 []
 
+[Problem]
+  type = FailingProblem
+  fail_step = 1
+[]
+
 [Executioner]
   type = Transient
   # This timestepper does not use dt to set the timestep, it uses the time_sequence.
   # dt = 250
   dtmin=250
   end_time = 3000.0
-  [./TimeStepper]
-    type = TimeSequenceStepperFailTest
-    time_sequence  = '0  1000.0 2000.0'
+
+  [./Steppers]
+    [./list]
+      type = TimeListStepper
+      time_list  = '0 1000.0 2000.0'
+    [../]
   [../]
+
   nl_rel_tol=1.e-10
 []
 

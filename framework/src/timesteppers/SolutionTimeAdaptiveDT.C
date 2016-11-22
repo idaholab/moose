@@ -24,7 +24,9 @@ InputParameters validParams<SolutionTimeAdaptiveDT>()
   InputParameters params = validParams<TimeStepper>();
   params.addParam<Real>("percent_change", 0.1, "Percentage to change the timestep by.  Should be between 0 and 1");
   params.addParam<int>("initial_direction", 1, "Direction for the first step.  1 for up... -1 for down. ");
+  params.addParam<bool>("adapt_log", false,    "Output adaptive time step log");
   params.addRequiredParam<Real>("dt", "The timestep size between solves");
+
   return params;
 }
 
@@ -68,13 +70,10 @@ SolutionTimeAdaptiveDT::step()
   }
 }
 
-StepperBlock *
-SolutionTimeAdaptiveDT::buildStepper()
+Real
+SolutionTimeAdaptiveDT::computeInitialDT()
 {
-  StepperBlock * s = new SolveTimeAdaptiveBlock(_direction, _percent_change);
-  s = BaseStepper::converged(s, BaseStepper::mult(0.5));
-  s = BaseStepper::initialN(BaseStepper::constant(getParam<Real>("dt")), s, _executioner.n_startup_steps());
-  return s;
+  return getParam<Real>("dt");
 }
 
 Real

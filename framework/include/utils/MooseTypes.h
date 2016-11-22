@@ -362,6 +362,9 @@ DerivativeStringClass(BoundaryName);
 /// This type is similar to BoundaryName but is used for "blocks" or subdomains in the current mesh
 DerivativeStringClass(SubdomainName);
 
+/// This type is used for objects that expect Stepper objects
+DerivativeStringClass(StepperName);
+
 /// This type is used for objects that expect Postprocessor objects
 DerivativeStringClass(PostprocessorName);
 

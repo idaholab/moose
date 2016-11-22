@@ -67,9 +67,12 @@
 [Executioner]
   type = Transient
   end_time = 4.0
-  [./TimeStepper]
-    type = ExodusTimeSequenceStepper
-    mesh = timesequence_no_start_time.e
+
+  [./Steppers]
+    [./list]
+      type = ExodusTimeListStepper
+      mesh = timesequence_no_start_time.e
+    [../]
   [../]
 []
 

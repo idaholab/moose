@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'fixed_times_stepper.i'
+    exodiff = 'fixed_times_stepper_out.e'
+    scale_refine = 3
+  [../]
+[]

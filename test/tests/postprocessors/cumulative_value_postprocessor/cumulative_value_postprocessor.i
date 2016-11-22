@@ -46,9 +46,11 @@
   type = Transient
   scheme = implicit-euler
 
-  [./TimeStepper]
-    type = ConstantDT
-    dt = 0.01
+  [./Steppers]
+    [./simple]
+      type = SimpleStepper
+      dt = 0.01
+    [../]
   [../]
 
   start_time = 0.0

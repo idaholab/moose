@@ -25,7 +25,7 @@
 // Forward Declarations
 class Transient;
 class TimeStepper;
-class StepperBlock;
+class FEProblemBase;
 
 template<>
 InputParameters validParams<Transient>();
@@ -243,7 +243,7 @@ protected:
   bool & _multiapps_converged;
 
   /// Whether or not the last solve converged
-  bool & _last_solve_converged;
+  bool _last_solve_converged;
 
   /// Whether step should be repeated due to xfem modifying the mesh
   bool _xfem_repeat_step;
@@ -303,7 +303,6 @@ protected:
   void updateStepperInfo(bool first);
 
   Real _new_dt;
-  std::unique_ptr<StepperBlock> _stepper;
 
   /// TODO: the following two member vars are only here because FEProblem/NonlinearSystem do not save the
   /// state of these values themselves.  If that gets fixed, these vars can be
@@ -319,14 +318,13 @@ protected:
   std::vector<Real> & _soln_aux;
   std::vector<Real> & _soln_predicted;
   Real & _prev_dt;
-  StepperInfo _si;
 
   // using a Real here is okay because the key is the simulation time as specified in StepperInfo
   // the moment after StepperBlock::next is called.  This time should be "saved" by steppers that
-  // want to rewind, and they will need to specify the rewind time from this "saved".  There are no
-  // operations on the time between the stepper requesting a snapshot and it being used as a key
+  // want to restore, and they will need to specify the restore time from this "saved".  There are no
+  // operations on the time between the stepper requesting a backup and it being used as a key
   // in this map.
-  std::map<Real, MooseSharedPointer<Backup>> _snapshots;
+  std::map<Real, MooseSharedPointer<Backup>> _backups;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

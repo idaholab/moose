@@ -21,7 +21,6 @@
 class TimeStepper;
 class FEProblemBase;
 class Transient;
-class StepperBlock;
 
 template<>
 InputParameters validParams<TimeStepper>();
@@ -41,10 +40,6 @@ public:
    * Initialize the time stepper. Called at the very beginning of Executioner::execute()
    */
   virtual void init();
-
-  // converted steppers *MUST* use _executioner->n_startup_steps() to return
-  // the result of what used to be computeInitialDT.
-  virtual StepperBlock * buildStepper() {return nullptr;};
 
   virtual void preExecute();
   virtual void preSolve() {}
@@ -112,14 +107,14 @@ protected:
    * Note that this does not return.
    * The TimeStepper's job here is to fill in _current_dt.
    */
-  virtual Real computeInitialDT() {return -1;};
+  virtual Real computeInitialDT() = 0;
 
   /**
    * Called to compute _current_dt for a normal step.
    * Note that this does not return.
    * The TimeStepper's job here is to fill in _current_dt.
    */
-  virtual Real computeDT() {return -1;};
+  virtual Real computeDT() = 0;
 
   /**
    * Called to compute _current_dt after a solve has failed.

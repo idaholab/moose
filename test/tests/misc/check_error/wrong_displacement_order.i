@@ -84,9 +84,11 @@
   nl_abs_tol = 1e-10
   nl_rel_step_tol = 1e-10
   nl_abs_step_tol = 1e-10
-  [./TimeStepper]
-    type = ConstantDT
-    dt = 0.001
+  [./Steppers]
+    [./simple]
+      type = SimpleStepper
+      dt = 0.001
+    [../]
   [../]
   dtmin = .001
 []
@@ -94,4 +96,3 @@
 [Outputs]
   exodus = true
 []
-
