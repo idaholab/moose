@@ -25,7 +25,7 @@
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 
-FlagElementsThread::FlagElementsThread(FEProblem & fe_problem,
+FlagElementsThread::FlagElementsThread(FEProblemBase & fe_problem,
                                        std::vector<Number> & serialized_solution,
                                        unsigned int max_h_level,
                                        const std::string & marker_name) :

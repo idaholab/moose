@@ -48,13 +48,13 @@ MaterialOutputAction::act()
 {
   // Error if _problem is NULL, I don't know how this would happen
   if (_problem.get() == NULL)
-    mooseError("FEProblem pointer is NULL, it is needed for auto material property output");
+    mooseError("FEProblemBase pointer is NULL, it is needed for auto material property output");
 
   buildMaterialOutputObjects(_problem.get());
 }
 
 void
-MaterialOutputAction::buildMaterialOutputObjects(FEProblem * problem_ptr)
+MaterialOutputAction::buildMaterialOutputObjects(FEProblemBase * problem_ptr)
 {
   // Do nothing if the application does not have output
   if (!_app.actionWarehouse().hasActions("add_output"))

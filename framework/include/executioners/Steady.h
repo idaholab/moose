@@ -22,7 +22,7 @@
 #include <string>
 
 class Steady;
-class FEProblem;
+class FEProblemBase;
 
 template<>
 InputParameters validParams<Steady>();
@@ -49,7 +49,7 @@ public:
   virtual void checkIntegrity();
 
 protected:
-  FEProblem & _problem;
+  FEProblemBase & _problem;
 
   int & _time_step;
   Real & _time;

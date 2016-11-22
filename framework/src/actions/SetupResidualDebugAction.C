@@ -17,7 +17,7 @@
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 template<>
 InputParameters validParams<SetupResidualDebugAction>()
@@ -39,7 +39,7 @@ SetupResidualDebugAction::act()
   if (_problem.get() == NULL)
     return;
 
-  _problem->getNonlinearSystem().debuggingResiduals(true);
+  _problem->getNonlinearSystemBase().debuggingResiduals(true);
 
   // debug variable residuals
   for (const auto & var_name : _show_var_residual)

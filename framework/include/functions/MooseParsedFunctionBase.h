@@ -65,8 +65,8 @@ protected:
    const std::string verifyFunction(const std::string & function_str);
 
 
-  /// Reference to the FEProblem class for this object
-  FEProblem & _pfb_feproblem;
+  /// Reference to the FEProblemBase class for this object
+  FEProblemBase & _pfb_feproblem;
 
   /// Variables passed to libMesh::ParsedFunction
   const std::vector<std::string> _vars;

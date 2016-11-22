@@ -23,7 +23,7 @@
 #include "libmesh/enum_quadrature_type.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 
 /**
  * This class determines the maximum number of Quadrature Points and
@@ -34,7 +34,7 @@ class FEProblem;
 class MaxQpsThread
 {
 public:
-  MaxQpsThread(FEProblem & fe_problem, QuadratureType type, Order order, Order face_order);
+  MaxQpsThread(FEProblemBase & fe_problem, QuadratureType type, Order order, Order face_order);
 
   // Splitting Constructor
   MaxQpsThread(MaxQpsThread & x, Threads::split split);
@@ -48,7 +48,7 @@ public:
   unsigned int max_shape_funcs() const { return _max_shape_funcs; }
 
 protected:
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
 
   QuadratureType _qtype;
   Order _order;

@@ -82,7 +82,7 @@ ExplicitRK2::solve()
   _stage = 2;
   _fe_problem.timeOld() = time_old;
   _fe_problem.time() = time_stage2;
-  _fe_problem.getNonlinearSystem().sys().solve();
+  _fe_problem.getNonlinearSystemBase().system().solve();
 
   // Advance solutions old->older, current->old.  Also moves Material
   // properties and other associated state forward in time.
@@ -95,7 +95,7 @@ ExplicitRK2::solve()
   _stage = 3;
   _fe_problem.timeOld() = time_stage2;
   _fe_problem.time() = time_new;
-  _fe_problem.getNonlinearSystem().sys().solve();
+  _fe_problem.getNonlinearSystemBase().system().solve();
 
   // Reset time at beginning of step to its original value
   _fe_problem.timeOld() = time_old;

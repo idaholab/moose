@@ -87,7 +87,7 @@ FrictionalContactProblem::FrictionalContactProblem(const InputParameters & param
   std::vector<Real> slip_factor = params.get<std::vector<Real> >("slip_factor");
   std::vector<Real> slip_too_far_factor = params.get<std::vector<Real> >("slip_too_far_factor");
 
-  unsigned int dim = getNonlinearSystem().subproblem().mesh().dimension();
+  unsigned int dim = getNonlinearSystemBase().subproblem().mesh().dimension();
 
   _disp_x = params.get<NonlinearVariableName>("disp_x");
   _residual_x = params.get<AuxVariableName>("residual_x");
@@ -240,7 +240,7 @@ FrictionalContactProblem::updateSolution(NumericVector<Number> & vec_solution, N
 
   unsigned int nfc = numLocalFrictionalConstraints();
   std::vector<SlipData> iterative_slip;
-  unsigned int dim = getNonlinearSystem().subproblem().mesh().dimension();
+  unsigned int dim = getNonlinearSystemBase().subproblem().mesh().dimension();
   iterative_slip.reserve(nfc*dim);
 
   if (_do_slip_update)
@@ -303,10 +303,10 @@ FrictionalContactProblem::predictorCleanup(NumericVector<Number>& ghosted_soluti
 bool
 FrictionalContactProblem::enforceRateConstraint(NumericVector<Number>& vec_solution, NumericVector<Number>& ghosted_solution)
 {
-  NonlinearSystem & nonlinear_sys = getNonlinearSystem();
+  NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
   unsigned int dim = nonlinear_sys.subproblem().mesh().dimension();
 
-  _displaced_problem->updateMesh(ghosted_solution, *_aux.currentSolution());
+  _displaced_problem->updateMesh(ghosted_solution, *_aux->currentSolution());
 
   MooseVariable * disp_x_var = &getVariable(0,_disp_x);
   MooseVariable * disp_y_var = &getVariable(0,_disp_y);
@@ -407,7 +407,7 @@ bool
 FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_solution,
                                         std::vector<SlipData> * iterative_slip)
 {
-  NonlinearSystem & nonlinear_sys = getNonlinearSystem();
+  NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
   unsigned int dim = nonlinear_sys.subproblem().mesh().dimension();
 
   MooseVariable * residual_x_var = &getVariable(0,_residual_x);
@@ -430,14 +430,14 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
   _slip_residual = 0.0;
   _it_slip_norm = 0.0;
   _inc_slip_norm = 0.0;
-  TransientNonlinearImplicitSystem & system = getNonlinearSystem().sys();
+  System & system = getNonlinearSystemBase().system();
 
   if (iterative_slip)
     iterative_slip->clear();
 
   if (getDisplacedProblem() && _interaction_params.size() > 0)
   {
-    computeResidual(system, ghosted_solution, *system.rhs);
+    computeResidual(ghosted_solution, getNonlinearSystemBase().RHS());
 
     _num_contact_nodes = 0;
     _num_slipping = 0;
@@ -659,7 +659,7 @@ FrictionalContactProblem::applySlip(NumericVector<Number> & vec_solution,
                                     NumericVector<Number> & ghosted_solution,
                                     std::vector<SlipData> & iterative_slip)
 {
-  NonlinearSystem & nonlinear_sys = getNonlinearSystem();
+  NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
   unsigned int dim = nonlinear_sys.subproblem().mesh().dimension();
   AuxiliarySystem & aux_sys = getAuxiliarySystem();
   NumericVector<Number> & aux_solution = aux_sys.solution();
@@ -816,7 +816,7 @@ FrictionalContactProblem::checkNonlinearConvergence(std::string & msg,
       {
         _do_slip_update = true;
 
-        NonlinearSystem & nonlinear_sys = getNonlinearSystem();
+        NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
         nonlinear_sys.update();
         const NumericVector<Number>*& ghosted_solution = nonlinear_sys.currentSolution();
 
@@ -868,7 +868,7 @@ FrictionalContactProblem::updateContactPoints(NumericVector<Number> & ghosted_so
   }
 
   //Do new contact search to update positions of slipped nodes
-  _displaced_problem->updateMesh(ghosted_solution, *_aux.currentSolution());
+  _displaced_problem->updateMesh(ghosted_solution, *_aux->currentSolution());
 
   for (PLIterator plit = penetration_locators->begin(); plit != penetration_locators->end(); ++plit)
   {
@@ -889,7 +889,7 @@ FrictionalContactProblem::updateIncrementalSlip()
   MooseVariable * inc_slip_y_var = &getVariable(0,_inc_slip_y);
   MooseVariable * inc_slip_z_var = nullptr;
 
-  unsigned int dim = getNonlinearSystem().subproblem().mesh().dimension();
+  unsigned int dim = getNonlinearSystemBase().subproblem().mesh().dimension();
   if (dim == 3)
     inc_slip_z_var = &getVariable(0,_inc_slip_z);
 

@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "AddBoundsVectorsAction.h"
 #include "FEProblem.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 template<>
 InputParameters validParams<AddBoundsVectorsAction>()
@@ -31,7 +31,6 @@ AddBoundsVectorsAction::AddBoundsVectorsAction(InputParameters params) :
 void
 AddBoundsVectorsAction::act()
 {
-  _problem->getNonlinearSystem().addVector("lower_bound", false, GHOSTED);
-  _problem->getNonlinearSystem().addVector("upper_bound", false, GHOSTED);
+  _problem->getNonlinearSystemBase().addVector("lower_bound", false, GHOSTED);
+  _problem->getNonlinearSystemBase().addVector("upper_bound", false, GHOSTED);
 }
-

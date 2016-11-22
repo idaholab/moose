@@ -20,7 +20,7 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(FEProblem & fe_problem,
+ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(FEProblemBase & fe_problem,
                                                      const MooseObjectWarehouse<AuxKernel> & storage) :
     ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),

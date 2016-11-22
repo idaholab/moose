@@ -109,8 +109,8 @@ protected:
   virtual VariableValue & coupledScalarDotDu(const std::string & var_name, unsigned int comp = 0);
 
 protected:
-  // Reference to FEProblem
-  FEProblem & _sc_fe_problem;
+  // Reference to FEProblemBase
+  FEProblemBase & _sc_fe_problem;
 
   /// Coupled vars whose values we provide
   std::map<std::string, std::vector<MooseVariableScalar *> > _coupled_scalar_vars;

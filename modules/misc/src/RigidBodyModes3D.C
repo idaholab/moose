@@ -12,8 +12,8 @@ template<>
 InputParameters validParams<RigidBodyModes3D>()
 {
   InputParameters params = validParams<NodalUserObject>();
-  params.addRequiredParam<std::string>("subspace_name", "FEProblem subspace containing rigid body mode vectors");
-  params.addParam<std::vector<unsigned int> >("subspace_indices", std::vector<unsigned int>(), "Indices of FEProblem subspace vectors containing rigid body modes");
+  params.addRequiredParam<std::string>("subspace_name", "FEProblemBase subspace containing rigid body mode vectors");
+  params.addParam<std::vector<unsigned int> >("subspace_indices", std::vector<unsigned int>(), "Indices of FEProblemBase subspace vectors containing rigid body modes");
   params.addParam<std::vector<std::string> >("modes", std::vector<std::string>(), "Names of the RigidBody3D modes computed here. Select from: trans_x, trans_y, trans_z, rot_x, rot_y, rot_z");
   params.addRequiredCoupledVar("disp_x", "x-displacement");
   params.addRequiredCoupledVar("disp_y", "y-displacement");
@@ -98,7 +98,7 @@ RigidBodyModes3D::execute()
 {
   // Set the appropriate dof of the selectedrigid body vectors
   // Currently this only works for Lagrange displacement variables!
-  NonlinearSystem& nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   const Node& node = *_current_node;
   unsigned int i = 0;
   // x-displacement mode
@@ -182,7 +182,7 @@ void
 RigidBodyModes3D::finalize()
 {
   // Close the basis vectors
-  NonlinearSystem& nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   for (unsigned int i = 0; i < _subspace_indices.size(); ++i) {
     std::stringstream postfix;
     postfix << "_" << _subspace_indices[i];
@@ -190,4 +190,3 @@ RigidBodyModes3D::finalize()
     mode.close();
   }
 }
-

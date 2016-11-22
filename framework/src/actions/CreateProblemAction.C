@@ -68,9 +68,9 @@ CreateProblemAction::act()
       _moose_object_pars.set<std::vector<std::string> >("petsc_inames") = std::vector<std::string>();
       _moose_object_pars.set<std::vector<std::string> >("petsc_values") = std::vector<std::string>();
 #endif
-      _problem = _factory.create<FEProblem>(_type, getParam<std::string>("name"), _moose_object_pars);
+      _problem = _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);
       if (!_problem.get())
-        mooseError("Problem has to be of a FEProblem type");
+        mooseError("Problem has to be of a FEProblemBase type");
     }
     // set up the problem
     _problem->setCoordSystem(_blocks, _coord_sys);

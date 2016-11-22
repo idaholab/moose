@@ -20,6 +20,7 @@
 
 class MultiApp;
 class UserObject;
+class FEProblemBase;
 class FEProblem;
 class Executioner;
 class MooseApp;
@@ -126,9 +127,20 @@ public:
   virtual MeshTools::BoundingBox getBoundingBox(unsigned int app);
 
   /**
+   * Get the FEProblemBase this MultiApp is part of.
+   */
+  FEProblemBase & problemBase() { return _fe_problem; }
+
+  /**
    * Get the FEProblem this MultiApp is part of.
    */
-  FEProblem & problem() { return _fe_problem; }
+  FEProblem & problem();
+
+  /**
+   * Get the FEProblemBase for the global app is part of.
+   * @param app The global app number
+   */
+  FEProblemBase & appProblemBase(unsigned int app);
 
   /**
    * Get the FEProblem for the global app is part of.
@@ -272,8 +284,8 @@ protected:
   /// call back executed right before app->runInputFile()
   virtual void preRunInputFile();
 
-  /// The FEProblem this MultiApp is part of
-  FEProblem & _fe_problem;
+  /// The FEProblemBase this MultiApp is part of
+  FEProblemBase & _fe_problem;
 
   /// The type of application to build
   std::string _app_type;

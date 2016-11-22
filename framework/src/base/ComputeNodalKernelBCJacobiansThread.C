@@ -20,7 +20,7 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(FEProblem & fe_problem,
+ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(FEProblemBase & fe_problem,
                                                                          const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
                                                                          SparseMatrix<Number> & jacobian) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),

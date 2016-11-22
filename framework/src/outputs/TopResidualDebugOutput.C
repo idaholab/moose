@@ -20,7 +20,7 @@
 #include "Console.h"
 #include "Action.h"
 #include "MooseMesh.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -42,7 +42,7 @@ InputParameters validParams<TopResidualDebugOutput>()
 TopResidualDebugOutput::TopResidualDebugOutput(const InputParameters & parameters) :
     BasicOutput<PetscOutput>(parameters),
     _num_residuals(getParam<unsigned int>("num_residuals")),
-    _sys(_problem_ptr->getNonlinearSystem().sys())
+    _sys(_problem_ptr->getNonlinearSystemBase().system())
 {
 }
 
@@ -51,7 +51,7 @@ TopResidualDebugOutput::output(const ExecFlagType & /*type*/)
 {
   // Display the top residuals
   if (_num_residuals > 0)
-    printTopResiduals(*(_sys.rhs), _num_residuals);
+    printTopResiduals(_problem_ptr->getNonlinearSystemBase().RHS(), _num_residuals);
 }
 
 void

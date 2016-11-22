@@ -92,9 +92,9 @@ public:
   virtual Problem & problem();
 
   /**
-   * Return a reference to this Executioner's FEProblem instance
+   * Return a reference to this Executioner's FEProblemBase instance
    */
-  FEProblem & feProblem();
+  FEProblemBase & feProblem();
 
   /** The name of the TimeStepper
    * This is an empty string for non-Transient executioners
@@ -104,7 +104,7 @@ public:
 
   /**
    * Can be used by subsclasses to call parentOutputPositionChanged()
-   * on the underlying FEProblem.
+   * on the underlying FEProblemBase.
    */
   virtual void parentOutputPositionChanged() {}
 
@@ -123,7 +123,7 @@ protected:
    */
   virtual void addAttributeReporter(const std::string & name, Real & attribute, const std::string execute_on = "");
 
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
 
   /// Initial Residual Variables
   Real _initial_residual_norm;

@@ -27,7 +27,7 @@
 // libMesh
 #include "libmesh/mesh_refinement.h"
 
-class FEProblem;
+class FEProblemBase;
 class MooseMesh;
 class DisplacedProblem;
 class MooseVariable;
@@ -48,7 +48,7 @@ class ErrorEstimator;
 class Adaptivity : public ConsoleStreamInterface
 {
 public:
-  Adaptivity(FEProblem & subproblem);
+  Adaptivity(FEProblemBase & subproblem);
   virtual ~Adaptivity();
 
   /**
@@ -221,7 +221,7 @@ public:
   bool isAdaptivityDue();
 
 protected:
-  FEProblem & _subproblem;
+  FEProblemBase & _subproblem;
   MooseMesh & _mesh;
 
   /// on/off flag reporting if the adaptivity is being used

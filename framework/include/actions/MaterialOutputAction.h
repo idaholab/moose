@@ -46,7 +46,7 @@ public:
   /**
    * Builds the objects necessary for material property output
    */
-  void buildMaterialOutputObjects(FEProblem * problem_ptr);
+  void buildMaterialOutputObjects(FEProblemBase * problem_ptr);
 
 private:
 

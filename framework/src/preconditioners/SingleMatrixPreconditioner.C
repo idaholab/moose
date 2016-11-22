@@ -36,7 +36,7 @@ InputParameters validParams<SingleMatrixPreconditioner>()
 SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & params) :
     MoosePreconditioner(params)
 {
-  NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   unsigned int n_vars = nl.nVariables();
 
   CouplingMatrix * cm = new CouplingMatrix(n_vars);

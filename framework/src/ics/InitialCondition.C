@@ -46,7 +46,7 @@ InitialCondition::InitialCondition(const InputParameters & parameters) :
     DependencyResolverInterface(),
     Restartable(parameters, "InitialConditions"),
     ZeroInterface(parameters),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(getParam<THREAD_ID>("_tid")),
     _assembly(_fe_problem.assembly(_tid)),

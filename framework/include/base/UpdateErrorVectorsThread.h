@@ -26,7 +26,7 @@ class Adaptivity;
 class UpdateErrorVectorsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  UpdateErrorVectorsThread(FEProblem & fe_problem,
+  UpdateErrorVectorsThread(FEProblemBase & fe_problem,
                            const std::map<std::string, std::unique_ptr<ErrorVector> > & indicator_field_to_error_vector);
 
   // Splitting Constructor

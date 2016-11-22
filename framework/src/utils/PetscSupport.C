@@ -137,7 +137,8 @@ setSolverOptions(SolverParams & solver_params)
 }
 
 void
-petscSetupDM (NonlinearSystem & nl) {
+petscSetupDM (NonlinearSystemBase & nl)
+{
 #if !PETSC_VERSION_LESS_THAN(3,3,0)
   PetscErrorCode  ierr;
   PetscBool       ismoose;
@@ -147,7 +148,7 @@ petscSetupDM (NonlinearSystem & nl) {
   ierr = DMMooseRegisterAll();
   CHKERRABORT(nl.comm().get(),ierr);
   // Create and set up the DM that will consume the split options and deal with block matrices.
-  PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
+  PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
   SNES snes = petsc_solver->snes();
   // if there exists a DMMoose object, not to recreate a new one
   ierr = SNESGetDM(snes, &dm);
@@ -182,7 +183,7 @@ petscSetupDM (NonlinearSystem & nl) {
 
 
 void
-petscSetOptions(FEProblem & problem)
+petscSetOptions(FEProblemBase & problem)
 {
   // Reference to the options stored in FEPRoblem
   PetscOptions & petsc = problem.getPetscOptions();
@@ -205,8 +206,8 @@ petscSetOptions(FEProblem & problem)
     setSinglePetscOption(petsc.inames[i], petsc.values[i]);
 
   // set up DM which is required if use a field split preconditioner
-  if (problem.getNonlinearSystem().haveFieldSplitPreconditioner())
-    petscSetupDM(problem.getNonlinearSystem());
+  if (problem.getNonlinearSystemBase().haveFieldSplitPreconditioner())
+    petscSetupDM(problem.getNonlinearSystemBase());
 
   // commandline options always win
   // the options from a user commandline will overwrite the existing ones if any conflicts
@@ -235,9 +236,9 @@ petscSetupOutput(CommandLine * cmd_line)
 PetscErrorCode
 petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason, void * ctx)
 {
-  // Cast the context pointer coming from PETSc to an FEProblem& and
+  // Cast the context pointer coming from PETSc to an FEProblemBase& and
   // get a reference to the System from it.
-  FEProblem & problem = *static_cast<FEProblem *>(ctx);
+  FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
 
   // Let's be nice and always check PETSc error codes.
   PetscErrorCode ierr = 0;
@@ -326,8 +327,8 @@ petscConverged(KSP ksp, PetscInt n, PetscReal rnorm, KSPConvergedReason * reason
 PetscErrorCode
 petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm, PetscReal fnorm, SNESConvergedReason * reason, void * ctx)
 {
-  FEProblem & problem = *static_cast<FEProblem *>(ctx);
-  NonlinearSystem & system = problem.getNonlinearSystem();
+  FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
+  NonlinearSystemBase & system = problem.getNonlinearSystemBase();
 
   // Let's be nice and always check PETSc error codes.
   PetscErrorCode ierr = 0;
@@ -368,7 +369,7 @@ petscNonlinearConverged(SNES snes, PetscInt it, PetscReal xnorm, PetscReal snorm
     }
 #endif
 
-  // Error message that will be set by the FEProblem.
+  // Error message that will be set by the FEProblemBase.
   std::string msg;
 
   // xnorm: 2-norm of current iterate
@@ -446,11 +447,11 @@ getPetscPCSide(Moose::PCSideType pcs)
 }
 
 void
-petscSetDefaults(FEProblem & problem)
+petscSetDefaults(FEProblemBase & problem)
 {
   // dig out Petsc solver
-  NonlinearSystem & nl = problem.getNonlinearSystem();
-  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
+  NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
+  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
   SNES snes = petsc_solver->snes();
   KSP ksp;
   SNESGetKSP(snes, &ksp);
@@ -492,7 +493,7 @@ petscSetDefaults(FEProblem & problem)
 }
 
 void
-storePetscOptions(FEProblem & fe_problem, const InputParameters & params)
+storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
 {
   // Note: Options set in the Preconditioner block will override those set in the Executioner block
   if (params.isParamValid("solve_type"))

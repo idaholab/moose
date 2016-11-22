@@ -17,7 +17,7 @@
 #ifdef LIBMESH_ENABLE_AMR
 
 #include "FEProblem.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "Adaptivity.h"
 #include "Executioner.h"
 #include "MooseEnum.h"
@@ -61,7 +61,7 @@ AdaptivityAction::AdaptivityAction(InputParameters params) :
 void
 AdaptivityAction::act()
 {
-  NonlinearSystem & system = _problem->getNonlinearSystem();
+  NonlinearSystemBase & system = _problem->getNonlinearSystemBase();
 
   Adaptivity & adapt = _problem->adaptivity();
 

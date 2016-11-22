@@ -17,7 +17,7 @@
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "MooseApp.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 #include <map>
 
@@ -54,7 +54,7 @@ CopyNodalVarsAction::act()
     {
       // Is this a NonlinearSystem variable or an AuxiliarySystem variable?
       if (_current_task == "copy_nodal_vars")
-        system = &_problem->getNonlinearSystem();
+        system = &_problem->getNonlinearSystemBase();
       else
         system = &_problem->getAuxiliarySystem();
 

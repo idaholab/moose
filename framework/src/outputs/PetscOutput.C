@@ -110,8 +110,8 @@ PetscOutput::solveSetup()
 #ifdef LIBMESH_HAVE_PETSC
 
   // Extract the non-linear and linear solvers from PETSc
-  NonlinearSystem & nl = _problem_ptr->getNonlinearSystem();
-  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
+  NonlinearSystemBase & nl = _problem_ptr->getNonlinearSystemBase();
+  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
   SNES snes = petsc_solver->snes();
   KSP ksp;
   SNESGetKSP(snes, &ksp);

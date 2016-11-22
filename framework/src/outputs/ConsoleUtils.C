@@ -56,7 +56,7 @@ outputFrameworkInformation(MooseApp & app)
 
 
 std::string
-outputMeshInformation(FEProblem & problem, bool verbose)
+outputMeshInformation(FEProblemBase & problem, bool verbose)
 {
   std::stringstream oss;
   oss << std::left;
@@ -98,16 +98,16 @@ outputMeshInformation(FEProblem & problem, bool verbose)
 
 
 std::string
-outputAuxiliarySystemInformation(FEProblem & problem)
+outputAuxiliarySystemInformation(FEProblemBase & problem)
 {
   return outputSystemInformationHelper(problem.getAuxiliarySystem().system());
 }
 
 
 std::string
-outputNonlinearSystemInformation(FEProblem & problem)
+outputNonlinearSystemInformation(FEProblemBase & problem)
 {
-  return outputSystemInformationHelper(problem.getNonlinearSystem().system());
+  return outputSystemInformationHelper(problem.getNonlinearSystemBase().system());
 }
 
 
@@ -208,7 +208,7 @@ outputSystemInformationHelper(const System & system)
 
 
 std::string
-outputExecutionInformation(MooseApp & app, FEProblem & problem)
+outputExecutionInformation(MooseApp & app, FEProblemBase & problem)
 {
 
   std::stringstream oss;
@@ -262,7 +262,7 @@ outputOutputInformation(MooseApp & app)
 }
 
 
-std::string outputLegacyInformation(MooseApp & /*app*/, FEProblem & problem)
+std::string outputLegacyInformation(MooseApp & /*app*/, FEProblemBase & problem)
 {
   std::stringstream oss;
   oss << std::left;

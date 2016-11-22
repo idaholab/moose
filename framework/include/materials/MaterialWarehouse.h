@@ -22,7 +22,7 @@
 class Material;
 
 /**
- * Material objects are special in that they have additional objects created automatically (see FEProblem::addMaterial).
+ * Material objects are special in that they have additional objects created automatically (see FEProblemBase::addMaterial).
  *
  * This class specializes the base class to acount for the additional Neightbor and face objects that may
  * exist.

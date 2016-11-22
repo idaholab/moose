@@ -71,7 +71,7 @@ public:
 
 protected:
   SubProblem & _subproblem;
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   SystemBase & _sys;
   NumericVector<Number> & _solution;
 

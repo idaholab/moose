@@ -27,13 +27,13 @@ InputParameters validParams<NumNonlinearIterations>()
 
 NumNonlinearIterations::NumNonlinearIterations(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    _fe_problem(dynamic_cast<FEProblem *>(&_subproblem)),
+    _fe_problem(dynamic_cast<FEProblemBase *>(&_subproblem)),
     _accumulate_over_step(getParam<bool>("accumulate_over_step")),
     _num_iters(0),
     _time(-std::numeric_limits<Real>::max())
 {
   if (!_fe_problem)
-    mooseError("Couldn't cast to FEProblem");
+    mooseError("Couldn't cast to FEProblemBase");
 }
 
 void

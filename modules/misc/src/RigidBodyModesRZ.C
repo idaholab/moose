@@ -12,8 +12,8 @@ template<>
 InputParameters validParams<RigidBodyModesRZ>()
 {
   InputParameters params = validParams<NodalUserObject>();
-  params.addRequiredParam<std::vector<unsigned int> >("subspace_name", "FEProblem subspace containing RZ rigid body modes");
-  params.addRequiredParam<std::vector<unsigned int> >("subspace_indices", "Indices of FEProblem subspace vectors containg rigid body modes");
+  params.addRequiredParam<std::vector<unsigned int> >("subspace_name", "FEProblemBase subspace containing RZ rigid body modes");
+  params.addRequiredParam<std::vector<unsigned int> >("subspace_indices", "Indices of FEProblemBase subspace vectors containg rigid body modes");
   params.addRequiredCoupledVar("disp_r", "r-displacement");
   params.addRequiredCoupledVar("disp_z", "z-displacement");
   return params;
@@ -46,7 +46,7 @@ void
 RigidBodyModesRZ::execute()
 {
   // Currently this only works for Lagrange displacement variables!
-  NonlinearSystem& nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   const Node& node = *_current_node;
   // z-translation mode
   {
@@ -64,7 +64,7 @@ void
 RigidBodyModesRZ::finalize()
 {
   // Close the basis vectors
-  NonlinearSystem& nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   for (unsigned int i = 0; i < _subspace_indices.size(); ++i) {
     std::stringstream postfix;
     postfix << "_" << _subspace_indices[i];
@@ -72,4 +72,3 @@ RigidBodyModesRZ::finalize()
     mode.close();
   }
 }
-

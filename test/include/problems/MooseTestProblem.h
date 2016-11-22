@@ -23,7 +23,7 @@ template<>
 InputParameters validParams<MooseTestProblem>();
 
 /**
- * FEProblem derived class for customization of callbacks. In this instance we only print out something in the c-tor and d-tor, so we know the class was build and used properly.
+ * FEProblemBase derived class for customization of callbacks. In this instance we only print out something in the c-tor and d-tor, so we know the class was build and used properly.
  */
 class MooseTestProblem : public FEProblem
 {

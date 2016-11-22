@@ -57,8 +57,8 @@ CrankNicolson::preSolve()
     _du_dot_du = 0;
 
     // for the first time step, compute residual for the old time step
-    _fe_problem.computeResidualType(_solution_old, *_nl.sys().rhs, Moose::KT_NONTIME);
-    _residual_old = *_nl.sys().rhs;
+    _fe_problem.computeResidualType(_solution_old, _nl.RHS(), Moose::KT_NONTIME);
+    _residual_old = _nl.RHS();
     _residual_old.close();
   }
 }

@@ -23,13 +23,13 @@
 #include "libmesh/node_range.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class AuxiliarySystem;
 
 class ComputeNodalAuxVarsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalAuxVarsThread(FEProblem & fe_problem, const MooseObjectWarehouse<AuxKernel> & storage);
+  ComputeNodalAuxVarsThread(FEProblemBase & fe_problem, const MooseObjectWarehouse<AuxKernel> & storage);
   // Splitting Constructor
   ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split);
 

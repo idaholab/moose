@@ -9,6 +9,7 @@
 
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
+#include "NonlinearSystem.h"
 
 // Forward Declarations
 class SwitchingFunctionConstraintLagrange;

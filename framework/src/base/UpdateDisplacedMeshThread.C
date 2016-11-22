@@ -17,7 +17,7 @@
 #include "MooseMesh.h"
 #include "SubProblem.h"
 
-UpdateDisplacedMeshThread::UpdateDisplacedMeshThread(FEProblem & fe_problem, DisplacedProblem & displaced_problem) :
+UpdateDisplacedMeshThread::UpdateDisplacedMeshThread(FEProblemBase & fe_problem, DisplacedProblem & displaced_problem) :
     ThreadedNodeLoop<SemiLocalNodeRange, SemiLocalNodeRange::const_iterator>(fe_problem),
     _displaced_problem(displaced_problem),
     _ref_mesh(_displaced_problem.refMesh()),

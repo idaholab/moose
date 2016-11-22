@@ -172,8 +172,8 @@ public:
 
 private:
 
-  /// Pointer to FEProblem
-  FEProblem * _bnd_feproblem;
+  /// Pointer to FEProblemBase
+  FEProblemBase * _bnd_feproblem;
 
   /// Point to mesh
   MooseMesh * _bnd_mesh;
@@ -187,7 +187,7 @@ private:
   /// Flag for allowing dual restriction with BlockRestrictable
   const bool _bnd_dual_restrictable;
 
-  /// Invalid BoundaryID for case when FEProblem
+  /// Invalid BoundaryID for case when FEProblemBase
   const BoundaryID _invalid_boundary_id;
 
   /// An empty set for referencing when block_ids is not included

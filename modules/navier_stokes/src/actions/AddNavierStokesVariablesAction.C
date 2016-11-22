@@ -52,7 +52,7 @@ AddNavierStokesVariablesAction::act()
   FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                  Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
 
-  // Add the variables to the FEProblem
+  // Add the variables to the FEProblemBase
   for (unsigned int i = 0; i < _vars.size(); ++i)
     _problem->addVariable(_vars[i], fe_type, _scaling[i]);
 

@@ -31,13 +31,13 @@ void
 SteadyWithNull::init()
 {
   Steady::init();
-  NumericVector<Number> * to_vector1 = &_problem.getNonlinearSystem().getVector("NullSpace_0");
+  NumericVector<Number> * to_vector1 = &_problem.getNonlinearSystemBase().getVector("NullSpace_0");
   const NumericVector<Number> * from_vector = _problem.getAuxiliarySystem().currentSolution();
   *to_vector1 = *from_vector;
   if (_problem.subspaceDim("TransposeNullSpace") > 0)
   {
-    NumericVector<Number> * to_vector2 = &_problem.getNonlinearSystem().getVector("TransposeNullSpace_0");
+    NumericVector<Number> * to_vector2 = &_problem.getNonlinearSystemBase().getVector("TransposeNullSpace_0");
     *to_vector2 = *from_vector;
   }
-  _problem.getNonlinearSystem().update();
+  _problem.getNonlinearSystemBase().update();
 }

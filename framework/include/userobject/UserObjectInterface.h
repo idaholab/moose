@@ -71,8 +71,8 @@ private:
   /// Parameters of the object with this interface
   const InputParameters & _uoi_params;
 
-  /// Reference to the FEProblem instance
-  FEProblem & _uoi_feproblem;
+  /// Reference to the FEProblemBase instance
+  FEProblemBase & _uoi_feproblem;
 
   /// Thread ID
   THREAD_ID _uoi_tid;

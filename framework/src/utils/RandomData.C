@@ -19,7 +19,7 @@
 
 const unsigned int MASTER = std::numeric_limits<unsigned int>::max();
 
-RandomData::RandomData(FEProblem &problem, const RandomInterface & random_interface) :
+RandomData::RandomData(FEProblemBase &problem, const RandomInterface & random_interface) :
     _rd_problem(problem),
     _rd_mesh(problem.mesh()),
     _is_nodal(random_interface.isNodal()),

@@ -21,7 +21,7 @@
 // libmesh includes
 #include "libmesh/sparse_matrix.h"
 
-ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(FEProblem & fe_problem,
+ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(FEProblemBase & fe_problem,
                                                                      const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
                                                                      SparseMatrix<Number> & jacobian) :
     ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),

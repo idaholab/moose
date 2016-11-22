@@ -21,10 +21,10 @@
 // libMesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblem & feproblem) :
+ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblemBase & feproblem) :
     ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(feproblem),
     _damping(1.0),
-    _nl(feproblem.getNonlinearSystem()),
+    _nl(feproblem.getNonlinearSystemBase()),
     _nodal_dampers(_nl.getNodalDamperWarehouse())
 {
 }

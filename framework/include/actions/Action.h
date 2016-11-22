@@ -25,7 +25,7 @@ class Action;
 class ActionWarehouse;
 class ActionFactory;
 class MooseMesh;
-class FEProblem;
+class FEProblemBase;
 class Executioner;
 class MooseApp;
 class Factory;
@@ -130,7 +130,7 @@ protected:
   MooseSharedPointer<MooseMesh> & _displaced_mesh;
 
   /// Convenience reference to a problem this action works on
-  MooseSharedPointer<FEProblem> & _problem;
+  MooseSharedPointer<FEProblemBase> & _problem;
 
   /// Convenience reference to an executioner
   MooseSharedPointer<Executioner> & _executioner;

@@ -80,8 +80,8 @@ protected:
    */
   void getAppInfo();
 
-  std::vector<FEProblem *> _to_problems;
-  std::vector<FEProblem *> _from_problems;
+  std::vector<FEProblemBase *> _to_problems;
+  std::vector<FEProblemBase *> _from_problems;
   std::vector<EquationSystems *> _to_es;
   std::vector<EquationSystems *> _from_es;
   std::vector<MooseMesh *> _to_meshes;

@@ -17,7 +17,6 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "SystemBase.h"
-#include "NonlinearSystem.h"
 #include "MooseVariable.h"
 
 // libMesh

@@ -23,7 +23,7 @@
 #include "NonlinearSystem.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 
 /**
  * Interface class ("Veneer") to provide generator methods for derivative
@@ -124,8 +124,8 @@ private:
   // check if the speciified variable name is not the variable this kernel is acting on (always true for any other type of object)
   bool isNotKernelVariable(const VariableName & name);
 
-  /// Reference to FEProblem
-  FEProblem & _dmi_fe_problem;
+  /// Reference to FEProblemBase
+  FEProblemBase & _dmi_fe_problem;
 
 };
 
@@ -133,7 +133,7 @@ private:
 template<class T>
 DerivativeMaterialInterface<T>::DerivativeMaterialInterface(const InputParameters & parameters) :
     T(parameters),
-    _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem"))
+    _dmi_fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
 }
 
@@ -319,7 +319,7 @@ DerivativeMaterialInterface<T>::validateCoupling(const MaterialPropertyName & ba
   std::vector<VariableName> missing;
 
   // iterate over all variables in the both the non-linear and auxiliary system (optional)
-  validateCouplingHelper<U>(prop_name, c, _dmi_fe_problem.getNonlinearSystem().system(), missing);
+  validateCouplingHelper<U>(prop_name, c, _dmi_fe_problem.getNonlinearSystemBase().system(), missing);
   if (validate_aux)
     validateCouplingHelper<U>(prop_name, c, _dmi_fe_problem.getAuxiliarySystem().system(), missing);
 

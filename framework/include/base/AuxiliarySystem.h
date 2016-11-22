@@ -25,7 +25,7 @@
 
 // Forward declarations
 class AuxKernel;
-class FEProblem;
+class FEProblemBase;
 class TimeIntegrator;
 class AuxScalarKernel;
 class AuxKernel;
@@ -43,7 +43,7 @@ template <typename T> class NumericVector;
 class AuxiliarySystem : public SystemBase
 {
 public:
-  AuxiliarySystem(FEProblem & subproblem, const std::string & name);
+  AuxiliarySystem(FEProblemBase & subproblem, const std::string & name);
   virtual ~AuxiliarySystem();
 
   virtual void init() override;
@@ -147,7 +147,7 @@ protected:
   void computeNodalVars(ExecFlagType type);
   void computeElementalVars(ExecFlagType type);
 
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
 
   TransientExplicitSystem & _sys;
 

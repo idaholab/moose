@@ -28,7 +28,7 @@ InputParameters validParams<RandomInterface>()
   return params;
 }
 
-RandomInterface::RandomInterface(const InputParameters & parameters, FEProblem & problem, THREAD_ID tid, bool is_nodal) :
+RandomInterface::RandomInterface(const InputParameters & parameters, FEProblemBase & problem, THREAD_ID tid, bool is_nodal) :
     _random_data(NULL),
     _generator(NULL),
     _ri_problem(problem),

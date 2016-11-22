@@ -12,7 +12,7 @@
 template<>
 InputParameters validParams<RichardsMultiphaseProblem>()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = validParams<FEProblemBase>();
   params.addRequiredParam<NonlinearVariableName>("bounded_var", "Variable whose value will be constrained to be greater than lower_var");
   params.addRequiredParam<NonlinearVariableName>("lower_var", "Variable that acts as a lower bound to bounded_var.  It will not be constrained during the solution procedure");
   return params;
@@ -52,7 +52,7 @@ RichardsMultiphaseProblem::initialSetup()
   _bounded_var_num = bounded.number();
   _lower_var_num = lower.number();
 
-  FEProblem::initialSetup();
+  FEProblemBase::initialSetup();
 }
 
 
@@ -67,10 +67,10 @@ RichardsMultiphaseProblem::updateSolution(NumericVector<Number>& vec_solution, N
 {
   bool updatedSolution = false;  // this gets set to true if we needed to enforce the bound at any node
 
-  unsigned int sys_num = getNonlinearSystem().number();
+  unsigned int sys_num = getNonlinearSystemBase().number();
 
   // For parallel procs i believe that i have to use local_nodes_begin, rather than just nodes_begin
-  // _mesh comes from SystemBase (_mesh = getNonlinearSystem().subproblem().mesh(), and subproblem is this object)
+  // _mesh comes from SystemBase (_mesh = getNonlinearSystemBase().subproblem().mesh(), and subproblem is this object)
   MeshBase::node_iterator nit = _mesh.getMesh().local_nodes_begin();
   const MeshBase::node_iterator nend = _mesh.getMesh().local_nodes_end();
 

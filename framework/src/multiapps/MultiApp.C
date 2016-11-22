@@ -92,7 +92,7 @@ MultiApp::MultiApp(const InputParameters & parameters):
     MooseObject(parameters),
     SetupInterface(this),
     Restartable(parameters, "MultiApps"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type")) : _fe_problem.getMooseApp().type()),
     _input_files(getParam<std::vector<FileName> >("input_files")),
     _total_num_apps(0),
@@ -298,7 +298,7 @@ MultiApp::getBoundingBox(unsigned int app)
   if (!_has_an_app)
     mooseError("No app for " << name() << " on processor " << _orig_rank);
 
-  FEProblem & problem = appProblem(app);
+  FEProblemBase & problem = appProblemBase(app);
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
@@ -341,8 +341,8 @@ MultiApp::getBoundingBox(unsigned int app)
   return MeshTools::BoundingBox(shifted_min, shifted_max);
 }
 
-FEProblem &
-MultiApp::appProblem(unsigned int app)
+FEProblemBase &
+MultiApp::appProblemBase(unsigned int app)
 {
   if (!_has_an_app)
     mooseError("No app for " << name() << " on processor " << _orig_rank);
@@ -352,13 +352,32 @@ MultiApp::appProblem(unsigned int app)
   return _apps[local_app]->getExecutioner()->feProblem();
 }
 
+FEProblem &
+MultiApp::problem()
+{
+  mooseDeprecated("MultiApp::problem() is deprecated, call MultiApp::problemBase() instead.\n");
+  return dynamic_cast<FEProblem&>(_fe_problem);
+}
+
+FEProblem &
+MultiApp::appProblem(unsigned int app)
+{
+  mooseDeprecated("MultiApp::appProblem() is deprecated, call MultiApp::appProblemBase() instead.\n");
+  if (!_has_an_app)
+    mooseError("No app for " << name() << " on processor " << _orig_rank);
+
+  unsigned int local_app = globalAppToLocal(app);
+
+  return dynamic_cast<FEProblem &>(_apps[local_app]->getExecutioner()->feProblem());
+}
+
 const UserObject &
 MultiApp::appUserObjectBase(unsigned int app, const std::string & name)
 {
   if (!_has_an_app)
     mooseError("No app for " << MultiApp::name() << " on processor " << _orig_rank);
 
-  return appProblem(app).getUserObjectBase(name);
+  return appProblemBase(app).getUserObjectBase(name);
 }
 
 Real
@@ -367,13 +386,13 @@ MultiApp::appPostprocessorValue(unsigned int app, const std::string & name)
   if (!_has_an_app)
     mooseError("No app for " << MultiApp::name() << " on processor " << _orig_rank);
 
-  return appProblem(app).getPostprocessorValue(name);
+  return appProblemBase(app).getPostprocessorValue(name);
 }
 
 NumericVector<Number> &
 MultiApp::appTransferVector(unsigned int app, std::string /*var_name*/)
 {
-  return appProblem(app).getAuxiliarySystem().solution();
+  return appProblemBase(app).getAuxiliarySystem().solution();
 }
 
 bool
@@ -455,7 +474,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
     full_name = multiapp_name.str();
 
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
-  app_params.set<FEProblem *>("_parent_fep") = &_fe_problem;
+  app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
   app_params.set<MooseSharedPointer<CommandLine> >("_command_line") = _app.commandLine();
   MooseApp * app = AppFactory::instance().create(_app_type, full_name, app_params, _my_comm);
   _apps[i] = app;
@@ -491,7 +510,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // This means we have a backup of this app that we need to give to it
   // Note: This won't do the restoration immediately.  The Backup
   // will be cached by the MooseApp object so that it can be used
-  // during FEProblem::initialSetup() during runInputFile()
+  // during FEProblemBase::initialSetup() during runInputFile()
   if (_app.isRestarting() || _app.isRecovering())
     app->restore(_backups[i]);
 

@@ -72,7 +72,7 @@ MultiAppUserObjectTransfer::execute()
           MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
 
           // Loop over the master nodes and set the value of the variable
-          System * to_sys = find_sys(_multi_app->appProblem(i).es(), _to_var_name);
+          System * to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name);
 
           unsigned int sys_num = to_sys->number();
           unsigned int var_num = to_sys->variable_number(_to_var_name);
@@ -81,16 +81,16 @@ MultiAppUserObjectTransfer::execute()
 
           MeshBase * mesh = NULL;
 
-          if (_displaced_target_mesh && _multi_app->appProblem(i).getDisplacedProblem())
+          if (_displaced_target_mesh && _multi_app->appProblemBase(i).getDisplacedProblem())
           {
-            mesh = &_multi_app->appProblem(i).getDisplacedProblem()->mesh().getMesh();
+            mesh = &_multi_app->appProblemBase(i).getDisplacedProblem()->mesh().getMesh();
           }
           else
-            mesh = &_multi_app->appProblem(i).mesh().getMesh();
+            mesh = &_multi_app->appProblemBase(i).mesh().getMesh();
 
           bool is_nodal = to_sys->variable_type(var_num).family == LAGRANGE;
 
-          const UserObject & user_object = _multi_app->problem().getUserObjectBase(_user_object_name);
+          const UserObject & user_object = _multi_app->problemBase().getUserObjectBase(_user_object_name);
 
           if (is_nodal)
           {
@@ -155,7 +155,7 @@ MultiAppUserObjectTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      FEProblem & to_problem = _multi_app->problem();
+      FEProblemBase & to_problem = _multi_app->problemBase();
       MooseVariable & to_var = to_problem.getVariable(0, _to_var_name);
       SystemBase & to_system_base = to_var.sys();
 

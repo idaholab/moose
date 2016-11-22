@@ -24,7 +24,7 @@ InputParameters validParams<TimestepSize>()
 
 TimestepSize::TimestepSize(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    _feproblem(dynamic_cast<FEProblem &>(_subproblem))
+    _feproblem(dynamic_cast<FEProblemBase &>(_subproblem))
 {}
 
 Real

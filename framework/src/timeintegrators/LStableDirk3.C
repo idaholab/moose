@@ -95,7 +95,7 @@ LStableDirk3::solve()
     _fe_problem.time() = time_old + _c[_stage-1]*_dt;
 
     // Do the solve
-    _fe_problem.getNonlinearSystem().sys().solve();
+    _fe_problem.getNonlinearSystemBase().system().solve();
   }
 }
 

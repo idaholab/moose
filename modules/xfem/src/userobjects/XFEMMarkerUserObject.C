@@ -27,9 +27,9 @@ XFEMMarkerUserObject::XFEMMarkerUserObject(const InputParameters & parameters) :
     _mesh(_subproblem.mesh()),
     _secondary_cracks(getParam<bool>("secondary_cracks"))
 {
-  FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
+  FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
   if (fe_problem == NULL)
-    mooseError("Problem casting _subproblem to FEProblem in XFEMMarkerUserObject");
+    mooseError("Problem casting _subproblem to FEProblemBase in XFEMMarkerUserObject");
   _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
   if (_xfem == NULL)
     mooseError("Problem casting to XFEM in XFEMMarkerUserObject");

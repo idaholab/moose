@@ -26,11 +26,11 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeDiracThread::ComputeDiracThread(FEProblem & feproblem,
+ComputeDiracThread::ComputeDiracThread(FEProblemBase & feproblem,
                                        SparseMatrix<Number> * jacobian) :
     ThreadedElementLoop<DistElemRange>(feproblem),
     _jacobian(jacobian),
-    _nl(feproblem.getNonlinearSystem()),
+    _nl(feproblem.getNonlinearSystemBase()),
     _dirac_kernels(_nl.getDiracKernelWarehouse())
 {}
 

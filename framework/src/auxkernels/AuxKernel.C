@@ -65,7 +65,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters) :
     MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     PostprocessorInterface(this),
     DependencyResolverInterface(),
-    RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
+    RandomInterface(parameters, *parameters.get<FEProblemBase *>("_fe_problem_base"), parameters.get<THREAD_ID>("_tid"), parameters.get<AuxiliarySystem *>("_aux_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<AuxVariableName>("variable")).isNodal()),
     GeometricSearchInterface(this),
     Restartable(parameters, "AuxKernels"),
     ZeroInterface(parameters),

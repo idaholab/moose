@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "GeneratedMesh.h"
-#include "NonlinearSystem.h"
 
 // libMesh includes
 #include "libmesh/getpot.h"

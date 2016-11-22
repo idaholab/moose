@@ -46,10 +46,10 @@ ReferenceResidualProblem::~ReferenceResidualProblem()
 void
 ReferenceResidualProblem::initialSetup()
 {
-  NonlinearSystem & nonlinear_sys = getNonlinearSystem();
+  NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
   AuxiliarySystem & aux_sys = getAuxiliarySystem();
-  TransientNonlinearImplicitSystem &s = nonlinear_sys.sys();
-  TransientExplicitSystem &as = aux_sys.sys();
+  System & s = nonlinear_sys.system();
+  TransientExplicitSystem & as = aux_sys.sys();
 
   if (_solnVarNames.size() > 0 && _solnVarNames.size() != s.n_vars())
     mooseError("In ReferenceResidualProblem, size of solution_variables (" \
@@ -94,7 +94,7 @@ ReferenceResidualProblem::initialSetup()
       mooseError("Could not find variable '" << _refResidVarNames[i] << "' in auxiliary system");
   }
 
-  FEProblem::initialSetup();
+  FEProblemBase::initialSetup();
 }
 
 void
@@ -105,19 +105,19 @@ ReferenceResidualProblem::timestepSetup()
     _refResid[i] = 0.0;
     _resid[i] = 0.0;
   }
-  FEProblem::timestepSetup();
+  FEProblemBase::timestepSetup();
 }
 
 void
 ReferenceResidualProblem::updateReferenceResidual()
 {
-  NonlinearSystem & nonlinear_sys = getNonlinearSystem();
+  NonlinearSystemBase & nonlinear_sys = getNonlinearSystemBase();
   AuxiliarySystem & aux_sys = getAuxiliarySystem();
-  TransientNonlinearImplicitSystem &s = nonlinear_sys.sys();
-  TransientExplicitSystem &as = aux_sys.sys();
+  System & s = nonlinear_sys.system();
+  TransientExplicitSystem & as = aux_sys.sys();
 
   for (unsigned int i=0; i<_solnVars.size(); ++i)
-    _resid[i] = s.calculate_norm(*s.rhs,_solnVars[i],DISCRETE_L2);
+    _resid[i] = s.calculate_norm(nonlinear_sys.RHS(),_solnVars[i],DISCRETE_L2);
 
   for (unsigned int i=0; i<_refResidVars.size(); ++i)
     _refResid[i] = as.calculate_norm(*as.current_local_solution,_refResidVars[i],DISCRETE_L2);
@@ -164,7 +164,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string &msg,
                << std::endl;
   }
 
-  NonlinearSystem & system = getNonlinearSystem();
+  NonlinearSystemBase & system = getNonlinearSystemBase();
   MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
   std::stringstream oss;
 

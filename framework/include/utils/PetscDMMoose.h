@@ -30,13 +30,13 @@
 #include <string>
 
 // Forward declarations
-class NonlinearSystem;
+class NonlinearSystemBase;
 
 extern PetscErrorCode DMMooseRegisterAll();
-extern PetscErrorCode DMCreateMoose(MPI_Comm,NonlinearSystem&,DM*);
+extern PetscErrorCode DMCreateMoose(MPI_Comm,NonlinearSystemBase&,DM*);
 extern PetscErrorCode DMMooseReset(DM);
-extern PetscErrorCode DMMooseSetNonlinearSystem(DM,NonlinearSystem&);
-extern PetscErrorCode DMMooseGetNonlinearSystem(DM,NonlinearSystem*&);
+extern PetscErrorCode DMMooseSetNonlinearSystem(DM, NonlinearSystemBase &);
+extern PetscErrorCode DMMooseGetNonlinearSystem(DM, NonlinearSystemBase *&);
 extern PetscErrorCode DMMooseGetBlocks(DM,std::vector<std::string>&);
 extern PetscErrorCode DMMooseGetVariables(DM,std::vector<std::string>&);
 extern PetscErrorCode DMMooseGetSides(DM,std::set<std::string>&);

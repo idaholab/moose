@@ -19,7 +19,7 @@
 #include "MoosePreconditioner.h"
 
 // Forward declarations
-class NonlinearSystem;
+class NonlinearSystemBase;
 class FieldSplitPreconditioner;
 
 template<>
@@ -43,7 +43,7 @@ public:
 
 protected:
   /// The nonlinear system this FSP is associated with (convenience reference)
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
 };
 
 #endif //FIELDSPLITPRECONDITIONER_H

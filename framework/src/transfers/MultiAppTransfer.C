@@ -33,7 +33,7 @@ InputParameters validParams<MultiAppTransfer>()
 
   params.addRequiredParam<MooseEnum>("direction", MultiAppTransfer::directions(), "Whether this Transfer will be 'to' or 'from' a MultiApp.");
 
-  // MultiAppTransfers by default will execute with their associated MultiApp. These flags will be added by FEProblem when the transfer is added.
+  // MultiAppTransfers by default will execute with their associated MultiApp. These flags will be added by FEProblemBase when the transfer is added.
   MultiMooseEnum multi_transfer_execute_on(params.get<MultiMooseEnum>("execute_on").getRawNames() + " same_as_multiapp", "same_as_multiapp");
   params.set<MultiMooseEnum>("execute_on") = multi_transfer_execute_on;
 
@@ -71,7 +71,7 @@ void
 MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 {
   for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-    if (_multi_app->hasLocalApp(i) && !find_sys(_multi_app->appProblem(i).es(), var_name))
+    if (_multi_app->hasLocalApp(i) && !find_sys(_multi_app->appProblemBase(i).es(), var_name))
       mooseError("Cannot find variable " << var_name << " for " << name() << " Transfer");
 }
 
@@ -106,25 +106,25 @@ MultiAppTransfer::getAppInfo()
   switch (_direction)
   {
     case TO_MULTIAPP:
-      _from_problems.push_back(&_multi_app->problem());
+      _from_problems.push_back(&_multi_app->problemBase());
       _from_positions.push_back(Point(0., 0., 0.));
       for (unsigned int i_app = 0; i_app < _multi_app->numGlobalApps(); i_app++)
       {
         if (!_multi_app->hasLocalApp(i_app)) continue;
         _local2global_map.push_back(i_app);
-        _to_problems.push_back(&_multi_app->appProblem(i_app));
+        _to_problems.push_back(&_multi_app->appProblemBase(i_app));
         _to_positions.push_back(_multi_app->position(i_app));
       }
       break;
 
     case FROM_MULTIAPP:
-      _to_problems.push_back(&_multi_app->problem());
+      _to_problems.push_back(&_multi_app->problemBase());
       _to_positions.push_back(Point(0., 0., 0.));
       for (unsigned int i_app = 0; i_app < _multi_app->numGlobalApps(); i_app++)
       {
         if (!_multi_app->hasLocalApp(i_app)) continue;
         _local2global_map.push_back(i_app);
-        _from_problems.push_back(&_multi_app->appProblem(i_app));
+        _from_problems.push_back(&_multi_app->appProblemBase(i_app));
         _from_positions.push_back(_multi_app->position(i_app));
       }
       break;

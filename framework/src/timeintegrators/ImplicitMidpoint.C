@@ -63,14 +63,14 @@ ImplicitMidpoint::solve()
   _console << "1st stage\n";
   _stage = 1;
   _fe_problem.time() = time_half;
-  _fe_problem.getNonlinearSystem().sys().solve();
+  _fe_problem.getNonlinearSystemBase().system().solve();
 
   // Compute second stage
   _fe_problem.initPetscOutput();
   _console << "2nd stage\n";
   _stage = 2;
   _fe_problem.time() = time_new;
-  _fe_problem.getNonlinearSystem().sys().solve();
+  _fe_problem.getNonlinearSystemBase().system().solve();
 }
 
 
@@ -115,6 +115,3 @@ ImplicitMidpoint::postStep(NumericVector<Number> & residual)
   else
     mooseError("ImplicitMidpoint::postStep(): _stage = " << _stage << ", only _stage = 1, 2 is allowed.");
 }
-
-
-

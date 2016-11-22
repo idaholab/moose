@@ -21,7 +21,7 @@
 
 #include <map>
 
-class FEProblem;
+class FEProblemBase;
 
 class VectorPostprocessorData : public Restartable
 {
@@ -29,7 +29,7 @@ public:
   /**
    * Class constructor
    */
-  VectorPostprocessorData(FEProblem & fe_problem);
+  VectorPostprocessorData(FEProblemBase & fe_problem);
 
   struct VectorPostprocessorState
   {

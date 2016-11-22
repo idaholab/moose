@@ -20,7 +20,7 @@
 #include "Restartable.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class MoosePreconditioner;
 
 namespace libMesh
@@ -53,7 +53,7 @@ public:
 
 protected:
   /// Subproblem this preconditioner is part of
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
 };
 
 #endif /* MOOSEPRECONDITIONER_H */

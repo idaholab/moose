@@ -21,8 +21,8 @@
 
 // Forward declarations
 class Predictor;
-class FEProblem;
-class NonlinearSystem;
+class FEProblemBase;
+class NonlinearSystemBase;
 
 namespace libMesh
 {
@@ -51,8 +51,8 @@ public:
   virtual NumericVector<Number> & solutionPredictor() { return _solution_predictor; }
 
 protected:
-  FEProblem & _fe_problem;
-  NonlinearSystem & _nl;
+  FEProblemBase & _fe_problem;
+  NonlinearSystemBase & _nl;
 
   int & _t_step;
   Real & _dt;

@@ -21,7 +21,7 @@
 #include "libmesh/node_range.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class AuxiliarySystem;
 class NodalKernel;
 
@@ -35,7 +35,7 @@ template <typename T> class SparseMatrix;
 class ComputeNodalKernelJacobiansThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelJacobiansThread(FEProblem & fe_problem,
+  ComputeNodalKernelJacobiansThread(FEProblemBase & fe_problem,
                                     const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
                                     SparseMatrix<Number> & jacobian);
 

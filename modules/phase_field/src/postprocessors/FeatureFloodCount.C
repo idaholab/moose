@@ -150,7 +150,7 @@ void
 FeatureFloodCount::initialSetup()
 {
   // Get a pointer to the PeriodicBoundaries buried in libMesh
-  _pbs = _fe_problem.getNonlinearSystem().dofMap().get_periodic_boundaries();
+  _pbs = _fe_problem.getNonlinearSystemBase().dofMap().get_periodic_boundaries();
 
   meshChanged();
 

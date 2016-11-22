@@ -32,7 +32,7 @@ private:
   Point getCenterPoint(unsigned int grain);
 
   MooseMesh & _mesh;
-  NonlinearSystem & _nl;
+
   const EBSDReader & _ebsd_reader;
 
   bool _consider_phase;

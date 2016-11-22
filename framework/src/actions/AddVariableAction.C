@@ -143,7 +143,7 @@ AddVariableAction::addVariable(std::string & var_name)
 
   if (getParam<bool>("eigen"))
   {
-    MooseEigenSystem & esys(static_cast<MooseEigenSystem &>(_problem->getNonlinearSystem()));
+    MooseEigenSystem & esys(static_cast<MooseEigenSystem &>(_problem->getNonlinearSystemBase()));
     esys.markEigenVariable(var_name);
   }
 }

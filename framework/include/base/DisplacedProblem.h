@@ -29,7 +29,7 @@ class AssemblyData;
 class DisplacedProblem;
 class MooseMesh;
 class Assembly;
-class FEProblem;
+class FEProblemBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -216,7 +216,7 @@ public:
   void undisplaceMesh();
 
 protected:
-  FEProblem & _mproblem;
+  FEProblemBase & _mproblem;
   MooseMesh & _mesh;
   EquationSystems _eq;
   /// reference mesh

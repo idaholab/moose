@@ -226,14 +226,14 @@ XFEM::update(Real time)
   return mesh_changed;
 }
 
-void XFEM::initSolution(NonlinearSystem & nl, AuxiliarySystem & /*aux*/)
+void XFEM::initSolution(NonlinearSystemBase & nl, AuxiliarySystem & /*aux*/)
 {
   const std::vector<MooseVariable *> & nl_vars = nl.getVariables(0); //TODO pass in real thread id?
 
   nl.serializeSolution();
 //  NumericVector<Number> & c_solution = *nl.sys().solution;
-  NumericVector<Number> & current_solution = *nl.sys().current_local_solution;
-  NumericVector<Number> & old_solution = *nl.sys().old_local_solution;
+  NumericVector<Number> & current_solution = *nl.system().current_local_solution;
+  NumericVector<Number> & old_solution = nl.solutionOld();
 
   for (std::map<unique_id_type, unique_id_type>::iterator nit = _new_node_to_parent_node.begin();
        nit != _new_node_to_parent_node.end(); ++nit)

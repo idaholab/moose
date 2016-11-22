@@ -130,8 +130,8 @@ protected:
   /// Reference to SubProblem
   SubProblem & _subproblem;
 
-  /// Reference to FEProblem
-  FEProblem & _fe_problem;
+  /// Reference to FEProblemBase
+  FEProblemBase & _fe_problem;
 
   /// Reference to SystemBase
   SystemBase & _sys;

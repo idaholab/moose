@@ -13,7 +13,7 @@
 /****************************************************************/
 
 #include "LStableDirk4.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
@@ -96,7 +96,7 @@ LStableDirk4::solve()
     _fe_problem.time() = time_old + _c[_stage-1]*_dt;
 
     // Do the solve
-    _fe_problem.getNonlinearSystem().sys().solve();
+    _fe_problem.getNonlinearSystemBase().system().solve();
   }
 }
 

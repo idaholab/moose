@@ -39,7 +39,7 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
   if (n_processors() > 1)
     mooseError("Can't use the Finite Difference Preconditioner in parallel yet!");
 
-  NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   unsigned int n_vars = nl.nVariables();
 
   CouplingMatrix * cm = new CouplingMatrix(n_vars);

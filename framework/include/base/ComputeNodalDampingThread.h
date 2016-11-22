@@ -20,13 +20,13 @@
 #include "MooseObjectWarehouse.h"
 
 // Forward declarations
-class NonlinearSystem;
+class NonlinearSystemBase;
 class NodalDamper;
 
 class ComputeNodalDampingThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalDampingThread(FEProblem & feproblem);
+  ComputeNodalDampingThread(FEProblemBase & feproblem);
 
   // Splitting Constructor
   ComputeNodalDampingThread(ComputeNodalDampingThread & x, Threads::split split);
@@ -41,7 +41,7 @@ public:
 
 protected:
   Real _damping;
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
   const MooseObjectWarehouse<NodalDamper> & _nodal_dampers;
 };
 

@@ -27,8 +27,8 @@ InputParameters validParams<ContactSlipDamper>()
 
 ContactSlipDamper::ContactSlipDamper(const InputParameters & parameters) :
     GeneralDamper(parameters),
-    _aux_sys(parameters.get<FEProblem *>("_fe_problem")->getAuxiliarySystem()),
-    _displaced_problem(parameters.get<FEProblem *>("_fe_problem")->getDisplacedProblem()),
+    _aux_sys(parameters.get<FEProblemBase *>("_fe_problem_base")->getAuxiliarySystem()),
+    _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
     _num_contact_nodes(0),
     _num_sticking(0),
     _num_slipping(0),
