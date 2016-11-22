@@ -12,17 +12,17 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ShapeElementUserObject.h"
+#include "ShapeSideUserObject.h"
 
 template<>
-InputParameters validParams<ShapeElementUserObject>()
+InputParameters validParams<ShapeSideUserObject>()
 {
-  InputParameters params = validParams<ElementUserObject>();
-  params += ShapeUserObject<ElementUserObject>::validParams();
+  InputParameters params = validParams<SideUserObject>();
+  params += ShapeUserObject<SideUserObject>::validParams();
   return params;
 }
 
-ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameters) :
-    ShapeUserObject<ElementUserObject>(parameters, ShapeType::Element)
+ShapeSideUserObject::ShapeSideUserObject(const InputParameters & parameters) :
+    ShapeUserObject<SideUserObject>(parameters, ShapeType::Side)
 {
 }

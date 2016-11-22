@@ -11,18 +11,30 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+#ifndef DRIFTDIFFUSIONFLUXAUX_H_
+#define DRIFTDIFFUSIONFLUXAUX_H_
 
-#include "ShapeElementUserObject.h"
+#include "AuxKernel.h"
+
+class DriftDiffusionFluxAux;
 
 template<>
-InputParameters validParams<ShapeElementUserObject>()
-{
-  InputParameters params = validParams<ElementUserObject>();
-  params += ShapeUserObject<ElementUserObject>::validParams();
-  return params;
-}
+InputParameters validParams<DriftDiffusionFluxAux>();
 
-ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameters) :
-    ShapeUserObject<ElementUserObject>(parameters, ShapeType::Element)
+class DriftDiffusionFluxAux : public AuxKernel
 {
-}
+public:
+  DriftDiffusionFluxAux(const InputParameters & parameters);
+
+protected:
+  virtual Real computeValue();
+
+private:
+  const Real _sgn;
+  const VariableGradient & _grad_potential;
+  const VariableValue & _u;
+  const VariableGradient & _grad_u;
+  const int _component;
+};
+
+#endif //DRIFTDIFFUSIONFLUXAUX_H
