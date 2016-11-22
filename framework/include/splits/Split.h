@@ -45,7 +45,7 @@ class Split :
     SplittingTypeSchur
   };
 
-  FEProblemBase& _fe_problem;
+  FEProblemBase & _fe_problem;
 
   /// "Variables Split operates on
   std::vector<NonlinearVariableName> _vars;

@@ -35,34 +35,32 @@ namespace Moose {
 
     p->computeJacobian(*eigen_system.solution.get(), *eigen_system.matrix_A);
 #else
-    mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
+    mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libmesh\n");
 #endif /* LIBMESH_HAVE_SLEPC */
   }
 }
 
 
-NonlinearEigenSystem::NonlinearEigenSystem(FEProblemBase & fe_problem, const std::string & name) :
+NonlinearEigenSystem::NonlinearEigenSystem(FEProblemBase & fe_problem, const std::string & name)
 #if LIBMESH_HAVE_SLEPC
-  NonlinearSystemBase(fe_problem, fe_problem.es().add_system<TransientEigenSystem>(name), name),
-  _transient_sys(fe_problem.es().get_system<TransientEigenSystem>(name))
-#else
-  NonlinearSystemBase(fe_problem, fe_problem.es().add_system<TransientBaseSystem>(name), name),
-  _transient_sys(fe_problem.es().get_system<TransientBaseSystem>(name))
+    : NonlinearSystemBase(fe_problem, fe_problem.es().add_system<TransientEigenSystem>(name), name),
+    _transient_sys(fe_problem.es().get_system<TransientEigenSystem>(name))
 #endif /* LIBMESH_HAVE_SLEPC */
 {
-  #ifndef LIBMESH_HAVE_SLEPC
-    mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
-  #endif /* LIBMESH_HAVE_SLEPC */
+#if LIBMESH_HAVE_SLEPC
   // Give the system a pointer to the matrix assembly
   // function defined below.
   sys().attach_assemble_function(Moose::assemble_matrix);
+#else
+  mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libmesh\n");
+#endif /* LIBMESH_HAVE_SLEPC */
 }
 
 NonlinearEigenSystem::~NonlinearEigenSystem()
 {
 }
 
-
+#if LIBMESH_HAVE_SLEPC
 void
 NonlinearEigenSystem::solve()
 {
@@ -106,8 +104,8 @@ NonlinearEigenSystem::getCurrentNonlinearIterationNumber()
 }
 
 
- NumericVector<Number> &
- NonlinearEigenSystem::RHS()
+NumericVector<Number> &
+NonlinearEigenSystem::RHS()
 {
   mooseError("did not implement yet \n");
   //return NULL;
@@ -120,3 +118,5 @@ NonlinearEigenSystem::nonlinearSolver()
   mooseError("did not implement yet \n");
   return NULL;
 }
+
+#endif /* LIBMESH_HAVE_SLEPC */

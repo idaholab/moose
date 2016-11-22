@@ -368,7 +368,7 @@ MultiApp::appProblem(unsigned int app)
 
   unsigned int local_app = globalAppToLocal(app);
 
-  return dynamic_cast<FEProblem&>(_apps[local_app]->getExecutioner()->feProblem());
+  return dynamic_cast<FEProblem &>(_apps[local_app]->getExecutioner()->feProblem());
 }
 
 const UserObject &

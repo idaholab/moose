@@ -54,9 +54,7 @@
 // problems
 #include "DisplacedProblem.h"
 #include "FEProblem.h"
-#if LIBMESH_HAVE_SLEPC
 #include "EigenProblem.h"
-#endif
 
 // kernels
 #include "TimeDerivative.h"
@@ -486,9 +484,7 @@ registerObjects(Factory & factory)
   // problems
   registerProblem(DisplacedProblem);
   registerProblem(FEProblem);
-#if LIBMESH_HAVE_SLEPC
   registerProblem(EigenProblem);
-#endif
 
   // kernels
   registerKernel(TimeDerivative);

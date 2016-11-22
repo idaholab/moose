@@ -31,10 +31,11 @@ EigenProblem::EigenProblem(const InputParameters & parameters) :
     FEProblemBase(parameters),
     _nl_eigen(new NonlinearEigenSystem(*this, "eigen0"))
 {
-#ifndef LIBMESH_HAVE_SLEPC
+#if LIBMESH_HAVE_SLEPC
+  _nl = _nl_eigen;
+#else
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
 #endif /* LIBMESH_HAVE_SLEPC */
-  _nl = _nl_eigen;
   _aux = new AuxiliarySystem(*this, "aux0");
 
   // Set necessary parametrs used in EigenSystem::solve(),

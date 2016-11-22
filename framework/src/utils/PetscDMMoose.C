@@ -554,13 +554,13 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
 
             // Sometime, we own nodes but do not own the elements the nodes connected to
             {
-              MeshBase::const_node_iterator       node_it  = dmm->_nl->sys().get_mesh().local_nodes_begin();
-              const MeshBase::const_node_iterator node_end = dmm->_nl->sys().get_mesh().local_nodes_end();
+              MeshBase::const_node_iterator       node_it  = dmm->_nl->system().get_mesh().local_nodes_begin();
+              const MeshBase::const_node_iterator node_end = dmm->_nl->system().get_mesh().local_nodes_end();
               bool is_on_current_block = false;
               for (; node_it != node_end; ++node_it)
               {
                 Node * node = *node_it;
-                const unsigned int n_comp = node->n_comp(dmm->_nl->sys().number(), v);
+                const unsigned int n_comp = node->n_comp(dmm->_nl->system().number(), v);
 
                 // skip it if no dof
                 if (!n_comp)
@@ -572,7 +572,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 {
                   // if one of incident elements belongs to a block, we consider
                   // the node lives in the block
-                  Elem & neighbor_elem = dmm->_nl->sys().get_mesh().elem_ref(elem_num);
+                  Elem & neighbor_elem = dmm->_nl->system().get_mesh().elem_ref(elem_num);
                   if (neighbor_elem.subdomain_id() == b)
                   {
                     is_on_current_block = true;
@@ -583,7 +583,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 if (!is_on_current_block)
                   continue;
 
-                const dof_id_type index = node->dof_number(dmm->_nl->sys().number(), v, 0);
+                const dof_id_type index = node->dof_number(dmm->_nl->system().number(), v, 0);
                 if (index >= dofmap.first_dof() && index < dofmap.end_dof())
                   indices.insert(index);
               }

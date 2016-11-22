@@ -30,12 +30,16 @@
  *
  * It is a part of FEProblemBase ;-)
  */
-class NonlinearEigenSystem : public NonlinearSystemBase
+class NonlinearEigenSystem
+#if LIBMESH_HAVE_SLEPC
+                            : public NonlinearSystemBase
+#endif /* LIBMESH_HAVE_SLEPC */
 {
 public:
   NonlinearEigenSystem(FEProblemBase & problem, const std::string & name);
   virtual ~NonlinearEigenSystem();
 
+#if LIBMESH_HAVE_SLEPC
   virtual void solve() override;
 
   /**
@@ -65,19 +69,9 @@ public:
 
   virtual NumericVector<Number> & solutionOlder() override { return *_transient_sys.older_local_solution; }
 
-#if LIBMESH_HAVE_SLEPC
   virtual TransientEigenSystem & sys() { return _transient_sys; }
-#else
-  virtual TransientBaseSystem & sys() { return _transient_sys; }
-#endif /* LIBMESH_HAVE_SLEPC */
-private:
-#if LIBMESH_HAVE_SLEPC
+protected:
   TransientEigenSystem & _transient_sys;
-#else
-  TransientBaseSystem & _transient_sys;
 #endif /* LIBMESH_HAVE_SLEPC */
 };
-
-
-
 #endif /* NONLINEAREIGENSYSTEM_H */

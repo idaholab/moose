@@ -42,7 +42,7 @@ public:
   virtual void outputStep(ExecFlagType type) override;
 
 protected:
-  NonlinearEigenSystem *_nl_eigen;
+  NonlinearEigenSystem * _nl_eigen;
 };
 
 #endif /* EIGENPROBLEM_H */

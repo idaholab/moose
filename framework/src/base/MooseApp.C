@@ -386,7 +386,7 @@ MooseApp::runInputFile()
 
   if (error_unused || warn_unused)
   {
-    MooseSharedPointer<FEProblemBase> fe_problem= _action_warehouse.problemBase();
+    MooseSharedPointer<FEProblemBase> fe_problem = _action_warehouse.problemBase();
     if (fe_problem.get() && name() == "main" && !getParam<bool>("minimal"))
     {
       // Check the CLI parameters
