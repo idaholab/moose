@@ -35,7 +35,7 @@ Steady::Steady(const InputParameters & parameters) :
     _time_step(_problem.timeStep()),
     _time(_problem.time())
 {
-  _problem.getNonlinearSystem().setDecomposition(_splitting);
+  _problem.getNonlinearSystemBase().setDecomposition(_splitting);
 
   if (!_restart_file_base.empty())
     _problem.setRestartFile(_restart_file_base);
@@ -126,6 +126,6 @@ void
 Steady::checkIntegrity()
 {
   // check to make sure that we don't have any time kernels in this simulation (Steady State)
-  if (_problem.getNonlinearSystem().containsTimeKernel())
+  if (_problem.getNonlinearSystemBase().containsTimeKernel())
     mooseError("You have specified time kernels in your steady state simulation");
 }

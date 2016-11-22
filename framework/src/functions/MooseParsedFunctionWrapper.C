@@ -15,7 +15,7 @@
 #include "MooseParsedFunctionWrapper.h"
 #include "FEProblem.h"
 
-MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblem & feproblem,
+MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblemBase & feproblem,
                                                      const std::string & function_str,
                                                      const std::vector<std::string> & vars,
                                                      const std::vector<std::string> & vals,

@@ -24,9 +24,9 @@ XFEMCutPlaneAux::XFEMCutPlaneAux(const InputParameters & parameters) :
     _quantity(Xfem::XFEM_CUTPLANE_QUANTITY(int(getParam<MooseEnum>("quantity")))),
     _plane_id(getParam<unsigned int>("plane_id"))
 {
-  FEProblem * fe_problem = dynamic_cast<FEProblem *>(&_subproblem);
+  FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
   if (fe_problem == NULL)
-    mooseError("Problem casting _subproblem to FEProblem in XFEMCutPlaneAux");
+    mooseError("Problem casting _subproblem to FEProblemBase in XFEMCutPlaneAux");
   _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
   if (_xfem == NULL)
     mooseError("Problem casting to XFEM in XFEMCutPlaneAux");

@@ -20,7 +20,7 @@
 #include "PetscOutput.h"
 
 // libMesh includes
-#include "libmesh/transient_system.h" // TransientNonlinearImplicitSystem typedef
+#include "libmesh/system.h"
 
 // Forward declerations
 class TopResidualDebugOutput;
@@ -94,7 +94,7 @@ protected:
   unsigned int _num_residuals;
 
   /// Reference to libMesh system
-  TransientNonlinearImplicitSystem & _sys;
+  System & _sys;
 };
 
 #endif // TOPRESIDUALDEBUGOUTPUT_H

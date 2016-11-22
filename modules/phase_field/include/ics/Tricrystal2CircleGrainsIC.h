@@ -41,8 +41,6 @@ public:
 
 protected:
   MooseMesh & _mesh;
-  /// A reference to the nonlinear system
-  NonlinearSystem & _nl;
 
   unsigned int _op_num;
   unsigned int _op_index;

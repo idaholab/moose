@@ -22,7 +22,7 @@
 
 #include <stdio.h>
 
-RestartableDataIO::RestartableDataIO(FEProblem & fe_problem) :
+RestartableDataIO::RestartableDataIO(FEProblemBase & fe_problem) :
     _fe_problem(fe_problem)
 {
   _in_file_handles.resize(libMesh::n_threads());
@@ -191,14 +191,14 @@ RestartableDataIO::deserializeRestartableData(const std::map<std::string, Restar
 void
 RestartableDataIO::serializeSystems(std::ostream & stream)
 {
-  storeHelper(stream, static_cast<SystemBase &>(_fe_problem.getNonlinearSystem()), NULL);
+  storeHelper(stream, static_cast<SystemBase &>(_fe_problem.getNonlinearSystemBase()), NULL);
   storeHelper(stream, static_cast<SystemBase &>(_fe_problem.getAuxiliarySystem()), NULL);
 }
 
 void
 RestartableDataIO::deserializeSystems(std::istream & stream)
 {
-  loadHelper(stream, static_cast<SystemBase &>(_fe_problem.getNonlinearSystem()), NULL);
+  loadHelper(stream, static_cast<SystemBase &>(_fe_problem.getNonlinearSystemBase()), NULL);
   loadHelper(stream, static_cast<SystemBase &>(_fe_problem.getAuxiliarySystem()), NULL);
 }
 

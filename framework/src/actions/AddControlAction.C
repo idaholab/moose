@@ -33,7 +33,7 @@ AddControlAction::AddControlAction(InputParameters parameters) :
 void
 AddControlAction::act()
 {
-  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem", _problem.get());
+  _moose_object_pars.addPrivateParam<FEProblemBase *>("_fe_problem_base", _problem.get());
   MooseSharedPointer<Control> control = _factory.create<Control>(_type, _name, _moose_object_pars);
   _problem->getControlWarehouse().addObject(control);
 }

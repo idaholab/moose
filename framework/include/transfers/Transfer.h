@@ -24,6 +24,7 @@
 // Forward declarations
 class Transfer;
 class SubProblem;
+class FEProblemBase;
 class FEProblem;
 class SystemBase;
 
@@ -75,7 +76,7 @@ public:
 protected:
 
   SubProblem & _subproblem;
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
   SystemBase & _sys;
 
   THREAD_ID _tid;

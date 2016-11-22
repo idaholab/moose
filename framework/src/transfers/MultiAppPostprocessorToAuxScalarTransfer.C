@@ -52,7 +52,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
     case TO_MULTIAPP:
     {
       // Extract the postprocessor that is being transferd
-      FEProblem & from_problem = _multi_app->problem();
+      FEProblemBase & from_problem = _multi_app->problemBase();
       Real pp_value = from_problem.getPostprocessorValue(_from_pp_name);
 
       // Loop through each of the sub apps
@@ -60,7 +60,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
         if (_multi_app->hasLocalApp(i))
         {
           // Get reference to the AuxVariable where the postprocessor will be passed
-          MooseVariableScalar & scalar =  _multi_app->appProblem(i).getScalarVariable(_tid, _to_aux_name);
+          MooseVariableScalar & scalar =  _multi_app->appProblemBase(i).getScalarVariable(_tid, _to_aux_name);
 
           scalar.reinit();
 
@@ -81,7 +81,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
       unsigned int num_apps = _multi_app->numGlobalApps();
 
       // The AuxVariable for storing the postprocessor values from the sub app
-      MooseVariableScalar & scalar =  _multi_app->problem().getScalarVariable(_tid, _to_aux_name);
+      MooseVariableScalar & scalar =  _multi_app->problemBase().getScalarVariable(_tid, _to_aux_name);
 
       // Ensure that the variable is up to date
       scalar.reinit();
@@ -97,7 +97,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
         if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
           // Note: This can't be done using MooseScalarVariable::insert() because different processors will be setting dofs separately.
-          scalar.sys().solution().set(dof[i], _multi_app->appProblem(i).getPostprocessorValue(_from_pp_name));
+          scalar.sys().solution().set(dof[i], _multi_app->appProblemBase(i).getPostprocessorValue(_from_pp_name));
 
       scalar.sys().solution().close();
 

@@ -16,7 +16,7 @@
 #include "FEProblem.h"
 #include "InitialCondition.h"
 
-ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblem & fe_problem) :
+ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblemBase & fe_problem) :
     _fe_problem(fe_problem)
 {
 }

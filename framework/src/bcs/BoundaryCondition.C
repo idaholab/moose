@@ -48,7 +48,7 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool no
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),

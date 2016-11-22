@@ -21,8 +21,8 @@
 #include "libmesh/elem_range.h"
 
 // Forward declarations
-class FEProblem;
-class NonlinearSystem;
+class FEProblemBase;
+class NonlinearSystemBase;
 class MaterialPropertyStorage;
 class MaterialData;
 class Assembly;
@@ -30,7 +30,7 @@ class Assembly;
 class ComputeMaterialsObjectThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeMaterialsObjectThread(FEProblem & fe_problem,
+  ComputeMaterialsObjectThread(FEProblemBase & fe_problem,
                                std::vector<MooseSharedPointer<MaterialData> > & material_data,
                                std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
                                std::vector<MooseSharedPointer<MaterialData> > & neighbor_material_data,
@@ -52,8 +52,8 @@ public:
   void join(const ComputeMaterialsObjectThread & /*y*/);
 
 protected:
-  FEProblem & _fe_problem;
-  NonlinearSystem & _nl;
+  FEProblemBase & _fe_problem;
+  NonlinearSystemBase & _nl;
   std::vector<MooseSharedPointer<MaterialData> > & _material_data;
   std::vector<MooseSharedPointer<MaterialData> > & _bnd_material_data;
   std::vector<MooseSharedPointer<MaterialData> > & _neighbor_material_data;

@@ -18,12 +18,12 @@
 #include "ThreadedNodeLoop.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 
 class ComputeBoundaryInitialConditionThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeBoundaryInitialConditionThread(FEProblem & fe_problem);
+  ComputeBoundaryInitialConditionThread(FEProblemBase & fe_problem);
 
   // Splitting Constructor
   ComputeBoundaryInitialConditionThread(ComputeBoundaryInitialConditionThread & x, Threads::split split);

@@ -22,7 +22,6 @@ InputParameters validParams<Tricrystal2CircleGrainsIC>()
 Tricrystal2CircleGrainsIC::Tricrystal2CircleGrainsIC(const InputParameters & parameters) :
     InitialCondition(parameters),
     _mesh(_fe_problem.mesh()),
-    _nl(_fe_problem.getNonlinearSystem()),
     _op_num(getParam<unsigned int>("op_num")),
     _op_index(getParam<unsigned int>("op_index"))
 {
@@ -60,4 +59,3 @@ Tricrystal2CircleGrainsIC::value(const Point & p)
   else
     return 0.0;
 }
-

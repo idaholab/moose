@@ -17,7 +17,7 @@ template<>
 InputParameters validParams<ReferenceResidualProblem>();
 
 /**
- * FEProblem derived class to enable convergence checking relative to a user-specified postprocessor
+ * FEProblemBase derived class to enable convergence checking relative to a user-specified postprocessor
  */
 class ReferenceResidualProblem : public FEProblem
 {

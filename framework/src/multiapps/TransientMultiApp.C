@@ -104,9 +104,9 @@ TransientMultiApp::appTransferVector(unsigned int app, std::string var_name)
     _transferred_vars.push_back(var_name);
 
   if (_interpolate_transfers)
-    return appProblem(app).getAuxiliarySystem().system().get_vector("transfer");
+    return appProblemBase(app).getAuxiliarySystem().system().get_vector("transfer");
 
-  return appProblem(app).getAuxiliarySystem().solution();
+  return appProblemBase(app).getAuxiliarySystem().solution();
 }
 
 void
@@ -157,7 +157,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
     for (unsigned int i=0; i<_my_num_apps; i++)
     {
 
-      FEProblem & problem = appProblem(_first_local_app + i);
+      FEProblemBase & problem = appProblemBase(_first_local_app + i);
 
       Transient * ex = _transient_executioners[i];
 
@@ -234,7 +234,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
             Real one_minus_step_percent = 1.0 - step_percent;
 
             // Do the interpolation for each variable that was transferred to
-            FEProblem & problem = appProblem(_first_local_app + i);
+            FEProblemBase & problem = appProblemBase(_first_local_app + i);
             AuxiliarySystem & aux_system = problem.getAuxiliarySystem();
             System & libmesh_aux_system = aux_system.system();
 
@@ -411,7 +411,7 @@ TransientMultiApp::advanceStep()
   {
     for (unsigned int i=0; i<_my_num_apps; i++)
     {
-      /*FEProblem * problem =*/ appProblem(_first_local_app + i);
+      /*FEProblemBase * problem =*/ appProblemBase(_first_local_app + i);
       Transient * ex = _transient_executioners[i];
 
       ex->endStep();
@@ -477,7 +477,7 @@ TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: N
 
     // Setup the app, disable the output so that the initial condition does not output
     // When an app is reset the initial condition was effectively already output before reset
-    FEProblem & problem = appProblem(local_app );
+    FEProblemBase & problem = appProblemBase(local_app );
     problem.allowOutput(false);
     setupApp(local_app, time);
     problem.allowOutput(true);
@@ -495,8 +495,8 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/)  // FIXME: Should we 
   if (!ex)
     mooseError("MultiApp " << name() << " is not using a Transient Executioner!");
 
-  // Get the FEProblem for the current MultiApp
-  FEProblem & problem = appProblem(_first_local_app + i);
+  // Get the FEProblemBase for the current MultiApp
+  FEProblemBase & problem = appProblemBase(_first_local_app + i);
 
   // Update the file numbers for the outputs from the parent application
   app->getOutputWarehouse().setFileNumbers(_app.getOutputFileNumbers());

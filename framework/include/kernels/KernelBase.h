@@ -103,8 +103,8 @@ protected:
   /// Reference to this kernel's SubProblem
   SubProblem & _subproblem;
 
-  /// Reference to this kernel's FEProblem
-  FEProblem & _fe_problem;
+  /// Reference to this kernel's FEProblemBase
+  FEProblemBase & _fe_problem;
 
   /// Reference to the EquationSystem object
   SystemBase & _sys;

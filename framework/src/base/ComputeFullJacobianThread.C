@@ -23,9 +23,9 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblem & fe_problem, SparseMatrix<Number> & jacobian) :
+ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblemBase & fe_problem, SparseMatrix<Number> & jacobian) :
     ComputeJacobianThread(fe_problem, jacobian),
-    _nl(fe_problem.getNonlinearSystem()),
+    _nl(fe_problem.getNonlinearSystemBase()),
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
     _dg_kernels(_nl.getDGKernelWarehouse()),
     _interface_kernels(_nl.getInterfaceKernelWarehouse()),

@@ -39,5 +39,5 @@ FailingProblem::converged()
     return false;
   }
 
-  return FEProblem::converged();
+  return FEProblemBase::converged();
 }

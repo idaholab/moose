@@ -14,7 +14,6 @@
 
 #include "MooseMesh.h"
 #include "Factory.h"
-#include "NonlinearSystem.h"
 #include "CacheChangedListsThread.h"
 #include "Assembly.h"
 #include "MooseUtils.h"

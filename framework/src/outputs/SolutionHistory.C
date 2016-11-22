@@ -14,7 +14,7 @@
 
 // MOOSE includes
 #include "SolutionHistory.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "FEProblem.h"
 
 template<>
@@ -43,7 +43,7 @@ void
 SolutionHistory::output(const ExecFlagType & /*type*/)
 {
   // Reference to the Non-linear System
-  NonlinearSystem & nl_sys = _problem_ptr->getNonlinearSystem();
+  NonlinearSystemBase & nl_sys = _problem_ptr->getNonlinearSystemBase();
 
   std::ofstream slh_file;
   slh_file.open(filename().c_str(), std::ios::app);

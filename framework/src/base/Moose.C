@@ -14,10 +14,10 @@
 
 
 #include "libmesh/petsc_macro.h"
+#include "libmesh/libmesh_config.h"
 
 #include "Moose.h"
 #include "Factory.h"
-#include "NonlinearSystem.h"
 #include "PetscSupport.h"
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
@@ -52,8 +52,9 @@
 #include "ParsedAddSideset.h"
 
 // problems
-#include "FEProblem.h"
 #include "DisplacedProblem.h"
+#include "FEProblem.h"
+#include "EigenProblem.h"
 
 // kernels
 #include "TimeDerivative.h"
@@ -481,8 +482,9 @@ registerObjects(Factory & factory)
   registerMeshModifier(ParsedAddSideset);
 
   // problems
-  registerProblem(FEProblem);
   registerProblem(DisplacedProblem);
+  registerProblem(FEProblem);
+  registerProblem(EigenProblem);
 
   // kernels
   registerKernel(TimeDerivative);
@@ -1146,7 +1148,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 }
 
 void
-setSolverDefaults(FEProblem & problem)
+setSolverDefaults(FEProblemBase & problem)
 {
 #ifdef LIBMESH_HAVE_PETSC
   // May be a touch expensive to create a new DM every time, but probably safer to do it this way

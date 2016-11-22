@@ -24,7 +24,7 @@
 // Forward Declarations
 class Transient;
 class TimeStepper;
-class FEProblem;
+class FEProblemBase;
 
 template<>
 InputParameters validParams<Transient>();
@@ -213,7 +213,7 @@ protected:
   virtual void solveStep(Real input_dt = -1.0);
 
   /// Here for backward compatibility
-  FEProblem & _problem;
+  FEProblemBase & _problem;
 
   MooseEnum _time_scheme;
   MooseSharedPointer<TimeStepper> _time_stepper;

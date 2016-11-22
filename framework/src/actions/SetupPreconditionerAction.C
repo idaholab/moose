@@ -19,7 +19,7 @@
 #include "MoosePreconditioner.h"
 #include "FEProblem.h"
 #include "CreateExecutionerAction.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 unsigned int SetupPreconditionerAction::_count = 0;
 
@@ -42,10 +42,10 @@ SetupPreconditionerAction::act()
   if (_problem.get() != NULL)
   {
     // build the preconditioner
-    _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
+    _moose_object_pars.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
     MooseSharedPointer<MoosePreconditioner> pc = _factory.create<MoosePreconditioner>(_type, _name, _moose_object_pars);
 
-    _problem->getNonlinearSystem().setPreconditioner(pc);
+    _problem->getNonlinearSystemBase().setPreconditioner(pc);
 
     /**
      * Go ahead and set common precondition options here.  The child classes will still be called

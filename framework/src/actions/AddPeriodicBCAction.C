@@ -48,7 +48,7 @@ AddPeriodicBCAction::AddPeriodicBCAction(InputParameters params) :
 void
 AddPeriodicBCAction::setPeriodicVars(PeriodicBoundaryBase & p, const std::vector<VariableName> & var_names)
 {
-  NonlinearSystem & nl = _problem->getNonlinearSystem();
+  NonlinearSystemBase & nl = _problem->getNonlinearSystemBase();
   const std::vector<VariableName> * var_names_ptr;
 
   // If var_names is empty - then apply this periodic condition to all variables in the system
@@ -90,7 +90,7 @@ AddPeriodicBCAction::autoTranslationBoundaries()
         mooseError("Could not detect orthogonal dimension ranges for DistributedMesh.");
     }
 
-    NonlinearSystem & nl = _problem->getNonlinearSystem();
+    NonlinearSystemBase & nl = _problem->getNonlinearSystemBase();
     std::vector<std::string> auto_dirs = getParam<std::vector<std::string> >("auto_direction");
 
     int dim_offset = _mesh->dimension() - 2;
@@ -138,7 +138,7 @@ AddPeriodicBCAction::autoTranslationBoundaries()
 void
 AddPeriodicBCAction::act()
 {
-  NonlinearSystem & nl = _problem->getNonlinearSystem();
+  NonlinearSystemBase & nl = _problem->getNonlinearSystemBase();
   _mesh = &_problem->mesh();
   auto displaced_problem = _problem->getDisplacedProblem();
 

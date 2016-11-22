@@ -19,7 +19,7 @@
 #include "Output.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 class InputParameters;
 
 /**
@@ -195,15 +195,15 @@ private:
    * Calls the outputStep method for each output object
    * @param type The type execution flag (see Moose.h)
    *
-   * This is private, users should utilize FEProblem::outputStep()
+   * This is private, users should utilize FEProblemBase::outputStep()
    */
   void outputStep(ExecFlagType type);
 
   ///@{
   /**
    * Ability to enable/disable output calls
-   * This is private, users should utilize FEProblem::allowOutput()
-   * @see FEProblem::allowOutput()
+   * This is private, users should utilize FEProblemBase::allowOutput()
+   * @see FEProblemBase::allowOutput()
    */
   void allowOutput(bool state);
   template <typename T> void allowOutput(bool state);
@@ -212,8 +212,8 @@ private:
 
   /**
    * Indicates that the next call to outputStep should be forced
-   * This is private, users should utilize FEProblem::forceOutput()
-   * @see FEProblem::forceOutput()
+   * This is private, users should utilize FEProblemBase::forceOutput()
+   * @see FEProblemBase::forceOutput()
    */
   void forceOutput();
 
@@ -233,37 +233,37 @@ private:
 
   /**
    * Calls the initialSetup function for each of the output objects
-   * @see FEProblem::initialSetup()
+   * @see FEProblemBase::initialSetup()
    */
   void initialSetup();
 
   /**
    * Calls the timestepSetup function for each of the output objects
-   * @see FEProblem::timestepSetup()
+   * @see FEProblemBase::timestepSetup()
    */
   void timestepSetup();
 
   /**
    * Calls the timestepSetup function for each of the output objects
-   * @see FEProblem::solve()
+   * @see FEProblemBase::solve()
    */
   void solveSetup();
 
   /**
    * Calls the jacobianSetup function for each of the output objects
-   * @see FEProblem::computeJacobian
+   * @see FEProblemBase::computeJacobian
    */
   void jacobianSetup();
 
   /**
    * Calls the residualSetup function for each of the output objects
-   * @see FEProblem::computeResidualTyp
+   * @see FEProblemBase::computeResidualTyp
    */
   void residualSetup();
 
   /**
    * Calls the subdomainSetup function for each of the output objects
-   * @see FEProblem::setupSubdomain
+   * @see FEProblemBase::setupSubdomain
    */
   void subdomainSetup();
 
@@ -280,7 +280,7 @@ private:
   /**
    * Sets the execution flag type
    *
-   * This is a private method used by FEProblem, it is not intended for any other purpose
+   * This is a private method used by FEProblemBase, it is not intended for any other purpose
    */
   void setOutputExecutionType(ExecFlagType type);
 
@@ -340,8 +340,8 @@ private:
   bool _force_output;
 
   // Allow complete access:
-  // FEProblem for calling initial, timestepSetup, outputStep, etc. methods
-  friend class FEProblem;
+  // FEProblemBase for calling initial, timestepSetup, outputStep, etc. methods
+  friend class FEProblemBase;
 
   // MaterialOutputAction for calling addInterfaceHideVariables
   friend class MaterialOutputAction;

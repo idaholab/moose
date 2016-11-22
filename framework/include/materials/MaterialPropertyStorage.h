@@ -186,7 +186,7 @@ protected:
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > * _props_elem_older;
 
   /// mapping from property name to property ID
-  /// NOTE: this is static so the property numbering is global within the simulation (not just FEProblem - should be useful when we will use material properties from
+  /// NOTE: this is static so the property numbering is global within the simulation (not just FEProblemBase - should be useful when we will use material properties from
   /// one FEPRoblem in another one - if we will ever do it)
   static std::map<std::string, unsigned int> _prop_ids;
 

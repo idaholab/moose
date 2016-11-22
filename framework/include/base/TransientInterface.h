@@ -17,7 +17,7 @@
 
 #include "InputParameters.h"
 
-class FEProblem;
+class FEProblemBase;
 class TransientInterface;
 
 template<>
@@ -37,7 +37,7 @@ public:
 protected:
   const InputParameters & _ti_params;
 
-  FEProblem & _ti_feproblem;
+  FEProblemBase & _ti_feproblem;
 
   /**
    * If the object is using implicit or explicit form. This does NOT mean time scheme,

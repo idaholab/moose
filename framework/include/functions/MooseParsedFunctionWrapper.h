@@ -27,7 +27,7 @@
 #include "libmesh/parsed_function.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 
 /**
  * A wrapper class for creating and evaluating parsed functions via the
@@ -42,12 +42,12 @@ public:
 
   /**
    * Class constructor
-   * @param feproblem Reference to the FEProblem object (provides access to Postprocessors)
+   * @param feproblem Reference to the FEProblemBase object (provides access to Postprocessors)
    * @param function_str A string that contains the function to evaluate
    * @param vars A vector of variable names contained within the function
    * @param vals A vector of variable values, matching the variables defined in vars
    */
-  MooseParsedFunctionWrapper(FEProblem & feproblem,
+  MooseParsedFunctionWrapper(FEProblemBase & feproblem,
                               const std::string & function_str,
                               const std::vector<std::string> & vars,
                               const std::vector<std::string> & vals,
@@ -82,8 +82,8 @@ public:
 
 private:
 
-  /// Reference to the FEProblem object
-  FEProblem & _feproblem;
+  /// Reference to the FEProblemBase object
+  FEProblemBase & _feproblem;
 
   /// Reference to the string containing the function to evaluate
   const std::string & _function_str;

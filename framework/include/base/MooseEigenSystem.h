@@ -20,12 +20,12 @@
 // libMesh
 #include "libmesh/eigen_system.h"
 
-class FEProblem;
+class FEProblemBase;
 
 class MooseEigenSystem : public NonlinearSystem
 {
 public:
-  MooseEigenSystem(FEProblem & problem, const std::string & name);
+  MooseEigenSystem(FEProblemBase & problem, const std::string & name);
   virtual ~MooseEigenSystem();
 
   /**

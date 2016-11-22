@@ -18,7 +18,7 @@
 
 #include "SubProblem.h"
 
-ResetDisplacedMeshThread::ResetDisplacedMeshThread(FEProblem & fe_problem, DisplacedProblem & displaced_problem) :
+ResetDisplacedMeshThread::ResetDisplacedMeshThread(FEProblemBase & fe_problem, DisplacedProblem & displaced_problem) :
     ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>(fe_problem),
     _displaced_problem(displaced_problem),
     _ref_mesh(_displaced_problem.refMesh())

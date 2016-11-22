@@ -37,7 +37,7 @@ EigenKernel::EigenKernel(const InputParameters & parameters) :
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _eigen(getParam<bool>("eigen")),
-    _eigen_sys(dynamic_cast<MooseEigenSystem *>(&_fe_problem.getNonlinearSystem())),
+    _eigen_sys(dynamic_cast<MooseEigenSystem *>(&_fe_problem.getNonlinearSystemBase())),
     _eigenvalue(NULL)
 {
   // The name to the postprocessor storing the eigenvalue

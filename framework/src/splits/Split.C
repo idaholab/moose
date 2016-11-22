@@ -60,7 +60,7 @@ InputParameters validParams<Split>()
 Split::Split (const InputParameters & parameters) :
     MooseObject(parameters),
     Restartable(parameters, "Splits"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _vars(getParam<std::vector<NonlinearVariableName> >("vars")),
     _blocks(getParam<std::vector<SubdomainName> >("blocks")),
     _sides(getParam<std::vector<BoundaryName> >("sides")),
@@ -265,7 +265,7 @@ Split::setup(const std::string& prefix)
     // Finally, recursively configure the splits contained within this split.
     for (unsigned int i = 0; i < _splitting.size(); ++i)
     {
-      MooseSharedPointer<Split> split = _fe_problem.getNonlinearSystem().getSplit(_splitting[i]);
+      MooseSharedPointer<Split> split = _fe_problem.getNonlinearSystemBase().getSplit(_splitting[i]);
       std::string sprefix = prefix + "fieldsplit_" + _splitting[i] + "_";
       split->setup(sprefix);
     }

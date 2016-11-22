@@ -27,7 +27,7 @@
 // Forward declarations
 class RestartableDatas;
 class RestartableDataValue;
-class FEProblem;
+class FEProblemBase;
 
 /**
  * Class for doing restart.
@@ -37,7 +37,7 @@ class FEProblem;
 class RestartableDataIO
 {
 public:
-  RestartableDataIO(FEProblem & fe_problem);
+  RestartableDataIO(FEProblemBase & fe_problem);
 
   virtual ~RestartableDataIO() = default;
 
@@ -78,17 +78,17 @@ private:
   void deserializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data, std::istream & stream, const std::set<std::string> & recoverable_data);
 
   /**
-   * Serializes the data for the Systems in FEProblem
+   * Serializes the data for the Systems in FEProblemBase
    */
   void serializeSystems(std::ostream & stream);
 
   /**
-   * Deserializes the data for the Systems in FEProblem
+   * Deserializes the data for the Systems in FEProblemBase
    */
   void deserializeSystems(std::istream & stream);
 
-  /// Reference to a FEProblem being restarted
-  FEProblem & _fe_problem;
+  /// Reference to a FEProblemBase being restarted
+  FEProblemBase & _fe_problem;
 
   /// A vector of file handles, one per thread
   std::vector<MooseSharedPointer<std::ifstream> > _in_file_handles;

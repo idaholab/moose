@@ -85,7 +85,7 @@ private:
 template<class T>
 JvarMapInterfaceBase<T>::JvarMapInterfaceBase(const InputParameters & parameters) :
     T(parameters),
-    _jvar_map(this->_fe_problem.getNonlinearSystem().nVariables(), -1)
+    _jvar_map(this->_fe_problem.getNonlinearSystemBase().nVariables(), -1)
 {
   auto nvar = this->_coupled_moose_vars.size();
 

@@ -227,8 +227,8 @@ protected:
   // Reference to the interface's input parameters
   const InputParameters & _c_parameters;
 
-  // Reference to FEProblem
-  FEProblem & _c_fe_problem;
+  // Reference to FEProblemBase
+  FEProblemBase & _c_fe_problem;
 
   /// Coupled vars whose values we provide
   std::map<std::string, std::vector<MooseVariable *> > _coupled_vars;

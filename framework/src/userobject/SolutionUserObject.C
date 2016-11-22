@@ -368,7 +368,7 @@ SolutionUserObject::initialSetup()
   if (_initialized)
     return;
 
-  // Several aspects of SolutionUserObject won't work if the FEProblem's MooseMesh is
+  // Several aspects of SolutionUserObject won't work if the FEProblemBase's MooseMesh is
   // a DistributedMesh:
   // .) ExodusII_IO::copy_nodal_solution() doesn't work in parallel.
   // .) We don't know if directValue will be used, which may request

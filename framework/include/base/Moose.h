@@ -58,7 +58,7 @@ class Factory;
 
 // forward declarations
 class Syntax;
-class FEProblem;
+class FEProblemBase;
 
 
 namespace Moose
@@ -126,7 +126,7 @@ void registerObjects(Factory & factory);
 void addActionTypes(Syntax & syntax);
 void registerActions(Syntax & syntax, ActionFactory & action_factory);
 
-void setSolverDefaults(FEProblem & problem);
+void setSolverDefaults(FEProblemBase & problem);
 
 /**
  * Swap the libMesh MPI communicator out for ours.

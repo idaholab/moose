@@ -64,7 +64,7 @@ MultiAppCopyTransfer::transferDofObject(libMesh::DofObject * to_object, libMesh:
 }
 
 void
-MultiAppCopyTransfer::transfer(FEProblem & to_problem, FEProblem & from_problem)
+MultiAppCopyTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from_problem)
 {
   // Populate the to/from variables needed to perform the transfer
   MooseVariable & to_var = to_problem.getVariable(0, _to_var_name);
@@ -110,18 +110,18 @@ MultiAppCopyTransfer::execute()
 
   if (_direction == TO_MULTIAPP)
   {
-    FEProblem & from_problem = _multi_app->problem();
+    FEProblemBase & from_problem = _multi_app->problemBase();
     for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       if (_multi_app->hasLocalApp(i))
-        transfer(_multi_app->appProblem(i), from_problem);
+        transfer(_multi_app->appProblemBase(i), from_problem);
   }
 
   else if (_direction == FROM_MULTIAPP)
   {
-    FEProblem & to_problem = _multi_app->problem();
+    FEProblemBase & to_problem = _multi_app->problemBase();
     for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       if (_multi_app->hasLocalApp(i))
-        transfer(to_problem, _multi_app->appProblem(i));
+        transfer(to_problem, _multi_app->appProblemBase(i));
   }
 
   _console << "Finished MultiAppCopyTransfer " << name() << std::endl;

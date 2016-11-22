@@ -31,7 +31,6 @@
 
 //forward declaration
 class MooseMesh;
-class NonlinearSystem;
 class Assembly;
 
 // libMesh forward declarations

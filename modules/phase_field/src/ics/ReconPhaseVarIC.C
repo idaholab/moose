@@ -18,7 +18,6 @@ InputParameters validParams<ReconPhaseVarIC>()
 ReconPhaseVarIC::ReconPhaseVarIC(const InputParameters & parameters) :
     InitialCondition(parameters),
     _mesh(_fe_problem.mesh()),
-    _nl(_fe_problem.getNonlinearSystem()),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
     _phase(getParam<unsigned int>("phase")),
     _node_to_phase_weight_map(_ebsd_reader.getNodeToPhaseWeightMap())

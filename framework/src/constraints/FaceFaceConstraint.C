@@ -34,7 +34,7 @@ InputParameters validParams<FaceFaceConstraint>()
 FaceFaceConstraint::FaceFaceConstraint(const InputParameters & parameters) :
     Constraint(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _dim(_mesh.dimension()),
 
     _q_point(_assembly.qPoints()),

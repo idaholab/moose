@@ -17,7 +17,7 @@
 #include "Factory.h"
 #include "EigenKernel.h"
 
-MooseEigenSystem::MooseEigenSystem(FEProblem & fe_problem, const std::string & name) :
+MooseEigenSystem::MooseEigenSystem(FEProblemBase & fe_problem, const std::string & name) :
     NonlinearSystem(fe_problem, name),
     _all_eigen_vars(false),
     _active_on_old(false),

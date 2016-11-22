@@ -42,7 +42,7 @@ AddOutputAction::AddOutputAction(InputParameters params) :
 void
 AddOutputAction::act()
 {
-  // Do nothing if FEProblem is NULL, this should only be the case for CoupledProblem
+  // Do nothing if FEProblemBase is NULL, this should only be the case for CoupledProblem
   if (_problem.get() == NULL)
     return;
 
@@ -58,8 +58,8 @@ AddOutputAction::act()
   if (output_warehouse.hasOutput(_name))
     mooseError("An output object named '" << _name << "' already exists");
 
-  // Add a pointer to the FEProblem class
-  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem",  _problem.get());
+  // Add a pointer to the FEProblemBase class
+  _moose_object_pars.addPrivateParam<FEProblemBase *>("_fe_problem_base", _problem.get());
 
   // Create common parameter exclude list
   std::vector<std::string> exclude;

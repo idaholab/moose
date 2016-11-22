@@ -37,7 +37,7 @@ public:
    * Populates the SubProblem and MooseMesh pointers
    * @param parameters The InputParameters for the object.
    * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly correspond to the section in the input file so errors are easy to understand.
-   * @param subproblem An optional method for inputting the SubProblem object, this is used by FEProblem, othersize
+   * @param subproblem An optional method for inputting the SubProblem object, this is used by FEProblemBase, othersize
    * the SubProblem comes from the parameters
    */
   Restartable(const InputParameters & parameters, std::string system_name, SubProblem * subproblem = NULL);
@@ -204,7 +204,7 @@ private:
   friend class NearestNodeLocator;
   friend class ReportableData;
   friend class FileOutput;
-  friend class FEProblem;
+  friend class FEProblemBase;
   friend class Transient;
   friend class TableOutput;
   friend class TransientMultiApp;

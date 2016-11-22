@@ -57,13 +57,13 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     MaterialPropertyInterface(this, blockIDs()),
-    RandomInterface(parameters, *parameters.get<FEProblem *>("_fe_problem"), parameters.get<THREAD_ID>("_tid"), false),
+    RandomInterface(parameters, *parameters.get<FEProblemBase *>("_fe_problem_base"), parameters.get<THREAD_ID>("_tid"), false),
     GeometricSearchInterface(this),
     Restartable(parameters, "Kernels"),
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*parameters.get<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
@@ -92,7 +92,7 @@ KernelBase::KernelBase(const InputParameters & parameters) :
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
-    if (_fe_problem.getNonlinearSystem().hasVariable(_save_in_strings[i]))
+    if (_fe_problem.getNonlinearSystemBase().hasVariable(_save_in_strings[i]))
       mooseError("Trying to use solution variable "+_save_in_strings[i]+" as a save_in variable in "+name());
 
     if (var->feType() != _var.feType())
@@ -110,7 +110,7 @@ KernelBase::KernelBase(const InputParameters & parameters) :
   {
     MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
 
-    if (_fe_problem.getNonlinearSystem().hasVariable(_diag_save_in_strings[i]))
+    if (_fe_problem.getNonlinearSystemBase().hasVariable(_diag_save_in_strings[i]))
       mooseError("Trying to use solution variable "+_diag_save_in_strings[i]+" as a diag_save_in variable in "+name());
 
     if (var->feType() != _var.feType())

@@ -26,7 +26,7 @@
 #include <vector>
 
 // Forward declarations
-class NonlinearSystem;
+class NonlinearSystemBase;
 class PhysicsBasedPreconditioner;
 
 template<>
@@ -77,7 +77,7 @@ public:
 
 protected:
   /// The nonlinear system this PBP is associated with (convenience reference)
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
   /// List of linear system that build up the preconditioner
   std::vector<LinearImplicitSystem *> _systems;
   /// Holds one Preconditioner object per small system to solve.

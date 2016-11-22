@@ -21,7 +21,7 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblem & problem,
+ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblemBase & problem,
                                                  const MooseObjectWarehouse<AuxKernel> & storage,
                                                  bool need_materials) :
     _problem(problem),

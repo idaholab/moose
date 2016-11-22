@@ -10,6 +10,7 @@
 // MOOSE Includes
 #include "Kernel.h"
 #include "InitialCondition.h"
+#include "NonlinearSystem.h"
 
 // System includes
 #include <string>
@@ -34,7 +35,7 @@ protected:
   MooseMesh & _mesh;
 
   /// A reference to the nonlinear system
-  NonlinearSystem & _nl;
+  NonlinearSystemBase & _nl;
 
   /// Number of order parameters
   unsigned int _op_num;

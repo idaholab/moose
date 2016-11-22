@@ -294,7 +294,7 @@ Parser::checkActiveUsed(std::vector<std::string > & sections,
 }
 
 void
-Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn, bool in_input_file, MooseSharedPointer<FEProblem> fe_problem) const
+Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn, bool in_input_file, MooseSharedPointer<FEProblemBase> fe_problem) const
 {
   // Make sure that multiapp overrides were processed properly
   int last = all_vars.size() - 1;                      // last is allowed to go negative

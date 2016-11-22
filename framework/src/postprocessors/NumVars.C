@@ -15,7 +15,7 @@
 // MOOSE includes
 #include "NumVars.h"
 #include "SubProblem.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 template<>
 InputParameters validParams<NumVars>()
@@ -39,11 +39,10 @@ NumVars::getValue()
   switch (_system)
   {
     case 0:
-      return _fe_problem.getNonlinearSystem().sys().n_vars();
+      return _fe_problem.getNonlinearSystemBase().system().n_vars();
     case 1:
       return _fe_problem.getAuxiliarySystem().sys().n_vars();
   }
 
   mooseError("Unknown system type!");
 }
-

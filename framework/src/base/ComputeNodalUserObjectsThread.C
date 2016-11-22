@@ -20,7 +20,7 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(FEProblem & fe_problem, const MooseObjectWarehouse<NodalUserObject> & user_objects) :
+ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalUserObject> & user_objects) :
     ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _user_objects(user_objects)
 {

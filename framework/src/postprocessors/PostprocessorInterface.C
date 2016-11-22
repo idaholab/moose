@@ -21,7 +21,7 @@
 PostprocessorInterface::PostprocessorInterface(const MooseObject * moose_object) :
     _ppi_params(moose_object->parameters()),
     // TODO: Retrieve using checked pointer method
-    _pi_feproblem(*_ppi_params.get<FEProblem *>("_fe_problem"))
+    _pi_feproblem(*_ppi_params.get<FEProblemBase *>("_fe_problem_base"))
 {
 }
 

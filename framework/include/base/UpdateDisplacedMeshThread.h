@@ -32,7 +32,7 @@ template <typename T> class NumericVector;
 class UpdateDisplacedMeshThread : public ThreadedNodeLoop<SemiLocalNodeRange, SemiLocalNodeRange::const_iterator>
 {
 public:
-  UpdateDisplacedMeshThread(FEProblem & fe_problem, DisplacedProblem & displaced_problem);
+  UpdateDisplacedMeshThread(FEProblemBase & fe_problem, DisplacedProblem & displaced_problem);
 
   UpdateDisplacedMeshThread(UpdateDisplacedMeshThread & x, Threads::split split);
 

@@ -64,13 +64,13 @@ Executioner::Executioner(const InputParameters & parameters) :
     UserObjectInterface(this),
     PostprocessorInterface(this),
     Restartable(parameters, "Executioners"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem", "This might happen if you don't have a mesh")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base", "This might happen if you don't have a mesh")),
     _initial_residual_norm(std::numeric_limits<Real>::max()),
     _old_initial_residual_norm(std::numeric_limits<Real>::max()),
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
     _splitting(getParam<std::vector<std::string> >("splitting"))
 {
-  // Extract and store PETSc related settings on FEProblem
+  // Extract and store PETSc related settings on FEProblemBase
 #ifdef LIBMESH_HAVE_PETSC
   Moose::PetscSupport::storePetscOptions(_fe_problem, _pars);
 #endif //LIBMESH_HAVE_PETSC
@@ -104,9 +104,9 @@ Executioner::Executioner(const InputParameters & parameters) :
   es.parameters.set<Real> ("nonlinear solver relative step tolerance")
     = getParam<Real>("nl_rel_step_tol");
 
-  _fe_problem.getNonlinearSystem()._compute_initial_residual_before_preset_bcs = getParam<bool>("compute_initial_residual_before_preset_bcs");
+  _fe_problem.getNonlinearSystemBase()._compute_initial_residual_before_preset_bcs = getParam<bool>("compute_initial_residual_before_preset_bcs");
 
-  _fe_problem.getNonlinearSystem()._l_abs_step_tol = getParam<Real>("l_abs_step_tol");
+  _fe_problem.getNonlinearSystemBase()._l_abs_step_tol = getParam<Real>("l_abs_step_tol");
 }
 
 Executioner::~Executioner()
@@ -145,7 +145,7 @@ Executioner::problem()
   return _fe_problem;
 }
 
-FEProblem &
+FEProblemBase &
 Executioner::feProblem()
 {
   return _fe_problem;
@@ -166,7 +166,7 @@ Executioner::lastSolveConverged()
 void
 Executioner::addAttributeReporter(const std::string & name, Real & attribute, const std::string execute_on)
 {
-  FEProblem * problem = parameters().getCheckedPointerParam<FEProblem *>("_fe_problem", "Failed to retrieve FEProblem when adding a attribute reporter in Executioner");
+  FEProblemBase * problem = parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base", "Failed to retrieve FEProblemBase when adding a attribute reporter in Executioner");
   InputParameters params = _app.getFactory().getValidParams("ExecutionerAttributeReporter");
   params.set<Real *>("value") = &attribute;
   if (!execute_on.empty())

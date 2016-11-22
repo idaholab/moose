@@ -13,7 +13,6 @@
 /****************************************************************/
 
 #include "ComputeJacobianBlocksThread.h"
-#include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "KernelBase.h"
 #include "IntegratedBC.h"
@@ -21,7 +20,7 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(FEProblem & fe_problem, std::vector<JacobianBlock*> & blocks) :
+ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(FEProblemBase & fe_problem, std::vector<JacobianBlock*> & blocks) :
     ComputeFullJacobianThread(fe_problem, blocks[0]->_jacobian /* have to pass something */),
     _blocks(blocks)
 {

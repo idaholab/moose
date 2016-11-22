@@ -14,7 +14,7 @@
 
 #include "RandomHitSolutionModifier.h"
 #include "RandomHitUserObject.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 template<>
 InputParameters validParams<RandomHitSolutionModifier>()
@@ -73,11 +73,11 @@ RandomHitSolutionModifier::execute()
       {
         _subproblem.reinitNode(closest_node, 0);
         _variable.setNodalValue(_variable.getNodalValue(*closest_node) + _amount);
-        _variable.insert(_fe_problem.getNonlinearSystem().solution());
+        _variable.insert(_fe_problem.getNonlinearSystemBase().solution());
       }
     }
   }
 
-  _fe_problem.getNonlinearSystem().solution().close();
-  _fe_problem.getNonlinearSystem().sys().update();
+  _fe_problem.getNonlinearSystemBase().solution().close();
+  _fe_problem.getNonlinearSystemBase().system().update();
 }

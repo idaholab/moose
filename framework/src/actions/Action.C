@@ -50,7 +50,7 @@ Action::Action(InputParameters parameters) :
     _current_task(_awh.getCurrentTaskName()),
     _mesh(_awh.mesh()),
     _displaced_mesh(_awh.displacedMesh()),
-    _problem(_awh.problem()),
+    _problem(_awh.problemBase()),
     _executioner(_app.executioner())
 {
 }

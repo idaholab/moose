@@ -20,7 +20,7 @@
 
 // Forward declarations
 class MooseMesh;
-class FEProblem;
+class FEProblemBase;
 class Factory;
 class MooseApp;
 

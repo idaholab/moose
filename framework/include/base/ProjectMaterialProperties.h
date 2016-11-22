@@ -21,8 +21,8 @@
 // libMesh includes
 #include "libmesh/elem_range.h"
 
-class FEProblem;
-class NonlinearSystem;
+class FEProblemBase;
+class NonlinearSystemBase;
 class MaterialPropertyStorage;
 class MaterialData;
 class Assembly;
@@ -31,7 +31,7 @@ class ProjectMaterialProperties : public ThreadedElementLoop<ConstElemPointerRan
 {
 public:
   ProjectMaterialProperties(bool refine,
-                            FEProblem & fe_problem, NonlinearSystem & sys,
+                            FEProblemBase & fe_problem, NonlinearSystemBase & sys,
                             std::vector<MooseSharedPointer<MaterialData> > & material_data,
                             std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
                             MaterialPropertyStorage & material_props,
@@ -53,8 +53,8 @@ public:
 protected:
   /// Whether or not you are projecting refinements.  Set to false for coarsening.
   bool _refine;
-  FEProblem & _fe_problem;
-  NonlinearSystem & _sys;
+  FEProblemBase & _fe_problem;
+  NonlinearSystemBase & _sys;
   std::vector<MooseSharedPointer<MaterialData> > & _material_data;
   std::vector<MooseSharedPointer<MaterialData> > & _bnd_material_data;
   MaterialPropertyStorage & _material_props;

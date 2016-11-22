@@ -48,7 +48,7 @@ protected:
   /**
    * Performs the transfer of a variable between two problems.
    */
-  void transfer(FEProblem & to_problem, FEProblem & from_problem);
+  void transfer(FEProblemBase & to_problem, FEProblemBase & from_problem);
 
   /**
    * Performs the transfer of values between a node or element.

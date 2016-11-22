@@ -20,7 +20,7 @@
 #include "ParallelUniqueId.h"
 
 // Forward Declarations
-class FEProblem;
+class FEProblemBase;
 class MooseObject;
 
 class VectorPostprocessorInterface
@@ -110,8 +110,8 @@ private:
   /// VectorPostprocessorInterface Parameters
   const InputParameters & _vpi_params;
 
-  /// Reference the the FEProblem class
-  FEProblem & _vpi_feproblem;
+  /// Reference the the FEProblemBase class
+  FEProblemBase & _vpi_feproblem;
 
   /// Thread ID
   THREAD_ID _vpi_tid;
