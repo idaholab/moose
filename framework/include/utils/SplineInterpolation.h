@@ -15,7 +15,7 @@
 #ifndef SPLINEINTERPOLATION_H
 #define SPLINEINTERPOLATION_H
 
-#include <vector>
+#include "SplineInterpolationBase.h"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -26,7 +26,7 @@
  *
  * Adopted from Numerical Recipes in C (section 3.3).
  */
-class SplineInterpolation
+class SplineInterpolation : SplineInterpolationBase
 {
 public:
   SplineInterpolation();
@@ -39,14 +39,14 @@ public:
    *
    * If yp1, ypn are not specified or greater or equal that 1e30, we use natural spline
    */
-  SplineInterpolation(const std::vector<double> & x, const std::vector<double> & y, double yp1 = 1e30, double ypn = 1e30);
+  SplineInterpolation(const std::vector<Real> & x, const std::vector<Real> & y, Real yp1 = 1e30, Real ypn = 1e30);
 
   virtual ~SplineInterpolation() = default;
 
   /**
    * Set the x-, y- values and first derivatives
    */
-  void setData(const std::vector<double> & x, const std::vector<double> & y, double yp1 = 1e30, double ypn = 1e30);
+  void setData(const std::vector<Real> & x, const std::vector<Real> & y, Real yp1 = 1e30, Real ypn = 1e30);
 
   void errorCheck();
 
@@ -54,11 +54,11 @@ public:
    * This function will take an independent variable input and will return the dependent variable
    * based on the generated fit
    */
-  double sample(double x) const;
+  Real sample(Real x) const;
 
-  double sampleDerivative(double x) const;
+  Real sampleDerivative(Real x) const;
 
-  double sample2ndDerivative(double x) const;
+  Real sample2ndDerivative(Real x) const;
 
   /**
    * This function will dump GNUPLOT input files that can be run to show the data points and
@@ -71,21 +71,18 @@ public:
    */
   unsigned int getSampleSize();
 
-  double domain(int i) const;
-  double range(int i) const;
+  Real domain(int i) const;
+  Real range(int i) const;
 
 protected:
-  std::vector<double> _x;
-  std::vector<double> _y;
+  std::vector<Real> _x;
+  std::vector<Real> _y;
   /// boundary conditions
-  double _yp1, _ypn;
-  /// second derivatives of the interpolating function
-  std::vector<double> _y2;
+  Real _yp1, _ypn;
+  /// Second derivatives
+  std::vector<Real> _y2;
 
   void solve();
-
-  void findInterval(double x, unsigned int & klo, unsigned int & khi) const;
-  void computeCoeffs(unsigned int klo, unsigned int khi, double x, double & h, double & a, double & b) const;
 
   static int _file_number;
 };
