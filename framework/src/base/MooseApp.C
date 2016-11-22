@@ -1080,6 +1080,15 @@ MooseApp::createMinimalApp()
     _action_warehouse.addActionBlock(action);
   }
 
+  // Initialize solver params - separate from CreateProblem to allow
+  // these parameters to be part of the Executioner input file block.
+  {
+    InputParameters action_params = _action_factory.getValidParams("SetupExecutionerProblemParamsAction");
+    action_params.set<std::string>("task") = "setup_executioner_problem_params";
+    MooseSharedPointer<Action> action = _action_factory.create("SetupExecutionerProblemParamsAction", "Executioner", action_params);
+    _action_warehouse.addActionBlock(action);
+  }
+
   // Outputs
   {
     // Build the Action parameters

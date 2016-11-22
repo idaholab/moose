@@ -133,6 +133,18 @@ public:
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
 
+  /// The below two functions initialize solver parameters that semantically belong in
+  /// the Executioner portion of the input file yet are actually solver
+  /// configuration.  They are called by a special action to set them up at an
+  /// appropriate time should not be called/used by any code in the FEProblem
+  /// class.  They contain code that use to live in the Executioner base class
+  /// validParams and constructor.
+  ///
+  /// TODO: some of these parameters are not applicable to all problem
+  /// configurations - this should be cleaned up some day...
+  static InputParameters executionerValidParams();
+  void executionerInitParams(InputParameters params);
+
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) override;
   virtual void setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys);
   void setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis);

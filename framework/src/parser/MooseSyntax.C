@@ -95,6 +95,7 @@ void associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   syntax.registerActionSyntax("DetermineSystemType", "Executioner");
   syntax.registerActionSyntax("CreateExecutionerAction", "Executioner");
+  syntax.registerActionSyntax("SetupExecutionerProblemParamsAction", "Executioner");
   syntax.registerActionSyntax("SetupTimeStepperAction", "Executioner/TimeStepper");
   syntax.registerActionSyntax("SetupTimeIntegratorAction", "Executioner/TimeIntegrator");
 

@@ -368,6 +368,7 @@
 #include "AddDamperAction.h"
 #include "AddFunctionAction.h"
 #include "CreateExecutionerAction.h"
+#include "SetupExecutionerProblemParamsAction.h"
 #include "DetermineSystemType.h"
 #include "EmptyAction.h"
 #include "InitProblemAction.h"
@@ -936,6 +937,7 @@ addActionTypes(Syntax & syntax)
   registerTask("deprecated_block", false);
   registerTask("set_adaptivity_options", false);
   registerTask("add_mortar_interface", false);
+  registerTask("setup_executioner_problem_params", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
   registerTask("setup_function_complete", false);
@@ -977,6 +979,7 @@ addActionTypes(Syntax & syntax)
 "(create_problem)"
 "(setup_time_integrator)"
 "(setup_executioner)"
+"(setup_executioner_problem_params)"
 "(setup_time_stepper)"
 "(setup_predictor)"
 "(setup_postprocessor_data)"
@@ -1061,6 +1064,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(AddFunctionAction, "add_function");
   registerAction(CreateExecutionerAction, "setup_executioner");
+  registerAction(SetupExecutionerProblemParamsAction, "setup_executioner_problem_params");
   registerAction(SetupTimeStepperAction, "setup_time_stepper");
   registerAction(SetupTimeIntegratorAction, "setup_time_integrator");
   registerAction(CreateDisplacedProblemAction, "init_displaced_problem");
