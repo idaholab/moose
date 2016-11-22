@@ -3,6 +3,9 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "StateSimTester.h"
+#include "StateSimRunner.h"
+
 template<>
 InputParameters validParams<StochasticToolsApp>()
 {
@@ -40,8 +43,10 @@ StochasticToolsApp::registerApps()
 // External entry point for dynamic object registration
 extern "C" void StochasticToolsApp__registerObjects(Factory & factory) { StochasticToolsApp::registerObjects(factory); }
 void
-StochasticToolsApp::registerObjects(Factory & /*factory*/)
+StochasticToolsApp::registerObjects(Factory & factory)
 {
+  registerUserObject(StateSimRunner);
+  registerPostprocessor(StateSimTester);
 }
 
 // External entry point for dynamic syntax association
