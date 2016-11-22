@@ -28,11 +28,11 @@ protected:
   ///  \f$ \epsilon_{\theta} = \frac{u_r}{r} \f$
   Real computeStrainZZ() override;
 
-  const bool _scalar_strain_coupled;
-  const VariableValue & _scalar_strain;
+  const bool _scalar_out_of_plane_strain_coupled;
+  const VariableValue & _scalar_out_of_plane_strain;
 
-  const bool _variable_strain_coupled;
-  const VariableValue & _variable_strain;
+  const bool _out_of_plane_strain_coupled;
+  const VariableValue & _out_of_plane_strain;
 };
 
 #endif //COMPUTEAXISYMMETRIC1DSMALLSTRAIN_H

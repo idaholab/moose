@@ -26,7 +26,6 @@ Compute2DFiniteStrain::Compute2DFiniteStrain(const InputParameters & parameters)
 void
 Compute2DFiniteStrain::computeProperties()
 {
-  // Method from Rashid, 1993
   RankTwoTensor ave_Fhat;
   Real ave_dfgrd_det = 0.0;
 

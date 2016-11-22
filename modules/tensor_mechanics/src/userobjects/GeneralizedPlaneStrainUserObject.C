@@ -18,8 +18,8 @@ InputParameters validParams<GeneralizedPlaneStrainUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params.addClassDescription("Generalized Plane Strain UserObject to provide Residual and diagonal Jacobian entry");
-  params.addParam<FunctionName>("traction", "0", "Function used to prescribe traction in the out-of-plane direction");
-  params.addParam<Real>("factor", 1.0, "Scale factor applied to prescribed traction");
+  params.addParam<FunctionName>("out_of_plane_pressure", "0", "Function used to prescribe pressure in the out-of-plane direction");
+  params.addParam<Real>("factor", 1.0, "Scale factor applied to prescribed pressure");
   params.addParam<std::string>("base_name", "Material properties base name");
   params.set<MultiMooseEnum>("execute_on") = "linear";
 
@@ -31,7 +31,7 @@ GeneralizedPlaneStrainUserObject::GeneralizedPlaneStrainUserObject(const InputPa
   _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
   _Cijkl(getMaterialProperty<RankFourTensor>(_base_name + "elasticity_tensor")),
   _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
-  _traction(getFunction("traction")),
+  _out_of_plane_pressure(getFunction("out_of_plane_pressure")),
   _factor(getParam<Real>("factor"))
 {
 }
@@ -40,9 +40,9 @@ void
 GeneralizedPlaneStrainUserObject::initialize()
 {
   if (_assembly.coordSystem() == Moose::COORD_XYZ)
-    _index = 2;
+    _scalar_out_of_plane_strain_direction = 2;
   else if (_assembly.coordSystem() == Moose::COORD_RZ)
-    _index = 1;
+    _scalar_out_of_plane_strain_direction = 1;
   else
     mooseError("Unsupported coordinate system for generalized plane strain formulation");
 
@@ -56,9 +56,9 @@ GeneralizedPlaneStrainUserObject::execute()
   for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     // residual, integral of stress_zz for COORD_XYZ
-    _residual += _JxW[_qp] * _coord[_qp] * (_stress[_qp](_index, _index) - _traction.value(_t, _q_point[_qp]) * _factor);
+    _residual += _JxW[_qp] * _coord[_qp] * (_stress[_qp](_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction) - _out_of_plane_pressure.value(_t, _q_point[_qp]) * _factor);
     // diagonal jacobian, integral of C(2, 2, 2, 2) for COORD_XYZ
-    _jacobian += _JxW[_qp] * _coord[_qp] * _Cijkl[_qp](_index, _index, _index, _index);
+    _jacobian += _JxW[_qp] * _coord[_qp] * _Cijkl[_qp](_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction);
   }
 }
 

@@ -12,9 +12,8 @@
 /**
  * Compute1DSmallStrain defines a strain tensor, assuming small strains,
  * in 1D problems, handling strains in other two directions.
- * Compute1DSmallStrain acts as a
  * Compute1DSmallStrain contains virtual methods to define the strain_yy and strain_zz
- * as a general nonzero value in the inherited class ComputeAxisymmetric1DSmallStrain.
+ * as a general nonzero value.
  */
 class Compute1DSmallStrain : public ComputeSmallStrain
 {

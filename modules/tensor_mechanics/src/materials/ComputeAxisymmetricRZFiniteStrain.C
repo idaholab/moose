@@ -14,7 +14,7 @@ template<>
 InputParameters validParams<ComputeAxisymmetricRZFiniteStrain>()
 {
   InputParameters params = validParams<Compute2DFiniteStrain>();
-  params.addClassDescription("Compute a strain increment and rotation increment for finite strains under axisymmetric assumptions.");
+  params.addClassDescription("Compute a strain increment for finite strains under axisymmetric assumptions.");
   return params;
 }
 
@@ -36,7 +36,7 @@ ComputeAxisymmetricRZFiniteStrain::initialSetup()
 Real
 ComputeAxisymmetricRZFiniteStrain::computeGradDispZZ()
 {
-  if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
+  if (!MooseUtils::absoluteFuzzyEqual(_q_point[_qp](0), 0.0))
     return (*_disp[0])[_qp] / _q_point[_qp](0);
   else
     return 0.0;
@@ -45,7 +45,7 @@ ComputeAxisymmetricRZFiniteStrain::computeGradDispZZ()
 Real
 ComputeAxisymmetricRZFiniteStrain::computeGradDispZZOld()
 {
-  if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
+  if (!MooseUtils::absoluteFuzzyEqual(_q_point[_qp](0), 0.0))
     return _disp_old_0[_qp] / _q_point[_qp](0);
   else
     return 0.0;

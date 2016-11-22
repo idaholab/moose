@@ -2,7 +2,7 @@
   order = FIRST
   family = LAGRANGE
   displacements = 'disp_x disp_y'
-  scalar_strain = scalar_strain_zz
+  scalar_out_of_plane_strain = scalar_strain_zz
   block = 1
 []
 

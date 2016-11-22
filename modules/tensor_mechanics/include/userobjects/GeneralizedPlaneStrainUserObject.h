@@ -35,11 +35,11 @@ protected:
   const MaterialProperty<RankFourTensor> & _Cijkl;
   const MaterialProperty<RankTwoTensor> & _stress;
 
-  Function & _traction;
+  Function & _out_of_plane_pressure;
   const Real _factor;
 
 private:
-  unsigned int _index;
+  unsigned int _scalar_out_of_plane_strain_direction;
   Real _residual;
   Real _jacobian;
 };

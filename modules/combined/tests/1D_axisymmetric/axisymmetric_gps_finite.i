@@ -6,7 +6,7 @@
 
 [GlobalParams]
   displacements = disp_x
-  scalar_strain = scalar_strain_yy
+  scalar_out_of_plane_strain = scalar_strain_yy
 []
 
 [Problem]

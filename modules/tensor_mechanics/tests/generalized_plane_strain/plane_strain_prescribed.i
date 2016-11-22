@@ -1,8 +1,13 @@
-# Tests for application of out-of-plane traction in generalized plane strain.
+[GlobalParams]
+  order = FIRST
+  family = LAGRANGE
+  displacements = 'disp_x disp_y'
+  scalar_out_of_plane_strain = scalar_strain_zz
+  block = 1
+[]
 
 [Mesh]
   file = square.e
-  displacements = 'disp_x disp_y'
 []
 
 [Variables]
@@ -10,20 +15,18 @@
   [../]
   [./disp_y]
   [../]
+[]
+
+[AuxVariables]
+  [./temp]
+  [../]
   [./scalar_strain_zz]
     order = FIRST
     family = SCALAR
   [../]
-[]
-
-[AuxVariables]
   [./saved_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./saved_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./stress_xx]
@@ -70,29 +73,22 @@
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./GeneralizedPlaneStrain]
-      [./gps]
-        use_displaced_mesh = true
-        displacements = 'disp_x disp_y'
-        scalar_strain = scalar_strain_zz
-        traction = traction_function
-        factor = 1e5
-      [../]
-    [../]
-  [../]
-[]
-
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
-    displacements = 'disp_x disp_y'
+    temperature = temp
     save_in = 'saved_x saved_y'
   [../]
 []
 
 [AuxKernels]
+  [./tempfuncaux]
+    type = FunctionAux
+    variable = temp
+    function = tempfunc
+    use_displaced_mesh = false
+  [../]
+
   [./stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -152,18 +148,31 @@
   [../]
 []
 
+[AuxScalarKernels]
+  [./strain_zz]
+    type = FunctionScalarAux
+    variable = scalar_strain_zz
+    function = scalar_strain_zz_func
+  [../]
+[]
+
 [Functions]
-  [./traction_function]
+  [./tempfunc]
+    type = ParsedFunction
+    value = '(1-x)*t'
+  [../]
+  [./scalar_strain_zz_func]
     type = PiecewiseLinear
-    x = '0  2'
-    y = '0  -1'
+    xy_data = '0 0
+               1 7.901e-5
+               2 1.103021e-2'
   [../]
 []
 
 [BCs]
-  [./leftx]
+  [./bottomx]
     type = PresetBC
-    boundary = 4
+    boundary = 1
     variable = disp_x
     value = 0.0
   [../]
@@ -183,8 +192,14 @@
   [../]
   [./strain]
     type = ComputePlaneSmallStrain
-    displacements = 'disp_x disp_y'
-    scalar_strain = scalar_strain_zz
+    eigenstrain_names = eigenstrain
+  [../]
+  [./thermal_strain]
+    type = ComputeThermalExpansionEigenstrain
+    temperature = temp
+    thermal_expansion_coeff = 0.02
+    stress_free_temperature = 0.5
+    eigenstrain_name = eigenstrain
   [../]
   [./stress]
     type = ComputeLinearElasticStress
@@ -203,8 +218,8 @@
 
 # controls for nonlinear iterations
   nl_max_its = 15
-  nl_rel_tol = 1e-14
-  nl_abs_tol = 1e-11
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-5
 
 # time control
   start_time = 0.0

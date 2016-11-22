@@ -10,9 +10,8 @@
 #include "Compute1DFiniteStrain.h"
 
 /**
- * ComputeAxisymmetric1DFiniteStrain defines a strain increment and rotation
- * increment for finite strains in an Axisymmetric 1D problem.
- * The COORD_TYPE in the Problem block must be set to RZ.
+ * ComputeAxisymmetric1DFiniteStrain defines a strain increment for finite strains
+ * in an Axisymmetric 1D problem. The COORD_TYPE in the Problem block must be set to RZ.
  */
 class ComputeAxisymmetric1DFiniteStrain : public Compute1DFiniteStrain
 {
@@ -39,13 +38,13 @@ protected:
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
 
-  bool _variable_strain_coupled;
-  const VariableValue & _variable_strain;
-  const VariableValue & _variable_strain_old;
+  bool _out_of_plane_strain_coupled;
+  const VariableValue & _out_of_plane_strain;
+  const VariableValue & _out_of_plane_strain_old;
 
-  bool _scalar_strain_coupled;
-  const VariableValue & _scalar_strain;
-  const VariableValue & _scalar_strain_old;
+  bool _scalar_out_of_plane_strain_coupled;
+  const VariableValue & _scalar_out_of_plane_strain;
+  const VariableValue & _scalar_out_of_plane_strain_old;
 };
 
 #endif //COMPUTEAXISYMMETRIC1DFINITESTRAIN_H

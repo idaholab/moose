@@ -16,10 +16,10 @@ InputParameters validParams<GeneralizedPlaneStrainAction>()
   InputParameters params = validParams<Action>();
   params.addClassDescription("Set up the GeneralizedPlaneStrain environment");
   params.addRequiredParam<std::vector<NonlinearVariableName> >("displacements", "The displacement variables");
-  params.addRequiredParam<NonlinearVariableName>("scalar_strain", "Scalar variable scalar_strain_yy for 1D Axisymmetric or 2D GeneralizedPlaneStrain problem");
+  params.addRequiredParam<NonlinearVariableName>("scalar_out_of_plane_strain", "Scalar variable for the out-of-plane strain (in y direction for 1D Axisymmetric or in z direction for 2D Cartesian problems)");
   params.addParam<NonlinearVariableName>("temperature", "The temperature variable");
-  params.addParam<FunctionName>("traction", "0", "Function used to prescribe traction in the out-of-plane Z direction");
-  params.addParam<Real>("factor", 1.0, "Scale factor applied to prescribed traction");
+  params.addParam<FunctionName>("out_of_plane_pressure", "0", "Function used to prescribe pressure in the out-of-plane direction (y for 1D Axisymmetric or z for 2D Cartesian problems)");
+  params.addParam<Real>("factor", 1.0, "Scale factor applied to prescribed pressure");
   params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<std::vector<SubdomainName> >("block", "The list of ids of the blocks (subdomain) that the GeneralizedPlaneStrain kernels will be applied to");
@@ -33,7 +33,7 @@ GeneralizedPlaneStrainAction::GeneralizedPlaneStrainAction(const InputParameters
     _ndisp(_displacements.size())
 {
   if (_ndisp > 2)
-    mooseError("GeneralizedPlaneStrain only works for 1D axisymmetric and 2D generalized plane strain case!");
+    mooseError("GeneralizedPlaneStrain only works for 1D axisymmetric or 2D generalized plane strain cases!");
 }
 
 void
@@ -45,7 +45,7 @@ GeneralizedPlaneStrainAction::act()
     InputParameters params = _factory.getValidParams(k_type);
     params.set<std::vector<NonlinearVariableName> >("displacements") = _displacements;
 
-    params.set<std::vector<VariableName> >("scalar_strain") = {getParam<NonlinearVariableName>("scalar_strain")};
+    params.set<std::vector<VariableName> >("scalar_out_of_plane_strain") = {getParam<NonlinearVariableName>("scalar_out_of_plane_strain")};
 
     if (isParamValid("base_name"))
       params.set<std::string>("base_name") = getParam<std::string>("base_name");
@@ -83,7 +83,7 @@ GeneralizedPlaneStrainAction::act()
     if (isParamValid("base_name"))
       params.set<std::string>("base_name") = getParam<std::string>("base_name");
 
-    params.set<FunctionName>("traction") = getParam<FunctionName>("traction");
+    params.set<FunctionName>("out_of_plane_pressure") = getParam<FunctionName>("out_of_plane_pressure");
     params.set<Real>("factor") = getParam<Real>("factor");
 
     if (isParamValid("block"))
@@ -99,7 +99,7 @@ GeneralizedPlaneStrainAction::act()
     std::string sk_type = "GeneralizedPlaneStrain";
     InputParameters params = _factory.getValidParams(sk_type);
 
-    params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("scalar_strain");
+    params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("scalar_out_of_plane_strain");
 
     // set the UserObjectName from previously added UserObject
     params.set<UserObjectName>("generalized_plane_strain") = _name + "_GeneralizedPlaneStrainUserObject";

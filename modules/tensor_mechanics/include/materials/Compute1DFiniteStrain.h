@@ -10,10 +10,9 @@
 #include "ComputeFiniteStrain.h"
 
 /**
- * Compute1DFiniteStrain defines a strain increment and a rotation increment
- * for finite strains in 1D problems, handling strains in other two directions.
- * Compute1DFiniteStrain contains virtual methods to define the displacement gradients
- * as a general nonzero value in the inherited class ComputeAxisymmetric1DFiniteStrain.
+ * Compute1DFiniteStrain defines a strain increment for finite strains in 1D problems,
+ * handling strains in other two directions. It contains virtual methods to define
+ * the displacement gradients as a general nonzero value.
  */
 class Compute1DFiniteStrain : public ComputeFiniteStrain
 {

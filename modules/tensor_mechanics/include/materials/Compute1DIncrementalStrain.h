@@ -13,7 +13,7 @@
  * Compute1DIncrementalStrain defines a strain increment only for incremental
  * small strains in 1D problems, handling strains in other two directions.
  * Compute1DIncrementalStrain contains virtual methods to define the displacement gradients
- * as a general nonzero value in the inherited class ComputeAxisymmetric1DIncrementalStrain.
+ * as a general nonzero value.
  */
 class Compute1DIncrementalStrain : public ComputeIncrementalSmallStrain
 {

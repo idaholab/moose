@@ -21,7 +21,7 @@ InputParameters validParams<GeneralizedPlaneStrainOffDiag>()
   params.addClassDescription("Generalized Plane Strain kernel to provide contribution of the out-of-plane strain to other kernels");
   params.addRequiredParam<std::vector<NonlinearVariableName> >("displacements", "Variable for the displacements");
   params.addParam<NonlinearVariableName>("temperature", "Variable for the temperature");
-  params.addCoupledVar("scalar_strain", "Scalar variable for 1D Axisymmetric problem");
+  params.addCoupledVar("scalar_out_of_plane_strain", "Scalar variable for generalized plane strain");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<std::vector<MaterialPropertyName>>("eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
 
@@ -34,12 +34,12 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
    _Jacobian_mult(getMaterialProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
    _deigenstrain_dT(_eigenstrain_names.size()),
-   _scalar_strain_var(coupledScalar("scalar_strain")),
+   _scalar_out_of_plane_strain_var(coupledScalar("scalar_out_of_plane_strain")),
    _temp_var(isParamValid("temperature") ? &_subproblem.getVariable(_tid, getParam<NonlinearVariableName>("temperature")) : NULL)
 {
   const std::vector<NonlinearVariableName> & nl_vnames(getParam<std::vector<NonlinearVariableName> >("displacements"));
   if (nl_vnames.size() > 2)
-    mooseError("GeneralizedPlaneStrainOffDiag only works for 1D axisymmetric and 2D generalized plane strain cases!");
+    mooseError("GeneralizedPlaneStrainOffDiag only works for 1D axisymmetric or 2D Cartesian generalized plane strain cases!");
 
   for (unsigned int i = 0; i < nl_vnames.size(); ++i)
     _disp_var.push_back(&_subproblem.getVariable(_tid, nl_vnames[i]));
@@ -54,10 +54,10 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
 void
 GeneralizedPlaneStrainOffDiag::computeOffDiagJacobianScalar(unsigned int jvar)
 {
-  if (_assembly.coordSystem() != Moose::COORD_XYZ)
-    _index = 2;
-  else if (_assembly.coordSystem() != Moose::COORD_RZ)
-    _index = 1;
+  if (_assembly.coordSystem() == Moose::COORD_XYZ)
+    _scalar_out_of_plane_strain_direction = 2;
+  else if (_assembly.coordSystem() == Moose::COORD_RZ)
+    _scalar_out_of_plane_strain_direction = 1;
 
   if (_var.number() == _disp_var[0]->number())
     computeDispOffDiagJacobianScalar(0, jvar);
@@ -70,7 +70,7 @@ GeneralizedPlaneStrainOffDiag::computeOffDiagJacobianScalar(unsigned int jvar)
 void
 GeneralizedPlaneStrainOffDiag::computeDispOffDiagJacobianScalar(unsigned int component, unsigned int jvar)
 {
-  if (jvar == _scalar_strain_var)
+  if (jvar == _scalar_out_of_plane_strain_var)
   {
     DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), jvar);
     DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar, _var.number());
@@ -80,8 +80,8 @@ GeneralizedPlaneStrainOffDiag::computeDispOffDiagJacobianScalar(unsigned int com
       for (_j = 0; _j < jv.order(); ++_j)
         for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
         {
-          ken(_i, _j) += _JxW[_qp] * _coord[_qp] * _Jacobian_mult[_qp](_index, _index, component, component) * _grad_test[_i][_qp](component);
-          kne(_j, _i) += _JxW[_qp] * _coord[_qp] * _Jacobian_mult[_qp](_index, _index, component, component) * _grad_test[_i][_qp](component);
+          ken(_i, _j) += _JxW[_qp] * _coord[_qp] * _Jacobian_mult[_qp](_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction, component, component) * _grad_test[_i][_qp](component);
+          kne(_j, _i) += _JxW[_qp] * _coord[_qp] * _Jacobian_mult[_qp](_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction, component, component) * _grad_test[_i][_qp](component);
         }
   }
 }
@@ -89,7 +89,7 @@ GeneralizedPlaneStrainOffDiag::computeDispOffDiagJacobianScalar(unsigned int com
 void
 GeneralizedPlaneStrainOffDiag::computeTempOffDiagJacobianScalar(unsigned int jvar)
 {
-  if (jvar == _scalar_strain_var)
+  if (jvar == _scalar_out_of_plane_strain_var)
   {
     DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar, _var.number());
     MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
@@ -99,6 +99,6 @@ GeneralizedPlaneStrainOffDiag::computeTempOffDiagJacobianScalar(unsigned int jva
       for (_j = 0; _j < jv.order(); ++_j)
         for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
           for (unsigned int ies = 0; ies < n_eigenstrains; ++ies)
-            kne(_j, _i) += _JxW[_qp] * _coord[_qp] * (_Jacobian_mult[_qp] * (*_deigenstrain_dT[ies])[_qp])(_index, _index) * _test[_i][_qp];
+            kne(_j, _i) += _JxW[_qp] * _coord[_qp] * (_Jacobian_mult[_qp] * (*_deigenstrain_dT[ies])[_qp])(_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction) * _test[_i][_qp];
   }
 }

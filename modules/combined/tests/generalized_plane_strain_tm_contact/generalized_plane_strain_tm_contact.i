@@ -2,8 +2,8 @@
   order = FIRST
   family = LAGRANGE
   displacements = 'disp_x disp_y'
-  scalar_strain = scalar_strain_zz
-  temp = temp
+  scalar_out_of_plane_strain = scalar_strain_zz
+  temperature = temp
 []
 
 [Mesh]
@@ -68,23 +68,9 @@
   [../]
 []
 
-[UserObjects]
-  [./gpsuo]
-    type = GeneralizedPlaneStrainUserObject
-  [../]
-[]
-
 [Kernels]
   [./TensorMechanics]
     use_displaced_mesh = true
-  [../]
-  [./gps_x]
-    type = GeneralizedPlaneStrainOffDiag
-    variable = disp_x
-  [../]
-  [./gps_y]
-    type = GeneralizedPlaneStrainOffDiag
-    variable = disp_y
   [../]
   [./heat]
     type = HeatConduction
@@ -92,11 +78,14 @@
   [../]
 []
 
-[ScalarKernels]
-  [./gps]
-    type = GeneralizedPlaneStrain
-    variable = scalar_strain_zz
-    generalized_plane_strain = gpsuo
+[Modules]
+  [./TensorMechanics]
+    [./GeneralizedPlaneStrain]
+      [./gps]
+        displacements = 'disp_x disp_y'
+        use_displaced_mesh = true
+      [../]
+    [../]
   [../]
 []
 
@@ -229,7 +218,7 @@
     normal_smoothing_distance = .1
     gap_conductivity = 0.01
     min_gap = 0.001
-#    quadrature = true
+    quadrature = true
   [../]
 []
 
@@ -242,13 +231,15 @@
   [../]
   [./strain]
     type = ComputePlaneSmallStrain
+    eigenstrain_names = eigenstrain
     block = '1 2'
   [../]
   [./thermal_strain]
-    type = ComputeThermalExpansionEigenStrain
+    type = ComputeThermalExpansionEigenstrain
     temperature = temp
     thermal_expansion_coeff = 0.02
     stress_free_temperature = 0.0
+    eigenstrain_name = eigenstrain
     block = '1 2'
   [../]
   [./stress]

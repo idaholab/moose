@@ -22,13 +22,13 @@ protected:
   virtual Real computeGradDispZZ();
   virtual Real computeGradDispZZOld();
 
-  const bool _scalar_strain_coupled;
-  const VariableValue & _scalar_strain;
-  const VariableValue & _scalar_strain_old;
+  const bool _scalar_out_of_plane_strain_coupled;
+  const VariableValue & _scalar_out_of_plane_strain;
+  const VariableValue & _scalar_out_of_plane_strain_old;
 
-  const bool _variable_strain_coupled;
-  const VariableValue & _variable_strain;
-  const VariableValue & _variable_strain_old;
+  const bool _out_of_plane_strain_coupled;
+  const VariableValue & _out_of_plane_strain;
+  const VariableValue & _out_of_plane_strain_old;
 };
 
 #endif //COMPUTEPLANEFINITESTRAIN_H

@@ -43,12 +43,12 @@ protected:
   const std::vector<MaterialPropertyName> _eigenstrain_names;
   std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
 
-  unsigned int _scalar_strain_var;
+  unsigned int _scalar_out_of_plane_strain_var;
 
   MooseVariable * _temp_var;
 
   std::vector<MooseVariable *> _disp_var;
 
-  unsigned int _index;
+  unsigned int _scalar_out_of_plane_strain_direction;
 };
 #endif //GENERALIZEDPLANESSTRAINOFFDIAG_H
