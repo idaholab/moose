@@ -76,6 +76,9 @@
 #include "PorousFlowDarcyVelocityComponent.h"
 #include "PorousFlowPropertyAux.h"
 
+// Functions
+#include "MovingPlanarFront.h"
+
 template<>
 InputParameters validParams<PorousFlowApp>()
 {
@@ -189,6 +192,9 @@ PorousFlowApp::registerObjects(Factory & factory)
   // AuxKernels
   registerAuxKernel(PorousFlowDarcyVelocityComponent);
   registerAuxKernel(PorousFlowPropertyAux);
+
+  // Functions
+  registerFunction(MovingPlanarFront);
 }
 
 // External entry point for dynamic syntax association
