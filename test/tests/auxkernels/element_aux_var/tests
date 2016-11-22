@@ -5,6 +5,19 @@
     exodiff = 'out.e'
   [../]
 
+  [./displaced_test]
+    type = 'Exodiff'
+    input = 'element_aux_var_displaced_test.i'
+    exodiff = 'displaced_out.e'
+  [../]
+
+  [./mixed_displaced_test]
+    type = 'Exodiff'
+    input = 'element_aux_var_displaced_test.i'
+    cli_args = 'AuxKernels/coupled_three/use_displaced_mesh=false Outputs/file_base=mixed_displaced_out'
+    exodiff = 'mixed_displaced_out.e'
+  [../]
+
   [./sort_test]
     type = 'Exodiff'
     input = 'elemental_sort_test.i'

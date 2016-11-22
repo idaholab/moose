@@ -20,6 +20,7 @@
 #include "AuxiliarySystem.h"
 #include "MooseTypes.h"
 #include "Assembly.h"
+#include "DisplacedProblem.h"
 
 //libmesh includes
 #include "libmesh/numeric_vector.h"
@@ -79,6 +80,8 @@ AuxKernel::AuxKernel(const InputParameters & parameters) :
     _assembly(_subproblem.assembly(_tid)),
 
     _var(_aux_sys.getVariable(_tid, parameters.get<AuxVariableName>("variable"))),
+    _displaced_problem(parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")->getDisplacedProblem()),
+    _displaced_var(_displaced_problem ? &_displaced_problem->auxSys().getVariable(_tid, parameters.get<AuxVariableName>("variable")) : NULL),
     _nodal(_var.isNodal()),
     _bnd(boundaryRestricted()),
 
@@ -109,6 +112,12 @@ AuxKernel::AuxKernel(const InputParameters & parameters) :
   for (const auto & it : coupled_vars)
     for (const auto & var : it.second)
       _depend_vars.insert(var->name());
+
+  if (_displaced_var)
+  {
+    addMooseVariableDependency(_displaced_var);
+    _displaced_var->nodalSln();
+  }
 }
 
 AuxKernel::~AuxKernel()
@@ -186,6 +195,8 @@ AuxKernel::compute()
       Real value = computeValue();
       // update variable data, which is referenced by other kernels, so the value is up-to-date
       _var.setNodalValue(value);
+      if (_displaced_var)
+        _displaced_var->setNodalValue(value);
     }
   }
   else                     /* elemental variables */
@@ -202,6 +213,8 @@ AuxKernel::compute()
       // Note that this will update the values at the quadrature points too
       // (because this is an Elemental variable)
       _var.setNodalValue(value);
+      if (_displaced_var)
+        _displaced_var->setNodalValue(value);
     }
     else                   /* high-order */
     {
@@ -211,20 +224,25 @@ AuxKernel::compute()
       _local_ke.zero();
 
       // assemble the local mass matrix and the load
-      for (unsigned int i = 0; i < _test.size(); i++)
-        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      {
+        Real qvalue = computeValue();
+        for (unsigned int i = 0; i < _test.size(); i++)
         {
           Real t = _JxW[_qp] * _coord[_qp] * _test[i][_qp];
-          _local_re(i) += t * computeValue();
+          _local_re(i) += t * qvalue;
           for (unsigned int j = 0; j < _test.size(); j++)
             _local_ke(i, j) += t * _test[j][_qp];
         }
+      }
 
       // mass matrix is always SPD
       _local_sol.resize(_n_local_dofs);
       _local_ke.cholesky_solve(_local_re, _local_sol);
 
       _var.setNodalValue(_local_sol);
+      if (_displaced_var)
+        _displaced_var->setNodalValue(_local_sol);
     }
   }
 }

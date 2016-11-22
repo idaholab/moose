@@ -1617,15 +1617,12 @@ void
 FEProblem::addAuxKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
 {
   parameters.set<FEProblem *>("_fe_problem") = this;
+
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
     parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->nlSys();
-    if (!parameters.get<std::vector<BoundaryName> >("boundary").empty())
-      _reinit_displaced_face = true;
-    else
-      _reinit_displaced_elem = true;
   }
   else
   {
@@ -1643,6 +1640,15 @@ FEProblem::addAuxKernel(const std::string & kernel_name, const std::string & nam
     parameters.set<SystemBase *>("_sys") = &_aux;
     parameters.set<SystemBase *>("_nl_sys") = &_nl;
   }
+
+  if (_displaced_problem != NULL)
+  {
+    if (!parameters.get<std::vector<BoundaryName> >("boundary").empty())
+      _reinit_displaced_face = true;
+    else
+      _reinit_displaced_elem = true;
+  }
+
   _aux.addKernel(kernel_name, name, parameters);
 }
 

@@ -135,10 +135,10 @@ public:
   const Node * & node() { return _node; }
   dof_id_type & nodalDofIndex() { return _nodal_dof_index; }
   bool isNodalDefined() { return _is_defined; }
-  const VariableValue & nodalSln() { return _nodal_u; }
-  const VariableValue & nodalSlnOld() { return _nodal_u_old; }
-  const VariableValue & nodalSlnOlder() { return _nodal_u_older; }
-  const VariableValue & nodalSlnDot() { return _nodal_u_dot; }
+  const VariableValue & nodalSln() { _need_nodal_u = true; return _nodal_u; }
+  const VariableValue & nodalSlnOld() { _need_nodal_u_old = true; return _nodal_u_old; }
+  const VariableValue & nodalSlnOlder() { _need_nodal_u_older = true; return _nodal_u_older; }
+  const VariableValue & nodalSlnDot() { _need_nodal_u_dot = true; return _nodal_u_dot; }
   const VariableValue & nodalSlnDuDotDu() { return _nodal_du_dot_du; }
 
   const VariableValue & nodalValue();
@@ -167,10 +167,10 @@ public:
   const Node * & nodeNeighbor() { return _node_neighbor; }
   dof_id_type & nodalDofIndexNeighbor() { return _nodal_dof_index_neighbor; }
   bool isNodalNeighborDefined() { return _is_defined_neighbor; }
-  const VariableValue & nodalSlnNeighbor() { return _nodal_u_neighbor; }
-  const VariableValue & nodalSlnOldNeighbor() { return _nodal_u_old_neighbor; }
-  const VariableValue & nodalSlnOlderNeighbor() { return _nodal_u_older_neighbor; }
-  const VariableValue & nodalSlnDotNeighbor() { return _nodal_u_dot_neighbor; }
+  const VariableValue & nodalSlnNeighbor() { _need_nodal_u_neighbor = true; return _nodal_u_neighbor; }
+  const VariableValue & nodalSlnOldNeighbor() { _need_nodal_u_old_neighbor = true; return _nodal_u_old_neighbor; }
+  const VariableValue & nodalSlnOlderNeighbor() { _need_nodal_u_older_neighbor = true; return _nodal_u_older_neighbor; }
+  const VariableValue & nodalSlnDotNeighbor() { _need_nodal_u_dot_neighbor = true; return _nodal_u_dot_neighbor; }
   const VariableValue & nodalSlnDuDotDuNeighbor() { return _nodal_du_dot_du_neighbor; }
 
   /**
