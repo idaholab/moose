@@ -55,4 +55,19 @@
     exodiff = 'polycrystal_action_out.e'
     allow_warnings = true
   [../]
+
+  [./euler_angles_updater]
+    type = 'Exodiff'
+    input = 'update_orientation.i'
+    exodiff = 'update_orientation_out.e'
+    allow_warnings = true
+  [../]
+
+  [./euler_angles_updater_check]
+    type = 'CSVDiff'
+    input = 'update_orientation_verify.i'
+    csvdiff = 'update_orientation_verify_out_angle_check_0001.csv'
+    rel_err = 1.e-3
+    allow_warnings = true
+  [../]
 []

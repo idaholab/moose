@@ -194,6 +194,7 @@
 #include "ConstantGrainForceAndTorque.h"
 #include "DiscreteNucleationInserter.h"
 #include "DiscreteNucleationMap.h"
+#include "EulerAngleUpdater.h"
 #include "GrainForceAndTorqueSum.h"
 #include "MaskedGrainForceAndTorque.h"
 #include "RandomEulerAngleProvider.h"
@@ -239,6 +240,7 @@
 /*
  * VectorPostprocessors
  */
+#include "EulerAngleUpdaterCheck.h"
 #include "FeatureVolumeFraction.h"
 #include "FeatureVolumeVectorPostprocessor.h"
 #include "GrainCentersPostprocessor.h"
@@ -443,11 +445,13 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerUserObject(DiscreteNucleationInserter);
   registerUserObject(DiscreteNucleationMap);
   registerUserObject(EBSDReader);
+  registerUserObject(EulerAngleUpdater);
   registerUserObject(GrainForceAndTorqueSum);
   registerUserObject(MaskedGrainForceAndTorque);
   registerUserObject(RandomEulerAngleProvider);
   registerUserObject(SolutionRasterizer);
 
+  registerVectorPostprocessor(EulerAngleUpdaterCheck);
   registerVectorPostprocessor(FeatureVolumeVectorPostprocessor);
   registerVectorPostprocessor(GrainForcesPostprocessor);
   registerVectorPostprocessor(GrainTextureVectorPostprocessor);

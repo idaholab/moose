@@ -32,11 +32,13 @@ void
 OutputEulerAngles::precalculateValue()
 {
   // ID of unique grain at current point
-  const unsigned int grain_id = _grain_tracker.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()),
+  const auto grain_id = _grain_tracker.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()),
                                                               FeatureFloodCount::FieldType::UNIQUE_REGION, 0);
 
   // Recover euler angles for current grain
-  const RealVectorValue angles = _euler.getEulerAngles(grain_id);
+  RealVectorValue angles;
+  if (grain_id >= 0)
+    angles = _euler.getEulerAngles(grain_id);
 
   // Return specific euler angle
   _value = angles(_output_euler_angle);
