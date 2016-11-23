@@ -131,10 +131,28 @@ EigenKernel::computeJacobian()
   }
 }
 
-Real
-EigenKernel::computeQpJacobian()
+void
+EigenKernel::computeOffDiagJacobian(unsigned int jvar)
 {
-  return 0;
+  if (!_is_implicit) return;
+
+  if (jvar == _var.number())
+    computeJacobian();
+  else
+  {
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+    _local_ke.resize(ke.m(), ke.n());
+    _local_ke.zero();
+
+    mooseAssert(*_eigenvalue != 0.0, "Can't divide by zero eigenvalue in EigenKernel!");
+    Real one_over_eigen = 1.0 / *_eigenvalue;
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < _phi.size(); _j++)
+        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+
+    ke += _local_ke;
+  }
 }
 
 bool
