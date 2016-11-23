@@ -68,6 +68,7 @@ class InternalSideUserObject;
 class GeneralUserObject;
 class Function;
 class KernelBase;
+class IntegratedBC;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1100,6 +1101,9 @@ protected:
 
   /// nonlocal kernels
   MooseObjectWarehouse<KernelBase> _nonlocal_kernels;
+
+  /// nonlocal integrated_bcs
+  MooseObjectWarehouse<IntegratedBC> _nonlocal_integrated_bcs;
 
   ///@{
   /// Initial condition storage

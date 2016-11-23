@@ -76,6 +76,7 @@
 #include "WrongJacobianDiffusion.h"
 #include "DefaultMatPropConsumerKernel.h"
 #include "DoNotCopyParametersKernel.h"
+#include "DriftDiffusionFluxAux.h"
 #include "CoupledAux.h"
 #include "CoupledScalarAux.h"
 #include "CoupledGradAux.h"
@@ -97,6 +98,7 @@
 #include "ExampleShapeElementKernel2.h"
 #include "SimpleTestShapeElementKernel.h"
 #include "LateDeclarationVectorPostprocessor.h"
+#include "PotentialAdvection.h"
 
 #include "RobinBC.h"
 #include "InflowBC.h"
@@ -115,6 +117,7 @@
 #include "MatDivergenceBC.h"
 #include "CoupledDirichletBC.h"
 #include "TestLapBC.h"
+#include "ExampleShapeSideIntegratedBC.h"
 
 // ICs
 #include "TEIC.h"
@@ -187,6 +190,8 @@
 #include "TestShapeElementUserObject.h"
 #include "ExampleShapeElementUserObject.h"
 #include "SimpleTestShapeElementUserObject.h"
+#include "NumShapeSideUserObject.h"
+#include "DenomShapeSideUserObject.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -298,6 +303,7 @@ void
 MooseTestApp::registerObjects(Factory & factory)
 {
   // Kernels
+  registerKernel(PotentialAdvection);
   registerKernel(ConservativeAdvection);
   registerKernel(CoeffParamDiffusion);
   registerKernel(CoupledConvection);
@@ -358,6 +364,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(SimpleTestShapeElementKernel);
 
   // Aux kernels
+  registerAux(DriftDiffusionFluxAux);
   registerAux(CoupledAux);
   registerAux(CoupledScalarAux);
   registerAux(CoupledGradAux);
@@ -384,6 +391,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerInterfaceKernel(InterfaceDiffusion);
 
   // Boundary Conditions
+  registerBoundaryCondition(ExampleShapeSideIntegratedBC);
   registerBoundaryCondition(RobinBC);
   registerBoundaryCondition(InflowBC);
   registerBoundaryCondition(OutflowBC);
@@ -496,6 +504,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(TestShapeElementUserObject);
   registerUserObject(ExampleShapeElementUserObject);
   registerUserObject(SimpleTestShapeElementUserObject);
+  registerUserObject(NumShapeSideUserObject);
+  registerUserObject(DenomShapeSideUserObject);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);

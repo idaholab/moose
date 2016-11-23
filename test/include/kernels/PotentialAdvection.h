@@ -11,18 +11,31 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+#ifndef POTENTIALADVECTION_H_
+#define POTENTIALADVECTION_H_
 
-#include "ShapeElementUserObject.h"
+#include "Kernel.h"
+
+class PotentialAdvection;
 
 template<>
-InputParameters validParams<ShapeElementUserObject>()
-{
-  InputParameters params = validParams<ElementUserObject>();
-  params += ShapeUserObject<ElementUserObject>::validParams();
-  return params;
-}
+InputParameters validParams<PotentialAdvection>();
 
-ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameters) :
-    ShapeUserObject<ElementUserObject>(parameters, ShapeType::Element)
+class PotentialAdvection : public Kernel
 {
-}
+public:
+  PotentialAdvection(const InputParameters & parameters);
+
+protected:
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+
+private:
+  const unsigned int _potential_id;
+  const Real _sgn;
+  VariableGradient _default;
+  const VariableGradient & _grad_potential;
+};
+
+#endif //POTENTIALADVECTION_H

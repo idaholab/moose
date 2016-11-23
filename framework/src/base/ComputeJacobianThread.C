@@ -22,6 +22,7 @@
 #include "KernelWarehouse.h"
 #include "NonlocalKernel.h"
 #include "SwapBackSentinel.h"
+#include "NonlocalIntegratedBC.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -86,6 +87,13 @@ ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     {
       bc->subProblem().prepareFaceShapes(bc->variable().number(), _tid);
       bc->computeJacobian();
+      /// done only when nonlocal integrated_bcs exist in the system
+      if (_fe_problem.checkNonlocalCouplingRequirement())
+      {
+        MooseSharedPointer<NonlocalIntegratedBC> nonlocal_integrated_bc = MooseSharedNamespace::dynamic_pointer_cast<NonlocalIntegratedBC>(bc);
+        if (nonlocal_integrated_bc)
+          bc->computeNonlocalJacobian();
+      }
     }
 }
 
