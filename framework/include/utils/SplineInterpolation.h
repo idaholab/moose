@@ -26,7 +26,7 @@
  *
  * Adopted from Numerical Recipes in C (section 3.3).
  */
-class SplineInterpolation : SplineInterpolationBase
+class SplineInterpolation : public SplineInterpolationBase
 {
 public:
   SplineInterpolation();

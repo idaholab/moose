@@ -24,7 +24,7 @@
  * Consistent with the terminology in Numerical Recipes, moving over a column spline means moving over the x1 coord
  * Likewise, moving over a row spline means moving over the x2 coord
  */
-class BicubicSplineInterpolation : SplineInterpolationBase
+class BicubicSplineInterpolation : public SplineInterpolationBase
 {
 public:
   BicubicSplineInterpolation();
