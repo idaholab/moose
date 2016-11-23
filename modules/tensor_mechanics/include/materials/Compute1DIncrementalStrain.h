@@ -10,9 +10,10 @@
 #include "ComputeIncrementalSmallStrain.h"
 
 /**
- * Compute1DIncrementalStrain defines a strain increment only for
- * incremental strains in 1D geometries, handling the out of line strains.
- * Compute1DIncrementalStrain contains a virtual method to define the strain_yy and strain_zz.
+ * Compute1DIncrementalStrain defines a strain increment only for incremental
+ * small strains in 1D problems, handling strains in other two directions.
+ * Compute1DIncrementalStrain contains virtual methods to define the displacement gradients
+ * as a general nonzero value.
  */
 class Compute1DIncrementalStrain : public ComputeIncrementalSmallStrain
 {
@@ -21,25 +22,24 @@ public:
 
 protected:
   /// Computes the current and old deformation gradients with the assumptions for
-  /// 1D geometries, including plane strain, generalized plane strain, and axisymmetric,
-  /// and returns the total strain increment tensor
-  virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment) override;
+  /// axisymmetric 1D problems, and returns the total strain increment tensor
+  void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment) override;
 
   /// Computes the current dUy/dY; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeDUYDY() = 0;
+  virtual Real computeGradDispYY() = 0;
 
   /// Computes the old dUy/dY; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeDUYDYOld() = 0;
+  virtual Real computeGradDispYYOld() = 0;
 
   /// Computes the current dUz/dZ; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeDUZDZ() = 0;
+  virtual Real computeGradDispZZ() = 0;
 
   /// Computes the old dUz/dZ; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeDUZDZOld() = 0;
+  virtual Real computeGradDispZZOld() = 0;
 };
 
 #endif //COMPUTE1DINCREMENTALSTRAIN_H

@@ -19,12 +19,10 @@ class GeneralizedPlaneStrainAction : public Action
 public:
   GeneralizedPlaneStrainAction(const InputParameters & params);
 
-  virtual void act();
+  void act() override;
 
 protected:
   std::vector<NonlinearVariableName> _displacements;
   unsigned int _ndisp;
-
-  NonlinearVariableName _scalar_strain_zz;
 };
 #endif //GENERALIZEDPLANESTRAINACTION_H

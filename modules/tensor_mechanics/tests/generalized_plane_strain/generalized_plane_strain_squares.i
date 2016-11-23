@@ -5,13 +5,10 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
+
   [./scalar_strain_zz1]
     order = FIRST
     family = SCALAR
@@ -94,13 +91,13 @@
       [./gps1]
         use_displaced_mesh = true
         displacements = 'disp_x disp_y'
-        scalar_strain_zz = scalar_strain_zz1
+        scalar_out_of_plane_strain = scalar_strain_zz1
         block = '1'
       [../]
       [./gps2]
         use_displaced_mesh = true
         displacements = 'disp_x disp_y'
-        scalar_strain_zz = scalar_strain_zz2
+        scalar_out_of_plane_strain = scalar_strain_zz2
         block = '2'
       [../]
     [../]
@@ -227,14 +224,14 @@
   [./strain1]
     type = ComputePlaneSmallStrain
     displacements = 'disp_x disp_y'
-    scalar_strain_zz = scalar_strain_zz1
+    scalar_out_of_plane_strain = scalar_strain_zz1
     block = 1
     eigenstrain_names = eigenstrain
   [../]
   [./strain2]
     type = ComputePlaneSmallStrain
     displacements = 'disp_x disp_y'
-    scalar_strain_zz = scalar_strain_zz2
+    scalar_out_of_plane_strain = scalar_strain_zz2
     block = 2
     eigenstrain_names = eigenstrain
   [../]

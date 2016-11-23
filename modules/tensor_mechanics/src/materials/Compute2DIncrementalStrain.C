@@ -32,7 +32,7 @@ Compute2DIncrementalStrain::computeTotalStrainIncrement(RankTwoTensor & total_st
 
   // Compute the displacement gradient (2,2) value for plane strain, generalized plane strain, or axisymmetric problems
   A(2,2) = computeGradDispZZ();
-  Fbar(2,2) = computeGradDispZZold();
+  Fbar(2,2) = computeGradDispZZOld();
 
   _deformation_gradient[_qp] = A;
   _deformation_gradient[_qp].addIa(1.0);

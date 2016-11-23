@@ -3,7 +3,7 @@
   family = LAGRANGE
   displacements = 'disp_x disp_y'
   temperature = temp
-  strain_zz = strain_zz
+  out_of_plane_strain = strain_zz
 []
 
 [Mesh]

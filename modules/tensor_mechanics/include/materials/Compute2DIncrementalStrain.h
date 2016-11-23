@@ -33,7 +33,7 @@ protected:
 
   /// Computes the old out-of-plane displacement gradient; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeGradDispZZold() = 0;
+  virtual Real computeGradDispZZOld() = 0;
 };
 
 #endif //COMPUTE2DINCREMENTALSTRAIN_H

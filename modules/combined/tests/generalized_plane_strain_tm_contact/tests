@@ -1,11 +1,11 @@
 [Tests]
- [./generalized_plane_strain_tm_contact_field]
+ [./generalized_plane_strain_tm_contact]
    type = 'Exodiff'
-   input = 'generalized_plane_strain_tm_contact_field.i'
-   exodiff = 'generalized_plane_strain_tm_contact_field_out.e'
+   input = 'generalized_plane_strain_tm_contact.i'
+   exodiff = 'generalized_plane_strain_tm_contact_out.e'
    min_parallel = 2
    custom_cmp = 'generalized.exodiff'
    superlu = true
-   deleted = '#6924'
+#   deleted = '#6924'
  [../]
 []

@@ -34,7 +34,6 @@ ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters) :
 void
 ComputeFiniteStrain::computeProperties()
 {
-  // Method from Rashid, 1993
   RankTwoTensor ave_Fhat;
   Real ave_dfgrd_det = 0.0;
 

@@ -35,16 +35,16 @@ ComputeAxisymmetricRZIncrementalStrain::initialSetup()
 Real
 ComputeAxisymmetricRZIncrementalStrain::computeGradDispZZ()
 {
-  if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
+  if (!MooseUtils::absoluteFuzzyEqual(_q_point[_qp](0), 0.0))
     return (*_disp[0])[_qp] / _q_point[_qp](0);
   else
     return 0.0;
 }
 
 Real
-ComputeAxisymmetricRZIncrementalStrain::computeGradDispZZold()
+ComputeAxisymmetricRZIncrementalStrain::computeGradDispZZOld()
 {
-  if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
+  if (!MooseUtils::absoluteFuzzyEqual(_q_point[_qp](0), 0.0))
     return _disp_old_0[_qp] / _q_point[_qp](0);
   else
     return 0.0;
