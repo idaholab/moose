@@ -3,27 +3,27 @@
     type = RunApp
     input = 'AC_CH_Multigrain.i'
     cli_args = '--check-input Mesh/uniform_refine=0 Executioner/Adaptivity/initial_adaptivity=0'
+
     # This example uses ShapeElementUserObject which contains a
-    # mooseWarning() that is treated as an error in dbg mode.
-    # Therefore only check this test in opt mode.
-    method = 'OPT'
+    # mooseWarning()
+    executable_pattern = 'phase_field-\w+$'
   [../]
   [./AC_CH_advection_constforce_rect]
     type = RunApp
     input = 'AC_CH_advection_constforce_rect.i'
     cli_args = '--check-input'
+
     # This example uses NonlocalKernel which contains a
-    # mooseWarning() that is treated as an error in dbg mode.
-    # Therefore only check this test in opt mode.
-    method = 'OPT'
+    # mooseWarning()
+    executable_pattern = 'phase_field-\w+$'
   [../]
   [./grain_forcedensity_ext]
     type = RunApp
     input = 'grain_forcedensity_ext.i'
     cli_args = '--check-input'
+
     # This example uses ShapeElementUserObject which contains a
-    # mooseWarning() that is treated as an error in dbg mode.
-    # Therefore only check this test in opt mode.
-    method = 'OPT'
+    # mooseWarning()
+    executable_pattern = 'phase_field-\w+$'
   [../]
 []
