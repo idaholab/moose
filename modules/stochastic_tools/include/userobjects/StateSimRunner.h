@@ -1,15 +1,8 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
 
 #ifndef STATESIMRUNNER_H
@@ -25,26 +18,25 @@ template<>
 InputParameters validParams<StateSimRunner>();
 
 /**
- *
+ Object to start a State Simulation and manage the moose timesteping with state event times.
  */
 class StateSimRunner : public GeneralUserObject
 {
 public:
   StateSimRunner(const InputParameters & parameters);
-  virtual ~StateSimRunner();
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize()override;
 
   Real getValue() const;
   //Real getValue() const { return 0; }
 
 protected:
-  string _model_path;
+  std::string _model_path;
   StateProcessor _state_sim;
-  int _next_state_time;
-  bool ran_state_sim;
+  unsigned int _next_state_time;
+  bool _ran_state_sim;
 };
 
 #endif /* STATESIMRUNNER_H */

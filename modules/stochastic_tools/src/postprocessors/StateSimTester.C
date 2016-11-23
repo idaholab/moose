@@ -1,15 +1,8 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
 
 #include "StateSimTester.h"
@@ -34,7 +27,6 @@ StateSimTester::StateSimTester(const InputParameters & parameters)
     _state_sim_runner_ptr(getUserObject<StateSimRunner>("state_sim_runner")),
     _test_val_enum(parameters.get<MooseEnum>("test_type").getEnum<SystemEnum>())
 {
-  //_state_sim_runner_ptr = &&getUserObject<StateSimRunner>("state_sim_runner"),
 }
 
 Real
@@ -43,7 +35,7 @@ StateSimTester::getValue()
   switch (_test_val_enum)
   {
     case SYNCTIMES:
-      return _state_sim_runner_ptr.getValue(); //todo
+      return _state_sim_runner_ptr.getValue();
     default:
       return -1;
   }

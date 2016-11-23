@@ -18,12 +18,11 @@
   dt = 1
 []
 
-
-
 [UserObjects]
   [./cur_Sim]
     type = StateSimRunner
     model_path = 'path/to/model'
+    seed = 7;
   [../]
 []
 
