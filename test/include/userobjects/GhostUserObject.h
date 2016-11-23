@@ -24,7 +24,7 @@ template<>
 InputParameters validParams<GhostUserObject>();
 
 /**
- * An Elemental user object tha uses built-in Random number generation.
+ * User object to show Ghosted User Objects on ALL processors or a single processor.
  */
 class GhostUserObject : public GeneralUserObject
 {
@@ -39,6 +39,7 @@ public:
 
 protected:
   std::set<dof_id_type> _ghost_data;
+  dof_id_type _rank;
 };
 
 #endif //GHOSTUSEROBJECT_H

@@ -9,7 +9,7 @@
   parallel_type = distributed
 
   # We are testing these two parameters
-  num_ghosted_edge_neighbors = 1
+  num_ghosted_layers = 1
   ghost_point_neighbors = false
 []
 

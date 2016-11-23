@@ -99,7 +99,7 @@ InputParameters validParams<MooseMesh>()
 
   // Note: This parameter is named to match 'construct_side_list_from_node_list' in SetupMeshAction
   params.addParam<bool>("construct_node_list_from_side_list", true, "Whether or not to generate nodesets from the sidesets (usually a good idea).");
-  params.addParam<unsigned short>("num_ghosted_edge_neighbors", 1, "Parameter to specify the number of geometric edge neighers"
+  params.addParam<unsigned short>("num_ghosted_layers", 1, "Parameter to specify the number of geometric element layers"
                                  " that will be available when DistribuedMesh is used. Value is ignored in ReplicatedMesh mode");
   params.addParam<bool>("ghost_point_neighbors", false, "Boolean to specify whether or not all point neighbors are ghosted"
                        " when DistribuedMesh is used. Value is ignored in ReplicatedMesh mode");
@@ -107,7 +107,7 @@ InputParameters validParams<MooseMesh>()
   params.registerBase("MooseMesh");
 
   // groups
-  params.addParamNamesToGroup("dim nemesis patch_update_strategy construct_node_list_from_side_list num_ghosted_edge_neighbors"
+  params.addParamNamesToGroup("dim nemesis patch_update_strategy construct_node_list_from_side_list num_ghosted_layers"
                               " ghost_point_neighbors", "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
@@ -203,11 +203,11 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     if (getParam<bool>("ghost_point_neighbors"))
       _ghosting_functors.emplace_back(libmesh_make_unique<GhostPointNeighbors>(*_mesh));
 
-    auto num_edge_neighbors = getParam<unsigned short>("num_ghosted_edge_neighbors");
-    if (num_edge_neighbors > 1)
+    auto num_ghosted_layers = getParam<unsigned short>("num_ghosted_layers");
+    if (num_ghosted_layers > 1)
     {
       auto default_coupling = libmesh_make_unique<DefaultCoupling>();
-      default_coupling->set_n_levels(num_edge_neighbors);
+      default_coupling->set_n_levels(num_ghosted_layers);
       _ghosting_functors.emplace_back(std::move(default_coupling));
     }
 

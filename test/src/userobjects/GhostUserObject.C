@@ -15,10 +15,14 @@
 #include "GhostUserObject.h"
 #include "MooseMesh.h"
 
+// invalid_processor_id
+#include "libmesh/dof_object.h"
+
 template<>
 InputParameters validParams<GhostUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
+  params.addParam<unsigned int>("rank", DofObject::invalid_processor_id, "The rank for which the ghosted elements are recorded (Default: ALL)");
 
   MultiMooseEnum setup_options(SetupInterface::getExecuteOptions());
   setup_options = "timestep_begin";
@@ -27,7 +31,8 @@ InputParameters validParams<GhostUserObject>()
 }
 
 GhostUserObject::GhostUserObject(const InputParameters & parameters) :
-    GeneralUserObject(parameters)
+    GeneralUserObject(parameters),
+    _rank(getParam<unsigned int>("rank"))
 {
 }
 
@@ -41,15 +46,19 @@ void
 GhostUserObject::execute()
 {
   auto my_processor_id = processor_id();
-  const auto & mesh = _subproblem.mesh().getMesh();
 
-  const auto end = mesh.active_elements_end();
-  for (auto el = mesh.active_elements_begin(); el != end; ++el)
+  if (_rank == DofObject::invalid_processor_id || my_processor_id == _rank)
   {
-    const auto & elem = *el;
+    const auto & mesh = _subproblem.mesh().getMesh();
 
-    if (elem->processor_id() != my_processor_id)
-      _ghost_data.emplace(elem->id());
+    const auto end = mesh.active_elements_end();
+    for (auto el = mesh.active_elements_begin(); el != end; ++el)
+    {
+      const auto & elem = *el;
+
+      if (elem->processor_id() != my_processor_id)
+        _ghost_data.emplace(elem->id());
+    }
   }
 }
 
