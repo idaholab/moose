@@ -4,9 +4,7 @@ import path_tool
 path_tool.activate_module('FactorySystem')
 path_tool.activate_module('argparse')
 
-from ParseGetPot import ParseGetPot
 from socket import gethostname
-#from options import *
 from util import *
 from RunParallel import RunParallel
 from CSVDiffer import CSVDiffer
@@ -17,6 +15,7 @@ from InputParameters import InputParameters
 from Factory import Factory
 from Parser import Parser
 from Warehouse import Warehouse
+from RunApp import RunApp
 
 import argparse
 from optparse import OptionParser, OptionGroup, Values
@@ -376,6 +375,12 @@ class TestHarness:
 
     if self.options.scaling and test['scale_refine']:
       caveats.append('scaled')
+
+    # Make sure nl_rel_tol met the maximum
+    if reason == '':
+      if isinstance(tester, RunApp):
+        if not tester.checkNlRelTol():
+          reason = 'NL_REL_TOL_TOO_LARGE'
 
     did_pass = True
     if reason == '':

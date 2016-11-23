@@ -1,6 +1,7 @@
 import re, os, sys, time
 from Tester import Tester
 from RunParallel import RunParallel # For TIMEOUT value
+from ParseGetPot import ParseGetPot, ParseException
 
 class RunApp(Tester):
 
@@ -81,6 +82,30 @@ class RunApp(Tester):
     # Lower the ceiling
     ncpus = min(ncpus, int(self.specs['max_parallel']))
     return ncpus
+
+  def checkNlRelTol(self):
+    """Parse the input file and make sure nl_rel_tol is below the maximum."""
+    abs_path = os.path.join(self.specs['test_dir'].strip(), self.specs['input'].strip())
+    print abs_path
+    try:
+      p = ParseGetPot(abs_path)
+      root = p.root_node
+      if 'Executioner' in root.children:
+        executioner = root.children['Executioner']
+        if 'nl_rel_tol' in executioner.params:
+          tol = float(executioner.params['nl_rel_tol'])
+          if tol > 1e-8:
+            return False
+      return True
+    # There are a bunch of possible errors that should be handled by MOOSE (bad
+    # GetPot, non-existant input file).  If we got one of these exceptions we
+    # probably don't care about solver tolerance.
+    except ParseException:
+      return True
+    except IOError:
+      return True
+
+
 
   def getCommand(self, options):
     specs = self.specs
