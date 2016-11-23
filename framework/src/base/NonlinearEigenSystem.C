@@ -27,38 +27,38 @@
 #include "libmesh/eigen_system.h"
 
 namespace Moose {
-  void assemble_matrix(EquationSystems & es, const std::string & system_name)
-  {
 #if LIBMESH_HAVE_SLEPC
-    FEProblemBase * p = es.parameters.get<FEProblemBase *>("_fe_problem_base");
-    EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
+void assemble_matrix(EquationSystems & es, const std::string & system_name)
+{
+  FEProblemBase * p = es.parameters.get<FEProblemBase *>("_fe_problem_base");
+  EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
 
-    p->computeJacobian(*eigen_system.solution.get(), *eigen_system.matrix_A);
+  p->computeJacobian(*eigen_system.solution.get(), *eigen_system.matrix_A);
+}
 #else
-    mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libmesh\n");
+void assemble_matrix(EquationSystems & /*es*/, const std::string & /*system_name*/)
+{
+  mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh\n");
+}
 #endif /* LIBMESH_HAVE_SLEPC */
-  }
 }
 
 
-NonlinearEigenSystem::NonlinearEigenSystem(FEProblemBase & fe_problem, const std::string & name)
 #if LIBMESH_HAVE_SLEPC
+NonlinearEigenSystem::NonlinearEigenSystem(FEProblemBase & fe_problem, const std::string & name)
     : NonlinearSystemBase(fe_problem, fe_problem.es().add_system<TransientEigenSystem>(name), name),
     _transient_sys(fe_problem.es().get_system<TransientEigenSystem>(name))
-#endif /* LIBMESH_HAVE_SLEPC */
 {
-#if LIBMESH_HAVE_SLEPC
   // Give the system a pointer to the matrix assembly
   // function defined below.
   sys().attach_assemble_function(Moose::assemble_matrix);
+}
 #else
-  mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libmesh\n");
-#endif /* LIBMESH_HAVE_SLEPC */
-}
-
-NonlinearEigenSystem::~NonlinearEigenSystem()
+NonlinearEigenSystem::NonlinearEigenSystem(FEProblemBase & /*fe_problem*/, const std::string & /*name*/)
 {
+  mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh\n");
 }
+#endif /* LIBMESH_HAVE_SLEPC */
 
 #if LIBMESH_HAVE_SLEPC
 void
@@ -73,21 +73,17 @@ NonlinearEigenSystem::solve()
   _time_integrator->postSolve();
 }
 
-
 void
 NonlinearEigenSystem::stopSolve()
 {
   mooseError("did not implement yet \n");
 }
 
-
-
 void
 NonlinearEigenSystem::setupFiniteDifferencedPreconditioner()
 {
   mooseError("did not implement yet \n");
 }
-
 
 bool
 NonlinearEigenSystem::converged()
@@ -103,14 +99,12 @@ NonlinearEigenSystem::getCurrentNonlinearIterationNumber()
   return 0;
 }
 
-
 NumericVector<Number> &
 NonlinearEigenSystem::RHS()
 {
   mooseError("did not implement yet \n");
   //return NULL;
 }
-
 
 NonlinearSolver<Number> *
 NonlinearEigenSystem::nonlinearSolver()
