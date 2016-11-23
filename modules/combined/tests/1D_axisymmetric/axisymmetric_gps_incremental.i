@@ -1,25 +1,22 @@
 #
-# This test checks the out of plane stress and constraint.  The model consists
-# of two sets of line elements.  One undergoes a temperature rise of 100 with
+# This test checks the generalized plane strain using incremental small strain formulation.
+# The model consists of two sets of line elements. One undergoes a temperature rise of 100 with
 # the other seeing a temperature rise of 300.  Young's modulus is 3600, and
 # Poisson's ratio is 0.2.  The thermal expansion coefficient is 1e-8.  All
 # nodes are constrained against movement.
 #
-# Without the strain_yy constraint, the stress solution would be
-# [-6e-3, -6e-3, -6e-3] and [-18e-3, -18e-3, -18e-3] (xx, yy, zz).  The out
-# of plane stress kernel works to minimize the out of plane stress, and the
-# constraint forces the out of plane strain to be equal.
+# For plane strain case, i.e., without constraining the strain_yy to be uniform,
+# the stress solution would be [-6e-3, -6e-3, -6e-3] and [-18e-3, -18e-3, -18e-3] (xx, yy, zz).
+# The generalized plane strain kernels work to balance the force in y direction.
 #
-# With an out of plane strain of 3e-3, the stress solution becomes
+# With out of plane strain of 3e-6, the stress solution becomes
 # [-3e-3, 6e-3, -3e-3] and [-15e-3, -6e-3, -15e-3] (xx, yy, zz).  This gives
-# an average out of plane stress of zero.
+# a domain integral of out-of-plane stress to be zero.
 #
 
 [GlobalParams]
-  # Set initial fuel density, other global parameters
-  order = FIRST
-  family = LAGRANGE
   displacements = disp_x
+  scalar_out_of_plane_strain = scalar_strain_yy
 []
 
 [Problem]
@@ -27,22 +24,35 @@
 []
 
 [Mesh]
-  file = constraint.e
+  file = lines.e
 []
 
 [Variables]
-  # Define dependent variables and initial conditions
   [./disp_x]
-  [../]
-  [./strain_yy]
   [../]
   [./temp]
     initial_condition = 580.0
   [../]
+  [./scalar_strain_yy]
+    order = FIRST
+    family = SCALAR
+  [../]
 []
 
 [AuxVariables]
-  [./stress_xx]      # stress aux variables are defined for output; this is a way to get integration point variables to the output file
+  [./strain_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./strain_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./strain_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -70,15 +80,7 @@
 []
 
 [Kernels]
-  [./rz]
-    type = StressDivergenceRZTensors
-    variable = disp_x
-    component = 0
-  [../]
-  [./solid_z]
-    type = WeakPlaneStress
-    variable = strain_yy
-    direction = y
+  [./TensorMechanics]
   [../]
   [./heat]
     type = HeatConduction
@@ -86,9 +88,41 @@
   [../]
 []
 
+[Modules]
+  [./TensorMechanics]
+    [./GeneralizedPlaneStrain]
+      [./gps]
+      [../]
+    [../]
+  [../]
+[]
+
 [AuxKernels]
-  # Define auxilliary kernels for each of the aux variables
-  [./stress_xx]               # computes stress components for output
+  [./strain_xx]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_xx
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
+  [../]
+  [./strain_yy]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_yy
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
+  [../]
+  [./strain_zz]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_zz
+    index_i = 2
+    index_j = 2
+    execute_on = timestep_end
+  [../]
+  [./stress_xx]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
@@ -135,35 +169,21 @@
   [../]
 []
 
-[Constraints]
-  [./syy_20]
-    type = EqualValueBoundaryConstraint
-    variable = strain_yy
-    slave = 1000
-    penalty = 1e12
-    formulation = kinematic
-  [../]
-[]
-
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = 1
     youngs_modulus = 3600
     poissons_ratio = 0.2
   [../]
 
   [./strain]
-    type = ComputeAxisymmetricRZIncrementalPlaneStrain
-    block = 1
-    strain_yy = strain_yy
+    type = ComputeAxisymmetric1DIncrementalStrain
     eigenstrain_names = thermal_eigenstrain
   [../]
 
   [./thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     eigenstrain_name = thermal_eigenstrain
-    block = 1
     thermal_expansion_coeff = 1e-8
     temperature = temp
     incremental_form = true
@@ -171,13 +191,11 @@
   [../]
 
   [./stress]
-    type = ComputeFiniteStrainElasticStress
-    block = 1
+    type = ComputeStrainIncrementBasedStress
   [../]
 
   [./thermal]
     type = HeatConductionMaterial
-    block = 1
     thermal_conductivity = 1.0
     specific_heat = 1.0
   [../]
@@ -185,27 +203,19 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-  petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu superlu_dist'
-
   line_search = 'none'
 
   l_max_its = 50
-  l_tol = 8e-3
+  l_tol = 1e-6
   nl_max_its = 15
-  nl_abs_tol = 1e-8 #1e-10
+  nl_abs_tol = 1e-10
   start_time = 0
   end_time = 1
   num_steps = 1
 []
 
 [Outputs]
-  # Define output file(s)
   exodus = true
   console = true
 []

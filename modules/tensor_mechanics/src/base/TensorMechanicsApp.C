@@ -61,7 +61,6 @@
 #include "ComputeRSphericalSmallStrain.h"
 #include "ComputeIncrementalSmallStrain.h"
 #include "ComputeAxisymmetricRZIncrementalStrain.h"
-#include "ComputeAxisymmetricRZIncrementalPlaneStrain.h"
 #include "ComputeRSphericalIncrementalStrain.h"
 #include "ComputeFiniteStrain.h"
 #include "ComputeAxisymmetricRZFiniteStrain.h"
@@ -94,6 +93,9 @@
 #include "ComputeStrainIncrementBasedStress.h"
 #include "ComputeElasticSmearedCrackingStress.h"
 #include "InclusionProperties.h"
+#include "ComputeAxisymmetric1DSmallStrain.h"
+#include "ComputeAxisymmetric1DIncrementalStrain.h"
+#include "ComputeAxisymmetric1DFiniteStrain.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -243,7 +245,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeRSphericalSmallStrain);
   registerMaterial(ComputeIncrementalSmallStrain);
   registerMaterial(ComputeAxisymmetricRZIncrementalStrain);
-  registerMaterial(ComputeAxisymmetricRZIncrementalPlaneStrain);
   registerMaterial(ComputeRSphericalIncrementalStrain);
   registerMaterial(ComputeFiniteStrain);
   registerMaterial(ComputeAxisymmetricRZFiniteStrain);
@@ -277,6 +278,9 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeStrainIncrementBasedStress);
   registerMaterial(ComputeElasticSmearedCrackingStress);
   registerMaterial(InclusionProperties);
+  registerMaterial(ComputeAxisymmetric1DSmallStrain);
+  registerMaterial(ComputeAxisymmetric1DIncrementalStrain);
+  registerMaterial(ComputeAxisymmetric1DFiniteStrain);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);

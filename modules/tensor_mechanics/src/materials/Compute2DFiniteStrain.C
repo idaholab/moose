@@ -26,7 +26,6 @@ Compute2DFiniteStrain::Compute2DFiniteStrain(const InputParameters & parameters)
 void
 Compute2DFiniteStrain::computeProperties()
 {
-  // Method from Rashid, 1993
   RankTwoTensor ave_Fhat;
   Real ave_dfgrd_det = 0.0;
 
@@ -39,7 +38,7 @@ Compute2DFiniteStrain::computeProperties()
 
     // Compute the displacement gradient (2,2) value for plane strain, generalized plane strain, or axisymmetric problems
     A(2,2) = computeGradDispZZ();
-    Fbar(2,2) = computeGradDispZZold();
+    Fbar(2,2) = computeGradDispZZOld();
 
     // Gauss point deformation gradient
     _deformation_gradient[_qp] = A;

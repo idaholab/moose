@@ -1,15 +1,15 @@
 [Tests]
- [./planestrain]
+ [./plane_strain]
     type = 'Exodiff'
-    input = 'planestrain.i'
-    exodiff = 'planestrain_out.e'
-    custom_cmp = 'planestrain.exodiff'
+    input = 'plane_strain.i'
+    exodiff = 'plane_strain_out.e'
+    custom_cmp = 'plane_strain.exodiff'
  [../]
- [./planestrain_prescribed]
+ [./plane_strain_prescribed]
    type = 'Exodiff'
-   input = 'planestrain_prescribed.i'
-   exodiff = 'planestrain_prescribed_out.e'
-   custom_cmp = 'planestrain.exodiff'
+   input = 'plane_strain_prescribed.i'
+   exodiff = 'plane_strain_prescribed_out.e'
+   custom_cmp = 'plane_strain.exodiff'
  [../]
  [./generalized_plane_strain_small]
    type = 'Exodiff'
@@ -35,10 +35,10 @@
    exodiff = 'generalized_plane_strain_squares_out.e'
    abs_zero = 1e-7
  [../]
- [./out_of_plane_traction]
+ [./out_of_plane_pressure]
    type = 'Exodiff'
-   input = 'out_of_plane_traction.i'
-   exodiff = 'out_of_plane_traction_out.e'
+   input = 'out_of_plane_pressure.i'
+   exodiff = 'out_of_plane_pressure_out.e'
    abs_zero = 1e-9
  [../]
 []

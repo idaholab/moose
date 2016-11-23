@@ -34,7 +34,7 @@ ComputeAxisymmetricRZSmallStrain::initialSetup()
 Real
 ComputeAxisymmetricRZSmallStrain::computeStrainZZ()
 {
-  if (_q_point[_qp](0) != 0.0)
+  if (!MooseUtils::absoluteFuzzyEqual(_q_point[_qp](0), 0.0))
     return (*_disp[0])[_qp] / _q_point[_qp](0);
   else
     return 0.0;
