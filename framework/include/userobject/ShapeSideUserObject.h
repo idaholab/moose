@@ -12,17 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ShapeElementUserObject.h"
+#ifndef SHAPESIDEUSEROBJECT_H
+#define SHAPESIDEUSEROBJECT_H
+
+#include "SideUserObject.h"
+#include "ShapeUserObject.h"
+
+//Forward Declarations
+class ShapeSideUserObject;
 
 template<>
-InputParameters validParams<ShapeElementUserObject>()
-{
-  InputParameters params = validParams<ElementUserObject>();
-  params += ShapeUserObject<ElementUserObject>::validParams();
-  return params;
-}
+InputParameters validParams<ShapeSideUserObject>();
 
-ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameters) :
-    ShapeUserObject<ElementUserObject>(parameters, ShapeType::Element)
+/**
+ * SideUserObject class in which the _phi and _grad_phi shape function data
+ * is available and correctly initialized on EXEC_NONLINEAR (the Jacobian calculation).
+ * This enables the calculation of Jacobian matrix contributions inside a UO.
+ *
+ * \warning It is up to the user to ensure _fe_problem.currentlyComputingJacobian()
+ *          returns true before utilizing the shape functions.
+ */
+class ShapeSideUserObject : public ShapeUserObject<SideUserObject>
 {
-}
+public:
+  ShapeSideUserObject(const InputParameters & parameters);
+};
+
+#endif //SHAPESIDEUSEROBJECT_H

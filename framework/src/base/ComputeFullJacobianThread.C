@@ -20,6 +20,7 @@
 #include "DGKernel.h"
 #include "InterfaceKernel.h"
 #include "NonlocalKernel.h"
+#include "NonlocalIntegratedBC.h"
 // libmesh includes
 #include "libmesh/threads.h"
 
@@ -145,6 +146,35 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
           bc->subProblem().prepareFaceShapes(jvar.number(), _tid);
           bc->computeJacobianBlock(jvar.number());
         }
+    }
+  }
+
+  /// done only when nonlocal integrated_bcs exist in the system
+  if (_fe_problem.checkNonlocalCouplingRequirement())
+  {
+    std::vector<std::pair<MooseVariable *, MooseVariable *> > & cne = _fe_problem.nonlocalCouplingEntries(_tid);
+    for (const auto & it : cne)
+    {
+      MooseVariable & ivariable = *(it.first);
+      MooseVariable & jvariable = *(it.second);
+
+      unsigned int ivar = ivariable.number();
+      unsigned int jvar = jvariable.number();
+
+      if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) && _integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
+      {
+        const std::vector<MooseSharedPointer<IntegratedBC> > & integrated_bcs = _integrated_bcs.getBoundaryObjects(bnd_id, _tid);
+        for (const auto & integrated_bc : integrated_bcs)
+        {
+          MooseSharedPointer<NonlocalIntegratedBC> nonlocal_integrated_bc = MooseSharedNamespace::dynamic_pointer_cast<NonlocalIntegratedBC>(integrated_bc);
+          if (nonlocal_integrated_bc)
+            if ((integrated_bc->variable().number() == ivar) && integrated_bc->isImplicit())
+            {
+              integrated_bc->subProblem().prepareFaceShapes(jvar, _tid);
+              integrated_bc->computeNonlocalOffDiagJacobian(jvar);
+            }
+        }
+      }
     }
   }
 
