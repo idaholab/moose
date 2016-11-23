@@ -149,7 +149,7 @@ EigenKernel::computeOffDiagJacobian(unsigned int jvar)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpOffDiagJacobian(jvar);
 
     ke += _local_ke;
   }
