@@ -1,27 +1,51 @@
+a=4
+b=5
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 4
-  ny = 4
-  xmin = -1
-  xmax = 3
-  ymin = -1
-  ymax = 3
-  elem_type = EDGE2
+  nx = ${a}
+  ny = ${b}
+  xmax = ${a}
+  ymax = ${b}
 []
 
 [Functions]
   [./spline_fn]
-    type = SplineFunction
-    x1 = '-1  0 3'
-    y = '0.5 0 3'
+    type = BicubicSplineFunction
+    x1 = '0 1 4'
+    x2 = '0 3 5'
+    y = '6 -357 -1219 3 -351 -1207 -234 -561 -1399'
+  [../]
+  [./u_func]
+    type = ParsedFunction
+    value = '12 * (x^4/12 - ${a}*x^3/6) + 24 * (y^4/12 - ${b}*y^3/6) + 3*x*y + 4*x + 5*y + 6'
+  [../]
+  [./u2_forcing_func]
+    type = ParsedFunction
+    value = '-12*x * (x - ${a}) - 24*y * (y - ${b})'
   [../]
 []
 
 [Variables]
   [./u]
-    order = THIRD
-    family = HERMITE
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
+[AuxVariables]
+  [./bi_func_value]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
+[AuxKernels]
+  [./bi_func_value]
+    type = FunctionAux
+    variable = bi_func_value
+    function = spline_fn
   [../]
 []
 
@@ -31,10 +55,15 @@
     variable = u
   [../]
 
-  [./ufn]
-    type = SplineFFn
+  # [./ufn]
+  #   type = BicubicSplineFFn
+  #   variable = u
+  #   function = spline_fn
+  # [../]
+  [./body_force]
+    type = BodyForce
     variable = u
-    function = spline_fn
+    function = u2_forcing_func
   [../]
 []
 
@@ -42,8 +71,8 @@
   [./sides]
     type = FunctionDirichletBC
     variable = u
-    boundary = '0 1'
-    function = spline_fn
+    boundary = '0 1 2 3'
+    function = u_func
   [../]
 []
 

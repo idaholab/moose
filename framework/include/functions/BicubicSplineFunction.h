@@ -16,6 +16,7 @@
 #define BICUBICSPLINEFUNCTION_H
 
 #include "Function.h"
+#include "FunctionInterface.h"
 #include "BicubicSplineInterpolation.h"
 
 class BicubicSplineFunction;
@@ -26,7 +27,8 @@ InputParameters validParams<BicubicSplineFunction>();
 /**
  * Function that uses spline interpolation
  */
-class BicubicSplineFunction : public Function
+class BicubicSplineFunction : public Function,
+                              public FunctionInterface
 {
 public:
   BicubicSplineFunction(const InputParameters & parameters);
@@ -38,6 +40,14 @@ public:
 
 protected:
   BicubicSplineInterpolation _ipol;
+
+  std::vector<Real> _yx11;
+  std::vector<Real> _yx1n;
+  std::vector<Real> _yx21;
+  std::vector<Real> _yx2n;
+
+  const Function & _yx1;
+  const Function & _yx2;
 };
 
 

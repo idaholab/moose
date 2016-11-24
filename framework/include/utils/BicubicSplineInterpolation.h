@@ -32,25 +32,36 @@ public:
    * In the future, may add interface that allows necessary vector of boundary conditions to be supplied for each edge of grid;
    * however, for now we just use natural splines at the grid boundaries
    */
-  BicubicSplineInterpolation(const std::vector<Real> & x1, const std::vector<Real> & x2, const std::vector<std::vector<Real> > & y);
+  BicubicSplineInterpolation(const std::vector<Real> & x1, const std::vector<Real> & x2, const std::vector<std::vector<Real> > & y, const std::vector<Real> & yx11 = std::vector<Real>(), const std::vector<Real> & yx1n = std::vector<Real>(), const std::vector<Real> & yx21 = std::vector<Real>(), const std::vector<Real> & yx2n = std::vector<Real>());
 
   virtual ~BicubicSplineInterpolation() = default;
 
   /**
    * Set the x1-, x2, y- values and first derivatives
    */
-  void setData(const std::vector<Real> & x1, const std::vector<Real> & x2, const std::vector<std::vector<Real> > & y);
+  void setData(const std::vector<Real> & x1, const std::vector<Real> & x2, const std::vector<std::vector<Real> > & y, const std::vector<Real> & yx11 = std::vector<Real>(), const std::vector<Real> & yx1n = std::vector<Real>(), const std::vector<Real> & yx21 = std::vector<Real>(), const std::vector<Real> & yx2n = std::vector<Real>());
 
   void errorCheck();
 
-  Real sample(Real x1, Real x2);
-  Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var);
-  Real sample2ndDerivative(Real x1, Real x2, unsigned int deriv_var);
+  Real sample(Real x1, Real x2, Real yx11 = 1e30, Real yx1n = 1e30);
+  Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var, Real yp1 = 1e30, Real ypn = 1e30);
+  Real sample2ndDerivative(Real x1, Real x2, unsigned int deriv_var, Real yp1 = 1e30, Real ypn = 1e30);
 
 protected:
   std::vector<Real> _x1;
   std::vector<Real> _x2;
   std::vector<std::vector<Real> > _y;
+
+  /**
+   * Boundary conditions. The first index indicates the coordinate
+   * the derivative is with respect to. The second index indicates
+   * the grid index, e.g. 1 is the lower bound, and n is the upper
+   * bound
+   */
+  std::vector<Real> _yx11;
+  std::vector<Real> _yx1n;
+  std::vector<Real> _yx21;
+  std::vector<Real> _yx2n;
 
   /// Second derivatives
   std::vector<std::vector<Real> > _y2_rows;

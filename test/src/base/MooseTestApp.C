@@ -63,6 +63,7 @@
 #include "CoupledKernelValueTest.h"
 #include "ScalarLagrangeMultiplier.h"
 #include "SplineFFn.h"
+#include "BicubicSplineFFn.h"
 #include "BlkResTestDiffusion.h"
 #include "DiffTensorKernel.h"
 #include "OptionallyCoupledForce.h"
@@ -345,6 +346,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(CoupledKernelGradTest);
   registerKernel(CoupledKernelValueTest);
   registerKernel(SplineFFn);
+  registerKernel(BicubicSplineFFn);
   registerKernel(BlkResTestDiffusion);
   registerKernel(DiffTensorKernel);
   registerKernel(ScalarLagrangeMultiplier);
