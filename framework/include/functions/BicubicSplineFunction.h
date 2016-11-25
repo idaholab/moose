@@ -41,13 +41,15 @@ public:
 protected:
   BicubicSplineInterpolation _ipol;
 
+  std::vector<Real> _x1;
+  std::vector<Real> _x2;
   std::vector<Real> _yx11;
   std::vector<Real> _yx1n;
   std::vector<Real> _yx21;
   std::vector<Real> _yx2n;
 
-  const Function & _yx1;
-  const Function & _yx2;
+  Function & _yx1;
+  Function & _yx2;
 };
 
 

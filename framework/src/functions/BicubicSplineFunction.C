@@ -37,8 +37,8 @@ BicubicSplineFunction::BicubicSplineFunction(const InputParameters & parameters)
     _yx1(getFunction("yx1")),
     _yx2(getFunction("yx2"))
 {
-  std::vector<Real> x1 = getParam<std::vector<Real> >("x1");
-  std::vector<Real> x2 = getParam<std::vector<Real> >("x2");
+  _x1 = getParam<std::vector<Real> >("x1");
+  _x2 = getParam<std::vector<Real> >("x2");
   std::vector<Real> yvec = getParam<std::vector<Real> >("y");
   if (isParamValid("yx11"))
     _yx11 = getParam<std::vector<Real> >("yx11");
@@ -49,7 +49,7 @@ BicubicSplineFunction::BicubicSplineFunction(const InputParameters & parameters)
   if (isParamValid("yx2n"))
     _yx2n = getParam<std::vector<Real> >("yx2n");
 
-  unsigned int m = x1.size(), n = x2.size(), mn = yvec.size();
+  unsigned int m = _x1.size(), n = _x2.size(), mn = yvec.size();
   if (m * n != mn)
     mooseError("The length of the supplied y must be equal to the lengths of x1 and x2 multiplied together");
 
@@ -78,23 +78,64 @@ BicubicSplineFunction::BicubicSplineFunction(const InputParameters & parameters)
   else if (_yx2n.size() != m)
     mooseError("The length of the vectors holding the first derivatives of y with respect to x2 must match the length of x1.");
 
-  _ipol.setData(x1, x2, y, _yx11, _yx1n, _yx21, _yx2n);
+  _ipol.setData(_x1, _x2, y, _yx11, _yx1n, _yx21, _yx2n);
 }
 
 Real
 BicubicSplineFunction::value(Real /*t*/, const Point & p)
 {
-  return _ipol.sample(p(0), p(1));
+  Point x1(_x1[0], p(1), 0);
+  Point xn(_x1.back(), p(1), 0);
+  Real yx11 = _yx1.value(0, x1);
+  Real yx1n = _yx1.value(0, xn);
+
+  return _ipol.sample(p(0), p(1), yx11, yx1n);
 }
 
 Real
 BicubicSplineFunction::derivative(const Point & p, unsigned int deriv_var)
 {
-  return _ipol.sampleDerivative(p(0), p(1), deriv_var);
+  Real yp1, ypn;
+  if (deriv_var == 1)
+  {
+    Point x1(_x1[0], p(1), 0);
+    Point xn(_x1.back(), p(1), 0);
+    yp1 = _yx1.value(0, x1);
+    ypn = _yx1.value(0, xn);
+  }
+  else if (deriv_var == 2)
+  {
+    Point x1(p(0), _x2[0], 0);
+    Point xn(p(0), _x2.back(), 0);
+    yp1 = _yx2.value(0, x1);
+    ypn = _yx2.value(0, xn);
+  }
+  else
+    mooseError("deriv_var must equal 1 or 2");
+
+  return _ipol.sampleDerivative(p(0), p(1), deriv_var, yp1, ypn);
 }
 
 Real
 BicubicSplineFunction::secondDerivative(const Point & p, unsigned int deriv_var)
 {
-  return _ipol.sample2ndDerivative(p(0), p(1), deriv_var);
+  Real yp1, ypn;
+  if (deriv_var == 1)
+  {
+    Point x1(_x1[0], p(1), 0);
+    Point xn(_x1.back(), p(1), 0);
+    yp1 = _yx1.value(0, x1);
+    ypn = _yx1.value(0, xn);
+  }
+  else if (deriv_var == 2)
+  {
+    Point x1(p(0), _x2[0], 0);
+    Point xn(p(0), _x2.back(), 0);
+    yp1 = _yx2.value(0, x1);
+    ypn = _yx2.value(0, xn);
+  }
+  else
+    mooseError("deriv_var must equal 1 or 2");
+
+  return _ipol.sample2ndDerivative(p(0), p(1), deriv_var, yp1, ypn);
 }
