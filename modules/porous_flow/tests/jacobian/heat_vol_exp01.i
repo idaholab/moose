@@ -1,5 +1,5 @@
-# Tests the PorousFlowMassVolumetricExpansion kernel
-# Fluid with constant bulk modulus, van-Genuchten capillary, HM porosity
+# Tests the PorousFlowHeatVolumetricExpansion kernel
+# Fluid with constant bulk modulus, van-Genuchten capillary, THM porosity
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -29,6 +29,8 @@
   [../]
   [./porepressure]
   [../]
+  [./temperature]
+  [../]
 []
 
 [ICs]
@@ -53,8 +55,14 @@
   [./p]
     type = RandomIC
     min = -1
-    max = 1
+    max = 0
     variable = porepressure
+  [../]
+  [./t]
+    type = RandomIC
+    min = 1
+    max = 2
+    variable = temperature
   [../]
 []
 
@@ -99,10 +107,13 @@
     displacements = 'disp_x disp_y disp_z'
     component = 2
   [../]
-  [./poro]
-    type = PorousFlowMassVolumetricExpansion
-    fluid_component = 0
+  [./dummy]
+    type = TimeDerivative
     variable = porepressure
+  [../]
+  [./temp]
+    type = PorousFlowHeatVolumetricExpansion
+    variable = temperature
   [../]
 []
 
@@ -110,7 +121,7 @@
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'porepressure disp_x disp_y disp_z'
+    porous_flow_vars = 'porepressure temperature disp_x disp_y disp_z'
     number_fluid_phases = 1
     number_fluid_components = 1
   [../]
@@ -119,6 +130,7 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
+    temperature = temperature
   [../]
   [./nnn]
     type = PorousFlowNodeNumber
@@ -160,13 +172,29 @@
     material_property = PorousFlow_fluid_phase_density
   [../]
   [./porosity]
-    type = PorousFlowPorosityHM
+    type = PorousFlowPorosityTHM
     porosity_zero = 0.1
     biot_coefficient = 0.5
     solid_bulk = 1
+    thermal_expansion_coeff = 0.1
   [../]
   [./p_eff]
     type = PorousFlowEffectiveFluidPressure
+  [../]
+  [./rock_heat]
+    type = PorousFlowMatrixInternalEnergy
+    specific_heat_capacity = 1.1
+    density = 0.5
+  [../]
+  [./water_heat]
+    type = PorousFlowInternalEnergyIdeal
+    specific_heat_capacity = 1.3
+    phase = 0
+  [../]
+  [./internal_energy_fluids]
+    type = PorousFlowJoiner
+    include_old = true
+    material_property = PorousFlow_fluid_phase_internal_energy_nodal
   [../]
 []
 

@@ -280,4 +280,11 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
+
+  [./heat_vol_exp01]
+    type = 'PetscJacobianTester'
+    input = 'heat_vol_exp01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
 []

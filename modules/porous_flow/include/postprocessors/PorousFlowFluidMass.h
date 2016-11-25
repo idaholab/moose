@@ -26,7 +26,7 @@ public:
   PorousFlowFluidMass(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   /// Holds info on the PorousFlow variables
   const PorousFlowDictator & _dictator;
