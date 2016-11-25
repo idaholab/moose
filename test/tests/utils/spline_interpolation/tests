@@ -1,8 +1,13 @@
 [Tests]
-  [./test]
+  [./regular_spline]
     type = 'Exodiff'
     input = 'spline_interpolation.i'
     exodiff = 'spline_interpolation_out.e'
   [../]
+  [./bicubic_spline]
+    type = 'Exodiff'
+    input = 'bicubic_spline_interpolation.i'
+    exodiff = 'bicubic_spline_interpolation_out.e'
+    custom_cmp = 'bicubic_spline_interpolation.cmp'
+  [../]
 []
-  

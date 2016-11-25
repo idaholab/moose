@@ -1,36 +1,45 @@
-a=4
-b=5
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = ${a}
-  ny = ${b}
-  xmax = ${a}
-  ymax = ${b}
+  nx = 4
+  ny = 4
+  xmax = 4
+  ymax = 4
 []
 
 [Functions]
+  [./yx1]
+    type = ParsedFunction
+    value = '3*x^2'
+  [../]
+  [./yx2]
+    type = ParsedFunction
+    value = '6*y^2'
+  [../]
   [./spline_fn]
     type = BicubicSplineFunction
-    x1 = '0 1 4'
-    x2 = '0 3 5'
-    y = '6 -357 -1219 3 -351 -1207 -234 -561 -1399'
+    x1 = '0 2 4'
+    x2 = '0 2 4'
+    y = '0 16 128 8 24 136 64 80 192'
+    yx11 = '0 0 0'
+    yx1n = '48 48 48'
+    yx21 = '0 0 0'
+    yx2n = '96 96 96'
+    yx1 = 'yx1'
+    yx2 = 'yx2'
   [../]
   [./u_func]
     type = ParsedFunction
-    value = '12 * (x^4/12 - ${a}*x^3/6) + 24 * (y^4/12 - ${b}*y^3/6) + 3*x*y + 4*x + 5*y + 6'
+    value = 'x^3 + 2*y^3'
   [../]
   [./u2_forcing_func]
     type = ParsedFunction
-    value = '-12*x * (x - ${a}) - 24*y * (y - ${b})'
+    value = '-6*x - 12*y'
   [../]
 []
 
 [Variables]
   [./u]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -54,12 +63,6 @@ b=5
     type = Diffusion
     variable = u
   [../]
-
-  # [./ufn]
-  #   type = BicubicSplineFFn
-  #   variable = u
-  #   function = spline_fn
-  # [../]
   [./body_force]
     type = BodyForce
     variable = u
@@ -77,10 +80,16 @@ b=5
 []
 
 [Postprocessors]
-  [./l2_err]
-    type = ElementL2Error
+  [./nodal_l2_err_spline]
+    type = NodalL2Error
     variable = u
     function = spline_fn
+    execute_on = 'initial timestep_end'
+  [../]
+  [./nodal_l2_err_analytic]
+    type = NodalL2Error
+    variable = u
+    function = u_func
     execute_on = 'initial timestep_end'
   [../]
 []
