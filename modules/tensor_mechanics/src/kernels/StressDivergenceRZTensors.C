@@ -24,28 +24,29 @@ StressDivergenceRZTensors::StressDivergenceRZTensors(const InputParameters & par
 {
 }
 
+void
+StressDivergenceRZTensors::initialSetup()
+{
+  if (getBlockCoordSystem() != Moose::COORD_RZ)
+    mooseError("The coordinate system in the Problem block must be set to RZ for axisymmetric geometries.");
+}
+
 Real
 StressDivergenceRZTensors::computeQpResidual()
 {
-  mooseAssert(_assembly.coordSystem() == Moose::COORD_RZ,
-              "The coordinate system in the Problem block must be set to RZ for Axisymmetric geometries.");
-
-  Real div = 0;
   if (_component == 0)
   {
-    div = _grad_test[_i][_qp](0) * _stress[_qp](0,0) +
-        + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](2,2) +
-        + _grad_test[_i][_qp](1) * _stress[_qp](0,1); // stress_{rz}
+    return   _grad_test[_i][_qp](0) * _stress[_qp](0,0) +
+           + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](2,2) +
+           + _grad_test[_i][_qp](1) * _stress[_qp](0,1); // stress_{rz}
   }
   else if (_component == 1)
   {
-    div = _grad_test[_i][_qp](1) * _stress[_qp](1,1) +
-        + _grad_test[_i][_qp](0) * _stress[_qp](1,0);  // stress_{zr}
+    return   _grad_test[_i][_qp](1) * _stress[_qp](1,1) +
+           + _grad_test[_i][_qp](0) * _stress[_qp](1,0);  // stress_{zr}
   }
   else
     mooseError("Invalid component for this AxisymmetricRZ problem.");
-
-  return div;
 }
 
 Real
@@ -60,13 +61,13 @@ StressDivergenceRZTensors::computeQpOffDiagJacobian(unsigned int jvar)
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     if (jvar == _disp_var[i])
-      return calculateJacobian( _component, i);
+      return calculateJacobian(_component, i);
   }
 
   if (_temp_coupled && jvar == _temp_var)
     return 0.0;
 
-  return 0;
+  return 0.0;
 }
 
 Real

@@ -25,10 +25,8 @@ ComputeAxisymmetricRZSmallStrain::ComputeAxisymmetricRZSmallStrain(const InputPa
 void
 ComputeAxisymmetricRZSmallStrain::initialSetup()
 {
-  const auto & subdomainIDs = _mesh.meshSubdomains();
-  for (auto subdomainID : subdomainIDs)
-    if (_fe_problem.getCoordSystem(subdomainID) != Moose::COORD_RZ)
-      mooseError("The coordinate system must be set to RZ for Axisymmetric geometries.");
+  if (getBlockCoordSystem() != Moose::COORD_RZ)
+    mooseError("The coordinate system must be set to RZ for Axisymmetric geometries.");
 }
 
 Real

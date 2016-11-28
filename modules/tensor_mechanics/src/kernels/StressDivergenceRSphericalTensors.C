@@ -24,28 +24,23 @@ InputParameters validParams<StressDivergenceRSphericalTensors>()
 StressDivergenceRSphericalTensors::StressDivergenceRSphericalTensors(const InputParameters & parameters) :
     StressDivergenceTensors(parameters)
 {
+  if (_component != 0)
+    mooseError("Invalid component for this 1D RSpherical problem.");
 }
 
 void
 StressDivergenceRSphericalTensors::initialSetup()
 {
-  const auto & subdomainIDs = _mesh.meshSubdomains();
-  for (auto subdomainID : subdomainIDs)
-    if (_fe_problem.getCoordSystem(subdomainID) != Moose::COORD_RSPHERICAL)
-      mooseError("The coordinate system in the Problem block must be set to RSPHERICAL for 1D spherically symmetric geometries.");
+  if (getBlockCoordSystem() != Moose::COORD_RSPHERICAL)
+    mooseError("The coordinate system in the Problem block must be set to RSPHERICAL for 1D spherically symmetric geometries.");
 }
-
 
 Real
 StressDivergenceRSphericalTensors::computeQpResidual()
 {
-  mooseAssert(_component == 0, "Invalid component for this 1D RSpherical problem.");
-
-  Real div = _grad_test[_i][_qp](0) * _stress[_qp](0,0) + //stress_{rr} part 1
-    + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](1,1) + //stress_{\theta \theta}
-    + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](2,2); //stress_{\phi \phi}
-
-  return div;
+  return   _grad_test[_i][_qp](0) * _stress[_qp](0,0) +               //stress_{rr} part 1
+         + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](1,1) + //stress_{\theta \theta}
+         + ( _test[_i][_qp] / _q_point[_qp](0)) * _stress[_qp](2,2);  //stress_{\phi \phi}
 }
 
 Real
@@ -58,15 +53,13 @@ Real
 StressDivergenceRSphericalTensors::computeQpOffDiagJacobian(unsigned int jvar)
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
-  {
     if (jvar == _disp_var[i])
       return calculateJacobian( _component, i);
-  }
 
   if (_temp_coupled && jvar == _temp_var)
     return 0.0;
 
-  return 0;
+  return 0.0;
 }
 
 Real

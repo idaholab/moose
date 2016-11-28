@@ -58,6 +58,13 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     mooseDeprecated("Use 'temperature' instead of 'temp'");
 }
 
+void
+StressDivergenceTensors::initialSetup()
+{
+  if (getBlockCoordSystem() != Moose::COORD_XYZ)
+    mooseError("The coordinate system in the Problem block must be set to XYZ for cartesian geometries.");
+}
+
 Real
 StressDivergenceTensors::computeQpResidual()
 {

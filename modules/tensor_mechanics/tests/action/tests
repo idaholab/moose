@@ -20,4 +20,18 @@
     expect_err = 'The block restrictions in the TensorMechanics/Master actions must be non-overlapping.'
     prereq = 'error_unrestricted'
   [../]
+
+  [./two_coord]
+    type = Exodiff
+    input = 'two_coord.i'
+    exodiff = 'two_coord_out.e'
+  [../]
+
+  [./error_coord]
+    type = RunException
+    input = 'two_coord.i'
+    cli_args = 'Modules/TensorMechanics/Master/active=error'
+    expect_err = 'The TensorMechanics action requires all subdomains to have the same coordinate system.'
+    prereq = 'two_coord'
+  [../]
 []

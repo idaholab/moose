@@ -284,7 +284,7 @@ TensorMechanicsAction::actSubdomainChecks()
     _coord_system = _problem->getCoordSystem(*check_subdomains.begin());
     for (auto subdomain : check_subdomains)
       if (_problem->getCoordSystem(subdomain) != _coord_system)
-        mooseError("The TensorMechanics action requires all subdomains to have the same coordinate system");
+        mooseError("The TensorMechanics action requires all subdomains to have the same coordinate system.");
   }
 }
 
