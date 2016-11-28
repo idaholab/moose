@@ -37,7 +37,6 @@ class NonlinearEigenSystem
 {
 public:
   NonlinearEigenSystem(FEProblemBase & problem, const std::string & name);
-  virtual ~NonlinearEigenSystem();
 
 #if LIBMESH_HAVE_SLEPC
   virtual void solve() override;

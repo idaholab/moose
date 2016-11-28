@@ -25,6 +25,7 @@ class PotentialAdvection : public Kernel
 {
 public:
   PotentialAdvection(const InputParameters & parameters);
+  virtual ~PotentialAdvection();
 
 protected:
   virtual Real computeQpResidual();
