@@ -43,7 +43,7 @@ namespace
 ComputeElasticSmearedCrackingStress::ComputeElasticSmearedCrackingStress(const InputParameters & parameters) :
     ComputeStressBase(parameters),
     _mechanical_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "mechanical_strain")),
-    _is_finite_strain(hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
+    _is_finite_strain(hasBlockMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _strain_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _rotation_increment(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
     _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress")),

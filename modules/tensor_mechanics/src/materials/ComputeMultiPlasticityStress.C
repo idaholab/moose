@@ -77,7 +77,7 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters
     _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "elastic_strain")),
 
-    _cosserat(hasMaterialProperty<RankTwoTensor>("curvature") && hasMaterialProperty<RankFourTensor>("elastic_flexural_rigidity_tensor")),
+    _cosserat(hasBlockMaterialProperty<RankTwoTensor>("curvature") && hasBlockMaterialProperty<RankFourTensor>("elastic_flexural_rigidity_tensor")),
     _curvature(_cosserat ? &getMaterialPropertyByName<RankTwoTensor>("curvature") : NULL),
     _elastic_flexural_rigidity_tensor(_cosserat ? &getMaterialPropertyByName<RankFourTensor>("elastic_flexural_rigidity_tensor") : NULL),
     _couple_stress(_cosserat ? &declareProperty<RankTwoTensor>("couple_stress") : NULL),
