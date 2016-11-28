@@ -14,19 +14,22 @@
 
 #include "SplineInterpolationBase.h"
 #include "MooseError.h"
+#include <limits>
+
+const Real SplineInterpolationBase::_deriv_bound = std::numeric_limits<Real>::max();
 
 SplineInterpolationBase::SplineInterpolationBase()
 {}
 
 void
-SplineInterpolationBase::spline(const std::vector<Real> & x, const std::vector<Real> & y, std::vector<Real> & y2, Real yp1/* = 1e30*/, Real ypn/* = 1e30*/)
+SplineInterpolationBase::spline(const std::vector<Real> & x, const std::vector<Real> & y, std::vector<Real> & y2, Real yp1/* = _deriv_bound*/, Real ypn/* = _deriv_bound*/)
 {
-  unsigned int n = x.size();
-  if (n == 0)
-    mooseError("Solving for an empty SplineInterpolation.");
+  auto n = x.size();
+  if (n < 2)
+    mooseError("You must have at least two knots to create a spline.");
 
   std::vector<Real> u(n, 0.);
-  y2.resize(n, 0.);
+  y2.assign(n, 0.);
 
   if (yp1 >= 1e30)
     y2[0] = u[0] = 0.;
@@ -36,7 +39,7 @@ SplineInterpolationBase::spline(const std::vector<Real> & x, const std::vector<R
     u[0] = (3.0 / (x[1] - x[0])) * ((y[1] - y[0]) / (x[1] - x[0]) - yp1);
   }
   // decomposition of tri-diagonal algorithm (y2 and u are used for temporary storage)
-  for (unsigned int i = 1; i + 1 < n; i++)
+  for (decltype(n) i = 1; i < n - 1; i++)
   {
     Real sig = (x[i] - x[i - 1]) / (x[i + 1] - x[i - 1]);
     Real p = sig * y2[i - 1] + 2.0;
@@ -56,14 +59,15 @@ SplineInterpolationBase::spline(const std::vector<Real> & x, const std::vector<R
 
   y2[n - 1] = (un - qn * u[n - 2]) / (qn * y2[n - 2] + 1.);
   // back substitution
-  for (int k = n - 2; k >= 0; k--)
-    y2[k] = y2[k] * y2[k + 1] + u[k];
+  for (auto k = n - 1; k >= 1; k--)
+    y2[k - 1] = y2[k - 1] * y2[k] + u[k - 1];
 }
 
 void
 SplineInterpolationBase::findInterval(const std::vector<Real> & x, Real x_int, unsigned int & klo, unsigned int & khi) const
 {
   klo = 0;
+  mooseAssert(x.size() >= 2, "You must have at least two knots to create a spline.");
   khi = x.size() - 1;
   while (khi - klo > 1)
   {

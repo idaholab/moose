@@ -21,7 +21,7 @@ SplineInterpolation::SplineInterpolation()
 {
 }
 
-SplineInterpolation::SplineInterpolation(const std::vector<Real> & x, const std::vector<Real> & y, Real yp1/* = 1e30*/, Real ypn/* = 1e30*/) :
+SplineInterpolation::SplineInterpolation(const std::vector<Real> & x, const std::vector<Real> & y, Real yp1/* = _deriv_bound*/, Real ypn/* = _deriv_bound*/) :
     SplineInterpolationBase(),
     _x(x),
     _y(y),
@@ -33,7 +33,7 @@ SplineInterpolation::SplineInterpolation(const std::vector<Real> & x, const std:
 }
 
 void
-SplineInterpolation::setData(const std::vector<Real> & x, const std::vector<Real> & y, Real yp1/* = 1e30*/, Real ypn/* = 1e30*/)
+SplineInterpolation::setData(const std::vector<Real> & x, const std::vector<Real> & y, Real yp1/* = _deriv_bound*/, Real ypn/* = _deriv_bound*/)
 {
   _x = x;
   _y = y;

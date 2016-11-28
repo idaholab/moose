@@ -37,16 +37,16 @@ public:
    * @param yp1 First derivative of the interpolating function at point 1
    * @param ypn First derivative of the interpolating function at point n
    *
-   * If yp1, ypn are not specified or greater or equal that 1e30, we use natural spline
+   * If yp1, ypn are not specified or greater or equal that _deriv_bound, we use natural spline
    */
-  SplineInterpolation(const std::vector<Real> & x, const std::vector<Real> & y, Real yp1 = 1e30, Real ypn = 1e30);
+  SplineInterpolation(const std::vector<Real> & x, const std::vector<Real> & y, Real yp1 = _deriv_bound, Real ypn = _deriv_bound);
 
   virtual ~SplineInterpolation() = default;
 
   /**
    * Set the x-, y- values and first derivatives
    */
-  void setData(const std::vector<Real> & x, const std::vector<Real> & y, Real yp1 = 1e30, Real ypn = 1e30);
+  void setData(const std::vector<Real> & x, const std::vector<Real> & y, Real yp1 = _deriv_bound, Real ypn = _deriv_bound);
 
   void errorCheck();
 

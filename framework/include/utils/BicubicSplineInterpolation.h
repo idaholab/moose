@@ -43,9 +43,9 @@ public:
 
   void errorCheck();
 
-  Real sample(Real x1, Real x2, Real yx11 = 1e30, Real yx1n = 1e30);
-  Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var, Real yp1 = 1e30, Real ypn = 1e30);
-  Real sample2ndDerivative(Real x1, Real x2, unsigned int deriv_var, Real yp1 = 1e30, Real ypn = 1e30);
+  Real sample(Real x1, Real x2, Real yx11 = _deriv_bound, Real yx1n = _deriv_bound);
+  Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var, Real yp1 = _deriv_bound, Real ypn = _deriv_bound);
+  Real sample2ndDerivative(Real x1, Real x2, unsigned int deriv_var, Real yp1 = _deriv_bound, Real ypn = _deriv_bound);
 
 protected:
   std::vector<Real> _x1;
