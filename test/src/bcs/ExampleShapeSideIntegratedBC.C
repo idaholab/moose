@@ -43,13 +43,13 @@ ExampleShapeSideIntegratedBC::ExampleShapeSideIntegratedBC(const InputParameters
 Real
 ExampleShapeSideIntegratedBC::computeQpResidual()
 {
-  return _test[_i][_qp] * (_u[_qp] + _num_shp_integral - _Vb) / (_denom_shp_integral + std::numeric_limits<double>::epsilon());
+  return _test[_i][_qp] * (_u[_qp] + _num_shp_integral - _Vb) / (_denom_shp_integral + std::numeric_limits<Real>::epsilon());
 }
 
 Real
 ExampleShapeSideIntegratedBC::computeQpJacobian()
 {
-  return _test[_i][_qp] * (_phi[_j][_qp]) / (_denom_shp_integral + std::numeric_limits<double>::epsilon());
+  return _test[_i][_qp] * (_phi[_j][_qp]) / (_denom_shp_integral + std::numeric_limits<Real>::epsilon());
 }
 
 Real
@@ -57,7 +57,7 @@ ExampleShapeSideIntegratedBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_var)
   {
-    Real jac = _test[_i][_qp] * (_num_shp_jacobian[_v_dofs[_j]] * _denom_shp_integral - (_u[_qp] + _num_shp_integral - _Vb) * _denom_shp_jacobian[_v_dofs[_j]]) / (_denom_shp_integral * _denom_shp_integral + std::numeric_limits<double>::epsilon());
+    Real jac = _test[_i][_qp] * (_num_shp_jacobian[_v_dofs[_j]] * _denom_shp_integral - (_u[_qp] + _num_shp_integral - _Vb) * _denom_shp_jacobian[_v_dofs[_j]]) / (_denom_shp_integral * _denom_shp_integral + std::numeric_limits<Real>::epsilon());
     return jac;
   }
 
@@ -65,7 +65,7 @@ ExampleShapeSideIntegratedBC::computeQpOffDiagJacobian(unsigned int jvar)
 }
 
 Real
-ExampleShapeSideIntegratedBC::computeQpNonlocalJacobian(dof_id_type dof_index)
+ExampleShapeSideIntegratedBC::computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
 {
   return 0;
 }
@@ -75,7 +75,7 @@ ExampleShapeSideIntegratedBC::computeQpNonlocalOffDiagJacobian(unsigned int jvar
 {
   if (jvar == _v_var)
   {
-    Real jac = _test[_i][_qp] * (_num_shp_jacobian[dof_index] * _denom_shp_integral - (_u[_qp] + _num_shp_integral - _Vb) * _denom_shp_jacobian[dof_index]) / (_denom_shp_integral * _denom_shp_integral + std::numeric_limits<double>::epsilon());
+    Real jac = _test[_i][_qp] * (_num_shp_jacobian[dof_index] * _denom_shp_integral - (_u[_qp] + _num_shp_integral - _Vb) * _denom_shp_jacobian[dof_index]) / (_denom_shp_integral * _denom_shp_integral + std::numeric_limits<Real>::epsilon());
     return jac;
   }
 
