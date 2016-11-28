@@ -65,7 +65,6 @@ SwitchingFunctionMultiPhaseMaterial::SwitchingFunctionMultiPhaseMaterial(const I
       if (_eta_names[i] == _eta_p_names[j])
         _is_p[i] = true;
     }
-    _console << "i = " << i << " _is_p = " << _is_p[i] << std::endl;
   }
 }
 
@@ -81,13 +80,37 @@ SwitchingFunctionMultiPhaseMaterial::computeQpProperties()
   for (unsigned int i = 0; i < _num_eta; ++i)
     sum_all += (*_eta[i])[_qp] * (*_eta[i])[_qp];
 
+  Real sum_notp = sum_all - sum_p;
+
   _prop_h[_qp] = sum_p / sum_all;
 
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
+    // First derivatives
     if (_is_p[i])
-      (*_prop_dh[i])[_qp] = 2.0 * (*_eta[i])[_qp] * (sum_all - sum_p) / (sum_all * sum_all);
+      (*_prop_dh[i])[_qp] = 2.0 * (*_eta[i])[_qp] * sum_notp / (sum_all * sum_all);
     else
       (*_prop_dh[i])[_qp] = - 2.0 * (*_eta[i])[_qp] * sum_p / (sum_all * sum_all);
+
+    // Second derivatives
+    for (unsigned int j = 0; j < _num_eta; ++j)
+    {
+      if (i == j)
+      {
+        if (_is_p[i])
+          (*_prop_d2h[i][j])[_qp] = (2.0 * sum_all * sum_notp - 8.0 * (*_eta[i])[_qp] * (*_eta[i])[_qp] * sum_notp)
+                                      / (sum_all * sum_all * sum_all);
+        else
+          (*_prop_d2h[i][j])[_qp] = (- 2.0 * sum_p * sum_all + 8.0 * (*_eta[i])[_qp] * (*_eta[i])[_qp] * sum_p)
+                                      / (sum_all * sum_all * sum_all);
+      }
+      else if (_is_p[i] && _is_p[j])
+        (*_prop_d2h[i][j])[_qp] = - 8.0 * (*_eta[i])[_qp] * (*_eta[j])[_qp] * sum_notp / (sum_all * sum_all * sum_all);
+      else if (!_is_p[i] && !_is_p[j])
+        (*_prop_d2h[i][j])[_qp] = 8.0 * (*_eta[i])[_qp] * (*_eta[j])[_qp] * sum_p / (sum_all * sum_all * sum_all);
+      else
+        (*_prop_d2h[i][j])[_qp] = (4.0 * sum_all - 8.0 * sum_notp) * (*_eta[i])[_qp] * (*_eta[j])[_qp]
+                                    / (sum_all * sum_all * sum_all);
+    }
   }
 }
