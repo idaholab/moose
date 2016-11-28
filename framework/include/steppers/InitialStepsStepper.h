@@ -29,7 +29,6 @@ class InitialStepsStepper : public Stepper
 {
 public:
   InitialStepsStepper(const InputParameters & parameters);
-  virtual ~InitialStepsStepper();
 
   virtual Real computeInitialDT() override;
 

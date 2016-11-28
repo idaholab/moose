@@ -16,7 +16,6 @@
 #define ITERATIONADAPTIVESTEPPER_H
 
 #include "Stepper.h"
-#include "LinearInterpolation.h"
 
 class IterationAdaptiveStepper;
 
@@ -36,7 +35,6 @@ class IterationAdaptiveStepper : public Stepper
 {
 public:
   IterationAdaptiveStepper(const InputParameters & parameters);
-  virtual ~IterationAdaptiveStepper();
 
   virtual Real computeInitialDT() override;
 

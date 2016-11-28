@@ -50,7 +50,9 @@ TimeListStepperBase::setupList(const std::vector<Real> & times)
 
   if (_app.halfTransient())
   {
-    unsigned int half = (_time_list.size() - 1) / 2;
+    mooseAssert(_time_list.size() >= 1, "Not enough time steps for a half transient!");
+
+    unsigned int half = (_time_list.size() - 1.) / 2.;
     _executioner.endTime() = _time_list[half];
   }
 

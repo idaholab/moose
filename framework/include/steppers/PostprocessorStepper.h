@@ -16,7 +16,6 @@
 #define POSTPROCESSORSTEPPER_H
 
 #include "Stepper.h"
-#include "LinearInterpolation.h"
 
 class PostprocessorStepper;
 
@@ -30,7 +29,6 @@ class PostprocessorStepper : public Stepper
 {
 public:
   PostprocessorStepper(const InputParameters & parameters);
-  virtual ~PostprocessorStepper();
 
   virtual Real computeInitialDT() override;
 

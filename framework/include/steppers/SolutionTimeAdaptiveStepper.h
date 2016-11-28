@@ -35,7 +35,6 @@ class SolutionTimeAdaptiveStepper : public Stepper
 {
 public:
   SolutionTimeAdaptiveStepper(const InputParameters & parameters);
-  virtual ~SolutionTimeAdaptiveStepper();
 
   virtual Real computeInitialDT() override;
 
@@ -54,7 +53,7 @@ protected:
   const Real & _input_dt;
 
   /// Number of steps in the same direction
-  int _n_steps;
+  unsigned int _n_steps;
 };
 
 #endif /* SOLUTIONTIMEADAPTIVESTEPPER_H */

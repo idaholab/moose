@@ -74,6 +74,8 @@ PiecewiseStepper::computeDT()
   if (_interpolate)
     return _linear_interpolation.sample(_time);
 
+  mooseAssert(!_times.empty(), "No _times given to PiecewiseStepper");
+
   if (MooseUtils::relativeFuzzyGreaterEqual(_time, _times.back()))
     return _dts.back();
 
@@ -88,8 +90,4 @@ Real
 PiecewiseStepper::computeFailedDT()
 {
   return 0.5 * _dt[0]; // _dt[0] was the dt actually used in the last timestep
-}
-
-PiecewiseStepper::~PiecewiseStepper()
-{
 }

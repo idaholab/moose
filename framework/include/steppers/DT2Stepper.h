@@ -31,7 +31,6 @@ class DT2Stepper : public Stepper
 {
 public:
   DT2Stepper(const InputParameters & parameters);
-  virtual ~DT2Stepper();
 
   virtual Real computeInitialDT() override;
 

@@ -54,7 +54,3 @@ SimpleStepper::computeFailedDT()
 {
   return _prev_dt = 0.5 * _dt[0]; // _dt[0] was the dt actually used in the last timestep
 }
-
-SimpleStepper::~SimpleStepper()
-{
-}

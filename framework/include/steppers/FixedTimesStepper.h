@@ -16,7 +16,6 @@
 #define FIXEDTIMESSTEPPER_H
 
 #include "Stepper.h"
-#include "LinearInterpolation.h"
 
 class FixedTimesStepper;
 
@@ -30,7 +29,6 @@ class FixedTimesStepper : public Stepper
 {
 public:
   FixedTimesStepper(const InputParameters & parameters);
-  virtual ~FixedTimesStepper();
 
   virtual Real computeInitialDT() override;
 

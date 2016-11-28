@@ -1,9 +1,22 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #include "StepperInfo.h"
 
 StepperInfo::StepperInfo()
   : _step_count(1),
     _time(0),
-    _dt(),
     _nonlin_iters(0),
     _lin_iters(0),
     _converged(),
@@ -23,11 +36,11 @@ StepperInfo::StepperInfo()
     _converged.push_front(true);
     _solve_time_secs.push_front(0);
   }
-  _soln_nonlin.reset(NumericVector<Number>::build(_dummy_comm).release());
+  _soln_nonlin = std::move(NumericVector<Number>::build(_dummy_comm));
   _soln_nonlin->init(0, 0, false, SERIAL);
-  _soln_aux.reset(NumericVector<Number>::build(_dummy_comm).release());
+  _soln_aux = std::move(NumericVector<Number>::build(_dummy_comm));
   _soln_aux->init(0, 0, false, SERIAL);
-  _soln_predicted.reset(NumericVector<Number>::build(_dummy_comm).release());
+  _soln_predicted = std::move(NumericVector<Number>::build(_dummy_comm));
   _soln_predicted->init(0, 0, false, SERIAL);
 }
 
@@ -74,12 +87,12 @@ StepperInfo::operator=(const StepperInfo& si)
 void
 StepperInfo::pushHistory(Real dt, bool converged, Real solve_time)
 {
-    _dt.push_front(dt);
-    _dt.pop_back();
-    _converged.push_front(converged);
-    _converged.pop_back();
-    _solve_time_secs.push_front(solve_time);
-    _solve_time_secs.pop_back();
+  _dt.push_front(dt);
+  _dt.pop_back();
+  _converged.push_front(converged);
+  _converged.pop_back();
+  _solve_time_secs.push_front(solve_time);
+  _solve_time_secs.pop_back();
 }
 
 void
@@ -113,17 +126,17 @@ StepperInfo::update(
 
   if (_soln_nonlin->size() != soln_nonlin.size())
   {
-    _soln_nonlin.reset(NumericVector<Number>::build(_dummy_comm).release());
+    _soln_nonlin = std::move(NumericVector<Number>::build(_dummy_comm));
     _soln_nonlin->init(soln_nonlin.size(), soln_nonlin.size(), false, SERIAL);
   }
   if (_soln_aux->size() != soln_aux.size())
   {
-    _soln_aux.reset(NumericVector<Number>::build(_dummy_comm).release());
+    _soln_aux = std::move(NumericVector<Number>::build(_dummy_comm));
     _soln_aux->init(soln_aux.size(), soln_aux.size(), false, SERIAL);
   }
   if (_soln_predicted->size() != soln_predicted.size())
   {
-    _soln_predicted.reset(NumericVector<Number>::build(_dummy_comm).release());
+    _soln_predicted = std::move(NumericVector<Number>::build(_dummy_comm));
     _soln_predicted->init(soln_predicted.size(), soln_predicted.size(), false, SERIAL);
   }
 

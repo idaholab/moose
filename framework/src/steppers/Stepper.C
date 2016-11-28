@@ -24,10 +24,6 @@ InputParameters validParams<Stepper>()
 
   params.registerBase("Stepper");
 
-  // Controls the name of the output from this stepper
-  // If this is left blank then the name will default to the name of the object
-  params.addPrivateParam<StepperName>("_output_name", "");
-
   return params;
 }
 
@@ -39,7 +35,7 @@ Stepper::Stepper(const InputParameters & parameters) :
     _fe_problem_base(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _executioner(*dynamic_cast<Transient*>(_app.getExecutioner())),
     _factory(_app.getFactory()),
-    _output_name(getParam<StepperName>("_output_name") != "" ? getParam<StepperName>("_output_name") : name()),
+    _output_name(parameters.have_parameter<StepperName>("_output_name") ? getParam<StepperName>("_output_name") : name()),
     _stepper_info(_fe_problem_base.getStepperInfo()),
     _step_count(_stepper_info._step_count),
     _time(_stepper_info._time),
@@ -54,10 +50,6 @@ Stepper::Stepper(const InputParameters & parameters) :
     _backup(_stepper_info._backup),
     _restore(_stepper_info._restore),
     _restore_time(_stepper_info._restore_time)
-{
-}
-
-Stepper::~Stepper()
 {
 }
 
