@@ -1066,3 +1066,18 @@ RankTwoTensor::fillColumn(unsigned int c, const TypeVector<Real> & v)
   for (unsigned int i = 0; i < N; ++i)
     _vals[i][c] = v(i);
 }
+
+RankTwoTensor
+RankTwoTensor::initialContraction(const RankFourTensor & b) const
+{
+  RankTwoTensor result;
+  const RankTwoTensor & a = *this;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          result(k, l) += a(i, j) * b(i, j, k, l);
+
+  return result;
+}

@@ -32,6 +32,7 @@
 #include "GeneralizedPlaneStrain.h"
 #include "GeneralizedPlaneStrainOffDiag.h"
 #include "WeakPlaneStress.h"
+#include "PlasticHeatEnergy.h"
 
 #include "LinearElasticTruss.h"
 #include "FiniteStrainPlasticMaterial.h"
@@ -96,6 +97,7 @@
 #include "ComputeAxisymmetric1DSmallStrain.h"
 #include "ComputeAxisymmetric1DIncrementalStrain.h"
 #include "ComputeAxisymmetric1DFiniteStrain.h"
+#include "ComputePlasticHeatEnergy.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -216,6 +218,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(GeneralizedPlaneStrain);
   registerKernel(GeneralizedPlaneStrainOffDiag);
   registerKernel(WeakPlaneStress);
+  registerKernel(PlasticHeatEnergy);
 
   registerMaterial(LinearElasticTruss);
   registerMaterial(FiniteStrainPlasticMaterial);
@@ -281,6 +284,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeAxisymmetric1DSmallStrain);
   registerMaterial(ComputeAxisymmetric1DIncrementalStrain);
   registerMaterial(ComputeAxisymmetric1DFiniteStrain);
+  registerMaterial(ComputePlasticHeatEnergy);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);

@@ -35,7 +35,7 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     _Jacobian_mult(getMaterialPropertyByName<RankFourTensor>(_base_name + "Jacobian_mult")),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
-    _disp_var(3),
+    _disp_var(_ndisp),
     _temp_coupled(isCoupled("temp") || isCoupled("temperature")),
     _temp_var(_temp_coupled ? (isCoupled("temp") ? coupled("temp") : coupled("temperature")) : 0)
 {
