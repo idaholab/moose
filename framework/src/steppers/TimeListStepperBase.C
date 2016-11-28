@@ -40,58 +40,13 @@ TimeListStepperBase::setupList(const std::vector<Real> & times)
   if (_app.halfTransient())
     end_time *= 2.0;
 
-  // only set up _time_list if the app is _not_ recovering
-  if (!_app.isRecovering())
+  _time_list.push_back(start_time);
+  for (unsigned int j = 0; j < times.size(); ++j)
   {
-    // also we need to do something different when restarting
-    /*
-    if (!_app.isRestarting())
-    {
-    */
-      _time_list.push_back(start_time);
-      for (unsigned int j = 0; j < times.size(); ++j)
-      {
-        if (times[j] > start_time && times[j] < end_time)
-          _time_list.push_back(times[j]);
-      }
-      _time_list.push_back(end_time);
-//    }
-    /*
-    else
-    {
-      // in case of restart it should be allowed to modify _time_list if it follows the following rule:
-      // all times up to current_step are identical
-      // 1. start time cannot be modified
-      // 2. the entries in _time_list and times must be equal up to entry with index current_step
-
-      if (!MooseUtils::absoluteFuzzyEqual(_executioner.getStartTime(), _time_list[0]))
-        mooseError("Timesequencestepper does not allow the start time to be modified.");
-
-      // save the restarted time_list
-      std::vector<Real> saved_time_list = _time_list;
-      _time_list.clear();
-
-      // step 1: fill in the entries up to current_step
-      int current_step = _executioner.timeStep();
-      for (int j = 0; j <= current_step; ++j)
-      {
-        if (!MooseUtils::absoluteFuzzyEqual(times[j], saved_time_list[j]))
-          mooseError("The timesequence provided in the restart file must be identical to "
-                     "the one in the old file up to entry number " << current_step + 1 << " = "
-                     << saved_time_list[current_step]);
-        _time_list.push_back(saved_time_list[j]);
-      }
-
-      // step 2: fill in the entries up after current_step
-      for (auto j = beginIndex(times, current_step + 1); j < times.size(); ++j)
-      {
-        if (times[j] < end_time)
-          _time_list.push_back(times[j]);
-      }
-      _time_list.push_back(end_time);
-    }
-    */
+    if (times[j] > start_time && times[j] < end_time)
+      _time_list.push_back(times[j]);
   }
+  _time_list.push_back(end_time);
 
   if (_app.halfTransient())
   {
