@@ -33,7 +33,7 @@ public:
 
 protected:
   /// The ExodusII file that is being read
-  std::string _mesh_file;
+  const std::string & _mesh_file;
   std::vector<Real> _times;
 };
 

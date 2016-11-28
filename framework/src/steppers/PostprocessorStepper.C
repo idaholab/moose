@@ -59,7 +59,3 @@ PostprocessorStepper::computeFailedDT()
   else // We are a root - so try to do something
     return 0.5 * _dt[0];
 }
-
-PostprocessorStepper::~PostprocessorStepper()
-{
-}

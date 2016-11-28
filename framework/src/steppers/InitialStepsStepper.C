@@ -46,7 +46,7 @@ InitialStepsStepper::computeInitialDT()
 Real
 InitialStepsStepper::computeDT()
 {
-  if ( _step_count  <= _n_steps )
+  if (_step_count <= _n_steps)
     return std::min(_incoming_stepper_dt, _input_dt);
 
   return _incoming_stepper_dt;
@@ -56,8 +56,4 @@ Real
 InitialStepsStepper::computeFailedDT()
 {
   return computeDT();
-}
-
-InitialStepsStepper::~InitialStepsStepper()
-{
 }

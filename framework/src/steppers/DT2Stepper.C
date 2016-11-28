@@ -55,7 +55,7 @@ DT2Stepper::computeInitialDT()
 Real
 DT2Stepper::computeDT()
 {
-  if (std::abs(_time - _end_time) < _tol && !_big_soln && _converged[0]) // Just finished initial big step
+  if (MooseUtils::absoluteFuzzyEqual(_time, _end_time, _tol) && !_big_soln && _converged[0]) // Just finished initial big step
   {
     // collect big dt soln and rewind to collect small dt solns
     _big_soln.reset(_soln_nonlin->clone().release());
@@ -65,17 +65,17 @@ DT2Stepper::computeDT()
 
     return windowDT() / 2.0; // doesn't actually matter what we return here because rewind
   }
-  else if (std::abs(_time - _start_time) < _tol && _big_soln && _converged[0]) // Start of first small step
+  else if (MooseUtils::absoluteFuzzyEqual(_time, _start_time, _tol) && _big_soln && _converged[0]) // Start of first small step
   {
     // we just rewound and need to do small steps
     return windowDT() / 2.0;
   }
-  else if (std::abs(_start_time + windowDT() / 2 - _time) < _tol && _big_soln && _converged[0]) // Start of second small step
+  else if (MooseUtils::absoluteFuzzyEqual(_time, _start_time + windowDT() / 2., _tol) && _big_soln && _converged[0]) // Start of second small step
   {
     // we just finished the first of the smaller dt steps
     return windowDT() / 2.0;
   }
-  else if (std::abs(_time - _end_time) < _tol && _big_soln && _converged[0]) // Finished second small step
+  else if (MooseUtils::absoluteFuzzyEqual(_time, _end_time, _tol) && _big_soln && _converged[0]) // Finished second small step
   {
     // we just finished the second of the two smaller dt steps and are ready for error calc
     Real err = calculateError();
@@ -113,11 +113,6 @@ DT2Stepper::computeFailedDT()
   return _dt[0]*0.5;
 }
 
-DT2Stepper::~DT2Stepper()
-{
-}
-
-
 Real
 DT2Stepper::resetWindow(Real start, Real dt)
 {
@@ -136,9 +131,9 @@ DT2Stepper::windowDT()
 Real
 DT2Stepper::calculateError()
 {
-  std::unique_ptr<NumericVector<Number>> small_soln(_soln_nonlin->clone().release());
+  auto small_soln = _soln_nonlin->clone();
 
-  std::unique_ptr<NumericVector<Number>> diff(_soln_nonlin->clone().release());
+  auto diff = _soln_nonlin->clone();
 
   *diff -= *_big_soln;
   Real err = (diff->l2_norm() / std::max(_big_soln->l2_norm(), small_soln->l2_norm())) / _dt[0];

@@ -45,7 +45,7 @@ IterationAdaptiveStepper::IterationAdaptiveStepper(const InputParameters & param
   if (isParamValid("iteration_window"))
     _iteration_window = getParam<int>("iteration_window");
   else
-    _iteration_window = ceil(_optimal_iterations / 5.0);
+    _iteration_window = std::ceil(_optimal_iterations / 5.0);
 }
 
 Real
@@ -83,8 +83,4 @@ Real
 IterationAdaptiveStepper::computeFailedDT()
 {
   return _cutback_factor * _dt[0];
-}
-
-IterationAdaptiveStepper::~IterationAdaptiveStepper()
-{
 }

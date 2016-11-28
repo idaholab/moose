@@ -30,7 +30,6 @@ class PiecewiseStepper : public Stepper
 {
 public:
   PiecewiseStepper(const InputParameters & parameters);
-  virtual ~PiecewiseStepper();
 
   virtual Real computeInitialDT() override;
 

@@ -19,10 +19,9 @@
 
 StepperInterface::StepperInterface(const MooseObject * moose_object) :
     DependencyResolverInterface(),
-    _si_name({moose_object->parameters().get<StepperName>("_output_name") != "" ? moose_object->parameters().get<StepperName>("_output_name") : moose_object->parameters().get<std::string>("_object_name")}),
+    _si_name({moose_object->parameters().have_parameter<StepperName>("_output_name") ? moose_object->parameters().get<StepperName>("_output_name") : moose_object->parameters().get<std::string>("_object_name")}),
     _si_params(moose_object->parameters()),
-    _si_feproblem_base(*_si_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base",
-                                                                      "Missing FEProblem Pointer in StepperInterface!")),
+    _si_feproblem_base(*_si_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base", "Missing FEProblem Pointer in StepperInterface!")),
     _default_dt(std::numeric_limits<Real>::max())
 {
 }

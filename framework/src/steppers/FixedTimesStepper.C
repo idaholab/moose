@@ -64,7 +64,3 @@ FixedTimesStepper::computeFailedDT()
   else
     return 0.5 * _dt[0];
 }
-
-FixedTimesStepper::~FixedTimesStepper()
-{
-}

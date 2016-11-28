@@ -54,7 +54,3 @@ LimitStepper::computeFailedDT()
 {
   return computeDT();
 }
-
-LimitStepper::~LimitStepper()
-{
-}

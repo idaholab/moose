@@ -75,7 +75,3 @@ KnotTimesStepper::computeFailedDT()
 {
   return _incoming_stepper_dt;
 }
-
-KnotTimesStepper::~KnotTimesStepper()
-{
-}

@@ -30,7 +30,6 @@ class KnotTimesStepper : public Stepper
 {
 public:
   KnotTimesStepper(const InputParameters & parameters);
-  virtual ~KnotTimesStepper();
 
   virtual Real computeInitialDT() override;
 

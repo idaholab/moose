@@ -16,7 +16,6 @@
 #define LIMITSTEPPER_H
 
 #include "Stepper.h"
-#include "LinearInterpolation.h"
 
 class LimitStepper;
 
@@ -30,7 +29,6 @@ class LimitStepper : public Stepper
 {
 public:
   LimitStepper(const InputParameters & parameters);
-  virtual ~LimitStepper();
 
   virtual Real computeInitialDT() override;
 

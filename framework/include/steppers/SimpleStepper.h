@@ -35,7 +35,6 @@ class SimpleStepper : public Stepper
 {
 public:
   SimpleStepper(const InputParameters & parameters);
-  virtual ~SimpleStepper();
 
   virtual Real computeInitialDT() override;
 

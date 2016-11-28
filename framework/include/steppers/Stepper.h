@@ -40,7 +40,6 @@ class Stepper :
 {
 public:
   Stepper(const InputParameters & parameters);
-  virtual ~Stepper();
 
   /**
    * Compute the timestep size for the the first timestep
