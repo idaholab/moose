@@ -13,6 +13,7 @@
 
 // Postprocessors
 #include "PorousFlowFluidMass.h"
+#include "PorousFlowHeatEnergy.h"
 
 // Materials
 #include "PorousFlow1PhaseMD_Gaussian.h"
@@ -65,6 +66,7 @@
 #include "PorousFlowHeatConduction.h"
 #include "PorousFlowHeatAdvection.h"
 #include "PorousFlowDispersiveFlux.h"
+#include "PorousFlowHeatVolumetricExpansion.h"
 
 // BoundaryConditions
 #include "PorousFlowSink.h"
@@ -130,6 +132,7 @@ PorousFlowApp::registerObjects(Factory & factory)
 
   // Postprocessors
   registerPostprocessor(PorousFlowFluidMass);
+  registerPostprocessor(PorousFlowHeatEnergy);
 
   // Materials
   registerMaterial(PorousFlow1PhaseMD_Gaussian);
@@ -182,6 +185,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerKernel(PorousFlowHeatConduction);
   registerKernel(PorousFlowHeatAdvection);
   registerKernel(PorousFlowDispersiveFlux);
+  registerKernel(PorousFlowHeatVolumetricExpansion);
 
   // BoundaryConditions
   registerBoundaryCondition(PorousFlowSink);
