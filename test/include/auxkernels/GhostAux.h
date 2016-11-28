@@ -25,7 +25,9 @@ template<>
 InputParameters validParams<GhostAux>();
 
 /**
- * An AuxKernel that uses built-in Random number generation.
+ * This AuxKernel retrieves values from the GhostUserObject
+ * and displays them in an elemental aux field. This class
+ * throws an error if used on a Lagrange basis.
  */
 class GhostAux : public AuxKernel
 {

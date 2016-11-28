@@ -27,6 +27,7 @@ InputParameters validParams<GhostUserObject>()
   MultiMooseEnum setup_options(SetupInterface::getExecuteOptions());
   setup_options = "timestep_begin";
   params.set<MultiMooseEnum>("execute_on") = setup_options;
+  params.addClassDescription("User object to calculate ghosted elements on a single processor or the union across all processors.");
   return params;
 }
 

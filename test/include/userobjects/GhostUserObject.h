@@ -24,7 +24,7 @@ template<>
 InputParameters validParams<GhostUserObject>();
 
 /**
- * User object to show Ghosted User Objects on ALL processors or a single processor.
+ * User object to calculate ghosted elements on a single processor or the union across all processors.
  */
 class GhostUserObject : public GeneralUserObject
 {
