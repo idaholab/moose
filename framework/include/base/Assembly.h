@@ -331,7 +331,7 @@ public:
 
   void init();
 
-  /// Create pair of vaiables requiring nonlocal jacobian contibiutions
+  /// Create pair of variables requiring nonlocal jacobian contributions
   void initNonlocalCoupling();
 
   /**
@@ -347,7 +347,7 @@ public:
   /**
    * Used for preparing the dense residual and jacobian blocks for one particular variable.
    *
-   * @param var The variable that needs to have it's datastructures prepared
+   * @param var The variable that needs to have its datastructures prepared
    */
   void prepareVariable(MooseVariable * var);
   void prepareVariableNonlocal(MooseVariable * var);

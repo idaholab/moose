@@ -205,7 +205,7 @@ FEProblemBase::~FEProblemBase()
 {
   // Flush the Console stream, the underlying call to Console::mooseConsole
   // relies on a call to Output::checkInterval that has references to
-  // _time, etc. If it is not flush here memory problems arise if you have
+  // _time, etc. If it is not flushed here memory problems arise if you have
   // an unflushed stream and start destructing things.
   _console << std::flush;
 
@@ -233,13 +233,7 @@ FEProblemBase::getCoordSystem(SubdomainID sid)
   if (it != _coord_sys.end())
     return (*it).second;
   else
-  {
-    std::stringstream err;
-    err << "Requested subdomain "
-        << sid
-        << " does not exist.";
-    mooseError(err.str());
-  }
+    mooseError("Requested subdomain " << sid << " does not exist.");
 }
 
 void
@@ -1921,7 +1915,7 @@ FEProblemBase::addMaterial(const std::string & mat_name, const std::string & nam
     MooseSharedPointer<Material> material = _factory.create<Material>(mat_name, name, parameters, tid);
     bool discrete = !material->getParam<bool>("compute");
 
-    // If the object is boundary restricted do not create the nieghbor and face objects
+    // If the object is boundary restricted do not create the neighbor and face objects
     if (material->boundaryRestricted())
     {
       _all_materials.addObject(material, tid);
@@ -3911,7 +3905,7 @@ FEProblemBase::initialAdaptMesh()
     {
       meshChanged();
 
-      //reproject the initial condition
+      // reproject the initial condition
       projectSolution();
 
       _cycles_completed++;

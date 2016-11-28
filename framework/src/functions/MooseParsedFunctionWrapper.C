@@ -127,7 +127,7 @@ MooseParsedFunctionWrapper::initialize()
       _pp_index.push_back(i);
     }
 
-    // Case when a scalar variable is bound by the naem given in the input vales
+    // Case when a scalar variable is bound by the name given in the input values
     else if (_feproblem.hasScalarVariable(_vals_input[i]))
     {
       // The scalar variable
@@ -148,7 +148,7 @@ MooseParsedFunctionWrapper::initialize()
     {
       // Use istringstream to convert, if it fails produce an error, otherwise add the variable to the _vals variable
       if (!(ss >> tmp))
-        mooseError("The input value '" << _vals_input[i] << "' was not understood, it must be a Real or a Postprocessor");
+        mooseError("The input value '" << _vals_input[i] << "' was not understood, it must be a Real Number, Postprocessor, or Scalar Variable");
       else
         _vals.push_back(tmp);
     }
