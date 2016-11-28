@@ -105,8 +105,6 @@ GBAnisotropyBase::GBAnisotropyBase(const InputParameters & parameters) :
 void
 GBAnisotropyBase::computeQpProperties()
 {
-  std::vector<std::vector<Real> > MOB = _mob;
-
   Real sum_kappa = 0.0;
   Real sum_gamma = 0.0;
   Real sum_L = 0.0;
@@ -120,8 +118,6 @@ GBAnisotropyBase::computeQpProperties()
   {
     for (unsigned int n = m + 1; n < _op_num; ++n) // m<n
     {
-      MOB[m][n] *= std::exp(-_Q[m][n] / (_kb * _T[_qp])); // Arrhenius relation
-
       gamma_value = _kappa_gamma[n][m];
 
       if (_inclination_anisotropy)
@@ -154,7 +150,7 @@ GBAnisotropyBase::computeQpProperties()
       sum_kappa += _kappa_gamma[m][n] * f_sigma*Val;
       sum_gamma += gamma_value * Val;
       // Following comes from substituting Eq. (36c) from the paper into (36b)
-      sum_L += Val * MOB[m][n] * f_mob * _mu_qp * _a_g2[n][m] / _sigma[m][n];
+      sum_L += Val * _mob[m][n] * std::exp(-_Q[m][n] / (_kb * _T[_qp])) * f_mob * _mu_qp * _a_g2[n][m] / _sigma[m][n];
     }
   }
 

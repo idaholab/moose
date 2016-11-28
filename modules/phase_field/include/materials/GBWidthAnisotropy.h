@@ -28,12 +28,9 @@ class GBWidthAnisotropy : public GBAnisotropyBase
 public:
   GBWidthAnisotropy(const InputParameters & parameters);
 
-protected:
-  virtual void computeQpProperties();
-
 private:
-  Real _mu_const;
-  Real _kappa_const;
+  const Real _mu;
+  const Real _kappa;
 };
 
 #endif //GBWIDTHANISOTROPY_H

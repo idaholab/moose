@@ -18,7 +18,7 @@ InputParameters validParams<GBAnisotropyBase>();
 /**
  * Function[kappa, gamma, m, L] = parameters (sigma, mob, w_GB, sigma0)
  * Parameter determination method is elaborated in Phys. Rev. B, 78(2), 024113, 2008, by N. Moelans
- * Thank Prof. Moelans for the explanation of her paper.
+ * Thanks to Prof. Moelans for the explanation of her paper.
  */
 class GBAnisotropyBase : public Material
 {
@@ -30,15 +30,15 @@ protected:
 
   const unsigned int _mesh_dimension;
 
-  Real _length_scale;
-  Real _time_scale;
-  Real _M_V;
-  Real _delta_sigma;
-  Real _delta_mob;
+  const Real _length_scale;
+  const Real _time_scale;
+  const Real _M_V;
+  const Real _delta_sigma;
+  const Real _delta_mob;
 
-  FileName _Anisotropic_GB_file_name;
+  const FileName _Anisotropic_GB_file_name;
 
-  bool _inclination_anisotropy;
+  const bool _inclination_anisotropy;
 
   const VariableValue & _T;
 

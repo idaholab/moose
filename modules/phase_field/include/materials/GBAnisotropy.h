@@ -25,11 +25,8 @@ class GBAnisotropy : public GBAnisotropyBase
 public:
   GBAnisotropy(const InputParameters & parameters);
 
-protected:
-  virtual void computeQpProperties();
-
 private:
-  Real _wGB;
+  const Real _wGB;
 };
 
 #endif //GBANISOTROPY_H

@@ -82,9 +82,3 @@ GBAnisotropy::GBAnisotropy(const InputParameters & parameters) :
       _a_g2[n][m] = g2; // lower triangle stores "g2" data.
     }
 }
-
-void
-GBAnisotropy::computeQpProperties()
-{
-  GBAnisotropyBase::computeQpProperties();
-}
