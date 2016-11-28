@@ -62,7 +62,7 @@ public:
 
   /**
    * A template method for performing the evaluation of the libMesh::ParsedFunction
-   * Within the source two specialization exists for returning a scalar or vector, template
+   * Within the source two specializations exists for returning a scalar or vector; template
    * specialization was utilized to allow for generic expansion.
    */
   template<typename T>
@@ -106,7 +106,7 @@ private:
   /// Vector of pointers to PP values
   std::vector<const Real *> _pp_vals;
 
-  /// Stores the relative location of variables (in _vars) that are connected to Postprocessors
+  /// Stores the relative location of variables (in _vars) that are connected to Scalar Variables
   std::vector<unsigned int> _scalar_index;
 
   /// Vector of pointers to PP values
@@ -131,7 +131,6 @@ private:
 
   // moose_unit needs access
   friend class ParsedFunctionTest;
-
 };
 
 /**

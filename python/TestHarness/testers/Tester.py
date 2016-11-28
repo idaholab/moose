@@ -167,9 +167,9 @@ class Tester(MooseObject):
       return (False, reason)
     # If we're testing with valgrind, then skip tests that require parallel or threads or don't meet the valgrind setting
     elif options.valgrind_mode != '':
-      if self.specs['valgrind'] == 'NONE':
+      if self.specs['valgrind'].upper() == 'NONE':
         reason = 'skipped (Valgrind==NONE)'
-      elif self.specs['valgrind'] == 'HEAVY' and options.valgrind_mode == 'NORMAL':
+      elif self.specs['valgrind'].upper() == 'HEAVY' and options.valgrind_mode.upper() == 'NORMAL':
         reason = 'skipped (Valgrind==HEAVY)'
       elif self.specs['min_parallel'] > 1 or self.specs['min_threads'] > 1:
         reason = 'skipped (Valgrind requires serial)'
