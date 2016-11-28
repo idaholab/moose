@@ -99,6 +99,7 @@
 #include "SimpleTestShapeElementKernel.h"
 #include "LateDeclarationVectorPostprocessor.h"
 #include "PotentialAdvection.h"
+#include "GhostAux.h"
 
 #include "RobinBC.h"
 #include "InflowBC.h"
@@ -192,6 +193,7 @@
 #include "SimpleTestShapeElementUserObject.h"
 #include "NumShapeSideUserObject.h"
 #include "DenomShapeSideUserObject.h"
+#include "GhostUserObject.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -382,6 +384,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(OldMaterialAux);
   registerAux(DotCouplingAux);
   registerAux(VectorPostprocessorAux);
+  registerAux(GhostAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);
@@ -506,6 +509,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(SimpleTestShapeElementUserObject);
   registerUserObject(NumShapeSideUserObject);
   registerUserObject(DenomShapeSideUserObject);
+  registerUserObject(GhostUserObject);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
