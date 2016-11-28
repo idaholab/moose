@@ -12,6 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#if 0
+
 #ifndef STEPPERTEST_H
 #define STEPPERTEST_H
 
@@ -264,3 +266,5 @@ buildStepper(StepperNode n)
 }
 
 #endif // STEPPERTEST_H
+
+#endif
