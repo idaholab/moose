@@ -12,6 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#if 0
+
 #include "StepperTest.h"
 #include "Stepper.h"
 #include "libmesh/parallel.h"
@@ -328,3 +330,5 @@ StepperTest::tableTestBasic(BasicTest tests[], int n)
     delete s;
   }
 }
+
+#endif
