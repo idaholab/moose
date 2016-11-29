@@ -200,7 +200,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters) :
   _eq.parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 }
 
-void FEProblemBase::newAssemblyArray(NonlinearSystemBase nl)
+void FEProblemBase::newAssemblyArray(NonlinearSystemBase & nl)
 {
   unsigned int n_threads = libMesh::n_threads();
 
@@ -218,7 +218,7 @@ void FEProblemBase::deleteAssemblyArray()
   }
 }
 
-void FEProblemBase::initNullSpaceVectors(const InputParameters & parameters, NonlinearSystemBase nl)
+void FEProblemBase::initNullSpaceVectors(const InputParameters & parameters, NonlinearSystemBase & nl)
 {
   unsigned int dimNullSpace = parameters.get<unsigned int>("null_space_dimension");
   unsigned int dimTransposeNullSpace = parameters.get<unsigned int>("transpose_null_space_dimension");
