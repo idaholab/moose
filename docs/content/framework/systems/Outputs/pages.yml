@@ -7,7 +7,6 @@
 - Exodus: content/framework/systems/Outputs/Exodus.md
 - GMV: content/framework/systems/Outputs/GMV.md
 - Gnuplot: content/framework/systems/Outputs/Gnuplot.md
-- ICEUpdater: content/framework/systems/Outputs/ICEUpdater.md
 - MaterialPropertyDebugOutput: content/framework/systems/Outputs/MaterialPropertyDebugOutput.md
 - Nemesis: content/framework/systems/Outputs/Nemesis.md
 - SolutionHistory: content/framework/systems/Outputs/SolutionHistory.md
