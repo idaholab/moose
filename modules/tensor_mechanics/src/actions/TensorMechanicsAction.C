@@ -123,10 +123,6 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   auto go = getParam<MultiMooseEnum>("generate_output");
   for (auto i = decltype(go.size())(0); i < go.size(); ++i)
     _generate_output.push_back(go.get(i));
-
-  // get subdomain IDs
-  for (auto & name : _subdomain_names)
-    _subdomain_ids.insert(_mesh->getSubdomainID(name));
 }
 
 void
@@ -273,6 +269,13 @@ TensorMechanicsAction::actSubdomainChecks()
   //
   // Do the coordinate system check only once the problem is created
   //
+  if (_current_task == "setup_mesh_complete")
+  {
+    // get subdomain IDs
+    for (auto & name : _subdomain_names)
+      _subdomain_ids.insert(_mesh->getSubdomainID(name));
+  }
+
   if (_current_task == "validate_coordinate_systems")
   {
     // use either block restriction list or list of all subdomains in the mesh

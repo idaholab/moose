@@ -368,15 +368,19 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(CavityPressureAction, "add_bc");
   registerAction(CavityPressurePPAction, "add_postprocessor");
   registerAction(CavityPressureUOAction, "add_user_object");
+
+  registerAction(LegacyTensorMechanicsAction, "setup_mesh_complete");
   registerAction(LegacyTensorMechanicsAction, "validate_coordinate_systems");
   registerAction(LegacyTensorMechanicsAction, "add_kernel");
 
+  registerAction(TensorMechanicsAction, "setup_mesh_complete");
   registerAction(TensorMechanicsAction, "validate_coordinate_systems");
   registerAction(TensorMechanicsAction, "add_variable");
   registerAction(TensorMechanicsAction, "add_aux_variable");
   registerAction(TensorMechanicsAction, "add_kernel");
   registerAction(TensorMechanicsAction, "add_aux_kernel");
   registerAction(TensorMechanicsAction, "add_material");
+
   registerAction(DynamicTensorMechanicsAction, "add_kernel");
   registerAction(PoroMechanicsAction, "add_kernel");
   registerAction(PressureAction, "add_bc");
