@@ -94,8 +94,10 @@ ComputeFiniteStrain::computeQpStrain()
   // Remove the eigenstrain increment
   subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
 
-  RankTwoTensor D = _strain_increment[_qp] / _dt;
-  _strain_rate[_qp] = D;
+  if (_dt > 0)
+    _strain_rate[_qp] = _strain_increment[_qp] / _dt;
+  else
+    _strain_rate[_qp].zero();
 
   //Update strain in intermediate configuration
   _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
