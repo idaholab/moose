@@ -17,16 +17,6 @@ pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD).la
 pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
                   $(patsubst %.c, %.$(obj-suffix).d, $(pcre_csrcfiles))
 
-#
-# ice_updater
-#
-ice_updater_DIR       := $(FRAMEWORK_DIR)/contrib/ice_updater
-ice_updater_srcfiles  := $(shell find $(ice_updater_DIR) -name "*.cpp")
-ice_updater_objects   := $(patsubst %.cpp, %.$(obj-suffix), $(ice_updater_srcfiles))
-ice_updater_LIB       :=  $(ice_updater_DIR)/libice_updater-$(METHOD).la
-# dependency files
-ice_updater_deps      := $(patsubst %.cpp, %.$(obj-suffix).d, $(ice_updater_srcfiles))
-
 moose_INC_DIRS := $(shell find $(FRAMEWORK_DIR)/include -type d -not -path "*/.svn*")
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d -not -path "*/.svn*")
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
@@ -36,7 +26,7 @@ moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
-moose_LIBS := $(moose_LIB) $(pcre_LIB) $(ice_updater_LIB)
+moose_LIBS := $(moose_LIB) $(pcre_LIB)
 
 # source files
 moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -name "*.C")
@@ -86,16 +76,10 @@ $(pcre_LIB): $(pcre_objects)
 	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(pcre_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(pcre_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(pcre_LIB) $(pcre_DIR)
 
-$(ice_updater_LIB): $(ice_updater_objects)
-	@echo "Linking Library "$@"..."
-	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(ice_updater_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(ice_updater_DIR)
-	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(ice_updater_LIB) $(ice_updater_DIR)
-
-$(moose_LIB): $(moose_objects) $(pcre_LIB) $(ice_updater_LIB)
+$(moose_LIB): $(moose_objects) $(pcre_LIB)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(ice_updater_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
 
 ## Clang static analyzer
@@ -106,7 +90,6 @@ sa:: $(moose_analyzer)
 
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/mtwist/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pcre/src/*.d)
--include $(wildcard $(FRAMEWORK_DIR)/contrib/ice_updater/src/*.d)
 
 #
 # exodiff
@@ -139,9 +122,9 @@ $(exodiff_APP): $(exodiff_objects)
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
-app_LIB  := $(moose_LIBS) $(pcre_LIB) $(ice_updater_LIB)
-app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(ice_updater_objects)
-app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(ice_updater_deps)
+app_LIB  := $(moose_LIBS) $(pcre_LIB)
+app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects)
+app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps)
 
 # The clean target removes everything we can remove "easily",
 # i.e. stuff which we have Makefile variables for.  Notes:
