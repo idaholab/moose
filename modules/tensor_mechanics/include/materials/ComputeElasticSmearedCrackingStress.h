@@ -27,6 +27,8 @@ public:
     CR_UNKNOWN
   };
 
+  virtual void initialSetup();
+
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
@@ -44,7 +46,7 @@ protected:
 
   const MaterialProperty<RankTwoTensor> & _mechanical_strain;
 
-  const bool _is_finite_strain;
+  bool _is_finite_strain;
 
   ///@{ Material properties related to stress and strain
   const MaterialProperty<RankTwoTensor> & _strain_increment;

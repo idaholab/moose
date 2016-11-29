@@ -338,6 +338,9 @@ BlockRestrictable::getBlockCoordSystem()
 
   const auto & subdomains = blockRestricted() ? blockIDs() : meshBlockIDs();
 
+  if (subdomains.empty())
+    mooseError("No subdomains found in the problem.");
+
   // make sure all subdomains are using the same coordinate system
   auto coord_system = _blk_feproblem->getCoordSystem(*subdomains.begin());
   for (auto subdomain : subdomains)
