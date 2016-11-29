@@ -261,6 +261,7 @@
   solve_type = PJFNK
   line_search = none
 
+  petsc_options = '-mat_superlu_dist_replacetinypivot'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_superlu_dist_fact'
   petsc_options_value = 'lu       superlu_dist SamePattern_SameRowPerm'
 
@@ -270,8 +271,8 @@
 
 # controls for nonlinear iterations
   nl_max_its = 20
-  nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-4
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-10
 
 # time control
   start_time = 0.0
