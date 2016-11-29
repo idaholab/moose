@@ -9,6 +9,7 @@
     * If you do not have CLT installed, you will be presented with a dialog box allowing you to install CLT.
 * [XQuartz 2.7.9](https://dl.bintray.com/xquartz/downloads/XQuartz-2.7.9.dmg)
 * MOOSE Environment package (choose one):
+    * Sierra 10.12: !MOOSEPACKAGE arch=osx10.12 return=link!
     * El Capitan 10.11: !MOOSEPACKAGE arch=osx10.11 return=link!
     * Yosemite 10.10: !MOOSEPACKAGE arch=osx10.10 return=link!
 
