@@ -29,15 +29,15 @@ PorousFlowEnergyTimeDerivative::PorousFlowEnergyTimeDerivative(const InputParame
     _rock_energy_nodal(getMaterialProperty<Real>("PorousFlow_matrix_internal_energy_nodal")),
     _rock_energy_nodal_old(getMaterialPropertyOld<Real>("PorousFlow_matrix_internal_energy_nodal")),
     _drock_energy_nodal_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_matrix_internal_energy_nodal_dvar")),
-    _fluid_density(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density") : NULL),
-    _fluid_density_old(_fluid_present ? &getMaterialPropertyOld<std::vector<Real> >("PorousFlow_fluid_phase_density") : NULL),
-    _dfluid_density_dvar(_fluid_present ? &getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar") : NULL),
-    _fluid_saturation_nodal(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal") : NULL),
-    _fluid_saturation_nodal_old(_fluid_present ? &getMaterialPropertyOld<std::vector<Real> >("PorousFlow_saturation_nodal") : NULL),
-    _dfluid_saturation_nodal_dvar(_fluid_present ? &getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar") : NULL),
-    _energy_nodal(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_internal_energy_nodal") : NULL),
-    _energy_nodal_old(_fluid_present ? &getMaterialPropertyOld<std::vector<Real> >("PorousFlow_fluid_phase_internal_energy_nodal") : NULL),
-    _denergy_nodal_dvar(_fluid_present ? &getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_internal_energy_nodal_dvar") : NULL)
+    _fluid_density(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density") : nullptr),
+    _fluid_density_old(_fluid_present ? &getMaterialPropertyOld<std::vector<Real> >("PorousFlow_fluid_phase_density") : nullptr),
+    _dfluid_density_dvar(_fluid_present ? &getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_dvar") : nullptr),
+    _fluid_saturation_nodal(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal") : nullptr),
+    _fluid_saturation_nodal_old(_fluid_present ? &getMaterialPropertyOld<std::vector<Real> >("PorousFlow_saturation_nodal") : nullptr),
+    _dfluid_saturation_nodal_dvar(_fluid_present ? &getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar") : nullptr),
+    _energy_nodal(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_internal_energy_nodal") : nullptr),
+    _energy_nodal_old(_fluid_present ? &getMaterialPropertyOld<std::vector<Real> >("PorousFlow_fluid_phase_internal_energy_nodal") : nullptr),
+    _denergy_nodal_dvar(_fluid_present ? &getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_internal_energy_nodal_dvar") : nullptr)
 {
 }
 

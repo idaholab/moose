@@ -40,6 +40,7 @@ class ExodusII_IO;
 class QBase;
 class PeriodicBoundaries;
 class Partitioner;
+class GhostingFunctor;
 }
 
 // Useful typedefs
@@ -562,11 +563,13 @@ public:
    */
   Real dimensionWidth(unsigned int component) const;
 
+  ///@{
   /**
    * Returns the min or max of the requested dimension respectively
    */
-  Real getMinInDimension(unsigned int component) const;
-  Real getMaxInDimension(unsigned int component) const;
+  virtual Real getMinInDimension(unsigned int component) const;
+  virtual Real getMaxInDimension(unsigned int component) const;
+  ///@}
 
   /**
    * This routine determines whether the Mesh is a regular orthogonal mesh (i.e. square in 2D, cubic in 3D).
@@ -776,6 +779,8 @@ public:
   virtual std::unique_ptr<PointLocatorBase> getPointLocator() const;
 
 protected:
+  std::vector<std::unique_ptr<GhostingFunctor> > _ghosting_functors;
+
   /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.
   MooseEnum _mesh_distribution_type;

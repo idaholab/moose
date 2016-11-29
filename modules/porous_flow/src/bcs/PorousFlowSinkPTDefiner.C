@@ -17,14 +17,14 @@ InputParameters validParams<PorousFlowSinkPTDefiner>()
 
 PorousFlowSinkPTDefiner::PorousFlowSinkPTDefiner(const InputParameters & parameters) :
     PorousFlowSink(parameters),
-    _pp(_involves_fluid ? &getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_nodal") : NULL),
-    _dpp_dvar(_involves_fluid ? &getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar") : NULL),
-    _temp(!_involves_fluid ? &getMaterialProperty<Real>("PorousFlow_temperature_nodal") : NULL),
-    _dtemp_dvar(!_involves_fluid ? &getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar") : NULL)
+    _pp(_involves_fluid ? &getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_nodal") : nullptr),
+    _dpp_dvar(_involves_fluid ? &getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar") : nullptr),
+    _temp(!_involves_fluid ? &getMaterialProperty<Real>("PorousFlow_temperature_nodal") : nullptr),
+    _dtemp_dvar(!_involves_fluid ? &getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar") : nullptr)
 {
-  if (_involves_fluid && (_pp == NULL || _dpp_dvar == NULL))
+  if (_involves_fluid && (_pp == nullptr || _dpp_dvar == nullptr))
     mooseError("PorousFlowSink: There is no porepressure Material");
-  if (!_involves_fluid && (_temp == NULL || _dtemp_dvar == NULL))
+  if (!_involves_fluid && (_temp == nullptr || _dtemp_dvar == nullptr))
     mooseError("PorousFlowSink: There is no temperature Material");
 }
 

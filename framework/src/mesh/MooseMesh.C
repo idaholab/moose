@@ -53,6 +53,9 @@
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/point_locator_base.h"
+#include "libmesh/default_coupling.h"
+#include "libmesh/ghost_point_neighbors.h"
+
 
 static const int GRAIN_SIZE = 1;     // the grain_size does not have much influence on our execution speed
 
@@ -96,11 +99,16 @@ InputParameters validParams<MooseMesh>()
 
   // Note: This parameter is named to match 'construct_side_list_from_node_list' in SetupMeshAction
   params.addParam<bool>("construct_node_list_from_side_list", true, "Whether or not to generate nodesets from the sidesets (usually a good idea).");
+  params.addParam<unsigned short>("num_ghosted_layers", 1, "Parameter to specify the number of geometric element layers"
+                                  " that will be available when DistributedMesh is used. Value is ignored in ReplicatedMesh mode");
+  params.addParam<bool>("ghost_point_neighbors", false, "Boolean to specify whether or not all point neighbors are ghosted"
+                        " when DistributedMesh is used. Value is ignored in ReplicatedMesh mode");
 
   params.registerBase("MooseMesh");
 
   // groups
-  params.addParamNamesToGroup("dim nemesis patch_update_strategy construct_node_list_from_side_list", "Advanced");
+  params.addParamNamesToGroup("dim nemesis patch_update_strategy construct_node_list_from_side_list num_ghosted_layers"
+                              " ghost_point_neighbors", "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
   return params;
@@ -190,6 +198,21 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
       _partitioner_name = "parmetis";
       _partitioner_overridden = true;
     }
+
+    // Add geometric ghosting functors to mesh if running with DistributedMesh
+    if (getParam<bool>("ghost_point_neighbors"))
+      _ghosting_functors.emplace_back(libmesh_make_unique<GhostPointNeighbors>(*_mesh));
+
+    auto num_ghosted_layers = getParam<unsigned short>("num_ghosted_layers");
+    if (num_ghosted_layers > 1)
+    {
+      auto default_coupling = libmesh_make_unique<DefaultCoupling>();
+      default_coupling->set_n_levels(num_ghosted_layers);
+      _ghosting_functors.emplace_back(std::move(default_coupling));
+    }
+
+    for (auto & gf : _ghosting_functors)
+      _mesh->add_ghosting_functor(*gf);
   }
   else
     _mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, dim);
@@ -1100,6 +1123,9 @@ MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<dof_id_type> > & 
 bool
 MooseMesh::detectOrthogonalDimRanges(Real tol)
 {
+  if (_regular_orthogonal_mesh)
+    return true;
+
   std::vector<Real> min(3, std::numeric_limits<Real>::max());
   std::vector<Real> max(3, std::numeric_limits<Real>::min());
   unsigned int dim = getMesh().mesh_dimension();
@@ -1288,10 +1314,7 @@ MooseMesh::detectPairedSidesets()
 Real
 MooseMesh::dimensionWidth(unsigned int component) const
 {
-  mooseAssert(_regular_orthogonal_mesh, "The current mesh is not a regular orthogonal mesh");
-  mooseAssert(component < LIBMESH_DIM, "Requested dimension out of bounds");
-
-  return _bounds[component][MAX] - _bounds[component][MIN];
+  return getMaxInDimension(component) - getMinInDimension(component);
 }
 
 Real
