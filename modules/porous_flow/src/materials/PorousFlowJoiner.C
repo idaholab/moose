@@ -36,7 +36,7 @@ PorousFlowJoiner::PorousFlowJoiner(const InputParameters & parameters) :
     _dtemperature_dvar(_at_qps ? getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_qp_dvar") : getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar")),
 
     _property(declareProperty<std::vector<Real> >(_pf_prop)),
-    _property_old(_include_old ? &declarePropertyOld<std::vector<Real> >(_pf_prop) : NULL),
+    _property_old(_include_old ? &declarePropertyOld<std::vector<Real> >(_pf_prop) : nullptr),
     _dproperty_dvar(declareProperty<std::vector<std::vector<Real> > >("d" + _pf_prop + "_dvar"))
 {
   _phase_property.resize(_num_phases);
