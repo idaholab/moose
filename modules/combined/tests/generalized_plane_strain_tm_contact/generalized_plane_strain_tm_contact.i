@@ -261,8 +261,8 @@
   solve_type = PJFNK
   line_search = none
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu       superlu_dist'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_superlu_dist_fact'
+  petsc_options_value = 'lu       superlu_dist SamePattern_SameRowPerm'
 
 # controls for linear iterations
   l_max_its = 100
