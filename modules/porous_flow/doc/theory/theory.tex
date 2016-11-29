@@ -3,6 +3,7 @@
 \usepackage{color}
 \usepackage{longtable}
 \usepackage{amsmath}
+\usepackage{hyperref}
 
 \setlength\oddsidemargin{-5mm}
 \setlength\topmargin{-2.0cm}
@@ -54,7 +55,7 @@ implemented and tested, \textcolor{blue}{blue text indicates
 
 The equations for heat flow, fluid flow, solid mechanics, and chemical
 reactions are defined here.  Notation is introduced throughout, but
-summarised in Section~\ref{ssec.notation}.  The Lagrangian coordinate
+summarised in \hyperref[ssec.notation]{Section~\ref*{ssec.notation}}.  The Lagrangian coordinate
 system is used since it co-moves with the mesh.
 
 \section{Fluid flow}
@@ -72,12 +73,13 @@ kg.m$^{-3}$), ${\mathbf v}_{s}$ is the velocity of the porous solid skeleton
 kg.s$^{-1}$.m$^{-2}$), and $q$ is a source (measured in
 kg.m$^{-3}$.s$^{-1}$).
 
-The coupling to the solid mechanics is via the
-$M\nabla\cdot {\mathbf v}_{s}$ term, as well as via changes in
-porosity and permeability described in Sections~\ref{por.sec} and~\ref{perm.sec}.
-Coupling to heat flow and chemical reactions is via the equations of
-state used within the terms of Eqn~(\ref{mass.cons.sp.eqn}), as well
-as the source term $q^{\species}$.
+The coupling to the solid mechanics is via the $M\nabla\cdot {\mathbf
+  v}_{s}$ term, as well as via changes in porosity and permeability
+described in \hyperref[por.sec]{Section~\ref*{por.sec}} and
+\hyperref[perm.sec]{Section~\ref*{perm.sec}}.  Coupling to heat flow
+and chemical reactions is via the equations of state used within the
+terms of \hyperref[mass.cons.sp.eqn]{Eqn~(\ref*{mass.cons.sp.eqn})},
+as well as the source term $q^{\species}$.
 
 The species are parameterised by $\species = 1,\ldots$.  For example,
 $\species$ might parameterise water, air, H$_{2}$, a solute, and so
@@ -110,7 +112,7 @@ material.
 
 The density $\rho_{\phase}$ is a function of pressure, mass fraction,
 and so on, as described by the equation of state used
-(Chapter~\ref{eos}).
+(\hyperref[eos]{Chapter~\ref*{eos}}).
 
 The saturation and mass fractions must obey
 \begin{eqnarray}
@@ -179,7 +181,7 @@ where $P$ is the reference pressure (usually taken to be the gas
 phase), and $P_{c,\phase}$ is the capillary pressure (nonpositive if
 the reference phase is the gas phase).   The capillary pressure is
 often a function of saturation, and various forms have been coded into
-the PorousFlow module: see Section~\ref{pc.sec}.  {\bf The capillary
+the PorousFlow module: see \hyperref[pc.sec]{Section~\ref*{pc.sec}}.  {\bf The capillary
 pressure relationship used in a model can have a great bearing on both the speed
 of convergence and the results obtained.}
 
@@ -204,7 +206,7 @@ where $H_{\species}$ is the Henry coefficient\footnote{Unforuntately,
   the Henry coefficient has multiple definitions which makes looking
   up numerical values complicated.}.  Occasionally this law is not
 accurate enough, and there are more complicated alternatives.
-Chapter~\ref{eos} discusses various equations of state that include
+\hyperref[eos]{Chapter~\ref*{eos}} discusses various equations of state that include
 computations of Henry's coefficients.
 
 \item \textcolor{blue}{When a liquid and a gaseous phase exist, the
@@ -284,8 +286,8 @@ $\alpha_{\phase, T} = 0 = \alpha_{\phase, L}$.
 Energy conservation for heat is described by the continuity
 equation
 \begin{equation}
-0 = \frac{\partial\energydens}{\partial t} + \textcolor{blue}{\energydens\nabla\cdot{\mathbf
-  v}_{s}} + \nabla\cdot \flux^{T} -
+0 = \frac{\partial\energydens}{\partial t} + \energydens\nabla\cdot{\mathbf
+  v}_{s} + \nabla\cdot \flux^{T} -
 \textcolor{blue}{\nu
   (1-\phi)\sigma^{\mathrm{eff}}_{ij}\frac{\partial}{\partial
     t}\epsilon_{ij}^{\mathrm{plastic}}}
@@ -296,23 +298,26 @@ Here $\energydens$ is the energy per unit volume in the rock-fluid
 system, ${\mathbf v}_{s}$ is velocity of the porous solid skeleton,
 $\flux^{T}$ is the heat flux, $\nu$ describes the ratio of
 plastic-deformation energy that gets transferred to heat energy,
-$\sigma^{\mathrm{eff}}_{ij}$ is the effective stress (see Eqn~(\ref{eff.stress.eqn})),
-  $\epsilon_{ij}^{\mathrm{plastic}}$ is the plastic strain, and
-  $q^{T}$ is a heat source.
+$\sigma^{\mathrm{eff}}_{ij}$ is the effective stress (see
+\hyperref[eff.stress.eqn]{Eqn~(\ref*{eff.stress.eqn})}),
+$\epsilon_{ij}^{\mathrm{plastic}}$ is the plastic strain, and $q^{T}$
+is a heat source.
 
 The coupling to the solid mechanics is via the
 $\energydens\nabla\cdot{\mathbf v}_{s}$ term, the $\nu
 (1-\phi)\sigma^{\mathrm{eff}}_{ij}\frac{\partial}{\partial
   t}\epsilon_{ij}^{\mathrm{plastic}}$ term, as well as via changes in
-porosity and permeability described in Sections~\ref{por.sec}
-and~\ref{perm.sec} Coupling to the fluid flow and chemical reactions
-is via the equations of state used within the terms of
-Eqn~(\ref{heat.cons.eqn}), as well as the source term $q^{T}$.
-Joule-Thompson effects\footnote{See for instance Eqn~(1) of SA
-  Mathias et al. ``Analytical solution for Joule-Thomson cooling
-  during CO$_{2}$ geo-sequestration in depleted oil and gas
-  reservoirs'' http://www.osti.gov/scitech/servlets/purl/985333} may
-be included via the fluid properties (Chapter~\ref{eos}).
+porosity and permeability described in
+\hyperref[por.sec]{Section~\ref*{por.sec}} and
+\hyperref[perm.sec]{Section~\ref*{perm.sec}} Coupling to the fluid
+flow and chemical reactions is via the equations of state used within
+the terms of \hyperref[heat.cons.eqn]{Eqn~(\ref*{heat.cons.eqn})}, as
+well as the source term $q^{T}$.  Joule-Thompson effects\footnote{See
+  for instance Eqn~(1) of SA Mathias et al. ``Analytical solution for
+  Joule-Thomson cooling during CO$_{2}$ geo-sequestration in depleted
+  oil and gas reservoirs''
+  http://www.osti.gov/scitech/servlets/purl/985333} may be included
+via the fluid properties (\hyperref[eos]{Chapter~\ref*{eos}}).
 
 Here it is assumed the liquids and
 solid are in local thermal equilibrium i.e. there is a single local
@@ -360,15 +365,15 @@ $\flux_{\phase}$ is the advective Darcy flux.
 
 \subsection{A simple example}
 
-Consider just the fluid
-terms of the heat-flow equation~(\ref{heat.cons.eqn}).  For notational
-simplicity, consider just one fully-saturated phase so that $\energydens =
-\phi\rho_{\phase}\energydens_{\phase}$.  Here $\energydens_{\phase}$
-has SI units J.kg$^{-1}$.  Also consider the fluid flux with no
-conduction so that $\flux^{T} =
+Consider just the fluid terms of the heat-flow
+\hyperref[heat.cons.eqn]{Eqn~(\ref{heat.cons.eqn})}.  For notational
+simplicity, consider just one fully-saturated phase so that
+$\energydens = \phi\rho_{\phase}\energydens_{\phase}$.  Here
+$\energydens_{\phase}$ has SI units J.kg$^{-1}$.  Also consider the
+fluid flux with no conduction so that $\flux^{T} =
 h_{\phase}\rho_{\phase}\darcyvel_{\phase}$.  Integrating
-Eqn~(\ref{heat.cons.eqn}) over an arbitrary volume $\Omega$, and employing
-integration by parts yields
+\hyperref[heat.cons.eqn]{Eqn~(\ref*{heat.cons.eqn})} over an arbitrary
+volume $\Omega$, and employing integration by parts yields
 \begin{equation}
 0 = \frac{\partial}{\partial t}\int_{\Omega}
 \phi\rho_{\phase}\energydens_{\phase} +
@@ -409,8 +414,9 @@ contribution is
 \int_{\partial\Omega} P{\mathbf n}\cdot \darcyvel \d t \ .
 \end{equation}
 
-Collecting these ideas together Eqn~(\ref{heat.cons.eqn}) reads, in
-this simple example
+Collecting these ideas together
+\hyperref[heat.cons.eqn]{Eqn~(\ref*{heat.cons.eqn})} reads, in this
+simple example
 \begin{equation}
 0 = \frac{\partial}{\partial t}\phi \rho C_{\mathrm{v}} T +
 \nabla\cdot \left(C_{\mathrm{v}}T + \frac{P}{\rho} \right) \rho \darcyvel
@@ -473,7 +479,7 @@ pumping fluid into a porous material, the $P_{f}$ porepressure is increased by
 $\Delta P_{f}$, and at the same time a mechanical external force applies an
 incremental pressure equaling $\alpha_{B}\Delta P_{f}$, then the volume of the porous
 solid remains static. (During this process, the porevolume and
-porosity will change, however, as quantified in Section~\ref{por.sec}.)
+porosity will change, however, as quantified in \hyperref[por.sec]{Section~\ref*{por.sec}}.)
 \end{itemize}
 
 It is assumed that the elastic constitutive law reads
@@ -517,11 +523,12 @@ the left-hand side).
 It is assumed that the {\em effective stress not the total stress}
 enters into the consitutive law (as above), and the plasticity, and
 the insitu stresses, and almost everywhere else.  One exception is
-specifying Neumann boundary conditions for the 
-displacements where the total stresses are being specified, as can be seen
-from Eqn~(\ref{cons.mom.eqn}).  Therefore, MOOSE will use effective stress,
-and not total stress, internally.  If one needs to input or output total
-stress, one must subtract $\alpha_{B}\nabla_{j} P_{f}$ from MOOSE's stress.
+specifying Neumann boundary conditions for the displacements where the
+total stresses are being specified, as can be seen from
+\hyperref[cons.mom.eqn]{Eqn~(\ref*{cons.mom.eqn})}.  Therefore, MOOSE
+will use effective stress, and not total stress, internally.  If one
+needs to input or output total stress, one must subtract
+$\alpha_{B}\nabla_{j} P_{f}$ from MOOSE's stress.
 
 
 \section{\textcolor{red}{Chemical reactions}}
@@ -587,10 +594,9 @@ by $M^{j}$, which is given by
   \label{mj_def}
   M^{j}=\phi \sum_{\phase} S_{\phase} \Psi^{j}_{\phase}
 \end{equation}
-where the sum in Eq. (\ref{mj_def}) is over the fluid phases only, and
-as before $\phi$ is the porosity and $S_{\phase}$ is the phase
-saturation.
-}
+where the sum in \hyperref[mj_def]{Eqn~(\ref*{mj_def})} is over the
+fluid phases only, and as before $\phi$ is the porosity and
+$S_{\phase}$ is the phase saturation.  }
 
 The continuity equation is then
 \begin{equation}
@@ -617,17 +623,19 @@ by
 \end{equation}
 }
 
-The total flux $\flux^{j}$ in Eq. (\ref{chemistry_continuity}) is
+The total flux $\flux^{j}$ in
+\hyperref[chemistry_continuity]{Eqn~(\ref*{chemistry_continuity})} is
 given by
 \begin{equation}
   \flux^{j}=\sum_{\phase} (\darcyvel_{\phase} - \phi S_{\phase} {\mathcal{D}}_{\phase}^{j} \nabla) \Psi_{\phase}^{j}
 \end{equation}
 which incorporates the advective and diffusive transport of chemical
-species in the sum over the fluid phases. ${\mathcal{D}}_{\phase}^{j}$ is the
-hydrodynamic dispersion tensor in phase $\phase$ of species $j$, including effects of
-tortuosity, dispersion etc, as in Eq. (\ref{hydro.disp.t.eqn}). It's
+species in the sum over the fluid phases. ${\mathcal{D}}_{\phase}^{j}$
+is the hydrodynamic dispersion tensor in phase $\phase$ of species
+$j$, including effects of tortuosity, dispersion etc, as in
+\hyperref[hydro.disp.t.eqn]{Eqn~(\ref*{hydro.disp.t.eqn})}. It's
 common to assume the this tensor is the same for all species in that
-phase. 
+phase.
 
 \textcolor{red}{
 First define the mineral saturation ratio $\Omega_{m}$ by
@@ -871,7 +879,7 @@ displacement vector of the porous solid. \\
 $\overline{V}_{m}$ & L.mol$^{-1}$ & molar volume \\
 \hline
 \caption{Notation introduced throughout
-  Section~\ref{sec.physical.equations}.}
+  \hyperref[sec.physical.equations]{Section~\ref*{sec.physical.equations}}.}
 \label{table.notation}
 \end{longtable}
 
@@ -880,11 +888,16 @@ $\overline{V}_{m}$ & L.mol$^{-1}$ & molar volume \\
 
 Since the number of phases and components is unity, the subscripts
 $\phase$ and $\species$ may be dropped.  Since $\massfrac=1$ there is
-no diffusion nor dispersion.   Assume that the relative
-permeability is unity.  Mass conservation of the fluid
-(Eqns~(\ref{mass.cons.sp.eqn}), (\ref{eqn.msph}),
-(\ref{adv.diff.disp.eqn}), (\ref{darc.eqn}), (\ref{diff.disp.eqn}),
-(\ref{hydro.disp.t.eqn}), (\ref{dl.eqn}) and (\ref{dt.eqn})) reads
+no diffusion nor dispersion.  Assume that the relative permeability is
+unity.  Mass conservation of the fluid
+(\hyperref[mass.cons.sp.eqn]{Eqns~(\ref*{mass.cons.sp.eqn})},
+\hyperref[eqn.msph]{(\ref*{eqn.msph})},
+\hyperref[adv.diff.disp.eqn]{(\ref*{adv.diff.disp.eqn})},
+\hyperref[darc.eqn]{(\ref*{darc.eqn})},
+\hyperref[diff.disp.eqn]{(\ref*{diff.disp.eqn})},
+\hyperref[hydro.disp.t.eqn]{(\ref*{hydro.disp.t.eqn})},
+\hyperref[dl.eqn]{(\ref*{dl.eqn})} and
+\hyperref[dt.eqn]{(\ref*{dt.eqn})}) reads
 \begin{equation}
 0 = \frac{\partial}{\partial t}\phi\rho +
 \nabla\cdot(\phi\rho{\mathbf{v}_{s}}) - \nabla_{i}\cdot\left(\frac{\rho
@@ -904,8 +917,10 @@ the fluid's specific heat capacity;
   rock-grain and fluid thermal conductivities: $\lambda =
   (1-\phi)\lambda^{R} + \phi\lambda^{f}$
 \end{itemize}
-The heat-energy conservation equation (Eqn~(\ref{heat.cons.eqn}),
-(\ref{en.per.vol.eqn}) and~(\ref{heat.flux.eqn})) is
+The heat-energy conservation equation
+(\hyperref[heat.cons.eqn]{Eqn~(\ref*{heat.cons.eqn})},
+\hyperref[en.per.vol.eqn]{(\ref*{en.per.vol.eqn})}
+and~\hyperref[heat.flux.eqn]{(\ref*{heat.flux.eqn})}) is
 \begin{eqnarray}
 0 & = & \frac{\partial}{\partial t}\left( (1-\phi)\rho_{R}C_{R}T + \phi\rho cT
 \right)
@@ -930,8 +945,9 @@ equations reads
 with $C = (1-\phi)\rho_{R}C_{R} + \phi\rho c$ being the macroscopic
 heat capacity.
 
-Eqns~(\ref{1phase.flow.eqn}) and~(\ref{heat.flow.simple.eqn}) with
-${\mathbf{v}}_{s}=0$ are the equations of FALCON.  Using the
+\hyperref[1phase.flow.eqn]{Eqns~(\ref*{1phase.flow.eqn})}
+and~\hyperref[heat.flow.simple.eqn]{(\ref*{heat.flow.simple.eqn})}
+with ${\mathbf{v}}_{s}=0$ are the equations of FALCON.  Using the
 assumption $\rho = \rho_{0}\exp(P/K_{f} - \alpha_{T}^{f}T)$, where
 $K_{f}$ is the constant bulk modulus of the fluid, and
 $\alpha_{T}^{f}$ is its constant thermal expansion coefficient, these
@@ -943,18 +959,21 @@ two equations are those of FLAC's THM.\footnote{There is one possible
   $\alpha_{B}=1$ without saying, because some of their formulation is
   only correct to $\alpha_{B}=1$, so I'm not sure whether this is
   FLAC's error/assumption, or an error in the porosity evolution
-  equation Eqn~(\ref{poro.evolve.eqn}) here.}
+  equation \hyperref[poro.evolve.eqn]{Eqn~(\ref*{poro.evolve.eqn})}
+  here.}
 
-The effective stress is given in Eqn~(\ref{eff.stress.eqn}), with
+The effective stress is given in
+\hyperref[eff.stress.eqn]{Eqn~(\ref*{eff.stress.eqn})}, with
 $P_{f}=P$.  The elastic constitutive equation is
-Eqn~(\ref{eqn.elasticity}).  Conservation of momentum is given in
-Eqn~(\ref{cons.mom.eqn}), with $\rho_{\mathrm{mat}} = (1 -
-\phi)\rho^{R} + \phi \rho$.  The variables are the 3 displacements (in 3
-dimensional problems), $u_{i}$.
+\hyperref[eqn.elasticity]{Eqn~(\ref*{eqn.elasticity})}.  Conservation
+of momentum is given in
+\hyperref[cons.mom.eqn]{Eqn~(\ref*{cons.mom.eqn})}, with
+$\rho_{\mathrm{mat}} = (1 - \phi)\rho^{R} + \phi \rho$.  The variables
+are the 3 displacements (in 3 dimensional problems), $u_{i}$.
 
-The evolution of porosity is given in Eqn~(\ref{poro.evolve.eqn}).  In
-many situations of interest, the change in porosity is very
-small.
+The evolution of porosity is given in
+\hyperref[poro.evolve.eqn]{Eqn~(\ref*{poro.evolve.eqn})}.  In many
+situations of interest, the change in porosity is very small.
 
 In summary, the variables for this case can be the porepressure $P$,
 the temperature $T$, and the three displacements $u_{i}$.
@@ -966,7 +985,7 @@ $\rho_{R}$; rock-grain specific heat capacity $C_{R}$; rock-grain
 thermal conductivity $\lambda^{R}$; fluid density $\rho$; 
 fluid viscosity $\mu$; fluid thermal conductivity $\lambda^{f}$; fluid
 specific heat capacity $c$.  All these can be coded
-into a suite of Materials, as described in Chapter~\ref{eos}.
+into a suite of Materials, as described in \hyperref[eos]{Chapter~\ref*{eos}}.
 
 %\section{Use case: Two-phase single-component (water-steam)}
 
@@ -1163,11 +1182,12 @@ In van Genuchten's paper, he finds good fits with experimental data
 for various soils and rock when the parameter $m$ ranges between about
 0.5 and 0.9 (meaning $2<n<10$, roughly), and $\alpha$ is beween
 $4\times 10^{-5}$\,Pa$^{-1}$ and $2\times 10^{-4}$\,Pa$^{-1}$.
-Figure~\ref{van_genuchten_pc.fig} shows the shape of the van Genuchten
-suction, $P_{c}$, as a function of $S_{\mathrm{eff}}$.
+\hyperref[van_genuchten_pc.fig]{Figure~\ref*{van_genuchten_pc.fig}}
+shows the shape of the van Genuchten suction, $P_{c}$, as a function
+of $S_{\mathrm{eff}}$.
 
 Numerically there are three important features of
-Eqn~(\ref{vg.cap.eqn}).
+\hyperref[vg.cap.eqn]{Eqn~(\ref*{vg.cap.eqn})}.
 \begin{enumerate}
 \item $S_{\mathrm{eff}}$ is a monotonically decreasing function of
   $P_{c}$, which is necessary for a unique solution.
@@ -1193,9 +1213,10 @@ I encourage users to set $m>0.5$.
 \centering
 \includegraphics[width=10cm]{van_genuchten_pc.eps}
 \caption{$\alpha P_{c}$ as a function of $S_{\mathrm{eff}}$ as given
-  by van Genuchten's expression Eqn~(\ref{vg.cap.eqn}).  Three values
-  of $m$ are shown: 0.5, 0.7 and 0.9 (the $m=0.5$ case has largest
-  $P_{c}$ around $S_{\mathrm{eff}}\sim 0$).}
+  by van Genuchten's expression
+  \hyperref[vg.cap.eqn]{Eqn~(\ref*{vg.cap.eqn})}.  Three values of $m$
+  are shown: 0.5, 0.7 and 0.9 (the $m=0.5$ case has largest $P_{c}$
+  around $S_{\mathrm{eff}}\sim 0$).}
 \label{van_genuchten_pc.fig}
 \end{figure}
 
@@ -1262,7 +1283,7 @@ assumed to be constant.
 \section{Effective fluid pressure}
 
 The effective fluid pressure used in the definition of the fluid
-effective stress Eqn~(\ref{eff.stress.eqn}) is
+effective stress \hyperref[eff.stress.eqn]{Eqn~(\ref*{eff.stress.eqn})} is
 \begin{equation}
 P = \sum_{\phase} S_{\phase}P_{\phase} \ .
 \end{equation}
@@ -1270,8 +1291,9 @@ P = \sum_{\phase} S_{\phase}P_{\phase} \ .
 \section{Enthalpy and energy-density}
 
 The specific enthalpy $h_{\phase}$, for a phase $\phase$, may be
-defined using one of the high-precision equation of 
-states (eg see Section~\ref{water.and.steam.sec}), or the relationship
+defined using one of the high-precision equation of states (eg see
+\hyperref[water.and.steam.sec]{Section~\ref*{water.and.steam.sec})},
+or the relationship
 \begin{equation}
 h_{\phase} = \energydens_{\phase} + a P_{\phase}/\rho_{\phase} \ .
 \end{equation}
@@ -1337,7 +1359,7 @@ The evolution of the porosity\footnote{This is a generalisation of
 \begin{equation}
 \frac{\partial \phi}{\partial t} = (\alpha_{B} -
 \phi)\frac{\partial}{\partial t}
-\left(\epsilon^{\mathrm{elastic}}_{ii} - \alpha_{T} T\right) +
+\left(\epsilon^{\mathrm{total}}_{ii} - \alpha_{T} T\right) +
 \frac{(1-\alpha_{B})(\alpha_{B}-\phi)}{K}\frac{\partial
   P_{f}}{\partial t} \ .
 \label{eqn.phi.dog}
@@ -1346,19 +1368,19 @@ Here $K$ is the bulk modulus of the drained porous skeleton: $1/K
 = \delta_{ij}\delta_{kl}C_{ijkl}$.  This has solution
 \begin{equation}
 \phi = \alpha_{B} + (\phi_{0} - \alpha_{B})\times \exp \left( \frac{\alpha_{B}
-  - 1}{K}P_{f} - \epsilon^{\mathrm{elastic}}_{ii} + \alpha_{T}T \right) \ ,
+  - 1}{K}P_{f} - \epsilon^{\mathrm{total}}_{ii} + \alpha_{T}T \right) \ ,
 \label{poro.evolve.eqn}
 \end{equation}
 where $\phi_{0}$ is the porosity at zero porepressure, zero elastic
 strain and zero temperature. Note this porosity can become negative. 
 
 The evolution of porosity is motivated further in the appendix
-Chapter~\ref{chap.evol.por}.
+\hyperref[chap.evol.por]{Chapter~\ref*{chap.evol.por}}.
 
 Without porepressure effects, the correct expression for porosity as a
 function of volumetric strain and temperature is
 \begin{equation}
-\phi = 1 + (\phi_{0} - 1)\times \exp \left(- \epsilon^{\mathrm{elastic}}_{ii} + \alpha_{T}T \right) \ .
+\phi = 1 + (\phi_{0} - 1)\times \exp \left(- \epsilon^{\mathrm{total}}_{ii} + \alpha_{T}T \right) \ .
 \end{equation}
 
 \textcolor{red}{These expressions may be modified to include the
@@ -1430,14 +1452,12 @@ $S_{\mathrm{eff}}=1$.
 
 \subsection{FLAC}
 
-\textcolor{blue}{
 \begin{equation}
 k_{\mathrm{r}} = (n + 1)S_{\mathrm{eff}}^{n} - n S_{\mathrm{eff}}^{n +
   1} \ .
 \end{equation}
 This has the distinct advantage over the Corey formulation that its
 derivative is continuous at $S_{\mathrm{eff}}=1$.
-}
 
 
 
@@ -1575,8 +1595,9 @@ derivative is
 }{\partial t}\tilde{M}(x, t) + {\mathbf{v}}_{s}\cdot \nabla
 \tilde{M}(x, t)\ .
 \end{equation}
-The continuity equation~(\ref{equation.continuity.eul}) can be
-re-written as
+The continuity
+\hyperref[equation.continuity.eul]{Eqn~(\ref*{equation.continuity.eul})}
+can be re-written as
 \begin{equation}
 0 = \frac{\mathrm{D}}{\mathrm{D} t}M + M\nabla\cdot {\mathrm{v}}_{s}
 \ .
@@ -1618,7 +1639,14 @@ The analytical solutions assume that pressure changes in the reservoir are small
 &&\beta = \frac{\rho_2  C_2  + \frac{ 1-\phi_r }{\phi_r}\rho_s C_s }{\left(\rho_1  C_1  - \rho_2  C_2 \right)} \label{eqn:beta}
 \end{eqnarray}
 
-\noindent where $S_1$ is the saturation of the water phase, $f_1$ is the fractional flow of the water (resident) phase, $T_{D1}$ is temperature and $r_D$ is radial distance.  The $C_j$ are the mass-based heat capacity of fluid 1, 2, or the formation rock.  The parameters $\alpha$ and $\beta$ in Eqs. \ref{eqn:alpha}-\ref{eqn:beta} are constant throughout the displacement.  Dimensionless variables are defined in LaForce et al (2014a).
+\noindent where $S_1$ is the saturation of the water phase, $f_1$ is
+the fractional flow of the water (resident) phase, $T_{D1}$ is
+temperature and $r_D$ is radial distance.  The $C_j$ are the
+mass-based heat capacity of fluid 1, 2, or the formation rock.  The
+parameters $\alpha$ and $\beta$ in
+\hyperref[eqn:alpha]{Eqns~\ref*{eqn:alpha}}---\hyperref[eqn:beta]{(\ref*{eqn:beta})}
+are constant throughout the displacement.  Dimensionless variables are
+defined in LaForce et al (2014a).
 
 %For one dimensional radial flow the dimensionless variables and linear heat loss coefficient, $\gamma_j=\gamma_R$, are defined as:
 %
@@ -1658,7 +1686,12 @@ k_{Tt}\frac{\partial^2 T_D}{\partial z^2} \to -U T_D.
 %
 %\noindent $(\rho C)_{a} = (1-\phi_a) \rho_a C_a +  \phi_a \rho_1 C_1 $.  The $C_j$ are the mass-based heat capacity of fluid 1, 2, or the adjacent formation rock, and $K_a$ is the saturated thermal conductivity of the adjacent formations. 
 
-In this formulation the thermal properties of the reservoir and the adjacent formations may be different, but the over- and under-burden must have the same thermal properties for vertical symmetry.  It will be interesting to test the simulator on the full equation \ref{eqn:generic_T} with vertical heat diffusion vs a simulated solution with the heat sink.
+In this formulation the thermal properties of the reservoir and the
+adjacent formations may be different, but the over- and under-burden
+must have the same thermal properties for vertical symmetry.  It will
+be interesting to test the simulator on the full
+\hyperref[eqn:generic_T]{Eqn~(\ref*{eqn:generic_T})} with vertical
+heat diffusion vs a simulated solution with the heat sink.
 
 
 \section{Two-component, two-phase, nonisothermal, forward coupled stress}
@@ -1809,14 +1842,15 @@ means it will deform uniformly without any shape change, and
 \frac{\Delta V_{\mathrm{f}}}{V_{\mathrm{f}}} = \frac{\Delta V}{V} \ .
 \end{equation}
 Substituting this equation, this specific pressure condition, and
-Eqn~(\ref{tildek.eqn}) into Eqns~(\ref{eqn.fund.volstrain})
-and~(\ref{eqn.deltavf}), yields
+\hyperref[tildek.eqn]{Eqn~(\ref*{tildek.eqn})} into
+\hyperref[eqn.fund.volstrain]{Eqns~(\ref*{eqn.fund.volstrain})}
+and~\hyperref[eqn.deltavf]{(\ref*{eqn.deltavf})}, yields
 \begin{equation}
 B = 1 + \phi - \phi/{\alpha_{B}} \ .
 \end{equation}
 
 Now that $A_{ij}$ and $B$ have been identified, they may be
-substituted into Eqn~(\ref{eqn.deltavf}).  Rearranging yields
+substituted into \hyperref[eqn.deltavf]{Eqn~(\ref*{eqn.deltavf})}.  Rearranging yields
 \begin{equation}
 \frac{\Delta V_{\mathrm{f}}}{V_{\mathrm{f}}} =
 \frac{\alpha_{B}}{\phi}\delta_{ij}C_{ijkl} \left[ \Delta
@@ -1838,7 +1872,7 @@ yields
   \epsilon_{ii}}{\partial t} + \frac{(1-\alpha_{B})(\alpha_{B} -
   \phi)}{K}\frac{\partial P_{\mathrm{f}}}{\partial t} \ ,
 \end{equation}
-as written in Eqn~(\ref{eqn.phi.dog})
+as written in \hyperref[eqn.phi.dog]{Eqn~(\ref*{eqn.phi.dog})}.
 
 \end{document}
 
