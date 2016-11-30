@@ -20,6 +20,7 @@
 #include "HashMap.h"
 #include "MooseError.h"
 #include "Backup.h"
+#include "RandGen.h"
 
 // libMesh includes
 #include "libmesh/vector_value.h"
@@ -35,6 +36,7 @@
 #include <list>
 #include <iostream>
 #include <map>
+#include <random>
 
 // Forward declarations
 class ColumnMajorMatrix;
@@ -415,6 +417,23 @@ dataLoad(std::istream & stream, HashMap<T,U> & m, void * context)
     U & value = m[key];
     loadHelper(stream, value, context);
   }
+}
+
+template <typename T>
+inline void
+dataLoad(std::istream & stream, RandGen<T> & eng, void * context)
+{
+  std::stringstream ss;
+  dataLoad(stream, ss, context);
+  ss >> eng;
+}
+template <typename T>
+inline void
+dataStore(std::ostream & stream, RandGen<T> & eng, void * context)
+{
+  std::stringstream ss;
+  ss << eng;
+  dataStore(stream, ss, context);
 }
 
 // Specializations (defined in .C)
