@@ -179,6 +179,8 @@ public:
 
   unsigned int getPropertyId (const std::string & prop_name);
 
+  unsigned int retrievePropertyId (const std::string & prop_name) const;
+
 protected:
   // indexing: [element][side]->material_properties
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > * _props_elem;
