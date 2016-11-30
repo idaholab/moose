@@ -146,6 +146,7 @@
 #include "StrainGradDispDerivatives.h"
 #include "SwitchingFunction3PhaseMaterial.h"
 #include "SwitchingFunctionMaterial.h"
+#include "SwitchingFunctionMultiPhaseMaterial.h"
 #include "ThirdPhaseSuppressionMaterial.h"
 #include "TimeStepMaterial.h"
 #include "VariableGradientMaterial.h"
@@ -407,6 +408,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(StrainGradDispDerivatives);
   registerMaterial(SwitchingFunction3PhaseMaterial);
   registerMaterial(SwitchingFunctionMaterial);
+  registerMaterial(SwitchingFunctionMultiPhaseMaterial);
   registerMaterial(ThirdPhaseSuppressionMaterial);
   registerMaterial(TimeStepMaterial);
   registerMaterial(VariableGradientMaterial);
