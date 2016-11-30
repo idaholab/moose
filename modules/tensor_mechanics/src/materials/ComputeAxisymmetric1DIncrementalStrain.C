@@ -6,6 +6,8 @@
 /****************************************************************/
 #include "ComputeAxisymmetric1DIncrementalStrain.h"
 #include "Assembly.h"
+#include "FEProblem.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<ComputeAxisymmetric1DIncrementalStrain>()
@@ -35,8 +37,10 @@ ComputeAxisymmetric1DIncrementalStrain::ComputeAxisymmetric1DIncrementalStrain(c
 void
 ComputeAxisymmetric1DIncrementalStrain::initialSetup()
 {
-  if (_assembly.coordSystem() != Moose::COORD_RZ)
-    mooseError("The coordinate system must be set to RZ for Axisymmetric 1D simulations");
+  const auto & subdomainIDs = _mesh.meshSubdomains();
+  for (auto subdomainID : subdomainIDs)
+    if (_fe_problem.getCoordSystem(subdomainID) != Moose::COORD_RZ)
+      mooseError("The coordinate system must be set to RZ for Axisymmetric simulations.");
 }
 
 Real
