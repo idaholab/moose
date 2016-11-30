@@ -165,7 +165,7 @@
   [../]
   [./y]
     type = DirichletBC
-    boundary = '1 5' #'4 6'
+    boundary = '4 6'
     variable = disp_y
     value = 0.0
   [../]
