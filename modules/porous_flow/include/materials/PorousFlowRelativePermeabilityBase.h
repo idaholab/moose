@@ -26,7 +26,8 @@ public:
   PorousFlowRelativePermeabilityBase(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void sizeNodalProperties() override;
+  virtual void computeNodalProperties() override;
 
   /**
    * Effective saturation of fluid phase

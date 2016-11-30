@@ -32,10 +32,17 @@ PorousFlowRelativePermeabilityBase::PorousFlowRelativePermeabilityBase(const Inp
 }
 
 void
-PorousFlowRelativePermeabilityBase::computeQpProperties()
+PorousFlowRelativePermeabilityBase::sizeNodalProperties()
+{
+  _relative_permeability.resize(_current_elem->n_nodes());
+  _drelative_permeability_ds.resize(_current_elem->n_nodes());
+}
+
+void
+PorousFlowRelativePermeabilityBase::computeNodalProperties()
 {
   // Effective saturation
-  Real seff = effectiveSaturation(_saturation_nodal[_qp][_phase_num]);
+  Real seff = effectiveSaturation(_saturation_nodal[_nodenum][_phase_num]);
   Real relperm, drelperm;
 
   if (seff < 0.0)
@@ -56,8 +63,8 @@ PorousFlowRelativePermeabilityBase::computeQpProperties()
     drelperm = 0.0;
   }
 
-  _relative_permeability[_qp] = relperm;
-  _drelative_permeability_ds[_qp] = drelperm * _dseff_ds;
+  _relative_permeability[_nodenum] = relperm;
+  _drelative_permeability_ds[_nodenum] = drelperm * _dseff_ds;
 }
 
 Real

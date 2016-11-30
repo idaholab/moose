@@ -29,14 +29,20 @@ public:
   PorousFlow1PhaseP(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
+  virtual void initNodalStatefulProperties() override;
+  virtual void computeNodalProperties() override;
+
+  /**
+   * Assemble std::vectors of porepressure, saturation and temperature at the quadpoints
+   */
+  void buildQpPPSS();
 
   /**
    * Assemble std::vectors of porepressure, saturation and temperature at the nodes
-   * and quadpoints
    */
-  void buildQpPPSS();
+  void buildNodalPPSS();
 
   /**
    * Effective saturation as a function of porepressure.

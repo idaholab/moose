@@ -11,14 +11,14 @@
 template<>
 InputParameters validParams<PorousFlowVariableBase>()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = validParams<PorousFlowNodalValueMaterial>();
   params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names");
   params.addClassDescription("Base class for thermophysical variable materials. Provides pressure and saturation material properties for all phases as required");
   return params;
 }
 
 PorousFlowVariableBase::PorousFlowVariableBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+    DerivativeMaterialInterface<PorousFlowNodalValueMaterial>(parameters),
 
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _num_phases(_dictator.numPhases()),
@@ -51,21 +51,41 @@ void
 PorousFlowVariableBase::initQpStatefulProperties()
 {
   /// Resize the material properties which constain pressure and saturation
-  _porepressure_nodal[_qp].resize(_num_phases);
   _porepressure_qp[_qp].resize(_num_phases);
   _gradp_qp[_qp].resize(_num_phases);
-  _dporepressure_nodal_dvar[_qp].resize(_num_phases);
   _dporepressure_qp_dvar[_qp].resize(_num_phases);
   _dgradp_qp_dgradv[_qp].resize(_num_phases);
   _dgradp_qp_dv[_qp].resize(_num_phases);
 
-  _saturation_nodal[_qp].resize(_num_phases);
   _saturation_qp[_qp].resize(_num_phases);
   _grads_qp[_qp].resize(_num_phases);
-  _dsaturation_nodal_dvar[_qp].resize(_num_phases);
   _dsaturation_qp_dvar[_qp].resize(_num_phases);
   _dgrads_qp_dgradv[_qp].resize(_num_phases);
   _dgrads_qp_dv[_qp].resize(_num_phases);
+}
+
+void
+PorousFlowVariableBase::sizeNodalStatefulProperties()
+{
+  _porepressure_nodal.resize(_current_elem->n_nodes());
+  _porepressure_nodal_old.resize(_current_elem->n_nodes());
+  _dporepressure_nodal_dvar.resize(_current_elem->n_nodes());
+
+  _saturation_nodal.resize(_current_elem->n_nodes());
+  _saturation_nodal_old.resize(_current_elem->n_nodes());
+  _dsaturation_nodal_dvar.resize(_current_elem->n_nodes());
+}
+
+void
+PorousFlowVariableBase::initNodalStatefulProperties()
+{
+  _porepressure_nodal[_nodenum].resize(_num_phases);
+  _porepressure_nodal_old[_nodenum].resize(_num_phases);
+  _dporepressure_nodal_dvar[_nodenum].resize(_num_phases);
+
+  _saturation_nodal[_nodenum].resize(_num_phases);
+  _saturation_nodal_old[_nodenum].resize(_num_phases);
+  _dsaturation_nodal_dvar[_nodenum].resize(_num_phases);
 }
 
 void
@@ -74,13 +94,41 @@ PorousFlowVariableBase::computeQpProperties()
   /// Prepare the derivative matrices with zeroes
   for (unsigned phase = 0; phase < _num_phases; ++phase)
   {
-    _dporepressure_nodal_dvar[_qp][phase].assign(_num_pf_vars, 0.0);
     _dporepressure_qp_dvar[_qp][phase].assign(_num_pf_vars, 0.0);
     _dgradp_qp_dgradv[_qp][phase].assign(_num_pf_vars, 0.0);
     _dgradp_qp_dv[_qp][phase].assign(_num_pf_vars, RealGradient());
-    _dsaturation_nodal_dvar[_qp][phase].assign(_num_pf_vars, 0.0);
     _dsaturation_qp_dvar[_qp][phase].assign(_num_pf_vars, 0.0);
     _dgrads_qp_dgradv[_qp][phase].assign(_num_pf_vars, 0.0);
     _dgrads_qp_dv[_qp][phase].assign(_num_pf_vars, RealGradient());
   }
 }
+
+void
+PorousFlowVariableBase::sizeNodalProperties()
+{
+  _porepressure_nodal.resize(_current_elem->n_nodes());
+  _dporepressure_nodal_dvar.resize(_current_elem->n_nodes());
+
+  _saturation_nodal.resize(_current_elem->n_nodes());
+  _dsaturation_nodal_dvar.resize(_current_elem->n_nodes());
+
+  for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
+  {
+    _porepressure_nodal[i].resize(_num_phases);
+    _dporepressure_nodal_dvar[i].resize(_num_phases);
+    _saturation_nodal[i].resize(_num_phases);
+    _dsaturation_nodal_dvar[i].resize(_num_phases);
+  }
+}
+
+void
+PorousFlowVariableBase::computeNodalProperties()
+{
+  /// Prepare the derivative matrices with zeroes
+  for (unsigned phase = 0; phase < _num_phases; ++phase)
+  {
+    _dporepressure_nodal_dvar[_nodenum][phase].assign(_num_pf_vars, 0.0);
+    _dsaturation_nodal_dvar[_nodenum][phase].assign(_num_pf_vars, 0.0);
+  }
+}
+

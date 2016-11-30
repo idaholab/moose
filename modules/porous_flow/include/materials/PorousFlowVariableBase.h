@@ -9,7 +9,7 @@
 #define POROUSFLOWVARIABLEBASE_H
 
 #include "DerivativeMaterialInterface.h"
-#include "Material.h"
+#include "PorousFlowNodalValueMaterial.h"
 #include "PorousFlowDictator.h"
 
 class PorousFlowVariableBase;
@@ -22,14 +22,18 @@ InputParameters validParams<PorousFlowVariableBase>();
  * primary variables such as porepressure and saturation at the nodes
  * and quadpoints for all phases as required
  */
-class PorousFlowVariableBase : public DerivativeMaterialInterface<Material>
+class PorousFlowVariableBase : public DerivativeMaterialInterface<PorousFlowNodalValueMaterial>
 {
 public:
   PorousFlowVariableBase(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
+  virtual void sizeNodalStatefulProperties() override;
+  virtual void initNodalStatefulProperties() override;
+  virtual void sizeNodalProperties() override;
+  virtual void computeNodalProperties() override;
 
   /// The variable names UserObject for the PorousFlow variables
   const PorousFlowDictator & _dictator;
