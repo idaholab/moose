@@ -23,7 +23,7 @@ ComputeLinearElasticStress::ComputeLinearElasticStress(const InputParameters & p
 void
 ComputeLinearElasticStress::initialSetup()
 {
-  if (hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
+  if (hasBlockMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
     mooseError("This linear elastic stress calculation only works for small strains; use ComputeFiniteStrainElasticStress for simulations using incremental and finite strains.");
 }
 

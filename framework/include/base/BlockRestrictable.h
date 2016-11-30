@@ -102,7 +102,6 @@ public:
 
   /**
    * Return the block subdomain ids for this object
-   * @param mesh_ids When true, this will return all mesh ids rather than ANY_BLOCK_ID (@see MooseObjectWarehouse)
    * @return a set of SudomainIDs that are valid for this object
    */
   const virtual std::set<SubdomainID> & blockIDs() const;
@@ -201,6 +200,12 @@ protected:
    * An initialization routine needed for dual constructors
    */
   void initializeBlockRestrictable(const InputParameters & parameters);
+
+  /**
+   * Check if the blocks this object operates on all have the same coordinate system,
+   * and if so return it.
+   */
+  Moose::CoordinateSystemType getBlockCoordSystem();
 
 private:
 

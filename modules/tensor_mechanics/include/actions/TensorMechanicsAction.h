@@ -22,7 +22,9 @@ public:
   virtual void act();
 
 protected:
+  void actSubdomainChecks();
   void actOutputGeneration();
+  void actGatherActionParameters();
 
   virtual std::string getKernelType();
   virtual InputParameters getKernelParameters(std::string type);
@@ -45,6 +47,9 @@ protected:
 
   /// set generated from the passed in vector of subdomain names
   std::set<SubdomainID> _subdomain_ids;
+
+  /// set generated from the combined block restrictions of all TensorMechanics/Master action blocks
+  std::set<SubdomainID> _subdomain_id_union;
 
   /// strain formulation
   enum class Strain

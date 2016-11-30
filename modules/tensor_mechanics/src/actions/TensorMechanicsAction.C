@@ -14,6 +14,7 @@
 #include "MooseObjectAction.h"
 
 #include "libmesh/string_to_enum.h"
+#include <algorithm>
 
 template <>
 InputParameters
@@ -128,22 +129,14 @@ void
 TensorMechanicsAction::act()
 {
   //
-  // consistency check for the coordinate system
+  // Consistency check for the coordinate system
   //
+  actSubdomainChecks();
 
-  // get subdomain IDs
-  _subdomain_ids.clear();
-  for (auto & name : _subdomain_names)
-    _subdomain_ids.insert(_mesh->getSubdomainID(name));
-
-  // use either block restriction list or list of all subdomains in the mesh
-  const auto & check_subdomains = _subdomain_ids.empty() ? _problem->mesh().meshSubdomains() : _subdomain_ids;
-
-  // make sure all subdomains are using the same coordinate system
-  _coord_system = _problem->getCoordSystem(*check_subdomains.begin());
-  for (auto subdomain : check_subdomains)
-    if (_problem->getCoordSystem(subdomain) != _coord_system)
-      mooseError("The TensorMechanics action requires all subdomains to have the same coordinate system");
+  //
+  // Gather info from all other TensorMechanicsAction
+  //
+  actGatherActionParameters();
 
   //
   // Deal with the optional AuxVariable based tensor quantity output
@@ -186,7 +179,7 @@ TensorMechanicsAction::act()
       _problem->addVariable(disp,
                             FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
                                    Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                            1.0, _subdomain_ids.empty() ? nullptr : &_subdomain_ids);
+                            1.0, _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
     }
   }
 
@@ -271,6 +264,34 @@ TensorMechanicsAction::act()
 }
 
 void
+TensorMechanicsAction::actSubdomainChecks()
+{
+  //
+  // Do the coordinate system check only once the problem is created
+  //
+  if (_current_task == "setup_mesh_complete")
+  {
+    // get subdomain IDs
+    for (auto & name : _subdomain_names)
+      _subdomain_ids.insert(_mesh->getSubdomainID(name));
+  }
+
+  if (_current_task == "validate_coordinate_systems")
+  {
+    // use either block restriction list or list of all subdomains in the mesh
+    const auto & check_subdomains = _subdomain_ids.empty() ? _problem->mesh().meshSubdomains() : _subdomain_ids;
+    if (check_subdomains.empty())
+      mooseError("No subdomains found");
+
+    // make sure all subdomains are using the same coordinate system
+    _coord_system = _problem->getCoordSystem(*check_subdomains.begin());
+    for (auto subdomain : check_subdomains)
+      if (_problem->getCoordSystem(subdomain) != _coord_system)
+        mooseError("The TensorMechanics action requires all subdomains to have the same coordinate system.");
+  }
+}
+
+void
 TensorMechanicsAction::actOutputGeneration()
 {
   // table data for output generation
@@ -296,7 +317,7 @@ TensorMechanicsAction::actOutputGeneration()
   //
   // Add variables (optional)
   //
-  if (_current_task == "add_variable" && getParam<bool>("add_variables"))
+  if (_current_task == "add_aux_variable" && getParam<bool>("add_variables"))
   {
     // Loop through output aux variables
     for (auto out : _generate_output)
@@ -305,7 +326,7 @@ TensorMechanicsAction::actOutputGeneration()
       _problem->addAuxVariable(data[out]._variable,
                                FEType(Utility::string_to_enum<Order>("CONSTANT"),
                                       Utility::string_to_enum<FEFamily>("MONOMIAL")),
-                               _subdomain_ids.empty() ? nullptr : &_subdomain_ids);
+                               _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
     }
   }
 
@@ -328,6 +349,31 @@ TensorMechanicsAction::actOutputGeneration()
       params.set<unsigned int>("index_j") = data[out]._index.second;
 
       _problem->addAuxKernel(type, variable, params);
+    }
+  }
+}
+
+void
+TensorMechanicsAction::actGatherActionParameters()
+{
+  //
+  // Gather info about all other master actions when we add variables
+  //
+  if (_current_task == "validate_coordinate_systems" && getParam<bool>("add_variables"))
+  {
+    auto actions = _awh.getActions<TensorMechanicsAction>();
+    for (const auto & action : actions)
+    {
+      const auto size_before = _subdomain_id_union.size();
+      const auto added_size = action->_subdomain_ids.size();
+      _subdomain_id_union.insert(action->_subdomain_ids.begin(), action->_subdomain_ids.end());
+      const auto size_after = _subdomain_id_union.size();
+
+      if (size_after != size_before + added_size)
+        mooseError("The block restrictions in the TensorMechanics/Master actions must be non-overlapping.");
+
+      if (added_size == 0 && actions.size() > 1)
+        mooseError("No TensorMechanics/Master action can be block unrestricted if more than one TensorMechanics/Master action is specified.");
     }
   }
 }

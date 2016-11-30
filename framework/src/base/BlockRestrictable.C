@@ -300,7 +300,7 @@ BlockRestrictable::hasBlockMaterialPropertyHelper(const std::string & prop_name)
   const MaterialWarehouse & warehouse = _blk_feproblem->getMaterialWarehouse();
 
   // Complete set of ids that this object is active
-  const std::set<SubdomainID> & ids = hasBlocks(Moose::ANY_BLOCK_ID) ? meshBlockIDs() : blockIDs();
+  const std::set<SubdomainID> & ids = blockRestricted() ? blockIDs() : meshBlockIDs();
 
   // Loop over each id for this object
   for (const auto & id : ids)
@@ -326,4 +326,26 @@ BlockRestrictable::hasBlockMaterialPropertyHelper(const std::string & prop_name)
 
   // If you get here the supplied property is defined on all blocks
   return true;
+}
+
+Moose::CoordinateSystemType
+BlockRestrictable::getBlockCoordSystem()
+{
+  if (!_blk_mesh)
+    mooseError("No mesh available in BlockRestrictable::checkCoordSystem()");
+  if (!_blk_feproblem)
+    mooseError("No problem available in BlockRestrictable::checkCoordSystem()");
+
+  const auto & subdomains = blockRestricted() ? blockIDs() : meshBlockIDs();
+
+  if (subdomains.empty())
+    mooseError("No subdomains found in the problem.");
+
+  // make sure all subdomains are using the same coordinate system
+  auto coord_system = _blk_feproblem->getCoordSystem(*subdomains.begin());
+  for (auto subdomain : subdomains)
+    if (_blk_feproblem->getCoordSystem(subdomain) != coord_system)
+      mooseError("This object requires all subdomains to have the same coordinate system.");
+
+  return coord_system;
 }

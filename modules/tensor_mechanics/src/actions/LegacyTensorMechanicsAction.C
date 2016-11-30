@@ -21,6 +21,6 @@ LegacyTensorMechanicsAction::LegacyTensorMechanicsAction(const InputParameters &
 void
 LegacyTensorMechanicsAction::act()
 {
-  if (_current_task == "add_kernel")
+  if (_current_task == "add_kernel" || _current_task == "validate_coordinate_systems")
     TensorMechanicsAction::act();
 }

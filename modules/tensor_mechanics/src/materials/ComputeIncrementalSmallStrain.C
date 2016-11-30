@@ -34,7 +34,10 @@ ComputeIncrementalSmallStrain::computeQpProperties()
   subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
 
   // strain rate
-  _strain_rate[_qp] = _strain_increment[_qp] /_dt;
+  if (_dt > 0)
+    _strain_rate[_qp] = _strain_increment[_qp] /_dt;
+  else
+    _strain_rate[_qp].zero();
 
   //Update strain in intermediate configuration: rotations are not needed
   _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];

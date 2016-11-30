@@ -12,8 +12,6 @@
 #include "TensorMechanicsAction.h"
 #include "LegacyTensorMechanicsAction.h"
 #include "DynamicTensorMechanicsAction.h"
-#include "TensorMechanicsAxisymmetricRZAction.h"
-#include "TensorMechanicsRSphericalAction.h"
 #include "PoroMechanicsAction.h"
 #include "PressureAction.h"
 #include "GeneralizedPlaneStrainAction.h"
@@ -357,8 +355,6 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("LegacyTensorMechanicsAction", "Kernels/TensorMechanics");
   syntax.registerActionSyntax("DynamicTensorMechanicsAction", "Kernels/DynamicTensorMechanics");
   syntax.registerActionSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
-  syntax.registerActionSyntax("TensorMechanicsAxisymmetricRZAction", "Kernels/StressDivergence2DAxisymmetricRZ");
-  syntax.registerActionSyntax("TensorMechanicsRSphericalAction", "Kernels/StressDivergence1DRSpherical");
 
   syntax.registerActionSyntax("EmptyAction", "BCs/Pressure");
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
@@ -366,18 +362,27 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("GeneralizedPlaneStrainAction", "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
   syntax.registerActionSyntax("TensorMechanicsAction", "Modules/TensorMechanics/Master/*");
 
+  registerTask("validate_coordinate_systems", /*is_required=*/false);
+  addTaskDependency("validate_coordinate_systems", "create_problem");
+
   registerAction(CavityPressureAction, "add_bc");
   registerAction(CavityPressurePPAction, "add_postprocessor");
   registerAction(CavityPressureUOAction, "add_user_object");
+
+  registerAction(LegacyTensorMechanicsAction, "setup_mesh_complete");
+  registerAction(LegacyTensorMechanicsAction, "validate_coordinate_systems");
   registerAction(LegacyTensorMechanicsAction, "add_kernel");
+
+  registerAction(TensorMechanicsAction, "setup_mesh_complete");
+  registerAction(TensorMechanicsAction, "validate_coordinate_systems");
+  registerAction(TensorMechanicsAction, "add_variable");
+  registerAction(TensorMechanicsAction, "add_aux_variable");
   registerAction(TensorMechanicsAction, "add_kernel");
   registerAction(TensorMechanicsAction, "add_aux_kernel");
-  registerAction(TensorMechanicsAction, "add_variable");
   registerAction(TensorMechanicsAction, "add_material");
+
   registerAction(DynamicTensorMechanicsAction, "add_kernel");
   registerAction(PoroMechanicsAction, "add_kernel");
-  registerAction(TensorMechanicsAxisymmetricRZAction, "add_kernel");
-  registerAction(TensorMechanicsRSphericalAction, "add_kernel");
   registerAction(PressureAction, "add_bc");
   registerAction(GeneralizedPlaneStrainAction, "add_kernel");
   registerAction(GeneralizedPlaneStrainAction, "add_user_object");

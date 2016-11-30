@@ -20,10 +20,10 @@ class ALEKernel : public Kernel
 public:
   ALEKernel(const InputParameters & parameters);
 
-protected:
   virtual void computeJacobian();
   virtual void computeOffDiagJacobian(unsigned int jvar);
 
+protected:
   /// undisplaced problem
   Assembly & _assembly_undisplaced;
 
