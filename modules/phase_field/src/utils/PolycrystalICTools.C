@@ -115,6 +115,9 @@ PolycrystalICTools::buildElementalGrainAdjacencyGraph(const std::map<dof_id_type
 {
   std::vector<std::vector<bool> > adjacency_matrix(n_grains);
 
+  // We can't call this in the constructor, it appears that _mesh_ptr is always NULL there.
+  mesh.errorIfDistributedMesh("advanced_op_assignment = true");
+
   // initialize
   for (unsigned int i = 0; i < n_grains; ++i)
     adjacency_matrix[i].resize(n_grains, false);
