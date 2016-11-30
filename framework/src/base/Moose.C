@@ -154,6 +154,7 @@
 #include "SolutionFunction.h"
 #include "PiecewiseBilinear.h"
 #include "SplineFunction.h"
+#include "BicubicSplineFunction.h"
 #include "PiecewiseMultilinear.h"
 #include "LinearCombinationFunction.h"
 #include "ImageFunction.h"
@@ -579,6 +580,7 @@ registerObjects(Factory & factory)
   registerFunction(SolutionFunction);
   registerFunction(PiecewiseBilinear);
   registerFunction(SplineFunction);
+  registerFunction(BicubicSplineFunction);
   registerFunction(PiecewiseMultilinear);
   registerFunction(LinearCombinationFunction);
   registerFunction(ImageFunction);
