@@ -4,17 +4,32 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "TensorMechanicsAction.h"
-#include "Factory.h"
-#include "FEProblem.h"
 #include "Conversion.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseMesh.h"
 #include "MooseObjectAction.h"
+#include "TensorMechanicsAction.h"
 
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
+
+const std::map<std::string, std::string> TensorMechanicsAction::_ranktwoaux_table = {
+    {"strain", "total_strain"},
+    {"stress", "stress"},
+    {"elastic_strain", "elastic_strain"},
+    {"plastic_strain", "plastic_strain"},
+    {"creep_strain", "creep_strain"}};
+const std::vector<char> TensorMechanicsAction::_component_table = {'x', 'y', 'z'};
+const std::map<std::string, std::string> TensorMechanicsAction::_ranktwoscalaraux_table = {
+    {"vonmises", "VonMisesStress"},
+    {"hydrostatic", "Hydrostatic"},
+    {"stress_max", "MaxPrincipal"},
+    {"stress_mid", "MidPrincipal"},
+    {"stress_min", "MinPrincipal"},
+    {"firstinv", "FirstInvariant"},
+    {"secondinv", "SecondInvariant"},
+    {"thirdinv", "ThirdInvariant"}};
 
 template <>
 InputParameters
@@ -47,8 +62,16 @@ validParams<TensorMechanicsAction>()
   params.addParamNamesToGroup("block save_in diag_save_in", "Advanced");
 
   // Output
-  MultiMooseEnum outputPropertiesType("strain_xx strain_yy strain_zz strain_xy strain_yz strain_zx "
-                                      "stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx");
+  std::string options = "";
+  for (auto & r2a : TensorMechanicsAction::_ranktwoaux_table)
+    for (unsigned int a = 0; a < 3; ++a)
+      for (unsigned int b = 0; b < 3; ++b)
+        options += (options == "" ? "" : " ") + r2a.first + '_' + TensorMechanicsAction::_component_table[a] + TensorMechanicsAction::_component_table[b];
+
+  for (auto & r2sa : TensorMechanicsAction::_ranktwoscalaraux_table)
+    options += " " + r2sa.first;
+
+  MultiMooseEnum outputPropertiesType(options);
   params.addParam<MultiMooseEnum>("generate_output", outputPropertiesType, "Add scalar quantity output for stress and/or strain");
 
   return params;
@@ -119,10 +142,13 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   if (_planar_formulation != PlanarFormulation::None)
     mooseError("Not implemented");
 
-  // generate output
-  auto go = getParam<MultiMooseEnum>("generate_output");
-  for (auto i = decltype(go.size())(0); i < go.size(); ++i)
-    _generate_output.push_back(go.get(i));
+  // convert output vareiable names to lower case
+  for (const auto & out : getParam<MultiMooseEnum>("generate_output"))
+  {
+    std::string lower(out);
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    _generate_output.push_back(lower);
+  }
 }
 
 void
@@ -294,26 +320,6 @@ TensorMechanicsAction::actSubdomainChecks()
 void
 TensorMechanicsAction::actOutputGeneration()
 {
-  // table data for output generation
-  struct OutputData
-  {
-    std::string _variable, _auxkernel, _tensor;
-    std::pair<unsigned int, unsigned int> _index;
-  };
-  const std::vector<OutputData> data = {
-      {"strain_xx", "RankTwoAux", "total_strain", {0, 0}},
-      {"strain_yy", "RankTwoAux", "total_strain", {1, 1}},
-      {"strain_zz", "RankTwoAux", "total_strain", {2, 2}},
-      {"strain_xy", "RankTwoAux", "total_strain", {0, 1}},
-      {"strain_yz", "RankTwoAux", "total_strain", {1, 2}},
-      {"strain_zx", "RankTwoAux", "total_strain", {2, 0}},
-      {"stress_xx", "RankTwoAux", "stress", {0, 0}},
-      {"stress_yy", "RankTwoAux", "stress", {1, 1}},
-      {"stress_zz", "RankTwoAux", "stress", {2, 2}},
-      {"stress_xy", "RankTwoAux", "stress", {0, 1}},
-      {"stress_yz", "RankTwoAux", "stress", {1, 2}},
-      {"stress_zx", "RankTwoAux", "stress", {2, 0}}};
-
   //
   // Add variables (optional)
   //
@@ -322,8 +328,8 @@ TensorMechanicsAction::actOutputGeneration()
     // Loop through output aux variables
     for (auto out : _generate_output)
     {
-      // Create displacement variables
-      _problem->addAuxVariable(data[out]._variable,
+      // Create output helper aux variables
+      _problem->addAuxVariable(out,
                                FEType(Utility::string_to_enum<Order>("CONSTANT"),
                                       Utility::string_to_enum<FEFamily>("MONOMIAL")),
                                _subdomain_id_union.empty() ? nullptr : &_subdomain_id_union);
@@ -338,17 +344,40 @@ TensorMechanicsAction::actOutputGeneration()
     // Loop through output aux variables
     for (auto out : _generate_output)
     {
-      auto type = data[out]._auxkernel;
-      auto variable = data[out]._variable;
+      std::string type = "";
+      InputParameters params = emptyInputParameters();
 
-      InputParameters params = _factory.getValidParams(type);
-      params.set<AuxVariableName>("variable") = variable;
-      params.set<MaterialPropertyName>("rank_two_tensor") = data[out]._tensor;
-      params.set<MultiMooseEnum>("execute_on") = "timestep_end";
-      params.set<unsigned int>("index_i") = data[out]._index.first;
-      params.set<unsigned int>("index_j") = data[out]._index.second;
+      // RankTwoAux
+      for (const auto & r2a : _ranktwoaux_table)
+        for (unsigned int a = 0; a < 3; ++a)
+          for (unsigned int b = 0; b < 3; ++b)
+            if (r2a.first + '_' + _component_table[a] + _component_table[b] == out)
+            {
+              type = "RankTwoAux";
+              params = _factory.getValidParams(type);
+              params.set<MaterialPropertyName>("rank_two_tensor") = r2a.second;
+              params.set<unsigned int>("index_i") = a;
+              params.set<unsigned int>("index_j") = b;
+            }
 
-      _problem->addAuxKernel(type, variable, params);
+      // RankTwoScalarAux (currently stress only)
+      const auto r2sa = _ranktwoscalaraux_table.find(out);
+      if (r2sa != _ranktwoscalaraux_table.end())
+      {
+        type = "RankTwoScalarAux";
+        params = _factory.getValidParams(type);
+        params.set<MaterialPropertyName>("rank_two_tensor") = "stress";
+        params.set<MooseEnum>("scalar_type") = r2sa->second;
+      }
+
+      if (type != "")
+      {
+        params.set<AuxVariableName>("variable") = out;
+        params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+        _problem->addAuxKernel(type, out, params);
+      }
+      else
+        mooseError("Unable to add output AuxKernel");
     }
   }
 }
