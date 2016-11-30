@@ -35,7 +35,7 @@ ComputeAxisymmetric1DIncrementalStrain::ComputeAxisymmetric1DIncrementalStrain(c
 void
 ComputeAxisymmetric1DIncrementalStrain::initialSetup()
 {
-  if (_assembly.coordSystem() != Moose::COORD_RZ)
+  if (getBlockCoordSystem() != Moose::COORD_RZ)
     mooseError("The coordinate system must be set to RZ for Axisymmetric 1D simulations");
 }
 

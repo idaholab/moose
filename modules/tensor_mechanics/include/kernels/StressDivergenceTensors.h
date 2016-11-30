@@ -29,13 +29,15 @@ class StressDivergenceTensors : public ALEKernel
 public:
   StressDivergenceTensors(const InputParameters & parameters);
 
-protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+protected:
+  virtual void initialSetup() override;
+
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   virtual void computeFiniteDeformJacobian();
 

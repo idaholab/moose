@@ -77,6 +77,7 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters
     _stress_old(declarePropertyOld<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain_old(declarePropertyOld<RankTwoTensor>(_base_name + "elastic_strain")),
 
+    // TODO: This design does NOT work. It makes these materials construction order dependent and it disregards block restrictions.
     _cosserat(hasMaterialProperty<RankTwoTensor>("curvature") && hasMaterialProperty<RankFourTensor>("elastic_flexural_rigidity_tensor")),
     _curvature(_cosserat ? &getMaterialPropertyByName<RankTwoTensor>("curvature") : NULL),
     _elastic_flexural_rigidity_tensor(_cosserat ? &getMaterialPropertyByName<RankFourTensor>("elastic_flexural_rigidity_tensor") : NULL),
