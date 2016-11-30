@@ -73,6 +73,39 @@ GeneratedMesh::GeneratedMesh(const InputParameters & parameters) :
 {
   if (_gauss_lobatto_grid && (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0))
     mooseError("Cannot apply both Gauss-Lobatto mesh grading and biasing at the same time.");
+
+  // All generated meshes are regular orthogonal meshes
+  _regular_orthogonal_mesh = true;
+}
+
+Real GeneratedMesh::getMinInDimension(unsigned int component) const
+{
+  switch (component)
+  {
+  case 0:
+    return _xmin;
+  case 1:
+    return _dim > 1 ? _ymin : 0;
+  case 2:
+    return _dim > 2 ? _zmin : 0;
+  default:
+    mooseError("Invalid component");
+  }
+}
+
+Real GeneratedMesh::getMaxInDimension(unsigned int component) const
+{
+  switch (component)
+  {
+  case 0:
+    return _xmax;
+  case 1:
+    return _dim > 1 ? _ymax : 0;
+  case 2:
+    return _dim > 2 ? _zmax : 0;
+  default:
+    mooseError("Invalid component");
+  }
 }
 
 MooseMesh &
