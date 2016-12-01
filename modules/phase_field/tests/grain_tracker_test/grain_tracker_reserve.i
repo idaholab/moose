@@ -8,6 +8,9 @@
   ymin = 0
   ymax = 100
   elem_type = QUAD4
+
+  # Required for use with distributed mesh
+  num_ghosted_layers = 2
 []
 
 [AuxVariables]
