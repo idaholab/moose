@@ -69,14 +69,6 @@ enum EClosuresType
   CLOSURES_TRACE  = 1
 };
 
-/**
- * Wall boiling model
- */
-enum EWallBoilingModelType
-{
-  WBM_SIMPLE = 0,
-  WBM_ORIGINAL = 1
-};
 
 enum EFlowRegimeNamesType
 {
