@@ -791,3 +791,23 @@ RankFourTensor::innerProductTranspose(const RankTwoTensor & b) const
 
   return result;
 }
+
+Real
+RankFourTensor::sum3x3() const
+{
+   // summation of Ciijj for i and j ranging from 0 to 2 - used in the volumetric locking correction
+   return _vals[0][0][0][0] + _vals[0][0][1][1] + _vals[0][0][2][2]
+        + _vals[1][1][0][0] + _vals[1][1][1][1] + _vals[1][1][2][2]
+        + _vals[2][2][0][0] + _vals[2][2][1][1] + _vals[2][2][2][2];
+}
+
+RealGradient
+RankFourTensor::sum3x1() const
+{
+  // used for volumetric locking correction
+  RealGradient a(3);
+  a(0) = _vals[0][0][0][0] + _vals[0][0][1][1] + _vals[0][0][2][2]; // C0000 + C0011 + C0022
+  a(1) = _vals[1][1][0][0] + _vals[1][1][1][1] + _vals[1][1][2][2]; // C1100 + C1111 + C1122
+  a(2) = _vals[2][2][0][0] + _vals[2][2][1][1] + _vals[2][2][2][2]; // C2200 + C2211 + C2222
+  return a;
+}
