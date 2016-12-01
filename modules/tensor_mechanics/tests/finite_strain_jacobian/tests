@@ -4,9 +4,23 @@
     input = 'bending_jacobian.i'
     exodiff = 'bending_jacobian_out.e'
   [../]
+  [./bending_Bbar]
+    type = 'Exodiff'
+    input = 'bending_jacobian.i'
+    exodiff = 'bending_jacobian_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction = true'
+    prereq = 'bending'
+  [../]
   [./3d_bar]
     type = 'Exodiff'
     input = '3d_bar.i'
     exodiff = '3d_bar_out.e'
+  [../]
+  [./3d_bar_Bbar]
+    type = 'Exodiff'
+    input = '3d_bar.i'
+    exodiff = '3d_bar_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction = true'
+    prereq = '3d_bar'
   [../]
 []
