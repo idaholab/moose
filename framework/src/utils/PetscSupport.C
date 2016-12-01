@@ -553,6 +553,10 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   // Setup the name value pairs
   bool boomeramg_found = false;
   bool strong_threshold_found = false;
+#if !PETSC_VERSION_LESS_THAN(3,7,0)
+  bool superlu_dist_found = false;
+  bool fact_pattern_found = false;
+#endif
   std::string pc_description = "";
   for (unsigned int i = 0; i < petsc_options_inames.size(); i++)
   {
@@ -571,6 +575,12 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
         boomeramg_found = true;
       if (petsc_options_inames[i] == "-pc_hypre_boomeramg_strong_threshold")
         strong_threshold_found = true;
+#if !PETSC_VERSION_LESS_THAN(3,7,0)
+      if (petsc_options_inames[i] == "-pc_factor_mat_solver_package" && petsc_options_values[i] == "superlu_dist")
+        superlu_dist_found = true;
+      if (petsc_options_inames[i] == "-mat_superlu_dist_fact")
+        fact_pattern_found = true;
+#endif
     }
     else
     {
@@ -590,6 +600,15 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
     pc_description += "strong_threshold: 0.7 (auto)";
   }
 
+#if !PETSC_VERSION_LESS_THAN(3,7,0)
+  // In PETSc-3.7.{0--4}, there is a bug when using superlu_dist, and we have to use SamePattern_SameRowPerm
+  if (superlu_dist_found && !fact_pattern_found)
+  {
+    po.inames.push_back("-mat_superlu_dist_fact");
+    po.values.push_back("SamePattern_SameRowPerm");
+    pc_description += "mat_superlu_dist_fact: SamePattern_SameRowPerm";
+  }
+#endif
   // Set Preconditioner description
   po.pc_description = pc_description;
 }

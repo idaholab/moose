@@ -165,7 +165,7 @@
   [../]
   [./y]
     type = DirichletBC
-    boundary = '1 5' #'4 6'
+    boundary = '4 6'
     variable = disp_y
     value = 0.0
   [../]
@@ -270,8 +270,8 @@
 
 # controls for nonlinear iterations
   nl_max_its = 20
-  nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-4
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-10
 
 # time control
   start_time = 0.0
