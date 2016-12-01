@@ -232,7 +232,7 @@ class TestHarness:
                     else: # This job is skipped - notify the runner
                       if reason != '':
                         if (self.options.report_skipped and reason.find('skipped') != -1) or reason.find('skipped') == -1:
-                          self.handleTestResult(tester.parameters(), '', reason)
+                          self.handleTestResult(tester, '', reason)
                       self.runner.jobSkipped(tester.parameters()['test_name'])
                 os.chdir(saved_cwd)
                 sys.path.pop()
@@ -313,6 +313,7 @@ class TestHarness:
     #          the leading part of the path
     test_dir = os.path.abspath(os.path.dirname(filename))
     relative_path = test_dir.replace(self.run_tests_dir, '')
+    first_directory = relative_path.split(os.path.sep)[1] # Get first directory
     relative_path = relative_path.replace('/' + self.options.input_file_name + '/', ':')
     relative_path = re.sub('^[/:]*', '', relative_path)  # Trim slashes and colons
     formatted_name = relative_path + '.' + tester.name()
@@ -324,6 +325,7 @@ class TestHarness:
     params['hostname'] = self.host_name
     params['moose_dir'] = self.moose_dir
     params['base_dir'] = self.base_dir
+    params['first_directory'] = first_directory
 
     if params.isValid('prereq'):
       if type(params['prereq']) != list:
@@ -372,6 +374,7 @@ class TestHarness:
       (reason, output) = self.buildPBSBatch(output, tester)
     elif self.options.dry_run:
       reason = 'DRY_RUN'
+      test['status_message'] = reason
       output += '\n'.join(tester.processResultsCommand(self.moose_dir, self.options))
     else:
       (reason, output) = tester.processResults(self.moose_dir, retcode, self.options, output)
@@ -388,11 +391,11 @@ class TestHarness:
           if not 'ALL' in test[check]:
             caveats.append(', '.join(test[check]))
       if len(caveats):
-        result = '[' + ', '.join(caveats).upper() + '] OK'
+        result = '[' + ', '.join(caveats).upper() + '] ' + tester.getStatusMessage()
       elif self.options.pbs and self.options.processingPBS == False:
         result = 'LAUNCHED'
       else:
-        result = 'OK'
+        result = tester.getStatusMessage()
     elif reason == 'DRY_RUN':
       result = 'DRY_RUN'
     else:
@@ -400,10 +403,10 @@ class TestHarness:
       did_pass = False
     if self.options.pbs and self.options.processingPBS == False and did_pass == True:
       # Handle the launch result, but do not add it to the results table (except if we learned that QSUB failed to launch for some reason)
-      self.handleTestResult(tester.specs, output, result, start, end, False)
+      self.handleTestResult(tester, output, result, start, end, False)
       return did_pass
     else:
-      self.handleTestResult(tester.specs, output, result, start, end)
+      self.handleTestResult(tester, output, result, start, end)
       return did_pass
 
   def getTiming(self, output):
@@ -498,17 +501,17 @@ class TestHarness:
                 self.testOutputAndFinish(tester, exit_code, outfile)
               else:
                 # I ran into this scenario when the cluster went down, but launched/completed my job :)
-                self.handleTestResult(tester.specs, '', 'FAILED (NO STDOUT FILE)', 0, 0, True)
+                self.handleTestResult(tester, '', 'FAILED (NO STDOUT FILE)', 0, 0, True)
 
             elif output_value == 'R':
               # Job is currently running
-              self.handleTestResult(tester.specs, '', 'RUNNING', 0, 0, True)
+              self.handleTestResult(tester, '', 'RUNNING', 0, 0, True)
             elif output_value == 'E':
               # Job is exiting
-              self.handleTestResult(tester.specs, '', 'EXITING', 0, 0, True)
+              self.handleTestResult(tester, '', 'EXITING', 0, 0, True)
             elif output_value == 'Q':
               # Job is currently queued
-              self.handleTestResult(tester.specs, '', 'QUEUED', 0, 0, True)
+              self.handleTestResult(tester, '', 'QUEUED', 0, 0, True)
     else:
       return ('BATCH FILE NOT FOUND', '')
 
@@ -566,7 +569,7 @@ class TestHarness:
 
   ## Update global variables and print output based on the test result
   # Containing OK means it passed, skipped means skipped, anything else means it failed
-  def handleTestResult(self, specs, output, result, start=0, end=0, add_to_table=True):
+  def handleTestResult(self, tester, output, result, start=0, end=0, add_to_table=True):
     timing = ''
 
     if self.options.timing:
@@ -577,8 +580,8 @@ class TestHarness:
     # Only add to the test_table if told to. We now have enough cases where we wish to print to the screen, but not
     # in the 'Final Test Results' area.
     if add_to_table:
-      self.test_table.append( (specs, output, result, timing, start, end) )
-      if result.find('OK') != -1 or result.find('DRY_RUN') != -1:
+      self.test_table.append( (tester, output, result, timing, start, end) )
+      if result.find(tester.getStatusMessage()) != -1:
         self.num_passed += 1
       elif result.find('skipped') != -1:
         self.num_skipped += 1
@@ -589,12 +592,9 @@ class TestHarness:
       else:
         self.num_failed += 1
 
-    self.postRun(specs, timing)
+    self.postRun(tester.specs, timing)
 
-    if self.options.show_directory:
-      print printResult(specs['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options)
-    else:
-      print printResult(specs['test_name'], result, timing, start, end, self.options)
+    print printResult(tester, result, timing, start, end, self.options)
 
     if self.options.verbose or ('FAILED' in result and not self.options.quiet):
       output = output.replace('\r', '\n')  # replace the carriage returns with newlines
@@ -606,30 +606,23 @@ class TestHarness:
         color = 'RED'
       else:
         color = 'GREEN'
-      test_name = colorText(specs['test_name']  + ": ", color, colored=self.options.colored, code=self.options.code)
+      test_name = colorText(tester.specs['test_name']  + ": ", color, colored=self.options.colored, code=self.options.code)
       output = test_name + ("\n" + test_name).join(lines)
       print output
 
       # Print result line again at the bottom of the output for failed tests
-      if self.options.show_directory:
-        print printResult(specs['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options), "(reprint)"
-      else:
-        print printResult(specs['test_name'], result, timing, start, end, self.options), "(reprint)"
+      print printResult(tester, result, timing, start, end, self.options), "(reprint)"
 
 
     if not 'skipped' in result:
       if self.options.file:
-        if self.options.show_directory:
-          self.file.write(printResult( specs['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options, color=False) + '\n')
-          self.file.write(output)
-        else:
-          self.file.write(printResult( specs['test_name'], result, timing, start, end, self.options, color=False) + '\n')
-          self.file.write(output)
+        self.file.write(printResult( tester, result, timing, start, end, self.options, color=False) + '\n')
+        self.file.write(output)
 
       if self.options.sep_files or (self.options.fail_files and 'FAILED' in result) or (self.options.ok_files and result.find('OK') != -1):
-        fname = os.path.join(specs['test_dir'], specs['test_name'].split('/')[-1] + '.' + result[:6] + '.txt')
+        fname = os.path.join(tester.specs['test_dir'], tester.specs['test_name'].split('/')[-1] + '.' + result[:6] + '.txt')
         f = open(fname, 'w')
-        f.write(printResult( specs['test_name'], result, timing, start, end, self.options, color=False) + '\n')
+        f.write(printResult( tester, result, timing, start, end, self.options, color=False) + '\n')
         f.write(output)
         f.close()
 
@@ -648,10 +641,7 @@ class TestHarness:
     if self.options.verbose or (self.num_failed != 0 and not self.options.quiet):
       print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
       for (test, output, result, timing, start, end) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
-        if self.options.show_directory:
-          print printResult(test['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options)
-        else:
-          print printResult(test['test_name'], result, timing, start, end, self.options)
+        print printResult(test, result, timing, start, end, self.options)
 
     time = clock() - self.start_time
     print '-' * (TERM_COLS-1)
@@ -721,6 +711,7 @@ class TestHarness:
     parser.add_argument('-j', '--jobs', nargs='?', metavar='int', action='store', type=int, dest='jobs', const=1, help='run test binaries in parallel')
     parser.add_argument('-e', action='store_true', dest='extra_info', help='Display "extra" information including all caveats and deleted tests')
     parser.add_argument('-c', '--no-color', action='store_false', dest='colored', help='Do not show colored output')
+    parser.add_argument('--color-first-directory', action='store_true', dest='color_first_directory', help='Color first directory')
     parser.add_argument('--heavy', action='store_true', dest='heavy_tests', help='Run tests marked with HEAVY : True')
     parser.add_argument('--all-tests', action='store_true', dest='all_tests', help='Run normal tests and tests marked with HEAVY : True')
     parser.add_argument('-g', '--group', action='store', type=str, dest='group', default='ALL', help='Run only tests in the named group')
@@ -761,7 +752,6 @@ class TestHarness:
     outputgroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='show the output of every test')
     outputgroup.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='only show the result of every test, don\'t show test output even if it fails')
     outputgroup.add_argument('--no-report', action='store_false', dest='report_skipped', help='do not report skipped tests')
-    outputgroup.add_argument('--show-directory', action='store_true', dest='show_directory', help='Print test directory path in out messages')
     outputgroup.add_argument('-o', '--output-dir', nargs=1, metavar='directory', dest='output_dir', default='', help='Save all output files in the directory, and create it if necessary')
     outputgroup.add_argument('-f', '--file', nargs=1, action='store', dest='file', help='Write verbose output of each test to FILE and quiet output to terminal')
     outputgroup.add_argument('-x', '--sep-files', action='store_true', dest='sep_files', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')

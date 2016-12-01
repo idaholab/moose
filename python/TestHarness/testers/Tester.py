@@ -20,6 +20,7 @@ class Tester(MooseObject):
     params.addParam('prereq',      [], "A list of prereq tests that need to run successfully before launching this test.")
     params.addParam('skip_checks', False, "Tells the TestHarness to skip additional checks (This parameter is set automatically by the TestHarness during recovery tests)")
     params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
+    params.addParam('status_message', 'OK', "The successful message")
 
     params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
 
@@ -50,6 +51,7 @@ class Tester(MooseObject):
     params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
     params.addParam('should_execute', True, 'Whether or not the executeable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation')
     params.addParam('required_submodule', [], "A list of initialized submodules for which this test requires.")
+    params.addParam('check_input',    False, "Check for correct input file syntax")
 
     return params
 
@@ -67,10 +69,25 @@ class Tester(MooseObject):
       if item.upper() == 'SERIAL':
         mesh_mode[i] = 'REPLICATED'
 
+    # Set the status message
+    if self.specs['check_input']:
+      self.status_message = 'SYNTAX PASS'
+    else:
+      self.status_message = self.specs['status_message']
+
+    # Set up common paramaters
+    self.should_execute = self.specs['should_execute']
+    self.check_input = self.specs['check_input']
+
   # Method to return the input file if applicable to this Tester
   def getInputFile(self):
     return None
 
+  def getStatusMessage(self):
+    return self.status_message
+
+  def getCheckInput(self):
+    return self.check_input
 
   def setValgrindMode(self, mode):
     # Increase the alloted time for tests when running with the valgrind option
@@ -91,7 +108,7 @@ class Tester(MooseObject):
   # Whether or not the executeable should be run
   # Don't override this
   def shouldExecute(self):
-    return self.specs['should_execute']
+    return self.should_execute
 
   # This method is called prior to running the test.  It can be used to cleanup files
   # or do other preparations before the tester is run

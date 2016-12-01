@@ -108,6 +108,9 @@ class RunApp(Tester):
       # also, neither is the conflicting option "warn-unused"
       specs['cli_args'].append('--error-unused')
 
+    if self.getCheckInput():
+      specs['cli_args'].append('--check-input')
+
     timing_string = ' '
     if options.timing:
       specs['cli_args'].append('--timing')

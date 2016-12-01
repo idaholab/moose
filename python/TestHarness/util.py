@@ -102,17 +102,18 @@ def runCommand(cmd, cwd=None):
 # 1) options.colored is False,
 # 2) the environment variable BITTEN_NOCOLOR is true, or
 # 3) the color parameter is False.
-def printResult(test_name, result, timing, start, end, options, color=True):
+def printResult(tester, result, timing, start, end, options, color=True):
   f_result = ''
+  first_directory = tester.specs['first_directory']
+  test_name = tester.specs['test_name']
+  status_message = tester.getStatusMessage()
 
   cnt = (TERM_COLS-2) - len(test_name + result)
   color_opts = {'code' : options.code, 'colored' : options.colored}
   if color:
     any_match = False
-    # Color leading paths
-    m = re.search(r'(.*):(.*)', test_name)
-    if m:
-      test_name = colorText(m.group(1), 'CYAN', **color_opts) + ':' + m.group(2)
+    if options.color_first_directory:
+      test_name = colorText(first_directory, 'CYAN', **color_opts) + test_name.replace(first_directory, '', 1) # Strip out first occurence only
     # Color the Caveats CYAN
     m = re.search(r'(\[.*?\])', result)
     if m:
@@ -145,7 +146,8 @@ def printResult(test_name, result, timing, start, end, options, color=True):
       any_match = True
       f_result += colorText(m.group(1), 'CYAN', **color_opts)
     # Color Passed tests GREEN
-    m = re.search('(OK|DRY_RUN)', result)
+
+    m = re.search('(' + status_message + ')', result)
     if m:
       any_match = True
       f_result += colorText(m.group(1), 'GREEN', **color_opts)
