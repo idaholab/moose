@@ -396,6 +396,8 @@ public:
   ///Assigns value to the rows of a specified column
   void fillColumn(unsigned int, const TypeVector<Real> &);
 
+  /// returns this_ij * b_ijkl
+  RankTwoTensor initialContraction(const RankFourTensor & b) const;
 private:
   static const unsigned int N = LIBMESH_DIM;
   Real _vals[N][N];

@@ -46,6 +46,7 @@ class RankTwoTensorTest : public CppUnit::TestFixture
   CPPUNIT_TEST( detTest );
   CPPUNIT_TEST( ddetTest );
   CPPUNIT_TEST( inverseTest );
+  CPPUNIT_TEST( initialContractionTest );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -73,6 +74,7 @@ public:
   void detTest();
   void ddetTest();
   void inverseTest();
+  void initialContractionTest();
 
  private:
   RankTwoTensor _m0;
