@@ -1,7 +1,0 @@
-[Tests]
-  [./extensions]
-    type = RunPythonApp
-    input = test_markdown_extensions.py
-    unittest = true
-  [../]
-[]
