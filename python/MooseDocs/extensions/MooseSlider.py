@@ -1,17 +1,15 @@
 import glob
 import re
 import os
-import string
 from markdown.util import etree
 from markdown.blockprocessors import BlockProcessor
-import inspect
-<<<<<<< 4dbb067b080bcc03256b592b47d043584e0f96cd
-
-=======
 import collections
->>>>>>> Updated slider to work correctly with Materialize.
+import logging
+log = logging.getLogger(__name__)
+
 import MooseDocs
 from MooseCommonExtension import MooseCommonExtension
+
 
 class MooseSlider(BlockProcessor, MooseCommonExtension):
   """
@@ -29,11 +27,8 @@ class MooseSlider(BlockProcessor, MooseCommonExtension):
   """
 
   RE = re.compile(r'^!\ ?slider(.*)')
-<<<<<<< 4dbb067b080bcc03256b592b47d043584e0f96cd
-=======
 
   ImageInfo = collections.namedtuple('ImageInfo', 'filename img_settings caption_settings')
->>>>>>> Updated slider to work correctly with Materialize.
 
   def __init__(self, parser, **kwargs):
     MooseCommonExtension.__init__(self, **kwargs)
@@ -110,7 +105,6 @@ class MooseSlider(BlockProcessor, MooseCommonExtension):
     ul.set('class', 'slides')
 
     for item in self.parseFilenames(block[match.end()+1:]):
-      print item
       li = etree.SubElement(ul, 'li')
       img = etree.SubElement(li, 'img')
       img.set('src', item.filename)

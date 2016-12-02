@@ -167,12 +167,11 @@ the syntax for the system or object being documented.
 
 ---
 
-## Images and Slideshows
+## Images
 !image docs/media/memory_logger-plot_multi.png width=30% padding-left=20px float=right caption=The [memory_logger](/memory_logger.md) is a utility that allows the user to track the memory use of a simulation.
 
-It is possible to include images and slideshows of images with more flexibility than standard markdown.
+It is possible to include images  with more flexibility than standard markdown.
 
-### Single Images
 The markdown keyword for MOOSE images is `!image` followed by the filename as shown below. This command, like most of the other
 special MOOSE markdown commands except arbitrary html attributes. Therefore, any keyword, value pairs (e.g., `width=50%`) are
 automatically applied to the `<figure>` tag of the image. For example, the following syntax was used to include the image on the right.
@@ -181,7 +180,7 @@ automatically applied to the `<figure>` tag of the image. For example, the follo
 !image docs/media/memory_logger-plot_multi.png width=30% padding-left=20px float=right caption=The [memory_logger](/memory_logger.md) is a utility that allows the user to track the memory use of a simulation.
 ```
 
-### Slideshows
+## Slideshows
 A sequence of images can be shown via a `slider`.
 By default the images will auto cycle between images.
 
@@ -195,8 +194,8 @@ A simple example:
 
 This would create a slideshow with the first image as `intro.png` and the next images those that are matched by the wildcard `other*.png`.
 
-Valid options for the slidehow are standard CSS options (see example below).  Changing
-the invterval between slides, transition time, and button layout is not possible
+Valid options for the slider are standard CSS options (see example below).  Changing
+the interval between slides, transition time, and button layout is not possible
 at this time.
 
 CSS options for background images can be applied to individual images as keyword
