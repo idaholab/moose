@@ -1,13 +1,13 @@
 import glob
 import re
 import os
-
-from markdown.blockprocessors import BlockProcessor
+import string
 from markdown.util import etree
+from markdown.blockprocessors import BlockProcessor
+import inspect
 
 import MooseDocs
 from MooseCommonExtension import MooseCommonExtension
-
 
 class MooseSlider(BlockProcessor, MooseCommonExtension):
   """
@@ -15,67 +15,68 @@ class MooseSlider(BlockProcessor, MooseCommonExtension):
   Markdown syntax is:
 
    !slider <options>
-     images/intro.png caption=Some caption
+     images/intro.png <image_options> caption=Some caption <caption_options>
      images/more*.png
 
   Where <options> are key=value pairs.
-  See http://getbootstrap.com/javascript/#carousel for allowed options.
-  Additionally, "caption" can also be used on the slideshow line to
-  set a default caption.
+  Valid options are standard CSS options (images are set as background images).
 
   It is assumed image names will have the same filepath as on the webserver.
   """
 
-  RE = re.compile(r'^!\ ?slideshow(.*)')
-  # If there are multiple carousels on the same page then
-  # they need to have different ids
-  MATCHES_FOUND = 0
+  RE = re.compile(r'^!\ ?slider(.*)')
 
   def __init__(self, parser, **kwargs):
     MooseCommonExtension.__init__(self, **kwargs)
     BlockProcessor.__init__(self, parser)
 
-    # The default settings
-    self._settings['caption'] =  None
-    self._settings['interval'] = None
-    self._settings['pause'] = None
-    self._settings['wrap'] = None
-    self._settings['keyboard'] = None
-
   def parseFilenames(self, filenames_block):
     """
-    Parse a set of lines with filenames in them and an optional caption.
+    Parse a set of lines with filenames, image options, and optional captions.
     Filenames can contain wildcards and glob will be used to expand them.
+    Any CSS styles after the filename (but before caption if it exists)
+    will be applied to the image (image is set as a background in slider).
+    CSS styles listed after the caption will be applied to it.
     Expected input is similar to:
-      images/1.png caption=My caption
+      images/1.png caption=My caption color=blue
+      images/2.png background-color=gray caption= Another caption color=red
       images/other*.png
     Input:
      filenames_block[str]: String block to parse
     Return:
-     list of dicts. Each dict has keys of "path" which is the filename path
-      and "caption" which is the associated caption. Caption will be "" if not
-      specified.
+     list of list of dicts. The list has an entry for each image (including
+     one for each expanded image from glob), each entry contains:
+     1. dict of "path" which is the filename path
+     2. dict of attributes to be applied to the image
+     3. dict of attributes to be applied to the caption
+     Each image will default to fit the slideshow window with white background
+     and no caption if no options are specified.
     """
     lines = filenames_block.split("\n")
     files = []
+    regular_expression = re.compile(r'(.*?\s|.*?$)(.*?)(caption.*|$)')
     for line in lines:
-      sline = line.strip()
-      idx = sline.find("caption=")
-      if idx >=0 :
-        caption = sline[idx+8:].strip()
-        fname = sline[:idx].strip()
-      else:
-        caption = ""
-        fname = sline
+      line = line.strip()
+      matches = regular_expression.search(line)
+      fname = matches.group(1).strip()
+
+      #get separate dictionaries for the image and caption
+      img_dict = dict()
+      caption_dict = dict()
+      dict_array = [img_dict,caption_dict]
+      for i in [2,3]:
+        settings = self.getSettings(matches.group(i).strip())
+        dict_array[i-2].update(settings)
 
       new_files = glob.glob(MooseDocs.abspath(fname))
       if not new_files:
         # If one of the paths is broken then
         # we return an empty list to indicate
         # an error state
+        print '\n\nWARNING!  Parser unable to detect file(s) "%s" in MooseSlider.py\n'%(fname)
         return []
       for f in new_files:
-        files.append({"path": os.path.relpath(f, os.getcwd()), "caption": caption})
+        files.append(({"path": f}, img_dict, caption_dict))
     return files
 
   def test(self, parent, block):
@@ -93,12 +94,11 @@ class MooseSlider(BlockProcessor, MooseCommonExtension):
 
     block = blocks.pop(0)
     match = self.RE.search(block)
-    options = match.group(1)
-    settings = self.getSettings(options)
-
+    settings = self.getSettings(match.group(1))
 
     slider = etree.SubElement(parent, 'div')
     slider.set('class', 'slider')
+    self.applyElementSettings(slider, settings)
 
     ul = etree.SubElement(slider, 'ul')
     ul.set('class', 'slides')
@@ -106,8 +106,16 @@ class MooseSlider(BlockProcessor, MooseCommonExtension):
     for item in self.parseFilenames(block[match.end()+1:]):
       li = etree.SubElement(ul, 'li')
       img = etree.SubElement(li, 'img')
-      img.set('src', '/' + item['path'])
+      img_dict = {'background-size':'contain', 'background-repeat':'no-repeat', 'background-color':'white'}
+      img_dict.update(item[1])
+      img.set('src', '/' + item[0]['path'])
+      self.applyElementSettings(img, img_dict)
 
-      if item['caption']:
+      #Add the caption and its options if they exist
+      if len(item[2]) != 0:
         caption = etree.SubElement(li, 'div')
-        caption.text = item['caption']
+        caption.set('class','caption')
+        caption.text = item[2]['caption']
+        styles = item[2]
+        del styles['caption']
+        caption = self.addStyle(caption, **styles)

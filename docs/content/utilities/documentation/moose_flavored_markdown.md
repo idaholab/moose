@@ -182,42 +182,45 @@ automatically applied to the `<figure>` tag of the image. For example, the follo
 ```
 
 ### Slideshows
-A sequence of images can be shown via a `carousel`. By default the images will auto cycle between images.
+A sequence of images can be shown via a `slider`.
+By default the images will auto cycle between images.
 
 A simple example:
 
 ```markdown
-!slideshow
+!slider
     intro.png
     other*.png
 ```
 
 This would create a slideshow with the first image as `intro.png` and the next images those that are matched by the wildcard `other*.png`.
 
-Valid options for the slideshow are the same as for the `bootstrap` [carousel](http://getbootstrap.com/javascript/#carousel):
+Valid options for the slidehow are standard CSS options (see example below).  Changing
+the invterval between slides, transition time, and button layout is not possible
+at this time.
 
-| Option               | Default | Description |
-| -------------------- | ------- | ----------- |
-| interval             | 5000    | The amount of time delay between images, in milliseconds. |
-| pause                | hover   | If set to "hover" then the carousel will pause when the mouse is moved over it. |
-| wrap                 | true    | If true then the carousel will cycle continuously. |
-| keyboard             | true    | If true then the carousel will respond to keyboard events. |
+CSS options for background images can be applied to individual images as keyword
+pairs.  Additionally, captions can be added to each image and
+modified with appropriate CSS options.
 
-Additionally, a `caption` option can be set globally or for each image line. The global caption will be used if no caption is specified on the image
-line.
+Any option that appears after the image (but before "caption", if it exists)
+will be applied to the image.  Any option that
+appears after "caption" will be applied to the caption.
 
 A full slideshow example might be:
 ```markdown
-!slideshow caption=My caption with spaces interval=5000 pause=null wrap=false keyboard=false width=500px
-    docs/media/memory_logger-plot_multi.png caption=Memory Logger plotting two results
-    docs/media/memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
-    docs/media/memory_*.png
+!slider max-width=50% left=220px
+    docs/media/memory_logger-darkmode.png caption= Output of memory logging tool position=relative left=150px top=-150px
+    docs/media/testImage_tallNarrow.png background-color=#F8F8FF caption= This is a tall, thin image color=red font-size=200% width=200px height=100%
+    docs/media/github*.png background-color=gray
+    docs/media/memory_logger-plot_multi.png
 ```
 
-!slideshow caption=My caption with spaces interval=5000 pause=null wrap=false keyboard=false width=500px
-    docs/media/memory_logger-plot_multi.png caption=Memory Logger plotting two results
-    docs/media/memory_logger-darkmode.png caption=Memory Logger utilizing darkmode
-    docs/media/memory_*.png
+!slider max-width=50% left=220px
+    docs/media/memory_logger-darkmode.png caption= Output of memory logging tool position=relative left=150px top=-150px
+    docs/media/testImage_tallNarrow.png background-color=#F8F8FF caption= This is a tall, thin image color=red font-size=200% width=200px height=100%
+    docs/media/github*.png background-color=gray
+    docs/media/memory_logger-plot_multi.png
 
 ---
 

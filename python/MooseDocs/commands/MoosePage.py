@@ -9,7 +9,6 @@ log = logging.getLogger(__name__)
 
 from NavigationNode import NavigationNode
 
-
 class MoosePage(NavigationNode):
   """
   Navigation item for markdown page.
