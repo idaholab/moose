@@ -40,7 +40,7 @@ PlasticHeatEnergy::PlasticHeatEnergy(const InputParameters & parameters) :
 Real
 PlasticHeatEnergy::computeQpResidual()
 {
-  return _test[_i][_qp] * _coeff * _plastic_heat[_qp];
+  return - _test[_i][_qp] * _coeff * _plastic_heat[_qp];
 }
 
 Real
@@ -54,7 +54,7 @@ PlasticHeatEnergy::computeQpOffDiagJacobian(unsigned int jvar)
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
     if (jvar == _disp_var[i])
-      return _test[_i][_qp] * _coeff * (_dplastic_heat_dstrain[_qp] * _grad_phi[_j][_qp])(i);
+      return - _test[_i][_qp] * _coeff * (_dplastic_heat_dstrain[_qp] * _grad_phi[_j][_qp])(i);
 
   return 0.0;
 }
