@@ -18,14 +18,16 @@
 #include <string>
 #include <set>
 #include <map>
+#include <vector>
+#include <list>
 #include <ostream>
 
 // MOOSE includes
 #include "Action.h"
 #include "ConsoleStreamInterface.h"
 
-/// Typedef to hide implementation details
-typedef std::vector<Action *>::iterator ActionIterator;
+/// alias to hide implementation details
+using ActionIterator = std::list<Action *>::iterator;
 
 class MooseMesh;
 class Syntax;
@@ -89,15 +91,21 @@ public:
    * Iterators to the Actions in the warehouse.  Iterators should always be used when executing
    * Actions to capture dynamically added Actions (meta-Actions).  Meta-Actions are allowed to
    * create and add additional Actions to the warehouse on the fly.  Those Actions will fire
-   * as long as their associated task occurs after the task that created them.
+   * as long as their associated task hasn't already passed (i.e. matches or is later).
    */
   ActionIterator actionBlocksWithActionBegin(const std::string & task);
   ActionIterator actionBlocksWithActionEnd(const std::string & task);
 
   /**
    * Retrieve a constant vector of \p Action pointers associated with the passed in task.
+   * TODO: Deprecate
    */
-  const std::vector<Action *> & getActionsByName(const std::string & task) const;
+  const std::vector<Action *> & getActionsByName(const std::string & task);
+
+  /**
+   * Retrieve a constant list of \p Action pointers associated with the passed in task.
+   */
+  const std::list<Action *> & getActionListByName(const std::string & task) const;
 
   /**
    * Retrieve an action with its name and the desired type.
@@ -206,7 +214,9 @@ protected:
   /// The Factory that builds Actions
   ActionFactory & _action_factory;
   /// Pointers to the actual parsed input file blocks
-  std::map<std::string, std::vector<Action *> > _action_blocks;
+  std::map<std::string, std::list<Action *> > _action_blocks;
+  /// Action blocks that have been requested
+  std::map<std::string, std::vector<Action *> > _requested_action_blocks;
   /// The container that holds the sorted action names from the DependencyResolver
   std::vector<std::string> _ordered_names;
   /// Use to store the current list of unsatisfied dependencies

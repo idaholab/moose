@@ -167,11 +167,33 @@ ActionWarehouse::actionBlocksWithActionEnd(const std::string & task)
 }
 
 const std::vector<Action *> &
-ActionWarehouse::getActionsByName(const std::string & task) const
+ActionWarehouse::getActionsByName(const std::string & task)
 {
-  std::map<std::string, std::vector<Action *> >::const_iterator it = _action_blocks.find(task);
+  // TODO: Deprecate this method
+  const auto it = _action_blocks.find(task);
   if (it == _action_blocks.end())
     mooseError("The task " << task << " does not exist.");
+
+  /**
+   * For backwards compatibility we will populate a vector
+   * and return it.
+   */
+  auto it2 = _requested_action_blocks.lower_bound(task);
+  if (it2 == _requested_action_blocks.end() || it2->first != task)
+    it2 = _requested_action_blocks.emplace_hint(it2, task, std::vector<Action *>(it->second.begin(), it->second.end()));
+  else
+    it2->second.assign(it->second.begin(), it->second.end());
+
+  return it2->second;
+}
+
+const std::list<Action *> &
+ActionWarehouse::getActionListByName(const std::string & task) const
+{
+  const auto it = _action_blocks.find(task);
+  if (it == _action_blocks.end())
+    mooseError("The task " << task << " does not exist.");
+
   return it->second;
 }
 
