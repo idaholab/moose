@@ -48,7 +48,7 @@ class MooseCommonExtension(object):
 
 
   @staticmethod
-  def applyElementSettings(element, settings):
+  def applyElementSettings(element, settings, keys=['id', 'class', 'style']):
     """
     Returns supplied element with style attributes.
 
@@ -59,9 +59,13 @@ class MooseCommonExtension(object):
       settings = self.getSettings(settings_string)
       div = self.appyElementSettings(etree.Element('div'), settings)
     """
-    for attr in ['id', 'class', 'style']:
-      if settings[attr] != None:
-        element.set(attr, settings[attr])
+#    for key in settings.keys():
+#        element.set(key, settings[key])
+#    for key, value in settings.iteritems():
+#        element.set(key, value)
+    for attr in keys:
+      if (attr in settings) and (settings[attr] != None):
+          element.set(attr, settings[attr])
     return element
 
 

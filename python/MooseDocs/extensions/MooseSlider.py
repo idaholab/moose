@@ -5,7 +5,11 @@ import string
 from markdown.util import etree
 from markdown.blockprocessors import BlockProcessor
 import inspect
+<<<<<<< 4dbb067b080bcc03256b592b47d043584e0f96cd
 
+=======
+import collections
+>>>>>>> Updated slider to work correctly with Materialize.
 import MooseDocs
 from MooseCommonExtension import MooseCommonExtension
 
@@ -25,6 +29,11 @@ class MooseSlider(BlockProcessor, MooseCommonExtension):
   """
 
   RE = re.compile(r'^!\ ?slider(.*)')
+<<<<<<< 4dbb067b080bcc03256b592b47d043584e0f96cd
+=======
+
+  ImageInfo = collections.namedtuple('ImageInfo', 'filename img_settings caption_settings')
+>>>>>>> Updated slider to work correctly with Materialize.
 
   def __init__(self, parser, **kwargs):
     MooseCommonExtension.__init__(self, **kwargs)
@@ -60,23 +69,20 @@ class MooseSlider(BlockProcessor, MooseCommonExtension):
       matches = regular_expression.search(line)
       fname = matches.group(1).strip()
 
-      #get separate dictionaries for the image and caption
-      img_dict = dict()
-      caption_dict = dict()
-      dict_array = [img_dict,caption_dict]
-      for i in [2,3]:
-        settings = self.getSettings(matches.group(i).strip())
-        dict_array[i-2].update(settings)
+      # Build separate dictionaries for the image and caption
+      img_settings = self.getSettings(matches.group(2).strip())
+      img_settings.setdefault('background-size', 'contain')
+      img_settings.setdefault('background-repeat', 'no-repeat')
+      img_settings.setdefault('background-color', 'white')
+      caption_settings = self.getSettings(matches.group(3).strip())
 
       new_files = glob.glob(MooseDocs.abspath(fname))
       if not new_files:
-        # If one of the paths is broken then
-        # we return an empty list to indicate
-        # an error state
-        print '\n\nWARNING!  Parser unable to detect file(s) "%s" in MooseSlider.py\n'%(fname)
+        log.error('Parser unable to detect file(s) {} in MooseSlider.py'.format(fname))
         return []
       for f in new_files:
-        files.append(({"path": f}, img_dict, caption_dict))
+        files.append(MooseSlider.ImageInfo(os.path.relpath(f), img_settings, caption_settings))
+
     return files
 
   def test(self, parent, block):
@@ -104,18 +110,15 @@ class MooseSlider(BlockProcessor, MooseCommonExtension):
     ul.set('class', 'slides')
 
     for item in self.parseFilenames(block[match.end()+1:]):
+      print item
       li = etree.SubElement(ul, 'li')
       img = etree.SubElement(li, 'img')
-      img_dict = {'background-size':'contain', 'background-repeat':'no-repeat', 'background-color':'white'}
-      img_dict.update(item[1])
-      img.set('src', '/' + item[0]['path'])
-      self.applyElementSettings(img, img_dict)
+      img.set('src', item.filename)
+      self.applyElementSettings(img, item.img_settings, keys=item.img_settings.keys())
 
       #Add the caption and its options if they exist
       if len(item[2]) != 0:
         caption = etree.SubElement(li, 'div')
         caption.set('class','caption')
-        caption.text = item[2]['caption']
-        styles = item[2]
-        del styles['caption']
-        caption = self.addStyle(caption, **styles)
+        caption.text = item.caption_settings.pop('caption', '')
+        caption = self.applyElementSettings(caption, item.caption_settings, keys=item.caption_settings.keys())
