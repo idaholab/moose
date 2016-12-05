@@ -53,7 +53,6 @@ PorousFlowVariableBase::initQpStatefulProperties()
   /// Resize the material properties which constain pressure and saturation
   _porepressure_nodal[_qp].resize(_num_phases);
   _porepressure_qp[_qp].resize(_num_phases);
-  _porepressure_nodal_old[_qp].resize(_num_phases);
   _gradp_qp[_qp].resize(_num_phases);
   _dporepressure_nodal_dvar[_qp].resize(_num_phases);
   _dporepressure_qp_dvar[_qp].resize(_num_phases);
@@ -62,7 +61,6 @@ PorousFlowVariableBase::initQpStatefulProperties()
 
   _saturation_nodal[_qp].resize(_num_phases);
   _saturation_qp[_qp].resize(_num_phases);
-  _saturation_nodal_old[_qp].resize(_num_phases);
   _grads_qp[_qp].resize(_num_phases);
   _dsaturation_nodal_dvar[_qp].resize(_num_phases);
   _dsaturation_qp_dvar[_qp].resize(_num_phases);
