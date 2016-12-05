@@ -125,7 +125,7 @@ OutputWarehouse::getOutputNames()
 {
   if (_object_names.empty())
   {
-    std::vector<Action *> actions =  _app.actionWarehouse().getActionsByName("add_output");
+    const auto & actions = _app.actionWarehouse().getActionListByName("add_output");
     for (const auto & act : actions)
       _object_names.insert(act->name());
   }

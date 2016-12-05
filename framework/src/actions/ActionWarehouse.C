@@ -169,7 +169,8 @@ ActionWarehouse::actionBlocksWithActionEnd(const std::string & task)
 const std::vector<Action *> &
 ActionWarehouse::getActionsByName(const std::string & task)
 {
-  // TODO: Deprecate this method
+  mooseDeprecated("ActionWarehouse::getActionsByName() is deprecated, use getActionListByName() instead");
+
   const auto it = _action_blocks.find(task);
   if (it == _action_blocks.end())
     mooseError("The task " << task << " does not exist.");

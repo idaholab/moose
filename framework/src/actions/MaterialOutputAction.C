@@ -74,7 +74,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblemBase * problem_ptr)
   bool outputs_has_properties = false;
   std::set<std::string> output_object_properties;
 
-  std::vector<Action *> output_actions =  _app.actionWarehouse().getActionsByName("add_output");
+  const auto & output_actions =  _app.actionWarehouse().getActionListByName("add_output");
   for (const auto & act : output_actions)
   {
     // Extract the Output action
