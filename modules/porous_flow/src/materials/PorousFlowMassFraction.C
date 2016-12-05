@@ -48,13 +48,11 @@ void
 PorousFlowMassFraction::initQpStatefulProperties()
 {
   _mass_frac[_qp].resize(_num_phases);
-  _mass_frac_old[_qp].resize(_num_phases);
   _grad_mass_frac[_qp].resize(_num_phases);
   _dmass_frac_dvar[_qp].resize(_num_phases);
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     _mass_frac[_qp][ph].resize(_num_components);
-    _mass_frac_old[_qp][ph].resize(_num_components);
     _grad_mass_frac[_qp][ph].resize(_num_components);
     _dmass_frac_dvar[_qp][ph].resize(_num_components);
     for (unsigned int comp = 0; comp < _num_components; ++comp)
