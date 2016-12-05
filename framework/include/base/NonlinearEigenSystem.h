@@ -62,6 +62,15 @@ public:
 
   virtual NumericVector<Number> & RHS() override;
 
+  // return the Nth converged eigenvlue
+  virtual std::pair<Real, Real> getNthConvergedEigenvalue(dof_id_type n) { return _transient_sys.get_eigenpair(n); }
+
+  // return all converged eigenvalues
+  virtual std::vector<std::pair<Real, Real> > & getAllConvergedEigenvalues() { return _eigen_values; }
+
+  // return the number of converged eigenvlues
+  virtual unsigned int getNumConvergedEigenvalues() { return _transient_sys.get_n_converged(); };
+
   virtual NonlinearSolver<Number> * nonlinearSolver() override;
 
   virtual NumericVector<Number> & solutionOld() override { return *_transient_sys.old_local_solution; }
@@ -71,6 +80,7 @@ public:
   virtual TransientEigenSystem & sys() { return _transient_sys; }
 protected:
   TransientEigenSystem & _transient_sys;
+  std::vector<std::pair<Real, Real> > _eigen_values;
 #endif /* LIBMESH_HAVE_SLEPC */
 };
 #endif /* NONLINEAREIGENSYSTEM_H */

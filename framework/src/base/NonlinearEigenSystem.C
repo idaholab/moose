@@ -60,6 +60,7 @@ NonlinearEigenSystem::NonlinearEigenSystem(FEProblemBase & /*fe_problem*/, const
 }
 #endif /* LIBMESH_HAVE_SLEPC */
 
+
 #if LIBMESH_HAVE_SLEPC
 void
 NonlinearEigenSystem::solve()
@@ -71,6 +72,15 @@ NonlinearEigenSystem::solve()
   setInitialSolution();
   _time_integrator->solve();
   _time_integrator->postSolve();
+
+  // update store eigenvalues
+  unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
+  _eigen_values.clear();
+  _eigen_values.resize(n_converged_eigenvalues);
+  for(unsigned int n = 0; n < n_converged_eigenvalues; n++)
+  {
+    _eigen_values.push_back(getNthConvergedEigenvalue(n));
+  }
 }
 
 void
@@ -88,8 +98,10 @@ NonlinearEigenSystem::setupFiniteDifferencedPreconditioner()
 bool
 NonlinearEigenSystem::converged()
 {
-  mooseError("did not implement yet \n");
-  return false;
+  if (_transient_sys.get_n_converged())
+    return true;
+  else
+    return false;
 }
 
 unsigned int
@@ -112,5 +124,4 @@ NonlinearEigenSystem::nonlinearSolver()
   mooseError("did not implement yet \n");
   return NULL;
 }
-
 #endif /* LIBMESH_HAVE_SLEPC */
