@@ -1299,7 +1299,12 @@ private:
 
 public:
   unsigned int rand() {return _rand_engine();}
-  void seedMasterRand(unsigned int seed) {_rand_engine.seed(seed); _reseed_subapps = true;}
+  void seedMasterRand(unsigned int seed) {
+    _reseed_subapps = true;
+    _master_seed = seed;
+    _rand_engine.seed(_master_seed);
+  }
+  unsigned int masterSeed() {return _master_seed;}
   bool subappsNeedReseed() { bool val = _reseed_subapps; _reseed_subapps = false; return val;}
 private:
   void reseedRand(ExecFlagType exec_flag) {

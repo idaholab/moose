@@ -165,12 +165,13 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters) :
     _fail_next_linear_convergence_check(false),
     _currently_computing_jacobian(false),
     _started_initial_setup(false),
-    _reseed_subapps(declareRestartableData<bool>("reseed_subapps")),
-    _master_seed(parameters.get<unsigned int>("master_rand_seed")),
+    _reseed_subapps(false),
+    _master_seed(declareRestartableData<unsigned int>("master_rand_seed")),
     _rand_engine(declareRestartableData<RandGen<std::mt19937>>("rand_engine")),
     _reset_rand_on(parameters.get<ExecFlagType>("reset_rand_on"))
 {
-  seedMasterRand(_master_seed);
+  // this is retrieved here so we can have _master_seed be restartable data
+  seedMasterRand(parameters.get<unsigned int>("master_rand_seed"));
   _time = 0.0;
   _time_old = 0.0;
   _t_step = 0;
