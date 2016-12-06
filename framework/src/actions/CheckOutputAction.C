@@ -49,7 +49,7 @@ CheckOutputAction::checkVariableOutput(const std::string & task)
   if (_awh.hasActions(task))
   {
     // Loop through the actions for the given task
-    const std::vector<Action *> & actions = _awh.getActionsByName(task);
+    const auto & actions = _awh.getActionListByName(task);
     for (const auto & act : actions)
     {
       // Cast the object to AddVariableAction so that that OutputInterface::buildOutputHideVariableList may be called
