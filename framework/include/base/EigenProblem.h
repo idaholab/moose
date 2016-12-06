@@ -18,7 +18,7 @@
 #include "libmesh/libmesh_config.h"
 
 
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 #include "NonlinearEigenSystem.h"
 
 class EigenProblem;
@@ -39,7 +39,6 @@ public:
 
   virtual void solve() override;
   virtual bool converged() override;
-  virtual void outputStep(ExecFlagType type) override;
 
 protected:
   NonlinearEigenSystem * _nl_eigen;

@@ -86,14 +86,5 @@ EigenProblem::solve()
 bool
 EigenProblem::converged()
 {
-  _console << "WARNING: did not implement yet \n";
-  return true;
-}
-
-
-void
-EigenProblem::outputStep(ExecFlagType /*type*/)
-{
-  _nl->update();
-  _aux->update();
+  return _nl_eigen->converged();
 }
