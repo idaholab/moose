@@ -9,8 +9,7 @@
 #define POROUSFLOWVARIABLEBASE_H
 
 #include "DerivativeMaterialInterface.h"
-#include "PorousFlowNodalValueMaterial.h"
-#include "PorousFlowDictator.h"
+#include "PorousFlowMaterial.h"
 
 class PorousFlowVariableBase;
 
@@ -22,7 +21,7 @@ InputParameters validParams<PorousFlowVariableBase>();
  * primary variables such as porepressure and saturation at the nodes
  * and quadpoints for all phases as required
  */
-class PorousFlowVariableBase : public DerivativeMaterialInterface<PorousFlowNodalValueMaterial>
+class PorousFlowVariableBase : public DerivativeMaterialInterface<PorousFlowMaterial>
 {
 public:
   PorousFlowVariableBase(const InputParameters & parameters);
@@ -30,13 +29,6 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
-  virtual void sizeNodalStatefulProperties() override;
-  virtual void initNodalStatefulProperties() override;
-  virtual void sizeNodalProperties() override;
-  virtual void computeNodalProperties() override;
-
-  /// The variable names UserObject for the PorousFlow variables
-  const PorousFlowDictator & _dictator;
 
   /// Number of phases
   const unsigned int _num_phases;
@@ -51,52 +43,52 @@ protected:
   const MaterialProperty<unsigned int> & _node_number;
 
   /// Nodal values of porepressure of the phases
-  MaterialProperty<std::vector<Real> > & _porepressure_nodal;
+  MaterialProperty<std::vector<Real> > * const _porepressure_nodal;
 
   /// Old values of nodal porepressure of the phases
-  MaterialProperty<std::vector<Real> > & _porepressure_nodal_old;
+  MaterialProperty<std::vector<Real> > * const _porepressure_nodal_old;
 
   /// Quadpoint porepressure of the phases
-  MaterialProperty<std::vector<Real> > & _porepressure_qp;
+  MaterialProperty<std::vector<Real> > * const _porepressure_qp;
 
   /// Grad(p) at the quadpoints
-  MaterialProperty<std::vector<RealGradient> > & _gradp_qp;
+  MaterialProperty<std::vector<RealGradient> > * const _gradp_qp;
 
   /// d(nodal porepressure)/d(nodal PorousFlow variable)
-  MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_nodal_dvar;
+  MaterialProperty<std::vector<std::vector<Real> > > * const _dporepressure_nodal_dvar;
 
   /// d(quadpoint porepressure)/d(quadpoint PorousFlow variable)
-  MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_qp_dvar;
+  MaterialProperty<std::vector<std::vector<Real> > > * const _dporepressure_qp_dvar;
 
   /// d(grad porepressure)/d(grad PorousFlow variable) at the quadpoints
-  MaterialProperty<std::vector<std::vector<Real> > > & _dgradp_qp_dgradv;
+  MaterialProperty<std::vector<std::vector<Real> > > * const _dgradp_qp_dgradv;
 
   /// d(grad porepressure)/d(PorousFlow variable) at the quadpoints
-  MaterialProperty<std::vector<std::vector<RealGradient> > > & _dgradp_qp_dv;
+  MaterialProperty<std::vector<std::vector<RealGradient> > > * const _dgradp_qp_dv;
 
   /// Nodal saturation of the phases
-  MaterialProperty<std::vector<Real> > & _saturation_nodal;
+  MaterialProperty<std::vector<Real> > * const _saturation_nodal;
 
   /// Old value of nodal saturation of the phases
-  MaterialProperty<std::vector<Real> > & _saturation_nodal_old;
+  MaterialProperty<std::vector<Real> > * const _saturation_nodal_old;
 
   /// Quadpoint saturation of the phases
-  MaterialProperty<std::vector<Real> > & _saturation_qp;
+  MaterialProperty<std::vector<Real> > * const _saturation_qp;
 
   /// Grad(s) at the quadpoints
-  MaterialProperty<std::vector<RealGradient> > & _grads_qp;
+  MaterialProperty<std::vector<RealGradient> > * const _grads_qp;
 
   /// d(nodal saturation)/d(nodal PorousFlow variable)
-  MaterialProperty<std::vector<std::vector<Real> > > & _dsaturation_nodal_dvar;
+  MaterialProperty<std::vector<std::vector<Real> > > * const _dsaturation_nodal_dvar;
 
   /// d(quadpoint saturation)/d(quadpoint porflow variable)
-  MaterialProperty<std::vector<std::vector<Real> > > & _dsaturation_qp_dvar;
+  MaterialProperty<std::vector<std::vector<Real> > > * const _dsaturation_qp_dvar;
 
   /// d(grad saturation)/d(grad PorousFlow variable) at the quadpoints
-  MaterialProperty<std::vector<std::vector<Real> > > & _dgrads_qp_dgradv;
+  MaterialProperty<std::vector<std::vector<Real> > > * const _dgrads_qp_dgradv;
 
   /// d(grad saturation)/d(PorousFlow variable) at the quadpoints
-  MaterialProperty<std::vector<std::vector<RealGradient> > > & _dgrads_qp_dv;
+  MaterialProperty<std::vector<std::vector<RealGradient> > > * const _dgrads_qp_dv;
 };
 
 #endif //POROUSFLOWVARIABLEBASE_H

@@ -21,6 +21,7 @@ PorousFlowViscosityConst::PorousFlowViscosityConst(const InputParameters & param
     _input_viscosity(getParam<Real>("viscosity")),
     _viscosity(declareProperty<Real>("PorousFlow_viscosity" + _phase))
 {
+  _nodal_material = true;
 }
 
 void

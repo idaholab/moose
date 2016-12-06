@@ -43,13 +43,13 @@ void
 PorousFlow1PhaseMD_Gaussian::initQpStatefulProperties()
 {
   PorousFlowVariableBase::initQpStatefulProperties();
-
   buildPS();
 }
 
 void
 PorousFlow1PhaseMD_Gaussian::computeQpProperties()
 {
+  // size stuff correctly and prepare the derivative matrices with zeroes
   PorousFlowVariableBase::computeQpProperties();
 
   buildPS();
@@ -57,76 +57,86 @@ PorousFlow1PhaseMD_Gaussian::computeQpProperties()
   if (_dictator.notPorousFlowVariable(_md_varnum))
     return;
 
-  if (_md_nodal_var[_node_number[_qp]] >= _logdens0)
+  if (_nodal_material)
   {
-    // fully saturated at the node
-    _dporepressure_nodal_dvar[_qp][0][_pvar] = _bulk;
-    _dsaturation_nodal_dvar[_qp][0][_pvar] = 0.0;
+    if (_md_nodal_var[_qp] >= _logdens0)
+    {
+      // fully saturated at the node
+      (*_dporepressure_nodal_dvar)[_qp][0][_pvar] = _bulk;
+      (*_dsaturation_nodal_dvar)[_qp][0][_pvar] = 0.0;
+    }
+    else
+    {
+      const Real pp = (*_porepressure_nodal)[_qp][0];
+      (*_dporepressure_nodal_dvar)[_qp][0][_pvar] = 1.0 / (_recip_bulk - 2.0 * _al * pp) / _al;
+      const Real sat = (*_saturation_nodal)[_qp][0];
+      (*_dsaturation_nodal_dvar)[_qp][0][_pvar] = -2.0 * _al2 * pp * sat * (*_dporepressure_nodal_dvar)[_qp][0][_pvar];
+    }
   }
-  else
+  else // not nodal_material
   {
-    const Real pp = _porepressure_nodal[_qp][0];
-    _dporepressure_nodal_dvar[_qp][0][_pvar] = 1.0 / (_recip_bulk - 2.0 * _al * pp) / _al;
-    const Real sat = _saturation_nodal[_qp][0];
-    _dsaturation_nodal_dvar[_qp][0][_pvar] = -2.0 * _al2 * pp * sat * _dporepressure_nodal_dvar[_qp][0][_pvar];
-  }
-
-  if (_md_qp_var[_qp] >= _logdens0)
-  {
-    // fully saturated at the quadpoint
-    _dporepressure_qp_dvar[_qp][0][_pvar] = _bulk;
-    _dgradp_qp_dgradv[_qp][0][_pvar] = _bulk;
-    _dgradp_qp_dv[_qp][0][_pvar] = 0.0;
-    _dsaturation_qp_dvar[_qp][0][_pvar] = 0.0;
-    _dgrads_qp_dgradv[_qp][0][_pvar] = 0.0;
-    _dgrads_qp_dv[_qp][0][_pvar] = 0.0;
-  }
-  else
-  {
-    const Real pp = _porepressure_qp[_qp][0];
-    _dporepressure_qp_dvar[_qp][0][_pvar] = 1.0 / (_recip_bulk - 2.0 * _al * pp) / _al;
-    _dgradp_qp_dgradv[_qp][0][_pvar] = 1.0 / (_recip_bulk - 2.0 * _al * pp) / _al;
-    _dgradp_qp_dv[_qp][0][_pvar] = _gradmd_qp_var[_qp] * 2.0 * _al * _dporepressure_qp_dvar[_qp][0][_pvar] / std::pow(_recip_bulk - 2.0 * _al * _porepressure_qp[_qp][0], 2.0) / _al;
-    const Real sat = _saturation_qp[_qp][0];
-    _dsaturation_qp_dvar[_qp][0][_pvar] = -2.0 * _al2 * pp * sat * _dporepressure_qp_dvar[_qp][0][_pvar];
-    _dgrads_qp_dgradv[_qp][0][_pvar] = -2.0 * _al2 * _porepressure_qp[_qp][0] * _saturation_qp[_qp][0] * _dgradp_qp_dgradv[_qp][0][_pvar];
-    _dgrads_qp_dv[_qp][0][_pvar] = -2.0 * _al2 * _dporepressure_qp_dvar[_qp][0][_pvar] * _saturation_qp[_qp][0] * _gradp_qp[_qp][0];
-    _dgrads_qp_dv[_qp][0][_pvar] += -2.0 * _al2 * _porepressure_qp[_qp][0] * _dsaturation_qp_dvar[_qp][0][_pvar] * _gradp_qp[_qp][0];
-    _dgrads_qp_dv[_qp][0][_pvar] += -2.0 * _al2 * _porepressure_qp[_qp][0] * _saturation_qp[_qp][0] * _dgradp_qp_dv[_qp][0][_pvar];
+    if (_md_qp_var[_qp] >= _logdens0)
+    {
+      // fully saturated at the quadpoint
+      (*_dporepressure_qp_dvar)[_qp][0][_pvar] = _bulk;
+      (*_dgradp_qp_dgradv)[_qp][0][_pvar] = _bulk;
+      (*_dgradp_qp_dv)[_qp][0][_pvar] = 0.0;
+      (*_dsaturation_qp_dvar)[_qp][0][_pvar] = 0.0;
+      (*_dgrads_qp_dgradv)[_qp][0][_pvar] = 0.0;
+      (*_dgrads_qp_dv)[_qp][0][_pvar] = 0.0;
+    }
+    else
+    {
+      const Real pp = (*_porepressure_qp)[_qp][0];
+      (*_dporepressure_qp_dvar)[_qp][0][_pvar] = 1.0 / (_recip_bulk - 2.0 * _al * pp) / _al;
+      (*_dgradp_qp_dgradv)[_qp][0][_pvar] = 1.0 / (_recip_bulk - 2.0 * _al * pp) / _al;
+      (*_dgradp_qp_dv)[_qp][0][_pvar] = _gradmd_qp_var[_qp] * 2.0 * _al * (*_dporepressure_qp_dvar)[_qp][0][_pvar] / std::pow(_recip_bulk - 2.0 * _al * (*_porepressure_qp)[_qp][0], 2.0) / _al;
+      const Real sat = (*_saturation_qp)[_qp][0];
+      (*_dsaturation_qp_dvar)[_qp][0][_pvar] = -2.0 * _al2 * pp * sat * (*_dporepressure_qp_dvar)[_qp][0][_pvar];
+      (*_dgrads_qp_dgradv)[_qp][0][_pvar] = -2.0 * _al2 * (*_porepressure_qp)[_qp][0] * (*_saturation_qp)[_qp][0] * (*_dgradp_qp_dgradv)[_qp][0][_pvar];
+      (*_dgrads_qp_dv)[_qp][0][_pvar] = -2.0 * _al2 * (*_dporepressure_qp_dvar)[_qp][0][_pvar] * (*_saturation_qp)[_qp][0] * (*_gradp_qp)[_qp][0];
+      (*_dgrads_qp_dv)[_qp][0][_pvar] += -2.0 * _al2 * (*_porepressure_qp)[_qp][0] * (*_dsaturation_qp_dvar)[_qp][0][_pvar] * (*_gradp_qp)[_qp][0];
+      (*_dgrads_qp_dv)[_qp][0][_pvar] += -2.0 * _al2 * (*_porepressure_qp)[_qp][0] * (*_saturation_qp)[_qp][0] * (*_dgradp_qp_dv)[_qp][0][_pvar];
+    }
   }
 }
 
 void
 PorousFlow1PhaseMD_Gaussian::buildPS()
 {
-  if (_md_nodal_var[_node_number[_qp]] >= _logdens0)
+  if (_nodal_material)
   {
-    // full saturation
-    _porepressure_nodal[_qp][0] = (_md_nodal_var[_node_number[_qp]] - _logdens0) * _bulk;
-    _saturation_nodal[_qp][0] = 1.0;
+    if (_md_nodal_var[_qp] >= _logdens0)
+    {
+      // full saturation
+      (*_porepressure_nodal)[_qp][0] = (_md_nodal_var[_qp] - _logdens0) * _bulk;
+      (*_saturation_nodal)[_qp][0] = 1.0;
+    }
+    else
+    {
+      // v = logdens0 + p/bulk - (al p)^2
+      // 0 = (v-logdens0) - p/bulk + (al p)^2
+      // 2 al p = (1/al/bulk) +/- sqrt((1/al/bulk)^2 - 4(v-logdens0))  (the "minus" sign is chosen)
+      // s = exp(-(al*p)^2)
+      (*_porepressure_nodal)[_qp][0] = (_recip_bulk - std::sqrt(_recip_bulk2 + 4.0 * (_logdens0 - _md_nodal_var[_qp]))) / (2.0 * _al);
+      (*_saturation_nodal)[_qp][0] = std::exp(-std::pow(_al * (*_porepressure_nodal)[_qp][0], 2.0));
+    }
   }
-  else
+  else // not _nodal_material
   {
-    // v = logdens0 + p/bulk - (al p)^2
-    // 0 = (v-logdens0) - p/bulk + (al p)^2
-    // 2 al p = (1/al/bulk) +/- sqrt((1/al/bulk)^2 - 4(v-logdens0))  (the "minus" sign is chosen)
-    // s = exp(-(al*p)^2)
-    _porepressure_nodal[_qp][0] = (_recip_bulk - std::sqrt(_recip_bulk2 + 4.0 * (_logdens0 - _md_nodal_var[_node_number[_qp]]))) / (2.0 * _al);
-    _saturation_nodal[_qp][0] = std::exp(-std::pow(_al * _porepressure_nodal[_qp][0], 2.0));
-}
-
-  if (_md_qp_var[_qp] >= _logdens0)
-  {
-    _porepressure_qp[_qp][0] = (_md_qp_var[_qp] - _logdens0) * _bulk;
-    _gradp_qp[_qp][0] = _gradmd_qp_var[_qp] * _bulk;
-    _saturation_qp[_qp][0] = 1.0;
-    _grads_qp[_qp][0] = 0.0;
-  }
-  else
-  {
-    _porepressure_qp[_qp][0] = (_recip_bulk - std::sqrt(_recip_bulk2 + 4.0 * (_logdens0 - _md_qp_var[_qp]))) / (2.0 * _al);
-    _gradp_qp[_qp][0] = _gradmd_qp_var[_qp] / (_recip_bulk - 2.0 * _al * _porepressure_qp[_qp][0]) / _al;
-    _saturation_qp[_qp][0] = std::exp(-std::pow(_al * _porepressure_qp[_qp][0], 2.0));
-    _grads_qp[_qp][0] = -2.0 * _al2 * _porepressure_qp[_qp][0] * _saturation_qp[_qp][0] * _gradp_qp[_qp][0];
+    if (_md_qp_var[_qp] >= _logdens0)
+    {
+      (*_porepressure_qp)[_qp][0] = (_md_qp_var[_qp] - _logdens0) * _bulk;
+      (*_gradp_qp)[_qp][0] = _gradmd_qp_var[_qp] * _bulk;
+      (*_saturation_qp)[_qp][0] = 1.0;
+      (*_grads_qp)[_qp][0] = 0.0;
+    }
+    else
+    {
+      (*_porepressure_qp)[_qp][0] = (_recip_bulk - std::sqrt(_recip_bulk2 + 4.0 * (_logdens0 - _md_qp_var[_qp]))) / (2.0 * _al);
+      (*_gradp_qp)[_qp][0] = _gradmd_qp_var[_qp] / (_recip_bulk - 2.0 * _al * (*_porepressure_qp)[_qp][0]) / _al;
+      (*_saturation_qp)[_qp][0] = std::exp(-std::pow(_al * (*_porepressure_qp)[_qp][0], 2.0));
+      (*_grads_qp)[_qp][0] = -2.0 * _al2 * (*_porepressure_qp)[_qp][0] * (*_saturation_qp)[_qp][0] * (*_gradp_qp)[_qp][0];
+    }
   }
 }

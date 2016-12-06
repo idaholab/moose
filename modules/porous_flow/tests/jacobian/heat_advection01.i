@@ -63,6 +63,10 @@
     type = PorousFlowTemperature
     temperature = temp
   [../]
+  [./temperature_nodal]
+    type = PorousFlowTemperatureNodal
+    temperature = temp
+  [../]
   [./nnn]
     type = PorousFlowNodeNumber
     on_initial_only = true
@@ -95,8 +99,22 @@
     al = 1.3
     m = 0.6
   [../]
+  [./PS_nodal]
+    type = PorousFlow1PhaseP_VG
+    porepressure = pp
+    at_nodes = true
+    al = 1.3
+    m = 0.6
+  [../]
   [./fluid_density]
     type = PorousFlowDensityConstBulk
+    density_P0 = 1.1
+    bulk_modulus = 0.5
+    phase = 0
+  [../]
+  [./fluid_density_nodal]
+    type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1.1
     bulk_modulus = 0.5
     phase = 0
@@ -110,8 +128,8 @@
     material_property = PorousFlow_fluid_phase_density_qp
     at_qps = true
   [../]
-  [./fluid_energy]
-    type = PorousFlowInternalEnergyIdeal
+  [./fluid_energy_nodal]
+    type = PorousFlowInternalEnergyIdealNodal
     specific_heat_capacity = 1.1
     phase = 0
   [../]
@@ -120,7 +138,7 @@
     material_property = PorousFlow_fluid_phase_internal_energy_nodal
   [../]
   [./fluid_enthalpy]
-    type = PorousFlowEnthalpy
+    type = PorousFlowEnthalpyNodal
     phase = 0
   [../]
   [./enthalpy_all]

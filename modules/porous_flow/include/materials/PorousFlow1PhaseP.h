@@ -31,18 +31,11 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
-  virtual void initNodalStatefulProperties() override;
-  virtual void computeNodalProperties() override;
 
   /**
    * Assemble std::vectors of porepressure, saturation and temperature at the quadpoints
    */
   void buildQpPPSS();
-
-  /**
-   * Assemble std::vectors of porepressure, saturation and temperature at the nodes
-   */
-  void buildNodalPPSS();
 
   /**
    * Effective saturation as a function of porepressure.

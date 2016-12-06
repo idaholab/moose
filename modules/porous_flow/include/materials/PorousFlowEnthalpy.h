@@ -16,7 +16,7 @@ template<>
 InputParameters validParams<PorousFlowEnthalpy>();
 
 /**
- * This material computes specific enthalpy (J/kg) for a fluid assuming
+ * This material computes specific enthalpy (J/kg) at the quadpoints for a fluid assuming
  * using the relationship
  * specify_enthalpy = specific_internal_energy + pressure/density
  */
@@ -26,21 +26,10 @@ public:
   PorousFlowEnthalpy(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
   /// enthalpy = internal_energy + porepressure / density * _pp_coeff
   const Real _pp_coeff;
-
-  /// Fluid energy at the nodes
-  const MaterialProperty<Real> & _energy_nodal;
-
-  /// d(Fluid energy at the nodes)/d(porepressure at the nodes)
-  const MaterialProperty<Real> & _denergy_nodal_dp;
-
-  /// d(Fluid energy at the nodes)/d(temperature at the nodes)
-  const MaterialProperty<Real> & _denergy_nodal_dt;
 
   /// Fluid energy at the quadpoints
   const MaterialProperty<Real> & _energy_qp;
@@ -51,15 +40,6 @@ protected:
   /// d(Fluid energy at the quadpoints)/d(temperature at the quadpoints)
   const MaterialProperty<Real> & _denergy_qp_dt;
 
-  /// Fluid density at the nodes
-  const MaterialProperty<Real> & _density_nodal;
-
-  /// d(Fluid density at the nodes)/d(porepressure at the nodes)
-  const MaterialProperty<Real> & _ddensity_nodal_dp;
-
-  /// d(Fluid density at the nodes)/d(temperature at the nodes)
-  const MaterialProperty<Real> & _ddensity_nodal_dt;
-
   /// Fluid density at the quadpoints
   const MaterialProperty<Real> & _density_qp;
 
@@ -68,18 +48,6 @@ protected:
 
   /// d(Fluid density at the quadpoints)/d(temperature at the quadpoints)
   const MaterialProperty<Real> & _ddensity_qp_dt;
-
-  /// Fluid phase enthalpy at the nodes
-  MaterialProperty<Real> & _enthalpy_nodal;
-
-  /// Old fluid phase enthalpy at the nodes
-  MaterialProperty<Real> & _enthalpy_nodal_old;
-
-  /// Derivative of fluid enthalpy wrt phase pore pressure at the nodes
-  MaterialProperty<Real> & _denthalpy_nodal_dp;
-
-  /// Derivative of fluid enthalpy wrt temperature at the nodes
-  MaterialProperty<Real> & _denthalpy_nodal_dt;
 
   /// Fluid phase enthalpy at the qps
   MaterialProperty<Real> & _enthalpy_qp;

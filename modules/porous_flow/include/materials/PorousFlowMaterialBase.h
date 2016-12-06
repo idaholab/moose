@@ -8,9 +8,8 @@
 #ifndef POROUSFLOWMATERIALBASE_H
 #define POROUSFLOWMATERIALBASE_H
 
-#include "PorousFlowNodalValueMaterial.h"
+#include "PorousFlowMaterial.h"
 #include "DerivativeMaterialInterface.h"
-#include "PorousFlowDictator.h"
 
 class PorousFlowMaterialBase;
 
@@ -24,15 +23,12 @@ InputParameters validParams<PorousFlowMaterialBase>();
  * phase index is valid, and provides a stringified version of the phase index to use
  * in the material property names.
  */
-class PorousFlowMaterialBase : public DerivativeMaterialInterface<PorousFlowNodalValueMaterial>
+class PorousFlowMaterialBase : public DerivativeMaterialInterface<PorousFlowMaterial>
 {
 public:
   PorousFlowMaterialBase(const InputParameters & parameters);
 
 protected:
-  /// The PorousFlow Dictator UserObject
-  const PorousFlowDictator & _dictator;
-
   /// Nearest node number for each quadpoint
   const MaterialProperty<unsigned int> & _node_number;
 

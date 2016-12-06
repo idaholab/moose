@@ -29,20 +29,14 @@ PorousFlowRelativePermeabilityBase::PorousFlowRelativePermeabilityBase(const Inp
 {
   if (_sum_s_res < _s_res)
     mooseError("Sum of residual saturations sum_s_res cannot be smaller than s_res in " << name());
+  _nodal_material = true;
 }
 
 void
-PorousFlowRelativePermeabilityBase::sizeNodalProperties()
-{
-  _relative_permeability.resize(_current_elem->n_nodes());
-  _drelative_permeability_ds.resize(_current_elem->n_nodes());
-}
-
-void
-PorousFlowRelativePermeabilityBase::computeNodalProperties()
+PorousFlowRelativePermeabilityBase::computeQpProperties()
 {
   // Effective saturation
-  Real seff = effectiveSaturation(_saturation_nodal[_nodenum][_phase_num]);
+  Real seff = effectiveSaturation(_saturation_nodal[_qp][_phase_num]);
   Real relperm, drelperm;
 
   if (seff < 0.0)
@@ -63,8 +57,8 @@ PorousFlowRelativePermeabilityBase::computeNodalProperties()
     drelperm = 0.0;
   }
 
-  _relative_permeability[_nodenum] = relperm;
-  _drelative_permeability_ds[_nodenum] = drelperm * _dseff_ds;
+  _relative_permeability[_qp] = relperm;
+  _drelative_permeability_ds[_qp] = drelperm * _dseff_ds;
 }
 
 Real
