@@ -415,7 +415,7 @@ FeatureFloodCount::finalize()
 const std::vector<unsigned int> &
 FeatureFloodCount::getVarToFeatureVector(dof_id_type elem_id) const
 {
-  mooseAssert(_compute_var_to_feature_map, "Please set \"compute_var_to_feature_map = true\" to use this interface method");
+  mooseDoOnce(if (!_compute_var_to_feature_map) mooseError("Please set \"compute_var_to_feature_map = true\" to use this interface method"));
 
   const auto pos = _entity_var_to_features.find(elem_id);
   if (pos != _entity_var_to_features.end())
