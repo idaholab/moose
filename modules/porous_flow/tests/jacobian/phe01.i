@@ -120,6 +120,10 @@
     type = PorousFlowTemperature
     temperature = temperature
   [../]
+  [./temp_nodal]
+    type = PorousFlowTemperatureNodal
+    temperature = temperature
+  [../]
   [./porosity]
     type = PorousFlowPorosityTM
     porosity_zero = 0.3

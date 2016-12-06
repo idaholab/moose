@@ -50,6 +50,10 @@
     type = PorousFlowTemperature
     temperature = 'temp'
   [../]
+  [./temperature_nodal]
+    type = PorousFlowTemperatureNodal
+    temperature = 'temp'
+  [../]
   [./nnn]
     type = PorousFlowNodeNumber
     on_initial_only = true
@@ -58,8 +62,18 @@
     type = PorousFlow1PhaseP
     porepressure = pp
   [../]
+  [./ppss_nodal]
+    type = PorousFlow1PhaseP
+    porepressure = pp
+    at_nodes = true
+  [../]
   [./methane]
     type = PorousFlowSingleComponentFluid
+    fp = methane
+    phase = 0
+  [../]
+  [./methane_nodal]
+    type = PorousFlowSingleComponentFluidNodal
     fp = methane
     phase = 0
   [../]

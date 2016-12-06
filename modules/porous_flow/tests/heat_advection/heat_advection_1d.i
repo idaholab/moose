@@ -171,7 +171,7 @@
     at_qps = true
   [../]
   [./fluid_energy]
-    type = PorousFlowInternalEnergyIdeal
+    type = PorousFlowInternalEnergyIdealNodal
     specific_heat_capacity = 2
     phase = 0
   [../]

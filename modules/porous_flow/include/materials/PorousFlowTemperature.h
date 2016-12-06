@@ -9,8 +9,7 @@
 #define POROUSFLOWTEMPERATURE_H
 
 #include "DerivativeMaterialInterface.h"
-#include "Material.h"
-#include "PorousFlowDictator.h"
+#include "PorousFlowMaterial.h"
 
 class PorousFlowTemperature;
 
@@ -20,23 +19,16 @@ InputParameters validParams<PorousFlowTemperature>();
 /**
  * Creates temperature Materials
  */
-class PorousFlowTemperature : public DerivativeMaterialInterface<Material>
+class PorousFlowTemperature : public DerivativeMaterialInterface<PorousFlowMaterial>
 {
 public:
   PorousFlowTemperature(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
-
-  /// The variable names UserObject for the PorousFlow variables
-  const PorousFlowDictator & _dictator;
+  virtual void computeQpProperties() override;
 
   /// Number of PorousFlow variables
   const unsigned int _num_pf_vars;
-
-  /// Nodal value of temperature
-  const VariableValue & _temperature_nodal_var;
 
   /// Quadpoint value of temperature
   const VariableValue & _temperature_qp_var;
@@ -50,23 +42,11 @@ protected:
   /// the PorousFlow variable number of the temperature
   const unsigned int _t_var_num;
 
-  /// Nearest node number for each quadpoint
-  const MaterialProperty<unsigned int> & _node_number;
-
-  /// Nodal value of temperature
-  MaterialProperty<Real> & _temperature_nodal;
-
-  /// Old value of nodal temperature
-  MaterialProperty<Real> & _temperature_nodal_old;
-
   /// Quadpoint temperature
   MaterialProperty<Real> & _temperature_qp;
 
   /// Grad(temperature) at the quadpoints
   MaterialProperty<RealGradient> & _gradt_qp;
-
-  /// d(nodal temperature)/d(nodal PorousFlow variable)
-  MaterialProperty<std::vector<Real> > & _dtemperature_nodal_dvar;
 
   /// d(quadpoint temperature)/d(quadpoint PorousFlow variable)
   MaterialProperty<std::vector<Real> > & _dtemperature_qp_dvar;

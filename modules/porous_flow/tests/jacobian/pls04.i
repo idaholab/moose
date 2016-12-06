@@ -123,6 +123,10 @@
     type = PorousFlowTemperature
     temperature = temp
   [../]
+  [./temperature_nodal]
+    type = PorousFlowTemperatureNodal
+    temperature = temp
+  [../]
   [./nnn]
     type = PorousFlowNodeNumber
     on_initial_only = true
@@ -131,6 +135,14 @@
     type = PorousFlow2PhasePP_VG
     phase0_porepressure = ppwater
     phase1_porepressure = ppgas
+    al = 1
+    m = 0.5
+  [../]
+  [./ppss_nodal]
+    type = PorousFlow2PhasePP_VG
+    phase0_porepressure = ppwater
+    phase1_porepressure = ppgas
+    at_nodes = true
     al = 1
     m = 0.5
   [../]
@@ -146,6 +158,20 @@
   [../]
   [./dens1]
     type = PorousFlowDensityConstBulk
+    density_P0 = 0.5
+    bulk_modulus = 0.5
+    phase = 1
+  [../]
+  [./dens0_nodal]
+    type = PorousFlowDensityConstBulk
+    at_nodes = true
+    density_P0 = 1
+    bulk_modulus = 1.5
+    phase = 0
+  [../]
+  [./dens1_nodal]
+    type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 0.5
     bulk_modulus = 0.5
     phase = 1
@@ -193,16 +219,26 @@
     material_property = PorousFlow_relative_permeability
   [../]
   [./enthalpy0]
-    type = PorousFlowEnthalpy
+    type = PorousFlowEnthalpyNodal
     phase = 0
   [../]
   [./enthalpy1]
-    type = PorousFlowEnthalpy
+    type = PorousFlowEnthalpyNodal
     phase = 1
   [../]
   [./enthalpy_all]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_enthalpy_nodal
+  [../]
+  [./fluid_energy0_nodal]
+    type = PorousFlowInternalEnergyIdealNodal
+    specific_heat_capacity = 1.1
+    phase = 0
+  [../]
+  [./fluid_energy1_nodal]
+    type = PorousFlowInternalEnergyIdealNodal
+    specific_heat_capacity = 1.8
+    phase = 1
   [../]
   [./fluid_energy0]
     type = PorousFlowInternalEnergyIdeal
