@@ -594,7 +594,10 @@ std::list<std::string>
 MooseApp::getCheckpointFiles()
 {
   // Extract the CommonOutputAction
-  const Action* common = _action_warehouse.getActionsByName("common_output")[0];
+  const auto & common_actions = _action_warehouse.getActionListByName("common_output");
+  mooseAssert(common_actions.size() == 1, "Should be only one common_output Action");
+
+  const Action * common = *common_actions.begin();
 
   // Storage for the directory names
   std::list<std::string> checkpoint_dirs;
@@ -610,7 +613,7 @@ MooseApp::getCheckpointFiles()
     checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
 
   // Add the directories from any existing checkpoint objects
-  const std::vector<Action *> actions = _action_warehouse.getActionsByName("add_output");
+  const auto & actions = _action_warehouse.getActionListByName("add_output");
   for (const auto & action : actions)
   {
     // Get the parameters from the MooseObjectAction
