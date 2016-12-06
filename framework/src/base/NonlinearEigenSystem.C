@@ -73,14 +73,12 @@ NonlinearEigenSystem::solve()
   _time_integrator->solve();
   _time_integrator->postSolve();
 
-  // update store eigenvalues
+  // store eigenvalues
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
   _eigen_values.clear();
-  _eigen_values.resize(n_converged_eigenvalues);
-  for(unsigned int n = 0; n < n_converged_eigenvalues; n++)
-  {
+  _eigen_values.reserve(n_converged_eigenvalues);
+  for (unsigned int n = 0; n < n_converged_eigenvalues; n++)
     _eigen_values.push_back(getNthConvergedEigenvalue(n));
-  }
 }
 
 void

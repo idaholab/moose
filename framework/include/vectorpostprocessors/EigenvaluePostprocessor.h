@@ -16,6 +16,7 @@
 #define EIGENVALUEPOSTPROCESSOR_H
 
 #include "GeneralVectorPostprocessor.h"
+#include "NonlinearEigenSystem.h"
 
 //Forward Declarations
 class EigenvaluePostprocessor;
@@ -32,7 +33,9 @@ public:
   virtual void execute() override;
 
 protected:
-  VectorPostprocessorValue & _eigen_values;
+  VectorPostprocessorValue & _eigen_values_real;
+  VectorPostprocessorValue & _eigen_values_imag;
+  NonlinearEigenSystem & _nl_eigen;
 };
 
 #endif // EIGENVALUEPOSTPROCESSOR_H

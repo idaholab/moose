@@ -63,7 +63,7 @@ public:
   virtual NumericVector<Number> & RHS() override;
 
   // return the Nth converged eigenvlue
-  virtual std::pair<Real, Real> getNthConvergedEigenvalue(dof_id_type n) { return _transient_sys.get_eigenpair(n); }
+  virtual std::pair<Real, Real>  getNthConvergedEigenvalue(dof_id_type n) { return _transient_sys.get_eigenpair(n); }
 
   // return all converged eigenvalues
   virtual std::vector<std::pair<Real, Real> > & getAllConvergedEigenvalues() { return _eigen_values; }
