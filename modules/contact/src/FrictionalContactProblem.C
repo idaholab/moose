@@ -430,7 +430,6 @@ FrictionalContactProblem::calculateSlip(const NumericVector<Number>& ghosted_sol
   _slip_residual = 0.0;
   _it_slip_norm = 0.0;
   _inc_slip_norm = 0.0;
-  System & system = getNonlinearSystemBase().system();
 
   if (iterative_slip)
     iterative_slip->clear();
