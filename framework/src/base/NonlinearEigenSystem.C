@@ -75,10 +75,9 @@ NonlinearEigenSystem::solve()
 
   // store eigenvalues
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
-  _eigen_values.clear();
-  _eigen_values.reserve(n_converged_eigenvalues);
+  _eigen_values.resize(n_converged_eigenvalues);
   for (unsigned int n = 0; n < n_converged_eigenvalues; n++)
-    _eigen_values.push_back(getNthConvergedEigenvalue(n));
+    _eigen_values[n] = getNthConvergedEigenvalue(n);
 }
 
 void
@@ -96,10 +95,7 @@ NonlinearEigenSystem::setupFiniteDifferencedPreconditioner()
 bool
 NonlinearEigenSystem::converged()
 {
-  if (_transient_sys.get_n_converged())
-    return true;
-  else
-    return false;
+  return _transient_sys.get_n_converged();
 }
 
 unsigned int
@@ -122,4 +118,18 @@ NonlinearEigenSystem::nonlinearSolver()
   mooseError("did not implement yet \n");
   return NULL;
 }
+
+const std::pair<Real, Real>
+NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
+{
+  unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
+  if (n >= n_converged_eigenvalues)
+  {
+    std::ostringstream err;
+    err <<n << " not in [0, " << n_converged_eigenvalues << ")" << std::endl;
+    mooseError(err.str());
+  }
+  return _transient_sys.get_eigenpair(n);
+}
+
 #endif /* LIBMESH_HAVE_SLEPC */

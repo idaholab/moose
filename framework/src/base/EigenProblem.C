@@ -33,9 +33,6 @@ EigenProblem::EigenProblem(const InputParameters & parameters) :
 {
 #if LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
-#else
-  mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
-#endif /* LIBMESH_HAVE_SLEPC */
   _aux = new AuxiliarySystem(*this, "aux0");
 
   // Set necessary parametrs used in EigenSystem::solve(),
@@ -48,12 +45,16 @@ EigenProblem::EigenProblem(const InputParameters & parameters) :
   FEProblemBase::newAssemblyArray(*_nl_eigen);
 
   FEProblemBase::initNullSpaceVectors(parameters, *_nl_eigen);
+#else
+  mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
+#endif /* LIBMESH_HAVE_SLEPC */
 }
 
 EigenProblem::~EigenProblem()
 {
+#if LIBMESH_HAVE_SLEPC
   FEProblemBase::deleteAssemblyArray();
-
+#endif /* LIBMESH_HAVE_SLEPC */
   delete _nl;
 
   delete _aux;
@@ -82,9 +83,10 @@ EigenProblem::solve()
   Moose::perf_log.pop("Eigen_solve()", "Execution");
 }
 
-
+#if LIBMESH_HAVE_SLEPC
 bool
 EigenProblem::converged()
 {
   return _nl_eigen->converged();
 }
+#endif

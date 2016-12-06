@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "EigenvaluePostprocessor.h"
+#include "libmesh/libmesh_config.h"
 
 template<>
 InputParameters validParams<EigenvaluePostprocessor>()
@@ -25,8 +26,11 @@ EigenvaluePostprocessor::EigenvaluePostprocessor(const InputParameters & paramet
     GeneralVectorPostprocessor(parameters),
     _eigen_values_real(declareVector("eigen_values_real")),
     _eigen_values_imag(declareVector("eigen_values_imag")),
-    _nl_eigen(dynamic_cast<NonlinearEigenSystem &>(_fe_problem.getNonlinearSystemBase()))
-{}
+    _nl_eigen(dynamic_cast<NonlinearEigenSystem *>(&_fe_problem.getNonlinearSystemBase()))
+{
+  if (!_nl_eigen)
+    mooseError("Given system is not a NonlinearEigenSystem \n");
+}
 
 void
 EigenvaluePostprocessor::initialize()
@@ -35,14 +39,18 @@ EigenvaluePostprocessor::initialize()
 void
 EigenvaluePostprocessor::execute()
 {
-  unsigned int n_converged_eigenvalues = _nl_eigen.getNumConvergedEigenvalues();
-  _eigen_values_real.clear();
-  _eigen_values_real.reserve(n_converged_eigenvalues);
-  _eigen_values_imag.clear();
-  _eigen_values_imag.reserve(n_converged_eigenvalues);
+#if LIBMESH_HAVE_SLEPC
+  unsigned int n_converged_eigenvalues = _nl_eigen->getNumConvergedEigenvalues();
+  const std::vector<std::pair<Real, Real> > & eigenvalues = _nl_eigen->getAllConvergedEigenvalues();
+  _eigen_values_real.resize(n_converged_eigenvalues);
+  _eigen_values_imag.resize(n_converged_eigenvalues);
   for (unsigned int n = 0; n < n_converged_eigenvalues; n++)
   {
-    _eigen_values_real.push_back(_nl_eigen.getAllConvergedEigenvalues()[n].first);
-    _eigen_values_imag.push_back(_nl_eigen.getAllConvergedEigenvalues()[n].second);
+    _eigen_values_real[n] = eigenvalues[n].first;
+    _eigen_values_imag[n] = eigenvalues[n].second;
   }
+#else
+  _eigen_values_real.clear();
+  _eigen_values_imag.clear();
+#endif
 }

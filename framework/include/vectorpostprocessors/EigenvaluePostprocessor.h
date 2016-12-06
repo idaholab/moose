@@ -35,7 +35,7 @@ public:
 protected:
   VectorPostprocessorValue & _eigen_values_real;
   VectorPostprocessorValue & _eigen_values_imag;
-  NonlinearEigenSystem & _nl_eigen;
+  NonlinearEigenSystem * _nl_eigen;
 };
 
 #endif // EIGENVALUEPOSTPROCESSOR_H

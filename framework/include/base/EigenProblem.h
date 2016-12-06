@@ -38,8 +38,9 @@ public:
   virtual ~EigenProblem();
 
   virtual void solve() override;
+#if LIBMESH_HAVE_SLEPC
   virtual bool converged() override;
-
+#endif
 protected:
   NonlinearEigenSystem * _nl_eigen;
 };
