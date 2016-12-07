@@ -329,7 +329,10 @@ public:
    */
   void reinitNodeNeighbor(const Node * node);
 
+  // DEPRECATED init method
   void init();
+
+  void init(const CouplingMatrix * cm);
 
   /// Create pair of variables requiring nonlocal jacobian contributions
   void initNonlocalCoupling();
@@ -561,8 +564,10 @@ protected:
   void modifyWeightsDueToXFEM(const Elem* elem);
 
   SystemBase & _sys;
-  /// Reference to coupling matrix
-  CouplingMatrix * & _cm;
+  /// Reference to coupling matrix (Will be removed)
+  CouplingMatrix * & _cm_deprecated;
+
+  const CouplingMatrix * _cm;
   const CouplingMatrix & _nonlocal_cm;
   /// Entries in the coupling matrix (only for field variables)
   std::vector<std::pair<MooseVariable *, MooseVariable *> > _cm_entry;
