@@ -158,9 +158,12 @@
           << "*** Warning, This code is deprecated, and likely to be removed in future library versions!\n" \
           << msg << '\n'                                                                                    \
           << __FILE__ << ", line " << __LINE__ << ", compiled "                                             \
-          << LIBMESH_DATE << " at " << LIBMESH_TIME << " ***"                                               \
-          << (Moose::_color_console ? XTERM_DEFAULT : "")                                                   \
-          << std::endl;                                                                                     \
+          << LIBMESH_DATE << " at " << LIBMESH_TIME << " ***\n";                                            \
+          if (libMesh::global_n_processors() == 1)                                                          \
+            print_trace(Moose::out);                                                                        \
+          else                                                                                              \
+            libMesh::write_traceout();                                                                      \
+          Moose::out << (Moose::_color_console ? XTERM_DEFAULT : "") << std::endl;                          \
       );                                                                                                    \
    } while (0)
 
