@@ -128,9 +128,8 @@
   [./concentration]
     type = ParsedMaterial
     f_name = c
-    args = 'w eta'
-    material_property_names = 'A cs cl h'
-    function = 'w/A + cs * h + cl * (1.0 - h)'
+    material_property_names = 'dF:=D[F,w]'
+    function = '-dF'
     outputs = exodus
   [../]
 []
