@@ -4,29 +4,33 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef GBANISOTROPY_H
-#define GBANISOTROPY_H
+#ifndef GBWIDTHANISOTROPY_H
+#define GBWIDTHANISOTROPY_H
 
 #include "GBAnisotropyBase.h"
 
 //Forward Declarations
-class GBAnisotropy;
+class GBWidthAnisotropy;
 
 template<>
-InputParameters validParams<GBAnisotropy>();
+InputParameters validParams<GBWidthAnisotropy>();
 
 /**
  * Function[kappa, gamma, m, L] = parameters (sigma, mob, w_GB, sigma0)
  * Parameter determination method is elaborated in Phys. Rev. B, 78(2), 024113, 2008, by N. Moelans
- * This material uses Algorithm 1 from the paper to determine parameters for constant GB width
+ * This material uses user-supplied m, kappa and calculates remaining parameters using Eq. (36a) -
+ * (36c) from the paper. The interface width is allowed to vary in this material. By maintaining
+ * kappa constant and equal for all interfaces, the Allen-Cahn equation is fully variational, as
+ * described in Moelans, Acta Mat., 59, 1077-1086, 2011.
  */
-class GBAnisotropy : public GBAnisotropyBase
+class GBWidthAnisotropy : public GBAnisotropyBase
 {
 public:
-  GBAnisotropy(const InputParameters & parameters);
+  GBWidthAnisotropy(const InputParameters & parameters);
 
 private:
-  const Real _wGB;
+  const Real _mu;
+  const Real _kappa;
 };
 
-#endif //GBANISOTROPY_H
+#endif //GBWIDTHANISOTROPY_H

@@ -14,4 +14,9 @@
     input = 'test3.i'
     exodiff = 'test3_out.e'
   [../]
+  [./testwidth1]
+    type = 'Exodiff'
+    input = 'testwidth1.i'
+    exodiff = 'testwidth1_out.e'
+  [../]
 []
