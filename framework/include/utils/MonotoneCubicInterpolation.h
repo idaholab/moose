@@ -32,6 +32,7 @@ public:
   virtual ~MonotoneCubicInterpolation() = default;
 
   virtual Real sample(Real x) const;
+  virtual Real sampleDerivative(Real x) const;
   // Real sampleDerivative(const std::vector<Real> & x, const std::vector<Real> & y, const std::vector<Real> & y2, Real x_int) const;
   // Real sample2ndDerivative(const std::vector<Real> & x, const std::vector<Real> & y, const std::vector<Real> & y2, Real x_int) const;
 
@@ -44,15 +45,23 @@ protected:
   
   Real phi(const Real & t) const;
   Real psi(const Real & t) const;
+  Real phiPrime(const Real & t) const;
+  Real psiPrime(const Real & t) const;
   
   /// Cubic hermite polynomials
-  Real H1(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real H2(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real H3(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real H4(const Real & xhi, const Real & xlo, const Real & x) const;
+  Real h1(const Real & xhi, const Real & xlo, const Real & x) const;
+  Real h2(const Real & xhi, const Real & xlo, const Real & x) const;
+  Real h3(const Real & xhi, const Real & xlo, const Real & x) const;
+  Real h4(const Real & xhi, const Real & xlo, const Real & x) const;
+  Real h1Prime(const Real & xhi, const Real & xlo, const Real & x) const;
+  Real h2Prime(const Real & xhi, const Real & xlo, const Real & x) const;
+  Real h3Prime(const Real & xhi, const Real & xlo, const Real & x) const;
+  Real h4Prime(const Real & xhi, const Real & xlo, const Real & x) const;
 
   /// Interpolating cubic polynomial
   virtual Real p(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
+                 const Real & dhi, const Real & dlo, const Real & x) const;
+  virtual Real pPrime(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
                  const Real & dhi, const Real & dlo, const Real & x) const;
 
   virtual void initialize_derivs();
