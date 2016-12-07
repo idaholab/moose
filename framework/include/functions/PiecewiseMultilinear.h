@@ -42,6 +42,9 @@ public:
    */
   PiecewiseMultilinear(const InputParameters & parameters);
 
+  // Necessary for using forward declaration of GriddedData in std::unique_ptr
+  virtual ~PiecewiseMultilinear();
+
   /**
    * Given t and p, return the interpolated value.
    */
@@ -50,7 +53,7 @@ public:
 private:
 
   /// object to provide function evaluations at points on the grid
-  MooseSharedPointer<GriddedData> _gridded_data;
+  std::unique_ptr<GriddedData> _gridded_data;
   /// dimension of the grid
   unsigned int _dim;
 

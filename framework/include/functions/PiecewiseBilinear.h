@@ -55,13 +55,16 @@ class PiecewiseBilinear : public Function
 public:
   PiecewiseBilinear(const InputParameters & parameters);
 
+  // Necessary for using forward declaration of BilinearInterpolation in std::unique_ptr
+  virtual ~PiecewiseBilinear();
+
   /**
    * This function will return a value based on the first input argument only.
    */
   virtual Real value(Real t, const Point & pt) override;
 
 private:
-  MooseSharedPointer<BilinearInterpolation> _bilinear_interp;
+  std::unique_ptr<BilinearInterpolation> _bilinear_interp;
   const std::string _data_file_name;
   const int _axis;
   const int _yaxis;
