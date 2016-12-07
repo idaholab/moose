@@ -125,9 +125,7 @@ NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
   if (n >= n_converged_eigenvalues)
   {
-    std::ostringstream err;
-    err <<n << " not in [0, " << n_converged_eigenvalues << ")" << std::endl;
-    mooseError(err.str());
+    mooseError(n << " not in [0, " << n_converged_eigenvalues << ")");
   }
   return _transient_sys.get_eigenpair(n);
 }

@@ -226,7 +226,7 @@
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
-#include "EigenvaluePostprocessor.h"
+#include "Eigenvalues.h"
 #include "NodalValueSampler.h"
 #include "SideValueSampler.h"
 #include "PointValueSampler.h"
@@ -653,7 +653,7 @@ registerObjects(Factory & factory)
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
-  registerVectorPostprocessor(EigenvaluePostprocessor);
+  registerVectorPostprocessor(Eigenvalues);
   registerVectorPostprocessor(NodalValueSampler);
   registerVectorPostprocessor(SideValueSampler);
   registerVectorPostprocessor(PointValueSampler);

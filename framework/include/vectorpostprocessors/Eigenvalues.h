@@ -12,22 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EIGENVALUEPOSTPROCESSOR_H
-#define EIGENVALUEPOSTPROCESSOR_H
+#ifndef EIGENVALUES_H
+#define EIGENVALUES_H
 
 #include "GeneralVectorPostprocessor.h"
 #include "NonlinearEigenSystem.h"
 
 //Forward Declarations
-class EigenvaluePostprocessor;
+class Eigenvalues;
 
 template<>
-InputParameters validParams<EigenvaluePostprocessor>();
+InputParameters validParams<Eigenvalues>();
 
-class EigenvaluePostprocessor : public GeneralVectorPostprocessor
+class Eigenvalues : public GeneralVectorPostprocessor
 {
 public:
-  EigenvaluePostprocessor(const InputParameters & parameters);
+  Eigenvalues(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -38,4 +38,4 @@ protected:
   NonlinearEigenSystem * _nl_eigen;
 };
 
-#endif // EIGENVALUEPOSTPROCESSOR_H
+#endif // EIGENVALUES_H

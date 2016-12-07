@@ -95,7 +95,7 @@
 
 [VectorPostprocessors]
   [./eigenvalues]
-    type = EigenvaluePostprocessor
+    type = Eigenvalues
     execute_on = 'timestep_end'
   [../]
 []

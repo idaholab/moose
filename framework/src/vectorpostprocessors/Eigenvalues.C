@@ -12,17 +12,17 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "EigenvaluePostprocessor.h"
+#include "Eigenvalues.h"
 #include "libmesh/libmesh_config.h"
 
 template<>
-InputParameters validParams<EigenvaluePostprocessor>()
+InputParameters validParams<Eigenvalues>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
   return params;
 }
 
-EigenvaluePostprocessor::EigenvaluePostprocessor(const InputParameters & parameters) :
+Eigenvalues::Eigenvalues(const InputParameters & parameters) :
     GeneralVectorPostprocessor(parameters),
     _eigen_values_real(declareVector("eigen_values_real")),
     _eigen_values_imag(declareVector("eigen_values_imag")),
@@ -33,11 +33,11 @@ EigenvaluePostprocessor::EigenvaluePostprocessor(const InputParameters & paramet
 }
 
 void
-EigenvaluePostprocessor::initialize()
+Eigenvalues::initialize()
 {}
 
 void
-EigenvaluePostprocessor::execute()
+Eigenvalues::execute()
 {
 #if LIBMESH_HAVE_SLEPC
   unsigned int n_converged_eigenvalues = _nl_eigen->getNumConvergedEigenvalues();
