@@ -166,28 +166,6 @@ ActionWarehouse::actionBlocksWithActionEnd(const std::string & task)
   return _action_blocks[task].end();
 }
 
-const std::vector<Action *> &
-ActionWarehouse::getActionsByName(const std::string & task)
-{
-  mooseDeprecated("ActionWarehouse::getActionsByName() is deprecated, use getActionListByName() instead");
-
-  const auto it = _action_blocks.find(task);
-  if (it == _action_blocks.end())
-    mooseError("The task " << task << " does not exist.");
-
-  /**
-   * For backwards compatibility we will populate a vector
-   * and return it.
-   */
-  auto it2 = _requested_action_blocks.lower_bound(task);
-  if (it2 == _requested_action_blocks.end() || it2->first != task)
-    it2 = _requested_action_blocks.emplace_hint(it2, task, std::vector<Action *>(it->second.begin(), it->second.end()));
-  else
-    it2->second.assign(it->second.begin(), it->second.end());
-
-  return it2->second;
-}
-
 const std::list<Action *> &
 ActionWarehouse::getActionListByName(const std::string & task) const
 {
