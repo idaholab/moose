@@ -43,7 +43,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters) :
   es().parameters.set<unsigned int>("eigenpairs")    = _n_eigen_pairs_required;
   es().parameters.set<unsigned int>("basis vectors") = getParam<unsigned int>("n_basis_vectors");
 
-  FEProblemBase::newAssemblyArray(*_nl_eigen);
+  newAssemblyArray(*_nl_eigen);
 
   FEProblemBase::initNullSpaceVectors(parameters, *_nl_eigen);
 #else

@@ -46,10 +46,12 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters) :
     _displaced_aux(*this, _mproblem.getAuxiliarySystem(), _mproblem.getAuxiliarySystem().name() + "_displaced", Moose::VAR_AUXILIARY),
     _geometric_search_data(_mproblem, _mesh)
 {
+  // TODO: Move newAssemblyArray further up to SubProblem so that we can use it here
   unsigned int n_threads = libMesh::n_threads();
+
   _assembly.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
-    _assembly[i] = new Assembly(_displaced_nl, _mproblem.couplingMatrix(), i);
+    _assembly[i] = new Assembly(_displaced_nl, i);
 }
 
 DisplacedProblem::~DisplacedProblem()
@@ -96,7 +98,7 @@ void
 DisplacedProblem::init()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _assembly[tid]->init();
+    _assembly[tid]->init(_mproblem.couplingMatrix());
 
   _displaced_nl.dofMap().attach_extra_send_list_function(&extraSendList, &_displaced_nl);
   _displaced_aux.dofMap().attach_extra_send_list_function(&extraSendList, &_displaced_aux);

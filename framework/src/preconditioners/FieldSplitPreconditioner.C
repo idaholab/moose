@@ -50,7 +50,7 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
   // the fieldSplit preconditioner
   bool full = getParam<bool>("full");
   // how variables couple
-  CouplingMatrix *cm = new CouplingMatrix(n_vars);
+  std::unique_ptr<CouplingMatrix> cm = libmesh_make_unique<CouplingMatrix>(n_vars);
   if (!full)
   {
     // put 1s on diagonal
@@ -72,7 +72,7 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
       for (unsigned int j = 0; j < n_vars; j++)
         (*cm)(i,j) = 1; // full coupling
   }
-  _fe_problem.setCouplingMatrix(cm);
+  _fe_problem.setCouplingMatrix(std::move(cm));
 
   // turn on a flag
   _nl.useFieldSplitPreconditioner(true);

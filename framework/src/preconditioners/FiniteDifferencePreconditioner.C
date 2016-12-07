@@ -42,7 +42,7 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   unsigned int n_vars = nl.nVariables();
 
-  CouplingMatrix * cm = new CouplingMatrix(n_vars);
+  std::unique_ptr<CouplingMatrix> cm = libmesh_make_unique<CouplingMatrix>(n_vars);
 
   bool full = getParam<bool>("full");
 
@@ -70,7 +70,7 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
         (*cm)(i,j) = 1;
   }
 
-  _fe_problem.setCouplingMatrix(cm);
+  _fe_problem.setCouplingMatrix(std::move(cm));
 
   bool implicit_geometric_coupling = getParam<bool>("implicit_geometric_coupling");
 

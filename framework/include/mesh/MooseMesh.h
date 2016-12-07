@@ -353,6 +353,9 @@ public:
    */
   void setBoundaryToNormalMap(std::unique_ptr<std::map<BoundaryID, RealVectorValue>> boundary_map);
 
+  // DEPRECATED METHOD
+  void setBoundaryToNormalMap(std::map<BoundaryID, RealVectorValue> * boundary_map);
+
   /**
    * Sets the set of BoundaryIDs
    * Is called by AddAllSideSetsByNormals

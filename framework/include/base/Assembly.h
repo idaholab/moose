@@ -49,7 +49,7 @@ template <typename T> class SparseMatrix;
 class Assembly
 {
 public:
-  Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid);
+  Assembly(SystemBase & sys, THREAD_ID tid);
   virtual ~Assembly();
 
   /**
@@ -329,10 +329,13 @@ public:
    */
   void reinitNodeNeighbor(const Node * node);
 
-  // DEPRECATED init method
-  void init();
-
+  /**
+   * Initialize the Assembly object and set the CouplingMatrix for use throughout.
+   */
   void init(const CouplingMatrix * cm);
+
+  /// Deprecated init method
+  void init();
 
   /// Create pair of variables requiring nonlocal jacobian contributions
   void initNonlocalCoupling();
@@ -564,9 +567,8 @@ protected:
   void modifyWeightsDueToXFEM(const Elem* elem);
 
   SystemBase & _sys;
-  /// Reference to coupling matrix (Will be removed)
-  CouplingMatrix * & _cm_deprecated;
 
+  /// Coupling matrices
   const CouplingMatrix * _cm;
   const CouplingMatrix & _nonlocal_cm;
   /// Entries in the coupling matrix (only for field variables)
