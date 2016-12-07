@@ -456,6 +456,7 @@ MooseApp::meshOnly(std::string mesh_file_name)
    * These actions should be the minimum set necessary to generate and output
    * a Mesh.
    */
+  _action_warehouse.executeActionsWithAction("meta_action");
   _action_warehouse.executeActionsWithAction("set_global_params");
   _action_warehouse.executeActionsWithAction("setup_mesh");
   _action_warehouse.executeActionsWithAction("add_partitioner");
