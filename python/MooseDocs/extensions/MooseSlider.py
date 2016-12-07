@@ -111,7 +111,7 @@ class MooseSlider(BlockProcessor, MooseCommonExtension):
       img_dict = {'background-size':'contain', 'background-repeat':'no-repeat', 'background-color':'white'}
       img_dict.update(item[1])
       img.set('src', '/' + item[0]['path'])
-      img = self.addStyle(img, **img_dict) 
+      img = self.addStyle(img, **img_dict)
 
       #Add the caption and its options if they exist
       if len(item[2]) != 0:
