@@ -10,12 +10,13 @@ from Warehouse import Warehouse
 Parser object for reading GetPot formatted files
 """
 class Parser:
-  def __init__(self, factory, warehouse):
+  def __init__(self, factory, warehouse, check_for_type=True):
     self.factory = factory
     self.warehouse = warehouse
     self.params_parsed = set()
     self.params_ignored = set()
     self.root = None
+    self._check_for_type = check_for_type
 
   """
   Parse the passed filename filling the warehouse with populated InputParameter objects
@@ -141,7 +142,7 @@ class Parser:
       self.warehouse.addObject(moose_object)
 
     # Are we in a tree node that "looks" like it should contain a buildable object?
-    elif self._looksLikeValidSubBlock(node):
+    elif self._check_for_type and self._looksLikeValidSubBlock(node):
       print 'Error detected when parsing file "' + os.path.join(os.getcwd(), filename) + '"'
       print '       Missing "type" parameter in block'
       error_code = error_code | 0x20
