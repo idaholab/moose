@@ -1,0 +1,7 @@
+[Tests]
+  [./test_monotone]
+    type = 'CSVDiff'
+    csvdiff = 'diffusivity.csv'
+    input = 'monotone_cubic_test.i'
+  [../]
+[]

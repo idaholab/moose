@@ -21,19 +21,18 @@
 #include "libmesh/libmesh_common.h"
 using libMesh::Real;
 
-MooseEnum monotonic_e ("monotonic_increase montonic_decrease monontonic_constant monotonic_not");
-
 class MonotoneCubicInterpolation
 {
 public:
   MonotoneCubicInterpolation();
   MonotoneCubicInterpolation(const std::vector<Real> x, const std::vector<Real> y);
-  
+
   virtual ~MonotoneCubicInterpolation() = default;
 
+  virtual void setData(const std::vector<Real> x, const std::vector<Real> y);
   virtual Real sample(Real x) const;
   virtual Real sampleDerivative(Real x) const;
-  // Real sampleDerivative(const std::vector<Real> & x, const std::vector<Real> & y, const std::vector<Real> & y2, Real x_int) const;
+  virtual void dumpCSV(std::string filename, const std::vector<Real> xnew);
   // Real sample2ndDerivative(const std::vector<Real> & x, const std::vector<Real> & y, const std::vector<Real> & y2, Real x_int) const;
 
 protected:
@@ -42,12 +41,12 @@ protected:
   Real sign(Real x) const;
   MooseEnum _monotonic_e = MooseEnum ("monotonic_increase montonic_decrease monontonic_constant monotonic_not");
   void checkMonotone();
-  
+
   Real phi(const Real & t) const;
   Real psi(const Real & t) const;
   Real phiPrime(const Real & t) const;
   Real psiPrime(const Real & t) const;
-  
+
   /// Cubic hermite polynomials
   Real h1(const Real & xhi, const Real & xlo, const Real & x) const;
   Real h2(const Real & xhi, const Real & xlo, const Real & x) const;
@@ -67,15 +66,15 @@ protected:
   virtual void initialize_derivs();
   virtual void modify_derivs(const Real & alpha, const Real & beta, const Real & delta, Real & yp_lo, Real & yp_hi);
   virtual void solve();
-  
-  const std::vector<Real> _x;
-  const std::vector<Real> _y;
+
+  std::vector<Real> _x;
+  std::vector<Real> _y;
   std::vector<Real> _h;
   std::vector<Real> _yp;
   std::vector<Real> _delta;
   std::vector<Real> _alpha;
   std::vector<Real> _beta;
-  
+
   unsigned int _n_knots;
   unsigned int _n_intervals;
 };

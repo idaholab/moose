@@ -15,6 +15,10 @@
 #include "MonotoneCubicInterpolation.h"
 #include "MooseError.h"
 
+#include <fstream>
+#include <sstream>
+#include <string>
+
 MonotoneCubicInterpolation::MonotoneCubicInterpolation()
 {}
 
@@ -22,6 +26,15 @@ MonotoneCubicInterpolation::MonotoneCubicInterpolation(const std::vector<Real> x
     _x(x),
     _y(y)
 {
+  errorCheck();
+  solve();
+}
+
+void
+MonotoneCubicInterpolation::setData(const std::vector<Real> x, const std::vector<Real> y)
+{
+  _x = x;
+  _y = y;
   errorCheck();
   solve();
 }
@@ -56,7 +69,7 @@ MonotoneCubicInterpolation::checkMonotone()
 {
   Real y_diff = _y[1] - _y[0];
   Real s = sign(y_diff);
-  for (unsigned int i = 1; i < _y.size(); ++i)
+  for (unsigned int i = 1; i < _y.size() - 1; ++i)
   {
     y_diff = _y[i+1] - _y[i];
     if (s == 0)
@@ -185,7 +198,7 @@ MonotoneCubicInterpolation::initialize_derivs()
 {
   for (unsigned int i = 1; i < _n_knots - 1; ++i)
     _yp[i] = (std::pow(_h[i-1], 2) * _y[i+1] - std::pow(_h[i], 2) * _y[i-1] - _y[i] * (_h[i-1] - _h[i]) * (_h[i-1] + _h[i])) / (_h[i-1] * _h[i] * (_h[i-1] * _h[i]));
-  
+
   _yp[0] = (-std::pow(_h[0], 2) * _y[2] - _h[1] * _y[0] * (2*_h[0] + _h[1]) + _y[1] * std::pow(_h[0] + _h[1], 2)) / (_h[0] * _h[1] * (_h[0] + _h[1]));
 
   Real hlast = _h[_n_intervals - 1];
@@ -216,6 +229,9 @@ MonotoneCubicInterpolation::solve()
   _alpha.resize(_n_intervals);
   _beta.resize(_n_intervals);
 
+  for (unsigned int i = 0; i < _n_intervals; ++i)
+    _h[i] = _x[i+1] - _x[i];
+
   initialize_derivs();
 
   for (unsigned int i = 0; i < _n_intervals; ++i)
@@ -223,7 +239,7 @@ MonotoneCubicInterpolation::solve()
     _delta[i] = (_y[i+1] - _y[i]) / _h[i];
 
     // Test for zero slope
-    if (_yp[i] == _delta[i] == 0)
+    if (_yp[i] == 0 && _delta[i] == 0)
       _alpha[i] = 1;
     else if (_delta[i] == 0)
       _alpha[i] = 4;
@@ -231,7 +247,7 @@ MonotoneCubicInterpolation::solve()
       _alpha[i] = _yp[i] / _delta[i];
 
     // Test for zero slope
-    if (_yp[i+1] == _delta[i] == 0)
+    if (_yp[i+1] == 0 && _delta[i] == 0)
       _beta[i] = 1;
     else if (_delta[i] == 0)
       _beta[i] = 4;
@@ -248,7 +264,7 @@ Real
 MonotoneCubicInterpolation::sample(Real x) const
 {
   for (unsigned int i = 0; i < _n_intervals; ++i)
-    if (_x[i] <= x <= _x[i+1])
+    if (_x[i] <= x && x <= _x[i+1])
       return p(_x[i+1], _x[i], _y[i+1], _y[i], _yp[i+1], _yp[i], x);
 
   mooseError("x not in interpolation range");
@@ -259,10 +275,25 @@ Real
 MonotoneCubicInterpolation::sampleDerivative(Real x) const
 {
   for (unsigned int i = 0; i < _n_intervals; ++i)
-    if (_x[i] <= x <= _x[i+1])
+    if (_x[i] <= x && x <= _x[i+1])
       return pPrime(_x[i+1], _x[i], _y[i+1], _y[i], _yp[i+1], _yp[i], x);
 
   mooseError("x not in interpolation range");
   return 0;
 }
 
+void
+MonotoneCubicInterpolation::dumpCSV(std::string filename, const std::vector<Real> xnew)
+{
+  unsigned int n = xnew.size();
+  std::vector<Real> ynew(n), ypnew(n);
+
+  std::ofstream out(filename.c_str());
+  for (unsigned int i = 0; i < n; ++i)
+  {
+    ynew[i] = sample(xnew[i]);
+    ypnew[i] = sampleDerivative(xnew[i]);
+    out << xnew[i] << ", " << ynew[i] << ", " << ypnew[i] << "\n";
+  }
+  out.close();
+}
