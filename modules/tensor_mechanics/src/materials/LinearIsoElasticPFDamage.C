@@ -50,7 +50,6 @@ LinearIsoElasticPFDamage::updateVar()
   {
     pp = 0.0;
   }
-  // Real xfac = Utility::pow<2>(1.0-c) + _kdamage;
   Real xfac = Utility::pow<2>(pp) + _kdamage;
 
   _mechanical_strain[_qp].symmetricEigenvaluesEigenvectors(_eigval, _eigvec);
