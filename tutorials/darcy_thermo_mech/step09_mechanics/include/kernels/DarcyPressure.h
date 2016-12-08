@@ -46,7 +46,7 @@ protected:
   /**
    * This is optional (but recommended!)
    */
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
   /**
    * These references will be set by the initialization list so that
