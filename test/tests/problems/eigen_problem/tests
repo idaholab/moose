@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'ipm.i'
+    csvdiff = 'ipm_out_eigenvalues_0001.csv'
+    slepc = true
+  [../]
+[]

@@ -92,3 +92,19 @@
   solve_type = 'NEWTON'
   petsc_options = '-eps_view -eps_monitor_conv'
 []
+
+[VectorPostprocessors]
+  [./eigenvalues]
+    type = Eigenvalues
+    execute_on = 'timestep_end'
+  [../]
+[]
+
+[Outputs]
+  csv = true
+  execute_on = 'timestep_end'
+  [./console]
+    type = Console
+    outlier_variable_norms = false
+  [../]
+[]
