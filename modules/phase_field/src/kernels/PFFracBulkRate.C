@@ -57,18 +57,15 @@ PFFracBulkRate::computeDFDOP(PFFunctionType type)
     {
       //Order parameter for damage variable
       Real c = _u[_qp];
-      Real p = 1.0;
-      if (c < 1.0)
-      {
-        p = 1.0 - c;
-      }
-      else
-      {
-        p = 0.0;
-      }
+      // Real p = 1.0;
+      // if (c > 1.0)
+      // {
+      //   p = 0.0;
+      // }
 //add this parameter p=1-c, which makes p = 0 when c goes above 1 to get the correct stress
 
-      Real x =   _l * _betaval[_qp] + 2.0*p * _G0_pos[_qp]/gc - (1-p)/_l;
+      Real x =   _l * _betaval[_qp] + 2.0*(1-c) * _G0_pos[_qp]/gc - c/_l;
+      // Real x =   _l * _betaval[_qp] + 2.0*p * _G0_pos[_qp]/gc - (1-p)/_l;
 
 
       return -(( std::abs(x) + x )/2.0)/_visco;
@@ -76,17 +73,14 @@ PFFracBulkRate::computeDFDOP(PFFunctionType type)
     case Jacobian:
     {
       Real c = _u[_qp];
-      Real p = 1.0;
-      if (c < 1.0)
-      {
-        p = 1.0 - c;
-      }
-      else
-      {
-        p = 0.0;
-      }
+      // Real p = 1.0;
+      // if (c > 1.0)
+      // {
+      //   p = 0.0;
+      // }
 //add this parameter p=1-c, which makes p = 0 when c goes above 1 to get the correct stress
-      Real x = _l * _betaval[_qp] + 2.0 * p * _G0_pos[_qp] / gc - (1.0 - p) / _l;
+      Real x = _l * _betaval[_qp] + 2.0 * (1-c) * _G0_pos[_qp] / gc - c / _l;
+      // Real x = _l * _betaval[_qp] + 2.0 * p * _G0_pos[_qp] / gc - (1.0 - p) / _l;
       Real signx = x > 0.0 ? 1.0 : -1.0;
       return (signx + 1.0)/2.0 * (2.0 * _G0_pos[_qp]/gc + 1.0/_l)/_visco;
     }
@@ -118,23 +112,21 @@ PFFracBulkRate::computeQpOffDiagJacobian(unsigned int jvar)
 
   Real c = _u[_qp];
   Real gc = _gc_prop[_qp];
-  Real p = 1.0;
-  if (c < 1.0)
-  {
-    p = 1.0 - c;
-  }
-  else
-  {
-    p = 0.0;
-  }
+  // Real p = 1.0;
+  // if (c > 1.0)
+  // {
+  //   p = 0.0;
+  // }
 
-  Real x = _l * _betaval[_qp] + 2.0*p * (_G0_pos[_qp]/gc) - (1.0-p)/_l;
+  Real x = _l * _betaval[_qp] + 2.0*(1-c) * (_G0_pos[_qp]/gc) - c/_l;
+  // Real x = _l * _betaval[_qp] + 2.0*p * (_G0_pos[_qp]/gc) - (1.0-p)/_l;
+
 
   Real signx = x > 0.0 ? 1.0 : -1.0;
 
   Real xfacbeta = -((signx + 1.0)/2.0) / _visco * _l;
-  Real xfac = -((signx + 1.0)/2.0) / _visco * 2.0 * p / gc;
-  // Real xfac = -((signx + 1.0)/2.0) / _visco * 2.0 * (1.0 - c) / gc;
+  // Real xfac = -((signx + 1.0)/2.0) / _visco * 2.0 * p / gc;
+  Real xfac = -((signx + 1.0)/2.0) / _visco * 2.0 * (1.0 - c) / gc;
 
 
   for (unsigned int k = 0; k < _ndisp; ++k)
