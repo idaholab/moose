@@ -36,7 +36,7 @@
 
 Assembly::Assembly(SystemBase & sys, CouplingMatrix * & cm, THREAD_ID tid) :
     _sys(sys),
-    _cm(cm),
+    _cm_deprecated(cm),
     _nonlocal_cm(_sys.subproblem().nonlocalCouplingMatrix()),
     _dof_map(_sys.dofMap()),
     _tid(tid),
@@ -893,6 +893,16 @@ Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, u
 void
 Assembly::init()
 {
+  // TODO: Will deprecate
+  init(_cm_deprecated);
+}
+
+void
+Assembly::init(const CouplingMatrix * cm)
+{
+  // Set the coupling matrix here. We don't need to do this again.
+  _cm = cm;
+
   unsigned int n_vars = _sys.nVariables();
 
   // I want the blocks to go by columns first to reduce copying of shape function in assembling "full" Jacobian
