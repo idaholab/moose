@@ -154,7 +154,7 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
     if (_parallel_mesh)
     {
       std::ostringstream oss;
-      oss << delete_files.checkpoint << '-' << proc_id;
+      oss << delete_files.checkpoint << '-' << n_processors() << '-' << proc_id;
       ret = remove(oss.str().c_str());
       if (ret != 0)
         mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);

@@ -114,7 +114,7 @@ SplineInterpolationBase::sampleDerivative(const std::vector<Real> & x, const std
 }
 
 Real
-SplineInterpolationBase::sample2ndDerivative(const std::vector<Real> & x, const std::vector<Real> & y, const std::vector<Real> & y2, Real x_int) const
+SplineInterpolationBase::sample2ndDerivative(const std::vector<Real> & x, const std::vector<Real> & /*y*/, const std::vector<Real> & y2, Real x_int) const
 {
   unsigned int klo, khi;
   findInterval(x, x_int, klo, khi);
