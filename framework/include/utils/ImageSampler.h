@@ -27,10 +27,7 @@
 
 // Some VTK header files have extra semi-colons in them, and clang
 // loves to warn about it...
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wextra-semi"
-#endif
+#include "libmesh/ignore_warnings.h"
 
 #include "vtkSmartPointer.h"
 #include "vtkPNGReader.h"
@@ -44,9 +41,7 @@
 #include "vtkImageMagnitude.h"
 #include "vtkImageFlip.h"
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+#include "libmesh/restore_warnings.h"
 
 #endif
 
