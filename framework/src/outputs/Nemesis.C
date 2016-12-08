@@ -37,7 +37,7 @@ InputParameters validParams<Nemesis>()
 
 Nemesis::Nemesis(const InputParameters & parameters) :
     AdvancedOutput<OversampleOutput>(parameters),
-    _nemesis_io_ptr(NULL),
+    _nemesis_io_ptr(nullptr),
     _file_num(0),
     _nemesis_num(0),
     _nemesis_initialized(false)
@@ -46,8 +46,6 @@ Nemesis::Nemesis(const InputParameters & parameters) :
 
 Nemesis::~Nemesis()
 {
-  // Clean up the libMesh::NemesisII_IO object
-  delete _nemesis_io_ptr;
 }
 
 void
@@ -68,12 +66,8 @@ Nemesis::meshChanged()
 
   // Do not delete the Nemesis_IO object if it has not been used; also there is no need to setup
   // the object in this case, so just return
-  if (_nemesis_io_ptr != NULL && !_nemesis_initialized)
+  if (_nemesis_io_ptr != nullptr && !_nemesis_initialized)
     return;
-
-  // Delete existing NemesisII_IO objects
-  if (_nemesis_io_ptr != NULL)
-    delete _nemesis_io_ptr;
 
   // Increment the file number
   _file_num++;
@@ -82,9 +76,8 @@ Nemesis::meshChanged()
   _nemesis_num = 1;
 
   // Create the new NemesisIO object
-  _nemesis_io_ptr = new Nemesis_IO(_mesh_ptr->getMesh());
+  _nemesis_io_ptr = libmesh_make_unique<Nemesis_IO>(_mesh_ptr->getMesh());
   _nemesis_initialized = false;
-
 }
 
 void
@@ -178,5 +171,4 @@ Nemesis::filename()
 
   // Return the filename
   return output.str();
-
 }

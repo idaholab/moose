@@ -83,9 +83,7 @@ protected:
   virtual void updateOversample();
 
   /**
-   * A pointer to the current mesh
-   * When using oversampling this points to the created oversampled, which must
-   * be cleaned up by the destructor.
+   * A convenience pointer to the current mesh (reference or displaced depending on "use_displaced")
    */
   MooseMesh * _mesh_ptr;
 
@@ -120,13 +118,16 @@ private:
    * This is only populated when the oversample() function is called, it must
    * be cleaned up by the destructor.
    */
-  std::vector<std::vector<MeshFunction *> > _mesh_functions;
+  std::vector<std::vector<std::unique_ptr<MeshFunction>>> _mesh_functions;
 
   /// When oversampling, the output is shift by this amount
   Point _position;
 
   /// A flag indicating that the mesh has changed and the oversampled mesh needs to be re-initialized
   bool _oversample_mesh_changed;
+
+  std::unique_ptr<EquationSystems> _oversample_es;
+  std::unique_ptr<MooseMesh> _cloned_mesh_ptr;
 
   /// Oversample solution vector
   /* Each of the MeshFunctions keeps a reference to this vector, the vector is updated for the current system
