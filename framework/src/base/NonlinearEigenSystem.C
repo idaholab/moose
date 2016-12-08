@@ -33,7 +33,7 @@ void assemble_matrix(EquationSystems & es, const std::string & system_name)
   FEProblemBase * p = es.parameters.get<FEProblemBase *>("_fe_problem_base");
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
 
-  p->computeJacobian(*eigen_system.solution.get(), *eigen_system.matrix_A);
+  p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_A);
 }
 #else
 void assemble_matrix(EquationSystems & /*es*/, const std::string & /*system_name*/)
@@ -60,6 +60,7 @@ NonlinearEigenSystem::NonlinearEigenSystem(FEProblemBase & /*fe_problem*/, const
 }
 #endif /* LIBMESH_HAVE_SLEPC */
 
+
 #if LIBMESH_HAVE_SLEPC
 void
 NonlinearEigenSystem::solve()
@@ -71,6 +72,12 @@ NonlinearEigenSystem::solve()
   setInitialSolution();
   _time_integrator->solve();
   _time_integrator->postSolve();
+
+  // store eigenvalues
+  unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
+  _eigen_values.resize(n_converged_eigenvalues);
+  for (unsigned int n = 0; n < n_converged_eigenvalues; n++)
+    _eigen_values[n] = getNthConvergedEigenvalue(n);
 }
 
 void
@@ -88,8 +95,7 @@ NonlinearEigenSystem::setupFiniteDifferencedPreconditioner()
 bool
 NonlinearEigenSystem::converged()
 {
-  mooseError("did not implement yet \n");
-  return false;
+  return _transient_sys.get_n_converged();
 }
 
 unsigned int
@@ -111,6 +117,17 @@ NonlinearEigenSystem::nonlinearSolver()
 {
   mooseError("did not implement yet \n");
   return NULL;
+}
+
+const std::pair<Real, Real>
+NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
+{
+  unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
+  if (n >= n_converged_eigenvalues)
+  {
+    mooseError(n << " not in [0, " << n_converged_eigenvalues << ")");
+  }
+  return _transient_sys.get_eigenpair(n);
 }
 
 #endif /* LIBMESH_HAVE_SLEPC */

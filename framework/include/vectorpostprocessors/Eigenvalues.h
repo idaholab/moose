@@ -12,37 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef EIGENPROBLEM_H
-#define EIGENPROBLEM_H
+#ifndef EIGENVALUES_H
+#define EIGENVALUES_H
 
-#include "libmesh/libmesh_config.h"
-
-
-#include "FEProblemBase.h"
+#include "GeneralVectorPostprocessor.h"
 #include "NonlinearEigenSystem.h"
 
-class EigenProblem;
+//Forward Declarations
+class Eigenvalues;
 
 template<>
-InputParameters validParams<EigenProblem>();
+InputParameters validParams<Eigenvalues>();
 
-/**
- * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
- *
- */
-class EigenProblem : public FEProblemBase
+class Eigenvalues : public GeneralVectorPostprocessor
 {
 public:
-  EigenProblem(const InputParameters & parameters);
+  Eigenvalues(const InputParameters & parameters);
 
-  virtual ~EigenProblem();
+  virtual void initialize() override;
+  virtual void execute() override;
 
-  virtual void solve() override;
-#if LIBMESH_HAVE_SLEPC
-  virtual bool converged() override;
-#endif
 protected:
+  VectorPostprocessorValue & _eigen_values_real;
+  VectorPostprocessorValue & _eigen_values_imag;
   NonlinearEigenSystem * _nl_eigen;
 };
 
-#endif /* EIGENPROBLEM_H */
+#endif // EIGENVALUES_H

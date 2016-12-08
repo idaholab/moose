@@ -71,6 +71,10 @@ LIBMESH_OPTIONS = {
                      'default'   : 'FALSE',
                      'options'   : {'TRUE' : '1', 'FALSE' : '0'}
                    },
+  'slepc' :        { 're_option' : r'#define\s+LIBMESH_HAVE_SLEPC\s+(\d+)',
+                     'default'   : 'FALSE',
+                     'options'   : {'TRUE' : '1', 'FALSE' : '0'}
+                   },
   'cxx11' :        { 're_option' : r'#define\s+LIBMESH_HAVE_CXX11\s+(\d+)',
                      'default'   : 'FALSE',
                      'options'   : {'TRUE' : '1', 'FALSE' : '0'}

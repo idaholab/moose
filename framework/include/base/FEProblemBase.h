@@ -314,6 +314,10 @@ public:
 
   virtual void subdomainSetup(SubdomainID subdomain, THREAD_ID tid);
 
+  virtual void newAssemblyArray(NonlinearSystemBase & nl);
+  virtual void deleteAssemblyArray();
+  virtual void initNullSpaceVectors(const InputParameters & parameters, NonlinearSystemBase & nl);
+
   /**
    * Whether or not this problem should utilize FE shape function caching.
    *
