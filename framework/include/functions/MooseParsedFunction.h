@@ -15,18 +15,12 @@
 #ifndef MOOSEPARSEDFUNCTION_H
 #define MOOSEPARSEDFUNCTION_H
 
-// std includes
-#include <iostream>
-#include <string>
-#include <map>
-
 // MOOSE includes
 #include "Function.h"
 #include "MooseParsedFunctionBase.h"
 
 //Forward declarations
 class MooseParsedFunction;
-class MooseParsedFunctionWrapper;
 
 template<>
 InputParameters validParams<MooseParsedFunction>();
@@ -50,7 +44,6 @@ public:
    * @param parameters The input parameters
    */
   MooseParsedFunction(const InputParameters & parameters);
-  virtual ~MooseParsedFunction();
 
   /**
    * Evaluate the equation at the given location. For 1-D and 2-D equations
@@ -92,10 +85,6 @@ protected:
   /// The function defined by the user
   std::string _value;
 
-  /// Pointer to the wrapper object for the function
-  MooseParsedFunctionWrapper * _function_ptr;
-
   friend class ParsedFunctionTest;
-
 };
 #endif //MOOSEPARSEDFUNCTION_H

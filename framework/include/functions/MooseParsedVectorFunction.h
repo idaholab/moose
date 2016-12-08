@@ -21,7 +21,6 @@
 
 // Forward decleratrions
 class MooseParsedVectorFunction;
-class MooseParsedFunctionWrapper;
 
 template<>
 InputParameters validParams<MooseParsedVectorFunction>();
@@ -40,7 +39,6 @@ public:
    * @param parameters The input parameters
    */
   MooseParsedVectorFunction(const InputParameters & parameters);
-  virtual ~MooseParsedVectorFunction();
 
   virtual RealVectorValue vectorValue(Real t, const Point & p) override;
 
@@ -52,9 +50,6 @@ protected:
 
   /// Storage for gradient input function(s), in format ready for libMesh
   std::string _vector_value;
-
-  // Pointer to the wrapper object for parsed functions
-  MooseParsedFunctionWrapper * _function_ptr;
 };
 
 #endif //MOOSEPARSEDVECTORFUNCTION_H

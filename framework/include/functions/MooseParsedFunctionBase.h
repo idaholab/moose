@@ -16,7 +16,8 @@
 #define MOOSEPARSEDFUNCTIONBASE_H
 
 // Standard library
-#include <map>
+#include <vector>
+#include <memory>
 
 // MOOSE includes
 #include "InputParameters.h"
@@ -24,6 +25,7 @@
 
 // Forward declarations
 class MooseParsedFunctionBase;
+class MooseParsedFunctionWrapper;
 
 /**
  * Creates the 'vars' and 'vals' parameters used by all ParsedFunctions, the
@@ -64,7 +66,6 @@ protected:
    */
    const std::string verifyFunction(const std::string & function_str);
 
-
   /// Reference to the FEProblemBase class for this object
   FEProblemBase & _pfb_feproblem;
 
@@ -73,6 +74,9 @@ protected:
 
   /// Values passed by the user, they may be Reals for Postprocessors
   const std::vector<std::string> _vals;
+
+  /// Pointer to the Parsed function wrapper object for the scalar
+  std::unique_ptr<MooseParsedFunctionWrapper> _function_ptr;
 };
 
 #endif // MOOSEPARSEDFUNCTIONBASE_H

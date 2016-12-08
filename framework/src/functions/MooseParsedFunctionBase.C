@@ -14,6 +14,7 @@
 
 #include "MooseError.h"
 #include "MooseParsedFunctionBase.h"
+#include "MooseParsedFunctionWrapper.h"
 
 template<>
 InputParameters validParams<MooseParsedFunctionBase>()
