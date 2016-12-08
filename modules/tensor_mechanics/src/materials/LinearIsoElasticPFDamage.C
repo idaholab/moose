@@ -46,11 +46,7 @@ LinearIsoElasticPFDamage::updateVar()
   Real mu = _elasticity_tensor[_qp](0,1,0,1);
   Real c = _c[_qp];
   Real pp = 1.0-c;
-  if (c < 1.0)
-  {
-    pp = 1.0-c;
-  }
-  else
+  if (c > 1.0)
   {
     pp = 0.0;
   }
