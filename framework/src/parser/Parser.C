@@ -749,6 +749,9 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
     }
     else
     {
+      if (p.isPrivate(it.first))
+        mooseWarning("The parameter '" << full_name << "' is a private parameter and should not be used in an input file.");
+
       /**
        * Scalar types
        */
