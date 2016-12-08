@@ -3,7 +3,6 @@
     type = 'CSVDiff'
     input = 'ipm.i'
     csvdiff = 'ipm_out_eigenvalues_0001.csv'
-    max_parallel = 1
     slepc = true
   [../]
 []

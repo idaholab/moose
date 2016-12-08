@@ -33,7 +33,7 @@ void assemble_matrix(EquationSystems & es, const std::string & system_name)
   FEProblemBase * p = es.parameters.get<FEProblemBase *>("_fe_problem_base");
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
 
-  p->computeJacobian(*eigen_system.solution.get(), *eigen_system.matrix_A);
+  p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_A);
 }
 #else
 void assemble_matrix(EquationSystems & /*es*/, const std::string & /*system_name*/)
