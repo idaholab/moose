@@ -200,7 +200,6 @@
     absolute_tolerance = 1e-12
     max_iterations = 50
     # output_iteration_info_on_error = true
-    compute = false # make this material "discrete"
     temperature = temp
   [../]
 
