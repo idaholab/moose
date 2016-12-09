@@ -22,7 +22,7 @@
 MonotoneCubicInterpolation::MonotoneCubicInterpolation()
 {}
 
-MonotoneCubicInterpolation::MonotoneCubicInterpolation(const std::vector<Real> x, const std::vector<Real> y):
+MonotoneCubicInterpolation::MonotoneCubicInterpolation(const std::vector<Real> & x, const std::vector<Real> & y):
     _x(x),
     _y(y)
 {
@@ -31,7 +31,7 @@ MonotoneCubicInterpolation::MonotoneCubicInterpolation(const std::vector<Real> x
 }
 
 void
-MonotoneCubicInterpolation::setData(const std::vector<Real> x, const std::vector<Real> y)
+MonotoneCubicInterpolation::setData(const std::vector<Real> & x, const std::vector<Real> & y)
 {
   _x = x;
   _y = y;
@@ -61,7 +61,12 @@ MonotoneCubicInterpolation::errorCheck()
 Real
 MonotoneCubicInterpolation::sign(Real x) const
 {
-  return x < 0 ? -1. : (x > 0 ? 1. : 0.);
+  if (x < 0)
+    return -1;
+  else if (x > 0)
+    return 1;
+  else
+    return 0;
 }
 
 void
@@ -80,33 +85,48 @@ MonotoneCubicInterpolation::checkMonotone()
       return;
     }
   }
-  s > 0 ? _monotonic_e = "monotonic_increase" :
-    (s < 0 ? _monotonic_e = "monotonic_decrease" :
-     _monotonic_e = "montonic_constant");
+  if (s > 0)
+    _monotonic_e = "monotonic_increase";
+  else if (s < 0)
+    _monotonic_e = "monotonic_decrease";
+  else
+    _monotonic_e = "monotonic_constant";
 }
 
 Real
 MonotoneCubicInterpolation::phi(const Real & t) const
 {
-  return 3. * std::pow(t, 2) - 2. * std::pow(t, 3);
+  return 3. * t * t - 2. * t * t * t;
 }
 
 Real
 MonotoneCubicInterpolation::phiPrime(const Real & t) const
 {
-  return 6. * t - 6. * std::pow(t, 2);
+  return 6. * t - 6. * t * t;
+}
+
+Real
+MonotoneCubicInterpolation::phiDoublePrime(const Real & t) const
+{
+  return 6. - 12. * t;
 }
 
 Real
 MonotoneCubicInterpolation::psi(const Real & t) const
 {
-  return std::pow(t, 3) - std::pow(t, 2);
+  return t * t * t - t * t;
 }
 
 Real
 MonotoneCubicInterpolation::psiPrime(const Real & t) const
 {
-  return 3. * std::pow(t, 2) - 2. * t;
+  return 3. * t * t - 2. * t;
+}
+
+Real
+MonotoneCubicInterpolation::psiDoublePrime(const Real & t) const
+{
+  return 6. * t - 2.;
 }
 
 Real
@@ -127,6 +147,15 @@ MonotoneCubicInterpolation::h1Prime(const Real & xhi, const Real & xlo, const Re
 }
 
 Real
+MonotoneCubicInterpolation::h1DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const
+{
+  Real h = xhi - xlo;
+  Real t = (xhi - x) / h;
+  Real tPrime = -1. / h;
+  return phiDoublePrime(t) * tPrime * tPrime;
+}
+
+Real
 MonotoneCubicInterpolation::h2(const Real & xhi, const Real & xlo, const Real & x) const
 {
   Real h = xhi - xlo;
@@ -144,6 +173,15 @@ MonotoneCubicInterpolation::h2Prime(const Real & xhi, const Real & xlo, const Re
 }
 
 Real
+MonotoneCubicInterpolation::h2DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const
+{
+  Real h = xhi - xlo;
+  Real t = (x - xlo) / h;
+  Real tPrime = 1. / h;
+  return phiDoublePrime(t) * tPrime * tPrime;
+}
+
+Real
 MonotoneCubicInterpolation::h3(const Real & xhi, const Real & xlo, const Real & x) const
 {
   Real h = xhi - xlo;
@@ -157,7 +195,16 @@ MonotoneCubicInterpolation::h3Prime(const Real & xhi, const Real & xlo, const Re
   Real h = xhi - xlo;
   Real t = (xhi - x) / h;
   Real tPrime = -1. / h;
-  return -h * psiPrime(t) * tPrime;
+  return -h * psiPrime(t) * tPrime; // psiPrime(t)
+}
+
+Real
+MonotoneCubicInterpolation::h3DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const
+{
+  Real h = xhi - xlo;
+  Real t = (xhi - x) / h;
+  Real tPrime = -1. / h;
+  return psiDoublePrime(t) * tPrime;
 }
 
 Real
@@ -174,12 +221,21 @@ MonotoneCubicInterpolation::h4Prime(const Real & xhi, const Real & xlo, const Re
   Real h = xhi - xlo;
   Real t = (x - xlo) / h;
   Real tPrime = 1. / h;
-  return h * psiPrime(t) * tPrime;
+  return h * psiPrime(t) * tPrime; // psiPrime(t)
+}
+
+Real
+MonotoneCubicInterpolation::h4DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const
+{
+  Real h = xhi - xlo;
+  Real t = (x - xlo) / h;
+  Real tPrime = 1. / h;
+  return psiDoublePrime(t) * tPrime;
 }
 
 Real
 MonotoneCubicInterpolation::p(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
-                                const Real & dhi, const Real & dlo, const Real & x) const
+                              const Real & dhi, const Real & dlo, const Real & x) const
 {
   return flo * h1(xhi, xlo, x) + fhi * h2(xhi, xlo, x)
     + dlo * h3(xhi, xlo, x) + dhi * h4(xhi, xlo, x);
@@ -187,10 +243,18 @@ MonotoneCubicInterpolation::p(const Real & xhi, const Real & xlo, const Real & f
 
 Real
 MonotoneCubicInterpolation::pPrime(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
-                                const Real & dhi, const Real & dlo, const Real & x) const
+                                   const Real & dhi, const Real & dlo, const Real & x) const
 {
   return flo * h1Prime(xhi, xlo, x) + fhi * h2Prime(xhi, xlo, x)
     + dlo * h3Prime(xhi, xlo, x) + dhi * h4Prime(xhi, xlo, x);
+}
+
+Real
+MonotoneCubicInterpolation::pDoublePrime(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
+                                         const Real & dhi, const Real & dlo, const Real & x) const
+{
+  return flo * h1DoublePrime(xhi, xlo, x) + fhi * h2DoublePrime(xhi, xlo, x)
+    + dlo * h3DoublePrime(xhi, xlo, x) + dhi * h4DoublePrime(xhi, xlo, x);
 }
 
 void
@@ -255,45 +319,63 @@ MonotoneCubicInterpolation::solve()
       _beta[i] = _yp[i+1] / _delta[i];
 
     // check if outside region of monotonicity
-    if (std::pow(_alpha[i], 2) + std::pow(_beta[i], 2) > 3.)
+    if (std::pow(_alpha[i], 2) + std::pow(_beta[i], 2) > 9.)
       modify_derivs(_alpha[i], _beta[i], _delta[i], _yp[i], _yp[i+1]);
   }
 }
 
-Real
-MonotoneCubicInterpolation::sample(Real x) const
+void
+MonotoneCubicInterpolation::findInterval(const Real & x, unsigned int & klo, unsigned int & khi) const
 {
-  for (unsigned int i = 0; i < _n_intervals; ++i)
-    if (_x[i] <= x && x <= _x[i+1])
-      return p(_x[i+1], _x[i], _y[i+1], _y[i], _yp[i+1], _yp[i], x);
-
-  mooseError("x not in interpolation range");
-  return 0;
+  klo = 0;
+  khi = _n_knots - 1;
+  while (khi - klo > 1)
+  {
+    unsigned int k = (khi + klo) >> 1;
+    if (_x[k] > x)
+      khi = k;
+    else
+      klo = k;
+  }
 }
 
 Real
-MonotoneCubicInterpolation::sampleDerivative(Real x) const
+MonotoneCubicInterpolation::sample(const Real & x) const
 {
-  for (unsigned int i = 0; i < _n_intervals; ++i)
-    if (_x[i] <= x && x <= _x[i+1])
-      return pPrime(_x[i+1], _x[i], _y[i+1], _y[i], _yp[i+1], _yp[i], x);
+  unsigned int klo, khi;
+  findInterval(x, klo, khi);
+  return p(_x[khi], _x[klo], _y[khi], _y[klo], _yp[khi], _yp[klo], x);
+}
 
-  mooseError("x not in interpolation range");
-  return 0;
+Real
+MonotoneCubicInterpolation::sampleDerivative(const Real & x) const
+{
+  unsigned int klo, khi;
+  findInterval(x, klo, khi);
+  return pPrime(_x[khi], _x[klo], _y[khi], _y[klo], _yp[khi], _yp[klo], x);
+}
+
+Real
+MonotoneCubicInterpolation::sample2ndDerivative(const Real & x) const
+{
+  unsigned int klo, khi;
+  findInterval(x, klo, khi);
+  return pDoublePrime(_x[khi], _x[klo], _y[khi], _y[klo], _yp[khi], _yp[klo], x);
 }
 
 void
-MonotoneCubicInterpolation::dumpCSV(std::string filename, const std::vector<Real> xnew)
+MonotoneCubicInterpolation::dumpCSV(std::string filename, const std::vector<Real> & xnew)
 {
   unsigned int n = xnew.size();
-  std::vector<Real> ynew(n), ypnew(n);
+  std::vector<Real> ynew(n), ypnew(n), yppnew(n);
 
   std::ofstream out(filename.c_str());
   for (unsigned int i = 0; i < n; ++i)
   {
     ynew[i] = sample(xnew[i]);
     ypnew[i] = sampleDerivative(xnew[i]);
-    out << xnew[i] << ", " << ynew[i] << ", " << ypnew[i] << "\n";
+    yppnew[i] = sample2ndDerivative(xnew[i]);
+    out << xnew[i] << ", " << ynew[i] << ", " << ypnew[i] << ", " << yppnew[i] << "\n";
   }
   out.close();
 }

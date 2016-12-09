@@ -25,27 +25,30 @@ class MonotoneCubicInterpolation
 {
 public:
   MonotoneCubicInterpolation();
-  MonotoneCubicInterpolation(const std::vector<Real> x, const std::vector<Real> y);
+  MonotoneCubicInterpolation(const std::vector<Real> & x, const std::vector<Real> & y);
 
   virtual ~MonotoneCubicInterpolation() = default;
 
-  virtual void setData(const std::vector<Real> x, const std::vector<Real> y);
-  virtual Real sample(Real x) const;
-  virtual Real sampleDerivative(Real x) const;
-  virtual void dumpCSV(std::string filename, const std::vector<Real> xnew);
+  virtual void setData(const std::vector<Real> & x, const std::vector<Real> & y);
+  virtual Real sample(const Real & x) const;
+  virtual Real sampleDerivative(const Real & x) const;
+  virtual Real sample2ndDerivative(const Real & x) const;
+  virtual void dumpCSV(std::string filename, const std::vector<Real> & xnew);
   // Real sample2ndDerivative(const std::vector<Real> & x, const std::vector<Real> & y, const std::vector<Real> & y2, Real x_int) const;
 
 protected:
 
   virtual void errorCheck();
   Real sign(Real x) const;
-  MooseEnum _monotonic_e = MooseEnum ("monotonic_increase montonic_decrease monontonic_constant monotonic_not");
+  MooseEnum _monotonic_e = MooseEnum ("monotonic_increase monotonic_decrease monontonic_constant monotonic_not");
   void checkMonotone();
 
   Real phi(const Real & t) const;
   Real psi(const Real & t) const;
   Real phiPrime(const Real & t) const;
   Real psiPrime(const Real & t) const;
+  Real phiDoublePrime(const Real & t) const;
+  Real psiDoublePrime(const Real & t) const;
 
   /// Cubic hermite polynomials
   Real h1(const Real & xhi, const Real & xlo, const Real & x) const;
@@ -56,16 +59,23 @@ protected:
   Real h2Prime(const Real & xhi, const Real & xlo, const Real & x) const;
   Real h3Prime(const Real & xhi, const Real & xlo, const Real & x) const;
   Real h4Prime(const Real & xhi, const Real & xlo, const Real & x) const;
+  Real h1DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const;
+  Real h2DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const;
+  Real h3DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const;
+  Real h4DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const;
 
-  /// Interpolating cubic polynomial
+  /// Interpolating cubic polynomial and derivatives
   virtual Real p(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
                  const Real & dhi, const Real & dlo, const Real & x) const;
   virtual Real pPrime(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
-                 const Real & dhi, const Real & dlo, const Real & x) const;
+                      const Real & dhi, const Real & dlo, const Real & x) const;
+  virtual Real pDoublePrime(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
+                            const Real & dhi, const Real & dlo, const Real & x) const;
 
   virtual void initialize_derivs();
   virtual void modify_derivs(const Real & alpha, const Real & beta, const Real & delta, Real & yp_lo, Real & yp_hi);
   virtual void solve();
+  virtual void findInterval(const Real & x, unsigned int & klo, unsigned int & khi) const;
 
   std::vector<Real> _x;
   std::vector<Real> _y;
