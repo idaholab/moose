@@ -32,6 +32,7 @@ public:
   virtual double sampleDerivative(const double & x) const;
   virtual double sample2ndDerivative(const double & x) const;
   virtual void dumpCSV(std::string filename, const std::vector<double> & xnew);
+  virtual unsigned int getSampleSize();
 
 protected:
 

@@ -389,3 +389,9 @@ MonotoneCubicInterpolation::dumpCSV(std::string filename, const std::vector<doub
   }
   out.close();
 }
+
+unsigned int
+MonotoneCubicInterpolation::getSampleSize()
+{
+  return _x.size();
+}
