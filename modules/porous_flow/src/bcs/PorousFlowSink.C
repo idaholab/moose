@@ -62,8 +62,7 @@ PorousFlowSink::PorousFlowSink(const InputParameters & parameters) :
     _internal_energy(_has_internal_energy ? &getMaterialPropertyByName<std::vector<Real> >("PorousFlow_fluid_phase_internal_energy_nodal") : nullptr),
     _dinternal_energy_dvar(_has_internal_energy ? &getMaterialPropertyByName<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_internal_energy_nodal_dvar") : nullptr),
     _thermal_conductivity(_has_thermal_conductivity ? &getMaterialProperty<RealTensorValue>("PorousFlow_thermal_conductivity_qp") : nullptr),
-    _dthermal_conductivity_dvar(_has_thermal_conductivity ? &getMaterialProperty<std::vector<RealTensorValue> >("dPorousFlow_thermal_conductivity_qp_dvar") : nullptr),
-    _node_number(getMaterialProperty<unsigned int>("PorousFlow_node_number"))
+    _dthermal_conductivity_dvar(_has_thermal_conductivity ? &getMaterialProperty<std::vector<RealTensorValue> >("dPorousFlow_thermal_conductivity_qp_dvar") : nullptr)
 {
   if (_involves_fluid && _ph >= _dictator.numPhases())
     mooseError("PorousFlowSink: The Dictator declares that the number of fluid phases is " << _dictator.numPhases() << ", but you have set the fluid_phase to " << _ph << ".  You must try harder.");
@@ -90,7 +89,7 @@ PorousFlowSink::computeResidual()
 {
   _qp_map.assign(_test.size(), -1);
   for (unsigned qp = 0; qp < _qrule->n_points(); qp++)
-    _qp_map[_node_number[qp]] = qp;
+    _qp_map[qp] = qp;
   IntegratedBC::computeResidual();
 }
 
@@ -126,7 +125,7 @@ PorousFlowSink::computeJacobian()
 {
   _qp_map.assign(_test.size(), -1);
   for (unsigned qp = 0; qp < _qrule->n_points(); qp++)
-    _qp_map[_node_number[qp]] = qp;
+    _qp_map[qp] = qp;
   IntegratedBC::computeJacobian();
 }
 
@@ -135,7 +134,7 @@ PorousFlowSink::computeJacobianBlock(unsigned int jvar)
 {
   _qp_map.assign(_test.size(), -1);
   for (unsigned qp = 0; qp < _qrule->n_points(); qp++)
-    _qp_map[_node_number[qp]] = qp;
+    _qp_map[qp] = qp;
   IntegratedBC::computeJacobianBlock(jvar);
 }
 

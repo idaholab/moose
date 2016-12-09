@@ -8,9 +8,8 @@
 #ifndef POROUSFLOWMATERIALVECTORBASE_H
 #define POROUSFLOWMATERIALVECTORBASE_H
 
-#include "Material.h"
+#include "PorousFlowMaterial.h"
 #include "DerivativeMaterialInterface.h"
-#include "PorousFlowDictator.h"
 
 class PorousFlowMaterialVectorBase;
 
@@ -20,18 +19,12 @@ InputParameters validParams<PorousFlowMaterialVectorBase>();
 /**
  * Base class for all PorousFlow vector materials
  */
-class PorousFlowMaterialVectorBase : public DerivativeMaterialInterface<Material>
+class PorousFlowMaterialVectorBase : public DerivativeMaterialInterface<PorousFlowMaterial>
 {
 public:
   PorousFlowMaterialVectorBase(const InputParameters & parameters);
 
 protected:
-  /// The PorousFlow Dictator UserObject
-  const PorousFlowDictator & _dictator;
-
-  /// Nearest node number for each quadpoint
-  const MaterialProperty<unsigned int> & _node_number;
-
   /// Number of phases
   const unsigned int _num_phases;
 

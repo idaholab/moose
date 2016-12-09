@@ -17,13 +17,9 @@ InputParameters validParams<PorousFlowPorosityBase>()
 
 PorousFlowPorosityBase::PorousFlowPorosityBase(const InputParameters & parameters) :
     PorousFlowMaterialVectorBase(parameters),
-    _porosity_nodal(declareProperty<Real>("PorousFlow_porosity_nodal")),
-    _porosity_nodal_old(declarePropertyOld<Real>("PorousFlow_porosity_nodal")),
-    _dporosity_nodal_dvar(declareProperty<std::vector<Real> >("dPorousFlow_porosity_nodal_dvar")),
-    _dporosity_nodal_dgradvar(declareProperty<std::vector<RealGradient> >("dPorousFlow_porosity_nodal_dgradvar")),
-    _porosity_qp(declareProperty<Real>("PorousFlow_porosity_qp")),
-    _porosity_qp_old(declarePropertyOld<Real>("PorousFlow_porosity_qp")),
-    _dporosity_qp_dvar(declareProperty<std::vector<Real> >("dPorousFlow_porosity_qp_dvar")),
-    _dporosity_qp_dgradvar(declareProperty<std::vector<RealGradient> >("dPorousFlow_porosity_qp_dgradvar"))
+    _porosity(_nodal_material ? declareProperty<Real>("PorousFlow_porosity_nodal") : declareProperty<Real>("PorousFlow_porosity_qp")),
+    _porosity_old(_nodal_material ? declarePropertyOld<Real>("PorousFlow_porosity_nodal") : declarePropertyOld<Real>("PorousFlow_porosity_qp")),
+    _dporosity_dvar(_nodal_material ? declareProperty<std::vector<Real> >("dPorousFlow_porosity_nodal_dvar") : declareProperty<std::vector<Real> >("dPorousFlow_porosity_qp_dvar")),
+    _dporosity_dgradvar(_nodal_material ? declareProperty<std::vector<RealGradient> >("dPorousFlow_porosity_nodal_dgradvar") : declareProperty<std::vector<RealGradient> >("dPorousFlow_porosity_qp_dgradvar"))
 {
 }

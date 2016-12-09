@@ -68,11 +68,8 @@ protected:
    */
   virtual Real d2EffectiveSaturation_dP2(Real pressure) const;
 
-  /// Nodal value of porepressure of the fluid phase
-  const VariableValue & _porepressure_nodal_var;
-
-  /// Quadpoint value of porepressure of the fluid phase
-  const VariableValue & _porepressure_qp_var;
+  /// Nodal or quadpoint value of porepressure of the fluid phase
+  const VariableValue & _porepressure_var;
 
   /// Gradient(_porepressure at quadpoints)
   const VariableGradient & _gradp_qp_var;

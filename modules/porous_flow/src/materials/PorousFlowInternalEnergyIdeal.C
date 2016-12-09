@@ -12,7 +12,7 @@ InputParameters validParams<PorousFlowInternalEnergyIdeal>()
 {
   InputParameters params = validParams<PorousFlowFluidPropertiesBase>();
   params.addRequiredParam<Real>("specific_heat_capacity", "The specific heat capactiy at constant volume of the ideal fluid (J/kg/K)");
-  params.addClassDescription("This Material calculates fluid internal energy at the quadpoints assuming a contant specific heat capacity");
+  params.addClassDescription("This Material calculates fluid internal energy at the quadpoints or nodes assuming a contant specific heat capacity");
   return params;
 }
 
@@ -20,18 +20,23 @@ PorousFlowInternalEnergyIdeal::PorousFlowInternalEnergyIdeal(const InputParamete
     PorousFlowFluidPropertiesBase(parameters),
 
     _cv(getParam<Real>("specific_heat_capacity")),
-    _internal_energy_qp(declareProperty<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase)),
-    _dinternal_energy_qp_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase, _pressure_variable_name)),
-    _dinternal_energy_qp_dt(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase, _temperature_variable_name))
+    _internal_energy(_nodal_material ? declareProperty<Real>("PorousFlow_fluid_phase_internal_energy_nodal" + _phase) : declareProperty<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase)),
+    _internal_energy_old(_nodal_material ? &declarePropertyOld<Real>("PorousFlow_fluid_phase_internal_energy_nodal" + _phase) : nullptr),
+    _dinternal_energy_dp(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_nodal" + _phase, _pressure_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase, _pressure_variable_name)),
+    _dinternal_energy_dt(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_nodal" + _phase, _temperature_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase, _temperature_variable_name))
 {
-  _nodal_material = false;
+}
+
+void
+PorousFlowInternalEnergyIdeal::initQpStatefulProperties()
+{
+  _internal_energy[_qp] = _cv * _temperature[_qp];
 }
 
 void
 PorousFlowInternalEnergyIdeal::computeQpProperties()
 {
-  /// Internal_Energy and derivatives wrt pressure and temperature at the qps
-  _internal_energy_qp[_qp] = _cv * _temperature_qp[_qp];
-  _dinternal_energy_qp_dp[_qp] = 0.0;
-  _dinternal_energy_qp_dt[_qp] = _cv;
+  _internal_energy[_qp] = _cv * _temperature[_qp];
+  _dinternal_energy_dp[_qp] = 0.0;
+  _dinternal_energy_dt[_qp] = _cv;
 }

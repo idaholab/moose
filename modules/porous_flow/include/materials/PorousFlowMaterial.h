@@ -28,7 +28,7 @@ protected:
   virtual void computeProperties() override;
 
   /// whether the derived class holds nodal values
-  bool _nodal_material;
+  const bool _nodal_material;
 
   /// The variable names UserObject for the PorousFlow variables
   const PorousFlowDictator & _dictator;

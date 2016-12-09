@@ -25,19 +25,15 @@ PorousFlowPorosityConst::PorousFlowPorosityConst(const InputParameters & paramet
 void
 PorousFlowPorosityConst::initQpStatefulProperties()
 {
-  _porosity_nodal[_qp] = _input_porosity[_qp];
-  _porosity_qp[_qp] = _input_porosity[_qp];
+  _porosity[_qp] = _input_porosity[_qp];
 
   // The derivatives are zero for all time
-  _dporosity_nodal_dvar[_qp].assign(_num_var, 0.0);
-  _dporosity_qp_dvar[_qp].assign(_num_var, 0.0);
-  _dporosity_nodal_dgradvar[_qp].assign(_num_var, RealGradient());
-  _dporosity_qp_dgradvar[_qp].assign(_num_var, RealGradient());
+  _dporosity_dvar[_qp].assign(_num_var, 0.0);
+  _dporosity_dgradvar[_qp].assign(_num_var, RealGradient());
 }
 
 void
 PorousFlowPorosityConst::computeQpProperties()
 {
-  _porosity_nodal[_qp] = _input_porosity[_qp];
-  _porosity_qp[_qp] = _input_porosity[_qp];
+  initQpStatefulProperties();
 }

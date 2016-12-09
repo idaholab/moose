@@ -72,11 +72,8 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  /// Nodal value of porepressure of the zero phase (eg, the gas phase)
-  const VariableValue & _phase0_porepressure_nodal;
-
-  /// Quadpoint value of porepressure of the zero phase (eg, the gas phase)
-  const VariableValue & _phase0_porepressure_qp;
+  /// Nodal or quadpoint value of porepressure of the zero phase (eg, the gas phase)
+  const VariableValue & _phase0_porepressure;
 
   /// Gradient(phase0_porepressure) at the qps
   const VariableGradient & _phase0_gradp_qp;
@@ -87,11 +84,8 @@ protected:
   /// PorousFlow variable number of the phase0 porepressure
   const unsigned int _pvar;
 
-  /// Nodal value of saturation of the one phase (eg, the water phase)
-  const VariableValue & _phase1_saturation_nodal;
-
-  /// Quadpoint value of saturation of the one phase (eg, the water phase)
-  const VariableValue & _phase1_saturation_qp;
+  /// Nodal or quadpoint value of saturation of the one phase (eg, the water phase)
+  const VariableValue & _phase1_saturation;
 
   /// Gradient(phase1_saturation) at the qps
   const VariableGradient & _phase1_grads_qp;

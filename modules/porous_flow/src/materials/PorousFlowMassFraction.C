@@ -21,10 +21,12 @@ InputParameters validParams<PorousFlowMassFraction>()
 PorousFlowMassFraction::PorousFlowMassFraction(const InputParameters & parameters) :
     PorousFlowMaterialVectorBase(parameters),
 
-    _mass_frac(declareProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
-    _mass_frac_old(declarePropertyOld<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
-    _grad_mass_frac(declareProperty<std::vector<std::vector<RealGradient> > >("PorousFlow_grad_mass_frac")),
-    _dmass_frac_dvar(declareProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar")),
+    _have_sized(false),
+
+    _mass_frac(_nodal_material ? declareProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac") : declareProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac_qp")),
+    _mass_frac_old(_nodal_material ? &declarePropertyOld<std::vector<std::vector<Real> > >("PorousFlow_mass_frac") : nullptr),
+    _grad_mass_frac(_nodal_material ? nullptr : &declareProperty<std::vector<std::vector<RealGradient> > >("PorousFlow_grad_mass_frac")),
+    _dmass_frac_dvar(_nodal_material ? declareProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar") : declareProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_qp_dvar")),
 
     _num_passed_mf_vars(coupledComponents("mass_fraction_vars"))
 {
@@ -39,7 +41,7 @@ PorousFlowMassFraction::PorousFlowMassFraction(const InputParameters & parameter
   for (unsigned i = 0; i < _num_passed_mf_vars; ++i)
   {
     _mf_vars_num[i] = coupled("mass_fraction_vars", i);
-    _mf_vars[i] = &coupledNodalValue("mass_fraction_vars", i);
+    _mf_vars[i] = (_nodal_material ? &coupledNodalValue("mass_fraction_vars", i) : &coupledValue("mass_fraction_vars", i));
     _grad_mf_vars[i] = &coupledGradient("mass_fraction_vars", i);
   }
 }
@@ -48,15 +50,17 @@ void
 PorousFlowMassFraction::initQpStatefulProperties()
 {
   _mass_frac[_qp].resize(_num_phases);
-  _grad_mass_frac[_qp].resize(_num_phases);
   _dmass_frac_dvar[_qp].resize(_num_phases);
+  if (!_nodal_material)
+    (*_grad_mass_frac)[_qp].resize(_num_phases);
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     _mass_frac[_qp][ph].resize(_num_components);
-    _grad_mass_frac[_qp][ph].resize(_num_components);
     _dmass_frac_dvar[_qp][ph].resize(_num_components);
     for (unsigned int comp = 0; comp < _num_components; ++comp)
       _dmass_frac_dvar[_qp][ph][comp].assign(_num_var, 0.0);
+    if (!_nodal_material)
+      (*_grad_mass_frac)[_qp][ph].resize(_num_components);
   }
 
   // the derivative matrix is fixed for all time
@@ -76,14 +80,17 @@ PorousFlowMassFraction::initQpStatefulProperties()
       i++;
     }
   }
-
   build_mass_frac(_qp);
+  _have_sized = true;
 }
 
 void
 PorousFlowMassFraction::computeQpProperties()
 {
-  build_mass_frac(_qp);
+  if (!_have_sized)
+    initQpStatefulProperties();
+  else
+    build_mass_frac(_qp);
 }
 
 void
@@ -93,13 +100,17 @@ PorousFlowMassFraction::build_mass_frac(unsigned int qp)
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
     Real total_mass_frac = 0;
-    _grad_mass_frac[_qp][ph][_num_components - 1] = 0.0;
+    if (!_nodal_material)
+      (*_grad_mass_frac)[_qp][ph][_num_components - 1] = 0.0;
     for (unsigned int comp = 0; comp < _num_components - 1; ++comp)
     {
-      _mass_frac[qp][ph][comp] = (*_mf_vars[i])[_node_number[qp]];
-      total_mass_frac += (*_mf_vars[i])[_node_number[qp]];
-      _grad_mass_frac[qp][ph][comp] = (*_grad_mf_vars[i])[qp];
-      _grad_mass_frac[_qp][ph][_num_components - 1] -= (*_grad_mf_vars[i])[qp];
+      _mass_frac[qp][ph][comp] = (*_mf_vars[i])[qp];
+      total_mass_frac += _mass_frac[qp][ph][comp];
+      if (!_nodal_material)
+      {
+        (*_grad_mass_frac)[qp][ph][comp] = (*_grad_mf_vars[i])[qp];
+        (*_grad_mass_frac)[_qp][ph][_num_components - 1] -= (*_grad_mf_vars[i])[qp];
+      }
       i++;
     }
     _mass_frac[qp][ph][_num_components - 1] = 1.0 - total_mass_frac;

@@ -152,9 +152,6 @@ protected:
   /// d(Thermal_Conductivity)/d(PorousFlow variable)
   const MaterialProperty<std::vector<RealTensorValue> > * _dthermal_conductivity_dvar;
 
-  /// Node Number information held in the quadpoints of the Materials
-  const MaterialProperty<unsigned int> & _node_number;
-
   /// _qp_map[node_number] = the quadpoint in the PorousFlow Materials that hold info for node = node_number
   std::vector<int> _qp_map;
 

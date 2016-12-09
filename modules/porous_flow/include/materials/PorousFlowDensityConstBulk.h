@@ -52,23 +52,17 @@ protected:
   /// constant bulk modulus
   const Real _bulk;
 
-  /// Fluid phase density at the nodes
-  MaterialProperty<Real> * const _density_nodal;
+  /// Fluid phase density at the nodes or quadpoints
+  MaterialProperty<Real> & _density;
 
   /// Old fluid phase density at the nodes
-  MaterialProperty<Real> * const _density_nodal_old;
+  MaterialProperty<Real> * const _density_old;
 
-  /// Derivative of fluid density wrt phase pore pressure at the nodes
-  MaterialProperty<Real> * const _ddensity_nodal_dp;
+  /// Derivative of fluid density wrt phase pore pressure at the nodes or quadpoints
+  MaterialProperty<Real> & _ddensity_dp;
 
   /// Derivative of fluid density wrt temperature at the nodes: this is zero, but we need to define it otherwise the DerivativeMaterial will size it to the number of quadpoints, not the number of nodes
-  MaterialProperty<Real> * const _ddensity_nodal_dt;
-
-  /// Fluid phase density at the qps
-  MaterialProperty<Real> * const _density_qp;
-
-  /// Derivative of fluid density wrt phase pore pressure at the qps
-  MaterialProperty<Real> * const _ddensity_qp_dp;
+  MaterialProperty<Real> & _ddensity_dt;
 };
 
 #endif //POROUSFLOWDENSITYCONSTBULK_H

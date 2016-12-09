@@ -13,6 +13,7 @@ InputParameters validParams<PorousFlowDiffusivityBase>()
   InputParameters params = validParams<PorousFlowMaterialVectorBase>();
   params.addRequiredParam<std::vector<Real> >("diffusion_coeff", "List of diffusion coefficients.  Order is i) component 0 in phase 0; ii) component 1 in phase 0 ...; component 0 in phase 1; ... component k in phase n (m^2/s");
   params.addClassDescription("Base class for effective diffusivity for each phase");
+  params.set<bool>("at_nodes") = false;
   return params;
 }
 

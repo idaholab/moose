@@ -18,7 +18,7 @@ InputParameters validParams<PorousFlowBrine>();
 
 /**
  * Fluid properties of Brine.
- * Provides density, viscosity, derivatives wrt pressure and temperature at the quadpoints
+ * Provides density, viscosity, derivatives wrt pressure and temperature at the quadpoints or nodes
  */
 class PorousFlowBrine : public PorousFlowFluidPropertiesBase
 {
@@ -26,34 +26,53 @@ public:
   PorousFlowBrine(const InputParameters & parameters);
 
 protected:
+  virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  /// Fluid phase density at the qps
-  MaterialProperty<Real> & _density_qp;
+  /// Fluid phase density at the qps or nodes
+  MaterialProperty<Real> & _density;
 
-  /// Derivative of fluid density wrt phase pore pressure at the qps
-  MaterialProperty<Real> & _ddensity_qp_dp;
+  /// Old fluid phase density at the nodes
+  MaterialProperty<Real> * const _density_old;
 
-  /// Derivative of fluid density wrt temperature at the qps
-  MaterialProperty<Real> & _ddensity_qp_dT;
+  /// Derivative of fluid density wrt phase pore pressure at the qps or nodes
+  MaterialProperty<Real> & _ddensity_dp;
 
-  /// Fluid phase internal_energy at the qps
-  MaterialProperty<Real> & _internal_energy_qp;
+  /// Derivative of fluid density wrt temperature at the qps or nodes
+  MaterialProperty<Real> & _ddensity_dT;
 
-  /// Derivative of fluid internal_energy wrt phase pore pressure at the qps
-  MaterialProperty<Real> & _dinternal_energy_qp_dp;
+  /// Fluid phase viscosity at the nodes
+  MaterialProperty<Real> * const _viscosity;
 
-  /// Derivative of fluid internal_energy wrt temperature at the qps
-  MaterialProperty<Real> & _dinternal_energy_qp_dT;
+  /// Derivative of fluid phase viscosity wrt pressure at the nodes
+  MaterialProperty<Real> * const _dviscosity_dp;
 
-  /// Fluid phase enthalpy at the qps
-  MaterialProperty<Real> & _enthalpy_qp;
+  /// Derivative of fluid phase viscosity wrt temperature at the nodes
+  MaterialProperty<Real> * const _dviscosity_dT;
 
-  /// Derivative of fluid enthalpy wrt phase pore pressure at the qps
-  MaterialProperty<Real> & _denthalpy_qp_dp;
+  /// Fluid phase internal_energy at the qps or nodes
+  MaterialProperty<Real> & _internal_energy;
 
-  /// Derivative of fluid enthalpy wrt temperature at the qps
-  MaterialProperty<Real> & _denthalpy_qp_dT;
+  /// Old fluid phase internal_energy at the nodes
+  MaterialProperty<Real> * const _internal_energy_old;
+
+  /// Derivative of fluid internal_energy wrt phase pore pressure at the qps or nodes
+  MaterialProperty<Real> & _dinternal_energy_dp;
+
+  /// Derivative of fluid internal_energy wrt temperature at the qps or nodes
+  MaterialProperty<Real> & _dinternal_energy_dT;
+
+  /// Fluid phase enthalpy at the qps or nodes
+  MaterialProperty<Real> & _enthalpy;
+
+  /// Old fluid phase enthalpy at the nodes
+  MaterialProperty<Real> * const _enthalpy_old;
+
+  /// Derivative of fluid enthalpy wrt phase pore pressure at the qps or nodes
+  MaterialProperty<Real> & _denthalpy_dp;
+
+  /// Derivative of fluid enthalpy wrt temperature at the qps or nodes
+  MaterialProperty<Real> & _denthalpy_dT;
 
   /// Brine Fluid properties UserObject
   const BrineFluidProperties * _brine_fp;
@@ -61,8 +80,8 @@ protected:
   /// Water Fluid properties UserObject
   const SinglePhaseFluidPropertiesPT * _water_fp;
 
-  /// NaCl mass fraction at the qps
-  const VariableValue & _xnacl_qp;
+  /// NaCl mass fraction at the qps or nodes
+  const VariableValue & _xnacl;
 };
 
 #endif //POROUSFLOWBRINE_H

@@ -13,8 +13,7 @@ InputParameters validParams<PorousFlowTemperature>()
 {
   InputParameters params = validParams<PorousFlowMaterial>();
   params.addCoupledVar("temperature", 20.0, "Fluid temperature variable");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names");
-  params.addClassDescription("Material to provide temperature at the quadpoints and derivatives of it with respect to the PorousFlow variables");
+  params.addClassDescription("Material to provide temperature at the quadpoints or nodes and derivatives of it with respect to the PorousFlow variables");
   return params;
 }
 
@@ -22,35 +21,41 @@ PorousFlowTemperature::PorousFlowTemperature(const InputParameters & parameters)
     DerivativeMaterialInterface<PorousFlowMaterial>(parameters),
 
     _num_pf_vars(_dictator.numVariables()),
-    _temperature_qp_var(coupledValue("temperature")),
-    _grad_temperature(coupledGradient("temperature")),
+    _temperature_var(_nodal_material ? coupledNodalValue("temperature") : coupledValue("temperature")),
+    _grad_temperature_var(_nodal_material ? nullptr : &coupledGradient("temperature")),
     _temperature_is_PF(_dictator.isPorousFlowVariable(coupled("temperature"))),
     _t_var_num(_temperature_is_PF ? _dictator.porousFlowVariableNum(coupled("temperature")) : 0),
 
-    _temperature_qp(declareProperty<Real>("PorousFlow_temperature_qp")),
-    _gradt_qp(declareProperty<RealGradient>("PorousFlow_grad_temperature_qp")),
-    _dtemperature_qp_dvar(declareProperty<std::vector<Real> >("dPorousFlow_temperature_qp_dvar")),
-    _dgradt_qp_dgradv(declareProperty<std::vector<Real> >("dPorousFlow_grad_temperature_qp_dgradvar")),
-    _dgradt_qp_dv(declareProperty<std::vector<RealGradient> >("dPorousFlow_grad_temperature_qp_dvar"))
+    _temperature(_nodal_material ? declareProperty<Real>("PorousFlow_temperature_nodal") : declareProperty<Real>("PorousFlow_temperature_qp")),
+    _dtemperature_dvar(_nodal_material ? declareProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar") : declareProperty<std::vector<Real> >("dPorousFlow_temperature_qp_dvar")),
+    _temperature_old(_nodal_material ? &declarePropertyOld<Real>("PorousFlow_temperature_nodal") : nullptr),
+    _grad_temperature(_nodal_material ? nullptr : &declareProperty<RealGradient>("PorousFlow_grad_temperature_qp")),
+    _dgrad_temperature_dgradv(_nodal_material ? nullptr : &declareProperty<std::vector<Real> >("dPorousFlow_grad_temperature_qp_dgradvar")),
+    _dgrad_temperature_dv(_nodal_material ? nullptr : &declareProperty<std::vector<RealGradient> >("dPorousFlow_grad_temperature_qp_dvar"))
 {
-  _nodal_material = false;
+}
+
+void
+PorousFlowTemperature::initQpStatefulProperties()
+{
+  _temperature[_qp] = _temperature_var[_qp];
 }
 
 void
 PorousFlowTemperature::computeQpProperties()
 {
-  _temperature_qp[_qp] = _temperature_qp_var[_qp];
-  _gradt_qp[_qp] = _grad_temperature[_qp];
-
-  // Prepare the derivative matrices with zeroes
-  _dtemperature_qp_dvar[_qp].assign(_num_pf_vars, 0.0);
-  _dgradt_qp_dgradv[_qp].assign(_num_pf_vars, 0.0);
-  _dgradt_qp_dv[_qp].assign(_num_pf_vars, RealGradient());
-
+  _temperature[_qp] = _temperature_var[_qp];
+  _dtemperature_dvar[_qp].assign(_num_pf_vars, 0.0);
   if (_temperature_is_PF)
-  {
     // _temperature is a PorousFlow variable
-    _dtemperature_qp_dvar[_qp][_t_var_num] = 1.0;
-    _dgradt_qp_dgradv[_qp][_t_var_num] = 1.0;
+    _dtemperature_dvar[_qp][_t_var_num] = 1.0;
+
+  if (!_nodal_material)
+  {
+    (*_grad_temperature)[_qp] = (*_grad_temperature_var)[_qp];
+    (*_dgrad_temperature_dgradv)[_qp].assign(_num_pf_vars, 0.0);
+    (*_dgrad_temperature_dv)[_qp].assign(_num_pf_vars, RealGradient());
+    if (_temperature_is_PF)
+      (*_dgrad_temperature_dgradv)[_qp][_t_var_num] = 1.0;
   }
 }

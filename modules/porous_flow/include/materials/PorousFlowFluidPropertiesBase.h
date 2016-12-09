@@ -26,19 +26,13 @@ public:
   PorousFlowFluidPropertiesBase(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
-  /// Pore pressure at the nodes
-  const MaterialProperty<std::vector<Real> > & _porepressure_nodal;
+  /// Pore pressure at the nodes or quadpoints
+  const MaterialProperty<std::vector<Real> > & _porepressure;
 
-  /// Pore pressure at the qps
-  const MaterialProperty<std::vector<Real> > & _porepressure_qp;
-
-  /// Fluid temperature at the nodes
-  const MaterialProperty<Real> & _temperature_nodal;
-
-  /// Fluid temperature at the qps
-  const MaterialProperty<Real> & _temperature_qp;
+  /// Fluid temperature at the nodes or quadpoints
+  const MaterialProperty<Real> & _temperature;
 
   /// Name of (dummy) pressure primary variable
   const VariableName _pressure_variable_name;

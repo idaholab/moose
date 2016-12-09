@@ -15,6 +15,7 @@ InputParameters validParams<PorousFlowThermalConductivityIdeal>()
   params.addParam<RealTensorValue>("wet_thermal_conductivity", "The thermal conductivity of the rock matrix when the aqueous saturation is unity.  This defaults to dry_thermal_conductivity.");
   params.addParam<Real>("exponent", 1.0, "Exponent on saturation.  Thermal conductivity = dry_thermal_conductivity + S^exponent * (wet_thermal_conductivity - dry_thermal_conductivity), where S is the aqueous saturation");
   params.addParam<unsigned>("aqueous_phase_number", 0, "The phase number of the aqueous phase.  In simulations without fluids, this parameter and the exponent parameter will not be used: only the dry_thermal_conductivity will be used.");
+  params.set<bool>("at_nodes") = false;
   params.addClassDescription("This Material calculates rock-fluid combined thermal conductivity by using a weighted sum.  Thermal conductivity = dry_thermal_conductivity + S^exponent * (wet_thermal_conductivity - dry_thermal_conductivity), where S is the aqueous saturation");
   return params;
 }
