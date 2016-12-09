@@ -18,72 +18,70 @@
 #include "MooseEnum.h"
 
 #include <vector>
-#include "libmesh/libmesh_common.h"
-using libMesh::Real;
 
 class MonotoneCubicInterpolation
 {
 public:
   MonotoneCubicInterpolation();
-  MonotoneCubicInterpolation(const std::vector<Real> & x, const std::vector<Real> & y);
+  MonotoneCubicInterpolation(const std::vector<double> & x, const std::vector<double> & y);
 
   virtual ~MonotoneCubicInterpolation() = default;
 
-  virtual void setData(const std::vector<Real> & x, const std::vector<Real> & y);
-  virtual Real sample(const Real & x) const;
-  virtual Real sampleDerivative(const Real & x) const;
-  virtual Real sample2ndDerivative(const Real & x) const;
-  virtual void dumpCSV(std::string filename, const std::vector<Real> & xnew);
-  // Real sample2ndDerivative(const std::vector<Real> & x, const std::vector<Real> & y, const std::vector<Real> & y2, Real x_int) const;
+  virtual void setData(const std::vector<double> & x, const std::vector<double> & y);
+  virtual double sample(const double & x) const;
+  virtual double sampleDerivative(const double & x) const;
+  virtual double sample2ndDerivative(const double & x) const;
+  virtual void dumpCSV(std::string filename, const std::vector<double> & xnew);
 
 protected:
 
   virtual void errorCheck();
-  Real sign(Real x) const;
-  MooseEnum _monotonic_e = MooseEnum ("monotonic_increase monotonic_decrease monontonic_constant monotonic_not");
+  double sign(const double & x) const;
+  enum MonotonicStatus {monotonic_increase, monotonic_decrease, monotonic_constant, monotonic_not};
+  MonotonicStatus _monotonic_status;
   void checkMonotone();
 
-  Real phi(const Real & t) const;
-  Real psi(const Real & t) const;
-  Real phiPrime(const Real & t) const;
-  Real psiPrime(const Real & t) const;
-  Real phiDoublePrime(const Real & t) const;
-  Real psiDoublePrime(const Real & t) const;
+  double phi(const double & t) const;
+  double psi(const double & t) const;
+  double phiPrime(const double & t) const;
+  double psiPrime(const double & t) const;
+  double phiDoublePrime(const double & t) const;
+  double psiDoublePrime(const double & t) const;
 
   /// Cubic hermite polynomials
-  Real h1(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real h2(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real h3(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real h4(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real h1Prime(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real h2Prime(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real h3Prime(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real h4Prime(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real h1DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real h2DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real h3DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const;
-  Real h4DoublePrime(const Real & xhi, const Real & xlo, const Real & x) const;
+  double h1(const double & xhi, const double & xlo, const double & x) const;
+  double h2(const double & xhi, const double & xlo, const double & x) const;
+  double h3(const double & xhi, const double & xlo, const double & x) const;
+  double h4(const double & xhi, const double & xlo, const double & x) const;
+  double h1Prime(const double & xhi, const double & xlo, const double & x) const;
+  double h2Prime(const double & xhi, const double & xlo, const double & x) const;
+  double h3Prime(const double & xhi, const double & xlo, const double & x) const;
+  double h4Prime(const double & xhi, const double & xlo, const double & x) const;
+  double h1DoublePrime(const double & xhi, const double & xlo, const double & x) const;
+  double h2DoublePrime(const double & xhi, const double & xlo, const double & x) const;
+  double h3DoublePrime(const double & xhi, const double & xlo, const double & x) const;
+  double h4DoublePrime(const double & xhi, const double & xlo, const double & x) const;
 
   /// Interpolating cubic polynomial and derivatives
-  virtual Real p(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
-                 const Real & dhi, const Real & dlo, const Real & x) const;
-  virtual Real pPrime(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
-                      const Real & dhi, const Real & dlo, const Real & x) const;
-  virtual Real pDoublePrime(const Real & xhi, const Real & xlo, const Real & fhi, const Real & flo,
-                            const Real & dhi, const Real & dlo, const Real & x) const;
+  virtual double p(const double & xhi, const double & xlo, const double & fhi, const double & flo,
+                 const double & dhi, const double & dlo, const double & x) const;
+  virtual double pPrime(const double & xhi, const double & xlo, const double & fhi, const double & flo,
+                      const double & dhi, const double & dlo, const double & x) const;
+  virtual double pDoublePrime(const double & xhi, const double & xlo, const double & fhi, const double & flo,
+                            const double & dhi, const double & dlo, const double & x) const;
 
   virtual void initialize_derivs();
-  virtual void modify_derivs(const Real & alpha, const Real & beta, const Real & delta, Real & yp_lo, Real & yp_hi);
+  virtual void modify_derivs(const double & alpha, const double & beta, const double & delta, double & yp_lo, double & yp_hi);
   virtual void solve();
-  virtual void findInterval(const Real & x, unsigned int & klo, unsigned int & khi) const;
+  virtual void findInterval(const double & x, unsigned int & klo, unsigned int & khi) const;
 
-  std::vector<Real> _x;
-  std::vector<Real> _y;
-  std::vector<Real> _h;
-  std::vector<Real> _yp;
-  std::vector<Real> _delta;
-  std::vector<Real> _alpha;
-  std::vector<Real> _beta;
+  std::vector<double> _x;
+  std::vector<double> _y;
+  std::vector<double> _h;
+  std::vector<double> _yp;
+  std::vector<double> _delta;
+  std::vector<double> _alpha;
+  std::vector<double> _beta;
 
   unsigned int _n_knots;
   unsigned int _n_intervals;
