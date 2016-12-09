@@ -20,7 +20,7 @@ public:
   PorousFlowVolumetricStrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
   /// If true then the strain rate will include terms that ensure mass is conserved when doing integrals over the displaced mesh
   const bool _consistent;

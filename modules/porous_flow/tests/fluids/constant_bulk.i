@@ -41,31 +41,12 @@
   [./temperature]
     type = PorousFlowTemperature
   [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperatureNodal
-  [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
-  [../]
   [./ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
   [../]
-  [./ppss_nodal]
-    type = PorousFlow1PhaseP
-    porepressure = pp
-    at_nodes = true
-  [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
-    bulk_modulus = 2e8
-    density_P0 = 1000
-    phase = 0
-  [../]
-  [./dens0_nodal]
-    type = PorousFlowDensityConstBulk
-    at_nodes = true
     bulk_modulus = 2e8
     density_P0 = 1000
     phase = 0
@@ -80,11 +61,11 @@
 [Postprocessors]
   [./density]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'PorousFlow_fluid_phase_density0'
+    mat_prop = 'PorousFlow_fluid_phase_density_qp0'
   [../]
   [./ddensity_dp]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'dPorousFlow_fluid_phase_density0/dpressure_variable_dummy'
+    mat_prop = 'dPorousFlow_fluid_phase_density_qp0/dpressure_variable_dummy'
   [../]
 []
 

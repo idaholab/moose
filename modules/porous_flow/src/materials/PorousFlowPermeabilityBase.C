@@ -12,6 +12,7 @@ InputParameters validParams<PorousFlowPermeabilityBase>()
 {
   InputParameters params = validParams<PorousFlowMaterialVectorBase>();
   params.addClassDescription("Base class for material permeability");
+  params.set<bool>("at_nodes") = false;
   return params;
 }
 
@@ -21,4 +22,6 @@ PorousFlowPermeabilityBase::PorousFlowPermeabilityBase(const InputParameters & p
     _dpermeability_qp_dvar(declareProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_qp_dvar")),
     _dpermeability_qp_dgradvar(declareProperty<std::vector<std::vector<RealTensorValue> > >("dPorousFlow_permeability_qp_dgradvar"))
 {
+  if (_nodal_material == true)
+    mooseError("PorousFlowPermeability classes are only defined for at_nodes = false");
 }

@@ -27,7 +27,6 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
-
   virtual void computeQpProperties() override;
 
   /// porosity at zero strain and zero porepressure
@@ -54,17 +53,11 @@ protected:
   /// d(strain)/(dvar)
   const MaterialProperty<std::vector<RealGradient> > & _dvol_strain_qp_dvar;
 
-  /// effective nodal porepressure
-  const MaterialProperty<Real> & _pf_nodal;
+  /// effective porepressure
+  const MaterialProperty<Real> & _pf;
 
-  /// d(effective nodal porepressure)/(d porflow variable)
-  const MaterialProperty<std::vector<Real> > & _dpf_nodal_dvar;
-
-  /// effective qp porepressure
-  const MaterialProperty<Real> & _pf_qp;
-
-  /// d(effective qp porepressure)/(d porflow variable)
-  const MaterialProperty<std::vector<Real> > & _dpf_qp_dvar;
+  /// d(effective porepressure)/(d porflow variable)
+  const MaterialProperty<std::vector<Real> > & _dpf_dvar;
 };
 
 #endif //POROUSFLOWPOROSITYHM_H

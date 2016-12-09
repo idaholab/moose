@@ -49,30 +49,12 @@
     type = PorousFlowTemperature
     temperature = temp
   [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperatureNodal
-    temperature = 'temp'
-  [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
-  [../]
   [./ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
   [../]
-  [./ppss_nodal]
-    type = PorousFlow1PhaseP
-    porepressure = pp
-    at_nodes = true
-  [../]
   [./brine]
     type = PorousFlowBrine
-    xnacl = 0.1047
-    phase = 0
-  [../]
-  [./brine_nodal]
-    type = PorousFlowBrineNodal
     xnacl = 0.1047
     phase = 0
   [../]
@@ -98,11 +80,11 @@
   [../]
   [./density]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'PorousFlow_fluid_phase_density0'
+    mat_prop = 'PorousFlow_fluid_phase_density_qp0'
   [../]
   [./viscosity]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'PorousFlow_viscosity0'
+    mat_prop = 'PorousFlow_viscosity_qp0'
   [../]
   [./enthalpy]
     type = ElementIntegralMaterialProperty

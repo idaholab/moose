@@ -48,18 +48,12 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
+    at_nodes = false
     temperature = temp
-  [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperatureNodal
-    temperature = temp
-  [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
   [../]
   [./thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
+    at_nodes = false
     dry_thermal_conductivity = '1.1 0.1 0.3 0.1 2.2 0 0.3 0 3.3'
   [../]
 []

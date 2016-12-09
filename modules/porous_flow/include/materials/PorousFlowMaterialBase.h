@@ -29,9 +29,6 @@ public:
   PorousFlowMaterialBase(const InputParameters & parameters);
 
 protected:
-  /// Nearest node number for each quadpoint
-  const MaterialProperty<unsigned int> & _node_number;
-
   /// Phase number of fluid
   const unsigned int _phase_num;
 

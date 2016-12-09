@@ -25,29 +25,20 @@ public:
   PorousFlowPorosityBase(const InputParameters & parameters);
 
 protected:
-  /// nodal porosity
-  MaterialProperty<Real> & _porosity_nodal;
+  /// When calculating nodal porosity, use the strain at the nearest quadpoint to the node
+  const bool _strain_at_nearest_qp;
 
-  /// old value of nodal porosity (which is, of course = _porosity in this case)
-  MaterialProperty<Real> & _porosity_nodal_old;
+  /// computed porosity at the nodes or quadpoints
+  MaterialProperty<Real> & _porosity;
 
-  /// d(nodal porosity)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real> > & _dporosity_nodal_dvar;
+  /// old value of porosity
+  MaterialProperty<Real> & _porosity_old;
 
-  /// d(nodal porosity)/d(PorousFlow variable)
-  MaterialProperty<std::vector<RealGradient> > & _dporosity_nodal_dgradvar;
+  /// d(porosity)/d(PorousFlow variable)
+  MaterialProperty<std::vector<Real> > & _dporosity_dvar;
 
-  /// qaudpoint porosity
-  MaterialProperty<Real> & _porosity_qp;
-
-  /// old value of quadpoint porosity (which is, of course = _porosity in this case)
-  MaterialProperty<Real> & _porosity_qp_old;
-
-  /// d(quadpoint porosity)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real> > & _dporosity_qp_dvar;
-
-  /// d(quadpoint porosity)/d(PorousFlow variable)
-  MaterialProperty<std::vector<RealGradient> > & _dporosity_qp_dgradvar;
+  /// d(porosity)/d(grad PorousFlow variable)
+  MaterialProperty<std::vector<RealGradient> > & _dporosity_dgradvar;
 };
 
 #endif //POROUSFLOWPOROSITYBASE_H

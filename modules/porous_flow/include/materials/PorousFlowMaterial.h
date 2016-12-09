@@ -28,7 +28,7 @@ protected:
   virtual void computeProperties() override;
 
   /// whether the derived class holds nodal values
-  bool _nodal_material;
+  const bool _nodal_material;
 
   /// The variable names UserObject for the PorousFlow variables
   const PorousFlowDictator & _dictator;
@@ -47,6 +47,16 @@ protected:
    * equal to tht enumber of nodes in the current element
    */
   void sizeAllRequestedProperties();
+
+  /**
+   * Find the nearest quadpoint to the node labelled by nodenum
+   * in the current element
+   * @param nodenum the node number in the current element
+   * @return the nearest quadpoint
+   */
+  unsigned nearestQP(unsigned nodenum) const;
+
+
 };
 
 #endif //POROUSFLOWMATERIAL_H

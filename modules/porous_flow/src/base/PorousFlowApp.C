@@ -28,7 +28,6 @@
 #include "PorousFlow2PhasePS.h"
 #include "PorousFlowVariableBase.h"
 #include "PorousFlowBrine.h"
-#include "PorousFlowBrineNodal.h"
 #include "PorousFlowDensityConstBulk.h"
 #include "PorousFlowEffectiveFluidPressure.h"
 #include "PorousFlowFluidPropertiesBase.h"
@@ -49,19 +48,15 @@
 #include "PorousFlowViscosityConst.h"
 #include "PorousFlowVolumetricStrain.h"
 #include "PorousFlowJoiner.h"
-#include "PorousFlowNodeNumber.h"
 #include "PorousFlowTemperature.h"
-#include "PorousFlowTemperatureNodal.h"
 #include "PorousFlowThermalConductivityIdeal.h"
 #include "PorousFlowMatrixInternalEnergy.h"
 #include "PorousFlowInternalEnergyIdeal.h"
-#include "PorousFlowInternalEnergyIdealNodal.h"
 #include "PorousFlowEnthalpy.h"
-#include "PorousFlowEnthalpyNodal.h"
 #include "PorousFlowDiffusivityConst.h"
 #include "PorousFlowDiffusivityMillingtonQuirk.h"
 #include "PorousFlowSingleComponentFluid.h"
-#include "PorousFlowSingleComponentFluidNodal.h"
+#include "PorousFlowNearestQp.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
@@ -154,7 +149,6 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlow2PhasePS);
   registerMaterial(PorousFlowVariableBase);
   registerMaterial(PorousFlowBrine);
-  registerMaterial(PorousFlowBrineNodal);
   registerMaterial(PorousFlowDensityConstBulk);
   registerMaterial(PorousFlowEffectiveFluidPressure);
   registerMaterial(PorousFlowFluidPropertiesBase);
@@ -175,19 +169,15 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowViscosityConst);
   registerMaterial(PorousFlowVolumetricStrain);
   registerMaterial(PorousFlowJoiner);
-  registerMaterial(PorousFlowNodeNumber);
   registerMaterial(PorousFlowTemperature);
-  registerMaterial(PorousFlowTemperatureNodal);
   registerMaterial(PorousFlowThermalConductivityIdeal);
   registerMaterial(PorousFlowMatrixInternalEnergy);
   registerMaterial(PorousFlowInternalEnergyIdeal);
-  registerMaterial(PorousFlowInternalEnergyIdealNodal);
   registerMaterial(PorousFlowEnthalpy);
-  registerMaterial(PorousFlowEnthalpyNodal);
   registerMaterial(PorousFlowDiffusivityConst);
   registerMaterial(PorousFlowDiffusivityMillingtonQuirk);
   registerMaterial(PorousFlowSingleComponentFluid);
-  registerMaterial(PorousFlowSingleComponentFluidNodal);
+  registerMaterial(PorousFlowNearestQp);
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);

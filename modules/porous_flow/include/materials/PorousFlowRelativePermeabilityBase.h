@@ -53,7 +53,7 @@ protected:
   VariableName _saturation_variable_name;
 
   /// Saturation material property
-  const MaterialProperty<std::vector<Real> > & _saturation_nodal;
+  const MaterialProperty<std::vector<Real> > & _saturation;
 
   /// Relative permeability material property
   MaterialProperty<Real> & _relative_permeability;

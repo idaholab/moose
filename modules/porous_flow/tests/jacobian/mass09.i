@@ -78,22 +78,7 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-  [../]
-  [./temperature_nodal]
-    type = PorousFlowTemperatureNodal
-  [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
-  [../]
-  [./ppss]
-    type = PorousFlow2PhasePS_VG
-    phase0_porepressure = ppwater
-    phase1_saturation = sgas
-    m = 0.5
-    p0 = 1
-    pc_max = -10
-    sat_lr = 0.1
+    at_nodes = true
   [../]
   [./ppss_nodal]
     type = PorousFlow2PhasePS_VG
@@ -108,6 +93,7 @@
   [./massfrac]
     type = PorousFlowMassFraction
     mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
+    at_nodes = true
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
@@ -126,10 +112,12 @@
   [./dens_all]
     type = PorousFlowJoiner
     include_old = true
-    material_property = PorousFlow_fluid_phase_density
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
+    at_nodes = true
     porosity = 0.1
   [../]
 []

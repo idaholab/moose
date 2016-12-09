@@ -138,16 +138,26 @@
 []
 
 [Materials]
+  # Permeability
+  [./permeability]
+    type = PorousFlowPermeabilityKozenyCarman
+    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
+    poroperm_function = kozeny_carman_phi0
+    k0 = 1e-10
+    phi0 = 0.05
+    m = 2
+    n = 7
+  [../]
   [./temperature]
     type = PorousFlowTemperature
   [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
+  [./temperature_nodal]
+    type = PorousFlowTemperature
+    at_nodes = true
   [../]
-
   [./massfrac]
     type = PorousFlowMassFraction
+    at_nodes = true
   [../]
 
   # Fluid pressure
@@ -160,17 +170,32 @@
     al = 1E-8 # unimportant in this fully-saturated test
     m = 0.8   # unimportant in this fully-saturated test
   [../]
+  [./ppss_nodal]
+    type = PorousFlow1PhaseP_VG # Calculate fluid pressure and saturation for 1-phase case
+    at_nodes = true
+    porepressure = pp
+    al = 1E-8 # unimportant in this fully-saturated test
+    m = 0.8   # unimportant in this fully-saturated test
+  [../]
 
   # Fluid density
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1000
     bulk_modulus = 2.2E9
     phase = 0
   [../]
   [./dens_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
+  [../]
+  [./dens0_qp]
+    type = PorousFlowDensityConstBulk
+    density_P0 = 1000
+    bulk_modulus = 2.2E9
+    phase = 0
   [../]
   [./dens_all_at_quadpoints]
     type = PorousFlowJoiner
@@ -184,34 +209,29 @@
   [../]
 
   # Permeability
-  [./permeability]
-    type = PorousFlowPermeabilityKozenyCarman
-    k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
-    poroperm_function = kozeny_carman_phi0
-    k0 = 1e-10
-    phi0 = 0.05
-    m = 2
-    n = 7
-  [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
+    at_nodes = true
     n = 0 # unimportant in this fully-saturated situation
     phase = 0
   [../]
   [./relperm_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability
+    at_nodes = true
+    material_property = PorousFlow_relative_permeability_nodal
   [../]
 
   # Fluid viscosity (assumed constant)
   [./visc0]
     type = PorousFlowViscosityConst
+    at_nodes = true
     viscosity = 1E-3
     phase = 0
   [../]
   [./visc_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
 []
 

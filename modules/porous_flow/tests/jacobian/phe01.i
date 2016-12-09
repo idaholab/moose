@@ -112,26 +112,21 @@
 []
 
 [Materials]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
-  [../]
   [./temp]
     type = PorousFlowTemperature
     temperature = temperature
-  [../]
-  [./temp_nodal]
-    type = PorousFlowTemperatureNodal
-    temperature = temperature
+    at_nodes = true
   [../]
   [./porosity]
     type = PorousFlowPorosityTM
+    at_nodes = true
     porosity_zero = 0.3
     thermal_expansion_coeff = 1.3
     solid_bulk = 2.2
   [../]
   [./volstrain]
     type = PorousFlowVolumetricStrain
+    at_nodes = false
   [../]
   [./phe]
     type = ComputePlasticHeatEnergy

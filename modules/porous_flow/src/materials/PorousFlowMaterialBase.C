@@ -19,7 +19,6 @@ InputParameters validParams<PorousFlowMaterialBase>()
 
 PorousFlowMaterialBase::PorousFlowMaterialBase(const InputParameters & parameters) :
     DerivativeMaterialInterface<PorousFlowMaterial>(parameters),
-    _node_number(getMaterialProperty<unsigned int>("PorousFlow_node_number")),
     _phase_num(getParam<unsigned int>("phase")),
     _phase(Moose::stringify(_phase_num))
 {

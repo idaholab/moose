@@ -50,16 +50,15 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
+    at_nodes = false
   [../]
   [./temperature_nodal]
-    type = PorousFlowTemperatureNodal
-  [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
+    type = PorousFlowTemperature
+    at_nodes = true
   [../]
   [./ppss]
     type = PorousFlow1PhaseP_VG
+    at_nodes = false
     porepressure = pp
     al = 1
     m = 0.5
@@ -73,12 +72,7 @@
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
-  [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1
-    bulk_modulus = 1.5
-    phase = 0
+    at_nodes = true
   [../]
   [./dens0_nodal]
     type = PorousFlowDensityConstBulk
@@ -87,37 +81,49 @@
     bulk_modulus = 1.5
     phase = 0
   [../]
-  [./dens_all]
+  [./dens_nodal_all]
     type = PorousFlowJoiner
     include_old = true
-    material_property = PorousFlow_fluid_phase_density
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
+  [../]
+  [./dens0]
+    type = PorousFlowDensityConstBulk
+    density_P0 = 1
+    bulk_modulus = 1.5
+    phase = 0
   [../]
   [./dens_qp_all]
     type = PorousFlowJoiner
+    at_nodes = false
     material_property = PorousFlow_fluid_phase_density_qp
-    at_qps = true
   [../]
   [./visc0]
     type = PorousFlowViscosityConst
     viscosity = 1
     phase = 0
+    at_nodes = true
   [../]
   [./visc_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity
+    material_property = PorousFlow_viscosity_nodal
+    at_nodes = true
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
+    at_nodes = false
     permeability = '1 0 0 0 2 0 0 0 3'
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
     n = 2
     phase = 0
+    at_nodes = true
   [../]
   [./relperm_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability
+    at_nodes = true
+    material_property = PorousFlow_relative_permeability_nodal
   [../]
 []
 

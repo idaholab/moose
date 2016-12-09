@@ -38,16 +38,8 @@ public:
   PorousFlowSink(const InputParameters & parameters);
 
 protected:
-  virtual void computeResidual() override;
-
   virtual Real computeQpResidual() override;
-
-  virtual void computeJacobian() override;
-
-  virtual void computeJacobianBlock(unsigned int jvar) override;
-
   virtual Real computeQpJacobian() override;
-
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// PorousFlow UserObject
@@ -151,12 +143,6 @@ protected:
 
   /// d(Thermal_Conductivity)/d(PorousFlow variable)
   const MaterialProperty<std::vector<RealTensorValue> > * _dthermal_conductivity_dvar;
-
-  /// Node Number information held in the quadpoints of the Materials
-  const MaterialProperty<unsigned int> & _node_number;
-
-  /// _qp_map[node_number] = the quadpoint in the PorousFlow Materials that hold info for node = node_number
-  std::vector<int> _qp_map;
 
   /// derivative of residual with respect to the jvar variable
   Real jac(unsigned int jvar);
