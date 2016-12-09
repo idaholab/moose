@@ -297,11 +297,15 @@ MonotoneCubicInterpolation::solve()
     _h[i] = _x[i+1] - _x[i];
 
   initialize_derivs();
+  for (unsigned int i = 0; i < _n_intervals; ++i)
+    _delta[i] = (_y[i+1] - _y[i]) / _h[i];
+  if (sign(_delta[0]) != sign(_yp[0]))
+    _yp[0] = 0;
+  if (sign(_delta[_n_intervals - 1]) != sign(_yp[_n_knots - 1]))
+    _yp[_n_knots - 1] = 0;
 
   for (unsigned int i = 0; i < _n_intervals; ++i)
   {
-    _delta[i] = (_y[i+1] - _y[i]) / _h[i];
-
     // Test for zero slope
     if (_yp[i] == 0 && _delta[i] == 0)
       _alpha[i] = 1;
