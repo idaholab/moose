@@ -127,7 +127,6 @@
 #include "DataStructIC.h"
 
 // Materials
-#include "MonotoneCubicMaterial.h"
 #include "MTMaterial.h"
 #include "TypesMaterial.h"
 #include "StatefulMaterial.h"
@@ -428,7 +427,6 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // Materials
   registerMaterial(MTMaterial);
-  registerMaterial(MonotoneCubicMaterial);
   registerMaterial(TypesMaterial);
   registerMaterial(StatefulMaterial);
   registerMaterial(SpatialStatefulMaterial);
