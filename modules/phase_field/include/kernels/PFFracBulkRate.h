@@ -48,13 +48,10 @@ protected:
   const VariableValue & _betaval;
   const unsigned int _beta_var;
 
-  const bool _xdisp_coupled;
-  const bool _ydisp_coupled;
-  const bool _zdisp_coupled;
-
-  const unsigned int _xdisp_var;
-  const unsigned int _ydisp_var;
-  const unsigned int _zdisp_var;
+  /// Coupled displacement variables
+  const unsigned int _ndisp;
+  std::vector<unsigned int> _disp_var;
+  std::string _base_name;
 
   ///Characteristic length, controls damage zone thickness
   Real _l;

@@ -4,18 +4,18 @@
   uniform_refine = 0
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Variables]
   [./disp_x]
-    block = 1
   [../]
   [./disp_y]
-    block = 1
   [../]
   [./c]
-    block = 1
   [../]
   [./b]
-    block = 1
   [../]
 []
 
@@ -25,20 +25,16 @@
 
 [AuxVariables]
   [./resid_x]
-    block = 1
   [../]
   [./resid_y]
-    block = 1
   [../]
   [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
-    block = 1
   [../]
   [./peeq]
     order = CONSTANT
     family = MONOMIAL
-    block = 1
   [../]
 []
 
@@ -46,22 +42,17 @@
   [./pfbulk]
     type = PFFracBulkRate
     variable = c
-    block = 1
     l = 0.08
     beta = b
     visco =1
     gc_prop_var = 'gc_prop'
     G0_var = 'G0'
     dG0_dstrain_var = 'dG0_dstrain'
-    disp_x = disp_x
-    disp_y = disp_y
   [../]
   [./solid_x]
     type = StressDivergencePFFracTensors
     variable = disp_x
-    displacements = 'disp_x disp_y'
     component = 0
-    block = 1
     save_in = resid_x
     c = c
     use_displaced_mesh = true
@@ -69,9 +60,7 @@
   [./solid_y]
     type = StressDivergencePFFracTensors
     variable = disp_y
-    displacements = 'disp_x disp_y'
     component = 1
-    block = 1
     save_in = resid_y
     c = c
     use_displaced_mesh = true
@@ -79,18 +68,15 @@
   [./dcdt]
     type = TimeDerivative
     variable = c
-    block = 1
   [../]
   [./pfintvar]
     type = PFFracIntVar
     variable = b
-    block = 1
   [../]
   [./pfintcoupled]
     type = PFFracCoupledInterface
     variable = b
     c = c
-    block = 1
   [../]
 []
 
@@ -102,14 +88,12 @@
     index_j = 1
     index_i = 1
     execute_on = timestep_end
-    block = 1
   [../]
   [./peeq]
     type = MaterialRealAux
     variable = peeq
     property = ep_eqv
     execute_on = timestep_end
-    block = 1
   [../]
 []
 
@@ -161,12 +145,10 @@
 [Materials]
   [./pfbulkmat]
     type = PFFracBulkRateMaterial
-    block = 1
     gc = 1e-3
   [../]
   [./viscop_damage]
     type = HyperElasticPhaseFieldIsoDamage
-    block = 1
     resid_abs_tol = 1e-18
     resid_rel_tol = 1e-8
     maxiters = 50
@@ -181,14 +163,11 @@
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 1
     C_ijkl = '120.0 80.0'
     fill_method = symmetric_isotropic
   [../]
   [./strain]
     type = ComputeFiniteStrain
-    block = 1
-    displacements = 'disp_x disp_y'
   [../]
 []
 
