@@ -29,8 +29,8 @@ InputParameters validParams<EigenProblem>()
 
 EigenProblem::EigenProblem(const InputParameters & parameters) :
     FEProblemBase(parameters),
-    _nl_eigen(new NonlinearEigenSystem(*this, "eigen0")),
-    _n_eigen_pairs_required(getParam<unsigned int>("n_eigen_pairs"))
+    _n_eigen_pairs_required(getParam<unsigned int>("n_eigen_pairs")),
+    _nl_eigen(new NonlinearEigenSystem(*this, "eigen0"))
 {
 #if LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;

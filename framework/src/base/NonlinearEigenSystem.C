@@ -47,7 +47,8 @@ void assemble_matrix(EquationSystems & /*es*/, const std::string & /*system_name
 #if LIBMESH_HAVE_SLEPC
 NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const std::string & name)
     : NonlinearSystemBase(eigen_problem, eigen_problem.es().add_system<TransientEigenSystem>(name), name),
-    _transient_sys(eigen_problem.es().get_system<TransientEigenSystem>(name))
+    _transient_sys(eigen_problem.es().get_system<TransientEigenSystem>(name)),
+    _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired())
 {
   // Give the system a pointer to the matrix assembly
   // function defined below.
@@ -75,6 +76,10 @@ NonlinearEigenSystem::solve()
 
   // store eigenvalues
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
+
+  if (_n_eigen_pairs_required < n_converged_eigenvalues)
+    n_converged_eigenvalues = _n_eigen_pairs_required;
+
   _eigen_values.resize(n_converged_eigenvalues);
   for (unsigned int n = 0; n < n_converged_eigenvalues; n++)
     _eigen_values[n] = getNthConvergedEigenvalue(n);

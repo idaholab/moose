@@ -84,6 +84,7 @@ public:
 protected:
   TransientEigenSystem & _transient_sys;
   std::vector<std::pair<Real, Real> > _eigen_values;
+  unsigned int _n_eigen_pairs_required;
 #endif /* LIBMESH_HAVE_SLEPC */
 };
 #endif /* NONLINEAREIGENSYSTEM_H */

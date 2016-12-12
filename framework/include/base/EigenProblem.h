@@ -44,8 +44,8 @@ public:
 
   virtual unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
 protected:
-  NonlinearEigenSystem * _nl_eigen;
   unsigned int _n_eigen_pairs_required;
+  NonlinearEigenSystem * _nl_eigen;
 };
 
 #endif /* EIGENPROBLEM_H */
