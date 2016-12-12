@@ -45,7 +45,9 @@ LinearIsoElasticPFDamage::updateVar()
   Real lambda = _elasticity_tensor[_qp](0,0,1,1);
   Real mu = _elasticity_tensor[_qp](0,1,0,1);
   Real c = _c[_qp];
-  Real xfac = Utility::pow<2>(1.0-c) + _kdamage;
+  Real xfac = _kdamage;
+  if (c < 1.0)
+    xfac = Utility::pow<2>(1 - c) + _kdamage;
 
   _mechanical_strain[_qp].symmetricEigenvaluesEigenvectors(_eigval, _eigvec);
 
@@ -84,7 +86,10 @@ LinearIsoElasticPFDamage::updateVar()
   //Used in PFFracBulkRate Jacobian
   _dG0_pos_dstrain[_qp] = stress0pos;
   //Used in StressDivergencePFFracTensors Jacobian
-  _dstress_dc[_qp] = -stress0pos * (2.0 * (1.0 - c));
+  if (c < 1.0)
+    _dstress_dc[_qp] = -stress0pos * (2.0 * (1.0 - c));
+  else
+    _dstress_dc[_qp] = -stress0pos * 0;
 }
 
 void
