@@ -89,7 +89,7 @@
   [./all]
     strain = SMALL
     add_variables = true
-    generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx vonmises hydrostatic firstinv secondinv thirdinv'
+    generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx vonmises_stress hydrostatic_stress firstinv_stress secondinv_stress thirdinv_stress'
   [../]
 []
 

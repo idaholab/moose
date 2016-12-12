@@ -14,6 +14,7 @@
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
 
+// map tensor name shortcuts to tensor material property names
 const std::map<std::string, std::string> TensorMechanicsAction::_ranktwoaux_table = {
     {"strain", "total_strain"},
     {"stress", "stress"},
@@ -21,15 +22,17 @@ const std::map<std::string, std::string> TensorMechanicsAction::_ranktwoaux_tabl
     {"plastic_strain", "plastic_strain"},
     {"creep_strain", "creep_strain"}};
 const std::vector<char> TensorMechanicsAction::_component_table = {'x', 'y', 'z'};
-const std::map<std::string, std::string> TensorMechanicsAction::_ranktwoscalaraux_table = {
-    {"vonmises", "VonMisesStress"},
-    {"hydrostatic", "Hydrostatic"},
-    {"stress_max", "MaxPrincipal"},
-    {"stress_mid", "MidPrincipal"},
-    {"stress_min", "MinPrincipal"},
-    {"firstinv", "FirstInvariant"},
-    {"secondinv", "SecondInvariant"},
-    {"thirdinv", "ThirdInvariant"}};
+// map aux variable name prefixes to RanTwoScalarAux option and list of permitted tensor name shortcuts
+const std::map<std::string, std::pair<std::string, std::vector<std::string>>> TensorMechanicsAction::_ranktwoscalaraux_table = {
+    {"vonmises", {"VonMisesStress", {"stress"}}},
+    {"hydrostatic", {"Hydrostatic", {"stress"}}},
+    {"max_principal", {"MaxPrincipal", {"stress"}}},
+    {"mid_principal", {"MidPrincipal", {"stress"}}},
+    {"min_principal", {"MinPrincipal", {"stress"}}},
+    {"equivalent", {"EquivalentPlasticStrain", {"plastic_strain", "creep_strain"}}},
+    {"firstinv", {"FirstInvariant", {"stress", "strain"}}},
+    {"secondinv", {"SecondInvariant", {"stress", "strain"}}},
+    {"thirdinv", {"ThirdInvariant", {"stress", "strain"}}}};
 
 template <>
 InputParameters
@@ -69,7 +72,8 @@ validParams<TensorMechanicsAction>()
         options += (options == "" ? "" : " ") + r2a.first + '_' + TensorMechanicsAction::_component_table[a] + TensorMechanicsAction::_component_table[b];
 
   for (auto & r2sa : TensorMechanicsAction::_ranktwoscalaraux_table)
-    options += " " + r2sa.first;
+    for (auto & t : r2sa.second.second)
+      options += " " + r2sa.first + "_" + t;
 
   MultiMooseEnum outputPropertiesType(options);
   params.addParam<MultiMooseEnum>("generate_output", outputPropertiesType, "Add scalar quantity output for stress and/or strain");
@@ -360,15 +364,22 @@ TensorMechanicsAction::actOutputGeneration()
               params.set<unsigned int>("index_j") = b;
             }
 
-      // RankTwoScalarAux (currently stress only)
-      const auto r2sa = _ranktwoscalaraux_table.find(out);
-      if (r2sa != _ranktwoscalaraux_table.end())
-      {
-        type = "RankTwoScalarAux";
-        params = _factory.getValidParams(type);
-        params.set<MaterialPropertyName>("rank_two_tensor") = "stress";
-        params.set<MooseEnum>("scalar_type") = r2sa->second;
-      }
+      // RankTwoScalarAux
+      for (const auto & r2sa : _ranktwoscalaraux_table)
+        for (const auto & t : r2sa.second.second)
+          if (r2sa.first + '_' + t == out)
+          {
+            const auto r2a = _ranktwoaux_table.find(t);
+            if (r2a != _ranktwoaux_table.end())
+            {
+              type = "RankTwoScalarAux";
+              params = _factory.getValidParams(type);
+              params.set<MaterialPropertyName>("rank_two_tensor") = r2a->second;
+              params.set<MooseEnum>("scalar_type") = r2sa.second.first;
+            }
+            else
+              mooseError("Internal error. The permitted tensor shortcuts in '_ranktwoscalaraux_table' must be keys in the '_ranktwoaux_table'.");
+          }
 
       if (type != "")
       {
