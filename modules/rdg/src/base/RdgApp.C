@@ -1,7 +1,29 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #include "RdgApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+
+// BCs
+#include "AEFVBC.h"
+
+// Materials
+#include "AEFVMaterial.h"
+
+// DG kernels
+#include "AEFVKernel.h"
+
+// User objects
+#include "AEFVSlopeReconstructionOneD.h"
+#include "AEFVSlopeLimitingOneD.h"
+#include "AEFVUpwindInternalSideFlux.h"
+#include "AEFVFreeOutflowBoundaryFlux.h"
 
 template<>
 InputParameters validParams<RdgApp>()
@@ -40,8 +62,22 @@ RdgApp::registerApps()
 // External entry point for dynamic object registration
 extern "C" void RdgApp__registerObjects(Factory & factory) { RdgApp::registerObjects(factory); }
 void
-RdgApp::registerObjects(Factory & /*factory*/)
+RdgApp::registerObjects(Factory & factory)
 {
+  // DG kernels
+  registerDGKernel(AEFVKernel);
+
+  // BCs
+  registerBoundaryCondition(AEFVBC);
+
+  // Materials
+  registerMaterial(AEFVMaterial);
+
+  // User objects
+  registerUserObject(AEFVSlopeReconstructionOneD);
+  registerUserObject(AEFVSlopeLimitingOneD);
+  registerUserObject(AEFVUpwindInternalSideFlux);
+  registerUserObject(AEFVFreeOutflowBoundaryFlux);
 }
 
 // External entry point for dynamic syntax association

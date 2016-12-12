@@ -102,3 +102,9 @@ markdown_extensions:
                       - ../modules/heat_conduction/src
                       - ../modules/heat_conduction/include
                   install: content/modules/heat_conduction/systems
+              rdg:
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - ../modules/rdg/src
+                      - ../modules/rdg/include
+                  install: content/modules/rdg/systems
