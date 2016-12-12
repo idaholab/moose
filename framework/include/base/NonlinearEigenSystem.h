@@ -25,6 +25,9 @@
 #include "libmesh/transient_system.h"
 #include "libmesh/eigen_system.h"
 
+// forward declarations
+class EigenProblem;
+
 /**
  * Nonlinear system to be solved
  *
@@ -36,7 +39,7 @@ class NonlinearEigenSystem
 #endif /* LIBMESH_HAVE_SLEPC */
 {
 public:
-  NonlinearEigenSystem(FEProblemBase & problem, const std::string & name);
+  NonlinearEigenSystem(EigenProblem & problem, const std::string & name);
 
 #if LIBMESH_HAVE_SLEPC
   virtual void solve() override;

@@ -18,7 +18,7 @@
 
 // moose includes
 #include "NonlinearEigenSystem.h"
-#include "FEProblem.h"
+#include "EigenProblem.h"
 #include "TimeIntegrator.h"
 
 // libmesh includes
@@ -45,16 +45,16 @@ void assemble_matrix(EquationSystems & /*es*/, const std::string & /*system_name
 
 
 #if LIBMESH_HAVE_SLEPC
-NonlinearEigenSystem::NonlinearEigenSystem(FEProblemBase & fe_problem, const std::string & name)
-    : NonlinearSystemBase(fe_problem, fe_problem.es().add_system<TransientEigenSystem>(name), name),
-    _transient_sys(fe_problem.es().get_system<TransientEigenSystem>(name))
+NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const std::string & name)
+    : NonlinearSystemBase(eigen_problem, eigen_problem.es().add_system<TransientEigenSystem>(name), name),
+    _transient_sys(eigen_problem.es().get_system<TransientEigenSystem>(name))
 {
   // Give the system a pointer to the matrix assembly
   // function defined below.
   sys().attach_assemble_function(Moose::assemble_matrix);
 }
 #else
-NonlinearEigenSystem::NonlinearEigenSystem(FEProblemBase & /*fe_problem*/, const std::string & /*name*/)
+NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & /*eigen_problem*/, const std::string & /*name*/)
 {
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh\n");
 }
