@@ -5,25 +5,16 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef RDGAPP_H
-#define RDGAPP_H
-
-#include "MooseApp.h"
-
-class RdgApp;
+#include "SlopeReconstructionOneD.h"
 
 template<>
-InputParameters validParams<RdgApp>();
-
-class RdgApp : public MooseApp
+InputParameters validParams<SlopeReconstructionOneD>()
 {
-public:
-  RdgApp(InputParameters parameters);
-  virtual ~RdgApp();
+  InputParameters params = validParams<SlopeReconstructionBase>();
+  return params;
+}
 
-  static void registerApps();
-  static void registerObjects(Factory & factory);
-  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
-};
-
-#endif /* RDGAPP_H */
+SlopeReconstructionOneD::SlopeReconstructionOneD(const InputParameters & parameters) :
+    SlopeReconstructionBase(parameters)
+{
+}

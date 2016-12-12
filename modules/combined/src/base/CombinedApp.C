@@ -25,6 +25,7 @@
 #include "WaterSteamEOSApp.h"
 #include "XFEMApp.h"
 #include "PorousFlowApp.h"
+#include "RdgApp.h"
 
 template<>
 InputParameters validParams<CombinedApp>()
@@ -76,6 +77,7 @@ CombinedApp::registerObjects(Factory & factory)
   WaterSteamEOSApp::registerObjects(factory);
   XFEMApp::registerObjects(factory);
   PorousFlowApp::registerObjects(factory);
+  RdgApp::registerObjects(factory);
 }
 
 // External entry point for dynamic syntax association
@@ -97,4 +99,5 @@ CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   WaterSteamEOSApp::associateSyntax(syntax, action_factory);
   XFEMApp::associateSyntax(syntax, action_factory);
   PorousFlowApp::associateSyntax(syntax, action_factory);
+  RdgApp::associateSyntax(syntax, action_factory);
 }
