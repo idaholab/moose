@@ -4,9 +4,9 @@
 []
 
 [Variables]
-  [./u]
+  [./disp_x]
   [../]
-  [./v]
+  [./disp_y]
   [../]
   [./c]
   [../]
@@ -42,21 +42,20 @@
     gc_prop_var = 'gc_prop'
     G0_var = 'G0_pos'
     dG0_dstrain_var = 'dG0_pos_dstrain'
-    disp_x = u
-    disp_y = v
+    displacements = 'disp_x disp_y'
   [../]
   [./solid_x]
     type = StressDivergencePFFracTensors
-    variable = u
-    displacements = 'u v'
+    variable = disp_x
+    displacements = 'disp_x disp_y'
     component = 0
     save_in = resid_x
     c = c
   [../]
   [./solid_y]
     type = StressDivergencePFFracTensors
-    variable = v
-    displacements = 'u v'
+    variable = disp_y
+    displacements = 'disp_x disp_y'
     component = 1
     save_in = resid_y
     c = c
@@ -90,19 +89,19 @@
 [BCs]
   [./ydisp]
     type = FunctionPresetBC
-    variable = v
+    variable = disp_y
     boundary = top
     function = tfunc
   [../]
   [./yfix]
     type = PresetBC
-    variable = v
+    variable = disp_y
     boundary = bottom
     value = 0
   [../]
   [./xfix]
     type = PresetBC
-    variable = u
+    variable = disp_x
     boundary = left
     value = 0
   [../]
@@ -141,7 +140,7 @@
   [./strain]
     type = ComputeSmallStrain
     block = 0
-    displacements = 'u v'
+    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -178,11 +177,12 @@
   nl_max_its = 10
 
   dt = 1e-4
-  dtmin = 1e-4
+  dtmin = 1e-5
   num_steps = 2
 []
 
 [Outputs]
+  file_base = void2d_out
   exodus = true
   csv = true
   gnuplot = true
