@@ -41,8 +41,11 @@ public:
 #if LIBMESH_HAVE_SLEPC
   virtual bool converged() override;
 #endif
+
+  virtual unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
 protected:
   NonlinearEigenSystem * _nl_eigen;
+  unsigned int _n_eigen_pairs_required;
 };
 
 #endif /* EIGENPROBLEM_H */

@@ -29,7 +29,8 @@ InputParameters validParams<EigenProblem>()
 
 EigenProblem::EigenProblem(const InputParameters & parameters) :
     FEProblemBase(parameters),
-    _nl_eigen(new NonlinearEigenSystem(*this, "eigen0"))
+    _nl_eigen(new NonlinearEigenSystem(*this, "eigen0")),
+    _n_eigen_pairs_required(getParam<unsigned int>("n_eigen_pairs"))
 {
 #if LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
@@ -39,7 +40,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters) :
   // i.e. the number of requested eigenpairs nev and the number
   // of basis vectors ncv used in the solution algorithm. Note that
   // ncv >= nev must hold and ncv >= 2*nev is recommended.
-  es().parameters.set<unsigned int>("eigenpairs")    = getParam<unsigned int>("n_eigen_pairs");
+  es().parameters.set<unsigned int>("eigenpairs")    = _n_eigen_pairs_required;
   es().parameters.set<unsigned int>("basis vectors") = getParam<unsigned int>("n_basis_vectors");
 
   FEProblemBase::newAssemblyArray(*_nl_eigen);
