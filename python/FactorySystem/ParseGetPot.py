@@ -72,7 +72,7 @@ class GPNode:
 
     # Write the parameters
     for param in self.params_list:
-      output += '{}{} = "{}"\n'.format(' '*2*(level + 1), param, str(self.params[param]))
+      output += "{}{} = '{}'\n".format(' '*2*(level + 1), param, str(self.params[param]))
 
     # Write the children
     for child in self.children_list:
