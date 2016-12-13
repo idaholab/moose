@@ -35,6 +35,8 @@ InterfaceGradientMatch::computeQpResidual(Moose::DGResidualType type)
     case Moose::Neighbor:
       return res * _test_neighbor[_i][_qp];
   }
+
+  mooseError("Internal error.");
 }
 
 Real
@@ -54,4 +56,6 @@ InterfaceGradientMatch::computeQpJacobian(Moose::DGJacobianType type)
     case Moose::NeighborElement:
       return _grad_phi[_j][_qp](_component) * _test_neighbor[_i][_qp];
   }
+
+  mooseError("Internal error.");
 }

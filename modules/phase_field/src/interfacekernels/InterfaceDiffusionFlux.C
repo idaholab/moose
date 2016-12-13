@@ -35,6 +35,8 @@ InterfaceDiffusionFlux::computeQpResidual(Moose::DGResidualType type)
     case Moose::Neighbor:
       return -_D_neighbor * _grad_neighbor_value[_qp] * -_normals[_qp] * _test_neighbor[_i][_qp];
   }
+
+  mooseError("Internal error.");
 }
 
 Real
@@ -54,4 +56,6 @@ InterfaceDiffusionFlux::computeQpJacobian(Moose::DGJacobianType type)
     case Moose::NeighborElement:
       return 0.0;
   }
+
+  mooseError("Internal error.");
 }
