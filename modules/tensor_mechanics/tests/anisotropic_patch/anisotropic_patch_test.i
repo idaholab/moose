@@ -79,138 +79,24 @@
 [] # Variables
 
 [AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./elastic_energy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vonmises]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./hydrostatic]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./firstinv]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./secondinv]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./thirdinv]
     order = CONSTANT
     family = MONOMIAL
   [../]
 [] # AuxVariables
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = SMALL
+    add_variables = true
+    generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx vonmises_stress hydrostatic_stress firstinv_stress secondinv_stress thirdinv_stress'
   [../]
 []
 
 [AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 0
-    variable = stress_xx
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 1
-    index_j = 1
-    variable = stress_yy
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 2
-    index_j = 2
-    variable = stress_zz
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 1
-    variable = stress_xy
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 1
-    index_j = 2
-    variable = stress_yz
-  [../]
-  [./stress_zx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 2
-    index_j = 0
-    variable = stress_zx
-  [../]
   [./elastic_energy]
     type = ElasticEnergyAux
     variable = elastic_energy
-  [../]
-  [./vonmises]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
-    scalar_type = VonMisesStress
-    variable = vonmises
-  [../]
-  [./hydrostatic]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
-    scalar_type = Hydrostatic
-    variable = hydrostatic
-  [../]
-  [./fi]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
-    scalar_type = FirstInvariant
-    variable = firstinv
-  [../]
-  [./si]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
-    scalar_type = SecondInvariant
-    variable = secondinv
-  [../]
-  [./ti]
-    type = RankTwoScalarAux
-    rank_two_tensor = stress
-    scalar_type = ThirdInvariant
-    variable = thirdinv
   [../]
 [] # AuxKernels
 
@@ -381,9 +267,6 @@
 #    youngs_modulus = 1e6
 #    poissons_ratio = 0.0
   [../]
-  [./strain]
-    type = ComputeSmallStrain
-  [../]
   [./stress]
     type = ComputeLinearElasticStress
   [../]
@@ -392,11 +275,7 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
   nl_abs_tol = 1e-10
-
   l_max_its = 20
 
   start_time = 0.0

@@ -23,7 +23,7 @@
   [./all]
     strain = FINITE
     add_variables = true
-    generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz'
+    generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_xz'
   [../]
 []
 
@@ -63,10 +63,6 @@
 []
 
 [AuxVariables]
-  [./stress_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./plastic_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -114,13 +110,6 @@
 []
 
 [AuxKernels]
-  [./stress_xz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xz
-    index_i = 0
-    index_j = 2
-  [../]
   [./plastic_xx]
     type = RankTwoAux
     rank_two_tensor = plastic_strain

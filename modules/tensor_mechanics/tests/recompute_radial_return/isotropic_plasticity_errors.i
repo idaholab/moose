@@ -20,28 +20,6 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[AuxVariables]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./plastic_strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./plastic_strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./plastic_strain_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
 [Functions]
   [./top_pull]
     type = ParsedFunction
@@ -59,43 +37,9 @@
     strain = SMALL
     incremental = true
     add_variables = true
+    generate_output = 'stress_yy plastic_strain_xx plastic_strain_yy plastic_strain_zz'
   [../]
 []
-
-[AuxKernels]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-
-  [./plastic_strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = plastic_strain_yy
-    index_i = 1
-    index_j = 1
-  [../]
-
-  [./plastic_strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = plastic_strain_xx
-    index_i = 0
-    index_j = 0
-  [../]
-
-  [./plastic_strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = plastic_strain_zz
-    index_i = 2
-    index_j = 2
-  [../]
- []
-
 
 [BCs]
   [./y_pull_function]
