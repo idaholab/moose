@@ -3,6 +3,10 @@
   file = void2d_mesh.xda
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Variables]
   [./disp_x]
   [../]
@@ -42,12 +46,10 @@
     gc_prop_var = 'gc_prop'
     G0_var = 'G0_pos'
     dG0_dstrain_var = 'dG0_pos_dstrain'
-    displacements = 'disp_x disp_y'
   [../]
   [./solid_x]
     type = StressDivergencePFFracTensors
     variable = disp_x
-    displacements = 'disp_x disp_y'
     component = 0
     save_in = resid_x
     c = c
@@ -55,7 +57,6 @@
   [./solid_y]
     type = StressDivergencePFFracTensors
     variable = disp_y
-    displacements = 'disp_x disp_y'
     component = 1
     save_in = resid_y
     c = c
@@ -177,12 +178,10 @@
   nl_max_its = 10
 
   dt = 1e-4
-  dtmin = 1e-5
   num_steps = 2
 []
 
 [Outputs]
-  file_base = void2d_out
   exodus = true
   csv = true
   gnuplot = true
