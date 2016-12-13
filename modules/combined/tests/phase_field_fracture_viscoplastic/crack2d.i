@@ -4,6 +4,10 @@
   uniform_refine = 0
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Variables]
   [./disp_x]
   [../]
@@ -40,12 +44,10 @@
     gc_prop_var = 'gc_prop'
     G0_var = 'G0'
     dG0_dstrain_var = 'dG0_dstrain'
-    displacements = 'disp_x disp_y'
   [../]
   [./solid_x]
     type = StressDivergencePFFracTensors
     variable = disp_x
-    displacements = 'disp_x disp_y'
     component = 0
     save_in = resid_x
     c = c
@@ -54,7 +56,6 @@
   [./solid_y]
     type = StressDivergencePFFracTensors
     variable = disp_y
-    displacements = 'disp_x disp_y'
     component = 1
     save_in = resid_y
     c = c
@@ -163,7 +164,6 @@
   [../]
   [./strain]
     type = ComputeFiniteStrain
-    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -205,6 +205,5 @@
 []
 
 [Outputs]
-  file_base = crack_2d_out
   exodus = true
 []

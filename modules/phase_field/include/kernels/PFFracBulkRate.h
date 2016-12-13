@@ -47,10 +47,9 @@ protected:
   ///Auxiliary variable: beta = Laplacian of c
   const VariableValue & _betaval;
   const unsigned int _beta_var;
-  // std::string _base_name;
 
   /// Coupled displacement variables
-  unsigned int _ndisp;
+  const unsigned int _ndisp;
   std::vector<unsigned int> _disp_var;
   std::string _base_name;
 

@@ -170,6 +170,9 @@ public:
   RankTwoTensor operator - () const;
 
   /// performs _vals *= a
+  RankTwoTensor & operator= (const Real a);
+
+  /// performs _vals *= a
   RankTwoTensor & operator*= (const Real a);
 
   /// returns _vals*a

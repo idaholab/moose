@@ -33,14 +33,14 @@ PFFracBulkRate::PFFracBulkRate(const InputParameters & parameters):
   _beta_var(coupled("beta")),
 
   _ndisp(coupledComponents("displacements")),
-  _disp_var(3),
+  _disp_var(_ndisp),
   _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
 
   _l(getParam<Real>("l")),
   _visco(getParam<Real>("visco"))
 
   {
-    for (unsigned int i = 0; i < _ndisp; ++i)
+      for (unsigned int i = 0; i < _ndisp; ++i)
       _disp_var[i] = coupled("displacements", i);
   }
 
@@ -56,7 +56,7 @@ PFFracBulkRate::computeDFDOP(PFFunctionType type)
     {
       //Order parameter for damage variable
       Real c = _u[_qp];
-      Real x =   _l * _betaval[_qp] + 2.0*(1-c) * _G0_pos[_qp]/gc - c/_l;
+      Real x =   _l * _betaval[_qp] + 2.0*(1.0-c) * _G0_pos[_qp]/gc - c/_l;
 
 
       return -(( std::abs(x) + x )/2.0)/_visco;
@@ -65,7 +65,7 @@ PFFracBulkRate::computeDFDOP(PFFunctionType type)
     {
       Real c = _u[_qp];
 
-      Real x = _l * _betaval[_qp] + 2.0 * (1-c) * _G0_pos[_qp] / gc - c / _l;
+      Real x = _l * _betaval[_qp] + 2.0 * (1.0-c) * _G0_pos[_qp] / gc - c / _l;
       Real signx = x > 0.0 ? 1.0 : -1.0;
       return (signx + 1.0)/2.0 * (2.0 * _G0_pos[_qp]/gc + 1.0/_l)/_visco;
     }
@@ -99,7 +99,7 @@ PFFracBulkRate::computeQpOffDiagJacobian(unsigned int jvar)
   Real gc = _gc_prop[_qp];
 
 
-  Real x = _l * _betaval[_qp] + 2.0*(1 - c) * (_G0_pos[_qp]/gc) - c/_l;
+  Real x = _l * _betaval[_qp] + 2.0*(1.0 - c) * (_G0_pos[_qp]/gc) - c/_l;
 
   Real signx = x > 0.0 ? 1.0 : -1.0;
 
@@ -118,7 +118,7 @@ PFFracBulkRate::computeQpOffDiagJacobian(unsigned int jvar)
     }
     else
       return 0.0;
-  // // Contribution of displacements to off diag Jacobian of c
+  // Contribution of displacements to off diag Jacobian of c
   if (disp_flag && _dG0_pos_dstrain != NULL)
   {
     Real val = 0.0;

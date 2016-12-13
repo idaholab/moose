@@ -334,6 +334,16 @@ RankTwoTensor::operator - () const
 }
 
 RankTwoTensor &
+RankTwoTensor::operator=(const Real a)
+{
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      _vals[i][j] = a;
+
+  return *this;
+}
+
+RankTwoTensor &
 RankTwoTensor::operator*=(const Real a)
 {
   for (unsigned int i = 0; i < N; ++i)

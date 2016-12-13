@@ -89,7 +89,7 @@ LinearIsoElasticPFDamage::updateVar()
   if (c < 1.0)
     _dstress_dc[_qp] = -stress0pos * (2.0 * (1.0 - c));
   else
-    _dstress_dc[_qp] = -stress0pos * 0;
+    _dstress_dc[_qp] = 0.0;
 }
 
 void
