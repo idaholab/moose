@@ -385,9 +385,16 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(TensorMechanicsAction, "add_aux_kernel");
   registerAction(TensorMechanicsAction, "add_material");
 
+  registerAction(DynamicTensorMechanicsAction, "setup_mesh_complete");
+  registerAction(DynamicTensorMechanicsAction, "validate_coordinate_systems");
   registerAction(DynamicTensorMechanicsAction, "add_kernel");
+
+  registerAction(PoroMechanicsAction, "setup_mesh_complete");
+  registerAction(PoroMechanicsAction, "validate_coordinate_systems");
   registerAction(PoroMechanicsAction, "add_kernel");
+
   registerAction(PressureAction, "add_bc");
+
   registerAction(GeneralizedPlaneStrainAction, "add_kernel");
   registerAction(GeneralizedPlaneStrainAction, "add_user_object");
   registerAction(GeneralizedPlaneStrainAction, "add_scalar_kernel");
