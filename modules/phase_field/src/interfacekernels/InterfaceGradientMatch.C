@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<InterfaceGradientMatch>()
 {
   InputParameters params = validParams<InterfaceKernel>();
+  params.addClassDescription("Enforce gradient continuity between two different variables across a subdomain boundary");
   params.addRequiredParam<unsigned int>("component", "Gradient component to set equal");
   return params;
 }

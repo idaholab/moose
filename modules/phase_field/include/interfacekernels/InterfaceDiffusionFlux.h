@@ -4,30 +4,34 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef INTERFACEGRADIENTMATCH_H
-#define INTERFACEGRADIENTMATCH_H
+#ifndef INTERFACEDIFFUSIONFLUX_H
+#define INTERFACEDIFFUSIONFLUX_H
 
 #include "InterfaceKernel.h"
 
-class InterfaceGradientMatch;
+class InterfaceDiffusionFlux;
 
 template<>
-InputParameters validParams<InterfaceGradientMatch>();
+InputParameters validParams<InterfaceDiffusionFlux>();
 
 /**
- * Enforce gradient continuity between two different variables across a
- * subdomain boundary.
+ * Add weak form surface terms of the Diffusion equation for two different
+ * variables across a subdomain boundary
  */
-class InterfaceGradientMatch : public InterfaceKernel
+class InterfaceDiffusionFlux : public InterfaceKernel
 {
 public:
-  InterfaceGradientMatch(const InputParameters & parameters);
+  InterfaceDiffusionFlux(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
-  const unsigned int _component;
+  /// diffusion coefficient
+  const Real _D;
+
+  /// neighbor diffusion coefficient
+  const Real _D_neighbor;
 };
 
-#endif // INTERFACEGRADIENTMATCH_H
+#endif // INTERFACEDIFFUSIONFLUX_H

@@ -109,6 +109,7 @@
 /*
  * InterfaceKernels
  */
+#include "InterfaceDiffusionFlux.h"
 #include "InterfaceGradientMatch.h"
 
 /*
@@ -378,6 +379,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerBoundaryCondition(CahnHilliardAnisoFluxBC);
   registerBoundaryCondition(CahnHilliardFluxBC);
 
+  registerInterfaceKernel(InterfaceDiffusionFlux);
   registerInterfaceKernel(InterfaceGradientMatch);
 
   registerMaterial(AsymmetricCrossTermBarrierFunctionMaterial);
