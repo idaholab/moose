@@ -1,14 +1,8 @@
-#
-# This test demonstrates an InterfaceKernel (InterfaceDiffusionFlux) that can
-# replace a pair of integrated DiffusionFluxBC boundary conditions.
-#
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 10
-  ymax = 0.5
+  nx = 50
+  ny = 50
 []
 
 [MeshModifiers]
@@ -24,7 +18,7 @@
     bottom_left = '0.49 0 0'
     top_right = '1 1 0'
   [../]
-  [./iface_u]
+  [./iface]
     type = SideSetsBetweenSubdomains
     master_block = 1
     paired_block = 2
@@ -34,58 +28,62 @@
 []
 
 [Variables]
-  [./u2]
+  [./u]
     block = 1
     [./InitialCondition]
       type = FunctionIC
       function = 'r:=sqrt((x-0.4)^2+(y-0.5)^2);if(r<0.05,5,1)'
     [../]
   [../]
-  [./v2]
+  [./v]
     block = 2
-    [./InitialCondition]
-      type = FunctionIC
-      function = 'r:=sqrt((x-0.7)^2+(y-0.5)^2);if(r<0.05,5,1)'
-    [../]
+    initial_condition = 0.8
   [../]
 []
 
 [Kernels]
-  [./u2_diff]
+  [./u_diff]
     type = Diffusion
-    variable = u2
+    variable = u
     block = 1
   [../]
-  [./u2_dt]
+  [./u_dt]
     type = TimeDerivative
-    variable = u2
+    variable = u
     block = 1
   [../]
-  [./v2_diff]
+  [./v_diff]
     type = Diffusion
-    variable = v2
+    variable = v
     block = 2
   [../]
-  [./v2_dt]
+  [./v_dt]
     type = TimeDerivative
-    variable = v2
+    variable = v
     block = 2
   [../]
 []
 
 [InterfaceKernels]
-  [./iface]
+  [./gradient_continuity]
+    type = InterfaceGradientMatch
+    variable = u
+    boundary = 10
+    neighbor_var = v
+    component = 0
+  [../]
+  [./diffusion_surface_term]
     type = InterfaceDiffusionFlux
     boundary = 10
-    variable = u2
-    neighbor_var = v2
+    variable = u
+    neighbor_var = v
   [../]
 []
 
 [Executioner]
   type = Transient
-  dt = 0.002
-  num_steps = 6
+  dt = 0.001
+  num_steps = 20
 []
 
 [Outputs]

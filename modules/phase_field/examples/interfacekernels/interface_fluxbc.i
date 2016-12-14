@@ -2,13 +2,15 @@
 # This test demonstrates an InterfaceKernel (InterfaceDiffusionFlux) that can
 # replace a pair of integrated DiffusionFluxBC boundary conditions.
 #
+# The AuxVariable 'diff' shows the difference between the BC and teh InterfaceKernel
+# approach.
+#
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 10
-  ymax = 0.5
+  nx = 50
+  ny = 50
 []
 
 [MeshModifiers]
@@ -31,9 +33,30 @@
     new_boundary = 10
     depends_on = 'box1 box2'
   [../]
+  [./iface_v]
+    type = SideSetsBetweenSubdomains
+    master_block = 2
+    paired_block = 1
+    new_boundary = 11
+    depends_on = 'box1 box2'
+  [../]
 []
 
 [Variables]
+  [./u1]
+    block = 1
+    [./InitialCondition]
+      type = FunctionIC
+      function = 'r:=sqrt((x-0.4)^2+(y-0.5)^2);if(r<0.05,5,1)'
+    [../]
+  [../]
+  [./v1]
+    block = 2
+    [./InitialCondition]
+      type = FunctionIC
+      function = 'r:=sqrt((x-0.7)^2+(y-0.5)^2);if(r<0.05,5,1)'
+    [../]
+  [../]
   [./u2]
     block = 1
     [./InitialCondition]
@@ -51,6 +74,27 @@
 []
 
 [Kernels]
+  [./u1_diff]
+    type = Diffusion
+    variable = u1
+    block = 1
+  [../]
+  [./u1_dt]
+    type = TimeDerivative
+    variable = u1
+    block = 1
+  [../]
+  [./v1_diff]
+    type = Diffusion
+    variable = v1
+    block = 2
+  [../]
+  [./v1_dt]
+    type = TimeDerivative
+    variable = v1
+    block = 2
+  [../]
+
   [./u2_diff]
     type = Diffusion
     variable = u2
@@ -73,6 +117,28 @@
   [../]
 []
 
+[AuxVariables]
+  [./diff]
+  [../]
+[]
+
+[AuxKernels]
+  [./u_side]
+    type = ParsedAux
+    variable = diff
+    block = 1
+    args = 'u1 u2'
+    function = 'u1 - u2'
+  [../]
+  [./v_side]
+    type = ParsedAux
+    variable = diff
+    block = 2
+    args = 'v1 v2'
+    function = 'v1 - v2'
+  [../]
+[]
+
 [InterfaceKernels]
   [./iface]
     type = InterfaceDiffusionFlux
@@ -82,10 +148,23 @@
   [../]
 []
 
+[BCs]
+  [./u_boundary_term]
+    type = DiffusionFluxBC
+    variable = u1
+    boundary = 10
+  [../]
+  [./v_boundary_term]
+    type = DiffusionFluxBC
+    variable = v1
+    boundary = 11
+  [../]
+[]
+
 [Executioner]
   type = Transient
-  dt = 0.002
-  num_steps = 6
+  dt = 0.001
+  num_steps = 20
 []
 
 [Outputs]

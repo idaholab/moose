@@ -1,9 +1,13 @@
+#
+# Test a gradient continuity interfacekernel
+#
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
   nx = 20
   ny = 10
-ymax = 0.5
+  ymax = 0.5
 []
 
 [MeshModifiers]
