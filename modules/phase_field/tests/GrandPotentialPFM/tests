@@ -4,4 +4,9 @@
     input = 'GrandPotentialPFM.i'
     exodiff = 'GrandPotentialPFM_out.e'
   [../]
+  [./GrandPotentialMultiphase]
+    type = 'Exodiff'
+    input = 'GrandPotentialMultiphase.i'
+    exodiff = 'GrandPotentialMultiphase_out.e'
+  [../]
 []
