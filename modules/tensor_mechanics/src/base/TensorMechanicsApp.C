@@ -71,6 +71,8 @@
 #include "ComputeVariableBaseEigenStrain.h"
 #include "ComputeVariableEigenstrain.h"
 #include "ComputeThermalExpansionEigenstrain.h"
+#include "ComputeMeanThermalExpansionFunctionEigenstrain.h"
+#include "ComputeInstantaneousThermalExpansionFunctionEigenstrain.h"
 #include "ComputeConcentrationDependentElasticityTensor.h"
 #include "FiniteStrainHyperElasticViscoPlastic.h"
 #include "LinearIsoElasticPFDamage.h"
@@ -258,6 +260,8 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeVariableEigenstrain);
   registerDeprecatedObjectName(ComputeThermalExpansionEigenstrain, "ComputeThermalExpansionEigenStrain", "12/19/2016 00:00");
   registerMaterial(ComputeThermalExpansionEigenstrain);
+  registerMaterial(ComputeMeanThermalExpansionFunctionEigenstrain);
+  registerMaterial(ComputeInstantaneousThermalExpansionFunctionEigenstrain);
   registerMaterial(ComputeConcentrationDependentElasticityTensor);
   registerMaterial(FiniteStrainHyperElasticViscoPlastic);
   registerMaterial(LinearIsoElasticPFDamage);

@@ -45,10 +45,7 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
     _disp_var.push_back(&_subproblem.getVariable(_tid, nl_vnames[i]));
 
   for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
-  {
-    MaterialPropertyName deriv_prop_name = _base_name + "d" + _eigenstrain_names[i] + "_dtemperature";
-    _deigenstrain_dT[i] = &getMaterialPropertyDerivative<RankTwoTensor>(deriv_prop_name, _temp_var->name());
-  }
+    _deigenstrain_dT[i] = &getMaterialPropertyDerivative<RankTwoTensor>(_base_name + _eigenstrain_names[i], _temp_var->name());
 }
 
 void

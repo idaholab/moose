@@ -7,31 +7,27 @@
 #ifndef COMPUTETHERMALEXPANSIONEIGENSTRAIN_H
 #define COMPUTETHERMALEXPANSIONEIGENSTRAIN_H
 
-#include "ComputeEigenstrainBase.h"
+#include "ComputeThermalExpansionEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
 
 class ComputeThermalExpansionEigenstrain;
-class RankTwoTensor;
 
 template<>
 InputParameters validParams<ComputeThermalExpansionEigenstrain>();
 
 /**
- * ComputeThermalExpansionEigenstrain computes an Eigenstrain corresponding to the
- * thermal expansion of a material.
+ * ComputeThermalExpansionEigenstrain computes an eigenstrain for thermal expansion
+ * with a constant expansion coefficient.
  */
-class ComputeThermalExpansionEigenstrain : public DerivativeMaterialInterface<ComputeEigenstrainBase>
+class ComputeThermalExpansionEigenstrain : public ComputeThermalExpansionEigenstrainBase
 {
 public:
   ComputeThermalExpansionEigenstrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpEigenstrain();
+  virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte) override;
 
-  const VariableValue & _temperature;
-  MaterialProperty<RankTwoTensor> & _deigenstrain_dT;
   const Real & _thermal_expansion_coeff;
-  Real _stress_free_temperature;
 };
 
 #endif // COMPUTETHERMALEXPANSIONEIGENSTRAIN_H
