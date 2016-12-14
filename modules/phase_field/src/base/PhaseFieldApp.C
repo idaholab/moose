@@ -20,6 +20,7 @@
 #include "ACInterfaceKobayashi1.h"
 #include "ACInterfaceKobayashi2.h"
 #include "ACSEDGPoly.h"
+#include "ACSwitching.h"
 #include "AllenCahn.h"
 #include "CahnHilliard.h"
 #include "CahnHilliardAniso.h"
@@ -293,6 +294,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACInterfaceKobayashi1);
   registerKernel(ACInterfaceKobayashi2);
   registerKernel(ACSEDGPoly);
+  registerKernel(ACSwitching);
   registerKernel(AllenCahn);
   registerKernel(CahnHilliard);
   registerKernel(CahnHilliardAniso);
