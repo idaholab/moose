@@ -19,7 +19,7 @@
     variable = temp
   [../]
   [./heat_conduction_time_derivative]
-    type = HeatCapacityConductionTimeDerivative
+    type = HeatConductionTimeDerivative
     variable = temp
   [../]
 []
