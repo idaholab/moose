@@ -4,27 +4,23 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "InterfaceDiffusionFlux.h"
+#include "InterfaceDiffusionBoundaryTerm.h"
 
 template<>
-InputParameters validParams<InterfaceDiffusionFlux>()
+InputParameters validParams<InterfaceDiffusionBoundaryTerm>()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = validParams<InterfaceDiffusionBase>();
   params.addClassDescription("Add weak form surface terms of the Diffusion equation for two different variables across a subdomain boundary");
-  params.addParam<Real>("D", 1.0, "Diffusion coefficient");
-  params.addParam<Real>("D_neighbor", 1.0, "Neighbor variable diffusion coefficient");
   return params;
 }
 
-InterfaceDiffusionFlux::InterfaceDiffusionFlux(const InputParameters & parameters) :
-    InterfaceKernel(parameters),
-    _D(getParam<Real>("D")),
-    _D_neighbor(getParam<Real>("D_neighbor"))
+InterfaceDiffusionBoundaryTerm::InterfaceDiffusionBoundaryTerm(const InputParameters & parameters) :
+    InterfaceDiffusionBase(parameters)
 {
 }
 
 Real
-InterfaceDiffusionFlux::computeQpResidual(Moose::DGResidualType type)
+InterfaceDiffusionBoundaryTerm::computeQpResidual(Moose::DGResidualType type)
 {
   // add weak form surface terms for the diffusion equation
   switch (type)
@@ -40,7 +36,7 @@ InterfaceDiffusionFlux::computeQpResidual(Moose::DGResidualType type)
 }
 
 Real
-InterfaceDiffusionFlux::computeQpJacobian(Moose::DGJacobianType type)
+InterfaceDiffusionBoundaryTerm::computeQpJacobian(Moose::DGJacobianType type)
 {
   switch (type)
   {

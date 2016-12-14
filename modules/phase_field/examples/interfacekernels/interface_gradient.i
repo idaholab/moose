@@ -25,6 +25,17 @@
     new_boundary = 10
     depends_on = 'box1 box2'
   [../]
+  [./rotate]
+    type = Transform
+    transform = ROTATE
+    vector_value = '5 0 0'
+    depends_on = iface
+  [../]
+[]
+
+[GlobalParams]
+  order = FIRST
+  family = LAGRANGE
 []
 
 [Variables]
@@ -65,15 +76,14 @@
 []
 
 [InterfaceKernels]
-  [./gradient_continuity]
-    type = InterfaceGradientMatch
+  [./flux_continuity]
+    type = InterfaceDiffusionFluxMatch
     variable = u
     boundary = 10
     neighbor_var = v
-    component = 0
   [../]
   [./diffusion_surface_term]
-    type = InterfaceDiffusionFlux
+    type = InterfaceDiffusionBoundaryTerm
     boundary = 10
     variable = u
     neighbor_var = v
@@ -82,11 +92,18 @@
 
 [Executioner]
   type = Transient
+
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu       superlu_dist'
+
   dt = 0.001
   num_steps = 20
 []
 
 [Outputs]
-  exodus = true
+  [./out]
+    type = Exodus
+    use_problem_dimension = false
+  [../]
   print_linear_residuals = false
 []

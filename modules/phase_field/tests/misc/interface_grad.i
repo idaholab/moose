@@ -78,11 +78,10 @@
 
 [InterfaceKernels]
   [./iface]
-    type = InterfaceGradientMatch
+    type = InterfaceDiffusionFluxMatch
     variable = u
     boundary = 10
     neighbor_var = v
-    component = 0
   [../]
 []
 

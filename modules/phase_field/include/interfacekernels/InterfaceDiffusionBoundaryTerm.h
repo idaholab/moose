@@ -4,34 +4,28 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef INTERFACEDIFFUSIONFLUX_H
-#define INTERFACEDIFFUSIONFLUX_H
+#ifndef INTERFACEDIFFUSIONBOUNDARYTERM_H
+#define INTERFACEDIFFUSIONBOUNDARYTERM_H
 
-#include "InterfaceKernel.h"
+#include "InterfaceDiffusionBase.h"
 
-class InterfaceDiffusionFlux;
+class InterfaceDiffusionBoundaryTerm;
 
 template<>
-InputParameters validParams<InterfaceDiffusionFlux>();
+InputParameters validParams<InterfaceDiffusionBoundaryTerm>();
 
 /**
  * Add weak form surface terms of the Diffusion equation for two different
  * variables across a subdomain boundary
  */
-class InterfaceDiffusionFlux : public InterfaceKernel
+class InterfaceDiffusionBoundaryTerm : public InterfaceDiffusionBase
 {
 public:
-  InterfaceDiffusionFlux(const InputParameters & parameters);
+  InterfaceDiffusionBoundaryTerm(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
-
-  /// diffusion coefficient
-  const Real _D;
-
-  /// neighbor diffusion coefficient
-  const Real _D_neighbor;
 };
 
-#endif // INTERFACEDIFFUSIONFLUX_H
+#endif // INTERFACEDIFFUSIONBOUNDARYTERM_H

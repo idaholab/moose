@@ -4,30 +4,28 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef INTERFACEGRADIENTMATCH_H
-#define INTERFACEGRADIENTMATCH_H
+#ifndef INTERFACEDIFFUSIONFLUXMATCH_H
+#define INTERFACEDIFFUSIONFLUXMATCH_H
 
-#include "InterfaceKernel.h"
+#include "InterfaceDiffusionBase.h"
 
-class InterfaceGradientMatch;
+class InterfaceDiffusionFluxMatch;
 
 template<>
-InputParameters validParams<InterfaceGradientMatch>();
+InputParameters validParams<InterfaceDiffusionFluxMatch>();
 
 /**
  * Enforce gradient continuity between two different variables across a
  * subdomain boundary.
  */
-class InterfaceGradientMatch : public InterfaceKernel
+class InterfaceDiffusionFluxMatch : public InterfaceDiffusionBase
 {
 public:
-  InterfaceGradientMatch(const InputParameters & parameters);
+  InterfaceDiffusionFluxMatch(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
-
-  const unsigned int _component;
 };
 
-#endif // INTERFACEGRADIENTMATCH_H
+#endif // INTERFACEDIFFUSIONFLUXMATCH_H

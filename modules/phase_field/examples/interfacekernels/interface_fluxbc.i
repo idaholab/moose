@@ -141,7 +141,7 @@
 
 [InterfaceKernels]
   [./iface]
-    type = InterfaceDiffusionFlux
+    type = InterfaceDiffusionBoundaryTerm
     boundary = 10
     variable = u2
     neighbor_var = v2
