@@ -32,13 +32,13 @@
   [./test_variable_x_aux]
     type = FunctionGradAux
     variable = test_variable_x
-    dimension_index = 0
+    dimension_index = x
     function = solution_function
   [../]
   [./test_variable_y_aux]
     type = FunctionGradAux
     variable = test_variable_y
-    dimension_index = 1
+    dimension_index = y
     function = solution_function
   [../]
 []
@@ -82,10 +82,6 @@
 
 [Executioner]
   type = Steady
-
-  # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
   nl_rel_tol = 1e-10
 []
 

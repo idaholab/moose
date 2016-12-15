@@ -25,16 +25,12 @@ template<>
 InputParameters validParams<FunctionGradAux>();
 
 /**
- * Coupled auxiliary gradient
+ * AuxKernel for computing the gradient of a function and selecting one component
+ * to be saved in the AuxVariable
  */
 class FunctionGradAux : public AuxKernel
 {
 public:
-
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   FunctionGradAux(const InputParameters & parameters);
 
   virtual ~FunctionGradAux();

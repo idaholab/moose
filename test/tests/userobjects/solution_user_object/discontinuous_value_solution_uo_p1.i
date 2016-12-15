@@ -18,20 +18,11 @@
   [./discontinuous_variable]
     order = CONSTANT
     family = MONOMIAL
-    [./InitialCondition]
-      type = FunctionIC
-      function = discontinuous_function
-    [../]
   [../]
 
   [./continuous_variable]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
-      type = FunctionIC
-      function = continuous_function
-    [../]
-
   [../]
 []
 
@@ -50,6 +41,19 @@
   [./diff]
     type = Diffusion
     variable = u
+  [../]
+[]
+
+[ICs]
+  [./discontinuous_variable]
+    type = FunctionIC
+    variable = discontinuous_variable
+    function = discontinuous_function
+  [../]
+  [./continuous_variable]
+    type = FunctionIC
+    variable = continuous_variable
+    function = continuous_function
   [../]
 []
 

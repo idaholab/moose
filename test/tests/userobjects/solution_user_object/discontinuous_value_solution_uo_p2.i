@@ -68,24 +68,24 @@
   [./continuous_gradient_left]
     type = TestDiscontinuousValuePP
     variable = continuous_variable
-    for_gradient = true
-    gradient_component = 0
+    evaluate_gradient = true
+    gradient_component = x
     point = '0.25 0.25 0.0'
     solution = soln
   [../]
   [./continuous_gradient_value_face]
     type = TestDiscontinuousValuePP
     variable = continuous_variable
-    for_gradient = true
-    gradient_component = 0
+    evaluate_gradient = true
+    gradient_component = x
     point = '0.5 0.25 0.0'
     solution = soln
   [../]
   [./continuous_gradient_right]
     type = TestDiscontinuousValuePP
     variable = continuous_variable
-    for_gradient = true
-    gradient_component = 0
+    evaluate_gradient = true
+    gradient_component = x
     point = '0.75 0.25 0.0'
     solution = soln
   [../]

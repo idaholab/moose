@@ -64,7 +64,7 @@ public:
    * @param var_name The variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual Real pointValueWrapper(Real t, const Point & p, const std::string & var_name, const MooseEnum & weighting_type = weightingType()) const;
+  Real pointValueWrapper(Real t, const Point & p, const std::string & var_name, const MooseEnum & weighting_type = weightingType()) const;
 
   /**
    * Returns a value at a specific location and variable (see SolutionFunction)
@@ -73,7 +73,7 @@ public:
    * @param local_var_index The local index of the variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual Real pointValue(Real t, const Point & p, const unsigned int local_var_index) const;
+  Real pointValue(Real t, const Point & p, const unsigned int local_var_index) const;
 
   /**
    * Returns a value at a specific location and variable (see SolutionFunction)
@@ -82,7 +82,7 @@ public:
    * @param var_name The variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual Real pointValue(Real t, const Point & p, const std::string & var_name) const;
+  Real pointValue(Real t, const Point & p, const std::string & var_name) const;
 
   /**
    * Returns a value at a specific location and variable for cases where the solution is
@@ -94,7 +94,7 @@ public:
    * @param local_var_index The local index of the variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual std::map<const Elem *, Real> discontinuousPointValue(Real t, Point pt, const unsigned int local_var_index) const;
+  std::map<const Elem *, Real> discontinuousPointValue(Real t, Point pt, const unsigned int local_var_index) const;
 
   /**
    * Returns a value at a specific location and variable for cases where the solution is
@@ -106,7 +106,7 @@ public:
    * @param var_name The variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual std::map<const Elem *, Real> discontinuousPointValue(Real t, const Point & p, const std::string & var_name) const;
+  std::map<const Elem *, Real> discontinuousPointValue(Real t, const Point & p, const std::string & var_name) const;
 
   /**
    * Returns the gradient at a specific location and variable checking for multiple values and weighting these values to
@@ -116,7 +116,7 @@ public:
    * @param var_name The variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual RealGradient pointValueGradientWrapper(Real t, const Point & p, const std::string & var_name, const MooseEnum & weighting_type = weightingType()) const;
+  RealGradient pointValueGradientWrapper(Real t, const Point & p, const std::string & var_name, const MooseEnum & weighting_type = weightingType()) const;
 
   /**
    * Returns the gradient at a specific location and variable (see SolutionFunction)
@@ -125,7 +125,7 @@ public:
    * @param var_name The variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual RealGradient pointValueGradient(Real t, const Point & p, const std::string & var_name) const;
+  RealGradient pointValueGradient(Real t, const Point & p, const std::string & var_name) const;
 
   /**
    * Returns the gradient at a specific location and variable (see SolutionFunction)
@@ -134,7 +134,7 @@ public:
    * @param local_var_index The local index of the variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual RealGradient pointValueGradient(Real t, Point pt, const unsigned int local_var_index) const;
+  RealGradient pointValueGradient(Real t, Point pt, const unsigned int local_var_index) const;
 
   /**
    * Returns the gradient at a specific location and variable for cases where the gradient is
@@ -146,7 +146,7 @@ public:
    * @param var_name The variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual std::map<const Elem *, RealGradient> discontinuousPointValueGradient(Real t, const Point & p, const std::string & var_name) const;
+  std::map<const Elem *, RealGradient> discontinuousPointValueGradient(Real t, const Point & p, const std::string & var_name) const;
 
   /**
    * Returns the gradient at a specific location and variable for cases where the gradient is
@@ -158,7 +158,7 @@ public:
    * @param local_var_index The local index of the variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual std::map<const Elem *, RealGradient> discontinuousPointValueGradient(Real t, Point pt, const unsigned int local_var_index) const;
+  std::map<const Elem *, RealGradient> discontinuousPointValueGradient(Real t, Point pt, const unsigned int local_var_index) const;
 
   /**
    * Return a value directly from a Node

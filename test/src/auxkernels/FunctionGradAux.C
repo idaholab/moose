@@ -20,15 +20,16 @@ template<>
 InputParameters validParams<FunctionGradAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  MooseEnum dim_indices("x=0 y=1 z=2", "x");
   params.addRequiredParam<FunctionName>("function", "Function used to compute gradient");
-  params.addRequiredParam<unsigned int>("dimension_index", "The dimension x=0|y=1|z=2");
+  params.addParam<MooseEnum>("dimension_index", dim_indices, "The dimension index x|y|z");
   return params;
 }
 
 FunctionGradAux::FunctionGradAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _func(getFunction("function")),
-    _dim_index(getParam<unsigned int>("dimension_index"))
+    _dim_index(getParam<MooseEnum>("dimension_index"))
 {
   if (_dim_index > _mesh.dimension())
     mooseError("dimension_index > mesh dimension");

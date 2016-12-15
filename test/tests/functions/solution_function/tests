@@ -65,13 +65,13 @@
     type = 'Exodiff'
     input = 'solution_function_grad_p1.i'
     exodiff = 'solution_function_grad_p1.e'
-    mesh_mode = SERIAL
+    mesh_mode = REPLICATED
   [../]
   [./solution_function_grad_p2]
     type = 'Exodiff'
     input = 'solution_function_grad_p2.i'
     exodiff = 'solution_function_grad_p2.e'
-    mesh_mode = SERIAL
+    mesh_mode = REPLICATED
     prereq = solution_function_grad_p1
   [../]
 []

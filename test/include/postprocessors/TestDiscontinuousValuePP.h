@@ -31,32 +31,19 @@ InputParameters validParams<TestDiscontinuousValuePP>();
 class TestDiscontinuousValuePP : public GeneralPostprocessor
 {
 public:
-  /**
-   * Constructor.
-   * @param parameters The input file parameters for this object
-   */
   TestDiscontinuousValuePP(const InputParameters & parameters);
 
-  /**
-   * Destructor
-   */
   virtual ~TestDiscontinuousValuePP(){};
 
-  /// initialize override
   virtual void initialize() {};
 
-  /// execute override
   virtual void execute() {};
 
-  /// finalize override
   virtual void finalize() {};
 
   /// initialSetup gets the pointer to the solution UO
   virtual void initialSetup();
 
-  /**
-   * Returns the value of the variable at the specified location
-   */
   virtual Real getValue();
 
 protected:
@@ -68,9 +55,9 @@ protected:
   Point _point;
 
   /// This option allows to switch between value and gradient evaluation
-  bool _for_gradient;
+  bool _evaluate_gradient;
 
-  /// Selection of the gradient component if _for_gradient is true; otherwise ignored
+  /// Selection of the gradient component if _evaluate_gradient is true; otherwise ignored
   unsigned int _gradient_component;
 
   /// Pointer to SolutionUserObject containing the solution of interest
