@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<ACGrGrBase>()
 {
   InputParameters params = ACBulk<Real>::validParams();
-  params.addRequiredCoupledVar("v", "Array of coupled variable names");
+  params.addRequiredCoupledVar("v", "Array of coupled order paramter names for other order parameters");
   params.addCoupledVar("T", "temperature");
   return params;
 }
