@@ -30,8 +30,6 @@ private:
   const VariableValue & _T;
 
   std::string _base_name;
-  MaterialProperty<Real> & _resistivity;
-  MaterialProperty<Real> & _dresistivity_dT;
   MaterialProperty<Real> & _electric_conductivity;
   MaterialProperty<Real> & _delectric_conductivity_dT;
 };

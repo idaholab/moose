@@ -22,8 +22,6 @@ ElectricalConductivity::ElectricalConductivity(const InputParameters & parameter
     _ref_temp(getParam<Real>("ref_temp")),
     _T(coupledValue("temp")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
-    _resistivity(declareProperty<Real>(_base_name + "resistivity")),
-    _dresistivity_dT(declarePropertyDerivative<Real>(_base_name + "resistivity", getVar("temp", 0)->name())),
     _electric_conductivity(declareProperty<Real>(_base_name + "electrical_conductivity")),
     _delectric_conductivity_dT(declarePropertyDerivative<Real>(_base_name + "electrical_conductivity", getVar("temp", 0)->name()))
 {
@@ -33,8 +31,8 @@ void
 ElectricalConductivity::computeQpProperties()
 {
   const Real ref_resis = _ref_resis / _length_scale;
-  _resistivity[_qp] = ref_resis * (1.0 + _temp_coeff * (_T[_qp] - _ref_temp));
-  _dresistivity_dT[_qp] = ref_resis * _temp_coeff;
-  _electric_conductivity[_qp] = 1.0 / _resistivity[_qp];
-  _delectric_conductivity_dT[_qp] = -1.0 / (_resistivity[_qp]*_resistivity[_qp]) * _dresistivity_dT[_qp];
+  const Real resistivity = ref_resis * (1.0 + _temp_coeff * (_T[_qp] - _ref_temp));
+  const Real dresistivity_dT = ref_resis * _temp_coeff;
+  _electric_conductivity[_qp] = 1.0 / resistivity;
+  _delectric_conductivity_dT[_qp] = -1.0 / (resistivity*resistivity) * dresistivity_dT;
 }

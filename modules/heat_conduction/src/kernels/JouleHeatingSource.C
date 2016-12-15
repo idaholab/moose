@@ -6,7 +6,7 @@ InputParameters validParams<JouleHeatingSource>()
   InputParameters params = validParams<HeatSource>();
   params.addCoupledVar("elec", "Electric potential for joule heating.");
   params.addCoupledVar("args", "Vector of arguments of the diffusivity");
-  params.addParam<MaterialPropertyName>("electrical_conductivity", "electrical_conductivity", "material property providing electrical resistivity of the material.");
+  params.addParam<MaterialPropertyName>("electrical_conductivity", "electrical_conductivity", "Material property providing electrical conductivity of the material.");
   return params;
 }
 
