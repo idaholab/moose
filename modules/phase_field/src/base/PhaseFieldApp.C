@@ -38,6 +38,7 @@
 #include "ConservedLangevinNoise.h"
 #include "CoupledAllenCahn.h"
 #include "CoupledSusceptibilityTimeDerivative.h"
+#include "CoupledSwitchingTimeDerivative.h"
 #include "GradientComponent.h"
 #include "HHPFCRFF.h"
 #include "KKSACBulkC.h"
@@ -318,6 +319,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ConservedLangevinNoise);
   registerKernel(CoupledAllenCahn);
   registerKernel(CoupledSusceptibilityTimeDerivative);
+  registerKernel(CoupledSwitchingTimeDerivative);
   registerKernel(GradientComponent);
   registerKernel(HHPFCRFF);
   registerKernel(KKSACBulkC);
