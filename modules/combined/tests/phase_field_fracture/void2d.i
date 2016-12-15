@@ -42,7 +42,7 @@
     variable = c
     l = 0.01
     beta = b
-    visco =1e-1
+    visco = 1e-1
     gc_prop_var = 'gc_prop'
     G0_var = 'G0_pos'
     dG0_dstrain_var = 'dG0_pos_dstrain'
@@ -159,7 +159,6 @@
 []
 
 [Preconditioning]
-  active = 'smp'
   [./smp]
     type = SMP
     full = true
@@ -168,10 +167,10 @@
 
 [Executioner]
   type = Transient
-
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
-  petsc_options_value = 'asm      31                  preonly       lu           1'
+
+  petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap'
+  petsc_options_value = 'asm      lu           1'
 
   nl_rel_tol = 1e-8
   l_max_its = 10

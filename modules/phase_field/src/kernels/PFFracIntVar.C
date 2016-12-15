@@ -23,14 +23,12 @@ PFFracIntVar::PFFracIntVar(const InputParameters & parameters):
 Real
 PFFracIntVar::precomputeQpResidual()
 {
-  //Residual is the variable value
+  // Residual is the variable value
   return _u[_qp];
 }
 
 Real
 PFFracIntVar::precomputeQpJacobian()
 {
-  Real val=1.0;
-  return val * _phi[_j][_qp];
+  return _phi[_j][_qp];
 }
-

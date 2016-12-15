@@ -40,14 +40,13 @@ void LinearIsoElasticPFDamage::computeQpStress()
 void
 LinearIsoElasticPFDamage::updateVar()
 {
-  RankTwoTensor stress0pos, stress0neg, stress0;
   //Isotropic elasticity is assumed
   Real lambda = _elasticity_tensor[_qp](0,0,1,1);
   Real mu = _elasticity_tensor[_qp](0,1,0,1);
   Real c = _c[_qp];
   Real xfac = _kdamage;
   if (c < 1.0)
-    xfac = Utility::pow<2>(1 - c) + _kdamage;
+    xfac += Utility::pow<2>(1.0 - c);
 
   _mechanical_strain[_qp].symmetricEigenvaluesEigenvectors(_eigval, _eigvec);
 
@@ -64,6 +63,7 @@ LinearIsoElasticPFDamage::updateVar()
   Real etrpos = (std::abs(etr) + etr) / 2.0;
   Real etrneg = (std::abs(etr) - etr) / 2.0;
 
+  RankTwoTensor stress0pos, stress0neg;
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
     stress0pos += _etens[i] * (lambda * etrpos + 2.0 * mu * (std::abs(_eigval[i]) + _eigval[i]) / 2.0);
@@ -81,15 +81,17 @@ LinearIsoElasticPFDamage::updateVar()
     val += Utility::pow<2>(_epos[i]);
   val *= mu;
 
-  //Energy with positive principal strains
+  // Energy with positive principal strains
   _G0_pos[_qp] = lambda * Utility::pow<2>(etrpos) / 2.0 + val;
-  //Used in PFFracBulkRate Jacobian
+
+  // Used in PFFracBulkRate Jacobian
   _dG0_pos_dstrain[_qp] = stress0pos;
-  //Used in StressDivergencePFFracTensors Jacobian
+
+  // Used in StressDivergencePFFracTensors Jacobian
   if (c < 1.0)
     _dstress_dc[_qp] = -stress0pos * (2.0 * (1.0 - c));
   else
-    _dstress_dc[_qp] = 0.0;
+    _dstress_dc[_qp].zero();
 }
 
 void
