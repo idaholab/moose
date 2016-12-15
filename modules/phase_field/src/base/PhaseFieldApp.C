@@ -108,6 +108,12 @@
 #include "CahnHilliardFluxBC.h"
 
 /*
+ * InterfaceKernels
+ */
+#include "InterfaceDiffusionBoundaryTerm.h"
+#include "InterfaceDiffusionFluxMatch.h"
+
+/*
  * Materials
  */
 #include "AsymmetricCrossTermBarrierFunctionMaterial.h"
@@ -374,6 +380,9 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerBoundaryCondition(CahnHilliardAnisoFluxBC);
   registerBoundaryCondition(CahnHilliardFluxBC);
+
+  registerInterfaceKernel(InterfaceDiffusionBoundaryTerm);
+  registerInterfaceKernel(InterfaceDiffusionFluxMatch);
 
   registerMaterial(AsymmetricCrossTermBarrierFunctionMaterial);
   registerMaterial(BarrierFunctionMaterial);
