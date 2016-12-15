@@ -33,6 +33,9 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+
+  /// filler value to put on the on-diagonal Jacobian
+  const Real _jacobian_fill;
 };
 
 #endif // NULLKERNEL_H

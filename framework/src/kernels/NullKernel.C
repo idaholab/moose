@@ -19,11 +19,13 @@ InputParameters validParams<NullKernel>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Kernel that sets a zero residual.");
+  params.addParam<Real>("jacobian_fill", 1e-9, "On diagonal Jacobian fill term to retain an invertable matrix for the preconditioner");
   return params;
 }
 
 NullKernel::NullKernel(const InputParameters & parameters) :
-    Kernel(parameters)
+    Kernel(parameters),
+    _jacobian_fill(getParam<Real>("jacobian_fill"))
 {
 }
 
@@ -36,5 +38,5 @@ NullKernel::computeQpResidual()
 Real
 NullKernel::computeQpJacobian()
 {
-  return 1.0;
+  return _jacobian_fill;
 }
