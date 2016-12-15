@@ -564,6 +564,59 @@ SolutionUserObject::getLocalVarIndex(const std::string & var_name) const
 }
 
 Real
+SolutionUserObject::pointValueWrapper(Real t, const Point & p, const std::string & var_name, const MooseEnum & weighting_type) const
+{
+  // first check if the FE type is continuous because in that case the value is
+  // unique and we can take a short cut, the default weighting_type found_first also
+  // shortcuts out
+  if (weighting_type == 1 ||
+     (_fe_problem.getVariable(_tid, var_name).feType().family != L2_LAGRANGE &&
+      _fe_problem.getVariable(_tid, var_name).feType().family != MONOMIAL &&
+      _fe_problem.getVariable(_tid, var_name).feType().family != L2_HIERARCHIC))
+    return pointValue(t, p, var_name);
+
+  // the shape function is discontinuous so we need to compute a suitable unique value
+  std::map<const Elem *, Real> values = discontinuousPointValue(t, p, var_name);
+  switch (weighting_type)
+  {
+    case 2:
+    {
+      Real average = 0.0;
+      for (auto & v : values)
+        average += v.second;
+      return average / Real(values.size());
+    }
+    case 4:
+    {
+      Real smallest_elem_id_value;
+      dof_id_type smallest_elem_id = _fe_problem.mesh().nElem();
+      for (auto & v : values)
+        if (v.first->id() < smallest_elem_id)
+        {
+          smallest_elem_id = v.first->id();
+          smallest_elem_id_value = v.second;
+        }
+      return smallest_elem_id_value;
+    }
+    case 8:
+    {
+      Real largest_elem_id_value;
+      dof_id_type largest_elem_id = 0;
+      for (auto & v : values)
+        if (v.first->id() > largest_elem_id)
+        {
+          largest_elem_id = v.first->id();
+          largest_elem_id_value = v.second;
+        }
+      return largest_elem_id_value;
+    }
+  }
+
+  mooseError("SolutionUserObject::pointValueWrapper reaches line that it should not be able to reach.");
+  return 0.0;
+}
+
+Real
 SolutionUserObject::pointValue(Real t, const Point & p, const std::string & var_name) const
 {
   const unsigned int local_var_index = getLocalVarIndex(var_name);
@@ -580,18 +633,18 @@ SolutionUserObject::pointValue(Real libmesh_dbg_var(t), const Point & p, const u
   for (unsigned int trans_num = 0 ; trans_num < _transformation_order.size() ; ++trans_num)
   {
     if (_transformation_order[trans_num] == "rotation0")
-      pt = _r0*pt;
+      pt = _r0 * pt;
     else if (_transformation_order[trans_num] == "translation")
-      for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
         pt(i) -= _translation[i];
     else if (_transformation_order[trans_num] == "scale")
-      for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
         pt(i) /= _scale[i];
     else if (_transformation_order[trans_num] == "scale_multiplier")
-      for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
         pt(i) *= _scale_multiplier[i];
     else if (_transformation_order[trans_num] == "rotation1")
-      pt = _r1*pt;
+      pt = _r1 * pt;
   }
 
   // Extract the value at the current point
@@ -602,10 +655,208 @@ SolutionUserObject::pointValue(Real libmesh_dbg_var(t), const Point & p, const u
   {
     mooseAssert(t == _interpolation_time, "Time passed into value() must match time at last call to timestepSetup()");
     Real val2 = evalMeshFunction(pt, local_var_index, 2);
-    val = val + (val2 - val)*_interpolation_factor;
+    val = val + (val2 - val) * _interpolation_factor;
   }
 
   return val;
+}
+
+std::map<const Elem *, Real>
+SolutionUserObject::discontinuousPointValue(Real t, const Point & p, const std::string & var_name) const
+{
+  const unsigned int local_var_index = getLocalVarIndex(var_name);
+  return discontinuousPointValue(t, p, local_var_index);
+}
+
+std::map<const Elem *, Real>
+SolutionUserObject::discontinuousPointValue(Real t, Point pt, const unsigned int local_var_index) const
+{
+  // do the transformations
+  for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
+  {
+    if (_transformation_order[trans_num] == "rotation0")
+      pt = _r0 * pt;
+    else if (_transformation_order[trans_num] == "translation")
+      for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+        pt(i) -= _translation[i];
+    else if (_transformation_order[trans_num] == "scale")
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        pt(i) /= _scale[i];
+    else if (_transformation_order[trans_num] == "scale_multiplier")
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        pt(i) *= _scale_multiplier[i];
+    else if (_transformation_order[trans_num] == "rotation1")
+      pt = _r1 * pt;
+  }
+
+  // Extract the value at the current point
+  std::map<const Elem *, Real> map = evalMultiValuedMeshFunction(pt, local_var_index, 1);
+
+  // Interpolate
+  if (_file_type == 1 && _interpolate_times)
+  {
+    mooseAssert(t == _interpolation_time, "Time passed into value() must match time at last call to timestepSetup()");
+    std::map<const Elem *, Real> map2 = evalMultiValuedMeshFunction(pt, local_var_index, 2);
+
+    if (map.size() != map2.size())
+      mooseError("In SolutionUserObject::discontinuousPointValue map and map2 have different size");
+
+    // construct the interpolated map
+    for (auto & k : map)
+    {
+      if (map2.find(k.first) == map2.end())
+        mooseError("In SolutionUserObject::discontinuousPointValue map and map2 have differing keys");
+      Real val = k.second;
+      Real val2 = map2[k.first];
+      map[k.first] = val + (val2 - val) * _interpolation_factor;
+    }
+  }
+
+  return map;
+}
+
+RealGradient
+SolutionUserObject::pointValueGradientWrapper(Real t, const Point & p, const std::string & var_name, const MooseEnum & weighting_type) const
+{
+  // the default weighting_type found_first shortcuts out
+  if (weighting_type == 1)
+    return pointValueGradient(t, p, var_name);
+
+  // the shape function is discontinuous so we need to compute a suitable unique value
+  std::map<const Elem *, RealGradient> values = discontinuousPointValueGradient(t, p, var_name);
+  switch (weighting_type)
+  {
+    case 2:
+    {
+      RealGradient average = RealGradient(0.0, 0.0, 0.0);
+      for (auto & v : values)
+        average += v.second;
+      return average / Real(values.size());
+    }
+    case 4:
+    {
+      RealGradient smallest_elem_id_value;
+      dof_id_type smallest_elem_id = _fe_problem.mesh().nElem();
+      for (auto & v : values)
+        if (v.first->id() < smallest_elem_id)
+        {
+          smallest_elem_id = v.first->id();
+          smallest_elem_id_value = v.second;
+        }
+      return smallest_elem_id_value;
+    }
+    case 8:
+    {
+      RealGradient largest_elem_id_value;
+      dof_id_type largest_elem_id = 0;
+      for (auto & v : values)
+        if (v.first->id() > largest_elem_id)
+        {
+          largest_elem_id = v.first->id();
+          largest_elem_id_value = v.second;
+        }
+      return largest_elem_id_value;
+    }
+  }
+
+  mooseError("SolutionUserObject::pointValueGradientWrapper reaches line that it should not be able to reach.");
+  return RealGradient(0.0, 0.0, 0.0);
+}
+
+RealGradient
+SolutionUserObject::pointValueGradient(Real t, const Point & p, const std::string & var_name) const
+{
+  const unsigned int local_var_index = getLocalVarIndex(var_name);
+  return pointValueGradient(t, p, local_var_index);
+}
+
+RealGradient
+SolutionUserObject::pointValueGradient(Real t, Point pt, const unsigned int local_var_index) const
+{
+  // do the transformations
+  for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
+  {
+    if (_transformation_order[trans_num] == "rotation0")
+      pt = _r0 * pt;
+    else if (_transformation_order[trans_num] == "translation")
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        pt(i) -= _translation[i];
+    else if (_transformation_order[trans_num] == "scale")
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        pt(i) /= _scale[i];
+    else if (_transformation_order[trans_num] == "scale_multiplier")
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        pt(i) *= _scale_multiplier[i];
+    else if (_transformation_order[trans_num] == "rotation1")
+      pt = _r1 * pt;
+  }
+
+  // Extract the value at the current point
+  RealGradient val = evalMeshFunctionGradient(pt, local_var_index, 1);
+
+  // Interpolate
+  if (_file_type == 1 && _interpolate_times)
+  {
+    mooseAssert(t == _interpolation_time, "Time passed into value() must match time at last call to timestepSetup()");
+    RealGradient val2 = evalMeshFunctionGradient(pt, local_var_index, 2);
+    val = val + (val2 - val) * _interpolation_factor;
+  }
+
+  return val;
+}
+
+std::map<const Elem *, RealGradient>
+SolutionUserObject::discontinuousPointValueGradient(Real t, const Point & p, const std::string & var_name) const
+{
+  const unsigned int local_var_index = getLocalVarIndex(var_name);
+  return discontinuousPointValueGradient(t, p, local_var_index);
+}
+
+std::map<const Elem *, RealGradient>
+SolutionUserObject::discontinuousPointValueGradient(Real t, Point pt, const unsigned int local_var_index) const
+{
+  // do the transformations
+  for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
+  {
+    if (_transformation_order[trans_num] == "rotation0")
+      pt = _r0 * pt;
+    else if (_transformation_order[trans_num] == "translation")
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        pt(i) -= _translation[i];
+    else if (_transformation_order[trans_num] == "scale")
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        pt(i) /= _scale[i];
+    else if (_transformation_order[trans_num] == "scale_multiplier")
+      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        pt(i) *= _scale_multiplier[i];
+    else if (_transformation_order[trans_num] == "rotation1")
+      pt = _r1 * pt;
+  }
+
+  // Extract the value at the current point
+  std::map<const Elem *, RealGradient> map = evalMultiValuedMeshFunctionGradient(pt, local_var_index, 1);
+
+  // Interpolate
+  if (_file_type == 1 && _interpolate_times)
+  {
+    mooseAssert(t == _interpolation_time, "Time passed into value() must match time at last call to timestepSetup()");
+    std::map<const Elem *, RealGradient> map2 = evalMultiValuedMeshFunctionGradient(pt, local_var_index, 1);
+
+    if (map.size() != map2.size())
+      mooseError("In SolutionUserObject::discontinuousPointValue map and map2 have different size");
+
+    // construct the interpolated map
+    for (auto & k : map)
+    {
+      if (map2.find(k.first) == map2.end())
+        mooseError("In SolutionUserObject::discontinuousPointValue map and map2 have differing keys");
+      RealGradient val = k.second;
+      RealGradient val2 = map2[k.first];
+      map[k.first] = val + (val2 - val) * _interpolation_factor;
+    }
+  }
+
+  return map;
 }
 
 Real
@@ -615,7 +866,7 @@ SolutionUserObject::directValue(dof_id_type dof_index) const
   if (_file_type==1 && _interpolate_times)
   {
     Real val2 = (*_serialized_solution2)(dof_index);
-    val = val + (val2 - val)*_interpolation_factor;
+    val = val + (val2 - val) * _interpolation_factor;
   }
   return val;
 }
@@ -648,6 +899,114 @@ SolutionUserObject::evalMeshFunction(const Point & p, const unsigned int local_v
     mooseError("Failed to access the data for variable '"<< _system_variables[local_var_index] << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
   }
   return output(local_var_index);
+}
+
+std::map<const Elem *, Real>
+SolutionUserObject::evalMultiValuedMeshFunction(const Point & p, const unsigned int local_var_index, unsigned int func_num) const
+{
+  // Storage for mesh function output
+  std::map<const Elem *, DenseVector<Number> > temporary_output;
+
+  // Extract a value from the _mesh_function
+  {
+    Threads::spin_mutex::scoped_lock lock(_solution_user_object_mutex);
+    if (func_num == 1)
+      _mesh_function->discontinuous_value(p, 0.0, temporary_output);
+
+    // Extract a value from _mesh_function2
+    else if (func_num == 2)
+      _mesh_function2->discontinuous_value(p, 0.0, temporary_output);
+
+    else
+      mooseError("The func_num must be 1 or 2");
+  }
+
+  // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
+  if (temporary_output.size() == 0)
+  {
+    std::ostringstream oss;
+    p.print(oss);
+    mooseError("Failed to access the data for variable '"<< _system_variables[local_var_index] << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
+  }
+
+  // Fill the actual map that is returned
+  std::map<const Elem *, Real> output;
+  for (auto & k : temporary_output)
+  {
+    mooseAssert(k.second.size() > local_var_index, "In SolutionUserObject::evalMultiValuedMeshFunction variable with local_var_index " << local_var_index << " does not exist");
+    output[k.first] = k.second(local_var_index);
+  }
+
+  return output;
+}
+
+RealGradient
+SolutionUserObject::evalMeshFunctionGradient(const Point & p, const unsigned int local_var_index, unsigned int func_num) const
+{
+  // Storage for mesh function output
+  std::vector<Gradient> output;
+
+  // Extract a value from the _mesh_function
+  {
+    Threads::spin_mutex::scoped_lock lock(_solution_user_object_mutex);
+    if (func_num == 1)
+      _mesh_function->gradient(p, 0.0, output, libmesh_nullptr);
+
+    // Extract a value from _mesh_function2
+    else if (func_num == 2)
+      _mesh_function2->gradient(p, 0.0, output, libmesh_nullptr);
+
+    else
+      mooseError("The func_num must be 1 or 2");
+  }
+
+  // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
+  if (output.size() == 0)
+  {
+    std::ostringstream oss;
+    p.print(oss);
+    mooseError("Failed to access the data for variable '"<< _system_variables[local_var_index] << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
+  }
+  return output[local_var_index];
+}
+
+std::map<const Elem *, RealGradient>
+SolutionUserObject::evalMultiValuedMeshFunctionGradient(const Point & p, const unsigned int local_var_index, unsigned int func_num) const
+{
+  // Storage for mesh function output
+  std::map<const Elem *, std::vector<Gradient> > temporary_output;
+
+  // Extract a value from the _mesh_function
+  {
+    Threads::spin_mutex::scoped_lock lock(_solution_user_object_mutex);
+    if (func_num == 1)
+      _mesh_function->discontinuous_gradient(p, 0.0, temporary_output);
+
+    // Extract a value from _mesh_function2
+    else if (func_num == 2)
+      _mesh_function2->discontinuous_gradient(p, 0.0, temporary_output);
+
+    else
+      mooseError("The func_num must be 1 or 2");
+  }
+
+  // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
+  if (temporary_output.size() == 0)
+  {
+    std::ostringstream oss;
+    p.print(oss);
+    mooseError("Failed to access the data for variable '"<< _system_variables[local_var_index] << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
+  }
+
+  // Fill the actual map that is returned
+  std::map<const Elem *, RealGradient> output;
+  for (auto & k : temporary_output)
+  {
+    mooseAssert(k.second.size() > local_var_index, "In SolutionUserObject::evalMultiValuedMeshFunction variable with local_var_index " << local_var_index << " does not exist");
+    output[k.first] = k.second[local_var_index];
+  }
+
+  return output;
 }
 
 const std::vector<std::string> &

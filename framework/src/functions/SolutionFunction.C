@@ -15,7 +15,7 @@
 #include "MooseError.h"
 #include "SolutionFunction.h"
 #include "SolutionUserObject.h"
-
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<SolutionFunction>()
@@ -41,6 +41,8 @@ SolutionFunction::SolutionFunction(const InputParameters & parameters) :
     _scale_factor(getParam<Real>("scale_factor")),
     _add_factor(getParam<Real>("add_factor"))
 {
+  for (unsigned int d = 0; d < _ti_feproblem.mesh().dimension(); ++d)
+    _add_grad(d) = _add_factor;
 }
 
 void
@@ -75,5 +77,11 @@ SolutionFunction::initialSetup()
 Real
 SolutionFunction::value(Real t, const Point & p)
 {
-  return _scale_factor*(_solution_object_ptr->pointValue(t, p, _solution_object_var_index)) + _add_factor;
+  return _scale_factor * (_solution_object_ptr->pointValue(t, p, _solution_object_var_index)) + _add_factor;
+}
+
+RealGradient
+SolutionFunction::gradient(Real t, const Point & p)
+{
+  return _scale_factor * (_solution_object_ptr->pointValueGradient(t, p, _solution_object_var_index)) + _add_grad;
 }
