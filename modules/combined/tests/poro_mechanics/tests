@@ -44,6 +44,7 @@
     type = Exodiff
     input = borehole_lowres.i
     exodiff = borehole_lowres.e
+    rel_err = 1e-5
   [../]
   [./borehole_heavy]
     type = Exodiff

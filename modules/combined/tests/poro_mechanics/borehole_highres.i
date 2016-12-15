@@ -58,6 +58,10 @@
   [../]
 []
 
+[GlobalParams]
+  volumetric_locking_correction=true
+[]
+
 [ICs]
   [./initial_p]
     type = ConstantIC

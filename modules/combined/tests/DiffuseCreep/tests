@@ -27,7 +27,7 @@
     type = 'Exodiff'
     input = 'stress_based_chem_pot.i'
     exodiff = 'stress_based_chem_pot_out.e'
-    abs_zero = 1e-8
+    abs_zero = 1e-7
   [../]
   [./variable_base_eigen_strain]
     type = 'Exodiff'
