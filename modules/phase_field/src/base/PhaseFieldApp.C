@@ -111,6 +111,8 @@
 /*
  * InterfaceKernels
  */
+#include "EqualGradientLagrangeInterface.h"
+#include "EqualGradientLagrangeMultiplier.h"
 #include "InterfaceDiffusionBoundaryTerm.h"
 #include "InterfaceDiffusionFluxMatch.h"
 
@@ -383,6 +385,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerBoundaryCondition(CahnHilliardAnisoFluxBC);
   registerBoundaryCondition(CahnHilliardFluxBC);
 
+  registerInterfaceKernel(EqualGradientLagrangeInterface);
+  registerInterfaceKernel(EqualGradientLagrangeMultiplier);
   registerInterfaceKernel(InterfaceDiffusionBoundaryTerm);
   registerInterfaceKernel(InterfaceDiffusionFluxMatch);
 
