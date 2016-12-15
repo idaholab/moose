@@ -40,8 +40,8 @@ void
 Eigenvalues::execute()
 {
 #if LIBMESH_HAVE_SLEPC
-  unsigned int n_converged_eigenvalues = _nl_eigen->getNumConvergedEigenvalues();
   const std::vector<std::pair<Real, Real> > & eigenvalues = _nl_eigen->getAllConvergedEigenvalues();
+  unsigned int n_converged_eigenvalues = eigenvalues.size();
   _eigen_values_real.resize(n_converged_eigenvalues);
   _eigen_values_imag.resize(n_converged_eigenvalues);
   for (unsigned int n = 0; n < n_converged_eigenvalues; n++)
