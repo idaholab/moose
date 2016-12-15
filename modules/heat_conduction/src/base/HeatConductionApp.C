@@ -33,6 +33,8 @@
 #include "HeatSource.h"
 #include "ThermalConductivity.h"
 #include "CoupledConvectiveFlux.h"
+#include "ElectricalConductivity.h"
+#include "JouleHeatingSource.h"
 
 template<>
 InputParameters validParams<HeatConductionApp>()
@@ -77,6 +79,7 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerKernel(HeatSource);
   registerKernel(HomogenizedHeatConduction);
   registerKernel(HeatCapacityConductionTimeDerivative);
+  registerKernel(JouleHeatingSource);
   registerKernel(SpecificHeatConductionTimeDerivative);
 
   registerBoundaryCondition(HeatConductionBC);
@@ -84,6 +87,7 @@ HeatConductionApp::registerObjects(Factory & factory)
   registerBoundaryCondition(GapHeatTransfer);
   registerBoundaryCondition(CoupledConvectiveFlux);
 
+  registerMaterial(ElectricalConductivity);
   registerMaterial(GapConductance);
   registerMaterial(HeatConductionMaterial);
   registerMaterial(AnisoHeatConductionMaterial);
