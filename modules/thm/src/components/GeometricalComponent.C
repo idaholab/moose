@@ -1,5 +1,6 @@
 #include "GeometricalComponent.h"
 #include "Conversion.h"
+#include "ConstantFunction.h"
 
 template<>
 InputParameters validParams<GeometricalComponent>()
@@ -80,4 +81,18 @@ GeometricalComponent::getConnections(RELAP7::EEndType id) const
     return it->second;
   else
     mooseError(name() << ": No end of this type available (" << id << ").");
+}
+
+const FunctionName &
+GeometricalComponent::getVariableFn(const FunctionName & fn_param_name)
+{
+  const FunctionName & fn_name = getParam<FunctionName>(fn_param_name);
+  const Function & fn = _sim.getFunction(fn_name);
+
+  if (dynamic_cast<const ConstantFunction *>(&fn) != NULL)
+  {
+    connectObject(fn.parameters(), "", fn_name, fn_param_name, "value");
+  }
+
+  return fn_name;
 }

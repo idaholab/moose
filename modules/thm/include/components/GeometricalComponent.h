@@ -29,6 +29,8 @@ public:
   virtual const std::vector<RELAP7::Connection> & getConnections(RELAP7::EEndType id) const;
 
 protected:
+  const FunctionName & getVariableFn(const FunctionName & fn_param_name);
+
   /// Node IDs
   unsigned int _first_node_id;
   unsigned int _last_node_id;
