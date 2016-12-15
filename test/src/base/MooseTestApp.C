@@ -100,6 +100,7 @@
 #include "LateDeclarationVectorPostprocessor.h"
 #include "PotentialAdvection.h"
 #include "GhostAux.h"
+#include "FunctionGradAux.h"
 
 #include "RobinBC.h"
 #include "InflowBC.h"
@@ -209,6 +210,7 @@
 #include "RealControlParameterReporter.h"
 #include "ScalarCoupledPostprocessor.h"
 #include "NumAdaptivityCycles.h"
+#include "TestDiscontinuousValuePP.h"
 
 // Functions
 #include "TimestepSetupFunction.h"
@@ -385,6 +387,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(DotCouplingAux);
   registerAux(VectorPostprocessorAux);
   registerAux(GhostAux);
+  registerAux(FunctionGradAux);
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);
@@ -524,6 +527,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(RealControlParameterReporter);
   registerPostprocessor(ScalarCoupledPostprocessor);
   registerPostprocessor(NumAdaptivityCycles);
+  registerPostprocessor(TestDiscontinuousValuePP);
 
   registerVectorPostprocessor(LateDeclarationVectorPostprocessor);
 

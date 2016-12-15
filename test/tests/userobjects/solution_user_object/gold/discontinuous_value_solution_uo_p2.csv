@@ -1,0 +1,4 @@
+time,continuous_gradient_left,continuous_gradient_right,continuous_gradient_value_face,discontinuous_value_face,discontinuous_value_left,discontinuous_value_right
+0,0,0,0,0,0,0
+1,1,2,1.5,4,3,5
+

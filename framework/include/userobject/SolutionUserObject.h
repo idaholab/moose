@@ -57,13 +57,14 @@ public:
   unsigned int getLocalVarIndex(const std::string & var_name) const;
 
   /**
-   * Returns a value at a specific location and variable (see SolutionFunction)
+   * Returns a value at a specific location and variable checking for multiple values and weighting these values to
+   * obtain a single unique value (see SolutionFunction)
    * @param t The time at which to extract (not used, it is handled automatically when reading the data)
    * @param p The location at which to return a value
    * @param var_name The variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual Real pointValue(Real t, const Point & p, const std::string & var_name) const;
+  Real pointValueWrapper(Real t, const Point & p, const std::string & var_name, const MooseEnum & weighting_type = weightingType()) const;
 
   /**
    * Returns a value at a specific location and variable (see SolutionFunction)
@@ -72,7 +73,92 @@ public:
    * @param local_var_index The local index of the variable to be evaluated
    * @return The desired value for the given variable at a location
    */
-  virtual Real pointValue(Real t, const Point & p, const unsigned int local_var_index) const;
+  Real pointValue(Real t, const Point & p, const unsigned int local_var_index) const;
+
+  /**
+   * Returns a value at a specific location and variable (see SolutionFunction)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  Real pointValue(Real t, const Point & p, const std::string & var_name) const;
+
+  /**
+   * Returns a value at a specific location and variable for cases where the solution is
+   * multivalued at element faces
+   * Use pointValue for continuous shape functions or if you are sure your point is within an
+   * element!
+   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * @param p The location at which to return a value
+   * @param local_var_index The local index of the variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  std::map<const Elem *, Real> discontinuousPointValue(Real t, Point pt, const unsigned int local_var_index) const;
+
+  /**
+   * Returns a value at a specific location and variable for cases where the solution is
+   * multivalued at element faces
+   * Use pointValue for continuous shape functions or if you are sure your point is within an
+   * element!
+   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  std::map<const Elem *, Real> discontinuousPointValue(Real t, const Point & p, const std::string & var_name) const;
+
+  /**
+   * Returns the gradient at a specific location and variable checking for multiple values and weighting these values to
+   * obtain a single unique value (see SolutionFunction)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  RealGradient pointValueGradientWrapper(Real t, const Point & p, const std::string & var_name, const MooseEnum & weighting_type = weightingType()) const;
+
+  /**
+   * Returns the gradient at a specific location and variable (see SolutionFunction)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  RealGradient pointValueGradient(Real t, const Point & p, const std::string & var_name) const;
+
+  /**
+   * Returns the gradient at a specific location and variable (see SolutionFunction)
+   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * @param p The location at which to return a value
+   * @param local_var_index The local index of the variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  RealGradient pointValueGradient(Real t, Point pt, const unsigned int local_var_index) const;
+
+  /**
+   * Returns the gradient at a specific location and variable for cases where the gradient is
+   * multivalued (e.g. at element faces)
+   * Use pointValueGradient for continuous gradients or if you are sure your point is within an
+   * element!
+   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * @param p The location at which to return a value
+   * @param var_name The variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  std::map<const Elem *, RealGradient> discontinuousPointValueGradient(Real t, const Point & p, const std::string & var_name) const;
+
+  /**
+   * Returns the gradient at a specific location and variable for cases where the gradient is
+   * multivalued (e.g. at element faces)
+   * Use pointValueGradient for continuous gradients or if you are sure your point is within an
+   * element!
+   * @param t The time at which to extract (not used, it is handled automatically when reading the data)
+   * @param p The location at which to return a value
+   * @param local_var_index The local index of the variable to be evaluated
+   * @return The desired value for the given variable at a location
+   */
+  std::map<const Elem *, RealGradient> discontinuousPointValueGradient(Real t, Point pt, const unsigned int local_var_index) const;
 
   /**
    * Return a value directly from a Node
@@ -107,6 +193,7 @@ public:
 
   bool isVariableNodal(const std::string & var_name) const;
 
+  static MooseEnum weightingType() { return MooseEnum("found_first=1 average=2 smallest_element_id=4 largest_element_id=8", "found_first"); }
 
 protected:
   /**
@@ -156,6 +243,32 @@ protected:
    * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
    */
   Real evalMeshFunction(const Point & p, const unsigned int local_var_index, unsigned int func_num) const;
+
+  /**
+   * A wrapper method for calling the various MeshFunctions that calls the mesh function
+   * functionality for evaluating discontinuous shape functions near a face (where it's multivalued)
+   * @param p The location at which data is desired
+   * @param local_var_index The local index of the variable to extract data from
+   * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
+   */
+  std::map<const Elem *, Real> evalMultiValuedMeshFunction(const Point & p, const unsigned int local_var_index, unsigned int func_num) const;
+
+  /**
+   * A wrapper method interfacing with the libMesh mesh function for evaluating the gradient
+   * @param p The location at which data is desired
+   * @param local_var_index The local index of the variable to extract data from
+   * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
+   */
+  RealGradient evalMeshFunctionGradient(const Point & p, const unsigned int local_var_index, unsigned int func_num) const;
+
+  /**
+   * A wrapper method interfacing with the libMesh mesh function that calls the gradient
+   * functionality for evaluating potentially discontinuous gradients at element's faces (where it's multivalued)
+   * @param p The location at which data is desired
+   * @param local_var_index The local index of the variable to extract data from
+   * @param func_num The MeshFunction index to use (1 = _mesh_function; 2 = _mesh_function2)
+   */
+  std::map<const Elem *, RealGradient> evalMultiValuedMeshFunctionGradient(const Point & p, const unsigned int local_var_index, unsigned int func_num) const;
 
   /// File type to read (0 = xda; 1 = ExodusII)
   MooseEnum _file_type;
