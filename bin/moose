@@ -5,6 +5,7 @@ from __future__ import print_function
 import re
 import argparse
 import os.path
+import sys
 import shutil
 
 def prepare_obj_paths(proj, kind, name):
@@ -52,8 +53,11 @@ def rename_internal(fname, objname):
 
 def newobj(args):
     proj, kind, name = args.proj, args.kind, args.name
-
     path_info = prepare_obj_paths(proj, kind, name)
+    if path_info is None:
+        print("invalid object kind '{}'".format(kind), file=sys.stderr)
+        sys.exit(1)
+
     os.makedirs(os.path.dirname(path_info['dst_h']), exist_ok=True)
     os.makedirs(os.path.dirname(path_info['dst_C']), exist_ok=True)
     shutil.copyfile(path_info['template_h'], path_info['dst_h'])
