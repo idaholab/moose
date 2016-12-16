@@ -34,7 +34,6 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-  const unsigned _dim;
   const MaterialProperty<Real> & _diffusion_coefficient;
   const MaterialProperty<Real> * const _diffusion_coefficient_dT;
 };
