@@ -78,10 +78,10 @@
 [Kernels]
 # Order parameter eta_alpha0
   [./ACa0_bulk]
-    type = AllenCahn
+    type = ACGrGrMulti
     variable = etaa0
-    f_name = F
-    args = 'etab0 etab1 w'
+    v =           'etab0 etab1'
+    gamma_names = 'gab   gab'
   [../]
   [./ACa0_sw]
     type = ACSwitching
@@ -101,10 +101,10 @@
   [../]
 # Order parameter eta_beta0
   [./ACb0_bulk]
-    type = AllenCahn
+    type = ACGrGrMulti
     variable = etab0
-    f_name = F
-    args = 'etaa0 etab1 w'
+    v =           'etaa0 etab1'
+    gamma_names = 'gab   gbb'
   [../]
   [./ACb0_sw]
     type = ACSwitching
@@ -124,10 +124,10 @@
   [../]
 # Order parameter eta_beta1
   [./ACb1_bulk]
-    type = AllenCahn
+    type = ACGrGrMulti
     variable = etab1
-    f_name = F
-    args = 'etaa0 etab0 w'
+    v =           'etaa0 etab0'
+    gamma_names = 'gab   gbb'
   [../]
   [./ACb1_sw]
     type = ACSwitching
@@ -244,21 +244,10 @@
     derivative_order = 2
     enable_jit = false
   [../]
-  [./FreeEng]
-    type = DerivativeParsedMaterial
-    args = 'etaa0 etab0 etab1 w'
-    f_name = F
-    constant_names =        'gbb  gab  m'
-    constant_expressions =  '1.5  4.5  1.0'
-    function = '1/4+m*(1/4*etaa0^4-1/2*etaa0^2+1/4*etab0^4-1/2*etab0^2+1/4*etab1^4-1/2*etab1^2
-                            +gab*etaa0^2*etab0^2+gab*etaa0^2*etab1^2+gbb*etab0^2*etab1^2)'
-    derivative_order = 2
-    enable_jit = false
-  [../]
   [./const]
     type = GenericConstantMaterial
-    prop_names =  'kappa_c  kappa   L   D    chi  Vm   ka    caeq kb    cbeq'
-    prop_values = '0        1       1.0 1.0  1.0  1.0  10.0  0.1  10.0  0.9'
+    prop_names =  'kappa_c  kappa   L   D    chi  Vm   ka    caeq kb    cbeq  gab gbb mu  tgrad_corr_mult'
+    prop_values = '0        1       1.0 1.0  1.0  1.0  10.0  0.1  10.0  0.9   4.5 1.5 1.0 0.0'
   [../]
   [./Mobility]
     type = DerivativeParsedMaterial
