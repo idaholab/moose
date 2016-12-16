@@ -67,6 +67,7 @@
 #include "BodyForce.h"
 #include "Reaction.h"
 #include "MassEigenKernel.h"
+#include "NullKernel.h"
 
 // bcs
 #include "ConvectiveFluxBC.h"
@@ -496,6 +497,7 @@ registerObjects(Factory & factory)
   registerKernel(BodyForce);
   registerKernel(Reaction);
   registerKernel(MassEigenKernel);
+  registerKernel(NullKernel);
 
   // bcs
   registerBoundaryCondition(ConvectiveFluxBC);

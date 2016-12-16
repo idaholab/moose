@@ -38,6 +38,7 @@
 #include "ConservedLangevinNoise.h"
 #include "CoupledAllenCahn.h"
 #include "CoupledSusceptibilityTimeDerivative.h"
+#include "CoupledSwitchingTimeDerivative.h"
 #include "GradientComponent.h"
 #include "HHPFCRFF.h"
 #include "KKSACBulkC.h"
@@ -110,6 +111,8 @@
 /*
  * InterfaceKernels
  */
+#include "EqualGradientLagrangeInterface.h"
+#include "EqualGradientLagrangeMultiplier.h"
 #include "InterfaceDiffusionBoundaryTerm.h"
 #include "InterfaceDiffusionFluxMatch.h"
 
@@ -318,6 +321,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ConservedLangevinNoise);
   registerKernel(CoupledAllenCahn);
   registerKernel(CoupledSusceptibilityTimeDerivative);
+  registerKernel(CoupledSwitchingTimeDerivative);
   registerKernel(GradientComponent);
   registerKernel(HHPFCRFF);
   registerKernel(KKSACBulkC);
@@ -381,6 +385,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerBoundaryCondition(CahnHilliardAnisoFluxBC);
   registerBoundaryCondition(CahnHilliardFluxBC);
 
+  registerInterfaceKernel(EqualGradientLagrangeInterface);
+  registerInterfaceKernel(EqualGradientLagrangeMultiplier);
   registerInterfaceKernel(InterfaceDiffusionBoundaryTerm);
   registerInterfaceKernel(InterfaceDiffusionFluxMatch);
 

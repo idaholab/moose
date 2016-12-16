@@ -9,6 +9,7 @@
     input = 'variablegradientmaterial.i'
     exodiff = 'variablegradientmaterial_out.e'
   [../]
+
   [./interface_grad]
     type = 'Exodiff'
     input = 'interface_grad.i'
@@ -18,5 +19,11 @@
     type = 'Exodiff'
     input = 'interface_flux.i'
     exodiff = 'interface_flux_out.e'
+  [../]
+
+  [./equal_gradient_lagrange]
+    type = 'Exodiff'
+    input = 'equal_gradient_lagrange.i'
+    exodiff = 'equal_gradient_lagrange_out.e'
   [../]
 []

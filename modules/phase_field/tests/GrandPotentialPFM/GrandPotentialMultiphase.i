@@ -159,24 +159,27 @@
     args = ''
   [../]
   [./coupled_etaa0dot]
-    type = CoupledSusceptibilityTimeDerivative
+    type = CoupledSwitchingTimeDerivative
     variable = w
     v = etaa0
-    f_name = fta0
+    Fj_names = 'rhoa rhob'
+    hj_names = 'ha   hb'
     args = 'etaa0 etab0 etab1'
   [../]
   [./coupled_etab0dot]
-    type = CoupledSusceptibilityTimeDerivative
+    type = CoupledSwitchingTimeDerivative
     variable = w
     v = etab0
-    f_name = ftb0
+    Fj_names = 'rhoa rhob'
+    hj_names = 'ha   hb'
     args = 'etaa0 etab0 etab1'
   [../]
   [./coupled_etab1dot]
-    type = CoupledSusceptibilityTimeDerivative
+    type = CoupledSwitchingTimeDerivative
     variable = w
     v = etab1
-    f_name = ftb1
+    Fj_names = 'rhoa rhob'
+    hj_names = 'ha   hb'
     args = 'etaa0 etab0 etab1'
   [../]
 []
@@ -263,30 +266,6 @@
     material_property_names = 'D chi'
     function = 'D*chi'
     derivative_order = 2
-    enable_jit = false
-  [../]
-  [./Coupledetaa0Fn]
-    type = DerivativeParsedMaterial
-    material_property_names = 'rhoa(w) rhob(w)'
-    function = '2.0*etaa0*(etab0^2+etab1^2)/(etaa0^2+etab0^2+etab1^2)^2*rhoa-2.0*etaa0*(etab0^2+etab1^2)/(etaa0^2+etab0^2+etab1^2)^2*rhob'
-    args = 'etaa0 etab0 etab1'
-    f_name = fta0
-    enable_jit = false
-  [../]
-  [./Coupledetab0Fn]
-    type = DerivativeParsedMaterial
-    material_property_names = 'rhoa(w) rhob(w)'
-    function = '-2.0*etab0*etaa0^2/(etaa0^2+etab0^2+etab1^2)^2*rhoa+2.0*etab0*etaa0^2/(etaa0^2+etab0^2+etab1^2)^2*rhob'
-    args = 'etaa0 etab0 etab1'
-    f_name = ftb0
-    enable_jit = false
-  [../]
-  [./Coupledetab1Fn]
-    type = DerivativeParsedMaterial
-    material_property_names = 'rhoa(w) rhob(w)'
-    function = '-2.0*etab1*etaa0^2/(etaa0^2+etab0^2+etab1^2)^2*rhoa+2.0*etab1*etaa0^2/(etaa0^2+etab0^2+etab1^2)^2*rhob'
-    args = 'etaa0 etab0 etab1'
-    f_name = ftb1
     enable_jit = false
   [../]
 []
