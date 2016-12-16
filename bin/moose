@@ -8,6 +8,45 @@ import os.path
 import sys
 import shutil
 
+def main():
+    parser = argparse.ArgumentParser()
+    build_cmds(parser)
+    args = parser.parse_args()
+    args.func(args)
+
+def build_cmds(parser):
+    mpath = os.environ.get('MOOSE_DIR')
+    if mpath is None:
+        print('the MOOSE_DIR environment variable must be set to use this command', file=sys.stderr)
+        sys.exit(1)
+
+    projpath = './'
+    projname = find_proj_name(projpath)
+    if projname is None:
+        print('no MOOSE app found here', file=sys.stderr)
+        sys.exit(1)
+
+    projinfo = {'path': projpath, 'name': 'Stork', 'moose_path': mpath}
+    subs = parser.add_subparsers()
+
+    sub = subs.add_parser('newobj', help='add and register a new moose object')
+    sub.add_argument('kind', type=str, help='superclass of object to create')
+    sub.add_argument('name', type=str, help='class name for new object')
+    sub.add_argument('--register', type=t_or_f, default=True, help='auto-generate the in-app registration line (default=True)')
+    sub.set_defaults(proj=projinfo, func=newobj)
+
+    sub = subs.add_parser('info', help='display local project info')
+    sub.set_defaults(proj=projinfo, func=show_proj_info)
+
+    sub = subs.add_parser('help', help='display help for subcomands')
+    sub.set_defaults(proj=projinfo, func=helpcmd)
+
+def show_proj_info(args):
+    proj = args.proj
+    print(' ' + proj['name'] + ':')
+    print('    Path:', proj['path'])
+    print('    MOOSE_DIR:', proj['moose_path'])
+
 def prepare_obj_paths(proj, kind, name):
     mpath, ppath = proj['moose_path'], proj['path']
     if kind == 'Kernel':
@@ -19,24 +58,16 @@ def prepare_obj_paths(proj, kind, name):
             }
     return None
 
-def main():
-    parser = argparse.ArgumentParser()
-    build_cmds(parser)
-    args = parser.parse_args()
-    args.func(args)
+def find_proj_name(proj_path):
+    fpath = os.path.join(proj_path, 'src/main.C')
+    with open(fpath, 'r') as f:
+        body = f.read()
+    r = re.compile(r'\s([A-Za-z0-9_]*)App::registerApps\(\s*\)\s*;')
+    m = r.search(body)
 
-def build_cmds(parser):
-    projinfo = {'path': './', 'name': 'Stork', 'moose_path': '../moose'}
-    subs = parser.add_subparsers()
-
-    sub = subs.add_parser('newobj', help='add and register a new moose object')
-    sub.add_argument('kind', type=str, help='superclass of object to create')
-    sub.add_argument('name', type=str, help='class name for new object')
-    sub.add_argument('--register', type=t_or_f, default=True, help='auto-generate the in-app registration line (default=True)')
-    sub.set_defaults(proj=projinfo, func=newobj)
-
-    sub = subs.add_parser('help')
-    sub.set_defaults(proj=projinfo, func=helpcmd)
+    if m is None:
+        return None
+    return m.group(1)
 
 def helpcmd(args):
     pass
