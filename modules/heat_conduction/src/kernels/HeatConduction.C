@@ -26,7 +26,6 @@ InputParameters validParams<HeatConductionKernel>()
 
 HeatConductionKernel::HeatConductionKernel(const InputParameters & parameters) :
     Diffusion(parameters),
-    _dim(_subproblem.mesh().dimension()),
     _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient_name")),
     _diffusion_coefficient_dT(hasMaterialProperty<Real>("diffusion_coefficient_dT_name") ?
                               &getMaterialProperty<Real>("diffusion_coefficient_dT_name") : NULL)
