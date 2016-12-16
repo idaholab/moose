@@ -28,5 +28,6 @@ TmplKernel::computeQpJacobian() {
 // implement these functions only if you have a particular need to:
 Real TmplKernel::computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
 void TmplKernel::precalculateResidual() { }
-void precalculateJacobian() { }
-void precalculateOffDiagJacobian(unsigned int /* jvar */) { }
+void TmplKernel::precalculateJacobian() { }
+void TmplKernel::precalculateOffDiagJacobian(unsigned int /* jvar */) { }
+

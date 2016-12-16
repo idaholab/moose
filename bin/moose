@@ -14,7 +14,7 @@ def prepare_obj_paths(proj, kind, name):
             'template_h': os.path.join(mpath, 'templates/Kernel.h'),
             'template_C': os.path.join(mpath, 'templates/Kernel.C'),
             'dst_h': os.path.join(ppath, 'include/kernels/{}.h'.format(name)),
-            'dst_C': os.path.join(ppath, 'include/kernels/{}.C'.format(name)),
+            'dst_C': os.path.join(ppath, 'src/kernels/{}.C'.format(name)),
             }
     return None
 
@@ -54,6 +54,8 @@ def newobj(args):
     proj, kind, name = args.proj, args.kind, args.name
 
     path_info = prepare_obj_paths(proj, kind, name)
+    os.makedirs(os.path.dirname(path_info['dst_h']), exist_ok=True)
+    os.makedirs(os.path.dirname(path_info['dst_C']), exist_ok=True)
     shutil.copyfile(path_info['template_h'], path_info['dst_h'])
     shutil.copyfile(path_info['template_C'], path_info['dst_C'])
     rename_internal(path_info['dst_h'], name)
