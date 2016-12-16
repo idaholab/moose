@@ -185,10 +185,9 @@
 []
 
 [Preconditioning]
-  active = 'smp'
   [./smp]
     type = SMP
-    full = true
+    coupled_groups = 'disp_x,disp_y c,b'
   [../]
 []
 
