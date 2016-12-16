@@ -35,7 +35,7 @@ HeatConductionKernel::HeatConductionKernel(const InputParameters & parameters) :
 Real
 HeatConductionKernel::computeQpResidual()
 {
-  return _diffusion_coefficient[_qp]*Diffusion::computeQpResidual();
+  return _diffusion_coefficient[_qp] * Diffusion::computeQpResidual();
 }
 
 Real
