@@ -106,7 +106,7 @@ def register_object(proj, name):
     with open(appfile, 'r') as f:
         body = f.read()
 
-    body = r.sub(r'\g<1>    registerObject({});\n'.format(name), body)
+    body = r.sub(r'\g<1>  registerObject({});\n'.format(name), body)
 
     with open(appfile, 'w') as f:
         f.write(body)
@@ -117,7 +117,6 @@ def t_or_f(arg):
     if s in ('f', 'false', 'n', 'no'):
         return False
     return True
-
 
 if __name__ == '__main__':
     main()
