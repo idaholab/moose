@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+import re
+import argparse
+import os.path
+import shutil
+
+def prepare_obj_paths(proj, kind, name):
+    mpath, ppath = proj['moose_path'], proj['path']
+    if kind == 'Kernel':
+        return {
+            'template_h': os.path.join(mpath, 'templates/Kernel.h'),
+            'template_C': os.path.join(mpath, 'templates/Kernel.C'),
+            'dst_h': os.path.join(ppath, 'include/kernels/{}.h'.format(name)),
+            'dst_C': os.path.join(ppath, 'include/kernels/{}.C'.format(name)),
+            }
+    return None
+
+def main():
+    parser = argparse.ArgumentParser()
+    build_cmds(parser)
+    args = parser.parse_args()
+    args.func(args)
+
+def build_cmds(parser):
+    projinfo = {'path': './', 'name': 'Stork', 'moose_path': '../moose'}
+    subs = parser.add_subparsers()
+
+    sub = subs.add_parser('newobj', help='add and register a new moose object')
+    sub.add_argument('kind', type=str, help='superclass of object to create')
+    sub.add_argument('name', type=str, help='class name for new object')
+    sub.add_argument('--register', type=t_or_f, default=True, help='auto-generate the in-app registration line (default=True)')
+    sub.set_defaults(proj=projinfo, func=newobj)
+
+    sub = subs.add_parser('help')
+    sub.set_defaults(proj=projinfo, func=helpcmd)
+
+def helpcmd(args):
+    pass
+
+def rename_internal(fname, objname):
+    with open(fname, 'r') as f:
+        body = f.read()
+
+    body = body.replace('TmplKernel', objname)
+    body = body.replace('TMPLKERNEL', objname.upper())
+
+    with open(fname, 'w') as f:
+        f.write(body)
+
+def newobj(args):
+    proj, kind, name = args.proj, args.kind, args.name
+
+    path_info = prepare_obj_paths(proj, kind, name)
+    shutil.copyfile(path_info['template_h'], path_info['dst_h'])
+    shutil.copyfile(path_info['template_C'], path_info['dst_C'])
+    rename_internal(path_info['dst_h'], name)
+    rename_internal(path_info['dst_C'], name)
+
+    if args.register:
+        register_object(proj, name)
+
+def register_object(proj, name):
+    r = re.compile(r'(App::registerObjects\( *Factory.*\)\s*{[^\n]*\n)')
+
+    appfile = os.path.join(proj['path'], 'src/base', proj['name']+'App.C')
+    with open(appfile, 'r') as f:
+        body = f.read()
+
+    body = r.sub(r'\g<1>    registerObject({});\n'.format(name), body)
+
+    with open(appfile, 'w') as f:
+        f.write(body)
+
+# hack to get python's argparse to do something useful with boolean flags
+def t_or_f(arg):
+    s = str(arg).lower()
+    if s in ('f', 'false', 'n', 'no'):
+        return False
+    return True
+
+
+if __name__ == '__main__':
+    main()
+
