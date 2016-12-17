@@ -1,0 +1,7 @@
+[Tests]
+  [./random_pps]
+    type = 'CSVDiff'
+    input = 'random_pps.i'
+    csvdiff = 'random_pps_out.csv'
+  [../]
+[]
