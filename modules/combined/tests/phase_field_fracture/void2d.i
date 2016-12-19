@@ -66,7 +66,7 @@
     variable = c
   [../]
   [./pfintvar]
-    type = PFFracIntVar
+    type = Reaction
     variable = b
   [../]
   [./pfintcoupled]
@@ -172,8 +172,9 @@
   petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      lu           1'
 
-  nl_rel_tol = 1e-8
-  l_max_its = 10
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-12
+  l_max_its = 15
   nl_max_its = 10
 
   dt = 1e-4

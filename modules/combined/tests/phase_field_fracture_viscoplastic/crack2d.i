@@ -70,7 +70,7 @@
     variable = c
   [../]
   [./pfintvar]
-    type = PFFracIntVar
+    type = Reaction
     variable = b
   [../]
   [./pfintcoupled]
