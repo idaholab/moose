@@ -2,7 +2,7 @@
 #ifndef TMPLKERNEL_H
 #define TMPLKERNEL_H
 
-#include "TmplKernel.h"
+#include "Kernel.h"
 
 class TmplKernel;
 

@@ -208,6 +208,7 @@ def register_object(proj, name):
     with open(appfile, 'r') as f:
         body = f.read()
 
+    body = '#include "{}.h"\n'.format(name) + body
     body = r.sub(r'\g<1>  registerObject({});\n'.format(name), body)
 
     with open(appfile, 'w') as f:

@@ -10,13 +10,14 @@ InputParameters validParams<TmplKernel>()
 }
 
 TmplKernel::TmplKernel(const InputParameters & parameters)
-    : TmplKernel(parameters)
+    : Kernel(parameters)
 {
 }
 
 Real
 TmplKernel::computeQpResidual() {
   // implement residual calculation here
+  return 0;
 }
 
 Real
