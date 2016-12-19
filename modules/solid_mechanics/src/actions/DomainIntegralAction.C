@@ -50,25 +50,25 @@ InputParameters validParams<DomainIntegralAction>()
   return params;
 }
 
-DomainIntegralAction::DomainIntegralAction(const InputParameters & params):
-  Action(params),
-  _boundary_names(getParam<std::vector<BoundaryName> >("boundary")),
-  _order(getParam<std::string>("order")),
-  _family(getParam<std::string>("family")),
-  _direction_method_moose_enum(getParam<MooseEnum>("crack_direction_method")),
-  _end_direction_method_moose_enum(getParam<MooseEnum>("crack_end_direction_method")),
-  _have_crack_direction_vector(false),
-  _have_crack_direction_vector_end_1(false),
-  _have_crack_direction_vector_end_2(false),
-  _treat_as_2d(getParam<bool>("2d")),
-  _axis_2d(getParam<unsigned int>("axis_2d")),
-  _convert_J_to_K(false),
-  _has_symmetry_plane(isParamValid("symmetry_plane")),
-  _symmetry_plane(_has_symmetry_plane ? getParam<unsigned int>("symmetry_plane") : std::numeric_limits<unsigned int>::max()),
-  _position_type(getParam<MooseEnum>("position_type")),
-  _q_function_type(getParam<MooseEnum>("q_function_type")),
-  _get_equivalent_k(getParam<bool>("equivalent_k")),
-  _use_displaced_mesh(false)
+DomainIntegralAction::DomainIntegralAction(const InputParameters & params) :
+    Action(params),
+    _boundary_names(getParam<std::vector<BoundaryName> >("boundary")),
+    _order(getParam<std::string>("order")),
+    _family(getParam<std::string>("family")),
+    _direction_method_moose_enum(getParam<MooseEnum>("crack_direction_method")),
+    _end_direction_method_moose_enum(getParam<MooseEnum>("crack_end_direction_method")),
+    _have_crack_direction_vector(false),
+    _have_crack_direction_vector_end_1(false),
+    _have_crack_direction_vector_end_2(false),
+    _treat_as_2d(getParam<bool>("2d")),
+    _axis_2d(getParam<unsigned int>("axis_2d")),
+    _convert_J_to_K(false),
+    _has_symmetry_plane(isParamValid("symmetry_plane")),
+    _symmetry_plane(_has_symmetry_plane ? getParam<unsigned int>("symmetry_plane") : std::numeric_limits<unsigned int>::max()),
+    _position_type(getParam<MooseEnum>("position_type")),
+    _q_function_type(getParam<MooseEnum>("q_function_type")),
+    _get_equivalent_k(getParam<bool>("equivalent_k")),
+    _use_displaced_mesh(false)
 {
   if (_q_function_type == GEOMETRY)
   {
@@ -407,19 +407,19 @@ DomainIntegralAction::act()
         case INTERACTION_INTEGRAL_KI:
           pp_base_name = "II_KI";
           aux_mode_name = "_I_";
-          params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1 - std::pow(_poissons_ratio,2));
+          params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1.0 - std::pow(_poissons_ratio, 2.0));
           break;
 
         case INTERACTION_INTEGRAL_KII:
           pp_base_name = "II_KII";
           aux_mode_name = "_II_";
-          params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1 - std::pow(_poissons_ratio,2));
+          params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1.0 - std::pow(_poissons_ratio, 2.0));
           break;
 
         case INTERACTION_INTEGRAL_KIII:
           pp_base_name = "II_KIII";
           aux_mode_name = "_III_";
-          params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1 + _poissons_ratio);
+          params.set<Real>("K_factor") = 0.5 * _youngs_modulus / (1.0 + _poissons_ratio);
           break;
 
         case INTERACTION_INTEGRAL_T:
@@ -641,11 +641,11 @@ DomainIntegralAction::act()
   else if (_current_task == "add_material")
   {
 
-    int n_int_integrals(0);
-    int i_ki;
-    int i_kii;
-    int i_kiii;
-    int i_t;
+    int n_int_integrals = 0;
+    int i_ki = 0;
+    int i_kii = 0;
+    int i_kiii = 0;
+    int i_t = 0;
 
     if (_integrals.count(INTERACTION_INTEGRAL_KI)  != 0)
     {
@@ -670,13 +670,13 @@ DomainIntegralAction::act()
 
     std::vector<MooseEnum> sif_mode_enum_vec(InteractionIntegralAuxFields::getSIFModesVec(n_int_integrals));
 
-    if (_integrals.count(INTERACTION_INTEGRAL_KI)  != 0)
+    if (_integrals.count(INTERACTION_INTEGRAL_KI) != 0)
       sif_mode_enum_vec[i_ki] = "KI";
-    if (_integrals.count(INTERACTION_INTEGRAL_KII)  != 0)
+    if (_integrals.count(INTERACTION_INTEGRAL_KII) != 0)
       sif_mode_enum_vec[i_kii] = "KII";
-    if (_integrals.count(INTERACTION_INTEGRAL_KIII)  != 0)
+    if (_integrals.count(INTERACTION_INTEGRAL_KIII) != 0)
       sif_mode_enum_vec[i_kiii] = "KIII";
-    if (_integrals.count(INTERACTION_INTEGRAL_T)  != 0)
+    if (_integrals.count(INTERACTION_INTEGRAL_T) != 0)
       sif_mode_enum_vec[i_t] = "T";
 
     if (sif_mode_enum_vec.size() > 0)

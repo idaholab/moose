@@ -373,8 +373,8 @@ TensorMechanicsPlasticMohrCoulombMulti::doReturnMap(const RankTwoTensor & trial_
   }
 
   unsigned trial;
-  bool nr_converged;
-  bool kt_success;
+  bool nr_converged = false;
+  bool kt_success = false;
   std::vector<RealVectorValue> ntip(3);
   std::vector<Real> dpmtip(3);
 
@@ -382,48 +382,53 @@ TensorMechanicsPlasticMohrCoulombMulti::doReturnMap(const RankTwoTensor & trial_
   {
     switch (trial_order[trial])
     {
-    case tip110100:
-      for (unsigned i = 0; i < 3; ++i)
-      {
-        ntip[0](i) = n[0](i);
-        ntip[1](i) = n[1](i);
-        ntip[2](i) = n[3](i);
-      }
-      kt_success = returnTip(eigvals, ntip, dpmtip, returned_stress, intnl_old, sinphi, cohcos, 0, nr_converged, ep_plastic_tolerance, yf);
-      if (nr_converged && kt_success)
-      {
-        dpm[0] = dpmtip[0];
-        dpm[1] = dpmtip[1];
-        dpm[3] = dpmtip[2];
-        dpm[2] = dpm[4] = dpm[5] = 0;
-      }
-      break;
-    case tip010101:
-      for (unsigned i = 0; i < 3; ++i)
-      {
-        ntip[0](i) = n[1](i);
-        ntip[1](i) = n[3](i);
-        ntip[2](i) = n[5](i);
-      }
-      kt_success = returnTip(eigvals, ntip, dpmtip, returned_stress, intnl_old, sinphi, cohcos, 0, nr_converged, ep_plastic_tolerance, yf);
-      if (nr_converged && kt_success)
-      {
-        dpm[1] = dpmtip[0];
-        dpm[3] = dpmtip[1];
-        dpm[5] = dpmtip[2];
-        dpm[0] = dpm[2] = dpm[4] = 0;
-      }
-      break;
-    case edge000101:
-      kt_success = returnEdge000101(eigvals, n, dpm, returned_stress, intnl_old, sinphi, cohcos, 0, mag_E, nr_converged, ep_plastic_tolerance, yf);
-      break;
-    case edge010100:
-      kt_success = returnEdge010100(eigvals, n, dpm, returned_stress, intnl_old, sinphi, cohcos, 0, mag_E, nr_converged, ep_plastic_tolerance, yf);
-      break;
-    case plane000100:
-      kt_success = returnPlane(eigvals, n, dpm, returned_stress, intnl_old, sinphi, cohcos, 0, nr_converged, ep_plastic_tolerance, yf);
-      break;
+      case tip110100:
+        for (unsigned int i = 0; i < 3; ++i)
+        {
+          ntip[0](i) = n[0](i);
+          ntip[1](i) = n[1](i);
+          ntip[2](i) = n[3](i);
+        }
+        kt_success = returnTip(eigvals, ntip, dpmtip, returned_stress, intnl_old, sinphi, cohcos, 0, nr_converged, ep_plastic_tolerance, yf);
+        if (nr_converged && kt_success)
+        {
+          dpm[0] = dpmtip[0];
+          dpm[1] = dpmtip[1];
+          dpm[3] = dpmtip[2];
+          dpm[2] = dpm[4] = dpm[5] = 0;
+        }
+        break;
+
+      case tip010101:
+        for (unsigned int i = 0; i < 3; ++i)
+        {
+          ntip[0](i) = n[1](i);
+          ntip[1](i) = n[3](i);
+          ntip[2](i) = n[5](i);
+        }
+        kt_success = returnTip(eigvals, ntip, dpmtip, returned_stress, intnl_old, sinphi, cohcos, 0, nr_converged, ep_plastic_tolerance, yf);
+        if (nr_converged && kt_success)
+        {
+          dpm[1] = dpmtip[0];
+          dpm[3] = dpmtip[1];
+          dpm[5] = dpmtip[2];
+          dpm[0] = dpm[2] = dpm[4] = 0;
+        }
+        break;
+
+      case edge000101:
+        kt_success = returnEdge000101(eigvals, n, dpm, returned_stress, intnl_old, sinphi, cohcos, 0, mag_E, nr_converged, ep_plastic_tolerance, yf);
+        break;
+
+      case edge010100:
+        kt_success = returnEdge010100(eigvals, n, dpm, returned_stress, intnl_old, sinphi, cohcos, 0, mag_E, nr_converged, ep_plastic_tolerance, yf);
+        break;
+
+      case plane000100:
+        kt_success = returnPlane(eigvals, n, dpm, returned_stress, intnl_old, sinphi, cohcos, 0, nr_converged, ep_plastic_tolerance, yf);
+        break;
     }
+
     if (nr_converged && kt_success)
       break;
   }
