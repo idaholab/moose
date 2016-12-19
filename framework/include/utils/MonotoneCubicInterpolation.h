@@ -19,7 +19,7 @@
 
 #include "libmesh/libmesh_common.h"
 
-using namespace libMesh;
+using libMesh::Real;
 
 class MonotoneCubicInterpolation
 {
