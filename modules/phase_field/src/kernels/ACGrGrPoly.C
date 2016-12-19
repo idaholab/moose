@@ -9,29 +9,15 @@
 template<>
 InputParameters validParams<ACGrGrPoly>()
 {
-  InputParameters params = ACBulk<Real>::validParams();
+  InputParameters params = validParams<ACGrGrBase>();
   params.addClassDescription("Grain-Boundary model poly-crystaline interface Allen-Cahn Kernel");
-  params.addRequiredCoupledVar("v", "Array of coupled variable names");
-  params.addCoupledVar("T", "temperature");
   return params;
 }
 
 ACGrGrPoly::ACGrGrPoly(const InputParameters & parameters) :
-    ACBulk<Real>(parameters),
-    _op_num(coupledComponents("v")),
-    _vals(_op_num),
-    _vals_var(_op_num),
-    _mu(getMaterialProperty<Real>("mu")),
-    _gamma(getMaterialProperty<Real>("gamma_asymm")),
-    _tgrad_corr_mult(getMaterialProperty<Real>("tgrad_corr_mult")),
-    _grad_T(isCoupled("T") ? &coupledGradient("T") : NULL)
+    ACGrGrBase(parameters),
+    _gamma(getMaterialProperty<Real>("gamma_asymm"))
 {
-  // Loop through grains and load coupled variables into the arrays
-  for (unsigned int i = 0; i < _op_num; ++i)
-  {
-    _vals[i] = &coupledValue("v", i);
-    _vals_var[i] = coupled("v", i);
-  }
 }
 
 Real

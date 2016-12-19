@@ -14,6 +14,7 @@
  */
 #include "ACGBPoly.h"
 #include "ACGrGrElasticDrivingForce.h"
+#include "ACGrGrMulti.h"
 #include "ACGrGrPoly.h"
 #include "ACInterface.h"
 #include "ACMultiInterface.h"
@@ -297,6 +298,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
 {
   registerKernel(ACGBPoly);
   registerKernel(ACGrGrElasticDrivingForce);
+  registerKernel(ACGrGrMulti);
   registerKernel(ACGrGrPoly);
   registerKernel(ACInterface);
   registerKernel(ACMultiInterface);
