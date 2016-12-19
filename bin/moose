@@ -139,20 +139,28 @@ def newobj(args):
         sys.exit(1)
 
     proj, kind, name = args.proj, args.kind, args.name
+    copy_template(proj, kind, name)
+
+    if not args.noregister:
+        register_object(proj, name)
+
+def copy_template(proj, kind, name):
     path_info = prepare_obj_paths(proj, kind, name)
     if path_info is None:
         print("invalid object kind '{}'".format(kind), file=sys.stderr)
         sys.exit(1)
 
-    os.makedirs(os.path.dirname(path_info['dst_h']), exist_ok=True)
-    os.makedirs(os.path.dirname(path_info['dst_C']), exist_ok=True)
+
+    dirname = os.path.dirname(path_info['dst_h'])
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    dirname = os.path.dirname(path_info['dst_C'])
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
     shutil.copyfile(path_info['template_h'], path_info['dst_h'])
     shutil.copyfile(path_info['template_C'], path_info['dst_C'])
     rename_internal(path_info['dst_h'], name)
     rename_internal(path_info['dst_C'], name)
-
-    if not args.noregister:
-        register_object(proj, name)
 
 def prepare_obj_paths(proj, kind, name):
     mpath, ppath = proj['moose_path'], proj['path']
