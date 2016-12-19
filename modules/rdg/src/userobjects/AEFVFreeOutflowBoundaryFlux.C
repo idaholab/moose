@@ -25,8 +25,8 @@ AEFVFreeOutflowBoundaryFlux::~AEFVFreeOutflowBoundaryFlux()
 }
 
 void
-AEFVFreeOutflowBoundaryFlux::calcFlux(unsigned int iside,
-                                      unsigned int ielem,
+AEFVFreeOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
+                                      unsigned int /*ielem*/,
                                       const std::vector<Real> & uvec1,
                                       const std::vector<Real> & dwave,
                                       std::vector<Real> & flux) const
@@ -44,10 +44,10 @@ AEFVFreeOutflowBoundaryFlux::calcFlux(unsigned int iside,
 }
 
 void
-AEFVFreeOutflowBoundaryFlux::calcJacobian(unsigned int iside,
-                                          unsigned int ielem,
-                                          const std::vector<Real> & uvec1,
-                                          const std::vector<Real> & dwave,
-                                          DenseMatrix<Real> & jac1) const
+AEFVFreeOutflowBoundaryFlux::calcJacobian(unsigned int /*iside*/,
+                                          unsigned int /*ielem*/,
+                                          const std::vector<Real> & /*uvec1*/,
+                                          const std::vector<Real> & /*dwave*/,
+                                          DenseMatrix<Real> & /*jac1*/) const
 {
 }

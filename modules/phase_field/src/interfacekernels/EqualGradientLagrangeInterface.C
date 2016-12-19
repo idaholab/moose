@@ -40,7 +40,7 @@ EqualGradientLagrangeInterface::computeQpResidual(Moose::DGResidualType type)
 }
 
 Real
-EqualGradientLagrangeInterface::computeQpJacobian(Moose::DGJacobianType type)
+EqualGradientLagrangeInterface::computeQpJacobian(Moose::DGJacobianType /*type*/)
 {
   return 0.0;
 }

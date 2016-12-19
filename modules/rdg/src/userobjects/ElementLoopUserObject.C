@@ -34,7 +34,7 @@ ElementLoopUserObject::ElementLoopUserObject(const InputParameters & parameters)
     addMooseVariableDependency(coupled_vars[i]);
 }
 
-ElementLoopUserObject::ElementLoopUserObject(ElementLoopUserObject & x, Threads::split split) :
+ElementLoopUserObject::ElementLoopUserObject(ElementLoopUserObject & x, Threads::split /*split*/) :
     GeneralUserObject(x.parameters()),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
@@ -141,7 +141,7 @@ ElementLoopUserObject::onElement(const Elem * elem)
 }
 
 void
-ElementLoopUserObject::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+ElementLoopUserObject::onBoundary(const Elem * /*elem*/, unsigned int side, BoundaryID /*bnd_id*/)
 {
   _current_side = side;
   computeBoundary();
@@ -172,7 +172,7 @@ ElementLoopUserObject::onInternalSide(const Elem *elem, unsigned int side)
 }
 
 void
-ElementLoopUserObject::onInterface(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+ElementLoopUserObject::onInterface(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/)
 {
 }
 
