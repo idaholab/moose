@@ -669,7 +669,7 @@ SolutionUserObject::discontinuousPointValue(Real t, const Point & p, const std::
 }
 
 std::map<const Elem *, Real>
-SolutionUserObject::discontinuousPointValue(Real t, Point pt, const unsigned int local_var_index) const
+SolutionUserObject::discontinuousPointValue(Real libmesh_dbg_var(t), Point pt, const unsigned int local_var_index) const
 {
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
@@ -771,7 +771,7 @@ SolutionUserObject::pointValueGradient(Real t, const Point & p, const std::strin
 }
 
 RealGradient
-SolutionUserObject::pointValueGradient(Real t, Point pt, const unsigned int local_var_index) const
+SolutionUserObject::pointValueGradient(Real libmesh_dbg_var(t), Point pt, const unsigned int local_var_index) const
 {
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)
@@ -813,7 +813,7 @@ SolutionUserObject::discontinuousPointValueGradient(Real t, const Point & p, con
 }
 
 std::map<const Elem *, RealGradient>
-SolutionUserObject::discontinuousPointValueGradient(Real t, Point pt, const unsigned int local_var_index) const
+SolutionUserObject::discontinuousPointValueGradient(Real libmesh_dbg_var(t), Point pt, const unsigned int local_var_index) const
 {
   // do the transformations
   for (unsigned int trans_num = 0; trans_num < _transformation_order.size(); ++trans_num)

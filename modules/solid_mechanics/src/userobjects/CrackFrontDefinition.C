@@ -441,7 +441,7 @@ CrackFrontDefinition::pickLoopCrackEndNodes(std::vector<dof_id_type> &end_nodes,
                                             std::map<dof_id_type, std::vector<dof_id_type> > &node_to_line_elem_map,
                                             std::vector<std::vector<dof_id_type> > &line_elems)
 {
-  unsigned int max_dist_node;
+  unsigned int max_dist_node = 0;
   Real min_dist = std::numeric_limits<Real>::max();
   Real max_dist = -std::numeric_limits<Real>::max();
   //Pick the node farthest from the origin as the end node, or the one with

@@ -558,8 +558,7 @@ GrainTracker::trackGrains()
       if (old_grain._status == Status::INACTIVE)      // Don't try to find matches for inactive grains
         continue;
 
-      std::size_t closest_match_index;
-      bool found_one = false;
+      std::size_t closest_match_index = invalid_size_t;
       Real min_centroid_diff = std::numeric_limits<Real>::max();
 
       /**
@@ -589,14 +588,14 @@ GrainTracker::trackGrains()
           Real curr_centroid_diff = centroidRegionDistance(old_grain._bboxes, new_grain._bboxes);
           if (curr_centroid_diff <= min_centroid_diff)
           {
-            found_one = true;
             closest_match_index = new_grain_index;
             min_centroid_diff = curr_centroid_diff;
           }
         }
       }
 
-      if (found_one)
+      // found a match
+      if (closest_match_index != invalid_size_t)
       {
         /**
          * It's possible that multiple existing grains will map to a single new grain (indicated by finding multiple
