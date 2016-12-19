@@ -7,6 +7,9 @@
 
 #include "PorousFlowFluidMass.h"
 
+// libmesh includes for qrule
+#include "libmesh/quadrature.h"
+
 template<>
 InputParameters validParams<PorousFlowFluidMass>()
 {
@@ -26,9 +29,9 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters) :
   _fluid_component(getParam<unsigned int>("fluid_component")),
   _phase_index(getParam<std::vector<unsigned int> >("phase")),
   _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
-  _fluid_density(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density")),
+  _fluid_density(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_nodal")),
   _fluid_saturation(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal")),
-  _mass_fraction(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
+  _mass_fraction(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac_nodal")),
   _saturation_threshold(getParam<Real>("saturation_threshold"))
 {
   const unsigned int num_phases = _dictator.numPhases();
@@ -67,6 +70,8 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters) :
 Real
 PorousFlowFluidMass::computeQpIntegral()
 {
+  mooseAssert(_current_elem->n_nodes() == _qrule->n_points(), "PorousFlow Postprocessors are currently only defined for number nodes = number quadpoints.");
+
   Real mass = 0.0;
   unsigned int ph;
 

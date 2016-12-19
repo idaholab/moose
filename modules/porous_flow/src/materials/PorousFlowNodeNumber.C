@@ -44,10 +44,10 @@ PorousFlowNodeNumber::computeQpProperties()
 unsigned
 PorousFlowNodeNumber::nearest()
 {
-  if (!_bnd)
+  if (!_bnd || true) // 6 Dec, added "|| true" for getting ready for deprecating this class, and commented check below
   {
-    if (_current_elem->n_nodes() > _qrule->n_points())
-      mooseError("PorousFlowNodeNumber: PorousFlow currently assumes that the number of nodes in an element does not exceed the number of quadpoints in the element, for elements not on a boundary.  This is so that PorousFlow Materials can store nodal information at the quadpoints.");
+    //if (_current_elem->n_nodes() > _qrule->n_points())
+    //  mooseError("PorousFlowNodeNumber: PorousFlow currently assumes that the number of nodes in an element does not exceed the number of quadpoints in the element, for elements not on a boundary.  This is so that PorousFlow Materials can store nodal information at the quadpoints.");
     /**
      * Coders take note:
      * For performance reasons, PorousFlow assumes that for _bnd=false

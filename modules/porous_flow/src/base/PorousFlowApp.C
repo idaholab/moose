@@ -48,7 +48,6 @@
 #include "PorousFlowViscosityConst.h"
 #include "PorousFlowVolumetricStrain.h"
 #include "PorousFlowJoiner.h"
-#include "PorousFlowNodeNumber.h"
 #include "PorousFlowTemperature.h"
 #include "PorousFlowThermalConductivityIdeal.h"
 #include "PorousFlowMatrixInternalEnergy.h"
@@ -57,6 +56,7 @@
 #include "PorousFlowDiffusivityConst.h"
 #include "PorousFlowDiffusivityMillingtonQuirk.h"
 #include "PorousFlowSingleComponentFluid.h"
+#include "PorousFlowNearestQp.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
@@ -169,7 +169,6 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowViscosityConst);
   registerMaterial(PorousFlowVolumetricStrain);
   registerMaterial(PorousFlowJoiner);
-  registerMaterial(PorousFlowNodeNumber);
   registerMaterial(PorousFlowTemperature);
   registerMaterial(PorousFlowThermalConductivityIdeal);
   registerMaterial(PorousFlowMatrixInternalEnergy);
@@ -178,6 +177,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowDiffusivityConst);
   registerMaterial(PorousFlowDiffusivityMillingtonQuirk);
   registerMaterial(PorousFlowSingleComponentFluid);
+  registerMaterial(PorousFlowNearestQp);
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);

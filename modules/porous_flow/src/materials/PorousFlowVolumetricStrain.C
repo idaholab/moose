@@ -19,6 +19,7 @@ InputParameters validParams<PorousFlowVolumetricStrain>()
   params.addParam<bool>("consistent_with_displaced_mesh", true, "The volumetric strain rate will include terms that ensure fluid mass conservation in the displaced mesh");
   params.addClassDescription("Compute volumetric strain and the volumetric_strain rate, for use in PorousFlow.");
   params.set<bool>("stateful_displacements") = true;
+  params.set<bool>("at_nodes") = false;
   return params;
 }
 
@@ -58,6 +59,8 @@ PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & p
     _grad_disp[i] = &_grad_zero;
     _grad_disp_old[i] = &_grad_zero;
   }
+  if (_nodal_material == true)
+    mooseError("PorousFlowVolumetricStrain classes are only defined for at_nodes = false");
 }
 
 void

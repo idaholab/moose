@@ -11,17 +11,14 @@
 template<>
 InputParameters validParams<PorousFlowMaterialBase>()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = validParams<PorousFlowMaterial>();
   params.addRequiredParam<unsigned int>("phase", "The phase number");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addClassDescription("Base class for PorousFlow materials");
   return params;
 }
 
 PorousFlowMaterialBase::PorousFlowMaterialBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
-    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _node_number(getMaterialProperty<unsigned int>("PorousFlow_node_number")),
+    DerivativeMaterialInterface<PorousFlowMaterial>(parameters),
     _phase_num(getParam<unsigned int>("phase")),
     _phase(Moose::stringify(_phase_num))
 {

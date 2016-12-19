@@ -33,6 +33,12 @@ protected:
   /// holds info on the PorousFlow variables
   const PorousFlowDictator & _dictator;
 
+  /// whether the porosity uses the volumetric strain at the closest quadpoint
+  const bool _strain_at_nearest_qp;
+
+  /// the nearest qp to the node
+  const MaterialProperty<unsigned int> * const _nearest_qp;
+
   /// porosity at the nodes, but it can depend on grad(variables) which are actually evaluated at the qps
   const MaterialProperty<Real> & _porosity;
 

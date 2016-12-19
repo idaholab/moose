@@ -29,11 +29,9 @@ public:
   PorousFlowMassVolumetricExpansion(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-
-  virtual Real computeQpJacobian();
-
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// the fluid component index
   const unsigned int _fluid_component;
@@ -50,6 +48,9 @@ protected:
   /// variable number of the displacements variables
   std::vector<unsigned int> _disp_var_num;
 
+  /// whether the porosity uses the volumetric strain at the closest quadpoint
+  const bool _strain_at_nearest_qp;
+
   /// porosity
   const MaterialProperty<Real> & _porosity;
 
@@ -58,6 +59,9 @@ protected:
 
   /// d(porosity)/d(grad porous-flow variable)
   const MaterialProperty<std::vector<RealGradient> > & _dporosity_dgradvar;
+
+  /// the nearest qp to the node
+  const MaterialProperty<unsigned int> * const _nearest_qp;
 
   /// fluid density
   const MaterialProperty<std::vector<Real> > & _fluid_density;

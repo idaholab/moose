@@ -22,7 +22,7 @@ InputParameters validParams<PorousFlowPorosityTM>()
 PorousFlowPorosityTM::PorousFlowPorosityTM(const InputParameters & parameters) :
     PorousFlowPorosityBase(parameters),
 
-    _phi0(coupledValue("porosity_zero")),
+    _phi0(_nodal_material ? coupledNodalValue("porosity_zero") : coupledValue("porosity_zero")),
     _exp_coeff(getParam<Real>("thermal_expansion_coeff")),
     _solid_bulk(getParam<Real>("solid_bulk")),
 
@@ -32,10 +32,8 @@ PorousFlowPorosityTM::PorousFlowPorosityTM(const InputParameters & parameters) :
     _vol_strain_qp(getMaterialProperty<Real>("PorousFlow_total_volumetric_strain_qp")),
     _dvol_strain_qp_dvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_total_volumetric_strain_qp_dvar")),
 
-    _temperature_nodal(getMaterialProperty<Real>("PorousFlow_temperature_nodal")),
-    _dtemperature_nodal_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar")),
-    _temperature_qp(getMaterialProperty<Real>("PorousFlow_temperature_qp")),
-    _dtemperature_qp_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_qp_dvar"))
+    _temperature(_nodal_material ? getMaterialProperty<Real>("PorousFlow_temperature_nodal") : getMaterialProperty<Real>("PorousFlow_temperature_qp")),
+    _dtemperature_dvar(_nodal_material ? getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar") : getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_qp_dvar"))
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
     _disp_var_num[i] = coupled("displacements", i);
@@ -44,34 +42,26 @@ PorousFlowPorosityTM::PorousFlowPorosityTM(const InputParameters & parameters) :
 void
 PorousFlowPorosityTM::initQpStatefulProperties()
 {
-  _porosity_nodal[_qp] = _phi0[_qp];
-  _porosity_qp[_qp] = _phi0[_qp];
+  _porosity[_qp] = _phi0[_qp];
 }
 
 void
 PorousFlowPorosityTM::computeQpProperties()
 {
-  // Note that in the following _strain[_qp] is evaluated at the quadpoint.
-  // _temperature_nodal[_qp] is actually the nodal value (it is just stored at the quadpoint).
-  // So _porosity_nodal[_qp], which should be the nodal value of porosity (but
-  // stored at the quadpoint) actually uses the strain at the quadpoint.  This
+  // Note that in the following _strain[_qp] is evaluated at q quadpoint
+  // So _porosity_nodal[_qp], which should be the nodal value of porosity
+  // actually uses the strain at a quadpoint.  This
   // is OK for LINEAR elements, as strain is constant over the element anyway.
-  _porosity_nodal[_qp] = 1.0 + (_phi0[_qp] - 1.0) * std::exp(-_vol_strain_qp[_qp] + _exp_coeff * _temperature_nodal[_qp]);
-  _porosity_qp[_qp] = 1.0 + (_phi0[_qp] - 1.0) * std::exp(-_vol_strain_qp[_qp] + _exp_coeff * _temperature_qp[_qp]);
 
-  _dporosity_qp_dvar[_qp].resize(_num_var);
-  _dporosity_nodal_dvar[_qp].resize(_num_var);
-  for (unsigned int v = 0; v < _num_var; ++v)
-  {
-    _dporosity_qp_dvar[_qp][v] = _exp_coeff * _dtemperature_qp_dvar[_qp][v] * (_porosity_qp[_qp] - 1.0);
-    _dporosity_nodal_dvar[_qp][v] = _exp_coeff * _dtemperature_nodal_dvar[_qp][v] * (_porosity_nodal[_qp] - 1.0);
-  }
+  const unsigned qp_to_use = (_nodal_material && (_bnd || _strain_at_nearest_qp) ? nearestQP(_qp) : _qp);
 
-  _dporosity_qp_dgradvar[_qp].resize(_num_var);
-  _dporosity_nodal_dgradvar[_qp].resize(_num_var);
+  _porosity[_qp] = 1.0 + (_phi0[_qp] - 1.0) * std::exp(-_vol_strain_qp[qp_to_use] + _exp_coeff * _temperature[_qp]);
+
+  _dporosity_dvar[_qp].resize(_num_var);
   for (unsigned int v = 0; v < _num_var; ++v)
-  {
-    _dporosity_qp_dgradvar[_qp][v] = - (_porosity_qp[_qp] - 1.0) * _dvol_strain_qp_dvar[_qp][v];
-    _dporosity_nodal_dgradvar[_qp][v] = - (_porosity_nodal[_qp] - 1.0) * _dvol_strain_qp_dvar[_qp][v];
-  }
+    _dporosity_dvar[_qp][v] = _exp_coeff * _dtemperature_dvar[_qp][v] * (_porosity[_qp] - 1.0);
+
+  _dporosity_dgradvar[_qp].resize(_num_var);
+  for (unsigned int v = 0; v < _num_var; ++v)
+    _dporosity_dgradvar[_qp][v] = - (_porosity[_qp] - 1.0) * _dvol_strain_qp_dvar[qp_to_use][v];
 }
