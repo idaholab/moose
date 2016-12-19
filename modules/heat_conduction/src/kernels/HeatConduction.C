@@ -12,7 +12,7 @@ template<>
 InputParameters validParams<HeatConductionKernel>()
 {
   InputParameters params = validParams<Diffusion>();
-  params.addClassDescription("Compute thermal conductivity");
+  params.addClassDescription("Computes residual/Jacobian contribution for $(k \\nabla T, \\nabla \\psi)$ term.");
   params.addParam<MaterialPropertyName>("diffusion_coefficient_name",
                                         "thermal_conductivity",
                                         "Property name of the diffusivity (Default: thermal_conductivity)");
