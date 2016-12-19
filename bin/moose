@@ -7,6 +7,7 @@ import argparse
 import os.path
 import sys
 import shutil
+import subprocess
 
 def main():
     parser = argparse.ArgumentParser()
@@ -21,25 +22,59 @@ def build_cmds(parser):
         sys.exit(1)
 
     projpath = './'
-    projname = find_proj_name(projpath)
+    projname, projpath = find_proj(projpath)
     if projname is None:
         print('no MOOSE app found here', file=sys.stderr)
         sys.exit(1)
 
     projinfo = {'path': projpath, 'name': 'Stork', 'moose_path': mpath}
+    parser.set_defaults(proj=projinfo, parser=parser)
+
     subs = parser.add_subparsers()
 
-    sub = subs.add_parser('newobj', help='add and register a new moose object')
+    subcmd = 'help'
+    help = 'display help subcomands'
+    sub = subs.add_parser(subcmd, help=help, description=help)
+    sub.add_argument('subcommand', nargs='?', default='summary', help='show help for a specific subcommand')
+    sub.set_defaults(func=helpcmd)
+
+    subcmd = 'info'
+    help = 'display local project info'
+    sub = subs.add_parser(subcmd, help=help, description=help)
+    sub.set_defaults(func=show_proj_info)
+
+    subcmd = 'newobj'
+    help = 'add and register a new moose object'
+    sub = subs.add_parser(subcmd, help=help, description=help)
     sub.add_argument('kind', type=str, help='superclass of object to create')
     sub.add_argument('name', type=str, help='class name for new object')
-    sub.add_argument('--register', type=t_or_f, default=True, help='auto-generate the in-app registration line (default=True)')
-    sub.set_defaults(proj=projinfo, func=newobj)
+    sub.add_argument('--noregister', action='store_true', default=False, help="don't auto-generate the in-app registration line (default=True)")
+    sub.set_defaults(func=newobj)
 
-    sub = subs.add_parser('info', help='display local project info')
-    sub.set_defaults(proj=projinfo, func=show_proj_info)
+    subcmd = 'libmesh'
+    help = 'perform libmesh-related tasks'
+    sub = subs.add_parser(subcmd, help=help, description=help)
+    subsubs = sub.add_subparsers()
+    help='update and rebuild the libmesh submodule in MOOSE'
+    subsub = subsubs.add_parser('update', help=help, description=help)
+    subsub.add_argument('--clean', action='store_true', default=False, help='remove existing build directory and reconfigure before build')
+    subsub.add_argument('--enable-timestamps', action='store_true', default=False, help='use timestamps to trigger object rebuilds')
+    subsub.set_defaults(func=update_libmesh)
 
-    sub = subs.add_parser('help', help='display help for subcomands')
-    sub.set_defaults(proj=projinfo, func=helpcmd)
+def helpcmd(args):
+    if args.subcommand == 'summary':
+        args.parser.print_help()
+        return
+
+    # retrieve subparsers from parser and find the one matching [subcommand]
+    subparsers_actions = [
+        action for action in args.parser._actions
+        if isinstance(action, argparse._SubParsersAction)]
+    for subparsers_action in subparsers_actions:
+        for subname, subparser in subparsers_action.choices.items():
+            if subname == args.subcommand:
+                print(subparser.format_help())
+                return
 
 def show_proj_info(args):
     proj = args.proj
@@ -47,40 +82,21 @@ def show_proj_info(args):
     print('    Path:', proj['path'])
     print('    MOOSE_DIR:', proj['moose_path'])
 
-def prepare_obj_paths(proj, kind, name):
-    mpath, ppath = proj['moose_path'], proj['path']
-    if kind == 'Kernel':
-        return {
-            'template_h': os.path.join(mpath, 'templates/Kernel.h'),
-            'template_C': os.path.join(mpath, 'templates/Kernel.C'),
-            'dst_h': os.path.join(ppath, 'include/kernels/{}.h'.format(name)),
-            'dst_C': os.path.join(ppath, 'src/kernels/{}.C'.format(name)),
-            }
-    return None
+def update_libmesh(args):
+    proj = args.proj
+    cmd = [os.path.join(proj['moose_path'], 'scripts', 'update_and_rebuild_libmesh.sh')]
+    if args.enable_timestamps:
+        cmd.append('--enable-timestamps')
+    if not args.clean:
+        cmd.append('--fast')
 
-def find_proj_name(proj_path):
-    fpath = os.path.join(proj_path, 'src/main.C')
-    with open(fpath, 'r') as f:
-        body = f.read()
-    r = re.compile(r'\s([A-Za-z0-9_]*)App::registerApps\(\s*\)\s*;')
-    m = r.search(body)
-
-    if m is None:
-        return None
-    return m.group(1)
-
-def helpcmd(args):
-    pass
-
-def rename_internal(fname, objname):
-    with open(fname, 'r') as f:
-        body = f.read()
-
-    body = body.replace('TmplKernel', objname)
-    body = body.replace('TMPLKERNEL', objname.upper())
-
-    with open(fname, 'w') as f:
-        f.write(body)
+    #cmd = ['bash', '-c', 'floobyjoober']
+    print(proj['moose_path'])
+    p = subprocess.Popen(cmd, cwd=proj['moose_path'], stdout=sys.stdout, stderr=subprocess.STDOUT)
+    _, error = p.communicate()
+    if p.returncode != 0:
+        print('libmesh update failed', file=sys.stderr)
+        sys.exit(p.returncode)
 
 def newobj(args):
     proj, kind, name = args.proj, args.kind, args.name
@@ -96,8 +112,47 @@ def newobj(args):
     rename_internal(path_info['dst_h'], name)
     rename_internal(path_info['dst_C'], name)
 
-    if args.register:
+    if not args.noregister:
         register_object(proj, name)
+
+def prepare_obj_paths(proj, kind, name):
+    mpath, ppath = proj['moose_path'], proj['path']
+    if kind == 'Kernel':
+        return {
+            'template_h': os.path.join(mpath, 'templates/Kernel.h'),
+            'template_C': os.path.join(mpath, 'templates/Kernel.C'),
+            'dst_h': os.path.join(ppath, 'include/kernels/{}.h'.format(name)),
+            'dst_C': os.path.join(ppath, 'src/kernels/{}.C'.format(name)),
+            }
+    return None
+
+def find_proj(proj_path, depth=0):
+    fpath = os.path.join(proj_path, 'src/main.C')
+    if not os.path.exists(fpath):
+        maxdepth = 10
+        if depth < maxdepth:
+            return find_proj(os.path.join(proj_path, '..'), depth+1)
+        return None, None
+
+    with open(fpath, 'r') as f:
+        body = f.read()
+    r = re.compile(r'\s([A-Za-z0-9_]*)App::registerApps\(\s*\)\s*;')
+    m = r.search(body)
+
+    proj_path = os.path.abspath(proj_path)
+    if m is None:
+        return None, proj_path
+    return m.group(1), proj_path
+
+def rename_internal(fname, objname):
+    with open(fname, 'r') as f:
+        body = f.read()
+
+    body = body.replace('TmplKernel', objname)
+    body = body.replace('TMPLKERNEL', objname.upper())
+
+    with open(fname, 'w') as f:
+        f.write(body)
 
 def register_object(proj, name):
     r = re.compile(r'(App::registerObjects\( *Factory.*\)\s*{[^\n]*\n)')
@@ -110,13 +165,6 @@ def register_object(proj, name):
 
     with open(appfile, 'w') as f:
         f.write(body)
-
-# hack to get python's argparse to do something useful with boolean flags
-def t_or_f(arg):
-    s = str(arg).lower()
-    if s in ('f', 'false', 'n', 'no'):
-        return False
-    return True
 
 if __name__ == '__main__':
     main()
