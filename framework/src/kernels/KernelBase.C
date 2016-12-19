@@ -43,6 +43,8 @@ InputParameters validParams<KernelBase>()
   params.addParamNamesToGroup("diag_save_in save_in", "Advanced");
 
   params.declareControllable("enable");
+
+  params.addParam<bool>   ("eigen_kernel", false,"Whether or not this kernel will be used as an eigen kernel");
   return params;
 }
 
@@ -83,7 +85,9 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     _grad_phi(_assembly.gradPhi()),
 
     _save_in_strings(parameters.get<std::vector<AuxVariableName> >("save_in")),
-    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in"))
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName> >("diag_save_in")),
+
+    _eigen_kernel(getParam<bool>("eigen_kernel"))
 {
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());

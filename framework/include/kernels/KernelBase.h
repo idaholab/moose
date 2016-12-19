@@ -99,6 +99,9 @@ public:
   /// Returns a reference to the SubProblem for which this Kernel is active
   SubProblem & subProblem();
 
+  /// if is it an eigen kernel
+  virtual isEigenKernel() { return _eigen_kernel; }
+
 protected:
   /// Reference to this kernel's SubProblem
   SubProblem & _subproblem;
@@ -174,6 +177,9 @@ protected:
   bool _has_diag_save_in;
   std::vector<MooseVariable*> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
+
+  /// Whether or not this kernel will be used as an eigen kernel
+  bool _eigen_kernel;
 };
 
 #endif /* KERNELBASE_H */
