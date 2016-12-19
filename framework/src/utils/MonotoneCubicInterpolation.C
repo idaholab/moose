@@ -24,7 +24,7 @@
 MonotoneCubicInterpolation::MonotoneCubicInterpolation()
 {}
 
-MonotoneCubicInterpolation::MonotoneCubicInterpolation(const std::vector<Real> & x, const std::vector<Real> & y):
+MonotoneCubicInterpolation::MonotoneCubicInterpolation(const std::vector<Real> & x, const std::vector<Real> & y) :
     _x(x),
     _y(y)
 {
