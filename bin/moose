@@ -21,13 +21,9 @@ def build_cmds(parser):
         print('the MOOSE_DIR environment variable must be set to use this command', file=sys.stderr)
         sys.exit(1)
 
-    projpath = './'
-    projname, projpath = find_proj(projpath)
-    if projname is None:
-        print('no MOOSE app found here', file=sys.stderr)
-        sys.exit(1)
+    projname, projpath = find_app('./')
 
-    projinfo = {'path': projpath, 'name': 'Stork', 'moose_path': mpath}
+    projinfo = {'path': projpath, 'name': projname, 'moose_path': mpath}
     parser.set_defaults(proj=projinfo, parser=parser)
 
     subs = parser.add_subparsers()
@@ -38,10 +34,10 @@ def build_cmds(parser):
     sub.add_argument('subcommand', nargs='?', default='summary', help='show help for a specific subcommand')
     sub.set_defaults(func=helpcmd)
 
-    subcmd = 'info'
+    subcmd = 'appinfo'
     help = 'display local project info'
     sub = subs.add_parser(subcmd, help=help, description=help)
-    sub.set_defaults(func=show_proj_info)
+    sub.set_defaults(func=show_app_info)
 
     subcmd = 'newobj'
     help = 'add and register a new moose object'
@@ -61,6 +57,16 @@ def build_cmds(parser):
     subsub.add_argument('--enable-timestamps', action='store_true', default=False, help='use timestamps to trigger object rebuilds')
     subsub.set_defaults(func=update_libmesh)
 
+    subcmd = 'build'
+    help = 'build/update moose libraries'
+    sub = subs.add_parser(subcmd, help=help, description=help)
+    sub.add_argument('--all', action='store_true', default=False, help='build everything')
+    sub.add_argument('--modules', action='store_true', default=False, help='build all module binaries and tests')
+    sub.add_argument('--tests', action='store_true', default=True, help='build moose regression tests and binary')
+    sub.add_argument('--unit', action='store_true', default=False, help='build unit tests')
+    sub.add_argument('-j', type=int, default=2, help='number of parallel build jobs')
+    sub.set_defaults(func=buildmoose)
+
 def helpcmd(args):
     if args.subcommand == 'summary':
         args.parser.print_help()
@@ -76,11 +82,42 @@ def helpcmd(args):
                 print(subparser.format_help())
                 return
 
-def show_proj_info(args):
+def show_app_info(args):
+    if args.proj['name'] is None:
+        print('no MOOSE app found here', file=sys.stderr)
+        sys.exit(1)
+
     proj = args.proj
     print(' ' + proj['name'] + ':')
     print('    Path:', proj['path'])
     print('    MOOSE_DIR:', proj['moose_path'])
+
+def buildmoose(args):
+    proj = args.proj
+    mpath = proj['moose_path']
+    testdir = os.path.join(mpath, 'test')
+    moduledir = os.path.join(mpath, 'modules')
+    unitdir = os.path.join(mpath, 'unit')
+
+    cmds = []
+    if args.all:
+        cmds.append((testdir , ['make', '-j', str(args.j)]))
+        cmds.append((moduledir , ['make', '-j', str(args.j)]))
+        cmds.append((unitdir , ['make', '-j', str(args.j)]))
+    else:
+        if args.tests:
+            cmds.append((testdir , ['make', '-j', str(args.j)]))
+        if args.modules:
+            cmds.append((moduledir , ['make', '-j', str(args.j)]))
+        if args.unit:
+            cmds.append((unitdir , ['make', '-j', str(args.j)]))
+
+    for (cwd, cmd) in cmds:
+        p = subprocess.Popen(cmd, cwd=cwd, stdout=sys.stdout, stderr=subprocess.STDOUT)
+        p.communicate()
+        if p.returncode != 0:
+            print('build in "{}" failed'.format(cwd), file=sys.stderr)
+            sys.exit(p.returncode)
 
 def update_libmesh(args):
     proj = args.proj
@@ -90,15 +127,17 @@ def update_libmesh(args):
     if not args.clean:
         cmd.append('--fast')
 
-    #cmd = ['bash', '-c', 'floobyjoober']
-    print(proj['moose_path'])
     p = subprocess.Popen(cmd, cwd=proj['moose_path'], stdout=sys.stdout, stderr=subprocess.STDOUT)
-    _, error = p.communicate()
+    p.communicate()
     if p.returncode != 0:
         print('libmesh update failed', file=sys.stderr)
         sys.exit(p.returncode)
 
 def newobj(args):
+    if args.proj['name'] is None:
+        print('no MOOSE app found here', file=sys.stderr)
+        sys.exit(1)
+
     proj, kind, name = args.proj, args.kind, args.name
     path_info = prepare_obj_paths(proj, kind, name)
     if path_info is None:
@@ -126,12 +165,12 @@ def prepare_obj_paths(proj, kind, name):
             }
     return None
 
-def find_proj(proj_path, depth=0):
+def find_app(proj_path, depth=0):
     fpath = os.path.join(proj_path, 'src/main.C')
     if not os.path.exists(fpath):
         maxdepth = 10
         if depth < maxdepth:
-            return find_proj(os.path.join(proj_path, '..'), depth+1)
+            return find_app(os.path.join(proj_path, '..'), depth+1)
         return None, None
 
     with open(fpath, 'r') as f:
@@ -141,7 +180,7 @@ def find_proj(proj_path, depth=0):
 
     proj_path = os.path.abspath(proj_path)
     if m is None:
-        return None, proj_path
+        return None, None
     return m.group(1), proj_path
 
 def rename_internal(fname, objname):
