@@ -126,10 +126,7 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-  [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
+    at_nodes = true
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
@@ -140,36 +137,40 @@
     type = ComputeSmallStrain
   [../]
   [./stress]
-    type = ComputeLinearElasticStress #MultiPlasticityStress
-    #ep_plastic_tolerance = 1E-9
-    #plastic_models = 'simple1'
+    type = ComputeLinearElasticStress
   [../]
 
   [./vol_strain]
     type = PorousFlowVolumetricStrain
+    at_nodes = false
   [../]
-  [./ppss]
+  [./ppss_nodal]
     type = PorousFlow1PhaseP_VG
     porepressure = porepressure
+    at_nodes = true
     al = 1
     m = 0.5
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
+    at_nodes = true
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1
     bulk_modulus = 1.5
     phase = 0
   [../]
   [./dens_all]
     type = PorousFlowJoiner
-    include_old = true
-    material_property = PorousFlow_fluid_phase_density
+    include_old = false
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
+    at_nodes = true
     porosity = 0.1
   [../]
 []

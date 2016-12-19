@@ -70,13 +70,11 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-  [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
+    at_nodes = true
   [../]
   [./ppss]
     type = PorousFlow2PhasePP_VG
+    at_nodes = true
     phase0_porepressure = pwater
     phase1_porepressure = pgas
     al = 1.1
@@ -84,16 +82,19 @@
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
+    at_nodes = true
     mass_fraction_vars = 'frac_ph0_c0 frac_ph0_c1 frac_ph1_c0 frac_ph1_c1'
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1.5
     bulk_modulus = 2.3
     phase = 0
   [../]
   [./dens1]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1.1
     bulk_modulus = 1.3
     phase = 1
@@ -101,15 +102,12 @@
   [./dens_all]
     type = PorousFlowJoiner
     include_old = true
-    material_property = PorousFlow_fluid_phase_density
-  [../]
-  [./dens_all_at_quadpoints]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_qp
-    at_qps = true
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
+    at_nodes = true
     porosity = 0.1
   [../]
   [./permeability]
@@ -118,31 +116,37 @@
   [../]
   [./relperm0]
     type = PorousFlowRelativePermeabilityCorey
+    at_nodes = true
     n = 1
     phase = 0
   [../]
   [./relperm1]
     type = PorousFlowRelativePermeabilityCorey
+    at_nodes = true
     n = 2
     phase = 1
   [../]
   [./relperm_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability
+    at_nodes = true
+    material_property = PorousFlow_relative_permeability_nodal
   [../]
   [./visc0]
     type = PorousFlowViscosityConst
+    at_nodes = true
     viscosity = 2.1
     phase = 0
   [../]
   [./visc1]
     type = PorousFlowViscosityConst
+    at_nodes = true
     viscosity = 1.1
     phase = 1
   [../]
   [./visc_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
 []
 

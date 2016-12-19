@@ -85,10 +85,11 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
+    at_nodes = false
   [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
+  [./temperature_nodal]
+    type = PorousFlowTemperature
+    at_nodes = true
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
@@ -100,33 +101,51 @@
     type = ComputeSmallStrain
   [../]
   [./stress]
-    type = ComputeLinearElasticStress #MultiPlasticityStress
-    #plastic_models = fake_plasticity
-    #ep_plastic_tolerance = 1E-9
+    type = ComputeLinearElasticStress
   [../]
   [./vol_strain]
     type = PorousFlowVolumetricStrain
+    at_nodes = false
   [../]
   [./porosity]
     type = PorousFlowPorosityHM
+    at_nodes = false
     porosity_zero = 0.1
     biot_coefficient = 0.5
     solid_bulk = 1
   [../]
   [./p_eff]
     type = PorousFlowEffectiveFluidPressure
+    at_nodes = false
   [../]
   [./ppss]
     type = PorousFlow1PhaseP_VG
+    at_nodes = false
     porepressure = pp
+    al = 1
+    m = 0.5
+  [../]
+  [./ppss_nodal]
+    type = PorousFlow1PhaseP_VG
+    porepressure = pp
+    at_nodes = true
     al = 1
     m = 0.5
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
+    at_nodes = true
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = false
+    density_P0 = 1
+    bulk_modulus = 1.5
+    phase = 0
+  [../]
+  [./dens0_nodal]
+    type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1
     bulk_modulus = 1.5
     phase = 0
@@ -134,24 +153,28 @@
   [./dens_all]
     type = PorousFlowJoiner
     include_old = true
-    material_property = PorousFlow_fluid_phase_density
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./dens_qp_all]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
-    at_qps = true
+    at_nodes = false
   [../]
   [./visc0]
     type = PorousFlowViscosityConst
+    at_nodes = true
     viscosity = 1
     phase = 0
   [../]
   [./visc_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
   [./permeability]
     type = PorousFlowPermeabilityKozenyCarman
+    at_nodes = false
     poroperm_function = kozeny_carman_phi0
     k_anisotropy = '1 0 0 0 2 0 0 0 3'
     phi0 = 0.1
@@ -161,12 +184,14 @@
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
+    at_nodes = true
     n = 2
     phase = 0
   [../]
   [./relperm_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability
+    at_nodes = true
+    material_property = PorousFlow_relative_permeability_nodal
   [../]
 []
 

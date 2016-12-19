@@ -50,10 +50,6 @@
     type = PorousFlowTemperature
     temperature = 'temp'
   [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
-  [../]
   [./ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
@@ -89,15 +85,15 @@
   [../]
   [./density]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'PorousFlow_fluid_phase_density0'
+    mat_prop = 'PorousFlow_fluid_phase_density_qp0'
   [../]
   [./viscosity]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'PorousFlow_viscosity0'
+    mat_prop = 'PorousFlow_viscosity_qp0'
   [../]
   [./enthalpy]
     type = ElementIntegralMaterialProperty
-    mat_prop = 'PorousFlow_fluid_phase_enthalpy_nodal0'
+    mat_prop = 'PorousFlow_fluid_phase_enthalpy_qp0'
   [../]
 []
 
