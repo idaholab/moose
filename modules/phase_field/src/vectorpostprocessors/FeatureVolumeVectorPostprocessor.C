@@ -105,7 +105,7 @@ FeatureVolumeVectorPostprocessor::getFeatureVolume(unsigned int feature_id) cons
 }
 
 void
-FeatureVolumeVectorPostprocessor::accumulateVolumes(const Elem * elem, const std::vector<unsigned int> & var_to_features, std::size_t num_features)
+FeatureVolumeVectorPostprocessor::accumulateVolumes(const Elem * elem, const std::vector<unsigned int> & var_to_features, std::size_t libmesh_dbg_var(num_features))
 {
   unsigned int dominant_feature_id = FeatureFloodCount::invalid_id;
   Real max_var_value = std::numeric_limits<Real>::lowest();

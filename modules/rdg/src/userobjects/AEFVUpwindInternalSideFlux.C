@@ -25,9 +25,9 @@ AEFVUpwindInternalSideFlux::~AEFVUpwindInternalSideFlux()
 }
 
 void
-AEFVUpwindInternalSideFlux::calcFlux(unsigned int iside,
-                                     unsigned int ielem,
-                                     unsigned int ineig,
+AEFVUpwindInternalSideFlux::calcFlux(unsigned int /*iside*/,
+                                     unsigned int /*ielem*/,
+                                     unsigned int /*ineig*/,
                                      const std::vector<Real> & uvec1,
                                      const std::vector<Real> & uvec2,
                                      const std::vector<Real> & dwave,
@@ -59,11 +59,11 @@ AEFVUpwindInternalSideFlux::calcFlux(unsigned int iside,
 }
 
 void
-AEFVUpwindInternalSideFlux::calcJacobian(unsigned int iside,
-                                         unsigned int ielem,
-                                         unsigned int ineig,
-                                         const std::vector<Real> & uvec1,
-                                         const std::vector<Real> & uvec2,
+AEFVUpwindInternalSideFlux::calcJacobian(unsigned int /*iside*/,
+                                         unsigned int /*ielem*/,
+                                         unsigned int /*ineig*/,
+                                         const std::vector<Real> & /*uvec1*/,
+                                         const std::vector<Real> & /*uvec2*/,
                                          const std::vector<Real> & dwave,
                                          DenseMatrix<Real> & jac1,
                                          DenseMatrix<Real> & jac2) const

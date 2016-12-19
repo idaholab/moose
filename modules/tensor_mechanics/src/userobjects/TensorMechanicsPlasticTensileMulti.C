@@ -269,7 +269,7 @@ TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stre
   }
 
   unsigned trial;
-  bool nr_converged;
+  bool nr_converged = false;
   for (trial = 0; trial < number_of_return_paths; ++trial)
   {
     switch (trial_order[trial])
@@ -284,7 +284,9 @@ TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stre
         nr_converged = returnPlane(eigvals, n, dpm, returned_stress, intnl_old, 0);
         break;
     }
+
     str = tensile_strength(intnl_old + dpm[0] + dpm[1] + dpm[2]);
+
     if (nr_converged && KuhnTuckerOK(returned_stress, dpm, str, ep_plastic_tolerance))
       break;
   }
@@ -662,4 +664,3 @@ TensorMechanicsPlasticTensileMulti::useCustomCTO() const
 {
   return _use_custom_cto;
 }
-
