@@ -41,7 +41,7 @@ private:
 
   const unsigned int _generator_id;
 
-  MooseRandom _random;
+  MooseRandom & _random;
 };
 
 #endif //RANDOMPOSTPROCESSOR_H

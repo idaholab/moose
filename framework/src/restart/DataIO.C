@@ -201,6 +201,15 @@ dataStore(std::ostream & stream, std::stringstream * & s, void * context)
   dataStore(stream, *s, context);
 }
 
+template<>
+void
+dataStore(std::ostream & stream, MooseRandom & v, void * context)
+{
+  Moose::out << "dataStore(std::ostream & stream, MooseRandom & v, void * context)" << std::endl;
+  LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> > states = v.getStates();
+  storeHelper(stream, states, context);
+}
+
 // global load functions
 
 template<>
@@ -415,4 +424,14 @@ void
 dataLoad(std::istream & stream, std::stringstream * & s, void * context)
 {
   dataLoad(stream, *s, context);
+}
+
+template<>
+void
+dataLoad(std::istream & stream, MooseRandom & v, void * context)
+{
+  Moose::out << "dataStore(std::istream & stream, MooseRandom & v, void * context)" << std::endl;
+  LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> > states;
+  LoadHelper(stream, states, context);
+  v.setStates(states);
 }

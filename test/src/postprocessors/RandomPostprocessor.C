@@ -28,7 +28,8 @@ InputParameters validParams<RandomPostprocessor>()
 
 RandomPostprocessor::RandomPostprocessor(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    _generator_id(getParam<unsigned int>("generator"))
+    _generator_id(getParam<unsigned int>("generator")),
+    _random(declareRestartableData<MooseRandom>("random_pps"))
 {
   _random.seed(_generator_id,getParam<unsigned int>("seed"));
 }

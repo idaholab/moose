@@ -167,6 +167,11 @@ public:
       it->second.first = it->second.second;
   }
 
+  LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> > getStates() { return _states; }
+
+  void setStates(LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> > states) { _states = states; }
+
+
 private:
 
   /**
