@@ -48,7 +48,6 @@
 #include "PorousFlowViscosityConst.h"
 #include "PorousFlowVolumetricStrain.h"
 #include "PorousFlowJoiner.h"
-#include "PorousFlowNodeNumber.h"
 #include "PorousFlowTemperature.h"
 #include "PorousFlowThermalConductivityIdeal.h"
 #include "PorousFlowMatrixInternalEnergy.h"
@@ -169,7 +168,6 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowViscosityConst);
   registerMaterial(PorousFlowVolumetricStrain);
   registerMaterial(PorousFlowJoiner);
-  registerMaterial(PorousFlowNodeNumber);
   registerMaterial(PorousFlowTemperature);
   registerMaterial(PorousFlowThermalConductivityIdeal);
   registerMaterial(PorousFlowMatrixInternalEnergy);

@@ -86,10 +86,19 @@
   [./temp]
     type = PorousFlowTemperature
   [../]
+  [./temperature_nodal]
+    type = PorousFlowTemperatureNodal
+  [../]
   [./ppss]
     type = PorousFlow2PhasePS
     phase0_porepressure = 1
     phase1_saturation = sgas
+  [../]
+  [./ppss_nodal]
+    type = PorousFlow2PhasePS
+    phase0_porepressure = 1
+    phase1_saturation = sgas
+    at_nodes = true
   [../]
   [./massfrac]
     type = PorousFlowMassFraction

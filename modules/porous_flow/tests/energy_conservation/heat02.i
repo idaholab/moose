@@ -92,7 +92,7 @@
     material_property = PorousFlow_fluid_phase_density
   [../]
   [./water_heat]
-    type = PorousFlowInternalEnergyIdeal
+    type = PorousFlowInternalEnergyIdealNodal
     specific_heat_capacity = 1.3
     phase = 0
   [../]

@@ -19,7 +19,7 @@ InputParameters validParams<PorousFlowViscosityConst>()
 PorousFlowViscosityConst::PorousFlowViscosityConst(const InputParameters & parameters) :
     PorousFlowFluidPropertiesBase(parameters),
     _input_viscosity(getParam<Real>("viscosity")),
-    _viscosity(declareProperty<Real>("PorousFlow_viscosity" + _phase))
+    _viscosity(_nodal_material ? declareProperty<Real>("PorousFlow_viscosity" + _phase) : declareProperty<Real>("PorousFlow_viscosity_qp" + _phase))
 {
 }
 

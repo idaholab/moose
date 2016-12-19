@@ -26,7 +26,7 @@ PorousFlowDispersiveFlux::PorousFlowDispersiveFlux(const InputParameters & param
     _fluid_density_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_qp")),
     _dfluid_density_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_qp_dvar")),
     _grad_mass_frac(getMaterialProperty<std::vector<std::vector<RealGradient> > >("PorousFlow_grad_mass_frac")),
-    _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar")),
+    _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_qp_dvar")),
     _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
     _dporosity_qp_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_qp_dvar")),
     _tortuosity(getMaterialProperty<std::vector<Real> >("PorousFlow_tortuosity")),

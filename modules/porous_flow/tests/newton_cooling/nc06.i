@@ -124,7 +124,7 @@
     material_property = PorousFlow_fluid_phase_enthalpy_nodal
   [../]
   [./fluid_energy0]
-    type = PorousFlowInternalEnergyIdeal
+    type = PorousFlowInternalEnergyIdealNodal
     specific_heat_capacity = 1.0E6
     phase = 0
   [../]

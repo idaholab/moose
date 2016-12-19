@@ -321,12 +321,12 @@
     density = 125
   [../]
   [./fluid_energy0]
-    type = PorousFlowInternalEnergyIdeal
+    type = PorousFlowInternalEnergyIdealNodal
     specific_heat_capacity = 2
     phase = 0
   [../]
   [./fluid_energy1]
-    type = PorousFlowInternalEnergyIdeal
+    type = PorousFlowInternalEnergyIdealNodal
     specific_heat_capacity = 1
     phase = 1
   [../]

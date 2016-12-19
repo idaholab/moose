@@ -74,6 +74,10 @@
     type = PorousFlowTemperature
     temperature = temp
   [../]
+  [./temperature_nodal]
+    type = PorousFlowTemperatureNodal
+    temperature = temp
+  [../]
   [./nnn]
     type = PorousFlowNodeNumber
     on_initial_only = true
@@ -89,6 +93,14 @@
     type = PorousFlow2PhasePP_VG
     phase0_porepressure = pwater
     phase1_porepressure = pgas
+    m = 0.5
+    al = 1
+  [../]
+  [./ppss_nodal]
+    type = PorousFlow2PhasePP_VG
+    phase0_porepressure = pwater
+    phase1_porepressure = pgas
+    at_nodes = true
     m = 0.5
     al = 1
   [../]

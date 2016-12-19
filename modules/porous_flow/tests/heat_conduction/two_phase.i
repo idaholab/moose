@@ -85,12 +85,12 @@
     density = 0.25
   [../]
   [./heat0]
-    type = PorousFlowInternalEnergyIdeal
+    type = PorousFlowInternalEnergyIdealNodal
     specific_heat_capacity = 1.0
     phase = 0
   [../]
   [./heat1]
-    type = PorousFlowInternalEnergyIdeal
+    type = PorousFlowInternalEnergyIdealNodal
     specific_heat_capacity = 2.0
     phase = 1
   [../]

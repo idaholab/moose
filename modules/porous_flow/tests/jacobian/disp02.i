@@ -76,9 +76,17 @@
   [./temp]
     type = PorousFlowTemperature
   [../]
+  [./temperature_nodal]
+    type = PorousFlowTemperatureNodal
+  [../]
   [./ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
+  [../]
+  [./ppss_nodal]
+    type = PorousFlow1PhaseP
+    porepressure = pp
+    at_nodes = true
   [../]
   [./massfrac]
     type = PorousFlowMassFraction

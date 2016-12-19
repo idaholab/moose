@@ -13,6 +13,8 @@ InputParameters validParams<PorousFlowRelativePermeabilityBase>()
   InputParameters params = validParams<PorousFlowMaterialBase>();
   params.addRangeCheckedParam<Real>("s_res", 0, "s_res >= 0 & s_res < 1", "The residual saturation of the phase j. Must be between 0 and 1");
   params.addRangeCheckedParam<Real>("sum_s_res", 0, "sum_s_res >= 0 & sum_s_res < 1", "Sum of residual saturations over all phases.  Must be between 0 and 1");
+  // Note for coders: currently only coded for nodal materials.  it is not difficult to generalise to quadpoint materials!
+  params.set<bool>("at_nodes") = true;
   params.addClassDescription("Base class for PorousFlow relative permeability materials");
   return params;
 }
@@ -29,6 +31,8 @@ PorousFlowRelativePermeabilityBase::PorousFlowRelativePermeabilityBase(const Inp
 {
   if (_sum_s_res < _s_res)
     mooseError("Sum of residual saturations sum_s_res cannot be smaller than s_res in " << name());
+  if (_nodal_material != true)
+    mooseError("PorousFlowRelativePermeability classes are only defined for at_nodes = true");
 }
 
 void

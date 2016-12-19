@@ -25,29 +25,17 @@ public:
   PorousFlowPorosityBase(const InputParameters & parameters);
 
 protected:
-  /// nodal porosity
-  MaterialProperty<Real> & _porosity_nodal;
+  /// computed porosity at the nodes or quadpoints
+  MaterialProperty<Real> & _porosity;
 
-  /// old value of nodal porosity (which is, of course = _porosity in this case)
-  MaterialProperty<Real> & _porosity_nodal_old;
+  /// old value of porosity
+  MaterialProperty<Real> & _porosity_old;
 
-  /// d(nodal porosity)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real> > & _dporosity_nodal_dvar;
+  /// d(porosity)/d(PorousFlow variable)
+  MaterialProperty<std::vector<Real> > & _dporosity_dvar;
 
-  /// d(nodal porosity)/d(PorousFlow variable)
-  MaterialProperty<std::vector<RealGradient> > & _dporosity_nodal_dgradvar;
-
-  /// qaudpoint porosity
-  MaterialProperty<Real> & _porosity_qp;
-
-  /// old value of quadpoint porosity (which is, of course = _porosity in this case)
-  MaterialProperty<Real> & _porosity_qp_old;
-
-  /// d(quadpoint porosity)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real> > & _dporosity_qp_dvar;
-
-  /// d(quadpoint porosity)/d(PorousFlow variable)
-  MaterialProperty<std::vector<RealGradient> > & _dporosity_qp_dgradvar;
+  /// d(porosity)/d(grad PorousFlow variable)
+  MaterialProperty<std::vector<RealGradient> > & _dporosity_dgradvar;
 };
 
 #endif //POROUSFLOWPOROSITYBASE_H

@@ -48,6 +48,10 @@
     type = PorousFlowTemperature
     temperature = temp
   [../]
+  [./temperature_nodal]
+    type = PorousFlowTemperatureNodal
+    temperature = temp
+  [../]
   [./nnn]
     type = PorousFlowNodeNumber
     on_initial_only = true
@@ -56,8 +60,14 @@
     type = PorousFlow1PhaseP
     porepressure = pp
   [../]
+  [./ppss_nodal]
+    type = PorousFlow1PhaseP
+    porepressure = pp
+    at_nodes = true
+  [../]
   [./dens0]
     type = PorousFlowIdealGas
+    at_nodes = true
     molar_mass = 5e-3
     phase = 0
   [../]
