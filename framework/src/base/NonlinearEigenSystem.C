@@ -30,10 +30,20 @@ namespace Moose {
 #if LIBMESH_HAVE_SLEPC
 void assemble_matrix(EquationSystems & es, const std::string & system_name)
 {
-  FEProblemBase * p = es.parameters.get<FEProblemBase *>("_fe_problem_base");
+  EigenProblem * p = es.parameters.get<EigenProblem *>("_eigen_problem");
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
 
   p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_A);
+
+  // if it is a generalized eigenvalue problem
+  bool generalized_eigenvalue_problem = p->isGeneralizedEigenvalueProblem();
+  if (generalized_eigenvalue_problem)
+  {
+    if (eigen_system.matrix_B)
+      p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_B);
+    else
+      mooseError("It is a generalized eigenvalue problem but matrix B is empty \n");
+  }
 }
 #else
 void assemble_matrix(EquationSystems & /*es*/, const std::string & /*system_name*/)
@@ -50,6 +60,8 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
     _transient_sys(eigen_problem.es().get_system<TransientEigenSystem>(name)),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired())
 {
+  if (eigen_problem.isGeneralizedEigenvalueProblem())
+    _transient_sys.set_eigenproblem_type(GNHEP);
   // Give the system a pointer to the matrix assembly
   // function defined below.
   sys().attach_assemble_function(Moose::assemble_matrix);

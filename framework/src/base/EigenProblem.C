@@ -17,6 +17,11 @@
 #include "EigenProblem.h"
 #include "DisplacedProblem.h"
 #include "Assembly.h"
+#include "SlepcSupport.h"
+
+// libmesh includes
+#include "libmesh/system.h"
+#include "libmesh/eigen_solver.h"
 
 template<>
 InputParameters validParams<EigenProblem>()
@@ -24,12 +29,17 @@ InputParameters validParams<EigenProblem>()
   InputParameters params = validParams<FEProblemBase>();
   params.addParam<unsigned int>("n_eigen_pairs", 1, "The dimension of the nullspace");
   params.addParam<unsigned int>("n_basis_vectors", 3, "The dimension of the nullspace");
+  params.addParam<bool>("generalized_eigenvalue_problem", false, "if we are trying to solve a generalized eigenvalue problem");
+#if LIBMESH_HAVE_SLEPC
+  params += Moose::SlepcSupport::getSlepcValidParams();
+#endif
   return params;
 }
 
 EigenProblem::EigenProblem(const InputParameters & parameters) :
     FEProblemBase(parameters),
     _n_eigen_pairs_required(getParam<unsigned int>("n_eigen_pairs")),
+    _generalized_eigenvalue_problem(getParam<bool>("generalized_eigenvalue_problem")),
     _nl_eigen(new NonlinearEigenSystem(*this, "eigen0"))
 {
 #if LIBMESH_HAVE_SLEPC
@@ -46,6 +56,8 @@ EigenProblem::EigenProblem(const InputParameters & parameters) :
   newAssemblyArray(*_nl_eigen);
 
   FEProblemBase::initNullSpaceVectors(parameters, *_nl_eigen);
+
+  _eq.parameters.set<EigenProblem *>("_eigen_problem") = this;
 #else
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
 #endif /* LIBMESH_HAVE_SLEPC */

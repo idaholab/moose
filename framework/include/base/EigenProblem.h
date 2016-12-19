@@ -43,8 +43,11 @@ public:
 #endif
 
   virtual unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
+  virtual bool isGeneralizedEigenvalueProblem() { return _generalized_eigenvalue_problem; }
+
 protected:
   unsigned int _n_eigen_pairs_required;
+  bool _generalized_eigenvalue_problem;
   NonlinearEigenSystem * _nl_eigen;
 };
 
