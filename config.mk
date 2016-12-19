@@ -13,7 +13,7 @@ ifneq ($(findstring SWIG Version 3,$(SWIG_VERSION)),)
 	HAS_SWIG := true
 else
 	HAS_SWIG := false
-$(error Swig is required to build crow)
+$(warning Swig is required to build crow)
 endif
 endif
 
