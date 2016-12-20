@@ -19,6 +19,10 @@
   [../]
 []
 
+[GlobalParams]
+  volumetric_locking_correction=true
+[]
+
 [AuxVariables]
   [./resid_x]
     block = 1

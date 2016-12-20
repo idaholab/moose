@@ -16,6 +16,10 @@
   [../]
 []
 
+[GlobalParams]
+  volumetric_locking_correction=true
+[]
+
 [AuxVariables]
   [./stress_yy]
     order = CONSTANT

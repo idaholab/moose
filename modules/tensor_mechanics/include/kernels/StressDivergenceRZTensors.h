@@ -38,6 +38,9 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
+  virtual void computeAverageGradientTest() override;
+  virtual void computeAverageGradientPhi() override;
+
   Real calculateJacobian(unsigned int ivar, unsigned int jvar);
 };
 

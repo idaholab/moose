@@ -40,6 +40,7 @@ protected:
   std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains;
 
   bool _volumetric_locking_correction;
+  const Real & _current_elem_volume;
 };
 
 #endif //COMPUTESTRAINBASE_H

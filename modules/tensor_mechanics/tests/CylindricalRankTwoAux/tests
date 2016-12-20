@@ -4,4 +4,10 @@
     input = 'test.i'
     exodiff = 'test_out.e'
   [../]
+  [./test_Bbar]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    prereq = 'test'
+  [../]
 []

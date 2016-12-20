@@ -5,11 +5,27 @@
     exodiff = 'isotropic_plasticity_incremental_strain_out.e'
     compiler = 'CLANG GCC'
   [../]
+  [./isotropic_plasticity_incremental_Bbar]
+    type = Exodiff
+    input = 'isotropic_plasticity_incremental_strain.i'
+    exodiff = 'isotropic_plasticity_incremental_strain_out.e'
+    compiler = 'CLANG GCC'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'isotropic_plasticity_incremental'
+  [../]
   [./isotropic_plasticity_finite]
     type = Exodiff
     input = 'isotropic_plasticity_finite_strain.i'
     exodiff = 'isotropic_plasticity_finite_strain_out.e'
     compiler = 'CLANG GCC'
+  [../]
+  [./isotropic_plasticity_finite_Bbar]
+    type = Exodiff
+    input = 'isotropic_plasticity_finite_strain.i'
+    exodiff = 'isotropic_plasticity_finite_strain_out.e'
+    compiler = 'CLANG GCC'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'isotropic_plasticity_finite'
   [../]
   [./uniaxial_viscoplasticity]
     type = Exodiff

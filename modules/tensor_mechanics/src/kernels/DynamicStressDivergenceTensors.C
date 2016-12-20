@@ -43,26 +43,39 @@ DynamicStressDivergenceTensors::computeQpResidual()
   * = [(1+_alpha)*_zeta/dt +_alpha+1]* Div sigma - [(1+2_alpha)*_zeta/dt + _alpha] Div sigma_old + _alpha*_zeta/dt Div sigma_older
   */
 
+  Real residual = 0.0;
   if (_static_initialization && _t == _dt)
+  {
     // If static inialization is true, then in the first step residual is only Ku which is stress.grad(test).
-    return _stress[_qp].row(_component) * _grad_test[_i][_qp];
+    residual +=  _stress[_qp].row(_component) * _grad_test[_i][_qp];
+
+    if (_volumetric_locking_correction)
+      residual += _stress[_qp].trace() / 3.0 * (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component));
+  }
   else if (_dt > 0)
-    return _stress[_qp].row(_component) * _grad_test[_i][_qp]*(1+_alpha+(1+_alpha)*_zeta/_dt)
-      -(_alpha+(1+2*_alpha)*_zeta/_dt)*_stress_old[_qp].row(_component)* _grad_test[_i][_qp]
-      + (_alpha*_zeta/_dt)*_stress_older[_qp].row(_component)*_grad_test[_i][_qp];
-  else
-    return 0;
+  {
+    residual +=  _stress[_qp].row(_component) * _grad_test[_i][_qp] * (1.0 + _alpha + (1.0 + _alpha) * _zeta / _dt)
+                 - (_alpha + (1.0 + 2.0 * _alpha) * _zeta / _dt) * _stress_old[_qp].row(_component) * _grad_test[_i][_qp]
+                 + (_alpha * _zeta/_dt) * _stress_older[_qp]. row(_component) * _grad_test[_i][_qp];
+
+    if (_volumetric_locking_correction)
+      residual +=  (_stress[_qp].trace() * (1.0 + _alpha + (1.0 + _alpha) * _zeta / _dt)
+                   - (_alpha + (1.0 + 2.0 * _alpha) * _zeta / _dt) * _stress_old[_qp].trace()
+                   + (_alpha * _zeta/_dt) * _stress_older[_qp]. trace()) / 3.0 * (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component));
+  }
+
+  return residual;
 }
 
 Real
 DynamicStressDivergenceTensors::computeQpJacobian()
 {
   if (_static_initialization && _t == _dt)
-    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
+    return StressDivergenceTensors::computeQpJacobian();
   else if (_dt > 0)
-    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp])*(1+_alpha+_zeta/_dt);
+    return StressDivergenceTensors::computeQpJacobian() * (1.0 + _alpha + _zeta / _dt);
   else
-    return 0;
+    return 0.0;
 }
 
 Real
@@ -81,12 +94,12 @@ DynamicStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
   if (active)
   {
     if (_static_initialization && _t == _dt)
-      return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
+      return StressDivergenceTensors::computeQpOffDiagJacobian(jvar);
     else if (_dt > 0)
-      return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp])*(1+_alpha+_zeta/_dt);
+      return StressDivergenceTensors::computeQpOffDiagJacobian(jvar) * (1.0 + _alpha + _zeta / _dt);
     else
-      return 0;
-   }
+      return 0.0;
+  }
   if (_temp_coupled && jvar == _temp_var)
     return 0.0;
 
