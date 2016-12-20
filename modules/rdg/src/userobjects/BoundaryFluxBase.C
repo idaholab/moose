@@ -28,7 +28,7 @@ void
 BoundaryFluxBase::initialize()
 {
   _cached_elem_id = 0;
-  _cached_side_id = -1;
+  _cached_side_id = libMesh::invalid_uint;
 }
 
 void
@@ -43,7 +43,7 @@ BoundaryFluxBase::finalize()
 
 const std::vector<Real> &
 BoundaryFluxBase::getFlux(unsigned int iside,
-                          unsigned int ielem,
+                          dof_id_type ielem,
                           const std::vector<Real> & uvec1,
                           const std::vector<Real> & dwave,
                           THREAD_ID tid) const
@@ -65,7 +65,7 @@ BoundaryFluxBase::getFlux(unsigned int iside,
 
 const DenseMatrix<Real> &
 BoundaryFluxBase::getJacobian(unsigned int iside,
-                              unsigned int ielem,
+                              dof_id_type ielem,
                               const std::vector<Real> & uvec1,
                               const std::vector<Real> & dwave,
                               THREAD_ID tid) const
