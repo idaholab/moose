@@ -37,74 +37,59 @@ AEFVKernel::~AEFVKernel()
 Real
 AEFVKernel::computeQpResidual(Moose::DGResidualType type)
 {
-  // assembly the input vectors, which are
+  // assemble the input vectors, which are
   //   the reconstructed linear monomial
   //   extrapolated at side center from the current and neighbor elements
-  //   and the unit vector normal to the face
-
   std::vector<Real> uvec1 = {_u1[_qp]};
   std::vector<Real> uvec2 = {_u2[_qp]};
-  std::vector<Real> dwave = {_normals[_qp](0), _normals[_qp](1), _normals[_qp](2)};
 
   // calculate the flux
-
-  const std::vector<Real> & flux =
-    _flux.getFlux(_current_side, _current_elem->id(), _neighbor_elem->id(),
-                  uvec1, uvec2, dwave, _tid);
+  const auto & flux = _flux.getFlux(_current_side, _current_elem->id(), _neighbor_elem->id(),
+                                    uvec1, uvec2, _normals[_qp], _tid);
 
   // distribute the contribution to the current and neighbor elements
-
-  Real re = 0.;
   switch (type)
   {
     case Moose::Element:
-      re =  flux[_component] * _test[_i][_qp];
-      break;
+      return flux[_component] * _test[_i][_qp];
+
     case Moose::Neighbor:
-      re = -flux[_component] * _test_neighbor[_i][_qp];
-      break;
+      return -flux[_component] * _test_neighbor[_i][_qp];
   }
-  return re;
+
+  return 0.0;
 }
 
 Real
 AEFVKernel::computeQpJacobian(Moose::DGJacobianType type)
 {
-  // assembly the input vectors, which are
+  // assemble the input vectors, which are
   //   the constant monomial from the current and neighbor elements
-  //   and the unit vector normal to the face
-
   std::vector<Real> uvec1 = { _uc1[_qp]};
   std::vector<Real> uvec2 = { _uc2[_qp]};
-  std::vector<Real> dwave = {_normals[_qp](0), _normals[_qp](1), _normals[_qp](2)};
 
-  // calculate the Jacobian matrix
+  // calculate the Jacobian matrices
+  const auto & fjac1 = _flux.getJacobian(Moose::Element, _current_side, _current_elem->id(),
+                                         _neighbor_elem->id(), uvec1, uvec2, _normals[_qp], _tid);
 
-  const DenseMatrix<Real> & fjac1 =
-    _flux.getJacobian(Moose::Element, _current_side, _current_elem->id(), _neighbor_elem->id(),
-                      uvec1, uvec2, dwave, _tid);
-
-  const DenseMatrix<Real> & fjac2 =
-    _flux.getJacobian(Moose::Neighbor, _current_side, _current_elem->id(), _neighbor_elem->id(),
-                      uvec1, uvec2, dwave, _tid);
+  const auto & fjac2 = _flux.getJacobian(Moose::Neighbor, _current_side, _current_elem->id(),
+                                         _neighbor_elem->id(), uvec1, uvec2, _normals[_qp], _tid);
 
   // distribute the contribution to the current and neighbor elements
-
-  Real re = 0.;
   switch (type)
   {
     case Moose::ElementElement:
-      re =  fjac1(_component, _component) * _phi[_j][_qp] * _test[_i][_qp];
-      break;
+      return  fjac1(_component, _component) * _phi[_j][_qp] * _test[_i][_qp];
+
     case Moose::ElementNeighbor:
-      re =  fjac2(_component, _component) * _phi_neighbor[_j][_qp] * _test[_i][_qp];
-      break;
+      return fjac2(_component, _component) * _phi_neighbor[_j][_qp] * _test[_i][_qp];
+
     case Moose::NeighborElement:
-      re = -fjac1(_component, _component) * _phi[_j][_qp] * _test_neighbor[_i][_qp];
-      break;
+      return -fjac1(_component, _component) * _phi[_j][_qp] * _test_neighbor[_i][_qp];
+
     case Moose::NeighborNeighbor:
-      re = -fjac2(_component, _component) * _phi_neighbor[_j][_qp] * _test_neighbor[_i][_qp];
-      break;
+      return -fjac2(_component, _component) * _phi_neighbor[_j][_qp] * _test_neighbor[_i][_qp];
   }
-  return re;
+
+  return 0.0;
 }
