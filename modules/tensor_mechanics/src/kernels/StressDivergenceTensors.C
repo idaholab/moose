@@ -159,14 +159,16 @@ Real
 StressDivergenceTensors::computeQpJacobian()
 {
   if (_use_finite_deform_jacobian)
-    return ElasticityTensorTools::elasticJacobian(_finite_deform_Jacobian_mult[_qp], _component, _component, _grad_test[_i][_qp], _grad_phi_undisplaced[_j][_qp]);
+    return ElasticityTensorTools::elasticJacobian(_finite_deform_Jacobian_mult[_qp], _component, _component,
+                                                  _grad_test[_i][_qp], _grad_phi_undisplaced[_j][_qp]);
 
   Real sum_C3x3 = _Jacobian_mult[_qp].sum3x3();
   RealGradient sum_C3x1 = _Jacobian_mult[_qp].sum3x1();
 
   Real jacobian = 0.0;
   // B^T_i * C * B_j
-  jacobian += ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
+  jacobian += ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, _component,
+                                                     _grad_test[_i][_qp], _grad_phi[_j][_qp]);
 
   if (_volumetric_locking_correction)
   {
@@ -174,10 +176,12 @@ StressDivergenceTensors::computeQpJacobian()
     // jacobian = B^T_i * C * B_j + Bvol^T_i * C * Bvol_j +  Bvol^T_i * C * B_j + B^T_i * C * Bvol_j
 
     // Bvol^T_i * C * Bvol_j
-    jacobian +=  sum_C3x3 * (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component)) * (_avg_grad_phi[_j][_component] - _grad_phi[_j][_qp](_component))/ 9.0;
+    jacobian +=   sum_C3x3 * (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component))
+                * (_avg_grad_phi[_j][_component] - _grad_phi[_j][_qp](_component)) / 9.0;
 
     // B^T_i * C * Bvol_j
-    jacobian += sum_C3x1(_component) * _grad_test[_i][_qp](_component) * (_avg_grad_phi[_j][_component] - _grad_phi[_j][_qp](_component)) / 3.0;
+    jacobian +=   sum_C3x1(_component) * _grad_test[_i][_qp](_component)
+                * (_avg_grad_phi[_j][_component] - _grad_phi[_j][_qp](_component)) / 3.0;
 
     // Bvol^T_i * C * B_j
     RankTwoTensor phi;
@@ -200,9 +204,8 @@ StressDivergenceTensors::computeQpJacobian()
       phi(1,2) = phi(2,1) = _grad_phi[_j][_qp](1);
     }
 
-    RankTwoTensor tmp(_Jacobian_mult[_qp] * phi);
-
-    jacobian += tmp.trace() * (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component)) / 3.0;
+    jacobian +=   (_Jacobian_mult[_qp] * phi).trace()
+                * (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component)) / 3.0;
   }
   return jacobian;
 }
@@ -210,128 +213,110 @@ StressDivergenceTensors::computeQpJacobian()
 Real
 StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  unsigned int coupled_component = 0;
-  bool active(false);
-
-  for (unsigned int i = 0; i < _ndisp; ++i)
-    if (jvar == _disp_var[i])
+  // off-diagonal Jacobian with respect to a coupled displacement component
+  for (unsigned int coupled_component = 0; coupled_component < _ndisp; ++coupled_component)
+    if (jvar == _disp_var[coupled_component])
     {
-      coupled_component = i;
-      active = true;
+      if (_use_finite_deform_jacobian)
+        return ElasticityTensorTools::elasticJacobian(_finite_deform_Jacobian_mult[_qp], _component, coupled_component,
+                                                      _grad_test[_i][_qp], _grad_phi_undisplaced[_j][_qp]);
+
+      const Real sum_C3x3 = _Jacobian_mult[_qp].sum3x3();
+      const RealGradient sum_C3x1 = _Jacobian_mult[_qp].sum3x1();
+      Real jacobian = 0.0;
+
+      // B^T_i * C * B_j
+      jacobian += ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, coupled_component,
+                                                         _grad_test[_i][_qp], _grad_phi[_j][_qp]);
+
+      if (_volumetric_locking_correction)
+      {
+        // jacobian = Bbar^T_i * C * Bbar_j where Bbar = B + Bvol
+        // jacobian = B^T_i * C * B_j + Bvol^T_i * C * Bvol_j +  Bvol^T_i * C * B_j + B^T_i * C * Bvol_j
+
+        // Bvol^T_i * C * Bvol_j
+        jacobian +=   sum_C3x3 * (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component))
+                    * (_avg_grad_phi[_j][coupled_component] - _grad_phi[_j][_qp](coupled_component)) / 9.0;
+
+        // B^T_i * C * Bvol_j
+        jacobian +=   sum_C3x1(_component) * _grad_test[_i][_qp](_component)
+                    * (_avg_grad_phi[_j][coupled_component] - _grad_phi[_j][_qp](coupled_component)) / 3.0;
+
+        // Bvol^T_i * C * B_i
+        RankTwoTensor phi;
+        for (unsigned int i = 0; i < 3; ++i)
+          phi(coupled_component, i) = _grad_phi[_j][_qp](i);
+
+        jacobian +=   (_Jacobian_mult[_qp] * phi).trace()
+                    * (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component)) / 3.0;
+      }
+
+      return jacobian;
     }
 
-  if (active)
-  {
-    if (_use_finite_deform_jacobian)
-      return ElasticityTensorTools::elasticJacobian(_finite_deform_Jacobian_mult[_qp], _component, coupled_component,
-                                            _grad_test[_i][_qp], _grad_phi_undisplaced[_j][_qp]);
-
-    Real sum_C3x3 = _Jacobian_mult[_qp].sum3x3();
-    RealGradient sum_C3x1 = _Jacobian_mult[_qp].sum3x1();
-    Real jacobian = 0.0;
-
-    // B^T_i * C * B_j
-    jacobian += ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, coupled_component,
-                                          _grad_test[_i][_qp], _grad_phi[_j][_qp]);
-
-    if (_volumetric_locking_correction)
-    {
-      // jacobian = Bbar^T_i * C * Bbar_j where Bbar = B + Bvol
-      // jacobian = B^T_i * C * B_j + Bvol^T_i * C * Bvol_j +  Bvol^T_i * C * B_j + B^T_i * C * Bvol_j
-
-      // Bvol^T_i * C * Bvol_j
-      jacobian +=  sum_C3x3 * (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component)) * (_avg_grad_phi[_j][coupled_component] - _grad_phi[_j][_qp](coupled_component)) / 9.0;
-
-      // B^T_i * C * Bvol_j
-      jacobian += sum_C3x1(_component) * _grad_test[_i][_qp](_component) * (_avg_grad_phi[_j][coupled_component] - _grad_phi[_j][_qp](coupled_component)) / 3.0;
-
-      // Bvol^T_i * C * B_i
-      RankTwoTensor phi;
-      if (coupled_component == 0)
-      {
-        phi(0,0) = _grad_phi[_j][_qp](0);
-        phi(0,1) = _grad_phi[_j][_qp](1);
-        phi(0,2) = _grad_phi[_j][_qp](2);
-      }
-      else if (coupled_component == 1)
-      {
-        phi(1,1) = _grad_phi[_j][_qp](1);
-        phi(1,0) = _grad_phi[_j][_qp](0);
-        phi(1,2) = _grad_phi[_j][_qp](2);
-      }
-      else if (coupled_component == 2)
-      {
-        phi(2,2) = _grad_phi[_j][_qp](2);
-        phi(2,0) = _grad_phi[_j][_qp](0);
-        phi(2,1) = _grad_phi[_j][_qp](1);
-      }
-
-      RankTwoTensor tmp(_Jacobian_mult[_qp] * phi);
-
-      jacobian += (tmp(0,0) + tmp(1,1) + tmp(2,2)) * (_avg_grad_test[_i][_component] - _grad_test[_i][_qp](_component)) / 3.0;
-    }
-    return jacobian;
-  }
-
+  // off-diagonal Jacobian with respect to a coupled temperature variable
   if (_temp_coupled && jvar == _temp_var)
   {
-    //return _d_stress_dT[_qp].rowDot(_component, _grad_test[_i][_qp]) * _phi[_j][_qp];
+    // return _d_stress_dT[_qp].rowDot(_component, _grad_test[_i][_qp]) * _phi[_j][_qp];
     return 0.0;
   }
 
-  return 0;
+  return 0.0;
 }
 
 void
 StressDivergenceTensors::computeFiniteDeformJacobian()
 {
-  RankTwoTensor identity(RankTwoTensor::initIdentity);
-  RankTwoTensor unrotated_stress = (*_rotation_increment)[_qp].transpose() * _stress[_qp] * (*_rotation_increment)[_qp];//Bring back to unrotated config
-  RankTwoTensor Fhat = (*_deformation_gradient)[_qp] * (*_deformation_gradient_old)[_qp].inverse();//Incremental deformation gradient Fhat
-  RankTwoTensor Fhatinv = Fhat.inverse();//Fhat inverse
+  const RankTwoTensor I(RankTwoTensor::initIdentity);
+  const RankFourTensor II_ijkl = I.mixedProductIkJl(I);
 
-  RankTwoTensor rot_times_stress = (*_rotation_increment)[_qp] * unrotated_stress;
-  RankFourTensor dstress_drot = identity.mixedProductIkJl(rot_times_stress) + identity.mixedProductJkIl(rot_times_stress);
-  RankFourTensor rot_rank_four = (*_rotation_increment)[_qp].mixedProductIkJl((*_rotation_increment)[_qp]);
-  RankFourTensor drot_dUhatinv = Fhat.mixedProductIkJl(identity);
+  // Bring back to unrotated config
+  const RankTwoTensor unrotated_stress = (*_rotation_increment)[_qp].transpose() * _stress[_qp] * (*_rotation_increment)[_qp];
 
-  RankTwoTensor A(RankTwoTensor::initIdentity);
-  A -= Fhatinv;
+  // Incremental deformation gradient Fhat
+  const RankTwoTensor Fhat = (*_deformation_gradient)[_qp] * (*_deformation_gradient_old)[_qp].inverse();
+  const RankTwoTensor Fhatinv = Fhat.inverse();
 
-  //Ctilde = Chat^-1 - I
-  RankTwoTensor Ctilde = A * A.transpose() - A - A.transpose();
-  RankFourTensor dCtilde_dFhatinv = -identity.mixedProductIkJl(A) - identity.mixedProductJkIl(A) + identity.mixedProductIkJl(identity) + identity.mixedProductJkIl(identity);
+  const RankTwoTensor rot_times_stress = (*_rotation_increment)[_qp] * unrotated_stress;
+  const RankFourTensor dstress_drot = I.mixedProductIkJl(rot_times_stress) + I.mixedProductJkIl(rot_times_stress);
+  const RankFourTensor rot_rank_four = (*_rotation_increment)[_qp].mixedProductIkJl((*_rotation_increment)[_qp]);
+  const RankFourTensor drot_dUhatinv = Fhat.mixedProductIkJl(I);
 
-  RankTwoTensor Uhat(RankTwoTensor::initIdentity);
-  Uhat -= 0.5 * Ctilde + 3.0/8.0 * Ctilde * Ctilde;//Second order approximation of Uhat - consistent with strain increment definition
+  const RankTwoTensor A = I - Fhatinv;
 
-  RankFourTensor dUhatinv_dCtilde = 0.5 * identity.mixedProductIkJl(identity) - 1.0/8.0 * (identity.mixedProductIkJl(Ctilde) + Ctilde.mixedProductIkJl(identity));
+  // Ctilde = Chat^-1 - I
+  const RankTwoTensor Ctilde = A * A.transpose() - A - A.transpose();
+  const RankFourTensor dCtilde_dFhatinv = -I.mixedProductIkJl(A) - I.mixedProductJkIl(A) + II_ijkl + I.mixedProductJkIl(I);
+
+  //Second order approximation of Uhat - consistent with strain increment definition
+  const RankTwoTensor Uhat = I - 0.5 * Ctilde - 3.0/8.0 * Ctilde * Ctilde;
+
+  RankFourTensor dUhatinv_dCtilde = 0.5 * II_ijkl - 1.0/8.0 * (I.mixedProductIkJl(Ctilde) + Ctilde.mixedProductIkJl(I));
   RankFourTensor drot_dFhatinv = drot_dUhatinv * dUhatinv_dCtilde * dCtilde_dFhatinv;
 
   drot_dFhatinv -= Fhat.mixedProductIkJl((*_rotation_increment)[_qp].transpose());
   _finite_deform_Jacobian_mult[_qp] = dstress_drot * drot_dFhatinv;
 
-
-  RankFourTensor dstrain_increment_dCtilde = -0.5 * identity.mixedProductIkJl(identity) + 0.25 * (identity.mixedProductIkJl(Ctilde) + Ctilde.mixedProductIkJl(identity));
+  const RankFourTensor dstrain_increment_dCtilde = -0.5 * II_ijkl + 0.25 * (I.mixedProductIkJl(Ctilde) + Ctilde.mixedProductIkJl(I));
   _finite_deform_Jacobian_mult[_qp] += rot_rank_four * _Jacobian_mult[_qp] * dstrain_increment_dCtilde * dCtilde_dFhatinv;
   _finite_deform_Jacobian_mult[_qp] += Fhat.mixedProductJkIl(_stress[_qp]);
 
-  RankFourTensor dFhat_dFhatinv = -Fhat.mixedProductIkJl(Fhat.transpose());
-  RankTwoTensor dJ_dFhatinv = dFhat_dFhatinv.innerProductTranspose(Fhat.ddet());
+  const RankFourTensor dFhat_dFhatinv = -Fhat.mixedProductIkJl(Fhat.transpose());
+  const RankTwoTensor dJ_dFhatinv = dFhat_dFhatinv.innerProductTranspose(Fhat.ddet());
 
-  //Component from Jacobian derivative
+  // Component from Jacobian derivative
   _finite_deform_Jacobian_mult[_qp] += _stress[_qp].outerProduct(dJ_dFhatinv);
 
-  //Derivative of Fhatinv w.r.t. undisplaced coordinates
-  RankTwoTensor Finv = (*_deformation_gradient)[_qp].inverse();
-  RankFourTensor dFhatinv_dGradu = -Fhatinv.mixedProductIkJl(Finv.transpose());
+  // Derivative of Fhatinv w.r.t. undisplaced coordinates
+  const RankTwoTensor Finv = (*_deformation_gradient)[_qp].inverse();
+  const RankFourTensor dFhatinv_dGradu = -Fhatinv.mixedProductIkJl(Finv.transpose());
   _finite_deform_Jacobian_mult[_qp] = _finite_deform_Jacobian_mult[_qp] * dFhatinv_dGradu;
 }
 
 void
 StressDivergenceTensors::computeAverageGradientTest()
 {
-  // calculate volume averaged value of shape function derivative
+  // Calculate volume averaged value of shape function derivative
   _avg_grad_test.resize(_test.size());
   for (_i = 0; _i < _test.size(); ++_i)
   {
