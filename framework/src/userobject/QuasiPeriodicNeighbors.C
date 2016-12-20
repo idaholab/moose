@@ -37,7 +37,7 @@ QuasiPeriodicNeighbors::QuasiPeriodicNeighbors(const InputParameters & parameter
 }
 
 void
-QuasiPeriodicNeighbors::initialize()
+QuasiPeriodicNeighbors::initialSetup()
 {
   setQuasiPeriodicNeighbors();
 }
@@ -45,6 +45,8 @@ QuasiPeriodicNeighbors::initialize()
 void
 QuasiPeriodicNeighbors::setQuasiPeriodicNeighbors()
 {
+  mooseWarning("Seetting quasiperiodic neighbors");
+
   std::list<std::pair<Elem *, std::pair<unsigned int, Elem *>>> neighbor_list;
 
   // pair the boundaries

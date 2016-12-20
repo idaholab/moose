@@ -27,9 +27,10 @@ class QuasiPeriodicNeighbors : public GeneralUserObject
 {
 public:
   QuasiPeriodicNeighbors(const InputParameters & parameters);
+  void initialSetup() override;
 
   void execute() override {}
-  void initialize() override;
+  void initialize() override {};
   void finalize() override {}
 
 protected:
