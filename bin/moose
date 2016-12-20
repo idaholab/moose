@@ -216,6 +216,9 @@ def register_object(proj, name):
     r = re.compile(r'(App::registerObjects\( *Factory.*\)\s*{[^\n]*\n)')
 
     appfile = os.path.join(proj['path'], 'src/base', proj['name']+'App.C')
+    if not os.path.exists(appfile):
+        print('app file "{}" not foundA)'.format(appfile), file=stderr)
+        sys.exit(1)
     with open(appfile, 'r') as f:
         body = f.read()
 
