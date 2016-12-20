@@ -4,7 +4,7 @@
 template<>
 InputParameters validParams<TmplKernel>()
 {
-  InputParameters params = validParams<TmplKernel>();
+  InputParameters params = validParams<Kernel>();
   // add custom kernel parameters here
   return params;
 }
