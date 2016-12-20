@@ -29,7 +29,7 @@ def build_cmds(parser):
     subs = parser.add_subparsers()
 
     subcmd = 'help'
-    help = 'display help subcomands'
+    help = 'display help for subcomands'
     sub = subs.add_parser(subcmd, help=help, description=help)
     sub.add_argument('subcommand', nargs='?', default='summary', help='show help for a specific subcommand')
     sub.set_defaults(func=helpcmd)
@@ -58,14 +58,13 @@ def build_cmds(parser):
     subsub.set_defaults(func=update_libmesh)
 
     subcmd = 'build'
-    help = 'build/update moose libraries'
-    sub = subs.add_parser(subcmd, help=help, description=help)
-    sub.add_argument('--all', action='store_true', default=False, help='build everything')
-    sub.add_argument('--modules', action='store_true', default=False, help='build all module binaries and tests')
-    sub.add_argument('--tests', action='store_true', default=True, help='build moose regression tests and binary')
-    sub.add_argument('--unit', action='store_true', default=False, help='build unit tests')
-    sub.add_argument('-j', type=int, default=2, help='number of parallel build jobs')
-    sub.set_defaults(func=buildmoose)
+    help = '(re)build moose apps, libraries, modules, and tests'
+    desc = 'With no arguments, builds the moose app in the current location.'
+    sub = subs.add_parser(subcmd, help=help, description=desc)
+    sub.add_argument('--modules', action='store_true', default=False, help='build core moose module binaries and tests')
+    sub.add_argument('--unit', action='store_true', default=False, help='build unit tests for the current project')
+    sub.add_argument('-j', type=int, default=4, help='number of parallel build jobs')
+    sub.set_defaults(func=buildproj)
 
 def helpcmd(args):
     if args.subcommand == 'summary':
@@ -92,32 +91,34 @@ def show_app_info(args):
     print('    Path:', proj['path'])
     print('    MOOSE_DIR:', proj['moose_path'])
 
-def buildmoose(args):
+def buildproj(args):
     proj = args.proj
+    iscore = in_moose_core('./')
+    if proj['name'] is None and not iscore:
+        print('no MOOSE app/project found here', file=sys.stderr)
+        sys.exit(1)
+
     mpath = proj['moose_path']
-    testdir = os.path.join(mpath, 'test')
-    moduledir = os.path.join(mpath, 'modules')
-    unitdir = os.path.join(mpath, 'unit')
-
-    cmds = []
-    if args.all:
-        cmds.append((testdir , ['make', '-j', str(args.j)]))
-        cmds.append((moduledir , ['make', '-j', str(args.j)]))
-        cmds.append((unitdir , ['make', '-j', str(args.j)]))
-    else:
-        if args.tests:
-            cmds.append((testdir , ['make', '-j', str(args.j)]))
-        if args.modules:
-            cmds.append((moduledir , ['make', '-j', str(args.j)]))
+    cmd = ['make', '-j', str(args.j)]
+    if iscore:
         if args.unit:
-            cmds.append((unitdir , ['make', '-j', str(args.j)]))
+            wd = os.path.join(mpath, 'unit')
+        elif args.modules:
+            wd = os.path.join(mpath, 'modules')
+        else:
+            wd = os.path.join(mpath, 'test')
+    else:
+        if args.unit:
+            wd = os.path.join(proj['path'], 'unit')
+        else:
+            wd = proj['path']
 
-    for (cwd, cmd) in cmds:
-        p = subprocess.Popen(cmd, cwd=cwd, stdout=sys.stdout, stderr=subprocess.STDOUT)
-        p.communicate()
-        if p.returncode != 0:
-            print('build in "{}" failed'.format(cwd), file=sys.stderr)
-            sys.exit(p.returncode)
+
+    p = subprocess.Popen(cmd, cwd=wd, stdout=sys.stdout, stderr=subprocess.STDOUT)
+    p.communicate()
+    if p.returncode != 0:
+        print('build in "{}" failed'.format(wd), file=sys.stderr)
+        sys.exit(p.returncode)
 
 def update_libmesh(args):
     proj = args.proj
@@ -173,6 +174,15 @@ def prepare_obj_paths(proj, kind, name):
             }
     return None
 
+def in_moose_core(curr_path, depth=0):
+    maxdepth = 10
+    fpath = os.path.join(curr_path, 'framework/include/kernels/Kernel.h')
+    if os.path.exists(fpath):
+        return True
+    if depth < maxdepth:
+        return in_moose_core(os.path.join(curr_path, '..'), depth+1)
+    return False
+
 def find_app(proj_path, depth=0):
     fpath = os.path.join(proj_path, 'src/main.C')
     if not os.path.exists(fpath):
@@ -189,6 +199,7 @@ def find_app(proj_path, depth=0):
     proj_path = os.path.abspath(proj_path)
     if m is None:
         return None, None
+
     return m.group(1), proj_path
 
 def rename_internal(fname, objname):
