@@ -52,7 +52,7 @@ public:
                                             unsigned int ineig,
                                             const std::vector<Real> & uvec1,
                                             const std::vector<Real> & uvec2,
-                                            const std::vector<Real> & dwave,
+                                            const RealVectorValue & dwave,
                                             THREAD_ID tid) const;
 
   /**
@@ -70,7 +70,7 @@ public:
                         unsigned int ineig,
                         const std::vector<Real> & uvec1,
                         const std::vector<Real> & uvec2,
-                        const std::vector<Real> & dwave,
+                        const RealVectorValue & dwave,
                         std::vector<Real> & flux) const = 0;
 
   /**
@@ -88,7 +88,7 @@ public:
                                                 unsigned int ineig,
                                                 const std::vector<Real> & uvec1,
                                                 const std::vector<Real> & uvec2,
-                                                const std::vector<Real> & dwave,
+                                                const RealVectorValue & dwave,
                                                 THREAD_ID tid) const;
 
   /**
@@ -107,7 +107,7 @@ public:
                             unsigned int ineig,
                             const std::vector<Real> & uvec1,
                             const std::vector<Real> & uvec2,
-                            const std::vector<Real> & dwave,
+                            const RealVectorValue & dwave,
                             DenseMatrix<Real> & jac1,
                             DenseMatrix<Real> & jac2) const = 0;
 

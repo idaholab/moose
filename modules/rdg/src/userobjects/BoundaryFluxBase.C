@@ -45,7 +45,7 @@ const std::vector<Real> &
 BoundaryFluxBase::getFlux(unsigned int iside,
                           dof_id_type ielem,
                           const std::vector<Real> & uvec1,
-                          const std::vector<Real> & dwave,
+                          const RealVectorValue & dwave,
                           THREAD_ID tid) const
 {
   Threads::spin_mutex::scoped_lock lock(_mutex);
@@ -67,7 +67,7 @@ const DenseMatrix<Real> &
 BoundaryFluxBase::getJacobian(unsigned int iside,
                               dof_id_type ielem,
                               const std::vector<Real> & uvec1,
-                              const std::vector<Real> & dwave,
+                              const RealVectorValue & dwave,
                               THREAD_ID tid) const
 {
   Threads::spin_mutex::scoped_lock lock(_mutex);

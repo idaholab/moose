@@ -46,7 +46,7 @@ public:
   virtual const std::vector<Real> & getFlux(unsigned int iside,
                                             dof_id_type ielem,
                                             const std::vector<Real> & uvec1,
-                                            const std::vector<Real> & dwave,
+                                            const RealVectorValue & dwave,
                                             THREAD_ID tid) const;
 
   /**
@@ -60,7 +60,7 @@ public:
   virtual void calcFlux(unsigned int iside,
                         dof_id_type ielem,
                         const std::vector<Real> & uvec1,
-                        const std::vector<Real> & dwave,
+                        const RealVectorValue & dwave,
                         std::vector<Real> & flux) const = 0;
 
   /**
@@ -73,7 +73,7 @@ public:
   virtual const DenseMatrix<Real> & getJacobian(unsigned int iside,
                                                 dof_id_type ielem,
                                                 const std::vector<Real> & uvec1,
-                                                const std::vector<Real> & dwave,
+                                                const RealVectorValue & dwave,
                                                 THREAD_ID tid) const;
 
   /**
@@ -87,7 +87,7 @@ public:
   virtual void calcJacobian(unsigned int iside,
                             dof_id_type ielem,
                             const std::vector<Real> & uvec1,
-                            const std::vector<Real> & dwave,
+                            const RealVectorValue & dwave,
                             DenseMatrix<Real> & jac1) const = 0;
 
 protected:
@@ -96,6 +96,7 @@ protected:
 
   /// Threaded storage for fluxes
   mutable std::vector<std::vector<Real> > _flux;
+
   /// Threaded storage for jacobians
   mutable std::vector<DenseMatrix<Real> > _jac1;
 

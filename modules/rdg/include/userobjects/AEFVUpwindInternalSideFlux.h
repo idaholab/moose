@@ -33,7 +33,7 @@ public:
                         unsigned int ineig,
                         const std::vector<Real> & uvec1,
                         const std::vector<Real> & uvec2,
-                        const std::vector<Real> & dwave,
+                        const RealVectorValue & dwave,
                         std::vector<Real> & flux) const override;
 
   virtual void calcJacobian(unsigned int iside,
@@ -41,7 +41,7 @@ public:
                             unsigned int ineig,
                             const std::vector<Real> & uvec1,
                             const std::vector<Real> & uvec2,
-                            const std::vector<Real> & dwave,
+                            const RealVectorValue & dwave,
                             DenseMatrix<Real> & jac1,
                             DenseMatrix<Real> & jac2) const override;
 
