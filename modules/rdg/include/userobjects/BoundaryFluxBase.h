@@ -44,9 +44,9 @@ public:
    * @param[in]   dwave     vector of unit normal
    */
   virtual const std::vector<Real> & getFlux(unsigned int iside,
-                                            unsigned int ielem,
+                                            dof_id_type ielem,
                                             const std::vector<Real> & uvec1,
-                                            const std::vector<Real> & dwave,
+                                            const RealVectorValue & dwave,
                                             THREAD_ID tid) const;
 
   /**
@@ -58,9 +58,9 @@ public:
    * @param[out]  flux      flux vector for conservation equations
    */
   virtual void calcFlux(unsigned int iside,
-                        unsigned int ielem,
+                        dof_id_type ielem,
                         const std::vector<Real> & uvec1,
-                        const std::vector<Real> & dwave,
+                        const RealVectorValue & dwave,
                         std::vector<Real> & flux) const = 0;
 
   /**
@@ -71,9 +71,9 @@ public:
    * @param[in]   dwave     vector of unit normal
    */
   virtual const DenseMatrix<Real> & getJacobian(unsigned int iside,
-                                                unsigned int ielem,
+                                                dof_id_type ielem,
                                                 const std::vector<Real> & uvec1,
-                                                const std::vector<Real> & dwave,
+                                                const RealVectorValue & dwave,
                                                 THREAD_ID tid) const;
 
   /**
@@ -85,18 +85,18 @@ public:
    * @param[out]  jac1      Jacobian matrix contribution
    */
   virtual void calcJacobian(unsigned int iside,
-                            unsigned int ielem,
+                            dof_id_type ielem,
                             const std::vector<Real> & uvec1,
-                            const std::vector<Real> & dwave,
+                            const RealVectorValue & dwave,
                             DenseMatrix<Real> & jac1) const = 0;
 
 protected:
-
-  mutable unsigned int _cached_elem_id;
-  mutable int _cached_side_id;
+  mutable unsigned int _cached_side_id;
+  mutable dof_id_type _cached_elem_id;
 
   /// Threaded storage for fluxes
   mutable std::vector<std::vector<Real> > _flux;
+
   /// Threaded storage for jacobians
   mutable std::vector<DenseMatrix<Real> > _jac1;
 

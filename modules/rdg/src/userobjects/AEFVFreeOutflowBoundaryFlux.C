@@ -28,26 +28,27 @@ void
 AEFVFreeOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
                                       unsigned int /*ielem*/,
                                       const std::vector<Real> & uvec1,
-                                      const std::vector<Real> & dwave,
+                                      const RealVectorValue & dwave,
                                       std::vector<Real> & flux) const
 {
+  mooseAssert(uvec1.size() == 1, "Invalid size for uvec1. Must be single variable coupling.");
+
   // assume the velocity vector is constant, e.g. = (1., 1., 1.)
-  Real uadv1 = 1.;
-  Real vadv1 = 1.;
-  Real wadv1 = 1.;
+  RealVectorValue uadv1(1.0, 1.0, 1.0);
 
   // assign the size of flux vector, e.g. = 1 for the advection equation
   flux.resize(1);
 
   // finally calculate the flux
-  flux[0] = (uadv1 * dwave[0] + vadv1 * dwave[1] + wadv1 * dwave[2]) * uvec1[0];
+  flux[0] = (uadv1 * dwave) * uvec1[0];
 }
 
 void
 AEFVFreeOutflowBoundaryFlux::calcJacobian(unsigned int /*iside*/,
                                           unsigned int /*ielem*/,
-                                          const std::vector<Real> & /*uvec1*/,
-                                          const std::vector<Real> & /*dwave*/,
+                                          const std::vector<Real> & libmesh_dbg_var(uvec1),
+                                          const RealVectorValue & /*dwave*/,
                                           DenseMatrix<Real> & /*jac1*/) const
 {
+  mooseAssert(uvec1.size() == 1, "Invalid size for uvec1. Must be single variable coupling.");
 }

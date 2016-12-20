@@ -49,7 +49,7 @@ InternalSideFluxBase::getFlux(unsigned int iside,
                               unsigned int ineig,
                               const std::vector<Real> & uvec1,
                               const std::vector<Real> & uvec2,
-                              const std::vector<Real> & dwave,
+                              const RealVectorValue & dwave,
                               THREAD_ID tid) const
 {
   Threads::spin_mutex::scoped_lock lock(_mutex);
@@ -76,7 +76,7 @@ InternalSideFluxBase::getJacobian(Moose::DGResidualType type,
                                   unsigned int ineig,
                                   const std::vector<Real> & uvec1,
                                   const std::vector<Real> & uvec2,
-                                  const std::vector<Real> & dwave,
+                                  const RealVectorValue & dwave,
                                   THREAD_ID tid) const
 {
   Threads::spin_mutex::scoped_lock lock(_mutex);

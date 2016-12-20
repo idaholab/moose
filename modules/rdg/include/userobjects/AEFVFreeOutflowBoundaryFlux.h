@@ -31,13 +31,13 @@ public:
   virtual void calcFlux(unsigned int iside,
                         unsigned int ielem,
                         const std::vector<Real> & uvec1,
-                        const std::vector<Real> & dwave,
+                        const RealVectorValue & dwave,
                         std::vector<Real> & flux) const override;
 
   virtual void calcJacobian(unsigned int iside,
                             unsigned int ielem,
                             const std::vector<Real> & uvec1,
-                            const std::vector<Real> & dwave,
+                            const RealVectorValue & dwave,
                             DenseMatrix<Real> & jac1) const override;
 
 protected:
