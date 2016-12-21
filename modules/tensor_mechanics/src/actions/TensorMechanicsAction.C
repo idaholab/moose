@@ -48,9 +48,6 @@ validParams<TensorMechanicsAction>()
   params.addParam<MooseEnum>("strain", strainType, "Strain formulation");
   params.addParam<bool>("incremental", "Use incremental or total strain");
 
-  MooseEnum planarFormulationType("NONE PLANE_STRESS PLANE_STRAIN GENERALIZED_PLANE_STRAIN", "NONE");
-  params.addParam<MooseEnum>("planar_formulation", planarFormulationType, "Out-of-plane stress/strain formulation");
-
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<bool>("volumetric_locking_correction", false, "Flag to correct volumetric locking");
   params.addParam<bool>("use_finite_deform_jacobian", false, "Jacobian for corrotational finite strain");
@@ -63,6 +60,13 @@ validParams<TensorMechanicsAction>()
   params.addParam<std::vector<AuxVariableName>>("save_in", "The displacement residuals");
   params.addParam<std::vector<AuxVariableName>>("diag_save_in", "The displacement diagonal preconditioner terms");
   params.addParamNamesToGroup("block save_in diag_save_in", "Advanced");
+
+  MooseEnum planarFormulationType("NONE PLANE_STRESS PLANE_STRAIN GENERALIZED_PLANE_STRAIN", "NONE");
+  params.addParam<MooseEnum>("planar_formulation", planarFormulationType, "Out-of-plane stress/strain formulation");
+  params.addParam<NonlinearVariableName>("scalar_out_of_plane_strain", "Scalar variable for the out-of-plane strain (in y direction for 1D Axisymmetric or in z direction for 2D Cartesian problems)");
+  params.addParam<FunctionName>("out_of_plane_pressure", "0", "Function used to prescribe pressure in the out-of-plane direction (y for 1D Axisymmetric or z for 2D Cartesian problems)");
+  params.addParam<Real>("pressure_factor", 1.0, "Scale factor applied to prescribed pressure");
+  params.addParamNamesToGroup("planar_formulation scalar_out_of_plane_strain out_of_plane_pressure pressure_factor", "Out-of-plane stress/strain");
 
   // Output
   std::string options = "";
@@ -143,9 +147,6 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   if (_planar_formulation != PlanarFormulation::None && _ndisp != 2)
     mooseError("Plane strain only works in 2 dimensions");
 
-  if (_planar_formulation != PlanarFormulation::None)
-    mooseError("Not implemented");
-
   // convert output vareiable names to lower case
   for (const auto & out : getParam<MultiMooseEnum>("generate_output"))
   {
@@ -182,18 +183,20 @@ TensorMechanicsAction::act()
   //
   if (_current_task == "meta_action")
   {
-    const std::string type = "GeneralizedPlaneStrainAction";
-    auto params = _action_factory.getValidParams(type);
-
     if (_planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
     {
-      auto action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("type", name() + "_gps", params));
+      // Set the action parameters
+      const std::string type = "GeneralizedPlaneStrainAction";
+      auto action_params = _action_factory.getValidParams(type);
+      action_params.set<bool>("_built_by_moose") = true;
+      action_params.set<std::string>("registered_identifier") = "(AutoBuilt)";
+      action_params.applyParameters(parameters(), {"use_displaced_mesh"});
+      action_params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
+      if (isParamValid("pressure_factor"))
+        action_params.set<Real>("factor") = getParam<Real>("pressure_factor");
 
-      // Set the object parameters
-      InputParameters & object_params = action->getObjectParams();
-      object_params.set<bool>("_built_by_moose") = true;
-
-      // Add the action to the warehouse
+      // Create and add the action to the warehouse
+      auto action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create(type, name() + "_gps", action_params));
       _awh.addActionBlock(action);
     }
   }
