@@ -32,7 +32,7 @@ public:
     return std::vector<std::string>(1, "");
   }
 
-private:
+protected:
   using Material::_qp;
 };
 
