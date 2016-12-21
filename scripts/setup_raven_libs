@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#Tries to load raven's conda package, and activate raven_libraries
+try_use_raven_conda ()
+{
+    if test -e /opt/raven_libs/bin/conda;
+    then
+	export PATH="/opt/raven_libs/bin:$PATH"
+	source activate raven_libraries
+    fi
+}
+
+#Check for conda and activate raven_libraries
+if which conda;
+then
+    if conda env list | grep -q raven_libraries;
+    then
+	source activate raven_libraries
+    else
+	try_use_raven_conda
+    fi
+else
+    try_use_raven_conda
+fi
