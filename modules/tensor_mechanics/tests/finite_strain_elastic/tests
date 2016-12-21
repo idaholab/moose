@@ -4,20 +4,48 @@
     input = 'finite_strain_elastic_new_test.i'
     exodiff = 'finite_strain_elastic_new_test_out.e'
   [../]
+  [./new_Bbar]
+    type = 'Exodiff'
+    input = 'finite_strain_elastic_new_test.i'
+    exodiff = 'finite_strain_elastic_new_test_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'new'
+  [../]
   [./fake_plastic]
     type = 'Exodiff'
     input = 'finite_strain_fake_plastic.i'
     exodiff = 'finite_strain_fake_plastic_out.e'
+  [../]
+  [./fake_plastic_Bbar]
+    type = 'Exodiff'
+    input = 'finite_strain_fake_plastic.i'
+    exodiff = 'finite_strain_fake_plastic_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'fake_plastic'
   [../]
   [./rotation_new]
     type = 'Exodiff'
     input = 'elastic_rotation_test.i'
     exodiff = 'elastic_rotation_test_out.e'
   [../]
+  [./rotation_new_Bbar]
+    type = 'Exodiff'
+    input = 'elastic_rotation_test.i'
+    exodiff = 'elastic_rotation_test_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'rotation_new'
+  [../]
   [./eigen_sol]
     type = 'Exodiff'
     input = 'finite_strain_elastic_eigen_sol.i'
     exodiff = 'finite_strain_elastic_eigen_sol_out.e'
+  [../]
+  [./eigen_sol_Bbar]
+    type = 'Exodiff'
+    input = 'finite_strain_elastic_eigen_sol.i'
+    exodiff = 'finite_strain_elastic_eigen_sol_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'eigen_sol'
   [../]
   [./stress_errorcheck]
     type = 'RunException'

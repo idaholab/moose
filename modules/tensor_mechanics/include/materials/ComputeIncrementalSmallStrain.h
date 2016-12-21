@@ -18,7 +18,7 @@ public:
   ComputeIncrementalSmallStrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties() override;
+  virtual void computeProperties() override;
 
   /// Computes the current and old deformation gradients and passes back the
   /// total strain increment tensor

@@ -6,12 +6,30 @@
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   [../]
+  [./small1_Bbar]
+    type = 'CSVDiff'
+    input = 'small_deform1.i'
+    csvdiff = 'small_deform1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'small1'
+  [../]
   [./small2]
     type = 'CSVDiff'
     input = 'small_deform2.i'
     csvdiff = 'small_deform2.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
+  [../]
+  [./small2_Bbar]
+    type = 'CSVDiff'
+    input = 'small_deform2.i'
+    csvdiff = 'small_deform2.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'small2'
   [../]
   [./small3]
     type = 'CSVDiff'
@@ -20,12 +38,30 @@
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   [../]
+  [./small3_Bbar]
+    type = 'CSVDiff'
+    input = 'small_deform3.i'
+    csvdiff = 'small_deform3.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'small3'
+  [../]
   [./small4]
     type = 'CSVDiff'
     input = 'small_deform4.i'
     csvdiff = 'small_deform4.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
+  [../]
+  [./small4_Bbar]
+    type = 'CSVDiff'
+    input = 'small_deform4.i'
+    csvdiff = 'small_deform4.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'small4'
   [../]
   [./small5]
     type = 'CSVDiff'
@@ -34,12 +70,30 @@
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   [../]
+  [./small5_Bbar]
+    type = 'CSVDiff'
+    input = 'small_deform5.i'
+    csvdiff = 'small_deform5.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'small5'
+  [../]
   [./small6]
     type = 'CSVDiff'
     input = 'small_deform6.i'
     csvdiff = 'small_deform6.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
+  [../]
+  [./small6_Bbar]
+    type = 'CSVDiff'
+    input = 'small_deform6.i'
+    csvdiff = 'small_deform6.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'small6'
   [../]
   [./small7]
     type = 'CSVDiff'
@@ -48,6 +102,15 @@
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
   [../]
+  [./small7_Bbar]
+    type = 'CSVDiff'
+    input = 'small_deform7.i'
+    csvdiff = 'small_deform7.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'small7'
+  [../]
 
   [./small_hard3]
     type = 'CSVDiff'
@@ -55,6 +118,15 @@
     csvdiff = 'small_deform_hard3.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
+  [../]
+  [./small_hard3_Bbar]
+    type = 'CSVDiff'
+    input = 'small_deform_hard3.i'
+    csvdiff = 'small_deform_hard3.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'small_hard3'
   [../]
 
   [./planar1]
@@ -65,6 +137,15 @@
     abs_zero = 1.0E-5
     cli_args = '--no-trap-fpe'
   [../]
+  [./planar1_Bbar]
+    type = 'CSVDiff'
+    input = 'planar1.i'
+    csvdiff = 'planar1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe GlobalParams/volumetric_locking_correction=true'
+    prereq = 'planar1'
+  [../]
   [./planar2]
     type = 'CSVDiff'
     input = 'planar2.i'
@@ -72,6 +153,15 @@
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
     cli_args = '--no-trap-fpe'
+  [../]
+  [./planar2_Bbar]
+    type = 'CSVDiff'
+    input = 'planar2.i'
+    csvdiff = 'planar2.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe GlobalParams/volumetric_locking_correction=true'
+    prereq = 'planar2'
   [../]
   [./planar3]
     type = 'CSVDiff'

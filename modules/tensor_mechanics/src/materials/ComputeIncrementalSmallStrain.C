@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "ComputeIncrementalSmallStrain.h"
-
+#include "Assembly.h"
 // libmesh includes
 #include "libmesh/quadrature.h"
 
@@ -23,25 +23,46 @@ ComputeIncrementalSmallStrain::ComputeIncrementalSmallStrain(const InputParamete
 }
 
 void
-ComputeIncrementalSmallStrain::computeQpProperties()
+ComputeIncrementalSmallStrain::computeProperties()
 {
-  RankTwoTensor total_strain_increment;
-  computeTotalStrainIncrement(total_strain_increment);
+  Real volumetric_strain = 0.0;
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  {
+    RankTwoTensor total_strain_increment;
+    computeTotalStrainIncrement(total_strain_increment);
 
-  _strain_increment[_qp] = total_strain_increment;
+    _strain_increment[_qp] = total_strain_increment;
 
-  //Remove the eigenstrain increment
-  subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
+    if (_volumetric_locking_correction)
+      volumetric_strain += total_strain_increment.trace() * _JxW[_qp] * _coord[_qp];
+  }
+  if (_volumetric_locking_correction)
+    volumetric_strain /= _current_elem_volume;
 
-  // strain rate
-  if (_dt > 0)
-    _strain_rate[_qp] = _strain_increment[_qp] /_dt;
-  else
-    _strain_rate[_qp].zero();
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  {
+    Real trace = _strain_increment[_qp].trace();
+    if (_volumetric_locking_correction)
+    {
+      _strain_increment[_qp](0,0) += (volumetric_strain - trace) / 3.0;
+      _strain_increment[_qp](1,1) += (volumetric_strain - trace) / 3.0;
+      _strain_increment[_qp](2,2) += (volumetric_strain - trace) / 3.0;
+    }
 
-  //Update strain in intermediate configuration: rotations are not needed
-  _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
-  _total_strain[_qp] = _total_strain_old[_qp] + total_strain_increment;
+    _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+
+    //Remove the Eigen strain increment
+    subtractEigenstrainIncrementFromStrain(_strain_increment[_qp]);
+
+    // strain rate
+    if (_dt > 0)
+      _strain_rate[_qp] = _strain_increment[_qp] /_dt;
+    else
+      _strain_rate[_qp].zero();
+
+    //Update strain in intermediate configuration: rotations are not needed
+    _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
+  }
 }
 
 void

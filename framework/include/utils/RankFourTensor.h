@@ -205,6 +205,13 @@ public:
   /// Inner product of the major transposed tensor with a rank two tensor
   RankTwoTensor innerProductTranspose(const RankTwoTensor &) const;
 
+  /// Calculates the sum of Ciijj for i and j varying from 0 to 2
+  Real sum3x3() const;
+
+  /// Calculates the vector a[i] = sum over j Ciijj for i and j varying from 0 to 2
+  RealGradient sum3x1() const;
+
+
 protected:
   /// Dimensionality of rank-four tensor
   static const unsigned int N = LIBMESH_DIM;

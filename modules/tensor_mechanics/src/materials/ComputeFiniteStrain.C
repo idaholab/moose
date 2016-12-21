@@ -19,13 +19,11 @@ InputParameters validParams<ComputeFiniteStrain>()
   MooseEnum decomposition_type("TaylorExpansion EigenSolution", "TaylorExpansion");
   params.addParam<MooseEnum>("decomposition_method", decomposition_type, "Methods to calculate the strain and rotation increments: " + decomposition_type.getRawNames());
   params.set<bool>("stateful_deformation_gradient") = true;
-
   return params;
 }
 
 ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters) :
     ComputeIncrementalStrainBase(parameters),
-    _current_elem_volume(_assembly.elemVolume()),
     _Fhat(_fe_problem.getMaxQps()),
     _decomposition_method(getParam<MooseEnum>("decomposition_method").getEnum<DecompMethod>())
 {
@@ -36,7 +34,6 @@ ComputeFiniteStrain::computeProperties()
 {
   RankTwoTensor ave_Fhat;
   Real ave_dfgrd_det = 0.0;
-
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     // Deformation gradient
@@ -56,17 +53,23 @@ ComputeFiniteStrain::computeProperties()
     _Fhat[_qp] = A * Fbar.inverse();
     _Fhat[_qp].addIa(1.0);
 
-    // Calculate average _Fhat for volumetric locking correction
-    ave_Fhat += _Fhat[_qp] * _JxW[_qp] * _coord[_qp];
+    if (_volumetric_locking_correction)
+    {
+      // Calculate average _Fhat for volumetric locking correction
+      ave_Fhat += _Fhat[_qp] * _JxW[_qp] * _coord[_qp];
 
-    // Average deformation gradient
-    ave_dfgrd_det += _deformation_gradient[_qp].det() * _JxW[_qp] * _coord[_qp];
+      // Average deformation gradient
+      ave_dfgrd_det += _deformation_gradient[_qp].det() * _JxW[_qp] * _coord[_qp];
+    }
   }
 
-  // needed for volumetric locking correction
-  ave_Fhat /= _current_elem_volume;
-  // average deformation gradient
-  ave_dfgrd_det /=_current_elem_volume;
+  if (_volumetric_locking_correction)
+  {
+    // needed for volumetric locking correction
+    ave_Fhat /= _current_elem_volume;
+    // average deformation gradient
+    ave_dfgrd_det /= _current_elem_volume;
+  }
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {

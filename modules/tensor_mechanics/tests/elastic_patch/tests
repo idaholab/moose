@@ -4,13 +4,28 @@
     input = 'elastic_patch.i'
     exodiff = 'elastic_patch_out.e'
   [../]
+  [./elastic_patch_Bbar]
+    type = 'Exodiff'
+    input = 'elastic_patch.i'
+    exodiff = 'elastic_patch_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'elastic_patch'
+  [../]
 
   [./elastic_patch_2Procs]
     type = Exodiff
     input = 'elastic_patch.i'
     exodiff = 'elastic_patch_out.e'
     min_parallel = '2'
-    prereq = 'elastic_patch'
+    prereq = 'elastic_patch_Bbar'
+  [../]
+  [./elastic_patch_2Procs_Bbar]
+    type = Exodiff
+    input = 'elastic_patch.i'
+    exodiff = 'elastic_patch_out.e'
+    min_parallel = '2'
+    prereq = 'elastic_patch_2Procs'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
   [../]
 
   [./elastic_patch_quadratic]
@@ -18,4 +33,11 @@
     input = 'elastic_patch_quadratic.i'
     exodiff = 'elastic_patch_quadratic_out.e'
   [../]
+  [./elastic_patch_quadratic_Bbar]
+    type = Exodiff
+    input = 'elastic_patch_quadratic.i'
+    exodiff = 'elastic_patch_quadratic_out.e'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'elastic_patch_quadratic'
+ [../]
 []

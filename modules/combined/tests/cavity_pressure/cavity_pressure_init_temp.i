@@ -46,6 +46,10 @@
   file = cavity_pressure.e
 []
 
+[GlobalParams]
+  volumetric_locking_correction=true
+[]
+
 [Functions]
   [./displ_positive]
     type = PiecewiseLinear

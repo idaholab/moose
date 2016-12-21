@@ -7,6 +7,7 @@
 
 #include "ComputeStrainBase.h"
 #include "MooseMesh.h"
+#include "Assembly.h"
 
 template<>
 InputParameters validParams<ComputeStrainBase>()
@@ -14,7 +15,7 @@ InputParameters validParams<ComputeStrainBase>()
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
-  params.addParam<bool>("volumetric_locking_correction", true, "Flag to correct volumetric locking");
+  params.addParam<bool>("volumetric_locking_correction", false, "Flag to correct volumetric locking");
   params.addParam<std::vector<MaterialPropertyName>>("eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
   return params;
 }
@@ -29,7 +30,8 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
     _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain")),
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _eigenstrains(_eigenstrain_names.size()),
-    _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
+    _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction")),
+    _current_elem_volume(_assembly.elemVolume())
 {
   for (unsigned int i = 0; i < _eigenstrains.size(); ++i)
   {
@@ -54,6 +56,9 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
     _disp[i] = &_zero;
     _grad_disp[i] = &_grad_zero;
   }
+
+  if (_ndisp == 1 && _volumetric_locking_correction)
+    mooseError("Volumetric locking correction have to be set to false for 1-D problems.");
 }
 
 void

@@ -46,6 +46,10 @@
   block = 1
 []
 
+[GlobalParams]
+  volumetric_locking_correction=true
+[]
+
 [Variables]
   [./disp_x]
   [../]

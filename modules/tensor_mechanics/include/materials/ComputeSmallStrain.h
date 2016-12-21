@@ -18,7 +18,7 @@ public:
   ComputeSmallStrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties() override;
+  virtual void computeProperties() override;
 };
 
 #endif //COMPUTESMALLSTRAIN_H

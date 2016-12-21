@@ -23,7 +23,6 @@ protected:
   virtual void computeQpStrain();
   virtual void computeQpIncrements(RankTwoTensor & e, RankTwoTensor & r);
 
-  const Real & _current_elem_volume;
   std::vector<RankTwoTensor> _Fhat;
 
 private:

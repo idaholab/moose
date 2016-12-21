@@ -13,5 +13,6 @@
     abs_zero = 1e-07
     scale_refine = 1
     prereq = 'sm_beam_pbp'
+    rel_err = 4e-5
   [../]
 []
