@@ -26,7 +26,7 @@ AEFVFreeOutflowBoundaryFlux::~AEFVFreeOutflowBoundaryFlux()
 
 void
 AEFVFreeOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
-                                      unsigned int /*ielem*/,
+                                      dof_id_type /*ielem*/,
                                       const std::vector<Real> & uvec1,
                                       const RealVectorValue & dwave,
                                       std::vector<Real> & flux) const
@@ -45,7 +45,7 @@ AEFVFreeOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
 
 void
 AEFVFreeOutflowBoundaryFlux::calcJacobian(unsigned int /*iside*/,
-                                          unsigned int /*ielem*/,
+                                          dof_id_type /*ielem*/,
                                           const std::vector<Real> & libmesh_dbg_var(uvec1),
                                           const RealVectorValue & /*dwave*/,
                                           DenseMatrix<Real> & /*jac1*/) const

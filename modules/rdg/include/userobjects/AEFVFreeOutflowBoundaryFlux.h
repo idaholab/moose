@@ -29,13 +29,13 @@ public:
   virtual ~AEFVFreeOutflowBoundaryFlux();
 
   virtual void calcFlux(unsigned int iside,
-                        unsigned int ielem,
+                        dof_id_type ielem,
                         const std::vector<Real> & uvec1,
                         const RealVectorValue & dwave,
                         std::vector<Real> & flux) const override;
 
   virtual void calcJacobian(unsigned int iside,
-                            unsigned int ielem,
+                            dof_id_type ielem,
                             const std::vector<Real> & uvec1,
                             const RealVectorValue & dwave,
                             DenseMatrix<Real> & jac1) const override;
