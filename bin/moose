@@ -20,10 +20,14 @@ def build_cmds(parser):
     if mpath is None:
         print('the MOOSE_DIR environment variable must be set to use this command', file=sys.stderr)
         sys.exit(1)
+    sys.path.append(os.path.join(mpath, 'python'))
 
-    projname, projpath = find_app('./')
+    import path_tool # this needs to die
+    path_tool.activate_module('TestHarness') # this needs to die
 
-    projinfo = {'path': projpath, 'name': projname, 'moose_path': mpath}
+    classname, projname, projpath = find_app('./')
+
+    projinfo = {'path': projpath, 'class': classname, 'name': projname, 'moose_path': mpath}
     parser.set_defaults(proj=projinfo, parser=parser)
 
     subs = parser.add_subparsers()
@@ -66,6 +70,15 @@ def build_cmds(parser):
     sub.add_argument('-j', type=int, default=4, help='number of parallel build jobs')
     sub.set_defaults(func=buildproj)
 
+    subcmd = 'test'
+    help = 'test moose apps, libraries, and modules'
+    desc = 'With no arguments, runs regression tests for the moose app in the current location. ' \
+           'To use test harness options, put -h (or desired options) after a -- (i.e. "moose test -- --no-color" or "moose test -- -h").'
+    sub = subs.add_parser(subcmd, help=help, description=desc)
+    sub.add_argument('--unit', action='store_true', default=False, help='run unit tests for the current project')
+    sub.add_argument('testflags', nargs='*', default=[], help='flags to pass into the test harness')
+    sub.set_defaults(func=testproj)
+
 def helpcmd(args):
     if args.subcommand == 'summary':
         args.parser.print_help()
@@ -82,25 +95,66 @@ def helpcmd(args):
                 return
 
 def show_app_info(args):
-    if args.proj['name'] is None:
+    if args.proj['class'] is None:
         print('no MOOSE app found here', file=sys.stderr)
         sys.exit(1)
 
     proj = args.proj
     print(' ' + proj['name'] + ':')
+    print('    Class:', proj['class'])
     print('    Path:', proj['path'])
     print('    MOOSE_DIR:', proj['moose_path'])
+
+
+def testproj(args):
+    proj = args.proj
+    iscore = in_moose_core('./')
+    if proj['class'] is None and not iscore:
+        print('no MOOSE app/project found here', file=sys.stderr)
+        sys.exit(1)
+
+    mpath = proj['moose_path']
+    if proj['class'] is None:
+        appname = 'moose_test'
+        wd = os.path.join(mpath, 'test')
+        if args.unit:
+            wd = os.path.join(mpath, 'unit')
+    else:
+        wd = proj['path']
+        appname = proj['class'].lower()
+        if args.unit:
+            wd = os.path.join(proj['path'], 'unit')
+
+    if not args.unit:
+        print("Running regression tests for '{}'...".format(appname))
+        runtests(proj, wd, appname, args.testflags)
+    else:
+        print("Running unit tests for '{}'...".format(appname))
+        p = subprocess.Popen('./run_tests', cwd=wd, stdout=sys.stdout, stderr=subprocess.STDOUT)
+        p.communicate()
+        if p.returncode != 0:
+            print('unit tests in "{}" failed to run'.format(wd), file=sys.stderr)
+            sys.exit(p.returncode)
+
+def runtests(proj, path, app_name, flags):
+    from TestHarness import TestHarness
+    os.chdir(path)
+
+    flags.insert(0, './run_tests')
+    flags.insert(1, '--error')
+
+    TestHarness.buildAndRun(flags, app_name, proj['moose_path'])
 
 def buildproj(args):
     proj = args.proj
     iscore = in_moose_core('./')
-    if proj['name'] is None and not iscore:
+    if proj['class'] is None and not iscore:
         print('no MOOSE app/project found here', file=sys.stderr)
         sys.exit(1)
 
     mpath = proj['moose_path']
     cmd = ['make', '-j', str(args.j)]
-    if iscore:
+    if proj['class'] is None:
         if args.unit:
             wd = os.path.join(mpath, 'unit')
         elif args.modules:
@@ -135,7 +189,7 @@ def update_libmesh(args):
         sys.exit(p.returncode)
 
 def newobj(args):
-    if args.proj['name'] is None:
+    if args.proj['class'] is None:
         print('no MOOSE app found here', file=sys.stderr)
         sys.exit(1)
 
@@ -189,18 +243,29 @@ def find_app(proj_path, depth=0):
         maxdepth = 10
         if depth < maxdepth:
             return find_app(os.path.join(proj_path, '..'), depth+1)
-        return None, None
+        return None, None, None
 
     with open(fpath, 'r') as f:
         body = f.read()
     r = re.compile(r'\s([A-Za-z0-9_]*)App::registerApps\(\s*\)\s*;')
     m = r.search(body)
+    if m is None:
+        return None, None, None
+
+    fpath = os.path.join(proj_path, 'Makefile')
+    if not os.path.exists(fpath):
+        return None, None, None
+
+    with open(fpath, 'r') as f:
+        body = f.read()
+
+    r = re.compile(r'\s*APPLICATION_NAME\s*:=\s*([a-zA-Z_-][a-zA-Z0-9_-]*)\s*')
+    m = r.search(body)
+    if m is None:
+        return None, None, None
 
     proj_path = os.path.abspath(proj_path)
-    if m is None:
-        return None, None
-
-    return m.group(1), proj_path
+    return m.group(1), m.group(1), proj_path
 
 def rename_internal(fname, objname):
     with open(fname, 'r') as f:
@@ -215,7 +280,7 @@ def rename_internal(fname, objname):
 def register_object(proj, name):
     r = re.compile(r'(App::registerObjects\( *Factory.*\)\s*{[^\n]*\n)')
 
-    appfile = os.path.join(proj['path'], 'src/base', proj['name']+'App.C')
+    appfile = os.path.join(proj['path'], 'src/base', proj['class']+'App.C')
     if not os.path.exists(appfile):
         print('app file "{}" not foundA)'.format(appfile), file=stderr)
         sys.exit(1)
