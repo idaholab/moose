@@ -110,7 +110,7 @@ MultiAppProjectionTransfer::assembleL2(EquationSystems & es, const std::string &
 
   // Get the meshfunction evaluations and the map that was stashed in the es.
   std::vector<Real> & final_evals = * es.parameters.get<std::vector<Real>*>("final_evals");
-  std::map<unsigned int, unsigned int> & element_map = * es.parameters.get<std::map<unsigned int, unsigned int>*>("element_map");
+  std::map<dof_id_type, unsigned int> & element_map = * es.parameters.get<std::map<dof_id_type, unsigned int>*>("element_map");
 
   // Setup system vectors and matrices.
   FEType fe_type = system.variable_type(0);
@@ -399,7 +399,7 @@ MultiAppProjectionTransfer::execute()
   }
 
   std::vector<std::vector<Real> > final_evals(_to_problems.size());
-  std::vector<std::map<unsigned int, unsigned int> > trimmed_element_maps(_to_problems.size());
+  std::vector<std::map<dof_id_type, unsigned int> > trimmed_element_maps(_to_problems.size());
 
   for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
   {
@@ -475,10 +475,10 @@ MultiAppProjectionTransfer::execute()
   for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
   {
     _to_es[i_to]->parameters.set<std::vector<Real>*>("final_evals") = & final_evals[i_to];
-    _to_es[i_to]->parameters.set<std::map<unsigned int, unsigned int>*>("element_map") = & trimmed_element_maps[i_to];
+    _to_es[i_to]->parameters.set<std::map<dof_id_type, unsigned int>*>("element_map") = & trimmed_element_maps[i_to];
     projectSolution(i_to);
     _to_es[i_to]->parameters.set<std::vector<Real>*>("final_evals") = NULL;
-    _to_es[i_to]->parameters.set<std::map<unsigned int, unsigned int>*>("element_map") = NULL;
+    _to_es[i_to]->parameters.set<std::map<dof_id_type, unsigned int>*>("element_map") = NULL;
   }
 
   for (unsigned int i = 0; i < _from_problems.size(); i++)
