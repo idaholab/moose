@@ -18,10 +18,10 @@ InputParameters validParams<PorousFlowAdvectiveFlux>()
 
 PorousFlowAdvectiveFlux::PorousFlowAdvectiveFlux(const InputParameters & parameters) :
     PorousFlowDarcyBase(parameters),
-    _mass_fractions(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac")),
-    _dmass_fractions_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_dvar")),
-    _relative_permeability(getMaterialProperty<std::vector<Real> >("PorousFlow_relative_permeability")),
-    _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_relative_permeability_dvar")),
+    _mass_fractions(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac_nodal")),
+    _dmass_fractions_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_nodal_dvar")),
+    _relative_permeability(getMaterialProperty<std::vector<Real> >("PorousFlow_relative_permeability_nodal")),
+    _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_relative_permeability_nodal_dvar")),
     _fluid_component(getParam<unsigned int>("fluid_component"))
 {
 }

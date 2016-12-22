@@ -7,6 +7,9 @@
 
 #include "PorousFlowHeatEnergy.h"
 
+// libmesh includes for qrule
+#include "libmesh/quadrature.h"
+
 template<>
 InputParameters validParams<PorousFlowHeatEnergy>()
 {
@@ -27,7 +30,7 @@ PorousFlowHeatEnergy::PorousFlowHeatEnergy(const InputParameters & parameters) :
     _phase_index(getParam<std::vector<unsigned int> >("phase")),
     _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
     _rock_energy_nodal(getMaterialProperty<Real>("PorousFlow_matrix_internal_energy_nodal")),
-    _fluid_density(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density") : nullptr),
+    _fluid_density(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_nodal") : nullptr),
     _fluid_saturation_nodal(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal") : nullptr),
     _energy_nodal(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_internal_energy_nodal") : nullptr)
 {
@@ -43,6 +46,8 @@ PorousFlowHeatEnergy::PorousFlowHeatEnergy(const InputParameters & parameters) :
 Real
 PorousFlowHeatEnergy::computeQpIntegral()
 {
+  mooseAssert(_current_elem->n_nodes() == _qrule->n_points(), "PorousFlow Postprocessors are currently only defined for number nodes = number quadpoints.");
+
   Real energy = 0.0;
   if (_include_porous_skeleton)
     energy += (1.0 - _porosity[_qp]) * _rock_energy_nodal[_qp];

@@ -198,10 +198,6 @@
   [./temperature]
     type = PorousFlowTemperature
   [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
-  [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     # bulk modulus = 1, poisson ratio = 0.2
@@ -221,20 +217,6 @@
     porepressure = p
     al = 1
     m = 0.5
-  [../]
-  [./massfrac]
-    type = PorousFlowMassFraction
-  [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1
-    bulk_modulus = 1.5
-    phase = 0
-  [../]
-  [./dens_all]
-    type = PorousFlowJoiner
-    include_old = true
-    material_property = PorousFlow_fluid_phase_density
   [../]
   [./p_eff]
     type = PorousFlowEffectiveFluidPressure

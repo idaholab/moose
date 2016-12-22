@@ -52,4 +52,41 @@
     input = s09.i
     exodiff = s09.e
   [../]
+
+  [./s10_left]
+    type = Exodiff
+    input = s10.i
+    cli_args = 'BCs/flux/boundary=left Outputs/file_base=s10_left'
+    exodiff = s10_left.e
+  [../]
+  [./s10_right]
+    type = Exodiff
+    input = s10.i
+    cli_args = 'BCs/flux/boundary=right Outputs/file_base=s10_right'
+    exodiff = s10_right.e
+  [../]
+  [./s10_top]
+    type = Exodiff
+    input = s10.i
+    cli_args = 'BCs/flux/boundary=top Outputs/file_base=s10_top'
+    exodiff = s10_top.e
+  [../]
+  [./s10_bottom]
+    type = Exodiff
+    input = s10.i
+    cli_args = 'BCs/flux/boundary=bottom Outputs/file_base=s10_bottom'
+    exodiff = s10_bottom.e
+  [../]
+  [./s10_front]
+    type = Exodiff
+    input = s10.i
+    cli_args = 'BCs/flux/boundary=front Outputs/file_base=s10_front'
+    exodiff = s10_front.e
+  [../]
+  [./s10_back]
+    type = Exodiff
+    input = s10.i
+    cli_args = 'BCs/flux/boundary=back Outputs/file_base=s10_back'
+    exodiff = s10_back.e
+  [../]
 []

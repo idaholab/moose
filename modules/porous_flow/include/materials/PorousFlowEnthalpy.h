@@ -16,7 +16,7 @@ template<>
 InputParameters validParams<PorousFlowEnthalpy>();
 
 /**
- * This material computes specific enthalpy (J/kg) for a fluid assuming
+ * This material computes specific enthalpy (J/kg) at the quadpoints for a fluid assuming
  * using the relationship
  * specify_enthalpy = specific_internal_energy + pressure/density
  */
@@ -26,69 +26,41 @@ public:
   PorousFlowEnthalpy(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /// enthalpy = internal_energy + porepressure / density * _pp_coeff
   const Real _pp_coeff;
 
-  /// Fluid energy at the nodes
-  const MaterialProperty<Real> & _energy_nodal;
+  /// Fluid energy at the quadpoints or nodes
+  const MaterialProperty<Real> & _energy;
 
-  /// d(Fluid energy at the nodes)/d(porepressure at the nodes)
-  const MaterialProperty<Real> & _denergy_nodal_dp;
+  /// d(Fluid energy at the quadpoints or nodes)/d(porepressure at the quadpoints or nodes)
+  const MaterialProperty<Real> & _denergy_dp;
 
-  /// d(Fluid energy at the nodes)/d(temperature at the nodes)
-  const MaterialProperty<Real> & _denergy_nodal_dt;
+  /// d(Fluid energy at the quadpoints or nodes)/d(temperature at the quadpoints or nodes)
+  const MaterialProperty<Real> & _denergy_dt;
 
-  /// Fluid energy at the quadpoints
-  const MaterialProperty<Real> & _energy_qp;
+  /// Fluid density at the quadpoints or nodes
+  const MaterialProperty<Real> & _density;
 
-  /// d(Fluid energy at the quadpoints)/d(porepressure at the quadpoints)
-  const MaterialProperty<Real> & _denergy_qp_dp;
+  /// d(Fluid density at the quadpoints or nodes)/d(porepressure at the quadpoints or nodes)
+  const MaterialProperty<Real> & _ddensity_dp;
 
-  /// d(Fluid energy at the quadpoints)/d(temperature at the quadpoints)
-  const MaterialProperty<Real> & _denergy_qp_dt;
+  /// d(Fluid density at the quadpoints or nodes)/d(temperature at the quadpoints or nodes)
+  const MaterialProperty<Real> & _ddensity_dt;
 
-  /// Fluid density at the nodes
-  const MaterialProperty<Real> & _density_nodal;
+  /// Fluid phase enthalpy at the qps or nodes
+  MaterialProperty<Real> & _enthalpy;
 
-  /// d(Fluid density at the nodes)/d(porepressure at the nodes)
-  const MaterialProperty<Real> & _ddensity_nodal_dp;
+  /// Old value of fluid phase enthalpy at the nodes
+  MaterialProperty<Real> * const _enthalpy_old;
 
-  /// d(Fluid density at the nodes)/d(temperature at the nodes)
-  const MaterialProperty<Real> & _ddensity_nodal_dt;
+  /// Derivative of fluid enthalpy wrt phase pore pressure at the qps or nodes
+  MaterialProperty<Real> & _denthalpy_dp;
 
-  /// Fluid density at the quadpoints
-  const MaterialProperty<Real> & _density_qp;
-
-  /// d(Fluid density at the quadpoints)/d(porepressure at the quadpoints)
-  const MaterialProperty<Real> & _ddensity_qp_dp;
-
-  /// d(Fluid density at the quadpoints)/d(temperature at the quadpoints)
-  const MaterialProperty<Real> & _ddensity_qp_dt;
-
-  /// Fluid phase enthalpy at the nodes
-  MaterialProperty<Real> & _enthalpy_nodal;
-
-  /// Old fluid phase enthalpy at the nodes
-  MaterialProperty<Real> & _enthalpy_nodal_old;
-
-  /// Derivative of fluid enthalpy wrt phase pore pressure at the nodes
-  MaterialProperty<Real> & _denthalpy_nodal_dp;
-
-  /// Derivative of fluid enthalpy wrt temperature at the nodes
-  MaterialProperty<Real> & _denthalpy_nodal_dt;
-
-  /// Fluid phase enthalpy at the qps
-  MaterialProperty<Real> & _enthalpy_qp;
-
-  /// Derivative of fluid enthalpy wrt phase pore pressure at the qps
-  MaterialProperty<Real> & _denthalpy_qp_dp;
-
-  /// Derivative of fluid enthalpy wrt temperature at the qps
-  MaterialProperty<Real> & _denthalpy_qp_dt;
+  /// Derivative of fluid enthalpy wrt temperature at the qps or nodes
+  MaterialProperty<Real> & _denthalpy_dt;
 };
 
 #endif // POROUSFLOWENTHALPY_H

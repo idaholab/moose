@@ -176,10 +176,6 @@
   [./temperature]
     type = PorousFlowTemperature
   [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
-  [../]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     bulk_modulus = 1
@@ -200,23 +196,6 @@
     al = 1
     m = 0.5
   [../]
-  [./massfrac]
-    type = PorousFlowMassFraction
-  [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1
-    bulk_modulus = 1
-    phase = 0
-  [../]
-  [./dens_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density
-  [../]
-  [./dens_all_at_quadpoints]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_qp
-  [../]
   [./p_eff]
     type = PorousFlowEffectiveFluidPressure
   [../]
@@ -234,15 +213,6 @@
     d = 5
     m = 2
     n = 7
-  [../]
-  [./relperm]
-    type = PorousFlowRelativePermeabilityCorey
-    n = 0 # unimportant in this fully-saturated situation
-    phase = 0
-  [../]
-  [./relperm_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability
   [../]
 []
 

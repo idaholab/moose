@@ -107,10 +107,6 @@
   [./temperature]
     type = PorousFlowTemperature
   [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
-  [../]
   [./ppss]
     type = PorousFlow2PhasePS
     phase0_porepressure = p0
@@ -128,7 +124,7 @@
   [../]
   [./kr_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability
+    material_property = PorousFlow_relative_permeability_qp
   [../]
 []
 

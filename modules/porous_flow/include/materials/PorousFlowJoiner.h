@@ -40,9 +40,8 @@ public:
   PorousFlowJoiner(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /// Name of (dummy) pressure variable
   const VariableName _pressure_variable_name;
@@ -61,9 +60,6 @@ protected:
 
   /// Whether to include old variables
   const bool _include_old;
-
-  /// If _at_qps=true then all quantities are computed at quadpoints, otherwise at the nodes
-  const bool _at_qps;
 
   /// Derivatives of porepressure variable wrt PorousFlow variables at the qps or nodes
   const MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_dvar;

@@ -14,7 +14,6 @@ InputParameters validParams<PorousFlowJoiner>()
 {
   InputParameters params = validParams<PorousFlowMaterialVectorBase>();
   params.addRequiredParam<std::string>("material_property", "The property that you want joined into a std::vector");
-  params.addParam<bool>("at_qps", false, "If true then join quadpoint properties, otherwise join nodal properties");
   params.addParam<bool>("include_old", false, "Join old properties into vectors as well as the current properties");
   params.addClassDescription("This Material forms a std::vector of properties, old properties (optionally), and derivatives, out of the individual phase properties");
   return params;
@@ -29,11 +28,10 @@ PorousFlowJoiner::PorousFlowJoiner(const InputParameters & parameters) :
     _mass_fraction_variable_name(_dictator.massFractionVariableNameDummy()),
     _pf_prop(getParam<std::string>("material_property")),
     _include_old(getParam<bool>("include_old")),
-    _at_qps(getParam<bool>("at_qps")),
 
-    _dporepressure_dvar(_at_qps ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar")),
-    _dsaturation_dvar(_at_qps ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar")),
-    _dtemperature_dvar(_at_qps ? getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_qp_dvar") : getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar")),
+    _dporepressure_dvar(!_nodal_material ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar")),
+    _dsaturation_dvar(!_nodal_material ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar")),
+    _dtemperature_dvar(!_nodal_material ? getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_qp_dvar") : getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar")),
 
     _property(declareProperty<std::vector<Real> >(_pf_prop)),
     _property_old(_include_old ? &declarePropertyOld<std::vector<Real> >(_pf_prop) : nullptr),
@@ -57,29 +55,34 @@ void
 PorousFlowJoiner::initQpStatefulProperties()
 {
   _property[_qp].resize(_num_phases);
-  _dproperty_dvar[_qp].resize(_num_phases);
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
-  {
     _property[_qp][ph] = (*_phase_property[ph])[_qp];
-    _dproperty_dvar[_qp][ph].resize(_num_var);
-  }
 }
 
 void
 PorousFlowJoiner::computeQpProperties()
 {
-  if (!_include_old)
-    initQpStatefulProperties();
+  initQpStatefulProperties();
 
+  _dproperty_dvar[_qp].resize(_num_phases);
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
-    _property[_qp][ph] = (*_phase_property[ph])[_qp];
+    _dproperty_dvar[_qp][ph].resize(_num_var);
     for (unsigned v = 0; v < _num_var; ++v)
     {
-      _dproperty_dvar[_qp][ph][v] = (*_dphase_property_dp[ph])[_qp] * _dporepressure_dvar[_qp][ph][v];
-      _dproperty_dvar[_qp][ph][v] += (*_dphase_property_ds[ph])[_qp] * _dsaturation_dvar[_qp][ph][v];
-      _dproperty_dvar[_qp][ph][v] += (*_dphase_property_dt[ph])[_qp] * _dtemperature_dvar[_qp][v];
+      // the "if" conditions in the following are because a nodal_material's derivatives might
+      // not have been defined.  If that is the case, then DerivativeMaterial passes back a
+      // MaterialProperty with zeroes (for the derivatives), but that property will be sized
+      // by the number of quadpoints in the element, which may be smaller than the number of
+      // nodes!
+      _dproperty_dvar[_qp][ph][v] = 0.0;
+      if ((*_dphase_property_dp[ph]).size() > _qp)
+        _dproperty_dvar[_qp][ph][v] += (*_dphase_property_dp[ph])[_qp] * _dporepressure_dvar[_qp][ph][v];
+      if ((*_dphase_property_ds[ph]).size() > _qp)
+        _dproperty_dvar[_qp][ph][v] += (*_dphase_property_ds[ph])[_qp] * _dsaturation_dvar[_qp][ph][v];
+      if ((*_dphase_property_dt[ph]).size() > _qp)
+        _dproperty_dvar[_qp][ph][v] += (*_dphase_property_dt[ph])[_qp] * _dtemperature_dvar[_qp][v];
     }
   }
 }
