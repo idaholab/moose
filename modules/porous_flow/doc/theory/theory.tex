@@ -64,7 +64,7 @@ Mass conservation for fluid species $\species$ is described by the continuity
 equation
 \begin{equation}
 0 = \frac{\partial M^{\species}}{\partial t} + M^{\species}\nabla\cdot{\mathbf
-  v}_{s} + \nabla\cdot \flux^{\species} - q^{\species} \ .  
+  v}_{s} + \nabla\cdot \flux^{\species} - q^{\species} \ .
 \label{mass.cons.sp.eqn}
 \end{equation}
 Here $M$ is the mass of fluid per volume of rock (measured in
@@ -99,16 +99,16 @@ over all phases present in the system:
 \begin{equation}
 M^{\species} =
 \phi\sum_{\phase}S_{\phase}\rho_{\phase}\massfrac_{\phase}^{\species}
-+ (1 - \phi)\rho^{R}A^{\species}
++ \textcolor{blue}{(1 - \phi)\rho^{R}A^{\species}}
 \label{eqn.msph}
 \end{equation}
 The solid's porosity is $\phi$.  $S_{\phase}$ is the saturation of
 phase $\phase$ (solid, liquid, gas, NAPL).  $\rho_{\phase}$ is the density of
 phase $\phase$.  $\massfrac_{\phase}^{\species}$ is the mass fraction
-of component $\species$ present in phase $\phase$.  The final term
+of component $\species$ present in phase $\phase$.  \textcolor{blue}{The final term
 represents fluid absorption into the porous-rock skeleton:
 $A^{\species}$ is the mass of absorbed species per mass of rock grain
-material.
+material.}
 
 The density $\rho_{\phase}$ is a function of pressure, mass fraction,
 and so on, as described by the equation of state used
@@ -226,12 +226,11 @@ P_{sat}(T) \ .
 \label{vap.p.eqn}
 \end{equation}
 Here $M_{w}$ is the molecular weight of water; $P_{c,l}=
-P_{c,l}(S_{l})\leq 0$ is the 
-capillary pressure --- the difference between aqueous (liquid water)
-and gas phase pressures --- a function of $S_{l}$; $\rho_{l}$ is the
-aqueous (liquid water) density; $R$ is the universal gas constant; $T$ is the
-temperature; $P_{sat}$ is the saturated vapour pressure of the bulk
-aqueous (liquid water) phase.}
+P_{c,l}(S_{l})\leq 0$ is the capillary pressure --- the difference
+between aqueous (liquid water) and gas phase pressures --- a function
+of $S_{l}$; $\rho_{l}$ is the aqueous (liquid water) density; $R$ is
+the universal gas constant; $T$ is the temperature; $P_{sat}$ is the
+saturated vapour pressure of the bulk aqueous (liquid water) phase.}
 \end{itemize}
 
 
@@ -324,27 +323,27 @@ solid are in local thermal equilibrium i.e. there is a single local
 temperature in all phases.   If this doesn't hold, one is also normally in the
   high-flow regime where the flow is non-Darcy as well.
 
-Sometimes a term is added
-that captures the thermal power due to volumetric expansion of the fluid, $K\beta
-T\nabla\cdot\darcyvel$, where $K$ is the bulk modulus of the fluid or 
-solid, $\beta$ is the thermal expansion coefficient, and $\darcyvel$
-is the Darcy velocity. This is not included in the Porous Flow module currently.
+Sometimes a term is added that captures the thermal power due to
+volumetric expansion of the fluid, $K\beta T\nabla\cdot\darcyvel$,
+where $K$ is the bulk modulus of the fluid or solid, $\beta$ is the
+thermal expansion coefficient, and $\darcyvel$ is the Darcy
+velocity. This is not included in the Porous Flow module currently.
 
 \subsection{Energy density: $\energydens$}
 
 The energy per unit volume is
 \begin{equation}
 \energydens = (1-\phi)\rho_{R}C_{R}T +
-\phi\sum_{\phase}S_{\phase}\rho_{\phase}\energydens_{\phase} 
-+ \sum_{\species}(1 -
-\phi)\rho^{R}\energydens_{\mathrm{abs\,}\species}A^{\species}
+\phi\sum_{\phase}S_{\phase}\rho_{\phase}\energydens_{\phase} +
+\textcolor{red}{\sum_{\species}(1 -
+  \phi)\rho^{R}\energydens_{\mathrm{abs\,}\species}A^{\species}}
 \label{en.per.vol.eqn}
 \end{equation}
 The notation is: porosity $\phi$; grain density $\rho_{R}$; specific
 heat capacity of rock $C_{R}$; temperature $T$; saturation of phase
 $S_{\phase}$ (solid, liquid, gas, NAPL); density of phase $\rho_{\phase}$;
-internal energy in phase $\energydens_{\phase}$; internal energy of
-absorbed species $\energydens_{\mathrm{abs\,}\species}$.
+internal energy in phase $\energydens_{\phase}$; \textcolor{red}{internal energy of
+absorbed species $\energydens_{\mathrm{abs\,}\species}$.}
 
 
 \subsection{Heat flux: $\flux^{T}$}
@@ -471,15 +470,17 @@ The notation is as follows.
   P_{\phase}$.  However, for multi-phase situations
   $P_{f}=\sum_{\phase}S_{\phase}P_{\phase}$ is also used.  \textcolor{red}{Yet other
   expressions involve Bishop's parameter.}
-\item $\alpha_{B}$ is the ``Biot coefficient''.   This obeys
+\item $\alpha_{B}$ is the ``Biot coefficient''.  This obeys
   $0\leq\alpha_{B}\leq 1$. For a multi-phase system, the Biot
-  coefficient is often chosen to be $\alpha_{B}=1$. The 
-Biot coefficient is interpreted physically by the following. If, by
-pumping fluid into a porous material, the $P_{f}$ porepressure is increased by
-$\Delta P_{f}$, and at the same time a mechanical external force applies an
-incremental pressure equaling $\alpha_{B}\Delta P_{f}$, then the volume of the porous
-solid remains static. (During this process, the porevolume and
-porosity will change, however, as quantified in \hyperref[por.sec]{Section~\ref*{por.sec}}.)
+  coefficient is often chosen to be $\alpha_{B}=1$. The Biot
+  coefficient is interpreted physically by the following. If, by
+  pumping fluid into a porous material, the $P_{f}$ porepressure is
+  increased by $\Delta P_{f}$, and at the same time a mechanical
+  external force applies an incremental pressure equaling
+  $\alpha_{B}\Delta P_{f}$, then the volume of the porous solid
+  remains static. (During this process, the porevolume and porosity
+  will change, however, as quantified in
+  \hyperref[por.sec]{Section~\ref*{por.sec}}.)
 \end{itemize}
 
 It is assumed that the elastic constitutive law reads
@@ -537,8 +538,7 @@ $\alpha_{B}\nabla_{j} P_{f}$ from MOOSE's stress.
 The first step in defining the chemistry is to choose a set of basis
 species  in the liquid phase, such that every other chemical species,
 including minerals (now all referred to as secondary species) can be
-expressed via combinations of these basis  species. 
-}
+expressed via combinations of these basis  species.}
 
 \textcolor{red}{
 Let $j$ index the basis species in the liquid phase, denoted by
@@ -601,13 +601,13 @@ $S_{\phase}$ is the phase saturation.  }
 The continuity equation is then
 \begin{equation}
 0 = \frac{\partial M^{j}}{\partial t} + \textcolor{red}{M^{j}\nabla\cdot{\mathbf
-  v}_{s}} + \nabla\cdot \flux^{j} - \textcolor{red}{q^{j}} \ .  
+  v}_{s}} + \nabla\cdot \flux^{j} - \textcolor{red}{q^{j}} \ .
 \label{chemistry_continuity}
 \end{equation}
 
 Here $\flux$ is the flux (a vector, measured
 mol.s$^{-1}$.L$^{-1}$), and $q^{j}$ is a source (measured in
-mol.L$^{-1}$.s$^{-1}$).  
+mol.L$^{-1}$.s$^{-1}$).
 
 \textcolor{red}{
 For minerals indexed by $m$ one has
@@ -651,10 +651,8 @@ write
 where the rate $I_{m}$ is positive for dissolution and negative for
 precipitation, $A_{m}$ is the specific reactive surface area per litre
 for mineral $m$, and the exponents $\theta$ and $\eta$ are specific to
-each 
-mineral reaction, but are often both taken to be unity. The rate
-constant $k_{m}$ (mole/(m$^{2}$ s)) is a function of temperature. 
-}
+each mineral reaction, but are often both taken to be unity. The rate
+constant $k_{m}$ (mole/(m$^{2}$ s)) is a function of temperature.  }
 
 \section{Notation}
 \label{ssec.notation}
@@ -979,13 +977,13 @@ In summary, the variables for this case can be the porepressure $P$,
 the temperature $T$, and the three displacements $u_{i}$.
 
 The following parameters depend, in principle, on the porepressure,
-temperature and (derivatives of) the displacements:
-porous-rock insitu permeability tensor $k_{ij}$; rock-grain density
-$\rho_{R}$; rock-grain specific heat capacity $C_{R}$; rock-grain
-thermal conductivity $\lambda^{R}$; fluid density $\rho$; 
-fluid viscosity $\mu$; fluid thermal conductivity $\lambda^{f}$; fluid
-specific heat capacity $c$.  All these can be coded
-into a suite of Materials, as described in \hyperref[eos]{Chapter~\ref*{eos}}.
+temperature and (derivatives of) the displacements: porous-rock insitu
+permeability tensor $k_{ij}$; rock-grain density $\rho_{R}$;
+rock-grain specific heat capacity $C_{R}$; rock-grain thermal
+conductivity $\lambda^{R}$; fluid density $\rho$; fluid viscosity
+$\mu$; fluid thermal conductivity $\lambda^{f}$; fluid specific heat
+capacity $c$.  All these can be coded into a suite of Materials, as
+described in \hyperref[eos]{Chapter~\ref*{eos}}.
 
 %\section{Use case: Two-phase single-component (water-steam)}
 
@@ -1020,8 +1018,8 @@ kg.m$^{-2}$.s$^{-1}$.  If applied to the heat equation, the function
 $f$ has units J.m$^{-2}$.s$^{-1}$.  These units are potentially
 modified if the extra building blocks enumerated below are used.
 
-The basic sink may be multiplied by a MOOSE Functions of 
-the pressure of a fluid phase {\em or} the temperature:
+The basic sink may be multiplied by a MOOSE Functions of the pressure
+of a fluid phase {\em or} the temperature:
 \begin{equation}
 s = f(t, x) \times g(P^{\beta}) \ \ \ \mbox{or}\ \ \ s = f(t, x)
 \times g(T) \ .
@@ -1372,7 +1370,7 @@ Here $K$ is the bulk modulus of the drained porous skeleton: $1/K
 \label{poro.evolve.eqn}
 \end{equation}
 where $\phi_{0}$ is the porosity at zero porepressure, zero elastic
-strain and zero temperature. Note this porosity can become negative. 
+strain and zero temperature. Note this porosity can become negative.
 
 The evolution of porosity is motivated further in the appendix
 \hyperref[chap.evol.por]{Chapter~\ref*{chap.evol.por}}.
@@ -1438,8 +1436,7 @@ version of the van-Genuchten expression is also offered, which is
 almost definitely indistinguishable experimentally from the original
 expression:
 \begin{equation}
-k_{\mathrm{r}} = 
-\left\{
+k_{\mathrm{r}} = \left\{
 \begin{array}{ll}
 \mbox{van Genuchten} & \mbox{ for } S_{\mathrm{eff}} < S_{c} \\
 \mbox{cubic} & \mbox{ for } S_{\mathrm{eff}} \geq S_{c} \ .
@@ -1504,12 +1501,228 @@ improved convergence.
 \section{Lumping and upwinding}
 
 The Porous Flow module employs fluid-mass and heat-energy lumping to
-the nodes, as well as full upwinding of the advective and diffusive
-flow terms.  This ensures far superior numerical convergence,
-especially in situations where mass-fractions of phases are close to
-disappearing.
+the nodes, as well as full upwinding of the advective flow terms.
+This ensures far superior numerical convergence, especially in
+situations where mass-fractions of phases are close to disappearing.
+
+\subsection{Lumping}
+
+Consider here just the fluid-flow equation, as the heat-energy
+equation is analogous.  The time-derivative term in
+\hyperref[mass.cons.sp.eqn]{Eqn~(\ref*{mass.cons.sp.eqn})} is discretised as
+\begin{equation}
+\psi \frac{M^{\species} - M^{\species}_{\mathrm{old}}}{\d t} \ .
+\label{lump.begin.eqn}
+\end{equation}
+Here $\psi$ is the test function that we are integrating against.  An
+alternative discretisation would be $\psi\phi(S\rho)'\dot{P}$ (in the
+single-phase situation), but Eqn~(\ref{lump.begin.eqn}) conserves mass
+more effectively than other alternatives.
+
+In the standard finite-element scheme, $M^{\species}$ and its
+individual parts (porosity, saturation, etc) are evaluated at each
+quadrature point.  However, in PorousFlow, everything in the time
+derivative is evaluated at the nodes.  Specifically, $M^{\species}$ at
+a node depends only on the independent variables at that node.  It has
+been shown in many papers that this lumping is advantageous for mass
+conservation and reduces spurious oscillations of the pressure around
+sharp fronts\footnote{MA Celia, ET Bouloutas and RL Zabra ``A general
+  mass-conservative numerical solution for the unsaturated flow
+  equation''  Water Resources Research 26 (1990) 1483--1496.}
+
+The cause of oscillations around sharp fronts, and how mass lumping
+removes the oscillations, can be illustrated through a simple example.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=9cm]{eg_richards_supg.eps}
+\caption{Two elements of length $L$.  Linear Lagrange shape/test
+  functions for each node are shown in red ($S_{0}$ for node 0,
+  $S_{1}$ for node 1, and $S_{2}$ for node 2).  Gravity acts in the
+  direction $-z$.  Gauss points are shown in green.}
+\label{eg_richards_supg.fig}
+\end{figure}
+
+Consider the situation in
+\hyperref[eg_richards_supg.fig]{Figure~\ref*{eg_richards_supg.fig}},
+and suppose that Node 2 has high potential, and that nodes 0 and 1 are
+at residual saturation where the relative permeability is zero.  Then
+fluid will flow from node 2 to node 1 (and then to node 0 in the next
+time step).  For simplicity, imagine that the fluid mass, $M$, is a linear
+function of the potential.  Then, up to constants, the discretised
+mass-conservation equation without mass lumping reads
+\begin{equation}
+\left(
+\begin{array}{ccc}
+2 & 1 & 0 \\
+1 & 4 & 1 \\
+0 & 1 & 2
+\end{array}
+\right)
+\left(
+\begin{array}{c}
+\dot{M}_{0} \\
+\dot{M}_{1} \\
+\dot{M}_{2}
+\end{array}
+\right)
+=
+\left(
+\begin{array}{c}
+0 \\
+1 \\
+-1
+\end{array}
+\right)
+\end{equation}
+The matrix on the LHS comes from performing the numerical integration
+of $M$ over the two elements.  Note that it is not diagonal
+because the integration over an element depends on the mass at
+both of its two nodes.  The RHS encodes that no fluid is flowing
+between nodes 0 and 1, but fluid is flowing from node 2 to node 1.
+
+The important point is the solution of these sets of equations is
+\begin{equation}
+\dot{M}_{0} < 0 \ .
+\end{equation}
+This means the finite element solution of the mass-conservation
+equation will be oscillatory around fronts.
+
+However, with mass lumping, the matrix in the above
+equation becomes diagonal, and the solution is $\dot{M}_{0} =
+0$.  Explicitly, the contribution to the residual at node $a$ is
+\begin{equation}
+\sum_{\mathrm{qp}}\psi_{a}^{\mathrm{qp}} \frac{M_{a}^{\species} -
+  M^{\species}_{a,\ \mathrm{old}}}{\d t} \ .
+\end{equation}
+where $M$ is evaluated at node $a$ using the independent (Nonlinear)
+variables evaluated at that node, and qp are the quadpoints.
+
+There is one small complication.  Porosity may be dependent on
+volumetric strain, which is dependent on the gradients of the
+displacement variables, which are evaluated at the quadpoints, not the
+nodes.  In this case, the porosity at node $a$ is assumed to be
+dependent on the volumetric strain evaluated at the closest quadpoint
+to the node.
+
+\subsection{Upwinding}
+
+Upwinding is necessary\footnote{Eg, see PS Huyakorn and GF Pinder ``A
+  new finite element technique for the solution of two-phase flow
+  through porous media'' Advances in Water Resources 1 (1978)
+  285--298.  See also V Dalen ``Simplified finite-element models for
+  reservoir flow problems'' SPEJ (Oct 1979) 333--343.  See also R
+  Helmig and R Huber ``Comparison of Galerkin-type discretization
+  techniques for two-phase flow in heterogeneous porous media''
+  Advances in Water Resources 21 (1998) 697--711.} in scenarios with
+nonlinear advection, such as the physics modelled by PorousFlow.  For
+multi-phase situations many upwinding schemes can lead to disaster as
+the algorithm attempts to withdraw fluid from a node where there is no
+fluid.  I believe that for situations where one phase disappears, or
+almost disappears, full upwinding is advisable, and hence PorousFlow
+always employs full upwinding.  It has the numerical disadvantage that
+it is not smooth (in contrast to the SUPG upwinding scheme\footnote{AN
+  Brooks and TJR Hughes ``Streamline upwind/Petrov-Galerkin
+  formulations for convection dominated flows with particular emphasis
+  on the incompressible Navier-Stokes equations'' Computer Methods in
+  Aplied Mechanics and Engineering 32 (1982) 199--259.  TJR Hughes and
+  M Mallet ``A new finite element formulation for computational fluid
+  dynamics: III. The generalized streamline operator for
+  multidimensional advective-diffusive systems'' Computer Methods in
+  Applied Mechanics and Engineering 58 (1986) 305--328.  TJR Hughes, M
+  Mallet and A Mizukami ``A new finite element formulation for
+  computational fluid dynamics: II. Beyond SUPG'' Computer Methods in
+  Applied Mechanics and Engineering 54 (1986) 341--355}, for
+instance), so that close to steady-state where the fluxes are zero,
+the upwind direction can oscillate, leading to nonconvergence, however
+this is dealt with by placing a cutoff on the upwinding in PorousFlow.
+The remainder of this section describes full upwinding for the
+single-phase unsaturated situation.  The multi-phase, multi-component
+scenario, and the advective term in the heat-flow equation are
+analogous.
+
+The weak form of the Darcy flux of
+\hyperref[darc.eqn]{Eqn~(\ref*{darc.eqn})} for a single element is
+\begin{equation}
+R_{a} = \int_{\mathrm{element}} \nabla_{i}\psi_{a}
+\frac{\rho k_{ij}\,k_{\mathrm{r}}}{\mu}(\nabla_{j}P - \rho
+g_{j})  \ .
+\end{equation}
+Here $\psi_{a}$ is the test function that we are integrating against,
+and $R_{a}$ is the contribution to the residual for this test
+function.  Define
+\begin{equation}
+m = \frac{\rho k_{\mathrm{r}}}{\mu} \ ,
+\end{equation}
+which is traditionally called the mobility.
+
+Upwinding is all a matter of choosing where in the element to evaluate
+$m$ in the above integral.  The sophisticated SUPG approach was
+designed to weight $m$ on the upstream side of the element.  Consider
+for a moment taking $m$ outside the integral:
+\begin{equation}
+\tilde{R}_{a} = m\int_{\mathrm{element}} \nabla_{i}\psi_{a}
+\kappa_{ij}(\nabla_{j}P - \rho
+g_{j}) = m I_{a} \ .
+\end{equation}
+$\tilde{R}$ is not exactly $R$, but note:
+\begin{itemize}
+\item the original $R_{a}$ is the mass flux flowing out of node $a$;
+\item so $I_{a}$ is thereby intepreted as a measure of fluid flow out of
+  node $a$.
+\end{itemize}
+This leads to the following definition of upwinding:
+\begin{equation}
+R_{a} \equiv m_{a}I_{a} \ \ \ \mbox{if}\ \ \ I_{a}\geq 0 \ .
+\end{equation}
+The nodes for which $I_{a}\geq 0$ are called ``upwind nodes'', since
+fluid is flowing from them to the ``downwind nodes''.  I think this
+approach was first introduced by Dalen\footnote{V Dalen ``Simplified
+  finite-element models for reservoir flow problems'' SPEJ (Oct 1979)
+  333--343} in 1979.
+
+The residual at the downwind nodes is determined by conserving mass.
+Specifically, let
+\begin{equation}
+I_{\mathrm{up}} = \sum_{I_{a}\geq 0}I_{a} \ \ \ \mbox{and}\ \ \
+I_{\mathrm{down}} = -\sum_{I_{a}<0} I_{a} \ .
+\end{equation}
+Then
+\begin{equation}
+R_{a} = I_{a}\frac{I_{\mathrm{up}}}{I_{\mathrm{down}}}
+\ \ \ \mbox{for}\ \ \ I_{a}<0 \ .
+\end{equation}
+Then $\sum_{a} R_{a} = 0$ as required by mass conservation within the
+element (which originates from $\sum_{a} \psi_{a} = 1$).
+
+The fully-upwind method is extremely
+advantageous to use if fluid saturations ever approach residual
+saturation (where $\kappa_{\mathrm{rel}}=0$) or zero density, for then
+the mobility is zero and it becomes impossible to withdraw fluid from
+such a node (in practice this may still happen due to precision loss
+or other related nasty artifacts that I will not describe here).
+
+Prescribed sinks, either from the boundary or from internal objects
+such as wellbores, are also fully-upwinded in PorousFlow since they
+also potentially suffer from phase-disappearence problems.
 
 \section{Preconditioners and linear solvers}
+
+MOOSE allows users to utilise the full power of the PETSc
+preconditioners and linear solvers.  The following choices have been
+found to be effective for various types of PorousFlow simulations.
+\begin{itemize}
+\item {\tt pc\_type = bjacobi, ksp\_type = bcgs}.
+\item {\tt pc\_type = bjacobi, ksp\_type = gmres}.
+\item {\tt pc\_type = asm, pc\_asm\_overlap = 2, sub\_pc\_type = lu,
+  sub\_pc\_factor\_shift\_type = NONZERO, 
+  ksp\_type = gmres}.
+\item {\tt pc\_type = asm, pc\_asm\_overlap = 2, sub\_pc\_type = lu,
+  sub\_pc\_factor\_shift\_type = NONZERO, 
+  ksp\_type = gmres} along with the following options {\tt
+  -ksp\_diagonal\_scale -ksp\_diagonal\_scale\_fix
+  -ksp\_gmres\_modifiedgramschmidt}.
+\end{itemize}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1658,7 +1871,11 @@ defined in LaForce et al (2014a).
 %\gamma_R &=& \frac{L^2 \pi }{q\left(\rho_1  C_1  - \rho_2  C_2 \right)}\label{eqn:gamma_R}
 %\end{eqnarray}
 %
-%\noindent where $L$ is length of the porous medium, $h$ is the vertical thickness of the porous medium, $q$ is volumetric injection rate, $T_i$ is initial reservoir temperature and $T_w$ is injection temperature at the well, which may be larger or smaller than the reservoir temperature. 
+%\noindent where $L$ is length of the porous medium, $h$ is the
+%vertical thickness of the porous medium, $q$ is volumetric injection
+%rate, $T_i$ is initial reservoir temperature and $T_w$ is injection
+%temperature at the well, which may be larger or smaller than the
+%reservoir temperature.
 
 The relative permeability of the phases are from one of the TOUGH2 models
 
@@ -1684,7 +1901,10 @@ k_{Tt}\frac{\partial^2 T_D}{\partial z^2} \to -U T_D.
 %&&U(t_D) = \sqrt{\frac{q K_{a}(\rho C)_{a}}{t_D \pi \phi_r L^2 h }}. \label{eqn:U_L}
 %\end{eqnarray}
 %
-%\noindent $(\rho C)_{a} = (1-\phi_a) \rho_a C_a +  \phi_a \rho_1 C_1 $.  The $C_j$ are the mass-based heat capacity of fluid 1, 2, or the adjacent formation rock, and $K_a$ is the saturated thermal conductivity of the adjacent formations. 
+%\noindent $(\rho C)_{a} = (1-\phi_a) \rho_a C_a +  \phi_a \rho_1 C_1
+%$.  The $C_j$ are the mass-based heat capacity of fluid 1, 2, or the
+%adjacent formation rock, and $K_a$ is the saturated thermal
+%conductivity of the adjacent formations.
 
 In this formulation the thermal properties of the reservoir and the
 adjacent formations may be different, but the over- and under-burden
@@ -1699,13 +1919,15 @@ heat diffusion vs a simulated solution with the heat sink.
 This solution will benchmark the code against the semi-analytical solutions in LaForce et al (AWR, 73 (2014) $242 - 253$), which takes the saturation and temperature solution from above and also calculates pressure and stress in the reservoir.  The semi-analytical solutions are strictly forward-coupled, so that pressure does not impact the saturation or temperature profiles, and stress has no impact on pressure, saturation or temperature. In that work, pressure and stress are calculated at a given snapshot in time, $t_D^*$. This gives pressure and stress equations with no time dependence:
 
 \begin{eqnarray}
-&&\frac{\partial P}{\partial r_D} = \frac{q}{4\pi h k r_D}  \frac{1}{M}\label{eqn:P_again} 
+&&\frac{\partial P}{\partial r_D} = \frac{q}{4\pi h k r_D}
+  \frac{1}{M}\label{eqn:P_again}
 \end{eqnarray}
 
-\noindent where $M$ is the mobility of the overall fluid composition at $r_D$.   
+\noindent where $M$ is the mobility of the overall fluid composition
+at $r_D$.
 
 The displacement $u$, of the porous medium at a fixed time is given by
-{\bf Note: Notation may not be consistent with the above!!}: 
+{\bf Note: Notation may not be consistent with the above!!}:
 
 \begin{eqnarray}
 &&\frac{d}{d \xi}\left(\frac{1}{\xi}\frac{d}{d \xi}(\xi u_D)\right) = \frac{\partial T_{D2}}{\partial \xi}+
@@ -1716,7 +1938,8 @@ The displacement $u$, of the porous medium at a fixed time is given by
 
 %\begin{eqnarray}
 %P_D & = & \frac{(P- P_{o})(1-\nu)}{\alpha T_r E}\\
-%T_{D2} & = & \begin{cases} T_{D1}, & \mbox{if } T_r \leq 0\vspace{0.25cm} \label{eqn:TD2}\\ 
+%T_{D2} & = & \begin{cases} T_{D1}, & \mbox{if } T_r \leq
+%0\vspace{0.25cm} \label{eqn:TD2}\\
 %-T_{D1}, &  \mbox{if } T_r > 0 \end{cases}\\
 %u_D & = & \frac{u(1-\nu)}{\alpha T_r r_w (1+\nu)}\\
 %\epsilon_{D,j} & = & \frac{\epsilon(1-\nu)}{\alpha T_r (1+\nu)}\\
@@ -1724,7 +1947,24 @@ The displacement $u$, of the porous medium at a fixed time is given by
 %\xi & = & \frac{r}{r_w}
 %\end{eqnarray}
 
-%\noindent where $\nu$ is the drained Poisson ratio, $E$ is the drained Young's modulus of the rock, $\alpha$ is the Biot pore-pressure coefficient (coefficient of linear thermal expansion), $P_o$ is the original pore pressure in the reservoir and $r_w$ is the well radius.  $T_r = T_i-T_w$ is the relative temperature and the dimensionless temperature is re-defined so that the injection temperature is -1.0 when cold fluid is injected ($T_r>0$) and +1.0 when hot fluid is injected ($T_r\leq 0$).  $\xi$ is a new dimensionless radial distance that is convenient for the stress/strain equations.  The length of the domain  $\xi_1=L/r_w$ must be the same as the length of the temperature and pressure domain. Strain is denoted by $\epsilon_j$ and $\sigma_j$ is stress, where $j$ can denote either a radial ($j=r$) or tangential ($j=\Theta$) variable.   Similarly $\epsilon_{D,j}$ and $\sigma_{D,j}$ denote dimensionless strain and stress, where $j$ can denote either the dimensionless radial ($j=\xi$) or tangential ($j=\theta$) variable.   $\sigma_r^e=\sigma_r + P$ is the effective radial stress.  
+%\noindent where $\nu$ is the drained Poisson ratio, $E$ is the
+%drained Young's modulus of the rock, $\alpha$ is the Biot
+%pore-pressure coefficient (coefficient of linear thermal expansion),
+%$P_o$ is the original pore pressure in the reservoir and $r_w$ is the
+%well radius.  $T_r = T_i-T_w$ is the relative temperature and the
+%dimensionless temperature is re-defined so that the injection
+%temperature is -1.0 when cold fluid is injected ($T_r>0$) and +1.0
+%when hot fluid is injected ($T_r\leq 0$).  $\xi$ is a new
+%dimensionless radial distance that is convenient for the
+%stress/strain equations.  The length of the domain  $\xi_1=L/r_w$
+%must be the same as the length of the temperature and pressure
+%domain. Strain is denoted by $\epsilon_j$ and $\sigma_j$ is stress,
+%where $j$ can denote either a radial ($j=r$) or tangential
+%($j=\Theta$) variable.   Similarly $\epsilon_{D,j}$ and
+%$\sigma_{D,j}$ denote dimensionless strain and stress, where $j$ can
+%denote either the dimensionless radial ($j=\xi$) or tangential
+%($j=\theta$) variable.   $\sigma_r^e=\sigma_r + P$ is the effective
+%radial stress.
 
 In these equations stresses are defined as positive if they are tensile and negative if they are compressive. The stress at the wall of the well will have equal magnitude as the fluid pressure, but opposite sign so that at the wellbore the effective radial stress is always zero.  These equations can be solved analytically on a finite reservoir domain for either zero stress or zero displacement outer boundary conditions.
 
@@ -1780,9 +2020,9 @@ $\Delta V_{\mathrm{f}}/V_{\mathrm{f}}$ must be derived.
 
 Assuming linearity
 \begin{equation}
-\frac{\Delta V_{\mathrm{f}}}{V_{\mathrm{f}}} = A_{ij} 
-(\Delta\sigma_{ij}^{\mathrm{tot}} + B \delta_{ij}\Delta P_{\mathrm{f}})
-\ .
+\frac{\Delta V_{\mathrm{f}}}{V_{\mathrm{f}}} = A_{ij}
+(\Delta\sigma_{ij}^{\mathrm{tot}} + B \delta_{ij}\Delta
+P_{\mathrm{f}}) \ .
 \label{eqn.deltavf}
 \end{equation}
 The Betti-Maxwell reciprocal theorem yields $A_{ij}$ and $B$, as is
@@ -1796,15 +2036,14 @@ So during some deformation that takes $\mechpressure$ from
 $\mechpressure^{i}$ to $\mechpressure^{f}$, and $P_{\mathrm{f}}$ from
 $P_{\mathrm{f}}^{i}$ to $P_{\mathrm{f}}^{f}$, the total work is
 \begin{eqnarray}
-W & = & -\int \mechpressure\d V + \int P_{\mathrm{f}}\d V_{\mathrm{f}} \ , \nonumber \\
- & = &
+W & = & -\int \mechpressure\d V + \int P_{\mathrm{f}}\d V_{\mathrm{f}}
+\ , \nonumber \\ & = &
 \frac{V}{K}\int_{\mechpressure^{i}}^{\mechpressure^{f}}\mechpressure
-\d \mechpressure 
-- \frac{V{\alpha_{B}}}{K}\int_{P_{\mathrm{f}}^{i}}^{P_{\mathrm{f}}^{f}}\mechpressure
-\d P_{\mathrm{f}} 
-+ V_{\mathrm{f}}A_{ii}\int_{\mechpressure^{i}}^{\mechpressure^{f}}P_{\mathrm{f}}
-\d \mechpressure 
-+
+\d \mechpressure -
+\frac{V{\alpha_{B}}}{K}\int_{P_{\mathrm{f}}^{i}}^{P_{\mathrm{f}}^{f}}\mechpressure
+\d P_{\mathrm{f}} +
+V_{\mathrm{f}}A_{ii}\int_{\mechpressure^{i}}^{\mechpressure^{f}}P_{\mathrm{f}}
+\d \mechpressure +
 V_{\mathrm{f}}A_{ii}B\int_{P_{\mathrm{f}}^{i}}^{P_{\mathrm{f}}^{f}}
 P_{\mathrm{f}} \d P_{\mathrm{f}} \ .
 \end{eqnarray}
