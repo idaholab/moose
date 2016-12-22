@@ -32,7 +32,7 @@
   [./electric]
     type = HeatConduction
     variable = elec
-    diffusion_coefficient_name = electrical_conductivity
+    diffusion_coefficient = electrical_conductivity
   [../]
 []
 

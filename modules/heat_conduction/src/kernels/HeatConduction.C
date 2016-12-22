@@ -13,10 +13,10 @@ InputParameters validParams<HeatConductionKernel>()
 {
   InputParameters params = validParams<Diffusion>();
   params.addClassDescription("Computes residual/Jacobian contribution for $(k \\nabla T, \\nabla \\psi)$ term.");
-  params.addParam<MaterialPropertyName>("diffusion_coefficient_name",
+  params.addParam<MaterialPropertyName>("diffusion_coefficient",
                                         "thermal_conductivity",
                                         "Property name of the diffusivity (Default: thermal_conductivity)");
-  params.addParam<MaterialPropertyName>("diffusion_coefficient_dT_name",
+  params.addParam<MaterialPropertyName>("diffusion_coefficient_dT",
                                         "thermal_conductivity_dT",
                                         "Property name of the derivative of the diffusivity with respect "
                                         "to the variable (Default: thermal_conductivity_dT)");
@@ -26,9 +26,9 @@ InputParameters validParams<HeatConductionKernel>()
 
 HeatConductionKernel::HeatConductionKernel(const InputParameters & parameters) :
     Diffusion(parameters),
-    _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient_name")),
-    _diffusion_coefficient_dT(hasMaterialProperty<Real>("diffusion_coefficient_dT_name") ?
-                              &getMaterialProperty<Real>("diffusion_coefficient_dT_name") : NULL)
+    _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient")),
+    _diffusion_coefficient_dT(hasMaterialProperty<Real>("diffusion_coefficient_dT") ?
+                              &getMaterialProperty<Real>("diffusion_coefficient_dT") : NULL)
 {
 }
 

@@ -17,7 +17,7 @@ InputParameters validParams<HomogenizedThermalConductivity>()
   params.addCoupledVar("temp_z", "solution in z");
   params.addRequiredRangeCheckedParam<unsigned int>("component", "component < 3", "An integer corresponding to the direction this pp acts in (0 for x, 1 for y, 2 for z)");
   params.addParam<Real>("scale_factor", 1, "Scale factor");
-  params.addParam<MaterialPropertyName>("diffusion_coefficient_name","thermal_conductivity", "Property name of the diffusivity (Default: thermal_conductivity)");
+  params.addParam<MaterialPropertyName>("diffusion_coefficient", "thermal_conductivity", "Property name of the diffusivity (Default: thermal_conductivity)");
   return params;
 }
 
@@ -27,7 +27,7 @@ HomogenizedThermalConductivity::HomogenizedThermalConductivity(const InputParame
     _grad_temp_y(_subproblem.mesh().dimension() >= 2 ? coupledGradient("temp_y") : _grad_zero),
     _grad_temp_z(_subproblem.mesh().dimension() == 3 ? coupledGradient("temp_z") : _grad_zero),
     _component(getParam<unsigned int>("component")),
-    _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient_name")),
+    _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient")),
     _scale(getParam<Real>("scale_factor"))
 {
 }
