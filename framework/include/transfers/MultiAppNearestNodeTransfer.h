@@ -86,8 +86,8 @@ protected:
   bool & _neighbors_cached;
   std::vector< std::vector<unsigned int> > & _cached_froms;
   std::vector< std::vector<dof_id_type> > & _cached_dof_ids;
-  std::map<unsigned int, unsigned int> & _cached_from_inds;
-  std::map<unsigned int, unsigned int> & _cached_qp_inds;
+  std::map<dof_id_type, unsigned int> & _cached_from_inds;
+  std::map<dof_id_type, unsigned int> & _cached_qp_inds;
 };
 
 #endif /* MULTIAPPNEARESTNODETRANSFER_H */
