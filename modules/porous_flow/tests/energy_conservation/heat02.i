@@ -56,49 +56,54 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
+    at_nodes = true
     temperature = temp
-  [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
+    at_nodes = true
     porosity = 0.1
   [../]
   [./rock_heat]
     type = PorousFlowMatrixInternalEnergy
+    at_nodes = true
     specific_heat_capacity = 2.2
     density = 0.5
   [../]
   [./ppss]
     type = PorousFlow1PhaseP_VG
+    at_nodes = true
     porepressure = pp
     al = 1
     m = 0.5
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
+    at_nodes = true
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1
     bulk_modulus = 1
     phase = 0
   [../]
   [./dens_all]
     type = PorousFlowJoiner
-    include_old = true
-    material_property = PorousFlow_fluid_phase_density
+    include_old = false
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./water_heat]
     type = PorousFlowInternalEnergyIdeal
+    at_nodes = true
     specific_heat_capacity = 1.3
     phase = 0
   [../]
   [./internal_energy_fluids]
     type = PorousFlowJoiner
-    include_old = true
+    include_old = false
+    at_nodes = true
     material_property = PorousFlow_fluid_phase_internal_energy_nodal
   [../]
 []

@@ -28,14 +28,14 @@ public:
   PorousFlow2PhasePP(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /**
    * Assemble std::vectors of porepressure and saturation at the nodes
-   * and quadpoints
+   * and quadpoints, and return the capillary pressure
    */
-  void buildQpPPSS();
+  Real buildQpPPSS();
 
   /**
    * Effective saturation as a function of porepressure (a negative quantity).
@@ -67,11 +67,8 @@ protected:
    */
   virtual Real d2EffectiveSaturation_dP2(Real pressure) const;
 
-  /// Nodal value of porepressure of the zero phase (eg, the water phase)
-  const VariableValue & _phase0_porepressure_nodal;
-
-  /// Quadpoint value of porepressure of the zero phase (eg, the water phase)
-  const VariableValue & _phase0_porepressure_qp;
+  /// Nodal or quadpoint value of porepressure of the zero phase (eg, the water phase)
+  const VariableValue & _phase0_porepressure;
 
   /// Gradient(phase0_porepressure) at the qps
   const VariableGradient & _phase0_gradp_qp;
@@ -82,11 +79,8 @@ protected:
   /// PorousFlow variable number of the phase0 porepressure
   const unsigned int _p0var;
 
-  /// Nodal value of porepressure of the one phase (eg, the gas phase)
-  const VariableValue & _phase1_porepressure_nodal;
-
-  /// Quadpoint value of porepressure of the one phase (eg, the gas phase)
-  const VariableValue & _phase1_porepressure_qp;
+  /// Nodal or quadpoint value of porepressure of the one phase (eg, the gas phase)
+  const VariableValue & _phase1_porepressure;
 
   /// Gradient(phase1_porepressure) at the qps
   const VariableGradient & _phase1_gradp_qp;

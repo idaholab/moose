@@ -22,30 +22,25 @@ PorousFlowDensityConstBulk::PorousFlowDensityConstBulk(const InputParameters & p
 
     _dens0(getParam<Real>("density_P0")),
     _bulk(getParam<Real>("bulk_modulus")),
-    _density_nodal(declareProperty<Real>("PorousFlow_fluid_phase_density" + _phase)),
-    _density_nodal_old(declarePropertyOld<Real>("PorousFlow_fluid_phase_density" + _phase)),
-    _ddensity_nodal_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density" + _phase, _pressure_variable_name)),
-    _density_qp(declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + _phase)),
-    _ddensity_qp_dp(declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase, _pressure_variable_name))
+    _density(_nodal_material ? declareProperty<Real>("PorousFlow_fluid_phase_density_nodal" + _phase) : declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + _phase)),
+    _density_old(_nodal_material ? &declarePropertyOld<Real>("PorousFlow_fluid_phase_density_nodal" + _phase) : nullptr),
+    _ddensity_dp(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" + _phase, _pressure_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase, _pressure_variable_name)),
+    _ddensity_dt(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" + _phase, _temperature_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase, _temperature_variable_name))
 {
 }
 
 void
 PorousFlowDensityConstBulk::initQpStatefulProperties()
 {
-  _density_nodal[_qp] = density(_porepressure_nodal[_qp][_phase_num]);
+  _density[_qp] = density(_porepressure[_qp][_phase_num]);
 }
 
 void
 PorousFlowDensityConstBulk::computeQpProperties()
 {
-  /// Density and derivatives wrt pressure at the nodes
-  _density_nodal[_qp] = density(_porepressure_nodal[_qp][_phase_num]);
-  _ddensity_nodal_dp[_qp] = dDensity_dP(_porepressure_nodal[_qp][_phase_num]);
-
-  /// Density and derivatives wrt pressure at the qps
-  _density_qp[_qp] = density(_porepressure_qp[_qp][_phase_num]);
-  _ddensity_qp_dp[_qp] = dDensity_dP(_porepressure_qp[_qp][_phase_num]);
+  _density[_qp] = density(_porepressure[_qp][_phase_num]);
+  _ddensity_dp[_qp] = dDensity_dP(_porepressure[_qp][_phase_num]);
+  _ddensity_dt[_qp] = 0.0;
 }
 
 Real

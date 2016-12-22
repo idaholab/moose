@@ -48,14 +48,12 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
+    at_nodes = true
     temperature = temp
-  [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
+    at_nodes = true
     porosity = 0.1
   [../]
   [./rock_heat]

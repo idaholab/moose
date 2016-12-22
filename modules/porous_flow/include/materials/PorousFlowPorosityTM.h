@@ -51,17 +51,11 @@ protected:
   /// d(strain)/(dvar)
   const MaterialProperty<std::vector<RealGradient> > & _dvol_strain_qp_dvar;
 
-  /// nodal temperature
-  const MaterialProperty<Real> & _temperature_nodal;
+  /// temperature at quadpoints or nodes
+  const MaterialProperty<Real> & _temperature;
 
-  /// d(nodal temperature)/(d porflow variable)
-  const MaterialProperty<std::vector<Real> > & _dtemperature_nodal_dvar;
-
-  /// qp temperature
-  const MaterialProperty<Real> & _temperature_qp;
-
-  /// d(qp temperature)/(d porflow variable)
-  const MaterialProperty<std::vector<Real> > & _dtemperature_qp_dvar;
+  /// d(temperature)/(d porflow variable)
+  const MaterialProperty<std::vector<Real> > & _dtemperature_dvar;
 };
 
 #endif //POROUSFLOWPOROSITYTM_H

@@ -48,9 +48,10 @@
     type = PorousFlowTemperature
     temperature = temp
   [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
+  [./temperature_nodal]
+    type = PorousFlowTemperature
+    at_nodes = true
+    temperature = temp
   [../]
   [./thermal_conductivity_irrelevant]
     type = PorousFlowThermalConductivityIdeal

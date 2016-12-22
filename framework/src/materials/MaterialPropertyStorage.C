@@ -402,6 +402,16 @@ MaterialPropertyStorage::getPropertyId (const std::string & prop_name)
 }
 
 unsigned int
+MaterialPropertyStorage::retrievePropertyId (const std::string & prop_name) const
+{
+  std::map<std::string, unsigned int>::const_iterator it = _prop_ids.find(prop_name);
+  if (it == _prop_ids.end())
+    mooseError("MaterialPropertyStorage: property " << prop_name << " is not yet declared");
+  else
+    return it->second;
+}
+
+unsigned int
 MaterialPropertyStorage::addPropertyId (const std::string & prop_name)
 {
   std::map<std::string, unsigned int>::iterator it = _prop_ids.find(prop_name);

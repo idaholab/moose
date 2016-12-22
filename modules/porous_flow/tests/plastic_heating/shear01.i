@@ -95,16 +95,14 @@
     specific_heat_capacity = 2
     density = 2
   [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
-  [../]
   [./temp]
     type = PorousFlowTemperature
+    at_nodes = true
     temperature = temperature
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
+    at_nodes = true
     porosity = 0.7
   [../]
   [./phe]

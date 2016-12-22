@@ -46,13 +46,10 @@
 []
 
 [Materials]
-  [./temperature]
+  [./temperature_nodal]
     type = PorousFlowTemperature
+    at_nodes = true
     temperature = temp
-  [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
   [../]
 []
 

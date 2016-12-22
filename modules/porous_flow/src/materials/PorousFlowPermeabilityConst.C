@@ -26,8 +26,8 @@ void
 PorousFlowPermeabilityConst::computeQpProperties()
 {
   _permeability_qp[_qp] = _input_permeability;
-  _dpermeability_qp_dvar[_qp].resize(_num_var, RealTensorValue());
+  _dpermeability_qp_dvar[_qp].assign(_num_var, RealTensorValue());
   _dpermeability_qp_dgradvar[_qp].resize(LIBMESH_DIM);
   for (unsigned i = 0; i < LIBMESH_DIM; ++i)
-    _dpermeability_qp_dgradvar[_qp][i].resize(_num_var, RealTensorValue());
+    _dpermeability_qp_dgradvar[_qp][i].assign(_num_var, RealTensorValue());
 }
