@@ -50,38 +50,35 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-  [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
+    at_nodes = true
   [../]
   [./ppss]
     type = PorousFlow1PhaseP_VG
+    at_nodes = true
     porepressure = pp
     al = 1.1
     m = 0.5
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
+    at_nodes = true
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1.1
     bulk_modulus = 1.3
     phase = 0
   [../]
   [./dens_all]
     type = PorousFlowJoiner
+    at_nodes = true
     include_old = true
-    material_property = PorousFlow_fluid_phase_density
-  [../]
-  [./dens_all_at_quadpoints]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_qp
-    at_qps = true
+    material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
+    at_nodes = true
     porosity = 0.1
   [../]
   [./permeability]
@@ -90,21 +87,25 @@
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityCorey
+    at_nodes = true
     n = 2
     phase = 0
   [../]
   [./relperm_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability
+    at_nodes = true
+    material_property = PorousFlow_relative_permeability_nodal
   [../]
   [./visc0]
     type = PorousFlowViscosityConst
+    at_nodes = true
     viscosity = 1.1
     phase = 0
   [../]
   [./visc_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
 []
 

@@ -22,14 +22,12 @@ InputParameters validParams<PorousFlow2PhasePS>()
 PorousFlow2PhasePS::PorousFlow2PhasePS(const InputParameters & parameters) :
     PorousFlowVariableBase(parameters),
 
-    _phase0_porepressure_nodal(coupledNodalValue("phase0_porepressure")),
-    _phase0_porepressure_qp(coupledValue("phase0_porepressure")),
+    _phase0_porepressure(_nodal_material ? coupledNodalValue("phase0_porepressure") : coupledValue("phase0_porepressure")),
     _phase0_gradp_qp(coupledGradient("phase0_porepressure")),
     _phase0_porepressure_varnum(coupled("phase0_porepressure")),
     _pvar(_dictator.isPorousFlowVariable(_phase0_porepressure_varnum) ? _dictator.porousFlowVariableNum(_phase0_porepressure_varnum) : 0),
 
-    _phase1_saturation_nodal(coupledNodalValue("phase1_saturation")),
-    _phase1_saturation_qp(coupledValue("phase1_saturation")),
+    _phase1_saturation(_nodal_material ? coupledNodalValue("phase1_saturation") : coupledValue("phase1_saturation")),
     _phase1_grads_qp(coupledGradient("phase1_saturation")),
     _phase1_saturation_varnum(coupled("phase1_saturation")),
     _svar(_dictator.isPorousFlowVariable(_phase1_saturation_varnum) ? _dictator.porousFlowVariableNum(_phase1_saturation_varnum) : 0),
@@ -46,13 +44,13 @@ void
 PorousFlow2PhasePS::initQpStatefulProperties()
 {
   PorousFlowVariableBase::initQpStatefulProperties();
-
-   buildQpPPSS();
+  buildQpPPSS();
 }
 
 void
 PorousFlow2PhasePS::computeQpProperties()
 {
+  // size stuff correctly and prepare the derivative matrices with zeroes
   PorousFlowVariableBase::computeQpProperties();
 
   buildQpPPSS();
@@ -63,62 +61,51 @@ PorousFlow2PhasePS::computeQpProperties()
     // _phase0_porepressure is a PorousFlow variable
     for (unsigned phase = 0; phase < _num_phases; ++phase)
     {
-      _dporepressure_nodal_dvar[_qp][phase][_pvar] = 1.0;
-      _dporepressure_qp_dvar[_qp][phase][_pvar] = 1.0;
-      _dgradp_qp_dgradv[_qp][phase][_pvar] = 1.0;
+      _dporepressure_dvar[_qp][phase][_pvar] = 1.0;
+      if (!_nodal_material)
+        (*_dgradp_qp_dgradv)[_qp][phase][_pvar] = 1.0;
     }
   }
-
-  // Calculate the capillary pressure and derivatives wrt saturation
-  const Real seff_nodal = effectiveSaturation(_phase1_saturation_nodal[_node_number[_qp]]);
-  const Real dpc_nodal = dCapillaryPressure_dS(seff_nodal) * _dseff_ds;
-
-  const Real seff_qp = effectiveSaturation(_phase1_saturation_qp[_qp]);
-  const Real dpc_qp = dCapillaryPressure_dS(seff_qp) * _dseff_ds;
-  const Real d2pc_qp = d2CapillaryPressure_dS2(seff_qp) * _dseff_ds * _dseff_ds;
 
   // _saturation is only dependent on _phase1_saturation, and its derivative is +/- 1
   if (_dictator.isPorousFlowVariable(_phase1_saturation_varnum))
   {
     // _phase1_saturation is a porflow variable
-    _dsaturation_nodal_dvar[_qp][0][_svar] = -1.0;
-    _dsaturation_nodal_dvar[_qp][1][_svar] = 1.0;
-    _dsaturation_qp_dvar[_qp][0][_svar] = -1.0;
-    _dsaturation_qp_dvar[_qp][1][_svar] = 1.0;
-    _dgrads_qp_dgradv[_qp][0][_svar] = -1.0;
-    _dgrads_qp_dgradv[_qp][1][_svar] = 1.0;
-
     // _phase1_porepressure depends on saturation through the capillary pressure function
-    _dporepressure_nodal_dvar[_qp][1][_svar] = dpc_nodal;
-    _dporepressure_qp_dvar[_qp][1][_svar] = dpc_qp;
-    _dgradp_qp_dv[_qp][1][_svar] = d2pc_qp * _grads_qp[_qp][1];
-    _dgradp_qp_dgradv[_qp][1][_svar] = dpc_qp;
+    _dsaturation_dvar[_qp][0][_svar] = -1.0;
+    _dsaturation_dvar[_qp][1][_svar] = 1.0;
+    const Real seff = effectiveSaturation(_phase1_saturation[_qp]);
+    const Real dpc = dCapillaryPressure_dS(seff) * _dseff_ds;
+    _dporepressure_dvar[_qp][1][_svar] = dpc;
+
+    if (!_nodal_material)
+    {
+      (*_dgrads_qp_dgradv)[_qp][0][_svar] = -1.0;
+      (*_dgrads_qp_dgradv)[_qp][1][_svar] = 1.0;
+      const Real d2pc_qp = d2CapillaryPressure_dS2(seff) * _dseff_ds * _dseff_ds;
+      (*_dgradp_qp_dv)[_qp][1][_svar] = d2pc_qp * (*_grads_qp)[_qp][1];
+      (*_dgradp_qp_dgradv)[_qp][1][_svar] = dpc;
+    }
   }
 }
 
 void
 PorousFlow2PhasePS::buildQpPPSS()
 {
-  _saturation_nodal[_qp][0] = 1.0 - _phase1_saturation_nodal[_node_number[_qp]];
-  _saturation_nodal[_qp][1] = _phase1_saturation_nodal[_node_number[_qp]];
-  _saturation_qp[_qp][0] = 1.0 - _phase1_saturation_qp[_qp];
-  _saturation_qp[_qp][1] = _phase1_saturation_qp[_qp];
-  _grads_qp[_qp][0] = -_phase1_grads_qp[_qp];
-  _grads_qp[_qp][1] = _phase1_grads_qp[_qp];
-
-  const Real seff_nodal = effectiveSaturation(_phase1_saturation_nodal[_node_number[_qp]]);
-  const Real pc_nodal = capillaryPressure(seff_nodal);
-
-  const Real seff_qp = effectiveSaturation(_phase1_saturation_qp[_qp]);
-  const Real pc_qp = capillaryPressure(seff_qp);
-  const Real dpc_qp = dCapillaryPressure_dS(seff_qp) * _dseff_ds;
-
-  _porepressure_nodal[_qp][0] = _phase0_porepressure_nodal[_node_number[_qp]];
-  _porepressure_nodal[_qp][1] = _phase0_porepressure_nodal[_node_number[_qp]] + pc_nodal;
-  _porepressure_qp[_qp][0] = _phase0_porepressure_qp[_qp];
-  _porepressure_qp[_qp][1] = _phase0_porepressure_qp[_qp] + pc_qp;
-  _gradp_qp[_qp][0] = _phase0_gradp_qp[_qp];
-  _gradp_qp[_qp][1] = _phase0_gradp_qp[_qp] + dpc_qp * _grads_qp[_qp][1];
+  _saturation[_qp][0] = 1.0 - _phase1_saturation[_qp];
+  _saturation[_qp][1] = _phase1_saturation[_qp];
+  const Real seff = effectiveSaturation(_phase1_saturation[_qp]);
+  const Real pc = capillaryPressure(seff);
+  _porepressure[_qp][0] = _phase0_porepressure[_qp];
+  _porepressure[_qp][1] = _phase0_porepressure[_qp] + pc;
+  if (!_nodal_material)
+  {
+    (*_grads_qp)[_qp][0] = -_phase1_grads_qp[_qp];
+    (*_grads_qp)[_qp][1] = _phase1_grads_qp[_qp];
+    const Real dpc_qp = dCapillaryPressure_dS(seff) * _dseff_ds;
+    (*_gradp_qp)[_qp][0] = _phase0_gradp_qp[_qp];
+    (*_gradp_qp)[_qp][1] = _phase0_gradp_qp[_qp] + dpc_qp * (*_grads_qp)[_qp][1];
+  }
 }
 
 Real

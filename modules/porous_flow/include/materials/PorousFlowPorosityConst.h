@@ -29,7 +29,6 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
-
   virtual void computeQpProperties() override;
 
   /// Constant porosity

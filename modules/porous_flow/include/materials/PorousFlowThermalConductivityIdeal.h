@@ -27,7 +27,7 @@ public:
   PorousFlowThermalConductivityIdeal(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
   /// Dry thermal conductivity of rock
   const RealTensorValue _la_dry;

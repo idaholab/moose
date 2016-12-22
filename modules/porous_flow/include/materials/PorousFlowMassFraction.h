@@ -26,20 +26,20 @@ public:
   PorousFlowMassFraction(const InputParameters & parameters);
 
 protected:
-  /// Mass fraction matrix
+  /// Mass fraction matrix at quadpoint or nodes
   MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac;
 
   /// Old value of mass fraction matrix
-  MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac_old;
+  MaterialProperty<std::vector<std::vector<Real> > > * const _mass_frac_old;
 
   /// Gradient of the mass fraction matrix at the quad points
-  MaterialProperty<std::vector<std::vector<RealGradient> > > & _grad_mass_frac;
+  MaterialProperty<std::vector<std::vector<RealGradient> > > * const _grad_mass_frac;
 
   /// Derivative of the mass fraction matrix with respect to the porous flow variables
   MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _dmass_frac_dvar;
 
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /**
    * Builds the mass-fraction variable matrix at the quad point

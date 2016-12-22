@@ -32,14 +32,14 @@ Real
 PorousFlowSinkPTDefiner::ptVar()
 {
   if (_involves_fluid)
-    return (*_pp)[_qp_map[_i]][_ph];
-  return (*_temp)[_qp_map[_i]];
+    return (*_pp)[_i][_ph];
+  return (*_temp)[_i];
 }
 
 Real
 PorousFlowSinkPTDefiner::dptVar(unsigned pvar)
 {
   if (_involves_fluid)
-    return (*_dpp_dvar)[_qp_map[_i]][_ph][pvar];
-  return (*_dtemp_dvar)[_qp_map[_i]][pvar];
+    return (*_dpp_dvar)[_i][_ph][pvar];
+  return (*_dtemp_dvar)[_i][pvar];
 }

@@ -28,9 +28,7 @@ public:
 
 protected:
   virtual Real computeQpResidual() override;
-
   virtual Real computeQpJacobian() override;
-
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// holds info on the Porous Flow variables
@@ -45,6 +43,9 @@ protected:
   /// whether fluid is present
   const bool _fluid_present;
 
+  /// whether the porosity uses the volumetric strain at the closest quadpoint
+  const bool _strain_at_nearest_qp;
+
   /// porosity
   const MaterialProperty<Real> & _porosity;
 
@@ -53,6 +54,9 @@ protected:
 
   /// d(porosity)/d(grad porous-flow variable)
   const MaterialProperty<std::vector<RealGradient> > & _dporosity_dgradvar;
+
+  /// the nearest qp to the node
+  const MaterialProperty<unsigned int> * const _nearest_qp;
 
   /// nodal rock energy density
   const MaterialProperty<Real> & _rock_energy_nodal;

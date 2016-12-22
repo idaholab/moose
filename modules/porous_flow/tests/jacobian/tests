@@ -53,6 +53,12 @@
     ratio_tol = 5E-6 # lots of chain rules here
     difference_tol = 1E10
   [../]
+  [./mass10]
+    type = 'PetscJacobianTester'
+    input = 'mass10.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
   [./fflux01]
     type = 'PetscJacobianTester'
     input = 'fflux01.i'

@@ -78,14 +78,25 @@
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
+    at_nodes = false
   [../]
-  [./nnn]
-    type = PorousFlowNodeNumber
-    on_initial_only = true
+  [./temperature_nodal]
+    type = PorousFlowTemperature
+    at_nodes = true
   [../]
   [./ppss]
     type = PorousFlow1PhaseP_BW
+    at_nodes = false
     porepressure = pp
+    Sn = 0.05
+    Ss = 0.9
+    las = 2.2
+    C = 1.5
+  [../]
+  [./ppss_nodal]
+    type = PorousFlow1PhaseP_BW
+    porepressure = pp
+    at_nodes = true
     Sn = 0.05
     Ss = 0.9
     las = 2.2
@@ -93,10 +104,19 @@
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
+    at_nodes = true
     mass_fraction_vars = 'massfrac0 massfrac1'
   [../]
   [./dens0]
     type = PorousFlowDensityConstBulk
+    at_nodes = false
+    density_P0 = 1
+    bulk_modulus = 1.5
+    phase = 0
+  [../]
+  [./dens0_nodal]
+    type = PorousFlowDensityConstBulk
+    at_nodes = true
     density_P0 = 1
     bulk_modulus = 1.5
     phase = 0
@@ -104,28 +124,33 @@
   [./dens_all]
     type = PorousFlowJoiner
     include_old = true
-    material_property = PorousFlow_fluid_phase_density
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./dens_qp_all]
     type = PorousFlowJoiner
     material_property = PorousFlow_fluid_phase_density_qp
-    at_qps = true
+    at_nodes = false
   [../]
   [./visc0]
     type = PorousFlowViscosityConst
+    at_nodes = true
     viscosity = 1
     phase = 0
   [../]
   [./visc_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
+    at_nodes = false
     permeability = '1 0 0 0 2 0 0 0 3'
   [../]
   [./relperm]
     type = PorousFlowRelativePermeabilityBW
+    at_nodes = true
     Sn = 0.05
     Ss = 0.9
     Kn = 0.02
@@ -135,7 +160,8 @@
   [../]
   [./relperm_all]
     type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability
+    at_nodes = true
+    material_property = PorousFlow_relative_permeability_nodal
   [../]
 []
 
