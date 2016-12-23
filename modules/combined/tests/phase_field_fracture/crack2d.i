@@ -5,31 +5,28 @@
 []
 
 [Variables]
-  [./u]
-    block = 1
+  [./disp_x]
+    order = FIRST
+    family = LAGRANGE
   [../]
-  [./v]
-    block = 1
+  [./disp_y]
+    order = FIRST
+    family = LAGRANGE
   [../]
   [./c]
-    block = 1
   [../]
   [./b]
-    block = 1
   [../]
 []
 
 [AuxVariables]
   [./resid_x]
-    block = 1
   [../]
   [./resid_y]
-    block = 1
   [../]
   [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
-    block = 1
   [../]
 []
 
@@ -41,52 +38,58 @@
 []
 
 [Kernels]
-  [./pfbulk]
+  [./pfbulk_x]
     type = PFFracBulkRate
     variable = c
-    block = 1
     l = 0.08
     beta = b
     visco =1e-4
     gc_prop_var = 'gc_prop'
     G0_var = 'G0_pos'
     dG0_dstrain_var = 'dG0_pos_dstrain'
-    disp_x = u
-    disp_y = v
+    displacements = 'disp_x disp_y'
+    component = 0
+  [../]
+  [./pfbulk_y]
+    type = PFFracBulkRate
+    variable = c
+    l = 0.08
+    beta = b
+    visco =1e-4
+    gc_prop_var = 'gc_prop'
+    G0_var = 'G0_pos'
+    dG0_dstrain_var = 'dG0_pos_dstrain'
+    displacements = 'disp_x disp_y'
+    component = 1
   [../]
   [./solid_x]
     type = StressDivergencePFFracTensors
-    variable = u
-    displacements = 'u v'
+    variable = disp_x
+    displacements = 'disp_x disp_y'
     component = 0
-    block = 1
     save_in = resid_x
     c = c
   [../]
   [./solid_y]
     type = StressDivergencePFFracTensors
-    variable = v
-    displacements = 'u v'
+    variable = disp_y
+    displacements = 'disp_x disp_y'
     component = 1
-    block = 1
     save_in = resid_y
     c = c
   [../]
   [./dcdt]
     type = TimeDerivative
     variable = c
-    block = 1
   [../]
   [./pfintvar]
     type = PFFracIntVar
     variable = b
-    block = 1
   [../]
   [./pfintcoupled]
     type = PFFracCoupledInterface
     variable = b
     c = c
-    block = 1
   [../]
 []
 
@@ -98,26 +101,25 @@
     index_j = 1
     index_i = 1
     execute_on = timestep_end
-    block = 1
   [../]
 []
 
 [BCs]
   [./ydisp]
     type = FunctionPresetBC
-    variable = v
+    variable = disp_y
     boundary = 2
     function = tfunc
   [../]
   [./yfix]
     type = PresetBC
-    variable = v
+    variable = disp_y
     boundary = 1
     value = 0
   [../]
   [./xfix]
     type = PresetBC
-    variable = u
+    variable = disp_x
     boundary = '1 2'
     value = 0
   [../]
@@ -126,25 +128,21 @@
 [Materials]
   [./pfbulkmat]
     type = PFFracBulkRateMaterial
-    block = 1
     gc = 1e-3
   [../]
   [./elastic]
     type = LinearIsoElasticPFDamage
-    block = 1
     c = c
     kdamage = 1e-8
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 1
     C_ijkl = '120.0 80.0'
     fill_method = symmetric_isotropic
   [../]
   [./strain]
     type = ComputeSmallStrain
-    block = 1
-    displacements = 'u v'
+    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -181,11 +179,12 @@
   nl_max_its = 10
 
   dt = 1e-4
-  dtmin = 1e-4
+  dtmin = 1e-5
   num_steps = 2
 []
 
 [Outputs]
+  file_base = crack_2d_new
   exodus = true
   csv = true
   gnuplot = true
