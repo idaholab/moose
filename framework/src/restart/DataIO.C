@@ -15,6 +15,7 @@
 #include "DataIO.h"
 #include "MooseMesh.h"
 #include "ColumnMajorMatrix.h"
+#include "MooseRandom.h"
 
 // libMesh includes
 #include "libmesh/numeric_vector.h"

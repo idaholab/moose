@@ -17,6 +17,7 @@
 
 // MOOSE includes
 #include "MooseError.h"
+#include "DataIO.h"
 
 // libMesh includes
 #include "libmesh/libmesh_config.h"
@@ -181,5 +182,9 @@ private:
    */
   LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> > _states;
 };
+
+// Used for Restart
+template<> void dataStore(std::ostream & stream, MooseRandom & v, void * context);
+template<> void dataLoad(std::istream & stream, MooseRandom & v, void * context);
 
 #endif // MOOSERANDOM_H

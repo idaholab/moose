@@ -20,7 +20,6 @@
 #include "HashMap.h"
 #include "MooseError.h"
 #include "Backup.h"
-#include "MooseRandom.h"
 
 // libMesh includes
 #include "libmesh/vector_value.h"
@@ -29,6 +28,7 @@
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
 #  include <type_traits>
 #endif
+#include LIBMESH_INCLUDE_UNORDERED_MAP
 
 // C++ includes
 #include <string>
@@ -87,7 +87,7 @@ inline void storeHelper(std::ostream & stream, std::map<P,Q> & data, void * cont
  * Unordered_map helper routine
  */
 template<typename P, typename Q>
-inline void storeHelper(std::ostream & stream, std::unordered_map<P,Q> & data, void * context);
+inline void storeHelper(std::ostream & stream, LIBMESH_BEST_UNORDERED_MAP<P,Q> & data, void * context);
 
 /**
  * HashMap helper routine
@@ -135,7 +135,7 @@ inline void loadHelper(std::istream & stream, std::map<P,Q> & data, void * conte
  * Unordered_map helper routine
  */
 template<typename P, typename Q>
-inline void loadHelper(std::istream & stream, std::unordered_map<P,Q> & data, void * context);
+inline void loadHelper(std::istream & stream, LIBMESH_BEST_UNORDERED_MAP<P,Q> & data, void * context);
 
 /**
  * Hashmap helper routine
@@ -269,14 +269,14 @@ dataStore(std::ostream & stream, std::map<T,U> & m, void * context)
 
 template<typename T, typename U>
 inline void
-dataStore(std::ostream & stream, std::unordered_map<T,U> & m, void * context)
+dataStore(std::ostream & stream, LIBMESH_BEST_UNORDERED_MAP<T,U> & m, void * context)
 {
   // First store the size of the map
   unsigned int size = m.size();
   stream.write((char *) &size, sizeof(size));
 
-  typename std::unordered_map<T,U>::iterator it = m.begin();
-  typename std::unordered_map<T,U>::iterator end = m.end();
+  typename LIBMESH_BEST_UNORDERED_MAP<T,U>::iterator it = m.begin();
+  typename LIBMESH_BEST_UNORDERED_MAP<T,U>::iterator end = m.end();
 
   for (; it != end; ++it)
   {
@@ -324,7 +324,6 @@ template<> void dataStore(std::ostream & stream, Elem * & e, void * context);
 template<> void dataStore(std::ostream & stream, Node * & n, void * context);
 template<> void dataStore(std::ostream & stream, std::stringstream & s, void * context);
 template<> void dataStore(std::ostream & stream, std::stringstream * & s, void * context);
-template<> void dataStore(std::ostream & stream, MooseRandom & v, void * context);
 
 // global load functions
 
@@ -435,7 +434,7 @@ dataLoad(std::istream & stream, std::map<T,U> & m, void * context)
 
 template<typename T, typename U>
 inline void
-dataLoad(std::istream & stream, std::unordered_map<T,U> & m, void * context)
+dataLoad(std::istream & stream, LIBMESH_BEST_UNORDERED_MAP<T,U> & m, void * context)
 {
   m.clear();
 
@@ -487,7 +486,6 @@ template<> void dataLoad(std::istream & stream, Elem * & e, void * context);
 template<> void dataLoad(std::istream & stream, Node * & e, void * context);
 template<> void dataLoad(std::istream & stream, std::stringstream & s, void * context);
 template<> void dataLoad(std::istream & stream, std::stringstream * & s, void * context);
-template<> void dataLoad(std::istream & stream, MooseRandom & v, void * context);
 
 // Scalar Helper Function
 template<typename P>
@@ -540,7 +538,7 @@ storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context)
 // Unordered_map Helper Function
 template<typename P, typename Q>
 inline void
-storeHelper(std::ostream & stream, std::unordered_map<P,Q> & data, void * context)
+storeHelper(std::ostream & stream, LIBMESH_BEST_UNORDERED_MAP<P,Q> & data, void * context)
 {
   dataStore(stream, data, context);
 }
@@ -604,7 +602,7 @@ loadHelper(std::istream & stream, std::map<P,Q> & data, void * context)
 // Unordered_map Helper Function
 template<typename P, typename Q>
 inline void
-loadHelper(std::istream & stream, std::unordered_map<P,Q> & data, void * context)
+loadHelper(std::istream & stream, LIBMESH_BEST_UNORDERED_MAP<P,Q> & data, void * context)
 {
   dataLoad(stream, data, context);
 }
