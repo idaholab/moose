@@ -168,11 +168,6 @@ public:
       it->second.first = it->second.second;
   }
 
-  LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> > getStates() { return _states; }
-
-  void setStates(LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> > states) { _states = states; }
-
-
 private:
 
   /**
@@ -181,10 +176,13 @@ private:
    * to the active state.
    */
   LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> > _states;
+
+  // for restart capability
+  friend void dataStore<MooseRandom>(std::ostream & stream, MooseRandom & v, void * context);
+  friend void dataLoad<MooseRandom>(std::istream & stream, MooseRandom & v, void * context);
 };
 
-// Used for Restart
-template<> void dataStore(std::ostream & stream, MooseRandom & v, void * context);
-template<> void dataLoad(std::istream & stream, MooseRandom & v, void * context);
+template<> inline void dataStore(std::ostream & stream, MooseRandom & v, void * context) { storeHelper(stream, v._states, context); }
+template<> inline void dataLoad(std::istream & stream, MooseRandom & v, void * context) { loadHelper(stream, v._states, context); }
 
 #endif // MOOSERANDOM_H
