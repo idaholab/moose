@@ -530,7 +530,7 @@ public:
   /**
    * Return list of controllable parameters
    */
-  const std::set<std::string> & getControllableParameters() { return _controllable_params; }
+  const std::set<std::string> & getControllableParameters() const { return _controllable_params; }
 
 
 private:
