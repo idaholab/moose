@@ -28,6 +28,7 @@
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
 #  include <type_traits>
 #endif
+#include LIBMESH_INCLUDE_UNORDERED_MAP
 
 // C++ includes
 #include <string>
@@ -83,6 +84,12 @@ template<typename P, typename Q>
 inline void storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context);
 
 /**
+ * Unordered_map helper routine
+ */
+template<typename P, typename Q>
+inline void storeHelper(std::ostream & stream, LIBMESH_BEST_UNORDERED_MAP<P,Q> & data, void * context);
+
+/**
  * HashMap helper routine
  */
 template<typename P, typename Q>
@@ -123,6 +130,12 @@ inline void loadHelper(std::istream & stream, std::set<P> & data, void * context
  */
 template<typename P, typename Q>
 inline void loadHelper(std::istream & stream, std::map<P,Q> & data, void * context);
+
+/**
+ * Unordered_map helper routine
+ */
+template<typename P, typename Q>
+inline void loadHelper(std::istream & stream, LIBMESH_BEST_UNORDERED_MAP<P,Q> & data, void * context);
 
 /**
  * Hashmap helper routine
@@ -243,6 +256,27 @@ dataStore(std::ostream & stream, std::map<T,U> & m, void * context)
 
   typename std::map<T,U>::iterator it = m.begin();
   typename std::map<T,U>::iterator end = m.end();
+
+  for (; it != end; ++it)
+  {
+    T & key = const_cast<T&>(it->first);
+
+    storeHelper(stream, key, context);
+
+    storeHelper(stream, it->second, context);
+  }
+}
+
+template<typename T, typename U>
+inline void
+dataStore(std::ostream & stream, LIBMESH_BEST_UNORDERED_MAP<T,U> & m, void * context)
+{
+  // First store the size of the map
+  unsigned int size = m.size();
+  stream.write((char *) &size, sizeof(size));
+
+  typename LIBMESH_BEST_UNORDERED_MAP<T,U>::iterator it = m.begin();
+  typename LIBMESH_BEST_UNORDERED_MAP<T,U>::iterator end = m.end();
 
   for (; it != end; ++it)
   {
@@ -398,6 +432,26 @@ dataLoad(std::istream & stream, std::map<T,U> & m, void * context)
   }
 }
 
+template<typename T, typename U>
+inline void
+dataLoad(std::istream & stream, LIBMESH_BEST_UNORDERED_MAP<T,U> & m, void * context)
+{
+  m.clear();
+
+  // First read the size of the map
+  unsigned int size = 0;
+  stream.read((char *) &size, sizeof(size));
+
+  for (unsigned int i = 0; i < size; i++)
+  {
+    T key;
+    loadHelper(stream, key, context);
+
+    U & value = m[key];
+    loadHelper(stream, value, context);
+  }
+}
+
 
 template<typename T, typename U>
 inline void
@@ -481,6 +535,14 @@ storeHelper(std::ostream & stream, std::map<P,Q> & data, void * context)
   dataStore(stream, data, context);
 }
 
+// Unordered_map Helper Function
+template<typename P, typename Q>
+inline void
+storeHelper(std::ostream & stream, LIBMESH_BEST_UNORDERED_MAP<P,Q> & data, void * context)
+{
+  dataStore(stream, data, context);
+}
+
 // HashMap Helper Function
 template<typename P, typename Q>
 inline void
@@ -533,6 +595,14 @@ loadHelper(std::istream & stream, std::set<P> & data, void * context)
 template<typename P, typename Q>
 inline void
 loadHelper(std::istream & stream, std::map<P,Q> & data, void * context)
+{
+  dataLoad(stream, data, context);
+}
+
+// Unordered_map Helper Function
+template<typename P, typename Q>
+inline void
+loadHelper(std::istream & stream, LIBMESH_BEST_UNORDERED_MAP<P,Q> & data, void * context)
 {
   dataLoad(stream, data, context);
 }
