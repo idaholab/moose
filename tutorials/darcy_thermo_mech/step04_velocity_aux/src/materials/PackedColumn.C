@@ -51,5 +51,5 @@ PackedColumn::computeQpProperties()
   _viscosity[_qp] = 7.98e-4; // (Pa*s) Water at 30 degrees C (Wikipedia)
 
   // Sample the LinearInterpolation object to get the permeability for the ball size
-  _permeability[_qp] = 0.8451e-9; // _permeability_interpolation.sample(_ball_radius);
+  _permeability[_qp] = _permeability_interpolation.sample(_ball_radius);
 }
