@@ -70,6 +70,13 @@
     x = '1       4'
     y = '400   700'
   [../]
+  [./youngs_modulus_function]
+    type = PiecewiseLinear
+    xy_data = '0          10e+6
+               599.9999   10e+6
+               600        9.94e+6
+               99900      10e3'
+  [../]
 []
 
 [Kernels]
@@ -140,10 +147,10 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeVariableIsotropicElasticityTensor
+    type = ComputeTemperatureDependentIsotropicElasticityTensor
     temperature = temp
-    youngs_modulus = 10.0e6
-    poissons_ratio = 0.0
+    youngs_modulus_function = youngs_modulus_function
+    poissons_ratio_function = 0.0
     block = 0
   [../]
   [./strain]

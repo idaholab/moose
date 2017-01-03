@@ -7,25 +7,31 @@
 #ifndef COMPUTEVARIABLEISOTROPICELASTICITYTENSOR_H
 #define COMPUTEVARIABLEISOTROPICELASTICITYTENSOR_H
 
-#include "ComputeIsotropicElasticityTensor.h"
+#include "ComputeElasticityTensorBase.h"
+
+class Function;
 
 /**
- * ComputeVariableIsotropicElasticityTensor defines an elasticity tensor material for
- * isotropic materials in which the elastic constants vary with temperature.  This
- * class exists as a basic test functionality for more complex elasticity tensor
- * classes in various MOOSE Apps.
+ * ComputeTemperatureDependentIsotropicElasticityTensor defines an elasticity tensor material for
+ * isotropic materials in which the elastic constants vary with temperature.
  */
-class ComputeVariableIsotropicElasticityTensor : public ComputeIsotropicElasticityTensor
+class ComputeTemperatureDependentIsotropicElasticityTensor : public ComputeElasticityTensorBase
 {
 public:
-  ComputeVariableIsotropicElasticityTensor(const InputParameters & parameters);
+  ComputeTemperatureDependentIsotropicElasticityTensor(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpElasticityTensor();
 
-  /// Temperature in Kelvin
+  /// Temperature
   const VariableValue & _temperature;
+
+  /// Function for the temperature dependence of the Young's modulus
+  Function & _youngs_modulus_function;
+
+  /// Function for the temperature dependence of the Poisson's ratio
+  Function & _poissons_ratio_function;
 
   /// Store the old elasticity tensor to compute the stress correctly
   MaterialProperty<RankFourTensor> & _elasticity_tensor_old;
