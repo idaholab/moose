@@ -63,6 +63,7 @@ protected:
 
 private:
   void processNodeLocations();
+  void generateIntermediateNodes();
 };
 
 #endif /* GEOMETRICALCOMPONENT_H */

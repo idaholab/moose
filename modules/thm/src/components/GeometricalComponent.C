@@ -13,9 +13,9 @@ InputParameters validParams<GeometricalComponent>()
   params.addRequiredParam<RealVectorValue>("orientation", "Orientation vector of the pipe");
   params.addParam<Real>("rotation", 0., "Rotation of the component (in degrees)");
 
-  params.addRequiredParam<Real>("length", "The length of the geometric component along the main axis");
-
+  params.addParam<Real>("length", "The length of the geometric component along the main axis");
   params.addParam<unsigned int>("n_elems", 0, "The number of elements along the main axis");
+
   std::vector<Real> default_node_locations (1, 0.0);
   params.addParam<std::vector<Real> >("node_locations", default_node_locations, "Node locations along the main axis.");
 
@@ -195,22 +195,25 @@ GeometricalComponent::processNodeLocations()
     }
   }
 
-  if (_2nd_order_mesh)
-  {
-    unsigned int actual_n_nodes = (2 * _n_elems) + 1;
-    std::vector<Real> actual_nodes(actual_n_nodes, 0.0);
-    unsigned int new_node_indx = 0;
+  if (_2nd_order_mesh) generateIntermediateNodes();
+}
 
-    for (int i = 0; i < _n_elems; ++i)
-    {
-      actual_nodes[new_node_indx] = _node_locations[i];
-      ++new_node_indx;
-      actual_nodes[new_node_indx] = 0.5 * (_node_locations[i] + _node_locations[i+1]);
-      ++new_node_indx;
-    }
-    actual_nodes[new_node_indx] = _node_locations[_n_elems];
-    _node_locations = actual_nodes;
+void
+GeometricalComponent::generateIntermediateNodes()
+{
+  unsigned int actual_n_nodes = (2 * _n_elems) + 1;
+  std::vector<Real> actual_nodes(actual_n_nodes, 0.0);
+  unsigned int new_node_indx = 0;
+
+  for (int i = 0; i < _n_elems; ++i)
+  {
+    actual_nodes[new_node_indx] = _node_locations[i];
+    ++new_node_indx;
+    actual_nodes[new_node_indx] = 0.5 * (_node_locations[i] + _node_locations[i+1]);
+    ++new_node_indx;
   }
+  actual_nodes[new_node_indx] = _node_locations[_n_elems];
+  _node_locations = actual_nodes;
 }
 
 const FunctionName &
