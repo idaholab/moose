@@ -132,7 +132,6 @@
     strength_coefficient = 0.5 #K
     strain_hardening_exponent = 0.5 #n
     output_iteration_info_on_error = true
-    compute = false # make this material "discrete"
     relative_tolerance = 1e-10
     absolute_tolerance = 1e-12
     max_iterations = 50
