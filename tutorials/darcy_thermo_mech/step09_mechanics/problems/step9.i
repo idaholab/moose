@@ -152,7 +152,7 @@
     block = 0
   [../]
 
-  [./_elastic_strain]
+  [./elastic_strain]
     type = ComputeFiniteStrainElasticStress
     block = 0
   [../]
