@@ -34,5 +34,5 @@ CoupledNeumannBC::CoupledNeumannBC(const InputParameters & parameters) :
 Real
 CoupledNeumannBC::computeQpResidual()
 {
-  return -_test[_i][_qp]*_alpha*_some_var_val[_qp];
+  return -_test[_i][_qp] * _alpha * _some_var_val[_qp];
 }

@@ -40,7 +40,7 @@ ExampleDiffusion::computeQpResidual()
 
   // Also... we're reusing the Diffusion Kernel's residual
   // so that we don't have to recode that.
-  return _diffusivity[_qp]*Diffusion::computeQpResidual();
+  return _diffusivity[_qp] * Diffusion::computeQpResidual();
 }
 
 Real
@@ -52,5 +52,5 @@ ExampleDiffusion::computeQpJacobian()
 
   // Also... we're reusing the Diffusion Kernel's residual
   // so that we don't have to recode that.
-  return _diffusivity[_qp]*Diffusion::computeQpJacobian();
+  return _diffusivity[_qp] * Diffusion::computeQpJacobian();
 }

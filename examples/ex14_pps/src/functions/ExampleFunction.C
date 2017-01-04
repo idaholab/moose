@@ -30,5 +30,5 @@ ExampleFunction::ExampleFunction(const InputParameters & parameters) :
 Real
 ExampleFunction::value(Real /*t*/, const Point & p)
 {
-  return _alpha*_alpha*libMesh::pi*libMesh::pi*std::sin(_alpha*libMesh::pi*p(0));  // p(0) == x
+  return _alpha * _alpha * libMesh::pi * libMesh::pi * std::sin(_alpha * libMesh::pi * p(0));  // p(0) == x
 }
