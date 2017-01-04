@@ -35,6 +35,8 @@
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
 
+#include <unordered_map>
+
 // Forward declarations
 class DisplacedProblem;
 class FEProblemBase;
@@ -1174,10 +1176,10 @@ protected:
   std::map<std::string, RandomData *> _random_data_objects;
 
   /// Cache for calculating materials on side
-  std::vector<LIBMESH_BEST_UNORDERED_MAP<SubdomainID, bool> > _block_mat_side_cache;
+  std::vector<std::unordered_map<SubdomainID, bool>> _block_mat_side_cache;
 
   /// Cache for calculating materials on side
-  std::vector<LIBMESH_BEST_UNORDERED_MAP<BoundaryID, bool> > _bnd_mat_side_cache;
+  std::vector<std::unordered_map<BoundaryID, bool>> _bnd_mat_side_cache;
 
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;

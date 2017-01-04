@@ -19,9 +19,7 @@
 #include "MooseError.h"
 #include "DataIO.h"
 
-// libMesh includes
-#include "libmesh/libmesh_config.h"
-#include LIBMESH_INCLUDE_UNORDERED_MAP
+#include <unordered_map>
 
 // External library includes
 #include "randistrs.h"
@@ -153,9 +151,11 @@ public:
    */
   void saveState()
   {
-    for (LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> >::iterator it = _states.begin();
-         it != _states.end(); ++it)
-      it->second.second = it->second.first;
+    std::for_each(_states.begin(), _states.end(),
+                  [](std::pair<const unsigned int, std::pair<mt_state, mt_state>> & pair)
+                    {
+                      pair.second.second = pair.second.first;
+                    });
   }
 
   /**
@@ -163,9 +163,11 @@ public:
    */
   void restoreState()
   {
-    for (LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> >::iterator it = _states.begin();
-         it != _states.end(); ++it)
-      it->second.first = it->second.second;
+    std::for_each(_states.begin(), _states.end(),
+                  [](std::pair<const unsigned int, std::pair<mt_state, mt_state>> & pair)
+                    {
+                      pair.second.first = pair.second.second;
+                    });
   }
 
 private:
@@ -175,7 +177,7 @@ private:
    * second is the backup state. It is used to restore state at a later time
    * to the active state.
    */
-  LIBMESH_BEST_UNORDERED_MAP<unsigned int, std::pair<mt_state, mt_state> > _states;
+  std::unordered_map<unsigned int, std::pair<mt_state, mt_state>> _states;
 
   // for restart capability
   friend void dataStore<MooseRandom>(std::ostream & stream, MooseRandom & v, void * context);
