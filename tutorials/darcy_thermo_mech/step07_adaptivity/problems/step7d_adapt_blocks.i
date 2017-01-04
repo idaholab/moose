@@ -21,7 +21,7 @@
 [Variables]
   [./pressure]
   [../]
-  [./temp]
+  [./temperature]
     initial_condition = 300 # Start at room temperature
   [../]
 []
@@ -48,15 +48,15 @@
   [../]
   [./heat_conduction]
     type = HeatConduction
-    variable = temp
+    variable = temperature
   [../]
   [./heat_conduction_time_derivative]
     type = HeatCapacityConductionTimeDerivative
-    variable = temp
+    variable = temperature
   [../]
   [./heat_convection]
     type = DarcyConvection
-    variable = temp
+    variable = temperature
     darcy_pressure = pressure
   [../]
 []
@@ -100,13 +100,13 @@
   [../]
   [./inlet_temperature]
     type = DirichletBC
-    variable = temp
+    variable = temperature
     boundary = left
     value = 350 # (C)
   [../]
   [./outlet_temperature]
     type = HeatConductionBC
-    variable = temp
+    variable = temperature
     boundary = right
   [../]
 []
@@ -151,9 +151,9 @@
   marker = error_frac
   max_h_level = 3
   [./Indicators]
-    [./temp_jump]
+    [./temperature_jump]
       type = GradientJumpIndicator
-      variable = temp
+      variable = temperature
       scale_by_flux_faces = true
     [../]
   [../]
@@ -161,7 +161,7 @@
     [./error_frac]
       type = ErrorFractionMarker
       coarsen = 0.1
-      indicator = temp_jump
+      indicator = temperature_jump
       refine = 0.6
     [../]
   [../]

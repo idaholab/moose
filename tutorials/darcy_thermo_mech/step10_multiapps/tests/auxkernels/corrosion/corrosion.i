@@ -30,7 +30,7 @@
 []
 
 [Variables]
-  [./temp]
+  [./temperature]
     initial_condition = 300
   [../]
 []
@@ -53,20 +53,20 @@
 [Kernels]
   [./heat_conduction]
     type = HeatConduction
-    variable = temp
+    variable = temperature
   [../]
 []
 
 [BCs]
   [./left]
     type = PostprocessorDirichletBC
-    variable = temp
+    variable = temperature
     boundary = left
     postprocessor = 301
   [../]
   [./right]
     type = NeumannBC
-    variable = temp
+    variable = temperature
     boundary = right
     value = 100 # prescribed flux
 
@@ -91,7 +91,7 @@
 [Postprocessors]
   [./k_eff]
     type = ThermalConductivity
-    variable = temp
+    variable = temperature
     T_hot = 301
     flux = 100
     dx = 0.1

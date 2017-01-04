@@ -10,7 +10,7 @@
 [Variables]
   [./pressure]
   [../]
-  [./temp]
+  [./temperature]
     initial_condition = 300 # Start at room temperature
   [../]
 []
@@ -37,15 +37,15 @@
   [../]
   [./heat_conduction]
     type = HeatConduction
-    variable = temp
+    variable = temperature
   [../]
   [./heat_conduction_time_derivative]
     type = HeatCapacityConductionTimeDerivative
-    variable = temp
+    variable = temperature
   [../]
   [./heat_convection]
     type = DarcyConvection
-    variable = temp
+    variable = temperature
     darcy_pressure = pressure
   [../]
 []
@@ -89,13 +89,13 @@
   [../]
   [./inlet_temperature]
     type = DirichletBC
-    variable = temp
+    variable = temperature
     boundary = left
     value = 350 # (C)
   [../]
   [./outlet_temperature]
     type = HeatConductionOutflow
-    variable = temp
+    variable = temperature
     boundary = right
   [../]
 []
@@ -109,13 +109,13 @@
 []
 
 [Postprocessors]
-  [./average_temp]
+  [./average_temperature]
     type = ElementAverageValue
-    variable = temp
+    variable = temperature
   [../]
   [./outlet_heat_flux]
     type = SideFluxIntegral
-    variable = temp
+    variable = temperature
     boundary = right
     diffusivity = thermal_conductivity
   [../]

@@ -8,7 +8,7 @@
 []
 
 [Variables]
-  [./temp]
+  [./temperature]
     initial_condition = 300 # Start at room temperature
   [../]
 []
@@ -16,24 +16,24 @@
 [Kernels]
   [./heat_conduction]
     type = HeatConduction
-    variable = temp
+    variable = temperature
   [../]
   [./heat_conduction_time_derivative]
     type = SpecificHeatConductionTimeDerivative
-    variable = temp
+    variable = temperature
   [../]
 []
 
 [BCs]
   [./inlet_temperature]
     type = DirichletBC
-    variable = temp
+    variable = temperature
     boundary = left
     value = 350 # (K)
   [../]
   [./outlet_temperature]
     type = HeatConductionOutflow
-    variable = temp
+    variable = temperature
     boundary = right
   [../]
 []
