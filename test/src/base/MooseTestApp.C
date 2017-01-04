@@ -211,6 +211,7 @@
 #include "ScalarCoupledPostprocessor.h"
 #include "NumAdaptivityCycles.h"
 #include "TestDiscontinuousValuePP.h"
+#include "RandomPostprocessor.h"
 
 // Functions
 #include "TimestepSetupFunction.h"
@@ -528,6 +529,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerPostprocessor(ScalarCoupledPostprocessor);
   registerPostprocessor(NumAdaptivityCycles);
   registerPostprocessor(TestDiscontinuousValuePP);
+  registerPostprocessor(RandomPostprocessor);
 
   registerVectorPostprocessor(LateDeclarationVectorPostprocessor);
 
