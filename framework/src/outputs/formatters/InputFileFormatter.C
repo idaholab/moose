@@ -156,6 +156,14 @@ InputFileFormatter::printParams(const std::string & /*prefix*/,
           for (unsigned int i=1; i<elements.size(); ++i)
             oss << " ...\n" << "  " << std::setw(63) << "# " << elements[i];
         }
+        const std::string group = params.getGroupName(iter.first);
+        if (!group.empty())
+        {
+          if (MooseUtils::trim(doc) != "")
+            oss << " ...\n" << "  " << std::setw(70) << "# Group: " << group;
+          else
+            oss << std::right << std::setw(l_offset) << "# Group: " << group;
+        }
       }
       oss << "\n";
     }
