@@ -88,7 +88,10 @@ YAMLFormatter::printParams(const std::string &prefix, const std::string & /*full
     MooseUtils::escape(doc);
     // Print the type
     oss << "\n" << indent << "    cpp_type: " << params.type(iter.first)
-        << "\n" << indent << "    group_name: " << params.getGroupName(iter.first);
+        << "\n" << indent << "    group_name: ";
+    std::string group_name = params.getGroupName(iter.first);
+    if (!group_name.empty())
+        oss << "'" << group_name << "'";
 
     {
       InputParameters::Parameter<MooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(iter.second);
