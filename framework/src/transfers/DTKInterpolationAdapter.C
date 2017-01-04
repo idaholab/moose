@@ -287,6 +287,7 @@ DTKInterpolationAdapter::update_variable_values(std::string var_name, Teuchos::A
   }
 
   sys->solution->close();
+  sys->update();
 
   // Swap back
   Moose::swapLibMeshComm(old_comm);
