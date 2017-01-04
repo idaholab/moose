@@ -52,11 +52,10 @@ public:
 #else
 
 // Use a hash table
-#include "libmesh/libmesh_common.h"
-#include LIBMESH_INCLUDE_UNORDERED_MAP
+#include <unordered_map>
 
 template<typename Key, typename T> /*, typename Hash = std::tr1::hash<Key>, class Pred = std::equal_to<Key>, typename Allocator = std::allocator<std::pair<const Key,T> > >*/
-class HashMap : public LIBMESH_BEST_UNORDERED_MAP< Key, T > /*, Hash, Pred, Allocator >*/
+class HashMap : public std::unordered_map<Key, T> /*, Hash, Pred, Allocator >*/
 {
 
 #ifdef LIBMESH_HAVE_PTHREAD
@@ -66,7 +65,7 @@ public:
   {
     libMesh::Threads::spin_mutex::scoped_lock lock(spin_mutex);
 
-    return LIBMESH_BEST_UNORDERED_MAP< Key, T > /*, Hash, Pred, Allocator >*/::operator[](k);
+    return std::unordered_map<Key, T> /*, Hash, Pred, Allocator >*/::operator[](k);
   }
 
   inline bool contains(const Key & key)

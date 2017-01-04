@@ -71,14 +71,13 @@ ConservedNoiseBase::finalize()
 Real
 ConservedNoiseBase::getQpValue(dof_id_type element_id, unsigned int qp) const
 {
-  LIBMESH_BEST_UNORDERED_MAP<dof_id_type, std::vector<Real> >::const_iterator me = _random_data.find(element_id);
+  const auto it_pair = _random_data.find(element_id);
 
-  if (me == _random_data.end())
+  if (it_pair == _random_data.end())
     mooseError("Element not found.");
   else
   {
-    libmesh_assert_less(qp, me->second.size());
-    return me->second[qp] - _offset;
+    libmesh_assert_less(qp, it_pair->second.size());
+    return it_pair->second[qp] - _offset;
   }
 }
-
