@@ -45,23 +45,24 @@ PackedColumn::PackedColumn(const InputParameters & parameters) :
     _use_variable_conductivity(isParamValid("thermal_conductivity")),
     _conductivity_variable(_use_variable_conductivity ? coupledValue("thermal_conductivity") : _zero)
 {
-  std::vector<Real> sphere_sizes = {1, 3};
-
   // From the paper: Table 1
+  std::vector<Real> sphere_sizes = {1, 3};
   std::vector<Real> permeability = {0.8451e-9, 8.968e-9};
 
   // Set the x,y data on the LinearInterpolation object.
   _permeability_interpolation.setData(sphere_sizes, permeability);
+
+  // The _sphere_radius is a constant, so we can compute the
+  // interpolated permeability once as well.
+  _interpolated_permeability = _permeability_interpolation.sample(_sphere_radius);
 }
 
 void
 PackedColumn::computeQpProperties()
 {
+  // Set constant material property values at the current qp.
   _viscosity[_qp] = 7.98e-4; // (Pa*s) Water at 30 degrees C (Wikipedia)
-
-  // Sample the LinearInterpolation object to get the permeability for the sphere size
-  _permeability[_qp] = _permeability_interpolation.sample(_sphere_radius);
-
+  _permeability[_qp] = _interpolated_permeability;
 
   // Compute the heat conduction material properties as a linear combination of
   // the material properties for water and steel.
@@ -89,7 +90,8 @@ PackedColumn::computeQpProperties()
   if (_use_variable_conductivity)
     _thermal_conductivity[_qp] = _conductivity_variable[_qp];
   else
-    _thermal_conductivity[_qp] = _porosity[_qp]*water_k + (1.0-_porosity[_qp])*steel_k;
-  _density[_qp] = _porosity[_qp]*water_rho + (1.0-_porosity[_qp])*steel_rho;
-  _heat_capacity[_qp] = _porosity[_qp]*water_cp*water_rho + (1.0-_porosity[_qp])*steel_cp*steel_rho;
+    _thermal_conductivity[_qp] = _porosity[_qp] * water_k + (1.0 - _porosity[_qp]) * steel_k;
+
+  _density[_qp] = _porosity[_qp] * water_rho + (1.0 - _porosity[_qp]) * steel_rho;
+  _heat_capacity[_qp] = _porosity[_qp] * water_cp*water_rho + (1.0 - _porosity[_qp]) * steel_cp*steel_rho;
 }

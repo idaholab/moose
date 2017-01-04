@@ -67,6 +67,11 @@ protected:
 
   /// The bulk density
   MaterialProperty<Real> & _density;
+
+  /// Single value to store the interpolated permeability base on
+  /// sphere size.  The _sphere_radius is assumed to be constant, so
+  /// we only have to compute this once.
+  Real _interpolated_permeability;
 };
 
 #endif // PACKEDCOLUMN_H
