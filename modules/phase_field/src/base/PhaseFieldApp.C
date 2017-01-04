@@ -59,7 +59,6 @@
 #include "MultiGrainRigidBodyMotion.h"
 #include "PFFracBulkRate.h"
 #include "PFFracCoupledInterface.h"
-#include "PFFracIntVar.h"
 #include "SimpleACInterface.h"
 #include "SimpleCHInterface.h"
 #include "SimpleCoupledACInterface.h"
@@ -74,6 +73,9 @@
 #include "SwitchingFunctionConstraintEta.h"
 #include "SwitchingFunctionConstraintLagrange.h"
 #include "SwitchingFunctionPenalty.h"
+
+// Remove this once the PFFracIntVar -> Reaction deprecation is expired:
+#include "Reaction.h"
 
 /*
  * Initial Conditions
@@ -343,7 +345,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(MultiGrainRigidBodyMotion);
   registerKernel(PFFracBulkRate);
   registerKernel(PFFracCoupledInterface);
-  registerKernel(PFFracIntVar);
   registerKernel(SimpleACInterface);
   registerKernel(SimpleCHInterface);
   registerKernel(SimpleCoupledACInterface);
@@ -358,6 +359,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionPenalty);
+  registerDeprecatedObjectName(Reaction, "PFFracIntVar", "03/01/2017 00:00");
 
   registerInitialCondition(BimodalInverseSuperellipsoidsIC);
   registerInitialCondition(BimodalSuperellipsoidsIC);
@@ -437,7 +439,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerPostprocessor(FauxGrainTracker);
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(FeatureVolumeFraction);
-  registerDeprecatedObjectName(FauxGrainTracker, "GrainCentersPostprocessor", "11/01/2016 00:00");
   registerPostprocessor(GrainTracker);
   registerPostprocessor(GrainTrackerElasticity);
   registerPostprocessor(PFCElementEnergyIntegral);
@@ -457,7 +458,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(PFCRFFEnergyDensity);
   registerAux(TotalFreeEnergy);
 
-  registerDeprecatedObjectName(FauxGrainTracker, "ComputeGrainCenterUserObject", "11/01/2016 00:00");
   registerUserObject(ComputeExternalGrainForceAndTorque);
   registerUserObject(ComputeGrainForceAndTorque);
   registerUserObject(ConservedMaskedNormalNoise);
