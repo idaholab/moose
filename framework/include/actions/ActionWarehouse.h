@@ -97,12 +97,6 @@ public:
   ActionIterator actionBlocksWithActionEnd(const std::string & task);
 
   /**
-   * Retrieve a constant vector of \p Action pointers associated with the passed in task.
-   * TODO: Deprecate
-   */
-  const std::vector<Action *> & getActionsByName(const std::string & task);
-
-  /**
    * Retrieve a constant list of \p Action pointers associated with the passed in task.
    */
   const std::list<Action *> & getActionListByName(const std::string & task) const;
