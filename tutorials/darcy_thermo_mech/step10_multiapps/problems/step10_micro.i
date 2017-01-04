@@ -77,7 +77,7 @@
   [./column]
     type = PackedColumn
     block = 0
-    ball_radius = 1 # mm
+    sphere_radius = 1 # mm
     phase = phi
   [../]
 []

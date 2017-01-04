@@ -18,10 +18,10 @@ InputParameters validParams<PackedColumn>()
 {
   InputParameters params = validParams<Material>();
 
-  // Add a parameter to get the radius of the balls in the column
+  // Add a parameter to get the radius of the spheres in the column
   // (used later to interpolate permeability).
-  params.addParam<Real>("ball_radius",
-                        "The radius of the steel balls that are packed in the column. "
+  params.addParam<Real>("sphere_radius",
+                        "The radius of the steel spheres that are packed in the column. "
                         "Used to interpolate _permeability.");
   return params;
 }
@@ -30,7 +30,7 @@ InputParameters validParams<PackedColumn>()
 PackedColumn::PackedColumn(const InputParameters & parameters) :
     Material(parameters),
     // Get the one parameter from the input file
-    _ball_radius(getParam<Real>("ball_radius")),
+    _sphere_radius(getParam<Real>("sphere_radius")),
     // Declare two material properties.  This returns references that
     // we hold onto as member variables.
     _permeability(declareProperty<Real>("permeability")),
@@ -40,13 +40,13 @@ PackedColumn::PackedColumn(const InputParameters & parameters) :
     _heat_capacity(declareProperty<Real>("heat_capacity")),
     _density(declareProperty<Real>("density"))
 {
-  std::vector<Real> ball_sizes = {1, 3};
+  std::vector<Real> sphere_sizes = {1, 3};
 
   // From the paper: Table 1
   std::vector<Real> permeability = {0.8451e-9, 8.968e-9};
 
   // Set the x,y data on the LinearInterpolation object.
-  _permeability_interpolation.setData(ball_sizes, permeability);
+  _permeability_interpolation.setData(sphere_sizes, permeability);
 }
 
 void
@@ -55,8 +55,8 @@ PackedColumn::computeQpProperties()
   // Viscosity of Water in Pa*s at 30 degrees C (Wikipedia)
   _viscosity[_qp] = 7.98e-4;
 
-  // Sample the LinearInterpolation object to get the permeability for the ball size
-  _permeability[_qp] = _permeability_interpolation.sample(_ball_radius);
+  // Sample the LinearInterpolation object to get the permeability for the sphere size
+  _permeability[_qp] = _permeability_interpolation.sample(_sphere_radius);
 
   // Compute the heat conduction material properties as a linear combination of
   // the material properties for water and steel.

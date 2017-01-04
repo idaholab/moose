@@ -18,8 +18,8 @@ InputParameters validParams<PackedColumn>()
 {
   InputParameters params = validParams<Material>();
 
-  // Add a parameter to get the radius of the balls in the column (used later to interpolate permeability).
-  params.addParam<Real>("ball_radius", "The radius of the steel balls that are packed in the column.  Used to interpolate _permeability.");
+  // Add a parameter to get the radius of the spheres in the column (used later to interpolate permeability).
+  params.addParam<Real>("sphere_radius", "The radius of the steel spheres that are packed in the column.  Used to interpolate _permeability.");
   params.addCoupledVar("phase", "The variable indicating the phase (steel=1 or water=0). If supplied this is used to compute the porosity instead of the supplied value.");
   params.addCoupledVar("thermal_conductivity", "When supplied the variable be will be used for thermal conductivity rather than being computed.");
   return params;
@@ -30,7 +30,7 @@ PackedColumn::PackedColumn(const InputParameters & parameters) :
     Material(parameters),
 
     // Get the one parameter from the input file
-    _ball_radius(getParam<Real>("ball_radius")),
+    _sphere_radius(getParam<Real>("sphere_radius")),
 
     // Declare two material properties.  This returns references that we
     // hold onto as member variables
@@ -45,13 +45,13 @@ PackedColumn::PackedColumn(const InputParameters & parameters) :
     _use_variable_conductivity(isParamValid("thermal_conductivity")),
     _conductivity_variable(_use_variable_conductivity ? coupledValue("thermal_conductivity") : _zero)
 {
-  std::vector<Real> ball_sizes = {1, 3};
+  std::vector<Real> sphere_sizes = {1, 3};
 
   // From the paper: Table 1
   std::vector<Real> permeability = {0.8451e-9, 8.968e-9};
 
   // Set the x,y data on the LinearInterpolation object.
-  _permeability_interpolation.setData(ball_sizes, permeability);
+  _permeability_interpolation.setData(sphere_sizes, permeability);
 }
 
 void
@@ -59,8 +59,8 @@ PackedColumn::computeQpProperties()
 {
   _viscosity[_qp] = 7.98e-4; // (Pa*s) Water at 30 degrees C (Wikipedia)
 
-  // Sample the LinearInterpolation object to get the permeability for the ball size
-  _permeability[_qp] = _permeability_interpolation.sample(_ball_radius);
+  // Sample the LinearInterpolation object to get the permeability for the sphere size
+  _permeability[_qp] = _permeability_interpolation.sample(_sphere_radius);
 
 
   // Compute the heat conduction material properties as a linear combination of

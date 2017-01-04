@@ -42,8 +42,8 @@ protected:
    */
   virtual void computeQpProperties() override;
 
-  /// The radius of the balls in the column
-  const Real & _ball_radius;
+  /// The radius of the spheres in the column
+  const Real & _sphere_radius;
 
   /// Based on the paper this will
   LinearInterpolation _permeability_interpolation;

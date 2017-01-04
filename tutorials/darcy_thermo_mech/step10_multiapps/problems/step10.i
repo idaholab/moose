@@ -102,13 +102,13 @@
     type = DirichletBC
     variable = pressure
     boundary = bottom
-    value = 4000 # (Pa) From Figure 2 from paper.  First data point for 1mm balls.
+    value = 4000 # (Pa) From Figure 2 from paper.  First data point for 1mm spheres.
   [../]
   [./outlet]
     type = DirichletBC
     variable = pressure
     boundary = top
-    value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm balls
+    value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm spheres
   [../]
   [./inlet_temperature]
     type = DirichletBC
@@ -145,7 +145,7 @@
   [./column]
     type = PackedColumn
     block = 0
-    ball_radius = 1
+    sphere_radius = 1
     temperature = temp
     thermal_conductivity = k_eff # Use the AuxVariable instead of calculating
   [../]

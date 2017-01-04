@@ -42,11 +42,11 @@ protected:
    */
   virtual void computeQpProperties() override;
 
-  /// The radius of the balls in the column
-  const Real & _ball_radius;
+  /// The radius of the spheres in the column
+  const Real & _sphere_radius;
 
   /// The permeability of the medium is based on a linear
-  /// interpolation between the two different ball sizes which are
+  /// interpolation between the two different sphere sizes which are
   /// assumed to be present.
   LinearInterpolation _permeability_interpolation;
 

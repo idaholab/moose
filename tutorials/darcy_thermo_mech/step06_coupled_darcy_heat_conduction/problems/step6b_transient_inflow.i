@@ -115,7 +115,7 @@
   [./column]
     type = PackedColumn
     block = 0
-    ball_radius = 1
+    sphere_radius = 1
   [../]
 []
 
