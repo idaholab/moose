@@ -17,14 +17,15 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class DarcyVelocity;
 
 template<>
 InputParameters validParams<DarcyVelocity>();
 
 /**
- * Constant auxiliary value
+ * Auxiliary kernel responsible for computing the Darcy velocity given
+ * several fluid properties and the pressure gradient.
  */
 class DarcyVelocity : public AuxKernel
 {
@@ -41,7 +42,7 @@ protected:
    */
   virtual Real computeValue() override;
 
-  /// Will hold 0,1,2 for x,y,z
+  /// Will hold 0, 1, or 2 corresponding to x, y, or z.
   int _component;
 
   /// The gradient of a coupled variable

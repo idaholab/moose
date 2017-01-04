@@ -26,9 +26,9 @@ InputParameters validParams<DarcyPressure>();
 /**
  * Represents K/mu * grad_u * grad_phi
  *
- * We are inheriting from Diffusion instead of from Kernel because
- * the grad_u * grad_phi is already coded in there and all we
- * need to do is specialize that calculation by multiplying by K/mu
+ * We are inheriting from Diffusion instead of from Kernel because the
+ * grad_u * grad_phi is already coded in there and all we need to do
+ * is specialize that calculation by multiplying by K/mu.
  */
 class DarcyPressure : public Diffusion
 {
@@ -47,13 +47,11 @@ protected:
    */
   virtual Real computeQpJacobian() override;
 
-  /**
-   * These references will be set by the initialization list so that
-   * values can be pulled from the Material system.
-   */
+  /// These references will be set by the initialization list so that
+  /// values can be pulled from the Material system.
   const MaterialProperty<Real> & _permeability;
   const MaterialProperty<Real> & _viscosity;
 };
 
 
-#endif /* DARCYPRESSURE_H */
+#endif // DARCYPRESSURE_H
