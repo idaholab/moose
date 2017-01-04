@@ -350,6 +350,7 @@
 #include "MultiAppUserObjectTransfer.h"
 #include "MultiAppNearestNodeTransfer.h"
 #include "MultiAppCopyTransfer.h"
+#include "MultiAppSeedTransfer.h"
 #include "MultiAppInterpolationTransfer.h"
 #include "MultiAppPostprocessorTransfer.h"
 #include "MultiAppProjectionTransfer.h"
@@ -780,6 +781,7 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppUserObjectTransfer);
   registerTransfer(MultiAppNearestNodeTransfer);
   registerTransfer(MultiAppCopyTransfer);
+  registerTransfer(MultiAppSeedTransfer);
   registerTransfer(MultiAppInterpolationTransfer);
   registerTransfer(MultiAppPostprocessorTransfer);
   registerTransfer(MultiAppProjectionTransfer);

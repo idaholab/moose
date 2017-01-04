@@ -77,6 +77,7 @@
 #include "NonlocalIntegratedBC.h"
 #include "ShapeElementUserObject.h"
 #include "ShapeSideUserObject.h"
+#include "Executioner.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -91,6 +92,8 @@ InputParameters validParams<FEProblemBase>()
   params.addPrivateParam<MooseMesh *>("mesh");
   params.addParam<unsigned int>("null_space_dimension", 0, "The dimension of the nullspace");
   params.addParam<unsigned int>("transpose_null_space_dimension", 0, "The dimension of the transpose nullspace");
+  params.addParam<ExecFlagType>("reset_rand_on", EXEC_INITIAL, "Execute phase on which to reset random number generator engine.");
+  params.addParam<unsigned int>("master_rand_seed", 1, "Seed for the app/problem's master pseudo random number generator");
   params.addParam<unsigned int>("near_null_space_dimension", 0, "The dimension of the near nullspace");
   params.addParam<bool>("solve", true, "Whether or not to actually solve the Nonlinear system.  This is handy in the case that all you want to do is execute AuxKernels, Transfers, etc. without actually solving anything");
   params.addParam<bool>("use_nonlinear", true, "Determines whether to use a Nonlinear vs a Eigenvalue system (Automatically determined based on executioner)");
@@ -161,9 +164,14 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters) :
     _force_restart(getParam<bool>("force_restart")),
     _fail_next_linear_convergence_check(false),
     _currently_computing_jacobian(false),
-    _started_initial_setup(false)
+    _started_initial_setup(false),
+    _reseed_subapps(false),
+    _master_seed(declareRestartableData<unsigned int>("master_rand_seed")),
+    _rand_engine(declareRestartableData<RandGen<std::mt19937>>("rand_engine")),
+    _reset_rand_on(parameters.get<ExecFlagType>("reset_rand_on"))
 {
-
+  // this is retrieved here so we can have _master_seed be restartable data
+  seedMasterRand(parameters.get<unsigned int>("master_rand_seed"));
   _time = 0.0;
   _time_old = 0.0;
   _t_step = 0;
@@ -553,6 +561,7 @@ void FEProblemBase::initialSetup()
   updateGeomSearch(); // Call all of the rest of the geometric searches
   Moose::perf_log.pop("Initial updateGeomSearch()", "Setup");
 
+  reseedRand(EXEC_INITIAL);
   // Random interface objects
   for (const auto & it : _random_data_objects)
     it.second->updateSeeds(EXEC_INITIAL);
@@ -688,6 +697,8 @@ void FEProblemBase::timestepSetup()
 
   _aux->timestepSetup();
   _nl->timestepSetup();
+
+  reseedRand(EXEC_TIMESTEP_BEGIN);
 
   // Random interface objects
   for (const auto & it : _random_data_objects)
@@ -2780,7 +2791,6 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name, const std::string
   }
 
   MooseSharedPointer<MultiApp> multi_app = _factory.create<MultiApp>(multi_app_name, name, parameters);
-
   _multi_apps.addObject(multi_app);
 
   // Store TranseintMultiApp objects in another container, this is needed for calling computeDT
@@ -3557,6 +3567,8 @@ FEProblemBase::computeResidualType(const NumericVector<Number>& soln, NumericVec
 
   unsigned int n_threads = libMesh::n_threads();
 
+  reseedRand(EXEC_LINEAR);
+
   // Random interface objects
   for (const auto & it : _random_data_objects)
     it.second->updateSeeds(EXEC_LINEAR);
@@ -3627,6 +3639,8 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<
     _aux->zeroVariablesForJacobian();
 
     unsigned int n_threads = libMesh::n_threads();
+
+    reseedRand(EXEC_NONLINEAR);
 
     // Random interface objects
     for (const auto & it : _random_data_objects)

@@ -1301,6 +1301,25 @@ private:
   /// At or beyond initialSteup stage
   bool _started_initial_setup;
 
+public:
+  unsigned int rand() {return _rand_engine();}
+  void seedMasterRand(unsigned int seed) {
+    _reseed_subapps = true;
+    _master_seed = seed;
+    _rand_engine.seed(_master_seed);
+  }
+  unsigned int masterSeed() {return _master_seed;}
+  bool subappsNeedReseed() { bool val = _reseed_subapps; _reseed_subapps = false; return val;}
+private:
+  void reseedRand(ExecFlagType exec_flag) {
+    if (exec_flag == _reset_rand_on)
+      seedMasterRand(_master_seed);
+  }
+  bool _reseed_subapps;
+  unsigned int _master_seed;
+  RandGen<std::mt19937>& _rand_engine;
+  ExecFlagType _reset_rand_on;
+
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;
   friend class MooseEigenSystem;
