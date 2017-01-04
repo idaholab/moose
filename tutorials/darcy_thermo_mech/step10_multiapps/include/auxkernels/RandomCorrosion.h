@@ -86,4 +86,4 @@ private:
   const PostprocessorValue & _temperature;
 };
 
-#endif //RANDOMCORROSION_H
+#endif // RANDOMCORROSION_H

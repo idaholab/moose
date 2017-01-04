@@ -56,4 +56,4 @@ protected:
   const MaterialProperty<Real> & _heat_capacity;
 };
 
-#endif //DARCYCONVECTION_H
+#endif // DARCYCONVECTION_H

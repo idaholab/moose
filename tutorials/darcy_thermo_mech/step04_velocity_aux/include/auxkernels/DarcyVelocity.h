@@ -53,4 +53,4 @@ protected:
   const MaterialProperty<Real> & _viscosity;
 };
 
-#endif //DARCYVELOCITY_H
+#endif // DARCYVELOCITY_H

@@ -11,8 +11,8 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef PACKEDCOLUMN_H_
-#define PACKEDCOLUMN_H_
+#ifndef PACKEDCOLUMN_H
+#define PACKEDCOLUMN_H
 
 #include "Material.h"
 
@@ -55,4 +55,4 @@ protected:
   MaterialProperty<Real> & _viscosity;
 };
 
-#endif //PACKEDCOLUMN_H
+#endif // PACKEDCOLUMN_H
