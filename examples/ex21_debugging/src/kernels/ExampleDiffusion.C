@@ -36,11 +36,11 @@ ExampleDiffusion::ExampleDiffusion(const InputParameters & parameters) :
 Real
 ExampleDiffusion::computeQpResidual()
 {
-  return _coupled_coef[_qp]*Diffusion::computeQpResidual();
+  return _coupled_coef[_qp] * Diffusion::computeQpResidual();
 }
 
 Real
 ExampleDiffusion::computeQpJacobian()
 {
-  return _coupled_coef[_qp]*Diffusion::computeQpJacobian();
+  return _coupled_coef[_qp] * Diffusion::computeQpJacobian();
 }

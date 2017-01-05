@@ -25,13 +25,13 @@
     type = DirichletBC # Simple u=value BC
     variable = pressure
     boundary = left # Name of a sideset in the mesh
-    value = 4000 # (Pa) From Figure 2 from paper.  First dot for 1mm balls.
+    value = 4000 # (Pa) From Figure 2 from paper.  First dot for 1mm spheres.
   [../]
   [./outlet]
     type = DirichletBC
     variable = pressure
     boundary = right
-    value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm balls
+    value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm spheres
   [../]
 []
 

@@ -11,8 +11,8 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef DARCY_THERMO_MECHAPP_H
-#define DARCY_THERMO_MECHAPP_H
+#ifndef DARCYTHERMOMECHAPP_H
+#define DARCYTHERMOMECHAPP_H
 
 #include "MooseApp.h"
 
@@ -32,4 +32,4 @@ public:
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
 };
 
-#endif /* DARCY_THERMO_MECHAPP_H */
+#endif // DARCYTHERMOMECHAPP_H

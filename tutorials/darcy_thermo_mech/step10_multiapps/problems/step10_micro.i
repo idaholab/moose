@@ -30,7 +30,7 @@
 []
 
 [Variables]
-  [./temp]
+  [./temperature]
     initial_condition = 300
   [../]
 []
@@ -46,27 +46,27 @@
     execute_on = 'timestep_end'
     variable = phi
     reference_temperature = 300
-    temperature = temp_in
+    temperature = temperature_in
   [../]
 []
 
 [Kernels]
   [./heat_conduction]
     type = HeatConduction
-    variable = temp
+    variable = temperature
   [../]
 []
 
 [BCs]
   [./left]
     type = PostprocessorDirichletBC
-    variable = temp
+    variable = temperature
     boundary = left
-    postprocessor = temp_in
+    postprocessor = temperature_in
   [../]
   [./right]
     type = NeumannBC
-    variable = temp
+    variable = temperature
     boundary = right
     value = 100 # prescribed flux
 
@@ -77,7 +77,7 @@
   [./column]
     type = PackedColumn
     block = 0
-    ball_radius = 1 # mm
+    sphere_radius = 1 # mm
     phase = phi
   [../]
 []
@@ -87,14 +87,14 @@
 []
 
 [Postprocessors]
-  [./temp_in]
+  [./temperature_in]
     type = Receiver
     default = 301
   [../]
   [./k_eff]
     type = ThermalConductivity
-    variable = temp
-    T_hot = temp_in
+    variable = temperature
+    T_hot = temperature_in
     flux = 100
     dx = 0.1
     boundary = right

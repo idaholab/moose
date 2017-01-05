@@ -47,10 +47,8 @@ protected:
   /// identify a coupled variable
   unsigned int _pressure_var;
 
-  /**
-   * These references will be set by the initialization list so that
-   * values can be pulled from the Material system.
-   */
+  /// These references will be set by the initialization list so that
+  /// values can be pulled from the Material system.
   const MaterialProperty<Real> & _permeability;
   const MaterialProperty<Real> & _porosity;
   const MaterialProperty<Real> & _viscosity;
@@ -58,4 +56,4 @@ protected:
   const MaterialProperty<Real> & _heat_capacity;
 };
 
-#endif //DARCYCONVECTION_H
+#endif // DARCYCONVECTION_H

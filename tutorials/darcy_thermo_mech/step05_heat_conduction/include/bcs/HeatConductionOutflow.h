@@ -42,11 +42,15 @@ public:
   HeatConductionOutflow(const InputParameters & parameters);
 
 protected:
-  /// This is called to integrate the residual across the boundary
+  /**
+   * This is called to integrate the residual across the boundary.
+   */
   virtual Real computeQpResidual() override;
 
-  /// Optional (but recommended!) to compute the derivative of the
-  /// residual with respect to _this_ variable
+  /**
+   * Optional (but recommended!) to compute the derivative of the
+   * residual with respect to _this_ variable.
+   */
   virtual Real computeQpJacobian() override;
 
   /// Thermal conductivity of the material
@@ -54,4 +58,4 @@ protected:
 };
 
 
-#endif //HEATCONDUCTIONOUTFLOW_H
+#endif // HEATCONDUCTIONOUTFLOW_H

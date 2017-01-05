@@ -32,11 +32,11 @@ ExampleDiffusion::ExampleDiffusion(const InputParameters & parameters) :
 Real
 ExampleDiffusion::computeQpResidual()
 {
-  return _diffusivity*Diffusion::computeQpResidual();
+  return _diffusivity * Diffusion::computeQpResidual();
 }
 
 Real
 ExampleDiffusion::computeQpJacobian()
 {
-  return _diffusivity*Diffusion::computeQpJacobian();
+  return _diffusivity * Diffusion::computeQpJacobian();
 }

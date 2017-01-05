@@ -42,5 +42,5 @@ CoupledDirichletBC::CoupledDirichletBC(const InputParameters & parameters) :
 Real
 CoupledDirichletBC::computeQpResidual()
 {
-  return _u[_qp]-(_alpha*_some_var_val[_qp]);
+  return _u[_qp] - (_alpha * _some_var_val[_qp]);
 }

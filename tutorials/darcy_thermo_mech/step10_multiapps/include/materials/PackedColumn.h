@@ -11,8 +11,8 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef PACKEDCOLUMN_H_
-#define PACKEDCOLUMN_H_
+#ifndef PACKEDCOLUMN_H
+#define PACKEDCOLUMN_H
 
 #include "Material.h"
 
@@ -42,8 +42,8 @@ protected:
    */
   virtual void computeQpProperties() override;
 
-  /// The radius of the balls in the column
-  const Real & _ball_radius;
+  /// The radius of the spheres in the column
+  const Real & _sphere_radius;
 
   /// Based on the paper this will
   LinearInterpolation _permeability_interpolation;
@@ -77,6 +77,11 @@ protected:
 
   /// The coupled thermal conductivity
   const VariableValue & _conductivity_variable;
+
+  /// Single value to store the interpolated permeability base on
+  /// sphere size.  The _sphere_radius is assumed to be constant, so
+  /// we only have to compute this once.
+  Real _interpolated_permeability;
 };
 
-#endif //PACKEDCOLUMN_H
+#endif // PACKEDCOLUMN_H
