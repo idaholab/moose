@@ -11,7 +11,7 @@ try_use_raven_conda ()
 }
 
 #Check for conda and activate raven_libraries
-if which conda;
+if which conda 2> /dev/null;
 then
     if conda env list | grep -q raven_libraries;
     then

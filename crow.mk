@@ -79,7 +79,7 @@ $(CROW_DIR)/control_modules/_distribution1D.so : $(CROW_DIR)/control_modules/dis
 						 $(CROW_DIR)/src/utilities/MDreader.C \
 						 $(CROW_DIR)/src/distributions/distribution.C $(CROW_LIB)
 # Swig
-	swig -c++ -python $(SWIG_PY_FLAGS)  -I$(CROW_DIR)/include/distributions/  -Iinclude/base/ -Iinclude/utilities/ \
+	. $(CROW_DIR)/scripts/setup_raven_libs && swig -c++ -python $(SWIG_PY_FLAGS)  -I$(CROW_DIR)/include/distributions/  -Iinclude/base/ -Iinclude/utilities/ \
 	  $(CROW_MODULES)/distribution1D.i
 # Compile
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile \
@@ -104,11 +104,10 @@ $(CROW_DIR)/control_modules/_crowtools.so : $(CROW_DIR)/control_modules/crowtool
 					     $(CROW_DIR)/src/tools/CrowToolsContainer.C \
 					     $(CROW_DIR)/src/utilities/InterpolationFunctions.C $(CROW_LIB)
 # Swig
-	swig -c++ -python $(SWIG_PY_FLAGS) -I$(CROW_DIR)/../moose/include/base/  \
+	. $(CROW_DIR)/scripts/setup_raven_libs && swig -c++ -python $(SWIG_PY_FLAGS) -I$(CROW_DIR)/../moose/include/base/  \
 	  -I$(CROW_DIR)/../moose/include/utils/ -I$(CROW_DIR)/include/tools/ \
 	  -I$(CROW_DIR)/include/utilities/ -I$(CROW_DIR)/include/base/ \
 	  $(CROW_MODULES)/crowtools.i
-#swig -c++ -python $(SWIG_PY_FLAGS) -I$(CROW_DIR)/include/tools/  -I$(CROW_DIR)/include/utilities/ $(CROW_DIR)/control_modules/crowtools.i
 # Compile
 	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile \
 	$(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(PYTHON_INCLUDE) $(app_INCLUDES)  $(libmesh_INCLUDE) -std=c++11 \
