@@ -56,7 +56,7 @@ GeneralizedPlaneStrainUserObject::execute()
   for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     // residual, integral of stress_zz for COORD_XYZ
-    _residual += _JxW[_qp] * _coord[_qp] * (_stress[_qp](_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction) - _out_of_plane_pressure.value(_t, _q_point[_qp]) * _factor);
+    _residual += _JxW[_qp] * _coord[_qp] * (_stress[_qp](_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction) + _out_of_plane_pressure.value(_t, _q_point[_qp]) * _factor);
     // diagonal jacobian, integral of C(2, 2, 2, 2) for COORD_XYZ
     _jacobian += _JxW[_qp] * _coord[_qp] * _Cijkl[_qp](_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction);
   }
