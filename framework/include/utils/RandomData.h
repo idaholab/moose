@@ -19,8 +19,7 @@
 #include "MooseTypes.h"
 #include "MooseRandom.h"
 
-#include "libmesh/libmesh_config.h"
-#include LIBMESH_INCLUDE_UNORDERED_MAP
+#include <unordered_map>
 
 class FEProblemBase;
 class MooseMesh;
@@ -66,7 +65,7 @@ private:
   unsigned int _current_master_seed;
   unsigned int _new_seed;
 
-  LIBMESH_BEST_UNORDERED_MAP<dof_id_type, unsigned int> _seeds;
+  std::unordered_map<dof_id_type, unsigned int> _seeds;
 };
 
 #endif //RANDOMDATA_H
