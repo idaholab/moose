@@ -10,7 +10,7 @@
 [Variables]
   [./pressure]
   [../]
-  [./temp]
+  [./temperature]
     initial_condition = 300 # Start at room temperature
   [../]
 []
@@ -37,15 +37,15 @@
   [../]
   [./heat_conduction]
     type = HeatConduction
-    variable = temp
+    variable = temperature
   [../]
   [./heat_conduction_time_derivative]
     type = HeatCapacityConductionTimeDerivative
-    variable = temp
+    variable = temperature
   [../]
   [./heat_convection]
     type = DarcyConvection
-    variable = temp
+    variable = temperature
     darcy_pressure = pressure
   [../]
 []
@@ -100,13 +100,13 @@
   [../]
   [./inlet_temperature]
     type = DirichletBC
-    variable = temp
+    variable = temperature
     boundary = left
     value = 350 # (C)
   [../]
   [./outlet_temperature]
     type = HeatConductionOutflow
-    variable = temp
+    variable = temperature
     boundary = right
   [../]
 []
@@ -115,7 +115,7 @@
   [./column]
     type = PackedColumn
     block = 0
-    ball_radius = 1
+    sphere_radius = 1
   [../]
 []
 

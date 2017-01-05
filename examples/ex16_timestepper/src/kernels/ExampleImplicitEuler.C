@@ -31,11 +31,11 @@ ExampleImplicitEuler::ExampleImplicitEuler(const InputParameters & parameters) :
 Real
 ExampleImplicitEuler::computeQpResidual()
 {
-  return _time_coefficient[_qp]*TimeDerivative::computeQpResidual();
+  return _time_coefficient[_qp] * TimeDerivative::computeQpResidual();
 }
 
 Real
 ExampleImplicitEuler::computeQpJacobian()
 {
-  return _time_coefficient[_qp]*TimeDerivative::computeQpJacobian();
+  return _time_coefficient[_qp] * TimeDerivative::computeQpJacobian();
 }

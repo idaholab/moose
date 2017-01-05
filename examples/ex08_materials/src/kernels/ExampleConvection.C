@@ -31,10 +31,10 @@ ExampleConvection::ExampleConvection(const InputParameters & parameters) :
 
 Real ExampleConvection::computeQpResidual()
 {
-  return _test[_i][_qp]*(_velocity[_qp]*_grad_u[_qp]);
+  return _test[_i][_qp] * (_velocity[_qp] * _grad_u[_qp]);
 }
 
 Real ExampleConvection::computeQpJacobian()
 {
-  return _test[_i][_qp]*(_velocity[_qp]*_grad_phi[_j][_qp]);
+  return _test[_i][_qp] * (_velocity[_qp] * _grad_phi[_j][_qp]);
 }

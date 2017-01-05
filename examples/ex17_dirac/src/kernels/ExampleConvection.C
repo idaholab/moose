@@ -52,11 +52,11 @@ ExampleConvection::ExampleConvection(const InputParameters & parameters) :
 Real ExampleConvection::computeQpResidual()
 {
   // velocity * _grad_u[_qp] is actually doing a dot product
-  return _test[_i][_qp]*(_velocity*_grad_u[_qp]);
+  return _test[_i][_qp] * (_velocity * _grad_u[_qp]);
 }
 
 Real ExampleConvection::computeQpJacobian()
 {
   // the partial derivative of _grad_u is just _grad_phi[_j]
-  return _test[_i][_qp]*(_velocity*_grad_phi[_j][_qp]);
+  return _test[_i][_qp] * (_velocity * _grad_phi[_j][_qp]);
 }

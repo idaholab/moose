@@ -33,11 +33,11 @@ ExampleTimeDerivative::ExampleTimeDerivative(const InputParameters & parameters)
 Real
 ExampleTimeDerivative::computeQpResidual()
 {
-  return _time_coefficient*TimeDerivative::computeQpResidual();
+  return _time_coefficient * TimeDerivative::computeQpResidual();
 }
 
 Real
 ExampleTimeDerivative::computeQpJacobian()
 {
-  return _time_coefficient*TimeDerivative::computeQpJacobian();
+  return _time_coefficient * TimeDerivative::computeQpJacobian();
 }
