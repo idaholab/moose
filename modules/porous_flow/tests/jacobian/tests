@@ -306,4 +306,45 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
+
+  [./line_sink01]
+    type = 'PetscJacobianTester'
+    input = 'line_sink01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./line_sink02]
+    type = 'PetscJacobianTester'
+    input = 'line_sink02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./line_sink03]
+    type = 'PetscJacobianTester'
+    input = 'line_sink03.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    skip = 'Only works sporadically -- too many qps?'
+  [../]
+  [./line_sink01_5]
+    type = 'PetscJacobianTester'
+    input = 'line_sink01.i'
+    cli_args = 'DiracKernels/dirac4/point_file=five_points.bh DiracKernels/dirac5/point_file=five_points.bh DiracKernels/dirac6/point_file=five_points.bh'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./line_sink02_5]
+    type = 'PetscJacobianTester'
+    input = 'line_sink02.i'
+    cli_args = 'DiracKernels/dirac4/point_file=five_points.bh DiracKernels/dirac5/point_file=five_points.bh DiracKernels/dirac6/point_file=five_points.bh'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./line_sink04]
+    type = 'PetscJacobianTester'
+    input = 'line_sink04.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    skip = 'Only works sporadically -- too many qps?'
+  [../]
 []
