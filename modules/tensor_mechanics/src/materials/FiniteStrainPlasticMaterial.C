@@ -10,7 +10,7 @@
 template<>
 InputParameters validParams<FiniteStrainPlasticMaterial>()
 {
-  InputParameters params = validParams<ComputeStressBase>();
+  InputParameters params = validParams<FiniteStrainMaterial>();
 
   params.addRequiredParam< std::vector<Real> >("yield_stress", "Input data as pairs of equivalent plastic strain and yield stress: Should start with equivalent plastic strain 0");
   params.addParam<Real>("rtol",1e-8,"Plastic strain NR tolerance");
@@ -22,16 +22,12 @@ InputParameters validParams<FiniteStrainPlasticMaterial>()
 }
 
 FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const InputParameters & parameters) :
-    ComputeStressBase(parameters),
+    FiniteStrainMaterial(parameters),
     _yield_stress_vector(getParam< std::vector<Real> >("yield_stress")),//Read from input file
     _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
     _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
     _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
     _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
-    _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
-    _strain_increment(getMaterialProperty<RankTwoTensor>("strain_increment")),
-    _rotation_increment(getMaterialProperty<RankTwoTensor>("rotation_increment")),
-    _elasticity_tensor(getMaterialProperty<RankFourTensor>("elasticity_tensor")),
     _rtol(getParam<Real>("rtol")),
     _ftol(getParam<Real>("ftol")),
     _eptol(getParam<Real>("eptol")),
@@ -42,12 +38,11 @@ FiniteStrainPlasticMaterial::FiniteStrainPlasticMaterial(const InputParameters &
 
 void FiniteStrainPlasticMaterial::initQpStatefulProperties()
 {
-  ComputeStressBase::initQpStatefulProperties();
-  _stress_old[_qp] = _stress[_qp];
-
+  _total_strain[_qp].zero();
+  _elastic_strain[_qp].zero();
+  _stress[_qp].zero();
   _plastic_strain[_qp].zero();
   _plastic_strain_old[_qp].zero();
-
   _eqv_plastic_strain[_qp] = 0.0;
 }
 
@@ -60,10 +55,24 @@ void FiniteStrainPlasticMaterial::computeQpStress()
   //Rotate the stress tensor to the current configuration
   _stress[_qp] = _rotation_increment[_qp]*_stress[_qp]*_rotation_increment[_qp].transpose();
 
+  //Calculate elastic strain increment
+  RankTwoTensor delta_ee = _strain_increment[_qp]-(_plastic_strain[_qp]-_plastic_strain_old[_qp]);
+
+  //Update elastic strain tensor in intermediate configuration
+  _elastic_strain[_qp] = _elastic_strain_old[_qp] + delta_ee;
+
+  //Rotate elastic strain tensor to the current configuration
+  _elastic_strain[_qp] = _rotation_increment[_qp] * _elastic_strain[_qp] * _rotation_increment[_qp].transpose();
+
   //Rotate plastic strain tensor to the current configuration
   _plastic_strain[_qp] = _rotation_increment[_qp] * _plastic_strain[_qp] * _rotation_increment[_qp].transpose();
 
-  _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+  //Update strain in intermediate configuration
+  _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+
+  //Rotate strain to current configuration
+  _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
+
 }
 
 /**
@@ -272,7 +281,11 @@ FiniteStrainPlasticMaterial::returnMap(const RankTwoTensor & sig_old, const Real
     }
 
     if (iter>=maxiter)
-      mooseError("Constitutive failure");
+    {
+      _stress[_qp](2,2) = 1.0e6;
+      _console << "Constitutive Error: Too many iterations " << err1 << ' ' <<  err2 << ' ' << err3 << '\n'; //Convergence failure
+      return;
+    }
 
     plastic_strain += delta_dp;
   }

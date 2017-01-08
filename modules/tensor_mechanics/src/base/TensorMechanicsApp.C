@@ -34,6 +34,7 @@
 
 #include "LinearElasticTruss.h"
 #include "FiniteStrainPlasticMaterial.h"
+#include "FiniteStrainRatePlasticMaterial.h"
 #include "FiniteStrainCrystalPlasticity.h"
 #include "FiniteStrainCPSlipRateRes.h"
 #include "FiniteStrainUObasedCP.h"
@@ -222,6 +223,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
 
   registerMaterial(LinearElasticTruss);
   registerMaterial(FiniteStrainPlasticMaterial);
+  registerMaterial(FiniteStrainRatePlasticMaterial);
   registerMaterial(FiniteStrainCrystalPlasticity);
   registerMaterial(FiniteStrainCPSlipRateRes);
   registerMaterial(FiniteStrainUObasedCP);
