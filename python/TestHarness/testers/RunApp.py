@@ -27,6 +27,7 @@ class RunApp(Tester):
     params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
     params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
     params.addParam('allow_warnings',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
+    params.addParam('keep_cerr',        False,  "Throw errors on all ranks. The default is to only throw an error on non-zero ranks.")
 
     params.addParamWithType('allow_deprecated_until', type(time.localtime()), "A test that only runs if current date is less than specified date")
 
@@ -121,6 +122,10 @@ class RunApp(Tester):
 
     if options.scaling and specs['scale_refine'] > 0:
       specs['cli_args'].insert(0, ' -r ' + str(specs['scale_refine']))
+
+    # TestHarness default is to NOT print errors from all ranks on parallel tests
+    if not specs['keep_cerr']:
+      specs['cli_args'].append('--drop-cerr')
 
     # The test harness should never use GDB backtraces: they don't
     # work well when dozens of expect_err jobs run at the same time.
