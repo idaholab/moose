@@ -27,6 +27,7 @@ class RunApp(Tester):
     params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
     params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
     params.addParam('allow_warnings',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
+    params.addParam('keep_cerr',        True,  "keep stderr on all ranks")
 
     params.addParamWithType('allow_deprecated_until', type(time.localtime()), "A test that only runs if current date is less than specified date")
 
@@ -134,6 +135,10 @@ class RunApp(Tester):
       default_ncpus = 1
     else:
       default_ncpus = options.parallel
+
+    # This is overridden as False in RunException.py
+    if not specs['keep_cerr']:
+      specs['cli_args'].append('--drop-cerr')
 
     caveats = []
     if nthreads > options.nthreads:
