@@ -5,6 +5,7 @@
 #include "RELAP7App.h"
 #include <map>
 #include <unordered_set>
+#include <numeric>
 
 class GeometricalComponent;
 
@@ -27,7 +28,8 @@ public:
   virtual RealVectorValue getDirection() { return _dir; }
   virtual Real getRotation() { return _rotation; }
 
-  virtual Real getNumElems() { return _n_elems; }
+  virtual Real getNumNodes() { return _n_nodes; }
+  virtual Real getNumElems() { return _n_elem; }
   virtual Real getLength() { return _length; }
 
   virtual const std::vector<RELAP7::Connection> & getConnections(RELAP7::EEndType id) const;
@@ -38,23 +40,39 @@ protected:
   /// Node IDs
   unsigned int _first_node_id;
   unsigned int _last_node_id;
+
   /// Physical position in the space
   Point _position;
+
   /// Offset for mesh generation
   Point _offset;
+
   /// Direction this pipe is going to
   RealVectorValue _dir;
+
   /// Rotation of the component around x-axis in non-displaced space
   Real _rotation;
 
   /// True if simulation is using a second order mesh
   bool _2nd_order_mesh;
 
+  /// Number of sections in the geometric component
+  unsigned int _n_sections;
+
   /// Length of the geometric component along the main axis
   Real _length;
 
+  /// Length of each subsection of the geometric component
+  std::vector<Real> _lengths;
+
   /// Number of elements along the main axis
-  unsigned int _n_elems;
+  unsigned int _n_elem;
+
+  /// Number of elements in each subsection of the geometric component
+  std::vector<unsigned int> _n_elems;
+
+  /// Number of nodes along the main axis
+  unsigned int _n_nodes;
 
   /// Node locations along the main axis
   std::vector<Real> _node_locations;
@@ -62,8 +80,11 @@ protected:
   std::map<RELAP7::EEndType, std::vector<RELAP7::Connection> > _connections;
 
 private:
-  void processNodeLocations();
-  void generateIntermediateNodes();
+  unsigned int validateNSectionsConsistent(int n_lengths, int n_n_elems);
+  void generateNodeLocations();
+  unsigned int computeNumberOfNodes(unsigned int n_elems);
+  std::vector<Real> getUniformNodeLocations(Real length, unsigned int n_nodes);
+  void placeLocalNodeLocations(Real start_length, unsigned int start_node, std::vector<Real> & local_node_locations);
 };
 
 #endif /* GEOMETRICALCOMPONENT_H */
