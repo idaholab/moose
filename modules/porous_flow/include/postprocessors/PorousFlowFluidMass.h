@@ -26,6 +26,7 @@ public:
   PorousFlowFluidMass(const InputParameters & parameters);
 
 protected:
+  virtual Real computeIntegral() override;
   virtual Real computeQpIntegral() override;
 
   /// Holds info on the PorousFlow variables
@@ -44,6 +45,8 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real> > > & _mass_fraction;
   /// Saturation threshold - only fluid mass at saturations below this are calculated
   const Real _saturation_threshold;
+  /// the variable for the corresponding PorousFlowMassTimeDerivative Kernel: this provides test functions
+  MooseVariable * const _var;
 };
 
 #endif //POROUSFLOWFLUIDMASS_H

@@ -26,6 +26,7 @@ public:
   PorousFlowHeatEnergy(const InputParameters & parameters);
 
 protected:
+  virtual Real computeIntegral() override;
   virtual Real computeQpIntegral() override;
 
   /// Holds info on the PorousFlow variables
@@ -57,6 +58,9 @@ protected:
 
   /// internal energy of the phases, evaluated at the nodes
   const MaterialProperty<std::vector<Real> > * _energy_nodal;
+
+  /// the variable for the corresponding PorousFlowEnergyTimeDerivative Kernel: this provides test functions
+  MooseVariable * const _var;
 };
 
 #endif //POROUSFLOWHEATENERGY_H

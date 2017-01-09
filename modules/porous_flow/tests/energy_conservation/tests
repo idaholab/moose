@@ -4,6 +4,11 @@
     input = 'except01.i'
     expect_err = 'The Dictator proclaims that the phase index 1 in the Postprocessor total_heat is greater than the largest phase index possible, which is 0'
   [../]
+  [./except02]
+    type = 'RunException'
+    input = 'except02.i'
+    expect_err = 'PorousFlowHeatEnergy: The dictator pronounces that the number of porous-flow variables is 2, however you have used kernel_variable_number = 2.  This is an error'
+  [../]
   [./heat01]
     type = 'CSVDiff'
     input = 'heat01.i'
