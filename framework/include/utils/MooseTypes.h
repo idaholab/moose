@@ -166,6 +166,8 @@ enum KernelType
 {
   KT_TIME = 0,
   KT_NONTIME = 1,
+  KT_NONEIGEN = 2,
+  KT_EIGEN  = 3,
   KT_ALL
 };
 

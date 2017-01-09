@@ -3620,12 +3620,18 @@ FEProblemBase::computeResidualType(const NumericVector<Number>& soln, NumericVec
 void
 FEProblemBase::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
 {
-  computeJacobian(soln, jacobian);
+  computeJacobian(soln, jacobian, Moose::KT_ALL);
+}
+
+void
+FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
+{
+  computeJacobian(soln, jacobian, Moose::KT_ALL);
 }
 
 
 void
-FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
+FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type)
 {
   if (!_has_jacobian || !_const_jacobian)
   {
@@ -3669,7 +3675,7 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<
 
     _app.getOutputWarehouse().jacobianSetup();
 
-    _nl->computeJacobian(jacobian);
+    _nl->computeJacobian(jacobian, kernel_type);
 
     _currently_computing_jacobian = false;
     _has_jacobian = true;

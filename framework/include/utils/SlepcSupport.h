@@ -15,7 +15,7 @@
 #ifndef SLEPCSUPPORT_H
 #define SLEPCSUPPORT_H
 
-#include "libmesh/libmesh.h"
+#include "libmesh/libmesh_config.h"
 
 #ifdef LIBMESH_HAVE_SLEPC
 

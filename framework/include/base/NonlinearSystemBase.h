@@ -246,6 +246,12 @@ public:
   void computeJacobian(SparseMatrix<Number> &  jacobian);
 
   /**
+   * Computes Jacobian
+   * @param jacobian Jacobian is formed in here
+   */
+  void computeJacobian(SparseMatrix<Number> &  jacobian, Moose::KernelType kernel_type);
+
+  /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller preconditioning matrices.
    *
    * Used by Physics-based preconditioning
@@ -443,6 +449,8 @@ public:
   const KernelWarehouse & getKernelWarehouse() { return _kernels; }
   const MooseObjectWarehouse<KernelBase> & getTimeKernelWarehouse() { return _time_kernels; }
   const MooseObjectWarehouse<KernelBase> & getNonTimeKernelWarehouse() { return _non_time_kernels; }
+  const MooseObjectWarehouse<KernelBase> & getEigenKernelWarehouse() { return _eigen_kernels; }
+  const MooseObjectWarehouse<KernelBase> & getNonEigenKernelWarehouse() { return _non_eigen_kernels; }
   const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
   const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse() { return _interface_kernels; }
   const MooseObjectWarehouse<DiracKernel> & getDiracKernelWarehouse() { return _dirac_kernels; }
@@ -497,7 +505,7 @@ protected:
    */
   void computeNodalBCs(NumericVector<Number> & residual);
 
-  void computeJacobianInternal(SparseMatrix<Number> &  jacobian);
+  void computeJacobianInternal(SparseMatrix<Number> &  jacobian, Moose::KernelType kernel_type);
 
   void computeDiracContributions(SparseMatrix<Number> * jacobian = NULL);
 
@@ -542,6 +550,8 @@ protected:
   MooseObjectWarehouse<InterfaceKernel> _interface_kernels;
   MooseObjectWarehouse<KernelBase> _time_kernels;
   MooseObjectWarehouse<KernelBase> _non_time_kernels;
+  MooseObjectWarehouse<KernelBase> _eigen_kernels;
+  MooseObjectWarehouse<KernelBase> _non_eigen_kernels;
 
   ///@}
 

@@ -100,7 +100,7 @@ public:
   SubProblem & subProblem();
 
   /// if is it an eigen kernel
-  virtual isEigenKernel() { return _eigen_kernel; }
+  virtual bool isEigenKernel() { return _eigen_kernel; }
 
 protected:
   /// Reference to this kernel's SubProblem

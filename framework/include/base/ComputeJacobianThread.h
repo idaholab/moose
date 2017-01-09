@@ -31,7 +31,7 @@ class KernelWarehouse;
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeJacobianThread(FEProblemBase & fe_problem, SparseMatrix<Number> & jacobian);
+  ComputeJacobianThread(FEProblemBase & fe_problem, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type = Moose::KT_ALL);
 
   // Splitting Constructor
   ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split);
@@ -65,6 +65,9 @@ protected:
 
   // Reference to Kernel storage structure
   const KernelWarehouse & _kernels;
+
+  // kernel type
+  Moose::KernelType _kernel_type;
 
   virtual void computeJacobian();
   virtual void computeFaceJacobian(BoundaryID bnd_id);

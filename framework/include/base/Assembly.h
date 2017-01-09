@@ -503,6 +503,11 @@ public:
   void setCachedJacobianContributions(SparseMatrix<Number> & jacobian);
 
   /**
+   * Zero out previously-cached Jacobian rows.
+   */
+  void zeroCachedJacobianContributions(SparseMatrix<Number> & jacobian);
+
+  /**
    * Adds previously-cached Jacobian values via SparseMatrix::add() calls.
    */
   void addCachedJacobianContributions(SparseMatrix<Number> & jacobian);

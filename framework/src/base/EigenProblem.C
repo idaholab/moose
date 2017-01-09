@@ -27,8 +27,8 @@ template<>
 InputParameters validParams<EigenProblem>()
 {
   InputParameters params = validParams<FEProblemBase>();
-  params.addParam<unsigned int>("n_eigen_pairs", 1, "The dimension of the nullspace");
-  params.addParam<unsigned int>("n_basis_vectors", 3, "The dimension of the nullspace");
+  params.addParam<unsigned int>("n_eigen_pairs", 1, "The number of eigen pairs");
+  params.addParam<unsigned int>("n_basis_vectors", 3, "The dimension of eigen subspaces");
   params.addParam<bool>("generalized_eigenvalue_problem", false, "if we are trying to solve a generalized eigenvalue problem");
 #if LIBMESH_HAVE_SLEPC
   params += Moose::SlepcSupport::getSlepcValidParams();

@@ -18,8 +18,6 @@
 #Its inverse will be 0.49950700634518.
 
 [Variables]
-  active = 'u'
-
   [./u]
     # second order is way better than first order
     order = FIRST

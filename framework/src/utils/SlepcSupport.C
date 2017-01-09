@@ -15,7 +15,7 @@
 #ifndef SLEPCSUPPORT_H
 #define SLEPCSUPPORT_H
 
-#include "libmesh/libmesh.h"
+#include "libmesh/libmesh_config.h"
 
 #ifdef LIBMESH_HAVE_SLEPC
 
@@ -30,17 +30,18 @@ namespace SlepcSupport
 {
 
   InputParameters
-  getPetscValidParams()
+  getSlepcValidParams()
   {
     InputParameters params = emptyInputParameters();
 
-    MooseEnum eigenvalue_problem_type("HEP NHEP GHEP GNHEP GHIEP");
-    params.addParam<MooseEnum>   ("eigenvalue_problem_type", eigenvalue_problem_type,
-                                  "HEP: Hermitian "
-                                  "NHEP: Non-Hermitian "
-                                  "GHEP: Gerneralized Hermitian "
-                                  "GNHEP: Generalized Non-Hermitian "
-                                  "GHIEP: Generalized indefinite Hermitian ");
+    // We are solving a Non-Hermitian eigenvalue problem by default
+    MooseEnum eigenvalue_problem_type("HEP NHEP GHEP GNHEP GHIEP","NHEP");
+    params.addParam<MooseEnum>("eigenvalue_problem_type", eigenvalue_problem_type,
+                               "HEP: Hermitian "
+                               "NHEP: Non-Hermitian "
+                               "GHEP: Gerneralized Hermitian "
+                               "GNHEP: Generalized Non-Hermitian "
+                               "GHIEP: Generalized indefinite Hermitian ");
     return params;
   }
 

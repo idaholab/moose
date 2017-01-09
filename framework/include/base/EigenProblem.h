@@ -48,6 +48,7 @@ public:
 protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
+
   NonlinearEigenSystem * _nl_eigen;
 };
 

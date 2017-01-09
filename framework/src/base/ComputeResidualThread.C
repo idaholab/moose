@@ -103,6 +103,17 @@ ComputeResidualThread::onElement(const Elem *elem)
   case Moose::KT_NONTIME:
     warehouse = &_non_time_kernels;
     break;
+
+  case Moose::KT_EIGEN:
+    warehouse = &_nl.getEigenKernelWarehouse();
+    break;
+
+  case Moose::KT_NONEIGEN:
+    warehouse = &_nl.getNonEigenKernelWarehouse();
+    break;
+
+  default:
+    mooseError("Unknown Kernel Type \n");
   }
 
   if (warehouse->hasActiveBlockObjects(_subdomain, _tid))

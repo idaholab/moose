@@ -1610,7 +1610,7 @@ NonlinearSystemBase::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobi
 }
 
 void
-NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
+NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> &  jacobian, Moose::KernelType kernel_type)
 {
 #ifdef LIBMESH_HAVE_PETSC
   //Necessary for speed
@@ -1663,7 +1663,7 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     {
     case Moose::COUPLING_DIAG:
       {
-        ComputeJacobianThread cj(_fe_problem, jacobian);
+        ComputeJacobianThread cj(_fe_problem, jacobian, kernel_type);
         Threads::parallel_reduce(elem_range, cj);
 
         unsigned int n_threads = libMesh::n_threads();
@@ -1847,7 +1847,10 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> &  jacobian)
     } // end loop over boundary nodes
 
     // Set the cached NodalBC values in the Jacobian matrix
-    _fe_problem.assembly(0).setCachedJacobianContributions(jacobian);
+   if (kernel_type == Moose::KT_EIGEN)
+     _fe_problem.assembly(0).zeroCachedJacobianContributions(jacobian);
+   else
+     _fe_problem.assembly(0).setCachedJacobianContributions(jacobian);
   }
   PARALLEL_CATCH;
   jacobian.close();
@@ -1870,8 +1873,15 @@ NonlinearSystemBase::setVariableGlobalDoFs(const std::string & var_name)
   _var_all_dof_indices.assign(aldit._all_dof_indices.begin(), aldit._all_dof_indices.end());
 }
 
+
 void
 NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian)
+{
+  computeJacobian(jacobian, Moose::KT_ALL);
+}
+
+void
+NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type)
 {
   Moose::perf_log.push("compute_jacobian()", "Execution");
 
@@ -1879,7 +1889,7 @@ NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian)
 
   try {
     jacobian.zero();
-    computeJacobianInternal(jacobian);
+    computeJacobianInternal(jacobian, kernel_type);
   }
   catch (MooseException & e)
   {

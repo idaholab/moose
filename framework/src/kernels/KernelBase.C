@@ -44,7 +44,7 @@ InputParameters validParams<KernelBase>()
 
   params.declareControllable("enable");
 
-  params.addParam<bool>   ("eigen_kernel", false,"Whether or not this kernel will be used as an eigen kernel");
+  params.addParam<bool>("eigen_kernel", false, "Whether or not this kernel will be used as an eigen kernel");
   return params;
 }
 

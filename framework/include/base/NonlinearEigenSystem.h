@@ -20,6 +20,8 @@
 
 #include "SystemBase.h"
 #include "NonlinearSystemBase.h"
+#include "KernelBase.h"
+#include "TimeKernel.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -70,6 +72,14 @@ public:
 
   // return all converged eigenvalues
   virtual const std::vector<std::pair<Real, Real> > & getAllConvergedEigenvalues() { return _eigen_values; }
+
+  /**
+   * Adds a kernel
+   * @param kernel_name The type of the kernel
+   * @param name The name of the kernel
+   * @param parameters Kernel parameters
+   */
+  virtual void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters) override;
 
   // return the number of converged eigenvlues
   virtual const unsigned int getNumConvergedEigenvalues() { return _transient_sys.get_n_converged(); };

@@ -27,7 +27,7 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem, SparseMatrix<Number> & jacobian) :
+ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type) :
     ThreadedElementLoop<ConstElemRange>(fe_problem),
     _jacobian(jacobian),
     _nl(fe_problem.getNonlinearSystemBase()),
@@ -35,7 +35,8 @@ ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem, SparseM
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
     _dg_kernels(_nl.getDGKernelWarehouse()),
     _interface_kernels(_nl.getInterfaceKernelWarehouse()),
-    _kernels(_nl.getKernelWarehouse())
+    _kernels(_nl.getKernelWarehouse()),
+    _kernel_type(kernel_type)
 {
 }
 
@@ -48,7 +49,8 @@ ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads:
     _integrated_bcs(x._integrated_bcs),
     _dg_kernels(x._dg_kernels),
     _interface_kernels(x._interface_kernels),
-    _kernels(x._kernels)
+    _kernels(x._kernels),
+    _kernel_type(x._kernel_type)
 {
 }
 
@@ -59,9 +61,37 @@ ComputeJacobianThread::~ComputeJacobianThread()
 void
 ComputeJacobianThread::computeJacobian()
 {
-  if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
+  // Temporary warehouse
+  const MooseObjectWarehouse<KernelBase> * warehouse;
+  switch (_kernel_type)
   {
-    const std::vector<MooseSharedPointer<KernelBase> > & kernels = _kernels.getActiveBlockObjects(_subdomain, _tid);
+  case Moose::KT_ALL:
+    warehouse = &_nl.getKernelWarehouse();
+    break;
+
+  case Moose::KT_TIME:
+    warehouse = &_nl.getTimeKernelWarehouse();
+    break;
+
+  case Moose::KT_NONTIME:
+    warehouse = &_nl.getNonTimeKernelWarehouse();
+    break;
+
+  case Moose::KT_EIGEN:
+    warehouse = &_nl.getEigenKernelWarehouse();
+    break;
+
+  case Moose::KT_NONEIGEN:
+    warehouse = &_nl.getNonEigenKernelWarehouse();
+    break;
+
+  default:
+    mooseError("Unknown kernel type \n");
+  }
+
+  if (warehouse->hasActiveBlockObjects(_subdomain, _tid))
+  {
+    const std::vector<MooseSharedPointer<KernelBase> > & kernels = warehouse->getActiveBlockObjects(_subdomain, _tid);
     for (const auto & kernel : kernels)
       if (kernel->isImplicit())
       {

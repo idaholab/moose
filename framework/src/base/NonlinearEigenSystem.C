@@ -33,14 +33,14 @@ void assemble_matrix(EquationSystems & es, const std::string & system_name)
   EigenProblem * p = es.parameters.get<EigenProblem *>("_eigen_problem");
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
 
-  p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_A);
+  p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_A, Moose::KT_NONEIGEN);
 
   // if it is a generalized eigenvalue problem
   bool generalized_eigenvalue_problem = p->isGeneralizedEigenvalueProblem();
   if (generalized_eigenvalue_problem)
   {
     if (eigen_system.matrix_B)
-      p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_B);
+      p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_B, Moose::KT_EIGEN);
     else
       mooseError("It is a generalized eigenvalue problem but matrix B is empty \n");
   }
@@ -62,6 +62,7 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
 {
   if (eigen_problem.isGeneralizedEigenvalueProblem())
     _transient_sys.set_eigenproblem_type(GNHEP);
+
   // Give the system a pointer to the matrix assembly
   // function defined below.
   sys().attach_assemble_function(Moose::assemble_matrix);
@@ -146,5 +147,36 @@ NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
   }
   return _transient_sys.get_eigenpair(n);
 }
+
+
+void
+NonlinearEigenSystem::addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters)
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    // Create the kernel object via the factory and add to warehouse
+    MooseSharedPointer<KernelBase> kernel = _factory.create<KernelBase>(kernel_name, name, parameters, tid);
+    _kernels.addObject(kernel, tid);
+
+    // Store time/non-time kernels separately
+    MooseSharedPointer<TimeKernel> t_kernel = MooseSharedNamespace::dynamic_pointer_cast<TimeKernel>(kernel);
+    if (t_kernel)
+      _time_kernels.addObject(kernel, tid);
+    else
+      _non_time_kernels.addObject(kernel, tid);
+
+    // Store eigen kernels separately
+    if (kernel->isEigenKernel())
+      _eigen_kernels.addObject(kernel, tid);
+    else
+      _non_eigen_kernels.addObject(kernel, tid);
+  }
+
+  if (parameters.get<std::vector<AuxVariableName> >("save_in").size() > 0)
+    _has_save_in = true;
+  if (parameters.get<std::vector<AuxVariableName> >("diag_save_in").size() > 0)
+    _has_diag_save_in = true;
+}
+
 
 #endif /* LIBMESH_HAVE_SLEPC */
