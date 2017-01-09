@@ -29,20 +29,19 @@
 []
 
 [Materials]
-  [./prop_to_time]
-    type = ProportionalToTime
+  [./stateful]
+    type = StatefulMaterial
   [../]
 []
 
 [Executioner]
   type = Transient
-  start_time = 0.0
 []
 
 [Postprocessors]
   [./matl_integral]
     type = ElementIntegralMaterialProperty
-    mat_prop = prop_to_time
+    mat_prop = diffusivity
     execute_on = timestep_end
     outputs = 'console csv'
   [../]
@@ -50,15 +49,5 @@
 
 [Outputs]
   csv = true
-  color = false
-  [./exodus]
-    type = Exodus
-    execute_on = 'timestep_end'
-  [../]
-  [./console]
-    type = Console
-    perf_log = true
-    max_rows = 10
-  [../]
+  exodus = true
 []
-

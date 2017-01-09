@@ -3,14 +3,14 @@
 []
 
 [Mesh] #dummy
-  type = GeneratedMesh 
+  type = GeneratedMesh
   dim = 2
 []
 
 [Executioner]
   type = Transient
   start_time = 0.0
-  dt = 1 
+  dt = 1
   end_time = 10.0
 []
 
@@ -20,6 +20,9 @@
     app_type = MooseTestApp
     execute_on = timestep_end
     input_files = material_sub_app_test_sub.i
+
+    # Test that stateful material properties
+    # are updated properly with subcycling
     sub_cycling = true
   [../]
 []
@@ -27,11 +30,4 @@
 [Outputs]
   csv = false
   exodus = false
-  color = false
-  [./console]
-    type = Console
-    perf_log = true
-    output_linear = false
-    max_rows = 15
-  [../]
 []
