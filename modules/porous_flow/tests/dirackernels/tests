@@ -19,4 +19,171 @@
     input = 'theis3.i'
     csvdiff = 'theis3.csv'
   [../]
+
+  [./bh_except01]
+    type = 'RunException'
+    input = 'bh_except01.i'
+    expect_err = 'PorousFlowLineSink: The Dictator declares that the number of fluid phases is 1, but you have set the fluid_phase to 1.  You must try harder.'
+  [../]
+  [./bh_except02]
+    type = 'RunException'
+    input = 'bh_except02.i'
+    expect_err = 'PorousFlowLineSink: The Dictator declares that the number of fluid components is 1, but you have set the mass_fraction_component to 1.  Please be assured that the Dictator has noted your error.'
+  [../]
+  [./bh_except03]
+    type = 'RunException'
+    input = 'bh_except03.i'
+    expect_err = 'PorousFlowLineSink: You have specified function_of=porepressure, but you do not have a quadpoint porepressure material'
+  [../]
+  [./bh_except04]
+    type = 'RunException'
+    input = 'bh_except04.i'
+    expect_err = 'PorousFlowLineSink: You have specified function_of=temperature, but you do not have a quadpoint temperature material'
+  [../]
+  [./bh_except05]
+    type = 'RunException'
+    input = 'bh_except05.i'
+    expect_err = 'PorousFlowLineSink: You have specified a fluid component, but do not have a nodal mass-fraction material'
+  [../]
+  [./bh_except06]
+    type = 'RunException'
+    input = 'bh_except06.i'
+    expect_err = 'PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material'
+  [../]
+  [./bh_except07]
+    type = 'RunException'
+    input = 'bh_except07.i'
+    expect_err = 'PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material'
+  [../]
+  [./bh_except08]
+    type = 'RunException'
+    input = 'bh_except08.i'
+    expect_err = 'PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material'
+  [../]
+  [./bh_except09]
+    type = 'RunException'
+    input = 'bh_except09.i'
+    expect_err = 'PorousFlowLineSink: You have set use_enthalpy=true, but do not have a nodal enthalpy material'
+  [../]
+  [./bh_except10]
+    type = 'RunException'
+    input = 'bh_except10.i'
+    expect_err = 'PorousFlowLineSink: You have set use_internal_energy=true, but do not have a nodal internal-energy material'
+  [../]
+  [./bh_except11]
+    type = 'RunException'
+    input = 'bh_except11.i'
+    expect_err = 'PorousFlowLineSink: You have set use_relative_permeability=true, but do not have a nodal relative permeability material'
+  [../]
+  [./bh_except12]
+    type = 'RunException'
+    input = 'bh_except12.i'
+    expect_err = 'PorousFlowLineGeometry: Error opening file does_not_exist'
+  [../]
+  [./bh_except13]
+    type = 'RunException'
+    input = 'bh_except13.i'
+    expect_err = 'PorousFlowLineGeometry: zero-segment length detected at \(x,y,z\) = 0.1 0.2 0.3'
+  [../]
+  [./bh_except14]
+    type = 'RunException'
+    input = 'bh_except14.i'
+    expect_err = 'The effective element size \(about 0.2-times-true-ele-size\) for an element containing a Peaceman-type borehole must be \(much\) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size 0.39598 and the borehole radius is 10'
+  [../]
+  [./bh_except15]
+    type = 'RunException'
+    input = 'bh_except15.i'
+    expect_err = 'PorousFlowPeacemanBorehole: You have specified function_of=porepressure, but you do not have a quadpoint permeability material'
+  [../]
+  [./bh_except16]
+    type = 'RunException'
+    input = 'bh_except16.i'
+    expect_err = 'PorousFlowPeacemanBorehole: You have specified function_of=temperature, but you do not have a quadpoint thermal_conductivity material'
+  [../]
+
+  [./pls01_00]
+    type = 'CSVDiff'
+    input = 'pls01.i'
+    cli_args = 'DiracKernels/pls/point_file=pls01_00.bh Outputs/file_base=pls01_00'
+    csvdiff = 'pls01_00.csv'
+  [../]
+  [./pls01_01]
+    type = 'CSVDiff'
+    input = 'pls01.i'
+    cli_args = 'DiracKernels/pls/point_file=pls01_01.bh Outputs/file_base=pls01_01'
+    csvdiff = 'pls01_01.csv'
+  [../]
+  [./pls01_20]
+    type = 'CSVDiff'
+    input = 'pls01.i'
+    cli_args = 'DiracKernels/pls/point_file=pls01_20.bh Outputs/file_base=pls01_20'
+    csvdiff = 'pls01_20.csv'
+  [../]
+  [./pls01_21]
+    type = 'CSVDiff'
+    input = 'pls01.i'
+    cli_args = 'DiracKernels/pls/point_file=pls01_21.bh Outputs/file_base=pls01_21'
+    csvdiff = 'pls01_21.csv'
+  [../]
+  [./pls02]
+    type = 'CSVDiff'
+    input = 'pls02.i'
+    csvdiff = 'pls02.csv'
+  [../]
+  [./pls03_00]
+    type = 'CSVDiff'
+    input = 'pls03.i'
+    cli_args = 'ICs/pp/function="if((x<1)&(y<0.5),1E7,-1E7)" Outputs/file_base=pls03_00'
+    csvdiff = 'pls03_00.csv'
+  [../]
+  [./pls03_01]
+    type = 'CSVDiff'
+    input = 'pls03.i'
+    cli_args = 'ICs/pp/function="if((x<1)&(y>0.5),1E7,-1E7)" Outputs/file_base=pls03_01'
+    csvdiff = 'pls03_01.csv'
+  [../]
+  [./pls03_20]
+    type = 'CSVDiff'
+    input = 'pls03.i'
+    cli_args = 'ICs/pp/function="if((x>1)&(y<0.5),1E7,-1E7)" Outputs/file_base=pls03_20'
+    csvdiff = 'pls03_20.csv'
+  [../]
+  [./pls03_21]
+    type = 'CSVDiff'
+    input = 'pls03.i'
+    cli_args = 'ICs/pp/function="if((x>1)&(y>0.5),1E7,-1E7)" Outputs/file_base=pls03_21'
+    csvdiff = 'pls03_21.csv'
+  [../]
+
+  [./bh02]
+    type = 'CSVDiff'
+    input = 'bh02.i'
+    csvdiff = 'bh02.csv'
+  [../]
+  [./bh03]
+    type = 'CSVDiff'
+    input = 'bh03.i'
+    csvdiff = 'bh03.csv'
+  [../]
+  [./bh04]
+    type = 'CSVDiff'
+    input = 'bh04.i'
+    csvdiff = 'bh04.csv'
+  [../]
+  [./bh05]
+    type = 'CSVDiff'
+    input = 'bh05.i'
+    csvdiff = 'bh05.csv'
+  [../]
+  [./bh07]
+    type = 'CSVDiff'
+    input = 'bh07.i'
+    cli_args = 'Outputs/file_base=bh07_csv Outputs/exodus=false'
+    csvdiff = 'bh07_csv_pp_0003.csv'
+  [../]
+  [./bh07_exo]
+    type = 'Exodiff'
+    input = 'bh07.i'
+    exodiff = 'bh07.e'
+  [../]
 []
