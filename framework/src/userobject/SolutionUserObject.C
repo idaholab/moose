@@ -588,7 +588,7 @@ SolutionUserObject::pointValueWrapper(Real t, const Point & p, const std::string
     }
     case 4:
     {
-      Real smallest_elem_id_value;
+      Real smallest_elem_id_value = std::numeric_limits<Real>::max();
       dof_id_type smallest_elem_id = _fe_problem.mesh().nElem();
       for (auto & v : values)
         if (v.first->id() < smallest_elem_id)
@@ -600,7 +600,7 @@ SolutionUserObject::pointValueWrapper(Real t, const Point & p, const std::string
     }
     case 8:
     {
-      Real largest_elem_id_value;
+      Real largest_elem_id_value = std::numeric_limits<Real>::lowest();
       dof_id_type largest_elem_id = 0;
       for (auto & v : values)
         if (v.first->id() > largest_elem_id)

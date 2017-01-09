@@ -292,7 +292,7 @@ MultiAppMeshFunctionTransfer::execute()
     unsigned int sys_num = to_sys->number();
     unsigned int var_num = to_sys->variable_number(_to_var_name);
 
-    NumericVector<Real> * solution;
+    NumericVector<Real> * solution = nullptr;
     switch (_direction)
     {
       case TO_MULTIAPP:
@@ -418,4 +418,3 @@ MultiAppMeshFunctionTransfer::execute()
 
   _console << "Finished MeshFunctionTransfer " << name() << std::endl;
 }
-
