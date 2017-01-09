@@ -156,7 +156,7 @@
   [./traction_function]
     type = PiecewiseLinear
     x = '0  2'
-    y = '0  -1'
+    y = '0  1'
   [../]
 []
 
