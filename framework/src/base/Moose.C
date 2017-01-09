@@ -50,6 +50,7 @@
 #include "ParsedSubdomainMeshModifier.h"
 #include "BreakBoundaryOnSubdomain.h"
 #include "ParsedAddSideset.h"
+#include "AssignSubdomainID.h"
 
 // problems
 #include "DisplacedProblem.h"
@@ -480,6 +481,7 @@ registerObjects(Factory & factory)
   registerMeshModifier(ParsedSubdomainMeshModifier);
   registerMeshModifier(BreakBoundaryOnSubdomain);
   registerMeshModifier(ParsedAddSideset);
+  registerMeshModifier(AssignSubdomainID);
 
   // problems
   registerProblem(DisplacedProblem);
