@@ -18,6 +18,8 @@ InputParameters validParams<PorousFlowFluidMass>()
   params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addParam<std::vector<unsigned int> >("phase", "The index of the fluid phase that this Postprocessor is restricted to.  Multiple indices can be entered");
   params.addRangeCheckedParam<Real>("saturation_threshold", 1.0, "saturation_threshold >= 0 & saturation_threshold <= 1", "The saturation threshold below which the mass is calculated for a specific phase. Default is 1.0. Note: only one phase_index can be entered");
+  params.addParam<unsigned int>("kernel_variable_number", 0, "The PorousFlow variable number (according to the dictatory) of the fluid-mass kernel.  This is required only in the unusual situation where a variety of different finite-element interpolation schemes are employed in the simulation");
+  params.set<bool>("use_displaced_mesh") = true;
   params.addClassDescription("Calculates the mass of a fluid component in a region");
   return params;
 }
@@ -32,7 +34,8 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters) :
   _fluid_density(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_nodal")),
   _fluid_saturation(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal")),
   _mass_fraction(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac_nodal")),
-  _saturation_threshold(getParam<Real>("saturation_threshold"))
+  _saturation_threshold(getParam<Real>("saturation_threshold")),
+  _var(getParam<unsigned>("kernel_variable_number") < _dictator.numVariables() ? _dictator.getCoupledMooseVars()[getParam<unsigned>("kernel_variable_number")] : nullptr)
 {
   const unsigned int num_phases = _dictator.numPhases();
   const unsigned int num_components = _dictator.numComponents();
@@ -44,6 +47,10 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters) :
   /// Check that the number of phases entered is not more than the total possible phases
   if (_phase_index.size() > num_phases)
    mooseError("The Dictator decrees that the number of phases in this simulation is " << num_phases << " but you have entered " << _phase_index.size() << " phases in the Postprocessor " << _name);
+
+  /// Check that kernel_variable_number is OK
+  if (getParam<unsigned>("kernel_variable_number") >= _dictator.numVariables())
+    mooseError("PorousFlowFluidMass: The dictator pronounces that the number of porous-flow variables is " << _dictator.numVariables() << ", however you have used kernel_variable_number = " << getParam<unsigned>("kernel_variable_number") << ".  This is an error");
 
   /**
    * Also check that the phase indices entered are not greater than the number of phases
@@ -68,19 +75,39 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters) :
 }
 
 Real
-PorousFlowFluidMass::computeQpIntegral()
+PorousFlowFluidMass::computeIntegral()
 {
-  mooseAssert(_current_elem->n_nodes() == _qrule->n_points(), "PorousFlow Postprocessors are currently only defined for number nodes = number quadpoints.");
+  Real sum = 0;
 
-  Real mass = 0.0;
-  unsigned int ph;
+  /** The use of _test in the loops below mean that the
+   * integral is exactly the same as the one computed
+   * by the PorousFlowMassTimeDerivative Kernel.  Because that
+   * Kernel is lumped, this Postprocessor also needs to
+   * be lumped.  Hence the use of the "nodal" Material
+   * Properties
+   */
+  const VariableTestValue & _test = (*_var).phi();
 
-  for (unsigned int i = 0; i < _phase_index.size(); ++i)
+  for (unsigned node = 0 ; node < _test.size(); ++node)
   {
-    ph = _phase_index[i];
-    if (_fluid_saturation[_qp][ph] <= _saturation_threshold)
-      mass += _fluid_density[_qp][ph] * _fluid_saturation[_qp][ph] * _mass_fraction[_qp][ph][_fluid_component];
+    Real nodal_volume = 0.0;
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+      nodal_volume += _JxW[_qp] * _coord[_qp] * _test[node][_qp];
+
+    Real mass = 0.0;
+    for (auto ph : _phase_index)
+    {
+      if (_fluid_saturation[node][ph] <= _saturation_threshold)
+        mass += _fluid_density[node][ph] * _fluid_saturation[node][ph] * _mass_fraction[node][ph][_fluid_component];
+    }
+    sum += nodal_volume * _porosity[node] * mass;
   }
 
-  return _porosity[_qp] * mass;
+  return sum;
+}
+
+Real
+PorousFlowFluidMass::computeQpIntegral()
+{
+  return 0.0;
 }
