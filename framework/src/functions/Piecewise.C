@@ -106,7 +106,7 @@ Piecewise::Piecewise(const InputParameters & parameters) :
 
   try
   {
-    _linear_interp.reset(new LinearInterpolation(x, y));
+    _linear_interp = libmesh_make_unique<LinearInterpolation>(x, y);
   }
   catch (std::domain_error & e)
   {

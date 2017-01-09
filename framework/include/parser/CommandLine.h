@@ -92,7 +92,7 @@ public:
    * Get the GetPot object
    * @return Pointer to the GetPot object
    */
-  GetPot * getPot() { return _get_pot; }
+  GetPot * getPot() { return _get_pot.get(); }
 
   /**
    * Check if we have a variable on the command line. Note that a call to this
@@ -122,7 +122,7 @@ public:
 
 protected:
   /// Pointer to GetPot object that represents the command line arguments
-  GetPot * _get_pot;
+  std::unique_ptr<GetPot> _get_pot;
   /// Command line options
   std::map<std::string, Option> _cli_options;
   /// This is a set of all "extra" options on the command line

@@ -38,14 +38,14 @@ LibmeshPartitioner::LibmeshPartitioner(const InputParameters & params) :
   switch (_partitioner_name)
   {
   case -2: // metis
-    _partitioner = new MetisPartitioner;
+    _partitioner = libmesh_make_unique<MetisPartitioner>();
     break;
   case -1: // parmetis
-    _partitioner = new ParmetisPartitioner;
+    _partitioner = libmesh_make_unique<ParmetisPartitioner>();
     break;
 
   case 0: // linear
-    _partitioner = new LinearPartitioner;
+    _partitioner = libmesh_make_unique<LinearPartitioner>();
     break;
   case 1: // centroid
   {
@@ -55,27 +55,26 @@ LibmeshPartitioner::LibmeshPartitioner(const InputParameters & params) :
     MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
     if (direction == "x")
-      _partitioner = new CentroidPartitioner(CentroidPartitioner::X);
+      _partitioner = libmesh_make_unique<CentroidPartitioner>(CentroidPartitioner::X);
     else if (direction == "y")
-      _partitioner = new CentroidPartitioner(CentroidPartitioner::Y);
+      _partitioner = libmesh_make_unique<CentroidPartitioner>(CentroidPartitioner::Y);
     else if (direction == "z")
-      _partitioner = new CentroidPartitioner(CentroidPartitioner::Z);
+      _partitioner = libmesh_make_unique<CentroidPartitioner>(CentroidPartitioner::Z);
     else if (direction == "radial")
-      _partitioner = new CentroidPartitioner(CentroidPartitioner::RADIAL);
+      _partitioner = libmesh_make_unique<CentroidPartitioner>(CentroidPartitioner::RADIAL);
     break;
   }
   case 2: // hilbert_sfc
-    _partitioner = new HilbertSFCPartitioner;
+    _partitioner = libmesh_make_unique<HilbertSFCPartitioner>();
     break;
   case 3: // morton_sfc
-    _partitioner = new MortonSFCPartitioner;
+    _partitioner = libmesh_make_unique<MortonSFCPartitioner>();
     break;
   }
 }
 
 LibmeshPartitioner::~LibmeshPartitioner()
 {
-  delete _partitioner;
 }
 
 std::unique_ptr<Partitioner>
@@ -84,14 +83,14 @@ LibmeshPartitioner::clone() const
   switch (_partitioner_name)
   {
   case -2: // metis
-    return std::unique_ptr<Partitioner>(new MetisPartitioner);
+    return libmesh_make_unique<MetisPartitioner>();
     break;
   case -1: // parmetis
-    return std::unique_ptr<Partitioner>(new ParmetisPartitioner);
+    return libmesh_make_unique<ParmetisPartitioner>();
     break;
 
   case 0: // linear
-    return std::unique_ptr<Partitioner>(new LinearPartitioner);
+    return libmesh_make_unique<LinearPartitioner>();
     break;
   case 1: // centroid
   {
@@ -101,26 +100,26 @@ LibmeshPartitioner::clone() const
     MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
     if (direction == "x")
-      return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::X));
+      return libmesh_make_unique<CentroidPartitioner>(CentroidPartitioner::X);
     else if (direction == "y")
-      return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Y));
+      return libmesh_make_unique<CentroidPartitioner>(CentroidPartitioner::Y);
     else if (direction == "z")
-      return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::Z));
+      return libmesh_make_unique<CentroidPartitioner>(CentroidPartitioner::Z);
     else if (direction == "radial")
-      return std::unique_ptr<Partitioner>(new CentroidPartitioner(CentroidPartitioner::RADIAL));
+      return libmesh_make_unique<CentroidPartitioner>(CentroidPartitioner::RADIAL);
     break;
   }
   case 2: // hilbert_sfc
-    return std::unique_ptr<Partitioner>(new HilbertSFCPartitioner);
+return libmesh_make_unique<HilbertSFCPartitioner>();
     break;
   case 3: // morton_sfc
-    return std::unique_ptr<Partitioner>(new MortonSFCPartitioner);
+return libmesh_make_unique<MortonSFCPartitioner>();
     break;
   }
   // this cannot happen but I need to trick the compiler into
   // believing me
   mooseError("Error in LibmeshPartitioner: Supplied partitioner option causes error in clone()");
-  return std::unique_ptr<Partitioner>(new MetisPartitioner);
+return libmesh_make_unique<MetisPartitioner>();
 }
 
 void

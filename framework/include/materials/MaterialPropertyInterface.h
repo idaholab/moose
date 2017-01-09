@@ -240,7 +240,7 @@ protected:
   bool _get_material_property_called;
 
   /// Storage vector for MaterialProperty<Real> default objects
-  std::vector<MooseSharedPointer<MaterialProperty<Real> > > _default_real_properties;
+  std::vector<std::unique_ptr<MaterialProperty<Real>>> _default_real_properties;
 
 private:
   /// An initialization routine needed for dual constructors

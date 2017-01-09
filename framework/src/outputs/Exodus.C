@@ -98,15 +98,15 @@ Exodus::sequence(bool state)
 void
 Exodus::outputSetup()
 {
-  if (_exodus_io_ptr != NULL)
+  if (_exodus_io_ptr)
   {
     // Do nothing if the ExodusII_IO objects exists, but has not been initialized
-    if (!_exodus_initialized && _exodus_io_ptr != NULL)
+    if (!_exodus_initialized)
       return;
 
     // Do nothing if the output is using oversampling. In this case the mesh that is being output
     // has not been changed, so there is no need to create a new ExodusII_IO object
-    if (_exodus_io_ptr != NULL && (_oversample || _change_position))
+    if (_oversample || _change_position)
       return;
 
     // Do nothing if the mesh has not changed and sequential output is not desired
@@ -115,7 +115,7 @@ Exodus::outputSetup()
   }
 
   // Create the ExodusII_IO object
-  _exodus_io_ptr.reset(new ExodusII_IO(_es_ptr->get_mesh()));
+  _exodus_io_ptr = libmesh_make_unique<ExodusII_IO>(_es_ptr->get_mesh());
   _exodus_initialized = false;
 
   // Increment file number and set appending status, append if all the following conditions are met:

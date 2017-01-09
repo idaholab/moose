@@ -30,7 +30,7 @@ MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblemBase & feproblem
   initialize();
 
   // Create the libMesh::ParsedFunction
-  _function_ptr = new ParsedFunction<Real,RealGradient>(_function_str, &_vars, &_vals);
+  _function_ptr = libmesh_make_unique<ParsedFunction<Real, RealGradient>>(_function_str, &_vars, &_vals);
 
   // Loop through the Postprocessor and Scalar variables and point the libMesh::ParsedFunction to the PostprocessorValue
   for (const auto & index : _pp_index)
@@ -42,7 +42,6 @@ MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblemBase & feproblem
 
 MooseParsedFunctionWrapper::~MooseParsedFunctionWrapper()
 {
-  delete _function_ptr;
 }
 
 template<>

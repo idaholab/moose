@@ -58,7 +58,7 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters) :
   }
 
   // base function object
-  _func_F =  ADFunctionPtr(new ADFunction());
+  _func_F = ADFunctionPtr(new ADFunction());
 
   // set FParser interneal feature flags
   setParserFeatureFlags(_func_F);

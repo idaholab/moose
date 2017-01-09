@@ -154,8 +154,12 @@ public:
    * Set custom coupling matrix
    * @param cm coupling matrix to be set
    */
+  void setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm);
+
+  // DEPRECATED METHOD
   void setCouplingMatrix(CouplingMatrix * cm);
-  CouplingMatrix * & couplingMatrix() { return _cm; }
+
+  const CouplingMatrix * couplingMatrix() { return _cm.get(); }
 
   /// Set custom coupling matrix for variables requiring nonlocal contribution
   void setNonlocalCouplingMatrix();
@@ -1095,7 +1099,7 @@ protected:
   AuxiliarySystem *_aux;
 
   Moose::CouplingType _coupling;                        ///< Type of variable coupling
-  CouplingMatrix * _cm;                                 ///< Coupling matrix for variables. It is diagonal, since we do only block diagonal preconditioning.
+  std::unique_ptr<CouplingMatrix> _cm;                  ///< Coupling matrix for variables.
 
   // Dimension of the subspace spanned by the vectors with a given prefix
   std::map<std::string,unsigned int> _subspace_dim;
@@ -1121,9 +1125,9 @@ protected:
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
 
-  std::vector<MooseSharedPointer<MaterialData> > _material_data;
-  std::vector<MooseSharedPointer<MaterialData> > _bnd_material_data;
-  std::vector<MooseSharedPointer<MaterialData> > _neighbor_material_data;
+  std::vector<std::shared_ptr<MaterialData>> _material_data;
+  std::vector<std::shared_ptr<MaterialData>> _bnd_material_data;
+  std::vector<std::shared_ptr<MaterialData>> _neighbor_material_data;
 
   ///@{
   // Material Warehouses

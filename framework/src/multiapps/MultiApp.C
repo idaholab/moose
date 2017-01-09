@@ -127,11 +127,11 @@ MultiApp::MultiApp(const InputParameters & parameters):
   /// Set up our Comm and set the number of apps we're going to be working on
   buildComm();
 
-  _backups.resize(_my_num_apps);
+  _backups.reserve(_my_num_apps);
 
   // Initialize the backups
   for (unsigned int i=0; i<_my_num_apps; i++)
-    _backups[i] = MooseSharedPointer<Backup>(new Backup);
+    _backups.emplace_back(std::make_shared<Backup>());
 }
 
 MultiApp::~MultiApp()

@@ -31,14 +31,8 @@ MooseParsedVectorFunction::MooseParsedVectorFunction(const InputParameters & par
     MooseParsedFunctionBase(parameters),
     _vector_value(verifyFunction(std::string("{") + getParam<std::string>("value_x") + "}{" +
                                  getParam<std::string>("value_y") + "}{" +
-                                 getParam<std::string>("value_z") + "}")),
-    _function_ptr(NULL)
+                                 getParam<std::string>("value_z") + "}"))
 {
-}
-
-MooseParsedVectorFunction::~MooseParsedVectorFunction()
-{
-  delete _function_ptr;
 }
 
 RealVectorValue
@@ -56,13 +50,12 @@ MooseParsedVectorFunction::gradient(Real /*t*/, const Point & /*p*/)
 void
 MooseParsedVectorFunction::initialSetup()
 {
-  if (_function_ptr == NULL)
+  if (!_function_ptr)
   {
     THREAD_ID tid = 0;
     if (isParamValid("_tid"))
       tid = getParam<THREAD_ID>("_tid");
 
-    _function_ptr = new MooseParsedFunctionWrapper(_pfb_feproblem, _vector_value, _vars, _vals, tid);
+    _function_ptr = libmesh_make_unique<MooseParsedFunctionWrapper>(_pfb_feproblem, _vector_value, _vars, _vals, tid);
   }
 }
-

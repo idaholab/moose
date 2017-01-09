@@ -155,7 +155,7 @@ MooseApp::MooseApp(InputParameters parameters) :
     int argc = getParam<int>("_argc");
     char ** argv = getParam<char**>("_argv");
 
-    _sys_info = MooseSharedPointer<SystemInfo>(new SystemInfo(argc, argv));
+    _sys_info = std::make_shared<SystemInfo>(argc, argv);
   }
   if (isParamValid("_command_line"))
     _command_line = getParam<MooseSharedPointer<CommandLine> >("_command_line");
