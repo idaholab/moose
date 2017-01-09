@@ -57,28 +57,25 @@ PatternedMesh::PatternedMesh(const InputParameters & parameters) :
   // The PatternedMesh class only works with ReplicatedMesh
   errorIfDistributedMesh("PatternedMesh");
 
-  _meshes.resize(_files.size());
+  _meshes.reserve(_files.size());
 
   // Read in all of the meshes
-  for (unsigned int i = 0; i < _files.size(); i++)
+  for (auto i = beginIndex(_files); i < _files.size(); ++i)
   {
-    ReplicatedMesh * mesh = new ReplicatedMesh(_communicator);
+    _meshes.emplace_back(libmesh_make_unique<ReplicatedMesh>(_communicator));
+    auto & mesh = _meshes.back();
+
     mesh->read(_files[i]);
-
-    _meshes[i] = mesh;
   }
 
-  _row_meshes.resize(_pattern.size());
+  _original_mesh = dynamic_cast<ReplicatedMesh *>(&getMesh());
+  if (!_original_mesh)
+    mooseError("PatternedMesh does not support DistributedMesh");
 
-  // The zeroth row (which is the top row) will be the real mesh
-  _row_meshes[0] = dynamic_cast<ReplicatedMesh *>( &getMesh() );
-
-  // Create a mesh for all the other rows
-  for (unsigned int i = 1; i < _pattern.size(); i++)
-  {
-    ReplicatedMesh * mesh = new ReplicatedMesh(_communicator);
-    _row_meshes[i] = mesh;
-  }
+  // Create a mesh for all n-1 rows, the first row is the original mesh
+  _row_meshes.reserve(_pattern.size() - 1);
+  for (auto i = beginIndex(_pattern); i < _pattern.size() - 1; ++i)
+    _row_meshes.emplace_back(libmesh_make_unique<ReplicatedMesh>(_communicator));
 }
 
 PatternedMesh::PatternedMesh(const PatternedMesh & other_mesh) :
@@ -93,15 +90,7 @@ PatternedMesh::PatternedMesh(const PatternedMesh & other_mesh) :
 
 PatternedMesh::~PatternedMesh()
 {
-  // Clean up the mesh we made (see what I did there?)
-  for (unsigned int i = 0; i < _meshes.size(); i++)
-    delete _meshes[i];
-
-  // Don't delete the first row - it is the real mesh - it will be cleaned up later
-  for (unsigned int i = 1; i < _row_meshes.size(); i++)
-    delete _row_meshes[i];
 }
-
 
 MooseMesh &
 PatternedMesh::clone() const
@@ -112,51 +101,51 @@ PatternedMesh::clone() const
 void
 PatternedMesh::buildMesh()
 {
-  // stitch_meshes() is only implemented for ReplicatedMesh.  So make sure
-  // we have one here before continuing.
-  ReplicatedMesh * the_mesh = dynamic_cast<ReplicatedMesh *>(&getMesh());
+  // Local pointers to simplify algorithm
+  std::vector<ReplicatedMesh *> row_meshes;
+  row_meshes.reserve(_pattern.size());
+  // First row is the original mesh
+  row_meshes.push_back(_original_mesh);
+  // Copy the remaining raw pointers into the local vector
+  for (const auto & row_mesh: _row_meshes)
+    row_meshes.push_back(row_mesh.get());
 
-  if (!the_mesh)
-    mooseError("Error, PatternedMesh calls stitch_meshes() which only works on ReplicatedMesh.");
-  else
-  {
-    BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
-    BoundaryID right = getBoundaryID(getParam<BoundaryName>("right_boundary"));
-    BoundaryID top = getBoundaryID(getParam<BoundaryName>("top_boundary"));
-    BoundaryID bottom = getBoundaryID(getParam<BoundaryName>("bottom_boundary"));
+  BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
+  BoundaryID right = getBoundaryID(getParam<BoundaryName>("right_boundary"));
+  BoundaryID top = getBoundaryID(getParam<BoundaryName>("top_boundary"));
+  BoundaryID bottom = getBoundaryID(getParam<BoundaryName>("bottom_boundary"));
 
-    // Build each row mesh
-    for (unsigned int i = 0; i < _pattern.size(); i++)
-      for (unsigned int j = 0; j < _pattern[i].size(); j++)
+  // Build each row mesh
+  for (auto i = beginIndex(_pattern); i < _pattern.size(); ++i)
+    for (auto j = beginIndex(_pattern[i]); j < _pattern[i].size(); ++j)
+    {
+      Real
+        deltax = j * _x_width,
+        deltay = i * _y_width;
+
+      // If this is the first cell of the row initialize the row mesh
+      if (j == 0)
       {
-        Real
-          deltax = j*_x_width,
-          deltay = i*_y_width;
+        row_meshes[i]->read(_files[_pattern[i][j]]);
 
-        // If this is the first cell of the row initialize the row mesh
-        if (j == 0)
-        {
-          _row_meshes[i]->read(_files[_pattern[i][j]]);
+        MeshTools::Modification::translate(*row_meshes[i], deltax, -deltay, 0);
 
-          MeshTools::Modification::translate(*_row_meshes[i], deltax, -deltay, 0);
-
-          continue;
-        }
-
-        ReplicatedMesh & cell_mesh = *_meshes[_pattern[i][j]];
-
-        // Move the mesh into the right spot.  -i because we are starting at the top
-        MeshTools::Modification::translate(cell_mesh, deltax, -deltay, 0);
-
-        _row_meshes[i]->stitch_meshes(dynamic_cast<ReplicatedMesh &>(cell_mesh), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
-
-        // Undo the translation
-        MeshTools::Modification::translate(cell_mesh, -deltax, deltay, 0);
+        continue;
       }
 
-    // Now stitch together the rows
-    // We're going to stitch them all to row 0 (which is the real mesh)
-    for (unsigned int i = 1; i < _pattern.size(); i++)
-      _row_meshes[0]->stitch_meshes(*_row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
-  }
+      ReplicatedMesh & cell_mesh = *_meshes[_pattern[i][j]];
+
+      // Move the mesh into the right spot.  -i because we are starting at the top
+      MeshTools::Modification::translate(cell_mesh, deltax, -deltay, 0);
+
+      row_meshes[i]->stitch_meshes(dynamic_cast<ReplicatedMesh &>(cell_mesh), right, left, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+
+      // Undo the translation
+      MeshTools::Modification::translate(cell_mesh, -deltax, deltay, 0);
+    }
+
+  // Now stitch together the rows
+  // We're going to stitch them all to row 0 (which is the real mesh)
+  for (auto i = beginIndex(_pattern, 1); i < _pattern.size(); i++)
+    row_meshes[0]->stitch_meshes(*row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
 }

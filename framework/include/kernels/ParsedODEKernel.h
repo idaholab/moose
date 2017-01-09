@@ -49,7 +49,7 @@ protected:
   std::vector<VariableValue *> _args;
   std::vector<std::string> _arg_names;
 
-  /// function parser object for the resudual and on-diagonal Jacobian
+  /// function parser object for the residual and on-diagonal Jacobian
   ADFunctionPtr _func_F;
   ADFunctionPtr _func_dFdu;
 

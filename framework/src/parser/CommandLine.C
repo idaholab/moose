@@ -24,14 +24,13 @@
 
 
 CommandLine::CommandLine(int argc, char *argv[]) :
-    _get_pot(new GetPot(argc, argv)),
+    _get_pot(libmesh_make_unique<GetPot>(argc, argv)),
     _has_prefix(false)
 {
 }
 
 CommandLine::~CommandLine()
 {
-  delete _get_pot;
 }
 
 void

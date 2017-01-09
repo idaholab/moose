@@ -35,7 +35,7 @@ public:
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n);
 
-  Partitioner * _partitioner;
+  std::unique_ptr<Partitioner> _partitioner;
   MooseEnum _partitioner_name;
 };
 

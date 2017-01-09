@@ -120,7 +120,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters) :
     _nl(NULL),
     _aux(NULL),
     _coupling(Moose::COUPLING_DIAG),
-    _cm(NULL),
     _scalar_ics(/*threaded=*/false),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("material_props", &_mesh)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
@@ -185,9 +184,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters) :
   _neighbor_material_data.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; i++)
   {
-    _material_data[i] = MooseSharedPointer<MaterialData>(new MaterialData(_material_props));
-    _bnd_material_data[i] = MooseSharedPointer<MaterialData>(new MaterialData(_bnd_material_props));
-    _neighbor_material_data[i] = MooseSharedPointer<MaterialData>(new MaterialData(_bnd_material_props));
+    _material_data[i] = std::make_shared<MaterialData>(_material_props);
+    _bnd_material_data[i] = std::make_shared<MaterialData>(_bnd_material_props);
+    _neighbor_material_data[i] = std::make_shared<MaterialData>(_bnd_material_props);
   }
 
   _active_elemental_moose_variables.resize(n_threads);
@@ -206,7 +205,7 @@ void FEProblemBase::newAssemblyArray(NonlinearSystemBase & nl)
 
   _assembly.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
-    _assembly[i] = new Assembly(nl, couplingMatrix(), i);
+    _assembly[i] = new Assembly(nl, i);
 }
 
 void FEProblemBase::deleteAssemblyArray()
@@ -258,7 +257,6 @@ FEProblemBase::~FEProblemBase()
   // an unflushed stream and start destructing things.
   _console << std::flush;
 
-  delete _cm;
   unsigned int n_threads = libMesh::n_threads();
   for (unsigned int i = 0; i < n_threads; i++)
   {
@@ -3132,9 +3130,17 @@ FEProblemBase::setCoupling(Moose::CouplingType type)
 void
 FEProblemBase::setCouplingMatrix(CouplingMatrix * cm)
 {
+  // TODO: Deprecate method
+
   _coupling = Moose::COUPLING_CUSTOM;
-  delete _cm;
-  _cm = cm;
+  _cm.reset(cm);
+}
+
+void
+FEProblemBase::setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm)
+{
+  _coupling = Moose::COUPLING_CUSTOM;
+  _cm = std::move(cm);
 }
 
 void
@@ -3218,7 +3224,7 @@ FEProblemBase::init()
   switch (_coupling)
   {
   case Moose::COUPLING_DIAG:
-    _cm = new CouplingMatrix(n_vars);
+    _cm = libmesh_make_unique<CouplingMatrix>(n_vars);
     for (unsigned int i = 0; i < n_vars; i++)
       for (unsigned int j = 0; j < n_vars; j++)
         (*_cm)(i, j) = (i == j ? 1 : 0);
@@ -3226,7 +3232,7 @@ FEProblemBase::init()
 
   // for full jacobian
   case Moose::COUPLING_FULL:
-    _cm = new CouplingMatrix(n_vars);
+    _cm = libmesh_make_unique<CouplingMatrix>(n_vars);
     for (unsigned int i = 0; i < n_vars; i++)
       for (unsigned int j = 0; j < n_vars; j++)
         (*_cm)(i, j) = 1;
@@ -3237,7 +3243,7 @@ FEProblemBase::init()
     break;
   }
 
-  _nl->dofMap()._dof_coupling = _cm;
+  _nl->dofMap()._dof_coupling = _cm.get();
   _nl->dofMap().attach_extra_sparsity_function(&extraSparsity, _nl);
   _nl->dofMap().attach_extra_send_list_function(&extraSendList, _nl);
   _aux->dofMap().attach_extra_send_list_function(&extraSendList, _aux);
@@ -3263,7 +3269,7 @@ FEProblemBase::init()
   Moose::perf_log.pop("NonlinearSystem::update()", "Setup");
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    _assembly[tid]->init();
+    _assembly[tid]->init(_cm.get());
 
   _nl->init();
 

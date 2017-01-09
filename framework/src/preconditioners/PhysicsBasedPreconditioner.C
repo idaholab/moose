@@ -63,7 +63,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const InputParameters & 
     unsigned int n_vars = nl.nVariables();
 
     // The coupling matrix is held and released by FEProblemBase, so it is not released in this object
-    CouplingMatrix * cm = new CouplingMatrix(n_vars);
+    std::unique_ptr<CouplingMatrix> cm = libmesh_make_unique<CouplingMatrix>(n_vars);
 
     bool full = false; //getParam<bool>("full"); // TODO: add a FULL option for PBP
 
@@ -91,7 +91,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner (const InputParameters & 
           (*cm)(i,j) = 1;
     }
 
-    _fe_problem.setCouplingMatrix(cm);
+    _fe_problem.setCouplingMatrix(std::move(cm));
   }
 
   // PC types

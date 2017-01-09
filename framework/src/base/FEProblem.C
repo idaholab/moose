@@ -30,9 +30,9 @@ FEProblem::FEProblem(const InputParameters & parameters) :
   _nl = _nl_sys;
   _aux = new AuxiliarySystem(*this, "aux0");
 
-  FEProblemBase::newAssemblyArray(*_nl_sys);
+  newAssemblyArray(*_nl_sys);
 
-  FEProblemBase::initNullSpaceVectors(parameters, *_nl_sys);
+  initNullSpaceVectors(parameters, *_nl_sys);
 
   _eq.parameters.set<FEProblem *>("_fe_problem") = this;
 }

@@ -66,23 +66,9 @@ OversampleOutput::OversampleOutput(const InputParameters & parameters) :
 
 OversampleOutput::~OversampleOutput()
 {
-  // When the Oversample::initOversample() is called it creates new objects for the _mesh_ptr and _es_ptr
-  // that contain the refined mesh and variables. Also, the _mesh_functions vector and _serialized_solution
-  // pointer are populated. In this case, it is the responsibility of the output object to clean these things
-  // up. If oversampling is not being used then you must not delete the _mesh_ptr and _es_ptr because
-  // they are owned by other objects.
-  if (_oversample || _change_position)
-  {
-    // Delete the mesh functions
-    for (unsigned int sys_num=0; sys_num < _mesh_functions.size(); ++sys_num)
-      for (unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
-        delete _mesh_functions[sys_num][var_num];
-
-    // Delete the mesh and equation system pointers, in the correct
-    // order.
-    delete _es_ptr;
-    delete _mesh_ptr;
-  }
+  // TODO: Remove once libmesh Issue #1184 is fixed
+  _oversample_es.reset();
+  _cloned_mesh_ptr.reset();
 }
 
 void
@@ -113,7 +99,8 @@ OversampleOutput::initOversample()
   }
 
   // Create the new EquationSystems
-  _es_ptr = new EquationSystems(_mesh_ptr->getMesh());
+  _oversample_es = libmesh_make_unique<EquationSystems>(_mesh_ptr->getMesh());
+  _es_ptr = _oversample_es.get();
 
   // Reference the system from which we are copying
   EquationSystems & source_es = _problem_ptr->es();
@@ -129,7 +116,7 @@ OversampleOutput::initOversample()
     System & source_sys = source_es.get_system(sys_num);
 
     // Add the system to the new EquationsSystems
-    ExplicitSystem & dest_sys = _es_ptr->add_system<ExplicitSystem>(source_sys.name());
+    ExplicitSystem & dest_sys = _oversample_es->add_system<ExplicitSystem>(source_sys.name());
 
     // Loop through the variables in the System
     unsigned int num_vars = source_sys.n_vars();
@@ -157,7 +144,7 @@ OversampleOutput::initOversample()
   }
 
   // Initialize the newly created EquationSystem
-  _es_ptr->init();
+  _oversample_es->init();
 }
 
 void
@@ -177,7 +164,7 @@ OversampleOutput::updateOversample()
     {
       // Get references to the source and destination systems
       System & source_sys = source_es.get_system(sys_num);
-      System & dest_sys = _es_ptr->get_system(sys_num);
+      System & dest_sys = _oversample_es->get_system(sys_num);
 
       // Update the solution for the oversampled mesh
       _serialized_solution->clear();
@@ -189,11 +176,8 @@ OversampleOutput::updateOversample()
       {
 
         // If the mesh has change the MeshFunctions need to be re-built, otherwise simply clear it for re-initialization
-        if (_mesh_functions[sys_num][var_num] == NULL || _oversample_mesh_changed)
-        {
-          delete _mesh_functions[sys_num][var_num];
-          _mesh_functions[sys_num][var_num] = new MeshFunction(source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
-        }
+        if (!_mesh_functions[sys_num][var_num] || _oversample_mesh_changed)
+          _mesh_functions[sys_num][var_num] = libmesh_make_unique<MeshFunction>(source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
         else
           _mesh_functions[sys_num][var_num]->clear();
 
@@ -225,11 +209,11 @@ OversampleOutput::cloneMesh()
     mesh_params.set<bool>("nemesis") = false;
     mesh_params.set<bool>("skip_partitioning") = false;
     mesh_params.set<std::string>("_object_name") = "output_problem_mesh";
-    _mesh_ptr = new FileMesh(mesh_params);
-    _mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
-    _mesh_ptr->init();
-    _mesh_ptr->prepare();
-    _mesh_ptr->meshChanged();
+    _cloned_mesh_ptr = libmesh_make_unique<FileMesh>(mesh_params);
+    _cloned_mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
+    _cloned_mesh_ptr->init();
+    _cloned_mesh_ptr->prepare();
+    _cloned_mesh_ptr->meshChanged();
   }
 
   // Clone the existing mesh
@@ -238,6 +222,9 @@ OversampleOutput::cloneMesh()
     if (_app.isRecovering())
       mooseWarning("Recovering or Restarting with Oversampling may not work (especially with adapted meshes)!!  Refs #2295");
 
-    _mesh_ptr= &(_problem_ptr->mesh().clone());
+    _cloned_mesh_ptr.reset(&(_problem_ptr->mesh().clone()));
   }
+
+  // Make sure that the mesh pointer points to the newly cloned mesh
+  _mesh_ptr = _cloned_mesh_ptr.get();
 }

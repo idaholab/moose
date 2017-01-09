@@ -119,24 +119,22 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
   // check if the string parsed cleanly into a Real number
   if (ss >> real_value && ss.eof())
   {
-    MooseSharedPointer<MaterialProperty<Real> > default_property(new MaterialProperty<Real>);
+    _default_real_properties.emplace_back(libmesh_make_unique<MaterialProperty<Real>>());
+    auto & default_property = _default_real_properties.back();
 
-    // resize to accomodate maximum number of qpoints
-    unsigned int nqp = _mi_feproblem.getMaxQps();
+    // resize to accomodate maximum number obf qpoints
+    auto nqp = _mi_feproblem.getMaxQps();
     default_property->resize(nqp);
 
     // set values for all qpoints to the given default
-    for (unsigned int qp = 0; qp < nqp; ++qp)
+    for (decltype(nqp) qp = 0; qp < nqp; ++qp)
       (*default_property)[qp] = real_value;
-
-    // add to the default property storage
-    _default_real_properties.push_back(default_property);
 
     // return the raw pointer inside the shared pointer
     return default_property.get();
   }
 
-  return NULL;
+  return nullptr;
 }
 
 std::set<SubdomainID>

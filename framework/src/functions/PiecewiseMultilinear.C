@@ -28,7 +28,7 @@ InputParameters validParams<PiecewiseMultilinear>()
 
 PiecewiseMultilinear::PiecewiseMultilinear(const InputParameters & parameters) :
     Function(parameters),
-    _gridded_data(new GriddedData(getParam<FileName>("data_file"))),
+    _gridded_data(libmesh_make_unique<GriddedData>(getParam<FileName>("data_file"))),
     _dim(_gridded_data->getDim())
 {
   _gridded_data->getAxes(_axes);
@@ -45,6 +45,10 @@ PiecewiseMultilinear::PiecewiseMultilinear(const InputParameters & parameters) :
   if (s.size() != _dim)
     mooseError("PiecewiseMultilinear needs the AXES to be independent.  Check the AXIS lines in your data file.");
 
+}
+
+PiecewiseMultilinear::~PiecewiseMultilinear()
+{
 }
 
 Real
