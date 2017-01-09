@@ -5,4 +5,10 @@
     csvdiff = 'ipm_out_eigenvalues_0001.csv'
     slepc = true
   [../]
+  [./gipm_test]
+    type = 'CSVDiff'
+    input = 'gipm.i'
+    csvdiff = 'gipm_out_eigenvalues_0001.csv'
+    slepc = true
+  [../]
 []
