@@ -106,12 +106,9 @@ PatternedMesh::buildMesh()
   row_meshes.reserve(_pattern.size());
   // First row is the original mesh
   row_meshes.push_back(_original_mesh);
-  // Copy the remaining pointers into the local vector
-  std::transform(_row_meshes.begin(), _row_meshes.end(), std::back_inserter(row_meshes),
-                [](std::unique_ptr<ReplicatedMesh> & row_mesh)
-                {
-                  return row_mesh.get();
-                });
+  // Copy the remaining raw pointers into the local vector
+  for (const auto & row_mesh: _row_meshes)
+    row_meshes.push_back(row_mesh.get());
 
   BoundaryID left = getBoundaryID(getParam<BoundaryName>("left_boundary"));
   BoundaryID right = getBoundaryID(getParam<BoundaryName>("right_boundary"));
@@ -119,8 +116,8 @@ PatternedMesh::buildMesh()
   BoundaryID bottom = getBoundaryID(getParam<BoundaryName>("bottom_boundary"));
 
   // Build each row mesh
-  for (unsigned int i = 0; i < _pattern.size(); i++)
-    for (unsigned int j = 0; j < _pattern[i].size(); j++)
+  for (auto i = beginIndex(_pattern); i < _pattern.size(); ++i)
+    for (auto j = beginIndex(_pattern[i]); j < _pattern[i].size(); ++j)
     {
       Real
         deltax = j * _x_width,
@@ -149,6 +146,6 @@ PatternedMesh::buildMesh()
 
   // Now stitch together the rows
   // We're going to stitch them all to row 0 (which is the real mesh)
-  for (unsigned int i = 1; i < _pattern.size(); i++)
+  for (auto i = beginIndex(_pattern, 1); i < _pattern.size(); i++)
     row_meshes[0]->stitch_meshes(*row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
 }
