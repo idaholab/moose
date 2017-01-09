@@ -44,8 +44,13 @@
     expect_err = 'The Dictator proclaims that the phase index 2 in the Postprocessor comp1_total_mass is greater than the largest phase index possible, which is 1'
   [../]
   [./mass09]
-  type = 'RunException'
-  input = 'mass09.i'
-  expect_err = 'A single phase_index must be entered when prescribing a saturation_threshold in the Postprocessor comp1_total_mass'
-[../]
+    type = 'RunException'
+    input = 'mass09.i'
+    expect_err = 'A single phase_index must be entered when prescribing a saturation_threshold in the Postprocessor comp1_total_mass'
+  [../]
+  [./mass10]
+    type = 'RunException'
+    input = 'mass10.i'
+    expect_err = 'PorousFlowFluidMass: The dictator pronounces that the number of porous-flow variables is 2, however you have used kernel_variable_number = 2.  This is an error'
+  [../]
 []
