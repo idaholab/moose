@@ -29,6 +29,7 @@ namespace Moose
   std::map<std::string, QuadratureType> quadrature_type_to_enum;
   std::map<std::string, CoordinateSystemType> coordinate_system_type_to_enum;
   std::map<std::string, SolveType> solve_type_to_enum;
+  std::map<std::string, EigenSolveType> eigen_solve_type_to_enum;
   std::map<std::string, LineSearchType> line_search_type_to_enum;
 
   void initExecStoreType()
@@ -78,6 +79,17 @@ namespace Moose
       solve_type_to_enum["NEWTON"] = ST_NEWTON;
       solve_type_to_enum["FD"]     = ST_FD;
       solve_type_to_enum["LINEAR"] = ST_LINEAR;
+    }
+  }
+
+  void initEigenSolveType()
+  {
+    if (eigen_solve_type_to_enum.empty())
+    {
+      eigen_solve_type_to_enum["POWER"]       = EST_POWER;
+      eigen_solve_type_to_enum["ARNOLDI"]     = EST_ARNOLDI;
+      eigen_solve_type_to_enum["KRYLOVSCHUR"] = EST_KRYLOVSCHUR;
+      eigen_solve_type_to_enum["JD"]          = EST_JD;
     }
   }
 
@@ -170,6 +182,20 @@ namespace Moose
       mooseError("Unknown solve type: " << upper);
 
     return solve_type_to_enum[upper];
+  }
+
+  template<>
+  EigenSolveType stringToEnum<EigenSolveType>(const std::string & s)
+  {
+    initEigenSolveType();
+
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    if (!eigen_solve_type_to_enum.count(upper))
+      mooseError("Unknown eigen solve type: " << upper);
+
+    return eigen_solve_type_to_enum[upper];
   }
 
   template<>

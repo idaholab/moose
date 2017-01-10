@@ -97,10 +97,8 @@
 
 [Executioner]
   type = Steady
-  solve_type = 'NEWTON'
-  petsc_options = '-eps_smallest_magnitude'
-  petsc_options_iname = '-eps_type'
-  petsc_options_value = 'jd'
+  eigen_solve_type = jd
+  petsc_options = '-eps_smallest_magnitude -eps_view -eps_monitor_conv -eps_monitor'
 []
 
 [VectorPostprocessors]

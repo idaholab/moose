@@ -89,7 +89,6 @@
 
 [Executioner]
   type = Steady
-  solve_type = 'NEWTON'
   petsc_options = '-eps_view -eps_monitor_conv'
   petsc_options_iname = '-eps_type'
   petsc_options_value = 'krylovschur'

@@ -26,6 +26,7 @@
 #include "Restartable.h"
 #include "SolverParams.h"
 #include "PetscSupport.h"
+#include "SlepcSupport.h"
 #include "MooseApp.h"
 #include "ExecuteMooseObjectWarehouse.h"
 #include "AuxGroupExecuteMooseObjectWarehouse.h"

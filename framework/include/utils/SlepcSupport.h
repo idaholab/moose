@@ -34,6 +34,8 @@ namespace SlepcSupport
    * @see EigenProblem
    */
   InputParameters getSlepcValidParams();
+  void storeSlepcOptions(FEProblemBase & fe_problem, const InputParameters & params);
+  void slepcSetOptions(FEProblemBase & problem);
 } // namespace SlepcSupport
 } // namespace moose
 

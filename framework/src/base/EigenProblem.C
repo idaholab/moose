@@ -74,15 +74,21 @@ EigenProblem::~EigenProblem()
 }
 
 
+void
+EigenProblem::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type)
+{
+  solverParams()._type = Moose::ST_NEWTON;
+  FEProblemBase::computeJacobian(soln, jacobian, kernel_type);
+}
+
 
 void
 EigenProblem::solve()
 {
   Moose::perf_log.push("Eigen_solve()", "Execution");
-#ifdef LIBMESH_HAVE_PETSC
-  Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app
+#if LIBMESH_HAVE_SLEPC
+  Moose::SlepcSupport::slepcSetOptions(*this); // Make sure the SLEPc options are setup for this app
 #endif
-
   if (_solve)
   {
      _nl->solve();

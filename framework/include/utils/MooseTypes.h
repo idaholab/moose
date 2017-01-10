@@ -242,6 +242,17 @@ enum SolveType
 };
 
 /**
+ * Type of the eigen solve
+ */
+enum EigenSolveType
+{
+  EST_POWER,            /// Power / Inverse / RQI
+  EST_ARNOLDI,          /// Arnoldi
+  EST_KRYLOVSCHUR,      /// Krylov-Schur
+  EST_JD                /// Jacobi-Davidson
+};
+
+/**
  * Type of constraint formulation
  */
 enum ConstraintFormulationType

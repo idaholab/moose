@@ -24,6 +24,8 @@ public:
 
   Moose::SolveType _type;
   Moose::LineSearchType _line_search;
+
+  Moose::EigenSolveType _eigen_solve_type;
 };
 
 #endif /* SOLVERPARAMS_H_ */
