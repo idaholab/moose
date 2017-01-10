@@ -5,7 +5,7 @@ import sys, os, inspect
 os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))
 
 #### Set the name of the application here and moose directory relative to the application
-app_name = 'combined/modules'
+app_name = 'combined/combined'
 
 MODULE_DIR = os.path.abspath('.')
 MOOSE_DIR = os.path.abspath(os.path.join(MODULE_DIR, '..'))
