@@ -22,7 +22,7 @@ markdown_extensions:
     - MooseDocs.extensions.MooseMarkdown:
           package: True
           make: ../modules
-          executable: ../modules/combined/modules-opt
+          executable: ../modules/combined/combined-opt
           repo: https://github.com/idaholab/moose/blob/master
           hide:
               - /Bounds # this should not be removed, this is deprecated syntax that we do not want to document
