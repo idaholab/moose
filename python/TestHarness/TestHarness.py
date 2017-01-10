@@ -345,7 +345,7 @@ class TestHarness:
         # Part 1:
         part1_params = part1.parameters()
         part1_params['test_name'] += '_part1'
-        part1_params['cli_args'].append('--half-transient :Outputs/checkpoint=true')
+        part1_params['cli_args'].append('--half-transient Outputs/checkpoint=true')
         part1_params['skip_checks'] = True
 
         # Part 2:

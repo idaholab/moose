@@ -150,7 +150,13 @@ Parser::parse(const std::string &input_filename)
 
   MooseUtils::checkFileReadable(input_filename, true);
 
-  _getpot_file.absorb(*_app.commandLine()->getPot());
+  /**
+   * Only allow the main application to "absorb" it's command line parameters into the input file object.
+   * This allows DBEs with substitutions on the CLI to work for the master application but not sub apps.
+   * If we did allow this, it would remove the ability to only set CLI overrides for the main app only.
+   */
+  if (_app.name() == "main")
+    _getpot_file.absorb(*_app.commandLine()->getPot());
 
   // GetPot object
   _getpot_file.enable_request_recording();
