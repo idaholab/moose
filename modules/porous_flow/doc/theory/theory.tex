@@ -99,16 +99,17 @@ over all phases present in the system:
 \begin{equation}
 M^{\species} =
 \phi\sum_{\phase}S_{\phase}\rho_{\phase}\massfrac_{\phase}^{\species}
-+ \textcolor{blue}{(1 - \phi)\rho^{R}A^{\species}}
++ (1 - \phi)C^{\species}
 \label{eqn.msph}
 \end{equation}
 The solid's porosity is $\phi$.  $S_{\phase}$ is the saturation of
 phase $\phase$ (solid, liquid, gas, NAPL).  $\rho_{\phase}$ is the density of
 phase $\phase$.  $\massfrac_{\phase}^{\species}$ is the mass fraction
-of component $\species$ present in phase $\phase$.  \textcolor{blue}{The final term
+of component $\species$ present in phase $\phase$.  The final term
 represents fluid absorption into the porous-rock skeleton:
-$A^{\species}$ is the mass of absorbed species per mass of rock grain
-material.}
+$C^{\species}$ is the mass of absorbed species per volume of solid
+rock-grain material, and its dynamics is specified in
+\hyperref[adsorption.sec]{Section~\ref*{adsorption.sec}}.
 
 The density $\rho_{\phase}$ is a function of pressure, mass fraction,
 and so on, as described by the equation of state used
@@ -533,6 +534,72 @@ $\alpha_{B}\nabla_{j} P_{f}$ from MOOSE's stress.
 
 
 \section{\textcolor{red}{Chemical reactions}}
+\label{chem.sec}
+
+\subsection{Adsorption and desorption}
+\label{adsorption.sec}
+
+The fluid mass \hyperref[eqn.msph]{Eqn~\ref*{eqn.msph}} contains
+contributions from adsorped species: $C^{\species}$ is the mass of
+absorped species per volume of solid rock-grain material.  Its
+dynamics involves no advective flux terms, as PorousFlow assumes that
+the adsorped species are trapped in the solid matrix.  The governing
+equation is
+\begin{equation}
+0 = \frac{\partial}{\partial t}(1 - \phi)C^{\species} + (1 -
+\phi)C^{\species}\nabla\cdot{\mathbf{v}}_{s} + L^{\species} \ .
+\end{equation}
+The $(1-\phi)$ terms account for the porosity of the solid skeleton
+(so $(1-\phi)C^{\species}$ is the mass of adsorped species per volume
+of porous skeleton), the coupling to the solid mechanics is via the
+second term, and $L^{\species}$ governs the adsorption-desorption
+process.
+
+Currently, PorousFlow assumes that $C^{\species}$ is a primary MOOSE
+variable (that is, defined in the {\tt [Variables]} block of the MOOSE
+input file).  This is in contrast to the remainder of PorousFlow where
+the primary variables can be arbitrary (so that variable switching and
+persistent variables can be used in difficult problems).  Usually
+$C^{\species}$ will have {\tt family=MONOMIAL} and {\tt order=CONSTANT}.
+
+PorousFlow assumes that $L$ follows the Langmuir form:
+\begin{equation}
+L = \frac{1}{\tau_{L}}\left(C - \frac{\rho_{L}P}{P_{L}+P} \right)
+\end{equation}
+Here $L$ is the mass-density rate (kg.m$^{-3}$.s$^{-1}$) of material
+moving from the adsorped state to the porespace.  The notation is as
+follows.
+\begin{itemize}
+\item $\rho_{L}$ is the so-called Langmuir density, which is
+  adsorped-gas-mass per volume of solid rock-grain material (kg.m$^{-3}$).  In
+  terms of the often used Langmuir volume, $V_{L}$, it is
+  $\rho_{L}=V_{L}\times(\mbox{gas density at STP})$.
+\item $P_{L}$ is the Langmuir pressure (Pa)
+\item $P$ is the relevant phase pressure (which will be the pressure
+  of the gas phase).  Currently, PorousFlow assumes that $P$ is a
+  primary MOOSE variable (that is, defined in the {\tt [Variables]}
+  block of the MOOSE input file).  This is in contrast to the
+  remainder of PorousFlow where the primary variables can be
+  arbitrary.
+\item $\tau_{L}$ is the time constant.  Two time constants may be
+  defined: one for desorption, and one for adsorption, so
+\begin{equation}
+\tau_{L} = \left\{
+\begin{array}{ll}
+\tau_{L,\ \mathrm{desorption}} & \mbox{ if }
+C>\frac{\rho_{L}P}{P_{L}+P} \\
+\tau_{L,\ \mathrm{adsorption}} & \mbox{ otherwise}
+\end{array}
+\right.
+\end{equation}
+A mollifier may also be defined to mollify the step-change between
+desorption and adsorption.
+\end{itemize}
+
+
+
+\subsection{General geochemistry}
+\label{geochem.sec}
 
 \textcolor{red}{
 The first step in defining the chemistry is to choose a set of basis
@@ -824,6 +891,8 @@ $P$ & Pa & Fluid porepressure \\
 $P_{f}$ & Pa & Measure of porepressure used in the effective stress.
 Often this is chosen to be $\sum_{\phase}S_{\phase}P_{\phase}$. \\
 
+$P_{L}$ & Pa & Langmuir pressure \\
+
 $\Phi_{\phase}^{j}$ & moles per litre & Total concentration of basis
 species $j$ in phase $\phase$ \\
 
@@ -842,6 +911,7 @@ $\rho_{\mathrm{mat}}$ & kg.m$^{-3}$ & The mass-density of the
 fluid-filled porous solid $\rho_{\mathrm{mat}} = (1 - \phi)\rho^{R} +
 \phi\sum_{\phase}S_{\phase}\rho_{\phase}$. \\
 
+$\rho_{L}$ & kg.m$^{-3}$ & Langmuir density\\
 
 $S$ & dimensionless & Saturation \\
 
@@ -863,6 +933,8 @@ $T$ & K & Temperature. \\
 $\tau_{0}\tau_{\phase}$ & dimensionless & The phase tortuosity, which
 includes a porous-medium dependent factor $\tau_{0}$ and a coefficient
 $\tau_{\phase}=\tau_{\phase}(S_{\phase})$. \\
+
+$\tau_{L}$ & s & Langmuir desorption time constant \\
 
 $\theta$ & dimensionless & exponent in rate expression \\
 
