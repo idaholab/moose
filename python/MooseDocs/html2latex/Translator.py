@@ -41,9 +41,9 @@ class Translator(object):
       html[str]: The raw html to convert to latex.
     """
 
-    # The html pars,er attempts to match < > even when they are inside code blocks
+    # The html parser attempts to match < > even when they are inside code blocks
     def sub(match):
-      return '<code{}>{}</code>'.format(match.group(1), match.group(2).replace('<', '##LESSTHAN##').replace('>', '##GREATERTHAN##'))
+      return '<code{}>{}</code>'.format(match.group(1), match.group(2).replace('<', '##LESSTHAN##').replace('>', '##GREATERTHAN##').replace('&lt;','##LESSTHAN##').replace('&gt;','##GREATERTHAN##'))
     html = re.sub(r'<code(.*?)>(.*?)</code>', sub, html, flags=re.MULTILINE|re.DOTALL)
 
     def html2latex(input):

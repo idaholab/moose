@@ -85,7 +85,10 @@ class MooseCommonExtension(object):
         if element.get('style') is not None:
           element.set('style', ';'.join([':'.join([attribute,value]), element.get('style')]))
         else:
+          #if value is not None:
           element.set('style', ':'.join([attribute,value]) + ';')
+          #else:
+            #print "\nAttribute", attribute, "Value", value
       return element
 
   def createErrorElement(self, message, title='Markdown Parsing Error', parent=None, warning=False):
