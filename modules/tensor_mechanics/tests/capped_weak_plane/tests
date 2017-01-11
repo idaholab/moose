@@ -24,6 +24,11 @@
     input = 'except5.i'
     expect_err = 'ComputeCappedWeakPlaneStress: Weak plane tensile strength plus compressive strength must be greater than smoothing_tol'
   [../]
+  [./except6]
+    type = 'RunException'
+    input = 'except6.i'
+    expect_err = 'ComputeCappedWeakInclinedPlaneStress: normal_vector must not have zero length'
+  [../]
   [./small1]
     type = 'CSVDiff'
     input = 'small_deform1.i'
@@ -124,5 +129,21 @@
     input = 'throw_test.i'
     expect_err = "Solve failed and timestep already at or below dtmin"
     recover = false
+  [../]
+
+  [./small_inclined2]
+    type = 'CSVDiff'
+    input = 'small_deform_inclined2.i'
+    csvdiff = 'small_deform_inclined2.csv'
+  [../]
+  [./small_inclined3]
+    type = 'CSVDiff'
+    input = 'small_deform_inclined3.i'
+    csvdiff = 'small_deform_inclined3.csv'
+  [../]
+  [./small_inclined5]
+    type = 'CSVDiff'
+    input = 'small_deform_inclined5.i'
+    csvdiff = 'small_deform_inclined5.csv'
   [../]
 []

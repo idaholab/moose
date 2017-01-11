@@ -396,6 +396,7 @@ with arrows indicating the flow-potential gradients.
 
 
 \chapter{Constraints and assumptions concerning parameters}
+\label{assumptions.sec}
 
 The friction angle and cohesion should be positive, and the dilation
 angle should be non-negative.  Furthermore, the MOOSE user must ensure that
@@ -654,7 +655,18 @@ and similarly for the derivative with respect to $q^{\mathrm{trial}}$.
 
 \chapter{Extensions}
 
-Different normal, cosserat.
+\section{Arbitrary normal}
+
+The above presentation assumed the weak plane's normal is $(0, 0, 1)$.
+A version of capped weak-plane plasticity is available that accepts an
+arbitrary normal vector.  It is called {\tt
+  ComputeCappedWeakInclinedPlaneStress}.  In the reference frame where
+the inclined plane's normal aligns with the $z$ axis, the assumptions
+listed in Chapter~\ref{assumptions.sec} must hold.
+
+\section{Cosserat}
+
+TODO.
 
 \chapter{Tests}
 
