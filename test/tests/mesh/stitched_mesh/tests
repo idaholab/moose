@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'stitched_mesh.i'
+    exodiff = 'stitched_mesh_out.e'
+  [../]
+[]
