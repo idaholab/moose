@@ -42,10 +42,10 @@
   {                                                                                 \
     std::ostringstream _error_oss_;                                                 \
     _error_oss_ << "\n\n"                                                           \
-                << (Moose::_color_console ? XTERM_RED : "")                         \
+                << COLOR_RED                                                        \
                 << "\n\n*** ERROR ***\n"                                            \
                 << msg                                                              \
-                << (Moose::_color_console ? XTERM_DEFAULT : "")                     \
+                << COLOR_DEFAULT                                                    \
                 << "\n\n";                                                          \
     if (Moose::_throw_on_error)                                                     \
       throw std::runtime_error(_error_oss_.str());                                  \
@@ -82,12 +82,12 @@
     {                                                                               \
       std::ostringstream _assert_oss_;                                              \
       _assert_oss_                                                                  \
-        << (Moose::_color_console ? XTERM_RED : "")                                 \
+        << COLOR_RED                                                                \
         << "\n\nAssertion `" #asserted "' failed\n"                                 \
         << msg                                                                      \
         << "\nat "                                                                  \
         << __FILE__ << ", line " << __LINE__                                        \
-        << (Moose::_color_console ? XTERM_DEFAULT : "")                             \
+        << COLOR_DEFAULT                                                            \
         << std::endl;                                                               \
       if (Moose::_throw_on_error)                                                   \
         throw std::runtime_error(_assert_oss_.str());                               \
@@ -115,11 +115,11 @@
       std::ostringstream _warn_oss_;                                                \
                                                                                     \
       _warn_oss_                                                                    \
-        << (Moose::_color_console ? XTERM_YELLOW : "")                              \
+        << COLOR_YELLOW                                                             \
         << "\n\n*** Warning ***\n"                                                  \
         << msg                                                                      \
         << "\nat " << __FILE__ << ", line " << __LINE__                             \
-        << (Moose::_color_console ? XTERM_DEFAULT : "")                             \
+        << COLOR_DEFAULT                                                            \
         << "\n\n";                                                                  \
       if (Moose::_throw_on_error)                                                   \
         throw std::runtime_error(_warn_oss_.str());                                 \
@@ -136,11 +136,11 @@
       mooseDoOnce(                                                                  \
         {                                                                           \
           Moose::out                                                                \
-            << (Moose::_color_console ? XTERM_CYAN : "")                            \
+            << COLOR_CYAN                                                           \
             << "\n\n*** Info ***\n"                                                 \
             << msg                                                                  \
             << "\nat " << __FILE__ << ", line " << __LINE__                         \
-            << (Moose::_color_console ? XTERM_DEFAULT : "")                         \
+            << COLOR_DEFAULT                                                        \
             << "\n" << std::endl;                                                   \
         }                                                                           \
       );                                                                            \
@@ -154,7 +154,7 @@
     else                                                                                                    \
       mooseDoOnce(                                                                                          \
         Moose::out                                                                                          \
-          << (Moose::_color_console ? XTERM_YELLOW : "")                                                    \
+          << COLOR_YELLOW                                                                                   \
           << "*** Warning, This code is deprecated, and likely to be removed in future library versions!\n" \
           << msg << '\n'                                                                                    \
           << __FILE__ << ", line " << __LINE__ << ", compiled "                                             \
@@ -163,7 +163,7 @@
             print_trace(Moose::out);                                                                        \
           else                                                                                              \
             libMesh::write_traceout();                                                                      \
-          Moose::out << (Moose::_color_console ? XTERM_DEFAULT : "") << std::endl;                          \
+          Moose::out << COLOR_DEFAULT << std::endl;                                                         \
       );                                                                                                    \
    } while (0)
 
