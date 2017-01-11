@@ -2,7 +2,7 @@
 
 As MOOSE and MOOSE-based applications continue to advance having quality documentation rapidly becomes
 key to the gaining new users and provide current users with an experience that allows rapid development.
-However, creating quality or any documentation at all can be a daunting task that often not achievable,
+However, creating quality or any documentation at all can be a daunting task that is often not achievable,
 MOOSE itself has gone through this problem itself, where documentation was limited, scattered among
 multiple formats, and difficult to navigate.
 

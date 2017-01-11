@@ -8,7 +8,7 @@ The MOOSE documentation system is capable of creating latex (*.tex) files or PDF
 ## Creating Content
 
 Creating a pdf begins by creating a markdown file with the desired content. For example, the file `~/projects/moose/docs/examples/report.md` contained in MOOSE is a report containing all the
-informatin regarding the MOOSE documentation system, including this page, to demonstrate the capability and syntax.
+information regarding the MOOSE documentation system, including this page, to demonstrate the capability and syntax.
 
 !text docs/examples/report.md max-height=500px
 
@@ -22,7 +22,7 @@ to the `moosedocs.py latex --help` output for further details regarding the temp
 ## Building the PDF
 
 
-The `~/projects/moose/docs/moosedocs.py python utility is used for converting the markdown
+The `~/projects/moose/docs/moosedocs.py' python utility is used for converting the markdown
 that was created into a pdf.
 
 ```bash
