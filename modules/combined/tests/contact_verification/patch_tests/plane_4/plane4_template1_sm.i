@@ -1,40 +1,21 @@
 [Mesh]
-  file = hertz_cyl_half_1deg.e
+  file = plane4_mesh.e
   displacements = 'disp_x disp_y'
 []
 
 [Problem]
-  type = FrictionalContactProblem
-  master = 2
-  slave = 3
-  friction_coefficient = 0.20
-  slip_factor = 1.0
-  slip_too_far_factor = 1.0
-  disp_x = disp_x
-  disp_y = disp_y
-  residual_x = saved_x
-  residual_y = saved_y
-  diag_stiff_x = diag_saved_x
-  diag_stiff_y = diag_saved_y
-  inc_slip_x = inc_slip_x
-  inc_slip_y = inc_slip_y
-  contact_slip_tolerance_factor = 100
-  target_relative_contact_residual = 1.e-2
-  maximum_slip_iterations = 100
-  minimum_slip_iterations = 1
-  slip_updates_per_iteration = 5
+  type = ReferenceResidualProblem
   solution_variables = 'disp_x disp_y'
   reference_residual_variables = 'saved_x saved_y'
-  contact_reference_residual_variables = 'saved_x saved_y'
 []
 
 [Variables]
   [./disp_x]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   [../]
 []
@@ -52,38 +33,42 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./penetration]
+    order = SECOND
+  [../]
   [./saved_x]
+    order = SECOND
   [../]
   [./saved_y]
+    order = SECOND
   [../]
   [./diag_saved_x]
+    order = SECOND
   [../]
   [./diag_saved_y]
+    order = SECOND
   [../]
   [./inc_slip_x]
+    order = SECOND
   [../]
   [./inc_slip_y]
+    order = SECOND
   [../]
   [./accum_slip_x]
+    order = SECOND
   [../]
   [./accum_slip_y]
+    order = SECOND
   [../]
   [./tang_force_x]
+    order = SECOND
   [../]
   [./tang_force_y]
-  [../]
-[]
-
-[Functions]
-  [./disp_ramp_vert]
-    type = PiecewiseLinear
-    x = '0. 1. 11.'
-    y = '0. -0.0020 -0.0020'
-  [../]
-  [./disp_ramp_horz]
-    type = PiecewiseLinear
-    x = '0. 1. 11.'
-    y = '0. 0.0 0.0014'
+    order = SECOND
   [../]
 []
 
@@ -93,8 +78,6 @@
     disp_y = disp_y
     save_in_disp_y = saved_y
     save_in_disp_x = saved_x
-    diag_save_in_disp_y = diag_saved_y
-    diag_save_in_disp_x = diag_saved_x
   [../]
 []
 
@@ -117,53 +100,43 @@
     variable = stress_xy
     index = 3
   [../]
-  [./inc_slip_x]
-    type = PenetrationAux
-    variable = inc_slip_x
-    execute_on = timestep_end
-    boundary = 3
-    paired_boundary = 2
+  [./stress_zz]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_zz
+    index = 2
   [../]
-  [./inc_slip_y]
-    type = PenetrationAux
+  [./zeroslip_x]
+    type = ConstantAux
+    variable = inc_slip_x
+    boundary = 4
+    execute_on = timestep_begin
+    value = 0.0
+  [../]
+  [./zeroslip_y]
+    type = ConstantAux
     variable = inc_slip_y
-    execute_on = timestep_end
-    boundary = 3
-    paired_boundary = 2
+    boundary = 4
+    execute_on = timestep_begin
+    value = 0.0
   [../]
   [./accum_slip_x]
-    type = PenetrationAux
+    type = AccumulateAux
     variable = accum_slip_x
+    accumulate_from_variable = inc_slip_x
     execute_on = timestep_end
-    boundary = 3
-    paired_boundary = 2
   [../]
   [./accum_slip_y]
-    type = PenetrationAux
+    type = AccumulateAux
     variable = accum_slip_y
+    accumulate_from_variable = inc_slip_y
     execute_on = timestep_end
-    boundary = 3
-    paired_boundary = 2
-  [../]
-  [./tang_force_x]
-    type = PenetrationAux
-    variable = tang_force_x
-    quantity = tangential_force_x
-    boundary = 3
-    paired_boundary = 2
-  [../]
-  [./tang_force_y]
-    type = PenetrationAux
-    variable = tang_force_y
-    quantity = tangential_force_y
-    boundary = 3
-    paired_boundary = 2
   [../]
   [./penetration]
     type = PenetrationAux
     variable = penetration
-    boundary = 3
-    paired_boundary = 2
+    boundary = 4
+    paired_boundary = 3
   [../]
 []
 
@@ -181,12 +154,12 @@
   [./top_react_x]
     type = NodalSum
     variable = saved_x
-    boundary = 4
+    boundary = 5
   [../]
   [./top_react_y]
     type = NodalSum
     variable = saved_y
-    boundary = 4
+    boundary = 5
   [../]
   [./ref_resid_x]
     type = NodalL2Norm
@@ -198,14 +171,32 @@
     execute_on = timestep_end
     variable = saved_y
   [../]
-  [./disp_x226]
+  [./sigma_yy]
+    type = ElementAverageValue
+    variable = stress_yy
+  [../]
+  [./sigma_zz]
+    type = ElementAverageValue
+    variable = stress_zz
+  [../]
+  [./disp_x9]
     type = NodalVariableValue
-    nodeid = 225
+    nodeid = 8
     variable = disp_x
   [../]
-  [./disp_y226]
+  [./disp_x16]
     type = NodalVariableValue
-    nodeid = 225
+    nodeid = 15
+    variable = disp_x
+  [../]
+  [./disp_y9]
+    type = NodalVariableValue
+    nodeid = 8
+    variable = disp_y
+  [../]
+  [./disp_y16]
+    type = NodalVariableValue
+    nodeid = 15
     variable = disp_y
   [../]
   [./_dt]
@@ -220,88 +211,43 @@
 []
 
 [BCs]
-  [./side_x]
-    type = DirichletBC
-    variable = disp_y
-    boundary = '1 2'
-    value = 0.0
-  [../]
   [./bot_y]
     type = DirichletBC
-    variable = disp_x
-    boundary = '1 2'
+    variable = disp_y
+    boundary = 1
     value = 0.0
   [../]
-  [./top_y_disp]
-    type = FunctionPresetBC
-    variable = disp_y
-    boundary = 4
-    function = disp_ramp_vert
-  [../]
-  [./top_x_disp]
-    type = FunctionPresetBC
+  [./side_x]
+    type = DirichletBC
     variable = disp_x
-    boundary = 4
-    function = disp_ramp_horz
+    boundary = 2
+    value = 0.0
+  [../]
+  [./top_press]
+    type = Pressure
+    variable = disp_y
+    boundary = 5
+    component = 1
+    factor = 109.89
   [../]
 []
 
 [Materials]
-  [./stiffStuff1]
-    type = Elastic
+  [./bot]
+    type = LinearIsotropicMaterial
     block = 1
-    disp_x = disp_x
     disp_y = disp_y
-    youngs_modulus = 1e10
-    poissons_ratio = 0.0
+    disp_x = disp_x
+    poissons_ratio = 0.3
+    youngs_modulus = 1e6
   [../]
-  [./stiffStuff2]
-    type = Elastic
+  [./top]
+    type = LinearIsotropicMaterial
     block = 2
-    disp_x = disp_x
     disp_y = disp_y
-    youngs_modulus = 1e6
-    poissons_ratio = 0.3
-  [../]
-  [./stiffStuff3]
-    type = Elastic
-    block = 3
     disp_x = disp_x
-    disp_y = disp_y
-    youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stiffStuff4]
-    type = Elastic
-    block = 4
-    disp_x = disp_x
-    disp_y = disp_y
     youngs_modulus = 1e6
-    poissons_ratio = 0.3
-  [../]
-  [./stiffStuff5]
-    type = Elastic
-    block = 5
-    disp_x = disp_x
-    disp_y = disp_y
-    youngs_modulus = 1e6
-    poissons_ratio = 0.3
-  [../]
-  [./stiffStuff6]
-    type = Elastic
-    block = 6
-    disp_x = disp_x
-    disp_y = disp_y
-    youngs_modulus = 1e6
-    poissons_ratio = 0.3
-  [../]
-  [./stiffStuff7]
-    type = Elastic
-    block = 7
-    disp_x = disp_x
-    disp_y = disp_y
-    youngs_modulus = 1e6
-    poissons_ratio = 0.3
   [../]
 []
 
@@ -316,45 +262,30 @@
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-5
-  nl_rel_tol = 1e-4
+  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-7
   l_max_its = 100
   nl_max_its = 200
+  dt = 1.0
+  end_time = 1.0
+  num_steps = 10
+  dtmin = 1.0
+  l_tol = 1e-3
 
-  start_time = 0.0
-  end_time = 2.0
-  l_tol = 1e-6
-  dt = 0.1
-  dtmin = 0.1
-[]
-
-[Preconditioning]
-  [./SMP]
-    type = SMP
-    full = true
-    petsc_options_iname = 'pc_type'
-    petsc_options_value = 'lu'
-  [../]
 []
 
 [VectorPostprocessors]
   [./x_disp]
     type = NodalValueSampler
     variable = disp_x
-    boundary = '3 4'
-    sort_by = id
-  [../]
-  [./y_disp]
-    type = NodalValueSampler
-    variable = disp_y
-    boundary = '3 4'
-    sort_by = id
+    boundary = '1 3 4 5'
+    sort_by = x
   [../]
   [./cont_press]
     type = NodalValueSampler
     variable = contact_pressure
     boundary = '3'
-    sort_by = id
+    sort_by = x
   [../]
 []
 
@@ -371,14 +302,7 @@
   [../]
   [./chkfile]
     type = CSV
-    show = 'x_disp y_disp cont_press'
-    start_time = 0.9
-    execute_vector_postprocessors_on = timestep_end
-  [../]
-  [./chkfile2]
-    type = CSV
-    show = 'bot_react_x bot_react_y disp_x226 disp_y226 top_react_x top_react_y'
-    start_time = 0.9
+    show = 'bot_react_x bot_react_y disp_x9 disp_y9 disp_x16 disp_y16 sigma_yy sigma_zz top_react_x top_react_y x_disp cont_press'
     execute_vector_postprocessors_on = timestep_end
   [../]
   [./outfile]
@@ -389,16 +313,15 @@
 []
 
 [Contact]
-  [./interface]
-    master = 2
+  [./leftright]
     slave = 3
-    disp_x = disp_x
     disp_y = disp_y
+    disp_x = disp_x
+    master = 4
+    order = SECOND
     system = constraint
-    model = coulomb
-    formulation = kinematic
     normalize_penalty = true
     tangential_tolerance = 1e-3
-    penalty = 1e+8
+    penalty = 1e+9
   [../]
 []

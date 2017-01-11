@@ -5,21 +5,23 @@
     csvdiff = 'single_point_2d_out_glued_kin.csv'
     cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-3
     Executioner/nl_rel_tol=1e-10 Executioner/nl_abs_tol=1e-12 Contact/leftright/model=glued Contact/leftright/formulation=kinematic'
-    rel_err = 5e-5
+    rel_err = 5e-4
     abs_zero = 3e-5
     max_parallel = 1
     superlu = true
+    prereq = 'glued_kin_sm'
   [../]
   [./glued_pen]
     type = 'CSVDiff'
     input = 'single_point_2d.i'
     csvdiff = 'single_point_2d_out_glued_pen.csv'
     cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-4 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 
-    Contact/leftright/formulation=penalty Contact/leftright/penalty=5.0e12 Outputs/file_base=single_point_2d_out_glued_pen'
-    rel_err = 1e-4
+    Contact/leftright/formulation=penalty Contact/leftright/penalty=2.0e12 Outputs/file_base=single_point_2d_out_glued_pen'
+    rel_err = 5e-4
     abs_zero = 3e-5
     max_parallel = 1
     superlu = true
+    prereq = 'glued_pen_sm'
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
@@ -27,9 +29,10 @@
     csvdiff = 'single_point_2d_out_frictionless_kin.csv'
     cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/model=frictionless Contact/leftright/formulation=kinematic Outputs/file_base=single_point_2d_out_frictionless_kin'
     rel_err = 1e-5
-    abs_zero = 1e-6
+    abs_zero = 1e-5
     max_parallel = 1
     superlu = true
+    prereq = 'frictionless_kin_sm'
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -40,6 +43,7 @@
     abs_zero = 1e-5
     max_parallel = 1
     superlu = true
+    prereq = 'frictionless_pen_sm'
   [../]
   [./mu_0_0_kin]
     type = 'CSVDiff'
@@ -47,9 +51,10 @@
     csvdiff = 'single_point_2d_out_fric_0_0_kin.csv'
     cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/model=coulomb Contact/leftright/formulation=kinematic Contact/leftright/friction_coefficient=0.0 Outputs/file_base=single_point_2d_out_fric_0_0_kin'
     rel_err = 1e-5
-    abs_zero = 1e-6
+    abs_zero = 1e-5
     max_parallel = 1
     superlu = true
+    prereq = 'mu_0_0_kin_sm'
   [../]
   [./mu_0_0_pen]
     type = 'CSVDiff'
@@ -60,6 +65,7 @@
     abs_zero = 1e-5
     max_parallel = 1
     superlu = true
+    prereq = 'mu_0_0_pen_sm'
   [../]
 #  [./mu_1_0_kin]
 #    type = 'CSVDiff'
@@ -81,10 +87,106 @@
     abs_zero = 3e-5
     max_parallel = 1
     superlu = true
+    prereq = 'mu_0_2_kin_sm'
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
     input = 'single_point_2d_frictional.i'
+    csvdiff = 'single_point_2d_out_frictional_0_2_pen.csv'
+    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/formulation=penalty
+    Contact/leftright/model=coulomb Contact/leftright/friction_coefficient=0.2 Contact/leftright/penalty=1.0e12 Outputs/file_base=single_point_2d_out_frictional_0_2_pen'
+    rel_err = 1e-4
+    abs_zero = 3e-5
+    max_parallel = 1
+    superlu = true
+    prereq = 'mu_0_2_pen_sm'
+  [../]
+  [./glued_kin_sm]
+    type = 'CSVDiff'
+    input = 'single_point_2d_sm.i'
+    csvdiff = 'single_point_2d_out_glued_kin.csv'
+    cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-3
+    Executioner/nl_rel_tol=1e-10 Executioner/nl_abs_tol=1e-12 Contact/leftright/model=glued Contact/leftright/formulation=kinematic'
+    rel_err = 5e-5
+    abs_zero = 3e-5
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./glued_pen_sm]
+    type = 'CSVDiff'
+    input = 'single_point_2d_sm.i'
+    csvdiff = 'single_point_2d_out_glued_pen.csv'
+    cli_args = 'Executioner/end_time=0.002 Executioner/l_tol=1e-4 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 
+    Contact/leftright/formulation=penalty Contact/leftright/penalty=5.0e12 Outputs/file_base=single_point_2d_out_glued_pen'
+    rel_err = 1e-4
+    abs_zero = 3e-5
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./frictionless_kin_sm]
+    type = 'CSVDiff'
+    input = 'single_point_2d_sm.i'
+    csvdiff = 'single_point_2d_out_frictionless_kin.csv'
+    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/model=frictionless Contact/leftright/formulation=kinematic Outputs/file_base=single_point_2d_out_frictionless_kin'
+    rel_err = 1e-5
+    abs_zero = 5e-6
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./frictionless_pen_sm]
+    type = 'CSVDiff'
+    input = 'single_point_2d_sm.i'
+    csvdiff = 'single_point_2d_out_frictionless_pen.csv'
+    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/model=frictionless Contact/leftright/formulation=penalty Contact/leftright/penalty=5.0e12 Outputs/file_base=single_point_2d_out_frictionless_pen'
+    rel_err = 1e-4
+    abs_zero = 1e-5
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./mu_0_0_kin_sm]
+    type = 'CSVDiff'
+    input = 'single_point_2d_sm.i'
+    csvdiff = 'single_point_2d_out_fric_0_0_kin.csv'
+    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/model=coulomb Contact/leftright/formulation=kinematic Contact/leftright/friction_coefficient=0.0 Outputs/file_base=single_point_2d_out_fric_0_0_kin'
+    rel_err = 1e-5
+    abs_zero = 5e-6
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./mu_0_0_pen_sm]
+    type = 'CSVDiff'
+    input = 'single_point_2d_sm.i'
+    csvdiff = 'single_point_2d_out_fric_0_0_pen.csv'
+    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/model=coulomb Contact/leftright/formulation=penalty Contact/leftright/friction_coefficient=0.0 Contact/leftright/penalty=8.0e12 Outputs/file_base=single_point_2d_out_fric_0_0_pen'
+    rel_err = 1e-4
+    abs_zero = 1e-5
+    max_parallel = 1
+    superlu = true
+  [../]
+#  [./mu_1_0_kin]
+#    type = 'CSVDiff'
+#    input = 'single_point_2d_frictional.i'
+#    csvdiff = 'single_point_2d_out_fric_1_0_kin.csv'
+#    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-7 Executioner/nl_abs_tol=1e-9 
+#    Contact/leftright/model=coulomb Contact/leftright/formulation=kinematic Contact/leftright/friction_coefficient=1.0e2 Outputs/file_base=single_point_2d_out_fric_1_0_kin'
+#    rel_err = 1e-4
+#    abs_zero = 1e-5
+#    max_parallel = 1
+#    superlu = true
+#  [../]
+  [./mu_0_2_kin_sm]
+    type = 'CSVDiff'
+    input = 'single_point_2d_frictional_sm.i'
+    csvdiff = 'single_point_2d_out_frictional_0_2_kin.csv'
+    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/friction_coefficient=0.2 Outputs/file_base=single_point_2d_out_frictional_0_2_kin'
+    rel_err = 1e-4
+    abs_zero = 3e-5
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./mu_0_2_pen_sm]
+    type = 'CSVDiff'
+    input = 'single_point_2d_frictional_sm.i'
     csvdiff = 'single_point_2d_out_frictional_0_2_pen.csv'
     cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/formulation=penalty
     Contact/leftright/model=coulomb Contact/leftright/friction_coefficient=0.2 Contact/leftright/penalty=1.0e12 Outputs/file_base=single_point_2d_out_frictional_0_2_pen'
