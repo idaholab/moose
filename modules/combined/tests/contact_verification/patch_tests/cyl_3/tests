@@ -57,6 +57,9 @@
     abs_zero = 3e-6
     max_parallel = 1
     superlu = true
+
+    # This test is unstable on PETSc 3.7.4 with 64bit indices enabled.
+    dof_id_bytes = 4
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
