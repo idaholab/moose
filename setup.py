@@ -1,5 +1,12 @@
 from distutils.core import setup, Extension
+import subprocess
+try:
+  eigen_flags = subprocess.check_output(["./scripts/find_eigen.py"])
+except:
+  eigen_flags = ""
 include_dirs=['include/distributions','include/utilities','contrib/include']
+if eigen_flags.startswith("-I"):
+  include_dirs.append(eigen_flags[2:].rstrip())
 swig_opts=['-c++','-Iinclude/distributions','-Iinclude/utilities']
 extra_compile_args=['-std=c++11']
 ext = 'py2'
