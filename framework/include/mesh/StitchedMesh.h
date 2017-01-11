@@ -33,7 +33,6 @@ class StitchedMesh : public MooseMesh
 public:
   StitchedMesh(const InputParameters & parameters);
   StitchedMesh(const StitchedMesh & other_mesh);
-  virtual ~StitchedMesh();
 
   virtual MooseMesh & clone() const override;
 

@@ -42,6 +42,9 @@ StitchedMesh::StitchedMesh(const InputParameters & parameters) :
     _clear_stitched_boundary_ids(getParam<bool>("clear_stitched_boundary_ids")),
     _stitch_boundaries(getParam<std::vector<BoundaryName>>("stitch_boundaries"))
 {
+  if (_files.empty())
+    mooseError("Must specify at least one mesh file for StitchedMesh");
+
   // The StitchedMesh class only works with ReplicatedMesh
   errorIfDistributedMesh("StitchedMesh");
 
@@ -79,10 +82,6 @@ StitchedMesh::StitchedMesh(const StitchedMesh & other_mesh) :
     _files(other_mesh._files),
     _clear_stitched_boundary_ids(other_mesh._clear_stitched_boundary_ids),
     _stitch_boundaries(other_mesh._stitch_boundaries)
-{
-}
-
-StitchedMesh::~StitchedMesh()
 {
 }
 
