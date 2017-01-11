@@ -305,7 +305,7 @@ ComputeCappedWeakPlaneStress::returnMap()
 
 
   if (step_size < _min_step_size)
-    throw MooseException("ComputeCappedWeakPlaneStress: Minimum step-size violated");
+    errorHandler("ComputeCappedWeakPlaneStress: Minimum step-size violated");
 
   // success!
   _stress_return_type = StressReturnType::nothing_special;
@@ -389,7 +389,7 @@ ComputeCappedWeakPlaneStress::dVardTrial(bool elastic_only, Real q, Real q_trial
   const int gesv_num_pq = _num_pq;
   LAPACKgesv_(&gesv_num_rhs, &gesv_num_pq, &jac[0], &gesv_num_rhs, &ipiv[0], &rhs_cto[0], &gesv_num_rhs, &info);
   if (info != 0)
-    throw MooseException("ComputeCappedWeakPlaneStress: PETSC LAPACK gsev routine returned with error code " + Moose::stringify(info));
+    errorHandler("ComputeCappedWeakPlaneStress: PETSC LAPACK gsev routine returned with error code " + Moose::stringify(info));
 
   const Real dgaEn_dptn = rhs_cto[0];
   const Real dpn_dptn = rhs_cto[1];
@@ -915,4 +915,10 @@ ComputeCappedWeakPlaneStress::calculateRHS(Real p_trial, Real q_trial, Real p, R
   _rhs[1] = p - p_trial + gaE * smoothed_q.dg[0];
   _rhs[2] = q - q_trial + Ezxzx * gaE / Ezzzz * smoothed_q.dg[1];
   return _rhs[0] * _rhs[0] + _rhs[1] * _rhs[1] + _rhs[2] * _rhs[2];
+}
+
+void
+ComputeCappedWeakPlaneStress::errorHandler(const std::string & message)
+{
+  throw MooseException(message);
 }
