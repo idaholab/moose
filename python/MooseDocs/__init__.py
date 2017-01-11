@@ -225,7 +225,7 @@ def moosedocs():
   log = logging.getLogger('MooseDocs')
 
   # Remove moose.svg files (these get generated via dot)
-  log.info('Removing *.moose.svg files from {}'.format(os.getcwd()))
+  log.debug('Removing *.moose.svg files from {}'.format(os.getcwd()))
   purge(['svg'])
 
   # Execute command

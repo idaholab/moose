@@ -85,7 +85,7 @@ class MooseMarkdown(markdown.Extension):
 
     # Generate YAML data from application
     # Populate the database for input file and children objects
-    log.info('Creating input file and source code use database.')
+    log.debug('Creating input file and source code use database.')
     database = MooseDocs.MooseLinkDatabase(**config)
 
     # Populate the syntax

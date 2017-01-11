@@ -19,5 +19,5 @@ def test(pattern=None, start_dir=None, **kwargs):
   os.chdir(start_dir)
   loader = unittest.TestLoader()
   suite = loader.discover(os.getcwd(), pattern)
-  runner = unittest.TextTestRunner()
+  runner = unittest.TextTestRunner(verbosity=2)
   runner.run(suite)

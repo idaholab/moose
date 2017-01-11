@@ -10,14 +10,14 @@ class TestBibtexExtension(MarkdownTestCase):
   """
   def writeGoldFile(self, file_name, html_array):
     """
-    The parsed markdown contains a path to ".../moose/bib/moose.bib".
+    The parsed markdown contains a path to ".../moose/docs/bib/moose.bib".
     This puts in the correct path after given the HTML that comes before
     and after the string "/Users/<username>/<intermediate_directories>/moose",
     and writes the appropriate gold file to compare the generated HTML.
     """
     RE = re.compile(r'.*?/moose')
     dir_match = RE.search(os.getcwd())
-    gold_name = os.path.join('gold',file_name)
+    gold_name = os.path.join(self._path, 'gold', file_name)
     with open(gold_name,'w') as goldFile:
       html = html_array[0] + dir_match.group(0) + html_array[1]
       goldFile.write(html)
