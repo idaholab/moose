@@ -205,22 +205,22 @@ CommandLine::haveVariable(const std::string & name, bool allow_prefix_change)
       _get_pot->set_prefix((_base_prefix + ":").c_str());
       if (_get_pot->have_variable(name))
         return true;
-    }
 
     /**
      * As a final attempt we'll see if the user has passed a global command line parameter
      * in the form ":name=value". Similarly to the normal subapp prefix, this will also
      * modify subsequent invocations to GetPot until resetPrefix() has been called.
      */
-    _get_pot->set_prefix(":");
-    if (_get_pot->have_variable(name))
-      return true;
-    else
+      _get_pot->set_prefix(":");
+      if (_get_pot->have_variable(name))
+        return true;
+
       /**
        * We failed to find the parameter with the subapp prefix (if applicable) or
-       * in the global section so we need to reset the prefix now back to nothing.
+       * in the global section so we need to reset the prefix back to the way it was.
        */
-      _get_pot->set_prefix("");
+      resetPrefix();
+    }
   }
 
   return false;

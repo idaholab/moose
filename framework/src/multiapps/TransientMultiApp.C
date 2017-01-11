@@ -210,15 +210,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         bool local_first = _first;
 
         // Now do all of the solves we need
-        while (true)
+        while (!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time)
         {
           if (local_first != true)
             ex->incrementStepOrReject();
 
           local_first = false;
-
-          if (!(!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time))
-            break;
 
           ex->preStep();
           ex->computeDT();
@@ -314,7 +311,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       {
         _console << "Solving Normal Step!" << std::endl;
 
-        if (_first)
+        if (_first && !_app.isRecovering())
           problem.advanceState();
 
         if (auto_advance)
@@ -517,6 +514,7 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/)  // FIXME: Should we 
   }
 
   ex->preExecute();
-  problem.advanceState();
+  if (!_app.isRecovering())
+    problem.advanceState();
   _transient_executioners[i] = ex;
 }
