@@ -81,15 +81,11 @@ DynamicStressDivergenceTensors::computeQpJacobian()
 Real
 DynamicStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  unsigned int coupled_component = 0;
   bool active = true;
 
   for (unsigned int i = 0; i < _ndisp; ++i)
     if (jvar == _disp_var[i])
-    {
-      coupled_component = i;
       active = true;
-    }
 
   if (active)
   {
