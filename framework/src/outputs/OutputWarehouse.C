@@ -27,7 +27,7 @@
 
 OutputWarehouse::OutputWarehouse(MooseApp & app) :
     _app(app),
-    _buffer_action_console_outputs(true),
+    _buffer_action_console_outputs(false),
     _output_exec_flag(EXEC_CUSTOM),
     _force_output(false)
 {
