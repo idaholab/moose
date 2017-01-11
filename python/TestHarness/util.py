@@ -104,56 +104,26 @@ def runCommand(cmd, cwd=None):
 # 3) the color parameter is False.
 def printResult(tester, result, timing, start, end, options, color=True):
   f_result = ''
+  caveats = ''
   first_directory = tester.specs['first_directory']
   test_name = tester.specs['test_name']
-  status_message = tester.getStatusMessage()
+  status = tester.getStatus()
 
   cnt = (TERM_COLS-2) - len(test_name + result)
   color_opts = {'code' : options.code, 'colored' : options.colored}
   if color:
-    any_match = False
     if options.color_first_directory:
       test_name = colorText(first_directory, 'CYAN', **color_opts) + test_name.replace(first_directory, '', 1) # Strip out first occurence only
     # Color the Caveats CYAN
     m = re.search(r'(\[.*?\])', result)
     if m:
-      any_match = True
-      f_result += colorText(m.group(1), 'CYAN', **color_opts) + " "
-    # Color Exodiff or CVSdiff tests YELLOW
-    m = re.search('(FAILED \((?:EXODIFF|CSVDIFF)\))', result)
-    if m:
-      any_match = True
-      f_result += colorText(m.group(1), 'YELLOW', **color_opts)
-    else:
-      # Color remaining FAILED tests RED
-      m = re.search('(FAILED \(.*\))', result)
-      if m:
-        any_match = True
-        f_result += colorText(m.group(1), 'RED', **color_opts)
-    # Color deleted tests RED
-    m = re.search('(deleted) (\(.*\))', result)
-    if m:
-      any_match = True
-      f_result += colorText(m.group(1), 'RED', **color_opts) + ' ' + m.group(2)
-    # Color long running tests YELLOW
-    m = re.search('(RUNNING\.\.\.)', result)
-    if m:
-      any_match = True
-      f_result += colorText(m.group(1), 'YELLOW', **color_opts)
-    # Color PBS status CYAN
-    m = re.search('((?:LAUNCHED|RUNNING(?!\.)|EXITING|QUEUED))', result)
-    if m:
-      any_match = True
-      f_result += colorText(m.group(1), 'CYAN', **color_opts)
-    # Color Passed tests GREEN
+      caveats = m.group(1)
+      f_result = colorText(caveats, 'CYAN', **color_opts)
 
-    m = re.search('(' + status_message + ')', result)
-    if m:
-      any_match = True
-      f_result += colorText(m.group(1), 'GREEN', **color_opts)
-
-    if not any_match:
-      f_result = result
+    # Color test results based on status.
+    # Keep any caveats that may have been colored
+    if status:
+      f_result += colorText(result.replace(caveats, ''), tester.getColor(status), **color_opts)
 
     f_result = test_name + '.'*cnt + ' ' + f_result
   else:

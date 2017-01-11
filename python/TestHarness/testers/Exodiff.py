@@ -52,23 +52,23 @@ class Exodiff(RunApp):
 
 
   def processResults(self, moose_dir, retcode, options, output):
-    (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
+    output = RunApp.processResults(self, moose_dir, retcode, options, output)
 
-    if reason != '' or self.specs['skip_checks']:
-      return (reason, output)
+    if self.getStatus() == 'FAIL' or self.specs['skip_checks']:
+      return output
 
     # Don't Run Exodiff on Scaled Tests
     if options.scaling and self.specs['scale_refine']:
-      return (reason, output)
+      return output
 
     # Make sure that all of the Exodiff files are actually available
     for file in self.specs['exodiff']:
       if not os.path.exists(os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)):
         output += "File Not Found: " + os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)
-        reason = 'MISSING GOLD FILE'
+        self.setStatus('MISSING GOLD FILE', 'FAIL')
         break
 
-    if reason == '':
+    if self.getStatus() != 'FAIL':
       # Retrieve the commands
       commands = self.processResultsCommand(moose_dir, options)
 
@@ -78,7 +78,7 @@ class Exodiff(RunApp):
         output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(self.specs['exodiff_opts'])
 
         if ('different' in exo_output or 'ERROR' in exo_output) and not "Files are the same" in exo_output:
-          reason = 'EXODIFF'
+          self.setStatus('EXODIFF', 'DIFF')
           break
 
-    return (reason, output)
+    return output
