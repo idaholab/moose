@@ -20,9 +20,8 @@ ELEMENT VARIABLES relative 1.e-5 floor 1.e-9
 	strain_xx      # min:               0 @ t1,b1,e1	max:     0.023601136 @ t3,b1,e4
 	strain_xy      # min:               0 @ t1,b1,e1	max:    0.0020836462 @ t3,b1,e1
 	strain_yy      # min:               0 @ t1,b1,e1	max:     0.026739002 @ t3,b1,e3
-	aux_strain_zz  # min:               0 @ t1,b1,e1	max:     0.011030212 @ t3,b1,e3
+	strain_zz      # min:               0 @ t1,b1,e1	max:     0.011030212 @ t3,b1,e3
 
 # No NODESET VARIABLES
 
 # No SIDESET VARIABLES
-

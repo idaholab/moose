@@ -39,22 +39,21 @@ GeneralizedPlaneStrainAction::GeneralizedPlaneStrainAction(const InputParameters
 void
 GeneralizedPlaneStrainAction::act()
 {
+  // user object name
+  const std::string uo_name = _name + "_GeneralizedPlaneStrainUserObject";
+
+  //
+  // Add off diagonal Jacobian kernels
+  //
   if (_current_task == "add_kernel")
   {
     std::string k_type = "GeneralizedPlaneStrainOffDiag";
     InputParameters params = _factory.getValidParams(k_type);
-    params.set<std::vector<NonlinearVariableName> >("displacements") = _displacements;
 
+    params.applyParameters(parameters(), {"scalar_out_of_plane_strain"});
     params.set<std::vector<VariableName> >("scalar_out_of_plane_strain") = {getParam<NonlinearVariableName>("scalar_out_of_plane_strain")};
 
-    if (isParamValid("base_name"))
-      params.set<std::string>("base_name") = getParam<std::string>("base_name");
-
-    if (isParamValid("block"))
-      params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
-
-    params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-
+    // add off-diagonal jacobian kernels for the displacements
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
       std::string k_name = _name + "GeneralizedPlaneStrainOffDiag_disp" + Moose::stringify(i);
@@ -63,7 +62,8 @@ GeneralizedPlaneStrainAction::act()
       _problem->addKernel(k_type, k_name, params);
     }
 
-    if (isParamValid("temperature"))
+    // add temperature kernel only if temperature is a nonlinear variable (and not an axuvariable)
+    if (isParamValid("temperature") && _problem->getNonlinearSystemBase().hasVariable("temperature"))
     {
       params.set<NonlinearVariableName>("temperature") = getParam<NonlinearVariableName>("temperature");
 
@@ -73,27 +73,24 @@ GeneralizedPlaneStrainAction::act()
       _problem->addKernel(k_type, k_name, params);
     }
   }
+
+  //
+  // Add user object
+  //
   else if (_current_task == "add_user_object")
   {
     std::string uo_type = "GeneralizedPlaneStrainUserObject";
     InputParameters params = _factory.getValidParams(uo_type);
 
-    std::string uo_name = _name + "_GeneralizedPlaneStrainUserObject";
-
-    if (isParamValid("base_name"))
-      params.set<std::string>("base_name") = getParam<std::string>("base_name");
-
-    params.set<FunctionName>("out_of_plane_pressure") = getParam<FunctionName>("out_of_plane_pressure");
-    params.set<Real>("factor") = getParam<Real>("factor");
-
-    if (isParamValid("block"))
-      params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
-
+    params.applyParameters(parameters());
     params.set<MultiMooseEnum>("execute_on") = "linear";
-    params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
     _problem->addUserObject(uo_type, uo_name, params);
   }
+
+  //
+  // Add scalar kernel
+  //
   else if (_current_task == "add_scalar_kernel")
   {
     std::string sk_type = "GeneralizedPlaneStrain";
@@ -102,9 +99,8 @@ GeneralizedPlaneStrainAction::act()
     params.set<NonlinearVariableName>("variable") = getParam<NonlinearVariableName>("scalar_out_of_plane_strain");
 
     // set the UserObjectName from previously added UserObject
-    params.set<UserObjectName>("generalized_plane_strain") = _name + "_GeneralizedPlaneStrainUserObject";
+    params.set<UserObjectName>("generalized_plane_strain") = uo_name;
 
-    std::string sk_name = _name + "_GeneralizedPlaneStrain";
-    _problem->addScalarKernel(sk_type, sk_name, params);
+    _problem->addScalarKernel(sk_type, _name + "_GeneralizedPlaneStrain", params);
   }
 }

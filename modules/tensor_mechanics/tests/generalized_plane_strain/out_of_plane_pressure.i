@@ -55,7 +55,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./aux_strain_zz]
+  [./strain_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -146,7 +146,7 @@
   [./strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
-    variable = aux_strain_zz
+    variable = strain_zz
     index_i = 2
     index_j = 2
   [../]

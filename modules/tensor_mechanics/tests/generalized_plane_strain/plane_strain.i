@@ -53,7 +53,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./aux_strain_zz]
+  [./strain_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -136,7 +136,7 @@
   [./strain_zz]
     type = RankTwoAux
     rank_two_tensor = total_strain
-    variable = aux_strain_zz
+    variable = strain_zz
     index_i = 2
     index_j = 2
   [../]
@@ -192,16 +192,16 @@
   solve_type = PJFNK
   line_search = none
 
-# controls for linear iterations
+  # controls for linear iterations
   l_max_its = 100
   l_tol = 1e-8
 
-# controls for nonlinear iterations
+  # controls for nonlinear iterations
   nl_max_its = 15
   nl_rel_tol = 1e-10
   nl_abs_tol = 1e-12
 
-# time control
+  # time control
   start_time = 0.0
   dt = 1.0
   dtmin = 1.0
