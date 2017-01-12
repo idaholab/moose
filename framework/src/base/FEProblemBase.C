@@ -3449,6 +3449,8 @@ FEProblemBase::outputStep(ExecFlagType type)
 {
   _nl->update();
   _aux->update();
+  if (_displaced_problem != NULL)
+    _displaced_problem->syncSolutions();
   _app.getOutputWarehouse().outputStep(type);
 }
 
