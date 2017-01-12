@@ -27,7 +27,7 @@ public:
   GrainForcesPostprocessor(const InputParameters & parameters);
 
   virtual ~GrainForcesPostprocessor() {}
-  virtual void initialize() {};
+  virtual void initialize();
   virtual void execute();
 
 protected:
