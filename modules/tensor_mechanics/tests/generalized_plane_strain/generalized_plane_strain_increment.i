@@ -35,7 +35,7 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
-    strain = SMALL
+    strain = FINITE
     incremental = true
     add_variables = true
     generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
@@ -96,10 +96,6 @@
   [../]
 []
 
-[Debug]
-  show_actions = true
-[]
-
 [Problem]
   kernel_coverage_check = false
 []
@@ -124,7 +120,6 @@
   dt = 1.0
   dtmin = 1.0
   end_time = 2.0
-  num_steps = 5000
 []
 
 [Outputs]

@@ -61,7 +61,7 @@ validParams<TensorMechanicsAction>()
   params.addParam<std::vector<AuxVariableName>>("diag_save_in", "The displacement diagonal preconditioner terms");
   params.addParamNamesToGroup("block save_in diag_save_in", "Advanced");
 
-  MooseEnum planarFormulationType("NONE PLANE_STRESS PLANE_STRAIN GENERALIZED_PLANE_STRAIN", "NONE");
+  MooseEnum planarFormulationType("NONE PLANE_STRAIN GENERALIZED_PLANE_STRAIN", "NONE"); // PLANE_STRESS
   params.addParam<MooseEnum>("planar_formulation", planarFormulationType, "Out-of-plane stress/strain formulation");
   params.addParam<NonlinearVariableName>("scalar_out_of_plane_strain", "Scalar variable for the out-of-plane strain (in y direction for 1D Axisymmetric or in z direction for 2D Cartesian problems)");
   params.addParam<FunctionName>("out_of_plane_pressure", "0", "Function used to prescribe pressure in the out-of-plane direction (y for 1D Axisymmetric or z for 2D Cartesian problems)");
@@ -249,7 +249,8 @@ TensorMechanicsAction::act()
       else
         mooseError("Unsupported strain formulation");
     }
-    else
+    else if (_planar_formulation == PlanarFormulation::PlaneStrain ||
+             _planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
     {
       std::map<StrainAndIncrement, std::string> type_map = {
           {StrainAndIncrement::SmallTotal, "ComputePlaneSmallStrain"},
@@ -263,14 +264,18 @@ TensorMechanicsAction::act()
       else
         mooseError("Unsupported coordinate system for plane strain.");
     }
+    else
+      mooseError("Unsupported planar formulation");
 
     // set material parameters
     auto params = _factory.getValidParams(type);
-    params.applyParameters(parameters(), {"displacements", "use_displaced_mesh", "eigenstrain_names"});
+    params.applyParameters(parameters(), {"displacements", "use_displaced_mesh", "eigenstrain_names", "scalar_out_of_plane_strain"});
 
     params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
     params.set<bool>("use_displaced_mesh") = false;
     params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") = _eigenstrain_names;
+    if (isParamValid("scalar_out_of_plane_strain"))
+      params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {getParam<NonlinearVariableName>("scalar_out_of_plane_strain")};
 
     _problem->addMaterial(type, name() + "_strain", params);
   }
