@@ -15,6 +15,10 @@
     type = Diffusion
     variable = u
   [../]
+  [./td]
+    type = TimeDerivative
+    variable = u
+  [../]
 []
 
 [BCs]
@@ -33,7 +37,9 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+  num_steps = 5
+  dt = 0.01
 
   # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
@@ -44,15 +50,7 @@
 
 [Outputs]
   exodus = true
-  print_perf_log = true
-[]
 
-[MultiApps]
-  [./full_solve]
-    type = FullSolveMultiApp
-# not setting app_type to use the same app type of master, i.e. MooseTestApp
-    execute_on = initial
-    positions = '0 0 0'
-    input_files = sub.i
-  [../]
+  # We can't control perf log output from a subapp
+  print_perf_log = true
 []
