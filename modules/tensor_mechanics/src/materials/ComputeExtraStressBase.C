@@ -17,6 +17,7 @@ InputParameters validParams<ComputeExtraStressBase>()
 ComputeExtraStressBase::ComputeExtraStressBase(const InputParameters & parameters) :
     Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+    _extra_stress_name(_base_name + "extra_stress"),
     _extra_stress(declareProperty<RankTwoTensor>(_base_name + "extra_stress"))
 {
 }
