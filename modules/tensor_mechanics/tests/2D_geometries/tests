@@ -1,15 +1,15 @@
 [Tests]
   [./plane_strain]
     type = Exodiff
-    input = 'planestrain_test.i'
-    exodiff = 'planestrain_test_out.e'
+    input = 'planestrain.i'
+    exodiff = 'planestrain_out.e'
     abs_zero = 1e-7
     compiler = 'CLANG GCC'
   [../]
   [./plane_strain_Bbar]
     type = Exodiff
-    input = 'planestrain_test.i'
-    exodiff = 'planestrain_test_out.e'
+    input = 'planestrain.i'
+    exodiff = 'planestrain_out.e'
     abs_zero = 5e-6
     compiler = 'CLANG GCC'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
@@ -17,15 +17,15 @@
   [../]
   [./finite_planestrain]
     type = Exodiff
-    input = 'finite_planestrain_test.i'
-    exodiff = 'finite_planestrain_test_out.e'
+    input = 'finite_planestrain.i'
+    exodiff = 'finite_planestrain_out.e'
     abs_zero = 1e-9
     compiler = 'CLANG GCC'
   [../]
   [./finite_planestrain_Bbar]
     type = Exodiff
-    input = 'finite_planestrain_test.i'
-    exodiff = 'finite_planestrain_test_out.e'
+    input = 'finite_planestrain.i'
+    exodiff = 'finite_planestrain_out.e'
     abs_zero = 1e-9
     compiler = 'CLANG GCC'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
