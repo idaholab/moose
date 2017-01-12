@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/opt/moose/miniconda/bin/python
 import fileinput
 import sys
 import os
@@ -389,9 +389,14 @@ if __name__ == '__main__':
 
   # run debug process to gather jacobian data
   try:
-    child = subprocess.Popen(mooseparams, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    data = child.communicate()[0]
+    child = subprocess.Popen(mooseparams, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+    data, errout = child.communicate()
     child.wait()
+    err = child.poll()
+    if err != 1 :
+      print "Error %d running executable:" % err
+      print errout
+      sys.exit(1)
   except:
     print 'Error executing moose based application\n'
     sys.exit(1)
