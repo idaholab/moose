@@ -161,6 +161,22 @@ Console::Console(const InputParameters & parameters) :
     _setup_log = true;
   }
 
+  if (_app.name() != "main" &&
+      (_pars.isParamSetByUser("perf_log") ||
+       _pars.isParamSetByUser("perf_log_interval") ||
+       _pars.isParamSetByUser("setup_log") ||
+       _pars.isParamSetByUser("solve_log") ||
+       _pars.isParamSetByUser("perf_header") ||
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+       _pars.isParamSetByUser("libmesh_log") ||
+#endif
+       common_action->parameters().isParamSetByUser("print_perf_log")))
+    mooseWarning("Performance logging cannot currently be controlled from a Multiapp, please set all performance options in the main input file");
+
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+  params.addParam<bool>("libmesh_log", true, "Print the libMesh performance log, requires libMesh to be configured with --enable-perflog");
+#endif
+
   // Deprecate the setup perf log
   Moose::setup_perf_log.disable_logging();
 
@@ -171,7 +187,8 @@ Console::Console(const InputParameters & parameters) :
     _execute_on.push_back(mme);
 
   // If --timing was used from the command-line, do nothing, all logs are enabled
-  if (!_timing)
+  // Also, only allow the main app to change the perf_log settings.
+  if (!_timing && _app.name() == "main")
   {
     // Disable performance logging (all log input options must be false)
     if (!_perf_log && !_setup_log && !_solve_log && !_perf_header && !_setup_log_early)
@@ -223,7 +240,7 @@ Console::~Console()
   /* If --timing was not used disable the logging b/c the destructor of these
    * object does the output, if --timing was used do nothing because all other
    * screen related output was disabled above */
-  if (!_timing)
+  if (!_timing && _app.name() == "main")
   {
     /* Disable the logs, without this the logs will be printed
        during the destructors of the logs themselves */
