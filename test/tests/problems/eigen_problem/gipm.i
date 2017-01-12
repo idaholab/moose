@@ -1,17 +1,15 @@
 [Mesh]
- type = GeneratedMesh
- dim = 2
- xmin = 0
- xmax = 100
- ymin = 0
- ymax = 100
- elem_type = QUAD4
- nx = 64
- ny = 64
+  type = GeneratedMesh
+  dim = 2
+  xmin = 0
+  xmax = 100
+  ymin = 0
+  ymax = 100
+  elem_type = QUAD4
+  nx = 64
+  ny = 64
 
- uniform_refine = 0
-
- displacements = 'x_disp y_disp'
+  displacements = 'x_disp y_disp'
 []
 
 #The minimum eigenvalue for this problem is 2*(pi/a)^2 + 2 with a = 100.
@@ -19,8 +17,7 @@
 
 [Variables]
   [./u]
-    # second order is way better than first order
-    order = FIRST
+    order = first
     family = LAGRANGE
   [../]
 []
@@ -90,15 +87,15 @@
 
 [Problem]
   type = EigenProblem
-  eigen_problem_type = GNHEP
+  eigen_problem_type = gen_non_hermitian
   n_eigen_pairs = 1
   n_basis_vectors = 18
 []
 
 [Executioner]
   type = Steady
-  eigen_solve_type = jd
-  petsc_options = '-eps_smallest_magnitude -eps_view -eps_monitor_conv -eps_monitor'
+  eigen_solve_type = jacobi_davidson
+  petsc_options = '-eps_view'
 []
 
 [VectorPostprocessors]

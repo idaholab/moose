@@ -39,7 +39,7 @@ InputParameters validParams<Executioner>()
 #ifdef LIBMESH_HAVE_PETSC
   params += Moose::PetscSupport::getPetscValidParams();
 #endif //LIBMESH_HAVE_PETSC
-  // add slepc options
+  // Add slepc options
 #ifdef LIBMESH_HAVE_SLEPC
   params += Moose::SlepcSupport::getSlepcValidParams();
 #endif

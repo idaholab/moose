@@ -66,7 +66,6 @@ protected:
   // Reference to Kernel storage structure
   const KernelWarehouse & _kernels;
 
-  // kernel type
   Moose::KernelType _kernel_type;
 
   virtual void computeJacobian();

@@ -246,10 +246,10 @@ enum SolveType
  */
 enum EigenSolveType
 {
-  EST_POWER,            /// Power / Inverse / RQI
-  EST_ARNOLDI,          /// Arnoldi
-  EST_KRYLOVSCHUR,      /// Krylov-Schur
-  EST_JD                /// Jacobi-Davidson
+  EST_POWER,            ///< Power / Inverse / RQI
+  EST_ARNOLDI,          ///< Arnoldi
+  EST_KRYLOVSCHUR,      ///< Krylov-Schur
+  EST_JACOBI_DAVIDSON   ///< Jacobi-Davidson
 };
 
 /**
@@ -257,12 +257,29 @@ enum EigenSolveType
  */
 enum EigenProblemType
 {
-  EPT_HEP,           /// Hermitian
-  EPT_NHEP,          /// Non-Hermitian
-  EPT_GHEP,          /// Generalized Hermitian
-  EPT_GHIEP,         /// Generalized Hermitian indefinite
-  EPT_GNHEP,         /// Generalized Non-Hermitian
-  EPT_PGNHEP         /// GNHEP with positive (semi-)definite B
+  EPT_HERMITIAN,              ///< Hermitian
+  EPT_NON_HERMITIAN,          ///< Non-Hermitian
+  EPT_GEN_HERMITIAN,          ///< Generalized Hermitian
+  EPT_GEN_INDEFINITE,         ///< Generalized Hermitian indefinite
+  EPT_GEN_NON_HERMITIAN,      ///< Generalized Non-Hermitian
+  EPT_POS_GEN_NON_HERMITIAN   ///< Generalized Non-Hermitian with positive (semi-)definite B
+};
+
+/**
+ * Which eigen pairs
+ */
+enum WhichEigenPairs
+{
+  WEP_LARGEST_MAGNITUDE,       ///< largest magnitude
+  WEP_SMALLEST_MAGNITUDE,      ///< smallest magnitude
+  WEP_LARGEST_REAL,            ///< largest real
+  WEP_SMALLEST_REAL,           ///< smallest real
+  WEP_LARGEST_IMAGINARY,       ///< largest imaginary
+  WEP_SMALLEST_IMAGINARY,      ///< smallest imaginary
+  WEP_TARGET_MAGNITUDE,        ///< target magnitude
+  WEP_TARGET_REAL,             ///< target real
+  WEP_TARGET_IMAGINARY,        ///< target imaginary
+  WEP_ALL_EIGENVALUES          ///< all eigenvalues
 };
 
 /**

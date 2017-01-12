@@ -3624,13 +3624,6 @@ FEProblemBase::computeJacobian(NonlinearImplicitSystem & /*sys*/, const NumericV
 }
 
 void
-FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
-{
-  computeJacobian(soln, jacobian, Moose::KT_ALL);
-}
-
-
-void
 FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type)
 {
   if (!_has_jacobian || !_const_jacobian)

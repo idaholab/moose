@@ -19,7 +19,6 @@
 #include "Assembly.h"
 #include "SlepcSupport.h"
 
-// libmesh includes
 #include "libmesh/system.h"
 #include "libmesh/eigen_solver.h"
 
@@ -76,46 +75,46 @@ EigenProblem::~EigenProblem()
   delete _aux;
 }
 
+#if LIBMESH_HAVE_SLEPC
 void
 EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
 {
-  // set eigen problem types
   switch (eigen_problem_type)
   {
-  case Moose::EPT_HEP:
+  case Moose::EPT_HERMITIAN:
     _nl_eigen->sys().set_eigenproblem_type(libMesh::HEP);
     _generalized_eigenvalue_problem = false;
     break;
 
-  case Moose::EPT_NHEP:
+  case Moose::EPT_NON_HERMITIAN:
     _nl_eigen->sys().set_eigenproblem_type(libMesh::NHEP);
     _generalized_eigenvalue_problem = false;
     break;
 
-  case Moose::EPT_GHEP:
+  case Moose::EPT_GEN_HERMITIAN:
     _nl_eigen->sys().set_eigenproblem_type(libMesh::GHEP);
     _generalized_eigenvalue_problem = true;
     break;
 
-  case Moose::EPT_GHIEP:
+  case Moose::EPT_GEN_INDEFINITE:
     _nl_eigen->sys().set_eigenproblem_type(libMesh::GHIEP);
     _generalized_eigenvalue_problem = true;
     break;
 
-  case Moose::EPT_GNHEP:
+  case Moose::EPT_GEN_NON_HERMITIAN:
     _nl_eigen->sys().set_eigenproblem_type(libMesh::GNHEP);
     _generalized_eigenvalue_problem = true;
     break;
 
-  case Moose::EPT_PGNHEP:
-    mooseError("libMesh does not support EPT_PGNHEP currently \n");
+  case Moose::EPT_POS_GEN_NON_HERMITIAN:
+    mooseError("libMesh does not support EPT_POS_GEN_NON_HERMITIAN currently \n");
     break;
 
   default:
     mooseError("Unknown eigen solver type \n");
   }
 }
-
+#endif
 
 void
 EigenProblem::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type)
@@ -145,6 +144,7 @@ EigenProblem::solve()
 
   Moose::perf_log.pop("Eigen_solve()", "Execution");
 }
+
 
 #if LIBMESH_HAVE_SLEPC
 bool

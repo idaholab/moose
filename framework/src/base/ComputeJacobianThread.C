@@ -61,7 +61,6 @@ ComputeJacobianThread::~ComputeJacobianThread()
 void
 ComputeJacobianThread::computeJacobian()
 {
-  // Temporary warehouse
   const MooseObjectWarehouse<KernelBase> * warehouse;
   switch (_kernel_type)
   {

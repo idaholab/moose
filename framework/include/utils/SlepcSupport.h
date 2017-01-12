@@ -19,7 +19,6 @@
 
 #ifdef LIBMESH_HAVE_SLEPC
 
-// MOOSE includes
 #include "MultiMooseEnum.h"
 #include "InputParameters.h"
 

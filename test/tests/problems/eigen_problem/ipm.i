@@ -14,12 +14,8 @@
   displacements = 'x_disp y_disp'
 []
 
-#The minimum eigenvalue for this problem is 2*(pi/a)^2 + 2 with a = 100.
-#Its inverse will be 0.49950700634518.
-
 [Variables]
   [./u]
-    # second order is way better than first order
     order = FIRST
     family = LAGRANGE
   [../]
@@ -83,6 +79,7 @@
 
 [Problem]
   type = EigenProblem
+  which_eigen_pairs = largest_magnitude
   n_eigen_pairs = 5
   n_basis_vectors = 15
 []
@@ -90,7 +87,7 @@
 [Executioner]
   type = Steady
   eigen_solve_type = krylovschur
-  petsc_options = '-eps_view -eps_monitor_conv'
+  petsc_options = '-eps_view'
 []
 
 [VectorPostprocessors]

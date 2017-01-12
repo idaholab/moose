@@ -113,6 +113,8 @@ public:
    */
   virtual void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
+  virtual void addEigenKernels(MooseSharedPointer<KernelBase> kernel, THREAD_ID tid) {};
+
   /**
    * Adds a NodalKernel
    * @param kernel_name The type of the nodal kernel
@@ -243,13 +245,7 @@ public:
    * Computes Jacobian
    * @param jacobian Jacobian is formed in here
    */
-  void computeJacobian(SparseMatrix<Number> &  jacobian);
-
-  /**
-   * Computes Jacobian
-   * @param jacobian Jacobian is formed in here
-   */
-  void computeJacobian(SparseMatrix<Number> &  jacobian, Moose::KernelType kernel_type);
+  void computeJacobian(SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type = Moose::KT_ALL);
 
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller preconditioning matrices.
@@ -505,7 +501,7 @@ protected:
    */
   void computeNodalBCs(NumericVector<Number> & residual);
 
-  void computeJacobianInternal(SparseMatrix<Number> &  jacobian, Moose::KernelType kernel_type);
+  void computeJacobianInternal(SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type);
 
   void computeDiracContributions(SparseMatrix<Number> * jacobian = NULL);
 

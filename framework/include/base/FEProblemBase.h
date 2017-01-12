@@ -722,8 +722,7 @@ public:
   virtual void computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual);
   virtual void computeResidualType(const NumericVector<Number> & soln, NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
   virtual void computeJacobian(NonlinearImplicitSystem & sys, const NumericVector<Number> & soln, SparseMatrix<Number> &  jacobian);
-  virtual void computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type);
-  virtual void computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian);
+  virtual void computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type = Moose::KT_ALL);
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller preconditioning matrices.
    *

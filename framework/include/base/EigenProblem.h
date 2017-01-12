@@ -45,11 +45,12 @@ public:
   virtual unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
   virtual bool isGeneralizedEigenvalueProblem() { return _generalized_eigenvalue_problem; }
   virtual void computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type) override;
+#if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
+#endif
 protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
-
   NonlinearEigenSystem * _nl_eigen;
 };
 
