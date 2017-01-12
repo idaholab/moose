@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef PORFLOWMASSTIMEDERIVATIVE_H
-#define PORFLOWMASSTIMEDERIVATIVE_H
+#ifndef POROUSFLOWMASSTIMEDERIVATIVE_H
+#define POROUSFLOWMASSTIMEDERIVATIVE_H
 
 #include "TimeDerivative.h"
 #include "PorousFlowDictator.h"
@@ -97,4 +97,4 @@ protected:
   Real computeQpJac(unsigned int pvar);
 };
 
-#endif //PORFLOWMASSTIMEDERIVATIVE_H
+#endif //POROUSFLOWMASSTIMEDERIVATIVE_H
