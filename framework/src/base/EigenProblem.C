@@ -29,9 +29,8 @@ InputParameters validParams<EigenProblem>()
   InputParameters params = validParams<FEProblemBase>();
   params.addParam<unsigned int>("n_eigen_pairs", 1, "The number of eigen pairs");
   params.addParam<unsigned int>("n_basis_vectors", 3, "The dimension of eigen subspaces");
-  params.addParam<bool>("generalized_eigenvalue_problem", false, "if we are trying to solve a generalized eigenvalue problem");
 #if LIBMESH_HAVE_SLEPC
-  params += Moose::SlepcSupport::getSlepcValidParams();
+  params += Moose::SlepcSupport::getSlepcEigenProblemValidParams();
 #endif
   return params;
 }
@@ -39,7 +38,7 @@ InputParameters validParams<EigenProblem>()
 EigenProblem::EigenProblem(const InputParameters & parameters) :
     FEProblemBase(parameters),
     _n_eigen_pairs_required(getParam<unsigned int>("n_eigen_pairs")),
-    _generalized_eigenvalue_problem(getParam<bool>("generalized_eigenvalue_problem")),
+    _generalized_eigenvalue_problem(false),
     _nl_eigen(new NonlinearEigenSystem(*this, "eigen0"))
 {
 #if LIBMESH_HAVE_SLEPC
@@ -58,6 +57,10 @@ EigenProblem::EigenProblem(const InputParameters & parameters) :
   FEProblemBase::initNullSpaceVectors(parameters, *_nl_eigen);
 
   _eq.parameters.set<EigenProblem *>("_eigen_problem") = this;
+
+  Moose::SlepcSupport::storeSlepcEigenProblemOptions(*this, _pars);
+
+  setEigenproblemType(solverParams()._eigen_problem_type);
 #else
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure\n");
 #endif /* LIBMESH_HAVE_SLEPC */
@@ -73,10 +76,51 @@ EigenProblem::~EigenProblem()
   delete _aux;
 }
 
+void
+EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
+{
+  // set eigen problem types
+  switch (eigen_problem_type)
+  {
+  case Moose::EPT_HEP:
+    _nl_eigen->sys().set_eigenproblem_type(libMesh::HEP);
+    _generalized_eigenvalue_problem = false;
+    break;
+
+  case Moose::EPT_NHEP:
+    _nl_eigen->sys().set_eigenproblem_type(libMesh::NHEP);
+    _generalized_eigenvalue_problem = false;
+    break;
+
+  case Moose::EPT_GHEP:
+    _nl_eigen->sys().set_eigenproblem_type(libMesh::GHEP);
+    _generalized_eigenvalue_problem = true;
+    break;
+
+  case Moose::EPT_GHIEP:
+    _nl_eigen->sys().set_eigenproblem_type(libMesh::GHIEP);
+    _generalized_eigenvalue_problem = true;
+    break;
+
+  case Moose::EPT_GNHEP:
+    _nl_eigen->sys().set_eigenproblem_type(libMesh::GNHEP);
+    _generalized_eigenvalue_problem = true;
+    break;
+
+  case Moose::EPT_PGNHEP:
+    mooseError("libMesh does not support EPT_PGNHEP currently \n");
+    break;
+
+  default:
+    mooseError("Unknown eigen solver type \n");
+  }
+}
+
 
 void
 EigenProblem::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type)
 {
+  // to avoid computing residual
   solverParams()._type = Moose::ST_NEWTON;
   FEProblemBase::computeJacobian(soln, jacobian, kernel_type);
 }

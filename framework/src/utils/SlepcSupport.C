@@ -36,23 +36,42 @@ namespace SlepcSupport
   {
     InputParameters params = emptyInputParameters();
 
+    // eigen solve type
+    MooseEnum eigen_solve_type("POWER ARNOLDI KRYLOVSCHUR JD");
+    params.addParam<MooseEnum>("eigen_solve_type", eigen_solve_type,
+                               "POWER: Power / Inverse / RQI "
+                               "ARNOLDI: Arnoldi "
+                               "KRYLOVSCHUR: Krylov-Schur "
+                               "JD: Jacobi-Davidson ");
+   return params;
+  }
+
+  InputParameters
+  getSlepcEigenProblemValidParams()
+  {
+    InputParameters params = emptyInputParameters();
+
     // We are solving a Non-Hermitian eigenvalue problem by default
-    MooseEnum eigenvalue_problem_type("HEP NHEP GHEP GNHEP GHIEP","NHEP");
-    params.addParam<MooseEnum>("eigenvalue_problem_type", eigenvalue_problem_type,
+    MooseEnum eigen_problem_type("HEP NHEP GHEP GNHEP GHIEP");
+    params.addParam<MooseEnum>("eigen_problem_type", eigen_problem_type,
                                "HEP: Hermitian "
                                "NHEP: Non-Hermitian "
                                "GHEP: Gerneralized Hermitian "
                                "GNHEP: Generalized Non-Hermitian "
                                "GHIEP: Generalized indefinite Hermitian ");
-    // eigen solve type
-    MooseEnum eigenvalue_solve_type("POWER ARNOLDI KRYLOVSCHUR JD");
-    params.addParam<MooseEnum>("eigen_solve_type",      eigenvalue_solve_type,
-                               "POWER: Power / Inverse / RQI "
-                               "ARNOLDI: Arnoldi "
-                               "KRYLOVSCHUR: Krylov-Schur "
-                               "JD: Jacobi-Davidson ");
-
    return params;
+  }
+
+  void
+  storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputParameters & params)
+  {
+    // eigen problem type
+    if (params.isParamValid("eigen_problem_type"))
+    {
+      // Extract the eigen problem type
+      const std::string & eigen_problem_type = params.get<MooseEnum>("eigen_problem_type");
+      eigen_problem.solverParams()._eigen_problem_type = Moose::stringToEnum<Moose::EigenProblemType>(eigen_problem_type);
+    }
   }
 
   void
@@ -73,6 +92,48 @@ namespace SlepcSupport
       // Extract the eigen solve type
       const std::string & eigen_solve_type = params.get<MooseEnum>("eigen_solve_type");
       fe_problem.solverParams()._eigen_solve_type = Moose::stringToEnum<Moose::EigenSolveType>(eigen_solve_type);
+    }
+    // eigen solve type
+    if (params.isParamValid("eigen_problem_type"))
+    {
+      // Extract the eigen problem type
+      const std::string & eigen_problem_type = params.get<MooseEnum>("eigen_problem_type");
+      fe_problem.solverParams()._eigen_problem_type = Moose::stringToEnum<Moose::EigenProblemType>(eigen_problem_type);
+    }
+  }
+
+  void
+  setEigenProblemOptions(SolverParams & solver_params)
+  {
+    // set eigen problem types
+    switch (solver_params._eigen_problem_type)
+    {
+    case Moose::EPT_HEP:
+      Moose::PetscSupport::setSinglePetscOption("-eps_hermitian");
+      break;
+
+    case Moose::EPT_NHEP:
+      Moose::PetscSupport::setSinglePetscOption("-eps_non_hermitian");
+      break;
+
+    case Moose::EPT_GHEP:
+      Moose::PetscSupport::setSinglePetscOption("-eps_gen_hermitian");
+      break;
+
+    case Moose::EPT_GHIEP:
+      Moose::PetscSupport::setSinglePetscOption("-eps_gen_indefinite");
+      break;
+
+    case Moose::EPT_GNHEP:
+      Moose::PetscSupport::setSinglePetscOption("-eps_gen_non_hermitian");
+      break;
+
+    case Moose::EPT_PGNHEP:
+      Moose::PetscSupport::setSinglePetscOption("-eps_pos_gen_non_hermitian");
+      break;
+
+    default:
+      mooseError("Unknown eigen solver type \n");
     }
   }
 
@@ -108,6 +169,7 @@ namespace SlepcSupport
   {
     Moose::PetscSupport::petscSetOptions(problem);
     setEigenSolverOptions(problem.solverParams());
+    setEigenProblemOptions(problem.solverParams());
     Moose::PetscSupport::addPetscOptionsFromCommandline();
   }
 

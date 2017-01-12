@@ -23,6 +23,8 @@
 #include "MultiMooseEnum.h"
 #include "InputParameters.h"
 
+class EigenProblem;
+
 namespace Moose
 {
 namespace SlepcSupport
@@ -34,7 +36,9 @@ namespace SlepcSupport
    * @see EigenProblem
    */
   InputParameters getSlepcValidParams();
+  InputParameters getSlepcEigenProblemValidParams();
   void storeSlepcOptions(FEProblemBase & fe_problem, const InputParameters & params);
+  void storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputParameters & params);
   void slepcSetOptions(FEProblemBase & problem);
 } // namespace SlepcSupport
 } // namespace moose

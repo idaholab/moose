@@ -30,6 +30,7 @@ namespace Moose
   std::map<std::string, CoordinateSystemType> coordinate_system_type_to_enum;
   std::map<std::string, SolveType> solve_type_to_enum;
   std::map<std::string, EigenSolveType> eigen_solve_type_to_enum;
+  std::map<std::string, EigenProblemType> eigen_problem_type_to_enum;
   std::map<std::string, LineSearchType> line_search_type_to_enum;
 
   void initExecStoreType()
@@ -90,6 +91,19 @@ namespace Moose
       eigen_solve_type_to_enum["ARNOLDI"]     = EST_ARNOLDI;
       eigen_solve_type_to_enum["KRYLOVSCHUR"] = EST_KRYLOVSCHUR;
       eigen_solve_type_to_enum["JD"]          = EST_JD;
+    }
+  }
+
+  void initEigenProlemType()
+  {
+    if (eigen_problem_type_to_enum.empty())
+    {
+      eigen_problem_type_to_enum["HEP"]    = EPT_HEP;
+      eigen_problem_type_to_enum["NHEP"]   = EPT_NHEP;
+      eigen_problem_type_to_enum["GHEP"]   = EPT_GHEP;
+      eigen_problem_type_to_enum["GNHEP"]  = EPT_GNHEP;
+      eigen_problem_type_to_enum["GHIEP"]  = EPT_GHIEP;
+      eigen_problem_type_to_enum["PGNHEP"] = EPT_PGNHEP;
     }
   }
 
@@ -196,6 +210,20 @@ namespace Moose
       mooseError("Unknown eigen solve type: " << upper);
 
     return eigen_solve_type_to_enum[upper];
+  }
+
+  template<>
+  EigenProblemType stringToEnum<EigenProblemType>(const std::string & s)
+  {
+    initEigenProlemType();
+
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    if (!eigen_problem_type_to_enum.count(upper))
+      mooseError("Unknown eigen problem type: " << upper);
+
+    return eigen_problem_type_to_enum[upper];
   }
 
   template<>

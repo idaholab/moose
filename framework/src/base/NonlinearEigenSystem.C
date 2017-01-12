@@ -36,7 +36,7 @@ void assemble_matrix(EquationSystems & es, const std::string & system_name)
   p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_A, Moose::KT_NONEIGEN);
 
   // if it is a generalized eigenvalue problem
-  bool generalized_eigenvalue_problem = p->isGeneralizedEigenvalueProblem();
+  bool generalized_eigenvalue_problem = eigen_system.generalized();
   if (generalized_eigenvalue_problem)
   {
     if (eigen_system.matrix_B)
@@ -60,9 +60,6 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
     _transient_sys(eigen_problem.es().get_system<TransientEigenSystem>(name)),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired())
 {
-  if (eigen_problem.isGeneralizedEigenvalueProblem())
-    _transient_sys.set_eigenproblem_type(GNHEP);
-
   // Give the system a pointer to the matrix assembly
   // function defined below.
   sys().attach_assemble_function(Moose::assemble_matrix);

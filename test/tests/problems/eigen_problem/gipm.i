@@ -90,7 +90,7 @@
 
 [Problem]
   type = EigenProblem
-  generalized_eigenvalue_problem = true
+  eigen_problem_type = GNHEP
   n_eigen_pairs = 1
   n_basis_vectors = 18
 []

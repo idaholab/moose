@@ -253,6 +253,19 @@ enum EigenSolveType
 };
 
 /**
+ * Type of the eigen problem
+ */
+enum EigenProblemType
+{
+  EPT_HEP,           /// Hermitian
+  EPT_NHEP,          /// Non-Hermitian
+  EPT_GHEP,          /// Generalized Hermitian
+  EPT_GHIEP,         /// Generalized Hermitian indefinite
+  EPT_GNHEP,         /// Generalized Non-Hermitian
+  EPT_PGNHEP         /// GNHEP with positive (semi-)definite B
+};
+
+/**
  * Type of constraint formulation
  */
 enum ConstraintFormulationType
