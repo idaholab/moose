@@ -1,4 +1,4 @@
-#!/user/bin/env python
+#!/usr/bin/env python
 import unittest
 from MooseDocs.testing import MarkdownTestCase
 

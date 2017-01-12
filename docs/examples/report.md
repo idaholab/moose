@@ -5,7 +5,7 @@
 @+ set tableofcontents = True +@
 @+ set headings = ['chapter', 'section', 'subsection', 'subsubsection', 'textbf', 'emph'] +@
 
-{!content/utilities/documentation/overview.md!}
+{!content/utilities/documentation/index.md!}
 
 {!content/utilities/documentation/setup.md!}
 

@@ -19,7 +19,7 @@ def latex_options(parser, subparser):
 
   tex = subparser.add_parser('latex', help='Generate a .tex or .pdf document from a markdown file.')
   tex.add_argument('input', type=str, help="The markdown file to convert to slides.")
-  tex.add_argument('--template', type=str, default='basic.tex', help="The template tex file to utilize (default: %(default)s).")
+  tex.add_argument('--template', type=str, default='latex.tex', help="The template tex file to utilize (default: %(default)s).")
   tex.add_argument('--output', '-o', default=None, help="The 'tex/pdf' file to create, if a .tex extension is provide only the latex will be created. If a pdf extension is provide than the pdf will be generated and all supporting files will be cleaned-up.")
   tex.add_argument('--site', default='http://mooseframework.com/docs/moose_docs/site', help='The website for where markdown links should be connected in latex/pdf file.')
   tex.add_argument('--hrule', type=bool, default=False, help='Disable the use use of \hrule in generated latex (default: %(default)s).')
