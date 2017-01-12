@@ -12,51 +12,18 @@
   displacements = 'disp_x disp_y'
 []
 
-[Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-[Kernels]
+[Modules]
   [./TensorMechanics]
+    [./Master]
+      [./all]
+        add_variables = true
+        generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy'
+      [../]
+    [../]
   [../]
 []
 
 [AuxVariables]
-  [./sigma11]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./sigma12]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./sigma22]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./sigma33]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./e11]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./e12]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./e22]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./c]
   [../]
 []
@@ -72,58 +39,6 @@
     inside = 0
     outside = 1
     block = 0
-  [../]
-[]
-
-[AuxKernels]
-  [./matl_sigma11]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 0
-    variable = sigma11
-  [../]
-  [./matl_sigma12]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 1
-    variable = sigma12
-  [../]
-  [./matl_sigma22]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 1
-    index_j = 1
-    variable = sigma22
-  [../]
-  [./matl_sigma33]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 2
-    index_j = 2
-    variable = sigma33
-  [../]
-  [./matl_e11]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    index_i = 0
-    index_j = 0
-    variable = e11
-  [../]
-  [./matl_e12]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    index_i = 0
-    index_j = 1
-    variable = e12
-  [../]
-  [./matl_e22]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    index_i = 1
-    index_j = 1
-    variable = e22
   [../]
 []
 
@@ -174,10 +89,6 @@
     type = TwoPhaseStressMaterial
     base_A = matrix
     base_B = ppt
-  [../]
-  [./global_strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y'
   [../]
   [./switching]
     type = SwitchingFunctionMaterial
