@@ -94,8 +94,7 @@ ComputeMaterialsObjectThread::onElement(const Elem *elem)
     _fe_problem.reinitElem(elem, _tid);
 
     unsigned int n_points = _assembly[_tid]->qRule()->n_points();
-    if (_material_data[_tid]->nQPoints() != n_points)
-      _material_data[_tid]->size(n_points);
+    _material_data[_tid]->resize(n_points);
 
     if (_has_stateful_props)
     {
@@ -116,8 +115,7 @@ ComputeMaterialsObjectThread::onBoundary(const Elem *elem, unsigned int side, Bo
     _assembly[_tid]->reinit(elem, side);
     unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
 
-    if (_bnd_material_data[_tid]->nQPoints() != face_n_points)
-      _bnd_material_data[_tid]->size(face_n_points);
+    _bnd_material_data[_tid]->resize(face_n_points);
 
     if (_has_bnd_stateful_props)
     {
@@ -144,10 +142,8 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem *elem, unsigned int side
   {
     _assembly[_tid]->reinit(elem, side);
     unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
-    if (_bnd_material_data[_tid]->nQPoints() != face_n_points)
-      _bnd_material_data[_tid]->size(face_n_points);
-    if (_neighbor_material_data[_tid]->nQPoints() != face_n_points)
-      _neighbor_material_data[_tid]->size(face_n_points);
+    _bnd_material_data[_tid]->resize(face_n_points);
+    _neighbor_material_data[_tid]->resize(face_n_points);
 
     if (_has_bnd_stateful_props)
     {

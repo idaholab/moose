@@ -171,6 +171,9 @@ public:
   const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props() const { return *_props_elem; }
   const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld() const { return *_props_elem_old; }
   const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOlder() const { return *_props_elem_older; }
+  MaterialProperties& props(const Elem* elem, unsigned int side) { return (*_props_elem)[elem][side]; }
+  MaterialProperties& propsOld(const Elem* elem, unsigned int side) { return (*_props_elem_old)[elem][side]; }
+  MaterialProperties& propsOlder(const Elem* elem, unsigned int side) { return (*_props_elem_older)[elem][side]; }
   ///@}
 
   bool hasProperty(const std::string & prop_name) const;
@@ -218,9 +221,12 @@ protected:
   /// the vector of stateful property ids (the vector index is the map to stateful prop_id)
   std::vector<unsigned int> _stateful_prop_id_to_prop_id;
 
-  unsigned int addPropertyId (const std::string & prop_name);
-
   void sizeProps(MaterialProperties & mp, unsigned int size);
+
+private:
+  /// Initializes hashmap entries for element and side to proper qpoint and
+  /// property count sizes.
+  void initProps(MaterialData & material_data, const Elem & elem, unsigned int side, unsigned int n_qpoints);
 };
 
 template<>

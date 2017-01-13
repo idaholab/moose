@@ -44,7 +44,7 @@ public:
   /**
    * Resize the data to hold properties for n_qpoints quadrature points.
    */
-  void size(unsigned int n_qpoints);
+  void resize(unsigned int n_qpoints);
 
   /**
    * Returns the number of quadrature points the material properties
@@ -109,11 +109,6 @@ public:
   /// necessarily just this one).
   template <typename T>
   bool haveProperty(const std::string & prop_name) const;
-  template <typename T>
-  bool havePropertyOld(const std::string & prop_name) const;
-  template <typename T>
-  bool havePropertyOlder(const std::string & prop_name) const;
-  ///@}
 
   ///@{
   /**
@@ -166,6 +161,9 @@ protected:
   /// Status of storage swapping (calling swap sets this to true; swapBack sets it to false)
   bool _swapped;
 
+private:
+  template<typename T>
+  MaterialProperty<T> & declareProp(MaterialProperties& props, const std::string & prop_name, unsigned int prop_id);
 };
 
 template <typename T>
@@ -179,51 +177,20 @@ MaterialData::haveProperty (const std::string & prop_name) const
   if (prop_id >= _props.size())
     return false;           // the property id exists, but the property was not created in this instance of the material type
 
-  if (dynamic_cast<const MaterialProperty<T>*>(_props[prop_id]) != NULL)
-    return true;
-
-  return false;
-}
-
-template <typename T>
-inline bool
-MaterialData::havePropertyOld (const std::string & prop_name) const
-{
-
-  if (!_storage.hasProperty(prop_name))
-    return false;
-
-  unsigned int prop_id = _storage.getPropertyId(prop_name);
-  if (dynamic_cast<const MaterialProperty<T>*>(_props_old[prop_id]) != NULL)
-    return true;
-
-  return false;
-}
-
-template <typename T>
-inline bool
-MaterialData::havePropertyOlder (const std::string & prop_name) const
-{
-  if (!_storage.hasProperty(prop_name))
-    return false;
-
-  unsigned int prop_id = _storage.getPropertyId(prop_name);
-  if (dynamic_cast<const MaterialProperty<T>*>(_props_older[prop_id]) != NULL)
-    return true;
-
-  return false;
+  return dynamic_cast<const MaterialProperty<T>*>(_props[prop_id]) != NULL;
 }
 
 template<typename T>
 void
 MaterialData::resizeProps(unsigned int size)
 {
-  if (_props.size() <= size)
-    _props.resize(size + 1, NULL);
-  if (_props_old.size() <= size)
-    _props_old.resize(size + 1, NULL);
-  if (_props_older.size() <= size)
-    _props_older.resize(size + 1, NULL);
+  auto n = size + 1;
+  if (_props.size() < n)
+    _props.resize(n, NULL);
+  if (_props_old.size() < n)
+    _props_old.resize(n, NULL);
+  if (_props_older.size() < n)
+    _props_older.resize(n, NULL);
 
   if (_props[size] == NULL)
     _props[size] = new MaterialProperty<T>;
@@ -237,54 +204,43 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::declareProperty(const std::string & prop_name)
 {
-  unsigned int prop_id = _storage.addProperty(prop_name);
-  resizeProps<T>(prop_id);
-
-  MaterialProperty<T> *prop = dynamic_cast<MaterialProperty<T>*>(_props[prop_id]);
-  mooseAssert(prop != NULL, "Internal error in declaring material property: " + prop_name);
-
-  return *prop;
+  return declareProp<T>(_props, prop_name, _storage.addProperty(prop_name));
 }
 
 template<typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOld(const std::string & prop_name)
 {
-  unsigned int prop_id = _storage.addPropertyOld(prop_name);
-  resizeProps<T>(prop_id);
-
-  MaterialProperty<T> *prop = dynamic_cast<MaterialProperty<T>*>(_props_old[prop_id]);
-  mooseAssert(prop != NULL, "Internal error in declaring material property: " + prop_name);
-
-  return *prop;
+  return declareProp<T>(_props_old, prop_name, _storage.addPropertyOld(prop_name));
 }
 
 template<typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOlder(const std::string & prop_name)
 {
-  unsigned int prop_id = _storage.addPropertyOlder(prop_name);
-  resizeProps<T>(prop_id);
-
-  MaterialProperty<T> *prop = dynamic_cast<MaterialProperty<T>*>(_props_older[prop_id]);
-  mooseAssert(prop != NULL, "Internal error in declaring material property: " + prop_name);
-
-  return *prop;
+  return declareProp<T>(_props_older, prop_name, _storage.addPropertyOlder(prop_name));
 }
 
+template<typename T>
+MaterialProperty<T> &
+MaterialData::declareProp(MaterialProperties& props, const std::string & prop_name, unsigned int prop_id)
+{
+  resizeProps<T>(prop_id);
+  auto prop = dynamic_cast<MaterialProperty<T>*>(props[prop_id]);
+  mooseAssert(prop != NULL, "Internal error in declaring material property: " + prop_name);
+  return *prop;
+}
 
 template<typename T>
 MaterialProperty<T> &
 MaterialData::getProperty(const std::string & name)
 {
-  unsigned int prop_id = _storage.getPropertyId(name);
+  auto prop_id = _storage.getPropertyId(name);
   resizeProps<T>(prop_id);
-
-  MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_props[prop_id]);
-  if (prop != NULL)
-    return *prop;
-  else
+  auto prop = dynamic_cast<MaterialProperty<T>*>(_props[prop_id]);
+  if (!prop)
     mooseError("Material has no property named: " + name);
+  return *prop;
 }
 
 template<typename T>
