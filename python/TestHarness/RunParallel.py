@@ -105,7 +105,7 @@ class RunParallel:
       return
 
     # Pre-run preperation
-    tester.prepare()
+    tester.prepare(self.options)
 
     job_index = self.jobs.index(None) # find an empty slot
     log( 'Command %d started: %s' % (job_index, command) )
@@ -148,6 +148,15 @@ class RunParallel:
       os.chdir(saved_dir)
       sys.path.pop()
 
+  def getOutputFromFiles(self, tester):
+    file_output = ''
+    for processor_id in xrange(tester.getProcs(self.options)):
+      # Obtain path and append processor id to redirect_output filename
+      file_path = os.path.join(tester.specs['test_dir'], tester.name() + '.processor.{}'.format(processor_id))
+      with open(file_path, 'r') as f:
+        file_output += self.readOutput(f)
+    return file_output
+
   ## Return control the the test harness by finalizing the test output and calling the callback
   def returnToTestHarness(self, job_index):
     (p, command, tester, time, f, slots) = self.jobs[job_index]
@@ -156,7 +165,14 @@ class RunParallel:
     did_pass = True
 
     output = 'Working Directory: ' + tester.specs['test_dir'] + '\nRunning command: ' + command + '\n'
-    output += self.readOutput(f)
+
+    if tester.specs.isValid('redirect_output') and tester.specs['redirect_output'] and tester.getProcs(self.options) > 1:
+      # If the tester enabled redirect_stdout and is using more than one processor
+      output += self.getOutputFromFiles(tester)
+    else:
+      # Handle the case were the tester did not inherite from RunApp (like analyzejacobian)
+      output += self.readOutput(f)
+
     if p.poll() == None: # process has not completed, it timed out
       output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
       f.close()

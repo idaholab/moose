@@ -95,7 +95,7 @@ class Tester(MooseObject):
 
   # This method is called prior to running the test.  It can be used to cleanup files
   # or do other preparations before the tester is run
-  def prepare(self):
+  def prepare(self, options):
     return
 
   def getThreads(self, options):

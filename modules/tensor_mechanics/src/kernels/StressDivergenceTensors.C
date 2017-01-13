@@ -289,7 +289,7 @@ StressDivergenceTensors::computeFiniteDeformJacobian()
   const RankFourTensor dCtilde_dFhatinv = -I.mixedProductIkJl(A) - I.mixedProductJkIl(A) + II_ijkl + I.mixedProductJkIl(I);
 
   //Second order approximation of Uhat - consistent with strain increment definition
-  const RankTwoTensor Uhat = I - 0.5 * Ctilde - 3.0/8.0 * Ctilde * Ctilde;
+  //const RankTwoTensor Uhat = I - 0.5 * Ctilde - 3.0/8.0 * Ctilde * Ctilde;
 
   RankFourTensor dUhatinv_dCtilde = 0.5 * II_ijkl - 1.0/8.0 * (I.mixedProductIkJl(Ctilde) + Ctilde.mixedProductIkJl(I));
   RankFourTensor drot_dFhatinv = drot_dUhatinv * dUhatinv_dCtilde * dCtilde_dFhatinv;

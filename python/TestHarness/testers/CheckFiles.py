@@ -9,15 +9,13 @@ class CheckFiles(RunApp):
     params = RunApp.validParams()
     params.addParam('check_files', [], "A list of files that MUST exist.")
     params.addParam('check_not_exists', [], "A list of files that must NOT exist.")
-    params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
-    params.addParam('delete_output_folders', True, "Delete output folders before running")
     params.addParam('file_expect_out', "A regular expression that must occur in all of the check files in order for the test to be considered passing.")
     return params
 
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)
 
-  def prepare(self):
+  def prepare(self, options):
     if self.specs['delete_output_before_running'] == True:
       self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['check_files'] + self.specs['check_not_exists'], self.specs['delete_output_folders'])
 

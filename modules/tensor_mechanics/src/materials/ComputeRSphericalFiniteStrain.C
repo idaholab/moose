@@ -41,7 +41,6 @@ ComputeRSphericalFiniteStrain::computeProperties()
 {
   // Method from Rashid, 1993
   RankTwoTensor ave_Fhat;
-  Real ave_dfgrd_det = 0.0;
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
