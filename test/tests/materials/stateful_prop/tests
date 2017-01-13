@@ -5,6 +5,12 @@
     exodiff = 'out.e'
   [../]
 
+  [./implicit_stateful]
+    type = 'Exodiff'
+    input = 'implicit_stateful.i'
+    exodiff = 'implicit_stateful_out.e'
+  [../]
+
   [./test_csv]
     type = 'CSVDiff'
     input = 'stateful_prop_test.i'
