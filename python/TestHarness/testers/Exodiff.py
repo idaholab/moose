@@ -14,8 +14,6 @@ class Exodiff(RunApp):
     params.addParam('rel_err',       5.5e-6, "Relative error value used in exodiff comparisons.")
     params.addParam('custom_cmp',            "Custom comparison file")
     params.addParam('use_old_floor',  False, "Use Exodiff old floor option")
-    params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
-    params.addParam('delete_output_folders', True, "Delete output folders before running")
     params.addParam('map',  True, "Use geometrical mapping to match up elements.  This is usually a good idea because it makes files comparable between runs with Serial and Parallel Mesh.")
 
     return params
@@ -24,7 +22,7 @@ class Exodiff(RunApp):
     RunApp.__init__(self, name, params)
 
 
-  def prepare(self):
+  def prepare(self, options):
     if self.specs['delete_output_before_running'] == True:
       self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['exodiff'], self.specs['delete_output_folders'])
 
