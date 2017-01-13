@@ -33,6 +33,8 @@ void shallowCopyData(const std::vector<unsigned int> & stateful_prop_ids, Materi
 {
   for (unsigned int i=0; i<stateful_prop_ids.size(); ++i)
   {
+    if (i >= data_from.size() || stateful_prop_ids[i] >= data.size())
+      continue;
     PropertyValue * prop = data[stateful_prop_ids[i]];              // do the look-up just once (OPT)
     PropertyValue * prop_from = data_from[i];                       // do the look-up just once (OPT)
     if (prop != NULL && prop_from != NULL)
@@ -44,6 +46,8 @@ void shallowCopyDataBack(const std::vector<unsigned int> & stateful_prop_ids, Ma
 {
   for (unsigned int i=0; i<stateful_prop_ids.size(); ++i)
   {
+    if (i >= data.size() || stateful_prop_ids[i] >= data_from.size())
+      continue;
     PropertyValue * prop = data[i];                                 // do the look-up just once (OPT)
     PropertyValue * prop_from = data_from[stateful_prop_ids[i]];    // do the look-up just once (OPT)
     if (prop != NULL && prop_from != NULL)

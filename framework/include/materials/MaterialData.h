@@ -247,28 +247,14 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::getPropertyOld(const std::string & name)
 {
-  unsigned int prop_id = _storage.getPropertyId(name);
-  resizeProps<T>(prop_id);
-
-  MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_props_old[prop_id]);
-  if (prop != NULL)
-    return *prop;
-  else
-    mooseError("Material has no property named: " + name);
+  return declarePropertyOld<T>(name);
 }
 
 template<typename T>
 MaterialProperty<T> &
 MaterialData::getPropertyOlder(const std::string & name)
 {
-  unsigned int prop_id = _storage.getPropertyId(name);
-  resizeProps<T>(prop_id);
-
-  MaterialProperty<T> * prop = dynamic_cast<MaterialProperty<T> *>(_props_older[prop_id]);
-  if (prop != NULL)
-    return *prop;
-  else
-    mooseError("Material has no property named: " + name);
+  return declarePropertyOlder<T>(name);
 }
 
 #endif /* MATERIALDATA_H */
