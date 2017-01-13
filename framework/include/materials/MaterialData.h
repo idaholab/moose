@@ -28,7 +28,7 @@ class Material;
 
 /**
  * Proxy for accessing MaterialPropertyStorage.
- *
+ * MaterialData stores the values associated with a particular material object
  */
 class MaterialData
 {
@@ -42,69 +42,71 @@ public:
   void release();
 
   /**
-   * Size the properties
+   * Resize the data to hold properties for n_qpoints quadrature points.
    */
   void size(unsigned int n_qpoints);
 
   /**
-   * Get the number of quadrature points
-   * @return The number of quadrature points
+   * Returns the number of quadrature points the material properties
+   * support/hold.
    */
   unsigned int nQPoints();
 
   /**
    * Declare the Real valued property named "name".
    * This must be done _before_ a property of that name is tried
-   * to be retrieved using get().
+   * to be retrieved using any of the getProperty function variants.
+   * Calling any of the declareProperty
+   * functions multiple times with the same property name is okay and
+   * will result in a single identical reference returned every time.
    */
   template<typename T>
   MaterialProperty<T> & declareProperty(const std::string & prop_name);
 
   /**
-   * Declare the Real valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOld().
+   * Declare the Real valued property prop_name.
+   * This must be done _before_ attempts to
+   * retrieved the property using getPropertyOld().
    */
   template<typename T>
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
 
   /**
-   * Declare the Real valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using getOlder().
+   * Declare the Real valued property named prop_name.
+   * This must be done _before_ attempts to
+   * retrieved the property using getPropertyOlder().
    */
   template<typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
 
-  //copy material properties from one element to another
+  /// copy material properties from one element to another
   void copy(const Elem & elem_to, const Elem & elem_from, unsigned int side);
 
-  // material properties for given element (and possible side)
+  /// material properties for given element (and possible side)
   void swap(const Elem & elem, unsigned int side = 0);
 
-  // Reinit material properties for given element (and possible side)
+  /// Reinit material properties for given element (and possible side)
   void reinit(const std::vector<MooseSharedPointer<Material> > & mats);
 
   /// Calls the reset method of Materials to ensure that they are in a proper state.
   void reset(const std::vector<MooseSharedPointer<Material> > & mats);
 
-  // material properties for given element (and possible side)
+  /// material properties for given element (and possible side)
   void swapBack(const Elem & elem, unsigned int side = 0);
 
   ///@{
   /**
-   *  Methods for retrieving MaterialProperties object
+   *  Methods for retrieving MaterialProperties object.  These functions
+   *  should NEVER be used to modify the sizes of the MaterialProperties
+   *  objects.
    */
   MaterialProperties & props() { return _props; }
   MaterialProperties & propsOld() { return _props_old; }
   MaterialProperties & propsOlder() { return _props_older; }
   ///@}
 
-  ///@{
-  /**
-   * Methods for testing the existence of a property
-   * @return True if the property exists
-   */
+  /// Returns true if the property exists - defined by any material (i.e. not
+  /// necessarily just this one).
   template <typename T>
   bool haveProperty(const std::string & prop_name) const;
   template <typename T>
@@ -129,8 +131,7 @@ public:
   ///@}
 
   /**
-   * Return the swapped status of material
-   * @return Returns true of the stateful material is swapped
+   * Returns true if the stateful material is in a swapped state.
    */
   bool isSwapped();
 
@@ -155,8 +156,9 @@ protected:
   ///@}
 
   /**
-   * Resizes the properties to the specified size
-   * @param size The size of the properties to set
+   * Resizes the number of properties to the specified size (including
+   * stateful old and older properties.  Newly added elements are set to
+   * default-constructed material properties.
    */
   template<typename T>
   void resizeProps(unsigned int size);

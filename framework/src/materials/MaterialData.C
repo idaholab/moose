@@ -36,18 +36,18 @@ MaterialData::release()
 }
 
 void
-MaterialData::size(unsigned int n_qpoints)
+MaterialData::resize(unsigned int n_qpoints)
 {
+  if (n_qpoints == _n_qpoints)
+    return;
+
   _props.resizeItems(n_qpoints);
   // if there are stateful material properties in the system, also resize
   // storage for old and older material properties
   if (_storage.hasStatefulProperties())
-  {
     _props_old.resizeItems(n_qpoints);
-
-    if (_storage.hasOlderProperties())
-      _props_older.resizeItems(n_qpoints);
-  }
+  if (_storage.hasOlderProperties())
+    _props_older.resizeItems(n_qpoints);
   _n_qpoints = n_qpoints;
 }
 

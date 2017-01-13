@@ -119,8 +119,12 @@ public:
   void shift();
 
   /**
-   * Copy material properties from elem_from to elem_to
-   * Thread safe
+   * Copy material properties from elem_from to elem_to. Thread safe.
+   *
+   * WARNING: This is not capable of copying material data to/from elements on other processors.
+   *          It only works if both elem_to and elem_from are both on the local processor.
+   *          We can't currently check to ensure that they're on processor here because this isn't a ParallelObject.
+   *
    * @param material_data MaterialData object to work with
    * @param elem_to Element to copy data to
    * @param elem_from Element to copy data from
@@ -170,6 +174,9 @@ public:
   ///@}
 
   bool hasProperty(const std::string & prop_name) const;
+
+  /// The addProperty functions are idempotent - calling multiple times with
+  /// the same name will provide the same id and works fine.
   unsigned int addProperty(const std::string & prop_name);
   unsigned int addPropertyOld(const std::string & prop_name);
   unsigned int addPropertyOlder(const std::string & prop_name);
@@ -177,6 +184,8 @@ public:
   std::vector<unsigned int> & statefulProps() { return _stateful_prop_id_to_prop_id; }
   std::map<unsigned int, std::string> statefulPropNames() { return _prop_names; }
 
+  /// Returns the property ID for the given prop_name, adding the property and
+  /// creating a new ID if it hasn't already been created.
   unsigned int getPropertyId (const std::string & prop_name);
 
   unsigned int retrievePropertyId (const std::string & prop_name) const;

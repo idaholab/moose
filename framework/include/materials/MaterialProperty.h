@@ -45,20 +45,15 @@ PropertyValue *_init_helper(int size, PropertyValue *prop, const std::vector<P>*
 class PropertyValue
 {
 public:
-  /**
-   * Destructor.
-   */
-  virtual ~PropertyValue() {};
+  virtual ~PropertyValue() { };
 
   /**
    * String identifying the type of parameter stored.
-   * Must be reimplemented in derived classes.
    */
   virtual std::string type () = 0;
 
   /**
    * Clone this value.  Useful in copy-construction.
-   * Must be reimplemented in derived classes.
    */
   virtual PropertyValue *init (int size) = 0;
 
@@ -66,7 +61,6 @@ public:
 
   /**
    * Resizes the property to the size n
-   * Must be reimplemented in derived classes.
    */
   virtual void resize (int n) = 0;
 
