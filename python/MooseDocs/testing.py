@@ -4,6 +4,16 @@ import unittest
 import difflib
 import markdown
 import MooseDocs
+
+def text_diff(text, gold, gold_name):
+    """
+    Helper for creating nicely formatted text diff message.
+    """
+    result = list(difflib.ndiff(gold, text))
+    n =  len(max(result, key=len))
+    msg = "\nThe supplied text differs from the gold ({}) as follows:\n{}\n{}\n{}".format(gold_name, '~'*n, '\n'.join(result).encode('utf-8'), '~'*n)
+    return msg
+
 class MarkdownTestCase(unittest.TestCase):
   """
   Provides functions for converting markdown to html and asserting conversion against
@@ -48,11 +58,7 @@ class MarkdownTestCase(unittest.TestCase):
     with open(gold_name) as fid:
       gold = fid.read().encode('utf-8').splitlines()
 
-    # Compare
-    result = list(difflib.ndiff(gold, text))
-    n =  len(max(result, key=len))
-    msg = "\nThe supplied text differs from the gold ({}) as follows:\n{}\n{}\n{}".format(gold_name, '~'*n, '\n'.join(result).encode('utf-8'), '~'*n)
-    self.assertTrue(text==gold, msg)
+    self.assertEqual(text, gold, text_diff(text, gold, gold_name))
 
   def assertConvert(self, name, md):
     """
@@ -89,3 +95,42 @@ class MarkdownTestCase(unittest.TestCase):
 
     # Compare against gold
     self.assertTextFile(name)
+
+class TestLatexBase(unittest.TestCase):
+    """
+    Test that basic html to latex conversion working.
+    """
+    working_dir = os.getcwd()
+    defaults = vars(MooseDocs.command_line_options(['latex', 'fake.md']))
+
+    def setUp(self):
+        """
+        Runs prior to each test.
+        """
+        os.chdir(os.path.join(MooseDocs.ROOT_DIR, 'docs'))
+
+    def tearDown(self):
+        """
+        Runs after each test.
+        """
+        os.chdir(self.working_dir)
+
+    def assertLaTeX(self, md, gold, preamble='', **kwargs):
+        """
+        Assert that the supplied markdown can be converted to latex.
+
+        This mimics latex.py without creating files.
+
+        Inputs:
+            md[str]: The markdown to convert.
+            gold[str]: The expected latex.
+        """
+        kwargs.update(self.defaults)
+        config_file = os.path.join(MooseDocs.ROOT_DIR, 'docs', kwargs['config_file'])
+        html, settings = MooseDocs.html2latex.generate_html(md, config_file)
+        for key, value in kwargs.iteritems():
+            if not value and key in settings:
+                kwargs[key] = settings[key]
+        tex, h2l = MooseDocs.html2latex.generate_latex(html, **kwargs)
+        self.assertEqual(tex, gold)
+        self.assertEqual(h2l.preamble(), preamble)

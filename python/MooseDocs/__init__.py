@@ -189,7 +189,7 @@ def purge(extensions):
         os.remove(full_file)
 
 
-def command_line_options():
+def command_line_options(*args):
   """
   Return the command line options for the moosedocs script.
   """
@@ -197,7 +197,7 @@ def command_line_options():
   # Command-line options
   parser = argparse.ArgumentParser(description="Tool for building and developing MOOSE and MOOSE-based application documentation.")
   parser.add_argument('--verbose', '-v', action='store_true', help="Execute with verbose (debug) output.")
-  parser.add_argument('--config-file', type=str, default=os.path.join('moosedocs.yml'), help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
+  parser.add_argument('--config-file', type=str, default='moosedocs.yml', help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
 
   subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
 
@@ -211,7 +211,7 @@ def command_line_options():
   presentation_parser = commands.presentation_options(parser, subparser)
 
   # Parse the arguments
-  options = parser.parse_args()
+  options = parser.parse_args(*args)
 
   return options
 
