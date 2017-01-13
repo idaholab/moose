@@ -57,6 +57,7 @@ mv "$dir/Makefile.${kind}" "$dir/Makefile"
 mv "$dir/run_tests.${kind}" "$dir/run_tests"
 mv "$dir/src/base/${srcname}App.C.${kind}" "$dir/src/base/${dstname}App.C"
 mv "$dir/include/base/${srcname}App.h" "$dir/include/base/${dstname}App.h"
+chmod a+x "$dir/run_tests"
 
 # remove unnecessary files
 rm -f "$dir/Makefile.*"
