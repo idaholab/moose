@@ -337,6 +337,12 @@ protected:
    */
   void initialiseVars(Real p_trial, Real q_trial, Real & p, Real & q, Real & gaE);
 
+  /**
+   * Performs any necessary cleaning-up, then throw MooseException(message)
+   * @param message The message to using in MooseException
+   */
+  virtual void errorHandler(const std::string & message);
+
 private:
   /// derivative of Variable with respect to trial variable (used in consistent-tangent-operator calculation)
   Real _dgaE_dpt;

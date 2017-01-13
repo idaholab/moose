@@ -36,7 +36,7 @@ ComputeMeanThermalExpansionFunctionEigenstrain::initialSetup()
                                    (_stress_free_temperature - _reference_temperature);
 
   //Evaluate the derivative of this function here so it will error out early on if that isn't supported for this function.
-  Real deriv = _thermal_expansion_function.value(_stress_free_temperature,p);
+  _thermal_expansion_function.value(_stress_free_temperature,p);
 }
 
 void
