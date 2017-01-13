@@ -171,9 +171,9 @@ public:
   const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props() const { return *_props_elem; }
   const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld() const { return *_props_elem_old; }
   const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOlder() const { return *_props_elem_older; }
-  MaterialProperties& props(const Elem* elem, unsigned int side) { return (*_props_elem)[elem][side]; }
-  MaterialProperties& propsOld(const Elem* elem, unsigned int side) { return (*_props_elem_old)[elem][side]; }
-  MaterialProperties& propsOlder(const Elem* elem, unsigned int side) { return (*_props_elem_older)[elem][side]; }
+  MaterialProperties & props(const Elem * elem, unsigned int side) { return (*_props_elem)[elem][side]; }
+  MaterialProperties & propsOld(const Elem * elem, unsigned int side) { return (*_props_elem_old)[elem][side]; }
+  MaterialProperties & propsOlder(const Elem * elem, unsigned int side) { return (*_props_elem_older)[elem][side]; }
   ///@}
 
   bool hasProperty(const std::string & prop_name) const;

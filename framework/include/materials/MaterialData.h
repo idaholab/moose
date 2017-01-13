@@ -163,7 +163,7 @@ protected:
 
 private:
   template<typename T>
-  MaterialProperty<T> & declareProp(MaterialProperties& props, const std::string & prop_name, unsigned int prop_id);
+  MaterialProperty<T> & declareHelper(MaterialProperties& props, const std::string & prop_name, unsigned int prop_id);
 };
 
 template <typename T>
@@ -177,7 +177,7 @@ MaterialData::haveProperty (const std::string & prop_name) const
   if (prop_id >= _props.size())
     return false;           // the property id exists, but the property was not created in this instance of the material type
 
-  return dynamic_cast<const MaterialProperty<T>*>(_props[prop_id]) != NULL;
+  return dynamic_cast<const MaterialProperty<T>*>(_props[prop_id]) != nullptr;
 }
 
 template<typename T>
@@ -186,17 +186,17 @@ MaterialData::resizeProps(unsigned int size)
 {
   auto n = size + 1;
   if (_props.size() < n)
-    _props.resize(n, NULL);
+    _props.resize(n, nullptr);
   if (_props_old.size() < n)
-    _props_old.resize(n, NULL);
+    _props_old.resize(n, nullptr);
   if (_props_older.size() < n)
-    _props_older.resize(n, NULL);
+    _props_older.resize(n, nullptr);
 
-  if (_props[size] == NULL)
+  if (_props[size] == nullptr)
     _props[size] = new MaterialProperty<T>;
-  if (_props_old[size] == NULL)
+  if (_props_old[size] == nullptr)
     _props_old[size] = new MaterialProperty<T>;
-  if (_props_older[size] == NULL)
+  if (_props_older[size] == nullptr)
     _props_older[size] = new MaterialProperty<T>;
 }
 
@@ -204,30 +204,30 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::declareProperty(const std::string & prop_name)
 {
-  return declareProp<T>(_props, prop_name, _storage.addProperty(prop_name));
+  return declareHelper<T>(_props, prop_name, _storage.addProperty(prop_name));
 }
 
 template<typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOld(const std::string & prop_name)
 {
-  return declareProp<T>(_props_old, prop_name, _storage.addPropertyOld(prop_name));
+  return declareHelper<T>(_props_old, prop_name, _storage.addPropertyOld(prop_name));
 }
 
 template<typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOlder(const std::string & prop_name)
 {
-  return declareProp<T>(_props_older, prop_name, _storage.addPropertyOlder(prop_name));
+  return declareHelper<T>(_props_older, prop_name, _storage.addPropertyOlder(prop_name));
 }
 
 template<typename T>
 MaterialProperty<T> &
-MaterialData::declareProp(MaterialProperties& props, const std::string & prop_name, unsigned int prop_id)
+MaterialData::declareHelper(MaterialProperties& props, const std::string & prop_name, unsigned int prop_id)
 {
   resizeProps<T>(prop_id);
   auto prop = dynamic_cast<MaterialProperty<T>*>(props[prop_id]);
-  mooseAssert(prop != NULL, "Internal error in declaring material property: " + prop_name);
+  mooseAssert(prop != nullptr, "Internal error in declaring material property: " + prop_name);
   return *prop;
 }
 

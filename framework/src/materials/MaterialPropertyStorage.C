@@ -37,7 +37,7 @@ void shallowCopyData(const std::vector<unsigned int> & stateful_prop_ids, Materi
       continue;
     PropertyValue * prop = data[stateful_prop_ids[i]];              // do the look-up just once (OPT)
     PropertyValue * prop_from = data_from[i];                       // do the look-up just once (OPT)
-    if (prop != NULL && prop_from != NULL)
+    if (prop != nullptr && prop_from != nullptr)
       prop->swap(prop_from);
   }
 }
@@ -50,7 +50,7 @@ void shallowCopyDataBack(const std::vector<unsigned int> & stateful_prop_ids, Ma
       continue;
     PropertyValue * prop = data[i];                                 // do the look-up just once (OPT)
     PropertyValue * prop_from = data_from[stateful_prop_ids[i]];    // do the look-up just once (OPT)
-    if (prop != NULL && prop_from != NULL)
+    if (prop != nullptr && prop_from != nullptr)
       prop->swap(prop_from);
   }
 }
@@ -351,7 +351,7 @@ MaterialPropertyStorage::getPropertyId (const std::string & prop_name)
   if (it != _prop_ids.end())
     return it->second;
 
-  unsigned int id = _prop_ids.size();
+  auto id = _prop_ids.size();
   _prop_ids[prop_name] = id;
   _prop_names[id] = prop_name;
   return id;
@@ -370,14 +370,14 @@ void
 MaterialPropertyStorage::initProps(MaterialData & material_data, const Elem & elem, unsigned int side, unsigned int n_qpoints)
 {
   material_data.resize(n_qpoints);
-  size_t n = _stateful_prop_id_to_prop_id.size();
+  auto n = _stateful_prop_id_to_prop_id.size();
 
   if (props(&elem, side).size() < n)
-    props(&elem, side).resize(n, NULL);
+    props(&elem, side).resize(n, nullptr);
   if (propsOld(&elem, side).size() < n)
-    propsOld(&elem, side).resize(n, NULL);
+    propsOld(&elem, side).resize(n, nullptr);
   if (propsOlder(&elem, side).size() < n)
-    propsOlder(&elem, side).resize(n, NULL);
+    propsOlder(&elem, side).resize(n, nullptr);
 
   // init properties (allocate memory. etc)
   for (unsigned int i = 0; i < n; i++)
@@ -385,11 +385,11 @@ MaterialPropertyStorage::initProps(MaterialData & material_data, const Elem & el
     auto prop_id = _stateful_prop_id_to_prop_id[i];
     // duplicate the stateful property in property storage (all three states - we will reuse the allocated memory there)
     // also allocating the right amount of memory, so we do not have to resize, etc.
-    if (props(&elem, side)[i] == NULL)
+    if (props(&elem, side)[i] == nullptr)
       props(&elem, side)[i] = material_data.props()[prop_id]->init(n_qpoints);
-    if (propsOld(&elem, side)[i] == NULL)
+    if (propsOld(&elem, side)[i] == nullptr)
       propsOld(&elem, side)[i] = material_data.propsOld()[prop_id]->init(n_qpoints);
-    if (hasOlderProperties() && propsOlder(&elem, side)[i] == NULL)
+    if (hasOlderProperties() && propsOlder(&elem, side)[i] == nullptr)
       propsOlder(&elem, side)[i] = material_data.propsOlder()[prop_id]->init(n_qpoints);
   }
 }
