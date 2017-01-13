@@ -18,6 +18,7 @@ markdown_extensions:
           package: True
           executable: modules/combined/combined-opt
           repo: https://github.com/idaholab/moose/blob/master
+          install: docs/content/documentation/systems
           links:
               Tests:
                   - test/tests
@@ -41,7 +42,6 @@ markdown_extensions:
                   paths:
                       - framework/src
                       - framework/include
-                  install: docs/content/documentation/systems
                   hide:
                       - /Bounds # deprecated syntax that we do not want to document
                       - /Adaptivity/Indicators
@@ -83,7 +83,6 @@ markdown_extensions:
                   paths:
                       - modules/phase_field/src
                       - modules/phase_field/include
-                  install: docs/content/documentation/systems
                   hide:
                       - /Bounds # deprecated
                       - /AuxKernels
@@ -103,7 +102,6 @@ markdown_extensions:
                   paths:
                       - modules/tensor_mechanics/src
                       - modules/tensor_mechanics/include
-                  install: docs/content/documentation/systems
                   hide:
                       - /Bounds # deprecated
                       - /AuxKernels
@@ -120,7 +118,6 @@ markdown_extensions:
                   paths:
                       - modules/heat_conduction/src
                       - modules/heat_conduction/include
-                  install: content/modules/heat_conduction/systems
                   hide:
                       - /Bounds # deprecated
                       - /BCs
@@ -138,4 +135,8 @@ markdown_extensions:
                   paths:
                       - modules/rdg/src
                       - modules/rdg/include
-                  install: docs/content/modules/rdg/systems
+                  hide:
+                      - /BCs
+                      - /DGKernels
+                      - /Materials
+                      - /UserObjects

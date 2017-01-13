@@ -44,6 +44,7 @@ class MooseMarkdown(markdown.Extension):
     self.config['package']      = [False, "Enable the use of the MoosePackageParser."]
     self.config['graphviz']     = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
     self.config['dot_ext']      = ['svg', "The graphviz/dot output file extension (default: svg)."]
+    self.config['install']      = ['', "The location to install system and object documentation."]
 
     # Construct the extension object
     super(MooseMarkdown, self).__init__(**kwargs)
@@ -94,6 +95,7 @@ class MooseMarkdown(markdown.Extension):
       key = item.keys()[0]
       options = item.values()[0]
       options.setdefault('name', key.replace('_', ' ').title())
+      options.setdefault('install', config['install'])
       self.syntax[key] = MooseDocs.MooseApplicationSyntax(exe_yaml, **options)
 
     # Preprocessors

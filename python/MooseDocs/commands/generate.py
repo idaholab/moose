@@ -8,10 +8,8 @@ def generate_options(parser, subparser):
   """
   Command-line options for generate command.
   """
-
   generate_parser = subparser.add_parser('generate', help="Check that documentation exists for your application and generate the markdown documentation from MOOSE application executable.")
   generate_parser.add_argument('--locations', nargs='+', help="List of locations to consider, names should match the keys listed in the configuration file.")
-
   return generate_parser
 
 def generate(config_file='moosedocs.yml', generate=True, locations=None, **kwargs):
@@ -40,7 +38,7 @@ def generate(config_file='moosedocs.yml', generate=True, locations=None, **kwarg
   for loc in ext_config['locations']:
     for key, value in loc.iteritems():
       if (locations == None) or (key in locations):
-        value.setdefault('name', key.replace('_', ' ').title())
-        syntax = MooseDocs.MooseApplicationSyntax(yaml, generate=generate, **value)
+        value['name'] = key # set the name so that path uses 'location' rather than display name
+        syntax = MooseDocs.MooseApplicationSyntax(yaml, generate=generate, install=ext_config['install'], **value)
         log.info("Checking documentation for '{}'.".format(key))
         syntax.check()
