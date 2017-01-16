@@ -8,16 +8,19 @@ def test_options(parser, subparser):
   """
   test_parser = subparser.add_parser('test', help='Performs unitesting of MooseDocs module')
   test_parser.add_argument('--pattern', default='test*.py', help="The test name pattern to search.")
-  test_parser.add_argument('--start-dir', default='tests', help="The location of the tests directory.")
   return test_parser
 
 
-def test(pattern=None, start_dir=None, **kwargs):
+def test(pattern=None, **kwargs):
   """
   Runs MooseDocs unittests.
   """
-  os.chdir(start_dir)
-  loader = unittest.TestLoader()
-  suite = loader.discover(os.getcwd(), pattern)
-  runner = unittest.TextTestRunner(verbosity=2)
-  runner.run(suite)
+  if not os.path.exists('tests'):
+      print 'No {} directory located.'.format('tests')
+      return 0
+  else:
+      os.chdir('tests')
+      loader = unittest.TestLoader()
+      suite = loader.discover(os.getcwd(), pattern)
+      runner = unittest.TextTestRunner(verbosity=2)
+      runner.run(suite)
