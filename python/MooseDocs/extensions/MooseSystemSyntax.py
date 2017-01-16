@@ -70,7 +70,7 @@ class MooseSystemSyntax(MooseSyntaxBase):
 
     node = self._yaml.find(sys_name)
     if not node:
-      return createErrorElement("The are not any sub-systems for the supplied syntax: {} You likely need to remove the '!subobjects' syntax.".format(sys_name))
+      return self.createErrorElement("The are not any sub-systems for the supplied syntax: {} You likely need to remove the '!subobjects' syntax.".format(sys_name))
 
     el = self.applyElementSettings(etree.Element('div'), settings)
     h2 = etree.SubElement(el, 'h2')
