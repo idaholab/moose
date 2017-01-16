@@ -228,6 +228,13 @@ def moosedocs():
   log.debug('Removing *.moose.svg files from {}'.format(os.getcwd()))
   purge(['svg'])
 
+  # Pull LFS image files
+  try:
+    subprocess.check_output(['git', 'lfs', 'pull'])
+  except subprocess.CalledProcessError:
+    print "ERROR: Unable to run 'git lfs', it is likely not installed but required for the MOOSE documentation system."
+    sys.exit(1)
+
   # Execute command
   cmd = options.pop('command')
   if cmd == 'test':
