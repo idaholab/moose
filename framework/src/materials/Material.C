@@ -17,6 +17,8 @@
 #include "SubProblem.h"
 #include "MaterialData.h"
 #include "Assembly.h"
+#include "Executioner.h"
+#include "Transient.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"
@@ -100,15 +102,13 @@ Material::Material(const InputParameters & parameters) :
 void
 Material::initStatefulProperties(unsigned int n_points)
 {
-  if (_has_stateful_property)
-    for (_qp = 0; _qp < n_points; ++_qp)
-      initQpStatefulProperties();
+  for (_qp = 0; _qp < n_points; ++_qp)
+    initQpStatefulProperties();
 }
 
 void
 Material::initQpStatefulProperties()
 {
-  mooseDoOnce(mooseWarning(std::string("Material \"") + name() + "\" declares one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class."));
 }
 
 void
