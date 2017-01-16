@@ -69,3 +69,21 @@ if [[ "$kind" == "module" ]]; then
     rm -f "$dir/include/base/${dstname}App.h"
 fi
 
+if [[ "$kind" == "app" ]]; then
+    (
+        cd $dir
+        git init
+        git add *
+    )
+    echo "MOOSE app created in '$dir'"
+    echo ""
+    echo "To store your changes on github:"
+    echo "    1. log in to your account"
+    echo "    2. Create a new repository named $dstname"
+    echo "    3. in this terminal run the following commands:"
+    echo "         cd $dstname"
+    echo "         git remote add origin https://github.com/YourGitHubUserName/$dstname"
+    echo '         git commit -m "initial commit"'
+    echo "         git push -u origin master"
+fi
+
