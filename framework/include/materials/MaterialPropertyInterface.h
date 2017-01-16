@@ -219,14 +219,6 @@ protected:
   const MaterialProperty <T> * defaultMaterialProperty(const std::string & name);
 
   /**
-   * A helper method for extracting the Material object from the MaterialWarehouse. In general, this method
-   * should not be used, please use `getMaterial` or `getMaterialByName`.
-   * @param The name of the material to retrieve.
-   * @return A shared pointer to the Material object.
-   */
-   virtual MooseSharedPointer<Material> getMaterialSharedPointerByName(const std::string & name);
-
-  /**
    * True by default. If false, this class throws an error if any of
    * the stateful material properties interfaces are used.
    */
