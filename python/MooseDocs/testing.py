@@ -5,13 +5,13 @@ import difflib
 import markdown
 import MooseDocs
 
-def text_diff(text, gold, gold_name):
+def text_diff(text, gold):
     """
     Helper for creating nicely formatted text diff message.
     """
     result = list(difflib.ndiff(gold, text))
     n =  len(max(result, key=len))
-    msg = "\nThe supplied text differs from the gold ({}) as follows:\n{}\n{}\n{}".format(gold_name, '~'*n, '\n'.join(result).encode('utf-8'), '~'*n)
+    msg = "\nThe supplied text differs from the gold as follows:\n{0}\n{1}\n{0}".format('~'*n, '\n'.join(result).encode('utf-8'))
     return msg
 
 class MarkdownTestCase(unittest.TestCase):
@@ -40,6 +40,16 @@ class MarkdownTestCase(unittest.TestCase):
     cls.parser = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
     os.chdir(cwd)
 
+  def readGold(self, name):
+    """
+    Read and return the contents of the gold file.
+    """
+    gold_name = os.path.join(os.path.dirname(name), 'gold', os.path.basename(name))
+    self.assertTrue(os.path.exists(gold_name), "Failed to locate gold file: {}".format(gold_name))
+    with open(gold_name) as fid:
+        gold = fid.read().encode('utf-8').splitlines()
+    return gold
+
   def assertTextFile(self, name):
     """
     Assert method for comparing converted html (text) against the text in gold file.
@@ -53,12 +63,8 @@ class MarkdownTestCase(unittest.TestCase):
         text = fid.read().encode('utf-8').splitlines()
 
     # Read gold file
-    gold_name = os.path.join(os.path.dirname(name), 'gold', os.path.basename(name))
-    self.assertTrue(os.path.exists(gold_name), "Failed to locate gold file: {}".format(gold_name))
-    with open(gold_name) as fid:
-      gold = fid.read().encode('utf-8').splitlines()
-
-    self.assertEqual(text, gold, text_diff(text, gold, gold_name))
+    gold = self.readGold(name)
+    self.assertEqual(text, gold, text_diff(text, gold))
 
   def assertConvert(self, name, md):
     """
