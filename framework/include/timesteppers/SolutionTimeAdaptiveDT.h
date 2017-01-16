@@ -45,19 +45,19 @@ protected:
    * Multiplier specifying the direction the timestep is currently going.
    * Positive for up.  Negative for down.
    */
-  int _direction;
+  short _direction;
 
   /// Percentage to change the timestep by either way.
   Real _percent_change;
 
-  timeval _solve_start, _solve_end;
-
+  /// Ratios to control whether to increase or decrease the current timestep
   Real _older_sol_time_vs_dt, _old_sol_time_vs_dt, _sol_time_vs_dt;
 
+  /// Boolean to control whether a separate adapt log is written to a file
   bool _adapt_log;
 
+  /// The filehandle to hold the log
   std::ofstream _adaptive_log;
-
 };
 
 #endif /* SOLUTIONTIMEADAPTIVEDT_H */

@@ -18,6 +18,12 @@
     exodiff = 'applied_strain.e'
   [../]
 
+  [./extra_stress_test]
+    type = 'Exodiff'
+    input = 'extra_stress_test.i'
+    exodiff = 'extra_stress_test_out.e'
+  [../]
+
   [./tensor_test]
     type = 'Exodiff'
     input = 'Tensor_test.i'
