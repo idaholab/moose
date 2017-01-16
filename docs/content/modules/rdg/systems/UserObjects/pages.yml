@@ -1,9 +1,0 @@
-- Overview: content/modules/rdg/systems/UserObjects/Overview.md
-- SlopeReconstructionBase: content/modules/rdg/systems/UserObjects/SlopeReconstructionBase.md
-- SlopeLimitingBase: content/modules/rdg/systems/UserObjects/SlopeLimitingBase.md
-- InternalSideFluxBase: content/modules/rdg/systems/UserObjects/InternalSideFluxBase.md
-- BoundaryFluxBase: content/modules/rdg/systems/UserObjects/BoundaryFluxBase.md
-- AEFVSlopeReconstructionOneD: content/modules/rdg/systems/UserObjects/AEFVSlopeReconstructionOneD.md
-- AEFVSlopeLimitingOneD: content/modules/rdg/systems/UserObjects/AEFVSlopeLimitingOneD.md
-- AEFVUpwindInternalSideFlux: content/modules/rdg/systems/UserObjects/AEFVUpwindInternalSideFlux.md
-- AEFVFreeOutflowBoundaryFlux: content/modules/rdg/systems/UserObjects/AEFVFreeOutflowBoundaryFlux.md

@@ -1,8 +1,7 @@
 import os
 import sys
 import argparse
-import argparse
-import logging
+import subprocess
 import multiprocessing
 
 import extensions
@@ -16,7 +15,6 @@ if utils.check_configuration(['yaml', 'jinja2', 'markdown', 'markdown_include', 
 
 import yaml
 from MarkdownTable import MarkdownTable
-from MooseObjectParameterTable import MooseObjectParameterTable
 from MooseApplicationSyntax import MooseApplicationSyntax
 from MooseLinkDatabase import MooseLinkDatabase
 
@@ -27,8 +25,9 @@ MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), '..', 'moose'))
 if not os.path.exists(MOOSE_DIR):
   MOOSE_DIR = os.path.join(os.getenv('HOME'), 'projects', 'moose')
 
+ROOT_DIR = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], stderr=subprocess.STDOUT).strip('\n')
 
-class MkMooseDocsFormatter(logging.Formatter):
+class MooseDocsFormatter(logging.Formatter):
   """
   A formatter that is aware of the class hierarchy of the MooseDocs library.
 
@@ -51,6 +50,27 @@ class MkMooseDocsFormatter(logging.Formatter):
   def counts(self):
     return self.COUNTS['WARNING'].value, self.COUNTS['ERROR'].value
 
+
+def abspath(*args):
+  """
+  Create an absolute path from paths that are given relative to the ROOT_DIR.
+
+  Inputs:
+    *args: Path(s) that are defined relative to the git repository root directory as defined in ROOT_DIR
+  """
+  return os.path.abspath(os.path.join(ROOT_DIR, *args))
+
+
+def relpath(abs_path):
+  """
+  Create a relative path from the absolute path given relative to the ROOT_DIR.
+
+  Inputs:
+    abs_path[str]: Absolute path that to be converted to a relative path to the git repository root directory as defined in ROOT_DIR
+  """
+  return os.path.relpath(abs_path, ROOT_DIR)
+
+
 def init_logging(verbose=False):
   """
   Call this function to initialize the MooseDocs logging formatter.
@@ -63,7 +83,7 @@ def init_logging(verbose=False):
     level = logging.INFO
 
   # Custom format that colors and counts errors/warnings
-  formatter = MkMooseDocsFormatter()
+  formatter = MooseDocsFormatter()
   handler = logging.StreamHandler()
   handler.setFormatter(formatter)
 
@@ -90,10 +110,12 @@ class Loader(yaml.Loader):
     Allow for the embedding of yaml files.
     http://stackoverflow.com/questions/528281/how-can-i-include-an-yaml-file-inside-another
     """
-    filename = self.construct_scalar(node)
+    filename = abspath(self.construct_scalar(node))
     if os.path.exists(filename):
       with open(filename, 'r') as f:
         return yaml.load(f, Loader)
+    else:
+      raise IOError("Unknown included file: {}".format(filename))
 
 
 def yaml_load(filename, loader=Loader):
@@ -101,18 +123,51 @@ def yaml_load(filename, loader=Loader):
   Load a YAML file capable of including other YAML files.
 
   Args:
-    filename[str]: The name fo the file to load.b
+    filename[str]: The name to the file to load, relative to the git root directory
     loader[yaml.Loader]: The loader to utilize.
   """
 
-  ## Attach the include constructor to our custom loader.
+  # Attach the include constructor to our custom loader.
   Loader.add_constructor('!include', Loader.include)
+
+  if not os.path.exists(filename):
+    raise IOError("The supplied configuration file was not found: {}".format(filename))
 
   with open(filename, 'r') as fid:
     yml = yaml.load(fid.read(), Loader)
 
   return yml
 
+def load_config(config_file, **kwargs):
+  """
+  Read the MooseDocs configure file (e.g., moosedocs.yml)
+  """
+  config = yaml_load(config_file)
+  config.update(kwargs)
+
+  # Set the default arguments
+  config.setdefault('site_dir', abspath('site'))
+  config.setdefault('navigation', abspath(os.path.join(os.getcwd(), 'navigation.yml')))
+  config.setdefault('template', 'materialize.html')
+  config.setdefault('template_arguments', dict())
+  config.setdefault('markdown_extensions', [])
+  return config
+
+def get_markdown_extensions(config):
+  """
+  Extract the markdown extensions and associated configurations from the yaml configuration.
+  """
+  extensions = []
+  extension_configs = dict()
+  for extension in config['markdown_extensions']:
+    if isinstance(extension, dict):
+      for k, v in extension.iteritems(): # there should only be one entry, but just in case
+        extensions.append(k)
+        extension_configs[k] = v
+    else:
+      extensions.append(extension)
+
+  return extensions, extension_configs
 
 def purge(extensions):
   """
@@ -134,7 +189,7 @@ def purge(extensions):
         os.remove(full_file)
 
 
-def command_line_options():
+def command_line_options(*args):
   """
   Return the command line options for the moosedocs script.
   """
@@ -142,13 +197,13 @@ def command_line_options():
   # Command-line options
   parser = argparse.ArgumentParser(description="Tool for building and developing MOOSE and MOOSE-based application documentation.")
   parser.add_argument('--verbose', '-v', action='store_true', help="Execute with verbose (debug) output.")
-  parser.add_argument('--config-file', type=str, default=os.path.join('moosedocs.yml'), help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
+  parser.add_argument('--config-file', type=str, default='moosedocs.yml', help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
 
   subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
 
   # Add the sub-commands
   test_parser = commands.test_options(parser, subparser)
-  check_parser = subparser.add_parser('check', help="Perform error checking on documentation.")
+  check_parser = commands.check_options(parser, subparser)
   generate_parser = commands.generate_options(parser, subparser)
   serve_parser = commands.serve_options(parser, subparser)
   build_parser = commands.build_options(parser, subparser)
@@ -156,7 +211,7 @@ def command_line_options():
   presentation_parser = commands.presentation_options(parser, subparser)
 
   # Parse the arguments
-  options = parser.parse_args()
+  options = parser.parse_args(*args)
 
   return options
 
@@ -170,7 +225,7 @@ def moosedocs():
   log = logging.getLogger('MooseDocs')
 
   # Remove moose.svg files (these get generated via dot)
-  log.info('Removing *.moose.svg files from {}'.format(os.getcwd()))
+  log.debug('Removing *.moose.svg files from {}'.format(os.getcwd()))
   purge(['svg'])
 
   # Execute command
@@ -178,7 +233,7 @@ def moosedocs():
   if cmd == 'test':
     commands.test(**options)
   elif cmd == 'check':
-    commands.generate(stubs=False, pages_stubs=False, **options)
+    commands.check(**options)
   elif cmd == 'generate':
     commands.generate(**options)
   elif cmd == 'serve':

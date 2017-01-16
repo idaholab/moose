@@ -1,110 +1,142 @@
-template: materialize.html
+template: website.html
 
 template_arguments:
     title: MOOSE
-    logo: media/moose_logo_small.png
+    logo: ../media/moose_logo_small.png
     repo_url: https://github.com/idaholab/moose/
-    site_url: /index.html
-
-extra_pages:
-    - MOOSE:
-        filename: index.html
-        template: materialize-home.html
 
 markdown_extensions:
     - toc
     - smarty
     - admonition
     - extra
-    - markdown_include.include           # pip install markdown-include
+    - markdown_include.include:          # pip install markdown-include
+          base_path: ..
     - mdx_math:                          # pip install python-markdown-math
           enable_dollar_delimiter: True
     - MooseDocs.extensions.MooseMarkdown:
           package: True
-          make: ../modules
-          executable: ../modules/combined/combined-opt
+          executable: modules/combined/combined-opt
           repo: https://github.com/idaholab/moose/blob/master
-          hide:
-              - /Bounds # this should not be removed, this is deprecated syntax that we do not want to document
-              - /Adaptivity/Indicators
-              - /AuxKernels
-              - /AuxScalarKernels
-              - /AuxVariables
-              - /BCs
-              - /Constraints
-              - /Controls
-              - /DGKernels
-              - /Dampers
-              - /Debug
-              - /DeprecatedBlock
-              - /DiracKernels
-              - /Executioner
-              - /Functions
-              - /GlobalParams
-              - /ICs
-              - /InterfaceKernels
-              - /Kernels
-              - /Materials
-              - /Mesh
-              - /MeshModifiers
-              - /Modules
-              - /MultiApps
-              - /NodalKernels
-              - /NodalNormals
-              - /Outputs
-              - /Postprocessors
-              - /Preconditioning
-              - /Problem
-              - /ScalarKernels
-              - /Transfers
-              - /Variables
-              - /VectorPostprocessors
-              - /UserObjects
+          install: docs/content/documentation/systems
           links:
               Tests:
-                  - ../test
-                  - ../modules/phase_field/tests
-                  - ../modules/tensor_mechanics/tests
+                  - test/tests
+                  - modules/phase_field/tests
+                  - modules/tensor_mechanics/tests
+                  - modules/heat_conduction/tests
               Examples:
-                  - ../examples
-                  - ../modules/phase_field/examples
-                  - ../modules/combined/examples
+                  - examples
+                  - modules/phase_field/examples
+                  - modules/combined/examples
               Tutorials:
-                  - ../tutorials
-                  - ../modules/tensor_mechanics/tutorials
+                  - tutorials
+                  - modules/tensor_mechanics/tutorials
               Source:
-                  - ../modules/heat_conduction/include
-                  - ../modules/tensor_mechanics/include
+                  - modules/phase_field/include
+                  - modules/tensor_mechanics/include
+                  - modules/heat_conduction/include
           locations:
-              framework:
+              - framework:
                   doxygen: http://mooseframework.com/docs/doxygen/moose/
                   paths:
-                      - ../framework/src
-                      - ../framework/include
-                  install: content/framework/systems
-              phase_field:
-                  doxygen: http://mooseframework.org/docs/doxygen/modules/
-                  paths:
-                      - ../modules/phase_field/src
-                      - ../modules/phase_field/include
-                  install: content/modules/phase_field/systems
-              tensor_mechanics:
-                  doxygen: http://mooseframework.org/docs/doxygen/modules/
-                  paths:
-                      - ../modules/tensor_mechanics/src
-                      - ../modules/tensor_mechanics/include
-                  install: content/modules/tensor_mechanics/systems
-              heat_conduction:
+                      - framework/src
+                      - framework/include
                   hide:
+                      - /Bounds # deprecated syntax that we do not want to document
+                      - /Adaptivity/Indicators
+                      - /AuxKernels
+                      - /AuxScalarKernels
+                      - /AuxVariables
+                      - /BCs
+                      - /Constraints
+                      - /Controls
+                      - /DGKernels
+                      - /Dampers
+                      - /Debug
+                      - /DeprecatedBlock
+                      - /DiracKernels
+                      - /Executioner
+                      - /Functions
+                      - /GlobalParams
+                      - /ICs
+                      - /InterfaceKernels
+                      - /Kernels
+                      - /Materials
+                      - /Mesh
+                      - /MeshModifiers
+                      - /Modules
+                      - /MultiApps
+                      - /NodalKernels
+                      - /NodalNormals
+                      - /Outputs
+                      - /Postprocessors
+                      - /Preconditioning
+                      - /Problem
+                      - /ScalarKernels
+                      - /Transfers
+                      - /Variables
+                      - /VectorPostprocessors
+                      - /UserObjects
+              - phase_field:
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - modules/phase_field/src
+                      - modules/phase_field/include
+                  hide:
+                      - /Bounds # deprecated
+                      - /AuxKernels
+                      - /AuxVariables
+                      - /BCs
+                      - /ICs
+                      - /Kernels
+                      - /Materials
+                      - /Modules
+                      - /Postprocessors
+                      - /UserObjects
+                      - /Variables
+                      - /VectorPostprocessors
+                      - /InterfaceKernels
+              - tensor_mechanics:
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - modules/tensor_mechanics/src
+                      - modules/tensor_mechanics/include
+                  hide:
+                      - /Bounds # deprecated
+                      - /AuxKernels
+                      - /BCs
+                      - /Kernels
+                      - /Materials
+                      - /Modules
+                      - /Postprocessors
+                      - /ScalarKernels
+                      - /UserObjects
+                      - /VectorPostprocessors
+              - heat_conduction:
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - modules/heat_conduction/src
+                      - modules/heat_conduction/include
+                  hide:
+                      - /Bounds # deprecated
+                      - /BCs
+                      - /Constraints
+                      - /DiracKernels
+                      - /Kernels
+                      - /Materials
+                      - /Modules
+                      - /Postprocessors
+                      - /UserObjects
                       - /ThermalContact
+              - rdg:
+                  name: rDG
                   doxygen: http://mooseframework.org/docs/doxygen/modules/
                   paths:
-                      - ../modules/heat_conduction/src
-                      - ../modules/heat_conduction/include
-                  install: content/modules/heat_conduction/systems
-              rdg:
-                  doxygen: http://mooseframework.org/docs/doxygen/modules/
-                  paths:
-                      - ../modules/rdg/src
-                      - ../modules/rdg/include
-                  install: content/modules/rdg/systems
+                      - modules/rdg/src
+                      - modules/rdg/include
+                  hide:
+                      - /BCs
+                      - /DGKernels
+                      - /Materials
+                      - /UserObjects

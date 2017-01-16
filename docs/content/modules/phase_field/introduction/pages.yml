@@ -1,9 +1,0 @@
-- Automatic Differentiation: content/modules/phase_field/introduction/AutomaticDifferentiation.md
-- Basic Phase Field Equations: content/modules/phase_field/introduction/PhaseFieldEquations.md
-- Discrete Nucleation: content/modules/phase_field/introduction/DiscreteNucleation.md
-- Expression Builder: content/modules/phase_field/introduction/ExpressionBuilder.md
-- Function Materials: content/modules/phase_field/introduction/FunctionMaterials.md
-- Function Material Kernels: content/modules/phase_field/introduction/FunctionMaterialKernels.md
-- Just in Time Compilation: content/modules/phase_field/introduction/JITCompile.md
-- Solving Phase Field Models: content/modules/phase_field/introduction/Solving.md
-- FAQ: content/modules/phase_field/introduction/FAQ.md

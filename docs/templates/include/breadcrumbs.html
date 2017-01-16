@@ -1,0 +1,15 @@
+{% if show_breadcrumbs|default(True) and current.breadcrumbs %}
+<nav class="breadcrumb-nav">
+  <div class="nav-wrapper">
+    <div class="col s12 m9 l10">
+      {% for node in current.breadcrumbs %}
+        {% if node.url() %}
+          <a href="{{current.relpath(node.url())}}" class="breadcrumb">{{node.name}}</a>
+        {% else %}
+          <span class="breadcrumb">{{node.name}}</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</nav>
+{% endif %}

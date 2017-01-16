@@ -14,13 +14,14 @@ def serve_options(parser, subparser):
   Command-line options for serve command.
   """
 
-  serve_parser = subparser.add_parser('serve', help='Generate and Sever the documentation using a local server.')
+  serve_parser = subparser.add_parser('serve', help='Serve the documentation using a local server.')
   serve_parser.add_argument('--host', default='127.0.0.1', type=str, help="The local host location for live web server (default: %(default)s).")
   serve_parser.add_argument('--port', default='8000', type=str, help="The local host port for live web server (default: %(default)s).")
+  serve_parser.add_argument('--disable-threads', action='store_true', help="Disable threaded building.")
 
   return serve_parser
 
-def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000'):
+def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', disable_threads=False):
   """
   Create live server
   """
@@ -42,7 +43,7 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000'):
 
   # Wrapper for building complete website
   def build_complete():
-    return build.build(config_file=config_file, site_dir=tempdir)
+    return build.build(config_file=config_file, site_dir=tempdir, disable_threads=disable_threads)
   config, parser, builder = build_complete()
 
   # Start the live server
@@ -50,7 +51,7 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000'):
 
   # Watch markdown files
   for page in builder:
-    server.watch(page.filename, page.build)
+    server.watch(page.path, page.build)
 
   # Watch support directories
   server.watch(os.path.join(os.getcwd(), 'media'), builder.copyFiles)
@@ -59,7 +60,7 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000'):
   server.watch(os.path.join(os.getcwd(), 'fonts'), builder.copyFiles)
 
   # Watch the pages file
-  server.watch(config['pages'], build_complete)
+  server.watch(config['navigation'], build_complete)
 
   # Start the server
   server.serve(root=config['site_dir'], host=host, port=port, restart_delay=0)

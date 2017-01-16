@@ -1,8 +1,0 @@
-#- CHPFCRFFSplitVariables: !include content/modules/phase_field/systems/Variables/CHPFCRFFSplitVariables/pages.yml
-- CHPFCRFFSplitVariables: content/modules/phase_field/systems/Variables/CHPFCRFFSplitVariables.md
-#- HHPFCRFFSplitVariables: !include content/modules/phase_field/systems/Variables/HHPFCRFFSplitVariables/pages.yml
-- HHPFCRFFSplitVariables: content/modules/phase_field/systems/Variables/HHPFCRFFSplitVariables.md
-#- PFCRFFVariables: !include content/modules/phase_field/systems/Variables/PFCRFFVariables/pages.yml
-- PFCRFFVariables: content/modules/phase_field/systems/Variables/PFCRFFVariables.md
-#- PolycrystalVariables: !include content/modules/phase_field/systems/Variables/PolycrystalVariables/pages.yml
-- PolycrystalVariables: content/modules/phase_field/systems/Variables/PolycrystalVariables.md

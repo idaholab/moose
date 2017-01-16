@@ -1,3 +1,0 @@
-- Overview: content/framework/systems/Mesh/Overview.md
-- MortarInterfaces: !include content/framework/systems/Mesh/MortarInterfaces/pages.yml
-- Partitioner: !include content/framework/systems/Mesh/Partitioner/pages.yml

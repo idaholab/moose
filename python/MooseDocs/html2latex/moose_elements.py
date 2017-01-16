@@ -49,13 +49,13 @@ def admonition_preamble():
   out = ['\\usepackage{xparse}']
   out += ['\\usepackage{tabularx}']
   out += ['\\usepackage[table]{xcolor}']
-  out += ['\\definecolor{code-background}{HTML}{ecf0f1}']
-  out += ['\\definecolor{info-title}{HTML}{528452} \\definecolor{info}{HTML}{82e0aa}']
-  out += ['\\definecolor{note-title}{HTML}{3a7296} \\definecolor{note}{HTML}{85c1e9}']
-  out += ['\\definecolor{important-title}{HTML}{b100b0} \\definecolor{important}{HTML}{FF00FF}']
-  out += ['\\definecolor{warning-title}{HTML}{968b2b} \\definecolor{warning}{HTML}{ffec46}']
-  out += ['\\definecolor{danger-title}{HTML}{b14d00} \\definecolor{danger}{HTML}{f75e1d}']
-  out += ['\\definecolor{error-title}{HTML}{940000} \\definecolor{error}{HTML}{ffb4b4}']
+  out += ['\\definecolor{code-background}{HTML}{ECF0F1}']
+  out += ['\\definecolor{info-title}{HTML}{528452} \\definecolor{info}{HTML}{82E0AA}']
+  out += ['\\definecolor{note-title}{HTML}{3A7296} \\definecolor{note}{HTML}{85C1E9}']
+  out += ['\\definecolor{important-title}{HTML}{B100B0} \\definecolor{important}{HTML}{FF00FF}']
+  out += ['\\definecolor{warning-title}{HTML}{968B2B} \\definecolor{warning}{HTML}{FFEC46}']
+  out += ['\\definecolor{danger-title}{HTML}{B14D00} \\definecolor{danger}{HTML}{F75E1D}']
+  out += ['\\definecolor{error-title}{HTML}{940000} \\definecolor{error}{HTML}{FFB4B4}']
   cmd = '\\DeclareDocumentCommand{\\admonition}{O{warning-title}O{warning}mm}\n'
   cmd += '{\n'
   cmd += '  \\rowcolors{1}{#1}{#2}\n'
@@ -70,7 +70,7 @@ def admonition_preamble():
 
 def listings_settings():
   out = ['\\usepackage[table]{xcolor}']
-  out += ['\\definecolor{code-background}{HTML}{ecf0f1}']
+  out += ['\\definecolor{code-background}{HTML}{ECF0F1}']
   out += ['\\lstset{basicstyle=\\footnotesize\\rmfamily, breaklines=true, backgroundcolor=\\color{code-background}}']
   return out
 
@@ -104,7 +104,11 @@ class admonition_div(elements.BlockElement):
   def convert(self, tag, content):
     atype = tag.attrs['class'][tag.attrs['class'].index('admonition')+1]
     title = self.content(tag.contents[1])
-    msg = self.content(tag.contents[3])
+    #Message is optional
+    if len(tag.contents) < 4:
+      msg = ''
+    else:
+      msg = self.content(tag.contents[3])
     return '\\admonition[%s-title][%s]{%s}{%s}' % (atype, atype, title, msg)
 
   def preamble(self):
