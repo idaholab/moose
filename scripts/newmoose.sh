@@ -46,7 +46,8 @@ find $dir | grep '/[.]' | xargs rm -rf # remove hidden files (e.g. vim swp files
 function recursiveRename {
     src=$1
     dst=$2
-    grep --recursive -l "$src" $dir | xargs sed -i '' 's/'"$src"'/'"$dst"'/g'
+    grep --recursive -l "$src" $dir | xargs sed -i.bak 's/'"$src"'/'"$dst"'/g'
+    find $dir | grep '\.bak$' | xargs rm -f
 }
 recursiveRename "$srcname" "$dstname"
 recursiveRename "$srcnamelow" "$dstnamelow"
