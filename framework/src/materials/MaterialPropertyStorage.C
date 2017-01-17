@@ -333,6 +333,7 @@ MaterialPropertyStorage::addPropertyOld (const std::string & prop_name)
 
   if (std::find(_stateful_prop_id_to_prop_id.begin(), _stateful_prop_id_to_prop_id.end(), prop_id) == _stateful_prop_id_to_prop_id.end())
     _stateful_prop_id_to_prop_id.push_back(prop_id);
+  _prop_names[prop_id] = prop_name;
 
   return prop_id;
 }
@@ -353,7 +354,6 @@ MaterialPropertyStorage::getPropertyId (const std::string & prop_name)
 
   auto id = _prop_ids.size();
   _prop_ids[prop_name] = id;
-  _prop_names[id] = prop_name;
   return id;
 }
 

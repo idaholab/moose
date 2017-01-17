@@ -193,6 +193,8 @@ public:
 
   unsigned int retrievePropertyId (const std::string & prop_name) const;
 
+  bool isStatefulProp(const std::string & prop_name) const {return _prop_names.count(retrievePropertyId(prop_name)) > 0;}
+
 protected:
   // indexing: [element][side]->material_properties
   HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > * _props_elem;
