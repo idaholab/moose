@@ -18,6 +18,8 @@ class Translator(object):
     #: BlockElement objects
     self.elements = ElementStorage(etype=elements.Element)
 
+    self.used = set()
+
     #: Unknown tag conversion
     self.unknown = unknown
 
@@ -41,9 +43,9 @@ class Translator(object):
       html[str]: The raw html to convert to latex.
     """
 
-    # The html pars,er attempts to match < > even when they are inside code blocks
+    # The html parser attempts to match < > even when they are inside code blocks
     def sub(match):
-      return '<code{}>{}</code>'.format(match.group(1), match.group(2).replace('<', '##LESSTHAN##').replace('>', '##GREATERTHAN##'))
+      return '<code{}>{}</code>'.format(match.group(1), match.group(2).replace('<', '##LESSTHAN##').replace('>', '##GREATERTHAN##').replace('&lt;','##LESSTHAN##').replace('&gt;','##GREATERTHAN##'))
     html = re.sub(r'<code(.*?)>(.*?)</code>', sub, html, flags=re.MULTILINE|re.DOTALL)
 
     def html2latex(input):
@@ -71,9 +73,6 @@ class Translator(object):
       if n_tags == old_n_tags:
         break
       old_n_tags = n_tags
-    #if n_tags > 0:
-    #    print 'Failed to convert all html tags.'
-
 
     output = []
     soup = bs4.BeautifulSoup(tex, "html.parser")
@@ -97,6 +96,7 @@ class Translator(object):
 
     for obj in self.elements:
       if obj.test(tag):
+        self.used.add(obj)
         #@todo check return type of convert(), expects a string
         return obj.prefix(tag) + obj.convert(tag, obj.content(tag))
 
@@ -109,7 +109,7 @@ class Translator(object):
 
     output = []
 
-    for obj in self.elements:
+    for obj in self.used:
       preamble = obj.preamble()
       if not isinstance(preamble, list):
         log.error("The preamble method of {} must return a list.".format(obj.__class__.__name__))

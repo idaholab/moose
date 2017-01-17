@@ -1,0 +1,51 @@
+<!--
+Page header including the "sidebar" navigation.
+-->
+
+{% for nav in navigation %}
+  {% for nav_key, nav_value in nav.iteritems() %}
+    {% if nav_value is not string %}
+      <ul id="dropdown-{{nav_key.replace(' ', '_').lower()}}" class="dropdown-content">
+      {% for item in nav_value %}
+        <li><a href="{{item.values()[0]}}">{{item.keys()[0]}}</a></li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+
+<nav>
+  <div class="nav-wrapper container">
+    <a href="{{current.relpath('index.html')}}" class="page-title">MOOSE</a>
+    <ul class="right">
+      {% for nav in navigation %}
+        {% set nav_key=nav.keys()[0] %}
+        {% set nav_value=nav.values()[0] %}
+        {% if nav_value is iterable %}
+          <li><a class="dropdown-button" href="#!" data-activates="dropdown-{{nav_key.replace(' ', '_').lower()}}">{{nav_key}}<i class="material-icons right">arrow_drop_down</i></a></li>
+        {% else %}
+         <li><a href="{{nav_value}}">{{nav_key}}<i class="material-icons right">arrow_drop_down</i></a></li>
+        {% endif %}
+      {% endfor %}
+      <li>
+        <form>
+          <div class="input-field search-wrapper">
+            <input id="search" type="search" required>
+            <label for="search"><i class="material-icons">search</i></label>
+            <i class="material-icons">close</i>
+            <div class="search-results"></div>
+          </div>
+        </form>
+      </li>
+      <li>
+        <a class="github-mark-label" href="{{repo_url}}">
+          {% if 'gitlab' in repo_url %}
+            <img class="github-mark" src={{current.mediapath('docs/media/gitlab-logo.png')}}>GitLab
+          {% else %}
+            <img class="github-mark" src={{current.mediapath('docs/media/github-mark-light.png')}}>GitHub
+          {% endif %}
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>

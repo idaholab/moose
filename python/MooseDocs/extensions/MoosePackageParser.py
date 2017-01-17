@@ -24,23 +24,15 @@ class MoosePackageParser(MooseCommonExtension, Pattern):
     self.package = MooseDocs.yaml_load("packages.yml")
 
     # The default settings
-    self._settings = {'arch' : None,
-             'return' : None}
+    self._settings['arch'] = None
+    self._settings['return'] =  None
 
   def handleMatch(self, match):
     """
-    Returns a tree element containing error message.
-
-    Uses the html to match the python markdown admonition package.
-    https://pythonhosted.org/Markdown/extensions/admonition.html
-
-    <div class="admonition danger">
-    <p class="admonition-title">Don't try this at home</p>
-    <p>...</p>
-    </div>
+    Returns a tree element package information.
     """
     # Update the settings from regex match
-    settings, styles = self.getSettings(match.group(2))
+    settings = self.getSettings(match.group(2))
     if not settings.has_key('arch') or not settings.has_key('return'):
       el = self.createErrorElement('Invalid MOOSEPACKAGE markdown syntax. Requires arch=, return=link|name')
     else:

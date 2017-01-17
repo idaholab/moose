@@ -12,6 +12,7 @@ class MooseInputBlock(MooseTextPatternBase):
 
   def __init__(self, **kwargs):
     MooseTextPatternBase.__init__(self, self.CPP_RE, language='text', **kwargs)
+    self._settings['block'] = None
 
   def handleMatch(self, match):
     """
@@ -19,11 +20,11 @@ class MooseInputBlock(MooseTextPatternBase):
     """
 
     # Update the settings from regex match
-    settings, styles = self.getSettings(match.group(3))
+    settings = self.getSettings(match.group(3))
 
     # Build the complete filename.
     rel_filename = match.group(2)
-    filename = os.path.join(self._root, rel_filename)
+    filename = MooseDocs.abspath(rel_filename)
 
     # Read the file and create element
     if not os.path.exists(filename):
@@ -43,6 +44,6 @@ class MooseInputBlock(MooseTextPatternBase):
         label = match.group(2)
       else:
         label = rel_filename
-      el = self.createElement(label, content, filename, rel_filename, settings, styles)
+      el = self.createElement(label, content, filename, rel_filename, settings)
 
     return el

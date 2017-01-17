@@ -1,6 +1,0 @@
-- Overview: content/framework/systems/Executioner/Overview.md
-- Adaptivity: content/framework/systems/Executioner/Adaptivity.md
-- Predictor: !include content/framework/systems/Executioner/Predictor/pages.yml
-- Quadrature: content/framework/systems/Executioner/Quadrature.md
-- TimeIntegrator: !include content/framework/systems/Executioner/TimeIntegrator/pages.yml
-- TimeStepper: !include content/framework/systems/Executioner/TimeStepper/pages.yml

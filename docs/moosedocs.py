@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
+import pdb
 
 # Locate MOOSE directory
 MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), '..', 'moose'))

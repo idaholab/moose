@@ -1,7 +1,0 @@
-- Overview: content/modules/tensor_mechanics/systems/BCs/Overview.md
-- CavityPressure: !include content/modules/tensor_mechanics/systems/BCs/CavityPressure/pages.yml
-- DashpotBC: content/modules/tensor_mechanics/systems/BCs/DashpotBC.md
-- DisplacementAboutAxis: content/modules/tensor_mechanics/systems/BCs/DisplacementAboutAxis.md
-- PresetVelocity: content/modules/tensor_mechanics/systems/BCs/PresetVelocity.md
-- Pressure: !include content/modules/tensor_mechanics/systems/BCs/Pressure/pages.yml
-- Pressure: content/modules/tensor_mechanics/systems/BCs/Pressure.md

@@ -24,11 +24,11 @@ class MooseTextFile(MooseTextPatternBase):
     """
 
     # Update the settings from regex match
-    settings, styles = self.getSettings(match.group(3))
+    settings = self.getSettings(match.group(3))
 
     # Read the file
     rel_filename = match.group(2).lstrip('/')
-    filename = os.path.join(self._root, rel_filename)
+    filename = MooseDocs.abspath(rel_filename)
     if not os.path.exists(filename):
       return self.createErrorElement("Unable to locate file: {}".format(rel_filename))
     if settings['line']:
@@ -45,7 +45,7 @@ class MooseTextFile(MooseTextPatternBase):
       return self.createErrorElement("Failed to extract content from {}.".format(filename))
 
     # Return the Element object
-    el = self.createElement(match.group(2), content, filename, rel_filename, settings, styles)
+    el = self.createElement(match.group(2), content, filename, rel_filename, settings)
     return el
 
   def extractLine(self, filename, desired):

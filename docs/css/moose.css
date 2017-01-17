@@ -3,6 +3,26 @@ html {
     line-height: 1.75rem;
     color: rgba(0,0,0,1.0);
     font-size: large;
+    text-align: justify;
+}
+
+html, body {
+  height: 100%;
+}
+
+.page-wrap {
+  min-height: 100%;
+  /* equal to footer height */
+  margin-bottom: -142px;
+}
+
+.page-wrap:after {
+  content: "";
+  display: block;
+}
+
+.page-footer, .page-wrap:after {
+  height: 142px;
 }
 
 h1 {
@@ -25,6 +45,15 @@ h4 {
     font-weight:300;
 }
 
+p {
+    top-margin:1.5rem;
+}
+
+.moose-copy-button{
+    position:relative;
+    float:right;
+}
+
 moose-caption {
     padding: 5px;
     margin: 0px;
@@ -40,12 +69,23 @@ moose-caption {
     width:100%;
 }
 
-.moose-devel-liks .btn, .btn-large, .btn-flat{
+a.moose-bad-link{
+    color:red;
+}
+
+.moose-devel-links .btn, .btn-large, .btn-flat{
     text-transform:none;
 }
 
+li{
+    padding-left:15px;
+}
 
-
+.moose-chip{
+    margin-left: 10px;
+    bottom: 8px;
+    position: relative;
+}
 
 #logo-container {
     height: 57px;
@@ -56,25 +96,27 @@ moose-caption {
     border-left: 2px solid #005897;
 }
 
+.collapsible-header .row{
+    margin:0;
+}
+
 .collapsible-body{
     padding:0px;
     padding-left: 30px;
     padding-top: 5px;
     padding-bottom: 15px;
-    padding-right: 5px;
+    padding-right: 30px;
 }
 
 .collapsible-header .moose-parameter-name{
-    width:20%;
-    float:left;
+    white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
     font-weight:600;
 }
 
 .collapsible-header .moose-parameter-header-default{
-    width:10%;
-    float:left;
+    white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
     color:#757575;
@@ -83,8 +125,6 @@ moose-caption {
 
 .collapsible-header .moose-parameter-header-description{
     white-space:nowrap;
-    float:right;
-    width:70%;
     overflow:hidden;
     text-overflow:ellipsis;
     color:#757575;
@@ -100,11 +140,6 @@ moose-caption {
 .collapsible li.active .moose-parameter-header-default{
     display:none;
 }
-
-.collapsible li.active .moose-parameter-name{
-    width:100%;
-}
-
 
 nav,
 .btn,
@@ -195,8 +230,12 @@ a.breadcrumb{
     padding-right: 4px;
 }
 
-header, main, footer {
-    padding-left: 300px;
+input[type="search"] {
+height: 64px !important; /* or height of nav */
+}
+
+.dropdown-button .material-icons{
+    margin-left:0;
 }
 
 @media only screen and (max-width : 992px) {
@@ -221,11 +260,6 @@ header, main, footer {
 .pinned {
     width:220px;
     position: fixed !important;
-}
-
-nav ul a,
-nav .brand-logo {
-    color: #444;
 }
 
 .button-collapse {
@@ -274,6 +308,34 @@ footer.page-footer {
 
 .moose-caption {
     padding: 5px;
+}
+
+
+.moose-group-header{
+    color: white;
+    background-color: #005897;
+    font-size: larger;
+}
+
+.moose-system-list .material-icons{
+    margin-left:15px;
+}
+
+.collapsible-header .moose-collection-name{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.collapsible-header .moose-collection-description{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    color:#757575;
+}
+
+.moose-system-list .collapsible-header .row{
+    margin-bottom: 0;
 }
 
 /* Slideshows with white backgrounds and captions, need a black drop text shadow */
