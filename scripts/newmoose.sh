@@ -3,6 +3,7 @@
 function printusage {
     echo "Usage:    newmoose.sh <type> <AppName>"
     echo ""
+    echo "    Creates a new blank MOOSE app in the current working directory."
     echo "    <type> must be either "app" or "module"."
     echo "    <AppName> should be given in CamelCase format."
 }
@@ -32,6 +33,12 @@ if [[ -z $MOOSE_DIR ]]; then
 fi
 if [[ "$kind" == "module" ]]; then
     dir="${MOOSE_DIR}/modules/$dir"
+fi
+
+absdir=$(echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")")
+if [[ "$kind" == "app" && "$absdir" =~ "$MOOSE_DIR" ]]; then
+    echo "error: your current working directory is inside the MOOSE directory" >&2
+    exit 1
 fi
 
 # make new app dir and copy stork files
