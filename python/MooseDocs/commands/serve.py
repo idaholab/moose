@@ -43,7 +43,7 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', disable_th
 
   # Wrapper for building complete website
   def build_complete():
-    return build.build(config_file=config_file, site_dir=tempdir, disable_threads=disable_threads)
+    return build.build_site(config_file=config_file, site_dir=tempdir, disable_threads=disable_threads)
   config, parser, builder = build_complete()
 
   # Start the live server
@@ -64,3 +64,4 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', disable_th
 
   # Start the server
   server.serve(root=config['site_dir'], host=host, port=port, restart_delay=0)
+  return 0 # error handled in MooseDocs.moosedocs
