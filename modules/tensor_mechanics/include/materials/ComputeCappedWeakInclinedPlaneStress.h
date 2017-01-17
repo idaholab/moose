@@ -17,11 +17,11 @@ InputParameters validParams<ComputeCappedWeakInclinedPlaneStress>();
 /**
  * ComputeCappedWeakInclinedPlaneStress performs the return-map
  * algorithm and associated stress updates for plastic
- * models that describe capped inclined-weak-plane plasticity
+ * models that describe capped weak-plane plasticity
  *
  * It assumes various things about the elasticity tensor, viz
- * in the reference frame where the normal to the inclined plane
- * is rotated equal to the "z" axis, it assumes:
+ * in the frame where the weak-plane's normal direction is the
+ * "2" direction:
  * E(i,i,j,k) = 0 except if k=j
  * E(0,0,i,j) = E(1,1,i,j)
  */
@@ -32,24 +32,10 @@ public:
   ComputeCappedWeakInclinedPlaneStress(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpStress() override;
   virtual void initQpStatefulProperties() override;
-  virtual void errorHandler(const std::string & message) override;
+  virtual void computeQpStress() override;
 
-  /**
-   * Rotate relevant vectors and tensors to the frame where the
-   * inclined plane's normal coincides with the "z" axis
-   */
-  void rotate();
-
-  /**
-   * Rotate relevant vectors and tensors from the frame where the
-   * inclined plane's normal coincides with the "z" axis
-   * back to the original reference frame
-   */
-  void unrotate();
-
-  /// Normal to the inclined weak plane
+  /// User-input value of the normal vector to the weak plane
   RealVectorValue _n_input;
 
   /// Current value of the normal
@@ -58,8 +44,35 @@ protected:
   /// Old value of the normal
   MaterialProperty<RealVectorValue> & _n_old;
 
-  /// Rotation matrix that rotates _n to "z" and vice-versa
-  RealTensorValue _rot;
+  /// Rotation matrix that rotates _n to "z"
+  RealTensorValue _rot_n_to_z;
+
+  /// Rotation matrix that rotates "z" to _n
+  RealTensorValue _rot_z_to_n;
+
+  /// Trial stress rotated to the frame where _n points along "z"
+  RankTwoTensor _rotated_trial;
+
+  /// Elasticity tensor rotated to the frame where _n points along "z"
+  RankFourTensor _rotated_Eijkl;
+
+  virtual void initialiseReturnProcess() override;
+
+  virtual void preReturnMap(Real p_trial, Real q_trial, const RankTwoTensor & stress_trial, const std::vector<Real> & intnl_old, const std::vector<Real> & yf) override;
+
+  virtual void computePQ(const RankTwoTensor & stress, Real & p, Real & q) const override;
+
+  virtual void setEppEqq(const RankFourTensor & Eijkl, Real & Epp, Real & Eqq) const override;
+
+  virtual void setStressAfterReturn(const RankTwoTensor & stress_trial, Real p_ok, Real q_ok, Real gaE, const std::vector<Real> & intnl, const f_and_derivs & smoothed_q, RankTwoTensor & stress) const override;
+
+  virtual void consistentTangentOperator(const RankTwoTensor & stress_trial, Real p_trial, Real q_trial, const RankTwoTensor & stress, Real p, Real q, Real gaE, const f_and_derivs & smoothed_q, RankFourTensor & cto) const override;
+
+  virtual RankTwoTensor dpdstress(const RankTwoTensor & stress) const override;
+
+  virtual RankTwoTensor dqdstress(const RankTwoTensor & stress) const override;
+
+  virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
 
 #endif //COMPUTECAPPEDWEAKINCLINEDPLANESTRESS_H
