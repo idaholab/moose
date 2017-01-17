@@ -288,7 +288,7 @@ def moosedocs():
     retcode = commands.latex(**options)
 
   # Check retcode
-  if retcode != 0:
+  if retcode > 0:
       return retcode
 
   # Display logging results
