@@ -82,11 +82,11 @@ InputParameters validParams<MooseMesh>()
                         "foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, "
                         "where N = # CPUs, with NemesisIO.");
 
-  MooseEnum dims("1=1 2 3", "3");
+  MooseEnum dims("1=1 2 3", "1");
   params.addParam<MooseEnum>("dim", dims,
                              "This is only required for certain mesh formats where "
-                             "the dimension of the mesh cannot be autodetected.  "
-                             "In particular you must supply this for GMSH meshes.  "
+                             "the dimension of the mesh cannot be autodetected. "
+                             "In particular you must supply this for GMSH meshes. "
                              "Note: This is completely ignored for ExodusII meshes!");
 
   MooseEnum partitioning("default=-3 metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc", "default");
