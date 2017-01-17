@@ -141,7 +141,7 @@ class Builder(object):
       helper(os.path.join(from_dir, 'media'), os.path.join(self._site_dir, 'media'))
 
 
-def build(config_file='moosedocs.yml', disable_threads=False, **kwargs):
+def build_site(config_file='moosedocs.yml', disable_threads=False, **kwargs):
   """
   The main build command.
   """
@@ -159,3 +159,11 @@ def build(config_file='moosedocs.yml', disable_threads=False, **kwargs):
   # Create the html
   builder.build(disable_threads=disable_threads)
   return config, parser, builder
+
+
+def build(*args, **kwargs):
+  """
+  The main build command.
+  """
+  build_site(*args, **kwargs)
+  return 0 # error checking handled by MooseDocs.moosedocs

@@ -42,3 +42,4 @@ def generate(config_file='moosedocs.yml', generate=True, locations=None, **kwarg
         syntax = MooseDocs.MooseApplicationSyntax(yaml, generate=generate, install=ext_config['install'], **value)
         log.info("Checking documentation for '{}'.".format(key))
         syntax.check()
+  return 0 # error handled in MooseDocs.moosedocs
