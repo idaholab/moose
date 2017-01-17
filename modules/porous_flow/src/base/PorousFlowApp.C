@@ -4,6 +4,7 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 #include "FluidPropertiesApp.h"
+#include "ChemicalReactionsApp.h"
 
 // UserObjects
 #include "PorousFlowDictator.h"
@@ -73,6 +74,8 @@
 #include "PorousFlowDispersiveFlux.h"
 #include "PorousFlowHeatVolumetricExpansion.h"
 #include "PorousFlowPlasticHeatEnergy.h"
+#include "PorousFlowDesorpedMassTimeDerivative.h"
+#include "PorousFlowDesorpedMassVolumetricExpansion.h"
 
 // BoundaryConditions
 #include "PorousFlowSink.h"
@@ -105,11 +108,13 @@ PorousFlowApp::PorousFlowApp(const InputParameters & parameters) :
   Moose::registerObjects(_factory);
   TensorMechanicsApp::registerObjects(_factory);
   FluidPropertiesApp::registerObjects(_factory);
+  ChemicalReactionsApp::registerObjects(_factory);
   PorousFlowApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
   TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
   FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
+  ChemicalReactionsApp::associateSyntax(_syntax, _action_factory);
   PorousFlowApp::associateSyntax(_syntax, _action_factory);
 }
 
@@ -198,6 +203,8 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerKernel(PorousFlowDispersiveFlux);
   registerKernel(PorousFlowHeatVolumetricExpansion);
   registerKernel(PorousFlowPlasticHeatEnergy);
+  registerKernel(PorousFlowDesorpedMassTimeDerivative);
+  registerKernel(PorousFlowDesorpedMassVolumetricExpansion);
 
   // BoundaryConditions
   registerBoundaryCondition(PorousFlowSink);

@@ -62,13 +62,13 @@ PorousFlowHeatEnergy::computeIntegral()
    * be lumped.  Hence the use of the "nodal" Material
    * Properties
    */
-  const VariableTestValue & _test = (*_var).phi();
+  const VariableTestValue & test = _var->phi();
 
-  for (unsigned node = 0 ; node < _test.size(); ++node)
+  for (unsigned node = 0 ; node < test.size(); ++node)
   {
     Real nodal_volume = 0.0;
     for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-      nodal_volume += _JxW[_qp] * _coord[_qp] * _test[node][_qp];
+      nodal_volume += _JxW[_qp] * _coord[_qp] * test[node][_qp];
 
     Real energy = 0.0;
     if (_include_porous_skeleton)

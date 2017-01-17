@@ -203,7 +203,7 @@ RankTwoTensor::column(const unsigned int c) const
 }
 
 void
-RankTwoTensor::rotate(RealTensorValue & R)
+RankTwoTensor::rotate(const RealTensorValue & R)
 {
   RankTwoTensor temp;
   for (unsigned int i = 0; i < N; i++)
@@ -219,7 +219,7 @@ RankTwoTensor::rotate(RealTensorValue & R)
 }
 
 void
-RankTwoTensor::rotate(RankTwoTensor & R)
+RankTwoTensor::rotate(const RankTwoTensor & R)
 {
   RankTwoTensor temp;
   for (unsigned int i = 0; i < N; i++)
