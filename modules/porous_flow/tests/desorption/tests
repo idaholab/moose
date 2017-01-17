@@ -1,0 +1,7 @@
+[Tests]
+  [./desorption01]
+    type = 'Exodiff'
+    input = 'desorption01.i'
+    exodiff = 'desorption01_out.e'
+  [../]
+[]
