@@ -211,6 +211,7 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOld(const std::string & prop_name)
 {
+  // TODO: add mooseDeprecated("'declarePropertyOld' is deprecated an no longer necessary");
   return declareHelper<T>(_props_old, prop_name, _storage.addPropertyOld(prop_name));
 }
 
@@ -218,6 +219,7 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOlder(const std::string & prop_name)
 {
+  // TODO: add mooseDeprecated("'declarePropertyOlder' is deprecated an no longer necessary");
   return declareHelper<T>(_props_older, prop_name, _storage.addPropertyOlder(prop_name));
 }
 
