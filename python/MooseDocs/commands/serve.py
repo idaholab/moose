@@ -51,7 +51,7 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', disable_th
 
   # Watch markdown files
   for page in builder:
-    server.watch(page.path, page.build)
+    server.watch(page.source(), page.build)
 
   # Watch support directories
   server.watch(os.path.join(os.getcwd(), 'media'), builder.copyFiles)
@@ -59,8 +59,10 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', disable_th
   server.watch(os.path.join(os.getcwd(), 'js'), builder.copyFiles)
   server.watch(os.path.join(os.getcwd(), 'fonts'), builder.copyFiles)
 
-  # Watch the pages file
+  # Watch the files and directories that require complete rebuild
   server.watch(config['navigation'], build_complete)
+  server.watch(config_file, build_complete)
+  server.watch('templates')
 
   # Start the server
   server.serve(root=config['site_dir'], host=host, port=port, restart_delay=0)

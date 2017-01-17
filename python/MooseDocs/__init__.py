@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 import argparse
 import subprocess
 import multiprocessing
@@ -19,7 +20,8 @@ from MooseApplicationSyntax import MooseApplicationSyntax
 from MooseLinkDatabase import MooseLinkDatabase
 
 import logging
-logging.getLogger(__name__).addHandler(logging.NullHandler())
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
 MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), '..', 'moose'))
 if not os.path.exists(MOOSE_DIR):
@@ -168,6 +170,41 @@ def get_markdown_extensions(config):
       extensions.append(extension)
 
   return extensions, extension_configs
+
+def read_markdown(md_file):
+  """
+  Reads and removes meta data (key, value pairs) from the top of a markdown file.
+
+  Inputs:
+    md_file[str]: The *.md file or text to convert.
+  """
+
+  # Read file, if provided
+  if os.path.isfile(md_file):
+    with open(md_file, 'r') as fid:
+      content = fid.read().decode('utf-8')
+  else:
+    content = md_file
+
+  # Extract meta data
+  output = dict()
+  count = 0
+  lines = content.splitlines()
+  for line in lines:
+    if line == '':
+      break
+    match = re.search(r'^(?P<key>[A-Za-z0-9_-]+)\s*:\s*(?P<value>.*)', line)
+    if match:
+      try:
+        value = eval(match.group('value'))
+      except:
+        value = match.group('value')
+      output[match.group('key')] = value
+      count += 1
+    else:
+      break
+  return '\n'.join(lines[count:]), output
+
 
 def purge(extensions):
   """

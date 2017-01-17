@@ -69,5 +69,5 @@ class MooseDiagram(BlockProcessor, MooseCommonExtension):
     # Create the img that will contain the flow chart
     img = etree.SubElement(parent, "img")
     img.set('class', 'moose-diagram')
-    img.set('src', '/' + out_file)
+    img.set('src', out_file)
     img.set('style', 'background:transparent; border:0px')

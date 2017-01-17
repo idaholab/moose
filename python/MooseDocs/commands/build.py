@@ -12,8 +12,8 @@ log = logging.getLogger(__name__)
 
 import MooseDocs
 from MooseDocs.extensions.MooseMarkdown import MooseMarkdown
-from NavigationNode import NavigationNode
-from MoosePage import MoosePage
+from MooseDocsNode import MooseDocsNode
+from MooseDocsMarkdownNode import MooseDocsMarkdownNode
 
 
 def build_options(parser, subparser):
@@ -24,10 +24,9 @@ def build_options(parser, subparser):
   build_parser.add_argument('--disable-threads', action='store_true', help="Disable threaded building.")
   return build_parser
 
-
 def make_tree(directory, node, **kwargs):
   """
-  Create the tree structure of NavigationNode/MoosePage objects
+  Create the tree structure of NavigationNode/MooseDocsMarkdownNode objects
   """
   for p in os.listdir(directory):
 
@@ -35,23 +34,18 @@ def make_tree(directory, node, **kwargs):
     if p in ['index.md', 'index.html']:
       continue
 
-    if os.path.isfile(path) and (path.endswith('.md') or path.endswith('.html')):
-      child = MoosePage(path, node, **kwargs)
-      node.children.append(child)
+    if os.path.isfile(path) and (path.endswith('.md')):
+      name = os.path.basename(path)[:-3]
+      child = MooseDocsMarkdownNode(name=name, parent=node, md_file=path, **kwargs)
 
     elif os.path.isdir(path) and (p not in ['.', '..']):
+      name = os.path.basename(path)
       md = os.path.join(path, 'index.md')
-      html = os.path.join(path, 'index.html')
       if os.path.exists(md):
-        child = MoosePage(md, node, **kwargs)
-      elif os.path.exists(html):
-        child = MoosePage(html, node, **kwargs)
+        child = MooseDocsMarkdownNode(name=name, parent=node, md_file=md, **kwargs)
       else:
-        child = NavigationNode(path, node, **kwargs)
-
+        child = MooseDocsNode(name=name, parent=node, **kwargs)
       make_tree(path, child, **kwargs)
-      node.children.append(child)
-
 
 def flat(node):
   """
@@ -60,8 +54,8 @@ def flat(node):
   Args:
     node[NavigationNode]: The root node to flatten from
   """
-  for child in node.children:
-    if isinstance(child, MoosePage):
+  for child in node:
+    if isinstance(child, MooseDocsMarkdownNode):
       yield child
     for c in flat(child):
       yield c
@@ -75,21 +69,13 @@ class Builder(object):
 
     self._site_dir = site_dir
 
-    # Extract the MooseLinkDatabase for creating source and doxygen links
-    self._syntax = dict()
-    for ext in parser.registeredExtensions:
-      if isinstance(ext, MooseMarkdown):
-        self._syntax = ext.syntax
-        break
-
     content_dir = os.path.join(os.getcwd(), 'content')
     kwargs = {'parser': parser,
               'site_dir': self._site_dir,
-              'syntax': self._syntax,
               'navigation': MooseDocs.yaml_load(navigation),
               'template': template,
               'template_args': template_args}
-    self._root = MoosePage(path=os.path.join(content_dir, 'index.md'), **kwargs)
+    self._root = MooseDocsMarkdownNode(name='', md_file=os.path.join(content_dir, 'index.md'), **kwargs)
     make_tree(content_dir, self._root, **kwargs)
 
     self._pages = [self._root] + list(flat(self._root))
@@ -99,7 +85,6 @@ class Builder(object):
     Allow direct iteration over pages contained in this object.
     """
     return self._pages.__iter__()
-
 
   def build(self, disable_threads=False):
     """
@@ -122,7 +107,6 @@ class Builder(object):
 
       self.copyFiles()
 
-
   def copyFiles(self):
     """
     Copy the css/js/fonts/media files for this project.
@@ -139,7 +123,6 @@ class Builder(object):
       helper(os.path.join(from_dir, 'js'), os.path.join(self._site_dir, 'js'))
       helper(os.path.join(from_dir, 'css'), os.path.join(self._site_dir, 'css'))
       helper(os.path.join(from_dir, 'media'), os.path.join(self._site_dir, 'media'))
-
 
 def build_site(config_file='moosedocs.yml', disable_threads=False, **kwargs):
   """
@@ -159,7 +142,6 @@ def build_site(config_file='moosedocs.yml', disable_threads=False, **kwargs):
   # Create the html
   builder.build(disable_threads=disable_threads)
   return config, parser, builder
-
 
 def build(*args, **kwargs):
   """

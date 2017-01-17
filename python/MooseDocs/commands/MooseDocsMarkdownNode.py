@@ -4,107 +4,74 @@ import bs4
 import jinja2
 import re
 import logging
-import MooseDocs
 log = logging.getLogger(__name__)
 
-from NavigationNode import NavigationNode
+import MooseDocs
+from MooseDocsNode import MooseDocsNode
 
-class MoosePage(NavigationNode):
+class MooseDocsMarkdownNode(MooseDocsNode):
   """
-  Navigation item for markdown page.
-
-  Args:
-    filename[str]: The complete markdown/html filename to be converted.
-    parser[markdown.Markdown(): Python Markdown object instance.
-    root[str]: The root directory.
-
-
-  NOTE: This class can also handle pure html pages as well, the markdown
-        conversion step is simply skipped if the file ends with .html.
+  Node for converting
   """
-  def __init__(self, *args, **kwargs):
-    super(MoosePage, self).__init__(*args, **kwargs)
+  def __init__(self, md_file=None, syntax=None, parser=None, navigation=None, template=None, template_args=dict(), **kwargs):
+    super(MooseDocsMarkdownNode, self).__init__(**kwargs)
 
+    if (not md_file) or (not os.path.exists(md_file)):
+      raise Exception('The supplied markdown file must exists: {}'.format(md_file))
 
-    self._html = None
-    self._content = ''
-    self._meta = dict()
-
-    # Determine url
-    local, _ = os.path.splitext(os.path.relpath(self.path, os.path.join(os.getcwd(), 'content')))
-    if os.path.basename(local) == 'index':
-      local = os.path.dirname(local)
-    self._url = os.path.join(local, 'index.html')
-
-    with open(self.path, 'r') as fid:
-      content = fid.read().decode('utf-8')
-
-    if self.path.endswith('.md'):
-      content, self._meta = self.meta(content)
-
-    self._content = content
-
-
-  def meta(self, content):
-
-    output = dict()
-
-    count = 0
-    lines = content.splitlines()
-    for line in lines:
-
-      if line == '':
+    # Extract the MooseLinkDatabase for creating source and doxygen links
+    self.__syntax = dict()
+    for ext in parser.registeredExtensions:
+      if isinstance(ext, MooseDocs.extensions.MooseMarkdown):
+        self.__syntax = ext.syntax
         break
 
-      match = re.search(r'^(?P<key>[A-Za-z0-9_-]+)\s*:\s*(?P<value>.*)', line)
-      if match:
-        value = match.group('value')
-        if value.lower() == 'false':
-          value = False
-        elif value.lower() == 'true':
-          value = True
-        elif value.isnumeric():
-          value = float(value)
-
-        output[match.group('key')] = value
-        count += 1
-      else:
-        break
+    self.__parser = parser
+    self.__navigation = navigation
+    self.__template = template
+    self.__template_args = template_args
+    self.__html = None
+    self.__md_file = md_file
 
 
-    self.name = output.pop('name', self.name)
-    return '\n'.join(lines[count:]), output
+  def source(self):
+    """
+    Return the source markdown file.
+    """
+    return self.__md_file
 
   def build(self):
     """
     Converts the markdown to html.
     """
 
-    # Parse the HTML
-    self._html = self._parser.convert(self._content)
+    # Read the markdown and parse the HTML
+    content, meta = MooseDocs.read_markdown(self.__md_file)
+    self.__html = self.__parser.convert(content)
 
-    template_args = copy.copy(self._template_args)
-    template_args.update(self._meta)
+    template_args = copy.copy(self.__template_args)
+    template_args['navigation'] = self.__navigation
+    template_args.update(meta)
 
     # Create the template object
     env = jinja2.Environment(loader=jinja2.FileSystemLoader([os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'templates'),
                                                              os.path.join(os.getcwd(), 'templates')]))
-    template = env.get_template(self._template)
+    template = env.get_template(self.__template)
 
     # Render the html via template
-    complete = template.render(current=self, navigation=self._navigation, **template_args)
+    complete = template.render(current=self, **template_args)
 
     # Make sure the destination directory exists
-    destination = os.path.join(self.site_dir, self.url())
-    if not os.path.exists(os.path.dirname(destination)):
-      os.makedirs(os.path.dirname(destination))
+    destination = self.path()
+    if not os.path.exists(destination):
+      os.makedirs(destination)
 
     # Finalize the html
     soup = self.finalize(bs4.BeautifulSoup(complete, 'html.parser'))
 
     # Write the file
-    with open(destination, 'w') as fid:
-      log.debug('Creating {}'.format(destination))
+    with open(self.url(), 'w') as fid:
+      log.debug('Creating {}'.format(self.url()))
       fid.write(soup.encode('utf-8'))
 
   def finalize(self, soup):
@@ -118,9 +85,9 @@ class MoosePage(NavigationNode):
       """
       Locate nodes for the 'desired' filename
       """
-      if node.path and node.path.endswith(desired):
+      if node.source() and node.source().endswith(desired):
         pages.append(node)
-      for child in node.children:
+      for child in node:
         finder(child, desired, pages)
       return pages
 
@@ -133,13 +100,13 @@ class MoosePage(NavigationNode):
 
         # Error if file not found or if multiple files found
         if not found:
-          log.error('Failed to locate page for markdown file {} in {}'.format(href, self.path))
+          log.error('Failed to locate page for markdown file {} in {}'.format(href, self.source()))
           #link.attrs.pop('href')
           link['class'] = 'moose-bad-link'
           continue
 
         elif len(found) > 1:
-          msg = 'Found multiple pages matching the supplied markdown file {} in {}:'.format(href, self.path)
+          msg = 'Found multiple pages matching the supplied markdown file {} in {}:'.format(href, self.source())
           for f in found:
             msg += '\n    {}'.format(f.path)
           log.error(msg)
@@ -193,17 +160,17 @@ class MoosePage(NavigationNode):
 
   def links(self, repo_url):
     """
-    Return the GitHub address for editing the markdown file.
+    Return the GitHub/GitLab address for editing the markdown file.
 
     Args:
       repo_url[str]: Web address to use as the base for creating the edit link
     """
 
-    output = [('Edit Markdown', os.path.join(repo_url, 'edit', 'devel', MooseDocs.relpath(self.path)))]
+    output = [('Edit Markdown', os.path.join(repo_url, 'edit', 'devel', MooseDocs.relpath(self.source())))]
 
-    name = self.breadcrumbs[-1].name
+    name = self.breadcrumbs()[-1].name()
 
-    for key, syntax in self.syntax.iteritems():
+    for key, syntax in self.__syntax.iteritems():
       if syntax.hasObject(name):
         include = syntax.filenames(name)[0]
         rel_include = MooseDocs.relpath(include)
@@ -219,21 +186,28 @@ class MoosePage(NavigationNode):
 
     return output
 
-
   def contents(self, level='h2'):
     """
     Return the table of contents.
     """
-    print self.path
-    soup = bs4.BeautifulSoup(self._html, 'html.parser')
+    soup = bs4.BeautifulSoup(self.content(), 'html.parser')
     for tag in soup.find_all(level):
       if 'id' in tag.attrs:
         yield (tag.contents[0], tag.attrs['id'])
-     # else:
-     #   yield (tag.contents[0], tag.contents[0].lower().replace(' ', '-'))
 
-  def html(self):
+  def content(self):
     """
     Return the generated html from markdown.
     """
-    return self._html
+    if self.__html is None:
+        raise Exception('The "build" command must be executed prior to extracting content.')
+    return self.__html
+
+  def url(self, parent=None):
+    """
+    Return the url to the page to be created.
+    """
+    path = self.path()
+    if parent:
+      path = os.path.relpath(parent.path(), path)
+    return os.path.join(path, 'index.html')

@@ -1,20 +1,20 @@
-@+ set documentclass = 'report' +@
-@+ set title = 'Single Source Documentation with MOOSE' +@
-@+ set author = 'Andrew E. Slaughter' +@
-@+ set institution = 'Idaho National Laboratory' +@
-@+ set tableofcontents = True +@
-@+ set headings = ['chapter', 'section', 'subsection', 'subsubsection', 'textbf', 'emph'] +@
+documentclass: report
+title: Single Source Documentation with MOOSE
+author: Andrew E. Slaughter
+institution: Idaho National Laboratory
+tableofcontents: True
+headings: ['chapter', 'section', 'subsection', 'subsubsection', 'textbf', 'emph']
 
-{!content/utilities/documentation/index.md!}
+{!docs/content/utilities/documentation/index.md!}
 
-{!content/utilities/documentation/setup.md!}
+{!docs/content/utilities/documentation/setup.md!}
 
-{!content/utilities/documentation/code.md!}
+{!docs/content/utilities/documentation/code.md!}
 
-{!content/utilities/documentation/website.md!}
+{!docs/content/utilities/documentation/website.md!}
 
-{!content/utilities/documentation/presentation.md!}
+{!docs/content/utilities/documentation/presentation.md!}
 
-{!content/utilities/documentation/pdf.md!}
+{!docs/content/utilities/documentation/pdf.md!}
 
-{!content/utilities/documentation/moose_flavored_markdown.md!}
+{!docs/content/utilities/documentation/moose_flavored_markdown.md!}
