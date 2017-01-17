@@ -23,4 +23,5 @@ def test(pattern=None, **kwargs):
       loader = unittest.TestLoader()
       suite = loader.discover(os.getcwd(), pattern)
       runner = unittest.TextTestRunner(verbosity=2)
-      runner.run(suite)
+      result = runner.run(suite)
+      return result.wasSuccessful()

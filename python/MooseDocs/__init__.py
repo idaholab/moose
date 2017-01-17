@@ -238,17 +238,21 @@ def moosedocs():
   # Execute command
   cmd = options.pop('command')
   if cmd == 'test':
-    commands.test(**options)
+    retcode = commands.test(**options)
   elif cmd == 'check':
-    commands.check(**options)
+    retcode = commands.check(**options)
   elif cmd == 'generate':
-    commands.generate(**options)
+    retcode = commands.generate(**options)
   elif cmd == 'serve':
-    commands.serve(**options)
+    retcode = commands.serve(**options)
   elif cmd == 'build':
-    commands.build(**options)
+    retcode = commands.build(**options)
   elif cmd == 'latex':
-    commands.latex(**options)
+    retcode = commands.latex(**options)
+
+  # Check retcode
+  if retcode != 0:
+      return retcode
 
   # Display logging results
   warn, err = formatter.counts()
