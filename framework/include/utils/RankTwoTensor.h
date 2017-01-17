@@ -130,20 +130,20 @@ public:
    * _vals[i][j] = R_ij * R_jl * _vals[k][l]
    * @param R rotation matrix as a RealTensorValue
    */
-  void rotate(RealTensorValue & R);
+  void rotate(const RealTensorValue & R);
 
   /**
    * rotates the tensor data given a rank two tensor rotation tensor
    * _vals[i][j] = R_ij * R_jl * _vals[k][l]
    * @param R rotation matrix as a RankTwoTensor
    */
-  void rotate(RankTwoTensor & R);
+  void rotate(const RankTwoTensor & R);
 
   /**
    * rotates the tensor data anticlockwise around the z-axis
    * @param a angle in radians
    */
-  RankTwoTensor rotateXyPlane(const Real a);
+  RankTwoTensor rotateXyPlane(Real a);
 
   /**
    * Returns a matrix that is the transpose of the matrix this
