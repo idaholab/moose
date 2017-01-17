@@ -17,9 +17,10 @@ FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-# dependency on tensor_mechanics and fluid_properties
+# dependency on tensor_mechanics and fluid_properties and chemical_reactions
 TENSOR_MECHANICS := yes
 FLUID_PROPERTIES := yes
+CHEMICAL_REACTIONS := yes
 SKIP_LOADER      := yes
 include $(MODULE_DIR)/modules.mk
 

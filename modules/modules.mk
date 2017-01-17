@@ -31,6 +31,8 @@ endif
 ifeq ($(POROUS_FLOW),yes)
         TENSOR_MECHANICS          := yes
         FLUID_PROPERTIES          := yes
+        CHEMICAL_REACTIONS        := yes
+
 endif
 
 ifeq ($(NAVIER_STOKES),yes)
@@ -164,7 +166,7 @@ ifeq ($(POROUS_FLOW),yes)
   APPLICATION_NAME   := porous_flow
 
   #Dependency on tensor_mechanics and fluid_properties
-  DEPEND_MODULES     := tensor_mechanics fluid_properties
+  DEPEND_MODULES     := tensor_mechanics fluid_properties chemical_reactions
   SUFFIX             := pflow
   include $(FRAMEWORK_DIR)/app.mk
 endif

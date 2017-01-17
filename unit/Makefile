@@ -25,12 +25,12 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
-SOLID_MECHANICS   := yes
-TENSOR_MECHANICS  := yes
-PHASE_FIELD       := yes
-XFEM              := yes
-POROUS_FLOW       := yes
-FLUID_PROPERTIES  := yes
+SOLID_MECHANICS    := yes
+TENSOR_MECHANICS   := yes
+PHASE_FIELD        := yes
+XFEM               := yes
+POROUS_FLOW        := yes
+FLUID_PROPERTIES   := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
