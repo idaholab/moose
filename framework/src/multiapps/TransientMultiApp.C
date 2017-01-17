@@ -210,7 +210,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         bool local_first = _first;
 
         // Now do all of the solves we need
-        while (!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time)
+        while (!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time || !ex->lastSolveConverged())
         {
           if (local_first != true)
             ex->incrementStepOrReject();
