@@ -1,10 +1,10 @@
 #!/bin/bash
 
 function printusage {
-    echo "Usage:    newapp.sh <type> <AppName>"
+    echo "Usage:    newmoose.sh <type> <AppName>"
     echo ""
     echo "    <type> must be either "app" or "module"."
-    echo "    <AppName> should be given in CapCase format."
+    echo "    <AppName> should be given in CamelCase format."
 }
 
 if [[ "$1" == "-h" || $# != 2 ]]; then
@@ -61,9 +61,9 @@ mv "$dir/include/base/${srcname}App.h" "$dir/include/base/${dstname}App.h"
 chmod a+x "$dir/run_tests"
 
 # remove unnecessary files
-rm -f "$dir/Makefile.*"
-rm -f "$dir/run_tests.*"
-rm -f "$dir/src/base/StorkApp.C.*"
+rm -f $dir/Makefile.*
+rm -f $dir/run_tests.*
+rm -f $dir/src/base/StorkApp.C.*
 
 if [[ "$kind" == "module" ]]; then
     rm -f "$dir/include/base/${dstname}App.h"
@@ -81,7 +81,7 @@ if [[ "$kind" == "app" ]]; then
     echo "    1. log in to your account"
     echo "    2. Create a new repository named $dstname"
     echo "    3. in this terminal run the following commands:"
-    echo "         cd $dstname"
+    echo "         cd $dir"
     echo "         git remote add origin https://github.com/YourGitHubUserName/$dstname"
     echo '         git commit -m "initial commit"'
     echo "         git push -u origin master"
