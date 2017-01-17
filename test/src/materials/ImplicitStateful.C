@@ -35,6 +35,12 @@ ImplicitStateful::ImplicitStateful(const InputParameters & parameters) :
 }
 
 void
+ImplicitStateful::initQpStatefulProperties()
+{
+  _prop[_qp] = 0;
+}
+
+void
 ImplicitStateful::computeQpProperties()
 {
   if (_use_older)

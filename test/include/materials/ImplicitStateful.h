@@ -31,7 +31,8 @@ public:
   ImplicitStateful(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
 private:
   bool _add_time;
