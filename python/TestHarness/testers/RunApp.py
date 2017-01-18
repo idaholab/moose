@@ -139,7 +139,7 @@ class RunApp(Tester):
       default_ncpus = options.parallel
 
     if specs['redirect_output'] and ncpus > 1:
-      specs['cli_args'].append('--redirect-output ' + self.name())
+      specs['cli_args'].append('--keep-cout --redirect-output ' + self.name())
 
     caveats = []
     if nthreads > options.nthreads:
