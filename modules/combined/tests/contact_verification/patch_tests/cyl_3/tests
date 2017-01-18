@@ -60,6 +60,8 @@
 
     # This test is unstable on PETSc 3.7.4 with 64bit indices enabled.
     dof_id_bytes = 4
+    # This test is fails reliably on INTEL compilers with PETSc 3.7.4 too.
+    skip = 'Reevaluate under PETSc 3.7.4'
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
