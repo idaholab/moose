@@ -40,9 +40,9 @@ Page header including the "sidebar" navigation.
       <li>
         <a class="github-mark-label" href="{{repo_url}}">
           {% if 'gitlab' in repo_url %}
-            <img class="github-mark" src={{current.mediapath('docs/media/gitlab-logo.png')}}>GitLab
+            <img class="github-mark" src={{current.relpath('media/gitlab-logo.png')}}>GitLab
           {% else %}
-            <img class="github-mark" src={{current.mediapath('docs/media/github-mark-light.png')}}>GitHub
+            <img class="github-mark" src={{current.relpath('media/github-mark-light.png')}}>GitHub
           {% endif %}
         </a>
       </li>

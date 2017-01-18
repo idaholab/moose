@@ -1,6 +1,6 @@
 # CentOS
 
-{!docs/content/getting_started/installation/minimum_requirements.md!}
+{!docs/content/getting_started/minimum_requirements.md!}
 
 ---
 ## Pre-Reqs

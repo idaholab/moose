@@ -1,3 +1,4 @@
+
 import os
 import re
 import logging
@@ -272,18 +273,18 @@ class moose_bib_a(elements.a):
   def convert(self, tag, content):
     return tag.attrs['data-moose-cite']
 
-class moose_carousel(elements.BlockElement):
+class moose_slider(elements.BlockElement):
   """
   Produces error for unsupported syntax for PDF creation.
   """
   name = 'div'
   attrs = ['class']
   def test(self, tag):
-    return super(moose_carousel, self).test(tag) and 'carousel' in tag.attrs['class']
+    return super(moose_slider, self).test(tag) and 'slider' in tag.attrs['class']
 
   def convert(self, tag, content):
     log.warning("!slideshow markdown is not currently supported for latex/pdf output.")
-    return '\\admonition[error-title][error]{ERROR: Un-supported Markdown!}{MOOSE Carousels are not currently supported for pdf output.}'
+    return '\\admonition[error-title][error]{ERROR: Un-supported Markdown!}{MOOSE Slider is not currently supported for pdf output.}'
   def preamble(self):
     return admonition_preamble()
 

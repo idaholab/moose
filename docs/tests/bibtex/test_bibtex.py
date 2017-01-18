@@ -16,10 +16,8 @@ class TestBibtexExtension(MarkdownTestCase):
     """
 
     html = super(TestBibtexExtension, self).readGold(name)
-    repl = 'data-moose-bibfiles="[u\'{}\']"'.format(os.path.abspath(os.path.join(os.getcwd(), '..', '..', 'bib', 'moose.bib')))
-    html[0] = re.sub(r'data-moose-bibfiles=\"\[.*?\]\"', repl, html[0])
+    html[0] = html[0].replace('<<CWD>>', os.path.abspath(os.path.join(os.getcwd(), '..')))
     return html
-
 
   def testCite(self):
     md = r'\cite{testkey}\n\bibliography{docs/bib/moose.bib}'

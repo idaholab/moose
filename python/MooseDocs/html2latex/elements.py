@@ -143,6 +143,16 @@ class ul(BlockElement):
   def convert(self, tag, content):
     return '\\begin{itemize}%s\\end{itemize}' % content
 
+class inline_equation(BlockElement):
+  name = 'script'
+  attrs = ['type']
+
+  def test(self, tag):
+    tf = super(inline_equation, self).test(tag)
+    return tf and (tag['type'] == u'math/tex')
+  def convert(self, tag, content):
+    return '$%s$' % content
+
 class equation(BlockElement):
   name = 'script'
   attrs = ['type']
@@ -152,7 +162,7 @@ class equation(BlockElement):
     return tf and (tag['type'] == u'math/tex; mode=display')
 
   def convert(self, tag, content):
-    return '\\begin{equation}%s\\end{equation}' % content
+    return content
 
 class hr(BlockElement):
   name = 'hr'

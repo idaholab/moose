@@ -17,11 +17,12 @@ def test(pattern=None, **kwargs):
   """
   if not os.path.exists('tests'):
       print 'No {} directory located.'.format('tests')
-      return 0
   else:
       os.chdir('tests')
       loader = unittest.TestLoader()
       suite = loader.discover(os.getcwd(), pattern)
       runner = unittest.TextTestRunner(verbosity=2)
       result = runner.run(suite)
-      return result.wasSuccessful()
+      if not result.wasSuccessful():
+          return 1
+  return 0
