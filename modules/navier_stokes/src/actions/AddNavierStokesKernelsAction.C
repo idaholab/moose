@@ -16,6 +16,7 @@ template<>
 InputParameters validParams<AddNavierStokesKernelsAction>()
 {
   InputParameters params = validParams<NSAction>();
+  params.addClassDescription("This class allows us to have a section of the input file like the following which automatically adds Kernels and AuxKernels for all the required nonlinear and auxiliary variables.");
   params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
   return params;
 }

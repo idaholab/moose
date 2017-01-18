@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<NSGravityPower>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("This class computes the momentum contributed by gravity.");
   params.addRequiredCoupledVar("momentum", "");
   params.addRequiredParam<Real>("acceleration", "The body force vector component.");
   return params;

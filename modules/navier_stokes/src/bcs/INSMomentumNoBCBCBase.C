@@ -13,6 +13,7 @@ InputParameters validParams<INSMomentumNoBCBCBase>()
 {
   InputParameters params = validParams<IntegratedBC>();
 
+  params.addClassDescription("Base class for the 'No BC' boundary condition.");
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D

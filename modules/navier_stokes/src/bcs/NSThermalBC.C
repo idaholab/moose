@@ -16,6 +16,7 @@ template<>
 InputParameters validParams<NSThermalBC>()
 {
   InputParameters params = validParams<NodalBC>();
+  params.addClassDescription("NS thermal BC.");
   params.addRequiredCoupledVar(NS::density, "density");
   params.addRequiredParam<Real>("initial", "Initial temperature");
   params.addRequiredParam<Real>("final", "Final temperature");

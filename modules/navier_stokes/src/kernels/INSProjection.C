@@ -13,6 +13,7 @@ InputParameters validParams<INSProjection>()
 {
   InputParameters params = validParams<Kernel>();
 
+  params.addClassDescription("This class computes the 'projection' part of the 'split' method for solving incompressible Navier-Stokes.");
   // Coupled variables
   params.addRequiredCoupledVar("a1", "x-acceleration");
   params.addCoupledVar("a2", "y-acceleration"); // only required in 2D and 3D

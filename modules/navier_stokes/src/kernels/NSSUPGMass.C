@@ -12,6 +12,7 @@ validParams<NSSUPGMass>()
 {
   // Initialize the params object from the base class
   InputParameters params = validParams<NSSUPGBase>();
+  params.addClassDescription("Compute residual and Jacobian terms form the SUPG terms in the mass equation.");
   return params;
 }
 

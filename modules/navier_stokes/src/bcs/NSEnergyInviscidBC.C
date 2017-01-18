@@ -16,6 +16,7 @@ template<>
 InputParameters validParams<NSEnergyInviscidBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
+  params.addClassDescription("This class corresponds to the inviscid part of the 'natural' boundary condition for the energy equation.");
   params.addRequiredCoupledVar(NS::temperature, "temperature");
   return params;
 }

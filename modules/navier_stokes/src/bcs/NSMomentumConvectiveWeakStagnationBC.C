@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<NSMomentumConvectiveWeakStagnationBC>()
 {
   InputParameters params = validParams<NSWeakStagnationBaseBC>();
+  params.addClassDescription("The convective part (sans pressure term) of the momentum equation boundary integral evaluated at specified stagnation temperature, stagnation pressure, and flow direction values.");
   params.addRequiredParam<unsigned>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
   return params;
 }

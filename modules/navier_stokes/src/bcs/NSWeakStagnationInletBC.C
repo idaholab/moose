@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<NSWeakStagnationInletBC>()
 {
   InputParameters params = validParams<MooseObject>();
+  params.addClassDescription("This class facilitates adding weak stagnation inlet BCs via an Action by setting up the required parameters.");
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
   params.addRequiredParam<Real>("stagnation_pressure", "The specifed stagnation pressure");
   params.addRequiredParam<Real>("stagnation_temperature", "The specifed stagnation temperature");

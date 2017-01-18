@@ -13,6 +13,7 @@ InputParameters validParams<INSChorinCorrector>()
 {
   InputParameters params = validParams<Kernel>();
 
+  params.addClassDescription("This class computes the 'Chorin' Corrector equation in fully-discrete (both time and space) form.");
   // Coupled variables
   params.addRequiredCoupledVar("u_star", "star x-velocity");
   params.addCoupledVar("v_star", "star y-velocity"); // only required in 2D and 3D

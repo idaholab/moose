@@ -11,6 +11,7 @@ InputParameters
 validParams<NSMassInviscidFlux>()
 {
   InputParameters params = validParams<NSKernel>();
+  params.addClassDescription("This class computes the inviscid flux in the mass equation.");
   return params;
 }
 

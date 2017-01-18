@@ -16,6 +16,7 @@ template<>
 InputParameters validParams<NSInitialCondition>()
 {
   InputParameters params = validParams<InitialCondition>();
+  params.addClassDescription("NSInitialCondition sets intial constant values for all variables.");
   params.addRequiredParam<Real>("initial_pressure", "The initial pressure, assumed constant everywhere");
   params.addRequiredParam<Real>("initial_temperature", "The initial temperature, assumed constant everywhere");
   params.addRequiredParam<RealVectorValue>("initial_velocity", "The initial velocity, assumed constant everywhere");

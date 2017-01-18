@@ -24,6 +24,7 @@ InputParameters validParams<AddNavierStokesICsAction>()
 {
   InputParameters params = validParams<NSAction>();
 
+  params.addClassDescription("This class allows us to have a section of the input file like the following which automatically adds initial conditions for all the required nonlinear and auxiliary variables.");
   params.addRequiredParam<Real>("initial_pressure", "The initial pressure, assumed constant everywhere");
   params.addRequiredParam<Real>("initial_temperature", "The initial temperature, assumed constant everywhere");
   params.addRequiredParam<RealVectorValue>("initial_velocity", "The initial velocity, assumed constant everywhere");

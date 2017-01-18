@@ -16,6 +16,7 @@ template<>
 InputParameters validParams<NSSUPGBase>()
 {
   InputParameters params = validParams<NSKernel>();
+  params.addClassDescription("This class acts as a base class for stabilization kernels.");
   params.addRequiredCoupledVar(NS::temperature, "temperature");
   params.addRequiredCoupledVar(NS::enthalpy, "total enthalpy");
   return params;

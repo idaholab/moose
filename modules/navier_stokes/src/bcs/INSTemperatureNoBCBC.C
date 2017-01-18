@@ -11,6 +11,7 @@ InputParameters validParams<INSTemperatureNoBCBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
 
+  params.addClassDescription("This class implements the 'No BC' boundary condition discussed by Griffiths, Papanastiou, and others.");
   // Required parameters
   params.addRequiredParam<Real>("k", "thermal conductivity");
 

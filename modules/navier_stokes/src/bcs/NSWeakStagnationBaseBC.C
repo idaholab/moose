@@ -14,6 +14,7 @@ template<>
 InputParameters validParams<NSWeakStagnationBaseBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
+  params.addClassDescription("This is the base class for 'weakly-imposed' stagnation boundary conditions.");
   params.addRequiredParam<Real>("stagnation_pressure", "The specifed stagnation pressure");
   params.addRequiredParam<Real>("stagnation_temperature", "The specifed stagnation temperature");
   params.addRequiredParam<Real>("sx", "x-component of specifed flow direction");

@@ -19,6 +19,7 @@ InputParameters validParams<NSImposedVelocityDirectionBC>()
   // Initialize the params object from the base class
   InputParameters params = validParams<NodalBC>();
 
+  params.addClassDescription("This class imposes a velocity direction component as a Dirichlet condition on the appropriate momentum equation.");
   // Coupled variables
   params.addRequiredCoupledVar(NS::density, "density");
   params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");

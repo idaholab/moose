@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<INSMomentumTractionForm>()
 {
   InputParameters params = validParams<INSMomentumBase>();
+  params.addClassDescription("This class computes momentum equation residual and Jacobian viscous contributions for the 'traction' form of the governing equations.");
   return params;
 }
 

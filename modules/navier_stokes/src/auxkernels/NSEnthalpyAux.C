@@ -14,6 +14,7 @@ InputParameters validParams<NSEnthalpyAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
+  params.addClassDescription("Nodal auxiliary variable, for computing enthalpy at the nodes.");
   // Mark variables as required
   params.addRequiredCoupledVar(NS::density, "density");
   params.addRequiredCoupledVar(NS::total_energy, "total energy");

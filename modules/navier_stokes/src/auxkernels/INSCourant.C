@@ -12,6 +12,7 @@ InputParameters validParams<INSCourant>()
 {
   InputParameters params = validParams<AuxKernel>();
 
+  params.addClassDescription("Computes h_min / |u|.");
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D

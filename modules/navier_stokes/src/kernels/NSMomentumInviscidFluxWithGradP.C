@@ -14,6 +14,7 @@ InputParameters
 validParams<NSMomentumInviscidFluxWithGradP>()
 {
   InputParameters params = validParams<NSKernel>();
+  params.addClassDescription("This class computes the inviscid flux with pressure gradient in the momentum equation.");
   params.addRequiredCoupledVar(NS::pressure, "pressure");
   params.addRequiredParam<unsigned int>("component", "");
   return params;

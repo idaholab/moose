@@ -16,6 +16,7 @@ template<>
 InputParameters validParams<NSStagnationTemperatureBC>()
 {
   InputParameters params = validParams<NSStagnationBC>();
+  params.addClassDescription("This Dirichlet condition imposes the condition T_0 = T_0_desired.");
   params.addRequiredCoupledVar(NS::temperature, "temperature");
   params.addRequiredParam<Real>("desired_stagnation_temperature", "");
   return params;

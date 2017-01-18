@@ -11,6 +11,7 @@ InputParameters
 validParams<NSMomentumInviscidSpecifiedPressureBC>()
 {
   InputParameters params = validParams<NSMomentumInviscidBC>();
+  params.addClassDescription("Momentum equation boundary condition in which pressure is specified (given) and the value of the convective part is allowed to vary (is computed implicitly).");
   params.addRequiredParam<Real>("specified_pressure", "The specified pressure for this boundary");
   return params;
 }
