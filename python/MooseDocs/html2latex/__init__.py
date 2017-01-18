@@ -80,7 +80,7 @@ def generate_pdf(tex_file, output):
   """
 
   # Working directory
-  cwd = os.path.dirname(tex_file)
+  cwd = os.path.abspath(os.path.dirname(tex_file))
 
   # Call pdflatex
   local_file = os.path.basename(tex_file)
