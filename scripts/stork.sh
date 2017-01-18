@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function printusage {
-    echo "Usage:    newmoose.sh <type> <AppName>"
+    echo "Usage:    stork.sh <type> <AppName>"
     echo ""
     echo "    Creates a new blank MOOSE app in the current working directory."
     echo "    <type> must be either "app" or "module"."
