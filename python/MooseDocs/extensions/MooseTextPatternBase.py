@@ -92,6 +92,6 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
     code = etree.SubElement(pre, 'code')
     if settings['language']:
       code.set('class', settings['language'])
-    code.text = content.strip('\n')
+    code.text = self.markdown.htmlStash.store(content.strip('\n'), safe=True)
 
     return el
