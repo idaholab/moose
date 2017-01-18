@@ -33,6 +33,14 @@ if [[ -z $MOOSE_DIR ]]; then
 fi
 if [[ "$kind" == "module" ]]; then
     dir="${MOOSE_DIR}/modules/$dir"
+    if [[ ! -w "${MOOSE_DIR}/modules" ]] ; then
+        echo "error: cannot create module without write permissions to $dir" ;
+        exit 1
+    fi
+fi
+if [[ ! -f "$MOOSE_DIR/stork/include/base/StorkApp.h" ]]; then
+    echo "error: cannot find usable MOOSE directory"
+    exit 1
 fi
 
 absdir=$(echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")")
@@ -47,7 +55,7 @@ if [[ -d "$dir" ]]; then
     exit 1
 fi
 cp -R "$MOOSE_DIR/stork" "$dir"
-find $dir | grep '/[.]' | xargs rm -rf # remove hidden files (e.g. vim swp files)
+find $dir | grep '/[.]' | xargs rm -f # remove hidden files (e.g. vim swp files)
 
 # rename app name within files
 function recursiveRename {
