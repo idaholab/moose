@@ -154,7 +154,7 @@ class RunParallel:
       # Obtain path and append processor id to redirect_output filename
       file_path = os.path.join(tester.specs['test_dir'], tester.name() + '.processor.{}'.format(processor_id))
       with open(file_path, 'r') as f:
-        file_output += self.readOutput(f)
+        file_output += "#"*80 + "\nOutput from processor " + str(processor_id) + "\n" + "#"*80 + "\n" + self.readOutput(f)
     return file_output
 
   ## Return control the the test harness by finalizing the test output and calling the callback
