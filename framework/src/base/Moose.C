@@ -1195,3 +1195,5 @@ bool _deprecated_is_error = false;
 bool _throw_on_error = false;
 
 } // namespace Moose
+
+OStreamProxy & _console = Moose::out;
