@@ -4284,10 +4284,6 @@ FEProblemBase::checkDependMaterialsHelper(const std::map<SubdomainID, std::vecto
       // See if any of the active materials supply this property
       for (const auto & mat2 : it.second)
       {
-        // Don't check THIS material for a coupled property
-        if (mat1 == mat2)
-          continue;
-
         const std::set<std::string> & supplied_props = mat2->Material::getSuppliedItems();
         block_supplied_props.insert(supplied_props.begin(), supplied_props.end());
       }
