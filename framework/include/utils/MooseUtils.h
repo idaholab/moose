@@ -248,6 +248,23 @@ namespace MooseUtils
    * @param prefix The prefix to use for indenting
    * @param message The message that will be indented
    * @param color The color to apply to the prefix (default CYAN)
+   *
+   * Takes a message like the following and indents it with another color code (see below)
+   *
+   * Input messsage:
+   * COLOR_YELLOW
+   * *** Warning ***
+   * Something bad has happened and we want to draw attention to it with color
+   * COLOR_DEFAULT
+   *
+   * Output message:
+   * COLOR_CYAN sub_app: COLOR_YELLOW
+   * COLOR_CYAN sub_app: COLOR_YELLOW *** Warning ***
+   * COLOR_CYAN sub_app: COLOR_YELLOW Something bad has happened and we want to draw attention to it with color
+   * COLOR_DEFAULT
+   *
+   * Also handles single line color codes
+   * COLOR_CYAN sub_app: 0 Nonline |R| = COLOR_GREEN 1.0e-10 COLOR_DEFAULT
    */
   void indentMessage(const std::string & prefix, std::string & message, const char* color = COLOR_CYAN);
 

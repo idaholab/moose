@@ -42,10 +42,10 @@
   {                                                                                 \
     std::ostringstream _error_oss_;                                                 \
     _error_oss_ << "\n\n"                                                           \
-                << (Moose::_color_console ? XTERM_RED : "")                         \
+                << COLOR_RED                                                        \
                 << "\n\n*** ERROR ***\n"                                            \
                 << msg                                                              \
-                << (Moose::_color_console ? XTERM_DEFAULT : "")                     \
+                << COLOR_DEFAULT                                                    \
                 << "\n\n";                                                          \
     if (Moose::_throw_on_error)                                                     \
       throw std::runtime_error(_error_oss_.str());                                  \
@@ -82,12 +82,12 @@
     {                                                                               \
       std::ostringstream _assert_oss_;                                              \
       _assert_oss_                                                                  \
-        << (Moose::_color_console ? XTERM_RED : "")                                 \
+        << COLOR_RED                                                                \
         << "\n\nAssertion `" #asserted "' failed\n"                                 \
         << msg                                                                      \
         << "\nat "                                                                  \
         << __FILE__ << ", line " << __LINE__                                        \
-        << (Moose::_color_console ? XTERM_DEFAULT : "")                             \
+        << COLOR_DEFAULT                                                            \
         << std::endl;                                                               \
       if (Moose::_throw_on_error)                                                   \
         throw std::runtime_error(_assert_oss_.str());                               \
@@ -105,6 +105,18 @@
   } while (0)
 #endif
 
+/**
+ * MooseWarning(), mooseInfo(), and mooseDeprecated() all print to _console instead of one of the
+ * standard or wrapped streams directly. _console is defined as a true Global variable in Moose.h
+ * so it's available anywhere these macros can be used. However, most of the time the macros are
+ * called from a MooseObject-derived object where MooseObject::_console is available in a more
+ * local scope. The one place where we've found these macros can break down is using them in a
+ * static member function in a MooseObject derived class. In that case, the scope lookup finds
+ * the MooseObject::_console object which is _not_ static instead of falling back to the global
+ * version. This will cause a compile warning in that instance. The work-around for that rare
+ * case is to print to the stream directly (not recommended), or make the method a const instance
+ * method instead.
+ */
 #define mooseWarning(msg)                                                           \
   do                                                                                \
   {                                                                                 \
@@ -115,16 +127,16 @@
       std::ostringstream _warn_oss_;                                                \
                                                                                     \
       _warn_oss_                                                                    \
-        << (Moose::_color_console ? XTERM_YELLOW : "")                              \
+        << COLOR_YELLOW                                                             \
         << "\n\n*** Warning ***\n"                                                  \
         << msg                                                                      \
         << "\nat " << __FILE__ << ", line " << __LINE__                             \
-        << (Moose::_color_console ? XTERM_DEFAULT : "")                             \
+        << COLOR_DEFAULT                                                            \
         << "\n\n";                                                                  \
       if (Moose::_throw_on_error)                                                   \
         throw std::runtime_error(_warn_oss_.str());                                 \
       else                                                                          \
-        Moose::err << _warn_oss_.str() << std::flush;                               \
+        _console << _warn_oss_.str() << std::flush;                                 \
     }                                                                               \
   } while (0)
 
@@ -135,12 +147,12 @@
     {                                                                               \
       mooseDoOnce(                                                                  \
         {                                                                           \
-          Moose::out                                                                \
-            << (Moose::_color_console ? XTERM_CYAN : "")                            \
+          _console                                                                  \
+            << COLOR_CYAN                                                           \
             << "\n\n*** Info ***\n"                                                 \
             << msg                                                                  \
             << "\nat " << __FILE__ << ", line " << __LINE__                         \
-            << (Moose::_color_console ? XTERM_DEFAULT : "")                         \
+            << COLOR_DEFAULT                                                        \
             << "\n" << std::endl;                                                   \
         }                                                                           \
       );                                                                            \
@@ -153,8 +165,8 @@
       mooseError("\n\nDeprecated code:\n" << msg << '\n');                                                  \
     else                                                                                                    \
       mooseDoOnce(                                                                                          \
-        Moose::out                                                                                          \
-          << (Moose::_color_console ? XTERM_YELLOW : "")                                                    \
+        _console                                                                                            \
+          << COLOR_YELLOW                                                                                   \
           << "*** Warning, This code is deprecated, and likely to be removed in future library versions!\n" \
           << msg << '\n'                                                                                    \
           << __FILE__ << ", line " << __LINE__ << ", compiled "                                             \
@@ -163,7 +175,7 @@
             print_trace(Moose::out);                                                                        \
           else                                                                                              \
             libMesh::write_traceout();                                                                      \
-          Moose::out << (Moose::_color_console ? XTERM_DEFAULT : "") << std::endl;                          \
+          Moose::out << COLOR_DEFAULT << std::endl;                                                         \
       );                                                                                                    \
    } while (0)
 
