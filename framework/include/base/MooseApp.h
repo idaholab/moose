@@ -465,6 +465,10 @@ public:
   void setRecover(const bool & value);
   ///@}
 
+  /// Returns whether the Application is running in check input mode
+  bool checkInput() const { return _check_input; }
+
+protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
    */
