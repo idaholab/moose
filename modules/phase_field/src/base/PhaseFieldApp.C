@@ -201,6 +201,7 @@
 /*
  * User Objects
  */
+#include "CoarseningIntegralTracker.h"
 #include "ComputeExternalGrainForceAndTorque.h"
 #include "ComputeGrainCenterUserObject.h"
 #include "ComputeGrainForceAndTorque.h"
@@ -460,6 +461,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(PFCRFFEnergyDensity);
   registerAux(TotalFreeEnergy);
 
+  registerUserObject(CoarseningIntegralTracker);
   registerUserObject(ComputeExternalGrainForceAndTorque);
   registerUserObject(ComputeGrainForceAndTorque);
   registerUserObject(ConservedMaskedNormalNoise);
