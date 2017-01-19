@@ -59,7 +59,7 @@ public:
   virtual std::vector<Real> getGhostCellValue(dof_id_type iside,
                                               unsigned int ielem,
                                               const std::vector<Real> & uvec1,
-                                              const std::vector<Real> & dwave) const = 0;
+                                              const RealVectorValue & dwave) const = 0;
 };
 
 #endif // BCUSEROBJECT_H
