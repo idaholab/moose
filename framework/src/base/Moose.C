@@ -129,7 +129,7 @@
 // DG
 #include "DGDiffusion.h"
 #include "DGFunctionDiffusionDirichletBC.h"
-#include "DGAdvection.h"
+#include "DGConvection.h"
 
 // ics
 #include "ConstantIC.h"
@@ -706,7 +706,7 @@ registerObjects(Factory & factory)
   // DG
   registerDGKernel(DGDiffusion);
   registerBoundaryCondition(DGFunctionDiffusionDirichletBC);
-  registerDGKernel(DGAdvection);
+  registerDGKernel(DGConvection);
 
   // Constraints
   registerConstraint(TiedValueConstraint);

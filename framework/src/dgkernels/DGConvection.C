@@ -12,25 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "DGAdvection.h"
+#include "DGConvection.h"
 
 template<>
-InputParameters validParams<DGAdvection>()
+InputParameters validParams<DGConvection>()
 {
   InputParameters params = validParams<DGKernel>();
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
-  params.addClassDescription("DG upwinding for the advection");
+  params.addClassDescription("DG upwinding for the convection");
   return params;
 }
 
-DGAdvection::DGAdvection(const InputParameters & parameters) :
+DGConvection::DGConvection(const InputParameters & parameters) :
     DGKernel(parameters),
     _velocity(getParam<RealVectorValue>("velocity"))
 {
 }
 
 Real
-DGAdvection::computeQpResidual(Moose::DGResidualType type)
+DGConvection::computeQpResidual(Moose::DGResidualType type)
 {
   Real r = 0;
 
@@ -57,7 +57,7 @@ DGAdvection::computeQpResidual(Moose::DGResidualType type)
 }
 
 Real
-DGAdvection::computeQpJacobian(Moose::DGJacobianType type)
+DGConvection::computeQpJacobian(Moose::DGJacobianType type)
 {
   Real r = 0;
 

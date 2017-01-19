@@ -68,7 +68,7 @@
 
 [DGKernels]
   [./dg_advection_u]
-    type = DGAdvection
+    type = DGConvection
     variable = u
     velocity = '1 0 0'
     block = 0
@@ -81,7 +81,7 @@
     block = 0
   [../]
   [./dg_advection_v]
-    type = DGAdvection
+    type = DGConvection
     variable = v
     velocity = '1 0 0'
     block = 1
