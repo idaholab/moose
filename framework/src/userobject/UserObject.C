@@ -45,8 +45,8 @@ UserObject::UserObject(const InputParameters & parameters) :
     Restartable(parameters, "UserObjects"),
     MeshChangedInterface(parameters),
     ScalarCoupleable(this),
-    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
+    _subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _coord_sys(_assembly.coordSystem())
