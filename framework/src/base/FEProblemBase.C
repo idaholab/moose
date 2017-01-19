@@ -4377,8 +4377,7 @@ FEProblemBase::checkDependMaterialsHelper(const std::map<SubdomainID, std::vecto
           oss << '\n';
         }
 
-        oss << "\nThis will result in ambiguous material property calculations and lead to incorrect results.\n";
-        mooseWarning(oss.str());
+        mooseError(oss.str());
         break;
       }
     }
