@@ -28,6 +28,7 @@ class BasicExtension(Extension):
     translator.elements.add('ol', elements.ol())
     translator.elements.add('ul', elements.ul())
     translator.elements.add('hr', elements.hr())
+    translator.elements.add('inline_equation', elements.inline_equation())
     translator.elements.add('equation', elements.equation())
     translator.elements.add('table', elements.table())
     translator.elements.add('figure', elements.figure())

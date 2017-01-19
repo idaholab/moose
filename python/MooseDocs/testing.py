@@ -42,12 +42,12 @@ class MarkdownTestCase(unittest.TestCase):
 
   def readGold(self, name):
     """
-    Read and return the contents of the gold file.
+    Read gold file in current directory.
     """
     gold_name = os.path.join(os.path.dirname(name), 'gold', os.path.basename(name))
     self.assertTrue(os.path.exists(gold_name), "Failed to locate gold file: {}".format(gold_name))
     with open(gold_name) as fid:
-        gold = fid.read().encode('utf-8').splitlines()
+      gold = fid.read().encode('utf-8').splitlines()
     return gold
 
   def assertTextFile(self, name):

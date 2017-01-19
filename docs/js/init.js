@@ -25,7 +25,8 @@
 MathJax.Hub.Config({
   config: ["MMLorHTML.js"],
   jax: ["input/TeX", "output/HTML-CSS", "output/NativeMML"],
-  extensions: ["MathMenu.js", "MathZoom.js"]
+  extensions: ["MathMenu.js", "MathZoom.js"],
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
 });
 
 // Copy code button

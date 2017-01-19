@@ -9,11 +9,11 @@ log = logging.getLogger(__name__)
 
 import elements
 
+import MooseDocs
 from Translator import Translator
 from BasicExtension import BasicExtension
 from MooseExtension import MooseExtension
-
-import MooseDocs
+from MooseDocs.commands.MooseDocsMarkdownNode import MooseDocsMarkdownNode
 
 def generate_html(md_file, config_file):
   """
@@ -23,30 +23,17 @@ def generate_html(md_file, config_file):
     md_file[str]: The *.md file or text to convert.
     config_file[str]: The *.yml configuration file.
   """
-  # Load the config to extract MooseMarkdown settings
-  #TODO: Make this more robust
-  config = MooseDocs.yaml_load(config_file)
-  md_config = config['markdown_extensions'][-1]['MooseDocs.extensions.MooseMarkdown']
-  md_config['dot_ext'] = 'svg'
 
-  # Convert markdown
-  if os.path.isfile(md_file):
-      with open(md_file, 'r') as fid:
-          md = fid.read()
-  else:
-    md = md_file
+  # Load the YAML configuration file
+  config = MooseDocs.load_config(config_file)
 
-  # Extract Jinja2 blocks
-  settings = dict()
-  def sub(match):
-    settings[match.group(1).strip()] = eval(match.group(2))
-    return ''
-  md = re.sub(r'@\+\s*set\s+(.*?)=(.*?)\+@', sub, md)
+  # Create the markdown parser
+  extensions, extension_configs = MooseDocs.get_markdown_extensions(config)
+  parser = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
 
-  moose = MooseDocs.extensions.MooseMarkdown(**md_config)
-  parser = markdown.Markdown(extensions=[moose, 'markdown_include.include', 'admonition', 'mdx_math', 'toc', 'extra'])
+  # Read and parse the markdown
+  md, settings = MooseDocs.read_markdown(md_file)
   return parser.convert(md), settings
-
 
 def generate_latex(html, **kwargs):
   """
@@ -93,7 +80,7 @@ def generate_pdf(tex_file, output):
   """
 
   # Working directory
-  cwd = os.path.dirname(tex_file)
+  cwd = os.path.abspath(os.path.dirname(tex_file))
 
   # Call pdflatex
   local_file = os.path.basename(tex_file)

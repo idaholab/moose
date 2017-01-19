@@ -23,7 +23,9 @@ Inline math may be specified by enclosing the latex in single `$`: $y=a\cdot x +
 be enclosed in `$$`:
 
 $$
+\begin{equation}
 x=\frac{1+y}{1+2z^2}.
+\end{equation}
 $$
 
 ### Admonition

@@ -38,7 +38,7 @@ markdown_extensions:
                   - modules/heat_conduction/include
           locations:
               - framework:
-                  doxygen: http://mooseframework.com/docs/doxygen/moose/
+                  doxygen: http://mooseframework.org/docs/doxygen/moose/
                   paths:
                       - framework/src
                       - framework/include
