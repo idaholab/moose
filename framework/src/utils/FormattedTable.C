@@ -52,8 +52,31 @@ dataLoad(std::istream & stream, FormattedTable & table, void * context)
   loadHelper(stream, table._column_names, context);
 
   table._stream_open = false;
+  //table.close();
 
   loadHelper(stream, table._last_key, context);
+}
+
+void
+FormattedTable::close()
+{
+  if (!_stream_open)
+    return;
+  _output_file.flush();
+  _output_file.close();
+  _stream_open = false;
+  _output_file_name = "";
+}
+
+void
+FormattedTable::open(const std::string & file_name)
+{
+  if (!_stream_open && _output_file_name == file_name)
+    return;
+  close();
+  _output_file_name = file_name;
+  _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
+  _stream_open = true;
 }
 
 FormattedTable::FormattedTable() :
@@ -82,12 +105,7 @@ FormattedTable::FormattedTable(const FormattedTable & o) :
 
 FormattedTable::~FormattedTable()
 {
-  if (_stream_open)
-  {
-    _output_file.flush();
-    _output_file.close();
-    _stream_open = false;
-  }
+  close();
 }
 
 bool
@@ -148,18 +166,7 @@ FormattedTable::printNoDataRow(char intersect_char, char fill_char,
 void
 FormattedTable::printTable(const std::string & file_name)
 {
-  if (!_stream_open)
-  {
-    _output_file_name = file_name;
-    _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
-    _stream_open = true;
-  }
-  else if (file_name.compare(_output_file_name) != 0)
-  {
-    _output_file.close();
-    _output_file_name = file_name;
-    _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
-  }
+  open(file_name);
   printTable(_output_file);
 }
 
@@ -267,21 +274,8 @@ FormattedTable::printTablePiece(std::ostream & out, unsigned int last_n_entries,
 void
 FormattedTable::printCSV(const std::string & file_name, int interval, bool align)
 {
-  if (!_stream_open)
-  {
-    _output_file_name = file_name;
-    _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
-    _stream_open = true;
-  }
-  else if (file_name.compare(_output_file_name) != 0)
-  {
-    _output_file.close();
-    _output_file_name = file_name;
-    _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
-  }
-
+  open(file_name);
   _output_file.seekp(0, std::ios::beg);
-
 
   /* When the alignment option is set to true, the widths of the columns needs to be computed based on
    * longest of the column name of the data supplied. This is done here by creating a map of the
