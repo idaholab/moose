@@ -2497,7 +2497,8 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   const MooseObjectWarehouse<NodalUserObject> & nodal = _nodal_user_objects[group][type];
   const MooseObjectWarehouse<GeneralUserObject> & general = _general_user_objects[group][type];
 
-  if (!elemental.hasActiveObjects() &&
+  if (!_use_legacy_uo_aux_computation && // This makes me die a little bit inside...
+      !elemental.hasActiveObjects() &&
       !side.hasActiveObjects() &&
       !internal_side.hasActiveObjects() &&
       !nodal.hasActiveObjects() &&
