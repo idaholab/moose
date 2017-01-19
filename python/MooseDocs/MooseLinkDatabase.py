@@ -41,8 +41,8 @@ class MooseLinkDatabase(object):
                  value being a list of paths.
   """
 
-  INPUT_RE = re.compile(r'type\s*=\s*(?P<key>\w+)\b')
-  HEADER_RE = re.compile(r'public\s*(?P<key>\w+)\b')
+  INPUT_RE = re.compile(r'\btype\s*=\s*(?P<key>\w+)\b')
+  HEADER_RE = re.compile(r'\bpublic\s+(?P<key>\w+)\b')
 
   def __init__(self, repo=None, links=None, **kwargs):
     self._repo = repo
@@ -60,9 +60,8 @@ class MooseLinkDatabase(object):
             rel_name = MooseDocs.relpath(full_name)
             if filename.endswith('.i'):
               self.search(full_name, self.INPUT_RE, self.inputs[key])
-
             elif filename.endswith('.h'):
-              self.search(full_name, self.HEADER_RE, self.inputs[key])
+              self.search(full_name, self.HEADER_RE, self.children[key])
 
   def search(self, filename, regex, database):
     """
@@ -75,10 +74,8 @@ class MooseLinkDatabase(object):
     """
     match = False
     with open(filename, 'r') as fid:
-      match = re.search(regex, fid.read())
-
-    if match:
-      key = match.group('key')
-      if key not in database:
-        database[key] = []
-      database[key].append(Item(filename, self._repo))
+      for match in re.finditer(regex, fid.read()):
+        key = match.group('key')
+        if key not in database:
+          database[key] = []
+        database[key].append(Item(filename, self._repo))

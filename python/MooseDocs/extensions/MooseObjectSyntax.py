@@ -172,7 +172,6 @@ class MooseObjectSyntax(MooseSyntaxBase):
       parent[etree.Element]: The parent element the headers and lists are to be applied
       items[dict]: Dictionary of databases containing link information
     """
-
     has_items = False
     for k, db in items.iteritems():
       if self._name in db:
