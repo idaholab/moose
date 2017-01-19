@@ -12,20 +12,20 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DGADVECTION_H
-#define DGADVECTION_H
+#ifndef DGCONVECTION_H
+#define DGCONVECTION_H
 
 #include "DGKernel.h"
 
-class DGAdvection;
+class DGConvection;
 
 template<>
-InputParameters validParams<DGAdvection>();
+InputParameters validParams<DGConvection>();
 
-class DGAdvection : public DGKernel
+class DGConvection : public DGKernel
 {
 public:
-  DGAdvection(const InputParameters & parameters);
+  DGConvection(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type);
@@ -34,4 +34,4 @@ protected:
   RealVectorValue _velocity;
 };
 
-#endif //DGADVECTION_H
+#endif //DGCONVECTION_H
