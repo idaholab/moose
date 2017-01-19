@@ -10,7 +10,7 @@
     type = SubdomainBoundingBox
     bottom_left = '1.0 0 0'
     block_id = 1
-    top_right = '2.0 1.0 0'
+    top_right = '2.0 0 0'
   [../]
   [./interface]
     type = SideSetsBetweenSubdomains
