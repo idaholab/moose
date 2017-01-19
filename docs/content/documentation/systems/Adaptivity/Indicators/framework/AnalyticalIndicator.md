@@ -1,4 +1,4 @@
-<!-- MOOSE Object Documentation Stub: Remove this when content is added. -->
+<!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # AnalyticalIndicator
 !description /Adaptivity/Indicators/AnalyticalIndicator

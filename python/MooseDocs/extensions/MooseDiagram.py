@@ -13,7 +13,7 @@ class MooseDiagram(BlockProcessor, MooseCommonExtension):
   Extension to allow for dot diagrams.
   """
 
-  RE = re.compile(r'^(graph|dirgraph)(.*)')
+  RE = re.compile(r'^(graph|digraph)(.*)')
 
   def __init__(self, md, graphviz=None, ext='svg', **kwargs):
     MooseCommonExtension.__init__(self, **kwargs)

@@ -66,4 +66,3 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', disable_th
 
   # Start the server
   server.serve(root=config['site_dir'], host=host, port=port, restart_delay=0)
-  return 0 # error handled in MooseDocs.moosedocs

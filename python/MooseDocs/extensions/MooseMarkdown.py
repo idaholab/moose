@@ -118,10 +118,10 @@ class MooseMarkdown(markdown.Extension):
     system_list = MooseSystemList(markdown_instance=md, yaml=exe_yaml, syntax=self.syntax, **config)
     md.inlinePatterns.add('moose_system_list', system_list, '_begin')
 
-    md.inlinePatterns.add('moose_input_block', MooseInputBlock(markdown_instance=md, **config), '<image_link')
-    md.inlinePatterns.add('moose_cpp_method', MooseCppMethod(markdown_instance=md, **config), '<image_link')
-    md.inlinePatterns.add('moose_text', MooseTextFile(markdown_instance=md, **config), '<image_link')
-    md.inlinePatterns.add('moose_image', MooseImageFile(markdown_instance=md, **config), '<image_link')
+    md.inlinePatterns.add('moose_input_block', MooseInputBlock(markdown_instance=md, **config), '_begin')
+    md.inlinePatterns.add('moose_cpp_method', MooseCppMethod(markdown_instance=md, **config), '_begin')
+    md.inlinePatterns.add('moose_text', MooseTextFile(markdown_instance=md, **config), '_begin')
+    md.inlinePatterns.add('moose_image', MooseImageFile(markdown_instance=md, **config), '_begin')
     md.inlinePatterns.add('moose_build_status', MooseBuildStatus(markdown_instance=md, **config), '_begin')
     if config['package']:
       md.inlinePatterns.add('moose_package_parser', MoosePackageParser(markdown_instance=md, **config), '_end')
