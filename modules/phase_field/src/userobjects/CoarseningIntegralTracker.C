@@ -25,6 +25,7 @@ CoarseningIntegralTracker::CoarseningIntegralTracker(const InputParameters & par
     _v(coupledValue("v")),
     _pre_adaptivity_ran(false)
 {
+  _fe_problem.requestCacheMeshChanged();
 }
 
 void

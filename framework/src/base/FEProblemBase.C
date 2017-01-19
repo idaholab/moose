@@ -159,7 +159,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters) :
     _force_restart(getParam<bool>("force_restart")),
     _fail_next_linear_convergence_check(false),
     _currently_computing_jacobian(false),
-    _started_initial_setup(false)
+    _started_initial_setup(false),
+    _cache_mesh_changed(false)
 {
 
   _time = 0.0;
@@ -4033,7 +4034,7 @@ FEProblemBase::updateMeshXFEM()
 void
 FEProblemBase::meshChanged()
 {
-  if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
+  if (_cache_mesh_changed || _material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material properties
 
   // Clear these out because they corresponded to the old mesh

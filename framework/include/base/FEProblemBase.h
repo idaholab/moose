@@ -1074,6 +1074,9 @@ public:
    */
   void reportMooseObjectDependency(MooseObject * a, MooseObject * b);
 
+  /// force the changed element lists to be cached after adaptivity steps
+  void requestCacheMeshChanged() { _cache_mesh_changed = true; }
+
 protected:
 
   ///@{
@@ -1298,10 +1301,10 @@ protected:
   Moose::PetscSupport::PetscOptions _petsc_options;
 #endif //LIBMESH_HAVE_PETSC
 
-/**
- * Method for sorting the MooseVariables based on variable numbers
- */
-static bool sortMooseVariables(MooseVariable * a, MooseVariable * b) { return a->number() < b->number(); }
+  /**
+   * Method for sorting the MooseVariables based on variable numbers
+   */
+  static bool sortMooseVariables(MooseVariable * a, MooseVariable * b) { return a->number() < b->number(); }
 
 private:
   bool _error_on_jacobian_nonzero_reallocation;
@@ -1311,8 +1314,11 @@ private:
   /// Whether or not the system is currently computing the Jacobian matrix
   bool _currently_computing_jacobian;
 
-  /// At or beyond initialSteup stage
+  /// At or beyond initialSetup stage
   bool _started_initial_setup;
+
+  /// build lists of changed elements after refinement steps
+  bool _cache_mesh_changed;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;

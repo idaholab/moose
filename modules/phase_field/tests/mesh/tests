@@ -12,4 +12,10 @@
     cli_args = 'Mesh/elem_type=HEX27 Outputs/file_base=mortarperiodic_hex27'
     exodiff = 'mortarperiodic_hex27.e'
   [../]
+
+  [./coarseningintegral]
+    type = 'CSVDiff'
+    input = 'coarseningintegral.i'
+    csvdiff = 'coarseningintegral_out.csv'
+  [../]
 []
