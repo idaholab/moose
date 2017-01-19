@@ -50,6 +50,12 @@ class MarkdownTestCase(unittest.TestCase):
       gold = fid.read().encode('utf-8').splitlines()
     return gold
 
+  def convert(self, md):
+    """
+    Convenience function for converting markdown to html.
+    """
+    return self.parser.convert(md)
+
   def assertTextFile(self, name):
     """
     Assert method for comparing converted html (text) against the text in gold file.

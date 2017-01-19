@@ -67,4 +67,3 @@ def latex(config_file=None, output=None, input=None, **kwargs):
   # Create PDF
   if output.endswith('.pdf'):
     html2latex.generate_pdf(tex_file, output)
-  return 0 # error check in MooseDocs.moosedocs

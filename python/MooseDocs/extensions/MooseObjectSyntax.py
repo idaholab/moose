@@ -69,8 +69,6 @@ class MooseObjectSyntax(MooseSyntaxBase):
       el = self.inputfilesElement(node, settings)
     elif action == 'childobjects':
       el = self.childobjectsElement(node, settings)
-    elif action == 'subobjects':
-      el = self.subobjectsElement(node, settings)
     return el
 
   def descriptionElement(self, node, settings):
@@ -117,10 +115,15 @@ class MooseObjectSyntax(MooseSyntaxBase):
         tables[name] = MooseObjectParameterTable(display_type = settings['display'])
       tables[name].addParam(param)
 
-    el = self.applyElementSettings(etree.Element('div'), settings)
-    el.set('id', '#input-parameters')
-    el.set('class', 'section scrollspy')
-    if any(tables.values()):
+    # Produces a debug message if parameters are empty, but generally we just want to include the
+    # !parameters command, if parameters exist then a table is produce otherwise nothing happens. This
+    # will allow for parameters to be added and the table appear if it was empty.
+    if not any(tables.values()):
+      log.debug('Unable to locate parameters for {}'.format(node['name']))
+    else:
+      el = self.applyElementSettings(etree.Element('div'), settings)
+      el.set('id', '#input-parameters')
+      el.set('class', 'section scrollspy')
       title = etree.SubElement(el, 'h2')
       title.text = 'Input Parameters'
       for key, table in tables.iteritems():
@@ -128,9 +131,7 @@ class MooseObjectSyntax(MooseSyntaxBase):
           subtitle = etree.SubElement(el, 'h3')
           subtitle.text = '{} {}'.format(key, 'Parameters')
           el.append(table.html())
-
-    return el
-
+      return el
 
   def inputfilesElement(self, node, settings):
     """

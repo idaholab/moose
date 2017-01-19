@@ -148,4 +148,3 @@ def build(*args, **kwargs):
   The main build command.
   """
   build_site(*args, **kwargs)
-  return 0 # error checking handled by MooseDocs.moosedocs
