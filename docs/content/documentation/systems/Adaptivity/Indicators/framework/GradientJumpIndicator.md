@@ -1,4 +1,4 @@
-<!-- MOOSE Object Documentation Stub: Remove this when content is added. -->
+<!-- MOOSE Documentation Stub: Remove this when content is added. -->
 
 # GradientJumpIndicator
 !description /Adaptivity/Indicators/GradientJumpIndicator
