@@ -29,21 +29,17 @@ class MooseInputBlock(MooseTextPatternBase):
     # Read the file and create element
     if not os.path.exists(filename):
       el = self.createErrorElement("The input file was not located: {}".format(rel_filename))
-    elif not settings.has_key('block'):
+    elif settings['block'] is None:
       el = self.createErrorElement("Use of !input syntax while not providing a block=some_block. If you wish to include the entire file, use !text instead")
     else:
       parser = ParseGetPot(filename)
       node = parser.root_node.getNode(settings['block'])
 
       if node == None:
-        content = 'ERROR: Failed to find {} in {}.'.format(match.group(2), rel_filename)
+        el = self.createErrorElement('Failed to find {} in {}.'.format(settings['block'], rel_filename))
       else:
         content = node.createString()
-
-      if match.group(2):
-        label = match.group(2)
-      else:
-        label = rel_filename
-      el = self.createElement(label, content, filename, rel_filename, settings)
+        label = match.group(2) if match.group(2) else rel_filename
+        el = self.createElement(label, content, filename, rel_filename, settings)
 
     return el
