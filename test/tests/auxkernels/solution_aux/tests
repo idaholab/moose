@@ -107,6 +107,9 @@
     input = 'output_error.i'
     expect_err = "Failed to access the data for variable 'u' at point"
     prereq = 'build'
+    # This test throws an error from a threaded region. Rather than lock the error region,
+    # we'll just avoid running it with multiple threads.
+    max_threads = 1
   [../]
 
   [./aux_nonlinear_solution]
