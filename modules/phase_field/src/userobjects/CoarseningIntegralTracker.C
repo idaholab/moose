@@ -70,11 +70,16 @@ CoarseningIntegralTracker::meshChanged()
     _fe_problem.prepare(parent, 0);
     _fe_problem.reinitElem(parent, 0);
     Real parent_sum = 0.0;
+    Real parent_vol = 0.0;
     for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
+    {
+      parent_vol += _JxW[qp] * _coord[qp];
       parent_sum += _JxW[qp] * _coord[qp] * _v[qp];
+    }
 
     // store corrective term
-    _corrective_source.insert(std::make_pair(parent, child_sum - parent_sum));
+    if (parent_vol > 0.0)
+      _corrective_source.insert(std::make_pair(parent, (child_sum - parent_sum) / parent_vol));
   }
 
   _pre_adaptivity_ran = false;
@@ -88,7 +93,7 @@ CoarseningIntegralTracker::threadJoin(const UserObject & y)
 }
 
 Real
-CoarseningIntegralTracker::sourceValue(const Elem * elem)
+CoarseningIntegralTracker::sourceValue(const Elem * elem) const
 {
   auto val_it = _corrective_source.find(elem);
   if (val_it == _corrective_source.end())

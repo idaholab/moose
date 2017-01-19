@@ -36,6 +36,7 @@
 #include "CHSplitConcentration.h"
 #include "CHSplitFlux.h"
 #include "CHSplitVar.h"
+#include "CoarseningIntegralCompensation.h"
 #include "CoefCoupledTimeDerivative.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledAllenCahn.h"
@@ -323,6 +324,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHSplitConcentration);
   registerKernel(CHSplitFlux);
   registerKernel(CHSplitVar);
+  registerKernel(CoarseningIntegralCompensation);
   registerKernel(CoefCoupledTimeDerivative);
   registerKernel(ConservedLangevinNoise);
   registerKernel(CoupledAllenCahn);

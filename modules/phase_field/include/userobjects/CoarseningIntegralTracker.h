@@ -33,7 +33,7 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
   // obtain the corrective source term value
-  Real sourceValue(const Elem *);
+  Real sourceValue(const Elem *) const;
 
 protected:
   /// simulation mesh
