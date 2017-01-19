@@ -106,7 +106,7 @@ Material::initStatefulProperties(unsigned int n_points)
   // because owned props might have been promoted to stateful by calls to
   // getMaterialProperty[Old/Older] from other objects.  In these cases, this
   // object won't otherwise know that it owns stateful properties.
-  for (auto& prop : _supplied_props)
+  for (auto & prop : _supplied_props)
   {
     if (_material_data->getMaterialPropertyStorage().isStatefulProp(prop))
     {
