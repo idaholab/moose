@@ -151,9 +151,9 @@
 #include "RecomputeMaterial.h"
 #include "NewtonMaterial.h"
 #include "ThrowMaterial.h"
+#include "ProportionalToTime.h"
 
 #include "DGMatDiffusion.h"
-#include "DGAdvection.h"
 #include "DGMDDBC.h"
 #include "DGFunctionConvectionDirichletBC.h"
 #include "CoupledKernelGradBC.h"
@@ -392,7 +392,6 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // DG kernels
   registerDGKernel(DGMatDiffusion);
-  registerDGKernel(DGAdvection);
 
   // Interface kernels
   registerInterfaceKernel(InterfaceDiffusion);
@@ -453,6 +452,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(RecomputeMaterial);
   registerMaterial(NewtonMaterial);
   registerMaterial(ThrowMaterial);
+  registerMaterial(ProportionalToTime);
 
 
   registerScalarKernel(ExplicitODE);
