@@ -27,5 +27,11 @@
     abs_zero = 1e-4
     rel_err = 5e-5
   [../]
+  [./1d_block_restrictable]
+    type = 'Exodiff'
+    input = 'block_restrictable.i'
+    exodiff = 'block_restrictable_out.e'
+    abs_zero = 1e-4
+    rel_error = 5e-5
+  [../]
 []
-
