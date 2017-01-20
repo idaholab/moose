@@ -143,6 +143,14 @@ protected:
   /// The absolute minimum PPS table width
   static const unsigned short _min_pps_width;
 
+private:
+  /// Close the underlying output file stream if any. This is idempotent.
+  void close();
+
+  /// Open or switch the underlying file stream to point to file_name. This is
+  /// idempotent.
+  void open(const std::string & file_name);
+
   /// The optional output file stream
   std::string _output_file_name;
   std::ofstream _output_file;
@@ -153,8 +161,6 @@ protected:
 
   /// Whether or not to output the Time column
   bool _output_time;
-
-private:
 
   /// *.csv file delimiter, defaults to ","
   std::string _csv_delimiter;
