@@ -173,10 +173,6 @@ Console::Console(const InputParameters & parameters) :
        common_action->parameters().isParamSetByUser("print_perf_log")))
     mooseWarning("Performance logging cannot currently be controlled from a Multiapp, please set all performance options in the main input file");
 
-#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
-  params.addParam<bool>("libmesh_log", true, "Print the libMesh performance log, requires libMesh to be configured with --enable-perflog");
-#endif
-
   // Deprecate the setup perf log
   Moose::setup_perf_log.disable_logging();
 
