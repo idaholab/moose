@@ -41,7 +41,7 @@
 [DGKernels]
   [./dg_advection_u]
     implicit = false
-    type = DGAdvection
+    type = DGConvection
     variable = u
     velocity = '1 0 0'
   [../]
