@@ -54,8 +54,6 @@ public:
 
   /**
    * Declare the Real valued property named "name".
-   * This must be done _before_ a property of that name is tried
-   * to be retrieved using any of the getProperty function variants.
    * Calling any of the declareProperty
    * functions multiple times with the same property name is okay and
    * will result in a single identical reference returned every time.
@@ -65,16 +63,12 @@ public:
 
   /**
    * Declare the Real valued property prop_name.
-   * This must be done _before_ attempts to
-   * retrieved the property using getPropertyOld().
    */
   template<typename T>
   MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
 
   /**
    * Declare the Real valued property named prop_name.
-   * This must be done _before_ attempts to
-   * retrieved the property using getPropertyOlder().
    */
   template<typename T>
   MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
@@ -212,7 +206,7 @@ MaterialProperty<T> &
 MaterialData::declarePropertyOld(const std::string & prop_name)
 {
   // TODO: add mooseDeprecated("'declarePropertyOld' is deprecated an no longer necessary");
-  return declareHelper<T>(_props_old, prop_name, _storage.addPropertyOld(prop_name));
+  return getPropertyOld<T>(prop_name);
 }
 
 template<typename T>
@@ -220,7 +214,7 @@ MaterialProperty<T> &
 MaterialData::declarePropertyOlder(const std::string & prop_name)
 {
   // TODO: add mooseDeprecated("'declarePropertyOlder' is deprecated an no longer necessary");
-  return declareHelper<T>(_props_older, prop_name, _storage.addPropertyOlder(prop_name));
+  return getPropertyOlder<T>(prop_name);
 }
 
 template<typename T>
@@ -249,14 +243,14 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::getPropertyOld(const std::string & name)
 {
-  return declarePropertyOld<T>(name);
+  return declareHelper<T>(_props_old, name, _storage.addPropertyOld(name));
 }
 
 template<typename T>
 MaterialProperty<T> &
 MaterialData::getPropertyOlder(const std::string & name)
 {
-  return declarePropertyOlder<T>(name);
+  return declareHelper<T>(_props_older, name, _storage.addPropertyOlder(name));
 }
 
 #endif /* MATERIALDATA_H */

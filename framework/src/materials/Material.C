@@ -120,7 +120,7 @@ Material::initStatefulProperties(unsigned int n_points)
 void
 Material::initQpStatefulProperties()
 {
-  mooseDoOnce(mooseError(std::string("Material \"") + name() + "\" provides one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class."));
+  mooseError(std::string("Material \"") + name() + "\" provides one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class.");
 }
 
 void
