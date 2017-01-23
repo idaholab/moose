@@ -88,6 +88,9 @@ ElementLoopUserObject::execute()
       _old_subdomain = _subdomain;
       _subdomain = cur_subdomain;
 
+      if (!this->hasBlocks(_subdomain))
+        break;
+
       if (_subdomain != _old_subdomain)
         subdomainChanged();
 
@@ -103,7 +106,8 @@ ElementLoopUserObject::execute()
 
         if (elem->neighbor(side) != NULL)
         {
-          onInternalSide(elem, side);
+          if (this->hasBlocks(elem->neighbor(side)->subdomain_id()))
+            onInternalSide(elem, side);
           if (boundary_ids.size() > 0)
             for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
               onInterface(elem, side, *it);
@@ -139,11 +143,8 @@ ElementLoopUserObject::subdomainChanged()
 void
 ElementLoopUserObject::onElement(const Elem * elem)
 {
-  if (this->hasBlocks(elem->subdomain_id()))
-  {
-    _current_elem = elem;
-    computeElement();
-  }
+  _current_elem = elem;
+  computeElement();
 }
 
 void
@@ -159,23 +160,21 @@ ElementLoopUserObject::onInternalSide(const Elem *elem, unsigned int side)
   _current_elem = elem;
   // Pointer to the neighbor we are currently working on.
   _current_neighbor = elem->neighbor(side);
-  if (this->hasBlocks(_current_elem->subdomain_id()) && this->hasBlocks(_current_neighbor->subdomain_id()))
+
+  // Get the global id of the element and the neighbor
+  const dof_id_type elem_id = elem->id();
+  const dof_id_type neighbor_id = _current_neighbor->id();
+
+  // TODO: add if-statement to check if this needs to be executed
+  if ((_current_neighbor->active() && (_current_neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (_current_neighbor->level() < elem->level()))
   {
-    // Get the global id of the element and the neighbor
-    const dof_id_type elem_id = elem->id();
-    const dof_id_type neighbor_id = _current_neighbor->id();
+    computeInternalSide();
+  }
 
-    // TODO: add if-statement to check if this needs to be executed
-    if ((_current_neighbor->active() && (_current_neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (_current_neighbor->level() < elem->level()))
-    {
-      computeInternalSide();
-    }
-
-    if (!_have_interface_elems && (_current_elem->processor_id() != _current_neighbor->processor_id()))
-    {
-      // if my current neighbor is on another processor store the current element ID for later communication
-      _interface_elem_ids.insert(_current_elem->id());
-    }
+  if (!_have_interface_elems && (_current_elem->processor_id() != _current_neighbor->processor_id()))
+  {
+    // if my current neighbor is on another processor store the current element ID for later communication
+    _interface_elem_ids.insert(_current_elem->id());
   }
 }
 
