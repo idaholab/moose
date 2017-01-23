@@ -32,13 +32,17 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    strain = SMALL
-    incremental = true
-    add_variables = true
-    eigenstrain_names = eigenstrain
-    generate_output = 'strain_xx strain_yy strain_zz'
+[Modules]
+  [./TensorMechanics]
+    [./Master]
+      [./all]
+        strain = SMALL
+        incremental = true
+        add_variables = true
+        eigenstrain_names = eigenstrain
+        generate_output = 'strain_xx strain_yy strain_zz'
+      [../]
+    [../]
   [../]
 []
 

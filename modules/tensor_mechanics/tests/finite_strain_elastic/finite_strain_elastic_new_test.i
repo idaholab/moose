@@ -15,10 +15,14 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    strain = FINITE
-    add_variables = true
+[Modules]
+  [./TensorMechanics]
+    [./Master]
+      [./all]
+        strain = FINITE
+        add_variables = true
+      [../]
+    [../]
   [../]
 []
 
