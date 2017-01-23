@@ -502,3 +502,17 @@ footer.page-footer {
     box-shadow: 2px 2px 3px #888888;
     display: inline-block;
 }
+
+#moose-markdown-content li {
+  list-style-type: disc;
+  padding-left: 0;
+  margin-left: 15px;
+}
+
+#moose-markdown-content strong {
+  font-weight: bold;
+}
+
+ul.collapsible li {
+  list-style-type: none;
+}

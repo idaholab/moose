@@ -7,6 +7,7 @@
     - Modules: docs/content/documentation/modules/index.md
 - Utilites:
     - Documentation Generation: docs/content/utilities/documentation/index.md
+    - Developing MOOSE Apps: docs/content/utilities/development/index.md
     - Memory Logger: docs/content/utilities/memory_logger/memory_logger.md
 - Help:
     - Frequently Asked Questions: docs/content/help/faq.md
