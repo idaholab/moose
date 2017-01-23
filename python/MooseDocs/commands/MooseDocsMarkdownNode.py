@@ -3,6 +3,7 @@ import copy
 import bs4
 import jinja2
 import re
+import multiprocessing
 import logging
 log = logging.getLogger(__name__)
 
@@ -60,8 +61,9 @@ class MooseDocsMarkdownNode(MooseDocsNode):
 
     # Make sure the destination directory exists
     destination = self.path()
-    if not os.path.exists(destination):
-      os.makedirs(destination)
+    with multiprocessing.Lock():
+      if not os.path.exists(destination):
+        os.makedirs(destination)
 
     # Finalize the html
     soup = self.finalize(bs4.BeautifulSoup(complete, 'html.parser'))
