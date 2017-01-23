@@ -4,7 +4,7 @@
 
 The version of the _Function Parser_ library that ships with MOOSE contains a just in time (JIT) compilation  feature that is not present in the [upstream version](http://warp.povusers.org/FunctionParser/).
 
-Include the JIT module (which also adds [automatic differentiation](AutomaticDifferentiation) support) with
+Include the JIT module (which also adds [automatic differentiation](phase_field/AutomaticDifferentiation.md) support) with
 
 ```cpp
 #include "libmesh/fparser_ad.hh"

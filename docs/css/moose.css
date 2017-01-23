@@ -513,6 +513,6 @@ footer.page-footer {
   font-weight: bold;
 }
 
-ul.collapsible li {
+#moose-markdown-content ul.collapsible li {
   list-style-type: none;
 }
