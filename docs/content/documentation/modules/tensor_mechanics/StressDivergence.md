@@ -31,4 +31,4 @@ Small strain linearized elasticity problems should be run with the parameter `us
 
 The input file syntax to set the Stress Divergence kernel for large deformation (finite strain) problems is
 
-!input modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Kernels overflow-y=scroll max-height=300px
+!input modules/tensor_mechanics/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Modules overflow-y=scroll max-height=300px
