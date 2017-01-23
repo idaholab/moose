@@ -2,6 +2,6 @@
   [./1Dinterface_energy]
     type = RunApp
     input = '1Dinterface_energy.i'
-    cli_args = '--check-input'
+    check_input = True
   [../]
 []

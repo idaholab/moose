@@ -83,7 +83,8 @@ class RunParallel:
       if self.soft_limit:
         self.big_queue.append([tester, command, os.getcwd()])
       else:
-        self.harness.handleTestResult(tester.specs, '', 'skipped (Insufficient slots)')
+        tester.setStatus('Insufficient slots', 'SKIP')
+        self.harness.handleTestResult(tester, '', '')
         self.skipped_jobs.add(tester.specs['test_name'])
       return
 
@@ -236,7 +237,8 @@ class RunParallel:
             threshold = max(start_min_threshold, (0.1 * float(tester.specs['max_time'])))
 
             if now >= threshold:
-              self.harness.handleTestResult(tester.specs, '', 'RUNNING...', start_time, now, False)
+              tester.setStatus('RUNNING...', 'PENDING')
+              self.harness.handleTestResult(tester, '', '', start_time, now, False)
 
               self.reported_jobs.add(tester)
               self.reported_timer = now
@@ -301,12 +303,14 @@ class RunParallel:
           # If the user is running the script with no options, we'll just exceed the slots for
           # these remaining big jobs. Otherwise, we'll skip them
           if not self.soft_limit and slots > self.job_slots:
-            self.harness.handleTestResult(tester.specs, '', 'skipped (Insufficient slots)')
+            tester.setStatus('Insufficient slots', 'SKIP')
+            self.harness.handleTestResult(tester, '', '')
             self.skipped_jobs.add(tester.specs['test_name'])
             keep_going = True
           # Do we have unsatisfied dependencies left?
           elif len(set(tester.specs['prereq']) & self.skipped_jobs):
-            self.harness.handleTestResult(tester.specs, '', 'skipped (skipped dependency)')
+            tester.setStatus('skipped dependency', 'SKIP')
+            self.harness.handleTestResult(tester, '', '')
             self.skipped_jobs.add(tester.specs['test_name'])
             keep_going = True
           # We need to keep trying in case there is a chain of unresolved dependencies

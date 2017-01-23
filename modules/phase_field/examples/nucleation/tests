@@ -2,6 +2,6 @@
   [./cahn_hilliard]
     type = RunApp
     input = 'cahn_hilliard.i'
-    cli_args = '--check-input'
+    check_input = True
   [../]
 []

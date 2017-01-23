@@ -2,6 +2,6 @@
   [./diffusion]
     type = RunApp
     input = 'diffusion.i'
-    cli_args = '--check-input'
+    check_input = True
   [../]
 []
