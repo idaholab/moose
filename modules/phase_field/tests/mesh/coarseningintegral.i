@@ -23,7 +23,7 @@
   [./diff]
     type = MatDiffusion
     variable = u
-    D_name = 1e-9
+    D_name = 0.01
   [../]
   [./src]
     type = CoarseningIntegralCompensation
@@ -58,7 +58,7 @@
 
 [Executioner]
   type = Transient
-  dt = 1
+  dt = 0.37
   num_steps = 6
   nl_abs_tol = 1e-8
 []

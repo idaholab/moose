@@ -31,8 +31,12 @@ CoarseningIntegralTracker::CoarseningIntegralTracker(const InputParameters & par
 void
 CoarseningIntegralTracker::initialize()
 {
+  // clear the stored child element integrals and set flaf to indicat new data was collected
   _pre_adaptivity_integral.clear();
   _pre_adaptivity_ran = true;
+
+  // clear the corrective source term for the current timestep
+  _corrective_source.clear();
 }
 
 void
@@ -50,9 +54,6 @@ CoarseningIntegralTracker::meshChanged()
   // if the userobject was not scheduled to run due to lack of dependencies we need to bail out
   if (!_pre_adaptivity_ran)
     return;
-
-  // clear the corrective source term for the current timestep
-  _corrective_source.clear();
 
   // loop over elements that just have been coarsened (currently not threaded)
   for (const auto & parent : *_mesh.coarsenedElementRange())

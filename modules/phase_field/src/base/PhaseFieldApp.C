@@ -181,6 +181,7 @@
  * AuxKernels
  */
 #include "BndsCalcAux.h"
+#include "CoarseningIntegralAux.h"
 #include "CrossTermGradientFreeEnergy.h"
 #include "EulerAngleVariables2RGBAux.h"
 #include "FeatureFloodCountAux.h"
@@ -449,6 +450,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerPostprocessor(PFCElementEnergyIntegral);
 
   registerAux(BndsCalcAux);
+  registerAux(CoarseningIntegralAux);
   registerAux(CrossTermGradientFreeEnergy);
   registerAux(EBSDReaderAvgDataAux);
   registerAux(EBSDReaderPointDataAux);

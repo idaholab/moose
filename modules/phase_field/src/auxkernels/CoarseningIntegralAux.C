@@ -1,0 +1,29 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
+#include "CoarseningIntegralAux.h"
+#include "CoarseningIntegralTracker.h"
+
+template<>
+InputParameters validParams<CoarseningIntegralAux>()
+{
+  InputParameters params = validParams<AuxKernel>();
+  params.addRequiredParam<UserObjectName>("tracker", "Coarsening integral tracker user object");
+  return params;
+}
+
+CoarseningIntegralAux::CoarseningIntegralAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
+    _tracker(getUserObject<CoarseningIntegralTracker>("tracker"))
+{
+}
+
+Real
+CoarseningIntegralAux::computeValue()
+{
+  return _tracker.sourceValue(_current_elem);
+}
