@@ -31,7 +31,6 @@ class MooseDocsMarkdownNode(MooseDocsNode):
     self.__html = None
     self.__md_file = md_file
 
-
   def source(self):
     """
     Return the source markdown file.
@@ -44,6 +43,7 @@ class MooseDocsMarkdownNode(MooseDocsNode):
     """
 
     # Read the markdown and parse the HTML
+    log.debug('Parsing markdown: {}'.format(self.__md_file))
     content, meta = MooseDocs.read_markdown(self.__md_file)
     self.__html = self.__parser.convert(content)
 
@@ -59,7 +59,8 @@ class MooseDocsMarkdownNode(MooseDocsNode):
     # Render the html via template
     complete = template.render(current=self, **template_args)
 
-    # Make sure the destination directory exists
+    # Make sure the destination directory exists, if it already does do nothing. If it does not exist try to create
+    # it, but include a try statement because it might get created by another process.
     destination = self.path()
     with multiprocessing.Lock():
       if not os.path.exists(destination):
@@ -99,8 +100,8 @@ class MooseDocsMarkdownNode(MooseDocsNode):
 
         # Error if file not found or if multiple files found
         if not found:
-          log.error('Failed to locate page for markdown file {} in {}'.format(href, self.source()))
-          #link.attrs.pop('href')
+          #TODO: convert to error when MOOSE is clean
+          log.warning('Failed to locate page for markdown file {} in {}'.format(href, self.source()))
           link['class'] = 'moose-bad-link'
           continue
 
@@ -112,7 +113,7 @@ class MooseDocsMarkdownNode(MooseDocsNode):
 
         # Update the link with the located page
         url = self.relpath(found[0].url())
-        log.debug('Converting link: {} --> {}'.format(href, url))
+        #log.debug('Converting link: {} --> {}'.format(href, url))
         link['href'] = url
 
     # Fix <pre><code class="python"> to be <pre class="language-python"><code>

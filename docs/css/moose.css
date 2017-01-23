@@ -136,9 +136,15 @@ li{
     font-weight:100;
 }
 
-.collapsible li.active .moose-parameter-header-description,
-.collapsible li.active .moose-parameter-header-default{
+li.active .collapsible-header .moose-collection-description,
+li.active .collapsible-header .moose-parameter-header-description,
+li.active .collapsible-header .moose-parameter-header-default{
     display:none;
+}
+
+li.active .collapsible-header .moose-collection-name,
+li.active .collapsible-header .moose-parameter-name{
+    overflow:unset;
 }
 
 nav,
@@ -150,9 +156,7 @@ footer.page-footer{
 
 .side-nav .collapsible li.active a.active,
 .side-nav.fixed .collapsible li.active a.active {
-
     background-color:#e8e8e8;
-
 }
 
 .side-nav .collapsible ul:last-child a.active:last-child,
