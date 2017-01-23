@@ -10,7 +10,7 @@
     type = SubdomainBoundingBox
     bottom_left = '1.0 0 0'
     block_id = 1
-    top_right = '2.0 1.0 0'
+    top_right = '2.0 0 0'
   [../]
   [./interface]
     type = SideSetsBetweenSubdomains
@@ -68,7 +68,7 @@
 
 [DGKernels]
   [./dg_advection_u]
-    type = DGAdvection
+    type = DGConvection
     variable = u
     velocity = '1 0 0'
     block = 0
@@ -81,7 +81,7 @@
     block = 0
   [../]
   [./dg_advection_v]
-    type = DGAdvection
+    type = DGConvection
     variable = v
     velocity = '1 0 0'
     block = 1
