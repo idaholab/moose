@@ -11,11 +11,13 @@ template<>
 InputParameters validParams<ElementLoopUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
+  params += validParams<BlockRestrictable>();
   return params;
 }
 
 ElementLoopUserObject::ElementLoopUserObject(const InputParameters & parameters) :
     GeneralUserObject(parameters),
+    BlockRestrictable(parameters),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
     ZeroInterface(parameters),
@@ -36,6 +38,7 @@ ElementLoopUserObject::ElementLoopUserObject(const InputParameters & parameters)
 
 ElementLoopUserObject::ElementLoopUserObject(ElementLoopUserObject & x, Threads::split /*split*/) :
     GeneralUserObject(x.parameters()),
+    BlockRestrictable(x.parameters()),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
     ZeroInterface(x.parameters()),
@@ -85,6 +88,9 @@ ElementLoopUserObject::execute()
       _old_subdomain = _subdomain;
       _subdomain = cur_subdomain;
 
+      if (!this->hasBlocks(_subdomain))
+        break;
+
       if (_subdomain != _old_subdomain)
         subdomainChanged();
 
@@ -100,7 +106,8 @@ ElementLoopUserObject::execute()
 
         if (elem->neighbor(side) != NULL)
         {
-          onInternalSide(elem, side);
+          if (this->hasBlocks(elem->neighbor(side)->subdomain_id()))
+            onInternalSide(elem, side);
           if (boundary_ids.size() > 0)
             for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
               onInterface(elem, side, *it);

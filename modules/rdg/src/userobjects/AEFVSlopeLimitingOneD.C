@@ -96,16 +96,20 @@ AEFVSlopeLimitingOneD::limitElementSlope() const
     if (elem->neighbor(is) != NULL)
     {
       const Elem* neig = elem->neighbor(is);
+      if (this->hasBlocks(neig->subdomain_id()))
+      {
+        xc[in] = neig->centroid()(0);
 
-      xc[in] = neig->centroid()(0);
+        // get the cell-average variable in this neighbor cell
+        ucell[in][0] = _u->getElementalValue(neig);
 
-      // get the cell-average variable in this neighbor cell
-      ucell[in][0] = _u->getElementalValue(neig);
+        // calculate the one-sided slopes of primitive variables
 
-      // calculate the one-sided slopes of primitive variables
-
-      for (iv = 0; iv < nvars; iv++)
-        sigma[in][iv] = (ucell[0][iv] - ucell[in][iv]) / (xc[0] - xc[in]);
+        for (iv = 0; iv < nvars; iv++)
+          sigma[in][iv] = (ucell[0][iv] - ucell[in][iv]) / (xc[0] - xc[in]);
+      }
+      else
+        bflag = in;
     }
     // when the current element is at the boundary,
     // we choose not to construct the slope in 1D just for convenience.
