@@ -15,7 +15,7 @@ class PetscJacobianTester(RunApp):
   def checkRunnable(self, options):
     if options.enable_recover:
       reason = 'skipped (PetscJacTester RECOVER)'
-      return (False, reason)
+      return False
     return RunApp.checkRunnable(self, options)
 
   def __init__(self, name, params):
@@ -32,4 +32,8 @@ class PetscJacobianTester(RunApp):
     else:
       reason = 'EXPECTED OUTPUT NOT FOUND';
 
-    return (reason, output)
+    # populate status bucket
+    if reason != '':
+      self.setStatus(reason, 'FAIL')
+
+    return output
