@@ -2383,6 +2383,8 @@ FEProblemBase::computeIndicators()
   // Initialize indicator aux variable fields
   if (_indicators.hasActiveObjects() || _internal_side_indicators.hasActiveObjects())
   {
+    Moose::perf_log.push("computeIndicators()", "Execution");
+
     std::vector<std::string> fields;
 
     // Indicator Fields
@@ -2396,11 +2398,8 @@ FEProblemBase::computeIndicators()
       fields.push_back(internal_indicator->name());
 
     _aux->zeroVariables(fields);
-  }
 
-  // compute Indicators
-  if (_indicators.hasActiveObjects() || _internal_side_indicators.hasActiveObjects())
-  {
+    // compute Indicators
     ComputeIndicatorThread cit(*this);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cit);
     _aux->solution().close();
@@ -2410,15 +2409,18 @@ FEProblemBase::computeIndicators()
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), finalize_cit);
     _aux->solution().close();
     _aux->update();
+
+    Moose::perf_log.pop("computeIndicators()", "Execution");
   }
 }
 
 void
 FEProblemBase::computeMarkers()
 {
-  // Initialize marker aux variable fields
   if (_markers.hasActiveObjects())
   {
+    Moose::perf_log.push("computeMarkers()", "Execution");
+
     std::vector<std::string> fields;
 
     // Marker Fields
@@ -2427,11 +2429,7 @@ FEProblemBase::computeMarkers()
       fields.push_back(marker->name());
 
     _aux->zeroVariables(fields);
-  }
 
-  // compute Markers
-  if (_markers.hasActiveObjects())
-  {
     _adaptivity.updateErrorVectors();
 
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
@@ -2446,6 +2444,8 @@ FEProblemBase::computeMarkers()
 
     _aux->solution().close();
     _aux->update();
+
+    Moose::perf_log.pop("computeMarkers()", "Execution");
   }
 }
 
@@ -2464,26 +2464,17 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   if (exec_type == EXEC_NONLINEAR)
     _currently_computing_jacobian = true;
 
-
   // Pre-aux UserObjects
-  Moose::perf_log.push("computeUserObjects()", "Execution");
   computeUserObjects(exec_type, Moose::PRE_AUX);
-  Moose::perf_log.pop("computeUserObjects()", "Execution");
 
   // AuxKernels
-  Moose::perf_log.push("computeAuxiliaryKernels()", "Execution");
   computeAuxiliaryKernels(exec_type);
-  Moose::perf_log.pop("computeAuxiliaryKernels()", "Execution");
 
   // Post-aux UserObjects
-  Moose::perf_log.push("computeUserObjects()", "Execution");
   computeUserObjects(exec_type, Moose::POST_AUX);
-  Moose::perf_log.pop("computeUserObjects()", "Execution");
 
   // Controls
-  Moose::perf_log.push("computeControls()", "Execution");
   executeControls(exec_type);
-  Moose::perf_log.pop("computeControls()", "Execution");
 
   // Return the current flag to None
   _current_execute_on_flag = EXEC_NONE;
@@ -2505,6 +2496,19 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   const MooseObjectWarehouse<InternalSideUserObject> & internal_side = _internal_side_user_objects[group][type];
   const MooseObjectWarehouse<NodalUserObject> & nodal = _nodal_user_objects[group][type];
   const MooseObjectWarehouse<GeneralUserObject> & general = _general_user_objects[group][type];
+
+  if (!_use_legacy_uo_aux_computation && // This makes me die a little bit inside...
+      !elemental.hasActiveObjects() &&
+      !side.hasActiveObjects() &&
+      !internal_side.hasActiveObjects() &&
+      !nodal.hasActiveObjects() &&
+      !general.hasActiveObjects())
+    // Nothing to do, return early
+    return;
+
+  // Start the timer here since we have at least one active user object
+  std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
+  Moose::perf_log.push(compute_uo_tag, "Execution");
 
   // Perform Residual/Jacobian setups
   switch (type)
@@ -2595,15 +2599,25 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
         _pps_data.storeValue(obj->name(), pp->getValue());
     }
   }
+
+  Moose::perf_log.pop(compute_uo_tag, "Execution");
 }
 
 void
 FEProblemBase::executeControls(const ExecFlagType & exec_type)
 {
-  _control_warehouse.setup(exec_type);
   const std::vector<MooseSharedPointer<Control> > & objects = _control_warehouse[exec_type].getActiveObjects();
-  for (const auto & control : objects)
-    control->execute();
+
+  if (!objects.empty())
+  {
+    Moose::perf_log.push("computeControls()", "Execution");
+
+    _control_warehouse.setup(exec_type);
+    for (const auto & control : objects)
+      control->execute();
+
+    Moose::perf_log.pop("computeControls()", "Execution");
+  }
 }
 
 void

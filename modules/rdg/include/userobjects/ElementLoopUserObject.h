@@ -56,6 +56,7 @@ InputParameters validParams<ElementLoopUserObject>();
  */
 class ElementLoopUserObject :
     public GeneralUserObject,
+    public BlockRestrictable,
     public Coupleable,
     public MooseVariableDependencyInterface,
     public ZeroInterface

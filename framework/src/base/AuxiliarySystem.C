@@ -26,6 +26,7 @@
 #include "ComputeElemAuxBcsThread.h"
 #include "Parser.h"
 #include "TimeIntegrator.h"
+#include "Conversion.h"
 
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/node_range.h"
@@ -348,46 +349,54 @@ AuxiliarySystem::addVector(const std::string & vector_name, const bool project, 
 void
 AuxiliarySystem::computeScalarVars(ExecFlagType type)
 {
-  Moose::perf_log.push("update_aux_vars_scalar()", "Execution");
-
   // Reference to the current storage container
   const MooseObjectWarehouse<AuxScalarKernel> & storage = _aux_scalar_storage[type];
 
-  PARALLEL_TRY {
-    // FIXME: run multi-threaded
-    THREAD_ID tid = 0;
-    if (storage.hasActiveObjects())
+  if (storage.hasActiveObjects())
+  {
+    std::string compute_aux_tag = "computeScalarAux(" + Moose::stringify(type) + ")";
+    Moose::perf_log.push(compute_aux_tag, "Execution");
+
+    PARALLEL_TRY
     {
-      _fe_problem.reinitScalars(tid);
+      // FIXME: run multi-threaded
+      THREAD_ID tid = 0;
+      if (storage.hasActiveObjects())
+      {
+        _fe_problem.reinitScalars(tid);
 
-      // Call compute() method on all active AuxScalarKernel objects
-      const std::vector<MooseSharedPointer<AuxScalarKernel> > & objects = storage.getActiveObjects(tid);
-      for (const auto & obj : objects)
-        obj->compute();
+        // Call compute() method on all active AuxScalarKernel objects
+        const std::vector<MooseSharedPointer<AuxScalarKernel> > & objects = storage.getActiveObjects(tid);
+        for (const auto & obj : objects)
+          obj->compute();
 
-      const std::vector<MooseVariableScalar *> & scalar_vars = getScalarVariables(tid);
-      for (const auto & var : scalar_vars)
-        var->insert(solution());
+        const std::vector<MooseVariableScalar *> & scalar_vars = getScalarVariables(tid);
+        for (const auto & var : scalar_vars)
+          var->insert(solution());
+      }
     }
-  }
-  PARALLEL_CATCH;
-  Moose::perf_log.pop("update_aux_vars_scalar()", "Execution");
+    PARALLEL_CATCH;
 
-  solution().close();
-  _sys.update();
+    Moose::perf_log.pop(compute_aux_tag, "Execution");
+
+    solution().close();
+    _sys.update();
+  }
 }
 
 void
 AuxiliarySystem::computeNodalVars(ExecFlagType type)
 {
-  Moose::perf_log.push("update_aux_vars_nodal()", "Execution");
-
   // Reference to the Nodal AuxKernel storage
   const MooseObjectWarehouse<AuxKernel> & nodal = _nodal_aux_storage[type];
 
-  // Block Nodal AuxKernels
-  PARALLEL_TRY {
-    if (nodal.hasActiveBlockObjects())
+  if (nodal.hasActiveBlockObjects())
+  {
+    std::string compute_aux_tag = "computeNodalAux(" + Moose::stringify(type) + ")";
+    Moose::perf_log.push(compute_aux_tag, "Execution");
+
+    // Block Nodal AuxKernels
+    PARALLEL_TRY
     {
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
       ComputeNodalAuxVarsThread navt(_fe_problem, nodal);
@@ -396,14 +405,17 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
       solution().close();
       _sys.update();
     }
+    PARALLEL_CATCH;
+    Moose::perf_log.pop(compute_aux_tag, "Execution");
   }
-  PARALLEL_CATCH;
-  Moose::perf_log.pop("update_aux_vars_nodal()", "Execution");
 
-  // Boundary Nodal AuxKernels
-  Moose::perf_log.push("update_aux_vars_nodal_bcs()", "Execution");
-  PARALLEL_TRY {
-    if (nodal.hasActiveBoundaryObjects())
+  if (nodal.hasActiveBoundaryObjects())
+  {
+    std::string compute_aux_tag = "computeNodalAuxBCs(" + Moose::stringify(type) + ")";
+    Moose::perf_log.push(compute_aux_tag, "Execution");
+
+    // Boundary Nodal AuxKernels
+    PARALLEL_TRY
     {
       ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
       ComputeNodalAuxBcsThread nabt(_fe_problem, nodal);
@@ -412,23 +424,24 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
       solution().close();
       _sys.update();
     }
+    PARALLEL_CATCH;
+    Moose::perf_log.pop(compute_aux_tag, "Execution");
   }
-  PARALLEL_CATCH;
-
-  Moose::perf_log.pop("update_aux_vars_nodal_bcs()", "Execution");
 }
 
 void
 AuxiliarySystem::computeElementalVars(ExecFlagType type)
 {
-  Moose::perf_log.push("update_aux_vars_elemental()", "Execution");
-
   // Reference to the Nodal AuxKernel storage
   const MooseObjectWarehouse<AuxKernel> & elemental = _elemental_aux_storage[type];
 
-  // Block Elemental AuxKernels
-  PARALLEL_TRY {
-    if (elemental.hasActiveBlockObjects())
+  if (elemental.hasActiveBlockObjects())
+  {
+    std::string compute_aux_tag = "computeElemAux(" + Moose::stringify(type) + ")";
+    Moose::perf_log.push(compute_aux_tag, "Execution");
+
+    // Block Elemental AuxKernels
+    PARALLEL_TRY
     {
       ConstElemRange & range = *_mesh.getActiveLocalElementRange();
       ComputeElemAuxVarsThread eavt(_fe_problem, elemental, true);
@@ -437,9 +450,17 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
       solution().close();
       _sys.update();
     }
+    PARALLEL_CATCH;
+    Moose::perf_log.pop(compute_aux_tag, "Execution");
+  }
 
-    // Boundary Elemental AuxKernels
-    if (elemental.hasActiveBoundaryObjects())
+  // Boundary Elemental AuxKernels
+  if (elemental.hasActiveBoundaryObjects())
+  {
+    std::string compute_aux_tag = "computeElemAuxBCs(" + Moose::stringify(type) + ")";
+    Moose::perf_log.push(compute_aux_tag, "Execution");
+
+    PARALLEL_TRY
     {
       ConstBndElemRange & bnd_elems = *_mesh.getBoundaryElementRange();
       ComputeElemAuxBcsThread eabt(_fe_problem, elemental, true);
@@ -448,10 +469,9 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
       solution().close();
       _sys.update();
     }
-
+    PARALLEL_CATCH;
+    Moose::perf_log.pop(compute_aux_tag, "Execution");
   }
-  PARALLEL_CATCH;
-  Moose::perf_log.pop("update_aux_vars_elemental()", "Execution");
 }
 
 void

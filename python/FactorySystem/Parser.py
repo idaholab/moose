@@ -28,6 +28,7 @@ class Parser:
     0x08 - Bad value
     0x10 - Mismatched type
     0x20 - Missing Node type parameter
+    0x40 - Tester creation failed
 
     If new error codes are added, the static mask value needs to be adjusted
   """
@@ -136,10 +137,13 @@ class Parser:
       params.addPrivateParam('_root', self.root)
 
       # Build the object
-      moose_object = self.factory.create(moose_type, node.name, params)
+      try:
+        moose_object = self.factory.create(moose_type, node.name, params)
 
-      # Put it in the warehouse
-      self.warehouse.addObject(moose_object)
+        # Put it in the warehouse
+        self.warehouse.addObject(moose_object)
+      except:
+        error_code = error_code | 0x40
 
     # Are we in a tree node that "looks" like it should contain a buildable object?
     elif self._check_for_type and self._looksLikeValidSubBlock(node):
