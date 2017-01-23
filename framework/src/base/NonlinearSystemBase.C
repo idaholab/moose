@@ -1007,8 +1007,12 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
     _fe_problem.reinitScalars(tid);
 
   // residual contributions from the domain
-  PARALLEL_TRY {
+  PARALLEL_TRY
+  {
+    Moose::perf_log.push("computeKernels()", "Execution");
+
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+
     ComputeResidualThread cr(_fe_problem, type);
 
     Threads::parallel_reduce(elem_range, cr);
@@ -1016,14 +1020,19 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
     unsigned int n_threads = libMesh::n_threads();
     for (unsigned int i=0; i<n_threads; i++) // Add any cached residuals that might be hanging around
       _fe_problem.addCachedResidual(i);
+
+    Moose::perf_log.pop("computeKernels()", "Execution");
   }
   PARALLEL_CATCH;
 
   // residual contributions from the scalar kernels
-  PARALLEL_TRY {
+  PARALLEL_TRY
+  {
     // do scalar kernels (not sure how to thread this)
     if (_scalar_kernels.hasActiveObjects())
     {
+      Moose::perf_log.push("computScalarKernels()", "Execution");
+
       const std::vector<MooseSharedPointer<ScalarKernel> > * scalars;
 
       // Use the right subset of ScalarKernels depending on the KernelType.
@@ -1051,6 +1060,8 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
         scalar_kernel->computeResidual();
       }
       _fe_problem.addResidualScalar();
+
+      Moose::perf_log.pop("computScalarKernels()", "Execution");
     }
   }
   PARALLEL_CATCH;
@@ -1060,6 +1071,8 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
   {
     if (_nodal_kernels.hasActiveBlockObjects())
     {
+      Moose::perf_log.push("computNodalKernels()", "Execution");
+
       ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels);
 
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
@@ -1071,6 +1084,8 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
       unsigned int n_threads = libMesh::n_threads();
       for (unsigned int i = 0; i < n_threads; i++) // Add any cached residuals that might be hanging around
         _fe_problem.addCachedResidual(i);
+
+      Moose::perf_log.pop("computNodalKernels()", "Execution");
     }
   }
   PARALLEL_CATCH;
@@ -1080,6 +1095,8 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
   {
     if (_nodal_kernels.hasActiveBoundaryObjects())
     {
+      Moose::perf_log.push("computNodalKernelBCs()", "Execution");
+
       ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels);
 
       ConstBndNodeRange & bnd_node_range = *_mesh.getBoundaryNodeRange();
@@ -1089,6 +1106,8 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
       unsigned int n_threads = libMesh::n_threads();
       for (unsigned int i = 0; i < n_threads; i++) // Add any cached residuals that might be hanging around
         _fe_problem.addCachedResidual(i);
+
+      Moose::perf_log.pop("computNodalKernelBCs()", "Execution");
     }
   }
   PARALLEL_CATCH;
@@ -1143,27 +1162,35 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual)
   if (_has_save_in)
     _fe_problem.getAuxiliarySystem().solution().close();
 
-  PARALLEL_TRY {
-    // last thing to do are nodal BCs
+  PARALLEL_TRY
+  {
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-    for (const auto & bnode : bnd_nodes)
+
+    if (!bnd_nodes.empty())
     {
-      BoundaryID boundary_id = bnode->_bnd_id;
-      Node * node = bnode->_node;
+      Moose::perf_log.push("computeNodalBCs()", "Execution");
 
-      if (node->processor_id() == processor_id())
+      for (const auto & bnode : bnd_nodes)
       {
-        // reinit variables in nodes
-        _fe_problem.reinitNodeFace(node, boundary_id, 0);
+        BoundaryID boundary_id = bnode->_bnd_id;
+        Node * node = bnode->_node;
 
-        if (_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+        if (node->processor_id() == processor_id())
         {
-          const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
-          for (const auto & nbc : bcs)
-            if (nbc->shouldApply())
-              nbc->computeResidual(residual);
+          // reinit variables in nodes
+          _fe_problem.reinitNodeFace(node, boundary_id, 0);
+
+          if (_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+          {
+            const std::vector<MooseSharedPointer<NodalBC> > & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
+            for (const auto & nbc : bcs)
+              if (nbc->shouldApply())
+                nbc->computeResidual(residual);
+          }
         }
       }
+
+      Moose::perf_log.pop("computeNodalBCs()", "Execution");
     }
   }
   PARALLEL_CATCH;
@@ -2072,14 +2099,13 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
 void
 NonlinearSystemBase::computeDiracContributions(SparseMatrix<Number> * jacobian)
 {
-  Moose::perf_log.push("computeDiracContributions()", "Execution");
-
   _fe_problem.clearDiracInfo();
 
   std::set<const Elem *> dirac_elements;
 
   if (_dirac_kernels.hasActiveObjects())
   {
+    Moose::perf_log.push("computeDiracContributions()", "Execution");
 
     // TODO: Need a threading fix... but it's complicated!
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
@@ -2103,12 +2129,12 @@ NonlinearSystemBase::computeDiracContributions(SparseMatrix<Number> * jacobian)
     //Threads::parallel_reduce(range, cd);
 
     cd(range);
+
+    Moose::perf_log.pop("computeDiracContributions()", "Execution");
   }
 
   if (jacobian == NULL)
     residualVector(Moose::KT_NONTIME).close();
-
-  Moose::perf_log.pop("computeDiracContributions()", "Execution");
 }
 
 NumericVector<Number> &
