@@ -62,28 +62,28 @@
   [./c1l]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.0
+    initial_condition = 0.1
   [../]
 
   # Liquid phase solute 2 concentration
   [./c2l]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.0
+    initial_condition = 0.05
   [../]
 
   # Solid phase solute 1 concentration
   [./c1s]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.0
+    initial_condition = 0.8
   [../]
 
   # Solid phase solute 2 concentration
   [./c2s]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.0
+    initial_condition = 0.1
   [../]
 
 []
