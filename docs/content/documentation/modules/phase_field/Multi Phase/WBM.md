@@ -6,52 +6,44 @@ The flexible **multiphase model** uses _n_ order parameters to control _n_ phase
 
 For multiphase models with _n_ phases ```DerivativeMultiPhaseMaterial``` ([Doxygen](http://mooseframework.org/docs/doxygen/modules/classDerivativeMultiPhaseMaterial.html)) can be used to form the global free energy as
 
-$$$
+$$
 F = \left[ \sum_i^n h_i(\eta_i)F_i \right] + g(\vec\eta)
-$$$
+$$
 
-| Input parameter | type | Description |
-| - | - | - |
-| f_name | string | Name of the global free energy function $$F$$ defined by this material (use this in the Parsed Function Kernels) |
-| fa_name | string | the ```f_name``` (derivative function name) of $$F_a$$, the phase free energy material object for the A-phase (first phase) |
-| fb_name | string | the ```f_name``` (derivative function name) of $$F_b$$, the phase free energy material object for the B-phase (second phase) | eta | coupled variable | The non-linear variable that acts as the order parameter to distinguish the two phases |
-| h | string | the ```function_name``` of the _switching function_ material (which should be a function of the order parameter ```eta```)|
-| g | string | the ```function_name``` of the _barrier function_ material (which should be a function of the order parameter ```eta```)|
-|W|  number | The prefactor for the barrier function |
-| args | coupled variable vector | A list of _all_ coupled variables that are used in the phase free energies named by ```fa_name``` and ```fb_name``` |
+!parameters /Materials/DerivativeMultiPhaseMaterial
 
-We need to enforce the constraint $$k(\vec\eta)=0$$ for
+We need to enforce the constraint $k(\vec\eta)=0$ for
 
-$$$
+$$
 k(\vec \eta)=\left[\sum_i h(\eta_i)\right] - 1 \underbrace{- \frac\epsilon2\lambda}_{\text{Jacobian fill}},
-$$$
+$$
 
-which ensures that the total weight of all phase free energy contributions at each point in the simulation volume is exactly unity (up to an $$\epsilon$$). This is achieved using either a hard or soft constraint enforcement method.
+which ensures that the total weight of all phase free energy contributions at each point in the simulation volume is exactly unity (up to an $\epsilon$). This is achieved using either a hard or soft constraint enforcement method.
 
 Check out the example input at ```moose/modules/phase_field/examples/multiphase/DerivativeMultiPhaseMaterial.i``` to see it in action.
 
 ## Lagrange multiplier constraint
 
-As first (hard) method for constraint enforcement the Lagrange multiplier technique is available, where the Lagrange multiplier $$\lambda$$ is a non-linear variable
+As first (hard) method for constraint enforcement the Lagrange multiplier technique is available, where the Lagrange multiplier $\lambda$ is a non-linear variable
 
-With $$a_i(\vec\eta,\vec c,v)$$ being the weak form (Allen-Cahn) residual for the $$i$$th non-conserved order parameter, we need to find $$(\vec\eta,\lambda)$$ satisfying the boundary conditions and such that
+With $a_i(\vec\eta,\vec c,v)$ being the weak form (Allen-Cahn) residual for the $i$th non-conserved order parameter, we need to find $(\vec\eta,\lambda)$ satisfying the boundary conditions and such that
 
-$$$\begin{align}
+$$\begin{align}
 a_i(\vec\eta,\vec c,v) + \underbrace{\int_\Omega\lambda\frac{\partial k}{\partial\eta_i} v\,dx}_{L_1(\eta_i)} &=& 0 \\
 \underbrace{\int_\Omega q\frac{\partial(\lambda k)}{\partial\lambda}\,dx}_{L_2(\lambda)} &=& 0
-\end{align}$$$
+\end{align}$$
 
-holds for every test function $$v$$ and $$q$$.
+holds for every test function $v$ and $q$.
 
-The $$L_1$$ Lagrange residuals are provided by ```SwitchingFunctionConstraintEta``` ([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionConstraintEta.html)) kernels - one for each phase order parameter.
+The $L_1$ Lagrange residuals are provided by ```SwitchingFunctionConstraintEta``` ([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionConstraintEta.html)) kernels - one for each phase order parameter.
 
-The $$L_2$$ Lagrange residual is provided by a ```SwitchingFunctionConstraintLagrange``` ([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionConstraintLagrange.html)) kernel.
+The $L_2$ Lagrange residual is provided by a ```SwitchingFunctionConstraintLagrange``` ([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionConstraintLagrange.html)) kernel.
 
-The _Jacobian fill_ term introduces a small $$\lambda$$ dependence in the constraint through a small $$\epsilon$$ factor (defaults to $$10^{-9}$$), which results in an on-diagonal Jacobian value of $$\epsilon$$ in the $$L_2$$ kernel (it drops out in the $$L_1$$ kernel). This is necessary to force a Jacobian matrix with _full rank_, avoids "Zero pivot" PETSc-Errors, and greatly improves convergence. The cost is a _violation_ of the constraint by about $$\epsilon$$, however this constraint violation can be made as small as the convergence limits.
+The _Jacobian fill_ term introduces a small $\lambda$ dependence in the constraint through a small $\epsilon$ factor (defaults to $10^{-9}$), which results in an on-diagonal Jacobian value of $\epsilon$ in the $L_2$ kernel (it drops out in the $L_1$ kernel). This is necessary to force a Jacobian matrix with _full rank_, avoids "Zero pivot" PETSc-Errors, and greatly improves convergence. The cost is a _violation_ of the constraint by about $\epsilon$, however this constraint violation can be made as small as the convergence limits.
 
 ## Penalty constraint
 
-As an alternative (softer) constraint enforcement we provide the ```SwitchingFunctionPenalty``` ([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionPenalty.html)) kernel, which effectively adds a free energy penalty of $$\gamma k(\vec \eta)^2$$ (with $$\epsilon=0$$), where $$\gamma$$ is the penalty prefactor (```penalty```). The constraint is enforced approximately to a tolerance of $$\frac1\gamma$$ (depending on the shape and units of the free energy).
+As an alternative (softer) constraint enforcement we provide the ```SwitchingFunctionPenalty``` ([Doxygen](http://mooseframework.org/docs/doxygen/modules/classSwitchingFunctionPenalty.html)) kernel, which effectively adds a free energy penalty of $\gamma k(\vec \eta)^2$ (with $\epsilon=0$), where $\gamma$ is the penalty prefactor (```penalty```). The constraint is enforced approximately to a tolerance of $\frac1\gamma$ (depending on the shape and units of the free energy).
 
 The gradient interface energy term for multiphase models with _n_>2 is derived [here](ACMultiInterface) and provided by the ```ACMultiInterface``` kernel.
 

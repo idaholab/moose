@@ -45,7 +45,7 @@ MOOSE provides capabilities that enable the easy development of multiphase field
 ## Initial Conditions
 * Initial Conditions - Basic phase field initial conditions
 * Image Reader - Reconstructing initial conditions from images (SEM, optical, etc.)
-* EBSD Reader - Reconstructing initial conditions from EBSD and EDS data
+* [EBSD Reader](ICs/EBSD.md) - Reconstructing initial conditions from EBSD and EDS data
 
 # Tutorials
 * Fe-Cr Phase Decomposition - Illustrates using parsed function kernels to create a two phase decomposition simulation
