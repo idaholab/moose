@@ -121,6 +121,18 @@ Syntax::replaceActionSyntax(const std::string & action, const std::string & synt
   registerActionSyntax(action, syntax, task);
 }
 
+void
+Syntax::deprecateActionSyntax(const std::string & syntax)
+{
+  _deprecated_syntax.insert(syntax);
+}
+
+bool
+Syntax::isDeprecatedSyntax(const std::string & syntax) const
+{
+  return _deprecated_syntax.find(syntax) != _deprecated_syntax.end();
+}
+
 std::string
 Syntax::getSyntaxByAction(const std::string & action, const std::string & task)
 {
