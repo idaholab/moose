@@ -1,4 +1,4 @@
-import os, sys, re, inspect, types, errno, pprint, subprocess, io, shutil, time, copy
+import os, sys, re, inspect, types, errno, pprint, subprocess, io, shutil, time, copy, unittest
 import path_tool
 
 path_tool.activate_module('FactorySystem')
@@ -28,6 +28,8 @@ class TestHarness:
   def buildAndRun(argv, app_name, moose_dir):
     if '--store-timing' in argv:
       harness = TestTimer(argv, app_name, moose_dir)
+    elif '--testharness-unittest' in argv:
+      harness = TestHarnessTester(argv, app_name, moose_dir)
     else:
       harness = TestHarness(argv, app_name, moose_dir)
 
@@ -768,6 +770,7 @@ class TestHarness:
     outputgroup.add_argument('--sep-files-ok', action='store_true', dest='ok_files', help='Write the output of each passed test to a separate file')
     outputgroup.add_argument('-a', '--sep-files-fail', action='store_true', dest='fail_files', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
     outputgroup.add_argument("--store-timing", action="store_true", dest="store_time", help="Store timing in the SQL database: $HOME/timingDB/timing.sqlite A parent directory (timingDB) must exist.")
+    outputgroup.add_argument("--testharness-unittest", action="store_true", help="Run the TestHarness unittests that test the TestHarness.")
     outputgroup.add_argument("--revision", nargs=1, action="store", type=str, dest="revision", help="The current revision being tested. Required when using --store-timing.")
     outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
     outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
@@ -926,3 +929,20 @@ class TestTimer(TestHarness):
     # Insert the data into the database
     cr.executemany('insert into timing values (?,?,?,?,?,?,?)', data)
     con.commit()
+
+class TestHarnessTester(object):
+  """
+  Class for running TestHarness unit tests.
+  """
+  def __init__(self, argv, *args):
+    self._argv = argv
+
+  def findAndRunTests(self):
+    """
+    Execute the unittests for the TestHarness.
+    """
+    location = os.path.join(os.path.dirname(__file__), 'unit_tests')
+    loader = unittest.TestLoader()
+    suite = loader.discover(location)#, pattern)
+    runner = unittest.TextTestRunner(verbosity=2)
+    self.error_code = int(not runner.run(suite).wasSuccessful())
