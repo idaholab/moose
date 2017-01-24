@@ -119,7 +119,7 @@ Other eigenstrains could be caused by defects such as over-sized or under-sized 
 
 !input modules/combined/tests/eigenstrain/inclusion.i block=var_dependence overflow-y=scroll max-height=400px
 
-!input modules/combined/tests/eigenstrain/inclusion.i block=eigen_strain overflow-y=scroll max-height=400px
+!input modules/combined/tests/eigenstrain/inclusion.i block=eigenstrain overflow-y=scroll max-height=400px
 
 Note the `DerivativeParsedMaterial`,  which evaluates an expression given in the input file, and its automatically generated derivatives, at each quadrature point.
 

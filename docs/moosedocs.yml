@@ -10,9 +10,9 @@ markdown_extensions:
     - smarty
     - admonition
     - extra
-    - markdown_include.include:          # pip install markdown-include
+    - markdown_include.include:
           base_path: ..
-    - mdx_math:                          # pip install python-markdown-math
+    - mdx_math:
           enable_dollar_delimiter: True
     - MooseDocs.extensions.MooseMarkdown:
           package: True

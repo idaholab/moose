@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import MooseDocs
 from MooseDocs.testing import MarkdownTestCase
 
 class TestBibtexExtension(MarkdownTestCase):
@@ -13,7 +14,7 @@ class TestBibtexExtension(MarkdownTestCase):
     and after the string "/Users/<username>/<intermediate_directories>/moose".
     """
     html = super(TestBibtexExtension, self).readGold(name)
-    html[0] = html[0].replace('<<CWD>>', os.path.abspath(os.path.join(os.getcwd(), '..')))
+    html[0] = html[0].replace('<<CWD>>', os.path.abspath(os.path.join(MooseDocs.MOOSE_DIR, 'docs')))
     return html
 
   def testCite(self):

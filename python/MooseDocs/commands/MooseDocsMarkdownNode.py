@@ -3,6 +3,7 @@ import copy
 import bs4
 import jinja2
 import re
+import multiprocessing
 import logging
 log = logging.getLogger(__name__)
 
@@ -20,11 +21,8 @@ class MooseDocsMarkdownNode(MooseDocsNode):
       raise Exception('The supplied markdown file must exists: {}'.format(md_file))
 
     # Extract the MooseLinkDatabase for creating source and doxygen links
-    self.__syntax = dict()
-    for ext in parser.registeredExtensions:
-      if isinstance(ext, MooseDocs.extensions.MooseMarkdown):
-        self.__syntax = ext.syntax
-        break
+    ext = MooseDocs.get_moose_markdown_extension(parser)
+    self.__syntax = ext.syntax if ext else dict()
 
     self.__parser = parser
     self.__navigation = navigation
@@ -63,8 +61,9 @@ class MooseDocsMarkdownNode(MooseDocsNode):
 
     # Make sure the destination directory exists
     destination = self.path()
-    if not os.path.exists(destination):
-      os.makedirs(destination)
+    with multiprocessing.Lock():
+      if not os.path.exists(destination):
+        os.makedirs(destination)
 
     # Finalize the html
     soup = self.finalize(bs4.BeautifulSoup(complete, 'html.parser'))

@@ -31,8 +31,7 @@ class MooseCppMethod(MooseTextPatternBase):
     super(MooseCppMethod, self).__init__(self.CPP_RE, language='cpp', **kwargs)
     self._settings['method'] = None
 
-
-    # The executable path is required
+    # The executable path is required (this can't be reached b/c of check in MooseMarkdown)
     if not executable:
       log.critical("The 'executable' must be provided to the MooseCppMethod object.")
       raise Exception('Critical Error')
@@ -64,11 +63,11 @@ class MooseCppMethod(MooseTextPatternBase):
     if not os.path.exists(filename):
       el = self.createErrorElement("C++ file not found: {}".format(rel_filename))
 
-    elif not settings.has_key('method'):
+    elif settings['method'] is None:
       el = self.createErrorElement("Use of !clang syntax while not providing a method=some_method. If you wish to include the entire file, use !text instead.")
 
     else:
-      log.info('Parsing method "{}" from {}'.format(settings['method'], filename))
+      log.debug('Parsing method "{}" from {}'.format(settings['method'], filename))
 
       try:
         parser = utils.MooseSourceParser(self._make_dir)
@@ -76,7 +75,7 @@ class MooseCppMethod(MooseTextPatternBase):
         decl, defn = parser.method(settings['method'])
         el = self.createElement(match.group(2), defn, filename, rel_filename, settings)
       except:
-        el = self.createErrorElement('Failed to parse method using clang, check that you have the make file option passed to the MooseMarkdown object.')
+        el = self.createErrorElement('Failed to parse method using clang, check that the supplied method name exists.')
 
     # Return the Element object
     return el
