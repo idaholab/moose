@@ -46,6 +46,12 @@ GenericConstantMaterial::GenericConstantMaterial(const InputParameters & paramet
 }
 
 void
+GenericConstantMaterial::initQpStatefulProperties()
+{
+  computeQpProperties();
+}
+
+void
 GenericConstantMaterial::computeQpProperties()
 {
   for (unsigned int i=0; i<_num_props; i++)

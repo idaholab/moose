@@ -119,8 +119,12 @@ public:
   void shift();
 
   /**
-   * Copy material properties from elem_from to elem_to
-   * Thread safe
+   * Copy material properties from elem_from to elem_to. Thread safe.
+   *
+   * WARNING: This is not capable of copying material data to/from elements on other processors.
+   *          It only works if both elem_to and elem_from are both on the local processor.
+   *          We can't currently check to ensure that they're on processor here because this isn't a ParallelObject.
+   *
    * @param material_data MaterialData object to work with
    * @param elem_to Element to copy data to
    * @param elem_from Element to copy data from
@@ -167,9 +171,15 @@ public:
   const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & props() const { return *_props_elem; }
   const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOld() const { return *_props_elem_old; }
   const HashMap<const Elem *, HashMap<unsigned int, MaterialProperties> > & propsOlder() const { return *_props_elem_older; }
+  MaterialProperties & props(const Elem * elem, unsigned int side) { return (*_props_elem)[elem][side]; }
+  MaterialProperties & propsOld(const Elem * elem, unsigned int side) { return (*_props_elem_old)[elem][side]; }
+  MaterialProperties & propsOlder(const Elem * elem, unsigned int side) { return (*_props_elem_older)[elem][side]; }
   ///@}
 
   bool hasProperty(const std::string & prop_name) const;
+
+  /// The addProperty functions are idempotent - calling multiple times with
+  /// the same name will provide the same id and works fine.
   unsigned int addProperty(const std::string & prop_name);
   unsigned int addPropertyOld(const std::string & prop_name);
   unsigned int addPropertyOlder(const std::string & prop_name);
@@ -177,9 +187,13 @@ public:
   std::vector<unsigned int> & statefulProps() { return _stateful_prop_id_to_prop_id; }
   std::map<unsigned int, std::string> statefulPropNames() { return _prop_names; }
 
+  /// Returns the property ID for the given prop_name, adding the property and
+  /// creating a new ID if it hasn't already been created.
   unsigned int getPropertyId (const std::string & prop_name);
 
   unsigned int retrievePropertyId (const std::string & prop_name) const;
+
+  bool isStatefulProp(const std::string & prop_name) const {return _prop_names.count(retrievePropertyId(prop_name)) > 0;}
 
 protected:
   // indexing: [element][side]->material_properties
@@ -209,9 +223,12 @@ protected:
   /// the vector of stateful property ids (the vector index is the map to stateful prop_id)
   std::vector<unsigned int> _stateful_prop_id_to_prop_id;
 
-  unsigned int addPropertyId (const std::string & prop_name);
-
   void sizeProps(MaterialProperties & mp, unsigned int size);
+
+private:
+  /// Initializes hashmap entries for element and side to proper qpoint and
+  /// property count sizes.
+  void initProps(MaterialData & material_data, const Elem & elem, unsigned int side, unsigned int n_qpoints);
 };
 
 template<>

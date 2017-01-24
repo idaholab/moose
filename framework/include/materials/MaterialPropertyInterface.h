@@ -186,7 +186,7 @@ protected:
   Moose::MaterialDataType _material_data_type;
 
   /// Pointer to the material data class that stores properties
-  MooseSharedPointer<MaterialData> _material_data;
+  std::shared_ptr<MaterialData> _material_data;
 
   /// Reference to the FEProblemBase class
   FEProblemBase & _mi_feproblem;
@@ -217,14 +217,6 @@ protected:
    */
   template<typename T>
   const MaterialProperty <T> * defaultMaterialProperty(const std::string & name);
-
-  /**
-   * A helper method for extracting the Material object from the MaterialWarehouse. In general, this method
-   * should not be used, please use `getMaterial` or `getMaterialByName`.
-   * @param The name of the material to retrieve.
-   * @return A shared pointer to the Material object.
-   */
-   virtual MooseSharedPointer<Material> getMaterialSharedPointerByName(const std::string & name);
 
   /**
    * True by default. If false, this class throws an error if any of

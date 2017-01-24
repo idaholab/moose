@@ -151,6 +151,7 @@
 #include "RecomputeMaterial.h"
 #include "NewtonMaterial.h"
 #include "ThrowMaterial.h"
+#include "ImplicitStateful.h"
 
 #include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
@@ -434,6 +435,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(SpatialStatefulMaterial);
   registerMaterial(ComputingInitialTest);
   registerMaterial(StatefulTest);
+  registerMaterial(ImplicitStateful);
   registerMaterial(StatefulSpatialTest);
   registerMaterial(CoupledMaterial);
   registerMaterial(CoupledMaterial2);

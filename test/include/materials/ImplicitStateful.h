@@ -11,42 +11,36 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#ifndef GENERICCONSTANTMATERIAL_H
-#define GENERICCONSTANTMATERIAL_H
+#ifndef IMPLICITSTATEFUL_H
+#define IMPLICITSTATEFUL_H
 
 #include "Material.h"
 
-
 //Forward Declarations
-class GenericConstantMaterial;
+class ImplicitStateful;
 
 template<>
-InputParameters validParams<GenericConstantMaterial>();
+InputParameters validParams<ImplicitStateful>();
 
 /**
- * This material automatically declares as material properties whatever is passed to it
- * through the parameters 'prop_names' and uses the values from 'prop_values' as the values
- * for those properties.
- *
- * This is not meant to be used in a production capacity... and instead is meant to be used
- * during development phases for ultimate flexibility.
+ * Stateful material class that defines a few properties.
  */
-class GenericConstantMaterial : public Material
+class ImplicitStateful : public Material
 {
 public:
-  GenericConstantMaterial(const InputParameters & parameters);
+  ImplicitStateful(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  std::vector<std::string> _prop_names;
-  std::vector<Real> _prop_values;
-
-  unsigned int _num_props;
-
-  std::vector<MaterialProperty<Real> *> _properties;
+private:
+  bool _add_time;
+  bool _use_older;
+  MaterialProperty<Real> & _prop;
+  const MaterialProperty<Real> & _coupled_old;
+  const MaterialProperty<Real> & _coupled_older;
 };
 
-#endif //GENERICCONSTANTMATERIAL_H
+#endif //STATEFULMATERIAL_H
+

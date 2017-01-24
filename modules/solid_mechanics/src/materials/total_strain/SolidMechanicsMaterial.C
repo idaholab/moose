@@ -24,6 +24,11 @@ InputParameters validParams<SolidMechanicsMaterial>()
   return params;
 }
 
+void
+SolidMechanicsMaterial::initQpStatefulProperties()
+{
+}
+
 SolidMechanicsMaterial::SolidMechanicsMaterial(const InputParameters & parameters)
   :Material(parameters),
    _appended_property_name( getParam<std::string>("appended_property_name") ),
