@@ -35,8 +35,8 @@ ComputeMeanThermalExpansionFunctionEigenstrain::initialSetup()
   _thexp_stress_free_temperature = _alphabar_stress_free_temperature *
                                    (_stress_free_temperature - _reference_temperature);
 
-  //Evaluate the derivative of this function here so it will error out early on if that isn't supported for this function.
-  _thermal_expansion_function.value(_stress_free_temperature,p);
+  // Evaluate the derivative of this function here so it will error out early on if that isn't supported for this function.
+  _thermal_expansion_function.timeDerivative(_stress_free_temperature,p);
 }
 
 void
@@ -49,13 +49,11 @@ ComputeMeanThermalExpansionFunctionEigenstrain::computeThermalStrain(Real & ther
   const Real current_alphabar = _thermal_expansion_function.value(current_temp,p);
   const Real thexp_current_temp = current_alphabar * (current_temp - _reference_temperature);
 
-  thermal_strain = thexp_current_temp - _thexp_stress_free_temperature;
-
   // Per the paper:  M. Niffenegger and K. Reichlin. The proper use of thermal expansion coefficients in
   // finite element calculations. Nuclear Engineering and Design, 243:356–359, Feb. 2012,
   // strictly speaking, thermal_strain should be divided by (1.0 + _thexp_stress_free_temperature)
   // to account for the ratio of the length at the stress-free temperature to the length at the reference temperature.
-  // However, because this is very close to 1, this can be skipped, so it is skipped here.
+  // While this is very close to 1, we include it for completeness here.
 
   thermal_strain = (thexp_current_temp - _thexp_stress_free_temperature) / (1.0 + _thexp_stress_free_temperature);
 
