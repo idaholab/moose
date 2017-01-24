@@ -1,7 +1,8 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # ConservedNormalNoise
+
 !description /UserObjects/ConservedNormalNoise
+
+`ConservedNormalNoise` can be used for [fluctuation based nucleation](Nucleation/Langevin Noise.md)
 
 !parameters /UserObjects/ConservedNormalNoise
 
