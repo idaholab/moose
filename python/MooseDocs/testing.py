@@ -20,6 +20,8 @@ class MarkdownTestCase(unittest.TestCase):
   gold html files.
   """
   parser = None
+  working_dir = os.getcwd()
+
 
   @classmethod
   def setUpClass(cls):
@@ -39,6 +41,18 @@ class MarkdownTestCase(unittest.TestCase):
     extensions, extension_configs = MooseDocs.get_markdown_extensions(config)
     cls.parser = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
     os.chdir(cwd)
+
+  def setUp(self):
+    """
+    Always work from the 'docs' directory
+    """
+    os.chdir(os.path.join(MooseDocs.MOOSE_DIR, 'docs'))
+
+  def tearDown(self):
+    """
+    Restore the working directory.
+    """
+    os.chdir(self.working_dir)
 
   def readGold(self, name):
     """

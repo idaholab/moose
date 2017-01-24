@@ -60,6 +60,9 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', disable_th
   server.watch(os.path.join(os.getcwd(), 'fonts'), builder.copyFiles)
 
   # Watch the files and directories that require complete rebuild
+  moose_extension = MooseDocs.get_moose_markdown_extension(parser)
+  if moose_extension:
+      server.watch(os.path.join(os.getcwd(), moose_extension.getConfig('executable')), build_complete)
   server.watch(config['navigation'], build_complete)
   server.watch(config_file, build_complete)
   server.watch('templates')

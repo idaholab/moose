@@ -171,6 +171,15 @@ def get_markdown_extensions(config):
 
   return extensions, extension_configs
 
+def get_moose_markdown_extension(parser):
+  """
+  Return the MooseMarkdown instance from the Markdown parser, if it exists.
+  """
+  for ext in parser.registeredExtensions:
+    if isinstance(ext, extensions.MooseMarkdown):
+      return ext
+
+
 def read_markdown(md_file):
   """
   Reads and removes meta data (key, value pairs) from the top of a markdown file.
