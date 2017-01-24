@@ -45,20 +45,15 @@ PropertyValue *_init_helper(int size, PropertyValue *prop, const std::vector<P>*
 class PropertyValue
 {
 public:
-  /**
-   * Destructor.
-   */
   virtual ~PropertyValue() {};
 
   /**
    * String identifying the type of parameter stored.
-   * Must be reimplemented in derived classes.
    */
   virtual std::string type () = 0;
 
   /**
    * Clone this value.  Useful in copy-construction.
-   * Must be reimplemented in derived classes.
    */
   virtual PropertyValue *init (int size) = 0;
 
@@ -66,7 +61,6 @@ public:
 
   /**
    * Resizes the property to the size n
-   * Must be reimplemented in derived classes.
    */
   virtual void resize (int n) = 0;
 
@@ -330,7 +324,7 @@ template<typename P>
 PropertyValue *_init_helper(int size, PropertyValue * /*prop*/, const P*)
 {
   MaterialProperty<P> *copy = new MaterialProperty<P>;
-  copy->_value.resize(size);
+  copy->_value.resize(size, P{});
   return copy;
 }
 
@@ -340,7 +334,7 @@ PropertyValue *_init_helper(int size, PropertyValue * /*prop*/, const std::vecto
 {
   typedef MaterialProperty<std::vector<P> > PropType;
   PropType *copy = new PropType;
-  copy->_value.resize(size);
+  copy->_value.resize(size, std::vector<P>{});
 
   // We don't know the size of the underlying vector at each
   // quadrature point, the user will be responsible for resizing it

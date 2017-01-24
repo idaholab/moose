@@ -43,7 +43,7 @@ private:
    * and previous material properties respectively
    */
   MaterialProperty<Real> & _diffusivity;
-  MaterialProperty<Real> & _diffusivity_old;
+  const MaterialProperty<Real> & _diffusivity_old;
 };
 
 #endif //EXAMPLEMATERIAL_H

@@ -72,9 +72,6 @@ class Material :
 {
 public:
 
-  /**
-   * Constructor
-   */
   Material(const InputParameters & parameters);
 
   /**
@@ -335,7 +332,6 @@ Material::getMaterialPropertyOlderByName(const std::string & prop_name)
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data->getPropertyOlder<T>(prop_name);
 }
-
 
 template<typename T>
 MaterialProperty<T> &

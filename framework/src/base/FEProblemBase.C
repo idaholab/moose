@@ -2038,8 +2038,7 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
   {
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int n_points = _assembly[tid]->qRule()->n_points();
-    if (_material_data[tid]->nQPoints() != n_points)
-      _material_data[tid]->size(n_points);
+    _material_data[tid]->resize(n_points);
 
     // Only swap if requested
     if (swap_stateful)
@@ -2062,8 +2061,7 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
     unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
 
-    if (_bnd_material_data[tid]->nQPoints() != n_points)
-      _bnd_material_data[tid]->size(n_points);
+    _bnd_material_data[tid]->resize(n_points);
 
     if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
       _bnd_material_data[tid]->swap(*elem, side);
@@ -2085,8 +2083,7 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
     const Elem * & neighbor = _assembly[tid]->neighbor();
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
-    if (_neighbor_material_data[tid]->nQPoints() != n_points)
-      _neighbor_material_data[tid]->size(n_points);
+    _neighbor_material_data[tid]->resize(n_points);
 
     // Only swap if requested
     if (swap_stateful)
@@ -2108,8 +2105,7 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
-    if (_bnd_material_data[tid]->nQPoints() != n_points)
-      _bnd_material_data[tid]->size(n_points);
+    _bnd_material_data[tid]->resize(n_points);
 
     if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
       _bnd_material_data[tid]->swap(*elem, side);
@@ -4302,10 +4298,6 @@ FEProblemBase::checkDependMaterialsHelper(const std::map<SubdomainID, std::vecto
       // See if any of the active materials supply this property
       for (const auto & mat2 : it.second)
       {
-        // Don't check THIS material for a coupled property
-        if (mat1 == mat2)
-          continue;
-
         const std::set<std::string> & supplied_props = mat2->Material::getSuppliedItems();
         block_supplied_props.insert(supplied_props.begin(), supplied_props.end());
       }

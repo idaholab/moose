@@ -26,6 +26,8 @@ public:
   SolidMechanicsMaterial(const InputParameters & parameters);
 
 protected:
+
+  virtual void initQpStatefulProperties() override;
   const std::string _appended_property_name;
   const VariableGradient & _grad_disp_x;
   const VariableGradient & _grad_disp_y;
