@@ -2,16 +2,16 @@
   [./Math_CH]
     type = RunApp
     input = 'Math_CH.i'
-    check_input = True
+    cli_args = '--check-input'
   [../]
   [./Parsed_CH]
     type = RunApp
     input = 'Parsed_CH.i'
-    check_input = True
+    cli_args = '--check-input'
   [../]
   [./Parsed_SplitCH]
     type = RunApp
     input = 'Parsed_SplitCH.i'
-    check_input = True
+    cli_args = '--check-input'
   [../]
 []

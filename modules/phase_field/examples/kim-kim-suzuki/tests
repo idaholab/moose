@@ -2,12 +2,12 @@
   [./kks_example_dirichlet]
     type = RunApp
     input = 'kks_example_dirichlet.i'
-    check_input = True
+    cli_args = '--check-input'
   [../]
   [./kks_example_noflux]
     type = RunApp
     input = 'kks_example_noflux.i'
-    check_input = True
+    cli_args = '--check-input'
   [../]
   [./kks_example_ternary]
     type = RunApp
@@ -15,7 +15,6 @@
     # Note: we use a smaller mesh, as this does not affect the
     # --check-input results in any way other than the amount of time
     # it takes to run.
-    check_input = True
-    cli_args = 'Mesh/nx=2 Mesh/ny=2'
+    cli_args = '--check-input Mesh/nx=2 Mesh/ny=2'
   [../]
 []

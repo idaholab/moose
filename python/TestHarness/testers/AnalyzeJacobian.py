@@ -57,11 +57,7 @@ class AnalyzeJacobian(Tester):
       elif retcode != 0 :
         reason = 'CRASH'
 
-    # populate status bucket
-    if reason != '':
-      self.setStatus(reason, 'FAIL')
-
-    return output
+    return (reason, output)
 
   def checkOutputForPattern(self, output, re_pattern):
     if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) == None:
