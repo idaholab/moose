@@ -20,7 +20,8 @@ class RunCommand(Tester):
     return self.command
 
   def processResults(self, moose_dir, retcode, options, output):
+    reason = ''
     if retcode != 0 :
-      self.setStatus('CODE %d' % retcode, 'FAIL')
+      reason = 'CODE %d' % retcode
 
-    return output
+    return (reason, output)
