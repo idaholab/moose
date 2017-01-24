@@ -47,13 +47,13 @@
   [./cl]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.0
+    initial_condition = 0.1
   [../]
   # Solid phase solute concentration
   [./cs]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.0
+    initial_condition = 0.9
   [../]
 []
 
