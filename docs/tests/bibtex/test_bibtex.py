@@ -51,3 +51,7 @@ class TestBibtexExtension(MarkdownTestCase):
   def testCitepThree(self):
     md = r'\citep{testkey, testkey, testkey}\n\bibliography{docs/bib/moose.bib}'
     self.assertConvert('test_citepThree.html', md)
+
+  def testBibtexMacro(self):
+    md = r'\cite{macroTestKey}\n\bibliography{docs/bib/macro_test.bib}'
+    self.assertConvert('test_bibtex_macro.html', md)

@@ -48,6 +48,7 @@ class MooseMarkdown(markdown.Extension):
     self.config['graphviz']     = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
     self.config['dot_ext']      = ['svg', "The graphviz/dot output file extension (default: svg)."]
     self.config['install']      = ['', "The location to install system and object documentation."]
+    self.config['macro_files']  = ['', "List of paths to files that contain macros to be used in bibtex parsing."]
 
     # Construct the extension object
     super(MooseMarkdown, self).__init__(**kwargs)
