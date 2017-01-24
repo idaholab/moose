@@ -385,6 +385,7 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(LegacyTensorMechanicsAction, "validate_coordinate_systems");
   registerAction(LegacyTensorMechanicsAction, "add_kernel");
 
+  registerAction(TensorMechanicsAction, "meta_action");
   registerAction(TensorMechanicsAction, "setup_mesh_complete");
   registerAction(TensorMechanicsAction, "validate_coordinate_systems");
   registerAction(TensorMechanicsAction, "add_variable");
@@ -403,7 +404,7 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
 
   registerAction(PressureAction, "add_bc");
 
+  registerAction(GeneralizedPlaneStrainAction, "add_scalar_kernel");
   registerAction(GeneralizedPlaneStrainAction, "add_kernel");
   registerAction(GeneralizedPlaneStrainAction, "add_user_object");
-  registerAction(GeneralizedPlaneStrainAction, "add_scalar_kernel");
 }

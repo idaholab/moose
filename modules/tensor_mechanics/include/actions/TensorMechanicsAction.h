@@ -71,9 +71,9 @@ protected:
   enum class PlanarFormulation
   {
     None,
-    PlaneStress,
     PlaneStrain,
-    GeneralizedPlaneStrain
+    GeneralizedPlaneStrain,
+    /* PlaneStress */
   } _planar_formulation;
 
   /// use displaced mesh (true unless _strain is SMALL)
