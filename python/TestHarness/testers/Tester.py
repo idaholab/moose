@@ -20,7 +20,6 @@ class Tester(MooseObject):
     params.addParam('prereq',      [], "A list of prereq tests that need to run successfully before launching this test.")
     params.addParam('skip_checks', False, "Tells the TestHarness to skip additional checks (This parameter is set automatically by the TestHarness during recovery tests)")
     params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
-    params.addParam('success_message', 'OK', "The successful message")
 
     params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
 
@@ -51,7 +50,6 @@ class Tester(MooseObject):
     params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
     params.addParam('should_execute', True, 'Whether or not the executeable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation')
     params.addParam('required_submodule', [], "A list of initialized submodules for which this test requires.")
-    params.addParam('check_input',    False, "Check for correct input file syntax")
 
     return params
 
@@ -69,67 +67,10 @@ class Tester(MooseObject):
       if item.upper() == 'SERIAL':
         mesh_mode[i] = 'REPLICATED'
 
-    # Set the status message
-    if self.specs['check_input']:
-      self.success_message = 'SYNTAX PASS'
-    else:
-      self.success_message = self.specs['success_message']
-
-    # Set up common paramaters
-    self.should_execute = self.specs['should_execute']
-    self.check_input = self.specs['check_input']
-    self.success_bucket = 'PASS'
-
-    # Initialize the status bucket
-    self.status = {}
-
-    # Initialize the tester with a passing status
-    self.setStatus(self.success_message, self.success_bucket)
-
-  # Return text color based on bucket status
-  def getColor(self, status):
-    BUCKET_COLOR = { 'PASS'    : 'GREEN',
-                     'FAIL'    : 'RED',
-                     'DIFF'    : 'YELLOW',
-                     'PBS'     : 'CYAN',
-                     'PENDING' : 'YELLOW',
-                     'DELETED' : 'RED',
-                     'SKIP'    : 'RESET'}
-
-    if status in BUCKET_COLOR:
-      return BUCKET_COLOR[status]
-    return 'RESET'
-
   # Method to return the input file if applicable to this Tester
   def getInputFile(self):
     return None
 
-  # Method to return the successful message printed to stdout
-  def getSuccessMessage(self):
-    return self.success_message
-
-  # Method to return status text (exodiff, crash, skipped because x, y and z etc)
-  def getStatusMessage(self):
-    return self.status_message
-
-  # Method to return enumerated status (PASS, FAIL, SKIP, DIFF, SILENT, DELETED)
-  def getStatus(self):
-    if self.getStatusMessage() in self.status:
-      return self.status[self.getStatusMessage()]
-    return None
-
-  # Method to set the bucket status
-  def setStatus(self, reason, bucket):
-    self.status_message = reason
-    self.status[reason] = bucket
-    return self.getStatus()
-
-  # Method to check for successfull test
-  def didPass(self):
-    return self.getStatus() == self.success_bucket
-
-  def getCheckInput(self):
-    return self.check_input
 
   def setValgrindMode(self, mode):
     # Increase the alloted time for tests when running with the valgrind option
@@ -150,7 +91,7 @@ class Tester(MooseObject):
   # Whether or not the executeable should be run
   # Don't override this
   def shouldExecute(self):
-    return self.should_execute
+    return self.specs['should_execute']
 
   # This method is called prior to running the test.  It can be used to cleanup files
   # or do other preparations before the tester is run
@@ -172,6 +113,7 @@ class Tester(MooseObject):
   def processResultsCommand(self, moose_dir, options):
     return []
 
+
   # This method will be called to process the results of running the test.  Any post-test
   # processing should happen in this method
   def processResults(self, moose_dir, retcode, options, output):
@@ -185,22 +127,17 @@ class Tester(MooseObject):
 
     # Are we running only tests in a specific group?
     if options.group <> 'ALL' and options.group not in self.specs['group']:
-      self.setStatus(reason, 'SKIP')
-      return False
+      return (False, reason)
     if options.not_group <> '' and options.not_group in self.specs['group']:
-      self.setStatus(reason, 'SKIP')
-      return False
+      return (False, reason)
 
     # Store regexp for matching tests if --re is used
     if options.reg_exp:
       match_regexp = re.compile(options.reg_exp)
 
     # If --re then only test matching regexp. Needs to run before other SKIP methods
-    # This also needs to be in its own bucket group. We normally print skipped messages.
-    # But we do not want to print tests that didn't match regex.
     if options.reg_exp and not match_regexp.search(self.specs['test_name']):
-      self.setStatus('silent', 'SILENT')
-      return False
+      return (False, reason)
 
     # Check for deleted tests
     if self.specs.isValid('deleted'):
@@ -211,50 +148,44 @@ class Tester(MooseObject):
         else:
           test_reason = self.specs['deleted']
         reason = 'deleted (' + test_reason + ')'
-      self.setStatus(reason, 'DELETED')
-      return False
+      return (False, reason)
 
     # Check for skipped tests
     if self.specs.type('skip') is bool and self.specs['skip']:
       # Backwards compatible (no reason)
-      self.setStatus('no reason', 'SKIP')
-      return False
+      return (False, 'skipped')
     elif self.specs.type('skip') is not bool and self.specs.isValid('skip'):
       skip_message = self.specs['skip']
       # We might want to trim the string so it formats nicely
       if len(skip_message) >= TERM_COLS - (len(self.specs['test_name'])+21):
-        reason = (skip_message)[:(TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
+        test_reason = (skip_message)[:(TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
       else:
-        reason = skip_message
-      self.setStatus(reason, 'SKIP')
-      return False
+        test_reason = skip_message
+      reason = 'skipped (' + test_reason + ')'
+      return (False, reason)
     # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
     elif (options.store_time or options.scaling) and self.specs['scale_refine'] == 0:
-      self.setStatus('silent', 'SILENT')
-      return False
+      return (False, reason)
     # If we're testing with valgrind, then skip tests that require parallel or threads or don't meet the valgrind setting
     elif options.valgrind_mode != '':
       if self.specs['valgrind'].upper() == 'NONE':
-        reason = 'Valgrind==NONE'
+        reason = 'skipped (Valgrind==NONE)'
       elif self.specs['valgrind'].upper() == 'HEAVY' and options.valgrind_mode.upper() == 'NORMAL':
-        reason = 'Valgrind==HEAVY'
+        reason = 'skipped (Valgrind==HEAVY)'
       elif self.specs['min_parallel'] > 1 or self.specs['min_threads'] > 1:
-        reason = 'Valgrind requires serial'
+        reason = 'skipped (Valgrind requires serial)'
       if reason != '':
-        self.setStatus(reason, 'SKIP')
-        return False
+        return (False, reason)
     # If we're running in recover mode skip tests that have recover = false
     elif options.enable_recover and self.specs['recover'] == False:
-      reason = 'NO RECOVER'
-      self.setStatus(reason, 'SKIP')
-      return False
+      reason = 'skipped (NO RECOVER)'
+      return (False, reason)
 
     # Check for PETSc versions
     (petsc_status, logic_reason, petsc_version) = checkPetscVersion(checks, self.specs)
     if not petsc_status:
-      reason = 'using PETSc ' + str(checks['petsc_version']) + ' REQ: ' + logic_reason + ' ' + petsc_version
-      self.setStatus(reason, 'SKIP')
-      return False
+      reason = 'skipped (using PETSc ' + str(checks['petsc_version']) + ' REQ: ' + logic_reason + ' ' + petsc_version + ')'
+      return (False, reason)
 
     # PETSc is being explicitly checked above
     local_checks = ['platform', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids', 'vtk', 'tecplot', \
@@ -266,70 +197,57 @@ class Tester(MooseObject):
       for x in self.specs[check]:
         if x[0] == '!':
           if inverse_set:
-            reason = 'Multiple Negation Unsupported'
-            self.setStatus(reason, 'SKIP')
-            return False
+            return (False, "(Multiple Negation Unsupported)")
           inverse_set = True
           operator_display = '=='
           x = x[1:] # Strip off the !
         x_upper = x.upper()
         if x_upper in test_platforms:
-          reason = 'Duplicate Entry or Negative of Existing Entry'
-          self.setStatus(reason, 'SKIP')
-          return False
+          return (False, "(Duplicate Entry or Negative of Existing Entry)")
         test_platforms.add(x.upper())
 
       match_found = len(test_platforms.intersection(checks[check])) > 0
       # Either we didn't find the match when we were using normal "include" logic
       # or we did find the match when we wanted to exclude it
       if inverse_set == match_found:
-        reason = re.sub(r'\[|\]', '', check).upper() + operator_display + ', '.join(test_platforms)
-        self.setStatus(reason, 'SKIP')
-        return False
+        reason = 'skipped (' + re.sub(r'\[|\]', '', check).upper() + operator_display + ', '.join(test_platforms) + ')'
+        return (False, reason)
 
     # Check for heavy tests
     if options.all_tests or options.heavy_tests:
       if not self.specs['heavy'] and options.heavy_tests:
-        reason = 'NOT HEAVY'
-        self.setStatus(reason, 'SKIP')
-        return False
+        reason = 'skipped (NOT HEAVY)'
+        return (False, reason)
     elif self.specs['heavy']:
-      reason = 'HEAVY'
-      self.setStatus(reason, 'SKIP')
-      return False
+      reason = 'skipped (HEAVY)'
+      return (False, reason)
 
     # Check for positive scale refine values when using store timing options
     if self.specs['scale_refine'] == 0 and options.store_time:
-      self.setStatus('scale_refine==0 store_time=True', 'SKIP')
-      return False
+      return (False, reason)
 
     # There should only be one entry in self.specs['dof_id_bytes']
     for x in self.specs['dof_id_bytes']:
       if x != 'ALL' and not x in checks['dof_id_bytes']:
-        reason = '--with-dof-id-bytes!=' + x
-        self.setStatus(reason, 'SKIP')
-        return False
+        return (False, 'skipped (--with-dof-id-bytes!=' + x + ')')
 
     # Check to make sure depend files exist
     for file in self.specs['depend_files']:
       if not os.path.isfile(os.path.join(self.specs['base_dir'], file)):
-        reason = 'DEPEND FILES'
-        self.setStatus(reason, 'SKIP')
-        return False
+        reason = 'skipped (DEPEND FILES)'
+        return (False, reason)
 
     # Check to make sure required submodules are initialized
     for var in self.specs['required_submodule']:
       if var not in checks["submodules"]:
-        reason = '%s submodule not initialized' % var
-        self.setStatus(reason, 'SKIP')
-        return False
+        reason = 'skipped (%s submodule not initialized)' % var
+        return (False, reason)
 
     # Check to make sure environment variable exists
     for var in self.specs['env_vars']:
       if not os.environ.has_key(var):
-        reason = 'ENV VAR NOT SET'
-        self.setStatus(reason, 'SKIP')
-        return False
+        reason = 'skipped (ENV VAR NOT SET)'
+        return (False, reason)
 
     # Check the return values of the derived classes
     return self.checkRunnable(options)

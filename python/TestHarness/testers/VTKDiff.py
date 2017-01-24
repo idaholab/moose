@@ -24,16 +24,16 @@ class VTKDiff(RunApp):
       self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['vtkdiff'])
 
   def processResults(self, moose_dir, retcode, options, output):
-    output = RunApp.processResults(self, moose_dir, retcode, options, output)
+    (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
 
     # Skip
     specs = self.specs
-    if self.getStatus() == 'FAIL' or specs['skip_checks']:
-      return output
+    if reason != '' or specs['skip_checks']:
+      return (reason, output)
 
     # Don't Run VTKDiff on Scaled Tests
     if options.scaling and specs['scale_refine']:
-      return output
+      return (reason, output)
 
     # Loop over every file
     for file in specs['vtkdiff']:
@@ -41,7 +41,7 @@ class VTKDiff(RunApp):
       # Error if gold file does not exist
       if not os.path.exists(os.path.join(specs['test_dir'], specs['gold_dir'], file)):
         output += "File Not Found: " + os.path.join(specs['test_dir'], specs['gold_dir'], file)
-        self.setStatus('MISSING GOLD FILE', 'FAIL')
+        reason = 'MISSING GOLD FILE'
         break
 
       # Perform diff
@@ -61,8 +61,8 @@ class VTKDiff(RunApp):
           output += differ.message() + '\n'
 
           if differ.fail():
-            self.setStatus('VTKDIFF', 'DIFF')
+            reason = 'VTKDIFF'
             break
 
     # Return to the test harness
-    return output
+    return (reason, output)

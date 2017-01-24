@@ -21,8 +21,7 @@ class RunException(RunApp):
   def checkRunnable(self, options):
     if options.enable_recover:
       reason = 'skipped (RunException RECOVER)'
-      self.setStatus(reason, 'SKIP')
-      return False
+      return (False, reason)
     return RunApp.checkRunnable(self, options)
 
   def prepare(self, options):
@@ -47,9 +46,6 @@ class RunException(RunApp):
           reason = 'NO EXPECTED ASSERT'
 
     if reason == '':
-      output = RunApp.processResults(self, moose_dir, retcode, options, output)
+      (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
 
-    if reason != '':
-      self.setStatus(reason, 'FAIL')
-
-    return output
+    return (reason, output)
