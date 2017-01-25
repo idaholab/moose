@@ -114,9 +114,11 @@ MeshExtruder::changeID(const std::vector<BoundaryName> & names, BoundaryID old_i
 MeshExtruder::QueryElemSubdomainID::QueryElemSubdomainID(std::vector<SubdomainID> existing_subdomains,
                                                          std::vector<unsigned int> layers,
                                                          std::vector<unsigned int> new_ids,
-                                                         unsigned int num_layers) :
-    QueryElemSubdomainIDBase(),
-    _num_layers(num_layers)
+                                                         unsigned int libmesh_dbg_var(num_layers)) :
+    QueryElemSubdomainIDBase()
+#ifdef DEBUG
+    ,_num_layers(num_layers)
+#endif
 {
   // Setup our stride depending on whether the user passed unique sets in new ids or just a single set of new ids
   const unsigned int zero = 0;
