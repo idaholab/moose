@@ -182,21 +182,6 @@ Console::Console(const InputParameters & parameters) :
   for (auto & mme : common_execute_on)
     _execute_on.push_back(mme);
 
-  // If --timing was used from the command-line, do nothing, all logs are enabled
-  // Also, only allow the main app to change the perf_log settings.
-  if (!_timing && _app.name() == "main")
-  {
-    // Disable performance logging (all log input options must be false)
-    if (!_perf_log && !_setup_log && !_solve_log && !_perf_header && !_setup_log_early)
-      Moose::perf_log.disable_logging();
-
-    // Disable libMesh log
-#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
-    if (!_libmesh_log)
-      libMesh::perflog.disable_logging();
-#endif
-  }
-
   // If --show-outputs is used, enable it
   if (_app.getParam<bool>("show_outputs"))
     _system_info_flags.push_back("output");
@@ -251,6 +236,24 @@ Console::~Console()
 void
 Console::initialSetup()
 {
+  // If --timing was used from the command-line, do nothing, all logs are enabled
+  // Also, only allow the main app to change the perf_log settings.
+  if (!_timing && _app.name() == "main")
+  {
+    if (_perf_log || _setup_log || _solve_log || _perf_header || _setup_log_early)
+      _app.getOutputWarehouse().setLoggingRequested();
+
+    // Disable performance logging if nobody needs logging
+    if (!_app.getOutputWarehouse().getLoggingRequested())
+      Moose::perf_log.disable_logging();
+
+    // Disable libMesh log
+#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
+    if (!_libmesh_log)
+      libMesh::perflog.disable_logging();
+#endif
+  }
+
   // system info flag can be changed only before console initial setup
   _allow_changing_sysinfo_flag = false;
 
