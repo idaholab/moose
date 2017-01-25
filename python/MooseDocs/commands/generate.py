@@ -38,7 +38,7 @@ def generate(config_file='moosedocs.yml', generate=True, locations=None, **kwarg
   for loc in ext_config['locations']:
     for key, value in loc.iteritems():
       if (locations == None) or (key in locations):
-        value['group'] = key 
+        value['group'] = key
         syntax = MooseDocs.MooseApplicationSyntax(yaml, generate=generate, install=ext_config['install'], **value)
         log.info("Checking documentation for '{}'.".format(key))
         syntax.check()
