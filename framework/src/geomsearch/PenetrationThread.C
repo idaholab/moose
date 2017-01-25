@@ -580,19 +580,18 @@ PenetrationThread::interactionsOffCommonEdge(PenetrationInfo * pi1,
   CommonEdgeResult common_edge(NO_COMMON);
   const std::vector<const Node *> & off_edge_nodes1 = pi1->_off_edge_nodes;
   const std::vector<const Node *> & off_edge_nodes2 = pi2->_off_edge_nodes;
-  const unsigned dim1(pi1->_side->dim());
-  const unsigned dim2(pi2->_side->dim());
+  const unsigned dim1 = pi1->_side->dim();
 
   if (dim1 == 1)
   {
-    mooseAssert(dim2==1,"Incompatible dimensionalities");
+    mooseAssert(pi2->_side->dim() == 1, "Incompatible dimensions.");
     mooseAssert(off_edge_nodes1.size()<2 && off_edge_nodes2.size()<2,"off_edge_nodes size should be <2 for 2D contact");
     if (off_edge_nodes1.size()==1 && off_edge_nodes2.size()==1 && off_edge_nodes1[0]==off_edge_nodes2[0])
       common_edge = COMMON_EDGE;
   }
   else
   {
-    mooseAssert(dim1==2 && dim2==2,"Incompatible dimensionalities");
+    mooseAssert(dim1 == 2 && pi2->_side->dim() == 2, "Incompatible dimensions.");
     mooseAssert(off_edge_nodes1.size()<3 && off_edge_nodes2.size()<3,"off_edge_nodes size should be <3 for 3D contact");
     if (off_edge_nodes1.size()==1)
     {
