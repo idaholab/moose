@@ -197,7 +197,10 @@ class MooseApplicationSyntax(object):
     # Create MooseActionInfo objects
     for key, value in actions.iteritems():
       for node in self._yaml_data['/' + key]:
-        code = [self._filenames[a] for a in value if a in self._filenames]
+        code = []
+        for a in value:
+          if a in self._filenames:
+            code += self._filenames[a]
         info = MooseActionInfo(node,
                                code=code,
                                install=install,

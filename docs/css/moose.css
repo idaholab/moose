@@ -73,18 +73,20 @@ moose-caption {
     width:220px;
 }
 
-.moose-devel-links {
+.moose-code-links,
+.moose-doxygen-link {
+    padding: 2px;
     font-size:80%;
     margin-top:10px;
     width:100%;
 }
 
-a.moose-bad-link{
-    color:red;
+.moose-code-links {
+    text-transform: none;
 }
 
-.moose-devel-links .btn, .btn-large, .btn-flat{
-    text-transform:none;
+a.moose-bad-link{
+    color:red;
 }
 
 li{

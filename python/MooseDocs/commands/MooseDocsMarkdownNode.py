@@ -158,26 +158,27 @@ class MooseDocsMarkdownNode(MooseDocsNode):
 
     return soup
 
-  def links(self, repo_url):
+  def code(self, repo_url):
     """
     Return the GitHub/GitLab address for editing the markdown file.
 
     Args:
       repo_url[str]: Web address to use as the base for creating the edit link
     """
+    info = []
+    for key, syntax in self.__syntax.iteritems():
+      for obj in syntax.objects().itervalues():
+        if obj.name == self.name():
+          info.append(obj)
+      for obj in syntax.actions().itervalues():
+        if obj.name == self.name():
+          info.append(obj)
 
     output = []
-    for key, syntax in self.__syntax.iteritems():
-      if syntax.hasObject(self.name()):
-        include = syntax.filenames(self.name())[0]
-        rel_include = MooseDocs.relpath(include)
-
-        output.append( ('Header', os.path.join(repo_url, 'blob', 'master', rel_include)) )
-
-        source = include.replace('/include/', '/src/').replace('.h', '.C')
-        if os.path.exists(source):
-          rel_source = MooseDocs.relpath(source)
-          output.append( ('Source', os.path.join(repo_url, 'blob', 'master', rel_source)) )
+    for obj in info:
+      for filename in obj.code:
+        rel_filename = MooseDocs.relpath(filename)
+        output.append( (os.path.basename(rel_filename), os.path.join(repo_url, 'blob', 'master', rel_filename)) )
 
     return output
 
