@@ -169,7 +169,10 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   if (_displaced_problem && mesh_changed)
   {
     // Now do refinement/coarsening
-    bool displaced_mesh_changed = _displaced_mesh_refinement->refine_and_coarsen_elements();
+#ifdef DEBUG
+    bool displaced_mesh_changed =
+#endif
+      _displaced_mesh_refinement->refine_and_coarsen_elements();
 
     // Since the undisplaced mesh changed, the displaced mesh better have changed!
     mooseAssert(displaced_mesh_changed, "Undisplaced mesh changed, but displaced mesh did not!");
