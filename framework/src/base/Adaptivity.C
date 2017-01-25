@@ -169,7 +169,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   if (_displaced_problem && mesh_changed)
   {
     // Now do refinement/coarsening
-#ifdef DEBUG
+#ifndef NDEBUG
     bool displaced_mesh_changed =
 #endif
       _displaced_mesh_refinement->refine_and_coarsen_elements();
