@@ -152,6 +152,7 @@
 #include "NewtonMaterial.h"
 #include "ThrowMaterial.h"
 #include "ImplicitStateful.h"
+#include "MaterialDerivativeTestMaterial.h"
 
 #include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
@@ -453,6 +454,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerMaterial(RecomputeMaterial);
   registerMaterial(NewtonMaterial);
   registerMaterial(ThrowMaterial);
+  registerMaterial(MaterialDerivativeTestMaterial);
 
   registerScalarKernel(ExplicitODE);
   registerScalarKernel(ImplicitODEx);
