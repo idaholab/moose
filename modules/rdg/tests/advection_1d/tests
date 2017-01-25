@@ -32,6 +32,6 @@
     input = 'block_restrictable.i'
     exodiff = 'block_restrictable_out.e'
     abs_zero = 1e-4
-    rel_error = 5e-5
+    rel_err = 5e-5
   [../]
 []
