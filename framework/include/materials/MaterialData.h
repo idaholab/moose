@@ -219,7 +219,7 @@ MaterialData::declarePropertyOlder(const std::string & prop_name)
 
 template<typename T>
 MaterialProperty<T> &
-MaterialData::declareHelper(MaterialProperties& props, const std::string & prop_name, unsigned int prop_id)
+MaterialData::declareHelper(MaterialProperties& props, const std::string & libmesh_dbg_var(prop_name), unsigned int prop_id)
 {
   resizeProps<T>(prop_id);
   auto prop = dynamic_cast<MaterialProperty<T>*>(props[prop_id]);
