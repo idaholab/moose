@@ -20,7 +20,7 @@ InputParameters validParams<ComputeMeanThermalExpansionFunctionEigenstrain>()
 
 ComputeMeanThermalExpansionFunctionEigenstrain::ComputeMeanThermalExpansionFunctionEigenstrain(const InputParameters & parameters) :
     ComputeThermalExpansionEigenstrainBase(parameters),
-    _thermal_expansion_function(getFunction("thermal_expansion_function")),
+    _thermal_expansion_function(&getFunction("thermal_expansion_function")),
     _reference_temperature(getParam<Real>("thermal_expansion_function_reference_temperature")),
     _alphabar_stress_free_temperature(0.0),
     _thexp_stress_free_temperature(0.0)
@@ -31,12 +31,12 @@ void
 ComputeMeanThermalExpansionFunctionEigenstrain::initialSetup()
 {
   Point p;
-  _alphabar_stress_free_temperature = _thermal_expansion_function.value(_stress_free_temperature,p);
+  _alphabar_stress_free_temperature = _thermal_expansion_function->value(_stress_free_temperature,p);
   _thexp_stress_free_temperature = _alphabar_stress_free_temperature *
                                    (_stress_free_temperature - _reference_temperature);
 
   //Evaluate the derivative of this function here so it will error out early on if that isn't supported for this function.
-  _thermal_expansion_function.value(_stress_free_temperature,p);
+  _thermal_expansion_function->timeDerivative(_stress_free_temperature,p);
 }
 
 void
@@ -46,7 +46,7 @@ ComputeMeanThermalExpansionFunctionEigenstrain::computeThermalStrain(Real & ther
   const Point p;
 
   const Real & current_temp = _temperature[_qp];
-  const Real current_alphabar = _thermal_expansion_function.value(current_temp,p);
+  const Real current_alphabar = _thermal_expansion_function->value(current_temp,p);
   const Real thexp_current_temp = current_alphabar * (current_temp - _reference_temperature);
 
   thermal_strain = thexp_current_temp - _thexp_stress_free_temperature;
@@ -59,7 +59,7 @@ ComputeMeanThermalExpansionFunctionEigenstrain::computeThermalStrain(Real & ther
 
   thermal_strain = (thexp_current_temp - _thexp_stress_free_temperature) / (1.0 + _thexp_stress_free_temperature);
 
-  const Real dalphabar_dT = _thermal_expansion_function.timeDerivative(current_temp, p);
+  const Real dalphabar_dT = _thermal_expansion_function->timeDerivative(current_temp, p);
   const Real numerator =  dalphabar_dT * (current_temp - _reference_temperature) + current_alphabar;
   const Real denominator = 1.0 + _alphabar_stress_free_temperature * (_stress_free_temperature - _reference_temperature);
   if (denominator < small)

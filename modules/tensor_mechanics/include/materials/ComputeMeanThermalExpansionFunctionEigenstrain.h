@@ -28,7 +28,7 @@ protected:
   virtual void initialSetup() override;
   virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte) override;
 
-  Function & _thermal_expansion_function;
+  Function * _thermal_expansion_function;
   const Real & _reference_temperature;
   Real _alphabar_stress_free_temperature;
   Real _thexp_stress_free_temperature;
