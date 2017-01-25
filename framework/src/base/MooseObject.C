@@ -54,3 +54,4 @@ MooseObject::writeMsg(std::string msg)
     MooseUtils::indentMessage(_app.name(), msg);
   Moose::out << msg << COLOR_DEFAULT;
 }
+

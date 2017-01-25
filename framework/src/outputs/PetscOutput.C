@@ -57,8 +57,8 @@ InputParameters validParams<PetscOutput>()
 
 PetscOutput::PetscOutput(const InputParameters & parameters) :
     Output(parameters),
-    _nonlinear_iter(0),
-    _linear_iter(0),
+    _lin_norm(std::numeric_limits<Real>::max()),
+    _nonlin_norm(std::numeric_limits<Real>::max()),
     _on_linear_residual(false),
     _on_nonlinear_residual(false),
     _nonlinear_dt_divisor(getParam<Real>("nonlinear_residual_dt_divisor")),
@@ -140,6 +140,18 @@ PetscOutput::solveSetup()
 #endif
 }
 
+std::string
+normColor(const Real & old_norm, const Real & norm)
+{
+  // Red if the residual went up... or if the norm is nan
+  if (norm != norm || norm > old_norm)
+    return COLOR_RED;
+  // Yellow if change is less than 5%
+  else if ((old_norm - norm) / old_norm <= 0.05)
+    return COLOR_YELLOW;
+  return COLOR_GREEN;
+}
+
 // Only define the monitor functions if PETSc exists
 #ifdef LIBMESH_HAVE_PETSC
 PetscErrorCode
@@ -153,31 +165,19 @@ PetscOutput::petscNonlinearOutput(SNES, PetscInt its, PetscReal norm, void * voi
   ptr->_linear_time = ptr->_nonlinear_time;
 
   // Set the current norm and iteration number
-  ptr->_norm = norm;
-  ptr->_nonlinear_iter = its;
+  Real old_norm = ptr->_nonlin_norm;
+  ptr->_nonlin_norm = norm;
+  if (its == 0)
+    old_norm = std::numeric_limits<Real>::max();
 
   // Set the flag indicating that output is occurring on the non-linear residual
+
+  ptr->logTags({"exec-nonlinear"}, "{:>2} Nonlinear |R| = {}{:e}\n", its, normColor(old_norm, norm), norm);
+
   ptr->_on_nonlinear_residual = true;
-
-  // Perform the output
   ptr->outputStep(EXEC_NONLINEAR);
-
-  /**
-   * This is one of three locations where we explicitly flush the output buffers during a simulation:
-   * PetscOutput::petscNonlinearOutput()
-   * PetscOutput::petscLinearOutput()
-   * OutputWarehouse::outputStep()
-   *
-   * All other Console output _should_ be using newlines to avoid covering buffer errors
-   * and to avoid excessive I/O. This call is necessary. In the PETSc callback the
-   * context bypasses the OutputWarehouse.
-   */
-  ptr->_app.getOutputWarehouse().flushConsoleBuffer();
-
-  // Reset the non-linear output flag and the simulation time
   ptr->_on_nonlinear_residual = false;
 
-  // Done
   return 0;
 }
 
@@ -191,31 +191,17 @@ PetscOutput::petscLinearOutput(KSP, PetscInt its, PetscReal norm, void * void_pt
   ptr->_linear_time += ptr->_linear_dt;
 
   // Set the current norm and iteration number
-  ptr->_norm = norm;
-  ptr->_linear_iter = its;
+  Real old_norm = ptr->_lin_norm;
+  ptr->_lin_norm = norm;
+  if (its == 0)
+    old_norm = std::numeric_limits<Real>::max();
 
-  // Set the flag indicating that output is occurring on the non-linear residual
+  ptr->logTags({"exec-linear"}, "{:>7} Linear |R| = {}{:e}\n", its, normColor(old_norm, norm), norm);
+
   ptr->_on_linear_residual = true;
-
-  // Perform the output
   ptr->outputStep(EXEC_LINEAR);
-
-  /**
-   * This is one of three locations where we explicitly flush the output buffers during a simulation:
-   * PetscOutput::petscNonlinearOutput()
-   * PetscOutput::petscLinearOutput()
-   * OutputWarehouse::outputStep()
-   *
-   * All other Console output _should_ be using newlines to avoid covering buffer errors
-   * and to avoid excessive I/O. This call is necessary. In the PETSc callback the
-   * context bypasses the OutputWarehouse.
-   */
-  ptr->_app.getOutputWarehouse().flushConsoleBuffer();
-
-  // Reset the linear output flag and the simulation time
   ptr->_on_linear_residual = false;
 
-  // Done
   return 0;
 }
 #endif

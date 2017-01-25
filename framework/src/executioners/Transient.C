@@ -82,6 +82,8 @@ InputParameters validParams<Transient>()
 
   params.addParamNamesToGroup("picard_max_its picard_rel_tol picard_abs_tol", "Picard");
 
+
+  params.addParam<unsigned int>("time_precision", 0, "The number of significant digits that are printed on time related outputs");
   params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
   params.addParam<unsigned int>("max_xfem_update", std::numeric_limits<unsigned int>::max(), "Maximum number of times to update XFEM crack topology in a step due to evolving cracks");
 
@@ -131,6 +133,7 @@ Transient::Transient(const InputParameters & parameters) :
     _picard_timestep_end_norm(declareRecoverableData<Real>("picard_timestep_end_norm", 0.0)),
     _picard_rel_tol(getParam<Real>("picard_rel_tol")),
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
+    _precision(getParam<unsigned int>("time_precision")),
     _verbose(getParam<bool>("verbose"))
 {
   if (!_verbose)
@@ -195,6 +198,7 @@ Transient::init()
     _time_old = _time;
 
   _problem.outputStep(EXEC_INITIAL);
+  logTimestepInfo("exec-initial");
 
   // If this is the first step
   if (_t_step == 0)
@@ -259,7 +263,10 @@ Transient::execute()
   }
 
   if (!_app.halfTransient())
+  {
     _problem.outputStep(EXEC_FINAL);
+    logTimestepInfo("exec-final");
+  }
   postExecute();
 }
 
@@ -338,6 +345,14 @@ Transient::takeStep(Real input_dt)
   }
 }
 
+void Transient::logTimestepInfo(const std::string & tag)
+{
+  logTags({tag}, "\nTime Step {:2}, time = {:.{}f}\n", _t_step, _time, _precision);
+  logTags({tag, "verbose"}, "{:>21}{:<}\n", "old time = ", _time_old);
+  logTags({tag} , "{:>21}{:<}\n", "dt = ", _dt);
+  logTags({tag, "verbose"}, "{:>21}{:<}\n", "old dt = ", _dt_old);
+}
+
 void
 Transient::solveStep(Real input_dt)
 {
@@ -388,6 +403,7 @@ Transient::solveStep(Real input_dt)
 
   // Perform output for timestep begin
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
+  logTimestepInfo("lev-info");
 
   // Update warehouse active objects
   _problem.updateActiveObjects();

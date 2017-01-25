@@ -43,13 +43,6 @@ InputParameters validParams<Console>()
   params.addParam<unsigned int>("max_rows", 15, "The maximum number of postprocessor/scalar values displayed on screen during a timestep (set to 0 for unlimited)");
   params.addParam<MooseEnum>("fit_mode", pps_fit_mode, "Specifies the wrapping mode for post-processor tables that are printed to the screen (ENVIRONMENT: Read \"MOOSE_PPS_WIDTH\" for desired width, AUTO: Attempt to determine width automatically (serial only), <n>: Desired width");
 
-  // Verbosity
-  params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
-
-  // Basic table output controls
-  params.addParam<bool>("scientific_time", false, "Control the printing of time and dt in scientific notation");
-  params.addParam<unsigned int>("time_precision", "The number of significant digits that are printed on time related outputs");
-
   // Performance Logging
   params.addParam<bool>("perf_log", false, "If true, all performance logs will be printed. The individual log settings will override this option.");
   params.addParam<unsigned int>("perf_log_interval", 0, "If set, the performance log will be printed every n time steps");
@@ -78,7 +71,7 @@ InputParameters validParams<Console>()
   params.addParam<MultiMooseEnum>("system_info", info, "List of information types to display ('framework', 'mesh', 'aux', 'nonlinear', 'execution', 'output')");
 
   // Advanced group
-  params.addParamNamesToGroup("max_rows verbose show_multiapp_name system_info", "Advanced");
+  params.addParamNamesToGroup("max_rows show_multiapp_name system_info", "Advanced");
 
   // Performance log group
   params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header", "Perf Log");
@@ -103,6 +96,9 @@ InputParameters validParams<Console>()
   params.set<MultiMooseEnum>("execute_vector_postprocessors_on", /*quiet_mode=*/true) = "initial timestep_end";
   params.set<MultiMooseEnum>("execute_scalars_on", /*quiet_mode=*/true) = "initial timestep_end";
 
+  params.addParam<unsigned int>("time_precision", 0, "DEPRECATED");
+  params.addParam<bool>("verbose", false, "DEPRECATED");
+
   return params;
 }
 
@@ -110,10 +106,8 @@ Console::Console(const InputParameters & parameters) :
     TableOutput(parameters),
     _max_rows(getParam<unsigned int>("max_rows")),
     _fit_mode(getParam<MooseEnum>("fit_mode")),
-    _scientific_time(getParam<bool>("scientific_time")),
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
-    _verbose(getParam<bool>("verbose")),
     _perf_log(getParam<bool>("perf_log")),
     _perf_log_interval(getParam<unsigned int>("perf_log_interval")),
     _solve_log(isParamValid("solve_log") ? getParam<bool>("solve_log") : _perf_log),
@@ -124,11 +118,8 @@ Console::Console(const InputParameters & parameters) :
     _all_variable_norms(getParam<bool>("all_variable_norms")),
     _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
     _outlier_multiplier(getParam<std::vector<Real> >("outlier_multiplier")),
-    _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
     _timing(_app.getParam<bool>("timing")),
     _console_buffer(_app.getOutputWarehouse().consoleBuffer()),
-    _old_linear_norm(std::numeric_limits<Real>::max()),
-    _old_nonlinear_norm(std::numeric_limits<Real>::max()),
     _print_mesh_changed_info(getParam<bool>("print_mesh_changed_info")),
     _system_info_flags(getParam<MultiMooseEnum>("system_info")),
     _allow_changing_sysinfo_flag(true)
@@ -260,10 +251,6 @@ Console::initialSetup()
   if (!_app.isRecovering())
     writeStreamToFile(false);
 
-  // Enable verbose output if Executioner has it enabled
-  if (_app.getExecutioner()->isParamValid("verbose") && _app.getExecutioner()->getParam<bool>("verbose"))
-    _verbose = true;
-
   // Display a message to indicate the application is running (useful for MultiApps)
   if (_problem_ptr->hasMultiApps() || _app.multiAppLevel() > 0)
     write(std::string("\nRunning App: ") + _app.name() + "\n");
@@ -290,12 +277,12 @@ Console::filename()
 void
 Console::output(const ExecFlagType & type)
 {
-  if (!onInterval())
-    _app.logDisableTimestep();
-
   // Return if the current output is not on the desired interval
   if (type != EXEC_FINAL && !onInterval())
+  {
+    _app.logDisableTimestep();
     return;
+  }
 
   // Output the system information first; this forces this to be the first item to write by default
   // However, 'output_system_information_on' still operates correctly, so it may be changed by the user
@@ -306,32 +293,6 @@ Console::output(const ExecFlagType & type)
   if (shouldOutput("input", type))
     outputInput();
 
-  // Write the timestep information ("Time Step 0 ..."), this is controlled with "execute_on"
-  if (type == EXEC_TIMESTEP_BEGIN || (type == EXEC_INITIAL && _execute_on.contains(EXEC_INITIAL)) || (type == EXEC_FINAL && _execute_on.contains(EXEC_FINAL)))
-    writeTimestepInformation();
-
-  // Print Non-linear Residual (control with "execute_on")
-  if (type == EXEC_NONLINEAR && _execute_on.contains(EXEC_NONLINEAR))
-  {
-    if (_nonlinear_iter == 0)
-      _old_nonlinear_norm = std::numeric_limits<Real>::max();
-
-    _console << std::setw(2) << _nonlinear_iter << " Nonlinear |R| = " << outputNorm(_old_nonlinear_norm, _norm) << '\n';
-
-    _old_nonlinear_norm = _norm;
-  }
-
-  // Print Linear Residual (control with "execute_on")
-  else if (type == EXEC_LINEAR && _execute_on.contains(EXEC_LINEAR))
-  {
-    if (_linear_iter == 0)
-      _old_linear_norm = std::numeric_limits<Real>::max();
-
-    _console << std::setw(7) << _linear_iter << " Linear |R| = " <<  outputNorm(_old_linear_norm, _norm) << '\n';
-
-    _old_linear_norm = _norm;
-  }
-
   // Write variable norms
   else if (type == EXEC_TIMESTEP_END)
   {
@@ -339,7 +300,6 @@ Console::output(const ExecFlagType & type)
       write(Moose::perf_log.get_perf_info(), false);
     writeVariableNorms();
   }
-
 
   // Write Postprocessors and Scalars
   if (shouldOutput("postprocessors", type))
@@ -376,52 +336,6 @@ Console::writeStreamToFile(bool append)
 }
 
 void
-Console::writeTimestepInformation()
-{
-  // Stream to build the time step information
-  std::stringstream oss;
-
-  // Write timestep data for transient executioners
-  if (_transient)
-  {
-    // Get the length of the time step string
-    std::ostringstream time_step_string;
-    time_step_string << timeStep();
-    unsigned int n = time_step_string.str().size();
-    if (n < 2)
-      n = 2;
-
-    // Write time step and time information
-    oss << std::endl << "Time Step " << std::setw(n) << timeStep();
-
-    // Set precision
-    if (_precision > 0)
-      oss << std::setw(_precision) << std::setprecision(_precision) << std::setfill('0') << std::showpoint;
-
-    // Show scientific notation
-    if (_scientific_time)
-      oss << std::scientific;
-
-    // Print the time
-    oss << ", time = " << time() << std::endl;
-
-    // Show old time information, if desired
-    if (_verbose)
-      oss << std::right << std::setw(21) << std::setfill(' ') << "old time = " << std::left << timeOld() << '\n';
-
-    // Show the time delta information
-    oss << std::right << std::setw(21) << std::setfill(' ') << "dt = "<< std::left << dt() << '\n';
-
-    // Show the old time delta information, if desired
-    if (_verbose)
-      oss << std::right << std::setw(21) << std::setfill(' ') << "old dt = " << _dt_old << '\n';
-  }
-
-  // Output to the screen
-  _console << oss.str();
-}
-
-void
 Console::writeVariableNorms()
 {
   // If all_variable_norms is true, then so should outlier printing
@@ -434,9 +348,6 @@ Console::writeVariableNorms()
 
   // Flag set when header prints
   bool header = false;
-
-  // String stream for variable norm information
-  std::ostringstream oss;
 
   // Get a references to the NonlinearSystem and libMesh system
   NonlinearSystemBase & nl = _problem_ptr->getNonlinearSystemBase();
@@ -458,59 +369,30 @@ Console::writeVariableNorms()
     var_norm *= var_norm; // use the norm squared
     std::string var_name = sys.variable_name(i);
 
+    std::string head;
     // Outlier if the variable norm is greater than twice (default) of the average norm
+    std::string color = COLOR_GREEN;
     if (_outlier_variable_norms && (var_norm > _outlier_multiplier[1] * avg_norm) )
     {
-      // Print the header
       if (!header)
-      {
-        oss << "\nOutlier Variable Residual Norms:\n";
-        header = true;
-      }
+        head = "\nOutlier Variable Residual Norms:\n";
+      header = true;
 
       // Set the color, RED if the variable norm is 0.8 (default) of the total norm
-      std::string color = COLOR_YELLOW;
+      color = COLOR_YELLOW;
       if (_outlier_variable_norms && (var_norm > _outlier_multiplier[0] * avg_norm * n_vars) )
         color = COLOR_RED;
-
-      // Display the residual
-      oss << "  " << var_name << ": " << std::scientific << color << std::sqrt(var_norm) << COLOR_DEFAULT << '\n';
+      logMsg("{}  {}: {}{:e}\n", head, var_name, color, std::sqrt(var_norm));
     }
-
-    // GREEN
     else if (_all_variable_norms)
     {
-      // Print the header if it doesn't already exist
       if (!header)
-      {
-        oss << "\nVariable Residual Norms:\n";
-        header = true;
-      }
-      oss << "  " << var_name << ": " << std::scientific << COLOR_GREEN << std::sqrt(var_norm) << COLOR_DEFAULT << '\n';
+        head = "\nVariable Residual Norms:\n";
+      logMsg("{}  {}: {}{:e}\n", head, var_name, color, std::sqrt(var_norm));
+      header = true;
     }
+    // Display the residual
   }
-
-  // Update the output streams
-  _console << oss.str();
-}
-
-// Quick helper to output the norm in color
-std::string
-Console::outputNorm(const Real & old_norm, const Real & norm)
-{
-  std::string color = COLOR_GREEN;
-
-  // Red if the residual went up... or if the norm is nan
-  if (norm != norm || norm > old_norm)
-    color = COLOR_RED;
-  // Yellow if change is less than 5%
-  else if ((old_norm - norm) / old_norm <= 0.05)
-    color = COLOR_YELLOW;
-
-  std::stringstream oss;
-  oss << std::scientific << color << norm << COLOR_DEFAULT;
-
-  return oss.str();
 }
 
 void

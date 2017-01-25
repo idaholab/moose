@@ -127,11 +127,6 @@ protected:
   std::string outputNorm(const Real & old_norm, const Real & norm);
 
   /**
-   * Prints the time step information for the screen output
-   */
-  void writeTimestepInformation();
-
-  /**
    * Write message to screen and/or file
    * @param message The desired message
    * @param indent True if multiapp indenting is desired
@@ -159,17 +154,11 @@ protected:
   /// The FormattedTable fit mode
   MooseEnum _fit_mode;
 
-  /// Toggle for outputting time in time and dt in scientific notation
-  bool _scientific_time;
-
   /// Flag for controlling outputting console information to a file
   bool _write_file;
 
   /// Flag for controlling outputting console information to screen
   bool _write_screen;
-
-  /// Flag for writing detailed time step information
-  bool _verbose;
 
   /// Stream for storing information to be written to a file
   std::stringstream _file_output_stream;
@@ -204,9 +193,6 @@ protected:
   /// Multipliers for coloring variable residual norms (default [2, 0.8])
   std::vector<Real> _outlier_multiplier;
 
-  /// Number of significant digits
-  unsigned int _precision;
-
 private:
 
   /**
@@ -226,12 +212,6 @@ private:
 
   /// Reference to cached messages from calls to _console
   const std::ostringstream & _console_buffer;
-
-  /// Storage for the old linear residual (needed for color output and only when used when printing to the screen)
-  Real _old_linear_norm;
-
-  /// Storage for the old non linear residual (needed for color output and only when used when printing to the screen)
-  Real _old_nonlinear_norm;
 
   /// Flag for printing mesh information when the mesh changes
   bool _print_mesh_changed_info;
