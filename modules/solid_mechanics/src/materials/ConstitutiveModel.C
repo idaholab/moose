@@ -123,13 +123,14 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
       Point p;
       Real alpha_current_temp = _alpha_function->value(current_temp,p);
       Real alpha_old_temp = _alpha_function->value(old_temp,p);
+      Real alpha_stress_free_temperature = _alpha_function->value(_stress_free_temp, p);
 
       if (_mean_alpha_function)
       {
         Real small(1e-6);
 
         Real numerator = alpha_current_temp * (current_temp - _ref_temp) - alpha_old_temp * (old_temp - _ref_temp);
-        Real denominator = 1.0 + alpha_old_temp * (old_temp - _ref_temp);
+        Real denominator = 1.0 + alpha_stress_free_temperature * (_stress_free_temp - _ref_temp);
         if (denominator < small)
           mooseError("Denominator too small in thermal strain calculation");
         inc_thermal_strain = numerator / denominator;
