@@ -1,0 +1,14 @@
+[Tests]
+  [./no_expect_err]
+    type = RunException
+    input = bad_kernel.i
+    expect_err = 'Wrong Error'
+  [../]
+
+  [./no_expect_out]
+    type = RunApp
+    input = good.i
+    expect_out = 'Wrong Error'
+    foo = bar
+  [../]
+[]
