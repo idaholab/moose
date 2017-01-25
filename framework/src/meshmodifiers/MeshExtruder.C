@@ -116,7 +116,7 @@ MeshExtruder::QueryElemSubdomainID::QueryElemSubdomainID(std::vector<SubdomainID
                                                          std::vector<unsigned int> new_ids,
                                                          unsigned int libmesh_dbg_var(num_layers)) :
     QueryElemSubdomainIDBase()
-#ifdef DEBUG
+#ifndef NDEBUG
     ,_num_layers(num_layers)
 #endif
 {

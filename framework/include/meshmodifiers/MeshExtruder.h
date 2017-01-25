@@ -57,7 +57,7 @@ protected:
 
     /// The total number of layers in the extrusion.  This is
     /// currently only used for a sanity check in dbg mode.
-#ifdef DEBUG
+#ifndef NDEBUG
     unsigned int _num_layers;
 #endif
   };
