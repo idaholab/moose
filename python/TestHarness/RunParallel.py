@@ -66,6 +66,9 @@ class RunParallel:
     # Jobs we are reporting as taking longer then 10% of MAX_TIME
     self.reported_jobs = set()
 
+    # Default time to wait before reporting long running jobs
+    self.default_reporting_time = 10.0 # Seconds (should be a float)
+
     # Reporting timer which resets when ever data is printed to the screen.
     self.reported_timer = clock()
 
@@ -225,17 +228,14 @@ class RunParallel:
           # this iteration
 
         # Has the TestHarness done nothing for awhile
-        elif now > (self.reported_timer + 10.0):
+        elif now > (self.reported_timer + self.default_reporting_time):
           # Has the current test been previously reported?
           if tester not in self.reported_jobs:
+            seconds_to_report = self.default_reporting_time
             if tester.specs.isValid('min_reported_time'):
-              start_min_threshold = start_time + float(tester.specs['min_reported_time'])
-            else:
-              start_min_threshold = start_time + (0.1 * float(tester.specs['max_time']))
+              seconds_to_report = float(tester.specs['min_reported_time'])
 
-            threshold = max(start_min_threshold, (0.1 * float(tester.specs['max_time'])))
-
-            if now >= threshold:
+            if now >= self.reported_timer + seconds_to_report:
               self.harness.handleTestResult(tester.specs, '', 'RUNNING...', start_time, now, False)
 
               self.reported_jobs.add(tester)
