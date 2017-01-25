@@ -231,8 +231,8 @@ class MooseApplicationSyntax(object):
   def getAction(self, name):
     return self._actions[name]
 
-  def actions(self, prefix='', include_self=True):
-    return self._getHelper(self._actions, prefix, include_self)
+  def actions(self, prefix=None, include_self=True):
+    return self.__getHelper(self._actions, prefix, include_self)
 
   def hasObject(self, name):
     """
@@ -243,8 +243,8 @@ class MooseApplicationSyntax(object):
   def getObject(self, name):
     return self._objects[name]
 
-  def objects(self, prefix='', include_self=True):
-    return self._getHelper(self._objects, prefix, include_self)
+  def objects(self, prefix=None, include_self=True):
+    return self.__getHelper(self._objects, prefix, include_self)
 
   def check(self):
     """
@@ -264,12 +264,15 @@ class MooseApplicationSyntax(object):
     return any([h in name for h in self._hide])
 
   @staticmethod
-  def _getHelper(items, prefix, include_self):
-    out = []
-    for item in items.itervalues():
-      if (item.key == prefix and include_self) or (item.key != prefix and os.path.dirname(item.key) == prefix):
-        out.append(item)
-    return out
+  def __getHelper(items, prefix=None, include_self=None):
+    if prefix:
+      out = []
+      for item in items.itervalues():
+        if (item.key == prefix and include_self) or (item.key != prefix and os.path.dirname(item.key) == prefix):
+          out.append(item)
+      return out
+    else:
+      return items
 
   def _updateSyntax(self, path, objects, actions):
     """

@@ -167,12 +167,9 @@ class MooseDocsMarkdownNode(MooseDocsNode):
     """
 
     output = []
-
-    name = self.breadcrumbs()[-1].name()
-
     for key, syntax in self.__syntax.iteritems():
-      if syntax.hasObject(name):
-        include = syntax.filenames(name)[0]
+      if syntax.hasObject(self.name()):
+        include = syntax.filenames(self.name())[0]
         rel_include = MooseDocs.relpath(include)
 
         output.append( ('Header', os.path.join(repo_url, 'blob', 'master', rel_include)) )
@@ -182,9 +179,17 @@ class MooseDocsMarkdownNode(MooseDocsNode):
           rel_source = MooseDocs.relpath(source)
           output.append( ('Source', os.path.join(repo_url, 'blob', 'master', rel_source)) )
 
-        output.append( ('Doxygen', syntax.doxygen(name)) )
-
     return output
+
+  def doxygen(self):
+    """
+    Return the url to the markdown file for this object.
+    """
+    # Build a complete list of objects
+    for syntax in self.__syntax.itervalues():
+      for obj in syntax.objects().itervalues():
+        if obj.name == self.name():
+          return syntax.doxygen(obj.name)
 
   def editMarkdown(self, repo_url):
     """
