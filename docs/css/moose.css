@@ -49,6 +49,16 @@ p {
     top-margin:1.5rem;
 }
 
+.moose-site-generated{
+    text-align: left;
+    float: left;
+}
+
+.moose-edit-markdown{
+    text-align: right;
+    float: right;
+}
+
 .moose-copy-button{
     position:relative;
     float:right;

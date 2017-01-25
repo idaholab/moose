@@ -166,7 +166,7 @@ class MooseDocsMarkdownNode(MooseDocsNode):
       repo_url[str]: Web address to use as the base for creating the edit link
     """
 
-    output = [('Edit Markdown', os.path.join(repo_url, 'edit', 'devel', MooseDocs.relpath(self.source())))]
+    output = []
 
     name = self.breadcrumbs()[-1].name()
 
@@ -185,6 +185,12 @@ class MooseDocsMarkdownNode(MooseDocsNode):
         output.append( ('Doxygen', syntax.doxygen(name)) )
 
     return output
+
+  def editMarkdown(self, repo_url):
+    """
+    Return the url to the markdown file for this object.
+    """
+    return os.path.join(repo_url, 'edit', 'devel', MooseDocs.relpath(self.source()))
 
   def contents(self, level='h2'):
     """
