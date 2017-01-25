@@ -2036,6 +2036,11 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
 {
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
   {
+#ifdef MOOSE_PROFILE_MATERIALS
+    if (tid == 0)
+      Moose::perf_log.push("computeMaterialsVolume()", "Execution");
+#endif
+
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int n_points = _assembly[tid]->qRule()->n_points();
     _material_data[tid]->resize(n_points);
@@ -2049,6 +2054,11 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
 
     if (_materials.hasActiveBlockObjects(blk_id, tid))
       _material_data[tid]->reinit(_materials.getActiveBlockObjects(blk_id, tid));
+
+#ifdef MOOSE_PROFILE_MATERIALS
+    if (tid == 0)
+      Moose::perf_log.pop("computeMaterialsVolume()", "Execution");
+#endif
   }
 }
 
@@ -2057,6 +2067,11 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
 {
   if (_all_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
   {
+#ifdef MOOSE_PROFILE_MATERIALS
+    if (tid == 0)
+      Moose::perf_log.push("computeMaterialsFace()", "Execution");
+#endif
+
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
@@ -2071,6 +2086,11 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
 
     if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _bnd_material_data[tid]->reinit(_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+#ifdef MOOSE_PROFILE_MATERIALS
+    if (tid == 0)
+      Moose::perf_log.pop("computeMaterialsFace()", "Execution");
+#endif
   }
 }
 
@@ -2079,6 +2099,11 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
 {
   if (_all_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
   {
+#ifdef MOOSE_PROFILE_MATERIALS
+    if (tid == 0)
+      Moose::perf_log.push("computeMaterialsNeighbor()", "Execution");
+#endif
+
     // NOTE: this will not work with h-adaptivity
     const Elem * & neighbor = _assembly[tid]->neighbor();
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
@@ -2094,6 +2119,11 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
 
     if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _neighbor_material_data[tid]->reinit(_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+#ifdef MOOSE_PROFILE_MATERIALS
+    if (tid == 0)
+      Moose::perf_log.pop("computeMaterialsNeighbor()", "Execution");
+#endif
   }
 }
 
@@ -2102,6 +2132,11 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
 {
   if (_all_materials.hasActiveBoundaryObjects(boundary_id, tid))
   {
+#ifdef MOOSE_PROFILE_MATERIALS
+    if (tid == 0)
+      Moose::perf_log.push("computeMaterialsBoundary()", "Execution");
+#endif
+
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
     unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
@@ -2115,6 +2150,11 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
 
     if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
       _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid));
+
+#ifdef MOOSE_PROFILE_MATERIALS
+    if (tid == 0)
+      Moose::perf_log.pop("computeMaterialsBoundary()", "Execution");
+#endif
   }
 }
 
