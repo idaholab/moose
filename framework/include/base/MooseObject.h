@@ -28,6 +28,8 @@ class MooseObject;
 template<>
 InputParameters validParams<MooseObject>();
 
+// needed to avoid #include cycle with MooseApp and MooseObject
+[[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);
 
 /**
  * Every object that can be built by the factory should be derived from this class.
@@ -77,6 +79,23 @@ public:
    */
   virtual bool enabled() { return _enabled; }
 
+  template <typename... Args>
+  [[ noreturn ]] void mooseError2(Args... args) const
+  {
+    std::ostringstream oss;
+    moose::internal::mooseStreamAll(oss, args...);
+    std::string msg = oss.str();
+    callMooseErrorRaw(msg, &_app);
+  }
+
+  template <typename... Args>
+  void mooseWarning2(Args... args) const { moose::internal::mooseWarningStream(_console, args...); }
+
+  template <typename... Args>
+  void mooseInfo2(Args... args) const { moose::internal::mooseInfoStream(_console, args...); }
+
+  template <typename... Args>
+  void mooseDeprecated2(Args... args) const { moose::internal::mooseDeprecatedStream(_console, args...); }
 
 protected:
 
