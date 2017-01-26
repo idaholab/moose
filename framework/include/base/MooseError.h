@@ -146,7 +146,6 @@
     do                                                                              \
     {                                                                               \
       mooseDoOnce(                                                                  \
-        {                                                                           \
           _console                                                                  \
             << COLOR_CYAN                                                           \
             << "\n\n*** Info ***\n"                                                 \
@@ -154,29 +153,32 @@
             << "\nat " << __FILE__ << ", line " << __LINE__                         \
             << COLOR_DEFAULT                                                        \
             << "\n" << std::endl;                                                   \
-        }                                                                           \
       );                                                                            \
     } while (0)
 
-#define mooseDeprecated(msg)                                                                                \
-  do                                                                                                        \
-  {                                                                                                         \
-    if (Moose::_deprecated_is_error)                                                                        \
-      mooseError("\n\nDeprecated code:\n" << msg << '\n');                                                  \
-    else                                                                                                    \
-      mooseDoOnce(                                                                                          \
-        _console                                                                                            \
-          << COLOR_YELLOW                                                                                   \
-          << "*** Warning, This code is deprecated, and likely to be removed in future library versions!\n" \
-          << msg << '\n'                                                                                    \
-          << __FILE__ << ", line " << __LINE__ << ", compiled "                                             \
-          << LIBMESH_DATE << " at " << LIBMESH_TIME << " ***\n";                                            \
-          if (libMesh::global_n_processors() == 1)                                                          \
-            print_trace(Moose::out);                                                                        \
-          else                                                                                              \
-            libMesh::write_traceout();                                                                      \
-          Moose::out << COLOR_DEFAULT << std::endl;                                                         \
-      );                                                                                                    \
+#define mooseDeprecated(msg)                                                                                  \
+  do                                                                                                          \
+  {                                                                                                           \
+    if (Moose::_deprecated_is_error)                                                                          \
+      mooseError("\n\nDeprecated code:\n" << msg << '\n');                                                    \
+    else                                                                                                      \
+      mooseDoOnce(                                                                                            \
+        std::ostringstream _deprecate_oss_;                                                                   \
+                                                                                                              \
+        _deprecate_oss_                                                                                       \
+          << COLOR_YELLOW                                                                                     \
+          << "*** Warning, This code is deprecated, and likely to be removed in future library versions!\n"   \
+          << msg << '\n'                                                                                      \
+          << __FILE__ << ", line " << __LINE__ << ", compiled "                                               \
+          << LIBMESH_DATE << " at " << LIBMESH_TIME << " ***"                                                 \
+          << COLOR_DEFAULT                                                                                    \
+          << "\n\n";                                                                                          \
+        if (libMesh::global_n_processors() == 1)                                                              \
+          print_trace(_deprecate_oss_);                                                                       \
+        else                                                                                                  \
+          libMesh::write_traceout();                                                                          \
+        _console << _deprecate_oss_.str() << std::flush;                                                      \
+      );                                                                                                      \
    } while (0)
 
 #define mooseCheckMPIErr(err) do { if (err != MPI_SUCCESS) { if (libMesh::global_n_processors() == 1) print_trace(); libmesh_here(); MOOSE_ABORT; } } while (0)

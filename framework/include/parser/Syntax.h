@@ -59,6 +59,15 @@ public:
    */
   void replaceActionSyntax(const std::string & action, const std::string & syntax, const std::string & task);
 
+  /**
+   * This method deprecates previously registered syntax. You should use the exact form that you want deprecated
+   * in the passed in parameter.
+   */
+  void deprecateActionSyntax(const std::string & syntax);
+
+  /// Returns a Boolean indicating whether the syntax has been deprecated through a call to deprecateActionSyntax
+  bool isDeprecatedSyntax(const std::string & syntax) const;
+
   // Retrieve the Syntax associated with the passed Action and task
   std::string getSyntaxByAction(const std::string & action, const std::string & task);
 
@@ -87,6 +96,8 @@ protected:
 
   /// Actions/Syntax association
   std::multimap<std::string, ActionInfo> _associated_actions;
+
+  std::set<std::string> _deprecated_syntax;
 };
 
 
