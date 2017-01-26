@@ -16,8 +16,18 @@ class AnalyzeJacobian(Tester):
 
     return params
 
+
   def __init__(self, name, params):
     Tester.__init__(self, name, params)
+
+
+  # Check if numpy is available
+  def checkRunnable(self, options):
+    try:
+      import numpy
+      return (True, '')
+    except Exception as e:
+      return (False, 'skipped (no numpy)')
 
 
   def getCommand(self, options):
@@ -58,6 +68,7 @@ class AnalyzeJacobian(Tester):
         reason = 'CRASH'
 
     return (reason, output)
+
 
   def checkOutputForPattern(self, output, re_pattern):
     if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) == None:
