@@ -126,9 +126,7 @@ CheckOutputAction::checkPerfLogOutput()
   {
     Moose::perf_log.disable_logging();
     Moose::setup_perf_log.disable_logging();
-#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
     libMesh::perflog.disable_logging();
-#endif
   }
 
   // If the --timing option is used from the command-line, enable all logging
@@ -136,8 +134,6 @@ CheckOutputAction::checkPerfLogOutput()
   {
     Moose::perf_log.enable_logging();
     Moose::setup_perf_log.enable_logging();
-#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
     libMesh::perflog.enable_logging();
-#endif
   }
 }
