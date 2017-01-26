@@ -67,7 +67,7 @@ Transfer::find_sys(EquationSystems & es, const std::string & var_name)
     if (es.get_system(i).has_variable(var_name))
       return &es.get_system(i);
 
-  mooseError2("Unable to find variable " + var_name + " in any system.");
+  ::mooseError2("Unable to find variable " + var_name + " in any system.");
 
   // Unreachable
   return &es.get_system(0);

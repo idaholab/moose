@@ -554,13 +554,13 @@ ComputeElasticSmearedCrackingStress::computeCrackFactor(int i, Real & sigma, Rea
                 , (*_crack_strain)[_qp](i), ", "
                 , _principal_strain(0, 0), ", "
                 , _principal_strain(1, 0), ", "
-                 << _principal_strain(2, 0) <<  ", "
-                 << _elastic_strain[_qp](0, 0) <<  ", "
-                 << _elastic_strain[_qp](1, 1) <<  ", "
-                 << _elastic_strain[_qp](2, 2) <<  ", "
-                 << _elastic_strain[_qp](0, 1) <<  ", "
-                 << _elastic_strain[_qp](0, 2) <<  ", "
-                 << _elastic_strain[_qp](1, 2));
+                , _principal_strain(2, 0),  ", "
+                , _elastic_strain[_qp](0, 0),  ", "
+                , _elastic_strain[_qp](1, 1),  ", "
+                , _elastic_strain[_qp](2, 2),  ", "
+                , _elastic_strain[_qp](0, 1),  ", "
+                , _elastic_strain[_qp](0, 2),  ", "
+                , _elastic_strain[_qp](1, 2));
     }
     const Real crackMaxStrain = (*_crack_max_strain)[_qp](i);
     // Compute stress that follows exponental curve

@@ -260,7 +260,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
           if (!converged)
           {
-            mooseWarning2("While sub_cycling ", name(), _first_local_app+i, " failed to converge!", std::endl);
+            mooseWarning2("While sub_cycling ", name(), _first_local_app+i, " failed to converge!\n");
+
             _failures++;
 
             if (_failures > _max_failures)
@@ -330,7 +331,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
           if (!ex->lastSolveConverged())
           {
-            mooseWarning2(name(), _first_local_app+i, " failed to converge!", std::endl);
+            mooseWarning2(name(), _first_local_app+i, " failed to converge!\n");
 
             if (_catch_up)
             {

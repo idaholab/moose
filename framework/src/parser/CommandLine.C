@@ -102,7 +102,7 @@ CommandLine::populateInputParams(InputParameters & params)
       }
     }
     else if (params.isParamRequired(orig_name))
-      mooseError2("Missing required command-line parameter: ", orig_name, std::endl, "Doc String: ", params.getDocString(orig_name));
+      mooseError2("Missing required command-line parameter: ", orig_name, "\nDoc String: ", params.getDocString(orig_name));
   }
 }
 

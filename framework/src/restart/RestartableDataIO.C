@@ -163,7 +163,7 @@ RestartableDataIO::deserializeRestartableData(const std::map<std::string, Restar
       }
       catch(...)
       {
-        mooseError2("restartable_data missing ", current_name, std::endl);
+        mooseError2("restartable_data missing ", current_name, "\n");
       }
     }
     else

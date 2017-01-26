@@ -100,7 +100,7 @@ EBSDReader::readFile()
           mooseError2("Unable to read in EBSD custom data column #", i);
 
       if (x < _minx || y < _miny || x > _maxx || y > _maxy || (g.dim == 3 && (z < _minz || z > _maxz)))
-        mooseError2("EBSD Data ouside of the domain declared in the header ([", _minx, ':', _maxx, "], [", _miny, ':', _maxy, "], [", _minz, ':', _maxz, "]) dim=" << g.dim << "\n" << line);
+        mooseError2("EBSD Data ouside of the domain declared in the header ([", _minx, ':', _maxx, "], [", _miny, ':', _maxy, "], [", _minz, ':', _maxz, "]) dim=", g.dim, "\n", line);
 
       d._p = Point(x, y, z);
 

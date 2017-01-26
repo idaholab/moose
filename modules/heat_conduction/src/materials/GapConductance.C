@@ -125,7 +125,7 @@ void GapConductance::setGapGeometryParameters(const InputParameters & params,
   {
     gap_geometry_type = GapConductance::GAP_GEOMETRY(int(params.get<MooseEnum>("gap_geometry_type")));
     if (params.isParamSetByUser("coord_type"))
-      mooseError2("Deprecated parameter 'coord_type' cannot be used together with 'gap_geometry_type' in GapConductance");
+      ::mooseError2("Deprecated parameter 'coord_type' cannot be used together with 'gap_geometry_type' in GapConductance");
   }
   else if (params.isParamSetByUser("coord_type"))
   {
@@ -154,39 +154,39 @@ void GapConductance::setGapGeometryParameters(const InputParameters & params,
   if (gap_geometry_type == GapConductance::PLATE)
   {
     if (coord_sys == Moose::COORD_RSPHERICAL)
-      mooseError2("'gap_geometry_type = PLATE' cannot be used with models having a spherical coordinate system.");
+      ::mooseError2("'gap_geometry_type = PLATE' cannot be used with models having a spherical coordinate system.");
   }
   else if (gap_geometry_type == GapConductance::CYLINDER)
   {
     if (coord_sys == Moose::COORD_XYZ)
     {
       if (!params.isParamValid("cylinder_axis_point_1") || !params.isParamValid("cylinder_axis_point_2"))
-        mooseError2("For 'gap_geometry_type = CYLINDER' to be used with a Cartesian model, 'cylinder_axis_point_1' and 'cylinder_axis_point_2' must be specified.");
+        ::mooseError2("For 'gap_geometry_type = CYLINDER' to be used with a Cartesian model, 'cylinder_axis_point_1' and 'cylinder_axis_point_2' must be specified.");
       p1 = params.get<RealVectorValue>("cylinder_axis_point_1");
       p2 = params.get<RealVectorValue>("cylinder_axis_point_2");
     }
     else if (coord_sys == Moose::COORD_RZ)
     {
       if (params.isParamValid("cylinder_axis_point_1") || params.isParamValid("cylinder_axis_point_2"))
-        mooseError2("The 'cylinder_axis_point_1' and 'cylinder_axis_point_2' cannot be specified with axisymmetric models.  The y-axis is used as the cylindrical axis of symmetry.");
+        ::mooseError2("The 'cylinder_axis_point_1' and 'cylinder_axis_point_2' cannot be specified with axisymmetric models.  The y-axis is used as the cylindrical axis of symmetry.");
       p1 = Point(0,0,0);
       p2 = Point(0,1,0);
     }
     else if (coord_sys == Moose::COORD_RSPHERICAL)
-      mooseError2("'gap_geometry_type = CYLINDER' cannot be used with models having a spherical coordinate system.");
+      ::mooseError2("'gap_geometry_type = CYLINDER' cannot be used with models having a spherical coordinate system.");
   }
   else if (gap_geometry_type == GapConductance::SPHERE)
   {
     if (coord_sys == Moose::COORD_XYZ || coord_sys == Moose::COORD_RZ)
     {
       if (!params.isParamValid("sphere_origin"))
-        mooseError2("For 'gap_geometry_type = SPHERE' to be used with a Cartesian or axisymmetric model, 'sphere_origin' must be specified.");
+        ::mooseError2("For 'gap_geometry_type = SPHERE' to be used with a Cartesian or axisymmetric model, 'sphere_origin' must be specified.");
       p1 = params.get<RealVectorValue>("sphere_origin");
     }
     else if (coord_sys == Moose::COORD_RSPHERICAL)
     {
       if (params.isParamValid("sphere_origin"))
-        mooseError2("The 'sphere_origin' cannot be specified with spherical models.  x=0 is used as the spherical origin.");
+        ::mooseError2("The 'sphere_origin' cannot be specified with spherical models.  x=0 is used as the spherical origin.");
       p1 = Point(0,0,0);
     }
   }
@@ -411,7 +411,7 @@ GapConductance::computeGapRadii(const GapConductance::GAP_GEOMETRY gap_geometry_
       radius = r2;
     }
     else
-      mooseError2("Issue with cylindrical flux calc. normals.\n");
+      ::mooseError2("Issue with cylindrical flux calc. normals.\n");
 
   }
   else if (gap_geometry_type == GapConductance::SPHERE)
@@ -432,7 +432,7 @@ GapConductance::computeGapRadii(const GapConductance::GAP_GEOMETRY gap_geometry_
       radius = r2;
     }
     else
-      mooseError2("Issue with spherical flux calc. normals. \n");
+      ::mooseError2("Issue with spherical flux calc. normals. \n");
   }
   else
   {

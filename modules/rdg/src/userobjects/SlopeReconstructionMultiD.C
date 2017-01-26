@@ -32,8 +32,8 @@ SlopeReconstructionMultiD::SlopeReconstructionMultiD(const InputParameters & par
 
   if (bnd_name.size() != bc_uo_name.size())
     mooseError2("Number of boundaries NOT equal to number of BCUserObject names:"
-              , std::endl, "Number of boundaries is ", bnd_name.size()
-              , std::endl, "Number of BCUserObject is ", bc_uo_name.size() );
+              , "\nNumber of boundaries is ", bnd_name.size()
+              , "\nNumber of BCUserObject is ", bc_uo_name.size() );
 
   for (unsigned int i = 0; i < bnd_name.size(); i++)
   {

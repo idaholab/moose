@@ -376,9 +376,9 @@ InputParameters::checkParams(const std::string & parsing_syntax)
     {
       // The parameter is required but missing
       if (oss.str().empty())
-        oss, "The following required parameters are missing:", std::endl;
-      oss, l_prefix, "/", it.first, std::endl;
-      oss, "\tDoc String: \"" + getDocString(it.first) + "\"", std::endl;
+        oss << "The following required parameters are missing:" << std::endl;
+      oss << l_prefix << "/" << it.first << std::endl;
+      oss << "\tDoc String: \"" + getDocString(it.first) + "\"" << std::endl;
     }
   }
 

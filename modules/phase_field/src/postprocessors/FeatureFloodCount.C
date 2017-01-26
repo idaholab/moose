@@ -1290,7 +1290,7 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
     for (auto i = beginIndex(rhs._bboxes); i < rhs._bboxes.size(); ++i)
       oss << "Max: " << rhs._bboxes[i].max() << " Min: " << rhs._bboxes[i].min() << '\n';
 
-    mooseError2("No Bounding Boxes Expanded - This is a catastrophic error!\n", oss.str());
+    ::mooseError2("No Bounding Boxes Expanded - This is a catastrophic error!\n", oss.str());
   }
 }
 

@@ -134,7 +134,7 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
 
   // build the base function
   if (_func_F->Parse(function_expression, variables) >= 0)
-     mooseError2("Invalid function\n", function_expression, '\n', 
+     mooseError2("Invalid function\n", function_expression, '\n',
                 variables, "\nin ParsedMaterialHelper.\n", _func_F->ErrorMsg());
 
   // create parameter passing buffer
