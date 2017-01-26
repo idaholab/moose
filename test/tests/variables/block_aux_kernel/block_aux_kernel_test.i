@@ -24,18 +24,6 @@
   [../]
 []
 
-[Functions]
-  [./t]
-    type = ParsedFunction
-    value = t
-  [../]
-
-  [./zero]
-    type = ParsedFunction
-    value = 0
-  [../]
-[]
-
 [AuxVariables]
   [./distance]
     order = FIRST
@@ -76,14 +64,14 @@
   [./x]
     type = FunctionAux
     variable = disp_x
-    function = zero
+    function = 0
     block = 1
   [../]
 
   [./y]
     type = FunctionAux
     variable = disp_y
-    function = zero
+    function = 0
     block = 1
   [../]
 

@@ -29,5 +29,9 @@ AddFunctionAction::AddFunctionAction(InputParameters params) :
 void
 AddFunctionAction::act()
 {
+  FunctionParserBase<Real> fp;
+  std::string vars = "x,y,z,t,NaN,pi,e";
+  if (fp.Parse(_name, vars) == -1) // -1 for success
+    mooseWarning("Function name '" + _name + "' could evaluate as a ParsedFunction");
   _problem->addFunction(_type, _name, _moose_object_pars);
 }

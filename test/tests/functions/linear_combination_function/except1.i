@@ -37,11 +37,6 @@
 
 
 [Functions]
-  [./x]
-    type = ParsedFunction
-    value = x
-  [../]
-
   [./twoxplus1]
     type = ParsedFunction
     value = 2*x+1
