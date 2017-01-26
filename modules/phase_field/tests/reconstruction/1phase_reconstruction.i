@@ -9,42 +9,57 @@
   kernel_coverage_check = false
 []
 
+# The following sections are extracted in the documentation in
+# moose/docs/content/documentation/modules/phase_field/ICs/EBSD.md
+
 [Mesh]
+  # Create a mesh representing the EBSD data
   type = EBSDMesh
   filename = IN100_001_28x28_Marmot.txt
 []
 
 [GlobalParams]
+  # Define the number and names of the order parameters used to represent the grains
   op_num = 8
   var_name_base = gr
-  execute_on = 'initial'
-  family = MONOMIAL
-  order = CONSTANT
 []
 
 [UserObjects]
   [./ebsd]
+    # Read in the EBSD data. Uses the filename given in the mesh block.
     type = EBSDReader
   [../]
-  [./grain_tracker]
-    type = GrainTracker
-    ebsd_reader = ebsd
-    compute_halo_maps = true # For displaying HALO fields
+[]
+
+[Variables]
+  [./PolycrystalVariables]
+    # Create all the order parameters
+    order = FIRST
+    family = LAGRANGE
   [../]
 []
 
 [ICs]
   [./PolycrystalICs]
     [./ReconVarIC]
+      # Uses the data from the user object 'ebsd' to initialize the variables for all the order parameters.
       ebsd_reader = ebsd
     [../]
   [../]
 []
+#ENDDOC - End of the file section that is included in the documentation. Do not change this line!
 
-[Variables]
-  [./PolycrystalVariables]
-    order = FIRST
-    family = LAGRANGE
+[GlobalParams]
+  execute_on = 'initial'
+  family = MONOMIAL
+  order = CONSTANT
+[]
+
+[UserObjects]
+  [./grain_tracker]
+    type = GrainTracker
+    ebsd_reader = ebsd
+    compute_halo_maps = true # For displaying HALO fields
   [../]
 []
 

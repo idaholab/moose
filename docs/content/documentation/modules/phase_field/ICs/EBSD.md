@@ -25,25 +25,15 @@ adaptivity and allow the mesh to get coarser during the simulation, the
 `uniform_refine` parameter is used to set how many times the mesh can be coarsened.
 The block takes the form:
 
-```text
-[Mesh]
-  type = EBSDMesh
-  filename = IN100_128x128.txt
-  uniform_refine = 4
-[]
-```
+!text modules/phase_field/examples/ebsd_reconstruction/IN100-111grn.i start=Mesh end=GlobalParams
 
 ## EBSD Reader UserObject
 
-The user object reads in the data file, using the name supplied in the mesh block,
+The UserObject reads in the data file, using the name supplied in the mesh block,
 and stores a data object with the local data at each material point as well as the
 average data about each grain. The block syntax is very simple:
 
-```text
-  [./ebsd]
-    type = EBSDReader
-  [../]
-```
+!text modules/phase_field/examples/ebsd_reconstruction/IN100-111grn.i start=UserObjects end=Variables
 
 ## Applying Initial Conditions
 
@@ -56,117 +46,19 @@ A grain structure is created from the EBSD data by assigning initial condition
 values for order parameters. Many more grains can be represented than the number
 of order parameters. The required blocks are
 
-```text
-[Mesh] #Creates a mesh representing the EBSD data
-  type = EBSDMesh
-  filename = IN100_001_28x28_Marmot.txt
-[]
-
-[GlobalParams]
-  op_num = 9 #Defines the number of order parameters used to represent the grains
-  var_name_base = gr
-[]
-
-[UserObjects]
-  [./ebsd] #Reads in the EBSD data. Uses the filename given in the mesh block
-    type = EBSDReader
-  [../]
-[]
-
-[Variables]
-  [./PolycrystalVariables] #Creates all the order parameters
-  [../]
-[]
-
-[ICs]
-  [./PolycrystalICs]
-    [./ReconVarIC] #Uses the data from the user object to initialize the variables for all the order parameters.
-      ebsd_reader = ebsd #Name of the ebsd reader user object
-    [../]
-  [../]
-[]
-```
-
-This example was taken from `tests/reconstruction/1phase_reconstruction.i`
+!text modules/phase_field/tests/reconstruction/1phase_reconstruction.i start=Mesh end=ENDDOC
 
 ### Case 2: Initialize a variable from a specific phase number in the EBSD data, ignoring the grain numbers
 Here, the value for a single variable is initialized from the EBSD data corresponding
 to a single phase number. The required blocks are
 
-```text
-[Mesh] #Creates a mesh representing the EBSD data
-  type = EBSDMesh
-  filename = 'Ti_2Phase_28x28_Sqr_Marmot.txt'
-[]
-
-[UserObjects]
-  [./ebsd] #Reads in the EBSD data. Uses the filename given in the mesh block
-    type = EBSDReader
-  [../]
-[]
-
-[Variables] #Creates the two variables being initialized
-  [./c1]
-  [../]
-  [./c2]
-  [../]
-[]
-
-[ICs]
-  [./phase1_recon] #Initializes the variable info from the ebsd data
-    type = ReconPhaseVarIC
-    ebsd_reader = ebsd #Name of the ebsd reader user object
-    phase = 1 #Phase number being used to initialize the variable
-    variable = c1 #Name of the variable being initialized
-  [../]
-  [./phase2_recon]
-    type = ReconPhaseVarIC
-    ebsd_reader = ebsd #Name of the ebsd reader user object
-    phase = 2 #Phase number being used to initialize the variable
-    variable = c2 #Name of the variable being initialized
-  [../]
-[]
-```
-
-Example taken from `tests/reconstruction/2phase_reconstruction1.i`
+!text modules/phase_field/tests/reconstruction/2phase_reconstruction.i start=Mesh end=ENDDOC
 
 ###Case 3: Create an initial grain structure from the EBSD data only corresponding to one phase number
 Here, the grain and phase numbers are used. The order parameters are initialized
 from the EBSD data, but only using those grains with a given phase number.
 
-```text
-[Mesh] #Creates a mesh representing the EBSD data
-  type = EBSDMesh
-  filename = 'Ti_2Phase_28x28_Sqr_Marmot.txt'
-[]
-
-[GlobalParams]
-  op_num = 3 #Number of order parameters being used for this phase
-  var_name_base = gr
-[]
-
-[UserObjects]
-  [./ebsd]
-    type = EBSDReader
-  [../]
-[]
-
-[Variables]
-  [./PolycrystalVariables]
-  [../]
-[]
-
-[ICs]
-  [./PolycrystalICs]
-    [./ReconVarIC]
-      ebsd_reader = ebsd #Name of the ebsd reader user object
-      phase = 1 #Phase number being used to assign the grain values
-    [../]
-  [../]
-[]
-```
-
-This example was taken from `tests/reconstruction/2phase_reconstruction2.i`
+!text modules/phase_field/tests/reconstruction/2phase_reconstruction2.i start=Mesh end=ENDDOC
 
 ## Using EBSD Crystal Info
 
@@ -174,9 +66,9 @@ The `EBSDReader` local grid data is extracted using the `getData(Point)` functio
 where you pass in location of the point where you want the data. The available data
 that can be extracted for a given point is
 
-* `phi1` - The first Euler angle $$\phi_1$$
-* `phi` - The second Euler angle $$\Phi$$
-* `phi2` - The third Euler angle $$\phi_2$$
+* `phi1` - The first Euler angle $\phi_1$
+* `phi` - The second Euler angle $\Phi$
+* `phi2` - The third Euler angle $\phi_2$
 * `grain` - The index of the grain
 * `phase` - The index of the phase
 * `symmetry` - The symmetry class (from TSL)
@@ -194,9 +86,9 @@ The EBSDReader average grain data is extracted using the `getAvgData(unsigned in
 function call, where you pass in the grain number for which you want the data.
 The available data that can be extracted
 
-* `phi1` - The average first Euler angle $$\phi_1$$
-* `phi` - The average second Euler angle $$\Phi$$
-* `phi2` - The average third Euler angle $$\phi_2$$
+* `phi1` - The average first Euler angle $\phi_1$
+* `phi` - The average second Euler angle $\Phi$
+* `phi2` - The average third Euler angle $\phi_2$
 * `phase` - The index of the phase of the grain
 * `symmetry` - The symmetry class (from TSL)
 * `p` - Point with centroid location
