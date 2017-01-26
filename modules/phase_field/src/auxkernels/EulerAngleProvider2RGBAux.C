@@ -43,17 +43,17 @@ EulerAngleProvider2RGBAux::precalculateValue()
   // ID of unique grain at current point
   const int grain_id = _grain_tracker.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()),
                                                               FeatureFloodCount::FieldType::UNIQUE_REGION, 0);
-  // Recover euler angles for current grain
-  RealVectorValue angles;
-  if (grain_id >= 0)
-    angles = _euler.getEulerAngles(grain_id);
 
-  // Assign correct RGB value either from euler2RGB or from _no_grain_color
+  // Recover Euler angles for current grain and assign correct
+  // RGB value either from euler2RGB or from _no_grain_color
   Point RGB;
-  if (grain_id < 0) //If not in a grain, return _no_grain_color
-    RGB = _no_grain_color;
-  else
+  if (grain_id >= 0 && grain_id < _euler.getGrainNum())
+  {
+    const RealVectorValue & angles = _euler.getEulerAngles(grain_id);
     RGB = euler2RGB(_sd, angles(0) / 180.0 * libMesh::pi, angles(1) / 180.0 * libMesh::pi, angles(2) / 180.0 * libMesh::pi, 1.0, _xtal_class);
+  }
+  else
+    RGB = _no_grain_color;
 
   // Create correct scalar output
   if (_output_type < 3)
