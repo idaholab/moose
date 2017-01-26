@@ -58,11 +58,11 @@
   active = 'dgdiff'
 
   [./dgdiff]
-    type = DGMatDiffusion
+    type = DGDiffusion
     variable = u
     sigma = 6
     epsilon = -1.0
-    prop_name = matp
+    diff = matp
   [../]
 []
 

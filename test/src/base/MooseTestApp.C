@@ -154,7 +154,6 @@
 #include "ImplicitStateful.h"
 #include "MaterialDerivativeTestMaterial.h"
 
-#include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
 #include "DGFunctionConvectionDirichletBC.h"
 #include "CoupledKernelGradBC.h"
@@ -390,9 +389,6 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(VectorPostprocessorAux);
   registerAux(GhostAux);
   registerAux(FunctionGradAux);
-
-  // DG kernels
-  registerDGKernel(DGMatDiffusion);
 
   // Interface kernels
   registerInterfaceKernel(InterfaceDiffusion);

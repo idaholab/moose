@@ -44,7 +44,8 @@ protected:
 
   Real _epsilon;
   Real _sigma;
-  Real _coefficient;
+  const MaterialProperty<Real> & _diff;
+  const MaterialProperty<Real> & _diff_neighbor;
 };
 
 #endif
