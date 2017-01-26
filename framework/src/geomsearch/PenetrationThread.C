@@ -128,7 +128,8 @@ PenetrationThread::operator() (const NodeIdRange & range)
     // See if we already have info about this node
     if (info)
     {
-      FEBase * fe = _fes[_tid][info->_side->dim()];
+      FEBase * fe_elem = _fes[_tid][info->_elem->dim()];
+      FEBase * fe_side = _fes[_tid][info->_side->dim()];
 
       if (!_update_location && (info->_distance >= 0 || info->isCaptured()))
       {
@@ -139,9 +140,9 @@ PenetrationThread::operator() (const NodeIdRange & range)
         // Use the previous reference coordinates
         std::vector<Point> points(1);
         points[0] = contact_ref;
-        fe->reinit(info->_side, &points);
-        const std::vector<Point> slave_pos = fe->get_xyz();
-        Moose::findContactPoint(*info, fe, _fe_type, slave_pos[0],
+        fe_side->reinit(info->_side, &points);
+        const std::vector<Point> slave_pos = fe_side->get_xyz();
+        Moose::findContactPoint(*info, fe_elem, fe_side, _fe_type, slave_pos[0],
                                 false, _tangential_tolerance, contact_point_on_side);
 
         // Restore the original reference coordinates
@@ -155,7 +156,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
         Real old_tangential_distance(info->_tangential_distance);
         bool contact_point_on_side(false);
 
-        Moose::findContactPoint(*info, fe, _fe_type, node,
+        Moose::findContactPoint(*info, fe_elem, fe_side, _fe_type, node,
                                 false, _tangential_tolerance, contact_point_on_side);
 
         if (contact_point_on_side)
@@ -1637,12 +1638,13 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
       break;
     }
 
-    FEBase * fe = _fes[_tid][side->dim()];
+    FEBase * fe_elem = _fes[_tid][elem->dim()];
+    FEBase * fe_side = _fes[_tid][side->dim()];
 
     //Optionally check to see whether face is reasonable candidate based on an
     //estimate of how closely it is likely to project to the face
     if (check_whether_reasonable)
-      if (!isFaceReasonableCandidate(elem, side, fe, slave_node, _tangential_tolerance))
+      if (!isFaceReasonableCandidate(elem, side, fe_side, slave_node, _tangential_tolerance))
       {
         delete side;
         break;
@@ -1680,7 +1682,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
                           dxyzdeta,
                           d2xyzdxideta);
 
-    Moose::findContactPoint(*pen_info, fe, _fe_type, *slave_node,
+    Moose::findContactPoint(*pen_info, fe_elem, fe_side, _fe_type, *slave_node,
                             true, _tangential_tolerance, contact_point_on_side);
 
     thisElemInfo.push_back(pen_info);
