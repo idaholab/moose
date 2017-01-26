@@ -65,7 +65,7 @@ class MooseCommonExtension(object):
     return element
 
 
-  def createErrorElement(self, message, title='Markdown Parsing Error', parent=None, warning=False):
+  def createErrorElement(self, message, title='Markdown Parsing Error', parent=None, error=True):
     """
     Returns a tree element containing error message.
 
@@ -81,7 +81,7 @@ class MooseCommonExtension(object):
         message[str]: The message to display in the alert box.
         title[str]: Set the title (default: "Markdown Parsing Error")
         parent[etree.Element]: The parent element that should contain the error message
-        warning[bool]: Create a warning rather than an error (default: False)
+        error[bool]: Log an error (default: True).
     """
     if parent:
       el = etree.SubElement(parent, 'div')
@@ -95,8 +95,6 @@ class MooseCommonExtension(object):
 
     msg = etree.SubElement(el, 'p')
     msg.text = message
-    if warning:
-      log.warning('{}: {}'.format(title, message))
-    else:
+    if error:
       log.error('{}: {}'.format(title, message))
     return el
