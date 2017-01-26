@@ -23,7 +23,8 @@ class MooseActionSyntax(MooseSyntaxBase):
 
   def __init__(self, yaml=None, syntax=None, **kwargs):
     MooseSyntaxBase.__init__(self, self.RE, yaml=yaml, syntax=syntax, **kwargs)
-    self._settings['title'] = None
+    self._settings['title'] = 'default'
+    self._settings['title_level'] = 2
 
   def handleMatch(self, match):
     """
@@ -33,6 +34,9 @@ class MooseActionSyntax(MooseSyntaxBase):
     action = match.group(2)
     syntax = match.group(3)
     settings = self.getSettings(match.group(4))
+
+    if settings['title'] == 'default':
+      settings['title'] = 'Available {}-{}'.format(action[:3].title(), action[3:].title())
 
     if action == 'subobjects':
       el = self.subobjectsElement(syntax, settings)
@@ -47,8 +51,9 @@ class MooseActionSyntax(MooseSyntaxBase):
     collection = MooseDocs.extensions.create_object_collection(sys_name, self._syntax)
     if collection:
       el = self.applyElementSettings(etree.Element('div'), settings)
-      h2 = etree.SubElement(el, 'h2')
-      h2.text = settings['title'] if settings['title'] else 'Available Sub-Objects'
+      if settings['title']:
+        h2 = etree.SubElement(el, 'h2')
+        h2.text = settings['title']
       el.append(collection)
     else:
       el = etree.Element('p')
@@ -61,8 +66,9 @@ class MooseActionSyntax(MooseSyntaxBase):
     collection = MooseDocs.extensions.create_system_collection(sys_name, self._syntax)
     if collection:
       el = self.applyElementSettings(etree.Element('div'), settings)
-      h2 = etree.SubElement(el, 'h2')
-      h2.text = settings['title'] if settings['title'] else 'Available Sub-Systems'
+      if settings['title']:
+        h2 = etree.SubElement(el, 'h{}'.format(settings['title_level']))
+        h2.text = settings['title']
       el.append(collection)
     else:
       el = etree.Element('p')

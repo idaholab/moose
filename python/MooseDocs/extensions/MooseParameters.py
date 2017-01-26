@@ -19,6 +19,8 @@ class MooseParameters(MooseSyntaxBase):
   def __init__(self, **kwargs):
     super(MooseParameters, self).__init__(self.RE, **kwargs)
     self._settings['display'] = "collapsible"
+    self._settings['title'] = 'Input Parameters'
+    self._settings['title_level'] = 2
 
   def handleMatch(self, match):
     """
@@ -58,13 +60,12 @@ class MooseParameters(MooseSyntaxBase):
       log.debug('Unable to locate parameters for {}'.format(info.name))
     else:
       el = self.applyElementSettings(etree.Element('div'), settings)
-      el.set('id', '#input-parameters')
-      el.set('class', 'section scrollspy')
-      title = etree.SubElement(el, 'h2')
-      title.text = 'Input Parameters'
+      if settings['title']:
+        title = etree.SubElement(el, 'h{}'.format(str(settings['title_level'])))
+        title.text = settings['title']
       for key, table in tables.iteritems():
         if table:
-          subtitle = etree.SubElement(el, 'h3')
+          subtitle = etree.SubElement(el, 'h{}'.format(str(settings['title_level'] + 1)))
           subtitle.text = '{} {}'.format(key, 'Parameters')
           el.append(table.html())
       return el

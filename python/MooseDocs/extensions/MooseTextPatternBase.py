@@ -49,7 +49,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
       content = re.sub(r'(\n{3,})', '\n\n', content)
 
     # Strip header and leading/trailing whitespace and newlines
-    if self._settings['strip_header']:
+    if settings['strip_header']:
       strt = content.find('/********')
       stop = content.rfind('*******/\n')
       content = content.replace(content[strt:stop+9], '')

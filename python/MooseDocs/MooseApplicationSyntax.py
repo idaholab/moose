@@ -80,11 +80,11 @@ class MooseObjectInfo(MooseInfoBase):
     """
 
     stub = MooseInfoBase.STUB_HEADER
-    stub += '\n# {}\n'.format(object_name)
-    stub += '!description {}\n\n'.format(full_name)
-    stub += '!parameters {}\n\n'.format(full_name)
-    stub += '!inputfiles {}\n\n'.format(full_name)
-    stub += '!childobjects {}\n'.format(full_name)
+    stub += '\n# {}\n'.format(self.name)
+    stub += '!description {}\n\n'.format(self.key)
+    stub += '!parameters {}\n\n'.format(self.key)
+    stub += '!inputfiles {}\n\n'.format(self.key)
+    stub += '!childobjects {}\n'.format(self.key)
 
     # Write the stub file
     loc = os.path.dirname(self.markdown)

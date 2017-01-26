@@ -51,6 +51,7 @@ InputParameters validParams<GeneratedMesh>()
 
   params.addParamNamesToGroup("dim", "Main");
 
+  params.addClassDescription("Create a line, square, or cube mesh with uniformaly spaced or biased elements.");
   return params;
 }
 

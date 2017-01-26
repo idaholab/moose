@@ -21,7 +21,6 @@ class TestMooseObjectSyntax(MarkdownTestCase):
   def testParameters(self):
     md = '!parameters /Adaptivity/Markers/BoxMarker'
     html = self.convert(md)
-    self.assertIn('<div class="section scrollspy" id="#input-parameters" style="">', html)
     self.assertIn('<h2 id="input-parameters">Input Parameters</h2>', html)
     self.assertIn('<h3 id="required-parameters">Required Parameters</h3>', html)
     self.assertIn('<div class="moose-parameter-description">How to mark elements outside the box.</div>', html)
@@ -33,7 +32,7 @@ class TestMooseObjectSyntax(MarkdownTestCase):
   def testParametersOptions(self):
     md = '!parameters /Kernels/Diffusion float=right width=42%'
     html = self.convert(md)
-    self.assertIn('<div class="section scrollspy" id="#input-parameters" style="float:right;width:42%;">', html)
+    self.assertIn('<div style="float:right;width:42%;">', html)
 
   def testInputFiles(self):
     md = '!inputfiles /Adaptivity/Markers/BoxMarker'
