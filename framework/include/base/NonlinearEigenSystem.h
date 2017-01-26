@@ -75,6 +75,10 @@ public:
 
   virtual void addEigenKernels(MooseSharedPointer<KernelBase> kernel, THREAD_ID tid) override;
 
+  // For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or Neumann)
+  // boundary conditions are  not allowed.
+  void checkIntegrity();
+
   // return the number of converged eigenvlues
   virtual const unsigned int getNumConvergedEigenvalues() { return _transient_sys.get_n_converged(); };
 

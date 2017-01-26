@@ -20,6 +20,9 @@
 #include "NonlinearEigenSystem.h"
 #include "EigenProblem.h"
 #include "TimeIntegrator.h"
+#include "DirichletBC.h"
+#include "IntegratedBC.h"
+#include "NodalBC.h"
 
 // libmesh includes
 #include "libmesh/sparse_matrix.h"
@@ -152,4 +155,23 @@ NonlinearEigenSystem::addEigenKernels(MooseSharedPointer<KernelBase> kernel, THR
     _non_eigen_kernels.addObject(kernel, tid);
 }
 
+void
+NonlinearEigenSystem::checkIntegrity()
+{
+  if (_integrated_bcs.hasActiveObjects())
+    mooseError("Can't set an inhomogeneous integrated boundary condition for eigenvalue problems.");
+
+  if (_nodal_bcs.hasActiveObjects())
+  {
+    const std::vector<MooseSharedPointer<NodalBC> > & nodal_bcs = _nodal_bcs.getActiveObjects();
+    for (const auto & nodal_bc : nodal_bcs)
+    {
+      MooseSharedPointer<DirichletBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<DirichletBC>(nodal_bc);
+      if (nbc && nbc->getParam<Real>("value"))
+        mooseError("Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
+      else if (!nbc)
+        mooseError("Invalid NodalBC for eigenvalue problems, please use homogeneous Dirichlet.");
+    }
+  }
+}
 #endif /* LIBMESH_HAVE_SLEPC */

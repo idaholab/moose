@@ -124,6 +124,15 @@ EigenProblem::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<N
   FEProblemBase::computeJacobian(soln, jacobian, kernel_type);
 }
 
+void
+EigenProblem::checkProblemIntegrity()
+{
+  FEProblemBase::checkProblemIntegrity();
+#if LIBMESH_HAVE_SLEPC
+  _nl_eigen->checkIntegrity();
+#endif
+}
+
 
 void
 EigenProblem::solve()

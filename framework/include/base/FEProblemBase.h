@@ -894,7 +894,7 @@ public:
    */
   void notifyWhenMeshChanges(MeshChangedInterface * mci);
 
-  void checkProblemIntegrity();
+  virtual void checkProblemIntegrity();
 
   void serializeSolution();
 
