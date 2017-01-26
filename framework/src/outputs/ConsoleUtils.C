@@ -77,8 +77,8 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
       << std::setw(console_field_width) << "    Total:" << mesh.n_nodes() << '\n'
       << std::setw(console_field_width) << "    Local:" << mesh.n_local_nodes() << '\n'
       << std::setw(console_field_width) << "  Elems:" << '\n'
-      << std::setw(console_field_width) << "    Total:" << mesh.n_elem() << '\n'
-      << std::setw(console_field_width) << "    Local:" << mesh.n_local_elem() << '\n';
+      << std::setw(console_field_width) << "    Total:" << mesh.n_active_elem() << '\n'
+      << std::setw(console_field_width) << "    Local:" << mesh.n_active_local_elem() << '\n';
 
   if (verbose)
   {

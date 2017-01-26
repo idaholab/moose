@@ -1,5 +1,6 @@
 import os
 import unittest
+import MooseDocs
 from MooseDocs.testing import MarkdownTestCase
 
 class TestMooseObjectSyntax(MarkdownTestCase):
@@ -11,7 +12,8 @@ class TestMooseObjectSyntax(MarkdownTestCase):
     html = self.convert(md)
     self.assertIn('<h2 id="available-sub-objects">Available Sub-Objects</h2>', html)
     self.assertIn('<div class="collapsible-header moose-group-header">Framework Objects</div>', html)
-    self.assertIn('<div class="moose-collection-name col l4"><a href="Adaptivity/Markers/framework/BoxMarker.md">BoxMarker</a></div>', html)
+    loc = os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'content', 'documentation', 'systems', 'Adaptivity', 'Markers', 'framework', 'BoxMarker.md')
+    self.assertIn('<div class="moose-collection-name col l4"><a href="{}">BoxMarker</a></div>'.format(loc), html)
 
   def testSubObjectsTitle(self):
     md = '!subobjects /Adaptivity/Markers title=My Custom Title'
@@ -20,14 +22,16 @@ class TestMooseObjectSyntax(MarkdownTestCase):
 
   def testSubObjectsError(self):
     md = '!subobjects /Not/A/Valid/System'
-    html = self.assertConvert('test_SubObjectsError.html', md)
+    html = self.convert(md)
+    self.assertIn('<p></p>', html)
 
   def testSubSystems(self):
     md = '!subsystems /Adaptivity'
     html = self.convert(md)
     self.assertIn('<h2 id="available-sub-systems">Available Sub-Systems</h2>', html)
     self.assertIn('<div class="collapsible-header moose-group-header">Framework Systems</div>', html)
-    self.assertIn('<div class="moose-collection-name col l4"><a href="systems/Adaptivity/Markers/index.md">Markers</a></div>', html)
+    loc = os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'content', 'documentation', 'systems', 'Adaptivity', 'Markers', 'index.md')
+    self.assertIn('<div class="moose-collection-name col l4"><a href="{}">Markers</a></div>'.format(loc), html)
 
   def testSubSystemsTitle(self):
     md = '!subsystems /Adaptivity title=My Custom Title'
@@ -36,4 +40,5 @@ class TestMooseObjectSyntax(MarkdownTestCase):
 
   def testSubSystemsError(self):
     md = '!subsystems /Not/A/Valid/System'
-    html = self.assertConvert('test_SubSystemsError.html', md)
+    html = self.convert(md)
+    self.assertIn('<p></p>', html)

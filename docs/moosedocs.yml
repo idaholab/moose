@@ -43,7 +43,9 @@ markdown_extensions:
                       - framework/src
                       - framework/include
                   hide:
-                      - /Bounds # deprecated syntax that we do not want to document
+                      - /AuxVariables/*/InitialCondition/
+                      - /Variables/*/InitialCondition/
+                      - /Bounds
                       - /Adaptivity/Indicators
                       - /AuxKernels
                       - /AuxScalarKernels
@@ -84,13 +86,17 @@ markdown_extensions:
                       - modules/phase_field/src
                       - modules/phase_field/include
                   hide:
-                      - /Bounds # deprecated
+                      - /Kernels/PFFracIntVar # deprecated
+                      - /AuxVariables/*/InitialCondition
+                      - /Variables/*/InitialCondition
+                      - /Bounds
                       - /AuxKernels
                       - /AuxVariables
                       - /BCs
                       - /ICs
                       - /Kernels
                       - /Materials
+                      - /Mesh
                       - /Modules
                       - /Postprocessors
                       - /UserObjects
@@ -103,7 +109,9 @@ markdown_extensions:
                       - modules/tensor_mechanics/src
                       - modules/tensor_mechanics/include
                   hide:
-                      - /Bounds # deprecated
+                      - /AuxVariables/*/InitialCondition/
+                      - /Variables/*/InitialCondition/
+                      - /Bounds
                       - /AuxKernels
                       - /BCs
                       - /Kernels
@@ -119,7 +127,9 @@ markdown_extensions:
                       - modules/heat_conduction/src
                       - modules/heat_conduction/include
                   hide:
-                      - /Bounds # deprecated
+                      - /AuxVariables/*/InitialCondition/
+                      - /Variables/*/InitialCondition/
+                      - /Bounds
                       - /BCs
                       - /Constraints
                       - /DiracKernels
@@ -136,6 +146,9 @@ markdown_extensions:
                       - modules/rdg/src
                       - modules/rdg/include
                   hide:
+                      - /AuxVariables/*/InitialCondition/
+                      - /Variables/*/InitialCondition/
+                      - /Bounds
                       - /BCs
                       - /DGKernels
                       - /Materials

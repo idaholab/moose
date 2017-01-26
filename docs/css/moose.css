@@ -49,6 +49,16 @@ p {
     top-margin:1.5rem;
 }
 
+.moose-site-generated{
+    text-align: left;
+    float: left;
+}
+
+.moose-edit-markdown{
+    text-align: right;
+    float: right;
+}
+
 .moose-copy-button{
     position:relative;
     float:right;
@@ -63,18 +73,20 @@ moose-caption {
     width:220px;
 }
 
-.moose-devel-links {
+.moose-code-links,
+.moose-doxygen-link {
+    padding: 2px;
     font-size:80%;
     margin-top:10px;
     width:100%;
 }
 
-a.moose-bad-link{
-    color:red;
+.moose-code-links {
+    text-transform: none;
 }
 
-.moose-devel-links .btn, .btn-large, .btn-flat{
-    text-transform:none;
+a.moose-bad-link{
+    color:red;
 }
 
 li{
@@ -136,9 +148,15 @@ li{
     font-weight:100;
 }
 
-.collapsible li.active .moose-parameter-header-description,
-.collapsible li.active .moose-parameter-header-default{
+li.active .collapsible-header .moose-collection-description,
+li.active .collapsible-header .moose-parameter-header-description,
+li.active .collapsible-header .moose-parameter-header-default{
     display:none;
+}
+
+li.active .collapsible-header .moose-collection-name,
+li.active .collapsible-header .moose-parameter-name{
+    overflow:unset;
 }
 
 nav,
@@ -150,9 +168,7 @@ footer.page-footer{
 
 .side-nav .collapsible li.active a.active,
 .side-nav.fixed .collapsible li.active a.active {
-
     background-color:#e8e8e8;
-
 }
 
 .side-nav .collapsible ul:last-child a.active:last-child,

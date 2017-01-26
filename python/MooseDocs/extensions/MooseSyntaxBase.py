@@ -19,17 +19,30 @@ class MooseSyntaxBase(MooseCommonExtension, Pattern):
     syntax[dict]: A dictionary of MooseApplicatinSyntax objects.
   """
 
-  def __init__(self, regex, markdown_instance=None, yaml=None, syntax=None, **kwargs):
+  def __init__(self, regex, markdown_instance=None, syntax=None, **kwargs):
     MooseCommonExtension.__init__(self, **kwargs)
     Pattern.__init__(self, regex, markdown_instance)
 
-    self._yaml = yaml
     self._syntax = syntax
-
-    # Error if the YAML was not supplied
-    if not isinstance(self._yaml, utils.MooseYaml):
-      log.error("The MooseYaml object must be supplied to constructor of MooseObjectClassDescription.")
 
     # Error if the syntax was not supplied
     if not isinstance(self._syntax, dict):
       log.error("A dictionary of MooseApplicationSyntax objects must be supplied.")
+
+  def getInfo(self, name):
+    info = self.getObject(name)
+    if info == None:
+      return self.getAction(name)
+    return info
+
+  def getObject(self, name):
+    for syntax in self._syntax.itervalues():
+      if syntax.hasObject(name):
+        return syntax.getObject(name)
+    return None
+
+  def getAction(self, name):
+    for syntax in self._syntax.itervalues():
+      if syntax.hasAction(name):
+        return syntax.getAction(name)
+    return None

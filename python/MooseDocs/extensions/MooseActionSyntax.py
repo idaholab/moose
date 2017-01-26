@@ -8,7 +8,7 @@ from MooseSyntaxBase import MooseSyntaxBase
 import utils
 import MooseDocs
 
-class MooseSystemSyntax(MooseSyntaxBase):
+class MooseActionSyntax(MooseSyntaxBase):
   """
   Creates tables of sub-object/systems.
 
@@ -29,7 +29,6 @@ class MooseSystemSyntax(MooseSyntaxBase):
     """
     Handle the regex match.
     """
-
     # Extract match options and settings
     action = match.group(2)
     syntax = match.group(3)
@@ -41,42 +40,30 @@ class MooseSystemSyntax(MooseSyntaxBase):
       el = self.subsystemsElement(syntax, settings)
     return el
 
-  def subobjectsElement(self, obj_name, settings):
+  def subobjectsElement(self, sys_name, settings):
     """
     Create table of sub-objects.
     """
-
-    node = self._yaml.find(os.path.join(obj_name, '*'))
-    if node:
-      node = self._yaml.find(obj_name)
-    elif not node:
-      node = self._yaml.find(os.path.join(obj_name, '<type>'))
-
-    if not node:
-      return self.createErrorElement("The are not any sub-objects for the supplied syntax: {}".format(obj_name))
-
-    el = self.applyElementSettings(etree.Element('div'), settings)
-    h2 = etree.SubElement(el, 'h2')
-    h2.text = settings['title'] if settings['title'] else 'Available Sub-Objects'
-    collection = MooseDocs.extensions.create_object_collection(node, self._syntax)
+    collection = MooseDocs.extensions.create_object_collection(sys_name, self._syntax)
     if collection:
+      el = self.applyElementSettings(etree.Element('div'), settings)
+      h2 = etree.SubElement(el, 'h2')
+      h2.text = settings['title'] if settings['title'] else 'Available Sub-Objects'
       el.append(collection)
+    else:
+      el = etree.Element('p')
     return el
 
   def subsystemsElement(self, sys_name, settings):
     """
     Create table of sub-systems.
     """
-
-    node = self._yaml.find(sys_name)
-    if not node:
-      return self.createErrorElement("The are not any sub-systems for the supplied syntax: {} You likely need to remove the '!subobjects' syntax.".format(sys_name))
-
-    el = self.applyElementSettings(etree.Element('div'), settings)
-    h2 = etree.SubElement(el, 'h2')
-    h2.text = settings['title'] if settings['title'] else 'Available Sub-Systems'
-    collection = MooseDocs.extensions.create_system_collection(node, self._syntax)
+    collection = MooseDocs.extensions.create_system_collection(sys_name, self._syntax)
     if collection:
+      el = self.applyElementSettings(etree.Element('div'), settings)
+      h2 = etree.SubElement(el, 'h2')
+      h2.text = settings['title'] if settings['title'] else 'Available Sub-Systems'
       el.append(collection)
-
+    else:
+      el = etree.Element('p')
     return el

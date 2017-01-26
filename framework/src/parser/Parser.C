@@ -231,6 +231,9 @@ Parser::parse(const std::string &input_filename)
       {
         if (!is_parent)
         {
+          if (_syntax.isDeprecatedSyntax(registered_identifier))
+            mooseDeprecated("The input file syntax \"[" << registered_identifier << "]\" is deprecated.");
+
           params = _action_factory.getValidParams(it->second._action);
 
           params.set<ActionWarehouse *>("awh") = &_action_wh;

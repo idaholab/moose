@@ -8,7 +8,9 @@ import logging
 log = logging.getLogger(__name__)
 
 from MooseObjectSyntax import MooseObjectSyntax
-from MooseSystemSyntax import MooseSystemSyntax
+from MooseParameters import MooseParameters
+from MooseDescription import MooseDescription
+from MooseActionSyntax import MooseActionSyntax
 from MooseTextFile import MooseTextFile
 from MooseImageFile import MooseImageFile
 from MooseInputBlock import MooseInputBlock
@@ -20,7 +22,7 @@ from MooseCSS import MooseCSS
 from MooseSlidePreprocessor import MooseSlidePreprocessor
 from MooseBuildStatus import MooseBuildStatus
 from MooseBibtex import MooseBibtex
-from MooseSystemList import MooseSystemList
+from MooseActionList import MooseActionList
 import MooseDocs
 import utils
 
@@ -94,6 +96,7 @@ class MooseMarkdown(markdown.Extension):
     for item in config['locations']:
       key = item.keys()[0]
       options = item.values()[0]
+      options.setdefault('group', key)
       options.setdefault('name', key.replace('_', ' ').title())
       options.setdefault('install', config['install'])
       self.syntax[key] = MooseDocs.MooseApplicationSyntax(exe_yaml, **options)
@@ -109,13 +112,19 @@ class MooseMarkdown(markdown.Extension):
     md.parser.blockprocessors.add('css', MooseCSS(md.parser, **config), '_begin')
 
     # Inline Patterns
-    object_markdown = MooseObjectSyntax(markdown_instance=md, yaml=exe_yaml, syntax=self.syntax, database=database, **config)
+    params = MooseParameters(markdown_instance=md, syntax=self.syntax, **config)
+    md.inlinePatterns.add('moose_parameters', params, '_begin')
+
+    desc = MooseDescription(markdown_instance=md, syntax=self.syntax, **config)
+    md.inlinePatterns.add('moose_description', desc, '_begin')
+
+    object_markdown = MooseObjectSyntax(markdown_instance=md, syntax=self.syntax, database=database, **config)
     md.inlinePatterns.add('moose_object_syntax', object_markdown, '_begin')
 
-    system_markdown = MooseSystemSyntax(markdown_instance=md, yaml=exe_yaml, syntax=self.syntax, **config)
+    system_markdown = MooseActionSyntax(markdown_instance=md, syntax=self.syntax, **config)
     md.inlinePatterns.add('moose_system_syntax', system_markdown, '_begin')
 
-    system_list = MooseSystemList(markdown_instance=md, yaml=exe_yaml, syntax=self.syntax, **config)
+    system_list = MooseActionList(markdown_instance=md, yaml=exe_yaml, syntax=self.syntax, **config)
     md.inlinePatterns.add('moose_system_list', system_list, '_begin')
 
     md.inlinePatterns.add('moose_input_block', MooseInputBlock(markdown_instance=md, **config), '_begin')
