@@ -189,6 +189,12 @@ public:
    */
   void bufferConsoleOutputsBeforeConstruction(bool buffer) { _buffer_action_console_outputs = buffer; }
 
+  /// Sets a Boolean indicating that at least one object is requesting performance logging in this application
+  void setLoggingRequested() { _logging_requested = true; }
+
+  /// Returns a Boolean indicating whether performance logging is requested in this application
+  bool getLoggingRequested() const { return _logging_requested; }
+
 private:
 
   /**
@@ -338,6 +344,9 @@ private:
 
   /// Flag indicating that next call to outputStep is forced
   bool _force_output;
+
+  /// Indicates that performance logging has been requested by the console or some object (PerformanceData)
+  bool _logging_requested;
 
   // Allow complete access:
   // FEProblemBase for calling initial, timestepSetup, outputStep, etc. methods

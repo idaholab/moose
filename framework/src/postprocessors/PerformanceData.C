@@ -36,7 +36,10 @@ PerformanceData::PerformanceData(const InputParameters & parameters) :
     _column(getParam<MooseEnum>("column").getEnum<PerfLogCols>()),
     _category(getParam<std::string>("category")),
     _event(getParam<std::string>("event"))
-{}
+{
+  // Notify the OutputWarehouse that logging has been requested
+  _app.getOutputWarehouse().setLoggingRequested();
+}
 
 Real
 PerformanceData::getValue()
