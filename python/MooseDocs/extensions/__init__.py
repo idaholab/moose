@@ -2,7 +2,7 @@ import os
 from MooseMarkdown import MooseMarkdown
 from markdown.util import etree
 
-def get_collection_items(info_objects):
+def get_collection_items(info_objects, show_hidden=False):
   """
   Returns li html elements for each object in a system.
 
@@ -11,7 +11,7 @@ def get_collection_items(info_objects):
   """
   items = []
   for info in info_objects:
-    if info.hidden:
+    if info.hidden and not show_hidden:
       continue
     item = etree.Element('li')
     items.append(item)
@@ -34,7 +34,7 @@ def get_collection_items(info_objects):
   return items
 
 
-def create_collection(name, syntax, action, groups=[]):
+def create_collection(name, syntax, action, groups=[], **kwargs):
   """
   Creates subobject collection for a given node from the YAML dump.
 
@@ -51,9 +51,9 @@ def create_collection(name, syntax, action, groups=[]):
   children = []
   for group in groups:
     if action == 'object':
-      items = get_collection_items(syntax[group].objects(name, include_self=False))
+      items = get_collection_items(syntax[group].objects(name, include_self=False), **kwargs)
     elif action == 'system':
-      items = get_collection_items(syntax[group].actions(name, include_self=False))
+      items = get_collection_items(syntax[group].actions(name, include_self=False), **kwargs)
     else:
       log.error('Invalid action name, must supply "system" or "object".')
       return None

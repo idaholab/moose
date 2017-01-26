@@ -22,6 +22,7 @@ class MooseActionList(MooseSyntaxBase):
   def __init__(self, yaml=None, syntax=None, **kwargs):
     MooseSyntaxBase.__init__(self, self.RE, syntax=syntax, **kwargs)
     self._settings['groups'] = None
+    self._settings['show_hidden'] = False
     self._yaml = yaml
 
   def handleMatch(self, match):
@@ -40,58 +41,65 @@ class MooseActionList(MooseSyntaxBase):
     # Build complete list of action objects
     actions = []
     for syn in self._syntax.itervalues():
-      actions += syn._actions.values()
-    actions = sorted(actions, key=lambda x: x.key)
+      actions += syn.actions().values()
 
     # Create the primary element
     el = etree.Element('div')
     el.set('class', 'moose-system-list')
 
+    # Storage structure for <div> tags to allow for nested item creation without
+    # the need for complete actions tree or sorted action objects.
+    folder_divs = dict()
+
     # Loop over keys
     for action in actions:
 
-      if action.hidden:
+      # Do nothing if the syntax is hidden
+      if action.hidden and not settings['show_hidden']:
         continue
 
-      # Create the top-level section
-      level = len(action.key.strip('/').split('/'))
-      id = action.name.replace(' ', '_').lower()
-      if level == 1:
-        div = etree.Element('div')
-        div.set('class', 'section scrollspy')
-        div.set('id', id)
+      # Attempt to build the sub-objects table
+      collection = MooseDocs.extensions.create_object_collection(action.key, self._syntax, groups=groups, show_hidden=settings['show_hidden'])
 
-      # Current heading
-      h = etree.Element('h{}'.format(str(level+1)))
-      h.text = action.name
-      h.set('id', id)
+      # Do nothing if the table is empty or the supplied group is not desired
+      if (not collection) and (action.group not in groups):
+        continue
 
-      # Add link to action pages
-      a = etree.SubElement(h, 'a')
-      a.set('href', action.markdown)
-      i = etree.SubElement(a, 'i')
-      i.set('class', 'material-icons')
-      i.text = 'input'
+      # Loop through the syntax ("folders") and create the necessary html element
+      folder = tuple(action.key.strip('/').split('/'))
+      div = el
+      for i in range(len(folder)):
+        current = '/'.join(folder[0:i+1])
 
-      # Create a chip showing where the action is defined
-      tag = etree.SubElement(h, 'div')
-      tag.set('class', 'chip moose-chip')
-      tag.text = action.group
+        # If a <div> with the current name exists, use it, otherwise create the <div> and associated heading
+        if current in folder_divs:
+          div = folder_divs[current]
+        else:
+          div = etree.SubElement(div, 'div')
+          folder_divs[current] = div
 
-      # Build a table(s) of sub-objects
-      collection = MooseDocs.extensions.create_object_collection(action.key, self._syntax, groups=groups)
+          h = etree.SubElement(div, 'h{}'.format(str(i+2)))
+          h.text = current
+          h_id = current.replace(' ', '_').lower()
+          h.set('id', h_id)
 
-      # If a table exists then this section should be displayed, so add it
+          if i == 0:
+            div.set('class', 'section scrollspy')
+            div.set('id', h_id)
+
+          # Add link to action pages
+          a = etree.SubElement(h, 'a')
+          a.set('href', action.markdown)
+          i = etree.SubElement(a, 'i')
+          i.set('class', 'material-icons')
+          i.text = 'input'
+
+          # Create a chip showing where the action is defined
+          tag = etree.SubElement(h, 'div')
+          tag.set('class', 'chip moose-chip')
+          tag.text = action.group
+
       if collection:
-        div.append(h)
         div.append(collection)
-        if div not in el:
-          el.append(div)
-
-      # If the table does not exist then only add this section if the groups are active
-      elif action.group in groups:
-        div.append(h)
-        if div not in el:
-          el.append(div)
 
     return el
