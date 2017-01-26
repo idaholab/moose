@@ -20,6 +20,9 @@ path_tool.activate_module('TestHarness')
 # Append error flag when running tests
 sys.argv.insert(1, "--error")
 
+# Append color first directory flag when running tests for modules
+sys.argv.insert(1, "--color-first-directory")
+
 from TestHarness import TestHarness
 # Run the tests!
 TestHarness.buildAndRun(sys.argv, app_name, MOOSE_DIR)

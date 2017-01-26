@@ -2,6 +2,6 @@
   [./circle_thermal_expansion_stress]
     type = RunApp
     input = 'circle_thermal_expansion_stress.i'
-    cli_args = '--check-input'
+    check_input = True
   [../]
 []
