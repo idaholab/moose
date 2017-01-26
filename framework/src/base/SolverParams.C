@@ -16,6 +16,9 @@
 
 SolverParams::SolverParams() :
     _type(Moose::ST_PJFNK),
-    _line_search(Moose::LS_INVALID)
+    _line_search(Moose::LS_INVALID),
+    _eigen_solve_type(Moose::EST_KRYLOVSCHUR),
+    _eigen_problem_type(Moose::EPT_NON_HERMITIAN),
+    _which_eigen_pairs(Moose::WEP_SMALLEST_MAGNITUDE)
 {
 }

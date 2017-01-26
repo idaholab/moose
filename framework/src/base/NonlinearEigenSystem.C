@@ -20,6 +20,9 @@
 #include "NonlinearEigenSystem.h"
 #include "EigenProblem.h"
 #include "TimeIntegrator.h"
+#include "DirichletBC.h"
+#include "IntegratedBC.h"
+#include "NodalBC.h"
 
 // libmesh includes
 #include "libmesh/sparse_matrix.h"
@@ -30,10 +33,18 @@ namespace Moose {
 #if LIBMESH_HAVE_SLEPC
 void assemble_matrix(EquationSystems & es, const std::string & system_name)
 {
-  FEProblemBase * p = es.parameters.get<FEProblemBase *>("_fe_problem_base");
+  EigenProblem * p = es.parameters.get<EigenProblem *>("_eigen_problem");
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
 
-  p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_A);
+  p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_A, Moose::KT_NONEIGEN);
+
+  if (eigen_system.generalized())
+  {
+    if (eigen_system.matrix_B)
+      p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_B, Moose::KT_EIGEN);
+    else
+      mooseError("It is a generalized eigenvalue problem but matrix B is empty \n");
+  }
 }
 #else
 void assemble_matrix(EquationSystems & /*es*/, const std::string & /*system_name*/)
@@ -135,4 +146,32 @@ NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
   return _transient_sys.get_eigenpair(n);
 }
 
+void
+NonlinearEigenSystem::addEigenKernels(MooseSharedPointer<KernelBase> kernel, THREAD_ID tid)
+{
+  if (kernel->isEigenKernel())
+    _eigen_kernels.addObject(kernel, tid);
+  else
+    _non_eigen_kernels.addObject(kernel, tid);
+}
+
+void
+NonlinearEigenSystem::checkIntegrity()
+{
+  if (_integrated_bcs.hasActiveObjects())
+    mooseError("Can't set an inhomogeneous integrated boundary condition for eigenvalue problems.");
+
+  if (_nodal_bcs.hasActiveObjects())
+  {
+    const std::vector<MooseSharedPointer<NodalBC> > & nodal_bcs = _nodal_bcs.getActiveObjects();
+    for (const auto & nodal_bc : nodal_bcs)
+    {
+      MooseSharedPointer<DirichletBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<DirichletBC>(nodal_bc);
+      if (nbc && nbc->getParam<Real>("value"))
+        mooseError("Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
+      else if (!nbc)
+        mooseError("Invalid NodalBC for eigenvalue problems, please use homogeneous Dirichlet.");
+    }
+  }
+}
 #endif /* LIBMESH_HAVE_SLEPC */

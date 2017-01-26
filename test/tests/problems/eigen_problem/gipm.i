@@ -6,17 +6,18 @@
   ymin = 0
   ymax = 100
   elem_type = QUAD4
-  nx = 8
-  ny = 8
-
-  uniform_refine = 0
+  nx = 64
+  ny = 64
 
   displacements = 'x_disp y_disp'
 []
 
+#The minimum eigenvalue for this problem is 2*(pi/a)^2 + 2 with a = 100.
+#Its inverse will be 0.49950700634518.
+
 [Variables]
   [./u]
-    order = FIRST
+    order = first
     family = LAGRANGE
   [../]
 []
@@ -65,6 +66,13 @@
     coefficient = 2.0
     use_displaced_mesh = true
   [../]
+
+  [./rhs]
+    type = Reaction
+    variable = u
+    use_displaced_mesh = true
+    eigen_kernel = true
+  [../]
 []
 
 [BCs]
@@ -79,14 +87,14 @@
 
 [Problem]
   type = EigenProblem
-  which_eigen_pairs = largest_magnitude
-  n_eigen_pairs = 5
-  n_basis_vectors = 15
+  eigen_problem_type = gen_non_hermitian
+  n_eigen_pairs = 1
+  n_basis_vectors = 18
 []
 
 [Executioner]
   type = Steady
-  eigen_solve_type = krylovschur
+  eigen_solve_type = jacobi_davidson
   petsc_options = '-eps_view'
 []
 

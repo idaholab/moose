@@ -112,6 +112,8 @@ MultiMooseEnum getCommonPetscKeys();
  */
 void setSinglePetscOption(const std::string & name, const std::string & value = "");
 
+void addPetscOptionsFromCommandline();
+
 }
 }
 

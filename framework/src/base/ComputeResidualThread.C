@@ -36,9 +36,7 @@ ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem, Moose::
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
     _dg_kernels(_nl.getDGKernelWarehouse()),
     _interface_kernels(_nl.getInterfaceKernelWarehouse()),
-    _kernels(_nl.getKernelWarehouse()),
-    _time_kernels(_nl.getTimeKernelWarehouse()),
-    _non_time_kernels(_nl.getNonTimeKernelWarehouse())
+    _kernels(_nl.getKernelWarehouse())
 {
 }
 
@@ -51,9 +49,7 @@ ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads:
     _integrated_bcs(x._integrated_bcs),
     _dg_kernels(x._dg_kernels),
     _interface_kernels(x._interface_kernels),
-    _kernels(x._kernels),
-    _time_kernels(x._time_kernels),
-    _non_time_kernels(x._kernels)
+    _kernels(x._kernels)
 {
 }
 
@@ -93,16 +89,27 @@ ComputeResidualThread::onElement(const Elem *elem)
   switch (_kernel_type)
   {
   case Moose::KT_ALL:
-    warehouse = &_kernels;
+    warehouse = &_nl.getKernelWarehouse();
     break;
 
   case Moose::KT_TIME:
-    warehouse = &_time_kernels;
+    warehouse = &_nl.getTimeKernelWarehouse();
     break;
 
   case Moose::KT_NONTIME:
-    warehouse = &_non_time_kernels;
+    warehouse = &_nl.getNonTimeKernelWarehouse();
     break;
+
+  case Moose::KT_EIGEN:
+    warehouse = &_nl.getEigenKernelWarehouse();
+    break;
+
+  case Moose::KT_NONEIGEN:
+    warehouse = &_nl.getNonEigenKernelWarehouse();
+    break;
+
+  default:
+    mooseError("Unknown Kernel Type \n");
   }
 
   if (warehouse->hasActiveBlockObjects(_subdomain, _tid))

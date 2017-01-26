@@ -1735,6 +1735,16 @@ Assembly::setCachedJacobianContributions(SparseMatrix<Number> & jacobian)
 }
 
 void
+Assembly::zeroCachedJacobianContributions(SparseMatrix<Number> & jacobian)
+{
+  // First zero the rows (including the diagonals) to prepare for
+  // setting the cached values.
+  jacobian.zero_rows(_cached_jacobian_contribution_rows, 0.0);
+
+  clearCachedJacobianContributions();
+}
+
+void
 Assembly::addCachedJacobianContributions(SparseMatrix<Number> & jacobian)
 {
   // TODO: Use SparseMatrix::add_values() for efficiency

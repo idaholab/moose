@@ -166,6 +166,8 @@ enum KernelType
 {
   KT_TIME = 0,
   KT_NONTIME = 1,
+  KT_NONEIGEN = 2,
+  KT_EIGEN  = 3,
   KT_ALL
 };
 
@@ -237,6 +239,47 @@ enum SolveType
   ST_NEWTON,           ///< Full Newton Solve
   ST_FD,               ///< Use finite differences to compute Jacobian
   ST_LINEAR            ///< Solving a linear problem
+};
+
+/**
+ * Type of the eigen solve
+ */
+enum EigenSolveType
+{
+  EST_POWER,            ///< Power / Inverse / RQI
+  EST_ARNOLDI,          ///< Arnoldi
+  EST_KRYLOVSCHUR,      ///< Krylov-Schur
+  EST_JACOBI_DAVIDSON   ///< Jacobi-Davidson
+};
+
+/**
+ * Type of the eigen problem
+ */
+enum EigenProblemType
+{
+  EPT_HERMITIAN,              ///< Hermitian
+  EPT_NON_HERMITIAN,          ///< Non-Hermitian
+  EPT_GEN_HERMITIAN,          ///< Generalized Hermitian
+  EPT_GEN_INDEFINITE,         ///< Generalized Hermitian indefinite
+  EPT_GEN_NON_HERMITIAN,      ///< Generalized Non-Hermitian
+  EPT_POS_GEN_NON_HERMITIAN   ///< Generalized Non-Hermitian with positive (semi-)definite B
+};
+
+/**
+ * Which eigen pairs
+ */
+enum WhichEigenPairs
+{
+  WEP_LARGEST_MAGNITUDE,       ///< largest magnitude
+  WEP_SMALLEST_MAGNITUDE,      ///< smallest magnitude
+  WEP_LARGEST_REAL,            ///< largest real
+  WEP_SMALLEST_REAL,           ///< smallest real
+  WEP_LARGEST_IMAGINARY,       ///< largest imaginary
+  WEP_SMALLEST_IMAGINARY,      ///< smallest imaginary
+  WEP_TARGET_MAGNITUDE,        ///< target magnitude
+  WEP_TARGET_REAL,             ///< target real
+  WEP_TARGET_IMAGINARY,        ///< target imaginary
+  WEP_ALL_EIGENVALUES          ///< all eigenvalues
 };
 
 /**

@@ -29,6 +29,9 @@ namespace Moose
   std::map<std::string, QuadratureType> quadrature_type_to_enum;
   std::map<std::string, CoordinateSystemType> coordinate_system_type_to_enum;
   std::map<std::string, SolveType> solve_type_to_enum;
+  std::map<std::string, EigenSolveType> eigen_solve_type_to_enum;
+  std::map<std::string, EigenProblemType> eigen_problem_type_to_enum;
+  std::map<std::string, WhichEigenPairs> which_eigen_pairs_to_enum;
   std::map<std::string, LineSearchType> line_search_type_to_enum;
 
   void initExecStoreType()
@@ -78,6 +81,47 @@ namespace Moose
       solve_type_to_enum["NEWTON"] = ST_NEWTON;
       solve_type_to_enum["FD"]     = ST_FD;
       solve_type_to_enum["LINEAR"] = ST_LINEAR;
+    }
+  }
+
+  void initEigenSolveType()
+  {
+    if (eigen_solve_type_to_enum.empty())
+    {
+      eigen_solve_type_to_enum["POWER"]           = EST_POWER;
+      eigen_solve_type_to_enum["ARNOLDI"]         = EST_ARNOLDI;
+      eigen_solve_type_to_enum["KRYLOVSCHUR"]     = EST_KRYLOVSCHUR;
+      eigen_solve_type_to_enum["JACOBI_DAVIDSON"] = EST_JACOBI_DAVIDSON;
+    }
+  }
+
+  void initEigenProlemType()
+  {
+    if (eigen_problem_type_to_enum.empty())
+    {
+      eigen_problem_type_to_enum["HERMITIAN"]             = EPT_HERMITIAN;
+      eigen_problem_type_to_enum["NON_HERMITIAN"]         = EPT_NON_HERMITIAN;
+      eigen_problem_type_to_enum["GEN_HERMITIAN"]         = EPT_GEN_HERMITIAN;
+      eigen_problem_type_to_enum["GEN_NON_HERMITIAN"]     = EPT_GEN_NON_HERMITIAN;
+      eigen_problem_type_to_enum["GEN_INDEFINITE"]        = EPT_GEN_INDEFINITE;
+      eigen_problem_type_to_enum["POS_GEN_NON_HERMITIAN"] = EPT_POS_GEN_NON_HERMITIAN;
+    }
+  }
+
+  void initWhichEigenPairs()
+  {
+    if (which_eigen_pairs_to_enum.empty())
+    {
+      which_eigen_pairs_to_enum["LARGEST_MAGNITUDE"]  = WEP_LARGEST_MAGNITUDE;
+      which_eigen_pairs_to_enum["SMALLEST_MAGNITUDE"] = WEP_SMALLEST_MAGNITUDE;
+      which_eigen_pairs_to_enum["LARGEST_REAL"]       = WEP_LARGEST_REAL;
+      which_eigen_pairs_to_enum["SMALLEST_REAL"]      = WEP_SMALLEST_REAL;
+      which_eigen_pairs_to_enum["LARGEST_IMAGINARY"]  = WEP_LARGEST_IMAGINARY;
+      which_eigen_pairs_to_enum["SMALLEST_IMAGINARY"] = WEP_SMALLEST_IMAGINARY;
+      which_eigen_pairs_to_enum["TARGET_MAGNITUDE"]   = WEP_TARGET_MAGNITUDE;
+      which_eigen_pairs_to_enum["TARGET_REAL"]        = WEP_TARGET_REAL;
+      which_eigen_pairs_to_enum["TARGET_IMAGINARY"]   = WEP_TARGET_IMAGINARY;
+      which_eigen_pairs_to_enum["ALL_EIGENVALUES"]    = WEP_ALL_EIGENVALUES;
     }
   }
 
@@ -170,6 +214,48 @@ namespace Moose
       mooseError("Unknown solve type: " << upper);
 
     return solve_type_to_enum[upper];
+  }
+
+  template<>
+  EigenSolveType stringToEnum<EigenSolveType>(const std::string & s)
+  {
+    initEigenSolveType();
+
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    if (!eigen_solve_type_to_enum.count(upper))
+      mooseError("Unknown eigen solve type: " << upper);
+
+    return eigen_solve_type_to_enum[upper];
+  }
+
+  template<>
+  EigenProblemType stringToEnum<EigenProblemType>(const std::string & s)
+  {
+    initEigenProlemType();
+
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    if (!eigen_problem_type_to_enum.count(upper))
+      mooseError("Unknown eigen problem type: " << upper);
+
+    return eigen_problem_type_to_enum[upper];
+  }
+
+  template<>
+  WhichEigenPairs stringToEnum<WhichEigenPairs>(const std::string & s)
+  {
+    initWhichEigenPairs();
+
+    std::string upper(s);
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+    if (!which_eigen_pairs_to_enum.count(upper))
+      mooseError("Unknown type of WhichEigenPairs: " << upper);
+
+    return which_eigen_pairs_to_enum[upper];
   }
 
   template<>
