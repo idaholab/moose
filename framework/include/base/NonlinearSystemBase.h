@@ -113,7 +113,7 @@ public:
    */
   virtual void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
-  virtual void addEigenKernels(MooseSharedPointer<KernelBase> kernel, THREAD_ID tid) {};
+  virtual void addEigenKernels(MooseSharedPointer<KernelBase> /*kernel*/, THREAD_ID /*tid*/) {};
 
   /**
    * Adds a NodalKernel
