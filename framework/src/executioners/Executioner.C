@@ -39,6 +39,10 @@ InputParameters validParams<Executioner>()
 #ifdef LIBMESH_HAVE_PETSC
   params += Moose::PetscSupport::getPetscValidParams();
 #endif //LIBMESH_HAVE_PETSC
+  // Add slepc options
+#ifdef LIBMESH_HAVE_SLEPC
+  params += Moose::SlepcSupport::getSlepcValidParams();
+#endif
   params.addParam<Real>        ("l_tol",           1.0e-5,   "Linear Tolerance");
   params.addParam<Real>        ("l_abs_step_tol",  -1,       "Linear Absolute Step Tolerance");
   params.addParam<unsigned int>("l_max_its",       10000,    "Max Linear Iterations");
@@ -70,10 +74,15 @@ Executioner::Executioner(const InputParameters & parameters) :
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
     _splitting(getParam<std::vector<std::string> >("splitting"))
 {
-  // Extract and store PETSc related settings on FEProblemBase
+// Extract and store PETSc related settings on FEProblemBase
 #ifdef LIBMESH_HAVE_PETSC
   Moose::PetscSupport::storePetscOptions(_fe_problem, _pars);
 #endif //LIBMESH_HAVE_PETSC
+
+// Extract and store SLEPc options
+#ifdef LIBMESH_HAVE_SLEPC
+  Moose::SlepcSupport::storeSlepcOptions(_fe_problem, _pars);
+#endif //LIBMESH_HAVE_SLEPC
 
   // solver params
   EquationSystems & es = _fe_problem.es();

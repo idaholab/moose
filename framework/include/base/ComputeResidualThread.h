@@ -66,8 +66,6 @@ protected:
   ///@{
   /// Reference to Kernel storage structures
   const KernelWarehouse & _kernels;
-  const MooseObjectWarehouse<KernelBase> & _time_kernels;
-  const MooseObjectWarehouse<KernelBase> & _non_time_kernels;
   ///@}
 };
 

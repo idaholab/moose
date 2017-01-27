@@ -20,6 +20,8 @@
 
 #include "SystemBase.h"
 #include "NonlinearSystemBase.h"
+#include "KernelBase.h"
+#include "TimeKernel.h"
 
 // libMesh includes
 #include "libmesh/transient_system.h"
@@ -70,6 +72,12 @@ public:
 
   // return all converged eigenvalues
   virtual const std::vector<std::pair<Real, Real> > & getAllConvergedEigenvalues() { return _eigen_values; }
+
+  virtual void addEigenKernels(MooseSharedPointer<KernelBase> kernel, THREAD_ID tid) override;
+
+  // For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or Neumann)
+  // boundary conditions are  not allowed.
+  void checkIntegrity();
 
   // return the number of converged eigenvlues
   virtual const unsigned int getNumConvergedEigenvalues() { return _transient_sys.get_n_converged(); };

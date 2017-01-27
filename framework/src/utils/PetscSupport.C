@@ -181,6 +181,22 @@ petscSetupDM (NonlinearSystemBase & nl)
 #endif
 }
 
+void addPetscOptionsFromCommandline()
+{
+  // commandline options always win
+  // the options from a user commandline will overwrite the existing ones if any conflicts
+  { // Get any options specified on the command-line
+    int argc;
+    char ** args;
+
+    PetscGetArgs(&argc, &args);
+#if PETSC_VERSION_LESS_THAN(3,7,0)
+    PetscOptionsInsert(&argc, &args, NULL);
+#else
+    PetscOptionsInsert(PETSC_NULL, &argc, &args, NULL);
+#endif
+  }
+}
 
 void
 petscSetOptions(FEProblemBase & problem)
@@ -209,19 +225,7 @@ petscSetOptions(FEProblemBase & problem)
   if (problem.getNonlinearSystemBase().haveFieldSplitPreconditioner())
     petscSetupDM(problem.getNonlinearSystemBase());
 
-  // commandline options always win
-  // the options from a user commandline will overwrite the existing ones if any conflicts
-  { // Get any options specified on the command-line
-    int argc;
-    char ** args;
-
-    PetscGetArgs(&argc, &args);
-#if PETSC_VERSION_LESS_THAN(3,7,0)
-    PetscOptionsInsert(&argc, &args, NULL);
-#else
-    PetscOptionsInsert(PETSC_NULL, &argc, &args, NULL);
-#endif
-  }
+  addPetscOptionsFromCommandline();
 }
 
 PetscErrorCode
