@@ -33,23 +33,7 @@ Any parameter that takes entity IDs in the input file will accept either numbers
 assigned to IDs on-the-fly in existing meshes to ease input file maintenance (see example). On-the-fly names will
 also be written to Exodus/XDA/XDR files. An illustration for mesh in exodus file format.
 
-
-```text
-[Mesh]
-  file = three_block.e
-
-  #These names will be applied on the
-  #fly to the mesh so that they can be
-  #used in the input file. In addition
-  #they will be written to the output
-  #file
-  block_id = '1 2 3'
-  block_name = 'wood steel copper'
-
-  boundary_id = '1 2'
-  boundary_name = 'left right'
-[]
-```
+!input test/tests/mesh/named_entities/name_on_the_fly.i block=Mesh label=False
 
 ## Replicated and Distributed Mesh
 
@@ -66,7 +50,8 @@ processor, it can be split prior to the simulation.
 
 !!! note
     Both the "replicated" and "distributed" mesh formats are parallel with respect to the execution of the finite
-    element assembly and solve.
+    element assembly and solve. In both types the solution data is distributed, which is the portion of the simulation
+    that usually dominates memory demands.
 
 ## Displaced Mesh
 
