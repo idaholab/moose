@@ -321,7 +321,7 @@ PQPlasticModel::dVardTrial(bool elastic_only, Real p_trial, Real q_trial, Real p
 
   // _rhs is defined above, the following are changes in rhs wrt the trial p and q values
   // In the following we use d(intnl)/d(trial variable) = - d(intnl)/d(variable)
-  std::array<Real, _num_pq * _num_rhs> rhs_cto{0.0};
+  std::array<Real, _num_pq * _num_rhs> rhs_cto{{0.0}};
 
   // change in p_trial
   for (unsigned i = 0; i < _num_intnl; ++i)

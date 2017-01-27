@@ -39,12 +39,8 @@ FauxGrainTracker::~FauxGrainTracker()
 Real
 FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType field_type, std::size_t var_idx) const
 {
-  auto use_default = false;
   if (var_idx == FeatureFloodCount::invalid_size_t)
-  {
-    use_default = true;
     var_idx = 0;
-  }
 
   mooseAssert(var_idx < _n_vars, "Index out of range");
 
