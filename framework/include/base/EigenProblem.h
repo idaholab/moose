@@ -44,6 +44,10 @@ public:
 
   virtual unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
   virtual bool isGeneralizedEigenvalueProblem() { return _generalized_eigenvalue_problem; }
+
+  // silences warning in debug mode about the other computeJacobian signature being hidden
+  using FEProblemBase::computeJacobian;
+
   virtual void computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type) override;
   virtual void checkProblemIntegrity() override;
 #if LIBMESH_HAVE_SLEPC

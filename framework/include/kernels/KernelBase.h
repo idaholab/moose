@@ -99,7 +99,7 @@ public:
   /// Returns a reference to the SubProblem for which this Kernel is active
   SubProblem & subProblem();
 
-  virtual const bool isEigenKernel() { return _eigen_kernel; }
+  virtual bool isEigenKernel() const { return _eigen_kernel; }
 
 protected:
   /// Reference to this kernel's SubProblem
