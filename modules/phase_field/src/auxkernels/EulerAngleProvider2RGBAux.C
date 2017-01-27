@@ -41,8 +41,8 @@ void
 EulerAngleProvider2RGBAux::precalculateValue()
 {
   // ID of unique grain at current point
-  const int grain_id = _grain_tracker.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()),
-                                                              FeatureFloodCount::FieldType::UNIQUE_REGION, 0);
+  const Real grain_id = _grain_tracker.getEntityValue((isNodal() ? _current_node->id() : _current_elem->id()),
+                                                      FeatureFloodCount::FieldType::UNIQUE_REGION, 0);
 
   // Recover Euler angles for current grain and assign correct
   // RGB value either from euler2RGB or from _no_grain_color
