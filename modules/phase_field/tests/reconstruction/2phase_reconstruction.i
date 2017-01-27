@@ -10,18 +10,24 @@
   kernel_coverage_check = false
 []
 
+# The following sections are extracted in the documentation in
+# moose/docs/content/documentation/modules/phase_field/ICs/EBSD.md
+
 [Mesh]
+  # Create a mesh representing the EBSD data
   type = EBSDMesh
   filename = 'Ti_2Phase_28x28_ebsd.txt'
 []
 
 [UserObjects]
   [./ebsd]
+    # Read in the EBSD data. Uses the filename given in the mesh block.
     type = EBSDReader
   [../]
 []
 
 [Variables]
+  # Creates the two variables being initialized
   [./c1]
   [../]
   [./c2]
@@ -30,6 +36,7 @@
 
 [ICs]
   [./phase1_recon]
+    # Initializes the variable info from the ebsd data
     type = ReconPhaseVarIC
     ebsd_reader = ebsd
     phase = 1
@@ -42,6 +49,7 @@
     variable = c2
   [../]
 []
+#ENDDOC - End of the file section that is included in the documentation. Do not change this line!
 
 [AuxVariables]
   [./PHI1]

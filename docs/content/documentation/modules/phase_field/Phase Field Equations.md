@@ -89,7 +89,7 @@ $$
 \end{eqnarray}
 $$
 
-where the $(\*,\*)$ operator represents a volume integral with an inner product and the $\left<\*,\*\right>$ operator represents a surface integral with an inner product. Solving the Cahn-Hilliard equation with FEM is more difficult, due to the fourth order gradient. It can be solved in two ways.
+where the $(*,*)$ operator represents a volume integral with an inner product and the $\left<*,*\right>$ operator represents a surface integral with an inner product. Solving the Cahn-Hilliard equation with FEM is more difficult, due to the fourth order gradient. It can be solved in two ways.
 
 The first is to directly solve the equation according to
 $$
