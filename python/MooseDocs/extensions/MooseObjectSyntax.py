@@ -47,9 +47,8 @@ class MooseObjectSyntax(MooseSyntaxBase):
     # Locate description
     info = self.getObject(syntax)
     if not info:
-      return self.createErrorElement('Failed to locate MooseObject with syntax {} in {} command.'.format(syntax, action))
-
-    if action == 'inputfiles':
+      el = self.createErrorElement('Failed to locate MooseObject with syntax in command: !{} {}'.format(action, syntax), error=False)
+    elif action == 'inputfiles':
       el = self.inputfilesElement(info, settings)
     elif action == 'childobjects':
       el = self.childobjectsElement(info, settings)

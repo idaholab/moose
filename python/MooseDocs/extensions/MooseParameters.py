@@ -32,7 +32,7 @@ class MooseParameters(MooseSyntaxBase):
     # Locate description
     info = self.getInfo(syntax)
     if not info:
-      return self.createErrorElement('Failed to locate MooseObject or Action with syntax: {}'.format(syntax))
+      return self.createErrorElement('Failed to locate MooseObject or Action for the command: !parameters {}'.format(syntax))
 
     # Create the tables (generate 'Required' and 'Optional' initially so that they come out in the proper order)
     tables = collections.OrderedDict()

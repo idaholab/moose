@@ -43,7 +43,7 @@ class MooseDocsMarkdownNode(MooseDocsNode):
     """
 
     # Read the markdown and parse the HTML
-    log.debug('Parsing markdown: {}'.format(self.__md_file))
+    log.info('Parsing markdown: {}'.format(self.__md_file))
     content, meta = MooseDocs.read_markdown(self.__md_file)
     self.__html = self.__parser.convert(content)
 
