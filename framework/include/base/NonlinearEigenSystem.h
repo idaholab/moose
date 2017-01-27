@@ -80,7 +80,7 @@ public:
   void checkIntegrity();
 
   // return the number of converged eigenvlues
-  virtual const unsigned int getNumConvergedEigenvalues() { return _transient_sys.get_n_converged(); };
+  virtual unsigned int getNumConvergedEigenvalues() const { return _transient_sys.get_n_converged(); };
 
   virtual NonlinearSolver<Number> * nonlinearSolver() override;
 
