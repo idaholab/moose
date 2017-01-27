@@ -21,7 +21,6 @@
 
 #include "MooseTestApp.h"
 
-#include "ConservativeAdvection.h"
 #include "CoeffParamDiffusion.h"
 #include "CoupledConvection.h"
 #include "ForcingFn.h"
@@ -309,7 +308,6 @@ MooseTestApp::registerObjects(Factory & factory)
 {
   // Kernels
   registerKernel(PotentialAdvection);
-  registerKernel(ConservativeAdvection);
   registerKernel(CoeffParamDiffusion);
   registerKernel(CoupledConvection);
   registerKernel(ForcingFn);
