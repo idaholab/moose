@@ -56,11 +56,15 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    strain = FINITE
-    add_variables = true
-    #generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+[Modules]
+  [./TensorMechanics]
+    [./Master]
+      [./all]
+        strain = FINITE
+        add_variables = true
+        #generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+      [../]
+    [../]
   [../]
 []
 

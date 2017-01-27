@@ -183,9 +183,14 @@ class MooseApplicationSyntax(object):
         raise IOError(full_path)
       self._updateSyntax(path, objects, actions)
 
-    # Create MooseObjctInfo objects
+    # Create MooseObjectInfo objects
     for key, value in objects.iteritems():
       for node in self._yaml_data['/' + key]:
+
+        # Skip this node if it has subblocks, which is not possible for MooseObjects
+        if node['subblocks']:
+          continue
+
         info = MooseObjectInfo(node,
                                code=self._filenames[value],
                                install=install,
