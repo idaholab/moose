@@ -21,7 +21,6 @@
 
 #include "MooseTestApp.h"
 
-#include "ConservativeAdvection.h"
 #include "CoeffParamDiffusion.h"
 #include "CoupledConvection.h"
 #include "ForcingFn.h"
@@ -154,7 +153,6 @@
 #include "ImplicitStateful.h"
 #include "MaterialDerivativeTestMaterial.h"
 
-#include "DGMatDiffusion.h"
 #include "DGMDDBC.h"
 #include "DGFunctionConvectionDirichletBC.h"
 #include "CoupledKernelGradBC.h"
@@ -310,7 +308,6 @@ MooseTestApp::registerObjects(Factory & factory)
 {
   // Kernels
   registerKernel(PotentialAdvection);
-  registerKernel(ConservativeAdvection);
   registerKernel(CoeffParamDiffusion);
   registerKernel(CoupledConvection);
   registerKernel(ForcingFn);
@@ -390,9 +387,6 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(VectorPostprocessorAux);
   registerAux(GhostAux);
   registerAux(FunctionGradAux);
-
-  // DG kernels
-  registerDGKernel(DGMatDiffusion);
 
   // Interface kernels
   registerInterfaceKernel(InterfaceDiffusion);

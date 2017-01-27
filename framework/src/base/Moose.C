@@ -59,6 +59,7 @@
 #include "EigenProblem.h"
 
 // kernels
+#include "ConservativeAdvection.h"
 #include "TimeDerivative.h"
 #include "CoupledTimeDerivative.h"
 #include "MassLumpedTimeDerivative.h"
@@ -494,6 +495,7 @@ registerObjects(Factory & factory)
 
   // kernels
   registerKernel(TimeDerivative);
+  registerKernel(ConservativeAdvection);
   registerKernel(CoupledTimeDerivative);
   registerKernel(MassLumpedTimeDerivative);
   registerKernel(Diffusion);

@@ -52,6 +52,7 @@ private:
 
   Real _epsilon;
   Real _sigma;
+  const MaterialProperty<Real> & _diff;
 };
 
 #endif //DGFUNCTIONDIFFUSIONDIRICHLETBC_H
