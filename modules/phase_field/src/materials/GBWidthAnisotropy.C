@@ -22,7 +22,6 @@ GBWidthAnisotropy::GBWidthAnisotropy(const InputParameters & parameters) :
     _kappa(getParam<Real>("kappa"))
 {
   _mu_qp = _mu;
-  Real sigma_init;
   Real g2 = 0.0;
   Real f_interf = 0.0;
   Real a = 0.0;
