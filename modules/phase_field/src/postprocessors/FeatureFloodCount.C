@@ -521,6 +521,22 @@ FeatureFloodCount::getFeatureVar(unsigned int feature_id) const
   return invalid_id;
 }
 
+const FeatureFloodCount::FeatureData &
+FeatureFloodCount::getFeature(unsigned int feature_id) const
+{
+  if (!_is_master)
+    mooseError("This method can only be called by the master rank");
+
+  auto local_index = _feature_id_to_local_index[feature_id];
+  if (local_index != invalid_size_t)
+  {
+    mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
+    return _feature_sets[local_index];
+  }
+
+  return _empty_feature;
+}
+
 bool
 FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
 {
