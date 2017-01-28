@@ -18,7 +18,7 @@ EBTerm c1("c1"), c2("c3"), phi("phi");
 
 Declare a function `G` and define it:
 
-```C++
+```cpp
 EBFunction G;
 
 G(c1, c2, c3) = c1 + 2 * c2 + 3 * pow(c3, 2);
@@ -97,5 +97,5 @@ All named variables declared through `EBTerm var("name")` will be substituted by
 
 ## See also
 
-- [Automatic Differentiation](/wiki/libMesh/FParserAutomaticDifferentiation) for MOOSE application developers
-- [Just In Time Compilation](/wiki/libMesh/FParserJustInTimeCompilation) of parsed functions for MOOSE application developers
+- [Automatic Differentiation](Function Materials/Automatic Differentiation.md) for MOOSE application developers
+- [Just In Time Compilation](Function Materials/JIT Compilation.md) of parsed functions for MOOSE application developers

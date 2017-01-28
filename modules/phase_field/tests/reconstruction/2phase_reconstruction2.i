@@ -9,6 +9,9 @@
   kernel_coverage_check = false
 []
 
+# The following sections are extracted in the documentation in
+# moose/docs/content/documentation/modules/phase_field/ICs/EBSD.md
+
 [Mesh]
   type = EBSDMesh
   filename = Ti_2Phase_28x28_ebsd.txt
@@ -25,19 +28,21 @@
   [../]
 []
 
-[ICs]
-  [./PolycrystalICs]
-    [./ReconVarIC]
-      ebsd_reader = ebsd
-      phase = 1
-    [../]
-  [../]
-[]
-
 [Variables]
   [./PolycrystalVariables]
   [../]
 []
+
+[ICs]
+  [./PolycrystalICs]
+    [./ReconVarIC]
+      ebsd_reader = ebsd
+      # select only data for phase 1 from the EBSD file
+      phase = 1
+    [../]
+  [../]
+[]
+#ENDDOC - End of the file section that is included in the documentation. Do not change this line!
 
 [Executioner]
   type = Transient
