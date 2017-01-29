@@ -32,7 +32,8 @@ ElementL2Difference::ElementL2Difference(const InputParameters & parameters) :
 Real
 ElementL2Difference::getValue()
 {
-  return std::sqrt(ElementIntegralPostprocessor::getValue());
+  gatherSum(_integral_value);
+  return _scaling * std::sqrt(_integral_value);
 }
 
 Real

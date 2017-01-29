@@ -29,7 +29,8 @@ ElementL2Norm::ElementL2Norm(const InputParameters & parameters) :
 Real
 ElementL2Norm::getValue()
 {
-  return std::sqrt(ElementIntegralVariablePostprocessor::getValue());
+  gatherSum(_integral_value);
+  return _scaling * std::sqrt(_integral_value);
 }
 
 Real

@@ -21,11 +21,13 @@ template<>
 InputParameters validParams<ElementIntegralPostprocessor>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
+  params.addParam<Real>("scaling", 1.0, "A simple scaling factor applied to the postprocessor");
   return params;
 }
 
 ElementIntegralPostprocessor::ElementIntegralPostprocessor(const InputParameters & parameters) :
     ElementPostprocessor(parameters),
+    _scaling(getParam<Real>("scaling")),
     _qp(0),
     _integral_value(0)
 {}
@@ -46,7 +48,7 @@ Real
 ElementIntegralPostprocessor::getValue()
 {
   gatherSum(_integral_value);
-  return _integral_value;
+  return _scaling * _integral_value;
 }
 
 void
