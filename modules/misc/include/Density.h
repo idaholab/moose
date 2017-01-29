@@ -32,6 +32,7 @@ protected:
   const VariableValue & _disp_r;
 
   const Real _orig_density;
+  MaterialProperty<Real> & _orig_density_prop;
   MaterialProperty<Real> & _density;
   MaterialProperty<Real> & _density_old;
 };

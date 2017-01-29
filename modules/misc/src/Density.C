@@ -39,8 +39,9 @@ Density::Density( const InputParameters & parameters) :
   _disp_r( _is_RZ || _is_SphericalR ? coupledValue("disp_r") : _zero ),
 
   _orig_density(getParam<Real>("density")),
-  _density(declareProperty<Real>("density")),
-  _density_old(declarePropertyOld<Real>("density"))
+  _orig_density_prop(declareProperty<Real>("density")),
+  _density(declareProperty<Real>("current_density")),
+  _density_old(declarePropertyOld<Real>("current_density"))
 
 {}
 
@@ -58,6 +59,8 @@ Density::computeProperties()
 {
   for (unsigned int qp(0); qp < _qrule->n_points(); ++qp)
   {
+    _orig_density_prop[qp] = _orig_density;
+
     Real d(_orig_density);
     if (_is_coupled)
     {

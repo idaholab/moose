@@ -22,7 +22,7 @@ InputParameters validParams<Gravity>()
 
 Gravity::Gravity(const InputParameters & parameters) :
   Kernel(parameters),
-  _density(getMaterialProperty<Real>("density")),
+  _density(getMaterialProperty<Real>("current_density")),
   _value(getParam<Real>("value")),
   _function(getFunction("function")),
   _alpha(getParam<Real>("alpha"))

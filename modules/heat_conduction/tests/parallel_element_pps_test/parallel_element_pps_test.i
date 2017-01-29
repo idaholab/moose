@@ -76,21 +76,21 @@
   [./constant]
     type = GenericConstantMaterial
     block = 1
-    prop_names = 'thermal_conductivity specific_heat density'
+    prop_names = 'thermal_conductivity specific_heat current_density'
     prop_values = '1.0 1.0 1.0'
   [../]
 
   [./constant2]
     type = GenericConstantMaterial
     block = 2
-    prop_names = 'thermal_conductivity specific_heat density'
+    prop_names = 'thermal_conductivity specific_heat current_density'
     prop_values = '0.8 0.8 0.8'
   [../]
 
   [./constant3]
     type = GenericConstantMaterial
     block = 3
-    prop_names = 'thermal_conductivity specific_heat density'
+    prop_names = 'thermal_conductivity specific_heat current_density'
     prop_values = '5 5 5'
   [../]
 []

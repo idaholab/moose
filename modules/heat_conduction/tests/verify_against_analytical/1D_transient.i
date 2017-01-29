@@ -66,7 +66,7 @@
   [../]
   [./rho]
     type = GenericConstantMaterial
-    prop_names = 'density'
+    prop_names = 'current_density'
     prop_values = '8.92' #copper in g/(cm^3)
     block = 0
   [../]

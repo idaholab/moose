@@ -25,7 +25,7 @@ InputParameters validParams<HeatConductionTimeDerivative>()
    * 'density' in the GlobalParams block of many many Bison simulations (for the
    * Density kernel)prevent us from doing this.
    */
-  params.addParam<MaterialPropertyName>("density_name", "density",
+  params.addParam<MaterialPropertyName>("density_name", "current_density",
                                         "Property name of the density material property");
   return params;
 }
