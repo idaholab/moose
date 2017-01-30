@@ -132,8 +132,6 @@ private:
 
   // RELAP-7 Control Logic (This will go away when the MOOSE system is created)
   friend class Component;
-  friend class R7SetupOutputAction;
-  friend class SolidMaterialProperties;
 };
 
 
