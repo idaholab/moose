@@ -23,8 +23,8 @@ CURR_DIR    := $(shell pwd)
 ROOT_DIR    := $(HERD_TRUNK_DIR)
 
 # framework
-include $(FRAMEWORK_DIR)/build.mk
-include $(FRAMEWORK_DIR)/moose.mk
+#include $(FRAMEWORK_DIR)/build.mk
+#include $(FRAMEWORK_DIR)/moose.mk
 
 APPLICATION_DIR    := $(HERD_TRUNK_DIR)/crow
 APPLICATION_NAME   := CROW
