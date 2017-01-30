@@ -110,4 +110,10 @@ AdaptivityAction::act()
   adapt.setInterval(getParam<unsigned int>("interval"));
 }
 
+// DEPRECATED CONSTRUCTOR
+AdaptivityAction::AdaptivityAction(const std::string & deprecated_name, InputParameters params) :
+    Action(deprecated_name, params)
+{
+}
+
 #endif //LIBMESH_ENABLE_AMR
