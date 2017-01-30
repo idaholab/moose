@@ -2,6 +2,7 @@
 #define ONEDENERGYWALLHEATING_H
 
 #include "Kernel.h"
+#include "DerivativeMaterialInterfaceRelap.h"
 
 // Forward Declarations
 class OneDEnergyWallHeating;
@@ -10,7 +11,7 @@ template<>
 InputParameters validParams<OneDEnergyWallHeating>();
 
 // The spatial part of the 1D energy conservation for Navier-Stokes flow
-class OneDEnergyWallHeating : public Kernel
+class OneDEnergyWallHeating : public DerivativeMaterialInterfaceRelap<Kernel>
 {
 public:
   OneDEnergyWallHeating(const InputParameters & parameters);
