@@ -110,27 +110,15 @@ class MooseActionInfo(MooseInfoBase):
     stub = MooseInfoBase.STUB_HEADER
     stub += '\n# {} System\n'.format(self.name)
     stub += '!parameters {}\n\n'.format(self.key)
-
-    has_subobjects = False
-    has_subsystems = False
-    if self._node['subblocks']:
-      for child in self._node['subblocks']:
-        if self.hasObject(child['name'].split('/')[-1]):
-          has_subobjects = True
-        if self.hasSystem(child['name']):
-          has_subsystems = True
-
-    if has_subobjects:
-      stub += '!subobjects {}\n\n'.format(full_name)
-    if has_subsystems:
-      stub += '!subsystems {}\n\n'.format(full_name)
+    stub += '!subobjects {}\n\n'.format(self.key)
+    stub += '!subsystems {}\n\n'.format(self.key)
 
     # Write the stub file
     loc = os.path.dirname(self.markdown)
     if not os.path.exists(loc):
       os.makedirs(loc)
-    with open(filename, 'w') as fid:
-      log.info('Creating stub page for MOOSE action {}: {}'.format(full_name, filename))
+    with open(self.markdown, 'w') as fid:
+      log.info('Creating stub page for MOOSE action {}: {}'.format(self.key, self.markdown))
       fid.write(stub)
       log.error("No documentation for {}. Documentation for this system should be created in: {}".format(self.key, self.markdown))
 
