@@ -16,4 +16,3 @@ def check(**kwargs):
   Performs checks for missing documentation.
   """
   MooseDocs.commands.generate(generate=False, **kwargs)
-  return 0 # error handled in MooseDocs.moosedocs
