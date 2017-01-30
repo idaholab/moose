@@ -1,11 +1,8 @@
-import re
-import os
 import logging
 log = logging.getLogger(__name__)
 
 from markdown.util import etree
 from MooseSyntaxBase import MooseSyntaxBase
-import utils
 import MooseDocs
 
 class MooseActionList(MooseSyntaxBase):

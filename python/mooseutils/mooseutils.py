@@ -127,7 +127,7 @@ def check_configuration(packages):
     for package in packages:
         try:
             __import__(package)
-        except ImportError, e:
+        except ImportError:
             missing.append(package)
 
     if missing:
