@@ -290,11 +290,11 @@ class MooseApplicationSyntax(object):
 
           # Update class to source definition map
           if filename.endswith('.h'):
-            for match in re.finditer(r'class\s*(?P<class>\w+)', content):
+            for match in re.finditer(r'class\s*(?P<class>\w+)\b[^;]', content):
               key = match.group('class')
               self._filenames[key] = [fullfile]
               src = fullfile.replace('/include/', '/src/')[:-2] + '.C'
-              if os.path.exists(src):
+              if os.path.exists(src) and (src not in self._filenames[key]):
                 self._filenames[key].append(src)
 
           # Map of registered objects
