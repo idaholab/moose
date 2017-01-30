@@ -78,7 +78,7 @@ class Translator(object):
     soup = bs4.BeautifulSoup(tex, "html.parser")
     for child in soup.children:
       if isinstance(child, bs4.element.Tag):
-        log.error('Failed to convert tag: {}'.format(child.name))
+        log.error('Failed to convert tag {}: {}'.format(child.name, str(child)))
         output += self.unknown.convert(child, self.unknown.content(child))
       else:
         output += unicode(child)
