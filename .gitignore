@@ -173,5 +173,5 @@ site
 docs/.moosedocs
 !docs/index.html
 !docs/templates/*.html
-!docs/media/*.png
+!docs/media/**/*.png
 !docs/tests/**/gold/*.html

@@ -27,8 +27,8 @@ template<>
 InputParameters validParams<FileMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
-
   params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
+  params.addClassDescription("Read a mesh from a file.");
   return params;
 }
 

@@ -60,8 +60,19 @@ p {
 }
 
 .moose-copy-button{
+    box-sizing: padding-box;
     position:relative;
+    bottom: 15px;
+    left: 15px;
     float:right;
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: small;
+    opacity: 0.15;
+}
+
+.moose-copy-button:hover{
+  opacity:1;
 }
 
 moose-caption {

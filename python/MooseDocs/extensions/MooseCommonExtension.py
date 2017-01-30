@@ -39,11 +39,20 @@ class MooseCommonExtension(object):
     if len(matches) == 0:
       return options
     for entry in matches:
-     if entry[0] in options.keys():
-       options[entry[0].strip()] = entry[1].strip()
-     else:
-      # log.warning('The style should be specified in the style argument (e.g., style="{}:{};")'.format(entry[0].strip(), entry[1].strip()))
-       options['style'] += '{}:{};'.format(entry[0].strip(), entry[1].strip())
+      key = entry[0].strip()
+      value = entry[1].strip()
+      if key in options.keys():
+        if value.lower() == 'true':
+          value = True
+        elif value.lower() == 'false':
+          value = False
+        elif value.lower() == 'none':
+          value = None
+        elif all([v.isdigit() for v in value]):
+          value = float(value)
+        options[key] = value
+      else:
+        options['style'] += '{}:{};'.format(key, value)
     return options
 
 

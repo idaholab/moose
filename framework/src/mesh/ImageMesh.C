@@ -25,7 +25,7 @@ InputParameters validParams<ImageMesh>()
 {
   InputParameters params = validParams<GeneratedMesh>();
   params += validParams<FileRangeBuilder>();
-  params.addClassDescription("Generated mesh with the aspect ratio of a given image stack");
+  params.addClassDescription("Generated mesh with the aspect ratio of a given image stack.");
 
   // Add ImageMesh-specific params
   params.addParam<bool>("scale_to_one", true, "Whether or not to scale the image so its max dimension is 1");

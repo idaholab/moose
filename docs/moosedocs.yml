@@ -65,7 +65,8 @@ markdown_extensions:
                       - /InterfaceKernels
                       - /Kernels
                       - /Materials
-                      - /Mesh
+                      - /Mesh/Partitioner
+                      - /Mesh/MortarInterfaces
                       - /MeshModifiers
                       - /Modules
                       - /MultiApps
