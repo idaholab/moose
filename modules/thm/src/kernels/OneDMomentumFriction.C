@@ -11,23 +11,19 @@ InputParameters validParams<OneDMomentumFriction>()
   params.addRequiredCoupledVar("u", "velocity");
   params.addCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredParam<MaterialPropertyName>("Cw", "The name of the material property that stores the wall drag coefficient");
-  params.addParam<MaterialPropertyName>("dCw_dbeta", "");
-  params.addRequiredParam<MaterialPropertyName>("dCw_drhoA", "");
-  params.addRequiredParam<MaterialPropertyName>("dCw_drhouA", "");
-  params.addRequiredParam<MaterialPropertyName>("dCw_drhoEA", "");
   return params;
 }
 
 OneDMomentumFriction::OneDMomentumFriction(const InputParameters & parameters) :
-    Kernel(parameters),
+    DerivativeMaterialInterfaceRelap<Kernel>(parameters),
     _area(coupledValue("area")),
     _u_vel(coupledValue("u")),
     _rhoA(coupledValue("rhoA")),
     _Cw(getMaterialProperty<Real>("Cw")),
-    _dCw_dbeta (isCoupled("beta") ? &getMaterialProperty<Real>("dCw_dbeta") : NULL),
-    _dCw_drhoA (getMaterialProperty<Real>("dCw_drhoA")),
-    _dCw_drhouA(getMaterialProperty<Real>("dCw_drhouA")),
-    _dCw_drhoEA(getMaterialProperty<Real>("dCw_drhoEA")),
+    _dCw_dbeta (isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("Cw", "beta") : NULL),
+    _dCw_drhoA (getMaterialPropertyDerivativeRelap<Real>("Cw", "rhoA")),
+    _dCw_drhouA(getMaterialPropertyDerivativeRelap<Real>("Cw", "rhouA")),
+    _dCw_drhoEA(isCoupled("rhoEA") ? &getMaterialPropertyDerivativeRelap<Real>("Cw", "rhoEA") : NULL),
     _beta_var_number(isCoupled("beta") ? coupled("beta") : libMesh::invalid_uint),
     _rhoA_var_number(coupled("rhoA")),
     _rhouA_var_number(coupled("rhouA")),
@@ -66,7 +62,7 @@ OneDMomentumFriction::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else if (jvar == _rhoEA_var_number)
   {
-    return _dCw_drhoEA[_qp] * _u_vel[_qp] * std::abs(_u_vel[_qp]) * _area[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    return (*_dCw_drhoEA)[_qp] * _u_vel[_qp] * std::abs(_u_vel[_qp]) * _area[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else if (jvar == _beta_var_number)
   {

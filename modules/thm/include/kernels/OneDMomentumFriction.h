@@ -2,6 +2,7 @@
 #define ONEDMOMENTUMFRICTION_H
 
 #include "Kernel.h"
+#include "DerivativeMaterialInterfaceRelap.h"
 
 // Forward Declarations
 class OneDMomentumFriction;
@@ -12,7 +13,7 @@ InputParameters validParams<OneDMomentumFriction>();
 /**
  * Contribution due to wall friction
  */
-class OneDMomentumFriction : public Kernel
+class OneDMomentumFriction : public DerivativeMaterialInterfaceRelap<Kernel>
 {
 public:
   OneDMomentumFriction(const InputParameters & parameters);
@@ -30,7 +31,7 @@ protected:
   const MaterialProperty<Real> * const _dCw_dbeta;
   const MaterialProperty<Real> & _dCw_drhoA;
   const MaterialProperty<Real> & _dCw_drhouA;
-  const MaterialProperty<Real> & _dCw_drhoEA;
+  const MaterialProperty<Real> * const _dCw_drhoEA;
 
   unsigned int _beta_var_number;
   unsigned int _rhoA_var_number;

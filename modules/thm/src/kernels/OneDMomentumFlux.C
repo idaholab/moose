@@ -7,35 +7,32 @@ InputParameters validParams<OneDMomentumFlux>()
   params.addCoupledVar("alpha", 1.0, "Volume fraction");
   params.addCoupledVar("beta", 0, "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredCoupledVar("rhoA", "density multiplied by area");
+  params.addRequiredCoupledVar("rhouA", "momentum multiplied by area");
   params.addCoupledVar("rhoEA", "total energy multiplied by area");
   params.addRequiredCoupledVar("u", "velocity");
   params.addRequiredCoupledVar("area", "cross-sectional area");
   params.addParam<bool>("is_liquid", true, "True for liquid, false for vapor");
   params.addRequiredParam<MaterialPropertyName>("pressure", "Pressure");
-  params.addRequiredParam<MaterialPropertyName>("dp_darhoA", "Derivative of pressure w.r.t. density");
-  params.addRequiredParam<MaterialPropertyName>("dp_darhouA", "Derivative of pressure w.r.t. momentum");
-  params.addRequiredParam<MaterialPropertyName>("dp_darhoEA", "Derivative of pressure w.r.t. total energy");
-  params.addParam<MaterialPropertyName>("dp_dbeta", "Derivative of pressure w.r.t. beta");
   return params;
 }
 
 OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters) :
-    Kernel(parameters),
+    DerivativeMaterialInterfaceRelap<Kernel>(parameters),
     _is_liquid(getParam<bool>("is_liquid")),
     _sign(_is_liquid ? 1. : -1.),
     _alpha(coupledValue("alpha")),
     _u_vel(coupledValue("u")),
     _pressure(getMaterialProperty<Real>("pressure")),
-    _dp_darhoA (getMaterialProperty<Real>("dp_darhoA")),
-    _dp_darhouA(getMaterialProperty<Real>("dp_darhouA")),
-    _dp_darhoEA(getMaterialProperty<Real>("dp_darhoEA")),
+    _dp_darhoA (getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoA")),
+    _dp_darhouA(getMaterialPropertyDerivativeRelap<Real>("pressure", "rhouA")),
+    _dp_darhoEA(isCoupled("rhoEA") ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "rhoEA") : NULL),
     _area(coupledValue("area")),
     _rhoA_var_number(coupled("rhoA")),
     _rhoEA_var_number(isCoupled("rhoEA") ? coupled("rhoEA") : libMesh::invalid_uint),
     _has_beta(isCoupled("beta")),
     _beta(coupledValue("beta")),
     _beta_var_number(_has_beta ? coupled("beta") : libMesh::invalid_uint),
-    _dp_dbeta(_has_beta ? &getMaterialProperty<Real>("dp_dbeta") : NULL),
+    _dp_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("pressure", "beta") : NULL),
     _daL_dbeta(_has_beta ? &getMaterialProperty<Real>("daL_dbeta") : NULL)
 {
 }
@@ -78,7 +75,7 @@ OneDMomentumFlux::computeQpOffDiagJacobian(unsigned int jvar)
   else if (jvar == _rhoEA_var_number)
   {
     // (2,3) entry of flux Jacobian is the same as the constant area case, p_2
-    Real A23 = _alpha[_qp] * _dp_darhoEA[_qp] * _area[_qp];
+    Real A23 = _alpha[_qp] * (*_dp_darhoEA)[_qp] * _area[_qp];
 
     // Contribution due to convective flux.  Negative sign comes from integration by parts.
     return -A23 * _phi[_j][_qp] * _grad_test[_i][_qp](0);

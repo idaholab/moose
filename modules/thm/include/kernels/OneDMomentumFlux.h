@@ -2,6 +2,7 @@
 #define ONEDMOMENTUMFLUX_H
 
 #include "Kernel.h"
+#include "DerivativeMaterialInterfaceRelap.h"
 
 class OneDMomentumFlux;
 
@@ -11,7 +12,7 @@ InputParameters validParams<OneDMomentumFlux>();
 /**
  * Momentum flux
  */
-class OneDMomentumFlux : public Kernel
+class OneDMomentumFlux : public DerivativeMaterialInterfaceRelap<Kernel>
 {
 public:
   OneDMomentumFlux(const InputParameters & parameters);
@@ -29,7 +30,7 @@ protected:
   const MaterialProperty<Real> & _pressure;
   const MaterialProperty<Real> & _dp_darhoA;
   const MaterialProperty<Real> & _dp_darhouA;
-  const MaterialProperty<Real> & _dp_darhoEA;
+  const MaterialProperty<Real> * _dp_darhoEA;
   const VariableValue & _area;
 
   unsigned int _rhoA_var_number;
