@@ -108,7 +108,7 @@ class MooseDocsMarkdownNode(MooseDocsNode):
         elif len(found) > 1:
           msg = 'Found multiple pages matching the supplied markdown file {} in {}:'.format(href, self.source())
           for f in found:
-            msg += '\n    {}'.format(f.path)
+            msg += '\n    {}'.format(f.source())
           log.error(msg)
 
         # Update the link with the located page

@@ -50,6 +50,8 @@ InputParameters validParams<TiledMesh>()
   params.addParam<unsigned int>("y_tiles", 1, "Number of tiles to stitch together (top to bottom) in the y-direction");
   params.addParam<unsigned int>("z_tiles", 1, "Number of tiles to stitch together (front to back) in the z-direction");
 
+  params.addClassDescription("Use the supplied mesh and create a tiled grid by repeating this mesh in the x,y, and z directions.");
+
   return params;
 }
 
