@@ -130,6 +130,7 @@ FlowJunction::addMooseObjects()
       params.set<std::vector<Real> >("scaling_factors") = _scaling_factor_bcs;
       // coupling
       params.set<std::vector<VariableName> >("rhoA") = cv_rhoA;
+      params.set<std::vector<VariableName> >("rhouA") = cv_rhouA;
       params.set<std::vector<VariableName> >("u") = cv_u;
       params.set<std::vector<VariableName> >("pressure") = cv_pressure;
       params.set<std::vector<VariableName> >("area") = cv_area;
@@ -152,6 +153,7 @@ FlowJunction::addMooseObjects()
       // coupling
       params.set<std::vector<VariableName> >("rhoA") = cv_rhoA;
       params.set<std::vector<VariableName> >("rhouA") = cv_rhouA;
+      params.set<std::vector<VariableName> >("rhoEA") = cv_rhoEA;
       params.set<std::vector<VariableName> >("u") = cv_u;
       params.set<std::vector<VariableName> >("enthalpy") = cv_enthalpy;
       params.set<std::vector<VariableName> >("area") = cv_area;
