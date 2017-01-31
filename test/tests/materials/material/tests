@@ -66,4 +66,11 @@
     exodiff = 'throw_material_out.e'
     recover = false
   [../]
+
+  [./test_constant_on_elem]
+    type = 'Exodiff'
+    input = 'qp_material.i'
+    exodiff = 'qp_material_out.e'
+  [../]
+
 []
