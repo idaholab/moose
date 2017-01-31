@@ -24,9 +24,12 @@ be enclosed in `$$`:
 
 $$
 \begin{equation}
+\label{eqn:test}
 x=\frac{1+y}{1+2z^2}.
 \end{equation}
 $$
+
+If the `\label{eqn:test}` was placed within the latex then it is possible to link to the equation using traditional latex syntax (`\eqref{eqn:test}`): Equation \eqref{eqn:test}.
 
 ### Admonition
 The [admonition](https://pythonhosted.org/Markdown/extensions/admonition.html) package enables for important and critical

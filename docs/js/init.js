@@ -43,3 +43,18 @@ $('.moose-figure-reference').each(function(i, e) {
     $(e).text('???');
   }
 });
+
+// Function for latex equation references
+MathJax.Hub.Queue(function(){
+  $('.moose-equation-reference').each(function(i, e) {
+    var elem = $($(e).attr('href'));
+    if (elem.length) {
+      var txt = $('.mtext', elem).text()
+      $(e).text(txt);
+      console.log('Located reference to Equation ' + txt);
+    } else {
+      console.error('Unable to located reference to equation: ' + $(e).attr('href'));
+      $(e).text('(??)');
+    }
+  });
+});

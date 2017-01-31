@@ -12,6 +12,7 @@ from MooseTextFile import MooseTextFile
 from MooseImageFile import MooseImageFile
 from MooseFigure import MooseFigure
 from MooseFigureReference import MooseFigureReference
+from MooseEquationReference import MooseEquationReference
 from MooseInlineProcessor import MooseInlineProcessor
 from MooseInputBlock import MooseInputBlock
 from MooseCppMethod import MooseCppMethod
@@ -136,7 +137,8 @@ class MooseMarkdown(markdown.Extension):
     md.inlinePatterns.add('moose_text', MooseTextFile(markdown_instance=md, **config), '_begin')
     md.inlinePatterns.add('moose_image', MooseImageFile(markdown_instance=md, **config), '_begin')
     md.inlinePatterns.add('moose_figure', MooseFigure(markdown_instance=md, **config), '_begin')
-    md.inlinePatterns.add('moose-figure-reference', MooseFigureReference(markdown_instance=md, **config), '>moose_figure')
+    md.inlinePatterns.add('moose_figure_reference', MooseFigureReference(markdown_instance=md, **config), '>moose_figure')
+    md.inlinePatterns.add('moose_equation_reference', MooseEquationReference(markdown_instance=md, **config), '<moose_figure_reference')
     md.inlinePatterns.add('moose_build_status', MooseBuildStatus(markdown_instance=md, **config), '_begin')
     if config['package']:
       md.inlinePatterns.add('moose_package_parser', MoosePackageParser(markdown_instance=md, **config), '_end')
