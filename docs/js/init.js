@@ -31,3 +31,15 @@ MathJax.Hub.Config({
 
 // Copy code button
 var clipboard = new Clipboard('.moose-copy-button');
+
+// Function for figure references
+$('.moose-figure-reference').each(function(i, e) {
+  var elem = $($(e).attr('href').replace(':', ''));
+  if (elem.length) {
+    $(e).text(elem.data('moose-figure-number'));
+    console.log('Located reference to Figure ' + elem.data('moose-figure-number'));
+  } else {
+    console.error('Unable to located reference to figure: ' + $(e).attr('href'));
+    $(e).text('???');
+  }
+});

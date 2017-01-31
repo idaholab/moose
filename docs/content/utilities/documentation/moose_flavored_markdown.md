@@ -163,7 +163,6 @@ the syntax for the system or object being documented.
 * `!parameters /Kernels/Diffusion`: Inserts tables describing the available input parameters for an object or action.
 * `!inputfiles /Kernels/Diffusion`: Creates a list of input files that use the object or action.
 * `!childobjects /Kernels/Diffusion`: Create a list of objects that inherit from the supplied object.
-* `!devel /Kernels/Diffusion`: Creates links to the repository source code and Doxygen page for the object.
 * `!subobjects /Kernels`: Creates a table of objects within the supplied system.
 * `!subsystems /Adaptivity`: Creates a table of sub-systems within the supplied system.
 
@@ -225,6 +224,56 @@ A full slideshow example might be:
 
 ---
 
+## Figures
+When writing documentation is customary to reference figures within text by number. To create a numbered figure use
+the `!figure` markdown syntax. This syntax operates nearly identically to the `!image` syntax with two exceptions.
+
+!figure docs/media/memory_logger-plot_multi.png width=250px caption=The numbered prefix is automatically applied to the caption. id=fig:memory_logger
+
+First, the caption will automatically be prefixed with the figure number (e.g., Figure \ref{fig:dark_mode}). The
+numbering begins at one and is reset on each page. The prefix "Figure" can be modified with by setting
+the "prefix" option.
+
+!figure docs/media/memory_logger-darkmode.png width=250px id=fig:dark_mode prefix=Fig. caption=The "prefix" setting changes the text that proceeds the number.
+
+Secondly, the "id" setting must be supplied. This defines the name to which the figure should be referred in the text.
+
+Figures can be referenced with latex style reference commands. For example, using `\ref{fig:memory_logger}` results in a
+reference to Figure \ref{fig:memory_logger}. If an invalid "id" is supplied the reference will display question marks: \ref{fig:invalid_id}.
+
+---
+
+## Flow Charts
+The ability to include diagrams using [GraphViz](http://www.graphviz.org/) using the [dot]() language is provided.
+Simply, include the "dot" syntax in the markdown, being sure to include the keywords ("graph" or
+"digraph") on the start of a new line.
+
+* The official page for the dot language is detailed here: [dot](http://www.graphviz.org/content/dot-language)
+* There are many sites that provide examples, for example:
+    * [https://en.wikipedia.org/wiki/DOT_(graph_description_language)](https://en.wikipedia.org/wiki/DOT_(graph_description_language))
+    * [http://graphs.grevian.org/example](http://graphs.grevian.org/example)
+* There also exists live, online tools for writing dot:
+    * [http://dreampuf.github.io/GraphvizOnline/](http://dreampuf.github.io/GraphvizOnline/)
+    * [http://www.webgraphviz.com/](http://www.webgraphviz.com/)
+
+For example, the following dot syntax placed directly in the markdown produces the following graph.
+```text
+graph {
+    bgcolor="#ffffff00" // transparent background
+    a -- b -- c;
+    b -- d;
+}
+```
+
+graph {
+    bgcolor="#ffffff00" // transparent background
+    a -- b -- c;
+    b -- d;
+}
+
+
+---
+
 ## CSS Options
 
 ### In-line CSS
@@ -271,35 +320,6 @@ An empty new line, designates the end of the css block.
 !css font-size=smaller margin-left=70% color=red text-shadow=1px 1px 1px rgba(0,0,0,.4)
 Another paragraph modified by CSS.
 
----
-
-## Flow Charts
-The ability to include diagrams using [GraphViz](http://www.graphviz.org/) using the [dot]() language is provided.
-Simply, include the "dot" syntax in the markdown, being sure to include the keywords ("graph" or
-"digraph") on the start of a new line.
-
-* The official page for the dot language is detailed here: [dot](http://www.graphviz.org/content/dot-language)
-* There are many sites that provide examples, for example:
-    * [https://en.wikipedia.org/wiki/DOT_(graph_description_language)](https://en.wikipedia.org/wiki/DOT_(graph_description_language))
-    * [http://graphs.grevian.org/example](http://graphs.grevian.org/example)
-* There also exists live, online tools for writing dot:
-    * [http://dreampuf.github.io/GraphvizOnline/](http://dreampuf.github.io/GraphvizOnline/)
-    * [http://www.webgraphviz.com/](http://www.webgraphviz.com/)
-
-For example, the following dot syntax placed directly in the markdown produces the following graph.
-```text
-graph {
-    bgcolor="#ffffff00" // transparent background
-    a -- b -- c;
-    b -- d;
-}
-```
-
-graph {
-    bgcolor="#ffffff00" // transparent background
-    a -- b -- c;
-    b -- d;
-}
 
 ---
 

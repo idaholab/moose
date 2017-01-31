@@ -28,17 +28,17 @@ class MooseImageFile(MooseCommonExtension, Pattern):
     Pattern.__init__(self, self.RE, markdown_instance)
     self._settings['caption'] = None
 
-  def handleMatch(self, match):
+  def createImageElement(self, rel_filename, settings):
     """
-    process settings associated with !image markdown
+    Create the element containing the image, this is a separate function to allow for other objects
+    (i.e., MooseFigure) to utilize this class to build similar html.
+
+    Inputs:
+      rel_filename[str]: The path to the image relative to the git repository.
+      settings[dict]: The settings extracted via getSettings() method.
     """
-
-    # A tuple separating specific MOOSE documentation features (self._settings) from HTML styles
-    settings = self.getSettings(match.group(3))
-
     # Read the file and create element
-    rel_filename = match.group(2)
-    filename = MooseDocs.abspath(match.group(2))
+    filename = MooseDocs.abspath(rel_filename)
     if not os.path.exists(filename):
       return self.createErrorElement('File not found: {}'.format(rel_filename))
 
@@ -64,3 +64,11 @@ class MooseImageFile(MooseCommonExtension, Pattern):
       p.text = settings['caption']
 
     return el
+
+  def handleMatch(self, match):
+    """
+    process settings associated with !image markdown
+    """
+    rel_filename = match.group(2)
+    settings = self.getSettings(match.group(3))
+    return self.createImageElement(rel_filename, settings)

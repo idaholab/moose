@@ -10,6 +10,9 @@ from MooseDescription import MooseDescription
 from MooseActionSyntax import MooseActionSyntax
 from MooseTextFile import MooseTextFile
 from MooseImageFile import MooseImageFile
+from MooseFigure import MooseFigure
+from MooseFigureReference import MooseFigureReference
+from MooseInlineProcessor import MooseInlineProcessor
 from MooseInputBlock import MooseInputBlock
 from MooseCppMethod import MooseCppMethod
 from MoosePackageParser import MoosePackageParser
@@ -98,6 +101,10 @@ class MooseMarkdown(markdown.Extension):
       options.setdefault('install', config['install'])
       self.syntax[key] = MooseDocs.MooseApplicationSyntax(exe_yaml, **options)
 
+    # Replace the InlineTreeprocessor with the MooseInlineProcessor, this allows
+    # for an initialize() method to be called prior to the convert for re-setting state.
+    md.treeprocessors['inline'] = MooseInlineProcessor(markdown_instance=md, **config)
+
     # Preprocessors
     md.preprocessors.add('moose_bibtex', MooseBibtex(markdown_instance=md, **config), '_end')
     if config['slides']:
@@ -128,6 +135,8 @@ class MooseMarkdown(markdown.Extension):
     md.inlinePatterns.add('moose_cpp_method', MooseCppMethod(markdown_instance=md, **config), '_begin')
     md.inlinePatterns.add('moose_text', MooseTextFile(markdown_instance=md, **config), '_begin')
     md.inlinePatterns.add('moose_image', MooseImageFile(markdown_instance=md, **config), '_begin')
+    md.inlinePatterns.add('moose_figure', MooseFigure(markdown_instance=md, **config), '_begin')
+    md.inlinePatterns.add('moose-figure-reference', MooseFigureReference(markdown_instance=md, **config), '>moose_figure')
     md.inlinePatterns.add('moose_build_status', MooseBuildStatus(markdown_instance=md, **config), '_begin')
     if config['package']:
       md.inlinePatterns.add('moose_package_parser', MoosePackageParser(markdown_instance=md, **config), '_end')
