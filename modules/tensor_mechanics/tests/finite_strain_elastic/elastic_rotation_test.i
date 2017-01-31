@@ -1,12 +1,17 @@
 #
 # Rotation Test
 #
-# This test is designed to compute a uniaxial stress and then follow that
-# stress as the mesh is rotated 90 degrees.
+# This test is designed to compute stress based on uniaxial strain
+# and then follow that stress as the mesh is rotated 90 degrees.
 #
 # The mesh is composed of one block with a single element.  The nodal
-# displacements in the x and y directions are prescribed.  Poisson's
-# ratio is zero.
+# displacements in the three directions are prescribed.  Poisson's
+# ratio is 1/3, and Young's modulus is 1e6.
+#
+# This test is mentioned in
+# K. Kamojjala, R. Brannon, A. Sadeghirad, and J. Guilkey, "Verification
+#   tests in solid mechanics," Engineering with Computers, Vol. 31, 2015.
+#   DOI: 10.1007/s00366-013-0342-x
 #
 [Mesh]
   type = FileMesh
@@ -21,37 +26,37 @@
   [./x_200]
     type = ParsedFunction
     vars = 'delta t0'
-    vals = '-1e-6 1.0'
+    vals = '1e-6 1.0'
     value = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2*(t-t0)) - 1.0)'
   [../]
   [./y_200]
     type = ParsedFunction
     vars = 'delta t0'
-    vals = '-1e-6 1.0'
+    vals = '1e-6 1.0'
     value = 'if(t<=1.0, 0.0, (1.0+delta)*sin(pi/2*(t-t0)))'
   [../]
   [./x_300]
     type = ParsedFunction
     vars = 'delta t0'
-    vals = '-1e-6 1.0'
+    vals = '1e-6 1.0'
     value = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2.0*(t-t0)) - sin(pi/2.0*(t-t0)) - 1.0)'
   [../]
   [./y_300]
     type = ParsedFunction
     vars = 'delta t0'
-    vals = '-1e-6 1.0'
+    vals = '1e-6 1.0'
     value = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) + (1+delta)*sin(pi/2.0*(t-t0)) - 1.0)'
   [../]
   [./x_400]
     type = ParsedFunction
     vars = 'delta t0'
-    vals = '-1e-6 1.0'
+    vals = '1e-6 1.0'
     value = 'if(t<=1.0, 0.0, -sin(pi/2.0*(t-t0)))'
   [../]
   [./y_400]
     type = ParsedFunction
     vars = 'delta t0'
-    vals = '-1e-6 1.0'
+    vals = '1e-6 1.0'
     value = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) - 1.0)'
   [../]
 []
@@ -62,14 +67,13 @@
       [./all]
         strain = FINITE
         add_variables = true
-        #generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+        generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
       [../]
     [../]
   [../]
 []
 
 [BCs]
-  # BCs
   [./no_x]
     type = PresetBC
     variable = disp_x
@@ -133,7 +137,7 @@
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     fill_method = symmetric9
-    C_ijkl = '10.0e6  0.0   0.0 10.0e6  0.0  10.0e6 5e6 5e6 5e6'
+    C_ijkl = '1.5e6 0.75e6 0.75e6 1.5e6 0.75e6 1.5e6 0.375e6 0.375e6 0.375e6'
   [../]
 []
 
