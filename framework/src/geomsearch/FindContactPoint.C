@@ -35,8 +35,9 @@ namespace Moose
  * Finds the closest point (called the contact point) on the master_elem on side "side" to the slave_point.
  *
  * @param p_info The penetration info object, contains master_elem, side, various other information
- * @param _fe FE object that will provide quadrature and shape function data
- * @param _fe_type The type of _fe, needed for inverse_map routines
+ * @param fe_elem FE object for the element
+ * @param fe_side FE object for the side
+ * @param fe_side_type The type of fe_side, needed for inverse_map routines
  * @param start_with_centroid if true, start inverse mapping procedure from element centroid
  * @param tangential_tolerance 'tangential' tolerance for determining whether a contact point on a side
  * @param slave_point The physical space coordinates of the slave node
@@ -44,7 +45,7 @@ namespace Moose
  */
 void
 findContactPoint(PenetrationInfo & p_info,
-                 FEBase * _fe, FEType & _fe_type, const Point & slave_point,
+                 FEBase * fe_elem, FEBase * fe_side, FEType & fe_side_type, const Point & slave_point,
                  bool start_with_centroid, const Real tangential_tolerance,
                  bool & contact_point_on_side)
 {
@@ -54,57 +55,36 @@ findContactPoint(PenetrationInfo & p_info,
 
   const Elem * side = p_info._side;
 
-  const std::vector<Point> & phys_point = _fe->get_xyz();
+  const std::vector<Point> & phys_point = fe_side->get_xyz();
 
-  const std::vector<RealGradient> & dxyz_dxi = _fe->get_dxyzdxi();
-  const std::vector<RealGradient> & d2xyz_dxi2 = _fe->get_d2xyzdxi2();
-  const std::vector<RealGradient> & d2xyz_dxieta = _fe->get_d2xyzdxideta();
+  const std::vector<RealGradient> & dxyz_dxi = fe_side->get_dxyzdxi();
+  const std::vector<RealGradient> & d2xyz_dxi2 = fe_side->get_d2xyzdxi2();
+  const std::vector<RealGradient> & d2xyz_dxieta = fe_side->get_d2xyzdxideta();
 
-  const std::vector<RealGradient> & dxyz_deta = _fe->get_dxyzdeta();
-  const std::vector<RealGradient> & d2xyz_deta2 = _fe->get_d2xyzdeta2();
-  const std::vector<RealGradient> & d2xyz_detaxi = _fe->get_d2xyzdxideta();
+  const std::vector<RealGradient> & dxyz_deta = fe_side->get_dxyzdeta();
+  const std::vector<RealGradient> & d2xyz_deta2 = fe_side->get_d2xyzdeta2();
+  const std::vector<RealGradient> & d2xyz_detaxi = fe_side->get_d2xyzdxideta();
 
   if (dim == 1)
   {
-    const Node * left = master_elem->node_ptr(0);
-    const Node * right = left;
-    Real leftCoor = (*left)(0);
-    Real rightCoor = leftCoor;
-    for (unsigned i = 1; i < master_elem->n_nodes(); ++i)
-    {
-      const Node * curr = master_elem->node_ptr(i);
-      Real coor = (*curr)(0);
-      if (coor < leftCoor)
-      {
-        left = curr;
-        leftCoor = coor;
-      }
-      if (coor > rightCoor)
-      {
-        right = curr;
-        rightCoor = coor;
-      }
-    }
-    const Node * nearestNode = left;
-    Point nearestPoint(leftCoor, 0, 0);
-    if (side->node(0) == right->id())
-    {
-      nearestNode = right;
-      nearestPoint(0) = rightCoor;
-    }
-    else if (side->node(0) != left->id())
-    {
-      mooseError("Error findContactPoint.  Logic error in 1D");
-    }
-    p_info._closest_point_ref = FEInterface::inverse_map(dim, _fe_type, master_elem, nearestPoint, TOLERANCE, false);
-    p_info._closest_point = nearestPoint;
-    p_info._normal = Point(left == nearestNode ? -1 : 1, 0, 0);
+    const Node * nearest_node = side->node_ptr(0);
+    p_info._closest_point = *nearest_node;
+    p_info._closest_point_ref = master_elem->master_point(master_elem->get_node_index(nearest_node));
+    std::vector<Point> elem_points = {p_info._closest_point_ref};
+    fe_elem->reinit(master_elem, &elem_points);
+
+    const std::vector<RealGradient> & elem_dxyz_dxi = fe_elem->get_dxyzdxi();
+    p_info._normal = elem_dxyz_dxi[0];
+    if (nearest_node->id() == master_elem->node_id(0))
+      p_info._normal *= -1.0;
+    p_info._normal /= p_info._normal.norm();
+
     p_info._distance = (p_info._closest_point - slave_point) * p_info._normal;
     p_info._dxyzdxi = dxyz_dxi;
     p_info._dxyzdeta = dxyz_deta;
     p_info._d2xyzdxideta = d2xyz_dxieta;
-    p_info._side_phi = _fe->get_phi();
-    p_info._side_grad_phi = _fe->get_dphi();
+    p_info._side_phi = fe_side->get_phi();
+    p_info._side_grad_phi = fe_side->get_dphi();
     contact_point_on_side = true;
     return;
   }
@@ -112,12 +92,12 @@ findContactPoint(PenetrationInfo & p_info,
   Point ref_point;
 
   if (start_with_centroid)
-    ref_point = FEInterface::inverse_map(dim-1, _fe_type, side, side->centroid(), TOLERANCE, false);
+    ref_point = FEInterface::inverse_map(dim-1, fe_side_type, side, side->centroid(), TOLERANCE, false);
   else
     ref_point = p_info._closest_point_ref;
 
   std::vector<Point> points = {ref_point};
-  _fe->reinit(side, &points);
+  fe_side->reinit(side, &points);
   RealGradient d = slave_point - phys_point[0];
 
   Real update_size = std::numeric_limits<Real>::max();
@@ -132,7 +112,6 @@ findContactPoint(PenetrationInfo & p_info,
     if (dim-1 == 2)
     {
       jac(1,0) = -(dxyz_dxi[0] * dxyz_deta[0]);
-
       jac(0,1) = -(dxyz_deta[0] * dxyz_dxi[0]);
       jac(1,1) = -(dxyz_deta[0] * dxyz_deta[0]);
     }
@@ -154,7 +133,7 @@ findContactPoint(PenetrationInfo & p_info,
       ref_point(1) -= update(1);
 
     points[0] = ref_point;
-    _fe->reinit(side, &points);
+    fe_side->reinit(side, &points);
     d = slave_point - phys_point[0];
 
     update_size = update.l2_norm();
@@ -198,7 +177,7 @@ findContactPoint(PenetrationInfo & p_info,
       ref_point(1) += update(1);
 
     points[0] = ref_point;
-    _fe->reinit(side, &points);
+    fe_side->reinit(side, &points);
     d = slave_point - phys_point[0];
 
     update_size = update.l2_norm();
@@ -240,7 +219,7 @@ findContactPoint(PenetrationInfo & p_info,
     restrictPointToFace(p_info._closest_point_on_face_ref,side,p_info._off_edge_nodes);
 
     points[0] = p_info._closest_point_on_face_ref;
-    _fe->reinit(side, &points);
+    fe_side->reinit(side, &points);
     Point closest_point_on_face(phys_point[0]);
 
     RealGradient off_face = closest_point_on_face - p_info._closest_point;
@@ -252,11 +231,11 @@ findContactPoint(PenetrationInfo & p_info,
     }
   }
 
-  const std::vector<std::vector<Real> > & phi = _fe->get_phi();
-  const std::vector<std::vector<RealGradient> > & grad_phi = _fe->get_dphi();
+  const std::vector<std::vector<Real> > & phi = fe_side->get_phi();
+  const std::vector<std::vector<RealGradient> > & grad_phi = fe_side->get_dphi();
 
   points[0] = p_info._closest_point_ref;
-  _fe->reinit(side, &points);
+  fe_side->reinit(side, &points);
 
   p_info._side_phi = phi;
   p_info._side_grad_phi = grad_phi;
