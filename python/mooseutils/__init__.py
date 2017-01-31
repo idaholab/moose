@@ -1,4 +1,4 @@
-from utils import colorText, str2bool, find_moose_executable, runExe, check_configuration
+from mooseutils import colorText, str2bool, find_moose_executable, runExe, check_configuration
 
 try:
     from MooseYaml import MooseYaml

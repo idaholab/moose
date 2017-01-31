@@ -1,4 +1,3 @@
-import sys
 import os
 import re
 import subprocess
@@ -122,7 +121,6 @@ class MooseSourceParser(object):
         """
 
         name = kwargs.pop('name', None)
-        defn = kwargs.pop('definition', False)
 
         for cursor in self._translation_unit.cursor.walk_preorder():
             if (hasattr(cursor, 'kind')) and (cursor.kind == kind) and (name == None or cursor.spelling == name):
@@ -134,9 +132,9 @@ class MooseSourceParser(object):
 
 if __name__ == '__main__':
 
-    src = '/Users/slauae/projects/moose/framework/src/kernels/Diffusion.C'
+    src = '%s/projects/moose/framework/src/kernels/Diffusion.C' % os.environ["HOME"]
 
-    parser = MooseSourceParser('/Users/slauae/projects/moose/framework')
+    parser = MooseSourceParser('%s/projects/moose/framework' % os.environ["HOME"])
     parser.parse(src)
     decl, defn = parser.method('computeQpResidual')
     print decl, defn

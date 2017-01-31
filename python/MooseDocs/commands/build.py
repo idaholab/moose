@@ -1,17 +1,11 @@
 import os
-import sys
-import copy
 import multiprocessing
 import markdown
-import markdown_include
-import bs4
-import shutil
 from distutils.dir_util import copy_tree
 import logging
 log = logging.getLogger(__name__)
 
 import MooseDocs
-from MooseDocs.extensions.MooseMarkdown import MooseMarkdown
 from MooseDocsNode import MooseDocsNode
 from MooseDocsMarkdownNode import MooseDocsMarkdownNode
 

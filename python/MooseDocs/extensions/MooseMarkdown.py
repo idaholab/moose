@@ -1,9 +1,6 @@
 import os
-import sys
-import re
 import markdown
 import collections
-import yaml
 import logging
 log = logging.getLogger(__name__)
 
@@ -24,7 +21,7 @@ from MooseBuildStatus import MooseBuildStatus
 from MooseBibtex import MooseBibtex
 from MooseActionList import MooseActionList
 import MooseDocs
-import utils
+import mooseutils
 
 class MooseMarkdown(markdown.Extension):
   """
@@ -67,8 +64,8 @@ class MooseMarkdown(markdown.Extension):
     else:
       log.debug("Executing {} to extract syntax.".format(exe))
       try:
-        raw = utils.runExe(exe, '--yaml')
-        return utils.MooseYaml(raw)
+        raw = mooseutils.runExe(exe, '--yaml')
+        return mooseutils.MooseYaml(raw)
       except:
         log.critical('Failed to read YAML file, MOOSE and modules are likely not compiled correctly.')
         raise Exception('Critical Error')

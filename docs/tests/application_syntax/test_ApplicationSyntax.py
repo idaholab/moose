@@ -3,7 +3,7 @@ import os
 import unittest
 import MooseDocs
 from MooseDocs.MooseApplicationSyntax import MooseObjectInfo
-import utils
+import mooseutils
 
 class TestMooseApplicationSyntax(unittest.TestCase):
 
@@ -16,8 +16,8 @@ class TestMooseApplicationSyntax(unittest.TestCase):
 
     # Extract the MOOSE YAML data
     exe = os.path.join(MooseDocs.MOOSE_DIR, 'modules', 'combined', 'combined-opt')
-    raw = utils.runExe(exe, '--yaml')
-    cls._yaml = utils.MooseYaml(raw)
+    raw = mooseutils.runExe(exe, '--yaml')
+    cls._yaml = mooseutils.MooseYaml(raw)
 
     # Extract the 'framework' location options and build the syntax object
     framework = options['locations'][0]['framework']

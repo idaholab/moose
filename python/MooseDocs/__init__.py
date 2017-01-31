@@ -7,11 +7,10 @@ import multiprocessing
 
 import extensions
 import commands
-import html2latex
-import utils
+import mooseutils
 
 # Check for the necessary packages, this does a load so they should all get loaded.
-if utils.check_configuration(['yaml', 'jinja2', 'markdown', 'markdown_include', 'mdx_math', 'bs4']):
+if mooseutils.check_configuration(['yaml', 'jinja2', 'markdown', 'markdown_include', 'mdx_math', 'bs4']):
   sys.exit(1)
 
 import yaml
@@ -41,7 +40,7 @@ class MooseDocsFormatter(logging.Formatter):
   def format(self, record):
     msg = logging.Formatter.format(self, record)
     if record.levelname in self.COLOR:
-      msg = utils.colorText(msg, self.COLOR[record.levelname])
+      msg = mooseutils.colorText(msg, self.COLOR[record.levelname])
 
     if record.levelname in self.COUNTS:
       with self.COUNTS[record.levelname].get_lock():

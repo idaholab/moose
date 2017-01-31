@@ -1,7 +1,6 @@
 import os
 import re
 import collections
-import yaml
 import logging
 log = logging.getLogger(__name__)
 import MooseDocs
