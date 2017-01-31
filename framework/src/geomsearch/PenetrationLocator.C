@@ -46,8 +46,8 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
   for (unsigned int i=0; i < libMesh::n_threads(); i++)
   {
     unsigned int n_dims = _mesh.dimension();
-    _fe[i].resize(n_dims);
-    for (unsigned int dim = 0; dim < n_dims; dim++)
+    _fe[i].resize(n_dims + 1);
+    for (unsigned int dim = 0; dim <= n_dims; ++dim)
       _fe[i][dim] = FEBase::build(dim, _fe_type).release();
   }
 
