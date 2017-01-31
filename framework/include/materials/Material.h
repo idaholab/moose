@@ -232,6 +232,11 @@ protected:
   /// If False MOOSE does not compute this property
   const bool _compute;
 
+  /// False by default.  If true, MOOSE will only call
+  /// computeQpProperties() for the 0th qp and then copy
+  /// that value around to all the qps.
+  const bool _constant_on_elem;
+
   enum QP_Data_Type {
     CURR,
     PREV
