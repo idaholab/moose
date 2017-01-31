@@ -1,5 +1,3 @@
-import re
-import os
 from markdown.util import etree
 import logging
 log = logging.getLogger(__name__)
@@ -7,7 +5,6 @@ log = logging.getLogger(__name__)
 import MooseDocs
 from markdown.inlinepatterns import Pattern
 from MooseCommonExtension import MooseCommonExtension
-import utils
 
 class MoosePackageParser(MooseCommonExtension, Pattern):
   """

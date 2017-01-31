@@ -1,6 +1,5 @@
-import os
 import yaml
-from yaml import CLoader as Loader, CDumper as Dumper
+from yaml import CLoader as Loader
 
 
 class MooseYaml(object):

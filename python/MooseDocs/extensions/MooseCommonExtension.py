@@ -1,12 +1,8 @@
 import re
-import os
 import copy
 from markdown.util import etree
 import logging
 log = logging.getLogger(__name__)
-
-import MooseDocs
-import utils
 
 class MooseCommonExtension(object):
   """

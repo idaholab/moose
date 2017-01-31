@@ -1,15 +1,12 @@
 import os
-import re
-from markdown.util import etree
 import logging
 log = logging.getLogger(__name__)
 
 import MooseDocs
 from MooseTextPatternBase import MooseTextPatternBase
-import utils
 
 try:
-  import utils.MooseSourceParser
+  import mooseutils.MooseSourceParser
   HAVE_MOOSE_CPP_PARSER = True
 except:
   HAVE_MOOSE_CPP_PARSER = False
@@ -70,7 +67,7 @@ class MooseCppMethod(MooseTextPatternBase):
       log.debug('Parsing method "{}" from {}'.format(settings['method'], filename))
 
       try:
-        parser = utils.MooseSourceParser(self._make_dir)
+        parser = mooseutils.MooseSourceParser(self._make_dir)
         parser.parse(filename)
         decl, defn = parser.method(settings['method'])
         el = self.createElement(match.group(2), defn, filename, rel_filename, settings)

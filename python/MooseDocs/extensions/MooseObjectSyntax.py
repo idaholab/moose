@@ -1,14 +1,8 @@
-import re
-import os
-import copy
-import collections
 import logging
 log = logging.getLogger(__name__)
 
-from markdown.inlinepatterns import Pattern
 from markdown.util import etree
 from MooseSyntaxBase import MooseSyntaxBase
-import utils
 
 class MooseObjectSyntax(MooseSyntaxBase):
   """

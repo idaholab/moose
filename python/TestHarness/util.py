@@ -1,7 +1,6 @@
 import platform, os, re
-from subprocess import *
-from time import strftime, gmtime, ctime, localtime, asctime
-from utils import colorText
+import subprocess
+from mooseutils import colorText
 
 TERM_COLS = 110
 
@@ -90,7 +89,7 @@ LIBMESH_OPTIONS = {
 def runCommand(cmd, cwd=None):
   # On Windows it is not allowed to close fds while redirecting output
   should_close = platform.system() != "Windows"
-  p = Popen([cmd], cwd=cwd, stdout=PIPE,stderr=STDOUT, close_fds=should_close, shell=True)
+  p = subprocess.Popen([cmd], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
   output = p.communicate()[0]
   if (p.returncode != 0):
     output = 'ERROR: ' + output
@@ -319,7 +318,7 @@ def getLibMeshConfigOption(libmesh_dir, option):
 
       success = 1
 
-    except IOError, e:
+    except IOError:
       # print "Warning: I/O Error trying to read", filename, ":", e.strerror, "... Will try other locations."
       pass
 
