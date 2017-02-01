@@ -93,10 +93,6 @@ void indirectSort(RandomAccessIterator beg,
   std::sort(b.begin(), b.end(), ic);
 }
 
-
-
-
-
 // A generic indirect sort function templated on the iterator type *and* the comparison functor
 // to be used for the ordering.
 template <class RandomAccessIterator,
@@ -114,6 +110,18 @@ void indirectSort(RandomAccessIterator beg,
 
   // Sort the indices, based on the data
   std::sort(b.begin(), b.end(), ic);
+}
+
+/// Uses indices created by the indirectSort function to sort the given
+/// container (which must support random access, resizing, and std::swap.
+template <typename T>
+void applyIndices(T & container, const std::vector<size_t> & indices)
+{
+  T tmp;
+  tmp.resize(container.size());
+  for (size_t i = 0; i < indices.size(); i++)
+    tmp[i] = container[indices[i]];
+  std::swap(tmp, container);
 }
 
 } // namespace Moose

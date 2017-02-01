@@ -145,10 +145,11 @@ public:
   ///@{
   /**
    * Return a Material object reference for calling compute directly.
-   * @param The name of the input parameter or explicit material name.
+   * @param name The name of the input parameter or explicit material name.
+   * @param no_warn supress warnings
    */
   Material & getMaterial(const std::string & name);
-  Material & getMaterialByName(const std::string & name);
+  Material & getMaterialByName(const std::string & name, bool no_warn = false);
   ///@}
 
   ///@{
