@@ -129,7 +129,7 @@ public:
    */
   const MaterialPropertyStorage & getMaterialPropertyStorage() const { return _storage; }
 
-  unsigned int getPropertyId (const std::string & prop_name) { return _storage.getPropertyId(prop_name); }
+  unsigned int getPropertyId (const std::string & prop_name) const { return _storage.getPropertyId(prop_name); }
 
 protected:
 
@@ -169,7 +169,7 @@ MaterialData::haveProperty (const std::string & prop_name) const
   if (!_storage.hasProperty(prop_name))
     return false;
 
-  unsigned int prop_id = _storage.getPropertyId(prop_name);
+  unsigned int prop_id = getPropertyId(prop_name);
   if (prop_id >= _props.size())
     return false;           // the property id exists, but the property was not created in this instance of the material type
 
@@ -233,7 +233,7 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::getProperty(const std::string & name)
 {
-  auto prop_id = _storage.getPropertyId(name);
+  auto prop_id = getPropertyId(name);
   resizeProps<T>(prop_id);
   auto prop = dynamic_cast<MaterialProperty<T>*>(_props[prop_id]);
   if (!prop)

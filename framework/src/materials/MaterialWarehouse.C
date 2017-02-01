@@ -106,18 +106,18 @@ MaterialWarehouse::sort(THREAD_ID tid /*=0*/)
 }
 
 void
-MaterialWarehouse::updateBlockMatPropDependency(SubdomainID id, std::set<MaterialProperty<T> *> & needed_mat_props, THREAD_ID /*tid = 0*/) const
+MaterialWarehouse::updateBlockMatPropDependency(SubdomainID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBlockObjects(id, tid))
     updateMatPropDependencyHelper(needed_mat_props, getActiveBlockObjects(id, tid));
 }
 
 void
-MaterialWarehouse::updateMatPropDependencyHelper(std::set<MaterialProperty<T> *> & needed_mat_props, const std::vector<MooseSharedPointer<T> > & objects)
+MaterialWarehouse::updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props, const std::vector<Material *> & material_objects)
 {
-  for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+  for (typename std::vector<Material *> >::const_iterator it = material_objects.begin(); it != material_objects.end(); ++it)
   {
-    const std::set<MaterialProperty<T> *> & mp_deps = (*it)->getMatPropDependencies();
+    const std::set<unsigned int> & mp_deps = (*it)->getMatPropDependencies();
     needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
   }
 }
