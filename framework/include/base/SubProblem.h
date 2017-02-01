@@ -111,6 +111,14 @@ public:
    */
   virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
 
+  virtual void setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids, THREAD_ID tid);
+
+  virtual const std::set<unsigned int> &getActiveMaterialProperties(THREAD_ID tid);
+
+  virtual bool hasActiveMaterialProperties(THREAD_ID tid);
+
+  virtual void clearActiveMaterialProperties(THREAD_ID tid);
+
   virtual Assembly & assembly(THREAD_ID tid) = 0;
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
@@ -367,6 +375,10 @@ protected:
   /// Whether or not there is currently a list of active elemental moose variables
   /* This needs to remain <unsigned int> for threading purposes */
   std::vector<unsigned int> _has_active_elemental_moose_variables;
+
+  std::vector<std::set<unsigned int> > _active_material_property_ids;
+
+  std::vector<unsigned int> _has_active_material_property_ids;
 
   /// nonlocal coupling requirement flag
   bool _requires_nonlocal_coupling;

@@ -2005,9 +2005,14 @@ void
 FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 {
   std::set<MooseVariable *> needed_moose_vars;
+  std::set<unsigned int> needed_mat_props;
+
 
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
+  {
     _all_materials.updateVariableDependency(needed_moose_vars, tid);
+    _all_materials.updateMatPropDependency(needed_mat_props, tid);
+  }
 
   const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
   for (const auto & id : ids)
@@ -2018,12 +2023,15 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 
   if (!needed_moose_vars.empty())
     setActiveElementalMooseVariables(needed_moose_vars, tid);
+
+  if (!needed_mat_props.empty())
+    setActiveMaterialProperties(needed_mat_props, tid);
 }
 
 void
 FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (_all_materials.hasActiveBlockObjects(blk_id, tid))
+  if (_all_materials.hasActiveBlockObjects(blk_id, tid) && _subproblem.hasActiveMaterialProperties(tid))
   {
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int n_points = _assembly[tid]->qRule()->n_points();
@@ -3060,6 +3068,36 @@ FEProblemBase::clearActiveElementalMooseVariables(THREAD_ID tid)
 
   if (_displaced_problem)
     _displaced_problem->clearActiveElementalMooseVariables(tid);
+}
+
+void
+FEProblemBase::setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids, THREAD_ID tid)
+{
+  SubProblem::setActiveMaterialProperties(mat_prop_ids, tid);
+
+  if (_displaced_problem)
+    _displaced_problem->setActiveMaterialProperties(mat_prop_ids, tid);
+}
+
+const std::set<unsigned int> &
+FEProblemBase::getActiveMaterialProperties(THREAD_ID tid)
+{
+  return SubProblem::getActiveMaterialProperties(tid);
+}
+
+bool
+FEProblemBase::hasActiveMaterialProperties(THREAD_ID tid)
+{
+  return SubProblem::hasActiveMaterialProperties(tid);
+}
+
+void
+FEProblemBase::clearActiveMaterialProperties(THREAD_ID tid)
+{
+  SubProblem::clearActiveMaterialProperties(tid);
+
+  if (_displaced_problem)
+    _displaced_problem->clearActiveMaterialProperties(tid);
 }
 
 void
