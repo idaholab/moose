@@ -201,6 +201,21 @@ class MooseApplicationSyntax(object):
                                hidden=self.hidden(node['name']))
         self._actions[info.key] = info
 
+    # Create MooseActionInfo objects from the MooseObjectInfo
+    # This is needed to allow for the !systems pages to be complete for apps that
+    # do not also include the framework
+    for obj_info in self._objects.itervalues():
+      action_key = os.path.dirname(obj_info.key)
+      if action_key not in self._actions:
+        for node in self._yaml_data[action_key]:
+          info = MooseActionInfo(node,
+                                 code=[],
+                                 install=install,
+                                 group=self._group,
+                                 generate=generate,
+                                 hidden=self.hidden(node['name']))
+          self._actions[info.key] = info
+
   def name(self):
     """
     Return the name of the syntax.
