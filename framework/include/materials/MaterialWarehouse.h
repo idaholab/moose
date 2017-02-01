@@ -51,7 +51,7 @@ public:
    */
   void addObjects(std::shared_ptr<Material> block, std::shared_ptr<Material> neighbor, std::shared_ptr<Material> face, THREAD_ID tid = 0);
 
-  void updateBlockMatPropDependency(SubdomainID id, std::set<MaterialProperty *> & needed_mat_props, THREAD_ID tid = 0) const;
+  void updateBlockMatPropDependency(SubdomainID id, std::set<MaterialProperty<T> *> & needed_mat_props, THREAD_ID tid = 0) const;
   
 
 protected:
@@ -64,7 +64,7 @@ protected:
   /**
    * Helper method for updating variable dependency vector
    */
-  static void updateMatPropDependencyHelper(std::set<MaterialProperty *> & needed_mat_props,
+  static void updateMatPropDependencyHelper(std::set<MaterialProperty<T> *> & needed_mat_props,
                                              const std::vector<MooseSharedPointer<T> > & objects);
 };
 

@@ -129,6 +129,8 @@ public:
    */
   const MaterialPropertyStorage & getMaterialPropertyStorage() const { return _storage; }
 
+  unsigned int getPropertyId (const std::string & prop_name) { return _storage.getPropertyId(prop_name); }
+
 protected:
 
   /// Reference to the MaterialStorage class

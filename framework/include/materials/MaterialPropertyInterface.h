@@ -179,7 +179,7 @@ public:
    */
   bool getMaterialPropertyCalled() const { return _get_material_property_called; }
 
-  const std::set<MaterialProperty *> & getMatPropDependencies() const { return _material_property_dependencies; }
+  template<typename T> const std::set<MaterialProperty<T> *> & getMatPropDependencies() const { return _material_property_dependencies; }
 
 protected:
   /// Parameters of the object with this interface
@@ -240,6 +240,10 @@ protected:
   /// Storage vector for MaterialProperty<Real> default objects
   std::vector<std::unique_ptr<MaterialProperty<Real>>> _default_real_properties;
 
+  void addMatPropDependency(MaterialProperty<T> * mat_prop_id) { _material_property_dependencies.insert(mat_prop); }
+
+  std::set<unsigned int> _material_property_dependencies;
+
 private:
   /// An initialization routine needed for dual constructors
   void initializeMaterialPropertyInterface(const InputParameters & parameters);
@@ -258,11 +262,6 @@ private:
 
   /// Storage for the boundary ids created by BoundaryRestrictable
   const std::set<BoundaryID> _mi_boundary_ids;
-
-  void addMatPropDependency(MaterialProperty * mat_prop) { _material_property_dependencies.insert(mat_prop); }
-  void addMatPropDependency(std::vector<MaterialProperty *> mat_props) { _material_property_dependencies.insert(mat_props.begin(), mat_props.end()); }
-
-  std::set<MaterialProperty *> _material_property_dependencies;
 };
 
 /**
@@ -366,10 +365,9 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
   // Update the boolean flag.
   _get_material_property_called = true;
 
-  const MaterialProperty<T> & mat_prop = _material_data->getProperty<T>(name);
-
-  addMatPropDependency(&mat_prop);
-  return mat_prop;
+  addMatPropDependency(_material_data->getPropertyId(name));
+  
+  return _material_data->getProperty<T>(name);
 }
 
 
