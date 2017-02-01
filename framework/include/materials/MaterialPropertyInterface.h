@@ -179,7 +179,7 @@ public:
    */
   bool getMaterialPropertyCalled() const { return _get_material_property_called; }
 
-  template<typename T> const std::set<unsigned int> & getMatPropDependencies() const { return _material_property_dependencies; }
+  const std::set<unsigned int> & getMatPropDependencies() const { return _material_property_dependencies; }
 
 protected:
   /// Parameters of the object with this interface

@@ -113,9 +113,9 @@ MaterialWarehouse::updateBlockMatPropDependency(SubdomainID id, std::set<unsigne
 }
 
 void
-MaterialWarehouse::updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props, const std::vector<Material *> & material_objects)
+MaterialWarehouse::updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props, const std::vector<MooseSharedPointer<Material> > & material_objects)
 {
-  for (typename std::vector<Material *> >::const_iterator it = material_objects.begin(); it != material_objects.end(); ++it)
+  for (std::vector<MooseSharedPointer<Material> > ::const_iterator it = material_objects.begin(); it != material_objects.end(); ++it)
   {
     const std::set<unsigned int> & mp_deps = (*it)->getMatPropDependencies();
     needed_mat_props.insert(mp_deps.begin(), mp_deps.end());

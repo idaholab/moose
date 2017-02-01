@@ -65,7 +65,7 @@ protected:
    * Helper method for updating variable dependency vector
    */
   static void updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props,
-                                             const std::vector<Material *> & material_objects);
+                                             const std::vector<MooseSharedPointer<Material> > & material_objects);
 };
 
 #endif // MATERIALWAREHOUSE_H
