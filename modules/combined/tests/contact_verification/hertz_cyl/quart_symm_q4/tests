@@ -9,17 +9,19 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    prereq = 'glued_kin_sm'
   [../]
   [./glued_pen]
     type = 'CSVDiff'
     input = 'hertz_cyl_qsym_1deg_template1.i'
     csvdiff = 'hertz_cyl_qsym_1deg_glued_pen_check.csv hertz_cyl_qsym_1deg_glued_pen_check_cont_press_0010.csv hertz_cyl_qsym_1deg_glued_pen_check_x_disp_0010.csv hertz_cyl_qsym_1deg_glued_pen_check_y_disp_0010.csv'
     cli_args = 'Contact/interface/model=glued Contact/interface/formulation=penalty Outputs/file_base=hertz_cyl_qsym_1deg_glued_pen_out Outputs/chkfile/file_base=hertz_cyl_qsym_1deg_glued_pen_check'
-    rel_err = 1e-5
+    rel_err = 2e-5
     abs_zero = 1e-8
     max_parallel = 1
     heavy = true
     superlu = true
+    prereq = 'glued_pen_sm'
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
@@ -31,6 +33,7 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    prereq = 'frictionless_kin_sm'
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -42,6 +45,7 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    prereq = 'frictionless_pen_sm'
   [../]
   [./frictionless_aug]
     type = 'CSVDiff'
@@ -53,11 +57,66 @@
     max_parallel = 1
     heavy = true
     superlu = true
-    skip = 'Waiting for damper changes.'
+    prereq = 'frictionless_aug_sm'
   [../]
-  [./mu_1_0_kin]
+  [./glued_kin_sm]
     type = 'CSVDiff'
-    input = 'hertz_cyl_qsym_1deg_mu_1_0_kin_q4.i'
+    input = 'hertz_cyl_qsym_1deg_template1_sm.i'
+    csvdiff = 'hertz_cyl_qsym_1deg_glued_kin_check.csv hertz_cyl_qsym_1deg_glued_kin_check_cont_press_0010.csv hertz_cyl_qsym_1deg_glued_kin_check_x_disp_0010.csv hertz_cyl_qsym_1deg_glued_kin_check_y_disp_0010.csv'
+    cli_args = 'Contact/interface/model=glued Contact/interface/formulation=kinematic Outputs/file_base=hertz_cyl_qsym_1deg_glued_kin_out Outputs/chkfile/file_base=hertz_cyl_qsym_1deg_glued_kin_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    heavy = true
+    superlu = true
+  [../]
+  [./glued_pen_sm]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_qsym_1deg_template1_sm.i'
+    csvdiff = 'hertz_cyl_qsym_1deg_glued_pen_check.csv hertz_cyl_qsym_1deg_glued_pen_check_cont_press_0010.csv hertz_cyl_qsym_1deg_glued_pen_check_x_disp_0010.csv hertz_cyl_qsym_1deg_glued_pen_check_y_disp_0010.csv'
+    cli_args = 'Contact/interface/model=glued Contact/interface/formulation=penalty Outputs/file_base=hertz_cyl_qsym_1deg_glued_pen_out Outputs/chkfile/file_base=hertz_cyl_qsym_1deg_glued_pen_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    heavy = true
+    superlu = true
+  [../]
+  [./frictionless_kin_sm]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_qsym_1deg_template1_sm.i'
+    csvdiff = 'hertz_cyl_qsym_1deg_frictionless_kin_check.csv hertz_cyl_qsym_1deg_frictionless_kin_check_cont_press_0010.csv hertz_cyl_qsym_1deg_frictionless_kin_check_x_disp_0010.csv hertz_cyl_qsym_1deg_frictionless_kin_check_y_disp_0010.csv'
+    cli_args = 'Contact/interface/model=frictionless Contact/interface/formulation=kinematic Outputs/file_base=hertz_cyl_qsym_1deg_frictionless_kin_out Outputs/chkfile/file_base=hertz_cyl_qsym_1deg_frictionless_kin_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    heavy = true
+    superlu = true
+  [../]
+  [./frictionless_pen_sm]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_qsym_1deg_template1_sm.i'
+    csvdiff = 'hertz_cyl_qsym_1deg_frictionless_pen_check.csv hertz_cyl_qsym_1deg_frictionless_pen_check_cont_press_0010.csv hertz_cyl_qsym_1deg_frictionless_pen_check_x_disp_0010.csv hertz_cyl_qsym_1deg_frictionless_pen_check_y_disp_0010.csv'
+    cli_args = 'Contact/interface/model=frictionless Contact/interface/formulation=penalty Outputs/file_base=hertz_cyl_qsym_1deg_frictionless_pen_out Outputs/chkfile/file_base=hertz_cyl_qsym_1deg_frictionless_pen_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    heavy = true
+    superlu = true
+  [../]
+  [./frictionless_aug_sm]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_qsym_1deg_template1_sm.i'
+    csvdiff = 'hertz_cyl_qsym_1deg_frictionless_aug_check.csv hertz_cyl_qsym_1deg_frictionless_aug_check_cont_press_0010.csv hertz_cyl_qsym_1deg_frictionless_aug_check_x_disp_0010.csv hertz_cyl_qsym_1deg_frictionless_aug_check_y_disp_0010.csv'
+    cli_args = 'Contact/interface/model=frictionless Contact/interface/formulation=augmented_lagrange Outputs/file_base=hertz_cyl_qsym_1deg_frictionless_aug_out Outputs/chkfile/file_base=hertz_cyl_qsym_1deg_frictionless_aug_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    heavy = true
+    superlu = true
+  [../]
+  [./mu_1_0_kin_sm]
+    type = 'CSVDiff'
+    input = 'hertz_cyl_qsym_1deg_mu_1_0_kin_q4_sm.i'
     csvdiff = 'hertz_cyl_qsym_1deg_mu_1_0_kin_q4_check.csv hertz_cyl_qsym_1deg_mu_1_0_kin_q4_check_cont_press_0010.csv hertz_cyl_qsym_1deg_mu_1_0_kin_q4_check_x_disp_0010.csv hertz_cyl_qsym_1deg_mu_1_0_kin_q4_check_y_disp_0010.csv'
     max_time = 1000
     rel_err = 1e-5

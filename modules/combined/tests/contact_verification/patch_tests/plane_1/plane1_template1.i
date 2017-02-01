@@ -1,3 +1,9 @@
+[GlobalParams]
+  order = FIRST
+  family = LAGRANGE
+  volumetric_locking_correction = true
+[]
+
 [Mesh]
   file = plane1_mesh.e
   displacements = 'disp_x disp_y'
@@ -11,12 +17,8 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -38,8 +40,6 @@
     family = MONOMIAL
   [../]
   [./penetration]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./saved_x]
   [../]
@@ -59,41 +59,46 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    save_in_disp_y = saved_y
-    save_in_disp_x = saved_x
-    diag_save_in_disp_y = diag_saved_y
-    diag_save_in_disp_x = diag_saved_x
+[Kernels]
+  [./TensorMechanics]
+    use_displaced_mesh = true
+    displacements = 'disp_x disp_y'
+    save_in = 'saved_x saved_y'
   [../]
 []
 
 [AuxKernels]
   [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xx
-    index = 0
+    index_i = 0
+    index_j = 0
+    execute_on = timestep_end
   [../]
   [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_yy
-    index = 1
+    index_i = 1
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_xy
-    index = 3
+    index_i = 0
+    index_j = 1
+    execute_on = timestep_end
   [../]
   [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
+    type = RankTwoAux
+    rank_two_tensor = stress
     variable = stress_zz
-    index = 2
+    index_i = 2
+    index_j = 2
+    execute_on = timestep_end
   [../]
   [./zeroslip_x]
     type = ConstantAux
@@ -222,21 +227,35 @@
 []
 
 [Materials]
-  [./bot]
-    type = LinearIsotropicMaterial
-    block = 1
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
+  [./bot_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '1'
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
   [../]
-  [./top]
-    type = LinearIsotropicMaterial
-    block = 2
-    disp_y = disp_y
-    disp_x = disp_x
-    poissons_ratio = 0.3
+  [./bot_strain]
+    type = ComputeIncrementalSmallStrain
+    displacements = 'disp_x disp_y'
+    block = '1'
+  [../]
+  [./bot_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '1'
+  [../]
+  [./top_elas_tens]
+    type = ComputeIsotropicElasticityTensor
+    block = '2'
     youngs_modulus = 1e6
+    poissons_ratio = 0.3
+  [../]
+  [./top_strain]
+    type = ComputeIncrementalSmallStrain
+    displacements = 'disp_x disp_y'
+    block = '2'
+  [../]
+  [./top_stress]
+    type = ComputeFiniteStrainElasticStress
+    block = '2'
   [../]
 []
 
