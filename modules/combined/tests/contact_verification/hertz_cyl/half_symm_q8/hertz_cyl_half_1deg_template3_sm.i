@@ -2,36 +2,17 @@
   order = SECOND
   family = LAGRANGE
   volumetric_locking_correction = true
-  displacements = 'disp_x disp_y'
 []
 
 [Mesh]
   file = hertz_cyl_half_1deg.e
+  displacements = 'disp_x disp_y'
 []
 
 [Problem]
-  type = FrictionalContactProblem
-  master = 2
-  slave = 3
-  friction_coefficient = 0.20
-  slip_factor = 1.0
-  slip_too_far_factor = 1.0
-  disp_x = disp_x
-  disp_y = disp_y
-  residual_x = saved_x
-  residual_y = saved_y
-  diag_stiff_x = diag_saved_x
-  diag_stiff_y = diag_saved_y
-  inc_slip_x = inc_slip_x
-  inc_slip_y = inc_slip_y
-  contact_slip_tolerance_factor = 100
-  target_relative_contact_residual = 5.e-3
-  maximum_slip_iterations = 100
-  minimum_slip_iterations = 1
-  slip_updates_per_iteration = 3
+  type = ReferenceResidualProblem
   solution_variables = 'disp_x disp_y'
   reference_residual_variables = 'saved_x saved_y'
-  contact_reference_residual_variables = 'saved_x saved_y'
 []
 
 [Variables]
@@ -89,37 +70,35 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
-    save_in = 'saved_x saved_y'
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    save_in_disp_y = saved_y
+    save_in_disp_x = saved_x
+    diag_save_in_disp_y = diag_saved_y
+    diag_save_in_disp_x = diag_saved_x
   [../]
 []
 
 [AuxKernels]
   [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
+    index = 0
   [../]
   [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
+    index = 1
   [../]
   [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xy
-    index_i = 0
-    index_j = 1
-    execute_on = timestep_end
+    index = 3
   [../]
   [./inc_slip_x]
     type = PenetrationAux
@@ -241,103 +220,75 @@
 []
 
 [Materials]
-  [./stuff1_elas_tens]
-    type = ComputeIsotropicElasticityTensor
-    block = '1'
+  [./stiffStuff1]
+    type = Elastic
+    block = 1
+    disp_x = disp_x
+    disp_y = disp_y
     youngs_modulus = 1e10
     poissons_ratio = 0.0
+    formulation = NonlinearPlaneStrain
+    large_strain = true
   [../]
-  [./stuff1_strain]
-    type = ComputeFiniteStrain
-    block = '1'
-  [../]
-  [./stuff1_stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '1'
-  [../]
-  [./stuff2_elas_tens]
-    type = ComputeIsotropicElasticityTensor
-    block = '2'
+  [./stiffStuff2]
+    type = Elastic
+    block = 2
+    disp_x = disp_x
+    disp_y = disp_y
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+    formulation = NonlinearPlaneStrain
+    large_strain = true
   [../]
-  [./stuff2_strain]
-    type = ComputeFiniteStrain
-    block = '2'
-  [../]
-  [./stuff2_stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '2'
-  [../]
-  [./stuff3_elas_tens]
-    type = ComputeIsotropicElasticityTensor
-    block = '3'
+  [./stiffStuff3]
+    type = Elastic
+    block = 3
+    disp_x = disp_x
+    disp_y = disp_y
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+    formulation = NonlinearPlaneStrain
+    large_strain = true
   [../]
-  [./stuff3_strain]
-    type = ComputeFiniteStrain
-    block = '3'
-  [../]
-  [./stuff3_stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '3'
-  [../]
-  [./stuff4_elas_tens]
-    type = ComputeIsotropicElasticityTensor
-    block = '4'
+  [./stiffStuff4]
+    type = Elastic
+    block = 4
+    disp_x = disp_x
+    disp_y = disp_y
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+    formulation = NonlinearPlaneStrain
+    large_strain = true
   [../]
-  [./stuff4_strain]
-    type = ComputeFiniteStrain
-    block = '4'
-  [../]
-  [./stuff4_stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '4'
-  [../]
-  [./stuff5_elas_tens]
-    type = ComputeIsotropicElasticityTensor
-    block = '5'
+  [./stiffStuff5]
+    type = Elastic
+    block = 5
+    disp_x = disp_x
+    disp_y = disp_y
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+    formulation = NonlinearPlaneStrain
+    large_strain = true
   [../]
-  [./stuff5_strain]
-    type = ComputeFiniteStrain
-    block = '5'
-  [../]
-  [./stuff5_stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '5'
-  [../]
-  [./stuff6_elas_tens]
-    type = ComputeIsotropicElasticityTensor
-    block = '6'
+  [./stiffStuff6]
+    type = Elastic
+    block = 6
+    disp_x = disp_x
+    disp_y = disp_y
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+    formulation = NonlinearPlaneStrain
+    large_strain = true
   [../]
-  [./stuff6_strain]
-    type = ComputeFiniteStrain
-    block = '6'
-  [../]
-  [./stuff6_stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '6'
-  [../]
-  [./stuff7_elas_tens]
-    type = ComputeIsotropicElasticityTensor
-    block = '7'
+  [./stiffStuff7]
+    type = Elastic
+    block = 7
+    disp_x = disp_x
+    disp_y = disp_y
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./stuff7_strain]
-    type = ComputeFiniteStrain
-    block = '7'
-  [../]
-  [./stuff7_stress]
-    type = ComputeFiniteStrainElasticStress
-    block = '7'
+    formulation = NonlinearPlaneStrain
+    large_strain = true
   [../]
 []
 
@@ -352,21 +303,16 @@
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-5
+  nl_abs_tol = 1e-7
+  nl_rel_tol = 1e-6
   l_max_its = 100
   nl_max_its = 200
 
   start_time = 0.0
   end_time = 2.0
-  l_tol = 1e-4
+  l_tol = 5e-4
   dt = 0.1
   dtmin = 0.1
-
-  [./Predictor]
-    type = SimplePredictor
-    scale = 1.0
-  [../]
 []
 
 [Preconditioning]
@@ -436,11 +382,20 @@
     disp_x = disp_x
     disp_y = disp_y
     order = SECOND
-    system = constraint
     model = coulomb
-    formulation = kinematic
+    friction_coefficient = 0.0
+    system = constraint
+    formulation = penalty
     normalize_penalty = true
     tangential_tolerance = 1e-3
-    penalty = 1e+8
+    penalty = 1e+9
+  [../]
+[]
+
+[Dampers]
+  [./contact_slip]
+    type = ContactSlipDamper
+    master = '2'
+    slave = '3'
   [../]
 []
