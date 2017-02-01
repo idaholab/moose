@@ -1,4 +1,4 @@
-time _dt bot_react_x bot_react_y disp_x639 disp_y639 num_lin_it num_nonlin_it ref_resid_x ref_resid_y top_react_x top_react_y
-0 0 0 0 0 0 0 0 0 0 0 0
-0.1 0.1 -2.7189784622681e-23 -5.5279746696312e-21 0 -0.0002 34 17 2.9718922175864 28.594631646564 -1.1120166731882e-08 -55.081789515614
+time _dt bot_react_x bot_react_y disp_x639 disp_y639 num_lin_it num_nonlin_it top_react_x top_react_y
+0 0 0 0 0 0 0 0 0 0
+0.1 0.1 6.0018935411854e-19 1.8807909613157e-37 0 -0.0002 33 17 -1.559412821095e-09 -55.081454604413
 
