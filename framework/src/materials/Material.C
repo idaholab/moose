@@ -188,18 +188,9 @@ Material::computeProperties()
     // just the ones for this Material.
     MaterialProperties & props = _material_data->props();
 
-    // We only want to copy around the Properties we are responsible for,
-    // so get a reference to that set now.
-    const std::set<std::string> & supplied_props = getSuppliedItems();
-
-    // The MaterialPropertyStorage allows us to map supplied property
-    // names to ids via retrieveId().
-    const MaterialPropertyStorage & storage = _fe_problem.getMaterialPropertyStorage();
-
     // Now copy the values computed at qp 0 to all the other qps.
-    for (const auto & prop_name : supplied_props)
+    for (const auto & prop_id : _supplied_prop_ids)
     {
-      auto prop_id = storage.retrievePropertyId(prop_name);
       auto nqp = _qrule->n_points();
       for (decltype(nqp) qp = 1; qp < nqp; ++qp)
         props[prop_id]->qpCopy(qp, props[prop_id], 0);
