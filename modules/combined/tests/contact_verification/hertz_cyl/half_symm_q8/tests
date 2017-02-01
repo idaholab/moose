@@ -141,7 +141,7 @@
     Outputs/file_base=hertz_cyl_half_1deg_glued_kin_out Outputs/chkfile/file_base=hertz_cyl_half_1deg_glued_kin_check
     Outputs/chkfile2/file_base=hertz_cyl_half_1deg_glued_kin_check2'
     rel_err = 1e-5
-    abs_zero = 3e-6
+    abs_zero = 5e-6
     max_parallel = 1
     heavy = true
     superlu = true
@@ -190,7 +190,7 @@
     Outputs/chkfile/start_time=3.49'
     max_time = 1000
     rel_err = 1e-5
-    abs_zero = 1e-6
+    abs_zero = 3e-6
     max_parallel = 1
     heavy = true
     superlu = true
@@ -208,7 +208,7 @@
     Outputs/chkfile/start_time=3.49'
     max_time = 1000
     rel_err = 1e-5
-    abs_zero = 1e-6
+    abs_zero = 3e-6
     max_parallel = 1
     heavy = true
     superlu = true
