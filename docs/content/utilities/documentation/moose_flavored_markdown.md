@@ -228,13 +228,13 @@ A full slideshow example might be:
 ---
 
 ## Figures
-When writing documentation is customary to reference figures within text by number. To create a numbered figure use
+When writing documentation it is customary to reference figures within text by number. To create a numbered figure use
 the `!figure` markdown syntax. This syntax operates nearly identically to the `!image` syntax with two exceptions.
 
 !figure docs/media/memory_logger-plot_multi.png width=250px caption=The numbered prefix is automatically applied to the caption. id=fig:memory_logger
 
 First, the caption will automatically be prefixed with the figure number (e.g., Figure \ref{fig:dark_mode}). The
-numbering begins at one and is reset on each page. The prefix "Figure" can be modified with by setting
+numbering begins at one and is reset on each page. The prefix "Figure" can be modified by setting
 the "prefix" option.
 
 !figure docs/media/memory_logger-darkmode.png width=250px id=fig:dark_mode prefix=Fig. caption=The "prefix" setting changes the text that proceeds the number.
