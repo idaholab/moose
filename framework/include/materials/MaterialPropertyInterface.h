@@ -179,6 +179,8 @@ public:
    */
   bool getMaterialPropertyCalled() const { return _get_material_property_called; }
 
+  const std::set<MaterialProperty *> & getMatPropDependencies() const { return _material_property_dependencies; }
+
 protected:
   /// Parameters of the object with this interface
   const InputParameters & _mi_params;
@@ -256,6 +258,11 @@ private:
 
   /// Storage for the boundary ids created by BoundaryRestrictable
   const std::set<BoundaryID> _mi_boundary_ids;
+
+  void addMatPropDependency(MaterialProperty * mat_prop) { _material_property_dependencies.insert(mat_prop); }
+  void addMatPropDependency(std::vector<MaterialProperty *> mat_props) { _material_property_dependencies.insert(mat_props.begin(), mat_props.end()); }
+
+  std::set<MaterialProperty *> _material_property_dependencies;
 };
 
 /**
@@ -285,6 +292,7 @@ MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
+  std::cout << "Material property " << prop_name << " is being requested by " << _mi_name  << "." << std::endl;
 
   // Check if it's just a constant
   const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);
@@ -358,7 +366,10 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
   // Update the boolean flag.
   _get_material_property_called = true;
 
-  return _material_data->getProperty<T>(name);
+  const MaterialProperty<T> & mat_prop = _material_data->getProperty<T>(name);
+
+  addMatPropDependency(&mat_prop);
+  return mat_prop;
 }
 
 

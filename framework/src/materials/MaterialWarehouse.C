@@ -104,3 +104,20 @@ MaterialWarehouse::sort(THREAD_ID tid /*=0*/)
   _neighbor_materials.sort(tid);
   _face_materials.sort(tid);
 }
+
+void
+MaterialWarehouse::updateBlockMatPropDependency(SubdomainID id, std::set<MaterialProperty *> & needed_mat_props, THREAD_ID /*tid = 0*/) const
+{
+  if (hasActiveBlockObjects(id, tid))
+    updateMatPropDependencyHelper(needed_mat_props, getActiveBlockObjects(id, tid));
+}
+
+void
+MaterialWarehouse::updateMatPropDependencyHelper(std::set<MaterialProperty *> & needed_mat_props, const std::vector<MooseSharedPointer<T> > & objects)
+{
+  for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
+  {
+    const std::set<MaterialProperty *> & mp_deps = (*it)->getMatPropDependencies();
+    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+  }
+}
