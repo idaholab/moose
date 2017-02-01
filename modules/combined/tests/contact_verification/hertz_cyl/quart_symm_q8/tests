@@ -45,7 +45,7 @@
     cli_args = 'Contact/interface/model=frictionless Contact/interface/formulation=penalty Outputs/file_base=hertz_cyl_qsym_1deg_frictionless_pen_out Outputs/chkfile/file_base=hertz_cyl_qsym_1deg_frictionless_pen_check'
     max_time = 1000
     rel_err = 4e-4
-    abs_zero = 1e-6
+    abs_zero = 5e-6
     max_parallel = 1
     heavy = true
     superlu = true
