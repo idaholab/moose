@@ -32,6 +32,13 @@ public:
   virtual void execute() override {}
 
   virtual Real getValue() override;
+private:
+  enum class ElemFilter
+  {
+    ACTIVE,
+    TOTAL,
+  };
+  const ElemFilter _filt;
 };
 
 #endif // NUMELEMS_H
