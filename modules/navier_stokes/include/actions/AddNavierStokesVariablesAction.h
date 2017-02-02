@@ -11,7 +11,7 @@
 
 class AddNavierStokesVariablesAction;
 
-template<>
+template <>
 InputParameters validParams<AddNavierStokesVariablesAction>();
 
 /**
@@ -38,6 +38,7 @@ public:
 
 protected:
   std::vector<Real> _scaling;
+  std::vector<SubdomainName> _blocks;
 };
 
 #endif /* ADDNAVIERSTOKESVARIABLESACTION_H */
