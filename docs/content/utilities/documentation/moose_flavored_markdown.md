@@ -69,7 +69,7 @@ especially useful when linking to generated pages. The syntax is identical to cr
 defined by [mkdocs], however the markdown path may be incomplete.
 
 * `[/Diffusion.md]`: [/Diffusion.md]
-* `[/Kernels/index..md]`: [/Kernels/index.md]
+* `[/Kernels/index..md]`: [systems/Kernels/index.md]
 * `[Diffusion](/Diffusion.md)`: [Diffusion](/Diffusion.md)
 
 ---

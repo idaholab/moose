@@ -13,7 +13,7 @@ markdown_extensions:
     - markdown_include.include:
           base_path: ..
     - mdx_math:
-          enable_dollar_delimiter: True
+        enable_dollar_delimiter: True
     - MooseDocs.extensions.MooseMarkdown:
           package: True
           executable: modules/combined/combined-opt
@@ -25,10 +25,12 @@ markdown_extensions:
                   - modules/phase_field/tests
                   - modules/tensor_mechanics/tests
                   - modules/heat_conduction/tests
+                  - modules/level_set/tests
               Examples:
                   - examples
                   - modules/phase_field/examples
                   - modules/combined/examples
+                  - modules/level_set/examples
               Tutorials:
                   - tutorials
                   - modules/tensor_mechanics/tutorials
@@ -36,6 +38,7 @@ markdown_extensions:
                   - modules/phase_field/include
                   - modules/tensor_mechanics/include
                   - modules/heat_conduction/include
+                  - modules/level_set/include
           locations:
               - framework:
                   doxygen: http://mooseframework.org/docs/doxygen/moose/
@@ -174,3 +177,18 @@ markdown_extensions:
                       - /Postprocessors
                       - /UserObjects
                       - /Modules
+              - level_set:
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - modules/level_set/src
+                      - modules/level_set/include
+                  hide:
+                      - /UserObjects/LevelSetCFLCondition
+                      - /UserObjects/LevelSetVolume
+                      - /Kernels # remove this and all below when framework is clean
+                      - /UserObjects
+                      - /Transfers
+                      - /MultiApps
+                      - /Problem
+                      - /Functions
+                      - /Postprocessors
