@@ -125,6 +125,9 @@ InterfaceKernel::computeElementOffDiagJacobian(unsigned int jvar)
     is_jvar_not_interface_var = false;
   }
 
+  if (_var.number() != _neighbor_var.number() && jvar == _neighbor_var.number())
+    is_jvar_not_interface_var = true;
+
   if (is_jvar_not_interface_var)
   {
     computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);

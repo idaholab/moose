@@ -259,6 +259,9 @@
 #include "NodalNormalsCorner.h"
 #include "NodalNormalsPreprocessor.h"
 #include "SolutionUserObject.h"
+//experimental:
+#include "QuasiPeriodicNeighbors.h"
+
 #ifdef LIBMESH_HAVE_FPARSER
 #include "Terminator.h"
 #endif
@@ -691,6 +694,10 @@ registerObjects(Factory & factory)
   registerUserObject(NodalNormalsCorner);
   registerUserObject(NodalNormalsEvaluator);
   registerUserObject(SolutionUserObject);
+
+  //experimental:
+  registerUserObject(QuasiPeriodicNeighbors);
+
 #ifdef LIBMESH_HAVE_FPARSER
   registerUserObject(Terminator);
 #endif

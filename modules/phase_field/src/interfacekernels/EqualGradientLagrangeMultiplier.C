@@ -39,9 +39,6 @@ EqualGradientLagrangeMultiplier::computeQpResidual(Moose::DGResidualType type)
 Real
 EqualGradientLagrangeMultiplier::computeQpJacobian(Moose::DGJacobianType type)
 {
-  if (type == Moose::ElementNeighbor)
-    return -_grad_phi_neighbor[_j][_qp](_component) * _test[_i][_qp];
-
   if (type == Moose::ElementElement)
     return -_jacobian_fill;
 
@@ -53,6 +50,9 @@ EqualGradientLagrangeMultiplier::computeQpOffDiagJacobian(Moose::DGJacobianType 
 {
   if (type == Moose::ElementElement && jvar == _element_jvar)
     return _grad_phi[_j][_qp](_component) * _test[_i][_qp];
+
+  if (type == Moose::ElementNeighbor && jvar == _neighbor_jvar)
+    return -_grad_phi_neighbor[_j][_qp](_component) * _test[_i][_qp];
 
   return 0.0;
 }

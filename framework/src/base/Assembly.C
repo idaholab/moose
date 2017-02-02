@@ -796,16 +796,74 @@ void
 Assembly::reinitElemAndNeighbor(const Elem * elem, unsigned int side, const Elem * neighbor, unsigned int neighbor_side)
 {
   _current_neighbor_side = neighbor_side;
-
   reinit(elem, side);
 
   unsigned int neighbor_dim = neighbor->dim();
 
   std::vector<Point> reference_points;
-  FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, _current_q_points_face.stdVector(), reference_points);
 
-  reinitFEFaceNeighbor(neighbor, reference_points);
-  reinitNeighbor(neighbor, reference_points);
+  RealVectorValue v;
+  RealVectorValue w;
+  v(0) = _mesh.dimensionWidth(0);
+  w(1) = _mesh.dimensionWidth(1);
+
+  const Point centroid_elem = elem->build_side(side)->centroid();
+  const Point centroid_elem_translated1 = centroid_elem + v;
+  const Point centroid_elem_translated2 = centroid_elem - v;
+  const Point centroid_elem_translated3 = centroid_elem - w;
+  const Point centroid_elem_translated4 = centroid_elem + w;
+
+  const Elem * const_test_elem1 = _mesh.getMesh().point_locator()(centroid_elem_translated1);
+  const Elem * const_test_elem2 = _mesh.getMesh().point_locator()(centroid_elem_translated2);
+  const Elem * const_test_elem3 = _mesh.getMesh().point_locator()(centroid_elem_translated3);
+  const Elem * const_test_elem4 = _mesh.getMesh().point_locator()(centroid_elem_translated4);
+
+  if (const_test_elem1 != NULL)
+  {
+    auto currentpoints =  _current_q_points_face.stdVector();
+    for (auto & point : currentpoints)
+      point += v;
+
+    FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, currentpoints, reference_points);
+    reinitFEFaceNeighbor(neighbor, reference_points);
+    reinitNeighbor(neighbor, reference_points);
+  }
+  else if (const_test_elem2 != NULL)
+  {
+    auto currentpoints =  _current_q_points_face.stdVector();
+    for (auto & point : currentpoints)
+      point -= v;
+
+    FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, currentpoints, reference_points);
+    reinitFEFaceNeighbor(neighbor, reference_points);
+    reinitNeighbor(neighbor, reference_points);
+  }
+  else if (const_test_elem3 != NULL)
+  {
+    auto currentpoints =  _current_q_points_face.stdVector();
+    for (auto & point : currentpoints)
+      point -= w;
+
+    FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, currentpoints, reference_points);
+    reinitFEFaceNeighbor(neighbor, reference_points);
+    reinitNeighbor(neighbor, reference_points);
+  }
+  else if (const_test_elem4 != NULL)
+  {
+    auto currentpoints =  _current_q_points_face.stdVector();
+    for (auto & point : currentpoints)
+      point += w;
+
+    FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, currentpoints, reference_points);
+    reinitFEFaceNeighbor(neighbor, reference_points);
+    reinitNeighbor(neighbor, reference_points);
+  }
+  else
+  {
+    FEInterface::inverse_map(neighbor_dim, FEType(), neighbor, _current_q_points_face.stdVector(), reference_points);
+    reinitFEFaceNeighbor(neighbor, reference_points);
+    reinitNeighbor(neighbor, reference_points);
+  }
 }
 
 void
