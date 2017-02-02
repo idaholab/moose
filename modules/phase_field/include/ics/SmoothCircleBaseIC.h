@@ -7,12 +7,8 @@
 #ifndef SMOOTHCIRCLEBASEIC_H
 #define SMOOTHCIRCLEBASEIC_H
 
-#include "Kernel.h"
 #include "InitialCondition.h"
 #include "MooseRandom.h"
-
-// System includes
-#include <string>
 
 // Forward Declarations
 class SmoothCircleBaseIC;

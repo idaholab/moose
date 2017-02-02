@@ -21,6 +21,8 @@ InputParameters validParams<DeformedGrainMaterial>()
 
 DeformedGrainMaterial::DeformedGrainMaterial(const InputParameters & parameters) :
     Material(parameters),
+    _op_num(coupledComponents("v")),
+    _vals(_op_num),
     _length_scale(getParam<Real>("length_scale")),
     _int_width(getParam<Real>("int_width")),
     _time_scale(getParam<Real>("time_scale")),
@@ -39,7 +41,6 @@ DeformedGrainMaterial::DeformedGrainMaterial(const InputParameters & parameters)
     _rho_eff(declareProperty<Real>("rho_eff")),
     _Def_Eng(declareProperty<Real>("Def_Eng")),
     _deformed_grain_num(getParam<unsigned int>("deformed_grain_num")),
-    _op_num(coupledComponents("v")),
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker")),
     _kb(8.617343e-5), //Boltzmann constant in eV/K
     _JtoeV(6.24150974e18) // Joule to eV conversion
@@ -47,7 +48,6 @@ DeformedGrainMaterial::DeformedGrainMaterial(const InputParameters & parameters)
   if (_op_num == 0)
     mooseError("Model requires op_num > 0");
 
-  _vals.resize(_op_num);
   for (unsigned int i=0; i < _op_num; ++i)
     _vals[i] = &coupledValue("v", i);
 }
@@ -56,11 +56,12 @@ void
 DeformedGrainMaterial::computeQpProperties()
 {
   _Disloc_Den_i[_qp] = _Disloc_Den * (_length_scale * _length_scale);
+
   Real rho_i;
   Real rho0 = 0.0;
   Real SumEtai2 = 0.0;
   for (unsigned int i = 0; i < _op_num; ++i)
-    SumEtai2 += (*_vals[i])[_qp]*(*_vals[i])[_qp];
+    SumEtai2 += (*_vals[i])[_qp] * (*_vals[i])[_qp];
 
   // calculate effective dislocation density and assign zero dislocation densities to undeformed grains
   const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
@@ -81,6 +82,7 @@ DeformedGrainMaterial::computeQpProperties()
       rho_i = _Disloc_Den_i[_qp];
     rho0 += rho_i * (*_vals[op_index])[_qp] * (*_vals[op_index])[_qp];
   }
+
   if (!one_active && _t_step > 0)
     mooseError("No active order parameters");
 
@@ -90,15 +92,16 @@ DeformedGrainMaterial::computeQpProperties()
     _rho_eff[_qp] = 0.0;
     _Disloc_Den_i[_qp] = 0.0;
   }
+
   _beta[_qp] = 0.5 * _Elas_Mod * _Burg_vec * _Burg_vec * _JtoeV * _length_scale;
 
   // Compute the deformation energy
   _Def_Eng[_qp] = _beta[_qp] * _rho_eff[_qp];
 
 
-  Real sigma = _GBE * _JtoeV * (_length_scale * _length_scale);
+  const Real sigma = _GBE * _JtoeV * (_length_scale * _length_scale);
   const Real length_scale4 = _length_scale * _length_scale * _length_scale * _length_scale;
-  Real M_GB = _GBMobility * _time_scale / (_JtoeV * length_scale4);
+  const Real M_GB = _GBMobility * _time_scale / (_JtoeV * length_scale4);
 
   _L[_qp] = 4.0/3.0 * M_GB / _int_width;
   _kappa[_qp] = 3.0/4.0 * sigma * _int_width;

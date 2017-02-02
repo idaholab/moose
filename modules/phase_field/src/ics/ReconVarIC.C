@@ -5,6 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "ReconVarIC.h"
+#include "EBSDReader.h"
 #include "MooseMesh.h"
 
 template<>

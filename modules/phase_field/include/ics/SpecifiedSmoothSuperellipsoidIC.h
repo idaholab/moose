@@ -7,11 +7,7 @@
 #ifndef SPECIFIEDSMOOTHSUPERELLIPSOIDIC_H
 #define SPECIFIEDSMOOTHSUPERELLIPSOIDIC_H
 
-#include "Kernel.h"
 #include "SmoothSuperellipsoidBaseIC.h"
-
-// System includes
-#include <string>
 
 // Forward Declarations
 class SpecifiedSmoothSuperellipsoidIC;
@@ -22,17 +18,17 @@ InputParameters validParams<SpecifiedSmoothSuperellipsoidIC>();
 /**
  * SpecifiedSmoothSuperellipsoidIC creates multiple SmoothSuperellipsoids (number = size of x_positions) that are positioned in the
  * set locations with the set semiaxes a, b, c and exponents n
- **/
+ */
 class SpecifiedSmoothSuperellipsoidIC : public SmoothSuperellipsoidBaseIC
 {
 public:
   SpecifiedSmoothSuperellipsoidIC(const InputParameters & parameters);
 
+protected:
   virtual void computeSuperellipsoidCenters();
   virtual void computeSuperellipsoidSemiaxes();
   virtual void computeSuperellipsoidExponents();
 
-protected:
   std::vector<Real> _x_positions;
   std::vector<Real> _y_positions;
   std::vector<Real> _z_positions;

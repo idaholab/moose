@@ -6,21 +6,9 @@
 /****************************************************************/
 #include "PolycrystalVariablesAction.h"
 #include "Factory.h"
-#include "Parser.h"
 #include "FEProblem.h"
 
-#include <sstream>
-#include <stdexcept>
-
-// libMesh includes
-#include "libmesh/libmesh.h"
-#include "libmesh/exodusII_io.h"
-#include "libmesh/equation_systems.h"
-#include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/explicit_system.h"
 #include "libmesh/string_to_enum.h"
-
-const Real PolycrystalVariablesAction::_abs_zero_tol = 1e-12;
 
 template<>
 InputParameters validParams<PolycrystalVariablesAction>()
@@ -67,4 +55,3 @@ PolycrystalVariablesAction::act()
                           getParam<Real>("scaling"));
   }
 }
-

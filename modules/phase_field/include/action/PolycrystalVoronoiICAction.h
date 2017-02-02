@@ -11,7 +11,7 @@
 #include "Action.h"
 
 /**
- * Automatically generates all variables to model a polycrystal with op_num orderparameters
+ * Random Voronoi tesselation polycrystal action
  */
 class PolycrystalVoronoiICAction: public Action
 {
@@ -21,14 +21,9 @@ public:
   virtual void act();
 
 private:
-  static const Real _abs_zero_tol;
-
-  unsigned int _op_num;
-  unsigned int _grain_num;
-  std::string _var_name_base;
-  //unsigned int _rand_seed;
-  //bool _cody_test;
-
+  const unsigned int _op_num;
+  const unsigned int _grain_num;
+  const std::string _var_name_base;
 };
 
 template<>

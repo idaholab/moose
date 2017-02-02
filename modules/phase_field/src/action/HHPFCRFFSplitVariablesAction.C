@@ -1,16 +1,11 @@
 #include "HHPFCRFFSplitVariablesAction.h"
 #include "Factory.h"
-#include "Parser.h"
 #include "FEProblem.h"
+#include "Conversion.h"
 #include "AddVariableAction.h"
-
-#include <sstream>
-#include <stdexcept>
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"
-
-const Real HHPFCRFFSplitVariablesAction::_abs_zero_tol = 1e-12;
 
 template<>
 InputParameters validParams<HHPFCRFFSplitVariablesAction>()
@@ -40,27 +35,18 @@ HHPFCRFFSplitVariablesAction::act()
 #ifdef DEBUG
   Moose::err << "Inside the HHPFCRFFSplitVariablesAction Object\n";
   Moose::err << "VariableBase: " << _L_name_base
-            << "\torder: " << getParam<MooseEnum>("order")
-            << "\tfamily: " << getParam<MooseEnum>("family") << std::endl;
+             << "\torder: " << getParam<MooseEnum>("order")
+             << "\tfamily: " << getParam<MooseEnum>("family") << std::endl;
 #endif
 
   // Loop through the number of L variables
   for (unsigned int l = 0; l < _num_L; ++l)
   {
     // Create L base name
-    std::string L_name = _L_name_base;
-    std::stringstream out;
-    out << l;
-    L_name.append(out.str());
+    std::string L_name = _L_name_base + Moose::stringify(l);
 
     // Create real L variable
-    std::string real_name = L_name;
-    real_name.append("_real");
-
-
-#ifdef DEBUG
-    Moose::err << "Real name = " << real_name << std::endl;
-#endif
+    std::string real_name = L_name + "_real";
 
     _problem->addVariable(real_name,
                           FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
@@ -70,12 +56,7 @@ HHPFCRFFSplitVariablesAction::act()
     if (l > 0)
     {
       // Create imaginary L variable IF l > 0
-      std::string imag_name = L_name;
-      imag_name.append("_imag");
-
-#ifdef DEBUG
-      Moose::err << "Imaginary name = " << imag_name << std::endl;
-#endif
+      std::string imag_name = L_name + "_imag";
 
       _problem->addVariable(imag_name,
                             FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
@@ -84,4 +65,3 @@ HHPFCRFFSplitVariablesAction::act()
     }
   }
 }
-

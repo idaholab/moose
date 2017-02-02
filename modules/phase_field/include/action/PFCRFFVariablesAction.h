@@ -1,3 +1,10 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #ifndef PFCRFFVARIABLESACTION_H
 #define PFCRFFVARIABLESACTION_H
 
@@ -21,10 +28,8 @@ public:
   virtual void act();
 
 private:
-  static const Real _abs_zero_tol;
-
-  unsigned int _num_L;
-  std::string _L_name_base;
+  const unsigned int _num_L;
+  const std::string _L_name_base;
 };
 
 #endif //PFCRFFVARIABLESACTION_H

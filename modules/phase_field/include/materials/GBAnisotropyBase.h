@@ -62,7 +62,7 @@ protected:
   const Real _JtoeV;
   Real _mu_qp;
 
-  unsigned int _op_num;
+  const unsigned int _op_num;
 
   std::vector<const VariableValue *> _vals;
   std::vector<const VariableGradient *> _grad_vals;

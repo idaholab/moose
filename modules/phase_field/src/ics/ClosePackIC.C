@@ -28,19 +28,12 @@ ClosePackIC::ClosePackIC(const InputParameters & parameters) :
 }
 
 void
-ClosePackIC::computeCircleRadii()
-{
-  // This method left intentionally blank
-}
-
-void
 ClosePackIC::computeCircleCenters()
 {
   // Determine the extents of the mesh
   MeshTools::BoundingBox bbox = MeshTools::bounding_box(_fe_problem.mesh().getMesh());
   const Point & min = bbox.min();
   const Point & max = bbox.max();
-
 
   // Create the x,y,z limits for the while loops
   Real x_min = min(0);
@@ -59,7 +52,7 @@ ClosePackIC::computeCircleCenters()
 
   // Adjust the 3D z-dimension maximum
   if (_fe_problem.mesh().dimension() == 3)
-    z_max = max(2) + 2*_radius;
+    z_max = max(2) + 2.0 * _radius;
 
   // Counters for offsetting every other row column in x,y dimensions
   unsigned int i = 0;
@@ -67,10 +60,9 @@ ClosePackIC::computeCircleCenters()
 
   while (z <= z_max)
   {
-
     // Offset the y-coordinate by sqrt(3)*r every other loop
     if (j % 2 != 0)
-      y += std::sqrt(3)*_radius/2;
+      y += std::sqrt(3) * _radius / 2.0;
 
     while (y <= y_max)
     {
@@ -81,8 +73,7 @@ ClosePackIC::computeCircleCenters()
 
       while (x <= x_max)
       {
-        Point p(x, y, z);
-        _centers.push_back(p);
+        _centers.push_back(Point(x, y, z));
         _radii.push_back(_radius);
         x += 2.0 * _radius;
       }

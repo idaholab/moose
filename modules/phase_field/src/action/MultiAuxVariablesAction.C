@@ -35,12 +35,13 @@ void
 MultiAuxVariablesAction::act()
 {
   if (_num_var != _data_size)
-    mooseError("Data type not provided for all the auxvariables in MultiAuxVariablesAction");
+    mooseError("Data type not provided for all the AuxVariables in MultiAuxVariablesAction");
 
   // Blocks from the input
   std::set<SubdomainID> blocks = getSubdomainIDs();
+
   // mesh dimension & components required for gradient variables
-  unsigned int dim = _mesh->dimension();
+  const unsigned int dim = _mesh->dimension();
   const std::vector<char> suffix = {'x', 'y', 'z'};
 
   // Loop through the number of order parameters
@@ -62,10 +63,10 @@ MultiAuxVariablesAction::act()
       if (_data_type[val] == "RealGradient")
         for (unsigned int x = 0; x < dim; ++x)
         {
-          /*
-          / The name of the variable is the variable name base followed by
-          /the order parameter and a suffix mentioning dimension it applies to.
-          */
+          /**
+           * The name of the variable is the variable name base followed by
+           * the order parameter and a suffix mentioning dimension it applies to.
+           */
           std::string var_name = _var_name_base[val] + Moose::stringify(gr) + "_" + suffix[x] ;
 
           if (blocks.empty())

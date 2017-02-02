@@ -7,11 +7,7 @@
 #ifndef MULTISMOOTHCIRCLEIC_H
 #define MULTISMOOTHCIRCLEIC_H
 
-#include "Kernel.h"
 #include "SmoothCircleBaseIC.h"
-
-// System includes
-#include <string>
 
 // Forward Declarations
 class MultiSmoothCircleIC;

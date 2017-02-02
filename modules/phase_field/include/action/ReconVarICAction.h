@@ -9,7 +9,6 @@
 
 #include "InputParameters.h"
 #include "Action.h"
-//#include "EBSDReader.h"
 
 // Forward Declarations
 class ReconVarICAction;
@@ -17,6 +16,9 @@ class ReconVarICAction;
 template<>
 InputParameters validParams<ReconVarICAction>();
 
+/**
+ * Action to set up initial conditions for a set of order parameters using EBSDReader data
+ */
 class ReconVarICAction: public Action
 {
 public:
@@ -25,9 +27,8 @@ public:
   virtual void act();
 
 private:
-  unsigned int _op_num;
-  std::string _var_name_base;
-  //std::vector<VariableName> _eta;
+  const unsigned int _op_num;
+  const std::string _var_name_base;
 };
 
 #endif //RECONVARICACTION_H

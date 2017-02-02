@@ -8,18 +8,18 @@
 #define RECONVARIC_H
 
 #include "InitialCondition.h"
-#include "EBSDReader.h"
 #include "PolycrystalICTools.h"
 
 // Forward Declarations
 class ReconVarIC;
+class EBSDReader;
 
 template<>
 InputParameters validParams<ReconVarIC>();
 
 /**
  * ReconVarIC creates a polycrystal initial condition from an EBSD dataset
-*/
+ */
 class ReconVarIC : public InitialCondition
 {
 public:
@@ -36,9 +36,10 @@ private:
   const EBSDReader & _ebsd_reader;
 
   bool _consider_phase;
-  unsigned int _phase;
-  unsigned int _op_num;
-  unsigned int _op_index;
+
+  const unsigned int _phase;
+  const unsigned int _op_num;
+  const unsigned int _op_index;
 
   unsigned int _grain_num;
 

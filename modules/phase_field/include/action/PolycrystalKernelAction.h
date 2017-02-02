@@ -22,13 +22,13 @@ public:
 
 protected:
   /// number of grains to create
-  unsigned int _op_num;
+  const unsigned int _op_num;
 
   /// base name for the order parameter variables
-  std::string _var_name_base;
+  const std::string _var_name_base;
 
   /// kernels are implicit?
-  bool _implicit;
+  const bool _implicit;
 };
 
 template<>

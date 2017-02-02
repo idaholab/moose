@@ -6,7 +6,6 @@
 /****************************************************************/
 #include "MatVecRealGradAuxKernelAction.h"
 #include "Factory.h"
-#include "Parser.h"
 #include "Conversion.h"
 #include "FEProblem.h"
 
@@ -25,23 +24,23 @@ InputParameters validParams<MatVecRealGradAuxKernelAction>()
 }
 
 MatVecRealGradAuxKernelAction::MatVecRealGradAuxKernelAction(const InputParameters & params) :
-    Action(params)
+    Action(params),
+    _div_var(getParam<AuxVariableName>("divergence_variable")),
+    _prop(getParam<std::vector<MaterialPropertyName> >("property")),
+    _div_prop(getParam<MaterialPropertyName>("divergence_property"))
 {
-  mooseDeprecated("Use 'MaterialVectorAuxKernel' or 'MaterialVectorGradAuxKernel' action instead depending on data_type of MaterialProperty<std::vector<date_type> >");
+  mooseDeprecated("Use 'MaterialVectorAuxKernel' or 'MaterialVectorGradAuxKernel' action instead depending on data_type of MaterialProperty<std::vector<data_type> >");
 }
 
 void
 MatVecRealGradAuxKernelAction::act()
 {
-  std::vector<std::string> var_name_base = getParam<std::vector<std::string> >("var_name_base");
-  std::vector<MaterialPropertyName> _prop = getParam<std::vector<MaterialPropertyName> >("property");
-  AuxVariableName _div_var = getParam<AuxVariableName>("divergence_variable");
-  MaterialPropertyName _div_prop = getParam<MaterialPropertyName>("divergence_property");
+  const std::vector<std::string> var_name_base = getParam<std::vector<std::string> >("var_name_base");
 
-  unsigned int op_num = getParam<unsigned int>("op_num");
-  unsigned int dim = getParam<unsigned int>("dim");
-  unsigned int size_v = var_name_base.size();
-  unsigned int size_p = _prop.size();
+  const unsigned int op_num = getParam<unsigned int>("op_num");
+  const unsigned int dim = getParam<unsigned int>("dim");
+  const unsigned int size_v = var_name_base.size();
+  const unsigned int size_p = _prop.size();
 
   if (size_p != size_v)
     mooseError("var_name_base and property must be vectors of the same dimension");
@@ -51,8 +50,6 @@ MatVecRealGradAuxKernelAction::act()
     for (unsigned int val = 0; val < size_v; ++val)
       for (unsigned int x = 0; x < dim; ++x)
       {
-
-
         std::string var_name = var_name_base[val] + Moose::stringify(x) + Moose::stringify(op);
         {
           InputParameters params = _factory.getValidParams("MaterialStdVectorRealGradientAux");
@@ -61,9 +58,7 @@ MatVecRealGradAuxKernelAction::act()
           params.set<unsigned int>("component") = x;
           params.set<unsigned int>("index") = op;
           params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-
-          std::string aux_kernel_name = "grad_" + var_name;
-          _problem->addAuxKernel("MaterialStdVectorRealGradientAux", aux_kernel_name, params);
+          _problem->addAuxKernel("MaterialStdVectorRealGradientAux", "grad_" + var_name, params);
         }
       }
 
@@ -76,9 +71,7 @@ MatVecRealGradAuxKernelAction::act()
         params.set<MaterialPropertyName>("property") = _div_prop;
         params.set<unsigned int>("index") = op;
         params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-
-        std::string aux_kernel_name = "div_" + Moose::stringify(op);
-        _problem->addAuxKernel("MaterialStdVectorAux", aux_kernel_name, params);
+        _problem->addAuxKernel("MaterialStdVectorAux", "div_" + Moose::stringify(op), params);
       }
       else
         mooseError("Must specify a divergence_property name along with divergence_variable name");

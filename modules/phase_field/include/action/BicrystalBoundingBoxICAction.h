@@ -11,7 +11,7 @@
 #include "Action.h"
 
 /**
- * Automatically generates all variables to model a polycrystal with op_num orderparameters
+ * Bicrystal using a bounding box
  */
 class BicrystalBoundingBoxICAction: public Action
 {
@@ -21,13 +21,8 @@ public:
   virtual void act();
 
 private:
-  static const Real _abs_zero_tol;
-
-  std::string _var_name_base;
-  unsigned int _op_num;
-
-  Real _x1, _y1, _z1;
-  Real _x2, _y2, _z2;
+  const std::string _var_name_base;
+  const unsigned int _op_num;
 };
 
 template<>

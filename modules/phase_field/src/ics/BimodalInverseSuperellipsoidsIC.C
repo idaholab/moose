@@ -55,7 +55,6 @@ BimodalInverseSuperellipsoidsIC::value(const Point & p)
   return value;
 }
 
-
 void
 BimodalInverseSuperellipsoidsIC::computeSuperellipsoidCenters()
 {

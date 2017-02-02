@@ -25,12 +25,8 @@
 //TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "Kernel.h"
 #include "InitialCondition.h"
 #include "C1ICBase.h"
-
-// System includes
-#include <string>
 
 // Forward Declarations
 class CrossIC;
@@ -41,30 +37,19 @@ InputParameters validParams<CrossIC>();
 /**
  * CrossIC creates a C1 continuous initial condition that looks like a cross in
  * the middle of the domain.
- **/
+ */
 class CrossIC : public C1ICBase
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   */
   CrossIC(const InputParameters & parameters);
 
-  /**
-   * The value of the variable at a point.
-   */
   virtual Real value(const Point & p);
-
-  /**
-   * The graident of the variable at a point.
-   */
   virtual RealGradient gradient(const Point & p);
-  Real _x1;
-  Real _y1;
-  Real _x2;
-  Real _y2;
+
+  const Real _x1;
+  const Real _y1;
+  const Real _x2;
+  const Real _y2;
 };
 
 #endif //CROSSIC_H

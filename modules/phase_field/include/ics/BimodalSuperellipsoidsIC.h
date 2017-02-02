@@ -9,9 +9,6 @@
 
 #include "SpecifiedSmoothSuperellipsoidIC.h"
 
-// System includes
-#include <string>
-
 // Forward Declarations
 class BimodalSuperellipsoidsIC;
 
