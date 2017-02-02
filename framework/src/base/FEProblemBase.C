@@ -3120,6 +3120,12 @@ FEProblemBase::createQRules(QuadratureType type, Order order, Order volume_order
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mqt);
     _max_qps = mqt.max();
     _max_shape_funcs = mqt.max_shape_funcs();
+
+    // If we have more shape functions or more quadrature points on
+    // another processor, then we may need to handle those elements
+    // ourselves later after repartitioning.
+    _communicator.max(_max_qps);
+    _communicator.max(_max_shape_funcs);
   }
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
