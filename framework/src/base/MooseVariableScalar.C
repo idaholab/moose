@@ -58,10 +58,17 @@ MooseVariableScalar::reinit()
   _du_dot_du.clear();
   _du_dot_du.resize(n, du_dot_du);
 
-  current_solution.get(_dof_indices, &_u[0]);
-  solution_old.get(_dof_indices, &_u_old[0]);
-  solution_older.get(_dof_indices, &_u_older[0]);
-  u_dot.get(_dof_indices, &_u_dot[0]);
+  // If we have an empty partition, or if we have a partition which
+  // does not include any of the subdomains of a subdomain-restricted
+  // variable, then we do not have access to that variable!  Hopefully
+  // we won't need it.
+  if (_dof_map.all_semilocal_indices(_dof_indices))
+  {
+    current_solution.get(_dof_indices, &_u[0]);
+    solution_old.get(_dof_indices, &_u_old[0]);
+    solution_older.get(_dof_indices, &_u_older[0]);
+    u_dot.get(_dof_indices, &_u_dot[0]);
+  }
 }
 
 bool
