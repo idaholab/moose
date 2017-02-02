@@ -40,6 +40,7 @@ class BasicExtension(Extension):
     translator.elements.add('tr', elements.tr())
     translator.elements.add('a', elements.a())
     translator.elements.add('p', elements.p())
+    translator.elements.add('span', elements.span())
     translator.elements.add('li', elements.li())
     translator.elements.add('em', elements.em())
     translator.elements.add('code', elements.code())

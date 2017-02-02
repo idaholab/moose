@@ -3,6 +3,7 @@ import sys
 import glob
 import re
 import livereload
+import multiprocessing
 import logging
 import shutil
 import MooseDocs
@@ -17,11 +18,11 @@ def serve_options(parser, subparser):
   serve_parser = subparser.add_parser('serve', help='Serve the documentation using a local server.')
   serve_parser.add_argument('--host', default='127.0.0.1', type=str, help="The local host location for live web server (default: %(default)s).")
   serve_parser.add_argument('--port', default='8000', type=str, help="The local host port for live web server (default: %(default)s).")
-  serve_parser.add_argument('--disable-threads', action='store_true', help="Disable threaded building.")
+  serve_parser.add_argument('--num-threads', '-j', type=int, default=multiprocessing.cpu_count(), help="Specify the number of threads to build pages with.")
 
   return serve_parser
 
-def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', disable_threads=False):
+def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', num_threads=multiprocessing.cpu_count()):
   """
   Create live server
   """
@@ -43,7 +44,7 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', disable_th
 
   # Wrapper for building complete website
   def build_complete():
-    return build.build_site(config_file=config_file, site_dir=tempdir, disable_threads=disable_threads)
+    return build.build_site(config_file=config_file, site_dir=tempdir, num_threads=num_threads)
   config, parser, builder = build_complete()
 
   # Start the live server

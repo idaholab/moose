@@ -21,7 +21,7 @@ class MooseBibtex(MooseCommonExtension, Preprocessor):
 
   RE_BIBLIOGRAPHY = r'(?<!`)\\bibliography\{(.*?)\}'
   RE_STYLE = r'(?<!`)\\bibliographystyle\{(.*?)\}'
-  RE_CITE = r'(?<!`)\\(?P<cmd>cite|citet|citep)\{(?P<key>.*?)\}'
+  RE_CITE = r'(?<!`)\\(?P<cmd>cite|citet|citep)\{(?P<keys>.*?)\}'
 
   def __init__(self, markdown_instance=None, **kwargs):
     MooseCommonExtension.__init__(self, **kwargs),
@@ -96,10 +96,20 @@ class MooseBibtex(MooseCommonExtension, Preprocessor):
     Return the author(s) citation for text, linked to bibliography.
     """
     cmd = match.group('cmd')
-    key = match.group('key')
-    tex = '\\%s{%s}' % (cmd, key)
+    keys = match.group('keys')
+    tex = '\\%s{%s}' % (cmd, keys)
 
-    if key in self._bibtex.entries:
+    cite_list = []
+
+    # Loop over all keys in the cite command
+    for key in [k.strip() for k in keys.split(',')]:
+
+      # Error if the key is not found and move on
+      if key not in self._bibtex.entries:
+        log.error('Unknown bibtext key: {}'.format(key))
+        continue
+
+      # Build the author list
       self._citations.append(key)
       entry = self._bibtex.entries[key]
       a = entry.persons['author']
@@ -114,8 +124,21 @@ class MooseBibtex(MooseCommonExtension, Preprocessor):
         author = ' '.join(a[0].last_names)
 
       if cmd == 'citep':
-        a = '<a href="#{}" data-moose-cite="{}">{}, {}</a>'.format(key, tex, author, entry.fields['year'])
-        return '({})'.format(self.markdown.htmlStash.store(a, safe=True))
+        a = '<a href="#{}">{}, {}</a>'.format(key, author, entry.fields['year'])
       else:
-        a = '<a href="#{}" data-moose-cite="{}">{} ({})</a>'.format(key, tex, author, entry.fields['year'])
-        return self.markdown.htmlStash.store(a, safe=True)
+        a = '<a href="#{}">{} ({})</a>'.format(key, author, entry.fields['year'])
+
+      cite_list.append(a)
+
+    # Create the correct text for list of keys in the cite command
+    if len(cite_list) == 2:
+     cite_list = [' and '.join(cite_list)]
+    elif len(cite_list) > 2:
+      cite_list[-1] = 'and ' + cite_list[-1]
+
+    # Write the html
+    if cmd == 'citep':
+      html = '(<span data-moose-cite="{}">{}</span>)'.format(tex, '; '.join(cite_list))
+    else:
+      html = '<span data-moose-cite="{}">{}</span>'.format(tex, ', '.join(cite_list))
+    return self.markdown.htmlStash.store(html, safe=True)

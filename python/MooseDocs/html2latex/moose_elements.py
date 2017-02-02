@@ -265,7 +265,7 @@ class moose_bib(elements.ol):
   def preamble(self):
     return ['\\usepackage{natbib}']
 
-class moose_bib_a(elements.a):
+class moose_bib_span(elements.span):
   """
   Convert the cite command from MooseBibtex to the proper latex cite command.
   """

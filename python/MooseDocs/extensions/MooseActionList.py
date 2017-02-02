@@ -52,7 +52,7 @@ class MooseActionList(MooseSyntaxBase):
     for action in actions:
 
       # Do nothing if the syntax is hidden
-      if action.hidden and not settings['show_hidden']:
+      if (action.group in groups) and action.hidden and (not settings['show_hidden']):
         continue
 
       # Attempt to build the sub-objects table
