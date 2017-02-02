@@ -1,0 +1,7 @@
+[Tests]
+  [./circle]
+    type = RunApp
+    input = circle_16.i
+    method = opt # Can be slow in debug and this is simply to make sure input file remains working
+  [../]
+[]

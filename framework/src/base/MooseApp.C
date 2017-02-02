@@ -1,15 +1,8 @@
 /****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
 /****************************************************************/
 
 // MOOSE includes
@@ -150,8 +143,7 @@ MooseApp::MooseApp(InputParameters parameters) :
     _legacy_uo_initialization_default(getParam<bool>("use_legacy_uo_initialization")),
     _check_input(getParam<bool>("check_input")),
     _restartable_data(libMesh::n_threads()),
-    _multiapp_level(0),
-    _use_name_prefix(false)
+    _multiapp_level(0)
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -188,7 +180,7 @@ MooseApp::setupOptions()
 {
   // Print the header, this is as early as possible
   std::string hdr(header() + "\n");
-  if (useNamePrefix())
+  if (multiAppLevel() > 0)
     MooseUtils::indentMessage(_name, hdr);
   Moose::out << hdr << std::flush;
 

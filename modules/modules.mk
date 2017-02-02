@@ -18,6 +18,7 @@ ifeq ($(ALL_MODULES),yes)
         WATER_STEAM_EOS           := yes
         XFEM                      := yes
         POROUS_FLOW               := yes
+        LEVEL_SET                 := yes
 endif
 
 ifeq ($(XFEM),yes)
@@ -43,7 +44,7 @@ ifeq ($(PHASE_FIELD),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact fluid_properties heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos xfem porous_flow"
+MODULE_NAMES := "chemical_reactions contact fluid_properties heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos xfem porous_flow level_set"
 
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
@@ -167,6 +168,13 @@ ifeq ($(POROUS_FLOW),yes)
   #Dependency on tensor_mechanics, fluid_properties and chemical_reactions
   DEPEND_MODULES     := tensor_mechanics fluid_properties chemical_reactions
   SUFFIX             := pflow
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(LEVEL_SET),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/level_set
+  APPLICATION_NAME   := level_set
+  SUFFIX             := ls
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

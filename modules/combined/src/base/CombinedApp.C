@@ -26,6 +26,7 @@
 #include "XFEMApp.h"
 #include "PorousFlowApp.h"
 #include "RdgApp.h"
+#include "LevelSetApp.h"
 
 template<>
 InputParameters validParams<CombinedApp>()
@@ -78,6 +79,7 @@ CombinedApp::registerObjects(Factory & factory)
   XFEMApp::registerObjects(factory);
   PorousFlowApp::registerObjects(factory);
   RdgApp::registerObjects(factory);
+  LevelSetApp::registerObjects(factory);
 }
 
 // External entry point for dynamic syntax association
@@ -100,4 +102,5 @@ CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   XFEMApp::associateSyntax(syntax, action_factory);
   PorousFlowApp::associateSyntax(syntax, action_factory);
   RdgApp::associateSyntax(syntax, action_factory);
+  LevelSetApp::associateSyntax(syntax, action_factory);
 }

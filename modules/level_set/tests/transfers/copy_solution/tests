@@ -1,0 +1,7 @@
+[Tests]
+  [./copy]
+    type = Exodiff
+    input = master.i
+    exodiff = master_out_sub0.e
+  [../]
+[]
