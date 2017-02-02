@@ -113,21 +113,8 @@ def mooseWarning(*args, **kwargs):
 def mooseDebug(*args, **kwargs):
     """
     A mooseMessage that only appears with the global MOOSE_DEBUG_MODE = True or debug=True passed directly.
-
-    This automatically indents the message based on how many files exist in the call stack, do remove this simply
-    set the 'indent' keyword to zero.
     """
     if kwargs.pop('debug', MOOSE_DEBUG_MODE):
-        """
-        indent = kwargs.pop('indent', None)
-        if not indent:
-            files = []
-            for item in inspect.stack():
-                print item
-                if item[1] not in files:
-                    files.append(item[1])
-            indent = len(files)-3 # -3 removes this file and starts the originating file with 0 indent
-        """
         return mooseMessage(*args, color=kwargs.pop('color', 'CYAN'), **kwargs)
 
 
@@ -141,7 +128,6 @@ def touch(fname):
 
 def gold(filename):
     if not os.path.exists(filename):
-        #print mooseError('The supplied filename does not exist:', filename)
         return None
 
     fn = os.path.basename(filename)

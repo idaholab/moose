@@ -151,7 +151,7 @@ class ImageDiffer(object):
         self.__errors.append((err, '\n'.join(msg)))
 
 
-# This file is executable and performs tests of the functionality
+# This file is executable and allows for running the ImageDiffer via the command line
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Perform comparison of images.')

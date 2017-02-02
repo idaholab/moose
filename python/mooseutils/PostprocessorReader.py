@@ -14,7 +14,12 @@ class PostprocessorReader(MooseDataFrame):
 
     def __call__(self, keys, time=None, warning=True, **kwargs):
         """
+        Return the data for the supplied keys.
 
+        Args:
+            keys[list]: Then names of the postprocessors to return.
+            time: Required for consistent calls in Peacock, but not used in general.
+            warning: When true (default) an error is produced if the users tries to use 'time' option, which does nothing.
         """
         if time != None and warning:
             tools.mooseWarning('Supplying a time argument is not supported in the PostprocessorReader.')
