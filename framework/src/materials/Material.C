@@ -34,9 +34,12 @@ InputParameters validParams<Material>()
   params += validParams<MaterialPropertyInterface>();
 
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
-  params.addParam<bool>("compute", true, "When false MOOSE will not call compute methods on this material, compute then "
-                                         "must be called retrieving the Material object via MaterialPropertyInterface::getMaterial "
-                                         "and calling the computeProerties method. Non-computed Materials are not sorted for dependencies.");
+  params.addParam<bool>("compute", true, "When false, MOOSE will not call compute methods on this material. "
+                                         "The user must call computeProperties() after retrieving the Material "
+                                         "via MaterialPropertyInterface::getMaterial(). "
+                                         "Non-computed Materials are not sorted for dependencies.");
+  params.addParam<bool>("constant_on_elem", false, "When true, MOOSE will only call computeQpProperties() for the 0th "
+                                                   "quadrature point, and then copy that value to the other qps.");
 
   // Outputs
   params += validParams<OutputInterface>();
@@ -44,7 +47,7 @@ InputParameters validParams<Material>()
   params.addParam<std::vector<std::string> >("output_properties", "List of material properties, from this material, to output (outputs must also be defined to an output type)");
 
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+  params.addParamNamesToGroup("use_displaced_mesh constant_on_elem", "Advanced");
   params.registerBase("Material");
 
   return params;
@@ -91,6 +94,7 @@ Material::Material(const InputParameters & parameters) :
     _mesh(_subproblem.mesh()),
     _coord_sys(_assembly.coordSystem()),
     _compute(getParam<bool>("compute")),
+    _constant_on_elem(getParam<bool>("constant_on_elem")),
     _has_stateful_property(false)
 {
   // Fill in the MooseVariable dependencies
@@ -171,8 +175,32 @@ Material::getOutputs()
 void
 Material::computeProperties()
 {
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+  // If this Material has the _constant_on_elem flag set, we take the
+  // value computed for _qp==0 and use it at all the quadrature points
+  // in the Elem.
+  if (_constant_on_elem)
+  {
+    // Compute MaterialProperty values at the first qp.
+    _qp = 0;
     computeQpProperties();
+
+    // Reference to *all* the MaterialProperties in the MaterialData object, not
+    // just the ones for this Material.
+    MaterialProperties & props = _material_data->props();
+
+    // Now copy the values computed at qp 0 to all the other qps.
+    for (const auto & prop_id : _supplied_prop_ids)
+    {
+      auto nqp = _qrule->n_points();
+      for (decltype(nqp) qp = 1; qp < nqp; ++qp)
+        props[prop_id]->qpCopy(qp, props[prop_id], 0);
+    }
+  }
+  else
+  {
+    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+      computeQpProperties();
+  }
 }
 
 

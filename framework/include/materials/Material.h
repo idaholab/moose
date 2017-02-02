@@ -229,8 +229,22 @@ protected:
   /// Set of properties declared
   std::set<std::string> _supplied_props;
 
+  /// The ids of the supplied properties, i.e. the indices where they
+  /// are stored in the _material_data->props().  Note: these ids ARE
+  /// NOT IN THE SAME ORDER AS THE _supplied_props set, which is
+  /// ordered alphabetically by name.  The intention of this container
+  /// is to allow rapid copying of MaterialProperty values in
+  /// Material::computeProperties() without looking up the ids from
+  /// the name strings each time.
+  std::set<unsigned int> _supplied_prop_ids;
+
   /// If False MOOSE does not compute this property
   const bool _compute;
+
+  /// False by default.  If true, MOOSE will only call
+  /// computeQpProperties() for the 0th qp and then copy
+  /// that value around to all the qps.
+  const bool _constant_on_elem;
 
   enum QP_Data_Type {
     CURR,
@@ -249,6 +263,11 @@ protected:
 private:
   /// Small helper function to call storeMatPropName
   void registerPropName(std::string prop_name, bool is_get, Prop_State state);
+
+  /// Small helper function to cache MaterialProperty ids while they are being declared.
+  template<typename T>
+  MaterialProperty<T> & cachePropertyIdWhileDeclaring(const std::string & prop_name,
+                                                      MaterialProperty<T> & prop);
 
   /// Check and throw an error if the execution has progerssed past the construction stage
   void checkExecutionStage();
@@ -333,12 +352,24 @@ Material::getMaterialPropertyOlderByName(const std::string & prop_name)
   return _material_data->getPropertyOlder<T>(prop_name);
 }
 
+
+template<typename T>
+MaterialProperty<T> &
+Material::cachePropertyIdWhileDeclaring(const std::string & prop_name,
+                                        MaterialProperty<T> & prop)
+{
+  // Ask the Storage what id it has assigned to the MaterialProperty named prop_name
+  const MaterialPropertyStorage & storage = _fe_problem.getMaterialPropertyStorage();
+  _supplied_prop_ids.insert(storage.retrievePropertyId(prop_name));
+  return prop;
+}
+
 template<typename T>
 MaterialProperty<T> &
 Material::declareProperty(const std::string & prop_name)
 {
   registerPropName(prop_name, false, Material::CURRENT);
-  return _material_data->declareProperty<T>(prop_name);
+  return cachePropertyIdWhileDeclaring(prop_name, _material_data->declareProperty<T>(prop_name));
 }
 
 template<typename T>
@@ -346,7 +377,7 @@ MaterialProperty<T> &
 Material::declarePropertyOld(const std::string & prop_name)
 {
   registerPropName(prop_name, false, Material::OLD);
-  return _material_data->declarePropertyOld<T>(prop_name);
+  return cachePropertyIdWhileDeclaring(prop_name, _material_data->declarePropertyOld<T>(prop_name));
 }
 
 template<typename T>
@@ -354,7 +385,7 @@ MaterialProperty<T> &
 Material::declarePropertyOlder(const std::string & prop_name)
 {
   registerPropName(prop_name, false, Material::OLDER);
-  return _material_data->declarePropertyOlder<T>(prop_name);
+  return cachePropertyIdWhileDeclaring(prop_name, _material_data->declarePropertyOlder<T>(prop_name));
 }
 
 template<typename T>
