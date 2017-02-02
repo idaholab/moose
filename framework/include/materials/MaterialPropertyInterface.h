@@ -366,7 +366,7 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
   _get_material_property_called = true;
 
   addMatPropDependency(_material_data->getPropertyId(name));
-  
+
   return _material_data->getProperty<T>(name);
 }
 
@@ -382,6 +382,8 @@ MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyNa
   // mark property as requested
   markMatPropRequested(name);
 
+  addMatPropDependency(_material_data->getPropertyId(name));
+
   return _material_data->getPropertyOld<T>(name);
 }
 
@@ -396,6 +398,8 @@ MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialProperty
   // mark property as requested
   markMatPropRequested(name);
 
+  addMatPropDependency(_material_data->getPropertyId(name));
+
   return _material_data->getPropertyOlder<T>(name);
 }
 
@@ -408,6 +412,8 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
 
   if (!hasMaterialPropertyByName<T>(name))
     return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(NULL, std::set<SubdomainID>());
+
+  addMatPropDependency(_material_data->getPropertyId(name));
 
   return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(&_material_data->getProperty<T>(name), _mi_feproblem.getMaterialPropertyBlocks(name));
 }
