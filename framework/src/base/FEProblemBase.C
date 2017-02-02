@@ -2016,7 +2016,10 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 
   const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
   for (const auto & id : ids)
+  {
     _materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
+    _materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid);
+  }
 
   const std::set<MooseVariable *> & current_active_elemental_moose_variables = getActiveElementalMooseVariables(tid);
   needed_moose_vars.insert(current_active_elemental_moose_variables.begin(), current_active_elemental_moose_variables.end());
@@ -2031,7 +2034,8 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 void
 FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (_all_materials.hasActiveBlockObjects(blk_id, tid) && _subproblem.hasActiveMaterialProperties(tid))
+  // if (_all_materials.hasActiveBlockObjects(blk_id, tid))
+  if (_all_materials.hasActiveBlockObjects(blk_id, tid) && this->hasActiveMaterialProperties(tid))
   {
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int n_points = _assembly[tid]->qRule()->n_points();

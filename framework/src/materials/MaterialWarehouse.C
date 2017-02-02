@@ -105,11 +105,26 @@ MaterialWarehouse::sort(THREAD_ID tid /*=0*/)
   _face_materials.sort(tid);
 }
 
+
+void
+MaterialWarehouse::updateMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
+{
+  if (hasActiveObjects(tid))
+    updateMatPropDependencyHelper(needed_mat_props, _all_objects[tid]);
+}
+
 void
 MaterialWarehouse::updateBlockMatPropDependency(SubdomainID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBlockObjects(id, tid))
     updateMatPropDependencyHelper(needed_mat_props, getActiveBlockObjects(id, tid));
+}
+
+void
+MaterialWarehouse::updateBoundaryMatPropDependency(BoundaryID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid/* = 0*/) const
+{
+  if (hasActiveBoundaryObjects(id, tid))
+    updateMatPropDependencyHelper(needed_mat_props, getActiveBoundaryObjects(id, tid));
 }
 
 void

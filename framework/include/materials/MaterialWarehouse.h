@@ -51,8 +51,11 @@ public:
    */
   void addObjects(std::shared_ptr<Material> block, std::shared_ptr<Material> neighbor, std::shared_ptr<Material> face, THREAD_ID tid = 0);
 
+  void updateMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
+
   void updateBlockMatPropDependency(SubdomainID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
-  
+
+  void updateBoundaryMatPropDependency(BoundaryID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
 
 protected:
   /// Stroage for neighbor material objects (Block are stored in the base class)

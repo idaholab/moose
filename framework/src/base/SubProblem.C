@@ -40,6 +40,8 @@ SubProblem::SubProblem(const InputParameters & parameters) :
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);
   _has_active_elemental_moose_variables.resize(n_threads);
+  _active_material_property_ids.resize(n_threads);
+  _has_active_material_property_ids.resize(n_threads);
 }
 
 SubProblem::~SubProblem()
