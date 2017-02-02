@@ -1,4 +1,5 @@
 import os
+import math
 import multiprocessing
 import markdown
 from distutils.dir_util import copy_tree
@@ -15,7 +16,7 @@ def build_options(parser, subparser):
   Command-line options for build command.
   """
   build_parser = subparser.add_parser('build', help='Build the documentation for serving on another system.')
-  build_parser.add_argument('--disable-threads', action='store_true', help="Disable threaded building.")
+  build_parser.add_argument('--num-threads', '-j', type=int, default=multiprocessing.cpu_count(), help="Specify the number of threads to build pages with.")
   return build_parser
 
 def make_tree(directory, node, **kwargs):
@@ -80,26 +81,30 @@ class Builder(object):
     """
     return self._pages.__iter__()
 
-  def build(self, disable_threads=False):
+  def build(self, num_threads=multiprocessing.cpu_count()):
     """
     Build all the pages in parallel.
     """
 
-    if disable_threads:
-      for page in self._pages:
+    def make_chunks(l, n):
+      n = int(math.ceil(len(l)/float(n)))
+      for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+    def build_pages(pages):
+      for page in pages:
         page.build()
 
-    else:
-      jobs = []
-      for page in self._pages:
-        p = multiprocessing.Process(target=page.build)
-        p.start()
-        jobs.append(p)
+    jobs = []
+    for chunk in make_chunks(self._pages, num_threads):
+      p = multiprocessing.Process(target=build_pages, args=(chunk,))
+      p.start()
+      jobs.append(p)
 
-      for job in jobs:
-        job.join()
+    for job in jobs:
+      job.join()
 
-      self.copyFiles()
+    self.copyFiles()
 
   def copyFiles(self):
     """
@@ -118,7 +123,7 @@ class Builder(object):
       helper(os.path.join(from_dir, 'css'), os.path.join(self._site_dir, 'css'))
       helper(os.path.join(from_dir, 'media'), os.path.join(self._site_dir, 'media'))
 
-def build_site(config_file='moosedocs.yml', disable_threads=False, **kwargs):
+def build_site(config_file='moosedocs.yml', num_threads=multiprocessing.cpu_count(), **kwargs):
   """
   The main build command.
   """
@@ -134,7 +139,7 @@ def build_site(config_file='moosedocs.yml', disable_threads=False, **kwargs):
   builder = Builder(parser, config['site_dir'], config['template'], config['template_arguments'], config['navigation'])
 
   # Create the html
-  builder.build(disable_threads=disable_threads)
+  builder.build(num_threads=num_threads)
   return config, parser, builder
 
 def build(*args, **kwargs):

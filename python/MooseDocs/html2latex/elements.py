@@ -194,6 +194,11 @@ class a(InlineElement):
   def preamble(self):
     return ['\\usepackage{hyperref}']
 
+class span(InlineElement):
+  name = 'span'
+  def convert(self, tag, content):
+    return content
+
 class p(InlineElement):
   name = 'p'
   def convert(self, tag, content):

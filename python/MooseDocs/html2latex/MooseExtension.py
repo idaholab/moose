@@ -14,7 +14,7 @@ class MooseExtension(Extension):
     translator.elements.add('moose_inline_code', moose_inline_code(), '<code')
 
     translator.elements.add('moose_bib', moose_bib(), '<ol')
-    translator.elements.add('moose_bib_a', moose_bib_a(), '<moose_internal_links')
+    translator.elements.add('moose_bib_span', moose_bib_span(), '<moose_internal_links')
     translator.elements.add('moose_slider', moose_slider(), '_begin')
     translator.elements.add('moose_buildstatus', moose_buildstatus(), '_begin')
     translator.elements.add('admonition_div', admonition_div(), '<div')

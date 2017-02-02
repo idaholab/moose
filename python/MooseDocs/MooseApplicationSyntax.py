@@ -201,6 +201,21 @@ class MooseApplicationSyntax(object):
                                hidden=self.hidden(node['name']))
         self._actions[info.key] = info
 
+    # Create MooseActionInfo objects from the MooseObjectInfo
+    # This is needed to allow for the !systems pages to be complete for apps that
+    # do not also include the framework
+    for obj_info in self._objects.itervalues():
+      action_key = os.path.dirname(obj_info.key)
+      if action_key not in self._actions:
+        for node in self._yaml_data[action_key]:
+          info = MooseActionInfo(node,
+                                 code=[],
+                                 install=install,
+                                 group=self._group,
+                                 generate=generate,
+                                 hidden=self.hidden(node['name']))
+          self._actions[info.key] = info
+
   def name(self):
     """
     Return the name of the syntax.
@@ -290,11 +305,11 @@ class MooseApplicationSyntax(object):
 
           # Update class to source definition map
           if filename.endswith('.h'):
-            for match in re.finditer(r'class\s*(?P<class>\w+)', content):
+            for match in re.finditer(r'class\s*(?P<class>\w+)\b[^;]', content):
               key = match.group('class')
               self._filenames[key] = [fullfile]
               src = fullfile.replace('/include/', '/src/')[:-2] + '.C'
-              if os.path.exists(src):
+              if os.path.exists(src) and (src not in self._filenames[key]):
                 self._filenames[key].append(src)
 
           # Map of registered objects

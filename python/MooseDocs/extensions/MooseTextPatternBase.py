@@ -31,6 +31,9 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
     self._settings['label'] = True
     self._settings['language'] = 'text'
     self._settings['strip-extra-newlines'] = False
+    self._settings['prefix'] = ''
+    self._settings['suffix'] = ''
+    self._settings['indent'] = 0
 
   def prepareContent(self, content, settings):
     """
@@ -53,6 +56,20 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
       strt = content.find('/********')
       stop = content.rfind('*******/\n')
       content = content.replace(content[strt:stop+9], '')
+
+    # Add indent
+    if settings['indent'] > 0:
+      lines = content.split('\n')
+      content = []
+      for line in lines:
+        content.append('{}{}'.format(' '*int(settings['indent']), line))
+      content = '\n'.join(content)
+
+    # Prefix/suffix
+    if settings['prefix']:
+      content = '{}\n{}'.format(settings['prefix'], content)
+    if settings['suffix']:
+      content = '{}\n{}'.format(content, settings['suffix'])
 
     return content
 
