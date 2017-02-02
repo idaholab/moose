@@ -95,7 +95,14 @@ InputParameters validParams<FeatureFloodCount>()
   params.addParam<bool>("compute_halo_maps", false, "Instruct the Postprocessor to communicate proper halo information to all ranks");
   params.addParam<bool>("compute_var_to_feature_map", false, "Instruct the Postprocessor to compute the active vars to features map");
   params.addParam<bool>("use_less_than_threshold_comparison", true, "Controls whether features are defined to be less than or greater than the threshold value.");
-  params.set<bool>("use_displaced_mesh") = true;
+
+  /**
+   * The FeatureFloodCount and derived objects should not to operate on the displaced mesh. These objects consume variable values from
+   * the nonlinear system and use a lot of raw geometric element information from the mesh. If you use the displaced system with
+   * EBSD information for instance, you'll have difficulties reconciling the difference between the coordinates from the EBSD data file
+   * and the potential displacements applied via boundary conditions.
+   */
+  params.set<bool>("use_displaced_mesh") = false;
 
   params.addParamNamesToGroup("use_single_map condense_map_info use_global_numbering", "Advanced");
 

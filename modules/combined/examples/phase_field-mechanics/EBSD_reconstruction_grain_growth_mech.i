@@ -10,7 +10,7 @@
 [GlobalParams]
   op_num = 8
   var_name_base = gr
-  grain_num = 110
+  displacements = 'disp_x disp_y'
 []
 
 [Variables]
@@ -63,6 +63,7 @@
   [./PolycrystalICs]
     [./ReconVarIC]
       ebsd_reader = ebsd
+      advanced_op_assignment = true
     [../]
   [../]
 []
@@ -73,7 +74,6 @@
   [./PolycrystalElasticDrivingForce]
   [../]
   [./TensorMechanics]
-    displacements = 'disp_x disp_y'
   [../]
 []
 
@@ -142,7 +142,7 @@
     type = EBSDReaderPointDataAux
     variable = EBSD_grain
     ebsd_reader = ebsd
-    data_name = 'grain'
+    data_name = 'feature_id'
     execute_on = 'initial'
   [../]
 []
@@ -230,11 +230,8 @@
   [../]
   [./grain_tracker]
     type = GrainTrackerElasticity
-    threshold = 0.2
     compute_var_to_feature_map = true
-    execute_on = 'initial timestep_begin'
     ebsd_reader = ebsd
-    flood_entity_type = ELEMENTAL
 
     fill_method = symmetric9
     C_ijkl = '1.27e5 0.708e5 0.708e5 1.27e5 0.708e5 1.27e5 0.7355e5 0.7355e5 0.7355e5'

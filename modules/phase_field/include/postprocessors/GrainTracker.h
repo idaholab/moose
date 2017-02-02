@@ -207,6 +207,19 @@ protected:
   /// Boolean to indicate that we should retrieve EBSD information from a specific phase
   const bool _consider_phase;
 
+  /**
+   * Boolean to indicate the first time this object executes.
+   * Note: _tracking_step isn't enough if people skip initial or execute more than once per step.
+   */
+  bool _first_time;
+
+  /**
+   * Boolean to terminate with an error if a new grain is created during the simulation.
+   * This is for simulations where new grains are not expected. Note, this does not impact
+   * the initial callback to newGrainCreated() nor does it get triggered for splitting grains.
+   */
+  bool _error_on_grain_creation;
+
 private:
   /// Holds the first unique grain index when using _reserve_op (all the remaining indices are sequential)
   unsigned int _reserve_grain_first_index;
@@ -216,10 +229,6 @@ private:
 
   /// Holds the next "regular" grain ID (a grain found or remapped to the standard op vars)
   unsigned int _max_curr_grain_id;
-
-  /// Boolean to indicate the first time this object executes.
-  /// _tracking_step isn't enough if people skip initial or execute more than once per step
-  bool _first_time;
 
   /// Boolean to indicate whether this is a Steady or Transient solve
   const bool _is_transient;
