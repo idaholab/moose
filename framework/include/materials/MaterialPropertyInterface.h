@@ -291,7 +291,6 @@ MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
-  std::cout << "Material property " << prop_name << " is being requested by " << _mi_name  << "." << std::endl;
 
   // Check if it's just a constant
   const MaterialProperty<T> * default_property = defaultMaterialProperty<T>(prop_name);

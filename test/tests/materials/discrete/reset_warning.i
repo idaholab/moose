@@ -12,8 +12,9 @@
 
 [Kernels]
   [./diff]
-    type = Diffusion
+    type = MatDiffusion
     variable = u
+    prop_name = 'prop'
   [../]
 []
 

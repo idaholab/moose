@@ -256,10 +256,10 @@ public:
   virtual void setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids, THREAD_ID tid) override;
 
   virtual const std::set<unsigned int> & getActiveMaterialProperties(THREAD_ID tid) override;
-  
+
   virtual bool hasActiveMaterialProperties(THREAD_ID tid) override;
 
-  virtual void clearActiveMaterialProperties(THREAD_ID tid) override;  
+  virtual void clearActiveMaterialProperties(THREAD_ID tid) override;
 
   virtual void createQRules(QuadratureType type, Order order, Order volume_order=INVALID_ORDER, Order face_order=INVALID_ORDER);
 
