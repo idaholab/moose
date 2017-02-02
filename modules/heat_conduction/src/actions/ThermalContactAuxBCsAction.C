@@ -52,6 +52,10 @@ ThermalContactAuxBCsAction::act()
 
   params.set<AuxVariableName>("variable") = ThermalContactAuxVarsAction::getGapValueName(_pars);
 
+  MultiMooseEnum execute_options = SetupInterface::getExecuteOptions();
+  execute_options = "initial linear";
+  params.set<MultiMooseEnum>("execute_on") = execute_options;
+
   std::vector<BoundaryName> bnds(1, getParam<BoundaryName>("slave"));
   params.set<std::vector<BoundaryName> >("boundary") = bnds;
   params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
@@ -86,6 +90,9 @@ ThermalContactAuxBCsAction::act()
     penetration_var_name = "qpoint_penetration";
 
   params.set<AuxVariableName>("variable") = penetration_var_name;
+
+  params.set<MultiMooseEnum>("execute_on") = execute_options;
+
   params.set<std::vector<BoundaryName> >("boundary") = bnds;
   params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
 
