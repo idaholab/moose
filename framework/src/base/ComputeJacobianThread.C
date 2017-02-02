@@ -303,6 +303,7 @@ void
 ComputeJacobianThread::post()
 {
   _fe_problem.clearActiveElementalMooseVariables(_tid);
+  _fe_problem.clearActiveMaterialProperties(_tid);
 }
 
 void ComputeJacobianThread::join(const ComputeJacobianThread & /*y*/)

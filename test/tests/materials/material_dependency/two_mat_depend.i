@@ -11,14 +11,10 @@
 []
 
 [Kernels]
-  # [./diff]
-  #   type = MatDiffusion
-  #   variable = u
-  #   prop_name = 'diff'
-  # [../]
   [./diff]
-    type = Diffusion
+    type = MatDiffusion
     variable = u
+    prop_name = 'diff'
   [../]
 []
 
@@ -38,13 +34,13 @@
 []
 
 [Materials]
-  # [./block]
-  #   type = GenericConstantMaterial
-  #   prop_names = 'diff'
-  #   prop_values = '1'
-  #   block = 0
-  # [../]
-  [./block]
+  [./call_me_mat]
+    type = GenericConstantMaterial
+    prop_names = 'diff'
+    prop_values = '1'
+    block = 0
+  [../]
+  [./please_dont_call_me_mat]
     type = ErrorMaterial
     block = 0
   [../]
