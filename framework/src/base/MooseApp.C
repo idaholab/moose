@@ -150,7 +150,8 @@ MooseApp::MooseApp(InputParameters parameters) :
     _legacy_uo_initialization_default(getParam<bool>("use_legacy_uo_initialization")),
     _check_input(getParam<bool>("check_input")),
     _restartable_data(libMesh::n_threads()),
-    _multiapp_level(0)
+    _multiapp_level(0),
+    _use_name_prefix(false)
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -187,7 +188,7 @@ MooseApp::setupOptions()
 {
   // Print the header, this is as early as possible
   std::string hdr(header() + "\n");
-  if (multiAppLevel() > 0)
+  if (useNamePrefix())
     MooseUtils::indentMessage(_name, hdr);
   Moose::out << hdr << std::flush;
 

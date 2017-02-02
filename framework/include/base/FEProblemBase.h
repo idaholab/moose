@@ -32,6 +32,7 @@
 #include "AuxGroupExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
 #include "NonlinearSystem.h"
+#include "MultiAppTransfer.h"
 
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
@@ -663,6 +664,13 @@ public:
    * Get a MultiApp object by name.
    */
   std::shared_ptr<MultiApp> getMultiApp(const std::string & multi_app_name);
+
+  /**
+   * Execute MultiAppTransfers associate with execution flag and direction.
+   * @param type The execution flag to execute.
+   * @param direction The direction (to or from) to transfer.
+   */
+  void execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECTION direction);
 
   /**
    * Execute the MultiApps associated with the ExecFlagType

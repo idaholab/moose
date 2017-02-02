@@ -71,6 +71,7 @@ temp_print_trace.*
 *.pvtu
 .depend
 *.png
+*.gif
 *.tif
 *.html
 *.xyz
@@ -166,13 +167,16 @@ out.xyz
 .jitcache/
 .jitdir/
 
+# Do not store ipython notebook checkpoints
+*-checkpoint.ipynb*
+
 # Documentation Generation
 site
 *.moose.md
 *.moose.yml
 *.moose.svg
 docs/.moosedocs
-!docs/index.html
 !docs/templates/*.html
 !docs/media/**/*.png
+!docs/media/**/*.gif
 !docs/tests/**/gold/*.html
