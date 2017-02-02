@@ -71,6 +71,13 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
       {
         _problem.prepare(elem, _tid);
         _problem.reinitElemFace(elem, side, boundary_id, _tid);
+        std::set<unsigned int> needed_mat_props;
+        for (const auto & aux : iter->second)
+        {
+          const std::set<unsigned int> & mp_deps = aux->getMatPropDependencies();
+          needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+        }
+        _problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
         if (_need_materials)
         {
@@ -102,6 +109,7 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
       }
     }
   }
+  _problem.clearActiveMaterialProperties(_tid);
 }
 
 void
