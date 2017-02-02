@@ -8,7 +8,7 @@
 #ifndef PFCRFFKERNELACTION_H
 #define PFCRFFKERNELACTION_H
 
-#include "Action.h"
+#include "HHPFCRFFSplitKernelAction.h"
 
 //Forward Declarations
 class PFCRFFKernelAction;
@@ -16,17 +16,12 @@ class PFCRFFKernelAction;
 template<>
 InputParameters validParams<PFCRFFKernelAction>();
 
-class PFCRFFKernelAction: public Action
+class PFCRFFKernelAction: public HHPFCRFFSplitKernelAction
 {
 public:
   PFCRFFKernelAction(const InputParameters & params);
 
   virtual void act();
-
-protected:
-  const unsigned int _num_L;
-  const std::string _L_name_base;
-  const std::string _n_name;
 };
 
 #endif //PFCRFFKERNELACTION_H

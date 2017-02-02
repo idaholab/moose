@@ -14,7 +14,7 @@ template<>
 InputParameters validParams<HHPFCRFFSplitKernelAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParams("Set up kernels for the RFF phase field crystal model");
+  params.addClassDescription("Set up kernels for the RFF phase field crystal model");
   params.addRequiredParam<unsigned int>("num_L", "specifies the number of complex L variables will be solved for");
   params.addRequiredParam<VariableName>("n_name", "Variable name used for the n variable");
   params.addRequiredParam<std::string>("L_name_base", "Base name for the complex L variables");
@@ -38,11 +38,6 @@ HHPFCRFFSplitKernelAction::HHPFCRFFSplitKernelAction(const InputParameters & par
 void
 HHPFCRFFSplitKernelAction::act()
 {
-#ifdef DEBUG
-  Moose::err << "Inside the HHPFCRFFSplitKernelAction Object\n";
-  Moose::err << "L name base:" << _L_name_base;
-#endif
-
   // Loop over the L_variables
   for (unsigned int l = 0; l < _num_L; ++l)
   {
