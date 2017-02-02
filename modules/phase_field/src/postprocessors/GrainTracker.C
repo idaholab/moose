@@ -54,16 +54,17 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _reserve_op_index(_n_reserve_ops <= _n_vars ? _n_vars - _n_reserve_ops : 0),
     _reserve_op_threshold(getParam<Real>("reserve_op_threshold")),
     _remap(getParam<bool>("remap_grains")),
-    _nl(static_cast<FEProblemBase &>(_subproblem).getNonlinearSystemBase()),
+    _nl(_fe_problem.getNonlinearSystemBase()),
     _feature_sets_old(declareRestartableData<std::vector<FeatureData> >("unique_grains")),
     _ebsd_reader(parameters.isParamValid("ebsd_reader") ? &getUserObject<EBSDReader>("ebsd_reader") : nullptr),
     _ebsd_op_var(_ebsd_reader ? &_fe_problem.getVariable(0, getParam<std::string>("var_name_base") + "_op") : nullptr),
     _phase(isParamValid("phase") ? getParam<unsigned int>("phase") : 0),
     _consider_phase(isParamValid("phase")),
+    _first_time(true),
+    _error_on_grain_creation(getParam<bool>("error_on_grain_creation")),
     _reserve_grain_first_index(0),
     _old_max_grain_id(0),
     _max_curr_grain_id(0),
-    _first_time(true),
     _is_transient(_subproblem.isTransient())
 {
   if (_ebsd_reader && !_ebsd_op_var)
@@ -760,9 +761,17 @@ GrainTracker::trackGrains()
   if (_old_max_grain_id < _max_curr_grain_id)
   {
     for (auto new_id = _old_max_grain_id + 1; new_id <= _max_curr_grain_id; ++new_id)
+    {
       // Don't trigger the callback on the reserve IDs
       if (new_id >= _reserve_grain_first_index + _n_reserve_ops)
-        newGrainCreated(new_id);
+      {
+        // See if we've been instructed to terminate with an error
+        if (!_first_time && _error_on_grain_creation)
+          mooseError("Error: New grain detected and \"error_on_new_grain_creation\" is set to true");
+        else
+          newGrainCreated(new_id);
+      }
+    }
   }
 }
 
@@ -850,7 +859,8 @@ GrainTracker::remapGrains()
           if (i == j)
             continue;
 
-          if (grain1._id == grain2._id)
+          if (i < j // This condition is here to prevent symmetric checks and equivalent entries stored in the list
+              && grain1._id == grain2._id)
           {
             ebsd_pairs.push_front(std::make_pair(i, j));
             if (grain1._var_index != grain2._var_index)

@@ -19,6 +19,8 @@ InputParameters validParams<GrainTrackerInterface>()
   params.addParam<Real>("reserve_op_threshold", 0.95, "Threshold for locating a new feature on the reserved op variable(s)" );
   params.addParam<UserObjectName>("ebsd_reader", "Optional: EBSD Reader for initial condition");
   params.addParam<unsigned int>("phase", "EBSD phase number from which to retrieve information");
+  params.addParam<bool>("error_on_grain_creation", false, "Terminate with an error if a grain is created "
+                        "(does not include initial callback to start simulation)");
 
   params.addRequiredCoupledVarWithAutoBuild("variable", "var_name_base", "op_num", "Array of coupled variables");
 

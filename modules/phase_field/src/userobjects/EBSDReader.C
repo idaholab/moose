@@ -274,7 +274,7 @@ EBSDReader::indexFromIndex(unsigned int var) const
 
   // Don't access out of range!
   if (avg_index >= _avg_data.size())
-    mooseError("Error! Index out of range in EBSDReader::indexFromIndex()");
+    mooseError("Error! Index out of range in EBSDReader::indexFromIndex(), index: " << avg_index << " size: " << _avg_data.size());
 
   return avg_index;
 }
