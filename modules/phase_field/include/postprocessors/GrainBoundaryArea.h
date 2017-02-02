@@ -16,7 +16,7 @@ template<>
 InputParameters validParams<GrainBoundaryArea>();
 
 /**
- * Calculate total grain boundary area.
+ * Calculate total grain boundary length in 2D and area in 3D.
  */
 class GrainBoundaryArea : public ElementIntegralPostprocessor
 {
@@ -29,7 +29,7 @@ protected:
   virtual Real computeQpIntegral() override;
 
   /// Number of order parameters
-  unsigned int _op_num;
+  const unsigned int _op_num;
 
   /// Order parameters
   std::vector<const VariableGradient *> _grads;
