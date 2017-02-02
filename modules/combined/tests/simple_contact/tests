@@ -4,6 +4,7 @@
     type = Exodiff
     input = 'simple_contact_dirac_test.i'
     exodiff = 'dirac_out.e'
+    allow_deprecated_until = 09/06/2016
   [../]
   [./3D]
     type = Exodiff
@@ -30,6 +31,7 @@
     abs_zero = 1e-7
     scale_refine = 1
     max_parallel = 1
+    allow_deprecated_until = 09/06/2016
   [../]
   [./RSpherical]
     type = Exodiff
@@ -42,6 +44,7 @@
     input = 'simple_contact_rspherical_dirac.i'
     exodiff = 'out_rspherical_dirac.e'
     max_parallel = 1
+    allow_deprecated_until = 09/06/2016
   [../]
 
 []

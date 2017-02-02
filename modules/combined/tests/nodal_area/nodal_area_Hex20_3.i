@@ -112,6 +112,7 @@
     penalty = 1e9
     order = SECOND
     tangential_tolerance = 1e-5
+    system = Constraint
   [../]
 []
 

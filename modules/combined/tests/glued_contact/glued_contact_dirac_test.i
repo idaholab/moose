@@ -1,14 +1,20 @@
-# This is a mechanical constraint (contact formulation) version of 4ElemTensionRelease.i
 [Mesh]
-  file = 4ElemTensionRelease.e
-  displacements = 'disp_x disp_y'
+  file = glued_contact_test.e
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
   [./up]
     type = PiecewiseLinear
-    x = '0 1      2 3'
-    y = '0 0.0001 0 -.0001'
+    x = '0 1'
+    y = '0 0.5001'
+  [../]
+
+  [./lateral]
+    type = PiecewiseLinear
+    x = '0 1 2 3'
+    y = '0 0 1 0'
+    scale_factor = 0.5
   [../]
 []
 
@@ -22,12 +28,18 @@
     order = FIRST
     family = LAGRANGE
   [../]
+
+  [./disp_z]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 [] # Variables
 
 [SolidMechanics]
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
@@ -37,20 +49,20 @@
     slave = 3
     disp_x = disp_x
     disp_y = disp_y
+    disp_z = disp_z
     penalty = 1e6
-    model = frictionless
-    tangential_tolerance = 0.01
-    system = constraint
+    model = glued
+    formulation = kinematic
   [../]
 []
 
 [BCs]
 
-  [./lateral]
-    type = PresetBC
+  [./bottom_lateral]
+    type = FunctionPresetBC
     variable = disp_x
-    boundary = '1 4'
-    value = 0
+    boundary = 1
+    function = lateral
   [../]
 
   [./bottom_up]
@@ -58,6 +70,13 @@
     variable = disp_y
     boundary = 1
     function = up
+  [../]
+
+  [./bottom_out]
+    type = PresetBC
+    variable = disp_z
+    boundary = 1
+    value = 0.0
   [../]
 
   [./top]
@@ -77,6 +96,7 @@
 
     disp_x = disp_x
     disp_y = disp_y
+    disp_z = disp_z
 
     youngs_modulus = 1e6
     poissons_ratio = 0.3
@@ -88,6 +108,7 @@
 
     disp_x = disp_x
     disp_y = disp_y
+    disp_z = disp_z
 
     youngs_modulus = 1e6
     poissons_ratio = 0.3
@@ -97,20 +118,27 @@
 [Executioner]
   type = Transient
 
-  # Preconditioned JFNK (default)
+  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre    boomeramg      101'
+
+
+
+#  petsc_options_iname = '-pc_type -pc_hypre_type -snes_type -snes_ls -snes_linesearch_type -ksp_gmres_restart'
+#  petsc_options_value = 'hypre    boomeramg      ls         basic    basic                    101'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart'
+  petsc_options_value = 'ilu      101'
+
 
   line_search = 'none'
+
+
+  nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-10
   l_tol = 1e-4
 
   l_max_its = 100
   nl_max_its = 10
   dt = 0.1
-  dtmin = 0.1
   num_steps = 30
 
   [./Predictor]
@@ -119,6 +147,17 @@
   [../]
 [] # Executioner
 
+[Postprocessors]
+  active = ''
+  [./resid]
+    type = Residual
+  [../]
+  [./iters]
+    type = NumNonlinearIterations
+  [../]
+[]
+
 [Outputs]
+  file_base = dirac_out
   exodus = true
 [] # Outputs

@@ -371,5 +371,6 @@
     normalize_penalty = true
     tangential_tolerance = 1e-3
     penalty = 1e6
+    system = Constraint
   [../]
 []

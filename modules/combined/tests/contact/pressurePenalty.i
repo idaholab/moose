@@ -49,6 +49,7 @@
     formulation = penalty
 #    model = glued
     tangential_tolerance = 1e-3
+    system = constraint
     tension_release = -1
   [../]
 []

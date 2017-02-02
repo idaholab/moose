@@ -219,5 +219,6 @@
     master = 2
     model = glued
     penalty = 1e+6
+    system = Constraint
   [../]
 []

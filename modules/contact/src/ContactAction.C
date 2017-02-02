@@ -38,7 +38,8 @@ InputParameters validParams<ContactAction>()
   params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
   params.addParam<MooseEnum>("formulation", formulation, "The contact formulation: default, penalty, augmented_lagrange, tangential_penalty");
-  params.addParam<MooseEnum>("system", system, "System to use for constraint enforcement.  Options are: " + system.getRawNames());
+  params.addParam<MooseEnum>("system", system, "System to use for constraint enforcement.  Options are: " + system.getRawNames() +
+                             " The 'DiracKernel' option is deprecated, so only the 'Constraint' option should be used");
 
   return params;
 }
@@ -65,6 +66,8 @@ ContactAction::ContactAction(const InputParameters & params) :
     if (_model != "coulomb")
       mooseError ("The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
   }
+  if (_system == "DiracKernel")
+    mooseDeprecated("The 'DiracKernel' system is deprecated. Add 'system = Constraint' to your Contact block to use the Constraint system for mechanical contact enforcement.");
 }
 
 void

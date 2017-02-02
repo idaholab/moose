@@ -111,6 +111,7 @@
     penalty = 1e7
     order = SECOND
     tangential_tolerance = 1e-5
+    system = Constraint
   [../]
 []
 
@@ -147,10 +148,6 @@
   start_time = 0.0
   dt = 1.0
   end_time = 1.0
-
-  [./Quadrature]
-    order = THIRD
-  [../]
 []
 
 [Postprocessors]
