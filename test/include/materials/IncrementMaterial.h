@@ -11,27 +11,28 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef ERROR_MATERIAL_H
-#define ERROR_MATERIAL_H
+#ifndef INCREMENT_MATERIAL_H
+#define INCREMENT_MATERIAL_H
 
-#include "Material.h"
+#include "GenericConstantMaterial.h"
 
-class ErrorMaterial;
+class IncrementMaterial;
 
 template<>
-InputParameters validParams<ErrorMaterial>();
+InputParameters validParams<GenericConstantMaterial>();
 
 /**
- * ErrorMaterial throws a MooseException when certain conditions are
- * met.
+ * GenericConstantMaterial that tracks the number of times computeQpProperties has been called.
  */
-class ErrorMaterial : public Material
+class IncrementMaterial : public GenericConstantMaterial
 {
 public:
-  ErrorMaterial(const InputParameters & parameters);
+  IncrementMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
+  unsigned int _inc;
+  MaterialProperty<Real> & _mat_prop;
 };
 
 #endif

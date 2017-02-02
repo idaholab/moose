@@ -2033,7 +2033,6 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 void
 FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
-  // if (_all_materials.hasActiveBlockObjects(blk_id, tid))
   if (_all_materials.hasActiveBlockObjects(blk_id, tid) && this->hasActiveMaterialProperties(tid))
   {
     const Elem * & elem = _assembly[tid]->elem();

@@ -11,23 +11,27 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "ErrorMaterial.h"
+#include "IncrementMaterial.h"
 
 template<>
-InputParameters validParams<ErrorMaterial>()
+InputParameters validParams<IncrementMaterial>()
 {
-  InputParameters params = validParams<Material>();
-  params.addClassDescription("Material that throws an error if its computeQpProperties method gets called.");
+  InputParameters params = validParams<GenericConstantMaterial>();
+  params.addClassDescription("Material that tracks the number of times computeQpProperties has been called.");
   return params;
 }
 
-ErrorMaterial::ErrorMaterial(const InputParameters & parameters) :
-    Material(parameters)
+IncrementMaterial::IncrementMaterial(const InputParameters & parameters) :
+    GenericConstantMaterial(parameters),
+    _inc(0),
+    _mat_prop(declareProperty<Real>("mat_prop"))
 {
 }
 
 void
-ErrorMaterial::computeQpProperties()
+IncrementMaterial::computeQpProperties()
 {
-  mooseError("Why are you calling me when I don't provide any properties?");
+  GenericConstantMaterial::computeQpProperties();
+  _inc++;
+  _mat_prop[_qp] = _inc;
 }

@@ -1,7 +1,8 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 1
+  dim = 2
   nx = 1
+  ny = 1
 []
 
 [Variables]
@@ -49,10 +50,12 @@
 
 [Materials]
   [./call_me_mat]
-    type = GenericConstantMaterial
+    type = IncrementMaterial
     prop_names = 'diff'
     prop_values = '1'
     block = 0
+    outputs = exodus
+    output_properties = 'mat_prop'
   [../]
 []
 
