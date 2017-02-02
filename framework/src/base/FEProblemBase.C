@@ -2007,11 +2007,10 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   std::set<MooseVariable *> needed_moose_vars;
   std::set<unsigned int> needed_mat_props;
 
-
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
   {
     _all_materials.updateVariableDependency(needed_moose_vars, tid);
-    _all_materials.updateMatPropDependency(needed_mat_props, tid);
+    _all_materials.updateBlockMatPropDependency(blk_id, needed_mat_props, tid);
   }
 
   const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
@@ -2024,18 +2023,18 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   const std::set<MooseVariable *> & current_active_elemental_moose_variables = getActiveElementalMooseVariables(tid);
   needed_moose_vars.insert(current_active_elemental_moose_variables.begin(), current_active_elemental_moose_variables.end());
 
-  if (!needed_moose_vars.empty())
-    setActiveElementalMooseVariables(needed_moose_vars, tid);
+  const std::set<unsigned int> & current_active_material_properties = getActiveMaterialProperties(tid);
+  needed_mat_props.insert(current_active_material_properties.begin(), current_active_material_properties.end());
 
-  if (!needed_mat_props.empty())
-    setActiveMaterialProperties(needed_mat_props, tid);
+  setActiveElementalMooseVariables(needed_moose_vars, tid);
+  setActiveMaterialProperties(needed_mat_props, tid);
 }
 
 void
 FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
-  // if (_all_materials.hasActiveBlockObjects(blk_id, tid))
-  if (_all_materials.hasActiveBlockObjects(blk_id, tid) && this->hasActiveMaterialProperties(tid))
+  if (_all_materials.hasActiveBlockObjects(blk_id, tid))
+  // if (_all_materials.hasActiveBlockObjects(blk_id, tid) && this->hasActiveMaterialProperties(tid))
   {
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int n_points = _assembly[tid]->qRule()->n_points();

@@ -51,8 +51,11 @@ SubProblem::~SubProblem()
 void
 SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid)
 {
-  _has_active_elemental_moose_variables[tid] = 1;
-  _active_elemental_moose_variables[tid] = moose_vars;
+  if (!moose_vars.empty())
+  {
+    _has_active_elemental_moose_variables[tid] = 1;
+    _active_elemental_moose_variables[tid] = moose_vars;
+  }
 }
 
 const std::set<MooseVariable *> &
@@ -77,8 +80,11 @@ SubProblem::clearActiveElementalMooseVariables(THREAD_ID tid)
 void
 SubProblem::setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids, THREAD_ID tid)
 {
-  _has_active_material_property_ids[tid] = 1;
-  _active_material_property_ids[tid] = mat_prop_ids;
+  if (!mat_prop_ids.empty())
+  {
+    _has_active_material_property_ids[tid] = 1;
+    _active_material_property_ids[tid] = mat_prop_ids;
+  }
 }
 
 const std::set<unsigned int> &

@@ -115,6 +115,14 @@ public:
   void updateBoundaryVariableDependency(BoundaryID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
   ///@}
 
+  void updateMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
+
+  void updateBlockMatPropDependency(SubdomainID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
+
+  void updateBoundaryMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
+
+  void updateBoundaryMatPropDependency(BoundaryID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
+
   /**
    * Populates a set of covered subdomains and the associated variable names.
    */
@@ -159,6 +167,9 @@ protected:
    */
   static void updateVariableDependencyHelper(std::set<MooseVariable *> & needed_moose_vars,
                                              const std::vector<std::shared_ptr<T>> & objects);
+
+  static void updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props,
+                                             const std::vector<std:shared_ptr<T>> & objects);
 
   /**
    * Calls assert on thread id.
@@ -414,7 +425,7 @@ MooseObjectWarehouseBase<T>::updateActive(THREAD_ID tid /*= 0*/)
 
 template<typename T>
 void
-MooseObjectWarehouseBase<T>::updateActiveHelper(std::vector<std::shared_ptr<T>> & active, const std::vector<std::shared_ptr<T> > & all)
+MooseObjectWarehouseBase<T>::updateActiveHelper(std::vector<std::shared_ptr<T>> & active, const std::vector<std::shared_ptr<T>> & all)
 {
   // Clear the active list
   active.clear();
@@ -466,7 +477,7 @@ MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(std::set<MooseVari
 {
   if (hasActiveBoundaryObjects(tid))
   {
-    typename std::map<BoundaryID, std::vector<std::shared_ptr<T> > >::const_iterator it;
+    typename std::map<BoundaryID, std::vector<std::shared_ptr<T>>>::const_iterator it;
     for (const auto & object_pair : _active_boundary_objects[tid])
       updateVariableDependencyHelper(needed_moose_vars, object_pair.second);
   }
@@ -491,6 +502,57 @@ MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(std::set<MooseVariab
     needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
   }
 }
+
+template<typename T>
+void
+MooseObjectWarehouseBase<T>::updateMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
+{
+  if (hasActiveObjects(tid))
+    updateMatPropDependencyHelper(needed_mat_props, _all_objects[tid]);
+}
+
+template<typename T>
+void
+MooseObjectWarehouseBase<T>::updateBlockMatPropDependency(SubdomainID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
+{
+  if (hasActiveBlockObjects(id, tid))
+    updateMatPropDependencyHelper(needed_mat_props, getActiveBlockObjects(id, tid));
+}
+
+
+template<typename T>
+void
+MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid/* = 0*/) const
+{
+  if (hasActiveBoundaryObjects(tid))
+  {
+    typename std::map<BoundaryID, std::vector<std::shared_ptr<T>>>::const_iterator it;
+    for (it = _active_boundary_objects[tid].begin(); it != _active_boundary_objects[tid].end(); ++it)
+      updateMatPropDependencyHelper(needed_mat_props, it->second);
+  }
+}
+
+
+template<typename T>
+void
+MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(BoundaryID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid/* = 0*/) const
+{
+  if (hasActiveBoundaryObjects(id, tid))
+    updateMatPropDependencyHelper(needed_mat_props, getActiveBoundaryObjects(id, tid));
+}
+
+
+template<typename T>
+void
+MooseObjectWarehouseBase<T>::updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props, const std::vector<std:shared_ptr<T>> & objects)
+{
+  for (typename std::vector<std:shared_ptr<T>> ::const_iterator it = objects.begin(); it != objects.end(); ++it)
+  {
+    const std::set<unsigned int> & mp_deps = (*it)->getMatPropDependencies();
+    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+  }
+}
+
 
 template<typename T>
 void
