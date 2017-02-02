@@ -1,3 +1,4 @@
+import shutil
 import sys
 import os
 import re
@@ -5,6 +6,7 @@ import io
 import traceback
 from pybtex.plugin import find_plugin
 from pybtex.database import BibliographyData, parse_file
+from pybtex.database.input.bibtex import UndefinedMacro as undefined_macro_exception
 
 import MooseDocs
 from MooseCommonExtension import MooseCommonExtension
@@ -26,6 +28,29 @@ class MooseBibtex(MooseCommonExtension, Preprocessor):
   def __init__(self, markdown_instance=None, **kwargs):
     MooseCommonExtension.__init__(self, **kwargs),
     Preprocessor.__init__(self, markdown_instance)
+    self._macro_files = kwargs.pop('macro_files', None)
+
+  def parseBibtexFile(self, bibfile):
+    """
+    Returns parsed bibtex file.  If "macro_files" are supplied in the configuration
+    file, then a temporary file will be made that contains the supplied macros
+    above the original bib file.  This temporary combined file can then be
+    parsed by pybtex.
+    """
+
+    if self._macro_files:
+      with open("tBib.bib", "wb") as tBib:
+        for tFile in self._macro_files:
+          with open(MooseDocs.abspath(tFile.strip()), "rb") as inFile:
+            shutil.copyfileobj(inFile, tBib)
+        with open(bibfile, "rb") as inFile:
+          shutil.copyfileobj(inFile, tBib)
+      data = parse_file("tBib.bib")
+      os.remove("tBib.bib")
+    else:
+      data = parse_file(bibfile)
+
+    return data
 
   def run(self, lines):
     """
@@ -45,9 +70,14 @@ class MooseBibtex(MooseCommonExtension, Preprocessor):
       for bfile in match.group(1).split(','):
         try:
           bibfiles.append(MooseDocs.abspath(bfile.strip()))
-          data = parse_file(bibfiles[-1])
+          data = self.parseBibtexFile(bibfiles[-1])
         except Exception as e:
-          log.error('Failed to parse bibtex file: {}'.format(bfile.strip()))
+          if isinstance(e,undefined_macro_exception):
+            log.error('Undefined macro in bibtex file: {}, '\
+              'specify macro_files arguments in configuration file (e.g. moosedocs.yml)'\
+              .format(bfile.strip()))
+          else:
+            log.error('Failed to parse bibtex file: {}'.format(bfile.strip()))
           traceback.print_exc(e)
           return lines
         self._bibtex.add_entries(data.entries.iteritems())
