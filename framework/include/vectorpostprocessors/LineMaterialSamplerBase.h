@@ -147,6 +147,11 @@ LineMaterialSamplerBase<T>::execute()
   const RealVectorValue line_unit_vec = line_vec / line_length;
   std::vector<Real> values(_material_properties.size());
 
+  std::set<unsigned int> needed_mat_props;
+  const std::set<unsigned int> & mp_deps = this->getMatPropDependencies();
+  needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+
   for (const auto & elem : intersected_elems)
   {
     if (elem->processor_id() != processor_id())
@@ -179,6 +184,7 @@ LineMaterialSamplerBase<T>::execute()
       addSample(_q_point[qp], qp_proj_dist_along_line, values);
     }
   }
+  _fe_problem.clearActiveMaterialProperties(_tid);
 }
 
 template <typename T>
