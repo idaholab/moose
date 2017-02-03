@@ -1959,6 +1959,18 @@ MooseMesh::nElem() const
   return getMesh().n_elem();
 }
 
+dof_id_type
+MooseMesh::maxNodeId() const
+{
+  return getMesh().max_node_id();
+}
+
+dof_id_type
+MooseMesh::maxElemId() const
+{
+  return getMesh().max_elem_id();
+}
+
 Elem *
 MooseMesh::elem(const dof_id_type i)
 {

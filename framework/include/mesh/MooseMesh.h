@@ -221,6 +221,14 @@ public:
   virtual dof_id_type nElem() const;
 
   /**
+   * Calls max_node/elem_id() on the underlying libMesh mesh object.
+   * This may be larger than n_nodes/elem() in cases where the id
+   * numbering is not contiguous.
+   */
+  virtual dof_id_type maxNodeId() const;
+  virtual dof_id_type maxElemId() const;
+
+  /**
    * Various accessors (pointers/references) for Node "i".
    */
   virtual const Node & node (const dof_id_type i) const;
