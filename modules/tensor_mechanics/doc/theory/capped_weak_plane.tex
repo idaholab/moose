@@ -65,9 +65,18 @@ Denote the normal to the layers by $z$, and the tangential directions
 by $x$ and $y$.  It is convenient to introduce two new stress variables in
 terms of the stress tensor $\sigma$:
 \begin{equation}
-p = \sigma_{zz} \ \ \ \mbox{and}\ \ \ q = \sqrt{\sigma_{zx}^{2} +
-  \sigma_{zy}^{2}} \ .
+p = \sigma_{zz} \ \ \ \mbox{and}\ \ \ q = \sqrt{\sigma_{xz}^{2} +
+  \sigma_{yz}^{2}} \ .
+\label{eqn.defn.p.q}
 \end{equation}
+In standard elasticity, the stress tensor is symmetric, so an
+equivalent definition of $q$ is
+$q=\sqrt{\mbox{$\frac{1}{2}$}(\sigma_{xz}+\sigma_{zx})^{2} +
+  \mbox{$\frac{1}{2}$}(\sigma_{yz}+\sigma_{zy})^{2}}$, however the
+symmeterisation is deliberately not written in
+Eqn~(\ref{eqn.defn.p.q}) and below so that the equations also hold for
+the Cosserat case of Section~\ref{cosserat.sec}.
+
 The joint slipping is assumed to be governed by a
 Drucker-Prager type of plasticity with a cohesion $C$, and friction
 angle $\phi$:
@@ -196,26 +205,26 @@ p = \sigma_{zz} = \sigma_{zz}^{\mathrm{trial}} - E_{zzij}\gamma
 \label{p.norm.eqn}
 \end{equation}
 where the last equality holds by assumption (see full list of
-assumptions below).  The $zx$ and $zy$ components are similar:
+assumptions below).  The $xz$ and $yz$ components are similar:
 \begin{equation}
-\sigma_{zx} = \sigma_{zx}^{\mathrm{trial}} - E_{zxzx}\gamma
-\frac{\partial g}{\partial q}\frac{\partial q}{\partial \sigma_{zx}}
+\sigma_{xz} = \sigma_{xz}^{\mathrm{trial}} - E_{xzxz}\gamma
+\frac{\partial g}{\partial q}\frac{\partial q}{\partial \sigma_{xz}}
 \ . \label{eqn.xz.flow}
 \end{equation}
 Another assumption has been made about $E$.  The final term is
 \begin{equation}
-\frac{\partial q}{\partial\sigma_{zx}} = \frac{\sigma_{xz}}{q} \ .
+\frac{\partial q}{\partial\sigma_{xz}} = \frac{\sigma_{xz}}{q} \ .
 \end{equation}
 This means that Eqn~(\ref{eqn.xz.flow}) can be re-written
 \begin{equation}
-\sigma_{zx}^{2} \left( 1 + E_{zxzx}\gamma \frac{\partial g}{\partial
+\sigma_{xz}^{2} \left( 1 + E_{xzxz}\gamma \frac{\partial g}{\partial
   q} \frac{1}{q} \right)^{2} =
-\left(\sigma^{\mathrm{trial}}_{zx}\right)^{2} \ .
+\left(\sigma^{\mathrm{trial}}_{xz}\right)^{2} \ .
 \end{equation}
-A similar equation holds for the $zy$ component, and these can be
+A similar equation holds for the $yz$ component, and these can be
 summed and rearranged to yield
 \begin{equation}
-q = q^{\mathrm{trial}} - E_{zxzx}\gamma \frac{\partial g}{\partial q}
+q = q^{\mathrm{trial}} - E_{xzxz}\gamma \frac{\partial g}{\partial q}
 \ . \label{q.norm.eqn}
 \end{equation}
 Equations~(\ref{f.zero.return}), (\ref{p.norm.eqn})
@@ -230,10 +239,10 @@ return-map process must solve the following system of equations
 \begin{eqnarray}
 0 & = & q + p\tan\phi - C \ , \\
 p & = & p^{\mathrm{trial}} - E_{zzzz}\gamma\tan\psi \ , \\
-q & = & q^{\mathrm{trial}} - E_{zxzx}\gamma \ .
+q & = & q^{\mathrm{trial}} - E_{xzxz}\gamma \ .
 \end{eqnarray}
 The solution satisfied $p^{\mathrm{trial}} - p =
-E_{zzzz}\gamma\tan\psi$ and $q^{\mathrm{trial}} - q = E_{zxzx}\gamma$.
+E_{zzzz}\gamma\tan\psi$ and $q^{\mathrm{trial}} - q = E_{xzxz}\gamma$.
 
 \begin{figure}[htb]
 \begin{center}
@@ -258,9 +267,9 @@ $q^{\mathrm{trial}} - q$ quantifies the amount of shear failure.
 Therefore, the following definitions are used in this plasticity model
 \begin{eqnarray}
 i_{0} & = & i_{0}^{\mathrm{old}} + \frac{q^{\mathrm{trial}} -
-  q}{E_{zxzx}} \ , \\
+  q}{E_{xzxz}} \ , \\
 i_{1} & = & i_{1}^{\mathrm{old}} + \frac{p^{\mathrm{trial}} -
-  p}{E_{zzzz}} - \frac{(q^{\mathrm{trial}} - q)\tan\psi}{E_{zxzx}} \ .
+  p}{E_{zzzz}} - \frac{(q^{\mathrm{trial}} - q)\tan\psi}{E_{xzxz}} \ .
 \end{eqnarray}
 The final term ensures that $i_{1}$ does not increase during pure
 shear failure.  The scaling by $E$ ensures that these internal
@@ -287,12 +296,12 @@ $\gamma$, $i_{0}$ and $i_{1}$ such that
 0 & = & f(p, q, i) \ , \nonumber \\
 p & = & p^{\mathrm{trial}} - E_{zzzz}\gamma \frac{\partial g}{\partial
   p} \ , \nonumber \\
-q & = & q^{\mathrm{trial}} - E_{zxzx}\gamma \frac{\partial g}{\partial
+q & = & q^{\mathrm{trial}} - E_{xzxz}\gamma \frac{\partial g}{\partial
   q} \ , \nonumber \\
 i_{0} & = & i_{0}^{\mathrm{old}} + \frac{q^{\mathrm{trial}} -
-  q}{E_{zxzx}} \ , \nonumber \\
+  q}{E_{xzxz}} \ , \nonumber \\
 i_{1} & = & i_{1}^{\mathrm{old}} + \frac{p^{\mathrm{trial}} -
-  p}{E_{zzzz}} - \frac{(q^{\mathrm{trial}} - q)\tan\psi}{E_{zxzx}} \ .
+  p}{E_{zzzz}} - \frac{(q^{\mathrm{trial}} - q)\tan\psi}{E_{xzxz}} \ .
 \label{rmp.eqn}
 \end{eqnarray}
 The latter two equations are assumed to hold in the smoothed situation
@@ -308,11 +317,11 @@ E_{zzxx}\gamma\frac{\partial g}{\partial p} \ , \\
 E_{zzyy}\gamma\frac{\partial g}{\partial p} \ , \\
 \sigma_{zz} & = & p \ , \\
 \sigma_{zx} & = & \sigma_{zx}^{\mathrm{trial}} q / q^{\mathrm{trial}}
-\ , \\
+\ , \label{szx.return.eqn} \\
 \sigma_{xz} & = & \sigma_{xz}^{\mathrm{trial}} q / q^{\mathrm{trial}}
 \ , \\
 \sigma_{zy} & = & \sigma_{zy}^{\mathrm{trial}} q / q^{\mathrm{trial}}
-\ , \\
+\ ,  \label{szy.return.eqn} \\
 \sigma_{yz} & = & \sigma_{yz}^{\mathrm{trial}} q / q^{\mathrm{trial}}
 \ .
 \end{eqnarray}
@@ -320,7 +329,8 @@ The plastic strain is
 \begin{equation}
 \ep_{ij}^{\mathrm{plastic}} = \ep_{ij}^{\mathrm{plastic, old}} +
 \delta\epsilon_{ij} + E_{ijkl}^{-1}(\sigma_{kl}^{\mathrm{old}} -
-\sigma_{kl}) \ .
+\sigma_{kl}) = \ep_{ij}^{\mathrm{plastic, old}} + E_{ijkl}\gamma
+\frac{\partial g}{\partial \sigma_{kl}}\ .
 \end{equation}
 The elastic strain is
 \begin{equation}
@@ -332,8 +342,8 @@ The elastic strain is
 
 \chapter{Smoothing}
 
-The shear yield function, $f_{0}$, describes a cone in $(\sigma_{zy},
-\sigma_{zx}, \sigma_{zz})$ space, as depicted in
+The shear yield function, $f_{0}$, describes a cone in $(\sigma_{yz},
+\sigma_{xz}, \sigma_{zz})$ space, as depicted in
 Figure~\ref{shear.cone.fig}.  The cone's tip is problematic for the
 return-map process (the derivative is not defined there) and there are
 two main ways of getting around this.  Firstly, a multi-surface
@@ -435,6 +445,7 @@ poor convergence of the return-map process will occur.
 It is assumed that the elasticity tensor has the following symmetries:
 \begin{equation}
 E_{ijkl} = E_{jikl} = E_{ijlk} = E_{klij} \ ,
+\label{eqn.elas.symms}
 \end{equation}
 and that
 \begin{equation}
@@ -442,19 +453,21 @@ and that
 \end{equation}
 and that
 \begin{equation}
-E_{zxzx} = E_{zyzy} \ ,
+E_{xzxz} = E_{yzyz} \ ,
 \end{equation}
 and that
 \begin{equation}
-0 = E_{zxij} \ \ \mbox{ unless } (i, j) = (z, x) \ \ \mbox{ or } (i,
+0 = E_{xzij} \ \ \mbox{ unless } (i, j) = (z, x) \ \ \mbox{ or } (i,
 j) = (x, z) \ .
+\label{eqn.elas.xz.con}
 \end{equation}
-These are quite standard conditions that hold for all materials I am
-aware of.
+These are quite standard conditions that hold for all non-Cosserat
+materials I am aware of.
 
 
 \chapter{Technical discussions}
 
+\section{Unknowns and the convergence criterion}
 The return-map problem Eqn~(\ref{rmp.eqn}) is solved as a $3\times 3$
 system consisting of the first 3 equations, and substituting the fourth and
 fifth equations wherever needed.  The three unknowns are $p$, $q$ and
@@ -462,6 +475,7 @@ $\ga_{E}=\gamma E_{zzzz}$, which all have the same units.  Convergence
 is deemed to be achieved when the sum of squares of the residuals of
 these 3 equations is less than a user-defined tolerance.
 
+\section{Iterative procedure and initial guesses}
 A Newton-Raphson process is used, along with a cubic line-search.  The
 process may be initialised with the solution that is correct for
 perfect plasticity (no hardening) and no smoothing, if the user
@@ -471,6 +485,7 @@ always advantageous to initialise the Newton-Raphson process in this
 way, as the yield surfaces can move dramatically during the return
 process.
 
+\section{Substepping the strain increments}
 Because of the difficulties encountered during the Newton-Raphson
 process during rapidly hardening/softening moduli, it is possible to
 subdivide the applied strain increment, $\delta\epsilon$, into smaller
@@ -482,6 +497,7 @@ experience it does adversely affect MOOSE's nonlinear convergence as
 some Residual calculations will take more substeps than other Residual
 calculations: in effect this is reducing the accuracy of the Jacobian.
 
+\section{The consistent tangent operator}
 MOOSE's Jacobian depends on the derivative
 \begin{equation}
 H_{ijkl} = \frac{\delta\sigma_{ij}}{\delta \epsilon_{kl}} \ .
@@ -498,7 +514,99 @@ $(p,q)$ language, we need to the sx derivatives
   q^{\mathrm{trial}})} \ .
 \end{equation}
 The algebra is extremely tedious, but it is fairly easy for the
-computer.
+computer.  The MOOSE code contains two implementations of the
+consistent tangent operator.  One is valie for any general $(p, q)$
+model, while the other is specialised to the weak-plane case.
+
+\section{General consistent tangent operator}
+
+The return-map algorithm provides
+\begin{equation}
+\sigma_{ij} = \sigma_{ij}^{\mathrm{trial}} - E_{ijmn}\gamma
+\frac{\partial g}{\partial \sigma_{mn}} \ .
+\end{equation}
+Since $\sigma^{\mathrm{trial}} = E\epsilon$, the consistent tangent
+operator is
+\begin{eqnarray}
+H_{ijkl} & = & E_{ijkl} -
+E_{ijmn}E_{pqkl}\frac{\partial}{\partial\sigma_{pq}^{\mathrm{trial}}}
+\gamma \frac{\partial g}{\partial\sigma_{mn}} \ . \nonumber \\
+& = & E_{ijkl} - E_{ijmn}E_{pqkl} \left(
+\frac{\partial
+  p^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
+\frac{\partial}{\partial p^{\mathrm{trial}}}
++ \frac{\partial
+  q^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
+\frac{\partial}{\partial q^{\mathrm{trial}}} \right)
+\gamma
+\left(
+\frac{\partial g}{\partial p}\frac{\partial p}{\partial \sigma_{mn}}
++
+\frac{\partial g}{\partial q}\frac{\partial q}{\partial \sigma_{mn}}
+\right)
+\end{eqnarray}
+However, note that
+\begin{equation}
+\frac{\partial}{\partial p^{\mathrm{trial}}} \left( p -
+p^{\mathrm{trial}} + \gamma E_{pp}\frac{\partial g}{\partial p}
+\right) = 0 \ ,
+\end{equation}
+because the return-map algorithm gaurantees that the expression inside
+parenthases is zero.  Therefore
+\begin{equation}
+\frac{\partial}{\partial p^{\mathrm{trial}}}\gamma\frac{\partial
+  g}{\partial p} = \frac{1}{E_{pp}} \left( 1- \frac{\partial
+  p}{\partial p^{\mathrm{trial}}} \right) \ .
+\end{equation}
+A similar expression holds for three other cases.  There are still
+terms that involve derivatives of $\partial p/\partial \sigma_{mn}$
+  and $\partial q/\partial\sigma_{mn}$, but these may be separated off
+  as seen below.
+
+The consistent tangent operator may therefore be written as
+\begin{eqnarray}
+H_{ijkl} & = & E_{ijkl} - E_{ijmn}E_{pqkl} \left\{
+\frac{\partial
+  p^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
+\frac{1}{E_{pp}}\left(1 - \frac{\partial p}{\partial
+  p^{\mathrm{trial}}} \right) \frac{\partial p}{\partial\sigma_{mn}}
+\right. \nonumber \\
+&& \left.
+\frac{\partial
+  q^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
+\frac{1}{E_{pp}}\left( - \frac{\partial p}{\partial
+  q^{\mathrm{trial}}} \right) \frac{\partial p}{\partial\sigma_{mn}}
++
+\frac{\partial
+  p^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
+\frac{1}{E_{qq}}\left(- \frac{\partial q}{\partial
+  p^{\mathrm{trial}}} \right) \frac{\partial q}{\partial\sigma_{mn}}
++
+\frac{\partial
+  q^{\mathrm{trial}}}{\partial\sigma_{pq}^{\mathrm{trial}}}
+\frac{1}{E_{qq}}\left(1 - \frac{\partial q}{\partial
+  q^{\mathrm{trial}}} \right) \frac{\partial q}{\partial\sigma_{mn}}
+\right\} \nonumber \\
+&& \frac{\partial \sigma_{ab}}{\partial\epsilon_{kl}} E_{ijmn} \gamma
+\left(
+\frac{\partial g}{\partial p}\frac{\partial^{2}
+  p}{\partial\sigma_{mn}\partial\sigma_{ab}}
++
+\frac{\partial g}{\partial q}\frac{\partial^{2}
+  q}{\partial\sigma_{mn}\partial\sigma_{ab}}
+\right) \ .
+\end{eqnarray}
+All terms but the final line have already been computed during the
+return-map process.  The final line may be brought to the right-hand
+side (since $H_{ijkl} = \partial\sigma_{ij}/\partial\epsilon_{kl}$)
+and the resulting expression multiplied inverse $H$'s coefficient to
+finally yield $H$.  This inversion, and all the multiplication of
+rank-four tensors may be computationally expensive, so a cheaper (but
+more lengthy looking) version is derived below for the capped
+weak-plane case.
+
+
+\section{Specialisation to the weak-plane case}
 
 The return-map equations Eqn~(\ref{rmp.eqn}) are obtaining $(p, q)$
 given the trial variables.  Finding $H$ is really just re-solving
@@ -507,7 +615,7 @@ these equations for a slightly changed trial variable.  Denote
 \left( \begin{array}{l} R_{0} \\ R_{1} \\ R_{2} \end{array} \right)
 =
 \left( \begin{array}{l} -f \\ -p + p^{\mathrm{trial}} - E_{zzzz}\gamma \frac{\partial g}{\partial
-  p} \\ -q + q^{\mathrm{trial}} - E_{zxzx}\gamma \frac{\partial g}{\partial
+  p} \\ -q + q^{\mathrm{trial}} - E_{xzxz}\gamma \frac{\partial g}{\partial
   q} \end{array} \right) \ .
 \end{equation}
 Then
@@ -520,7 +628,7 @@ E_{zzzz}\gamma \frac{\partial^{2}g}{\partial p\partial i_{i}}\frac{\partial i_{i
   p^{\mathrm{trial}}}
 \ , \\
 \frac{\partial R_{2}}{\partial p^{\mathrm{trial}}} & = &
--E_{zxzx}\gamma \frac{\partial^{2}g}{\partial q\partial i_{i}}\frac{\partial i_{i}}{\partial
+-E_{xzxz}\gamma \frac{\partial^{2}g}{\partial q\partial i_{i}}\frac{\partial i_{i}}{\partial
   p^{\mathrm{trial}}}
 \end{eqnarray}
 In these equations
@@ -590,6 +698,9 @@ H_{xxii} & = & E_{xxii} - E_{zzxx} E_{zzii}\left( \frac{\delta \gamma}{\delta
 \end{eqnarray}
 If you understand all this, give yourself a pat on the back and then
 go and check the code for bugs: there are plenty more nasty equations!
+
+\section{The consistent tangent operator and substepping strain
+  increments}
 
 One extra complication arises from the potential substepping of the
 applied strain increment $\delta\epsilon$.  At each substep,
@@ -665,8 +776,34 @@ the inclined plane's normal aligns with the $z$ axis, the assumptions
 listed in Chapter~\ref{assumptions.sec} must hold.
 
 \section{Cosserat}
+\label{cosserat.sec}
 
-TODO.
+The difference between the Cosserat and non-Cosserat case is that the
+stress tensor is potentially non-symmetric, and that only
+$\sigma_{xz}$ and $\sigma_{yz}$ enter into the definition of $q$.
+That is, Eqn~(\ref{eqn.defn.p.q}) holds as it is written.  This means
+that the return-map process often results in a non-symmetric stress
+tensor, even if the trial stress was symmetric.  The equations of
+moment equilibrium then typically generate a spatially-varying moment
+stress, the precise nature of which depends on the problem at hand,
+such as the boundary conditions.
+
+The differences between the above presentation for the non-Cosserat
+case, and the Cosserat case are only:
+\begin{enumerate}
+\item Eqn~(\ref{szx.return.eqn}) and~(\ref{szy.return.eqn}) do not
+  hold.  These components of stress take their trial values after the
+  return-map problem has been solved: $\sigma_{zx} =
+  \sigma_{zx}^{\mathrm{trial}}$ and $\sigma_{zy} =
+  \sigma_{zy}^{\mathrm{trial}}$.
+\item The elasticity tensor need not have the symmetries given in
+  Eqn~(\ref{eqn.elas.symms}): it only needs to satisfy
+  $E_{ijkl}=E_{klij}$.
+\end{enumerate}
+The MOOSE Material is called {\tt ComputeCappedWeakPlaneCosseratStress}.
+
+
+
 
 \chapter{Tests}
 

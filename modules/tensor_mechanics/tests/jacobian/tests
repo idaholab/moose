@@ -274,6 +274,19 @@
     difference_tol = 1E10
   [../]
 
+  [./cwpc01]
+    type = 'PetscJacobianTester'
+    input = 'cwpc01.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./cwpc02]
+    type = 'PetscJacobianTester'
+    input = 'cwpc02.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
   [./phe01]
     type = 'PetscJacobianTester'
     input = 'phe01.i'
