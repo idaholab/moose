@@ -95,6 +95,10 @@ OversampleOutput::initOversample()
   if (_oversample)
   {
     MeshRefinement mesh_refinement(_mesh_ptr->getMesh());
+
+    // We want original and refined partitioning to match so we can
+    // query from one to the other safely on distributed meshes.
+    _mesh_ptr->getMesh().skip_partitioning(true);
     mesh_refinement.uniformly_refine(_refinements);
   }
 
