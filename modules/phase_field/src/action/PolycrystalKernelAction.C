@@ -6,7 +6,6 @@
 /****************************************************************/
 #include "PolycrystalKernelAction.h"
 #include "Factory.h"
-#include "Parser.h"
 #include "Conversion.h"
 #include "FEProblem.h"
 
@@ -14,6 +13,7 @@ template<>
 InputParameters validParams<PolycrystalKernelAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("Set up ACGrGrPoly, ACInterface, TimeDerivative, and ACGBPoly kernels");
   params.addRequiredParam<unsigned int>("op_num", "specifies the total number of grains (deformed + recrystallized) to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<VariableName>("c", "Name of coupled concentration variable");
@@ -111,8 +111,6 @@ PolycrystalKernelAction::act()
 
       std::string kernel_name = "ACBubInteraction_" + var_name;
       _problem->addKernel("ACGBPoly", kernel_name, params);
-
     }
-
   }
 }

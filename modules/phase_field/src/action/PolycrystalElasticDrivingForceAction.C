@@ -1,6 +1,12 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #include "PolycrystalElasticDrivingForceAction.h"
 #include "Factory.h"
-#include "Parser.h"
 #include "FEProblem.h"
 #include "Conversion.h"
 
@@ -56,4 +62,3 @@ PolycrystalElasticDrivingForceAction::act()
     _problem->addKernel(kernel_type, kernel_name, poly_params);
   }
 }
-

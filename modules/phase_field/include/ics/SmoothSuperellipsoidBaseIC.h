@@ -7,12 +7,8 @@
 #ifndef SMOOTHSUPERELLIPSOIDBASEIC_H
 #define SMOOTHSUPERELLIPSOIDBASEIC_H
 
-#include "Kernel.h"
 #include "InitialCondition.h"
 #include "MooseRandom.h"
-
-// System includes
-#include <string>
 
 // Forward Declarations
 class SmoothSuperellipsoidBaseIC;

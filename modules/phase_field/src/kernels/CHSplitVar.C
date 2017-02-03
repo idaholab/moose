@@ -1,11 +1,18 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #include "CHSplitVar.h"
 
 template<>
 InputParameters validParams<CHSplitVar>()
 {
   InputParameters params = validParams<KernelGrad>();
+  params.addClassDescription("Alternative Cahn-Hilliard split");
   params.addRequiredCoupledVar("c", "Variable representing the laplacian of c");
-
   return params;
 }
 
@@ -36,4 +43,3 @@ CHSplitVar::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0.0;
 }
-

@@ -47,17 +47,20 @@ C1ICBase::C1ICBase(const InputParameters & parameters) :
     _width(parameters.get<Real>("width")),
     _buffer(parameters.get<Real>("buffer")),
     _interface(parameters.get<Real>("interface"))
-{}
+{
+}
 
 Number
 C1ICBase::interfaceValue(Real r)
 {
   Real x = (r - _buffer) / _interface;
 
-  if (x < 0.0) return (_average + _amplitude);
-  if (x > 1.0) return (_average - _amplitude);
+  if (x < 0.0)
+    return (_average + _amplitude);
+  if (x > 1.0)
+    return (_average - _amplitude);
 
-  return ((1.0 + 4.0*x*x*x - 6.0*x*x) * _amplitude +
+  return ((1.0 + 4.0 * x*x*x - 6.0 * x*x) * _amplitude +
           _average);
 }
 
@@ -66,9 +69,10 @@ C1ICBase::interfaceDerivative(Real r)
 {
   Real x = (r - _buffer) / _interface;
 
-  if (x < 0.0) return 0.0;
-  if (x > 1.0) return 0.0;
+  if (x < 0.0)
+    return 0.0;
+  if (x > 1.0)
+    return 0.0;
 
   return ((12.0*x*x - 12.0*x) * _amplitude);
 }
-

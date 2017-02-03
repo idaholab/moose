@@ -7,11 +7,7 @@
 #ifndef RNDBOUNDINGBOXIC_H
 #define RNDBOUNDINGBOXIC_H
 
-#include "Kernel.h"
 #include "InitialCondition.h"
-
-// System includes
-#include <string>
 
 // Forward Declarations
 class RndBoundingBoxIC;
@@ -27,40 +23,30 @@ InputParameters validParams<RndBoundingBoxIC>();
  *
  * When setting the initial condition if bottom_left <= Point <= top_right then the "inside" value is used.
  * Otherwise the "outside" value is used.
- **/
+ */
 class RndBoundingBoxIC : public InitialCondition
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   */
   RndBoundingBoxIC(const InputParameters & parameters);
 
-  /**
-   * The value of the variable at a point.
-   *
-   * This must be overriden by derived classes.
-   */
   virtual Real value(const Point & p);
 
 private:
-  Real _x1;
-  Real _y1;
-  Real _z1;
-  Real _x2;
-  Real _y2;
-  Real _z2;
-  Real _mx_invalue;
-  Real _mx_outvalue;
-  Real _mn_invalue;
-  Real _mn_outvalue;
-  Real _range_invalue;
-  Real _range_outvalue;
+  const Real _x1;
+  const Real _y1;
+  const Real _z1;
+  const Real _x2;
+  const Real _y2;
+  const Real _z2;
+  const Real _mx_invalue;
+  const Real _mx_outvalue;
+  const Real _mn_invalue;
+  const Real _mn_outvalue;
+  const Real _range_invalue;
+  const Real _range_outvalue;
 
-  Point _bottom_left;
-  Point _top_right;
+  const Point _bottom_left;
+  const Point _top_right;
 };
 
 #endif //RNDBOUNDINGBOXIC_H

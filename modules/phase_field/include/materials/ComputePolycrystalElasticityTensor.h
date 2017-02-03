@@ -33,7 +33,7 @@ protected:
   const GrainDataTracker<RankFourTensor> & _grain_tracker;
 
   /// Number of order parameters
-  unsigned int _op_num;
+  const unsigned int _op_num;
 
   /// Order parameters
   std::vector<const VariableValue *> _vals;

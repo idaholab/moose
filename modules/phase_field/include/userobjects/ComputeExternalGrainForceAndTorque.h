@@ -50,7 +50,7 @@ protected:
   /// material property that provides jacobian of force density with respect to c
   const MaterialProperty<std::vector<RealGradient> > & _dFdc;
   /// no. of order parameters
-  unsigned int _op_num;
+  const unsigned int _op_num;
   /// provide UserObject for calculating grain volumes and centers
   const GrainTrackerInterface & _grain_tracker;
   unsigned int _grain_num;

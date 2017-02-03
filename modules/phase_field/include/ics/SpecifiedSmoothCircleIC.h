@@ -7,11 +7,7 @@
 #ifndef SPECIFIEDSMOOTHCIRCLEIC_H
 #define SPECIFIEDSMOOTHCIRCLEIC_H
 
-#include "Kernel.h"
 #include "SmoothCircleBaseIC.h"
-
-// System includes
-#include <string>
 
 // Forward Declarations
 class SpecifiedSmoothCircleIC;
@@ -26,18 +22,12 @@ InputParameters validParams<SpecifiedSmoothCircleIC>();
 class SpecifiedSmoothCircleIC : public SmoothCircleBaseIC
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   */
   SpecifiedSmoothCircleIC(const InputParameters & parameters);
 
+protected:
   virtual void computeCircleRadii();
-
   virtual void computeCircleCenters();
 
-protected:
   std::vector<Real> _x_positions;
   std::vector<Real> _y_positions;
   std::vector<Real> _z_positions;

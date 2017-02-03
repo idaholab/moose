@@ -21,12 +21,9 @@ public:
   virtual void act();
 
 private:
-  static const Real _abs_zero_tol;
-
-  unsigned int _op_num;
-  //unsigned int _grain_num;
-  std::string _var_name_base;
-  MooseEnum _random_type;
+  const unsigned int _op_num;
+  const std::string _var_name_base;
+  const MooseEnum _random_type;
 };
 
 template<>

@@ -1,16 +1,17 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #include "CHPFCRFFSplitVariablesAction.h"
 #include "Factory.h"
-#include "Parser.h"
 #include "FEProblem.h"
+#include "Conversion.h"
 #include "AddVariableAction.h"
-
-#include <sstream>
-#include <stdexcept>
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"
-
-const Real CHPFCRFFSplitVariablesAction::_abs_zero_tol = 1e-12;
 
 template<>
 InputParameters validParams<CHPFCRFFSplitVariablesAction>()
@@ -50,14 +51,7 @@ CHPFCRFFSplitVariablesAction::act()
   poly_params.set<MultiMooseEnum>("execute_on") = execute_options;
   poly_params.set<std::vector<FileName> >("input_files") = _sub_filenames;
   poly_params.set<unsigned int>("max_procs_per_app") = 1;
-
-  Point one(0.0, 0.0, 0.0);
-
-  std::vector<Point > positions;
-  positions.push_back(one);
-
-  poly_params.set<std::vector<Point> >("positions") = positions;
-
+  poly_params.set<std::vector<Point> >("positions") = { Point() };
   _problem->addMultiApp("TransientMultiApp", "HHEquationSolver", poly_params);
 
   poly_params = _factory.getValidParams("MultiAppNearestNodeTransfer");
@@ -66,38 +60,16 @@ CHPFCRFFSplitVariablesAction::act()
   poly_params.set<AuxVariableName>("variable") = _n_name;
   poly_params.set<VariableName>("source_variable") = _n_name;
   poly_params.set<MultiAppName>("multi_app") = "HHEquationSolver";
-
-
-  // Create Name for Transfer
-  std::string trans_name = _n_name;
-  trans_name.append("_trans");
-
-  _problem->addTransfer("MultiAppNearestNodeTransfer", trans_name, poly_params);
-
-#ifdef DEBUG
-  Moose::err << "Inside the CHPFCRFFSplitVariablesAction Object\n";
-  Moose::err << "VariableBase: " << _L_name_base
-            << "\torder: " << getParam<MooseEnum>("order")
-            << "\tfamily: " << getParam<MooseEnum>("family") << std::endl;
-#endif
+  _problem->addTransfer("MultiAppNearestNodeTransfer", _n_name + "_trans", poly_params);
 
   // Loop through the number of L variables
   for (unsigned int l = 0; l < _num_L; ++l)
   {
     // Create L base name
-    std::string L_name = _L_name_base;
-    std::stringstream out;
-    out << l;
-    L_name.append(out.str());
+    std::string L_name = _L_name_base + Moose::stringify(l);
 
     // Create real L variable
-    std::string real_name = L_name;
-    real_name.append("_real");
-
-
-#ifdef DEBUG
-    Moose::err << "Real name = " << real_name << std::endl;
-#endif
+    std::string real_name = L_name + "_real";
 
     _problem->addAuxVariable(real_name,
                              FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
@@ -108,23 +80,12 @@ CHPFCRFFSplitVariablesAction::act()
     poly_params.set<AuxVariableName>("variable") = real_name;
     poly_params.set<VariableName>("source_variable") = real_name;
     poly_params.set<MultiAppName>("multi_app") = "HHEquationSolver";
-
-
-    // Create Name for Transfer
-    std::string trans_name = real_name;
-    trans_name.append("_trans");
-
-    _problem->addTransfer("MultiAppNearestNodeTransfer", trans_name, poly_params);
+    _problem->addTransfer("MultiAppNearestNodeTransfer", real_name + "_trans", poly_params);
 
     if (l > 0)
     {
       // Create imaginary L variable IF l > 0
-      std::string imag_name = L_name;
-      imag_name.append("_imag");
-
-#ifdef DEBUG
-      Moose::err << "Imaginary name = " << imag_name << std::endl;
-#endif
+      std::string imag_name = L_name + "_imag";
 
       _problem->addAuxVariable(imag_name,
                                FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
@@ -135,14 +96,7 @@ CHPFCRFFSplitVariablesAction::act()
       poly_params.set<AuxVariableName>("variable") = imag_name;
       poly_params.set<VariableName>("source_variable") = imag_name;
       poly_params.set<MultiAppName>("multi_app") = "HHEquationSolver";
-
-      // Create Name for Transfer
-      std::string trans_name = imag_name;
-      trans_name.append("_trans");
-
-      _problem->addTransfer("MultiAppNearestNodeTransfer", trans_name, poly_params);
+      _problem->addTransfer("MultiAppNearestNodeTransfer", imag_name + "_trans", poly_params);
     }
-
   }
-
 }

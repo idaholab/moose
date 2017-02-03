@@ -18,15 +18,19 @@ public:
 
 protected:
   /// number of grains to create
-  unsigned int _grain_num;
+  const unsigned int _grain_num;
+
   /// base name for the auxvariables
   const std::vector<std::string> & _var_name_base;
+
   /// number of auxvariables
-  unsigned int _num_var;
+  const unsigned int _num_var;
+
   /// list of material properties to be used
   const std::vector<MaterialPropertyName> & _prop;
+
   /// number of properties
-  unsigned int _num_prop;
+  const unsigned int _num_prop;
 };
 
 template<>

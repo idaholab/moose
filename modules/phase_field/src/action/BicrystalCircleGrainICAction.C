@@ -6,28 +6,14 @@
 /****************************************************************/
 #include "BicrystalCircleGrainICAction.h"
 #include "Factory.h"
-#include "Parser.h"
 #include "FEProblem.h"
 #include "Conversion.h"
-
-#include <sstream>
-#include <stdexcept>
-
-// libMesh includes
-#include "libmesh/libmesh.h"
-#include "libmesh/exodusII_io.h"
-#include "libmesh/equation_systems.h"
-#include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/explicit_system.h"
-#include "libmesh/string_to_enum.h"
-
-const Real BicrystalCircleGrainICAction::_abs_zero_tol = 1e-12;
 
 template<>
 InputParameters validParams<BicrystalCircleGrainICAction>()
 {
   InputParameters params = validParams<Action>();
-
+  params.addClassDescription("Bicrystal with a circular grain and an embedding outer grain");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addRequiredParam<unsigned int>("op_num", "Number of grains, should be 2");
   params.addRequiredParam<Real>("radius", "Void radius");
@@ -35,9 +21,7 @@ InputParameters validParams<BicrystalCircleGrainICAction>()
   params.addRequiredParam<Real>("y", "The y coordinate of the circle grain center");
   params.addParam<Real>("z", 0.0, "The z coordinate of the circle grain center");
   params.addParam<Real>("int_width", 0.0, "The interfacial width of the void surface.  Defaults to sharp interface");
-
   params.addParam<bool>("3D_sphere", true, "in 3D, whether the smaller grain is a spheres or columnar grain");
-
   return params;
 }
 
@@ -59,20 +43,13 @@ BicrystalCircleGrainICAction::BicrystalCircleGrainICAction(const InputParameters
 void
 BicrystalCircleGrainICAction::act()
 {
-#ifdef DEBUG
-  Moose::err << "Inside the BicrystalCircleGrainICAction Object\n";
-#endif
-
   // Loop through the number of order parameters
   for (unsigned int op = 0; op < _op_num; op++)
   {
-    //Create variable names
-    std::string var_name = _var_name_base;
-    std::stringstream out;
-    out << op;
-    var_name.append(out.str());
+    // Create variable names
+    std::string var_name = _var_name_base + Moose::stringify(op);
 
-    //Set parameters for SmoothCircleIC
+    // Set parameters for SmoothCircleIC
     InputParameters poly_params = _factory.getValidParams("SmoothCircleIC");
     poly_params.set<VariableName>("variable") = var_name;
     poly_params.set<Real>("x1") = _x;
@@ -83,7 +60,7 @@ BicrystalCircleGrainICAction::act()
     poly_params.set<bool>("3D_spheres") = _3D_sphere;
     if (op == 0)
     {
-      //Values for circle grain
+      // Values for circle grain
       poly_params.set<Real>("invalue") = 1.0;
       poly_params.set<Real>("outvalue") = 0.0;
     }
@@ -94,7 +71,7 @@ BicrystalCircleGrainICAction::act()
       poly_params.set<Real>("outvalue") = 1.0;
     }
 
-    //Add initial condition
+    // Add initial condition
     _problem->addInitialCondition("SmoothCircleIC", "BicrystalCircleGrainIC_" + Moose::stringify(op), poly_params);
   }
 }

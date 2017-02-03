@@ -6,26 +6,16 @@
 /****************************************************************/
 #include "ReconVarICAction.h"
 #include "Factory.h"
-#include "Parser.h"
 #include "FEProblem.h"
 #include "Conversion.h"
-
-#include <sstream>
-#include <stdexcept>
-
-// libMesh includes
-#include "libmesh/libmesh.h"
-#include "libmesh/exodusII_io.h"
-#include "libmesh/equation_systems.h"
-#include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/explicit_system.h"
 
 template<>
 InputParameters validParams<ReconVarICAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("Action to set up initial conditions for a set of order parameters using EBSDReader data");
   params.addRequiredParam<UserObjectName>("ebsd_reader", "The EBSDReader GeneralUserObject");
-  params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order paraameters to create");
+  params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<unsigned int>("phase", "EBSD phase number to be assigned to this grain");
   params.addParam<bool>("advanced_op_assignment", false, "Enable advanced grain to op assignment (avoid invalid graph coloring)");
@@ -51,26 +41,18 @@ ReconVarICAction::act()
     // Set initial condition for each order parameter
     for (unsigned int op = 0; op < _op_num; ++op)
     {
-      // Create variable names
-      std::string var_name = _var_name_base;
-      std::stringstream out;
-      out << op;
-      var_name.append(out.str());
+      // Define parameters for ReconVarIC
+      InputParameters poly_params = _factory.getValidParams("ReconVarIC");
+      poly_params.set<VariableName>("variable") = _var_name_base + Moose::stringify(op);
+      poly_params.set<unsigned int>("op_index") = op;
+      poly_params.set<unsigned int>("op_num") = _op_num;
+      poly_params.set<UserObjectName>("ebsd_reader") = getParam<UserObjectName>("ebsd_reader");
+      poly_params.set<bool>("advanced_op_assignment") = getParam<bool>("advanced_op_assignment");
+      if (isParamValid("phase"))
+        poly_params.set<unsigned int>("phase") = getParam<unsigned int>("phase");
 
-      {
-        // Define parameters for ReconVarIC
-        InputParameters poly_params = _factory.getValidParams("ReconVarIC");
-        poly_params.set<VariableName>("variable") = var_name;
-        poly_params.set<unsigned int>("op_index") = op;
-        poly_params.set<unsigned int>("op_num") = _op_num;
-        poly_params.set<UserObjectName>("ebsd_reader") = getParam<UserObjectName>("ebsd_reader");
-        poly_params.set<bool>("advanced_op_assignment") = getParam<bool>("advanced_op_assignment");
-        if (isParamValid("phase"))
-          poly_params.set<unsigned int>("phase") = getParam<unsigned int>("phase");
-
-        // Add initial condition
-        _problem->addInitialCondition("ReconVarIC", "Initialize_op_" + Moose::stringify(op), poly_params);
-      }
+      // Add initial condition
+      _problem->addInitialCondition("ReconVarIC", "Initialize_op_" + Moose::stringify(op), poly_params);
     }
 
     // Add the elemental op

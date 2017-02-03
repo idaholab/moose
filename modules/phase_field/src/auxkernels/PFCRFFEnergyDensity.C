@@ -20,7 +20,6 @@ InputParameters validParams<PFCRFFEnergyDensity>()
    MooseEnum log_options("tolerance cancelation expansion nothing");
    params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
    params.addParam<Real>("tol", 1.0e-9, "Tolerance used when the tolerance approach is chosen");
-
    return params;
 }
 
@@ -33,7 +32,6 @@ PFCRFFEnergyDensity::PFCRFFEnergyDensity(const InputParameters & parameters) :
     _num_exp_terms(getParam<unsigned int>("num_exp_terms")),
     _log_approach(getParam<MooseEnum>("log_approach")),
     _tol(getParam<Real>("tol"))
-
 {
   _vals.resize(_order);
   for (unsigned int i = 0; i < _order; ++i)
