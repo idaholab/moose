@@ -127,11 +127,6 @@ OversampleOutput::initOversample()
     if (num_vars > 0)
     {
       _mesh_functions[sys_num].resize(num_vars);
-      _serialized_solution = NumericVector<Number>::build(_communicator);
-      _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
-
-      // Need to pull down a full copy of this vector on every processor so we can get values in parallel
-      source_sys.solution->localize(*_serialized_solution);
 
       // Add the variables to the system... simultaneously creating MeshFunctions for them.
       for (unsigned int var_num = 0; var_num < num_vars; var_num++)
@@ -170,18 +165,13 @@ OversampleOutput::updateOversample()
       System & source_sys = source_es.get_system(sys_num);
       System & dest_sys = _oversample_es->get_system(sys_num);
 
-      // Update the solution for the oversampled mesh
-      _serialized_solution->clear();
-      _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
-      source_sys.solution->localize(*_serialized_solution);
-
       // Update the mesh functions
       for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
       {
 
         // If the mesh has change the MeshFunctions need to be re-built, otherwise simply clear it for re-initialization
         if (!_mesh_functions[sys_num][var_num] || _oversample_mesh_changed)
-          _mesh_functions[sys_num][var_num] = libmesh_make_unique<MeshFunction>(source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
+          _mesh_functions[sys_num][var_num] = libmesh_make_unique<MeshFunction>(source_es, *source_sys.current_local_solution, source_sys.get_dof_map(), var_num);
         else
           _mesh_functions[sys_num][var_num]->clear();
 
