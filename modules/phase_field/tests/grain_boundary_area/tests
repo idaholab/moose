@@ -1,0 +1,12 @@
+[Tests]
+  [./disc]
+    type = 'CSVDiff'
+    input = 'disc.i'
+    csvdiff = 'disc_out.csv'
+  [../]
+  [./diagonal]
+    type = 'CSVDiff'
+    input = 'diagonal.i'
+    csvdiff = 'diagonal_out.csv'
+  [../]
+[]
