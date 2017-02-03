@@ -36,11 +36,24 @@ class MarkdownTestCase(unittest.TestCase):
     cwd = os.getcwd()
     os.chdir(os.path.join(MooseDocs.MOOSE_DIR, 'docs'))
 
-    config = MooseDocs.yaml_load('moosedocs.yml')
+    config = MooseDocs.load_config('moosedocs.yml')
 
     extensions, extension_configs = MooseDocs.get_markdown_extensions(config)
+    cls.updateExtensionConfigs(extension_configs)
     cls.parser = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
     os.chdir(cwd)
+
+  @classmethod
+  def updateExtensionConfigs(cls, extension_configs):
+    """
+    Method to change the arguments that come from the configuration file for
+    specific tests.  This way one can test optional arguments without permanently
+    changing moosedocs.yml
+    """
+    if 'testBibtexMacro' in dir(cls):
+      if 'MooseDocs.extensions.MooseMarkdown' in extension_configs:
+        extension_configs['MooseDocs.extensions.MooseMarkdown']['macro_files'] =\
+          ['docs/bib/macro_test_abbrev.bib']
 
   def setUp(self):
     """
