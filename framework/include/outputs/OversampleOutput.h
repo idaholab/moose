@@ -40,7 +40,7 @@ InputParameters validParams<OversampleOutput>();
  * changes to the libMesh::EquationsSystems() pointer (_es_ptr), i.e., this pointer is
  * will point to the oversampled system, if oversamping is utilized.
  *
- * Additionally, the class adds a pointer the the mesh object (_mesh_ptr) that again
+ * Additionally, the class adds a pointer to the mesh object (_mesh_ptr) that again
  * points to the correct mesh depending on the use of oversampling.
  *
  * The use of oversampling is triggered by setting the oversample input parameter to a
