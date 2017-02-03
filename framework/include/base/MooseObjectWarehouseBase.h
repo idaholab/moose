@@ -169,7 +169,7 @@ protected:
                                              const std::vector<std::shared_ptr<T>> & objects);
 
   static void updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props,
-                                             const std::vector<std:shared_ptr<T>> & objects);
+                                            const std::vector<std:shared_ptr<T>> & objects);
 
   /**
    * Calls assert on thread id.
@@ -505,7 +505,7 @@ MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(std::set<MooseVariab
 
 template<typename T>
 void
-MooseObjectWarehouseBase<T>::updateMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
+MooseObjectWarehouseBase<T>::updateMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid/* = 0*/) const
 {
   if (hasActiveObjects(tid))
     updateMatPropDependencyHelper(needed_mat_props, _all_objects[tid]);
@@ -513,7 +513,7 @@ MooseObjectWarehouseBase<T>::updateMatPropDependency(std::set<unsigned int> & ne
 
 template<typename T>
 void
-MooseObjectWarehouseBase<T>::updateBlockMatPropDependency(SubdomainID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
+MooseObjectWarehouseBase<T>::updateBlockMatPropDependency(SubdomainID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid/* = 0*/) const
 {
   if (hasActiveBlockObjects(id, tid))
     updateMatPropDependencyHelper(needed_mat_props, getActiveBlockObjects(id, tid));

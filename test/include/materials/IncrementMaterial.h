@@ -22,7 +22,7 @@ template<>
 InputParameters validParams<GenericConstantMaterial>();
 
 /**
- * GenericConstantMaterial that tracks the number of times computeQpProperties has been called.
+ * A material that tracks the number of times computeQpProperties has been called.
  */
 class IncrementMaterial : public GenericConstantMaterial
 {
