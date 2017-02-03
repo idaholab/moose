@@ -7,12 +7,8 @@
 #ifndef POLYCRYSTALREDUCEDIC_H
 #define POLYCRYSTALREDUCEDIC_H
 
-#include "Kernel.h"
 #include "InitialCondition.h"
 #include "PolycrystalICTools.h"
-
-// System includes
-#include <string>
 
 // Forward Declarations
 class PolycrystalReducedIC;
@@ -25,29 +21,17 @@ InputParameters validParams<PolycrystalReducedIC>();
  * With 2 Grains, _typ = 0 results in a circular inclusion grain and _type = 1 gives a bicrystal.
  * With more than 2 grains, _typ = 0 gives set positions for 6 grains, _type = 1 gives hexagonal grains for 4 grains.
  *                          _typ = 2 Gives a random voronoi structure
-*/
+ */
 class PolycrystalReducedIC : public InitialCondition
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   */
   PolycrystalReducedIC(const InputParameters & parameters);
 
-  /**
-   * The value of the variable at a point.
-   *
-   * This must be overriden by derived classes.
-   */
   virtual Real value(const Point & p);
-
   virtual void initialSetup();
 
 protected:
   bool assignColors(const AdjacencyGraph & adjacency_matrix, std::vector<unsigned int> & colors, unsigned int grain) const;
-
   bool isGraphValid(const AdjacencyGraph & adjacency_matrix, std::vector<unsigned int> & colors, unsigned int grain, unsigned int color) const;
 
   MooseMesh & _mesh;

@@ -21,10 +21,8 @@ public:
   virtual void act();
 
 private:
-  static const Real _abs_zero_tol;
-
-  unsigned int _op_num;
-  std::string _var_name_base;
+  const unsigned int _op_num;
+  const std::string _var_name_base;
 };
 
 template<>

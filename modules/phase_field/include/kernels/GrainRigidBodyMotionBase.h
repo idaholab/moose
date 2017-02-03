@@ -48,7 +48,7 @@ protected:
   const std::vector<dof_id_type> & _c_dofs;
 
   /// no. of order parameters
-  unsigned int _op_num;
+  const unsigned int _op_num;
   /// Variable value for the order parameters
   std::vector<const VariableValue *> _vals;
   std::vector<unsigned int> _vals_var;

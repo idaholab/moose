@@ -10,8 +10,8 @@
 #include "Action.h"
 
 /**
- * Action that sets up ACSEDGPoly Kernels that add the stored energy contribution to grain growth models
- * This allows such models to simulate recrystallization as well.
+ * Action that sets up ACSEDGPoly Kernels that adds the stored energy contribution
+ * to grain growth models. This allows such models to simulate recrystallization as well.
  */
 class PolycrystalStoredEnergyAction: public Action
 {
@@ -22,13 +22,13 @@ public:
 
 protected:
   /// number of grains to create
-  unsigned int _op_num;
+  const unsigned int _op_num;
 
   /// base name for the order parameter variables
-  std::string _var_name_base;
+  const std::string _var_name_base;
 
   /// number of deformed grains
-  unsigned int _deformed_grain_num;
+  const unsigned int _deformed_grain_num;
 };
 
 template<>

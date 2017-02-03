@@ -6,22 +6,8 @@
 /****************************************************************/
 #include "PolycrystalVoronoiICAction.h"
 #include "Factory.h"
-#include "Parser.h"
 #include "FEProblem.h"
 #include "Conversion.h"
-
-#include <sstream>
-#include <stdexcept>
-
-// libMesh includes
-#include "libmesh/libmesh.h"
-#include "libmesh/exodusII_io.h"
-#include "libmesh/equation_systems.h"
-#include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/explicit_system.h"
-#include "libmesh/string_to_enum.h"
-
-const Real PolycrystalVoronoiICAction::_abs_zero_tol = 1e-12;
 
 template<>
 InputParameters validParams<PolycrystalVoronoiICAction>()
@@ -55,15 +41,9 @@ PolycrystalVoronoiICAction::act()
   // Loop through the number of order parameters
   for (unsigned int op = 0; op < _op_num; op++)
   {
-    //Create variable names
-    std::string var_name = _var_name_base;
-    std::stringstream out;
-    out << op;
-    var_name.append(out.str());
-
     //Set parameters for BoundingBoxIC
     InputParameters poly_params = _factory.getValidParams("PolycrystalReducedIC");
-    poly_params.set<VariableName>("variable") = var_name;
+    poly_params.set<VariableName>("variable") = _var_name_base + Moose::stringify(op);
     poly_params.set<unsigned int>("op_num") = _op_num;
     poly_params.set<unsigned int>("grain_num") = _grain_num;
     poly_params.set<unsigned int>("op_index") = op;

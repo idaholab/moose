@@ -48,7 +48,8 @@ private:
   /// constant value corresponding to grain rotation
   const Real _mr;
 
-  unsigned int _op_num;
+  const unsigned int _op_num;
+
   /// type of force density material
   std::string _base_name;
 

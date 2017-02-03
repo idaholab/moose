@@ -8,7 +8,6 @@
 #define RAMPIC_H
 
 #include "InitialCondition.h"
-#include "InputParameters.h"
 
 //Forward Declarations
 class RampIC;

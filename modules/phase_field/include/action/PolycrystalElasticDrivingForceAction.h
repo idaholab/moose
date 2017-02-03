@@ -1,3 +1,10 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #ifndef POLYCRYSTALELASTICDRIVINGFORCEACTION_H
 #define POLYCRYSTALELASTICDRIVINGFORCEACTION_H
 
@@ -10,10 +17,11 @@ class PolycrystalElasticDrivingForceAction;
 template<>
 InputParameters validParams<PolycrystalElasticDrivingForceAction>();
 /**
- * Action that addes the elastic driving force for each order parameter
+ * Action that adds the elastic driving force for each order parameter
  */
-class PolycrystalElasticDrivingForceAction: public Action,
-                                  public DerivativeMaterialPropertyNameInterface
+class PolycrystalElasticDrivingForceAction:
+  public Action,
+  public DerivativeMaterialPropertyNameInterface
 {
 public:
   PolycrystalElasticDrivingForceAction(const InputParameters & params);
@@ -21,9 +29,8 @@ public:
   virtual void act();
 
 private:
-
   /// Number of order parameters used in the model
-  unsigned int _op_num;
+  const unsigned int _op_num;
 
   /// Base name for the order parameters
   std::string _var_name_base;

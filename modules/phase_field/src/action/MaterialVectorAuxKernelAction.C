@@ -6,7 +6,6 @@
 /****************************************************************/
 #include "MaterialVectorAuxKernelAction.h"
 #include "Factory.h"
-#include "Parser.h"
 #include "Conversion.h"
 #include "FEProblem.h"
 
@@ -41,15 +40,14 @@ MaterialVectorAuxKernelAction::act()
     for (unsigned int val = 0; val < _num_var; ++val)
     {
       std::string var_name = _var_name_base[val] + Moose::stringify(gr);
-      {
-        InputParameters params = _factory.getValidParams("MaterialStdVectorAux");
-        params.set<AuxVariableName>("variable") = var_name;
-        params.set<MaterialPropertyName>("property") = _prop[val];
-        params.set<unsigned int>("index") = gr;
-        params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
 
-        std::string aux_kernel_name = var_name;
-        _problem->addAuxKernel("MaterialStdVectorAux", aux_kernel_name, params);
-      }
+      InputParameters params = _factory.getValidParams("MaterialStdVectorAux");
+      params.set<AuxVariableName>("variable") = var_name;
+      params.set<MaterialPropertyName>("property") = _prop[val];
+      params.set<unsigned int>("index") = gr;
+      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+
+      std::string aux_kernel_name = var_name;
+      _problem->addAuxKernel("MaterialStdVectorAux", aux_kernel_name, params);
     }
 }

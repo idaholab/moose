@@ -28,23 +28,28 @@ public:
 protected:
   virtual void computeQpProperties();
 
+  /// total number of grains
+  const unsigned int _op_num;
+
+  /// order parameter values
   std::vector<const VariableValue *> _vals;
-  Real _length_scale;
-  Real _int_width;
-  Real _time_scale;
-  Real _GBMobility;
+
+  const Real _length_scale;
+  const Real _int_width;
+  const Real _time_scale;
+  const Real _GBMobility;
 
   /// the GB Energy
-  Real _GBE;
+  const Real _GBE;
 
   /// the average dislocation density
-  Real _Disloc_Den;
+  const Real _Disloc_Den;
 
   /// the elastic modulus
-  Real _Elas_Mod;
+  const Real _Elas_Mod;
 
   /// the Length of Burger's Vector
-  Real _Burg_vec;
+  const Real _Burg_vec;
 
   /// the same parameters that appear in the original grain growth model
   MaterialProperty<Real> & _kappa;
@@ -68,10 +73,7 @@ protected:
   // Constants
 
   /// number of deformed grains
-  unsigned int _deformed_grain_num;
-
-  /// total number of grains
-  unsigned int _op_num;
+  const unsigned int _deformed_grain_num;
 
   /// Grain tracker object
   const GrainTrackerInterface & _grain_tracker;

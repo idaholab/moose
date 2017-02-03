@@ -16,8 +16,9 @@ template<>
 InputParameters validParams<CoefCoupledTimeDerivative>();
 
 /**
- * This calculates the time derivative for a coupled variable multiplied by a scalar coedfficient
- **/
+ * This calculates the time derivative for a coupled variable multiplied by a
+ * scalar coefficient
+ */
 class CoefCoupledTimeDerivative : public CoupledTimeDerivative
 {
 public:
@@ -27,7 +28,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  Real _coef;
+  const Real _coef;
 };
 
 #endif //COEFCOUPLEDTIMEDERIVATIVE_H

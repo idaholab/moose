@@ -43,11 +43,6 @@ InputParameters validParams<C1ICBase>();
 class C1ICBase : public InitialCondition
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   */
   C1ICBase(const InputParameters & parameters);
 
 protected:

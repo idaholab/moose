@@ -10,7 +10,7 @@ template<>
 InputParameters validParams<CHSplitVar>();
 
 /**
- *
+ * Alternative Cahn-Hilliard split
  */
 class CHSplitVar : public KernelGrad
 {
@@ -23,7 +23,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  Real _var_c;
+  const unsigned int _var_c;
   const VariableGradient & _grad_c;
 };
 

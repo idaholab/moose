@@ -16,7 +16,6 @@ InputParameters validParams<ThumbIC>()
   params.addRequiredParam<Real>("height", "The z coordinate of the circle center");
   params.addRequiredParam<Real>("invalue", "The variable value inside the circle");
   params.addRequiredParam<Real>("outvalue", "The variable value outside the circle");
-
   return params;
 }
 
@@ -27,7 +26,8 @@ ThumbIC::ThumbIC(const InputParameters & parameters) :
     _height(parameters.get<Real>("height")),
     _invalue(parameters.get<Real>("invalue")),
     _outvalue(parameters.get<Real>("outvalue"))
-{}
+{
+}
 
 Real
 ThumbIC::value(const Point & p)
@@ -58,4 +58,3 @@ ThumbIC::value(const Point & p)
 
   return value;
 }
-

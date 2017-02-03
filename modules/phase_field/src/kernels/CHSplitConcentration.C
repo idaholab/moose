@@ -29,14 +29,14 @@ CHSplitConcentration::CHSplitConcentration(const InputParameters & parameters) :
 Real
 CHSplitConcentration::computeQpResidual()
 {
-  RealVectorValue a = _mobility[_qp] * _grad_mu[_qp];
+  const RealVectorValue a = _mobility[_qp] * _grad_mu[_qp];
   return _grad_test[_i][_qp] * a ;
 }
 
 Real
 CHSplitConcentration::computeQpJacobian()
 {
-  RealVectorValue a = _dmobility_dc[_qp] * _grad_mu[_qp];
+  const RealVectorValue a = _dmobility_dc[_qp] * _grad_mu[_qp];
   return _grad_test[_i][_qp] * a * _phi[_j][_qp];
 }
 
@@ -45,7 +45,7 @@ CHSplitConcentration::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _mu_var)
   {
-    RealVectorValue a = _mobility[_qp] * _grad_phi[_j][_qp];
+    const RealVectorValue a = _mobility[_qp] * _grad_phi[_j][_qp];
     return _grad_test[_i][_qp] * a;
   }
   else

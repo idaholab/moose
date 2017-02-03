@@ -17,9 +17,9 @@ public:
   virtual void act();
 
 protected:
-  AuxVariableName _div_var;
-  std::vector<MaterialPropertyName> _prop;
-  MaterialPropertyName _div_prop;
+  const AuxVariableName _div_var;
+  const std::vector<MaterialPropertyName> _prop;
+  const MaterialPropertyName _div_prop;
 };
 
 template<>

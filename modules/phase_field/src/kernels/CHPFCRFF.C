@@ -1,11 +1,18 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #include "CHPFCRFF.h"
 #include "MathUtils.h"
-using namespace MathUtils;
 
 template<>
 InputParameters validParams<CHPFCRFF>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Cahn-Hilliard residual for the RFF form of the phase field crystal model");
   params.addRequiredCoupledVar("v", "Array of names of the real parts of the L variables");
   MooseEnum log_options("tolerance cancelation expansion nothing");
   params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
@@ -13,7 +20,7 @@ InputParameters validParams<CHPFCRFF>()
   params.addParam<Real>("n_exp_terms", 4, "Number of terms used in the Taylor expansion of the natural log term");
   params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used with the kernel");
   params.addParam<MaterialPropertyName>("Dmob_name", "DM", "The D mobility used with the kernel");
-  params.addParam<bool>("has_MJac",false,"Jacobian information for the mobility is defined");
+  params.addParam<bool>("has_MJac", false, "Jacobian information for the mobility is defined");
   params.addParam<Real>("a", 1.0, "Constants on Taylor Series");
   params.addParam<Real>("b", 1.0, "Constants on Taylor Series");
   params.addParam<Real>("c", 1.0, "Constants on Taylor Series");
@@ -27,15 +34,14 @@ CHPFCRFF::CHPFCRFF(const InputParameters & parameters) :
     _DM(_has_MJac ? &getMaterialProperty<Real>("Dmob_name") : NULL),
     _log_approach(getParam<MooseEnum>("log_approach")),
     _tol(getParam<Real>("tol")),
+    _num_L(coupledComponents("v")),
+    _vals_var(_num_L),
+    _grad_vals(_num_L),
     _n_exp_terms(getParam<Real>("n_exp_terms")),
     _a(getParam<Real>("a")),
     _b(getParam<Real>("b")),
-    _c(getParam<Real>("c")),
-    _num_L(coupledComponents("v")) // number of L variables
+    _c(getParam<Real>("c"))
 {
-  _grad_vals.resize(_num_L); // Resize variable array
-  _vals_var.resize(_num_L);
-
   // Loop through grains and load coupled gradients into the arrays
   for (unsigned int i = 0; i < _num_L; ++i)
   {
@@ -232,4 +238,3 @@ CHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0.0;
 }
-
