@@ -125,6 +125,7 @@ markdown_extensions:
                       - /ScalarKernels
                       - /UserObjects
                       - /VectorPostprocessors
+                      - /Modules
               - heat_conduction:
                   doxygen: http://mooseframework.org/docs/doxygen/modules/
                   paths:
@@ -185,10 +186,4 @@ markdown_extensions:
                   hide:
                       - /UserObjects/LevelSetCFLCondition
                       - /UserObjects/LevelSetVolume
-                      - /Kernels # remove this and all below when framework is clean
-                      - /UserObjects
-                      - /Transfers
-                      - /MultiApps
-                      - /Problem
-                      - /Functions
-                      - /Postprocessors
+                      - /Modules

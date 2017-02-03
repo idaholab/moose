@@ -35,10 +35,14 @@ class MooseActionList(MooseSyntaxBase):
         if settings['groups']:
             groups = settings['groups'].split()
 
-        # Build complete list of action objects
+        # Build complete list of unique action objects
         actions = []
+        keys = set()
         for syn in self._syntax.itervalues():
-            actions += syn.actions().values()
+            for value in syn.actions().values():
+                if value.key not in keys:
+                    actions.append(value)
+                    keys.add(value.key)
 
         # Create the primary element
         el = etree.Element('div')

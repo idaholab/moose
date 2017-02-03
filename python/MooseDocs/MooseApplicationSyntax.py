@@ -11,7 +11,7 @@ class MooseInfoBase(object):
     """
     STUB_HEADER = '<!-- MOOSE Documentation Stub: Remove this when content is added. -->\n'
 
-    def __init__(self, node, code=[], install='', group='', hidden=False, generate=False):
+    def __init__(self, node, code=[], install='', group='', hidden=False, generate=False, check=True):
 
         # Define public parameters to be accessible
         self.syntax = node['name']
@@ -23,6 +23,7 @@ class MooseInfoBase(object):
         self.key = '/'.join([x for x in node['name'].split('/') if x not in ['<type>', '*']])
         self.name = self.key.split('/')[-1]
         self.install = install
+        self._do_check = check
 
         # Protected
         self._node = node
@@ -33,8 +34,12 @@ class MooseInfoBase(object):
         """
         Check the status of the documentation for a MooseObject.
         """
+        # Do nothing if the check is disabled
+        if not self._do_check:
+            return
+
         # Error if the filename does not exist and create a stub if desired
-        if not os.path.exists(self.markdown):
+        elif not os.path.exists(self.markdown):
             log.error("No documentation for {}. Documentation for this object should be created in: {}".format(self.key, self.markdown))
             if self._generate:
                 self.generate()
@@ -213,7 +218,8 @@ class MooseApplicationSyntax(object):
                                            install=install,
                                            group=self._group,
                                            generate=generate,
-                                           hidden=self.hidden(node['name']))
+                                           hidden=self.hidden(node['name']),
+                                           check=False)
                     self._actions[info.key] = info
 
     def name(self):
