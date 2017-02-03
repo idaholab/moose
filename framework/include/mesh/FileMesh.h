@@ -34,7 +34,6 @@ public:
 
   virtual void buildMesh() override;
 
-  void read(const std::string & file_name);
   virtual ExodusII_IO * exReader() const override { return _exreader.get(); }
 
   // Get/Set Filename (for meshes read from a file)
@@ -44,8 +43,7 @@ public:
 protected:
   /// the file_name from whence this mesh came
   std::string _file_name;
-  /// Whether or not we're reading a checkpoint file
-  bool _is_checkpoint;
+
   /// Auxiliary object for restart
   std::unique_ptr<ExodusII_IO> _exreader;
 };

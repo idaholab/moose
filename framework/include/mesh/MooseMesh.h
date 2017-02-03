@@ -826,8 +826,8 @@ protected:
   /// true if mesh is changed (i.e. after adaptivity step)
   bool _is_changed;
 
-  /// True if a Nemesis Mesh was read in
-  bool _is_nemesis;
+  /// Set to true for meshes that have been split before running the simulation (Exodus / Parallel Checkpoint)
+  bool _pre_split;
 
   /// True if prepare has been called on the mesh
   bool _is_prepared;

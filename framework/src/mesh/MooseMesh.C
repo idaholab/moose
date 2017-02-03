@@ -77,10 +77,7 @@ InputParameters validParams<MooseMesh>()
                              "REPLICATED: Always use libMesh::ReplicatedMesh "
                              "DEFAULT: Use libMesh::ReplicatedMesh unless --distributed-mesh is specified on the command line");
 
-  params.addParam<bool>("nemesis", false,
-                        "If nemesis=true and file=foo.e, actually reads "
-                        "foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, "
-                        "where N = # CPUs, with NemesisIO.");
+  params.addParam<bool>("pre_split", false, "Whether or not the mesh has been pre-split into files intended to be read into a parallel_type=DISTRIBUTED mesh");
 
   MooseEnum dims("1=1 2 3", "1");
   params.addParam<MooseEnum>("dim", dims,
@@ -107,7 +104,7 @@ InputParameters validParams<MooseMesh>()
   params.registerBase("MooseMesh");
 
   // groups
-  params.addParamNamesToGroup("dim nemesis patch_update_strategy construct_node_list_from_side_list num_ghosted_layers"
+  params.addParamNamesToGroup("dim pre_split patch_update_strategy construct_node_list_from_side_list num_ghosted_layers"
                               " ghost_point_neighbors", "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
@@ -128,7 +125,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     _custom_partitioner_requested(false),
     _uniform_refine_level(0),
     _is_changed(false),
-    _is_nemesis(getParam<bool>("nemesis")),
+    _pre_split(getParam<bool>("pre_split")),
     _is_prepared(false),
     _needs_prepare_for_use(false),
     _node_to_elem_map_built(false),
@@ -151,7 +148,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
 
   case 1: // SERIAL
     mooseDeprecated("Using 'distribution = SERIAL' in the Mesh block is deprecated, use 'parallel_type = REPLICATED' instead.");
-    if (_app.getDistributedMeshOnCommandLine() || _is_nemesis)
+    if (_app.getDistributedMeshOnCommandLine() || _pre_split)
       _distribution_overridden = true;
     break;
 
@@ -169,7 +166,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
     _use_distributed_mesh = true;
     break;
   case 1: // SERIAL
-    if (_app.getDistributedMeshOnCommandLine() || _is_nemesis)
+    if (_app.getDistributedMeshOnCommandLine() || _pre_split)
       _parallel_type_overridden = true;
     break;
   case 2: // DEFAULT
@@ -185,7 +182,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
 
   // If the user specifies 'nemesis = true' in the Mesh block, we
   // must use DistributedMesh.
-  if (_is_nemesis)
+  if (_pre_split)
     _use_distributed_mesh = true;
 
   unsigned dim = getParam<MooseEnum>("dim");
@@ -230,7 +227,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
     _partitioner_overridden(other_mesh._partitioner_overridden),
     _uniform_refine_level(other_mesh.uniformRefineLevel()),
     _is_changed(false),
-    _is_nemesis(false),
+    _pre_split(getParam<bool>("pre_split")),
     _is_prepared(false),
     _needs_prepare_for_use(false),
     _node_to_elem_map_built(false),
@@ -308,7 +305,7 @@ MooseMesh::freeBndElems()
 void
 MooseMesh::prepare(bool force)
 {
-  if (dynamic_cast<DistributedMesh *>(&getMesh()) && !_is_nemesis)
+  if (dynamic_cast<DistributedMesh *>(&getMesh()) && !_pre_split)
   {
     // Call prepare_for_use() and allow renumbering
     getMesh().allow_renumbering(true);

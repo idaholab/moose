@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'checkpoint_split.i'
+    exodiff = 'checkpoint_split_out.e'
+    min_parallel = 2
+    max_parallel = 2
+  [../]
+[]

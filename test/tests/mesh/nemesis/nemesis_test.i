@@ -10,7 +10,7 @@
 
 [Mesh]
   file = cylinder/cylinder.e
-  nemesis = true
+  pre_split = true
   # This option lets us exodiff against a gold standard generated
   # without repartitioning
   skip_partitioning = true

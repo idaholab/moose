@@ -30,15 +30,14 @@ InputParameters validParams<FileMesh>()
   InputParameters params = validParams<MooseMesh>();
   params.addRequiredParam<MeshFileName>("file", "The name of the mesh file to read");
   params.addClassDescription("Read a mesh from a file.");
-  params.addParam<bool>("checkpoint", false, "Whether or not the file format is a checkpoint file");
+
   return params;
 }
 
 FileMesh::FileMesh(const InputParameters & parameters) :
     MooseMesh(parameters),
     _file_name(getParam<MeshFileName>("file")),
-    _is_checkpoint(getParam<bool>("checkpoint")),
-    _exreader(NULL)
+    _exreader(nullptr)
 {
   getMesh().set_mesh_dimension(getParam<MooseEnum>("dim"));
 }
@@ -46,8 +45,7 @@ FileMesh::FileMesh(const InputParameters & parameters) :
 FileMesh::FileMesh(const FileMesh & other_mesh) :
     MooseMesh(other_mesh),
     _file_name(other_mesh._file_name),
-    _is_checkpoint(other_mesh._is_checkpoint),
-    _exreader(NULL)
+    _exreader(nullptr)
 {
 }
 
@@ -64,10 +62,17 @@ FileMesh::clone() const
 void
 FileMesh::buildMesh()
 {
-  std::string _file_name = getParam<MeshFileName>("file");
-
   Moose::perf_log.push("Read Mesh", "Setup");
-  if (_is_nemesis)
+
+   std::string _file_name = getParam<MeshFileName>("file");
+
+   // If we have an exodus file and it's pre-split...
+   bool is_nemesis = _pre_split && (_file_name.rfind(".exd") < _file_name.size() || _file_name.rfind(".e") < _file_name.size());
+
+   // If we have a checkpoint file and it's pre-split...
+   bool is_checkpoint = _pre_split && _file_name.rfind(".cpr") < _file_name.size();
+
+  if (is_nemesis)
   {
     // Nemesis_IO only takes a reference to DistributedMesh, so we can't be quite so short here.
     DistributedMesh & pmesh = cast_ref<DistributedMesh &>(getMesh());
@@ -83,7 +88,7 @@ FileMesh::buildMesh()
     getMesh().prepare_for_use();
     getMesh().skip_partitioning(skip_partitioning_later);
   }
-  else if (_is_checkpoint)
+  else if (is_checkpoint)
   {
     CheckpointIO reader(getMesh());
 
@@ -93,21 +98,13 @@ FileMesh::buildMesh()
 
     DistributedMesh * pmesh = cast_ptr<DistributedMesh *>(&mesh);
 
-    //mesh.allow_renumbering(false);
-
     if (pmesh)
       reader.parallel() = true;
 
     reader.read(_file_name);
 
-    //mesh.update_parallel_id_counts();
-    //mesh.find_neighbors(true, true);
-    //mesh.update_parallel_id_counts();
-    //mesh.delete_remote_elements();
     mesh.skip_partitioning(true);
-    //mesh.redistribute();
     mesh.prepare_for_use();
-    mesh.print_info();
   }
   else // not reading Nemesis files
   {
@@ -130,13 +127,4 @@ FileMesh::buildMesh()
   }
 
   Moose::perf_log.pop("Read Mesh", "Setup");
-}
-
-void
-FileMesh::read(const std::string & file_name)
-{
-  if (dynamic_cast<DistributedMesh *>(&getMesh()) && !_is_nemesis)
-    getMesh().read(file_name, /*mesh_data=*/NULL, /*skip_renumber=*/false);
-  else
-    getMesh().read(file_name, /*mesh_data=*/NULL, /*skip_renumber=*/true);
 }
