@@ -1,6 +1,6 @@
 [Mesh]
   file = cylinder/cylinder.e
-  nemesis = true
+  pre_split = true
   # leaving skip_partitioning off lets us exodiff against a gold
   # standard generated with default libMesh settings
   # skip_partitioning = true
