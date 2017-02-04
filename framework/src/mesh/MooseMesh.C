@@ -428,6 +428,25 @@ MooseMesh::nodePtr(const dof_id_type i)
   return getMesh().node_ptr(i);
 }
 
+
+const Node*
+MooseMesh::queryNodePtr(const dof_id_type i) const
+{
+  if (i > getMesh().max_node_id())
+    return (*_quadrature_nodes.find(i)).second;
+
+  return getMesh().query_node_ptr(i);
+}
+
+Node*
+MooseMesh::queryNodePtr(const dof_id_type i)
+{
+  if (i > getMesh().max_node_id())
+    return _quadrature_nodes[i];
+
+  return getMesh().query_node_ptr(i);
+}
+
 void
 MooseMesh::meshChanged()
 {
@@ -1959,6 +1978,18 @@ MooseMesh::nElem() const
   return getMesh().n_elem();
 }
 
+dof_id_type
+MooseMesh::maxNodeId() const
+{
+  return getMesh().max_node_id();
+}
+
+dof_id_type
+MooseMesh::maxElemId() const
+{
+  return getMesh().max_elem_id();
+}
+
 Elem *
 MooseMesh::elem(const dof_id_type i)
 {
@@ -1983,6 +2014,18 @@ const Elem *
 MooseMesh::elemPtr(const dof_id_type i) const
 {
   return getMesh().elem_ptr(i);
+}
+
+Elem *
+MooseMesh::queryElemPtr(const dof_id_type i)
+{
+  return getMesh().query_elem_ptr(i);
+}
+
+const Elem *
+MooseMesh::queryElemPtr(const dof_id_type i) const
+{
+  return getMesh().query_elem_ptr(i);
 }
 
 bool

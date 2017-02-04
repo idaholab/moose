@@ -92,7 +92,7 @@
   [./BndsCalc]
     type = BndsCalcAux
     variable = bnds
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
   [../]
   [./elastic_strain11]
     type = RankTwoAux
@@ -225,6 +225,9 @@
   [./run_time]
     type = RunTime
     time_type = active
+  [../]
+  [./bnd_length]
+    type = GrainBoundaryArea
   [../]
 []
 

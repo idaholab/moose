@@ -169,6 +169,7 @@
  * Postprocessors
  */
 #include "FeatureFloodCount.h"
+#include "GrainBoundaryArea.h"
 #include "GrainTracker.h"
 #include "GrainTrackerElasticity.h"
 #include "FauxGrainTracker.h"
@@ -439,6 +440,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerPostprocessor(FauxGrainTracker);
   registerPostprocessor(FeatureFloodCount);
   registerPostprocessor(FeatureVolumeFraction);
+  registerPostprocessor(GrainBoundaryArea);
   registerPostprocessor(GrainTracker);
   registerPostprocessor(GrainTrackerElasticity);
   registerPostprocessor(PFCElementEnergyIntegral);
