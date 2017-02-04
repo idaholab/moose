@@ -175,14 +175,23 @@ DOFMapOutput::output(const ExecFlagType & /*type*/)
         oss << "], \"dofs\": [";
 
         // get the list of unique DOFs for this variable
+        // Start by looking at local DOFs
         std::set<dof_id_type> dofs;
-        for (unsigned int i = 0; i < _mesh.nElem(); ++i)
-          if (_mesh.elemPtr(i)->subdomain_id() == *sd)
+        ConstElemRange * active_local_elems = _mesh.getActiveLocalElementRange();
+        for (const auto & elem : *active_local_elems)
+        {
+          if (elem->subdomain_id() == *sd)
           {
             std::vector<dof_id_type> di;
-            dof_map.dof_indices(_mesh.elemPtr(i), di, var);
+            dof_map.dof_indices(elem, di, var);
             dofs.insert(di.begin(), di.end());
           }
+        }
+
+        // Then collect DOFs from other processors.  On a distributed
+        // mesh they may know about DOFs we can't even see.
+        _communicator.set_union(dofs);
+
         oss << join(dofs.begin(), dofs.end(), ", ") << "]}";
       }
       oss << "]}";

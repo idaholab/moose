@@ -221,7 +221,18 @@ public:
   virtual dof_id_type nElem() const;
 
   /**
+   * Calls max_node/elem_id() on the underlying libMesh mesh object.
+   * This may be larger than n_nodes/elem() in cases where the id
+   * numbering is not contiguous.
+   */
+  virtual dof_id_type maxNodeId() const;
+  virtual dof_id_type maxElemId() const;
+
+  /**
    * Various accessors (pointers/references) for Node "i".
+   *
+   * If the requested node is a remote node on a distributed mesh,
+   * only the query accessors are valid to call, and they return NULL.
    */
   virtual const Node & node (const dof_id_type i) const;
   virtual Node & node (const dof_id_type i);
@@ -229,14 +240,21 @@ public:
   virtual Node & nodeRef (const dof_id_type i);
   virtual const Node* nodePtr(const dof_id_type i) const;
   virtual Node* nodePtr(const dof_id_type i);
+  virtual const Node* queryNodePtr(const dof_id_type i) const;
+  virtual Node* queryNodePtr(const dof_id_type i);
 
   /**
    * Various accessors (pointers/references) for Elem "i".
+   *
+   * If the requested elem is a remote element on a distributed mesh,
+   * only the query accessors are valid to call, and they return NULL.
    */
   virtual Elem * elem(const dof_id_type i);
   virtual const Elem * elem(const dof_id_type i) const;
   virtual Elem * elemPtr(const dof_id_type i);
   virtual const Elem * elemPtr(const dof_id_type i) const;
+  virtual Elem * queryElemPtr(const dof_id_type i);
+  virtual const Elem * queryElemPtr(const dof_id_type i) const;
 
   /**
    * Setter/getter for the _is_changed flag.
