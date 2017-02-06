@@ -148,7 +148,8 @@ MooseApp::MooseApp(InputParameters parameters) :
     _legacy_uo_initialization_default(getParam<bool>("use_legacy_uo_initialization")),
     _check_input(getParam<bool>("check_input")),
     _restartable_data(libMesh::n_threads()),
-    _multiapp_level(0)
+    _multiapp_level(0),
+    _log_show_tags{"lev-info"}
 {
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
@@ -1091,3 +1092,29 @@ MooseApp::createMinimalApp()
 
   _action_warehouse.build();
 }
+
+void
+MooseApp::logDisableTimestep() {
+  _disabled_log_step = _executioner->feProblem().timeStep();
+}
+
+bool
+MooseApp::printLog(const std::set<std::string> tags)
+{
+  if (_disabled_log_step == _executioner->feProblem().timeStep())
+    return false;
+
+  for (auto tag : _log_hide_tags)
+  {
+    if (tags.count(tag) > 0)
+      return false;
+  }
+
+  for (auto tag : _log_show_tags)
+  {
+    if (tags.count(tag) > 0)
+      return true;
+  }
+  return false;
+}
+

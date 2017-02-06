@@ -22,6 +22,8 @@
 // libMesh includes
 #include "libmesh/parallel_object.h"
 
+#include "format.h"
+
 class MooseApp;
 class MooseObject;
 
@@ -77,6 +79,18 @@ public:
    */
   virtual bool enabled() { return _enabled; }
 
+  template<typename... Args>
+  void logTags(const std::set<std::string> & tags, const std::string & msg, Args && ... args)
+  {
+    if (printLog(tags))
+      writeMsg(fmt::format(msg, std::forward<Args>(args)...));
+  }
+
+  template<typename... Args>
+  void logMsg(const std::string & msg, Args && ... args)
+  {
+    logTags({"lev-info"}, msg, std::forward<Args>(args)...);
+  }
 
 protected:
 
@@ -92,6 +106,9 @@ protected:
   /// Reference to the "enable" InputParaemters, used by Controls for toggling on/off MooseObjects
   const bool & _enabled;
 
+private:
+  void writeMsg(std::string msg);
+  bool printLog(const std::set<std::string> & tags);
 };
 
 template <typename T>

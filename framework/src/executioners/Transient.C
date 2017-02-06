@@ -133,6 +133,9 @@ Transient::Transient(const InputParameters & parameters) :
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
     _verbose(getParam<bool>("verbose"))
 {
+  if (!_verbose)
+    _app.logHideTag("verbose");
+
   _problem.getNonlinearSystemBase().setDecomposition(_splitting);
   _t_step = 0;
   _dt = 0;

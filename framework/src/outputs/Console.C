@@ -189,6 +189,12 @@ Console::Console(const InputParameters & parameters) :
         Moose::_color_console = false;
     }
   }
+
+  for (auto tag : _execute_on)
+  {
+    std::transform(tag.begin(), tag.end(), tag.begin(), ::tolower);
+    _app.logShowTag("exec-" + tag);
+  }
 }
 
 Console::~Console()
@@ -284,6 +290,9 @@ Console::filename()
 void
 Console::output(const ExecFlagType & type)
 {
+  if (!onInterval())
+    _app.logDisableTimestep();
+
   // Return if the current output is not on the desired interval
   if (type != EXEC_FINAL && !onInterval())
     return;
