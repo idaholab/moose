@@ -169,11 +169,11 @@ def printResult(test_name, result, timing, start, end, options, color=True):
 
 
 def getPlatforms():
-  # We'll use uname to figure this out.  platform.uname() is available on all platforms
-  #   while os.uname() is not (See bugs.python.org/issue8080).
+    # We'll use uname to figure this out.  platform.uname() is available on all platforms
+    #   while os.uname() is not (See bugs.python.org/issue8080).
     # Supported platforms are LINUX, DARWIN, ML, MAVERICKS, YOSEMITE, or ALL
     platforms = set(['ALL'])
-  raw_uname = platform.uname()
+    raw_uname = platform.uname()
     if raw_uname[0].upper() == 'DARWIN':
         platforms.add('DARWIN')
         if re.match("12\.", raw_uname[2]):
