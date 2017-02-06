@@ -18,7 +18,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
       language[str]: The code language (e.g., 'python' or 'c++')
     """
 
-  def __init__(self, pattern, markdown_instance=None, repo=None, **kwargs):
+    def __init__(self, pattern, markdown_instance=None, repo=None, **kwargs):
         MooseCommonExtension.__init__(self, **kwargs)
         Pattern.__init__(self, pattern, markdown_instance)
 
@@ -101,13 +101,13 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
         else:
             title = etree.SubElement(el, 'div')
 
-    if settings['label']:
+        if settings['label']:
             title.text = label
 
         # Build the code
         pre = etree.SubElement(el, 'pre')
         code = etree.SubElement(pre, 'code')
-    if settings['language']:
+        if settings['language']:
             code.set('class', settings['language'])
         code.text = self.markdown.htmlStash.store(content.strip('\n'), safe=True)
 

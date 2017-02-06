@@ -19,9 +19,9 @@ class Tester(MooseObject):
         params.addParam('group',       [], "A list of groups for which this test belongs.")
         params.addParam('prereq',      [], "A list of prereq tests that need to run successfully before launching this test.")
         params.addParam('skip_checks', False, "Tells the TestHarness to skip additional checks (This parameter is set automatically by the TestHarness during recovery tests)")
-    params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
+        params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
 
-    params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
+        params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
 
         params.addParam('valgrind', 'NONE', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 

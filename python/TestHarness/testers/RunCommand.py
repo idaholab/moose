@@ -4,24 +4,24 @@ from RunParallel import RunParallel # For TIMEOUT value
 
 class RunCommand(Tester):
 
-  @staticmethod
-  def validParams():
-    params = Tester.validParams()
-    params.addRequiredParam('command',      "The command line to execute for this test.")
-    params.addParam('test_name',          "The name of the test - populated automatically")
-    return params
+    @staticmethod
+    def validParams():
+        params = Tester.validParams()
+        params.addRequiredParam('command',      "The command line to execute for this test.")
+        params.addParam('test_name',          "The name of the test - populated automatically")
+        return params
 
-  def __init__(self, name, params):
-    Tester.__init__(self, name, params)
-    self.command = params['command']
+    def __init__(self, name, params):
+        Tester.__init__(self, name, params)
+        self.command = params['command']
 
-  def getCommand(self, options):
-    # Create the command line string to run
-    return self.command
+    def getCommand(self, options):
+        # Create the command line string to run
+        return self.command
 
-  def processResults(self, moose_dir, retcode, options, output):
+    def processResults(self, moose_dir, retcode, options, output):
         reason = ''
-    if retcode != 0 :
+        if retcode != 0 :
             reason = 'CODE %d' % retcode
 
         return (reason, output)

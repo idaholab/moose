@@ -172,7 +172,7 @@ class InputFileTextbox(QtGui.QTextEdit):
                         comment = ' # ' + item.param_comments[param]
 
                     param_value = item.table_data[param]
-          if ' ' in param_value or '=' in param_value:
+                    if ' ' in param_value or '=' in param_value:
                         param_value = "'"+param_value.strip("'")+"'"
 
                     self.the_string += indent_string + '  ' + param + ' = ' + param_value + comment + '\n'
