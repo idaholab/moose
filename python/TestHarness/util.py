@@ -90,10 +90,10 @@ def runCommand(cmd, cwd=None):
   # On Windows it is not allowed to close fds while redirecting output
   should_close = platform.system() != "Windows"
   p = subprocess.Popen([cmd], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
-  output = p.communicate()[0]
-  if (p.returncode != 0):
-    output = 'ERROR: ' + output
-  return output
+    output = p.communicate()[0]
+    if (p.returncode != 0):
+        output = 'ERROR: ' + output
+    return output
 
 ## print an optionally colorified test result
 #
@@ -106,7 +106,7 @@ def printResult(test_name, result, timing, start, end, options, color=True):
 
   cnt = (TERM_COLS-2) - len(test_name + result)
   color_opts = {'code' : options.code, 'colored' : options.colored}
-  if color:
+    if color:
     any_match = False
     # Color leading paths
     m = re.search(r'(.*):(.*)', test_name)
@@ -153,7 +153,7 @@ def printResult(test_name, result, timing, start, end, options, color=True):
       f_result = result
 
     f_result = test_name + '.'*cnt + ' ' + f_result
-  else:
+    else:
     f_result = test_name + '.'*cnt + ' ' + result
 
   # Tack on the timing if it exists

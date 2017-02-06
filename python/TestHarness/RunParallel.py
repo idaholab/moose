@@ -19,12 +19,12 @@ import os, sys
 #
 class RunParallel:
 
-  ## Return this return code if the process must be killed because of timeout
-  TIMEOUT = -999999
+    ## Return this return code if the process must be killed because of timeout
+    TIMEOUT = -999999
 
   def __init__(self, harness, max_processes=None, average_load=64.0):
-    ## The test harness to run callbacks on
-    self.harness = harness
+        ## The test harness to run callbacks on
+        self.harness = harness
 
     # Retrieve and store the TestHarness options for use in this object
     self.options = harness.getOptions()
@@ -45,7 +45,7 @@ class RunParallel:
     self.slots_in_use = 0
 
     ## List of currently running jobs as (Popen instance, command, test, time when expires, slots) tuples
-    # None means no job is running in this slot
+        # None means no job is running in this slot
     self.jobs = [None] * self.job_slots
 
     # Requested average load level to stay below
@@ -72,7 +72,7 @@ class RunParallel:
     # Reporting timer which resets when ever data is printed to the screen.
     self.reported_timer = clock()
 
-  ## run the command asynchronously and call testharness.testOutputAndFinish when complete
+    ## run the command asynchronously and call testharness.testOutputAndFinish when complete
   def run(self, tester, command, recurse=True, slot_check=True):
     # First see if any of the queued jobs can be run but only if recursion is allowed on this run
     if recurse:
@@ -110,8 +110,8 @@ class RunParallel:
     # Pre-run preperation
     tester.prepare(self.options)
 
-    job_index = self.jobs.index(None) # find an empty slot
-    log( 'Command %d started: %s' % (job_index, command) )
+        job_index = self.jobs.index(None) # find an empty slot
+        log( 'Command %d started: %s' % (job_index, command) )
 
     # It seems that using PIPE doesn't work very well when launching multiple jobs.
     # It deadlocks rather easy.  Instead we will use temporary files
@@ -160,11 +160,11 @@ class RunParallel:
         file_output += "#"*80 + "\nOutput from processor " + str(processor_id) + "\n" + "#"*80 + "\n" + self.readOutput(f)
     return file_output
 
-  ## Return control the the test harness by finalizing the test output and calling the callback
+    ## Return control the the test harness by finalizing the test output and calling the callback
   def returnToTestHarness(self, job_index):
     (p, command, tester, time, f, slots) = self.jobs[job_index]
 
-    log( 'Command %d done:    %s' % (job_index, command) )
+        log( 'Command %d done:    %s' % (job_index, command) )
     did_pass = True
 
     output = 'Working Directory: ' + tester.specs['test_dir'] + '\nRunning command: ' + command + '\n'
@@ -176,7 +176,7 @@ class RunParallel:
       # Handle the case were the tester did not inherite from RunApp (like analyzejacobian)
       output += self.readOutput(f)
 
-    if p.poll() == None: # process has not completed, it timed out
+        if p.poll() == None: # process has not completed, it timed out
       output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
       f.close()
       if platform.system() == "Windows":
@@ -187,7 +187,7 @@ class RunParallel:
 
       if not self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock()):
         did_pass = False
-    else:
+        else:
       f.close()
 
       if tester in self.reported_jobs:
@@ -201,13 +201,13 @@ class RunParallel:
     else:
       self.skipped_jobs.add(tester.specs['test_name'])
 
-    self.jobs[job_index] = None
+        self.jobs[job_index] = None
     self.slots_in_use = self.slots_in_use - slots
 
-  ## Don't return until one of the running processes exits.
-  #
-  # When a process exits (or times out) call returnToTestHarness and return from
-  # this function.
+    ## Don't return until one of the running processes exits.
+    #
+    # When a process exits (or times out) call returnToTestHarness and return from
+    # this function.
   def spinwait(self, time_to_wait=0.05):
     now = clock()
     job_index = 0
@@ -262,9 +262,9 @@ class RunParallel:
       self.spinwait(0.5) # If the load average is high we'll sleep longer here to let things clear out
 #      print "DEBUG: Ready to run (load average: ", os.getloadavg()[0], ")\n"
 
-  ## Wait until all processes are done, then return
-  def join(self):
-    while self.jobs.count(None) != len(self.jobs):
+    ## Wait until all processes are done, then return
+    def join(self):
+        while self.jobs.count(None) != len(self.jobs):
       self.spinwait()
       self.startReadyJobs(slot_check=True)
 
@@ -351,6 +351,6 @@ class RunParallel:
 LOG = []
 LOG_ON = False
 def log(msg):
-  if LOG_ON:
+    if LOG_ON:
     LOG.append(msg)
-    print msg
+        print msg
