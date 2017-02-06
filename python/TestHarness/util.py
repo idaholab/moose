@@ -187,39 +187,39 @@ def getPlatforms():
     return platforms
 
 def runExecutable(libmesh_dir, location, bin, args):
-  # Installed location of libmesh executable
-  libmesh_installed   = libmesh_dir + '/' + location + '/' + bin
+    # Installed location of libmesh executable
+    libmesh_installed   = libmesh_dir + '/' + location + '/' + bin
 
-  # Uninstalled location of libmesh executable
-  libmesh_uninstalled = libmesh_dir + '/' + bin
+    # Uninstalled location of libmesh executable
+    libmesh_uninstalled = libmesh_dir + '/' + bin
 
   # Uninstalled location of libmesh executable
   libmesh_uninstalled2 = libmesh_dir + '/contrib/bin/' + bin
 
-  # The eventual variable we will use to refer to libmesh's executable
-  libmesh_exe = ''
+    # The eventual variable we will use to refer to libmesh's executable
+    libmesh_exe = ''
 
-  if os.path.exists(libmesh_installed):
-    libmesh_exe = libmesh_installed
+    if os.path.exists(libmesh_installed):
+        libmesh_exe = libmesh_installed
 
-  elif os.path.exists(libmesh_uninstalled):
-    libmesh_exe = libmesh_uninstalled
+    elif os.path.exists(libmesh_uninstalled):
+        libmesh_exe = libmesh_uninstalled
 
   elif os.path.exists(libmesh_uninstalled2):
     libmesh_exe = libmesh_uninstalled2
 
-  else:
-    print "Error! Could not find '" + bin + "' in any of the usual libmesh's locations!"
-    exit(1)
+    else:
+        print "Error! Could not find '" + bin + "' in any of the usual libmesh's locations!"
+        exit(1)
 
-  return runCommand(libmesh_exe + " " + args).rstrip()
+    return runCommand(libmesh_exe + " " + args).rstrip()
 
 
 def getCompilers(libmesh_dir):
     # Supported compilers are GCC, INTEL or ALL
     compilers = set(['ALL'])
 
-  mpicxx_cmd = runExecutable(libmesh_dir, "bin", "libmesh-config", "--cxx")
+    mpicxx_cmd = runExecutable(libmesh_dir, "bin", "libmesh-config", "--cxx")
 
     # Account for usage of distcc or ccache
     if "distcc" in mpicxx_cmd or "ccache" in mpicxx_cmd:
@@ -227,7 +227,7 @@ def getCompilers(libmesh_dir):
 
     # If mpi ic on the command, run -show to get the compiler
     if "mpi" in mpicxx_cmd:
-    raw_compiler = runCommand(mpicxx_cmd + " -show")
+        raw_compiler = runCommand(mpicxx_cmd + " -show")
     else:
         raw_compiler = mpicxx_cmd
 
@@ -333,7 +333,7 @@ def getSharedOption(libmesh_dir):
     # We need to detect this condition
     shared_option = set(['ALL'])
 
-  result = runExecutable(libmesh_dir, "contrib/bin", "libtool", "--config | grep build_libtool_libs | cut -d'=' -f2")
+    result = runExecutable(libmesh_dir, "contrib/bin", "libtool", "--config | grep build_libtool_libs | cut -d'=' -f2")
 
     if re.search('yes', result) != None:
         shared_option.add('DYNAMIC')
