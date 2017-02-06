@@ -4,11 +4,10 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef COMPUTELINEARELASTICPFFRACSTRESS_H
-#define COMPUTELINEARELASTICPFFRACSTRESS_H
+#ifndef COMPUTELINEARELASTICPFFRACTURESTRESS_H
+#define COMPUTELINEARELASTICPFFRACTURESTRESS_H
 
 #include "ComputeStressBase.h"
-#include "Function.h"
 
 /**
  * Phase-field fracture
@@ -16,10 +15,10 @@
  * Small strain Anisotropic Elastic formulation
  * Stiffness matrix scaled for heterogeneous elasticity property
  */
-class ComputeLinearElasticPFFracStress : public ComputeStressBase
+class ComputeLinearElasticPFFractureStress : public ComputeStressBase
 {
 public:
-  ComputeLinearElasticPFFracStress(const InputParameters & parameters);
+  ComputeLinearElasticPFFractureStress(const InputParameters & parameters);
 
 protected:
   virtual void computeQpStress();
@@ -35,4 +34,4 @@ protected:
   MaterialProperty<RankTwoTensor> & _dstress_dc;
 };
 
-#endif //COMPUTELINEARELASTICPFFRACSTRESS_H
+#endif //COMPUTELINEARELASTICPFFRACTURESTRESS_H

@@ -27,7 +27,7 @@
 
 [Kernels]
   [./pfbulk]
-    type = ACPFFrac
+    type = AllenCahnPFFracture
     variable = c
     beta = b
   [../]
@@ -97,7 +97,7 @@
     prop_values = '1e-3 0.08 1e-4'
   [../]
   [./elastic]
-    type = ComputeLinearElasticPFFracStress
+    type = ComputeLinearElasticPFFractureStress
     c = c
   [../]
   [./elasticity_tensor]

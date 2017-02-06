@@ -66,7 +66,7 @@
 #include "ComputeAxisymmetricRZFiniteStrain.h"
 #include "ComputeRSphericalFiniteStrain.h"
 #include "ComputeLinearElasticStress.h"
-#include "ComputeLinearElasticPFFracStress.h"
+#include "ComputeLinearElasticPFFractureStress.h"
 #include "ComputeFiniteStrainElasticStress.h"
 #include "ComputeVariableElasticConstantStress.h"
 #include "ComputeEigenstrain.h"
@@ -257,7 +257,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeAxisymmetricRZFiniteStrain);
   registerMaterial(ComputeRSphericalFiniteStrain);
   registerMaterial(ComputeLinearElasticStress);
-  registerMaterial(ComputeLinearElasticPFFracStress);
+  registerMaterial(ComputeLinearElasticPFFractureStress);
   registerMaterial(ComputeFiniteStrainElasticStress);
   registerMaterial(ComputeVariableElasticConstantStress);
   registerMaterial(ComputeEigenstrain);
