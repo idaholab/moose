@@ -31,21 +31,21 @@ class GPNode:
       self.children[child].Print(prefix + self.name + '/')
 
 
-  ##
-  # Perform a fuzzy search for a node name
-  # @return The node object if any part of a node key is in the supplied name
-  def getNode(self, name):
-    node = None
-    if name in self.children:
-      node = self.children[name]
+    ##
+    # Perform a fuzzy search for a node name
+    # @return The node object if any part of a node key is in the supplied name
+    def getNode(self, name):
+        node = None
+        if name in self.children:
+            node = self.children[name]
 
 
-    else:
-      for key, value in self.children.iteritems():
-        node = value.getNode(name)
-        if node != None:
-          break
-    return node
+        else:
+            for key, value in self.children.iteritems():
+                node = value.getNode(name)
+                if node != None:
+                    break
+        return node
 
   def fullName(self, no_root=False):
     if self.parent == None:
@@ -56,36 +56,36 @@ class GPNode:
     else:
       return self.parent.fullName(no_root) + '/' + self.name
 
-  ##
-  # Build a string suitable for writing to a raw input file
-  # @param level The indentation level to apply to the string
-  def createString(self, level = 0):
+    ##
+    # Build a string suitable for writing to a raw input file
+    # @param level The indentation level to apply to the string
+    def createString(self, level = 0):
 
-    # String to be returned
-    output = ''
+        # String to be returned
+        output = ''
 
-    # Create the opening and closing blocks
-    if self.parent and self.parent.name != 'root':
-      output += '{}[./{}]\n'.format(' '*2*level, self.name)
-    else:
-      output += '{}[{}]\n'.format(' '*2*level, self.name)
+        # Create the opening and closing blocks
+        if self.parent and self.parent.name != 'root':
+            output += '{}[./{}]\n'.format(' '*2*level, self.name)
+        else:
+            output += '{}[{}]\n'.format(' '*2*level, self.name)
 
-    # Write the parameters
-    for param in self.params_list:
-      output += "{}{} = '{}'\n".format(' '*2*(level + 1), param, str(self.params[param]))
+        # Write the parameters
+        for param in self.params_list:
+            output += "{}{} = '{}'\n".format(' '*2*(level + 1), param, str(self.params[param]))
 
-    # Write the children
-    for child in self.children_list:
-      output += self.children[child].createString(level + 1) + '\n'
+        # Write the children
+        for child in self.children_list:
+            output += self.children[child].createString(level + 1) + '\n'
 
-    # Write the block closing
-    if self.parent and self.parent.name != 'root':
-      output += '{}[../]'.format(' '*2*level)
-    else:
-      output += '{}[]\n'.format(' '*2*level)
+        # Write the block closing
+        if self.parent and self.parent.name != 'root':
+            output += '{}[../]'.format(' '*2*level)
+        else:
+            output += '{}[]\n'.format(' '*2*level)
 
-    # Return the data
-    return output
+        # Return the data
+        return output
 
 
 class ParseException(Exception):

@@ -13,8 +13,8 @@ class Factory:
     return self.objects[type].validParams()
 
 
-  def create(self, type, *args, **kwargs):
-    return self.objects[type](*args, **kwargs)
+    def create(self, type, *args, **kwargs):
+        return self.objects[type](*args, **kwargs)
 
 
   def getClassHierarchy(self, classes):

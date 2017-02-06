@@ -101,9 +101,9 @@ class CSVDiffer:
           if val1 == 0 and val2 == 0:
             continue
 
-          rel_diff = 0
-          if max( abs(val1), abs(val2) ) > 0:
-              rel_diff = abs( ( val1 - val2 ) / max( abs(val1), abs(val2) ) )
+                    rel_diff = 0
+                    if max( abs(val1), abs(val2) ) > 0:
+                        rel_diff = abs( ( val1 - val2 ) / max( abs(val1), abs(val2) ) )
 
           if rel_diff > rel_tol:
             self.addError(fname, "The values in column \"" + key.strip() + "\" don't match\n\trel diff:  " + str(val1) + " ~ " + str(val2) + " = " + str(rel_diff))

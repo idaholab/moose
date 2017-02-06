@@ -8,26 +8,26 @@ name = 'stitched_mesh_out'
 camera = vtk.vtkCamera()
 size = [600,600]
 if name == 'left':
-  camera.SetViewUp(0.0000, 1.0000, 0.0000)
-  camera.SetPosition(0.4587, 0.4610, 2.5937)
-  camera.SetFocalPoint(0.4587, 0.4610, 0.0000)
-  out = 'stitched_mesh_left.png'
+    camera.SetViewUp(0.0000, 1.0000, 0.0000)
+    camera.SetPosition(0.4587, 0.4610, 2.5937)
+    camera.SetFocalPoint(0.4587, 0.4610, 0.0000)
+    out = 'stitched_mesh_left.png'
 elif name == 'center':
-  camera.SetViewUp(0.0000, 1.0000, 0.0000)
-  camera.SetPosition(1.4587, 0.4610, 2.5937)
-  camera.SetFocalPoint(1.4587, 0.4610, 0.0000)
-  out = 'stitched_mesh_center.png'
+    camera.SetViewUp(0.0000, 1.0000, 0.0000)
+    camera.SetPosition(1.4587, 0.4610, 2.5937)
+    camera.SetFocalPoint(1.4587, 0.4610, 0.0000)
+    out = 'stitched_mesh_center.png'
 elif name == 'right':
-  camera.SetViewUp(0.0000, 1.0000, 0.0000)
-  camera.SetPosition(2.4587, 0.4610, 2.5937)
-  camera.SetFocalPoint(2.4587, 0.4610, 0.0000)
-  out = 'stitched_mesh_right.png'
+    camera.SetViewUp(0.0000, 1.0000, 0.0000)
+    camera.SetPosition(2.4587, 0.4610, 2.5937)
+    camera.SetFocalPoint(2.4587, 0.4610, 0.0000)
+    out = 'stitched_mesh_right.png'
 elif name == 'stitched_mesh_out':
-  camera.SetViewUp(0.0000, 1.0000, 0.0000)
-  camera.SetPosition(1.4587, 0.4610, 3.1575)
-  camera.SetFocalPoint(1.4587, 0.4610, -0.0000)
-  size = [900, 400]
-  out = 'stitched_mesh_out.png'
+    camera.SetViewUp(0.0000, 1.0000, 0.0000)
+    camera.SetPosition(1.4587, 0.4610, 3.1575)
+    camera.SetFocalPoint(1.4587, 0.4610, -0.0000)
+    size = [900, 400]
+    out = 'stitched_mesh_out.png'
 
 reader = chigger.exodus.ExodusReader('{}.e'.format(name))
 result = chigger.exodus.ExodusResult(reader, camera=camera, edges=True, edge_color=[0,0,0], color=[1,1,1])

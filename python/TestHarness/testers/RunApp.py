@@ -28,7 +28,7 @@ class RunApp(Tester):
     params.addParam('min_parallel',    1, "Minimum number of MPI processes that this test can be run with (Default: 1)")
     params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
     params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
-    params.addParam('allow_warnings',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
+        params.addParam('allow_warnings',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
     params.addParam('redirect_output',  False, "Redirect stdout to files. Neccessary when expecting an error when using parallel options")
 
     params.addParamWithType('allow_deprecated_until', type(time.localtime()), "A test that only runs if current date is less than specified date")
@@ -103,7 +103,7 @@ class RunApp(Tester):
     if options.error and '--error' not in specs['cli_args'] and not specs["allow_warnings"]:
       # The user has passed the error option to the test harness
       # and it is NOT supplied already in the cli-args option\
-      specs['cli_args'].append('--error')
+            specs['cli_args'].append('--error')
 
     if options.error_unused and '--error-unused' not in specs['cli_args'] and '--warn-unused' not in specs['cli_args'] and not specs["allow_warnings"]:
       # The user has passed the error-unused option to the test harness
@@ -114,7 +114,7 @@ class RunApp(Tester):
     timing_string = ' '
     if options.timing:
       specs['cli_args'].append('--timing')
-      specs['cli_args'].append('Outputs/print_perf_log=true')
+            specs['cli_args'].append('Outputs/print_perf_log=true')
 
     if options.colored == False:
             specs['cli_args'].append('--no-color')

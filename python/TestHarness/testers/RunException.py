@@ -7,8 +7,8 @@ class RunException(RunApp):
     params = RunApp.validParams()
 
     params.addParam('expect_err', "A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
-    params.addParam('expect_assert', "DEBUG MODE ONLY: A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
-    params.addParam('should_crash', True, "Inidicates that the test is expected to crash or otherwise terminate early")
+        params.addParam('expect_assert', "DEBUG MODE ONLY: A regular expression that must occur in the ouput. (Test may terminiate unexpectedly and be considered passing)")
+        params.addParam('should_crash', True, "Inidicates that the test is expected to crash or otherwise terminate early")
 
     # RunException tests executed in parallel need to have their output redirected to a file, and examined individually
     params['redirect_output'] = True
@@ -36,7 +36,7 @@ class RunException(RunApp):
     specs = self.specs
 
     # Expected errors and assertions might do a lot of things including crash so we
-    # will handle them seperately
+        # will handle them seperately
     if specs.isValid('expect_err'):
       if not self.checkOutputForPattern(output, specs['expect_err']):
         reason = 'NO EXPECTED ERR'

@@ -112,7 +112,7 @@ class MPLPlotter(QtGui.QWidget):
 
     def on_context_menu(self, point):
         # show context menu
-            self.popMenu.exec_(self.canvas.mapToGlobal(point))
+        self.popMenu.exec_(self.canvas.mapToGlobal(point))
 
     def savePlot(self):
         file_name = QtGui.QFileDialog.getSaveFileName(self, 'Save file', self.plotTitle, "Images (*.pdf)")

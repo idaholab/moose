@@ -10,13 +10,13 @@ from Warehouse import Warehouse
 Parser object for reading GetPot formatted files
 """
 class Parser:
-  def __init__(self, factory, warehouse, check_for_type=True):
+    def __init__(self, factory, warehouse, check_for_type=True):
     self.factory = factory
     self.warehouse = warehouse
     self.params_parsed = set()
     self.params_ignored = set()
-    self.root = None
-    self._check_for_type = check_for_type
+        self.root = None
+        self._check_for_type = check_for_type
 
   """
   Parse the passed filename filling the warehouse with populated InputParameter objects
@@ -41,12 +41,12 @@ class Parser:
     error_code = 0x00
 
     try:
-      self.root = ParseGetPot.readInputFile(filename)
+            self.root = ParseGetPot.readInputFile(filename)
     except ParseGetPot.ParseException, ex:
       print "Parse Error in " + filename + ": " + ex.msg
       return 0x01 # Parse Error
 
-    error_code = self._parseNode(filename, self.root)
+        error_code = self._parseNode(filename, self.root)
 
     if len(self.params_ignored):
       print 'Warning detected when parsing file "' + os.path.join(os.getcwd(), filename) + '"'
@@ -130,11 +130,11 @@ class Parser:
       # Extract the parameters from the Getpot node
       error_code = error_code | self.extractParams(filename, params, node)
 
-      # Add factory and warehouse as private params of the object
-      params.addPrivateParam('_factory', self.factory)
-      params.addPrivateParam('_warehouse', self.warehouse)
-      params.addPrivateParam('_parser', self)
-      params.addPrivateParam('_root', self.root)
+            # Add factory and warehouse as private params of the object
+            params.addPrivateParam('_factory', self.factory)
+            params.addPrivateParam('_warehouse', self.warehouse)
+            params.addPrivateParam('_parser', self)
+            params.addPrivateParam('_root', self.root)
 
       # Build the object
       try:
@@ -146,7 +146,7 @@ class Parser:
         error_code = error_code | 0x40
 
     # Are we in a tree node that "looks" like it should contain a buildable object?
-    elif self._check_for_type and self._looksLikeValidSubBlock(node):
+        elif self._check_for_type and self._looksLikeValidSubBlock(node):
       print 'Error detected when parsing file "' + os.path.join(os.getcwd(), filename) + '"'
       print '       Missing "type" parameter in block'
       error_code = error_code | 0x20

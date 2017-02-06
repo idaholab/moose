@@ -795,11 +795,11 @@ class MemoryPlotter:
       tmp_memory = []
       tmp_time = []
 
-      tmp_stdout_x = []
-      tmp_stdout_y = []
+            tmp_stdout_x = []
+            tmp_stdout_y = []
 
-      tmp_pstack_x = []
-      tmp_pstack_y = []
+            tmp_pstack_x = []
+            tmp_pstack_y = []
 
       stdout_msg = []
       pstack_msg = []
@@ -816,14 +816,14 @@ class MemoryPlotter:
         tmp_memory.append(decimal.Decimal(records[1]) / self.multiples)
         tmp_time.append(str(decimal.Decimal(records[0]) - tmp_zero))
 
-        if len(records[2]) > 0 and self.arguments.stdout:
-          tmp_stdout_x.append(tmp_time[-1])
-          tmp_stdout_y.append(tmp_memory[-1])
+                if len(records[2]) > 0 and self.arguments.stdout:
+                    tmp_stdout_x.append(tmp_time[-1])
+                    tmp_stdout_y.append(tmp_memory[-1])
           stdout_msg.append(records[2])
 
-        if len(records[3]) > 0 and self.arguments.pstack:
-          tmp_pstack_x.append(tmp_time[-1])
-          tmp_pstack_y.append(tmp_memory[-1])
+                if len(records[3]) > 0 and self.arguments.pstack:
+                    tmp_pstack_x.append(tmp_time[-1])
+                    tmp_pstack_y.append(tmp_memory[-1])
           pstack_msg.append(records[3])
 
       # Do the actual plotting:
@@ -848,22 +848,22 @@ class MemoryPlotter:
         plot_list[-1].yaxis.label.set_color('white')
         plot_list[-1].grid(color='0.6')
 
-      # Plot annotations
-      if self.arguments.stdout:
+            # Plot annotations
+            if self.arguments.stdout:
         stdout_line, = plot_list[-1].plot(tmp_stdout_x, tmp_stdout_y, 'x', picker=10, color=f.get_color(), markeredgecolor='0.08', markeredgewidth=0.1)
         next_index = str(len(plot_list))
         stdout_line.set_gid('stdout' + next_index)
         self.stdout_msgs[next_index] = stdout_msg
         self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, stdout_msg, f.get_color())
 
-      if self.arguments.pstack:
+            if self.arguments.pstack:
         pstack_line, = plot_list[-1].plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=10, color=f.get_color(), markeredgecolor='0.08', markeredgewidth=0.1)
         next_index = str(len(plot_list))
         pstack_line.set_gid('pstack' + next_index)
         self.pstack_msgs[next_index] = pstack_msg
 
-    # Make points clickable
-    fig.canvas.mpl_connect('pick_event', self)
+        # Make points clickable
+        fig.canvas.mpl_connect('pick_event', self)
 
     # Create legend
     legend = plt.legend(tmp_plot, tmp_legend, loc = self.arguments.legend)
@@ -877,10 +877,10 @@ class MemoryPlotter:
 
     plt.show()
 
-  def __call__(self, event):
+    def __call__(self, event):
     color_codes = {'RESET':'\033[0m', 'r':'\033[31m','g':'\033[32m','c':'\033[36m','y':'\033[33m', 'b':'\033[34m', 'm':'\033[35m', 'k':'\033[0m', 'w':'\033[0m' }
-    line = event.artist
-    ind = event.ind
+        line = event.artist
+        ind = event.ind
 
     name = line.get_gid()[:-1]
     index = line.get_gid()[-1]
@@ -888,7 +888,7 @@ class MemoryPlotter:
     if self.arguments.stdout and name == 'stdout':
       if self.arguments.no_color != False:
         print color_codes[line.get_color()]
-      print "stdout -----------------------------------------------------\n"
+            print "stdout -----------------------------------------------------\n"
       for id in ind:
         print self.stdout_msgs[index][id]
       if self.arguments.no_color != False:
@@ -897,24 +897,24 @@ class MemoryPlotter:
     if self.arguments.pstack and name == 'pstack':
       if self.arguments.no_color != False:
         print color_codes[line.get_color()]
-      print "pstack -----------------------------------------------------\n"
+            print "pstack -----------------------------------------------------\n"
       for id in ind:
         print self.pstack_msgs[index][id]
       if self.arguments.no_color != False:
         print color_codes['RESET']
 
-  def buildAnnotation(self,fig,x,y,msg,c):
-    for i in range(len(x)):
-      fig.annotate(str(msg[i].split('\n')[0][:self.arguments.trim_text[-1]]),
-                   xy=(x[i], y[i]),
-                   rotation=self.arguments.rotate_text[-1],
-                   xytext=(decimal.Decimal(x[i]) + decimal.Decimal(self.arguments.move_text[0]), decimal.Decimal(y[i]) + decimal.Decimal(self.arguments.move_text[1])),
-                   color=c, horizontalalignment='center', verticalalignment='bottom',
-                   arrowprops=dict(arrowstyle="->",
-                                   connectionstyle="arc3,rad=0.5",
-                                   color=c
-                                 )
-                 )
+    def buildAnnotation(self,fig,x,y,msg,c):
+        for i in range(len(x)):
+            fig.annotate(str(msg[i].split('\n')[0][:self.arguments.trim_text[-1]]),
+                         xy=(x[i], y[i]),
+                         rotation=self.arguments.rotate_text[-1],
+                         xytext=(decimal.Decimal(x[i]) + decimal.Decimal(self.arguments.move_text[0]), decimal.Decimal(y[i]) + decimal.Decimal(self.arguments.move_text[1])),
+                         color=c, horizontalalignment='center', verticalalignment='bottom',
+                         arrowprops=dict(arrowstyle="->",
+                                         connectionstyle="arc3,rad=0.5",
+                                         color=c
+                                       )
+                       )
 
 class ReadLog:
   """Read a memory_logger log file, and display the results to stdout in an easy to read form.

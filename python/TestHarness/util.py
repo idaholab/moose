@@ -105,7 +105,7 @@ def printResult(test_name, result, timing, start, end, options, color=True):
   f_result = ''
 
   cnt = (TERM_COLS-2) - len(test_name + result)
-  color_opts = {'code' : options.code, 'colored' : options.colored}
+    color_opts = {'code' : options.code, 'colored' : options.colored}
     if color:
     any_match = False
     # Color leading paths
@@ -225,11 +225,11 @@ def getCompilers(libmesh_dir):
   if "distcc" in mpicxx_cmd or "ccache" in mpicxx_cmd:
     mpicxx_cmd = mpicxx_cmd.split()[-1]
 
-  # If mpi ic on the command, run -show to get the compiler
-  if "mpi" in mpicxx_cmd:
+    # If mpi ic on the command, run -show to get the compiler
+    if "mpi" in mpicxx_cmd:
     raw_compiler = runCommand(mpicxx_cmd + " -show")
-  else:
-    raw_compiler = mpicxx_cmd
+    else:
+        raw_compiler = mpicxx_cmd
 
   if re.match('icpc', raw_compiler) != None:
     compilers.add("INTEL")
