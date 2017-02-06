@@ -488,7 +488,7 @@ class TestHarness:
                         # Report the current status of JOB_ID
                         if output_value == 'F':
                             # F = Finished. Get the exit code reported by qstat
-              exit_code = int(re.search(r'Exit_status = (-?\d+)', qstat_stdout).group(1))
+                            exit_code = int(re.search(r'Exit_status = (-?\d+)', qstat_stdout).group(1))
 
                             # Read the stdout file
                             if os.path.exists(job[2]):
