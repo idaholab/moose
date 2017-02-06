@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'diff_kernel_aux_mat_dep.i'
     exodiff = 'diff_kernel_aux_mat_dep_out.e'
+    max_threads = 1
   [../]
 []
