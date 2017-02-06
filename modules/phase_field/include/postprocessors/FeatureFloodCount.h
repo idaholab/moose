@@ -268,6 +268,14 @@ public:
     bool _intersects_boundary;
   };
 
+  /**
+   * Return a const reference to the entire Feature data structure.
+   * Note: this method may only be called on the master process since
+   * the remaining ranks only have partial feature information that can
+   * be used incorrectly.
+   */
+  const FeatureData & getFeature(unsigned int feature_id) const;
+
 protected:
   /**
    * This method is used to populate any of the data structures used for storing field data (nodal or elemental).
@@ -559,6 +567,8 @@ protected:
 
   /// Convenience variable for testing master rank
   bool _is_master;
+
+  FeatureData _empty_feature;
 };
 
 template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);

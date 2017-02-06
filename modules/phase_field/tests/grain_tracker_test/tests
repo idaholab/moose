@@ -74,6 +74,12 @@
     valgrind ='HEAVY'
   [../]
 
+  [./bounding_box_vpp]
+    type = 'CSVDiff'
+    input = 'bounding_box_vector_postprocessor_test.i'
+    csvdiff = 'bounding_box_vector_postprocessor_test_out_bboxes_0000.csv'
+  [../]
+
   ###################################################
   # Faux grain tracker
   ###################################################
