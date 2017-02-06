@@ -23,7 +23,7 @@ class PetscJacobianTester(RunApp):
         self.specs['cli_args'].append('-snes_type test')
 
     def processResults(self, moose_dir, retcode, options, output):
-    m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(user-defined state\)", output, re.MULTILINE | re.DOTALL);
+        m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(user-defined state\)", output, re.MULTILINE | re.DOTALL);
         if m:
             if float(m.group(1)) < float(self.specs['ratio_tol']) and float(m.group(2)) < float(self.specs['difference_tol']):
                 reason = ''
