@@ -89,13 +89,13 @@ class CSVDiffer:
                     if abs(val2) < abs_zero:
                         val2 = 0
 
-          # disallow nan in the gold file
-          if math.isnan(val1):
-            self.addError(fname, "The values in column \"" + key.strip() + "\" contain NaN")
+                    # disallow nan in the gold file
+                    if math.isnan(val1):
+                        self.addError(fname, "The values in column \"" + key.strip() + "\" contain NaN")
 
-          # disallow inf in the gold file
-          if math.isinf(val1):
-            self.addError(fname, "The values in column \"" + key.strip() + "\" contain Inf")
+                    # disallow inf in the gold file
+                    if math.isinf(val1):
+                        self.addError(fname, "The values in column \"" + key.strip() + "\" contain Inf")
 
                     # if they're both exactly zero (due to the threshold above) then they're equal so pass this test
                     if val1 == 0 and val2 == 0:
@@ -131,11 +131,11 @@ class CSVDiffer:
                 if len(headers) != len(vals):
                     self.addError(fname, "Number of columns ("+str(len(vals))+") not the same as number of column names ("+str(len(headers))+") in row "+repr(row))
                 for header, val in zip(headers,vals):
-          try:
-            table[header].append(float(val))
-          except:
-            # ignore strings
-            table[header].append(0)
+                    try:
+                        table[header].append(float(val))
+                    except:
+                        # ignore strings
+                        table[header].append(0)
 
         except Exception as e:
             self.addError(fname, "Exception parsing file: "+str(e.args))
