@@ -253,25 +253,25 @@ def getPetscVersion(libmesh_dir):
 # TODO: find a way to eval() logic instead
 def checkPetscVersion(checks, test):
     # If any version of petsc works, return true immediately
-  if 'ALL' in set(test['petsc_version']):
+    if 'ALL' in set(test['petsc_version']):
         return (True, None, None)
     # Iterate through petsc versions in test[PETSC_VERSION] and match it against check[PETSC_VERSION]
-  for petsc_version in test['petsc_version']:
+    for petsc_version in test['petsc_version']:
         logic, version = re.search(r'(.*?)(\d\S+)', petsc_version).groups()
         # Exact match
         if logic == '' or logic == '=':
-      if version == checks['petsc_version']:
+            if version == checks['petsc_version']:
         return (True, None, version)
             else:
                 return (False, '!=', version)
         # Logical match
-    if logic == '>' and checks['petsc_version'][0:3] > version[0:3]:
+        if logic == '>' and checks['petsc_version'][0:3] > version[0:3]:
             return (True, None, version)
-    elif logic == '>=' and checks['petsc_version'][0:3] >= version[0:3]:
+        elif logic == '>=' and checks['petsc_version'][0:3] >= version[0:3]:
             return (True, None, version)
-    elif logic == '<' and checks['petsc_version'][0:3] < version[0:3]:
+        elif logic == '<' and checks['petsc_version'][0:3] < version[0:3]:
             return (True, None, version)
-    elif logic == '<=' and checks['petsc_version'][0:3] <= version[0:3]:
+        elif logic == '<=' and checks['petsc_version'][0:3] <= version[0:3]:
             return (True, None, version)
     return (False, logic, version)
 

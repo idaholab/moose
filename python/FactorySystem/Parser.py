@@ -102,7 +102,7 @@ class Parser:
                                 params['error_code'] = 0x02
                                 error_code = error_code | params['error_code']
                         else:
-              # Otherwise, just do normal assignment
+                            # Otherwise, just do normal assignment
                             params[key] = value
             else:
                 self.params_ignored.add(key)

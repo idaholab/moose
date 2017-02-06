@@ -12,16 +12,16 @@ class RunApp(Tester):
         params.addParam('input_switch', '-i', "The default switch used for indicating an input to the executable")
         params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
         params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
-    params.addParam('match_literal', False, "Treat expect_out as a string not a regular expression.")
+        params.addParam('match_literal', False, "Treat expect_out as a string not a regular expression.")
         params.addParam('absent_out',         "A regular expression that must be *absent* from the output for the test to pass.")
-    params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
+        params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
         params.addParam('executable_pattern', "A test that only runs if the exectuable name matches the given pattern")
-    params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
-    params.addParam('delete_output_folders', True, "Delete output folders before running")
+        params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
+        params.addParam('delete_output_folders', True, "Delete output folders before running")
 
-    params.addParam('walltime',           "The max time as pbs understands it")
-    params.addParam('job_name',           "The test name as pbs understands it")
-    params.addParam('no_copy',            "The tests file as pbs understands it")
+        params.addParam('walltime',           "The max time as pbs understands it")
+        params.addParam('job_name',           "The test name as pbs understands it")
+        params.addParam('no_copy',            "The tests file as pbs understands it")
 
         # Parallel/Thread testing
         params.addParam('max_parallel', 1000, "Maximum number of MPI processes this test can be run with      (Default: 1000)")
@@ -29,7 +29,7 @@ class RunApp(Tester):
         params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
         params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
         params.addParam('allow_warnings',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
-    params.addParam('redirect_output',  False, "Redirect stdout to files. Neccessary when expecting an error when using parallel options")
+        params.addParam('redirect_output',  False, "Redirect stdout to files. Neccessary when expecting an error when using parallel options")
 
         params.addParamWithType('allow_deprecated_until', type(time.localtime()), "A test that only runs if current date is less than specified date")
 
@@ -85,7 +85,7 @@ class RunApp(Tester):
         ncpus = min(ncpus, int(self.specs['max_parallel']))
         return ncpus
 
-  def getCommand(self, options):
+    def getCommand(self, options):
         specs = self.specs
         # Create the command line string to run
         command = ''
@@ -138,7 +138,7 @@ class RunApp(Tester):
         else:
             default_ncpus = options.parallel
 
-    if specs['redirect_output'] and ncpus > 1:
+        if specs['redirect_output'] and ncpus > 1:
             specs['cli_args'].append('--keep-cout --redirect-output ' + self.name())
 
         caveats = []
@@ -157,92 +157,92 @@ class RunApp(Tester):
 
         if self.force_mpi or options.parallel or ncpus > 1 or nthreads > 1:
             command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(specs['cli_args'])
-    elif options.valgrind_mode.upper() == specs['valgrind'].upper() or options.valgrind_mode.upper() == 'HEAVY' and specs['valgrind'].upper() == 'NORMAL':
+        elif options.valgrind_mode.upper() == specs['valgrind'].upper() or options.valgrind_mode.upper() == 'HEAVY' and specs['valgrind'].upper() == 'NORMAL':
             command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes -v ' + specs['executable'] + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
         else:
-      command = specs['executable'] + timing_string + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
+            command = specs['executable'] + timing_string + specs['input_switch'] + ' ' + specs['input'] + ' ' + ' '.join(specs['cli_args'])
 
-    if options.pbs:
-      return self.getPBSCommand(options)
+        if options.pbs:
+            return self.getPBSCommand(options)
 
-    return command
+        return command
 
-  def getPBSCommand(self, options):
-    if options.parallel == None:
-      default_ncpus = 1
-    else:
-      default_ncpus = options.parallel
+    def getPBSCommand(self, options):
+        if options.parallel == None:
+            default_ncpus = 1
+        else:
+            default_ncpus = options.parallel
 
-    # Raise the floor
-    ncpus = max(default_ncpus, int(self.specs['min_parallel']))
-    # Lower the ceiling
-    ncpus = min(ncpus, int(self.specs['max_parallel']))
+        # Raise the floor
+        ncpus = max(default_ncpus, int(self.specs['min_parallel']))
+        # Lower the ceiling
+        ncpus = min(ncpus, int(self.specs['max_parallel']))
 
-    # Set number of threads to be used lower bound
-    nthreads = max(options.nthreads, int(self.specs['min_threads']))
-    # Set number of threads to be used upper bound
-    nthreads = min(nthreads, int(self.specs['max_threads']))
+        # Set number of threads to be used lower bound
+        nthreads = max(options.nthreads, int(self.specs['min_threads']))
+        # Set number of threads to be used upper bound
+        nthreads = min(nthreads, int(self.specs['max_threads']))
 
-    extra_args = ''
-    if options.parallel or ncpus > 1 or nthreads > 1:
-      extra_args = ' --n-threads=' + str(nthreads) + ' ' + ' '.join(self.specs['cli_args'])
+        extra_args = ''
+        if options.parallel or ncpus > 1 or nthreads > 1:
+            extra_args = ' --n-threads=' + str(nthreads) + ' ' + ' '.join(self.specs['cli_args'])
 
-    timing_string = ' '
-    if options.timing:
-      self.specs['cli_args'].append('--timing')
-      self.specs['cli_args'].append('Outputs/print_perf_log=true')
+        timing_string = ' '
+        if options.timing:
+            self.specs['cli_args'].append('--timing')
+            self.specs['cli_args'].append('Outputs/print_perf_log=true')
 
-    # Append any extra args to the cluster_launcher
-    if extra_args != '':
-      self.specs['cli_args'] = extra_args
-    else:
-      self.specs['cli_args'] = ' '.join(self.specs['cli_args'])
-    self.specs['cli_args'] = "'" + self.specs['cli_args'].strip() + "'"
+        # Append any extra args to the cluster_launcher
+        if extra_args != '':
+            self.specs['cli_args'] = extra_args
+        else:
+            self.specs['cli_args'] = ' '.join(self.specs['cli_args'])
+        self.specs['cli_args'] = "'" + self.specs['cli_args'].strip() + "'"
 
-    # Open our template. This should probably be done at the same time as cluster_handle.
+        # Open our template. This should probably be done at the same time as cluster_handle.
         template_script = open(os.path.join(self.specs['moose_dir'], 'python', 'TestHarness', 'pbs_template.i'), 'r')
-    content = template_script.read()
-    template_script.close()
+        content = template_script.read()
+        template_script.close()
 
-    # Convert MAX_TIME to hours:minutes for walltime use
-    hours = int(int(self.specs['max_time']) / 3600)
-    minutes = int(int(self.specs['max_time']) / 60) % 60
-    self.specs['walltime'] = '{0:02d}'.format(hours) + ':' + '{0:02d}'.format(minutes) + ':00'
+        # Convert MAX_TIME to hours:minutes for walltime use
+        hours = int(int(self.specs['max_time']) / 3600)
+        minutes = int(int(self.specs['max_time']) / 60) % 60
+        self.specs['walltime'] = '{0:02d}'.format(hours) + ':' + '{0:02d}'.format(minutes) + ':00'
 
-    # Truncate JOB_NAME. PBS can only accept 13 character (6 characters from test name + _## (test serial number) + _### (serialized number generated by cluster_launcher) = the 13 character limit)
-    self.specs['job_name'] = self.specs['input'][:6] + '_' + str(options.test_serial_number).zfill(2)
-    self.specs['job_name'] = self.specs['job_name'].replace('.', '')
-    self.specs['job_name'] = self.specs['job_name'].replace('-', '')
+        # Truncate JOB_NAME. PBS can only accept 13 character (6 characters from test name + _## (test serial number) + _### (serialized number generated by cluster_launcher) = the 13 character limit)
+        self.specs['job_name'] = self.specs['input'][:6] + '_' + str(options.test_serial_number).zfill(2)
+        self.specs['job_name'] = self.specs['job_name'].replace('.', '')
+        self.specs['job_name'] = self.specs['job_name'].replace('-', '')
 
-    # Convert TEST_NAME to input tests file name (normally just 'tests')
-    self.specs['no_copy'] = options.input_file_name
+        # Convert TEST_NAME to input tests file name (normally just 'tests')
+        self.specs['no_copy'] = options.input_file_name
 
-    # Are we using the PBS Emulator? Make this param valid if so.
-    # Add the substitution string here so it is not visable to the user
-    self.specs.addStringSubParam('pbs_stdout', 'PBS_STDOUT', "Save stdout to this location")
-    self.specs.addStringSubParam('pbs_stderr', 'PBS_STDERR', "Save stderr to this location")
-    if options.PBSEmulator:
-      self.specs['pbs_stdout'] = 'pbs_stdout = PBS_EMULATOR'
-      self.specs['pbs_stderr'] = 'pbs_stderr = PBS_EMULATOR'
-    else:
-      # The PBS Emulator fails when using the PROJECT argument (#PBS -P <project name>)
-      self.specs.addStringSubParam('pbs_project', 'PBS_PROJECT', "Identify this job submission with this project")
-      self.specs['pbs_project'] = 'pbs_project = %s' % (options.pbs_project)
+        # Are we using the PBS Emulator? Make this param valid if so.
+        # Add the substitution string here so it is not visable to the user
+        self.specs.addStringSubParam('pbs_stdout', 'PBS_STDOUT', "Save stdout to this location")
+        self.specs.addStringSubParam('pbs_stderr', 'PBS_STDERR', "Save stderr to this location")
+        if options.PBSEmulator:
+            self.specs['pbs_stdout'] = 'pbs_stdout = PBS_EMULATOR'
+            self.specs['pbs_stderr'] = 'pbs_stderr = PBS_EMULATOR'
+        else:
+            # The PBS Emulator fails when using the PROJECT argument (#PBS -P <project name>)
+            self.specs.addStringSubParam('pbs_project', 'PBS_PROJECT', "Identify this job submission with this project")
+            self.specs['pbs_project'] = 'pbs_project = %s' % (options.pbs_project)
 
 
-    # Do all of the replacements for the valid parameters
-    for spec in self.specs.valid_keys():
-      if spec in self.specs.substitute:
-        self.specs[spec] = self.specs.substitute[spec].replace(spec.upper(), self.specs[spec])
-      content = content.replace('<' + spec.upper() + '>', str(self.specs[spec]))
+        # Do all of the replacements for the valid parameters
+        for spec in self.specs.valid_keys():
+            if spec in self.specs.substitute:
+                self.specs[spec] = self.specs.substitute[spec].replace(spec.upper(), self.specs[spec])
+            content = content.replace('<' + spec.upper() + '>', str(self.specs[spec]))
 
-    # Make sure we strip out any string substitution parameters that were not supplied
-    for spec in self.specs.substitute_keys():
-      if not self.specs.isValid(spec):
-        content = content.replace('<' + spec.upper() + '>', '')
+        # Make sure we strip out any string substitution parameters that were not supplied
+        for spec in self.specs.substitute_keys():
+            if not self.specs.isValid(spec):
+                content = content.replace('<' + spec.upper() + '>', '')
 
-    # Write the cluster_launcher input file
-    options.cluster_handle.write(content + '\n')
+        # Write the cluster_launcher input file
+        options.cluster_handle.write(content + '\n')
 
     return os.path.join(self.specs['moose_dir'], 'scripts', 'cluster_launcher.py') + ' ' + options.pbs + '.cluster'
 
@@ -250,10 +250,10 @@ class RunApp(Tester):
     def processResults(self, moose_dir, retcode, options, output):
         reason = ''
         specs = self.specs
-    if specs.isValid('expect_out'):
-      if specs['match_literal']:
+        if specs.isValid('expect_out'):
+            if specs['match_literal']:
                 have_expected_out = self.checkOutputForLiteral(output, specs['expect_out'])
-      else:
+            else:
                 have_expected_out = self.checkOutputForPattern(output, specs['expect_out'])
             if (not have_expected_out):
                 reason = 'EXPECTED OUTPUT MISSING'
@@ -263,24 +263,24 @@ class RunApp(Tester):
             if (have_absent_out):
                 reason = 'OUTPUT NOT ABSENT'
 
-    if reason == '':
-      # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
-      # since a message to standard error might actually be a real error.  This case should be handled
-      # in the derived class.
-      if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( filter( lambda x: x in output, specs['errors'] ) ) > 0:
-        reason = 'ERRMSG'
-      elif retcode == RunParallel.TIMEOUT:
-        reason = 'TIMEOUT'
-      elif retcode == 0 and specs['should_crash'] == True:
-        reason = 'NO CRASH'
-      elif retcode != 0 and specs['should_crash'] == False:
-        reason = 'CRASH'
-      # Valgrind runs
+        if reason == '':
+            # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
+            # since a message to standard error might actually be a real error.  This case should be handled
+            # in the derived class.
+            if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( filter( lambda x: x in output, specs['errors'] ) ) > 0:
+                reason = 'ERRMSG'
+            elif retcode == RunParallel.TIMEOUT:
+                reason = 'TIMEOUT'
+            elif retcode == 0 and specs['should_crash'] == True:
+                reason = 'NO CRASH'
+            elif retcode != 0 and specs['should_crash'] == False:
+                reason = 'CRASH'
+            # Valgrind runs
             elif retcode == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
-        reason = 'MEMORY ERROR'
-      # PBS runs
-      elif retcode == 0 and options.pbs and 'command not found' in output:
-        reason = 'QSUB NOT FOUND'
+                reason = 'MEMORY ERROR'
+            # PBS runs
+            elif retcode == 0 and options.pbs and 'command not found' in output:
+                reason = 'QSUB NOT FOUND'
 
         return (reason, output)
 
@@ -290,11 +290,11 @@ class RunApp(Tester):
         else:
             return True
 
-  def checkOutputForLiteral(self, output, literal):
-    if output.find(literal) == -1:
-      return False
-    else:
-      return True
+    def checkOutputForLiteral(self, output, literal):
+        if output.find(literal) == -1:
+            return False
+        else:
+            return True
 
     def deleteFilesAndFolders(self, test_dir, paths, delete_folders=True):
         # First delete the files (at the end of each of the paths)

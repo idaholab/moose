@@ -7,7 +7,7 @@ MOOSE_PYTHON_DIR = None
 if os.environ.has_key('MOOSE_DIR'):
     MOOSE_PYTHON_DIR = os.path.join(os.environ['MOOSE_DIR'], 'python')
 else:
-  MOOSE_PYTHON_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file__)))[0], 'python')
+    MOOSE_PYTHON_DIR = os.path.join(os.path.split(os.path.dirname(os.path.abspath(__file__)))[0], 'python')
 
 # Add moose/python to path
 if os.path.exists(MOOSE_PYTHON_DIR):
@@ -66,7 +66,7 @@ class ClusterLauncher:
                     print "Type missing in " + filename
                     sys.exit(1)
 
-        params = self.factory.validParams(job_node.params['type'])
+                params = self.factory.validParams(job_node.params['type'])
 
                 params['job_name'] = jobname
 
@@ -113,7 +113,7 @@ class ClusterLauncher:
         # Turn the remaining work over to the Job instance
         # To keep everything consistent we'll also append our serial number to our job name
         specs['job_name'] = next_dir
-    job_instance = self.factory.create(specs['type'], specs['job_name'], specs)
+        job_instance = self.factory.create(specs['type'], specs['job_name'], specs)
 
         # Copy files
         job_instance.copyFiles(job_file)

@@ -29,7 +29,7 @@ class MooseImageFile(MooseCommonExtension, Pattern):
         self._settings['caption'] = None
 
     def createImageElement(self, rel_filename, settings):
-    """
+        """
         Create the element containing the image, this is a separate function to allow for other objects
         (i.e., MooseFigure) to utilize this class to build similar html.
 

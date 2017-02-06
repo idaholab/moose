@@ -38,7 +38,7 @@ class TestHarness:
         sys.exit(harness.error_code)
 
 
-  def __init__(self, argv, app_name, moose_dir):
+    def __init__(self, argv, app_name, moose_dir):
         self.factory = Factory()
 
         # Build a Warehouse to hold the MooseObjects
@@ -57,29 +57,29 @@ class TestHarness:
         # Finally load the plugins!
         self.factory.loadPlugins(dirs, 'testers', Tester)
 
-    self.test_table = []
-    self.num_passed = 0
-    self.num_failed = 0
-    self.num_skipped = 0
-    self.num_pending = 0
-    self.host_name = gethostname()
+        self.test_table = []
+        self.num_passed = 0
+        self.num_failed = 0
+        self.num_skipped = 0
+        self.num_pending = 0
+        self.host_name = gethostname()
         self.moose_dir = moose_dir
         self.base_dir = os.getcwd()
         self.run_tests_dir = os.path.abspath('.')
         self.code = '2d2d6769726c2d6d6f6465'
         self.error_code = 0x0
-    # Assume libmesh is a peer directory to MOOSE if not defined
-    if os.environ.has_key("LIBMESH_DIR"):
-      self.libmesh_dir = os.environ['LIBMESH_DIR']
-    else:
+        # Assume libmesh is a peer directory to MOOSE if not defined
+        if os.environ.has_key("LIBMESH_DIR"):
+            self.libmesh_dir = os.environ['LIBMESH_DIR']
+        else:
             self.libmesh_dir = os.path.join(self.moose_dir, 'libmesh', 'installed')
-    self.file = None
+        self.file = None
 
-    # Parse arguments
-    self.parseCLArgs(argv)
+        # Parse arguments
+        self.parseCLArgs(argv)
 
-    self.checks = {}
-    self.checks['platform'] = getPlatforms()
+        self.checks = {}
+        self.checks['platform'] = getPlatforms()
         self.checks['submodules'] = getInitializedSubmodules(self.run_tests_dir)
 
         # The TestHarness doesn't strictly require the existence of libMesh in order to run. Here we allow the user
@@ -128,12 +128,12 @@ class TestHarness:
                (self.options.cli_args.find('--parallel-mesh') != -1 or self.options.cli_args.find('--distributed-mesh') != -1)):
 
             option_set = set(['ALL', 'PARALLEL'])
-      self.checks['mesh_mode'] = option_set
+            self.checks['mesh_mode'] = option_set
 
         method = set(['ALL', self.options.method.upper()])
-    self.checks['method'] = method
+        self.checks['method'] = method
 
-    self.initialize(argv, app_name)
+        self.initialize(argv, app_name)
 
     """
     Recursively walks the current tree looking for tests to run
@@ -144,52 +144,52 @@ class TestHarness:
     """
     def findAndRunTests(self, find_only=False):
         self.error_code = 0x0
-    self.preRun()
-    self.start_time = clock()
+        self.preRun()
+        self.start_time = clock()
 
-    try:
-      # PBS STUFF
-      if self.options.pbs:
-        # Check to see if we are using the PBS Emulator.
-        # Its expensive, so it must remain outside of the os.walk for loop.
-        self.options.PBSEmulator = self.checkPBSEmulator()
-      if self.options.pbs and os.path.exists(self.options.pbs):
-        self.options.processingPBS = True
-        self.processPBSResults()
-      else:
-        self.options.processingPBS = False
+        try:
+            # PBS STUFF
+            if self.options.pbs:
+                # Check to see if we are using the PBS Emulator.
+                # Its expensive, so it must remain outside of the os.walk for loop.
+                self.options.PBSEmulator = self.checkPBSEmulator()
+            if self.options.pbs and os.path.exists(self.options.pbs):
+                self.options.processingPBS = True
+                self.processPBSResults()
+            else:
+                self.options.processingPBS = False
                 self.base_dir = os.getcwd()
                 for dirpath, dirnames, filenames in os.walk(self.base_dir, followlinks=True):
-          # Prune submdule paths when searching for tests
+                    # Prune submdule paths when searching for tests
                     if self.base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git')):
-            dirnames[:] = []
+                        dirnames[:] = []
 
-          # walk into directories that aren't contrib directories
-          if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
-            for file in filenames:
-              # set cluster_handle to be None initially (happens for each test)
-              self.options.cluster_handle = None
-              # See if there were other arguments (test names) passed on the command line
-              if file == self.options.input_file_name: #and self.test_match.search(file):
-                saved_cwd = os.getcwd()
-                sys.path.append(os.path.abspath(dirpath))
-                os.chdir(dirpath)
+                    # walk into directories that aren't contrib directories
+                    if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
+                        for file in filenames:
+                            # set cluster_handle to be None initially (happens for each test)
+                            self.options.cluster_handle = None
+                            # See if there were other arguments (test names) passed on the command line
+                            if file == self.options.input_file_name: #and self.test_match.search(file):
+                                saved_cwd = os.getcwd()
+                                sys.path.append(os.path.abspath(dirpath))
+                                os.chdir(dirpath)
 
-                if self.prunePath(file):
-                  continue
+                                if self.prunePath(file):
+                                    continue
 
-                # Build a Parser to parse the objects
+                                # Build a Parser to parse the objects
                                 parser = Parser(self.factory, self.warehouse)
 
-                # Parse it
-                self.error_code = self.error_code | parser.parse(file)
+                                # Parse it
+                                self.error_code = self.error_code | parser.parse(file)
 
-                # Retrieve the tests from the warehouse
+                                # Retrieve the tests from the warehouse
                                 testers = self.warehouse.getActiveObjects()
 
-                # Augment the Testers with additional information directly from the TestHarness
-                for tester in testers:
-                  self.augmentParameters(file, tester)
+                                # Augment the Testers with additional information directly from the TestHarness
+                                for tester in testers:
+                                    self.augmentParameters(file, tester)
 
                                 # Short circuit this loop if we've only been asked to parse Testers
                                 # Note: The warehouse will accumulate all testers in this mode
@@ -200,54 +200,54 @@ class TestHarness:
                                 # Clear out the testers, we won't need them to stick around in the warehouse
                                 self.warehouse.clear()
 
-                if self.options.enable_recover:
-                  testers = self.appendRecoverableTests(testers)
+                                if self.options.enable_recover:
+                                    testers = self.appendRecoverableTests(testers)
 
-                # Handle PBS tests.cluster file
-                if self.options.pbs:
-                  (tester, command) = self.createClusterLauncher(dirpath, testers)
-                  if command is not None:
-                    self.runner.run(tester, command)
-                else:
-                  # Go through the Testers and run them
-                  for tester in testers:
-                    # Double the alloted time for tests when running with the valgrind option
-                    tester.setValgrindMode(self.options.valgrind_mode)
+                                # Handle PBS tests.cluster file
+                                if self.options.pbs:
+                                    (tester, command) = self.createClusterLauncher(dirpath, testers)
+                                    if command is not None:
+                                        self.runner.run(tester, command)
+                                else:
+                                    # Go through the Testers and run them
+                                    for tester in testers:
+                                        # Double the alloted time for tests when running with the valgrind option
+                                        tester.setValgrindMode(self.options.valgrind_mode)
 
-                    # When running in valgrind mode, we end up with a ton of output for each failed
-                    # test.  Therefore, we limit the number of fails...
-                    if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
+                                        # When running in valgrind mode, we end up with a ton of output for each failed
+                                        # test.  Therefore, we limit the number of fails...
+                                        if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
                                             (should_run, reason) = (False, 'Max Fails Exceeded')
-                    elif self.num_failed > self.options.max_fails:
+                                        elif self.num_failed > self.options.max_fails:
                                             (should_run, reason) = (False, 'Max Fails Exceeded')
                                         elif tester.parameters().isValid('error_code'):
                                             (should_run, reason) = (False, 'skipped (Parser Error)')
-                    else:
+                                        else:
                                             (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
 
-                    if should_run:
-                      command = tester.getCommand(self.options)
-                      # This method spawns another process and allows this loop to continue looking for tests
-                      # RunParallel will call self.testOutputAndFinish when the test has completed running
-                      # This method will block when the maximum allowed parallel processes are running
-                      self.runner.run(tester, command)
-                    else: # This job is skipped - notify the runner
+                                        if should_run:
+                                            command = tester.getCommand(self.options)
+                                            # This method spawns another process and allows this loop to continue looking for tests
+                                            # RunParallel will call self.testOutputAndFinish when the test has completed running
+                                            # This method will block when the maximum allowed parallel processes are running
+                                            self.runner.run(tester, command)
+                                        else: # This job is skipped - notify the runner
                                             if reason != '':
                                                 if (self.options.report_skipped and reason.find('skipped') != -1) or reason.find('skipped') == -1:
                                                     self.handleTestResult(tester.parameters(), '', reason)
-                      self.runner.jobSkipped(tester.parameters()['test_name'])
-                os.chdir(saved_cwd)
-                sys.path.pop()
-    except KeyboardInterrupt:
-      print '\nExiting due to keyboard interrupt...'
-      sys.exit(0)
+                                            self.runner.jobSkipped(tester.parameters()['test_name'])
+                                os.chdir(saved_cwd)
+                                sys.path.pop()
+        except KeyboardInterrupt:
+            print '\nExiting due to keyboard interrupt...'
+            sys.exit(0)
 
         self.runner.join()
-    # Wait for all tests to finish
-    if self.options.pbs and self.options.processingPBS == False:
-      print '\n< checking batch status >\n'
-      self.options.processingPBS = True
-      self.processPBSResults()
+        # Wait for all tests to finish
+        if self.options.pbs and self.options.processingPBS == False:
+            print '\n< checking batch status >\n'
+            self.options.processingPBS = True
+            self.processPBSResults()
 
         self.cleanup()
 
@@ -257,36 +257,36 @@ class TestHarness:
 
         return
 
-  def createClusterLauncher(self, dirpath, testers):
-    self.options.test_serial_number = 0
-    command = None
-    tester = None
-    # Create the tests.cluster input file
-    # Loop through each tester and create a job
-    for tester in testers:
+    def createClusterLauncher(self, dirpath, testers):
+        self.options.test_serial_number = 0
+        command = None
+        tester = None
+        # Create the tests.cluster input file
+        # Loop through each tester and create a job
+        for tester in testers:
             (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
-      if should_run:
-        if self.options.cluster_handle == None:
-          self.options.cluster_handle = open(dirpath + '/' + self.options.pbs + '.cluster', 'w')
-        self.options.cluster_handle.write('[Jobs]\n')
-        # This returns the command to run as well as builds the parameters of the test
-        # The resulting command once this loop has completed is sufficient to launch
-        # all previous jobs
-        command = tester.getCommand(self.options)
-        self.options.cluster_handle.write('[]\n')
-        self.options.test_serial_number += 1
-      else: # This job is skipped - notify the runner
+            if should_run:
+                if self.options.cluster_handle == None:
+                    self.options.cluster_handle = open(dirpath + '/' + self.options.pbs + '.cluster', 'w')
+                self.options.cluster_handle.write('[Jobs]\n')
+                # This returns the command to run as well as builds the parameters of the test
+                # The resulting command once this loop has completed is sufficient to launch
+                # all previous jobs
+                command = tester.getCommand(self.options)
+                self.options.cluster_handle.write('[]\n')
+                self.options.test_serial_number += 1
+            else: # This job is skipped - notify the runner
                 if (reason != ''):
                     self.handleTestResult(tester.parameters(), '', reason)
                     self.runner.jobSkipped(tester.parameters()['test_name'])
 
-    # Close the tests.cluster file
-    if self.options.cluster_handle is not None:
-      self.options.cluster_handle.close()
-      self.options.cluster_handle = None
+        # Close the tests.cluster file
+        if self.options.cluster_handle is not None:
+            self.options.cluster_handle.close()
+            self.options.cluster_handle = None
 
-    # Return the final tester/command (sufficient to run all tests)
-    return (tester, command)
+        # Return the final tester/command (sufficient to run all tests)
+        return (tester, command)
 
 
     def prunePath(self, filename):
@@ -362,234 +362,234 @@ class TestHarness:
         testers.extend(new_tests)
         return testers
 
-  ## Finish the test by inspecting the raw output
+    ## Finish the test by inspecting the raw output
     def testOutputAndFinish(self, tester, retcode, output, start=0, end=0):
-    caveats = []
+        caveats = []
         test = tester.specs  # Need to refactor
 
-    if test.isValid('caveats'):
-      caveats = test['caveats']
+        if test.isValid('caveats'):
+            caveats = test['caveats']
 
-    if self.options.pbs and self.options.processingPBS == False:
+        if self.options.pbs and self.options.processingPBS == False:
             (reason, output) = self.buildPBSBatch(output, tester)
         elif self.options.dry_run:
             reason = 'DRY_RUN'
             output += '\n'.join(tester.processResultsCommand(self.moose_dir, self.options))
-    else:
+        else:
             (reason, output) = tester.processResults(self.moose_dir, retcode, self.options, output)
 
-    if self.options.scaling and test['scale_refine']:
-      caveats.append('scaled')
+        if self.options.scaling and test['scale_refine']:
+            caveats.append('scaled')
 
         did_pass = True
         if reason == '':
             # It ran OK but is this test set to be skipped on any platform, compiler, so other reason?
             if self.options.extra_info:
-        checks = ['platform', 'compiler', 'petsc_version', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids']
+                checks = ['platform', 'compiler', 'petsc_version', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids']
                 for check in checks:
                     if not 'ALL' in test[check]:
                         caveats.append(', '.join(test[check]))
-      if len(caveats):
+            if len(caveats):
                 result = '[' + ', '.join(caveats).upper() + '] OK'
             elif self.options.pbs and self.options.processingPBS == False:
                 result = 'LAUNCHED'
-      else:
+            else:
                 result = 'OK'
         elif reason == 'DRY_RUN':
             result = 'DRY_RUN'
-    else:
+        else:
             result = 'FAILED (%s)' % reason
             did_pass = False
         if self.options.pbs and self.options.processingPBS == False and did_pass == True:
-      # Handle the launch result, but do not add it to the results table (except if we learned that QSUB failed to launch for some reason)
+            # Handle the launch result, but do not add it to the results table (except if we learned that QSUB failed to launch for some reason)
             self.handleTestResult(tester.specs, output, result, start, end, False)
-      return did_pass
-    else:
+            return did_pass
+        else:
             self.handleTestResult(tester.specs, output, result, start, end)
-      return did_pass
+            return did_pass
 
-  def getTiming(self, output):
-    time = ''
-    m = re.search(r"Active time=(\S+)", output)
-    if m != None:
-      return m.group(1)
+    def getTiming(self, output):
+        time = ''
+        m = re.search(r"Active time=(\S+)", output)
+        if m != None:
+            return m.group(1)
 
-  def getSolveTime(self, output):
-    time = ''
-    m = re.search(r"solve().*", output)
-    if m != None:
-      return m.group().split()[5]
+    def getSolveTime(self, output):
+        time = ''
+        m = re.search(r"solve().*", output)
+        if m != None:
+            return m.group().split()[5]
 
-  def checkExpectError(self, output, expect_error):
-    if re.search(expect_error, output, re.MULTILINE | re.DOTALL) == None:
-      #print "%" * 100, "\nExpect Error Pattern not found:\n", expect_error, "\n", "%" * 100, "\n"
-      return False
-    else:
-      return True
+    def checkExpectError(self, output, expect_error):
+        if re.search(expect_error, output, re.MULTILINE | re.DOTALL) == None:
+            #print "%" * 100, "\nExpect Error Pattern not found:\n", expect_error, "\n", "%" * 100, "\n"
+            return False
+        else:
+            return True
 
 # PBS Defs
 
-  def checkPBSEmulator(self):
-    try:
-      qstat_process = subprocess.Popen(['qstat', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      qstat_output = qstat_process.communicate()
-    except OSError:
-      # qstat binary is not available
-      print 'qstat not available. Perhaps you need to load the PBS module?'
-      sys.exit(1)
-    if len(qstat_output[1]):
-      # The PBS Emulator has no --version argument, and thus returns output to stderr
-      return True
-    else:
-      return False
+    def checkPBSEmulator(self):
+        try:
+            qstat_process = subprocess.Popen(['qstat', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            qstat_output = qstat_process.communicate()
+        except OSError:
+            # qstat binary is not available
+            print 'qstat not available. Perhaps you need to load the PBS module?'
+            sys.exit(1)
+        if len(qstat_output[1]):
+            # The PBS Emulator has no --version argument, and thus returns output to stderr
+            return True
+        else:
+            return False
 
-  def processPBSResults(self):
-    # If batch file exists, check the contents for pending tests.
-    if os.path.exists(self.options.pbs):
-      # Build a list of launched jobs
-      batch_file = open(self.options.pbs)
-      batch_list = [y.split(':') for y in [x for x in batch_file.read().split('\n')]]
-      batch_file.close()
-      del batch_list[-1:]
+    def processPBSResults(self):
+        # If batch file exists, check the contents for pending tests.
+        if os.path.exists(self.options.pbs):
+            # Build a list of launched jobs
+            batch_file = open(self.options.pbs)
+            batch_list = [y.split(':') for y in [x for x in batch_file.read().split('\n')]]
+            batch_file.close()
+            del batch_list[-1:]
 
-      # Loop through launched jobs and match the TEST_NAME to determin correct stdout (Output_Path)
-      for job in batch_list:
-        file = '/'.join(job[2].split('/')[:-2]) + '/' + job[3]
+            # Loop through launched jobs and match the TEST_NAME to determin correct stdout (Output_Path)
+            for job in batch_list:
+                file = '/'.join(job[2].split('/')[:-2]) + '/' + job[3]
 
-        # Build a Warehouse to hold the MooseObjects
-        warehouse = Warehouse()
+                # Build a Warehouse to hold the MooseObjects
+                warehouse = Warehouse()
 
-        # Build a Parser to parse the objects
-        parser = Parser(self.factory, warehouse)
+                # Build a Parser to parse the objects
+                parser = Parser(self.factory, warehouse)
 
-        # Parse it
-        parser.parse(file)
+                # Parse it
+                parser.parse(file)
 
-        # Retrieve the tests from the warehouse
-        testers = warehouse.getAllObjects()
-        for tester in testers:
-          self.augmentParameters(file, tester)
+                # Retrieve the tests from the warehouse
+                testers = warehouse.getAllObjects()
+                for tester in testers:
+                    self.augmentParameters(file, tester)
 
-        for tester in testers:
-          # Build the requested Tester object
-          if job[1] == tester.parameters()['test_name']:
-            # Create Test Type
-            # test = self.factory.create(tester.parameters()['type'], tester)
+                for tester in testers:
+                    # Build the requested Tester object
+                    if job[1] == tester.parameters()['test_name']:
+                        # Create Test Type
+                        # test = self.factory.create(tester.parameters()['type'], tester)
 
-            # Get job status via qstat
-            qstat = ['qstat', '-f', '-x', str(job[0])]
-            qstat_command = subprocess.Popen(qstat, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            qstat_stdout = qstat_command.communicate()[0]
-            if qstat_stdout != None:
-              output_value = re.search(r'job_state = (\w+)', qstat_stdout).group(1)
-            else:
-              return ('QSTAT NOT FOUND', '')
+                        # Get job status via qstat
+                        qstat = ['qstat', '-f', '-x', str(job[0])]
+                        qstat_command = subprocess.Popen(qstat, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        qstat_stdout = qstat_command.communicate()[0]
+                        if qstat_stdout != None:
+                            output_value = re.search(r'job_state = (\w+)', qstat_stdout).group(1)
+                        else:
+                            return ('QSTAT NOT FOUND', '')
 
-            # Report the current status of JOB_ID
-            if output_value == 'F':
-              # F = Finished. Get the exit code reported by qstat
+                        # Report the current status of JOB_ID
+                        if output_value == 'F':
+                            # F = Finished. Get the exit code reported by qstat
               exit_code = int(re.search(r'Exit_status = (-?\d+)', qstat_stdout).group(1))
 
-              # Read the stdout file
-              if os.path.exists(job[2]):
-                output_file = open(job[2], 'r')
-                # Not sure I am doing this right: I have to change the TEST_DIR to match the temporary cluster_launcher TEST_DIR location, thus violating the tester.specs...
-                tester.parameters()['test_dir'] = '/'.join(job[2].split('/')[:-1])
-                outfile = output_file.read()
-                output_file.close()
-                self.testOutputAndFinish(tester, exit_code, outfile)
-              else:
-                # I ran into this scenario when the cluster went down, but launched/completed my job :)
+                            # Read the stdout file
+                            if os.path.exists(job[2]):
+                                output_file = open(job[2], 'r')
+                                # Not sure I am doing this right: I have to change the TEST_DIR to match the temporary cluster_launcher TEST_DIR location, thus violating the tester.specs...
+                                tester.parameters()['test_dir'] = '/'.join(job[2].split('/')[:-1])
+                                outfile = output_file.read()
+                                output_file.close()
+                                self.testOutputAndFinish(tester, exit_code, outfile)
+                            else:
+                                # I ran into this scenario when the cluster went down, but launched/completed my job :)
                                 self.handleTestResult(tester.specs, '', 'FAILED (NO STDOUT FILE)', 0, 0, True)
 
-            elif output_value == 'R':
-              # Job is currently running
+                        elif output_value == 'R':
+                            # Job is currently running
                             self.handleTestResult(tester.specs, '', 'RUNNING', 0, 0, True)
-            elif output_value == 'E':
-              # Job is exiting
+                        elif output_value == 'E':
+                            # Job is exiting
                             self.handleTestResult(tester.specs, '', 'EXITING', 0, 0, True)
-            elif output_value == 'Q':
-              # Job is currently queued
+                        elif output_value == 'Q':
+                            # Job is currently queued
                             self.handleTestResult(tester.specs, '', 'QUEUED', 0, 0, True)
-    else:
-      return ('BATCH FILE NOT FOUND', '')
+        else:
+            return ('BATCH FILE NOT FOUND', '')
 
-  def buildPBSBatch(self, output, tester):
-    # Create/Update the batch file
-    if 'command not found' in output:
+    def buildPBSBatch(self, output, tester):
+        # Create/Update the batch file
+        if 'command not found' in output:
             return ('QSUB NOT FOUND', '')
-    else:
-      # Get the Job information from the ClusterLauncher
-      results = re.findall(r'JOB_NAME: (\w+) JOB_ID:.* (\d+).*TEST_NAME: (\S+)', output)
-      if len(results) != 0:
-        file_name = self.options.pbs
-        job_list = open(os.path.abspath(os.path.join(tester.specs['executable'], os.pardir)) + '/' + file_name, 'a')
-        for result in results:
-          (test_dir, job_id, test_name) = result
-          qstat_command = subprocess.Popen(['qstat', '-f', '-x', str(job_id)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-          qstat_stdout = qstat_command.communicate()[0]
-          # Get the Output_Path from qstat stdout
-          if qstat_stdout != None:
-            output_value = re.search(r'Output_Path(.*?)(^ +)', qstat_stdout, re.S | re.M).group(1)
-            output_value = output_value.split(':')[1].replace('\n', '').replace('\t', '').strip()
-          else:
-            job_list.close()
+        else:
+            # Get the Job information from the ClusterLauncher
+            results = re.findall(r'JOB_NAME: (\w+) JOB_ID:.* (\d+).*TEST_NAME: (\S+)', output)
+            if len(results) != 0:
+                file_name = self.options.pbs
+                job_list = open(os.path.abspath(os.path.join(tester.specs['executable'], os.pardir)) + '/' + file_name, 'a')
+                for result in results:
+                    (test_dir, job_id, test_name) = result
+                    qstat_command = subprocess.Popen(['qstat', '-f', '-x', str(job_id)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    qstat_stdout = qstat_command.communicate()[0]
+                    # Get the Output_Path from qstat stdout
+                    if qstat_stdout != None:
+                        output_value = re.search(r'Output_Path(.*?)(^ +)', qstat_stdout, re.S | re.M).group(1)
+                        output_value = output_value.split(':')[1].replace('\n', '').replace('\t', '').strip()
+                    else:
+                        job_list.close()
                         return ('QSTAT NOT FOUND', '')
-          # Write job_id, test['test_name'], and Ouput_Path to the batch file
-          job_list.write(str(job_id) + ':' + test_name + ':' + output_value + ':' + self.options.input_file_name  + '\n')
-        # Return to TestHarness and inform we have launched the job
-        job_list.close()
+                    # Write job_id, test['test_name'], and Ouput_Path to the batch file
+                    job_list.write(str(job_id) + ':' + test_name + ':' + output_value + ':' + self.options.input_file_name  + '\n')
+                # Return to TestHarness and inform we have launched the job
+                job_list.close()
                 return ('', 'LAUNCHED')
-      else:
+            else:
                 return ('QSTAT INVALID RESULTS', output)
 
-  def cleanPBSBatch(self):
-    # Open the PBS batch file and assign it to a list
-    if os.path.exists(self.options.pbs_cleanup):
-      batch_file = open(self.options.pbs_cleanup, 'r')
-      batch_list = [y.split(':') for y in [x for x in batch_file.read().split('\n')]]
-      batch_file.close()
-      del batch_list[-1:]
-    else:
-      print 'PBS batch file not found:', self.options.pbs_cleanup
-      sys.exit(1)
+    def cleanPBSBatch(self):
+        # Open the PBS batch file and assign it to a list
+        if os.path.exists(self.options.pbs_cleanup):
+            batch_file = open(self.options.pbs_cleanup, 'r')
+            batch_list = [y.split(':') for y in [x for x in batch_file.read().split('\n')]]
+            batch_file.close()
+            del batch_list[-1:]
+        else:
+            print 'PBS batch file not found:', self.options.pbs_cleanup
+            sys.exit(1)
 
-    # Loop through launched jobs and delete whats found.
-    for job in batch_list:
-      if os.path.exists(job[2]):
-        batch_dir = os.path.abspath(os.path.join(job[2], os.pardir)).split('/')
-        if os.path.exists('/'.join(batch_dir)):
-          shutil.rmtree('/'.join(batch_dir))
-        if os.path.exists('/'.join(batch_dir[:-1]) + '/' + self.options.pbs_cleanup + '.cluster'):
-          os.remove('/'.join(batch_dir[:-1]) + '/' + self.options.pbs_cleanup + '.cluster')
-    os.remove(self.options.pbs_cleanup)
+        # Loop through launched jobs and delete whats found.
+        for job in batch_list:
+            if os.path.exists(job[2]):
+                batch_dir = os.path.abspath(os.path.join(job[2], os.pardir)).split('/')
+                if os.path.exists('/'.join(batch_dir)):
+                    shutil.rmtree('/'.join(batch_dir))
+                if os.path.exists('/'.join(batch_dir[:-1]) + '/' + self.options.pbs_cleanup + '.cluster'):
+                    os.remove('/'.join(batch_dir[:-1]) + '/' + self.options.pbs_cleanup + '.cluster')
+        os.remove(self.options.pbs_cleanup)
 
 # END PBS Defs
 
-  ## Update global variables and print output based on the test result
+    ## Update global variables and print output based on the test result
     # Containing OK means it passed, skipped means skipped, anything else means it failed
     def handleTestResult(self, specs, output, result, start=0, end=0, add_to_table=True):
-    timing = ''
+        timing = ''
 
-    if self.options.timing:
-      timing = self.getTiming(output)
-    elif self.options.store_time:
-      timing = self.getSolveTime(output)
+        if self.options.timing:
+            timing = self.getTiming(output)
+        elif self.options.store_time:
+            timing = self.getSolveTime(output)
 
-    # Only add to the test_table if told to. We now have enough cases where we wish to print to the screen, but not
-    # in the 'Final Test Results' area.
-    if add_to_table:
+        # Only add to the test_table if told to. We now have enough cases where we wish to print to the screen, but not
+        # in the 'Final Test Results' area.
+        if add_to_table:
             self.test_table.append( (specs, output, result, timing, start, end) )
             if result.find('OK') != -1 or result.find('DRY_RUN') != -1:
-        self.num_passed += 1
+                self.num_passed += 1
             elif result.find('skipped') != -1:
                 self.num_skipped += 1
             elif result.find('deleted') != -1:
                 self.num_skipped += 1
             elif result.find('LAUNCHED') != -1 or result.find('RUNNING') != -1 or result.find('QUEUED') != -1 or result.find('EXITING') != -1:
-        self.num_pending += 1
-      else:
-        self.num_failed += 1
+                self.num_pending += 1
+            else:
+                self.num_failed += 1
 
         self.postRun(specs, timing)
 
@@ -620,7 +620,7 @@ class TestHarness:
 
 
         if not 'skipped' in result:
-      if self.options.file:
+            if self.options.file:
                 if self.options.show_directory:
                     self.file.write(printResult( specs['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options, color=False) + '\n')
                     self.file.write(output)
@@ -630,10 +630,10 @@ class TestHarness:
 
             if self.options.sep_files or (self.options.fail_files and 'FAILED' in result) or (self.options.ok_files and result.find('OK') != -1):
                 fname = os.path.join(specs['test_dir'], specs['test_name'].split('/')[-1] + '.' + result[:6] + '.txt')
-        f = open(fname, 'w')
+                f = open(fname, 'w')
                 f.write(printResult( specs['test_name'], result, timing, start, end, self.options, color=False) + '\n')
-        f.write(output)
-        f.close()
+                f.write(output)
+                f.close()
 
     # Write the app_name to a file, if the tests passed
     def writeState(self, app_name):
@@ -643,34 +643,34 @@ class TestHarness:
             result_file.write(os.path.split(app_name)[1].split('-')[0] + '\n')
             result_file.close()
 
-  # Print final results, close open files, and exit with the correct error code
+    # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
-    # Print the results table again if a bunch of output was spewed to the screen between
-    # tests as they were running
-    if self.options.verbose or (self.num_failed != 0 and not self.options.quiet):
-      print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
+        # Print the results table again if a bunch of output was spewed to the screen between
+        # tests as they were running
+        if self.options.verbose or (self.num_failed != 0 and not self.options.quiet):
+            print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
             for (test, output, result, timing, start, end) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
                 if self.options.show_directory:
                     print printResult(test['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options)
                 else:
                     print printResult(test['test_name'], result, timing, start, end, self.options)
 
-    time = clock() - self.start_time
-    print '-' * (TERM_COLS-1)
-    print 'Ran %d tests in %.1f seconds' % (self.num_passed+self.num_failed, time)
+        time = clock() - self.start_time
+        print '-' * (TERM_COLS-1)
+        print 'Ran %d tests in %.1f seconds' % (self.num_passed+self.num_failed, time)
 
-    if self.num_passed:
-      summary = '<g>%d passed</g>'
-    else:
-      summary = '<b>%d passed</b>'
-    summary += ', <b>%d skipped</b>'
-    if self.num_pending:
+        if self.num_passed:
+            summary = '<g>%d passed</g>'
+        else:
+            summary = '<b>%d passed</b>'
+        summary += ', <b>%d skipped</b>'
+        if self.num_pending:
             summary += ', <c>%d pending</c>'
-    else:
+        else:
             summary += ', <b>%d pending</b>'
-    if self.num_failed:
+        if self.num_failed:
             summary += ', <r>%d FAILED</r>'
-    else:
+        else:
             summary += ', <b>%d failed</b>'
 
         # Mask off TestHarness error codes to report parser errors
@@ -679,74 +679,74 @@ class TestHarness:
 
         print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
                          colored=self.options.colored, code=self.options.code )
-    if self.options.pbs:
-      print '\nYour PBS batch file:', self.options.pbs
-    if self.file:
-      self.file.close()
+        if self.options.pbs:
+            print '\nYour PBS batch file:', self.options.pbs
+        if self.file:
+            self.file.close()
 
         if self.num_failed == 0:
             self.writeState(self.executable)
 
-  def initialize(self, argv, app_name):
-    # Initialize the parallel runner with how many tests to run in parallel
-    self.runner = RunParallel(self, self.options.jobs, self.options.load)
+    def initialize(self, argv, app_name):
+        # Initialize the parallel runner with how many tests to run in parallel
+        self.runner = RunParallel(self, self.options.jobs, self.options.load)
 
-    ## Save executable-under-test name to self.executable
-    self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method
+        ## Save executable-under-test name to self.executable
+        self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method
 
-    # Save the output dir since the current working directory changes during tests
-    self.output_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), self.options.output_dir)
+        # Save the output dir since the current working directory changes during tests
+        self.output_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), self.options.output_dir)
 
-    # Create the output dir if they ask for it. It is easier to ask for forgiveness than permission
-    if self.options.output_dir:
-      try:
-        os.makedirs(self.output_dir)
-      except OSError, ex:
-        if ex.errno == errno.EEXIST: pass
-        else: raise
+        # Create the output dir if they ask for it. It is easier to ask for forgiveness than permission
+        if self.options.output_dir:
+            try:
+                os.makedirs(self.output_dir)
+            except OSError, ex:
+                if ex.errno == errno.EEXIST: pass
+                else: raise
 
-    # Open the file to redirect output to and set the quiet option for file output
-    if self.options.file:
-      self.file = open(os.path.join(self.output_dir, self.options.file), 'w')
-    if self.options.file or self.options.fail_files or self.options.sep_files:
-      self.options.quiet = True
+        # Open the file to redirect output to and set the quiet option for file output
+        if self.options.file:
+            self.file = open(os.path.join(self.output_dir, self.options.file), 'w')
+        if self.options.file or self.options.fail_files or self.options.sep_files:
+            self.options.quiet = True
 
-  ## Parse command line options and assign them to self.options
-  def parseCLArgs(self, argv):
-    parser = argparse.ArgumentParser(description='A tool used to test MOOSE based applications')
-    parser.add_argument('test_name', nargs=argparse.REMAINDER)
-    parser.add_argument('--opt', action='store_const', dest='method', const='opt', help='test the app_name-opt binary')
-    parser.add_argument('--dbg', action='store_const', dest='method', const='dbg', help='test the app_name-dbg binary')
+    ## Parse command line options and assign them to self.options
+    def parseCLArgs(self, argv):
+        parser = argparse.ArgumentParser(description='A tool used to test MOOSE based applications')
+        parser.add_argument('test_name', nargs=argparse.REMAINDER)
+        parser.add_argument('--opt', action='store_const', dest='method', const='opt', help='test the app_name-opt binary')
+        parser.add_argument('--dbg', action='store_const', dest='method', const='dbg', help='test the app_name-dbg binary')
         parser.add_argument('--devel', action='store_const', dest='method', const='devel', help='test the app_name-devel binary')
-    parser.add_argument('--oprof', action='store_const', dest='method', const='oprof', help='test the app_name-oprof binary')
-    parser.add_argument('--pro', action='store_const', dest='method', const='pro', help='test the app_name-pro binary')
+        parser.add_argument('--oprof', action='store_const', dest='method', const='oprof', help='test the app_name-oprof binary')
+        parser.add_argument('--pro', action='store_const', dest='method', const='pro', help='test the app_name-pro binary')
         parser.add_argument('-j', '--jobs', nargs='?', metavar='int', action='store', type=int, dest='jobs', const=1, help='run test binaries in parallel')
-    parser.add_argument('-e', action='store_true', dest='extra_info', help='Display "extra" information including all caveats and deleted tests')
-    parser.add_argument('-c', '--no-color', action='store_false', dest='colored', help='Do not show colored output')
-    parser.add_argument('--heavy', action='store_true', dest='heavy_tests', help='Run tests marked with HEAVY : True')
-    parser.add_argument('--all-tests', action='store_true', dest='all_tests', help='Run normal tests and tests marked with HEAVY : True')
-    parser.add_argument('-g', '--group', action='store', type=str, dest='group', default='ALL', help='Run only tests in the named group')
-    parser.add_argument('--not_group', action='store', type=str, dest='not_group', help='Run only tests NOT in the named group')
+        parser.add_argument('-e', action='store_true', dest='extra_info', help='Display "extra" information including all caveats and deleted tests')
+        parser.add_argument('-c', '--no-color', action='store_false', dest='colored', help='Do not show colored output')
+        parser.add_argument('--heavy', action='store_true', dest='heavy_tests', help='Run tests marked with HEAVY : True')
+        parser.add_argument('--all-tests', action='store_true', dest='all_tests', help='Run normal tests and tests marked with HEAVY : True')
+        parser.add_argument('-g', '--group', action='store', type=str, dest='group', default='ALL', help='Run only tests in the named group')
+        parser.add_argument('--not_group', action='store', type=str, dest='not_group', help='Run only tests NOT in the named group')
 #    parser.add_argument('--dofs', action='store', dest='dofs', help='This option is for automatic scaling which is not currently implemented in MOOSE 2.0')
-    parser.add_argument('--dbfile', nargs='?', action='store', dest='dbFile', help='Location to timings data base file. If not set, assumes $HOME/timingDB/timing.sqlite')
-    parser.add_argument('-l', '--load-average', action='store', type=float, dest='load', default=64.0, help='Do not run additional tests if the load average is at least LOAD')
-    parser.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
-    parser.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Scale problems that have SCALE_REFINE set')
-    parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', default='tests', help='The default test specification file to look for (default="tests").')
-    parser.add_argument('--libmesh_dir', nargs=1, action='store', type=str, dest='libmesh_dir', help='Currently only needed for bitten code coverage')
+        parser.add_argument('--dbfile', nargs='?', action='store', dest='dbFile', help='Location to timings data base file. If not set, assumes $HOME/timingDB/timing.sqlite')
+        parser.add_argument('-l', '--load-average', action='store', type=float, dest='load', default=64.0, help='Do not run additional tests if the load average is at least LOAD')
+        parser.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
+        parser.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Scale problems that have SCALE_REFINE set')
+        parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', default='tests', help='The default test specification file to look for (default="tests").')
+        parser.add_argument('--libmesh_dir', nargs=1, action='store', type=str, dest='libmesh_dir', help='Currently only needed for bitten code coverage')
         parser.add_argument('--skip-config-checks', action='store_true', dest='skip_config_checks', help='Skip configuration checks (all tests will run regardless of restrictions)')
-    parser.add_argument('--parallel', '-p', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of processors to use when running mpiexec')
-    parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
-    parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
+        parser.add_argument('--parallel', '-p', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of processors to use when running mpiexec')
+        parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
+        parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
         parser.add_argument('--recover', action='store_true', dest='enable_recover', help='Run a test in recover mode')
         parser.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         parser.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
-    parser.add_argument('--valgrind-max-fails', nargs=1, type=int, dest='valgrind_max_fails', default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
+        parser.add_argument('--valgrind-max-fails', nargs=1, type=int, dest='valgrind_max_fails', default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
         parser.add_argument('--max-fails', nargs=1, type=int, dest='max_fails', default=50, help='The number of tests allowed to fail before any additional tests will run')
-    parser.add_argument('--pbs', nargs='?', metavar='batch_file', dest='pbs', const='generate', help='Enable launching tests via PBS. If no batch file is specified one will be created for you')
-    parser.add_argument('--pbs-cleanup', nargs=1, metavar='batch_file', help='Clean up the directories/files created by PBS. You must supply the same batch_file used to launch PBS.')
-    parser.add_argument('--pbs-project', nargs=1, default='moose', help='Identify PBS job submission to specified project')
-    parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
+        parser.add_argument('--pbs', nargs='?', metavar='batch_file', dest='pbs', const='generate', help='Enable launching tests via PBS. If no batch file is specified one will be created for you')
+        parser.add_argument('--pbs-cleanup', nargs=1, metavar='batch_file', help='Clean up the directories/files created by PBS. You must supply the same batch_file used to launch PBS.')
+        parser.add_argument('--pbs-project', nargs=1, default='moose', help='Identify PBS job submission to specified project')
+        parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
 
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
@@ -755,103 +755,103 @@ class TestHarness:
         parser.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (Pass "--error-unused" to executable)')
 
         # Option to use for passing unwrapped options to the executable
-    parser.add_argument('--cli-args', nargs='?', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')
+        parser.add_argument('--cli-args', nargs='?', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')
 
         parser.add_argument('--dry-run', action='store_true', dest='dry_run', help="Pass --dry-run to print commands to run, but don't actually run them")
 
-    outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
+        outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
         outputgroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='show the output of every test')
-    outputgroup.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='only show the result of every test, don\'t show test output even if it fails')
+        outputgroup.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='only show the result of every test, don\'t show test output even if it fails')
         outputgroup.add_argument('--no-report', action='store_false', dest='report_skipped', help='do not report skipped tests')
         outputgroup.add_argument('--show-directory', action='store_true', dest='show_directory', help='Print test directory path in out messages')
-    outputgroup.add_argument('-o', '--output-dir', nargs=1, metavar='directory', dest='output_dir', default='', help='Save all output files in the directory, and create it if necessary')
-    outputgroup.add_argument('-f', '--file', nargs=1, action='store', dest='file', help='Write verbose output of each test to FILE and quiet output to terminal')
-    outputgroup.add_argument('-x', '--sep-files', action='store_true', dest='sep_files', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
-    outputgroup.add_argument('--sep-files-ok', action='store_true', dest='ok_files', help='Write the output of each passed test to a separate file')
-    outputgroup.add_argument('-a', '--sep-files-fail', action='store_true', dest='fail_files', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
-    outputgroup.add_argument("--store-timing", action="store_true", dest="store_time", help="Store timing in the SQL database: $HOME/timingDB/timing.sqlite A parent directory (timingDB) must exist.")
+        outputgroup.add_argument('-o', '--output-dir', nargs=1, metavar='directory', dest='output_dir', default='', help='Save all output files in the directory, and create it if necessary')
+        outputgroup.add_argument('-f', '--file', nargs=1, action='store', dest='file', help='Write verbose output of each test to FILE and quiet output to terminal')
+        outputgroup.add_argument('-x', '--sep-files', action='store_true', dest='sep_files', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
+        outputgroup.add_argument('--sep-files-ok', action='store_true', dest='ok_files', help='Write the output of each passed test to a separate file')
+        outputgroup.add_argument('-a', '--sep-files-fail', action='store_true', dest='fail_files', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
+        outputgroup.add_argument("--store-timing", action="store_true", dest="store_time", help="Store timing in the SQL database: $HOME/timingDB/timing.sqlite A parent directory (timingDB) must exist.")
         outputgroup.add_argument("--testharness-unittest", action="store_true", help="Run the TestHarness unittests that test the TestHarness.")
     outputgroup.add_argument("--revision", nargs=1, action="store", type=str, dest="revision", help="The current revision being tested. Required when using --store-timing.")
-    outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
-    outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
+        outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
+        outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
 
         code = True
         if self.code.decode('hex') in argv:
             del argv[argv.index(self.code.decode('hex'))]
             code = False
-    self.options = parser.parse_args(argv[1:])
+        self.options = parser.parse_args(argv[1:])
         self.tests = self.options.test_name
-    self.options.code = code
+        self.options.code = code
 
         # Convert all list based options of length one to scalars
-    for key, value in vars(self.options).items():
-      if type(value) == list and len(value) == 1:
-        tmp_str = getattr(self.options, key)
-        setattr(self.options, key, value[0])
+        for key, value in vars(self.options).items():
+            if type(value) == list and len(value) == 1:
+                tmp_str = getattr(self.options, key)
+                setattr(self.options, key, value[0])
 
-    self.checkAndUpdateCLArgs()
+        self.checkAndUpdateCLArgs()
 
-  ## Called after options are parsed from the command line
-  # Exit if options don't make any sense, print warnings if they are merely weird
-  def checkAndUpdateCLArgs(self):
-    opts = self.options
-    if opts.output_dir and not (opts.file or opts.sep_files or opts.fail_files or opts.ok_files):
-      print 'WARNING: --output-dir is specified but no output files will be saved, use -f or a --sep-files option'
-    if opts.group == opts.not_group:
-      print 'ERROR: The group and not_group options cannot specify the same group'
-      sys.exit(1)
-    if opts.store_time and not (opts.revision):
-      print 'ERROR: --store-timing is specified but no revision'
-      sys.exit(1)
-    if opts.store_time:
-      # timing returns Active Time, while store_timing returns Solve Time.
-      # Thus we need to turn off timing.
-      opts.timing = False
-      opts.scaling = True
+    ## Called after options are parsed from the command line
+    # Exit if options don't make any sense, print warnings if they are merely weird
+    def checkAndUpdateCLArgs(self):
+        opts = self.options
+        if opts.output_dir and not (opts.file or opts.sep_files or opts.fail_files or opts.ok_files):
+            print 'WARNING: --output-dir is specified but no output files will be saved, use -f or a --sep-files option'
+        if opts.group == opts.not_group:
+            print 'ERROR: The group and not_group options cannot specify the same group'
+            sys.exit(1)
+        if opts.store_time and not (opts.revision):
+            print 'ERROR: --store-timing is specified but no revision'
+            sys.exit(1)
+        if opts.store_time:
+            # timing returns Active Time, while store_timing returns Solve Time.
+            # Thus we need to turn off timing.
+            opts.timing = False
+            opts.scaling = True
         if opts.valgrind_mode and (opts.parallel > 1 or opts.nthreads > 1):
-      print 'ERROR: --parallel and/or --threads can not be used with --valgrind'
-      sys.exit(1)
+            print 'ERROR: --parallel and/or --threads can not be used with --valgrind'
+            sys.exit(1)
 
-    # Update any keys from the environment as necessary
-    if not self.options.method:
-      if os.environ.has_key('METHOD'):
-        self.options.method = os.environ['METHOD']
-      else:
-        self.options.method = 'opt'
+        # Update any keys from the environment as necessary
+        if not self.options.method:
+            if os.environ.has_key('METHOD'):
+                self.options.method = os.environ['METHOD']
+            else:
+                self.options.method = 'opt'
 
         if not self.options.valgrind_mode:
             self.options.valgrind_mode = ''
 
-    # Update libmesh_dir to reflect arguments
-    if opts.libmesh_dir:
-      self.libmesh_dir = opts.libmesh_dir
+        # Update libmesh_dir to reflect arguments
+        if opts.libmesh_dir:
+            self.libmesh_dir = opts.libmesh_dir
 
-    # Generate a batch file if PBS argument supplied with out a file
-    if opts.pbs == 'generate':
-      largest_serial_num = 0
-      for name in os.listdir('.'):
-        m = re.search('pbs_(\d{3})', name)
-        if m != None and int(m.group(1)) > largest_serial_num:
-          largest_serial_num = int(m.group(1))
-      opts.pbs = "pbs_" +  str(largest_serial_num+1).zfill(3)
+        # Generate a batch file if PBS argument supplied with out a file
+        if opts.pbs == 'generate':
+            largest_serial_num = 0
+            for name in os.listdir('.'):
+                m = re.search('pbs_(\d{3})', name)
+                if m != None and int(m.group(1)) > largest_serial_num:
+                    largest_serial_num = int(m.group(1))
+            opts.pbs = "pbs_" +  str(largest_serial_num+1).zfill(3)
 
         # When running heavy tests, we'll make sure we use --no-report
         if opts.heavy_tests:
             self.options.report_skipped = False
 
-  def postRun(self, specs, timing):
-    return
+    def postRun(self, specs, timing):
+        return
 
-  def preRun(self):
+    def preRun(self):
         if self.options.yaml:
             self.factory.printYaml("Tests")
             sys.exit(0)
         elif self.options.dump:
             self.factory.printDump("Tests")
             sys.exit(0)
-    if self.options.pbs_cleanup:
-      self.cleanPBSBatch()
-      sys.exit(0)
+        if self.options.pbs_cleanup:
+            self.cleanPBSBatch()
+            sys.exit(0)
 
     def getOptions(self):
         return self.options

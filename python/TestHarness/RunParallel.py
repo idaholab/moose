@@ -63,14 +63,14 @@ class RunParallel:
         # List of skipped jobs to resolve prereq issues for tests that never run
         self.skipped_jobs = set()
 
-    # Jobs we are reporting as taking longer then 10% of MAX_TIME
-    self.reported_jobs = set()
+        # Jobs we are reporting as taking longer then 10% of MAX_TIME
+        self.reported_jobs = set()
 
         # Default time to wait before reporting long running jobs
         self.default_reporting_time = 10.0 # Seconds (should be a float)
 
-    # Reporting timer which resets when ever data is printed to the screen.
-    self.reported_timer = clock()
+        # Reporting timer which resets when ever data is printed to the screen.
+        self.reported_timer = clock()
 
     ## run the command asynchronously and call testharness.testOutputAndFinish when complete
     def run(self, tester, command, recurse=True, slot_check=True):
@@ -91,7 +91,7 @@ class RunParallel:
             return
 
         # Now make sure that this job doesn't have an unsatisfied prereq
-    if tester.specs['prereq'] != None and len(set(tester.specs['prereq']) - self.finished_jobs) and self.options.pbs is None:
+        if tester.specs['prereq'] != None and len(set(tester.specs['prereq']) - self.finished_jobs) and self.options.pbs is None:
             self.queue.append([tester, command, os.getcwd()])
             return
 
@@ -108,7 +108,7 @@ class RunParallel:
             return
 
         # Pre-run preperation
-    tester.prepare(self.options)
+        tester.prepare(self.options)
 
         job_index = self.jobs.index(None) # find an empty slot
         log( 'Command %d started: %s' % (job_index, command) )
@@ -151,14 +151,14 @@ class RunParallel:
             os.chdir(saved_dir)
             sys.path.pop()
 
-  def getOutputFromFiles(self, tester):
-    file_output = ''
-    for processor_id in xrange(tester.getProcs(self.options)):
-      # Obtain path and append processor id to redirect_output filename
-      file_path = os.path.join(tester.specs['test_dir'], tester.name() + '.processor.{}'.format(processor_id))
-      with open(file_path, 'r') as f:
+    def getOutputFromFiles(self, tester):
+        file_output = ''
+        for processor_id in xrange(tester.getProcs(self.options)):
+            # Obtain path and append processor id to redirect_output filename
+            file_path = os.path.join(tester.specs['test_dir'], tester.name() + '.processor.{}'.format(processor_id))
+            with open(file_path, 'r') as f:
                 file_output += "#"*80 + "\nOutput from processor " + str(processor_id) + "\n" + "#"*80 + "\n" + self.readOutput(f)
-    return file_output
+        return file_output
 
     ## Return control the the test harness by finalizing the test output and calling the callback
     def returnToTestHarness(self, job_index):
@@ -169,15 +169,15 @@ class RunParallel:
 
         output = 'Working Directory: ' + tester.specs['test_dir'] + '\nRunning command: ' + command + '\n'
 
-    if tester.specs.isValid('redirect_output') and tester.specs['redirect_output'] and tester.getProcs(self.options) > 1:
-      # If the tester enabled redirect_stdout and is using more than one processor
-      output += self.getOutputFromFiles(tester)
-    else:
-      # Handle the case were the tester did not inherite from RunApp (like analyzejacobian)
-      output += self.readOutput(f)
+        if tester.specs.isValid('redirect_output') and tester.specs['redirect_output'] and tester.getProcs(self.options) > 1:
+            # If the tester enabled redirect_stdout and is using more than one processor
+            output += self.getOutputFromFiles(tester)
+        else:
+            # Handle the case were the tester did not inherite from RunApp (like analyzejacobian)
+            output += self.readOutput(f)
 
         if p.poll() == None: # process has not completed, it timed out
-      output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
+            output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
             f.close()
             if platform.system() == "Windows":
                 p.terminate()
@@ -191,15 +191,15 @@ class RunParallel:
             f.close()
 
             if tester in self.reported_jobs:
-        tester.specs.addParam('caveats', ['FINISHED'], "")
+                tester.specs.addParam('caveats', ['FINISHED'], "")
 
             if not self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock()):
                 did_pass = False
 
         if did_pass:
-      self.finished_jobs.add(tester.specs['test_name'])
+            self.finished_jobs.add(tester.specs['test_name'])
         else:
-      self.skipped_jobs.add(tester.specs['test_name'])
+            self.skipped_jobs.add(tester.specs['test_name'])
 
         self.jobs[job_index] = None
         self.slots_in_use = self.slots_in_use - slots
@@ -212,39 +212,39 @@ class RunParallel:
         now = clock()
         job_index = 0
         slot_freed = False
-    for tuple in self.jobs:
-      if tuple != None:
+        for tuple in self.jobs:
+            if tuple != None:
                 (p, command, tester, start_time, f, slots) = tuple
-        if p.poll() != None or now > (start_time + float(tester.specs['max_time'])):
-          # finish up as many jobs as possible, don't sleep until
-          # we've cleared all of the finished jobs
-          self.returnToTestHarness(job_index)
+                if p.poll() != None or now > (start_time + float(tester.specs['max_time'])):
+                    # finish up as many jobs as possible, don't sleep until
+                    # we've cleared all of the finished jobs
+                    self.returnToTestHarness(job_index)
 
-          # We just output to the screen so reset the test harness "activity" timer
-          self.reported_timer = now
+                    # We just output to the screen so reset the test harness "activity" timer
+                    self.reported_timer = now
 
-          slot_freed = True
-          # We just reset the timer so no need to check if we've been waiting for awhile in
-          # this iteration
+                    slot_freed = True
+                    # We just reset the timer so no need to check if we've been waiting for awhile in
+                    # this iteration
 
-        # Has the TestHarness done nothing for awhile
+                # Has the TestHarness done nothing for awhile
                 elif now > (self.reported_timer + self.default_reporting_time):
-          # Has the current test been previously reported?
-          if tester not in self.reported_jobs:
+                    # Has the current test been previously reported?
+                    if tester not in self.reported_jobs:
                         seconds_to_report = self.default_reporting_time
-            if tester.specs.isValid('min_reported_time'):
+                        if tester.specs.isValid('min_reported_time'):
                             seconds_to_report = float(tester.specs['min_reported_time'])
 
                         if now >= self.reported_timer + seconds_to_report:
                             self.harness.handleTestResult(tester.specs, '', 'RUNNING...', start_time, now, False)
 
-              self.reported_jobs.add(tester)
-              self.reported_timer = now
+                            self.reported_jobs.add(tester)
+                            self.reported_timer = now
 
-      job_index += 1
+            job_index += 1
 
-    if not slot_freed:
-      sleep(time_to_wait)
+        if not slot_freed:
+            sleep(time_to_wait)
 
     def satisfyLoad(self):
     # Get the current load average, or zero if it isn't available for some reason (such as being
@@ -307,7 +307,7 @@ class RunParallel:
                     # Do we have unsatisfied dependencies left?
                     elif len(set(tester.specs['prereq']) & self.skipped_jobs):
                         self.harness.handleTestResult(tester.specs, '', 'skipped (skipped dependency)')
-            self.skipped_jobs.add(tester.specs['test_name'])
+                        self.skipped_jobs.add(tester.specs['test_name'])
                         keep_going = True
                     # We need to keep trying in case there is a chain of unresolved dependencies
                     # and we hit them out of order in this loop
@@ -318,7 +318,7 @@ class RunParallel:
             if len(self.queue) != 0:
                 print "\nCyclic or Invalid Dependency Detected!"
                 for (tester, command, dirpath) in self.queue:
-          print tester.specs['test_name']
+                    print tester.specs['test_name']
                 sys.exit(1)
 
     # This function reads output from the file (i.e. the test output)
@@ -327,17 +327,17 @@ class RunParallel:
     def readOutput(self, f, max_size=100000):
         first_part = int(max_size*(2.0/3.0))
         second_part = int(max_size*(1.0/3.0))
-    output = ''
+        output = ''
 
         f.seek(0)
-    if self.harness.options.sep_files != True:
-      output = f.read(first_part)     # Limit the output to 1MB
-      if len(output) == first_part:   # This means we didn't read the whole file yet
-        output += "\n" + "#"*80 + "\n\nOutput trimmed\n\n" + "#"*80 + "\n"
-        f.seek(-second_part, 2)       # Skip the middle part of the file
+        if self.harness.options.sep_files != True:
+            output = f.read(first_part)     # Limit the output to 1MB
+            if len(output) == first_part:   # This means we didn't read the whole file yet
+                output += "\n" + "#"*80 + "\n\nOutput trimmed\n\n" + "#"*80 + "\n"
+                f.seek(-second_part, 2)       # Skip the middle part of the file
 
-        if (f.tell() <= first_part):  # Don't re-read some of what you've already read
-          f.seek(first_part+1, 0)
+                if (f.tell() <= first_part):  # Don't re-read some of what you've already read
+                    f.seek(first_part+1, 0)
 
         output += f.read()              # Now read the rest
         return output

@@ -25,7 +25,7 @@ class MoosePackageParser(MooseCommonExtension, Pattern):
         self._settings['return'] =  None
 
     def handleMatch(self, match):
-    """
+        """
         Returns a tree element package information.
         """
         # Update the settings from regex match

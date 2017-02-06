@@ -11,7 +11,7 @@ class Tester(MooseObject):
         # Common Options
         params.addRequiredParam('type', "The type of test of Tester to create for this test.")
         params.addParam('max_time',   300, "The maximum in seconds that the test will be allowed to run.")
-    params.addParam('min_reported_time', "The minimum time elapsed before a test is reported as taking to long to run.")
+        params.addParam('min_reported_time', "The minimum time elapsed before a test is reported as taking to long to run.")
         params.addParam('skip',     "Provide a reason this test will be skipped.")
         params.addParam('deleted',         "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
 
@@ -95,7 +95,7 @@ class Tester(MooseObject):
 
     # This method is called prior to running the test.  It can be used to cleanup files
     # or do other preparations before the tester is run
-  def prepare(self, options):
+    def prepare(self, options):
         return
 
     def getThreads(self, options):
@@ -126,9 +126,9 @@ class Tester(MooseObject):
         reason = ''
 
         # Are we running only tests in a specific group?
-    if options.group <> 'ALL' and options.group not in self.specs['group']:
+        if options.group <> 'ALL' and options.group not in self.specs['group']:
             return (False, reason)
-    if options.not_group <> '' and options.not_group in self.specs['group']:
+        if options.not_group <> '' and options.not_group in self.specs['group']:
             return (False, reason)
 
         # Store regexp for matching tests if --re is used
@@ -136,28 +136,28 @@ class Tester(MooseObject):
             match_regexp = re.compile(options.reg_exp)
 
         # If --re then only test matching regexp. Needs to run before other SKIP methods
-    if options.reg_exp and not match_regexp.search(self.specs['test_name']):
+        if options.reg_exp and not match_regexp.search(self.specs['test_name']):
             return (False, reason)
 
         # Check for deleted tests
-    if self.specs.isValid('deleted'):
+        if self.specs.isValid('deleted'):
             if options.extra_info:
                 # We might want to trim the string so it formats nicely
-        if len(self.specs['deleted']) >= TERM_COLS - (len(self.specs['test_name'])+21):
-          test_reason = (self.specs['deleted'])[:(TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
+                if len(self.specs['deleted']) >= TERM_COLS - (len(self.specs['test_name'])+21):
+                    test_reason = (self.specs['deleted'])[:(TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
                 else:
-          test_reason = self.specs['deleted']
+                    test_reason = self.specs['deleted']
                 reason = 'deleted (' + test_reason + ')'
             return (False, reason)
 
         # Check for skipped tests
-    if self.specs.type('skip') is bool and self.specs['skip']:
+        if self.specs.type('skip') is bool and self.specs['skip']:
             # Backwards compatible (no reason)
             return (False, 'skipped')
-    elif self.specs.type('skip') is not bool and self.specs.isValid('skip'):
-      skip_message = self.specs['skip']
+        elif self.specs.type('skip') is not bool and self.specs.isValid('skip'):
+            skip_message = self.specs['skip']
             # We might want to trim the string so it formats nicely
-      if len(skip_message) >= TERM_COLS - (len(self.specs['test_name'])+21):
+            if len(skip_message) >= TERM_COLS - (len(self.specs['test_name'])+21):
                 test_reason = (skip_message)[:(TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
             else:
                 test_reason = skip_message
@@ -168,16 +168,16 @@ class Tester(MooseObject):
             return (False, reason)
         # If we're testing with valgrind, then skip tests that require parallel or threads or don't meet the valgrind setting
         elif options.valgrind_mode != '':
-      if self.specs['valgrind'].upper() == 'NONE':
+            if self.specs['valgrind'].upper() == 'NONE':
                 reason = 'skipped (Valgrind==NONE)'
-      elif self.specs['valgrind'].upper() == 'HEAVY' and options.valgrind_mode.upper() == 'NORMAL':
+            elif self.specs['valgrind'].upper() == 'HEAVY' and options.valgrind_mode.upper() == 'NORMAL':
                 reason = 'skipped (Valgrind==HEAVY)'
-      elif self.specs['min_parallel'] > 1 or self.specs['min_threads'] > 1:
+            elif self.specs['min_parallel'] > 1 or self.specs['min_threads'] > 1:
                 reason = 'skipped (Valgrind requires serial)'
             if reason != '':
                 return (False, reason)
         # If we're running in recover mode skip tests that have recover = false
-    elif options.enable_recover and self.specs['recover'] == False:
+        elif options.enable_recover and self.specs['recover'] == False:
             reason = 'skipped (NO RECOVER)'
             return (False, reason)
 
@@ -204,7 +204,7 @@ class Tester(MooseObject):
                 x_upper = x.upper()
                 if x_upper in test_platforms:
                     return (False, "(Duplicate Entry or Negative of Existing Entry)")
-        test_platforms.add(x.upper())
+                test_platforms.add(x.upper())
 
             match_found = len(test_platforms.intersection(checks[check])) > 0
             # Either we didn't find the match when we were using normal "include" logic
@@ -214,16 +214,16 @@ class Tester(MooseObject):
                 return (False, reason)
 
         # Check for heavy tests
-    if options.all_tests or options.heavy_tests:
-      if not self.specs['heavy'] and options.heavy_tests:
+        if options.all_tests or options.heavy_tests:
+            if not self.specs['heavy'] and options.heavy_tests:
                 reason = 'skipped (NOT HEAVY)'
                 return (False, reason)
-    elif self.specs['heavy']:
+        elif self.specs['heavy']:
             reason = 'skipped (HEAVY)'
             return (False, reason)
 
         # Check for positive scale refine values when using store timing options
-    if self.specs['scale_refine'] == 0 and options.store_time:
+        if self.specs['scale_refine'] == 0 and options.store_time:
             return (False, reason)
 
         # There should only be one entry in self.specs['dof_id_bytes']

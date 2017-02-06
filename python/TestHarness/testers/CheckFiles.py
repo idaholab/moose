@@ -15,8 +15,8 @@ class CheckFiles(RunApp):
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
 
-  def prepare(self, options):
-    if self.specs['delete_output_before_running'] == True:
+    def prepare(self, options):
+        if self.specs['delete_output_before_running'] == True:
             self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['check_files'] + self.specs['check_not_exists'], self.specs['delete_output_folders'])
 
     def processResults(self, moose_dir, retcode, options, output):

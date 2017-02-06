@@ -17,8 +17,8 @@ class CSVDiff(RunApp):
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
 
-  def prepare(self, options):
-    if self.specs['delete_output_before_running'] == True:
+    def prepare(self, options):
+        if self.specs['delete_output_before_running'] == True:
             self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['csvdiff'])
 
     def processResults(self, moose_dir, retcode, options, output):
@@ -29,11 +29,11 @@ class CSVDiff(RunApp):
             return (reason, output)
 
         # Don't Run CSVDiff on Scaled Tests
-    if options.scaling and specs['scale_refine']:
+        if options.scaling and specs['scale_refine']:
             return (reason, output)
 
-    if len(specs['csvdiff']) > 0:
-      differ = CSVDiffer( specs['test_dir'], specs['csvdiff'], specs['abs_zero'], specs['rel_err'] )
+        if len(specs['csvdiff']) > 0:
+            differ = CSVDiffer( specs['test_dir'], specs['csvdiff'], specs['abs_zero'], specs['rel_err'] )
             msg = differ.diff()
             output += 'Running CSVDiffer.py\n' + msg
             if msg != '':

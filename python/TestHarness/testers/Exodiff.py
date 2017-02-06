@@ -22,8 +22,8 @@ class Exodiff(RunApp):
         RunApp.__init__(self, name, params)
 
 
-  def prepare(self, options):
-    if self.specs['delete_output_before_running'] == True:
+    def prepare(self, options):
+        if self.specs['delete_output_before_running'] == True:
             self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['exodiff'], self.specs['delete_output_folders'])
 
     def processResultsCommand(self, moose_dir, options):

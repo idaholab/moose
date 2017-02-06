@@ -54,7 +54,7 @@ class MooseCommonExtension(object):
 
     @staticmethod
     def applyElementSettings(element, settings, keys=['id', 'class', 'style']):
-    """
+        """
         Returns supplied element with style attributes.
 
         Useful for adding things like; sizing, floating,

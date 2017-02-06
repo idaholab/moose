@@ -4,8 +4,8 @@ from Job import Job
 import os, sys, subprocess, shutil, re
 
 class PBSJob(Job):
-  def validParams():
-    params = Job.validParams()
+    def validParams():
+        params = Job.validParams()
 
         params.addRequiredParam('chunks', "The number of PBS chunks.")
         # Only one of either of the next two paramteres can be specified
@@ -14,16 +14,16 @@ class PBSJob(Job):
 
         params.addParam('place', 'scatter:excl', "The PBS job placement scheme to use.")
         params.addParam('walltime', '4:00:00', "The requested walltime for this job.")
-    params.addParam('no_copy', "A list of files specifically not to copy")
-    params.addParam('no_copy_pattern', "A pattern of files not to copy")
-    params.addParam('copy_files', "A list of files specifically to copy")
+        params.addParam('no_copy', "A list of files specifically not to copy")
+        params.addParam('no_copy_pattern', "A pattern of files not to copy")
+        params.addParam('copy_files', "A list of files specifically to copy")
 
-    params.addStringSubParam('pbs_o_workdir', 'PBS_O_WORKDIR', "Move to this directory")
-    params.addStringSubParam('pbs_project', '#PBS -P PBS_PROJECT', "Identify as PBS_PROJECT in the PBS queuing system")
-    params.addStringSubParam('pbs_stdout', '#PBS -o PBS_STDOUT', "Save stdout to this location")
-    params.addStringSubParam('pbs_stderr', '#PBS -e PBS_STDERR', "Save stderr to this location")
+        params.addStringSubParam('pbs_o_workdir', 'PBS_O_WORKDIR', "Move to this directory")
+        params.addStringSubParam('pbs_project', '#PBS -P PBS_PROJECT', "Identify as PBS_PROJECT in the PBS queuing system")
+        params.addStringSubParam('pbs_stdout', '#PBS -o PBS_STDOUT', "Save stdout to this location")
+        params.addStringSubParam('pbs_stderr', '#PBS -e PBS_STDERR', "Save stderr to this location")
 
-    params.addStringSubParam('combine_streams', '#PBS -j oe', "Combine stdout and stderror into one file (needed for NO EXPECTED ERR)")
+        params.addStringSubParam('combine_streams', '#PBS -j oe', "Combine stdout and stderror into one file (needed for NO EXPECTED ERR)")
         params.addStringSubParam('threads', '--n-threads=THREADS', "The number of threads to run per MPI process.")
         params.addStringSubParam('queue', '#PBS -q QUEUE', "Which queue to submit this job to.")
         params.addStringSubParam('cli_args', 'CLI_ARGS', "Any extra command line arguments to tack on.")
@@ -37,7 +37,7 @@ class PBSJob(Job):
         params.addRequiredParam('input_file', "The input file name.")
 
         return params
-  validParams = staticmethod(validParams)
+    validParams = staticmethod(validParams)
 
     def __init__(self, name, params):
         Job.__init__(self, name, params)
@@ -46,23 +46,23 @@ class PBSJob(Job):
     def copyFiles(self, job_file):
         params = self.specs
 
-    # Save current location as PBS_O_WORKDIR
-    params['pbs_o_workdir'] = os.getcwd()
+        # Save current location as PBS_O_WORKDIR
+        params['pbs_o_workdir'] = os.getcwd()
 
-    # Create regexp object of no_copy_pattern
-    if params.isValid('no_copy_pattern'):
-      # Match no_copy_pattern value
-      pattern = re.compile(params['no_copy_pattern'])
-    else:
-      # Match nothing if not set. Better way?
-      pattern = re.compile(r'')
+        # Create regexp object of no_copy_pattern
+        if params.isValid('no_copy_pattern'):
+            # Match no_copy_pattern value
+            pattern = re.compile(params['no_copy_pattern'])
+        else:
+            # Match nothing if not set. Better way?
+            pattern = re.compile(r'')
 
-    # Copy files (unless they are listed in "no_copy")
+        # Copy files (unless they are listed in "no_copy")
         for file in os.listdir('../'):
-      if os.path.isfile('../' + file) and file != job_file and \
-         (not params.isValid('no_copy') or file not in params['no_copy']) and \
-         (not params.isValid('no_copy_pattern') or pattern.match(file) is None):
-        shutil.copy('../' + file, '.')
+            if os.path.isfile('../' + file) and file != job_file and \
+               (not params.isValid('no_copy') or file not in params['no_copy']) and \
+               (not params.isValid('no_copy_pattern') or pattern.match(file) is None):
+                shutil.copy('../' + file, '.')
 
         # Copy directories
         if params.isValid('copy_files'):
@@ -129,5 +129,5 @@ class PBSJob(Job):
 
     def launch(self):
         # Finally launch the job
-    my_process = subprocess.Popen('qsub ' + os.path.split(self.specs['template_script'])[1], stdout=subprocess.PIPE, shell=True)
-    print 'JOB_NAME:', self.specs['job_name'], 'JOB_ID:', my_process.communicate()[0].split('.')[0], 'TEST_NAME:', self.specs['test_name']
+        my_process = subprocess.Popen('qsub ' + os.path.split(self.specs['template_script'])[1], stdout=subprocess.PIPE, shell=True)
+        print 'JOB_NAME:', self.specs['job_name'], 'JOB_ID:', my_process.communicate()[0].split('.')[0], 'TEST_NAME:', self.specs['test_name']

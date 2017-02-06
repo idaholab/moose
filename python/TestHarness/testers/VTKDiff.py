@@ -19,7 +19,7 @@ class VTKDiff(RunApp):
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
 
-  def prepare(self, options):
+    def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
             self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['vtkdiff'])
 
