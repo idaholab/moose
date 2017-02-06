@@ -3,11 +3,11 @@ from InputParameters import InputParameters
 # This is the base class from which all objects should inherit
 class MooseObject(object):
 
-  @staticmethod
-  def validParams():
-    params = InputParameters()
+    @staticmethod
+    def validParams():
+        params = InputParameters()
 
-    return params
+        return params
 
     ##
     # MooseObject can be built via two methods:
@@ -30,16 +30,16 @@ class MooseObject(object):
     # supplied name in the constructor. If the name was not given in the constructor
     # and the "name" parameter is defined it will return the value of this parameter.
     # Otherwise None will be returned.
-  def name(self):
+    def name(self):
         if (self._name is None) and self.isParamValid('name'):
             self._name = self.getParam('name')
-    return self._name
+        return self._name
 
-  def parameters(self):
-    return self._pars
+    def parameters(self):
+        return self._pars
 
-  def getParam(self, name):
-    return self._pars[name]
+    def getParam(self, name):
+        return self._pars[name]
 
     def isParamValid(self, name):
         return self._pars.isValid(name)

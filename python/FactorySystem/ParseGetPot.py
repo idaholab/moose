@@ -3,32 +3,32 @@
 import sys, os, re
 
 class GPNode:
-  def __init__(self, name, parent):
-    self.name = name
-    self.parent = parent
-    self.params = {}
-    self.params_list = [] #This is here to capture the ordering
-    self.param_comments = {}
-    self.children = {}
-    self.children_list = []  #This is here to capture the ordering
-    self.comments = []
+    def __init__(self, name, parent):
+        self.name = name
+        self.parent = parent
+        self.params = {}
+        self.params_list = [] #This is here to capture the ordering
+        self.param_comments = {}
+        self.children = {}
+        self.children_list = []  #This is here to capture the ordering
+        self.comments = []
 
-  """ Print this node and it's children """
-  def Print(self, prefix=''):
-    print prefix + self.name
+    """ Print this node and it's children """
+    def Print(self, prefix=''):
+        print prefix + self.name
 
-    for comment in self.comments:
-      print '# ' + comment
+        for comment in self.comments:
+            print '# ' + comment
 
-    for param in self.params_list:
-      comment = ''
-      if param in self.param_comments:
-        comment = '# ' + self.param_comments[param]
-      print prefix + self.name + '/' + param + ": " + str(self.params[param]) + ' | ' + comment
+        for param in self.params_list:
+            comment = ''
+            if param in self.param_comments:
+                comment = '# ' + self.param_comments[param]
+            print prefix + self.name + '/' + param + ": " + str(self.params[param]) + ' | ' + comment
 
 
-    for child in self.children_list:
-      self.children[child].Print(prefix + self.name + '/')
+        for child in self.children_list:
+            self.children[child].Print(prefix + self.name + '/')
 
 
     ##
@@ -47,14 +47,14 @@ class GPNode:
                     break
         return node
 
-  def fullName(self, no_root=False):
-    if self.parent == None:
-      if no_root and self.name == 'root':
-        return ''
-      else:
-        return self.name
-    else:
-      return self.parent.fullName(no_root) + '/' + self.name
+    def fullName(self, no_root=False):
+        if self.parent == None:
+            if no_root and self.name == 'root':
+                return ''
+            else:
+                return self.name
+        else:
+            return self.parent.fullName(no_root) + '/' + self.name
 
     ##
     # Build a string suitable for writing to a raw input file
@@ -89,21 +89,21 @@ class GPNode:
 
 
 class ParseException(Exception):
-  def __init__(self, expr, msg):
-    self.expr = expr
-    self.msg = msg
+    def __init__(self, expr, msg):
+        self.expr = expr
+        self.msg = msg
 
 class ParseGetPot:
-  def __init__(self, file_name):
-    self.file_name = file_name
-    self.file = open(file_name)
-    self.unique_keys = set() #The full path to each key to ensure that no duplicates are supplied
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.file = open(file_name)
+        self.unique_keys = set() #The full path to each key to ensure that no duplicates are supplied
 
-    self.root_node = GPNode('root', None)
+        self.root_node = GPNode('root', None)
 
-    self.section_begin_re = re.compile(r"\s*\[\s*(\./)?([^(\.\./) \t\n\r\f\v]+)\s*]")
+        self.section_begin_re = re.compile(r"\s*\[\s*(\./)?([^(\.\./) \t\n\r\f\v]+)\s*]")
 
-    self.section_end_re = re.compile(r"\s*\[\s*(\.\./)?\s*\]")
+        self.section_end_re = re.compile(r"\s*\[\s*(\.\./)?\s*\]")
 
     self.parameter_res = [re.compile(r"\s*([\w\-]+)\s*=\s*'([^\n]+)'"),  # parameter value in two single ticks
                           re.compile(r'\s*([\w\-]+)\s*=\s*"([^\n]+)"'),  # parameter value in two double ticks
@@ -136,26 +136,26 @@ class ParseGetPot:
       line = lines[current_line][current_position:]
       #print current_line, current_position, 'of', len(lines[current_line]), line
 
-      m = self.section_begin_re.match(line)
-      if m:
+            m = self.section_begin_re.match(line)
+            if m:
         current_position += m.end()
-        child_name = m.group(2)
+                child_name = m.group(2)
 
-        if child_name in current_node.children:
-          child = current_node.children[child_name]
-        else:
-          child = GPNode(child_name, current_node)
-          current_node.children[child_name] = child
-          current_node.children_list.append(child_name)
+                if child_name in current_node.children:
+                    child = current_node.children[child_name]
+                else:
+                    child = GPNode(child_name, current_node)
+                    current_node.children[child_name] = child
+                    current_node.children_list.append(child_name)
 
         current_line, current_position = self._recursiveParseFile(child, lines, current_line, current_position)
-        continue
+                continue
 
-      # Look for a parameter on this line
+            # Look for a parameter on this line
       for re_param in self.parameter_res:
         m = re_param.match(line)
 
-        if m:
+                if m:
           current_position += m.end()
           param_name = m.group(1)
           param_value = m.group(2)
@@ -204,8 +204,8 @@ class ParseGetPot:
         continue # with outer loop since we found a parameter and have to remove it from the current line before continuing
 
       # Comment in the block (not after a parameter or section header)
-      m = self.comment_re.match(line)
-      if m:
+            m = self.comment_re.match(line)
+            if m:
         current_position = -1 # remainder of line ignored
         if param_name=='':
           current_node.comments.append(m.group(1))
@@ -213,9 +213,9 @@ class ParseGetPot:
           current_node.param_comments[param_name] = m.group(1)
         continue
 
-      # Is this section over?
-      m = self.section_end_re.match(line)
-      if m:
+            # Is this section over?
+            m = self.section_end_re.match(line)
+            if m:
         current_position += m.end()
         return current_line, current_position
 
@@ -224,14 +224,14 @@ class ParseGetPot:
 
     return current_line, current_position
 
-  def _parseFile(self):
-    lines = self.file.readlines()
+    def _parseFile(self):
+        lines = self.file.readlines()
     self._recursiveParseFile(self.root_node, lines, 0, 0)
 
 def readInputFile(file_name):
-  pgp = ParseGetPot(file_name)
+    pgp = ParseGetPot(file_name)
 #  pgp.root_node.Print()
-  return pgp.root_node
+    return pgp.root_node
 
 
 if __name__ == '__main__':
@@ -241,5 +241,5 @@ if __name__ == '__main__':
     filename = '2d_diffusion_test.i'
 
   pgp = ParseGetPot(filename)
-  print 'Printing tree'
-  pgp.root_node.Print()
+    print 'Printing tree'
+    pgp.root_node.Print()

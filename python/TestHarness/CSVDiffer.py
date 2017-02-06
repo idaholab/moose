@@ -2,46 +2,46 @@ import os, re, math
 
 class CSVDiffer:
   def __init__(self, test_dir, out_files, abs_zero=1e-11, relative_error=5.5e-6):
-    self.abs_zero = float(abs_zero)
-    self.rel_tol = float(relative_error)
+        self.abs_zero = float(abs_zero)
+        self.rel_tol = float(relative_error)
     self.files = []
     self.msg = ''
-    self.num_errors = 0
+        self.num_errors = 0
 
     # read in files
     for out_file in out_files:
       # Check for an easy mistake to make
       if out_file[-2:] == '.e':
-        self.msg += 'Diffing ' + out_file + '\n'
-        self.msg += 'WARNING: Are you sure you want to use csv diff on a .e file?\n'
+                self.msg += 'Diffing ' + out_file + '\n'
+                self.msg += 'WARNING: Are you sure you want to use csv diff on a .e file?\n'
 
-      test_filename = os.path.join(test_dir,out_file)
-      gold_filename = os.path.join(test_dir, 'gold', out_file)
-      if not os.path.exists(test_filename):
-        self.addError(test_filename, 'File does not exist!')
-      elif not os.path.exists(gold_filename):
-        self.addError(gold_filename, 'Gold file does not exist!')
-      else:
-        try:
-          f1 = open( test_filename )
-          f2 = open( gold_filename )
-          self.addCSVPair(out_file, f1.read(), f2.read())
-        except Exception as e:
-          self.addError(out_file, 'Exception reading files '+str(e.args))
+            test_filename = os.path.join(test_dir,out_file)
+            gold_filename = os.path.join(test_dir, 'gold', out_file)
+            if not os.path.exists(test_filename):
+                self.addError(test_filename, 'File does not exist!')
+            elif not os.path.exists(gold_filename):
+                self.addError(gold_filename, 'Gold file does not exist!')
+            else:
+                try:
+                    f1 = open( test_filename )
+                    f2 = open( gold_filename )
+                    self.addCSVPair(out_file, f1.read(), f2.read())
+                except Exception as e:
+                    self.addError(out_file, 'Exception reading files '+str(e.args))
 
 
   # add the contents of two files to be diffed
   def addCSVPair(self, fname, text1, text2):
     self.files.append( (fname, text1, text2) )
 
-  def clearDiff(self):
-    """Clears the diff message and errors so diff can be called again"""
-    self.msg = ''
-    self.num_errors = 0
+    def clearDiff(self):
+        """Clears the diff message and errors so diff can be called again"""
+        self.msg = ''
+        self.num_errors = 0
 
   # diff the files added to the system and return a message of differences
   # This method should only be called once. If it called again you must
-  # manually clear messages by calling clearDiff
+    # manually clear messages by calling clearDiff
   def diff(self):
 
     for fname, text1, text2 in self.files:
@@ -97,8 +97,8 @@ class CSVDiffer:
           if math.isinf(val1):
             self.addError(fname, "The values in column \"" + key.strip() + "\" contain Inf")
 
-          # if they're both exactly zero (due to the threshold above) then they're equal so pass this test
-          if val1 == 0 and val2 == 0:
+                    # if they're both exactly zero (due to the threshold above) then they're equal so pass this test
+                    if val1 == 0 and val2 == 0:
             continue
 
                     rel_diff = 0
@@ -106,7 +106,7 @@ class CSVDiffer:
                         rel_diff = abs( ( val1 - val2 ) / max( abs(val1), abs(val2) ) )
 
           if rel_diff > rel_tol:
-            self.addError(fname, "The values in column \"" + key.strip() + "\" don't match\n\trel diff:  " + str(val1) + " ~ " + str(val2) + " = " + str(rel_diff))
+                        self.addError(fname, "The values in column \"" + key.strip() + "\" don't match\n\trel diff:  " + str(val1) + " ~ " + str(val2) + " = " + str(rel_diff))
             # assume all other vals in this column are wrong too, so don't report them
             break
 
@@ -129,7 +129,7 @@ class CSVDiffer:
       for row in lines:
         vals = row.split(',')
         if len(headers) != len(vals):
-          self.addError(fname, "Number of columns ("+str(len(vals))+") not the same as number of column names ("+str(len(headers))+") in row "+repr(row))
+                    self.addError(fname, "Number of columns ("+str(len(vals))+") not the same as number of column names ("+str(len(headers))+") in row "+repr(row))
         for header, val in zip(headers,vals):
           try:
             table[header].append(float(val))
@@ -137,8 +137,8 @@ class CSVDiffer:
             # ignore strings
             table[header].append(0)
 
-    except Exception as e:
-      self.addError(fname, "Exception parsing file: "+str(e.args))
+        except Exception as e:
+            self.addError(fname, "Exception parsing file: "+str(e.args))
       return {}
 
     return table
@@ -147,11 +147,11 @@ class CSVDiffer:
   # every error is added through here, so it could also output in xml, etc.
   def addError(self, fname, message):
     self.msg += 'In ' + fname + ': ' + message + '\n'
-    self.num_errors += 1
+        self.num_errors += 1
 
-  def getNumErrors(self):
-    """Return number of errors in diff"""
-    return self.num_errors
+    def getNumErrors(self):
+        """Return number of errors in diff"""
+        return self.num_errors
 
 # testing the test harness!
 if __name__ == '__main__':

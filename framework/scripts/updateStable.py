@@ -69,8 +69,8 @@ def getCoverage():
 
   # Use the same commands from the coverage_html script to generate the raw.info file
   coverage_cmd = [ 'lcov',
-                   '--base-directory', 'moose/framework',
-                   '--directory', 'moose/framework/src/',
+                     '--base-directory', 'moose/framework',
+                     '--directory', 'moose/framework/src/',
                    '--capture',
                    '--ignore-errors', 'gcov,source',
                    '--output-file', 'raw.info'
@@ -160,7 +160,7 @@ def process_args():
   return opts[0]
 
 if __name__ == '__main__':
-  if os.getenv('STABLE'):
+    if os.getenv('STABLE'):
     runCMD(comment_syntax_cmd)
     runCMD(rsync_comment_syntax_cmd)
     arg_revision = process_args()

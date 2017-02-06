@@ -39,7 +39,7 @@ lgpl_header = \
 global_options = {}
 
 def fixupHeader():
-  for dirpath, dirnames, filenames in os.walk(os.getcwd() + "/../../"):
+    for dirpath, dirnames, filenames in os.walk(os.getcwd() + "/../../"):
 
     # Don't traverse into ignored directories
     for ignore in global_ignores:
@@ -51,7 +51,7 @@ def fixupHeader():
     for file in filenames:
       suffix = os.path.splitext(file)
       if suffix[-1] == '.C' or suffix[-1] == '.h':
-        checkAndUpdate(os.path.abspath(dirpath + '/' + file))
+                checkAndUpdate(os.path.abspath(dirpath + '/' + file))
 
 
 def checkAndUpdate(filename):
@@ -59,16 +59,16 @@ def checkAndUpdate(filename):
   text = f.read()
   f.close()
 
-  # Use the copyright header for framework files, use the lgpl header
-  # for everything else
-  header = lgpl_header
-  for dirname in moose_paths:
-    if (string.find(filename, dirname) != -1):
-      header = copyright_header
-      break
+    # Use the copyright header for framework files, use the lgpl header
+    # for everything else
+    header = lgpl_header
+    for dirname in moose_paths:
+        if (string.find(filename, dirname) != -1):
+            header = copyright_header
+            break
 
   # Check (exact match only)
-  if (string.find(text, header) == -1):
+    if (string.find(text, header) == -1):
     # print the first 10 lines or so of the file
     if global_options.update == False: # Report only
       print filename + ' does not contain an up to date header'
@@ -77,10 +77,10 @@ def checkAndUpdate(filename):
     else:
       # Update
       f = open(filename + '~tmp', 'w')
-      f.write(header)
+            f.write(header)
 
-      # Make sure any previous header version is removed
-      text = re.sub(r'^/\*+/$.*^/\*+/$', '', text, flags=re.S | re.M)
+            # Make sure any previous header version is removed
+            text = re.sub(r'^/\*+/$.*^/\*+/$', '', text, flags=re.S | re.M)
 
       f.write(text)
       f.close()

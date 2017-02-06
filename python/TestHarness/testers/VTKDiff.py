@@ -5,9 +5,9 @@ from XMLDiffer import XMLDiffer
 
 class VTKDiff(RunApp):
 
-  @staticmethod
-  def validParams():
-    params = RunApp.validParams()
+    @staticmethod
+    def validParams():
+        params = RunApp.validParams()
         params.addRequiredParam('vtkdiff',   [], "A list of files to exodiff.")
         params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
         params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exodiff comparisons.")
@@ -21,19 +21,19 @@ class VTKDiff(RunApp):
 
   def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
-      self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['vtkdiff'])
+            self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['vtkdiff'])
 
     def processResults(self, moose_dir, retcode, options, output):
-    (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
+        (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
 
         # Skip
         specs = self.specs
-    if reason != '' or specs['skip_checks']:
-      return (reason, output)
+        if reason != '' or specs['skip_checks']:
+            return (reason, output)
 
         # Don't Run VTKDiff on Scaled Tests
         if options.scaling and specs['scale_refine']:
-      return (reason, output)
+            return (reason, output)
 
         # Loop over every file
         for file in specs['vtkdiff']:
@@ -41,7 +41,7 @@ class VTKDiff(RunApp):
             # Error if gold file does not exist
             if not os.path.exists(os.path.join(specs['test_dir'], specs['gold_dir'], file)):
                 output += "File Not Found: " + os.path.join(specs['test_dir'], specs['gold_dir'], file)
-        reason = 'MISSING GOLD FILE'
+                reason = 'MISSING GOLD FILE'
                 break
 
             # Perform diff
@@ -61,8 +61,8 @@ class VTKDiff(RunApp):
                     output += differ.message() + '\n'
 
                     if differ.fail():
-            reason = 'VTKDIFF'
+                        reason = 'VTKDIFF'
                         break
 
         # Return to the test harness
-    return (reason, output)
+        return (reason, output)

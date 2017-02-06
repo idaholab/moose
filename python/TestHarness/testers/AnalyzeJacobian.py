@@ -67,7 +67,7 @@ class AnalyzeJacobian(Tester):
       elif retcode != 0 :
         reason = 'CRASH'
 
-    return (reason, output)
+        return (reason, output)
 
 
   def checkOutputForPattern(self, output, re_pattern):

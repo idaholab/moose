@@ -767,8 +767,8 @@ class MemoryPlotter:
     plot_list = []
     tmp_plot = []
     tmp_legend = []
-    self.stdout_msgs = {}
-    self.pstack_msgs = {}
+        self.stdout_msgs = {}
+        self.pstack_msgs = {}
     self.multiples = 1
     self.memory_label = 'Memory in Bytes'
 
@@ -779,14 +779,14 @@ class MemoryPlotter:
         largest_memory.append(int(records[1]))
     largest_memory.sort()
 
-    # Determine the scale of the graph
-    suffixes = ["Terabytes", "Gigabytes", "Megabytes", "Kilobytes", "Bytes"]
-    multiplier = 1 << 40;
-    index = 0
-    while largest_memory[-1] < multiplier and multiplier >= 1:
-      multiplier = multiplier >> 10
-      index = index + 1
-    self.multiples = multiplier
+        # Determine the scale of the graph
+        suffixes = ["Terabytes", "Gigabytes", "Megabytes", "Kilobytes", "Bytes"]
+        multiplier = 1 << 40;
+        index = 0
+        while largest_memory[-1] < multiplier and multiplier >= 1:
+            multiplier = multiplier >> 10
+            index = index + 1
+        self.multiples = multiplier
         self.memory_label = "Memory in " + suffixes[index-1]
 
     # Loop through each log file
@@ -801,8 +801,8 @@ class MemoryPlotter:
             tmp_pstack_x = []
             tmp_pstack_y = []
 
-      stdout_msg = []
-      pstack_msg = []
+            stdout_msg = []
+            pstack_msg = []
 
       # Get the start time, and make this 0
       try:
@@ -819,12 +819,12 @@ class MemoryPlotter:
                 if len(records[2]) > 0 and self.arguments.stdout:
                     tmp_stdout_x.append(tmp_time[-1])
                     tmp_stdout_y.append(tmp_memory[-1])
-          stdout_msg.append(records[2])
+                    stdout_msg.append(records[2])
 
                 if len(records[3]) > 0 and self.arguments.pstack:
                     tmp_pstack_x.append(tmp_time[-1])
                     tmp_pstack_y.append(tmp_memory[-1])
-          pstack_msg.append(records[3])
+                    pstack_msg.append(records[3])
 
       # Do the actual plotting:
       f, = plot_list[-1].plot(tmp_time, tmp_memory)
@@ -851,16 +851,16 @@ class MemoryPlotter:
             # Plot annotations
             if self.arguments.stdout:
         stdout_line, = plot_list[-1].plot(tmp_stdout_x, tmp_stdout_y, 'x', picker=10, color=f.get_color(), markeredgecolor='0.08', markeredgewidth=0.1)
-        next_index = str(len(plot_list))
-        stdout_line.set_gid('stdout' + next_index)
-        self.stdout_msgs[next_index] = stdout_msg
-        self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, stdout_msg, f.get_color())
+                next_index = str(len(plot_list))
+                stdout_line.set_gid('stdout' + next_index)
+                self.stdout_msgs[next_index] = stdout_msg
+                self.buildAnnotation(plot_list[-1], tmp_stdout_x, tmp_stdout_y, stdout_msg, f.get_color())
 
             if self.arguments.pstack:
         pstack_line, = plot_list[-1].plot(tmp_pstack_x, tmp_pstack_y, 'o', picker=10, color=f.get_color(), markeredgecolor='0.08', markeredgewidth=0.1)
-        next_index = str(len(plot_list))
-        pstack_line.set_gid('pstack' + next_index)
-        self.pstack_msgs[next_index] = pstack_msg
+                next_index = str(len(plot_list))
+                pstack_line.set_gid('pstack' + next_index)
+                self.pstack_msgs[next_index] = pstack_msg
 
         # Make points clickable
         fig.canvas.mpl_connect('pick_event', self)
@@ -882,24 +882,24 @@ class MemoryPlotter:
         line = event.artist
         ind = event.ind
 
-    name = line.get_gid()[:-1]
-    index = line.get_gid()[-1]
+        name = line.get_gid()[:-1]
+        index = line.get_gid()[-1]
 
-    if self.arguments.stdout and name == 'stdout':
+        if self.arguments.stdout and name == 'stdout':
       if self.arguments.no_color != False:
         print color_codes[line.get_color()]
             print "stdout -----------------------------------------------------\n"
       for id in ind:
-        print self.stdout_msgs[index][id]
+                print self.stdout_msgs[index][id]
       if self.arguments.no_color != False:
         print color_codes['RESET']
 
-    if self.arguments.pstack and name == 'pstack':
+        if self.arguments.pstack and name == 'pstack':
       if self.arguments.no_color != False:
         print color_codes[line.get_color()]
             print "pstack -----------------------------------------------------\n"
       for id in ind:
-        print self.pstack_msgs[index][id]
+                print self.pstack_msgs[index][id]
       if self.arguments.no_color != False:
         print color_codes['RESET']
 

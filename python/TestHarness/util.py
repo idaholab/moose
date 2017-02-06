@@ -102,66 +102,66 @@ def runCommand(cmd, cwd=None):
 # 2) the environment variable BITTEN_NOCOLOR is true, or
 # 3) the color parameter is False.
 def printResult(test_name, result, timing, start, end, options, color=True):
-  f_result = ''
+    f_result = ''
 
-  cnt = (TERM_COLS-2) - len(test_name + result)
+    cnt = (TERM_COLS-2) - len(test_name + result)
     color_opts = {'code' : options.code, 'colored' : options.colored}
     if color:
-    any_match = False
-    # Color leading paths
-    m = re.search(r'(.*):(.*)', test_name)
-    if m:
-      test_name = colorText(m.group(1), 'CYAN', **color_opts) + ':' + m.group(2)
-    # Color the Caveats CYAN
-    m = re.search(r'(\[.*?\])', result)
-    if m:
-      any_match = True
-      f_result += colorText(m.group(1), 'CYAN', **color_opts) + " "
-    # Color Exodiff or CVSdiff tests YELLOW
-    m = re.search('(FAILED \((?:EXODIFF|CSVDIFF)\))', result)
-    if m:
-      any_match = True
-      f_result += colorText(m.group(1), 'YELLOW', **color_opts)
+        any_match = False
+        # Color leading paths
+        m = re.search(r'(.*):(.*)', test_name)
+        if m:
+            test_name = colorText(m.group(1), 'CYAN', **color_opts) + ':' + m.group(2)
+        # Color the Caveats CYAN
+        m = re.search(r'(\[.*?\])', result)
+        if m:
+            any_match = True
+            f_result += colorText(m.group(1), 'CYAN', **color_opts) + " "
+        # Color Exodiff or CVSdiff tests YELLOW
+        m = re.search('(FAILED \((?:EXODIFF|CSVDIFF)\))', result)
+        if m:
+            any_match = True
+            f_result += colorText(m.group(1), 'YELLOW', **color_opts)
+        else:
+            # Color remaining FAILED tests RED
+            m = re.search('(FAILED \(.*\))', result)
+            if m:
+                any_match = True
+                f_result += colorText(m.group(1), 'RED', **color_opts)
+        # Color deleted tests RED
+        m = re.search('(deleted) (\(.*\))', result)
+        if m:
+            any_match = True
+            f_result += colorText(m.group(1), 'RED', **color_opts) + ' ' + m.group(2)
+        # Color long running tests YELLOW
+        m = re.search('(RUNNING\.\.\.)', result)
+        if m:
+            any_match = True
+            f_result += colorText(m.group(1), 'YELLOW', **color_opts)
+        # Color PBS status CYAN
+        m = re.search('((?:LAUNCHED|RUNNING(?!\.)|EXITING|QUEUED))', result)
+        if m:
+            any_match = True
+            f_result += colorText(m.group(1), 'CYAN', **color_opts)
+        # Color Passed tests GREEN
+        m = re.search('(OK|DRY_RUN)', result)
+        if m:
+            any_match = True
+            f_result += colorText(m.group(1), 'GREEN', **color_opts)
+
+        if not any_match:
+            f_result = result
+
+        f_result = test_name + '.'*cnt + ' ' + f_result
     else:
-      # Color remaining FAILED tests RED
-      m = re.search('(FAILED \(.*\))', result)
-      if m:
-        any_match = True
-        f_result += colorText(m.group(1), 'RED', **color_opts)
-    # Color deleted tests RED
-    m = re.search('(deleted) (\(.*\))', result)
-    if m:
-      any_match = True
-      f_result += colorText(m.group(1), 'RED', **color_opts) + ' ' + m.group(2)
-    # Color long running tests YELLOW
-    m = re.search('(RUNNING\.\.\.)', result)
-    if m:
-      any_match = True
-      f_result += colorText(m.group(1), 'YELLOW', **color_opts)
-    # Color PBS status CYAN
-    m = re.search('((?:LAUNCHED|RUNNING(?!\.)|EXITING|QUEUED))', result)
-    if m:
-      any_match = True
-      f_result += colorText(m.group(1), 'CYAN', **color_opts)
-    # Color Passed tests GREEN
-    m = re.search('(OK|DRY_RUN)', result)
-    if m:
-      any_match = True
-      f_result += colorText(m.group(1), 'GREEN', **color_opts)
+        f_result = test_name + '.'*cnt + ' ' + result
 
-    if not any_match:
-      f_result = result
-
-    f_result = test_name + '.'*cnt + ' ' + f_result
-    else:
-    f_result = test_name + '.'*cnt + ' ' + result
-
-  # Tack on the timing if it exists
-  if timing:
-    f_result += ' [' + '%0.3f' % float(timing) + 's]'
-  if options.debug_harness:
-    f_result += ' Start: ' + '%0.3f' % start + ' End: ' + '%0.3f' % end
-  return f_result
+    # Tack on the timing if it exists
+    if timing:
+        f_result += ' [' + '%0.3f' % float(timing) + 's]'
+    if options.debug_harness:
+        f_result += ' Start: ' + '%0.3f' % start + ' End: ' + '%0.3f' % end
+    return f_result
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because
 # it messes up the trac output.
@@ -171,20 +171,20 @@ def printResult(test_name, result, timing, start, end, options, color=True):
 def getPlatforms():
   # We'll use uname to figure this out.  platform.uname() is available on all platforms
   #   while os.uname() is not (See bugs.python.org/issue8080).
-  # Supported platforms are LINUX, DARWIN, ML, MAVERICKS, YOSEMITE, or ALL
-  platforms = set(['ALL'])
+    # Supported platforms are LINUX, DARWIN, ML, MAVERICKS, YOSEMITE, or ALL
+    platforms = set(['ALL'])
   raw_uname = platform.uname()
-  if raw_uname[0].upper() == 'DARWIN':
-    platforms.add('DARWIN')
-    if re.match("12\.", raw_uname[2]):
-      platforms.add('ML')
-    if re.match("13\.", raw_uname[2]):
-      platforms.add("MAVERICKS")
-    if re.match("14\.", raw_uname[2]):
-      platforms.add("YOSEMITE")
-  else:
-    platforms.add(raw_uname[0].upper())
-  return platforms
+    if raw_uname[0].upper() == 'DARWIN':
+        platforms.add('DARWIN')
+        if re.match("12\.", raw_uname[2]):
+            platforms.add('ML')
+        if re.match("13\.", raw_uname[2]):
+            platforms.add("MAVERICKS")
+        if re.match("14\.", raw_uname[2]):
+            platforms.add("YOSEMITE")
+    else:
+        platforms.add(raw_uname[0].upper())
+    return platforms
 
 def runExecutable(libmesh_dir, location, bin, args):
   # Installed location of libmesh executable
@@ -216,14 +216,14 @@ def runExecutable(libmesh_dir, location, bin, args):
 
 
 def getCompilers(libmesh_dir):
-  # Supported compilers are GCC, INTEL or ALL
-  compilers = set(['ALL'])
+    # Supported compilers are GCC, INTEL or ALL
+    compilers = set(['ALL'])
 
   mpicxx_cmd = runExecutable(libmesh_dir, "bin", "libmesh-config", "--cxx")
 
-  # Account for usage of distcc or ccache
-  if "distcc" in mpicxx_cmd or "ccache" in mpicxx_cmd:
-    mpicxx_cmd = mpicxx_cmd.split()[-1]
+    # Account for usage of distcc or ccache
+    if "distcc" in mpicxx_cmd or "ccache" in mpicxx_cmd:
+        mpicxx_cmd = mpicxx_cmd.split()[-1]
 
     # If mpi ic on the command, run -show to get the compiler
     if "mpi" in mpicxx_cmd:
@@ -231,49 +231,49 @@ def getCompilers(libmesh_dir):
     else:
         raw_compiler = mpicxx_cmd
 
-  if re.match('icpc', raw_compiler) != None:
-    compilers.add("INTEL")
-  elif re.match('[cg]\+\+', raw_compiler) != None:
-    compilers.add("GCC")
-  elif re.match('clang\+\+', raw_compiler) != None:
-    compilers.add("CLANG")
+    if re.match('icpc', raw_compiler) != None:
+        compilers.add("INTEL")
+    elif re.match('[cg]\+\+', raw_compiler) != None:
+        compilers.add("GCC")
+    elif re.match('clang\+\+', raw_compiler) != None:
+        compilers.add("CLANG")
 
-  return compilers
+    return compilers
 
 def getPetscVersion(libmesh_dir):
-  major_version = getLibMeshConfigOption(libmesh_dir, 'petsc_major')
-  minor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_minor')
-  if len(major_version) != 1 or len(minor_version) != 1:
-    print "Error determining PETSC version"
+    major_version = getLibMeshConfigOption(libmesh_dir, 'petsc_major')
+    minor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_minor')
+    if len(major_version) != 1 or len(minor_version) != 1:
+        print "Error determining PETSC version"
         exit(1)
 
-  return major_version.pop() + '.' + minor_version.pop()
+    return major_version.pop() + '.' + minor_version.pop()
 
 # Break down petsc version logic in a new define
 # TODO: find a way to eval() logic instead
 def checkPetscVersion(checks, test):
-  # If any version of petsc works, return true immediately
+    # If any version of petsc works, return true immediately
   if 'ALL' in set(test['petsc_version']):
-    return (True, None, None)
-  # Iterate through petsc versions in test[PETSC_VERSION] and match it against check[PETSC_VERSION]
+        return (True, None, None)
+    # Iterate through petsc versions in test[PETSC_VERSION] and match it against check[PETSC_VERSION]
   for petsc_version in test['petsc_version']:
-    logic, version = re.search(r'(.*?)(\d\S+)', petsc_version).groups()
-    # Exact match
-    if logic == '' or logic == '=':
+        logic, version = re.search(r'(.*?)(\d\S+)', petsc_version).groups()
+        # Exact match
+        if logic == '' or logic == '=':
       if version == checks['petsc_version']:
         return (True, None, version)
-      else:
-        return (False, '!=', version)
-    # Logical match
+            else:
+                return (False, '!=', version)
+        # Logical match
     if logic == '>' and checks['petsc_version'][0:3] > version[0:3]:
-      return (True, None, version)
+            return (True, None, version)
     elif logic == '>=' and checks['petsc_version'][0:3] >= version[0:3]:
-      return (True, None, version)
+            return (True, None, version)
     elif logic == '<' and checks['petsc_version'][0:3] < version[0:3]:
-      return (True, None, version)
+            return (True, None, version)
     elif logic == '<=' and checks['petsc_version'][0:3] <= version[0:3]:
-      return (True, None, version)
-  return (False, logic, version)
+            return (True, None, version)
+    return (False, logic, version)
 
 def getIfAsioExists(moose_dir):
   option_set = set(['ALL'])
@@ -284,9 +284,9 @@ def getIfAsioExists(moose_dir):
   return option_set
 
 def getLibMeshConfigOption(libmesh_dir, option):
-  # Some tests work differently with parallel mesh enabled
-  # We need to detect this condition
-  option_set = set(['ALL'])
+    # Some tests work differently with parallel mesh enabled
+    # We need to detect this condition
+    option_set = set(['ALL'])
 
     filenames = [
       libmesh_dir + '/include/base/libmesh_config.h',   # Old location
@@ -296,25 +296,25 @@ def getLibMeshConfigOption(libmesh_dir, option):
     success = 0
     for filename in filenames:
         if success == 1:
-      break
+            break
 
         try:
             f = open(filename)
-      contents = f.read()
-      f.close()
+            contents = f.read()
+            f.close()
 
-      info = LIBMESH_OPTIONS[option]
-      m = re.search(info['re_option'], contents)
-      if m != None:
-        if 'options' in info:
-          for value, option in info['options'].iteritems():
-            if m.group(1) == option:
-              option_set.add(value)
-        else:
-          option_set.clear()
-          option_set.add(m.group(1))
-      else:
-        option_set.add(info['default'])
+            info = LIBMESH_OPTIONS[option]
+            m = re.search(info['re_option'], contents)
+            if m != None:
+                if 'options' in info:
+                    for value, option in info['options'].iteritems():
+                        if m.group(1) == option:
+                            option_set.add(value)
+                else:
+                    option_set.clear()
+                    option_set.add(m.group(1))
+            else:
+                option_set.add(info['default'])
 
             success = 1
 
@@ -326,12 +326,12 @@ def getLibMeshConfigOption(libmesh_dir, option):
         print "Error! Could not find libmesh_config.h in any of the usual locations!"
         exit(1)
 
-  return option_set
+    return option_set
 
 def getSharedOption(libmesh_dir):
-  # Some tests may only run properly with shared libraries on/off
-  # We need to detect this condition
-  shared_option = set(['ALL'])
+    # Some tests may only run properly with shared libraries on/off
+    # We need to detect this condition
+    shared_option = set(['ALL'])
 
   result = runExecutable(libmesh_dir, "contrib/bin", "libtool", "--config | grep build_libtool_libs | cut -d'=' -f2")
 
@@ -344,7 +344,7 @@ def getSharedOption(libmesh_dir):
         print "Error! Could not determine whether shared libraries were built."
         exit(1)
 
-  return shared_option
+    return shared_option
 
 def getInitializedSubmodules(root_dir):
     """

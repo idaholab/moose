@@ -15,9 +15,9 @@ FRAMEWORK_DIR = os.path.abspath(os.path.join(MOOSE_DIR, 'framework'))
 #### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
     MOOSE_DIR = os.environ['MOOSE_DIR']
-  FRAMEWORK_DIR = os.path.join(MOOSE_DIR, 'framework')
+    FRAMEWORK_DIR = os.path.join(MOOSE_DIR, 'framework')
 if os.environ.has_key("FRAMEWORK_DIR"):
-  FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
+    FRAMEWORK_DIR = os.environ['FRAMEWORK_DIR']
 
 sys.path.append(MOOSE_DIR + '/framework/scripts/syntaxHTML')
 import genInputFileSyntaxHTML

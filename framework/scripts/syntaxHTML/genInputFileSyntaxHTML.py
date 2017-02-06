@@ -108,10 +108,10 @@ def massage_data( data ):
   for block in data:
     name =  block['name']
     if name == 'Executioner' or name == 'InitialCondition':
-      curr_type = str(block['type'])
-      if curr_type == 'None':
-        curr_type = 'ALL'
-      block['name'] += ' (' + curr_type + ')'
+            curr_type = str(block['type'])
+            if curr_type == 'None':
+                curr_type = 'ALL'
+            block['name'] += ' (' + curr_type + ')'
   return data
 
 # used by copytree, don't copy any .svn files out to the server!

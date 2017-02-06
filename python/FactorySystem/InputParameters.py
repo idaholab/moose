@@ -1,55 +1,55 @@
 class InputParameters:
     def __init__(self, *args):
-    self.valid = {}
-    self.strict_types = {}
-    self.desc = {}
-    self.substitute = {}
-    self.required = set()
-    self.private = set()
+        self.valid = {}
+        self.strict_types = {}
+        self.desc = {}
+        self.substitute = {}
+        self.required = set()
+        self.private = set()
         self.group = {}
 
-  def addRequiredParam(self, name, *args):
-    self.required.add(name)
-    self.addParam(name, *args)
+    def addRequiredParam(self, name, *args):
+        self.required.add(name)
+        self.addParam(name, *args)
 
-  def addParam(self, name, *args):
-    if len(args) == 2:
-      self.valid[name] = args[0]
-    self.desc[name] = args[-1]
+    def addParam(self, name, *args):
+        if len(args) == 2:
+            self.valid[name] = args[0]
+        self.desc[name] = args[-1]
 
-  def addRequiredParamWithType(self, name, my_type, *args):
-    self.required.add(name)
-    self.addParamWithType(name, my_type, *args)
+    def addRequiredParamWithType(self, name, my_type, *args):
+        self.required.add(name)
+        self.addParamWithType(name, my_type, *args)
 
-  def addParamWithType(self, name, my_type, *args):
-    if len(args) == 3:
-      self.valid[name] = args[0]
-    self.strict_types[name] = my_type
-    self.desc[name] = args[-1]
+    def addParamWithType(self, name, my_type, *args):
+        if len(args) == 3:
+            self.valid[name] = args[0]
+        self.strict_types[name] = my_type
+        self.desc[name] = args[-1]
 
-  def addPrivateParam(self, name, *args):
-    self.private.add(name)
-    if len(args) == 1:
-      self.valid[name] = args[0]
+    def addPrivateParam(self, name, *args):
+        self.private.add(name)
+        if len(args) == 1:
+            self.valid[name] = args[0]
 
-  def addStringSubParam(self, name, substitution, *args):
-    self.substitute[name] = substitution
-    self.addParam(name, *args)
+    def addStringSubParam(self, name, substitution, *args):
+        self.substitute[name] = substitution
+        self.addParam(name, *args)
 
-  def isValid(self, name):
-    if name in self.valid and self.valid[name] != None and self.valid[name] != []:
-      return True
-    else:
-      return False
+    def isValid(self, name):
+        if name in self.valid and self.valid[name] != None and self.valid[name] != []:
+            return True
+        else:
+            return False
 
-  def __contains__(self, item):
-    return item in self.desc
+    def __contains__(self, item):
+        return item in self.desc
 
-  def __getitem__(self, key):
-    return self.valid[key]
+    def __getitem__(self, key):
+        return self.valid[key]
 
-  def __setitem__(self, key, value):
-    self.valid[key] = value
+    def __setitem__(self, key, value):
+        self.valid[key] = value
 
     ##
     # Adds parameters from another InputParameters object via += operator
@@ -69,29 +69,29 @@ class InputParameters:
         # Return this InputParameters object
         return self
 
-  def type(self, key):
-    if key in self.valid:
-      return type(self.valid[key])
-    else:
-      return None
+    def type(self, key):
+        if key in self.valid:
+            return type(self.valid[key])
+        else:
+            return None
 
-  def keys(self):
-    return set([k for k in self.desc])
+    def keys(self):
+        return set([k for k in self.desc])
 
-  def required_keys(self):
-    return self.required
+    def required_keys(self):
+        return self.required
 
-  def valid_keys(self):
-    return self.valid
+    def valid_keys(self):
+        return self.valid
 
-  def substitute_keys(self):
-    return self.substitute
+    def substitute_keys(self):
+        return self.substitute
 
-  def isRequired(self, key):
-    return key in self.required
+    def isRequired(self, key):
+        return key in self.required
 
-  def getDescription(self, key):
-    return self.desc[key]
+    def getDescription(self, key):
+        return self.desc[key]
 
     ##
     # Specify a group name for the keys listed
@@ -139,11 +139,11 @@ class InputParameters:
                 self[common_key] = common[common_key]
 
 
-  def printParams(self):
-    for k in self.desc:
-      value = ''
-      if k in self.valid:
-        value = self.valid[k]
+    def printParams(self):
+        for k in self.desc:
+            value = ''
+            if k in self.valid:
+                value = self.valid[k]
 
-      print k.ljust(20), value
+            print k.ljust(20), value
             print ' '.ljust(20), self.desc[k]

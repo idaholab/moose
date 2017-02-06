@@ -4,19 +4,19 @@ import os, re
 
 class PetscJacobianTester(RunApp):
 
-  @staticmethod
-  def validParams():
-    params = RunApp.validParams()
+    @staticmethod
+    def validParams():
+        params = RunApp.validParams()
     params.addParam('ratio_tol', 1e-8, "Relative tolerance to compare the ration against.")
     params.addParam('difference_tol', 1e-8, "Relative tolerance to compare the difference against.")
 
     return params
 
-  def checkRunnable(self, options):
-    if options.enable_recover:
-      reason = 'skipped (PetscJacTester RECOVER)'
-      return (False, reason)
-    return RunApp.checkRunnable(self, options)
+    def checkRunnable(self, options):
+        if options.enable_recover:
+            reason = 'skipped (PetscJacTester RECOVER)'
+            return (False, reason)
+        return RunApp.checkRunnable(self, options)
 
   def __init__(self, name, params):
     RunApp.__init__(self, name, params)
@@ -32,4 +32,4 @@ class PetscJacobianTester(RunApp):
     else:
       reason = 'EXPECTED OUTPUT NOT FOUND';
 
-    return (reason, output)
+        return (reason, output)

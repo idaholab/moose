@@ -21,165 +21,165 @@ pstack_binary = 'gstack'
 ##################################################################
 
 def generateTraces(job_num, application_name, num_hosts):
-  command = "qstat -n " + job_num
+    command = "qstat -n " + job_num
 
-  p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-  output = p.communicate()[0]
+    p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    output = p.communicate()[0]
 
-  # The lists of hosts
-  hosts = []
-  # The array of jobs
-  jobs = []
+    # The lists of hosts
+    hosts = []
+    # The array of jobs
+    jobs = []
 
-  # The machine name should go here!
-  host_strs = node_name_pattern.findall(output)
-  for i in host_strs:
-    hosts.append(i)
+    # The machine name should go here!
+    host_strs = node_name_pattern.findall(output)
+    for i in host_strs:
+        hosts.append(i)
 
-  # Launch all the jobs
-  if num_hosts == 0:
-    num_hosts = len(hosts)
+    # Launch all the jobs
+    if num_hosts == 0:
+        num_hosts = len(hosts)
 
-  for i in range(len(hosts)):
-    if i >= num_hosts:
-      continue
+    for i in range(len(hosts)):
+        if i >= num_hosts:
+            continue
 
-    #command = "ssh " + host + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I {} gdb --batch --pid={} -ex bt 2>&1 | grep '^#' \""
-    command = "ssh " + hosts[i] + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I '{}' sh -c 'echo Host: " + hosts[i] + " PID: {}; " + pstack_binary + " {}; printf '*%.0s' {1..80}; echo' \""
-    f = TemporaryFile()
-    p = subprocess.Popen(command, stdout=f, close_fds=False, shell=True)
-    jobs.append((p, f))
+        #command = "ssh " + host + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I {} gdb --batch --pid={} -ex bt 2>&1 | grep '^#' \""
+        command = "ssh " + hosts[i] + " \"ps -e | grep " + application_name + " | awk '{print \$1}' | xargs -I '{}' sh -c 'echo Host: " + hosts[i] + " PID: {}; " + pstack_binary + " {}; printf '*%.0s' {1..80}; echo' \""
+        f = TemporaryFile()
+        p = subprocess.Popen(command, stdout=f, close_fds=False, shell=True)
+        jobs.append((p, f))
 
-  # Now process the output from each of the jobs
-  traces = []
-  for (p, f) in jobs:
-    p.wait()
-    f.seek(0)
-    output = f.read()
-    f.close()
+    # Now process the output from each of the jobs
+    traces = []
+    for (p, f) in jobs:
+        p.wait()
+        f.seek(0)
+        output = f.read()
+        f.close()
 
-    # strip blank lines
-    output = os.linesep.join([s for s in output.splitlines() if s])
+        # strip blank lines
+        output = os.linesep.join([s for s in output.splitlines() if s])
 
-    traces.extend(splitTraces(output))
+        traces.extend(splitTraces(output))
 
-  return traces
+    return traces
 
 def readTracesFromFile(filename):
-  f = open(filename)
-  data = f.read()
-  return splitTraces(data)
+    f = open(filename)
+    data = f.read()
+    return splitTraces(data)
 
 def splitTraces(trace_string):
-  trace_regex = re.compile("^\**\n", re.M)
-  traces = trace_regex.split(trace_string)
+    trace_regex = re.compile("^\**\n", re.M)
+    traces = trace_regex.split(trace_string)
 
 #  # Only keep lines beginning with a #
 #  throw_away = re.compile("^[^#].*", re.M)
 #  traces = [throw_away.sub("", trace) for trace in traces]
 
-  return traces
+    return traces
 
 # Process the individual traces
 def processTraces(traces, num_lines_to_keep):
-  unique_stack_traces = {}
-  last_lines_regex = re.compile("(?:.*\n){" + str(num_lines_to_keep) + "}\Z", re.M)
-  host_regex = re.compile("^(Host.*)", re.M)
+    unique_stack_traces = {}
+    last_lines_regex = re.compile("(?:.*\n){" + str(num_lines_to_keep) + "}\Z", re.M)
+    host_regex = re.compile("^(Host.*)", re.M)
 
-  for trace in traces:
-    if len(trace) == 0:
-      continue
+    for trace in traces:
+        if len(trace) == 0:
+            continue
 
-    # Grab the host and PID
-    m = host_regex.search(trace)
-    if m:
-      host_pid = m.group(1)
+        # Grab the host and PID
+        m = host_regex.search(trace)
+        if m:
+            host_pid = m.group(1)
 
-    # If the user requested to save only the last few lines, do that here
-    if num_lines_to_keep:
-      m = last_lines_regex.search(trace)
-      if m:
-        trace = m.group(0)
+        # If the user requested to save only the last few lines, do that here
+        if num_lines_to_keep:
+            m = last_lines_regex.search(trace)
+            if m:
+                trace = m.group(0)
 
-    unique = ''
-    for bt in unique_stack_traces:
-      if compareTraces(trace, bt):
-        unique = bt
+        unique = ''
+        for bt in unique_stack_traces:
+            if compareTraces(trace, bt):
+                unique = bt
 
-    if unique == '':
-      unique_stack_traces[trace] = [host_pid]
-    else:
-      unique_stack_traces[unique].append(host_pid)
+        if unique == '':
+            unique_stack_traces[trace] = [host_pid]
+        else:
+            unique_stack_traces[unique].append(host_pid)
 
-  return unique_stack_traces
+    return unique_stack_traces
 
 def compareTraces(trace1, trace2):
-  lines1 = trace1.split("\n")
-  lines2 = trace2.split("\n")
+    lines1 = trace1.split("\n")
+    lines2 = trace2.split("\n")
 
-  if len(lines1) != len(lines2):
-    return False
+    if len(lines1) != len(lines2):
+        return False
 
-  # Only compare the stack trace part - not the memory addresses
-  # Note this subroutine may need tweaking if the stack trace is different
-  # on the current machine
-  memory_re = re.compile("0x[0-9a-f]*")
-  for i in xrange(len(lines1)):
-    line1 = lines1[i].split()[2:]
-    line2 = lines2[i].split()[2:]
+    # Only compare the stack trace part - not the memory addresses
+    # Note this subroutine may need tweaking if the stack trace is different
+    # on the current machine
+    memory_re = re.compile("0x[0-9a-f]*")
+    for i in xrange(len(lines1)):
+        line1 = lines1[i].split()[2:]
+        line2 = lines2[i].split()[2:]
 
-    # Let's strip out all the memory addresses too
-    line1 = [memory_re.sub("0x...", line) for line in line1]
-    line2 = [memory_re.sub("0x...", line) for line in line2]
+        # Let's strip out all the memory addresses too
+        line1 = [memory_re.sub("0x...", line) for line in line1]
+        line2 = [memory_re.sub("0x...", line) for line in line2]
 
-    if line1 != line2:
-      return False
+        if line1 != line2:
+            return False
 
-  return True
+    return True
 
 def main():
-  parser = OptionParser(usage='Usage: %prog [options] <PBS Job num> <Application>')
-  parser.add_option('-s', '--stacks', action='store', dest='stacks', type='int', default=0, help="The number of stack frames to keep and compare for uniqueness (Default: ALL)")
-  parser.add_option('-n', '--hosts', action='store', dest='hosts', type='int', default=0, help="The number of hosts to visit (Default: ALL)")
-  parser.add_option('-f', '--force', action='store_true', dest='force', default=False, help="Whether or not to force a regen if a cache file exists")
-  (options, args) = parser.parse_args()
+    parser = OptionParser(usage='Usage: %prog [options] <PBS Job num> <Application>')
+    parser.add_option('-s', '--stacks', action='store', dest='stacks', type='int', default=0, help="The number of stack frames to keep and compare for uniqueness (Default: ALL)")
+    parser.add_option('-n', '--hosts', action='store', dest='hosts', type='int', default=0, help="The number of hosts to visit (Default: ALL)")
+    parser.add_option('-f', '--force', action='store_true', dest='force', default=False, help="Whether or not to force a regen if a cache file exists")
+    (options, args) = parser.parse_args()
 
-  if len(args) != 2:
-    parser.print_help()
-    sys.exit(1)
+    if len(args) != 2:
+        parser.print_help()
+        sys.exit(1)
 
-  # The PBS job number and the application should be passed on the command line
-  # Additionally, an optional argument of the number of frames to keep (compare) may be passed
-  job_num = args[0]
-  application = args[1]
-  num_to_keep = options.stacks
-  num_hosts = options.hosts
+    # The PBS job number and the application should be passed on the command line
+    # Additionally, an optional argument of the number of frames to keep (compare) may be passed
+    job_num = args[0]
+    application = args[1]
+    num_to_keep = options.stacks
+    num_hosts = options.hosts
 
-  # first see if there is a cache file available
-  cache_filename = application + '.' + job_num + '.cache'
+    # first see if there is a cache file available
+    cache_filename = application + '.' + job_num + '.cache'
 
-  traces = []
-  if not os.path.exists(cache_filename) or options.force:
-    traces = generateTraces(job_num, application, options.hosts)
+    traces = []
+    if not os.path.exists(cache_filename) or options.force:
+        traces = generateTraces(job_num, application, options.hosts)
 
-    # Cache the restuls to a file
-    cache_file = open(cache_filename, 'w')
-    for trace in traces:
-      cache_file.write(trace + "*"*80 + "\n")
-    cache_file.write("\n")
-    cache_file.close()
+        # Cache the restuls to a file
+        cache_file = open(cache_filename, 'w')
+        for trace in traces:
+            cache_file.write(trace + "*"*80 + "\n")
+        cache_file.write("\n")
+        cache_file.close()
 
-  # Process the traces to collapse them into unique stacks
-  traces = readTracesFromFile(cache_filename)
-  unique_stack_traces = processTraces(traces, num_to_keep)
+    # Process the traces to collapse them into unique stacks
+    traces = readTracesFromFile(cache_filename)
+    unique_stack_traces = processTraces(traces, num_to_keep)
 
-  print "Unique Stack Traces"
-  for trace, count in unique_stack_traces.iteritems():
-    print "*"*80 + "\nCount: " + str(len(count)) + "\n"
-    if len(count) < 10:
-      print "\n".join(count)
-    print "\n" + trace
+    print "Unique Stack Traces"
+    for trace, count in unique_stack_traces.iteritems():
+        print "*"*80 + "\nCount: " + str(len(count)) + "\n"
+        if len(count) < 10:
+            print "\n".join(count)
+        print "\n" + trace
 
 
 if __name__ == '__main__':
-  main()
+    main()
