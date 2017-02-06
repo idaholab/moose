@@ -245,7 +245,7 @@ def getPetscVersion(libmesh_dir):
   minor_version = getLibMeshConfigOption(libmesh_dir, 'petsc_minor')
   if len(major_version) != 1 or len(minor_version) != 1:
     print "Error determining PETSC version"
-    exit(1)
+        exit(1)
 
   return major_version.pop() + '.' + minor_version.pop()
 
@@ -288,18 +288,18 @@ def getLibMeshConfigOption(libmesh_dir, option):
   # We need to detect this condition
   option_set = set(['ALL'])
 
-  filenames = [
-    libmesh_dir + '/include/base/libmesh_config.h',   # Old location
-    libmesh_dir + '/include/libmesh/libmesh_config.h' # New location
-    ];
+    filenames = [
+      libmesh_dir + '/include/base/libmesh_config.h',   # Old location
+      libmesh_dir + '/include/libmesh/libmesh_config.h' # New location
+      ];
 
-  success = 0
-  for filename in filenames:
-    if success == 1:
+    success = 0
+    for filename in filenames:
+        if success == 1:
       break
 
-    try:
-      f = open(filename)
+        try:
+            f = open(filename)
       contents = f.read()
       f.close()
 
@@ -316,15 +316,15 @@ def getLibMeshConfigOption(libmesh_dir, option):
       else:
         option_set.add(info['default'])
 
-      success = 1
+            success = 1
 
     except IOError:
-      # print "Warning: I/O Error trying to read", filename, ":", e.strerror, "... Will try other locations."
-      pass
+            # print "Warning: I/O Error trying to read", filename, ":", e.strerror, "... Will try other locations."
+            pass
 
-  if success == 0:
-    print "Error! Could not find libmesh_config.h in any of the usual locations!"
-    exit(1)
+    if success == 0:
+        print "Error! Could not find libmesh_config.h in any of the usual locations!"
+        exit(1)
 
   return option_set
 
@@ -335,14 +335,14 @@ def getSharedOption(libmesh_dir):
 
   result = runExecutable(libmesh_dir, "contrib/bin", "libtool", "--config | grep build_libtool_libs | cut -d'=' -f2")
 
-  if re.search('yes', result) != None:
-    shared_option.add('DYNAMIC')
-  elif re.search('no', result) != None:
-    shared_option.add('STATIC')
-  else:
-    # Neither no nor yes?  Not possible!
-    print "Error! Could not determine whether shared libraries were built."
-    exit(1)
+    if re.search('yes', result) != None:
+        shared_option.add('DYNAMIC')
+    elif re.search('no', result) != None:
+        shared_option.add('STATIC')
+    else:
+        # Neither no nor yes?  Not possible!
+        print "Error! Could not determine whether shared libraries were built."
+        exit(1)
 
   return shared_option
 

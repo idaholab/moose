@@ -13,7 +13,7 @@ class RunApp(Tester):
     params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
     params.addParam('expect_out',         "A regular expression that must occur in the input in order for the test to be considered passing.")
     params.addParam('match_literal', False, "Treat expect_out as a string not a regular expression.")
-    params.addParam('absent_out',         "A regular expression that must be *absent* from the output for the test to pass.")
+        params.addParam('absent_out',         "A regular expression that must be *absent* from the output for the test to pass.")
     params.addParam('should_crash', False, "Inidicates that the test is expected to crash or otherwise terminate early")
     params.addParam('executable_pattern', "A test that only runs if the exectuable name matches the given pattern")
     params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
@@ -56,7 +56,7 @@ class RunApp(Tester):
 
   def checkRunnable(self, options):
     if options.enable_recover:
-      if self.specs.isValid('expect_out') or self.specs.isValid('absent_out') or self.specs['should_crash'] == True:
+            if self.specs.isValid('expect_out') or self.specs.isValid('absent_out') or self.specs['should_crash'] == True:
         reason = 'skipped (expect_out RECOVER)'
         return (False, reason)
 
@@ -95,10 +95,10 @@ class RunApp(Tester):
       print 'Application not found: ' + str(specs['executable'])
       sys.exit(1)
 
-    if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in specs['cli_args'] or '--distributed-mesh' not in specs['cli_args']):
+        if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in specs['cli_args'] or '--distributed-mesh' not in specs['cli_args']):
       # The user has passed the parallel-mesh option to the test harness
       # and it is NOT supplied already in the cli-args option
-      specs['cli_args'].append('--distributed-mesh')
+            specs['cli_args'].append('--distributed-mesh')
 
     if options.error and '--error' not in specs['cli_args'] and not specs["allow_warnings"]:
       # The user has passed the error option to the test harness
@@ -117,7 +117,7 @@ class RunApp(Tester):
       specs['cli_args'].append('Outputs/print_perf_log=true')
 
     if options.colored == False:
-      specs['cli_args'].append('--no-color')
+            specs['cli_args'].append('--no-color')
 
     if options.cli_args:
       specs['cli_args'].insert(0, options.cli_args)
@@ -125,9 +125,9 @@ class RunApp(Tester):
     if options.scaling and specs['scale_refine'] > 0:
       specs['cli_args'].insert(0, ' -r ' + str(specs['scale_refine']))
 
-    # The test harness should never use GDB backtraces: they don't
-    # work well when dozens of expect_err jobs run at the same time.
-    specs['cli_args'].append('--no-gdb-backtrace')
+        # The test harness should never use GDB backtraces: they don't
+        # work well when dozens of expect_err jobs run at the same time.
+        specs['cli_args'].append('--no-gdb-backtrace')
 
     # Get the number of processors and threads the Tester requires
     ncpus = self.getProcs(options)
@@ -261,7 +261,7 @@ class RunApp(Tester):
         if reason == '' and specs.isValid('absent_out'):
             have_absent_out = self.checkOutputForPattern(output, specs['absent_out'])
             if (have_absent_out):
-        reason = 'OUTPUT NOT ABSENT'
+                reason = 'OUTPUT NOT ABSENT'
 
     if reason == '':
       # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)

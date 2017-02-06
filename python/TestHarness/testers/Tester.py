@@ -12,7 +12,7 @@ class Tester(MooseObject):
     params.addRequiredParam('type', "The type of test of Tester to create for this test.")
     params.addParam('max_time',   300, "The maximum in seconds that the test will be allowed to run.")
     params.addParam('min_reported_time', "The minimum time elapsed before a test is reported as taking to long to run.")
-    params.addParam('skip',     "Provide a reason this test will be skipped.")
+        params.addParam('skip',     "Provide a reason this test will be skipped.")
     params.addParam('deleted',         "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
 
     params.addParam('heavy',    False, "Set to True if this test should only be run when the '--heavy' option is used.")
@@ -36,14 +36,14 @@ class Tester(MooseObject):
     params.addParam('unique_ids',    ['ALL'], "A test that runs only if UNIQUE_IDs are enabled ('ALL', 'TRUE', 'FALSE')")
     params.addParam('recover',       True,    "A test that runs with '--recover' mode enabled")
     params.addParam('vtk',           ['ALL'], "A test that runs only if VTK is detected ('ALL', 'TRUE', 'FALSE')")
-    params.addParam('tecplot',       ['ALL'], "A test that runs only if Tecplot is detected ('ALL', 'TRUE', 'FALSE')")
-    params.addParam('dof_id_bytes',  ['ALL'], "A test that runs only if libmesh is configured --with-dof-id-bytes = a specific number, e.g. '4', '8'")
-    params.addParam('petsc_debug',   ['ALL'], "{False,True} -> test only runs when PETSc is configured with --with-debugging={0,1}, otherwise test always runs.")
-    params.addParam('curl',          ['ALL'], "A test that runs only if CURL is detected ('ALL', 'TRUE', 'FALSE')")
-    params.addParam('tbb',           ['ALL'], "A test that runs only if TBB is available ('ALL', 'TRUE', 'FALSE')")
-    params.addParam('superlu',       ['ALL'], "A test that runs only if SuperLU is available via PETSc ('ALL', 'TRUE', 'FALSE')")
+        params.addParam('tecplot',       ['ALL'], "A test that runs only if Tecplot is detected ('ALL', 'TRUE', 'FALSE')")
+        params.addParam('dof_id_bytes',  ['ALL'], "A test that runs only if libmesh is configured --with-dof-id-bytes = a specific number, e.g. '4', '8'")
+        params.addParam('petsc_debug',   ['ALL'], "{False,True} -> test only runs when PETSc is configured with --with-debugging={0,1}, otherwise test always runs.")
+        params.addParam('curl',          ['ALL'], "A test that runs only if CURL is detected ('ALL', 'TRUE', 'FALSE')")
+        params.addParam('tbb',           ['ALL'], "A test that runs only if TBB is available ('ALL', 'TRUE', 'FALSE')")
+        params.addParam('superlu',       ['ALL'], "A test that runs only if SuperLU is available via PETSc ('ALL', 'TRUE', 'FALSE')")
     params.addParam('slepc',         ['ALL'], "A test that runs only if SLEPc is available ('ALL', 'TRUE', 'FALSE')")
-    params.addParam('unique_id',     ['ALL'], "A test that runs only if libmesh is configured with --enable-unique-id ('ALL', 'TRUE', 'FALSE')")
+        params.addParam('unique_id',     ['ALL'], "A test that runs only if libmesh is configured with --enable-unique-id ('ALL', 'TRUE', 'FALSE')")
     params.addParam('cxx11',         ['ALL'], "A test that runs only if CXX11 is available ('ALL', 'TRUE', 'FALSE')")
     params.addParam('asio',          ['ALL'], "A test that runs only if ASIO is available ('ALL', 'TRUE', 'FALSE')")
     params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
@@ -188,7 +188,7 @@ class Tester(MooseObject):
       return (False, reason)
 
     # PETSc is being explicitly checked above
-    local_checks = ['platform', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids', 'vtk', 'tecplot', \
+        local_checks = ['platform', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids', 'vtk', 'tecplot', \
                     'petsc_debug', 'curl', 'tbb', 'superlu', 'cxx11', 'asio', 'unique_id', 'slepc']
     for check in local_checks:
       test_platforms = set()
@@ -226,9 +226,9 @@ class Tester(MooseObject):
     if self.specs['scale_refine'] == 0 and options.store_time:
       return (False, reason)
 
-    # There should only be one entry in self.specs['dof_id_bytes']
-    for x in self.specs['dof_id_bytes']:
-      if x != 'ALL' and not x in checks['dof_id_bytes']:
+        # There should only be one entry in self.specs['dof_id_bytes']
+        for x in self.specs['dof_id_bytes']:
+            if x != 'ALL' and not x in checks['dof_id_bytes']:
         return (False, 'skipped (--with-dof-id-bytes!=' + x + ')')
 
     # Check to make sure depend files exist

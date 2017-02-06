@@ -12,7 +12,7 @@ class VTKDiff(RunApp):
     params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
     params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exodiff comparisons.")
     params.addParam('rel_err',       5.5e-6, "Relative error value used in exodiff comparisons.")
-    params.addParam('ignored_attributes',  [], "Ignore e.g. type and/or version in sample XML block <VTKFile type=\"Foo\" version=\"0.1\">")
+        params.addParam('ignored_attributes',  [], "Ignore e.g. type and/or version in sample XML block <VTKFile type=\"Foo\" version=\"0.1\">")
 
     return params
 
@@ -50,15 +50,15 @@ class VTKDiff(RunApp):
           gold = os.path.join(specs['test_dir'], specs['gold_dir'], file)
           test = os.path.join(specs['test_dir'], file)
 
-          # We always ignore the header_type attribute, since it was
-          # introduced in VTK 7 and doesn't seem to be important as
-          # far as Paraview is concerned.
-          specs['ignored_attributes'].append('header_type')
+                    # We always ignore the header_type attribute, since it was
+                    # introduced in VTK 7 and doesn't seem to be important as
+                    # far as Paraview is concerned.
+                    specs['ignored_attributes'].append('header_type')
 
-          differ = XMLDiffer(gold, test, abs_zero=specs['abs_zero'], rel_tol=specs['rel_err'], ignored_attributes=specs['ignored_attributes'])
+                    differ = XMLDiffer(gold, test, abs_zero=specs['abs_zero'], rel_tol=specs['rel_err'], ignored_attributes=specs['ignored_attributes'])
 
-          # Print the results of the VTKDiff whether it passed or failed.
-          output += differ.message() + '\n'
+                    # Print the results of the VTKDiff whether it passed or failed.
+                    output += differ.message() + '\n'
 
           if differ.fail():
             reason = 'VTKDIFF'

@@ -82,7 +82,7 @@ class TestHarness:
     self.checks['platform'] = getPlatforms()
     self.checks['submodules'] = getInitializedSubmodules(self.run_tests_dir)
 
-    # The TestHarness doesn't strictly require the existence of libMesh in order to run. Here we allow the user
+        # The TestHarness doesn't strictly require the existence of libMesh in order to run. Here we allow the user
     # to select whether they want to probe for libMesh configuration options.
     if self.options.skip_config_checks:
       self.checks['compiler'] = set(['ALL'])
@@ -93,13 +93,13 @@ class TestHarness:
       self.checks['unique_ids'] = set(['ALL'])
       self.checks['vtk'] = set(['ALL'])
       self.checks['tecplot'] = set(['ALL'])
-      self.checks['dof_id_bytes'] = set(['ALL'])
-      self.checks['petsc_debug'] = set(['ALL'])
-      self.checks['curl'] = set(['ALL'])
-      self.checks['tbb'] = set(['ALL'])
-      self.checks['superlu'] = set(['ALL'])
+            self.checks['dof_id_bytes'] = set(['ALL'])
+            self.checks['petsc_debug'] = set(['ALL'])
+            self.checks['curl'] = set(['ALL'])
+            self.checks['tbb'] = set(['ALL'])
+            self.checks['superlu'] = set(['ALL'])
       self.checks['slepc'] = set(['ALL'])
-      self.checks['unique_id'] = set(['ALL'])
+            self.checks['unique_id'] = set(['ALL'])
       self.checks['cxx11'] = set(['ALL'])
       self.checks['asio'] =  set(['ALL'])
     else:
@@ -111,21 +111,21 @@ class TestHarness:
       self.checks['unique_ids'] = getLibMeshConfigOption(self.libmesh_dir, 'unique_ids')
       self.checks['vtk'] =  getLibMeshConfigOption(self.libmesh_dir, 'vtk')
       self.checks['tecplot'] =  getLibMeshConfigOption(self.libmesh_dir, 'tecplot')
-      self.checks['dof_id_bytes'] = getLibMeshConfigOption(self.libmesh_dir, 'dof_id_bytes')
-      self.checks['petsc_debug'] = getLibMeshConfigOption(self.libmesh_dir, 'petsc_debug')
-      self.checks['curl'] =  getLibMeshConfigOption(self.libmesh_dir, 'curl')
-      self.checks['tbb'] =  getLibMeshConfigOption(self.libmesh_dir, 'tbb')
-      self.checks['superlu'] =  getLibMeshConfigOption(self.libmesh_dir, 'superlu')
+            self.checks['dof_id_bytes'] = getLibMeshConfigOption(self.libmesh_dir, 'dof_id_bytes')
+            self.checks['petsc_debug'] = getLibMeshConfigOption(self.libmesh_dir, 'petsc_debug')
+            self.checks['curl'] =  getLibMeshConfigOption(self.libmesh_dir, 'curl')
+            self.checks['tbb'] =  getLibMeshConfigOption(self.libmesh_dir, 'tbb')
+            self.checks['superlu'] =  getLibMeshConfigOption(self.libmesh_dir, 'superlu')
       self.checks['slepc'] =  getLibMeshConfigOption(self.libmesh_dir, 'slepc')
-      self.checks['unique_id'] =  getLibMeshConfigOption(self.libmesh_dir, 'unique_id')
+            self.checks['unique_id'] =  getLibMeshConfigOption(self.libmesh_dir, 'unique_id')
       self.checks['cxx11'] =  getLibMeshConfigOption(self.libmesh_dir, 'cxx11')
       self.checks['asio'] =  getIfAsioExists(self.moose_dir)
 
-    # Override the MESH_MODE option if using the '--distributed-mesh'
-    # or (deprecated) '--parallel-mesh' option.
-    if (self.options.parallel_mesh == True or self.options.distributed_mesh == True) or \
+        # Override the MESH_MODE option if using the '--distributed-mesh'
+        # or (deprecated) '--parallel-mesh' option.
+        if (self.options.parallel_mesh == True or self.options.distributed_mesh == True) or \
           (self.options.cli_args != None and \
-           (self.options.cli_args.find('--parallel-mesh') != -1 or self.options.cli_args.find('--distributed-mesh') != -1)):
+               (self.options.cli_args.find('--parallel-mesh') != -1 or self.options.cli_args.find('--distributed-mesh') != -1)):
 
       option_set = set(['ALL', 'PARALLEL'])
       self.checks['mesh_mode'] = option_set
@@ -749,8 +749,8 @@ class TestHarness:
     parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
 
     # Options that pass straight through to the executable
-    parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
-    parser.add_argument('--distributed-mesh', action='store_true', dest='distributed_mesh', help='Pass "--distributed-mesh" to executable')
+        parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
+        parser.add_argument('--distributed-mesh', action='store_true', dest='distributed_mesh', help='Pass "--distributed-mesh" to executable')
     parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors (Pass "--error" to executable)')
     parser.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (Pass "--error-unused" to executable)')
 
