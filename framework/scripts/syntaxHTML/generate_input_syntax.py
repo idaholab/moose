@@ -2,8 +2,8 @@
 import sys, os
 
 if len(sys.argv) < 2:
-  print 'Usage: generate_input_syntax.py app_path app_name'
-  exit(1)
+    print 'Usage: generate_input_syntax.py app_path app_name'
+    exit(1)
 
 app_path = sys.argv[1]
 

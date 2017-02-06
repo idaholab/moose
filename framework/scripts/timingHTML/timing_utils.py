@@ -44,10 +44,10 @@ class HTMLGen:
             json = JSON_TEMPLATE.replace('$LABEL$', self.app_name + '.' + test)
 
             # fill out revision vs timing
-      self.ex('select revision, seconds, date, scale, load from timing where app_name = ? and test_name = ? order by date',
+            self.ex('select revision, seconds, date, scale, load from timing where app_name = ? and test_name = ? order by date',
                          (self.app_name,test))
             results = self.cr.fetchall()
-      data = ['["' + str(r[0]) + '", ' + str(r[1]) + ']' for r in results]
+            data = ['["' + str(r[0]) + '", ' + str(r[1]) + ']' for r in results]
             data = '[ ' + ', '.join(data) + ' ]'
             json = json.replace('$REV_DATA$', data)
 

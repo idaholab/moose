@@ -14,7 +14,7 @@ class Exodiff(RunApp):
         params.addParam('rel_err',       5.5e-6, "Relative error value used in exodiff comparisons.")
         params.addParam('custom_cmp',            "Custom comparison file")
         params.addParam('use_old_floor',  False, "Use Exodiff old floor option")
-    params.addParam('map',  True, "Use geometrical mapping to match up elements.  This is usually a good idea because it makes files comparable between runs with Serial and Parallel Mesh.")
+        params.addParam('map',  True, "Use geometrical mapping to match up elements.  This is usually a good idea because it makes files comparable between runs with Serial and Parallel Mesh.")
 
         return params
 
@@ -37,12 +37,12 @@ class Exodiff(RunApp):
             if self.specs['use_old_floor']:
                 old_floor = ' -use_old_floor'
 
-      if self.specs['map']:
-         map_option = ' -m '
-      else:
-         map_option = ' '
+            if self.specs['map']:
+                map_option = ' -m '
+            else:
+                map_option = ' '
 
-      commands.append(os.path.join(moose_dir, 'framework', 'contrib', 'exodiff', 'exodiff') + map_option + custom_cmp + ' -F' + ' ' + str(self.specs['abs_zero']) \
+            commands.append(os.path.join(moose_dir, 'framework', 'contrib', 'exodiff', 'exodiff') + map_option + custom_cmp + ' -F' + ' ' + str(self.specs['abs_zero']) \
                             + old_floor + ' -t ' + str(self.specs['rel_err']) + ' ' + ' '.join(self.specs['exodiff_opts']) + ' ' \
                             + os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file) + ' ' + os.path.join(self.specs['test_dir'], file))
 

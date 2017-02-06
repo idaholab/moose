@@ -192,7 +192,7 @@ class ParseGetPot:
 
                     unique_key = current_node.fullName(True) + '/' + param_name
                     if unique_key in self.unique_keys:
-            raise ParseException("DuplicateSymbol", 'In file: ' + os.getcwd() + '/' + os.path.basename(self.file_name) + " \n Duplicate section name: " + unique_key)
+                        raise ParseException("DuplicateSymbol", 'In file: ' + os.getcwd() + '/' + os.path.basename(self.file_name) + " \n Duplicate section name: " + unique_key)
                     self.unique_keys.add(unique_key)
 
                     current_node.params[param_name] = param_value
