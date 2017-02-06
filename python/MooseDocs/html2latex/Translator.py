@@ -44,9 +44,16 @@ class Translator(object):
     """
 
     # The html parser attempts to match < > even when they are inside code blocks
-    def sub(match):
+    def subAngleBrackets(match):
       return '<code{}>{}</code>'.format(match.group(1), match.group(2).replace('<', '##LESSTHAN##').replace('>', '##GREATERTHAN##').replace('&lt;','##LESSTHAN##').replace('&gt;','##GREATERTHAN##'))
-    html = re.sub(r'<code(.*?)>(.*?)</code>', sub, html, flags=re.MULTILINE|re.DOTALL)
+    html = re.sub(r'<code(.*?)>(.*?)</code>', subAngleBrackets, html,
+      flags=re.MULTILINE|re.DOTALL)
+
+    # Replace html's unicode quotation marks with those used by latex
+    def subQuoteMarks(match):
+      return '<p>{}</p>'.format(match.group(1).replace('&ldquo;','``').replace('&rdquo;','\'\'').replace('&lsquo;','`').replace('&rsquo;','\''))
+    html = re.sub(r'<p>(.*?)</p>', subQuoteMarks, html, flags=re.MULTILINE|re.DOTALL)
+
 
     def html2latex(input):
       n_tags = 0
