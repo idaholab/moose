@@ -87,9 +87,9 @@ LIBMESH_OPTIONS = {
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
 def runCommand(cmd, cwd=None):
-  # On Windows it is not allowed to close fds while redirecting output
-  should_close = platform.system() != "Windows"
-  p = subprocess.Popen([cmd], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
+    # On Windows it is not allowed to close fds while redirecting output
+    should_close = platform.system() != "Windows"
+    p = subprocess.Popen([cmd], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
     output = p.communicate()[0]
     if (p.returncode != 0):
         output = 'ERROR: ' + output
@@ -318,7 +318,7 @@ def getLibMeshConfigOption(libmesh_dir, option):
 
             success = 1
 
-    except IOError:
+        except IOError:
             # print "Warning: I/O Error trying to read", filename, ":", e.strerror, "... Will try other locations."
             pass
 
@@ -347,16 +347,16 @@ def getSharedOption(libmesh_dir):
   return shared_option
 
 def getInitializedSubmodules(root_dir):
-  """
-  Gets a list of initialized submodules.
-  Input:
-    root_dir[str]: path to execute the git command. This should be the root
-      directory of the app so that the submodule names are correct
-  Return:
-    list[str]: List of iniitalized submodule names or an empty list if there was an error.
-  """
-  output = runCommand("git submodule status", cwd=root_dir)
-  if output.startswith("ERROR"):
-    return []
-  # This ignores submodules that have a '-' at the beginning which means they are not initialized
-  return re.findall(r'^[ +]\S+ (\S+)', output, flags=re.MULTILINE)
+    """
+    Gets a list of initialized submodules.
+    Input:
+      root_dir[str]: path to execute the git command. This should be the root
+        directory of the app so that the submodule names are correct
+    Return:
+      list[str]: List of iniitalized submodule names or an empty list if there was an error.
+    """
+    output = runCommand("git submodule status", cwd=root_dir)
+    if output.startswith("ERROR"):
+        return []
+    # This ignores submodules that have a '-' at the beginning which means they are not initialized
+    return re.findall(r'^[ +]\S+ (\S+)', output, flags=re.MULTILINE)

@@ -35,7 +35,7 @@ class MooseDocsMarkdownNode(MooseDocsNode):
     """
     return self.__md_file
 
-  def build(self, lock):
+    def build(self, lock):
     """
     Converts the markdown to html.
     """
@@ -60,7 +60,7 @@ class MooseDocsMarkdownNode(MooseDocsNode):
     # Make sure the destination directory exists, if it already does do nothing. If it does not exist try to create
     # it, but include a try statement because it might get created by another process.
     destination = self.path()
-    with lock:
+        with lock:
       if not os.path.exists(destination):
         os.makedirs(destination)
 

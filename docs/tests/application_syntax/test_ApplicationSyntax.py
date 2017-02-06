@@ -16,8 +16,8 @@ class TestMooseApplicationSyntax(unittest.TestCase):
 
     # Extract the MOOSE YAML data
     exe = os.path.join(MooseDocs.MOOSE_DIR, 'modules', 'combined', 'combined-opt')
-    raw = mooseutils.runExe(exe, '--yaml')
-    cls._yaml = mooseutils.MooseYaml(raw)
+        raw = mooseutils.runExe(exe, '--yaml')
+        cls._yaml = mooseutils.MooseYaml(raw)
 
     # Extract the 'framework' location options and build the syntax object
     framework = options['locations'][0]['framework']

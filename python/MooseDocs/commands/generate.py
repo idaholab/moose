@@ -31,8 +31,8 @@ def generate(config_file='moosedocs.yml', generate=True, locations=None, **kwarg
     raise IOError('The executable does not exist: {}'.format(exe))
   else:
     log.debug("Executing {} to extract syntax.".format(exe))
-    raw = mooseutils.runExe(exe, '--yaml')
-    yaml = mooseutils.MooseYaml(raw)
+        raw = mooseutils.runExe(exe, '--yaml')
+        yaml = mooseutils.MooseYaml(raw)
 
   # Populate the syntax
   for loc in ext_config['locations']:

@@ -40,7 +40,7 @@ class MooseDocsFormatter(logging.Formatter):
   def format(self, record):
     msg = logging.Formatter.format(self, record)
     if record.levelname in self.COLOR:
-      msg = mooseutils.colorText(msg, self.COLOR[record.levelname])
+            msg = mooseutils.colorText(msg, self.COLOR[record.levelname])
 
     if record.levelname in self.COUNTS:
       with self.COUNTS[record.levelname].get_lock():

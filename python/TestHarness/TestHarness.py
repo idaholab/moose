@@ -80,7 +80,7 @@ class TestHarness:
 
     self.checks = {}
     self.checks['platform'] = getPlatforms()
-    self.checks['submodules'] = getInitializedSubmodules(self.run_tests_dir)
+        self.checks['submodules'] = getInitializedSubmodules(self.run_tests_dir)
 
         # The TestHarness doesn't strictly require the existence of libMesh in order to run. Here we allow the user
     # to select whether they want to probe for libMesh configuration options.

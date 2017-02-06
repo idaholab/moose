@@ -49,7 +49,7 @@ class Tester(MooseObject):
     params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
     params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
     params.addParam('should_execute', True, 'Whether or not the executeable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation')
-    params.addParam('required_submodule', [], "A list of initialized submodules for which this test requires.")
+        params.addParam('required_submodule', [], "A list of initialized submodules for which this test requires.")
 
     return params
 
@@ -237,9 +237,9 @@ class Tester(MooseObject):
         reason = 'skipped (DEPEND FILES)'
         return (False, reason)
 
-    # Check to make sure required submodules are initialized
-    for var in self.specs['required_submodule']:
-      if var not in checks["submodules"]:
+        # Check to make sure required submodules are initialized
+        for var in self.specs['required_submodule']:
+            if var not in checks["submodules"]:
         reason = 'skipped (%s submodule not initialized)' % var
         return (False, reason)
 

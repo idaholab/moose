@@ -91,14 +91,14 @@ class Builder(object):
       for i in range(0, len(l), n):
         yield l[i:i + n]
 
-    def build_pages(pages, lock):
+        def build_pages(pages, lock):
       for page in pages:
-        page.build(lock)
+                page.build(lock)
 
     jobs = []
-    lock = multiprocessing.Lock()
+        lock = multiprocessing.Lock()
     for chunk in make_chunks(self._pages, num_threads):
-      p = multiprocessing.Process(target=build_pages, args=(chunk, lock))
+            p = multiprocessing.Process(target=build_pages, args=(chunk, lock))
       p.start()
       jobs.append(p)
 

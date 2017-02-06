@@ -69,8 +69,8 @@ class MooseMarkdown(markdown.Extension):
     else:
       log.debug("Executing {} to extract syntax.".format(exe))
       try:
-        raw = mooseutils.runExe(exe, '--yaml')
-        return mooseutils.MooseYaml(raw)
+                raw = mooseutils.runExe(exe, '--yaml')
+                return mooseutils.MooseYaml(raw)
       except:
         log.critical('Failed to read YAML file, MOOSE and modules are likely not compiled correctly.')
         raise Exception('Critical Error')

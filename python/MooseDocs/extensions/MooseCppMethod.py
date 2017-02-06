@@ -6,7 +6,7 @@ import MooseDocs
 from MooseTextPatternBase import MooseTextPatternBase
 
 try:
-  import mooseutils.MooseSourceParser
+    import mooseutils.MooseSourceParser
   HAVE_MOOSE_CPP_PARSER = True
 except:
   HAVE_MOOSE_CPP_PARSER = False
@@ -67,7 +67,7 @@ class MooseCppMethod(MooseTextPatternBase):
       log.debug('Parsing method "{}" from {}'.format(settings['method'], filename))
 
       try:
-        parser = mooseutils.MooseSourceParser(self._make_dir)
+                parser = mooseutils.MooseSourceParser(self._make_dir)
         parser.parse(filename)
         decl, defn = parser.method(settings['method'])
         el = self.createElement(match.group(2), defn, filename, rel_filename, settings)
