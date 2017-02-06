@@ -228,15 +228,20 @@ MooseApp::setupOptions()
   if (getParam<bool>("no_color"))
     Moose::setColorConsole(false);
 
-  std::string color = getParam<std::string>("color");
-  if (color == "auto")
-    Moose::setColorConsole(true);
-  else if (color == "on")
-    Moose::setColorConsole(true, true);
-  else if (color == "off")
-    Moose::setColorConsole(false, true);
-  else
-    mooseWarning("ignoring invalid --color arg (want 'auto', 'on', or 'off')");
+  if (isUltimateMaster()) // makes sure coloring isn't reset incorrectly in multi-app settings
+  {
+    std::string color = getParam<std::string>("color");
+    if (color == "auto")
+      // force true if parallel run - because MPI makes it seem like we aren't
+      // writing to interactive terminal, but we probably are indirectly.
+      Moose::setColorConsole(true, comm().size() > 1);
+    else if (color == "on")
+      Moose::setColorConsole(true, true);
+    else if (color == "off")
+      Moose::setColorConsole(false, true);
+    else
+      mooseWarning("ignoring invalid --color arg (want 'auto', 'on', or 'off')");
+  }
 
   // this warning goes below --color processing to honor that setting for
   // the warning. And below settings for warnings/error setup.

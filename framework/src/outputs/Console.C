@@ -358,8 +358,9 @@ Console::writeStreamToFile(bool append)
   else
     output.open(filename().c_str(), std::ios::trunc);
 
+  std::string s = _file_output_stream.str();
   // Write contents of file output stream and close the file
-  output << _file_output_stream.str();
+  output << MooseUtils::removeColor(s);
   output.close();
 
   // Clear the file output stream

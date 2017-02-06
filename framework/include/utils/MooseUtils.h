@@ -269,6 +269,11 @@ namespace MooseUtils
   void indentMessage(const std::string & prefix, std::string & message, const char* color = COLOR_CYAN);
 
   /**
+   * remove ANSI escape sequences for teminal color from msg
+   */
+  std::string & removeColor(std::string & msg);
+
+  /**
    * Retrieves the names of all of the files contained within the list of directories passed into the routine.
    * The names returned will be the paths to the files relative to the current directory.
    * @param directory_list The list of directories to retrieve files from.
