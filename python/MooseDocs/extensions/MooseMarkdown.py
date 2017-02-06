@@ -48,7 +48,7 @@ class MooseMarkdown(markdown.Extension):
         self.config['graphviz']     = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
         self.config['dot_ext']      = ['svg', "The graphviz/dot output file extension (default: svg)."]
         self.config['install']      = ['', "The location to install system and object documentation."]
-    self.config['macro_files']  = ['', "List of paths to files that contain macros to be used in bibtex parsing."]
+        self.config['macro_files']  = ['', "List of paths to files that contain macros to be used in bibtex parsing."]
 
         # Construct the extension object
         super(MooseMarkdown, self).__init__(**kwargs)
@@ -114,7 +114,7 @@ class MooseMarkdown(markdown.Extension):
 
         # Block processors
         md.parser.blockprocessors.add('diagrams', MooseDiagram(md.parser, **config), '_begin')
-    md.parser.blockprocessors.add('slider', MooseSlider(md.parser, **config), '_begin')
+        md.parser.blockprocessors.add('slider', MooseSlider(md.parser, **config), '_begin')
         md.parser.blockprocessors.add('css', MooseCSS(md.parser, **config), '_begin')
 
         # Inline Patterns

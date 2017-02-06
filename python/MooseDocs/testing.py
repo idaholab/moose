@@ -36,24 +36,24 @@ class MarkdownTestCase(unittest.TestCase):
         cwd = os.getcwd()
         os.chdir(os.path.join(MooseDocs.MOOSE_DIR, 'docs'))
 
-    config = MooseDocs.load_config('moosedocs.yml')
+        config = MooseDocs.load_config('moosedocs.yml')
 
-    extensions, extension_configs = MooseDocs.get_markdown_extensions(config)
-    cls.updateExtensionConfigs(extension_configs)
+        extensions, extension_configs = MooseDocs.get_markdown_extensions(config)
+        cls.updateExtensionConfigs(extension_configs)
         cls.parser = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
         os.chdir(cwd)
 
-  @classmethod
-  def updateExtensionConfigs(cls, extension_configs):
-    """
-    Method to change the arguments that come from the configuration file for
-    specific tests.  This way one can test optional arguments without permanently
-    changing moosedocs.yml
-    """
-    if 'testBibtexMacro' in dir(cls):
-      if 'MooseDocs.extensions.MooseMarkdown' in extension_configs:
-        extension_configs['MooseDocs.extensions.MooseMarkdown']['macro_files'] =\
-          ['docs/bib/macro_test_abbrev.bib']
+    @classmethod
+    def updateExtensionConfigs(cls, extension_configs):
+        """
+        Method to change the arguments that come from the configuration file for
+        specific tests.  This way one can test optional arguments without permanently
+        changing moosedocs.yml
+        """
+        if 'testBibtexMacro' in dir(cls):
+            if 'MooseDocs.extensions.MooseMarkdown' in extension_configs:
+                extension_configs['MooseDocs.extensions.MooseMarkdown']['macro_files'] =\
+                  ['docs/bib/macro_test_abbrev.bib']
 
     def setUp(self):
         """
@@ -99,7 +99,7 @@ class MarkdownTestCase(unittest.TestCase):
         gold = self.readGold(name)
         self.assertEqual(text, gold, text_diff(text, gold))
 
-  def assertConvert(self, name, md):
+    def assertConvert(self, name, md):
         """
         Assert that markdown is converted to html, compared against gold file.
 
@@ -129,8 +129,8 @@ class MarkdownTestCase(unittest.TestCase):
 
         # Parse the markdown
         name = os.path.join(self._path, name)
-    with open(name, 'w') as fid:
-        fid.write(self.parser.convert(md))
+        with open(name, 'w') as fid:
+            fid.write(self.parser.convert(md))
 
         # Compare against gold
         self.assertTextFile(name)
