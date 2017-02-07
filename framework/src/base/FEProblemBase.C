@@ -2006,7 +2006,7 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   std::set<MooseVariable *> needed_moose_vars;
 
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
-    _all_materials.updateVariableDependency(needed_moose_vars, tid);
+    _all_materials.updateBlockVariableDependency(blk_id, needed_moose_vars, tid);
 
   const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
   for (const auto & id : ids)
@@ -2555,7 +2555,14 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   // Execute GeneralUserObjects
   if (general.hasActiveObjects())
   {
+<<<<<<< ceb49856d57483f63a6c6a92df89149bc8dd2c3e
     const auto & objects = general.getActiveObjects();
+=======
+    const std::vector<MooseSharedPointer<GeneralUserObject> > & objects = general.getActiveObjects();
+    std::set<MooseVariable *> needed_moose_vars;
+    general.updateVariableDependency(needed_moose_vars, 0);
+    setActiveElementalMooseVariables(needed_moose_vars, 0);
+>>>>>>> Changes to due to name change with FEProblem and NonlinearSystem
     for (const auto & obj : objects)
     {
       obj->initialize();
@@ -2566,6 +2573,7 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
       if (pp)
         _pps_data.storeValue(obj->name(), pp->getValue());
     }
+    clearActiveElementalMooseVariables(0);
   }
 
   Moose::perf_log.pop(compute_uo_tag, "Execution");
@@ -2794,13 +2802,18 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECT
     const auto & transfers = wh.getActiveObjects();
 
     _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << string_direction << "MultiApps" << COLOR_DEFAULT << std::endl;
+
+    std::set<MooseVariable *> needed_moose_vars;
+    _to_multi_app_transfers[type].updateVariableDependency(needed_moose_vars);
+    setActiveElementalMooseVariables(needed_moose_vars, 0);
+
     for (const auto & transfer : transfers)
     {
       Moose::perf_log.push(transfer->name(), "Transfers");
       transfer->execute();
       Moose::perf_log.pop(transfer->name(), "Transfers");
     }
-
+    clearActiveElementalMooseVariables(0);
     _console << "Waiting For Transfers To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator);
 
@@ -2852,7 +2865,34 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
   }
 
   // Execute Transfers _from_ MultiApps
+<<<<<<< ceb49856d57483f63a6c6a92df89149bc8dd2c3e
   execMultiAppTransfers(type, MultiAppTransfer::FROM_MULTIAPP);
+=======
+  if (_from_multi_app_transfers[type].hasActiveObjects())
+  {
+    const std::vector<MooseSharedPointer<Transfer> > & transfers = _from_multi_app_transfers[type].getActiveObjects();
+
+    std::set<MooseVariable *> needed_moose_vars;
+    _from_multi_app_transfers[type].updateVariableDependency(needed_moose_vars);
+    setActiveElementalMooseVariables(needed_moose_vars, 0);
+
+    _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
+    for (const auto & transfer : transfers)
+    {
+      Moose::perf_log.push(transfer->name(), "Transfers");
+      transfer->execute();
+      Moose::perf_log.pop(transfer->name(), "Transfers");
+    }
+    clearActiveElementalMooseVariables(0);
+    _console << "Waiting For Transfers To Finish" << '\n';
+    MooseUtils::parallelBarrierNotify(_communicator);
+
+    _console << COLOR_CYAN << "Transfers " << Moose::stringify(type) << " Are Finished\n" << COLOR_DEFAULT << std::endl;
+  }
+  else if (multi_apps.size())
+    _console << COLOR_CYAN << "\nNo Transfers on " <<  Moose::stringify(type) << " From MultiApps\n" << COLOR_DEFAULT << std::endl;
+
+>>>>>>> Changes to due to name change with FEProblem and NonlinearSystem
 
   // If we made it here then everything passed
   return true;
