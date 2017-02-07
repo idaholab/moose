@@ -6,11 +6,12 @@
 /****************************************************************/
 
 // Navier-Stokes includes
-#include "NSMomentumInviscidSpecifiedNormalFlowBC.h"
 #include "NS.h"
+#include "NSMomentumInviscidSpecifiedNormalFlowBC.h"
 
-template<>
-InputParameters validParams<NSMomentumInviscidSpecifiedNormalFlowBC>()
+template <>
+InputParameters
+validParams<NSMomentumInviscidSpecifiedNormalFlowBC>()
 {
   InputParameters params = validParams<NSMomentumInviscidBC>();
   params.addRequiredCoupledVar(NS::pressure, "pressure");
@@ -18,8 +19,8 @@ InputParameters validParams<NSMomentumInviscidSpecifiedNormalFlowBC>()
   return params;
 }
 
-NSMomentumInviscidSpecifiedNormalFlowBC::NSMomentumInviscidSpecifiedNormalFlowBC(const InputParameters & parameters) :
-    NSMomentumInviscidBC(parameters),
+NSMomentumInviscidSpecifiedNormalFlowBC::NSMomentumInviscidSpecifiedNormalFlowBC(const InputParameters & parameters)
+  : NSMomentumInviscidBC(parameters),
     _pressure(coupledValue(NS::pressure)),
     _rhou_udotn(getParam<Real>("rhou_udotn"))
 {
@@ -28,9 +29,8 @@ NSMomentumInviscidSpecifiedNormalFlowBC::NSMomentumInviscidSpecifiedNormalFlowBC
 Real
 NSMomentumInviscidSpecifiedNormalFlowBC::computeQpResidual()
 {
-  return
-    pressureQpResidualHelper(_pressure[_qp]) +
-    convectiveQpResidualHelper(_rhou_udotn);
+  return pressureQpResidualHelper(_pressure[_qp]) +
+         convectiveQpResidualHelper(_rhou_udotn);
 }
 
 Real
@@ -42,7 +42,11 @@ NSMomentumInviscidSpecifiedNormalFlowBC::computeQpJacobian()
   return pressureQpJacobianHelper(_component + 1);
 }
 
-Real NSMomentumInviscidSpecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jvar)
+Real
+NSMomentumInviscidSpecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jvar)
 {
-  return pressureQpJacobianHelper(mapVarNumber(jvar));
+  if (isNSVariable(jvar))
+    return pressureQpJacobianHelper(mapVarNumber(jvar));
+  else
+    return 0.0;
 }

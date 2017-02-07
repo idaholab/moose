@@ -6,11 +6,12 @@
 /****************************************************************/
 
 // Navier-Stokes includes
-#include "NSEnergyInviscidSpecifiedNormalFlowBC.h"
 #include "NS.h"
+#include "NSEnergyInviscidSpecifiedNormalFlowBC.h"
 
-template<>
-InputParameters validParams<NSEnergyInviscidSpecifiedNormalFlowBC>()
+template <>
+InputParameters
+validParams<NSEnergyInviscidSpecifiedNormalFlowBC>()
 {
   InputParameters params = validParams<NSEnergyInviscidBC>();
   params.addRequiredCoupledVar(NS::pressure, "pressure");
@@ -18,32 +19,38 @@ InputParameters validParams<NSEnergyInviscidSpecifiedNormalFlowBC>()
   return params;
 }
 
-NSEnergyInviscidSpecifiedNormalFlowBC::NSEnergyInviscidSpecifiedNormalFlowBC(const InputParameters & parameters) :
-    NSEnergyInviscidBC(parameters),
+NSEnergyInviscidSpecifiedNormalFlowBC::NSEnergyInviscidSpecifiedNormalFlowBC(const InputParameters & parameters)
+  : NSEnergyInviscidBC(parameters),
     _pressure(coupledValue(NS::pressure)),
     _un(getParam<Real>("un"))
 {
 }
 
-Real NSEnergyInviscidSpecifiedNormalFlowBC::computeQpResidual()
+Real
+NSEnergyInviscidSpecifiedNormalFlowBC::computeQpResidual()
 {
   return qpResidualHelper(_pressure[_qp], _un);
 }
 
-Real NSEnergyInviscidSpecifiedNormalFlowBC::computeQpJacobian()
+Real
+NSEnergyInviscidSpecifiedNormalFlowBC::computeQpJacobian()
 {
   return computeJacobianHelper(/*on-diagonal variable is energy=*/4);
 }
 
-Real NSEnergyInviscidSpecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jvar)
+Real
+NSEnergyInviscidSpecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jvar)
 {
-  return computeJacobianHelper(mapVarNumber(jvar));
+  if (isNSVariable(jvar))
+    return computeJacobianHelper(mapVarNumber(jvar));
+  else
+    return 0.0;
 }
 
-Real NSEnergyInviscidSpecifiedNormalFlowBC::computeJacobianHelper(unsigned var_number)
+Real
+NSEnergyInviscidSpecifiedNormalFlowBC::computeJacobianHelper(unsigned var_number)
 {
   // For specified u.n, term "A" is zero, see base class for details.
-  return
-    qpJacobianTermB(var_number, _un) +
-    qpJacobianTermC(var_number, _un);
+  return qpJacobianTermB(var_number, _un) +
+         qpJacobianTermC(var_number, _un);
 }

@@ -6,8 +6,8 @@
 /****************************************************************/
 
 // Navier-Stokes includes
-#include "NSIntegratedBC.h"
 #include "NS.h"
+#include "NSIntegratedBC.h"
 
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
@@ -15,8 +15,9 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<NSIntegratedBC>()
+template <>
+InputParameters
+validParams<NSIntegratedBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
 
@@ -34,8 +35,8 @@ InputParameters validParams<NSIntegratedBC>()
   return params;
 }
 
-NSIntegratedBC::NSIntegratedBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
+NSIntegratedBC::NSIntegratedBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _u_vel(coupledValue(NS::velocity_x)),
     _v_vel(_mesh.dimension() >= 2 ? coupledValue(NS::velocity_y) : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue(NS::velocity_z) : _zero),
@@ -65,6 +66,19 @@ NSIntegratedBC::NSIntegratedBC(const InputParameters & parameters) :
     // FluidProperties UserObject
     _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
+}
+
+bool
+NSIntegratedBC::isNSVariable(unsigned var)
+{
+  if (var == _rho_var_number ||
+      var == _rhou_var_number ||
+      var == _rhov_var_number ||
+      var == _rhow_var_number ||
+      var == _rhoE_var_number)
+    return true;
+  else
+    return false;
 }
 
 unsigned

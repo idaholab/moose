@@ -6,17 +6,17 @@
 /****************************************************************/
 #include "NSMomentumViscousFlux.h"
 
-
-template<>
-InputParameters validParams<NSMomentumViscousFlux>()
+template <>
+InputParameters
+validParams<NSMomentumViscousFlux>()
 {
   InputParameters params = validParams<NSKernel>();
   params.addRequiredParam<unsigned int>("component", "");
   return params;
 }
 
-NSMomentumViscousFlux::NSMomentumViscousFlux(const InputParameters & parameters) :
-    NSKernel(parameters),
+NSMomentumViscousFlux::NSMomentumViscousFlux(const InputParameters & parameters)
+  : NSKernel(parameters),
     _component(getParam<unsigned int>("component")),
     _vst_derivs(*this)
 {
@@ -57,17 +57,22 @@ NSMomentumViscousFlux::computeQpJacobian()
 Real
 NSMomentumViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  Real value = 0.0;
+  if (isNSVariable(jvar))
+  {
+    Real value = 0.0;
 
-  // Set variable names as in the notes
-  const unsigned int k = _component;
+    // Set variable names as in the notes
+    const unsigned int k = _component;
 
-  // Map jvar into the variable m for our problem, regardless of
-  // how Moose has numbered things.
-  unsigned int m = mapVarNumber(jvar);
+    // Map jvar into the variable m for our problem, regardless of
+    // how Moose has numbered things.
+    unsigned int m = mapVarNumber(jvar);
 
-  for (unsigned ell = 0; ell < LIBMESH_DIM; ++ell)
-    value += _vst_derivs.dtau(k, ell, m) * _grad_test[_i][_qp](ell);
+    for (unsigned ell = 0; ell < LIBMESH_DIM; ++ell)
+      value += _vst_derivs.dtau(k, ell, m) * _grad_test[_i][_qp](ell);
 
-  return value;
+    return value;
+  }
+  else
+    return 0.0;
 }
