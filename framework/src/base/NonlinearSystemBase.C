@@ -2070,7 +2070,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
     *_increment_vec = update;
     ComputeElemDampingThread cid(_fe_problem);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cid);
-    damping = cid.damping();
+    damping = std::min(cid.damping(), damping);
   }
 
   if (_nodal_dampers.hasActiveObjects())
@@ -2079,7 +2079,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
     *_increment_vec = update;
     ComputeNodalDampingThread cndt(_fe_problem);
     Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cndt);
-    damping = cndt.damping();
+    damping = std::min(cndt.damping(), damping);
   }
 
   if (_general_dampers.hasActiveObjects())
@@ -2089,8 +2089,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
     for (const auto & damper : gdampers)
     {
       Real gd_damping = damper->computeDamping(solution, update);
-      if (gd_damping < damping)
-        damping = gd_damping;
+      damping = std::min(gd_damping, damping);
     }
   }
 

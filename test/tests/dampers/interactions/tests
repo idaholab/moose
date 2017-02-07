@@ -1,0 +1,15 @@
+[Tests]
+  [./interacting_node_elem1]
+    type = 'RunException'
+    input = 'interacting_node_elem_dampers.i'
+    expect_out = 'Damping factor: 0.1415'
+    expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
+  [../]
+  [./interacting_node_elem2]
+    type = 'RunException'
+    input = 'interacting_node_elem_dampers.i'
+    expect_out = 'Damping factor: 0.3333'
+    expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
+    cli_args = "Dampers/active='nodal2 elem2'"
+  [../]
+[]
