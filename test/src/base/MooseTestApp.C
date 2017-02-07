@@ -269,6 +269,9 @@
 // Indicators
 #include "MaterialTestIndicator.h"
 
+// MultiApps
+#include "EarlyDeleteMultiApp.h"
+
 template<>
 InputParameters validParams<MooseTestApp>()
 {
@@ -552,6 +555,9 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // Indicators
   registerIndicator(MaterialTestIndicator);
+
+  // MultiApps
+  registerMultiApp(EarlyDeleteMultiApp);
 }
 
 // External entry point for dynamic syntax association
