@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import fileinput
 import sys
 import os
@@ -79,7 +80,7 @@ def findExecutable(executable_option, method_option):
     executable = recursiveFindFile(os.getcwd(), p, True)
 
     if not executable:
-      print 'Executable not found! Try specifying it using -e'
+      print('Executable not found! Try specifying it using -e')
       sys.exit(1)
 
     return executable
@@ -157,7 +158,7 @@ def analyze(dofdata, Mfd, Mhc, Mdiff) :
 
       if norm[i][j] > rel_tol * fd[i][j] and norm[i][j] > abs_tol:
         if not printed :
-          print "\nKernel for variable '%s':" % nlvars[i]
+          print("\nKernel for variable '%s':" % nlvars[i])
           printed = True
           all_good = False
 
@@ -177,12 +178,12 @@ def analyze(dofdata, Mfd, Mhc, Mdiff) :
             problem = "is slightly off (by %f %%)" % err
 
         if i == j :
-          print "  (%d,%d) On-diagonal Jacobian %s" % (i, j, problem)
+          print("  (%d,%d) On-diagonal Jacobian %s" % (i, j, problem))
         else :
-          print "  (%d,%d) Off-diagonal Jacobian for variable '%s' %s" % (i, j, nlvars[j], problem)
+          print("  (%d,%d) Off-diagonal Jacobian for variable '%s' %s" % (i, j, nlvars[j], problem))
 
   if all_good :
-    print "No errors detected. :-)"
+    print("No errors detected. :-)")
 
 
 # output parsed (but not processed) jacobian matric data in gnuplot's nonuniform matrix format
@@ -298,7 +299,7 @@ if __name__ == '__main__':
       options.input_file = arg
 
   if options.input_file is None :
-    print 'Please specify an input file.'
+    print('Please specify an input file.')
     sys.exit(1)
 
   executable = findExecutable(options.executable, options.method)
@@ -318,24 +319,24 @@ if __name__ == '__main__':
     mooseparams = moosebaseparams[:]
     mooseparams.extend(['Problem/solve=false', 'BCs/active=', 'Outputs/' + dofoutname+ '/type=DOFMap', 'Outputs/active=' + dofoutname, 'Outputs/file_base=' + basename + '_' + dofoutname])
     if options.debug :
-      print "Running\n%s\n" % " ".join(mooseparams)
+      print("Running\n%s\n" % " ".join(mooseparams))
     try:
       child = subprocess.Popen(mooseparams, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
       data = child.communicate()[0]
       child.wait()
     except:
-      print 'Error executing moose based application to gather DOF map\n'
+      print('Error executing moose based application to gather DOF map\n')
       sys.exit(1)
   else :
-    print "Runing without automatic options DOF map '%s' will not be generated automatically!" % dofmapfilename
+    print("Runing without automatic options DOF map '%s' will not be generated automatically!" % dofmapfilename)
 
   # analyze return code
   if child.returncode == 1 :
     # MOOSE failed with an unexpected error
-    print data
+    print(data)
     sys.exit(1)
   elif child.returncode == -11 :
-    print "The moose application crashed with a segmentation fault (try recompiling)"
+    print("The moose application crashed with a segmentation fault (try recompiling)")
     sys.exit(1)
 
 
@@ -344,7 +345,7 @@ if __name__ == '__main__':
     dofjson = myfile.readlines()
   dofdata = json.loads(dofjson[0].rstrip('\n'))
   if options.debug :
-    print "DOF map output:\n%s\n" % dofdata
+    print("DOF map output:\n%s\n" % dofdata)
 
 
   # for every DOF get the list of kernels contributing to it
@@ -383,17 +384,17 @@ if __name__ == '__main__':
     mooseparams.extend([ '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds', 'Executioner/solve_type=NEWTON', 'BCs/active='])
 
   if options.debug :
-    print "Running\n%s\n" % " ".join(mooseparams)
+    print("Running\n%s\n" % " ".join(mooseparams))
   else :
-    print 'Running input with executable %s ...\n' % executable
+    print('Running input with executable %s ...\n' % executable)
 
   # run debug process to gather jacobian data
   try:
     child = subprocess.Popen(mooseparams, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    data = child.communicate()[0]
+    data = child.communicate()[0].decode("utf-8")
     child.wait()
   except:
-    print 'Error executing moose based application\n'
+    print('Error executing moose based application\n')
     sys.exit(1)
 
   # parse the raw output, which contains the PETSc debug information
