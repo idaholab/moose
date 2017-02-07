@@ -12,38 +12,52 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "YAMLFormatter.h"
+#include "JSONFormatter.h"
 #include "Parser.h"
 #include "MooseEnum.h"
 
 #include <sstream>
 #include <vector>
 
-YAMLFormatter::YAMLFormatter(bool dump_mode) :
+JSONFormatter::JSONFormatter(bool dump_mode) :
     SyntaxTree(true),
     _dump_mode(dump_mode)
 {
 }
 
 std::string
-YAMLFormatter::preamble() const
+JSONFormatter::postscript() const
 {
-  //important: start and end yaml data delimiters used by python
-  return "**START YAML DATA**\n";
+  std::stringstream s;
+  s << "**START JSON DATA**\n" << _json << "\n**END JSON DATA**\n";
+  return s.str();
+}
+
+std::vector<std::string> JSONFormatter::splitPath(const std::string& long_name) const
+{
+  std::string s;
+  std::istringstream f(long_name);
+  std::vector<std::string> paths;
+  while (std::getline(f, s, '/'))
+    if (s.size() > 0 )
+      paths.push_back(s);
+  return paths;
+}
+
+Json::Value& JSONFormatter::getJson(const std::string& full_path)
+{
+  auto paths = splitPath(full_path);
+  Json::Value* next = &_json[paths[0]];
+  for ( auto pit = paths.begin() + 1; pit != paths.end(); ++pit)
+    next = &((*next)[*pit]);
+  return *next;
 }
 
 std::string
-YAMLFormatter::postscript() const
+JSONFormatter::printParams(const std::string &prefix, const std::string & fully_qualified_name,
+                           InputParameters &params, short /*depth*/, const std::string &search_string, bool &found)
 {
-  return "**END YAML DATA**\n";
-}
-
-std::string
-YAMLFormatter::printParams(const std::string &prefix, const std::string & /*fully_qualified_name*/,
-                           InputParameters &params, short depth, const std::string &search_string, bool &found)
-{
-  std::ostringstream oss;
-  std::string indent(depth*2, ' ');
+  Json::Value all_params;
 
   for (auto & iter : params)
   {
@@ -52,6 +66,7 @@ YAMLFormatter::printParams(const std::string &prefix, const std::string & /*full
     if (params.isPrivate(iter.first) || name == "active" || (search_string != "" && search_string != iter.first) || haveSeenIt(prefix, iter.first))
       continue;
 
+    Json::Value param_json;
     found = true;
 
     // Mark it as "seen"
@@ -60,9 +75,9 @@ YAMLFormatter::printParams(const std::string &prefix, const std::string & /*full
     // Block params may be required and will have a doc string
     std::string required = params.isParamRequired(iter.first) ? "Yes" : "No";
 
-    oss << indent << "  - name: " << name << "\n";
-    oss << indent << "    required: " << required << "\n";
-    oss << indent << "    default: !!str ";
+
+    param_json["name"] = name;
+    param_json["required"] = required;
 
     // Only output default if it has one
     if (params.isParamValid(iter.first))
@@ -74,82 +89,64 @@ YAMLFormatter::printParams(const std::string &prefix, const std::string & /*full
       std::ostringstream toss;
       buildOutputString(toss, iter);
 
-      // remove additional '\n' possibly generated in output (breaks YAML parsing)
+      // remove additional '\n' possibly generated in output (breaks JSON parsing)
       std::string tmp_str = toss.str();
       for (auto & ch : tmp_str)
         if (ch == '\n')
           ch = ' ';
-      oss << tmp_str;
+      param_json["default"] = tmp_str;
     }
     else if (params.hasDefaultCoupledValue(iter.first))
-      oss <<  params.defaultCoupledValue(iter.first);
+      param_json["default"] = params.defaultCoupledValue(iter.first);
 
-    std::string doc = params.getDocString(iter.first);
-    MooseUtils::escape(doc);
-    // Print the type
-    oss << "\n" << indent << "    cpp_type: " << params.type(iter.first)
-        << "\n" << indent << "    group_name: ";
-    std::string group_name = params.getGroupName(iter.first);
-    if (!group_name.empty())
-        oss << "'" << group_name << "'";
+    param_json["cpp_type"] = params.type(iter.first);
+    param_json["group_name"] = params.getGroupName(iter.first);
 
     {
       InputParameters::Parameter<MooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MooseEnum>*>(iter.second);
       if (enum_type)
-        oss << "\n" << indent << "    options: " << enum_type->get().getRawNames();
+        param_json["options"] = enum_type->get().getRawNames();
     }
     {
       InputParameters::Parameter<MultiMooseEnum> * enum_type = dynamic_cast<InputParameters::Parameter<MultiMooseEnum>*>(iter.second);
       if (enum_type)
-        oss << "\n" << indent << "    options: " << enum_type->get().getRawNames();
+        param_json["options"] = enum_type->get().getRawNames();
     }
     {
       InputParameters::Parameter<std::vector<MooseEnum> > * enum_type = dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum> >*>(iter.second);
       if (enum_type)
-        oss << "\n" << indent << "    options: " << (enum_type->get())[0].getRawNames();
+        param_json["options"] = (enum_type->get())[0].getRawNames();
     }
 
-    oss << "\n" << indent << "    description: |\n      " << indent
-         << doc << "\n";
+    std::string doc = params.getDocString(iter.first);
+    MooseUtils::escape(doc);
+    param_json["description"] = doc;
+    all_params[name] = param_json;
   }
-
-  return oss.str();
+  Json::Value& json = getJson(fully_qualified_name);
+  json["full_path"] = fully_qualified_name;
+  json["parameters"] = all_params;
+  return std::string();
 }
 
 std::string
-YAMLFormatter::preTraverse(short depth) const
+JSONFormatter::printBlockOpen(const std::string &name, short /*depth*/, const std::string & doc)
 {
-  std::string indent(depth*2, ' ');
-
-  return indent + "  subblocks:\n";
-}
-
-
-std::string
-YAMLFormatter::printBlockOpen(const std::string &name, short depth, const std::string & doc)
-{
-  std::ostringstream oss;
-  std::string indent(depth*2, ' ');
-
+  Json::Value& json = getJson(name);
   std::string docEscaped = doc;
   MooseUtils::escape(docEscaped);
-
-  oss << indent << "- name: " << name << "\n";
-  oss << indent << "  description: |\n"
-      << indent << "    " << docEscaped << "\n";
-  oss << indent << "  parameters:\n";
-
-  return oss.str();
+  json["description"] = docEscaped;
+  return std::string();
 }
 
 std::string
-YAMLFormatter::printBlockClose(const std::string &/*name*/, short /*depth*/) const
+JSONFormatter::printBlockClose(const std::string &/*name*/, short /*depth*/) const
 {
   return std::string();
 }
 
 void
-YAMLFormatter::buildOutputString(std::ostringstream & output, const std::iterator_traits<InputParameters::iterator>::value_type & p)
+JSONFormatter::buildOutputString(std::ostringstream & output, const std::iterator_traits<InputParameters::iterator>::value_type & p)
 {
   // Account for Point
   InputParameters::Parameter<Point> * ptr0 = dynamic_cast<InputParameters::Parameter<Point>*>(p.second);

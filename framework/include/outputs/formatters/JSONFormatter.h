@@ -12,32 +12,41 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef YAMLFORMATTER_H
-#define YAMLFORMATTER_H
+#ifndef JSONFORMATTER_H
+#define JSONFORMATTER_H
 
 #include "SyntaxTree.h"
 #include <sstream>
 #include <iterator>
+#include "json/json.h"
 
 /**
- * This class produces produces a yaml dump of the InputFileParameters that is machine parsable by any YAML formatter.
+ * This class produces produces a JSON dump of the InputFileParameters that is machine parsable by any JSON formatter.
  */
-class YAMLFormatter : public SyntaxTree
+class JSONFormatter : public SyntaxTree
 {
 public:
-  YAMLFormatter(bool dump_mode);
+  JSONFormatter(bool dump_mode);
 
-  virtual std::string preamble() const override;
   virtual std::string postscript() const override;
 
-  virtual std::string preTraverse(short depth) const override;
   virtual std::string printBlockOpen(const std::string &name, short depth, const std::string & doc) override;
   virtual std::string printBlockClose(const std::string &name, short depth) const override;
   virtual std::string printParams(const std::string &prefix, const std::string &fully_qualified_name, InputParameters &params, short depth, const std::string &search_string, bool &found) override;
 
 protected:
+  /**
+   * Splits a path like "foo/bar/other" into a vector with entries "foo", "bar", "other"
+   * @param long_name Path to break up
+   */
+  std::vector<std::string> splitPath(const std::string& long_name) const;
+  /**
+   * Gets the JSON entry for the specified path and creates it if it doesn't exist
+   * @param full_path Path to the entry
+   */
+  Json::Value _json;
+  Json::Value& getJson(const std::string& full_path);
   bool _dump_mode;
-
 
   /**
    * Method for building an output string that accounts for specific types (e.g., Point)
@@ -47,4 +56,4 @@ protected:
   void buildOutputString(std::ostringstream & output, const std::iterator_traits<InputParameters::iterator>::value_type & p);
 };
 
-#endif /* YAMLFORMATTER_H */
+#endif /* JSONFORMATTER_H */

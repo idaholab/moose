@@ -1,4 +1,4 @@
-This directory is for 3rd party codes that are redistributed with MOOSE.  
+This directory is for 3rd party codes that are redistributed with MOOSE.
 
 mtwist-1.1/
   /***************************************************************************\
@@ -30,4 +30,13 @@ exodiff/
   |*-------------------------------------------------------------------------*|
   |* Copyright: Sandia Corportation                                          *|
   |* License: http://opensource.org/licenses/BSD-3-Clause                    *|
+  /***************************************************************************\
+
+jsoncpp/
+  /***************************************************************************\
+  |* A C++ library for interacting with JSON                                 *|
+  |* https://github.com/open-source-parsers/jsoncpp/                         *|
+  |*-------------------------------------------------------------------------*|
+  |* Copyright: Public Domain                                                *|
+  |* License: MIT/Public Domain                                              *|
   /***************************************************************************\

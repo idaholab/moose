@@ -20,6 +20,7 @@
 #include "Executioner.h"
 #include "InputFileFormatter.h"
 #include "YAMLFormatter.h"
+#include "JSONFormatter.h"
 #include "PetscSupport.h"
 #include "Conversion.h"
 #include "CommandLine.h"
@@ -71,6 +72,7 @@ InputParameters validParams<MooseApp>()
 
   params.addCommandLineParam<std::string>("dump", "--dump [search_string]", "Shows a dump of available input file syntax.");
   params.addCommandLineParam<std::string>("yaml", "--yaml", "Dumps input file syntax in YAML format.");
+  params.addCommandLineParam<std::string>("json", "--json", "Dumps input file syntax in JSON format.");
   params.addCommandLineParam<bool>("syntax", "--syntax", false, "Dumps the associated Action syntax paths ONLY");
   params.addCommandLineParam<bool>("check_input", "--check-input", false, "Check the input file (i.e. requires -i <filename>) and quit.");
   params.addCommandLineParam<bool>("list_constructed_objects", "--list-constructed-objects", false, "List all moose object type names constructed by the master app factory.");
@@ -283,6 +285,25 @@ MooseApp::setupOptions()
       _parser.buildFullTree("");
     else
       _parser.buildFullTree(yaml_following_arg);
+
+    _ready_to_exit = true;
+  }
+  else if (isParamValid("json"))
+  {
+    Moose::perf_log.disable_logging();
+
+    _parser.initSyntaxFormatter(Parser::JSON, true);
+
+    // Get command line argument following --json on command line
+    std::string json_following_arg = getParam<std::string>("json");
+
+    // If the argument following --json is non-existent or begins with
+    // a dash, call buildFullTree() with an empty string, otherwise
+    // pass the argument following --json.
+    if (json_following_arg.empty() || (json_following_arg.find('-') == 0))
+      _parser.buildFullTree("");
+    else
+      _parser.buildFullTree(json_following_arg);
 
     _ready_to_exit = true;
   }
