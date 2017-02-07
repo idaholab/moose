@@ -70,6 +70,10 @@ CavityPressureUserObject::initialize()
     if (_init_temp_given)
       init_temp = _init_temp;
 
+    if (MooseUtils::absoluteFuzzyLessEqual(init_temp, 0.0))
+      mooseError("Cannot have initial temperature of zero when initializing cavity pressure. "
+                 "Does the supplied Postprocessor for temperature execute at initial?");
+
     _n0 = _initial_pressure * _volume / (_R * init_temp);
     _start_time = _t - _dt;
     const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t - _start_time) / _startup_time;
