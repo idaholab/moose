@@ -21,14 +21,14 @@
 #include <unordered_map>
 
 template<typename Key, typename T>
-class HashMap : public std::unordered_map<Key, T> /*, Hash, Pred, Allocator >*/
+class HashMap : public std::unordered_map<Key, T>
 {
 public:
   inline T & operator[](const Key & k)
   {
     libMesh::Threads::spin_mutex::scoped_lock lock(spin_mutex);
 
-    return std::unordered_map<Key, T> /*, Hash, Pred, Allocator >*/::operator[](k);
+    return std::unordered_map<Key, T>::operator[](k);
   }
 
   inline bool contains(const Key & key)

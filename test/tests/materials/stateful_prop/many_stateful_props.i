@@ -113,7 +113,6 @@
 [Executioner]
   type = Transient
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
