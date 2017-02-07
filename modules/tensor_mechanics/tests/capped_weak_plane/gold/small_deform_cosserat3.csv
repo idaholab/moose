@@ -1,0 +1,4 @@
+time,c_s_xx,c_s_xy,c_s_xz,c_s_yx,c_s_yy,c_s_yz,c_s_zx,c_s_zy,c_s_zz,f_compressive,f_shear,f_tensile,intnl_shear,intnl_tensile,iter,ls,s_xx,s_xy,s_xz,s_yx,s_yy,s_yz,s_zx,s_zy,s_zz,strainp_xx,strainp_xy,strainp_xz,strainp_yx,strainp_yy,strainp_yz,strainp_zx,strainp_zy,strainp_zz,straint_xx,straint_xy,straint_xz,straint_yx,straint_yy,straint_yz,straint_zx,straint_zy,straint_zz
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,0,0,0,0,0,0,0,0,0,-99.999999999997,8.8817841970013e-16,-100,6.0000000000007,0,0,0,-1.0749179324421e-12,6.3837823915947e-16,16.000000000001,6.3837823915947e-16,-1.0735301536613e-12,12.000000000001,32.000000000003,24.000000000002,-3.2256419757459e-12,0,0,4.8000000000006,0,0,3.6000000000004,0,0,1.2333333333337,0,1.5959455978987e-16,9.600000000001,0,1.7347234759768e-16,7.2000000000007,0,6.0715321659188e-17,1.2333333333333
+

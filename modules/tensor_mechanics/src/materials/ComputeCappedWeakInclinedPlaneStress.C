@@ -80,8 +80,8 @@ ComputeCappedWeakInclinedPlaneStress::preReturnMap(Real /*p_trial*/, Real q_tria
 
   _rotated_trial = stress_trial;
   _rotated_trial.rotate(_rot_n_to_z);
-  _in_trial20 = _rotated_trial(2, 0);
-  _in_trial21 = _rotated_trial(2, 1);
+  _in_trial02 = _rotated_trial(0, 2);
+  _in_trial12 = _rotated_trial(1, 2);
   _in_q_trial = q_trial;
 
   _rotated_Eijkl = _elasticity_tensor[_qp];
@@ -94,14 +94,14 @@ ComputeCappedWeakInclinedPlaneStress::computePQ(const RankTwoTensor & stress, Re
   RankTwoTensor rotated_stress = stress;
   rotated_stress.rotate(_rot_n_to_z);
   p = rotated_stress(2, 2);
-  q = std::sqrt(Utility::pow<2>(rotated_stress(2, 0)) + Utility::pow<2>(rotated_stress(2, 1)));
+  q = std::sqrt(Utility::pow<2>(rotated_stress(0, 2)) + Utility::pow<2>(rotated_stress(1, 2)));
 }
 
 void
 ComputeCappedWeakInclinedPlaneStress::setEppEqq(const RankFourTensor & /*Eijkl*/, Real & Epp, Real & Eqq) const
 {
   Epp = _rotated_Eijkl(2, 2, 2, 2);
-  Eqq = _rotated_Eijkl(2, 0, 2, 0);
+  Eqq = _rotated_Eijkl(0, 2, 0, 2);
 }
 
 void
@@ -118,8 +118,8 @@ ComputeCappedWeakInclinedPlaneStress::setStressAfterReturn(const RankTwoTensor &
     stress(2, 0) = stress(2, 1) = stress(0, 2) = stress(1, 2) = 0.0;
   else
   {
-    stress(2, 0) = stress(0, 2) = _in_trial20 * q_ok / _in_q_trial;
-    stress(2, 1) = stress(1, 2) = _in_trial21 * q_ok / _in_q_trial;
+    stress(2, 0) = stress(0, 2) = _in_trial02 * q_ok / _in_q_trial;
+    stress(2, 1) = stress(1, 2) = _in_trial12 * q_ok / _in_q_trial;
   }
 
   // rotate back to the original frame
@@ -133,9 +133,10 @@ ComputeCappedWeakInclinedPlaneStress::consistentTangentOperator(const RankTwoTen
 }
 
 RankTwoTensor
-ComputeCappedWeakInclinedPlaneStress::dpdstress(const RankTwoTensor & stress) const
+ComputeCappedWeakInclinedPlaneStress::dpdstress(const RankTwoTensor & /*stress*/) const
 {
-  RankTwoTensor dpdsig = ComputeCappedWeakPlaneStress::dpdstress(stress);
+  RankTwoTensor dpdsig = RankTwoTensor();
+  dpdsig(2, 2) = 1.0;
   dpdsig.rotate(_rot_z_to_n);
   return dpdsig;
 }
@@ -143,7 +144,9 @@ ComputeCappedWeakInclinedPlaneStress::dpdstress(const RankTwoTensor & stress) co
 RankTwoTensor
 ComputeCappedWeakInclinedPlaneStress::dqdstress(const RankTwoTensor & stress) const
 {
-  RankTwoTensor dqdsig = ComputeCappedWeakPlaneStress::dqdstress(stress);
+  RankTwoTensor rotated_stress = stress;
+  rotated_stress.rotate(_rot_n_to_z);
+  RankTwoTensor dqdsig = ComputeCappedWeakPlaneStress::dqdstress(rotated_stress);
   dqdsig.rotate(_rot_z_to_n);
   return dqdsig;
 }
@@ -151,7 +154,9 @@ ComputeCappedWeakInclinedPlaneStress::dqdstress(const RankTwoTensor & stress) co
 RankFourTensor
 ComputeCappedWeakInclinedPlaneStress::d2qdstress2(const RankTwoTensor & stress) const
 {
-  RankFourTensor d2qdsig2 = ComputeCappedWeakPlaneStress::d2qdstress2(stress);
+  RankTwoTensor rotated_stress = stress;
+  rotated_stress.rotate(_rot_n_to_z);
+  RankFourTensor d2qdsig2 = ComputeCappedWeakPlaneStress::d2qdstress2(rotated_stress);
   d2qdsig2.rotate(_rot_z_to_n);
   return d2qdsig2;
 }

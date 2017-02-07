@@ -146,4 +146,25 @@
     input = 'small_deform_inclined5.i'
     csvdiff = 'small_deform_inclined5.csv'
   [../]
+
+  [./small_cosserat1]
+    type = 'CSVDiff'
+    input = 'small_deform_cosserat1.i'
+    csvdiff = 'small_deform_cosserat1.csv'
+  [../]
+  [./small_cosserat2]
+    type = 'CSVDiff'
+    input = 'small_deform_cosserat2.i'
+    csvdiff = 'small_deform_cosserat2.csv'
+  [../]
+  [./small_cosserat3]
+    type = 'CSVDiff'
+    input = 'small_deform_cosserat3.i'
+    csvdiff = 'small_deform_cosserat3.csv'
+  [../]
+  [./small_cosserat4]
+    type = 'CSVDiff'
+    input = 'small_deform_cosserat4.i'
+    csvdiff = 'small_deform_cosserat4.csv'
+  [../]
 []

@@ -33,8 +33,8 @@ ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters
     _small_smoother2(Utility::pow<2>(getParam<Real>("tip_smoother"))),
     _perfect_guess(getParam<bool>("perfect_guess")),
     _stress_return_type(StressReturnType::nothing_special),
-    _in_trial20(0.0),
-    _in_trial21(0.0),
+    _in_trial02(0.0),
+    _in_trial12(0.0),
     _in_q_trial(0.0)
 {
   // With arbitary UserObjects, it is impossible to check everything,
@@ -71,8 +71,9 @@ ComputeCappedWeakPlaneStress::preReturnMap(Real /*p_trial*/, Real q_trial, const
   else if (yf[2] >= 0)
     _stress_return_type = StressReturnType::no_tension;
 
-  _in_trial20 = stress_trial(2, 0);
-  _in_trial21 = stress_trial(2, 1);
+  // The following are useful for the Cosserat case too
+  _in_trial02 = stress_trial(0, 2);
+  _in_trial12 = stress_trial(1, 2);
   _in_q_trial = q_trial;
 }
 
@@ -80,14 +81,15 @@ void
 ComputeCappedWeakPlaneStress::computePQ(const RankTwoTensor & stress, Real & p, Real & q) const
 {
   p = stress(2, 2);
-  q = std::sqrt(Utility::pow<2>(stress(2, 0)) + Utility::pow<2>(stress(2, 1)));
+  // Because the following is not explicitly symmeterised, it is useful for the Cosserat case too
+  q = std::sqrt(Utility::pow<2>(stress(0, 2)) + Utility::pow<2>(stress(1, 2)));
 }
 
 void
 ComputeCappedWeakPlaneStress::setEppEqq(const RankFourTensor & Eijkl, Real & Epp, Real & Eqq) const
 {
   Epp = Eijkl(2, 2, 2, 2);
-  Eqq = Eijkl(2, 0, 2, 0);
+  Eqq = Eijkl(0, 2, 0, 2);
 }
 
 void
@@ -103,8 +105,8 @@ ComputeCappedWeakPlaneStress::setStressAfterReturn(const RankTwoTensor & stress_
     stress(2, 0) = stress(2, 1) = stress(0, 2) = stress(1, 2) = 0.0;
   else
   {
-    stress(2, 0) = stress(0, 2) = _in_trial20 * q_ok / _in_q_trial;
-    stress(2, 1) = stress(1, 2) = _in_trial21 * q_ok / _in_q_trial;
+    stress(2, 0) = stress(0, 2) = _in_trial02 * q_ok / _in_q_trial;
+    stress(2, 1) = stress(1, 2) = _in_trial12 * q_ok / _in_q_trial;
   }
 }
 
@@ -147,31 +149,31 @@ ComputeCappedWeakPlaneStress::consistentTangentOperator(const RankTwoTensor & /*
     cto(1, 1, i, i) -= poisson_effect;
     if (q_trial > 0.0)
     {
-      cto(2, 0, i, i) = cto(0, 2, i, i) = _in_trial20 / q_trial * _dq_dpt * dpt_depii;
-      cto(2, 1, i, i) = cto(1, 2, i, i) = _in_trial21 / q_trial * _dq_dpt * dpt_depii;
+      cto(2, 0, i, i) = cto(0, 2, i, i) = _in_trial02 / q_trial * _dq_dpt * dpt_depii;
+      cto(2, 1, i, i) = cto(1, 2, i, i) = _in_trial12 / q_trial * _dq_dpt * dpt_depii;
     }
   }
 
   const Real poisson_effect = - _elasticity_tensor[_qp](2, 2, 0, 0) / Ezzzz * (_dgaE_dqt * smoothed_q.dg[0] + gaE * smoothed_q.d2g[0][0] * _dp_dqt + gaE * smoothed_q.d2g[0][1] * _dq_dqt + gaE * smoothed_q.d2g_di[0][0] * (dintnl0_dqt + dintnl0_dq * _dq_dqt) + gaE * smoothed_q.d2g_di[0][1] * (dintnl1_dqt + dintnl1_dp * _dp_dqt + dintnl1_dq * _dq_dqt));
 
-  const Real dqt_dep20 = (q_trial == 0.0 ? 1.0 : _in_trial20 / q_trial) * _elasticity_tensor[_qp](2, 0, 2, 0);
+  const Real dqt_dep20 = (q_trial == 0.0 ? 1.0 : _in_trial02 / q_trial) * _elasticity_tensor[_qp](2, 0, 2, 0);
   cto(2, 2, 2, 0) = cto(2, 2, 0, 2) = _dp_dqt * dqt_dep20;
   cto(0, 0, 2, 0) = cto(0, 0, 0, 2) = cto(1, 1, 2, 0) = cto(1, 1, 0, 2) =  poisson_effect* dqt_dep20;
   if (q_trial > 0.0)
   {
     // for q_trial=0, Jacobian_mult is just given by the elastic case
-    cto(0, 2, 0, 2) = cto(2, 0, 0, 2) = cto(0, 2, 2, 0) = cto(2, 0, 2, 0) = _elasticity_tensor[_qp](2, 0, 2, 0) * q / q_trial + _in_trial20 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep20;
-    cto(1, 2, 0, 2) = cto(2, 1, 0, 2) = cto(1, 2, 2, 0) = cto(2, 1, 2, 0) = _in_trial21 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep20;
+    cto(0, 2, 0, 2) = cto(2, 0, 0, 2) = cto(0, 2, 2, 0) = cto(2, 0, 2, 0) = _elasticity_tensor[_qp](2, 0, 2, 0) * q / q_trial + _in_trial02 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep20;
+    cto(1, 2, 0, 2) = cto(2, 1, 0, 2) = cto(1, 2, 2, 0) = cto(2, 1, 2, 0) = _in_trial12 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep20;
   }
 
-  const Real dqt_dep21 = (q_trial == 0.0 ? 1.0 : _in_trial21 / q_trial) * _elasticity_tensor[_qp](2, 1, 2, 1);
+  const Real dqt_dep21 = (q_trial == 0.0 ? 1.0 : _in_trial12 / q_trial) * _elasticity_tensor[_qp](2, 1, 2, 1);
   cto(2, 2, 2, 1) = cto(2, 2, 1, 2) = _dp_dqt * dqt_dep21;
   cto(0, 0, 2, 1) = cto(0, 0, 1, 2) = cto(1, 1, 2, 1) = cto(1, 1, 1, 2) = poisson_effect * dqt_dep21;
   if (q_trial > 0.0)
   {
     // for q_trial=0, Jacobian_mult is just given by the elastic case
-    cto(0, 2, 1, 2) = cto(2, 0, 1, 2) = cto(0, 2, 2, 1) = cto(2, 0, 2, 1) = _in_trial20 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep21;
-    cto(1, 2, 1, 2) = cto(2, 1, 1, 2) = cto(1, 2, 2, 1) = cto(2, 1, 2, 1) = _elasticity_tensor[_qp](2, 1, 2, 1) * q / q_trial + _in_trial21 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep21;
+    cto(0, 2, 1, 2) = cto(2, 0, 1, 2) = cto(0, 2, 2, 1) = cto(2, 0, 2, 1) = _in_trial02 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep21;
+    cto(1, 2, 1, 2) = cto(2, 1, 1, 2) = cto(1, 2, 2, 1) = cto(2, 1, 2, 1) = _elasticity_tensor[_qp](2, 1, 2, 1) * q / q_trial + _in_trial12 * (_dq_dqt - q / q_trial) / q_trial * dqt_dep21;
   }
 }
 
