@@ -71,8 +71,3 @@
   dtmin = 0.5
   nl_max_its = 5
 []
-
-[Outputs]
-  file_base = out
-  exodus = true
-[]
