@@ -364,6 +364,10 @@ void FEProblemBase::initialSetup()
   if (_app.isRecovering() && (_app.isUltimateMaster() || _force_restart))
     _resurrector->setRestartFile(_app.getRecoverFileBase());
 
+  _mesh.initialSetup();
+  if (_displaced_problem)
+    _displaced_mesh->initialSetup();
+
   if ((_app.isRestarting() || _app.isRecovering()) && (_app.isUltimateMaster() || _force_restart))
     _resurrector->restartFromFile();
   else

@@ -101,6 +101,11 @@ public:
   void init();
 
   /**
+   * Perform initial setup on the mesh object.
+   */
+  virtual void initialSetup();
+
+  /**
    * Must be overridden by child classes.
    *
    * This is where the Mesh object is actually created and filled in.
