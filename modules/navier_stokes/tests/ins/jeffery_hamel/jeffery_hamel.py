@@ -47,61 +47,61 @@ fontP.set_size('x-small')
 
 # Set up ODEs to be integrated.
 def f(t, y, alpha, Re):
-  return [y[1], y[2], -2 * Re * alpha * y[0] * y[1] - 4 * alpha**2 * y[1]]
+    return [y[1], y[2], -2 * Re * alpha * y[0] * y[1] - 4 * alpha**2 * y[1]]
 
 # Set up Jacobian of the ODEs.
 def jac(t, y, alpha, Re):
-  return [[0, 1, 0],
-          [0, 0, 1],
-          [-2 * Re * alpha * y[1],
-           -2 * Re * alpha * y[0] + 4 * alpha**2,
-           0]]
+    return [[0, 1, 0],
+            [0, 0, 1],
+            [-2 * Re * alpha * y[1],
+             -2 * Re * alpha * y[0] + 4 * alpha**2,
+             0]]
 
 def solve_ode(guess, dt, alpha, Re):
-  '''
-  guess - sets the initial condition for the y[2] component of the solution
-  dt - the timestep size to use for the integration routine
-  '''
-  # Set initial conditions.
-  y0, t0 = [1, 0, guess], 0
+    '''
+    guess - sets the initial condition for the y[2] component of the solution
+    dt - the timestep size to use for the integration routine
+    '''
+    # Set initial conditions.
+    y0, t0 = [1, 0, guess], 0
 
-  # Construct ODE object.  I get an error when trying to use order=1
-  # here. It seems like the default order is 5 if you specify nothing.
-  # The possible method options is 'adams' and 'bdf'.  For this
-  # problem, I saw no difference between 6th-order adams and 7-12th
-  # order adams...
-  r = ode(f, jac).set_integrator('vode', method='adams', with_jacobian=True, order=6)
+    # Construct ODE object.  I get an error when trying to use order=1
+    # here. It seems like the default order is 5 if you specify nothing.
+    # The possible method options is 'adams' and 'bdf'.  For this
+    # problem, I saw no difference between 6th-order adams and 7-12th
+    # order adams...
+    r = ode(f, jac).set_integrator('vode', method='adams', with_jacobian=True, order=6)
 
-  # Set up [alpha, Re] list of parameters which are used by the 'f' and 'jac' functions.
-  p = [alpha, Re]
+    # Set up [alpha, Re] list of parameters which are used by the 'f' and 'jac' functions.
+    p = [alpha, Re]
 
-  # The ODE object does not store the entire solution internally.
-  # That is up to the user.  In our case, we are interested in the
-  # values of both y0 and y2.  y2 is needed for computing the exact
-  # value of the pressure.
-  timesteps = []
-  solution = []
-  second_deriv = []
+    # The ODE object does not store the entire solution internally.
+    # That is up to the user.  In our case, we are interested in the
+    # values of both y0 and y2.  y2 is needed for computing the exact
+    # value of the pressure.
+    timesteps = []
+    solution = []
+    second_deriv = []
 
-  # This follows the various examples which call multiple functions on a single line
-  r.set_initial_value(y0, t0).set_f_params(*p).set_jac_params(*p)
+    # This follows the various examples which call multiple functions on a single line
+    r.set_initial_value(y0, t0).set_f_params(*p).set_jac_params(*p)
 
-  # Store the initial condition for plotting later
-  timesteps.append(t0)
-  solution.append(y0[0])
-  second_deriv.append(y0[2])
+    # Store the initial condition for plotting later
+    timesteps.append(t0)
+    solution.append(y0[0])
+    second_deriv.append(y0[2])
 
-  # Do the time integration
-  while r.successful() and abs(r.t - 1) > dt/2:
-    r.integrate(r.t + dt)
-    # For debugging purposes, we can print the most recent solution
-    # print r.t, r.y
-    timesteps.append(r.t)
-    solution.append(r.y[0])
-    second_deriv.append(r.y[2])
+    # Do the time integration
+    while r.successful() and abs(r.t - 1) > dt/2:
+        r.integrate(r.t + dt)
+        # For debugging purposes, we can print the most recent solution
+        # print r.t, r.y
+        timesteps.append(r.t)
+        solution.append(r.y[0])
+        second_deriv.append(r.y[2])
 
-  # Return the ODE object as well as the computed solution at each time step.
-  return r, timesteps, solution, second_deriv
+    # Return the ODE object as well as the computed solution at each time step.
+    return r, timesteps, solution, second_deriv
 
 
 
@@ -153,51 +153,51 @@ print_results = True
 plot_results = False
 
 while (current_iterate < max_its):
-  # print('Newton Iteration {}'.format(current_iterate))
+    # print('Newton Iteration {}'.format(current_iterate))
 
-  # Solve ODE system with current alpha value
-  r, timesteps, solution, second_deriv = solve_ode(guess, dt, alpha, Re)
+    # Solve ODE system with current alpha value
+    r, timesteps, solution, second_deriv = solve_ode(guess, dt, alpha, Re)
 
-  # Compute residual for the current value of alpha
-  newton_res = r.y[0]
-  # print('  newton_res={}'.format(newton_res))
+    # Compute residual for the current value of alpha
+    newton_res = r.y[0]
+    # print('  newton_res={}'.format(newton_res))
 
-  # Print current solution, residual based on current value of alpha
-  print('{:2d}: guess={:.15e}, |y0(eta=1)| = {:.8e}'.format(current_iterate, guess, abs(newton_res)))
+    # Print current solution, residual based on current value of alpha
+    print('{:2d}: guess={:.15e}, |y0(eta=1)| = {:.8e}'.format(current_iterate, guess, abs(newton_res)))
 
-  # If the Newton residual is small enough, break out of Newton loop
-  if (abs(newton_res) < nl_abs_tol):
-    break
+    # If the Newton residual is small enough, break out of Newton loop
+    if (abs(newton_res) < nl_abs_tol):
+        break
 
-  # We estimate Jacobian by finite differencing, so compute the ODE
-  # with a perturbed initial guess.
-  r2, dummy, dummy, dummy = solve_ode(guess + newton_fd_eps, dt, alpha, Re)
+    # We estimate Jacobian by finite differencing, so compute the ODE
+    # with a perturbed initial guess.
+    r2, dummy, dummy, dummy = solve_ode(guess + newton_fd_eps, dt, alpha, Re)
 
-  # Approximate the Jacobian
-  newton_jac = (r2.y[0] - r.y[0]) / newton_fd_eps
-  # print('  newton_jac={}'.format(newton_jac))
+    # Approximate the Jacobian
+    newton_jac = (r2.y[0] - r.y[0]) / newton_fd_eps
+    # print('  newton_jac={}'.format(newton_jac))
 
-  # Compute update
-  dguess = -newton_res/newton_jac
-  # print('  alpha={:.15e}'.format(alpha))
+    # Compute update
+    dguess = -newton_res/newton_jac
+    # print('  alpha={:.15e}'.format(alpha))
 
-  # Update the parameter
-  guess += dguess
+    # Update the parameter
+    guess += dguess
 
-  # Increment the Newton iterate
-  current_iterate += 1
+    # Increment the Newton iterate
+    current_iterate += 1
 
 
 # Warn if we got here after using too many iterations.
 if (current_iterate >= max_its):
-  print('\nWarning, max iterates reached before reaching tolerance!\n')
+    print('\nWarning, max iterates reached before reaching tolerance!\n')
 
 # Compute the "constant" K for each value of eta.  It turns out it is
 # not actually constant.. but it is fairly close.  We can compute a
 # mean and standard deviation to try and pick the best single value...
 K = []
 for i in xrange(len(timesteps)):
-  K.append(-1. / (4. * alpha * alpha) * (alpha * Re * solution[i]**2 + second_deriv[i]) - solution[i])
+    K.append(-1. / (4. * alpha * alpha) * (alpha * Re * solution[i]**2 + second_deriv[i]) - solution[i])
 
 mean_K = np.mean(K)
 std_K = np.std(K)
@@ -225,18 +225,18 @@ print('mean(K) = {:.11f}, std(K) = {:.11e}'.format(mean_K, std_K))
 
 # Print all results.  Useful for tabulating values of f(theta).
 if print_results:
-  print('eta'.rjust(22) + ', ' + 'f'.rjust(22) + ', ' + 'f"'.rjust(22))
-  for i in xrange(len(timesteps)):
-    print('{:.16e}, {:.16e}, {:.16e}, {:.16e}'.format(timesteps[i], solution[i], second_deriv[i], K[i]))
+    print('eta'.rjust(22) + ', ' + 'f'.rjust(22) + ', ' + 'f"'.rjust(22))
+    for i in xrange(len(timesteps)):
+        print('{:.16e}, {:.16e}, {:.16e}, {:.16e}'.format(timesteps[i], solution[i], second_deriv[i], K[i]))
 
 if plot_results:
-  fig = plt.figure()
-  ax1 = fig.add_subplot(111)
-  ax1.plot(timesteps, solution, color="red", marker="o", linestyle="-", linewidth=2)
-  ax1.set_xlabel(r'$\eta$')
-  ax1.set_ylabel(r'$f(\eta)$')
-  ax1.set_title(r'$\alpha={:.2f}^{{\circ}}$, $\mathrm{{Re}}={:.2f}$'.format(alpha*180/math.pi, Re))
-  plt.savefig('jeffery_hamel.pdf', format='pdf')
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    ax1.plot(timesteps, solution, color="red", marker="o", linestyle="-", linewidth=2)
+    ax1.set_xlabel(r'$\eta$')
+    ax1.set_ylabel(r'$f(\eta)$')
+    ax1.set_title(r'$\alpha={:.2f}^{{\circ}}$, $\mathrm{{Re}}={:.2f}$'.format(alpha*180/math.pi, Re))
+    plt.savefig('jeffery_hamel.pdf', format='pdf')
 
 
 # dt               alpha(degrees)   Re   f''(0)

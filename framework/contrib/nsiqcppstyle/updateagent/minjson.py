@@ -47,22 +47,22 @@ slashstarcomment = compile(r'/\*.*?\*/',DOTALL)
 doubleslashcomment = compile(r'//.*\n')
 
 def _Read(aString):
-        """Use eval in a 'safe' way to turn javascript expression into
-           a python expression.  Allow only True, False, and None in global
-           __builtins__, and since those map as true, false, null in
-           javascript, pass those as locals
-        """
-        try:
-            result = eval(aString,
-            {"__builtins__":{'True':True,'False':False,'None':None}},
-            {'null':None,'true':True,'false':False})
-        except NameError:
-            raise ReadException, \
-            "Strings must be quoted. Could not read '%s'." % aString
-        except SyntaxError:
-            raise ReadException, \
-            "Syntax error.  Could not read '%s'." % aString
-        return result
+    """Use eval in a 'safe' way to turn javascript expression into
+       a python expression.  Allow only True, False, and None in global
+       __builtins__, and since those map as true, false, null in
+       javascript, pass those as locals
+    """
+    try:
+        result = eval(aString,
+        {"__builtins__":{'True':True,'False':False,'None':None}},
+        {'null':None,'true':True,'false':False})
+    except NameError:
+        raise ReadException, \
+        "Strings must be quoted. Could not read '%s'." % aString
+    except SyntaxError:
+        raise ReadException, \
+        "Syntax error.  Could not read '%s'." % aString
+    return result
 
 # badOperators is defined at the top of the module
 
@@ -70,7 +70,7 @@ def _Read(aString):
 regexes = {}
 for operator in badOperators:
     if operator in '+*':
-        # '+' and '*' need to be escaped with \ in re
+    # '+' and '*' need to be escaped with \ in re
         regexes[operator,'numeric operation'] \
         = compile(r"\d*\s*\%s|\%s\s*\d*" % (operator, operator))
     else:

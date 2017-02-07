@@ -19,52 +19,52 @@ fontP.set_size('x-small')
 
 
 def get_last_row(csv_filename):
-  '''
-  Function which returns just the last row of a CSV file.  We have to
-  read every line of the file, there was no stackoverflow example of
-  reading just the last line.
-  http://stackoverflow.com/questions/20296955/reading-last-row-from-csv-file-python-error
-  '''
-  with open(csv_filename, 'r') as f:
-    lastrow = None
-    for row in csv.reader(f):
-      if (row != []): # skip blank lines at end of file.
-        lastrow = row
-    return lastrow
+    '''
+    Function which returns just the last row of a CSV file.  We have to
+    read every line of the file, there was no stackoverflow example of
+    reading just the last line.
+    http://stackoverflow.com/questions/20296955/reading-last-row-from-csv-file-python-error
+    '''
+    with open(csv_filename, 'r') as f:
+        lastrow = None
+        for row in csv.reader(f):
+            if (row != []): # skip blank lines at end of file.
+                lastrow = row
+        return lastrow
 
 
 def run_moose(dt, time_integrator):
-  '''
-  Function which actually runs MOOSE.
-  '''
-  implicit_flag = 'true'
-  explicit_methods = ['ExplicitEuler', 'ExplicitMidpoint', 'Heun', 'Ralston']
+    '''
+    Function which actually runs MOOSE.
+    '''
+    implicit_flag = 'true'
+    explicit_methods = ['ExplicitEuler', 'ExplicitMidpoint', 'Heun', 'Ralston']
 
-  # Set implicit_flag based on TimeIntegrator name
-  if (time_integrator in explicit_methods):
-    implicit_flag = 'false'
+    # Set implicit_flag based on TimeIntegrator name
+    if (time_integrator in explicit_methods):
+        implicit_flag = 'false'
 
-  command_line_args = ['../../../moose_test-opt', '-i', 'scalar.i',
-                       'Executioner/dt={}'.format(dt),
-                       'Executioner/TimeIntegrator/type={}'.format(time_integrator),
-                       'GlobalParams/implicit={}'.format(implicit_flag)]
-  try:
-    child = subprocess.Popen(command_line_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    # communicate() waits for the process to terminate, so there's no
-    # need to wait() for it.  It also sets the returncode attribute on
-    # child.
-    (stdoutdata, stderrdata) = child.communicate()
-    if (child.returncode != 0):
-      print('Running MOOSE failed: program output is below:')
-      print(stdoutdata)
-      raise
-  except:
-    print('Error executing moose_test')
-    sys.exit(1)
+    command_line_args = ['../../../moose_test-opt', '-i', 'scalar.i',
+                         'Executioner/dt={}'.format(dt),
+                         'Executioner/TimeIntegrator/type={}'.format(time_integrator),
+                         'GlobalParams/implicit={}'.format(implicit_flag)]
+    try:
+        child = subprocess.Popen(command_line_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        # communicate() waits for the process to terminate, so there's no
+        # need to wait() for it.  It also sets the returncode attribute on
+        # child.
+        (stdoutdata, stderrdata) = child.communicate()
+        if (child.returncode != 0):
+            print('Running MOOSE failed: program output is below:')
+            print(stdoutdata)
+            raise
+    except:
+        print('Error executing moose_test')
+        sys.exit(1)
 
-  # Parse the last line of the output file to get the error at the final time.
-  last_row = get_last_row('scalar_out.csv')
-  return float(last_row[1])
+    # Parse the last line of the output file to get the error at the final time.
+    last_row = get_last_row('scalar_out.csv')
+    return float(last_row[1])
 
 
 
@@ -91,28 +91,28 @@ markers = ['v', 'o', 'x', '^', 'H', 'h', '+', 'D', '*', '4', 'd', '8']
 linestyles = [':', '-', '-.', '--', ':', '-.', '--', ':', '--', '-', '-.', '-']
 
 for i in xrange(len(time_integrators)):
-  time_integrator = time_integrators[i]
+    time_integrator = time_integrators[i]
 
-  # Place to store the results for this TimeIntegrator
-  results = []
+    # Place to store the results for this TimeIntegrator
+    results = []
 
-  # Call MOOSE to compute the results
-  for dt in dts:
-    results.append(run_moose(dt, time_integrator))
+    # Call MOOSE to compute the results
+    for dt in dts:
+        results.append(run_moose(dt, time_integrator))
 
-  # Make plot
-  xdata = np.log10(np.reciprocal(dts))
-  ydata = np.log10(results)
+    # Make plot
+    xdata = np.log10(np.reciprocal(dts))
+    ydata = np.log10(results)
 
-  # Compute linear fit of last three points.
-  start_fit = len(xdata) - 3
-  end_fit = len(xdata)
-  fit = np.polyfit(xdata[start_fit:end_fit], ydata[start_fit:end_fit], 1)
+    # Compute linear fit of last three points.
+    start_fit = len(xdata) - 3
+    end_fit = len(xdata)
+    fit = np.polyfit(xdata[start_fit:end_fit], ydata[start_fit:end_fit], 1)
 
-  # Make the plot -- unpack the user's additional plotting arguments
-  # from kwargs by prepending with **.
-  ax1.plot(xdata, ydata, label=time_integrator + ", $" + "{:.2f}".format(fit[0]) + "$",
-           color=colors[i], marker=markers[i], linestyle=linestyles[i])
+    # Make the plot -- unpack the user's additional plotting arguments
+    # from kwargs by prepending with **.
+    ax1.plot(xdata, ydata, label=time_integrator + ", $" + "{:.2f}".format(fit[0]) + "$",
+             color=colors[i], marker=markers[i], linestyle=linestyles[i])
 
 
 # Set up the axis labels.

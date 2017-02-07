@@ -8,9 +8,9 @@ import chigger
 name = 'cube.e'
 name = 'tiled_mesh_test_in.e'
 if name == 'cube.e':
-  out = 'tiled_mesh_input.png'
+    out = 'tiled_mesh_input.png'
 else:
-  out = 'tiled_mesh_output.png'
+    out = 'tiled_mesh_output.png'
 
 camera = vtk.vtkCamera()
 camera.SetViewUp(-0.2136, 0.8540, -0.4745)

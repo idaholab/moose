@@ -15,125 +15,125 @@ def text_diff(text, gold):
     return msg
 
 class MarkdownTestCase(unittest.TestCase):
-  """
-  Provides functions for converting markdown to html and asserting conversion against
-  gold html files.
-  """
-  parser = None
-  working_dir = os.getcwd()
-
-
-  @classmethod
-  def setUpClass(cls):
     """
-    Create the markdown parser using the 'moosedocs.yml' configuration file.
+    Provides functions for converting markdown to html and asserting conversion against
+    gold html files.
     """
+    parser = None
+    working_dir = os.getcwd()
 
-    # Define the local directory
-    cls._path = os.path.abspath(os.path.dirname(inspect.getfile(cls)))
 
-    # Create the markdown object
-    cwd = os.getcwd()
-    os.chdir(os.path.join(MooseDocs.MOOSE_DIR, 'docs'))
+    @classmethod
+    def setUpClass(cls):
+        """
+        Create the markdown parser using the 'moosedocs.yml' configuration file.
+        """
 
-    config = MooseDocs.load_config('moosedocs.yml')
+        # Define the local directory
+        cls._path = os.path.abspath(os.path.dirname(inspect.getfile(cls)))
 
-    extensions, extension_configs = MooseDocs.get_markdown_extensions(config)
-    cls.updateExtensionConfigs(extension_configs)
-    cls.parser = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
-    os.chdir(cwd)
+        # Create the markdown object
+        cwd = os.getcwd()
+        os.chdir(os.path.join(MooseDocs.MOOSE_DIR, 'docs'))
 
-  @classmethod
-  def updateExtensionConfigs(cls, extension_configs):
-    """
-    Method to change the arguments that come from the configuration file for
-    specific tests.  This way one can test optional arguments without permanently
-    changing moosedocs.yml
-    """
-    if 'testBibtexMacro' in dir(cls):
-      if 'MooseDocs.extensions.MooseMarkdown' in extension_configs:
-        extension_configs['MooseDocs.extensions.MooseMarkdown']['macro_files'] =\
-          ['docs/bib/macro_test_abbrev.bib']
+        config = MooseDocs.load_config('moosedocs.yml')
 
-  def setUp(self):
-    """
-    Always work from the 'docs' directory
-    """
-    os.chdir(os.path.join(MooseDocs.MOOSE_DIR, 'docs'))
+        extensions, extension_configs = MooseDocs.get_markdown_extensions(config)
+        cls.updateExtensionConfigs(extension_configs)
+        cls.parser = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
+        os.chdir(cwd)
 
-  def tearDown(self):
-    """
-    Restore the working directory.
-    """
-    os.chdir(self.working_dir)
+    @classmethod
+    def updateExtensionConfigs(cls, extension_configs):
+        """
+        Method to change the arguments that come from the configuration file for
+        specific tests.  This way one can test optional arguments without permanently
+        changing moosedocs.yml
+        """
+        if 'testBibtexMacro' in dir(cls):
+            if 'MooseDocs.extensions.MooseMarkdown' in extension_configs:
+                extension_configs['MooseDocs.extensions.MooseMarkdown']['macro_files'] =\
+                  ['docs/bib/macro_test_abbrev.bib']
 
-  def readGold(self, name):
-    """
-    Read gold file in current directory.
-    """
-    gold_name = os.path.join(os.path.dirname(name), 'gold', os.path.basename(name))
-    self.assertTrue(os.path.exists(gold_name), "Failed to locate gold file: {}".format(gold_name))
-    with open(gold_name) as fid:
-      gold = fid.read().encode('utf-8').splitlines()
-    return gold
+    def setUp(self):
+        """
+        Always work from the 'docs' directory
+        """
+        os.chdir(os.path.join(MooseDocs.MOOSE_DIR, 'docs'))
 
-  def convert(self, md):
-    """
-    Convenience function for converting markdown to html.
-    """
-    return self.parser.convert(md)
+    def tearDown(self):
+        """
+        Restore the working directory.
+        """
+        os.chdir(self.working_dir)
 
-  def assertTextFile(self, name):
-    """
-    Assert method for comparing converted html (text) against the text in gold file.
+    def readGold(self, name):
+        """
+        Read gold file in current directory.
+        """
+        gold_name = os.path.join(os.path.dirname(name), 'gold', os.path.basename(name))
+        self.assertTrue(os.path.exists(gold_name), "Failed to locate gold file: {}".format(gold_name))
+        with open(gold_name) as fid:
+            gold = fid.read().encode('utf-8').splitlines()
+        return gold
 
-    Inputs:
-        name[str]: Name of html file to open, there should be a corresponding file in the gold directory.
-    """
-    # Read text file
-    self.assertTrue(os.path.exists(name), "Failed to locate test output file: {}".format(name))
-    with open(name) as fid:
-        text = fid.read().encode('utf-8').splitlines()
+    def convert(self, md):
+        """
+        Convenience function for converting markdown to html.
+        """
+        return self.parser.convert(md)
 
-    # Read gold file
-    gold = self.readGold(name)
-    self.assertEqual(text, gold, text_diff(text, gold))
+    def assertTextFile(self, name):
+        """
+        Assert method for comparing converted html (text) against the text in gold file.
 
-  def assertConvert(self, name, md):
-    """
-    Assert that markdown is converted to html, compared against gold file.
+        Inputs:
+            name[str]: Name of html file to open, there should be a corresponding file in the gold directory.
+        """
+        # Read text file
+        self.assertTrue(os.path.exists(name), "Failed to locate test output file: {}".format(name))
+        with open(name) as fid:
+            text = fid.read().encode('utf-8').splitlines()
 
-    Inputs:
-        name[str]: The name of the html file to create.
-        md[str]: The markdown text to convert and create.
-    """
-    name = os.path.join(self._path, name)
-    with open(name, 'w') as fid:
-        fid.write(self.parser.convert(md))
-    self.assertTextFile(name)
+        # Read gold file
+        gold = self.readGold(name)
+        self.assertEqual(text, gold, text_diff(text, gold))
 
-  def assertConvertFile(self, name, md_name):
-    """
-    Assert that markdown file is converted to html, compared against gold file.
+    def assertConvert(self, name, md):
+        """
+        Assert that markdown is converted to html, compared against gold file.
 
-    Inputs:
-        name[str]: The name of the html file to create.
-        md_name[str]: The markdown text file to convert and create.
-    """
+        Inputs:
+            name[str]: The name of the html file to create.
+            md[str]: The markdown text to convert and create.
+        """
+        name = os.path.join(self._path, name)
+        with open(name, 'w') as fid:
+            fid.write(self.parser.convert(md))
+        self.assertTextFile(name)
 
-    # Read the markdown file
-    md_name = os.path.join(self._path, md_name)
-    self.assertTrue(os.path.exists(md_name), "Failed to locate markdown file: {}".format(md_name))
-    with open(md_name, 'r') as fid:
-        md = fid.read()
+    def assertConvertFile(self, name, md_name):
+        """
+        Assert that markdown file is converted to html, compared against gold file.
 
-    # Parse the markdown
-    name = os.path.join(self._path, name)
-    with open(name, 'w') as fid:
-        fid.write(self.parser.convert(md))
+        Inputs:
+            name[str]: The name of the html file to create.
+            md_name[str]: The markdown text file to convert and create.
+        """
 
-    # Compare against gold
-    self.assertTextFile(name)
+        # Read the markdown file
+        md_name = os.path.join(self._path, md_name)
+        self.assertTrue(os.path.exists(md_name), "Failed to locate markdown file: {}".format(md_name))
+        with open(md_name, 'r') as fid:
+            md = fid.read()
+
+        # Parse the markdown
+        name = os.path.join(self._path, name)
+        with open(name, 'w') as fid:
+            fid.write(self.parser.convert(md))
+
+        # Compare against gold
+        self.assertTextFile(name)
 
 class TestLatexBase(unittest.TestCase):
     """

@@ -10,105 +10,105 @@ from MooseCommonExtension import MooseCommonExtension
 import MooseDocs
 
 class MooseTextPatternBase(MooseCommonExtension, Pattern):
-  """
-  Base class for pattern matching text blocks.
-
-  Args:
-    regex: The string containing the regular expression to match.
-    language[str]: The code language (e.g., 'python' or 'c++')
-  """
-
-  def __init__(self, pattern, markdown_instance=None, repo=None, **kwargs):
-    MooseCommonExtension.__init__(self, **kwargs)
-    Pattern.__init__(self, pattern, markdown_instance)
-
-    # The root/repo settings
-    self._repo = repo
-
-    # The default settings
-    self._settings['strip_header'] = True
-    self._settings['repo_link'] = True
-    self._settings['label'] = True
-    self._settings['language'] = 'text'
-    self._settings['strip-extra-newlines'] = False
-    self._settings['prefix'] = ''
-    self._settings['suffix'] = ''
-    self._settings['indent'] = 0
-
-  def prepareContent(self, content, settings):
     """
-    Prepare the convent for conversion to Element object.
+    Base class for pattern matching text blocks.
 
     Args:
-      content[str]: The content to prepare (i.e., the file contents).
+      regex: The string containing the regular expression to match.
+      language[str]: The code language (e.g., 'python' or 'c++')
     """
 
-    # Strip leading/trailing newlines
-    content = re.sub(r'^(\n*)', '', content)
-    content = re.sub(r'(\n*)$', '', content)
+    def __init__(self, pattern, markdown_instance=None, repo=None, **kwargs):
+        MooseCommonExtension.__init__(self, **kwargs)
+        Pattern.__init__(self, pattern, markdown_instance)
 
-    # Strip extra new lines (optional)
-    if settings['strip-extra-newlines']:
-      content = re.sub(r'(\n{3,})', '\n\n', content)
+        # The root/repo settings
+        self._repo = repo
 
-    # Strip header and leading/trailing whitespace and newlines
-    if settings['strip_header']:
-      strt = content.find('/********')
-      stop = content.rfind('*******/\n')
-      content = content.replace(content[strt:stop+9], '')
+        # The default settings
+        self._settings['strip_header'] = True
+        self._settings['repo_link'] = True
+        self._settings['label'] = True
+        self._settings['language'] = 'text'
+        self._settings['strip-extra-newlines'] = False
+        self._settings['prefix'] = ''
+        self._settings['suffix'] = ''
+        self._settings['indent'] = 0
 
-    # Add indent
-    if settings['indent'] > 0:
-      lines = content.split('\n')
-      content = []
-      for line in lines:
-        content.append('{}{}'.format(' '*int(settings['indent']), line))
-      content = '\n'.join(content)
+    def prepareContent(self, content, settings):
+        """
+        Prepare the convent for conversion to Element object.
 
-    # Prefix/suffix
-    if settings['prefix']:
-      content = '{}\n{}'.format(settings['prefix'], content)
-    if settings['suffix']:
-      content = '{}\n{}'.format(content, settings['suffix'])
+        Args:
+          content[str]: The content to prepare (i.e., the file contents).
+        """
 
-    return content
+        # Strip leading/trailing newlines
+        content = re.sub(r'^(\n*)', '', content)
+        content = re.sub(r'(\n*)$', '', content)
 
-  def createElement(self, label, content, filename, rel_filename, settings):
-    """
-    Create the code element from the supplied source code content.
+        # Strip extra new lines (optional)
+        if settings['strip-extra-newlines']:
+            content = re.sub(r'(\n{3,})', '\n\n', content)
 
-    Args:
-      label[str]: The label supplied in the regex, [label](...)
-      content[str]: The code content to insert into the markdown.
-      filename[str]: The complete filename (for error checking)
-      rel_filename[str]: The relative filename; used for creating github link.
-      settings[dict]: The current settings.
+        # Strip header and leading/trailing whitespace and newlines
+        if settings['strip_header']:
+            strt = content.find('/********')
+            stop = content.rfind('*******/\n')
+            content = content.replace(content[strt:stop+9], '')
 
-    NOTE: The code related settings and clean up are applied in this method.
-    """
+        # Add indent
+        if settings['indent'] > 0:
+            lines = content.split('\n')
+            content = []
+            for line in lines:
+                content.append('{}{}'.format(' '*int(settings['indent']), line))
+            content = '\n'.join(content)
 
-    # Strip extra new lines
-    content = self.prepareContent(content, settings)
+        # Prefix/suffix
+        if settings['prefix']:
+            content = '{}\n{}'.format(settings['prefix'], content)
+        if settings['suffix']:
+            content = '{}\n{}'.format(content, settings['suffix'])
 
-    # Build outer div container
-    el = self.applyElementSettings(etree.Element('div'), settings)
-    el.set('class', 'moosedocs-code-div')
+        return content
 
-    # Build label
-    if settings['repo_link'] and self._repo:
-      title = etree.SubElement(el, 'a')
-      title.set('href', os.path.join(self._repo, rel_filename))
-    else:
-      title = etree.SubElement(el, 'div')
+    def createElement(self, label, content, filename, rel_filename, settings):
+        """
+        Create the code element from the supplied source code content.
 
-    if settings['label']:
-      title.text = label
+        Args:
+          label[str]: The label supplied in the regex, [label](...)
+          content[str]: The code content to insert into the markdown.
+          filename[str]: The complete filename (for error checking)
+          rel_filename[str]: The relative filename; used for creating github link.
+          settings[dict]: The current settings.
 
-    # Build the code
-    pre = etree.SubElement(el, 'pre')
-    code = etree.SubElement(pre, 'code')
-    if settings['language']:
-      code.set('class', settings['language'])
-    code.text = self.markdown.htmlStash.store(content.strip('\n'), safe=True)
+        NOTE: The code related settings and clean up are applied in this method.
+        """
 
-    return el
+        # Strip extra new lines
+        content = self.prepareContent(content, settings)
+
+        # Build outer div container
+        el = self.applyElementSettings(etree.Element('div'), settings)
+        el.set('class', 'moosedocs-code-div')
+
+        # Build label
+        if settings['repo_link'] and self._repo:
+            title = etree.SubElement(el, 'a')
+            title.set('href', os.path.join(self._repo, rel_filename))
+        else:
+            title = etree.SubElement(el, 'div')
+
+        if settings['label']:
+            title.text = label
+
+        # Build the code
+        pre = etree.SubElement(el, 'pre')
+        code = etree.SubElement(pre, 'code')
+        if settings['language']:
+            code.set('class', settings['language'])
+        code.text = self.markdown.htmlStash.store(content.strip('\n'), safe=True)
+
+        return el
