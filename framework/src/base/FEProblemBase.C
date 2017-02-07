@@ -676,6 +676,14 @@ void FEProblemBase::initialSetup()
     for (THREAD_ID tid = 0; tid < n_threads; ++tid)
         _assembly[tid]->initNonlocalCoupling();
   }
+
+  // Remove some of the heavier objects that are only needed during initial
+  // Several other types of objects may be added here in the future.
+  _multi_apps.clear(EXEC_INITIAL);
+  _transient_multi_apps.clear(EXEC_INITIAL);
+  _transfers.clear(EXEC_INITIAL);
+  _to_multi_app_transfers.clear(EXEC_INITIAL);
+  _from_multi_app_transfers.clear(EXEC_INITIAL);
 }
 
 void FEProblemBase::timestepSetup()

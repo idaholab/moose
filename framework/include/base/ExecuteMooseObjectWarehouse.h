@@ -18,6 +18,7 @@
 // MOOSE includes
 #include "MooseObjectWarehouse.h"
 #include "SetupInterface.h"
+#include "Conversion.h"
 
 /**
  * A class for storing MooseObjects based on execution flag.
@@ -48,6 +49,13 @@ public:
    * @param object A shared pointer to the object being added
    */
   virtual void addObject(std::shared_ptr<T> object, THREAD_ID tid = 0);
+
+  /**
+   * Clears all of the objects in the warehouse for the given exec_flag. Since we are using
+   * shared pointers to hold objects. The actual objects themselves will not be released
+   * unless they are only being held by a single warehouse.
+   */
+  void clear(ExecFlagType exec_flag);
 
   ///@{
   /**
@@ -215,6 +223,45 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID t
   }
   else
     mooseError2("The object being added (", object->name(), ") must inherit from SetupInterface to be added to the ExecuteMooseObjectWarehouse container.");
+}
+
+template<typename T>
+void
+ExecuteMooseObjectWarehouse<T>::clear(ExecFlagType exec_flag)
+{
+  const auto all_objects = MooseObjectWarehouse<T>::getObjects();
+  const auto all_flags = Moose::vectorStringsToEnum<ExecFlagType>(SetupInterface::getExecuteOptions());
+
+  for (const auto & object : all_objects)
+  {
+    const auto & name = object->name();
+    bool multiple_execute_on = false;
+
+    // We want to see if this object is any of the other execute warehouses.
+    // If it isn't, we'll remove it from all_objects as well so that the
+    // shared pointer reference count goes to zero and the object is destroyed
+    for (const auto & flag : all_flags)
+    {
+      // We ignore the matching case since we are only focused on objects in multiple warehouses
+      if (flag == exec_flag)
+        continue;
+
+      if (_execute_objects[flag].hasObject(name))
+      {
+        multiple_execute_on = true;
+        break;
+      }
+    }
+
+    if (!multiple_execute_on)
+    {
+      // Remove the object from the "all objects" warehouse
+      MooseObjectWarehouse<T>::deleteObject(object);
+
+      // Remove the object from this execute warehouse
+      _execute_objects[exec_flag].deleteObject(object);
+    }
+  }
 }
 
 template<typename T>
