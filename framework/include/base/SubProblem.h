@@ -400,8 +400,10 @@ protected:
   /* This needs to remain <unsigned int> for threading purposes */
   std::vector<unsigned int> _has_active_elemental_moose_variables;
 
-  std::vector<std::set<unsigned int> > _active_material_property_ids;
+  /// Set of material property ids that determine whether materials get reinited
+  std::vector<std::set<unsigned int>> _active_material_property_ids;
 
+  /// True if _active_material_property_ids is not empty
   std::vector<unsigned int> _has_active_material_property_ids;
 
   /// nonlocal coupling requirement flag

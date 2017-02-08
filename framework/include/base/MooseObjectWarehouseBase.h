@@ -530,11 +530,8 @@ void
 MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid/* = 0*/) const
 {
   if (hasActiveBoundaryObjects(tid))
-  {
-    typename std::map<BoundaryID, std::vector<std::shared_ptr<T>>>::const_iterator it;
-    for (it = _active_boundary_objects[tid].begin(); it != _active_boundary_objects[tid].end(); ++it)
-      updateMatPropDependencyHelper(needed_mat_props, it->second);
-  }
+    for (auto & active_bnd_object : _active_boundary_objects[tid])
+      updateMatPropDependencyHelper(needed_mat_props, active_bnd_object.second);
 }
 
 
@@ -551,9 +548,13 @@ template<typename T>
 void
 MooseObjectWarehouseBase<T>::updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props, const std::vector<std:shared_ptr<T>> & objects)
 {
+<<<<<<< HEAD
   for (typename std::vector<std:shared_ptr<T>> ::const_iterator it = objects.begin(); it != objects.end(); ++it)
+=======
+  for (auto & object : objects)
+>>>>>>> 5225638... Convert to range based for loops (#8444)
   {
-    const std::set<unsigned int> & mp_deps = (*it)->getMatPropDependencies();
+    const std::set<unsigned int> & mp_deps = object->getMatPropDependencies();
     needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
   }
 }

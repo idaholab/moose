@@ -255,6 +255,7 @@ protected:
    */
   void addMatPropDependency(unsigned int mat_prop_id) { _material_property_dependencies.insert(mat_prop_id); }
 
+  /// The set of material properties (as given by their IDs) that _this_ object depends on
   std::set<unsigned int> _material_property_dependencies;
 
 private:
