@@ -113,7 +113,7 @@ AddVariableAction::createInitialConditionAction()
     action_params.set<std::string>("type") = "ConstantIC";
 
   // Create the action
-  MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddInitialConditionAction", long_name, action_params));
+  std::shared_ptr<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddInitialConditionAction", long_name, action_params));
 
   // Set the required parameters for the object to be created
   action->getObjectParams().set<VariableName>("variable") = var_name;

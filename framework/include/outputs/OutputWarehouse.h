@@ -46,7 +46,7 @@ public:
    * It is the responsibility of the OutputWarehouse to delete the output objects
    * add using this method
    */
-  void addOutput(MooseSharedPointer<Output> & output);
+  void addOutput(std::shared_ptr<Output> & output);
 
   /**
    * Get a complete set of all output object names
@@ -224,10 +224,10 @@ private:
   void forceOutput();
 
   /**
-   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
+   * We are using std::shared_ptr to handle the cleanup of the pointers at the end of execution.
    * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
    */
-  std::vector<MooseSharedPointer<Output> > _all_ptrs;
+  std::vector<std::shared_ptr<Output> > _all_ptrs;
 
   /**
    * Adds the file name to the list of filenames being output

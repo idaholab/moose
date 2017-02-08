@@ -679,10 +679,10 @@ void
 Transient::preExecute()
 {
   // Add time period start times to sync times
-  // const std::vector<MooseSharedPointer<Control> > & controls = _problem.getControlWarehouse().getActiveObjects();
+  // const std::vector<std::shared_ptr<Control> > & controls = _problem.getControlWarehouse().getActiveObjects();
   // for (auto & control : controls)
   // {
-  //   MooseSharedPointer<TimePeriod> tp = MooseSharedNamespace::dynamic_pointer_cast<TimePeriod>(control);
+  //   std::shared_ptr<TimePeriod> tp = MooseSharedNamespace::dynamic_pointer_cast<TimePeriod>(control);
   //   if (tp)
   //     _time_stepper->addSyncTime(tp->getSyncTimes());
   // }

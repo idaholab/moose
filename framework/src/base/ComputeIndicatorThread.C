@@ -88,7 +88,7 @@ ComputeIndicatorThread::onElement(const Elem *elem)
   {
     if (_indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
     {
-      const std::vector<MooseSharedPointer<Indicator> > & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
+      const std::vector<std::shared_ptr<Indicator> > & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & indicator : indicators)
         indicator->computeIndicator();
     }
@@ -99,14 +99,14 @@ ComputeIndicatorThread::onElement(const Elem *elem)
   {
     if (_indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
     {
-      const std::vector<MooseSharedPointer<Indicator> > & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
+      const std::vector<std::shared_ptr<Indicator> > & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & indicator : indicators)
         indicator->finalize();
     }
 
     if (_internal_side_indicators.hasActiveBlockObjects(_subdomain, _tid))
     {
-      const std::vector<MooseSharedPointer<InternalSideIndicator> > & internal_indicators = _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
+      const std::vector<std::shared_ptr<InternalSideIndicator> > & internal_indicators = _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & internal_indicator : internal_indicators)
         internal_indicator->finalize();
     }
@@ -163,7 +163,7 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
       SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblemBase::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-      const std::vector<MooseSharedPointer<InternalSideIndicator> > & indicators = _internal_side_indicators.getActiveBlockObjects(block_id, _tid);
+      const std::vector<std::shared_ptr<InternalSideIndicator> > & indicators = _internal_side_indicators.getActiveBlockObjects(block_id, _tid);
       for (const auto & indicator : indicators)
         indicator->computeIndicator();
     }

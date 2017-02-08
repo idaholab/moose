@@ -50,7 +50,7 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   {
     if (_user_objects.hasActiveBoundaryObjects(bnd, _tid))
     {
-      const std::vector<MooseSharedPointer<NodalUserObject> > & objects = _user_objects.getActiveBoundaryObjects(bnd, _tid);
+      const std::vector<std::shared_ptr<NodalUserObject> > & objects = _user_objects.getActiveBoundaryObjects(bnd, _tid);
       for (const auto & uo : objects)
         uo->execute();
     }
@@ -62,13 +62,13 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   // "unique_node_execute = true".
 
   // To inforce the unique execution this vector is populated and checked if the unique flag is enabled.
-  std::vector<MooseSharedPointer<NodalUserObject> > computed;
+  std::vector<std::shared_ptr<NodalUserObject> > computed;
 
   const std::set<SubdomainID> & block_ids = _fe_problem.mesh().getNodeBlockIds(*node);
   for (const auto & block : block_ids)
     if (_user_objects.hasActiveBlockObjects(block, _tid))
     {
-      const std::vector<MooseSharedPointer<NodalUserObject> > & objects = _user_objects.getActiveBlockObjects(block, _tid);
+      const std::vector<std::shared_ptr<NodalUserObject> > & objects = _user_objects.getActiveBlockObjects(block, _tid);
       for (const auto & uo : objects)
         if (!uo->isUniqueNodeExecute() || std::count(computed.begin(), computed.end(), uo) == 0)
         {

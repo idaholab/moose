@@ -57,10 +57,10 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   if (node->processor_id() == _fe_problem.processor_id())
   {
     // Get a map of all active block restricted AuxKernel objects
-    const std::map<BoundaryID, std::vector<MooseSharedPointer<AuxKernel> > > & kernels = _storage.getActiveBoundaryObjects(_tid);
+    const std::map<BoundaryID, std::vector<std::shared_ptr<AuxKernel> > > & kernels = _storage.getActiveBoundaryObjects(_tid);
 
     // Operate on the node BoundaryID only
-    const std::map<BoundaryID, std::vector<MooseSharedPointer<AuxKernel> > >::const_iterator iter = kernels.find(boundary_id);
+    const std::map<BoundaryID, std::vector<std::shared_ptr<AuxKernel> > >::const_iterator iter = kernels.find(boundary_id);
     if (iter != kernels.end())
     {
       _fe_problem.reinitNodeFace(node, boundary_id, _tid);

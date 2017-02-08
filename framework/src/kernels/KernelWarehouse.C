@@ -25,7 +25,7 @@ KernelWarehouse::KernelWarehouse() :
 
 
 void
-KernelWarehouse::addObject(MooseSharedPointer<KernelBase> object, THREAD_ID tid)
+KernelWarehouse::addObject(std::shared_ptr<KernelBase> object, THREAD_ID tid)
 {
   // Add object to the general storage
   MooseObjectWarehouse<KernelBase>::addObject(object, tid);
@@ -44,7 +44,7 @@ KernelWarehouse::hasActiveVariableBlockObjects(unsigned int variable_id, Subdoma
 }
 
 
-const std::vector<MooseSharedPointer<KernelBase> > &
+const std::vector<std::shared_ptr<KernelBase> > &
 KernelWarehouse::getActiveVariableBlockObjects(unsigned int variable_id, SubdomainID block_id, THREAD_ID tid) const
 {
   checkThreadID(tid);

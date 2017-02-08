@@ -30,11 +30,11 @@
 
 #ifdef LIBMESH_HAVE_CXX11_SHARED_PTR
 #  include <memory>
-#  define MooseSharedPointer std::shared_ptr
+#  define std::shared_ptr std::shared_ptr
 #  define MooseSharedNamespace std
 #else
 #  include "boost/shared_ptr.hpp"
-#  define MooseSharedPointer boost::shared_ptr
+#  define std::shared_ptr boost::shared_ptr
 #  define MooseSharedNamespace boost
 #endif
 

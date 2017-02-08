@@ -35,19 +35,19 @@ public:
 
   /**
    * Add Constraint object to the warehouse.
-   * @param object A MooseSharedPointer of the object
+   * @param object A std::shared_ptr of the object
    * @param tid Not used.
    */
-  void addObject(MooseSharedPointer<Constraint> object, THREAD_ID tid = 0);
+  void addObject(std::shared_ptr<Constraint> object, THREAD_ID tid = 0);
 
   ///@{
   /**
    * Access methods for active objects.
    */
-  const std::vector<MooseSharedPointer<NodalConstraint> > & getActiveNodalConstraints() const;
-  const std::vector<MooseSharedPointer<FaceFaceConstraint> > & getActiveFaceFaceConstraints(const std::string & interface) const;
-  const std::vector<MooseSharedPointer<ElemElemConstraint> > & getActiveElemElemConstraints(InterfaceID interface_id) const;
-  const std::vector<MooseSharedPointer<NodeFaceConstraint> > & getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced);
+  const std::vector<std::shared_ptr<NodalConstraint> > & getActiveNodalConstraints() const;
+  const std::vector<std::shared_ptr<FaceFaceConstraint> > & getActiveFaceFaceConstraints(const std::string & interface) const;
+  const std::vector<std::shared_ptr<ElemElemConstraint> > & getActiveElemElemConstraints(InterfaceID interface_id) const;
+  const std::vector<std::shared_ptr<NodeFaceConstraint> > & getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced);
   ///@}
 
   ///@{

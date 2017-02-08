@@ -59,12 +59,12 @@ public:
   /**
    * Create a Backup for the current system.
    */
-  MooseSharedPointer<Backup> createBackup();
+  std::shared_ptr<Backup> createBackup();
 
   /**
    * Restore a Backup for the current system.
    */
-  void restoreBackup(MooseSharedPointer<Backup> backup, bool for_restart = false);
+  void restoreBackup(std::shared_ptr<Backup> backup, bool for_restart = false);
 
 private:
   /**
@@ -91,7 +91,7 @@ private:
   FEProblemBase & _fe_problem;
 
   /// A vector of file handles, one per thread
-  std::vector<MooseSharedPointer<std::ifstream> > _in_file_handles;
+  std::vector<std::shared_ptr<std::ifstream> > _in_file_handles;
 };
 
 #endif /* RESTARTABLEDATAIO_H */

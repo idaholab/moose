@@ -50,13 +50,13 @@ ComputeNodalDampingThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   std::set<MooseVariable *> damped_vars;
 
-  const std::vector<MooseSharedPointer<NodalDamper> > & ndampers = _nl.getNodalDamperWarehouse().getActiveObjects(_tid);
+  const std::vector<std::shared_ptr<NodalDamper> > & ndampers = _nl.getNodalDamperWarehouse().getActiveObjects(_tid);
   for (const auto & damper : ndampers)
     damped_vars.insert(damper->getVariable());
 
   _nl.reinitIncrementAtNodeForDampers(_tid, damped_vars);
 
-  const std::vector<MooseSharedPointer<NodalDamper> > & objects = _nodal_dampers.getActiveObjects(_tid);
+  const std::vector<std::shared_ptr<NodalDamper> > & objects = _nodal_dampers.getActiveObjects(_tid);
   for (const auto & obj : objects)
   {
     Real cur_damping = obj->computeDamping();

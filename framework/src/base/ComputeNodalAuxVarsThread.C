@@ -51,13 +51,13 @@ ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
   _fe_problem.reinitNode(node, _tid);
 
   // Get a map of all active block restricted AuxKernel objects
-  const std::map<SubdomainID, std::vector<MooseSharedPointer<AuxKernel> > > & block_kernels = _storage.getActiveBlockObjects(_tid);
+  const std::map<SubdomainID, std::vector<std::shared_ptr<AuxKernel> > > & block_kernels = _storage.getActiveBlockObjects(_tid);
 
   // Loop over all SubdomainIDs for the curnent node, if an AuxKernel is active on this block then compute it.
   const std::set<SubdomainID> & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
   for (const auto & block : block_ids)
   {
-    std::map<SubdomainID, std::vector<MooseSharedPointer<AuxKernel> > >::const_iterator iter = block_kernels.find(block);
+    std::map<SubdomainID, std::vector<std::shared_ptr<AuxKernel> > >::const_iterator iter = block_kernels.find(block);
 
     if (iter != block_kernels.end())
       for (const auto & aux : iter->second)

@@ -224,7 +224,7 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
 
     const unsigned int file_version = 2;
 
-    _in_file_handles[tid] = MooseSharedPointer<std::ifstream>(new std::ifstream(file_name.c_str(), std::ios::in | std::ios::binary));
+    _in_file_handles[tid] = std::shared_ptr<std::ifstream>(new std::ifstream(file_name.c_str(), std::ios::in | std::ios::binary));
 
     // header
     char id[2];
@@ -277,10 +277,10 @@ RestartableDataIO::readRestartableData(const RestartableDatas & restartable_data
   }
 }
 
-MooseSharedPointer<Backup>
+std::shared_ptr<Backup>
 RestartableDataIO::createBackup()
 {
-  MooseSharedPointer<Backup> backup(new Backup);
+  std::shared_ptr<Backup> backup(new Backup);
 
   serializeSystems(backup->_system_data);
 
@@ -297,7 +297,7 @@ RestartableDataIO::createBackup()
 }
 
 void
-RestartableDataIO::restoreBackup(MooseSharedPointer<Backup> backup, bool for_restart)
+RestartableDataIO::restoreBackup(std::shared_ptr<Backup> backup, bool for_restart)
 {
   unsigned int n_threads = libMesh::n_threads();
 

@@ -63,7 +63,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
     unsigned int jvar = jvariable.number();
 
     // The NodalKernels that are active and are coupled to the jvar in question
-    std::vector<MooseSharedPointer<NodalKernel> > active_involved_kernels;
+    std::vector<std::shared_ptr<NodalKernel> > active_involved_kernels;
 
     const std::set<SubdomainID> & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
     for (const auto & block : block_ids)
@@ -71,7 +71,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
       if (_nodal_kernels.hasActiveBlockObjects(block, _tid))
       {
         // Loop over each NodalKernel to see if it's involved with the jvar
-        const std::vector<MooseSharedPointer<NodalKernel> > & objects = _nodal_kernels.getActiveBlockObjects(block, _tid);
+        const std::vector<std::shared_ptr<NodalKernel> > & objects = _nodal_kernels.getActiveBlockObjects(block, _tid);
         for (const auto & nodal_kernel : objects)
         {
           // If this NodalKernel isn't operating on this ivar... skip it

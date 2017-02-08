@@ -60,7 +60,7 @@ public:
   /**
    * Return const reference to the map containing the InputParameter objects
    */
-  const std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> > & getInputParameters(THREAD_ID tid = 0) const;
+  const std::multimap<MooseObjectName, std::shared_ptr<InputParameters> > & getInputParameters(THREAD_ID tid = 0) const;
 
   /**
    * Returns a ControllableParameter object
@@ -78,13 +78,13 @@ public:
 private:
 
   /// Storage for the InputParameters objects
-  std::vector<std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> > > _input_parameters;
+  std::vector<std::multimap<MooseObjectName, std::shared_ptr<InputParameters> > > _input_parameters;
 
   /// InputParameter links
   std::map<MooseObjectParameterName, std::vector<MooseObjectParameterName> > _input_parameter_links;
 
   /// A list of parameters that were controlled (only used for output)
-  std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectParameterName> > _controlled_parameters;
+  std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectParameterName> > _controlled_parameters;
 
   /**
    * Method for adding a new InputParameters object
@@ -122,7 +122,7 @@ private:
    * Return the list of controlled parameters (used for output)
    * @see ControlOutput
    */
-  const std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectParameterName> > & getControlledParameters() { return _controlled_parameters; }
+  const std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectParameterName> > & getControlledParameters() { return _controlled_parameters; }
   void clearControlledParameters() { _controlled_parameters.clear(); }
 
   friend class Factory;
@@ -150,7 +150,7 @@ InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName
     params.insert(params.end(), link_it->second.begin(), link_it->second.end());
 
   // Parameter object iterator
-  std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> >::const_iterator iter;
+  std::multimap<MooseObjectName, std::shared_ptr<InputParameters> >::const_iterator iter;
 
   // Loop over all threads
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)

@@ -113,7 +113,7 @@ public:
    */
   virtual void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
-  virtual void addEigenKernels(MooseSharedPointer<KernelBase> /*kernel*/, THREAD_ID /*tid*/) {};
+  virtual void addEigenKernels(std::shared_ptr<KernelBase> /*kernel*/, THREAD_ID /*tid*/) {};
 
   /**
    * Adds a NodalKernel
@@ -191,7 +191,7 @@ public:
    * Retrieves a split by name
    * @param name The name of the split
    */
-  MooseSharedPointer<Split> getSplit(const std::string & name);
+  std::shared_ptr<Split> getSplit(const std::string & name);
 
   void zeroVectorForResidual(const std::string & vector_name);
 
@@ -318,7 +318,7 @@ public:
    * Sets a preconditioner
    * @param pc The preconditioner to be set
    */
-  void setPreconditioner(MooseSharedPointer<MoosePreconditioner> pc);
+  void setPreconditioner(std::shared_ptr<MoosePreconditioner> pc);
 
   /**
    * If called with true this system will use a finite differenced form of
@@ -412,7 +412,7 @@ public:
 
   unsigned int _num_residual_evaluations;
 
-  void setPredictor(MooseSharedPointer<Predictor> predictor);
+  void setPredictor(std::shared_ptr<Predictor> predictor);
   Predictor * getPredictor() { return _predictor.get(); }
 
   TimeIntegrator * getTimeIntegrator() { return _time_integrator.get(); }
@@ -526,7 +526,7 @@ protected:
   NumericVector<Number> & _residual_copy;
 
   /// Time integrator
-  MooseSharedPointer<TimeIntegrator> _time_integrator;
+  std::shared_ptr<TimeIntegrator> _time_integrator;
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
   /// \f$ {du^dot}\over{du} \f$
@@ -586,7 +586,7 @@ protected:
   /// The difference of current and old solutions
   NumericVector<Number> & _sln_diff;
   /// Preconditioner
-  MooseSharedPointer<MoosePreconditioner> _preconditioner;
+  std::shared_ptr<MoosePreconditioner> _preconditioner;
   /// Preconditioning side
   Moose::PCSideType _pc_side;
 
@@ -633,7 +633,7 @@ protected:
   Real _final_residual;
 
   /// If predictor is active, this is non-NULL
-  MooseSharedPointer<Predictor> _predictor;
+  std::shared_ptr<Predictor> _predictor;
 
   bool _computing_initial_residual;
 

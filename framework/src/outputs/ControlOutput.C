@@ -63,10 +63,10 @@ ControlOutput::outputActiveObjects()
 {
   // Extract InputParameter objects from warehouse
   InputParameterWarehouse & wh = _app.getInputParameterWarehouse();
-  const std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> > & params = wh.getInputParameters();
+  const std::multimap<MooseObjectName, std::shared_ptr<InputParameters> > & params = wh.getInputParameters();
 
   // Populate a map based on unique InputParameter objects
-  std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectName> > objects;
+  std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectName> > objects;
   for (const auto & iter : params)
     objects[iter.second].insert(iter.first);
 
@@ -78,7 +78,7 @@ ControlOutput::outputActiveObjects()
   oss << "Active Objects:\n" << COLOR_DEFAULT;
   for (const auto & iter : objects)
   {
-    MooseSharedPointer<InputParameters> ptr = iter.first;
+    std::shared_ptr<InputParameters> ptr = iter.first;
     if (ptr->get<bool>("enable"))
     {
       // We print slightly differently in the first iteration of the loop.
@@ -105,14 +105,14 @@ ControlOutput::outputControls()
 
   // Extract InputParameter objects from warehouse
   InputParameterWarehouse & wh = _app.getInputParameterWarehouse();
-  const std::multimap<MooseObjectName, MooseSharedPointer<InputParameters> > & params = wh.getInputParameters();
+  const std::multimap<MooseObjectName, std::shared_ptr<InputParameters> > & params = wh.getInputParameters();
 
   // The stream to build
   std::stringstream oss;
   oss << std::left;
 
   // Populate a map based on unique InputParameter objects
-  std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectName> > objects;
+  std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectName> > objects;
   for (const auto & iter : params)
     objects[iter.second].insert(iter.first);
 
@@ -120,7 +120,7 @@ ControlOutput::outputControls()
   oss << "Controls:\n";
   for (const auto & iter : objects)
   {
-    MooseSharedPointer<InputParameters> ptr = iter.first;
+    std::shared_ptr<InputParameters> ptr = iter.first;
 
     const std::set<std::string> & names = ptr->getControllableParameters();
 
@@ -159,7 +159,7 @@ ControlOutput::outputChangedControls()
 {
   // Extract InputParameter objects from warehouse
   InputParameterWarehouse & wh = _app.getInputParameterWarehouse();
-  const std::map<MooseSharedPointer<InputParameters>, std::set<MooseObjectParameterName> > & controls = wh.getControlledParameters();
+  const std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectParameterName> > & controls = wh.getControlledParameters();
 
   // The stream to build
   std::stringstream oss;
@@ -172,7 +172,7 @@ ControlOutput::outputChangedControls()
   // Loop over the controlled parameters
   for (const auto & iter : controls)
   {
-    const MooseSharedPointer<InputParameters> ptr = iter.first;
+    const std::shared_ptr<InputParameters> ptr = iter.first;
     oss << "  " << COLOR_YELLOW << ptr->get<std::string>("_object_name") << COLOR_DEFAULT << '\n';
 
     // Tag(s)

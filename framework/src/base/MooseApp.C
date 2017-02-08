@@ -112,19 +112,19 @@ InputParameters validParams<MooseApp>()
   params.addPrivateParam<std::string>("_type");
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char**>("_argv");
-  params.addPrivateParam<MooseSharedPointer<CommandLine> >("_command_line");
-  params.addPrivateParam<MooseSharedPointer<Parallel::Communicator> >("_comm");
+  params.addPrivateParam<std::shared_ptr<CommandLine> >("_command_line");
+  params.addPrivateParam<std::shared_ptr<Parallel::Communicator> >("_comm");
 
   return params;
 }
 
 MooseApp::MooseApp(InputParameters parameters) :
     ConsoleStreamInterface(*this),
-    ParallelObject(*parameters.get<MooseSharedPointer<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
+    ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator> >("_comm")), // Can't call getParam() before pars is set
     _name(parameters.get<std::string>("_app_name")),
     _pars(parameters),
     _type(getParam<std::string>("_type")),
-    _comm(getParam<MooseSharedPointer<Parallel::Communicator> >("_comm")),
+    _comm(getParam<std::shared_ptr<Parallel::Communicator> >("_comm")),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
@@ -158,7 +158,7 @@ MooseApp::MooseApp(InputParameters parameters) :
     _sys_info = std::make_shared<SystemInfo>(argc, argv);
   }
   if (isParamValid("_command_line"))
-    _command_line = getParam<MooseSharedPointer<CommandLine> >("_command_line");
+    _command_line = getParam<std::shared_ptr<CommandLine> >("_command_line");
   else
     mooseError("Valid CommandLine object required");
 
@@ -378,7 +378,7 @@ MooseApp::runInputFile()
 
   if (error_unused || warn_unused)
   {
-    MooseSharedPointer<FEProblemBase> fe_problem = _action_warehouse.problemBase();
+    std::shared_ptr<FEProblemBase> fe_problem = _action_warehouse.problemBase();
     if (fe_problem.get() && name() == "main" && !getParam<bool>("minimal"))
     {
       // Check the CLI parameters
@@ -459,7 +459,7 @@ MooseApp::meshOnly(std::string mesh_file_name)
   _action_warehouse.executeActionsWithAction("uniform_refine_mesh");
   _action_warehouse.executeActionsWithAction("setup_mesh_complete");
 
-  MooseSharedPointer<MooseMesh> & mesh = _action_warehouse.mesh();
+  std::shared_ptr<MooseMesh> & mesh = _action_warehouse.mesh();
 
   // If no argument specified or if the argument following --mesh-only starts
   // with a dash, try to build an output filename based on the input mesh filename.
@@ -500,7 +500,7 @@ MooseApp::registerRecoverableData(std::string name)
   _recoverable_data.insert(name);
 }
 
-MooseSharedPointer<Backup>
+std::shared_ptr<Backup>
 MooseApp::backup()
 {
   FEProblemBase & fe_problem = _executioner->feProblem();
@@ -511,7 +511,7 @@ MooseApp::backup()
 }
 
 void
-MooseApp::restore(MooseSharedPointer<Backup> backup, bool for_restart)
+MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
 {
   // This means that a Backup is coming through to use for restart / recovery
   // We should just cache it for now
@@ -918,7 +918,7 @@ MooseApp::header() const
 void
 MooseApp::addMeshModifier(const std::string & modifier_name, const std::string & name, InputParameters parameters)
 {
-  MooseSharedPointer<MeshModifier> mesh_modifier = _factory.create<MeshModifier>(modifier_name, name, parameters);
+  std::shared_ptr<MeshModifier> mesh_modifier = _factory.create<MeshModifier>(modifier_name, name, parameters);
 
   _mesh_modifiers.insert(std::make_pair(MooseUtils::shortName(name), mesh_modifier));
 }
@@ -932,7 +932,7 @@ MooseApp::getMeshModifier(const std::string & name) const
 void
 MooseApp::executeMeshModifiers()
 {
-  DependencyResolver<MooseSharedPointer<MeshModifier> > resolver;
+  DependencyResolver<std::shared_ptr<MeshModifier> > resolver;
 
   // Add all of the dependencies into the resolver and sort them
   for (const auto & it : _mesh_modifiers)
@@ -943,7 +943,7 @@ MooseApp::executeMeshModifiers()
     std::vector<std::string> & modifiers = it.second->getDependencies();
     for (const auto & depend_name : modifiers)
     {
-      std::map<std::string, MooseSharedPointer<MeshModifier> >::const_iterator depend_it = _mesh_modifiers.find(depend_name);
+      std::map<std::string, std::shared_ptr<MeshModifier> >::const_iterator depend_it = _mesh_modifiers.find(depend_name);
 
       if (depend_it == _mesh_modifiers.end())
         mooseError("The MeshModifier \"" << depend_name << "\" was not created, did you make a spelling mistake or forget to include it in your input file?");
@@ -952,7 +952,7 @@ MooseApp::executeMeshModifiers()
     }
   }
 
-  const std::vector<MooseSharedPointer<MeshModifier> > & ordered_modifiers = resolver.getSortedValues();
+  const std::vector<std::shared_ptr<MeshModifier> > & ordered_modifiers = resolver.getSortedValues();
 
   if (ordered_modifiers.size())
   {
@@ -984,7 +984,7 @@ MooseApp::setRestart(const bool & value)
 {
   _restart = value;
 
-  MooseSharedPointer<FEProblemBase> fe_problem = _action_warehouse.problemBase();
+  std::shared_ptr<FEProblemBase> fe_problem = _action_warehouse.problemBase();
 }
 
 void
@@ -1018,7 +1018,7 @@ MooseApp::createMinimalApp()
     action_params.set<std::string>("task") = "setup_mesh";
 
     // Create The Action
-    MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("SetupMeshAction", "Mesh", action_params));
+    std::shared_ptr<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("SetupMeshAction", "Mesh", action_params));
 
     // Set the object parameters
     InputParameters & params = action->getObjectParams();
@@ -1037,7 +1037,7 @@ MooseApp::createMinimalApp()
     action_params.set<std::string>("task") = "init_mesh";
 
     // Build the action
-    MooseSharedPointer<Action> action = _action_factory.create("SetupMeshAction", "Mesh", action_params);
+    std::shared_ptr<Action> action = _action_factory.create("SetupMeshAction", "Mesh", action_params);
     _action_warehouse.addActionBlock(action);
   }
 
@@ -1048,7 +1048,7 @@ MooseApp::createMinimalApp()
     action_params.set<std::string>("type") = "Transient";
 
     // Create the action
-    MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("CreateExecutionerAction", "Executioner", action_params));
+    std::shared_ptr<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("CreateExecutionerAction", "Executioner", action_params));
 
     // Set the object parameters
     InputParameters & params = action->getObjectParams();
@@ -1066,7 +1066,7 @@ MooseApp::createMinimalApp()
     action_params.set<std::string>("type") = "FEProblem";
 
     // Create the action
-    MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("CreateProblemAction", "Problem", action_params));
+    std::shared_ptr<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("CreateProblemAction", "Problem", action_params));
 
     // Set the object parameters
     InputParameters & params = action->getObjectParams();
@@ -1083,7 +1083,7 @@ MooseApp::createMinimalApp()
     action_params.set<bool>("console") = false;
 
     // Create action
-    MooseSharedPointer<Action> action = _action_factory.create("CommonOutputAction", "Outputs", action_params);
+    std::shared_ptr<Action> action = _action_factory.create("CommonOutputAction", "Outputs", action_params);
 
     // Add Action to the warehouse
     _action_warehouse.addActionBlock(action);

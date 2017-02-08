@@ -32,7 +32,7 @@ public:
   typedef FunctionParserADBase<Real> ADFunction;
 
   /// Shorthand for an smart pointer to an autodiff function parser object.
-  typedef MooseSharedPointer<ADFunction> ADFunctionPtr;
+  typedef std::shared_ptr<ADFunction> ADFunctionPtr;
 
   /// apply input paramters to internal feature flags of the parser object
   void setParserFeatureFlags(ADFunctionPtr &);

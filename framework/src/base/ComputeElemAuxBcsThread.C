@@ -47,7 +47,7 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
   _tid = puid.id;
 
   // Reference to all boundary restricted AuxKernels for the current thread
-  const std::map<BoundaryID, std::vector<MooseSharedPointer<AuxKernel> > > & boundary_kernels = _storage.getActiveBoundaryObjects(_tid);
+  const std::map<BoundaryID, std::vector<std::shared_ptr<AuxKernel> > > & boundary_kernels = _storage.getActiveBoundaryObjects(_tid);
 
   for (const auto & belem : range)
   {
@@ -65,7 +65,7 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
       }
 
       // Locate the AuxKernel objects for the current BoundaryID
-      const std::map<BoundaryID, std::vector<MooseSharedPointer<AuxKernel> > >::const_iterator iter = boundary_kernels.find(boundary_id);
+      const std::map<BoundaryID, std::vector<std::shared_ptr<AuxKernel> > >::const_iterator iter = boundary_kernels.find(boundary_id);
 
       if (iter != boundary_kernels.end() && !(iter->second.empty()) )
       {

@@ -62,14 +62,14 @@ public:
   void variableIntegrityCheck(const AuxVariableName & var_name) const;
 
   /// Return the MultiApp that this transfer belongs to
-  const MooseSharedPointer<MultiApp> getMultiApp() const { return _multi_app; }
+  const std::shared_ptr<MultiApp> getMultiApp() const { return _multi_app; }
 
   /// Return the execution flags, handling "same_as_multiapp"
   virtual const std::vector<ExecFlagType> & execFlags() const;
 
 protected:
   /// The MultiApp this Transfer is transferring data to or from
-  MooseSharedPointer<MultiApp> _multi_app;
+  std::shared_ptr<MultiApp> _multi_app;
 
   /// Whether we're transferring to or from the MultiApp
   MooseEnum _direction;

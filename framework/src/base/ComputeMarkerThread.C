@@ -77,7 +77,7 @@ ComputeMarkerThread::onElement(const Elem *elem)
 
   if (_marker_whs.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<MooseSharedPointer<Marker> > & markers = _marker_whs.getActiveBlockObjects(_subdomain, _tid);
+    const std::vector<std::shared_ptr<Marker> > & markers = _marker_whs.getActiveBlockObjects(_subdomain, _tid);
     for (const auto & marker : markers)
       marker->computeMarker();
   }

@@ -28,9 +28,9 @@
 #include "libmesh/quadrature.h"
 
 ComputeMaterialsObjectThread::ComputeMaterialsObjectThread(FEProblemBase & fe_problem,
-                                                           std::vector<MooseSharedPointer<MaterialData> > & material_data,
-                                                           std::vector<MooseSharedPointer<MaterialData> > & bnd_material_data,
-                                                           std::vector<MooseSharedPointer<MaterialData> > & neighbor_material_data,
+                                                           std::vector<std::shared_ptr<MaterialData> > & material_data,
+                                                           std::vector<std::shared_ptr<MaterialData> > & bnd_material_data,
+                                                           std::vector<std::shared_ptr<MaterialData> > & neighbor_material_data,
                                                            MaterialPropertyStorage & material_props,
                                                            MaterialPropertyStorage & bnd_material_props,
                                                            std::vector<Assembly *> & assembly) :

@@ -156,7 +156,7 @@ AuxiliarySystem::addKernel(const std::string & kernel_name, const std::string & 
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseSharedPointer<AuxKernel> kernel = _factory.create<AuxKernel>(kernel_name, name, parameters, tid);
+    std::shared_ptr<AuxKernel> kernel = _factory.create<AuxKernel>(kernel_name, name, parameters, tid);
     if (kernel->isNodal())
       _nodal_aux_storage.addObject(kernel, tid);
     else
@@ -169,7 +169,7 @@ AuxiliarySystem::addScalarKernel(const std::string & kernel_name, const std::str
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseSharedPointer<AuxScalarKernel> kernel = _factory.create<AuxScalarKernel>(kernel_name, name, parameters, tid);
+    std::shared_ptr<AuxScalarKernel> kernel = _factory.create<AuxScalarKernel>(kernel_name, name, parameters, tid);
     _aux_scalar_storage.addObject(kernel, tid);
   }
 }
@@ -285,7 +285,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
 
   // Elemental AuxKernels
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _elemental_aux_storage[type].getActiveObjects();
+    const std::vector<std::shared_ptr<AuxKernel> > & auxs = _elemental_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -295,7 +295,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
 
   // Nodal AuxKernels
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _nodal_aux_storage[type].getActiveObjects();
+    const std::vector<std::shared_ptr<AuxKernel> > & auxs = _nodal_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -313,7 +313,7 @@ AuxiliarySystem::getDependObjects()
 
   // Elemental AuxKernels
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _elemental_aux_storage.getActiveObjects();
+    const std::vector<std::shared_ptr<AuxKernel> > & auxs = _elemental_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -323,7 +323,7 @@ AuxiliarySystem::getDependObjects()
 
   // Nodal AuxKernels
   {
-    const std::vector<MooseSharedPointer<AuxKernel> > & auxs = _nodal_aux_storage.getActiveObjects();
+    const std::vector<std::shared_ptr<AuxKernel> > & auxs = _nodal_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -366,7 +366,7 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
         _fe_problem.reinitScalars(tid);
 
         // Call compute() method on all active AuxScalarKernel objects
-        const std::vector<MooseSharedPointer<AuxScalarKernel> > & objects = storage.getActiveObjects(tid);
+        const std::vector<std::shared_ptr<AuxScalarKernel> > & objects = storage.getActiveObjects(tid);
         for (const auto & obj : objects)
           obj->compute();
 

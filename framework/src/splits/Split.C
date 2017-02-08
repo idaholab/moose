@@ -265,7 +265,7 @@ Split::setup(const std::string& prefix)
     // Finally, recursively configure the splits contained within this split.
     for (unsigned int i = 0; i < _splitting.size(); ++i)
     {
-      MooseSharedPointer<Split> split = _fe_problem.getNonlinearSystemBase().getSplit(_splitting[i]);
+      std::shared_ptr<Split> split = _fe_problem.getNonlinearSystemBase().getSplit(_splitting[i]);
       std::string sprefix = prefix + "fieldsplit_" + _splitting[i] + "_";
       split->setup(sprefix);
     }

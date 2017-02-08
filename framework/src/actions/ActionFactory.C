@@ -27,7 +27,7 @@ ActionFactory::~ActionFactory()
 {
 }
 
-MooseSharedPointer<Action>
+std::shared_ptr<Action>
 ActionFactory::create(const std::string & action, const std::string & action_name, InputParameters parameters)
 {
   parameters.addPrivateParam("_moose_app", &_app);
@@ -61,7 +61,7 @@ ActionFactory::create(const std::string & action, const std::string & action_nam
 
   // Add the name to the parameters and create the object
   parameters.set<std::string>("_action_name") = action_name;
-  MooseSharedPointer<Action> action_obj = (*build_info->_build_pointer)(parameters);
+  std::shared_ptr<Action> action_obj = (*build_info->_build_pointer)(parameters);
 
   if (parameters.get<std::string>("task") == "")
     action_obj->appendTask(build_info->_task);

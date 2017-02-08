@@ -67,7 +67,7 @@ ActionWarehouse::clear()
 }
 
 void
-ActionWarehouse::addActionBlock(MooseSharedPointer<Action> action)
+ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
 {
   /**
    * Note: This routine uses the XTerm colors directly which is not advised for general purpose output coloring.
@@ -123,7 +123,7 @@ ActionWarehouse::addActionBlock(MooseSharedPointer<Action> action)
 
     // Make sure that the ObjectAction task and Action task are consistent
     // otherwise that means that is action was built by the wrong type
-    MooseSharedPointer<MooseObjectAction> moa = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action);
+    std::shared_ptr<MooseObjectAction> moa = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action);
     if (moa.get())
     {
       const InputParameters & mparams = moa->getObjectParams();
@@ -370,7 +370,7 @@ ActionWarehouse::printInputFile(std::ostream & out)
   out << tree.print("");
 }
 
-MooseSharedPointer<FEProblem>
+std::shared_ptr<FEProblem>
 ActionWarehouse::problem()
 {
   mooseDeprecated("ActionWarehouse::problem() is deprecated, please use ActionWarehouse::problemBase() \n");

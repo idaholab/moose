@@ -50,7 +50,7 @@ public:
    * Adds an object to the storage structure.
    * @param object A shared pointer to the object being added
    */
-  virtual void addObject(MooseSharedPointer<T> object, THREAD_ID tid = 0);
+  virtual void addObject(std::shared_ptr<T> object, THREAD_ID tid = 0);
 
   ///@{
   /**
@@ -215,13 +215,13 @@ ExecuteMooseObjectWarehouse<T>::setup(ExecFlagType exec_flag, THREAD_ID tid/* = 
 
 template<typename T>
 void
-ExecuteMooseObjectWarehouse<T>::addObject(MooseSharedPointer<T> object, THREAD_ID tid/*=0*/)
+ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid/*=0*/)
 {
   // Update list of all objects
   MooseObjectWarehouse<T>::addObject(object, tid);
 
   // Update the execute flag lists of objects
-  MooseSharedPointer<SetupInterface> ptr = MooseSharedNamespace::dynamic_pointer_cast<SetupInterface>(object);
+  std::shared_ptr<SetupInterface> ptr = MooseSharedNamespace::dynamic_pointer_cast<SetupInterface>(object);
   if (ptr)
   {
     const std::vector<ExecFlagType> flags = ptr->execFlags();

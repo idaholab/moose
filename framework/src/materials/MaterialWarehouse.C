@@ -17,7 +17,7 @@
 #include "Material.h"
 
 void
-MaterialWarehouse::addObjects(MooseSharedPointer<Material> block, MooseSharedPointer<Material> neighbor, MooseSharedPointer<Material> face, THREAD_ID tid /*=0*/)
+MaterialWarehouse::addObjects(std::shared_ptr<Material> block, std::shared_ptr<Material> neighbor, std::shared_ptr<Material> face, THREAD_ID tid /*=0*/)
 {
   MooseObjectWarehouse<Material>::addObject(block, tid);
   _neighbor_materials.addObject(neighbor, tid);

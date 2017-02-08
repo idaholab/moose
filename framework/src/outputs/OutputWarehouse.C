@@ -87,7 +87,7 @@ OutputWarehouse::subdomainSetup()
 }
 
 void
-OutputWarehouse::addOutput(MooseSharedPointer<Output> & output)
+OutputWarehouse::addOutput(std::shared_ptr<Output> & output)
 {
   _all_ptrs.push_back(output);
 

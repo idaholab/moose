@@ -46,7 +46,7 @@ CreateDisplacedProblemAction::act()
     object_params.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
 
     // Create the object
-    MooseSharedPointer<DisplacedProblem> disp_problem = _factory.create<DisplacedProblem>("DisplacedProblem", "DisplacedProblem", object_params);
+    std::shared_ptr<DisplacedProblem> disp_problem = _factory.create<DisplacedProblem>("DisplacedProblem", "DisplacedProblem", object_params);
 
     // Add the Displaced Problem to FEProblemBase
     _problem->addDisplacedProblem(disp_problem);

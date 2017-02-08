@@ -39,7 +39,7 @@ InputParameters validParams<MultiApp>();
 /**
  * Helper class for holding Sub-app backups
  */
-class SubAppBackups : public std::vector<MooseSharedPointer<Backup> >
+class SubAppBackups : public std::vector<std::shared_ptr<Backup> >
 {};
 
 /**

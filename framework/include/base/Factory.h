@@ -104,7 +104,7 @@
 /**
  * Typedef to wrap shared pointer type
  */
-typedef MooseSharedPointer<MooseObject> MooseObjectPtr;
+typedef std::shared_ptr<MooseObject> MooseObjectPtr;
 
 /**
  * Typedef for function to build objects
@@ -215,7 +215,7 @@ public:
    * @param print_deprecated controls the deprecated message
    * @return The created object
    */
-  MooseSharedPointer<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters,
+  std::shared_ptr<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters,
                                          THREAD_ID tid = 0, bool print_deprecated = true);
 
   /**
@@ -227,10 +227,10 @@ public:
    * @return The created object
    */
   template<typename T>
-  MooseSharedPointer<T>
+  std::shared_ptr<T>
   create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0)
   {
-    MooseSharedPointer<T> new_object = MooseSharedNamespace::dynamic_pointer_cast<T>(create(obj_name, name, parameters, tid, false));
+    std::shared_ptr<T> new_object = MooseSharedNamespace::dynamic_pointer_cast<T>(create(obj_name, name, parameters, tid, false));
     if (!new_object)
       mooseError("We expected to create an object of type '" + demangle(typeid(T).name())
                  + "'.\nInstead we received a parameters object for type '" + obj_name

@@ -233,7 +233,7 @@ protected:
   /// Error vector for use with the error estimator.
   std::unique_ptr<ErrorVector> _error;
 
-  MooseSharedPointer<DisplacedProblem> _displaced_problem;
+  std::shared_ptr<DisplacedProblem> _displaced_problem;
 
   /// A mesh refinement object for displaced mesh
   std::unique_ptr<MeshRefinement> _displaced_mesh_refinement;

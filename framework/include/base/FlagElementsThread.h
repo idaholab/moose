@@ -38,7 +38,7 @@ public:
 
 protected:
   FEProblemBase & _fe_problem;
-  MooseSharedPointer<DisplacedProblem> _displaced_problem;
+  std::shared_ptr<DisplacedProblem> _displaced_problem;
   AuxiliarySystem & _aux_sys;
   unsigned int _system_number;
   Adaptivity & _adaptivity;

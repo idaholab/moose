@@ -88,7 +88,7 @@ GeometricSearchData::update(GeometricSearchType type)
 
   if (type == ALL || type == PENETRATION)
   {
-    for (std::map<unsigned int, MooseSharedPointer<ElementPairLocator> >::iterator epl_it = _element_pair_locators.begin();
+    for (std::map<unsigned int, std::shared_ptr<ElementPairLocator> >::iterator epl_it = _element_pair_locators.begin();
          epl_it != _element_pair_locators.end(); ++epl_it)
     {
       ElementPairLocator & epl = *epl_it->second;
@@ -353,7 +353,7 @@ GeometricSearchData::getMortarNearestNodeLocator(const unsigned int master_id, c
 
 void
 GeometricSearchData::addElementPairLocator(const unsigned int & interface_id,
-                                           MooseSharedPointer<ElementPairLocator> epl)
+                                           std::shared_ptr<ElementPairLocator> epl)
 {
   _element_pair_locators[interface_id] = epl;
 }

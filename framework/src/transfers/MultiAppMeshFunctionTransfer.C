@@ -17,7 +17,7 @@
 #include "MooseTypes.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
-#include "MooseTypes.h" // for MooseSharedPointer
+#include "MooseTypes.h" // for std::shared_ptr
 #include "MooseMesh.h"
 
 // libMesh includes
@@ -191,7 +191,7 @@ MultiAppMeshFunctionTransfer::execute()
   }
 
   // Setup the local mesh functions.
-  std::vector<MooseSharedPointer<MeshFunction> > local_meshfuns;
+  std::vector<std::shared_ptr<MeshFunction> > local_meshfuns;
   for (unsigned int i_from = 0; i_from < _from_problems.size(); i_from++)
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
@@ -199,7 +199,7 @@ MultiAppMeshFunctionTransfer::execute()
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-    MooseSharedPointer<MeshFunction> from_func;
+    std::shared_ptr<MeshFunction> from_func;
     //TODO: make MultiAppTransfer give me the right es
     if (_displaced_source_mesh && from_problem.getDisplacedProblem())
       from_func.reset(new MeshFunction(from_problem.getDisplacedProblem()->es(),
