@@ -122,8 +122,13 @@ class Tester(MooseObject):
 
     # This is the base level runnable check common to all Testers.  DO NOT override
     # this method in any of your derived classes.  Instead see "checkRunnable"
-    def checkRunnableBase(self, options, checks):
+    def checkRunnableBase(self, options, checks, test_list=None):
         reason = ''
+
+        # Check if we only want to run failed tests
+        if options.failed_tests:
+            if self.specs['test_name'] not in test_list:
+                return (False, '')
 
         # Are we running only tests in a specific group?
         if options.group <> 'ALL' and options.group not in self.specs['group']:
