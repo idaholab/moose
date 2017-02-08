@@ -295,7 +295,7 @@ PQPlasticModel::returnMap()
 
   setStressAfterReturn(stress_trial, p_ok, q_ok, gaE_total, _intnl[_qp], smoothed_q, _stress[_qp]);
 
-  _plastic_strain[_qp] = _plastic_strain_old[_qp] + _strain_increment[_qp] + _elasticity_tensor[_qp].invSymm() * (_stress_old[_qp] - _stress[_qp]);
+  _plastic_strain[_qp] = _plastic_strain_old[_qp] + (gaE_total / _Epp) * (smoothed_q.dg[0] * dpdstress(_stress[_qp]) + smoothed_q.dg[1] * dqdstress(_stress[_qp]));
 
   consistentTangentOperator(stress_trial, _p_trial, _q_trial, _stress[_qp], p_ok, q_ok, gaE_total, smoothed_q, _Jacobian_mult[_qp]);
 }

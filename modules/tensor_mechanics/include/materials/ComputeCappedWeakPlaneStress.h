@@ -71,11 +71,11 @@ protected:
     nothing_special, no_compression, no_tension
   } _stress_return_type;
 
-  /// trial value of stress(2, 0)
-  Real _in_trial20;
+  /// trial value of stress(0, 2)
+  Real _in_trial02;
 
-  /// trial value of stress(2, 1)
-  Real _in_trial21;
+  /// trial value of stress(1, 2)
+  Real _in_trial12;
 
   /// trial value of q
   Real _in_q_trial;
