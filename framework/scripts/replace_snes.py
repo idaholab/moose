@@ -11,19 +11,19 @@ global_ignores = ['archive', 'contrib', '.svn', '.git']
 global_options = {}
 
 def fixupHeader():
-  for dirpath, dirnames, filenames in os.walk(os.getcwd() + "/../../../"):
+    for dirpath, dirnames, filenames in os.walk(os.getcwd() + "/../../../"):
 
-    # Don't traverse into ignored directories
-    for ignore in global_ignores:
-      if ignore in dirnames:
-        dirnames.remove(ignore)
+        # Don't traverse into ignored directories
+        for ignore in global_ignores:
+            if ignore in dirnames:
+                dirnames.remove(ignore)
 
-    #print dirpath
-    #print dirnames
-    for file in filenames:
-      suffix = os.path.splitext(file)
-      if suffix[-1] == '.i':
-        checkAndUpdate(dirpath + '/' + file)
+        #print dirpath
+        #print dirnames
+        for file in filenames:
+            suffix = os.path.splitext(file)
+            if suffix[-1] == '.i':
+                checkAndUpdate(dirpath + '/' + file)
 
 
 #re_print_linear = re.compile(r"^(\s*)([^#]*) print_linear_residuals\b \s*(.*)", re.X)
@@ -35,51 +35,51 @@ def fixupHeader():
 #re2 = re.compile(r"(.*)^([^#]*? petsc_options \s*=\s* (?: '\s*' | \"\s*\" | \s* ) )$", re.M | re.X | re.S)
 
 def checkAndUpdate(filename):
-  # Use the parser to find a specific parameter
-  try:
-    data = ParseGetPot.readInputFile(filename)
-  except:        # ParseGetPot class
-    print "*********************************************************************\nFailed to Parse " + filename + "\n"
-    return
+    # Use the parser to find a specific parameter
+    try:
+        data = ParseGetPot.readInputFile(filename)
+    except:        # ParseGetPot class
+        print "*********************************************************************\nFailed to Parse " + filename + "\n"
+        return
 
-  if 'Executioner' in data.children:
-    new_data = data.children['Executioner']
-    if 'print_linear_residuals' in new_data.params:
-      print filename
-      update(filename)
+    if 'Executioner' in data.children:
+        new_data = data.children['Executioner']
+        if 'print_linear_residuals' in new_data.params:
+            print filename
+            update(filename)
 
-  if 'Output' in data.children:
-    new_data = data.children['Output']
-    if 'print_linear_residuals' in new_data.params:
-      print filename
-      update(filename)
+    if 'Output' in data.children:
+        new_data = data.children['Output']
+        if 'print_linear_residuals' in new_data.params:
+            print filename
+            update(filename)
 
 
 def update(filename):
-  f = open(filename)
-  lines = f.readlines()
-  f.close()
+    f = open(filename)
+    lines = f.readlines()
+    f.close()
 
-  re_linear_res = re.compile(r"(\s*)([^#]*) print_linear_residuals.*\n", re.X)
-  re_output = re.compile(r"([^#]*? \s* \[Output\].*)$(.*)$", re.X | re.M)   # .*$(.*)?$"
+    re_linear_res = re.compile(r"(\s*)([^#]*) print_linear_residuals.*\n", re.X)
+    re_output = re.compile(r"([^#]*? \s* \[Output\].*)$(.*)$", re.X | re.M)   # .*$(.*)?$"
 
-  replacement_made = False
+    replacement_made = False
 #  line_search_added = False
-  for i, line in enumerate(lines):
+    for i, line in enumerate(lines):
 
-    # Remove print_linear_residuals
-    (lines[i], num_replacements) = re_linear_res.subn("", lines[i])
-    if num_replacements:
-      replacement_made = True
+        # Remove print_linear_residuals
+        (lines[i], num_replacements) = re_linear_res.subn("", lines[i])
+        if num_replacements:
+            replacement_made = True
 
-    # Add linear_residuals
-    m = re_output.search(lines[i])
-    if m != None:
-      (lines[i], num_replacements) = re_output.subn("\g<1>\n  linear_residuals = true", lines[i])
-      replacement_made = True
+        # Add linear_residuals
+        m = re_output.search(lines[i])
+        if m != None:
+            (lines[i], num_replacements) = re_output.subn("\g<1>\n  linear_residuals = true", lines[i])
+            replacement_made = True
 
 
-    # Replace PETSC3.1 linesearch options
+        # Replace PETSC3.1 linesearch options
 #    (lines[i], num_replacements) = re_ls31_option.subn("\g<1>\g<2>", lines[i])
 #    if num_replacements:
 #      replacement_made = True
@@ -111,18 +111,18 @@ def update(filename):
 #      else:
 #        (lines[i], num_replacements) = re_ls33_value.subn("\g<1>\g<3>\n\n  line_search = '" + line_search_type + "'\n", lines[i])
 
-    # See if we've left an empty set of options now that we've replaced the solver type, remove if necessary
-    if replacement_made:
+        # See if we've left an empty set of options now that we've replaced the solver type, remove if necessary
+        if replacement_made:
 #      lines[i] = re2.sub("\g<1>", lines[i])
 
-      f = open(filename + '~tmp', 'w')
-      f.write(''.join(lines))
-      f.close()
-      os.rename(filename + '~tmp', filename)
+            f = open(filename + '~tmp', 'w')
+            f.write(''.join(lines))
+            f.close()
+            os.rename(filename + '~tmp', filename)
 
 if __name__ == '__main__':
-  parser = OptionParser()
-  parser.add_option("-u", "--update", action="store_true", dest="update", default=False)
-  parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False)
-  (global_options, args) = parser.parse_args()
-  fixupHeader()
+    parser = OptionParser()
+    parser.add_option("-u", "--update", action="store_true", dest="update", default=False)
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False)
+    (global_options, args) = parser.parse_args()
+    fixupHeader()

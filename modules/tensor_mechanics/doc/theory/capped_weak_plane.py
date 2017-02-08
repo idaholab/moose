@@ -12,33 +12,33 @@ import matplotlib.pyplot as plt
 import scipy.linalg
 
 def sw(x, eps):
-  if (x < - eps):
-    return 0
-  return 0.5 * (x + eps) - eps / np.pi * np.cos(0.5 * np.pi * x / eps)
+    if (x < - eps):
+        return 0
+    return 0.5 * (x + eps) - eps / np.pi * np.cos(0.5 * np.pi * x / eps)
 
 def yield_function(x, y, coh, tanphi, tensile, compressive, tip_s, s_tol):
-  yf_raw = [0, 0, 0]
-  yf_raw[0] = np.sqrt(y * y + tip_s * tip_s) + x * tanphi - coh
-  yf_raw[1] = x - tensile
-  yf_raw[2] = - x - compressive
+    yf_raw = [0, 0, 0]
+    yf_raw[0] = np.sqrt(y * y + tip_s * tip_s) + x * tanphi - coh
+    yf_raw[1] = x - tensile
+    yf_raw[2] = - x - compressive
 
-  # sort in ascending order
-  yf = sorted(yf_raw)
+    # sort in ascending order
+    yf = sorted(yf_raw)
 
-  # perform the smoothing
-  if yf[2] > yf[1] + s_tol:
-    return yf[2]
+    # perform the smoothing
+    if yf[2] > yf[1] + s_tol:
+        return yf[2]
 
-  yfnew = yf[2] + sw(yf[1] - yf[2], s_tol)
+    yfnew = yf[2] + sw(yf[1] - yf[2], s_tol)
 
-  if yfnew > yf[0] + s_tol:
-    return yfnew
+    if yfnew > yf[0] + s_tol:
+        return yfnew
 
-  return yfnew + sw(yf[0] - yfnew, s_tol)
+    return yfnew + sw(yf[0] - yfnew, s_tol)
 
 
 def mat_yf(x, y, coh, tanphi, tensile, compressive, tip_s, s_tol):
-  return [[yield_function(i, j, coh, tanphi, tensile, compressive, tip_s, s_tol) for i in x] for j in y]
+    return [[yield_function(i, j, coh, tanphi, tensile, compressive, tip_s, s_tol) for i in x] for j in y]
 
 
 # parse command line
@@ -58,8 +58,8 @@ p.add_option("--nf", action="store", type="int", dest="nf", default=3, help="Thi
 p.add_option("-l", action="store_true", dest="labels", help="Include labels on the contours")
 (opts, args) = p.parse_args()
 if len(args) != 4:
-   p.print_help()
-   sys.exit(1)
+    p.print_help()
+    sys.exit(1)
 (coh, tanphi, tensile, compressive) = map(float, args)
 tip_s = (opts.tip_smoother if opts.tip_smoother >= 0 else 0.1 * coh)
 s_tol = (opts.smoothing_tol if opts.smoothing_tol >= 0 else 0.1 * coh)
@@ -69,13 +69,13 @@ x = np.arange(opts.pmin, opts.pmax, (opts.pmax - opts.pmin) / opts.np)
 y = np.arange(0, opts.qmax, opts.qmax / opts.nq)
 levels = [opts.fmax]
 if opts.nf < 0:
-  levels = - opts.nf
+    levels = - opts.nf
 elif opts.nf > 1:
-  delf = (opts.fmax - opts.fmin) / (opts.nf - 1)
-  levels = np.arange(opts.fmin, opts.fmax + delf, delf)
+    delf = (opts.fmax - opts.fmin) / (opts.nf - 1)
+    levels = np.arange(opts.fmin, opts.fmax + delf, delf)
 CS = plt.contour(x, y, mat_yf(x, y, coh, tanphi, tensile, compressive, tip_s, s_tol), levels)
 if opts.labels:
-  plt.clabel(CS, inline=1, fontsize=10)
+    plt.clabel(CS, inline=1, fontsize=10)
 plt.savefig(opts.output)
 
 

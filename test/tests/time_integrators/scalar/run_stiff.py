@@ -19,59 +19,59 @@ fontP.set_size('x-small')
 
 
 def get_last_row(csv_filename):
-  '''
-  Function which returns just the last row of a CSV file.  We have to
-  read every line of the file, there was no stackoverflow example of
-  reading just the last line.
-  http://stackoverflow.com/questions/20296955/reading-last-row-from-csv-file-python-error
-  '''
-  with open(csv_filename, 'r') as f:
-    lastrow = None
-    for row in csv.reader(f):
-      if (row != []): # skip blank lines at end of file.
-        lastrow = row
-    return lastrow
+    '''
+    Function which returns just the last row of a CSV file.  We have to
+    read every line of the file, there was no stackoverflow example of
+    reading just the last line.
+    http://stackoverflow.com/questions/20296955/reading-last-row-from-csv-file-python-error
+    '''
+    with open(csv_filename, 'r') as f:
+        lastrow = None
+        for row in csv.reader(f):
+            if (row != []): # skip blank lines at end of file.
+                lastrow = row
+        return lastrow
 
 
 def run_moose(y2_exponent, dt, time_integrator, lam):
-  '''
-  Function which actually runs MOOSE.
-  '''
-  command_line_args = ['../../../moose_test-opt', '-i', 'stiff.i',
-                       'Executioner/dt={}'.format(dt),
-                       'Executioner/dtmin={}'.format(dt),
-                       'Executioner/TimeIntegrator/type={}'.format(time_integrator),
-                       'LAMBDA={}'.format(lam),
-                       'Y2_EXPONENT={}'.format(y2_exponent)]
-  try:
-    child = subprocess.Popen(command_line_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    # communicate() waits for the process to terminate, so there's no
-    # need to wait() for it.  It also sets the returncode attribute on
-    # child.
-    (stdoutdata, stderrdata) = child.communicate()
+    '''
+    Function which actually runs MOOSE.
+    '''
+    command_line_args = ['../../../moose_test-opt', '-i', 'stiff.i',
+                         'Executioner/dt={}'.format(dt),
+                         'Executioner/dtmin={}'.format(dt),
+                         'Executioner/TimeIntegrator/type={}'.format(time_integrator),
+                         'LAMBDA={}'.format(lam),
+                         'Y2_EXPONENT={}'.format(y2_exponent)]
+    try:
+        child = subprocess.Popen(command_line_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        # communicate() waits for the process to terminate, so there's no
+        # need to wait() for it.  It also sets the returncode attribute on
+        # child.
+        (stdoutdata, stderrdata) = child.communicate()
 
-    if (child.returncode != 0):
-      print('Running MOOSE failed: program output is below:')
-      print(stdoutdata)
-      raise
+        if (child.returncode != 0):
+            print('Running MOOSE failed: program output is below:')
+            print(stdoutdata)
+            raise
 
-  except:
-    print('Error executing moose_test')
-    sys.exit(1)
+    except:
+        print('Error executing moose_test')
+        sys.exit(1)
 
-  # Parse the last line of the output file to get the error at the final time.
-  #
-  # The columns are in alphabetical order, we want to look at
-  # "max_error_y1", which is the "stiff" component of the system of
-  # ODEs.
-  # The columns are currently given by:
-  # time,error_y1,error_y2,max_error_y1,max_error_y2,value_y1,value_y1_abs_max,value_y2,value_y2_abs_max,y1,y2
-  output_filename = 'stiff_out.csv'
-  last_row = get_last_row(output_filename)
-  max_error_y1 = float(last_row[3])
-  value_y1_abs_max = float(last_row[6])
-  normalized_error = max_error_y1 / value_y1_abs_max
-  return normalized_error
+    # Parse the last line of the output file to get the error at the final time.
+    #
+    # The columns are in alphabetical order, we want to look at
+    # "max_error_y1", which is the "stiff" component of the system of
+    # ODEs.
+    # The columns are currently given by:
+    # time,error_y1,error_y2,max_error_y1,max_error_y2,value_y1,value_y1_abs_max,value_y2,value_y2_abs_max,y1,y2
+    output_filename = 'stiff_out.csv'
+    last_row = get_last_row(output_filename)
+    max_error_y1 = float(last_row[3])
+    value_y1_abs_max = float(last_row[6])
+    normalized_error = max_error_y1 / value_y1_abs_max
+    return normalized_error
 
 
 
@@ -111,56 +111,56 @@ linestyles = [':', '-', '-', '--', ':', '-', '--', ':', '--', '-', '-', '-']
 #     time_integrators
 #       dts
 for lam in lams:
-  for y2_exponent in y2_exponents:
-    fig = plt.figure()
-    ax1 = fig.add_subplot(111)
+    for y2_exponent in y2_exponents:
+        fig = plt.figure()
+        ax1 = fig.add_subplot(111)
 
-    for i in xrange(len(time_integrators)):
-      time_integrator = time_integrators[i]
+        for i in xrange(len(time_integrators)):
+            time_integrator = time_integrators[i]
 
-      # Place to store the results for this TimeIntegrator
-      results = []
+            # Place to store the results for this TimeIntegrator
+            results = []
 
-      # Call MOOSE to compute the results
-      for dt in dts:
-        results.append(run_moose(y2_exponent, dt, time_integrator, lam))
+            # Call MOOSE to compute the results
+            for dt in dts:
+                results.append(run_moose(y2_exponent, dt, time_integrator, lam))
 
-      # Make plot
-      xdata = np.log10(np.reciprocal(dts))
-      ydata = np.log10(results)
+            # Make plot
+            xdata = np.log10(np.reciprocal(dts))
+            ydata = np.log10(results)
 
-      # Compute linear fit of last three points.
-      start_fit = len(xdata) - 3
-      end_fit = len(xdata)
-      fit = np.polyfit(xdata[start_fit:end_fit], ydata[start_fit:end_fit], 1)
+            # Compute linear fit of last three points.
+            start_fit = len(xdata) - 3
+            end_fit = len(xdata)
+            fit = np.polyfit(xdata[start_fit:end_fit], ydata[start_fit:end_fit], 1)
 
-      # Print results for tabulation etc.
-      print('{} (Slope={})'.format(time_integrator, fit[0]))
-      print('dt,  max_error_y1')
-      for j in xrange(len(dts)):
-        print('{}, {}'.format(dts[j], results[j]))
-      print('') # blank line
+            # Print results for tabulation etc.
+            print('{} (Slope={})'.format(time_integrator, fit[0]))
+            print('dt,  max_error_y1')
+            for j in xrange(len(dts)):
+                print('{}, {}'.format(dts[j], results[j]))
+            print('') # blank line
 
-      ax1.plot(xdata, ydata, label=time_integrator + ", $" + "{:.2f}".format(fit[0]) + "$",
-               color=colors[i], marker=markers[i], linestyle=linestyles[i])
+            ax1.plot(xdata, ydata, label=time_integrator + ", $" + "{:.2f}".format(fit[0]) + "$",
+                     color=colors[i], marker=markers[i], linestyle=linestyles[i])
 
-    # Set up the axis labels.
-    ax1.set_xlabel('$\log (\Delta t^{-1})$')
-    ax1.set_ylabel('$\log (\|e\|_{L^{\infty}} / \|y_1\|_{L^{\infty}})$')
+        # Set up the axis labels.
+        ax1.set_xlabel('$\log (\Delta t^{-1})$')
+        ax1.set_ylabel('$\log (\|e\|_{L^{\infty}} / \|y_1\|_{L^{\infty}})$')
 
-    # The input file name up to the file extension
-    filebase = 'linear'
-    if (y2_exponent != 1):
-      filebase = 'nonlinear'
+        # The input file name up to the file extension
+        filebase = 'linear'
+        if (y2_exponent != 1):
+            filebase = 'nonlinear'
 
-    # Add a title
-    ax1.set_title('{}, $\\lambda = {}$'.format(filebase.title(), lam))
+        # Add a title
+        ax1.set_title('{}, $\\lambda = {}$'.format(filebase.title(), lam))
 
-    # Add a legend
-    plt.legend(loc='lower left', prop=fontP)
+        # Add a legend
+        plt.legend(loc='lower left', prop=fontP)
 
-    # Save a PDF
-    plt.savefig(filebase + '_lambda_{}.pdf'.format(lam), format='pdf')
+        # Save a PDF
+        plt.savefig(filebase + '_lambda_{}.pdf'.format(lam), format='pdf')
 
 
 # Local Variables:

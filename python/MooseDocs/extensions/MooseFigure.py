@@ -5,49 +5,49 @@ log = logging.getLogger(__name__)
 from MooseImageFile import MooseImageFile
 
 class MooseFigure(MooseImageFile):
-  """
-  Defines syntax for adding images as numbered figures with labels that can be referenced (see MooseFigureReference)
-  """
-  RE = r'^!figure\s+(.*?)(?:$|\s+)(.*)'
-
-  def __init__(self, *args, **kwargs):
-    super(MooseFigure, self).__init__(*args, **kwargs)
-
-    self._settings['prefix'] = 'Figure'
-    self._settings['id'] = None
-    self._figure_number = 0
-
-  def initialize(self):
     """
-    Reset the figure numbering prior to processing the markdown for this page.
+    Defines syntax for adding images as numbered figures with labels that can be referenced (see MooseFigureReference)
     """
-    self._figure_number = 0
+    RE = r'^!figure\s+(.*?)(?:$|\s+)(.*)'
 
-  def handleMatch(self, match):
-    """
-    Creates the html for a numbered MOOSE figure.
-    """
+    def __init__(self, *args, **kwargs):
+        super(MooseFigure, self).__init__(*args, **kwargs)
 
-    # Increment the image number
-    self._figure_number += 1
+        self._settings['prefix'] = 'Figure'
+        self._settings['id'] = None
+        self._figure_number = 0
 
-    # Extract information from the regex match
-    rel_filename = match.group(2)
-    settings = self.getSettings(match.group(3))
+    def initialize(self):
+        """
+        Reset the figure numbering prior to processing the markdown for this page.
+        """
+        self._figure_number = 0
 
-    # Error if the 'label' setting is not provided
-    if not settings['id']:
-      return self.createErrorElement("The 'id' setting must be supplied for the figure: {}".format(rel_filename))
-    else:
-      settings['id'] = settings['id'].replace(':', '')
+    def handleMatch(self, match):
+        """
+        Creates the html for a numbered MOOSE figure.
+        """
 
-    # Update the caption to include the numbered prefix
-    if settings['caption']:
-      settings['caption'] = '{} {}: {}'.format(settings['prefix'], self._figure_number, settings['caption'])
-    else:
-      settings['caption'] = '{} {}'.format(settings['prefix'], self._figure_number)
+        # Increment the image number
+        self._figure_number += 1
 
-    # Create the element and store the number
-    el = self.createImageElement(rel_filename, settings)
-    el.set('data-moose-figure-number', str(self._figure_number))
-    return el
+        # Extract information from the regex match
+        rel_filename = match.group(2)
+        settings = self.getSettings(match.group(3))
+
+        # Error if the 'label' setting is not provided
+        if not settings['id']:
+            return self.createErrorElement("The 'id' setting must be supplied for the figure: {}".format(rel_filename))
+        else:
+            settings['id'] = settings['id'].replace(':', '')
+
+        # Update the caption to include the numbered prefix
+        if settings['caption']:
+            settings['caption'] = '{} {}: {}'.format(settings['prefix'], self._figure_number, settings['caption'])
+        else:
+            settings['caption'] = '{} {}'.format(settings['prefix'], self._figure_number)
+
+        # Create the element and store the number
+        el = self.createImageElement(rel_filename, settings)
+        el.set('data-moose-figure-number', str(self._figure_number))
+        return el
