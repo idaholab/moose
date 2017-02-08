@@ -61,8 +61,8 @@ XFEMGeometricCut3D::cutElementByGeometry(const Elem* elem,
       // This returns the lowest-order type of side.
       std::unique_ptr<Elem> curr_edge = curr_side->side(j);
       if (curr_edge->type() != EDGE2)
-        mooseError2("In cutElementByGeometry face edge must be EDGE2, but type is: ", libMesh::Utility::enum_to_string(curr_edge->type())
-                  , " base element type is: ", libMesh::Utility::enum_to_string(elem->type()));
+        mooseError2("In cutElementByGeometry face edge must be EDGE2, but type is: ", libMesh::Utility::enum_to_string(curr_edge->type()),
+                    " base element type is: ", libMesh::Utility::enum_to_string(elem->type()));
       Node * node1 = curr_edge->get_node(0);
       Node * node2 = curr_edge->get_node(1);
 

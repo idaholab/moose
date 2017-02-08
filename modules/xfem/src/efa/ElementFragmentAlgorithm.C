@@ -334,8 +334,8 @@ ElementFragmentAlgorithm::clearAncestry()
   for (unsigned int i = 0; i < _parent_elements.size(); ++i)
   {
     if (!Efa::deleteFromMap(_elements, _parent_elements[i]))
-      EFAError("Attempted to delete parent element: ", _parent_elements[i]->id()
-              , " from _elements, but couldn't find it");
+      EFAError("Attempted to delete parent element: ", _parent_elements[i]->id(),
+                " from _elements, but couldn't find it");
   }
   _parent_elements.clear();
 

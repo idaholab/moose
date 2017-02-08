@@ -50,8 +50,8 @@ CrackDataSampler::initialize()
   if (_crack_front_definition->getNumCrackFrontPoints() != _domain_integral_postprocessor_values.size())
     mooseError2("In CrackDataSampler, number of crack front nodes != number of domain integral postprocessors");
   if (_position_type == "angle" && !_crack_front_definition->hasAngleAlongFront())
-    mooseError2("In CrackDataSampler, 'position_type = Angle' specified, but angle is not available.  "
-              , "Must specify 'crack_mouth_boundary' in CrackFrontDefinition");
+    mooseError2("In CrackDataSampler, 'position_type = Angle' specified, but angle is not available.  ",
+                "Must specify 'crack_mouth_boundary' in CrackFrontDefinition");
   SamplerBase::initialize();
 }
 

@@ -183,8 +183,8 @@ SolutionUserObject::readExodusII()
     {
       std::istringstream ss(s_timestep);
       if (!(ss >> _exodus_time_index) || _exodus_time_index > n_steps)
-        mooseError2("Invalid value passed as \"timestep\". Expected \"LATEST\" or a valid integer less than "
-                  , n_steps, ", received ", s_timestep);
+        mooseError2("Invalid value passed as \"timestep\". Expected \"LATEST\" or a valid integer less than ",
+                    n_steps, ", received ", s_timestep);
     }
   }
   else

@@ -44,8 +44,8 @@ XFEMGeometricCut2D::cutElementByGeometry(const Elem* elem, std::vector<CutEdge> 
       // be an EDGE2 here because this class is for 2D only.
       std::unique_ptr<Elem> curr_side = elem->side(i);
       if (curr_side->type() != EDGE2)
-        mooseError2("In cutElementByGeometry element side must be EDGE2, but type is: ", libMesh::Utility::enum_to_string(curr_side->type())
-                  , " base element type is: ", libMesh::Utility::enum_to_string(elem->type()));
+        mooseError2("In cutElementByGeometry element side must be EDGE2, but type is: ", libMesh::Utility::enum_to_string(curr_side->type()),
+                    " base element type is: ", libMesh::Utility::enum_to_string(elem->type()));
 
       const Node *node1 = curr_side->get_node(0);
       const Node *node2 = curr_side->get_node(1);

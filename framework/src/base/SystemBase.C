@@ -614,8 +614,8 @@ SystemBase::copyVars(ExodusII_IO & io)
     {
       std::istringstream ss(vci._timestep);
       if (!(ss >> timestep) || timestep > n_steps)
-        mooseError2("Invalid value passed as \"initial_from_file_timestep\". Expected \"LATEST\" or a valid integer between 1 and "
-                  , n_steps, " inclusive, received ", vci._timestep);
+        mooseError2("Invalid value passed as \"initial_from_file_timestep\". Expected \"LATEST\" or a valid integer between 1 and ",
+                    n_steps, " inclusive, received ", vci._timestep);
     }
 
     did_copy = true;

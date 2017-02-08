@@ -157,8 +157,8 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
     if (linenum == 1)
       num_cols = itemnum;
     else if (num_cols+1 != itemnum)
-      mooseError2("In PiecewiseBilinear ", _name, ": Read ", itemnum, " columns of data but expected ", num_cols+1
-                , " columns while reading line ", linenum, " of '", _data_file_name, "'.");
+      mooseError2("In PiecewiseBilinear ", _name, ": Read ", itemnum, " columns of data but expected ", num_cols+1,
+                  " columns while reading line ", linenum, " of '", _data_file_name, "'.");
   }
 
   x.resize(itemnum-1);

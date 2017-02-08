@@ -44,8 +44,8 @@ EFAElement3D::EFAElement3D(const EFAElement3D* from_elem, bool convert_to_local)
         _local_nodes.push_back(_nodes[i]); // convenient to delete local nodes
       }
       else
-        EFAError("In EFAelement3D ", from_elem->id(), " the copy constructor must have from_elem w/ global nodes. node: "
-                , i, " category: ", from_elem->_nodes[i]->category());
+        EFAError("In EFAelement3D ", from_elem->id(), " the copy constructor must have from_elem w/ global nodes. node: ",
+                  i, " category: ", from_elem->_nodes[i]->category());
     }
 
     // copy faces, fragments and interior nodes from from_elem
@@ -343,9 +343,9 @@ EFAElement3D::setupNeighbors(std::map<EFANode*, std::set<EFAElement*> > &Inverse
         {
           if (_face_neighbors[face_id].size() > 1)
           {
-            EFAError("Element ", _id, " already has 2 face neighbors: "
-                    , _face_neighbors[face_id][0]->id(), " "
-                    , _face_neighbors[face_id][1]->id());
+            EFAError("Element ", _id, " already has 2 face neighbors: ",
+                      _face_neighbors[face_id][0]->id(), " ",
+                      _face_neighbors[face_id][1]->id());
           }
           _face_neighbors[face_id].push_back(neigh_elem);
         }
@@ -408,10 +408,10 @@ EFAElement3D::initCrackTip(std::set<EFAElement*> &CrackTipElements)
 
         //Make sure the current elment hasn't been flagged as a tip element
         if (_crack_tip_split_element)
-          EFAError("crack_tip_split_element already flagged.  In elem: ", _id
-                  , " flags: ", _crack_tip_split_element
-                  , " ", _face_neighbors[face_iter][0]->isCrackTipSplit()
-                  , " ", _face_neighbors[face_iter][1]->isCrackTipSplit());
+          EFAError("crack_tip_split_element already flagged.  In elem: ", _id,
+                    " flags: ", _crack_tip_split_element,
+                    " ", _face_neighbors[face_iter][0]->isCrackTipSplit(),
+                    " ", _face_neighbors[face_iter][1]->isCrackTipSplit());
 
         _face_neighbors[face_iter][0]->setCrackTipSplit();
         _face_neighbors[face_iter][1]->setCrackTipSplit();
@@ -547,14 +547,14 @@ EFAElement3D::willCrackTipExtend(std::vector<unsigned int> &split_neighbors) con
     {
       unsigned int neigh_idx = _crack_tip_neighbors[i]; // essentially a face_id
       if (numFaceNeighbors(neigh_idx) != 1)
-        EFAError("in will_crack_tip_extend() element ", _id, " has "
-                , _face_neighbors[neigh_idx].size(), " neighbors on face ", neigh_idx);
+        EFAError("in will_crack_tip_extend() element ", _id, " has ",
+                  _face_neighbors[neigh_idx].size(), " neighbors on face ", neigh_idx);
 
       EFAElement3D * neighbor_elem = _face_neighbors[neigh_idx][0];
       if (neighbor_elem->numFragments() > 2)
       {
-        EFAError("in will_crack_tip_extend() element ", neighbor_elem->id(), " has "
-                , neighbor_elem->numFragments(), " fragments");
+        EFAError("in will_crack_tip_extend() element ", neighbor_elem->id(), " has ",
+                  neighbor_elem->numFragments(), " fragments");
       }
       else if (neighbor_elem->numFragments() == 2)
       {
@@ -1575,8 +1575,8 @@ EFAElement3D::addFaceEdgeCut(unsigned int face_id, unsigned int edge_id, double 
     unsigned int emb_id = cut_edge->getEmbeddedNodeIndex(position, edge_node1);
     EFANode* old_emb = cut_edge->getEmbeddedNode(emb_id);
     if (embedded_node && embedded_node != old_emb)
-      EFAError("Attempting to add edge intersection when one already exists with different node."
-              , " elem: ", _id, " edge: ", edge_id, " position: ", position);
+      EFAError("Attempting to add edge intersection when one already exists with different node.",
+                " elem: ", _id, " edge: ", edge_id, " position: ", position);
     local_embedded = old_emb;
     cut_exist = true;
   }

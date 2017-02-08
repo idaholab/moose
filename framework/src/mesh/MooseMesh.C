@@ -2384,9 +2384,9 @@ void
 MooseMesh::errorIfDistributedMesh(std::string name) const
 {
   if (_use_distributed_mesh)
-    mooseError2("Cannot use ", name, " with DistributedMesh!\n"
-              , "Consider specifying parallel_type = 'replicated' in your input file\n"
-              , "to prevent it from being run with DistributedMesh.");
+    mooseError2("Cannot use ", name, " with DistributedMesh!\n",
+                "Consider specifying parallel_type = 'replicated' in your input file\n",
+                "to prevent it from being run with DistributedMesh.");
 }
 
 void

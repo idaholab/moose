@@ -383,9 +383,9 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
     {
       if (!T::_advanced_execute_on.contains(execute_data_name) ||
           (T::_advanced_execute_on[execute_data_name].isValid() && T::_advanced_execute_on[execute_data_name].contains("none")))
-        mooseWarning2("Postprocessor '", pps->PPName()
-                    , "' has requested to be output by the '", T::name()
-                    , "' output, but postprocessor output is not support by this type of output object.");
+        mooseWarning2("Postprocessor '", pps->PPName(),
+                      "' has requested to be output by the '", T::name(),
+                      "' output, but postprocessor output is not support by this type of output object.");
     }
 
     // Set the flag state for postprocessors that utilize 'outputs' parameter

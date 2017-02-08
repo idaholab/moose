@@ -124,9 +124,9 @@ InputParameters::operator=(const InputParameters & rhs)
   if (!rhs._allow_copy)
   {
     const std::string & name = rhs.get<std::string>("_object_name"); // If _allow_parameter_copy is set then so is name (see InputParameterWarehouse::addInputParameters)
-    mooseError2("Copying of the InputParameters object for the ", name, " object is not allowed.\n\nThe likely cause for this error "
-              , "is having a constructor that does not use a const reference, all constructors\nfor MooseObject based classes should be as follows:\n\n"
-              , "    MyObject::MyObject(const InputParameters & parameters);");
+    mooseError2("Copying of the InputParameters object for the ", name, " object is not allowed.\n\nThe likely cause for this error ",
+                "is having a constructor that does not use a const reference, all constructors\nfor MooseObject based classes should be as follows:\n\n",
+                "    MyObject::MyObject(const InputParameters & parameters);");
   }
 
   Parameters::operator=(rhs);

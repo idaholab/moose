@@ -847,9 +847,9 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename, const
       // registration method in it. This shouldn't be an error, so
       // we'll just move on.
 #ifdef DEBUG
-      mooseWarning2("Unable to find extern \"C\" method \"", registration_method_name \
-                  , "\" in library: ", dl_lib_full_path, ".\n" \
-                  , "This doesn't necessarily indicate an error condition unless you believe that the method should exist in that library.\n");
+      mooseWarning2("Unable to find extern \"C\" method \"", registration_method_name,
+                    "\" in library: ", dl_lib_full_path, ".\n",
+                    "This doesn't necessarily indicate an error condition unless you believe that the method should exist in that library.\n");
 #endif
 
 #ifdef LIBMESH_HAVE_DLOPEN

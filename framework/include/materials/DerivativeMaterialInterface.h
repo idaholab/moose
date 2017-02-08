@@ -379,9 +379,9 @@ DerivativeMaterialInterface<T>::validateDerivativeMaterialPropertyBase(const std
   // check if the material property does not exist on the blocks of the current object,
   // and check if it is not a plain number in the input file
   if (!haveMaterialProperty<U>(prop_name) && this->template defaultMaterialProperty<U>(prop_name) == 0)
-    mooseWarning2(   "The material property '", prop_name
-                , "' does not exist. The kernel '", this->name()
-                , "' only needs its derivatives, but this may indicate a typo in the input file.");
+    mooseWarning2(   "The material property '", prop_name,
+                  "' does not exist. The kernel '", this->name(),
+                  "' only needs its derivatives, but this may indicate a typo in the input file.");
 }
 
 template<class T>

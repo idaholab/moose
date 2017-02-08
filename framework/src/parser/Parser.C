@@ -1039,8 +1039,8 @@ void Parser::setScalarComponentParameter(const std::string & full_name, const st
   int vec_size = gp->vector_variable_size(full_name.c_str());
 
   if (vec_size != LIBMESH_DIM)
-    mooseError2(std::string("Error in Scalar Component parameter ") + full_name + ": size is ", vec_size
-              , ", should be ", LIBMESH_DIM);
+    mooseError2(std::string("Error in Scalar Component parameter ") + full_name + ": size is ", vec_size,
+                ", should be ", LIBMESH_DIM);
 
   T value;
   for (int i = 0; i < vec_size; ++i)
@@ -1069,8 +1069,8 @@ void Parser::setVectorComponentParameter(const std::string & full_name, const st
   int vec_size = gp->vector_variable_size(full_name.c_str());
 
   if (vec_size % LIBMESH_DIM)
-    mooseError2(std::string("Error in Vector Component parameter ") + full_name + ": size is ", vec_size
-              , ", should be a multiple of ", LIBMESH_DIM);
+    mooseError2(std::string("Error in Vector Component parameter ") + full_name + ": size is ", vec_size,
+                ", should be a multiple of ", LIBMESH_DIM);
 
   std::vector<T> values;
   for (int i = 0; i < vec_size / LIBMESH_DIM; ++i)
@@ -1175,8 +1175,8 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
 
   int vec_size = gp->vector_variable_size(full_name.c_str());
   if (vec_size != LIBMESH_DIM * LIBMESH_DIM)
-    mooseError2(std::string("Error in RealTensorValue parameter ") + full_name + ": size is ", vec_size
-              , ", should be ", LIBMESH_DIM * LIBMESH_DIM);
+    mooseError2(std::string("Error in RealTensorValue parameter ") + full_name + ": size is ", vec_size,
+                ", should be ", LIBMESH_DIM * LIBMESH_DIM);
 
   RealTensorValue value;
   for (int i = 0; i < LIBMESH_DIM; ++i)

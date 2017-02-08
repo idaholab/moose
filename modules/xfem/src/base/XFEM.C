@@ -627,8 +627,8 @@ XFEM::markCutEdgesByState(Real time)
       else if (mit2 != _state_marked_frags.end()) // cut-surface secondary crack initiation
       {
         if (CEMElem->numFragments() != 1)
-          mooseError2("element ", elem->id(), " flagged for a secondary crack, but has "
-                    , CEMElem->numFragments(), " fragments");
+          mooseError2("element ", elem->id(), " flagged for a secondary crack, but has ",
+                      CEMElem->numFragments(), " fragments");
         std::vector<unsigned int> interior_edge_id = CEMElem->getFragment(0)->getInteriorEdgeID();
         if (interior_edge_id.size() == 1)
           orig_cut_side_id = interior_edge_id[0];

@@ -80,8 +80,8 @@ FunctionParserUtils::evaluate(ADFunctionPtr & parser)
 
   // hard fail or return not a number
   if (_fail_on_evalerror)
-    mooseError2("DerivativeParsedMaterial function evaluation encountered an error: "
-              , _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
+    mooseError2("DerivativeParsedMaterial function evaluation encountered an error: ",
+                _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
 
   return _nan;
 }

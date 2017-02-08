@@ -358,9 +358,9 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
         mooseError2("We'll never get here!");
     } // if (cached_point.relative_fuzzy_equals(p))
     else
-      mooseError2("Cached Dirac point ", cached_point
-                , " already exists with ID: ", id
-                , " and does not match point ", p);
+      mooseError2("Cached Dirac point ", cached_point,
+                  " already exists with ID: ", id,
+                  " and does not match point ", p);
 
     // We only want one iteration of this while loop at maximum.
     i_found_it = false;
