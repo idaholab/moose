@@ -73,23 +73,21 @@ void
 ComputeUserObjectsThread::onElement(const Elem * elem)
 {
   _fe_problem.prepare(elem, _tid);
-  _fe_problem.reinitElem(elem, _tid);
-
-  // Set up Sentinel class so that, even if reinitMaterials() throws, we
-  // still remember to swap back during stack unwinding.
-  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
-  _fe_problem.reinitMaterials(_subdomain, _tid);
-
   if (_elemental_user_objects.hasActiveBlockObjects(_subdomain, _tid))
   {
+    _fe_problem.reinitElem(elem, _tid);
+
+    // Set up Sentinel class so that, even if reinitMaterials() throws, we
+    // still remember to swap back during stack unwinding.
+    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
+    _fe_problem.reinitMaterials(_subdomain, _tid);
+
     const std::vector<MooseSharedPointer<ElementUserObject> > & objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
     for (const auto & uo : objects)
       uo->execute();
-  }
 
-  // UserObject Jacobians
-  if (_fe_problem.currentlyComputingJacobian())
-    if (_elemental_user_objects.hasActiveBlockObjects(_subdomain, _tid))
+    // UserObject Jacobians
+    if (_fe_problem.currentlyComputingJacobian())
     {
       // Prepare shape functions for ShapeElementUserObjects
       std::vector<MooseVariable *> jacobian_moose_vars = _fe_problem.getUserObjectJacobianVariables(_tid);
@@ -109,6 +107,7 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
         }
       }
     }
+  }
 }
 
 void
