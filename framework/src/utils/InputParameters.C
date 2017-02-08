@@ -243,6 +243,16 @@ InputParameters::getDocString(const std::string & name) const
   return doc_string;
 }
 
+void
+InputParameters::setDocString(const std::string & name, const std::string & doc)
+{
+  std::map<std::string, std::string>::iterator doc_string_it = _doc_string.find(name);
+  if (doc_string_it == _doc_string.end())
+    mooseError("Unable to set the documentation string (using setDocString) for the \"" << name << "\" parameter, the parameter does not exist.");
+  else
+    doc_string_it->second = doc;
+}
+
 bool
 InputParameters::isParamRequired(const std::string & name) const
 {

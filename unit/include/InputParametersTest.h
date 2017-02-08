@@ -37,6 +37,8 @@ public:
   void checkControlParamTypeError();
   void checkControlParamValidError();
   void checkSuppressedError();
+  void checkSetDocString();
+  void checkSetDocStringError();
 
 private:
 };
