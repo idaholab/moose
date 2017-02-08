@@ -44,6 +44,9 @@ class MooseActionList(MooseSyntaxBase):
         el = etree.Element('div')
         el.set('class', 'moose-system-list')
 
+        # Alphabetize actions
+        actions.sort(key=lambda action: action.name)
+
         # Storage structure for <div> tags to allow for nested item creation without
         # the need for complete actions tree or sorted action objects.
         folder_divs = dict()
