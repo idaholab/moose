@@ -65,7 +65,8 @@
 [Materials]
   [./stateful]
     type = StatefulTest
-    block = 1
+    prop_names = thermal_conductivity
+    prop_values = 1.0
   [../]
 []
 

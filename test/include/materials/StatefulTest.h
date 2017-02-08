@@ -34,12 +34,17 @@ protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 
-  MaterialProperty<Real> & _thermal_conductivity;
-  MaterialProperty<Real> & _thermal_conductivity_old;
-  MaterialProperty<Real> & _thermal_conductivity_older;
-
   // optional coupled variable
   const VariableValue * _coupled_val;
+
+  std::vector<std::string> _prop_names;
+  std::vector<Real> _prop_values;
+
+  unsigned int _num_props;
+
+  std::vector<MaterialProperty<Real> *> _properties;
+  std::vector<MaterialProperty<Real> *> _properties_old;
+  std::vector<MaterialProperty<Real> *> _properties_older;
 };
 
 #endif //STATEFULTEST_H

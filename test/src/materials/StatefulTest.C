@@ -17,32 +17,53 @@ template<>
 InputParameters validParams<StatefulTest>()
 {
   InputParameters params = validParams<Material>();
+  params.addParam<std::vector<std::string> >("prop_names", "The names of the properties this material will have");
+  params.addParam<std::vector<Real> >("prop_values", "The values associated with the named properties");
   params.addCoupledVar("coupled", "Coupled Value to be used in initQpStatefulProperties()");
   return params;
 }
 
 StatefulTest::StatefulTest(const InputParameters & parameters) :
     Material(parameters),
-    _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
-    _thermal_conductivity_old(declarePropertyOld<Real>("thermal_conductivity")),
-    _thermal_conductivity_older(declarePropertyOlder<Real>("thermal_conductivity")),
-    _coupled_val(isParamValid("coupled") ? &coupledNodalValue("coupled") : nullptr)
+    _coupled_val(isParamValid("coupled") ? &coupledNodalValue("coupled") : nullptr),
+    _prop_names(getParam<std::vector<std::string> >("prop_names")),
+    _prop_values(getParam<std::vector<Real> >("prop_values"))
 {
+  unsigned int num_names = _prop_names.size();
+  unsigned int num_values = _prop_values.size();
+
+  if (num_names != num_values)
+    mooseError("Number of prop_names must match the number of prop_values for StatefulTest material!");
+
+  _num_props = num_names;
+
+  _properties.resize(num_names);
+  _properties_old.resize(num_names);
+  _properties_older.resize(num_names);
+
+  for (unsigned int i = 0; i < _num_props; ++i)
+  {
+    _properties[i] = &declareProperty<Real>(_prop_names[i]);
+    _properties_old[i] = &declarePropertyOld<Real>(_prop_names[i]);
+    _properties_older[i] = &declarePropertyOlder<Real>(_prop_names[i]);
+  }
 }
 
 void
 StatefulTest::initQpStatefulProperties()
 {
-  // Test of variable coupling in initQpStatefulProperties
   if (_coupled_val)
-    _thermal_conductivity[_qp] = (*_coupled_val)[_qp];
+    for (unsigned int i = 0; i < _num_props; ++i)
+      (*_properties[i])[_qp] = (*_coupled_val)[_qp];
   else
-    _thermal_conductivity[_qp] = 1.0;
+    for (unsigned int i = 0; i < _num_props; ++i)
+      (*_properties[i])[_qp] = _prop_values[i];
 }
 
 void
 StatefulTest::computeQpProperties()
 {
   // Really Expensive Fibonacci sequence generator!
-  _thermal_conductivity[_qp] = _thermal_conductivity_old[_qp] + _thermal_conductivity_older[_qp];
+  for (unsigned int i = 0; i < _num_props; ++i)
+    (*_properties[i])[_qp] = (*_properties_old[i])[_qp] + (*_properties_older[i])[_qp];
 }

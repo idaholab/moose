@@ -393,4 +393,3 @@ MaterialPropertyStorage::initProps(MaterialData & material_data, const Elem & el
       propsOlder(&elem, side)[i] = material_data.propsOlder()[prop_id]->init(n_qpoints);
   }
 }
-

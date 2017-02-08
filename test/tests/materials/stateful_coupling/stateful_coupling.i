@@ -50,12 +50,12 @@
     mat_prop = 'some_prop'
     coupled_mat_prop = 'thermal_conductivity'
     use_old_prop = true
-    block = 0
   [../]
 
   [./stateful_mat]
     type = StatefulTest
-    block = 0
+    prop_names = thermal_conductivity
+    prop_values = 1.0
     output_properties = thermal_conductivity
     outputs = exodus
   [../]
