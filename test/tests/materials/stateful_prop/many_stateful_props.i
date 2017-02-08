@@ -1,6 +1,15 @@
+# This test creates several unused stateful properties.
+# It's here to make sure that we don't consume too much
+# memory if we store them all. With 180x180 elements
+# we were previously seeing nearly a Gigabyte of memory
+# consumed using TBB's map. We are now using unordered
+# map which saves us 6x to 8x on memory.
+
 [Mesh]
-  dim = 3
-  file = cube.e
+  type = GeneratedMesh
+  nx = 10 #180
+  ny = 10 #180
+  dim = 2
 []
 
 [Variables]
@@ -49,22 +58,47 @@
   [./bottom]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = left
     value = 0.0
   [../]
   [./top]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = right
     value = 1.0
   [../]
 []
 
 [Materials]
-  [./stateful]
+  [./stateful1]
     type = StatefulTest
-    prop_names = thermal_conductivity
-    prop_values = 1.0
+    prop_names = 'thermal_conductivity'
+    prop_values = '1'
+  [../]
+  [./stateful2]
+    type = StatefulTest
+    prop_names = 'foo2'
+    prop_values = '2'
+  [../]
+  [./stateful3]
+    type = StatefulTest
+    prop_names = 'foo3'
+    prop_values = '3'
+  [../]
+  [./stateful4]
+    type = StatefulTest
+    prop_names = 'foo4'
+    prop_values = '4'
+  [../]
+  [./stateful5]
+    type = StatefulTest
+    prop_names = 'foo5'
+    prop_values = '5'
+  [../]
+  [./stateful6]
+    type = StatefulTest
+    prop_names = 'foo6'
+    prop_values = '6'
   [../]
 []
 
@@ -79,15 +113,16 @@
 [Executioner]
   type = Transient
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+
   l_max_its = 10
   start_time = 0.0
-  num_steps = 5
+  num_steps = 1
   dt = .1
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []

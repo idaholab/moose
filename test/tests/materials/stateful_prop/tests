@@ -85,4 +85,10 @@
     exodiff = 'spatial_adaptivity_test_out.e-s003'
     cli_args = '--error'
   [../]
+
+  [./many_stateful_props]
+    type = 'Exodiff'
+    input = 'many_stateful_props.i'
+    exodiff = 'many_stateful_props_out.e'
+  [../]
 []
