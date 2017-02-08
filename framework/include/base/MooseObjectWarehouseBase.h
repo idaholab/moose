@@ -115,13 +115,15 @@ public:
   void updateBoundaryVariableDependency(BoundaryID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
   ///@}
 
+  ///@{
+  /**
+   * Update material property dependency vector.
+   */
   void updateMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
-
   void updateBlockMatPropDependency(SubdomainID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
-
   void updateBoundaryMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
-
   void updateBoundaryMatPropDependency(BoundaryID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
+  ///@}
 
   /**
    * Populates a set of covered subdomains and the associated variable names.
@@ -168,6 +170,9 @@ protected:
   static void updateVariableDependencyHelper(std::set<MooseVariable *> & needed_moose_vars,
                                              const std::vector<std::shared_ptr<T>> & objects);
 
+  /**
+   * Helper method for updating material property dependency vector
+   */
   static void updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props,
                                             const std::vector<std:shared_ptr<T>> & objects);
 

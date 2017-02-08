@@ -179,6 +179,12 @@ public:
    */
   bool getMaterialPropertyCalled() const { return _get_material_property_called; }
 
+  /**
+   * Retrieve the set of material properties that _this_ object depends on.
+   *
+   * @return The IDs corresponding to the material properties that
+   * MUST be reinited before evaluating this object
+   */
   const std::set<unsigned int> & getMatPropDependencies() const { return _material_property_dependencies; }
 
 protected:
@@ -240,6 +246,13 @@ protected:
   /// Storage vector for MaterialProperty<Real> default objects
   std::vector<std::unique_ptr<MaterialProperty<Real>>> _default_real_properties;
 
+  /**
+   * Call this function to add the passed in material property ID to the list of material property
+   * IDs that _this_ object depends on.
+   *
+   * @param mat_prop_id The material property ID that should be added to _this_ object's material
+   * dependency list.
+   */
   void addMatPropDependency(unsigned int mat_prop_id) { _material_property_dependencies.insert(mat_prop_id); }
 
   std::set<unsigned int> _material_property_dependencies;

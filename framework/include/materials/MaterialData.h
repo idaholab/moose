@@ -129,6 +129,13 @@ public:
    */
   const MaterialPropertyStorage & getMaterialPropertyStorage() const { return _storage; }
 
+  /**
+   * Wrapper for MaterialStorage::getPropertyId. Allows classes with a MaterialData object
+   * (i.e. MaterialPropertyInterface) to access material property IDs.
+   * @param prop_name The name of the material property
+   *
+   * @return An unsigned int corresponding to the property ID of the passed in prop_name
+   */
   unsigned int getPropertyId(const std::string & prop_name) const { return _storage.getPropertyId(prop_name); }
 
 protected:

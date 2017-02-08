@@ -253,12 +253,36 @@ public:
    */
   virtual void clearActiveElementalMooseVariables(THREAD_ID tid) override;
 
+  /**
+   * Record and set the material properties required by the current computing thread.
+   * @param mat_prop_ids The set of material properties required by the current computing thread.
+   *
+   * @param tid The thread id
+   */
   virtual void setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids, THREAD_ID tid) override;
 
+  /**
+   * Get the material properties required by the current computing thread.
+   *
+   * @param tid The thread id
+   */
   virtual const std::set<unsigned int> & getActiveMaterialProperties(THREAD_ID tid) override;
 
+  /**
+   * Method to check whether or not a list of active material roperties has been set. This method
+   * is called by reinitMaterials to determine whether Material computeProperties methods need to be
+   * called. If the return is False, this check prevents unnecessary material property computation
+   * @param tid The thread id
+   *
+   * @return True if there has been a list of active material properties set, False otherwise
+   */
   virtual bool hasActiveMaterialProperties(THREAD_ID tid) override;
 
+  /**
+   * Clear the active material properties. Should be called at the end of every computing thread
+   *
+   * @param tid The thread id
+   */
   virtual void clearActiveMaterialProperties(THREAD_ID tid) override;
 
   virtual void createQRules(QuadratureType type, Order order, Order volume_order=INVALID_ORDER, Order face_order=INVALID_ORDER);
