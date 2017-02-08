@@ -42,15 +42,15 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters) :
 
   /// Check that the number of components entered is not greater than the total number of components
   if (_fluid_component >= num_components)
-    mooseError("The Dictator proclaims that the number of components in this simulation is " << num_components << " whereas you have used the Postprocessor PorousFlowFluidMass with component = " << _fluid_component << ".  The Dictator does not take such mistakes lightly.");
+    mooseError2("The Dictator proclaims that the number of components in this simulation is ", num_components, " whereas you have used the Postprocessor PorousFlowFluidMass with component = ", _fluid_component, ".  The Dictator does not take such mistakes lightly.");
 
   /// Check that the number of phases entered is not more than the total possible phases
   if (_phase_index.size() > num_phases)
-   mooseError("The Dictator decrees that the number of phases in this simulation is " << num_phases << " but you have entered " << _phase_index.size() << " phases in the Postprocessor " << _name);
+   mooseError2("The Dictator decrees that the number of phases in this simulation is ", num_phases, " but you have entered ", _phase_index.size(), " phases in the Postprocessor ", _name);
 
   /// Check that kernel_variable_number is OK
   if (getParam<unsigned>("kernel_variable_number") >= _dictator.numVariables())
-    mooseError("PorousFlowFluidMass: The dictator pronounces that the number of porous-flow variables is " << _dictator.numVariables() << ", however you have used kernel_variable_number = " << getParam<unsigned>("kernel_variable_number") << ".  This is an error");
+    mooseError2("PorousFlowFluidMass: The dictator pronounces that the number of porous-flow variables is ", _dictator.numVariables(), ", however you have used kernel_variable_number = ", getParam<unsigned>("kernel_variable_number"), ".  This is an error");
 
   /**
    * Also check that the phase indices entered are not greater than the number of phases
@@ -61,12 +61,12 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters) :
   {
     unsigned int max_phase_num = * std::max_element(_phase_index.begin(), _phase_index.end());
     if (max_phase_num > num_phases - 1)
-      mooseError("The Dictator proclaims that the phase index " << max_phase_num << " in the Postprocessor " << _name << " is greater than the largest phase index possible, which is " << num_phases - 1);
+      mooseError2("The Dictator proclaims that the phase index ", max_phase_num, " in the Postprocessor ", _name, " is greater than the largest phase index possible, which is ", num_phases - 1);
   }
 
   /// Using saturation_threshold only makes sense for a specific phase_index
   if (_saturation_threshold < 1.0 && _phase_index.size() != 1)
-    mooseError("A single phase_index must be entered when prescribing a saturation_threshold in the Postprocessor " << _name);
+    mooseError2("A single phase_index must be entered when prescribing a saturation_threshold in the Postprocessor ", _name);
 
   /// If _phase_index is empty, create vector of all phase numbers to calculate mass over all phases
   if (_phase_index.empty())

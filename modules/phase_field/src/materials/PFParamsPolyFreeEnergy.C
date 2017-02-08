@@ -70,7 +70,7 @@ PFParamsPolyFreeEnergy::computeQpProperties()
       KN = 0.835510425;
       break;
     default:
-      mooseError("Error in PFParamsPolyFreeEnergy: incorrect polynomial order");
+      mooseError2("Error in PFParamsPolyFreeEnergy: incorrect polynomial order");
   }
 
   // Convert surface energy from J/m2 to eV/length_scale
@@ -95,7 +95,7 @@ PFParamsPolyFreeEnergy::computeQpProperties()
       Co = std::pow(2.0, 9.0)*( 15.0/4.0*a - 15.0/4.0*a*a + 3.0/8.0 );
       break;
     default:
-      mooseError("Error in PFParamsPolyFreeEnergy: incorrect polynomial order");
+      mooseError2("Error in PFParamsPolyFreeEnergy: incorrect polynomial order");
   }
 
   _M[_qp] = KN/Co*(_D[_qp]*_int_width/surf_energy);

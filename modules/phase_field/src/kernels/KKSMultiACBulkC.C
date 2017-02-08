@@ -24,7 +24,7 @@ KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters) :
     _prop_d2F1dc12(getMaterialPropertyDerivative<Real>(_Fj_names[0], _c1_name, _c1_name))
 {
   if (_num_j != coupledComponents("cj_names"))
-    mooseError("Need to pass in as many cj_names as Fj_names in KKSMultiACBulkC " << name());
+    mooseError2("Need to pass in as many cj_names as Fj_names in KKSMultiACBulkC ", name());
 
   // Load concentration variables into the arrays
   for (unsigned int i = 0; i < _num_j; ++i)
@@ -72,7 +72,7 @@ KKSMultiACBulkC::computeDFDOP(PFFunctionType type)
       return -_phi[_j][_qp] * _prop_dF1dc1[_qp] * sum;
   }
 
-  mooseError("Invalid type passed in");
+  mooseError2("Invalid type passed in");
 }
 
 Real

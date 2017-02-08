@@ -93,7 +93,7 @@ CompositeTensorBase<T,U>::CompositeTensorBase(const InputParameters & parameters
     _d2weights(_num_comp)
 {
   if (_num_comp != _weight_names.size())
-    mooseError("The number of supplied 'tensors' and 'weights' must match.");
+    mooseError2("The number of supplied 'tensors' and 'weights' must match.");
 }
 
 template<class T, class U>

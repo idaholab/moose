@@ -68,7 +68,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters) :
     _is_transient(_subproblem.isTransient())
 {
   if (_ebsd_reader && !_ebsd_op_var)
-    mooseError("EBSD OP variable must be supplied if the reader is supplied");
+    mooseError2("EBSD OP variable must be supplied if the reader is supplied");
 }
 
 GrainTracker::~GrainTracker()
@@ -430,7 +430,7 @@ GrainTracker::expandEBSDGrains()
 
           auto elem_vector_it = node_to_elem_map.find(current_node->id());
           if (elem_vector_it == node_to_elem_map.end())
-            mooseError("Error in node to elem map");
+            mooseError2("Error in node to elem map");
 
           const auto & elem_vector = elem_vector_it->second;
 
@@ -767,7 +767,7 @@ GrainTracker::trackGrains()
       {
         // See if we've been instructed to terminate with an error
         if (!_first_time && _error_on_grain_creation)
-          mooseError("Error: New grain detected and \"error_on_new_grain_creation\" is set to true");
+          mooseError2("Error: New grain detected and \"error_on_new_grain_creation\" is set to true");
         else
           newGrainCreated(new_id);
       }
@@ -911,8 +911,8 @@ GrainTracker::remapGrains()
             else if (!attemptGrainRenumber(grain1, 0, max))
             {
               _console << std::flush;
-              mooseError(COLOR_RED << "Unable to find any suitable order parameters for remapping."
-                         " Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
+              mooseError2(COLOR_RED, "Unable to find any suitable order parameters for remapping."
+                         " Perhaps you need more op variables?\n\n", COLOR_DEFAULT);
             }
 
           grains_remapped = true;
@@ -945,8 +945,8 @@ GrainTracker::remapGrains()
                        && !attemptGrainRenumber(grain2, 0, max))
               {
                 _console << std::flush;
-                mooseError(COLOR_RED << "Unable to find any suitable order parameters for remapping."
-                           " Perhaps you need more op variables?\n\n" << COLOR_DEFAULT);
+                mooseError2(COLOR_RED, "Unable to find any suitable order parameters for remapping."
+                           " Perhaps you need more op variables?\n\n", COLOR_DEFAULT);
               }
 
             grains_remapped = true;
@@ -961,7 +961,7 @@ GrainTracker::remapGrains()
     if (_ebsd_reader)
       for (auto & ebsd_pair : ebsd_pairs)
         if (_feature_sets[ebsd_pair.first]._var_index != _feature_sets[ebsd_pair.first]._var_index)
-          mooseError("EBSD split grain remapped - This case is currently not handled");
+          mooseError2("EBSD split grain remapped - This case is currently not handled");
 
     /**
      * The remapping loop is complete but only on the master process.

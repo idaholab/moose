@@ -111,7 +111,7 @@ MultiDContactConstraint::updateContactSet()
       break;
 
     default:
-      mooseError("Invalid or unavailable contact model");
+      mooseError2("Invalid or unavailable contact model");
       break;
     }
 
@@ -195,7 +195,7 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
       break;
 
     default:
-      mooseError("Invalid or unavailable contact model");
+      mooseError2("Invalid or unavailable contact model");
       break;
     }
     return _test_slave[_i][_qp] * resid;
@@ -212,7 +212,7 @@ MultiDContactConstraint::computeQpResidual(Moose::ConstraintType type)
       break;
 
     default:
-      mooseError("Invalid or unavailable contact model");
+      mooseError2("Invalid or unavailable contact model");
       break;
     }
     return _test_master[_i][_qp] * resid;
@@ -245,7 +245,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
       break;
 
     default:
-      mooseError("Invalid or unavailable contact model");
+      mooseError2("Invalid or unavailable contact model");
       break;
     }
     return _test_slave[_i][_qp] * slave_jac;
@@ -266,7 +266,7 @@ MultiDContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
       break;
 
     default:
-      mooseError("Invalid or unavailable contact model");
+      mooseError2("Invalid or unavailable contact model");
       break;
     }
     return _test_slave[_i][_qp] * slave_jac;

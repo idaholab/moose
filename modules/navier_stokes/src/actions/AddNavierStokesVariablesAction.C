@@ -50,7 +50,7 @@ AddNavierStokesVariablesAction::act()
 
   // Make sure the number of scaling parameters matches the number of variables
   if (_scaling.size() != _vars.size())
-    mooseError("Must provide a scaling parameter for each variable.");
+    mooseError2("Must provide a scaling parameter for each variable.");
 
   // All variables have the same type
   FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),

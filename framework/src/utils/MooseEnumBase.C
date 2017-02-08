@@ -30,7 +30,7 @@ MooseEnumBase::MooseEnumBase(std::string names, bool allow_out_of_range) :
 {
   if (names.find(',') != std::string::npos)
   {
-    mooseDeprecated("Please use a space to separate options in a MooseEnum, commas are deprecated\nMooseEnum initialized with names: \"" << names << '\"');
+    mooseDeprecated2("Please use a space to separate options in a MooseEnum, commas are deprecated\nMooseEnum initialized with names: \"", names, '\"');
     fillNames(names, ",");
   }
   else
@@ -82,13 +82,13 @@ MooseEnumBase::fillNames(std::string names, std::string option_delim)
 
     // Make sure the option is not malformed
     if (elements[i].find_first_of('=') == 0 || elements[i].find_last_of('=') == elements[i].length()-1)
-      mooseError("You cannot place whitespace around the '=' character in MooseEnumBase");
+      mooseError2("You cannot place whitespace around the '=' character in MooseEnumBase");
 
     // split on equals sign
     MooseUtils::tokenize(MooseUtils::trim(elements[i]), name_value, 1, "=");
 
     if (name_value.size() < 1 || name_value.size() > 2)
-      mooseError("Invalid option supplied in MooseEnumBase: " << elements[i]);
+      mooseError2("Invalid option supplied in MooseEnumBase: ", elements[i]);
 
     // See if there is a value supplied for this option
     // strtol allows for proper conversions of both int and hex strings
@@ -120,8 +120,8 @@ MooseEnumBase::checkDeprecatedBase(const std::string & name_upper) const
   if (it != _deprecated_names.end())
   {
     if (it->second != "")
-      mooseWarning(name_upper + " is deprecated, consider using " + it->second);
+      mooseWarning2(name_upper + " is deprecated, consider using " + it->second);
     else
-      mooseWarning(name_upper + " is deprecated");
+      mooseWarning2(name_upper + " is deprecated");
   }
 }

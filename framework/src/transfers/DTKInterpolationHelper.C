@@ -98,7 +98,7 @@ DTKInterpolationHelper::transferWithOffset(unsigned int from,
   unsigned int dim = 3;
 
   if (from_es && to_es && (from_es->get_mesh().mesh_dimension() < to_es->get_mesh().mesh_dimension()))
-    mooseError("Receiving system dimension should be less than or equal to the sending system dimension!");
+    mooseError2("Receiving system dimension should be less than or equal to the sending system dimension!");
 
   if (from_es && to_es)
     dim = std::max(from_es->get_mesh().mesh_dimension(), to_es->get_mesh().mesh_dimension());

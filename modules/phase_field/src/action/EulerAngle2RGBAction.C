@@ -68,6 +68,6 @@ EulerAngle2RGBAction::act()
       _problem->addAuxKernel("EulerAngleProvider2RGBAux", var_name, params);
     }
     else
-      mooseError("Internal error in EulerAngle2RGBAction.");
+      mooseError2("Internal error in EulerAngle2RGBAction.");
   }
 }

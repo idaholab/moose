@@ -441,7 +441,7 @@ MooseVariable::nodalValue()
     return _nodal_u;
   }
   else
-    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+    mooseError2("Nodal values can be requested only on nodal variables, variable '", name(), "' is not nodal.");
 }
 
 const VariableValue &
@@ -453,7 +453,7 @@ MooseVariable::nodalValueOld()
     return _nodal_u_old;
   }
   else
-    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+    mooseError2("Nodal values can be requested only on nodal variables, variable '", name(), "' is not nodal.");
 }
 
 const VariableValue &
@@ -465,7 +465,7 @@ MooseVariable::nodalValueOlder()
     return _nodal_u_older;
   }
   else
-    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+    mooseError2("Nodal values can be requested only on nodal variables, variable '", name(), "' is not nodal.");
 }
 
 const VariableValue &
@@ -477,7 +477,7 @@ MooseVariable::nodalValueDot()
     return _nodal_u_dot;
   }
   else
-    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+    mooseError2("Nodal values can be requested only on nodal variables, variable '", name(), "' is not nodal.");
 }
 
 const VariableValue &
@@ -489,7 +489,7 @@ MooseVariable::nodalValueNeighbor()
     return _nodal_u_neighbor;
   }
   else
-    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+    mooseError2("Nodal values can be requested only on nodal variables, variable '", name(), "' is not nodal.");
 }
 
 const VariableValue &
@@ -501,7 +501,7 @@ MooseVariable::nodalValueOldNeighbor()
     return _nodal_u_old_neighbor;
   }
   else
-    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+    mooseError2("Nodal values can be requested only on nodal variables, variable '", name(), "' is not nodal.");
 }
 
 const VariableValue &
@@ -513,7 +513,7 @@ MooseVariable::nodalValueOlderNeighbor()
     return _nodal_u_older_neighbor;
   }
   else
-    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+    mooseError2("Nodal values can be requested only on nodal variables, variable '", name(), "' is not nodal.");
 }
 
 const VariableValue &
@@ -525,7 +525,7 @@ MooseVariable::nodalValueDotNeighbor()
     return _nodal_u_dot_neighbor;
   }
   else
-    mooseError("Nodal values can be requested only on nodal variables, variable '" << name() << "' is not nodal.");
+    mooseError2("Nodal values can be requested only on nodal variables, variable '", name(), "' is not nodal.");
 }
 
 
@@ -1552,7 +1552,7 @@ MooseVariable::setNodalValueNeighbor(const DenseVector<Number> & values)
   _has_nodal_value_neighbor = true;
 
   if (isNodal())
-    mooseError("Variable " + name() + " has to be nodal!");
+    mooseError2("Variable " + name() + " has to be nodal!");
   else
   {
     for (unsigned int qp=0; qp<_u_neighbor.size(); qp++)
@@ -1608,7 +1608,7 @@ void
 MooseVariable::computeIncrementAtNode(const NumericVector<Number> & increment_vec)
 {
   if (!isNodal())
-    mooseError("computeIncrementAtNode can only be called for nodal variables");
+    mooseError2("computeIncrementAtNode can only be called for nodal variables");
 
   _increment.resize(1);
 

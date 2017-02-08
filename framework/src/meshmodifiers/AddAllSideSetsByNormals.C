@@ -42,7 +42,7 @@ AddAllSideSetsByNormals::modify()
   setup();
 
   if (!_mesh_ptr)
-    mooseError("_mesh_ptr must be initialized before calling AddAllSideSetsByNormals::modify()!");
+    mooseError2("_mesh_ptr must be initialized before calling AddAllSideSetsByNormals::modify()!");
 
   // We can't call this in the constructor, it appears that _mesh_ptr is always NULL there.
   _mesh_ptr->errorIfDistributedMesh("AddAllSideSetsByNormals");

@@ -87,7 +87,7 @@ AddPeriodicBCAction::autoTranslationBoundaries()
       // If we can't detect the orthogonal dimension ranges for this
       // Mesh, then auto_direction periodicity isn't going to work.
       if (!is_orthogonal_mesh)
-        mooseError("Could not detect orthogonal dimension ranges for DistributedMesh.");
+        mooseError2("Could not detect orthogonal dimension ranges for DistributedMesh.");
     }
 
     NonlinearSystemBase & nl = _problem->getNonlinearSystemBase();
@@ -102,13 +102,13 @@ AddPeriodicBCAction::autoTranslationBoundaries()
       else if (dir == "Y" || dir == "y")
       {
         if (dim_offset < 0)
-          mooseError("Cannot wrap 'Y' direction when using a 1D mesh");
+          mooseError2("Cannot wrap 'Y' direction when using a 1D mesh");
         component = 1;
       }
       else if (dir == "Z" || dir == "z")
       {
         if (dim_offset <= 0)
-          mooseError("Cannot wrap 'Z' direction when using a 1D or 2D mesh");
+          mooseError2("Cannot wrap 'Z' direction when using a 1D or 2D mesh");
         component = 2;
       }
 
@@ -120,7 +120,7 @@ AddPeriodicBCAction::autoTranslationBoundaries()
         PeriodicBoundary p(v);
 
         if (boundary_ids == NULL)
-          mooseError("Couldn't auto-detect a paired boundary for use with periodic boundary conditions");
+          mooseError2("Couldn't auto-detect a paired boundary for use with periodic boundary conditions");
 
         p.myboundary = boundary_ids->first;
         p.pairedboundary = boundary_ids->second;
@@ -169,7 +169,7 @@ AddPeriodicBCAction::act()
     // If the user provided a forward transformation, he must also provide an inverse -- we can't
     // form the inverse of an arbitrary function automatically...
     if (inv_fn_names == std::vector<std::string>())
-      mooseError("You must provide an inv_transform_func for FunctionPeriodicBoundary!");
+      mooseError2("You must provide an inv_transform_func for FunctionPeriodicBoundary!");
 
     FunctionPeriodicBoundary pb(*_problem, fn_names);
     pb.myboundary = _mesh->getBoundaryID(getParam<BoundaryName>("primary"));
@@ -191,6 +191,6 @@ AddPeriodicBCAction::act()
   }
   else
   {
-    mooseError("You have to specify either 'auto_direction', 'translation' or 'trans_func' in your period boundary section '" + _name + "'");
+    mooseError2("You have to specify either 'auto_direction', 'translation' or 'trans_func' in your period boundary section '" + _name + "'");
   }
 }

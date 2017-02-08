@@ -40,7 +40,7 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters) :
   else if (temp_formulation == "kinematic")
     _formulation = Moose::Kinematic;
   else
-    mooseError("Formulation must be either Penalty or Kinematic");
+    mooseError2("Formulation must be either Penalty or Kinematic");
 }
 
 void

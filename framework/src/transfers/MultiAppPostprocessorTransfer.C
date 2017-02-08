@@ -42,7 +42,7 @@ MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParamete
 {
   if (_direction == FROM_MULTIAPP)
     if (!_reduction_type.isValid())
-      mooseError("In MultiAppPostprocessorTransfer, must specify 'reduction_type' if direction = from_multiapp");
+      mooseError2("In MultiAppPostprocessorTransfer, must specify 'reduction_type' if direction = from_multiapp");
 }
 
 void
@@ -81,7 +81,7 @@ MultiAppPostprocessorTransfer::execute()
           reduced_pp_value = std::numeric_limits<Real>::max();
           break;
         default:
-          mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
+          mooseError2("Can't get here unless someone adds a new enum and fails to add it to this switch");
       }
 
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
@@ -102,7 +102,7 @@ MultiAppPostprocessorTransfer::execute()
               reduced_pp_value = std::min(curr_pp_value,reduced_pp_value);
               break;
           default:
-            mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
+            mooseError2("Can't get here unless someone adds a new enum and fails to add it to this switch");
           }
         }
       }
@@ -123,7 +123,7 @@ MultiAppPostprocessorTransfer::execute()
           _communicator.min(reduced_pp_value);
           break;
       default:
-        mooseError("Can't get here unless someone adds a new enum and fails to add it to this switch");
+        mooseError2("Can't get here unless someone adds a new enum and fails to add it to this switch");
       }
 
       to_problem.getPostprocessorValue(_to_pp_name) = reduced_pp_value;

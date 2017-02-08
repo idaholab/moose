@@ -56,7 +56,7 @@ ParsedSubdomainMeshModifier::ParsedSubdomainMeshModifier(const InputParameters &
 
   // parse function
   if (_func_F->Parse(_function, "x,y,z") >= 0)
-    mooseError("Invalid function\n" << _function << "\nin ParsedSubdomainMeshModifier " << name() << ".\n" << _func_F->ErrorMsg());
+    mooseError2("Invalid function\n", _function, "\nin ParsedSubdomainMeshModifier ", name(), ".\n", _func_F->ErrorMsg());
 
   _func_params.resize(3);
 }
@@ -66,7 +66,7 @@ ParsedSubdomainMeshModifier::modify()
 {
   // Check that we have access to the mesh
   if (!_mesh_ptr)
-    mooseError("_mesh_ptr must be initialized before calling ParsedSubdomainMeshModifier::modify()");
+    mooseError2("_mesh_ptr must be initialized before calling ParsedSubdomainMeshModifier::modify()");
 
   // Reference the the libMesh::MeshBase
   MeshBase & mesh = _mesh_ptr->getMesh();

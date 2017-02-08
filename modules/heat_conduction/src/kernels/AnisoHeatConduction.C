@@ -43,25 +43,25 @@ AnisoHeatConduction::AnisoHeatConduction(const InputParameters & parameters) :
 
 
   if (!_k_i[0])
-    mooseError("No thermal conductivity was defined");
+    mooseError2("No thermal conductivity was defined");
 
   if (!_k_i[0] && _k_i[1])
-    mooseError("Cannot define y conductivity but not x");
+    mooseError2("Cannot define y conductivity but not x");
 
   if (_k_i[2] && (!_k_i[0] || !_k_i[1]))
-    mooseError("Cannot define z conductivty but not x and y");
+    mooseError2("Cannot define z conductivty but not x and y");
 
   if (_dim == 2 && !_k_i[1])
-    mooseError("Must define x and y thermal conductivities for 2D");
+    mooseError2("Must define x and y thermal conductivities for 2D");
 
   if (_dim == 3 && (!_k_i[1] || !_k_i[2]))
-    mooseError("Must define x, y, and z thermal conductivities for 3D");
+    mooseError2("Must define x, y, and z thermal conductivities for 3D");
 
   if (_dim == 2 && !(_k_i_dT[0] && _k_i_dT[1]))
-    mooseError("Must define k_x_dT and k_y_dT for 2D");
+    mooseError2("Must define k_x_dT and k_y_dT for 2D");
 
   if (_dim == 3 && !(_k_i_dT[0] && _k_i_dT[1] && _k_i_dT[2]))
-    mooseError("Must define k_x_dT, k_y_dT, and k_z_dT for 3D");
+    mooseError2("Must define k_x_dT, k_y_dT, and k_z_dT for 3D");
 }
 
 Real

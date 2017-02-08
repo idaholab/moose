@@ -58,11 +58,11 @@ Axisymmetric2D3DSolutionFunction::Axisymmetric2D3DSolutionFunction(const InputPa
     _var_names(getParam<std::vector<std::string> >("from_variables"))
 {
   if (_has_component && _var_names.size() != 2)
-    mooseError("Must supply names of 2 variables in 'from_variables' if 'component' is specified");
+    mooseError2("Must supply names of 2 variables in 'from_variables' if 'component' is specified");
   else if (!_has_component && _var_names.size() == 2)
-    mooseError("Must supply 'component' if 2 variables specified in 'from_variables'");
+    mooseError2("Must supply 'component' if 2 variables specified in 'from_variables'");
   else if (_var_names.size() > 2)
-    mooseError("If 'from_variables' is specified, it must have either 1 (scalar) or 2 (vector components) variables");
+    mooseError2("If 'from_variables' is specified, it must have either 1 (scalar) or 2 (vector components) variables");
 
   Point zero;
   Point unit_vec_y;
@@ -76,9 +76,9 @@ Axisymmetric2D3DSolutionFunction::Axisymmetric2D3DSolutionFunction(const InputPa
     _default_axes = false;
 
   if (_3d_axis_point1.relative_fuzzy_equals(_3d_axis_point2))
-    mooseError("3d_axis_point1 and 3d_axis_point2 must be different points");
+    mooseError2("3d_axis_point1 and 3d_axis_point2 must be different points");
   if (_2d_axis_point1.relative_fuzzy_equals(_2d_axis_point2))
-    mooseError("2d_axis_point1 and 2d_axis_point2 must be different points");
+    mooseError2("2d_axis_point1 and 2d_axis_point2 must be different points");
 }
 
 void
@@ -96,15 +96,15 @@ Axisymmetric2D3DSolutionFunction::initialSetup()
 
     // If there are more than one, throw an error
     if (vars.size() > 1)
-      mooseError("If the SolutionUserObject contains multiple variables, the variable name must be specified in the input file with 'from_variables'");
+      mooseError2("If the SolutionUserObject contains multiple variables, the variable name must be specified in the input file with 'from_variables'");
 
     // Define the variable
     _var_names.push_back(vars[0]);
   }
   if (_2d_axis_point1(2) != 0)
-    mooseError("3rd component of 2d_axis_point1 must be zero");
+    mooseError2("3rd component of 2d_axis_point1 must be zero");
   if (_2d_axis_point2(2) != 0)
-    mooseError("3rd component of 2d_axis_point2 must be zero");
+    mooseError2("3rd component of 2d_axis_point2 must be zero");
 
   _solution_object_var_indices.resize(_var_names.size());
   for (unsigned int i = 0; i < _var_names.size(); ++i)
@@ -173,7 +173,7 @@ Axisymmetric2D3DSolutionFunction::value(Real t, const Point & p)
     val_vec_rz(0) = r_dir_2d(0)*val_x + r_dir_2d(1)*val_y;
     val_vec_rz(1) = z_dir_2d(0)*val_x + z_dir_2d(1)*val_y;
     if (!r_gt_zero && !MooseUtils::absoluteFuzzyEqual(val_vec_rz(0),0.0))
-      mooseError("In Axisymmetric2D3DSolutionFunction r=0 and r component of value vector != 0");
+      mooseError2("In Axisymmetric2D3DSolutionFunction r=0 and r component of value vector != 0");
     Point val_vec_3d = val_vec_rz(0)*r_dir_3d + val_vec_rz(1)*z_dir_3d;
 
     val = val_vec_3d(_component);

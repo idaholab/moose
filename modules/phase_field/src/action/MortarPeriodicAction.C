@@ -36,7 +36,7 @@ MortarPeriodicAction::act()
   // get the mesh
   MooseSharedPointer<MortarPeriodicMesh> mesh = MooseSharedNamespace::dynamic_pointer_cast<MortarPeriodicMesh>(_mesh);
   if (!mesh)
-    mooseError("Please use a MortarPeriodicMesh in your simulation.");
+    mooseError2("Please use a MortarPeriodicMesh in your simulation.");
 
   // mesh dimension
   const unsigned short dim = mesh->dimension();
@@ -94,7 +94,7 @@ MortarPeriodicAction::act()
               break;
 
             default:
-              mooseError("Periodicity type not implemented");
+              mooseError2("Periodicity type not implemented");
           }
         }
       }
@@ -144,7 +144,7 @@ MortarPeriodicAction::act()
               break;
 
             default:
-              mooseError("Periodicity type not implemented");
+              mooseError2("Periodicity type not implemented");
           }
         }
       }

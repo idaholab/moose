@@ -58,7 +58,7 @@ LinearInterpolationMaterial::LinearInterpolationMaterial(const InputParameters &
     }
     catch (std::domain_error & e)
     {
-      mooseError("In LinearInterpolationMaterial " << _name << ": " << e.what());
+      mooseError2("In LinearInterpolationMaterial ", _name, ": ", e.what());
     }
 
     _linear_interp->dumpSampleFile(getParam<std::string>("prop_name"),

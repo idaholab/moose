@@ -95,7 +95,7 @@ extern bool _warnings_are_errors;
 extern bool _deprecated_is_error;
 
 /**
- * Variable to turn on exceptions during mooseError() and mooseWarning(), should
+ * Variable to turn on exceptions during mooseError2() and mooseWarning2(), should
  * only be used with MOOSE unit.
  */
 extern bool _throw_on_error;

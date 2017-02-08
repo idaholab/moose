@@ -363,7 +363,7 @@ MaterialPropertyStorage::retrievePropertyId (const std::string & prop_name) cons
 {
   auto it = _prop_ids.find(prop_name);
   if (it == _prop_ids.end())
-    mooseError("MaterialPropertyStorage: property " + prop_name + " is not yet declared");
+    mooseError2("MaterialPropertyStorage: property " + prop_name + " is not yet declared");
   return it->second;
 }
 

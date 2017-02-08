@@ -54,7 +54,7 @@ IsotropicPowerLawHardening::computeStressInitialize(unsigned qp, Real effectiveT
   const SymmIsotropicElasticityTensor * eT = dynamic_cast<const SymmIsotropicElasticityTensor*>(&elasticityTensor);
   if (!eT)
   {
-    mooseError("IsotropicPowerLawHardening requires a SymmIsotropicElasticityTensor");
+    mooseError2("IsotropicPowerLawHardening requires a SymmIsotropicElasticityTensor");
   }
   _shear_modulus = eT->shearModulus();
   _youngs_modulus = eT->youngsModulus();

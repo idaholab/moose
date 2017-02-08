@@ -212,7 +212,7 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name)
     for (const auto & block_id : _mi_block_ids)
       oss << " " << block_id;
     oss << "\n";
-    mooseError(oss.str());
+    mooseError2(oss.str());
   }
 
   // Check boundary compatibility
@@ -228,7 +228,7 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name)
     for (const auto & bnd_id : _mi_boundary_ids)
       oss << " " << bnd_id;
     oss << "\n";
-    mooseError(oss.str());
+    mooseError2(oss.str());
   }
 
   return *discrete;
@@ -238,5 +238,5 @@ void
 MaterialPropertyInterface::checkExecutionStage()
 {
   if (_mi_feproblem.startedInitialSetup())
-    mooseError("Material properties must be retrieved during object construction to ensure correct problem integrity validation.");
+    mooseError2("Material properties must be retrieved during object construction to ensure correct problem integrity validation.");
 }

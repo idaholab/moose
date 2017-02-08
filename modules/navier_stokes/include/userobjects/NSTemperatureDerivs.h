@@ -76,7 +76,7 @@ Real NSTemperatureDerivs<T>::get_grad(unsigned i)
       return -U0 * tmp;
 
     default:
-      mooseError("Should not get here!");
+      mooseError2("Should not get here!");
       break;
   }
 }
@@ -147,7 +147,7 @@ Real NSTemperatureDerivs<T>::get_hess(unsigned i, unsigned j)
       return 0.0;
 
     default:
-      mooseError("Should not get here!");
+      mooseError2("Should not get here!");
       break;
   }
 

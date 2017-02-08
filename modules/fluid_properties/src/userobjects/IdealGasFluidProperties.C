@@ -42,7 +42,7 @@ Real
 IdealGasFluidProperties::pressure(Real v, Real u) const
 {
   if (v == 0.0)
-    mooseError(name() << ": Invalid value of specific volume detected (v = " << v << ").");
+    mooseError2(name(), ": Invalid value of specific volume detected (v = ", v, ").");
 
   // The std::max function serves as a hard limiter, which will guarantee non-negative pressure
   // when resolving strongly nonlinear waves
@@ -97,7 +97,7 @@ IdealGasFluidProperties::k(Real, Real) const
 Real
 IdealGasFluidProperties::s(Real, Real) const
 {
-  mooseError(name() << ": s() not implemented.");
+  mooseError2(name(), ": s() not implemented.");
   return 0;
 }
 
@@ -113,13 +113,13 @@ IdealGasFluidProperties::dp_duv(Real v, Real u, Real & dp_dv, Real & dp_du, Real
 void
 IdealGasFluidProperties::rho_e_ps(Real, Real, Real &, Real &) const
 {
-  mooseError(name() << ": rho_e_ps() not implemented.");
+  mooseError2(name(), ": rho_e_ps() not implemented.");
 }
 
 void
 IdealGasFluidProperties::rho_e_dps(Real, Real, Real &, Real &, Real &, Real &, Real &, Real &) const
 {
-  mooseError(name() << ": rho_e_dps() not implemented.");
+  mooseError2(name(), ": rho_e_dps() not implemented.");
 }
 
 Real
@@ -139,7 +139,7 @@ Real
 IdealGasFluidProperties::rho(Real pressure, Real temperature) const
 {
   if ((_gamma - 1) * pressure == 0.)
-    mooseError(name() << ": Invalid gamma or pressure detected in rho(pressure = " << pressure << ", gamma = " << _gamma << ")");
+    mooseError2(name(), ": Invalid gamma or pressure detected in rho(pressure = ", pressure, ", gamma = ", _gamma, ")");
 
   return pressure / (_gamma - 1.0) / _cv / temperature;
 }
@@ -195,13 +195,13 @@ IdealGasFluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real &
 Real
 IdealGasFluidProperties::p_from_h_s(Real /*h*/, Real /*s*/) const
 {
-  mooseError(name() << ": p_from_h_s() not implemented.");
+  mooseError2(name(), ": p_from_h_s() not implemented.");
   return 0;
 }
 
 Real
 IdealGasFluidProperties::dpdh_from_h_s(Real /*h*/, Real /*s*/) const
 {
-  mooseError(name() << ": dpdh_from_h_s() not implemented.");
+  mooseError2(name(), ": dpdh_from_h_s() not implemented.");
   return 0;
 }

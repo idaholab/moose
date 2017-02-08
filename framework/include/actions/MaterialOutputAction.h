@@ -64,7 +64,7 @@ private:
    * @param property_name The name of the material property to output
    * @param material A pointer to the Material object containing the property of interest
    *
-   * By default this function produces an mooseError, you must create a specialization for any type that you
+   * By default this function produces an mooseError2, you must create a specialization for any type that you
    * wish to have the automatic output capability. Also, you need to add a test for this type within the
    * act() method.
    */
@@ -108,7 +108,7 @@ template<typename T>
 void
 MaterialOutputAction::materialOutputHelper(const std::string & /*property_name*/, std::shared_ptr<Material> /*material*/)
 {
-  mooseError("Unknown type, you must create a specialization of materialOutputHelper");
+  mooseError2("Unknown type, you must create a specialization of materialOutputHelper");
 }
 
 template<typename T>

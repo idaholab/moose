@@ -51,19 +51,19 @@ JIntegral::initialSetup()
   {
     if (_has_crack_front_point_index)
     {
-      mooseWarning("crack_front_point_index ignored because CrackFrontDefinition is set to treat as 2D");
+      mooseWarning2("crack_front_point_index ignored because CrackFrontDefinition is set to treat as 2D");
     }
   }
   else
   {
     if (!_has_crack_front_point_index)
     {
-      mooseError("crack_front_point_index must be specified in JIntegral");
+      mooseError2("crack_front_point_index must be specified in JIntegral");
     }
   }
 
   if (_convert_J_to_K && (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio")))
-    mooseError("youngs_modulus and poissons_ratio must be specified if convert_J_to_K = true");
+    mooseError2("youngs_modulus and poissons_ratio must be specified if convert_J_to_K = true");
 }
 
 Real

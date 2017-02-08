@@ -72,11 +72,11 @@ TransientMultiApp::TransientMultiApp(const InputParameters & parameters):
 {
   // Transfer interpolation only makes sense for sub-cycling solves
   if (_interpolate_transfers && !_sub_cycling)
-    mooseError("MultiApp " << name() << " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
+    mooseError2("MultiApp ", name(), " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
 
   // Subcycling overrides catch up, we don't want to confuse users by allowing them to set both.
   if (_sub_cycling && _catch_up)
-    mooseError("MultiApp " << name() << " sub_cycling and catch_up cannot both be set to true simultaneously.");
+    mooseError2("MultiApp ", name(), " sub_cycling and catch_up cannot both be set to true simultaneously.");
 }
 
 TransientMultiApp::~TransientMultiApp()
@@ -260,7 +260,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
           if (!converged)
           {
-            mooseWarning("While sub_cycling " << name() << _first_local_app+i << " failed to converge!" << std::endl);
+            mooseWarning2("While sub_cycling ", name(), _first_local_app+i, " failed to converge!", std::endl);
             _failures++;
 
             if (_failures > _max_failures)
@@ -330,7 +330,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
           if (!ex->lastSolveConverged())
           {
-            mooseWarning(name() << _first_local_app+i << " failed to converge!" << std::endl);
+            mooseWarning2(name(), _first_local_app+i, " failed to converge!", std::endl);
 
             if (_catch_up)
             {
@@ -389,7 +389,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   }
   catch (MultiAppSolveFailure & e)
   {
-    mooseWarning(e.what());
+    mooseWarning2(e.what());
     _console << "Failed to Solve MultiApp " << name() << ", attempting to recover." << std::endl;
     return_value = false;
   }
@@ -490,7 +490,7 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/)  // FIXME: Should we 
   MooseApp * app = _apps[i];
   Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
   if (!ex)
-    mooseError("MultiApp " << name() << " is not using a Transient Executioner!");
+    mooseError2("MultiApp ", name(), " is not using a Transient Executioner!");
 
   // Get the FEProblemBase for the current MultiApp
   FEProblemBase & problem = appProblemBase(_first_local_app + i);

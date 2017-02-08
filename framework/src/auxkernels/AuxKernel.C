@@ -240,7 +240,7 @@ AuxKernel::coupledDot(const std::string & var_name, unsigned int comp)
 {
   MooseVariable * var = getVar(var_name, comp);
   if (var->kind() == Moose::VAR_AUXILIARY)
-    mooseError(name() << ": Unable to couple time derivative of an auxiliary variable into the auxiliary system.");
+    mooseError2(name(), ": Unable to couple time derivative of an auxiliary variable into the auxiliary system.");
 
   return Coupleable::coupledDot(var_name, comp);
 }
@@ -250,7 +250,7 @@ AuxKernel::coupledDotDu(const std::string & var_name, unsigned int comp)
 {
   MooseVariable * var = getVar(var_name, comp);
   if (var->kind() == Moose::VAR_AUXILIARY)
-    mooseError(name() << ": Unable to couple time derivative of an auxiliary variable into the auxiliary system.");
+    mooseError2(name(), ": Unable to couple time derivative of an auxiliary variable into the auxiliary system.");
 
   return Coupleable::coupledDotDu(var_name, comp);
 }

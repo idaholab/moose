@@ -152,5 +152,5 @@ ExplicitRK2::postStep(NumericVector<Number> & residual)
     residual.close();
   }
   else
-    mooseError("ExplicitRK2::postStep(): _stage = " << _stage << ", only _stage = 1-3 is allowed.");
+    mooseError2("ExplicitRK2::postStep(): _stage = ", _stage, ", only _stage = 1-3 is allowed.");
 }

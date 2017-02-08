@@ -53,7 +53,7 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
   _connected_nodes.clear();
 
   if ((_slave_node_ids.size() == 0) && (_slave_node_set_id == "NaN"))
-    mooseError("Please specify slave node ids or boundary id.");
+    mooseError2("Please specify slave node ids or boundary id.");
   else if ((_slave_node_ids.size() == 0) && (_slave_node_set_id != "NaN"))
   {
     std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_slave_node_set_id));
@@ -94,7 +94,7 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
   const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
 
   if (elems.size() == 0)
-    mooseError("Couldn't find any elements connected to master node");
+    mooseError2("Couldn't find any elements connected to master node");
   _subproblem.addGhostedElem(elems[0]);
 }
 

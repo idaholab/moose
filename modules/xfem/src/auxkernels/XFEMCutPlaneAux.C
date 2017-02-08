@@ -26,12 +26,12 @@ XFEMCutPlaneAux::XFEMCutPlaneAux(const InputParameters & parameters) :
 {
   FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
   if (fe_problem == NULL)
-    mooseError("Problem casting _subproblem to FEProblemBase in XFEMCutPlaneAux");
+    mooseError2("Problem casting _subproblem to FEProblemBase in XFEMCutPlaneAux");
   _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
   if (_xfem == NULL)
-    mooseError("Problem casting to XFEM in XFEMCutPlaneAux");
+    mooseError2("Problem casting to XFEM in XFEMCutPlaneAux");
   if (isNodal())
-    mooseError("XFEMCutPlaneAux can only be run on an element variable");
+    mooseError2("XFEMCutPlaneAux can only be run on an element variable");
 }
 
 Real

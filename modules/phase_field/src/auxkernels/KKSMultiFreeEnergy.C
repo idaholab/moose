@@ -33,9 +33,9 @@ KKSMultiFreeEnergy::KKSMultiFreeEnergy(const InputParameters & parameters) :
 {
   // Check that same number of Fj, hj, and gj are passed in
   if (_hj_names.size() != _num_j)
-    mooseError("Size of hj_names is not equal to size of Fj_names in KKSMultiFreeEnergy AuxKernel " << name());
+    mooseError2("Size of hj_names is not equal to size of Fj_names in KKSMultiFreeEnergy AuxKernel ", name());
   if (_gj_names.size() != _num_j)
-    mooseError("Size of gj_names is not equal to size of Fj_names in KKSMultiFreeEnergy AuxKernel " << name());
+    mooseError2("Size of gj_names is not equal to size of Fj_names in KKSMultiFreeEnergy AuxKernel ", name());
 
   // get bulk properties
   for (unsigned int i = 0; i < _num_j; ++i)
@@ -47,7 +47,7 @@ KKSMultiFreeEnergy::KKSMultiFreeEnergy(const InputParameters & parameters) :
 
   // Check to ensure size of interfacial_vars is the same as kappa_names
   if (_nvars != _nkappas)
-    mooseError("Size of interfacial_vars is not equal to the size of kappa_names in KKSMultiFreeEnergy AuxKernel " << name());
+    mooseError2("Size of interfacial_vars is not equal to the size of kappa_names in KKSMultiFreeEnergy AuxKernel ", name());
 
   // Assign kappa values
   for (unsigned int i = 0; i < _nkappas; ++i)

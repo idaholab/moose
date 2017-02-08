@@ -32,7 +32,7 @@ void mooseSetToZero<ElasticityTensorR4>(ElasticityTensorR4 & v);
 class ElasticityTensorR4 : public RankFourTensor
 {
 public:
-  ElasticityTensorR4() : RankFourTensor() { mooseDeprecated("Use RankFourTensor instead of ElasticityTensorR4. See http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Deprecations/ElasticityTensorR4/ to update your code"); }
+  ElasticityTensorR4() : RankFourTensor() { mooseDeprecated2("Use RankFourTensor instead of ElasticityTensorR4. See http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Deprecations/ElasticityTensorR4/ to update your code"); }
 
   /// Copy constructor for RankFourTensor
   ElasticityTensorR4(const RankFourTensor &a);

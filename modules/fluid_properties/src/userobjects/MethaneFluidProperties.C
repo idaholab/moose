@@ -111,7 +111,7 @@ MethaneFluidProperties::cp(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (280 K <= T <= 1080 K)
   if (temperature <= 280.0 || temperature >= 1080.0)
-    mooseError("Temperature " << temperature << "K out of range (280K, 1080K) in " << name() << ":cp()");
+    mooseError2("Temperature ", temperature, "K out of range (280K, 1080K) in ", name(), ":cp()");
 
   std::vector<Real> a;
   if (temperature < 755.0)
@@ -138,7 +138,7 @@ MethaneFluidProperties::mu(Real /*density*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
-    mooseError("Temperature " << temperature << "K out of range (200K, 1000K) in " << name() << ":mu()");
+    mooseError2("Temperature ", temperature, "K out of range (200K, 1000K) in ", name(), ":mu()");
 
   const std::vector<Real> a {2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11,
     -2.7237166e-14};
@@ -170,7 +170,7 @@ MethaneFluidProperties::k(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
-    mooseError("Temperature " << temperature << "K out of range (200K, 1000K) in " << name() << ":k()");
+    mooseError2("Temperature ", temperature, "K out of range (200K, 1000K) in ", name(), ":k()");
 
   const std::vector<Real> a {-1.3401499e-2, 3.663076e-4, -1.82248608e-6, 5.93987998e-9, -9.1405505e-12,
     6.7896889e-15, -1.95048736e-18};
@@ -187,7 +187,7 @@ MethaneFluidProperties::s(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (280 K <= t <= 1080 K)
   if (temperature <= 280.0 || temperature >= 1080.0)
-    mooseError("Temperature " << temperature << "K out of range (280K, 1080K) in " << name() << ":s()");
+    mooseError2("Temperature ", temperature, "K out of range (280K, 1080K) in ", name(), ":s()");
 
   std::vector<Real> a;
   if (temperature < 755.0)
@@ -208,7 +208,7 @@ MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (280 K <= t <= 1080 K)
   if (temperature <= 280.0 || temperature >= 1080.0)
-    mooseError("Temperature " << temperature << "K out of range (280K, 1080K) in " << name() << ":cp()");
+    mooseError2("Temperature ", temperature, "K out of range (280K, 1080K) in ", name(), ":cp()");
 
   std::vector<Real> a;
   if (temperature < 755.0)

@@ -34,7 +34,7 @@ void
 MaterialVectorAuxKernelAction::act()
 {
   if (_num_prop != _num_var)
-    mooseError("variable_base and property must be vectors of the same size");
+    mooseError2("variable_base and property must be vectors of the same size");
 
   for (unsigned int gr = 0; gr < _grain_num; ++gr)
     for (unsigned int val = 0; val < _num_var; ++val)

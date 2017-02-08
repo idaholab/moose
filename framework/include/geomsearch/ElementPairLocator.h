@@ -61,7 +61,7 @@ public:
   const ElementPairList & getElemPairs() const
   {
     if (_elem_pairs == NULL)
-      mooseError("_elem_pairs has not yet been initialized and it needs to be initialized by a derived class");
+      mooseError2("_elem_pairs has not yet been initialized and it needs to be initialized by a derived class");
     return *_elem_pairs;
   }
 
@@ -69,7 +69,7 @@ public:
   {
     std::map<std::pair<const Elem*, const Elem*>, ElementPairInfo>::const_iterator it = _element_pair_info.find(elem_pair);
     if (it == _element_pair_info.end())
-      mooseError("Could not find ElemenPairInfo for specified element pair");
+      mooseError2("Could not find ElemenPairInfo for specified element pair");
     return it->second;
   }
 

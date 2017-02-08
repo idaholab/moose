@@ -50,7 +50,7 @@ VariableTimeIntegrationAux::VariableTimeIntegrationAux(const InputParameters & p
       _coupled_vars.push_back(&coupledValueOlder("variable_to_integrate"));
       break;
     default:
-      mooseError("VariableTimeIntegrationAux: unknown time integraiton order specfied");
+      mooseError2("VariableTimeIntegrationAux: unknown time integraiton order specfied");
   }
 }
 

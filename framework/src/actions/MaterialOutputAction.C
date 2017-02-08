@@ -48,7 +48,7 @@ MaterialOutputAction::act()
 {
   // Error if _problem is NULL, I don't know how this would happen
   if (_problem.get() == NULL)
-    mooseError("FEProblemBase pointer is NULL, it is needed for auto material property output");
+    mooseError2("FEProblemBase pointer is NULL, it is needed for auto material property output");
 
   buildMaterialOutputObjects(_problem.get());
 }
@@ -132,7 +132,7 @@ MaterialOutputAction::buildMaterialOutputObjects(FEProblemBase * problem_ptr)
             materialOutputHelper<RealTensorValue>(name, mat);
 
           else
-            mooseWarning("The type for material property '" << name << "' is not supported for automatic output.");
+            mooseWarning2("The type for material property '", name, "' is not supported for automatic output.");
         }
 
         // If the material object as limited outputs, store the variables associated with the output objects

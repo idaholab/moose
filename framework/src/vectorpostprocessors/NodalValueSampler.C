@@ -92,7 +92,7 @@ NodalValueSampler::execute()
     SamplerBase::addSample(*_current_node, _current_node->id(), _values);
 
   else if (num_values != 0 && num_values < _has_values.size())
-    mooseError("You must use separate NodalValueSampler objects for variables with different discretizations.");
+    mooseError2("You must use separate NodalValueSampler objects for variables with different discretizations.");
 }
 
 void

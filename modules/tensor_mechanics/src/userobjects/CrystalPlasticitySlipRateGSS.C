@@ -44,7 +44,7 @@ CrystalPlasticitySlipRateGSS::readFileFlowRateParams()
   {
     for (unsigned int j = 0; j < _num_slip_sys_flowrate_props; ++j)
       if (!(file >> vec[j]))
-        mooseError("Error CrystalPlasticitySlipRateGSS: Premature end of slip_sys_flow_rate_param file");
+        mooseError2("Error CrystalPlasticitySlipRateGSS: Premature end of slip_sys_flow_rate_param file");
 
     _a0(i)=vec[0];
     _xm(i)=vec[1];
@@ -57,7 +57,7 @@ void
 CrystalPlasticitySlipRateGSS::getFlowRateParams()
 {
   if (_flowprops.size() <= 0)
-    mooseError("CrystalPlasticitySlipRateGSS: Error in reading flow rate  properties: Specify input in .i file or a slip_sys_flow_prop_file_name");
+    mooseError2("CrystalPlasticitySlipRateGSS: Error in reading flow rate  properties: Specify input in .i file or a slip_sys_flow_prop_file_name");
 
   _a0.resize(_variable_size);
   _xm.resize(_variable_size);
@@ -73,16 +73,16 @@ CrystalPlasticitySlipRateGSS::getFlowRateParams()
     ve = _flowprops[i * num_data_grp + 1];
 
     if (vs <= 0 || ve <= 0)
-      mooseError("CrystalPlasticitySlipRateGSS: Indices in flow rate parameter read must be positive integers: is = " << vs << " ie = " << ve );
+      mooseError2("CrystalPlasticitySlipRateGSS: Indices in flow rate parameter read must be positive integers: is = ", vs, " ie = ", ve );
 
     if (vs != std::floor(vs) || ve != std::floor(ve))
-      mooseError("CrystalPlasticitySlipRateGSS: Error in reading flow props: Values specifying start and end number of slip system groups should be integer");
+      mooseError2("CrystalPlasticitySlipRateGSS: Error in reading flow props: Values specifying start and end number of slip system groups should be integer");
 
     is = static_cast<unsigned int>(vs);
     ie = static_cast<unsigned int>(ve);
 
     if (is > ie)
-      mooseError("CrystalPlasticitySlipRateGSS: Start index is = " << is << " should be greater than end index ie = " << ie << " in flow rate parameter read");
+      mooseError2("CrystalPlasticitySlipRateGSS: Start index is = ", is, " should be greater than end index ie = ", ie, " in flow rate parameter read");
 
     for (unsigned int j = is; j <= ie; ++j)
     {
@@ -95,7 +95,7 @@ CrystalPlasticitySlipRateGSS::getFlowRateParams()
   {
     if (!(_a0(i) > 0.0 && _xm(i) > 0.0))
     {
-      mooseWarning( "CrystalPlasticitySlipRateGSS: Non-positive flow rate parameters " << _a0(i) << "," << _xm(i) );
+      mooseWarning2( "CrystalPlasticitySlipRateGSS: Non-positive flow rate parameters ", _a0(i), ",", _xm(i) );
       break;
     }
   }
@@ -145,7 +145,7 @@ CrystalPlasticitySlipRateGSS::calcSlipRate(unsigned int qp, Real dt, std::vector
     if (std::abs(val[i] * dt) > _slip_incr_tol)
     {
 #ifdef DEBUG
-      mooseWarning("Maximum allowable slip increment exceeded " << std::abs(val[i])*dt);
+      mooseWarning2("Maximum allowable slip increment exceeded ", std::abs(val[i])*dt);
 #endif
       return false;
     }

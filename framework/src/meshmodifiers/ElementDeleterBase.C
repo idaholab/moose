@@ -31,7 +31,7 @@ ElementDeleterBase::modify()
 {
   // Check that we have access to the mesh
   if (!_mesh_ptr)
-    mooseError("_mesh_ptr must be initialized before calling ElementDeleterBase::modify()");
+    mooseError2("_mesh_ptr must be initialized before calling ElementDeleterBase::modify()");
 
   MeshBase & mesh = _mesh_ptr->getMesh();
 

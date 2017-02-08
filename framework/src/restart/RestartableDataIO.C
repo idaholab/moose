@@ -163,7 +163,7 @@ RestartableDataIO::deserializeRestartableData(const std::map<std::string, Restar
       }
       catch(...)
       {
-        mooseError("restartable_data missing " << current_name << std::endl);
+        mooseError2("restartable_data missing ", current_name, std::endl);
       }
     }
     else
@@ -184,7 +184,7 @@ RestartableDataIO::deserializeRestartableData(const std::map<std::string, Restar
     std::ostringstream names;
     for (unsigned int i=0; i<ignored_data.size(); i++)
       names << ignored_data[i] << "\n";
-    mooseWarning("The following RestartableData was found in restart file but is being ignored:\n" << names.str());
+    mooseWarning2("The following RestartableData was found in restart file but is being ignored:\n", names.str());
   }
 }
 
@@ -241,20 +241,20 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
 
     // check the header
     if (id[0] != 'R' || id[1] != 'D')
-      mooseError("Corrupted restartable data file!");
+      mooseError2("Corrupted restartable data file!");
 
     // check the file version
     if (this_file_version > file_version)
-      mooseError("Trying to restart from a newer file version - you need to update MOOSE");
+      mooseError2("Trying to restart from a newer file version - you need to update MOOSE");
 
     if (this_file_version < file_version)
-      mooseError("Trying to restart from an older file version - you need to checkout an older version of MOOSE.");
+      mooseError2("Trying to restart from an older file version - you need to checkout an older version of MOOSE.");
 
     if (this_n_procs != n_procs)
-      mooseError("Cannot restart using a different number of processors!");
+      mooseError2("Cannot restart using a different number of processors!");
 
     if (this_n_threads != n_threads)
-      mooseError("Cannot restart using a different number of threads!");
+      mooseError2("Cannot restart using a different number of threads!");
   }
 }
 
@@ -269,7 +269,7 @@ RestartableDataIO::readRestartableData(const RestartableDatas & restartable_data
     const std::map<std::string, RestartableDataValue *> & restartable_data = restartable_datas[tid];
 
     if (!_in_file_handles[tid].get() || !_in_file_handles[tid]->is_open())
-      mooseError("In RestartableDataIO: Need to call readRestartableDataHeader() before calling readRestartableData()");
+      mooseError2("In RestartableDataIO: Need to call readRestartableDataHeader() before calling readRestartableData()");
 
     deserializeRestartableData(restartable_data, *_in_file_handles[tid], recoverable_data);
 

@@ -48,7 +48,7 @@ ValueThresholdMarker::ValueThresholdMarker(const InputParameters & parameters) :
   {
     Real diff = _refine - _coarsen;
     if ((diff > 0 && _invert) || (diff < 0 && !_invert))
-      mooseError("Invalid combination of refine, coarsen, and invert values specified");
+      mooseError2("Invalid combination of refine, coarsen, and invert values specified");
   }
 }
 

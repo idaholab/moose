@@ -125,7 +125,7 @@ XFEMCutElem::computeXFEMWeights(QBase * qrule, Xfem::XFEM_QRULE xfem_qrule, cons
       break;
     }
     default:
-      mooseError("Undefined option for XFEM_QRULE");
+      mooseError2("Undefined option for XFEM_QRULE");
   }
   _have_weights = true;
 }

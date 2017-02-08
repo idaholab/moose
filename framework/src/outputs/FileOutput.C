@@ -92,7 +92,7 @@ FileOutput::FileOutput(const InputParameters & parameters) :
       inc_path += '/' + path_names[i];
       if (access(inc_path.c_str(), W_OK) == -1)
         if (mkdir(inc_path.c_str(), S_IRWXU | S_IRGRP) == -1)
-          mooseError("Could not create directory: " + inc_path + " for file base: " + _file_base);
+          mooseError2("Could not create directory: " + inc_path + " for file base: " + _file_base);
     }
   }
 }

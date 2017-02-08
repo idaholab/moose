@@ -54,7 +54,7 @@ SplitCHParsed::computeDFDC(PFFunctionType type)
       return _d2Fdc2[_qp] * _phi[_j][_qp];
   }
 
-  mooseError("Internal error");
+  mooseError2("Internal error");
 }
 
 Real

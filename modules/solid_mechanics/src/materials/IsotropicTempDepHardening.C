@@ -36,18 +36,18 @@ IsotropicTempDepHardening::IsotropicTempDepHardening(const InputParameters & par
 {
   const unsigned int len = _hardening_functions_names.size();
   if (len < 2)
-    mooseError("At least two stress-strain curves must be provided in hardening_functions");
+    mooseError2("At least two stress-strain curves must be provided in hardening_functions");
   _hardening_functions.resize(len);
 
   const unsigned int len_temps = _hf_temperatures.size();
   if (len != len_temps)
-    mooseError("The vector of hardening function temperatures must have the same length as the vector of temperature dependent hardening functions.");
+    mooseError2("The vector of hardening function temperatures must have the same length as the vector of temperature dependent hardening functions.");
 
   //Check that the temperatures are strictly increasing
   for (unsigned int i = 1; i < len_temps; ++i)
   {
     if (_hf_temperatures[i] <= _hf_temperatures[i-1])
-      mooseError("The temperature dependent hardening functions and corresponding temperatures should be listed in order of increasing temperature.");
+      mooseError2("The temperature dependent hardening functions and corresponding temperatures should be listed in order of increasing temperature.");
   }
 
   std::vector<Real> yield_stress_vec;
@@ -55,7 +55,7 @@ IsotropicTempDepHardening::IsotropicTempDepHardening(const InputParameters & par
   {
     PiecewiseLinear * const f = dynamic_cast<PiecewiseLinear*>(&getFunctionByName(_hardening_functions_names[i]));
     if (!f)
-      mooseError("Function " << _hardening_functions_names[i] << " not found in " << name());
+      mooseError2("Function ", _hardening_functions_names[i], " not found in ", name());
 
     _hardening_functions[i] = f;
 
@@ -73,7 +73,7 @@ IsotropicTempDepHardening::computeStressInitialize(unsigned qp, Real effectiveTr
 {
   const SymmIsotropicElasticityTensor * eT = dynamic_cast<const SymmIsotropicElasticityTensor*>(&elasticityTensor);
   if (!eT)
-    mooseError("IsotropicPlasticity requires a SymmIsotropicElasticityTensor");
+    mooseError2("IsotropicPlasticity requires a SymmIsotropicElasticityTensor");
 
   _shear_modulus = eT->shearModulus();
   initializeHardeningFunctions(qp);
@@ -117,7 +117,7 @@ IsotropicTempDepHardening::initializeHardeningFunctions(unsigned qp)
   }
 
   if (_hf_fraction < 0.0)
-    mooseError("The hardening function fraction cannot be less than zero.");
+    mooseError2("The hardening function fraction cannot be less than zero.");
 }
 
 Real
@@ -147,5 +147,5 @@ IsotropicTempDepHardening::computeYieldStress(unsigned qp)
 {
   _yield_stress = _interp_yield_stress->sample(_temperature[qp]);
   if (_yield_stress <= 0.0)
-    mooseError("The yield stress must be greater than zero, but during the simulation your yield stress became less than zero.");
+    mooseError2("The yield stress must be greater than zero, but during the simulation your yield stress became less than zero.");
 }

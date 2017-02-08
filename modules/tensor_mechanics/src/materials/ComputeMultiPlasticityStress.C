@@ -92,13 +92,13 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters
     _step_one(declareRestartableData<bool>("step_one", true))
 {
   if (_epp_tol <= 0)
-    mooseError("ComputeMultiPlasticityStress: ep_plastic_tolerance must be positive");
+    mooseError2("ComputeMultiPlasticityStress: ep_plastic_tolerance must be positive");
 
   if (_n_supplied)
   {
     // normalise the inputted transverse_direction
     if (_n_input.norm() == 0)
-      mooseError("ComputeMultiPlasticityStress: transverse_direction vector must not have zero length");
+      mooseError2("ComputeMultiPlasticityStress: transverse_direction vector must not have zero length");
     else
       _n_input /= _n_input.norm();
   }
@@ -143,7 +143,7 @@ ComputeMultiPlasticityStress::initQpStatefulProperties()
   if (_fspb_debug == "jacobian")
   {
     checkDerivatives();
-    mooseError("Finite-differencing completed.  Exiting with no error");
+    mooseError2("Finite-differencing completed.  Exiting with no error");
   }
 }
 
@@ -164,7 +164,7 @@ ComputeMultiPlasticityStress::computeQpStress()
     // cannot do this at initQpStatefulProperties level since E_ijkl is not defined
     checkJacobian(_elasticity_tensor[_qp].invSymm(), _intnl_old[_qp]);
     checkSolution(_elasticity_tensor[_qp].invSymm());
-    mooseError("Finite-differencing completed.  Exiting with no error");
+    mooseError2("Finite-differencing completed.  Exiting with no error");
    }
 
   preReturnMap();  // do rotations to new frame if necessary
@@ -329,7 +329,7 @@ ComputeMultiPlasticityStress::quickStep(const RankTwoTensor & stress_old, RankTw
     return true;
   }
   else // presumably returnMapAll is incorrectly coded!
-    mooseError("ComputeMultiPlasticityStress::quickStep   should not get here!");
+    mooseError2("ComputeMultiPlasticityStress::quickStep   should not get here!");
 }
 
 bool
@@ -452,7 +452,7 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old, Rank
       checkDerivatives();
       checkJacobian(_my_elasticity_tensor.invSymm(), _intnl_old[_qp]);
       checkSolution(_my_elasticity_tensor.invSymm());
-      mooseError("Exiting\n");
+      mooseError2("Exiting\n");
     }
   }
 
@@ -1059,7 +1059,7 @@ ComputeMultiPlasticityStress::checkKuhnTucker(const std::vector<Real> & f, const
           return false;
     }
     else if (pm[surface] != 0)
-      mooseError("Crash due to plastic multiplier not being zero.  This occurred because of poor coding!!");
+      mooseError2("Crash due to plastic multiplier not being zero.  This occurred because of poor coding!!");
   }
   for (unsigned surface = 0; surface < _num_surfaces; ++surface)
     if (pm[surface] < 0)
@@ -1088,7 +1088,7 @@ ComputeMultiPlasticityStress::applyKuhnTucker(const std::vector<Real> & f, const
         }
     }
     else if (pm[surface] != 0)
-      mooseError("Crash due to plastic multiplier not being zero.  This occurred because of poor coding!!");
+      mooseError2("Crash due to plastic multiplier not being zero.  This occurred because of poor coding!!");
   }
 
   // if didn't turn off anything yet, turn off surface with minimum pm

@@ -96,12 +96,12 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
     std::set<SubdomainName> seen_it;
 
     if (ids.size() != names.size())
-      mooseError("You must supply the same number of block ids and names parameters");
+      mooseError2("You must supply the same number of block ids and names parameters");
 
     for (unsigned int i=0; i<ids.size(); ++i)
     {
       if (seen_it.find(names[i]) != seen_it.end())
-        mooseError("The following dynamic block name is not unique: " + names[i]);
+        mooseError2("The following dynamic block name is not unique: " + names[i]);
       seen_it.insert(names[i]);
       mesh->setSubdomainName(ids[i], names[i]);
     }
@@ -114,12 +114,12 @@ SetupMeshAction::setupMesh(MooseMesh *mesh)
     std::set<SubdomainName> seen_it;
 
     if (ids.size() != names.size())
-      mooseError("You must supply the same number of boundary ids and names parameters");
+      mooseError2("You must supply the same number of boundary ids and names parameters");
 
     for (unsigned int i=0; i<ids.size(); ++i)
     {
       if (seen_it.find(names[i]) != seen_it.end())
-        mooseError("The following dynamic boundary name is not unique: " + names[i]);
+        mooseError2("The following dynamic boundary name is not unique: " + names[i]);
       mesh->setBoundaryName(ids[i], names[i]);
       seen_it.insert(names[i]);
     }
@@ -154,7 +154,7 @@ SetupMeshAction::act()
 
       std::vector<std::string> displacements = getParam<std::vector<std::string> >("displacements");
       if (displacements.size() < _displaced_mesh->dimension())
-        mooseError("Number of displacements must be greater than or equal to the dimension of the mesh!");
+        mooseError2("Number of displacements must be greater than or equal to the dimension of the mesh!");
     }
 
     setupMesh(_mesh.get());

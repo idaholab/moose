@@ -47,7 +47,7 @@ MeshExtruder::MeshExtruder(const InputParameters & parameters) :
 {
   // Check the length of the vectors
   if (_existing_subdomains.size() != _new_ids.size() && _existing_subdomains.size() * _layers.size() != _new_ids.size())
-    mooseError("The length of the \"existing_subdomains\", \"layers\", and \"new_ids\" are not valid");
+    mooseError2("The length of the \"existing_subdomains\", \"layers\", and \"new_ids\" are not valid");
 }
 
 void
@@ -58,7 +58,7 @@ MeshExtruder::modify()
   MooseMesh * source_mesh =  &(_mesh_ptr->clone());
 
   if (source_mesh->getMesh().mesh_dimension() == 3)
-    mooseError("You cannot extrude a 3D mesh!");
+    mooseError2("You cannot extrude a 3D mesh!");
 
   _mesh_ptr->getMesh().clear();
 

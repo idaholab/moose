@@ -44,7 +44,7 @@ GeneralizedPlaneStrainUserObject::initialize()
   else if (_assembly.coordSystem() == Moose::COORD_RZ)
     _scalar_out_of_plane_strain_direction = 1;
   else
-    mooseError("Unsupported coordinate system for generalized plane strain formulation");
+    mooseError2("Unsupported coordinate system for generalized plane strain formulation");
 
   _residual = 0;
   _jacobian = 0;

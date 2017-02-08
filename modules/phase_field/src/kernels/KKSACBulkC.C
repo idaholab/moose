@@ -59,7 +59,7 @@ KKSACBulkC::computeDFDOP(PFFunctionType type)
       return _phi[_j][_qp] * res;
   }
 
-  mooseError("Invalid type passed in");
+  mooseError2("Invalid type passed in");
 }
 
 Real

@@ -36,7 +36,7 @@ CrackDataSampler::CrackDataSampler(const InputParameters & parameters) :
   for (unsigned int i=0; i<pps_names.size(); ++i)
   {
     if (!hasPostprocessorByName(pps_names[i]))
-      mooseError("In CrackDataSampler, postprocessor with name: "<<pps_names[i]<<" does not exist");
+      mooseError2("In CrackDataSampler, postprocessor with name: ", pps_names[i], " does not exist");
     _domain_integral_postprocessor_values.push_back(&getPostprocessorValueByName(pps_names[i]));
   }
   std::vector<std::string> var_names;
@@ -48,10 +48,10 @@ void
 CrackDataSampler::initialize()
 {
   if (_crack_front_definition->getNumCrackFrontPoints() != _domain_integral_postprocessor_values.size())
-    mooseError("In CrackDataSampler, number of crack front nodes != number of domain integral postprocessors");
+    mooseError2("In CrackDataSampler, number of crack front nodes != number of domain integral postprocessors");
   if (_position_type == "angle" && !_crack_front_definition->hasAngleAlongFront())
-    mooseError("In CrackDataSampler, 'position_type = Angle' specified, but angle is not available.  "
-               << "Must specify 'crack_mouth_boundary' in CrackFrontDefinition");
+    mooseError2("In CrackDataSampler, 'position_type = Angle' specified, but angle is not available.  "
+              , "Must specify 'crack_mouth_boundary' in CrackFrontDefinition");
   SamplerBase::initialize();
 }
 

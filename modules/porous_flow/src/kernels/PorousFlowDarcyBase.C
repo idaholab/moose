@@ -67,7 +67,7 @@ PorousFlowDarcyBase::darcyQpJacobian(unsigned int jvar, unsigned int ph)
 Real
 PorousFlowDarcyBase::computeQpResidual()
 {
-  mooseError("PorousFlowDarcyBase: computeQpResidual called");
+  mooseError2("PorousFlowDarcyBase: computeQpResidual called");
   return 0.0;
 }
 

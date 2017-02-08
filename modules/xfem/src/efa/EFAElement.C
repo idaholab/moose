@@ -257,7 +257,7 @@ EFAElement::mergeNodes(EFANode* &childNode, EFANode* &childOfNeighborNode, EFAEl
 {
   // Important: this must be run only on child elements that were just created
   if (!_parent)
-    EFAError("no getParent element for child element " << _id << " in mergeNodes");
+    EFAError("no getParent element for child element ", _id, " in mergeNodes");
 
   EFAElement* childElem = this;
   if (childNode != childOfNeighborNode)
@@ -271,8 +271,8 @@ EFAElement::mergeNodes(EFANode* &childNode, EFANode* &childOfNeighborNode, EFAEl
           childOfNeighborElem->switchNode(childNode, childOfNeighborNode, true);
           if (!Efa::deleteFromMap(PermanentNodes, childOfNeighborNode))
           {
-            EFAError("Attempted to delete node: " << childOfNeighborNode->id()
-                     << " from PermanentNodes, but couldn't find it");
+            EFAError("Attempted to delete node: ", childOfNeighborNode->id()
+                    , " from PermanentNodes, but couldn't find it");
           }
           childOfNeighborNode = childNode;
         }
@@ -281,8 +281,8 @@ EFAElement::mergeNodes(EFANode* &childNode, EFANode* &childOfNeighborNode, EFAEl
         childElem->switchNode(childOfNeighborNode, childNode, true);
           if (!Efa::deleteFromMap(PermanentNodes, childNode))
           {
-            EFAError("Attempted to delete node: " << childNode->id()
-                     << " from PermanentNodes, but couldn't find it");
+            EFAError("Attempted to delete node: ", childNode->id()
+                    , " from PermanentNodes, but couldn't find it");
           }
           childNode = childOfNeighborNode;
         }
@@ -292,15 +292,15 @@ EFAElement::mergeNodes(EFANode* &childNode, EFANode* &childOfNeighborNode, EFAEl
           childOfNeighborElem->switchNode(childNode, childOfNeighborNode, true);
           if (!Efa::deleteFromMap(PermanentNodes, childOfNeighborNode)) // delete childOfNeighborNode
           {
-            EFAError("Attempted to delete node: " << childOfNeighborNode->id()
-                     << " from PermanentNodes, but couldn't find it");
+            EFAError("Attempted to delete node: ", childOfNeighborNode->id()
+                    , " from PermanentNodes, but couldn't find it");
           }
           childOfNeighborNode = childNode;
         }
         else
         {
-          EFAError("Attempting to merge nodes: " << childNode->id() << " and "
-                   << childOfNeighborNode->id() << " but both are permanent themselves");
+          EFAError("Attempting to merge nodes: ", childNode->id(), " and "
+                  , childOfNeighborNode->id(), " but both are permanent themselves");
         }
       }
       else
@@ -308,12 +308,12 @@ EFAElement::mergeNodes(EFANode* &childNode, EFANode* &childOfNeighborNode, EFAEl
         if (childOfNeighborNode->parent() != childNode &&
             childOfNeighborNode->parent() != childNode->parent())
         {
-          EFAError("Attempting to merge nodes " << childOfNeighborNode->idCatString() << " and "
-                   << childNode->idCatString() << " but neither the 2nd node nor its parent is parent of the 1st");
+          EFAError("Attempting to merge nodes ", childOfNeighborNode->idCatString(), " and "
+                  , childNode->idCatString(), " but neither the 2nd node nor its parent is parent of the 1st");
         }
         childOfNeighborElem->switchNode(childNode, childOfNeighborNode, true);
         if (!Efa::deleteFromMap(TempNodes, childOfNeighborNode))
-          EFAError("Attempted to delete node: " << childOfNeighborNode->id() << " from TempNodes, but couldn't find it");
+          EFAError("Attempted to delete node: ", childOfNeighborNode->id(), " from TempNodes, but couldn't find it");
         childOfNeighborNode = childNode;
       }
     }
@@ -322,12 +322,12 @@ EFAElement::mergeNodes(EFANode* &childNode, EFANode* &childOfNeighborNode, EFAEl
       if (childNode->parent() != childOfNeighborNode &&
           childNode->parent() != childOfNeighborNode->parent())
       {
-        EFAError("Attempting to merge nodes " << childNode->id() << " and "
-                 << childOfNeighborNode->id() << " but neither the 2nd node nor its parent is parent of the 1st");
+        EFAError("Attempting to merge nodes ", childNode->id(), " and "
+                , childOfNeighborNode->id(), " but neither the 2nd node nor its parent is parent of the 1st");
       }
       childElem->switchNode(childOfNeighborNode, childNode, true);
       if (!Efa::deleteFromMap(TempNodes, childNode))
-        EFAError("Attempted to delete node: " << childNode->id() << " from TempNodes, but couldn't find it");
+        EFAError("Attempted to delete node: ", childNode->id(), " from TempNodes, but couldn't find it");
       childNode = childOfNeighborNode;
     }
     else //both nodes are temporary -- create new permanent node and delete temporary nodes
@@ -341,14 +341,14 @@ EFAElement::mergeNodes(EFANode* &childNode, EFANode* &childOfNeighborNode, EFAEl
 
       if (childNode->parent() != childOfNeighborNode->parent())
       {
-        EFAError("Attempting to merge nodes " << childNode->id() << " and "
-                 << childOfNeighborNode->id() << " but they don't share a common parent");
+        EFAError("Attempting to merge nodes ", childNode->id(), " and "
+                , childOfNeighborNode->id(), " but they don't share a common parent");
       }
 
       if (!Efa::deleteFromMap(TempNodes, childOfNeighborNode))
-        EFAError("Attempted to delete node: " << childOfNeighborNode->id() << " from TempNodes, but couldn't find it");
+        EFAError("Attempted to delete node: ", childOfNeighborNode->id(), " from TempNodes, but couldn't find it");
       if (!Efa::deleteFromMap(TempNodes, childNode))
-        EFAError("Attempted to delete node: " << childNode->id() << " from TempNodes, but couldn't find it");
+        EFAError("Attempted to delete node: ", childNode->id(), " from TempNodes, but couldn't find it");
       childOfNeighborNode = newNode;
       childNode = newNode;
     }

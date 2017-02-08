@@ -29,7 +29,7 @@ ScalarComponentIC::ScalarComponentIC(const InputParameters & parameters) :
     _initial_values(getParam<std::vector<Real> >("values"))
 {
   if (_initial_values.size() < _var.order())
-    mooseError("The initial vector values size given to the scalar variable '" << name() << "' has wrong size." );
+    mooseError2("The initial vector values size given to the scalar variable '", name(), "' has wrong size." );
 }
 
 Real

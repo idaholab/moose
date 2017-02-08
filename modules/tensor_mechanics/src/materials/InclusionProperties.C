@@ -37,7 +37,7 @@ InclusionProperties::InclusionProperties(const InputParameters & parameters) :
     _elastic_energy(declareProperty<Real>(getParam<MaterialPropertyName>("energy_name")))
 {
   if (_misfit.size() != 2)
-    mooseError("Supply 2 misfit_strains in order eps_11, eps_22 in InclusionProperties.");
+    mooseError2("Supply 2 misfit_strains in order eps_11, eps_22 in InclusionProperties.");
 
   _nu = _lambda / 2.0 / (_lambda + _mu);
   _kappa = 3 - 4 * _nu;

@@ -145,12 +145,12 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
   switch (_mesh_distribution_type)
   {
   case 0: // PARALLEL
-    mooseDeprecated("Using 'distribution = PARALLEL' in the Mesh block is deprecated, use 'parallel_type = DISTRIBUTED' instead.");
+    mooseDeprecated2("Using 'distribution = PARALLEL' in the Mesh block is deprecated, use 'parallel_type = DISTRIBUTED' instead.");
     _use_distributed_mesh = true;
     break;
 
   case 1: // SERIAL
-    mooseDeprecated("Using 'distribution = SERIAL' in the Mesh block is deprecated, use 'parallel_type = REPLICATED' instead.");
+    mooseDeprecated2("Using 'distribution = SERIAL' in the Mesh block is deprecated, use 'parallel_type = REPLICATED' instead.");
     if (_app.getDistributedMeshOnCommandLine() || _is_nemesis)
       _distribution_overridden = true;
     break;
@@ -381,14 +381,14 @@ MooseMesh::update()
 const Node &
 MooseMesh::node(const dof_id_type i) const
 {
-  mooseDeprecated("MooseMesh::node() is deprecated, please use MooseMesh::nodeRef() instead");
+  mooseDeprecated2("MooseMesh::node() is deprecated, please use MooseMesh::nodeRef() instead");
   return nodeRef(i);
 }
 
 Node &
 MooseMesh::node(const dof_id_type i)
 {
-  mooseDeprecated("MooseMesh::node() is deprecated, please use MooseMesh::nodeRef() instead");
+  mooseDeprecated2("MooseMesh::node() is deprecated, please use MooseMesh::nodeRef() instead");
   return nodeRef(i);
 }
 
@@ -777,7 +777,7 @@ MooseMesh::getNodeBlockIds(const Node & node) const
   std::map<dof_id_type, std::set<SubdomainID> >::const_iterator it = _block_node_list.find(node.id());
 
   if (it == _block_node_list.end())
-    mooseError("Unable to find node: " << node.id() << " in any block list.");
+    mooseError2("Unable to find node: ", node.id(), " in any block list.");
 
   return it->second;
 }
@@ -869,7 +869,7 @@ MooseMesh::addQuadratureNode(const Elem * elem, const unsigned short int side, c
     dof_id_type new_id = max_id - _quadrature_nodes.size();
 
     if (new_id <= getMesh().max_node_id())
-      mooseError("Quadrature node id collides with existing node id!");
+      mooseError2("Quadrature node id collides with existing node id!");
 
     qnode = new Node(point, new_id);
 
@@ -922,7 +922,7 @@ BoundaryID
 MooseMesh::getBoundaryID(const BoundaryName & boundary_name) const
 {
   if (boundary_name == "ANY_BOUNDARY_ID")
-    mooseError("Please use getBoundaryIDs() when passing \"ANY_BOUNDARY_ID\"");
+    mooseError2("Please use getBoundaryIDs() when passing \"ANY_BOUNDARY_ID\"");
 
   BoundaryID id = Moose::INVALID_BOUNDARY_ID;
   std::istringstream ss(boundary_name);
@@ -950,7 +950,7 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name, bool 
     {
       ids.assign(_mesh_boundary_ids.begin(), _mesh_boundary_ids.end());
       if (i)
-        mooseWarning("You passed \"ANY_BOUNDARY_ID\" in addition to other boundary_names.  This may be a logic error.");
+        mooseWarning2("You passed \"ANY_BOUNDARY_ID\" in addition to other boundary_names.  This may be a logic error.");
       break;
     }
 
@@ -982,7 +982,7 @@ SubdomainID
 MooseMesh::getSubdomainID(const SubdomainName & subdomain_name) const
 {
   if (subdomain_name == "ANY_BLOCK_ID")
-    mooseError("Please use getSubdomainIDs() when passing \"ANY_BLOCK_ID\"");
+    mooseError2("Please use getSubdomainIDs() when passing \"ANY_BLOCK_ID\"");
 
   SubdomainID id = Moose::INVALID_BLOCK_ID;
   std::istringstream ss(subdomain_name);
@@ -1004,7 +1004,7 @@ MooseMesh::getSubdomainIDs(const std::vector<SubdomainName> & subdomain_name) co
     {
       ids.assign(_mesh_subdomains.begin(), _mesh_subdomains.end());
       if (i)
-        mooseWarning("You passed \"ANY_BLOCK_ID\" in addition to other block names.  This may be a logic error.");
+        mooseWarning2("You passed \"ANY_BLOCK_ID\" in addition to other block names.  This may be a logic error.");
       break;
     }
 
@@ -1423,7 +1423,7 @@ const std::pair<BoundaryID, BoundaryID> *
 MooseMesh::getPairedBoundaryMapping(unsigned int component)
 {
   if (!_regular_orthogonal_mesh)
-    mooseError("Trying to retrieve automatic paired mapping for a mesh that is not regular and orthogonal");
+    mooseError2("Trying to retrieve automatic paired mapping for a mesh that is not regular and orthogonal");
 
   mooseAssert(component < dimension(), "Requested dimension out of bounds");
 
@@ -1504,7 +1504,7 @@ MooseMesh::buildRefinementMap(const Elem & elem, QBase & qrule, QBase & qrule_fa
     std::pair<int, ElemType> the_pair(parent_side, elem.type());
 
     if (_elem_type_to_refinement_map.find(the_pair) != _elem_type_to_refinement_map.end())
-      mooseError("Already built a qp refinement map!");
+      mooseError2("Already built a qp refinement map!");
 
     std::vector<std::pair<unsigned int, QpMap> > coarsen_map;
     std::vector<std::vector<QpMap> > & refinement_map = _elem_type_to_refinement_map[the_pair];
@@ -1516,7 +1516,7 @@ MooseMesh::buildRefinementMap(const Elem & elem, QBase & qrule, QBase & qrule_fa
 
     if (_elem_type_to_child_side_refinement_map.find(elem.type()) != _elem_type_to_child_side_refinement_map.end() &&
        _elem_type_to_child_side_refinement_map[elem.type()].find(child_pair) != _elem_type_to_child_side_refinement_map[elem.type()].end())
-      mooseError("Already built a qp refinement map!");
+      mooseError2("Already built a qp refinement map!");
 
     std::vector<std::pair<unsigned int, QpMap> > coarsen_map;
     std::vector<std::vector<QpMap> > & refinement_map = _elem_type_to_child_side_refinement_map[elem.type()][child_pair];
@@ -1535,7 +1535,7 @@ MooseMesh::getRefinementMap(const Elem & elem, int parent_side, int child, int c
     std::pair<int, ElemType> the_pair(parent_side, elem.type());
 
     if (_elem_type_to_refinement_map.find(the_pair) == _elem_type_to_refinement_map.end())
-      mooseError("Could not find a suitable qp refinement map!");
+      mooseError2("Could not find a suitable qp refinement map!");
 
     return _elem_type_to_refinement_map[the_pair];
   }
@@ -1545,7 +1545,7 @@ MooseMesh::getRefinementMap(const Elem & elem, int parent_side, int child, int c
 
     if (_elem_type_to_child_side_refinement_map.find(elem.type()) == _elem_type_to_child_side_refinement_map.end() ||
        _elem_type_to_child_side_refinement_map[elem.type()].find(child_pair) == _elem_type_to_child_side_refinement_map[elem.type()].end())
-      mooseError("Could not find a suitable qp refinement map!");
+      mooseError2("Could not find a suitable qp refinement map!");
 
     return _elem_type_to_child_side_refinement_map[elem.type()][child_pair];
   }
@@ -1563,7 +1563,7 @@ MooseMesh::buildCoarseningMap(const Elem & elem, QBase & qrule, QBase & qrule_fa
   std::pair<int, ElemType> the_pair(input_side, elem.type());
 
   if (_elem_type_to_coarsening_map.find(the_pair) != _elem_type_to_coarsening_map.end())
-    mooseError("Already built a qp coarsening map!");
+    mooseError2("Already built a qp coarsening map!");
 
   std::vector<std::vector<QpMap> > refinement_map;
   std::vector<std::pair<unsigned int, QpMap> > & coarsen_map = _elem_type_to_coarsening_map[the_pair];
@@ -1585,7 +1585,7 @@ MooseMesh::getCoarseningMap(const Elem & elem, int input_side)
   std::pair<int, ElemType> the_pair(input_side, elem.type());
 
   if (_elem_type_to_coarsening_map.find(the_pair) == _elem_type_to_coarsening_map.end())
-    mooseError("Could not find a suitable qp refinement map!");
+    mooseError2("Could not find a suitable qp refinement map!");
 
   return _elem_type_to_coarsening_map[the_pair];
 }
@@ -1813,10 +1813,10 @@ MooseMesh::init()
   {
     // Check of partitioner is supplied (not allowed if custom partitioner is used)
     if (!parameters().isParamSetByAddParam("partitioner"))
-      mooseError("If partitioner block is provided, partitioner keyword cannot be used!");
+      mooseError2("If partitioner block is provided, partitioner keyword cannot be used!");
     // Set custom partitioner
     if (!_custom_partitioner.get())
-      mooseError("Custom partitioner requested but not set!");
+      mooseError2("Custom partitioner requested but not set!");
     getMesh().partitioner().reset(_custom_partitioner.release());
   }
   else
@@ -1845,7 +1845,7 @@ MooseMesh::init()
     case 1: // centroid
     {
       if (!isParamValid("centroid_partitioner_direction"))
-        mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+        mooseError2("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
 
       MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
@@ -1996,14 +1996,14 @@ MooseMesh::maxElemId() const
 Elem *
 MooseMesh::elem(const dof_id_type i)
 {
-  mooseDeprecated("MooseMesh::elem() is deprecated, please use MooseMesh::elemPtr() instead");
+  mooseDeprecated2("MooseMesh::elem() is deprecated, please use MooseMesh::elemPtr() instead");
   return elemPtr(i);
 }
 
 const Elem *
 MooseMesh::elem(const dof_id_type i) const
 {
-  mooseDeprecated("MooseMesh::elem() is deprecated, please use MooseMesh::elemPtr() instead");
+  mooseDeprecated2("MooseMesh::elem() is deprecated, please use MooseMesh::elemPtr() instead");
   return elemPtr(i);
 }
 
@@ -2100,7 +2100,7 @@ MooseMesh::setBoundaryToNormalMap(std::unique_ptr<std::map<BoundaryID, RealVecto
 void
 MooseMesh::setBoundaryToNormalMap(std::map<BoundaryID, RealVectorValue> * boundary_map)
 {
-  mooseDeprecated("setBoundaryToNormalMap(std::map<BoundaryID, RealVectorValue> * boundary_map) is deprecated, use the unique_ptr version instead");
+  mooseDeprecated2("setBoundaryToNormalMap(std::map<BoundaryID, RealVectorValue> * boundary_map) is deprecated, use the unique_ptr version instead");
   _boundary_to_normal_map.reset(boundary_map);
 }
 
@@ -2312,7 +2312,7 @@ MooseMesh::getNodeList(boundary_id_type nodeset_id) const
   std::map<boundary_id_type, std::vector<dof_id_type> >::const_iterator it = _node_set_nodes.find(nodeset_id);
 
   if (it == _node_set_nodes.end())
-    mooseError("Unable to nodeset ID: " << nodeset_id << '.');
+    mooseError2("Unable to nodeset ID: ", nodeset_id, '.');
 
   return it->second;
 }
@@ -2323,7 +2323,7 @@ MooseMesh::getSubdomainBoundaryIds(SubdomainID subdomain_id) const
   std::map<SubdomainID, std::set<BoundaryID> >::const_iterator it = _subdomain_boundary_ids.find(subdomain_id);
 
   if (it == _subdomain_boundary_ids.end())
-    mooseError("Unable to find subdomain ID: " << subdomain_id << '.');
+    mooseError2("Unable to find subdomain ID: ", subdomain_id, '.');
 
   return it->second;
 }
@@ -2384,15 +2384,15 @@ void
 MooseMesh::errorIfDistributedMesh(std::string name) const
 {
   if (_use_distributed_mesh)
-    mooseError("Cannot use " << name << " with DistributedMesh!\n"
-               << "Consider specifying parallel_type = 'replicated' in your input file\n"
-               << "to prevent it from being run with DistributedMesh.");
+    mooseError2("Cannot use ", name, " with DistributedMesh!\n"
+              , "Consider specifying parallel_type = 'replicated' in your input file\n"
+              , "to prevent it from being run with DistributedMesh.");
 }
 
 void
 MooseMesh::errorIfParallelDistribution(std::string name) const
 {
-  mooseDeprecated("errorIfParallelDistribution() is deprecated, call errorIfDistributedMesh() instead.");
+  mooseDeprecated2("errorIfParallelDistribution() is deprecated, call errorIfDistributedMesh() instead.");
   errorIfDistributedMesh(name);
 }
 
@@ -2404,7 +2404,7 @@ MooseMesh::getMortarInterfaceByName(const std::string name)
   if (it != _mortar_interface_by_name.end())
     return (*it).second;
   else
-    mooseError("Requesting non-existent mortar interface '" << name << "'.");
+    mooseError2("Requesting non-existent mortar interface '", name, "'.");
 }
 
 MooseMesh::MortarInterface *
@@ -2414,7 +2414,7 @@ MooseMesh::getMortarInterface(BoundaryID master, BoundaryID slave)
   if (it != _mortar_interface_by_ids.end())
     return (*it).second;
   else
-    mooseError("Requesting non-existing mortar interface (master = " << master << ", slave = " << slave << ").");
+    mooseError2("Requesting non-existing mortar interface (master = ", master, ", slave = ", slave, ").");
 }
 
 void

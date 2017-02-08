@@ -72,7 +72,7 @@ FlagElementsThread::onElement(const Elem *elem)
 
     // Make sure we aren't masking an issue in the Marker system by rounding its values.
     if (std::abs(marker_value - _serialized_solution[dof_number]) > TOLERANCE*TOLERANCE)
-      mooseError("Invalid Marker value detected: " << _serialized_solution[dof_number]);
+      mooseError2("Invalid Marker value detected: ", _serialized_solution[dof_number]);
   }
 
   // If no Markers cared about what happened to this element let's just leave it alone

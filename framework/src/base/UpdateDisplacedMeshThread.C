@@ -77,7 +77,7 @@ void UpdateDisplacedMeshThread::pre()
       _aux_var_nums_directions.push_back(i);
     }
     else
-      mooseError("Undefined variable '"<<displacement_name<<"' used for displacements!");
+      mooseError2("Undefined variable '", displacement_name, "' used for displacements!");
   }
 
   _num_var_nums = _var_nums.size();

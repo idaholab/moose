@@ -26,7 +26,7 @@ SplineInterpolationBase::spline(const std::vector<Real> & x, const std::vector<R
 {
   auto n = x.size();
   if (n < 2)
-    mooseError("You must have at least two knots to create a spline.");
+    mooseError2("You must have at least two knots to create a spline.");
 
   std::vector<Real> u(n, 0.);
   y2.assign(n, 0.);
@@ -84,7 +84,7 @@ SplineInterpolationBase::computeCoeffs(const std::vector<Real> & x, unsigned int
 {
   h = x[khi] - x[klo];
   if (h == 0)
-    mooseError("The values of x must be distinct");
+    mooseError2("The values of x must be distinct");
   a = (x[khi] - x_int) / h;
   b = (x_int - x[klo]) / h;
 }

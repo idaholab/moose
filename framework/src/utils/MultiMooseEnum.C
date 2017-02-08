@@ -207,7 +207,7 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
     if (std::find(_names.begin(), _names.end(), upper) == _names.end())
     {
       if (_out_of_range_index == 0)     // Are out of range values allowed?
-        mooseError("Invalid option \"" << upper << "\" in MultiMooseEnum.  Valid options (not case-sensitive) are \"" << _raw_names << "\".");
+        mooseError2("Invalid option \"", upper, "\" in MultiMooseEnum.  Valid options (not case-sensitive) are \"", _raw_names, "\".");
       else
       {
         // Allow values assigned outside of the enumeration range

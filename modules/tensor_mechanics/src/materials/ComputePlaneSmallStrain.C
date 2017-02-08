@@ -25,7 +25,7 @@ ComputePlaneSmallStrain::ComputePlaneSmallStrain(const InputParameters & paramet
     _out_of_plane_strain(_out_of_plane_strain_coupled ? coupledValue("out_of_plane_strain") : _zero)
 {
   if (_out_of_plane_strain_coupled && _scalar_out_of_plane_strain_coupled)
-    mooseError("Must define only one of out_of_plane_strain or scalar_out_of_plane_strain");
+    mooseError2("Must define only one of out_of_plane_strain or scalar_out_of_plane_strain");
 }
 
 Real

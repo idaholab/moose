@@ -61,7 +61,7 @@ CrystalPlasticitySlipRate::getSlipSystems()
     // Read the slip normal
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       if (!(fileslipsys >> vec[j]))
-        mooseError("CrystalPlasticitySlipRate Error: Premature end of file reading slip system file \n");
+        mooseError2("CrystalPlasticitySlipRate Error: Premature end of file reading slip system file \n");
 
     // Normalize the vectors
     Real mag;
@@ -74,7 +74,7 @@ CrystalPlasticitySlipRate::getSlipSystems()
     // Read the slip direction
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       if (!(fileslipsys >> vec[j]))
-        mooseError("CrystalPlasticitySlipRate Error: Premature end of file reading slip system file \n");
+        mooseError2("CrystalPlasticitySlipRate Error: Premature end of file reading slip system file \n");
 
     // Normalize the vectors
     mag = Utility::pow<2>(vec[0]) + Utility::pow<2>(vec[1]) + Utility::pow<2>(vec[2]);
@@ -88,7 +88,7 @@ CrystalPlasticitySlipRate::getSlipSystems()
       mag += _mo(i * LIBMESH_DIM + j) * _no(i * LIBMESH_DIM + j);
 
     if (std::abs(mag) > 1e-8)
-      mooseError("CrystalPlasticitySlipRate Error: Slip direction and normal not orthonormal, System number = " << i << "\n");
+      mooseError2("CrystalPlasticitySlipRate Error: Slip direction and normal not orthonormal, System number = ", i, "\n");
   }
 
   fileslipsys.close();

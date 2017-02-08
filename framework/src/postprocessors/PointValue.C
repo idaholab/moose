@@ -49,7 +49,7 @@ PointValue::execute()
 
   // Error if the element cannot be located
   if (!elem)
-    mooseError("No element located at " << _point_vec[0] << " in PointValue Postprocessor named: " << name());
+    mooseError2("No element located at ", _point_vec[0], " in PointValue Postprocessor named: ", name());
 
   // Store the element id and processor id that owns the located element
   _elem_id = elem->id();

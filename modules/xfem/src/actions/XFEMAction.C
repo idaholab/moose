@@ -71,7 +71,7 @@ XFEMAction::act()
 
   MooseSharedPointer<XFEM> xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(xfem_interface);
   if (xfem == NULL)
-    mooseError("dynamic cast of xfem object failed");
+    mooseError2("dynamic cast of xfem object failed");
 
   if (_current_task == "setup_xfem"){
 
@@ -93,7 +93,7 @@ XFEMAction::act()
     if (_xfem_cut_type == "line_segment_2d")
     {
       if (_xfem_cut_data.size() % 6 != 0)
-      mooseError("Length of XFEM_cuts must be a multiple of 6.");
+      mooseError2("Length of XFEM_cuts must be a multiple of 6.");
 
       unsigned int num_cuts = _xfem_cut_data.size()/6;
 
@@ -133,7 +133,7 @@ XFEMAction::act()
     else if (_xfem_cut_type == "square_cut_3d")
     {
       if (_xfem_cut_data.size() % 12 != 0)
-        mooseError("Length of XFEM_cuts must be 12 when square_cut_3d");
+        mooseError2("Length of XFEM_cuts must be 12 when square_cut_3d");
 
       unsigned int num_cuts = _xfem_cut_data.size()/12;
       std::vector<Real> square_cut_data(12);
@@ -147,7 +147,7 @@ XFEMAction::act()
     else if (_xfem_cut_type == "circle_cut_3d")
     {
        if (_xfem_cut_data.size() % 9 != 0)
-         mooseError("Length of XFEM_cuts must be 9 when circle_cut_3d");
+         mooseError2("Length of XFEM_cuts must be 9 when circle_cut_3d");
 
        unsigned int num_cuts = _xfem_cut_data.size()/9;
        std::vector<Real> circle_cut_data(9);
@@ -161,7 +161,7 @@ XFEMAction::act()
     else if (_xfem_cut_type == "ellipse_cut_3d")
     {
       if (_xfem_cut_data.size() % 9 != 0)
-        mooseError("Length of XFEM_cuts must be 9 when ellipse_cut_3d");
+        mooseError2("Length of XFEM_cuts must be 9 when ellipse_cut_3d");
 
       unsigned int num_cuts = _xfem_cut_data.size()/9;
       std::vector<Real> ellipse_cut_data(9);
@@ -173,7 +173,7 @@ XFEMAction::act()
       }
     }
     else
-      mooseError("unrecognized XFEM cut type");
+      mooseError2("unrecognized XFEM cut type");
   }
   else if (_current_task == "add_aux_variable" && _xfem_cut_plane)
   {

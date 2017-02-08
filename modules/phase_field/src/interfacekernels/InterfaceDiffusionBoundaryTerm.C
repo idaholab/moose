@@ -32,7 +32,7 @@ InterfaceDiffusionBoundaryTerm::computeQpResidual(Moose::DGResidualType type)
       return -_D_neighbor * _grad_neighbor_value[_qp] * -_normals[_qp] * _test_neighbor[_i][_qp];
   }
 
-  mooseError("Internal error.");
+  mooseError2("Internal error.");
 }
 
 Real
@@ -53,5 +53,5 @@ InterfaceDiffusionBoundaryTerm::computeQpJacobian(Moose::DGJacobianType type)
       return 0.0;
   }
 
-  mooseError("Internal error.");
+  mooseError2("Internal error.");
 }

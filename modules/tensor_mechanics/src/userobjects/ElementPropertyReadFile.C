@@ -58,7 +58,7 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
       break;
 
     default:
-      mooseError("Error ElementPropertyReadFile: Provide valid read type");
+      mooseError2("Error ElementPropertyReadFile: Provide valid read type");
   }
 }
 
@@ -75,7 +75,7 @@ ElementPropertyReadFile::readElementData()
   for ( unsigned int i = 0; i < _nelem; i++)
     for ( unsigned int j = 0; j < _nprop; j++ )
       if (!(file_prop >> _data[i*_nprop + j]))
-        mooseError("Error ElementPropertyReadFile: Premature end of file");
+        mooseError2("Error ElementPropertyReadFile: Premature end of file");
 
   file_prop.close();
 }
@@ -93,7 +93,7 @@ ElementPropertyReadFile::readGrainData()
   for ( unsigned int i=0; i < _ngrain; i++)
     for ( unsigned int j = 0; j < _nprop; j++ )
       if (!(file_prop >> _data[ i * _nprop + j]))
-        mooseError("Error ElementPropertyReadFile: Premature end of file");
+        mooseError2("Error ElementPropertyReadFile: Premature end of file");
 
   file_prop.close();
   initGrainCenterPoints();
@@ -120,7 +120,7 @@ ElementPropertyReadFile::getData( const Elem * elem , unsigned int prop_num ) co
     case 1:
       return getGrainData(elem, prop_num);
   }
-  mooseError("Error ElementPropertyReadFile: Provide valid read type");
+  mooseError2("Error ElementPropertyReadFile: Provide valid read type");
 }
 
 Real

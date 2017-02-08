@@ -61,6 +61,6 @@ ComputeMeanThermalExpansionFunctionEigenstrain::computeThermalStrain(Real & ther
   const Real numerator =  dalphabar_dT * (current_temp - _reference_temperature) + current_alphabar;
   const Real denominator = 1.0 + _alphabar_stress_free_temperature * (_stress_free_temperature - _reference_temperature);
   if (denominator < small)
-    mooseError("Denominator too small in thermal strain calculation");
+    mooseError2("Denominator too small in thermal strain calculation");
   instantaneous_cte = numerator / denominator;
 }

@@ -162,7 +162,7 @@ public:
         _name_to_params_pointer[obj_name] = &validParams<T>;
       }
       else
-        mooseError("Object '" + obj_name + "' already registered.");
+        mooseError2("Object '" + obj_name + "' already registered.");
     }
     // TODO: Possibly store and print information about objects that are skipped here?
   }
@@ -231,7 +231,7 @@ public:
   {
     std::shared_ptr<T> new_object = std::dynamic_pointer_cast<T>(create(obj_name, name, parameters, tid, false));
     if (!new_object)
-      mooseError("We expected to create an object of type '" + demangle(typeid(T).name())
+      mooseError2("We expected to create an object of type '" + demangle(typeid(T).name())
                  + "'.\nInstead we received a parameters object for type '" + obj_name
                  + "'.\nDid you call the wrong \"add\" method in your Action?");
 

@@ -51,7 +51,7 @@ Predictor::Predictor(const InputParameters & parameters) :
     _skip_times_old(getParam<std::vector<Real> >("skip_times_old"))
 {
   if (_scale < 0.0 || _scale > 1.0)
-    mooseError("Input value for scale = " << _scale << " is outside of permissible range (0 to 1)");
+    mooseError2("Input value for scale = ", _scale, " is outside of permissible range (0 to 1)");
 }
 
 Predictor::~Predictor()

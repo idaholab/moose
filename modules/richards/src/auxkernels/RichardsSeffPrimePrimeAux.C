@@ -30,9 +30,9 @@ RichardsSeffPrimePrimeAux::RichardsSeffPrimePrimeAux(const InputParameters & par
 {
   int n = coupledComponents("pressure_vars");
   if (_wrt1 < 0 || _wrt1 >= n)
-    mooseError("Your wrtnum1 is " << _wrt1 << " but it must obey 0 <= wrtnum1 < " << n << ".");
+    mooseError2("Your wrtnum1 is ", _wrt1, " but it must obey 0 <= wrtnum1 < ", n, ".");
   if (_wrt2 < 0 || _wrt2 >= n)
-    mooseError("Your wrtnum2 is " << _wrt2 << " but it must obey 0 <= wrtnum2 < " << n << ".");
+    mooseError2("Your wrtnum2 is ", _wrt2, " but it must obey 0 <= wrtnum2 < ", n, ".");
   _pressure_vals.resize(n);
 
   for (int i = 0 ; i < n; ++i)

@@ -75,10 +75,10 @@ MultiAppCopyTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from_
 
   // Check integrity
   if (to_var.feType() != from_var.feType())
-    mooseError("The variables must be the same type (order and family).");
+    mooseError2("The variables must be the same type (order and family).");
 
   if ( (to_mesh.n_nodes() != from_mesh.n_nodes()) || (to_mesh.n_elem() != from_mesh.n_elem()))
-    mooseError("The meshes must be identical to utilize MultiAppCopyTransfer.");
+    mooseError2("The meshes must be identical to utilize MultiAppCopyTransfer.");
 
   // Transfer node dofs
   MeshBase::const_node_iterator node_it = to_mesh.local_nodes_begin();

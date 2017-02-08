@@ -31,7 +31,7 @@ TensorMechanicsPlasticMeanCapTC::TensorMechanicsPlasticMeanCapTC(const InputPara
 {
   // cannot check the following for all values of the internal parameter, but this will catch most errors
   if (_strength.value(0) <= _c_strength.value(0))
-    mooseError("MeanCapTC: tensile strength (which is usually positive) must not be less than compressive strength (which is usually negative)");
+    mooseError2("MeanCapTC: tensile strength (which is usually positive) must not be less than compressive strength (which is usually negative)");
 }
 
 

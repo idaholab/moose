@@ -50,7 +50,7 @@ KKSMultiACBulkF::computeDFDOP(PFFunctionType type)
       return _phi[_j][_qp] * (sum + _wi * _prop_d2gi[_qp]);
   }
 
-  mooseError("Invalid type passed in");
+  mooseError2("Invalid type passed in");
 }
 
 Real

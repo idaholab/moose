@@ -24,7 +24,7 @@ Grad2ParsedFunction::Grad2ParsedFunction(const InputParameters & parameters) :
 {
   _len2 = _direction*_direction;
   if (_len2 == 0)
-    mooseError("The direction in the Grad2ParsedFunction must have positive length.");
+    mooseError2("The direction in the Grad2ParsedFunction must have positive length.");
 }
 
 Real

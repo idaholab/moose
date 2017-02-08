@@ -44,7 +44,7 @@ KKSACBulkF::computeDFDOP(PFFunctionType type)
     }
   }
 
-  mooseError("Invalid type passed in");
+  mooseError2("Invalid type passed in");
 }
 
 Real

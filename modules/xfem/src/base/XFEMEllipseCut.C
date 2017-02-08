@@ -27,7 +27,7 @@ XFEMEllipseCut::XFEMEllipseCut(std::vector<Real> ellipse_nodes) :
   Point ray2 = _vertices[1] - _center;
 
    if ( std::abs(ray1*ray2) > 1e-6 )
-     mooseError("XFEMEllipseCut only works on an elliptic cut. Users should provide two points at the long and short axis.");
+     mooseError2("XFEMEllipseCut only works on an elliptic cut. Users should provide two points at the long and short axis.");
 
   _normal = ray1.cross(ray2);
   Xfem::normalizePoint(_normal);

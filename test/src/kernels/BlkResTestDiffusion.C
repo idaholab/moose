@@ -89,49 +89,49 @@ BlkResTestDiffusion::BlkResTestDiffusion(const InputParameters & parameters) :
 
     // Test true single SudomainName input
     if (!hasBlocks("1"))
-      mooseError("Test 1: hasBlocks(SubdomainName) = true failed");
+      mooseError2("Test 1: hasBlocks(SubdomainName) = true failed");
 
     // Test false of single Subdomain input
     if (hasBlocks("3"))
-      mooseError("Test 2: hasBlocks(SubdomainName) = false failed");
+      mooseError2("Test 2: hasBlocks(SubdomainName) = false failed");
 
     // Test true vector SubdomainName input
     if (!hasBlocks(id_names))
-      mooseError("Test 3: hasBlocks(std::vector<SubdomainName>) = true failed");
+      mooseError2("Test 3: hasBlocks(std::vector<SubdomainName>) = true failed");
 
     // Test false vector SudomainName input
     id_names.push_back("3");
     if (hasBlocks(id_names))
-      mooseError("Test 4: hasBlocks(std::vector<SubdomainName>) = false failed");
+      mooseError2("Test 4: hasBlocks(std::vector<SubdomainName>) = false failed");
 
     // Test true single SubdomainID input
     if (!hasBlocks(1))
-      mooseError("Test 5: hasBlocks(SubdomainID) = true failed");
+      mooseError2("Test 5: hasBlocks(SubdomainID) = true failed");
 
     // Test false single SubdomainID input
     if (hasBlocks(5))
-      mooseError("Test 6: hasBlocks(SubdomainID) = false failed");
+      mooseError2("Test 6: hasBlocks(SubdomainID) = false failed");
 
     // Test true for std::vector<SubdomainID>
     if (!hasBlocks(ids))
-      mooseError("Test 7: hasBlocks(std::vector<SubdomainID>) = true failed");
+      mooseError2("Test 7: hasBlocks(std::vector<SubdomainID>) = true failed");
 
     // Test false for std::vector<SubdomainID>
     ids.push_back(4);
     if (hasBlocks(ids))
-      mooseError("Test 8: hasBlocks(std::vector<SubdomainID>) = false failed");
+      mooseError2("Test 8: hasBlocks(std::vector<SubdomainID>) = false failed");
 
     // Test true for std::set<SubdomainID>
     if (!hasBlocks(id_set))
-      mooseError("Test 9: hasBlocks(std::set<SubdomainID) = true failed");
+      mooseError2("Test 9: hasBlocks(std::set<SubdomainID) = true failed");
 
     // Test false for std::set<SubdomainID>
     id_set.insert(12);
     if (hasBlocks(id_set))
-      mooseError("Test 10: hasBlocks(std::set<SubdomainID>) = false failed");
+      mooseError2("Test 10: hasBlocks(std::set<SubdomainID>) = false failed");
 
     // This is the expected error, all the above tests passed
-    mooseError("hasBlocks testing passed");
+    mooseError2("hasBlocks testing passed");
   }
 
   // Test of stored ANY_BLOCK_ID on object
@@ -139,9 +139,9 @@ BlkResTestDiffusion::BlkResTestDiffusion(const InputParameters & parameters) :
   {
     // Test that ANY_BLOCK_ID is working
     if (hasBlocks(1))
-      mooseError("hasBlocks_ANY_BLOCK_ID test passed");
+      mooseError2("hasBlocks_ANY_BLOCK_ID test passed");
     else
-      mooseError("hasBlocks_ANY_BLOCK_ID test failed");
+      mooseError2("hasBlocks_ANY_BLOCK_ID test failed");
   }
 
   // Test that the blocks() method is working
@@ -149,9 +149,9 @@ BlkResTestDiffusion::BlkResTestDiffusion(const InputParameters & parameters) :
   {
     const std::vector<SubdomainName> & blks = blocks();
     if (blks[0] == "1" && blks[1] == "2" && blks.size() == 2)
-      mooseError("Blocks testing passed"); // expected error
+      mooseError2("Blocks testing passed"); // expected error
     else
-      mooseError("Blocks testing failed");
+      mooseError2("Blocks testing failed");
   }
 
   // Test that the getSubdomains() is working
@@ -159,9 +159,9 @@ BlkResTestDiffusion::BlkResTestDiffusion(const InputParameters & parameters) :
   {
     const std::set<SubdomainID> & ids = blockIDs();
     if (ids.count(1) == 1 && ids.count(2) == 1)
-      mooseError("blockIDs testing passed"); // expected error
+      mooseError2("blockIDs testing passed"); // expected error
     else
-      mooseError("blockIDs testing failed");
+      mooseError2("blockIDs testing failed");
   }
 
   // Test that the isSubset() is working
@@ -173,26 +173,26 @@ BlkResTestDiffusion::BlkResTestDiffusion(const InputParameters & parameters) :
     sub_id.insert(4);
     sub_id.insert(2);
     if (isBlockSubset(sub_id))
-      mooseError("isBlockSubset testing passed"); // expected error
+      mooseError2("isBlockSubset testing passed"); // expected error
     else
-      mooseError("isBlockSubset testing failed");
+      mooseError2("isBlockSubset testing failed");
   }
 
   // Test that hasMaterialPropertyBlock is working properly
   else if (test == "hasBlockMaterialProperty_true")
   {
     if (hasBlockMaterialProperty<Real>("a"))
-      mooseError("hasBlockMaterialProperty is true, test passed"); // expected error
+      mooseError2("hasBlockMaterialProperty is true, test passed"); // expected error
     else
-      mooseError("hasBlockMaterialProperty is false, test failed");
+      mooseError2("hasBlockMaterialProperty is false, test failed");
   }
 
   else if (test == "hasBlockMaterialProperty_false")
   {
     if (hasBlockMaterialProperty<Real>("b"))
-      mooseError("hasBlockMaterialProperty is true, test failed");
+      mooseError2("hasBlockMaterialProperty is true, test failed");
     else
-      mooseError("hasBlockMaterialProperty is false, test passed"); // expected error
+      mooseError2("hasBlockMaterialProperty is false, test passed"); // expected error
   }
 }
 

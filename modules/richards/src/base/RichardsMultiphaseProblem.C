@@ -42,11 +42,11 @@ RichardsMultiphaseProblem::initialSetup()
 
   // some checks
   if (!bounded.isNodal() || !lower.isNodal())
-    mooseError("Both the bounded and lower variables must be nodal variables in RichardsMultiphaseProblem");
+    mooseError2("Both the bounded and lower variables must be nodal variables in RichardsMultiphaseProblem");
   if (bounded.feType().family != lower.feType().family)
-    mooseError("Both the bounded and lower variables must belong to the same element family, eg LAGRANGE, in RichardsMultiphaseProblem");
+    mooseError2("Both the bounded and lower variables must belong to the same element family, eg LAGRANGE, in RichardsMultiphaseProblem");
   if (bounded.feType().order != lower.feType().order)
-    mooseError("Both the bounded and lower variables must have the same order, eg FIRST, in RichardsMultiphaseProblem");
+    mooseError2("Both the bounded and lower variables must have the same order, eg FIRST, in RichardsMultiphaseProblem");
 
   // extract the required info
   _bounded_var_num = bounded.number();

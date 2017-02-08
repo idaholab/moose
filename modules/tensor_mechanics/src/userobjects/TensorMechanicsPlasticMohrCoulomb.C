@@ -46,16 +46,16 @@ TensorMechanicsPlasticMohrCoulomb::TensorMechanicsPlasticMohrCoulomb(const Input
 
 {
   if (_lode_cutoff < 0)
-    mooseError("mc_lode_cutoff must not be negative");
+    mooseError2("mc_lode_cutoff must not be negative");
 
   // With arbitary UserObjects, it is impossible to check everything, and
   // I think this is the best I can do
   if (phi(0) < 0 || psi(0) < 0 || phi(0) > libMesh::pi / 2.0 || psi(0) > libMesh::pi / 2.0)
-    mooseError("Mohr-Coulomb friction and dilation angles must lie in [0, Pi/2]");
+    mooseError2("Mohr-Coulomb friction and dilation angles must lie in [0, Pi/2]");
   if (phi(0) < psi(0))
-    mooseError("Mohr-Coulomb friction angle must not be less than Mohr-Coulomb dilation angle");
+    mooseError2("Mohr-Coulomb friction angle must not be less than Mohr-Coulomb dilation angle");
   if (cohesion(0) < 0)
-    mooseError("Mohr-Coulomb cohesion must not be negative");
+    mooseError2("Mohr-Coulomb cohesion must not be negative");
 
   // check Abbo et al's convexity constraint (Eqn c.18 in their paper)
   // With an arbitrary UserObject, it is impossible to check for all angles
@@ -64,7 +64,7 @@ TensorMechanicsPlasticMohrCoulomb::TensorMechanicsPlasticMohrCoulomb(const Input
   sin_angle = std::max(sin_angle, std::sin(std::max(phi(1E6), psi(1E6))));
   Real rhs = std::sqrt(3)*(35*std::sin(_tt) + 14*std::sin(5*_tt) - 5*std::sin(7*_tt))/16/Utility::pow<5>(std::cos(_tt))/(11 - 10*std::cos(2*_tt));
   if (rhs <= sin_angle)
-    mooseError("Mohr-Coulomb edge smoothing angle is too small and a non-convex yield surface will result.  Please choose a larger value");
+    mooseError2("Mohr-Coulomb edge smoothing angle is too small and a non-convex yield surface will result.  Please choose a larger value");
 }
 
 

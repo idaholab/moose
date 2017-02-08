@@ -54,18 +54,18 @@ GetMaterialPropertyBoundaryBlockNamesTest::performTest(const std::vector<T> & re
 
   // Vectors must be same length
   if (retrieved_names.size() != expected_names.size())
-    mooseError("TEST FAILED: The vectors of retrieved and expected names are of different lengths");
+    mooseError2("TEST FAILED: The vectors of retrieved and expected names are of different lengths");
 
   // Test that the vectors are the same
   for (unsigned int i = 0; i < retrieved_names.size(); i++)
   {
     std::vector<std::string>::const_iterator it = std::find(expected_names.begin(), expected_names.end(), retrieved_names[i]);
     if (it == expected_names.end())
-      mooseError("TEST FAILED: The retrieved name " << retrieved_names[i] << " was not located in the list of expected names.");
+      mooseError2("TEST FAILED: The retrieved name ", retrieved_names[i], " was not located in the list of expected names.");
   }
 
   // If you are here, you win
-  mooseError("TEST PASSED: The retrieved names are the same as the names expected");
+  mooseError2("TEST PASSED: The retrieved names are the same as the names expected");
 }
 
 #endif /* GETMATERIALPROPERTYBOUNDARYNAMESTEST_H */

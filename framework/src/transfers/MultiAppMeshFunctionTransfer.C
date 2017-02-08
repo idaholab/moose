@@ -347,7 +347,7 @@ MultiAppMeshFunctionTransfer::execute()
         }
 
         if (_error_on_miss && ! point_found)
-          mooseError("Point not found! " << *node + _to_positions[i_to]);
+          mooseError2("Point not found! ", *node + _to_positions[i_to]);
 
         dof_id_type dof = node->dof_number(sys_num, var_num, 0);
         solution->set(dof, best_val);
@@ -394,7 +394,7 @@ MultiAppMeshFunctionTransfer::execute()
         }
 
         if (_error_on_miss && ! point_found)
-          mooseError("Point not found! " << elem->centroid() + _to_positions[i_to]);
+          mooseError2("Point not found! ", elem->centroid() + _to_positions[i_to]);
 
         dof_id_type dof = elem->dof_number(sys_num, var_num, 0);
         solution->set(dof, best_val);

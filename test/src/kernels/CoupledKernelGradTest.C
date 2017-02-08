@@ -33,7 +33,7 @@ CoupledKernelGradTest::CoupledKernelGradTest(const InputParameters & parameters)
   std::vector<Real> a(getParam<std::vector<Real> >("vel"));
   if (a.size()!=2)
   {
-    mooseError("ERROR: CoupledKernelGradTest only implemented for 2D, vel is not size 2");
+    mooseError2("ERROR: CoupledKernelGradTest only implemented for 2D, vel is not size 2");
   }
   _beta=RealVectorValue(a[0],a[1]);
 

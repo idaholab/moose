@@ -28,9 +28,9 @@ TestBoundaryRestrictableAssert::TestBoundaryRestrictableAssert(const InputParame
   if (getParam<bool>("test_invalid"))
   {
     if (_current_boundary_id == Moose::INVALID_BOUNDARY_ID)
-      mooseError("Invalid boundary id test passed");
+      mooseError2("Invalid boundary id test passed");
     else
-      mooseError("Invalid boundary id test failed");
+      mooseError2("Invalid boundary id test failed");
   }
 }
 
@@ -39,7 +39,7 @@ void
 TestBoundaryRestrictableAssert::execute()
 {
   if (_current_boundary_id == 2)
-    mooseError("Valid boundary id test passed");
+    mooseError2("Valid boundary id test passed");
   else
-    mooseError("Valid boundary id test failed");
+    mooseError2("Valid boundary id test failed");
 }

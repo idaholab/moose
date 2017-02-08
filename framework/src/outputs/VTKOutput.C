@@ -55,7 +55,7 @@ VTKOutput::output(const ExecFlagType & /*type*/)
   _file_num++;
 
 #else
-  mooseError("libMesh not configured with VTK");
+  mooseError2("libMesh not configured with VTK");
 #endif
 }
 

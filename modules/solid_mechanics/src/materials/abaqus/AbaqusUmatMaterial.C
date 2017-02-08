@@ -122,7 +122,7 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters) :
   {
     std::ostringstream error;
     error << "Cannot open library: " << dlerror() << '\n';
-    mooseError(error.str());
+    mooseError2(error.str());
   }
 
   // Reset errors
@@ -141,7 +141,7 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters) :
     dlclose(_handle);
     std::ostringstream error;
     error << "Cannot load symbol 'umat_': " << dlsym_error << '\n';
-    mooseError(error.str());
+    mooseError2(error.str());
   }
 }
 

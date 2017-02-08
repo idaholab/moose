@@ -36,13 +36,13 @@ DiscreteNucleation::DiscreteNucleation(const InputParameters & params) :
 {
   // check inputs
   if (_nvar != _op_values.size())
-    mooseError("The op_names and op_values parameter vectors must have the same number of entries");
+    mooseError2("The op_names and op_values parameter vectors must have the same number of entries");
   if (_nvar != _args.size())
-    mooseError("Internal error.");
+    mooseError2("Internal error.");
 
   // this does not work with legacy UO initialization
   if (_fe_problem.legacyUoInitialization())
-    mooseError("DiscreteNucleation needs to be run with legacy UO initialization disabled. Set Problem/use_legacy_uo_initialization=false");
+    mooseError2("DiscreteNucleation needs to be run with legacy UO initialization disabled. Set Problem/use_legacy_uo_initialization=false");
 
   // get libMesh variable numbers
   for (unsigned int i = 0; i < _nvar; ++i)

@@ -29,7 +29,7 @@ void
 StressDivergenceRZTensors::initialSetup()
 {
   if (getBlockCoordSystem() != Moose::COORD_RZ)
-    mooseError("The coordinate system in the Problem block must be set to RZ for axisymmetric geometries.");
+    mooseError2("The coordinate system in the Problem block must be set to RZ for axisymmetric geometries.");
 }
 
 Real
@@ -56,7 +56,7 @@ StressDivergenceRZTensors::computeQpResidual()
       div += (_avg_grad_test[_i][1] - _grad_test[_i][_qp](1)) * (_stress[_qp].trace()) / 3.0;
   }
   else
-    mooseError("Invalid component for this AxisymmetricRZ problem.");
+    mooseError2("Invalid component for this AxisymmetricRZ problem.");
 
   return div;
 }
@@ -138,7 +138,7 @@ StressDivergenceRZTensors::calculateJacobian(unsigned int ivar, unsigned int jva
   else if (ivar == 1 && jvar == 1)
     first_term = ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], ivar, jvar, test, phi); //test_y and phi_y
   else
-    mooseError("Invalid component in Jacobian Calculation");
+    mooseError2("Invalid component in Jacobian Calculation");
 
   Real val = 0.0;
   // volumetric locking correction

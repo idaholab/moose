@@ -26,7 +26,7 @@ PlaneStrain::PlaneStrain(SolidModel & solid_model,
    _volumetric_locking_correction(solid_model.getParam<bool>("volumetric_locking_correction"))
 {
   if (_have_strain_zz && _have_scalar_strain_zz)
-      mooseError("Must define only one of strain_zz or scalar_strain_zz");
+      mooseError2("Must define only one of strain_zz or scalar_strain_zz");
 }
 
 PlaneStrain::~PlaneStrain()

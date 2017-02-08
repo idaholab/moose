@@ -59,7 +59,7 @@ ParsedAddSideset::ParsedAddSideset(const InputParameters & parameters) :
 
   // parse function
   if (_func_F->Parse(_function, "x,y,z") >= 0)
-    mooseError("Invalid function\n" << _function << "\nin ParsedAddSideset " << name() << ".\n" << _func_F->ErrorMsg());
+    mooseError2("Invalid function\n", _function, "\nin ParsedAddSideset ", name(), ".\n", _func_F->ErrorMsg());
 
   _func_params.resize(3);
 }

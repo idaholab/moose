@@ -43,7 +43,7 @@ PorousFlowMassTimeDerivative::PorousFlowMassTimeDerivative(const InputParameters
     _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_nodal_dvar"))
 {
   if (_fluid_component >= _dictator.numComponents())
-    mooseError("The Dictator proclaims that the number of components in this simulation is " << _dictator.numComponents() << " whereas you have used the Kernel PorousFlowComponetMassTimeDerivative with component = " << _fluid_component << ".  The Dictator does not take such mistakes lightly");
+    mooseError2("The Dictator proclaims that the number of components in this simulation is ", _dictator.numComponents(), " whereas you have used the Kernel PorousFlowComponetMassTimeDerivative with component = ", _fluid_component, ".  The Dictator does not take such mistakes lightly");
 }
 
 Real

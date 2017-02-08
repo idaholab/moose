@@ -191,7 +191,7 @@ protected:
   /// Compute the stress (sigma += deltaSigma)
   virtual void computeStress()
   {
-    mooseError("SolidModel::computeStress must be defined by the derived class");
+    mooseError2("SolidModel::computeStress must be defined by the derived class");
   }
 
   // Compute Eshelby tensor, used in J Integral calculation

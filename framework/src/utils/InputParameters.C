@@ -101,7 +101,7 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
       std::map<std::string, std::string>::const_iterator pos = _deprecated_params.find(name);
       if (pos != _deprecated_params.end())
       {
-        mooseDeprecated("The parameter " << name << " is deprecated.\n" << pos->second);
+        mooseDeprecated2("The parameter ", name, " is deprecated.\n", pos->second);
       }
     }
   }
@@ -124,9 +124,9 @@ InputParameters::operator=(const InputParameters & rhs)
   if (!rhs._allow_copy)
   {
     const std::string & name = rhs.get<std::string>("_object_name"); // If _allow_parameter_copy is set then so is name (see InputParameterWarehouse::addInputParameters)
-    mooseError("Copying of the InputParameters object for the " << name << " object is not allowed.\n\nThe likely cause for this error "
-               << "is having a constructor that does not use a const reference, all constructors\nfor MooseObject based classes should be as follows:\n\n"
-               << "    MyObject::MyObject(const InputParameters & parameters);");
+    mooseError2("Copying of the InputParameters object for the ", name, " object is not allowed.\n\nThe likely cause for this error "
+              , "is having a constructor that does not use a const reference, all constructors\nfor MooseObject based classes should be as follows:\n\n"
+              , "    MyObject::MyObject(const InputParameters & parameters);");
   }
 
   Parameters::operator=(rhs);
@@ -361,7 +361,7 @@ InputParameters::mooseObjectSyntaxVisibility() const
   } while (0)
 
 #define checkMooseType(param_type, name) if (have_parameter<param_type>(name) || have_parameter<std::vector<param_type> >(name)) \
-    mooseError("Parameter '" << name << "' cannot be marked as controllable because its type (" << this->type(name) << ") is not controllable.")
+    mooseError2("Parameter '", name, "' cannot be marked as controllable because its type (", this->type(name), ") is not controllable.")
 
 void
 InputParameters::checkParams(const std::string & parsing_syntax)
@@ -376,9 +376,9 @@ InputParameters::checkParams(const std::string & parsing_syntax)
     {
       // The parameter is required but missing
       if (oss.str().empty())
-        oss << "The following required parameters are missing:" << std::endl;
-      oss << l_prefix << "/" << it.first << std::endl;
-      oss << "\tDoc String: \"" + getDocString(it.first) + "\"" << std::endl;
+        oss, "The following required parameters are missing:", std::endl;
+      oss, l_prefix, "/", it.first, std::endl;
+      oss, "\tDoc String: \"" + getDocString(it.first) + "\"", std::endl;
     }
   }
 
@@ -394,17 +394,17 @@ InputParameters::checkParams(const std::string & parsing_syntax)
   }
 
   if (!oss.str().empty())
-    mooseError(oss.str());
+    mooseError2(oss.str());
 
   // Controllable parameters
   for (const auto & param_name : _controllable_params)
   {
     // Check that parameter is valid
     if (!isParamValid(param_name))
-      mooseError("The parameter '" << param_name << "' is not a valid parameter for the object " << l_prefix << " thus cannot be marked as controllable.");
+      mooseError2("The parameter '", param_name, "' is not a valid parameter for the object ", l_prefix, " thus cannot be marked as controllable.");
 
     if (isPrivate(param_name))
-      mooseError("The parameter, '" << param_name << "', in " << l_prefix << " is a private parameter and cannot be marked as controllable");
+      mooseError2("The parameter, '", param_name, "', in ", l_prefix, " is a private parameter and cannot be marked as controllable");
 
     checkMooseType(NonlinearVariableName, param_name);
     checkMooseType(AuxVariableName, param_name);
@@ -442,7 +442,7 @@ InputParameters::defaultCoupledValue(const std::string & coupling_name) const
   std::map<std::string, Real>::const_iterator value_it = _default_coupled_value.find(coupling_name);
 
   if (value_it == _default_coupled_value.end())
-    mooseError("Attempted to retrieve default value for coupled variable '" << coupling_name << "' when none was provided. \n\nThere are three reasons why this may have occurred:\n 1. The other version of params.addCoupledVar() should be used in order to provide a default value. \n 2. This should have been a required coupled variable added with params.addRequiredCoupledVar() \n 3. The call to get the coupled value should have been properly guarded with isCoupled()\n");
+    mooseError2("Attempted to retrieve default value for coupled variable '", coupling_name, "' when none was provided. \n\nThere are three reasons why this may have occurred:\n 1. The other version of params.addCoupledVar() should be used in order to provide a default value. \n 2. This should have been a required coupled variable added with params.addRequiredCoupledVar() \n 3. The call to get the coupled value should have been properly guarded with isCoupled()\n");
 
   return value_it->second;
 }
@@ -541,7 +541,7 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names, con
     if (param_names.find(param_name) != param_names.end())
       _group[param_name] = group_name;
     else
-      mooseError("Unable to find a parameter with name: " << param_name << " when adding to group " << group_name << '.');
+      mooseError2("Unable to find a parameter with name: ", param_name, " when adding to group ", group_name, '.');
 }
 
 std::vector<std::string>
@@ -567,7 +567,7 @@ InputParameters::getDefaultPostprocessorValue(const std::string & name, bool sup
   // Check that a default exists, error if it does not
   std::map<std::string, PostprocessorValue>::const_iterator it = _default_postprocessor_value.find(name);
   if (!(suppress_error || it != _default_postprocessor_value.end()))
-    mooseError("A default PostprcessorValue does not exist for the given name: " << name);
+    mooseError2("A default PostprcessorValue does not exist for the given name: ", name);
 
   // Return the value
   return it->second;
@@ -653,7 +653,7 @@ InputParameters::applyParameters(const InputParameters & common, const std::vect
 bool
 InputParameters::paramSetByUser(const std::string & name) const
 {
-  mooseDeprecated("paramSetByUser() is deprecated. Use isParamSetByUser() instead.");
+  mooseDeprecated2("paramSetByUser() is deprecated. Use isParamSetByUser() instead.");
   return isParamSetByUser(name);
 }
 
@@ -672,7 +672,7 @@ const std::string &
 InputParameters::getDescription(const std::string & name)
 {
   if (_doc_string.find(name) == _doc_string.end())
-    mooseError("No parameter exists with the name " << name );
+    mooseError2("No parameter exists with the name ", name );
   return _doc_string[name];
 }
 
@@ -715,7 +715,7 @@ void
 InputParameters::addParam<MooseEnum>(const std::string & /*name*/,
                                      const std::string & /*doc_string*/)
 {
-  mooseError("You must supply a MooseEnum object when using addParam, even if the parameter is not required!");
+  mooseError2("You must supply a MooseEnum object when using addParam, even if the parameter is not required!");
 }
 
 template <>
@@ -723,7 +723,7 @@ void
 InputParameters::addParam<MultiMooseEnum>(const std::string & /*name*/,
                                           const std::string & /*doc_string*/)
 {
-  mooseError("You must supply a MultiMooseEnum object when using addParam, even if the parameter is not required!");
+  mooseError2("You must supply a MultiMooseEnum object when using addParam, even if the parameter is not required!");
 }
 
 template <>
@@ -731,7 +731,7 @@ void
 InputParameters::addParam<std::vector<MooseEnum> >(const std::string & /*name*/,
                                                    const std::string & /*doc_string*/)
 {
-  mooseError("You must supply a vector of MooseEnum object(s) when using addParam, even if the parameter is not required!");
+  mooseError2("You must supply a vector of MooseEnum object(s) when using addParam, even if the parameter is not required!");
 }
 
 template <>
@@ -740,7 +740,7 @@ InputParameters::addDeprecatedParam<MooseEnum>(const std::string & /*name*/,
                                                const std::string & /*doc_string*/,
                                                const std::string & /*deprecation_message*/)
 {
-  mooseError("You must supply a MooseEnum object and the deprecation string when using addDeprecatedParam, even if the parameter is not required!");
+  mooseError2("You must supply a MooseEnum object and the deprecation string when using addDeprecatedParam, even if the parameter is not required!");
 }
 
 template <>
@@ -749,7 +749,7 @@ InputParameters::addDeprecatedParam<MultiMooseEnum>(const std::string & /*name*/
                                                     const std::string & /*doc_string*/,
                                                     const std::string & /*deprecation_message*/)
 {
-  mooseError("You must supply a MultiMooseEnum object and the deprecation string when using addDeprecatedParam, even if the parameter is not required!");
+  mooseError2("You must supply a MultiMooseEnum object and the deprecation string when using addDeprecatedParam, even if the parameter is not required!");
 }
 
 template <>
@@ -758,7 +758,7 @@ InputParameters::addDeprecatedParam<std::vector<MooseEnum> >(const std::string &
                                                              const std::string & /*doc_string*/,
                                                              const std::string & /*deprecation_message*/)
 {
-  mooseError("You must supply a vector of MooseEnum object(s) and the deprecation string when using addDeprecatedParam, even if the parameter is not required!");
+  mooseError2("You must supply a vector of MooseEnum object(s) and the deprecation string when using addDeprecatedParam, even if the parameter is not required!");
 }
 
 template<>

@@ -32,7 +32,7 @@ PorousFlow2PhasePP::PorousFlow2PhasePP(const InputParameters & parameters) :
     _p1var(_dictator.isPorousFlowVariable(_phase1_porepressure_varnum) ? _dictator.porousFlowVariableNum(_phase1_porepressure_varnum) : 0)
 {
   if (_num_phases != 2)
-    mooseError("The Dictator announces that the number of phases is " << _dictator.numPhases() << " whereas PorousFlow2PhasePP can only be used for 2-phase simulation.  When you have an efficient government, you have a dictatorship.");
+    mooseError2("The Dictator announces that the number of phases is ", _dictator.numPhases(), " whereas PorousFlow2PhasePP can only be used for 2-phase simulation.  When you have an efficient government, you have a dictatorship.");
 }
 
 void

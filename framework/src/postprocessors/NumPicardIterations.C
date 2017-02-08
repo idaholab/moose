@@ -36,7 +36,7 @@ NumPicardIterations::initialize()
   _transient_executioner = dynamic_cast<Transient *>(_app.getExecutioner());
   if (!_transient_executioner)
   {
-    mooseError("The NumPicardIterations Postprocessor can only be used with a Transient Executioner");
+    mooseError2("The NumPicardIterations Postprocessor can only be used with a Transient Executioner");
   }
 }
 

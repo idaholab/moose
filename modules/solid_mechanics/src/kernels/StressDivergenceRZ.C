@@ -115,7 +115,7 @@ StressDivergenceRZ::computeQpResidual()
   }
   else
   {
-    mooseError("Invalid component");
+    mooseError2("Invalid component");
   }
 
   return div;

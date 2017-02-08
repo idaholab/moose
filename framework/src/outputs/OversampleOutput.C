@@ -220,7 +220,7 @@ OversampleOutput::cloneMesh()
   else
   {
     if (_app.isRecovering())
-      mooseWarning("Recovering or Restarting with Oversampling may not work (especially with adapted meshes)!!  Refs #2295");
+      mooseWarning2("Recovering or Restarting with Oversampling may not work (especially with adapted meshes)!!  Refs #2295");
 
     _cloned_mesh_ptr.reset(&(_problem_ptr->mesh().clone()));
   }

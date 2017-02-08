@@ -85,7 +85,7 @@ ComputeJacobianThread::computeJacobian()
     break;
 
   default:
-    mooseError("Unknown kernel type \n");
+    mooseError2("Unknown kernel type \n");
   }
 
   if (warehouse->hasActiveBlockObjects(_subdomain, _tid))

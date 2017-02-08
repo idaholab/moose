@@ -39,7 +39,7 @@ VolumeHistogram::VolumeHistogram(const InputParameters & parameters) :
     _volume(declareVector("n"))
 {
   if (coupledComponents("variable") != 1)
-    mooseError("VolumeHistogram works on exactly one coupled variable");
+    mooseError2("VolumeHistogram works on exactly one coupled variable");
 
   // initialize the bin center value vector
   _bin_center.resize(_nbins);

@@ -205,7 +205,7 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOld(const std::string & prop_name)
 {
-  // TODO: add mooseDeprecated("'declarePropertyOld' is deprecated an no longer necessary");
+  // TODO: add mooseDeprecated2("'declarePropertyOld' is deprecated an no longer necessary");
   return getPropertyOld<T>(prop_name);
 }
 
@@ -213,7 +213,7 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::declarePropertyOlder(const std::string & prop_name)
 {
-  // TODO: add mooseDeprecated("'declarePropertyOlder' is deprecated an no longer necessary");
+  // TODO: add mooseDeprecated2("'declarePropertyOlder' is deprecated an no longer necessary");
   return getPropertyOlder<T>(prop_name);
 }
 
@@ -235,7 +235,7 @@ MaterialData::getProperty(const std::string & name)
   resizeProps<T>(prop_id);
   auto prop = dynamic_cast<MaterialProperty<T>*>(_props[prop_id]);
   if (!prop)
-    mooseError("Material has no property named: " + name);
+    mooseError2("Material has no property named: " + name);
   return *prop;
 }
 

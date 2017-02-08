@@ -409,7 +409,7 @@ public:
       mooseAssert(_root != NULL, "Empty term provided on left side of operator " #op); \
       mooseAssert(term._root != NULL, "Empty term provided on right side of operator " #op); \
       if (dynamic_cast<EBTempIDNode *>(_root)) \
-        mooseError("Using compound assignment operator on anonymous term. Set it to 0 first!"); \
+        mooseError2("Using compound assignment operator on anonymous term. Set it to 0 first!"); \
       _root = new EBBinaryOpTermNode(_root, term.cloneRoot(), EBBinaryOpTermNode::OP); \
       return *this; \
     }

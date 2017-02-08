@@ -90,7 +90,7 @@ stringify(const LineSearchType & t)
   case LS_BT:    return "bt";
   case LS_CP:    return "cp";
 #endif
-  case LS_INVALID: mooseError("Invalid LineSearchType");
+  case LS_INVALID: mooseError2("Invalid LineSearchType");
   }
   return "";
 }
@@ -205,7 +205,7 @@ petscSetOptions(FEProblemBase & problem)
   PetscOptions & petsc = problem.getPetscOptions();
 
   if (petsc.inames.size() != petsc.values.size())
-    mooseError("PETSc names and options are not the same length");
+    mooseError2("PETSc names and options are not the same length");
 
 #if PETSC_VERSION_LESS_THAN(3,7,0)
   PetscOptionsClear();
@@ -446,7 +446,7 @@ getPetscPCSide(Moose::PCSideType pcs)
   case Moose::PCS_LEFT: return PC_LEFT;
   case Moose::PCS_RIGHT: return PC_RIGHT;
   case Moose::PCS_SYMMETRIC: return PC_SYMMETRIC;
-  default: mooseError("Unknown PC side requested."); break;
+  default: mooseError2("Unknown PC side requested."); break;
   }
 }
 
@@ -530,7 +530,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
      * which happens before the parser is even created.  We'll throw an error if somebody attempts to add this option later.
      */
     if (option == "-log_summary")
-      mooseError("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
+      mooseError2("The PETSc option \"-log_summary\" can only be used on the command line.  Please remove it from the input file");
 
     // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in their input files)
     else
@@ -542,7 +542,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
         help_string = "Please use \"Outputs/print_linear_residuals=true\"";
 
       if (help_string != "")
-        mooseWarning("The PETSc option " << option << " should not be used directly in a MOOSE input file. " << help_string);
+        mooseWarning2("The PETSc option ", option, " should not be used directly in a MOOSE input file. ", help_string);
     }
 
     // Update the stored items, but do not create duplicates
@@ -552,7 +552,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
 
   // Check that the name value pairs are sized correctly
   if (petsc_options_inames.size() != petsc_options_values.size())
-    mooseError("PETSc names and options are not the same length");
+    mooseError2("PETSc names and options are not the same length");
 
   // Setup the name value pairs
   bool boomeramg_found = false;
@@ -690,7 +690,7 @@ setSinglePetscOption(const std::string & name, const std::string & value)
   // Not convenient to use the usual error checking macro, because we
   // don't have a specific communicator in this helper function.
   if (ierr)
-    mooseError("Error setting PETSc option.");
+    mooseError2("Error setting PETSc option.");
 }
 
 

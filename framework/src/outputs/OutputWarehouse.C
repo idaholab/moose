@@ -137,7 +137,7 @@ void
 OutputWarehouse::addOutputFilename(const OutFileBase & filename)
 {
   if (_file_base_set.find(filename) != _file_base_set.end())
-    mooseError("An output file with the name, " << filename << ", already exists.");
+    mooseError2("An output file with the name, ", filename, ", already exists.");
   _file_base_set.insert(filename);
 }
 
@@ -280,7 +280,7 @@ OutputWarehouse::checkOutputs(const std::set<OutputName> & names)
 {
   for (const auto & name : names)
     if (!isReservedName(name) && !hasOutput(name))
-      mooseError("The output object '" << name << "' is not a defined output object");
+      mooseError2("The output object '", name, "' is not a defined output object");
 }
 
 

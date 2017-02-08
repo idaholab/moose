@@ -284,7 +284,7 @@ DependencyResolver<T>::getSortedValuesSets()
   if (next_set.empty())
   {
     if (!_independent_items.empty() || !depends.empty())
-      mooseError("DependencyResolver error: next_set shouldn't be empty!");
+      mooseError2("DependencyResolver error: next_set shouldn't be empty!");
   }
   else
   {

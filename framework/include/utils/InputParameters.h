@@ -791,7 +791,7 @@ InputParameters::getCheckedPointerParam(const std::string &name, const std::stri
 
   // Note: You will receive a compile error on this line if you attempt to pass a non-pointer template type to this method
   if (param == NULL)
-    mooseError("Parameter " << name << " is NULL.\n" << error_string);
+    mooseError2("Parameter ", name, " is NULL.\n", error_string);
   return this->get<T>(name);
 }
 
@@ -810,7 +810,7 @@ template <typename T>
 void
 InputParameters::addRequiredParam(const std::string & /*name*/, const T & /*value*/, const std::string & /*doc_string*/)
 {
-  mooseError("You cannot call addRequiredParam and supply a default value for this type, please use addParam instead");
+  mooseError2("You cannot call addRequiredParam and supply a default value for this type, please use addParam instead");
 }
 
 template <typename T, typename S>
@@ -947,7 +947,7 @@ InputParameters::checkConsistentType(const std::string &name) const
   // Do we have a paremeter with the same name but a different type?
   InputParameters::const_iterator it = _values.find(name);
   if (it != _values.end() && dynamic_cast<const Parameter<T>*>(it->second) == NULL)
-    mooseError("Attempting to set parameter \"" << name << "\" with type (" << demangle(typeid(T).name()) << ")\nbut the parameter already exists as type (" << it->second->type() << ")");
+    mooseError2("Attempting to set parameter \"", name, "\" with type (", demangle(typeid(T).name()), ")\nbut the parameter already exists as type (", it->second->type(), ")");
 }
 
 template <typename T>
@@ -955,7 +955,7 @@ void
 InputParameters::suppressParameter(const std::string &name)
 {
   if (!this->have_parameter<T>(name))
-    mooseError("Unable to suppress nonexistent parameter: " << name);
+    mooseError2("Unable to suppress nonexistent parameter: ", name);
 
   _required_params.erase(name);
   _private_params.insert(name);
@@ -1063,7 +1063,7 @@ const T &
 InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const T*)
 {
   if (!pars.isParamValid(name))
-    mooseError("The parameter \"" << name << "\" is being retrieved before being set.\n");
+    mooseError2("The parameter \"", name, "\" is being retrieved before being set.\n");
   return pars.get<T>(name);
 }
 

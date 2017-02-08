@@ -10,11 +10,11 @@
 //has spaces in it:
 
 //#include <iostream>
-//#define EFAError(msg) do {std::c o u t<<"CutElemMesh ERROR: "<<msg<<std::endl; exit(1);} while (0)
+//#define EFAError(msg) do {std::c o u t, "CutElemMesh ERROR: ", msg, std::endl; exit(1);} while (0)
 //#define EFAWarning(msg) do {std::c o u t<<"CutElemMesh WARNING: "<<msg<<std::endl;} while (0)
 
 //This version just calls MooseError for error reporting, which is preferred if this is run
 //within the MOOSE environment:
 #include "MooseError.h"
-#define EFAError(msg) mooseError(msg)
-#define EFAWarning(msg) mooseWarning(msg)
+#define EFAError(msg) mooseError2(msg)
+#define EFAWarning(msg) mooseWarning2(msg)

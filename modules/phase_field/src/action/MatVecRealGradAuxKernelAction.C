@@ -29,7 +29,7 @@ MatVecRealGradAuxKernelAction::MatVecRealGradAuxKernelAction(const InputParamete
     _prop(getParam<std::vector<MaterialPropertyName> >("property")),
     _div_prop(getParam<MaterialPropertyName>("divergence_property"))
 {
-  mooseDeprecated("Use 'MaterialVectorAuxKernel' or 'MaterialVectorGradAuxKernel' action instead depending on data_type of MaterialProperty<std::vector<data_type> >");
+  mooseDeprecated2("Use 'MaterialVectorAuxKernel' or 'MaterialVectorGradAuxKernel' action instead depending on data_type of MaterialProperty<std::vector<data_type> >");
 }
 
 void
@@ -43,7 +43,7 @@ MatVecRealGradAuxKernelAction::act()
   const unsigned int size_p = _prop.size();
 
   if (size_p != size_v)
-    mooseError("var_name_base and property must be vectors of the same dimension");
+    mooseError2("var_name_base and property must be vectors of the same dimension");
 
   for (unsigned int op = 0; op < op_num; ++op)
   {
@@ -74,7 +74,7 @@ MatVecRealGradAuxKernelAction::act()
         _problem->addAuxKernel("MaterialStdVectorAux", "div_" + Moose::stringify(op), params);
       }
       else
-        mooseError("Must specify a divergence_property name along with divergence_variable name");
+        mooseError2("Must specify a divergence_property name along with divergence_variable name");
     }
   }
 }

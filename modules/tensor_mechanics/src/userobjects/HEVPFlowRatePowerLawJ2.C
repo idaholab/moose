@@ -36,7 +36,7 @@ HEVPFlowRatePowerLawJ2::computeValue(unsigned int qp, Real & val) const
   if (val > _flow_rate_tol)
   {
 #ifdef DEBUG
-    mooseWarning("Flow rate greater than " << _flow_rate_tol << " " << val << " " << eqv_stress << " " << _strength[qp]);
+    mooseWarning2("Flow rate greater than ", _flow_rate_tol, " ", val, " ", eqv_stress, " ", _strength[qp]);
 #endif
     return false;
   }

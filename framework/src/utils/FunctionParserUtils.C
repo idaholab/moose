@@ -80,8 +80,8 @@ FunctionParserUtils::evaluate(ADFunctionPtr & parser)
 
   // hard fail or return not a number
   if (_fail_on_evalerror)
-    mooseError("DerivativeParsedMaterial function evaluation encountered an error: "
-               << _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
+    mooseError2("DerivativeParsedMaterial function evaluation encountered an error: "
+              , _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
 
   return _nan;
 }
@@ -94,7 +94,7 @@ FunctionParserUtils::addFParserConstants(ADFunctionPtr & parser,
   // check constant vectors
   unsigned int nconst = constant_expressions.size();
   if (nconst != constant_expressions.size())
-    mooseError("The parameter vectors constant_names and constant_values must have equal length.");
+    mooseError2("The parameter vectors constant_names and constant_values must have equal length.");
 
   // previously evaluated constant_expressions may be used in following constant_expressions
   std::vector<Real> constant_values(nconst);
@@ -109,15 +109,15 @@ FunctionParserUtils::addFParserConstants(ADFunctionPtr & parser,
     // add previously evaluated constants
     for (unsigned int j = 0; j < i; ++j)
       if (!expression->AddConstant(constant_names[j], constant_values[j]))
-        mooseError("Invalid constant name in ParsedMaterialHelper");
+        mooseError2("Invalid constant name in ParsedMaterialHelper");
 
     // build the temporary comnstant expression function
     if (expression->Parse(constant_expressions[i], "") >= 0)
-       mooseError("Invalid constant expression\n" << constant_expressions[i] << "\n in parsed function object.\n" <<  expression->ErrorMsg());
+       mooseError2("Invalid constant expression\n", constant_expressions[i], "\n in parsed function object.\n",  expression->ErrorMsg());
 
     constant_values[i] = expression->Eval(NULL);
 
     if (!parser->AddConstant(constant_names[i], constant_values[i]))
-      mooseError("Invalid constant name in parsed function object");
+      mooseError2("Invalid constant name in parsed function object");
   }
 }

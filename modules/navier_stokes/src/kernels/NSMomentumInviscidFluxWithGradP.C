@@ -128,7 +128,7 @@ NSMomentumInviscidFluxWithGradP::computeQpOffDiagJacobian(unsigned int jvar)
   }
 
   // We shouldn't get here... jvar should have matched one of the if statements above!
-  mooseError("computeQpOffDiagJacobian called with invalid jvar.");
+  mooseError2("computeQpOffDiagJacobian called with invalid jvar.");
 }
 
 Real

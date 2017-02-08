@@ -31,7 +31,7 @@ void
 ContactPenetrationVarAction::act()
 {
   if (!_problem->getDisplacedProblem())
-    mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the Mesh block.");
+    mooseError2("Contact requires updated coordinates.  Use the 'displacements = ...' line in the Mesh block.");
 
   _problem->addAuxVariable("penetration",
                            FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),

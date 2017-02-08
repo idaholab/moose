@@ -37,7 +37,7 @@ CreateDisplacedProblemAction::act()
   if (isParamValid("displacements"))
   {
     if (!_displaced_mesh)
-      mooseError("displacements were set but a displaced mesh wasn't created!");
+      mooseError2("displacements were set but a displaced mesh wasn't created!");
 
     // Define the parameters
     InputParameters object_params = _factory.getValidParams("DisplacedProblem");

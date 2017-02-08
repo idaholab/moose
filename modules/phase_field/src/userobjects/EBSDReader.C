@@ -48,11 +48,11 @@ EBSDReader::readFile()
   // Fetch and check mesh
   EBSDMesh * mesh = dynamic_cast<EBSDMesh *>(&_mesh);
   if (mesh == NULL)
-    mooseError("Please use an EBSDMesh in your simulation.");
+    mooseError2("Please use an EBSDMesh in your simulation.");
 
   std::ifstream stream_in(mesh->getEBSDFilename().c_str());
   if (!stream_in)
-    mooseError("Can't open EBSD file: " << mesh->getEBSDFilename());
+    mooseError2("Can't open EBSD file: ", mesh->getEBSDFilename());
 
   const EBSDMesh::EBSDMeshGeometry & g = mesh->getEBSDGeometry();
 
@@ -97,10 +97,10 @@ EBSDReader::readFile()
       d._custom.resize(_custom_columns);
       for (unsigned int i = 0; i < _custom_columns; ++i)
         if (!(iss >> d._custom[i]))
-          mooseError("Unable to read in EBSD custom data column #" << i);
+          mooseError2("Unable to read in EBSD custom data column #", i);
 
       if (x < _minx || y < _miny || x > _maxx || y > _maxy || (g.dim == 3 && (z < _minz || z > _maxz)))
-        mooseError("EBSD Data ouside of the domain declared in the header ([" << _minx << ':' << _maxx << "], [" << _miny << ':' << _maxy << "], [" << _minz << ':' << _maxz << "]) dim=" << g.dim << "\n" << line);
+        mooseError2("EBSD Data ouside of the domain declared in the header ([", _minx, ':', _maxx, "], [", _miny, ':', _maxy, "], [", _minz, ':', _maxz, "]) dim=" << g.dim << "\n" << line);
 
       d._p = Point(x, y, z);
 
@@ -145,13 +145,13 @@ EBSDReader::readFile()
       a._phase = j._phase;
     else
       if (a._phase != j._phase)
-        mooseError("An EBSD feature needs to have a uniform phase.");
+        mooseError2("An EBSD feature needs to have a uniform phase.");
 
     if (a._n == 0)
       a._symmetry = j._symmetry;
     else
       if (a._symmetry != j._symmetry)
-        mooseError("An EBSD feature needs to have a uniform symmetry parameter.");
+        mooseError2("An EBSD feature needs to have a uniform symmetry parameter.");
 
     for (unsigned int i = 0; i < _custom_columns; ++i)
       a._custom[i] += j._custom[i];
@@ -274,7 +274,7 @@ EBSDReader::indexFromIndex(unsigned int var) const
 
   // Don't access out of range!
   if (avg_index >= _avg_data.size())
-    mooseError("Error! Index out of range in EBSDReader::indexFromIndex(), index: " << avg_index << " size: " << _avg_data.size());
+    mooseError2("Error! Index out of range in EBSDReader::indexFromIndex(), index: ", avg_index, " size: ", _avg_data.size());
 
   return avg_index;
 }
@@ -296,7 +296,7 @@ EBSDReader::getGlobalID(unsigned int feature_id) const
 {
   auto it = _global_id_map.find(feature_id);
   if (it == _global_id_map.end())
-    mooseError("Invalid Feature ID");
+    mooseError2("Invalid Feature ID");
   return it->second;
 }
 
@@ -393,7 +393,7 @@ EBSDReader::getPointDataAccessFunctor(const MooseEnum & field_name) const
 
   // If ret_val was not set by any of the above cases, throw an error.
   if (!ret_val)
-    mooseError("Error:  Please input supported EBSD_param");
+    mooseError2("Error:  Please input supported EBSD_param");
 
   // If we made it here, wrap up the the ret_val in a
   // MooseSharedPointer and ship it off.
@@ -442,7 +442,7 @@ EBSDReader::getAvgDataAccessFunctor(const MooseEnum & field_name) const
 
   // If ret_val was not set by any of the above cases, throw an error.
   if (!ret_val)
-    mooseError("Error:  Please input supported EBSD_param");
+    mooseError2("Error:  Please input supported EBSD_param");
 
   // If we made it here, wrap up the the ret_val in a
   // MooseSharedPointer and ship it off.

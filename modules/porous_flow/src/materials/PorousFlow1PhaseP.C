@@ -26,7 +26,7 @@ PorousFlow1PhaseP::PorousFlow1PhaseP(const InputParameters & parameters) :
     _p_var_num(_dictator.isPorousFlowVariable(_porepressure_varnum) ? _dictator.porousFlowVariableNum(_porepressure_varnum) : 0)
 {
   if (_num_phases != 1)
-    mooseError("The Dictator proclaims that the number of phases is " << _dictator.numPhases() << " whereas PorousFlow1PhaseP can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
+    mooseError2("The Dictator proclaims that the number of phases is ", _dictator.numPhases(), " whereas PorousFlow1PhaseP can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
 }
 
 void

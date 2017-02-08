@@ -35,7 +35,7 @@ void
 MultiAuxVariablesAction::act()
 {
   if (_num_var != _data_size)
-    mooseError("Data type not provided for all the AuxVariables in MultiAuxVariablesAction");
+    mooseError2("Data type not provided for all the AuxVariables in MultiAuxVariablesAction");
 
   // Blocks from the input
   std::set<SubdomainID> blocks = getSubdomainIDs();

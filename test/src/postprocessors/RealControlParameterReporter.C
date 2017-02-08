@@ -38,7 +38,7 @@ RealControlParameterReporter::initialSetup()
   MooseObjectParameterName name(getParam<std::string>("parameter"));
   const InputParameters & params = getMooseApp().getInputParameterWarehouse().getInputParametersObject(name.tag(), name.name(), _tid);
   if (!params.isParamValid(name.parameter()))
-    mooseError("Unable to locate the parameter: " << name);
+    mooseError2("Unable to locate the parameter: ", name);
   else
     _parameter = &(params.get<Real>(name.parameter()));
 }

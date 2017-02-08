@@ -32,7 +32,7 @@ FunctionGradAux::FunctionGradAux(const InputParameters & parameters) :
     _dim_index(getParam<MooseEnum>("dimension_index"))
 {
   if (_dim_index > _mesh.dimension())
-    mooseError("dimension_index > mesh dimension");
+    mooseError2("dimension_index > mesh dimension");
 }
 
 FunctionGradAux::~FunctionGradAux()

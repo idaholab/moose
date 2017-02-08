@@ -703,7 +703,7 @@ void
 Transient::setupTimeIntegrator()
 {
   if (_time_scheme.isValid() && _problem.hasTimeIntegrator())
-    mooseError("You cannot specify time_scheme in the Executioner and independently add a TimeIntegrator to the system at the same time");
+    mooseError2("You cannot specify time_scheme in the Executioner and independently add a TimeIntegrator to the system at the same time");
 
   if (!_problem.hasTimeIntegrator())
   {
@@ -722,7 +722,7 @@ Transient::setupTimeIntegrator()
     case 4: ti_str = "ExplicitMidpoint"; break;
     case 5: ti_str = "LStableDirk2"; break;
     case 6: ti_str = "ExplicitTVDRK2"; break;
-    default: mooseError("Unknown scheme"); break;
+    default: mooseError2("Unknown scheme"); break;
     }
 
     InputParameters params = _app.getFactory().getValidParams(ti_str);

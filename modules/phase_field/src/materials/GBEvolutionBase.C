@@ -48,7 +48,7 @@ GBEvolutionBase::GBEvolutionBase(const InputParameters & parameters) :
     _JtoeV(6.24150974e18) // Joule to eV conversion
 {
   if (_GBMobility == -1 && _GBmob0 == 0)
-    mooseError("Either a value for GBMobility or for GBmob0 and Q must be provided");
+    mooseError2("Either a value for GBMobility or for GBmob0 and Q must be provided");
 }
 
 void

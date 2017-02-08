@@ -383,9 +383,9 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
     {
       if (!T::_advanced_execute_on.contains(execute_data_name) ||
           (T::_advanced_execute_on[execute_data_name].isValid() && T::_advanced_execute_on[execute_data_name].contains("none")))
-        mooseWarning("Postprocessor '" << pps->PPName()
-                     << "' has requested to be output by the '" << T::name()
-                     << "' output, but postprocessor output is not support by this type of output object.");
+        mooseWarning2("Postprocessor '", pps->PPName()
+                    , "' has requested to be output by the '", T::name()
+                    , "' output, but postprocessor output is not support by this type of output object.");
     }
 
     // Set the flag state for postprocessors that utilize 'outputs' parameter
@@ -400,9 +400,9 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
     if (pp_on.contains("none"))
     {
       if (execute_on_name == "execute_postprocessors_on")
-        mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the '" << T::name() << "' output object.");
+        mooseWarning2("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the '", T::name(), "' output object.");
       else if (execute_on_name == "execute_vectorpostprocessors_on")
-        mooseWarning("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector postprocessor output is disabled for the '" << T::name() << "' output object.");
+        mooseWarning2("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector postprocessor output is disabled for the '", T::name(), "' output object.");
     }
   }
 }

@@ -39,14 +39,14 @@ SideSetsFromPoints::SideSetsFromPoints(const InputParameters & parameters) :
     _points(getParam<std::vector<Point> >("points"))
 {
   if (_points.size() != _boundary_names.size())
-    mooseError("point list and boundary list are not the same length");
+    mooseError2("point list and boundary list are not the same length");
 }
 
 void
 SideSetsFromPoints::modify()
 {
   if (!_mesh_ptr)
-    mooseError("_mesh_ptr must be initialized before calling SideSetsFromPoints::modify()!");
+    mooseError2("_mesh_ptr must be initialized before calling SideSetsFromPoints::modify()!");
 
   // We can't call this in the constructor, it appears that _mesh_ptr is always NULL there.
   _mesh_ptr->errorIfDistributedMesh("SideSetsFromPoints");

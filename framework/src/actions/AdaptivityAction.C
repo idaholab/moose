@@ -86,7 +86,7 @@ AdaptivityAction::act()
   if (num_weight_names)
   {
     if (num_weight_names != num_weight_values)
-      mooseError("Number of weight_names must be equal to number of weight_values in Execution/Adaptivity");
+      mooseError2("Number of weight_names must be equal to number of weight_values in Execution/Adaptivity");
 
     // If weights have been specified then set the default weight to zero
     std::vector<Real> weights(system.nVariables(),0);

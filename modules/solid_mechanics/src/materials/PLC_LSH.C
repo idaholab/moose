@@ -70,7 +70,7 @@ PLC_LSH::PLC_LSH( const InputParameters & parameters)
 {
   if (_yield_stress <= 0)
   {
-    mooseError("Yield stress must be greater than zero");
+    mooseError2("Yield stress must be greater than zero");
   }
 }
 
@@ -162,7 +162,7 @@ PLC_LSH::computeStress()
      delS > _absolute_stress_tolerance &&
      (delS/first_delS) > _relative_tolerance)
   {
-    mooseError("Max stress iteration hit during plasticity-creep solve!");
+    mooseError2("Max stress iteration hit during plasticity-creep solve!");
   }
 
   _strain_increment = elastic_strain_increment;
@@ -240,7 +240,7 @@ PLC_LSH::computeCreep( const SymmTensor & strain_increment,
      norm_creep_residual > _absolute_tolerance &&
      (norm_creep_residual/first_norm_creep_residual) > _relative_tolerance)
   {
-    mooseError("Max sub-newton iteration hit during creep solve!");
+    mooseError2("Max sub-newton iteration hit during creep solve!");
   }
 
   // compute creep and elastic strain increments (avoid potential divide by zero - how should this be done)?
@@ -332,7 +332,7 @@ PLC_LSH::computeLSH( const SymmTensor & strain_increment,
        norm_plas_residual > _absolute_tolerance &&
        (norm_plas_residual/first_norm_plas_residual) > _relative_tolerance)
     {
-      mooseError("Max sub-newton iteration hit during plasticity increment solve!");
+      mooseError2("Max sub-newton iteration hit during plasticity increment solve!");
     }
 
     if (effective_trial_stress < 0.01)

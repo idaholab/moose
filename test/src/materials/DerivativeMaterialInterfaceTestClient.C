@@ -51,39 +51,39 @@ DerivativeMaterialInterfaceTestClient::computeQpProperties()
   if (_by_name || _prop_name == "prop")
   {
     if (_prop0[_qp] != 0.0)
-      mooseError("Uninitialized non-existing derivative (should be a zero property).");
+      mooseError2("Uninitialized non-existing derivative (should be a zero property).");
     if (_prop1[_qp] == 0.0)
-      mooseError("property1 stayed at its zero default value. This indicates a broken execution order.");
+      mooseError2("property1 stayed at its zero default value. This indicates a broken execution order.");
     if (_prop1[_qp] != 1.0)
-      mooseError("Unexpected DerivativeMaterial property1 value. " << _prop1[_qp]);
+      mooseError2("Unexpected DerivativeMaterial property1 value. ", _prop1[_qp]);
     if (_prop2[_qp] != 2.0)
-      mooseError("Unexpected DerivativeMaterial property2 value. " << _prop2[_qp]);
+      mooseError2("Unexpected DerivativeMaterial property2 value. ", _prop2[_qp]);
     if (_prop3[_qp] != 3.0)
-      mooseError("Unexpected DerivativeMaterial property3 value. " << _prop3[_qp]);
+      mooseError2("Unexpected DerivativeMaterial property3 value. ", _prop3[_qp]);
     if (_prop4[_qp] != 4.0)
-      mooseError("Unexpected DerivativeMaterial property4 value. " << _prop4[_qp]);
+      mooseError2("Unexpected DerivativeMaterial property4 value. ", _prop4[_qp]);
     if (_prop5[_qp] != 5.0)
-      mooseError("Unexpected DerivativeMaterial property5 value. " << _prop5[_qp]);
+      mooseError2("Unexpected DerivativeMaterial property5 value. ", _prop5[_qp]);
   }
   else if (_prop_name == "1.0")
   {
     if (_prop0[_qp] != 0.0)
-      mooseError("Unexpected DerivativeMaterial default property0 value. " << _prop0[_qp]);
+      mooseError2("Unexpected DerivativeMaterial default property0 value. ", _prop0[_qp]);
     if (_prop1[_qp] != 0.0)
-      mooseError("Unexpected DerivativeMaterial default property1 value. " << _prop1[_qp]);
+      mooseError2("Unexpected DerivativeMaterial default property1 value. ", _prop1[_qp]);
     if (_prop2[_qp] != 0.0)
-      mooseError("Unexpected DerivativeMaterial default property2 value. " << _prop2[_qp]);
+      mooseError2("Unexpected DerivativeMaterial default property2 value. ", _prop2[_qp]);
     if (_prop3[_qp] != 0.0)
-      mooseError("Unexpected DerivativeMaterial default property3 value. " << _prop3[_qp]);
+      mooseError2("Unexpected DerivativeMaterial default property3 value. ", _prop3[_qp]);
     if (_prop4[_qp] != 0.0)
-      mooseError("Unexpected DerivativeMaterial default property4 value. " << _prop4[_qp]);
+      mooseError2("Unexpected DerivativeMaterial default property4 value. ", _prop4[_qp]);
     if (_prop5[_qp] != 0.0)
-      mooseError("Unexpected DerivativeMaterial default property5 value. " << _prop5[_qp]);
+      mooseError2("Unexpected DerivativeMaterial default property5 value. ", _prop5[_qp]);
   }
   else
-    mooseError("Unexpected DerivativeMaterial property name.");
+    mooseError2("Unexpected DerivativeMaterial property name.");
 
   // check execution order (if the order is wrong the property is lagging by one element)
   if (_prop6[_qp] != _current_elem->id())
-    mooseError("Wrong material execution order.");
+    mooseError2("Wrong material execution order.");
 }

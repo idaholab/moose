@@ -157,18 +157,18 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
       oss << delete_files.checkpoint << '-' << n_processors() << '-' << proc_id;
       ret = remove(oss.str().c_str());
       if (ret != 0)
-        mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);
+        mooseWarning2("Error during the deletion of file '", oss.str().c_str(), "': ", ret);
     }
     else if (proc_id == 0)
     {
       ret = remove(delete_files.checkpoint.c_str());
       if (ret != 0)
-        mooseWarning("Error during the deletion of file '" << delete_files.checkpoint << "': " << ret);
+        mooseWarning2("Error during the deletion of file '", delete_files.checkpoint, "': ", ret);
 
       // Delete the system files (xdr and xdr.0000, ...)
       ret = remove(delete_files.system.c_str());
       if (ret != 0)
-        mooseWarning("Error during the deletion of file '" << delete_files.system << "': " << ret);
+        mooseWarning2("Error during the deletion of file '", delete_files.system, "': ", ret);
     }
 
     {
@@ -180,7 +180,7 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
           << proc_id;
       ret = remove(oss.str().c_str());
       if (ret != 0)
-        mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);
+        mooseWarning2("Error during the deletion of file '", oss.str().c_str(), "': ", ret);
     }
 
     unsigned int n_threads = libMesh::n_threads();
@@ -195,7 +195,7 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
           oss << "-" << tid;
         ret = remove(oss.str().c_str());
         if (ret != 0)
-          mooseWarning("Error during the deletion of file '" << oss.str().c_str() << "': " << ret);
+          mooseWarning2("Error during the deletion of file '", oss.str().c_str(), "': ", ret);
       }
     }
   }

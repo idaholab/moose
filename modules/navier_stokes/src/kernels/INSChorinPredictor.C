@@ -124,7 +124,7 @@ Real INSChorinPredictor::computeQpResidual()
     break;
   }
   default:
-    mooseError("Unrecognized Chorin predictor type requested.");
+    mooseError2("Unrecognized Chorin predictor type requested.");
   }
 
 
@@ -171,7 +171,7 @@ Real INSChorinPredictor::computeQpJacobian()
     break;
   }
   default:
-    mooseError("Unrecognized Chorin predictor type requested.");
+    mooseError2("Unrecognized Chorin predictor type requested.");
   }
 
   return mass_part + other_part;
@@ -269,7 +269,7 @@ Real INSChorinPredictor::computeQpOffDiagJacobian(unsigned jvar)
   }
 
   default:
-    mooseError("Unrecognized Chorin predictor type requested.");
+    mooseError2("Unrecognized Chorin predictor type requested.");
   }
 }
 

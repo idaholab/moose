@@ -64,7 +64,7 @@ protected:
 
   virtual Real volumeRatioOld(unsigned /*qp*/) const
   {
-    mooseError("volumeRatioOld not defined");
+    mooseError2("volumeRatioOld not defined");
   }
 
   /// Rotate stress to current configuration

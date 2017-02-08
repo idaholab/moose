@@ -38,7 +38,7 @@ Nonlinear::Nonlinear( SolidModel & solid_model,
   }
   else
   {
-    mooseError( "The options for the increment calculation are RashidApprox and Eigen.");
+    mooseError2( "The options for the increment calculation are RashidApprox and Eigen.");
   }
 
 }
@@ -68,7 +68,7 @@ Nonlinear::computeStrainAndRotationIncrement( const ColumnMajorMatrix & Fhat,
 
   else
   {
-    mooseError("Unknown polar decomposition type!");
+    mooseError2("Unknown polar decomposition type!");
   }
 }
 

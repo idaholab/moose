@@ -59,9 +59,9 @@ GapValueAux::GapValueAux(const InputParameters & parameters) :
   Order pairedVarOrder(_moose_var.order());
   Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
   if (pairedVarOrder != gvaOrder && pairedVarOrder != CONSTANT)
-    mooseError("ERROR: specified order for GapValueAux ("<<Utility::enum_to_string<Order>(gvaOrder)
-               <<") does not match order for paired_variable \""<< _moose_var.name() << "\" ("
-               <<Utility::enum_to_string<Order>(pairedVarOrder)<<")");
+    mooseError2("ERROR: specified order for GapValueAux (", Utility::enum_to_string<Order>(gvaOrder)
+              , ") does not match order for paired_variable \"", _moose_var.name(), "\" ("
+              , Utility::enum_to_string<Order>(pairedVarOrder), ")");
 
 }
 
@@ -96,7 +96,7 @@ GapValueAux::computeValue()
       msg << current_node->id();
       msg << " on processor ";
       msg << processor_id();
-      mooseWarning( msg.str() );
+      mooseWarning2( msg.str() );
     }
   }
   return gap_value;

@@ -169,7 +169,7 @@ InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName
         {
           // Do not allow non-controllable types to be controlled
           if (!param_pair.second->isControllable(desired.parameter()))
-            mooseError("The desired parameter is not controllable: " << desired);
+            mooseError2("The desired parameter is not controllable: ", desired);
 
           // Store pointer to the writable parameter
           output.insert(desired, param_pair.second);
@@ -183,7 +183,7 @@ InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName
 
   // Error if nothing was found
   if (output.size() == 0)
-    mooseError("The controlled parameter was not found: " << input);
+    mooseError2("The controlled parameter was not found: ", input);
 
   return output;
 }

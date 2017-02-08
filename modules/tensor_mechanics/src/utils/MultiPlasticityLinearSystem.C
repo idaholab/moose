@@ -96,7 +96,7 @@ MultiPlasticityLinearSystem::eliminateLinearDependence(const RankTwoTensor & str
   std::vector<double> s;
   int info = singularValuesOfR(r, s);
   if (info != 0)
-    mooseError("In finding the SVD in the return-map algorithm, the PETSC LAPACK gesvd routine returned with error code " << info);
+    mooseError2("In finding the SVD in the return-map algorithm, the PETSC LAPACK gesvd routine returned with error code ", info);
 
   // num_lin_dep are the number of linearly dependent
   // "r vectors", if num_active <= 6
@@ -170,7 +170,7 @@ MultiPlasticityLinearSystem::eliminateLinearDependence(const RankTwoTensor & str
       r_tmp.push_back(r[current_yf]);
       info = singularValuesOfR(r_tmp, s);
       if (info != 0)
-        mooseError("In finding the SVD in the return-map algorithm, the PETSC LAPACK gesvd routine returned with error code " << info);
+        mooseError2("In finding the SVD in the return-map algorithm, the PETSC LAPACK gesvd routine returned with error code ", info);
       if (s[s.size() - 1] < _svd_tol*s[0])
       {
         scheduled_for_deactivation[current_yf] = true;
@@ -570,7 +570,7 @@ MultiPlasticityLinearSystem::nrStep(const RankTwoTensor & stress, const std::vec
   LAPACKgesv_(&system_size, &nrhs, &a[0], &system_size, &ipiv[0], &rhs[0], &system_size, &info);
 
   if (info != 0)
-    mooseError("In solving the linear system in a Newton-Raphson process, the PETSC LAPACK gsev routine returned with error code " << info);
+    mooseError2("In solving the linear system in a Newton-Raphson process, the PETSC LAPACK gsev routine returned with error code ", info);
 
 
 

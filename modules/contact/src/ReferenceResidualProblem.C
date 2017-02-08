@@ -30,11 +30,11 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
   if (params.isParamValid("reference_residual_variables"))
     _refResidVarNames = params.get<std::vector<std::string> >("reference_residual_variables");
   if (_solnVarNames.size() != _refResidVarNames.size())
-    mooseError("In ReferenceResidualProblem, size of solution_variables (" \
-               << _solnVarNames.size() \
-               << ") != size of reference_residual_variables (" \
-               << _refResidVarNames.size() \
-               << ")");
+    mooseError2("In ReferenceResidualProblem, size of solution_variables (" \
+              , _solnVarNames.size() \
+              , ") != size of reference_residual_variables (" \
+              , _refResidVarNames.size() \
+              , ")");
 
   _accept_mult = params.get<Real>("acceptable_multiplier");
   _accept_iters = params.get<int>("acceptable_iterations");
@@ -52,11 +52,11 @@ ReferenceResidualProblem::initialSetup()
   TransientExplicitSystem & as = aux_sys.sys();
 
   if (_solnVarNames.size() > 0 && _solnVarNames.size() != s.n_vars())
-    mooseError("In ReferenceResidualProblem, size of solution_variables (" \
-               << _solnVarNames.size() \
-               << ") != number of variables in system (" \
-               << s.n_vars() \
-               << ")");
+    mooseError2("In ReferenceResidualProblem, size of solution_variables (" \
+              , _solnVarNames.size() \
+              , ") != number of variables in system (" \
+              , s.n_vars() \
+              , ")");
 
   _solnVars.clear();
   for (unsigned int i=0; i<_solnVarNames.size(); ++i)
@@ -73,7 +73,7 @@ ReferenceResidualProblem::initialSetup()
       }
     }
     if (!foundMatch)
-      mooseError("Could not find solution variable '" << _solnVarNames[i] << "' in system");
+      mooseError2("Could not find solution variable '", _solnVarNames[i], "' in system");
   }
 
   _refResidVars.clear();
@@ -91,7 +91,7 @@ ReferenceResidualProblem::initialSetup()
       }
     }
     if (!foundMatch)
-      mooseError("Could not find variable '" << _refResidVarNames[i] << "' in auxiliary system");
+      mooseError2("Could not find variable '", _refResidVarNames[i], "' in auxiliary system");
   }
 
   FEProblemBase::initialSetup();

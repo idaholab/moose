@@ -108,7 +108,7 @@ RadialReturnStressUpdate::updateStress(RankTwoTensor & strain_increment,
       if (_output_iteration_info_on_error)
         Moose::err << iteration_output;
 
-      mooseError("Exceeded maximum iterations in RadialReturnStressUpdate solve for material: " << _name << ".  Rerun with  'output_iteration_info_on_error = true' for more information.");
+      mooseError2("Exceeded maximum iterations in RadialReturnStressUpdate solve for material: ", _name, ".  Rerun with  'output_iteration_info_on_error = true' for more information.");
     }
 
     // compute inelastic strain increments while avoiding a potential divide by zero
@@ -129,7 +129,7 @@ RadialReturnStressUpdate::getIsotropicShearModulus()
 {
   const Real shear_modulus = _elasticity_tensor[_qp](0,1,0,1);
   if (_mesh.dimension() == 3 && shear_modulus != _elasticity_tensor[_qp](0,2,0,2))
-    mooseError("Check to ensure that your Elasticity Tensor is truly Isotropic");
+    mooseError2("Check to ensure that your Elasticity Tensor is truly Isotropic");
   return shear_modulus;
 }
 
@@ -140,7 +140,7 @@ RadialReturnStressUpdate::getIsotropicBulkModulus()
   // dilatational modulus is defined as lambda plus two mu
   const Real dilatational_modulus = _elasticity_tensor[_qp](0,0,0,0);
   if (_mesh.dimension() == 3 && dilatational_modulus != _elasticity_tensor[_qp](2,2,2,2))
-    mooseError("Check to ensure that your Elasticity Tensor is truly Isotropic");
+    mooseError2("Check to ensure that your Elasticity Tensor is truly Isotropic");
   const Real lambda = dilatational_modulus - 2.0 * shear_modulus;
   const Real bulk_modulus = lambda + 2.0 * shear_modulus / 3.0;
   return bulk_modulus;

@@ -49,12 +49,12 @@ AddExtraNodeset::modify()
   {
     unsigned int n_coord = getParam<std::vector<Real> >("coord").size();
     if (n_coord % _mesh_ptr->dimension() != 0)
-      mooseError("Size of node coordinates does not match the mesh dimension");
+      mooseError2("Size of node coordinates does not match the mesh dimension");
     if (n_coord !=0)
       data_valid = true;
   }
   if (!data_valid)
-    mooseError("Node set can not be empty!");
+    mooseError2("Node set can not be empty!");
 
   // Get the BoundaryIDs from the mesh
   std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName> >("new_boundary");
@@ -82,7 +82,7 @@ AddExtraNodeset::modify()
 
     const Elem * elem = _mesh_ptr->getMesh().point_locator() (p);
     if (!elem)
-      mooseError("Unable to locate the following point within the domain, please check its coordinates:\n" << p);
+      mooseError2("Unable to locate the following point within the domain, please check its coordinates:\n", p);
 
     bool on_node = false;
     for (unsigned int j = 0; j<elem->n_nodes(); ++j)
@@ -103,7 +103,7 @@ AddExtraNodeset::modify()
       }
     }
     if (!on_node)
-      mooseError("Point can not be located!");
+      mooseError2("Point can not be located!");
   }
 
   for (unsigned int i = 0; i < boundary_ids.size(); ++i)

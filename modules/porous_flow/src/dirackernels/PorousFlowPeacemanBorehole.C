@@ -37,9 +37,9 @@ PorousFlowPeacemanBorehole::PorousFlowPeacemanBorehole(const InputParameters & p
     _dperm_or_cond_dvar(_p_or_t == 0 ? getMaterialProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_qp_dvar") : getMaterialProperty<std::vector<RealTensorValue> >("dPorousFlow_thermal_conductivity_qp_dvar"))
 {
   if (_p_or_t == 0 && !_has_permeability)
-    mooseError("PorousFlowPeacemanBorehole: You have specified function_of=porepressure, but you do not have a quadpoint permeability material");
+    mooseError2("PorousFlowPeacemanBorehole: You have specified function_of=porepressure, but you do not have a quadpoint permeability material");
   if (_p_or_t == 1 && !_has_thermal_conductivity)
-    mooseError("PorousFlowPeacemanBorehole: You have specified function_of=temperature, but you do not have a quadpoint thermal_conductivity material");
+    mooseError2("PorousFlowPeacemanBorehole: You have specified function_of=temperature, but you do not have a quadpoint thermal_conductivity material");
 
   // construct the rotation matrix needed to rotate the permeability
   const unsigned int num_pts = _zs.size();
@@ -138,7 +138,7 @@ PorousFlowPeacemanBorehole::wellConstant(const RealTensorValue & perm, const Rea
   const Real halfPi = acos(0.0);
 
   if (r0 <= rad)
-    mooseError("The effective element size (about 0.2-times-true-ele-size) for an element containing a Peaceman-type borehole must be (much) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size " << r0 << " and the borehole radius is " << rad << "\n");
+    mooseError2("The effective element size (about 0.2-times-true-ele-size) for an element containing a Peaceman-type borehole must be (much) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size ", r0, " and the borehole radius is ", rad, "\n");
 
   return 4 * halfPi * effective_perm * half_len / std::log(r0 / rad);
 }

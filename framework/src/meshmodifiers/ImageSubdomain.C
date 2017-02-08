@@ -38,7 +38,7 @@ ImageSubdomain::modify()
 {
   // Check that we have access to the mesh
   if (!_mesh_ptr)
-    mooseError("_mesh_ptr must be initialized before calling SubdomainBoundingBox::modify()");
+    mooseError2("_mesh_ptr must be initialized before calling SubdomainBoundingBox::modify()");
 
   // Initialize the ImageSampler
   setupImageSampler(*_mesh_ptr);
