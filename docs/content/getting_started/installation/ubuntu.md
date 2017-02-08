@@ -27,7 +27,6 @@ libhwloc-dev
 
     * Ubuntu 16.04: !MOOSEPACKAGE arch=ubuntu16.04 return=link!
     * Ubuntu 14.04: !MOOSEPACKAGE arch=ubuntu14.04 return=link!
-    * Ubuntu 12.04: !MOOSEPACKAGE arch=ubuntu12.04 return=link!
 
 {!docs/content/getting_started/installation/install_redistributable_deb.md!}
 {!docs/content/getting_started/installation/clone_moose.md!}

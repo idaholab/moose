@@ -25,7 +25,7 @@ git
 
 * Download one our redistributables according to your version of Fedora
 
-    * Fedora Core 23: !MOOSEPACKAGE arch=fedora23 return=link!
+    * Fedora 25: !MOOSEPACKAGE arch=fedora25 return=link!
 
 {!docs/content/getting_started/installation/install_redistributable_rpm.md!}
 {!docs/content/getting_started/installation/clone_moose.md!}
