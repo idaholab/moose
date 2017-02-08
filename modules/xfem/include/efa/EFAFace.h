@@ -19,7 +19,7 @@ class EFAFace
 {
 public:
 
-  EFAFace(unsigned int n_nodes);
+  EFAFace(unsigned int n_nodes, unsigned int num_interior_face_nodes = 0);
   EFAFace(const EFAFace & other_face);
   EFAFace(const EFAFragment2D * frag);
 
@@ -32,6 +32,7 @@ private:
   unsigned int _num_edges;
   std::vector<EFAEdge*> _edges;
   std::vector<EFAFaceNode*> _interior_nodes;
+  std::vector<EFANode*> _face_interior_nodes;
 
 public:
 
@@ -55,6 +56,8 @@ public:
   void reverseEdges();
   bool isTriOrQuad() const;
 
+  EFANode * getInteriorFaceNode(unsigned int i) const {return _face_interior_nodes[i];};
+  void setInteriorFaceNode(unsigned int i, EFANode * node);
   bool equivalent(const EFAFace* other_face) const;
   bool containsNode(const EFANode* node) const;
   bool containsFace(const EFAFace* other_face) const;

@@ -6,7 +6,7 @@
 /****************************************************************/
 
 #include "XFEMGeometricCut2D.h"
-
+#include "XFEMFuncs.h"
 #include "MooseError.h"
 #include "libmesh/string_to_enum.h"
 
@@ -127,14 +127,13 @@ XFEMGeometricCut2D::IntersectSegmentWithCutLine(const Point & segment_point1,
   // http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
 
   bool cut_segment = false;
-  Real tol = 1.e-15;
   Point seg_dir = segment_point2 - segment_point1;
   Point cut_dir = cutting_line_point2 - cutting_line_point1;
   Point cut_start_to_seg_start = segment_point1 - cutting_line_point1;
 
   Real cut_dir_cross_seg_dir = crossProduct2D(cut_dir(0), cut_dir(1), seg_dir(0), seg_dir(1));
 
-  if (std::abs(cut_dir_cross_seg_dir) > tol)
+  if (std::abs(cut_dir_cross_seg_dir) > Xfem::tol)
   {
     //Fraction of the distance along the cutting segment where it intersects the edge segment
     Real cut_int_frac = crossProduct2D(cut_start_to_seg_start(0), cut_start_to_seg_start(1), seg_dir(0), seg_dir(1)) /

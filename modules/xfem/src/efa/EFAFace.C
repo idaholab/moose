@@ -14,11 +14,12 @@
 #include "EFAFuncs.h"
 #include "EFAError.h"
 
-EFAFace::EFAFace(unsigned int n_nodes) :
+EFAFace::EFAFace(unsigned int n_nodes, unsigned int num_interior_face_nodes) :
     _num_nodes(n_nodes),
     _nodes(_num_nodes, NULL),
     _num_edges(_num_nodes),
-    _edges(_num_edges, NULL)
+    _edges(_num_edges, NULL),
+    _face_interior_nodes(num_interior_face_nodes, NULL)
 {
 }
 
@@ -75,6 +76,12 @@ EFAFace::~EFAFace()
   }
 }
 
+void
+EFAFace::setInteriorFaceNode(unsigned int i, EFANode * node)
+{
+  _face_interior_nodes[i] = node;
+}
+
 unsigned int
 EFAFace::numNodes() const
 {
@@ -96,15 +103,28 @@ EFAFace::getNode(unsigned int node_id) const
 void
 EFAFace::switchNode(EFANode *new_node, EFANode *old_node)
 {
+  bool is_face_node = true;
   for (unsigned int i = 0; i < _num_nodes; ++i)
   {
     if (_nodes[i] == old_node)
+    {
       _nodes[i] = new_node;
+      is_face_node = false;
+    }
   }
-  for (unsigned int i = 0; i < _edges.size(); ++i)
-    _edges[i]->switchNode(new_node, old_node);
-  for (unsigned int i = 0; i < _interior_nodes.size(); ++i)
-    _interior_nodes[i]->switchNode(new_node, old_node);
+  if (is_face_node)
+  {
+    for (unsigned int i = 0; i < _face_interior_nodes.size(); ++i)
+      if (_face_interior_nodes[i] == old_node)
+        _face_interior_nodes[i] = new_node;
+  }
+  else
+  {
+    for (unsigned int i = 0; i < _edges.size(); ++i)
+      _edges[i]->switchNode(new_node, old_node);
+    for (unsigned int i = 0; i < _interior_nodes.size(); ++i)
+      _interior_nodes[i]->switchNode(new_node, old_node);
+  }
 }
 
 bool
