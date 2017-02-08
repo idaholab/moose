@@ -77,7 +77,7 @@ CheckOutputAction::checkMaterialOutput()
     return;
 
   // A complete list of all Material objects
-  const std::vector<std::shared_ptr<Material> > & materials = _problem->getMaterialWarehouse().getActiveObjects();
+  const auto & materials = _problem->getMaterialWarehouse().getActiveObjects();
 
   // TODO include boundary materials
 

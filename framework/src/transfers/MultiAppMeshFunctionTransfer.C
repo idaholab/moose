@@ -17,7 +17,6 @@
 #include "MooseTypes.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
-#include "MooseTypes.h" // for std::shared_ptr
 #include "MooseMesh.h"
 
 // libMesh includes
@@ -191,7 +190,7 @@ MultiAppMeshFunctionTransfer::execute()
   }
 
   // Setup the local mesh functions.
-  std::vector<std::shared_ptr<MeshFunction> > local_meshfuns;
+  std::vector<std::shared_ptr<MeshFunction>> local_meshfuns;
   for (unsigned int i_from = 0; i_from < _from_problems.size(); i_from++)
   {
     FEProblemBase & from_problem = *_from_problems[i_from];

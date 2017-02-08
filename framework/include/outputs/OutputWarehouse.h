@@ -227,7 +227,7 @@ private:
    * We are using std::shared_ptr to handle the cleanup of the pointers at the end of execution.
    * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
    */
-  std::vector<std::shared_ptr<Output> > _all_ptrs;
+  std::vector<std::shared_ptr<Output>> _all_ptrs;
 
   /**
    * Adds the file name to the list of filenames being output

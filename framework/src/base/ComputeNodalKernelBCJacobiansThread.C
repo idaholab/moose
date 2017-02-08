@@ -69,7 +69,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
     if (_nodal_kernels.hasActiveBoundaryObjects(boundary_id, _tid))
     {
       // Loop over each NodalKernel to see if it's involved with the jvar
-      const std::vector<std::shared_ptr<NodalKernel> > & objects = _nodal_kernels.getActiveBoundaryObjects(boundary_id, _tid);
+      const auto & objects = _nodal_kernels.getActiveBoundaryObjects(boundary_id, _tid);
       for (const auto & nodal_kernel : objects)
       {
         // If this NodalKernel isn't operating on this ivar... skip it

@@ -62,7 +62,7 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
   for (const auto & block : block_ids)
     if (_nodal_kernels.hasActiveBlockObjects(block, _tid))
     {
-      const std::vector<std::shared_ptr<NodalKernel> > & objects = _nodal_kernels.getActiveBlockObjects(block, _tid);
+      const auto & objects = _nodal_kernels.getActiveBlockObjects(block, _tid);
       for (const auto & nodal_kernel : objects)
         nodal_kernel->computeResidual();
     }

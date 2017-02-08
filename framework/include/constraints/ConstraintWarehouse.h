@@ -44,10 +44,10 @@ public:
   /**
    * Access methods for active objects.
    */
-  const std::vector<std::shared_ptr<NodalConstraint> > & getActiveNodalConstraints() const;
-  const std::vector<std::shared_ptr<FaceFaceConstraint> > & getActiveFaceFaceConstraints(const std::string & interface) const;
-  const std::vector<std::shared_ptr<ElemElemConstraint> > & getActiveElemElemConstraints(InterfaceID interface_id) const;
-  const std::vector<std::shared_ptr<NodeFaceConstraint> > & getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced);
+  const std::vector<std::shared_ptr<NodalConstraint>> & getActiveNodalConstraints() const;
+  const std::vector<std::shared_ptr<FaceFaceConstraint>> & getActiveFaceFaceConstraints(const std::string & interface) const;
+  const std::vector<std::shared_ptr<ElemElemConstraint>> & getActiveElemElemConstraints(InterfaceID interface_id) const;
+  const std::vector<std::shared_ptr<NodeFaceConstraint>> & getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced);
   ///@}
 
   ///@{

@@ -123,7 +123,7 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
 
     // Make sure that the ObjectAction task and Action task are consistent
     // otherwise that means that is action was built by the wrong type
-    std::shared_ptr<MooseObjectAction> moa = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action);
+    std::shared_ptr<MooseObjectAction> moa = std::dynamic_pointer_cast<MooseObjectAction>(action);
     if (moa.get())
     {
       const InputParameters & mparams = moa->getObjectParams();

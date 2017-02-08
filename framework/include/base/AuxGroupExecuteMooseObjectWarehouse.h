@@ -95,12 +95,12 @@ AuxGroupExecuteMooseObjectWarehouse<T>::updateDependObjects(const std::set<std::
 {
   checkThreadID(tid);
 
-  for (typename std::vector<std::shared_ptr<T> >::const_iterator it = _all_objects[tid].begin(); it != _all_objects[tid].end(); ++it)
+  for (const auto & object_ptr: _all_objects[tid])
   {
-    if (depend_uo.find((*it)->name()) != depend_uo.end())
-      _group_objects[Moose::PRE_AUX].addObject(*it, tid);
+    if (depend_uo.find(object_ptr->name()) != depend_uo.end())
+      _group_objects[Moose::PRE_AUX].addObject(object_ptr, tid);
     else
-      _group_objects[Moose::POST_AUX].addObject(*it, tid);
+      _group_objects[Moose::POST_AUX].addObject(object_ptr, tid);
   }
 }
 

@@ -546,7 +546,7 @@ public:
   const T & getUserObject(const std::string & name, unsigned int tid = 0)
   {
     if (_all_user_objects.hasActiveObject(name, tid))
-      return *(MooseSharedNamespace::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name, tid)));
+      return *(std::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name, tid)));
 
 
     mooseError("Unable to find user object with name '" + name + "'");
@@ -1333,9 +1333,9 @@ FEProblemBase::initializeUserObjects(const MooseObjectWarehouse<T> & warehouse)
   {
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      const std::vector<std::shared_ptr<T> > & objects = warehouse.getActiveObjects(tid);
-      for (typename std::vector<std::shared_ptr<T> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-        (*it)->initialize();
+      const auto & objects = warehouse.getActiveObjects(tid);
+      for (const auto & object : objects)
+        object->initialize();
     }
   }
 }
@@ -1363,7 +1363,7 @@ FEProblemBase::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
     {
       object->finalize();
 
-      auto pp = MooseSharedNamespace::dynamic_pointer_cast<Postprocessor>(object);
+      auto pp = std::dynamic_pointer_cast<Postprocessor>(object);
 
       if (pp)
         _pps_data.storeValue(pp->PPName(), pp->getValue());

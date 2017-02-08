@@ -224,7 +224,7 @@ RestartableDataIO::readRestartableDataHeader(std::string base_file_name)
 
     const unsigned int file_version = 2;
 
-    _in_file_handles[tid] = std::shared_ptr<std::ifstream>(new std::ifstream(file_name.c_str(), std::ios::in | std::ios::binary));
+    _in_file_handles[tid] = std::make_shared<std::ifstream>(file_name.c_str(), std::ios::in | std::ios::binary);
 
     // header
     char id[2];
@@ -280,7 +280,7 @@ RestartableDataIO::readRestartableData(const RestartableDatas & restartable_data
 std::shared_ptr<Backup>
 RestartableDataIO::createBackup()
 {
-  std::shared_ptr<Backup> backup(new Backup);
+  std::shared_ptr<Backup> backup = std::make_shared<Backup>();
 
   serializeSystems(backup->_system_data);
 

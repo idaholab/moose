@@ -60,7 +60,7 @@ public:
   /**
    * Return const reference to the map containing the InputParameter objects
    */
-  const std::multimap<MooseObjectName, std::shared_ptr<InputParameters> > & getInputParameters(THREAD_ID tid = 0) const;
+  const std::multimap<MooseObjectName, std::shared_ptr<InputParameters>> & getInputParameters(THREAD_ID tid = 0) const;
 
   /**
    * Returns a ControllableParameter object
@@ -78,13 +78,13 @@ public:
 private:
 
   /// Storage for the InputParameters objects
-  std::vector<std::multimap<MooseObjectName, std::shared_ptr<InputParameters> > > _input_parameters;
+  std::vector<std::multimap<MooseObjectName, std::shared_ptr<InputParameters>>> _input_parameters;
 
   /// InputParameter links
   std::map<MooseObjectParameterName, std::vector<MooseObjectParameterName> > _input_parameter_links;
 
   /// A list of parameters that were controlled (only used for output)
-  std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectParameterName> > _controlled_parameters;
+  std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectParameterName>> _controlled_parameters;
 
   /**
    * Method for adding a new InputParameters object
@@ -145,40 +145,37 @@ InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName
 
   // Vector of desired parameters
   std::vector<MooseObjectParameterName> params(1, input);
-  std::map<MooseObjectParameterName, std::vector<MooseObjectParameterName> >::const_iterator link_it = _input_parameter_links.find(input);
+  const auto link_it = _input_parameter_links.find(input);
   if (link_it != _input_parameter_links.end())
     params.insert(params.end(), link_it->second.begin(), link_it->second.end());
-
-  // Parameter object iterator
-  std::multimap<MooseObjectName, std::shared_ptr<InputParameters> >::const_iterator iter;
 
   // Loop over all threads
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     // Loop over all InputParameter objects
-    for (iter = _input_parameters[tid].begin(); iter != _input_parameters[tid].end(); ++iter)
+    for (const auto & param_pair : _input_parameters[tid])
     {
       // Loop of all desired params
-      for (std::vector<MooseObjectParameterName>::iterator it = params.begin(); it != params.end(); ++it)
+      for (const auto & param : params)
       {
         // If the desired object name does not match the current object name, move on
-        MooseObjectParameterName desired = *it;
+        MooseObjectParameterName desired = param;
 
-        if (desired != iter->first)
+        if (desired != param_pair.first)
           continue;
 
         // If the parameter is valid and controllable update the output vector with a pointer to the parameter
-        if (iter->second->libMesh::Parameters::have_parameter<T>(desired.parameter()))
+        if (param_pair.second->libMesh::Parameters::have_parameter<T>(desired.parameter()))
         {
           // Do not allow non-controllable types to be controlled
-          if (!iter->second->isControllable(desired.parameter()))
+          if (!param_pair.second->isControllable(desired.parameter()))
             mooseError("The desired parameter is not controllable: " << desired);
 
           // Store pointer to the writable parameter
-          output.insert(desired, iter->second);
+          output.insert(desired, param_pair.second);
 
           if (mark_as_controlled && tid == 0)
-            _controlled_parameters[iter->second].insert(desired);
+            _controlled_parameters[param_pair.second].insert(desired);
         }
       }
     }

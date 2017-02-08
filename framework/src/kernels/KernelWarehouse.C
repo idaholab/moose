@@ -44,11 +44,11 @@ KernelWarehouse::hasActiveVariableBlockObjects(unsigned int variable_id, Subdoma
 }
 
 
-const std::vector<std::shared_ptr<KernelBase> > &
+const std::vector<std::shared_ptr<KernelBase>> &
 KernelWarehouse::getActiveVariableBlockObjects(unsigned int variable_id, SubdomainID block_id, THREAD_ID tid) const
 {
   checkThreadID(tid);
-  std::map<unsigned int, MooseObjectWarehouse<KernelBase> >::const_iterator iter = _variable_kernel_storage.find(variable_id);
+  const auto iter = _variable_kernel_storage.find(variable_id);
   mooseAssert(iter != _variable_kernel_storage.end(), "Unable to located variable kernels for the given variable id: " << variable_id << ".");
   return iter->second.getActiveBlockObjects(block_id, tid);
 }

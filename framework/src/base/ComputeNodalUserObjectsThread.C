@@ -50,7 +50,7 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   {
     if (_user_objects.hasActiveBoundaryObjects(bnd, _tid))
     {
-      const std::vector<std::shared_ptr<NodalUserObject> > & objects = _user_objects.getActiveBoundaryObjects(bnd, _tid);
+      const auto & objects = _user_objects.getActiveBoundaryObjects(bnd, _tid);
       for (const auto & uo : objects)
         uo->execute();
     }
@@ -68,7 +68,7 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   for (const auto & block : block_ids)
     if (_user_objects.hasActiveBlockObjects(block, _tid))
     {
-      const std::vector<std::shared_ptr<NodalUserObject> > & objects = _user_objects.getActiveBlockObjects(block, _tid);
+      const auto & objects = _user_objects.getActiveBlockObjects(block, _tid);
       for (const auto & uo : objects)
         if (!uo->isUniqueNodeExecute() || std::count(computed.begin(), computed.end(), uo) == 0)
         {

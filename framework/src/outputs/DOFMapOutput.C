@@ -162,7 +162,7 @@ DOFMapOutput::output(const ExecFlagType & /*type*/)
         // if this variable has active kernels output them
         if (kernels.hasActiveVariableBlockObjects(var, *sd))
         {
-          const std::vector<std::shared_ptr<KernelBase> > & active_kernels = kernels.getActiveVariableBlockObjects(var, *sd);
+          const auto & active_kernels = kernels.getActiveVariableBlockObjects(var, *sd);
           for (unsigned i = 0; i<active_kernels.size(); ++i)
           {
             KernelBase & kb = *(active_kernels[i].get());

@@ -57,7 +57,7 @@ ComputeElemAuxVarsThread::subdomainChanged()
 
   if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<std::shared_ptr<AuxKernel> > & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
+    const std::vector<std::shared_ptr<AuxKernel>> & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
     for (const auto & aux : kernels)
     {
       aux->subdomainSetup();
@@ -75,7 +75,7 @@ ComputeElemAuxVarsThread::onElement(const Elem * elem)
 {
   if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<std::shared_ptr<AuxKernel> > & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
+    const std::vector<std::shared_ptr<AuxKernel>> & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
 

@@ -51,13 +51,13 @@ ComputeElemDampingThread::onElement(const Elem *elem)
 
   std::set<MooseVariable *> damped_vars;
 
-  const std::vector<std::shared_ptr<ElementDamper> > & edampers = _nl.getElementDamperWarehouse().getActiveObjects(_tid);
+  const std::vector<std::shared_ptr<ElementDamper>> & edampers = _nl.getElementDamperWarehouse().getActiveObjects(_tid);
   for (const auto & damper : edampers)
     damped_vars.insert(damper->getVariable());
 
   _nl.reinitIncrementAtQpsForDampers(_tid, damped_vars);
 
-  const std::vector<std::shared_ptr<ElementDamper> > & objects = _element_dampers.getActiveObjects(_tid);
+  const std::vector<std::shared_ptr<ElementDamper>> & objects = _element_dampers.getActiveObjects(_tid);
   for (const auto & obj : objects)
   {
     Real cur_damping = obj->computeDamping();

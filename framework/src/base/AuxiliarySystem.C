@@ -285,7 +285,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
 
   // Elemental AuxKernels
   {
-    const std::vector<std::shared_ptr<AuxKernel> > & auxs = _elemental_aux_storage[type].getActiveObjects();
+    const std::vector<std::shared_ptr<AuxKernel>> & auxs = _elemental_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -295,7 +295,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
 
   // Nodal AuxKernels
   {
-    const std::vector<std::shared_ptr<AuxKernel> > & auxs = _nodal_aux_storage[type].getActiveObjects();
+    const std::vector<std::shared_ptr<AuxKernel>> & auxs = _nodal_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -313,7 +313,7 @@ AuxiliarySystem::getDependObjects()
 
   // Elemental AuxKernels
   {
-    const std::vector<std::shared_ptr<AuxKernel> > & auxs = _elemental_aux_storage.getActiveObjects();
+    const std::vector<std::shared_ptr<AuxKernel>> & auxs = _elemental_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -323,7 +323,7 @@ AuxiliarySystem::getDependObjects()
 
   // Nodal AuxKernels
   {
-    const std::vector<std::shared_ptr<AuxKernel> > & auxs = _nodal_aux_storage.getActiveObjects();
+    const std::vector<std::shared_ptr<AuxKernel>> & auxs = _nodal_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<std::string> & uo = aux->getDependObjects();
@@ -366,7 +366,7 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
         _fe_problem.reinitScalars(tid);
 
         // Call compute() method on all active AuxScalarKernel objects
-        const std::vector<std::shared_ptr<AuxScalarKernel> > & objects = storage.getActiveObjects(tid);
+        const std::vector<std::shared_ptr<AuxScalarKernel>> & objects = storage.getActiveObjects(tid);
         for (const auto & obj : objects)
           obj->compute();
 

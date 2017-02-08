@@ -65,9 +65,8 @@ void
 MooseObjectWarehouse<T>::initialSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<std::shared_ptr<T> >::const_iterator it;
-  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
-    (*it)->initialSetup();
+  for (const auto & object : _active_objects[tid])
+    object->initialSetup();
 }
 
 
@@ -76,9 +75,8 @@ void
 MooseObjectWarehouse<T>::timestepSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<std::shared_ptr<T> >::const_iterator it;
-  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
-    (*it)->timestepSetup();
+  for (const auto & object : _active_objects[tid])
+    object->timestepSetup();
 }
 
 
@@ -89,9 +87,9 @@ MooseObjectWarehouse<T>::subdomainSetup(SubdomainID id, THREAD_ID tid/* = 0*/) c
   checkThreadID(tid);
   if (hasActiveBlockObjects(id, tid))
   {
-    const std::vector<std::shared_ptr<T> > & objects = getActiveBlockObjects(id, tid);
-    for (typename std::vector<std::shared_ptr<T> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-      (*it)->subdomainSetup();
+    const auto & objects = getActiveBlockObjects(id, tid);
+    for (const auto & object : objects)
+      object->subdomainSetup();
   }
 }
 
@@ -101,9 +99,8 @@ void
 MooseObjectWarehouse<T>::subdomainSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<std::shared_ptr<T> >::const_iterator it;
-  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
-    (*it)->subdomainSetup();
+  for (const auto & object : _active_objects[tid])
+    object->subdomainSetup();
 }
 
 
@@ -112,9 +109,8 @@ void
 MooseObjectWarehouse<T>::jacobianSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<std::shared_ptr<T> >::const_iterator it;
-  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
-    (*it)->jacobianSetup();
+  for (const auto & object : _active_objects[tid])
+    object->jacobianSetup();
 }
 
 
@@ -123,9 +119,8 @@ void
 MooseObjectWarehouse<T>::residualSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::vector<std::shared_ptr<T> >::const_iterator it;
-  for (it = _active_objects[tid].begin(); it != _active_objects[tid].end(); ++it)
-    (*it)->residualSetup();
+  for (const auto & object : _active_objects[tid])
+    object->residualSetup();
 }
 
 #endif // MOOSEOBJECTWAREHOUSE_H

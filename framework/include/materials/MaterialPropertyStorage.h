@@ -108,7 +108,8 @@ public:
    * @param elem Element we are on
    * @param side Side of the element 'elem' (0 for volumetric material properties)
    */
-  void initStatefulProps(MaterialData & material_data, const std::vector<std::shared_ptr<Material> > & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side = 0);
+  void initStatefulProps(MaterialData & material_data, const std::vector<std::shared_ptr<Material>> & mats, unsigned int n_qpoints,
+                         const Elem & elem, unsigned int side = 0);
 
   /**
    * Shift the material properties in time.

@@ -163,10 +163,10 @@ NonlinearEigenSystem::checkIntegrity()
 
   if (_nodal_bcs.hasActiveObjects())
   {
-    const std::vector<std::shared_ptr<NodalBC> > & nodal_bcs = _nodal_bcs.getActiveObjects();
+    const auto & nodal_bcs = _nodal_bcs.getActiveObjects();
     for (const auto & nodal_bc : nodal_bcs)
     {
-      std::shared_ptr<DirichletBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<DirichletBC>(nodal_bc);
+      std::shared_ptr<DirichletBC> nbc = std::dynamic_pointer_cast<DirichletBC>(nodal_bc);
       if (nbc && nbc->getParam<Real>("value"))
         mooseError("Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
       else if (!nbc)

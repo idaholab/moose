@@ -249,7 +249,7 @@ Parser::parse(const std::string &input_filename)
           std::shared_ptr<Action> action_obj = _action_factory.create(it->second._action, MooseUtils::shortName(curr_identifier), params);
 
           // extract the MooseObject params if necessary
-          std::shared_ptr<MooseObjectAction> object_action = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action_obj);
+          std::shared_ptr<MooseObjectAction> object_action = std::dynamic_pointer_cast<MooseObjectAction>(action_obj);
           if (object_action)
           {
             extractParams(curr_identifier, object_action->getObjectParams());
@@ -431,8 +431,7 @@ Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
    * here or not.
    */
   std::shared_ptr<CommandLine> cmd_line;
-//  if (_app.name() == "main") // See AppFactory::createApp
-    cmd_line = _app.commandLine();
+  cmd_line = _app.commandLine();
 
   if (cmd_line.get())
   {

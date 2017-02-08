@@ -741,10 +741,10 @@ FEProblemBase::checkNonlocalCoupling()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     const KernelWarehouse & all_kernels = _nl->getKernelWarehouse();
-    const std::vector<std::shared_ptr<KernelBase> > & kernels = all_kernels.getObjects(tid);
+    const auto & kernels = all_kernels.getObjects(tid);
     for (const auto & kernel : kernels)
     {
-      std::shared_ptr<NonlocalKernel> nonlocal_kernel = MooseSharedNamespace::dynamic_pointer_cast<NonlocalKernel>(kernel);
+      std::shared_ptr<NonlocalKernel> nonlocal_kernel = std::dynamic_pointer_cast<NonlocalKernel>(kernel);
       if (nonlocal_kernel)
       {
         if (_calculate_jacobian_in_uo)
@@ -753,10 +753,10 @@ FEProblemBase::checkNonlocalCoupling()
       }
     }
     const MooseObjectWarehouse<IntegratedBC> & all_integrated_bcs = _nl->getIntegratedBCWarehouse();
-    const std::vector<std::shared_ptr<IntegratedBC> > & integrated_bcs = all_integrated_bcs.getObjects(tid);
+    const auto & integrated_bcs = all_integrated_bcs.getObjects(tid);
     for (const auto & integrated_bc : integrated_bcs)
     {
-      std::shared_ptr<NonlocalIntegratedBC> nonlocal_integrated_bc = MooseSharedNamespace::dynamic_pointer_cast<NonlocalIntegratedBC>(integrated_bc);
+      std::shared_ptr<NonlocalIntegratedBC> nonlocal_integrated_bc = std::dynamic_pointer_cast<NonlocalIntegratedBC>(integrated_bc);
       if (nonlocal_integrated_bc)
       {
         if (_calculate_jacobian_in_uo)
@@ -771,10 +771,10 @@ void
 FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
 {
   std::set<MooseVariable *> uo_jacobian_moose_vars;
-  const std::vector<std::shared_ptr<ElementUserObject> > & e_objects = _elemental_user_objects.getActiveObjects(tid);
+  const auto & e_objects = _elemental_user_objects.getActiveObjects(tid);
   for (const auto & uo : e_objects)
   {
-    std::shared_ptr<ShapeElementUserObject> shape_element_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeElementUserObject>(uo);
+    std::shared_ptr<ShapeElementUserObject> shape_element_uo = std::dynamic_pointer_cast<ShapeElementUserObject>(uo);
     if (shape_element_uo)
     {
       _calculate_jacobian_in_uo = shape_element_uo->computeJacobianFlag();
@@ -782,10 +782,10 @@ FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
       uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
-  const std::vector<std::shared_ptr<SideUserObject> > & s_objects = _side_user_objects.getActiveObjects(tid);
+  const auto & s_objects = _side_user_objects.getActiveObjects(tid);
   for (const auto & uo : s_objects)
   {
-    std::shared_ptr<ShapeSideUserObject> shape_side_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeSideUserObject>(uo);
+    std::shared_ptr<ShapeSideUserObject> shape_side_uo = std::dynamic_pointer_cast<ShapeSideUserObject>(uo);
     if (shape_side_uo)
     {
       _calculate_jacobian_in_uo = shape_side_uo->computeJacobianFlag();
@@ -1857,7 +1857,7 @@ FEProblemBase::projectSolution()
   // processor with highest ID
   if (processor_id() == (n_processors()-1) && _scalar_ics.hasActiveObjects())
   {
-    const std::vector<std::shared_ptr<ScalarInitialCondition> > & ics = _scalar_ics.getActiveObjects();
+    const auto & ics = _scalar_ics.getActiveObjects();
     for (const auto & ic : ics)
     {
       MooseVariableScalar & var = ic->variable();
@@ -2149,33 +2149,33 @@ std::shared_ptr<Postprocessor>
 getPostprocessorPointer(std::shared_ptr<MooseObject> mo)
 {
   {
-    std::shared_ptr<ElementPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<ElementPostprocessor>(mo);
+    std::shared_ptr<ElementPostprocessor> intermediate = std::dynamic_pointer_cast<ElementPostprocessor>(mo);
     if (intermediate.get())
-      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
+      return std::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    std::shared_ptr<NodalPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<NodalPostprocessor>(mo);
+    std::shared_ptr<NodalPostprocessor> intermediate = std::dynamic_pointer_cast<NodalPostprocessor>(mo);
     if (intermediate.get())
-      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
+      return std::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    std::shared_ptr<InternalSidePostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<InternalSidePostprocessor>(mo);
+    std::shared_ptr<InternalSidePostprocessor> intermediate = std::dynamic_pointer_cast<InternalSidePostprocessor>(mo);
     if (intermediate.get())
-      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
+      return std::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    std::shared_ptr<SidePostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<SidePostprocessor>(mo);
+    std::shared_ptr<SidePostprocessor> intermediate = std::dynamic_pointer_cast<SidePostprocessor>(mo);
     if (intermediate.get())
-      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
+      return std::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    std::shared_ptr<GeneralPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<GeneralPostprocessor>(mo);
+    std::shared_ptr<GeneralPostprocessor> intermediate = std::dynamic_pointer_cast<GeneralPostprocessor>(mo);
     if (intermediate.get())
-      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
+      return std::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   return std::shared_ptr<Postprocessor>();
@@ -2248,11 +2248,11 @@ FEProblemBase::addUserObject(std::string user_object_name, const std::string & n
     _all_user_objects.addObject(user_object, tid);
 
     // Attempt to create all the possible UserObject types
-    std::shared_ptr<ElementUserObject> euo = MooseSharedNamespace::dynamic_pointer_cast<ElementUserObject>(user_object);
-    std::shared_ptr<SideUserObject> suo = MooseSharedNamespace::dynamic_pointer_cast<SideUserObject>(user_object);
-    std::shared_ptr<InternalSideUserObject> isuo = MooseSharedNamespace::dynamic_pointer_cast<InternalSideUserObject>(user_object);
-    std::shared_ptr<NodalUserObject> nuo = MooseSharedNamespace::dynamic_pointer_cast<NodalUserObject>(user_object);
-    std::shared_ptr<GeneralUserObject> guo = MooseSharedNamespace::dynamic_pointer_cast<GeneralUserObject>(user_object);
+    std::shared_ptr<ElementUserObject> euo = std::dynamic_pointer_cast<ElementUserObject>(user_object);
+    std::shared_ptr<SideUserObject> suo = std::dynamic_pointer_cast<SideUserObject>(user_object);
+    std::shared_ptr<InternalSideUserObject> isuo = std::dynamic_pointer_cast<InternalSideUserObject>(user_object);
+    std::shared_ptr<NodalUserObject> nuo = std::dynamic_pointer_cast<NodalUserObject>(user_object);
+    std::shared_ptr<GeneralUserObject> guo = std::dynamic_pointer_cast<GeneralUserObject>(user_object);
 
     // Account for displaced mesh use
     if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -2360,7 +2360,7 @@ FEProblemBase::parentOutputPositionChanged()
 {
   for (const auto & it : _multi_apps)
   {
-    const std::vector<std::shared_ptr<MultiApp> > & objects = it.second.getActiveObjects();
+    const auto & objects = it.second.getActiveObjects();
     for (const auto & obj : objects)
       obj->parentOutputPositionChanged();
   }
@@ -2384,12 +2384,12 @@ FEProblemBase::computeIndicators()
     std::vector<std::string> fields;
 
     // Indicator Fields
-    const std::vector<std::shared_ptr<Indicator> > & indicators = _indicators.getActiveObjects();
+    const auto & indicators = _indicators.getActiveObjects();
     for (const auto & indicator : indicators)
       fields.push_back(indicator->name());
 
     // InternalSideIndicator Fields
-    const std::vector<std::shared_ptr<InternalSideIndicator> > & internal_indicators = _internal_side_indicators.getActiveObjects();
+    const auto & internal_indicators = _internal_side_indicators.getActiveObjects();
     for (const auto & internal_indicator : internal_indicators)
       fields.push_back(internal_indicator->name());
 
@@ -2420,7 +2420,7 @@ FEProblemBase::computeMarkers()
     std::vector<std::string> fields;
 
     // Marker Fields
-    const std::vector<std::shared_ptr<Marker> > & markers = _markers.getActiveObjects();
+    const auto & markers = _markers.getActiveObjects();
     for (const auto & marker : markers)
       fields.push_back(marker->name());
 
@@ -2430,7 +2430,7 @@ FEProblemBase::computeMarkers()
 
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      const std::vector<std::shared_ptr<Marker> > & markers = _markers.getActiveObjects(tid);
+      const auto & markers = _markers.getActiveObjects(tid);
       for (const auto & marker : markers)
         marker->markerSetup();
     }
@@ -2583,14 +2583,14 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   // Execute GeneralUserObjects
   if (general.hasActiveObjects())
   {
-    const std::vector<std::shared_ptr<GeneralUserObject> > & objects = general.getActiveObjects();
+    const auto & objects = general.getActiveObjects();
     for (const auto & obj : objects)
     {
       obj->initialize();
       obj->execute();
       obj->finalize();
 
-      std::shared_ptr<Postprocessor> pp = MooseSharedNamespace::dynamic_pointer_cast<Postprocessor>(obj);
+      std::shared_ptr<Postprocessor> pp = std::dynamic_pointer_cast<Postprocessor>(obj);
       if (pp)
         _pps_data.storeValue(obj->name(), pp->getValue());
     }
@@ -2602,7 +2602,7 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 void
 FEProblemBase::executeControls(const ExecFlagType & exec_type)
 {
-  const std::vector<std::shared_ptr<Control> > & objects = _control_warehouse[exec_type].getActiveObjects();
+  const auto & objects = _control_warehouse[exec_type].getActiveObjects();
 
   if (!objects.empty())
   {
@@ -2716,7 +2716,7 @@ FEProblemBase::addIndicator(std::string indicator_name, const std::string & name
   {
     std::shared_ptr<Indicator> indicator = _factory.create<Indicator>(indicator_name, name, parameters, tid);
 
-    std::shared_ptr<InternalSideIndicator> isi = MooseSharedNamespace::dynamic_pointer_cast<InternalSideIndicator>(indicator);
+    std::shared_ptr<InternalSideIndicator> isi = std::dynamic_pointer_cast<InternalSideIndicator>(indicator);
     if (isi)
       _internal_side_indicators.addObject(isi, tid);
     else
@@ -2763,7 +2763,7 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name, const std::string
 {
   setInputParametersFEProblem(parameters);
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
-  parameters.set<std::shared_ptr<CommandLine> >("_command_line") = _app.commandLine();
+  parameters.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
 
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2792,7 +2792,7 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name, const std::string
   _multi_apps.addObject(multi_app);
 
   // Store TranseintMultiApp objects in another container, this is needed for calling computeDT
-  std::shared_ptr<TransientMultiApp> trans_multi_app = MooseSharedNamespace::dynamic_pointer_cast<TransientMultiApp>(multi_app);
+  std::shared_ptr<TransientMultiApp> trans_multi_app = std::dynamic_pointer_cast<TransientMultiApp>(multi_app);
   if (trans_multi_app)
     _transient_multi_apps.addObject(trans_multi_app);
 }
@@ -2814,7 +2814,7 @@ bool
 FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
 {
   // Active MultiApps
-  const std::vector<std::shared_ptr<MultiApp> > & multi_apps = _multi_apps[type].getActiveObjects();
+  const auto & multi_apps = _multi_apps[type].getActiveObjects();
 
   // Do anything that needs to be done to Apps before transfers
   for (const auto & multi_app : multi_apps)
@@ -2823,7 +2823,7 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
   // Execute Transfers _to_ MultiApps
   if (_to_multi_app_transfers[type].hasActiveObjects())
   {
-    const std::vector<std::shared_ptr<Transfer> > & transfers = _to_multi_app_transfers[type].getActiveObjects();
+    const auto & transfers = _to_multi_app_transfers[type].getActiveObjects();
 
     _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << " To MultiApps" << COLOR_DEFAULT << std::endl;
     for (const auto & transfer : transfers)
@@ -2866,7 +2866,7 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
   // Execute Transfers _from_ MultiApps
   if (_from_multi_app_transfers[type].hasActiveObjects())
   {
-    const std::vector<std::shared_ptr<Transfer> > & transfers = _from_multi_app_transfers[type].getActiveObjects();
+    const auto & transfers = _from_multi_app_transfers[type].getActiveObjects();
 
     _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
     for (const auto & transfer : transfers)
@@ -2892,7 +2892,7 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
 void
 FEProblemBase::advanceMultiApps(ExecFlagType type)
 {
-  const std::vector<std::shared_ptr<MultiApp> > multi_apps = _multi_apps[type].getActiveObjects();
+  const auto & multi_apps = _multi_apps[type].getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2911,7 +2911,7 @@ FEProblemBase::advanceMultiApps(ExecFlagType type)
 void
 FEProblemBase::backupMultiApps(ExecFlagType type)
 {
-  const std::vector<std::shared_ptr<MultiApp> > multi_apps = _multi_apps[type].getActiveObjects();
+  const auto & multi_apps = _multi_apps[type].getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2930,7 +2930,7 @@ FEProblemBase::backupMultiApps(ExecFlagType type)
 void
 FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
 {
-  const std::vector<std::shared_ptr<MultiApp> > multi_apps = _multi_apps[type].getActiveObjects();
+  const auto & multi_apps = _multi_apps[type].getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2953,7 +2953,7 @@ FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
 Real
 FEProblemBase::computeMultiAppsDT(ExecFlagType type)
 {
-  const std::vector<std::shared_ptr<TransientMultiApp> > & multi_apps = _transient_multi_apps[type].getActiveObjects();
+  const auto & multi_apps = _transient_multi_apps[type].getActiveObjects();
 
   Real smallest_dt = std::numeric_limits<Real>::max();
 
@@ -2969,7 +2969,7 @@ FEProblemBase::execTransfers(ExecFlagType type)
 {
   if (_transfers[type].hasActiveObjects())
   {
-    const std::vector<std::shared_ptr<Transfer> > & transfers = _transfers[type].getActiveObjects();
+    const auto & transfers = _transfers[type].getActiveObjects();
     for (const auto & transfer : transfers)
       transfer->execute();
   }
@@ -3006,7 +3006,7 @@ FEProblemBase::addTransfer(const std::string & transfer_name, const std::string 
   std::shared_ptr<Transfer> transfer = _factory.create<Transfer>(transfer_name, name, parameters);
 
   // Add MultiAppTransfer object
-  std::shared_ptr<MultiAppTransfer> multi_app_transfer = MooseSharedNamespace::dynamic_pointer_cast<MultiAppTransfer>(transfer);
+  std::shared_ptr<MultiAppTransfer> multi_app_transfer = std::dynamic_pointer_cast<MultiAppTransfer>(transfer);
   if (multi_app_transfer)
   {
     if (multi_app_transfer->direction() == MultiAppTransfer::TO_MULTIAPP)
@@ -3164,9 +3164,9 @@ FEProblemBase::setNonlocalCouplingMatrix()
 {
   unsigned int n_vars = _nl->nVariables();
   _nonlocal_cm.resize(n_vars);
-  const std::vector<MooseVariable *> & vars = _nl->getVariables(0);
-  const std::vector<std::shared_ptr<KernelBase> > & nonlocal_kernel = _nonlocal_kernels.getObjects();
-  const std::vector<std::shared_ptr<IntegratedBC> > & nonlocal_integrated_bc = _nonlocal_integrated_bcs.getObjects();
+  const auto & vars = _nl->getVariables(0);
+  const auto & nonlocal_kernel = _nonlocal_kernels.getObjects();
+  const auto & nonlocal_integrated_bc = _nonlocal_integrated_bcs.getObjects();
   for (const auto & ivar : vars)
   {
     for (const auto & kernel : nonlocal_kernel)
@@ -4190,7 +4190,7 @@ FEProblemBase::checkProblemIntegrity()
     //checkBoundaryMatProps();
 
     // Check that material properties exist when requested by other properties on a given block
-    const std::vector<std::shared_ptr<Material> > & materials = _all_materials.getActiveObjects();
+    const auto & materials = _all_materials.getActiveObjects();
     for (const auto & material : materials)
       material->checkStatefulSanity();
 
@@ -4259,7 +4259,7 @@ FEProblemBase::checkUserObjects()
   // and the blocks that they are defined on
   std::set<std::string> names;
 
-  const std::vector<std::shared_ptr<UserObject> > & objects = _all_user_objects.getActiveObjects();
+  const auto & objects = _all_user_objects.getActiveObjects();
   for (const auto & obj : objects)
     names.insert(obj->name());
 
@@ -4288,7 +4288,7 @@ FEProblemBase::checkUserObjects()
 
 
 void
-FEProblemBase::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<std::shared_ptr<Material> > > & materials_map)
+FEProblemBase::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<std::shared_ptr<Material>>> & materials_map)
 {
   for (const auto & it : materials_map)
   {
@@ -4330,7 +4330,7 @@ FEProblemBase::checkDependMaterialsHelper(const std::map<SubdomainID, std::vecto
   // This loop checks that materials are not supplied by multiple Material objects
   for (const auto & it : materials_map)
   {
-    const std::vector<std::shared_ptr<Material> > & materials = it.second;
+    const auto & materials = it.second;
     std::set<std::string> inner_supplied, outer_supplied;
 
     for (const auto & outer_mat : materials)

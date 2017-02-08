@@ -41,9 +41,6 @@ public:
    */
   ExecuteMooseObjectWarehouse(bool threaded = true);
 
-  /**
-   * Destructor.
-   */
   virtual ~ExecuteMooseObjectWarehouse();
 
   /**
@@ -102,32 +99,26 @@ protected:
   getStorageHelper(std::map<ExecFlagType, MooseObjectWarehouse<T> > & objects, ExecFlagType exec_flag) const;
 };
 
-
 template<typename T>
 ExecuteMooseObjectWarehouse<T>::ExecuteMooseObjectWarehouse(bool threaded) :
     MooseObjectWarehouse<T>(threaded)
 {
   // Initialize the active/all data structures with the correct map entries and empty vectors
-  for (std::vector<ExecFlagType>::const_iterator it = Moose::exec_types.begin(); it != Moose::exec_types.end(); ++it)
-  {
-    std::pair<ExecFlagType, MooseObjectWarehouse<T> > item(*it, MooseObjectWarehouse<T>(threaded));
-    _execute_objects.insert(item);
-  }
+  for (const auto & exec_type : Moose::exec_types)
+    _execute_objects.insert(std::make_pair(exec_type, MooseObjectWarehouse<T>(threaded)));
 }
-
 
 template<typename T>
 ExecuteMooseObjectWarehouse<T>::~ExecuteMooseObjectWarehouse()
 {
 }
 
-
 template<typename T>
 const MooseObjectWarehouse<T> &
 ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagType exec_flag) const
 {
   // Use find to avoid accidental insertion
-  typename std::map<ExecFlagType, MooseObjectWarehouse<T> >::const_iterator iter = _execute_objects.find(exec_flag);
+  const auto iter = _execute_objects.find(exec_flag);
 
   if (iter == _execute_objects.end())
     mooseError("Unable to locate the desired execute flag, the global list of execute parameters is likely out-of-date.");
@@ -140,14 +131,13 @@ MooseObjectWarehouse<T> &
 ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagType exec_flag)
 {
   // Use find to avoid accidental insertion
-  typename std::map<ExecFlagType, MooseObjectWarehouse<T> >::iterator iter = _execute_objects.find(exec_flag);
+  const auto iter = _execute_objects.find(exec_flag);
 
   if (iter == _execute_objects.end())
     mooseError("Unable to locate the desired execute flag, the global list of execute parameters is likely out-of-date.");
 
   return iter->second;
 }
-
 
 template<typename T>
 void
@@ -157,33 +147,29 @@ ExecuteMooseObjectWarehouse<T>::updateActive(THREAD_ID tid/* = 0 */)
   MooseObjectWarehouse<T>::updateActive(tid);
 
   // Update the execute flag lists of objects
-  typename std::map<ExecFlagType, MooseObjectWarehouse<T> >::iterator iter;
-  for (iter = _execute_objects.begin(); iter != _execute_objects.end(); ++iter)
-    iter->second.updateActive(tid);
+  for (auto & object_pair : _execute_objects)
+    object_pair.second.updateActive(tid);
 }
-
 
 template<typename T>
 void
 ExecuteMooseObjectWarehouse<T>::jacobianSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::map<ExecFlagType, MooseObjectWarehouse<T> >::const_iterator iter = _execute_objects.find(EXEC_NONLINEAR);
+  const auto iter = _execute_objects.find(EXEC_NONLINEAR);
   if (iter != _execute_objects.end())
     iter->second.jacobianSetup(tid);
 }
-
 
 template<typename T>
 void
 ExecuteMooseObjectWarehouse<T>::residualSetup(THREAD_ID tid/* = 0*/) const
 {
   checkThreadID(tid);
-  typename std::map<ExecFlagType, MooseObjectWarehouse<T> >::const_iterator iter = _execute_objects.find(EXEC_LINEAR);
+  const auto iter = _execute_objects.find(EXEC_LINEAR);
   if (iter != _execute_objects.end())
     iter->second.residualSetup(tid);
 }
-
 
 template<typename T>
 void
@@ -212,7 +198,6 @@ ExecuteMooseObjectWarehouse<T>::setup(ExecFlagType exec_flag, THREAD_ID tid/* = 
   }
 }
 
-
 template<typename T>
 void
 ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid/*=0*/)
@@ -221,7 +206,7 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID t
   MooseObjectWarehouse<T>::addObject(object, tid);
 
   // Update the execute flag lists of objects
-  std::shared_ptr<SetupInterface> ptr = MooseSharedNamespace::dynamic_pointer_cast<SetupInterface>(object);
+  std::shared_ptr<SetupInterface> ptr = std::dynamic_pointer_cast<SetupInterface>(object);
   if (ptr)
   {
     const std::vector<ExecFlagType> flags = ptr->execFlags();
@@ -232,15 +217,13 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID t
     mooseError("The object being added (" << object->name() << ") must inherit from SetupInterface to be added to the ExecuteMooseObjectWarehouse container.");
 }
 
-
 template<typename T>
 void
 ExecuteMooseObjectWarehouse<T>::sort(THREAD_ID tid/* = 0*/)
 {
   // Sort execute object storage
-  typename std::map<ExecFlagType, MooseObjectWarehouse<T> >::iterator iter;
-  for (iter = _execute_objects.begin(); iter != _execute_objects.end(); ++iter)
-    iter->second.sort(tid);
+  for (auto & object_pair : _execute_objects)
+    object_pair.second.sort(tid);
 }
 
 #endif // EXECUTEMOOSEOBJECTWAREHOUSE_H

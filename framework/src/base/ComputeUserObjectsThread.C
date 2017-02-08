@@ -82,7 +82,7 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
 
   if (_elemental_user_objects.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<std::shared_ptr<ElementUserObject> > & objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
+    const auto & objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
     for (const auto & uo : objects)
       uo->execute();
   }
@@ -100,10 +100,10 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
 
         _fe_problem.prepareShapes(jvar_id, _tid);
 
-        const std::vector<std::shared_ptr<ElementUserObject> > & e_objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
+        const auto & e_objects = _elemental_user_objects.getActiveBlockObjects(_subdomain, _tid);
         for (const auto & uo : e_objects)
         {
-          std::shared_ptr<ShapeElementUserObject> shape_element_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeElementUserObject>(uo);
+          std::shared_ptr<ShapeElementUserObject> shape_element_uo = std::dynamic_pointer_cast<ShapeElementUserObject>(uo);
           if (shape_element_uo)
             shape_element_uo->executeJacobianWrapper(jvar_id, dof_indices);
         }
@@ -126,7 +126,7 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
 
     _fe_problem.setCurrentBoundaryID(bnd_id);
 
-    const std::vector<std::shared_ptr<SideUserObject> > & objects = _side_user_objects.getActiveBoundaryObjects(bnd_id, _tid);
+    const auto & objects = _side_user_objects.getActiveBoundaryObjects(bnd_id, _tid);
     for (const auto & uo : objects)
       uo->execute();
 
@@ -144,7 +144,7 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
 ;
         for (const auto & uo : objects)
         {
-          std::shared_ptr<ShapeSideUserObject> shape_side_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeSideUserObject>(uo);
+          std::shared_ptr<ShapeSideUserObject> shape_side_uo = std::dynamic_pointer_cast<ShapeSideUserObject>(uo);
           if (shape_side_uo)
             shape_side_uo->executeJacobianWrapper(jvar_id, dof_indices);
         }
@@ -181,7 +181,7 @@ ComputeUserObjectsThread::onInternalSide(const Elem *elem, unsigned int side)
       SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-      const std::vector<std::shared_ptr<InternalSideUserObject> > & objects = _internal_side_user_objects.getActiveBlockObjects(_subdomain, _tid);
+      const auto & objects = _internal_side_user_objects.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & uo : objects)
       {
         if (!uo->blockRestricted())

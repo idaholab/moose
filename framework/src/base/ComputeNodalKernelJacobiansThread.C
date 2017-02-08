@@ -71,7 +71,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
       if (_nodal_kernels.hasActiveBlockObjects(block, _tid))
       {
         // Loop over each NodalKernel to see if it's involved with the jvar
-        const std::vector<std::shared_ptr<NodalKernel> > & objects = _nodal_kernels.getActiveBlockObjects(block, _tid);
+        const auto & objects = _nodal_kernels.getActiveBlockObjects(block, _tid);
         for (const auto & nodal_kernel : objects)
         {
           // If this NodalKernel isn't operating on this ivar... skip it

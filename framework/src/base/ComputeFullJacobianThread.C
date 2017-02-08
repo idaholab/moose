@@ -64,7 +64,7 @@ ComputeFullJacobianThread::computeJacobian()
     if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) && _kernels.hasActiveVariableBlockObjects(ivar, _subdomain, _tid))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
-      const std::vector<std::shared_ptr<KernelBase> > & kernels = _kernels.getActiveVariableBlockObjects(ivar, _subdomain, _tid);
+      const std::vector<std::shared_ptr<KernelBase>> & kernels = _kernels.getActiveVariableBlockObjects(ivar, _subdomain, _tid);
       for (const auto & kernel : kernels)
         if ((kernel->variable().number() == ivar) && kernel->isImplicit())
         {
@@ -88,10 +88,10 @@ ComputeFullJacobianThread::computeJacobian()
 
       if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) && _kernels.hasActiveVariableBlockObjects(ivar, _subdomain, _tid))
       {
-        const std::vector<std::shared_ptr<KernelBase> > & kernels = _kernels.getActiveVariableBlockObjects(ivar, _subdomain, _tid);
+        const std::vector<std::shared_ptr<KernelBase>> & kernels = _kernels.getActiveVariableBlockObjects(ivar, _subdomain, _tid);
         for (const auto & kernel : kernels)
         {
-          std::shared_ptr<NonlocalKernel> nonlocal_kernel = MooseSharedNamespace::dynamic_pointer_cast<NonlocalKernel>(kernel);
+          std::shared_ptr<NonlocalKernel> nonlocal_kernel = std::dynamic_pointer_cast<NonlocalKernel>(kernel);
           if (nonlocal_kernel)
             if ((kernel->variable().number() == ivar) && kernel->isImplicit())
             {
@@ -112,7 +112,7 @@ ComputeFullJacobianThread::computeJacobian()
       if (ivariable->activeOnSubdomain(_subdomain) > 0 && _kernels.hasActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid))
       {
         // for each variable get the list of active kernels
-        const std::vector<std::shared_ptr<KernelBase> > & kernels = _kernels.getActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid);
+        const std::vector<std::shared_ptr<KernelBase>> & kernels = _kernels.getActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid);
         for (const auto & kernel : kernels)
           if (kernel->isImplicit())
           {
@@ -139,7 +139,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
     if (ivar.activeOnSubdomain(_subdomain) && jvar.activeOnSubdomain(_subdomain) && _integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be any)
-      const std::vector<std::shared_ptr<IntegratedBC> > & bcs = _integrated_bcs.getBoundaryObjects(bnd_id, _tid);
+      const std::vector<std::shared_ptr<IntegratedBC>> & bcs = _integrated_bcs.getBoundaryObjects(bnd_id, _tid);
       for (const auto & bc : bcs)
         if (bc->shouldApply() && bc->variable().number() == ivar.number() && bc->isImplicit())
         {
@@ -163,10 +163,10 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 
       if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) && _integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
       {
-        const std::vector<std::shared_ptr<IntegratedBC> > & integrated_bcs = _integrated_bcs.getBoundaryObjects(bnd_id, _tid);
+        const std::vector<std::shared_ptr<IntegratedBC>> & integrated_bcs = _integrated_bcs.getBoundaryObjects(bnd_id, _tid);
         for (const auto & integrated_bc : integrated_bcs)
         {
-          std::shared_ptr<NonlocalIntegratedBC> nonlocal_integrated_bc = MooseSharedNamespace::dynamic_pointer_cast<NonlocalIntegratedBC>(integrated_bc);
+          std::shared_ptr<NonlocalIntegratedBC> nonlocal_integrated_bc = std::dynamic_pointer_cast<NonlocalIntegratedBC>(integrated_bc);
           if (nonlocal_integrated_bc)
             if ((integrated_bc->variable().number() == ivar) && integrated_bc->isImplicit())
             {
@@ -187,7 +187,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
       if (ivar->activeOnSubdomain(_subdomain) > 0 && _integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
       {
         // for each variable get the list of active kernels
-        const std::vector<std::shared_ptr<IntegratedBC> > & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
+        const std::vector<std::shared_ptr<IntegratedBC>> & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
         for (const auto & bc : bcs)
           if (bc->variable().number() == ivar->number() && bc->isImplicit())
           {
@@ -208,10 +208,10 @@ ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
 {
   if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
-    std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
+    const auto & ce = _fe_problem.couplingEntries(_tid);
     for (const auto & it : ce)
     {
-      const std::vector<std::shared_ptr<DGKernel> > & dgks = _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
+      const std::vector<std::shared_ptr<DGKernel>> & dgks = _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & dg : dgks)
       {
         MooseVariable & ivariable = *(it.first);
@@ -236,10 +236,10 @@ ComputeFullJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
 {
   if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, _tid))
   {
-    std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
+    const auto & ce = _fe_problem.couplingEntries(_tid);
     for (const auto & it : ce)
     {
-      const std::vector<std::shared_ptr<InterfaceKernel> > & int_ks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
+      const std::vector<std::shared_ptr<InterfaceKernel>> & int_ks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & interface_kernel : int_ks)
       {
         if (!interface_kernel->isImplicit())

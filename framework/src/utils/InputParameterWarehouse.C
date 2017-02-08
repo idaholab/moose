@@ -29,7 +29,7 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
     mooseError("The object name may not contain '::' in the name: " << name);
 
   // Create the actual InputParameters object that will be reference by the objects
-  std::shared_ptr<InputParameters> ptr(new InputParameters(parameters));
+  std::shared_ptr<InputParameters> ptr = std::make_shared<InputParameters>(parameters);
 
   // Set the name parameter to the object being created
   ptr->set<std::string>("_object_name") = name;
@@ -43,14 +43,14 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
     mooseError("A '" << unique_name.tag() << "' object already exists with the name '" << unique_name.name() << "'.\n");
 
   // Store the parameters according to the base name
-  _input_parameters[tid].insert(std::pair<MooseObjectName, std::shared_ptr<InputParameters> >(unique_name, ptr));
+  _input_parameters[tid].insert(std::pair<MooseObjectName, std::shared_ptr<InputParameters>>(unique_name, ptr));
 
   // Store the object according to the control tags
   if (ptr->isParamValid("control_tags"))
   {
     const std::vector<std::string> & tags = ptr->get<std::vector<std::string> >("control_tags");
     for (const auto & tag : tags)
-      _input_parameters[tid].insert(std::pair<MooseObjectName, std::shared_ptr<InputParameters> >(MooseObjectName(tag, name),  ptr));
+      _input_parameters[tid].insert(std::pair<MooseObjectName, std::shared_ptr<InputParameters>>(MooseObjectName(tag, name),  ptr));
   }
 
   // Set the name and tid parameters
@@ -101,8 +101,7 @@ InputParameters &
 InputParameterWarehouse::getInputParameters(const MooseObjectName & object_name, THREAD_ID tid) const
 {
   // Locate the InputParameters object and error if it was not located
-  std::multimap<MooseObjectName, std::shared_ptr<InputParameters> >::const_iterator iter;
-  iter = _input_parameters[tid].find(object_name);
+  const auto iter = _input_parameters[tid].find(object_name);
   if (iter == _input_parameters[tid].end())
     mooseError("Unknown InputParameters object " << object_name);
 
@@ -111,7 +110,7 @@ InputParameterWarehouse::getInputParameters(const MooseObjectName & object_name,
 }
 
 
-const std::multimap<MooseObjectName, std::shared_ptr<InputParameters> > &
+const std::multimap<MooseObjectName, std::shared_ptr<InputParameters>> &
 InputParameterWarehouse::getInputParameters(THREAD_ID tid) const
 {
   return _input_parameters[tid];

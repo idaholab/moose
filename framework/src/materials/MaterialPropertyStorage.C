@@ -216,7 +216,8 @@ MaterialPropertyStorage::restrictStatefulProps(const std::vector<std::pair<unsig
 }
 
 void
-MaterialPropertyStorage::initStatefulProps(MaterialData & material_data, const std::vector<std::shared_ptr<Material> > & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side/* = 0*/)
+MaterialPropertyStorage::initStatefulProps(MaterialData & material_data, const std::vector<std::shared_ptr<Material>> & mats,
+                                           unsigned int n_qpoints, const Elem & elem, unsigned int side/* = 0*/)
 {
   // NOTE: since materials are storing their computed properties in MaterialData class, we need to
   // juggle the memory between MaterialData and MaterialProperyStorage classes

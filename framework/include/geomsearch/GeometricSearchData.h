@@ -87,7 +87,7 @@ public:
   MooseMesh & _mesh;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> _penetration_locators;
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> _nearest_node_locators;
-  std::map<unsigned int, std::shared_ptr<ElementPairLocator> > _element_pair_locators;
+  std::map<unsigned int, std::shared_ptr<ElementPairLocator>> _element_pair_locators;
 
 protected:
 
