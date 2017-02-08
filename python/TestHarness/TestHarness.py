@@ -75,6 +75,9 @@ class TestHarness:
             self.libmesh_dir = os.path.join(self.moose_dir, 'libmesh', 'installed')
         self.file = None
 
+        # Failed Tests file object
+        self.writeFailedTest = None
+
         # Parse arguments
         self.parseCLArgs(argv)
 
@@ -223,7 +226,7 @@ class TestHarness:
                                         elif tester.parameters().isValid('error_code'):
                                             (should_run, reason) = (False, 'skipped (Parser Error)')
                                         else:
-                                            (should_run, reason) = tester.checkRunnableBase(self.options, self.checks)
+                                            (should_run, reason) = tester.checkRunnableBase(self.options, self.checks, self.test_list)
 
                                         if should_run:
                                             command = tester.getCommand(self.options)
@@ -239,6 +242,8 @@ class TestHarness:
                                 os.chdir(saved_cwd)
                                 sys.path.pop()
         except KeyboardInterrupt:
+            if self.writeFailedTest != None:
+                self.writeFailedTest.close()
             print '\nExiting due to keyboard interrupt...'
             sys.exit(0)
 
@@ -427,8 +432,7 @@ class TestHarness:
         else:
             return True
 
-# PBS Defs
-
+    # PBS Defs
     def checkPBSEmulator(self):
         try:
             qstat_process = subprocess.Popen(['qstat', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -563,8 +567,7 @@ class TestHarness:
                 if os.path.exists('/'.join(batch_dir[:-1]) + '/' + self.options.pbs_cleanup + '.cluster'):
                     os.remove('/'.join(batch_dir[:-1]) + '/' + self.options.pbs_cleanup + '.cluster')
         os.remove(self.options.pbs_cleanup)
-
-# END PBS Defs
+    # END PBS Defs
 
     ## Update global variables and print output based on the test result
     # Containing OK means it passed, skipped means skipped, anything else means it failed
@@ -620,6 +623,9 @@ class TestHarness:
 
 
         if not 'skipped' in result:
+            if 'FAILED' in result and not self.options.failed_tests:
+                self.writeFailedTest.write(specs['test_name'] + '\n')
+
             if self.options.file:
                 if self.options.show_directory:
                     self.file.write(printResult( specs['relative_path'] + '/' + specs['test_name'].split('/')[-1], result, timing, start, end, self.options, color=False) + '\n')
@@ -687,6 +693,10 @@ class TestHarness:
         if self.num_failed == 0:
             self.writeState(self.executable)
 
+        # Close the failed_tests file
+        if self.writeFailedTest != None:
+            self.writeFailedTest.close()
+
     def initialize(self, argv, app_name):
         # Initialize the parallel runner with how many tests to run in parallel
         self.runner = RunParallel(self, self.options.jobs, self.options.load)
@@ -727,7 +737,7 @@ class TestHarness:
         parser.add_argument('--all-tests', action='store_true', dest='all_tests', help='Run normal tests and tests marked with HEAVY : True')
         parser.add_argument('-g', '--group', action='store', type=str, dest='group', default='ALL', help='Run only tests in the named group')
         parser.add_argument('--not_group', action='store', type=str, dest='not_group', help='Run only tests NOT in the named group')
-#    parser.add_argument('--dofs', action='store', dest='dofs', help='This option is for automatic scaling which is not currently implemented in MOOSE 2.0')
+        # parser.add_argument('--dofs', action='store', dest='dofs', help='This option is for automatic scaling which is not currently implemented in MOOSE 2.0')
         parser.add_argument('--dbfile', nargs='?', action='store', dest='dbFile', help='Location to timings data base file. If not set, assumes $HOME/timingDB/timing.sqlite')
         parser.add_argument('-l', '--load-average', action='store', type=float, dest='load', default=64.0, help='Do not run additional tests if the load average is at least LOAD')
         parser.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
@@ -747,6 +757,8 @@ class TestHarness:
         parser.add_argument('--pbs-cleanup', nargs=1, metavar='batch_file', help='Clean up the directories/files created by PBS. You must supply the same batch_file used to launch PBS.')
         parser.add_argument('--pbs-project', nargs=1, default='moose', help='Identify PBS job submission to specified project')
         parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
+        parser.add_argument('--failed-tests', action='store_true', dest='failed_tests', help='Run tests that previously failed')
+
 
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
@@ -788,6 +800,16 @@ class TestHarness:
             if type(value) == list and len(value) == 1:
                 tmp_str = getattr(self.options, key)
                 setattr(self.options, key, value[0])
+
+        # If attempting to test only failed_tests, open the .failed_tests file and create a list object
+        # otherwise, open the failed_tests file object for writing (clobber).
+        self.test_list = []
+        failed_tests_file = os.path.join(os.getcwd(), '.failed_tests')
+        if self.options.failed_tests:
+            with open(failed_tests_file, 'r') as tmp_failed_tests:
+                self.test_list = tmp_failed_tests.read().split('\n')
+        else:
+            self.writeFailedTest = open(failed_tests_file, 'w')
 
         self.checkAndUpdateCLArgs()
 
