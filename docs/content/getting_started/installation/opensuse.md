@@ -20,7 +20,7 @@ git
 
 * Download one our redistributables according to your version of OpenSUSE
 
-    * OpenSuSE 42.1: !MOOSEPACKAGE arch=opensuse42.1 return=link!
+    * OpenSuSE Leap: !MOOSEPACKAGE arch=opensuseleap return=link!
 
 {!docs/content/getting_started/installation/install_redistributable_rpm.md!}
 {!docs/content/getting_started/installation/clone_moose.md!}
