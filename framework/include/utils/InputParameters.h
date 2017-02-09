@@ -319,6 +319,14 @@ public:
   std::string getDocString(const std::string &name) const;
 
   /**
+   * Set the doc string of a parameter.
+   *
+   * This method is generally used from within the validParams function to modify the documentation for an
+   * existing parameter, such as a parameter that is supplied from an interface class.
+   */
+  void setDocString(const std::string & name, const std::string & doc);
+
+  /**
    * Returns a boolean indicating whether the specified parameter is required or not
    */
   bool isParamRequired(const std::string &name) const;
