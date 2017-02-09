@@ -79,6 +79,7 @@ temp_print_trace.*
 *.bak
 *.processor.*
 .clang_complete
+.failed_tests
 
 # Allow certain files in gold directories
 !**/gold/*.e
