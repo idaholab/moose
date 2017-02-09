@@ -5,6 +5,7 @@ MOOSE includes a set of community developed physics modules that you can build o
 * [Phase Field](modules/phase_field/index.md)
 * [Tensor Mechanics](modules/tensor_mechanics/index.md)
 * [Reconstructed Discontinous Galerkin](modules/rdg/index.md)
+* [Navier-Stokes](modules/navier_stokes/index.md)
 
 The purpose of the modules is to encapsulate common kernels, boundary conditions, etc. to prevent code duplication.
 Examples include: heat conduction, solid mechanics, Navier-Stokes, and others.
