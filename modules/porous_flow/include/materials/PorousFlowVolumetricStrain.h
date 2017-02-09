@@ -49,20 +49,17 @@ protected:
    * Since the volumetric strain rate depends on derivatives of the displacement variables,
    * this should be multiplied by _grad_phi in kernels
    */
-  MaterialProperty<std::vector<RealGradient> > & _dvol_strain_rate_qp_dvar;
+  MaterialProperty<std::vector<RealGradient>> & _dvol_strain_rate_qp_dvar;
 
   /// The total volumetric strain at the quadpoints
   MaterialProperty<Real> & _vol_total_strain_qp;
-
-  /// The old value of total volumetric strain at the quadpoints
-  MaterialProperty<Real> & _vol_total_strain_qp_old;
 
   /**
    * The derivative of the total volumetric strain with respect to the porous flow variables.
    * Since the total volumetric strain depends on derivatives of the displacement variables,
    * this should be multiplied by _grad_phi in kernels
    */
-  MaterialProperty<std::vector<RealGradient> > & _dvol_total_strain_qp_dvar;
+  MaterialProperty<std::vector<RealGradient>> & _dvol_total_strain_qp_dvar;
 };
 
 #endif //POROUSFLOWVOLUMETRICSTRAIN_H

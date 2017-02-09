@@ -25,14 +25,8 @@ PorousFlowPorosityHMBiotModulus::PorousFlowPorosityHMBiotModulus(const InputPara
     _pf_old(_nodal_material ? getMaterialPropertyOld<Real>("PorousFlow_effective_fluid_pressure_nodal") : getMaterialPropertyOld<Real>("PorousFlow_effective_fluid_pressure_qp")),
     _vol_strain_qp_old(getMaterialPropertyOld<Real>("PorousFlow_total_volumetric_strain_qp")),
     _vol_strain_rate_qp(getMaterialProperty<Real>("PorousFlow_volumetric_strain_rate_qp")),
-    _dvol_strain_rate_qp_dvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_volumetric_strain_rate_qp_dvar"))
+    _dvol_strain_rate_qp_dvar(getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_volumetric_strain_rate_qp_dvar"))
 {
-}
-
-void
-PorousFlowPorosityHMBiotModulus::initQpStatefulProperties()
-{
-  _porosity[_qp] = _phi0[_qp];
 }
 
 void

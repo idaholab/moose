@@ -31,7 +31,6 @@ public:
   PorousFlowPorosityHMBiotModulus(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
   /// constant biot modulus
@@ -50,7 +49,7 @@ protected:
   const MaterialProperty<Real> & _vol_strain_rate_qp;
 
   /// d(volumetric strain rate)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<RealGradient> > & _dvol_strain_rate_qp_dvar;
+  const MaterialProperty<std::vector<RealGradient>> & _dvol_strain_rate_qp_dvar;
 };
 
 #endif //POROUSFLOWPOROSITYHMBIOTMODULUS_H

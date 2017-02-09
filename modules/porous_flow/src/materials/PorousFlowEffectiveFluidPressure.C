@@ -17,15 +17,14 @@ InputParameters validParams<PorousFlowEffectiveFluidPressure>()
 
 PorousFlowEffectiveFluidPressure::PorousFlowEffectiveFluidPressure(const InputParameters & parameters) :
     PorousFlowMaterialVectorBase(parameters),
-    _porepressure(_nodal_material ? getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_nodal") : getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_qp")),
-    _porepressure_old(_nodal_material ? getMaterialPropertyOld<std::vector<Real> >("PorousFlow_porepressure_nodal") : getMaterialPropertyOld<std::vector<Real> >("PorousFlow_porepressure_qp")),
-    _dporepressure_dvar(_nodal_material ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar")),
-    _saturation(_nodal_material ? getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal") : getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_qp")),
-    _saturation_old(_nodal_material ? getMaterialPropertyOld<std::vector<Real> >("PorousFlow_saturation_nodal") : getMaterialPropertyOld<std::vector<Real> >("PorousFlow_saturation_qp")),
-    _dsaturation_dvar(_nodal_material ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar")),
+    _porepressure(_nodal_material ? getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_nodal") : getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_qp")),
+    _porepressure_old(_nodal_material ? getMaterialPropertyOld<std::vector<Real>>("PorousFlow_porepressure_nodal") : getMaterialPropertyOld<std::vector<Real>>("PorousFlow_porepressure_qp")),
+    _dporepressure_dvar(_nodal_material ? getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_porepressure_nodal_dvar") : getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_porepressure_qp_dvar")),
+    _saturation(_nodal_material ? getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal") : getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp")),
+    _saturation_old(_nodal_material ? getMaterialPropertyOld<std::vector<Real>>("PorousFlow_saturation_nodal") : getMaterialPropertyOld<std::vector<Real>>("PorousFlow_saturation_qp")),
+    _dsaturation_dvar(_nodal_material ? getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_saturation_nodal_dvar") : getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_saturation_qp_dvar")),
     _pf(_nodal_material ? declareProperty<Real>("PorousFlow_effective_fluid_pressure_nodal") : declareProperty<Real>("PorousFlow_effective_fluid_pressure_qp")),
-    _pf_old(_nodal_material ? declarePropertyOld<Real>("PorousFlow_effective_fluid_pressure_nodal") : declarePropertyOld<Real>("PorousFlow_effective_fluid_pressure_qp")),
-    _dpf_dvar(_nodal_material ? declareProperty<std::vector<Real> >("dPorousFlow_effective_fluid_pressure_nodal_dvar") : declareProperty<std::vector<Real> >("dPorousFlow_effective_fluid_pressure_qp_dvar"))
+    _dpf_dvar(_nodal_material ? declareProperty<std::vector<Real>>("dPorousFlow_effective_fluid_pressure_nodal_dvar") : declareProperty<std::vector<Real>>("dPorousFlow_effective_fluid_pressure_qp_dvar"))
 {
 }
 

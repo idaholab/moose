@@ -33,10 +33,9 @@ PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & p
     _grad_disp_old(3),
 
     _vol_strain_rate_qp(declareProperty<Real>("PorousFlow_volumetric_strain_rate_qp")),
-    _dvol_strain_rate_qp_dvar(declareProperty<std::vector<RealGradient> >("dPorousFlow_volumetric_strain_rate_qp_dvar")),
+    _dvol_strain_rate_qp_dvar(declareProperty<std::vector<RealGradient>>("dPorousFlow_volumetric_strain_rate_qp_dvar")),
     _vol_total_strain_qp(declareProperty<Real>("PorousFlow_total_volumetric_strain_qp")),
-    _vol_total_strain_qp_old(declarePropertyOld<Real>("PorousFlow_total_volumetric_strain_qp")),
-    _dvol_total_strain_qp_dvar(declareProperty<std::vector<RealGradient> >("dPorousFlow_total_volumetric_strain_qp_dvar"))
+    _dvol_total_strain_qp_dvar(declareProperty<std::vector<RealGradient>>("dPorousFlow_total_volumetric_strain_qp_dvar"))
 {
   if (_ndisp != _mesh.dimension())
     mooseError("PorousFlowVolumetricStrain: The number of variables supplied in 'displacements' must match the mesh dimension.");
