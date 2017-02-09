@@ -33,7 +33,7 @@ GhostAux::GhostAux(const InputParameters & params) :
     _ghost_uo(getUserObject<GhostUserObject>("ghost_user_object"))
 {
   if (isNodal())
-    mooseError("This AuxKernel only supports Elemental fields");
+    mooseError2("This AuxKernel only supports Elemental fields");
 }
 
 Real

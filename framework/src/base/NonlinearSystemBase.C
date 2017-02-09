@@ -231,7 +231,7 @@ NonlinearSystemBase::setDecomposition(const std::vector<std::string>& splits)
   {
     std::ostringstream err;
     err << "Only a single top-level split is allowed in a Problem's decomposition.";
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   if (splits.size())
   {
@@ -381,7 +381,7 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name, const std
   }
 
   else
-    mooseError("Unknown BoundaryCondition type for object named " << bc->name());
+    mooseError2("Unknown BoundaryCondition type for object named ", bc->name());
 }
 
 void
@@ -455,7 +455,7 @@ NonlinearSystemBase::addDamper(const std::string & damper_name, const std::strin
     else if (nd)
       _nodal_dampers.addObject(nd, tid);
     else
-      mooseError("Invalid damper type");
+      mooseError2("Invalid damper type");
   }
 }
 
@@ -616,7 +616,7 @@ NonlinearSystemBase::residualVector(Moose::KernelType type)
   case Moose::KT_NONTIME: return _Re_non_time;
   case Moose::KT_ALL: return _Re_non_time;
 
-  default: mooseError("Trying to get residual vector that is not available");
+  default: mooseError2("Trying to get residual vector that is not available");
   }
 }
 
@@ -1052,7 +1052,7 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
         break;
 
       default:
-        mooseError("Unrecognized KernelType in computeResidualInternal().");
+        mooseError2("Unrecognized KernelType in computeResidualInternal().");
       }
 
       for (const auto & scalar_kernel : *scalars)
@@ -2260,7 +2260,7 @@ void
 NonlinearSystemBase::setPreconditioner(std::shared_ptr<MoosePreconditioner> pc)
 {
   if (_preconditioner.get() != nullptr)
-    mooseError("More than one active Preconditioner detected");
+    mooseError2("More than one active Preconditioner detected");
 
   _preconditioner = pc;
 }
@@ -2312,7 +2312,7 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
     {
       std::stringstream missing_block_ids;
       std::copy (difference.begin(), difference.end(), std::ostream_iterator<unsigned int>( missing_block_ids, " "));
-      mooseError("Each subdomain must contain at least one Kernel.\nThe following block(s) lack an active kernel: "
+      mooseError2("Each subdomain must contain at least one Kernel.\nThe following block(s) lack an active kernel: "
                  + missing_block_ids.str());
     }
   }
@@ -2328,7 +2328,7 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
   {
     std::stringstream missing_kernel_vars;
     std::copy (difference.begin(), difference.end(), std::ostream_iterator<std::string>( missing_kernel_vars, " "));
-    mooseError("Each variable must be referenced by at least one active Kernel.\nThe following variable(s) lack an active kernel: "
+    mooseError2("Each variable must be referenced by at least one active Kernel.\nThe following variable(s) lack an active kernel: "
                + missing_kernel_vars.str());
   }
 }
@@ -2349,7 +2349,7 @@ NonlinearSystemBase::setPCSide(MooseEnum pcs)
   else if (pcs == "symmetric")
     _pc_side = Moose::PCS_SYMMETRIC;
   else
-    mooseError("Unknown PC side specified.");
+    mooseError2("Unknown PC side specified.");
 }
 
 bool

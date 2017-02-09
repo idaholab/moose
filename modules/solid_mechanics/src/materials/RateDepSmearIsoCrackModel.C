@@ -30,7 +30,7 @@ RateDepSmearIsoCrackModel::RateDepSmearIsoCrackModel(const InputParameters & par
 {
 
   if ( _nstate != 2 )
-    mooseError(" RateDpeSmearIsoCrackModel Error: Requires 2 state variables - nstate = 2");
+    mooseError2(" RateDpeSmearIsoCrackModel Error: Requires 2 state variables - nstate = 2");
 
 }
 

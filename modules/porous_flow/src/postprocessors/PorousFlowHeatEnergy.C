@@ -42,12 +42,12 @@ PorousFlowHeatEnergy::PorousFlowHeatEnergy(const InputParameters & parameters) :
     /// Check that the phase indices entered are not greater than the number of phases
     const unsigned int max_phase_num = *std::max_element(_phase_index.begin(), _phase_index.end());
     if (max_phase_num > _num_phases - 1)
-      mooseError("The Dictator proclaims that the phase index " << max_phase_num << " in the Postprocessor " << _name << " is greater than the largest phase index possible, which is " << _num_phases - 1);
+      mooseError2("The Dictator proclaims that the phase index ", max_phase_num, " in the Postprocessor ", _name, " is greater than the largest phase index possible, which is ", _num_phases - 1);
   }
 
   /// Check that kernel_variable_number is OK
   if (getParam<unsigned>("kernel_variable_number") >= _dictator.numVariables())
-    mooseError("PorousFlowHeatEnergy: The dictator pronounces that the number of porous-flow variables is " << _dictator.numVariables() << ", however you have used kernel_variable_number = " << getParam<unsigned>("kernel_variable_number") << ".  This is an error");
+    mooseError2("PorousFlowHeatEnergy: The dictator pronounces that the number of porous-flow variables is ", _dictator.numVariables(), ", however you have used kernel_variable_number = ", getParam<unsigned>("kernel_variable_number"), ".  This is an error");
 }
 
 Real

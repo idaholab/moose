@@ -81,7 +81,7 @@ Split::setup(const std::string& prefix)
 {
 // petsc 3.3.0 or later needed
 #if !defined(LIBMESH_HAVE_PETSC) || PETSC_VERSION_LESS_THAN(3,3,0)
-  mooseError("The Splits functionality requires PETSc 3.3.0 or later.");
+  mooseError2("The Splits functionality requires PETSc 3.3.0 or later.");
 #endif
 
   // The Split::setup() implementation does not actually depend on any
@@ -277,7 +277,7 @@ Split::setup(const std::string& prefix)
     // Need to prepend the prefix and strip off the leading '-' on the option name.
     const std::string & op = _petsc_options.flags[j];
     if (op[0] != '-')
-      mooseError("Invalid petsc option name " << op << " for Split " << _name);
+      mooseError2("Invalid petsc option name ", op, " for Split ", _name);
     std::string opt = prefix + op.substr(1);
 
     //push back PETSc options
@@ -285,14 +285,14 @@ Split::setup(const std::string& prefix)
   }
   // check if inames match values
   if (_petsc_options.values.size() != _petsc_options.inames.size())
-    mooseError("PETSc option values do not match PETSc option names");
+    mooseError2("PETSc option values do not match PETSc option names");
 
   for (unsigned j = 0; j < _petsc_options.inames.size(); ++j)
   {
     // Need to prepend the prefix and strip off the leading '-' on the option name.
     const std::string & op = _petsc_options.inames[j];
     if (op[0] != '-')
-      mooseError("Invalid petsc option name " << op << " for Split " << _name);
+      mooseError2("Invalid petsc option name ", op, " for Split ", _name);
     std::string opt = prefix + op.substr(1);
 
     po.inames.push_back(opt);

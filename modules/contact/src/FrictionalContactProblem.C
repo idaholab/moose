@@ -102,13 +102,13 @@ FrictionalContactProblem::FrictionalContactProblem(const InputParameters & param
   if (dim == 3)
   {
     if (!params.isParamValid("disp_z"))
-      mooseError("Missing disp_z in FrictionalContactProblem");
+      mooseError2("Missing disp_z in FrictionalContactProblem");
     if (!params.isParamValid("residual_z"))
-      mooseError("Missing residual_z in FrictionalContactProblem");
+      mooseError2("Missing residual_z in FrictionalContactProblem");
     if (!params.isParamValid("diag_stiff_z"))
-      mooseError("Missing diag_stiff_z in FrictionalContactProblem");
+      mooseError2("Missing diag_stiff_z in FrictionalContactProblem");
     if (!params.isParamValid("inc_slip_z"))
-      mooseError("Missing inc_slip_z in FrictionalContactProblem");
+      mooseError2("Missing inc_slip_z in FrictionalContactProblem");
     _disp_z = params.get<NonlinearVariableName>("disp_z");
     _residual_z = params.get<AuxVariableName>("residual_z");
     _diag_stiff_z = params.get<AuxVariableName>("diag_stiff_z");
@@ -117,13 +117,13 @@ FrictionalContactProblem::FrictionalContactProblem(const InputParameters & param
 
   unsigned int num_interactions = master.size();
   if (num_interactions != slave.size())
-    mooseError("Sizes of master surface and slave surface lists must match in FrictionalContactProblem");
+    mooseError2("Sizes of master surface and slave surface lists must match in FrictionalContactProblem");
   if (num_interactions != friction_coefficient.size())
-    mooseError("Must have friction coefficient defined for every interaction in FrictionalContactProblem");
+    mooseError2("Must have friction coefficient defined for every interaction in FrictionalContactProblem");
   if (num_interactions != slip_factor.size())
-    mooseError("Must have slip factor defined for every interaction in FrictionalContactProblem");
+    mooseError2("Must have slip factor defined for every interaction in FrictionalContactProblem");
   if (num_interactions != slip_too_far_factor.size())
-    mooseError("Must have slip too far factor defined for every interaction in FrictionalContactProblem");
+    mooseError2("Must have slip too far factor defined for every interaction in FrictionalContactProblem");
 
   for (unsigned int i=0; i<master.size(); ++i)
   {
@@ -153,7 +153,7 @@ FrictionalContactProblem::FrictionalContactProblem(const InputParameters & param
     have_target_relative = true;
   }
   if (!(have_target || have_target_relative))
-    mooseError("Must specify either target_contact_residual or target_relative_contact_residual");
+    mooseError2("Must specify either target_contact_residual or target_relative_contact_residual");
 
   _contact_slip_tol_factor = params.get<Real>("contact_slip_tolerance_factor");
 
@@ -180,7 +180,7 @@ FrictionalContactProblem::initialSetup()
       }
     }
     if (!foundMatch)
-      mooseError("Could not find variable '" << _contactRefResidVarNames[i] << "' in reference_residual_variables");
+      mooseError2("Could not find variable '", _contactRefResidVarNames[i], "' in reference_residual_variables");
   }
 
 //  if (_contactRefResidVarIndices.size()>0)

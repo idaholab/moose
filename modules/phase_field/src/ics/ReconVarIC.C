@@ -43,7 +43,7 @@ ReconVarIC::initialSetup()
 
   // We do not want to have more order parameters than grains. That would leave some unused.
   if (_op_num > _grain_num)
-    mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
+    mooseError2("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
 
   if (!_advanced_op_assignment)
   {
@@ -100,13 +100,13 @@ ReconVarIC::value(const Point & /*p*/)
 
   // Return error if current node is NULL
   if (_current_node == NULL)
-    mooseError("The following node id is reporting a NULL condition: " << _current_node->id());
+    mooseError2("The following node id is reporting a NULL condition: ", _current_node->id());
 
   // Make sure the _current_node is in the node_to_grain_weight_map (return error if not in map)
   std::map<dof_id_type, std::vector<Real> >::const_iterator it = _node_to_grain_weight_map.find(_current_node->id());
 
   if (it == _node_to_grain_weight_map.end())
-    mooseError("The following node id is not in the node map: " << _current_node->id());
+    mooseError2("The following node id is not in the node map: ", _current_node->id());
 
   // Increment through all grains at node_index (these are global IDs if consider_phase is false and local IDs otherwise)
   for (unsigned int index = 0; index < _grain_num; ++index)

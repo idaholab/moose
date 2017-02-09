@@ -35,7 +35,7 @@ NonlocalKernel::NonlocalKernel(const InputParameters & parameters) :
     Kernel(parameters)
 {
   _mesh.errorIfDistributedMesh("NonlocalKernel");
-  mooseWarning("NonlocalKernel is a computationally expensive experimental capability used only for integral terms.");
+  mooseWarning2("NonlocalKernel is a computationally expensive experimental capability used only for integral terms.");
 }
 
 void

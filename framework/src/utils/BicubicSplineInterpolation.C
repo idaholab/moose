@@ -55,31 +55,31 @@ BicubicSplineInterpolation::errorCheck()
   auto m = _x1.size(), n = _x2.size();
 
   if (_y.size() != m)
-    mooseError("y row dimension does not match the size of x1.");
+    mooseError2("y row dimension does not match the size of x1.");
   else
     for (decltype(m) i = 0; i < _y.size(); ++i)
       if (_y[i].size() != n)
-        mooseError("y column dimension does not match the size of x2.");
+        mooseError2("y column dimension does not match the size of x2.");
 
   if (_yx11.empty())
     _yx11.resize(n, _deriv_bound);
   else if (_yx11.size() != n)
-    mooseError("The length of the vectors holding the first derivatives of y with respect to x1 must match the length of x2.");
+    mooseError2("The length of the vectors holding the first derivatives of y with respect to x1 must match the length of x2.");
 
   if (_yx1n.empty())
     _yx1n.resize(n, _deriv_bound);
   else if (_yx1n.size() != n)
-    mooseError("The length of the vectors holding the first derivatives of y with respect to x1 must match the length of x2.");
+    mooseError2("The length of the vectors holding the first derivatives of y with respect to x1 must match the length of x2.");
 
   if (_yx21.empty())
     _yx21.resize(m, _deriv_bound);
   else if (_yx21.size() != m)
-    mooseError("The length of the vectors holding the first derivatives of y with respect to x2 must match the length of x1.");
+    mooseError2("The length of the vectors holding the first derivatives of y with respect to x2 must match the length of x1.");
 
   if (_yx2n.empty())
     _yx2n.resize(m, _deriv_bound);
   else if (_yx2n.size() != m)
-    mooseError("The length of the vectors holding the first derivatives of y with respect to x2 must match the length of x1.");
+    mooseError2("The length of the vectors holding the first derivatives of y with respect to x2 must match the length of x1.");
 }
 
 void
@@ -176,7 +176,7 @@ BicubicSplineInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deri
 
   else
   {
-    mooseError("deriv_var must be either 1 or 2");
+    mooseError2("deriv_var must be either 1 or 2");
     return 0;
   }
 }
@@ -220,7 +220,7 @@ BicubicSplineInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int d
 
   else
   {
-    mooseError("deriv_var must be either 1 or 2");
+    mooseError2("deriv_var must be either 1 or 2");
     return 0;
   }
 }

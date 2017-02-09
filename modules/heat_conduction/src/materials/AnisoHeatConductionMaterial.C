@@ -68,15 +68,15 @@ AnisoHeatConductionMaterial::AnisoHeatConductionMaterial(const InputParameters &
       (_subproblem.mesh().dimension() > 1 && !k_y) ||
       (_subproblem.mesh().dimension() > 2 && !k_z))
   {
-    mooseError("Incomplete set of orthotropic thermal conductivity parameters");
+    mooseError2("Incomplete set of orthotropic thermal conductivity parameters");
   }
   if (_specific_heat_temperature_function && !_has_temp)
   {
-    mooseError("Must couple with temperature if using specific heat function");
+    mooseError2("Must couple with temperature if using specific heat function");
   }
   if (isParamValid("specific_heat") && _specific_heat_temperature_function)
   {
-    mooseError("Cannot define both specific heat and specific heat temperature function");
+    mooseError2("Cannot define both specific heat and specific heat temperature function");
   }
 
   k_x = isParamValid("thermal_conductivity_x") && (NULL != _thermal_conductivity_x_pp);
@@ -84,7 +84,7 @@ AnisoHeatConductionMaterial::AnisoHeatConductionMaterial(const InputParameters &
   k_z = isParamValid("thermal_conductivity_z") && (NULL != _thermal_conductivity_z_pp);
   if (k_x || k_y || k_z)
   {
-    mooseError("Cannot define thermal conductivity value and Postprocessor");
+    mooseError2("Cannot define thermal conductivity value and Postprocessor");
   }
 }
 

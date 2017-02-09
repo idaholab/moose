@@ -65,23 +65,23 @@ PorousFlowSink::PorousFlowSink(const InputParameters & parameters) :
     _dthermal_conductivity_dvar(_has_thermal_conductivity ? &getMaterialProperty<std::vector<RealTensorValue> >("dPorousFlow_thermal_conductivity_qp_dvar") : nullptr)
 {
   if (_involves_fluid && _ph >= _dictator.numPhases())
-    mooseError("PorousFlowSink: The Dictator declares that the number of fluid phases is " << _dictator.numPhases() << ", but you have set the fluid_phase to " << _ph << ".  You must try harder.");
+    mooseError2("PorousFlowSink: The Dictator declares that the number of fluid phases is ", _dictator.numPhases(), ", but you have set the fluid_phase to ", _ph, ".  You must try harder.");
   if (!_involves_fluid && (_use_mass_fraction || _use_mobility || _use_relperm || _use_enthalpy || _use_internal_energy))
-    mooseError("PorousFlowSink: To use_mass_fraction, use_mobility, use_relperm, use_enthalpy or use_internal_energy, you must provide a fluid phase number");
+    mooseError2("PorousFlowSink: To use_mass_fraction, use_mobility, use_relperm, use_enthalpy or use_internal_energy, you must provide a fluid phase number");
   if (_use_mass_fraction && _sp >= _dictator.numComponents())
-    mooseError("PorousFlowSink: The Dictator declares that the number of fluid components is " << _dictator.numComponents() << ", but you have set the mass_fraction_component to " << _sp << ".  Please be assured that the Dictator has noted your error.");
+    mooseError2("PorousFlowSink: The Dictator declares that the number of fluid components is ", _dictator.numComponents(), ", but you have set the mass_fraction_component to ", _sp, ".  Please be assured that the Dictator has noted your error.");
   if (_use_mass_fraction && !_has_mass_fraction)
-    mooseError("PorousFlowSink: You have used the use_mass_fraction flag, but you have no mass_fraction Material");
+    mooseError2("PorousFlowSink: You have used the use_mass_fraction flag, but you have no mass_fraction Material");
   if (_use_mobility && !_has_mobility)
-    mooseError("PorousFlowSink: You have used the use_mobility flag, but there are not the required Materials for this");
+    mooseError2("PorousFlowSink: You have used the use_mobility flag, but there are not the required Materials for this");
   if (_use_relperm && !_has_relperm)
-    mooseError("PorousFlowSink: You have used the use_relperm flag, but you have no relperm Material");
+    mooseError2("PorousFlowSink: You have used the use_relperm flag, but you have no relperm Material");
   if (_use_enthalpy && !_has_enthalpy)
-    mooseError("PorousFlowSink: You have used the use_enthalpy flag, but you have no enthalpy Material");
+    mooseError2("PorousFlowSink: You have used the use_enthalpy flag, but you have no enthalpy Material");
   if (_use_internal_energy && !_has_internal_energy)
-    mooseError("PorousFlowSink: You have used the use_internal_energy flag, but you have no internal_energy Material");
+    mooseError2("PorousFlowSink: You have used the use_internal_energy flag, but you have no internal_energy Material");
   if (_use_thermal_conductivity && !_has_thermal_conductivity)
-    mooseError("PorousFlowSink: You have used the use_thermal_conductivity flag, but you have no thermal_conductivity Material");
+    mooseError2("PorousFlowSink: You have used the use_thermal_conductivity flag, but you have no thermal_conductivity Material");
 }
 
 Real

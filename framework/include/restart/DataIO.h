@@ -168,7 +168,7 @@ template<typename T>
 inline void
 dataStore(std::ostream & /*stream*/, T * & /*v*/, void * /*context*/)
 {
-  mooseError("Attempting to store a raw pointer type: \"" << demangle(typeid(T).name()) << " *\" as restartable data!\nWrite a custom dataStore() template specialization!\n\n");
+  mooseError2("Attempting to store a raw pointer type: \"", demangle(typeid(T).name()), " *\" as restartable data!\nWrite a custom dataStore() template specialization!\n\n");
 }
 
 template<typename T, typename U>
@@ -337,7 +337,7 @@ dataLoad(std::istream & stream, T & v, void * /*context*/)
 template<typename T>
 void dataLoad(std::istream & /*stream*/, T * & /*v*/, void * /*context*/)
 {
-  mooseError("Attempting to load a raw pointer type: \"" << demangle(typeid(T).name()) << " *\" as restartable data!\nWrite a custom dataLoad() template specialization!\n\n");
+  mooseError2("Attempting to load a raw pointer type: \"", demangle(typeid(T).name()), " *\" as restartable data!\nWrite a custom dataLoad() template specialization!\n\n");
 }
 
 template<typename T, typename U>

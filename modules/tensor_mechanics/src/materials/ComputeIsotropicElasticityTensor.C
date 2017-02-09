@@ -50,7 +50,7 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(const InputPa
     iso_const[1] = _shear_modulus;
   }
   else
-    mooseError("Incorrect combination of elastic properties in ComputeIsotropicElasticityTensor. Possible combinations are: lambda and shear_modulus, youngs_modulus and poissons_ratio, or bulk_modulus and shear_modulus.");
+    mooseError2("Incorrect combination of elastic properties in ComputeIsotropicElasticityTensor. Possible combinations are: lambda and shear_modulus, youngs_modulus and poissons_ratio, or bulk_modulus and shear_modulus.");
 
   //Fill elasticity tensor
   _Cijkl.fillFromInputVector(iso_const, RankFourTensor::symmetric_isotropic);

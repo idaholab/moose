@@ -35,7 +35,7 @@ namespace
     else if (n == "power")
       cm = ComputeElasticSmearedCrackingStress::CR_POWER;
     if (cm == ComputeElasticSmearedCrackingStress::CR_UNKNOWN)
-      mooseError("Unknown cracking model");
+      mooseError2("Unknown cracking model");
     return cm;
   }
 }
@@ -89,17 +89,17 @@ ComputeElasticSmearedCrackingStress::ComputeElasticSmearedCrackingStress(const I
     for (unsigned int i = 0; i < planes.size(); ++i)
     {
       if (planes[i] > 2)
-        mooseError("Active planes must be 0, 1, or 2");
+        mooseError2("Active planes must be 0, 1, or 2");
       _active_crack_planes[planes[i]] = 1;
     }
   }
   if (_cracking_residual_stress < 0 ||
       _cracking_residual_stress > 1 )
-    mooseError("cracking_residual_stress must be between 0 and 1");
+    mooseError2("cracking_residual_stress must be between 0 and 1");
   if (parameters.isParamSetByUser("cracking_neg_fraction") &&
       (_cracking_neg_fraction <=0 ||
        _cracking_neg_fraction > 1))
-    mooseError("cracking_neg_fraction must be > zero and <= 1");
+    mooseError2("cracking_neg_fraction must be > zero and <= 1");
 }
 
 void
@@ -529,7 +529,7 @@ ComputeElasticSmearedCrackingStress::computeCrackStrainAndOrientation(ColumnMajo
     principal_strain(2,0) = ePrime(2, 2);
   }
   else
-    mooseError("Invalid number of known crack directions");
+    mooseError2("Invalid number of known crack directions");
 }
 
 unsigned int
@@ -549,18 +549,18 @@ ComputeElasticSmearedCrackingStress::computeCrackFactor(int i, Real & sigma, Rea
   {
     if ((*_crack_max_strain)[_qp](i) < (*_crack_strain)[_qp](i))
     {
-      mooseError("Max strain less than crack strain: " << i << " " << sigma << ", "
-                 << (*_crack_max_strain)[_qp](i) << ", "
-                 << (*_crack_strain)[_qp](i) << ", "
-                 << _principal_strain(0, 0) << ", "
-                 << _principal_strain(1, 0) << ", "
-                 << _principal_strain(2, 0) <<  ", "
-                 << _elastic_strain[_qp](0, 0) <<  ", "
-                 << _elastic_strain[_qp](1, 1) <<  ", "
-                 << _elastic_strain[_qp](2, 2) <<  ", "
-                 << _elastic_strain[_qp](0, 1) <<  ", "
-                 << _elastic_strain[_qp](0, 2) <<  ", "
-                 << _elastic_strain[_qp](1, 2));
+      mooseError2("Max strain less than crack strain: ", i, " ", sigma, ", ",
+                  (*_crack_max_strain)[_qp](i), ", ",
+                  (*_crack_strain)[_qp](i), ", ",
+                  _principal_strain(0, 0), ", ",
+                  _principal_strain(1, 0), ", ",
+                  _principal_strain(2, 0),  ", ",
+                  _elastic_strain[_qp](0, 0),  ", ",
+                  _elastic_strain[_qp](1, 1),  ", ",
+                  _elastic_strain[_qp](2, 2),  ", ",
+                  _elastic_strain[_qp](0, 1),  ", ",
+                  _elastic_strain[_qp](0, 2),  ", ",
+                  _elastic_strain[_qp](1, 2));
     }
     const Real crackMaxStrain = (*_crack_max_strain)[_qp](i);
     // Compute stress that follows exponental curve
@@ -593,7 +593,7 @@ ComputeElasticSmearedCrackingStress::computeCrackFactor(int i, Real & sigma, Rea
         << (*_crack_max_strain)[_qp](i) << ", "
         << (*_crack_strain)[_qp](i) << ", "
         << std::endl;
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   return flag_value;
 }

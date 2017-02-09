@@ -29,9 +29,9 @@ PorousFlowMassFraction::PorousFlowMassFraction(const InputParameters & parameter
     _num_passed_mf_vars(coupledComponents("mass_fraction_vars"))
 {
   if (_num_phases < 1 || _num_components < 1)
-    mooseError("PorousFlowMassFraction: The Dictator proclaims that the number of phases is " << _num_phases << " and the number of components is " << _num_components << ", and stipulates that you should not use PorousFlowMassFraction in this case");
+    mooseError2("PorousFlowMassFraction: The Dictator proclaims that the number of phases is ", _num_phases, " and the number of components is ", _num_components, ", and stipulates that you should not use PorousFlowMassFraction in this case");
   if (_num_passed_mf_vars != _num_phases*(_num_components - 1))
-    mooseError("PorousFlowMassFraction: The number of mass_fraction_vars is " << _num_passed_mf_vars << " which must be equal to the Dictator's num_phases (" << _num_phases << ") multiplied by num_components-1 (" << _num_components - 1 << ")");
+    mooseError2("PorousFlowMassFraction: The number of mass_fraction_vars is ", _num_passed_mf_vars, " which must be equal to the Dictator's num_phases (", _num_phases, ") multiplied by num_components-1 (", _num_components - 1, ")");
 
   _mf_vars_num.resize(_num_passed_mf_vars);
   _mf_vars.resize(_num_passed_mf_vars);

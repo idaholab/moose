@@ -29,9 +29,9 @@ PorousFlowRelativePermeabilityBW::PorousFlowRelativePermeabilityBW(const InputPa
     _c(getParam<Real>("C"))
 {
   if (_ss <= _sn)
-    mooseError("In BW relative permeability Sn set to " << _sn << " and Ss set to " << _ss << " but these must obey Ss > Sn");
+    mooseError2("In BW relative permeability Sn set to ", _sn, " and Ss set to ", _ss, " but these must obey Ss > Sn");
   if (_ks <= _kn)
-    mooseError("In BW relative permeability Kn set to " << _kn << " and Ks set to " << _ks << " but these must obey Ks > Kn");
+    mooseError2("In BW relative permeability Kn set to ", _kn, " and Ks set to ", _ks, " but these must obey Ks > Kn");
 }
 
 Real

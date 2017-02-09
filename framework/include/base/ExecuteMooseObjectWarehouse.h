@@ -121,7 +121,7 @@ ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagType exec_flag) const
   const auto iter = _execute_objects.find(exec_flag);
 
   if (iter == _execute_objects.end())
-    mooseError("Unable to locate the desired execute flag, the global list of execute parameters is likely out-of-date.");
+    mooseError2("Unable to locate the desired execute flag, the global list of execute parameters is likely out-of-date.");
 
   return iter->second;
 }
@@ -134,7 +134,7 @@ ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagType exec_flag)
   const auto iter = _execute_objects.find(exec_flag);
 
   if (iter == _execute_objects.end())
-    mooseError("Unable to locate the desired execute flag, the global list of execute parameters is likely out-of-date.");
+    mooseError2("Unable to locate the desired execute flag, the global list of execute parameters is likely out-of-date.");
 
   return iter->second;
 }
@@ -214,7 +214,7 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID t
       _execute_objects[*it].addObject(object, tid);
   }
   else
-    mooseError("The object being added (" << object->name() << ") must inherit from SetupInterface to be added to the ExecuteMooseObjectWarehouse container.");
+    mooseError2("The object being added (", object->name(), ") must inherit from SetupInterface to be added to the ExecuteMooseObjectWarehouse container.");
 }
 
 template<typename T>

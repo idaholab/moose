@@ -106,7 +106,7 @@ LStableDirk3::postStep(NumericVector<Number> & residual)
 {
   // Error if _stage got messed up somehow.
   if (_stage > 3)
-    mooseError("LStableDirk3::postStep(): Member variable _stage can only have values 1, 2, or 3.");
+    mooseError2("LStableDirk3::postStep(): Member variable _stage can only have values 1, 2, or 3.");
 
   // In the standard RK notation, the residual of stage 1 of s is given by:
   //

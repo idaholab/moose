@@ -176,7 +176,7 @@ ColumnMajorMatrix::eigen(ColumnMajorMatrix & eval, ColumnMajorMatrix & evec) con
 #endif
 
   if (return_value)
-    mooseError("error in lapack eigen solve");
+    mooseError2("error in lapack eigen solve");
 }
 
 void
@@ -217,7 +217,7 @@ ColumnMajorMatrix::eigenNonsym(ColumnMajorMatrix & eval_real, ColumnMajorMatrix 
 #endif
 
   if (return_value)
-    mooseError("error in lapack eigen solve");
+    mooseError2("error in lapack eigen solve");
 }
 
 void

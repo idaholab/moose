@@ -63,7 +63,7 @@ KKSXeVacSolidMaterial::computeDF(unsigned int i_var) {
   if (i_var == _cmv_var)
     return 1.0/_Omega * (_Efv + _kB*_T * (std::log(cmv) - std::log(-cmv + 1.0)));
 
-  mooseError("Unknown derivative requested");
+  mooseError2("Unknown derivative requested");
 }
 
 // Derivative of the Free energy
@@ -81,7 +81,7 @@ KKSXeVacSolidMaterial::computeD2F(unsigned int i_var, unsigned int j_var) {
   if (i_var == _cmv_var)
     return 1.0/_Omega * _kB*_T * (1.0 / (1.0 - cmv) + 1.0 / cmv);
 
-  mooseError("Unknown derivative requested");
+  mooseError2("Unknown derivative requested");
 }
 
 // note that the second cross derivatives are actually 0.0!

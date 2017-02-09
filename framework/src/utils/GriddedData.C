@@ -124,12 +124,12 @@ Real
 GriddedData::evaluateFcn(const std::vector<unsigned int> & ijk)
 {
   if (ijk.size() != _dim)
-    mooseError("Gridded data evaluateFcn called with " << ijk.size() << " arguments, but expected " << _dim);
+    mooseError2("Gridded data evaluateFcn called with ", ijk.size(), " arguments, but expected ", _dim);
   unsigned int index = ijk[0];
   for (unsigned int i = 1; i < _dim; ++i)
     index += ijk[i] * _step[i];
   if (index >= _fcn.size())
-    mooseError("Gridded data evaluateFcn attempted to access index " << index << " of function, but it contains only " << _fcn.size() << " entries");
+    mooseError2("Gridded data evaluateFcn attempted to access index ", index, " of function, but it contains only ", _fcn.size(), " entries");
   return _fcn[index];
 }
 
@@ -173,7 +173,7 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
   // open file and initialize quantities
   std::ifstream file(file_name.c_str());
   if (!file.good())
-    mooseError("Error opening file '" + file_name + "' from GriddedData.");
+    mooseError2("Error opening file '" + file_name + "' from GriddedData.");
   std::string line;
   bool reading_grid_data = false;
   bool reading_value_data = false;
@@ -231,7 +231,7 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
 
   // check that some axes have been defined
   if (dim == 0)
-    mooseError("No valid AXIS lines found by GriddedData");
+    mooseError2("No valid AXIS lines found by GriddedData");
 
   // step is useful in evaluateFcn
   step.resize(dim);
@@ -245,11 +245,11 @@ GriddedData::parse(unsigned int & dim, std::vector<int> & axes, std::vector<std:
   for (unsigned int i = 0; i < dim; ++i)
   {
     if (grid[i].size() == 0)
-      mooseError("Axis " << i << " in your GriddedData has zero size");
+      mooseError2("Axis ", i, " in your GriddedData has zero size");
     num_data_points *= grid[i].size();
   }
   if (num_data_points != f.size())
-    mooseError("According to AXIS statements in GriddedData, number of data points is " << num_data_points << " but " << f.size() << " function values were read from file");
+    mooseError2("According to AXIS statements in GriddedData, number of data points is ", num_data_points, " but ", f.size(), " function values were read from file");
 
 }
 

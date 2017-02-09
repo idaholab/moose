@@ -44,7 +44,7 @@ MultiPlasticityDebugger::outputAndCheckDebugParameters()
   _fspb_debug_stress.print();
 
   if (_fspb_debug_pm.size() != _num_surfaces || _fspb_debug_intnl.size() != _num_models || _fspb_debug_pm_change.size() != _num_surfaces || _fspb_debug_intnl_change.size() != _num_models)
-    mooseError("The debug parameters have the wrong size\n");
+    mooseError2("The debug parameters have the wrong size\n");
 
   Moose::err << "plastic multipliers =\n";
   for (unsigned surface = 0; surface < _num_surfaces; ++surface)

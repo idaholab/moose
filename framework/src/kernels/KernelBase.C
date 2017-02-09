@@ -95,10 +95,10 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
     if (_fe_problem.getNonlinearSystemBase().hasVariable(_save_in_strings[i]))
-      mooseError("Trying to use solution variable "+_save_in_strings[i]+" as a save_in variable in "+name());
+      mooseError2("Trying to use solution variable "+_save_in_strings[i]+" as a save_in variable in "+name());
 
     if (var->feType() != _var.feType())
-      mooseError("Error in " + name() + ". When saving residual values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
+      mooseError2("Error in " + name() + ". When saving residual values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
 
     _save_in[i] = var;
     var->sys().addVariableToZeroOnResidual(_save_in_strings[i]);
@@ -113,10 +113,10 @@ KernelBase::KernelBase(const InputParameters & parameters) :
     MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
 
     if (_fe_problem.getNonlinearSystemBase().hasVariable(_diag_save_in_strings[i]))
-      mooseError("Trying to use solution variable "+_diag_save_in_strings[i]+" as a diag_save_in variable in "+name());
+      mooseError2("Trying to use solution variable "+_diag_save_in_strings[i]+" as a diag_save_in variable in "+name());
 
     if (var->feType() != _var.feType())
-      mooseError("Error in " + name() + ". When saving diagonal Jacobian values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
+      mooseError2("Error in " + name() + ". When saving diagonal Jacobian values in an Auxiliary variable the AuxVariable must be the same type as the nonlinear variable the object is acting on.");
 
     _diag_save_in[i] = var;
     var->sys().addVariableToZeroOnJacobian(_diag_save_in_strings[i]);

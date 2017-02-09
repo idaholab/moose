@@ -29,7 +29,7 @@ FiniteStrainMaterial::FiniteStrainMaterial(const InputParameters & parameters) :
     _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment")),
     _deformation_gradient(declareProperty<RankTwoTensor>("deformation_gradient"))
 {
-  mooseDeprecated("FiniteStrainMaterial is deprecated.   Please use the TensorMechanics plug-and-play system instead: http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/PlugAndPlayMechanicsApproach/");
+  mooseDeprecated2("FiniteStrainMaterial is deprecated.   Please use the TensorMechanics plug-and-play system instead: http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/PlugAndPlayMechanicsApproach/");
 }
 
 void
@@ -98,7 +98,7 @@ FiniteStrainMaterial::computeStrain()
 void
 FiniteStrainMaterial::computeQpStrain()
 {
-  mooseError("Wrong computeQpStrain called in FiniteStrainMaterial");
+  mooseError2("Wrong computeQpStrain called in FiniteStrainMaterial");
 }
 
 void

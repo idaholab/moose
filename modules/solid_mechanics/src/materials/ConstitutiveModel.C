@@ -47,14 +47,14 @@ ConstitutiveModel::ConstitutiveModel(const InputParameters & parameters) :
   if (parameters.isParamValid("thermal_expansion_function_type"))
   {
     if (!_alpha_function)
-      mooseError("thermal_expansion_function_type can only be set when thermal_expansion_function is used");
+      mooseError2("thermal_expansion_function_type can only be set when thermal_expansion_function is used");
     MooseEnum tec = getParam<MooseEnum>("thermal_expansion_function_type");
     if (tec == "mean")
       _mean_alpha_function = true;
     else if (tec == "instantaneous")
       _mean_alpha_function = false;
     else
-      mooseError("Invalid option for thermal_expansion_function_type");
+      mooseError2("Invalid option for thermal_expansion_function_type");
   }
   else
     _mean_alpha_function = false;
@@ -62,15 +62,15 @@ ConstitutiveModel::ConstitutiveModel(const InputParameters & parameters) :
   if (parameters.isParamValid("thermal_expansion_reference_temperature"))
   {
     if (!_alpha_function)
-      mooseError("thermal_expansion_reference_temperature can only be set when thermal_expansion_function is used");
+      mooseError2("thermal_expansion_reference_temperature can only be set when thermal_expansion_function is used");
     if (!_mean_alpha_function)
-      mooseError("thermal_expansion_reference_temperature can only be set when thermal_expansion_function_type = mean");
+      mooseError2("thermal_expansion_reference_temperature can only be set when thermal_expansion_function_type = mean");
     _ref_temp = getParam<Real>("thermal_expansion_reference_temperature");
     if (!_has_temp)
-      mooseError("Cannot specify thermal_expansion_reference_temperature without coupling to temperature");
+      mooseError2("Cannot specify thermal_expansion_reference_temperature without coupling to temperature");
   }
   else if (_mean_alpha_function)
-    mooseError("Must specify thermal_expansion_reference_temperature if thermal_expansion_function_type = mean");
+    mooseError2("Must specify thermal_expansion_reference_temperature if thermal_expansion_function_type = mean");
 }
 
 void
@@ -132,7 +132,7 @@ ConstitutiveModel::applyThermalStrain(unsigned qp,
         Real numerator = alpha_current_temp * (current_temp - _ref_temp) - alpha_old_temp * (old_temp - _ref_temp);
         Real denominator = 1.0 + alpha_stress_free_temperature * (_stress_free_temp - _ref_temp);
         if (denominator < small)
-          mooseError("Denominator too small in thermal strain calculation");
+          mooseError2("Denominator too small in thermal strain calculation");
         inc_thermal_strain = numerator / denominator;
         d_thermal_strain_d_temp = alpha_current_temp * (current_temp - _ref_temp);
       }

@@ -209,7 +209,7 @@ const MaterialProperty<T> &
 AuxKernel::getMaterialProperty(const std::string & name)
 {
   if (isNodal())
-    mooseError("Nodal AuxKernel '" << AuxKernel::name() << "' attempted to reference material property '" << name << "'\nConsider using an elemental auxiliary variable for '" << _var.name() << "'.");
+    mooseError2("Nodal AuxKernel '", AuxKernel::name(), "' attempted to reference material property '", name, "'\nConsider using an elemental auxiliary variable for '", _var.name(), "'.");
 
   return MaterialPropertyInterface::getMaterialProperty<T>(name);
 }
@@ -219,7 +219,7 @@ const MaterialProperty<T> &
 AuxKernel::getMaterialPropertyOld(const std::string & name)
 {
   if (isNodal())
-    mooseError("Nodal AuxKernel '" << AuxKernel::name() << "' attempted to reference material property '" << name << "'\nConsider using an elemental auxiliary variable for '" << _var.name() << "'.");
+    mooseError2("Nodal AuxKernel '", AuxKernel::name(), "' attempted to reference material property '", name, "'\nConsider using an elemental auxiliary variable for '", _var.name(), "'.");
 
   return MaterialPropertyInterface::getMaterialPropertyOld<T>(name);
 }
@@ -229,7 +229,7 @@ const MaterialProperty<T> &
 AuxKernel::getMaterialPropertyOlder(const std::string & name)
 {
   if (isNodal())
-    mooseError("Nodal AuxKernel '" << AuxKernel::name() << "' attempted to reference material property '" << name << "'\nConsider using an elemental auxiliary variable for '" << _var.name() << "'.");
+    mooseError2("Nodal AuxKernel '", AuxKernel::name(), "' attempted to reference material property '", name, "'\nConsider using an elemental auxiliary variable for '", _var.name(), "'.");
 
   return MaterialPropertyInterface::getMaterialPropertyOlder<T>(name);
 }

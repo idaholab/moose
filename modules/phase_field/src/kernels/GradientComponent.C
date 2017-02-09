@@ -23,7 +23,7 @@ GradientComponent::GradientComponent(const InputParameters & parameters) :
     _component(getParam<unsigned int>("component"))
 {
   if (_component >= LIBMESH_DIM)
-    mooseError("Component too large for LIBMESH_DIM");
+    mooseError2("Component too large for LIBMESH_DIM");
 }
 
 Real

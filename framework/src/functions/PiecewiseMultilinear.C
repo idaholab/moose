@@ -38,12 +38,12 @@ PiecewiseMultilinear::PiecewiseMultilinear(const InputParameters & parameters) :
   for (unsigned int i = 0; i < _dim; ++i)
     for (unsigned int j = 1; j < _grid[i].size(); ++j)
       if (_grid[i][j - 1] >= _grid[i][j])
-        mooseError("PiecewiseMultilinear needs monotonically-increasing axis data.  Axis " << i << " contains non-monotonicity at value " << _grid[i][j]);
+        mooseError2("PiecewiseMultilinear needs monotonically-increasing axis data.  Axis ", i, " contains non-monotonicity at value ", _grid[i][j]);
 
   // GriddedData does not demand that each axis is independent, but we do
   std::set<int> s(_axes.begin(), _axes.end());
   if (s.size() != _dim)
-    mooseError("PiecewiseMultilinear needs the AXES to be independent.  Check the AXIS lines in your data file.");
+    mooseError2("PiecewiseMultilinear needs the AXES to be independent.  Check the AXIS lines in your data file.");
 
 }
 

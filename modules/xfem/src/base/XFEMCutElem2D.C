@@ -50,7 +50,7 @@ XFEMCutElem2D::getNodeCoordinates(EFANode* CEMnode, MeshBase* displaced_mesh) co
       master_points.push_back(node_p);
     }
     else
-      mooseError("master nodes must be local");
+      mooseError2("master nodes must be local");
   }
   for (unsigned int i = 0; i < master_nodes.size(); ++i)
     node_coor += master_weights[i]*master_points[i];
@@ -113,7 +113,7 @@ XFEMCutElem2D::getCutPlaneOrigin(unsigned int plane_id, MeshBase* displaced_mesh
     }
   }
   if (cut_line_nodes.size() == 0)
-    mooseError("no cut line found in this element");
+    mooseError2("no cut line found in this element");
   if (plane_id < cut_line_nodes.size()) // valid plane_id
     orig = getNodeCoordinates(cut_line_nodes[plane_id][0], displaced_mesh);
   return orig;
@@ -135,7 +135,7 @@ XFEMCutElem2D::getCutPlaneNormal(unsigned int plane_id, MeshBase* displaced_mesh
     }
   }
   if (cut_line_nodes.size() == 0)
-    mooseError("no cut line found in this element");
+    mooseError2("no cut line found in this element");
   if (plane_id < cut_line_nodes.size()) // valid plane_id
   {
     Point cut_line_p1 = getNodeCoordinates(cut_line_nodes[plane_id][0], displaced_mesh);
@@ -175,7 +175,7 @@ XFEMCutElem2D::getCrackTipOriginAndDirection(unsigned tip_id, Point & origin, Po
     }
   }
   if (cut_line_nodes.size() == 0)
-    mooseError("no cut line found in this element");
+    mooseError2("no cut line found in this element");
 
   Point cut_line_p1 = getNodeCoordinates(cut_line_nodes[0]);
   Point cut_line_p2 = getNodeCoordinates(cut_line_nodes[1]);
@@ -285,7 +285,7 @@ XFEMCutElem2D::getPhysicalQuadraturePoints(std::vector<std::vector<Real> > &tsg)
     }
   }
   else
-    mooseError("Invalid partial element!");
+    mooseError2("Invalid partial element!");
 }
 
 void
@@ -321,7 +321,7 @@ XFEMCutElem2D::solveMomentFitting(unsigned int nen,
     }
   }
   else
-    mooseError("Invalid element");
+    mooseError2("Invalid element");
 
   wsg.resize(wss.size());
   for (unsigned int i = 0; i < wsg.size(); ++i)
@@ -337,7 +337,7 @@ XFEMCutElem2D::solveMomentFitting(unsigned int nen,
     else if (nen == 3) // 2D triangle elem
       old_weights[l] = wss[l][3]*jac;
     else
-      mooseError("Invalid element!");
+      mooseError2("Invalid element!");
     for (unsigned int k = 0; k < nen; ++k) // physical coords of Q-pts
     {
       wsg[l][0] += shape[k][2]*elem_nodes[k](0);
@@ -356,7 +356,7 @@ XFEMCutElem2D::solveMomentFitting(unsigned int nen,
     if (nqp > 3) A[3+ind] = wsg[i][0]*wsg[i][1]; // x*y
     if (nqp > 4) A[4+ind] = wsg[i][0]*wsg[i][0]; // x^2
     if (nqp > 5) A[5+ind] = wsg[i][1]*wsg[i][1]; // y^2
-    if (nqp > 6) mooseError("Q-points of more than 6 are not allowed now!");
+    if (nqp > 6) mooseError2("Q-points of more than 6 are not allowed now!");
     ind = ind+nqp;
   }
 
@@ -372,7 +372,7 @@ XFEMCutElem2D::solveMomentFitting(unsigned int nen,
     if (nqp > 3) b[3] += tsg[i][2]*tsg[i][0]*tsg[i][1];
     if (nqp > 4) b[4] += tsg[i][2]*tsg[i][0]*tsg[i][0];
     if (nqp > 5) b[5] += tsg[i][2]*tsg[i][1]*tsg[i][1];
-    if (nqp > 6) mooseError("Q-points of more than 6 are not allowed now!");
+    if (nqp > 6) mooseError2("Q-points of more than 6 are not allowed now!");
   }
 
   int nrhs = 1;
@@ -407,7 +407,7 @@ XFEMCutElem2D::getIntersectionInfo(unsigned int plane_id, Point & normal, std::v
     }
   }
   if (cut_line_nodes.size() == 0)
-    mooseError("No cut line found in this element");
+    mooseError2("No cut line found in this element");
 
   if (plane_id < cut_line_nodes.size()) // valid plane_id
   {

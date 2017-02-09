@@ -31,7 +31,7 @@ RichardsDensityConstBulkCut::RichardsDensityConstBulkCut(const InputParameters &
     _c3(std::pow(_cut_limit-_zero_point, 3))
 {
   if (_zero_point >= _cut_limit)
-    mooseError("RichardsDensityConstantbulkCut: zero_point must be less than cut_limit");
+    mooseError2("RichardsDensityConstantbulkCut: zero_point must be less than cut_limit");
 }
 
 

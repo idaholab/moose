@@ -46,7 +46,7 @@ NumDOFs::NumDOFs(const InputParameters & parameters) :
       _es_pointer = &_subproblem.es();
       break;
     default:
-      mooseError("Unhandled enum");
+      mooseError2("Unhandled enum");
   }
 }
 

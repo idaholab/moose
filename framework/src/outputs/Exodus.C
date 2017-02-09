@@ -72,11 +72,11 @@ Exodus::initialSetup()
   // The libMesh::ExodusII_IO will fail when it is closed if the object is created but
   // nothing is written to the file. This checks that at least something will be written.
   if (!hasOutput())
-    mooseError("The current settings result in nothing being output to the Exodus file.");
+    mooseError2("The current settings result in nothing being output to the Exodus file.");
 
   // Test that some sort of variable output exists (case when all variables are disabled but input output is still enabled
   if (!hasNodalVariableOutput() && !hasElementalVariableOutput() && !hasPostprocessorOutput() && !hasScalarOutput())
-    mooseError("The current settings results in only the input file and no variables being output to the Exodus file, this is not supported.");
+    mooseError2("The current settings results in only the input file and no variables being output to the Exodus file, this is not supported.");
 }
 
 void

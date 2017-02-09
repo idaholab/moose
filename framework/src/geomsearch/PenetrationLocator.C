@@ -57,7 +57,7 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem, GeometricSearchD
           (_subproblem.hasVariable("nodal_normal_y")) &&
           (_subproblem.hasVariable("nodal_normal_z"))))
     {
-      mooseError("To use nodal-normal-based smoothing, the nodal_normal_x, nodal_normal_y, and nodal_normal_z variables must exist.  Are you missing the [NodalNormals] block?");
+      mooseError2("To use nodal-normal-based smoothing, the nodal_normal_x, nodal_normal_y, and nodal_normal_z variables must exist.  Are you missing the [NodalNormals] block?");
     }
   }
 }
@@ -178,6 +178,6 @@ PenetrationLocator::setNormalSmoothingMethod(std::string nsmString)
   else if (nsmString == "nodal_normal_based")
     _normal_smoothing_method = NSM_NODAL_NORMAL_BASED;
   else
-    mooseError("Invalid normal_smoothing_method: "<<nsmString);
+    mooseError2("Invalid normal_smoothing_method: ", nsmString);
   _do_normal_smoothing = true;
 }

@@ -33,6 +33,6 @@ DoubleWellPotential::computeDFDOP(PFFunctionType type)
       return _phi[_j][_qp]*(3.0*_u[_qp]*_u[_qp] - 1.0);
   }
 
-  mooseError("Invalid type passed in");
+  mooseError2("Invalid type passed in");
 }
 

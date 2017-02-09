@@ -47,7 +47,7 @@ void
 SplineInterpolation::errorCheck()
 {
   if (_x.size() != _y.size())
-    mooseError("SplineInterpolation: vectors are not the same length");
+    mooseError2("SplineInterpolation: vectors are not the same length");
 
   bool error = false;
   for (unsigned i = 0; !error && i + 1 < _x.size(); ++i)
@@ -55,7 +55,7 @@ SplineInterpolation::errorCheck()
       error = true;
 
   if (error)
-    mooseError( "x-values are not strictly increasing" );
+    mooseError2( "x-values are not strictly increasing" );
 }
 
 void

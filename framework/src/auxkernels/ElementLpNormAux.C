@@ -40,7 +40,7 @@ ElementLpNormAux::compute()
   precalculateValue();
 
   if (isNodal())
-    mooseError("ElementLpNormAux only makes sense as an Elemental AuxVariable.");
+    mooseError2("ElementLpNormAux only makes sense as an Elemental AuxVariable.");
 
   // Sum up the squared-error values by calling computeValue(), then
   // return the sqrt of the result.

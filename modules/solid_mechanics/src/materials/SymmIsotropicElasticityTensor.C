@@ -71,7 +71,7 @@ Real
 SymmIsotropicElasticityTensor::youngsModulus() const
 {
   if (!_E_set)
-    mooseError("Youngs modulus not set");
+    mooseError2("Youngs modulus not set");
 
   return _E;
 }
@@ -81,7 +81,7 @@ SymmIsotropicElasticityTensor::mu() const
 {
   if (!_mu_set)
   {
-    mooseError("mu not set");
+    mooseError2("mu not set");
   }
   return _mu;
 }
@@ -210,7 +210,7 @@ SymmIsotropicElasticityTensor::stiffness(const unsigned int i,
   }
   else
   {
-    mooseError( "Wrong index in stiffness calculation" );
+    mooseError2( "Wrong index in stiffness calculation" );
   }
   return test * b;
 }

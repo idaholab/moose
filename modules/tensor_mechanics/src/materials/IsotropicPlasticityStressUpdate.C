@@ -43,16 +43,16 @@ IsotropicPlasticityStressUpdate::IsotropicPlasticityStressUpdate(const InputPara
     _temperature(coupledValue("temperature"))
 {
   if (parameters.isParamSetByUser("yield_stress") && _yield_stress <= 0.0)
-    mooseError("Yield stress must be greater than zero");
+    mooseError2("Yield stress must be greater than zero");
 
   if (_yield_stress_function == NULL && !parameters.isParamSetByUser("yield_stress"))
-    mooseError("Either yield_stress or yield_stress_function must be given");
+    mooseError2("Either yield_stress or yield_stress_function must be given");
 
   if (!parameters.isParamSetByUser("hardening_constant") && !isParamValid("hardening_function"))
-    mooseError("Either hardening_constant or hardening_function must be defined");
+    mooseError2("Either hardening_constant or hardening_function must be defined");
 
   if (parameters.isParamSetByUser("hardening_constant") && isParamValid("hardening_function"))
-    mooseError("Only the hardening_constant or only the hardening_function can be defined but not both");
+    mooseError2("Only the hardening_constant or only the hardening_function can be defined but not both");
 }
 
 void
@@ -162,6 +162,6 @@ IsotropicPlasticityStressUpdate::computeYieldStress()
     Point p;
     _yield_stress = _yield_stress_function->value(_temperature[_qp], p);
     if (_yield_stress <= 0.0)
-      mooseError("The yield stress must be greater than zero, but during the simulation your yield stress became less than zero.");
+      mooseError2("The yield stress must be greater than zero, but during the simulation your yield stress became less than zero.");
   }
 }

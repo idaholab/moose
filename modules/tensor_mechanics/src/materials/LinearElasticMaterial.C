@@ -32,7 +32,7 @@ LinearElasticMaterial::LinearElasticMaterial(const InputParameters & parameters)
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
     _applied_strain_vector(getParam<std::vector<Real> >("applied_strain_vector"))
 {
-  mooseDeprecated("LinearElasticMaterial is deprecated. Refer to http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Deprecations/LinearElasticMaterial to convert this input file.");
+  mooseDeprecated2("LinearElasticMaterial is deprecated. Refer to http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Deprecations/LinearElasticMaterial to convert this input file.");
 
   //Initialize applied strain tensor from input vector
   if (_applied_strain_vector.size() == 6)

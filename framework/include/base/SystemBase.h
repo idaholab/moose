@@ -170,8 +170,8 @@ public:
    */
   virtual NumericVector<Number> & serializedSolution() = 0;
 
-  virtual NumericVector<Number> & residualCopy() { mooseError("This system does not support getting a copy of the residual"); }
-  virtual NumericVector<Number> & residualGhosted() { mooseError("This system does not support getting a ghosted copy of the residual"); }
+  virtual NumericVector<Number> & residualCopy() { mooseError2("This system does not support getting a copy of the residual"); }
+  virtual NumericVector<Number> & residualGhosted() { mooseError2("This system does not support getting a ghosted copy of the residual"); }
 
   /**
    * Will modify the send_list to add all of the extra ghosted dofs for this system

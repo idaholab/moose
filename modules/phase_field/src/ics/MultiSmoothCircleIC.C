@@ -47,7 +47,7 @@ MultiSmoothCircleIC::initialSetup()
 
   // a variation is provided, but the type is set to 'none'
   if (_radius_variation > 0.0 && _radius_variation_type == 2)
-    mooseError("If radius_variation > 0.0, you must pass in a radius_variation_type in MultiSmoothCircleIC");
+    mooseError2("If radius_variation > 0.0, you must pass in a radius_variation_type in MultiSmoothCircleIC");
 
   SmoothCircleBaseIC::initialSetup();
 }
@@ -107,7 +107,7 @@ MultiSmoothCircleIC::computeCircleCenters()
     }
 
     if (num_tries == _max_num_tries)
-      mooseError("Too many tries in MultiSmoothCircleIC");
+      mooseError2("Too many tries in MultiSmoothCircleIC");
 
     accept: continue;
   }

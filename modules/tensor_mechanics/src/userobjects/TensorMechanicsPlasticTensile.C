@@ -37,7 +37,7 @@ TensorMechanicsPlasticTensile::TensorMechanicsPlasticTensile(const InputParamete
 
 {
   if (_lode_cutoff < 0)
-    mooseError("tensile_lode_cutoff must not be negative");
+    mooseError2("tensile_lode_cutoff must not be negative");
   _ccc = (-std::cos(3.0 * _tt) * (std::cos(_tt) - std::sin(_tt) / std::sqrt(3.0)) - 3.0 * _sin3tt * (std::sin(_tt) + std::cos(_tt) / std::sqrt(3.0))) / (18.0 * Utility::pow<3>(std::cos(3.0 * _tt)));
   _bbb = (std::sin(6.0 * _tt) * (std::cos(_tt) - std::sin(_tt) / std::sqrt(3.0)) - 6.0 * std::cos(6.0 * _tt) * (std::sin(_tt) + std::cos(_tt) / std::sqrt(3.0))) / (18.0 * Utility::pow<3>(std::cos(3.0 * _tt)));
   _aaa = -std::sin(_tt) / std::sqrt(3.0) - _bbb * _sin3tt - _ccc * Utility::pow<2>(_sin3tt) + std::cos(_tt);

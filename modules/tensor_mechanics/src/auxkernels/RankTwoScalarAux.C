@@ -45,7 +45,7 @@ RankTwoScalarAux::computeValue()
     if (_selected_qp >= _q_point.size())
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      mooseError("RankTwoScalarAux.  selected_qp specified as " << _selected_qp << " but there are only " << _q_point.size() << " quadpoints in the element");
+      mooseError2("RankTwoScalarAux.  selected_qp specified as ", _selected_qp, " but there are only ", _q_point.size(), " quadpoints in the element");
     }
     qp = _selected_qp;
   }

@@ -36,7 +36,7 @@ EqualGradientLagrangeInterface::computeQpResidual(Moose::DGResidualType type)
       return -_lambda[_qp] * _grad_test_neighbor[_i][_qp](_component);
   }
 
-  mooseError("Internal error.");
+  mooseError2("Internal error.");
 }
 
 Real

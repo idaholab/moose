@@ -119,7 +119,7 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
   {
     // Some error checking
     if (!_syntax.hasTask(task))
-      mooseError("A(n) " << task << " is not a registered task");
+      mooseError2("A(n) ", task, " is not a registered task");
 
     // Make sure that the ObjectAction task and Action task are consistent
     // otherwise that means that is action was built by the wrong type
@@ -133,10 +133,10 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
         const std::string & base = mparams.get<std::string>("_moose_base");
 
         if (!_syntax.verifyMooseObjectTask(base, task))
-          mooseError("Task " << task << " is not registered to build " << base << " derived objects");
+          mooseError2("Task ", task, " is not registered to build ", base, " derived objects");
       }
       else
-        mooseError("Unable to locate registered base parameter for " << moa->getMooseObjectType());
+        mooseError2("Unable to locate registered base parameter for ", moa->getMooseObjectType());
     }
 
     // Add the current task to current action
@@ -171,7 +171,7 @@ ActionWarehouse::getActionListByName(const std::string & task) const
 {
   const auto it = _action_blocks.find(task);
   if (it == _action_blocks.end())
-    mooseError("The task " << task << " does not exist.");
+    mooseError2("The task ", task, " does not exist.");
 
   return it->second;
 }
@@ -228,7 +228,7 @@ ActionWarehouse::checkUnsatisfiedActions() const
   }
 
   if (!empty)
-    mooseError(std::string("The following unsatisfied actions where found while setting up the MOOSE problem:\n")
+    mooseError2(std::string("The following unsatisfied actions where found while setting up the MOOSE problem:\n")
                + oss.str() + "\n");
 }
 
@@ -373,6 +373,6 @@ ActionWarehouse::printInputFile(std::ostream & out)
 std::shared_ptr<FEProblem>
 ActionWarehouse::problem()
 {
-  mooseDeprecated("ActionWarehouse::problem() is deprecated, please use ActionWarehouse::problemBase() \n");
+  mooseDeprecated2("ActionWarehouse::problem() is deprecated, please use ActionWarehouse::problemBase() \n");
   return std::dynamic_pointer_cast<FEProblem>(_problem);
 }

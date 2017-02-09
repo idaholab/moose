@@ -21,12 +21,12 @@ XFEMMarkerAux::XFEMMarkerAux(const InputParameters & parameters) :
 {
   FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
   if (fe_problem == NULL)
-    mooseError("Problem casting _subproblem to FEProblemBase in XFEMMarkerAux");
+    mooseError2("Problem casting _subproblem to FEProblemBase in XFEMMarkerAux");
   _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
   if (_xfem == NULL)
-    mooseError("Problem casting to XFEM in XFEMMarkerAux");
+    mooseError2("Problem casting to XFEM in XFEMMarkerAux");
   if (isNodal())
-    mooseError("XFEMMarkerAux can only be run on an element variable");
+    mooseError2("XFEMMarkerAux can only be run on an element variable");
 }
 
 Real

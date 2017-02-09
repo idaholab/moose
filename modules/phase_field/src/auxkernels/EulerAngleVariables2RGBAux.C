@@ -53,5 +53,5 @@ EulerAngleVariables2RGBAux::computeValue()
       return RGBint;
   }
   else
-    mooseError("Incorrect value for output_type in EulerAngleVariables2RGBAux");
+    mooseError2("Incorrect value for output_type in EulerAngleVariables2RGBAux");
 }

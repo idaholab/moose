@@ -61,9 +61,9 @@ ContactAction::ContactAction(const InputParameters & params) :
   if (_formulation == "tangential_penalty")
   {
     if (_system != "Constraint")
-      mooseError ("The 'tangential_penalty' formulation can only be used with the 'Constraint' system");
+      mooseError2 ("The 'tangential_penalty' formulation can only be used with the 'Constraint' system");
     if (_model != "coulomb")
-      mooseError ("The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
+      mooseError2 ("The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
   }
 }
 
@@ -71,7 +71,7 @@ void
 ContactAction::act()
 {
   if (!_problem->getDisplacedProblem())
-    mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the Mesh block.");
+    mooseError2("Contact requires updated coordinates.  Use the 'displacements = ...' line in the Mesh block.");
 
   // Determine number of dimensions
   unsigned int numdims(1);
@@ -96,7 +96,7 @@ ContactAction::act()
       if (isParamValid("parser_syntax"))
         _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
       else
-        mooseError("The 'parser_syntax' parameter is not valid, which indicates that this actions was not created by the Parser, which is not currently supported.");
+        mooseError2("The 'parser_syntax' parameter is not valid, which indicates that this actions was not created by the Parser, which is not currently supported.");
 
       // Create Constraint objects
       params.set<std::string>("model") = _model;
@@ -156,7 +156,7 @@ ContactAction::act()
         if (isParamValid("parser_syntax"))
           _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
         else
-          mooseError("The 'parser_syntax' parameter is not valid, which indicates that this actions was not created by the Parser, which is not currently supported.");
+          mooseError2("The 'parser_syntax' parameter is not valid, which indicates that this actions was not created by the Parser, which is not currently supported.");
 
 
         // Create master objects
@@ -214,7 +214,7 @@ ContactAction::act()
         if (isParamValid("parser_syntax"))
           _app.parser().extractParams(getParam<std::string>("parser_syntax"), params);
         else
-          mooseError("The 'parser_syntax' parameter is not valid, which indicates that this actions was not created by the Parser, which is not currently supported.");
+          mooseError2("The 'parser_syntax' parameter is not valid, which indicates that this actions was not created by the Parser, which is not currently supported.");
 
         // Create slave objects
         params.set<std::string>("model") = _model;

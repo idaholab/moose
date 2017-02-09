@@ -388,7 +388,7 @@ void restrictPointToFace(Point& p,
 
     default:
     {
-      mooseError("Unsupported face type: "<<t);
+      mooseError2("Unsupported face type: ", t);
       break;
     }
   }

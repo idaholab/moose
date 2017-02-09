@@ -25,14 +25,14 @@ StressDivergenceRSphericalTensors::StressDivergenceRSphericalTensors(const Input
     StressDivergenceTensors(parameters)
 {
   if (_component != 0)
-    mooseError("Invalid component for this 1D RSpherical problem.");
+    mooseError2("Invalid component for this 1D RSpherical problem.");
 }
 
 void
 StressDivergenceRSphericalTensors::initialSetup()
 {
   if (getBlockCoordSystem() != Moose::COORD_RSPHERICAL)
-    mooseError("The coordinate system in the Problem block must be set to RSPHERICAL for 1D spherically symmetric geometries.");
+    mooseError2("The coordinate system in the Problem block must be set to RSPHERICAL for 1D spherically symmetric geometries.");
 }
 
 Real

@@ -33,7 +33,7 @@ StatefulTest::StatefulTest(const InputParameters & parameters) :
   unsigned int num_values = _prop_values.size();
 
   if (num_names != num_values)
-    mooseError("Number of prop_names must match the number of prop_values for StatefulTest material!");
+    mooseError2("Number of prop_names must match the number of prop_values for StatefulTest material!");
 
   _num_props = num_names;
 

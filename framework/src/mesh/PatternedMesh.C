@@ -70,7 +70,7 @@ PatternedMesh::PatternedMesh(const InputParameters & parameters) :
 
   _original_mesh = dynamic_cast<ReplicatedMesh *>(&getMesh());
   if (!_original_mesh)
-    mooseError("PatternedMesh does not support DistributedMesh");
+    mooseError2("PatternedMesh does not support DistributedMesh");
 
   // Create a mesh for all n-1 rows, the first row is the original mesh
   _row_meshes.reserve(_pattern.size() - 1);

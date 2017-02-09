@@ -151,7 +151,7 @@ AStableDirk4::postStep(NumericVector<Number> & residual)
   {
     // Error if _stage got messed up somehow.
     if (_stage > 4)
-      mooseError("AStableDirk4::postStep(): Member variable _stage can only have values 1-4.");
+      mooseError2("AStableDirk4::postStep(): Member variable _stage can only have values 1-4.");
 
     if (_stage < 4)
     {

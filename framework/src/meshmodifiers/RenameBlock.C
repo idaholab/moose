@@ -32,18 +32,18 @@ RenameBlock::RenameBlock(const InputParameters & parameters) :
 {
   // error checking.  Must have exactly one of old_block_id or old_block_name
   if (isParamValid("old_block_id") && isParamValid("old_block_name"))
-    mooseError("RenameBlock: You must supply exactly one of old_block_id or old_block_name\n");
+    mooseError2("RenameBlock: You must supply exactly one of old_block_id or old_block_name\n");
   else if (!isParamValid("old_block_id") && !isParamValid("old_block_name"))
-    mooseError("RenameBlock: You must supply exactly one of old_block_id or old_block_name\n");
+    mooseError2("RenameBlock: You must supply exactly one of old_block_id or old_block_name\n");
 
   // error checking.  Must have exactly one of new_block_id or new_block_name
   // In principal we could have both (the old block would then be given a new ID and a new name)
   // but i feel that could lead to confusion for the user.  If the user wants to do that they
   // should use two of these RenameBlock MeshModifiers.
   if (isParamValid("new_block_id") && isParamValid("new_block_name"))
-    mooseError("RenameBlock: You must supply exactly one of new_block_id or new_block_name\n");
+    mooseError2("RenameBlock: You must supply exactly one of new_block_id or new_block_name\n");
   else if (!isParamValid("new_block_id") && !isParamValid("new_block_name"))
-    mooseError("RenameBlock: You must supply exactly one of new_block_id or new_block_name\n");
+    mooseError2("RenameBlock: You must supply exactly one of new_block_id or new_block_name\n");
 }
 
 void
@@ -51,7 +51,7 @@ RenameBlock::modify()
 {
   // Check that we have access to the mesh
   if (!_mesh_ptr)
-    mooseError("_mesh_ptr must be initialized before calling RenameBlock::modify()");
+    mooseError2("_mesh_ptr must be initialized before calling RenameBlock::modify()");
 
   // grab the user input.  Can't do all this in the constructor as some things may not
   // have been put into the mesh yet, eg old_block_name might have been inserted by
@@ -66,7 +66,7 @@ RenameBlock::modify()
   {
     _new_block_id = getParam<std::vector<SubdomainID> >("new_block_id");
     if (_new_block_id.size() != _old_block_id.size())
-      mooseError("RenameBlock: The vector of old_block information must have the same length as the vector of new_block information\n");
+      mooseError2("RenameBlock: The vector of old_block information must have the same length as the vector of new_block information\n");
     for (MeshBase::element_iterator el = _mesh_ptr->getMesh().active_elements_begin(); el != _mesh_ptr->getMesh().active_elements_end(); ++el)
       for (unsigned i = 0 ; i < _old_block_id.size() ; ++i)
         if ((*el)->subdomain_id() == _old_block_id[i])
@@ -76,7 +76,7 @@ RenameBlock::modify()
   {
     _new_block_name = getParam<std::vector<SubdomainName> >("new_block_name");
     if (_new_block_name.size() != _old_block_id.size())
-      mooseError("RenameBlock: The vector of old_block information must have the same length as the vector of new_block information\n");
+      mooseError2("RenameBlock: The vector of old_block information must have the same length as the vector of new_block information\n");
     for (unsigned i = 0 ; i < _old_block_id.size() ; ++i)
       // libmesh appears to check that _old_block_id[i] isn't too big or too small
       _mesh_ptr->getMesh().subdomain_name(_old_block_id[i]) = _new_block_name[i];

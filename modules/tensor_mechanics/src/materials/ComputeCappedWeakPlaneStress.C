@@ -40,13 +40,13 @@ ComputeCappedWeakPlaneStress::ComputeCappedWeakPlaneStress(const InputParameters
   // With arbitary UserObjects, it is impossible to check everything,
   // but this will catch the common errors
   if (_tan_phi.value(0) < 0 || _tan_psi.value(0) < 0)
-    mooseError("ComputeCappedWeakPlaneStress: Weak-plane friction and dilation angles must lie in [0, Pi/2]");
+    mooseError2("ComputeCappedWeakPlaneStress: Weak-plane friction and dilation angles must lie in [0, Pi/2]");
   if (_tan_phi.value(0) < _tan_psi.value(0))
-    mooseError("ComputeCappedWeakPlaneStress: Weak-plane friction angle must not be less than dilation angle");
+    mooseError2("ComputeCappedWeakPlaneStress: Weak-plane friction angle must not be less than dilation angle");
   if (_cohesion.value(0) < 0)
-    mooseError("ComputeCappedWeakPlaneStress: Weak-plane cohesion must not be negative");
+    mooseError2("ComputeCappedWeakPlaneStress: Weak-plane cohesion must not be negative");
   if (_tstrength.value(0) + _cstrength.value(0) <= _smoothing_tol)
-    mooseError("ComputeCappedWeakPlaneStress: Weak plane tensile strength plus compressive strength must be greater than smoothing_tol");
+    mooseError2("ComputeCappedWeakPlaneStress: Weak plane tensile strength plus compressive strength must be greater than smoothing_tol");
 }
 
 

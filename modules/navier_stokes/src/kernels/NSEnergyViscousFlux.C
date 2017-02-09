@@ -99,10 +99,10 @@ NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
     }
 
     default:
-      mooseError("Invalid variable!");
+      mooseError2("Invalid variable!");
       break;
   } // end switch (m)
 
-  mooseError("Shouldn't get here...");
+  mooseError2("Shouldn't get here...");
   return 0.0;
 }

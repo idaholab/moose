@@ -52,7 +52,7 @@ LayeredBase::LayeredBase(const InputParameters & parameters) :
     _cumulative(parameters.get<bool>("cumulative"))
 {
   if (_layered_base_params.isParamValid("num_layers") && _layered_base_params.isParamValid("bounds"))
-    mooseError("'bounds' and 'num_layers' cannot both be set in " << _layered_base_name);
+    mooseError2("'bounds' and 'num_layers' cannot both be set in ", _layered_base_name);
 
   if (_layered_base_params.isParamValid("num_layers"))
   {
@@ -71,10 +71,10 @@ LayeredBase::LayeredBase(const InputParameters & parameters) :
     _num_layers = _layer_bounds.size() - 1;  // Layers are only in-between the bounds
   }
   else
-    mooseError("One of 'bounds' or 'num_layers' must be specified for " << _layered_base_name);
+    mooseError2("One of 'bounds' or 'num_layers' must be specified for ", _layered_base_name);
 
   if (!_interval_based && _sample_type == 1)
-    mooseError("'sample_type = interpolate' not supported with 'bounds' in " << _layered_base_name);
+    mooseError2("'sample_type = interpolate' not supported with 'bounds' in ", _layered_base_name);
 
   MeshTools::BoundingBox bounding_box = MeshTools::bounding_box(_layered_base_subproblem.mesh());
   _layer_values.resize(_num_layers);
@@ -190,7 +190,7 @@ LayeredBase::integralValue(Point p) const
       return total / num_values;
     }
     default:
-      mooseError("Unknown sample type!");
+      mooseError2("Unknown sample type!");
   }
 }
 
@@ -199,7 +199,7 @@ Real
 LayeredBase::getLayerValue(unsigned int layer) const
 {
   if (layer >= _layer_values.size())
-    mooseError("Layer '" << layer << "' not found in '" << _layered_base_name << "'.");
+    mooseError2("Layer '", layer, "' not found in '", _layered_base_name, "'.");
   return _layer_values[layer];
 }
 

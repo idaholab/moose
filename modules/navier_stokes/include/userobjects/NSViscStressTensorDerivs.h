@@ -54,11 +54,11 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
 
   // 0 <= k,ell <= 2
   if (k > 2 || ell > 2)
-    mooseError("Error, 0 <= k,ell <= 2 violated!");
+    mooseError2("Error, 0 <= k,ell <= 2 violated!");
 
   // 0 <= m <= 4
   if (m >= 5)
-    mooseError("Error, m <= 4 violated!");
+    mooseError2("Error, m <= 4 violated!");
 
   //
   // Convenience variables
@@ -137,7 +137,7 @@ Real NSViscStressTensorDerivs<T>::dtau(unsigned k, unsigned ell, unsigned m)
       return 0.;
 
     default:
-      mooseError("Invalid variable requested.");
+      mooseError2("Invalid variable requested.");
       break;
   }
 

@@ -35,7 +35,7 @@ GenericConstantMaterial::GenericConstantMaterial(const InputParameters & paramet
   unsigned int num_values = _prop_values.size();
 
   if (num_names != num_values)
-    mooseError("Number of prop_names must match the number of prop_values for a GenericConstantMaterial!");
+    mooseError2("Number of prop_names must match the number of prop_values for a GenericConstantMaterial!");
 
   _num_props = num_names;
 

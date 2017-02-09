@@ -32,47 +32,47 @@ RadialDisplacementCylinderAux::RadialDisplacementCylinderAux(const InputParamete
     if (sbd == sbd_begin)
       _coord_system = _subproblem.getCoordSystem(sbd);
     else if (_subproblem.getCoordSystem(sbd) != _coord_system)
-      mooseError("RadialDisplacementCylinderAux requires that all subdomains have the same coordinate type");
+      mooseError2("RadialDisplacementCylinderAux requires that all subdomains have the same coordinate type");
   }
 
   for (unsigned int i = 0; i < _ndisp; ++i)
     _disp_vals[i] = &coupledValue("displacements", i);
 
   if (_ndisp != _mesh.dimension())
-    mooseError("The number of displacement variables supplied must match the mesh dimension.");
+    mooseError2("The number of displacement variables supplied must match the mesh dimension.");
 
   if (_coord_system == Moose::COORD_XYZ && _ndisp == 1)
-    mooseError("RadialDisplacmentCylinderAux is not applicable for 1D Cartesian models");
+    mooseError2("RadialDisplacmentCylinderAux is not applicable for 1D Cartesian models");
 
   else if (!(_coord_system == Moose::COORD_XYZ || _coord_system == Moose::COORD_RZ))
-    mooseError("RadialDisplacementCylinderAux can only be used with Cartesian or axisymmetric coordinate systems");
+    mooseError2("RadialDisplacementCylinderAux can only be used with Cartesian or axisymmetric coordinate systems");
 
   if (isParamValid("origin"))
   {
     if (_coord_system != Moose::COORD_XYZ)
-      mooseError("The 'origin' parameter is only valid for Cartesian models.");
+      mooseError2("The 'origin' parameter is only valid for Cartesian models.");
 
     _origin = getParam<RealVectorValue>("origin");
   }
   else if (_coord_system == Moose::COORD_XYZ)
-    mooseError("Must specify 'origin' for models with Cartesian coordinate systems.");
+    mooseError2("Must specify 'origin' for models with Cartesian coordinate systems.");
 
   if (isParamValid("axis_vector"))
   {
     if (!(_coord_system == Moose::COORD_XYZ && _ndisp == 3))
-      mooseError("The 'axis_vector' parameter is only valid for 3D Cartesian models.");
+      mooseError2("The 'axis_vector' parameter is only valid for 3D Cartesian models.");
 
     _axis_vector = getParam<RealVectorValue>("axis_vector");
     Real vec_len = _axis_vector.norm();
     if (MooseUtils::absoluteFuzzyEqual(vec_len, 0.0))
-      mooseError("axis_vector must have nonzero length");
+      mooseError2("axis_vector must have nonzero length");
     _axis_vector /= vec_len;
   }
   else if (_coord_system == Moose::COORD_XYZ && _ndisp == 3)
-    mooseError("Must specify 'axis_vector' for 3D Cartesian models");
+    mooseError2("Must specify 'axis_vector' for 3D Cartesian models");
 
   if (!isNodal())
-    mooseError("Must run on a nodal variable");
+    mooseError2("Must run on a nodal variable");
 }
 
 Real
@@ -115,7 +115,7 @@ RadialDisplacementCylinderAux::computeValue()
       rad_disp = (*_disp_vals[0])[_qp];
       break;
     default:
-      mooseError("Unsupported coordinate system");
+      mooseError2("Unsupported coordinate system");
   }
 
   return rad_disp;

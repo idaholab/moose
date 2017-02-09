@@ -35,7 +35,7 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters) :
 {
   if (!parameters.isParamValid("boundary"))
   {
-    mooseError("In order to use an interface kernel, you must specify a boundary where it will live.");
+    mooseError2("In order to use an interface kernel, you must specify a boundary where it will live.");
   }
 }
 

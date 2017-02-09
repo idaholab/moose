@@ -77,7 +77,7 @@ public:
     // Locate the map entry, error if it is not found
     typename std::map<std::string, T>::iterator iter = _map.find(name);
     if (iter == _map.end())
-      mooseError("Unknown map key " << name);
+      mooseError2("Unknown map key ", name);
     return iter->second;
   }
 

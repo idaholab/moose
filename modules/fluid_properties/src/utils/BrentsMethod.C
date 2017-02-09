@@ -23,7 +23,7 @@ bracket(std::function<Real (Real)> const & f, Real & x1, Real & x2)
 
   // If the initial guesses are identical
   if (x1 == x2)
-    mooseError("Bad initial range (0) used in BrentsMethod::bracket");
+    mooseError2("Bad initial range (0) used in BrentsMethod::bracket");
 
   f1 = f(x1);
   f2 = f(x2);
@@ -48,7 +48,7 @@ bracket(std::function<Real (Real)> const & f, Real & x1, Real & x2)
       /// Increment counter
       iter++;
       if (iter >= n)
-        mooseError("No bracketing interval found by BrentsMethod::bracket after " << n << " iterations");
+        mooseError2("No bracketing interval found by BrentsMethod::bracket after ", n, " iterations");
     }
   }
 }
@@ -64,7 +64,7 @@ root(std::function<Real (Real)> const & f, Real x1, Real x2, Real tol)
   Real eps = 1.0e-12;
 
   if (fa * fb > 0.0)
-    mooseError("Root must be bracketed in BrentsMethod::root");
+    mooseError2("Root must be bracketed in BrentsMethod::root");
 
   fc = fb;
   for (unsigned int i = 1; i <= iter_max; ++i)
@@ -150,7 +150,7 @@ root(std::function<Real (Real)> const & f, Real x1, Real x2, Real tol)
     fb = f(b);
   }
 
-  mooseError("Maximum number of iterations exceeded in BrentsMethod::root");
+  mooseError2("Maximum number of iterations exceeded in BrentsMethod::root");
   return 0.0; // Should never get here
 }
 } // namespace BrentsMethod

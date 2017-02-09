@@ -41,7 +41,7 @@ NodalVariableValue::NodalVariableValue(const InputParameters & parameters) :
   _mesh.errorIfDistributedMesh("NodalVariableValue");
 
   if (_node_ptr == NULL)
-    mooseError("Node #" << getParam<unsigned int>("nodeid") << " specified in '" << name() << "' not found in the mesh!");
+    mooseError2("Node #", getParam<unsigned int>("nodeid"), " specified in '", name(), "' not found in the mesh!");
 }
 
 Real

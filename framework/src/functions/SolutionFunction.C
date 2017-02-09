@@ -66,7 +66,7 @@ SolutionFunction::initialSetup()
 
     // If there are more than one, throw an error
     if (vars.size() > 1)
-      mooseError("The SolutionUserObject contains multiple variables, the SolutionFunction must specifiy the desired variable in the input file with 'from_variable'");
+      mooseError2("The SolutionUserObject contains multiple variables, the SolutionFunction must specifiy the desired variable in the input file with 'from_variable'");
 
     // Define the variable
     var_name = vars[0];

@@ -29,12 +29,12 @@ XFEMMarkerUserObject::XFEMMarkerUserObject(const InputParameters & parameters) :
 {
   FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
   if (fe_problem == NULL)
-    mooseError("Problem casting _subproblem to FEProblemBase in XFEMMarkerUserObject");
+    mooseError2("Problem casting _subproblem to FEProblemBase in XFEMMarkerUserObject");
   _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
   if (_xfem == NULL)
-    mooseError("Problem casting to XFEM in XFEMMarkerUserObject");
+    mooseError2("Problem casting to XFEM in XFEMMarkerUserObject");
   if (isNodal())
-    mooseError("XFEMMarkerUserObject can only be run on an element variable");
+    mooseError2("XFEMMarkerUserObject can only be run on an element variable");
 
   if (isParamValid("initiate_on_boundary"))
   {
@@ -76,7 +76,7 @@ XFEMMarkerUserObject::execute()
   {
     if (mit != _marked_elems.end())
     {
-      mooseError("ERROR: element "<<_current_eid<<" already marked for crack growth.");
+      mooseError2("ERROR: element ", _current_eid, " already marked for crack growth.");
     }
     _marked_elems[_current_eid] = direction;
   }
@@ -84,7 +84,7 @@ XFEMMarkerUserObject::execute()
   {
     if (mit != _marked_elems.end())
     {
-      mooseError("ERROR: element "<<_current_eid<<" already marked for crack growth.");
+      mooseError2("ERROR: element ", _current_eid, " already marked for crack growth.");
     }
     _marked_elems[_current_eid] = direction;
     _marked_elem_sides[_current_eid] = boundarySide;
@@ -93,7 +93,7 @@ XFEMMarkerUserObject::execute()
   {
     if (mit != _marked_elems.end())
     {
-      mooseError("ERROR: element "<<_current_eid<<" already marked for crack growth.");
+      mooseError2("ERROR: element ", _current_eid, " already marked for crack growth.");
     }
     _marked_elems[_current_eid] = direction;
     _marked_frags.insert(_current_eid);

@@ -136,5 +136,5 @@ LStableDirk2::postStep(NumericVector<Number> & residual)
     residual.close();
   }
   else
-    mooseError("LStableDirk2::postStep(): Member variable _stage can only have values 1 or 2.");
+    mooseError2("LStableDirk2::postStep(): Member variable _stage can only have values 1 or 2.");
 }

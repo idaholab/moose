@@ -77,7 +77,7 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const InputParameters & par
 
   // Check that the mesh pointer was defined, it is required for this class to operate
   if (_bnd_mesh == NULL)
-    mooseError("The input parameters must contain a pointer to FEProblemBase via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
+    mooseError2("The input parameters must contain a pointer to FEProblemBase via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
 
   // If the user supplies boundary IDs
   if (parameters.isParamValid("boundary"))
@@ -98,7 +98,7 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const InputParameters & par
   // Produce error if the object is not allowed to be both block and boundary restricted
   if (!_bnd_dual_restrictable && !_bnd_ids.empty() && !_block_ids.empty())
     if (!_block_ids.empty() && _block_ids.find(Moose::ANY_BLOCK_ID) == _block_ids.end())
-      mooseError("Attempted to restrict the object '" << name << "' to a boundary, but the object is already restricted by block(s)");
+      mooseError2("Attempted to restrict the object '", name, "' to a boundary, but the object is already restricted by block(s)");
 
   // Store ANY_BOUNDARY_ID if empty
   if (_bnd_ids.empty())
@@ -127,7 +127,7 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const InputParameters & par
       msg << "The object '" << name << "' contains the following boundary ids that do no exist on the mesh:";
       for (const auto & id : diff)
         msg << " " << id;
-      mooseError(msg.str());
+      mooseError2(msg.str());
     }
   }
 }

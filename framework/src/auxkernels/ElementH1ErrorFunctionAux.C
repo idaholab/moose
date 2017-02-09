@@ -38,7 +38,7 @@ ElementH1ErrorFunctionAux::compute()
   precalculateValue();
 
   if (isNodal())
-    mooseError("ElementH1ErrorFunctionAux only makes sense as an Elemental AuxVariable.");
+    mooseError2("ElementH1ErrorFunctionAux only makes sense as an Elemental AuxVariable.");
 
   Real summed_value = 0;
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)

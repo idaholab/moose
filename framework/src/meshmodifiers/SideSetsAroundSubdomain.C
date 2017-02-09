@@ -70,7 +70,7 @@ SideSetsAroundSubdomain::modify()
 
   // Extract the SubdomainID
   if (numBlocks() > 1)
-     mooseWarning("SideSetsAroundSubdomain only acts on a single subdomain, but multiple were provided: only the " << block_id << "' subdomain is being used.");
+     mooseWarning2("SideSetsAroundSubdomain only acts on a single subdomain, but multiple were provided: only the ", block_id, "' subdomain is being used.");
 
   // Create the boundary IDs from the list of names provided (the true flag creates ids from unknown names)
   std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs(_boundary_names, true);

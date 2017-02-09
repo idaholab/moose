@@ -47,7 +47,7 @@ PolynomialFreeEnergy::PolynomialFreeEnergy(const InputParameters & parameters) :
                                 ( 3.0/4.0*_a*_a - 3.0/4.0*_a )*_c);
       break;
     default:
-      mooseError("Error in PolynomialFreeEnergy: incorrect polynomial order");
+      mooseError2("Error in PolynomialFreeEnergy: incorrect polynomial order");
   }
 
   //Parse function

@@ -229,7 +229,7 @@ T &
 Restartable::declareRestartableDataWithContext(std::string data_name, void * context)
 {
   if (!_restartable_subproblem)
-    mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
+    mooseError2("No valid SubProblem found for ", _restartable_system_name, "/", _restartable_name);
 
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
   RestartableData<T> * data_ptr = new RestartableData<T>(full_name, context);
@@ -244,7 +244,7 @@ T &
 Restartable::declareRestartableDataWithContext(std::string data_name, const T & init_value, void * context)
 {
   if (!_restartable_subproblem)
-    mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
+    mooseError2("No valid SubProblem found for ", _restartable_system_name, "/", _restartable_name);
 
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
   RestartableData<T> * data_ptr = new RestartableData<T>(full_name, context);
@@ -283,7 +283,7 @@ T &
 Restartable::declareRecoverableData(std::string data_name)
 {
   if (!_restartable_subproblem)
-    mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
+    mooseError2("No valid SubProblem found for ", _restartable_system_name, "/", _restartable_name);
 
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
 
@@ -297,7 +297,7 @@ T &
 Restartable::declareRecoverableData(std::string data_name, const T & init_value)
 {
   if (!_restartable_subproblem)
-    mooseError("No valid SubProblem found for " << _restartable_system_name << "/" << _restartable_name);
+    mooseError2("No valid SubProblem found for ", _restartable_system_name, "/", _restartable_name);
 
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
 

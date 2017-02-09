@@ -37,7 +37,7 @@ MovingPlanarFront::MovingPlanarFront(const InputParameters & parameters) :
     _front_normal(_end_posn - _start_posn)
 {
   if (_front_normal.size() == 0)
-    mooseError("MovingPlanarFront: start_posn and end_posn must be different points");
+    mooseError2("MovingPlanarFront: start_posn and end_posn must be different points");
   _front_normal /= _front_normal.size();
 }
 

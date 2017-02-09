@@ -49,7 +49,7 @@ SymmAnisotropicElasticityTensor::SymmAnisotropicElasticityTensor(std::vector<Rea
 {
 // test the input vector length to make sure it's correct
   if ((all_21==true && init_list.size()!=21) ||(all_21==false && init_list.size()!=9) )
-    mooseError("Please correct the number of entries in the stiffness input.");
+    mooseError2("Please correct the number of entries in the stiffness input.");
 
   if (all_21 == true)
   {

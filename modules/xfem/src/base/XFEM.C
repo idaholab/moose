@@ -30,7 +30,7 @@ XFEM::XFEM (const InputParameters & params) :
     _efa_mesh(Moose::out)
 {
 #ifndef LIBMESH_ENABLE_UNIQUE_ID
-  mooseError("MOOSE requires unique ids to be enabled in libmesh (configure with --enable-unique-id) to use XFEM!");
+  mooseError2("MOOSE requires unique ids to be enabled in libmesh (configure with --enable-unique-id) to use XFEM!");
 #endif
   _has_secondary_cut = false;
 }
@@ -100,7 +100,7 @@ XFEM::addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal)
   std::map<const Elem*, RealVectorValue>::iterator mit;
   mit = _state_marked_elems.find(elem);
   if (mit != _state_marked_elems.end())
-    mooseError(" ERROR: element "<<elem->id()<<" already marked for crack growth.");
+    mooseError2(" ERROR: element ", elem->id(), " already marked for crack growth.");
   _state_marked_elems[elem] = normal;
 }
 
@@ -113,7 +113,7 @@ XFEM::addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal, unsigne
   mit = _state_marked_elem_sides.find(elem);
   if (mit != _state_marked_elem_sides.end())
   {
-    mooseError(" ERROR: side of element "<<elem->id()<<" already marked for crack initiation.");
+    mooseError2(" ERROR: side of element ", elem->id(), " already marked for crack initiation.");
     exit(1);
   }
   _state_marked_elem_sides[elem] = marked_side;
@@ -128,7 +128,7 @@ XFEM::addStateMarkedFrag(unsigned int elem_id, RealVectorValue & normal)
   mit = _state_marked_frags.find(elem);
   if (mit != _state_marked_frags.end())
   {
-    mooseError(" ERROR: element "<<elem->id()<<" already marked for fragment-secondary crack initiation.");
+    mooseError2(" ERROR: element ", elem->id(), " already marked for fragment-secondary crack initiation.");
     exit(1);
   }
   _state_marked_frags.insert(elem);
@@ -245,7 +245,7 @@ void XFEM::initSolution(NonlinearSystemBase & nl, AuxiliarySystem & /*aux*/)
       Point new_point(*new_node);
       Point parent_point(*parent_node);
       if (new_point != parent_point)
-        mooseError("Points don't match");
+        mooseError2("Points don't match");
       unsigned int new_node_dof = new_node->dof_number(nl.number(), nl_vars[ivar]->number(),0);
       unsigned int parent_node_dof = parent_node->dof_number(nl.number(), nl_vars[ivar]->number(),0);
       if (parent_node->processor_id() == _mesh->processor_id())
@@ -276,7 +276,7 @@ Node * XFEM::getNodeFromUniqueID(unique_id_type uid)
     }
   }
   if (!matching_node)
-    mooseError("Couldn't find node matching unique id: "<<uid);
+    mooseError2("Couldn't find node matching unique id: ", uid);
   return matching_node;
 }
 
@@ -299,7 +299,7 @@ void XFEM::buildEFAMesh()
     else if (_mesh->mesh_dimension() == 3)
       _efa_mesh.add3DElement(quad, elem->id());
     else
-      mooseError ("XFEM only works for 2D and 3D");
+      mooseError2 ("XFEM only works for 2D and 3D");
   }
 
   //Restore fragment information for elements that have been previously cut
@@ -362,7 +362,7 @@ XFEM::markCutEdgesByGeometry(Real time)
       EFAElement2D * CEMElem = dynamic_cast<EFAElement2D*>(EFAelem);
 
       if (!CEMElem)
-        mooseError("EFAelem is not of EFAelement2D type");
+        mooseError2("EFAelem is not of EFAelement2D type");
 
       // continue if elem has been already cut twice - IMPORTANT
       if (CEMElem->isFinalCut())
@@ -553,7 +553,7 @@ XFEM::markCutEdgesByState(Real time)
       continue;
 
     if (!CEMElem)
-      mooseError("EFAelem is not of EFAelement2D type");
+      mooseError2("EFAelem is not of EFAelement2D type");
 
     // continue if elem is already cut twice - IMPORTANT
     if (CEMElem->isFinalCut())
@@ -579,7 +579,7 @@ XFEM::markCutEdgesByState(Real time)
         orig_node = CEMElem->getTipEmbeddedNode();
       }
       else
-        mooseError("element "<<elem->id()<<" has no valid crack-tip edge");
+        mooseError2("element ", elem->id(), " has no valid crack-tip edge");
 
       //obtain the crack tip origin coordinates and direction.
       std::map<const Elem*, std::vector<Point> >::iterator ecodm = _elem_crack_origin_direction_map.find(elem);
@@ -588,7 +588,7 @@ XFEM::markCutEdgesByState(Real time)
         crack_tip_direction = (ecodm->second)[1];
       }
       else
-        mooseError("element " << elem->id() << " cannot find its crack tip origin and direction.");
+        mooseError2("element ", elem->id(), " cannot find its crack tip origin and direction.");
     }
     else
     {
@@ -627,8 +627,8 @@ XFEM::markCutEdgesByState(Real time)
       else if (mit2 != _state_marked_frags.end()) // cut-surface secondary crack initiation
       {
         if (CEMElem->numFragments() != 1)
-          mooseError("element "<<elem->id()<<" flagged for a secondary crack, but has "
-                     <<CEMElem->numFragments()<<" fragments");
+          mooseError2("element ", elem->id(), " flagged for a secondary crack, but has ",
+                      CEMElem->numFragments(), " fragments");
         std::vector<unsigned int> interior_edge_id = CEMElem->getFragment(0)->getInteriorEdgeID();
         if (interior_edge_id.size() == 1)
           orig_cut_side_id = interior_edge_id[0];
@@ -653,14 +653,14 @@ XFEM::markCutEdgesByState(Real time)
         crack_tip_direction /= pow(crack_tip_direction.norm_sq(),0.5);
       }
       else
-        mooseError ("element " << elem->id() << " flagged for state-based growth, but has no edge intersections");
+        mooseError2 ("element ", elem->id(), " flagged for state-based growth, but has no edge intersections");
     }
 
     Point cut_origin(0.0,0.0,0.0);
     if (orig_node)
       cut_origin = getEFANodeCoords(orig_node, CEMElem, elem);// cutting plane origin's coords
     else
-      mooseError("element "<<elem->id()<<" does not have valid orig_node");
+      mooseError2("element ", elem->id(), " does not have valid orig_node");
 
     // loop through element edges to add possible second cut points
     std::vector<Point> edge_ends(2,Point(0.0,0.0,0.0));
@@ -734,7 +734,7 @@ XFEM::markCutEdgesByState(Real time)
           EFAElement2D * CEMElem = dynamic_cast<EFAElement2D*>(EFAelem);
 
           if (!CEMElem)
-            mooseError("EFAelem is not of EFAelement2D type");
+            mooseError2("EFAelem is not of EFAelement2D type");
 
           // continue if elem has been already cut twice - IMPORTANT
           if (CEMElem->isFinalCut())
@@ -808,7 +808,7 @@ XFEM::markCutFacesByGeometry(Real time)
       EFAElement * EFAelem = _efa_mesh.getElemByID(elem->id());
       EFAElement3D * CEMElem = dynamic_cast<EFAElement3D*>(EFAelem);
       if (!CEMElem)
-        mooseError("EFAelem is not of EFAelement3D type");
+        mooseError2("EFAelem is not of EFAelement3D type");
 
       // continue if elem has been already cut twice - IMPORTANT
       if (CEMElem->isFinalCut())
@@ -1028,14 +1028,14 @@ XFEM::cutMeshWithEFA()
     {
       EFAElement2D* new_efa_elem2d = dynamic_cast<EFAElement2D*>(NewElements[i]);
       if (!new_efa_elem2d)
-        mooseError("EFAelem is not of EFAelement2D type");
+        mooseError2("EFAelem is not of EFAelement2D type");
       xfce = new XFEMCutElem2D(libmesh_elem, new_efa_elem2d, (*_material_data)[0]->nQPoints());
     }
     else if (_mesh->mesh_dimension() == 3)
     {
       EFAElement3D* new_efa_elem3d = dynamic_cast<EFAElement3D*>(NewElements[i]);
       if (!new_efa_elem3d)
-        mooseError("EFAelem is not of EFAelement3D type");
+        mooseError2("EFAelem is not of EFAelement3D type");
       xfce = new XFEMCutElem3D(libmesh_elem, new_efa_elem3d, (*_material_data)[0]->nQPoints());
     }
     _cut_elem_map.insert(std::pair<unique_id_type,XFEMCutElem*>(libmesh_elem->unique_id(), xfce));
@@ -1147,7 +1147,7 @@ XFEM::cutMeshWithEFA()
   {
     std::vector<const Elem *> & sibling_elem_vec = it->second;
     if (sibling_elem_vec.size() != 2)
-      mooseError("Must have exactly 2 sibling elements");
+      mooseError2("Must have exactly 2 sibling elements");
     _sibling_elems.push_back(std::make_pair(sibling_elem_vec[0], sibling_elem_vec[1]));
   }
 
@@ -1215,7 +1215,7 @@ XFEM::getEFANodeCoords(EFANode* CEMnode,
       master_points.push_back(node_p);
     }
     else
-      mooseError ("master nodes must be permanent");
+      mooseError2 ("master nodes must be permanent");
   }
   for (unsigned int i = 0; i < master_nodes.size(); ++i)
     node_coor += master_weights[i]*master_points[i];
@@ -1270,7 +1270,7 @@ XFEM::getCutPlane(const Elem* elem,
         comp = planedata(index);
       }
       else
-        mooseError("In get_cut_plane index out of range");
+        mooseError2("In get_cut_plane index out of range");
     }
   }
   return comp;
@@ -1331,7 +1331,7 @@ XFEM::getFragmentEdges(const Elem* elem,
   if (CEMElem->numFragments() > 0)
   {
     if (CEMElem->numFragments() > 1)
-      mooseError("element " << elem->id() << " has more than one fragments at this point");
+      mooseError2("element ", elem->id(), " has more than one fragments at this point");
     for (unsigned int i = 0; i < CEMElem->getFragment(0)->numEdges(); ++i)
     {
       std::vector<Point> p_line(2,Point(0.0,0.0,0.0));
@@ -1352,7 +1352,7 @@ XFEM::getFragmentFaces(const Elem* elem,
   if (CEMElem->numFragments() > 0)
   {
     if (CEMElem->numFragments() > 1)
-      mooseError("element " << elem->id() << " has more than one fragments at this point");
+      mooseError2("element ", elem->id(), " has more than one fragments at this point");
     for (unsigned int i = 0; i < CEMElem->getFragment(0)->numFaces(); ++i)
     {
       unsigned int num_face_nodes = CEMElem->getFragmentFace(0,i)->numNodes();

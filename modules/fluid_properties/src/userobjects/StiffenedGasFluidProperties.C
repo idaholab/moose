@@ -38,7 +38,7 @@ StiffenedGasFluidProperties::StiffenedGasFluidProperties(const InputParameters &
     _k(getParam<Real>("k"))
 {
   if (_cv == 0.0)
-    mooseError(name() << ": cv cannot be zero.");
+    mooseError2(name(), ": cv cannot be zero.");
   _cp = _cv * _gamma;
 }
 
@@ -95,7 +95,7 @@ StiffenedGasFluidProperties::s(Real v, Real u) const
   Real p = this->pressure(v, u);
   Real n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1);
   if (n <= 0)
-    mooseError(name() << ": Negative argument in the ln() function.");
+    mooseError2(name(), ": Negative argument in the ln() function.");
   return _cv * std::log(n) + _q_prime;
 }
 
@@ -184,7 +184,7 @@ StiffenedGasFluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho
 void
 StiffenedGasFluidProperties::e_dpT(Real, Real, Real &, Real &, Real &) const
 {
-  mooseError(name() << ": e_dpT() not implemented.");
+  mooseError2(name(), ": e_dpT() not implemented.");
 }
 
 Real

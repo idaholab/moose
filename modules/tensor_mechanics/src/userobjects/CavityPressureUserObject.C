@@ -56,7 +56,7 @@ CavityPressureUserObject::getValue(const std::string & quantity) const
   else if ("cavity_pressure" == quantity)
     value = _cavity_pressure;
   else
-    mooseError("Unknown quantity in " + name());
+    mooseError2("Unknown quantity in " + name());
 
   return value;
 }
@@ -71,7 +71,7 @@ CavityPressureUserObject::initialize()
       init_temp = _init_temp;
 
     if (MooseUtils::absoluteFuzzyLessEqual(init_temp, 0.0))
-      mooseError("Cannot have initial temperature of zero when initializing cavity pressure. "
+      mooseError2("Cannot have initial temperature of zero when initializing cavity pressure. "
                  "Does the supplied Postprocessor for temperature execute at initial?");
 
     _n0 = _initial_pressure * _volume / (_R * init_temp);

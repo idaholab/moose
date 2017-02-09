@@ -68,7 +68,7 @@ Real NSEnergyInviscidBC::qpJacobianTermA(unsigned var_number, Real pressure)
       break;
 
     default:
-      mooseError("Shouldn't get here!");
+      mooseError2("Shouldn't get here!");
       break;
   }
 
@@ -99,7 +99,7 @@ Real NSEnergyInviscidBC::qpJacobianTermB(unsigned var_number, Real un)
     }
 
     default:
-      mooseError("Shouldn't get here!");
+      mooseError2("Shouldn't get here!");
       break;
   }
 

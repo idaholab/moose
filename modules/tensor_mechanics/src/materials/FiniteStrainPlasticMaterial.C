@@ -272,7 +272,7 @@ FiniteStrainPlasticMaterial::returnMap(const RankTwoTensor & sig_old, const Real
     }
 
     if (iter>=maxiter)
-      mooseError("Constitutive failure");
+      mooseError2("Constitutive failure");
 
     plastic_strain += delta_dp;
   }
@@ -358,7 +358,7 @@ FiniteStrainPlasticMaterial::getYieldStress(const Real eqpe)
   nsize = _yield_stress_vector.size();
 
   if (_yield_stress_vector[0] > 0.0 || nsize % 2 > 0)//Error check for input inconsitency
-    mooseError("Error in yield stress input: Should be a vector with eqv plastic strain and yield stress pair values.\n");
+    mooseError2("Error in yield stress input: Should be a vector with eqv plastic strain and yield stress pair values.\n");
 
   unsigned int ind = 0;
   Real tol = 1e-8;
@@ -393,7 +393,7 @@ FiniteStrainPlasticMaterial::getdYieldStressdPlasticStrain(const Real eqpe)
   nsize = _yield_stress_vector.size();
 
   if (_yield_stress_vector[0] > 0.0 || nsize % 2 > 0)//Error check for input inconsitency
-    mooseError("Error in yield stress input: Should be a vector with eqv plastic strain and yield stress pair values.\n");
+    mooseError2("Error in yield stress input: Should be a vector with eqv plastic strain and yield stress pair values.\n");
 
   unsigned int ind = 0;
 

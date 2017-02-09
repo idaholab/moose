@@ -35,7 +35,7 @@ CrystalPlasticityStateVariable::CrystalPlasticityStateVariable(const InputParame
     _scale_factor(getParam<std::vector<Real> >("scale_factor"))
 {
   if (_scale_factor.size() != _num_mat_state_var_evol_rate_comps)
-    mooseError("CrystalPlasticityStateVariable: Scale factor should be have the same size of evolution rate components.");
+    mooseError2("CrystalPlasticityStateVariable: Scale factor should be have the same size of evolution rate components.");
 
   _mat_prop_state_var_evol_rate_comps.resize(_num_mat_state_var_evol_rate_comps);
 
@@ -55,12 +55,12 @@ CrystalPlasticityStateVariable::initSlipSysProps(std::vector<Real> & val) const
       readInitialValueFromInline(val);
       break;
     default:
-      mooseError("CrystalPlasticityStateVariable: Read option for initial value of internal variables is not supported.");
+      mooseError2("CrystalPlasticityStateVariable: Read option for initial value of internal variables is not supported.");
   }
 
   for (unsigned int i = 0; i < _variable_size; ++i)
     if (val[i] <= 0.0)
-      mooseError("CrystalPlasticityStateVariable: Value of state variables " << i  << " non positive");
+      mooseError2("CrystalPlasticityStateVariable: Value of state variables ", i , " non positive");
 }
 
 void
@@ -73,7 +73,7 @@ CrystalPlasticityStateVariable::readInitialValueFromFile(std::vector<Real> & val
 
   for (unsigned int i = 0; i < _variable_size; ++i)
     if (!(file >> val[i]))
-      mooseError("Error CrystalPlasticityStateVariable: Premature end of state_variable file");
+      mooseError2("Error CrystalPlasticityStateVariable: Premature end of state_variable file");
 
   file.close();
 }
@@ -82,9 +82,9 @@ void
 CrystalPlasticityStateVariable::readInitialValueFromInline(std::vector<Real> & val) const
 {
   if (_groups.size() <= 0)
-    mooseError("CrystalPlasticityStateVariable: Error in reading initial state variable values: Specify input in .i file or in state_variable file");
+    mooseError2("CrystalPlasticityStateVariable: Error in reading initial state variable values: Specify input in .i file or in state_variable file");
   else if (_groups.size() != (_group_values.size() + 1))
-    mooseError("CrystalPlasticityStateVariable: The size of the groups and group_values does not match.");
+    mooseError2("CrystalPlasticityStateVariable: The size of the groups and group_values does not match.");
 
   for (unsigned int i = 0; i < _groups.size() - 1; ++i)
   {
@@ -94,7 +94,7 @@ CrystalPlasticityStateVariable::readInitialValueFromInline(std::vector<Real> & v
     ie = _groups[i + 1] - 1;
 
    if (is > ie)
-      mooseError("CrystalPlasticityStateVariable: Start index is = " << is << " should be greater than end index ie = " << ie << " in state variable read");
+      mooseError2("CrystalPlasticityStateVariable: Start index is = ", is, " should be greater than end index ie = ", ie, " in state variable read");
 
     for (unsigned int j = is; j <= ie; ++j)
       val[j] = _group_values[i];

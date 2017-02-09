@@ -163,7 +163,7 @@ bool CommandLine::search(const std::string &option_name, T & argument)
     }
   }
   else
-    mooseError("Unrecognized option name");
+    mooseError2("Unrecognized option name");
 
   return false;
 }

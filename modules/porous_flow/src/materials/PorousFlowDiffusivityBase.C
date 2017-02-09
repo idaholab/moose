@@ -28,9 +28,9 @@ PorousFlowDiffusivityBase::PorousFlowDiffusivityBase(const InputParameters & par
 {
   // Also, the number of diffusion coefficients must be equal to the num_phases * num_components
   if (_input_diffusion_coeff.size() != _num_phases * _num_components)
-    mooseError("The number of diffusion coefficients entered is not equal to the number of phases multiplied by the number of fluid components");
+    mooseError2("The number of diffusion coefficients entered is not equal to the number of phases multiplied by the number of fluid components");
   if (_nodal_material == true)
-    mooseError("PorousFlowRelativeDiffusivity classes are only defined for at_nodes = false");
+    mooseError2("PorousFlowRelativeDiffusivity classes are only defined for at_nodes = false");
 }
 
 void

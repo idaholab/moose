@@ -167,8 +167,8 @@ TimeStepper::constrainStep(Real &dt)
     if (dt <= 0.0)
     {
       _console << diag.str();
-      mooseError("Adjusting to sync_time resulted in a non-positive time step.  dt: "
-                 <<dt<<" sync_time: "<<*_sync_times.begin()<<" time: "<<_time);
+      mooseError2("Adjusting to sync_time resulted in a non-positive time step.  dt: ",
+                  dt, " sync_time: ", *_sync_times.begin(), " time: ", _time);
     }
 
     at_sync_point = true;
@@ -217,7 +217,7 @@ Real
 TimeStepper::computeFailedDT()
 {
   if (_dt <= _dt_min)
-    mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
+    mooseError2("Solve failed and timestep already at or below dtmin, cannot continue!");
 
   // cut the time step in a half
   if (0.5 * _dt >= _dt_min)

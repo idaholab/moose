@@ -27,7 +27,7 @@ PoroMechanicsCoupling::PoroMechanicsCoupling(const InputParameters & parameters)
   _component(getParam<unsigned int>("component"))
 {
   if (_component >= _mesh.dimension())
-    mooseError("PoroMechanicsCoupling: component should not be greater than the mesh dimension\n");
+    mooseError2("PoroMechanicsCoupling: component should not be greater than the mesh dimension\n");
 }
 
 Real

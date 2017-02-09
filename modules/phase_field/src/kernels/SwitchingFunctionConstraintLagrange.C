@@ -29,7 +29,7 @@ SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(const I
 {
   // parameter check. We need exactly one eta per h
   if (_num_h != coupledComponents("etas"))
-    mooseError("Need to pass in as many h_names as etas in SwitchingFunctionConstraintLagrange kernel " << name());
+    mooseError2("Need to pass in as many h_names as etas in SwitchingFunctionConstraintLagrange kernel ", name());
 
   // fetch switching functions (for the residual) and h derivatives (for the Jacobian)
   for (unsigned int i = 0; i < _num_h; ++i)

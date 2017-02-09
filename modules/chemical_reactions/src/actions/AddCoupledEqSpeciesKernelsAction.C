@@ -143,7 +143,7 @@ AddCoupledEqSpeciesKernelsAction::act()
           secondary = true;
       }
       else
-        mooseError("Error parsing term: " << term.as_string());
+        mooseError2("Error parsing term: ", term.as_string());
     }
 
     oss << "\nEquilibrium Species: " << eq_species[n_reactions-1] << std::endl;
@@ -152,7 +152,7 @@ AddCoupledEqSpeciesKernelsAction::act()
     primary_species_involved.push_back(local_species_list);
   }
 
-  if (n_reactions == 0) mooseError("No equilibrium reaction provided!");
+  if (n_reactions == 0) mooseError2("No equilibrium reaction provided!");
   // End parsing
 
   oss << "Number of reactions: " << n_reactions << std::endl;

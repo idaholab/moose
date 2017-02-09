@@ -248,7 +248,7 @@ SubProblem::nLinearIterations()
 void
 SubProblem::meshChanged()
 {
-  mooseError("This system does not support changing the mesh");
+  mooseError2("This system does not support changing the mesh");
 }
 
 template <>
@@ -325,7 +325,7 @@ SubProblem::checkMatProps(std::map<T, std::set<std::string> > & props,
           // and not is not a zero material property.
           if (props[id].find(prop_it.second) == props[id].end() && props[any_id].find(prop_it.second) == props[any_id].end() &&
               zero_props[id].find(prop_it.second) == zero_props[id].end() && zero_props[any_id].find(prop_it.second) == zero_props[any_id].end())
-            mooseError("Material property '" << prop_it.second << "', requested by '" << prop_it.first << "' is not defined on " << restrictionTypeName<T>() << " " << id);
+            mooseError2("Material property '", prop_it.second, "', requested by '", prop_it.first, "' is not defined on ", restrictionTypeName<T>(), " ", id);
         }
       }
     }
@@ -338,10 +338,10 @@ SubProblem::checkMatProps(std::map<T, std::set<std::string> > & props,
         // Check if the name is contained in the map and skip over the id if it is Moose::ANY_BLOCK_ID/ANY_BOUNDARY_ID
         if (props[check_id].find(prop_it.second) == props[check_id].end() &&
             zero_props[check_id].find(prop_it.second) == zero_props[check_id].end() && check_id != any_id)
-          mooseError("Material property '" + prop_it.second + "', requested by '" + prop_it.first + "' is not defined on " + restrictionTypeName<T>() + " " + check_name);
+          mooseError2("Material property '" + prop_it.second + "', requested by '" + prop_it.first + "' is not defined on " + restrictionTypeName<T>() + " " + check_name);
       }
     else
-      mooseError("No material defined on " + restrictionTypeName<T>() + " " + check_name);
+      mooseError2("No material defined on " + restrictionTypeName<T>() + " " + check_name);
   }
 }
 

@@ -31,11 +31,11 @@ TensorMechanicsPlasticTensileMulti::TensorMechanicsPlasticTensileMulti(const Inp
     _use_custom_cto(getParam<bool>("use_custom_cto"))
 {
   if (_shift < 0)
-    mooseError("Value of 'shift' in TensorMechanicsPlasticTensileMulti must not be negative\n");
+    mooseError2("Value of 'shift' in TensorMechanicsPlasticTensileMulti must not be negative\n");
   if (_shift > _f_tol)
     _console << "WARNING: value of 'shift' in TensorMechanicsPlasticTensileMulti is probably set too high\n";
   if (LIBMESH_DIM != 3)
-    mooseError("TensorMechanicsPlasticTensileMulti is only defined for LIBMESH_DIM=3");
+    mooseError2("TensorMechanicsPlasticTensileMulti is only defined for LIBMESH_DIM=3");
   MooseRandom::seed(0);
 }
 
@@ -296,7 +296,7 @@ TensorMechanicsPlasticTensileMulti::doReturnMap(const RankTwoTensor & trial_stre
     Moose::err << "Trial stress = \n";
     trial_stress.print(Moose::err);
     Moose::err << "Internal parameter = " << intnl_old << "\n";
-    mooseError("TensorMechanicsPlasticTensileMulti: FAILURE!  You probably need to implement a line search\n");
+    mooseError2("TensorMechanicsPlasticTensileMulti: FAILURE!  You probably need to implement a line search\n");
     // failure - must place yield function values at trial stress into yf
     str = tensile_strength(intnl_old);
     yf[0] = eigvals[0] - str;

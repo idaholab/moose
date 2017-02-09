@@ -112,7 +112,7 @@ MultiAppInterpolationTransfer::execute()
           idi = new RadialBasisInterpolation<LIBMESH_DIM>(from_sys.comm(), _radius);
           break;
         default:
-          mooseError("Unknown interpolation type!");
+          mooseError2("Unknown interpolation type!");
       }
 
       std::vector<Point>  &src_pts  (idi->get_source_points());
@@ -295,7 +295,7 @@ MultiAppInterpolationTransfer::execute()
           idi = new RadialBasisInterpolation<LIBMESH_DIM>(to_sys.comm(), _radius);
           break;
         default:
-          mooseError("Unknown interpolation type!");
+          mooseError2("Unknown interpolation type!");
       }
 
       std::vector<Point>  &src_pts  (idi->get_source_points());

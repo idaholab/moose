@@ -51,10 +51,10 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh
   std::set<BoundaryID>::const_iterator sit;
   sit=bids.find(_boundary1);
   if (sit == bids.end())
-    mooseError("NearestNodeLocator being created for boundaries "<<_boundary1<<" and "<<_boundary2<<", but boundary "<<_boundary1<<" does not exist");
+    mooseError2("NearestNodeLocator being created for boundaries ", _boundary1, " and ", _boundary2, ", but boundary ", _boundary1, " does not exist");
   sit=bids.find(_boundary2);
   if (sit == bids.end())
-    mooseError("NearestNodeLocator being created for boundaries "<<_boundary1<<" and "<<_boundary2<<", but boundary "<<_boundary2<<" does not exist");
+    mooseError2("NearestNodeLocator being created for boundaries ", _boundary1, " and ", _boundary2, ", but boundary ", _boundary2, " does not exist");
   */
 }
 

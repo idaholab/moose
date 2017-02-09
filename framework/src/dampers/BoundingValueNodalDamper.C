@@ -29,7 +29,7 @@ BoundingValueNodalDamper::BoundingValueNodalDamper(const InputParameters & param
     _min_value(parameters.get<Real>("min_value"))
 {
   if (_min_value > _max_value)
-    mooseError("max_value must be greater than min_value");
+    mooseError2("max_value must be greater than min_value");
 }
 
 Real

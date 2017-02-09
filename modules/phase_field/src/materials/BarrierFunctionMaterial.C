@@ -52,7 +52,7 @@ BarrierFunctionMaterial::computeQpProperties()
       break;
 
     default:
-      mooseError("Internal error");
+      mooseError2("Internal error");
   }
 }
 

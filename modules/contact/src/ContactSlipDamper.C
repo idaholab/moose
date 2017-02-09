@@ -41,16 +41,16 @@ ContactSlipDamper::ContactSlipDamper(const InputParameters & parameters) :
     _debug_output(parameters.get<bool>("debug_output"))
 {
   if (!_displaced_problem)
-    mooseError("Must have displaced problem to use ContactSlipDamper");
+    mooseError2("Must have displaced problem to use ContactSlipDamper");
 
   std::vector<int> master = parameters.get<std::vector<int> >("master");
   std::vector<int> slave = parameters.get<std::vector<int> >("slave");
 
   unsigned int num_interactions = master.size();
   if (num_interactions != slave.size())
-    mooseError("Sizes of master surface and slave surface lists must match in ContactSlipDamper");
+    mooseError2("Sizes of master surface and slave surface lists must match in ContactSlipDamper");
   if (num_interactions == 0)
-    mooseError("Must define at least one master/slave pair in ContactSlipDamper");
+    mooseError2("Must define at least one master/slave pair in ContactSlipDamper");
 
   for (unsigned int i = 0; i < master.size(); ++i)
   {
@@ -162,7 +162,7 @@ ContactSlipDamper::computeDamping(const NumericVector<Number> & solution,
                   node_damping_factor = 1.0 - (cur_it_slip_in_old_dir + prev_iter_slip_mag) / cur_it_slip_in_old_dir;
 
                 if (node_damping_factor < 0.0)
-                  mooseError("Damping factor can't be negative");
+                  mooseError2("Damping factor can't be negative");
 
                 if (node_damping_factor < _min_damping_factor)
                   node_damping_factor = _min_damping_factor;

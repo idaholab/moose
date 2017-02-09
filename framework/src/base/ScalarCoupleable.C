@@ -47,7 +47,7 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object) :
         else if (problem.hasVariable(coupled_var_name))
           ; // ignore normal variables
         else
-          mooseError("Coupled variable '" + coupled_var_name + "' was not found\n");
+          mooseError2("Coupled variable '" + coupled_var_name + "' was not found\n");
       }
     }
   }
@@ -78,7 +78,7 @@ ScalarCoupleable::isCoupledScalar(const std::string & var_name, unsigned int i)
   {
     // Make sure the user originally requested this value in the InputParameter syntax
     if (!_coupleable_params.hasCoupledValue(var_name))
-      mooseError("The coupled scalar variable \"" << var_name << "\" was never added to this objects's InputParameters, please double-check your spelling");
+      mooseError2("The coupled scalar variable \"", var_name, "\" was never added to this objects's InputParameters, please double-check your spelling");
 
     return false;
   }
@@ -155,10 +155,10 @@ ScalarCoupleable::getScalarVar(const std::string & var_name, unsigned int comp)
     if (comp < _coupled_scalar_vars[var_name].size())
       return _coupled_scalar_vars[var_name][comp];
     else
-      mooseError("Trying to get a non-existent component of variable '" + var_name + "'");
+      mooseError2("Trying to get a non-existent component of variable '" + var_name + "'");
   }
   else
-    mooseError("Trying to get a non-existent variable '" + var_name + "'");
+    mooseError2("Trying to get a non-existent variable '" + var_name + "'");
 }
 
 unsigned int

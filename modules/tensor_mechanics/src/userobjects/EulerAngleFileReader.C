@@ -41,7 +41,7 @@ EulerAngleFileReader::readFile()
   // Read in Euler angles from _file_name
   std::ifstream inFile(_file_name.c_str());
   if (!inFile)
-    mooseError("Can't open " << _file_name);
+    mooseError2("Can't open ", _file_name);
 
   // Skip first 4 lines
   for (unsigned int i = 0; i < 4; ++i)

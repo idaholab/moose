@@ -61,7 +61,7 @@ ImageSampler::ImageSampler(const InputParameters & parameters) :
 {
 #ifndef LIBMESH_HAVE_VTK
   // This should be impossible to reach, the registration of ImageSampler is also guarded with LIBMESH_HAVE_VTK
-  mooseError("libMesh must be configured with VTK enabled to utilize ImageSampler");
+  mooseError2("libMesh must be configured with VTK enabled to utilize ImageSampler");
 #endif
 }
 
@@ -123,7 +123,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
     // We don't have parameters, so see if we can get them from ImageMesh
     ImageMesh * image_mesh = dynamic_cast<ImageMesh*>(&mesh);
     if (!image_mesh)
-      mooseError("No file range parameters were provided and the Mesh is not an ImageMesh.");
+      mooseError2("No file range parameters were provided and the Mesh is not an ImageMesh.");
 
     // Get the ImageMesh's parameters.  This should work, otherwise
     // errors would already have been thrown...
@@ -145,7 +145,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
 
   // Error if no files where located
   if (_files->GetNumberOfValues() == 0)
-    mooseError("No image file(s) located");
+    mooseError2("No image file(s) located");
 
 
   // Read the image stack.  Hurray for VTK not using polymorphism in a
@@ -156,7 +156,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
   else if (file_suffix == "tiff" || file_suffix == "tif")
     _image = vtkSmartPointer<vtkTIFFReader>::New();
   else
-    mooseError("Un-supported file type '" << file_suffix << "'");
+    mooseError2("Un-supported file type '", file_suffix, "'");
 
   // Now that _image is set up, actually read the images
   // Indicate that data read has started
@@ -192,7 +192,7 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
     unsigned int n = _data->GetNumberOfScalarComponents();
     _component = _is_pars.get<unsigned int>("component");
     if (_component >= n)
-      mooseError("'component' parameter must be empty or have a value of 0 to " << n-1);
+      mooseError2("'component' parameter must be empty or have a value of 0 to ", n-1);
   }
   else
     _component = 0;
@@ -298,7 +298,7 @@ ImageSampler::vtkThreshold()
 
   // Error if both upper and lower are not set
   if (!_is_pars.isParamValid("upper_value") || !_is_pars.isParamValid("lower_value"))
-    mooseError("When thresholding is applied, both the upper_value and lower_value parameters must be set");
+    mooseError2("When thresholding is applied, both the upper_value and lower_value parameters must be set");
 
   // Create the thresholding object
   _image_threshold = vtkSmartPointer<vtkImageThreshold>::New();

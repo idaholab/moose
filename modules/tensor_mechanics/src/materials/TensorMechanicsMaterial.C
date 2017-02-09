@@ -58,13 +58,13 @@ TensorMechanicsMaterial::TensorMechanicsMaterial(const InputParameters & paramet
     _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
     _prefactor_function(isParamValid("elasticity_tensor_prefactor") ? &getFunction("elasticity_tensor_prefactor") : NULL)
 {
-  mooseDeprecated("EigenStrainBaseMaterial is deprecated.   Please use the TensorMechanics plug-and-play system instead: http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/PlugAndPlayMechanicsApproach/");
+  mooseDeprecated2("EigenStrainBaseMaterial is deprecated.   Please use the TensorMechanics plug-and-play system instead: http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/PlugAndPlayMechanicsApproach/");
 
   const std::vector<FunctionName> & fcn_names(getParam<std::vector<FunctionName> >("initial_stress"));
   const unsigned num = fcn_names.size();
 
   if (!(num == 0 || num == 3*3))
-    mooseError("Either zero or " << 3*3 << " initial stress functions must be provided to TensorMechanicsMaterial.  You supplied " << num << "\n");
+    mooseError2("Either zero or ", 3*3, " initial stress functions must be provided to TensorMechanicsMaterial.  You supplied ", num, "\n");
 
   _initial_stress.resize(num);
   for (unsigned i = 0; i < num; ++i)

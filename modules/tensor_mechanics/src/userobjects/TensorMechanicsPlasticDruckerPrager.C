@@ -31,11 +31,11 @@ TensorMechanicsPlasticDruckerPrager::TensorMechanicsPlasticDruckerPrager(const I
     _zero_psi_hardening(_mc_psi.modelName().compare("Constant") == 0)
 {
   if (_mc_phi.value(0.0) < 0.0 || _mc_psi.value(0.0) < 0.0 || _mc_phi.value(0.0) > libMesh::pi / 2.0 || _mc_psi.value(0.0) > libMesh::pi / 2.0)
-    mooseError("TensorMechanicsPlasticDruckerPrager: MC friction and dilation angles must lie in [0, Pi/2]");
+    mooseError2("TensorMechanicsPlasticDruckerPrager: MC friction and dilation angles must lie in [0, Pi/2]");
   if (_mc_phi.value(0) < _mc_psi.value(0.0))
-    mooseError("TensorMechanicsPlasticDruckerPrager: MC friction angle must not be less than MC dilation angle");
+    mooseError2("TensorMechanicsPlasticDruckerPrager: MC friction angle must not be less than MC dilation angle");
   if (_mc_cohesion.value(0.0) < 0)
-    mooseError("TensorMechanicsPlasticDruckerPrager: MC cohesion should not be negative");
+    mooseError2("TensorMechanicsPlasticDruckerPrager: MC cohesion should not be negative");
 
   initializeAandB(0.0, _aaa, _bbb);
   initializeB(0.0, dilation, _bbb_flow);

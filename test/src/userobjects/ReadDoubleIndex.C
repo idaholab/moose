@@ -76,319 +76,319 @@ ReadDoubleIndex::ReadDoubleIndex(const InputParameters & params) :
 
   // check real
   if (_real_di.size() != 3)
-    mooseError("Error reading real_di.");
+    mooseError2("Error reading real_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_real_di[j].size() != array_length[j])
-      mooseError("Error reading real_di.");
+      mooseError2("Error reading real_di.");
     for (unsigned int i = 0; i < _real_di[j].size(); ++i)
       if (!MooseUtils::absoluteFuzzyEqual(_real_di[j][i], (j + 1.0) + 0.1 * (i + 1)))
-        mooseError("Error reading real_di.");
+        mooseError2("Error reading real_di.");
   }
 
   // check unsigned int
   if (_uint_di.size() != 3)
-    mooseError("Error reading uint_di.");
+    mooseError2("Error reading uint_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_uint_di[j].size() != array_length[j])
-      mooseError("Error reading uint_di.");
+      mooseError2("Error reading uint_di.");
     for (unsigned int i = 0; i < _uint_di[j].size(); ++i)
       if (_uint_di[j][i] != (j + 1) * 10 + i + 1)
-        mooseError("Error reading uint_di.");
+        mooseError2("Error reading uint_di.");
   }
 
   // check int
   if (_int_di.size() != 3)
-    mooseError("Error reading int_di.");
+    mooseError2("Error reading int_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_int_di[j].size() != array_length[j])
-      mooseError("Error reading int_di.");
+      mooseError2("Error reading int_di.");
     for (unsigned int i = 0; i < _int_di[j].size(); ++i)
     {
       int mult = ((j == 1) ? -1 : 1);
       if (_int_di[j][i] != mult * static_cast<int>(((j + 1) * 10 + i + 1)))
-        mooseError("Error reading int_di.");
+        mooseError2("Error reading int_di.");
     }
   }
 
   // check long
   if (_long_di.size() != 3)
-    mooseError("Error reading long_di.");
+    mooseError2("Error reading long_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_long_di[j].size() != array_length[j])
-      mooseError("Error reading long_di.");
+      mooseError2("Error reading long_di.");
     for (unsigned int i = 0; i < _long_di[j].size(); ++i)
     {
       long mult = ((j != 1) ? -1 : 1);
       if (_long_di[j][i] != mult * ((j + 1) * 10 + i + 1))
-        mooseError("Error reading long_di.");
+        mooseError2("Error reading long_di.");
     }
   }
 
   // check SubdomainID
   if (_subid_di.size() != 3)
-    mooseError("Error reading subid_di.");
+    mooseError2("Error reading subid_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_subid_di[j].size() != array_length[j])
-      mooseError("Error reading subid_di.");
+      mooseError2("Error reading subid_di.");
     for (unsigned int i = 0; i < _subid_di[j].size(); ++i)
       if (_subid_di[j][i] != (j + 2) * 10 + i + 2)
-        mooseError("Error reading subid_di.");
+        mooseError2("Error reading subid_di.");
   }
 
   // check BoundaryID
   if (_bid_di.size() != 3)
-    mooseError("Error reading bid_di.");
+    mooseError2("Error reading bid_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_bid_di[j].size() != array_length[j])
-      mooseError("Error reading bid_di.");
+      mooseError2("Error reading bid_di.");
     for (unsigned int i = 0; i < _bid_di[j].size(); ++i)
       if (_bid_di[j][i] != static_cast<short>((j + 2) * 10 + i + 1))
-        mooseError("Error reading bid_di.");
+        mooseError2("Error reading bid_di.");
   }
 
   // check std::string
   if (_str_di.size() != 3)
-    mooseError("Error reading str_di.");
+    mooseError2("Error reading str_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_str_di[j].size() != array_length[j])
-      mooseError("Error reading str_di.");
+      mooseError2("Error reading str_di.");
     for (unsigned int i = 0; i < _str_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "string" << j << i;
       if (_str_di[j][i] != ss.str())
-        mooseError("Error reading str_di.");
+        mooseError2("Error reading str_di.");
     }
   }
 
   // check FileName
   if (_file_di.size() != 3)
-    mooseError("Error reading file_di.");
+    mooseError2("Error reading file_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_file_di[j].size() != array_length[j])
-      mooseError("Error reading file_di.");
+      mooseError2("Error reading file_di.");
     for (unsigned int i = 0; i < _file_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "file" << j << i;
       if (_file_di[j][i] != ss.str())
-        mooseError("Error reading file_di.");
+        mooseError2("Error reading file_di.");
     }
   }
 
   // check FileNameNoExtension
   if (_file_no_di.size() != 3)
-    mooseError("Error reading file_no_di.");
+    mooseError2("Error reading file_no_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_file_no_di[j].size() != array_length[j])
-      mooseError("Error reading file_no_di.");
+      mooseError2("Error reading file_no_di.");
     for (unsigned int i = 0; i < _file_no_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "file_no" << j << i;
       if (_file_no_di[j][i] != ss.str())
-        mooseError("Error reading file_no_di.");
+        mooseError2("Error reading file_no_di.");
     }
   }
 
   // check MeshFileName
   if (_mesh_file_di.size() != 3)
-    mooseError("Error reading mesh_file_di.");
+    mooseError2("Error reading mesh_file_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_mesh_file_di[j].size() != array_length[j])
-      mooseError("Error reading mesh_file_di.");
+      mooseError2("Error reading mesh_file_di.");
     for (unsigned int i = 0; i < _mesh_file_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "mesh_file" << j << i;
       if (_mesh_file_di[j][i] != ss.str())
-        mooseError("Error reading mesh_file_di.");
+        mooseError2("Error reading mesh_file_di.");
     }
   }
 
   // check SubdomainName
   if (_subdomain_name_di.size() != 3)
-    mooseError("Error reading subdomain_name_di.");
+    mooseError2("Error reading subdomain_name_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_subdomain_name_di[j].size() != array_length[j])
-      mooseError("Error reading subdomain_name_di.");
+      mooseError2("Error reading subdomain_name_di.");
     for (unsigned int i = 0; i < _subdomain_name_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "subdomain_name" << j << i;
       if (_subdomain_name_di[j][i] != ss.str())
-        mooseError("Error reading subdomain_name_di.");
+        mooseError2("Error reading subdomain_name_di.");
     }
   }
 
   // check BoundaryName
   if (_boundary_name_di.size() != 3)
-    mooseError("Error reading boundary_name_di.");
+    mooseError2("Error reading boundary_name_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_boundary_name_di[j].size() != array_length[j])
-      mooseError("Error reading boundary_name_di.");
+      mooseError2("Error reading boundary_name_di.");
     for (unsigned int i = 0; i < _boundary_name_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "boundary_name" << j << i;
       if (_boundary_name_di[j][i] != ss.str())
-        mooseError("Error reading boundary_name_di.");
+        mooseError2("Error reading boundary_name_di.");
     }
   }
 
   // check FunctionName
   if (_function_name_di.size() != 3)
-    mooseError("Error reading function_name_di.");
+    mooseError2("Error reading function_name_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_function_name_di[j].size() != array_length[j])
-      mooseError("Error reading function_name_di.");
+      mooseError2("Error reading function_name_di.");
     for (unsigned int i = 0; i < _function_name_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "function_name" << j << i;
       if (_function_name_di[j][i] != ss.str())
-        mooseError("Error reading function_name_di.");
+        mooseError2("Error reading function_name_di.");
     }
   }
 
   // check UserObjectName
   if (_userobject_name_di.size() != 3)
-    mooseError("Error reading userobject_name_di.");
+    mooseError2("Error reading userobject_name_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_userobject_name_di[j].size() != array_length[j])
-      mooseError("Error reading userobject_name_di.");
+      mooseError2("Error reading userobject_name_di.");
     for (unsigned int i = 0; i < _userobject_name_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "userobject_name" << j << i;
       if (_userobject_name_di[j][i] != ss.str())
-        mooseError("Error reading userobject_name_di.");
+        mooseError2("Error reading userobject_name_di.");
     }
   }
 
   // check IndicatorName
   if (_indicator_name_di.size() != 3)
-    mooseError("Error reading indicator_name_di.");
+    mooseError2("Error reading indicator_name_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_indicator_name_di[j].size() != array_length[j])
-      mooseError("Error reading indicator_name_di.");
+      mooseError2("Error reading indicator_name_di.");
     for (unsigned int i = 0; i < _indicator_name_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "indicator_name" << j << i;
       if (_indicator_name_di[j][i] != ss.str())
-        mooseError("Error reading indicator_name_di.");
+        mooseError2("Error reading indicator_name_di.");
     }
   }
 
   // check MarkerName
   if (_marker_name_di.size() != 3)
-    mooseError("Error reading marker_name_di.");
+    mooseError2("Error reading marker_name_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_marker_name_di[j].size() != array_length[j])
-      mooseError("Error reading marker_name_di.");
+      mooseError2("Error reading marker_name_di.");
     for (unsigned int i = 0; i < _marker_name_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "marker_name" << j << i;
       if (_marker_name_di[j][i] != ss.str())
-        mooseError("Error reading marker_name_di.");
+        mooseError2("Error reading marker_name_di.");
     }
   }
 
   // check MultiAppName
   if (_multiapp_name_di.size() != 3)
-    mooseError("Error reading multiapp_name_di.");
+    mooseError2("Error reading multiapp_name_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_multiapp_name_di[j].size() != array_length[j])
-      mooseError("Error reading multiapp_name_di.");
+      mooseError2("Error reading multiapp_name_di.");
     for (unsigned int i = 0; i < _multiapp_name_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "multiapp_name" << j << i;
       if (_multiapp_name_di[j][i] != ss.str())
-        mooseError("Error reading multiapp_name_di.");
+        mooseError2("Error reading multiapp_name_di.");
     }
   }
 
   // check PostprocessorName
   if (_postprocessor_name_di.size() != 3)
-    mooseError("Error reading postprocessor_name_di.");
+    mooseError2("Error reading postprocessor_name_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_postprocessor_name_di[j].size() != array_length[j])
-      mooseError("Error reading postprocessor_name_di.");
+      mooseError2("Error reading postprocessor_name_di.");
     for (unsigned int i = 0; i < _postprocessor_name_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "postprocessor_name" << j << i;
       if (_postprocessor_name_di[j][i] != ss.str())
-        mooseError("Error reading postprocessor_name_di.");
+        mooseError2("Error reading postprocessor_name_di.");
     }
   }
 
   // check VectorPostprocessorName
   if (_vector_postprocessor_name_di.size() != 3)
-    mooseError("Error reading vector_postprocessor_name_di.");
+    mooseError2("Error reading vector_postprocessor_name_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_vector_postprocessor_name_di[j].size() != array_length[j])
-      mooseError("Error reading vector_postprocessor_name_di.");
+      mooseError2("Error reading vector_postprocessor_name_di.");
     for (unsigned int i = 0; i < _vector_postprocessor_name_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "vector_postprocessor_name" << j << i;
       if (_vector_postprocessor_name_di[j][i] != ss.str())
-        mooseError("Error reading vector_postprocessor_name_di.");
+        mooseError2("Error reading vector_postprocessor_name_di.");
     }
   }
 
   // check OutputName
   if (_output_name_di.size() != 3)
-    mooseError("Error reading output_name_di.");
+    mooseError2("Error reading output_name_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_output_name_di[j].size() != array_length[j])
-      mooseError("Error reading output_name_di.");
+      mooseError2("Error reading output_name_di.");
     for (unsigned int i = 0; i < _output_name_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "output_name" << j << i;
       if (_output_name_di[j][i] != ss.str())
-        mooseError("Error reading output_name_di.");
+        mooseError2("Error reading output_name_di.");
     }
   }
 
   // check MaterialPropertyName
   if (_material_property_name_di.size() != 3)
-    mooseError("Error reading material_property_name_di.");
+    mooseError2("Error reading material_property_name_di.");
   for (unsigned int j = 0; j < 3; ++j)
   {
     if (_material_property_name_di[j].size() != array_length[j])
-      mooseError("Error reading material_property_name_di.");
+      mooseError2("Error reading material_property_name_di.");
     for (unsigned int i = 0; i < _material_property_name_di[j].size(); ++i)
     {
       std::stringstream ss;
       ss << "material_property_name" << j << i;
       if (_material_property_name_di[j][i] != ss.str())
-        mooseError("Error reading material_property_name_di.");
+        mooseError2("Error reading material_property_name_di.");
     }
   }
 }

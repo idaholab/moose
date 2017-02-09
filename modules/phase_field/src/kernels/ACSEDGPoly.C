@@ -69,5 +69,5 @@ ACSEDGPoly::computeDFDOP(PFFunctionType type)
       return   _beta[_qp] * _phi[_j][_qp] * (2.0 * SumEtai2 * ((rho_i - _rho_eff[_qp]) - _u[_qp] * drho_eff_detai)
               - 4.0 * _u[_qp] * _u[_qp] * (rho_i - _rho_eff[_qp])) / (SumEtai2 * SumEtai2);
   }
-  mooseError("Invalid type passed in");
+  mooseError2("Invalid type passed in");
 }

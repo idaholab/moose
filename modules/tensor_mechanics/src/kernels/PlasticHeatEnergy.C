@@ -34,7 +34,7 @@ PlasticHeatEnergy::PlasticHeatEnergy(const InputParameters & parameters) :
 
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
-    mooseError("PlasticHeatEnergy: The number of displacement variables supplied must match the mesh dimension.");
+    mooseError2("PlasticHeatEnergy: The number of displacement variables supplied must match the mesh dimension.");
 }
 
 Real

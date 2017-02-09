@@ -41,17 +41,17 @@ IsotropicPlasticity::IsotropicPlasticity(const InputParameters & parameters) :
     _hardening_variable_old(declarePropertyOld<Real>("hardening_variable"))
 {
   if (isParamValid("yield_stress") && _yield_stress <= 0)
-    mooseError("Yield stress must be greater than zero");
+    mooseError2("Yield stress must be greater than zero");
 
   if (_yield_stress_function == NULL && !isParamValid("yield_stress"))
-    mooseError("Either yield_stress or yield_stress_function must be given");
+    mooseError2("Either yield_stress or yield_stress_function must be given");
 
   if ((isParamValid("hardening_constant") && isParamValid("hardening_function")) ||
       (!isParamValid("hardening_constant") && !isParamValid("hardening_function")))
-    mooseError("Either hardening_constant or hardening_function must be defined");
+    mooseError2("Either hardening_constant or hardening_function must be defined");
 
   if (isParamValid("hardening_function") && !_hardening_function)
-    mooseError("The hardening_function must be PiecewiseLinear");
+    mooseError2("The hardening_function must be PiecewiseLinear");
 }
 
 void
@@ -72,7 +72,7 @@ IsotropicPlasticity::computeStressInitialize(unsigned qp, Real effectiveTrialStr
 {
   const SymmIsotropicElasticityTensor * eT = dynamic_cast<const SymmIsotropicElasticityTensor*>(&elasticityTensor);
   if (!eT)
-    mooseError("IsotropicPlasticity requires a SymmIsotropicElasticityTensor");
+    mooseError2("IsotropicPlasticity requires a SymmIsotropicElasticityTensor");
 
   _shear_modulus = eT->shearModulus();
   computeYieldStress(qp);
@@ -160,6 +160,6 @@ IsotropicPlasticity::computeYieldStress(unsigned qp)
     Point p;
     _yield_stress = _yield_stress_function->value(_temperature[qp], p);
     if (_yield_stress <= 0)
-      mooseError("Yield stress must be greater than zero");
+      mooseError2("Yield stress must be greater than zero");
   }
 }

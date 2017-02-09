@@ -62,11 +62,11 @@ MultiSmoothSuperellipsoidIC::initialSetup()
   unsigned int nv = _numbub.size();
 
   if (nv != _bubspac.size() || nv != _exponent.size() || nv != _semiaxis_a.size() || nv != _semiaxis_b.size()|| nv != _semiaxis_c.size())
-    mooseError("Vectors for numbub, bubspac, exponent, semiaxis_a, semiaxis_b, and semiaxis_c must be the same size.");
+    mooseError2("Vectors for numbub, bubspac, exponent, semiaxis_a, semiaxis_b, and semiaxis_c must be the same size.");
 
   if (_semiaxis_variation_type != 2 &&
       (nv != _semiaxis_a_variation.size() || nv != _semiaxis_b_variation.size() || nv != _semiaxis_c_variation.size()))
-      mooseError("Vectors for numbub, semiaxis_a_variation, semiaxis_b_variation, and semiaxis_c_variation must be the same size.");
+      mooseError2("Vectors for numbub, semiaxis_a_variation, semiaxis_b_variation, and semiaxis_c_variation must be the same size.");
 
   for (_gk = 0; _gk < nv; ++_gk)
   {
@@ -79,11 +79,11 @@ MultiSmoothSuperellipsoidIC::initialSetup()
     _range = _top_right - _bottom_left;
 
     if (_semiaxis_a_variation[_gk] > 0.0 && _semiaxis_variation_type == 2)
-      mooseError("If Semiaxis_a_variation > 0.0, you must pass in a Semiaxis_variation_type in MultiSmoothSuperellipsoidIC");
+      mooseError2("If Semiaxis_a_variation > 0.0, you must pass in a Semiaxis_variation_type in MultiSmoothSuperellipsoidIC");
     if (_semiaxis_b_variation[_gk] > 0.0 && _semiaxis_variation_type == 2)
-      mooseError("If Semiaxis_b_variation > 0.0, you must pass in a Semiaxis_variation_type in MultiSmoothSuperellipsoidIC");
+      mooseError2("If Semiaxis_b_variation > 0.0, you must pass in a Semiaxis_variation_type in MultiSmoothSuperellipsoidIC");
     if (_semiaxis_c_variation[_gk] > 0.0 && _semiaxis_variation_type == 2)
-      mooseError("If Semiaxis_c_variation > 0.0, you must pass in a Semiaxis_variation_type in MultiSmoothSuperellipsoidIC");
+      mooseError2("If Semiaxis_c_variation > 0.0, you must pass in a Semiaxis_variation_type in MultiSmoothSuperellipsoidIC");
 
     SmoothSuperellipsoidBaseIC::initialSetup();
   }
@@ -161,7 +161,7 @@ MultiSmoothSuperellipsoidIC::computeSuperellipsoidCenters()
     }
 
     if (num_tries == _max_num_tries)
-      mooseError("Too many tries in MultiSmoothCircleIC");
+      mooseError2("Too many tries in MultiSmoothCircleIC");
 
     accept: continue;
   }

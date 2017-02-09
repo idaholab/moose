@@ -72,7 +72,7 @@ FileRangeBuilder::FileRangeBuilder(const InputParameters & params) :
 
   // 4.) Provided a filename and a range, warn that the range will be ignored.
   if (has_file && has_file_range)
-    mooseWarning("Warning: file_range was ignored since a filename was provided.");
+    mooseWarning2("Warning: file_range was ignored since a filename was provided.");
 
   // 5.) Provided a file_base but not a file_range, we'll create one
   if (has_file_base && !has_file_range)
@@ -91,7 +91,7 @@ FileRangeBuilder::FileRangeBuilder(const InputParameters & params) :
   // warning and truncate the extra values.
   if (has_file_range && file_range.size() != 2)
   {
-    mooseWarning("A maximum of two values are allowed in the file_range, extra values truncated.");
+    mooseWarning2("A maximum of two values are allowed in the file_range, extra values truncated.");
     file_range.resize(2);
   }
 
@@ -138,7 +138,7 @@ FileRangeBuilder::FileRangeBuilder(const InputParameters & params) :
   }
 
   else
-    mooseError("We'll never get here!");
+    mooseError2("We'll never get here!");
 
   // If we made it here, there were no errors
 }
@@ -153,15 +153,15 @@ FileRangeBuilder::errorCheck()
   case 0:
     return;
   case 1:
-    mooseError("Cannot provide both file and file_base parameters");
+    mooseError2("Cannot provide both file and file_base parameters");
     break;
   case 2:
-    mooseError("You must provide a valid value for either the 'file' parameter or the 'file_base' parameter.");
+    mooseError2("You must provide a valid value for either the 'file' parameter or the 'file_base' parameter.");
     break;
   case 3:
-    mooseError("If you provide a 'file_base', you must also provide a valid 'file_suffix', e.g. 'png'.");
+    mooseError2("If you provide a 'file_base', you must also provide a valid 'file_suffix', e.g. 'png'.");
     break;
   default:
-    mooseError("Unknown error code!");
+    mooseError2("Unknown error code!");
   }
 }

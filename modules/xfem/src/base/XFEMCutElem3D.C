@@ -50,7 +50,7 @@ XFEMCutElem3D::getNodeCoordinates(EFANode* CEMnode, MeshBase* displaced_mesh) co
       master_points.push_back(node_p);
     }
     else
-      mooseError("master nodes must be local");
+      mooseError2("master nodes must be local");
   }
   for (unsigned int i = 0; i < master_nodes.size(); ++i)
     node_coor += master_weights[i]*master_points[i];
@@ -126,7 +126,7 @@ XFEMCutElem3D::getCutPlaneOrigin(unsigned int plane_id, MeshBase* displaced_mesh
     }
   }
   if (cut_plane_nodes.size() == 0)
-    mooseError("no cut plane found in this element");
+    mooseError2("no cut plane found in this element");
   if (plane_id < cut_plane_nodes.size()) // valid plane_id
   {
     std::vector<Point> cut_plane_points;
@@ -157,7 +157,7 @@ XFEMCutElem3D::getCutPlaneNormal(unsigned int plane_id, MeshBase* displaced_mesh
     }
   }
   if (cut_plane_nodes.size() == 0)
-    mooseError("no cut plane found in this element");
+    mooseError2("no cut plane found in this element");
   if (plane_id < cut_plane_nodes.size()) // valid plane_id
   {
     std::vector<Point> cut_plane_points;
@@ -186,14 +186,14 @@ void
 XFEMCutElem3D::getCrackTipOriginAndDirection(unsigned /*tip_id*/, Point & /*origin*/, Point & /*direction*/) const
 {
   //TODO: not implemented for 3D
-  mooseError("getCrackTipOriginAndDirection not yet implemented for XFEMCutElem3D");
+  mooseError2("getCrackTipOriginAndDirection not yet implemented for XFEMCutElem3D");
 }
 
 void
 XFEMCutElem3D::getFragmentFaces(std::vector<std::vector<Point> > &/*frag_faces*/, MeshBase* /*displaced_mesh*/) const
 {
   //TODO: not implemented for 3D
-  mooseError("getFragmentFaces not yet implemented for XFEMCutElem3D");
+  mooseError2("getFragmentFaces not yet implemented for XFEMCutElem3D");
 }
 
 const EFAElement*
@@ -229,7 +229,7 @@ XFEMCutElem3D::getIntersectionInfo(unsigned int plane_id, Point & normal, std::v
     }
   }
   if (cut_plane_nodes.size() == 0)
-    mooseError("No cut plane found in this element");
+    mooseError2("No cut plane found in this element");
 
   if (plane_id < cut_plane_nodes.size()) // valid plane_id
   {
