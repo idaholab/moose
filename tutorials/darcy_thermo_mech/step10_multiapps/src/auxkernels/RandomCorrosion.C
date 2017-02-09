@@ -40,7 +40,7 @@ RandomCorrosion::RandomCorrosion(const InputParameters & parameters) :
 {
   // This class only works with Nodal aux variables
   if (!isNodal())
-    mooseError("RandomCorrosion only operates using nodal aux variables.");
+    mooseError2("RandomCorrosion only operates using nodal aux variables.");
 
   // Setup the random number generation
   setRandomResetFrequency(EXEC_TIMESTEP_BEGIN);

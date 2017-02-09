@@ -42,7 +42,7 @@ BlockAverageValue::averageValue(SubdomainID block) const
   if (_average_values.find(block) != _average_values.end())
     return _average_values.find(block)->second;
 
-  mooseError("Unknown block requested for average value!");
+  mooseError2("Unknown block requested for average value!");
 
   return 0; // To satisfy compilers
 }
