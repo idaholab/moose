@@ -39,8 +39,19 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
   auto & prop_names = mat.getSuppliedItems();
   for (auto & prop : prop_names)
   {
+    if (hasMaterialProperty<Real>(prop))
+      _prop_refs.push_back(&getMaterialProperty<Real>(prop));
+    else if (hasMaterialProperty<unsigned int>(prop))
+      _prop_refs.push_back(&getMaterialProperty<unsigned int>(prop));
+    else if (hasMaterialProperty<int>(prop))
+      _prop_refs.push_back(&getMaterialProperty<int>(prop));
+    else
+    {
+      mooseWarning("property " + prop + " is of unsupported type and skipped by MaterialVectorPostProcessor");
+      continue;
+    }
     _prop_vecs.push_back(&declareVector(prop));
-    _prop_refs.push_back(&getMaterialProperty<Real>(prop));
+    _prop_names.push_back(prop);
   }
 }
 
@@ -58,12 +69,29 @@ MaterialVectorPostprocessor::execute()
     _qp_ids.push_back(qp);
   }
 
-  for (unsigned int i = 0; i < _prop_vecs.size(); i++)
+  for (unsigned int i = 0; i < _prop_names.size(); i++)
   {
+    auto prop_name = _prop_names[i];
     auto prop = _prop_vecs[i];
-    auto vals = _prop_refs[i];
-    for (unsigned int qp = 0; qp < nqp; qp++)
-      prop->push_back((*vals)[qp]);
+    std::vector<Real> vals;
+    if (hasMaterialProperty<Real>(prop_name))
+    {
+      auto vals = dynamic_cast<const MaterialProperty<Real> *>(_prop_refs[i]);
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        prop->push_back((*vals)[qp]);
+    }
+    else if (hasMaterialProperty<unsigned int>(prop_name))
+    {
+      auto vals = dynamic_cast<const MaterialProperty<unsigned int> *>(_prop_refs[i]);
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        prop->push_back((*vals)[qp]);
+    }
+    else if (hasMaterialProperty<int>(prop_name))
+    {
+      auto vals = dynamic_cast<const MaterialProperty<int> *>(_prop_refs[i]);
+      for (unsigned int qp = 0; qp < nqp; qp++)
+        prop->push_back((*vals)[qp]);
+    }
   }
 }
 

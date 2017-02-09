@@ -41,7 +41,8 @@ private:
   VectorPostprocessorValue & _elem_ids;
   VectorPostprocessorValue & _qp_ids;
   std::vector<VectorPostprocessorValue *> _prop_vecs;
-  std::vector<const MaterialProperty<Real>*> _prop_refs;
+  std::vector<const PropertyValue*> _prop_refs;
+  std::vector<std::string> _prop_names;
 };
 
 #endif
