@@ -37,10 +37,10 @@ DisplacementAboutAxis::DisplacementAboutAxis(const InputParameters & parameters)
     _axis_direction(getParam<RealVectorValue>("axis_direction"))
 {
   if (_component < 0 || _component > 2)
-    mooseError("Invalid component given for " << name() << ": " << _component << "."  );
+    mooseError2("Invalid component given for ", name(), ": ", _component, "."  );
 
   if (_axis_direction.norm() == 0.)
-    mooseError("Please specify a non-zero direction vector for the axis_direction in " << name());
+    mooseError2("Please specify a non-zero direction vector for the axis_direction in ", name());
 }
 
 void

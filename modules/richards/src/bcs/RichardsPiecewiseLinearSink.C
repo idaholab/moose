@@ -161,7 +161,7 @@ RichardsPiecewiseLinearSink::computeQpResidual()
   if (_area_pp == 0.0)
   {
     if (flux != 0)
-      mooseError("RichardsPiecewiseLinearSink: flux is nonzero, but area is zero!\n");
+      mooseError2("RichardsPiecewiseLinearSink: flux is nonzero, but area is zero!\n");
     // if flux == 0, then leave it as zero.
   }
   else
@@ -253,7 +253,7 @@ RichardsPiecewiseLinearSink::jac(unsigned int wrt_num)
   if (_area_pp == 0.0)
   {
     if (deriv != 0)
-      mooseError("RichardsPiecewiseLinearSink: deriv is nonzero, but area is zero!\n");
+      mooseError2("RichardsPiecewiseLinearSink: deriv is nonzero, but area is zero!\n");
     // if deriv == 0, then leave it as zero.
   }
   else

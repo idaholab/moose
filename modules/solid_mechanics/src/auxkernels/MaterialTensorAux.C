@@ -43,7 +43,7 @@ MaterialTensorAux::computeValue()
       Moose::err << "qp_select = " << _qp_select << std::endl;
       Moose::err << "qp = " << _qp << std::endl;
       Moose::err << "q_point.size() = " << _q_point.size() << std::endl;
-      mooseError("The parameter qp_select is not valid");
+      mooseError2("The parameter qp_select is not valid");
     }
   }
   else

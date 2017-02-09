@@ -106,7 +106,7 @@ DependencyResolverInterface::cyclicDependencyError(CyclicDependencyException<T> 
   const typename std::multimap<T, T> & depends = e.getCyclicDependencies();
   for (typename std::multimap<T, T>::const_iterator it = depends.begin(); it != depends.end(); ++it)
     oss << (static_cast<T>(it->first))->name() << " -> " << (static_cast<T>(it->second))->name() << "\n";
-  mooseError(oss.str());
+  mooseError2(oss.str());
 
 }
 

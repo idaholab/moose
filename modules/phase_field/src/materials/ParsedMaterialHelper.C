@@ -70,7 +70,7 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
   if (_map_mode == USE_PARAM_NAMES)
     for (std::vector<std::string>::iterator it = _arg_constant_defaults.begin(); it != _arg_constant_defaults.end(); ++it)
       if (!_func_F->AddConstant(*it, _pars.defaultCoupledValue(*it)))
-        mooseError("Invalid constant name in parsed function object");
+        mooseError2("Invalid constant name in parsed function object");
 
   // set variable names based on map_mode
   switch (_map_mode)
@@ -83,19 +83,19 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
     case USE_PARAM_NAMES:
       // we do not allow vector coupling in this mode
       if (!_mapping_is_unique)
-        mooseError("Derivative parsed materials must couple exactly one non-linear variable per coupled variable input parameter.");
+        mooseError2("Derivative parsed materials must couple exactly one non-linear variable per coupled variable input parameter.");
 
       for (unsigned i = 0; i < _nargs; ++i)
         _variable_names[i] = _arg_param_names[i];
       break;
 
     default:
-      mooseError("Unnknown variable mapping mode.");
+      mooseError2("Unnknown variable mapping mode.");
   }
 
   // tolerance vectors
   if (tol_names.size() != tol_values.size())
-    mooseError("The parameter vectors tol_names and tol_values must have equal length.");
+    mooseError2("The parameter vectors tol_names and tol_values must have equal length.");
 
   // set tolerances
   _tol.resize(_nargs);
@@ -134,8 +134,8 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
 
   // build the base function
   if (_func_F->Parse(function_expression, variables) >= 0)
-     mooseError("Invalid function\n" << function_expression << '\n' <<
-                variables << "\nin ParsedMaterialHelper.\n" << _func_F->ErrorMsg());
+     mooseError2("Invalid function\n", function_expression, '\n',
+                variables, "\nin ParsedMaterialHelper.\n", _func_F->ErrorMsg());
 
   // create parameter passing buffer
   _func_params.resize(_nargs + nmat_props);
@@ -162,7 +162,7 @@ ParsedMaterialHelper::functionsOptimize()
   if (!_disable_fpoptimizer)
     _func_F->Optimize();
   if (_enable_jit && !_func_F->JITCompile())
-    mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
+    mooseWarning2("Failed to JIT compile expression, falling back to byte code interpretation.");
 }
 
 void

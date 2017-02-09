@@ -74,7 +74,7 @@ GBAnisotropyBase::GBAnisotropyBase(const InputParameters & parameters) :
   std::ifstream inFile(_Anisotropic_GB_file_name.c_str());
 
   if (!inFile)
-    mooseError("Can't open GB anisotropy input file");
+    mooseError2("Can't open GB anisotropy input file");
 
   for (unsigned int i = 0; i < 2; ++i)
     inFile.ignore(255, '\n'); // ignore line
@@ -123,7 +123,7 @@ GBAnisotropyBase::computeQpProperties()
       if (_inclination_anisotropy)
       {
         if (_mesh_dimension == 3)
-          mooseError("This material doesn't support inclination dependence for 3D for now!");
+          mooseError2("This material doesn't support inclination dependence for 3D for now!");
 
         Real phi_ave = libMesh::pi * n / (2.0 * _op_num);
         Real sin_phi = std::sin(2.0 * phi_ave);

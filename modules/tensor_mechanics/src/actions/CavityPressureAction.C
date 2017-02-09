@@ -53,7 +53,7 @@ CavityPressureAction::act()
     }
   }
   else
-    mooseError("The input file should specify a string of displacement names, e.g. 'displacements = disp_x disp_y disp_z'; these names should match the Variable block names");
+    mooseError2("The input file should specify a string of displacement names, e.g. 'displacements = disp_x disp_y disp_z'; these names should match the Variable block names");
 
   unsigned int _ndisp = displacements.size();
 
@@ -73,7 +73,7 @@ CavityPressureAction::act()
     save_in[2] = getParam<std::vector<AuxVariableName> >("save_in_disp_z");
 
   if (isParamValid("save_in") && save_in.size() != _ndisp)
-    mooseError("Number of save_in variables should equal to the number of displacement variables " << _ndisp);
+    mooseError2("Number of save_in variables should equal to the number of displacement variables ", _ndisp);
 
   PostprocessorName ppname;
   if (isParamValid("output"))

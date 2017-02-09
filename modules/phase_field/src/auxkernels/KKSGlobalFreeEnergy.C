@@ -31,7 +31,7 @@ KKSGlobalFreeEnergy::KKSGlobalFreeEnergy(const InputParameters & parameters) :
 {
   //Error check to ensure size of interfacial_vars is the same as kappa_names
   if (_nvars != _nkappas)
-    mooseError("Size of interfacial_vars is not equal to the size of kappa_names in KKSGlobalFreeEnergy");
+    mooseError2("Size of interfacial_vars is not equal to the size of kappa_names in KKSGlobalFreeEnergy");
 
   // Assign kappa values
   for (unsigned int i = 0; i < _nkappas; ++i)

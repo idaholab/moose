@@ -30,7 +30,8 @@ public:
   CoupledMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override { _mat_prop[_qp] = 1.0; }
+  virtual void computeQpProperties() override;
 
   std::string _mat_prop_name;
   MaterialProperty<Real> & _mat_prop;

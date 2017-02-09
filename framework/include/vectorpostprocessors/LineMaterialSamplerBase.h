@@ -118,7 +118,7 @@ LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & para
   for (unsigned int i = 0; i < material_property_names.size(); ++i)
   {
     if (!hasMaterialProperty<T>(material_property_names[i]))
-      mooseError("In LineMaterialSamplerBase material property: " + material_property_names[i] + " does not exist.");
+      mooseError2("In LineMaterialSamplerBase material property: " + material_property_names[i] + " does not exist.");
     _material_properties.push_back(&getMaterialProperty<T>(material_property_names[i]));
   }
 

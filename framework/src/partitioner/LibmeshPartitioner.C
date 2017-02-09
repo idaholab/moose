@@ -50,7 +50,7 @@ LibmeshPartitioner::LibmeshPartitioner(const InputParameters & params) :
   case 1: // centroid
   {
     if (!isParamValid("centroid_partitioner_direction"))
-      mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+      mooseError2("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
 
     MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
@@ -95,7 +95,7 @@ LibmeshPartitioner::clone() const
   case 1: // centroid
   {
     if (!isParamValid("centroid_partitioner_direction"))
-      mooseError("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
+      mooseError2("If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
 
     MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
@@ -118,7 +118,7 @@ return libmesh_make_unique<MortonSFCPartitioner>();
   }
   // this cannot happen but I need to trick the compiler into
   // believing me
-  mooseError("Error in LibmeshPartitioner: Supplied partitioner option causes error in clone()");
+  mooseError2("Error in LibmeshPartitioner: Supplied partitioner option causes error in clone()");
 return libmesh_make_unique<MetisPartitioner>();
 }
 

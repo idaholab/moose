@@ -73,7 +73,7 @@ Real NSPressureDerivs<T>::get_grad(unsigned i)
       return gam - 1.;
 
     default:
-      mooseError("Should not get here!");
+      mooseError2("Should not get here!");
       break;
   }
 }
@@ -140,7 +140,7 @@ Real NSPressureDerivs<T>::get_hess(unsigned i, unsigned j)
       return 0.;
 
     default:
-      mooseError("Should not get here!");
+      mooseError2("Should not get here!");
       break;
   }
 

@@ -94,7 +94,7 @@ CommonOutputAction::act()
     create("Exodus");
 #else
   if (getParam<bool>("exodus"))
-    mooseWarning("Exodus output requested but not enabled through libMesh");
+    mooseWarning2("Exodus output requested but not enabled through libMesh");
 #endif
 
 #ifdef LIBMESH_HAVE_NEMESIS_API
@@ -102,7 +102,7 @@ CommonOutputAction::act()
     create("Nemesis");
 #else
   if (getParam<bool>("nemesis"))
-    mooseWarning("Nemesis output requested but not enabled through libMesh");
+    mooseWarning2("Nemesis output requested but not enabled through libMesh");
 #endif
 
   // Only create a Console if screen output was not created
@@ -119,7 +119,7 @@ CommonOutputAction::act()
     create("VTK");
 #else
   if (getParam<bool>("vtk"))
-    mooseWarning("VTK output requested but not enabled through libMesh");
+    mooseWarning2("VTK output requested but not enabled through libMesh");
 #endif
 
   if (getParam<bool>("xda"))
@@ -163,7 +163,7 @@ CommonOutputAction::create(std::string object_type)
   std::transform(object_type.begin(), object_type.end(), object_type.begin(), ::tolower);
 
   // Create the action
-  MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddOutputAction", object_type, _action_params));
+  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddOutputAction", object_type, _action_params));
 
   // Set flag indicating that the object to be created was created with short-cut syntax
   action->getObjectParams().set<bool>("_built_by_moose") = true;

@@ -66,7 +66,7 @@ TimeExtremeValue::TimeExtremeValue(const InputParameters & parameters) :
         break;
 
       default:
-        mooseError("Unrecognzed _type == " << _type);
+        mooseError2("Unrecognzed _type == ", _type);
     }
   }
 }
@@ -93,7 +93,7 @@ TimeExtremeValue::execute()
       break;
 
     default:
-      mooseError("Unrecognzed _type == " << _type);
+      mooseError2("Unrecognzed _type == ", _type);
   }
 }
 

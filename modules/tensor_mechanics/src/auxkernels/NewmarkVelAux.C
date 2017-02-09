@@ -28,7 +28,7 @@ NewmarkVelAux::computeValue()
 {
   Real vel_old = _u_old[_qp];
   if (!isNodal())
-    mooseError("must run on a nodal variable");
+    mooseError2("must run on a nodal variable");
   // Calculates Velocity using Newmark time integration scheme
   return vel_old + (_dt*(1-_gamma))*_accel_old[_qp] + _gamma*_dt*_accel[_qp];
 }

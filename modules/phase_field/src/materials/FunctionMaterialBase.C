@@ -44,7 +44,7 @@ FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters) :
     {
       // make sure each nonlinear variable is coupled in only once
       if (std::find(_arg_names.begin(), _arg_names.end(), vars->second[j]->name()) != _arg_names.end())
-        mooseError("A nonlinear variable can only be coupled in once.");
+        mooseError2("A nonlinear variable can only be coupled in once.");
 
       // insert the map values
       //unsigned int number = vars->second[j]->number();

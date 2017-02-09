@@ -65,6 +65,6 @@ VerifyElementUniqueID::finalize()
   std::sort(_all_ids.begin(), _all_ids.end());
   std::vector<dof_id_type>::iterator it_end = std::unique(_all_ids.begin(), _all_ids.end());
   if (it_end != _all_ids.end())
-    mooseError("Duplicate unique_ids found!");
+    mooseError2("Duplicate unique_ids found!");
 }
 

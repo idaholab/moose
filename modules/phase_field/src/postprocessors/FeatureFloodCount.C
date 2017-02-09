@@ -339,7 +339,7 @@ FeatureFloodCount::sortAndLabel()
     mooseAssert(range_front <= range_back && range_back < _feature_count, "Indexing error in feature sets");
 
     if (!_single_map_mode && (_feature_sets[range_front]._var_index != map_num || _feature_sets[range_back]._var_index != map_num))
-      mooseError("Error in _feature_sets sorting, map index: " << map_num);
+      mooseError2("Error in _feature_sets sorting, map index: ", map_num);
 
     feature_offset += _feature_counts_per_map[map_num];
   }
@@ -422,7 +422,7 @@ FeatureFloodCount::finalize()
 const std::vector<unsigned int> &
 FeatureFloodCount::getVarToFeatureVector(dof_id_type elem_id) const
 {
-  mooseDoOnce(if (!_compute_var_to_feature_map) mooseError("Please set \"compute_var_to_feature_map = true\" to use this interface method"));
+  mooseDoOnce(if (!_compute_var_to_feature_map) mooseError2("Please set \"compute_var_to_feature_map = true\" to use this interface method"));
 
   const auto pos = _entity_var_to_features.find(elem_id);
   if (pos != _entity_var_to_features.end())
@@ -617,7 +617,7 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id, FieldType field_type, s
     case FieldType::CENTROID:
     {
       if (_periodic_node_map.size())
-        mooseDoOnce(mooseWarning("Centroids are not correct when using periodic boundaries, contact the MOOSE team"));
+        mooseDoOnce(mooseWarning2("Centroids are not correct when using periodic boundaries, contact the MOOSE team"));
 
       // If this element contains the centroid of one of features, return one
       const auto * elem_ptr = _mesh.elemPtr(entity_id);
@@ -911,7 +911,7 @@ FeatureFloodCount::updateFieldInfo()
 
     // TODO: Fixme
     if (!_global_numbering)
-      mooseError("Local numbering currently disabled");
+      mooseError2("Local numbering currently disabled");
 
 //    // If the user doesn't want a global numbering, we'll reset the feature_number for each map
 //    if (!_global_numbering && feature._var_index != old_var_index)
@@ -1290,7 +1290,7 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
     for (auto i = beginIndex(rhs._bboxes); i < rhs._bboxes.size(); ++i)
       oss << "Max: " << rhs._bboxes[i].max() << " Min: " << rhs._bboxes[i].min() << '\n';
 
-    mooseError("No Bounding Boxes Expanded - This is a catastrophic error!\n" << oss.str());
+    ::mooseError2("No Bounding Boxes Expanded - This is a catastrophic error!\n", oss.str());
   }
 }
 

@@ -68,7 +68,7 @@ CombinedCreepPlasticity::initialSetup()
       }
       if (!found)
       {
-        mooseError("Unable to find submodel " + submodels[i_name]);
+        mooseError2("Unable to find submodel " + submodels[i_name]);
       }
     }
   }
@@ -159,7 +159,7 @@ CombinedCreepPlasticity::computeStress( const Elem & current_elem,
      delS > _absolute_tolerance &&
      (delS/first_delS) > _relative_tolerance)
   {
-    mooseError("Max stress iteration hit during CombinedCreepPlasticity solve!");
+    mooseError2("Max stress iteration hit during CombinedCreepPlasticity solve!");
   }
 
   strain_increment = elastic_strain_increment;

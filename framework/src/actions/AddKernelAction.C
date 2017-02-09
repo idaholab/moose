@@ -34,7 +34,7 @@ AddKernelAction::act()
   else
   {
     if (getAllTasks().find("add_aux_bc") != getAllTasks().end())
-      mooseWarning("The [AuxBCs] block is deprecated, all AuxKernels including both block and boundary restricted should be added within the [AuxKernels] block");
+      mooseWarning2("The [AuxBCs] block is deprecated, all AuxKernels including both block and boundary restricted should be added within the [AuxKernels] block");
 
     _problem->addAuxKernel(_type, _name, _moose_object_pars);
   }

@@ -52,7 +52,7 @@ MooseObjectPtr
 Factory::create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid /* =0 */, bool print_deprecated /* =true */)
 {
   if (print_deprecated)
-    mooseDeprecated("Factory::create() is deprecated, please use Factory::create<T>() instead");
+    mooseDeprecated2("Factory::create() is deprecated, please use Factory::create<T>() instead");
 
   // Pointer to the object constructor
   std::map<std::string, buildPtr>::iterator it = _name_to_build_pointer.find(obj_name);
@@ -89,7 +89,7 @@ time_t Factory::parseTime(const std::string t_str)
 {
   // The string must be a certain length to be valid
   if (t_str.size() != 16)
-    mooseError("The deprecated time not formatted correctly; it must be given as mm/dd/yyyy HH:MM");
+    mooseError2("The deprecated time not formatted correctly; it must be given as mm/dd/yyyy HH:MM");
 
   // Store the time, the time must be specified as: mm/dd/yyyy HH:MM
   time_t t_end;
@@ -139,7 +139,7 @@ void Factory::deprecatedMessage(const std::string obj_name)
       msg << "Update your application using the '" << name_it->second << "' object";
 
     // Produce the error message
-    mooseError(msg.str());
+    mooseError2(msg.str());
   }
 
   // Expiring object
@@ -154,7 +154,7 @@ void Factory::deprecatedMessage(const std::string obj_name)
       msg << "Replaced " << obj_name << " with " <<  name_it->second;
 
     // Produce the error message
-    mooseDeprecated(msg.str());
+    mooseDeprecated2(msg.str());
   }
 }
 
@@ -172,7 +172,7 @@ Factory::reportUnregisteredError(const std::string & obj_name) const
   oss << "\n\nMake sure you have compiled the library and either set the \"library_path\" variable "
       << "in your input file or exported \"MOOSE_LIBRARY_PATH\".";
 
-  mooseError(oss.str());
+  mooseError2(oss.str());
 }
 
 std::vector<std::string>

@@ -11,7 +11,6 @@
 * MOOSE Environment package (choose one):
     * Sierra 10.12: !MOOSEPACKAGE arch=osx10.12 return=link!
     * El Capitan 10.11: !MOOSEPACKAGE arch=osx10.11 return=link!
-    * Yosemite 10.10: !MOOSEPACKAGE arch=osx10.10 return=link!
 
 !!! note
     If you have any opened terminals at this point, you will need to close them, and re-open them in order to use the MOOSE environment. The following instructions will ultimately fail if you do not.

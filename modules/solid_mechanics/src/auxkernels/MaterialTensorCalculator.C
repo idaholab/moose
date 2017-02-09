@@ -35,21 +35,21 @@ MaterialTensorCalculator::MaterialTensorCalculator(const InputParameters & param
   if (_quantity_moose_enum.isValid())
   {
     if ( _index > 0 )
-      mooseError("Cannot define an index and a quantity in " + name);
+      mooseError2("Cannot define an index and a quantity in " + name);
     else
       _quantity = QUANTITY_ENUM(int(_quantity_moose_enum));
   }
   else
   {
     if ( _index < 0 )
-      mooseError("Neither an index nor a quantity listed for " + name);
+      mooseError2("Neither an index nor a quantity listed for " + name);
     else
       _quantity = COMPONENT; // default
   }
 
   if (_index > -1 && _index > 5)
   {
-    mooseError("The material tensor index must be >= 0 and <= 5 OR < 0 (off).");
+    mooseError2("The material tensor index must be >= 0 and <= 5 OR < 0 (off).");
   }
 }
 
@@ -128,7 +128,7 @@ MaterialTensorCalculator::getTensorQuantity(const SymmTensor & tensor,
       break;
 
     default:
-    mooseError("Unknown quantity in MaterialTensorAux: " + _quantity_moose_enum.operator std::string());
+    mooseError2("Unknown quantity in MaterialTensorAux: " + _quantity_moose_enum.operator std::string());
   }
   return value;
 }

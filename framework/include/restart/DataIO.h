@@ -63,7 +63,7 @@ inline void storeHelper(std::ostream & stream, std::vector<P> & data, void * con
  * Shared pointer helper routine
  */
 template<typename P>
-inline void storeHelper(std::ostream & stream, MooseSharedPointer<P> & data, void * context);
+inline void storeHelper(std::ostream & stream, std::shared_ptr<P> & data, void * context);
 
 /**
  * Unique pointer helper routine
@@ -111,7 +111,7 @@ inline void loadHelper(std::istream & stream, std::vector<P> & data, void * cont
  * Shared Pointer helper routine
  */
 template<typename P>
-inline void loadHelper(std::istream & stream, MooseSharedPointer<P> & data, void * context);
+inline void loadHelper(std::istream & stream, std::shared_ptr<P> & data, void * context);
 
 /**
  * Unique Pointer helper routine
@@ -168,7 +168,7 @@ template<typename T>
 inline void
 dataStore(std::ostream & /*stream*/, T * & /*v*/, void * /*context*/)
 {
-  mooseError("Attempting to store a raw pointer type: \"" << demangle(typeid(T).name()) << " *\" as restartable data!\nWrite a custom dataStore() template specialization!\n\n");
+  mooseError2("Attempting to store a raw pointer type: \"", demangle(typeid(T).name()), " *\" as restartable data!\nWrite a custom dataStore() template specialization!\n\n");
 }
 
 template<typename T, typename U>
@@ -193,7 +193,7 @@ dataStore(std::ostream & stream, std::vector<T> & v, void * context)
 
 template<typename T>
 inline void
-dataStore(std::ostream & stream, MooseSharedPointer<T> & v, void * context)
+dataStore(std::ostream & stream, std::shared_ptr<T> & v, void * context)
 {
   T * tmp = v.get();
 
@@ -337,7 +337,7 @@ dataLoad(std::istream & stream, T & v, void * /*context*/)
 template<typename T>
 void dataLoad(std::istream & /*stream*/, T * & /*v*/, void * /*context*/)
 {
-  mooseError("Attempting to load a raw pointer type: \"" << demangle(typeid(T).name()) << " *\" as restartable data!\nWrite a custom dataLoad() template specialization!\n\n");
+  mooseError2("Attempting to load a raw pointer type: \"", demangle(typeid(T).name()), " *\" as restartable data!\nWrite a custom dataLoad() template specialization!\n\n");
 }
 
 template<typename T, typename U>
@@ -364,7 +364,7 @@ dataLoad(std::istream & stream, std::vector<T> & v, void * context)
 
 template<typename T>
 inline void
-dataLoad(std::istream & stream, MooseSharedPointer<T> & v, void * context)
+dataLoad(std::istream & stream, std::shared_ptr<T> & v, void * context)
 {
   T * tmp = v.get();
 
@@ -503,10 +503,10 @@ storeHelper(std::ostream & stream, std::vector<P> & data, void * context)
   dataStore(stream, data, context);
 }
 
-// MooseSharedPointer Helper Function
+// std::shared_ptr Helper Function
 template<typename P>
 inline void
-storeHelper(std::ostream & stream, MooseSharedPointer<P> & data, void * context)
+storeHelper(std::ostream & stream, std::shared_ptr<P> & data, void * context)
 {
   dataStore(stream, data, context);
 }
@@ -567,10 +567,10 @@ loadHelper(std::istream & stream, std::vector<P> & data, void * context)
   dataLoad(stream, data, context);
 }
 
-// MooseSharedPointer Helper Function
+// std::shared_ptr Helper Function
 template<typename P>
 inline void
-loadHelper(std::istream & stream, MooseSharedPointer<P> & data, void * context)
+loadHelper(std::istream & stream, std::shared_ptr<P> & data, void * context)
 {
   dataLoad(stream, data, context);
 }

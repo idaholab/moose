@@ -27,7 +27,7 @@ ComputeCosseratSmallStrain::ComputeCosseratSmallStrain(const InputParameters & p
     _grad_wc(_nrots)
 {
   if (_nrots != 3)
-    mooseError("ComputeCosseratSmallStrain: This Material is only defined for 3-dimensional simulations so 3 Cosserat rotation variables are needed");
+    mooseError2("ComputeCosseratSmallStrain: This Material is only defined for 3-dimensional simulations so 3 Cosserat rotation variables are needed");
   for (unsigned i = 0; i < _nrots; ++i)
   {
     _wc[i] = &coupledValue("Cosserat_rotations", i);

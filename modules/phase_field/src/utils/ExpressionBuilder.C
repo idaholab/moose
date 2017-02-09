@@ -130,7 +130,7 @@ ExpressionBuilder::EBBinaryOpTermNode::precedence() const
       return 9;
   }
 
-  mooseError("Unknown type.");
+  mooseError2("Unknown type.");
 }
 
 std::string
@@ -176,7 +176,7 @@ ExpressionBuilder::EBFunction::operator ExpressionBuilder::EBTerm() const
 {
   unsigned int narg = _arguments.size();
   if (narg != _eval_arguments.size())
-    mooseError("EBFunction is used wth a different number of arguments than it was defined with.");
+    mooseError2("EBFunction is used wth a different number of arguments than it was defined with.");
 
   // prepare a copy of the function term to perform the substitution on
   EBTerm result(_term);
@@ -431,14 +431,14 @@ ExpressionBuilder::EBTermSubstitution::EBTermSubstitution(const EBTerm & find, c
   // the expression we want to substitute (has to be a symbol node)
   const EBSymbolNode * find_root = dynamic_cast<const EBSymbolNode *>(find.getRoot());
   if (find_root == NULL)
-    mooseError("Function arguments must be pure symbols.");
+    mooseError2("Function arguments must be pure symbols.");
   _find = find_root->stringify();
 
   // the term we want to substitute with
   if (replace.getRoot() != NULL)
     _replace = replace.cloneRoot();
   else
-    mooseError("Trying to substitute in an empty term for " << _find);
+    mooseError2("Trying to substitute in an empty term for ", _find);
 }
 
 ExpressionBuilder::EBTermNode *

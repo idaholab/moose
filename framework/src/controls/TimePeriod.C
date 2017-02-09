@@ -40,11 +40,11 @@ TimePeriod::TimePeriod(const InputParameters & parameters) :
 {
   // Error if not a transient problem
   if (!_fe_problem.isTransient())
-    mooseError("TimePeriod objects only operate on transient problems.");
+    mooseError2("TimePeriod objects only operate on transient problems.");
 
   // Error if enable and disable lists are both empty
   if (_enable.empty() && _disable.empty())
-    mooseError("Either or both of the 'enable_objects' and 'disable_objects' parameters must be set.");
+    mooseError2("Either or both of the 'enable_objects' and 'disable_objects' parameters must be set.");
 
   // Set start time
   if (isParamValid("start_time"))
@@ -60,7 +60,7 @@ TimePeriod::TimePeriod(const InputParameters & parameters) :
 
   // Check that start/end time are the same length
   if (_end_time.size() != _start_time.size())
-    mooseError("The end time and start time vectors must be the same length.");
+    mooseError2("The end time and start time vectors must be the same length.");
 
   // Resize the start/end times if only a single value given
   if (_end_time.size() == 1 && (_disable.size() > 1 || _enable.size() > 1) )
@@ -70,12 +70,12 @@ TimePeriod::TimePeriod(const InputParameters & parameters) :
     _start_time = std::vector<Real>(size, _start_time[0]);
   }
   else if (_end_time.size() != _disable.size() && _end_time.size() != _enable.size())
-    mooseError("The start/end time input must be a scalar or the same length as the enable/disable lists.");
+    mooseError2("The start/end time input must be a scalar or the same length as the enable/disable lists.");
 
   // Test that start and end times are in proper order
   for (unsigned int i = 0; i < _start_time.size(); ++i)
     if (_start_time[i] >= _end_time[i])
-      mooseError("The start time(s) must be less than the end time(s).");
+      mooseError2("The start time(s) must be less than the end time(s).");
 }
 
 

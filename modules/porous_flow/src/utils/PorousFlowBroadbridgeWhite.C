@@ -42,7 +42,7 @@ LambertW(Real z)
 
   /* Uncomment this stuff is you ever need to call with a negative argument
   if (z < -em1)
-    mooseError("LambertW: bad argument " << z << "\n");
+    mooseError2("LambertW: bad argument ", z, "\n");
 
   if (0.0 == z)
     return 0.0;
@@ -85,7 +85,7 @@ LambertW(Real z)
       return w; /* rel-abs error */
   }
   /* should never get here */
-  mooseError("LambertW: No convergence at z= " << z << "\n");
+  mooseError2("LambertW: No convergence at z= ", z, "\n");
 }
 
 Real

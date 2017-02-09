@@ -43,7 +43,7 @@ ComputeReturnMappingStress::initialSetup()
     if (rrr)
       _models.push_back(rrr);
     else
-      mooseError("Model " + models[i] + " is not compatible with ComputeReturnMappingStress");
+      mooseError2("Model " + models[i] + " is not compatible with ComputeReturnMappingStress");
   }
 }
 
@@ -157,7 +157,7 @@ ComputeReturnMappingStress::updateQpStress(RankTwoTensor & strain_increment,
   if (counter == _max_its &&
       l2norm_delta_stress > _absolute_tolerance &&
       (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance)
-    mooseError("Max stress iteration hit during ComputeReturnMappingStress solve!");
+    mooseError2("Max stress iteration hit during ComputeReturnMappingStress solve!");
 
   strain_increment = elastic_strain_increment;
 }

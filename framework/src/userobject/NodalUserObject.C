@@ -56,5 +56,5 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters) :
 void
 NodalUserObject::subdomainSetup()
 {
-  mooseError("NodalUserObjects do not execute subdomainSetup method, this function does nothing and should not be used.");
+  mooseError2("NodalUserObjects do not execute subdomainSetup method, this function does nothing and should not be used.");
 }

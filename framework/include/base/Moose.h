@@ -95,7 +95,7 @@ extern bool _warnings_are_errors;
 extern bool _deprecated_is_error;
 
 /**
- * Variable to turn on exceptions during mooseError() and mooseWarning(), should
+ * Variable to turn on exceptions during mooseError2() and mooseWarning2(), should
  * only be used with MOOSE unit.
  */
 extern bool _throw_on_error;
@@ -141,12 +141,5 @@ void enableFPE(bool on = true);
 #endif
 
 } // namespace Moose
-
-/**
- * Global alias to Moose::out. This is here so that _console can be used anywhere
- * throughout the framework (namely by the mooseWarning() macro). If there's a local
- * object _console, that will be used, if not, we'll fall back to just using Moose::out.
- */
-extern OStreamProxy & _console;
 
 #endif /* MOOSE_H */

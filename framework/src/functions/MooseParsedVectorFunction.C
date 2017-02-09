@@ -44,7 +44,7 @@ MooseParsedVectorFunction::vectorValue(Real t, const Point & p)
 RealGradient
 MooseParsedVectorFunction::gradient(Real /*t*/, const Point & /*p*/)
 {
-  mooseError("The gradient method is not defined in MooseParsedVectorFunction");
+  mooseError2("The gradient method is not defined in MooseParsedVectorFunction");
 }
 
 void

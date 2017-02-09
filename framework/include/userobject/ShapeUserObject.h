@@ -104,7 +104,7 @@ ShapeUserObject<T>::ShapeUserObject(const InputParameters & parameters, ShapeTyp
     _grad_phi(type == ShapeType::Element ? this->_assembly.gradPhi() : this->_assembly.gradPhiFace()),
     _compute_jacobians(MooseObject::getParam<bool>("compute_jacobians"))
 {
-  mooseWarning("Jacobian calculation in UserObjects is an experimental capability with a potentially unstable interface.");
+  mooseWarning2("Jacobian calculation in UserObjects is an experimental capability with a potentially unstable interface.");
 }
 
 template<typename T>

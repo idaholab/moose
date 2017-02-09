@@ -48,7 +48,7 @@ void
 SetupMeshCompleteAction::act()
 {
   if (!_mesh)
-    mooseError("No mesh file was supplied and no generation block was provided");
+    mooseError2("No mesh file was supplied and no generation block was provided");
 
   if (_current_task == "execute_mesh_modifiers")
   {

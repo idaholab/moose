@@ -179,11 +179,11 @@ NSEnergyViscousBC::computeQpOffDiagJacobian(unsigned jvar)
       } // end case 1,2,3
 
       case 4: // energy
-        mooseError("Shouldn't get here, this is the on-diagonal entry!");
+        mooseError2("Shouldn't get here, this is the on-diagonal entry!");
         break;
 
       default:
-        mooseError("Invalid m value.");
+        mooseError2("Invalid m value.");
         break;
     }
 

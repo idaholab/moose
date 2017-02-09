@@ -29,7 +29,7 @@ FunctionScalarIC::FunctionScalarIC(const InputParameters & parameters) :
 {
   std::vector<FunctionName> funcs = getParam<std::vector<FunctionName> >("function");
   if (funcs.size() != _ncomp)
-    mooseError("number of functions must be equal to the scalar variable order");
+    mooseError2("number of functions must be equal to the scalar variable order");
 
   for (const auto & func_name : funcs)
     _func.push_back(&getFunctionByName(func_name));

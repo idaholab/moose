@@ -27,7 +27,7 @@ PorousFlowSquarePulsePointSource::PorousFlowSquarePulsePointSource(const InputPa
 {
   /// Sanity check to ensure that the end_time is greater than the start_time
   if (_end_time <= _start_time)
-    mooseError("Start time for PorousFlowSquarePulsePointSource is " << _start_time << " but it must be less than end time " << _end_time);
+    mooseError2("Start time for PorousFlowSquarePulsePointSource is ", _start_time, " but it must be less than end time ", _end_time);
 }
 
 void

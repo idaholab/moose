@@ -40,7 +40,7 @@ GrainTrackerElasticity::newGrain(unsigned int new_grain_id)
     if (_random_rotations)
       angles.random();
     else
-      mooseError("GrainTrackerElasticity has run out of grain rotation data.");
+      mooseError2("GrainTrackerElasticity has run out of grain rotation data.");
   }
 
   RankFourTensor C_ijkl = _C_ijkl;

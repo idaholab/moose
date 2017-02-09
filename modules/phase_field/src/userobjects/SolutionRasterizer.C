@@ -32,7 +32,7 @@ SolutionRasterizer::SolutionRasterizer(const InputParameters & parameters) :
   if (_raster_mode == "FILTER")
   {
     if (!isParamValid("threshold"))
-      mooseError("Please specify 'threshold' parameter for raster_mode = FILTER");
+      mooseError2("Please specify 'threshold' parameter for raster_mode = FILTER");
     _threshold = getParam<Real>("threshold");
   }
 }
@@ -104,7 +104,7 @@ SolutionRasterizer::initialSetup()
     // the new number should always be lower -> shorter than the old one, but we check to be sure
     if (newline0.size() > len0)
     {
-      mooseWarning("SolutionRasterizer could not update XYZ atom count in header.");
+      mooseWarning2("SolutionRasterizer could not update XYZ atom count in header.");
       return;
     }
 

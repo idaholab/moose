@@ -38,7 +38,7 @@ ContactPenetrationAuxAction::act()
 {
   if (!_problem->getDisplacedProblem())
   {
-    mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the Mesh block.");
+    mooseError2("Contact requires updated coordinates.  Use the 'displacements = ...' line in the Mesh block.");
   }
 
   {

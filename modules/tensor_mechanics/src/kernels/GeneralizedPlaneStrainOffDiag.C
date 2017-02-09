@@ -39,7 +39,7 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
 {
   const std::vector<NonlinearVariableName> & nl_vnames(getParam<std::vector<NonlinearVariableName> >("displacements"));
   if (nl_vnames.size() > 2)
-    mooseError("GeneralizedPlaneStrainOffDiag only works for 1D axisymmetric or 2D Cartesian generalized plane strain cases!");
+    mooseError2("GeneralizedPlaneStrainOffDiag only works for 1D axisymmetric or 2D Cartesian generalized plane strain cases!");
 
   for (unsigned int i = 0; i < nl_vnames.size(); ++i)
     _disp_var.push_back(&_subproblem.getVariable(_tid, nl_vnames[i]));

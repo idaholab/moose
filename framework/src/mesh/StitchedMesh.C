@@ -43,7 +43,7 @@ StitchedMesh::StitchedMesh(const InputParameters & parameters) :
     _stitch_boundaries(getParam<std::vector<BoundaryName>>("stitch_boundaries"))
 {
   if (_files.empty())
-    mooseError("Must specify at least one mesh file for StitchedMesh");
+    mooseError2("Must specify at least one mesh file for StitchedMesh");
 
   // The StitchedMesh class only works with ReplicatedMesh
   errorIfDistributedMesh("StitchedMesh");
@@ -51,7 +51,7 @@ StitchedMesh::StitchedMesh(const InputParameters & parameters) :
   // Get the original mesh
   _original_mesh = dynamic_cast<ReplicatedMesh *>(&getMesh());
   if (!_original_mesh)
-    mooseError("StitchedMesh does not support DistributedMesh");
+    mooseError2("StitchedMesh does not support DistributedMesh");
 
   // Read the first mesh into the original mesh... then we'll stitch all of the others into that
   _original_mesh->read(_files[0]);
@@ -68,7 +68,7 @@ StitchedMesh::StitchedMesh(const InputParameters & parameters) :
   }
 
   if (_stitch_boundaries.size() % 2 != 0)
-    mooseError("There must be an even amount of stitch_boundaries in " << name());
+    mooseError2("There must be an even amount of stitch_boundaries in ", name());
 
   _stitch_boundaries_pairs.reserve(_stitch_boundaries.size() / 2);
 

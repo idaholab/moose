@@ -62,7 +62,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      mooseError("Can't interpolate to a MultiApp!!");
+      mooseError2("Can't interpolate to a MultiApp!!");
       break;
     }
     case FROM_MULTIAPP:
@@ -78,7 +78,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
           idi = new RadialBasisInterpolation<LIBMESH_DIM>(_communicator, _radius);
           break;
         default:
-          mooseError("Unknown interpolation type!");
+          mooseError2("Unknown interpolation type!");
       }
 
       std::vector<Point>  &src_pts  (idi->get_source_points());

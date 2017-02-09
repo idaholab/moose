@@ -78,7 +78,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
 
   // Check that the mesh pointer was defined, it is required for this class to operate
   if (_blk_mesh == NULL)
-    mooseError("The input parameters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
+    mooseError2("The input parameters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
 
   // Populate the MaterialData pointer
   if (_blk_feproblem != NULL)
@@ -115,7 +115,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
 
       // Test if the variable blockIDs are valid for this object
       if (!isBlockSubset(var_ids))
-         mooseError("In object " << name << " the defined blocks are outside of the domain of the variable");
+         mooseError2("In object ", name, " the defined blocks are outside of the domain of the variable");
     }
   }
 
@@ -127,7 +127,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
   // Produce error if the object is not allowed to be both block and boundary restricted
   if (!_blk_dual_restrictable && !_boundary_ids.empty() && !_boundary_ids.empty())
     if (!_boundary_ids.empty() && _boundary_ids.find(Moose::ANY_BOUNDARY_ID) == _boundary_ids.end())
-      mooseError("Attempted to restrict the object '" << name << "' to a block, but the object is already restricted by boundary");
+      mooseError2("Attempted to restrict the object '", name, "' to a block, but the object is already restricted by boundary");
 
   // If no blocks were defined above, specify that it is valid on all blocks
   if (_blk_ids.empty())
@@ -150,7 +150,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
       msg << "The object '" << name << "' contains the following block ids that do no exist on the mesh:";
       for (const auto & id : diff)
         msg << " " << id;
-      mooseError(msg.str());
+      mooseError2(msg.str());
     }
   }
 }
@@ -278,7 +278,7 @@ BlockRestrictable::variableSubdomainIDs(const InputParameters & parameters) cons
   else if (parameters.have_parameter<AuxVariableName>("variable"))
     var = &_blk_feproblem->getVariable(tid, parameters.get<AuxVariableName>("variable"));
   else
-    mooseError("Unknown variable.");
+    mooseError2("Unknown variable.");
 
   // Return the block ids for the variable
   return sys->getSubdomainsForVar(var->number());
@@ -311,7 +311,7 @@ BlockRestrictable::hasBlockMaterialPropertyHelper(const std::string & prop_name)
     // If block materials exist, populated the set of properties that were declared
     if (warehouse.hasActiveBlockObjects(id))
     {
-      const std::vector<MooseSharedPointer<Material> > & mats = warehouse.getActiveBlockObjects(id);
+      const std::vector<std::shared_ptr<Material>> & mats = warehouse.getActiveBlockObjects(id);
       for (const auto & mat : mats)
       {
         const std::set<std::string> & mat_props = mat->getSuppliedItems();
@@ -332,20 +332,20 @@ Moose::CoordinateSystemType
 BlockRestrictable::getBlockCoordSystem()
 {
   if (!_blk_mesh)
-    mooseError("No mesh available in BlockRestrictable::checkCoordSystem()");
+    mooseError2("No mesh available in BlockRestrictable::checkCoordSystem()");
   if (!_blk_feproblem)
-    mooseError("No problem available in BlockRestrictable::checkCoordSystem()");
+    mooseError2("No problem available in BlockRestrictable::checkCoordSystem()");
 
   const auto & subdomains = blockRestricted() ? blockIDs() : meshBlockIDs();
 
   if (subdomains.empty())
-    mooseError("No subdomains found in the problem.");
+    mooseError2("No subdomains found in the problem.");
 
   // make sure all subdomains are using the same coordinate system
   auto coord_system = _blk_feproblem->getCoordSystem(*subdomains.begin());
   for (auto subdomain : subdomains)
     if (_blk_feproblem->getCoordSystem(subdomain) != coord_system)
-      mooseError("This object requires all subdomains to have the same coordinate system.");
+      mooseError2("This object requires all subdomains to have the same coordinate system.");
 
   return coord_system;
 }

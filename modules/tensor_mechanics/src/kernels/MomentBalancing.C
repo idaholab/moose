@@ -35,18 +35,18 @@ MomentBalancing::MomentBalancing(const InputParameters & parameters) :
     _disp_var(_ndisp)
 {
   if (_nrots != 3)
-    mooseError("MomentBalancing: This Kernel is only defined for 3-dimensional simulations so 3 Cosserat rotation variables are needed");
+    mooseError2("MomentBalancing: This Kernel is only defined for 3-dimensional simulations so 3 Cosserat rotation variables are needed");
   for (unsigned i = 0; i < _nrots; ++i)
     _wc_var[i] = coupled("Cosserat_rotations", i);
 
   if (_ndisp != 3)
-    mooseError("MomentBalancing: This Kernel is only defined for 3-dimensional simulations so 3 displacement variables are needed");
+    mooseError2("MomentBalancing: This Kernel is only defined for 3-dimensional simulations so 3 displacement variables are needed");
   for (unsigned i = 0; i < _ndisp; ++i)
     _disp_var[i] = coupled("displacements", i);
 
   // Following check is necessary to ensure the correct Jacobian is calculated
   if (_wc_var[_component] != _var.number())
-    mooseError("MomentBalancing: The variable for this Kernel must be equal to the Cosserat rotation variable defined by the \"component\" and the \"Cosserat_rotations\" parameters");
+    mooseError2("MomentBalancing: The variable for this Kernel must be equal to the Cosserat rotation variable defined by the \"component\" and the \"Cosserat_rotations\" parameters");
 }
 
 Real

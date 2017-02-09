@@ -31,12 +31,12 @@ MooseParsedFunctionBase::MooseParsedFunctionBase(const InputParameters & paramet
     _vals(parameters.get<std::vector<std::string> >("vals"))
 {
   if (_vars.size() != _vals.size())
-    mooseError("Number of vars must match the number of vals for a MooseParsedFunction!");
+    mooseError2("Number of vars must match the number of vals for a MooseParsedFunction!");
 
   // Loop through the variables assigned by the user and give an error if x,y,z,t are used
   for (const auto & var : _vars)
     if (var.find_first_of("xyzt") != std::string::npos && var.size() == 1)
-      mooseError("The variables \"x, y, z, and t\" in the ParsedFunction are pre-declared for use and must not be declared in \"vars\"");
+      mooseError2("The variables \"x, y, z, and t\" in the ParsedFunction are pre-declared for use and must not be declared in \"vars\"");
 }
 
 MooseParsedFunctionBase::~MooseParsedFunctionBase()
@@ -48,7 +48,7 @@ MooseParsedFunctionBase::verifyFunction(const std::string & function_str)
 {
   // Throws an error if quotes are found
   if (function_str.find("\"") != std::string::npos)
-    mooseError("The value in ParsedFunction contains quotes(\") which cannot be properly parsed");
+    mooseError2("The value in ParsedFunction contains quotes(\") which cannot be properly parsed");
 
   // Return the input equation (no error)
   return function_str;

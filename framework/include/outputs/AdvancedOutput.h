@@ -361,18 +361,18 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
   bool has_limited_pps = false;
 
   // Loop through each of the execution flags
-  const std::vector<MooseSharedPointer<UserObject> > & objects = warehouse.getActiveObjects();
-  for (std::vector<MooseSharedPointer<UserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++ it)
+  const auto & objects = warehouse.getActiveObjects();
+  for (const auto & object : objects)
   {
     // Store the name in the available postprocessors, if it does not already exist in the list
-    MooseSharedPointer<postprocessor_type> pps = MooseSharedNamespace::dynamic_pointer_cast<postprocessor_type>(*it);
+    std::shared_ptr<postprocessor_type> pps = std::dynamic_pointer_cast<postprocessor_type>(object);
     if (!pps)
       continue;
 
     execute_data.available.insert(pps->PPName());
 
     // Extract the list of outputs
-    std::set<OutputName> pps_outputs = pps->getOutputs();
+    const auto & pps_outputs = pps->getOutputs();
 
     // Check that the outputs lists are valid
     T::_app.getOutputWarehouse().checkOutputs(pps_outputs);
@@ -383,9 +383,9 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
     {
       if (!T::_advanced_execute_on.contains(execute_data_name) ||
           (T::_advanced_execute_on[execute_data_name].isValid() && T::_advanced_execute_on[execute_data_name].contains("none")))
-        mooseWarning("Postprocessor '" << pps->PPName()
-                     << "' has requested to be output by the '" << T::name()
-                     << "' output, but postprocessor output is not support by this type of output object.");
+        mooseWarning2("Postprocessor '", pps->PPName(),
+                      "' has requested to be output by the '", T::name(),
+                      "' output, but postprocessor output is not support by this type of output object.");
     }
 
     // Set the flag state for postprocessors that utilize 'outputs' parameter
@@ -400,9 +400,9 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
     if (pp_on.contains("none"))
     {
       if (execute_on_name == "execute_postprocessors_on")
-        mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the '" << T::name() << "' output object.");
+        mooseWarning2("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor output is disabled for the '", T::name(), "' output object.");
       else if (execute_on_name == "execute_vectorpostprocessors_on")
-        mooseWarning("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector postprocessor output is disabled for the '" << T::name() << "' output object.");
+        mooseWarning2("A VectorPostprocessor utilizes the 'outputs' parameter; however, vector postprocessor output is disabled for the '", T::name(), "' output object.");
     }
   }
 }

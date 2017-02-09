@@ -28,10 +28,10 @@ PorousFlowPropertyAux::PorousFlowPropertyAux(const InputParameters & parameters)
 {
   // Check that the phase and fluid_component are valid
   if (_phase >= _dictator.numPhases())
-    mooseError("Phase number in the AuxKernel " << _name << " is greater than the number of phases in the problem");
+    mooseError2("Phase number in the AuxKernel ", _name, " is greater than the number of phases in the problem");
 
   if (_fluid_component >= _dictator.numComponents())
-    mooseError("Fluid component number in the AuxKernel " << _name << " is greater than the number of phases in the problem");
+    mooseError2("Fluid component number in the AuxKernel ", _name, " is greater than the number of phases in the problem");
 
   // Only get material properties required by this instance of the AuxKernel
   switch (_property_enum)

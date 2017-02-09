@@ -156,7 +156,7 @@ protected:
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
   /// Time integrator
-  MooseSharedPointer<TimeIntegrator> _time_integrator;
+  std::shared_ptr<TimeIntegrator> _time_integrator;
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
 

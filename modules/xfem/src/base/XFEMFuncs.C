@@ -86,7 +86,7 @@ void dunavant_rule2(const Real* wts, const Real* a, const Real* b, const unsigne
       }
 
       default:
-        mooseError("Unknown permutation id: " << permutation_ids[p] << "!");
+        mooseError2("Unknown permutation id: ", permutation_ids[p], "!");
     }
   }
 }
@@ -135,7 +135,7 @@ void stdQuadr2D(unsigned int nen, unsigned int iord, std::vector<std::vector<Rea
       }
     }
     else
-      mooseError("Invalid quadrature order = " + Moose::stringify(iord) + " for quad elements");
+      mooseError2("Invalid quadrature order = " + Moose::stringify(iord) + " for quad elements");
   }
   else if (nen == 3) // triangle
   {
@@ -214,10 +214,10 @@ void stdQuadr2D(unsigned int nen, unsigned int iord, std::vector<std::vector<Rea
       }
     }
     else
-      mooseError("Invalid quadrature order = " + Moose::stringify(iord) + " for triangle elements");
+      mooseError2("Invalid quadrature order = " + Moose::stringify(iord) + " for triangle elements");
   }
   else
-    mooseError("Invalid 2D element type");
+    mooseError2("Invalid 2D element type");
 }
 
 void wissmannPoints(unsigned int nqp, std::vector<std::vector<Real> > &wss)
@@ -251,7 +251,7 @@ void wissmannPoints(unsigned int nqp, std::vector<std::vector<Real> > &wss)
     wss[5][2] = wss[4][2];
   }
   else
-    mooseError("Unknown Wissmann quadrature type");
+    mooseError2("Unknown Wissmann quadrature type");
 }
 
 void shapeFunc2D(unsigned int nen, std::vector<Real> &ss, std::vector<Point> &xl,
@@ -330,7 +330,7 @@ void shapeFunc2D(unsigned int nen, std::vector<Real> &ss, std::vector<Point> &xl
     }
   }
   else
-    mooseError("ShapeFunc2D only works for linear quads and tris!");
+    mooseError2("ShapeFunc2D only works for linear quads and tris!");
 }
 
 double r8vec_norm(int n, double a[])
@@ -405,12 +405,12 @@ int plane_normal_line_exp_int_3d(double pp[3], double normal[3], double p1[3], d
 //
 //  Make sure the line is not degenerate.
   if (line_exp_is_degenerate_nd(DIM_NUM, p1, p2))
-    mooseError("PLANE_NORMAL_LINE_EXP_INT_3D - Fatal error!  The line is degenerate.");
+    mooseError2("PLANE_NORMAL_LINE_EXP_INT_3D - Fatal error!  The line is degenerate.");
 //
 //  Make sure the plane normal vector is a unit vector.
   temp = r8vec_norm(DIM_NUM, normal);
   if (temp == 0.0)
-    mooseError("PLANE_NORMAL_LINE_EXP_INT_3D - Fatal error!  The normal vector of the plane is degenerate.");
+    mooseError2("PLANE_NORMAL_LINE_EXP_INT_3D - Fatal error!  The normal vector of the plane is degenerate.");
 
   for (unsigned int i = 0; i < DIM_NUM; ++i)
     normal[i] = normal[i]/temp;

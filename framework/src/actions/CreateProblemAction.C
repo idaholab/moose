@@ -70,7 +70,7 @@ CreateProblemAction::act()
 #endif
       _problem = _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);
       if (!_problem.get())
-        mooseError("Problem has to be of a FEProblemBase type");
+        mooseError2("Problem has to be of a FEProblemBase type");
     }
     // set up the problem
     _problem->setCoordSystem(_blocks, _coord_sys);
@@ -98,7 +98,7 @@ CreateProblemAction::act()
         restart_file_base = MooseUtils::getRecoveryFileBase(files);
 
         if (restart_file_base == "")
-          mooseError("Unable to find suitable restart file");
+          mooseError2("Unable to find suitable restart file");
       }
 
       _console << "\nUsing " << restart_file_base << " for restart.\n\n";

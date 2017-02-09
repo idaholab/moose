@@ -87,7 +87,7 @@ TiledMesh::buildMesh()
   ReplicatedMesh * serial_mesh = dynamic_cast<ReplicatedMesh *>( &getMesh() );
 
   if (!serial_mesh)
-    mooseError("Error, TiledMesh calls stitch_meshes() which only works on ReplicatedMesh.");
+    mooseError2("Error, TiledMesh calls stitch_meshes() which only works on ReplicatedMesh.");
   else
   {
     std::string mesh_file(getParam<MeshFileName>("file"));

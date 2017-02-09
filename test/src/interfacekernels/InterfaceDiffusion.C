@@ -32,7 +32,7 @@ InterfaceDiffusion::InterfaceDiffusion(const InputParameters & parameters) :
 {
   if (!parameters.isParamValid("boundary"))
   {
-    mooseError("In order to use the InterfaceDiffusion dgkernel, you must specify a boundary where it will live.");
+    mooseError2("In order to use the InterfaceDiffusion dgkernel, you must specify a boundary where it will live.");
   }
 }
 

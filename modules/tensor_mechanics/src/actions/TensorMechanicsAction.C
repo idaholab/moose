@@ -111,7 +111,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     else if (incremental && _strain == Strain::Finite)
       _strain_and_increment = StrainAndIncrement::FiniteIncremental;
     else
-      mooseError("Internal error");
+      mooseError2("Internal error");
   }
   else
   {
@@ -120,7 +120,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     else if (_strain == Strain::Finite)
       _strain_and_increment = StrainAndIncrement::FiniteIncremental;
     else
-      mooseError("Internal error");
+      mooseError2("Internal error");
   }
 
   // determine if displaced mesh is to be used
@@ -129,7 +129,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   {
     bool use_displaced_mesh_param = getParam<bool>("use_displaced_mesh");
     if (use_displaced_mesh_param != _use_displaced_mesh && params.isParamSetByUser("strain"))
-      mooseError("Wrong combination of use displaced mesh and strain model");
+      mooseError2("Wrong combination of use displaced mesh and strain model");
     _use_displaced_mesh = use_displaced_mesh_param;
   }
 
@@ -138,14 +138,14 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _coupled_displacements[i] = _displacements[i];
 
   if (_save_in.size() != 0 && _save_in.size() != _ndisp)
-    mooseError("Number of save_in variables should equal to the number of displacement variables " << _ndisp);
+    mooseError2("Number of save_in variables should equal to the number of displacement variables ", _ndisp);
 
   if (_diag_save_in.size() != 0 && _diag_save_in.size() != _ndisp)
-    mooseError("Number of diag_save_in variables should equal to the number of displacement variables " << _ndisp);
+    mooseError2("Number of diag_save_in variables should equal to the number of displacement variables ", _ndisp);
 
   // plane strain consistency check
   if (_planar_formulation != PlanarFormulation::None && _ndisp != 2)
-    mooseError("Plane strain only works in 2 dimensions");
+    mooseError2("Plane strain only works in 2 dimensions");
 
   // convert output vareiable names to lower case
   for (const auto & out : getParam<MultiMooseEnum>("generate_output"))
@@ -157,7 +157,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
 
   // Error if volumetric locking correction is true for 1D problems
   if (_ndisp == 1 && getParam<bool>("volumetric_locking_correction"))
-    mooseError("Volumetric locking correction should be set to false for 1D problems.");
+    mooseError2("Volumetric locking correction should be set to false for 1D problems.");
 }
 
 void
@@ -247,7 +247,7 @@ TensorMechanicsAction::act()
       if (type_it != type_map.end())
         type = type_it->second;
       else
-        mooseError("Unsupported strain formulation");
+        mooseError2("Unsupported strain formulation");
     }
     else if (_planar_formulation == PlanarFormulation::PlaneStrain ||
              _planar_formulation == PlanarFormulation::GeneralizedPlaneStrain)
@@ -262,10 +262,10 @@ TensorMechanicsAction::act()
       if (type_it != type_map.end())
         type = type_it->second;
       else
-        mooseError("Unsupported coordinate system for plane strain.");
+        mooseError2("Unsupported coordinate system for plane strain.");
     }
     else
-      mooseError("Unsupported planar formulation");
+      mooseError2("Unsupported planar formulation");
 
     // set material parameters
     auto params = _factory.getValidParams(type);
@@ -323,13 +323,13 @@ TensorMechanicsAction::actSubdomainChecks()
     // use either block restriction list or list of all subdomains in the mesh
     const auto & check_subdomains = _subdomain_ids.empty() ? _problem->mesh().meshSubdomains() : _subdomain_ids;
     if (check_subdomains.empty())
-      mooseError("No subdomains found");
+      mooseError2("No subdomains found");
 
     // make sure all subdomains are using the same coordinate system
     _coord_system = _problem->getCoordSystem(*check_subdomains.begin());
     for (auto subdomain : check_subdomains)
       if (_problem->getCoordSystem(subdomain) != _coord_system)
-        mooseError("The TensorMechanics action requires all subdomains to have the same coordinate system.");
+        mooseError2("The TensorMechanics action requires all subdomains to have the same coordinate system.");
   }
 }
 
@@ -390,7 +390,7 @@ TensorMechanicsAction::actOutputGeneration()
               params.set<MooseEnum>("scalar_type") = r2sa.second.first;
             }
             else
-              mooseError("Internal error. The permitted tensor shortcuts in '_ranktwoscalaraux_table' must be keys in the '_ranktwoaux_table'.");
+              mooseError2("Internal error. The permitted tensor shortcuts in '_ranktwoscalaraux_table' must be keys in the '_ranktwoaux_table'.");
           }
 
       if (type != "")
@@ -400,7 +400,7 @@ TensorMechanicsAction::actOutputGeneration()
         _problem->addAuxKernel(type, out, params);
       }
       else
-        mooseError("Unable to add output AuxKernel");
+        mooseError2("Unable to add output AuxKernel");
     }
   }
 }
@@ -422,10 +422,10 @@ TensorMechanicsAction::actGatherActionParameters()
       const auto size_after = _subdomain_id_union.size();
 
       if (size_after != size_before + added_size)
-        mooseError("The block restrictions in the TensorMechanics/Master actions must be non-overlapping.");
+        mooseError2("The block restrictions in the TensorMechanics/Master actions must be non-overlapping.");
 
       if (added_size == 0 && actions.size() > 1)
-        mooseError("No TensorMechanics/Master action can be block unrestricted if more than one TensorMechanics/Master action is specified.");
+        mooseError2("No TensorMechanics/Master action can be block unrestricted if more than one TensorMechanics/Master action is specified.");
     }
   }
 }
@@ -443,7 +443,7 @@ TensorMechanicsAction::getKernelType()
   if (type_it != type_map.end())
     return type_it->second;
   else
-    mooseError("Unsupported coordinate system");
+    mooseError2("Unsupported coordinate system");
 }
 
 InputParameters
@@ -459,7 +459,7 @@ TensorMechanicsAction::getKernelParameters(std::string type)
   if (parameters().isParamValid("temp"))
   {
     params.set<NonlinearVariableName>("temperature") = getParam<NonlinearVariableName>("temp");
-    mooseDeprecated("Use 'temperature' instead of 'temp'");
+    mooseDeprecated2("Use 'temperature' instead of 'temp'");
   }
 
   return params;

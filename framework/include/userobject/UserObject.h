@@ -89,7 +89,7 @@ public:
    * If a UserObject overrides this function that UserObject can then be used in a
    * Transfer to transfer information from one domain to another.
    */
-  virtual Real spatialValue(const Point & /*p*/) const { mooseError(name() << " does not satisfy the Spatial UserObject interface!"); }
+  virtual Real spatialValue(const Point & /*p*/) const { mooseError2(name(), " does not satisfy the Spatial UserObject interface!"); }
 
   /**
    * Must override.

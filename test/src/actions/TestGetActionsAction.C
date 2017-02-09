@@ -44,10 +44,10 @@ TestGetActionsAction::act()
   {
     if (i > 0)
       if (actions[i]->name() < actions[i-1]->name())
-        mooseError("actions are not sorted properly");
+        mooseError2("actions are not sorted properly");
     auto action = &_awh.getAction<AddMaterialAction>(actions[i]->name());
     if (actions[i] != action)
-      mooseError("getAction is returning the wrong action, something is really wrong");
+      mooseError2("getAction is returning the wrong action, something is really wrong");
   }
 
   // test to make sure all actions are consistent across processors
@@ -59,13 +59,13 @@ TestGetActionsAction::act()
       auto size = actions.size();
       comm.receive(pid, size);
       if (size != actions.size())
-        mooseError("error occurs during getting actions, sizes of actions on master and rank " << pid << " are different");
+        mooseError2("error occurs during getting actions, sizes of actions on master and rank ", pid, " are different");
       for (auto i = beginIndex(actions); i < actions.size(); ++i)
       {
         std::string action_name;
         comm.receive(pid, action_name);
         if (action_name != actions[i]->name())
-          mooseError("error occurs during getting actions, action names are inconsistent on master and rank " << pid);
+          mooseError2("error occurs during getting actions, action names are inconsistent on master and rank ", pid);
       }
     }
   }

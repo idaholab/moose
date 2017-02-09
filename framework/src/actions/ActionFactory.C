@@ -27,7 +27,7 @@ ActionFactory::~ActionFactory()
 {
 }
 
-MooseSharedPointer<Action>
+std::shared_ptr<Action>
 ActionFactory::create(const std::string & action, const std::string & action_name, InputParameters parameters)
 {
   parameters.addPrivateParam("_moose_app", &_app);
@@ -57,11 +57,11 @@ ActionFactory::create(const std::string & action, const std::string & action_nam
     build_info = &(iters.first->second);
 
   if (!build_info)
-    mooseError(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + action_name);
+    mooseError2(std::string("Unable to find buildable Action from supplied InputParameters Object for ") + action_name);
 
   // Add the name to the parameters and create the object
   parameters.set<std::string>("_action_name") = action_name;
-  MooseSharedPointer<Action> action_obj = (*build_info->_build_pointer)(parameters);
+  std::shared_ptr<Action> action_obj = (*build_info->_build_pointer)(parameters);
 
   if (parameters.get<std::string>("task") == "")
     action_obj->appendTask(build_info->_task);
@@ -80,7 +80,7 @@ ActionFactory::getValidParams(const std::string & name)
   ActionFactory::iterator iter = _name_to_build_info.find(name);
 
   if (iter == _name_to_build_info.end())
-    mooseError(std::string("A '") + name + "' is not a registered Action\n\n");
+    mooseError2(std::string("A '") + name + "' is not a registered Action\n\n");
 
   InputParameters params = (iter->second._params_pointer)();
   params.addPrivateParam<unsigned int>("unique_id", iter->second._unique_id);

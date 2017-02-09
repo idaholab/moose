@@ -95,5 +95,5 @@ NSMomentumInviscidFlux::computeJacobianHelper(unsigned int m)
       return -1.0 * (gam - 1.0) * _phi[_j][_qp] * _grad_test[_i][_qp](_component);
   }
 
-  mooseError("Shouldn't get here!");
+  mooseError2("Shouldn't get here!");
 }

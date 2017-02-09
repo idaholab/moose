@@ -28,7 +28,7 @@ HexPolycrystalIC::HexPolycrystalIC(const InputParameters & parameters) :
     _perturbation_percent(getParam<Real>("perturbation_percent"))
 {
   if (_perturbation_percent < 0.0 || _perturbation_percent > 1.0)
-    mooseError("perturbation_percent out of range");
+    mooseError2("perturbation_percent out of range");
   _random.seed(_tid, getParam<unsigned int>("rand_seed"));
 }
 
@@ -43,7 +43,7 @@ HexPolycrystalIC::initialSetup()
     grain_pow *= root;
 
   if (_grain_num != grain_pow)
-    mooseError("HexPolycrystalIC requires a square or cubic number depending on the mesh dimension");
+    mooseError2("HexPolycrystalIC requires a square or cubic number depending on the mesh dimension");
 
   // Set up domain bounds with mesh tools
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
@@ -54,7 +54,7 @@ HexPolycrystalIC::initialSetup()
   _range = _top_right - _bottom_left;
 
   if (_op_num > _grain_num)
-     mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
+     mooseError2("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
 
   _centerpoints.resize(_grain_num);
   _assigned_op.resize(_grain_num);

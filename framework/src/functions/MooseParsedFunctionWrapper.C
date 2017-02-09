@@ -147,7 +147,7 @@ MooseParsedFunctionWrapper::initialize()
     {
       // Use istringstream to convert, if it fails produce an error, otherwise add the variable to the _vals variable
       if (!(ss >> tmp))
-        mooseError("The input value '" << _vals_input[i] << "' was not understood, it must be a Real Number, Postprocessor, or Scalar Variable");
+        mooseError2("The input value '", _vals_input[i], "' was not understood, it must be a Real Number, Postprocessor, or Scalar Variable");
       else
         _vals.push_back(tmp);
     }

@@ -141,7 +141,7 @@ SymmElasticityTensor::stiffness( const unsigned int i, const unsigned int j,
     std::stringstream s;
     s << "Wrong index in stiffness calculation: ";
     s << i << " " << j;
-    mooseError( s.str() );
+    mooseError2( s.str() );
   }
   return test * b;
 }
@@ -151,7 +151,7 @@ SymmElasticityTensor::convertFrom9x9( const ColumnMajorMatrix & input )
 {
   if ( input.numEntries() != 81 )
   {
-    mooseError( "Cannot convert from ColumnMajorMatrix (wrong size)" );
+    mooseError2( "Cannot convert from ColumnMajorMatrix (wrong size)" );
   }
 
   _val[ 0] = input(0,0);
@@ -188,7 +188,7 @@ SymmElasticityTensor::convertFrom6x6( const ColumnMajorMatrix & input )
 {
   if ( input.numEntries() != 36 )
   {
-    mooseError( "Cannot convert from ColumnMajorMatrix (wrong size)" );
+    mooseError2( "Cannot convert from ColumnMajorMatrix (wrong size)" );
   }
 
   _val[ 0] = input(0,0);
@@ -359,20 +359,20 @@ SymmElasticityTensor::rotateFromGlobalToLocal( const ColumnMajorMatrix & R )
 void
 SymmElasticityTensor::adjustForCracking( const RealVectorValue & /*crack_flags*/)
 {
-  mooseError("adjustForCracking method not defined");
+  mooseError2("adjustForCracking method not defined");
 }
 
 void
 SymmElasticityTensor::adjustForCrackingWithShearRetention( const RealVectorValue & /*crack_flags*/)
 {
-  mooseError("adjustForCrackingWithShearRetention method not defined");
+  mooseError2("adjustForCrackingWithShearRetention method not defined");
 }
 
 void
 SymmElasticityTensor::fillFromInputVector(std::vector<Real> input, bool all)
 {
   if ((all == true && input.size() != 21) || (all == false && input.size() != 9 ))
-    mooseError("Please check the number of entries in the stiffness input vector.");
+    mooseError2("Please check the number of entries in the stiffness input vector.");
 
   if (all == true)
   {

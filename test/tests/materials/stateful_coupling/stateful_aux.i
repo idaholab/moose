@@ -56,6 +56,8 @@
   [./stateful_mat]
     type = StatefulTest
     coupled = aux
+    prop_names = thermal_conductivity
+    prop_values = -1 # ignored
     output_properties = thermal_conductivity
     outputs = exodus
   [../]

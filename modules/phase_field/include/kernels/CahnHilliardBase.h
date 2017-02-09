@@ -79,7 +79,7 @@ CahnHilliardBase<T>::CahnHilliardBase(const InputParameters & parameters) :
   {
     const VariableName iname = _coupled_moose_vars[i]->name();
     if (iname == _var.name())
-      mooseError("The kernel variable should not be specified in the coupled `args` parameter.");
+      mooseError2("The kernel variable should not be specified in the coupled `args` parameter.");
 
     _second_derivatives[i+1] = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), iname);
     _third_derivatives[i+1]  = &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), _var.name(), iname);
@@ -128,7 +128,7 @@ CahnHilliardBase<T>::computeGradDFDCons(PFFunctionType type)
       return res;
   }
 
-  mooseError("Internal error");
+  mooseError2("Internal error");
 }
 
 template<typename T>

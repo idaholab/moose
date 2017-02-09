@@ -24,7 +24,7 @@ GradParsedFunction::GradParsedFunction(const InputParameters & parameters) :
 {
   _len = _direction.norm();
   if (_len == 0)
-    mooseError("The direction in the GradParsedFunction must have positive length.");
+    mooseError2("The direction in the GradParsedFunction must have positive length.");
   _direction /= 2.0; // note - so we can do central differences
 }
 

@@ -127,5 +127,5 @@ Steady::checkIntegrity()
 {
   // check to make sure that we don't have any time kernels in this simulation (Steady State)
   if (_problem.getNonlinearSystemBase().containsTimeKernel())
-    mooseError("You have specified time kernels in your steady state simulation");
+    mooseError2("You have specified time kernels in your steady state simulation");
 }

@@ -43,7 +43,7 @@ SideSetsFromNormals::SideSetsFromNormals(const InputParameters & parameters) :
 
 
   if (_normals.size() != _boundary_names.size())
-    mooseError("normal list and boundary list are not the same length");
+    mooseError2("normal list and boundary list are not the same length");
 
   // Make sure that the normals are normalized
   for (auto & normal : _normals)
@@ -57,7 +57,7 @@ void
 SideSetsFromNormals::modify()
 {
   if (!_mesh_ptr)
-    mooseError("_mesh_ptr must be initialized before calling SideSetsFromNormals::modify()!");
+    mooseError2("_mesh_ptr must be initialized before calling SideSetsFromNormals::modify()!");
 
   // We can't call this in the constructor, it appears that _mesh_ptr is always NULL there.
   _mesh_ptr->errorIfDistributedMesh("SideSetsFromNormals");

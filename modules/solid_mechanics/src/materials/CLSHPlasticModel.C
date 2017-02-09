@@ -50,7 +50,7 @@ CLSHPlasticModel::computeStressInitialize(unsigned qp, Real effectiveTrialStress
   const SymmIsotropicElasticityTensor * eT = dynamic_cast<const SymmIsotropicElasticityTensor*>(&elasticityTensor);
   if (!eT)
   {
-    mooseError("CLSHPlasticModel requires a SymmIsotropicElasticityTensor");
+    mooseError2("CLSHPlasticModel requires a SymmIsotropicElasticityTensor");
   }
   _shear_modulus = eT->shearModulus();
   _yield_condition = effectiveTrialStress - _hardening_variable_old[qp] - _yield_stress;

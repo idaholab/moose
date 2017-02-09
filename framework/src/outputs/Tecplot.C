@@ -50,7 +50,7 @@ Tecplot::Tecplot(const InputParameters & parameters) :
 #ifndef LIBMESH_HAVE_TECPLOT_API
   if (_binary)
   {
-    mooseWarning("Teclplot binary output requested but not available, outputting ASCII format instead.");
+    mooseWarning2("Teclplot binary output requested but not available, outputting ASCII format instead.");
     _binary = false;
   }
 #endif

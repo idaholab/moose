@@ -102,25 +102,24 @@
 #define registerNamedPartitioner(obj, name)         registerNamedObject(obj, name)
 
 /**
- * Typedef to wrap shared pointer type
+ * alias to wrap shared pointer type
  */
-typedef MooseSharedPointer<MooseObject> MooseObjectPtr;
+using MooseObjectPtr = std::shared_ptr<MooseObject>;
 
 /**
- * Typedef for function to build objects
+ * alias for validParams function
  */
-typedef MooseObjectPtr (*buildPtr)(const InputParameters & parameters);
-typedef MooseObjectPtr (*buildLegacyPtr)(const std::string & name, InputParameters parameters);
+using paramsPtr = InputParameters (*)();
 
 /**
- * Typedef for validParams
+ * alias for method to build objects
  */
-typedef InputParameters (*paramsPtr)();
+using buildPtr = MooseObjectPtr (*)(const InputParameters & parameters);
 
 /**
- * Typedef for registered Object iterator
+ * alias for registered Object iterator
  */
-typedef std::map<std::string, paramsPtr>::iterator registeredMooseObjectIterator;
+using registeredMooseObjectIterator = std::map<std::string, paramsPtr>::iterator;
 
 /**
  * Build an object of type T
@@ -163,7 +162,7 @@ public:
         _name_to_params_pointer[obj_name] = &validParams<T>;
       }
       else
-        mooseError("Object '" + obj_name + "' already registered.");
+        mooseError2("Object '" + obj_name + "' already registered.");
     }
     // TODO: Possibly store and print information about objects that are skipped here?
   }
@@ -215,8 +214,8 @@ public:
    * @param print_deprecated controls the deprecated message
    * @return The created object
    */
-  MooseSharedPointer<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters,
-                                         THREAD_ID tid = 0, bool print_deprecated = true);
+  std::shared_ptr<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters,
+                                      THREAD_ID tid = 0, bool print_deprecated = true);
 
   /**
    * Build an object (must be registered)
@@ -227,12 +226,12 @@ public:
    * @return The created object
    */
   template<typename T>
-  MooseSharedPointer<T>
+  std::shared_ptr<T>
   create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0)
   {
-    MooseSharedPointer<T> new_object = MooseSharedNamespace::dynamic_pointer_cast<T>(create(obj_name, name, parameters, tid, false));
+    std::shared_ptr<T> new_object = std::dynamic_pointer_cast<T>(create(obj_name, name, parameters, tid, false));
     if (!new_object)
-      mooseError("We expected to create an object of type '" + demangle(typeid(T).name())
+      mooseError2("We expected to create an object of type '" + demangle(typeid(T).name())
                  + "'.\nInstead we received a parameters object for type '" + obj_name
                  + "'.\nDid you call the wrong \"add\" method in your Action?");
 

@@ -37,7 +37,7 @@ PorousFlow2PhasePS::PorousFlow2PhasePS(const InputParameters & parameters) :
     _dseff_ds(1.0 / (1.0 - _sat_lr))
 {
   if (_dictator.numPhases() != 2)
-    mooseError("The Dictator proclaims that the number of phases is " << _dictator.numPhases() << " whereas PorousFlow2PhasePS can only be used for 2-phase simulation.  Be aware that the Dictator has noted your mistake.");
+    mooseError2("The Dictator proclaims that the number of phases is ", _dictator.numPhases(), " whereas PorousFlow2PhasePS can only be used for 2-phase simulation.  Be aware that the Dictator has noted your mistake.");
 }
 
 void

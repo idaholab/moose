@@ -42,16 +42,16 @@ SmoothSuperellipsoidBaseIC::initialSetup()
   computeSuperellipsoidCenters();
 
   if (_centers.size() != _as.size())
-    mooseError("_center and semiaxis _as vectors are not the same size in the Superellipsoid IC");
+    mooseError2("_center and semiaxis _as vectors are not the same size in the Superellipsoid IC");
   if (_centers.size() != _bs.size())
-    mooseError("_center and semiaxis _bs vectors are not the same size in the Superellipsoid IC");
+    mooseError2("_center and semiaxis _bs vectors are not the same size in the Superellipsoid IC");
   if (_centers.size() != _cs.size())
-    mooseError("_center and semiaxis _cs vectors are not the same size in the Superellipsoid IC");
+    mooseError2("_center and semiaxis _cs vectors are not the same size in the Superellipsoid IC");
   if (_centers.size() != _ns.size())
-    mooseError("_center and exponent _ns vectors are not the same size in the Superellipsoid IC");
+    mooseError2("_center and exponent _ns vectors are not the same size in the Superellipsoid IC");
 
   if (_centers.size() < 1)
-    mooseError("_centers, _as, _bs, _cs, and _ns were not initialized in the Superellipsoid IC");
+    mooseError2("_centers, _as, _bs, _cs, and _ns were not initialized in the Superellipsoid IC");
 }
 
 Real

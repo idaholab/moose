@@ -59,16 +59,16 @@ OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters) :
    */
   Real len = w.norm();
   if (len == 0.0)
-    mooseError("Length of width_direction vector is zero in " << name);
+    mooseError2("Length of width_direction vector is zero in ", name);
   w /= len;
 
   len = l.norm();
   if (len == 0.0)
-    mooseError("Length of length_direction vector is zero in " << name);
+    mooseError2("Length of length_direction vector is zero in ", name);
   l /= len;
 
   if (w*l > 1E-10)
-    mooseError("width_direction and length_direction are not perpendicular in " << name);
+    mooseError2("width_direction and length_direction are not perpendicular in ", name);
 
   // The rotation matrix!
   _rot_matrix = new RealTensorValue(w, l, w.cross(l));

@@ -29,7 +29,7 @@ FunctionScalarAux::FunctionScalarAux(const InputParameters & parameters) :
 {
   std::vector<FunctionName> funcs = getParam<std::vector<FunctionName> >("function");
   if (funcs.size() != _var.order())
-    mooseError("number of functions is not equal to the number of scalar variable components");
+    mooseError2("number of functions is not equal to the number of scalar variable components");
 
   for (const auto & func : funcs)
     _functions.push_back(&getFunctionByName(func));

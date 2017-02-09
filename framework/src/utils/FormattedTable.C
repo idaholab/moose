@@ -97,7 +97,7 @@ FormattedTable::FormattedTable(const FormattedTable & o) :
     _csv_precision(14)
 {
   if (_stream_open)
-    mooseError ("Copying a FormattedTable with an open stream is not supported");
+    mooseError2 ("Copying a FormattedTable with an open stream is not supported");
 
   for (const auto & it : o._data)
     _data[it.first] = it.second;
@@ -129,7 +129,7 @@ FormattedTable::getLastData(const std::string & name)
 
   std::map<std::string, Real>::iterator it = (_data[_last_key]).find(name);
   if (it == (_data[_last_key]).end())
-    mooseError("No Data found for name: " + name);
+    mooseError2("No Data found for name: " + name);
 
   return it->second;
 }
@@ -410,7 +410,7 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
   }
 
   else
-    mooseError("gnuplot format \"" + format + "\" is not supported.");
+    mooseError2("gnuplot format \"" + format + "\" is not supported.");
 
   // Write the data to disk
   std::string dat_name = base_file + ".dat";
@@ -470,11 +470,11 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
 /* We aren't going to run gnuplot automatically
 
   if (!system(NULL))
-    mooseError("No way to run gnuplot on this computer");
+    mooseError2("No way to run gnuplot on this computer");
 
   std::string command = "gnuplot " + gp_name;
   if (system(command.c_str()))
-    mooseError("gnuplot command failed");
+    mooseError2("gnuplot command failed");
 */
 }
 

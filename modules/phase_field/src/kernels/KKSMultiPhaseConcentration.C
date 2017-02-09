@@ -35,13 +35,13 @@ KKSMultiPhaseConcentration::KKSMultiPhaseConcentration(const InputParameters & p
 {
   //Check to make sure the the number of hj's is the same as the number of cj's
   if (_num_j != _hj_names.size())
-    mooseError("Need to pass in as many hj_names as cjs in KKSMultiPhaseConcentration" << name());
+    mooseError2("Need to pass in as many hj_names as cjs in KKSMultiPhaseConcentration", name());
   //Check to make sure the the number of etas is the same as the number of cj's
   if (_num_j != _eta_names.size())
-    mooseError("Need to pass in as many etas as cjs in KKSMultiPhaseConcentration" << name());
+    mooseError2("Need to pass in as many etas as cjs in KKSMultiPhaseConcentration", name());
 
   if (_num_j == 0)
-    mooseError("Need to supply at least 1 phase concentration cj in KKSMultiPhaseConcentration" << name());
+    mooseError2("Need to supply at least 1 phase concentration cj in KKSMultiPhaseConcentration", name());
 
   // get order parameter names and variable indices
   for (unsigned int i = 0; i < _num_j; ++i)
@@ -68,7 +68,7 @@ KKSMultiPhaseConcentration::KKSMultiPhaseConcentration(const InputParameters & p
 
   // Check to make sure the nonlinear variable is set to one of the cj's
   if (_k < 0)
-    mooseError("Need to set nonlinear variable to one of the cj's in KKSMultiPhaseConcentration" << name());
+    mooseError2("Need to set nonlinear variable to one of the cj's in KKSMultiPhaseConcentration", name());
 }
 
 Real

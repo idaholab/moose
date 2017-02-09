@@ -94,6 +94,7 @@ NSEnergyViscousFlux::computeQpOffDiagJacobian(unsigned int jvar)
           for (unsigned int ell = 0; ell < LIBMESH_DIM; ++ell)
             intermediate_value += _vst_derivs.dtau(k, ell, m) * U(ell) / rho; // Note: pass 'm' to dtau, it will convert it internally
 
+
           // Hit accumulated value with test function
           value += intermediate_value * _grad_test[_i][_qp](k);
         } // end for k

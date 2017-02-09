@@ -38,3 +38,11 @@ MooseObject::MooseObject(const InputParameters & parameters) :
     _enabled(getParam<bool>("enable"))
 {
 }
+
+[[noreturn]] void
+callMooseErrorRaw(std::string & msg, MooseApp * app)
+{
+  app->getOutputWarehouse().mooseConsole();
+  moose::internal::mooseErrorRaw(msg, app->name());
+}
+

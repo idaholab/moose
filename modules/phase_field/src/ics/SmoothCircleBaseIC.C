@@ -42,10 +42,10 @@ SmoothCircleBaseIC::initialSetup()
   computeCircleCenters();
 
   if (_centers.size() != _radii.size())
-    mooseError("_center and _radii vectors are not the same size in the Circle IC");
+    mooseError2("_center and _radii vectors are not the same size in the Circle IC");
 
   if (_centers.size() < 1)
-    mooseError("_center and _radii were not initialized in the Circle IC");
+    mooseError2("_center and _radii were not initialized in the Circle IC");
 }
 
 Real

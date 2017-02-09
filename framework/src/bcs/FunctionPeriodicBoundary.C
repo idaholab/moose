@@ -32,7 +32,7 @@ FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblemBase & feproblem, st
 
   // Make certain the the dimensions agree
   if (_dim != feproblem.mesh().dimension())
-    mooseError("Transform function has to have the same dimension as the problem being solved.");
+    mooseError2("Transform function has to have the same dimension as the problem being solved.");
 
   // Initialize the functions (i.e., call thier initialSetup methods)
   init();
@@ -72,7 +72,7 @@ FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt) const
     return Point(_tr_x->value(t, pt), _tr_y->value(t, pt), _tr_z->value(t, pt));
 
   default:
-    mooseError("Unsupported dimension");
+    mooseError2("Unsupported dimension");
     break;
   }
 
@@ -82,7 +82,7 @@ FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt) const
 std::unique_ptr<PeriodicBoundaryBase> FunctionPeriodicBoundary::clone(TransformationType t) const
 {
   if (t==INVERSE)
-    mooseError("No way to automatically clone() an inverse FunctionPeriodicBoundary object");
+    mooseError2("No way to automatically clone() an inverse FunctionPeriodicBoundary object");
 
   return libmesh_make_unique<FunctionPeriodicBoundary>(*this);
 }
@@ -105,7 +105,7 @@ FunctionPeriodicBoundary::init()
     _tr_z->initialSetup();
     break;
   default:
-    mooseError("Unsupported dimension");
+    mooseError2("Unsupported dimension");
     break;
   }
 }

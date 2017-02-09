@@ -38,7 +38,7 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters) :
       _pf_var_num[_moose_var_num[i]] = i;
     else
       // should not couple AuxVariables to the Dictator (Jacobian entries are not calculated for them)
-      mooseError("PorousFlowDictator: AuxVariables variables must not be coupled into the Dictator for this is against specification #1984.  Variable number " << i << " is an AuxVariable.");
+      mooseError2("PorousFlowDictator: AuxVariables variables must not be coupled into the Dictator for this is against specification #1984.  Variable number ", i, " is an AuxVariable.");
 }
 
 unsigned int
@@ -63,7 +63,7 @@ unsigned int
 PorousFlowDictator::porousFlowVariableNum(unsigned int moose_var_num) const
 {
   if (moose_var_num >= _pf_var_num.size() || _pf_var_num[moose_var_num] == _num_variables)
-    mooseError("The Dictator proclaims that the moose variable with number " << moose_var_num << " is not a PorousFlow variable.  Exiting with error code 1984.");
+    mooseError2("The Dictator proclaims that the moose variable with number ", moose_var_num, " is not a PorousFlow variable.  Exiting with error code 1984.");
   return _pf_var_num[moose_var_num];
 }
 

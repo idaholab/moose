@@ -43,7 +43,7 @@ void
 TestSerializedSolution::execute()
 {
   if (_serialized_solution.size() != _test_sys.system().n_dofs())
-    mooseError("Serialized solution vector doesn't contain the correct number of entries!");
+    mooseError2("Serialized solution vector doesn't contain the correct number of entries!");
 
   // Sum up all entries in the solution vector
   for (unsigned int i=0; i<_serialized_solution.size(); i++)
@@ -52,7 +52,7 @@ TestSerializedSolution::execute()
   // Verify that every processor got the same value
   // Note: the arguments to this "if" MUST be in this order!
   if (!_communicator.verify(_sum) && processor_id() == 0)
-    mooseError("Serialized solution vectors are not the same on all processors!");
+    mooseError2("Serialized solution vectors are not the same on all processors!");
 }
 
 Real

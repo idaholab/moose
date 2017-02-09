@@ -30,7 +30,7 @@ TensorMechanicsHardeningCubic::TensorMechanicsHardeningCubic(const InputParamete
   _beta(-3.0 * _alpha * Utility::pow<2>(_half_intnl_limit))
 {
   if (_intnl_limit <= _intnl_0)
-    mooseError("internal_limit must be greater than internal_0 in Cubic Hardening");
+    mooseError2("internal_limit must be greater than internal_0 in Cubic Hardening");
 }
 
 Real

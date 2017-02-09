@@ -85,12 +85,12 @@ ComputeJacobianThread::computeJacobian()
     break;
 
   default:
-    mooseError("Unknown kernel type \n");
+    mooseError2("Unknown kernel type \n");
   }
 
   if (warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<MooseSharedPointer<KernelBase> > & kernels = warehouse->getActiveBlockObjects(_subdomain, _tid);
+    const std::vector<std::shared_ptr<KernelBase>> & kernels = warehouse->getActiveBlockObjects(_subdomain, _tid);
     for (const auto & kernel : kernels)
       if (kernel->isImplicit())
       {
@@ -99,7 +99,7 @@ ComputeJacobianThread::computeJacobian()
         /// done only when nonlocal kernels exist in the system
         if (_fe_problem.checkNonlocalCouplingRequirement())
         {
-          MooseSharedPointer<NonlocalKernel> nonlocal_kernel = MooseSharedNamespace::dynamic_pointer_cast<NonlocalKernel>(kernel);
+          std::shared_ptr<NonlocalKernel> nonlocal_kernel = std::dynamic_pointer_cast<NonlocalKernel>(kernel);
           if (nonlocal_kernel)
             kernel->computeNonlocalJacobian();
         }
@@ -110,7 +110,7 @@ ComputeJacobianThread::computeJacobian()
 void
 ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
-  const std::vector<MooseSharedPointer<IntegratedBC> > & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
+  const std::vector<std::shared_ptr<IntegratedBC>> & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
   for (const auto & bc : bcs)
     if (bc->shouldApply() && bc->isImplicit())
     {
@@ -119,7 +119,7 @@ ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
       /// done only when nonlocal integrated_bcs exist in the system
       if (_fe_problem.checkNonlocalCouplingRequirement())
       {
-        MooseSharedPointer<NonlocalIntegratedBC> nonlocal_integrated_bc = MooseSharedNamespace::dynamic_pointer_cast<NonlocalIntegratedBC>(bc);
+        std::shared_ptr<NonlocalIntegratedBC> nonlocal_integrated_bc = std::dynamic_pointer_cast<NonlocalIntegratedBC>(bc);
         if (nonlocal_integrated_bc)
           bc->computeNonlocalJacobian();
       }
@@ -130,7 +130,7 @@ void
 ComputeJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
 {
   // No need to call hasActiveObjects, this is done in the calling method (see onInternalSide)
-  const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
+  const std::vector<std::shared_ptr<DGKernel>> & dgks = _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
   for (const auto & dg : dgks)
     if (dg->isImplicit())
     {
@@ -145,7 +145,7 @@ void
 ComputeJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
 {
   // No need to call hasActiveObjects, this is done in the calling method (see onInterface)
-  const std::vector<MooseSharedPointer<InterfaceKernel> > & intks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
+  const std::vector<std::shared_ptr<InterfaceKernel> > & intks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
   for (const auto & intk : intks)
     if (intk->isImplicit())
     {

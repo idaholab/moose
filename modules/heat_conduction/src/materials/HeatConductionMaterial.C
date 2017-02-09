@@ -44,19 +44,19 @@ HeatConductionMaterial::HeatConductionMaterial(const InputParameters & parameter
 {
   if (_thermal_conductivity_temperature_function && !_has_temp)
   {
-    mooseError("Must couple with temperature if using thermal conductivity function");
+    mooseError2("Must couple with temperature if using thermal conductivity function");
   }
   if (isParamValid("thermal_conductivity") && _thermal_conductivity_temperature_function)
   {
-    mooseError("Cannot define both thermal conductivity and thermal conductivity temperature function");
+    mooseError2("Cannot define both thermal conductivity and thermal conductivity temperature function");
   }
   if (_specific_heat_temperature_function && !_has_temp)
   {
-    mooseError("Must couple with temperature if using specific heat function");
+    mooseError2("Must couple with temperature if using specific heat function");
   }
   if (isParamValid("specific_heat") && _specific_heat_temperature_function)
   {
-    mooseError("Cannot define both specific heat and specific heat temperature function");
+    mooseError2("Cannot define both specific heat and specific heat temperature function");
   }
 }
 
@@ -78,7 +78,7 @@ HeatConductionMaterial::computeProperties()
           << "\ttemp: " << _temperature[qp] << "\n"
           << "\telem: " << _current_elem->id() << "\n"
           << "\tproc: " << processor_id() << "\n";
-      mooseWarning( msg.str() );
+      mooseWarning2( msg.str() );
       qp_temperature = 0;
       }
     }

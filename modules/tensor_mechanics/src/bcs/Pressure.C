@@ -31,7 +31,7 @@ Pressure::Pressure(const InputParameters & parameters) :
     _alpha(getParam<Real>("alpha"))
 {
   if (_component > 2)
-    mooseError( "Invalid component given for " << name() << ": " << _component << "." << std::endl );
+    mooseError2( "Invalid component given for ", name(), ": ", _component, ".\n");
 }
 
 Real

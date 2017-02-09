@@ -34,7 +34,7 @@ AssignElementSubdomainID::modify()
 {
   // Check that we have access to the mesh
   if (!_mesh_ptr)
-    mooseError("_mesh_ptr must be initialized before calling SubdomainBoundingBox::modify()");
+    mooseError2("_mesh_ptr must be initialized before calling SubdomainBoundingBox::modify()");
 
   // Reference the the libMesh::MeshBase
   MeshBase & mesh = _mesh_ptr->getMesh();
@@ -50,7 +50,7 @@ AssignElementSubdomainID::modify()
     {
       Elem * elem = mesh.query_elem_ptr(dof);
       if (!elem)
-        mooseError("invalid element ID is in element_ids");
+        mooseError2("invalid element ID is in element_ids");
       else
         elements.push_back(elem);
     }
@@ -65,7 +65,7 @@ AssignElementSubdomainID::modify()
       Elem * elem = *el;
       if (elem->id() != e && (!has_warned_remapping))
       {
-        mooseWarning("AssignElementSubdomainID will ignore the element remapping");
+        mooseWarning2("AssignElementSubdomainID will ignore the element remapping");
         has_warned_remapping = true;
       }
       elements.push_back(elem);
@@ -73,7 +73,7 @@ AssignElementSubdomainID::modify()
   }
 
   if (bids.size() != elements.size())
-    mooseError(" Size of subdomain_ids is not consistent with the number of elements");
+    mooseError2(" Size of subdomain_ids is not consistent with the number of elements");
 
   // Assign new subdomain IDs and make sure elements in different types are not assigned with the same subdomain ID
   std::map<ElemType, std::set<SubdomainID> > type2blocks;
@@ -92,7 +92,7 @@ AssignElementSubdomainID::modify()
         it.second.insert(newid);
       }
       else if (it.second.count(newid) > 0)
-        mooseError("trying to assign elements with different types with the same subdomain ID");
+        mooseError2("trying to assign elements with different types with the same subdomain ID");
     }
 
     if (!has_type)

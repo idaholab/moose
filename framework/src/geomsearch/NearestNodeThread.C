@@ -72,7 +72,7 @@ NearestNodeThread::operator() (const NodeIdRange & range)
     }
 
     if (closest_distance == std::numeric_limits<Real>::max())
-      mooseError("Unable to find nearest node!");
+      mooseError2("Unable to find nearest node!");
 
     NearestNodeLocator::NearestNodeInfo & info = _nearest_node_info[node.id()];
 

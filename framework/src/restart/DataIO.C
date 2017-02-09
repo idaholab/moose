@@ -125,7 +125,7 @@ dataStore(std::ostream & stream, const Elem * & e, void * context)
   {
     id = e->id();
     if (id == libMesh::DofObject::invalid_id)
-      mooseError("Can't output Elems with invalid ids!");
+      mooseError2("Can't output Elems with invalid ids!");
   }
 
   storeHelper(stream, id, context);
@@ -142,7 +142,7 @@ dataStore(std::ostream & stream, const Node * & n, void * context)
   {
     id = n->id();
     if (id == libMesh::DofObject::invalid_id)
-      mooseError("Can't output Nodes with invalid ids!");
+      mooseError2("Can't output Nodes with invalid ids!");
   }
 
   storeHelper(stream, id, context);
@@ -159,7 +159,7 @@ dataStore(std::ostream & stream, Elem * & e, void * context)
   {
     id = e->id();
     if (id == libMesh::DofObject::invalid_id)
-      mooseError("Can't output Elems with invalid ids!");
+      mooseError2("Can't output Elems with invalid ids!");
   }
 
   storeHelper(stream, id, context);
@@ -176,7 +176,7 @@ dataStore(std::ostream & stream, Node * & n, void * context)
   {
     id = n->id();
     if (id == libMesh::DofObject::invalid_id)
-      mooseError("Can't output Nodes with invalid ids!");
+      mooseError2("Can't output Nodes with invalid ids!");
   }
 
   storeHelper(stream, id, context);
@@ -319,7 +319,7 @@ void
 dataLoad(std::istream & stream, const Elem * & e, void * context)
 {
   if (!context)
-    mooseError("Can only load Elem objects using a MooseMesh context!");
+    mooseError2("Can only load Elem objects using a MooseMesh context!");
 
   MooseMesh * mesh = static_cast<MooseMesh *>(context);
 
@@ -339,7 +339,7 @@ void
 dataLoad(std::istream & stream, const Node * & n, void * context)
 {
   if (!context)
-    mooseError("Can only load Node objects using a MooseMesh context!");
+    mooseError2("Can only load Node objects using a MooseMesh context!");
 
   MooseMesh * mesh = static_cast<MooseMesh *>(context);
 
@@ -359,7 +359,7 @@ void
 dataLoad(std::istream & stream, Elem * & e, void * context)
 {
   if (!context)
-    mooseError("Can only load Elem objects using a MooseMesh context!");
+    mooseError2("Can only load Elem objects using a MooseMesh context!");
 
   MooseMesh * mesh = static_cast<MooseMesh *>(context);
 
@@ -379,7 +379,7 @@ void
 dataLoad(std::istream & stream, Node * & n, void * context)
 {
   if (!context)
-    mooseError("Can only load Node objects using a MooseMesh context!");
+    mooseError2("Can only load Node objects using a MooseMesh context!");
 
   MooseMesh * mesh = static_cast<MooseMesh *>(context);
 

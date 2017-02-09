@@ -115,7 +115,7 @@ MultiApp::MultiApp(const InputParameters & parameters):
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this))
 {
   if (_move_apps.size() != _move_positions.size())
-    mooseError("The number of apps to move and the positions to move them to must be the same for MultiApp " << _name);
+    mooseError2("The number of apps to move and the positions to move them to must be the same for MultiApp ", _name);
 
   // Fill in the _positions vector
   fillPositions();
@@ -172,14 +172,14 @@ void
 MultiApp::fillPositions()
 {
   if (isParamValid("positions") && isParamValid("positions_file"))
-    mooseError("Both 'positions' and 'positions_file' cannot be specified simultaneously in MultiApp " << name());
+    mooseError2("Both 'positions' and 'positions_file' cannot be specified simultaneously in MultiApp ", name());
 
   if (isParamValid("positions"))
   {
     _positions = getParam<std::vector<Point> >("positions");
 
     if (_positions.size() < _input_files.size())
-      mooseError("Not enough positions for the number of input files provided in MultiApp " << name());
+      mooseError2("Not enough positions for the number of input files provided in MultiApp ", name());
   }
   else if (isParamValid("positions_file"))
   {
@@ -187,7 +187,7 @@ MultiApp::fillPositions()
     std::vector<FileName> input_files = getParam<std::vector<FileName> >("input_files");
 
     if (input_files.size() != 1 && positions_files.size() != input_files.size())
-      mooseError("Number of input_files for MultiApp " << name() << " must either be only one or match the number of positions_file files");
+      mooseError2("Number of input_files for MultiApp ", name(), " must either be only one or match the number of positions_file files");
 
     // Clear out the _input_files because we're going to rebuild it
     if (input_files.size() != 1)
@@ -209,7 +209,7 @@ MultiApp::fillPositions()
         positions_vec.insert(positions_vec.begin(), begin, end);
 
         if (positions_vec.size() % LIBMESH_DIM != 0)
-          mooseError("Number of entries in 'positions_file' " << positions_file << " must be divisible by " << LIBMESH_DIM << " in MultiApp " << name());
+          mooseError2("Number of entries in 'positions_file' ", positions_file, " must be divisible by ", LIBMESH_DIM, " in MultiApp ", name());
       }
 
       // Bradcast the vector to all processors
@@ -238,7 +238,7 @@ MultiApp::fillPositions()
     _positions = {Point()};
 
     if (_positions.size() < _input_files.size())
-      mooseError("Not enough positions for the number of input files provided in MultiApp " << name());
+      mooseError2("Not enough positions for the number of input files provided in MultiApp ", name());
   }
 }
 
@@ -267,7 +267,7 @@ Executioner *
 MultiApp::getExecutioner(unsigned int app)
 {
   if (!_has_an_app)
-    mooseError("No app for " << name() << " on processor " << _orig_rank);
+    mooseError2("No app for ", name(), " on processor ", _orig_rank);
 
   return _apps[globalAppToLocal(app)]->getExecutioner();
 }
@@ -296,7 +296,7 @@ MeshTools::BoundingBox
 MultiApp::getBoundingBox(unsigned int app)
 {
   if (!_has_an_app)
-    mooseError("No app for " << name() << " on processor " << _orig_rank);
+    mooseError2("No app for ", name(), " on processor ", _orig_rank);
 
   FEProblemBase & problem = appProblemBase(app);
 
@@ -345,7 +345,7 @@ FEProblemBase &
 MultiApp::appProblemBase(unsigned int app)
 {
   if (!_has_an_app)
-    mooseError("No app for " << name() << " on processor " << _orig_rank);
+    mooseError2("No app for ", name(), " on processor ", _orig_rank);
 
   unsigned int local_app = globalAppToLocal(app);
 
@@ -355,16 +355,16 @@ MultiApp::appProblemBase(unsigned int app)
 FEProblem &
 MultiApp::problem()
 {
-  mooseDeprecated("MultiApp::problem() is deprecated, call MultiApp::problemBase() instead.\n");
+  mooseDeprecated2("MultiApp::problem() is deprecated, call MultiApp::problemBase() instead.\n");
   return dynamic_cast<FEProblem&>(_fe_problem);
 }
 
 FEProblem &
 MultiApp::appProblem(unsigned int app)
 {
-  mooseDeprecated("MultiApp::appProblem() is deprecated, call MultiApp::appProblemBase() instead.\n");
+  mooseDeprecated2("MultiApp::appProblem() is deprecated, call MultiApp::appProblemBase() instead.\n");
   if (!_has_an_app)
-    mooseError("No app for " << name() << " on processor " << _orig_rank);
+    mooseError2("No app for ", name(), " on processor ", _orig_rank);
 
   unsigned int local_app = globalAppToLocal(app);
 
@@ -375,7 +375,7 @@ const UserObject &
 MultiApp::appUserObjectBase(unsigned int app, const std::string & name)
 {
   if (!_has_an_app)
-    mooseError("No app for " << MultiApp::name() << " on processor " << _orig_rank);
+    mooseError2("No app for ", MultiApp::name(), " on processor ", _orig_rank);
 
   return appProblemBase(app).getUserObjectBase(name);
 }
@@ -384,7 +384,7 @@ Real
 MultiApp::appPostprocessorValue(unsigned int app, const std::string & name)
 {
   if (!_has_an_app)
-    mooseError("No app for " << MultiApp::name() << " on processor " << _orig_rank);
+    mooseError2("No app for ", MultiApp::name(), " on processor ", _orig_rank);
 
   return appProblemBase(app).getPostprocessorValue(name);
 }
@@ -475,7 +475,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
-  app_params.set<MooseSharedPointer<CommandLine> >("_command_line") = _app.commandLine();
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
   MooseApp * app = AppFactory::instance().create(_app_type, full_name, app_params, _my_comm);
   _apps[i] = app;
 
@@ -619,7 +619,7 @@ MultiApp::globalAppToLocal(unsigned int global_app)
     return global_app-_first_local_app;
 
   _console << _first_local_app << " " << global_app << '\n';
-  mooseError("Invalid global_app!");
+  mooseError2("Invalid global_app!");
 }
 
 void

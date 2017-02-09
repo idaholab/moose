@@ -28,7 +28,7 @@ MaterialStdVectorRealGradientAux::MaterialStdVectorRealGradientAux(const InputPa
     _component(getParam<unsigned int>("component"))
 {
   if (_component > LIBMESH_DIM)
-    mooseError("The component " << _component << " does not exist for " << LIBMESH_DIM << " dimensional problems");
+    mooseError2("The component ", _component, " does not exist for ", LIBMESH_DIM, " dimensional problems");
 }
 
 Real

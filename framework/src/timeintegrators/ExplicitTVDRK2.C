@@ -152,5 +152,5 @@ ExplicitTVDRK2::postStep(NumericVector<Number> & residual)
     residual.close();
   }
   else
-    mooseError("ExplicitTVDRK2::postStep(): _stage = " << _stage << ", only _stage = 1-3 is allowed.");
+    mooseError2("ExplicitTVDRK2::postStep(): _stage = ", _stage, ", only _stage = 1-3 is allowed.");
 }

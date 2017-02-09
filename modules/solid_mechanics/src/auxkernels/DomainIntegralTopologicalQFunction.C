@@ -35,14 +35,14 @@ DomainIntegralTopologicalQFunction::initialSetup()
   {
     if (_has_crack_front_point_index)
     {
-      mooseWarning("crack_front_point_index ignored because CrackFrontDefinition is set to treat as 2D");
+      mooseWarning2("crack_front_point_index ignored because CrackFrontDefinition is set to treat as 2D");
     }
   }
   else
   {
     if (!_has_crack_front_point_index)
     {
-      mooseError("crack_front_point_index must be specified in DomainIntegralTopologicalQFunction");
+      mooseError2("crack_front_point_index must be specified in DomainIntegralTopologicalQFunction");
     }
   }
 }

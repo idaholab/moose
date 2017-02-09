@@ -47,7 +47,7 @@ ACGBPoly::computeDFDOP(PFFunctionType type)
       return mult*_phi[_j][_qp]*c*c;
   }
 
-  mooseError("Invalid type passed in");
+  mooseError2("Invalid type passed in");
 }
 
 Real

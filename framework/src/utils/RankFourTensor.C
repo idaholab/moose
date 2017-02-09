@@ -85,7 +85,7 @@ RankFourTensor::RankFourTensor(const InitMethod init)
       break;
 
     default:
-      mooseError("Unknown RankFourTensor initialization pattern.");
+      mooseError2("Unknown RankFourTensor initialization pattern.");
   }
 }
 
@@ -545,7 +545,7 @@ RankFourTensor::surfaceFillFromInputVector(const std::vector<Real> & input)
     _vals[1][0][1][0] = _vals[0][1][0][1];
   }
   else
-    mooseError("Please provide correct number of inputs for surface RankFourTensor initialization.");
+    mooseError2("Please provide correct number of inputs for surface RankFourTensor initialization.");
 }
 
 void
@@ -583,7 +583,7 @@ RankFourTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod 
       fillPrincipalFromInputVector(input);
       break;
     default:
-      mooseError("fillFromInputVector called with unknown fill_method of " << fill_method);
+      mooseError2("fillFromInputVector called with unknown fill_method of ", fill_method);
   }
 }
 
@@ -591,7 +591,7 @@ void
 RankFourTensor::fillSymmetricFromInputVector(const std::vector<Real> & input, bool all)
 {
   if ((all == true && input.size() != 21) || (all == false && input.size() != 9))
-    mooseError("Please check the number of entries in the stiffness input vector.");
+    mooseError2("Please check the number of entries in the stiffness input vector.");
 
   zero();
 
@@ -655,7 +655,7 @@ void
 RankFourTensor::fillAntisymmetricFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 6)
-    mooseError("To use fillAntisymmetricFromInputVector, your input must have size 6.  Yours has size " << input.size());
+    mooseError2("To use fillAntisymmetricFromInputVector, your input must have size 6.  Yours has size ", input.size());
 
   zero();
 
@@ -698,7 +698,7 @@ void
 RankFourTensor::fillGeneralIsotropicFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 3)
-    mooseError("To use fillGeneralIsotropicFromInputVector, your input must have size 3.  Yours has size " << input.size());
+    mooseError2("To use fillGeneralIsotropicFromInputVector, your input must have size 3.  Yours has size ", input.size());
 
   zero();
 
@@ -717,7 +717,7 @@ void
 RankFourTensor::fillAntisymmetricIsotropicFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 1)
-    mooseError("To use fillAntisymmetricIsotropicFromInputVector, your input must have size 1. Yours has size " << input.size());
+    mooseError2("To use fillAntisymmetricIsotropicFromInputVector, your input must have size 1. Yours has size ", input.size());
   fillGeneralIsotropicFromInputVector({0.0, 0.0, input[0]});
 }
 
@@ -725,7 +725,7 @@ void
 RankFourTensor::fillSymmetricIsotropicFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 2)
-    mooseError("To use fillSymmetricIsotropicFromInputVector, your input must have size 2. Yours has size " << input.size());
+    mooseError2("To use fillSymmetricIsotropicFromInputVector, your input must have size 2. Yours has size ", input.size());
   fillGeneralIsotropicFromInputVector({input[0], input[1], 0.0});
 }
 
@@ -733,7 +733,7 @@ void
 RankFourTensor::fillAxisymmetricRZFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 5)
-    mooseError("To use fillAxisymmetricRZFromInputVector, your input must have size 5.  Your vector has size " << input.size());
+    mooseError2("To use fillAxisymmetricRZFromInputVector, your input must have size 5.  Your vector has size ", input.size());
 
                              // C1111     C1122     C1133     C2222     C2233=C1133
   fillSymmetricFromInputVector({input[0], input[1], input[2], input[0], input[2],
@@ -745,7 +745,7 @@ void
 RankFourTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 81)
-    mooseError("To use fillGeneralFromInputVector, your input must have size 81. Yours has size " << input.size());
+    mooseError2("To use fillGeneralFromInputVector, your input must have size 81. Yours has size ", input.size());
 
   int ind;
   for (unsigned int i = 0; i < N; ++i)
@@ -762,7 +762,7 @@ void
 RankFourTensor::fillPrincipalFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 9)
-    mooseError("To use fillPrincipalFromInputVector, your input must have size 9. Yours has size " << input.size());
+    mooseError2("To use fillPrincipalFromInputVector, your input must have size 9. Yours has size ", input.size());
 
   zero();
 

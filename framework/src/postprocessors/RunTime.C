@@ -42,6 +42,6 @@ RunTime::getValue()
       return Moose::perf_log.get_active_time();
   }
 
-  mooseError("Invalid Type");
+  mooseError2("Invalid Type");
 }
 

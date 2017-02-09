@@ -29,7 +29,7 @@ PorousFlowRelativePermeabilityBase::PorousFlowRelativePermeabilityBase(const Inp
     _dseff_ds(1.0 / (1.0 - _sum_s_res))
 {
   if (_sum_s_res < _s_res)
-    mooseError("Sum of residual saturations sum_s_res cannot be smaller than s_res in " << name());
+    mooseError2("Sum of residual saturations sum_s_res cannot be smaller than s_res in ", name());
 }
 
 void

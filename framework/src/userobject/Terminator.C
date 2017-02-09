@@ -32,7 +32,7 @@ Terminator::Terminator(const InputParameters & parameters) :
 {
   // build the expression object
   if (_fp.ParseAndDeduceVariables(_expression, _pp_names) >= 0)
-     mooseError(std::string("Invalid function\n" + _expression + "\nin Terminator.\n") + _fp.ErrorMsg());
+     mooseError2(std::string("Invalid function\n" + _expression + "\nin Terminator.\n") + _fp.ErrorMsg());
 
   _pp_num = _pp_names.size();
   _pp_values.resize(_pp_num);

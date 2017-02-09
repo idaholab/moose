@@ -52,7 +52,7 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters) :
     _poissons_ratio(getParam<Real>("poissons_ratio"))
 {
   if (_has_temp && !_current_instantaneous_thermal_expansion_coef)
-    mooseError("To include thermal strain term in interaction integral, must both couple temperature in DomainIntegral block and compute thermal expansion property in material model using compute_InteractionIntegral = true.");
+    mooseError2("To include thermal strain term in interaction integral, must both couple temperature in DomainIntegral block and compute thermal expansion property in material model using compute_InteractionIntegral = true.");
 }
 
 void
@@ -63,12 +63,12 @@ InteractionIntegral::initialSetup()
   if (_treat_as_2d)
   {
     if (_has_crack_front_point_index)
-      mooseWarning("crack_front_point_index ignored because CrackFrontDefinition is set to treat as 2D");
+      mooseWarning2("crack_front_point_index ignored because CrackFrontDefinition is set to treat as 2D");
   }
   else
   {
     if (!_has_crack_front_point_index)
-      mooseError("crack_front_point_index must be specified in qFunctionJIntegral3D");
+      mooseError2("crack_front_point_index must be specified in qFunctionJIntegral3D");
   }
 }
 

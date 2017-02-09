@@ -24,7 +24,7 @@ AsymmetricCrossTermBarrierFunctionMaterial::AsymmetricCrossTermBarrierFunctionMa
   // switching functions
   const std::vector<MaterialPropertyName> & hi_names = getParam<std::vector<MaterialPropertyName> >("hi_names");
   if (hi_names.size() != _num_eta)
-    mooseError("The number of coupled etas must be equal to the number of hi_names in AsymmetricCrossTermBarrierFunctionMaterial " << name());
+    mooseError2("The number of coupled etas must be equal to the number of hi_names in AsymmetricCrossTermBarrierFunctionMaterial ", name());
 
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
@@ -81,7 +81,7 @@ AsymmetricCrossTermBarrierFunctionMaterial::computeQpProperties()
           break;
 
         default:
-          mooseError("Internal error");
+          mooseError2("Internal error");
       }
 
       _prop_g[_qp] += (Wij * hi + Wji * hj) * B;

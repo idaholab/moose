@@ -55,16 +55,16 @@ MultiPlasticityRawComponentAssembler::MultiPlasticityRawComponentAssembler(const
   if (_specialIC == "rock")
   {
     if (_num_models != 2)
-      mooseError("Choosing specialIC=rock, you must have plasticity models of type 'TensileMulti MohrCoulombMulti'\n");
+      mooseError2("Choosing specialIC=rock, you must have plasticity models of type 'TensileMulti MohrCoulombMulti'\n");
     if (!(_f[0]->modelName().compare("TensileMulti") == 0 && _f[1]->modelName().compare("MohrCoulombMulti") == 0))
-      mooseError("Choosing specialIC=rock, you must have plasticity models of type 'TensileMulti MohrCoulombMulti'\n");
+      mooseError2("Choosing specialIC=rock, you must have plasticity models of type 'TensileMulti MohrCoulombMulti'\n");
   }
   if (_specialIC == "joint")
   {
     if (_num_models != 2)
-      mooseError("Choosing specialIC=joint, you must have plasticity models of type 'WeakPlaneTensile WeakPlaneShear'\n");
+      mooseError2("Choosing specialIC=joint, you must have plasticity models of type 'WeakPlaneTensile WeakPlaneShear'\n");
     if (!(_f[0]->modelName().compare("WeakPlaneTensile") == 0 && _f[1]->modelName().compare("WeakPlaneShear") == 0))
-      mooseError("Choosing specialIC=joint, you must have plasticity models of type 'WeakPlaneTensile WeakPlaneShear'\n");
+      mooseError2("Choosing specialIC=joint, you must have plasticity models of type 'WeakPlaneTensile WeakPlaneShear'\n");
   }
 }
 

@@ -96,7 +96,7 @@ KKSCHBulk::computeGradDFDCons(PFFunctionType type)
       return 0.0; // res * dcadc;
   }
 
-  mooseError("Invalid type passed in");
+  mooseError2("Invalid type passed in");
 }
 
 Real

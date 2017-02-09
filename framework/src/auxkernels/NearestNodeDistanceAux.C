@@ -31,7 +31,7 @@ NearestNodeDistanceAux::NearestNodeDistanceAux(const InputParameters & parameter
     _nearest_node(_nodal ? getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0]) : getQuadratureNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0]))
 {
   if (boundaryNames().size() > 1)
-    mooseError("NearestNodeDistanceAux can only be used with one boundary at a time!");
+    mooseError2("NearestNodeDistanceAux can only be used with one boundary at a time!");
 }
 
 Real

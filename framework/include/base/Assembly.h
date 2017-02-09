@@ -515,7 +515,7 @@ public:
   /**
    * Set the pointer to the XFEM controller object
    */
-  void setXFEM(MooseSharedPointer<XFEMInterface> xfem) { _xfem = xfem; }
+  void setXFEM(std::shared_ptr<XFEMInterface> xfem) { _xfem = xfem; }
 
 protected:
   /**
@@ -594,7 +594,7 @@ protected:
   unsigned int _mesh_dimension;
 
   /// The XFEM controller
-  MooseSharedPointer<XFEMInterface> _xfem;
+  std::shared_ptr<XFEMInterface> _xfem;
 
   /// The "volume" fe object that matches the current elem
   std::map<FEType, FEBase *> _current_fe;

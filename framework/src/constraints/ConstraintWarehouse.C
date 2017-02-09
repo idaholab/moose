@@ -26,16 +26,16 @@ ConstraintWarehouse::ConstraintWarehouse() :
 
 
 void
-ConstraintWarehouse::addObject(MooseSharedPointer<Constraint> object, THREAD_ID /*tid = 0*/)
+ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object, THREAD_ID /*tid = 0*/)
 {
   // Adds to the storage of _all_objects
   MooseObjectWarehouse<Constraint>::addObject(object);
 
   // Cast the the possible Contraint types
-  MooseSharedPointer<NodeFaceConstraint> nfc = MooseSharedNamespace::dynamic_pointer_cast<NodeFaceConstraint>(object);
-  MooseSharedPointer<FaceFaceConstraint> ffc = MooseSharedNamespace::dynamic_pointer_cast<FaceFaceConstraint>(object);
-  MooseSharedPointer<NodalConstraint>    nc =  MooseSharedNamespace::dynamic_pointer_cast<NodalConstraint>(object);
-  MooseSharedPointer<ElemElemConstraint>  ec = MooseSharedNamespace::dynamic_pointer_cast<ElemElemConstraint>(object);
+  std::shared_ptr<NodeFaceConstraint> nfc = std::dynamic_pointer_cast<NodeFaceConstraint>(object);
+  std::shared_ptr<FaceFaceConstraint> ffc = std::dynamic_pointer_cast<FaceFaceConstraint>(object);
+  std::shared_ptr<NodalConstraint> nc = std::dynamic_pointer_cast<NodalConstraint>(object);
+  std::shared_ptr<ElemElemConstraint> ec = std::dynamic_pointer_cast<ElemElemConstraint>(object);
 
   // NodeFaceConstraint
   if (nfc)
@@ -69,18 +69,18 @@ ConstraintWarehouse::addObject(MooseSharedPointer<Constraint> object, THREAD_ID 
     _nodal_constraints.addObject(nc);
 
   else
-    mooseError("Unknown type of Constraint object");
+    mooseError2("Unknown type of Constraint object");
 }
 
 
-const std::vector<MooseSharedPointer<NodalConstraint> > &
+const std::vector<std::shared_ptr<NodalConstraint>> &
 ConstraintWarehouse::getActiveNodalConstraints() const
 {
   return _nodal_constraints.getActiveObjects();
 }
 
 
-const std::vector<MooseSharedPointer<NodeFaceConstraint> > &
+const std::vector<std::shared_ptr<NodeFaceConstraint>> &
 ConstraintWarehouse::getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced)
 {
   std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint> >::const_iterator it, end_it;
@@ -102,7 +102,7 @@ ConstraintWarehouse::getActiveNodeFaceConstraints(BoundaryID boundary_id, bool d
 }
 
 
-const std::vector<MooseSharedPointer<FaceFaceConstraint> > &
+const std::vector<std::shared_ptr<FaceFaceConstraint>> &
 ConstraintWarehouse::getActiveFaceFaceConstraints(const std::string & interface) const
 {
   std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint> >::const_iterator it = _face_face_constraints.find(interface);
@@ -110,7 +110,7 @@ ConstraintWarehouse::getActiveFaceFaceConstraints(const std::string & interface)
   return it->second.getActiveObjects();
 }
 
-const std::vector<MooseSharedPointer<ElemElemConstraint> > &
+const std::vector<std::shared_ptr<ElemElemConstraint>> &
 ConstraintWarehouse::getActiveElemElemConstraints(const InterfaceID interface_id) const
 {
   std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint> >::const_iterator it = _element_constraints.find(interface_id);
@@ -187,7 +187,7 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
 {
   for (const auto & it : _face_face_constraints)
   {
-    const std::vector<MooseSharedPointer<FaceFaceConstraint> > & objects = it.second.getActiveObjects();
+    const auto & objects = it.second.getActiveObjects();
     for (const auto & ffc : objects)
     {
       MooseVariable & var = ffc->variable();

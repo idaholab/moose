@@ -63,7 +63,7 @@ public:
   /**
    * This method add an \p Action instance to the warehouse.
    */
-  void addActionBlock(MooseSharedPointer<Action> blk);
+  void addActionBlock(std::shared_ptr<Action> blk);
 
   /**
    * This method checks the actions stored in the warehouse against the list of required registered
@@ -120,7 +120,7 @@ public:
       }
     }
     if (!p)
-      mooseError("Action with name being " << name << " does not exist");
+      mooseError2("Action with name being ", name, " does not exist");
     return *p;
   }
 
@@ -180,12 +180,12 @@ public:
   // shared pointers here, just their memory management capability.
   // Therefore, _mesh is actually being used more like a unique_ptr in
   // this context.  Since full support for unique_ptr is not quite
-  // available yet, we've implemented it as a MooseSharedPointer.
-  MooseSharedPointer<MooseMesh> & mesh() { return _mesh; }
-  MooseSharedPointer<MooseMesh> & displacedMesh() { return _displaced_mesh; }
+  // available yet, we've implemented it as a std::shared_ptr.
+  std::shared_ptr<MooseMesh> & mesh() { return _mesh; }
+  std::shared_ptr<MooseMesh> & displacedMesh() { return _displaced_mesh; }
 
-  MooseSharedPointer<FEProblemBase> & problemBase() { return _problem; }
-  MooseSharedPointer<FEProblem>  problem();
+  std::shared_ptr<FEProblemBase> & problemBase() { return _problem; }
+  std::shared_ptr<FEProblem>  problem();
   MooseApp & mooseApp() { return _app; }
   const std::string & getCurrentTaskName() const { return _current_task; }
 
@@ -199,7 +199,7 @@ protected:
    */
   void buildBuildableActions(const std::string &task);
 
-  std::vector<MooseSharedPointer<Action> > _all_ptrs;
+  std::vector<std::shared_ptr<Action> > _all_ptrs;
 
   /// The MooseApp this Warehouse is associated with
   MooseApp & _app;
@@ -236,13 +236,13 @@ protected:
   //
 
   /// Mesh class
-  MooseSharedPointer<MooseMesh> _mesh;
+  std::shared_ptr<MooseMesh> _mesh;
 
   /// Possible mesh for displaced problem
-  MooseSharedPointer<MooseMesh> _displaced_mesh;
+  std::shared_ptr<MooseMesh> _displaced_mesh;
 
   /// Problem class
-  MooseSharedPointer<FEProblemBase> _problem;
+  std::shared_ptr<FEProblemBase> _problem;
 };
 
 #endif // ACTIONWAREHOUSE_H

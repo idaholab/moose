@@ -30,7 +30,7 @@ ACMultiInterface::ACMultiInterface(const InputParameters & parameters) :
     _L(getMaterialProperty<Real>("mob_name"))
 {
   if (_num_etas != _kappa_names.size())
-    mooseError("Supply the same nummber of etas and kappa_names.");
+    mooseError2("Supply the same nummber of etas and kappa_names.");
 
   unsigned int nvariables = _fe_problem.getNonlinearSystemBase().nVariables();
 
@@ -55,7 +55,7 @@ ACMultiInterface::ACMultiInterface(const InputParameters & parameters) :
   }
 
   if (a < 0)
-    mooseError("Kernel variable must be listed in etas for ACMultiInterface kernel " << name());
+    mooseError2("Kernel variable must be listed in etas for ACMultiInterface kernel ", name());
   else
     _a = a;
 }

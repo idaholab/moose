@@ -49,7 +49,7 @@ DerivativeMultiPhaseBase::DerivativeMultiPhaseBase(const InputParameters & param
 {
   // check passed in parameter vectors
   if (_num_fi != _num_hi)
-    mooseError("Need to pass in as many hi_names as fi_names in DerivativeMultiPhaseBase " << name());
+    mooseError2("Need to pass in as many hi_names as fi_names in DerivativeMultiPhaseBase ", name());
 
   // get order parameter names and libmesh variable names, set barrier function derivatives
   for (unsigned int i = 0; i < _num_etas; ++i)

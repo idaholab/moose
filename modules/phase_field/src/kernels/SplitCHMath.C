@@ -31,6 +31,6 @@ SplitCHMath::computeDFDC(PFFunctionType type)
       return (3.0*_u[_qp]*_u[_qp] - 1.0) * _phi[_j][_qp]; //return Jacobian value
   }
 
-  mooseError("Invalid type passed in");
+  mooseError2("Invalid type passed in");
 }
 

@@ -75,7 +75,7 @@ ImageMesh::buildMesh3D(const std::vector<std::string> & filenames)
   // If the user gave us a "stack" with 0 or 1 files in it, we can't
   // really create a 3D Mesh from that
   if (filenames.size() <= 1)
-    mooseError("ImageMesh error: Cannot create a 3D ImageMesh from an image stack with " << filenames.size() << " images.");
+    mooseError2("ImageMesh error: Cannot create a 3D ImageMesh from an image stack with ", filenames.size(), " images.");
 
   // For each file in the stack, process it using the 'file' command.
   // We want to be sure that all the images in the stack are the same
@@ -242,5 +242,5 @@ ImageMesh::GetPixelInfo(std::string filename, int & xpixels, int & ypixels)
 
   // Report and exit if there was an error
   if (error_message != "")
-    mooseError(error_message);
+    mooseError2(error_message);
 }

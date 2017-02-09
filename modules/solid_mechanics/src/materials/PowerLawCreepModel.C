@@ -44,7 +44,7 @@ PowerLawCreepModel::computeStressInitialize(unsigned qp, Real /*effectiveTrialSt
   const SymmIsotropicElasticityTensor * eT = dynamic_cast<const SymmIsotropicElasticityTensor*>(&elasticityTensor);
   if (!eT)
   {
-    mooseError("PowerLawCreepModel requires a SymmIsotropicElasticityTensor");
+    mooseError2("PowerLawCreepModel requires a SymmIsotropicElasticityTensor");
   }
   _shear_modulus = eT->shearModulus();
 

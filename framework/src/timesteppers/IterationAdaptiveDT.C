@@ -78,16 +78,16 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters) :
   else
   {
     if (isParamValid("iteration_window"))
-      mooseError("'optimal_iterations' must be used for 'iteration_window' to be used");
+      mooseError2("'optimal_iterations' must be used for 'iteration_window' to be used");
     if (isParamValid("linear_iteration_ratio"))
-      mooseError("'optimal_iterations' must be used for 'linear_iteration_ratio' to be used");
+      mooseError2("'optimal_iterations' must be used for 'linear_iteration_ratio' to be used");
   }
 
   if (isParamValid("timestep_limiting_function"))
     _max_function_change = isParamValid("max_function_change") ?
                            getParam<Real>("max_function_change") : -1;
   else if (isParamValid("max_function_change"))
-    mooseError("'timestep_limiting_function' must be used for 'max_function_change' to be used");
+    mooseError2("'timestep_limiting_function' must be used for 'max_function_change' to be used");
 }
 
 void
@@ -107,7 +107,7 @@ IterationAdaptiveDT::init()
        _times[i] = _piecewise_timestep_limiting_function->domain(i);
     }
     else
-      mooseError("timestep_limiting_function must be a Piecewise function");
+      mooseError2("timestep_limiting_function must be a Piecewise function");
   }
 }
 
@@ -218,7 +218,7 @@ IterationAdaptiveDT::computeFailedDT()
 
   // Can't cut back any more
   if (_dt <= _dt_min)
-    mooseError("Solve failed and timestep already at dtmin, cannot continue!");
+    mooseError2("Solve failed and timestep already at dtmin, cannot continue!");
 
   if (_verbose)
   {

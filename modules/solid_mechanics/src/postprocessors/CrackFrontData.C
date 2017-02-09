@@ -34,16 +34,16 @@ CrackFrontData::CrackFrontData(const InputParameters & parameters) :
     _scale_factor(getParam<Real>("scale_factor"))
 {
   if (!_subproblem.getVariable(_tid, _var_name).isNodal())
-    mooseError("CrackFrontData can be output only for nodal variables, variable '" << _var_name << "' is not nodal");
+    mooseError2("CrackFrontData can be output only for nodal variables, variable '", _var_name, "' is not nodal");
 }
 
 void
 CrackFrontData::initialize()
 {
   if (!(_crack_front_point_index < _crack_front_definition->getNumCrackFrontPoints()))
-    mooseError("crack_front_point_index out of range in CrackFrontData");
+    mooseError2("crack_front_point_index out of range in CrackFrontData");
   if (!_crack_front_definition->hasCrackFrontNodes())
-    mooseError("CrackFrontData not currently supported if crack front is defined with points rather than nodes");
+    mooseError2("CrackFrontData not currently supported if crack front is defined with points rather than nodes");
 
 
   _crack_front_node = _crack_front_definition->getCrackFrontNodePtr(_crack_front_point_index);

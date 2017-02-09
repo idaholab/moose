@@ -49,7 +49,7 @@ public:
   /**
    * A special method unique to this class for adding Block, Neighbor, and Face material objects.
    */
-  void addObjects(MooseSharedPointer<Material> block, MooseSharedPointer<Material> neighbor, MooseSharedPointer<Material> face, THREAD_ID tid = 0);
+  void addObjects(std::shared_ptr<Material> block, std::shared_ptr<Material> neighbor, std::shared_ptr<Material> face, THREAD_ID tid = 0);
 
 protected:
   /// Stroage for neighbor material objects (Block are stored in the base class)

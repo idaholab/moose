@@ -100,7 +100,7 @@ Water97FluidProperties::rho(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
+      mooseError2("Water97FluidProperties::inRegion has given an incorrect region");
   }
   return density;
 }
@@ -163,7 +163,7 @@ Water97FluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho, Rea
     }
 
     default:
-      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
+      mooseError2("Water97FluidProperties::inRegion has given an incorrect region");
   }
 
   rho = this->rho(pressure, temperature);
@@ -212,7 +212,7 @@ Water97FluidProperties::e(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
+      mooseError2("Water97FluidProperties::inRegion has given an incorrect region");
   }
   // Output in kJ/kg
   return internal_energy / 1000.0;
@@ -283,7 +283,7 @@ Water97FluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & 
     }
 
     default:
-      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
+      mooseError2("Water97FluidProperties::inRegion has given an incorrect region");
   }
 
   e = this->e(pressure, temperature);
@@ -345,7 +345,7 @@ Water97FluidProperties::c(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
+      mooseError2("Water97FluidProperties::inRegion has given an incorrect region");
   }
 
   return std::sqrt(speed2);
@@ -392,7 +392,7 @@ Water97FluidProperties::cp(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
+      mooseError2("Water97FluidProperties::inRegion has given an incorrect region");
   }
   // Output in kJ/kg
   return specific_heat / 1000.0;
@@ -442,7 +442,7 @@ Water97FluidProperties::cv(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
+      mooseError2("Water97FluidProperties::inRegion has given an incorrect region");
   }
   // Output in kJ/kg
   return specific_heat / 1000.0;
@@ -600,7 +600,7 @@ Water97FluidProperties::s(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
+      mooseError2("Water97FluidProperties::inRegion has given an incorrect region");
   }
   // Output in kJ/kg
   return entropy / 1000.0;
@@ -645,7 +645,7 @@ Water97FluidProperties::h(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
+      mooseError2("Water97FluidProperties::inRegion has given an incorrect region");
   }
   // Output in kJ/kg
   return enthalpy / 1000.0;
@@ -704,7 +704,7 @@ Water97FluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
       break;
 
     default:
-      mooseError("Water97FluidProperties::inRegion has given an incorrect region");
+      mooseError2("Water97FluidProperties::inRegion has given an incorrect region");
   }
   // Output in kJ/kg
   h = enthalpy / 1000.0;
@@ -715,7 +715,7 @@ Water97FluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
 Real
 Water97FluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
 {
-  mooseError("Water97FluidProperties::beta not implemented yet");
+  mooseError2("Water97FluidProperties::beta not implemented yet");
   return 0.0;
 }
 
@@ -725,7 +725,7 @@ Water97FluidProperties::pSat(Real temperature) const
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 273.15 K <= t <= 647.096 K
   if (temperature < 273.15 || temperature > _T_critical)
-    mooseError("Water97FluidProperties::pSat: Temperature is outside range 273.15 K <= T <= 647.096 K");
+    mooseError2("Water97FluidProperties::pSat: Temperature is outside range 273.15 K <= T <= 647.096 K");
 
   // Constants for region 4 (the saturation curve up to the critical point)
   const std::vector<Real> n4 {0.11670521452767e4, -0.72421316703206e6, -0.17073846940092e2, 0.12020824702470e5,
@@ -748,7 +748,7 @@ Water97FluidProperties::TSat(Real pressure) const
   // Check whether the input pressure is within the region of validity of this equation.
   // Valid for 611.213 Pa <= p <= 22.064 MPa
   if (pressure < 611.23 || pressure > _p_critical)
-    mooseError("Water97FluidProperties::TSat: Pressure is outside range 611.213 Pa <= p <= 22.064 MPa");
+    mooseError2("Water97FluidProperties::TSat: Pressure is outside range 611.213 Pa <= p <= 22.064 MPa");
 
   // Constants for region 4 (the saturation curve up to the critical point)
   const std::vector<Real> n4 {0.11670521452767e4, -0.72421316703206e6, -0.17073846940092e2, 0.12020824702470e5,
@@ -771,7 +771,7 @@ Water97FluidProperties::b23p(Real temperature) const
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 623.15 K <= t <= 863.15 K
   if (temperature < 623.15 || temperature > 863.15)
-    mooseError("Water97FluidProperties::b23p: Temperature is outside range of 623.15 K <= T <= 863.15 K");
+    mooseError2("Water97FluidProperties::b23p: Temperature is outside range of 623.15 K <= T <= 863.15 K");
 
   // Constants for the boundary between regions 2 and 3
   const std::vector<Real> n23 {0.34805185628969e3, -0.11671859879975e1, 0.10192970039326e-2, 0.57254459862746e3,
@@ -786,7 +786,7 @@ Water97FluidProperties::b23T(Real pressure) const
   // Check whether the input pressure is within the region of validity of this equation.
   // Valid for 16.529 MPa <= p <= 100 MPa
   if (pressure < 16.529e6 || pressure > 100.0e6)
-    mooseError("Water97FluidProperties::b23T: Pressure is outside range 16.529 MPa <= p <= 100 MPa");
+    mooseError2("Water97FluidProperties::b23T: Pressure is outside range 16.529 MPa <= p <= 100 MPa");
 
   // Constants for the boundary between regions 2 and 3
   const std::vector<Real> n23 {0.34805185628969e3, -0.11671859879975e1, 0.10192970039326e-2,
@@ -803,15 +803,15 @@ Water97FluidProperties::inRegion(Real pressure, Real temperature) const
   if (temperature > 273.15 && temperature <= 1073.15)
   {
     if (pressure < 0.0 || pressure > 100.0e6)
-      mooseError("Pressure "<< pressure << " is out of range in Water97FluidProperties::inRegion");
+      mooseError2("Pressure ", pressure, " is out of range in Water97FluidProperties::inRegion");
   }
   else if (temperature > 1073.15 && temperature <= 2273.15)
   {
     if (pressure < 0.0 || pressure > 50.0e6)
-      mooseError("Pressure "<< pressure << " is out of range in Water97FluidProperties::inRegion");
+      mooseError2("Pressure ", pressure, " is out of range in Water97FluidProperties::inRegion");
   }
   else
-    mooseError("Temperature " << temperature << " is out of range in Water97FluidProperties::inRegion");
+    mooseError2("Temperature ", temperature, " is out of range in Water97FluidProperties::inRegion");
 
   // Determine the phase region that the (P, T) point lies in
   unsigned int region;
@@ -1324,7 +1324,7 @@ Water97FluidProperties::subregion3(Real pressure, Real temperature) const
       subregion = 23;
   }
   else
-    mooseError("Water97FluidProperties::subregion3. Shouldn't have got here!");
+    mooseError2("Water97FluidProperties::subregion3. Shouldn't have got here!");
 
   return subregion;
 }
@@ -1458,6 +1458,6 @@ Water97FluidProperties::densityRegion3(Real pressure, Real temperature) const
 Real
 Water97FluidProperties::henryConstant(Real /*temperature*/) const
 {
-  mooseError("Water97FluidProperties::henryConstant() not defined");
+  mooseError2("Water97FluidProperties::henryConstant() not defined");
   return 0.0;
 }

@@ -26,7 +26,7 @@ RichardsSat::RichardsSat(const InputParameters & parameters) :
     _sum_s_res(getParam<Real>("sum_s_res"))
 {
   if (_sum_s_res < _s_res)
-    mooseError("sum_s_res set to " << _sum_s_res << " but it must obey s_res <= sum_s_res < 1");
+    mooseError2("sum_s_res set to ", _sum_s_res, " but it must obey s_res <= sum_s_res < 1");
 }
 
 void

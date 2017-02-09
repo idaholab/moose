@@ -41,7 +41,7 @@ SphericalAverage::SphericalAverage(const InputParameters & parameters) :
     _average(_nvals)
 {
   if (coupledComponents("variable") != 1)
-    mooseError("SphericalAverage works on exactly one coupled variable");
+    mooseError2("SphericalAverage works on exactly one coupled variable");
 
   // Note: We associate the local variable "i" with nbins and "j" with nvals throughout.
 

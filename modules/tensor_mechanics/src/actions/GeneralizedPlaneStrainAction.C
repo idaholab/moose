@@ -33,7 +33,7 @@ GeneralizedPlaneStrainAction::GeneralizedPlaneStrainAction(const InputParameters
     _ndisp(_displacements.size())
 {
   if (_ndisp > 2)
-    mooseError("GeneralizedPlaneStrain only works for 1D axisymmetric or 2D generalized plane strain cases!");
+    mooseError2("GeneralizedPlaneStrain only works for 1D axisymmetric or 2D generalized plane strain cases!");
 }
 
 void

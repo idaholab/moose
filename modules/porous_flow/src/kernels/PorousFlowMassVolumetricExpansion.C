@@ -38,7 +38,7 @@ PorousFlowMassVolumetricExpansion::PorousFlowMassVolumetricExpansion(const Input
     _dstrain_rate_qp_dvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_volumetric_strain_rate_qp_dvar"))
 {
   if (_fluid_component >= _dictator.numComponents())
-    mooseError("The Dictator proclaims that the number of components in this simulation is " << _dictator.numComponents() << " whereas you have used the Kernel PorousFlowComponetMassVolumetricExpansion with component = " << _fluid_component << ".  The Dictator is watching you");
+    mooseError2("The Dictator proclaims that the number of components in this simulation is ", _dictator.numComponents(), " whereas you have used the Kernel PorousFlowComponetMassVolumetricExpansion with component = ", _fluid_component, ".  The Dictator is watching you");
 }
 
 Real

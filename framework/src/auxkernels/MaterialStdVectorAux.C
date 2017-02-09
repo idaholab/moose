@@ -39,7 +39,7 @@ MaterialStdVectorAux::getRealValue()
     if (_selected_qp >= _q_point.size())
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      mooseError("MaterialStdVectorAux.  selected_qp specified as " << _selected_qp << " but there are only " << _q_point.size() << " quadpoints in the element");
+      mooseError2("MaterialStdVectorAux.  selected_qp specified as ", _selected_qp, " but there are only ", _q_point.size(), " quadpoints in the element");
     }
 
     return _prop[_selected_qp][_index];

@@ -54,7 +54,7 @@ RigidBodyModes3D::RigidBodyModes3D(const InputParameters & parameters) :
   if (_modes.size() > 6) {
     std::stringstream err;
     err << "Expected between 0 and 6 rigid body modes, got " << _modes.size()  << " instead\n";
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   for (std::set<std::string>::const_iterator it = _modes.begin(); it != _modes.end(); ++it)
   {
@@ -67,7 +67,7 @@ RigidBodyModes3D::RigidBodyModes3D(const InputParameters & parameters) :
         err << *it;
       }
       err << "\n";
-      mooseError(err.str());
+      mooseError2(err.str());
     }
   }
 
@@ -78,7 +78,7 @@ RigidBodyModes3D::RigidBodyModes3D(const InputParameters & parameters) :
   if (_subspace_indices.size() != _modes.size()) {
     std::stringstream err;
     err << "Number of subspace indices " << _subspace_indices.size() << " must match the number or rigid body modes " << _modes.size()  << "\n";
-    mooseError(err.str());
+    mooseError2(err.str());
   }
 
   for (unsigned int i = 0; i < _subspace_indices.size(); ++i)
@@ -88,7 +88,7 @@ RigidBodyModes3D::RigidBodyModes3D(const InputParameters & parameters) :
     {
       std::stringstream err;
       err << "Invalid " << i << "-th " << _subspace_name << " index " << _subspace_indices[i] << "; must be < " << _fe_problem.subspaceDim(_subspace_name) << "\n";
-      mooseError(err.str());
+      mooseError2(err.str());
     }
   }
 }

@@ -152,7 +152,7 @@ void
 dataStore(std::ostream & stream, PenetrationInfo * & pinfo, void * context)
 {
   if (!context)
-    mooseError("Can only store PenetrationInfo objects using a MooseMesh context!");
+    mooseError2("Can only store PenetrationInfo objects using a MooseMesh context!");
 
   if (pinfo)
   {
@@ -203,7 +203,7 @@ void
 dataLoad(std::istream & stream, PenetrationInfo * & pinfo, void * context)
 {
   if (!context)
-    mooseError("Can only load PenetrationInfo objects using a MooseMesh context!");
+    mooseError2("Can only load PenetrationInfo objects using a MooseMesh context!");
 
   // First, see if this is supposed to be NULL
   unsigned int i = 0;

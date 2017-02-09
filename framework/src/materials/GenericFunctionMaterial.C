@@ -35,7 +35,7 @@ GenericFunctionMaterial::GenericFunctionMaterial(const InputParameters & paramet
   unsigned int num_values = _prop_values.size();
 
   if (num_names != num_values)
-    mooseError("Number of prop_names much match the number of prop_values for a GenericFunctionMaterial!");
+    mooseError2("Number of prop_names much match the number of prop_values for a GenericFunctionMaterial!");
 
   _num_props = num_names;
 

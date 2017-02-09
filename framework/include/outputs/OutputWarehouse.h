@@ -46,7 +46,7 @@ public:
    * It is the responsibility of the OutputWarehouse to delete the output objects
    * add using this method
    */
-  void addOutput(MooseSharedPointer<Output> & output);
+  void addOutput(std::shared_ptr<Output> & output);
 
   /**
    * Get a complete set of all output object names
@@ -224,10 +224,10 @@ private:
   void forceOutput();
 
   /**
-   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
+   * We are using std::shared_ptr to handle the cleanup of the pointers at the end of execution.
    * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
    */
-  std::vector<MooseSharedPointer<Output> > _all_ptrs;
+  std::vector<std::shared_ptr<Output>> _all_ptrs;
 
   /**
    * Adds the file name to the list of filenames being output
@@ -368,14 +368,14 @@ OutputWarehouse::getOutput(const OutputName & name)
 {
   // Check that the object exists
   if (!hasOutput(name))
-    mooseError("An output object with the name '" << name << "' does not exist.");
+    mooseError2("An output object with the name '", name, "' does not exist.");
 
   // Attempt to cast the object to the correct type
   T * output = dynamic_cast<T*>(_object_map[name]);
 
   // Error if the cast fails
   if (output == NULL)
-    mooseError("An output object with the name '" << name << "' for the specified type does not exist");
+    mooseError2("An output object with the name '", name, "' for the specified type does not exist");
 
   // Return the object
   return output;

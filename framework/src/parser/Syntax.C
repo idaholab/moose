@@ -24,7 +24,7 @@ void
 Syntax::registerTaskName(std::string task, bool is_required)
 {
   if (_registered_tasks.find(task) != _registered_tasks.end())
-    mooseError("A " << task << " is already registered.  Do you need to use appendTaskName instead?");
+    mooseError2("A ", task, " is already registered.  Do you need to use appendTaskName instead?");
 
   _tasks.addItem(task);
   _registered_tasks[task] = is_required;
@@ -34,7 +34,7 @@ void
 Syntax::registerTaskName(std::string task, std::string moose_object_type, bool is_required)
 {
   if (_registered_tasks.find(task) != _registered_tasks.end())
-    mooseError("A " << task << " is already registered.  Do you need to use appendTaskName instead?");
+    mooseError2("A ", task, " is already registered.  Do you need to use appendTaskName instead?");
 
   _tasks.addItem(task);
   _registered_tasks[task] = is_required;
@@ -45,7 +45,7 @@ void
 Syntax::appendTaskName(std::string task, std::string moose_object_type)
 {
   if (_registered_tasks.find(task) == _registered_tasks.end())
-    mooseError("A " << task << " is not a registered task name.");
+    mooseError2("A ", task, " is not a registered task name.");
 
   _moose_systems_to_tasks.insert(std::make_pair(moose_object_type, task));
 }
@@ -54,7 +54,7 @@ void
 Syntax::addDependency(std::string task, std::string pre_req)
 {
   if (_registered_tasks.find(task) == _registered_tasks.end())
-    mooseError("A " << task << " is not a registered task name.");
+    mooseError2("A ", task, " is not a registered task name.");
 
   _tasks.insertDependency(task, pre_req);
 }

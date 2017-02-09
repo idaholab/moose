@@ -34,7 +34,7 @@ RichardsPolyLineSink::RichardsPolyLineSink(const InputParameters & parameters) :
   // open file
   std::ifstream file(_point_file.c_str());
   if (!file.good())
-    mooseError("Error opening file '" + _point_file + "' from RichardsPolyLineSink.");
+    mooseError2("Error opening file '" + _point_file + "' from RichardsPolyLineSink.");
 
   std::vector<Real> scratch;
   while (parseNextLineReals(file, scratch))

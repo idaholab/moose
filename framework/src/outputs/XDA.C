@@ -50,7 +50,7 @@ XDA::output(const ExecFlagType & /*type*/)
 
   // Make sure the filename has an extension
   if (es_name.size() < 4)
-    mooseError("Unacceptable filename, you must include an extension (.xda or .xdr).");
+    mooseError2("Unacceptable filename, you must include an extension (.xda or .xdr).");
 
   // Insert the mesh suffix
   mesh_name.insert(mesh_name.size()-4, "_mesh");

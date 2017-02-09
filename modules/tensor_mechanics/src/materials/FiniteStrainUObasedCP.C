@@ -214,7 +214,7 @@ void FiniteStrainUObasedCP::computeQpStress()
       }
     }
     if (substep_iter > _max_substep_iter && _err_tol)
-      mooseError("FiniteStrainUObasedCP: Constitutive failure");
+      mooseError2("FiniteStrainUObasedCP: Constitutive failure");
   }
   while (_err_tol);
 
@@ -308,7 +308,7 @@ FiniteStrainUObasedCP::solveStatevar()
   if (iterg == _maxiterg)
   {
 #ifdef DEBUG
-    mooseWarning("FiniteStrainUObasedCP: Hardness Integration error\n");
+    mooseWarning2("FiniteStrainUObasedCP: Hardness Integration error\n");
 #endif
     _err_tol = true;
   }
@@ -360,7 +360,7 @@ FiniteStrainUObasedCP::solveStress()
   if (_err_tol)
   {
 #ifdef DEBUG
-    mooseWarning("FiniteStrainUObasedCP: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp);
+    mooseWarning2("FiniteStrainUObasedCP: Slip increment exceeds tolerance - Element number ", _current_elem->id(), " Gauss point = ", _qp);
 #endif
     return;
   }
@@ -379,7 +379,7 @@ FiniteStrainUObasedCP::solveStress()
     if (_err_tol)
     {
 #ifdef DEBUG
-      mooseWarning("FiniteStrainUObasedCP: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp);
+      mooseWarning2("FiniteStrainUObasedCP: Slip increment exceeds tolerance - Element number ", _current_elem->id(), " Gauss point = ", _qp);
 #endif
       return;
     }
@@ -390,7 +390,7 @@ FiniteStrainUObasedCP::solveStress()
     if (_use_line_search && rnorm > rnorm_prev && !lineSearchUpdate(rnorm_prev, dpk2))
     {
 #ifdef DEBUG
-      mooseWarning("FiniteStrainUObasedCP: Failed with line search");
+      mooseWarning2("FiniteStrainUObasedCP: Failed with line search");
 #endif
       _err_tol = true;
       return;
@@ -405,7 +405,7 @@ FiniteStrainUObasedCP::solveStress()
   if (iter >= _maxiter)
   {
 #ifdef DEBUG
-    mooseWarning("FiniteStrainUObasedCP: Stress Integration error rmax = " << rnorm);
+    mooseWarning2("FiniteStrainUObasedCP: Stress Integration error rmax = ", rnorm);
 #endif
     _err_tol = true;
   }
@@ -665,6 +665,6 @@ FiniteStrainUObasedCP::lineSearchUpdate(const Real rnorm_prev, const RankTwoTens
     }
 
     default:
-      mooseError("Line search method is not provided.");
+      mooseError2("Line search method is not provided.");
   }
 }

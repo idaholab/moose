@@ -37,7 +37,7 @@ Q2PMaterial::Q2PMaterial(const InputParameters & parameters) :
     _gravity(declareProperty<RealVectorValue>("gravity"))
 {
   if (isCoupled("perm_change") && (coupledComponents("perm_change") != LIBMESH_DIM*LIBMESH_DIM))
-    mooseError(LIBMESH_DIM*LIBMESH_DIM << " components of perm_change must be given to a Q2PMaterial.  You supplied " << coupledComponents("perm_change") << "\n");
+    mooseError2(LIBMESH_DIM*LIBMESH_DIM, " components of perm_change must be given to a Q2PMaterial.  You supplied ", coupledComponents("perm_change"), "\n");
 
   _perm_change.resize(LIBMESH_DIM*LIBMESH_DIM);
   for (unsigned int i = 0; i < LIBMESH_DIM*LIBMESH_DIM; ++i)

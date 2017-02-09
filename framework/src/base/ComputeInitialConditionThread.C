@@ -43,9 +43,9 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
 
     if (warehouse.hasActiveBlockObjects(subdomain, _tid))
     {
-      const std::vector<MooseSharedPointer<InitialCondition> > & ics = warehouse.getActiveBlockObjects(subdomain, _tid);
-      for (std::vector<MooseSharedPointer<InitialCondition> >::const_iterator it = ics.begin(); it != ics.end(); ++it)
-        (*it)->compute();
+      const auto & ics = warehouse.getActiveBlockObjects(subdomain, _tid);
+      for (const auto & ic : ics)
+        ic->compute();
     }
   }
 }

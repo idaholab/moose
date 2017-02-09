@@ -27,7 +27,7 @@ GrainBoundaryArea::GrainBoundaryArea(const InputParameters & parameters) :
 {
   // make sure user input is valid
   if (MooseUtils::absoluteFuzzyEqual(_factor, 0.0))
-    mooseError("Neither grains_per_side nor op_range may be zero.");
+    mooseError2("Neither grains_per_side nor op_range may be zero.");
 
   // Loop over variables (ops)
   for (auto op_index = decltype(_op_num)(0); op_index < _op_num; ++op_index)

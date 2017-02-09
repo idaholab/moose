@@ -30,7 +30,7 @@ XFEMCircleCut::XFEMCircleCut(std::vector<Real> circle_nodes) :
   Real R1 = std::sqrt(ray1.norm_sq());
   Real R2 = std::sqrt(ray2.norm_sq());
   if ( std::abs(R1 - R2) > 1e-10 )
-    mooseError("XFEMCircleCut only works for a circular cut");
+    mooseError2("XFEMCircleCut only works for a circular cut");
 
    _radius = 0.5*(R1 + R2);
    _angle = std::acos( (ray1*ray2)/(R1*R2) );

@@ -87,3 +87,28 @@ InputParametersTest::checkSuppressedError()
     CPPUNIT_ASSERT( msg.find("Unable to suppress nonexistent parameter") != std::string::npos );
   }
 }
+
+void
+InputParametersTest::checkSetDocString()
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("little_guy", "What about that little guy?");
+  params.setDocString("little_guy", "That little guy, I wouldn't worry about that little_guy.");
+  CPPUNIT_ASSERT(params.getDocString("little_guy").find("That little guy, I wouldn't worry about that little_guy.") != std::string::npos);
+}
+
+void
+InputParametersTest::checkSetDocStringError()
+{
+  try
+  {
+    InputParameters params = emptyInputParameters();
+    params.setDocString("little_guy", "That little guy, I wouldn't worry about that little_guy.");
+    CPPUNIT_ASSERT(false); // Should not get here
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+    CPPUNIT_ASSERT(msg.find("Unable to set the documentation string (using setDocString)") != std::string::npos);
+  }
+}

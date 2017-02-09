@@ -216,7 +216,8 @@ MaterialPropertyStorage::restrictStatefulProps(const std::vector<std::pair<unsig
 }
 
 void
-MaterialPropertyStorage::initStatefulProps(MaterialData & material_data, const std::vector<MooseSharedPointer<Material> > & mats, unsigned int n_qpoints, const Elem & elem, unsigned int side/* = 0*/)
+MaterialPropertyStorage::initStatefulProps(MaterialData & material_data, const std::vector<std::shared_ptr<Material>> & mats,
+                                           unsigned int n_qpoints, const Elem & elem, unsigned int side/* = 0*/)
 {
   // NOTE: since materials are storing their computed properties in MaterialData class, we need to
   // juggle the memory between MaterialData and MaterialProperyStorage classes
@@ -362,7 +363,7 @@ MaterialPropertyStorage::retrievePropertyId (const std::string & prop_name) cons
 {
   auto it = _prop_ids.find(prop_name);
   if (it == _prop_ids.end())
-    mooseError("MaterialPropertyStorage: property " + prop_name + " is not yet declared");
+    mooseError2("MaterialPropertyStorage: property " + prop_name + " is not yet declared");
   return it->second;
 }
 
@@ -393,4 +394,3 @@ MaterialPropertyStorage::initProps(MaterialData & material_data, const Elem & el
       propsOlder(&elem, side)[i] = material_data.propsOlder()[prop_id]->init(n_qpoints);
   }
 }
-

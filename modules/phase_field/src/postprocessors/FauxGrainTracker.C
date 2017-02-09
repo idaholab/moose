@@ -61,7 +61,7 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::Field
     case FieldType::CENTROID:
     {
       if (_periodic_node_map.size())
-        mooseDoOnce(mooseWarning("Centroids are not correct when using periodic boundaries, contact the MOOSE team"));
+        mooseDoOnce(mooseWarning2("Centroids are not correct when using periodic boundaries, contact the MOOSE team"));
 
       // If this element contains the centroid of one of features, return it's index
       const auto * elem_ptr = _mesh.elemPtr(entity_id);
@@ -258,7 +258,7 @@ FauxGrainTracker::getValue()
 bool
 FauxGrainTracker::doesFeatureIntersectBoundary(unsigned int /*feature_id*/) const
 {
-  mooseDoOnce(mooseWarning("FauxGrainTracker::doesFeatureIntersectboundary() is unimplemented"));
+  mooseDoOnce(mooseWarning2("FauxGrainTracker::doesFeatureIntersectboundary() is unimplemented"));
 
   return false;
 }

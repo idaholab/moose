@@ -38,10 +38,10 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
   _weights = getParam<std::vector<Real> >("weights");
 
   if (_master_node_ids.size() != _weights.size())
-    mooseError("master and weights should be of equal size.");
+    mooseError2("master and weights should be of equal size.");
 
   if ((_slave_node_ids.size() == 0) && (_slave_node_set_id == "NaN"))
-    mooseError("Please specify slave_node_ids or slave_node_set.");
+    mooseError2("Please specify slave_node_ids or slave_node_set.");
   else if ((_slave_node_ids.size() == 0) && (_slave_node_set_id != "NaN"))
   {
     std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_slave_node_set_id));

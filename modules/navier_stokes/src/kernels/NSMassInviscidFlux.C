@@ -70,7 +70,7 @@ NSMassInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
         return 0.0;
 
       default:
-        mooseError("Should not get here!");
+        mooseError2("Should not get here!");
         break;
     }
   }

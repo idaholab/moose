@@ -29,9 +29,9 @@ MaterialRealTensorValueAux::MaterialRealTensorValueAux(const InputParameters & p
     _col(getParam<unsigned int>("column"))
 {
   if (_row > LIBMESH_DIM)
-    mooseError("The row component " << _row << " does not exist for " << LIBMESH_DIM << " dimensional problems");
+    mooseError2("The row component ", _row, " does not exist for ", LIBMESH_DIM, " dimensional problems");
   if (_col > LIBMESH_DIM)
-    mooseError("The column component " << _col << " does not exist for " << LIBMESH_DIM << " dimensional problems");
+    mooseError2("The column component ", _col, " does not exist for ", LIBMESH_DIM, " dimensional problems");
 }
 
 Real

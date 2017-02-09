@@ -35,7 +35,7 @@ OptionallyCoupledForce::OptionallyCoupledForce(const InputParameters & parameter
     _v_coupled(isCoupled("v"))
 {
   if (!_v_coupled && _v_var < 64)
-    mooseError("Something is wrong with the coupling system.  It should be producing really huge numbers for coupled('v') But instead it generated: " << _v_var);
+    mooseError2("Something is wrong with the coupling system.  It should be producing really huge numbers for coupled('v') But instead it generated: ", _v_var);
 }
 
 Real

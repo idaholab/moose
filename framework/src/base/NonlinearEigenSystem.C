@@ -43,13 +43,13 @@ void assemble_matrix(EquationSystems & es, const std::string & system_name)
     if (eigen_system.matrix_B)
       p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_B, Moose::KT_EIGEN);
     else
-      mooseError("It is a generalized eigenvalue problem but matrix B is empty \n");
+      mooseError2("It is a generalized eigenvalue problem but matrix B is empty \n");
   }
 }
 #else
 void assemble_matrix(EquationSystems & /*es*/, const std::string & /*system_name*/)
 {
-  mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh\n");
+  mooseError2("Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh\n");
 }
 #endif /* LIBMESH_HAVE_SLEPC */
 }
@@ -68,7 +68,7 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
 #else
 NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & /*eigen_problem*/, const std::string & /*name*/)
 {
-  mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh\n");
+  mooseError2("Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh\n");
 }
 #endif /* LIBMESH_HAVE_SLEPC */
 
@@ -99,13 +99,13 @@ NonlinearEigenSystem::solve()
 void
 NonlinearEigenSystem::stopSolve()
 {
-  mooseError("did not implement yet \n");
+  mooseError2("did not implement yet \n");
 }
 
 void
 NonlinearEigenSystem::setupFiniteDifferencedPreconditioner()
 {
-  mooseError("did not implement yet \n");
+  mooseError2("did not implement yet \n");
 }
 
 bool
@@ -117,21 +117,21 @@ NonlinearEigenSystem::converged()
 unsigned int
 NonlinearEigenSystem::getCurrentNonlinearIterationNumber()
 {
-  mooseError("did not implement yet \n");
+  mooseError2("did not implement yet \n");
   return 0;
 }
 
 NumericVector<Number> &
 NonlinearEigenSystem::RHS()
 {
-  mooseError("did not implement yet \n");
+  mooseError2("did not implement yet \n");
   //return NULL;
 }
 
 NonlinearSolver<Number> *
 NonlinearEigenSystem::nonlinearSolver()
 {
-  mooseError("did not implement yet \n");
+  mooseError2("did not implement yet \n");
   return NULL;
 }
 
@@ -141,13 +141,13 @@ NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
   if (n >= n_converged_eigenvalues)
   {
-    mooseError(n << " not in [0, " << n_converged_eigenvalues << ")");
+    mooseError2(n, " not in [0, ", n_converged_eigenvalues, ")");
   }
   return _transient_sys.get_eigenpair(n);
 }
 
 void
-NonlinearEigenSystem::addEigenKernels(MooseSharedPointer<KernelBase> kernel, THREAD_ID tid)
+NonlinearEigenSystem::addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD_ID tid)
 {
   if (kernel->isEigenKernel())
     _eigen_kernels.addObject(kernel, tid);
@@ -159,18 +159,18 @@ void
 NonlinearEigenSystem::checkIntegrity()
 {
   if (_integrated_bcs.hasActiveObjects())
-    mooseError("Can't set an inhomogeneous integrated boundary condition for eigenvalue problems.");
+    mooseError2("Can't set an inhomogeneous integrated boundary condition for eigenvalue problems.");
 
   if (_nodal_bcs.hasActiveObjects())
   {
-    const std::vector<MooseSharedPointer<NodalBC> > & nodal_bcs = _nodal_bcs.getActiveObjects();
+    const auto & nodal_bcs = _nodal_bcs.getActiveObjects();
     for (const auto & nodal_bc : nodal_bcs)
     {
-      MooseSharedPointer<DirichletBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<DirichletBC>(nodal_bc);
+      std::shared_ptr<DirichletBC> nbc = std::dynamic_pointer_cast<DirichletBC>(nodal_bc);
       if (nbc && nbc->getParam<Real>("value"))
-        mooseError("Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
+        mooseError2("Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
       else if (!nbc)
-        mooseError("Invalid NodalBC for eigenvalue problems, please use homogeneous Dirichlet.");
+        mooseError2("Invalid NodalBC for eigenvalue problems, please use homogeneous Dirichlet.");
     }
   }
 }
