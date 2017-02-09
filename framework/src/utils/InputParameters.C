@@ -382,6 +382,8 @@ InputParameters::checkParams(const std::string & parsing_syntax)
     }
   }
 
+  mooseError("bla");
+
   // Range checked parameters
   for (const auto & it : *this)
   {
