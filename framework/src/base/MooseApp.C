@@ -240,13 +240,13 @@ MooseApp::setupOptions()
     else if (color == "off")
       Moose::setColorConsole(false, true);
     else
-      mooseWarning("ignoring invalid --color arg (want 'auto', 'on', or 'off')");
+      mooseWarning2("ignoring invalid --color arg (want 'auto', 'on', or 'off')");
   }
 
   // this warning goes below --color processing to honor that setting for
   // the warning. And below settings for warnings/error setup.
   if (getParam<bool>("no_color"))
-    mooseDeprecated("The --no-color flag is deprecated. Use '--color off' instead.");
+    mooseDeprecated2("The --no-color flag is deprecated. Use '--color off' instead.");
 
   // If there's no threading model active, but the user asked for
   // --n-threads > 1 on the command line, throw a mooseError2.  This is
