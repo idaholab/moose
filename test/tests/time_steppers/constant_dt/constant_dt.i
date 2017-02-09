@@ -54,9 +54,11 @@
   petsc_options_value = 'hypre boomeramg'
 
   # Pluggable TimeStepper System
-  [./TimeStepper]
-    type = ConstantDT
-    dt = 0.2
+  [./Steppers]
+    [./simple]
+      type = SimpleStepper
+      dt = 0.2
+    [../]
   [../]
 []
 

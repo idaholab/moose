@@ -44,12 +44,19 @@
   solve_type = NEWTON
   start_time = 0.0
   end_time = 5.0
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 1.0
-    optimal_iterations = 10
-    time_t = '0.0, 5.0'
-    time_dt = '1.0, 5.0'
+
+  [./Steppers]
+    [./adapt]
+      type = IterationAdaptiveStepper
+      dt = 1.0
+      optimal_iterations = 10
+    [../]
+    [./knots]
+      type = KnotTimesStepper
+      incoming_stepper = adapt
+      times = '0.0, 5.0'
+      dts = '1.0, 5.0'
+    [../]
   [../]
 []
 
@@ -64,4 +71,3 @@
   exodus = true
   checkpoint = true
 []
-

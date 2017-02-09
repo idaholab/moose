@@ -794,6 +794,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       dynamicCastAndExtractScalar(VariableName          , it.second, full_name, it.first, in_global, global_params_block);
       dynamicCastAndExtractScalar(NonlinearVariableName , it.second, full_name, it.first, in_global, global_params_block);
       dynamicCastAndExtractScalar(AuxVariableName       , it.second, full_name, it.first, in_global, global_params_block);
+      dynamicCastAndExtractScalar(StepperName           , it.second, full_name, it.first, in_global, global_params_block);
       dynamicCastAndExtractScalar(FunctionName          , it.second, full_name, it.first, in_global, global_params_block);
       dynamicCastAndExtractScalar(UserObjectName        , it.second, full_name, it.first, in_global, global_params_block);
       dynamicCastAndExtractScalar(PostprocessorName     , it.second, full_name, it.first, in_global, global_params_block);

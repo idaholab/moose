@@ -86,9 +86,11 @@
 
   start_time = 1.0
   num_steps = 2
-  [./TimeStepper]
-    type = PostprocessorDT
-    postprocessor = dt
+  [./Steppers]
+    [./pp]
+      type = PostprocessorStepper
+      postprocessor = dt
+    [../]
   [../]
 []
 

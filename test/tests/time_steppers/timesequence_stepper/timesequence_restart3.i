@@ -63,9 +63,11 @@
 [Executioner]
   type = Transient
   end_time = 4.5
-  [./TimeStepper]
-    type = TimeSequenceStepper
-    time_sequence  = '0   0.85 1.3 1.9 2 4 4.5'
+  [./Steppers]
+    [./list]
+      type = TimeListStepper
+      time_list = '0   0.85 1.3 1.9 2 4 4.5'
+    [../]
   [../]
 []
 

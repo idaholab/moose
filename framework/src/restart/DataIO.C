@@ -42,6 +42,13 @@ dataStore(std::ostream & stream, std::string & v, void * /*context*/)
 
 template<>
 void
+dataStore(std::ostream & stream, StepperName & v, void * context)
+{
+  dataStore(stream, static_cast<std::string&>(v), context);
+}
+
+template<>
+void
 dataStore(std::ostream & stream, NumericVector<Real> & v, void * /*context*/)
 {
   v.close();
@@ -225,6 +232,12 @@ dataLoad(std::istream & stream, std::string & v, void * /*context*/)
   stream.read(&v[0], sizeof(char) * size);
 }
 
+template<>
+void
+dataLoad(std::istream & stream, StepperName & v, void * context)
+{
+  dataLoad(stream, static_cast<std::string&>(v), context);
+}
 
 template<>
 void
