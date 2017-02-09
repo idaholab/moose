@@ -288,12 +288,17 @@ protected:
   Real _picard_rel_tol;
   Real _picard_abs_tol;
 
+  /// console time output precision
+  unsigned int _precision;
+
   ///should detailed diagnostic output be printed
   bool _verbose;
 
   Real _solution_change_norm;
 
   void setupTimeIntegrator();
+
+  void logTimestepInfo(const std::string & tag);
 };
 
 #endif //TRANSIENTEXECUTIONER_H

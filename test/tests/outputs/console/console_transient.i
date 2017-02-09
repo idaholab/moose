@@ -46,6 +46,7 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  time_precision = 6
   verbose = true
 []
 
@@ -56,7 +57,6 @@
     type = Console
     verbose = true
     perf_log = true
-    time_precision = 6
     execute_on = 'failed nonlinear linear timestep_end'
   [../]
 []

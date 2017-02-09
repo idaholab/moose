@@ -468,6 +468,11 @@ public:
   /// Returns whether the Application is running in check input mode
   bool checkInput() const { return _check_input; }
 
+  void logShowTag(std::string tag) {_log_show_tags.insert(tag);};
+  void logHideTag(std::string tag) {_log_hide_tags.insert(tag);};
+  void logDisableTimestep();
+  bool printLog(const std::set<std::string> tags);
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
@@ -659,6 +664,10 @@ private:
 
   /// Cache for a Backup to use for restart / recovery
   std::shared_ptr<Backup> _cached_backup;
+
+  std::set<std::string> _log_show_tags;
+  std::set<std::string> _log_hide_tags;
+  int _disabled_log_step = -42;
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;

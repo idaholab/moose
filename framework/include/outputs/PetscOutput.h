@@ -48,13 +48,9 @@ public:
 protected:
 
   /// Current norm returned from PETSc
-  Real _norm;
+  Real _lin_norm;
 
-  /// Current non-linear iteration returned from PETSc
-  PetscInt _nonlinear_iter;
-
-  /// Current linear iteration returned from PETSc
-  PetscInt _linear_iter;
+  Real _nonlin_norm;
 
 private:
 

@@ -38,3 +38,21 @@ MooseObject::MooseObject(const InputParameters & parameters) :
     _enabled(getParam<bool>("enable"))
 {
 }
+
+bool
+MooseObject::printLog(const std::set<std::string> & tags)
+{
+  return _app.printLog(tags);
+}
+
+void
+MooseObject::writeMsg(std::string msg)
+{
+  if (msg.empty())
+    return;
+  if (!_app.isUltimateMaster())
+    MooseUtils::indentMessage(_app.name(), msg);
+  // TODO: Split/tee into file stream like Console::writeStreamToFile did
+  Moose::out << msg << COLOR_DEFAULT;
+}
+
