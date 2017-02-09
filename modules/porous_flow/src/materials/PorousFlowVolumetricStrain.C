@@ -35,6 +35,7 @@ PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & p
     _vol_strain_rate_qp(declareProperty<Real>("PorousFlow_volumetric_strain_rate_qp")),
     _dvol_strain_rate_qp_dvar(declareProperty<std::vector<RealGradient> >("dPorousFlow_volumetric_strain_rate_qp_dvar")),
     _vol_total_strain_qp(declareProperty<Real>("PorousFlow_total_volumetric_strain_qp")),
+    _vol_total_strain_qp_old(declarePropertyOld<Real>("PorousFlow_total_volumetric_strain_qp")),
     _dvol_total_strain_qp_dvar(declareProperty<std::vector<RealGradient> >("dPorousFlow_total_volumetric_strain_qp_dvar"))
 {
   if (_ndisp != _mesh.dimension())
@@ -61,6 +62,12 @@ PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & p
   }
   if (_nodal_material == true)
     mooseError("PorousFlowVolumetricStrain classes are only defined for at_nodes = false");
+}
+
+void
+PorousFlowVolumetricStrain::initQpStatefulProperties()
+{
+  _vol_total_strain_qp[_qp] = 0.0;
 }
 
 void

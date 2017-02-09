@@ -20,6 +20,7 @@ public:
   PorousFlowVolumetricStrain(const InputParameters & parameters);
 
 protected:
+  virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
   /// If true then the strain rate will include terms that ensure mass is conserved when doing integrals over the displaced mesh
@@ -52,6 +53,9 @@ protected:
 
   /// The total volumetric strain at the quadpoints
   MaterialProperty<Real> & _vol_total_strain_qp;
+
+  /// The old value of total volumetric strain at the quadpoints
+  MaterialProperty<Real> & _vol_total_strain_qp_old;
 
   /**
    * The derivative of the total volumetric strain with respect to the porous flow variables.
