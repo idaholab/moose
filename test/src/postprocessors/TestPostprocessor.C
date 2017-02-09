@@ -31,7 +31,7 @@ TestPostprocessor::TestPostprocessor(const InputParameters & parameters) :
     _older_val(getPostprocessorValueOlderByName(name()))
 {
   if (_test_type == "report_old" && !isParamValid("report_name"))
-    mooseError("Must set 'report_name' parameter when using the 'report_old' test type.");
+    mooseError2("Must set 'report_name' parameter when using the 'report_old' test type.");
 }
 
 Real
@@ -57,7 +57,7 @@ TestPostprocessor::getValue()
   // This should not be attainable
   else
   {
-    mooseError("Invalid test type.");
+    mooseError2("Invalid test type.");
     return 0.0;
   }
 }

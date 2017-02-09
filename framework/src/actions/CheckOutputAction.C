@@ -103,7 +103,7 @@ CheckOutputAction::checkConsoleOutput()
       num_screen_outputs++;
 
   if (num_screen_outputs > 1)
-    mooseWarning("Multiple (" << num_screen_outputs << ") Console output objects are writing to the screen, this will likely cause duplicate messages printed.");
+    mooseWarning2("Multiple (", num_screen_outputs, ") Console output objects are writing to the screen, this will likely cause duplicate messages printed.");
 }
 
 void

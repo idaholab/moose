@@ -684,7 +684,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               {
                 std::ostringstream err;
                 err << "Cannot use a displaced contact (" << it.second.first << "," << it.second.second << ") with an undisplaced problem";
-                mooseError(err.str());
+                mooseError2(err.str());
               }
               locator = displaced_problem->geomSearchData()._penetration_locators[it.first];
             }
@@ -785,7 +785,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               {
                 std::ostringstream err;
                 err << "Cannot use a displaced uncontact (" << it.second.first << "," << it.second.second << ") with an undisplaced problem";
-                mooseError(err.str());
+                mooseError2(err.str());
               }
               locator = displaced_problem->geomSearchData()._penetration_locators[it.first];
             }
@@ -1111,13 +1111,13 @@ DMMooseFunction(DM dm, Vec x, Vec r)
   {
     std::ostringstream err;
     err << "ERROR: cannot specifiy both a function and object to compute the Residual!" << std::endl;
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   if (nl->nonlinearSolver()->matvec && nl->nonlinearSolver()->residual_and_jacobian_object)
   {
     std::ostringstream err;
     err << "ERROR: cannot specifiy both a function and object to compute the combined Residual & Jacobian!" << std::endl;
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   if (nl->nonlinearSolver()->residual != NULL)
     nl->nonlinearSolver()->residual(*(nl->system().current_local_solution.get()), R, nl->nonlinearSolver()->system());
@@ -1131,7 +1131,7 @@ DMMooseFunction(DM dm, Vec x, Vec r)
   {
     std::ostringstream err;
     err << "No suitable residual computation routine found";
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   R.close();
   PetscFunctionReturn(0);
@@ -1203,13 +1203,13 @@ DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
   {
     std::ostringstream err;
     err << "ERROR: cannot specifiy both a function and object to compute the Jacobian!" << std::endl;
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   if (nl->nonlinearSolver()->matvec && nl->nonlinearSolver()->residual_and_jacobian_object)
   {
     std::ostringstream err;
     err << "ERROR: cannot specifiy both a function and object to compute the combined Residual & Jacobian!" << std::endl;
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   if (nl->nonlinearSolver()->jacobian != NULL)
     nl->nonlinearSolver()->jacobian(*(nl->system().current_local_solution.get()), the_pc, nl->nonlinearSolver()->system());
@@ -1223,7 +1223,7 @@ DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
   {
     std::ostringstream err;
     err << "No suitable Jacobian routine or object";
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   the_pc.close();
   Jac.close();
@@ -1646,7 +1646,7 @@ DMSetUp_Moose_Pre(DM dm)
       {
         std::ostringstream err;
         err << "Problem retrieving contact for PenetrationLocator with master " << cpair.first << " and slave " << cpair.second;
-        mooseError(err.str());
+        mooseError2(err.str());
       }
       BoundaryID master_id = dmm->_nl->mesh().getBoundaryID(cpair.first);
       BoundaryID slave_id = dmm->_nl->mesh().getBoundaryID(cpair.second);
@@ -1672,7 +1672,7 @@ DMSetUp_Moose_Pre(DM dm)
       {
         std::ostringstream err;
         err << "Problem retrieving uncontact for PenetrationLocator with master " << cpair.first << " and slave " << cpair.second;
-        mooseError(err.str());
+        mooseError2(err.str());
       }
       BoundaryID master_id = dmm->_nl->mesh().getBoundaryID(cpair.first);
       BoundaryID slave_id = dmm->_nl->mesh().getBoundaryID(cpair.second);

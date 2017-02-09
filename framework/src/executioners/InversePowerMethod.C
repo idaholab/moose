@@ -44,9 +44,9 @@ InversePowerMethod::InversePowerMethod(const InputParameters & parameters) :
 
   addAttributeReporter("eigenvalue", _eigenvalue, "initial timestep_end");
 
-  if (_max_iter<_min_iter) mooseError("max_power_iterations<min_power_iterations!");
-  if (_eig_check_tol<0.0) mooseError("eig_check_tol<0!");
-  if (_pfactor<0.0) mooseError("pfactor<0!");
+  if (_max_iter<_min_iter) mooseError2("max_power_iterations<min_power_iterations!");
+  if (_eig_check_tol<0.0) mooseError2("eig_check_tol<0!");
+  if (_pfactor<0.0) mooseError2("pfactor<0!");
 }
 
 void

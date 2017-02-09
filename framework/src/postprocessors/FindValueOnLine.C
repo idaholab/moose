@@ -69,9 +69,9 @@ FindValueOnLine::execute()
   bool left_to_right = left < right;
   // Initial bounds check
   if ((left_to_right && _target < left) || (!left_to_right && _target < right))
-    mooseError("Target value \"" << _target << "\" is less than the minimum sampled value \"" << std::min(left, right) << "\"");
+    mooseError2("Target value \"", _target, "\" is less than the minimum sampled value \"", std::min(left, right), "\"");
   if ((left_to_right && _target > right) || (!left_to_right && _target > left))
-    mooseError("Target value \"" << _target << "\" is greater than the maximum sampled value \"" << std::max(left, right) << "\"");
+    mooseError2("Target value \"", _target, "\" is greater than the maximum sampled value \"", std::max(left, right), "\"");
 
   bool found_it = false;
   Real value = 0;
@@ -102,7 +102,7 @@ FindValueOnLine::execute()
   }
 
   if (!found_it)
-    mooseError("Target value \"" << std::setprecision(10) << _target << "\" not found on line within tolerance, last sample: " << value << ".");
+    mooseError2("Target value \"", std::setprecision(10), _target, "\" not found on line within tolerance, last sample: ", value, ".");
 
   _position = s * _length;
 }
@@ -132,7 +132,7 @@ FindValueOnLine::getValueAtPoint(const Point & p)
   else
   {
     // there is no element
-    mooseError("No element found at the current search point. Please make sure the sampling line stays inside the mesh completely.");
+    mooseError2("No element found at the current search point. Please make sure the sampling line stays inside the mesh completely.");
   }
 }
 

@@ -53,7 +53,7 @@ MooseVariableBase::allDofIndices() const
   if (it != _sys.subproblem()._var_dof_map.end())
     return it->second;
   else
-   mooseError("VariableAllDoFMap not prepared for " << name() << " . Check nonlocal coupling requirement for the variable.");
+   mooseError2("VariableAllDoFMap not prepared for ", name(), " . Check nonlocal coupling requirement for the variable.");
 }
 
 Order

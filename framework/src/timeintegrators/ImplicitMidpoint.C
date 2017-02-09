@@ -113,5 +113,5 @@ ImplicitMidpoint::postStep(NumericVector<Number> & residual)
     residual.close();
   }
   else
-    mooseError("ImplicitMidpoint::postStep(): _stage = " << _stage << ", only _stage = 1, 2 is allowed.");
+    mooseError2("ImplicitMidpoint::postStep(): _stage = ", _stage, ", only _stage = 1, 2 is allowed.");
 }

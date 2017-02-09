@@ -96,7 +96,7 @@ PolycrystalICTools::assignPointToGrain(const Point & p, const std::vector<Point>
   }
 
   if (min_index >= grain_num)
-    mooseError("ERROR in PolycrystalVoronoiVoidIC: didn't find minimum values in grain_value_calc");
+    mooseError2("ERROR in PolycrystalVoronoiVoidIC: didn't find minimum values in grain_value_calc");
 
   return min_index;
 }
@@ -191,7 +191,7 @@ PolycrystalICTools::buildElementalGrainAdjacencyGraph(const std::map<dof_id_type
         if (true)
           visitElementalNeighbors(mesh.elemPtr(*entity_it), halo_ids[i]);
         else
-          mooseError("Unimplemented");
+          mooseError2("Unimplemented");
       }
 
       set_difference.clear();
@@ -277,7 +277,7 @@ PolycrystalICTools::assignOpsToGrains(const AdjacencyGraph & adjacency_matrix, u
   std::vector<unsigned int> grain_to_op(n_grains, GraphColoring::INVALID_COLOR);
 
   if (!colorGraph(adjacency_matrix, grain_to_op, n_grains, n_ops, 0))
-    mooseError("Unable to find a valid Grain to op configuration, do you have enough op variables?");
+    mooseError2("Unable to find a valid Grain to op configuration, do you have enough op variables?");
 
   Moose::perf_log.pop("assignOpsToGrains()", "PolycrystalICTools");
 

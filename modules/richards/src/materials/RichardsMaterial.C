@@ -113,17 +113,17 @@ RichardsMaterial::RichardsMaterial(const InputParameters & parameters) :
   }
 
   if (_material_por <= 0 || _material_por >= 1)
-    mooseError("Porosity set to " << _material_por << " but it must be between 0 and 1");
+    mooseError2("Porosity set to ", _material_por, " but it must be between 0 and 1");
 
   if (isCoupled("perm_change") && (coupledComponents("perm_change") != LIBMESH_DIM*LIBMESH_DIM))
-    mooseError(LIBMESH_DIM*LIBMESH_DIM << " components of perm_change must be given to a RichardsMaterial.  You supplied " << coupledComponents("perm_change") << "\n");
+    mooseError2(LIBMESH_DIM*LIBMESH_DIM, " components of perm_change must be given to a RichardsMaterial.  You supplied ", coupledComponents("perm_change"), "\n");
 
   _perm_change.resize(LIBMESH_DIM*LIBMESH_DIM);
   for (unsigned int i = 0; i < LIBMESH_DIM*LIBMESH_DIM; ++i)
     _perm_change[i] = (isCoupled("perm_change")? &coupledValue("perm_change", i) : &_zero); // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a pointer
 
   if (!(_material_viscosity.size() == _num_p && getParam<std::vector<UserObjectName> >("relperm_UO").size() == _num_p && getParam<std::vector<UserObjectName> >("seff_UO").size() == _num_p && getParam<std::vector<UserObjectName> >("sat_UO").size() == _num_p && getParam<std::vector<UserObjectName> >("density_UO").size() == _num_p && getParam<std::vector<UserObjectName> >("SUPG_UO").size() == _num_p))
-    mooseError("There are " << _num_p << " Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO");
+    mooseError2("There are ", _num_p, " Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO");
 
   _d2density.resize(_num_p);
   _d2rel_perm_dv.resize(_num_p);

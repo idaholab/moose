@@ -49,7 +49,7 @@ PolycrystalReducedIC::initialSetup()
   _range = _top_right - _bottom_left;
 
   if (_op_num > _grain_num)
-     mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
+     mooseError2("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
 
   MooseRandom::seed(_rand_seed);
 

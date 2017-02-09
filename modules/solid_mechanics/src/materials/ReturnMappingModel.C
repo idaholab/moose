@@ -137,7 +137,7 @@ ReturnMappingModel::computeStress(const Elem & /*current_elem*/, unsigned qp,
     {
       Moose::err << iter_output;
     }
-    mooseError("Exceeded maximum iterations in ReturnMappingModel solve for material: " << _name << ".  Rerun with  'output_iteration_info_on_error = true' for more information.");
+    mooseError2("Exceeded maximum iterations in ReturnMappingModel solve for material: ", _name, ".  Rerun with  'output_iteration_info_on_error = true' for more information.");
   }
 
   // compute inelastic and elastic strain increments (avoid potential divide by zero - how should this be done)?

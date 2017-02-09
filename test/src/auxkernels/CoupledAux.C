@@ -52,7 +52,7 @@ CoupledAux::computeValue()
     // when we attempt to divide by zero!
   {
     if (_coupled_val[_qp] == 0)
-      mooseError("Floating point exception in coupled_value");
+      mooseError2("Floating point exception in coupled_value");
 
     return _value / _coupled_val[_qp];
   }

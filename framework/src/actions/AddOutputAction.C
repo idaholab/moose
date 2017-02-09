@@ -51,12 +51,12 @@ AddOutputAction::act()
 
   // Reject the reserved names for objects not built by MOOSE
   if (!_moose_object_pars.get<bool>("_built_by_moose") && output_warehouse.isReservedName(_name))
-    mooseError("The name '" << _name << "' is a reserved name for output objects");
+    mooseError2("The name '", _name, "' is a reserved name for output objects");
 
   // Check that an object by the same name does not already exist; this must be done before the object
   // is created to avoid getting misleading errors from the Parser
   if (output_warehouse.hasOutput(_name))
-    mooseError("An output object named '" << _name << "' already exists");
+    mooseError2("An output object named '", _name, "' already exists");
 
   // Add a pointer to the FEProblemBase class
   _moose_object_pars.addPrivateParam<FEProblemBase *>("_fe_problem_base", _problem.get());

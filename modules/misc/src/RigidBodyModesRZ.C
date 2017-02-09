@@ -29,7 +29,7 @@ RigidBodyModesRZ::RigidBodyModesRZ(const InputParameters & parameters) :
   if (_subspace_indices.size() != 1) {
     std::stringstream err;
     err << "Expected 1 RZ rigid body mode, got " << _subspace_indices.size()  << " instead\n";
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   for (unsigned int i = 0; i < _subspace_indices.size(); ++i)
   {
@@ -37,7 +37,7 @@ RigidBodyModesRZ::RigidBodyModesRZ(const InputParameters & parameters) :
     {
       std::stringstream err;
       err << "Invalid " << i << "-th " << _subspace_name << " index " << _subspace_indices[i] << "; must be < " << _fe_problem.subspaceDim(_subspace_name) << "\n";
-      mooseError(err.str());
+      mooseError2(err.str());
     }
   }
 }

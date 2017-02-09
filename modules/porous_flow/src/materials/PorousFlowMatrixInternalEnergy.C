@@ -30,7 +30,7 @@ PorousFlowMatrixInternalEnergy::PorousFlowMatrixInternalEnergy(const InputParame
     _den_nodal_dvar(declareProperty<std::vector<Real> >("dPorousFlow_matrix_internal_energy_nodal_dvar"))
 {
   if (_nodal_material != true)
-    mooseError("PorousFlowMatrixInternalEnergy classes are only defined for at_nodes = true");
+    mooseError2("PorousFlowMatrixInternalEnergy classes are only defined for at_nodes = true");
 }
 
 void

@@ -132,7 +132,7 @@ EulerAngleUpdater::initialize()
     if (_angles[i].phi2 < 0.0)
       _angles[i].phi2 += 360.0;
     if (_angles[i].Phi < 0.0)
-      mooseError("Euler angle out of range.");
+      mooseError2("Euler angle out of range.");
   }
 
   _first_time = false;

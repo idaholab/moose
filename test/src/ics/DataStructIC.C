@@ -60,5 +60,5 @@ DataStructIC::value(const Point & /*p*/)
   if (it != _data.end())
     return it->second;
 
-  mooseError("The following id is not in the data structure: " << _current_node->id());
+  mooseError2("The following id is not in the data structure: ", _current_node->id());
 }

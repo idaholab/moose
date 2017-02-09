@@ -29,16 +29,16 @@ ReconPhaseVarIC::value(const Point & /*p*/)
 {
   // Return error if current node is NULL
   if (_current_node == nullptr)
-    mooseError("_current_node is reporting NULL");
+    mooseError2("_current_node is reporting NULL");
 
   // Make sure the _current_node is in the _node_to_phase_weight_map (return error if not in map)
   std::map<dof_id_type, std::vector<Real> >::const_iterator it = _node_to_phase_weight_map.find(_current_node->id());
   if (it == _node_to_phase_weight_map.end())
-    mooseError("The following node id is not in the node map: " << _current_node->id());
+    mooseError2("The following node id is not in the node map: ", _current_node->id());
 
   // make sure we have enough ophase weights
   if (_phase >= it->second.size())
-    mooseError("Requested an out-of-range phase number");
+    mooseError2("Requested an out-of-range phase number");
 
   return it->second[_phase];
 }

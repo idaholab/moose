@@ -78,7 +78,7 @@ unsigned int
 RichardsVarNames::richards_var_num(unsigned int moose_var_num) const
 {
   if (moose_var_num >= _ps_var_num.size() || _ps_var_num[moose_var_num] == _num_v)
-    mooseError("The moose variable with number " << moose_var_num << " is not a richards according to the RichardsVarNames UserObject");
+    mooseError2("The moose variable with number ", moose_var_num, " is not a richards according to the RichardsVarNames UserObject");
   return _ps_var_num[moose_var_num];
 }
 

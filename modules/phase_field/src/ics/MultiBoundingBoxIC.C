@@ -35,7 +35,7 @@ MultiBoundingBoxIC::MultiBoundingBoxIC(const InputParameters & parameters) :
 
   // make sure inputs are the same length
   if (_c2.size() != _nbox || _inside.size() != _nbox)
-    mooseError("vector inputs must all be the same size");
+    mooseError2("vector inputs must all be the same size");
 }
 
 Real

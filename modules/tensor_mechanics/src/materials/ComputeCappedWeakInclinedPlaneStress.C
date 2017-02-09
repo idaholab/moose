@@ -28,7 +28,7 @@ ComputeCappedWeakInclinedPlaneStress::ComputeCappedWeakInclinedPlaneStress(const
     _rotated_Eijkl(RankFourTensor())
 {
   if (_n_input.norm() == 0)
-    mooseError("ComputeCappedWeakInclinedPlaneStress: normal_vector must not have zero length");
+    mooseError2("ComputeCappedWeakInclinedPlaneStress: normal_vector must not have zero length");
   else
     _n_input /= _n_input.norm();
 

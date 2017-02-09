@@ -41,9 +41,9 @@ Q2PPiecewiseLinearSinkFlux::Q2PPiecewiseLinearSinkFlux(const InputParameters & p
     _permeability(getMaterialProperty<RealTensorValue>("permeability"))
 {
   if ((isParamValid("fluid_density") && !isParamValid("fluid_viscosity")) || (!isParamValid("fluid_density") && isParamValid("fluid_viscosity")))
-    mooseError("Q2PPiecewiseLinearSink: you must supply both of fluid_density and fluid_viscosity if you wish to multiply by the mobility");
+    mooseError2("Q2PPiecewiseLinearSink: you must supply both of fluid_density and fluid_viscosity if you wish to multiply by the mobility");
   if ((isParamValid("fluid_relperm") && !isCoupled("saturation")) || (!isParamValid("fluid_relperm") && isCoupled("saturation")))
-    mooseError("Q2PPiecewiseLinearSink: you must supply both of fluid_relperm and saturation if you wish to multiply by the relative permeaility");
+    mooseError2("Q2PPiecewiseLinearSink: you must supply both of fluid_relperm and saturation if you wish to multiply by the relative permeaility");
 }
 
 Real

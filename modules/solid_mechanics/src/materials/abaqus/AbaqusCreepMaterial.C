@@ -83,7 +83,7 @@ AbaqusCreepMaterial::AbaqusCreepMaterial(const InputParameters & parameters) :
   {
     std::ostringstream error;
     error << "Cannot open library: " << dlerror() << '\n';
-    mooseError(error.str());
+    mooseError2(error.str());
   }
 
   // Reset errors
@@ -102,7 +102,7 @@ AbaqusCreepMaterial::AbaqusCreepMaterial(const InputParameters & parameters) :
     dlclose(_handle);
     std::ostringstream error;
     error << "Cannot load symbol 'creep_': " << dlsym_error << '\n';
-    mooseError(error.str());
+    mooseError2(error.str());
   }
 }
 
@@ -179,7 +179,7 @@ void AbaqusCreepMaterial::computeStress()
   if (dts_squared >= 0.)
     _ets[_qp] = std::sqrt(1.5 * dts_squared);
   else
-    mooseError("Attempted to take square root of a negative number!\n");
+    mooseError2("Attempted to take square root of a negative number!\n");
 
   // Calculate gradient of dev stress potential (grad_dts)
   // grad_dts = d(qtild)/d(dev_trial_stress)

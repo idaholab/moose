@@ -83,7 +83,7 @@ public:
   MultiMooseEnum & systemInfoFlags()
     {
       if (!_allow_changing_sysinfo_flag)
-        mooseError("accessing console system information flags is not allowed after console initial setup");
+        mooseError2("accessing console system information flags is not allowed after console initial setup");
       return _system_info_flags;
     }
 
@@ -112,7 +112,7 @@ protected:
   /**
    * Not implemented.
    */
-  virtual void outputVectorPostprocessors() override { mooseError("Can't currently output VectorPostprocessors to the screen"); };
+  virtual void outputVectorPostprocessors() override { mooseError2("Can't currently output VectorPostprocessors to the screen"); };
 
   /**
    * Print system information

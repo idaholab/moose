@@ -61,14 +61,14 @@ NeighborCoupleable::coupledNeighborValueOlder(const std::string & var_name, unsi
     if (_c_is_implicit)
       return var->nodalSlnOlderNeighbor();
     else
-      mooseError("Older values not available for explicit schemes");
+      mooseError2("Older values not available for explicit schemes");
   }
   else
   {
     if (_c_is_implicit)
       return var->slnOlderNeighbor();
     else
-      mooseError("Older values not available for explicit schemes");
+      mooseError2("Older values not available for explicit schemes");
   }
 }
 
@@ -76,7 +76,7 @@ const VariableGradient &
 NeighborCoupleable::coupledNeighborGradient(const std::string & var_name, unsigned int comp)
 {
   if (_neighbor_nodal)
-    mooseError("Nodal variables do not have gradients");
+    mooseError2("Nodal variables do not have gradients");
 
   MooseVariable * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
@@ -86,7 +86,7 @@ const VariableGradient &
 NeighborCoupleable::coupledNeighborGradientOld(const std::string & var_name, unsigned int comp)
 {
   if (_neighbor_nodal)
-    mooseError("Nodal variables do not have gradients");
+    mooseError2("Nodal variables do not have gradients");
 
   validateExecutionerType(var_name);
   MooseVariable * var = getVar(var_name, comp);
@@ -97,21 +97,21 @@ const VariableGradient &
 NeighborCoupleable::coupledNeighborGradientOlder(const std::string & var_name, unsigned int comp)
 {
   if (_neighbor_nodal)
-    mooseError("Nodal variables do not have gradients");
+    mooseError2("Nodal variables do not have gradients");
 
   validateExecutionerType(var_name);
   MooseVariable * var = getVar(var_name, comp);
   if (_c_is_implicit)
     return var->gradSlnOlderNeighbor();
   else
-    mooseError("Older values not available for explicit schemes");
+    mooseError2("Older values not available for explicit schemes");
 }
 
 const VariableSecond &
 NeighborCoupleable::coupledNeighborSecond(const std::string & var_name, unsigned int comp)
 {
   if (_neighbor_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError2("Nodal variables do not have second derivatives");
 
   MooseVariable * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->secondSlnNeighbor() : var->secondSlnOldNeighbor();

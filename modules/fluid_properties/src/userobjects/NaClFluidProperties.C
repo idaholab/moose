@@ -120,7 +120,7 @@ NaClFluidProperties::rho_e_dpT(Real pressure, Real temperature, Real & rho, Real
 Real
 NaClFluidProperties::c(Real /*pressure*/, Real /*temperature*/) const
 {
-  mooseError("NaClFluidProperties::c not implemented");
+  mooseError2("NaClFluidProperties::c not implemented");
   return 0.0;
 }
 
@@ -151,14 +151,14 @@ NaClFluidProperties::cv(Real pressure, Real temperature) const
 Real
 NaClFluidProperties::mu(Real /*density*/, Real /*temperature*/) const
 {
-  mooseError("NaClFluidProperties::mu not implemented");
+  mooseError2("NaClFluidProperties::mu not implemented");
   return 0.0;
 }
 
 void
 NaClFluidProperties::mu_drhoT(Real /*density*/, Real /*temperature*/, Real & /*mu*/, Real & /*dmu_drho*/, Real & /*dmu_dT*/) const
 {
-  mooseError("NaClFluidProperties::mu_drhoT not implemented");
+  mooseError2("NaClFluidProperties::mu_drhoT not implemented");
 }
 
 Real
@@ -173,7 +173,7 @@ NaClFluidProperties::k(Real /*pressure*/, Real temperature) const
 Real
 NaClFluidProperties::s(Real /*pressure*/, Real /*temperature*/) const
 {
-  mooseError("NaClFluidProperties::s not implemented");
+  mooseError2("NaClFluidProperties::s not implemented");
   return 0.0;
 }
 
@@ -217,12 +217,12 @@ NaClFluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & dh_
 Real
 NaClFluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
 {
-  mooseError("NaClFluidProperties::beta not implemented");
+  mooseError2("NaClFluidProperties::beta not implemented");
   return 0.0;
 }
 
 Real
 NaClFluidProperties::henryConstant(Real /*temperature*/) const
 {
-  mooseError("NaClFluidProperties::henryConstant not valid");
+  mooseError2("NaClFluidProperties::henryConstant not valid");
   return 0.0;}

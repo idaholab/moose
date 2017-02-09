@@ -35,7 +35,7 @@ GrainAdvectionVelocity::GrainAdvectionVelocity(const InputParameters & parameter
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
     _velocity_advection(declareProperty<std::vector<RealGradient> >(_base_name + "advection_velocity"))
 {
-  mooseDeprecated("Use GrainAdvectionAux for visualizing advection velocities.");
+  mooseDeprecated2("Use GrainAdvectionAux for visualizing advection velocities.");
 }
 
 void

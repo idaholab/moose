@@ -133,14 +133,14 @@ AddCoupledEqSpeciesAuxKernelsAction::act()
             secondary = true;
         }
         else
-          mooseError("Error parsing term: " << term.as_string());
+          mooseError2("Error parsing term: ", term.as_string());
       }
 
       stos.push_back(local_stos);
       primary_species_involved.push_back(local_species_list);
     }
 
-    if (n_reactions == 0) mooseError("No equilibrium reaction provided!");
+    if (n_reactions == 0) mooseError2("No equilibrium reaction provided!");
     // End parsing
 
     for (unsigned int j = 0; j < n_reactions; ++j)

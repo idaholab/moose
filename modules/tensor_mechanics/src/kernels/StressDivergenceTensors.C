@@ -48,7 +48,7 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
 
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
-    mooseError("The number of displacement variables supplied must match the mesh dimension.");
+    mooseError2("The number of displacement variables supplied must match the mesh dimension.");
 
   if (_use_finite_deform_jacobian)
   {
@@ -59,18 +59,18 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
 
   // deprecate temp in favor of temperature
   if (isCoupled("temp"))
-    mooseDeprecated("Use 'temperature' instead of 'temp'");
+    mooseDeprecated2("Use 'temperature' instead of 'temp'");
 
   // Error if volumetic locking correction is turned on for 1D problems
   if (_ndisp == 1 && _volumetric_locking_correction)
-    mooseError("Volumetric locking correction should be set to false for 1-D problems.");
+    mooseError2("Volumetric locking correction should be set to false for 1-D problems.");
 }
 
 void
 StressDivergenceTensors::initialSetup()
 {
   if (getBlockCoordSystem() != Moose::COORD_XYZ)
-    mooseError("The coordinate system in the Problem block must be set to XYZ for cartesian geometries.");
+    mooseError2("The coordinate system in the Problem block must be set to XYZ for cartesian geometries.");
 }
 
 void

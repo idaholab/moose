@@ -34,9 +34,9 @@ PorousFlowThermalConductivityIdeal::PorousFlowThermalConductivityIdeal(const Inp
     _dla_qp_dvar(declareProperty<std::vector<RealTensorValue> >("dPorousFlow_thermal_conductivity_qp_dvar"))
 {
   if (_aqueous_phase && (_aqueous_phase_number >= _num_phases))
-    mooseError("PorousFlowThermalConductivityIdeal: Your aqueous phase number, " << _aqueous_phase_number << " must not exceed the number of fluid phases in the system, which is " << _num_phases << "\n");
+    mooseError2("PorousFlowThermalConductivityIdeal: Your aqueous phase number, ", _aqueous_phase_number, " must not exceed the number of fluid phases in the system, which is ", _num_phases, "\n");
   if (_nodal_material == true)
-    mooseError("PorousFlowThermalConductivity classes are only defined for at_nodes = false");
+    mooseError2("PorousFlowThermalConductivity classes are only defined for at_nodes = false");
 }
 
 void

@@ -51,7 +51,7 @@ BicubicSplineFunction::BicubicSplineFunction(const InputParameters & parameters)
 
   unsigned int m = _x1.size(), n = _x2.size(), mn = yvec.size();
   if (m * n != mn)
-    mooseError("The length of the supplied y must be equal to the lengths of x1 and x2 multiplied together");
+    mooseError2("The length of the supplied y must be equal to the lengths of x1 and x2 multiplied together");
 
   std::vector<std::vector<Real> > y(m, std::vector<Real>(n));
   for (unsigned int i = 0; i < m; ++i)
@@ -61,22 +61,22 @@ BicubicSplineFunction::BicubicSplineFunction(const InputParameters & parameters)
   if (_yx11.empty())
     _yx11.resize(n, 1e30);
   else if (_yx11.size() != n)
-    mooseError("The length of the vectors holding the first derivatives of y with respect to x1 must match the length of x2.");
+    mooseError2("The length of the vectors holding the first derivatives of y with respect to x1 must match the length of x2.");
 
   if (_yx1n.empty())
     _yx1n.resize(n, 1e30);
   else if (_yx1n.size() != n)
-    mooseError("The length of the vectors holding the first derivatives of y with respect to x1 must match the length of x2.");
+    mooseError2("The length of the vectors holding the first derivatives of y with respect to x1 must match the length of x2.");
 
   if (_yx21.empty())
     _yx21.resize(m, 1e30);
   else if (_yx21.size() != m)
-    mooseError("The length of the vectors holding the first derivatives of y with respect to x2 must match the length of x1.");
+    mooseError2("The length of the vectors holding the first derivatives of y with respect to x2 must match the length of x1.");
 
   if (_yx2n.empty())
     _yx2n.resize(m, 1e30);
   else if (_yx2n.size() != m)
-    mooseError("The length of the vectors holding the first derivatives of y with respect to x2 must match the length of x1.");
+    mooseError2("The length of the vectors holding the first derivatives of y with respect to x2 must match the length of x1.");
 
   _ipol.setData(_x1, _x2, y, _yx11, _yx1n, _yx21, _yx2n);
 }
@@ -111,7 +111,7 @@ BicubicSplineFunction::derivative(const Point & p, unsigned int deriv_var)
     ypn = _yx2.value(0, xn);
   }
   else
-    mooseError("deriv_var must equal 1 or 2");
+    mooseError2("deriv_var must equal 1 or 2");
 
   return _ipol.sampleDerivative(p(0), p(1), deriv_var, yp1, ypn);
 }
@@ -135,7 +135,7 @@ BicubicSplineFunction::secondDerivative(const Point & p, unsigned int deriv_var)
     ypn = _yx2.value(0, xn);
   }
   else
-    mooseError("deriv_var must equal 1 or 2");
+    mooseError2("deriv_var must equal 1 or 2");
 
   return _ipol.sample2ndDerivative(p(0), p(1), deriv_var, yp1, ypn);
 }

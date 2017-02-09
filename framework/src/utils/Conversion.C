@@ -156,7 +156,7 @@ namespace Moose
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!execstore_type_to_enum.count(upper))
-      mooseError("Unknown execution flag: " << upper);
+      mooseError2("Unknown execution flag: ", upper);
 
     return execstore_type_to_enum[upper];
   }
@@ -170,7 +170,7 @@ namespace Moose
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!quadrature_type_to_enum.count(upper))
-      mooseError("Unknown quadrature type: " << upper);
+      mooseError2("Unknown quadrature type: ", upper);
 
     return quadrature_type_to_enum[upper];
 
@@ -197,7 +197,7 @@ namespace Moose
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!coordinate_system_type_to_enum.count(upper))
-      mooseError("Unknown coordinate system type: " << upper);
+      mooseError2("Unknown coordinate system type: ", upper);
 
     return coordinate_system_type_to_enum[upper];
   }
@@ -211,7 +211,7 @@ namespace Moose
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!solve_type_to_enum.count(upper))
-      mooseError("Unknown solve type: " << upper);
+      mooseError2("Unknown solve type: ", upper);
 
     return solve_type_to_enum[upper];
   }
@@ -225,7 +225,7 @@ namespace Moose
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!eigen_solve_type_to_enum.count(upper))
-      mooseError("Unknown eigen solve type: " << upper);
+      mooseError2("Unknown eigen solve type: ", upper);
 
     return eigen_solve_type_to_enum[upper];
   }
@@ -239,7 +239,7 @@ namespace Moose
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!eigen_problem_type_to_enum.count(upper))
-      mooseError("Unknown eigen problem type: " << upper);
+      mooseError2("Unknown eigen problem type: ", upper);
 
     return eigen_problem_type_to_enum[upper];
   }
@@ -253,7 +253,7 @@ namespace Moose
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!which_eigen_pairs_to_enum.count(upper))
-      mooseError("Unknown type of WhichEigenPairs: " << upper);
+      mooseError2("Unknown type of WhichEigenPairs: ", upper);
 
     return which_eigen_pairs_to_enum[upper];
   }
@@ -267,7 +267,7 @@ namespace Moose
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
     if (!line_search_type_to_enum.count(upper))
-      mooseError("Unknown line search type: " << upper);
+      mooseError2("Unknown line search type: ", upper);
 
     return line_search_type_to_enum[upper];
   }

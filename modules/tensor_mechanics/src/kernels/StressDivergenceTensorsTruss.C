@@ -41,7 +41,7 @@ StressDivergenceTensorsTruss::StressDivergenceTensorsTruss(const InputParameters
 
   // deprecate temp in favor of temperature
   if (isCoupled("temp"))
-    mooseDeprecated("Use 'temperature' instead of 'temp'");
+    mooseDeprecated2("Use 'temperature' instead of 'temp'");
 }
 
 void

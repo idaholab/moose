@@ -41,7 +41,7 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
 
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
-    mooseError("The number of variables supplied in 'displacements' must match the mesh dimension.");
+    mooseError2("The number of variables supplied in 'displacements' must match the mesh dimension.");
 
   // fetch coupled variables and gradients (as stateful properties if necessary)
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -58,7 +58,7 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
   }
 
   if (_ndisp == 1 && _volumetric_locking_correction)
-    mooseError("Volumetric locking correction have to be set to false for 1-D problems.");
+    mooseError2("Volumetric locking correction have to be set to false for 1-D problems.");
 }
 
 void

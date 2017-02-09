@@ -26,7 +26,7 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
 {
   // Error if the name contains "::"
   if (name.find("::") != std::string::npos)
-    mooseError("The object name may not contain '::' in the name: " << name);
+    mooseError2("The object name may not contain '::' in the name: ", name);
 
   // Create the actual InputParameters object that will be reference by the objects
   std::shared_ptr<InputParameters> ptr = std::make_shared<InputParameters>(parameters);
@@ -40,7 +40,7 @@ InputParameterWarehouse::addInputParameters(const std::string & name, InputParam
 
   // Check that the Parameters do not already exist
   if (_input_parameters[tid].find(unique_name) != _input_parameters[tid].end())
-    mooseError("A '" << unique_name.tag() << "' object already exists with the name '" << unique_name.name() << "'.\n");
+    mooseError2("A '", unique_name.tag(), "' object already exists with the name '", unique_name.name(), "'.\n");
 
   // Store the parameters according to the base name
   _input_parameters[tid].insert(std::pair<MooseObjectName, std::shared_ptr<InputParameters>>(unique_name, ptr));
@@ -103,7 +103,7 @@ InputParameterWarehouse::getInputParameters(const MooseObjectName & object_name,
   // Locate the InputParameters object and error if it was not located
   const auto iter = _input_parameters[tid].find(object_name);
   if (iter == _input_parameters[tid].end())
-    mooseError("Unknown InputParameters object " << object_name);
+    mooseError2("Unknown InputParameters object ", object_name);
 
   // Return a reference to the parameter
   return *(iter->second.get());

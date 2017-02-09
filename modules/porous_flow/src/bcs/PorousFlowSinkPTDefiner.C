@@ -23,9 +23,9 @@ PorousFlowSinkPTDefiner::PorousFlowSinkPTDefiner(const InputParameters & paramet
     _dtemp_dvar(!_involves_fluid ? &getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar") : nullptr)
 {
   if (_involves_fluid && (_pp == nullptr || _dpp_dvar == nullptr))
-    mooseError("PorousFlowSink: There is no porepressure Material");
+    mooseError2("PorousFlowSink: There is no porepressure Material");
   if (!_involves_fluid && (_temp == nullptr || _dtemp_dvar == nullptr))
-    mooseError("PorousFlowSink: There is no temperature Material");
+    mooseError2("PorousFlowSink: There is no temperature Material");
 }
 
 Real

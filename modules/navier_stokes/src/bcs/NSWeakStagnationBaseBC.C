@@ -39,7 +39,7 @@ NSWeakStagnationBaseBC::staticValues(Real & T_s, Real & p_s, Real & rho_s)
   T_s = _stagnation_temperature - 0.5 * this->velmag2() / _fp.cp();
 
   if (T_s < 0.)
-    mooseError("Negative temperature detected in NSWeakStagnationBaseBC!");
+    mooseError2("Negative temperature detected in NSWeakStagnationBaseBC!");
 
   // p_s = p_0 * (T_0/T)^(-gam/(gam-1))
   p_s = _stagnation_pressure * std::pow(_stagnation_temperature / T_s, -_fp.gamma() / (_fp.gamma() - 1.));

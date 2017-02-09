@@ -212,7 +212,7 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
                           _transient_sys);
 
   if (!petsc_mat)
-    mooseError("Could not convert to Petsc matrix.");
+    mooseError2("Could not convert to Petsc matrix.");
 
   petsc_mat->close();
 

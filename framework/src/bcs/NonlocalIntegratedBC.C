@@ -35,7 +35,7 @@ NonlocalIntegratedBC::NonlocalIntegratedBC(const InputParameters & parameters) :
     IntegratedBC(parameters)
 {
   _mesh.errorIfDistributedMesh("NonlocalIntegratedBC");
-  mooseWarning("NonlocalIntegratedBC is a computationally expensive experimental capability used only for integral terms.");
+  mooseWarning2("NonlocalIntegratedBC is a computationally expensive experimental capability used only for integral terms.");
 }
 
 void

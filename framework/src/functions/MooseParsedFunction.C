@@ -53,7 +53,7 @@ MooseParsedFunction::timeDerivative(Real t, const Point & p)
 RealVectorValue
 MooseParsedFunction::vectorValue(Real /*t*/, const Point & /*p*/)
 {
-  mooseError("The vectorValue method is not defined in ParsedFunction");
+  mooseError2("The vectorValue method is not defined in ParsedFunction");
 }
 
 void

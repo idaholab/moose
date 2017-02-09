@@ -57,6 +57,6 @@ PFCTradMaterial::computeQpProperties()
       break;
 
     default:
-      mooseError("Unknown order value.");
+      mooseError2("Unknown order value.");
   }
 }

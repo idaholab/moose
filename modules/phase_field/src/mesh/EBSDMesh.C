@@ -36,7 +36,7 @@ EBSDMesh::EBSDMesh(const InputParameters & parameters) :
     _filename(getParam<FileName>("filename"))
 {
   if (_nx != 1 || _ny != 1 || _nz !=1)
-    mooseWarning("Do not specify mesh geometry information, it is read from the EBSD file.");
+    mooseWarning2("Do not specify mesh geometry information, it is read from the EBSD file.");
 }
 
 EBSDMesh::~EBSDMesh()
@@ -49,7 +49,7 @@ EBSDMesh::readEBSDHeader()
   std::ifstream stream_in(_filename.c_str());
 
   if (!stream_in)
-    mooseError("Can't open EBSD file: " << _filename);
+    mooseError2("Can't open EBSD file: ", _filename);
 
   // Labels to look for in the header
   std::vector<std::string> labels = {
@@ -115,13 +115,13 @@ EBSDMesh::readEBSDHeader()
   for (unsigned i = 0; i < dim; ++i)
   {
     if (_geometry.n[i] == 0)
-      mooseError("Error reading header, EBSD grid size is zero.");
+      mooseError2("Error reading header, EBSD grid size is zero.");
     if (_geometry.d[i] == 0.0)
-      mooseError("Error reading header, EBSD data step size is zero.");
+      mooseError2("Error reading header, EBSD data step size is zero.");
   }
 
   if (dim == 0)
-    mooseError("Error reading header, EBSD data is zero dimensional.");
+    mooseError2("Error reading header, EBSD data is zero dimensional.");
 
   _geometry.dim = dim;
 }
@@ -152,7 +152,7 @@ EBSDMesh::buildMesh()
     for (unsigned int j = 0; j < _geometry.dim; ++j)
     {
       if (nr[j] % 2 != 0)
-        mooseError("EBSDMesh error. Requested uniform_refine levels not possible.");
+        mooseError2("EBSDMesh error. Requested uniform_refine levels not possible.");
       nr[j] /= 2;
     }
 

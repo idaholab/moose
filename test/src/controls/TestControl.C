@@ -44,7 +44,7 @@ TestControl::TestControl(const InputParameters & parameters) :
     getControllableValueByName<bool>("Executioner/enable");
 
   else if (_test_type != "point")
-    mooseError("Unknown test type.");
+    mooseError2("Unknown test type.");
 }
 
 void

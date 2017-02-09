@@ -91,7 +91,7 @@ RateDepSmearCrackModel::computeStress(const Elem & /*current_elem*/,
 
   if ( _nconv || _err_tol )
   {
-    mooseWarning("RateDepSmearCrackModel: Constitutive cutback");
+    mooseWarning2("RateDepSmearCrackModel: Constitutive cutback");
     stress_new = SymmTensor::genRandomSymmTensor(_rndm_scale_var);
   }
   else
@@ -152,7 +152,7 @@ RateDepSmearCrackModel::updateVariables()
 {
   int error = matrixInversion(_jac, _nstate);
   if (error != 0)
-    mooseError("Error in Matrix  Inversion in RankFourTensor");
+    mooseError2("Error in Matrix  Inversion in RankFourTensor");
 
   for ( unsigned int i = 0; i < _nstate; i++ )
   {

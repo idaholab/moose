@@ -97,7 +97,7 @@ namespace SlepcSupport
 
     if (params.isParamValid("solve_type"))
     {
-      mooseError("Can not use \"solve_type\" for eigenvalue problems, please use \"eigen_solve_type\" instead \n");
+      mooseError2("Can not use \"solve_type\" for eigenvalue problems, please use \"eigen_solve_type\" instead \n");
     }
 
     if (params.isParamValid("eigen_solve_type"))
@@ -137,7 +137,7 @@ namespace SlepcSupport
       break;
 
     default:
-      mooseError("Unknown eigen solver type \n");
+      mooseError2("Unknown eigen solver type \n");
     }
   }
 
@@ -195,7 +195,7 @@ namespace SlepcSupport
       break;
 
     default:
-      mooseError("Unknown type of WhichEigenPairs \n");
+      mooseError2("Unknown type of WhichEigenPairs \n");
     }
   }
 
@@ -221,7 +221,7 @@ namespace SlepcSupport
       break;
 
     default:
-      mooseError("Unknown eigen solver type \n");
+      mooseError2("Unknown eigen solver type \n");
     }
   }
 

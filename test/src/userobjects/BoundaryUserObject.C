@@ -35,7 +35,7 @@ BoundaryUserObject::BoundaryUserObject(const InputParameters & parameters) :
   {
     std::vector<Real> facs = getParam<std::vector<Real> >("factors");
     if (facs.size() != ids.size())
-      mooseError("number of factors is wrong");
+      mooseError2("number of factors is wrong");
     for (unsigned int i = 0; i < ids.size(); i++)
       _factors[ids[i]] = facs[i];
   }

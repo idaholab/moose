@@ -70,23 +70,23 @@ PorousFlowLineSink::PorousFlowLineSink(const InputParameters & parameters) :
   _total_outflow_mass.zero();
 
   if (_ph >= _dictator.numPhases())
-    mooseError("PorousFlowLineSink: The Dictator declares that the number of fluid phases is " << _dictator.numPhases() << ", but you have set the fluid_phase to " << _ph << ".  You must try harder.");
+    mooseError2("PorousFlowLineSink: The Dictator declares that the number of fluid phases is ", _dictator.numPhases(), ", but you have set the fluid_phase to ", _ph, ".  You must try harder.");
   if (_use_mass_fraction && _sp >= _dictator.numComponents())
-    mooseError("PorousFlowLineSink: The Dictator declares that the number of fluid components is " << _dictator.numComponents() << ", but you have set the mass_fraction_component to " << _sp << ".  Please be assured that the Dictator has noted your error.");
+    mooseError2("PorousFlowLineSink: The Dictator declares that the number of fluid components is ", _dictator.numComponents(), ", but you have set the mass_fraction_component to ", _sp, ".  Please be assured that the Dictator has noted your error.");
   if (_p_or_t == 0 && !_has_porepressure)
-    mooseError("PorousFlowLineSink: You have specified function_of=porepressure, but you do not have a quadpoint porepressure material");
+    mooseError2("PorousFlowLineSink: You have specified function_of=porepressure, but you do not have a quadpoint porepressure material");
   if (_p_or_t == 1 && !_has_temperature)
-    mooseError("PorousFlowLineSink: You have specified function_of=temperature, but you do not have a quadpoint temperature material");
+    mooseError2("PorousFlowLineSink: You have specified function_of=temperature, but you do not have a quadpoint temperature material");
   if (_use_mass_fraction && !_has_mass_fraction)
-    mooseError("PorousFlowLineSink: You have specified a fluid component, but do not have a nodal mass-fraction material");
+    mooseError2("PorousFlowLineSink: You have specified a fluid component, but do not have a nodal mass-fraction material");
   if (_use_relative_permeability && !_has_relative_permeability)
-    mooseError("PorousFlowLineSink: You have set use_relative_permeability=true, but do not have a nodal relative permeability material");
+    mooseError2("PorousFlowLineSink: You have set use_relative_permeability=true, but do not have a nodal relative permeability material");
   if (_use_mobility && !_has_mobility)
-    mooseError("PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material");
+    mooseError2("PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, relative permeability or viscosity material");
   if (_use_enthalpy && !_has_enthalpy)
-    mooseError("PorousFlowLineSink: You have set use_enthalpy=true, but do not have a nodal enthalpy material");
+    mooseError2("PorousFlowLineSink: You have set use_enthalpy=true, but do not have a nodal enthalpy material");
   if (_use_internal_energy && !_has_internal_energy)
-    mooseError("PorousFlowLineSink: You have set use_internal_energy=true, but do not have a nodal internal-energy material");
+    mooseError2("PorousFlowLineSink: You have set use_internal_energy=true, but do not have a nodal internal-energy material");
 
   // To correctly compute the Jacobian terms,
   // tell MOOSE that this DiracKernel depends on all the PorousFlow Variables

@@ -33,7 +33,7 @@ MultiPhaseStressMaterial::MultiPhaseStressMaterial(const InputParameters & param
 {
   // verify parameter length
   if (_n_phase != _phase_base.size())
-    mooseError("h and phase_base input vectors need to have the same length in MultiPhaseStressMaterial " << name());
+    mooseError2("h and phase_base input vectors need to have the same length in MultiPhaseStressMaterial ", name());
 
   for (unsigned int i = 0; i < _n_phase; ++i)
   {

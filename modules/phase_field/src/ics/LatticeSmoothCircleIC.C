@@ -52,10 +52,10 @@ LatticeSmoothCircleIC::initialSetup()
 
   //Error checks
   if (_range(0) != 0.0 && _range(1) != 0.0 && _circles_per_side[1] == 0)
-    mooseError("If domain is > 1D, circles_per_side must have more than one value");
+    mooseError2("If domain is > 1D, circles_per_side must have more than one value");
 
   if (_range(2) != 0.0 && _circles_per_side[2] == 0)
-    mooseError("If domain is 3D, circles_per_side must have three values");
+    mooseError2("If domain is 3D, circles_per_side must have three values");
 
   if (_range(1) == 0.0 && _range(2) == 0.0)
   {
@@ -76,7 +76,7 @@ LatticeSmoothCircleIC::initialSetup()
   {
     case 2: //No variation
       if (_radius_variation > 0.0)
-        mooseError("If radius_variation > 0.0, you must pass in a radius_variation_type in LatticeSmoothCircleIC");
+        mooseError2("If radius_variation > 0.0, you must pass in a radius_variation_type in LatticeSmoothCircleIC");
       break;
   }
   SmoothCircleBaseIC::initialSetup();

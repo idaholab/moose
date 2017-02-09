@@ -59,7 +59,7 @@ const VariableGradient &
 NeighborMooseVariableInterface::neighborGradient()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have gradients");
+    mooseError2("Nodal variables do not have gradients");
 
   return _variable->gradSlnNeighbor();
 }
@@ -68,7 +68,7 @@ const VariableGradient &
 NeighborMooseVariableInterface::neighborGradientOld()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have gradients");
+    mooseError2("Nodal variables do not have gradients");
 
   return _variable->gradSlnOldNeighbor();
 }
@@ -77,7 +77,7 @@ const VariableGradient &
 NeighborMooseVariableInterface::neighborGradientOlder()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have gradients");
+    mooseError2("Nodal variables do not have gradients");
 
   return _variable->gradSlnOlderNeighbor();
 }
@@ -86,7 +86,7 @@ const VariableSecond &
 NeighborMooseVariableInterface::neighborSecond()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError2("Nodal variables do not have second derivatives");
 
   return _variable->secondSlnNeighbor();
 }
@@ -95,7 +95,7 @@ const VariableSecond &
 NeighborMooseVariableInterface::neighborSecondOld()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError2("Nodal variables do not have second derivatives");
 
   return _variable->secondSlnOldNeighbor();
 }
@@ -104,7 +104,7 @@ const VariableSecond &
 NeighborMooseVariableInterface::neighborSecondOlder()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError2("Nodal variables do not have second derivatives");
 
   return _variable->secondSlnOlderNeighbor();
 }
@@ -113,7 +113,7 @@ const VariableTestSecond &
 NeighborMooseVariableInterface::neighborSecondTest()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError2("Nodal variables do not have second derivatives");
 
   return _variable->secondPhiFaceNeighbor();
 }
@@ -122,7 +122,7 @@ const VariablePhiSecond &
 NeighborMooseVariableInterface::neighborSecondPhi()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError2("Nodal variables do not have second derivatives");
 
   return _mvi_assembly->secondPhiFaceNeighbor();
 }

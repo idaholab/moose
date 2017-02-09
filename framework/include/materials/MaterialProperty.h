@@ -193,10 +193,10 @@ public:
 
 private:
   /// private copy constructor to avoid shallow copying of material properties
-  MaterialProperty(const MaterialProperty<T> & /*src*/) { mooseError("Material properties must be assigned to references (missing '&')"); }
+  MaterialProperty(const MaterialProperty<T> & /*src*/) { mooseError2("Material properties must be assigned to references (missing '&')"); }
 
   /// private assignment operator to avoid shallow copying of material properties
-  MaterialProperty<T> & operator = (const MaterialProperty<T> & /*rhs*/) { mooseError("Material properties must be assigned to references (missing '&')"); }
+  MaterialProperty<T> & operator = (const MaterialProperty<T> & /*rhs*/) { mooseError2("Material properties must be assigned to references (missing '&')"); }
 
   /// Stored parameter value.
   MooseArray<T> _value;

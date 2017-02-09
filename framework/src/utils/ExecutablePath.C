@@ -34,7 +34,7 @@ std::string getExecutablePath()
   if (_NSGetExecutablePath(path, &size) == 0)
     exec_path = path;
   else
-    mooseError("Unable to retrieve executable path");
+    mooseError2("Unable to retrieve executable path");
 #else //Linux with Proc
   std::ostringstream oss;
   oss << "/proc/" << getpid() << "/exe";

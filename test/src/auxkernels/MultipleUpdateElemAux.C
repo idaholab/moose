@@ -31,9 +31,9 @@ MultipleUpdateElemAux::MultipleUpdateElemAux(const InputParameters & parameters)
   for (unsigned int i=0; i<_n_vars; i++)
   {
     _vars.push_back(getVar("vars", i));
-    if (_vars[i]->isNodal()) mooseError("variables have to be elemental");
+    if (_vars[i]->isNodal()) mooseError2("variables have to be elemental");
   }
-  if (isNodal()) mooseError("variable have to be elemental");
+  if (isNodal()) mooseError2("variable have to be elemental");
 }
 
 MultipleUpdateElemAux::~MultipleUpdateElemAux()

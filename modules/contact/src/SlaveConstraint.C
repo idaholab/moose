@@ -269,7 +269,7 @@ SlaveConstraint::computeQpJacobian()
   }
   else
   {
-    mooseError("Invalid or unavailable contact model");
+    mooseError2("Invalid or unavailable contact model");
   }
 
   return _test[_i][_qp] * term * _phi[_j][_qp];
@@ -286,7 +286,7 @@ SlaveConstraint::nodalArea(PenetrationInfo & pinfo)
   if (area == 0)
   {
     if (_t_step > 1)
-      mooseError("Zero nodal area found");
+      mooseError2("Zero nodal area found");
 
     else
       area = 1; // Avoid divide by zero during initialization

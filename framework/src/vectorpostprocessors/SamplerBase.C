@@ -117,7 +117,7 @@ SamplerBase::finalize()
 #ifndef NDEBUG
   for (const auto vec_ptr : vec_ptrs)
     if (vec_ptr->size() != vector_length)
-      mooseError("Vector length mismatch");
+      mooseError2("Vector length mismatch");
 #endif
 
   // Sort each of the vectors using the same sorted indices

@@ -51,7 +51,7 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
       // make sure time sequence is in ascending order
       for (unsigned int j = 0; j < times.size() - 1; ++j)
         if (times[j + 1] <= times[j])
-          mooseError("time_sequence must be in ascending order.");
+          mooseError2("time_sequence must be in ascending order.");
 
       _time_sequence.push_back(start_time);
       for (unsigned int j = 0; j < times.size(); ++j)
@@ -69,7 +69,7 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
       // 2. the entries in _time_sequence and times must be equal up to entry with index _current_step
 
       if (!MooseUtils::absoluteFuzzyEqual(_executioner.getStartTime(), _time_sequence[0]))
-        mooseError("Timesequencestepper does not allow the start time to be modified.");
+        mooseError2("Timesequencestepper does not allow the start time to be modified.");
 
       // sync _executioner.endTime with _time_sequence
       Real end_time = _executioner.endTime();
@@ -77,7 +77,7 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
       // make sure time sequence is in ascending order
       for (unsigned int j = 0; j < times.size() - 1; ++j)
         if (times[j + 1] <= times[j])
-          mooseError("time_sequence must be in ascending order.");
+          mooseError2("time_sequence must be in ascending order.");
 
       // save the restarted time_sequence
       std::vector<Real> saved_time_sequence = _time_sequence;
@@ -87,9 +87,9 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
       for (unsigned int j = 0; j <= _current_step; ++j)
       {
         if (!MooseUtils::absoluteFuzzyEqual(times[j], saved_time_sequence[j]))
-          mooseError("The timesequence provided in the restart file must be identical to "
-                     "the one in the old file up to entry number " << _current_step + 1 << " = "
-                     << saved_time_sequence[_current_step]);
+          mooseError2("The timesequence provided in the restart file must be identical to "
+                     "the one in the old file up to entry number ", _current_step + 1, " = ",
+                      saved_time_sequence[_current_step]);
 
         _time_sequence.push_back(saved_time_sequence[j]);
       }
@@ -135,7 +135,7 @@ Real
 TimeSequenceStepperBase::computeFailedDT()
 {
   if (computeDT() <= _dt_min)
-    mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
+    mooseError2("Solve failed and timestep already at or below dtmin, cannot continue!");
 
   // cut the time step in a half if possible
   Real dt = 0.5 * computeDT();

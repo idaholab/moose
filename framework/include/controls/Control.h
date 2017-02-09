@@ -208,7 +208,7 @@ Control::getControllableParameterHelper(const MooseObjectParameterName & desired
         oss << "The controlled parameter with tag, '" << desired.tag() << "', and name, '" << desired.name() << "', in " << name() << " was found,\n";
         oss << "but the number of parameters have differing values.\n\n";
         oss << output.dump();
-        mooseWarning(oss.str());
+        mooseWarning2(oss.str());
       }
     }
   }

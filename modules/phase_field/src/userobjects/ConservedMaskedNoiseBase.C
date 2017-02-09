@@ -78,7 +78,7 @@ ConservedMaskedNoiseBase::getQpValue(dof_id_type element_id, unsigned int qp) co
   const auto it_pair = _random_data.find(element_id);
 
   if (it_pair == _random_data.end())
-    mooseError("Element not found.");
+    mooseError2("Element not found.");
   else
   {
     libmesh_assert_less(qp, it_pair->second.size());

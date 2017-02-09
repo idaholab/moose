@@ -42,13 +42,13 @@ PorousFlowPermeabilityKozenyCarman::PorousFlowPermeabilityKozenyCarman(const Inp
   {
     case 0: // kozeny_carman_fd2
       if (!(parameters.isParamValid("f") && parameters.isParamValid("d")))
-        mooseError("You must specify f and d in order to use kozeny_carman_fd2 in PorousFlowPermeabilityKozenyCarman");
+        mooseError2("You must specify f and d in order to use kozeny_carman_fd2 in PorousFlowPermeabilityKozenyCarman");
       _A = _f * _d * _d;
       break;
 
     case 1: // kozeny_carman_phi0
       if (!(parameters.isParamValid("k0") && parameters.isParamValid("phi0")))
-        mooseError("You must specify k0 and phi0 in order to use kozeny_carman_phi0 in PorousFlowPermeabilityKozenyCarman");
+        mooseError2("You must specify k0 and phi0 in order to use kozeny_carman_phi0 in PorousFlowPermeabilityKozenyCarman");
       _A = _k0 * std::pow(1.0 - _phi0, _m)/std::pow(_phi0, _n);
       break;
   }

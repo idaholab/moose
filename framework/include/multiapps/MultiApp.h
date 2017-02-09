@@ -375,7 +375,7 @@ dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
   multi_app->backup();
 
   if (!multi_app)
-    mooseError("Error storing std::vector<Backup*>");
+    mooseError2("Error storing std::vector<Backup*>");
 
   for (unsigned int i=0; i<backups.size(); i++)
     dataStore(stream, backups[i], context);
@@ -388,7 +388,7 @@ dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
   MultiApp * multi_app = static_cast<MultiApp *>(context);
 
   if (!multi_app)
-    mooseError("Error loading std::vector<Backup*>");
+    mooseError2("Error loading std::vector<Backup*>");
 
   for (unsigned int i=0; i<backups.size(); i++)
     dataLoad(stream, backups[i], context);

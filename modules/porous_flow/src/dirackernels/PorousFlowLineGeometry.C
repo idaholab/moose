@@ -30,7 +30,7 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
   // open file
   std::ifstream file(_point_file.c_str());
   if (!file.good())
-    mooseError("PorousFlowLineGeometry: Error opening file " + _point_file);
+    mooseError2("PorousFlowLineGeometry: Error opening file " + _point_file);
 
   // construct the arrays of weight, x, y and z
   std::vector<Real> scratch;
@@ -64,7 +64,7 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
   {
     _half_seg_len[i] = 0.5 * std::sqrt(Utility::pow<2>(_xs[i+1] - _xs[i]) + Utility::pow<2>(_ys[i+1] - _ys[i]) + Utility::pow<2>(_zs[i+1] - _zs[i]));
     if (_half_seg_len[i] == 0)
-      mooseError("PorousFlowLineGeometry: zero-segment length detected at (x,y,z) = " << _xs[i] << " " << _ys[i] << " " << _zs[i] << "\n");
+      mooseError2("PorousFlowLineGeometry: zero-segment length detected at (x,y,z) = ", _xs[i], " ", _ys[i], " ", _zs[i], "\n");
   }
   if (num_pts == 1)
     _half_seg_len[0] = _line_length;

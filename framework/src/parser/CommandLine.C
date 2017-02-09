@@ -102,7 +102,7 @@ CommandLine::populateInputParams(InputParameters & params)
       }
     }
     else if (params.isParamRequired(orig_name))
-      mooseError("Missing required command-line parameter: " << orig_name << std::endl << "Doc String: " << params.getDocString(orig_name));
+      mooseError2("Missing required command-line parameter: ", orig_name, "\nDoc String: ", params.getDocString(orig_name));
   }
 }
 
@@ -128,11 +128,11 @@ CommandLine::search(const std::string & option_name)
     if (pos->second.required)
     {
       printUsage();
-      mooseError("Required parameter: " << option_name << " missing");
+      mooseError2("Required parameter: ", option_name, " missing");
     }
   }
   else
-    mooseError("Unrecognized option name");
+    mooseError2("Unrecognized option name");
 
   return false;
 }

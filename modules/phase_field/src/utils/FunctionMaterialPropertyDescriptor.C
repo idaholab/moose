@@ -123,7 +123,7 @@ FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expressi
     }
   }
 
-  mooseError("Malformed material_properties expression '" << expression << "'");
+  mooseError2("Malformed material_properties expression '", expression, "'");
 }
 
 void
@@ -150,7 +150,7 @@ FunctionMaterialPropertyDescriptor::parseDependentVariables(const std::string & 
     _dependent_vars.erase(std::unique(_dependent_vars.begin(), _dependent_vars.end()), _dependent_vars.end());
   }
   else
-    mooseError("Malformed material_properties expression '" << expression << "'");
+    mooseError2("Malformed material_properties expression '", expression, "'");
 }
 
 void
@@ -179,7 +179,7 @@ FunctionMaterialPropertyDescriptor::value() const
     else if (_kernel_parent)
       _value = &(_kernel_parent->getMaterialPropertyDerivative<Real>(_base_name, _derivative_vars));
     else
-      mooseError("A FunctionMaterialPropertyDescriptor must be owned by either a Material or a Kernel object.");
+      mooseError2("A FunctionMaterialPropertyDescriptor must be owned by either a Material or a Kernel object.");
   }
 
   return *_value;

@@ -39,15 +39,15 @@ FeatureFloodCountAux::FeatureFloodCountAux(const InputParameters & parameters) :
 {
   if (_flood_counter.isElemental() == isNodal() &&
       (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING" || _field_display == "GHOSTED_ENTITIES" || _field_display == "HALOS"))
-    mooseError("UNIQUE_REGION, VARIABLE_COLORING, GHOSTED_ENTITIES and HALOS must be on variable types that match the entity mode of the FeatureFloodCounter");
+    mooseError2("UNIQUE_REGION, VARIABLE_COLORING, GHOSTED_ENTITIES and HALOS must be on variable types that match the entity mode of the FeatureFloodCounter");
 
   if (isNodal())
   {
     if (_field_display == "ACTIVE_BOUNDS")
-      mooseError("ACTIVE_BOUNDS is only available for elemental aux variables");
+      mooseError2("ACTIVE_BOUNDS is only available for elemental aux variables");
 
     if (_field_display == "CENTROID")
-      mooseError("CENTROID is only available for elemental aux variables");
+      mooseError2("CENTROID is only available for elemental aux variables");
   }
 }
 
@@ -75,7 +75,7 @@ FeatureFloodCountAux::precalculateValue()
     break;
   }
   default:
-    mooseError("Unimplemented \"field_display\" type");
+    mooseError2("Unimplemented \"field_display\" type");
   }
 }
 

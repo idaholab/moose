@@ -123,7 +123,7 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParamete
     _read_from_slip_sys_file = true;
 
   if (_read_from_slip_sys_file && ! ( _num_slip_sys_props > 0 ))
-    mooseError("Crystal Plasticity Error: Specify number of internal variable's initial values to be read from slip system file");
+    mooseError2("Crystal Plasticity Error: Specify number of internal variable's initial values to be read from slip system file");
 
   getSlipSystems();
 
@@ -199,7 +199,7 @@ FiniteStrainCrystalPlasticity::readFileInitSlipSysRes()
 
   for (unsigned int i = 0; i < _nss; ++i)
     if (!(file >> _gss[_qp][i]))
-      mooseError("Error FiniteStrainCrystalPlasticity: Premature end of slip_sys_res_prop file");
+      mooseError2("Error FiniteStrainCrystalPlasticity: Premature end of slip_sys_res_prop file");
 
   file.close();
 }
@@ -209,7 +209,7 @@ void
 FiniteStrainCrystalPlasticity::getInitSlipSysRes()
 {
   if (_gprops.size() <= 0)
-    mooseError("FiniteStrainCrystalPLasticity: Error in reading slip system resistance properties: Specify input in .i file or in slip_sys_res_prop_file or in slip_sys_file");
+    mooseError2("FiniteStrainCrystalPLasticity: Error in reading slip system resistance properties: Specify input in .i file or in slip_sys_res_prop_file or in slip_sys_file");
 
   _gss[_qp].resize(_nss,0.0);
   _gss_old[_qp].resize(_nss,0.0);
@@ -225,16 +225,16 @@ FiniteStrainCrystalPlasticity::getInitSlipSysRes()
     ve = _gprops[i * num_data_grp + 1];
 
     if (vs <= 0 || ve <= 0)
-      mooseError( "FiniteStrainCrystalPLasticity: Indices in gss property read must be positive integers: is = " << vs << " ie = " << ve );
+      mooseError2( "FiniteStrainCrystalPLasticity: Indices in gss property read must be positive integers: is = ", vs, " ie = ", ve );
 
     if (vs != floor(vs) || ve != floor(ve))
-      mooseError("FiniteStrainCrystalPLasticity: Error in reading slip system resistances: Values specifying start and end number of slip system groups should be integer");
+      mooseError2("FiniteStrainCrystalPLasticity: Error in reading slip system resistances: Values specifying start and end number of slip system groups should be integer");
 
     is = static_cast<unsigned int>(vs);
     ie = static_cast<unsigned int>(ve);
 
     if (is > ie)
-      mooseError("FiniteStrainCrystalPLasticity: Start index is = " << is << " should be greater than end index ie = " << ie << " in slip system resistance property read");
+      mooseError2("FiniteStrainCrystalPLasticity: Start index is = ", is, " should be greater than end index ie = ", ie, " in slip system resistance property read");
 
     for (unsigned int j = is; j <= ie; ++j)
       _gss[_qp][j-1] = _gprops[i * num_data_grp + 2];
@@ -242,7 +242,7 @@ FiniteStrainCrystalPlasticity::getInitSlipSysRes()
 
   for (unsigned int i = 0; i < _nss; ++i)
     if (_gss[_qp][i] <= 0.0)
-      mooseError("FiniteStrainCrystalPLasticity: Value of resistance for slip system " << i + 1 << " non positive");
+      mooseError2("FiniteStrainCrystalPLasticity: Value of resistance for slip system ", i + 1, " non positive");
 }
 
 // Read flow rate parameters from .txt file. See test.
@@ -264,7 +264,7 @@ FiniteStrainCrystalPlasticity::readFileFlowRateParams()
   {
     for (unsigned int j = 0; j < _num_slip_sys_flowrate_props; ++j)
       if (!(file >> vec[j]))
-        mooseError("Error FiniteStrainCrystalPlasticity: Premature end of slip_sys_flow_rate_param file");
+        mooseError2("Error FiniteStrainCrystalPlasticity: Premature end of slip_sys_flow_rate_param file");
 
     _a0(i)=vec[0];
     _xm(i)=vec[1];
@@ -278,7 +278,7 @@ void
 FiniteStrainCrystalPlasticity::getFlowRateParams()
 {
   if (_flowprops.size() <= 0)
-    mooseError("FiniteStrainCrystalPLasticity: Error in reading flow rate  properties: Specify input in .i file or a slip_sys_flow_prop_file_name");
+    mooseError2("FiniteStrainCrystalPLasticity: Error in reading flow rate  properties: Specify input in .i file or a slip_sys_flow_prop_file_name");
 
   _a0.resize(_nss);
   _xm.resize(_nss);
@@ -294,16 +294,16 @@ FiniteStrainCrystalPlasticity::getFlowRateParams()
     ve = _flowprops[i * num_data_grp + 1];
 
     if (vs <= 0 || ve <= 0)
-      mooseError("FiniteStrainCrystalPLasticity: Indices in flow rate parameter read must be positive integers: is = " << vs << " ie = " << ve );
+      mooseError2("FiniteStrainCrystalPLasticity: Indices in flow rate parameter read must be positive integers: is = ", vs, " ie = ", ve );
 
     if (vs != floor(vs) || ve != floor(ve))
-      mooseError("FiniteStrainCrystalPLasticity: Error in reading flow props: Values specifying start and end number of slip system groups should be integer");
+      mooseError2("FiniteStrainCrystalPLasticity: Error in reading flow props: Values specifying start and end number of slip system groups should be integer");
 
     is = static_cast<unsigned int>(vs);
     ie = static_cast<unsigned int>(ve);
 
     if (is > ie)
-      mooseError("FiniteStrainCrystalPLasticity: Start index is = " << is << " should be greater than end index ie = " << ie << " in flow rate parameter read");
+      mooseError2("FiniteStrainCrystalPLasticity: Start index is = ", is, " should be greater than end index ie = ", ie, " in flow rate parameter read");
 
     for (unsigned int j = is; j <= ie; ++j)
     {
@@ -316,7 +316,7 @@ FiniteStrainCrystalPlasticity::getFlowRateParams()
   {
     if (!(_a0(i) > 0.0 && _xm(i) > 0.0))
     {
-      mooseWarning( "FiniteStrainCrystalPlasticity: Non-positive flow rate parameters " << _a0(i) << "," << _xm(i) );
+      mooseWarning2( "FiniteStrainCrystalPlasticity: Non-positive flow rate parameters ", _a0(i), ",", _xm(i) );
       break;
     }
   }
@@ -333,7 +333,7 @@ void
 FiniteStrainCrystalPlasticity::getHardnessParams()
 {
   if (_hprops.size() <= 0)
-    mooseError("FiniteStrainCrystalPLasticity: Error in reading hardness properties: Specify input in .i file or a slip_sys_hard_prop_file_name");
+    mooseError2("FiniteStrainCrystalPLasticity: Error in reading hardness properties: Specify input in .i file or a slip_sys_hard_prop_file_name");
 
   _r = _hprops[0];
   _h0 = _hprops[1];
@@ -357,7 +357,7 @@ FiniteStrainCrystalPlasticity::getSlipSystems()
     // Read the slip normal
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       if ( ! (fileslipsys >> vec[j]) )
-        mooseError("Crystal Plasticity Error: Premature end of file reading slip system file \n");
+        mooseError2("Crystal Plasticity Error: Premature end of file reading slip system file \n");
 
     // Normalize the vectors
     Real mag;
@@ -370,7 +370,7 @@ FiniteStrainCrystalPlasticity::getSlipSystems()
     // Read the slip direction
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       if ( ! (fileslipsys >> vec[j]) )
-        mooseError("Crystal Plasticity Error: Premature end of file reading slip system file \n");
+        mooseError2("Crystal Plasticity Error: Premature end of file reading slip system file \n");
 
     // Normalize the vectors
     mag = Utility::pow<2>(vec[0]) + Utility::pow<2>(vec[1]) + Utility::pow<2>(vec[2]);
@@ -384,12 +384,12 @@ FiniteStrainCrystalPlasticity::getSlipSystems()
       mag += _mo(i*LIBMESH_DIM+j) * _no(i*LIBMESH_DIM+j);
 
     if (std::abs(mag) > 1e-8)
-      mooseError("Crystal Plasicity Error: Slip direction and normal not orthonormal, System number = " << i << "\n");
+      mooseError2("Crystal Plasicity Error: Slip direction and normal not orthonormal, System number = ", i, "\n");
 
     if (_read_from_slip_sys_file)
       for (unsigned int j = 0; j < _num_slip_sys_props; ++j)
         if (!(fileslipsys >> _slip_sys_props(i * _num_slip_sys_props + j)))
-          mooseError("Crystal Plasticity Error: Premature end of file reading slip system file - check in slip system file read input options/values\n");
+          mooseError2("Crystal Plasticity Error: Premature end of file reading slip system file - check in slip system file read input options/values\n");
   }
 
   fileslipsys.close();
@@ -455,7 +455,7 @@ void FiniteStrainCrystalPlasticity::computeQpStress()
 
 #ifdef DEBUG
     if (substep_iter > _max_substep_iter)
-      mooseWarning("FiniteStrainCrystalPlasticity: Failure with substepping");
+      mooseWarning2("FiniteStrainCrystalPlasticity: Failure with substepping");
 #endif
 
     if (!_err_tol || substep_iter > _max_substep_iter)
@@ -513,7 +513,7 @@ FiniteStrainCrystalPlasticity::postSolveQp()
       _stress[_qp] = RankTwoTensor::genRandomSymmTensor( _rndm_scale_var, 1.0 );
     }
     else
-      mooseError("FiniteStrainCrystalPlasticity: Constitutive failure");
+      mooseError2("FiniteStrainCrystalPlasticity: Constitutive failure");
   }
   else
   {
@@ -589,7 +589,7 @@ FiniteStrainCrystalPlasticity::solveStatevar()
   if (iterg == _maxiterg)
   {
 #ifdef DEBUG
-    mooseWarning("FiniteStrainCrystalPLasticity: Hardness Integration error gmax" << gmax << "\n");
+    mooseWarning2("FiniteStrainCrystalPLasticity: Hardness Integration error gmax", gmax, "\n");
 #endif
     _err_tol = true;
   }
@@ -655,7 +655,7 @@ FiniteStrainCrystalPlasticity::solveStress()
   if (_err_tol)
   {
 #ifdef DEBUG
-    mooseWarning("FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp);
+    mooseWarning2("FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number ", _current_elem->id(), " Gauss point = ", _qp);
 #endif
     return;
   }
@@ -673,7 +673,7 @@ FiniteStrainCrystalPlasticity::solveStress()
     if (_err_tol)
     {
 #ifdef DEBUG
-      mooseWarning("FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number " << _current_elem->id() << " Gauss point = " << _qp);
+      mooseWarning2("FiniteStrainCrystalPLasticity: Slip increment exceeds tolerance - Element number ", _current_elem->id(), " Gauss point = ", _qp);
 #endif
       return;
     }
@@ -684,7 +684,7 @@ FiniteStrainCrystalPlasticity::solveStress()
     if (_use_line_search && rnorm > rnorm_prev && !line_search_update(rnorm_prev, dpk2))
     {
 #ifdef DEBUG
-      mooseWarning("FiniteStrainCrystalPLasticity: Failed with line search");
+      mooseWarning2("FiniteStrainCrystalPLasticity: Failed with line search");
 #endif
       _err_tol = true;
       return;
@@ -699,7 +699,7 @@ FiniteStrainCrystalPlasticity::solveStress()
   if (iter >= _maxiter)
   {
 #ifdef DEBUG
-    mooseWarning("FiniteStrainCrystalPLasticity: Stress Integration error rmax = " << rnorm);
+    mooseWarning2("FiniteStrainCrystalPLasticity: Stress Integration error rmax = ", rnorm);
 #endif
     _err_tol = true;
   }
@@ -875,7 +875,7 @@ FiniteStrainCrystalPlasticity::getSlipIncrements()
     {
       _err_tol = true;
 #ifdef DEBUG
-      mooseWarning("Maximum allowable slip increment exceeded " << std::abs(_slip_incr(i)));
+      mooseWarning2("Maximum allowable slip increment exceeded ", std::abs(_slip_incr(i)));
 #endif
       return;
     }
@@ -913,7 +913,7 @@ FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
   LAPACKsyev_("V", "U", &nd, &cmat[0][0], &nd, w, work, &lwork, &info);
 
   if (info != 0)
-    mooseError("FiniteStrainCrystalPLasticity: DSYEV function call in getMatRot function failed");
+    mooseError2("FiniteStrainCrystalPLasticity: DSYEV function call in getMatRot function failed");
 
   diag.zero();
 
@@ -1105,7 +1105,7 @@ FiniteStrainCrystalPlasticity::line_search_update(const Real rnorm_prev, const R
     return false;
   }
   else{
-    mooseError("Line search meothod is not provided.");
+    mooseError2("Line search meothod is not provided.");
     return false;
   }
 }

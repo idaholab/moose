@@ -124,7 +124,7 @@ SolutionUserObject::SolutionUserObject(const InputParameters & parameters) :
   _r1 = vec1_to_z.transpose()*(rot1_z*vec1_to_z);
 
   if (isParamValid("timestep") && getParam<std::string>("timestep") == "-1")
-    mooseError("A \"timestep\" of -1 is no longer supported for interpolation. Instead simply remove this parameter altogether for interpolation");
+    mooseError2("A \"timestep\" of -1 is no longer supported for interpolation. Instead simply remove this parameter altogether for interpolation");
 }
 
 SolutionUserObject::~SolutionUserObject()
@@ -154,7 +154,7 @@ SolutionUserObject::readXda()
 
   // This should never occur, just in case produce an error
   else
-    mooseError("Faild to determine proper read method for XDA/XDR equation system file: " << _es_file);
+    mooseError2("Faild to determine proper read method for XDA/XDR equation system file: ", _es_file);
 
   // Update and store the EquationSystems name locally
   _es->update();
@@ -183,8 +183,8 @@ SolutionUserObject::readExodusII()
     {
       std::istringstream ss(s_timestep);
       if (!(ss >> _exodus_time_index) || _exodus_time_index > n_steps)
-        mooseError("Invalid value passed as \"timestep\". Expected \"LATEST\" or a valid integer less than "
-                   << n_steps << ", received " << s_timestep);
+        mooseError2("Invalid value passed as \"timestep\". Expected \"LATEST\" or a valid integer less than ",
+                    n_steps, ", received ", s_timestep);
     }
   }
   else
@@ -194,7 +194,7 @@ SolutionUserObject::readExodusII()
   // Check that the number of time steps is valid
   int num_exo_times = _exodus_times->size();
   if (num_exo_times == 0)
-    mooseError("In SolutionUserObject, exodus file contains no timesteps.");
+    mooseError2("In SolutionUserObject, exodus file contains no timesteps.");
 
   // Account for parallel mesh
   if (dynamic_cast<DistributedMesh *>(_mesh.get()))
@@ -292,7 +292,7 @@ SolutionUserObject::readExodusII()
   else
   {
     if (_exodus_time_index > num_exo_times)
-      mooseError("In SolutionUserObject, timestep = "<<_exodus_time_index<<", but there are only "<<num_exo_times<<" time steps.");
+      mooseError2("In SolutionUserObject, timestep = ", _exodus_time_index, ", but there are only ", num_exo_times, " time steps.");
 
     // Copy the values from the ExodusII file
     for (const auto & var_name : nodal)
@@ -403,7 +403,7 @@ SolutionUserObject::initialSetup()
 
   // Produce an error for an unknown file type
   else
-    mooseError("In SolutionUserObject, invalid file type (only .xda, .xdr, and .e supported)");
+    mooseError2("In SolutionUserObject, invalid file type (only .xda, .xdr, and .e supported)");
 
   // Intilize the serial solution vector
   _serialized_solution = NumericVector<Number>::build(_communicator);
@@ -511,7 +511,7 @@ bool
 SolutionUserObject::updateExodusBracketingTimeIndices(Real time)
 {
   if (_file_type != 1)
-    mooseError("In SolutionUserObject, getTimeInterpolationData only applicable for exodusII file type");
+    mooseError2("In SolutionUserObject, getTimeInterpolationData only applicable for exodusII file type");
 
   int old_index1 = _exodus_index1;
   int old_index2 = _exodus_index2;
@@ -559,7 +559,7 @@ SolutionUserObject::getLocalVarIndex(const std::string & var_name) const
   // Extract the variable index for the MeshFunction(s)
   std::map<std::string, unsigned int>::const_iterator it = _local_variable_index.find(var_name);
   if (it == _local_variable_index.end())
-    mooseError("Value requested for nonexistent variable '" << var_name << "' in the '" << name() << "' SolutionUserObject");
+    mooseError2("Value requested for nonexistent variable '", var_name, "' in the '", name(), "' SolutionUserObject");
   return it->second;
 }
 
@@ -612,7 +612,7 @@ SolutionUserObject::pointValueWrapper(Real t, const Point & p, const std::string
     }
   }
 
-  mooseError("SolutionUserObject::pointValueWrapper reaches line that it should not be able to reach.");
+  mooseError2("SolutionUserObject::pointValueWrapper reaches line that it should not be able to reach.");
   return 0.0;
 }
 
@@ -699,13 +699,13 @@ SolutionUserObject::discontinuousPointValue(Real libmesh_dbg_var(t), Point pt, c
     std::map<const Elem *, Real> map2 = evalMultiValuedMeshFunction(pt, local_var_index, 2);
 
     if (map.size() != map2.size())
-      mooseError("In SolutionUserObject::discontinuousPointValue map and map2 have different size");
+      mooseError2("In SolutionUserObject::discontinuousPointValue map and map2 have different size");
 
     // construct the interpolated map
     for (auto & k : map)
     {
       if (map2.find(k.first) == map2.end())
-        mooseError("In SolutionUserObject::discontinuousPointValue map and map2 have differing keys");
+        mooseError2("In SolutionUserObject::discontinuousPointValue map and map2 have differing keys");
       Real val = k.second;
       Real val2 = map2[k.first];
       map[k.first] = val + (val2 - val) * _interpolation_factor;
@@ -759,7 +759,7 @@ SolutionUserObject::pointValueGradientWrapper(Real t, const Point & p, const std
     }
   }
 
-  mooseError("SolutionUserObject::pointValueGradientWrapper reaches line that it should not be able to reach.");
+  mooseError2("SolutionUserObject::pointValueGradientWrapper reaches line that it should not be able to reach.");
   return RealGradient(0.0, 0.0, 0.0);
 }
 
@@ -843,13 +843,13 @@ SolutionUserObject::discontinuousPointValueGradient(Real libmesh_dbg_var(t), Poi
     std::map<const Elem *, RealGradient> map2 = evalMultiValuedMeshFunctionGradient(pt, local_var_index, 1);
 
     if (map.size() != map2.size())
-      mooseError("In SolutionUserObject::discontinuousPointValue map and map2 have different size");
+      mooseError2("In SolutionUserObject::discontinuousPointValue map and map2 have different size");
 
     // construct the interpolated map
     for (auto & k : map)
     {
       if (map2.find(k.first) == map2.end())
-        mooseError("In SolutionUserObject::discontinuousPointValue map and map2 have differing keys");
+        mooseError2("In SolutionUserObject::discontinuousPointValue map and map2 have differing keys");
       RealGradient val = k.second;
       RealGradient val2 = map2[k.first];
       map[k.first] = val + (val2 - val) * _interpolation_factor;
@@ -888,7 +888,7 @@ SolutionUserObject::evalMeshFunction(const Point & p, const unsigned int local_v
       (*_mesh_function2)(p, 0.0, output);
 
     else
-      mooseError("The func_num must be 1 or 2");
+      mooseError2("The func_num must be 1 or 2");
   }
 
   // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
@@ -896,7 +896,7 @@ SolutionUserObject::evalMeshFunction(const Point & p, const unsigned int local_v
   {
     std::ostringstream oss;
     p.print(oss);
-    mooseError("Failed to access the data for variable '"<< _system_variables[local_var_index] << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
+    mooseError2("Failed to access the data for variable '", _system_variables[local_var_index], "' at point ", oss.str(), " in the '", name(), "' SolutionUserObject");
   }
   return output(local_var_index);
 }
@@ -918,7 +918,7 @@ SolutionUserObject::evalMultiValuedMeshFunction(const Point & p, const unsigned 
       _mesh_function2->discontinuous_value(p, 0.0, temporary_output);
 
     else
-      mooseError("The func_num must be 1 or 2");
+      mooseError2("The func_num must be 1 or 2");
   }
 
   // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
@@ -926,7 +926,7 @@ SolutionUserObject::evalMultiValuedMeshFunction(const Point & p, const unsigned 
   {
     std::ostringstream oss;
     p.print(oss);
-    mooseError("Failed to access the data for variable '"<< _system_variables[local_var_index] << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
+    mooseError2("Failed to access the data for variable '", _system_variables[local_var_index], "' at point ", oss.str(), " in the '", name(), "' SolutionUserObject");
   }
 
   // Fill the actual map that is returned
@@ -957,7 +957,7 @@ SolutionUserObject::evalMeshFunctionGradient(const Point & p, const unsigned int
       _mesh_function2->gradient(p, 0.0, output, libmesh_nullptr);
 
     else
-      mooseError("The func_num must be 1 or 2");
+      mooseError2("The func_num must be 1 or 2");
   }
 
   // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
@@ -965,7 +965,7 @@ SolutionUserObject::evalMeshFunctionGradient(const Point & p, const unsigned int
   {
     std::ostringstream oss;
     p.print(oss);
-    mooseError("Failed to access the data for variable '"<< _system_variables[local_var_index] << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
+    mooseError2("Failed to access the data for variable '", _system_variables[local_var_index], "' at point ", oss.str(), " in the '", name(), "' SolutionUserObject");
   }
   return output[local_var_index];
 }
@@ -987,7 +987,7 @@ SolutionUserObject::evalMultiValuedMeshFunctionGradient(const Point & p, const u
       _mesh_function2->discontinuous_gradient(p, 0.0, temporary_output);
 
     else
-      mooseError("The func_num must be 1 or 2");
+      mooseError2("The func_num must be 1 or 2");
   }
 
   // Error if the data is out-of-range, which will be the case if the mesh functions are evaluated outside the domain
@@ -995,7 +995,7 @@ SolutionUserObject::evalMultiValuedMeshFunctionGradient(const Point & p, const u
   {
     std::ostringstream oss;
     p.print(oss);
-    mooseError("Failed to access the data for variable '"<< _system_variables[local_var_index] << "' at point " << oss.str() << " in the '" << name() << "' SolutionUserObject");
+    mooseError2("Failed to access the data for variable '", _system_variables[local_var_index], "' at point ", oss.str(), " in the '", name(), "' SolutionUserObject");
   }
 
   // Fill the actual map that is returned

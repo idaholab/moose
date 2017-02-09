@@ -79,7 +79,7 @@ MooseEnum::operator=(const std::string & name)
   if (std::find(_names.begin(), _names.end(), upper) == _names.end())
   {
     if (_out_of_range_index == 0)     // Are out of range values allowed?
-      mooseError(std::string("Invalid option \"") + upper + "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + _raw_names + "\".");
+      mooseError2(std::string("Invalid option \"") + upper + "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + _raw_names + "\".");
     else
     {
       // Allow values assigned outside of the enumeration range

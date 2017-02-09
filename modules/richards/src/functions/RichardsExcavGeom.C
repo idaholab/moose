@@ -35,7 +35,7 @@ RichardsExcavGeom::RichardsExcavGeom(const InputParameters & parameters) :
     _retreat_vel(_end_posn - _start_posn)
 {
   if (_start_time >= _end_time)
-    mooseError("Start time for excavation set to " << _start_time << " but this must be less than the end time, which is " << _end_time);
+    mooseError2("Start time for excavation set to ", _start_time, " but this must be less than the end time, which is ", _end_time);
   _retreat_vel /= (_end_time - _start_time); // this is now a velocity
   _norm_retreat_vel = _retreat_vel.norm();
 }

@@ -35,7 +35,7 @@ PorousFlow1PhaseMD_Gaussian::PorousFlow1PhaseMD_Gaussian(const InputParameters &
     _pvar(_dictator.isPorousFlowVariable(_md_varnum) ? _dictator.porousFlowVariableNum(_md_varnum) : 0)
 {
   if (_num_phases != 1)
-    mooseError("The Dictator proclaims that the number of phases is " << _dictator.numPhases() << " whereas PorousFlow1PhaseMD_Gaussian can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
+    mooseError2("The Dictator proclaims that the number of phases is ", _dictator.numPhases(), " whereas PorousFlow1PhaseMD_Gaussian can only be used for 1-phase simulations.  Be aware that the Dictator has noted your mistake.");
 }
 
 void

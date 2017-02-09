@@ -35,7 +35,7 @@ VectorOfPostprocessors::VectorOfPostprocessors(const InputParameters & parameter
   for (const auto & pps_name : pps_names)
   {
     if (!hasPostprocessorByName(pps_name))
-      mooseError("In VectorOfPostprocessors, postprocessor with name: " << pps_name << " does not exist");
+      mooseError2("In VectorOfPostprocessors, postprocessor with name: ", pps_name, " does not exist");
     _postprocessor_values.push_back(&getPostprocessorValueByName(pps_name));
   }
 }

@@ -153,13 +153,13 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
       // build derivative
       newitem._F = ADFunctionPtr(new ADFunction(*current._F));
       if (newitem._F->AutoDiff(_variable_names[i]) != -1)
-        mooseError("Failed to take order " << newitem._dargs.size() << " derivative in material " << _name);
+        mooseError2("Failed to take order ", newitem._dargs.size(), " derivative in material ", _name);
 
       // optimize and compile
       if (!_disable_fpoptimizer)
         newitem._F->Optimize();
       if (_enable_jit && !newitem._F->JITCompile())
-        mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
+        mooseWarning2("Failed to JIT compile expression, falling back to byte code interpretation.");
 
       // generate material property argument vector
       std::vector<VariableName> darg_names(0);

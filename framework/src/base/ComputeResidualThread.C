@@ -109,7 +109,7 @@ ComputeResidualThread::onElement(const Elem *elem)
     break;
 
   default:
-    mooseError("Unknown Kernel Type \n");
+    mooseError2("Unknown Kernel Type \n");
   }
 
   if (warehouse->hasActiveBlockObjects(_subdomain, _tid))
@@ -160,7 +160,7 @@ ComputeResidualThread::onInterface(const Elem *elem, unsigned int side, Boundary
     const Elem * neighbor = elem->neighbor(side);
 
     if (!(neighbor->level() == elem->level()))
-      mooseError("Sorry, interface kernels do not work with mesh adaptivity");
+      mooseError2("Sorry, interface kernels do not work with mesh adaptivity");
 
     if (neighbor->active())
     {

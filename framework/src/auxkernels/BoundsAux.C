@@ -32,7 +32,7 @@ BoundsAux::BoundsAux(const InputParameters & parameters) :
     _bounded_variable_id(coupled("bounded_variable"))
 {
   if (!isNodal())
-    mooseError("BoundsAux must be used on a nodal auxiliary variable!");
+    mooseError2("BoundsAux must be used on a nodal auxiliary variable!");
   _upper_valid = parameters.isParamValid("upper");
   if (_upper_valid) _upper = getParam<Real>("upper");
   _lower_valid = parameters.isParamValid("lower");

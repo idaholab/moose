@@ -44,7 +44,7 @@ PeacemanBorehole::PeacemanBorehole(const InputParameters & parameters) :
   // open file
   std::ifstream file(_point_file.c_str());
   if (!file.good())
-    mooseError("Error opening file '" + _point_file + "' from a Peaceman-type Borehole.");
+    mooseError2("Error opening file '" + _point_file + "' from a Peaceman-type Borehole.");
 
   // construct the arrays of radius, x, y and z
   std::vector<Real> scratch;
@@ -78,7 +78,7 @@ PeacemanBorehole::PeacemanBorehole(const InputParameters & parameters) :
   {
     _half_seg_len[i] = 0.5*std::sqrt(std::pow(_xs[i+1] - _xs[i], 2) + std::pow(_ys[i+1] - _ys[i], 2) + std::pow(_zs[i+1] - _zs[i], 2));
     if (_half_seg_len[i] == 0)
-      mooseError("Peaceman-type borehole has a zero-segment length at (x,y,z) = " << _xs[i] << " " << _ys[i] << " " << _zs[i] << "\n");
+      mooseError2("Peaceman-type borehole has a zero-segment length at (x,y,z) = ", _xs[i], " ", _ys[i], " ", _zs[i], "\n");
   }
   if (num_pts == 1)
     _half_seg_len[0] = _borehole_length;
@@ -210,7 +210,7 @@ PeacemanBorehole::wellConstant(const RealTensorValue & perm, const RealTensorVal
   const Real halfPi = acos(0.0);
 
   if (r0 <= rad)
-    mooseError("The effective element size (about 0.2-times-true-ele-size) for an element containing a Peaceman-type borehole must be (much) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size " << r0 << " and the borehole radius is " << rad << "\n");
+    mooseError2("The effective element size (about 0.2-times-true-ele-size) for an element containing a Peaceman-type borehole must be (much) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size ", r0, " and the borehole radius is ", rad, "\n");
 
   return 4*halfPi*effective_perm*half_len/std::log(r0/rad);
 }

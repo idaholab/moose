@@ -53,7 +53,7 @@ TestShapeElementUserObject::executeJacobian(unsigned int jvar)
   {
     // internal testing to make sure the _phis are initialized, set flag on call
     if (_phi.size() != _u_dofs)
-      mooseError("Shape functions for u are initialized incorrectly. Expected " << _u_dofs << " DOFs, found " << _phi.size());
+      mooseError2("Shape functions for u are initialized incorrectly. Expected ", _u_dofs, " DOFs, found ", _phi.size());
     _execute_mask |= 1;
   }
 
@@ -62,7 +62,7 @@ TestShapeElementUserObject::executeJacobian(unsigned int jvar)
   {
     // internal testing to make sure the _phis are initialized, set flag on call
     if (_phi.size() != _v_dofs)
-      mooseError("Shape functions for v are initialized incorrectly");
+      mooseError2("Shape functions for v are initialized incorrectly");
     _execute_mask |= 2;
   }
 }
@@ -74,9 +74,9 @@ TestShapeElementUserObject::finalize()
   if (_fe_problem.currentlyComputingJacobian())
   {
     if ((_execute_mask & 1) == 0)
-      mooseError("Never called executeJacobian for variable u.");
+      mooseError2("Never called executeJacobian for variable u.");
     if ((_execute_mask & 2) == 0)
-      mooseError("Never called executeJacobian for variable v.");
+      mooseError2("Never called executeJacobian for variable v.");
   }
 }
 

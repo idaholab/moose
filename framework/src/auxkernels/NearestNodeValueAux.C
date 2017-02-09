@@ -34,7 +34,7 @@ NearestNodeValueAux::NearestNodeValueAux(const InputParameters & parameters) :
     _paired_variable(coupled("paired_variable"))
 {
   if (boundaryNames().size() > 1)
-    mooseError("NearestNodeValueAux can only be used with one boundary at a time!");
+    mooseError2("NearestNodeValueAux can only be used with one boundary at a time!");
 }
 
 Real

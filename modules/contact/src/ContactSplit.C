@@ -46,24 +46,24 @@ ContactSplit::ContactSplit (const InputParameters & params) :
   if (_contact_master.size() != _contact_slave.size()) {
     std::ostringstream err;
     err << "Master and slave contact lists must have matching sizes: " << _contact_master.size() << " != " << _contact_slave.size();
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   if (_contact_displaced.size() && _contact_master.size() != _contact_displaced.size()) {
     std::ostringstream err;
     err << "Master and displaced contact lists must have matching sizes: " << _contact_master.size() << " != " << _contact_displaced.size();
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   if (!_contact_displaced.size()) _contact_displaced.resize(_contact_master.size());
 
   if (_uncontact_master.size() != _uncontact_slave.size()) {
     std::ostringstream err;
     err << "Master and slave uncontact lists must have matching sizes: " << _uncontact_master.size() << " != " << _uncontact_slave.size();
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   if (_uncontact_displaced.size() && _uncontact_master.size() != _uncontact_displaced.size()) {
     std::ostringstream err;
     err << "Master and displaced uncontact lists must have matching sizes: " << _uncontact_master.size() << " != " << _uncontact_displaced.size();
-    mooseError(err.str());
+    mooseError2(err.str());
   }
   if (!_uncontact_displaced.size()) _uncontact_displaced.resize(_uncontact_master.size());
 

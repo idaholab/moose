@@ -63,7 +63,7 @@ RankTwoTensor::RankTwoTensor(const InitMethod init)
       break;
 
     default:
-      mooseError("Unknown RankTwoTensor initialization pattern.");
+      mooseError2("Unknown RankTwoTensor initialization pattern.");
   }
 }
 
@@ -135,7 +135,7 @@ void
 RankTwoTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method)
 {
   if (fill_method != autodetect && fill_method != input.size())
-    mooseError("Expected an input vector size of " << fill_method << " to fill the RankTwoTensor");
+    mooseError2("Expected an input vector size of ", fill_method, " to fill the RankTwoTensor");
 
   switch (input.size())
   {
@@ -175,7 +175,7 @@ RankTwoTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod f
       break;
 
     default:
-      mooseError("Please check the number of entries in the input vecto for building a RankTwoTensor. It must be 1, 3, 6, or 9");
+      mooseError2("Please check the number of entries in the input vecto for building a RankTwoTensor. It must be 1, 3, 6, or 9");
   }
 }
 
@@ -799,7 +799,7 @@ RankTwoTensor::inverse() const
   Real det = (*this).det();
 
   if (det == 0)
-    mooseError("Rank Two Tensor is singular");
+    mooseError2("Rank Two Tensor is singular");
 
   result /= det;
   return result;
@@ -851,7 +851,7 @@ RankTwoTensor::surfaceFillFromInputVector(const std::vector<Real> & input)
     _vals[1][1] = input[3];
   }
   else
-    mooseError("please provide correct number of values for surface RankTwoTensor initialization.");
+    mooseError2("please provide correct number of values for surface RankTwoTensor initialization.");
 }
 
 void
@@ -968,7 +968,7 @@ RankTwoTensor::syev(const char * calculation_type, std::vector<PetscScalar> & ei
   LAPACKsyev_(calculation_type, "U", &nd, &a[0], &nd, &eigvals[0], &work[0], &lwork, &info);
 
   if (info != 0)
-    mooseError("In computing the eigenvalues and eigenvectors of a symmetric rank-2 tensor, the PETSC LAPACK syev routine returned error code " << info);
+    mooseError2("In computing the eigenvalues and eigenvectors of a symmetric rank-2 tensor, the PETSC LAPACK syev routine returned error code ", info);
 }
 
 void
@@ -993,7 +993,7 @@ RankTwoTensor::getRUDecompositionRotation(RankTwoTensor & rot) const
   LAPACKsyev_("V", "U", &nd, &cmat[0][0], &nd, w, work, &lwork, &info);
 
   if (info != 0)
-    mooseError("In computing the eigenvalues and eigenvectors of a symmetric rank-2 tensor, the PETSC LAPACK syev routine returned error code " << info);
+    mooseError2("In computing the eigenvalues and eigenvectors of a symmetric rank-2 tensor, the PETSC LAPACK syev routine returned error code ", info);
 
   diag.zero();
 

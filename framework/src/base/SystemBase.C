@@ -100,7 +100,7 @@ SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
 {
   MooseVariable * var = dynamic_cast<MooseVariable *>(_vars[tid].getVariable(var_name));
   if (var == NULL)
-    mooseError("Variable '" + var_name + "' does not exist in this system");
+    mooseError2("Variable '" + var_name + "' does not exist in this system");
   return *var;
 }
 
@@ -109,7 +109,7 @@ SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
 {
   MooseVariable * var = dynamic_cast<MooseVariable *>(_vars[tid].getVariable(var_number));
   if (var == NULL)
-    mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
+    mooseError2("variable #" + Moose::stringify(var_number) + " does not exist in this system");
   return *var;
 }
 
@@ -118,7 +118,7 @@ SystemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
 {
   MooseVariableScalar * var = dynamic_cast<MooseVariableScalar *>(_vars[tid].getVariable(var_name));
   if (var == NULL)
-    mooseError("Scalar variable '" + var_name + "' does not exist in this system");
+    mooseError2("Scalar variable '" + var_name + "' does not exist in this system");
   return *var;
 }
 
@@ -127,7 +127,7 @@ SystemBase::getScalarVariable(THREAD_ID tid, unsigned int var_number)
 {
   MooseVariableScalar * var = dynamic_cast<MooseVariableScalar *>(_vars[tid].getVariable(var_number));
   if (var == NULL)
-    mooseError("variable #" + Moose::stringify(var_number) + " does not exist in this system");
+    mooseError2("variable #" + Moose::stringify(var_number) + " does not exist in this system");
   return *var;
 }
 
@@ -614,8 +614,8 @@ SystemBase::copyVars(ExodusII_IO & io)
     {
       std::istringstream ss(vci._timestep);
       if (!(ss >> timestep) || timestep > n_steps)
-        mooseError("Invalid value passed as \"initial_from_file_timestep\". Expected \"LATEST\" or a valid integer between 1 and "
-                   << n_steps << " inclusive, received " << vci._timestep);
+        mooseError2("Invalid value passed as \"initial_from_file_timestep\". Expected \"LATEST\" or a valid integer between 1 and ",
+                    n_steps, " inclusive, received ", vci._timestep);
     }
 
     did_copy = true;

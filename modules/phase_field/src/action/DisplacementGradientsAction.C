@@ -57,7 +57,7 @@ DisplacementGradientsAction::act()
   {
     unsigned int ndisp = _displacements.size();
     if (ndisp * ndisp != ngrad)
-      mooseError("Number of displacement gradient variables must be the square of the number of displacement variables.");
+      mooseError2("Number of displacement gradient variables must be the square of the number of displacement variables.");
 
     // Loop through the displacements
     unsigned int i = 0;
@@ -73,5 +73,5 @@ DisplacementGradientsAction::act()
       }
   }
   else
-    mooseError("Internal error.");
+    mooseError2("Internal error.");
 }

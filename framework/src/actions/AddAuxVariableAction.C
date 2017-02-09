@@ -67,7 +67,7 @@ AddAuxVariableAction::act()
   {
     // Check that the order is valid (CONSTANT, FIRST, or SECOND)
     if (_fe_type.order > 9)
-      mooseError("Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH or NINTH order (" << _fe_type.order << " supplied)");
+      mooseError2("Non-scalar AuxVariables must be CONSTANT, FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH or NINTH order (", _fe_type.order, " supplied)");
 
     if (blocks.empty())
       _problem->addAuxVariable(var_name, _fe_type);

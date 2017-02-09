@@ -104,7 +104,7 @@ Adaptivity::setErrorEstimator(const MooseEnum & error_estimator_name)
   else if (error_estimator_name == "PatchRecoveryErrorEstimator")
     _error_estimator = libmesh_make_unique<PatchRecoveryErrorEstimator>();
   else
-    mooseError(std::string("Unknown error_estimator selection: ") + std::string(error_estimator_name));
+    mooseError2(std::string("Unknown error_estimator selection: ") + std::string(error_estimator_name));
 }
 
 void

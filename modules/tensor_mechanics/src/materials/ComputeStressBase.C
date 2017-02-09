@@ -41,7 +41,7 @@ ComputeStressBase::ComputeStressBase(const InputParameters & parameters) :
   const unsigned num = fcn_names.size();
 
   if (!(num == 0 || num == 3*3))
-    mooseError("Either zero or " << 3*3 << " initial stress functions must be provided to TensorMechanicsMaterial.  You supplied " << num << "\n");
+    mooseError2("Either zero or ", 3*3, " initial stress functions must be provided to TensorMechanicsMaterial.  You supplied ", num, "\n");
 
   _initial_stress.resize(num);
   for (unsigned i = 0; i < num; ++i)

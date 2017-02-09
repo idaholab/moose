@@ -124,7 +124,7 @@ DiracKernelInfo::findPoint(Point p, const MooseMesh& mesh)
   // Check that the PointLocator is ready to start locating points.
   // So far I do not have any tests that trip this...
   if (_point_locator->initialized() == false)
-    mooseError("Error, PointLocator is not initialized!");
+    mooseError2("Error, PointLocator is not initialized!");
 
   // Note: The PointLocator object returns NULL when the Point is not
   // found within the Mesh.  This is not considered to be an error as

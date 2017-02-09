@@ -352,7 +352,7 @@ PenetrationThread::operator() (const NodeIdRange & range)
               {
                 if (closest_node_on_face != ridgeSetDataVec[closest_ridge_set_index]._closest_node)
                 {
-                  mooseError("Closest node when restricting point to face != closest node from RidgeSetData");
+                  mooseError2("Closest node when restricting point to face != closest node from RidgeSetData");
                 }
               }
             }
@@ -530,12 +530,12 @@ PenetrationThread::competeInteractions(PenetrationInfo * pi1,
     {
       //We already checked for ridges, and it got rejected, so neither face must be valid
       result=NEITHER_WINS;
-//      mooseError("Erroneously encountered ridge case");
+//      mooseError2("Erroneously encountered ridge case");
     }
     else if (cer == EDGE_AND_COMMON_NODE) //off side of face, off corner of another face.  Favor the off-side face
     {
       if (pi1->_off_edge_nodes.size() == pi2->_off_edge_nodes.size())
-        mooseError("Invalid off_edge_nodes counts");
+        mooseError2("Invalid off_edge_nodes counts");
 
       else if (pi1->_off_edge_nodes.size()==2)
         result=FIRST_WINS;
@@ -544,7 +544,7 @@ PenetrationThread::competeInteractions(PenetrationInfo * pi1,
         result=SECOND_WINS;
 
       else
-        mooseError("Invalid off_edge_nodes counts");
+        mooseError2("Invalid off_edge_nodes counts");
     }
     else //Use the same logic as in the on-face condition (above).  A little copy-paste can't hurt...
     {
@@ -760,7 +760,7 @@ PenetrationThread::getSideCornerNodes(Elem* side,
 
     default:
     {
-      mooseError("Unsupported face type: "<<t);
+      mooseError2("Unsupported face type: ", t);
       break;
     }
   }
@@ -782,7 +782,7 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
   {
     unsigned int local_index = side->get_node_index(edge_node);
     if (local_index == libMesh::invalid_uint)
-      mooseError("Side does not contain node");
+      mooseError2("Side does not contain node");
     local_node_indices.push_back(local_index);
   }
   mooseAssert(local_node_indices.size() == side->dim(), "Number of edge nodes must match side dimensionality");
@@ -816,7 +816,7 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
       }
       else
       {
-        mooseError("Invalid local node indices");
+        mooseError2("Invalid local node indices");
       }
       break;
     }
@@ -867,7 +867,7 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
       }
       else
       {
-        mooseError("Invalid local node indices");
+        mooseError2("Invalid local node indices");
       }
 
       break;
@@ -931,14 +931,14 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
       }
       else
       {
-        mooseError("Invalid local node indices");
+        mooseError2("Invalid local node indices");
       }
       break;
     }
 
     default:
     {
-      mooseError("Unsupported face type: "<<t);
+      mooseError2("Unsupported face type: ", t);
       break;
     }
   }
@@ -1120,7 +1120,7 @@ PenetrationThread::restrictPointToFace(Point& p,
 
     default:
     {
-      mooseError("Unsupported face type: "<<t);
+      mooseError2("Unsupported face type: ", t);
       break;
     }
   }
@@ -1291,7 +1291,7 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo * info,
     if (face_info_comm_edge.size() == 0)
       edges_without_neighbors.push_back(i);
     else if (face_info_comm_edge.size() > 1)
-      mooseError("Only one neighbor allowed per edge");
+      mooseError2("Only one neighbor allowed per edge");
     else
       edge_face_info[i] = face_info_comm_edge[0];
   }
@@ -1310,7 +1310,7 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo * info,
   if (edge_nodes.size() > 1)
   {
     if (edge_nodes.size() != 2)
-      mooseError("Invalid number of smoothing edges");
+      mooseError2("Invalid number of smoothing edges");
 
     //find common node
     std::vector<const Node*> common_nodes;
@@ -1319,7 +1319,7 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo * info,
                           std::inserter(common_nodes, common_nodes.end()));
 
     if (common_nodes.size() != 1)
-      mooseError("Invalid number of common nodes");
+      mooseError2("Invalid number of common nodes");
 
     for (const auto & pinfo : edge_face_info)
       elems_to_exclude.insert(pinfo->_elem->id());
@@ -1483,7 +1483,7 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
 
     default:
     {
-      mooseError("Unsupported face type: "<<t);
+      mooseError2("Unsupported face type: ", t);
       break;
     }
   }
@@ -1550,7 +1550,7 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node * slave_node,
       if (thisElemInfo.size() > 0 && !allowMultipleNeighbors)
       {
         if (thisElemInfo.size() > 1)
-          mooseError("Found multiple neighbors to current edge/face on surface when only one is allowed");
+          mooseError2("Found multiple neighbors to current edge/face on surface when only one is allowed");
         face_info_comm_edge.push_back(thisElemInfo[0]);
         break;
       }
@@ -1559,7 +1559,7 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node * slave_node,
       if (thisElemInfo.size() > 0 && !allowMultipleNeighbors)
       {
         if (thisElemInfo.size() > 1)
-          mooseError("Found multiple neighbors to current edge/face on surface when only one is allowed");
+          mooseError2("Found multiple neighbors to current edge/face on surface when only one is allowed");
         face_info_comm_edge.push_back(thisElemInfo[0]);
         break;
       }

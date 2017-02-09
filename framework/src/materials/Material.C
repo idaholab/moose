@@ -124,7 +124,7 @@ Material::initStatefulProperties(unsigned int n_points)
 void
 Material::initQpStatefulProperties()
 {
-  mooseError(std::string("Material \"") + name() + "\" provides one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class.");
+  mooseError2(std::string("Material \"") + name() + "\" provides one or more stateful properties but initQpStatefulProperties() was not overridden in the derived class.");
 }
 
 void
@@ -132,7 +132,7 @@ Material::checkStatefulSanity() const
 {
   for (const auto & it : _props_to_flags)
     if (static_cast<int>(it.second) % 2 == 0) // Only Stateful properties declared!
-      mooseError("Material '" << name() << "' has stateful properties declared but not associated \"current\" properties." << it.second);
+      mooseError2("Material '", name(), "' has stateful properties declared but not associated \"current\" properties.", it.second);
 }
 
 void
@@ -222,7 +222,7 @@ void
 Material::resetQpProperties()
 {
   if (!_compute)
-    mooseDoOnce(mooseWarning("You disabled the computation of this (" << name() << ") material by MOOSE, but have not overridden the 'resetQpProperties' method, this can lead to unintended values being set for material property values."));
+    mooseDoOnce(mooseWarning2("You disabled the computation of this (", name(), ") material by MOOSE, but have not overridden the 'resetQpProperties' method, this can lead to unintended values being set for material property values."));
 }
 
 void
@@ -236,5 +236,5 @@ void
 Material::checkExecutionStage()
 {
   if (_fe_problem.startedInitialSetup())
-    mooseError("Material properties must be retrieved during material object construction to ensure correct dependency resolution.");
+    mooseError2("Material properties must be retrieved during material object construction to ensure correct dependency resolution.");
 }

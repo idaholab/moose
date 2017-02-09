@@ -24,7 +24,7 @@ TensorMechanicsPlasticWeakPlaneTensile::TensorMechanicsPlasticWeakPlaneTensile(c
 {
   // cannot check the following for all values of strength, but this is a start
   if (_strength.value(0) < 0)
-    mooseError("Weak plane tensile strength must not be negative");
+    mooseError2("Weak plane tensile strength must not be negative");
 }
 
 

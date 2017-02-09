@@ -29,7 +29,7 @@ dataLoad(std::istream & stream, ElasticityTensorR4 & et, void * context)
 ElasticityTensorR4::ElasticityTensorR4(const RankFourTensor &a) :
     RankFourTensor(a)
 {
-  mooseDeprecated("Use RankFourTensor instead of ElasticityTensorR4. See http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Deprecations/ElasticityTensorR4/ to update your code");
+  mooseDeprecated2("Use RankFourTensor instead of ElasticityTensorR4. See http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Deprecations/ElasticityTensorR4/ to update your code");
 }
 
 Real

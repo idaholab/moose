@@ -65,7 +65,7 @@ IsotropicPowerLawHardeningStressUpdate::computeYieldStress()
   // Then solve for yield stress using equation from the header file
   _yield_stress = std::pow(_K / std::pow(_youngs_modulus, _strain_hardening_exponent), 1.0 / (1.0 - _strain_hardening_exponent));
   if (_yield_stress <= 0.0)
-    mooseError("The yield stress must be greater than zero, but during the simulation your yield stress became less than zero.");
+    mooseError2("The yield stress must be greater than zero, but during the simulation your yield stress became less than zero.");
 }
 
 Real
@@ -74,6 +74,6 @@ IsotropicPowerLawHardeningStressUpdate::getIsotropicLameLambda()
   const Real lame_lambda = _elasticity_tensor[_qp](0,0,1,1);
 
   if (_mesh.dimension() == 3 && lame_lambda != _elasticity_tensor[_qp](1,1,2,2))
-    mooseError("Check to ensure that your Elasticity Tensor is truly Isotropic: different lambda values");
+    mooseError2("Check to ensure that your Elasticity Tensor is truly Isotropic: different lambda values");
   return lame_lambda;
 }

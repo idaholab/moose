@@ -24,7 +24,7 @@ SimpleEigenStrainMaterial::SimpleEigenStrainMaterial(const InputParameters & par
     _epsilon0(getParam<Real>("epsilon0")),
     _c0(getParam<Real>("c0"))
 {
-  mooseDeprecated("SimpleEigenStrainMaterial is deprecated. Refer to http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Deprecations/SimpleEigenStrainMaterial to convert this input file.");
+  mooseDeprecated2("SimpleEigenStrainMaterial is deprecated. Refer to http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Deprecations/SimpleEigenStrainMaterial to convert this input file.");
 }
 
 void SimpleEigenStrainMaterial::computeEigenStrain()

@@ -738,7 +738,7 @@ public:
    */
   bool isDistributionForced() const
   {
-    mooseDeprecated("isDistributionForced() is deprecated, call isParallelTypeFoced() instead.");
+    mooseDeprecated2("isDistributionForced() is deprecated, call isParallelTypeFoced() instead.");
     return isParallelTypeForced();
   }
 

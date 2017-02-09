@@ -49,49 +49,49 @@ BndTestDirichletBC::BndTestDirichletBC(const InputParameters & parameters) :
 
     // Test true single SudomainName input
     if (!hasBoundary("1"))
-      mooseError("Test 1: hasBoundary(SubdomainName) = true failed");
+      mooseError2("Test 1: hasBoundary(SubdomainName) = true failed");
 
     // Test false of single Subdomain input
     if (hasBoundary("3"))
-      mooseError("Test 2: hasBoundary(BoundaryName) = false failed");
+      mooseError2("Test 2: hasBoundary(BoundaryName) = false failed");
 
     // Test true vector BoundaryName input
     if (!hasBoundary(id_names))
-      mooseError("Test 3: hasBoundary(std::vector<BoundaryName>) = true failed");
+      mooseError2("Test 3: hasBoundary(std::vector<BoundaryName>) = true failed");
 
     // Test false vector SudomainName input
     id_names.push_back("3");
     if (hasBoundary(id_names))
-      mooseError("Test 4: hasBoundary(std::vector<BoundaryName>) = false failed");
+      mooseError2("Test 4: hasBoundary(std::vector<BoundaryName>) = false failed");
 
     // Test true single BoundaryID input
     if (!hasBoundary(1))
-      mooseError("Test 5: hasBoundary(BoundaryID) = true failed");
+      mooseError2("Test 5: hasBoundary(BoundaryID) = true failed");
 
     // Test false single BoundaryID input
     if (hasBoundary(5))
-      mooseError("Test 6: hasBoundary(BoundaryID) = false failed");
+      mooseError2("Test 6: hasBoundary(BoundaryID) = false failed");
 
     // Test true for std::vector<BoundaryID>
     if (!hasBoundary(ids))
-      mooseError("Test 7: hasBoundary(std::vector<BoundaryID>) = true failed");
+      mooseError2("Test 7: hasBoundary(std::vector<BoundaryID>) = true failed");
 
     // Test false for std::vector<BoundaryID>
     ids.push_back(4);
     if (hasBoundary(ids))
-      mooseError("Test 8: hasBoundary(std::vector<BoundaryID>) = false failed");
+      mooseError2("Test 8: hasBoundary(std::vector<BoundaryID>) = false failed");
 
     // Test true for std::set<BoundaryID>
     if (!hasBoundary(id_set))
-      mooseError("Test 9: hasBoundary(std::set<BoundaryID) = true failed");
+      mooseError2("Test 9: hasBoundary(std::set<BoundaryID) = true failed");
 
     // Test false for std::set<BoundaryID>
     id_set.insert(12);
     if (hasBoundary(id_set))
-      mooseError("Test 10: hasBoundary(std::set<BoundaryID>) = false failed");
+      mooseError2("Test 10: hasBoundary(std::set<BoundaryID>) = false failed");
 
     // This is the expected error, all the above tests passed
-    mooseError("hasBoundary testing passed");
+    mooseError2("hasBoundary testing passed");
   }
 
   // Test that the boundarhNames() method is working
@@ -99,9 +99,9 @@ BndTestDirichletBC::BndTestDirichletBC(const InputParameters & parameters) :
   {
     const std::vector<BoundaryName> & bnds = boundaryNames();
     if (bnds.size() == 1 && bnds[0] == "1")
-      mooseError("boundaryNames test passed"); // expected error
+      mooseError2("boundaryNames test passed"); // expected error
     else
-      mooseError("boundaryNames test failed");
+      mooseError2("boundaryNames test failed");
   }
 
   // Test that the boundaryIDS() is working
@@ -109,9 +109,9 @@ BndTestDirichletBC::BndTestDirichletBC(const InputParameters & parameters) :
   {
     const std::set<BoundaryID> & ids = boundaryIDs();
     if (ids.count(1) == 1)
-      mooseError("boundaryIDs test passed"); // expected error
+      mooseError2("boundaryIDs test passed"); // expected error
     else
-      mooseError("boundaryIDs test faild");
+      mooseError2("boundaryIDs test faild");
   }
 
   // Test that the isBoundarySubset() is working
@@ -123,26 +123,26 @@ BndTestDirichletBC::BndTestDirichletBC(const InputParameters & parameters) :
     sub_id.insert(4);
     sub_id.insert(2);
     if (isBoundarySubset(sub_id))
-      mooseError("isBoundarySubset test passed"); // expetect error
+      mooseError2("isBoundarySubset test passed"); // expetect error
     else
-      mooseError("isBoundarySubset test failed");
+      mooseError2("isBoundarySubset test failed");
   }
 
   // Test that hasMaterialPropertyBoundary is working properly
   else if (test == "hasBoundaryMaterialProperty_true")
   {
     if (hasBoundaryMaterialProperty<Real>("a"))
-      mooseError("hasBoundaryMaterialProperty is true, test passed"); // expected error
+      mooseError2("hasBoundaryMaterialProperty is true, test passed"); // expected error
     else
-      mooseError("hasBoundaryMaterialProperty is false, test failed");
+      mooseError2("hasBoundaryMaterialProperty is false, test failed");
   }
 
   else if (test == "hasBoundaryMaterialProperty_false")
   {
     if (hasBoundaryMaterialProperty<Real>("b"))
-      mooseError("hasBoundaryMaterialProperty is true, test failed");
+      mooseError2("hasBoundaryMaterialProperty is true, test failed");
     else
-      mooseError("hasBoundaryMaterialProperty is false, test passed"); // expected error
+      mooseError2("hasBoundaryMaterialProperty is false, test passed"); // expected error
   }
 }
 

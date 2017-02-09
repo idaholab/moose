@@ -152,7 +152,7 @@ AdvancedOutput<T>::initialSetup()
 
   // Check that enable[disable]OutputTypes was called
   if (!T::isParamValid("_execute_valid_params_was_called"))
-    mooseError("The static method AdvancedOutput<T>::enableOutputTypes must be called inside the validParams function for this object to properly define the input parameters for the output object named '" << T::name() << "'");
+    mooseError2("The static method AdvancedOutput<T>::enableOutputTypes must be called inside the validParams function for this object to properly define the input parameters for the output object named '", T::name(), "'");
 
   // Initialize the available output
   initAvailableLists();
@@ -204,49 +204,49 @@ template<class T>
 void
 AdvancedOutput<T>::outputNodalVariables()
 {
-  mooseError("Individual output of nodal variables is not support for the output object named '" << T::name() << "'");
+  mooseError2("Individual output of nodal variables is not support for the output object named '", T::name(), "'");
 }
 
 template<class T>
 void
 AdvancedOutput<T>::outputElementalVariables()
 {
-  mooseError("Individual output of elemental variables is not support for this output object named '" << T::name() << "'");
+  mooseError2("Individual output of elemental variables is not support for this output object named '", T::name(), "'");
 }
 
 template<class T>
 void
 AdvancedOutput<T>::outputPostprocessors()
 {
-  mooseError("Individual output of postprocessors is not support for this output object named '" << T::name() << "'");
+  mooseError2("Individual output of postprocessors is not support for this output object named '", T::name(), "'");
 }
 
 template<class T>
 void
 AdvancedOutput<T>::outputVectorPostprocessors()
 {
-  mooseError("Individual output of VectorPostprocessors is not support for this output object named '" << T::name() << "'");
+  mooseError2("Individual output of VectorPostprocessors is not support for this output object named '", T::name(), "'");
 }
 
 template<class T>
 void
 AdvancedOutput<T>::outputScalarVariables()
 {
-  mooseError("Individual output of scalars is not support for this output object named '" << T::name() << "'");
+  mooseError2("Individual output of scalars is not support for this output object named '", T::name(), "'");
 }
 
 template<class T>
 void
 AdvancedOutput<T>::outputSystemInformation()
 {
-  mooseError("Output of system information is not support for this output object named '" << T::name() << "'");
+  mooseError2("Output of system information is not support for this output object named '", T::name(), "'");
 }
 
 template<class T>
 void
 AdvancedOutput<T>::outputInput()
 {
-  mooseError("Output of the input file information is not support for this output object named '" << T::name() << "'");
+  mooseError2("Output of the input file information is not support for this output object named '", T::name(), "'");
 }
 
 // General outputStep() method
@@ -560,7 +560,7 @@ AdvancedOutput<T>::initShowHideLists(const std::vector<VariableName> & show, con
     std::ostringstream oss;
     oss << "Output(s) do not exist (must be variable, scalar, postprocessor, or vector postprocessor): ";
     std::copy(unknown.begin(), unknown.end(), infix_ostream_iterator<std::string>(oss, " "));
-    mooseError(oss.str());
+    mooseError2(oss.str());
   }
 }
 
@@ -602,7 +602,7 @@ AdvancedOutput<T>::initOutputList(OutputData & data)
       std::ostringstream oss;
       oss << "Output(s) specified to be both shown and hidden: ";
       std::copy(tmp.begin(), tmp.end(), infix_ostream_iterator<std::string>(oss, " "));
-      mooseError(oss.str());
+      mooseError2(oss.str());
     }
 
     // Define the output variable list
@@ -689,7 +689,7 @@ bool
 AdvancedOutput<T>::hasOutputHelper(const std::string & name)
 {
   if (!T::_initialized)
-    mooseError("The output object must be initialized before it may be determined if " << name << " output is enabled.");
+    mooseError2("The output object must be initialized before it may be determined if ", name, " output is enabled.");
 
   return !_execute_data[name].output.empty() && T::_advanced_execute_on.contains(name) && T::_advanced_execute_on[name].isValid() && !T::_advanced_execute_on[name].contains("none");
 }

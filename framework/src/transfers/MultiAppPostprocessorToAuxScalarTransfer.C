@@ -91,7 +91,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
 
       // Error if there is a size mismatch between the scalar AuxVariable and the number of sub apps
       if (num_apps != scalar.sln().size())
-        mooseError("The number of sub apps (" << num_apps << ") must be equal to the order of the scalar AuxVariable (" << scalar.order() << ")");
+        mooseError2("The number of sub apps (", num_apps, ") must be equal to the order of the scalar AuxVariable (", scalar.order(), ")");
 
       // Loop over each sub-app and populate the AuxVariable values from the postprocessors
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)

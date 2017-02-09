@@ -98,7 +98,7 @@ EigenExecutionerBase::init()
   // check when the postprocessors are evaluated
   ExecFlagType bx_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).execBitFlags();
   if ((bx_execflag & EXEC_LINEAR) == EXEC_NONE)
-    mooseError("Postprocessor "+getParam<PostprocessorName>("bx_norm")+" requires execute_on = 'linear'");
+    mooseError2("Postprocessor "+getParam<PostprocessorName>("bx_norm")+" requires execute_on = 'linear'");
 
   if (isParamValid("normalization"))
     _norm_execflag = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization")).execBitFlags();
@@ -110,7 +110,7 @@ EigenExecutionerBase::init()
     _problem.execute(EXEC_LINEAR);
 
   if (_source_integral==0.0)
-    mooseError("|Bx| = 0!");
+    mooseError2("|Bx| = 0!");
 
   // normalize solution to make |Bx|=_eigenvalue, _eigenvalue at this point has the initialized value
   makeBXConsistent(_eigenvalue);
@@ -155,9 +155,9 @@ EigenExecutionerBase::checkIntegrity()
 {
   // check to make sure that we don't have any time kernels in this simulation
   if (_eigen_sys.containsTimeKernel())
-    mooseError("You have specified time kernels in your steady state eigenvalue simulation");
+    mooseError2("You have specified time kernels in your steady state eigenvalue simulation");
   if (!_eigen_sys.containsEigenKernel())
-    mooseError("You have not specified any eigen kernels in your eigenvalue simulation");
+    mooseError2("You have not specified any eigen kernels in your eigenvalue simulation");
 }
 
 void
@@ -184,7 +184,7 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
     solution_diff = &getPostprocessorValueByName(xdiff);
     ExecFlagType xdiff_execflag = _problem.getUserObject<UserObject>(xdiff).execBitFlags();
     if ((xdiff_execflag & EXEC_LINEAR) == EXEC_NONE)
-      mooseError("Postprocessor "+xdiff+" requires execute_on = 'linear'");
+      mooseError2("Postprocessor "+xdiff+" requires execute_on = 'linear'");
   }
 
   // not perform any iteration when max_iter==0
@@ -460,7 +460,7 @@ EigenExecutionerBase::Chebyshev_Parameters::reinit()
 void
 EigenExecutionerBase::chebyshev(Chebyshev_Parameters & chebyshev_parameters, unsigned int iter, const PostprocessorValue * solution_diff)
 {
-  if (!solution_diff) mooseError("solution diff is required for Chebyshev acceleration");
+  if (!solution_diff) mooseError2("solution diff is required for Chebyshev acceleration");
 
   if (chebyshev_parameters.lgac==0)
   {

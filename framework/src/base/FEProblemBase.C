@@ -280,7 +280,7 @@ FEProblemBase::getCoordSystem(SubdomainID sid)
   if (it != _coord_sys.end())
     return (*it).second;
   else
-    mooseError("Requested subdomain " << sid << " does not exist.");
+    mooseError2("Requested subdomain ", sid, " does not exist.");
 }
 
 void
@@ -296,7 +296,7 @@ FEProblemBase::setCoordSystem(const std::vector<SubdomainName> & blocks, const M
     else if (coord_sys.size() == 1)
       coord_type = Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);      // one system specified, the whole domain is going to have that system
     else
-      mooseError("Multiple coordinate systems specified, but no blocks given.");
+      mooseError2("Multiple coordinate systems specified, but no blocks given.");
 
     for (const auto & sbd : subdomains)
       _coord_sys[sbd] = coord_type;
@@ -326,7 +326,7 @@ FEProblemBase::setCoordSystem(const std::vector<SubdomainName> & blocks, const M
     else
     {
       if (blocks.size() != coord_sys.size())
-        mooseError("Number of blocks and coordinate systems does not match.");
+        mooseError2("Number of blocks and coordinate systems does not match.");
 
       for (unsigned int i = 0; i < blocks.size(); i++)
       {
@@ -337,7 +337,7 @@ FEProblemBase::setCoordSystem(const std::vector<SubdomainName> & blocks, const M
 
       for (const auto & sid : subdomains)
         if (_coord_sys.find(sid) == _coord_sys.end())
-          mooseError("Subdomain '" + Moose::stringify(sid) + "' does not have a coordinate system specified.");
+          mooseError2("Subdomain '" + Moose::stringify(sid) + "' does not have a coordinate system specified.");
     }
   }
 }
@@ -399,7 +399,7 @@ void FEProblemBase::initialSetup()
     if (_mesh.uniformRefineLevel() > 0 && _app.setFileRestart())
     {
       if (!_app.isUltimateMaster())
-        mooseError("Doing extra refinements when restarting is NOT supported for sub-apps of a MultiApp");
+        mooseError2("Doing extra refinements when restarting is NOT supported for sub-apps of a MultiApp");
 
       Moose::perf_log.push("Uniformly Refine Mesh", "Setup");
       adaptivity().uniformRefineWithProjection();
@@ -502,7 +502,7 @@ void FEProblemBase::initialSetup()
 
     unsigned int n = adaptivity().getInitialSteps();
     if (n && !_app.isUltimateMaster() && _app.isRestarting())
-      mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
+      mooseError2("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
 
     initialAdaptMesh();
     Moose::perf_log.pop("initial adaptivity", "Setup");
@@ -602,7 +602,7 @@ void FEProblemBase::initialSetup()
     Moose::perf_log.push("execMultiApps()", "Setup");
     bool converged = execMultiApps(EXEC_INITIAL);
     if (!converged)
-      mooseError("failed to converge initial MultiApp");
+      mooseError2("failed to converge initial MultiApp");
 
     // We'll backup the Multiapp here
     backupMultiApps(EXEC_INITIAL);
@@ -721,7 +721,7 @@ unsigned int
 FEProblemBase::getMaxQps() const
 {
   if (_max_qps == std::numeric_limits<unsigned int>::max())
-    mooseError("Max QPS uninitialized");
+    mooseError2("Max QPS uninitialized");
   return _max_qps;
 }
 
@@ -729,7 +729,7 @@ unsigned int
 FEProblemBase::getMaxShapeFunctions() const
 {
   if (_max_shape_funcs == std::numeric_limits<unsigned int>::max())
-    mooseError("Max shape functions uninitialized");
+    mooseError2("Max shape functions uninitialized");
   return _max_shape_funcs;
 }
 
@@ -1107,7 +1107,7 @@ FEProblemBase::ghostGhostedBoundaries()
 void
 FEProblemBase::sizeZeroes(unsigned int /*size*/, THREAD_ID /*tid*/)
 {
-  mooseDoOnce(mooseWarning("This function is deprecated and no longer performs any function. Please do not call it."));
+  mooseDoOnce(mooseWarning2("This function is deprecated and no longer performs any function. Please do not call it."));
 }
 
 bool
@@ -1448,7 +1448,7 @@ FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
 
     // Try once more
     if (!hasFunction(name, tid))
-      mooseError("Unable to find function " + name);
+      mooseError2("Unable to find function " + name);
   }
 
   return *(_functions.getActiveObject(name, tid));
@@ -1458,13 +1458,13 @@ void
 FEProblemBase::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
   if (_aux->hasVariable(var_name))
-    mooseError("Cannot have an auxiliary variable and a nonlinear variable with the same name: " << var_name);
+    mooseError2("Cannot have an auxiliary variable and a nonlinear variable with the same name: ", var_name);
 
   if (_nl->hasVariable(var_name))
   {
     const Variable & var = _nl->system().variable(_nl->system().variable_number(var_name));
     if (var.type() != type)
-      mooseError("Variable with name '" << var_name << "' already exists but is of a differing type!");
+      mooseError2("Variable with name '", var_name, "' already exists but is of a differing type!");
 
     return;
   }
@@ -1625,13 +1625,13 @@ void
 FEProblemBase::addAuxVariable(const std::string & var_name, const FEType & type, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)
 {
   if (_nl->hasVariable(var_name))
-    mooseError("Cannot have an auxiliary variable and a nonlinear variable with the same name!");
+    mooseError2("Cannot have an auxiliary variable and a nonlinear variable with the same name!");
 
   if (_aux->hasVariable(var_name))
   {
     const Variable & var = _aux->sys().variable(_aux->sys().variable_number(var_name));
     if (var.type() != type)
-      mooseError("AuxVariable with name '" << var_name << "' already exists but is of a differing type!");
+      mooseError2("AuxVariable with name '", var_name, "' already exists but is of a differing type!");
 
     return;
   }
@@ -1830,7 +1830,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name, const std::strin
   }
 
   else
-    mooseError("Variable '" << var_name << "' requested in initial condition '" << name << "' does not exist.");
+    mooseError2("Variable '", var_name, "' requested in initial condition '", name, "' does not exist.");
 }
 
 void
@@ -1909,7 +1909,7 @@ FEProblemBase::getMaterial(std::string name, Moose::MaterialDataType type, THREA
 
   std::shared_ptr<Material> material = _all_materials[type].getActiveObject(name, tid);
   if (material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
-    mooseWarning("You are retrieving a Material object (" << material->name() << "), but its compute flag is not set to true. This indicates that MOOSE is computing this property which may not be desired and produce un-expected results.");
+    mooseWarning2("You are retrieving a Material object (", material->name(), "), but its compute flag is not set to true. This indicates that MOOSE is computing this property which may not be desired and produce un-expected results.");
 
   return material;
 }
@@ -2208,7 +2208,7 @@ FEProblemBase::addPostprocessor(std::string pp_name, const std::string & name, I
 {
   // Check for name collision
   if (_all_user_objects.hasActiveObject(name))
-    mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a Postprocessor by the same name.");
+    mooseError2(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a Postprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
   initPostprocessorData(name);
@@ -2219,7 +2219,7 @@ FEProblemBase::addVectorPostprocessor(std::string pp_name, const std::string & n
 {
   // Check for name collision
   if (_all_user_objects.hasActiveObject(name))
-    mooseError(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a VectorPostprocessor by the same name.");
+    mooseError2(std::string("A UserObject with the name \"") + name + "\" already exists.  You may not add a VectorPostprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
 }
@@ -2290,7 +2290,7 @@ FEProblemBase::getUserObjectBase(const std::string & name)
   if (_all_user_objects.hasActiveObject(name))
     return *(_all_user_objects.getActiveObject(name).get());
 
-  mooseError("Unable to find user object with name '" + name + "'");
+  mooseError2("Unable to find user object with name '" + name + "'");
 }
 
 bool
@@ -3039,7 +3039,7 @@ FEProblemBase::getVariable(THREAD_ID tid, const std::string & var_name)
   if (_nl->hasVariable(var_name))
     return _nl->getVariable(tid, var_name);
   else if (!_aux->hasVariable(var_name))
-    mooseError("Unknown variable " + var_name);
+    mooseError2("Unknown variable " + var_name);
 
   return _aux->getVariable(tid, var_name);
 }
@@ -3063,7 +3063,7 @@ FEProblemBase::getScalarVariable(THREAD_ID tid, const std::string & var_name)
   else if (_aux->hasScalarVariable(var_name))
     return _aux->getScalarVariable(tid, var_name);
   else
-    mooseError("Unknown variable " + var_name);
+    mooseError2("Unknown variable " + var_name);
 }
 
 void
@@ -3270,7 +3270,7 @@ FEProblemBase::init()
 
 
   if (_solve && n_vars == 0)
-    mooseError("No variables specified in the FEProblemBase '" << name() << "'.");
+    mooseError2("No variables specified in the FEProblemBase '", name(), "'.");
 
   ghostGhostedBoundaries(); // We do this again right here in case new boundaries have been added
 
@@ -3563,7 +3563,7 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln, NumericVector
     // *possible* to handle exceptions from other systems, but in the
     // meantime, we don't want to silently swallow any unhandled
     // exceptions here.
-    mooseError("An unhandled MooseException was raised during residual computation.  Please contact the MOOSE team for assistance.");
+    mooseError2("An unhandled MooseException was raised during residual computation.  Please contact the MOOSE team for assistance.");
   }
 }
 
@@ -4146,7 +4146,7 @@ FEProblemBase::checkProblemIntegrity()
       if (n_processors() > 1)
       {
         if (_mesh.uniformRefineLevel() > 0 && _mesh.getMesh().skip_partitioning() == false)
-          mooseError("This simulation is using uniform refinement on the mesh, with stateful properties and adaptivity. "
+          mooseError2("This simulation is using uniform refinement on the mesh, with stateful properties and adaptivity. "
                      "You must skip partitioning to run this case:\nMesh/skip_partitioning=true");
 
         _console << "\nWarning! Mesh re-partitioning is disabled while using stateful material properties!  This can lead to large load imbalances and degraded performance!!\n\n";
@@ -4185,7 +4185,7 @@ FEProblemBase::checkProblemIntegrity()
         /// unsigned int is necessary to print SubdomainIDs in the statement below
         std::copy (local_mesh_subs.begin(), local_mesh_subs.end(), std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
 
-        mooseError("The following blocks from your input mesh do not contain an active material: " + extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, all blocks must contain a Material object.\n");
+        mooseError2("The following blocks from your input mesh do not contain an active material: " + extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, all blocks must contain a Material object.\n");
       }
     }
 
@@ -4246,7 +4246,7 @@ FEProblemBase::checkDisplacementOrders()
       {
         MooseVariable & mv = _displaced_problem->getVariable(/*tid=*/0, var_name);
         if (mv.order() != SECOND)
-          mooseError("Error: mesh has SECOND order elements, so all displacement variables must be SECOND order.");
+          mooseError2("Error: mesh has SECOND order elements, so all displacement variables must be SECOND order.");
       }
     }
   }
@@ -4279,14 +4279,14 @@ FEProblemBase::checkUserObjects()
     oss << "One or more UserObjects is referencing a nonexistent block:\n";
     for (const auto & id : difference)
       oss << id << "\n";
-    mooseError(oss.str());
+    mooseError2(oss.str());
   }
 
   // check that all requested UserObjects were defined in the input file
   for (const auto & it : _pps_data.values())
   {
     if (names.find(it.first) == names.end())
-      mooseError("Postprocessor '" + it.first + "' requested but not specified in the input file.");
+      mooseError2("Postprocessor '" + it.first + "' requested but not specified in the input file.");
   }
 }
 
@@ -4327,7 +4327,7 @@ FEProblemBase::checkDependMaterialsHelper(const std::map<SubdomainID, std::vecto
       oss << "One or more Material Properties were not supplied on block " << it.first << ":\n";
       for (const auto & name : difference)
         oss << name << "\n";
-      mooseError(oss.str());
+      mooseError2(oss.str());
     }
   }
 
@@ -4378,7 +4378,7 @@ FEProblemBase::checkDependMaterialsHelper(const std::map<SubdomainID, std::vecto
           oss << '\n';
         }
 
-        mooseError(oss.str());
+        mooseError2(oss.str());
         break;
       }
     }
@@ -4396,9 +4396,9 @@ FEProblemBase::checkCoordinateSystems()
   {
     SubdomainID sid = (*it)->subdomain_id();
     if (_coord_sys[sid] == Moose::COORD_RZ && (*it)->dim() == 3)
-      mooseError("An RZ coordinate system was requested for subdomain " + Moose::stringify(sid) + " which contains 3D elements.");
+      mooseError2("An RZ coordinate system was requested for subdomain " + Moose::stringify(sid) + " which contains 3D elements.");
     if (_coord_sys[sid] == Moose::COORD_RSPHERICAL && (*it)->dim() > 1)
-      mooseError("An RSPHERICAL coordinate system was requested for subdomain " + Moose::stringify(sid) + " which contains 2D or 3D elements.");
+      mooseError2("An RSPHERICAL coordinate system was requested for subdomain " + Moose::stringify(sid) + " which contains 2D or 3D elements.");
   }
 }
 

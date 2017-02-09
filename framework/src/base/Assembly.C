@@ -616,7 +616,7 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
         break;
 
       default:
-        mooseError("Unknown coordinate system");
+        mooseError2("Unknown coordinate system");
         break;
     }
 
@@ -673,7 +673,7 @@ Assembly::setCoordinateTransformation(const QBase * qrule, const MooseArray<Poin
     break;
 
   default:
-    mooseError("Unknown coordinate system");
+    mooseError2("Unknown coordinate system");
     break;
   }
 }

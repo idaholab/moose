@@ -43,7 +43,7 @@ VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
     _scalar_vars.push_back(dynamic_cast<MooseVariableScalar *>(var));
   }
   else
-    mooseError("Unknown variable class passed into VariableWarehouse. Attempt to hack us?");
+    mooseError2("Unknown variable class passed into VariableWarehouse. Attempt to hack us?");
 }
 
 void

@@ -32,7 +32,7 @@ PeriodicDistanceAux::PeriodicDistanceAux(const InputParameters & parameters) :
     if (_point(i) < _mesh.getMinInDimension(i) || _point(i) > _mesh.getMaxInDimension(i))
     {
       _console << _mesh.getMinInDimension(i) << "\t" << _mesh.getMaxInDimension(i) << "\n";
-      mooseError("\"point\" is outside of the domain.");
+      mooseError2("\"point\" is outside of the domain.");
     }
 }
 

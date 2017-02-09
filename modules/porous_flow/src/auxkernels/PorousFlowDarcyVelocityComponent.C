@@ -39,7 +39,7 @@ PorousFlowDarcyVelocityComponent::PorousFlowDarcyVelocityComponent(const InputPa
     _gravity(getParam<RealVectorValue>("gravity"))
 {
   if (_ph >= _dictator.numPhases())
-    mooseError("The Dictator proclaims that the number of phases in this simulation is " << _dictator.numPhases() << " whereas you have used the AuxKernel PorousFlowDarcyVelocityComponent with fluid_phase = " << _ph << ".  The Dictator is watching you, to ensure your wellbeing.");
+    mooseError2("The Dictator proclaims that the number of phases in this simulation is ", _dictator.numPhases(), " whereas you have used the AuxKernel PorousFlowDarcyVelocityComponent with fluid_phase = ", _ph, ".  The Dictator is watching you, to ensure your wellbeing.");
 }
 
 Real

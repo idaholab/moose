@@ -75,7 +75,7 @@ getQuantity(const RankTwoTensor & tensor, const MooseEnum scalar_type, const Poi
       val = directionValueTensor(tensor, direction);
       break;
     default:
-      mooseError("RankTwoScalarAux Error: Pass valid scalar type - " + scalarOptions().getRawNames());
+      mooseError2("RankTwoScalarAux Error: Pass valid scalar type - " + scalarOptions().getRawNames());
   }
 
   return val;

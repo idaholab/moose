@@ -72,7 +72,7 @@ PerformanceData::getValue()
     case PERCENT_OF_ACTIVE_TIME_WITH_SUB:
       return (total_time != 0.) ? perf_data.tot_time_incl_sub / total_time * 100. : 0.;
     default:
-      mooseError("Invalid column!");
+      mooseError2("Invalid column!");
   }
 
   return 0;

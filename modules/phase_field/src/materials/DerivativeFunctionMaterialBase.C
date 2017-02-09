@@ -109,7 +109,7 @@ DerivativeFunctionMaterialBase::initialSetup()
         }
 
         if (!needs_third_derivatives)
-          mooseWarning("This simulation does not actually need the third derivatives of DerivativeFunctionMaterialBase " + name());
+          mooseWarning2("This simulation does not actually need the third derivatives of DerivativeFunctionMaterialBase " + name());
       }
     }
   }

@@ -36,11 +36,11 @@ StrainGradDispDerivatives::StrainGradDispDerivatives(const InputParameters & par
       break;
 
     default:
-      mooseError("Supply 1, 4, or 9 displacement_gradient component variables");
+      mooseError2("Supply 1, 4, or 9 displacement_gradient component variables");
   }
 
   if (_gdim > LIBMESH_DIM)
-    mooseError("Too many gradient component variables for the current LIBMESH_DIM");
+    mooseError2("Too many gradient component variables for the current LIBMESH_DIM");
 
   for (unsigned int i = 0; i < _nvar; ++i)
     _dstrain[i] = &declarePropertyDerivative<RankTwoTensor>("elastic_strain", getVar("displacement_gradients", i)->name());

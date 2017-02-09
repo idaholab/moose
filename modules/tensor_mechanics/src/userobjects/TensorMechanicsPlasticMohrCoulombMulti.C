@@ -35,11 +35,11 @@ TensorMechanicsPlasticMohrCoulombMulti::TensorMechanicsPlasticMohrCoulombMulti(c
     _use_custom_returnMap(getParam<bool>("use_custom_returnMap"))
 {
   if (_shift < 0)
-    mooseError("Value of 'shift' in TensorMechanicsPlasticMohrCoulombMulti must not be negative\n");
+    mooseError2("Value of 'shift' in TensorMechanicsPlasticMohrCoulombMulti must not be negative\n");
   if (_shift > _f_tol)
     _console << "WARNING: value of 'shift' in TensorMechanicsPlasticMohrCoulombMulti is probably set too high\n";
   if (LIBMESH_DIM != 3)
-    mooseError("TensorMechanicsPlasticMohrCoulombMulti is only defined for LIBMESH_DIM=3");
+    mooseError2("TensorMechanicsPlasticMohrCoulombMulti is only defined for LIBMESH_DIM=3");
   MooseRandom::seed(0);
 }
 
@@ -445,7 +445,7 @@ TensorMechanicsPlasticMohrCoulombMulti::doReturnMap(const RankTwoTensor & trial_
     Moose::err << "which has eigenvalues = " << eigvals[0] << " " << eigvals[1] << " " << eigvals[2] << "\n";
     Moose::err << "and yield functions = " << yf[0] << " " << yf[1] << " " << yf[2] << " " << yf[3] << " " << yf[4] << " " << yf[5] << "\n";
     Moose::err << "Internal parameter = " << intnl_old << "\n";
-    mooseError("TensorMechanicsPlasticMohrCoulombMulti: FAILURE!  You probably need to implement a line search if your hardening is too severe, or you need to tune your tolerances (eg, yield_function_tolerance should be a little smaller than (young modulus)*ep_plastic_tolerance).\n");
+    mooseError2("TensorMechanicsPlasticMohrCoulombMulti: FAILURE!  You probably need to implement a line search if your hardening is too severe, or you need to tune your tolerances (eg, yield_function_tolerance should be a little smaller than (young modulus)*ep_plastic_tolerance).\n");
     return false;
   }
 

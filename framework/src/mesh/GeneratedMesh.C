@@ -73,7 +73,7 @@ GeneratedMesh::GeneratedMesh(const InputParameters & parameters) :
     _bias_z(getParam<Real>("bias_z"))
 {
   if (_gauss_lobatto_grid && (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0))
-    mooseError("Cannot apply both Gauss-Lobatto mesh grading and biasing at the same time.");
+    mooseError2("Cannot apply both Gauss-Lobatto mesh grading and biasing at the same time.");
 
   // All generated meshes are regular orthogonal meshes
   _regular_orthogonal_mesh = true;
@@ -90,7 +90,7 @@ Real GeneratedMesh::getMinInDimension(unsigned int component) const
   case 2:
     return _dim > 2 ? _zmin : 0;
   default:
-    mooseError("Invalid component");
+    mooseError2("Invalid component");
   }
 }
 
@@ -105,7 +105,7 @@ Real GeneratedMesh::getMaxInDimension(unsigned int component) const
   case 2:
     return _dim > 2 ? _zmax : 0;
   default:
-    mooseError("Invalid component");
+    mooseError2("Invalid component");
   }
 }
 
@@ -243,7 +243,7 @@ GeneratedMesh::buildMesh()
           else
           {
             // We don't yet handle anything higher order than quadratic...
-            mooseError("Unable to bias node at node(" << dir << ")=" << node(dir));
+            mooseError2("Unable to bias node at node(", dir, ")=", node(dir));
           }
         }
       }

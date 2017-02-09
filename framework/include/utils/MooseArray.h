@@ -341,7 +341,7 @@ inline
 MooseArray<T> &
 MooseArray<T>::operator=(const MooseArray<T> & rhs)
 {
-//  mooseError("Shouldn't be doing this!");
+//  mooseError2("Shouldn't be doing this!");
   resize(rhs._size);
 //  memcpy(_data,rhs._data,sizeof(T)*_size);
 

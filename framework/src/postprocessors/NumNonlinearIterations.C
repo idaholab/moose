@@ -33,7 +33,7 @@ NumNonlinearIterations::NumNonlinearIterations(const InputParameters & parameter
     _time(-std::numeric_limits<Real>::max())
 {
   if (!_fe_problem)
-    mooseError("Couldn't cast to FEProblemBase");
+    mooseError2("Couldn't cast to FEProblemBase");
 }
 
 void

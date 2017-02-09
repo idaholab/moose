@@ -46,10 +46,10 @@ ValueRangeMarker::ValueRangeMarker(const InputParameters & parameters) :
     _u(coupledValue("variable"))
 {
   if (_upper_bound < _lower_bound)
-    mooseError("Invalid bounds specified (upper_bound < lower_bound)");
+    mooseError2("Invalid bounds specified (upper_bound < lower_bound)");
 
   if (_buffer_size < 0.0)
-    mooseError("Buffer size must be non-negative: " << _buffer_size);
+    mooseError2("Buffer size must be non-negative: ", _buffer_size);
 }
 
 Marker::MarkerValue

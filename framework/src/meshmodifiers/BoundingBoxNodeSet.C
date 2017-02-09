@@ -43,14 +43,14 @@ BoundingBoxNodeSet::modify()
   std::vector<BoundaryName> boundary_names = getParam<std::vector<BoundaryName> >("new_boundary");
   std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs(boundary_names, true);
   if (boundary_ids.size() != 1)
-    mooseError("Only one boundary ID can be assigned to a nodeset using a bounding box!");
+    mooseError2("Only one boundary ID can be assigned to a nodeset using a bounding box!");
 
   // Get a reference to our BoundaryInfo object
   BoundaryInfo & boundary_info = _mesh_ptr->getMesh().get_boundary_info();
 
   // Check that we have access to the mesh
   if (!_mesh_ptr)
-    mooseError("_mesh_ptr must be initialized before calling BoundingBoxNodeSet::modify()");
+    mooseError2("_mesh_ptr must be initialized before calling BoundingBoxNodeSet::modify()");
 
   // Reference the the libMesh::MeshBase
   MeshBase & mesh = _mesh_ptr->getMesh();
@@ -69,7 +69,7 @@ BoundingBoxNodeSet::modify()
   }
 
   if (!found_node)
-    mooseError("No nodes found within the bounding box");
+    mooseError2("No nodes found within the bounding box");
 
   boundary_info.nodeset_name(boundary_ids[0]) = boundary_names[0];
 }

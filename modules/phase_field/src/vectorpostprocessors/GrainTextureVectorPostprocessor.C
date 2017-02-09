@@ -29,7 +29,7 @@ GrainTextureVectorPostprocessor::GrainTextureVectorPostprocessor(const InputPara
     _sample(4)
 {
   if (_euler.getGrainNum() < _grain_num)
-    mooseError("Euler angle provider has too few angles.");
+    mooseError2("Euler angle provider has too few angles.");
 
   std::vector<std::string> output_variables(4);
   output_variables[0] = "unique_grain";

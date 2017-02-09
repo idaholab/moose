@@ -36,7 +36,7 @@ InterfaceOrientationMaterial::InterfaceOrientationMaterial(const InputParameters
 {
   // this currently only works in 2D simulations
   if (_mesh.dimension() != 2)
-    mooseError("InterfaceOrientationMaterial requires a two-dimensional mesh.");
+    mooseError2("InterfaceOrientationMaterial requires a two-dimensional mesh.");
 }
 
 void

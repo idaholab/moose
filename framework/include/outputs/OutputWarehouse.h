@@ -368,14 +368,14 @@ OutputWarehouse::getOutput(const OutputName & name)
 {
   // Check that the object exists
   if (!hasOutput(name))
-    mooseError("An output object with the name '" << name << "' does not exist.");
+    mooseError2("An output object with the name '", name, "' does not exist.");
 
   // Attempt to cast the object to the correct type
   T * output = dynamic_cast<T*>(_object_map[name]);
 
   // Error if the cast fails
   if (output == NULL)
-    mooseError("An output object with the name '" << name << "' for the specified type does not exist");
+    mooseError2("An output object with the name '", name, "' for the specified type does not exist");
 
   // Return the object
   return output;

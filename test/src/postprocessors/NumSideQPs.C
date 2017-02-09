@@ -42,5 +42,5 @@ NumSideQPs::computeIntegral()
 Real
 NumSideQPs::computeQpIntegral()
 {
-  mooseError("Unimplemented method");
+  mooseError2("Unimplemented method");
 }

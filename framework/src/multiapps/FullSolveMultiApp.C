@@ -51,7 +51,7 @@ FullSolveMultiApp::initialSetup()
       Executioner * ex = app->getExecutioner();
 
       if (!ex)
-        mooseError("Executioner does not exist!");
+        mooseError2("Executioner does not exist!");
 
       ex->init();
 
@@ -66,7 +66,7 @@ bool
 FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advance)
 {
   if (!auto_advance)
-    mooseError("FullSolveMultiApp is not compatible with auto_advance=false");
+    mooseError2("FullSolveMultiApp is not compatible with auto_advance=false");
 
   if (!_has_an_app)
     return true;

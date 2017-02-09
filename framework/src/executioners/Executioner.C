@@ -150,7 +150,7 @@ Executioner::postSolve()
 Problem &
 Executioner::problem()
 {
-  mooseDoOnce(mooseWarning("This method is deprecated, use feProblem() instead"));
+  mooseDoOnce(mooseWarning2("This method is deprecated, use feProblem() instead"));
   return _fe_problem;
 }
 

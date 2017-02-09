@@ -22,7 +22,7 @@ PorousFlowDiffusivityConst::PorousFlowDiffusivityConst(const InputParameters & p
 {
   // Check that the number of tortuosities entered is equal to the number of phases
   if (_input_tortuosity.size() != _num_phases)
-    mooseError("The number of tortuosity values entered is not equal to the number of phases specified in the Dictator");
+    mooseError2("The number of tortuosity values entered is not equal to the number of phases specified in the Dictator");
 }
 
 void

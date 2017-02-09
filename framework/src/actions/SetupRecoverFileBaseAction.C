@@ -49,7 +49,7 @@ SetupRecoverFileBaseAction::act()
     std::string recovery_file_base = MooseUtils::getRecoveryFileBase(checkpoint_files);
 
     if (recovery_file_base.empty())
-      mooseError("Unable to find suitable recovery file!");
+      mooseError2("Unable to find suitable recovery file!");
 
     _app.setRecoverFileBase(recovery_file_base);
   }

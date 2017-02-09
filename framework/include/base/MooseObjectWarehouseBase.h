@@ -383,7 +383,7 @@ MooseObjectWarehouseBase<T>::getActiveObject(const std::string & name, THREAD_ID
   for (const auto & object : _active_objects[tid])
     if (object->name() == name)
       return object;
-  mooseError("Unable to locate active object: " << name << ".");
+  mooseError2("Unable to locate active object: ", name, ".");
 }
 
 template<typename T>

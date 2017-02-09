@@ -46,7 +46,7 @@ DeformedGrainMaterial::DeformedGrainMaterial(const InputParameters & parameters)
     _JtoeV(6.24150974e18) // Joule to eV conversion
 {
   if (_op_num == 0)
-    mooseError("Model requires op_num > 0");
+    mooseError2("Model requires op_num > 0");
 
   for (unsigned int i=0; i < _op_num; ++i)
     _vals[i] = &coupledValue("v", i);
@@ -84,7 +84,7 @@ DeformedGrainMaterial::computeQpProperties()
   }
 
   if (!one_active && _t_step > 0)
-    mooseError("No active order parameters");
+    mooseError2("No active order parameters");
 
   _rho_eff[_qp] = rho0 / SumEtai2;
   if (_rho_eff[_qp]<1e-9)
