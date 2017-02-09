@@ -546,7 +546,7 @@ public:
   const T & getUserObject(const std::string & name, unsigned int tid = 0)
   {
     if (_all_user_objects.hasActiveObject(name, tid))
-      return *(MooseSharedNamespace::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name, tid)));
+      return *(std::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name, tid)));
 
 
     mooseError("Unable to find user object with name '" + name + "'");
@@ -662,7 +662,7 @@ public:
   /**
    * Get a MultiApp object by name.
    */
-  MooseSharedPointer<MultiApp> getMultiApp(const std::string & multi_app_name);
+  std::shared_ptr<MultiApp> getMultiApp(const std::string & multi_app_name);
 
   /**
    * Execute the MultiApps associated with the ExecFlagType
@@ -820,8 +820,8 @@ public:
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) override;
 
   // Displaced problem /////
-  virtual void addDisplacedProblem(MooseSharedPointer<DisplacedProblem> displaced_problem);
-  virtual MooseSharedPointer<DisplacedProblem> getDisplacedProblem() { return _displaced_problem; }
+  virtual void addDisplacedProblem(std::shared_ptr<DisplacedProblem> displaced_problem);
+  virtual std::shared_ptr<DisplacedProblem> getDisplacedProblem() { return _displaced_problem; }
 
   virtual void updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
 
@@ -875,10 +875,10 @@ public:
 #endif //LIBMESH_ENABLE_AMR
 
   /// Create XFEM controller object
-  void initXFEM(MooseSharedPointer<XFEMInterface> xfem);
+  void initXFEM(std::shared_ptr<XFEMInterface> xfem);
 
   /// Get a pointer to the XFEM controller object
-  MooseSharedPointer<XFEMInterface> getXFEM(){return _xfem;}
+  std::shared_ptr<XFEMInterface> getXFEM(){return _xfem;}
 
   /// Find out whether the current analysis is using XFEM
   bool haveXFEM() { return _xfem != NULL; }
@@ -985,12 +985,12 @@ public:
    *
    * This will return enabled or disabled objects, the main purpose is for iterative materials.
    */
-  MooseSharedPointer<Material> getMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID tid = 0);
+  std::shared_ptr<Material> getMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID tid = 0);
 
   /*
    * Return a pointer to the MaterialData
    */
-  MooseSharedPointer<MaterialData> getMaterialData(Moose::MaterialDataType type, THREAD_ID tid = 0);
+  std::shared_ptr<MaterialData> getMaterialData(Moose::MaterialDataType type, THREAD_ID tid = 0);
 
   /**
    * Will return True if the user wants to get an error when
@@ -1199,7 +1199,7 @@ protected:
    *
    * @see checkProblemIntegrity
    */
-  void checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & materials_map);
+  void checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<std::shared_ptr<Material> > > & materials_map);
 
   /// Verify that there are no element type/coordinate type conflicts
   void checkCoordinateSystems();
@@ -1215,11 +1215,11 @@ protected:
 #endif
 
   /// Pointer to XFEM controller
-  MooseSharedPointer<XFEMInterface> _xfem;
+  std::shared_ptr<XFEMInterface> _xfem;
 
   // Displaced mesh /////
   MooseMesh * _displaced_mesh;
-  MooseSharedPointer<DisplacedProblem> _displaced_problem;
+  std::shared_ptr<DisplacedProblem> _displaced_problem;
   GeometricSearchData _geometric_search_data;
 
   bool _reinit_displaced_elem;
@@ -1333,9 +1333,9 @@ FEProblemBase::initializeUserObjects(const MooseObjectWarehouse<T> & warehouse)
   {
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      const std::vector<MooseSharedPointer<T> > & objects = warehouse.getActiveObjects(tid);
-      for (typename std::vector<MooseSharedPointer<T> >::const_iterator it = objects.begin(); it != objects.end(); ++it)
-        (*it)->initialize();
+      const auto & objects = warehouse.getActiveObjects(tid);
+      for (const auto & object : objects)
+        object->initialize();
     }
   }
 }
@@ -1363,7 +1363,7 @@ FEProblemBase::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
     {
       object->finalize();
 
-      auto pp = MooseSharedNamespace::dynamic_pointer_cast<Postprocessor>(object);
+      auto pp = std::dynamic_pointer_cast<Postprocessor>(object);
 
       if (pp)
         _pps_data.storeValue(pp->PPName(), pp->getValue());

@@ -745,10 +745,10 @@ FEProblemBase::checkNonlocalCoupling()
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     const KernelWarehouse & all_kernels = _nl->getKernelWarehouse();
-    const std::vector<MooseSharedPointer<KernelBase> > & kernels = all_kernels.getObjects(tid);
+    const auto & kernels = all_kernels.getObjects(tid);
     for (const auto & kernel : kernels)
     {
-      MooseSharedPointer<NonlocalKernel> nonlocal_kernel = MooseSharedNamespace::dynamic_pointer_cast<NonlocalKernel>(kernel);
+      std::shared_ptr<NonlocalKernel> nonlocal_kernel = std::dynamic_pointer_cast<NonlocalKernel>(kernel);
       if (nonlocal_kernel)
       {
         if (_calculate_jacobian_in_uo)
@@ -757,10 +757,10 @@ FEProblemBase::checkNonlocalCoupling()
       }
     }
     const MooseObjectWarehouse<IntegratedBC> & all_integrated_bcs = _nl->getIntegratedBCWarehouse();
-    const std::vector<MooseSharedPointer<IntegratedBC> > & integrated_bcs = all_integrated_bcs.getObjects(tid);
+    const auto & integrated_bcs = all_integrated_bcs.getObjects(tid);
     for (const auto & integrated_bc : integrated_bcs)
     {
-      MooseSharedPointer<NonlocalIntegratedBC> nonlocal_integrated_bc = MooseSharedNamespace::dynamic_pointer_cast<NonlocalIntegratedBC>(integrated_bc);
+      std::shared_ptr<NonlocalIntegratedBC> nonlocal_integrated_bc = std::dynamic_pointer_cast<NonlocalIntegratedBC>(integrated_bc);
       if (nonlocal_integrated_bc)
       {
         if (_calculate_jacobian_in_uo)
@@ -775,10 +775,10 @@ void
 FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
 {
   std::set<MooseVariable *> uo_jacobian_moose_vars;
-  const std::vector<MooseSharedPointer<ElementUserObject> > & e_objects = _elemental_user_objects.getActiveObjects(tid);
+  const auto & e_objects = _elemental_user_objects.getActiveObjects(tid);
   for (const auto & uo : e_objects)
   {
-    MooseSharedPointer<ShapeElementUserObject> shape_element_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeElementUserObject>(uo);
+    std::shared_ptr<ShapeElementUserObject> shape_element_uo = std::dynamic_pointer_cast<ShapeElementUserObject>(uo);
     if (shape_element_uo)
     {
       _calculate_jacobian_in_uo = shape_element_uo->computeJacobianFlag();
@@ -786,10 +786,10 @@ FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
       uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
-  const std::vector<MooseSharedPointer<SideUserObject> > & s_objects = _side_user_objects.getActiveObjects(tid);
+  const auto & s_objects = _side_user_objects.getActiveObjects(tid);
   for (const auto & uo : s_objects)
   {
-    MooseSharedPointer<ShapeSideUserObject> shape_side_uo = MooseSharedNamespace::dynamic_pointer_cast<ShapeSideUserObject>(uo);
+    std::shared_ptr<ShapeSideUserObject> shape_side_uo = std::dynamic_pointer_cast<ShapeSideUserObject>(uo);
     if (shape_side_uo)
     {
       _calculate_jacobian_in_uo = shape_side_uo->computeJacobianFlag();
@@ -1402,7 +1402,7 @@ FEProblemBase::addFunction(std::string type, const std::string & name, InputPara
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseSharedPointer<Function> func = _factory.create<Function>(type, name, parameters, tid);
+    std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters, tid);
     _functions.addObject(func, tid);
   }
 }
@@ -1815,7 +1815,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name, const std::strin
     {
       MooseVariable & var = getVariable(tid, var_name);
       parameters.set<SystemBase *>("_sys") = &var.sys();
-      MooseSharedPointer<InitialCondition> ic = _factory.create<InitialCondition>(ic_name, name, parameters, tid);
+      std::shared_ptr<InitialCondition> ic = _factory.create<InitialCondition>(ic_name, name, parameters, tid);
       _ics.addObject(ic, tid);
     }
   }
@@ -1825,7 +1825,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name, const std::strin
   {
     MooseVariableScalar & var = getScalarVariable(0, var_name);
     parameters.set<SystemBase *>("_sys") = &var.sys();
-    MooseSharedPointer<ScalarInitialCondition> ic = _factory.create<ScalarInitialCondition>(ic_name, name, parameters);
+    std::shared_ptr<ScalarInitialCondition> ic = _factory.create<ScalarInitialCondition>(ic_name, name, parameters);
     _scalar_ics.addObject(ic);
   }
 
@@ -1861,7 +1861,7 @@ FEProblemBase::projectSolution()
   // processor with highest ID
   if (processor_id() == (n_processors()-1) && _scalar_ics.hasActiveObjects())
   {
-    const std::vector<MooseSharedPointer<ScalarInitialCondition> > & ics = _scalar_ics.getActiveObjects();
+    const auto & ics = _scalar_ics.getActiveObjects();
     for (const auto & ic : ics)
     {
       MooseVariableScalar & var = ic->variable();
@@ -1892,7 +1892,7 @@ FEProblemBase::projectSolution()
 }
 
 
-MooseSharedPointer<Material>
+std::shared_ptr<Material>
 FEProblemBase::getMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID tid)
 {
   switch (type)
@@ -1907,7 +1907,7 @@ FEProblemBase::getMaterial(std::string name, Moose::MaterialDataType type, THREA
     break;
   }
 
-  MooseSharedPointer<Material> material = _all_materials[type].getActiveObject(name, tid);
+  std::shared_ptr<Material> material = _all_materials[type].getActiveObject(name, tid);
   if (material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
     mooseWarning("You are retrieving a Material object (" << material->name() << "), but its compute flag is not set to true. This indicates that MOOSE is computing this property which may not be desired and produce un-expected results.");
 
@@ -1915,10 +1915,10 @@ FEProblemBase::getMaterial(std::string name, Moose::MaterialDataType type, THREA
 }
 
 
-MooseSharedPointer<MaterialData>
+std::shared_ptr<MaterialData>
 FEProblemBase::getMaterialData(Moose::MaterialDataType type, THREAD_ID tid)
 {
-  MooseSharedPointer<MaterialData> output;
+  std::shared_ptr<MaterialData> output;
   switch (type)
   {
   case Moose::BLOCK_MATERIAL_DATA:
@@ -1963,7 +1963,7 @@ FEProblemBase::addMaterial(const std::string & mat_name, const std::string & nam
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     // Create the general Block/Boundary Material object
-    MooseSharedPointer<Material> material = _factory.create<Material>(mat_name, name, parameters, tid);
+    std::shared_ptr<Material> material = _factory.create<Material>(mat_name, name, parameters, tid);
     bool discrete = !material->getParam<bool>("compute");
 
     // If the object is boundary restricted do not create the neighbor and face objects
@@ -1988,13 +1988,13 @@ FEProblemBase::addMaterial(const std::string & mat_name, const std::string & nam
       // face material
       current_parameters.set<Moose::MaterialDataType>("_material_data_type") = Moose::FACE_MATERIAL_DATA;
       object_name = name + "_face";
-      MooseSharedPointer<Material> face_material = _factory.create<Material>(mat_name, object_name, current_parameters, tid);
+      std::shared_ptr<Material> face_material = _factory.create<Material>(mat_name, object_name, current_parameters, tid);
 
       // neighbor material
       current_parameters.set<Moose::MaterialDataType>("_material_data_type") = Moose::NEIGHBOR_MATERIAL_DATA;
       current_parameters.set<bool>("_neighbor") = true;
       object_name = name + "_neighbor";
-      MooseSharedPointer<Material> neighbor_material = _factory.create<Material>(mat_name, object_name, current_parameters, tid);
+      std::shared_ptr<Material> neighbor_material = _factory.create<Material>(mat_name, object_name, current_parameters, tid);
 
       // Store the material objects
       _all_materials.addObjects(material, neighbor_material, face_material, tid);
@@ -2149,40 +2149,40 @@ FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 /**
  * Small helper function used by addPostprocessor to try to get a Postprocessor pointer from a MooseObject
  */
-MooseSharedPointer<Postprocessor>
-getPostprocessorPointer(MooseSharedPointer<MooseObject> mo)
+std::shared_ptr<Postprocessor>
+getPostprocessorPointer(std::shared_ptr<MooseObject> mo)
 {
   {
-    MooseSharedPointer<ElementPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<ElementPostprocessor>(mo);
+    std::shared_ptr<ElementPostprocessor> intermediate = std::dynamic_pointer_cast<ElementPostprocessor>(mo);
     if (intermediate.get())
-      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
+      return std::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    MooseSharedPointer<NodalPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<NodalPostprocessor>(mo);
+    std::shared_ptr<NodalPostprocessor> intermediate = std::dynamic_pointer_cast<NodalPostprocessor>(mo);
     if (intermediate.get())
-      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
+      return std::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    MooseSharedPointer<InternalSidePostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<InternalSidePostprocessor>(mo);
+    std::shared_ptr<InternalSidePostprocessor> intermediate = std::dynamic_pointer_cast<InternalSidePostprocessor>(mo);
     if (intermediate.get())
-      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
+      return std::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    MooseSharedPointer<SidePostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<SidePostprocessor>(mo);
+    std::shared_ptr<SidePostprocessor> intermediate = std::dynamic_pointer_cast<SidePostprocessor>(mo);
     if (intermediate.get())
-      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
+      return std::static_pointer_cast<Postprocessor>(intermediate);
   }
 
   {
-    MooseSharedPointer<GeneralPostprocessor> intermediate = MooseSharedNamespace::dynamic_pointer_cast<GeneralPostprocessor>(mo);
+    std::shared_ptr<GeneralPostprocessor> intermediate = std::dynamic_pointer_cast<GeneralPostprocessor>(mo);
     if (intermediate.get())
-      return MooseSharedNamespace::static_pointer_cast<Postprocessor>(intermediate);
+      return std::static_pointer_cast<Postprocessor>(intermediate);
   }
 
-  return MooseSharedPointer<Postprocessor>();
+  return std::shared_ptr<Postprocessor>();
 }
 
 template <typename UO_TYPE, typename PP_TYPE>
@@ -2248,15 +2248,15 @@ FEProblemBase::addUserObject(std::string user_object_name, const std::string & n
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     // Create the UserObject
-    MooseSharedPointer<UserObject> user_object = _factory.create<UserObject>(user_object_name, name, parameters, tid);
+    std::shared_ptr<UserObject> user_object = _factory.create<UserObject>(user_object_name, name, parameters, tid);
     _all_user_objects.addObject(user_object, tid);
 
     // Attempt to create all the possible UserObject types
-    MooseSharedPointer<ElementUserObject> euo = MooseSharedNamespace::dynamic_pointer_cast<ElementUserObject>(user_object);
-    MooseSharedPointer<SideUserObject> suo = MooseSharedNamespace::dynamic_pointer_cast<SideUserObject>(user_object);
-    MooseSharedPointer<InternalSideUserObject> isuo = MooseSharedNamespace::dynamic_pointer_cast<InternalSideUserObject>(user_object);
-    MooseSharedPointer<NodalUserObject> nuo = MooseSharedNamespace::dynamic_pointer_cast<NodalUserObject>(user_object);
-    MooseSharedPointer<GeneralUserObject> guo = MooseSharedNamespace::dynamic_pointer_cast<GeneralUserObject>(user_object);
+    std::shared_ptr<ElementUserObject> euo = std::dynamic_pointer_cast<ElementUserObject>(user_object);
+    std::shared_ptr<SideUserObject> suo = std::dynamic_pointer_cast<SideUserObject>(user_object);
+    std::shared_ptr<InternalSideUserObject> isuo = std::dynamic_pointer_cast<InternalSideUserObject>(user_object);
+    std::shared_ptr<NodalUserObject> nuo = std::dynamic_pointer_cast<NodalUserObject>(user_object);
+    std::shared_ptr<GeneralUserObject> guo = std::dynamic_pointer_cast<GeneralUserObject>(user_object);
 
     // Account for displaced mesh use
     if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
@@ -2364,7 +2364,7 @@ FEProblemBase::parentOutputPositionChanged()
 {
   for (const auto & it : _multi_apps)
   {
-    const std::vector<MooseSharedPointer<MultiApp> > & objects = it.second.getActiveObjects();
+    const auto & objects = it.second.getActiveObjects();
     for (const auto & obj : objects)
       obj->parentOutputPositionChanged();
   }
@@ -2388,12 +2388,12 @@ FEProblemBase::computeIndicators()
     std::vector<std::string> fields;
 
     // Indicator Fields
-    const std::vector<MooseSharedPointer<Indicator> > & indicators = _indicators.getActiveObjects();
+    const auto & indicators = _indicators.getActiveObjects();
     for (const auto & indicator : indicators)
       fields.push_back(indicator->name());
 
     // InternalSideIndicator Fields
-    const std::vector<MooseSharedPointer<InternalSideIndicator> > & internal_indicators = _internal_side_indicators.getActiveObjects();
+    const auto & internal_indicators = _internal_side_indicators.getActiveObjects();
     for (const auto & internal_indicator : internal_indicators)
       fields.push_back(internal_indicator->name());
 
@@ -2424,7 +2424,7 @@ FEProblemBase::computeMarkers()
     std::vector<std::string> fields;
 
     // Marker Fields
-    const std::vector<MooseSharedPointer<Marker> > & markers = _markers.getActiveObjects();
+    const auto & markers = _markers.getActiveObjects();
     for (const auto & marker : markers)
       fields.push_back(marker->name());
 
@@ -2434,7 +2434,7 @@ FEProblemBase::computeMarkers()
 
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      const std::vector<MooseSharedPointer<Marker> > & markers = _markers.getActiveObjects(tid);
+      const auto & markers = _markers.getActiveObjects(tid);
       for (const auto & marker : markers)
         marker->markerSetup();
     }
@@ -2587,14 +2587,14 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   // Execute GeneralUserObjects
   if (general.hasActiveObjects())
   {
-    const std::vector<MooseSharedPointer<GeneralUserObject> > & objects = general.getActiveObjects();
+    const auto & objects = general.getActiveObjects();
     for (const auto & obj : objects)
     {
       obj->initialize();
       obj->execute();
       obj->finalize();
 
-      MooseSharedPointer<Postprocessor> pp = MooseSharedNamespace::dynamic_pointer_cast<Postprocessor>(obj);
+      std::shared_ptr<Postprocessor> pp = std::dynamic_pointer_cast<Postprocessor>(obj);
       if (pp)
         _pps_data.storeValue(obj->name(), pp->getValue());
     }
@@ -2606,7 +2606,7 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 void
 FEProblemBase::executeControls(const ExecFlagType & exec_type)
 {
-  const std::vector<MooseSharedPointer<Control> > & objects = _control_warehouse[exec_type].getActiveObjects();
+  const auto & objects = _control_warehouse[exec_type].getActiveObjects();
 
   if (!objects.empty())
   {
@@ -2718,9 +2718,9 @@ FEProblemBase::addIndicator(std::string indicator_name, const std::string & name
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseSharedPointer<Indicator> indicator = _factory.create<Indicator>(indicator_name, name, parameters, tid);
+    std::shared_ptr<Indicator> indicator = _factory.create<Indicator>(indicator_name, name, parameters, tid);
 
-    MooseSharedPointer<InternalSideIndicator> isi = MooseSharedNamespace::dynamic_pointer_cast<InternalSideIndicator>(indicator);
+    std::shared_ptr<InternalSideIndicator> isi = std::dynamic_pointer_cast<InternalSideIndicator>(indicator);
     if (isi)
       _internal_side_indicators.addObject(isi, tid);
     else
@@ -2757,7 +2757,7 @@ FEProblemBase::addMarker(std::string marker_name, const std::string & name, Inpu
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    MooseSharedPointer<Marker> marker = _factory.create<Marker>(marker_name, name, parameters, tid);
+    std::shared_ptr<Marker> marker = _factory.create<Marker>(marker_name, name, parameters, tid);
     _markers.addObject(marker, tid);
   }
 }
@@ -2767,7 +2767,7 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name, const std::string
 {
   setInputParametersFEProblem(parameters);
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
-  parameters.set<MooseSharedPointer<CommandLine> >("_command_line") = _app.commandLine();
+  parameters.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
 
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -2791,12 +2791,12 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name, const std::string
     parameters.set<SystemBase *>("_sys") = _aux;
   }
 
-  MooseSharedPointer<MultiApp> multi_app = _factory.create<MultiApp>(multi_app_name, name, parameters);
+  std::shared_ptr<MultiApp> multi_app = _factory.create<MultiApp>(multi_app_name, name, parameters);
 
   _multi_apps.addObject(multi_app);
 
   // Store TranseintMultiApp objects in another container, this is needed for calling computeDT
-  MooseSharedPointer<TransientMultiApp> trans_multi_app = MooseSharedNamespace::dynamic_pointer_cast<TransientMultiApp>(multi_app);
+  std::shared_ptr<TransientMultiApp> trans_multi_app = std::dynamic_pointer_cast<TransientMultiApp>(multi_app);
   if (trans_multi_app)
     _transient_multi_apps.addObject(trans_multi_app);
 }
@@ -2808,7 +2808,7 @@ FEProblemBase::hasMultiApp(const std::string & multi_app_name)
 }
 
 
-MooseSharedPointer<MultiApp>
+std::shared_ptr<MultiApp>
 FEProblemBase::getMultiApp(const std::string & multi_app_name)
 {
   return _multi_apps.getActiveObject(multi_app_name);
@@ -2818,7 +2818,7 @@ bool
 FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
 {
   // Active MultiApps
-  const std::vector<MooseSharedPointer<MultiApp> > & multi_apps = _multi_apps[type].getActiveObjects();
+  const auto & multi_apps = _multi_apps[type].getActiveObjects();
 
   // Do anything that needs to be done to Apps before transfers
   for (const auto & multi_app : multi_apps)
@@ -2827,7 +2827,7 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
   // Execute Transfers _to_ MultiApps
   if (_to_multi_app_transfers[type].hasActiveObjects())
   {
-    const std::vector<MooseSharedPointer<Transfer> > & transfers = _to_multi_app_transfers[type].getActiveObjects();
+    const auto & transfers = _to_multi_app_transfers[type].getActiveObjects();
 
     _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << " To MultiApps" << COLOR_DEFAULT << std::endl;
     for (const auto & transfer : transfers)
@@ -2870,7 +2870,7 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
   // Execute Transfers _from_ MultiApps
   if (_from_multi_app_transfers[type].hasActiveObjects())
   {
-    const std::vector<MooseSharedPointer<Transfer> > & transfers = _from_multi_app_transfers[type].getActiveObjects();
+    const auto & transfers = _from_multi_app_transfers[type].getActiveObjects();
 
     _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << " From MultiApps" << COLOR_DEFAULT << std::endl;
     for (const auto & transfer : transfers)
@@ -2896,7 +2896,7 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
 void
 FEProblemBase::advanceMultiApps(ExecFlagType type)
 {
-  const std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps[type].getActiveObjects();
+  const auto & multi_apps = _multi_apps[type].getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2915,7 +2915,7 @@ FEProblemBase::advanceMultiApps(ExecFlagType type)
 void
 FEProblemBase::backupMultiApps(ExecFlagType type)
 {
-  const std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps[type].getActiveObjects();
+  const auto & multi_apps = _multi_apps[type].getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2934,7 +2934,7 @@ FEProblemBase::backupMultiApps(ExecFlagType type)
 void
 FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
 {
-  const std::vector<MooseSharedPointer<MultiApp> > multi_apps = _multi_apps[type].getActiveObjects();
+  const auto & multi_apps = _multi_apps[type].getActiveObjects();
 
   if (multi_apps.size())
   {
@@ -2957,7 +2957,7 @@ FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
 Real
 FEProblemBase::computeMultiAppsDT(ExecFlagType type)
 {
-  const std::vector<MooseSharedPointer<TransientMultiApp> > & multi_apps = _transient_multi_apps[type].getActiveObjects();
+  const auto & multi_apps = _transient_multi_apps[type].getActiveObjects();
 
   Real smallest_dt = std::numeric_limits<Real>::max();
 
@@ -2973,7 +2973,7 @@ FEProblemBase::execTransfers(ExecFlagType type)
 {
   if (_transfers[type].hasActiveObjects())
   {
-    const std::vector<MooseSharedPointer<Transfer> > & transfers = _transfers[type].getActiveObjects();
+    const auto & transfers = _transfers[type].getActiveObjects();
     for (const auto & transfer : transfers)
       transfer->execute();
   }
@@ -3007,10 +3007,10 @@ FEProblemBase::addTransfer(const std::string & transfer_name, const std::string 
   }
 
   // Create the Transfer objects
-  MooseSharedPointer<Transfer> transfer = _factory.create<Transfer>(transfer_name, name, parameters);
+  std::shared_ptr<Transfer> transfer = _factory.create<Transfer>(transfer_name, name, parameters);
 
   // Add MultiAppTransfer object
-  MooseSharedPointer<MultiAppTransfer> multi_app_transfer = MooseSharedNamespace::dynamic_pointer_cast<MultiAppTransfer>(transfer);
+  std::shared_ptr<MultiAppTransfer> multi_app_transfer = std::dynamic_pointer_cast<MultiAppTransfer>(transfer);
   if (multi_app_transfer)
   {
     if (multi_app_transfer->direction() == MultiAppTransfer::TO_MULTIAPP)
@@ -3168,9 +3168,9 @@ FEProblemBase::setNonlocalCouplingMatrix()
 {
   unsigned int n_vars = _nl->nVariables();
   _nonlocal_cm.resize(n_vars);
-  const std::vector<MooseVariable *> & vars = _nl->getVariables(0);
-  const std::vector<MooseSharedPointer<KernelBase> > & nonlocal_kernel = _nonlocal_kernels.getObjects();
-  const std::vector<MooseSharedPointer<IntegratedBC> > & nonlocal_integrated_bc = _nonlocal_integrated_bcs.getObjects();
+  const auto & vars = _nl->getVariables(0);
+  const auto & nonlocal_kernel = _nonlocal_kernels.getObjects();
+  const auto & nonlocal_integrated_bc = _nonlocal_integrated_bcs.getObjects();
   for (const auto & ivar : vars)
   {
     for (const auto & kernel : nonlocal_kernel)
@@ -3529,7 +3529,7 @@ FEProblemBase::addPredictor(const std::string & type, const std::string & name, 
 {
   setInputParametersFEProblem(parameters);
   parameters.set<SubProblem *>("_subproblem") = this;
-  MooseSharedPointer<Predictor> predictor = _factory.create<Predictor>(type, name, parameters);
+  std::shared_ptr<Predictor> predictor = _factory.create<Predictor>(type, name, parameters);
   _nl->setPredictor(predictor);
 }
 
@@ -3911,7 +3911,7 @@ FEProblemBase::predictorCleanup(NumericVector<Number>& /*ghosted_solution*/)
 }
 
 void
-FEProblemBase::addDisplacedProblem(MooseSharedPointer<DisplacedProblem> displaced_problem)
+FEProblemBase::addDisplacedProblem(std::shared_ptr<DisplacedProblem> displaced_problem)
 {
   _displaced_mesh = &displaced_problem->mesh();
   _displaced_problem = displaced_problem;
@@ -4026,7 +4026,7 @@ FEProblemBase::adaptMesh()
 #endif //LIBMESH_ENABLE_AMR
 
 void
-FEProblemBase::initXFEM(MooseSharedPointer<XFEMInterface> xfem)
+FEProblemBase::initXFEM(std::shared_ptr<XFEMInterface> xfem)
 {
   _xfem = xfem;
   _xfem->setMesh(&_mesh.getMesh());
@@ -4194,7 +4194,7 @@ FEProblemBase::checkProblemIntegrity()
     //checkBoundaryMatProps();
 
     // Check that material properties exist when requested by other properties on a given block
-    const std::vector<MooseSharedPointer<Material> > & materials = _all_materials.getActiveObjects();
+    const auto & materials = _all_materials.getActiveObjects();
     for (const auto & material : materials)
       material->checkStatefulSanity();
 
@@ -4263,7 +4263,7 @@ FEProblemBase::checkUserObjects()
   // and the blocks that they are defined on
   std::set<std::string> names;
 
-  const std::vector<MooseSharedPointer<UserObject> > & objects = _all_user_objects.getActiveObjects();
+  const auto & objects = _all_user_objects.getActiveObjects();
   for (const auto & obj : objects)
     names.insert(obj->name());
 
@@ -4292,7 +4292,7 @@ FEProblemBase::checkUserObjects()
 
 
 void
-FEProblemBase::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<MooseSharedPointer<Material> > > & materials_map)
+FEProblemBase::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<std::shared_ptr<Material>>> & materials_map)
 {
   for (const auto & it : materials_map)
   {
@@ -4334,7 +4334,7 @@ FEProblemBase::checkDependMaterialsHelper(const std::map<SubdomainID, std::vecto
   // This loop checks that materials are not supplied by multiple Material objects
   for (const auto & it : materials_map)
   {
-    const std::vector<MooseSharedPointer<Material> > & materials = it.second;
+    const auto & materials = it.second;
     std::set<std::string> inner_supplied, outer_supplied;
 
     for (const auto & outer_mat : materials)

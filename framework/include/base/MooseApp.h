@@ -224,7 +224,7 @@ public:
   /**
    * Retrieve the Executioner shared pointer for this App
    */
-  MooseSharedPointer<Executioner> & executioner() { return _executioner; }
+  std::shared_ptr<Executioner> & executioner() { return _executioner; }
 
   /**
    * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.
@@ -246,7 +246,7 @@ public:
    * @return The reference to the command line object
    * Setup options based on InputParameters.
    */
-  MooseSharedPointer<CommandLine> commandLine() { return _command_line; }
+  std::shared_ptr<CommandLine> commandLine() { return _command_line; }
 
   /**
    * This method is here so we can determine whether or not we need to
@@ -404,7 +404,7 @@ public:
    * Create a Backup from the current App.  A Backup contains all the data necessary to be able
    * to restore the state of an App.
    */
-  MooseSharedPointer<Backup> backup();
+  std::shared_ptr<Backup> backup();
 
   /**
    * Restore a Backup.  This sets the App's state.
@@ -412,7 +412,7 @@ public:
    * @param backup The Backup holding the data for the app
    * @param for_restart Whether this restoration is explicitly for the first restoration of restart data
    */
-  void restore(MooseSharedPointer<Backup> backup, bool for_restart = false);
+  void restore(std::shared_ptr<Backup> backup, bool for_restart = false);
 
   /**
    * Returns a string to be printed at the beginning of a simulation
@@ -518,7 +518,7 @@ protected:
   const std::string _type;
 
   /// The MPI communicator this App is going to use
-  const MooseSharedPointer<Parallel::Communicator> _comm;
+  const std::shared_ptr<Parallel::Communicator> _comm;
 
   /// Input file name used
   std::string _input_filename;
@@ -542,7 +542,7 @@ protected:
   Real _global_time_offset;
 
   /// Command line object
-  MooseSharedPointer<CommandLine> _command_line;
+  std::shared_ptr<CommandLine> _command_line;
 
   /// Syntax of the input file
   Syntax _syntax;
@@ -563,13 +563,13 @@ protected:
   Parser _parser;
 
   /// Pointer to the executioner of this run (typically build by actions)
-  MooseSharedPointer<Executioner> _executioner;
+  std::shared_ptr<Executioner> _executioner;
 
   /// Boolean to indicate whether to use a Nonlinear or EigenSystem (inspected by actions)
   bool _use_nonlinear;
 
   /// System Information
-  MooseSharedPointer<SystemInfo> _sys_info;
+  std::shared_ptr<SystemInfo> _sys_info;
 
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
   enum UNUSED_CHECK { OFF, WARN_UNUSED, ERROR_UNUSED } _enable_unused_check;
@@ -655,10 +655,10 @@ private:
   unsigned int _multiapp_level;
 
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
-  std::map<std::string, MooseSharedPointer<MeshModifier> > _mesh_modifiers;
+  std::map<std::string, std::shared_ptr<MeshModifier> > _mesh_modifiers;
 
   /// Cache for a Backup to use for restart / recovery
-  MooseSharedPointer<Backup> _cached_backup;
+  std::shared_ptr<Backup> _cached_backup;
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;

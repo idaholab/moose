@@ -71,7 +71,7 @@ SetupDebugAction::createOutputAction(const std::string & type, const std::string
   _action_params.set<std::string>("type") = type;
 
   // Create the action
-  MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddOutputAction", name, _action_params));
+  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddOutputAction", name, _action_params));
 
   // Set the object parameters
   InputParameters & object_params = action->getObjectParams();

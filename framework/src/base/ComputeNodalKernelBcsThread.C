@@ -65,7 +65,7 @@ ComputeNodalKernelBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
     if (node->processor_id() == _fe_problem.processor_id())
     {
       _fe_problem.reinitNodeFace(node, boundary_id, _tid);
-      const std::vector<MooseSharedPointer<NodalKernel> > & objects = _nodal_kernels.getActiveBoundaryObjects(boundary_id, _tid);
+      const auto & objects = _nodal_kernels.getActiveBoundaryObjects(boundary_id, _tid);
       for (const auto & nodal_kernel : objects)
         nodal_kernel->computeResidual();
 

@@ -147,7 +147,7 @@ NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
 }
 
 void
-NonlinearEigenSystem::addEigenKernels(MooseSharedPointer<KernelBase> kernel, THREAD_ID tid)
+NonlinearEigenSystem::addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD_ID tid)
 {
   if (kernel->isEigenKernel())
     _eigen_kernels.addObject(kernel, tid);
@@ -163,10 +163,10 @@ NonlinearEigenSystem::checkIntegrity()
 
   if (_nodal_bcs.hasActiveObjects())
   {
-    const std::vector<MooseSharedPointer<NodalBC> > & nodal_bcs = _nodal_bcs.getActiveObjects();
+    const auto & nodal_bcs = _nodal_bcs.getActiveObjects();
     for (const auto & nodal_bc : nodal_bcs)
     {
-      MooseSharedPointer<DirichletBC> nbc = MooseSharedNamespace::dynamic_pointer_cast<DirichletBC>(nodal_bc);
+      std::shared_ptr<DirichletBC> nbc = std::dynamic_pointer_cast<DirichletBC>(nodal_bc);
       if (nbc && nbc->getParam<Real>("value"))
         mooseError("Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
       else if (!nbc)

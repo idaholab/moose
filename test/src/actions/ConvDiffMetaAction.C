@@ -38,8 +38,8 @@ ConvDiffMetaAction::ConvDiffMetaAction(const InputParameters & params) :
 void
 ConvDiffMetaAction::act()
 {
-  MooseSharedPointer<Action> action;
-  MooseSharedPointer<MooseObjectAction> moose_object_action;
+  std::shared_ptr<Action> action;
+  std::shared_ptr<MooseObjectAction> moose_object_action;
 
   std::vector<NonlinearVariableName> variables = getParam<std::vector<NonlinearVariableName> > ("variables");
 

@@ -35,7 +35,7 @@ public:
   /**
    * Add object to the warehouse.
    */
-  void addObject(MooseSharedPointer<InitialCondition> object, THREAD_ID tid);
+  void addObject(std::shared_ptr<InitialCondition> object, THREAD_ID tid);
 
 
 protected:

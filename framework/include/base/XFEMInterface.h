@@ -85,7 +85,7 @@ public:
   /**
    * Set the pointer to the MaterialData
    */
-  void setMaterialData(std::vector<MooseSharedPointer<MaterialData> > * material_data)
+  void setMaterialData(std::vector<std::shared_ptr<MaterialData>> * material_data)
   {
     _material_data = material_data;
   }
@@ -93,7 +93,7 @@ public:
   /**
    * Set the pointer to the Boundary MaterialData
    */
-  void setBoundaryMaterialData(std::vector<MooseSharedPointer<MaterialData> > * bnd_material_data)
+  void setBoundaryMaterialData(std::vector<std::shared_ptr<MaterialData>> * bnd_material_data)
   {
     _bnd_material_data = bnd_material_data;
   }
@@ -116,8 +116,8 @@ public:
 
 protected:
   FEProblemBase * _fe_problem;
-  std::vector<MooseSharedPointer<MaterialData> > * _material_data;
-  std::vector<MooseSharedPointer<MaterialData> > * _bnd_material_data;
+  std::vector<std::shared_ptr<MaterialData>> * _material_data;
+  std::vector<std::shared_ptr<MaterialData>> * _bnd_material_data;
 
   MeshBase * _mesh;
   MeshBase * _mesh2;
