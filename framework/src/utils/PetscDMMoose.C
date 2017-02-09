@@ -679,7 +679,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             PenetrationLocator * locator;
             if (displaced)
             {
-              MooseSharedPointer<DisplacedProblem> displaced_problem = dmm->_nl->_fe_problem.getDisplacedProblem();
+              std::shared_ptr<DisplacedProblem> displaced_problem = dmm->_nl->_fe_problem.getDisplacedProblem();
               if (!displaced_problem)
               {
                 std::ostringstream err;
@@ -780,7 +780,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             PenetrationLocator * locator;
             if (displaced)
             {
-              MooseSharedPointer<DisplacedProblem> displaced_problem = dmm->_nl->_fe_problem.getDisplacedProblem();
+              std::shared_ptr<DisplacedProblem> displaced_problem = dmm->_nl->_fe_problem.getDisplacedProblem();
               if (!displaced_problem)
               {
                 std::ostringstream err;
@@ -2021,7 +2021,7 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
   ierr = PetscFree(sides);
   CHKERRQ(ierr);
   PetscInt maxcontacts = dmm->_nl->_fe_problem.geomSearchData()._penetration_locators.size();
-  MooseSharedPointer<DisplacedProblem> displaced_problem = dmm->_nl->_fe_problem.getDisplacedProblem();
+  std::shared_ptr<DisplacedProblem> displaced_problem = dmm->_nl->_fe_problem.getDisplacedProblem();
   if (displaced_problem)
     maxcontacts = PetscMax(maxcontacts,(PetscInt)displaced_problem->geomSearchData()._penetration_locators.size());
 

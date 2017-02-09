@@ -72,7 +72,7 @@ ComputeDiracThread::onElement(const Elem * elem)
     return;
 
   std::set<MooseVariable *> needed_moose_vars;
-  const std::vector<MooseSharedPointer<DiracKernel> > & dkernels = _dirac_kernels.getActiveObjects(_tid);
+  const std::vector<std::shared_ptr<DiracKernel>> & dkernels = _dirac_kernels.getActiveObjects(_tid);
 
   // Only call reinitMaterials() if one or more DiracKernels has
   // actually called getMaterialProperty().  Loop over all the

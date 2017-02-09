@@ -27,16 +27,11 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
-#ifdef LIBMESH_HAVE_CXX11_SHARED_PTR
-#  include <memory>
-#  define MooseSharedPointer std::shared_ptr
-#  define MooseSharedNamespace std
-#else
-#  include "boost/shared_ptr.hpp"
-#  define MooseSharedPointer boost::shared_ptr
-#  define MooseSharedNamespace boost
-#endif
+// DO NOT USE (Deprecated)
+#define MooseSharedPointer std::shared_ptr
+#define MooseSharedNamespace std
 
 /**
  * Macro for inferring the proper type of a normal loop index compatible

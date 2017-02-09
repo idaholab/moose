@@ -126,14 +126,14 @@ protected:
   /// The current action (even though we have seperate instances for each action)
   const std::string & _current_task;
 
-  MooseSharedPointer<MooseMesh> & _mesh;
-  MooseSharedPointer<MooseMesh> & _displaced_mesh;
+  std::shared_ptr<MooseMesh> & _mesh;
+  std::shared_ptr<MooseMesh> & _displaced_mesh;
 
   /// Convenience reference to a problem this action works on
-  MooseSharedPointer<FEProblemBase> & _problem;
+  std::shared_ptr<FEProblemBase> & _problem;
 
   /// Convenience reference to an executioner
-  MooseSharedPointer<Executioner> & _executioner;
+  std::shared_ptr<Executioner> & _executioner;
 
 };
 

@@ -32,7 +32,7 @@ InitialConditionWarehouse::initialSetup(THREAD_ID tid)
 
 
 void
-InitialConditionWarehouse::addObject(MooseSharedPointer<InitialCondition> object, THREAD_ID tid)
+InitialConditionWarehouse::addObject(std::shared_ptr<InitialCondition> object, THREAD_ID tid)
 {
   // Check that when object is boundary restricted that the variable is nodal
   const MooseVariable & var = object->variable();

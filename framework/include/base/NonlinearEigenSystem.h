@@ -73,7 +73,7 @@ public:
   // return all converged eigenvalues
   virtual const std::vector<std::pair<Real, Real> > & getAllConvergedEigenvalues() { return _eigen_values; }
 
-  virtual void addEigenKernels(MooseSharedPointer<KernelBase> kernel, THREAD_ID tid) override;
+  virtual void addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD_ID tid) override;
 
   // For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or Neumann)
   // boundary conditions are  not allowed.

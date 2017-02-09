@@ -246,10 +246,10 @@ Parser::parse(const std::string &input_filename)
           params.addPrivateParam<std::string>("parser_syntax", curr_identifier);
 
           // Create the Action
-          MooseSharedPointer<Action> action_obj = _action_factory.create(it->second._action, MooseUtils::shortName(curr_identifier), params);
+          std::shared_ptr<Action> action_obj = _action_factory.create(it->second._action, MooseUtils::shortName(curr_identifier), params);
 
           // extract the MooseObject params if necessary
-          MooseSharedPointer<MooseObjectAction> object_action = MooseSharedNamespace::dynamic_pointer_cast<MooseObjectAction>(action_obj);
+          std::shared_ptr<MooseObjectAction> object_action = std::dynamic_pointer_cast<MooseObjectAction>(action_obj);
           if (object_action)
           {
             extractParams(curr_identifier, object_action->getObjectParams());
@@ -303,7 +303,7 @@ Parser::checkActiveUsed(std::vector<std::string > & sections,
 }
 
 void
-Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn, bool in_input_file, MooseSharedPointer<FEProblemBase> fe_problem) const
+Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_on_warn, bool in_input_file, std::shared_ptr<FEProblemBase> fe_problem) const
 {
   // Make sure that multiapp overrides were processed properly
   int last = all_vars.size() - 1;                      // last is allowed to go negative
@@ -430,9 +430,8 @@ Parser::appendAndReorderSectionNames(std::vector<std::string> & section_names)
    * name of the controlling application to determine whether to use the command line
    * here or not.
    */
-  MooseSharedPointer<CommandLine> cmd_line;
-//  if (_app.name() == "main") // See AppFactory::createApp
-    cmd_line = _app.commandLine();
+  std::shared_ptr<CommandLine> cmd_line;
+  cmd_line = _app.commandLine();
 
   if (cmd_line.get())
   {

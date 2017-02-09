@@ -56,7 +56,7 @@ public:
   const MaterialProperty<T> & getNeighborMaterialPropertyOlder(const std::string & name);
 
 protected:
-  MooseSharedPointer<MaterialData> _neighbor_material_data;
+  std::shared_ptr<MaterialData> _neighbor_material_data;
 };
 
 

@@ -70,7 +70,7 @@ public:
    *
    * @see ControlInterface
    */
-  void insert(const MooseObjectParameterName & name, MooseSharedPointer<InputParameters> param_object);
+  void insert(const MooseObjectParameterName & name, std::shared_ptr<InputParameters> param_object);
 
 private:
 
@@ -89,7 +89,7 @@ ControllableParameter<T>::ControllableParameter()
 
 template<typename T>
 void
-ControllableParameter<T>::insert(const MooseObjectParameterName & name, MooseSharedPointer<InputParameters> param_object)
+ControllableParameter<T>::insert(const MooseObjectParameterName & name, std::shared_ptr<InputParameters> param_object)
 {
   // Get a pointer to the Parameter
   T* param_ptr = &param_object-> template set<T>(name.parameter());

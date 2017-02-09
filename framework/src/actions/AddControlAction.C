@@ -34,6 +34,6 @@ void
 AddControlAction::act()
 {
   _moose_object_pars.addPrivateParam<FEProblemBase *>("_fe_problem_base", _problem.get());
-  MooseSharedPointer<Control> control = _factory.create<Control>(_type, _name, _moose_object_pars);
+  std::shared_ptr<Control> control = _factory.create<Control>(_type, _name, _moose_object_pars);
   _problem->getControlWarehouse().addObject(control);
 }

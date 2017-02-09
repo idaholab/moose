@@ -361,18 +361,18 @@ AdvancedOutput<T>::initPostprocessorOrVectorPostprocessorLists(const std::string
   bool has_limited_pps = false;
 
   // Loop through each of the execution flags
-  const std::vector<MooseSharedPointer<UserObject> > & objects = warehouse.getActiveObjects();
-  for (std::vector<MooseSharedPointer<UserObject> >::const_iterator it = objects.begin(); it != objects.end(); ++ it)
+  const auto & objects = warehouse.getActiveObjects();
+  for (const auto & object : objects)
   {
     // Store the name in the available postprocessors, if it does not already exist in the list
-    MooseSharedPointer<postprocessor_type> pps = MooseSharedNamespace::dynamic_pointer_cast<postprocessor_type>(*it);
+    std::shared_ptr<postprocessor_type> pps = std::dynamic_pointer_cast<postprocessor_type>(object);
     if (!pps)
       continue;
 
     execute_data.available.insert(pps->PPName());
 
     // Extract the list of outputs
-    std::set<OutputName> pps_outputs = pps->getOutputs();
+    const auto & pps_outputs = pps->getOutputs();
 
     // Check that the outputs lists are valid
     T::_app.getOutputWarehouse().checkOutputs(pps_outputs);

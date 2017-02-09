@@ -163,7 +163,7 @@ CommonOutputAction::create(std::string object_type)
   std::transform(object_type.begin(), object_type.end(), object_type.begin(), ::tolower);
 
   // Create the action
-  MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddOutputAction", object_type, _action_params));
+  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddOutputAction", object_type, _action_params));
 
   // Set flag indicating that the object to be created was created with short-cut syntax
   action->getObjectParams().set<bool>("_built_by_moose") = true;

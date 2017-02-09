@@ -114,7 +114,7 @@ ComputeResidualThread::onElement(const Elem *elem)
 
   if (warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::vector<MooseSharedPointer<KernelBase> > & kernels = warehouse->getActiveBlockObjects(_subdomain, _tid);
+    const auto & kernels = warehouse->getActiveBlockObjects(_subdomain, _tid);
     for (const auto & kernel : kernels)
       kernel->computeResidual();
   }
@@ -125,7 +125,7 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 {
   if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
   {
-    const std::vector<MooseSharedPointer<IntegratedBC> > & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
+    const auto & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
 
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
@@ -174,7 +174,7 @@ ComputeResidualThread::onInterface(const Elem *elem, unsigned int side, Boundary
       SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-      const std::vector<MooseSharedPointer<InterfaceKernel> > & int_ks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
+      const auto & int_ks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & interface_kernel : int_ks)
         interface_kernel->computeResidual();
 
@@ -211,7 +211,7 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
       SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-      const std::vector<MooseSharedPointer<DGKernel> > & dgks = _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
+      const auto & dgks = _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & dg_kernel : dgks)
         if (dg_kernel->hasBlocks(neighbor->subdomain_id()))
           dg_kernel->computeResidual();

@@ -80,10 +80,10 @@ public:
   void swap(const Elem & elem, unsigned int side = 0);
 
   /// Reinit material properties for given element (and possible side)
-  void reinit(const std::vector<MooseSharedPointer<Material> > & mats);
+  void reinit(const std::vector<std::shared_ptr<Material>> & mats);
 
   /// Calls the reset method of Materials to ensure that they are in a proper state.
-  void reset(const std::vector<MooseSharedPointer<Material> > & mats);
+  void reset(const std::vector<std::shared_ptr<Material>> & mats);
 
   /// material properties for given element (and possible side)
   void swapBack(const Elem & elem, unsigned int side = 0);

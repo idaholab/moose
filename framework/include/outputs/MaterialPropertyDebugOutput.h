@@ -59,7 +59,7 @@ protected:
    * @param output The output stream to populate
    * @param materials Vector of pointers to the Material objects of interest
    */
-  void printMaterialProperties(std::stringstream & output, const std::vector<MooseSharedPointer<Material> > & materials) const;
+  void printMaterialProperties(std::stringstream & output, const std::vector<std::shared_ptr<Material>> & materials) const;
 
 };
 

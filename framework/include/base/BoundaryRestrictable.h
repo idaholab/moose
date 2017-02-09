@@ -200,7 +200,7 @@ private:
   THREAD_ID _bnd_tid;
 
   /// Pointer to MaterialData for boundary (@see hasBoundaryMaterialProperty)
-  MooseSharedPointer<MaterialData> _bnd_material_data;
+  std::shared_ptr<MaterialData> _bnd_material_data;
 
   /// Whether or not this object is restricted to nodesets
   bool _bnd_nodal;

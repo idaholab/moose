@@ -128,7 +128,7 @@ public:
    *
    * @param ts The TimeStepper to use
    */
-  void setTimeStepper(MooseSharedPointer<TimeStepper> ts) { _time_stepper = ts; }
+  void setTimeStepper(std::shared_ptr<TimeStepper> ts) { _time_stepper = ts; }
 
   /**
    * Get the timestepper.
@@ -216,7 +216,7 @@ protected:
   FEProblemBase & _problem;
 
   MooseEnum _time_scheme;
-  MooseSharedPointer<TimeStepper> _time_stepper;
+  std::shared_ptr<TimeStepper> _time_stepper;
 
   /// Current timestep.
   int & _t_step;
