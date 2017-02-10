@@ -148,10 +148,7 @@ Material::checkStatefulSanity() const
 {
   for (const auto & it : _props_to_flags)
     if (static_cast<int>(it.second) % 2 == 0) // Only Stateful properties declared!
-      mooseError("Material '",
-                 name(),
-                 "' has stateful properties declared but not associated \"current\" properties.",
-                 it.second);
+      mooseError("Material '", name(), "' requests undefined stateful property '", it.first, "'");
 }
 
 void
@@ -159,6 +156,9 @@ Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_St
 {
   if (!is_get)
   {
+    _supplied_props.insert(prop_name);
+    _supplied_prop_ids.insert(_material_data->getPropertyId(prop_name));
+
     _props_to_flags[prop_name] |= static_cast<int>(state);
     if (static_cast<int>(state) % 2 == 0)
       _has_stateful_property = true;
@@ -166,23 +166,11 @@ Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_St
 
   // Store material properties for block ids
   for (const auto & block_id : blockIDs())
-  {
-    // Only save this prop as a "supplied" prop is it was registered as a result of a call to
-    // declareProperty not getMaterialProperty
-    if (!is_get)
-      _supplied_props.insert(prop_name);
     _fe_problem.storeMatPropName(block_id, prop_name);
-  }
 
   // Store material properties for the boundary ids
   for (const auto & boundary_id : boundaryIDs())
-  {
-    // Only save this prop as a "supplied" prop is it was registered as a result of a call to
-    // declareProperty not getMaterialProperty
-    if (!is_get)
-      _supplied_props.insert(prop_name);
     _fe_problem.storeMatPropName(boundary_id, prop_name);
-  }
 }
 
 std::set<OutputName>

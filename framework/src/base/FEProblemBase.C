@@ -4578,6 +4578,8 @@ void
 FEProblemBase::checkDependMaterialsHelper(
     const std::map<SubdomainID, std::vector<std::shared_ptr<Material>>> & materials_map)
 {
+  auto & prop_names = _material_props.statefulPropNames();
+
   for (const auto & it : materials_map)
   {
     /// These two sets are used to make sure that all dependent props on a block are actually supplied
@@ -4587,6 +4589,13 @@ FEProblemBase::checkDependMaterialsHelper(
     {
       const std::set<std::string> & depend_props = mat1->getRequestedItems();
       block_depend_props.insert(depend_props.begin(), depend_props.end());
+
+      auto & alldeps = mat1->getMatPropDependencies(); // includes requested stateful props
+      for (auto & dep : alldeps)
+      {
+        if (prop_names.count(dep) > 0)
+          block_depend_props.insert(prop_names.at(dep));
+      }
 
       // See if any of the active materials supply this property
       for (const auto & mat2 : it.second)

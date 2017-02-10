@@ -26,7 +26,10 @@ validParams<GenericFunctionMaterial>()
                                              "The corresponding names of the "
                                              "functions that are going to provide "
                                              "the values for the variables");
-  params.addParam<bool>("enable_stateful", false, "Enable the declaration of old and older values");
+  params.addDeprecatedParam<bool>("enable_stateful",
+                                  false,
+                                  "Enable the declaration of old and older values",
+                                  "all properties can implicitly become stateful");
   return params;
 }
 
@@ -58,11 +61,6 @@ GenericFunctionMaterial::GenericFunctionMaterial(const InputParameters & paramet
   for (unsigned int i = 0; i < _num_props; i++)
   {
     _properties[i] = &declareProperty<Real>(_prop_names[i]);
-    if (_enable_stateful)
-    {
-      _properties_old[i] = &declarePropertyOld<Real>(_prop_names[i]);
-      _properties_older[i] = &declarePropertyOlder<Real>(_prop_names[i]);
-    }
     _functions[i] = &getFunctionByName(_prop_values[i]);
   }
 }

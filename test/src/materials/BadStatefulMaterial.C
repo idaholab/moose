@@ -18,21 +18,25 @@ template <>
 InputParameters
 validParams<BadStatefulMaterial>()
 {
-  return validParams<Material>();
+  InputParameters params = validParams<Material>();
+  params.addParam<bool>("get_older", false, "true to retrieve older property instead of old");
+  return params;
 }
 
 BadStatefulMaterial::BadStatefulMaterial(const InputParameters & parameters) : Material(parameters)
 {
+  if (getParam<bool>("get_older"))
+    getMaterialPropertyOlder<Real>("nonexistingpropertyname");
+  else
+    getMaterialPropertyOld<Real>("nonexistingpropertyname");
 }
 
 void
 BadStatefulMaterial::initQpStatefulProperties()
 {
-  // Bad Material
 }
 
 void
 BadStatefulMaterial::computeQpProperties()
 {
-  // Bad Material
 }
