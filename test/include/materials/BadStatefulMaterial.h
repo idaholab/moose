@@ -32,9 +32,6 @@ public:
 protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
-
-private:
-  MaterialProperty<Real> & _prop_old;
 };
 
 #endif // STATEFULMATERIAL_H
