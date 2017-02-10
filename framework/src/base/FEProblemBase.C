@@ -102,7 +102,7 @@ InputParameters validParams<FEProblemBase>()
 
 FEProblemBase::FEProblemBase(const InputParameters & parameters) :
     SubProblem(parameters),
-    Restartable(parameters, "FEProblemBase", this),
+    Restartable(parameters.get<std::string>("_object_name"), "FEProblemBase", *this),
     _mesh(*parameters.get<MooseMesh *>("mesh")),
     _eq(_mesh),
     _initialized(false),
@@ -677,13 +677,25 @@ void FEProblemBase::initialSetup()
         _assembly[tid]->initNonlocalCoupling();
   }
 
-  // Remove some of the heavier objects that are only needed during initial
-  // Several other types of objects may be added here in the future.
-  _multi_apps.clear(EXEC_INITIAL);
-  _transient_multi_apps.clear(EXEC_INITIAL);
-  _transfers.clear(EXEC_INITIAL);
-  _to_multi_app_transfers.clear(EXEC_INITIAL);
-  _from_multi_app_transfers.clear(EXEC_INITIAL);
+//  // Remove some of the heavier objects that are only needed during initial
+//  // Several other types of objects may be added here in the future.
+//  std::vector<std::string> removed_object_names;
+//
+//  _multi_apps.clear(EXEC_INITIAL, &removed_object_names);
+//  _transient_multi_apps.clear(EXEC_INITIAL, &removed_object_names);
+//
+//  /**
+//   * In the case of multiapps, the multiapp itself registers the SubAppsBackup object
+//   * with _this_ app. That doesn't get cleaned up when we delete the MultiApp.
+//   * We still need to find and delete that backup.
+//   */
+//  for (auto & removed_object_name : removed_object_names)
+//    removed_object_name += "backups";
+//  _app.deleteRestartableData(removed_object_names);
+//
+//  _transfers.clear(EXEC_INITIAL);
+//  _to_multi_app_transfers.clear(EXEC_INITIAL);
+//  _from_multi_app_transfers.clear(EXEC_INITIAL);
 }
 
 void FEProblemBase::timestepSetup()

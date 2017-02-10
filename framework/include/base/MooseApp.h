@@ -388,6 +388,8 @@ public:
    */
   virtual void registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
 
+  void deleteRestartableData(const std::vector<std::string> & names);
+
   /**
    * Return reference to the restatable data object
    * @return A const reference to the restatable data object

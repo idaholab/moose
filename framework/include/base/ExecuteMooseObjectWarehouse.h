@@ -54,8 +54,10 @@ public:
    * Clears all of the objects in the warehouse for the given exec_flag. Since we are using
    * shared pointers to hold objects. The actual objects themselves will not be released
    * unless they are only being held by a single warehouse.
+   * The removed_objects_names argument can be passed in to catch the names of all of the
+   * deleted objects.
    */
-  void clear(ExecFlagType exec_flag);
+  void clear(ExecFlagType exec_flag, std::vector<std::string> * removed_object_names = nullptr);
 
   ///@{
   /**
@@ -227,7 +229,7 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID t
 
 template<typename T>
 void
-ExecuteMooseObjectWarehouse<T>::clear(ExecFlagType exec_flag)
+ExecuteMooseObjectWarehouse<T>::clear(ExecFlagType exec_flag, std::vector<std::string> * removed_object_names)
 {
   const auto all_objects = MooseObjectWarehouse<T>::getObjects();
   const auto all_flags = Moose::vectorStringsToEnum<ExecFlagType>(SetupInterface::getExecuteOptions());
@@ -255,6 +257,10 @@ ExecuteMooseObjectWarehouse<T>::clear(ExecFlagType exec_flag)
 
     if (!multiple_execute_on)
     {
+      // Make sure we save the name _before_ we delete the object!
+      if (removed_object_names)
+        removed_object_names->push_back(object->getRestartPrefix());
+
       // Remove the object from the "all objects" warehouse
       MooseObjectWarehouse<T>::deleteObject(object);
 

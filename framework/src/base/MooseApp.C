@@ -689,6 +689,20 @@ MooseApp::registerRestartableData(std::string name, RestartableDataValue * data,
 }
 
 void
+MooseApp::deleteRestartableData(const std::vector<std::string> & names)
+{
+  for (const auto & name : names)
+  {
+    for (auto & restartable_map : _restartable_data)
+    {
+      auto it = restartable_map.find(name);
+      if (it != restartable_map.end())
+        restartable_map.erase(it);
+    }
+  }
+}
+
+void
 MooseApp::dynamicAppRegistration(const std::string & app_name, std::string library_path)
 {
   Parameters params;
