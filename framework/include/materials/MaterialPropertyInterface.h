@@ -246,15 +246,6 @@ protected:
   /// Storage vector for MaterialProperty<Real> default objects
   std::vector<std::unique_ptr<MaterialProperty<Real>>> _default_real_properties;
 
-  /**
-   * Call this function to add the passed in material property ID to the list of material property
-   * IDs that _this_ object depends on.
-   *
-   * @param mat_prop_id The material property ID that should be added to _this_ object's material
-   * dependency list.
-   */
-  void addMatPropDependency(unsigned int mat_prop_id) { _material_property_dependencies.insert(mat_prop_id); }
-
   /// The set of material properties (as given by their IDs) that _this_ object depends on
   std::set<unsigned int> _material_property_dependencies;
 
@@ -378,7 +369,7 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
   // Update the boolean flag.
   _get_material_property_called = true;
 
-  addMatPropDependency(_material_data->getPropertyId(name));
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
   return _material_data->getProperty<T>(name);
 }
@@ -395,7 +386,7 @@ MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyNa
   // mark property as requested
   markMatPropRequested(name);
 
-  addMatPropDependency(_material_data->getPropertyId(name));
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
   return _material_data->getPropertyOld<T>(name);
 }
@@ -411,7 +402,7 @@ MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialProperty
   // mark property as requested
   markMatPropRequested(name);
 
-  addMatPropDependency(_material_data->getPropertyId(name));
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
   return _material_data->getPropertyOlder<T>(name);
 }
@@ -426,7 +417,7 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
   if (!hasMaterialPropertyByName<T>(name))
     return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(NULL, std::set<SubdomainID>());
 
-  addMatPropDependency(_material_data->getPropertyId(name));
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
   return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(&_material_data->getProperty<T>(name), _mi_feproblem.getMaterialPropertyBlocks(name));
 }

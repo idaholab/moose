@@ -174,7 +174,7 @@ protected:
    * Helper method for updating material property dependency vector
    */
   static void updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props,
-                                            const std::vector<std:shared_ptr<T>> & objects);
+                                            const std::vector<std::shared_ptr<T>> & objects);
 
   /**
    * Calls assert on thread id.
@@ -546,13 +546,9 @@ MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(BoundaryID id, std:
 
 template<typename T>
 void
-MooseObjectWarehouseBase<T>::updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props, const std::vector<std:shared_ptr<T>> & objects)
+MooseObjectWarehouseBase<T>::updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props, const std::vector<std::shared_ptr<T>> & objects)
 {
-<<<<<<< HEAD
-  for (typename std::vector<std:shared_ptr<T>> ::const_iterator it = objects.begin(); it != objects.end(); ++it)
-=======
   for (auto & object : objects)
->>>>>>> 5225638... Convert to range based for loops (#8444)
   {
     const std::set<unsigned int> & mp_deps = object->getMatPropDependencies();
     needed_mat_props.insert(mp_deps.begin(), mp_deps.end());

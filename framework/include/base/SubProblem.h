@@ -403,9 +403,6 @@ protected:
   /// Set of material property ids that determine whether materials get reinited
   std::vector<std::set<unsigned int>> _active_material_property_ids;
 
-  /// True if _active_material_property_ids is not empty
-  std::vector<unsigned int> _has_active_material_property_ids;
-
   /// nonlocal coupling requirement flag
   bool _requires_nonlocal_coupling;
 
