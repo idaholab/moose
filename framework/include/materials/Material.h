@@ -336,6 +336,7 @@ template<typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOldByName(const std::string & prop_name)
 {
+  _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLD);
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data->getPropertyOld<T>(prop_name);
@@ -345,6 +346,7 @@ template<typename T>
 const MaterialProperty<T> &
 Material::getMaterialPropertyOlderByName(const std::string & prop_name)
 {
+  _requested_props.insert(prop_name);
   registerPropName(prop_name, true, Material::OLDER);
   _fe_problem.markMatPropRequested(prop_name);
   return _material_data->getPropertyOlder<T>(prop_name);
