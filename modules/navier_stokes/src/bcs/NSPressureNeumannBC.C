@@ -6,11 +6,12 @@
 /****************************************************************/
 
 // Navier-Stokes inclues
-#include "NSPressureNeumannBC.h"
 #include "NS.h"
+#include "NSPressureNeumannBC.h"
 
-template<>
-InputParameters validParams<NSPressureNeumannBC>()
+template <>
+InputParameters
+validParams<NSPressureNeumannBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
 
@@ -20,17 +21,13 @@ InputParameters validParams<NSPressureNeumannBC>()
   return params;
 }
 
-
-
-NSPressureNeumannBC::NSPressureNeumannBC(const InputParameters & parameters) :
-    NSIntegratedBC(parameters),
+NSPressureNeumannBC::NSPressureNeumannBC(const InputParameters & parameters)
+  : NSIntegratedBC(parameters),
     _pressure(coupledValue(NS::pressure)),
     _component(getParam<unsigned>("component")),
     _pressure_derivs(*this)
 {
 }
-
-
 
 Real
 NSPressureNeumannBC::computeQpResidual()
@@ -38,24 +35,20 @@ NSPressureNeumannBC::computeQpResidual()
   return _pressure[_qp] * _normals[_qp](_component) * _test[_i][_qp];
 }
 
-
-
 Real
 NSPressureNeumannBC::computeQpJacobian()
 {
-  return computeJacobianHelper(_component + 1);  // <-- the on-diagonal variable number is _component+1
+  return computeJacobianHelper(_component + 1); // <-- the on-diagonal variable number is _component+1
 }
-
-
 
 Real
 NSPressureNeumannBC::computeQpOffDiagJacobian(unsigned jvar)
 {
-  unsigned m = mapVarNumber(jvar);
-  return computeJacobianHelper(m);
+  if (isNSVariable(jvar))
+    return computeJacobianHelper(mapVarNumber(jvar));
+  else
+    return 0.0;
 }
-
-
 
 Real
 NSPressureNeumannBC::computeJacobianHelper(unsigned m)

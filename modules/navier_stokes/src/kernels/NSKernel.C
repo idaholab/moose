@@ -6,8 +6,8 @@
 /****************************************************************/
 
 // Navier-Stokes includes
-#include "NSKernel.h"
 #include "NS.h"
+#include "NSKernel.h"
 
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
@@ -15,8 +15,9 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<NSKernel>()
+template <>
+InputParameters
+validParams<NSKernel>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
@@ -31,8 +32,8 @@ InputParameters validParams<NSKernel>()
   return params;
 }
 
-NSKernel::NSKernel(const InputParameters & parameters) :
-    Kernel(parameters),
+NSKernel::NSKernel(const InputParameters & parameters)
+  : Kernel(parameters),
     // Coupled variables
     _u_vel(coupledValue(NS::velocity_x)),
     _v_vel(_mesh.dimension() >= 2 ? coupledValue(NS::velocity_y) : _zero),
@@ -65,6 +66,19 @@ NSKernel::NSKernel(const InputParameters & parameters) :
     // FluidProperties UserObject
     _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
+}
+
+bool
+NSKernel::isNSVariable(unsigned var)
+{
+  if (var == _rho_var_number ||
+      var == _rhou_var_number ||
+      var == _rhov_var_number ||
+      var == _rhow_var_number ||
+      var == _rhoE_var_number)
+    return true;
+  else
+    return false;
 }
 
 unsigned
