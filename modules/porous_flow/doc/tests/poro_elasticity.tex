@@ -1,0 +1,183 @@
+\documentclass[]{scrreprt}
+\usepackage{amsmath,amsfonts,graphicx}
+%\usepackage{multirow}
+%\usepackage{pslatex}
+%\usepackage{tabularx}
+%\usepackage{comment}
+%\usepackage{xspace}
+%\usepackage{array}
+
+%\usepackage{hyperref}
+
+%\usepackage{caption}
+%\DeclareCaptionFont{white}{\color{white}}
+%\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+
+\def\species{\mathrm{sp}}
+\def\phase{\mathrm{ph}}
+\def\massfrac{\chi}
+\def\flux{\mathbf{F}}
+\def\darcyvel{\mathbf{v}}
+\def\energydens{\mathcal{E}}
+\def\d{\mathrm{d}}
+
+\newcommand{\uo}{\mbox{UO\textsubscript{2}}\xspace}
+
+\setcounter{secnumdepth}{3}
+
+
+\begin{document}
+
+
+\title{Poroelasticitiy Tests}
+\author{CSIRO}
+\maketitle
+
+\tableofcontents
+
+\chapter{Introduction}
+
+The PorousFlow module includes the ability to couple fluid flow to
+solid mechanics, and thus includes poroelasticity, which is the theory
+of a fully-saturated single-phase fluid with constant bulk density and
+constant viscosity coupled to small-strain isotropic elasticity.
+
+There is one important difference between the theories, however.  The
+time-derivative terms of poroelasticity are
+\begin{equation}
+\frac{1}{M}\dot{P} + \alpha\dot{\epsilon}_{ii} \ ,
+\label{eqn.poro.dt}
+\end{equation}
+where $M$ is the Biot modulus:
+\begin{equation}
+\frac{1}{M} = \frac{(1-\alpha)(\alpha - \phi)}{K} +
+\frac{\phi}{K_{\mathrm{f}}} \ ,
+\label{biotmod.eqn}
+\end{equation}
+$P$ is the fluid porepressure, $\alpha$ is the Biot coefficient,
+$\epsilon_{ii}$ is the volumetric strain, $\phi$ is the porosity, $K$
+is the solid (drained) bulk modulus, and $K_{\mathrm{f}}$ is the fluid
+bulk modulus.  Evidently from Eqn~(\ref{biotmod.eqn}), the Biot
+modulus, $M$, should evolve with time as the porosity evolves.
+Indeed, the terms in Eqn~(\ref{eqn.poro.dt}) are derived from the
+continuity equation $\partial (\phi\rho)/\partial t +
+\phi\rho\dot{\epsilon}_{ii}$ using the evolution of $\phi$ (and that
+$\rho = \rho_{0}\exp(P/K_{\mathrm{f}})$).  However, in the standard
+analytical solutions of poroelasticity theory, the Biot modulus, $M$
+is considered fixed.
+
+The PorousFlow module allows porosity to vary with fluid porepressure
+and volumetric strain, so usually the Biot modulus would vary too,
+causing differences with the analytical solutions of poroelasticity.
+Therefore, PorousFlow offers a porosity relationship that evolves
+porosity in such a way as to keep $M$ fixed.  This is called {\tt
+  PorousFlowPorosityHMBiotModulus}.
+
+PorousFlow is also built with finite strains in mind, whereas
+poroelasticity is not.  Therefore, in comparisons with solutions from
+poroelasticity theory, either the strain should be kept small, or the
+various finite-strain switches in PorousFlow should be turned off
+(they are all on by default).
+
+\chapter{Simple tests}
+
+\section{Volumetric expansion due to increasing porepressure}
+
+The porepressure within a fully-saturated sample is increased:
+\begin{equation}
+P_{\mathrm{f}} = t \ .
+\end{equation}
+Zero mechanical pressure is applied to the sample's exterior, so that
+no Neumann BCs are needed on the sample.  No fluid flow occurs since
+the porepressure is increased uniformly throughout the sample
+
+The effective stresses should then evolve as
+$\sigma_{ij}^{\mathrm{eff}} = \alpha t \delta_{ij}$, and the
+volumetric strain $\epsilon_{00}+\epsilon_{11}+\epsilon_{22} = \alpha
+t/K$.  MOOSE produces this result correctly.
+
+\section{Undrained oedometer test}
+
+A cubic single-element fully-saturated sample has roller BCs applied
+to its sides and bottom.  All the sample's boundaries are impermeable.
+A downwards (normal) displacement, $u_{z}$, is applied to its
+top, and the rise in porepressure and effective stress is observed.
+(Here $z$ denotes the direction normal to the top face.)  There is
+no fluid flow in the single element.
+
+Under these conditions, assuming constant porosity, and denoting the
+height ($z$ length) of the sample by $L$:
+\begin{eqnarray}
+P_{\mathrm{f}} & = & -K_{f}\log(1 - u_{z}) \ , \nonumber \\
+\sigma_{xx}^{\mathrm{eff}} & = & (K - \mbox{$\frac{2}{3}$}G)u_{z}/L \ , \nonumber \\
+\sigma_{zz}^{\mathrm{eff}} & = & (K + \mbox{$\frac{4}{3}$}G)u_{z}/L \ .
+\end{eqnarray}
+
+\section{Porepressure generation of a confined sample}
+
+A single-element fully-saturated sample is constrained on all sides
+and its boundaries are impermeable.  Fluid is pumped into the sample
+via a source $s$ (kg.s$^{-1}$.m$^{-3}$) and the rise
+in porepressure is observed.
+
+Denoting the strength of the source by $s$ (units are s$^{-1}$), the expected result is
+\begin{eqnarray}
+\mbox{fluid mass} & = & \mbox{fluid mass}_{0} + st \ , \nonumber \\
+\sigma_{ij}^{\mathrm{eff}} & = & 0 \ , \nonumber \\
+P_{\mathrm{f}} & = & K_{\mathrm{f}}\log(\rho\phi/\rho_{0}) \ , \nonumber
+\\
+\rho & = & \rho_{0}\exp(P_{\mathrm{f}}/K_{f}) \ , \nonumber \\
+\phi & = & \alpha + (\phi_{0}-\alpha)\exp\left(
+P_{\mathrm{f}}(\alpha - 1)/K\right) \ . \\
+\end{eqnarray}
+Here $K$ is the solid bulk modulus.
+
+\section{Porepressure generation of an unconfined sample}
+
+A single-element fully-saturated sample is constrained on all sides,
+except its top.  All its boundaries are impermeable.  Fluid is pumped
+into the sample via a source $s$ (kg.s$^{-1}$.m$^{-3}$)) and the rise
+in the top surface, the porepressure, and the stress are observed.
+
+Regardless of the evolution of porosity, the following ratios result
+\begin{eqnarray}
+\sigma_{xx}/\epsilon_{zz} & = & K - 2G/3 \ , \nonumber \\
+\sigma_{zz}/\epsilon_{zz} & = & K + 4G/3 \ , \nonumber \\
+P/\epsilon_{zz} & = & (K + 3G/3 + \alpha^{2}M)/\alpha - \alpha M \ .
+\end{eqnarray}
+where $K$ is the undrained bulk modulus, $G$ the shear modulus,
+$\alpha$ the Biot coefficient, and $M$ is the initial Biot modulus.
+MOOSE produces these results when using the {\tt
+  PorousFlowPorosityHM} material.
+
+
+However, if the Biot modulus, $M$, is held fixed as the porosity
+evolves, and the source is
+\begin{equation}
+s = S \rho_{0}\exp(P/K_{\mathrm{f}}) \ ,
+\end{equation}
+with $S$ being a {\em constant} volumetric source
+(m$^{3}$.s$^{-1}$.m$^{-3}$) then
+\begin{eqnarray}
+\epsilon_{zz} & = & \frac{\alpha M s t}{K + 4G/3 + \alpha^{2}M} \ ,
+\nonumber \\
+P & = & M(st - \alpha\epsilon_{zz}) \ , \nonumber \\
+\sigma_{xx} & = & (K - 2G/3)\epsilon_{zz} \ , \nonumber \\
+\sigma_{zz} & = & (K + 4G/3)\epsilon_{zz} \ .
+\end{eqnarray}
+MOOSE produces these results when using the {\tt
+  PorousFlowPorosityHMBiotModulus} material.
+
+\chapter{Terzaghi consolidation}
+
+This is documented at {\tt
+  http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/TensorMechanicsBasics/PoroMechanics/}.
+The PorousFlow Material {\tt PorousFlowPorosityHMBiotModulus} must be used.
+
+\chapter{Mandel's consolidation of a drained medium}
+
+This is documented at {\tt http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/TensorMechanicsBasics/PoroMechanics/}
+The PorousFlow Material {\tt PorousFlowPorosityHMBiotModulus} must be used.
+
+\end{document}
+

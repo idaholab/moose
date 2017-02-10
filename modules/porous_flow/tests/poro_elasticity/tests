@@ -19,15 +19,30 @@
     input = pp_generation_unconfined.i
     csvdiff = pp_generation_unconfined.csv
   [../]
+  [./pp_generation_unconfined_constM]
+    type = CSVDiff
+    input = pp_generation_unconfined_constM.i
+    csvdiff = pp_generation_unconfined_constM.csv
+  [../]
   [./mandel]
     type = CSVDiff
     input = mandel.i
     csvdiff = mandel.csv
   [../]
+  [./mandel_constM]
+    type = CSVDiff
+    input = mandel_constM.i
+    csvdiff = mandel_constM.csv
+  [../]
   [./terzaghi]
     type = CSVDiff
     input = terzaghi.i
     csvdiff = terzaghi.csv
+  [../]
+  [./terzaghi_constM]
+    type = CSVDiff
+    input = terzaghi_constM.i
+    csvdiff = terzaghi_constM.csv
   [../]
   [./vol_expansion_poroperm]
     type = CSVDiff

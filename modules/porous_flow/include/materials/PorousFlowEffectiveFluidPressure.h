@@ -28,25 +28,32 @@ public:
   PorousFlowEffectiveFluidPressure(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /// quadpoint or nodal porepressure of each phase
-  const MaterialProperty<std::vector<Real> > & _porepressure;
+  const MaterialProperty<std::vector<Real>> & _porepressure;
+
+  /// old value of quadpoint or nodal porepressure of each phase
+  const MaterialProperty<std::vector<Real>> & _porepressure_old;
 
   /// d(porepressure)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dporepressure_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dporepressure_dvar;
 
   /// quadpoint or nodal saturation of each phase
-  const MaterialProperty<std::vector<Real> > & _saturation;
+  const MaterialProperty<std::vector<Real>> & _saturation;
+
+  /// old value of quadpoint or nodal saturation of each phase
+  const MaterialProperty<std::vector<Real>> & _saturation_old;
 
   /// d(saturation)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dsaturation_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_dvar;
 
   /// computed effective fluid pressure (at quadpoints or nodes)
   MaterialProperty<Real> & _pf;
 
   /// d(_pf)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real> > & _dpf_dvar;
+  MaterialProperty<std::vector<Real>> & _dpf_dvar;
 };
 
 #endif //POROUSFLOWEFFECTIVEFLUIDPRESSURE_H
