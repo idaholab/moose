@@ -18,7 +18,6 @@ InputParameters validParams<StiffenedGasFluidProperties>()
   params.addRequiredParam<Real>("p_inf", "");
   params.addParam<Real>("q_prime", 0, "Parameter");
 
-  params.addParam<Real>("beta", 4.6e-4, "Coefficient of thermal expansion");
   params.addParam<Real>("mu", 1.e-3, "Dynamic viscosity, Pa.s");
   params.addParam<Real>("k", 0.6, "Thermal conductivity, W/(m-K)");
 
@@ -33,7 +32,6 @@ StiffenedGasFluidProperties::StiffenedGasFluidProperties(const InputParameters &
     _q_prime(getParam<Real>("q_prime")),
     _p_inf(getParam<Real>("p_inf")),
 
-    _beta(getParam<Real>("beta")),
     _mu(getParam<Real>("mu")),
     _k(getParam<Real>("k"))
 {
@@ -153,9 +151,18 @@ StiffenedGasFluidProperties::rho_e_dps(Real pressure, Real entropy, Real & rho, 
 }
 
 Real
-StiffenedGasFluidProperties::beta(Real, Real) const
+StiffenedGasFluidProperties::beta(Real pressure, Real temperature) const
 {
-  return _beta;
+  // The volumetric thermal expansion coefficient is defined as
+  //   1/v dv/dT)_p
+  // It is the fractional change rate of volume with respect to temperature change
+  // at constant pressure. Here it is coded as
+  //   - 1/rho drho/dT)_p
+  // using chain rule with v = v(rho)
+
+  Real rho, drho_dp, drho_dT;
+  rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  return - drho_dT / rho;
 }
 
 void

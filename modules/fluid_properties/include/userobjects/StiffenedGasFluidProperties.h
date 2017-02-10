@@ -65,7 +65,6 @@ protected:
   Real _p_inf;
   Real _cp;
 
-  Real _beta;
   Real _mu;
   Real _k;
 };
