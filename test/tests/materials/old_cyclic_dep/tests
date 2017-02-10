@@ -1,6 +1,0 @@
-[Tests]
-  [./test]
-    type = RunApp
-    input = 'test.i'
-  [../]
-[]
