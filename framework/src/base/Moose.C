@@ -229,6 +229,7 @@
 #include "RelativeSolutionDifferenceNorm.h"
 #include "AxisymmetricCenterlineAverageValue.h"
 #include "VariableInnerProduct.h"
+#include "VariableResidual.h"
 
 // vector PPS
 #include "ConstantVectorPostprocessor.h"
@@ -661,6 +662,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(RelativeSolutionDifferenceNorm);
   registerPostprocessor(AxisymmetricCenterlineAverageValue);
   registerPostprocessor(VariableInnerProduct);
+  registerPostprocessor(VariableResidual);
 
   // vector PPS
   registerVectorPostprocessor(ConstantVectorPostprocessor);
@@ -1204,4 +1206,3 @@ bool _throw_on_error = false;
 
 // TODO: delete this after migration to new error/warn funcs is complete
 OStreamProxy & _console = Moose::out;
-
