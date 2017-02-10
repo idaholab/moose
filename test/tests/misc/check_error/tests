@@ -543,4 +543,12 @@
     expect_err = "Performance logging cannot currently be controlled from a Multiapp"
     max_parallel = 1
   [../]
+
+  [./function_conflict]
+    # Check to see if a warning is produced when a function name could evaluate to a ParsedFunction
+    type = 'RunApp'
+    input = 'function_conflict.i'
+    expect_out = "Function name 'x' could evaluate as a ParsedFunction"
+    allow_warnings = true
+  [../]
 []
