@@ -13,21 +13,6 @@
   file = heat_conduction_ortho.e
 [] # Mesh
 
-[Functions]
-  [./1000]
-    type = ParsedFunction
-    value = 1000
-  [../]
-  [./100]
-    type = ParsedFunction
-    value = 100
-  [../]
-  [./10]
-    type = ParsedFunction
-    value = 10
-  [../]
-[]
-
 [Variables]
 
   [./temp]

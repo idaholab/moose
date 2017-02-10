@@ -17,13 +17,6 @@
   [../]
 []
 
-[Functions]
-  [./t]
-    type = ParsedFunction
-    value = t
-  [../]
-[]
-
 [Kernels]
   [./diff]
     type = Diffusion

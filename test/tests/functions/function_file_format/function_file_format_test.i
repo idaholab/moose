@@ -72,7 +72,7 @@
     data_file = columns_space.dat
     format = columns
   [../]
-  [./e]
+  [./e_func]
     type = PiecewiseLinear
     data_file = rows_more_data.csv
     format = rows
@@ -151,7 +151,7 @@
     type = FunctionDirichletBC
     variable = e
     boundary = '1'
-    function = e
+    function = e_func
   [../]
   [./f]
     type = FunctionDirichletBC

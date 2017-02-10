@@ -10,13 +10,6 @@
   [../]
 []
 
-[Functions]
-  [./t]
-    type = ParsedFunction
-    value = t
-  [../]
-[]
-
 [AuxKernels]
   [./t]
     type = FunctionAux
