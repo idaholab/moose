@@ -45,10 +45,10 @@ protected:
   virtual Real computeHardeningValue(Real scalar);
   virtual Real computeHardeningDerivative(Real scalar);
 
-  Function * const _yield_stress_function;
+  Function * _yield_stress_function;
   Real _yield_stress;
   const Real _hardening_constant;
-  Function * const _hardening_function;
+  Function * _hardening_function;
 
   Real _yield_condition;
   Real _hardening_slope;
