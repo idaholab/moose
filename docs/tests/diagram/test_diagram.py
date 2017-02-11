@@ -1,5 +1,7 @@
+#!/usr/bin/env python
 import os
 import re
+import unittest
 import MooseDocs
 from MooseDocs.testing import MarkdownTestCase
 
@@ -21,3 +23,6 @@ class TestDiagramExtension(MarkdownTestCase):
         html = self.parser.convert(md)
         match = re.search(self.REGEX, html)
         self.assertTrue(match != None)
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

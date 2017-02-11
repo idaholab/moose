@@ -53,8 +53,8 @@ solve when steady-state is achieved according to the criteria defined by \citet{
 
 !text modules/level_set/examples/rotating_circle/circle_rotate_sub.i max-height=300px overflow-y=scroll
 
-Figure \ref{circle_rotate_master} shows the results of the bubble problem with reinitialization, the result looks
-similar to the SUPG result. However, if you consider the area conservation discussed in the [Area Comparison](#area_comparison) section, the reinitialization scheme yields the superior solution for this problem. 
+Figure \ref{circle_rotate_master_out} shows the results of the bubble problem with reinitialization, the result looks
+similar to the SUPG result. However, if you consider the area conservation discussed in the [Area Comparison](#area_comparison) section, the reinitialization scheme yields the superior solution for this problem.
 
 !figure docs/media/level_set/circle_rotate_out.gif id=circle_rotate_out width=32% margin-right=2% float=left caption=Results from solving the rotating circle problem with the level set equation alone.
 
@@ -68,7 +68,7 @@ Figure \ref{area_comparison} is a plot of the area of
 the circle during the three simulations. Note that in the
 unstabilized, un-reinitialized level set equation, both area
 conservation and stability issues are readily apparent. The
-instabilities are especially obvious in Figure \ref{fig:area_comparison}, where the drastic
+instabilities are especially obvious in Figure \ref{area_comparison}, where the drastic
 area changes are due to numerical oscillations in the solution
 field. Adding SUPG stabilization helps ameliorate the stability
 concern but it suffers from loss of area conservation. The

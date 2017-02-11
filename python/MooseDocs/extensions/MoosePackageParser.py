@@ -1,3 +1,4 @@
+import os
 from markdown.util import etree
 import logging
 log = logging.getLogger(__name__)
@@ -18,7 +19,7 @@ class MoosePackageParser(MooseCommonExtension, Pattern):
         Pattern.__init__(self, self.RE, markdown_instance)
 
         # Load the yaml data containing package information
-        self.package = MooseDocs.yaml_load("packages.yml")
+        self.package = MooseDocs.yaml_load(os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'packages.yml'))
 
         # The default settings
         self._settings['arch'] = None

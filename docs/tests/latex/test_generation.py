@@ -47,3 +47,6 @@ class TestGeneration(unittest.TestCase):
         """
         out = subprocess.check_output(['./moosedocs.py', 'latex' , 'examples/report.md', '--output', self.tex_file])
         self.assertTrue(os.path.exists(self.tex_file))
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

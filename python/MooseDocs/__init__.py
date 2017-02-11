@@ -9,6 +9,8 @@ import extensions
 import commands
 import mooseutils
 
+from MooseMarkdown import MooseMarkdown
+
 # Check for the necessary packages, this does a load so they should all get loaded.
 if mooseutils.check_configuration(['yaml', 'jinja2', 'markdown', 'markdown_include', 'mdx_math', 'bs4']):
     sys.exit(1)
@@ -26,7 +28,9 @@ MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), '..', 'moose'))
 if not os.path.exists(MOOSE_DIR):
     MOOSE_DIR = os.path.join(os.getenv('HOME'), 'projects', 'moose')
 
-ROOT_DIR = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], stderr=subprocess.STDOUT).strip('\n')
+ROOT_DIR = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], cwd=os.path.dirname(__file__), stderr=subprocess.STDOUT).strip('\n')
+
+TEMP_DIR = os.path.abspath(os.path.join(os.getenv('HOME'), '.local', 'share', 'moose'))
 
 class MooseDocsFormatter(logging.Formatter):
     """
@@ -99,6 +103,11 @@ def init_logging(verbose=False):
 
     return formatter
 
+def html_id(string):
+    """
+    Returns valid string for use as html id tag.
+    """
+    return re.sub(r'(-+)', '-', re.sub(r'[^\w]', '-', string).lower()).strip('-')
 
 class Loader(yaml.Loader):
     """
@@ -143,15 +152,12 @@ def load_config(config_file, **kwargs):
     """
     Read the MooseDocs configure file (e.g., moosedocs.yml)
     """
-    config = yaml_load(config_file)
-    config.update(kwargs)
 
-    # Set the default arguments
-    config.setdefault('site_dir', abspath('site'))
-    config.setdefault('navigation', abspath(os.path.join(os.getcwd(), 'navigation.yml')))
-    config.setdefault('template', 'materialize.html')
-    config.setdefault('template_arguments', dict())
-    config.setdefault('markdown_extensions', [])
+    key = 'MooseDocs.extensions.MooseMarkdownExtension'
+    config = yaml_load(config_file)
+    for item in config:
+        if key in item:
+            item[key].update(kwargs)
     return config
 
 def get_markdown_extensions(config):
@@ -160,24 +166,23 @@ def get_markdown_extensions(config):
     """
     extensions = []
     extension_configs = dict()
-    for extension in config['markdown_extensions']:
-        if isinstance(extension, dict):
-            for k, v in extension.iteritems(): # there should only be one entry, but just in case
+    for ext in config:
+        if isinstance(ext, dict):
+            for k, v in ext.iteritems(): # there should only be one entry, but just in case
                 extensions.append(k)
                 extension_configs[k] = v
         else:
-            extensions.append(extension)
+            extensions.append(ext)
 
     return extensions, extension_configs
 
 def get_moose_markdown_extension(parser):
     """
-    Return the MooseMarkdown instance from the Markdown parser, if it exists.
+    Return the MooseMarkdownExtension instance from the Markdown parser, if it exists.
     """
     for ext in parser.registeredExtensions:
-        if isinstance(ext, extensions.MooseMarkdown):
+        if isinstance(ext, extensions.MooseMarkdownExtension):
             return ext
-
 
 def read_markdown(md_file):
     """
@@ -213,7 +218,6 @@ def read_markdown(md_file):
             break
     return '\n'.join(lines[count:]), output
 
-
 def purge(extensions):
     """
     Removes generated files from repository.
@@ -242,23 +246,29 @@ def command_line_options(*args):
     # Command-line options
     parser = argparse.ArgumentParser(description="Tool for building and developing MOOSE and MOOSE-based application documentation.")
     parser.add_argument('--verbose', '-v', action='store_true', help="Execute with verbose (debug) output.")
-    parser.add_argument('--config-file', type=str, default='moosedocs.yml', help="The configuration file to use for building the documentation using MOOSE. (Default: %(default)s)")
 
     subparser = parser.add_subparsers(title='Commands', description="Documentation creation command to execute.", dest='command')
 
     # Add the sub-commands
-    test_parser = commands.test_options(parser, subparser)
-    check_parser = commands.check_options(parser, subparser)
-    generate_parser = commands.generate_options(parser, subparser)
-    serve_parser = commands.serve_options(parser, subparser)
-    build_parser = commands.build_options(parser, subparser)
-    latex_parser = commands.latex_options(parser, subparser)
-    presentation_parser = commands.presentation_options(parser, subparser)
+    test_parser = subparser.add_parser('test', help='Performs unit testing of MooseDocs module.')
+    commands.test_options(test_parser)
 
-    # Parse the arguments
-    options = parser.parse_args(*args)
+    check_parser = subparser.add_parser('check', help="Check that the documentation exists and is complete for your application and optionally generating missing markdown files.")
+    commands.check_options(check_parser)
 
-    return options
+    build_parser = subparser.add_parser('build', help='Build the documentation for serving on another system.')
+    commands.build_options(build_parser)
+
+    latex_parser = subparser.add_parser('latex', help='Generate a .tex or .pdf document from a markdown file.')
+    commands.latex_options(latex_parser)
+
+    presentation_parser = subparser.add_parser('presentation', help="Convert a markdown file to an html presentation.")
+    commands.presentation_options(presentation_parser)
+
+    subparser.add_parser('generate', help='Deprecated: use "check --generate"')
+    subparser.add_parser('serve', help='Deprecated: use "build --serve"')
+
+    return parser.parse_args(*args)
 
 def moosedocs():
 
@@ -275,7 +285,7 @@ def moosedocs():
 
     # Pull LFS image files
     try:
-        subprocess.check_output(['git', 'lfs', 'pull'])
+        subprocess.check_output(['git', 'lfs', 'pull'], cwd=ROOT_DIR)
     except subprocess.CalledProcessError:
         print "ERROR: Unable to run 'git lfs', it is likely not installed but required for the MOOSE documentation system."
         sys.exit(1)
@@ -287,13 +297,17 @@ def moosedocs():
     elif cmd == 'check':
         retcode = commands.check(**options)
     elif cmd == 'generate':
-        retcode = commands.generate(**options)
+        retcode = None
+        log.error('Deprecated command, please used "check --generate" instead.')
     elif cmd == 'serve':
-        retcode = commands.serve(**options)
+        retcode = None
+        log.error('Deprecated command, please used "build --serve" instead.')
     elif cmd == 'build':
         retcode = commands.build(**options)
     elif cmd == 'latex':
         retcode = commands.latex(**options)
+    elif cmd == 'presentation':
+        retcode = commands.presentation(**options)
 
     # Check retcode
     if retcode is not None:

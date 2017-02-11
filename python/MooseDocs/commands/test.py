@@ -1,17 +1,16 @@
 import os
 import unittest
 import MooseDocs
+import logging
+log = logging.getLogger(__name__)
 
-def test_options(parser, subparser):
+def test_options(parser):
     """
     Command-line options for test command.
     """
-    test_parser = subparser.add_parser('test', help='Performs unitesting of MooseDocs module')
-    test_parser.add_argument('--pattern', default='test*.py', help="The test name pattern to search.")
-    return test_parser
+    parser.add_argument('--pattern', default='test*.py', help="The test name pattern to search.")
 
-
-def test(pattern=None, **kwargs):
+def test(pattern=None):
     """
     Runs MooseDocs unittests.
     """

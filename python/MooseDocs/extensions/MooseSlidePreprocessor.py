@@ -1,6 +1,6 @@
 import re
 from markdown.preprocessors import Preprocessor
-from markdown.util import etree
+import MooseDocs
 
 class MooseSlidePreprocessor(Preprocessor):
     """
@@ -52,11 +52,11 @@ class MooseSlidePreprocessor(Preprocessor):
 
         # Slide id
         if add_id:
-            id = self._getSlideID(section)
-            if id:
-                if parent and parent != id:
-                    id = '{}-{}'.format(parent, id)
-            attr.append('id="{}"'.format(id))
+            htmlid = self._getSlideID(section)
+            if htmlid:
+                if parent and parent != htmlid:
+                    htmlid = '{}-{}'.format(parent, htmlid)
+                attr.append('id="{}"'.format(htmlid))
 
         # Define section tags
         start_section = u'<section {}>'.format(' '.join(attr))
@@ -71,5 +71,5 @@ class MooseSlidePreprocessor(Preprocessor):
         """
         match = re.search(r'#+\s*(.*?)\s*\n', section)
         if match:
-            return match.group(1).lower().replace(' ','-')
+            return MooseDocs.html_id(match.group(1))
         return None

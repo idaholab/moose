@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import unittest
 from MooseDocs.testing import MarkdownTestCase
@@ -22,3 +23,6 @@ class TestMooseInputBlock(MarkdownTestCase):
     def testInputError(self):
         md = '!input this/is/not/a/valid/file.i'
         self.assertConvert('test_InputError.html', md)
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

@@ -1,6 +1,7 @@
 import os
 import markdown
 import collections
+import cPickle as pickle
 import logging
 log = logging.getLogger(__name__)
 
@@ -20,14 +21,17 @@ from MoosePackageParser import MoosePackageParser
 from MooseSlider import MooseSlider
 from MooseDiagram import MooseDiagram
 from MooseCSS import MooseCSS
-from MooseSlidePreprocessor import MooseSlidePreprocessor
+from MooseCSSPreprocessor import MooseCSSPreprocessor
 from MooseBuildStatus import MooseBuildStatus
 from MooseBibtex import MooseBibtex
 from MooseActionList import MooseActionList
+from MooseCopyCodeButton import MooseCopyCodeButton
+from MooseContentScroll import MooseContentScroll
+from MooseTemplate import MooseTemplate
 import MooseDocs
 import mooseutils
 
-class MooseMarkdown(markdown.Extension):
+class MooseMarkdownExtension(markdown.Extension):
     """
     Extensions that comprise the MOOSE flavored markdown.
     """
@@ -39,19 +43,20 @@ class MooseMarkdown(markdown.Extension):
 
         # Define the configuration options
         self.config = dict()
-        self.config['executable']   = ['', "The executable to utilize for generating application syntax."]
-        self.config['locations']    = [dict(), "The locations to parse for syntax."]
-        self.config['repo']         = ['', "The remote repository to create hyperlinks."]
-        self.config['links']        = [dict(), "The set of paths for generating input file and source code links to objects."]
-        self.config['slides']       = [False, "Enable the parsing for creating reveal.js slides."]
-        self.config['package']      = [False, "Enable the use of the MoosePackageParser."]
-        self.config['graphviz']     = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
-        self.config['dot_ext']      = ['svg', "The graphviz/dot output file extension (default: svg)."]
-        self.config['install']      = ['', "The location to install system and object documentation."]
-        self.config['macro_files']  = ['', "List of paths to files that contain macros to be used in bibtex parsing."]
+        self.config['executable']    = ['', "The executable to utilize for generating application syntax."]
+        self.config['locations']     = [dict(), "The locations to parse for syntax."]
+        self.config['repo']          = ['', "The remote repository to create hyperlinks."]
+        self.config['links']         = [dict(), "The set of paths for generating input file and source code links to objects."]
+        self.config['package']       = [False, "Enable the use of the MoosePackageParser."]
+        self.config['graphviz']      = ['/opt/moose/graphviz/bin', 'The location of graphviz executable for use with diagrams.']
+        self.config['dot_ext']       = ['svg', "The graphviz/dot output file extension (default: svg)."]
+        self.config['install']       = ['', "The location to install system and object documentation."]
+        self.config['macro_files']   = ['', "List of paths to files that contain macros to be used in bibtex parsing."]
+        self.config['template']      = ['', "The jinja2 template to apply."]
+        self.config['template_args'] = [dict(), "Arguments passed to to the MooseTemplate Postprocessor."]
 
         # Construct the extension object
-        super(MooseMarkdown, self).__init__(**kwargs)
+        super(MooseMarkdownExtension, self).__init__(**kwargs)
 
         # Create the absolute path to the executable
         self.setConfig('executable', MooseDocs.abspath(self.getConfig('executable')))
@@ -61,8 +66,15 @@ class MooseMarkdown(markdown.Extension):
         Execute the supplied MOOSE application and return the YAML.
         """
 
+        cache = os.path.join(MooseDocs.TEMP_DIR, 'moosedocs.yaml')
         exe = self.getConfig('executable')
-        if not (exe or os.path.exists(exe)):
+
+        if os.path.exists(cache) and (os.path.getmtime(cache) >= os.path.getmtime(cache)):
+            with open(cache, 'r') as fid:
+                log.debug('Reading MooseYaml Pickle: ' + cache)
+                return mooseutils.MooseYaml(pickle.load(fid))
+
+        elif not (exe or os.path.exists(exe)):
             log.critical('The executable does not exist: {}'.format(exe))
             raise Exception('Critical Error')
 
@@ -70,6 +82,9 @@ class MooseMarkdown(markdown.Extension):
             log.debug("Executing {} to extract syntax.".format(exe))
             try:
                 raw = mooseutils.runExe(exe, '--yaml')
+                with open(cache, 'w') as fid:
+                    log.debug('Writing MooseYaml Pickle: ' + cache)
+                    pickle.dump(raw, fid)
                 return mooseutils.MooseYaml(raw)
             except:
                 log.critical('Failed to read YAML file, MOOSE and modules are likely not compiled correctly.')
@@ -84,6 +99,12 @@ class MooseMarkdown(markdown.Extension):
 
         # Create a config object
         config = self.getConfigs()
+
+        # Default template arguments
+        config['template_args'].setdefault('title', None)
+        config['template_args'].setdefault('logo', None)
+        config['template_args'].setdefault('repo_url', None)
+        config['template_args'].setdefault('navigation', 'navigation.yml')
 
         # Extract YAML
         exe_yaml = self.execute()
@@ -109,8 +130,7 @@ class MooseMarkdown(markdown.Extension):
 
         # Preprocessors
         md.preprocessors.add('moose_bibtex', MooseBibtex(markdown_instance=md, **config), '_end')
-        if config['slides']:
-            md.preprocessors.add('moose_slides', MooseSlidePreprocessor(markdown_instance=md), '_end')
+        md.preprocessors.add('moose_css_list', MooseCSSPreprocessor(markdown_instance=md, **config), '_end')
 
         # Block processors
         md.parser.blockprocessors.add('diagrams', MooseDiagram(md.parser, **config), '_begin')
@@ -144,5 +164,13 @@ class MooseMarkdown(markdown.Extension):
         if config['package']:
             md.inlinePatterns.add('moose_package_parser', MoosePackageParser(markdown_instance=md, **config), '_end')
 
+        # Postprocessing
+        md.treeprocessors.add('moose_code_button', MooseCopyCodeButton(markdown_instance=md, **config), '_end')
+        md.treeprocessors.add('moose_content_scroll', MooseContentScroll(markdown_instance=md, **config), '_end')
+
+        if config['template']:
+            md.postprocessors.add('moose_template', MooseTemplate(markdown_instance=md, **config), '_end')
+
+
 def makeExtension(*args, **kwargs):
-    return MooseMarkdown(*args, **kwargs)
+    return MooseMarkdownExtension(*args, **kwargs)

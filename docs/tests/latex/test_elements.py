@@ -14,3 +14,6 @@ class TestLatexElements(testing.TestLatexBase):
         md = '# Heading 1'
         gold = u'\n\\section{Heading 1\\label{sec:heading-1}}'
         self.assertLaTeX(md, gold)
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

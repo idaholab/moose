@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import unittest
 import MooseDocs
@@ -23,3 +24,6 @@ class TestMooseMooseCppMethod(MarkdownTestCase):
     def testClangBadMethod(self):
         md = '!clang framework/src/kernels/Diffusion.C method=not_a_valid_function'
         self.assertConvert('test_ClangBadMethod.html', md)
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

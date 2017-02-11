@@ -82,7 +82,7 @@ class TestMarkdownExtensions(MarkdownTestCase):
         html = self.parser.convert('"foo"')
         self.assertEqual(u'<p>&ldquo;foo&rdquo;</p>', html)
 
-        html = self.parser.convert('...')
+        html = self.parser.convert('\n...')
         self.assertEqual(u'<p>&hellip;</p>', html)
 
         html = self.parser.convert('--')
