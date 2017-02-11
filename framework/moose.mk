@@ -3,6 +3,7 @@
 #
 moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
+moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/jsoncpp
 
 #
 # pcre
@@ -89,6 +90,7 @@ sa:: $(moose_analyzer)
 -include $(moose_deps)
 
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/mtwist/src/*.d)
+-include $(wildcard $(FRAMEWORK_DIR)/contrib/jsoncpp/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pcre/src/*.d)
 
 #

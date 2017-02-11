@@ -126,7 +126,7 @@ YAMLFormatter::preTraverse(short depth) const
 
 
 std::string
-YAMLFormatter::printBlockOpen(const std::string &name, short depth, const std::string & doc) const
+YAMLFormatter::printBlockOpen(const std::string &name, short depth, const std::string & doc)
 {
   std::ostringstream oss;
   std::string indent(depth*2, ' ');
