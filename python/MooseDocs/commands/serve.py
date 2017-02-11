@@ -47,7 +47,7 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', num_thread
         return build.build_site(config_file=config_file, site_dir=tempdir, num_threads=num_threads)
     config, parser, builder = build_complete()
 
-    # Start the live server
+    # Create the live server
     server = livereload.Server()
 
     # Watch markdown files
@@ -64,9 +64,9 @@ def serve(config_file='moosedocs.yml', host='127.0.0.1', port='8000', num_thread
     moose_extension = MooseDocs.get_moose_markdown_extension(parser)
     if moose_extension:
         server.watch(os.path.join(os.getcwd(), moose_extension.getConfig('executable')), build_complete)
-    server.watch(config['navigation'], build_complete)
     server.watch(config_file, build_complete)
-    server.watch('templates')
+    server.watch(config['navigation'], builder.build)
+    server.watch('templates', builder.build)
 
     # Start the server
     server.serve(root=config['site_dir'], host=host, port=port, restart_delay=0)

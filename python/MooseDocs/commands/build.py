@@ -72,7 +72,6 @@ class Builder(object):
                   'template_args': template_args}
         self._root = MooseDocsMarkdownNode(name='', md_file=os.path.join(content_dir, 'index.md'), **kwargs)
         make_tree(content_dir, self._root, **kwargs)
-
         self._pages = [self._root] + list(flat(self._root))
 
     def __iter__(self):
