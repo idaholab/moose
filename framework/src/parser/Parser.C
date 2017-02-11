@@ -33,6 +33,7 @@
 #include "SyntaxTree.h"
 #include "InputFileFormatter.h"
 #include "YAMLFormatter.h"
+#include "JSONFormatter.h"
 #include "MooseTypes.h"
 #include "CommandLine.h"
 
@@ -510,6 +511,9 @@ Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)
     break;
   case YAML:
     _syntax_formatter = new YAMLFormatter(dump_mode);
+    break;
+  case JSON:
+    _syntax_formatter = new JSONFormatter(dump_mode);
     break;
   default:
     mooseError2("Unrecognized Syntax Formatter requested");
