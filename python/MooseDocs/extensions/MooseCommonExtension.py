@@ -49,6 +49,7 @@ class MooseCommonExtension(object):
                 options[key] = value
             else:
                 options['style'] += '{}:{};'.format(key, value)
+
         return options
 
 

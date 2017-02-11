@@ -5,7 +5,11 @@ class MooseDocsNode(object):
     """
     General node for creating tree structure of documentation.
 
-    This serves as the base class for other node objects that create content.
+    This serves as the base class for other node objects that create content; this base node is a place holder node
+    that doesn't contain any markdown content.
+
+    The main purpose of the nodes is to accept the necessary "state" in the object construction, but the build() method
+    actually performs the work. This allows the nodes to be executed by multithreading.
     """
 
     def __init__(self, name=None, site_dir=None, parent=None, **kwargs):

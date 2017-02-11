@@ -30,7 +30,7 @@ Complete source code and snippets are available.
 ## Include Markdown
 You can include other markdown files.
 
-{!slides/presentation-include.md!}
+{!docs/examples/presentation-include.md!}
 
 ---
 
@@ -68,31 +68,22 @@ Vertical slides are prefixed with the top-level name.
 <!-- .slide data-background="#ff6700" -->
 
 # Caution
-The MOOSE presentation builder **does not** use the [reveal.js](http://lab.hakim.se/reveal-js/#/) markdown parsing, so do not attempt to use the syntax provided by the reveal.js system.
+The MOOSE presentation builder **does not** use the [reveal.js](http://lab.hakim.se/reveal-js/#/) markdown parsing,
+so do not attempt to use the syntax provided by the reveal.js system.
 
 ---
 # Slide Generation Instructions
 
-## (1) Clone reveal.js
-
-```
-cd ~/projects
-git clone https://github.com/hakimel/reveal.js.git
-```
-
---
-
-## (2) Create Markdown
+## (1) Create Markdown
 
 Generate a markdown file. The file should be located inside the
 repository that you are working.
 
-For example, this demo is generated from the 'demo.md' file located
-in moose/docs/slides directory.
+For example, this demo is generated from the 'moose/docs/examples/presentation.md' file.
 
 --
 
-## (3) Generate Slides
+## (2) Generate Slides
 MOOSE contains a python utility for converting the markdown that was created into
 a presentation.
 
@@ -101,14 +92,15 @@ cd ~/projects/moose/docs
 ./moosedocs presentation /path/to/your/markdown.md
 ```
 
-This will create an index.html file in your reveal.js checkout that contains the presentation. Run `./moosedocs presentation --help` for additional options when running this
+This will create an index.html file in your reveal.js checkout that contains the presentation. Run `./moosedocs
+presentation --help` for additional options when running this
 script.
 
 --
 
-## (4) View Slides
-To view the slides, simply open the index.html file created. On OSX you can preform the following.
+## (3) View Slides
+To view the presentation, simply open the index.html file created. On MacOS you can preform the following.
 
 ```
-open ~/projects/reveal.js/index.html
+open /path/to/you/markdown.html
 ```
