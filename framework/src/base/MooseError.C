@@ -51,6 +51,18 @@ mooseErrorRaw(std::string msg, const std::string prefix)
   std::ostringstream oss;
   oss << msg << "\n";
 
+  // this independent flush of the partial error message (i.e. without the
+  // trace) is here because trace retrieval can be slow in some
+  // circumstances, and we want to get the error message out ASAP.
+  msg = oss.str();
+  if (!prefix.empty())
+    MooseUtils::indentMessage(prefix, msg);
+  {
+    Threads::spin_mutex::scoped_lock lock(moose_err_lock);
+    Moose::err << msg << std::flush;
+  }
+
+  oss.str("");
   if (libMesh::global_n_processors() == 1)
     print_trace(oss);
 
