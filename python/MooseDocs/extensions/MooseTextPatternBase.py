@@ -1,5 +1,6 @@
 import re
 import os
+import cgi
 import logging
 import copy
 log = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
         self._settings['prefix'] = ''
         self._settings['suffix'] = ''
         self._settings['indent'] = 0
+        self._settings['strip-leading-whitespace'] = False
 
     def prepareContent(self, content, settings):
         """
@@ -51,11 +53,15 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
         if settings['strip-extra-newlines']:
             content = re.sub(r'(\n{3,})', '\n\n', content)
 
-        # Strip header and leading/trailing whitespace and newlines
+        # Strip header
         if settings['strip_header']:
             strt = content.find('/********')
             stop = content.rfind('*******/\n')
             content = content.replace(content[strt:stop+9], '')
+
+        # Strip leading white-space
+        if settings['strip-leading-whitespace']:
+            content = re.sub(r'^(\s+)', '', content, flags=re.MULTILINE)
 
         # Add indent
         if settings['indent'] > 0:
@@ -109,6 +115,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
         code = etree.SubElement(pre, 'code')
         if settings['language']:
             code.set('class', settings['language'])
-        code.text = self.markdown.htmlStash.store(content.strip('\n'), safe=True)
+        content = cgi.escape(content, quote=True)
+        code.text = self.markdown.htmlStash.store(content.strip('\n'))
 
         return el
