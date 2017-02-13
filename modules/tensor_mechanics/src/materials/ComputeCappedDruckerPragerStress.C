@@ -369,8 +369,8 @@ ComputeCappedDruckerPragerStress::consistentTangentOperator(const RankTwoTensor 
         for (unsigned l = 0; l < _tensor_dimensionality; ++l)
         {
           cto(i, j, k, l) -= (i == j) * (1.0 / 3.0) * (_Epp * (1.0 - _dp_dpt) / 3.0 * (k == l) + s_over_q(k, l) * _Eqq * (- _dp_dqt));
-	  cto(i, j, k, l) -= s_over_q(i, j) * (_Epp * (- _dq_dpt) / 3.0 * (k == l) + s_over_q(k, l) * _Eqq * (1.0 - _dq_dqt));
-	}
+          cto(i, j, k, l) -= s_over_q(i, j) * (_Epp * (- _dq_dpt) / 3.0 * (k == l) + s_over_q(k, l) * _Eqq * (1.0 - _dq_dqt));
+        }
 
   if (smoothed_q.dg[1] != 0.0)
   {
