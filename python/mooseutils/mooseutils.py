@@ -137,3 +137,33 @@ def check_configuration(packages):
         return 1
 
     return 0
+
+def touch(fname):
+    """
+    Touch a file so to update modified time.
+    """
+    with open(fname, 'a'):
+        os.utime(fname, None)
+
+
+def gold(filename):
+    """
+    Get the gold filename corresponding to a filename.
+    """
+    if not os.path.exists(filename):
+        return None
+
+    fn = os.path.basename(filename)
+    dn = os.path.dirname(filename)
+    gold = os.path.join(dn, 'gold', fn)
+    if os.path.exists(gold):
+        return gold
+    return None
+
+def unique_list(output, input):
+    """
+    Insert items into list, but only if they are unique.
+    """
+    for item in input:
+        if item not in output:
+            output.append(item)
