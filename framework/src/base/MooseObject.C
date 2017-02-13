@@ -43,6 +43,9 @@ MooseObject::MooseObject(const InputParameters & parameters) :
 callMooseErrorRaw(std::string & msg, MooseApp * app)
 {
   app->getOutputWarehouse().mooseConsole();
-  moose::internal::mooseErrorRaw(msg, app->name());
+  std::string prefix;
+  if (!app->isUltimateMaster())
+    prefix = app->name();
+  moose::internal::mooseErrorRaw(msg, prefix);
 }
 
