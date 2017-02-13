@@ -696,3 +696,10 @@ PQPlasticModel::consistentTangentOperator(const RankTwoTensor & stress_trial, Re
 
   cto = (cto.transposeMajor() * inv).transposeMajor();
 }
+
+void
+PQPlasticModel::setStressAfterReturn(const RankTwoTensor & stress_trial, Real /*p_ok*/, Real /*q_ok*/, Real gaE, const std::vector<Real> & /*intnl*/, const f_and_derivs & smoothed_q, RankTwoTensor & stress) const
+{
+  const RankTwoTensor correction = _elasticity_tensor[_qp] * (smoothed_q.dg[0] * dpdstress(stress) + smoothed_q.dg[1] * dqdstress(stress));
+  stress = stress_trial - gaE / _Epp * correction;
+}

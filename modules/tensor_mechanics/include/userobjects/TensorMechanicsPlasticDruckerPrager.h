@@ -29,6 +29,33 @@ class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
 
   virtual std::string modelName() const override;
 
+  /// Calculates aaa and bbb as a function of the internal parameter intnl
+  void bothAB(Real intnl, Real & aaa, Real & bbb) const;
+
+  /// Calculates d(aaa)/d(intnl) and d(bbb)/d(intnl) as a function of the internal parameter intnl
+  void dbothAB(Real intnl, Real & daaa, Real & dbbb) const;
+
+  /**
+   * bbb (friction) and bbb_flow (dilation) are computed using the same function,
+   * onlyB, and this parameter tells that function whether to compute bbb or bbb_flow
+   */
+  enum FrictionDilation { friction = 0, dilation = 1 };
+
+  /**
+   * Calculate bbb or bbb_flow
+   * @param intnl the internal parameter
+   * @param fd if fd==friction then bbb is calculated.  if fd==dilation then bbb_flow is calculated
+   * @param bbb either bbb or bbb_flow, depending on fd
+   */
+  void onlyB(Real intnl, int fd, Real & bbb) const;
+
+  /**
+   * Calculate d(bbb)/d(intnl) or d(bbb_flow)/d(intnl)
+   * @param intnl the internal parameter
+   * @param fd if fd==friction then bbb is calculated.  if fd==dilation then bbb_flow is calculated
+   * @param bbb either bbb or bbb_flow, depending on fd
+   */
+  void donlyB(Real intnl, int fd, Real & dbbb) const;
  protected:
   /// Hardening model for cohesion
   const TensorMechanicsHardeningModel & _mc_cohesion;
@@ -66,34 +93,6 @@ class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
 
   /// True if there is no hardening of dilation angle
   const bool _zero_psi_hardening;
-
-  /// Calculates aaa and bbb as a function of the internal parameter intnl
-  void bothAB(Real intnl, Real & aaa, Real & bbb) const;
-
-  /// Calculates d(aaa)/d(intnl) and d(bbb)/d(intnl) as a function of the internal parameter intnl
-  void dbothAB(Real intnl, Real & daaa, Real & dbbb) const;
-
-  /**
-   * bbb (friction) and bbb_flow (dilation) are computed using the same function,
-   * onlyB, and this parameter tells that function whether to compute bbb or bbb_flow
-   */
-  enum FrictionDilation { friction = 0, dilation = 1 };
-
-  /**
-   * Calculate bbb or bbb_flow
-   * @param intnl the internal parameter
-   * @param fd if fd==friction then bbb is calculated.  if fd==dilation then bbb_flow is calculated
-   * @param bbb either bbb or bbb_flow, depending on fd
-   */
-  void onlyB(Real intnl, int fd, Real & bbb) const;
-
-  /**
-   * Calculate d(bbb)/d(intnl) or d(bbb_flow)/d(intnl)
-   * @param intnl the internal parameter
-   * @param fd if fd==friction then bbb is calculated.  if fd==dilation then bbb_flow is calculated
-   * @param bbb either bbb or bbb_flow, depending on fd
-   */
-  void donlyB(Real intnl, int fd, Real & dbbb) const;
 
   /// Function that's used in dyieldFunction_dstress and flowPotential
   virtual RankTwoTensor df_dsig(const RankTwoTensor & stress, Real bbb) const;
