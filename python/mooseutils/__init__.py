@@ -1,5 +1,5 @@
-from mooseutils import colorText, str2bool, find_moose_executable, runExe, check_configuration
-from tools import mooseDebug, mooseWarning, mooseMessage, mooseError, touch, unique_list, gold
+from mooseutils import colorText, str2bool, find_moose_executable, runExe, check_configuration, touch, unique_list, gold
+from message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from MooseException import MooseException
 try:
     from MooseYaml import MooseYaml

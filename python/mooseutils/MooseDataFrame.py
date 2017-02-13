@@ -1,7 +1,7 @@
 import os
 import pandas
 
-import tools
+import message
 
 class MooseDataFrame(object):
     """
@@ -64,12 +64,12 @@ class MooseDataFrame(object):
         file_exists = os.path.exists(self.filename)
         if file_exists and (os.path.getmtime(self.filename) < self._run_start_time):
             self.clear()
-            tools.mooseDebug("The csv file {} exists but is old compared to the run start time.".format(self.filename), debug=True)
+            message.mooseDebug("The csv file {} exists but is old compared to the run start time.".format(self.filename), debug=True)
             retcode = MooseDataFrame.OLDFILE
 
         elif not os.path.exists(self.filename):
             self.clear()
-            tools.mooseDebug("The csv file {} does not exist.".format(self.filename))
+            message.mooseDebug("The csv file {} does not exist.".format(self.filename))
             retcode = MooseDataFrame.INVALID
 
         else:
@@ -81,9 +81,9 @@ class MooseDataFrame(object):
                     self.data = pandas.read_csv(self.filename)
                     if self._index:
                         self.data.set_index(self._index, inplace=True)
-                    tools.mooseDebug("Reading csv file: {}".format(self.filename))
+                    message.mooseDebug("Reading csv file: {}".format(self.filename))
                 except:
                     self.clear()
-                    tools.mooseDebug("Unable to read file {} it likely does not contain data.".format(self.filename))
+                    message.mooseDebug("Unable to read file {} it likely does not contain data.".format(self.filename))
 
         return retcode

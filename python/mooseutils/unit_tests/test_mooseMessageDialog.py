@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import sys
 import unittest
-from mooseutils import tools
+import mooseutils
 from PyQt5 import QtWidgets
 
 class TestMooseMessageDialog(unittest.TestCase):
     """
-    Tests the usage of the various messages functions in tools package.
+    Tests the usage of the various messages functions in message package.
     """
 
     app = QtWidgets.QApplication(sys.argv)
@@ -15,7 +15,7 @@ class TestMooseMessageDialog(unittest.TestCase):
         """
         Test the default dialog message.
         """
-        box = tools.mooseMessage("A message", dialog = True, test = True)
+        box = mooseutils.mooseMessage("A message", dialog = True, test = True)
         self.assertTrue(box.text() == "A message")
         self.assertTrue(box.icon() == QtWidgets.QMessageBox.NoIcon)
 
@@ -23,7 +23,7 @@ class TestMooseMessageDialog(unittest.TestCase):
         """
         Test the warning dialog message.
         """
-        box = tools.mooseWarning("A message", dialog = True, test = True)
+        box = mooseutils.mooseWarning("A message", dialog = True, test = True)
         self.assertIn("A message", box.text())
         self.assertIn("WARNING", box.text())
         self.assertTrue(box.icon() == QtWidgets.QMessageBox.Warning)
@@ -32,7 +32,7 @@ class TestMooseMessageDialog(unittest.TestCase):
         """
         Test the error dialog message.
         """
-        box = tools.mooseError("A message", dialog = True, test = True)
+        box = mooseutils.mooseError("A message", dialog = True, test = True)
         self.assertIn("A message", box.text())
         self.assertIn("ERROR", box.text())
         self.assertTrue(box.icon() == QtWidgets.QMessageBox.Critical)

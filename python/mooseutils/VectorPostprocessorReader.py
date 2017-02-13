@@ -4,7 +4,7 @@ import pandas
 import bisect
 
 from MooseDataFrame import MooseDataFrame
-import tools
+import message
 
 class VectorPostprocessorReader(object):
     """
@@ -97,7 +97,7 @@ class VectorPostprocessorReader(object):
         Allows this object to be used in boolean cases.
 
         Example:
-            data = tools.VectorPostprocessorReader('files_*.csv')
+            data = VectorPostprocessorReader('files_*.csv')
             if not data:
                 print 'No data found!'
         """
@@ -156,7 +156,7 @@ class VectorPostprocessorReader(object):
                 try:
                     df = pandas.read_csv(fname)
                 except:
-                    tools.mooseWarning('The file {} failed to load, it is likely empty.'.format(fname))
+                    message.mooseWarning('The file {} failed to load, it is likely empty.'.format(fname))
                     continue
 
                 df.insert(0, 'index (Peacock)', pandas.Series(df.index, index=df.index))

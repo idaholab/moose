@@ -1,5 +1,5 @@
 from MooseDataFrame import MooseDataFrame
-import tools
+import message
 
 class PostprocessorReader(MooseDataFrame):
     """
@@ -22,7 +22,7 @@ class PostprocessorReader(MooseDataFrame):
             warning: When true (default) an error is produced if the users tries to use 'time' option, which does nothing.
         """
         if time != None and warning:
-            tools.mooseWarning('Supplying a time argument is not supported in the PostprocessorReader.')
+            message.mooseWarning('Supplying a time argument is not supported in the PostprocessorReader.')
         return self.data[keys]
 
     def __contains__(self, variable):
