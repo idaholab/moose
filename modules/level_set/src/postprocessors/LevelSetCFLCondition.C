@@ -18,40 +18,38 @@ InputParameters validParams<LevelSetCFLCondition>()
 
 LevelSetCFLCondition::LevelSetCFLCondition(const InputParameters & parameters) :
     LevelSetVelocityInterface<ElementPostprocessor>(parameters),
-    _min_width(std::numeric_limits<Real>::max()),
-    _max_velocity(std::numeric_limits<Real>::min())
+    _cfl_timestep(std::numeric_limits<Real>::max())
 {
 }
 
 void
 LevelSetCFLCondition::execute()
 {
-  _min_width = std::min(_min_width, _current_elem->hmin());
+  // Compute maximum velocity
+  _max_velocity = std::numeric_limits<Real>::min();
   for (unsigned int qp = 0; qp < _q_point.size(); ++qp)
   {
     RealVectorValue vel(_velocity_x[qp], _velocity_y[qp], _velocity_z[qp]);
     _max_velocity = std::max(_max_velocity, std::abs(vel.size()));
   }
+  _cfl_timestep = std::min(_cfl_timestep, _current_elem->hmin() / _max_velocity);
 }
 
 void
 LevelSetCFLCondition::finalize()
 {
-  gatherMax(_max_velocity);
-  gatherMin(_min_width);
+  gatherMin(_cfl_timestep);
 }
 
 void
 LevelSetCFLCondition::threadJoin(const UserObject & user_object)
 {
   const LevelSetCFLCondition & cfl = static_cast<const LevelSetCFLCondition&>(user_object);
-  _min_width = std::min(_min_width, cfl._min_width);
-  _max_velocity = std::max(_max_velocity, cfl._max_velocity);
+  _cfl_timestep = std::min(_cfl_timestep, cfl._cfl_timestep);
 }
-
 
 PostprocessorValue
 LevelSetCFLCondition::getValue()
 {
-  return _min_width / _max_velocity;
+  return _cfl_timestep;
 }

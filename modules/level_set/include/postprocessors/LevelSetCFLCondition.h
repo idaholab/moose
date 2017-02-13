@@ -33,11 +33,11 @@ public:
 
 private:
 
-  /// The minimum element size across all elements.
-  Real _min_width;
-
-  /// The maximum velocity across all elements.
+  /// The max velocity on an element, this is done simply to avoid creating temporary calls to execute.
   Real _max_velocity;
+
+  /// The minimum timestep computed using CFL condition.
+  Real _cfl_timestep;
 };
 
 #endif // LEVELSETCFLCONDITION_H
