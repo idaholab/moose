@@ -98,12 +98,7 @@ public:
    *
    * However, during Recovery this will read the CPA file...
    */
-  void init();
-
-  /**
-   * Perform initial setup on the mesh object.
-   */
-  virtual void initialSetup();
+  virtual void init();
 
   /**
    * Must be overridden by child classes.
