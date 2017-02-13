@@ -783,7 +783,7 @@ class MemoryPlotter:
         suffixes = ["Terabytes", "Gigabytes", "Megabytes", "Kilobytes", "Bytes"]
         multiplier = 1 << 40;
         index = 0
-        while largest_memory[-1] < multiplier and multiplier >= 1:
+        while largest_memory[-1] < multiplier and multiplier > 1:
             multiplier = multiplier >> 10
             index = index + 1
         self.multiples = multiplier
