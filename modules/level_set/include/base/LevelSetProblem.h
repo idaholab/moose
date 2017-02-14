@@ -13,7 +13,7 @@ template<>
 InputParameters validParams<LevelSetProblem>();
 
 /**
- * Problem that defines a custom call to MultiAppTransfers to allows for
+ * Problem that defines a custom call to MultiAppTransfers to allow for
  * adaptivity to be transferred from master to sub-application.
  */
 class LevelSetProblem : public FEProblem

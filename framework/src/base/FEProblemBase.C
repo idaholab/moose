@@ -58,6 +58,7 @@
 #include "Indicator.h"
 #include "Marker.h"
 #include "MultiApp.h"
+#include "MultiAppTransfer.h"
 #include "TransientMultiApp.h"
 #include "ElementUserObject.h"
 #include "NodalUserObject.h"

@@ -17,8 +17,7 @@ template<>
 InputParameters validParams<LevelSetOlssonBubble>();
 
 /**
- * Implements the "bubble" function from Olsson and Kreiss (2005) that
- * creates function that varies from 0 to 1.
+ * Implements the "bubble" function from Olsson and Kreiss (2005).
  */
 class LevelSetOlssonBubble : public Function
 {

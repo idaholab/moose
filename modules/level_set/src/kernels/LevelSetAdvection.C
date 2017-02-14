@@ -12,7 +12,7 @@ template<>
 InputParameters validParams<LevelSetAdvection>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Implements the level set advection equation: $\\vec{v}\\cdot\\nabla u = 0$, where the weak form is $(\\Psi_i, \\vec{v}\\cdot\\nabla u) = 0$.");
+  params.addClassDescription("Implements the level set advection equation: $\\vec{v}\\cdot\\nabla u = 0$, where the weak form is $(\\psi_i, \\vec{v}\\cdot\\nabla u) = 0$.");
   params += validParams<LevelSetVelocityInterface<> >();
   return params;
 }

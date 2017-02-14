@@ -34,5 +34,5 @@ LevelSetTimeDerivativeSUPG::computeQpJacobian()
 {
   computeQpVelocity();
   Real tau = _current_elem->hmin() / (2 * _velocity.norm());
-  return tau * _velocity * _grad_test[_i][_qp] * _phi[_j][_qp]*_du_dot_du[_qp];
+  return tau * _velocity * _grad_test[_i][_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
 }

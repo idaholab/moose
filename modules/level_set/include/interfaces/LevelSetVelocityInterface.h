@@ -16,7 +16,6 @@
 template<typename T = Kernel>
 class LevelSetVelocityInterface;
 
-//void injectLevelSetVelocityInterfaceParameters(InputParameters & parameters);
 template<>
 InputParameters validParams<LevelSetVelocityInterface<> >();
 
@@ -33,7 +32,7 @@ public:
 protected:
 
   /**
-   * This method should be called with the velocity vector should be updated, this is not
+   * This method should be called when the velocity vector needs to be updated, this is not
    * done automatically to avoid populating a vector that is not used.
    */
   void computeQpVelocity();

@@ -46,9 +46,9 @@ LevelSetOlssonVortex::vectorValue(Real t, const Point & p)
 
   // Compute the coefficient used to reverse the flow
   _reverse_coefficient = 1.0;
-  if (_reverse_type == 0 && t > _reverse_time/2.)
+  if (_reverse_type == 0 && t > _reverse_time / 2.)
     _reverse_coefficient = -1.0;
   else if (_reverse_type == 1)
-    _reverse_coefficient = cos(_pi*t/_reverse_time);
+    _reverse_coefficient = std::cos(_pi * t / _reverse_time);
   return _reverse_coefficient * _output;
 }

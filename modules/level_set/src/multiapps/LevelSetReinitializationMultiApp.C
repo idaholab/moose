@@ -29,7 +29,6 @@ InputParameters validParams<LevelSetReinitializationMultiApp>()
   params.suppressParameter<std::vector<unsigned int> >("move_apps");
   params.suppressParameter<std::vector<Point> >("move_positions");
 
-
   return params;
 }
 
@@ -77,7 +76,8 @@ LevelSetReinitializationMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, b
 
   int rank;
   int ierr;
-  ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
+  ierr = MPI_Comm_rank(_orig_comm, &rank);
+  mooseCheckMPIErr(ierr);
 
   bool last_solve_converged = true;
 

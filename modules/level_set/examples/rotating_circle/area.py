@@ -1,6 +1,3 @@
-"""
-python /Users/slauae/projects/moose/modules/level_set/examples/rotating_circle/area.py
-"""
 import matplotlib.pyplot as plt
 import tools
 

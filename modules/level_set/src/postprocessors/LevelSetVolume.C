@@ -51,7 +51,7 @@ LevelSetVolume::execute()
     if (_u[_qp] > _threshold)
       cnt++;
   }
-  _volume += cnt/n * _current_elem_volume;
+  _volume += cnt / n * _current_elem_volume;
 }
 
 void

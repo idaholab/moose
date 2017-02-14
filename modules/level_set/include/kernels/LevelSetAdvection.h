@@ -21,7 +21,7 @@ InputParameters validParams<LevelSetAdvection>();
 /**
  * Advection Kernel for the levelset equation.
  *
- * \Psi_i \vec{v} \nabla u,
+ * \psi_i \vec{v} \nabla u,
  * where \vec{v} is the interface velocity that is a set of
  * coupled variables.
  */

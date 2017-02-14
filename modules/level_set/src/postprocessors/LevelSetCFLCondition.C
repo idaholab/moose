@@ -30,7 +30,7 @@ LevelSetCFLCondition::execute()
   for (unsigned int qp = 0; qp < _q_point.size(); ++qp)
   {
     RealVectorValue vel(_velocity_x[qp], _velocity_y[qp], _velocity_z[qp]);
-    _max_velocity = std::max(_max_velocity, std::abs(vel.size()));
+    _max_velocity = std::max(_max_velocity, std::abs(vel.norm()));
   }
   _cfl_timestep = std::min(_cfl_timestep, _current_elem->hmin() / _max_velocity);
 }

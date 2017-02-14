@@ -36,7 +36,7 @@ protected:
   /// Access to the level set specific problem to allow for the resetTime() method to be called.
   LevelSetReinitializationProblem * _level_set_problem;
 
-  /// Access to the Execution to call execute()
+  /// Access to the Executioner object to call execute()
   Executioner * _executioner;
 
   /// The solve interval for reinitialization.

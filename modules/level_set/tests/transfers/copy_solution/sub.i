@@ -15,8 +15,7 @@
 []
 
 [Problem]
-
- kernel_coverage_check = false
+  kernel_coverage_check = false
 []
 
 [Outputs]
