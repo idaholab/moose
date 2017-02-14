@@ -20,13 +20,13 @@ class CheckFiles(RunApp):
             self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['check_files'] + self.specs['check_not_exists'], self.specs['delete_output_folders'])
 
     def processResults(self, moose_dir, retcode, options, output):
-        (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
+        output = RunApp.processResults(self, moose_dir, retcode, options, output)
 
         specs = self.specs
-        if reason != '' or specs['skip_checks']:
-            return (reason, output)
-
-        if reason == '':
+        if self.getStatus() == 'FAIL' or specs['skip_checks']:
+            return output
+        else:
+            reason = ''
             # if still no errors, check other files (just for existence)
             for file in self.specs['check_files']:
                 if not os.path.isfile(os.path.join(self.specs['test_dir'], file)):
@@ -48,4 +48,10 @@ class CheckFiles(RunApp):
                             reason = 'NO EXPECTED OUT IN FILE'
                             break
 
-        return (reason, output)
+        # populate status bucket
+        if reason != '':
+            self.setStatus(reason, 'FAIL')
+        else:
+            self.setStatus(self.success_message, self.bucket_success)
+
+        return output

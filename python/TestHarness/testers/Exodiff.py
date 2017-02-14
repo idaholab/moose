@@ -21,7 +21,6 @@ class Exodiff(RunApp):
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
 
-
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
             self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['exodiff'], self.specs['delete_output_folders'])
@@ -48,25 +47,27 @@ class Exodiff(RunApp):
 
         return commands
 
-
     def processResults(self, moose_dir, retcode, options, output):
-        (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
+        output = RunApp.processResults(self, moose_dir, retcode, options, output)
 
-        if reason != '' or self.specs['skip_checks']:
-            return (reason, output)
+        if self.getStatus() == self.bucket_fail or self.specs['skip_checks']:
+            self.setStatus('skip checked', self.bucket_skip)
+            return output
 
         # Don't Run Exodiff on Scaled Tests
         if options.scaling and self.specs['scale_refine']:
-            return (reason, output)
+            self.success_message = "SCALED"
+            self.setStatus(self.getSuccessMessage(), self.bucket_success)
+            return output
 
         # Make sure that all of the Exodiff files are actually available
         for file in self.specs['exodiff']:
             if not os.path.exists(os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)):
                 output += "File Not Found: " + os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)
-                reason = 'MISSING GOLD FILE'
+                self.setStatus('MISSING GOLD FILE', self.bucket_fail)
                 break
 
-        if reason == '':
+        if self.getStatus() != self.bucket_fail:
             # Retrieve the commands
             commands = self.processResultsCommand(moose_dir, options)
 
@@ -76,7 +77,11 @@ class Exodiff(RunApp):
                 output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(self.specs['exodiff_opts'])
 
                 if ('different' in exo_output or 'ERROR' in exo_output) and not "Files are the same" in exo_output:
-                    reason = 'EXODIFF'
+                    self.setStatus('EXODIFF', self.bucket_diff)
                     break
 
-        return (reason, output)
+        # If status is still pending, then it is a passing test
+        if self.getStatus() == self.bucket_pending:
+            self.setStatus(self.success_message, self.bucket_success)
+
+        return output
