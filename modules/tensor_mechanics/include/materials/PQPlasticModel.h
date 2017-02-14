@@ -430,7 +430,7 @@ protected:
    * This is called after the return-map process has completed
    * successfully in (p, q) space, just after finaliseReturnProcess
    * has been called.
-   * Derived classes must override this function
+   * Derived classes may override this function
    * @param stress_trial The trial value of stress
    * @param p_ok Returned value of p
    * @param q_ok Returned value of q
@@ -438,7 +438,7 @@ protected:
    * @param smoothed_q Holds the current value of yield function and derivatives evaluated at (p_ok, q_ok, _intnl)
    * @param stress[out] The returned value of the stress tensor
    */
-  virtual void setStressAfterReturn(const RankTwoTensor & stress_trial, Real p_ok, Real q_ok, Real gaE, const std::vector<Real> & intnl, const f_and_derivs & smoothed_q, RankTwoTensor & stress) const = 0;
+  virtual void setStressAfterReturn(const RankTwoTensor & stress_trial, Real p_ok, Real q_ok, Real gaE, const std::vector<Real> & intnl, const f_and_derivs & smoothed_q, RankTwoTensor & stress) const;
 
   /**
    * Calculates the consistent tangent operator.
