@@ -22,21 +22,24 @@ class CSVDiff(RunApp):
             self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['csvdiff'])
 
     def processResults(self, moose_dir, retcode, options, output):
-        (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
+        output = RunApp.processResults(self, moose_dir, retcode, options, output)
 
         specs = self.specs
-        if reason != '' or specs['skip_checks']:
-            return (reason, output)
+        if self.getStatus() == 'FAIL' or specs['skip_checks']:
+            return output
 
         # Don't Run CSVDiff on Scaled Tests
         if options.scaling and specs['scale_refine']:
-            return (reason, output)
+            self.setStatus("don't run CSVDiff on Scaled Tests", self.bucket_skip)
+            return output
 
         if len(specs['csvdiff']) > 0:
             differ = CSVDiffer( specs['test_dir'], specs['csvdiff'], specs['abs_zero'], specs['rel_err'] )
             msg = differ.diff()
             output += 'Running CSVDiffer.py\n' + msg
             if msg != '':
-                reason = 'CSVDIFF'
+                self.setStatus('CSVDIFF', self.bucket_diff)
+                return output
 
-        return (reason, output)
+        self.setStatus(self.success_message, self.bucket_success)
+        return output

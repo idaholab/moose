@@ -57,14 +57,14 @@ class RunApp(Tester):
     def checkRunnable(self, options):
         if options.enable_recover:
             if self.specs.isValid('expect_out') or self.specs.isValid('absent_out') or self.specs['should_crash'] == True:
-                reason = 'skipped (expect_out RECOVER)'
-                return (False, reason)
+                self.setStatus('expect_out RECOVER', self.bucket_skip)
+                return False
 
         if self.specs.isValid('executable_pattern') and re.search(self.specs['executable_pattern'], self.specs['executable']) == None:
-            reason = 'skipped (EXECUTABLE PATTERN)'
-            return (False, reason)
+            self.setStatus('EXECUTABLE PATTERN', self.bucket_skip)
+            return False
 
-        return (True, '')
+        return True
 
     def getThreads(self, options):
         #Set number of threads to be used lower bound
@@ -110,6 +110,9 @@ class RunApp(Tester):
             # and it is NOT supplied already in the cli-args option
             # also, neither is the conflicting option "warn-unused"
             specs['cli_args'].append('--error-unused')
+
+        if self.getCheckInput():
+            specs['cli_args'].append('--check-input')
 
         timing_string = ' '
         if options.timing:
@@ -282,7 +285,12 @@ class RunApp(Tester):
             elif retcode == 0 and options.pbs and 'command not found' in output:
                 reason = 'QSUB NOT FOUND'
 
-        return (reason, output)
+        # Populate the bucket
+        if reason != '':
+            self.setStatus(reason, self.bucket_fail)
+        else:
+            self.setStatus(self.success_message, self.bucket_success)
+        return output
 
     def checkOutputForPattern(self, output, re_pattern):
         if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) == None:

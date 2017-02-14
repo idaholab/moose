@@ -2,28 +2,29 @@
   [./AC_CH_Multigrain]
     type = RunApp
     input = 'AC_CH_Multigrain.i'
-    cli_args = '--check-input Mesh/uniform_refine=0 Executioner/Adaptivity/initial_adaptivity=0'
+    cli_args = 'Mesh/uniform_refine=0 Executioner/Adaptivity/initial_adaptivity=0'
 
     # This example uses ShapeElementUserObject which contains a
     # mooseWarning2()
     executable_pattern = 'phase_field-\w+$'
+    check_input = True
   [../]
   [./AC_CH_advection_constforce_rect]
     type = RunApp
     input = 'AC_CH_advection_constforce_rect.i'
-    cli_args = '--check-input'
 
     # This example uses NonlocalKernel which contains a
     # mooseWarning2()
     executable_pattern = 'phase_field-\w+$'
+    check_input = True
   [../]
   [./grain_forcedensity_ext]
     type = RunApp
     input = 'grain_forcedensity_ext.i'
-    cli_args = '--check-input'
 
     # This example uses ShapeElementUserObject which contains a
     # mooseWarning2()
     executable_pattern = 'phase_field-\w+$'
+    check_input = True
   [../]
 []

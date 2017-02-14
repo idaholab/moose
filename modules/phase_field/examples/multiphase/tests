@@ -2,6 +2,6 @@
   [./DerivativeMultiPhaseMaterial]
     type = RunApp
     input = 'DerivativeMultiPhaseMaterial.i'
-    cli_args = '--check-input'
+    check_input = True
   [../]
 []

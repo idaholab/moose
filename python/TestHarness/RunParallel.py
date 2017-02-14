@@ -86,7 +86,8 @@ class RunParallel:
             if self.soft_limit:
                 self.big_queue.append([tester, command, os.getcwd()])
             else:
-                self.harness.handleTestResult(tester.specs, '', 'skipped (Insufficient slots)')
+                tester.setStatus('Insufficient slots', tester.bucket_skip)
+                self.harness.handleTestStatus(tester)
                 self.skipped_jobs.add(tester.specs['test_name'])
             return
 
@@ -160,7 +161,7 @@ class RunParallel:
                 file_output += "#"*80 + "\nOutput from processor " + str(processor_id) + "\n" + "#"*80 + "\n" + self.readOutput(f)
         return file_output
 
-    ## Return control the the test harness by finalizing the test output and calling the callback
+    ## Return control to the test harness by finalizing the test output and calling the callback
     def returnToTestHarness(self, job_index):
         (p, command, tester, time, f, slots) = self.jobs[job_index]
 
@@ -179,22 +180,40 @@ class RunParallel:
         if p.poll() == None: # process has not completed, it timed out
             output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
             f.close()
+            tester.setStatus('TIMEOUT', tester.bucket_fail)
             if platform.system() == "Windows":
                 p.terminate()
             else:
                 pgid = os.getpgid(p.pid)
                 os.killpg(pgid, SIGTERM)
 
-            if not self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock()):
+            if self.options.pbs and not self.options.processingPBS:
+                if not self.harness.handleTestStatus(tester, output):
+                    did_pass = False
+            elif not self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock()):
                 did_pass = False
         else:
             f.close()
 
-            if tester in self.reported_jobs:
-                tester.specs.addParam('caveats', ['FINISHED'], "")
+            # PBS jobs
+            if self.options.pbs and not self.options.processingPBS:
+                if not self.harness.handleTestStatus(tester, output):
+                    did_pass = False
 
-            if not self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock()):
-                did_pass = False
+            # All other jobs
+            else:
+                if tester in self.reported_jobs:
+                    tester.specs.addParam('caveats', ['FINISHED'], "")
+
+                if self.options.dry_run:
+                    # Set the successful message for DRY_RUN
+                    tester.success_message = 'DRY RUN'
+                    output += '\n'.join(tester.processResultsCommand(tester.specs['moose_dir'], self.options))
+                else:
+                    output = tester.processResults(tester.specs['moose_dir'], p.returncode, self.options, output)
+
+                if not self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock()):
+                    did_pass = False
 
         if did_pass:
             self.finished_jobs.add(tester.specs['test_name'])
@@ -236,8 +255,8 @@ class RunParallel:
                             seconds_to_report = float(tester.specs['min_reported_time'])
 
                         if now >= self.reported_timer + seconds_to_report:
-                            self.harness.handleTestResult(tester.specs, '', 'RUNNING...', start_time, now, False)
-
+                            tester.setStatus('RUNNING...', tester.bucket_pending)
+                            self.harness.handleTestStatus(tester)
                             self.reported_jobs.add(tester)
                             self.reported_timer = now
 
@@ -301,12 +320,14 @@ class RunParallel:
                     # If the user is running the script with no options, we'll just exceed the slots for
                     # these remaining big jobs. Otherwise, we'll skip them
                     if not self.soft_limit and slots > self.job_slots:
-                        self.harness.handleTestResult(tester.specs, '', 'skipped (Insufficient slots)')
+                        tester.setStatus('Insufficient slots', tester.bucket_skip)
+                        self.harness.handleTestStatus(tester)
                         self.skipped_jobs.add(tester.specs['test_name'])
                         keep_going = True
                     # Do we have unsatisfied dependencies left?
                     elif len(set(tester.specs['prereq']) & self.skipped_jobs):
-                        self.harness.handleTestResult(tester.specs, '', 'skipped (skipped dependency)')
+                        tester.setStatus('skipped dependency', tester.bucket_skip)
+                        self.harness.handleTestStatus(tester)
                         self.skipped_jobs.add(tester.specs['test_name'])
                         keep_going = True
                     # We need to keep trying in case there is a chain of unresolved dependencies
