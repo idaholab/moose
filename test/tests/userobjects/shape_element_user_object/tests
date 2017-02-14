@@ -48,6 +48,9 @@
     recover = false
     allow_warnings = true
     mesh_mode = REPLICATED
+    # This tests sometimes reports an incorrect jacobian when run
+    # with multiple threads.
+    max_threads = 1
   [../]
   [./shape_side_uo_physics_test]
     type = 'Exodiff'
