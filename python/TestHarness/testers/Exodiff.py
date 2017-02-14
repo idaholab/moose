@@ -51,7 +51,6 @@ class Exodiff(RunApp):
         output = RunApp.processResults(self, moose_dir, retcode, options, output)
 
         if self.getStatus() == self.bucket_fail or self.specs['skip_checks']:
-            self.setStatus('skip checked', self.bucket_skip)
             return output
 
         # Don't Run Exodiff on Scaled Tests

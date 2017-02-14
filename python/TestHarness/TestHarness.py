@@ -623,6 +623,7 @@ class TestHarness:
         caveats = []
         timing = ''
         status = tester.getStatus()
+        did_pass = tester.didPass()
 
         if tester.specs.isValid('caveats'):
             caveats = tester.specs['caveats']
@@ -660,7 +661,7 @@ class TestHarness:
 
         print printResult(tester, result, timing, start, end, self.options)
 
-        if self.options.verbose or (status == 'FAIL' and not self.options.quiet):
+        if self.options.verbose or (not did_pass and not self.options.quiet):
             output = output.replace('\r', '\n')  # replace the carriage returns with newlines
             lines = output.split('\n');
 
@@ -676,14 +677,14 @@ class TestHarness:
                 print printResult(tester, result, timing, start, end, self.options), "(reprint)"
 
         if status != 'SKIP':
-            if 'FAILED' in result and not self.options.failed_tests:
+            if not did_pass and not self.options.failed_tests:
                 self.writeFailedTest.write(tester.specs['test_name'] + '\n')
 
             if self.options.file:
                 self.file.write(printResult( tester, result, timing, start, end, self.options, color=False) + '\n')
                 self.file.write(output)
 
-            if self.options.sep_files or (self.options.fail_files and status == 'FAIL') or (self.options.ok_files and status == 'PASS'):
+            if self.options.sep_files or (self.options.fail_files and not did_pass) or (self.options.ok_files and did_pass):
                 fname = os.path.join(tester.specs['test_dir'], tester.specs['test_name'].split('/')[-1] + '.' + result[:6] + '.txt')
                 f = open(fname, 'w')
                 f.write(printResult( tester, result, timing, start, end, self.options, color=False) + '\n')

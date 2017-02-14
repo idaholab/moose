@@ -46,6 +46,8 @@ class TestHarnessTester(TestHarnessTestCase):
         e = cm.exception
         self.assertRegexpMatches(e.output, 'test_harness\.exodiff.*?FAILED \(EXODIFF\)')
         self.assertRegexpMatches(e.output, 'test_harness\.csvdiff.*?FAILED \(CSVDIFF\)')
+        self.assertRegexpMatches(e.output, 'test_harness\.exodiff.*?Running exodiff')
+        self.assertRegexpMatches(e.output, 'test_harness\.csvdiff.*?Running CSVDiffer.py')
 
     def testMissingGold(self):
         """
