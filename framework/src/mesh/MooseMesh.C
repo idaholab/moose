@@ -1875,9 +1875,6 @@ MooseMesh::init()
     buildMesh();
 }
 
-void
-MooseMesh::initialSetup() {}
-
 unsigned int
 MooseMesh::dimension() const
 {
