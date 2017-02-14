@@ -112,8 +112,8 @@ std::string
 FileOutput::getOutputFileBase(MooseApp & app, std::string suffix)
 {
   // If the App has an outputfile, then use it (MultiApp scenario)
-  if (!app.getOutputFileBase().empty())
-    return app.getOutputFileBase();
+  if (!app.levelString().empty())
+    return app.levelString();
 
   // If the output base is not set it must be determined from the input file
   /* This will only return a non-empty string if the setInputFileName() was called, which is
