@@ -39,14 +39,16 @@ class MooseBibtex(MooseCommonExtension, Preprocessor):
         """
 
         if self._macro_files:
-            with open("tBib.bib", "wb") as tBib:
+            tBib_path = MooseDocs.abspath("tBib.bib")
+            with open(tBib_path, "wb") as tBib:
                 for tFile in self._macro_files:
                     with open(MooseDocs.abspath(tFile.strip()), "rb") as inFile:
                         shutil.copyfileobj(inFile, tBib)
                 with open(bibfile, "rb") as inFile:
                     shutil.copyfileobj(inFile, tBib)
-            data = parse_file("tBib.bib")
-            os.remove("tBib.bib")
+            data = parse_file(tBib_path)
+            if os.path.isfile(tBib_path):
+                os.remove(tBib_path)
         else:
             data = parse_file(bibfile)
 
