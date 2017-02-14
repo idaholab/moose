@@ -395,9 +395,10 @@ TensorMechanicsAction::actOutputGeneration()
 
       if (type != "")
       {
+        params.applyParameters(parameters());
         params.set<AuxVariableName>("variable") = out;
         params.set<MultiMooseEnum>("execute_on") = "timestep_end";
-        _problem->addAuxKernel(type, out, params);
+        _problem->addAuxKernel(type, out + '_' + name(), params);
       }
       else
         mooseError2("Unable to add output AuxKernel");
