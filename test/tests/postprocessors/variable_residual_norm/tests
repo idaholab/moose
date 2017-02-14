@@ -1,0 +1,9 @@
+[Tests]
+  [./variable_residual_test]
+    type = 'CSVDiff'
+    input = 'variable_residual.i'
+    csvdiff = 'variable_residual_out.csv'
+    max_threads = 1
+    max_parallel = 1
+  [../]
+[]
