@@ -1,0 +1,51 @@
+
+#  *****************************************************************
+#             EXODIFF	(Version: 2.83) Modified: 2015-08-20
+#             Authors:  Richard Drake, rrdrake@sandia.gov
+#                       Greg Sjaardema, gdsjaar@sandia.gov
+#             Run on    2017/02/15   15:16:46 MST
+#  *****************************************************************
+
+#  FILE 1: /Users/halejd/gitProjects/moose/modules/tensor_mechanics/tests/recompute_radial_return/gold/affine_plasticity_out.e
+#   Title: affine_plasticity_out.e
+#          Dim = 3, Blocks = 1, Nodes = 8, Elements = 1, Nodesets = 6, Sidesets = 6
+#          Vars: Global = 9, Nodal = 3, Element = 7, Nodeset = 0, Sideset = 0, Times = 201
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               2 @ t201
+
+GLOBAL VARIABLES relative 1.e-6 floor 0.0
+	analytic_xx         # min:               0 @ t1	max:   1.8936476e+08 @ t201
+	analytic_yy         # min:               0 @ t1	max:        95262794 @ t22
+	analytic_zz         # min:               0 @ t1	max:   1.9052559e+08 @ t22
+	stress_xx           # min:               0 @ t1	max:   1.8935615e+08 @ t201
+	stress_yy           # min:               0 @ t1	max:        95262794 @ t37
+	stress_zz           # min:               0 @ t1	max:   1.9052559e+08 @ t41
+
+NODAL VARIABLES relative 1.e-6 floor 1e-10
+	disp_x  # min:               0 @ t1,n1	max:       0.0103923 @ t201,n2
+	disp_y  # min:               0 @ t1,n1	max:           0.003 @ t101,n3
+	disp_z  # min:               0 @ t1,n1	max:       0.0103923 @ t201,n5
+
+ELEMENT VARIABLES relative 1.e-6 floor 0.0
+	stress_xx          # min:               0 @ t1,b0,e1	max:   1.8935615e+08 @ t201,b0,e1
+	stress_yy          # min:               0 @ t1,b0,e1	max:        95262794 @ t41,b0,e1
+	stress_zz          # min:               0 @ t1,b0,e1	max:   1.9052559e+08 @ t41,b0,e1
+	vonmises           # min:               0 @ t1,b0,e1	max:   2.8578838e+08 @ t41,b0,e1
+	plastic_strain_xx  # min:               0 @ t1,b0,e1	max:    0.0091938434 @ t201,b0,e1
+	plastic_strain_yy  # min:               0 @ t1,b0,e1	max:    0.0025624433 @ t115,b0,e1
+	plastic_strain_zz  # min:               0 @ t1,b0,e1	max:    0.0096775438 @ t201,b0,e1
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
