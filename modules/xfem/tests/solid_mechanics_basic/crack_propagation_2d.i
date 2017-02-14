@@ -74,7 +74,7 @@
   [./topx]
     type = PresetBC
     boundary = top
-    variable = disp_y
+    variable = disp_x
     value = 0.0
   [../]
   [./topy]
