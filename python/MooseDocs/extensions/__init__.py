@@ -10,7 +10,8 @@ def get_collection_items(info_objects, show_hidden=False):
       info_objects: A list of MooseInfoBase objects to collect.
     """
     items = []
-    for info in info_objects:
+    # Alphabetize items as they're passed in
+    for info in sorted(info_objects, key=lambda item: item.name):
         if info.hidden and not show_hidden:
             continue
         item = etree.Element('li')
