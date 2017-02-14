@@ -40,6 +40,7 @@
 #include "ComputeCappedWeakPlaneStress.h"
 #include "ComputeCappedWeakInclinedPlaneStress.h"
 #include "ComputeCappedWeakPlaneCosseratStress.h"
+#include "ComputeCappedDruckerPragerStress.h"
 #include "ComputeMultiPlasticityStress.h"
 #include "ComputeCosseratLinearElasticStress.h"
 #include "ComputeCosseratSmallStrain.h"
@@ -116,6 +117,7 @@
 #include "TensorMechanicsPlasticOrthotropic.h"
 #include "TensorMechanicsPlasticMeanCap.h"
 #include "TensorMechanicsPlasticMeanCapTC.h"
+#include "TensorMechanicsPlasticDruckerPrager.h"
 #include "TensorMechanicsPlasticDruckerPragerHyperbolic.h"
 #include "TensorMechanicsHardeningConstant.h"
 #include "TensorMechanicsHardeningGaussian.h"
@@ -232,6 +234,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeCappedWeakPlaneStress);
   registerMaterial(ComputeCappedWeakInclinedPlaneStress);
   registerMaterial(ComputeCappedWeakPlaneCosseratStress);
+  registerMaterial(ComputeCappedDruckerPragerStress);
   registerMaterial(ComputeMultiPlasticityStress);
   registerMaterial(ComputeCosseratLinearElasticStress);
   registerMaterial(ComputeCosseratSmallStrain);
@@ -309,6 +312,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(TensorMechanicsPlasticOrthotropic);
   registerUserObject(TensorMechanicsPlasticMeanCap);
   registerUserObject(TensorMechanicsPlasticMeanCapTC);
+  registerUserObject(TensorMechanicsPlasticDruckerPrager);
   registerUserObject(TensorMechanicsPlasticDruckerPragerHyperbolic);
   registerUserObject(TensorMechanicsHardeningConstant);
   registerUserObject(TensorMechanicsHardeningGaussian);
