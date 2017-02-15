@@ -66,6 +66,7 @@ InputParameters validParams<MooseApp>()
   params.addCommandLineParam<bool>("show_controls", "--show-controls", false, "Shows the Control logic available and executed.");
 
   params.addCommandLineParam<bool>("no_color", "--no-color", false, "Disable coloring of all Console outputs.");
+  params.addCommandLineParam<std::string>("color", "--color [auto,on,off]", "default-on", "Whether to use color in console output (default 'on').");
 
   params.addCommandLineParam<bool>("help", "-h --help", false, "Displays CLI usage statement.");
   params.addCommandLineParam<bool>("minimal", "--minimal", false, "Ignore input file and build a minimal application with Transient executioner.");
@@ -225,8 +226,34 @@ MooseApp::setupOptions()
   else
     Moose::_deprecated_is_error = false;
 
-  // Toggle the color console off
-  Moose::_color_console = !getParam<bool>("no_color");
+  if (isUltimateMaster()) // makes sure coloring isn't reset incorrectly in multi-app settings
+  {
+    // Toggle the color console off
+    Moose::setColorConsole(true, true); // set default color condition
+    if (getParam<bool>("no_color"))
+      Moose::setColorConsole(false);
+
+    char * c_color = std::getenv("MOOSE_COLOR");
+    std::string color = "on";
+    if (c_color)
+      color = c_color;
+    if (getParam<std::string>("color") != "default-on")
+      color = getParam<std::string>("color");
+
+    if (color == "auto")
+      Moose::setColorConsole(true);
+    else if (color == "on")
+      Moose::setColorConsole(true, true);
+    else if (color == "off")
+      Moose::setColorConsole(false);
+    else
+      mooseWarning2("ignoring invalid --color arg (want 'auto', 'on', or 'off')");
+  }
+
+  // this warning goes below --color processing to honor that setting for
+  // the warning. And below settings for warnings/error setup.
+  if (getParam<bool>("no_color"))
+    mooseDeprecated2("The --no-color flag is deprecated. Use '--color off' instead.");
 
   // If there's no threading model active, but the user asked for
   // --n-threads > 1 on the command line, throw a mooseError2.  This is
