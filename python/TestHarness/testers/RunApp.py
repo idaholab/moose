@@ -118,8 +118,6 @@ class RunApp(Tester):
 
         if options.colored == False:
             specs['cli_args'].append('--color off')
-        else:
-            specs['cli_args'].append('--color on')
 
         if options.cli_args:
             specs['cli_args'].insert(0, options.cli_args)
