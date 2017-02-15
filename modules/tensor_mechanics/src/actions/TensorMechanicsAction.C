@@ -38,7 +38,7 @@ template <>
 InputParameters
 validParams<TensorMechanicsAction>()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = validParams<TensorMechanicsActionBase>();
   params.addClassDescription("Set up stress divergence kernels with coordinate system aware logic");
   params.addRequiredParam<std::vector<NonlinearVariableName>>("displacements", "The nonlinear displacement variables for the problem");
   params.addParam<NonlinearVariableName>("temp", "The temperature"); // Deprecated
@@ -86,7 +86,7 @@ validParams<TensorMechanicsAction>()
 }
 
 TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
-  : Action(params),
+  : TensorMechanicsActionBase(params),
     _displacements(getParam<std::vector<NonlinearVariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _coupled_displacements(_ndisp),
@@ -95,8 +95,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _subdomain_ids(),
     _strain(getParam<MooseEnum>("strain").getEnum<Strain>()),
-    _planar_formulation(getParam<MooseEnum>("planar_formulation").getEnum<PlanarFormulation>()),
-    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names"))
+    _planar_formulation(getParam<MooseEnum>("planar_formulation").getEnum<PlanarFormulation>())
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -269,11 +268,10 @@ TensorMechanicsAction::act()
 
     // set material parameters
     auto params = _factory.getValidParams(type);
-    params.applyParameters(parameters(), {"displacements", "use_displaced_mesh", "eigenstrain_names", "scalar_out_of_plane_strain"});
+    params.applyParameters(parameters(), {"displacements", "use_displaced_mesh", "scalar_out_of_plane_strain"});
 
     params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
     params.set<bool>("use_displaced_mesh") = false;
-    params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") = _eigenstrain_names;
     if (isParamValid("scalar_out_of_plane_strain"))
       params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {getParam<NonlinearVariableName>("scalar_out_of_plane_strain")};
 

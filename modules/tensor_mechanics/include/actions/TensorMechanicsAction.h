@@ -7,14 +7,14 @@
 #ifndef TENSORMECHANICSACTION_H
 #define TENSORMECHANICSACTION_H
 
-#include "Action.h"
+#include "TensorMechanicsActionBase.h"
 
 class TensorMechanicsAction;
 
 template <>
 InputParameters validParams<TensorMechanicsAction>();
 
-class TensorMechanicsAction : public Action
+class TensorMechanicsAction : public TensorMechanicsActionBase
 {
 public:
   TensorMechanicsAction(const InputParameters & params);
@@ -78,9 +78,6 @@ protected:
 
   /// use displaced mesh (true unless _strain is SMALL)
   bool _use_displaced_mesh;
-
-  /// names of properties containing eigenstrain tensors to be applied in strain model
-  const std::vector<MaterialPropertyName> _eigenstrain_names;
 
   /// output aux variables to generate for sclar stress/strain tensor quantities
   std::vector<std::string> _generate_output;
