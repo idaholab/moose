@@ -19,10 +19,15 @@
 []
 
 [UserObjects]
+  [./ext_coupler]
+    type = StateExternalCouplingUO
+    eval_names = 'comp1 comp2'
+  [../]
   [./cur_Sim]
     type = StateSimRunner
     model_path = 'path/to/model'
-    seed = 7;
+    seed = 7
+    ext_coupling_UO = ext_coupler
   [../]
 []
 
@@ -42,3 +47,4 @@
   solve = false
   kernel_coverage_check = false
 []
+

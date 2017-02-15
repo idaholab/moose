@@ -5,6 +5,7 @@
 
 #include "StateSimTester.h"
 #include "StateSimRunner.h"
+#include "StateExternalCouplingUO.h"
 
 template<>
 InputParameters validParams<StochasticToolsApp>()
@@ -47,6 +48,7 @@ StochasticToolsApp::registerObjects(Factory & factory)
 {
   registerUserObject(StateSimRunner);
   registerPostprocessor(StateSimTester);
+  registerPostprocessor(StateExternalCouplingUO);
 }
 
 // External entry point for dynamic syntax association
