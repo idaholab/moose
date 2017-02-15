@@ -27,7 +27,7 @@ description.
 !text framework/src/kernels/Diffusion.C line=addClassDescription
 
 When the documentation for this object is generated this string is added to the first portion of the page and the
-system overview table. For example, the [Kernels overview](/Kernels/index.md) includes a table with each object
+system overview table. For example, the [Kernels overview](systems/Kernels/index.md) includes a table with each object
 listed; the table includes the class description from the source code.
 
 ## Object and System Descriptions

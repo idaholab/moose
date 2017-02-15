@@ -1,0 +1,7 @@
+[Tests]
+  [./mms]
+    type = CSVDiff
+    input = advection_mms.i
+    csvdiff = advection_mms_out.csv
+  [../]
+[]

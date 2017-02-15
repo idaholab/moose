@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = Exodiff
+    input = olsson_1d.i
+    exodiff = olsson_1d_out.e
+  [../]
+[]

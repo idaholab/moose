@@ -37,6 +37,7 @@ InputParameters validParams<MultiAppTransfer>()
   MultiMooseEnum multi_transfer_execute_on(params.get<MultiMooseEnum>("execute_on").getRawNames() + " same_as_multiapp", "same_as_multiapp");
   params.set<MultiMooseEnum>("execute_on") = multi_transfer_execute_on;
 
+  params.addParam<bool>("check_multiapp_execute_on", true, "When false the check between the multiapp and transfer execute on flags is not preformed.");
   params.addParam<bool>("displaced_source_mesh", false, "Whether or not to use the displaced mesh for the source mesh.");
   params.addParam<bool>("displaced_target_mesh", false, "Whether or not to use the displaced mesh for the target mesh.");
 
@@ -63,7 +64,7 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters) :
     _displaced_source_mesh(false),
     _displaced_target_mesh(false)
 {
-  if (execFlags() != _multi_app->execFlags())
+  if (getParam<bool>("check_multiapp_execute_on") && (execFlags() != _multi_app->execFlags()))
       mooseDoOnce(mooseWarning2("MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"));
 }
 

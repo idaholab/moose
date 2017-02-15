@@ -40,6 +40,12 @@ protected:
   const PostprocessorValue & _pps_value;
   bool _has_initial_dt;
   Real _initial_dt;
+
+  /// Multiplier applied to the postprocessor value
+  const Real & _scale;
+
+  /// Factor added to the postprocessor value
+  const Real & _factor;
 };
 
 

@@ -148,7 +148,8 @@ OutputWarehouse::outputStep(ExecFlagType type)
     type = EXEC_FORCED;
 
   for (const auto & obj : _all_objects)
-    obj->outputStep(type);
+    if (obj->enabled())
+      obj->outputStep(type);
 
   /**
    * This is one of three locations where we explicitly flush the output buffers during a simulation:

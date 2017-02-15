@@ -44,7 +44,7 @@ class MultiAppTransfer : public Transfer
 public:
   MultiAppTransfer(const InputParameters & parameters);
 
-  enum
+  enum DIRECTION
   {
     TO_MULTIAPP,
     FROM_MULTIAPP
