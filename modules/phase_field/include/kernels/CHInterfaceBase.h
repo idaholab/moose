@@ -14,7 +14,7 @@
 
 /**
  * This is the Cahn-Hilliard equation base class that implements the interfacial or gradient energy term of the equation.
- * See M.R. Tonks et al. / Computational Materials Science 51 (2012) 20–29 for more information.
+ * See M.R. Tonks et al. / Computational Materials Science 51 (2012) 20-29 for more information.
  */
 template<typename T>
 class CHInterfaceBase : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >

@@ -11,7 +11,7 @@
 #include "Action.h"
 
 /**
- * Bicrystal with a circular grain and an embedding outer grainß
+ * Bicrystal with a circular grain and an embedding outer grain
  */
 class BicrystalCircleGrainICAction: public Action
 {

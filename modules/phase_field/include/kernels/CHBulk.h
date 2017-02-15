@@ -15,7 +15,7 @@
  * This is the Cahn-Hilliard equation base class that implements the bulk or
  * local energy term of the equation. It is templated on the type of the mobility,
  * which can be either a number (Real) or a tensor (RealValueTensor).
- * See M.R. Tonks et al. / Computational Materials Science 51 (2012) 20–29 for more information.
+ * See M.R. Tonks et al. / Computational Materials Science 51 (2012) 20-29 for more information.
  * Note that the function computeGradDFDCons MUST be overridden in any kernel that inherits from
  * CHBulk. Use CHMath as an example of how this works.
  */
