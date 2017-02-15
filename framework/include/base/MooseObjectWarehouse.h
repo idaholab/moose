@@ -19,10 +19,11 @@
 #include "MooseObjectWarehouseBase.h"
 
 /**
- * A storage container for MooseObjects.
+ * A storage container for MooseObjects that inherit from SetupInterface.
  *
- * This container is stores threaded copies and includes automatic storage of block/boundary
- * restricted objects. It also, maintains lists of active objects for use by Controls.
+ * Objects that inherit from SetupInterface have various functions (e.g., initialSetup). This
+ * class provides convenience functions for looping over all active objects stored in the warehouse and
+ * calling the setup methods.
  */
 template<typename T>
 class MooseObjectWarehouse : public MooseObjectWarehouseBase<T>
