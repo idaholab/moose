@@ -29,9 +29,12 @@
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/eigen_system.h"
 
-namespace Moose {
 #if LIBMESH_HAVE_SLEPC
-void assemble_matrix(EquationSystems & es, const std::string & system_name)
+
+namespace Moose {
+
+void
+assemble_matrix(EquationSystems & es, const std::string & system_name)
 {
   EigenProblem * p = es.parameters.get<EigenProblem *>("_eigen_problem");
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
@@ -43,37 +46,20 @@ void assemble_matrix(EquationSystems & es, const std::string & system_name)
     if (eigen_system.matrix_B)
       p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_B, Moose::KT_EIGEN);
     else
-      mooseError("It is a generalized eigenvalue problem but matrix B is empty \n");
+      mooseError("It is a generalized eigenvalue problem but matrix B is empty\n");
   }
 }
-#else
-void assemble_matrix(EquationSystems & /*es*/, const std::string & /*system_name*/)
-{
-  mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh\n");
-}
-#endif /* LIBMESH_HAVE_SLEPC */
+
 }
 
-
-#if LIBMESH_HAVE_SLEPC
 NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const std::string & name)
-    : NonlinearSystemBase(eigen_problem, eigen_problem.es().add_system<TransientEigenSystem>(name), name),
+  : NonlinearSystemBase(eigen_problem, eigen_problem.es().add_system<TransientEigenSystem>(name), name),
     _transient_sys(eigen_problem.es().get_system<TransientEigenSystem>(name)),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired())
 {
-  // Give the system a pointer to the matrix assembly
-  // function defined below.
   sys().attach_assemble_function(Moose::assemble_matrix);
 }
-#else
-NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & /*eigen_problem*/, const std::string & /*name*/)
-{
-  mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh\n");
-}
-#endif /* LIBMESH_HAVE_SLEPC */
 
-
-#if LIBMESH_HAVE_SLEPC
 void
 NonlinearEigenSystem::solve()
 {
@@ -135,17 +121,6 @@ NonlinearEigenSystem::nonlinearSolver()
   return NULL;
 }
 
-const std::pair<Real, Real>
-NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
-{
-  unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
-  if (n >= n_converged_eigenvalues)
-  {
-    mooseError(n, " not in [0, ", n_converged_eigenvalues, ")");
-  }
-  return _transient_sys.get_eigenpair(n);
-}
-
 void
 NonlinearEigenSystem::addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD_ID tid)
 {
@@ -174,4 +149,22 @@ NonlinearEigenSystem::checkIntegrity()
     }
   }
 }
+
+const std::pair<Real, Real>
+NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
+{
+  unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
+  if (n >= n_converged_eigenvalues)
+    mooseError(n, " not in [0, ", n_converged_eigenvalues, ")");
+  return _transient_sys.get_eigenpair(n);
+}
+
+#else
+
+NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const std::string & /*name*/)
+  : libMesh::ParallelObject(eigen_problem)
+{
+  mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh\n");
+}
+
 #endif /* LIBMESH_HAVE_SLEPC */

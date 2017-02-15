@@ -30,20 +30,16 @@
 // forward declarations
 class EigenProblem;
 
-/**
- * Nonlinear system to be solved
- *
- * It is a part of FEProblemBase ;-)
- */
-class NonlinearEigenSystem
 #if LIBMESH_HAVE_SLEPC
-                            : public NonlinearSystemBase
-#endif /* LIBMESH_HAVE_SLEPC */
+
+/**
+ * Nonlinear eigenvalue system to be solved
+ */
+class NonlinearEigenSystem : public NonlinearSystemBase
 {
 public:
   NonlinearEigenSystem(EigenProblem & problem, const std::string & name);
 
-#if LIBMESH_HAVE_SLEPC
   virtual void solve() override;
 
   /**
@@ -61,25 +57,20 @@ public:
 
   /**
    * Returns the convergence state
+   *
    * @return true if converged, otherwise false
    */
   virtual bool converged() override;
 
   virtual NumericVector<Number> & RHS() override;
 
-  // return the Nth converged eigenvlue <real, imag>
-  virtual const std::pair<Real, Real> getNthConvergedEigenvalue(dof_id_type n);
-
-  // return all converged eigenvalues
-  virtual const std::vector<std::pair<Real, Real> > & getAllConvergedEigenvalues() { return _eigen_values; }
-
   virtual void addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD_ID tid) override;
 
-  // For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or Neumann)
-  // boundary conditions are  not allowed.
-  void checkIntegrity();
-
-  // return the number of converged eigenvlues
+  /**
+   * Get the number of converged eigenvalues
+   *
+   * @return The number of converged eigenvalues
+   */
   virtual unsigned int getNumConvergedEigenvalues() const { return _transient_sys.get_n_converged(); };
 
   virtual NonlinearSolver<Number> * nonlinearSolver() override;
@@ -89,10 +80,51 @@ public:
   virtual NumericVector<Number> & solutionOlder() override { return *_transient_sys.older_local_solution; }
 
   virtual TransientEigenSystem & sys() { return _transient_sys; }
+
+  /**
+   * For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or Neumann)
+   * boundary conditions are not allowed.
+   */
+  void checkIntegrity();
+
+  /**
+   * Return the Nth converged eigenvalue.
+   *
+   * @return The Nth converged eigenvalue as a complex number, i.e. the first and the second number is the real and the imaginary part of
+   * the eigenvalue, respectively.
+   */
+  virtual const std::pair<Real, Real> getNthConvergedEigenvalue(dof_id_type n);
+
+  /**
+   * Get the number of converged eigenvalues
+   *
+   * @return all converged eigenvalues as complex numbers
+   */
+  virtual const std::vector<std::pair<Real, Real>> & getAllConvergedEigenvalues() { return _eigen_values; }
+
 protected:
   TransientEigenSystem & _transient_sys;
-  std::vector<std::pair<Real, Real> > _eigen_values;
+
+  std::vector<std::pair<Real, Real>> _eigen_values;
   unsigned int _n_eigen_pairs_required;
-#endif /* LIBMESH_HAVE_SLEPC */
 };
+
+#else
+
+class NonlinearEigenSystem : public libMesh::ParallelObject
+{
+public:
+  NonlinearEigenSystem(EigenProblem & problem, const std::string & name);
+
+  /**
+   * Returns the convergence state
+   * @return true if converged, otherwise false
+   */
+  bool converged() { return false; }
+
+  void checkIntegrity() { }
+};
+
+#endif
+
 #endif /* NONLINEAREIGENSYSTEM_H */

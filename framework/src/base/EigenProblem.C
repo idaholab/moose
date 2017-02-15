@@ -128,11 +128,8 @@ void
 EigenProblem::checkProblemIntegrity()
 {
   FEProblemBase::checkProblemIntegrity();
-#if LIBMESH_HAVE_SLEPC
   _nl_eigen->checkIntegrity();
-#endif
 }
-
 
 void
 EigenProblem::solve()
@@ -154,11 +151,8 @@ EigenProblem::solve()
   Moose::perf_log.pop("Eigen_solve()", "Execution");
 }
 
-
-#if LIBMESH_HAVE_SLEPC
 bool
 EigenProblem::converged()
 {
   return _nl_eigen->converged();
 }
-#endif
