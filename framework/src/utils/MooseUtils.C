@@ -372,6 +372,14 @@ MaterialPropertyStorageDump(const HashMap<const libMesh::Elem *, HashMap<unsigne
   }
 }
 
+std::string &
+removeColor(std::string & msg)
+{
+  pcrecpp::RE re("(\\33\\[3[0-7]m))", pcrecpp::DOTALL());
+  re.GlobalReplace(std::string(""), &msg);
+  return msg;
+}
+
 void
 indentMessage(const std::string & prefix, std::string & message, const char* color/*= COLOR_CYAN*/)
 {
