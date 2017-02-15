@@ -13,6 +13,7 @@ template<>
 InputParameters validParams<NSVelocityAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Velocity auxiliary value.");
   params.addRequiredCoupledVar(NS::density, "Density (conserved form)");
   params.addRequiredCoupledVar("momentum", "Momentum (conserved form)");
   return params;

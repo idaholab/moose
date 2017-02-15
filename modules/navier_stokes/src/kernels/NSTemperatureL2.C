@@ -16,6 +16,7 @@ template<>
 InputParameters validParams<NSTemperatureL2>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("This class was originally used to solve for the temperature using an L2-projection.");
   params.addRequiredCoupledVar(NS::velocity_x, "x-direction velocity component");
   params.addCoupledVar(NS::velocity_y, "y-direction velocity component"); // only reqiured in >= 2D
   params.addCoupledVar(NS::velocity_z, "z-direction velocity component"); // only required in 3D

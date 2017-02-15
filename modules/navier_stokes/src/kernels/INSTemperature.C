@@ -13,6 +13,7 @@ InputParameters validParams<INSTemperature>()
 {
   InputParameters params = validParams<Kernel>();
 
+  params.addClassDescription("This class computes the residual and Jacobian contributions for the incompressible Navier-Stokes temperature (energy) equation.");
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D

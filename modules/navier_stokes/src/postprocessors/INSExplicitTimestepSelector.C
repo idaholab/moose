@@ -15,6 +15,8 @@ InputParameters validParams<INSExplicitTimestepSelector>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
 
+  params.addClassDescription("Postprocessor that computes the minimum value of h_min/|u|, where |u| is coupled in as an aux variable.");
+
   // Coupled variables
   params.addRequiredCoupledVar("vel_mag", "Velocity magnitude");
 

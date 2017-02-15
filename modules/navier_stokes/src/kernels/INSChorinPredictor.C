@@ -13,6 +13,7 @@ InputParameters validParams<INSChorinPredictor>()
 {
   InputParameters params = validParams<Kernel>();
 
+  params.addClassDescription("This class computes the 'Chorin' Predictor equation in fully-discrete (both time and space) form.");
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D

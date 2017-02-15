@@ -11,6 +11,7 @@ template<>
 InputParameters validParams<WedgeFunction>()
 {
   InputParameters params = validParams<Function>();
+  params.addClassDescription("Function object for tests/ins/jeffery_hamel responsible for setting the exact value of the velocity and pressure variables.");
   params.addRequiredParam<Real>("alpha_degrees", "The wedge half-angle size (in degrees) used in computing 'f' below.");
   params.addRequiredParam<Real>("Re", "The Reynolds number used in computing 'f' below.");
   params.addRequiredRangeCheckedParam<unsigned int>("var_num", "var_num<3", "The variable (0==vel_x, 1==vel_y, 2==p) we are computing the exact solution for.");

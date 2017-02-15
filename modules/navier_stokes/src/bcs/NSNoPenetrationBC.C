@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<NSNoPenetrationBC>()
 {
   InputParameters params = validParams<MooseObject>();
+  params.addClassDescription("This class facilitates adding solid wall 'no penetration' BCs for the Euler equations.");
   params.addRequiredParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
   params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
 

@@ -15,6 +15,7 @@ InputParameters validParams<NSInflowThermalBC>()
 {
   InputParameters params = validParams<NodalBC>();
 
+  params.addClassDescription("This class is used on a boundary where the incoming flow values (rho, u, v, T) are all completely specified.");
   // Boundary condition values, all required except for velocity which defaults to zero.
   params.addRequiredParam<Real>("specified_rho", "Density of incoming flow");
   params.addRequiredParam<Real>("specified_temperature", "Temperature of incoming flow");

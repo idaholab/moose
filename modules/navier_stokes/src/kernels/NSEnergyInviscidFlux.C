@@ -17,6 +17,7 @@ InputParameters
 validParams<NSEnergyInviscidFlux>()
 {
   InputParameters params = validParams<NSKernel>();
+  params.addClassDescription("This class computes the inviscid part of the energy flux.");
   params.addRequiredCoupledVar(NS::enthalpy, "total enthalpy");
   return params;
 }

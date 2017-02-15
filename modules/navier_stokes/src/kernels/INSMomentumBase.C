@@ -12,6 +12,7 @@ InputParameters validParams<INSMomentumBase>()
 {
   InputParameters params = validParams<Kernel>();
 
+  params.addClassDescription("This class computes the spatial part of the momentum equation residual and Jacobian for the incompressible Navier-Stokes momentum equation, calling a virtual function to get the viscous contribution.");
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", 0, "y-velocity"); // only required in 2D and 3D

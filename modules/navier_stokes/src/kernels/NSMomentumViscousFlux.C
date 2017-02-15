@@ -11,6 +11,7 @@ InputParameters
 validParams<NSMomentumViscousFlux>()
 {
   InputParameters params = validParams<NSKernel>();
+  params.addClassDescription("Derived instance of the NSViscousFluxBase class for the momentum equations.");
   params.addRequiredParam<unsigned int>("component", "");
   return params;
 }

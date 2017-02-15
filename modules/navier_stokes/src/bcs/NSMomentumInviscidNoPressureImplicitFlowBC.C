@@ -11,6 +11,7 @@ InputParameters
 validParams<NSMomentumInviscidNoPressureImplicitFlowBC>()
 {
   InputParameters params = validParams<NSMomentumInviscidBC>();
+  params.addClassDescription("Momentum equation boundary condition used when pressure *is not* integrated by parts.");
   return params;
 }
 

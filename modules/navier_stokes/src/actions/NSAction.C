@@ -17,6 +17,7 @@ InputParameters validParams<NSAction>()
 {
   InputParameters params = validParams<Action>();
 
+  params.addClassDescription("This is a base Action class for the Navier-Stokes module which is responsible for building lists of names that other Actions can subsequently use.  Subclasses should call its act() function prior to doing their own work.");
   return params;
 }
 

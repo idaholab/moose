@@ -14,6 +14,7 @@ InputParameters
 validParams<NSSUPGEnergy>()
 {
   InputParameters params = validParams<NSSUPGBase>();
+  params.addClassDescription("Compute residual and Jacobian terms form the SUPG terms in the energy equation.");
   return params;
 }
 

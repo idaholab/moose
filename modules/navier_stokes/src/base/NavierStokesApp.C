@@ -107,6 +107,45 @@
 // Functions
 #include "WedgeFunction.h"
 
+// CNSFV (Compressible Navier-Stokes by Finite Volume)
+#include "CNSFVMachIC.h"
+#include "CNSFVPressureIC.h"
+
+#include "CNSFVNoSlopeReconstruction.h"
+#include "CNSFVGreenGaussSlopeReconstruction.h"
+#include "CNSFVLeastSquaresSlopeReconstruction.h"
+#include "CNSFVSlopeReconstructionOneD.h"
+#include "CNSFVNoSlopeLimiting.h"
+#include "CNSFVMinmaxSlopeLimiting.h"
+#include "CNSFVWENOSlopeLimiting.h"
+#include "CNSFVSlopeLimitingOneD.h"
+#include "CNSFVHLLCInternalSideFlux.h"
+#include "CNSFVFreeInflowBoundaryFlux.h"
+#include "CNSFVFreeOutflowBoundaryFlux.h"
+#include "CNSFVRiemannInvariantBoundaryFlux.h"
+#include "CNSFVHLLCInflowOutflowBoundaryFlux.h"
+#include "CNSFVHLLCSlipBoundaryFlux.h"
+#include "CNSFVFreeInflowBCUserObject.h"
+#include "CNSFVFreeOutflowBCUserObject.h"
+#include "CNSFVCharacteristicBCUserObject.h"
+#include "CNSFVRiemannInvariantBCUserObject.h"
+#include "CNSFVSlipBCUserObject.h"
+
+#include "CNSFVBC.h"
+
+#include "CNSFVKernel.h"
+
+#include "CNSFVMaterial.h"
+
+#include "CNSFVEntropyProductionAux.h"
+#include "CNSFVMachAux.h"
+#include "CNSFVPressureAux.h"
+#include "CNSFVSpecificTotalEnthalpyAux.h"
+
+#include "CNSFVIdealGasEntropyL2Error.h"
+#include "CNSFVIdealGasTotalEnthalpyL2Error.h"
+#include "CNSFVTimeStepLimit.h"
+
 template<>
 InputParameters validParams<NavierStokesApp>()
 {
@@ -245,6 +284,45 @@ NavierStokesApp::registerObjects(Factory & factory)
 
   // Functions
   registerFunction(WedgeFunction);
+
+  // CNSFV
+  registerInitialCondition(CNSFVMachIC);
+  registerInitialCondition(CNSFVPressureIC);
+
+  registerUserObject(CNSFVNoSlopeReconstruction);
+  registerUserObject(CNSFVGreenGaussSlopeReconstruction);
+  registerUserObject(CNSFVLeastSquaresSlopeReconstruction);
+  registerUserObject(CNSFVSlopeReconstructionOneD);
+  registerUserObject(CNSFVNoSlopeLimiting);
+  registerUserObject(CNSFVMinmaxSlopeLimiting);
+  registerUserObject(CNSFVWENOSlopeLimiting);
+  registerUserObject(CNSFVSlopeLimitingOneD);
+  registerUserObject(CNSFVHLLCInternalSideFlux);
+  registerUserObject(CNSFVFreeInflowBoundaryFlux);
+  registerUserObject(CNSFVFreeOutflowBoundaryFlux);
+  registerUserObject(CNSFVRiemannInvariantBoundaryFlux);
+  registerUserObject(CNSFVHLLCInflowOutflowBoundaryFlux);
+  registerUserObject(CNSFVHLLCSlipBoundaryFlux);
+  registerUserObject(CNSFVFreeInflowBCUserObject);
+  registerUserObject(CNSFVFreeOutflowBCUserObject);
+  registerUserObject(CNSFVCharacteristicBCUserObject);
+  registerUserObject(CNSFVRiemannInvariantBCUserObject);
+  registerUserObject(CNSFVSlipBCUserObject);
+
+  registerBoundaryCondition(CNSFVBC);
+
+  registerKernel(CNSFVKernel);
+
+  registerMaterial(CNSFVMaterial);
+
+  registerAux(CNSFVEntropyProductionAux);
+  registerAux(CNSFVMachAux);
+  registerAux(CNSFVPressureAux);
+  registerAux(CNSFVSpecificTotalEnthalpyAux);
+
+  registerPostprocessor(CNSFVIdealGasEntropyL2Error);
+  registerPostprocessor(CNSFVIdealGasTotalEnthalpyL2Error);
+  registerPostprocessor(CNSFVTimeStepLimit);
 }
 
 // External entry point for dynamic syntax association

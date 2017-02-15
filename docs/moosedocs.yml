@@ -154,3 +154,23 @@ markdown_extensions:
                       - /DGKernels
                       - /Materials
                       - /UserObjects
+              - navier_stokes:
+                  name: Navier-Stokes
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - modules/navier_stokes/src
+                      - modules/navier_stokes/include
+                  hide:
+                      - /AuxVariables/*/InitialCondition/
+                      - /Variables/*/InitialCondition/
+                      - /AuxKernels
+                      - /BCs
+                      - /Bounds
+                      - /DGKernels
+                      - /Functions
+                      - /ICs
+                      - /Kernels
+                      - /Materials
+                      - /Postprocessors
+                      - /UserObjects
+                      - /Modules

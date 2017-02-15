@@ -17,6 +17,7 @@ InputParameters validParams<NSSpecificVolumeAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
+  params.addClassDescription("Auxiliary kernel for computing the specific volume (1/rho) of the fluid.");
   params.addRequiredCoupledVar(NS::density, "density");
 
   return params;

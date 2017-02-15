@@ -17,6 +17,7 @@ InputParameters validParams<NSInternalEnergyAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
+  params.addClassDescription("Auxiliary kernel for computing the internal energy of the fluid.");
   params.addRequiredCoupledVar(NS::density, "density");
   params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
   params.addCoupledVar(NS::velocity_y, "y-velocity"); // Only required in >= 2D

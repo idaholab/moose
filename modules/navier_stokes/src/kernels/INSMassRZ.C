@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<INSMassRZ>()
 {
   InputParameters params = validParams<INSMass>();
+  params.addClassDescription("This class computes the mass equation residual and Jacobian contributions for the incompressible Navier-Stokes momentum equation in RZ coordinates.");
   return params;
 }
 

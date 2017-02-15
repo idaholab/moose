@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<INSMomentumTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
+  params.addClassDescription("This class computes the time derivative for the incompressible Navier-Stokes momentum equation.");
   params.addRequiredParam<Real>("rho", "density");
   return params;
 }

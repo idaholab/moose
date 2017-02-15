@@ -24,6 +24,7 @@ InputParameters validParams<NavierStokesMaterial>()
 {
   InputParameters params = validParams<Material>();
 
+  params.addClassDescription("This is the base class all materials should use if you are trying to use the Navier-Stokes Kernels.");
   params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
   params.addCoupledVar(NS::velocity_y, "y-velocity"); // only required in >= 2D
   params.addCoupledVar(NS::velocity_z, "z-velocity"); // only required in 3D

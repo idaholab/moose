@@ -13,6 +13,7 @@ InputParameters validParams<INSMomentumNoBCBCLaplaceForm>()
 {
   InputParameters params = validParams<INSMomentumNoBCBCBase>();
 
+  params.addClassDescription("This class implements the 'No BC' boundary condition based on the 'Laplace' form of the viscous stress tensor.");
   return params;
 }
 

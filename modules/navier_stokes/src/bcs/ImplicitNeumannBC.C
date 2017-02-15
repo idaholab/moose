@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<ImplicitNeumannBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
+  params.addClassDescription("This class implements a form of the Neumann boundary condition in which the boundary term is treated 'implicitly'.");
   return params;
 }
 

@@ -13,6 +13,7 @@ InputParameters validParams<INSMomentumNoBCBCTractionForm>()
 {
   InputParameters params = validParams<INSMomentumNoBCBCBase>();
 
+  params.addClassDescription("This class implements the 'No BC' boundary condition based on the 'traction' form of the viscous stress tensor.");
   return params;
 }
 

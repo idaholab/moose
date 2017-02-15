@@ -15,6 +15,7 @@ InputParameters validParams<Air>()
 {
   InputParameters params = validParams<NavierStokesMaterial>();
 
+  params.addClassDescription("Air.");
   // Allow the user to specify the dynamic viscosity from the input file,
   // otherwise use the value at 300K by default
   params.addParam<Real>("dynamic_viscosity", 1.9830e-5, "in kg/m/s");

@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<INSMomentumTractionFormRZ>()
 {
   InputParameters params = validParams<INSMomentumTractionForm>();
+  params.addClassDescription("This class computes additional momentum equation residual and Jacobian contributions for the incompressible Navier-Stokes momentum equation in RZ (axisymmetric cylindrical) coordinates.");
   return params;
 }
 

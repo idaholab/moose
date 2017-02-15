@@ -17,6 +17,7 @@ template<>
 InputParameters validParams<NSStagnationBC>()
 {
   InputParameters params = validParams<NodalBC>();
+  params.addClassDescription("This is the base class for the 'imposed stagnation' value boundary conditions.");
   params.addRequiredCoupledVar("mach", "Mach number");
   params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
   return params;

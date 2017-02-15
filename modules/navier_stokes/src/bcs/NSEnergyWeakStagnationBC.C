@@ -13,6 +13,7 @@ template<>
 InputParameters validParams<NSEnergyWeakStagnationBC>()
 {
   InputParameters params = validParams<NSWeakStagnationBaseBC>();
+  params.addClassDescription("The inviscid energy BC term with specified normal flow.");
   return params;
 }
 

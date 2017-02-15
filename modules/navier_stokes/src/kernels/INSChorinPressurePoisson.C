@@ -13,6 +13,7 @@ InputParameters validParams<INSChorinPressurePoisson>()
 {
   InputParameters params = validParams<Kernel>();
 
+  params.addClassDescription("This class computes the pressure Poisson solve which is part of the 'split' scheme used for solving the incompressible Navier-Stokes equations.");
   // Coupled variables
   params.addRequiredCoupledVar("u_star", "star x-velocity");
   params.addCoupledVar("v_star", "star y-velocity"); // only required in 2D and 3D

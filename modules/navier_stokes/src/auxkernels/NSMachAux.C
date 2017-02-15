@@ -20,6 +20,7 @@ InputParameters validParams<NSMachAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
+  params.addClassDescription("Auxiliary kernel for computing the Mach number assuming an ideal gas.");
   params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
   params.addCoupledVar(NS::velocity_y, "y-velocity"); // Only required in >= 2D
   params.addCoupledVar(NS::velocity_z, "z-velocity"); // Only required in 3D...

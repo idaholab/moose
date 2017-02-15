@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<INSTemperatureTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
+  params.addClassDescription("This class computes the time derivative for the incompressible Navier-Stokes momentum equation.");
   params.addRequiredParam<Real>("rho", "density");
   params.addRequiredParam<Real>("cp", "specific heat");
   return params;
