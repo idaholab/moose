@@ -66,7 +66,7 @@ public:
    * Get the name of the object
    * @return The name of the object
    */
-  const std::string & name() { return _name; }
+  const std::string & name() const { return _name; }
 
   /**
    * Get the parameters of the object
@@ -306,7 +306,7 @@ public:
    *
    * @see MultiApp TransientMultiApp
    */
-  std::map<std::string, unsigned int> getOutputFileNumbers();
+  std::map<std::string, unsigned int> getOutputFileNumbers() const;
 
   /**
    * Get the OutputWarehouse objects
@@ -434,9 +434,6 @@ public:
 
   /// Returns whether the Application is running in check input mode
   bool checkInput() const { return _check_input; }
-
-  /// Returns the root app for this app or itself if it has no parent.
-  const MooseApp & root() const;
 
 protected:
   /**
@@ -583,8 +580,13 @@ protected:
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;
 
 private:
-  /// pointer to the parent/owning MultiApp object if any.
-  MooseApp * _parent = nullptr;
+  /// Returns the root app for this app or itself if it has no parent.
+  const MooseApp & root() const;
+
+  /// Pointer to the parent/owning MooseApp object if any.
+  /// It is important that this stay const and private to preserve multi-app
+  /// isolation.
+  const MooseApp * _parent = nullptr;
 
   /** Method for creating the minimum required actions for an application (no input file)
    *

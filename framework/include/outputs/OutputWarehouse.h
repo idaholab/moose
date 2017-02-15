@@ -95,7 +95,7 @@ public:
    * Extracts the file numbers from the output objects
    * @return Map of file numbers for the output objects
    */
-  std::map<std::string, unsigned int> getFileNumbers();
+  std::map<std::string, unsigned int> getFileNumbers() const;
 
   /**
    * Stores the common InputParameters object

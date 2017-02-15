@@ -536,7 +536,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   std::string full_name = multiapp_name.str();
 
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
-  app_params.set<MooseApp *>("_parent") = &_app;
+  app_params.set<const MooseApp *>("_parent") = &_app;
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
   MooseApp * app = AppFactory::instance().create(_app_type, full_name, app_params, _my_comm);
   _apps[i] = app;

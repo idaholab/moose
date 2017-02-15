@@ -236,7 +236,7 @@ MooseApp::MooseApp(InputParameters parameters)
 {
   if (isParamValid("_parent"))
   {
-    _parent = parameters.getCheckedPointerParam<MooseApp *>("_parent");
+    _parent = parameters.getCheckedPointerParam<const MooseApp *>("_parent");
     _restart = _parent->isRestarting();
     _recover = _parent->isRecovering();
     if (_parent->multiAppLevel() > 0)
@@ -1268,7 +1268,7 @@ MooseApp::multiAppLevel() const
 }
 
 std::map<std::string, unsigned int>
-MooseApp::getOutputFileNumbers()
+MooseApp::getOutputFileNumbers() const
 {
   if (isUltimateMaster())
     return _output_warehouse.getFileNumbers();

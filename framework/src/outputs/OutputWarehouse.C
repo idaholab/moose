@@ -233,7 +233,7 @@ OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input, unsig
 }
 
 std::map<std::string, unsigned int>
-OutputWarehouse::getFileNumbers()
+OutputWarehouse::getFileNumbers() const
 {
 
   std::map<std::string, unsigned int> output;
