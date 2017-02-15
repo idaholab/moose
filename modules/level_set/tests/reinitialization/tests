@@ -1,0 +1,8 @@
+[Tests]
+  [./full]
+    # Runs two steps of a full reinitialization problem just to make sure it continues to work
+    type = Exodiff
+    input = master.i
+    exodiff = master_out.e
+  [../]
+[]

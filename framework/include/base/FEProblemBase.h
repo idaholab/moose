@@ -31,6 +31,7 @@
 #include "ExecuteMooseObjectWarehouse.h"
 #include "AuxGroupExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
+#include "MultiAppTransfer.h"
 #include "NonlinearSystem.h"
 
 // libMesh includes
@@ -663,6 +664,13 @@ public:
    * Get a MultiApp object by name.
    */
   std::shared_ptr<MultiApp> getMultiApp(const std::string & multi_app_name);
+
+  /**
+   * Execute MultiAppTransfers associate with execution flag and direction.
+   * @param type The execution flag to execute.
+   * @param direction The direction (to or from) to transfer.
+   */
+  void execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECTION direction);
 
   /**
    * Execute the MultiApps associated with the ExecFlagType

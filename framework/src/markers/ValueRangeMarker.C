@@ -38,7 +38,6 @@ ValueRangeMarker::ValueRangeMarker(const InputParameters & parameters) :
     _lower_bound(parameters.get<Real>("lower_bound")),
     _upper_bound(parameters.get<Real>("upper_bound")),
     _buffer_size(parameters.get<Real>("buffer_size")),
-
     _third_state(getParam<MooseEnum>("third_state").getEnum<MarkerValue>()),
     _inside(getParam<bool>("invert") ? COARSEN : REFINE),
     _outside(getParam<bool>("invert") ? REFINE : COARSEN),

@@ -154,6 +154,12 @@ public:
   void uniformRefineWithProjection();
 
   /**
+   * Allow adaptivity to be toggled programatically.
+   * @param state The adaptivity state (on/off).
+   */
+  void setAdpaptivityOn(bool state) { _mesh_refinement_on = state; }
+
+  /**
    * Is adaptivity on?
    *
    * @return true if we do mesh adaptivity, otherwise false
@@ -194,6 +200,11 @@ public:
    * Set the maximum refinement level (for the new Adaptivity system).
    */
   void setMaxHLevel(unsigned int level) { _max_h_level = level; }
+
+  /**
+   * Return the maximum h-level.
+   */
+  unsigned int getMaxHLevel() { return _max_h_level; }
 
   /**
    * Set the interval (number of timesteps) between refinement steps.

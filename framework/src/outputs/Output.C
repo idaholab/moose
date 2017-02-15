@@ -59,6 +59,7 @@ InputParameters validParams<Output>()
   params.addPrivateParam<bool>("_built_by_moose", false);
 
   // Register this class as base class
+  params.declareControllable("enable");
   params.registerBase("Output");
 
   return params;
