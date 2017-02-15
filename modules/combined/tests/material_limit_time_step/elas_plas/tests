@@ -1,0 +1,22 @@
+[Tests]
+  [./nl1]
+    type = 'Exodiff'
+    input = 'nafems_nl1.i'
+    exodiff = 'nafems_nl1_out.e'
+  [../]
+  [./nl1h]
+    type = 'Exodiff'
+    input = 'nafems_nl1h.i'
+    exodiff = 'nafems_nl1h_out.e'
+  [../]
+  [./nl1_lim]
+    type = 'Exodiff'
+    input = 'nafems_nl1_lim.i'
+    exodiff = 'nafems_nl1_lim_out.e'
+  [../]
+  [./nl1h_lim]
+    type = 'Exodiff'
+    input = 'nafems_nl1h_lim.i'
+    exodiff = 'nafems_nl1h_lim_out.e'
+  [../]
+[]
