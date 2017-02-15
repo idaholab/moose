@@ -100,7 +100,9 @@ InputParameters validParams<MooseApp>()
 
   params.addCommandLineParam<bool>("error", "--error", false, "Turn all warnings into errors");
 
-  params.addCommandLineParam<bool>("timing", "-t --timing", false, "Enable all performance logging for timing purposes. This will disable all screen output of performance logs for all Console objects.");
+  params.addCommandLineParam<bool>("timing", "-t --timing", false, "Enable all performance logging for timing purposes. This will disable all "
+                                   "screen output of performance logs for all Console objects.");
+  params.addCommandLineParam<bool>("no_timing", "--no-timing", false, "Disabled performance logging. Overrides -t or --timing if passed in conjunction with this flag");
 
   // Legacy Flags
   params.addParam<bool>("use_legacy_uo_aux_computation", false, "Set to true to have MOOSE recompute *all* AuxKernel types every time *any* UserObject type is executed.\nThis behavoir is non-intuitive and will be removed late fall 2014, The default is controlled through MooseApp");
@@ -203,7 +205,10 @@ MooseApp::setupOptions()
   _distributed_mesh_on_command_line = getParam<bool>("distributed_mesh");
 
   _half_transient = getParam<bool>("half_transient");
-  _pars.set<bool>("timing") = getParam<bool>("timing");
+
+  // The no_timing flag takes precedence over the timing flag.
+  if (getParam<bool>("no_timing"))
+    _pars.set<bool>("timing") = false;
 
   if (isParamValid("trap_fpe") && isParamValid("no_trap_fpe"))
     mooseError2("Cannot use both \"--trap-fpe\" and \"--no-trap-fpe\" flags.");
