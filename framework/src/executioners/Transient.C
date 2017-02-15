@@ -413,7 +413,7 @@ Transient::computeDT(bool first)
     updateStepperInfo(first);
 
     if (!_fe_problem.getStepperInfo().converged() && _fe_problem.getStepperInfo().dt() <= dtMin())
-      mooseError("Solve failed and timestep already at or below dtmin, cannot continue!");
+      mooseError2("Solve failed and timestep already at or below dtmin, cannot continue!");
 
     _new_dt = _fe_problem.computeDT();
 
@@ -426,7 +426,7 @@ Transient::computeDT(bool first)
     if (si.restoreTime() != -1)
     {
       if (_backups.count(si.restoreTime()) == 0)
-        mooseError("no backup available for requested restore time");
+        mooseError2("no backup available for requested restore time");
       _app.restore(_backups[si.restoreTime()]);
       computeDT(); // recursive call necessary because restore modifies state _si depends on
     }
@@ -872,14 +872,6 @@ Transient::lastSolveConverged()
 void
 Transient::preExecute()
 {
-  // Add time period start times to sync times
-  // const std::vector<MooseSharedPointer<Control> > & controls = _problem.getControlWarehouse().getActiveObjects();
-  // for (auto & control : controls)
-  // {
-  //   MooseSharedPointer<TimePeriod> tp = MooseSharedNamespace::dynamic_pointer_cast<TimePeriod>(control);
-  //   if (tp)
-  //     _time_stepper->addSyncTime(tp->getSyncTimes());
-  // }
   if (_time_stepper)
     _time_stepper->preExecute();
 }
@@ -907,7 +899,7 @@ void
 Transient::setupTimeIntegrator()
 {
   if (_time_scheme.isValid() && _problem.hasTimeIntegrator())
-    mooseError("You cannot specify time_scheme in the Executioner and independently add a TimeIntegrator to the system at the same time");
+    mooseError2("You cannot specify time_scheme in the Executioner and independently add a TimeIntegrator to the system at the same time");
 
   if (!_problem.hasTimeIntegrator())
   {
@@ -926,7 +918,7 @@ Transient::setupTimeIntegrator()
     case 4: ti_str = "ExplicitMidpoint"; break;
     case 5: ti_str = "LStableDirk2"; break;
     case 6: ti_str = "ExplicitTVDRK2"; break;
-    default: mooseError("Unknown scheme"); break;
+    default: mooseError2("Unknown scheme"); break;
     }
 
     InputParameters params = _app.getFactory().getValidParams(ti_str);

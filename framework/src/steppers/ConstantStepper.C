@@ -49,5 +49,5 @@ ConstantStepper::computeDT()
 Real
 ConstantStepper::computeFailedDT()
 {
-  mooseError("Solve failed!  ConstantStepper does not allow cutting the timestep! \nYou may want to change your Stepper to something more sophisticated like SimpleStepper.");
+  mooseError2("Solve failed!  ConstantStepper does not allow cutting the timestep! \nYou may want to change your Stepper to something more sophisticated like SimpleStepper.");
 }
