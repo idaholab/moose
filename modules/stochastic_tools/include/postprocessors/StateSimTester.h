@@ -9,10 +9,10 @@
 #define STATESIMTESTER_H
 
 #include "GeneralPostprocessor.h"
-#include "StateSimRunner.h"
 
 //Forward Declarations
 class StateSimTester;
+class StateSimRunner;
 
 // libMesh forward declarations
 namespace libMesh

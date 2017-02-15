@@ -8,10 +8,14 @@
 #ifndef STATESIMRUNNER_H
 #define STATESIMRUNNER_H
 
-#include <string>
 #include "GeneralUserObject.h"
 #include "StateProcessor.h"
+#include <string>
 
+
+/**
+ Object to couple the Moose time steps with the State Sim Discrete Events.
+ */
 class StateSimRunner;
 
 template<>
@@ -23,6 +27,10 @@ InputParameters validParams<StateSimRunner>();
 class StateSimRunner : public GeneralUserObject
 {
 public:
+  /**
+   * Main constructor to run a StateSim model.
+   * @param parameters - user object parameters contains model_path, external_coupling_uo and seed
+   */
   StateSimRunner(const InputParameters & parameters);
 
   virtual void initialize() override;
@@ -30,12 +38,12 @@ public:
   virtual void finalize()override;
 
   Real getValue() const;
-  //Real getValue() const { return 0; }
 
 protected:
   std::string _model_path;
+  StateSimModel _state_sim_model;
   StateProcessor _state_sim;
-  unsigned int _next_state_time;
+  TimespanH _next_state_time;
   bool _ran_state_sim;
 };
 
