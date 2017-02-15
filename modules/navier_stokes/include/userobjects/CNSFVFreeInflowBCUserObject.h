@@ -26,7 +26,7 @@ public:
   CNSFVFreeInflowBCUserObject(const InputParameters & parameters);
 
   virtual std::vector<Real> getGhostCellValue(unsigned int iside,
-                                              unsigned int ielem,
+                                              dof_id_type ielem,
                                               const std::vector<Real> & uvec1,
                                               const RealVectorValue & dwave) const;
 

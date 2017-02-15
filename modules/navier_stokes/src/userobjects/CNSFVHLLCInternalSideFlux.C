@@ -32,8 +32,8 @@ CNSFVHLLCInternalSideFlux::~CNSFVHLLCInternalSideFlux()
 
 void
 CNSFVHLLCInternalSideFlux::calcFlux(unsigned int iside,
-                                    unsigned int ielem,
-                                    unsigned int ineig,
+                                    dof_id_type ielem,
+                                    dof_id_type ineig,
                                     const std::vector<Real> & uvec1,
                                     const std::vector<Real> & uvec2,
                                     const RealVectorValue & dwave,
@@ -216,8 +216,8 @@ CNSFVHLLCInternalSideFlux::calcFlux(unsigned int iside,
 
 void
 CNSFVHLLCInternalSideFlux::calcJacobian(unsigned int iside,
-                                        unsigned int ielem,
-                                        unsigned int ineig,
+                                        dof_id_type ielem,
+                                        dof_id_type ineig,
                                         const std::vector<Real> & uvec1,
                                         const std::vector<Real> & uvec2,
                                         const RealVectorValue & dwave,
