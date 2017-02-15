@@ -3,8 +3,8 @@
 ###############################################################################
 #
 # Optional Environment variables
-# MOOSE_DIR        - Root directory of the MOOSE project 
-# HERD_TRUNK_DIR   - Location of the HERD repository
+# MOOSE_DIR        - Root directory of the MOOSE project
+# MODULE_DIR       - Location of the MOOSE modules directory
 # FRAMEWORK_DIR    - Location of the MOOSE framework
 #
 ###############################################################################

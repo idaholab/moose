@@ -37,6 +37,7 @@ endif
 
 ifeq ($(NAVIER_STOKES),yes)
         FLUID_PROPERTIES          := yes
+        RDG                       := yes
 endif
 
 ifeq ($(PHASE_FIELD),yes)
@@ -44,7 +45,7 @@ ifeq ($(PHASE_FIELD),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact fluid_properties heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos xfem porous_flow level_set"
+MODULE_NAMES := "chemical_reactions contact fluid_properties heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos xfem porous_flow rdg level_set"
 
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
@@ -71,6 +72,13 @@ ifeq ($(FLUID_PROPERTIES),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
+ifeq ($(RDG),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/rdg
+  APPLICATION_NAME   := rdg
+  SUFFIX             := rdg
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
 ifeq ($(HEAT_CONDUCTION),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/heat_conduction
   APPLICATION_NAME   := heat_conduction
@@ -89,8 +97,8 @@ ifeq ($(NAVIER_STOKES),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/navier_stokes
   APPLICATION_NAME   := navier_stokes
 
-  # Dependency on porous flow
-  DEPEND_MODULES     := fluid_properties
+  # Dependency on fluid properties and rdg
+  DEPEND_MODULES     := fluid_properties rdg
   SUFFIX             := ns
   include $(FRAMEWORK_DIR)/app.mk
 endif
@@ -110,13 +118,6 @@ ifeq ($(PHASE_FIELD),yes)
   DEPEND_MODULES     := tensor_mechanics
 
   SUFFIX             := pf
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(RDG),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/rdg
-  APPLICATION_NAME   := rdg
-  SUFFIX             := rdg
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
