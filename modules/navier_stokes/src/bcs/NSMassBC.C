@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<NSMassBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
+  params.addClassDescription("This class corresponds to the 'natural' boundary condition for the mass equation.");
   return params;
 }
 

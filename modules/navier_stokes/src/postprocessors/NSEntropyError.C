@@ -16,6 +16,7 @@ template<>
 InputParameters validParams<NSEntropyError>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
+  params.addClassDescription("Computes entropy error.");
   params.addRequiredParam<Real>("rho_infty", "Freestream density");
   params.addRequiredParam<Real>("p_infty", "Freestream pressure");
   params.addRequiredCoupledVar(NS::density, "density");

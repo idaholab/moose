@@ -14,6 +14,7 @@ InputParameters
 validParams<NSMomentumInviscidSpecifiedNormalFlowBC>()
 {
   InputParameters params = validParams<NSMomentumInviscidBC>();
+  params.addClassDescription("Momentum equation boundary condition in which pressure is specified (given) and the value of the convective part is allowed to vary (is computed implicitly).");
   params.addRequiredCoupledVar(NS::pressure, "pressure");
   params.addRequiredParam<Real>("rhou_udotn", "The _component'th entry of the (rho*u)(u.n) vector for this boundary");
   return params;

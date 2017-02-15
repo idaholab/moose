@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<NSPenalizedNormalFlowBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
+  params.addClassDescription("This class penalizes the the value of u.n on the boundary so that it matches some desired value.");
   params.addRequiredParam<Real>("penalty", "The penalty parameter, some (large) value.");
   params.addParam<Real>("specified_udotn", 0., "The desired value of u.n.");
   return params;

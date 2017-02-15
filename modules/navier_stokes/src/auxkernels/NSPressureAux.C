@@ -20,6 +20,7 @@ InputParameters validParams<NSPressureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
+  params.addClassDescription("Nodal auxiliary variable, for computing pressure at the nodes.");
   // Mark variables as required
   params.addRequiredCoupledVar(NS::specific_volume, "specific volume");
   params.addRequiredCoupledVar(NS::internal_energy, "internal energy");

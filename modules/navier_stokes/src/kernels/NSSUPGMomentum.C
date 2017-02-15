@@ -14,6 +14,7 @@ InputParameters
 validParams<NSSUPGMomentum>()
 {
   InputParameters params = validParams<NSSUPGBase>();
+  params.addClassDescription("Compute residual and Jacobian terms form the SUPG terms in the momentum equation.");
   params.addRequiredParam<unsigned int>("component", "");
   return params;
 }

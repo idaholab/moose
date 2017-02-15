@@ -11,6 +11,7 @@ InputParameters
 validParams<NSMassUnspecifiedNormalFlowBC>()
 {
   InputParameters params = validParams<NSMassBC>();
+  params.addClassDescription("This class implements the mass equation boundary term with the rho*(u.n) boundary integral computed implicitly.");
   return params;
 }
 

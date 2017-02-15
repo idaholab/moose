@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<NSMomentumPressureWeakStagnationBC>()
 {
   InputParameters params = validParams<NSWeakStagnationBaseBC>();
+  params.addClassDescription("This class implements the pressure term of the momentum equation boundary integral for use in weak stagnation boundary conditions.");
   params.addRequiredParam<unsigned int>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
   return params;
 }

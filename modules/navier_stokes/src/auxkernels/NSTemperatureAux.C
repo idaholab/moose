@@ -20,6 +20,7 @@ InputParameters validParams<NSTemperatureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
+  params.addClassDescription("Temperature is an auxiliary value computed from the total energy based on the FluidProperties.");
   // Mark variables as required
   params.addRequiredCoupledVar(NS::specific_volume, "specific volume");
   params.addRequiredCoupledVar(NS::internal_energy, "internal energy");

@@ -13,6 +13,7 @@ template<>
 InputParameters validParams<NSImposedVelocityBC>()
 {
   InputParameters params = validParams<NodalBC>();
+  params.addClassDescription("Impose Velocity BC.");
   params.addRequiredCoupledVar(NS::density, "density");
   params.addRequiredParam<Real>("desired_velocity", "");
   return params;

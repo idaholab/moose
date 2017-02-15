@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<NSMassSpecifiedNormalFlowBC>()
 {
   InputParameters params = validParams<NSMassBC>();
+  params.addClassDescription("This class implements the mass equation boundary term with a specified value of rho*(u.n) imposed weakly.");
   params.addRequiredParam<Real>("rhoun", "The specified value of rho*(u.n) for this boundary");
   return params;
 }

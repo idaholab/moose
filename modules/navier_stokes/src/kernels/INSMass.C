@@ -11,6 +11,7 @@ InputParameters validParams<INSMass>()
 {
   InputParameters params = validParams<Kernel>();
 
+  params.addClassDescription("This class computes the mass equation residual and Jacobian contributions for the incompressible Navier-Stokes momentum equation.");
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", 0, "y-velocity"); // only required in 2D and 3D

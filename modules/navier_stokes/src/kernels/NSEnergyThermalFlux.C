@@ -14,6 +14,7 @@ InputParameters
 validParams<NSEnergyThermalFlux>()
 {
   InputParameters params = validParams<NSKernel>();
+  params.addClassDescription("This class is responsible for computing residuals and Jacobian terms for the k * grad(T) * grad(phi) term in the Navier-Stokes energy equation.");
   params.addRequiredCoupledVar(NS::temperature, "temperature");
   return params;
 }

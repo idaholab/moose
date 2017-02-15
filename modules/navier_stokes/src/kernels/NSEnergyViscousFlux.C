@@ -11,6 +11,7 @@ InputParameters
 validParams<NSEnergyViscousFlux>()
 {
   InputParameters params = validParams<NSKernel>();
+  params.addClassDescription("Viscous flux terms in energy equation.");
   return params;
 }
 

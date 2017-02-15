@@ -10,6 +10,7 @@ template<>
 InputParameters validParams<INSMomentumLaplaceForm>()
 {
   InputParameters params = validParams<INSMomentumBase>();
+  params.addClassDescription("This class computes momentum equation residual and Jacobian viscous contributions for the 'Laplacian' form of the governing equations.");
   return params;
 }
 

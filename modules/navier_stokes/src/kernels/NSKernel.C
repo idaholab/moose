@@ -20,6 +20,7 @@ InputParameters
 validParams<NSKernel>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("This class couples together all the variables for the compressible Navier-Stokes equations to allow them to be used in derived Kernel classes.");
   params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
   params.addCoupledVar(NS::velocity_y, "y-velocity"); // only required in 2D and 3D
   params.addCoupledVar(NS::velocity_z, "z-velocity"); // only required in 3D

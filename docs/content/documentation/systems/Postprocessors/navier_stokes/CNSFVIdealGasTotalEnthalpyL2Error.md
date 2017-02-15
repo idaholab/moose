@@ -1,0 +1,7 @@
+!description /Postprocessors/CNSFVIdealGasTotalEnthalpyL2Error
+
+!parameters /Postprocessors/CNSFVIdealGasTotalEnthalpyL2Error
+
+!inputfiles /Postprocessors/CNSFVIdealGasTotalEnthalpyL2Error
+
+!childobjects /Postprocessors/CNSFVIdealGasTotalEnthalpyL2Error
