@@ -187,3 +187,19 @@ markdown_extensions:
                       - /UserObjects/LevelSetCFLCondition
                       - /UserObjects/LevelSetVolume
                       - /Modules
+              - porous_flow:
+                  doxygen: http://mooseframework.org/docs/doxygen/modules/
+                  paths:
+                      - modules/porous_flow/src
+                      - modules/porous_flow/include
+                  hide:
+                      - /Bounds
+                      - /Modules
+                      - /UserObjects
+                      - /Kernels
+                      - /Materials
+                      - /Postprocessors
+                      - /AuxKernels
+                      - /BCs
+                      - /DiracKernels
+                      - /Functions
