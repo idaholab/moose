@@ -18,9 +18,9 @@ InputParameters validParams<PorousFlowDiffusivityMillingtonQuirk>()
 PorousFlowDiffusivityMillingtonQuirk::PorousFlowDiffusivityMillingtonQuirk(const InputParameters & parameters) :
     PorousFlowDiffusivityBase(parameters),
     _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
-    _dporosity_qp_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_qp_dvar")),
-    _saturation_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_qp")),
-    _dsaturation_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar"))
+    _dporosity_qp_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar")),
+    _saturation_qp(getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp")),
+    _dsaturation_qp_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_saturation_qp_dvar"))
 {
 }
 

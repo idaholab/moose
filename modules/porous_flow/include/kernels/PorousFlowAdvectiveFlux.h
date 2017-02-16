@@ -41,16 +41,16 @@ protected:
   virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar);
 
   /// Mass fraction of each component in each phase
-  const MaterialProperty<std::vector<std::vector<Real> > > & _mass_fractions;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _mass_fractions;
 
   /// Derivative of the mass fraction of each component in each phase wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _dmass_fractions_dvar;
+  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_fractions_dvar;
 
   /// Relative permeability of each phase
-  const MaterialProperty<std::vector<Real> > & _relative_permeability;
+  const MaterialProperty<std::vector<Real>> & _relative_permeability;
 
   /// Derivative of relative permeability of each phase wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real> > > & _drelative_permeability_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _drelative_permeability_dvar;
 
   /// Index of the fluid component that this kernel acts on
   const unsigned int _fluid_component;

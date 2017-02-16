@@ -25,18 +25,18 @@ InputParameters validParams<PorousFlowDarcyBase>()
 PorousFlowDarcyBase::PorousFlowDarcyBase(const InputParameters & parameters) :
     Kernel(parameters),
     _permeability(getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")),
-    _dpermeability_dvar(getMaterialProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_qp_dvar")),
-    _dpermeability_dgradvar(getMaterialProperty<std::vector<std::vector<RealTensorValue> > >("dPorousFlow_permeability_qp_dgradvar")),
-    _fluid_density_node(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_nodal")),
-    _dfluid_density_node_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_nodal_dvar")),
-    _fluid_density_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_qp")),
-    _dfluid_density_qp_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_qp_dvar")),
-    _fluid_viscosity(getMaterialProperty<std::vector<Real> >("PorousFlow_viscosity_nodal")),
-    _dfluid_viscosity_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_viscosity_nodal_dvar")),
-    _pp(getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_nodal")),
-    _grad_p(getMaterialProperty<std::vector<RealGradient> >("PorousFlow_grad_porepressure_qp")),
-    _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_grad_porepressure_qp_dgradvar")),
-    _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient> > >("dPorousFlow_grad_porepressure_qp_dvar")),
+    _dpermeability_dvar(getMaterialProperty<std::vector<RealTensorValue>>("dPorousFlow_permeability_qp_dvar")),
+    _dpermeability_dgradvar(getMaterialProperty<std::vector<std::vector<RealTensorValue>>>("dPorousFlow_permeability_qp_dgradvar")),
+    _fluid_density_node(getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal")),
+    _dfluid_density_node_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_fluid_phase_density_nodal_dvar")),
+    _fluid_density_qp(getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")),
+    _dfluid_density_qp_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_fluid_phase_density_qp_dvar")),
+    _fluid_viscosity(getMaterialProperty<std::vector<Real>>("PorousFlow_viscosity_nodal")),
+    _dfluid_viscosity_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_viscosity_nodal_dvar")),
+    _pp(getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_nodal")),
+    _grad_p(getMaterialProperty<std::vector<RealGradient>>("PorousFlow_grad_porepressure_qp")),
+    _dgrad_p_dgrad_var(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_grad_porepressure_qp_dgradvar")),
+    _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient>>>("dPorousFlow_grad_porepressure_qp_dvar")),
     _porousflow_dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _num_phases(_porousflow_dictator.numPhases()),
     _gravity(getParam<RealVectorValue>("gravity"))
@@ -104,7 +104,7 @@ PorousFlowDarcyBase::upwind(JacRes res_or_jac, unsigned int jvar)
   /// Compute the residual and jacobian without the mobility terms. Even if we are computing the Jacobian
   /// we still need this in order to see which nodes are upwind and which are downwind.
 
-  std::vector<std::vector<Real> > component_re(num_nodes);
+  std::vector<std::vector<Real>> component_re(num_nodes);
   for (_i = 0; _i < num_nodes; ++_i)
   {
     component_re[_i].assign(_num_phases, 0.0);
@@ -117,7 +117,7 @@ PorousFlowDarcyBase::upwind(JacRes res_or_jac, unsigned int jvar)
   if ((ke.n() == 0) && (res_or_jac == CALCULATE_JACOBIAN)) // this removes a problem encountered in the initial timestep when use_displaced_mesh=true
     return;
 
-  std::vector<std::vector<std::vector<Real> > > component_ke;
+  std::vector<std::vector<std::vector<Real>>> component_ke;
   if (res_or_jac == CALCULATE_JACOBIAN)
   {
     component_ke.resize(ke.m());

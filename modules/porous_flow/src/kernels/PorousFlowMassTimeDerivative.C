@@ -29,18 +29,18 @@ PorousFlowMassTimeDerivative::PorousFlowMassTimeDerivative(const InputParameters
     _strain_at_nearest_qp(getParam<bool>("strain_at_nearest_qp")),
     _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
     _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal")),
-    _dporosity_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_nodal_dvar")),
-    _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_porosity_nodal_dgradvar")),
+    _dporosity_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_nodal_dvar")),
+    _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_porosity_nodal_dgradvar")),
     _nearest_qp(_strain_at_nearest_qp ? &getMaterialProperty<unsigned int>("PorousFlow_nearestqp_nodal") : nullptr),
-    _fluid_density(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_nodal")),
-    _fluid_density_old(getMaterialPropertyOld<std::vector<Real> >("PorousFlow_fluid_phase_density_nodal")),
-    _dfluid_density_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_density_nodal_dvar")),
-    _fluid_saturation_nodal(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal")),
-    _fluid_saturation_nodal_old(getMaterialPropertyOld<std::vector<Real> >("PorousFlow_saturation_nodal")),
-    _dfluid_saturation_nodal_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar")),
-    _mass_frac(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac_nodal")),
-    _mass_frac_old(getMaterialPropertyOld<std::vector<std::vector<Real> > >("PorousFlow_mass_frac_nodal")),
-    _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real> > > >("dPorousFlow_mass_frac_nodal_dvar"))
+    _fluid_density(getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal")),
+    _fluid_density_old(getMaterialPropertyOld<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal")),
+    _dfluid_density_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_fluid_phase_density_nodal_dvar")),
+    _fluid_saturation_nodal(getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal")),
+    _fluid_saturation_nodal_old(getMaterialPropertyOld<std::vector<Real>>("PorousFlow_saturation_nodal")),
+    _dfluid_saturation_nodal_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_saturation_nodal_dvar")),
+    _mass_frac(getMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_nodal")),
+    _mass_frac_old(getMaterialPropertyOld<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_nodal")),
+    _dmass_frac_dvar(getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>("dPorousFlow_mass_frac_nodal_dvar"))
 {
   if (_fluid_component >= _dictator.numComponents())
     mooseError2("The Dictator proclaims that the number of components in this simulation is ", _dictator.numComponents(), " whereas you have used the Kernel PorousFlowComponetMassTimeDerivative with component = ", _fluid_component, ".  The Dictator does not take such mistakes lightly");

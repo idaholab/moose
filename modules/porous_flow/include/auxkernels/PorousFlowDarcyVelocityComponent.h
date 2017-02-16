@@ -37,19 +37,19 @@ protected:
   virtual Real computeValue();
 
   /// Relative permeability of each phase
-  const MaterialProperty<std::vector<Real> > & _relative_permeability;
+  const MaterialProperty<std::vector<Real>> & _relative_permeability;
 
   /// Viscosity of each component in each phase
-  const MaterialProperty<std::vector<Real> > & _fluid_viscosity;
+  const MaterialProperty<std::vector<Real>> & _fluid_viscosity;
 
   /// Permeability of porous material
   const MaterialProperty<RealTensorValue> & _permeability;
 
   /// Gradient of the pore pressure in each phase
-  const MaterialProperty<std::vector<RealGradient> > & _grad_p;
+  const MaterialProperty<std::vector<RealGradient>> & _grad_p;
 
   /// Fluid density for each phase (at the qp)
-  const MaterialProperty<std::vector<Real> > & _fluid_density_qp;
+  const MaterialProperty<std::vector<Real>> & _fluid_density_qp;
 
   /// PorousFlow UserObject
   const PorousFlowDictator & _dictator;

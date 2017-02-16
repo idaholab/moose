@@ -17,10 +17,10 @@ InputParameters validParams<PorousFlowSinkPTDefiner>()
 
 PorousFlowSinkPTDefiner::PorousFlowSinkPTDefiner(const InputParameters & parameters) :
     PorousFlowSink(parameters),
-    _pp(_involves_fluid ? &getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_nodal") : nullptr),
-    _dpp_dvar(_involves_fluid ? &getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar") : nullptr),
+    _pp(_involves_fluid ? &getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_nodal") : nullptr),
+    _dpp_dvar(_involves_fluid ? &getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_porepressure_nodal_dvar") : nullptr),
     _temp(!_involves_fluid ? &getMaterialProperty<Real>("PorousFlow_temperature_nodal") : nullptr),
-    _dtemp_dvar(!_involves_fluid ? &getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar") : nullptr)
+    _dtemp_dvar(!_involves_fluid ? &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar") : nullptr)
 {
   if (_involves_fluid && (_pp == nullptr || _dpp_dvar == nullptr))
     mooseError2("PorousFlowSink: There is no porepressure Material");

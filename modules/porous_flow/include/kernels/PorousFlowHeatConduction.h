@@ -39,16 +39,16 @@ protected:
   const MaterialProperty<RealTensorValue> & _la;
 
   /// d(thermal conductivity at the quadpoints)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<RealTensorValue> > & _dla_dvar;
+  const MaterialProperty<std::vector<RealTensorValue>> & _dla_dvar;
 
   /// grad(temperature)
   const MaterialProperty<RealGradient> & _grad_t;
 
   /// d(gradT)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<RealGradient> > & _dgrad_t_dvar;
+  const MaterialProperty<std::vector<RealGradient>> & _dgrad_t_dvar;
 
   /// d(gradT)/d(grad PorousFlow variable)
-  const MaterialProperty<std::vector<Real> > & _dgrad_t_dgradvar;
+  const MaterialProperty<std::vector<Real>> & _dgrad_t_dgradvar;
 };
 
 #endif //POROUSFLOWHEATCONDUCTION_H

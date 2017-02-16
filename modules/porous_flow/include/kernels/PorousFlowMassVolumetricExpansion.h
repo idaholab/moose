@@ -55,37 +55,37 @@ protected:
   const MaterialProperty<Real> & _porosity;
 
   /// d(porosity)/d(porous-flow variable)
-  const MaterialProperty<std::vector<Real> > & _dporosity_dvar;
+  const MaterialProperty<std::vector<Real>> & _dporosity_dvar;
 
   /// d(porosity)/d(grad porous-flow variable)
-  const MaterialProperty<std::vector<RealGradient> > & _dporosity_dgradvar;
+  const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
 
   /// the nearest qp to the node
   const MaterialProperty<unsigned int> * const _nearest_qp;
 
   /// fluid density
-  const MaterialProperty<std::vector<Real> > & _fluid_density;
+  const MaterialProperty<std::vector<Real>> & _fluid_density;
 
   /// d(fluid density)/d(porous-flow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dfluid_density_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_density_dvar;
 
   /// fluid saturation
-  const MaterialProperty<std::vector<Real> > & _fluid_saturation;
+  const MaterialProperty<std::vector<Real>> & _fluid_saturation;
 
   /// d(fluid saturation)/d(porous-flow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dfluid_saturation_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_saturation_dvar;
 
   /// mass fraction
-  const MaterialProperty<std::vector<std::vector<Real> > > & _mass_frac;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _mass_frac;
 
   /// d(mass fraction)/d(porous-flow variable)
-  const MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _dmass_frac_dvar;
+  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_frac_dvar;
 
   /// strain rate
   const MaterialProperty<Real> & _strain_rate_qp;
 
   /// d(strain rate)/d(porous-flow variable)
-  const MaterialProperty<std::vector<RealGradient> > & _dstrain_rate_qp_dvar;
+  const MaterialProperty<std::vector<RealGradient>> & _dstrain_rate_qp_dvar;
 
   /**
    * Derivative of mass part of the residual with respect to the Variable

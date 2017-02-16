@@ -64,7 +64,7 @@ protected:
   const MaterialProperty<RealTensorValue> & _perm_or_cond;
 
   /// d(Permeability)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<RealTensorValue> > & _dperm_or_cond_dvar;
+  const MaterialProperty<std::vector<RealTensorValue>> & _dperm_or_cond_dvar;
 
   /// rotation matrix used in well_constant calculation
   std::vector<RealTensorValue> _rot_matrix;

@@ -17,7 +17,7 @@ InputParameters validParams<PorousFlowFluidPropertiesBase>()
 
 PorousFlowFluidPropertiesBase::PorousFlowFluidPropertiesBase(const InputParameters & parameters) :
     PorousFlowMaterialBase(parameters),
-    _porepressure(_nodal_material ? getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_nodal") : getMaterialProperty<std::vector<Real> >("PorousFlow_porepressure_qp")),
+    _porepressure(_nodal_material ? getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_nodal") : getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_qp")),
     _temperature(_nodal_material ? getMaterialProperty<Real>("PorousFlow_temperature_nodal") : getMaterialProperty<Real>("PorousFlow_temperature_qp")),
     _pressure_variable_name(_dictator.pressureVariableNameDummy()),
     _temperature_variable_name(_dictator.temperatureVariableNameDummy()),

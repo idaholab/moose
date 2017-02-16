@@ -23,10 +23,10 @@ PorousFlowDesorpedMassVolumetricExpansion::PorousFlowDesorpedMassVolumetricExpan
     _conc_var_number(coupled("conc_var")),
     _conc(coupledValue("conc_var")),
     _porosity(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
-    _dporosity_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_qp_dvar")),
-    _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_porosity_qp_dgradvar")),
+    _dporosity_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar")),
+    _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar")),
     _strain_rate_qp(getMaterialProperty<Real>("PorousFlow_volumetric_strain_rate_qp")),
-    _dstrain_rate_qp_dvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_volumetric_strain_rate_qp_dvar"))
+    _dstrain_rate_qp_dvar(getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_volumetric_strain_rate_qp_dvar"))
 {
 }
 

@@ -51,13 +51,13 @@ protected:
   const MaterialProperty<Real> & _vol_strain_qp;
 
   /// d(strain)/(dvar)
-  const MaterialProperty<std::vector<RealGradient> > & _dvol_strain_qp_dvar;
+  const MaterialProperty<std::vector<RealGradient>> & _dvol_strain_qp_dvar;
 
   /// effective porepressure
   const MaterialProperty<Real> & _pf;
 
   /// d(effective porepressure)/(d porflow variable)
-  const MaterialProperty<std::vector<Real> > & _dpf_dvar;
+  const MaterialProperty<std::vector<Real>> & _dpf_dvar;
 };
 
 #endif //POROUSFLOWPOROSITYHM_H

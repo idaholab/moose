@@ -31,16 +31,16 @@ protected:
   virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar) override;
 
   /// Enthalpy of each phase
-  const MaterialProperty<std::vector<Real> > & _enthalpy;
+  const MaterialProperty<std::vector<Real>> & _enthalpy;
 
   /// Derivative of the enthalpy wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real> > > & _denthalpy_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _denthalpy_dvar;
 
   /// Relative permeability of each phase
-  const MaterialProperty<std::vector<Real> > & _relative_permeability;
+  const MaterialProperty<std::vector<Real>> & _relative_permeability;
 
   /// Derivative of relative permeability of each phase wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real> > > & _drelative_permeability_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _drelative_permeability_dvar;
 };
 
 #endif // POROUSFLOWHEATADVECTION_H

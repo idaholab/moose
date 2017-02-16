@@ -43,34 +43,34 @@ protected:
   Real computeQpJac(unsigned int jvar) const;
 
   /// Fluid density for each phase (at the qp)
-  const MaterialProperty<std::vector<Real> > & _fluid_density_qp;
+  const MaterialProperty<std::vector<Real>> & _fluid_density_qp;
 
   /// Derivative of the fluid density for each phase wrt PorousFlow variables (at the qp)
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dfluid_density_qp_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_density_qp_dvar;
 
   /// Gradient of mass fraction of each component in each phase
-  const MaterialProperty<std::vector<std::vector<RealGradient> > > & _grad_mass_frac;
+  const MaterialProperty<std::vector<std::vector<RealGradient>>> & _grad_mass_frac;
 
   /// Derivative of mass fraction wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _dmass_frac_dvar;
+  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_frac_dvar;
 
   /// Porosity at the qps
   const MaterialProperty<Real> & _porosity_qp;
 
   /// Derivative of porosity wrt PorousFlow variables (at the qps)
-  const MaterialProperty<std::vector<Real> > & _dporosity_qp_dvar;
+  const MaterialProperty<std::vector<Real>> & _dporosity_qp_dvar;
 
   /// Tortuosity tau_0 * tau_{alpha} for fluid phase alpha
-  const MaterialProperty<std::vector<Real> >& _tortuosity;
+  const MaterialProperty<std::vector<Real>>& _tortuosity;
 
   /// Derivative of tortuosity wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dtortuosity_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dtortuosity_dvar;
 
   /// Diffusion coefficients of component k in fluid phase alpha
-  const MaterialProperty<std::vector<std::vector<Real> > > & _diffusion_coeff;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _diffusion_coeff;
 
   /// Derivative of the diffusion coefficients wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _ddiffusion_coeff_dvar;
+  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _ddiffusion_coeff_dvar;
 
   /// PorousFlow Dictator UserObject
   const PorousFlowDictator & _dictator;
@@ -85,34 +85,34 @@ protected:
   const RankTwoTensor _identity_tensor;
 
   /// Relative permeability of each phase
-  const MaterialProperty<std::vector<Real> > & _relative_permeability;
+  const MaterialProperty<std::vector<Real>> & _relative_permeability;
 
   /// Derivative of relative permeability wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real> > > & _drelative_permeability_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _drelative_permeability_dvar;
 
   /// Viscosity of each component in each phase
-  const MaterialProperty<std::vector<Real> > & _fluid_viscosity;
+  const MaterialProperty<std::vector<Real>> & _fluid_viscosity;
 
   /// Derivative of viscosity wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dfluid_viscosity_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_viscosity_dvar;
 
   /// Permeability of porous material
   const MaterialProperty<RealTensorValue> & _permeability;
 
   /// Derivative of permeability wrt PorousFlow variables
-  const MaterialProperty<std::vector<RealTensorValue> > & _dpermeability_dvar;
+  const MaterialProperty<std::vector<RealTensorValue>> & _dpermeability_dvar;
 
   /// d(permeabiity)/d(grad(porous-flow variable))
-  const MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dpermeability_dgradvar;
+  const MaterialProperty<std::vector<std::vector<RealTensorValue>>> & _dpermeability_dgradvar;
 
   /// Gradient of the pore pressure in each phase
-  const MaterialProperty<std::vector<RealGradient> > & _grad_p;
+  const MaterialProperty<std::vector<RealGradient>> & _grad_p;
 
   /// Derivative of Grad porepressure in each phase wrt grad(PorousFlow variables)
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dgrad_p_dgrad_var;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dgrad_p_dgrad_var;
 
   /// Derivative of Grad porepressure in each phase wrt PorousFlow variables
-  const MaterialProperty<std::vector<std::vector<RealGradient> > > & _dgrad_p_dvar;
+  const MaterialProperty<std::vector<std::vector<RealGradient>>> & _dgrad_p_dvar;
 
   /// Gravitational acceleration
   const RealVectorValue _gravity;
