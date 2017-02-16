@@ -32,7 +32,7 @@ CNSFVFreeOutflowBoundaryFlux::~CNSFVFreeOutflowBoundaryFlux()
 
 void
 CNSFVFreeOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
-                                       unsigned int /*ielem*/,
+                                       dof_id_type /*ielem*/,
                                        const std::vector<Real> & uvec1,
                                        const RealVectorValue & dwave,
                                        std::vector<Real> & flux) const
@@ -73,7 +73,7 @@ CNSFVFreeOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
 
 void
 CNSFVFreeOutflowBoundaryFlux::calcJacobian(unsigned int /*iside*/,
-                                           unsigned int /*ielem*/,
+                                           dof_id_type /*ielem*/,
                                            const std::vector<Real> & /*uvec1*/,
                                            const RealVectorValue & /*dwave*/,
                                            DenseMatrix<Real> & /*jac1*/) const

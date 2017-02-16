@@ -48,7 +48,7 @@ CNSFVFreeInflowBCUserObject::CNSFVFreeInflowBCUserObject(const InputParameters &
 
 std::vector<Real>
 CNSFVFreeInflowBCUserObject::getGhostCellValue(unsigned int /*iside*/,
-                                               unsigned int /*ielem*/,
+                                               dof_id_type /*ielem*/,
                                                const std::vector<Real> & /*uvec1*/,
                                                const RealVectorValue & /*dwave*/) const
 {
