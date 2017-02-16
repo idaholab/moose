@@ -14,7 +14,7 @@ class PetscJacobianTester(RunApp):
 
     def checkRunnable(self, options):
         if options.enable_recover:
-            reason = 'skipped (PetscJacTester RECOVER)'
+            self.setStatus('PetscJacTester RECOVER', self.bucket_skip)
             return False
         return RunApp.checkRunnable(self, options)
 
@@ -34,7 +34,7 @@ class PetscJacobianTester(RunApp):
 
         # populate status bucket
         if reason != '':
-            self.setStatus(reason, 'FAIL')
+            self.setStatus(reason, self.bucket_fail)
         else:
             self.setStatus(self.success_message, self.bucket_success)
 
