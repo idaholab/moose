@@ -209,7 +209,3 @@
   file_base = out
   exodus = true
 []
-
-[Problem]
-  use_legacy_uo_initialization = false
-[]

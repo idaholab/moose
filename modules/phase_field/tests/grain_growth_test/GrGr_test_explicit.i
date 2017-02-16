@@ -101,7 +101,3 @@
   interval = 20
   exodus = true
 []
-
-[Problem]
-  use_legacy_uo_initialization = false
-[]

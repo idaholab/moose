@@ -104,7 +104,3 @@
   file_base = GBEvolution_mob
   exodus = true
 []
-
-[Problem]
-  use_legacy_uo_initialization = false
-[]

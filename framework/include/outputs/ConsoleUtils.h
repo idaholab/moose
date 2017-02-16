@@ -75,11 +75,6 @@ std::string outputExecutionInformation(MooseApp & app, FEProblemBase & problem);
 std::string outputOutputInformation(MooseApp & app);
 
 /**
- * Output the legacy flag information
- */
-std::string outputLegacyInformation(MooseApp & app, FEProblemBase & problem);
-
-/**
  * Output system information
  * @param system The libMesh system to output
  * @see outputAuxiliarySystemInformation outputNonlinearSystemInformation

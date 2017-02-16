@@ -922,10 +922,6 @@ public:
 
   void setMaterialCoverageCheck(bool flag) { _material_coverage_check = flag; }
 
-  bool & legacyUoAuxComputation() { return _use_legacy_uo_aux_computation; }
-
-  bool & legacyUoInitialization() { return _use_legacy_uo_initialization; }
-
   /**
    * Updates the active boundary id
    * @param id The BoundaryID to set as active
@@ -1303,9 +1299,6 @@ protected:
 static bool sortMooseVariables(MooseVariable * a, MooseVariable * b) { return a->number() < b->number(); }
 
 private:
-  bool _use_legacy_uo_aux_computation;
-  bool _use_legacy_uo_initialization;
-
   bool _error_on_jacobian_nonzero_reallocation;
   bool _force_restart;
   bool _fail_next_linear_convergence_check;

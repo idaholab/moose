@@ -207,16 +207,6 @@ public:
   void disableCheckUnusedFlag();
 
   /**
-   * Tell MOOSE to compute all aux kernels when any user objects are computed - deprecated behavior
-   */
-  bool & legacyUoAuxComputationDefault();
-
-  /**
-   * Tell MOOSE to compute all aux kernels when any user objects are computed - deprecated behavior
-   */
-  bool & legacyUoInitializationDefault();
-
-  /**
    * Retrieve the Executioner for this App
    */
   Executioner * getExecutioner() { return _executioner.get(); }
@@ -601,12 +591,6 @@ protected:
 
   /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
   std::map<std::string, unsigned int> _output_file_numbers;
-
-  /// Legacy Uo Aux computation flag
-  bool _legacy_uo_aux_computation_default;
-
-  /// Legacy Uo Initialization flag
-  bool _legacy_uo_initialization_default;
 
   /// true if we want to just check the input file
   bool _check_input;
