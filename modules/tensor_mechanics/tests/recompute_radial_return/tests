@@ -82,4 +82,10 @@
     expect_err = 'Check to ensure that your Elasticity Tensor is truly Isotropic'
     prereq = 'isotropic_plasticity_error4'
   [../]
+  [./affine_plasticity]
+    type = Exodiff
+    input = 'affine_plasticity.i'
+    exodiff = 'affine_plasticity_out.e'
+    custom_cmp = 'affine_plasticity.exodiff'
+  [../]
 []
