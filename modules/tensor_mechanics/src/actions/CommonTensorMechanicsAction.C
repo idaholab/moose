@@ -10,7 +10,7 @@
 template<>
 InputParameters validParams<CommonTensorMechanicsAction>()
 {
-  InputParameters params = validParams<TensorMechanicsAction>();
+  InputParameters params = validParams<TensorMechanicsActionBase>();
   return params;
 }
 

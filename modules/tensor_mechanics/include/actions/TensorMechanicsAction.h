@@ -81,13 +81,6 @@ protected:
 
   /// output aux variables to generate for sclar stress/strain tensor quantities
   std::vector<std::string> _generate_output;
-
-public:
-  ///@{ table data for output generation
-  static const std::map<std::string, std::string> _ranktwoaux_table;
-  static const std::vector<char> _component_table;
-  static const std::map<std::string, std::pair<std::string, std::vector<std::string>>> _ranktwoscalaraux_table;
-  ///@}
 };
 
 #endif //TENSORMECHANICSACTION_H
