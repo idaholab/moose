@@ -56,8 +56,8 @@ public:
    * @param[in]   uvec1     vector of variables on the host side
    * @param[in]   dwave     vector of unit normal
    */
-  virtual std::vector<Real> getGhostCellValue(dof_id_type iside,
-                                              unsigned int ielem,
+  virtual std::vector<Real> getGhostCellValue(unsigned int iside,
+                                              dof_id_type ielem,
                                               const std::vector<Real> & uvec1,
                                               const RealVectorValue & dwave) const = 0;
 };

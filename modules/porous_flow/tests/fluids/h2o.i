@@ -2,7 +2,7 @@
 # Region 1 density
 # Pressure 80 MPa
 # Temperature 300K (26.85C)
-# Water density should equal 1.0 / 0.971180894e–3 = 1029.7 kg/m^3 (IAPWS IF97)
+# Water density should equal 1.0 / 0.971180894e-3 = 1029.7 kg/m^3 (IAPWS IF97)
 # Water viscosity should equal 0.00085327 Pa.s (NIST webbook)
 # Results are within expected accuracy
 

@@ -48,8 +48,8 @@ public:
    * @param[in]   dwave     vector of unit normal
    */
   virtual const std::vector<Real> & getFlux(unsigned int iside,
-                                            unsigned int ielem,
-                                            unsigned int ineig,
+                                            dof_id_type ielem,
+                                            dof_id_type ineig,
                                             const std::vector<Real> & uvec1,
                                             const std::vector<Real> & uvec2,
                                             const RealVectorValue & dwave,
@@ -66,8 +66,8 @@ public:
    * @param[out]  flux      flux vector across the side
    */
   virtual void calcFlux(unsigned int iside,
-                        unsigned int ielem,
-                        unsigned int ineig,
+                        dof_id_type ielem,
+                        dof_id_type ineig,
                         const std::vector<Real> & uvec1,
                         const std::vector<Real> & uvec2,
                         const RealVectorValue & dwave,
@@ -84,8 +84,8 @@ public:
    */
   virtual const DenseMatrix<Real> & getJacobian(Moose::DGResidualType type,
                                                 unsigned int iside,
-                                                unsigned int ielem,
-                                                unsigned int ineig,
+                                                dof_id_type ielem,
+                                                dof_id_type ineig,
                                                 const std::vector<Real> & uvec1,
                                                 const std::vector<Real> & uvec2,
                                                 const RealVectorValue & dwave,
@@ -103,8 +103,8 @@ public:
    * @param[out]  jac2      Jacobian matrix contribution to the "right" cell
    */
   virtual void calcJacobian(unsigned int iside,
-                            unsigned int ielem,
-                            unsigned int ineig,
+                            dof_id_type ielem,
+                            dof_id_type ineig,
                             const std::vector<Real> & uvec1,
                             const std::vector<Real> & uvec2,
                             const RealVectorValue & dwave,

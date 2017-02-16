@@ -11,7 +11,7 @@ template<>
 InputParameters validParams<LevelSetCFLCondition>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
-  params.addClassDescription("Compute the minimum timestep from the Courant–Friedrichs–Lewy (CFL) condition for the level-set equation.");
+  params.addClassDescription("Compute the minimum timestep from the Courant-Friedrichs-Lewy (CFL) condition for the level-set equation.");
   params += validParams<LevelSetVelocityInterface<> >();
   return params;
 }

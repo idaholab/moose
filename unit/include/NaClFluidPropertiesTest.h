@@ -36,7 +36,7 @@ class NaClFluidPropertiesTest : public CppUnit::TestFixture
    *
    * Values for thermal conductivity from Urqhart and Bauer,
    * Experimental determination of single-crystal halite thermal conductivity,
-   * diffusivity and specific heat from −75 °C to 300 °C, Int. J. Rock Mech.
+   * diffusivity and specific heat from -75 C to 300 C, Int. J. Rock Mech.
    * and Mining Sci., 78 (2015)
    */
   CPPUNIT_TEST(halite);
