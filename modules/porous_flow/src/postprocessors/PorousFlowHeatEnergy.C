@@ -16,7 +16,7 @@ InputParameters validParams<PorousFlowHeatEnergy>()
   InputParameters params = validParams<ElementIntegralPostprocessor>();
   params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
   params.addParam<bool>("include_porous_skeleton", true, "Include the heat energy of the porous skeleton");
-  params.addParam<std::vector<unsigned int> >("phase", "The index(es) of the fluid phase that this Postprocessor is restricted to.  Multiple indices can be entered.");
+  params.addParam<std::vector<unsigned int>>("phase", "The index(es) of the fluid phase that this Postprocessor is restricted to.  Multiple indices can be entered.");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<unsigned int>("kernel_variable_number", 0, "The PorousFlow variable number (according to the dictatory) of the heat-energy kernel.  This is required only in the unusual situation where a variety of different finite-element interpolation schemes are employed in the simulation");
   params.addClassDescription("Calculates the sum of heat energy of fluid component(s) and/or the porous skeleton in a region");
@@ -29,12 +29,12 @@ PorousFlowHeatEnergy::PorousFlowHeatEnergy(const InputParameters & parameters) :
     _num_phases(_dictator.numPhases()),
     _fluid_present(_num_phases > 0),
     _include_porous_skeleton(getParam<bool>("include_porous_skeleton")),
-    _phase_index(getParam<std::vector<unsigned int> >("phase")),
+    _phase_index(getParam<std::vector<unsigned int>>("phase")),
     _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
     _rock_energy_nodal(getMaterialProperty<Real>("PorousFlow_matrix_internal_energy_nodal")),
-    _fluid_density(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_nodal") : nullptr),
-    _fluid_saturation_nodal(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal") : nullptr),
-    _energy_nodal(_fluid_present ? &getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_internal_energy_nodal") : nullptr),
+    _fluid_density(_fluid_present ? &getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal") : nullptr),
+    _fluid_saturation_nodal(_fluid_present ? &getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal") : nullptr),
+    _energy_nodal(_fluid_present ? &getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_internal_energy_nodal") : nullptr),
     _var(getParam<unsigned>("kernel_variable_number") < _dictator.numVariables() ? _dictator.getCoupledMooseVars()[getParam<unsigned>("kernel_variable_number")] : nullptr)
 {
   if (!_phase_index.empty())

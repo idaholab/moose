@@ -38,11 +38,11 @@ protected:
   /// Porosity
   const MaterialProperty<Real> & _porosity;
   /// Phase density (kg/m^3)
-  const MaterialProperty<std::vector<Real> > & _fluid_density;
+  const MaterialProperty<std::vector<Real>> & _fluid_density;
   /// Phase saturation (-)
-  const MaterialProperty<std::vector<Real> > & _fluid_saturation;
+  const MaterialProperty<std::vector<Real>> & _fluid_saturation;
   /// Mass fraction of each fluid component in each phase
-  const MaterialProperty<std::vector<std::vector<Real> > > & _mass_fraction;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _mass_fraction;
   /// Saturation threshold - only fluid mass at saturations below this are calculated
   const Real _saturation_threshold;
   /// the variable for the corresponding PorousFlowMassTimeDerivative Kernel: this provides test functions

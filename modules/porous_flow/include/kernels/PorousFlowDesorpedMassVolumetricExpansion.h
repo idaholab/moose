@@ -44,16 +44,16 @@ protected:
   const MaterialProperty<Real> & _porosity;
 
   /// d(porosity)/d(porous-flow variable)
-  const MaterialProperty<std::vector<Real> > & _dporosity_dvar;
+  const MaterialProperty<std::vector<Real>> & _dporosity_dvar;
 
   /// d(porosity)/d(grad porous-flow variable)
-  const MaterialProperty<std::vector<RealGradient> > & _dporosity_dgradvar;
+  const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
 
   /// strain rate
   const MaterialProperty<Real> & _strain_rate_qp;
 
   /// d(strain rate)/d(porous-flow variable)
-  const MaterialProperty<std::vector<RealGradient> > & _dstrain_rate_qp_dvar;
+  const MaterialProperty<std::vector<RealGradient>> & _dstrain_rate_qp_dvar;
 
   /**
    * Derivative of the residual with respect to the Moose variable

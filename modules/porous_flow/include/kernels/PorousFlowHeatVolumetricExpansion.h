@@ -50,10 +50,10 @@ protected:
   const MaterialProperty<Real> & _porosity;
 
   /// d(porosity)/d(porous-flow variable)
-  const MaterialProperty<std::vector<Real> > & _dporosity_dvar;
+  const MaterialProperty<std::vector<Real>> & _dporosity_dvar;
 
   /// d(porosity)/d(grad porous-flow variable)
-  const MaterialProperty<std::vector<RealGradient> > & _dporosity_dgradvar;
+  const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
 
   /// the nearest qp to the node
   const MaterialProperty<unsigned int> * const _nearest_qp;
@@ -62,31 +62,31 @@ protected:
   const MaterialProperty<Real> & _rock_energy_nodal;
 
   /// d(nodal rock energy density)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<Real> > & _drock_energy_nodal_dvar;
+  const MaterialProperty<std::vector<Real>> & _drock_energy_nodal_dvar;
 
   /// nodal fluid density
-  const MaterialProperty<std::vector<Real> > * _fluid_density;
+  const MaterialProperty<std::vector<Real>> * _fluid_density;
 
   /// d(nodal fluid density)/d(porous-flow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > * _dfluid_density_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * _dfluid_density_dvar;
 
   /// nodal fluid saturation
-  const MaterialProperty<std::vector<Real> > * _fluid_saturation_nodal;
+  const MaterialProperty<std::vector<Real>> * _fluid_saturation_nodal;
 
   /// d(nodal fluid saturation)/d(porous-flow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > * _dfluid_saturation_nodal_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * _dfluid_saturation_nodal_dvar;
 
   /// internal energy of the phases, evaluated at the nodes
-  const MaterialProperty<std::vector<Real> > * _energy_nodal;
+  const MaterialProperty<std::vector<Real>> * _energy_nodal;
 
   /// d(internal energy)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > * _denergy_nodal_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * _denergy_nodal_dvar;
 
   /// strain rate
   const MaterialProperty<Real> & _strain_rate_qp;
 
   /// d(strain rate)/d(porous-flow variable)
-  const MaterialProperty<std::vector<RealGradient> > & _dstrain_rate_qp_dvar;
+  const MaterialProperty<std::vector<RealGradient>> & _dstrain_rate_qp_dvar;
 
   /**
    * Derivative of energy part of the residual with respect to the Variable

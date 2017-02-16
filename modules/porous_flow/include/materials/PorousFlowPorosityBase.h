@@ -35,10 +35,10 @@ protected:
   MaterialProperty<Real> & _porosity_old;
 
   /// d(porosity)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real> > & _dporosity_dvar;
+  MaterialProperty<std::vector<Real>> & _dporosity_dvar;
 
   /// d(porosity)/d(grad PorousFlow variable)
-  MaterialProperty<std::vector<RealGradient> > & _dporosity_dgradvar;
+  MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
 };
 
 #endif //POROUSFLOWPOROSITYBASE_H

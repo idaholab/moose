@@ -24,10 +24,10 @@ PorousFlowMatrixInternalEnergy::PorousFlowMatrixInternalEnergy(const InputParame
     _density(getParam<Real>("density")),
     _heat_cap(_cp * _density),
     _temperature_nodal(getMaterialProperty<Real>("PorousFlow_temperature_nodal")),
-    _dtemperature_nodal_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar")),
+    _dtemperature_nodal_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")),
     _en_nodal(declareProperty<Real>("PorousFlow_matrix_internal_energy_nodal")),
     _en_nodal_old(declarePropertyOld<Real>("PorousFlow_matrix_internal_energy_nodal")),
-    _den_nodal_dvar(declareProperty<std::vector<Real> >("dPorousFlow_matrix_internal_energy_nodal_dvar"))
+    _den_nodal_dvar(declareProperty<std::vector<Real>>("dPorousFlow_matrix_internal_energy_nodal_dvar"))
 {
   if (_nodal_material != true)
     mooseError2("PorousFlowMatrixInternalEnergy classes are only defined for at_nodes = true");

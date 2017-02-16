@@ -16,7 +16,7 @@ InputParameters validParams<PorousFlowFluidMass>()
   InputParameters params = validParams<ElementIntegralPostprocessor>();
   params.addParam<unsigned int>("fluid_component", 0, "The index corresponding to the fluid component that this Postprocessor acts on");
   params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names.");
-  params.addParam<std::vector<unsigned int> >("phase", "The index of the fluid phase that this Postprocessor is restricted to.  Multiple indices can be entered");
+  params.addParam<std::vector<unsigned int>>("phase", "The index of the fluid phase that this Postprocessor is restricted to.  Multiple indices can be entered");
   params.addRangeCheckedParam<Real>("saturation_threshold", 1.0, "saturation_threshold >= 0 & saturation_threshold <= 1", "The saturation threshold below which the mass is calculated for a specific phase. Default is 1.0. Note: only one phase_index can be entered");
   params.addParam<unsigned int>("kernel_variable_number", 0, "The PorousFlow variable number (according to the dictatory) of the fluid-mass kernel.  This is required only in the unusual situation where a variety of different finite-element interpolation schemes are employed in the simulation");
   params.set<bool>("use_displaced_mesh") = true;
@@ -29,11 +29,11 @@ PorousFlowFluidMass::PorousFlowFluidMass(const InputParameters & parameters) :
 
   _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
   _fluid_component(getParam<unsigned int>("fluid_component")),
-  _phase_index(getParam<std::vector<unsigned int> >("phase")),
+  _phase_index(getParam<std::vector<unsigned int>>("phase")),
   _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
-  _fluid_density(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_nodal")),
-  _fluid_saturation(getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_nodal")),
-  _mass_fraction(getMaterialProperty<std::vector<std::vector<Real> > >("PorousFlow_mass_frac_nodal")),
+  _fluid_density(getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_nodal")),
+  _fluid_saturation(getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal")),
+  _mass_fraction(getMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_nodal")),
   _saturation_threshold(getParam<Real>("saturation_threshold")),
   _var(getParam<unsigned>("kernel_variable_number") < _dictator.numVariables() ? _dictator.getCoupledMooseVars()[getParam<unsigned>("kernel_variable_number")] : nullptr)
 {

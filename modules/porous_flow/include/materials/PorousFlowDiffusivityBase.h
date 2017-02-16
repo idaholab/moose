@@ -25,16 +25,16 @@ protected:
   virtual void computeQpProperties() override;
 
   /// Tortuosity tau_0 * tau_{alpha} for fluid phase alpha
-  MaterialProperty<std::vector<Real> > & _tortuosity;
+  MaterialProperty<std::vector<Real>> & _tortuosity;
 
   /// Derivative of tortuosity wrt PorousFlow variables
-  MaterialProperty<std::vector<std::vector<Real> > > & _dtortuosity_dvar;
+  MaterialProperty<std::vector<std::vector<Real>>> & _dtortuosity_dvar;
 
   /// Diffusion coefficients of component k in fluid phase alpha
-  MaterialProperty<std::vector<std::vector<Real> > > & _diffusion_coeff;
+  MaterialProperty<std::vector<std::vector<Real>>> & _diffusion_coeff;
 
   /// Derivative of the diffusion coefficients wrt PorousFlow variables
-  MaterialProperty<std::vector<std::vector<std::vector<Real> > > > & _ddiffusion_coeff_dvar;
+  MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _ddiffusion_coeff_dvar;
 
   /// Input diffusion coefficients
   const std::vector<Real> _input_diffusion_coeff;

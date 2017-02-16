@@ -17,10 +17,10 @@ InputParameters validParams<PorousFlowHeatAdvection>()
 
 PorousFlowHeatAdvection::PorousFlowHeatAdvection(const InputParameters & parameters) :
     PorousFlowDarcyBase(parameters),
-    _enthalpy(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_enthalpy_nodal")),
-    _denthalpy_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_fluid_phase_enthalpy_nodal_dvar")),
-    _relative_permeability(getMaterialProperty<std::vector<Real> >("PorousFlow_relative_permeability_nodal")),
-    _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_relative_permeability_nodal_dvar"))
+    _enthalpy(getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_enthalpy_nodal")),
+    _denthalpy_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_fluid_phase_enthalpy_nodal_dvar")),
+    _relative_permeability(getMaterialProperty<std::vector<Real>>("PorousFlow_relative_permeability_nodal")),
+    _drelative_permeability_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_relative_permeability_nodal_dvar"))
 {
 }
 
