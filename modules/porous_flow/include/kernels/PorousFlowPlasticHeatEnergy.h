@@ -43,10 +43,10 @@ protected:
   const MaterialProperty<Real> & _porosity;
 
   /// d(porosity)/d(porous-flow variable) - these derivatives will be wrt variables at the nodes
-  const MaterialProperty<std::vector<Real> > & _dporosity_dvar;
+  const MaterialProperty<std::vector<Real>> & _dporosity_dvar;
 
   /// d(porosity)/d(grad porous-flow variable) - remember these derivatives will be wrt grad(vars) at qps
-  const MaterialProperty<std::vector<RealGradient> > & _dporosity_dgradvar;
+  const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
 };
 
 #endif //POROUSFLOWPLASTICHEATENERGY_H

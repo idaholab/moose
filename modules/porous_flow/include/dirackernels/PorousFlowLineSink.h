@@ -109,52 +109,52 @@ protected:
   const unsigned int _sp;
 
   /// Quadpoint pore pressure in each phase
-  const MaterialProperty<std::vector<Real> > * const _pp;
+  const MaterialProperty<std::vector<Real>> * const _pp;
 
   /// d(quadpoint pore pressure in each phase)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > * const _dpp_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dpp_dvar;
 
   /// Quadpoint temperature
   const MaterialProperty<Real> * const _temperature;
 
   /// d(quadpoint temperature)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<Real> > * const _dtemperature_dvar;
+  const MaterialProperty<std::vector<Real>> * const _dtemperature_dvar;
 
   /// Fluid density for each phase (at the node)
-  const MaterialProperty<std::vector<Real> > * const _fluid_density_node;
+  const MaterialProperty<std::vector<Real>> * const _fluid_density_node;
 
   /// d(Fluid density for each phase (at the node))/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > * const _dfluid_density_node_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_density_node_dvar;
 
   /// Viscosity of each component in each phase
-  const MaterialProperty<std::vector<Real> > * const _fluid_viscosity;
+  const MaterialProperty<std::vector<Real>> * const _fluid_viscosity;
 
   /// d(Viscosity of each component in each phase)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > * const _dfluid_viscosity_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dfluid_viscosity_dvar;
 
   /// Relative permeability of each phase
-  const MaterialProperty<std::vector<Real> > * const _relative_permeability;
+  const MaterialProperty<std::vector<Real>> * const _relative_permeability;
 
   /// d(Relative permeability of each phase)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > * const _drelative_permeability_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _drelative_permeability_dvar;
 
   /// Mass fraction of each component in each phase
-  const MaterialProperty<std::vector<std::vector<Real> > > * const _mass_fractions;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _mass_fractions;
 
   /// d(Mass fraction of each component in each phase)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<std::vector<Real> > > > * const _dmass_fractions_dvar;
+  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> * const _dmass_fractions_dvar;
 
   /// Enthalpy of each phase
-  const MaterialProperty<std::vector<Real> > * const _enthalpy;
+  const MaterialProperty<std::vector<Real>> * const _enthalpy;
 
   /// d(enthalpy of each phase)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > * const _denthalpy_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _denthalpy_dvar;
 
   /// Internal_Energy of each phase
-  const MaterialProperty<std::vector<Real> > * const _internal_energy;
+  const MaterialProperty<std::vector<Real>> * const _internal_energy;
 
   /// d(internal_energy of each phase)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real> > > * const _dinternal_energy_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dinternal_energy_dvar;
 };
 
 #endif //POROUSFLOWLINESINK_H

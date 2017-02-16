@@ -45,7 +45,7 @@ protected:
   const MaterialProperty<Real> & _temperature_nodal;
 
   /// d(temperature at the nodes)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<Real> > & _dtemperature_nodal_dvar;
+  const MaterialProperty<std::vector<Real>> & _dtemperature_nodal_dvar;
 
   /// Matrix internal_energy at the nodes
   MaterialProperty<Real> & _en_nodal;
@@ -54,7 +54,7 @@ protected:
   MaterialProperty<Real> & _en_nodal_old;
 
   /// d(matrix internal energy)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real> > & _den_nodal_dvar;
+  MaterialProperty<std::vector<Real>> & _den_nodal_dvar;
 };
 
 #endif // POROUSFLOWMATRIXINTERNALENERGY_H

@@ -28,10 +28,10 @@ PorousFlowThermalConductivityIdeal::PorousFlowThermalConductivityIdeal(const Inp
     _exponent(getParam<Real>("exponent")),
     _aqueous_phase(_num_phases > 0),
     _aqueous_phase_number(getParam<unsigned>("aqueous_phase_number")),
-    _saturation_qp(_aqueous_phase ? &getMaterialProperty<std::vector<Real> >("PorousFlow_saturation_qp") : nullptr),
-    _dsaturation_qp_dvar(_aqueous_phase ? &getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar") : nullptr),
+    _saturation_qp(_aqueous_phase ? &getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp") : nullptr),
+    _dsaturation_qp_dvar(_aqueous_phase ? &getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_saturation_qp_dvar") : nullptr),
     _la_qp(declareProperty<RealTensorValue>("PorousFlow_thermal_conductivity_qp")),
-    _dla_qp_dvar(declareProperty<std::vector<RealTensorValue> >("dPorousFlow_thermal_conductivity_qp_dvar"))
+    _dla_qp_dvar(declareProperty<std::vector<RealTensorValue>>("dPorousFlow_thermal_conductivity_qp_dvar"))
 {
   if (_aqueous_phase && (_aqueous_phase_number >= _num_phases))
     mooseError2("PorousFlowThermalConductivityIdeal: Your aqueous phase number, ", _aqueous_phase_number, " must not exceed the number of fluid phases in the system, which is ", _num_phases, "\n");

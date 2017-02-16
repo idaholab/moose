@@ -29,7 +29,7 @@ protected:
   virtual void computeQpProperties() override;
 
   /// Pore pressure at the nodes or quadpoints
-  const MaterialProperty<std::vector<Real> > & _porepressure;
+  const MaterialProperty<std::vector<Real>> & _porepressure;
 
   /// Fluid temperature at the nodes or quadpoints
   const MaterialProperty<Real> & _temperature;

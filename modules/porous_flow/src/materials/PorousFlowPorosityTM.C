@@ -30,10 +30,10 @@ PorousFlowPorosityTM::PorousFlowPorosityTM(const InputParameters & parameters) :
     _disp_var_num(_ndisp),
 
     _vol_strain_qp(getMaterialProperty<Real>("PorousFlow_total_volumetric_strain_qp")),
-    _dvol_strain_qp_dvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_total_volumetric_strain_qp_dvar")),
+    _dvol_strain_qp_dvar(getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_total_volumetric_strain_qp_dvar")),
 
     _temperature(_nodal_material ? getMaterialProperty<Real>("PorousFlow_temperature_nodal") : getMaterialProperty<Real>("PorousFlow_temperature_qp")),
-    _dtemperature_dvar(_nodal_material ? getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar") : getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_qp_dvar"))
+    _dtemperature_dvar(_nodal_material ? getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar") : getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar"))
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
     _disp_var_num[i] = coupled("displacements", i);

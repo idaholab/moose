@@ -47,7 +47,7 @@ public:
   const MaterialProperty<Real> & _pf;
 
   /// d(effective porepressure)/(d porflow variable)
-  const MaterialProperty<std::vector<Real> > & _dpf_dvar;
+  const MaterialProperty<std::vector<Real>> & _dpf_dvar;
 };
 
 #endif //POROUSFLOWEFFECTIVESTRESSCOUPLING_H

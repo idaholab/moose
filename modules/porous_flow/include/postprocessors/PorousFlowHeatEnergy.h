@@ -51,13 +51,13 @@ protected:
   const MaterialProperty<Real> & _rock_energy_nodal;
 
   /// nodal fluid density
-  const MaterialProperty<std::vector<Real> > * _fluid_density;
+  const MaterialProperty<std::vector<Real>> * _fluid_density;
 
   /// nodal fluid saturation
-  const MaterialProperty<std::vector<Real> > * _fluid_saturation_nodal;
+  const MaterialProperty<std::vector<Real>> * _fluid_saturation_nodal;
 
   /// internal energy of the phases, evaluated at the nodes
-  const MaterialProperty<std::vector<Real> > * _energy_nodal;
+  const MaterialProperty<std::vector<Real>> * _energy_nodal;
 
   /// the variable for the corresponding PorousFlowEnergyTimeDerivative Kernel: this provides test functions
   MooseVariable * const _var;

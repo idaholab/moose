@@ -29,10 +29,10 @@ protected:
   MaterialProperty<RealTensorValue> & _permeability_qp;
 
   /// d(quadpoint permeability)/d(PorousFlow variable)
-  MaterialProperty<std::vector<RealTensorValue> > & _dpermeability_qp_dvar;
+  MaterialProperty<std::vector<RealTensorValue>> & _dpermeability_qp_dvar;
 
   /// d(quadpoint permeability)/d(grad(PorousFlow variable))
-  MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dpermeability_qp_dgradvar;
+  MaterialProperty<std::vector<std::vector<RealTensorValue>>> & _dpermeability_qp_dgradvar;
 };
 
 #endif //POROUSFLOWPERMEABILITYBASE_H

@@ -29,13 +29,13 @@ PorousFlowJoiner::PorousFlowJoiner(const InputParameters & parameters) :
     _pf_prop(getParam<std::string>("material_property")),
     _include_old(getParam<bool>("include_old")),
 
-    _dporepressure_dvar(!_nodal_material ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_porepressure_nodal_dvar")),
-    _dsaturation_dvar(!_nodal_material ? getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real> > >("dPorousFlow_saturation_nodal_dvar")),
-    _dtemperature_dvar(!_nodal_material ? getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_qp_dvar") : getMaterialProperty<std::vector<Real> >("dPorousFlow_temperature_nodal_dvar")),
+    _dporepressure_dvar(!_nodal_material ? getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_porepressure_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_porepressure_nodal_dvar")),
+    _dsaturation_dvar(!_nodal_material ? getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_saturation_qp_dvar") : getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_saturation_nodal_dvar")),
+    _dtemperature_dvar(!_nodal_material ? getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar") : getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")),
 
-    _property(declareProperty<std::vector<Real> >(_pf_prop)),
-    _property_old(_include_old ? &declarePropertyOld<std::vector<Real> >(_pf_prop) : nullptr),
-    _dproperty_dvar(declareProperty<std::vector<std::vector<Real> > >("d" + _pf_prop + "_dvar"))
+    _property(declareProperty<std::vector<Real>>(_pf_prop)),
+    _property_old(_include_old ? &declarePropertyOld<std::vector<Real>>(_pf_prop) : nullptr),
+    _dproperty_dvar(declareProperty<std::vector<std::vector<Real>>>("d" + _pf_prop + "_dvar"))
 {
   _phase_property.resize(_num_phases);
   _dphase_property_dp.resize(_num_phases);

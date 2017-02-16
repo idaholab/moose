@@ -26,8 +26,8 @@ PorousFlowDesorpedMassTimeDerivative::PorousFlowDesorpedMassTimeDerivative(const
     _conc_old(coupledValueOld("conc_var")),
     _porosity(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
     _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_qp")),
-    _dporosity_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_qp_dvar")),
-    _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_porosity_qp_dgradvar"))
+    _dporosity_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar")),
+    _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar"))
 {
 }
 

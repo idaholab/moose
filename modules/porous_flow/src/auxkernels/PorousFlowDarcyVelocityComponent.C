@@ -28,11 +28,11 @@ InputParameters validParams<PorousFlowDarcyVelocityComponent>()
 
 PorousFlowDarcyVelocityComponent::PorousFlowDarcyVelocityComponent(const InputParameters & parameters) :
     AuxKernel(parameters),
-    _relative_permeability(getMaterialProperty<std::vector<Real> >("PorousFlow_relative_permeability_qp")),
-    _fluid_viscosity(getMaterialProperty<std::vector<Real> >("PorousFlow_viscosity_qp")),
+    _relative_permeability(getMaterialProperty<std::vector<Real>>("PorousFlow_relative_permeability_qp")),
+    _fluid_viscosity(getMaterialProperty<std::vector<Real>>("PorousFlow_viscosity_qp")),
     _permeability(getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")),
-    _grad_p(getMaterialProperty<std::vector<RealGradient> >("PorousFlow_grad_porepressure_qp")),
-    _fluid_density_qp(getMaterialProperty<std::vector<Real> >("PorousFlow_fluid_phase_density_qp")),
+    _grad_p(getMaterialProperty<std::vector<RealGradient>>("PorousFlow_grad_porepressure_qp")),
+    _fluid_density_qp(getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _ph(getParam<unsigned int>("fluid_phase")),
     _component(getParam<MooseEnum>("component")),

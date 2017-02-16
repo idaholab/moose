@@ -47,7 +47,7 @@ protected:
   MaterialProperty<Real> & _temperature;
 
   /// d(computed temperature)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real> > & _dtemperature_dvar;
+  MaterialProperty<std::vector<Real>> & _dtemperature_dvar;
 
   /// Old value of computed temperature at the nodes
   MaterialProperty<Real> * const _temperature_old;
@@ -56,10 +56,10 @@ protected:
   MaterialProperty<RealGradient> * const _grad_temperature;
 
   /// d(grad temperature)/d(grad PorousFlow variable) at the quadpoints
-  MaterialProperty<std::vector<Real> > * const _dgrad_temperature_dgradv;
+  MaterialProperty<std::vector<Real>> * const _dgrad_temperature_dgradv;
 
   /// d(grad temperature)/d(PorousFlow variable) at the quadpoints
-  MaterialProperty<std::vector<RealGradient> > * const _dgrad_temperature_dv;
+  MaterialProperty<std::vector<RealGradient>> * const _dgrad_temperature_dv;
 };
 
 #endif //POROUSFLOWTEMPERATURE_H

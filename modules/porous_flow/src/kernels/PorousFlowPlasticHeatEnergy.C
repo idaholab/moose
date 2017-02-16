@@ -25,8 +25,8 @@ PorousFlowPlasticHeatEnergy::PorousFlowPlasticHeatEnergy(const InputParameters &
     _strain_at_nearest_qp(getParam<bool>("strain_at_nearest_qp")),
     _nearest_qp(_strain_at_nearest_qp ? &getMaterialProperty<unsigned int>("PorousFlow_nearestqp_nodal") : nullptr),
     _porosity(getMaterialProperty<Real>("PorousFlow_porosity_nodal")),
-    _dporosity_dvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_porosity_nodal_dvar")),
-    _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_porosity_nodal_dgradvar"))
+    _dporosity_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_nodal_dvar")),
+    _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_porosity_nodal_dgradvar"))
 {
 }
 

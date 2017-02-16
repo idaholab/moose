@@ -19,8 +19,8 @@ InputParameters validParams<PorousFlowPermeabilityBase>()
 PorousFlowPermeabilityBase::PorousFlowPermeabilityBase(const InputParameters & parameters) :
     PorousFlowMaterialVectorBase(parameters),
     _permeability_qp(declareProperty<RealTensorValue>("PorousFlow_permeability_qp")),
-    _dpermeability_qp_dvar(declareProperty<std::vector<RealTensorValue> >("dPorousFlow_permeability_qp_dvar")),
-    _dpermeability_qp_dgradvar(declareProperty<std::vector<std::vector<RealTensorValue> > >("dPorousFlow_permeability_qp_dgradvar"))
+    _dpermeability_qp_dvar(declareProperty<std::vector<RealTensorValue>>("dPorousFlow_permeability_qp_dvar")),
+    _dpermeability_qp_dgradvar(declareProperty<std::vector<std::vector<RealTensorValue>>>("dPorousFlow_permeability_qp_dgradvar"))
 {
   if (_nodal_material == true)
     mooseError2("PorousFlowPermeability classes are only defined for at_nodes = false");

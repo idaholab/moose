@@ -55,19 +55,19 @@ protected:
   const MaterialProperty<Real> & _vol_strain_qp;
 
   /// d(strain)/(dvar)
-  const MaterialProperty<std::vector<RealGradient> > & _dvol_strain_qp_dvar;
+  const MaterialProperty<std::vector<RealGradient>> & _dvol_strain_qp_dvar;
 
   /// effective porepressure at the quadpoints or nodes
   const MaterialProperty<Real> & _pf;
 
   /// d(effective porepressure)/(d porflow variable)
-  const MaterialProperty<std::vector<Real> > & _dpf_dvar;
+  const MaterialProperty<std::vector<Real>> & _dpf_dvar;
 
   /// temperature at the quadpoints or nodes
   const MaterialProperty<Real> & _temperature;
 
   /// d(temperature)/(d porflow variable)
-  const MaterialProperty<std::vector<Real> > & _dtemperature_dvar;
+  const MaterialProperty<std::vector<Real>> & _dtemperature_dvar;
 };
 
 #endif //POROUSFLOWPOROSITYTHM_H

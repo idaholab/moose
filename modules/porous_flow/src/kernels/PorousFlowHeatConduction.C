@@ -20,10 +20,10 @@ PorousFlowHeatConduction::PorousFlowHeatConduction(const InputParameters & param
     Kernel(parameters),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _la(getMaterialProperty<RealTensorValue>("PorousFlow_thermal_conductivity_qp")),
-    _dla_dvar(getMaterialProperty<std::vector<RealTensorValue> >("dPorousFlow_thermal_conductivity_qp_dvar")),
+    _dla_dvar(getMaterialProperty<std::vector<RealTensorValue>>("dPorousFlow_thermal_conductivity_qp_dvar")),
     _grad_t(getMaterialProperty<RealGradient>("PorousFlow_grad_temperature_qp")),
-    _dgrad_t_dvar(getMaterialProperty<std::vector<RealGradient> >("dPorousFlow_grad_temperature_qp_dvar")),
-    _dgrad_t_dgradvar(getMaterialProperty<std::vector<Real> >("dPorousFlow_grad_temperature_qp_dgradvar"))
+    _dgrad_t_dvar(getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_grad_temperature_qp_dvar")),
+    _dgrad_t_dgradvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_grad_temperature_qp_dgradvar"))
 {
 }
 

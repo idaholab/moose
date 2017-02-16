@@ -49,13 +49,13 @@ protected:
   const MaterialProperty<Real> & _vol_strain_qp;
 
   /// d(strain)/(dvar)
-  const MaterialProperty<std::vector<RealGradient> > & _dvol_strain_qp_dvar;
+  const MaterialProperty<std::vector<RealGradient>> & _dvol_strain_qp_dvar;
 
   /// temperature at quadpoints or nodes
   const MaterialProperty<Real> & _temperature;
 
   /// d(temperature)/(d porflow variable)
-  const MaterialProperty<std::vector<Real> > & _dtemperature_dvar;
+  const MaterialProperty<std::vector<Real>> & _dtemperature_dvar;
 };
 
 #endif //POROUSFLOWPOROSITYTM_H
