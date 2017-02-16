@@ -87,6 +87,10 @@ KernelBase::KernelBase(const InputParameters & parameters) :
 
     _eigen_kernel(getParam<bool>("eigen_kernel"))
 {
+  mooseDeprecated(
+      " "
+      << "hello"
+      );
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
 

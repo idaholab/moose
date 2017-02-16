@@ -38,6 +38,7 @@ Kernel::Kernel(const InputParameters & parameters) :
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu())
 {
+  mooseWarning("foo" << "bar");
 }
 
 void
