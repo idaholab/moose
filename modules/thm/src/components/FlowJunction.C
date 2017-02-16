@@ -63,7 +63,7 @@ FlowJunction::addVariables()
     break;
 
   default:
-    mooseError(name() << ": Not implemented yet.");
+    mooseError2(name(), ": Not implemented yet.");
     break;
   }
 }

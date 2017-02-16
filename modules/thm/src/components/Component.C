@@ -138,7 +138,7 @@ Component::setSubdomainCoordSystem(unsigned int block_id, Moose::CoordinateSyste
     }
   }
 
-  mooseError(name() << ": Trying to set coordinate system " << coord_type << " on a block id '" << block_id << "',"
+  mooseError2(name(), ": Trying to set coordinate system ", coord_type, " on a block id '", block_id, "',"
     " but this component does not have such a block.");
 }
 
