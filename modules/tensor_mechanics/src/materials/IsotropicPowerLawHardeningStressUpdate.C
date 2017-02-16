@@ -58,7 +58,7 @@ IsotropicPowerLawHardeningStressUpdate::computeHardeningDerivative(Real scalar)
 void
 IsotropicPowerLawHardeningStressUpdate::computeYieldStress()
 {
-  // Pull in the Lamè lambda, and caculate E
+  // Pull in the Lam\`{e} lambda, and caculate E
   const Real lambda = getIsotropicLameLambda();
   _youngs_modulus = _shear_modulus * (3.0 * lambda + 2 * _shear_modulus) / ( lambda + _shear_modulus);
 

@@ -203,8 +203,8 @@ public:
    * of salts in aqueous solutions at elevated temperatures, J. Res. U.S. Geol.
    * Surv., 5, 389-395 (1977). Equation describing halite solubility is repeated
    * in Chou, Phase relations in the system NaCI-KCI-H2O. III: Solubilities of
-   * halite in vapor-saturated liquids above 445°C and redetermination of phase
-   * equilibrium properties in the system NaCI-HzO to 1000°C and 1500 bars,
+   * halite in vapor-saturated liquids above 445 C and redetermination of phase
+   * equilibrium properties in the system NaCI-HzO to 1000 C and 1500 bars,
    * Geochimica et Cosmochimica Acta 51, 1965-1975 (1987).
    * Note: this correlation is valid for 0 <= T <= 424.5 C
    *
