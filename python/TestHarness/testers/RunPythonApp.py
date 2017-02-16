@@ -1,4 +1,5 @@
 import os, re
+import util
 from Tester import Tester
 
 class RunPythonApp(Tester):
@@ -31,9 +32,9 @@ class RunPythonApp(Tester):
 
         if specs.isValid('expect_out'):
             if specs['match_literal']:
-                out_ok = self.checkOutputForLiteral(output, specs['expect_out'])
+                out_ok = util.checkOutputForLiteral(output, specs['expect_out'])
             else:
-                out_ok = self.checkOutputForPattern(output, specs['expect_out'])
+                out_ok = util.checkOutputForPattern(output, specs['expect_out'])
 
             # Process out_ok
             if (out_ok and retcode != 0):
@@ -41,21 +42,13 @@ class RunPythonApp(Tester):
             elif (not out_ok):
                 reason = 'NO EXPECTED OUT'
         elif specs['unittest']:
-            out_ok = self.checkOutputForPattern(output, "^OK$") or self.checkOutputForPattern(output, "^OK\s\(skipped=\d+\)$")
+            out_ok = util.checkOutputForPattern(output, "^OK$") or util.checkOutputForPattern(output, "^OK\s\(skipped=\d+\)$")
             if not out_ok:
                 reason = 'FAILED'
 
-        # Return the reason and command output
-        return (reason, output)
-
-    def checkOutputForPattern(self, output, re_pattern):
-        if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) == None:
-            return False
+        # Populate the bucket
+        if reason != '':
+            self.setStatus(reason, self.bucket_fail)
         else:
-            return True
-
-    def checkOutputForLiteral(self, output, literal):
-        if output.find(literal) == -1:
-            return False
-        else:
-            return True
+            self.setStatus(self.success_message, self.bucket_success)
+        return output

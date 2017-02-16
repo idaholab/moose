@@ -1,6 +1,6 @@
 import os
 import sys
-
+import util
 from RunPythonApp import RunPythonApp
 from mooseutils.ImageDiffer import ImageDiffer
 
@@ -26,11 +26,7 @@ class ImageDiff(RunPythonApp):
         Cleans up image files from previous execution
         """
         if self.specs['delete_output_before_running'] == True:
-            for file in self.specs['imagediff']:
-                try:
-                    os.remove(os.path.join(self.specs['test_dir'], file))
-                except:
-                    pass
+            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['imagediff'], self.specs['delete_output_folders'])
 
     def processResults(self, moose_dir, retcode, options, output):
         """
@@ -38,9 +34,9 @@ class ImageDiff(RunPythonApp):
         """
 
         # Call base class processResults
-        (reason, output) = RunPythonApp.processResults(self, moose_dir, retcode, options, output)
-        if reason:
-            return (reason, output)
+        output = RunPythonApp.processResults(self, moose_dir, retcode, options, output)
+        if self.getStatus() == self.bucket_fail:
+            return output
 
         # Loop through files
         specs = self.specs
@@ -49,7 +45,7 @@ class ImageDiff(RunPythonApp):
             # Error if gold file does not exist
             if not os.path.exists(os.path.join(specs['test_dir'], specs['gold_dir'], filename)):
                 output += "File Not Found: " + os.path.join(specs['test_dir'], specs['gold_dir'], filename)
-                reason = 'MISSING GOLD FILE'
+                self.setStatus('MISSING GOLD FILE', self.bucket_fail)
                 break
 
             # Perform diff
@@ -71,8 +67,12 @@ class ImageDiff(RunPythonApp):
 
                 output += differ.message()
                 if differ.fail():
-                    reason = 'IMAGEDIFF'
+                    self.setStatus('IMAGEDIFF', self.bucket_diff)
                     break
 
-        # Return the reason and command output
-        return (reason, output)
+
+        # If status is still pending, then it is a passing test
+        if self.getStatus() == self.bucket_pending:
+            self.setStatus(self.success_message, self.bucket_success)
+
+        return output

@@ -1,3 +1,4 @@
+import util
 from RunPythonApp import RunPythonApp
 
 class RunPythonException(RunPythonApp):
@@ -20,13 +21,17 @@ class RunPythonException(RunPythonApp):
 
         if specs.isValid('expect_err'):
             if specs['match_literal']:
-                out_ok = self.checkOutputForLiteral(output, specs['expect_err'])
+                out_ok = util.checkOutputForLiteral(output, specs['expect_err'])
             else:
-                out_ok = self.checkOutputForPattern(output, specs['expect_err'])
+                out_ok = util.checkOutputForPattern(output, specs['expect_err'])
 
             # Process out_ok
             if out_ok:
                 reason = ''
 
-        # Return the reason and command output
-        return (reason, output)
+        # Populate the bucket
+        if reason != '':
+            self.setStatus(reason, self.buck_fail)
+        else:
+            self.setStatus(self.success_message, self.buck_success)
+        return output

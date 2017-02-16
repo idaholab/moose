@@ -1,5 +1,6 @@
 import re, os, sys, time
 from Tester import Tester
+import util
 from RunParallel import RunParallel # For TIMEOUT value
 
 class RunApp(Tester):
@@ -264,14 +265,14 @@ class RunApp(Tester):
         specs = self.specs
         if specs.isValid('expect_out'):
             if specs['match_literal']:
-                have_expected_out = self.checkOutputForLiteral(output, specs['expect_out'])
+                have_expected_out = util.checkOutputForLiteral(output, specs['expect_out'])
             else:
-                have_expected_out = self.checkOutputForPattern(output, specs['expect_out'])
+                have_expected_out = util.checkOutputForPattern(output, specs['expect_out'])
             if (not have_expected_out):
                 reason = 'EXPECTED OUTPUT MISSING'
 
         if reason == '' and specs.isValid('absent_out'):
-            have_absent_out = self.checkOutputForPattern(output, specs['absent_out'])
+            have_absent_out = util.checkOutputForPattern(output, specs['absent_out'])
             if (have_absent_out):
                 reason = 'OUTPUT NOT ABSENT'
 
@@ -299,47 +300,6 @@ class RunApp(Tester):
             self.setStatus(reason, self.bucket_fail)
         else:
             self.setStatus(self.success_message, self.bucket_success)
+
         return output
 
-    def checkOutputForPattern(self, output, re_pattern):
-        if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) == None:
-            return False
-        else:
-            return True
-
-    def checkOutputForLiteral(self, output, literal):
-        if output.find(literal) == -1:
-            return False
-        else:
-            return True
-
-    def deleteFilesAndFolders(self, test_dir, paths, delete_folders=True):
-        # First delete the files (at the end of each of the paths)
-        if self.specs['delete_output_before_running'] == True:
-            for file in paths:
-                full_path = os.path.join(test_dir, file)
-                if os.path.exists(full_path):
-                    try:
-                        os.remove(full_path)
-                    except:
-                        print "Unable to remove file: " + full_path
-
-            # Now try to delete directories that might have been created
-            if delete_folders:
-                for file in paths:
-                    path = os.path.dirname(file)
-                    while path != '':
-                        (path, tail) = os.path.split(path)
-                        try:
-                            os.rmdir(os.path.join(test_dir, path, tail))
-                        except:
-                            # There could definitely be problems with removing the directory
-                            # because it might be non-empty due to checkpoint files or other
-                            # files being created on different operating systems. We just
-                            # don't care for the most part and we don't want to error out.
-                            # As long as our test boxes clean before each test, we'll notice
-                            # the case where these files aren't being generated for a
-                            # particular run.
-                            #
-                            # TL;DR; Just pass...
-                            pass

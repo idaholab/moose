@@ -242,11 +242,11 @@ class TestHarness:
                                             self.runner.run(tester, command)
                                         else: # This job is skipped - notify the runner
                                             status = tester.getStatus()
-                                            if status != 'SILENT': # SILENT occurs when a user is using --re options
-                                                if (self.options.report_skipped and status == 'SKIP') \
-                                                   or status == 'SKIP':
+                                            if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
+                                                if (self.options.report_skipped and status == tester.bucket_skip) \
+                                                   or status == tester.bucket_skip:
                                                     self.handleTestStatus(tester)
-                                                elif status == 'DELETED' and self.options.extra_info:
+                                                elif status == tester.bucket_deleted and self.options.extra_info:
                                                     self.handleTestStatus(tester)
                                             self.runner.jobSkipped(tester.parameters()['test_name'])
                                 os.chdir(saved_cwd)
@@ -292,10 +292,10 @@ class TestHarness:
                 self.options.test_serial_number += 1
             else: # This job is skipped - notify the runner
                 status = tester.getStatus()
-                if status != 'SILENT': # SILENT occurs when a user is using --re options
-                    if (self.options.report_skipped and status == 'SKIP') or status == 'SKIP':
+                if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
+                    if (self.options.report_skipped and status == tester.bucket_skip) or status == tester.bucket_skip:
                         self.handleTestStatus(tester)
-                    elif status == 'DELETED' and self.options.extra_info:
+                    elif status == tester.bucket_deleted and self.options.extra_info:
                         self.handleTestStatus(tester)
                 self.runner.jobSkipped(tester.parameters()['test_name'])
 
@@ -409,7 +409,7 @@ class TestHarness:
                 result = tester.getSuccessMessage()
 
         # FAIL, DIFF and DELETED fall into this catagory
-        elif status == 'FAIL' or status == 'DIFF' or status == 'DELETED':
+        elif status == tester.bucket_fail or status == tester.bucket_diff or status == tester.bucket_deleted:
             result = 'FAILED (%s)' % tester.getStatusMessage()
 
         # PBS and any other possibly unknown statuses fall into this catagory.
@@ -514,7 +514,7 @@ class TestHarness:
                             else:
                                 # I ran into this scenario when the cluster went down, but launched/completed my job :)
                                 reason = 'FAILED (NO STDOUT FILE)'
-                                tester.setStatus(reason, 'FAIL')
+                                tester.setStatus(reason, tester.bucket_fail)
                         elif output_value == 'R':
                             # Job is currently running
                             reason = 'RUNNING'
@@ -525,8 +525,8 @@ class TestHarness:
                             # Job is currently queued
                             reason = 'QUEUED'
 
-                        if reason != '' and tester.getStatus() != 'FAIL':
-                            tester.setStatus(reason, 'PBS')
+                        if reason != '' and tester.getStatus() != tester.bucket_fail:
+                            tester.setStatus(reason, tester.bucket_pbs)
                             self.handleTestStatus(tester)
 
         else:
@@ -535,7 +535,7 @@ class TestHarness:
     def buildPBSBatch(self, output, tester):
         # Create/Update the batch file
         if 'command not found' in output:
-            tester.setStatus('QSUB NOT FOUND', 'FAIL')
+            tester.setStatus('QSUB NOT FOUND', tester.bucket_fail)
         else:
             # Get the Job information from the ClusterLauncher
             results = re.findall(r'JOB_NAME: (\w+) JOB_ID:.* (\d+).*TEST_NAME: (\S+)', output)
@@ -552,14 +552,14 @@ class TestHarness:
                         output_value = output_value.split(':')[1].replace('\n', '').replace('\t', '').strip()
                     else:
                         job_list.close()
-                        tester.setStatus('QSTAT NOT FOUND', 'FAIL')
+                        tester.setStatus('QSTAT NOT FOUND', tester.bucket_fail)
                     # Write job_id, test['test_name'], and Ouput_Path to the batch file
                     job_list.write(str(job_id) + ':' + test_name + ':' + output_value + ':' + self.options.input_file_name  + '\n')
                 # Return to TestHarness and inform we have launched the job
                 job_list.close()
-                tester.setStatus('LAUNCHED', 'PBS')
+                tester.setStatus('LAUNCHED', tester.bucket_pbs)
             else:
-                tester.setStatus('QSTAT INVALID RESULTS', 'FAIL')
+                tester.setStatus('QSTAT INVALID RESULTS', tester.bucket_fail)
         return
 
     def cleanPBSBatch(self):
@@ -590,7 +590,7 @@ class TestHarness:
         test_completed = False
 
         # Statuses that inform the TestHarness, that this test is still running.
-        if status == 'PENDING':
+        if status == tester.bucket_pending:
             print printResult(tester, tester.getStatusMessage(), 0, 0, 0, self.options)
 
         # Statuses generated when using PBS options
@@ -645,11 +645,11 @@ class TestHarness:
         # in the 'Final Test Results' area.
         if add_to_table:
             self.test_table.append( (tester, output, result, timing, start, end) )
-            if status == 'SKIP':
+            if status == tester.bucket_skip:
                 self.num_skipped += 1
-            elif status == 'PASS':
+            elif status == tester.bucket_success:
                 self.num_passed += 1
-            elif status == 'PENDING' or status == 'PBS':
+            elif status == tester.bucket_pending or status == tester.bucket_pbs:
                 self.num_pending += 1
             else:
                 # Dump everything else into the failure status (neccessary due to PBS launch failures
@@ -675,7 +675,7 @@ class TestHarness:
                 # Print result line again at the bottom of the output for failed tests
                 print printResult(tester, result, timing, start, end, self.options), "(reprint)"
 
-        if status != 'SKIP':
+        if status != tester.bucket_skip:
             if not did_pass and not self.options.failed_tests:
                 self.writeFailedTest.write(tester.specs['test_name'] + '\n')
 
