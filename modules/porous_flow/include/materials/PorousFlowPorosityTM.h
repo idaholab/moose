@@ -27,7 +27,6 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
-
   virtual void computeQpProperties() override;
 
   /// porosity at zero strain and zero temperature

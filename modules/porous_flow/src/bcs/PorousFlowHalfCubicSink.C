@@ -27,7 +27,7 @@ PorousFlowHalfCubicSink::PorousFlowHalfCubicSink(const InputParameters & paramet
 }
 
 Real
-PorousFlowHalfCubicSink::multiplier()
+PorousFlowHalfCubicSink::multiplier()const
 {
   const Real x = ptVar() - _center;
 
@@ -42,7 +42,7 @@ PorousFlowHalfCubicSink::multiplier()
 }
 
 Real
-PorousFlowHalfCubicSink::dmultiplier_dvar(unsigned int pvar)
+PorousFlowHalfCubicSink::dmultiplier_dvar(unsigned int pvar) const
 {
   const Real x = ptVar() - _center;
 

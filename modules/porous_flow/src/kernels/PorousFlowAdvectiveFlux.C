@@ -26,12 +26,12 @@ PorousFlowAdvectiveFlux::PorousFlowAdvectiveFlux(const InputParameters & paramet
 {
 }
 
-Real PorousFlowAdvectiveFlux::mobility(unsigned nodenum, unsigned phase)
+Real PorousFlowAdvectiveFlux::mobility(unsigned nodenum, unsigned phase) const
 {
   return _mass_fractions[nodenum][phase][_fluid_component] * _fluid_density_node[nodenum][phase] * _relative_permeability[nodenum][phase] / _fluid_viscosity[nodenum][phase];
 }
 
-Real PorousFlowAdvectiveFlux::dmobility(unsigned nodenum, unsigned phase, unsigned pvar)
+Real PorousFlowAdvectiveFlux::dmobility(unsigned nodenum, unsigned phase, unsigned pvar) const
 {
   Real dm = _dmass_fractions_dvar[nodenum][phase][_fluid_component][pvar] * _fluid_density_node[nodenum][phase] * _relative_permeability[nodenum][phase] / _fluid_viscosity[nodenum][phase];
   dm += _mass_fractions[nodenum][phase][_fluid_component] * _dfluid_density_node_dvar[nodenum][phase][pvar] * _relative_permeability[nodenum][phase] / _fluid_viscosity[nodenum][phase];

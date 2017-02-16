@@ -60,7 +60,7 @@ protected:
    * with variable number jvar.
    * @param jvar take the derivative of the mass part of the residual wrt this variable number
    */
-  Real computeQpJac(unsigned int jvar);
+  Real computeQpJac(unsigned int jvar) const;
 };
 
 #endif //POROUSFLOWDESORPEDMASSVOLUMETRICEXPANSION_H

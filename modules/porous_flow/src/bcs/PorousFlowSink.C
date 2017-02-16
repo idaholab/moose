@@ -120,7 +120,7 @@ PorousFlowSink::computeQpOffDiagJacobian(unsigned int jvar)
 }
 
 Real
-PorousFlowSink::jac(unsigned int jvar)
+PorousFlowSink::jac(unsigned int jvar) const
 {
   if (_dictator.notPorousFlowVariable(jvar))
     return 0.0;
@@ -185,13 +185,13 @@ PorousFlowSink::jac(unsigned int jvar)
 }
 
 Real
-PorousFlowSink::multiplier()
+PorousFlowSink::multiplier() const
 {
   return _m_func.value(_t, _q_point[_qp]);
 }
 
 Real
-PorousFlowSink::dmultiplier_dvar(unsigned int /*pvar*/)
+PorousFlowSink::dmultiplier_dvar(unsigned int /*pvar*/) const
 {
   return 0.0;
 }

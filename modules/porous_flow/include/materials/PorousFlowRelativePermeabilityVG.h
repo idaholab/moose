@@ -35,7 +35,6 @@ public:
 
 protected:
   virtual Real relativePermeability(Real seff) const override;
-
   virtual Real dRelativePermeability(Real seff) const override;
 
   /// van Genuchten exponent m for the specified phase

@@ -65,7 +65,7 @@ protected:
   std::vector<Real> _half_seg_len;
 
   /// Add Dirac Points to the line sink
-  virtual void addPoints();
+  virtual void addPoints() override;
 
   /// reads a space-separated line of floats from ifs and puts in myvec
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);

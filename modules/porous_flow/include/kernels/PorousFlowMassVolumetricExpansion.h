@@ -93,7 +93,7 @@ protected:
    * This is used by both computeQpJacobian and computeQpOffDiagJacobian
    * @param jvar take the derivative of the mass part of the residual wrt this variable number
    */
-  Real computedMassQpJac(unsigned int jvar);
+  Real computedMassQpJac(unsigned int jvar) const;
 
   /**
    * Derivative of volumetric-strain part of the residual with respect to the Variable
@@ -101,7 +101,7 @@ protected:
    * This is used by both computeQpJacobian and computeQpOffDiagJacobian
    * @param jvar take the derivative of the volumetric-strain part of the residual wrt this variable number
    */
-  Real computedVolQpJac(unsigned int jvar);
+  Real computedVolQpJac(unsigned int jvar) const;
 };
 
 #endif //POROUSFLOWMASSVOLUMETRICEXPANSION_H

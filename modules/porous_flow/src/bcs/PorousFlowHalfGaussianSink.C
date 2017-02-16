@@ -27,7 +27,7 @@ PorousFlowHalfGaussianSink::PorousFlowHalfGaussianSink(const InputParameters & p
 }
 
 Real
-PorousFlowHalfGaussianSink::multiplier()
+PorousFlowHalfGaussianSink::multiplier() const
 {
   if (ptVar() >= _center)
     return PorousFlowSink::multiplier() * _maximum;
@@ -35,7 +35,7 @@ PorousFlowHalfGaussianSink::multiplier()
 }
 
 Real
-PorousFlowHalfGaussianSink::dmultiplier_dvar(unsigned int pvar)
+PorousFlowHalfGaussianSink::dmultiplier_dvar(unsigned int pvar) const
 {
   if (ptVar() >= _center)
     return PorousFlowSink::dmultiplier_dvar(pvar) * _maximum;

@@ -38,9 +38,9 @@ class PorousFlowDictator :
  public:
   PorousFlowDictator(const InputParameters & parameters);
 
-  void initialize() {};
-  void execute() {};
-  void finalize() {};
+  virtual void initialize() override {};
+  virtual void execute() override {};
+  virtual void finalize() override {};
 
   /**
    * The number of PorousFlow variables.  Materials
