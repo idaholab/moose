@@ -81,7 +81,7 @@
 #endif
 
 template <typename... Args>
-[[ noreturn ]] void mooseError2(Args && ... args);
+[[ noreturn ]] void mooseError(Args && ... args);
 
 namespace moose
 {
@@ -106,7 +106,7 @@ void
 mooseWarningStream(S & oss, Args && ... args)
 {
   if (Moose::_warnings_are_errors)
-    mooseError2(std::forward<Args>(args)...);
+    mooseError(std::forward<Args>(args)...);
 
   std::ostringstream ss;
   mooseStreamAll(ss, args...);
@@ -136,7 +136,7 @@ void
 mooseDeprecatedStream(S & oss, Args && ... args)
 {
   if (Moose::_deprecated_is_error)
-    mooseError2("\n\nDeprecated code:\n", std::forward<Args>(args)...);
+    mooseError("\n\nDeprecated code:\n", std::forward<Args>(args)...);
 
   mooseDoOnce(
     std::ostringstream ss;
@@ -155,142 +155,49 @@ mooseDeprecatedStream(S & oss, Args && ... args)
 } // namespace internal
 } // namespace moose
 
+/// Emit an error message with the given stringified, concatenated args and
+/// terminate the application.  Inside static functions, you will need to
+/// explicitly scope your mooseError call - i.e. do "::mooseError(arg1, ...);".
 template <typename... Args>
 [[ noreturn ]] void
-mooseError2(Args && ... args)
+mooseError(Args && ... args)
 {
   std::ostringstream oss;
   moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
   moose::internal::mooseErrorRaw(oss.str());
 }
 
+/// Emit a warning message with the given stringified, concatenated args.
+/// Inside static functions, you will need to explicitly scope your
+/// mooseWarning call - i.e. do "::mooseWarning(arg1, ...);".
 template <typename... Args>
 void
-mooseWarning2(Args && ... args)
+mooseWarning(Args && ... args)
 {
   moose::internal::mooseWarningStream(Moose::out, std::forward<Args>(args)...);
 }
 
+/// Emit a deprecated code/feature message with the given stringified, concatenated args.
 template <typename... Args>
 void
-mooseInfo2(Args && ... args)
-{
-  moose::internal::mooseInfoStream(Moose::out, std::forward<Args>(args)...);
-}
-
-template <typename... Args>
-void
-mooseDeprecated2(Args && ... args)
+mooseDeprecated(Args && ... args)
 {
   moose::internal::mooseDeprecatedStream(Moose::out, std::forward<Args>(args)...);
 }
 
-/**
- * Global alias to Moose::out. This is here so that _console can be used anywhere
- * throughout the framework (namely by the mooseWarning() macro). If there's a local
- * object _console, that will be used, if not, we'll fall back to just using Moose::out.
- */
-extern OStreamProxy & _console;
+/// Emit an informational message with the given stringified, concatenated args.
+template <typename... Args>
+void
+mooseInfo(Args && ... args)
+{
+  moose::internal::mooseInfoStream(Moose::out, std::forward<Args>(args)...);
+}
 
-/**
- * MOOSE wrapped versions of useful libMesh macros (see libmesh_common.h)
- */
-#define mooseError(msg)                                                             \
-  do                                                                                \
-  {                                                                                 \
-    std::ostringstream _error_oss_;                                                 \
-    _error_oss_ << "\n\n"                                                           \
-                << COLOR_RED                                                        \
-                << "\n\n*** ERROR ***\n"                                            \
-                << msg                                                              \
-                << COLOR_DEFAULT                                                    \
-                << "\n\n";                                                          \
-    if (Moose::_throw_on_error)                                                     \
-      throw std::runtime_error(_error_oss_.str());                                  \
-    else                                                                            \
-    {                                                                               \
-      Moose::err << _error_oss_.str() << std::flush;                                \
-      if (libMesh::global_n_processors() == 1)                                      \
-        print_trace();                                                              \
-      else                                                                          \
-        libMesh::write_traceout();                                                  \
-      libmesh_here();                                                               \
-      MOOSE_ABORT;                                                                  \
-    }                                                                               \
-  } while (0)
-
-/**
- * MooseWarning(), mooseInfo(), and mooseDeprecated() all print to _console instead of one of the
- * standard or wrapped streams directly. _console is defined as a true Global variable in Moose.h
- * so it's available anywhere these macros can be used. However, most of the time the macros are
- * called from a MooseObject-derived object where MooseObject::_console is available in a more
- * local scope. The one place where we've found these macros can break down is using them in a
- * static member function in a MooseObject derived class. In that case, the scope lookup finds
- * the MooseObject::_console object which is _not_ static instead of falling back to the global
- * version. This will cause a compile warning in that instance. The work-around for that rare
- * case is to print to the stream directly (not recommended), or make the method a const instance
- * method instead.
- */
-#define mooseWarning(msg)                                                           \
-  do                                                                                \
-  {                                                                                 \
-    if (Moose::_warnings_are_errors)                                                \
-      mooseError(msg);                                                              \
-    else                                                                            \
-    {                                                                               \
-      std::ostringstream _warn_oss_;                                                \
-                                                                                    \
-      _warn_oss_                                                                    \
-        << COLOR_YELLOW                                                             \
-        << "\n\n*** Warning ***\n"                                                  \
-        << msg                                                                      \
-        << "\nat " << __FILE__ << ", line " << __LINE__                             \
-        << COLOR_DEFAULT                                                            \
-        << "\n\n";                                                                  \
-      if (Moose::_throw_on_error)                                                   \
-        throw std::runtime_error(_warn_oss_.str());                                 \
-      else                                                                          \
-        _console << _warn_oss_.str() << std::flush;                                 \
-    }                                                                               \
-  } while (0)
-
-#define mooseInfo(msg)                                                              \
-    do                                                                              \
-    {                                                                               \
-      mooseDoOnce(                                                                  \
-          _console                                                                  \
-            << COLOR_CYAN                                                           \
-            << "\n\n*** Info ***\n"                                                 \
-            << msg                                                                  \
-            << "\nat " << __FILE__ << ", line " << __LINE__                         \
-            << COLOR_DEFAULT                                                        \
-            << "\n" << std::endl;                                                   \
-      );                                                                            \
-    } while (0)
-
-#define mooseDeprecated(msg)                                                                                  \
-  do                                                                                                          \
-  {                                                                                                           \
-    if (Moose::_deprecated_is_error)                                                                          \
-      mooseError("\n\nDeprecated code:\n" << msg << '\n');                                                    \
-    else                                                                                                      \
-      mooseDoOnce(                                                                                            \
-        std::ostringstream _deprecate_oss_;                                                                   \
-                                                                                                              \
-        _deprecate_oss_                                                                                       \
-          << COLOR_YELLOW                                                                                     \
-          << "*** Warning, This code is deprecated, and likely to be removed in future library versions!\n"   \
-          << msg << '\n'                                                                                      \
-          << __FILE__ << ", line " << __LINE__ << ", compiled "                                               \
-          << LIBMESH_DATE << " at " << LIBMESH_TIME << " ***"                                                 \
-          << COLOR_DEFAULT                                                                                    \
-          << "\n\n";                                                                                          \
-        if (libMesh::global_n_processors() == 1)                                                              \
-          print_trace(_deprecate_oss_);                                                                       \
-        else                                                                                                  \
-          libMesh::write_traceout();                                                                          \
-        _console << _deprecate_oss_.str() << std::flush;                                                      \
-      );                                                                                                      \
-   } while (0)
+// TODO: Delete these after all apps have been transitioned to the new "not
+// 2" versions of these functions.
+template <typename... Args> [[ noreturn ]] void mooseError2(Args && ... args) { mooseError(std::forward<Args>(args)...); }
+template <typename... Args> void mooseWarning2(Args && ... args) { mooseWarning(std::forward<Args>(args)...); }
+template <typename... Args> void mooseDeprecated2(Args && ... args) { mooseDeprecated(std::forward<Args>(args)...); }
+template <typename... Args> void mooseInfo2(Args && ... args) { mooseInfo(std::forward<Args>(args)...); }
 
 #endif /* MOOSEERRORS_H */

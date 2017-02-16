@@ -1218,6 +1218,3 @@ bool _deprecated_is_error = false;
 bool _throw_on_error = false;
 
 } // namespace Moose
-
-// TODO: delete this after migration to new error/warn funcs is complete
-OStreamProxy & _console = Moose::out;

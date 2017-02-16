@@ -80,22 +80,33 @@ public:
   virtual bool enabled() { return _enabled; }
 
   template <typename... Args>
-  [[ noreturn ]] void mooseError2(Args... args) const
+  [[ noreturn ]] void mooseError(Args && ... args) const
   {
     std::ostringstream oss;
-    moose::internal::mooseStreamAll(oss, args...);
+    moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
     std::string msg = oss.str();
     callMooseErrorRaw(msg, &_app);
   }
 
   template <typename... Args>
-  void mooseWarning2(Args... args) const { moose::internal::mooseWarningStream(_console, args...); }
+  void mooseWarning(Args && ... args) const { moose::internal::mooseWarningStream(_console, std::forward<Args>(args)...); }
 
   template <typename... Args>
-  void mooseInfo2(Args... args) const { moose::internal::mooseInfoStream(_console, args...); }
+  void mooseDeprecated(Args && ... args) const { moose::internal::mooseDeprecatedStream(_console, std::forward<Args>(args)...); }
 
   template <typename... Args>
-  void mooseDeprecated2(Args... args) const { moose::internal::mooseDeprecatedStream(_console, args...); }
+  void mooseInfo(Args && ... args) const { moose::internal::mooseInfoStream(_console, std::forward<Args>(args)...); }
+
+  /// TODO: Delete these after all apps have been transitioned to the new "not
+  /// 2" versions of these functions.
+  template <typename... Args>
+  [[ noreturn ]] void mooseError2(Args && ... args) const { mooseError(std::forward<Args>(args)...); }
+  template <typename... Args>
+  void mooseWarning2(Args && ... args) const { mooseWarning(std::forward<Args>(args)...); }
+  template <typename... Args>
+  void mooseDeprecated2(Args && ... args) const { mooseDeprecated(std::forward<Args>(args)...); }
+  template <typename... Args>
+  void mooseInfo2(Args && ... args) const { mooseInfo(std::forward<Args>(args)...); }
 
 protected:
 
