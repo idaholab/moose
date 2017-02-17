@@ -63,7 +63,7 @@ class RunParallel:
         # List of skipped jobs to resolve prereq issues for tests that never run
         self.skipped_jobs = set()
 
-        # Jobs we are reporting as taking longer then 10% of MAX_TIME
+        # Jobs we are reporting as taking longer then 10% of MAX_TIME or that we waited on for output files
         self.reported_jobs = set()
 
         # Default time to wait before reporting long running jobs
@@ -152,6 +152,20 @@ class RunParallel:
             os.chdir(saved_dir)
             sys.path.pop()
 
+    def checkOutputReady(self, tester):
+        # See if the output is available, it'll be available if we are just using the TemporaryFile mechanism
+        # If we are redirecting output though, it might take a few moments for the file buffers to appear
+        # after one of the process quits.
+        if not tester.specs.isValid('redirect_output') or not tester.specs['redirect_output'] or tester.getProcs(self.options) == 1:
+            return True
+
+        for processor_id in xrange(tester.getProcs(self.options)):
+            # Obtain path and append processor id to redirect_output filename
+            file_path = os.path.join(tester.specs['test_dir'], tester.name() + '.processor.{}'.format(processor_id))
+            if not os.access(file_path, os.R_OK):
+                return False
+        return True
+
     def getOutputFromFiles(self, tester):
         file_output = ''
         for processor_id in xrange(tester.getProcs(self.options)):
@@ -170,12 +184,19 @@ class RunParallel:
 
         output = 'Working Directory: ' + tester.specs['test_dir'] + '\nRunning command: ' + command + '\n'
 
-        if tester.specs.isValid('redirect_output') and tester.specs['redirect_output'] and tester.getProcs(self.options) > 1:
-            # If the tester enabled redirect_stdout and is using more than one processor
-            output += self.getOutputFromFiles(tester)
+        # See if there's already a fail status set on this test. If there is, we shouldn't attempt to read from the files
+        # Note: We cannot use the didPass() method on the tester here because the tester hasn't had a chance to set
+        # status yet in the postprocessing stage. We'll inspect didPass() after processing results
+        if tester.getStatus() != 'FAIL':
+            # Read the output either from the temporary file or redirected files
+            if tester.specs.isValid('redirect_output') and tester.specs['redirect_output'] and tester.getProcs(self.options) > 1:
+                # If the tester enabled redirect_stdout and is using more than one processor
+                output += self.getOutputFromFiles(tester)
+            else:
+                # Handle the case were the tester did not inherite from RunApp (like analyzejacobian)
+                output += self.readOutput(f)
         else:
-            # Handle the case were the tester did not inherite from RunApp (like analyzejacobian)
-            output += self.readOutput(f)
+            output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
 
         if p.poll() == None: # process has not completed, it timed out
             output += '\n' + "#"*80 + '\nProcess terminated by test harness. Max time exceeded (' + str(tester.specs['max_time']) + ' seconds)\n' + "#"*80 + '\n'
@@ -188,17 +209,15 @@ class RunParallel:
                 os.killpg(pgid, SIGTERM)
 
             if self.options.pbs and not self.options.processingPBS:
-                if not self.harness.handleTestStatus(tester, output):
-                    did_pass = False
-            elif not self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock()):
-                did_pass = False
+                self.harness.handleTestStatus(tester, output)
+            else:
+                self.harness.testOutputAndFinish(tester, RunParallel.TIMEOUT, output, time, clock())
         else:
             f.close()
 
             # PBS jobs
             if self.options.pbs and not self.options.processingPBS:
-                if not self.harness.handleTestStatus(tester, output):
-                    did_pass = False
+                self.harness.handleTestStatus(tester, output)
 
             # All other jobs
             else:
@@ -209,13 +228,12 @@ class RunParallel:
                     # Set the successful message for DRY_RUN
                     tester.success_message = 'DRY RUN'
                     output += '\n'.join(tester.processResultsCommand(tester.specs['moose_dir'], self.options))
-                else:
+                elif tester.getStatus() != 'FAIL': # Still haven't processed results!
                     output = tester.processResults(tester.specs['moose_dir'], p.returncode, self.options, output)
 
-                if not self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock()):
-                    did_pass = False
+                self.harness.testOutputAndFinish(tester, p.returncode, output, time, clock())
 
-        if did_pass:
+        if tester.didPass():
             self.finished_jobs.add(tester.specs['test_name'])
         else:
             self.skipped_jobs.add(tester.specs['test_name'])
@@ -234,19 +252,37 @@ class RunParallel:
         for tuple in self.jobs:
             if tuple != None:
                 (p, command, tester, start_time, f, slots) = tuple
-                if p.poll() != None or now > (start_time + float(tester.specs['max_time'])):
-                    # finish up as many jobs as possible, don't sleep until
-                    # we've cleared all of the finished jobs
+                # Look for completed tests
+                if p.poll() != None:
+                    if not self.checkOutputReady(tester):
+                        # Here we'll use the reported_jobs set to start a new timer
+                        # for waiting for files so we can do somthing else while we wait
+                        if tester not in self.reported_jobs:
+                            self.jobs[job_index] = (p, command, tester, clock(), f, slots)
+                            self.reported_jobs.add(tester)
+                         # We've been waiting for awhile for files now, timeout!
+                        elif now > (start_time + self.default_reporting_time):
+                            tester.setStatus('FILE TIMEOUT', tester.bucket_fail)
+                            # Report
+                            self.returnToTestHarness(job_index)
+                            self.reported_timer = now
+                            slot_freed = True
+
+                    # Output is ready
+                    else:
+                        # Report
+                        self.returnToTestHarness(job_index)
+                        self.reported_timer = now
+                        slot_freed = True
+
+                # Timeouts
+                elif now > (start_time + float(tester.specs['max_time'])):
+                    # Report
                     self.returnToTestHarness(job_index)
-
-                    # We just output to the screen so reset the test harness "activity" timer
                     self.reported_timer = now
-
                     slot_freed = True
-                    # We just reset the timer so no need to check if we've been waiting for awhile in
-                    # this iteration
 
-                # Has the TestHarness done nothing for awhile
+                # Has the TestHarness done nothing for awhile?
                 elif now > (self.reported_timer + self.default_reporting_time):
                     # Has the current test been previously reported?
                     if tester not in self.reported_jobs:
