@@ -49,7 +49,7 @@ PorousFlowDesorpedMassVolumetricExpansion::computeQpOffDiagJacobian(unsigned int
 }
 
 Real
-PorousFlowDesorpedMassVolumetricExpansion::computeQpJac(unsigned int jvar)
+PorousFlowDesorpedMassVolumetricExpansion::computeQpJac(unsigned int jvar) const
 {
   Real deriv = 0.0;
 

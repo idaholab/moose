@@ -42,7 +42,7 @@ PorousFlowNodeNumber::computeQpProperties()
 }
 
 unsigned
-PorousFlowNodeNumber::nearest()
+PorousFlowNodeNumber::nearest() const
 {
   if (!_bnd || true) // 6 Dec, added "|| true" for getting ready for deprecating this class, and commented check below
   {

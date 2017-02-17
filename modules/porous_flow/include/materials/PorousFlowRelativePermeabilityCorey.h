@@ -29,7 +29,6 @@ public:
 
 protected:
   virtual Real relativePermeability(Real seff) const override;
-
   virtual Real dRelativePermeability(Real seff) const override;
 
   /// Corey exponent n for the specified phase

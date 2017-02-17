@@ -24,12 +24,12 @@ PorousFlowHeatAdvection::PorousFlowHeatAdvection(const InputParameters & paramet
 {
 }
 
-Real PorousFlowHeatAdvection::mobility(unsigned nodenum, unsigned phase)
+Real PorousFlowHeatAdvection::mobility(unsigned nodenum, unsigned phase) const
 {
   return _enthalpy[nodenum][phase] * _fluid_density_node[nodenum][phase] * _relative_permeability[nodenum][phase] / _fluid_viscosity[nodenum][phase];
 }
 
-Real PorousFlowHeatAdvection::dmobility(unsigned nodenum, unsigned phase, unsigned pvar)
+Real PorousFlowHeatAdvection::dmobility(unsigned nodenum, unsigned phase, unsigned pvar) const
 {
   Real dm = _denthalpy_dvar[nodenum][phase][pvar] * _fluid_density_node[nodenum][phase] * _relative_permeability[nodenum][phase] / _fluid_viscosity[nodenum][phase];
   dm += _enthalpy[nodenum][phase] * _dfluid_density_node_dvar[nodenum][phase][pvar] * _relative_permeability[nodenum][phase] / _fluid_viscosity[nodenum][phase];

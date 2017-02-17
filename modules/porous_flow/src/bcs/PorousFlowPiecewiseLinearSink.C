@@ -24,13 +24,13 @@ PorousFlowPiecewiseLinearSink::PorousFlowPiecewiseLinearSink(const InputParamete
 }
 
 Real
-PorousFlowPiecewiseLinearSink::multiplier()
+PorousFlowPiecewiseLinearSink::multiplier() const
 {
   return PorousFlowSink::multiplier() * _sink_func.sample(ptVar());
 }
 
 Real
-PorousFlowPiecewiseLinearSink::dmultiplier_dvar(unsigned int pvar)
+PorousFlowPiecewiseLinearSink::dmultiplier_dvar(unsigned int pvar) const
 {
   return PorousFlowSink::dmultiplier_dvar(pvar) * _sink_func.sample(ptVar()) + PorousFlowSink::multiplier() * _sink_func.sampleDerivative(ptVar()) * dptVar(pvar);
 }

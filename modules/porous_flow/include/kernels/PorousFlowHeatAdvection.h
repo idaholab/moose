@@ -26,9 +26,8 @@ public:
   PorousFlowHeatAdvection(const InputParameters & parameters);
 
 protected:
-  virtual Real mobility(unsigned nodenum, unsigned phase) override;
-
-  virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar) override;
+  virtual Real mobility(unsigned nodenum, unsigned phase) const override;
+  virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar) const override;
 
   /// Enthalpy of each phase
   const MaterialProperty<std::vector<Real>> & _enthalpy;

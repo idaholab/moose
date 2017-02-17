@@ -30,22 +30,22 @@ public:
 
 protected:
   /// Nodal pore pressure in each phase
-  const MaterialProperty<std::vector<Real>> * _pp;
+  const MaterialProperty<std::vector<Real>> * const _pp;
 
   /// d(Nodal pore pressure in each phase)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real>>> * _dpp_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dpp_dvar;
 
   /// Nodal temperature
-  const MaterialProperty<Real> * _temp;
+  const MaterialProperty<Real> * const _temp;
 
   /// d(Nodal temperature)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<Real>> * _dtemp_dvar;
+  const MaterialProperty<std::vector<Real>> * const _dtemp_dvar;
 
   /// Provides the variable value (either porepressure, or temperature, depending on _involves_fluid)
-  virtual Real ptVar();
+  virtual Real ptVar() const;
 
   /// Provides the d(variable)/(d PorousFlow Variable pvar)
-  virtual Real dptVar(unsigned pvar);
+  virtual Real dptVar(unsigned pvar) const;
 };
 
 #endif //POROUSFLOWSINKPTDEFINER_H

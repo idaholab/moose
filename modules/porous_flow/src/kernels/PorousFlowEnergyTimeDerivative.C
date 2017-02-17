@@ -77,7 +77,7 @@ PorousFlowEnergyTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 }
 
 Real
-PorousFlowEnergyTimeDerivative::computeQpJac(unsigned int pvar)
+PorousFlowEnergyTimeDerivative::computeQpJac(unsigned int pvar) const
 {
   const unsigned nearest_qp = (_strain_at_nearest_qp ? (*_nearest_qp)[_i] : _i);
 

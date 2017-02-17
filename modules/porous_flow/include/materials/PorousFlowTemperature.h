@@ -35,7 +35,7 @@ protected:
   const VariableValue & _temperature_var;
 
   /// Gradient(_temperature at quadpoints)
-  const VariableGradient * _grad_temperature_var;
+  const VariableGradient * const _grad_temperature_var;
 
   /// Whether the temperature coupled variable is a PorousFlow variable
   const bool _temperature_is_PF;

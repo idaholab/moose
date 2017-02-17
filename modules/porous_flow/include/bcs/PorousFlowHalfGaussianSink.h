@@ -42,9 +42,9 @@ protected:
   /// center of the Gaussian sink
   const Real _center;
 
-  virtual Real multiplier() override;
+  virtual Real multiplier() const override;
 
-  virtual Real dmultiplier_dvar(unsigned int pvar) override;
+  virtual Real dmultiplier_dvar(unsigned int pvar) const override;
 };
 
 #endif //POROUSFLOWHALFGAUSSIANSINK_H

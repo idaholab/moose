@@ -44,13 +44,13 @@ PorousFlowDarcyBase::PorousFlowDarcyBase(const InputParameters & parameters) :
 }
 
 Real
-PorousFlowDarcyBase::darcyQp(unsigned int ph)
+PorousFlowDarcyBase::darcyQp(unsigned int ph) const
 {
   return _grad_test[_i][_qp] * (_permeability[_qp] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity));
 }
 
 Real
-PorousFlowDarcyBase::darcyQpJacobian(unsigned int jvar, unsigned int ph)
+PorousFlowDarcyBase::darcyQpJacobian(unsigned int jvar, unsigned int ph) const
 {
   if (_porousflow_dictator.notPorousFlowVariable(jvar))
     return 0.0;
@@ -322,12 +322,12 @@ PorousFlowDarcyBase::upwind(JacRes res_or_jac, unsigned int jvar)
   }
 }
 
-Real PorousFlowDarcyBase::mobility(unsigned nodenum, unsigned phase)
+Real PorousFlowDarcyBase::mobility(unsigned nodenum, unsigned phase) const
 {
   return _fluid_density_node[nodenum][phase] / _fluid_viscosity[nodenum][phase];
 }
 
-Real PorousFlowDarcyBase::dmobility(unsigned nodenum, unsigned phase, unsigned pvar)
+Real PorousFlowDarcyBase::dmobility(unsigned nodenum, unsigned phase, unsigned pvar) const
 {
   Real dm = _dfluid_density_node_dvar[nodenum][phase][pvar] / _fluid_viscosity[nodenum][phase];
   dm -= _fluid_density_node[nodenum][phase] * _dfluid_viscosity_dvar[nodenum][phase][pvar] / std::pow(_fluid_viscosity[nodenum][phase], 2);

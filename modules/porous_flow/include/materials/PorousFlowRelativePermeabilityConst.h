@@ -26,7 +26,6 @@ public:
 
 protected:
   virtual Real relativePermeability(Real seff) const override;
-
   virtual Real dRelativePermeability(Real seff) const override;
 
   /// Constant relative permeability

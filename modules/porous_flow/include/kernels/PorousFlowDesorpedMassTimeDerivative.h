@@ -60,7 +60,7 @@ protected:
    * This is used by both computeQpJacobian and computeQpOffDiagJacobian
    * @param jvar take the derivative of the residual wrt this Moose variable
    */
-  Real computeQpJac(unsigned int jvar);
+  Real computeQpJac(unsigned int jvar) const;
 };
 
 #endif //POROUSFLOWDESORPEDMASSTIMEDERIVATIVE_H
