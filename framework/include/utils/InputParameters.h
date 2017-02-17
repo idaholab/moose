@@ -529,8 +529,8 @@ public:
   void defaultCoupledValue(const std::string & coupling_name, Real value);
 
   /**
-  * Returns the auto build vectors for all parameters.
-  */
+   * Returns the auto build vectors for all parameters.
+   */
   const std::map<std::string, std::pair<std::string, std::string>> & getAutoBuildVectors() const;
 
   /**
