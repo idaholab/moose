@@ -17,6 +17,12 @@
     csvdiff = 'grav01c.csv'
     rel_err = 1.0E-5
   [../]
+  [./grav01c_action]
+    type = 'CSVDiff'
+    input = 'grav01c_action.i'
+    csvdiff = 'grav01c_action.csv'
+    rel_err = 1.0E-5
+  [../]
   [./grav02a]
     type = 'CSVDiff'
     input = 'grav02a.i'

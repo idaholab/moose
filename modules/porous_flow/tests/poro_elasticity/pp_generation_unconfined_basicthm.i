@@ -1,3 +1,5 @@
+# Identical to pp_generation_unconfined_fullysat_volume.i but using an Action
+#
 # A sample is constrained on all sides, except its top
 # and its boundaries are
 # also impermeable.  Fluid is pumped into the sample via a
@@ -48,21 +50,6 @@
   zmax = 0.5
 []
 
-[GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-  PorousFlowDictator = dictator
-  block = 0
-[]
-
-[UserObjects]
-  [./dictator]
-    type = PorousFlowDictator
-    porous_flow_vars = 'porepressure disp_x disp_y disp_z'
-    number_fluid_phases = 1
-    number_fluid_components = 1
-  [../]
-[]
-
 [Variables]
   [./disp_x]
   [../]
@@ -97,46 +84,6 @@
 
 
 [Kernels]
-  [./grad_stress_x]
-    type = StressDivergenceTensors
-    variable = disp_x
-    component = 0
-  [../]
-  [./grad_stress_y]
-    type = StressDivergenceTensors
-    variable = disp_y
-    component = 1
-  [../]
-  [./grad_stress_z]
-    type = StressDivergenceTensors
-    variable = disp_z
-    component = 2
-  [../]
-  [./poro_x]
-    type = PorousFlowEffectiveStressCoupling
-    biot_coefficient = 0.3
-    variable = disp_x
-    component = 0
-  [../]
-  [./poro_y]
-    type = PorousFlowEffectiveStressCoupling
-    biot_coefficient = 0.3
-    variable = disp_y
-    component = 1
-  [../]
-  [./poro_z]
-    type = PorousFlowEffectiveStressCoupling
-    biot_coefficient = 0.3
-    component = 2
-    variable = disp_z
-  [../]
-  [./mass0]
-    type = PorousFlowFullySaturatedMassTimeDerivative
-    variable = porepressure
-    multiply_by_density = false
-    coupling_type = HydroMechanical
-    biot_coefficient = 0.3
-  [../]
   [./source]
     type = UserForcingFunction
     function = 0.1
@@ -144,84 +91,30 @@
   [../]
 []
 
-[AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
+[Modules]
+  [./FluidProperties]
+    [./the_simple_fluid]
+      type = SimpleFluidProperties
+      thermal_expansion = 0.0
+      bulk_modulus = 3.3333333333
+      viscosity = 1.0
+      density0 = 1.0
+    [../]
   [../]
 []
 
-[AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./stress_xz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xz
-    index_i = 0
-    index_j = 2
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yz
-    index_i = 1
-    index_j = 2
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-  [../]
+[PorousFlowBasicTHM]
+  coupling_type = HydroMechanical
+  displacements = 'disp_x disp_y disp_z'
+  multiply_by_density = false
+  porepressure = porepressure
+  biot_coefficient = 0.3
+  gravity = '0 0 0'
+  fp = the_simple_fluid
 []
-
 
 
 [Materials]
-  [./temperature_qp]
-    type = PorousFlowTemperature
-  [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '1 1.5'
@@ -235,37 +128,22 @@
   [./stress]
     type = ComputeLinearElasticStress
   [../]
-  [./eff_fluid_pressure]
-    type = PorousFlowEffectiveFluidPressure
-  [../]
-  [./vol_strain]
-    type = PorousFlowVolumetricStrain
-    consistent_with_displaced_mesh = false
-  [../]
-  [./ppss]
-    type = PorousFlow1PhaseP
-    porepressure = porepressure
-  [../]
-  [./dens0_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1
-    bulk_modulus = 3.3333333333
-    phase = 0
-  [../]
-  [./dens_all_at_quadpoints]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_qp
-    at_nodes = false
-  [../]
   [./porosity]
     type = PorousFlowPorosityConst # the "const" is irrelevant here: all that uses Porosity is the BiotModulus, which just uses the initial value of porosity
     porosity = 0.1
+    PorousFlowDictator = dictator
   [../]
   [./biot_modulus]
     type = PorousFlowConstantBiotModulus
+    PorousFlowDictator = dictator
     biot_coefficient = 0.3
     fluid_bulk_modulus = 3.3333333333
     solid_bulk_compliance = 0.5
+  [../]
+  [./permeability_irrelevant]
+    type = PorousFlowPermeabilityConst
+    PorousFlowDictator = dictator
+    permeability = '1.5 0 0   0 1.5 0   0 0 1.5'
   [../]
 []
 
@@ -358,7 +236,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = pp_generation_unconfined_fully_saturated_volume
+  file_base = pp_generation_unconfined_basicthm
   [./csv]
     type = CSV
   [../]

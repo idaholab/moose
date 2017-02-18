@@ -1,5 +1,8 @@
+# using a BasicTHM Action
+#
 # Mandel's problem of consolodation of a drained medium
-# Using the FullySaturatedDarcyBase and FullySaturatedMassTimeDerivative kernels
+# Using the FullySaturatedDarcyBase and FullySaturatedFullySaturatedMassTimeDerivative kernels
+# with multiply_by_density = false, so that this problem becomes linear
 # Note the use of consistent_with_displaced_mesh = false in the calculation of volumetric strain
 #
 # A sample is in plane strain.
@@ -64,16 +67,6 @@
   block = 0
 []
 
-
-[UserObjects]
-  [./dictator]
-    type = PorousFlowDictator
-    porous_flow_vars = 'porepressure disp_x disp_y disp_z'
-    number_fluid_phases = 1
-    number_fluid_components = 1
-  [../]
-[]
-
 [Variables]
   [./disp_x]
   [../]
@@ -128,10 +121,6 @@
 
 
 [AuxVariables]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./tot_force]
     order = CONSTANT
     family = MONOMIAL
@@ -139,13 +128,6 @@
 []
 
 [AuxKernels]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
   [./tot_force]
     type = ParsedAux
     args = 'stress_yy porepressure'
@@ -155,60 +137,29 @@
   [../]
 []
 
-
-
-[Kernels]
-  [./grad_stress_x]
-    type = StressDivergenceTensors
-    variable = disp_x
-    component = 0
-  [../]
-  [./grad_stress_y]
-    type = StressDivergenceTensors
-    variable = disp_y
-    component = 1
-  [../]
-  [./grad_stress_z]
-    type = StressDivergenceTensors
-    variable = disp_z
-    component = 2
-  [../]
-  [./poro_x]
-    type = PorousFlowEffectiveStressCoupling
-    biot_coefficient = 0.6
-    variable = disp_x
-    component = 0
-  [../]
-  [./poro_y]
-    type = PorousFlowEffectiveStressCoupling
-    biot_coefficient = 0.6
-    variable = disp_y
-    component = 1
-  [../]
-  [./poro_z]
-    type = PorousFlowEffectiveStressCoupling
-    biot_coefficient = 0.6
-    component = 2
-    variable = disp_z
-  [../]
-  [./mass0]
-    type = PorousFlowFullySaturatedMassTimeDerivative
-    biot_coefficient = 0.6
-    coupling_type = HydroMechanical
-    variable = porepressure
-  [../]
-  [./flux]
-    type = PorousFlowFullySaturatedDarcyBase
-    variable = porepressure
-    gravity = '0 0 0'
+[Modules]
+  [./FluidProperties]
+    [./the_simple_fluid]
+      type = SimpleFluidProperties
+      thermal_expansion = 0.0
+      bulk_modulus = 8.0
+      viscosity = 1.0
+      density0 = 1.0
+    [../]
   [../]
 []
 
+[PorousFlowBasicTHM]
+  coupling_type = HydroMechanical
+  displacements = 'disp_x disp_y disp_z'
+  multiply_by_density = false
+  porepressure = porepressure
+  biot_coefficient = 0.6
+  gravity = '0 0 0'
+  fp = the_simple_fluid
+[]
 
 [Materials]
-  [./temperature]
-    type = PorousFlowTemperature
-  [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '0.5 0.75'
@@ -220,30 +171,6 @@
   [../]
   [./stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./eff_fluid_pressure_qp]
-    type = PorousFlowEffectiveFluidPressure
-  [../]
-  [./vol_strain]
-    type = PorousFlowVolumetricStrain
-    consistent_with_displaced_mesh = false
-  [../]
-  [./ppss]
-    type = PorousFlow1PhaseP
-    porepressure = porepressure
-  [../]
-  [./massfrac]
-    type = PorousFlowMassFraction
-  [../]
-  [./dens0_qp]
-    type = PorousFlowDensityConstBulk
-    density_P0 = 1
-    bulk_modulus = 8
-    phase = 0
-  [../]
-  [./dens_all_at_quadpoints]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_qp
   [../]
   [./porosity]
     type = PorousFlowPorosityConst # only the initial value of this is ever used
@@ -258,15 +185,6 @@
   [./permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1.5 0 0   0 1.5 0   0 0 1.5'
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    viscosity = 1
-    phase = 0
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_qp
   [../]
 []
 
@@ -385,7 +303,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = mandel_fully_saturated
+  file_base = mandel_basicthm
   [./csv]
     interval = 3
     type = CSV
