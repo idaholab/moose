@@ -28,9 +28,8 @@ public:
   PorousFlowMatrixInternalEnergy(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /// Specific heat capacity of rock grains
   const Real _cp;

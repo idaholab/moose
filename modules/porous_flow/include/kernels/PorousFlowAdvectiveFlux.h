@@ -26,19 +26,8 @@ public:
   PorousFlowAdvectiveFlux(const InputParameters & parameters);
 
 protected:
-  /** The mobility of the fluid.
-   * This is mass_fraction * fluid_density * relative_permeability / fluid_viscosity
-   * @param nodenum The node-number to evaluate the mobility for
-   * @param phase the fluid phase number
-   */
-  virtual Real mobility(unsigned nodenum, unsigned phase);
-
-  /** The derivative of mobility with respect to PorousFlow variable pvar
-   * @param nodenum The node-number to evaluate the mobility for
-   * @param phase the fluid phase number
-   * @param pvar the PorousFlow variable pvar
-   */
-  virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar);
+  virtual Real mobility(unsigned nodenum, unsigned phase) const override;
+  virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar) const override;
 
   /// Mass fraction of each component in each phase
   const MaterialProperty<std::vector<std::vector<Real>>> & _mass_fractions;

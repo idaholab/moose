@@ -29,7 +29,7 @@ PorousFlowSinkPTDefiner::PorousFlowSinkPTDefiner(const InputParameters & paramet
 }
 
 Real
-PorousFlowSinkPTDefiner::ptVar()
+PorousFlowSinkPTDefiner::ptVar() const
 {
   if (_involves_fluid)
     return (*_pp)[_i][_ph];
@@ -37,7 +37,7 @@ PorousFlowSinkPTDefiner::ptVar()
 }
 
 Real
-PorousFlowSinkPTDefiner::dptVar(unsigned pvar)
+PorousFlowSinkPTDefiner::dptVar(unsigned pvar) const
 {
   if (_involves_fluid)
     return (*_dpp_dvar)[_i][_ph][pvar];

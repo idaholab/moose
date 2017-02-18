@@ -48,10 +48,10 @@ protected:
   const unsigned _aqueous_phase_number;
 
   /// Saturation of the fluid phases at the quadpoints
-  const MaterialProperty<std::vector<Real>> * _saturation_qp;
+  const MaterialProperty<std::vector<Real>> * const _saturation_qp;
 
   /// d(Saturation)/d(PorousFlow variable)
-  const MaterialProperty<std::vector<std::vector<Real>>> * _dsaturation_qp_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dsaturation_qp_dvar;
 
   /// Thermal conducitivity at the qps
   MaterialProperty<RealTensorValue> & _la_qp;

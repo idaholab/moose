@@ -35,9 +35,9 @@ protected:
   /// piecewise-linear function of porepressure that multiplies the sink flux
   const LinearInterpolation _sink_func;
 
-  virtual Real multiplier() override;
+  virtual Real multiplier() const override;
 
-  virtual Real dmultiplier_dvar(unsigned int pvar) override;
+  virtual Real dmultiplier_dvar(unsigned int pvar) const override;
 };
 
 #endif //POROUSFLOWPIECEWISELINEARSINK_H

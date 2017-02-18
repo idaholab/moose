@@ -68,7 +68,7 @@ PorousFlowMassVolumetricExpansion::computeQpOffDiagJacobian(unsigned int jvar)
 }
 
 Real
-PorousFlowMassVolumetricExpansion::computedVolQpJac(unsigned int jvar)
+PorousFlowMassVolumetricExpansion::computedVolQpJac(unsigned int jvar) const
 {
   if (_dictator.notPorousFlowVariable(jvar))
     return 0.0;
@@ -85,7 +85,7 @@ PorousFlowMassVolumetricExpansion::computedVolQpJac(unsigned int jvar)
   return _test[_i][_qp] * mass * _porosity[_i] * dvol;
 }
 Real
-PorousFlowMassVolumetricExpansion::computedMassQpJac(unsigned int jvar)
+PorousFlowMassVolumetricExpansion::computedMassQpJac(unsigned int jvar) const
 {
   if (_dictator.notPorousFlowVariable(jvar))
     return 0.0;

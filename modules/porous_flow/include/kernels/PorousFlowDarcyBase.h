@@ -27,33 +27,30 @@ public:
   PorousFlowDarcyBase(const InputParameters & parameters);
 
 protected:
+  virtual Real computeQpResidual() override;
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+
   /// the Darcy part of the flux (this is the non-upwinded part)
-  virtual Real darcyQp(unsigned int ph);
+  virtual Real darcyQp(unsigned int ph) const;
 
   /// Jacobian of the Darcy part of the flux
-  virtual Real darcyQpJacobian(unsigned int jvar, unsigned int ph);
-
-  virtual Real computeQpResidual();
-
-  virtual void computeResidual();
-
-  virtual void computeJacobian();
-
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual Real darcyQpJacobian(unsigned int jvar, unsigned int ph) const;
 
   /** The mobility of the fluid.  For multi-component Darcy flow
    * this is mass_fraction * fluid_density * relative_permeability / fluid_viscosity
    * @param nodenum The node-number to evaluate the mobility for
    * @param phase the fluid phase number
    */
-  virtual Real mobility(unsigned nodenum, unsigned phase);
+  virtual Real mobility(unsigned nodenum, unsigned phase) const;
 
   /** The derivative of mobility with respect to PorousFlow variable pvar
    * @param nodenum The node-number to evaluate the mobility for
    * @param phase the fluid phase number
    * @param pvar the PorousFlow variable pvar
    */
-  virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar);
+  virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar) const;
 
   enum JacRes { CALCULATE_RESIDUAL=0, CALCULATE_JACOBIAN=1 };
 

@@ -50,14 +50,14 @@ protected:
   /// node number for each quadpoint
   MaterialProperty<unsigned int> & _node_number_old;
 
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   /**
    * Calculate the node number to a given quadpoint
    * @return the node number
    */
-  virtual unsigned nearest();
+  virtual unsigned nearest() const;
 
 };
 

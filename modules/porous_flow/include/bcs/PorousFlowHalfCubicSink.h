@@ -44,9 +44,9 @@ protected:
   /// center of the cubic sink
   const Real _center;
 
-  virtual Real multiplier() override;
+  virtual Real multiplier() const override;
 
-  virtual Real dmultiplier_dvar(unsigned int pvar) override;
+  virtual Real dmultiplier_dvar(unsigned int pvar) const override;
 };
 
 #endif //POROUSFLOWHALFCUBICSINK_H
