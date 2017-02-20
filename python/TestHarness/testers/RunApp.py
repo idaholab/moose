@@ -19,6 +19,10 @@ class RunApp(Tester):
         params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
         params.addParam('delete_output_folders', True, "Delete output folders before running")
 
+        # RunApp can also run arbitrary commands. If the "command" parameter is supplied
+        # it'll be used in lieu of building up the command automatically
+        params.addParam('command',            "The command line to execute for this test.")
+
         params.addParam('walltime',           "The max time as pbs understands it")
         params.addParam('job_name',           "The test name as pbs understands it")
         params.addParam('no_copy',            "The tests file as pbs understands it")
@@ -87,6 +91,11 @@ class RunApp(Tester):
 
     def getCommand(self, options):
         specs = self.specs
+
+        # Just return an arbitrary command if one is supplied
+        if specs.isValid('command'):
+            return specs['command']
+
         # Create the command line string to run
         command = ''
 

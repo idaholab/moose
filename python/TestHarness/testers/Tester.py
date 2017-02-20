@@ -212,7 +212,6 @@ class Tester(MooseObject):
     def getCommand(self, options):
         return
 
-
     # This method is called to return the commands (list) used for processing results
     def processResultsCommand(self, moose_dir, options):
         return []
