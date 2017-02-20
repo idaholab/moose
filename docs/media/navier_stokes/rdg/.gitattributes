@@ -1,0 +1,12 @@
+2d_obliqueshock_dens_profile.png filter=lfs diff=lfs merge=lfs -text
+2d_obliqueshock_expl_hist.png filter=lfs diff=lfs merge=lfs -text
+2d_obliqueshock_expl_minmax_dens.png filter=lfs diff=lfs merge=lfs -text
+2d_obliqueshock_expl_minmax_pres.png filter=lfs diff=lfs merge=lfs -text
+2d_obliqueshock_expl_weno_dens.png filter=lfs diff=lfs merge=lfs -text
+2d_obliqueshock_expl_weno_pres.png filter=lfs diff=lfs merge=lfs -text
+2d_obliqueshock_mesh.png filter=lfs diff=lfs merge=lfs -text
+2d_obliqueshock_pres_profile.png filter=lfs diff=lfs merge=lfs -text
+code_structure.png filter=lfs diff=lfs merge=lfs -text
+fig_lax_dens.png filter=lfs diff=lfs merge=lfs -text
+fig_lax_pres.png filter=lfs diff=lfs merge=lfs -text
+weno_stencil.png filter=lfs diff=lfs merge=lfs -text
