@@ -417,4 +417,6 @@ void dataStore(std::ostream & stream, RankTwoTensor &, void *);
 template<>
 void dataLoad(std::istream & stream, RankTwoTensor &, void *);
 
+std::ostream & operator<<(std::ostream & os, const RankTwoTensor & tensor);
+
 #endif //RANKTWOTENSOR_H
