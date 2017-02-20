@@ -25,8 +25,8 @@ class ImageDiff(RunPythonApp):
         """
         Cleans up image files from previous execution
         """
-        if self.specs['delete_output_before_running'] == True:
-            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['imagediff'], self.specs['delete_output_folders'])
+#        if self.specs['delete_output_before_running'] == True:
+#            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['imagediff'], self.specs['delete_output_folders'])
 
     def processResults(self, moose_dir, retcode, options, output):
         """

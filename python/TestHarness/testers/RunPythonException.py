@@ -31,7 +31,7 @@ class RunPythonException(RunPythonApp):
 
         # Populate the bucket
         if reason != '':
-            self.setStatus(reason, self.buck_fail)
+            self.setStatus(reason, self.bucket_fail)
         else:
-            self.setStatus(self.success_message, self.buck_success)
+            self.setStatus(self.success_message, self.bucket_success)
         return output
