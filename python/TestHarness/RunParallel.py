@@ -174,8 +174,9 @@ class RunParallel:
         for processor_id in xrange(tester.getProcs(self.options)):
             # Obtain path and append processor id to redirect_output filename
             file_path = os.path.join(tester.specs['test_dir'], tester.name() + '.processor.{}'.format(processor_id))
-            with open(file_path, 'r') as f:
-                file_output += "#"*80 + "\nOutput from processor " + str(processor_id) + "\n" + "#"*80 + "\n" + self.readOutput(f)
+            if os.access(file_path, os.R_OK):
+                with open(file_path, 'r') as f:
+                    file_output += "#"*80 + "\nOutput from processor " + str(processor_id) + "\n" + "#"*80 + "\n" + self.readOutput(f)
         return file_output
 
     ## Return control to the test harness by finalizing the test output and calling the callback
@@ -192,7 +193,13 @@ class RunParallel:
             # Read the output either from the temporary file or redirected files
             if tester.specs.isValid('redirect_output') and tester.specs['redirect_output'] and tester.getProcs(self.options) > 1:
                 # If the tester enabled redirect_stdout and is using more than one processor
-                output += self.getOutputFromFiles(tester)
+                redirected_output = self.getOutputFromFiles(tester)
+                output += redirected_output
+
+                # If we asked for redirected output but none was found, we'll call that a failure
+                if redirected_output == '':
+                    tester.setStatus('FILE TIMEOUT', tester.bucket_fail)
+                    output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
             else:
                 # Handle the case were the tester did not inherite from RunApp (like analyzejacobian)
                 output += self.readOutput(f)
@@ -261,9 +268,9 @@ class RunParallel:
                         if tester not in self.files_not_ready:
                             self.jobs[job_index] = (p, command, tester, clock(), f, slots)
                             self.files_not_ready.add(tester)
-                        # We've been waiting for awhile (twice the default reporting time), timeout!
-                        elif now > (start_time + (self.default_reporting_time * 2.0)):
-                            tester.setStatus('FILE TIMEOUT', tester.bucket_fail)
+                        # We've been waiting for awhile, let's read what we've got
+                        # and send it back to the tester.
+                        elif now > (start_time + self.default_reporting_time):
                             # Report
                             self.returnToTestHarness(job_index)
                             self.reported_timer = now
