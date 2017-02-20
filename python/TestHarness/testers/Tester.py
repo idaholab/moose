@@ -153,7 +153,23 @@ class Tester(MooseObject):
         self.status[reason] = bucket
         return self.getStatus()
 
+    # Method to check if a test has failed. This method will return true iff a
+    # tester has failed at any point during the processing of the test.
+    # Note: It's possible for a tester to report false for both didFail and
+    #       didPass. This will happen if the tester is in-progress for instance.
+    # See didPass()
+    def didFail(self):
+        status = self.getStatus()
+        return status == self.bucket_fail or status == self.bucket_diff
+
     # Method to check for successfull test
+    # Note: This method can return False until the tester has completely finished.
+    #       For this reason it should be used only after the tester has completed.
+    #       Instead you may want to use the didFail method which returns false
+    #       only if the tester has failed at any point during the processing
+    #       of that tester (e.g. after the main command has been run but before
+    #       output has been tested).
+    # See didFail()
     def didPass(self):
         return self.getStatus() == self.bucket_success
 

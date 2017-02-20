@@ -419,7 +419,6 @@ class TestHarness:
             result = tester.getStatusMessage()
 
         self.handleTestResult(tester, output, result, start, end)
-        return did_pass
 
     def getTiming(self, output):
         time = ''
