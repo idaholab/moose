@@ -1,4 +1,5 @@
 import re, os, sys
+import util
 from Tester import Tester
 from RunParallel import RunParallel # For TIMEOUT value
 
@@ -56,7 +57,7 @@ class AnalyzeJacobian(Tester):
         reason = ''
         specs = self.specs
         if specs.isValid('expect_out'):
-            out_ok = self.checkOutputForPattern(output, specs['expect_out'])
+            out_ok = util.checkOutputForPattern(output, specs['expect_out'])
             if (out_ok and retcode != 0):
                 reason = 'OUT FOUND BUT CRASH'
             elif (not out_ok):
@@ -69,14 +70,8 @@ class AnalyzeJacobian(Tester):
 
         # populate status bucket
         if reason != '':
-            self.setStatus(reason, 'FAIL')
+            self.setStatus(reason, self.bucket_fail)
         else:
             self.setStatus(self.success_message, self.bucket_success)
 
         return output
-
-    def checkOutputForPattern(self, output, re_pattern):
-        if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) == None:
-            return False
-        else:
-            return True
