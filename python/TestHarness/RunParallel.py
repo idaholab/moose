@@ -66,6 +66,9 @@ class RunParallel:
         # Jobs we are reporting as taking longer then 10% of MAX_TIME or that we waited on for output files
         self.reported_jobs = set()
 
+        # Jobs that take too long to prepare their output files
+        self.files_not_ready = set()
+
         # Default time to wait before reporting long running jobs
         self.default_reporting_time = 10.0 # Seconds (should be a float)
 
@@ -180,14 +183,12 @@ class RunParallel:
         (p, command, tester, time, f, slots) = self.jobs[job_index]
 
         log( 'Command %d done:    %s' % (job_index, command) )
-        did_pass = True
-
         output = 'Working Directory: ' + tester.specs['test_dir'] + '\nRunning command: ' + command + '\n'
 
         # See if there's already a fail status set on this test. If there is, we shouldn't attempt to read from the files
         # Note: We cannot use the didPass() method on the tester here because the tester hasn't had a chance to set
         # status yet in the postprocessing stage. We'll inspect didPass() after processing results
-        if tester.getStatus() != 'FAIL':
+        if not tester.didFail():
             # Read the output either from the temporary file or redirected files
             if tester.specs.isValid('redirect_output') and tester.specs['redirect_output'] and tester.getProcs(self.options) > 1:
                 # If the tester enabled redirect_stdout and is using more than one processor
@@ -255,13 +256,13 @@ class RunParallel:
                 # Look for completed tests
                 if p.poll() != None:
                     if not self.checkOutputReady(tester):
-                        # Here we'll use the reported_jobs set to start a new timer
-                        # for waiting for files so we can do somthing else while we wait
-                        if tester not in self.reported_jobs:
+                        # Here we'll use the files_not_ready set to start a new timer
+                        # for waiting for files so that we can do somthing else while we wait
+                        if tester not in self.files_not_ready:
                             self.jobs[job_index] = (p, command, tester, clock(), f, slots)
-                            self.reported_jobs.add(tester)
-                         # We've been waiting for awhile for files now, timeout!
-                        elif now > (start_time + self.default_reporting_time):
+                            self.files_not_ready.add(tester)
+                        # We've been waiting for awhile (twice the default reporting time), timeout!
+                        elif now > (start_time + (self.default_reporting_time * 2.0)):
                             tester.setStatus('FILE TIMEOUT', tester.bucket_fail)
                             # Report
                             self.returnToTestHarness(job_index)
