@@ -5,7 +5,7 @@
     exodiff = 'break_boundary_on_subdomain_in.e'
     cli_args = '--mesh-only'
     recover = false
-    mesh_mode = SERIAL
+    mesh_mode = REPLICATED
   [../]
 
   [./break_bottom]
@@ -14,6 +14,6 @@
     exodiff = 'break_bottom_interface_on_subdomain_in.e'
     cli_args = '--mesh-only'
     recover = false
-    mesh_mode = SERIAL
+    mesh_mode = REPLICATED
   [../]
 []
