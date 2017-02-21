@@ -64,14 +64,14 @@ Mass conservation for fluid species $\species$ is described by the continuity
 equation
 \begin{equation}
 0 = \frac{\partial M^{\species}}{\partial t} + M^{\species}\nabla\cdot{\mathbf
-  v}_{s} + \nabla\cdot \flux^{\species} - q^{\species} \ .
+  v}_{s} + \nabla\cdot \flux^{\species} + \Lambda M^{\species} - q^{\species} \ .
 \label{mass.cons.sp.eqn}
 \end{equation}
 Here $M$ is the mass of fluid per volume of rock (measured in
-kg.m$^{-3}$), ${\mathbf v}_{s}$ is the velocity of the porous solid skeleton
-(measured in m.s$^{-1}$), $\flux$ is the flux (a vector, measured
-kg.s$^{-1}$.m$^{-2}$), and $q$ is a source (measured in
-kg.m$^{-3}$.s$^{-1}$).
+kg.m$^{-3}$), ${\mathbf v}_{s}$ is the velocity of the porous solid
+skeleton (measured in m.s$^{-1}$), $\flux$ is the flux (a vector,
+measured kg.s$^{-1}$.m$^{-2}$), $\Lambda$ is a radioactive decay rate,
+and $q$ is a source (measured in kg.m$^{-3}$.s$^{-1}$).
 
 The coupling to the solid mechanics is via the $M\nabla\cdot {\mathbf
   v}_{s}$ term, as well as via changes in porosity and permeability
@@ -856,6 +856,8 @@ $K_{\phase}^{i}$ & depends on reaction & equilibrium constant for secondary spec
 phase $\phase$ \\
 
 $k_{m}$ & mol.m$^{-2}$.s$^{-1}$ & mineral rate constant \\
+
+$\Lambda$ & s$^{-1}$ & Radioactive decay rate of a fluid species \\
 
 $\lambda$ & J.s$^{-1}$.m$^{-1}$.K$^{-1}$ & Thermal conductivity of
 the rock-fluid system (J.s$^{-1}$.m$^{-1}$.K$^{-1} =$
