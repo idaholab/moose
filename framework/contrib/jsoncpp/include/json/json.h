@@ -264,6 +264,7 @@ license you like.
 
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
+namespace moosecontrib {
 namespace Json {
 typedef int Int;
 typedef unsigned int UInt;
@@ -298,6 +299,7 @@ typedef UInt64 LargestUInt;
 #define JSONCPP_ISTREAM       std::istream
 #endif // if JSONCPP_USING_SECURE_MEMORY
 } // end namespace Json
+} // end namespace moosecontrib
 
 #endif // JSON_CONFIG_H_INCLUDED
 
@@ -326,6 +328,7 @@ typedef UInt64 LargestUInt;
 #include "config.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
+namespace moosecontrib {
 namespace Json {
 
 // writer.h
@@ -349,6 +352,7 @@ class ValueIterator;
 class ValueConstIterator;
 
 } // namespace Json
+} // end namespace moosecontrib
 
 #endif // JSON_FORWARDS_H_INCLUDED
 
@@ -379,6 +383,7 @@ class ValueConstIterator;
 
 #pragma pack(push, 8)
 
+namespace moosecontrib {
 namespace Json {
 
 /** \brief Configuration passed to reader and writer.
@@ -422,6 +427,7 @@ public:
 };
 
 } // namespace Json
+} // end namespace moosecontrib
 
 #pragma pack(pop)
 
@@ -488,6 +494,7 @@ public:
 
 /** \brief JSON (JavaScript Object Notation).
  */
+namespace moosecontrib {
 namespace Json {
 
 /** Base class for all exceptions we throw.
@@ -1295,6 +1302,7 @@ public:
 };
 
 } // namespace Json
+} // end namespace moosecontrib
 
 
 namespace std {
@@ -1351,6 +1359,7 @@ inline void swap(Json::Value& a, Json::Value& b) { a.swap(b); }
 
 #pragma pack(push, 8)
 
+namespace moosecontrib {
 namespace Json {
 
 /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a
@@ -1724,6 +1733,7 @@ bool JSON_API parseFromStream(
 JSON_API JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM&, Value&);
 
 } // namespace Json
+} // end namespace moosecontrib
 
 #pragma pack(pop)
 
@@ -1770,6 +1780,7 @@ JSON_API JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM&, Value&);
 
 #pragma pack(push, 8)
 
+namespace moosecontrib {
 namespace Json {
 
 class Value;
@@ -2073,6 +2084,7 @@ JSONCPP_STRING JSON_API valueToQuotedString(const char* value);
 JSON_API JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM&, const Value& root);
 
 } // namespace Json
+} // end namespace moosecontrib
 
 #pragma pack(pop)
 

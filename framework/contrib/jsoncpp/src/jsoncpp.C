@@ -108,6 +108,7 @@ license you like.
  * It is an internal header that must not be exposed.
  */
 
+namespace moosecontrib {
 namespace Json {
 static char getDecimalPoint() {
 #ifdef JSONCPP_NO_LOCALE_SUPPORT
@@ -198,7 +199,8 @@ static inline void fixNumericLocaleInput(char* begin, char* end) {
   }
 }
 
-} // namespace Json {
+} // namespace Json
+} // end namespace moosecontrib
 
 #endif // LIB_JSONCPP_JSON_TOOL_H_INCLUDED
 
@@ -269,6 +271,7 @@ static inline void fixNumericLocaleInput(char* begin, char* end) {
 
 static size_t const stackLimit_g = JSONCPP_DEPRECATED_STACK_LIMIT; // see readValue()
 
+namespace moosecontrib {
 namespace Json {
 
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
@@ -2251,6 +2254,7 @@ JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM& sin, Value& root) {
 }
 
 } // namespace Json
+} // end namespace moosecontrib
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: src/lib_json/json_reader.cpp
@@ -2272,6 +2276,7 @@ JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM& sin, Value& root) {
 
 // included by json_value.cpp
 
+namespace moosecontrib {
 namespace Json {
 
 // //////////////////////////////////////////////////////////////////
@@ -2432,6 +2437,7 @@ ValueIterator& ValueIterator::operator=(const SelfType& other) {
 }
 
 } // namespace Json
+} // end namespace moosecontrib
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: src/lib_json/json_valueiterator.inl
@@ -2469,6 +2475,7 @@ ValueIterator& ValueIterator::operator=(const SelfType& other) {
 
 #define JSON_ASSERT_UNREACHABLE assert(false)
 
+namespace moosecontrib {
 namespace Json {
 
 // This is a walkaround to avoid the static initialization of Value::null.
@@ -2623,6 +2630,7 @@ static inline void releaseStringValue(char* value, unsigned) {
 #endif // JSONCPP_USING_SECURE_MEMORY
 
 } // namespace Json
+} // end namespace moosecontrib
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -2636,6 +2644,7 @@ static inline void releaseStringValue(char* value, unsigned) {
 #include "json_valueiterator.inl"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
+namespace moosecontrib {
 namespace Json {
 
 Exception::Exception(JSONCPP_STRING const& msg)
@@ -4062,6 +4071,7 @@ Value& Path::make(Value& root) const {
 }
 
 } // namespace Json
+} // end namespace moosecontrib
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: src/lib_json/json_value.cpp
@@ -4151,6 +4161,7 @@ Value& Path::make(Value& root) const {
 #pragma warning(disable : 4996)
 #endif
 
+namespace moosecontrib {
 namespace Json {
 
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
@@ -5300,6 +5311,7 @@ JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM& sout, Value const& root) {
 }
 
 } // namespace Json
+} // end namespace moosecontrib
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: src/lib_json/json_writer.cpp
