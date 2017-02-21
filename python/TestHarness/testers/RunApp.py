@@ -1,5 +1,6 @@
 import re, os, sys, time
 from Tester import Tester
+import util
 from RunParallel import RunParallel # For TIMEOUT value
 
 class RunApp(Tester):
@@ -7,7 +8,7 @@ class RunApp(Tester):
     @staticmethod
     def validParams():
         params = Tester.validParams()
-        params.addRequiredParam('input',      "The input file to use for this test.")
+        params.addParam('input',              "The input file to use for this test.")
         params.addParam('test_name',          "The name of the test - populated automatically")
         params.addParam('input_switch', '-i', "The default switch used for indicating an input to the executable")
         params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
@@ -18,6 +19,10 @@ class RunApp(Tester):
         params.addParam('executable_pattern', "A test that only runs if the exectuable name matches the given pattern")
         params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
         params.addParam('delete_output_folders', True, "Delete output folders before running")
+
+        # RunApp can also run arbitrary commands. If the "command" parameter is supplied
+        # it'll be used in lieu of building up the command automatically
+        params.addParam('command',            "The command line to execute for this test.")
 
         params.addParam('walltime',           "The max time as pbs understands it")
         params.addParam('job_name',           "The test name as pbs understands it")
@@ -50,6 +55,10 @@ class RunApp(Tester):
         # Handle the special allow_deprecated_until parameter
         if params.isValid('allow_deprecated_until') and params['allow_deprecated_until'] > time.localtime():
             self.specs['cli_args'].append('--allow-deprecated')
+
+        # Make sure that either input or command is supplied
+        if not (params.isValid('input') or params.isValid('command')):
+            raise Exception('Either "input" or "command" must be supplied for a RunApp test')
 
     def getInputFile(self):
         return self.specs['input'].strip()
@@ -87,11 +96,17 @@ class RunApp(Tester):
 
     def getCommand(self, options):
         specs = self.specs
+
+        # Just return an arbitrary command if one is supplied
+        if specs.isValid('command'):
+            return os.path.join(specs['test_dir'], specs['command']) + ' ' + ' '.join(specs['cli_args'])
+
         # Create the command line string to run
         command = ''
 
         # Check for built application
         if not options.dry_run and not os.path.exists(specs['executable']):
+            print os.getcwd()
             print 'Application not found: ' + str(specs['executable'])
             sys.exit(1)
 
@@ -255,14 +270,14 @@ class RunApp(Tester):
         specs = self.specs
         if specs.isValid('expect_out'):
             if specs['match_literal']:
-                have_expected_out = self.checkOutputForLiteral(output, specs['expect_out'])
+                have_expected_out = util.checkOutputForLiteral(output, specs['expect_out'])
             else:
-                have_expected_out = self.checkOutputForPattern(output, specs['expect_out'])
+                have_expected_out = util.checkOutputForPattern(output, specs['expect_out'])
             if (not have_expected_out):
                 reason = 'EXPECTED OUTPUT MISSING'
 
         if reason == '' and specs.isValid('absent_out'):
-            have_absent_out = self.checkOutputForPattern(output, specs['absent_out'])
+            have_absent_out = util.checkOutputForPattern(output, specs['absent_out'])
             if (have_absent_out):
                 reason = 'OUTPUT NOT ABSENT'
 
@@ -290,47 +305,5 @@ class RunApp(Tester):
             self.setStatus(reason, self.bucket_fail)
         else:
             self.setStatus(self.success_message, self.bucket_success)
+
         return output
-
-    def checkOutputForPattern(self, output, re_pattern):
-        if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) == None:
-            return False
-        else:
-            return True
-
-    def checkOutputForLiteral(self, output, literal):
-        if output.find(literal) == -1:
-            return False
-        else:
-            return True
-
-    def deleteFilesAndFolders(self, test_dir, paths, delete_folders=True):
-        # First delete the files (at the end of each of the paths)
-        if self.specs['delete_output_before_running'] == True:
-            for file in paths:
-                full_path = os.path.join(test_dir, file)
-                if os.path.exists(full_path):
-                    try:
-                        os.remove(full_path)
-                    except:
-                        print "Unable to remove file: " + full_path
-
-            # Now try to delete directories that might have been created
-            if delete_folders:
-                for file in paths:
-                    path = os.path.dirname(file)
-                    while path != '':
-                        (path, tail) = os.path.split(path)
-                        try:
-                            os.rmdir(os.path.join(test_dir, path, tail))
-                        except:
-                            # There could definitely be problems with removing the directory
-                            # because it might be non-empty due to checkpoint files or other
-                            # files being created on different operating systems. We just
-                            # don't care for the most part and we don't want to error out.
-                            # As long as our test boxes clean before each test, we'll notice
-                            # the case where these files aren't being generated for a
-                            # particular run.
-                            #
-                            # TL;DR; Just pass...
-                            pass

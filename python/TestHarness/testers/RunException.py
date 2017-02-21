@@ -1,3 +1,4 @@
+import util
 from RunApp import RunApp
 
 class RunException(RunApp):
@@ -29,7 +30,7 @@ class RunException(RunApp):
             file_paths = []
             for processor_id in xrange(self.getProcs(options)):
                 file_paths.append(self.name() + '.processor.{}'.format(processor_id))
-            self.deleteFilesAndFolders(self.specs['test_dir'], file_paths, False)
+            util.deleteFilesAndFolders(self.specs['test_dir'], file_paths, False)
 
     def processResults(self, moose_dir, retcode, options, output):
         reason = ''
@@ -38,18 +39,18 @@ class RunException(RunApp):
         # Expected errors and assertions might do a lot of things including crash so we
         # will handle them seperately
         if specs.isValid('expect_err'):
-            if not self.checkOutputForPattern(output, specs['expect_err']):
+            if not util.checkOutputForPattern(output, specs['expect_err']):
                 reason = 'NO EXPECTED ERR'
         elif specs.isValid('expect_assert'):
             if options.method == 'dbg':  # Only check asserts in debug mode
-                if not self.checkOutputForPattern(output, specs['expect_assert']):
+                if not util.checkOutputForPattern(output, specs['expect_assert']):
                     reason = 'NO EXPECTED ASSERT'
 
         if reason == '':
             output = RunApp.processResults(self, moose_dir, retcode, options, output)
 
         if reason != '':
-            self.setStatus(reason, 'FAIL')
+            self.setStatus(reason, self.bucket_fail)
         else:
             self.setStatus(self.success_message, self.bucket_success)
 

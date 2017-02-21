@@ -1,5 +1,6 @@
 from RunApp import RunApp
 from CSVDiffer import CSVDiffer
+import util
 import os
 
 class CSVDiff(RunApp):
@@ -19,13 +20,13 @@ class CSVDiff(RunApp):
 
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
-            self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['csvdiff'])
+            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['csvdiff'])
 
     def processResults(self, moose_dir, retcode, options, output):
         output = RunApp.processResults(self, moose_dir, retcode, options, output)
 
         specs = self.specs
-        if self.getStatus() == 'FAIL' or specs['skip_checks']:
+        if self.getStatus() == self.bucket_fail or specs['skip_checks']:
             return output
 
         # Don't Run CSVDiff on Scaled Tests

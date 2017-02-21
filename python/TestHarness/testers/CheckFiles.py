@@ -1,5 +1,5 @@
 from RunApp import RunApp
-from util import runCommand
+import util
 import os
 
 class CheckFiles(RunApp):
@@ -17,13 +17,13 @@ class CheckFiles(RunApp):
 
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
-            self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['check_files'] + self.specs['check_not_exists'], self.specs['delete_output_folders'])
+            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['check_files'] + self.specs['check_not_exists'], self.specs['delete_output_folders'])
 
     def processResults(self, moose_dir, retcode, options, output):
         output = RunApp.processResults(self, moose_dir, retcode, options, output)
 
         specs = self.specs
-        if self.getStatus() == 'FAIL' or specs['skip_checks']:
+        if self.getStatus() == self.bucket_fail or specs['skip_checks']:
             return output
         else:
             reason = ''
@@ -44,13 +44,13 @@ class CheckFiles(RunApp):
                         fid = open(os.path.join(self.specs['test_dir'], file), 'r')
                         contents = fid.read()
                         fid.close()
-                        if not self.checkOutputForPattern(contents, self.specs['file_expect_out']):
+                        if not util.checkOutputForPattern(contents, self.specs['file_expect_out']):
                             reason = 'NO EXPECTED OUT IN FILE'
                             break
 
         # populate status bucket
         if reason != '':
-            self.setStatus(reason, 'FAIL')
+            self.setStatus(reason, self.bucket_fail)
         else:
             self.setStatus(self.success_message, self.bucket_success)
 

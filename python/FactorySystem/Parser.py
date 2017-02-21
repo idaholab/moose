@@ -35,7 +35,7 @@ class Parser:
     @staticmethod
     def getErrorCodeMask():
         # See Error codes description above for mask calculation
-        return 0x3F
+        return 0x7F
 
     def parse(self, filename):
         error_code = 0x00
@@ -142,7 +142,8 @@ class Parser:
 
                 # Put it in the warehouse
                 self.warehouse.addObject(moose_object)
-            except:
+            except Exception as e:
+                print 'Error creating Tester in "' + os.path.join(os.getcwd(), filename) + '": ', e
                 error_code = error_code | 0x40
 
         # Are we in a tree node that "looks" like it should contain a buildable object?
