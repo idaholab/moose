@@ -54,7 +54,7 @@ BimodalSuperellipsoidsIC::initialSetup()
   _range = _top_right - _bottom_left;
 
   if (_size_variation_type == 2 && _size_variation > 0.0)
-    mooseError2("If size_variation > 0.0, you must pass in a size_variation_type in BimodalSuperellipsoidsIC");
+    mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalSuperellipsoidsIC");
 
   SmoothSuperellipsoidBaseIC::initialSetup();
 }
@@ -190,7 +190,7 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
     }
 
     if (num_tries == _max_num_tries)
-      mooseError2("Too many tries in MultiSmoothCircleIC");
+      mooseError("Too many tries in MultiSmoothCircleIC");
 
     accept: continue;
   }

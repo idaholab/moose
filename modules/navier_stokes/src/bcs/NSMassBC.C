@@ -42,7 +42,7 @@ NSMassBC::qpJacobianHelper(unsigned var_number)
       return _phi[_j][_qp] * _test[_i][_qp] * _normals[_qp](var_number-1);
 
     default:
-      mooseError2("Should not get here!");
+      mooseError("Should not get here!");
       break;
   }
 }

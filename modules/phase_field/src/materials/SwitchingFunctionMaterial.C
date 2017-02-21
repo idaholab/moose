@@ -44,7 +44,7 @@ SwitchingFunctionMaterial::computeQpProperties()
       break;
 
     default:
-      mooseError2("Internal error");
+      mooseError("Internal error");
   }
 }
 

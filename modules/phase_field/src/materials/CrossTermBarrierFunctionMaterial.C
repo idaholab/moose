@@ -21,7 +21,7 @@ CrossTermBarrierFunctionMaterial::CrossTermBarrierFunctionMaterial(const InputPa
   for (unsigned int i = 0; i < _num_eta; ++i)
     for (unsigned int j = 0; j < i; ++j)
       if (_W_ij[_num_eta * i + j] != _W_ij[_num_eta * j + i])
-        mooseError2("Please supply a symmetric W_ij matrix for CrossTermBarrierFunctionMaterial ", name());
+        mooseError("Please supply a symmetric W_ij matrix for CrossTermBarrierFunctionMaterial ", name());
 }
 
 void
@@ -63,7 +63,7 @@ CrossTermBarrierFunctionMaterial::computeQpProperties()
           break;
 
         default:
-          mooseError2("Internal error");
+          mooseError("Internal error");
       }
     }
 }

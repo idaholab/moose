@@ -94,7 +94,7 @@ CommonOutputAction::act()
     create("Exodus");
 #else
   if (getParam<bool>("exodus"))
-    mooseWarning2("Exodus output requested but not enabled through libMesh");
+    mooseWarning("Exodus output requested but not enabled through libMesh");
 #endif
 
 #ifdef LIBMESH_HAVE_NEMESIS_API
@@ -102,7 +102,7 @@ CommonOutputAction::act()
     create("Nemesis");
 #else
   if (getParam<bool>("nemesis"))
-    mooseWarning2("Nemesis output requested but not enabled through libMesh");
+    mooseWarning("Nemesis output requested but not enabled through libMesh");
 #endif
 
   // Only create a Console if screen output was not created
@@ -119,7 +119,7 @@ CommonOutputAction::act()
     create("VTK");
 #else
   if (getParam<bool>("vtk"))
-    mooseWarning2("VTK output requested but not enabled through libMesh");
+    mooseWarning("VTK output requested but not enabled through libMesh");
 #endif
 
   if (getParam<bool>("xda"))

@@ -33,7 +33,7 @@ GrainAdvectionAux::GrainAdvectionAux(const InputParameters & parameters) :
     _component(getParam<MooseEnum>("component"))
 {
   if (isNodal())
-    mooseError2("Advection velocity can be assigned to elemental variables only.");
+    mooseError("Advection velocity can be assigned to elemental variables only.");
 }
 
 void

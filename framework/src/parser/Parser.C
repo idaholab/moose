@@ -198,7 +198,7 @@ Parser::parse(const std::string &input_filename)
       Moose::err << "Error: the following unidentified entries were found in your input file:" << std::endl;
       for (const auto & ufo : ufos)
         Moose::err << ufo << std::endl;
-      mooseError2("Your input file may have a syntax error, or you may have forgotten to put quotes around a vector, ie. v='1 2'.");
+      mooseError("Your input file may have a syntax error, or you may have forgotten to put quotes around a vector, ie. v='1 2'.");
     }
   }
 
@@ -226,14 +226,14 @@ Parser::parse(const std::string &input_filename)
         std::multimap<std::string, Syntax::ActionInfo>::iterator> iters = _syntax.getActions(registered_identifier);
 
       if (iters.first == iters.second)
-        mooseError2(std::string("A '") + curr_identifier + "' does not have an associated \"Action\".\nDid you leave off a leading \"./\" in one of your nested blocks?\n");
+        mooseError(std::string("A '") + curr_identifier + "' does not have an associated \"Action\".\nDid you leave off a leading \"./\" in one of your nested blocks?\n");
 
       for (std::multimap<std::string, Syntax::ActionInfo>::iterator it = iters.first; it != iters.second; ++it)
       {
         if (!is_parent)
         {
           if (_syntax.isDeprecatedSyntax(registered_identifier))
-            mooseDeprecated2("The input file syntax \"[", registered_identifier, "]\" is deprecated.");
+            mooseDeprecated("The input file syntax \"[", registered_identifier, "]\" is deprecated.");
 
           params = _action_factory.getValidParams(it->second._action);
 
@@ -299,7 +299,7 @@ Parser::checkActiveUsed(std::vector<std::string > & sections,
     oss << "One or more active lists in the input file are missing a referenced section:\n";
     for (const auto & name : difference)
       oss << name << "\n";
-    mooseError2(oss.str());
+    mooseError(oss.str());
   }
 }
 
@@ -393,9 +393,9 @@ Parser::checkUnidentifiedParams(std::vector<std::string> & all_vars, bool error_
       oss << name << "\n";
 
     if (error_on_warn)
-      mooseError2(oss.str());
+      mooseError(oss.str());
     else
-      mooseWarning2(oss.str());
+      mooseWarning(oss.str());
   }
 }
 
@@ -404,7 +404,7 @@ Parser::checkOverriddenParams(bool error_on_warn) const
 {
   if (!_sections_read && error_on_warn)
     // The user has requested errors but we haven't done any parsing yet so throw an error
-    mooseError2("No parsing has been done, so checking for overridden parameters is not possible");
+    mooseError("No parsing has been done, so checking for overridden parameters is not possible");
 
   std::set<std::string> overridden_vars = _getpot_file_error_checking.get_overridden_variables();
 
@@ -417,9 +417,9 @@ Parser::checkOverriddenParams(bool error_on_warn) const
       oss << name << "\n";
 
     if (error_on_warn)
-      mooseError2(oss.str());
+      mooseError(oss.str());
     else
-      mooseWarning2(oss.str());
+      mooseWarning(oss.str());
   }
 }
 
@@ -516,7 +516,7 @@ Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)
     _syntax_formatter = new JSONFormatter(dump_mode);
     break;
   default:
-    mooseError2("Unrecognized Syntax Formatter requested");
+    mooseError("Unrecognized Syntax Formatter requested");
     break;
   }
 }
@@ -762,7 +762,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
     else
     {
       if (p.isPrivate(it.first))
-        mooseError2("The parameter '", full_name, "' is a private parameter and should not be used in an input file.");
+        mooseError("The parameter '", full_name, "' is a private parameter and should not be used in an input file.");
 
       /**
        * Scalar types
@@ -897,7 +897,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 
   // All of the parameters for this object have been extracted.  See if there are any errors
   if (!error_stream.str().empty())
-    mooseError2(error_stream.str());
+    mooseError(error_stream.str());
 
   // Here we will see if there are any auto build vectors that need to be created
   const std::map<std::string, std::pair<std::string, std::string> > & auto_build_vectors = p.getAutoBuildVectors();
@@ -1013,7 +1013,7 @@ void Parser::setDoubleIndexParameter(const std::string & full_name, const std::s
 
   for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
     if (!MooseUtils::tokenizeAndConvert<T>(first_tokenized_vector[j], param->set()[j]))
-      mooseError2("Reading parameter ", short_name, " failed.");
+      mooseError("Reading parameter ", short_name, " failed.");
 
   if (in_global)
   {
@@ -1043,7 +1043,7 @@ void Parser::setScalarComponentParameter(const std::string & full_name, const st
   int vec_size = gp->vector_variable_size(full_name.c_str());
 
   if (vec_size != LIBMESH_DIM)
-    mooseError2(std::string("Error in Scalar Component parameter ") + full_name + ": size is ", vec_size,
+    mooseError(std::string("Error in Scalar Component parameter ") + full_name + ": size is ", vec_size,
                 ", should be ", LIBMESH_DIM);
 
   T value;
@@ -1073,7 +1073,7 @@ void Parser::setVectorComponentParameter(const std::string & full_name, const st
   int vec_size = gp->vector_variable_size(full_name.c_str());
 
   if (vec_size % LIBMESH_DIM)
-    mooseError2(std::string("Error in Vector Component parameter ") + full_name + ": size is ", vec_size,
+    mooseError(std::string("Error in Vector Component parameter ") + full_name + ": size is ", vec_size,
                 ", should be a multiple of ", LIBMESH_DIM);
 
   std::vector<T> values;
@@ -1179,7 +1179,7 @@ void Parser::setScalarParameter<RealTensorValue>(const std::string & full_name, 
 
   int vec_size = gp->vector_variable_size(full_name.c_str());
   if (vec_size != LIBMESH_DIM * LIBMESH_DIM)
-    mooseError2(std::string("Error in RealTensorValue parameter ") + full_name + ": size is ", vec_size,
+    mooseError(std::string("Error in RealTensorValue parameter ") + full_name + ": size is ", vec_size,
                 ", should be ", LIBMESH_DIM * LIBMESH_DIM);
 
   RealTensorValue value;
@@ -1317,7 +1317,7 @@ void Parser::setVectorParameter<VariableName>(const std::string & full_name, con
 
     for (int i = 0; i < vec_size; ++i)
       if (var_names[i] == "")
-        mooseError2("MOOSE does not currently support a coupled vector where some parameters are reals and others are variables");
+        mooseError("MOOSE does not currently support a coupled vector where some parameters are reals and others are variables");
       else
         param->set()[i] = var_names[i];
   }

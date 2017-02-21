@@ -26,8 +26,8 @@ TestSetupPostprocessorDataActionFunction::TestSetupPostprocessorDataActionFuncti
   Function(parameters)
 {
   if (hasPostprocessor("postprocessor"))
-    mooseError2("TestSetupPostprocessorDataActionFunction pass");
+    mooseError("TestSetupPostprocessorDataActionFunction pass");
   else
-    mooseError2("TestSetupPostprocessorDataActionFunction fail");
+    mooseError("TestSetupPostprocessorDataActionFunction fail");
 
 }

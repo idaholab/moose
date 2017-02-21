@@ -31,5 +31,5 @@ DeprecatedBlockAction::DeprecatedBlockAction(InputParameters parameters) :
 void
 DeprecatedBlockAction::act()
 {
-  mooseError2("Input file block '" + name()  + "' has been deprecated.");
+  mooseError("Input file block '" + name()  + "' has been deprecated.");
 }

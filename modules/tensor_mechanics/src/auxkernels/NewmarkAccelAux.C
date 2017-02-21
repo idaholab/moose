@@ -29,7 +29,7 @@ Real
 NewmarkAccelAux::computeValue()
 {
   if (!isNodal())
-    mooseError2("must run on a nodal variable");
+    mooseError("must run on a nodal variable");
 
   Real accel_old = _u_old[_qp];
   if (_dt == 0)

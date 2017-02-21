@@ -105,7 +105,7 @@ NSKernel::mapVarNumber(unsigned var)
   else if (var == _rhoE_var_number)
     mapped_var_number = 4;
   else
-    mooseError2("Invalid var!");
+    mooseError("Invalid var!");
 
   return mapped_var_number;
 }

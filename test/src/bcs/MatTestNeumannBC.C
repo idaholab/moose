@@ -31,7 +31,7 @@ MatTestNeumannBC::MatTestNeumannBC(const InputParameters & parameters) :
     _value = &getMaterialPropertyByName<Real>(_prop_name);
 
   else
-    mooseError2("The material property ", _prop_name, " is not defined on all boundaries of this object");
+    mooseError("The material property ", _prop_name, " is not defined on all boundaries of this object");
 }
 
 Real

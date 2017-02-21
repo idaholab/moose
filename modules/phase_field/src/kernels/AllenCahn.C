@@ -47,7 +47,7 @@ AllenCahn::computeDFDOP(PFFunctionType type)
       return _d2FdEta2[_qp] * _phi[_j][_qp];
   }
 
-  mooseError2("Internal error");
+  mooseError("Internal error");
 }
 
 Real

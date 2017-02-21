@@ -51,7 +51,7 @@ public:
 
   virtual void computeDeformationGradient( unsigned int /*qp*/, ColumnMajorMatrix & /*F*/)
   {
-    mooseError2("computeDeformationGradient not defined for element type used");
+    mooseError("computeDeformationGradient not defined for element type used");
   }
 
   virtual void computeStrain( const unsigned qp,

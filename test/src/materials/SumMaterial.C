@@ -45,8 +45,8 @@ void
 SumMaterial::computeQpProperties()
 {
   if (_mp1[_qp] != _val_mp1)
-    mooseError2("failure");
+    mooseError("failure");
   if (_mp2[_qp] != _val_mp2)
-    mooseError2("failure");
+    mooseError("failure");
   _sum[_qp] = _mp1[_qp] + _mp2[_qp];
 }

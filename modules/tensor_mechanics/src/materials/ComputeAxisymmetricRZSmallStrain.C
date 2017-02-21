@@ -26,7 +26,7 @@ void
 ComputeAxisymmetricRZSmallStrain::initialSetup()
 {
   if (getBlockCoordSystem() != Moose::COORD_RZ)
-    mooseError2("The coordinate system must be set to RZ for Axisymmetric geometries.");
+    mooseError("The coordinate system must be set to RZ for Axisymmetric geometries.");
 }
 
 Real

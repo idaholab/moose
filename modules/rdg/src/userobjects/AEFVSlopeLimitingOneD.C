@@ -202,7 +202,7 @@ AEFVSlopeLimitingOneD::limitElementSlope() const
       break;
 
     default:
-      mooseError2("Unknown 1D TVD-type slope limiter scheme");
+      mooseError("Unknown 1D TVD-type slope limiter scheme");
       break;
   }
 

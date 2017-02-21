@@ -84,7 +84,7 @@ HomogenizedThermalConductivity::computeQpIntegral()
       break;
 
     default:
-      mooseError2("Internal error.");
+      mooseError("Internal error.");
   }
 
   return _scale * _diffusion_coefficient[_qp] * value;

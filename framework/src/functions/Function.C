@@ -55,7 +55,7 @@ Function::gradient(Real /*t*/, const Point & /*p*/)
 Real
 Function::timeDerivative(Real /*t*/, const Point & /*p*/)
 {
-  mooseError2("timeDerivative method not defined for function ", name());
+  mooseError("timeDerivative method not defined for function ", name());
   return 0;
 }
 
@@ -68,13 +68,13 @@ Function::vectorValue(Real /*t*/, const Point & /*p*/)
 Real
 Function::integral()
 {
-  mooseError2("Integral method not defined for function ", name());
+  mooseError("Integral method not defined for function ", name());
   return 0;
 }
 
 Real
 Function::average()
 {
-  mooseError2("Average method not defined for function ", name());
+  mooseError("Average method not defined for function ", name());
   return 0;
 }

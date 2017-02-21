@@ -26,17 +26,17 @@ public:
 
   virtual Real computeQpSlaveValue()
   {
-    mooseError2("Unimplemented pure virtual method.  SparsityBasedContactConstraint should only be used as a base class");
+    mooseError("Unimplemented pure virtual method.  SparsityBasedContactConstraint should only be used as a base class");
     return 0;
   }
   virtual Real computeQpResidual(Moose::ConstraintType /*type*/)
   {
-    mooseError2("Unimplemented pure virtual method.  SparsityBasedContactConstraint should only be used as a base class");
+    mooseError("Unimplemented pure virtual method.  SparsityBasedContactConstraint should only be used as a base class");
     return 0;
   }
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType /*type*/)
   {
-    mooseError2("Unimplemented pure virtual method.  SparsityBasedContactConstraint should only be used as a base class");
+    mooseError("Unimplemented pure virtual method.  SparsityBasedContactConstraint should only be used as a base class");
     return 0;
   }
 

@@ -190,7 +190,7 @@ CNSFVHLLCSlipBoundaryFlux::calcFlux(unsigned int iside,
   }
   else
   {
-    mooseError2("Weird wave speed occured in ", name(), ": ", __FUNCTION__, "\n",
+    mooseError("Weird wave speed occured in ", name(), ": ", __FUNCTION__, "\n",
                 "iside = ", iside, "\n",
                 "ielem = ", ielem, "\n",
                 "rho1  = ",  rho1, "\n",
@@ -949,7 +949,7 @@ CNSFVHLLCSlipBoundaryFlux::calcJacobian(unsigned int iside,
     Real omeg2 = 1. / (s2 - sm);
     Real prsta = rho1 * dsv1 * (sm - vdon1) + pres1;
 
-    mooseError2("Weird wave speed occured in ", name(), ": ", __FUNCTION__, "\n",
+    mooseError("Weird wave speed occured in ", name(), ": ", __FUNCTION__, "\n",
                 "iside = ", iside, "\n",
                 "ielem = ", ielem, "\n",
                 "rho1  = ",  rho1, "\n",

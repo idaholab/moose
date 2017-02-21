@@ -67,7 +67,7 @@ XFEMMaterialTensorMarkerUserObject::doesElementCrack(RealVectorValue &direction)
           directions[qp](1) == 0 &&
           directions[qp](2) == 0)
       {
-        mooseError2("Direction has zero length in XFEMMaterialTensorMarkerUserObject");
+        mooseError("Direction has zero length in XFEMMaterialTensorMarkerUserObject");
       }
       if (tensor_quantities[qp] > max_quantity)
       {

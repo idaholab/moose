@@ -28,7 +28,7 @@ ComputeThermalExpansionEigenstrainBase::ComputeThermalExpansionEigenstrainBase(c
   else if (isParamValid("stress_free_reference_temperature"))
     _stress_free_temperature = getParam<Real>("stress_free_reference_temperature");
   else
-    mooseError2("Please specify 'stress_free_temperature'.");
+    mooseError("Please specify 'stress_free_temperature'.");
 }
 
 void

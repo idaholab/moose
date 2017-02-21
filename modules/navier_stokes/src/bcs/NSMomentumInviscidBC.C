@@ -88,7 +88,7 @@ NSMomentumInviscidBC::convectiveQpJacobianHelper(unsigned var_number)
       break;
 
     default:
-      mooseError2("Shouldn't get here!");
+      mooseError("Shouldn't get here!");
       break;
   }
 

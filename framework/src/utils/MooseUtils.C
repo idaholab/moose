@@ -82,7 +82,7 @@ checkFileReadable(const std::string & filename, bool check_line_endings, bool th
   if (in.fail())
   {
     if (throw_on_unreadable)
-      mooseError2((std::string("Unable to open file \"") + filename
+      mooseError((std::string("Unable to open file \"") + filename
                   + std::string("\". Check to make sure that it exists and that you have read permission.")).c_str());
     else
       return false;
@@ -95,7 +95,7 @@ checkFileReadable(const std::string & filename, bool check_line_endings, bool th
     in >> std::noskipws;
     while (iter != eos)
       if (*iter++ == '\r')
-        mooseError2(filename + " contains Windows(DOS) line endings which are not supported.");
+        mooseError(filename + " contains Windows(DOS) line endings which are not supported.");
   }
 
   in.close();
@@ -110,7 +110,7 @@ checkFileWriteable(const std::string & filename, bool throw_on_unwritable)
   if (out.fail())
   {
     if (throw_on_unwritable)
-      mooseError2((std::string("Unable to open file \"") + filename
+      mooseError((std::string("Unable to open file \"") + filename
                   + std::string("\". Check to make sure that it exists and that you have write permission.")).c_str());
     else
       return false;
@@ -155,7 +155,7 @@ void serialBegin(const libMesh::Parallel::Communicator & comm)
     comm.receive(comm.rank() - 1, dummy);
   }
   else
-    mooseWarning2("Entering serial execution block (use only for debugging)");
+    mooseWarning("Entering serial execution block (use only for debugging)");
 }
 
 void serialEnd(const libMesh::Parallel::Communicator & comm)
@@ -168,7 +168,7 @@ void serialEnd(const libMesh::Parallel::Communicator & comm)
     comm.send(comm.rank() + 1, dummy);
   }
   else
-    mooseWarning2("Leaving serial execution block (use only for debugging)");
+    mooseWarning("Leaving serial execution block (use only for debugging)");
 }
 
 bool
@@ -199,7 +199,7 @@ splitFileName(std::string full_file)
 {
   // Error if path ends with /
   if (full_file.empty() || *full_file.rbegin() == '/')
-    mooseError2("Invalid full file name: ", full_file);
+    mooseError("Invalid full file name: ", full_file);
 
   // Define the variables to output
   std::string path;

@@ -23,7 +23,7 @@ void
 ComputeCosseratLinearElasticStress::initialSetup()
 {
   if (hasBlockMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
-    mooseError2("This linear elastic stress calculation only works for small strains");
+    mooseError("This linear elastic stress calculation only works for small strains");
 }
 
 void

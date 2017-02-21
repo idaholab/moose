@@ -36,7 +36,7 @@ ComputeCappedDruckerPragerStress::ComputeCappedDruckerPragerStress(const InputPa
   // With arbitary UserObjects, it is impossible to check everything,
   // but this will catch the common errors
   if (_tstrength.value(0) + _cstrength.value(0) <= _smoothing_tol)
-    mooseError2("ComputeCappedDruckerPragerStress: Tensile strength plus compressive strength must be greater than smoothing_tol");
+    mooseError("ComputeCappedDruckerPragerStress: Tensile strength plus compressive strength must be greater than smoothing_tol");
 }
 
 void

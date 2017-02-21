@@ -109,7 +109,7 @@ LStableDirk4::postStep(NumericVector<Number> & residual)
   if (_stage > _n_stages)
     // the explicit cast prevents strange compiler weirdness with the static
     // const variable and the variadic mooseError function
-    mooseError2("LStableDirk4::postStep(): Member variable _stage can only have values 1-", (unsigned int)_n_stages, ".");
+    mooseError("LStableDirk4::postStep(): Member variable _stage can only have values 1-", (unsigned int)_n_stages, ".");
 
   // In the standard RK notation, the residual of stage 1 of s is given by:
   //

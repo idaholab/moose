@@ -39,9 +39,9 @@ MatCoefDiffusion::MatCoefDiffusion(const InputParameters & parameters) :
   // (true if material property exists anywhere)
   case 1:
     if (hasMaterialProperty<Real>(_prop_name))
-      mooseError2("hasMaterialProperty test passed");
+      mooseError("hasMaterialProperty test passed");
     else
-      mooseError2("hasMaterialProperty test failed");
+      mooseError("hasMaterialProperty test failed");
   }
 
   // Check that hasBlockMaterialProperty is working
@@ -49,7 +49,7 @@ MatCoefDiffusion::MatCoefDiffusion(const InputParameters & parameters) :
   if (hasBlockMaterialProperty<Real>(_prop_name))
     _coef = &getMaterialPropertyByName<Real>(_prop_name);
   else
-    mooseError2("The material property ", _prop_name, " is not defined on all blocks of the kernel");
+    mooseError("The material property ", _prop_name, " is not defined on all blocks of the kernel");
 }
 
 Real

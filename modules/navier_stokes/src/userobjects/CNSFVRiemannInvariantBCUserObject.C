@@ -182,7 +182,7 @@ CNSFVRiemannInvariantBCUserObject::getGhostCellValue(unsigned int iside,
     urigh[4] = rhoe1;
   }
   else
-    mooseError2("Something is wrong in ", name(), ": ", __FUNCTION__, "\n",
+    mooseError("Something is wrong in ", name(), ": ", __FUNCTION__, "\n",
                 "ielem = ", ielem, "\n",
                 "iside = ", iside, "\n",
                 "mach1 = ", mach1, "\n");

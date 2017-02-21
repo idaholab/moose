@@ -29,14 +29,14 @@ ComputeAxisymmetric1DIncrementalStrain::ComputeAxisymmetric1DIncrementalStrain(c
     _scalar_out_of_plane_strain_old(_scalar_out_of_plane_strain_coupled ? coupledScalarValueOld("scalar_out_of_plane_strain") : _zero)
 {
   if (_out_of_plane_strain_coupled && _scalar_out_of_plane_strain_coupled)
-    mooseError2("Must define only one of out_of_plane_strain or scalar_out_of_plane_strain");
+    mooseError("Must define only one of out_of_plane_strain or scalar_out_of_plane_strain");
 }
 
 void
 ComputeAxisymmetric1DIncrementalStrain::initialSetup()
 {
   if (getBlockCoordSystem() != Moose::COORD_RZ)
-    mooseError2("The coordinate system must be set to RZ for Axisymmetric 1D simulations");
+    mooseError("The coordinate system must be set to RZ for Axisymmetric 1D simulations");
 }
 
 Real

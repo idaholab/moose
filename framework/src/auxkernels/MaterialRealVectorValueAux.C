@@ -28,7 +28,7 @@ MaterialRealVectorValueAux::MaterialRealVectorValueAux(const InputParameters & p
     _component(getParam<unsigned int>("component"))
 {
   if (_component > LIBMESH_DIM)
-    mooseError2("The component ", _component, " does not exist for ", LIBMESH_DIM, " dimensional problems");
+    mooseError("The component ", _component, " does not exist for ", LIBMESH_DIM, " dimensional problems");
 }
 
 Real

@@ -275,7 +275,7 @@ NavierStokesMaterial::computeTau(unsigned int qp)
   //             << ", element "
   //             << _current_elem->id()
   //             << std::endl;
-  //   mooseError2("Can't continue, would be nice to throw an exception here?");
+  //   mooseError("Can't continue, would be nice to throw an exception here?");
   // }
 
   // The speed of sound for an ideal gas, sqrt(gamma * R * T).  Not needed unless

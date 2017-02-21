@@ -30,7 +30,7 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
   if (params.isParamValid("reference_residual_variables"))
     _refResidVarNames = params.get<std::vector<std::string> >("reference_residual_variables");
   if (_solnVarNames.size() != _refResidVarNames.size())
-    mooseError2("In ReferenceResidualProblem, size of solution_variables (",
+    mooseError("In ReferenceResidualProblem, size of solution_variables (",
                 _solnVarNames.size(),
                 ") != size of reference_residual_variables (",
                 _refResidVarNames.size(),
@@ -52,7 +52,7 @@ ReferenceResidualProblem::initialSetup()
   TransientExplicitSystem & as = aux_sys.sys();
 
   if (_solnVarNames.size() > 0 && _solnVarNames.size() != s.n_vars())
-    mooseError2("In ReferenceResidualProblem, size of solution_variables (",
+    mooseError("In ReferenceResidualProblem, size of solution_variables (",
                 _solnVarNames.size(),
                 ") != number of variables in system (",
                 s.n_vars(),
@@ -73,7 +73,7 @@ ReferenceResidualProblem::initialSetup()
       }
     }
     if (!foundMatch)
-      mooseError2("Could not find solution variable '", _solnVarNames[i], "' in system");
+      mooseError("Could not find solution variable '", _solnVarNames[i], "' in system");
   }
 
   _refResidVars.clear();
@@ -91,7 +91,7 @@ ReferenceResidualProblem::initialSetup()
       }
     }
     if (!foundMatch)
-      mooseError2("Could not find variable '", _refResidVarNames[i], "' in auxiliary system");
+      mooseError("Could not find variable '", _refResidVarNames[i], "' in auxiliary system");
   }
 
   FEProblemBase::initialSetup();

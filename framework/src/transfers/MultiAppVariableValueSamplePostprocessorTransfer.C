@@ -89,7 +89,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      mooseError2("Can't transfer a variable value from a MultiApp to a Postprocessor in the Master.");
+      mooseError("Can't transfer a variable value from a MultiApp to a Postprocessor in the Master.");
       break;
     }
   }

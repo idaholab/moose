@@ -88,7 +88,7 @@ ContactMaster::ContactMaster(const InputParameters & parameters) :
     _penetration_locator.setUpdate(false);
 
   if (_friction_coefficient < 0)
-    mooseError2("The friction coefficient must be nonnegative");
+    mooseError("The friction coefficient must be nonnegative");
 }
 
 void
@@ -228,7 +228,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
           ( pen_force + pinfo->_lagrange_multiplier * pinfo->_normal)));
       break;
     default:
-      mooseError2("Invalid contact formulation");
+      mooseError("Invalid contact formulation");
       break;
     }
     pinfo->_mech_status=PenetrationInfo::MS_SLIPPING;
@@ -279,14 +279,14 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo)
                               pinfo->_lagrange_multiplier*distance_vec/distance_vec.norm();
       break;
     default:
-      mooseError2("Invalid contact formulation");
+      mooseError("Invalid contact formulation");
       break;
     }
     pinfo->_mech_status=PenetrationInfo::MS_STICKING;
   }
   else
   {
-    mooseError2("Invalid or unavailable contact model");
+    mooseError("Invalid or unavailable contact model");
   }
 }
 
@@ -321,7 +321,7 @@ ContactMaster::computeQpJacobian()
       return _test[_i][_qp] * penalty * _phi[_j][_qp] * pinfo->_normal(_component) * pinfo->_normal(_component);
       break;
     default:
-      mooseError2("Invalid contact formulation");
+      mooseError("Invalid contact formulation");
       break;
     }
     break;
@@ -337,12 +337,12 @@ ContactMaster::computeQpJacobian()
       return _test[_i][_qp] * penalty * _phi[_j][_qp];
       break;
     default:
-      mooseError2("Invalid contact formulation");
+      mooseError("Invalid contact formulation");
       break;
     }
     break;
   default:
-    mooseError2("Invalid or unavailable contact model");
+    mooseError("Invalid or unavailable contact model");
     break;
   }
 
@@ -385,13 +385,13 @@ contactModel(const std::string & the_name)
   else if ("experimental" == name)
   {
     model = CM_FRICTIONLESS;
-    mooseWarning2("Use of contact model \"experimental\" is deprecated.  Use \"frictionless\" instead.");
+    mooseWarning("Use of contact model \"experimental\" is deprecated.  Use \"frictionless\" instead.");
   }
   else
   {
     std::string err("Invalid contact model found: ");
     err += name;
-    mooseError2( err );
+    mooseError( err );
   }
   return model;
 }
@@ -419,7 +419,7 @@ contactFormulation(const std::string & the_name)
   {
     std::string err("Invalid formulation found: ");
     err += name;
-    mooseError2( err );
+    mooseError( err );
   }
   return formulation;
 }
@@ -435,7 +435,7 @@ ContactMaster::nodalArea(PenetrationInfo & pinfo)
   if (area == 0)
   {
     if (_t_step > 1)
-      mooseError2("Zero nodal area found");
+      mooseError("Zero nodal area found");
 
     else
       area = 1; // Avoid divide by zero during initialization
