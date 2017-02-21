@@ -16,6 +16,7 @@
 #define TRANSIENT_H
 
 #include "Executioner.h"
+#include "Stepper.h"
 
 // System includes
 #include <string>
@@ -78,7 +79,7 @@ public:
 
   virtual void postExecute() override;
 
-  virtual void computeDT();
+  virtual void computeDT(bool first = false);
 
   virtual void preStep();
 
@@ -205,6 +206,9 @@ public:
   //iteration count (which starts at 0), increment by 1.
   Real numPicardIts() { return _picard_it+1; }
 
+  int n_startup_steps();
+
+  int timeStep();
 
 protected:
   /**
@@ -220,6 +224,7 @@ protected:
 
   /// Current timestep.
   int & _t_step;
+  int & _t_step_backup;
   /// Current time
   Real & _time;
   /// Previous time
@@ -238,7 +243,7 @@ protected:
   bool & _multiapps_converged;
 
   /// Whether or not the last solve converged
-  bool & _last_solve_converged;
+  bool _last_solve_converged;
 
   /// Whether step should be repeated due to xfem modifying the mesh
   bool _xfem_repeat_step;
@@ -250,7 +255,7 @@ protected:
   Real _dtmax;
   unsigned int _num_steps;
   int _n_startup_steps;
-  unsigned int _steps_taken;
+  unsigned int & _steps_taken;
 
   /**
    * Steady state detection variables:
@@ -294,6 +299,32 @@ protected:
   Real _solution_change_norm;
 
   void setupTimeIntegrator();
+
+  void updateStepperInfo(bool first);
+
+  Real _new_dt;
+
+  /// TODO: the following two member vars are only here because FEProblem/NonlinearSystem do not save the
+  /// state of these values themselves.  If that gets fixed, these vars can be
+  /// removed from this class and vals just fetched from
+  /// FEProblem/NonlinearSystem directly.
+  /// Number of nonlinear iterations in previous solve
+  unsigned int & _nl_its;
+  /// Number of linear iterations in previous solve
+  unsigned int & _l_its;
+
+  Real _solve_time;
+  std::vector<Real> & _soln_nonlin;
+  std::vector<Real> & _soln_aux;
+  std::vector<Real> & _soln_predicted;
+  Real & _prev_dt;
+
+  // using a Real here is okay because the key is the simulation time as specified in StepperInfo
+  // the moment after StepperBlock::next is called.  This time should be "saved" by steppers that
+  // want to restore, and they will need to specify the restore time from this "saved".  There are no
+  // operations on the time between the stepper requesting a backup and it being used as a key
+  // in this map.
+  std::map<Real, MooseSharedPointer<Backup>> _backups;
 };
 
 #endif //TRANSIENTEXECUTIONER_H

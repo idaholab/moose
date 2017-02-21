@@ -45,11 +45,20 @@
   start_time = 0.0
   dtmin = 1.0
   end_time = 10.0
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    optimal_iterations = 1
-    linear_iteration_ratio = 1
-    dt = 5.0
+#  [./TimeStepper]
+#    type = IterationAdaptiveDT
+#    optimal_iterations = 1
+#    linear_iteration_ratio = 1
+#    dt = 5.0
+#  [../]
+
+  [./Steppers]
+    [./adapt]
+      type = IterationAdaptiveStepper
+      optimal_iterations = 1
+      linear_iteration_ratio = 1
+      dt = 5.0
+    [../]
   [../]
 []
 

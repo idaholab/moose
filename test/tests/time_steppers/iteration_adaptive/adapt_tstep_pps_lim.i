@@ -54,11 +54,23 @@
   end_time = 40.0
   n_startup_steps = 2
   dtmax = 6.0
-  [./TimeStepper]
-    type = IterationAdaptiveDT
-    optimal_iterations = 10
-    postprocessor_dtlim = timestep_pp
-    dt = 1.0
+#  [./TimeStepper]
+#    type = IterationAdaptiveDT
+#    optimal_iterations = 10
+#    postprocessor_dtlim = timestep_pp
+#    dt = 1.0
+#  [../]
+  [./Steppers]
+    [./adapt]
+      type = IterationAdaptiveStepper
+      optimal_iterations = 10
+      dt = 1.0
+    [../]
+    [./pp]
+      type = PostprocessorStepper
+      incoming_stepper = adapt
+      postprocessor = timestep_pp
+    [../]
   [../]
 []
 
@@ -71,6 +83,7 @@
   [./timestep_pp]
     type = FunctionValuePostprocessor
     function = timestep_fn
+    execute_on = 'initial timestep_end'
   [../]
 []
 

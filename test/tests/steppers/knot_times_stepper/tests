@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'knot_times_stepper.i'
+    exodiff = 'knot_times_stepper_out.e'
+    scale_refine = 3
+  [../]
+[]

@@ -147,10 +147,12 @@
   end_time = 0.1
 #  dt = 0.1
 #  num_steps = 10
-  [./TimeStepper]
-     type = FunctionDT
-     time_t = '0.01 0.1'
-     time_dt = '0.005 0.05'
+  [./Steppers]
+    [./piecewise]
+      type = PiecewiseStepper
+      times = '0.01 0.1'
+      dts = '0.005 0.05'
+    [../]
   [../]
 
   nl_abs_tol = 1.e-15

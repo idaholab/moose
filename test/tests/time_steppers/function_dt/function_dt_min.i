@@ -69,11 +69,18 @@
 
   start_time = 0
   num_steps = 10
-  [./TimeStepper]
-    type = FunctionDT
-    time_t  = '0   0.85 2'
-    time_dt = '0.2 0.2  0.2'
-    min_dt = 0.1
+
+  [./Steppers]
+    [./piecewise]
+      type = PiecewiseStepper
+      times  = '0   0.85 2'
+      dts    = '0.2 0.2  0.2'
+    [../]
+    [./min]
+      type = LimitStepper
+      incoming_stepper = piecewise
+      min = 0.1
+    [../]
   [../]
 []
 

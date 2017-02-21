@@ -1,0 +1,15 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'constant_stepper.i'
+    exodiff = 'constant_stepper_out.e'
+    scale_refine = 3
+  [../]
+
+  [./fail]
+    type = 'RunException'
+    input = 'constant_stepper_fail.i'
+    expect_err = 'does not allow cutting'
+    scale_refine = 3
+  [../]
+[]

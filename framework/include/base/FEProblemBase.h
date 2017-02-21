@@ -33,6 +33,8 @@
 #include "MaterialWarehouse.h"
 #include "MultiAppTransfer.h"
 #include "NonlinearSystem.h"
+#include "Stepper.h"
+#include "StepperInfo.h"
 
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
@@ -383,6 +385,11 @@ public:
   virtual void onTimestepBegin() override;
   virtual void onTimestepEnd() override;
 
+  /**
+   * Compute dt using Steppers
+   */
+  virtual Real computeDT();
+
   virtual Real & time() const { return _time; }
   virtual Real & timeOld() const { return _time_old; }
   virtual int & timeStep() const { return _t_step; }
@@ -497,6 +504,40 @@ public:
 
   // Materials /////
   void addMaterial(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+
+  // Steppers ////
+  /**
+   * Add a Stepper
+   */
+  void addStepper(const std::string & stepper_name, const std::string & name, InputParameters parameters);
+
+  /**
+   * Get the DT from another Stepper.
+   *
+   * Note: This is intended to be called in the constructor of a Stepper
+   * This returns a _reference_ and must be caught as a reference.
+   * The value within this reference will automatically be updated by the system.
+   *
+   * @param name The name of the InputParameter holding the Stepper name to get the value from.
+   */
+  Real & getStepperDT(const StepperName & name);
+
+  /**
+   * Grab the Stepper Warehouse
+   */
+  MooseObjectWarehouseBase<Stepper> & getStepperWarehouse() { return _steppers; }
+
+  /**
+   * Whether or not there are any Steppers.
+   */
+  bool hasSteppers() { return _steppers.hasActiveObjects(); }
+
+  /**
+   * Get the current Stepper information
+   *
+   * Meant to be called in the constructor of Stepper
+   */
+  StepperInfo & getStepperInfo() { return _stepper_info; }
 
   /**
    * Add the MooseVariables that the current materials depend on to the dependency list.
@@ -1097,6 +1138,9 @@ protected:
   /// Whether or not to actually solve the nonlinear system
   bool _solve;
 
+  /// Whether the last solve converged
+  bool _converged;
+
   bool _transient;
   Real & _time;
   Real & _time_old;
@@ -1114,6 +1158,15 @@ protected:
   std::map<std::string,unsigned int> _subspace_dim;
 
   std::vector<Assembly *> _assembly;
+
+  /// Steppers
+  MooseObjectWarehouseBase<Stepper> _steppers;
+
+  /// Stepper DT values
+  std::map<StepperName, Real> _stepper_dt_values;
+
+  /// Data for Steppers
+  StepperInfo _stepper_info;
 
   /// functions
   MooseObjectWarehouse<Function> _functions;

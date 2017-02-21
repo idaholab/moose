@@ -46,9 +46,9 @@ InputParameters validParams<AB2PredictorCorrector>()
 
 AB2PredictorCorrector::AB2PredictorCorrector(const InputParameters & parameters) :
     TimeStepper(parameters),
-    _u1(_fe_problem.getNonlinearSystemBase().addVector("u1", true, GHOSTED)),
+    _u1(_fe_problem.getNonlinearSystem().addVector("u1", true, GHOSTED)),
     _aux1(_fe_problem.getAuxiliarySystem().addVector("aux1", true, GHOSTED)),
-    _pred1(_fe_problem.getNonlinearSystemBase().addVector("pred1", true, GHOSTED)),
+    _pred1(_fe_problem.getNonlinearSystem().addVector("pred1", true, GHOSTED)),
     _dt_full(declareRestartableData<Real>("dt_full", 0)),
     _error(declareRestartableData<Real>("error", 0)),
     _e_tol(getParam<Real>("e_tol")),
@@ -84,7 +84,7 @@ AB2PredictorCorrector::preSolve()
 void
 AB2PredictorCorrector::step()
 {
-  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
+  NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
   AuxiliarySystem & aux = _fe_problem.getAuxiliarySystem();
 
   _fe_problem.solve();
@@ -177,8 +177,8 @@ AB2PredictorCorrector::stringtoint(std::string string)
 Real
 AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
 {
- _pred1 = _fe_problem.getNonlinearSystemBase().getPredictor()->solutionPredictor();
-  TimeIntegrator * ti = _fe_problem.getNonlinearSystemBase().getTimeIntegrator();
+ _pred1 = _fe_problem.getNonlinearSystem().getPredictor()->solutionPredictor();
+  TimeIntegrator * ti = _fe_problem.getNonlinearSystem().getTimeIntegrator();
   std::string scheme = ti->name();
   Real dt_old = _my_dt_old;
   if (dt_old == 0)

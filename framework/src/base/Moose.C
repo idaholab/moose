@@ -321,6 +321,21 @@
 #include "PostprocessorDT.h"
 #include "AB2PredictorCorrector.h"
 
+// Steppers
+#include "ConstantStepper.h"
+#include "SimpleStepper.h"
+#include "InitialStepsStepper.h"
+#include "PiecewiseStepper.h"
+#include "FixedTimesStepper.h"
+#include "LimitStepper.h"
+#include "IterationAdaptiveStepper.h"
+#include "KnotTimesStepper.h"
+#include "PostprocessorStepper.h"
+#include "SolutionTimeAdaptiveStepper.h"
+#include "TimeListStepper.h"
+#include "ExodusTimeListStepper.h"
+#include "DT2Stepper.h"
+
 // time integrators
 #include "SteadyState.h"
 #include "ImplicitEuler.h"
@@ -420,6 +435,7 @@
 #include "CheckOutputAction.h"
 #include "SetupRecoverFileBaseAction.h"
 #include "AddNodalKernelAction.h"
+#include "AddStepperAction.h"
 
 // Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
@@ -582,6 +598,21 @@ registerObjects(Factory & factory)
   registerExecutioner(Transient);
   registerExecutioner(InversePowerMethod);
   registerExecutioner(NonlinearEigen);
+
+  // Steppers
+  registerStepper(ConstantStepper);
+  registerStepper(SimpleStepper);
+  registerStepper(InitialStepsStepper);
+  registerStepper(PiecewiseStepper);
+  registerStepper(FixedTimesStepper);
+  registerStepper(LimitStepper);
+  registerStepper(IterationAdaptiveStepper);
+  registerStepper(KnotTimesStepper);
+  registerStepper(PostprocessorStepper);
+  registerStepper(SolutionTimeAdaptiveStepper);
+  registerStepper(TimeListStepper);
+  registerStepper(ExodusTimeListStepper);
+  registerStepper(DT2Stepper);
 
   // functions
   registerFunction(Axisymmetric2D3DSolutionFunction);
@@ -866,6 +897,8 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("init_mesh",                    MooseMesh,              false);
   registerMooseObjectTask("add_mesh_modifier",            MeshModifier,           false);
 
+  registerMooseObjectTask("add_stepper",                  Stepper,                false);
+
   registerMooseObjectTask("add_kernel",                   Kernel,                 false);
   appendMooseObjectTask  ("add_kernel",                   EigenKernel);
 
@@ -991,6 +1024,7 @@ addActionTypes(Syntax & syntax)
 "(create_problem)"
 "(setup_time_integrator)"
 "(setup_executioner)"
+"(add_stepper)"
 "(setup_time_stepper)"
 "(setup_predictor)"
 "(setup_postprocessor_data)"
@@ -1075,6 +1109,9 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(AddFunctionAction, "add_function");
   registerAction(CreateExecutionerAction, "setup_executioner");
+
+  registerAction(AddStepperAction, "add_stepper");
+
   registerAction(SetupTimeStepperAction, "setup_time_stepper");
   registerAction(SetupTimeIntegratorAction, "setup_time_integrator");
   registerAction(CreateDisplacedProblemAction, "init_displaced_problem");
