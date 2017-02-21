@@ -357,11 +357,11 @@ SubProblem::getAxisymmetricRadialCoord()
 void
 SubProblem::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
 {
-  _app.registerRestartableData(this->name() + "/" + name, data, tid);
+  _app.registerRestartableData(name, data, tid);
 }
 
 void
 SubProblem::registerRecoverableData(std::string name)
 {
-  _app.registerRecoverableData(this->name() + "/" + name);
+  _app.registerRecoverableData(name);
 }

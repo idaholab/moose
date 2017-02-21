@@ -40,7 +40,7 @@ public:
    * @param subproblem An optional method for inputting the SubProblem object, this is used by FEProblemBase, othersize
    * the SubProblem comes from the parameters
    */
-  Restartable(const InputParameters & parameters, std::string system_name, SubProblem * subproblem = NULL);
+  Restartable(const InputParameters & parameters, std::string system_name, SubProblem * subproblem = nullptr);
 
   /**
    * Constructor for objects that don't have "parameters"
@@ -56,6 +56,11 @@ public:
    * Emtpy destructor
    */
   virtual ~Restartable() = default;
+
+  /**
+   * Get the default restart prefix for this object.
+   */
+  std::string getRestartPrefix();
 
 protected:
 
@@ -183,20 +188,25 @@ private:
   /// Helper function so we don't have to include SubProblem in the header
   void registerRecoverableDataOnSubProblem(std::string name);
 
-  /// The name of the object
-  std::string _restartable_name;
-
   /// The object's parameters
   const InputParameters * _restartable_params;
 
+  /// Pointer to the SubProblem class
+  SubProblem * const _restartable_subproblem;
+
+  /// The name of the object
+  std::string _restartable_name;
   /// The system name this object is in
   std::string _restartable_system_name;
+  /**
+   * The default prefix used to uniquely identify a restartable data item.
+   * Note: This prefix will not match the actual name if the user overrides
+   * it with the "declare with name" method(s).
+   */
+  std::string _default_restartable_prefix;
 
   /// The thread ID for this object
   THREAD_ID _restartable_tid;
-
-  /// Pointer to the SubProblem class
-  SubProblem * _restartable_subproblem;
 
   /// For access to registerRestartableDataOnSubProblem()
   friend class PostprocessorData;
@@ -229,9 +239,9 @@ T &
 Restartable::declareRestartableDataWithContext(std::string data_name, void * context)
 {
   if (!_restartable_subproblem)
-    mooseError2("No valid SubProblem found for ", _restartable_system_name, "/", _restartable_name);
+    mooseError2("No valid SubProblem found for ", getRestartPrefix());
 
-  std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
+  std::string full_name = getRestartPrefix() + data_name;
   RestartableData<T> * data_ptr = new RestartableData<T>(full_name, context);
 
   registerRestartableDataOnSubProblem(full_name, data_ptr, _restartable_tid);
@@ -244,9 +254,9 @@ T &
 Restartable::declareRestartableDataWithContext(std::string data_name, const T & init_value, void * context)
 {
   if (!_restartable_subproblem)
-    mooseError2("No valid SubProblem found for ", _restartable_system_name, "/", _restartable_name);
+    mooseError2("No valid SubProblem found for ", getRestartPrefix());
 
-  std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
+  std::string full_name = getRestartPrefix() + data_name;
   RestartableData<T> * data_ptr = new RestartableData<T>(full_name, context);
 
   data_ptr->set() = init_value;
@@ -267,15 +277,13 @@ template<typename T>
 T &
 Restartable::declareRestartableDataWithObjectNameWithContext(std::string data_name, std::string object_name, void * context)
 {
-  std::string old_name = _restartable_name;
+  // We can't use the prefix method here because we are overridding the name
+  std::string full_name = _restartable_system_name + '/' + object_name + '/' + data_name;
+  RestartableData<T> * data_ptr = new RestartableData<T>(full_name, context);
 
-  _restartable_name = object_name;
+  registerRestartableDataOnSubProblem(full_name, data_ptr, _restartable_tid);
 
-  T & value = declareRestartableDataWithContext<T>(data_name, context);
-
-  _restartable_name = old_name;
-
-  return value;
+  return data_ptr->get();
 }
 
 template<typename T>
@@ -283,9 +291,9 @@ T &
 Restartable::declareRecoverableData(std::string data_name)
 {
   if (!_restartable_subproblem)
-    mooseError2("No valid SubProblem found for ", _restartable_system_name, "/", _restartable_name);
+    mooseError2("No valid SubProblem found for ", getRestartPrefix());
 
-  std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
+  std::string full_name = getRestartPrefix() + data_name;
 
   registerRecoverableDataOnSubProblem(full_name);
 
@@ -297,9 +305,9 @@ T &
 Restartable::declareRecoverableData(std::string data_name, const T & init_value)
 {
   if (!_restartable_subproblem)
-    mooseError2("No valid SubProblem found for ", _restartable_system_name, "/", _restartable_name);
+    mooseError2("No valid SubProblem found for ", getRestartPrefix());
 
-  std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
+  std::string full_name = getRestartPrefix() + data_name;
 
   registerRecoverableDataOnSubProblem(full_name);
 

@@ -47,6 +47,12 @@ public:
    */
   virtual void addObject(std::shared_ptr<T> object, THREAD_ID tid = 0);
 
+  /**
+   * Delete an object from the warehouse. Note that THREAD_ID is not required
+   * because it only makes sense to delete all instances of the object across threads.
+   */
+  void deleteObject(MooseSharedPointer<T> object);
+
   ///@{
   /**
    * Retrieve complete vector to the all/block/boundary restricted objects for a given thread.
@@ -91,6 +97,7 @@ public:
   /**
    * Convenience functions for checking/getting specific objects
    */
+  bool hasObject(const std::string & name, THREAD_ID tid = 0) const;
   bool hasActiveObject(const std::string & name, THREAD_ID tid = 0) const;
   std::shared_ptr<T> getActiveObject(const std::string & name, THREAD_ID tid = 0) const;
   ///@}
@@ -119,7 +126,6 @@ public:
    * Populates a set of covered subdomains and the associated variable names.
    */
   void subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables, THREAD_ID tid = 0) const;
-
 
 protected:
 
@@ -161,9 +167,16 @@ protected:
                                              const std::vector<std::shared_ptr<T>> & objects);
 
   /**
+   * Helper method for removing an object from all warehouse containers
+   */
+  static void deleteObjectFromVector(std::vector<MooseSharedPointer<T>> & container, MooseSharedPointer<T> & object);
+
+  /**
    * Calls assert on thread id.
    */
   void checkThreadID(THREAD_ID tid) const;
+
+
 
 };
 
@@ -226,6 +239,36 @@ MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid 
         _active_block_objects[tid][*it].push_back(object);
     }
   }
+}
+
+template<typename T>
+void
+MooseObjectWarehouseBase<T>::deleteObject(MooseSharedPointer<T> object)
+{
+  for (auto i = decltype(_num_threads)(0); i < _num_threads; ++i)
+  {
+    deleteObjectFromVector(_all_objects[i], object);
+    deleteObjectFromVector(_active_objects[i], object);
+
+    for (auto & map_pair : _all_block_objects[i])
+      deleteObjectFromVector(map_pair.second, object);
+    for (auto & map_pair : _active_block_objects[i])
+      deleteObjectFromVector(map_pair.second, object);
+    for (auto & map_pair : _all_boundary_objects[i])
+      deleteObjectFromVector(map_pair.second, object);
+    for (auto & map_pair : _active_boundary_objects[i])
+      deleteObjectFromVector(map_pair.second, object);
+  }
+}
+
+template<typename T>
+void
+MooseObjectWarehouseBase<T>::deleteObjectFromVector(std::vector<MooseSharedPointer<T>> & container, MooseSharedPointer<T> & object)
+{
+  auto isObject = [&object](MooseSharedPointer<T> v_object) { return object->name() == v_object->name(); };
+
+  auto new_end = std::remove_if(container.begin(), container.end(), isObject);
+  container.erase(new_end, container.end());
 }
 
 template<typename T>
@@ -363,6 +406,19 @@ MooseObjectWarehouseBase<T>::hasActiveBoundaryObjects(BoundaryID id, THREAD_ID t
   const auto iter = _active_boundary_objects[tid].find(id);
   return iter != _active_boundary_objects[tid].end();
 }
+
+template<typename T>
+bool
+MooseObjectWarehouseBase<T>::hasObject(const std::string & name, THREAD_ID tid/* = 0*/) const
+{
+  checkThreadID(tid);
+  typename std::vector<MooseSharedPointer<T> >::const_iterator it;
+  for (it = _all_objects[tid].begin(); it != _all_objects[tid].end(); ++it)
+    if ((*it)->name() == name)
+      return true;
+  return false;
+}
+
 
 template<typename T>
 bool

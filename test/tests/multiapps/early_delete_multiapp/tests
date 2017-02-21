@@ -1,0 +1,38 @@
+[Tests]
+  [./test_early_delete]
+    type = 'RunApp'
+    input = 'early_delete_master.i'
+
+    # This RE looks for the message from the destructor of the EarlyDeleteMultiApp
+    # to appear before the master app's first time step indicator. To make
+    # sure we are matching the master app's output we anchor the "Time Step"
+    # expression to the left-hand border.
+    #
+    # ******* Early delete multiapp "full_solve" deleted! *******
+    # early_delete0:
+    #
+    # Time Step  0, time = 0
+    #
+    expect_out = 'Early delete multiapp \S+ deleted.*^Time Step\s+0, time = 0'
+    recover = false
+  [../]
+
+  [./test_no_early_delete]
+    type = 'RunApp'
+    input = 'early_delete_master.i'
+    cli_args = 'MultiApps/early_delete/execute_on="initial timestep_begin"'
+
+    # This RE looks for the message from the destructor of the EarlyDeleteMultiApp
+    # to appear before the master app's first time step indicator. To make
+    # sure we are matching the master app's output we anchor the "Time Step"
+    # expression to the left-hand border.
+    #
+    # ******* Early delete multiapp "full_solve" deleted! *******
+    # early_delete0:
+    #
+    # Time Step  0, time = 0
+    #
+    absent_out = 'Early delete multiapp \S+ deleted.*^Time Step\s+0, time = 0'
+    recover = false
+  [../]
+[]

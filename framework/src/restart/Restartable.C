@@ -18,33 +18,49 @@
 #include "FEProblem.h"
 
 Restartable::Restartable(const InputParameters & parameters, std::string system_name, SubProblem * subproblem) :
-    _restartable_name(parameters.get<std::string>("_object_name")),
     _restartable_params(&parameters),
+    _restartable_subproblem(parameters.isParamValid("_subproblem") ? parameters.get<SubProblem *>("_subproblem") :
+                           (parameters.isParamValid("_fe_problem_base") ? parameters.get<FEProblemBase *>("_fe_problem_base") :
+                           (parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : subproblem))),
+    _restartable_name(parameters.get<std::string>("_object_name")),
     _restartable_system_name(system_name),
     _restartable_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
 {
-  _restartable_subproblem = parameters.isParamValid("_subproblem") ? parameters.get<SubProblem *>("_subproblem") :
-    (parameters.isParamValid("_fe_problem_base") ? parameters.get<FEProblemBase *>("_fe_problem_base") :
-      (parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : subproblem));
 }
 
 Restartable::Restartable(const std::string & name, std::string system_name, SubProblem & fe_problem, THREAD_ID tid) :
+    _restartable_subproblem(&fe_problem),
     _restartable_name(name),
     _restartable_system_name(system_name),
-    _restartable_tid(tid),
-    _restartable_subproblem(&fe_problem)
+    _default_restartable_prefix(_restartable_subproblem->name() + '/' + _restartable_system_name + '/' + _restartable_name + '/'),
+    _restartable_tid(tid)
 {
-
 }
 
 void
 Restartable::registerRestartableDataOnSubProblem(std::string name, RestartableDataValue * data, THREAD_ID tid)
 {
+  mooseAssert(_restartable_subproblem, "SubProblem pointer is null in Restartable interface");
   _restartable_subproblem->registerRestartableData(name, data, tid);
 }
 
 void
 Restartable::registerRecoverableDataOnSubProblem(std::string name)
 {
+  mooseAssert(_restartable_subproblem, "SubProblem pointer is null in Restartable interface");
   _restartable_subproblem->registerRecoverableData(name);
+}
+
+std::string
+Restartable::getRestartPrefix()
+{
+  if (_default_restartable_prefix.empty())
+  {
+    if (!_restartable_subproblem)
+      mooseError2("SubProblem pointer is null in Restartable interface");
+
+    _default_restartable_prefix = _restartable_subproblem->name() + '/' + _restartable_system_name + '/' + _restartable_name + '/';
+  }
+
+  return _default_restartable_prefix;
 }
