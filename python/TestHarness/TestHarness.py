@@ -200,6 +200,8 @@ class TestHarness:
                                     self.warehouse.markAllObjectsInactive()
                                     continue
 
+                                self.checkForRaceConditionOutputs(testers, dirpath)
+
                                 # Clear out the testers, we won't need them to stick around in the warehouse
                                 self.warehouse.clear()
 
@@ -720,6 +722,8 @@ class TestHarness:
         # Mask off TestHarness error codes to report parser errors
         if self.error_code & Parser.getErrorCodeMask():
             summary += ', <r>FATAL PARSER ERROR</r>'
+        if self.error_code & ~Parser.getErrorCodeMask():
+            summary += ', <r>FATAL TEST HARNESS ERROR</r>'
 
         print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
                          colored=self.options.colored, code=self.options.code )
@@ -895,6 +899,32 @@ class TestHarness:
         # When running heavy tests, we'll make sure we use --no-report
         if opts.heavy_tests:
             self.options.report_skipped = False
+
+
+    def checkForRaceConditionOutputs(self, testers, dirpath):
+        d = DependencyResolver()
+
+        for tester in testers:
+            d.insertDependency(tester.getName(), tester.getPrereqs())
+
+
+        try:
+            all_sets = d.getSortedValuesSets()
+            for independent_set in all_sets:
+                output_files_in_dir = set()
+                for tester in testers:
+                    if tester.getName() not in independent_set:
+                        continue
+
+                    output_files = tester.getOutputFiles()
+                    duplicate_files = output_files_in_dir.intersection(output_files)
+                    if len(duplicate_files):
+                        print 'Duplicate output files detected in directory:\n', dirpath, '\n\t', '\n\t'.join(duplicate_files)
+                        self.error_code = self.error_code | 0x80
+                    output_files_in_dir.update(output_files)
+        except:
+            # Cyclic Dependency, we'll let RunParallel deal with that
+            self.error_code = self.error_code | 0x80
 
     def postRun(self, specs, timing):
         return
