@@ -286,10 +286,10 @@ typedef UInt64 LargestUInt;
 #define JSON_HAS_INT64
 #endif // if defined(JSON_NO_INT64)
 #if JSONCPP_USING_SECURE_MEMORY
-#define JSONCPP_STRING        std::basic_string<char, std::char_traits<char>, Json::SecureAllocator<char> >
-#define JSONCPP_OSTRINGSTREAM std::basic_ostringstream<char, std::char_traits<char>, Json::SecureAllocator<char> >
+#define JSONCPP_STRING        std::basic_string<char, std::char_traits<char>, moosecontrib::Json::SecureAllocator<char> >
+#define JSONCPP_OSTRINGSTREAM std::basic_ostringstream<char, std::char_traits<char>, moosecontrib::Json::SecureAllocator<char> >
 #define JSONCPP_OSTREAM       std::basic_ostream<char, std::char_traits<char>>
-#define JSONCPP_ISTRINGSTREAM std::basic_istringstream<char, std::char_traits<char>, Json::SecureAllocator<char> >
+#define JSONCPP_ISTRINGSTREAM std::basic_istringstream<char, std::char_traits<char>, moosecontrib::Json::SecureAllocator<char> >
 #define JSONCPP_ISTREAM       std::istream
 #else
 #define JSONCPP_STRING        std::string
@@ -513,8 +513,8 @@ protected:
 /** Exceptions which the user cannot easily avoid.
  *
  * E.g. out-of-memory (when we use malloc), stack-overflow, malicious input
- * 
- * \remark derived from Json::Exception
+ *
+ * \remark derived from moosecontrib::Json::Exception
  */
 class JSON_API RuntimeError : public Exception {
 public:
@@ -524,8 +524,8 @@ public:
 /** Exceptions thrown by JSON_ASSERT/JSON_FAIL macros.
  *
  * These are precondition-violations (user bugs) and internal errors (our bugs).
- * 
- * \remark derived from Json::Exception
+ *
+ * \remark derived from moosecontrib::Json::Exception
  */
 class JSON_API LogicError : public Exception {
 public:
@@ -571,8 +571,8 @@ enum CommentPlacement {
  *
  * Example of usage:
  * \code
- * Json::Value aValue( StaticString("some text") );
- * Json::Value object;
+ * moosecontrib::Json::Value aValue( StaticString("some text") );
+ * moosecontrib::Json::Value object;
  * static const StaticString code("code");
  * object[code] = 1234;
  * \endcode
@@ -629,40 +629,40 @@ public:
   typedef std::vector<JSONCPP_STRING> Members;
   typedef ValueIterator iterator;
   typedef ValueConstIterator const_iterator;
-  typedef Json::UInt UInt;
-  typedef Json::Int Int;
+  typedef moosecontrib::Json::UInt UInt;
+  typedef moosecontrib::Json::Int Int;
 #if defined(JSON_HAS_INT64)
-  typedef Json::UInt64 UInt64;
-  typedef Json::Int64 Int64;
+  typedef moosecontrib::Json::UInt64 UInt64;
+  typedef moosecontrib::Json::Int64 Int64;
 #endif // defined(JSON_HAS_INT64)
-  typedef Json::LargestInt LargestInt;
-  typedef Json::LargestUInt LargestUInt;
-  typedef Json::ArrayIndex ArrayIndex;
+  typedef moosecontrib::Json::LargestInt LargestInt;
+  typedef moosecontrib::Json::LargestUInt LargestUInt;
+  typedef moosecontrib::Json::ArrayIndex ArrayIndex;
 
   static const Value& null;  ///< We regret this reference to a global instance; prefer the simpler Value().
   static const Value& nullRef;  ///< just a kludge for binary-compatibility; same as null
   static Value const& nullSingleton(); ///< Prefer this to null or nullRef.
 
-  /// Minimum signed integer value that can be stored in a Json::Value.
+  /// Minimum signed integer value that can be stored in a moosecontrib::Json::Value.
   static const LargestInt minLargestInt;
-  /// Maximum signed integer value that can be stored in a Json::Value.
+  /// Maximum signed integer value that can be stored in a moosecontrib::Json::Value.
   static const LargestInt maxLargestInt;
-  /// Maximum unsigned integer value that can be stored in a Json::Value.
+  /// Maximum unsigned integer value that can be stored in a moosecontrib::Json::Value.
   static const LargestUInt maxLargestUInt;
 
-  /// Minimum signed int value that can be stored in a Json::Value.
+  /// Minimum signed int value that can be stored in a moosecontrib::Json::Value.
   static const Int minInt;
-  /// Maximum signed int value that can be stored in a Json::Value.
+  /// Maximum signed int value that can be stored in a moosecontrib::Json::Value.
   static const Int maxInt;
-  /// Maximum unsigned int value that can be stored in a Json::Value.
+  /// Maximum unsigned int value that can be stored in a moosecontrib::Json::Value.
   static const UInt maxUInt;
 
 #if defined(JSON_HAS_INT64)
-  /// Minimum signed 64 bits int value that can be stored in a Json::Value.
+  /// Minimum signed 64 bits int value that can be stored in a moosecontrib::Json::Value.
   static const Int64 minInt64;
-  /// Maximum signed 64 bits int value that can be stored in a Json::Value.
+  /// Maximum signed 64 bits int value that can be stored in a moosecontrib::Json::Value.
   static const Int64 maxInt64;
-  /// Maximum unsigned 64 bits int value that can be stored in a Json::Value.
+  /// Maximum unsigned 64 bits int value that can be stored in a moosecontrib::Json::Value.
   static const UInt64 maxUInt64;
 #endif // defined(JSON_HAS_INT64)
 
@@ -725,9 +725,9 @@ This is useful since clear() and resize() will not alter types.
 
     Examples:
 \code
-Json::Value null_value; // null
-Json::Value arr_value(Json::arrayValue); // []
-Json::Value obj_value(Json::objectValue); // {}
+moosecontrib::Json::Value null_value; // null
+moosecontrib::Json::Value arr_value(moosecontrib::Json::arrayValue); // []
+moosecontrib::Json::Value obj_value(moosecontrib::Json::objectValue); // {}
 \endcode
   */
   Value(ValueType type = nullValue);
@@ -752,7 +752,7 @@ Json::Value obj_value(Json::objectValue); // {}
    * Example of usage:
    * \code
    * static StaticString foo("some text");
-   * Json::Value aValue(foo);
+   * moosecontrib::Json::Value aValue(foo);
    * \endcode
    */
   Value(const StaticString& value);
@@ -908,7 +908,7 @@ Json::Value obj_value(Json::objectValue); // {}
    * the new entry is not duplicated.
    * Example of use:
    * \code
-   * Json::Value object;
+   * moosecontrib::Json::Value object;
    * static const StaticString code("code");
    * object[code] = 1234;
    * \endcode
@@ -1306,9 +1306,9 @@ public:
 
 
 namespace std {
-/// Specialize std::swap() for Json::Value.
+/// Specialize std::swap() for moosecontrib::Json::Value.
 template<>
-inline void swap(Json::Value& a, Json::Value& b) { a.swap(b); }
+inline void swap(moosecontrib::Json::Value& a, moosecontrib::Json::Value& b) { a.swap(b); }
 }
 
 #pragma pack(pop)
@@ -1435,7 +1435,7 @@ public:
              bool collectComments = true);
 
   /// \brief Parse from input stream.
-  /// \see Json::operator>>(std::istream&, Json::Value&).
+  /// \see moosecontrib::Json::operator>>(std::istream&, moosecontrib::Json::Value&).
   bool parse(JSONCPP_ISTREAM& is, Value& root, bool collectComments = true);
 
   /** \brief Returns a user friendly string that list errors in the parsed
@@ -1629,7 +1629,7 @@ Usage:
 */
 class JSON_API CharReaderBuilder : public CharReader::Factory {
 public:
-  // Note: We use a Json::Value so that we can add data-members to this class
+  // Note: We use a moosecontrib::Json::Value so that we can add data-members to this class
   // without a major version bump.
   /** Configuration of this builder.
     These are case-sensitive.
@@ -1667,7 +1667,7 @@ public:
     JSON Value.
     \sa setDefaults()
     */
-  Json::Value settings_;
+  moosecontrib::Json::Value settings_;
 
   CharReaderBuilder();
   ~CharReaderBuilder() JSONCPP_OVERRIDE;
@@ -1677,24 +1677,24 @@ public:
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */
-  bool validate(Json::Value* invalid) const;
+  bool validate(moosecontrib::Json::Value* invalid) const;
 
   /** A simple way to update a specific setting.
    */
   Value& operator[](JSONCPP_STRING key);
 
   /** Called by ctor, but you can use this to reset settings_.
-   * \pre 'settings' != NULL (but Json::null is fine)
+   * \pre 'settings' != NULL (but moosecontrib::Json::null is fine)
    * \remark Defaults:
    * \snippet src/lib_json/json_reader.cpp CharReaderBuilderDefaults
    */
-  static void setDefaults(Json::Value* settings);
+  static void setDefaults(moosecontrib::Json::Value* settings);
   /** Same as old Features::strictMode().
-   * \pre 'settings' != NULL (but Json::null is fine)
+   * \pre 'settings' != NULL (but moosecontrib::Json::null is fine)
    * \remark Defaults:
    * \snippet src/lib_json/json_reader.cpp CharReaderBuilderStrictMode
    */
-  static void strictMode(Json::Value* settings);
+  static void strictMode(moosecontrib::Json::Value* settings);
 };
 
 /** Consume entire stream and use its begin/end.
@@ -1713,7 +1713,7 @@ bool JSON_API parseFromStream(
  This can be used to read a file into a particular sub-object.
  For example:
  \code
- Json::Value root;
+ moosecontrib::Json::Value root;
  cin >> root["dir"]["file"];
  cout << root;
  \endcode
@@ -1728,7 +1728,7 @@ bool JSON_API parseFromStream(
  }
  \endverbatim
  \throw std::exception on parse error.
- \see Json::operator<<()
+ \see moosecontrib::Json::operator<<()
 */
 JSON_API JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM&, Value&);
 
@@ -1839,7 +1839,7 @@ Usage:
   StreamWriterBuilder builder;
   builder["commentStyle"] = "None";
   builder["indentation"] = "   ";  // or whatever you like
-  std::unique_ptr<Json::StreamWriter> writer(
+  std::unique_ptr<moosecontrib::Json::StreamWriter> writer(
       builder.newStreamWriter());
   writer->write(value, &std::cout);
   std::cout << std::endl;  // add lf and flush
@@ -1847,7 +1847,7 @@ Usage:
 */
 class JSON_API StreamWriterBuilder : public StreamWriter::Factory {
 public:
-  // Note: We use a Json::Value so that we can add data-members to this class
+  // Note: We use a moosecontrib::Json::Value so that we can add data-members to this class
   // without a major version bump.
   /** Configuration of this builder.
     Available settings (case-sensitive):
@@ -1870,7 +1870,7 @@ public:
     JSON Value.
     \sa setDefaults()
     */
-  Json::Value settings_;
+  moosecontrib::Json::Value settings_;
 
   StreamWriterBuilder();
   ~StreamWriterBuilder() JSONCPP_OVERRIDE;
@@ -1883,17 +1883,17 @@ public:
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */
-  bool validate(Json::Value* invalid) const;
+  bool validate(moosecontrib::Json::Value* invalid) const;
   /** A simple way to update a specific setting.
    */
   Value& operator[](JSONCPP_STRING key);
 
   /** Called by ctor, but you can use this to reset settings_.
-   * \pre 'settings' != NULL (but Json::null is fine)
+   * \pre 'settings' != NULL (but moosecontrib::Json::null is fine)
    * \remark Defaults:
    * \snippet src/lib_json/json_writer.cpp StreamWriterBuilderDefaults
    */
-  static void setDefaults(Json::Value* settings);
+  static void setDefaults(moosecontrib::Json::Value* settings);
 };
 
 /** \brief Abstract class for writers.
@@ -2080,7 +2080,7 @@ JSONCPP_STRING JSON_API valueToString(bool value);
 JSONCPP_STRING JSON_API valueToQuotedString(const char* value);
 
 /// \brief Output using the StyledStreamWriter.
-/// \see Json::operator>>()
+/// \see moosecontrib::Json::operator>>()
 JSON_API JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM&, const Value& root);
 
 } // namespace Json
@@ -2130,12 +2130,12 @@ JSON_API JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM&, const Value& root);
 
 // @todo <= add detail about condition in exception
 # define JSON_ASSERT(condition)                                                \
-  {if (!(condition)) {Json::throwLogicError( "assert json failed" );}}
+  {if (!(condition)) {moosecontrib::Json::throwLogicError( "assert json failed" );}}
 
 # define JSON_FAIL_MESSAGE(message)                                            \
   {                                                                            \
     JSONCPP_OSTRINGSTREAM oss; oss << message;                                    \
-    Json::throwLogicError(oss.str());                                          \
+    moosecontrib::Json::throwLogicError(oss.str());                                          \
     abort();                                                                   \
   }
 
