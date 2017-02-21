@@ -1,5 +1,5 @@
 from RunApp import RunApp
-from util import runCommand
+import util
 import os
 
 class Exodiff(RunApp):
@@ -23,7 +23,7 @@ class Exodiff(RunApp):
 
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
-            self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['exodiff'], self.specs['delete_output_folders'])
+            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['exodiff'], self.specs['delete_output_folders'])
 
     def processResultsCommand(self, moose_dir, options):
         commands = []
@@ -71,7 +71,7 @@ class Exodiff(RunApp):
             commands = self.processResultsCommand(moose_dir, options)
 
             for command in commands:
-                exo_output = runCommand(command)
+                exo_output = util.runCommand(command)
 
                 output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(self.specs['exodiff_opts'])
 

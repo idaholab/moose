@@ -1,5 +1,5 @@
 from RunApp import RunApp
-from util import runCommand
+import util
 import os
 from XMLDiffer import XMLDiffer
 
@@ -21,14 +21,14 @@ class VTKDiff(RunApp):
 
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
-            self.deleteFilesAndFolders(self.specs['test_dir'], self.specs['vtkdiff'])
+            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['vtkdiff'])
 
     def processResults(self, moose_dir, retcode, options, output):
         output = RunApp.processResults(self, moose_dir, retcode, options, output)
 
         # Skip
         specs = self.specs
-        if self.getStatus() == 'FAIL' or specs['skip_checks']:
+        if self.getStatus() == self.bucket_fail or specs['skip_checks']:
             return output
 
         # Don't Run VTKDiff on Scaled Tests
@@ -41,7 +41,7 @@ class VTKDiff(RunApp):
             # Error if gold file does not exist
             if not os.path.exists(os.path.join(specs['test_dir'], specs['gold_dir'], file)):
                 output += "File Not Found: " + os.path.join(specs['test_dir'], specs['gold_dir'], file)
-                self.setStatus('MISSING GOLD FILE', 'FAIL')
+                self.setStatus('MISSING GOLD FILE', self.bucket_fail)
                 break
 
             # Perform diff
@@ -61,8 +61,11 @@ class VTKDiff(RunApp):
                     output += differ.message() + '\n'
 
                     if differ.fail():
-                        self.setStatus('VTKDIFF', 'DIFF')
+                        self.setStatus('VTKDIFF', self.bucket_skip)
                         break
 
-        # Return to the test harness
+        # If status is still pending, then it is a passing test
+        if self.getStatus() == self.bucket_pending:
+            self.setStatus(self.success_message, self.bucket_success)
+
         return output

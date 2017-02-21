@@ -1,4 +1,5 @@
-from util import *
+import re, os
+import util
 from InputParameters import InputParameters
 from MooseObject import MooseObject
 
@@ -212,7 +213,6 @@ class Tester(MooseObject):
     def getCommand(self, options):
         return
 
-
     # This method is called to return the commands (list) used for processing results
     def processResultsCommand(self, moose_dir, options):
         return []
@@ -256,8 +256,8 @@ class Tester(MooseObject):
         if self.specs.isValid('deleted'):
             if options.extra_info:
                 # We might want to trim the string so it formats nicely
-                if len(self.specs['deleted']) >= TERM_COLS - (len(self.specs['test_name'])+21):
-                    test_reason = (self.specs['deleted'])[:(TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
+                if len(self.specs['deleted']) >= util.TERM_COLS - (len(self.specs['test_name'])+21):
+                    test_reason = (self.specs['deleted'])[:(util.TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
                 else:
                     test_reason = self.specs['deleted']
                 reason = 'deleted (' + test_reason + ')'
@@ -272,8 +272,8 @@ class Tester(MooseObject):
         elif self.specs.type('skip') is not bool and self.specs.isValid('skip'):
             skip_message = self.specs['skip']
             # We might want to trim the string so it formats nicely
-            if len(skip_message) >= TERM_COLS - (len(self.specs['test_name'])+21):
-                reason = (skip_message)[:(TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
+            if len(skip_message) >= util.TERM_COLS - (len(self.specs['test_name'])+21):
+                reason = (skip_message)[:(util.TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
             else:
                 reason = skip_message
             self.setStatus(reason, self.bucket_skip)
@@ -300,7 +300,7 @@ class Tester(MooseObject):
             return False
 
         # Check for PETSc versions
-        (petsc_status, logic_reason, petsc_version) = checkPetscVersion(checks, self.specs)
+        (petsc_status, logic_reason, petsc_version) = util.checkPetscVersion(checks, self.specs)
         if not petsc_status:
             reason = 'using PETSc ' + str(checks['petsc_version']) + ' REQ: ' + logic_reason + ' ' + petsc_version
             self.setStatus(reason, self.bucket_skip)
