@@ -113,6 +113,12 @@ class Tester(MooseObject):
         # Initialize the tester with a pending status
         self.setStatus('launched', self.bucket_pending)
 
+    def getName(self):
+        return self.specs['test_name']
+
+    def getPrereqs(self):
+        return self.specs['prereq']
+
     # Return text color based on bucket status. Return the
     # RESET color switch in the event of an unknown status
     def getColor(self, status):
@@ -123,6 +129,10 @@ class Tester(MooseObject):
     # Method to return the input file if applicable to this Tester
     def getInputFile(self):
         return None
+
+    # Method to return the output files if applicable to this Tester
+    def getOutputFiles(self):
+        return []
 
     # Method to return the successful message printed to stdout
     def getSuccessMessage(self):
@@ -211,7 +221,6 @@ class Tester(MooseObject):
     # processing should happen in this method
     def processResults(self, moose_dir, retcode, options, output):
         return
-
 
     # This is the base level runnable check common to all Testers.  DO NOT override
     # this method in any of your derived classes.  Instead see "checkRunnable"
