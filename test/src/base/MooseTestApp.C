@@ -247,6 +247,7 @@
 #include "FailingProblem.h"
 
 // actions
+#include "AddMatAndKernel.h"
 #include "ConvDiffMetaAction.h"
 #include "AddLotsOfAuxVariablesAction.h"
 #include "ApplyCoupledVariablesTestAction.h"
@@ -579,4 +580,9 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("AddLotsOfDiffusion", "Testing/LotsOfDiffusion/*");
   syntax.registerActionSyntax("TestGetActionsAction", "TestGetActions");
   syntax.registerActionSyntax("BadAddKernelAction", "BadKernels/*");
+
+  registerAction(AddMatAndKernel, "add_kernel");
+  registerAction(AddMatAndKernel, "add_material");
+  registerAction(AddMatAndKernel, "add_variable");
+  syntax.registerActionSyntax("AddMatAndKernel", "AddMatAndKernel");
 }
