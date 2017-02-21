@@ -14,6 +14,8 @@ class ImageDiff(RunApp):
         params.addParam('delete_output_before_running', True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
         params.addParam('allowed_linux', "Absolute zero cuttoff used for linux machines, if not provided 'allowed' is used.")
         params.addParam('allowed_darwin', "Absolute zero cuttoff used for Mac OS (Darwin) machines, if not provided 'allowed' is used.")
+        # We don't want to check for any errors on the screen with this. If there are any real errors then the image test will fail.
+        params['errors'] = []
         return params
 
     def __init__(self, name, params):
