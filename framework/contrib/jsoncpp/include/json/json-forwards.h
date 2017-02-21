@@ -7,28 +7,28 @@
 // //////////////////////////////////////////////////////////////////////
 
 /*
-The JsonCpp library's source code, including accompanying documentation, 
+The JsonCpp library's source code, including accompanying documentation,
 tests and demonstration applications, are licensed under the following
 conditions...
 
-The author (Baptiste Lepilleur) explicitly disclaims copyright in all 
-jurisdictions which recognize such a disclaimer. In such jurisdictions, 
+The author (Baptiste Lepilleur) explicitly disclaims copyright in all
+jurisdictions which recognize such a disclaimer. In such jurisdictions,
 this software is released into the Public Domain.
 
 In jurisdictions which do not recognize Public Domain property (e.g. Germany as of
 2010), this software is Copyright (c) 2007-2010 by Baptiste Lepilleur, and is
 released under the terms of the MIT License (see below).
 
-In jurisdictions which recognize Public Domain property, the user of this 
-software may choose to accept it either as 1) Public Domain, 2) under the 
-conditions of the MIT License (see below), or 3) under the terms of dual 
+In jurisdictions which recognize Public Domain property, the user of this
+software may choose to accept it either as 1) Public Domain, 2) under the
+conditions of the MIT License (see below), or 3) under the terms of dual
 Public Domain/MIT License conditions described here, as they choose.
 
 The MIT License is about as close to Public Domain as a license can get, and is
 described in clear, concise terms at:
 
    http://en.wikipedia.org/wiki/MIT_License
-   
+
 The full text of the MIT License follows:
 
 ========================================================================
@@ -231,6 +231,7 @@ license you like.
 
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
+namespace moosecontrib {
 namespace Json {
 typedef int Int;
 typedef unsigned int UInt;
@@ -252,10 +253,10 @@ typedef UInt64 LargestUInt;
 #define JSON_HAS_INT64
 #endif // if defined(JSON_NO_INT64)
 #if JSONCPP_USING_SECURE_MEMORY
-#define JSONCPP_STRING        std::basic_string<char, std::char_traits<char>, Json::SecureAllocator<char> >
-#define JSONCPP_OSTRINGSTREAM std::basic_ostringstream<char, std::char_traits<char>, Json::SecureAllocator<char> >
+#define JSONCPP_STRING        std::basic_string<char, std::char_traits<char>, moosecontrib::Json::SecureAllocator<char> >
+#define JSONCPP_OSTRINGSTREAM std::basic_ostringstream<char, std::char_traits<char>, moosecontrib::Json::SecureAllocator<char> >
 #define JSONCPP_OSTREAM       std::basic_ostream<char, std::char_traits<char>>
-#define JSONCPP_ISTRINGSTREAM std::basic_istringstream<char, std::char_traits<char>, Json::SecureAllocator<char> >
+#define JSONCPP_ISTRINGSTREAM std::basic_istringstream<char, std::char_traits<char>, moosecontrib::Json::SecureAllocator<char> >
 #define JSONCPP_ISTREAM       std::istream
 #else
 #define JSONCPP_STRING        std::string
@@ -265,6 +266,7 @@ typedef UInt64 LargestUInt;
 #define JSONCPP_ISTREAM       std::istream
 #endif // if JSONCPP_USING_SECURE_MEMORY
 } // end namespace Json
+} // end namespace moosecontrib
 
 #endif // JSON_CONFIG_H_INCLUDED
 
@@ -293,6 +295,7 @@ typedef UInt64 LargestUInt;
 #include "config.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
+namespace moosecontrib {
 namespace Json {
 
 // writer.h
@@ -316,6 +319,7 @@ class ValueIterator;
 class ValueConstIterator;
 
 } // namespace Json
+} // namespace moosecontrib
 
 #endif // JSON_FORWARDS_H_INCLUDED
 

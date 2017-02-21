@@ -6,28 +6,28 @@
 // //////////////////////////////////////////////////////////////////////
 
 /*
-The JsonCpp library's source code, including accompanying documentation, 
+The JsonCpp library's source code, including accompanying documentation,
 tests and demonstration applications, are licensed under the following
 conditions...
 
-The author (Baptiste Lepilleur) explicitly disclaims copyright in all 
-jurisdictions which recognize such a disclaimer. In such jurisdictions, 
+The author (Baptiste Lepilleur) explicitly disclaims copyright in all
+jurisdictions which recognize such a disclaimer. In such jurisdictions,
 this software is released into the Public Domain.
 
 In jurisdictions which do not recognize Public Domain property (e.g. Germany as of
 2010), this software is Copyright (c) 2007-2010 by Baptiste Lepilleur, and is
 released under the terms of the MIT License (see below).
 
-In jurisdictions which recognize Public Domain property, the user of this 
-software may choose to accept it either as 1) Public Domain, 2) under the 
-conditions of the MIT License (see below), or 3) under the terms of dual 
+In jurisdictions which recognize Public Domain property, the user of this
+software may choose to accept it either as 1) Public Domain, 2) under the
+conditions of the MIT License (see below), or 3) under the terms of dual
 Public Domain/MIT License conditions described here, as they choose.
 
 The MIT License is about as close to Public Domain as a license can get, and is
 described in clear, concise terms at:
 
    http://en.wikipedia.org/wiki/MIT_License
-   
+
 The full text of the MIT License follows:
 
 ========================================================================
@@ -108,6 +108,7 @@ license you like.
  * It is an internal header that must not be exposed.
  */
 
+namespace moosecontrib {
 namespace Json {
 static char getDecimalPoint() {
 #ifdef JSONCPP_NO_LOCALE_SUPPORT
@@ -198,7 +199,8 @@ static inline void fixNumericLocaleInput(char* begin, char* end) {
   }
 }
 
-} // namespace Json {
+} // namespace Json
+} // end namespace moosecontrib
 
 #endif // LIB_JSONCPP_JSON_TOOL_H_INCLUDED
 
@@ -238,7 +240,7 @@ static inline void fixNumericLocaleInput(char* begin, char* end) {
 #include <limits>
 
 #if defined(_MSC_VER)
-#if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above 
+#if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above
 #define snprintf sprintf_s
 #elif _MSC_VER >= 1900 // VC++ 14.0 and above
 #define snprintf std::snprintf
@@ -269,6 +271,7 @@ static inline void fixNumericLocaleInput(char* begin, char* end) {
 
 static size_t const stackLimit_g = JSONCPP_DEPRECATED_STACK_LIMIT; // see readValue()
 
+namespace moosecontrib {
 namespace Json {
 
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
@@ -383,7 +386,7 @@ bool Reader::parse(const char* beginDoc,
 
 bool Reader::readValue() {
   // readValue() may call itself only if it calls readObject() or ReadArray().
-  // These methods execute nodes_.push() just before and nodes_.pop)() just after calling readValue(). 
+  // These methods execute nodes_.push() just before and nodes_.pop)() just after calling readValue().
   // parse() executes one nodes_.push(), so > instead of >=.
   if (nodes_.size() > stackLimit_g) throwRuntimeError("Exceeded stackLimit in readValue().");
 
@@ -2166,11 +2169,11 @@ static void getValidReaderKeys(std::set<JSONCPP_STRING>* valid_keys)
   valid_keys->insert("rejectDupKeys");
   valid_keys->insert("allowSpecialFloats");
 }
-bool CharReaderBuilder::validate(Json::Value* invalid) const
+bool CharReaderBuilder::validate(moosecontrib::Json::Value* invalid) const
 {
-  Json::Value my_invalid;
+  moosecontrib::Json::Value my_invalid;
   if (!invalid) invalid = &my_invalid;  // so we do not need to test for NULL
-  Json::Value& inv = *invalid;
+  moosecontrib::Json::Value& inv = *invalid;
   std::set<JSONCPP_STRING> valid_keys;
   getValidReaderKeys(&valid_keys);
   Value::Members keys = settings_.getMemberNames();
@@ -2188,7 +2191,7 @@ Value& CharReaderBuilder::operator[](JSONCPP_STRING key)
   return settings_[key];
 }
 // static
-void CharReaderBuilder::strictMode(Json::Value* settings)
+void CharReaderBuilder::strictMode(moosecontrib::Json::Value* settings)
 {
 //! [CharReaderBuilderStrictMode]
   (*settings)["allowComments"] = false;
@@ -2203,7 +2206,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings)
 //! [CharReaderBuilderStrictMode]
 }
 // static
-void CharReaderBuilder::setDefaults(Json::Value* settings)
+void CharReaderBuilder::setDefaults(moosecontrib::Json::Value* settings)
 {
 //! [CharReaderBuilderDefaults]
   (*settings)["collectComments"] = true;
@@ -2251,6 +2254,7 @@ JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM& sin, Value& root) {
 }
 
 } // namespace Json
+} // end namespace moosecontrib
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: src/lib_json/json_reader.cpp
@@ -2272,6 +2276,7 @@ JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM& sin, Value& root) {
 
 // included by json_value.cpp
 
+namespace moosecontrib {
 namespace Json {
 
 // //////////////////////////////////////////////////////////////////
@@ -2432,6 +2437,7 @@ ValueIterator& ValueIterator::operator=(const SelfType& other) {
 }
 
 } // namespace Json
+} // end namespace moosecontrib
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: src/lib_json/json_valueiterator.inl
@@ -2469,6 +2475,7 @@ ValueIterator& ValueIterator::operator=(const SelfType& other) {
 
 #define JSON_ASSERT_UNREACHABLE assert(false)
 
+namespace moosecontrib {
 namespace Json {
 
 // This is a walkaround to avoid the static initialization of Value::null.
@@ -2521,7 +2528,7 @@ static inline bool InRange(double d, T min, U max) {
   return d >= min && d <= max;
 }
 #else  // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
-static inline double integerToDouble(Json::UInt64 value) {
+static inline double integerToDouble(moosecontrib::Json::UInt64 value) {
   return static_cast<double>(Int64(value / 2)) * 2.0 + static_cast<double>(Int64(value & 1));
 }
 
@@ -2553,7 +2560,7 @@ static inline char* duplicateStringValue(const char* value,
   char* newString = static_cast<char*>(malloc(length + 1));
   if (newString == NULL) {
     throwRuntimeError(
-        "in Json::Value::duplicateStringValue(): "
+        "in moosecontrib::Json::Value::duplicateStringValue(): "
         "Failed to allocate string value buffer");
   }
   memcpy(newString, value, length);
@@ -2570,13 +2577,13 @@ static inline char* duplicateAndPrefixStringValue(
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
   JSON_ASSERT_MESSAGE(length <= static_cast<unsigned>(Value::maxInt) - sizeof(unsigned) - 1U,
-                      "in Json::Value::duplicateAndPrefixStringValue(): "
+                      "in moosecontrib::Json::Value::duplicateAndPrefixStringValue(): "
                       "length too big for prefixing");
   unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
   char* newString = static_cast<char*>(malloc(actualLength));
   if (newString == 0) {
     throwRuntimeError(
-        "in Json::Value::duplicateAndPrefixStringValue(): "
+        "in moosecontrib::Json::Value::duplicateAndPrefixStringValue(): "
         "Failed to allocate string value buffer");
   }
   *reinterpret_cast<unsigned*>(newString) = length;
@@ -2623,6 +2630,7 @@ static inline void releaseStringValue(char* value, unsigned) {
 #endif // JSONCPP_USING_SECURE_MEMORY
 
 } // namespace Json
+} // end namespace moosecontrib
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -2636,6 +2644,7 @@ static inline void releaseStringValue(char* value, unsigned) {
 #include "json_valueiterator.inl"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
+namespace moosecontrib {
 namespace Json {
 
 Exception::Exception(JSONCPP_STRING const& msg)
@@ -2686,7 +2695,7 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
   JSON_ASSERT(text != 0);
   JSON_ASSERT_MESSAGE(
       text[0] == '\0' || text[0] == '/',
-      "in Json::Value::setComment(): Comments must start with /");
+      "in moosecontrib::Json::Value::setComment(): Comments must start with /");
   // It seems that /**/ style comments are acceptable as well.
   comment_ = duplicateStringValue(text, len);
 }
@@ -3043,7 +3052,7 @@ bool Value::operator>(const Value& other) const { return other < *this; }
 bool Value::operator==(const Value& other) const {
   // if ( type_ != other.type_ )
   // GCC 2.95.3 says:
-  // attempt to take address of bit-field structure member `Json::Value::type_'
+  // attempt to take address of bit-field structure member `moosecontrib::Json::Value::type_'
   // Beats me, but a temp solves the problem.
   int temp = other.type_;
   if (type_ != temp)
@@ -3089,7 +3098,7 @@ bool Value::operator!=(const Value& other) const { return !(*this == other); }
 
 const char* Value::asCString() const {
   JSON_ASSERT_MESSAGE(type_ == stringValue,
-                      "in Json::Value::asCString(): requires stringValue");
+                      "in moosecontrib::Json::Value::asCString(): requires stringValue");
   if (value_.string_ == 0) return 0;
   unsigned this_len;
   char const* this_str;
@@ -3100,7 +3109,7 @@ const char* Value::asCString() const {
 #if JSONCPP_USING_SECURE_MEMORY
 unsigned Value::getCStringLength() const {
   JSON_ASSERT_MESSAGE(type_ == stringValue,
-	                  "in Json::Value::asCString(): requires stringValue");
+	                  "in moosecontrib::Json::Value::asCString(): requires stringValue");
   if (value_.string_ == 0) return 0;
   unsigned this_len;
   char const* this_str;
@@ -3391,7 +3400,7 @@ bool Value::operator!() const { return isNull(); }
 void Value::clear() {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == arrayValue ||
                           type_ == objectValue,
-                      "in Json::Value::clear(): requires complex value");
+                      "in moosecontrib::Json::Value::clear(): requires complex value");
   start_ = 0;
   limit_ = 0;
   switch (type_) {
@@ -3406,7 +3415,7 @@ void Value::clear() {
 
 void Value::resize(ArrayIndex newSize) {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == arrayValue,
-                      "in Json::Value::resize(): requires arrayValue");
+                      "in moosecontrib::Json::Value::resize(): requires arrayValue");
   if (type_ == nullValue)
     *this = Value(arrayValue);
   ArrayIndex oldSize = size();
@@ -3425,7 +3434,7 @@ void Value::resize(ArrayIndex newSize) {
 Value& Value::operator[](ArrayIndex index) {
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == arrayValue,
-      "in Json::Value::operator[](ArrayIndex): requires arrayValue");
+      "in moosecontrib::Json::Value::operator[](ArrayIndex): requires arrayValue");
   if (type_ == nullValue)
     *this = Value(arrayValue);
   CZString key(index);
@@ -3441,14 +3450,14 @@ Value& Value::operator[](ArrayIndex index) {
 Value& Value::operator[](int index) {
   JSON_ASSERT_MESSAGE(
       index >= 0,
-      "in Json::Value::operator[](int index): index cannot be negative");
+      "in moosecontrib::Json::Value::operator[](int index): index cannot be negative");
   return (*this)[ArrayIndex(index)];
 }
 
 const Value& Value::operator[](ArrayIndex index) const {
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == arrayValue,
-      "in Json::Value::operator[](ArrayIndex)const: requires arrayValue");
+      "in moosecontrib::Json::Value::operator[](ArrayIndex)const: requires arrayValue");
   if (type_ == nullValue)
     return nullSingleton();
   CZString key(index);
@@ -3461,7 +3470,7 @@ const Value& Value::operator[](ArrayIndex index) const {
 const Value& Value::operator[](int index) const {
   JSON_ASSERT_MESSAGE(
       index >= 0,
-      "in Json::Value::operator[](int index) const: index cannot be negative");
+      "in moosecontrib::Json::Value::operator[](int index) const: index cannot be negative");
   return (*this)[ArrayIndex(index)];
 }
 
@@ -3479,7 +3488,7 @@ void Value::initBasic(ValueType vtype, bool allocated) {
 Value& Value::resolveReference(const char* key) {
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == objectValue,
-      "in Json::Value::resolveReference(): requires objectValue");
+      "in moosecontrib::Json::Value::resolveReference(): requires objectValue");
   if (type_ == nullValue)
     *this = Value(objectValue);
   CZString actualKey(
@@ -3499,7 +3508,7 @@ Value& Value::resolveReference(char const* key, char const* cend)
 {
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == objectValue,
-      "in Json::Value::resolveReference(key, end): requires objectValue");
+      "in moosecontrib::Json::Value::resolveReference(key, end): requires objectValue");
   if (type_ == nullValue)
     *this = Value(objectValue);
   CZString actualKey(
@@ -3525,7 +3534,7 @@ Value const* Value::find(char const* key, char const* cend) const
 {
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == objectValue,
-      "in Json::Value::find(key, end, found): requires objectValue or nullValue");
+      "in moosecontrib::Json::Value::find(key, end, found): requires objectValue or nullValue");
   if (type_ == nullValue) return NULL;
   CZString actualKey(key, static_cast<unsigned>(cend-key), CZString::noDuplication);
   ObjectValues::const_iterator it = value_.map_->find(actualKey);
@@ -3610,7 +3619,7 @@ bool Value::removeMember(JSONCPP_STRING const& key, Value* removed)
 Value Value::removeMember(const char* key)
 {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == objectValue,
-                      "in Json::Value::removeMember(): requires objectValue");
+                      "in moosecontrib::Json::Value::removeMember(): requires objectValue");
   if (type_ == nullValue)
     return nullSingleton();
 
@@ -3676,7 +3685,7 @@ bool Value::isMember(const CppTL::ConstString& key) const {
 Value::Members Value::getMemberNames() const {
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == objectValue,
-      "in Json::Value::getMemberNames(), value must be objectValue");
+      "in moosecontrib::Json::Value::getMemberNames(), value must be objectValue");
   if (type_ == nullValue)
     return Value::Members();
   Members members;
@@ -4062,6 +4071,7 @@ Value& Path::make(Value& root) const {
 }
 
 } // namespace Json
+} // end namespace moosecontrib
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: src/lib_json/json_value.cpp
@@ -4140,7 +4150,7 @@ Value& Path::make(Value& root) const {
 #endif
 #endif
 
-#if defined(__BORLANDC__)  
+#if defined(__BORLANDC__)
 #include <float.h>
 #define isfinite _finite
 #define snprintf _snprintf
@@ -4151,6 +4161,7 @@ Value& Path::make(Value& root) const {
 #pragma warning(disable : 4996)
 #endif
 
+namespace moosecontrib {
 namespace Json {
 
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
@@ -4228,7 +4239,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
   // concepts of reals and integers.
   if (isfinite(value)) {
     len = snprintf(buffer, sizeof(buffer), formatString, value);
-    
+
     // try to ensure we preserve the fact that this was given to us as a double on input
     if (!strstr(buffer, ".") && !strstr(buffer, "e")) {
       strcat(buffer, ".0");
@@ -5215,7 +5226,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   JSONCPP_STRING cs_str = settings_["commentStyle"].asString();
   bool eyc = settings_["enableYAMLCompatibility"].asBool();
   bool dnp = settings_["dropNullPlaceholders"].asBool();
-  bool usf = settings_["useSpecialFloats"].asBool(); 
+  bool usf = settings_["useSpecialFloats"].asBool();
   unsigned int pre = settings_["precision"].asUInt();
   CommentStyle::Enum cs = CommentStyle::All;
   if (cs_str == "All") {
@@ -5251,11 +5262,11 @@ static void getValidWriterKeys(std::set<JSONCPP_STRING>* valid_keys)
   valid_keys->insert("useSpecialFloats");
   valid_keys->insert("precision");
 }
-bool StreamWriterBuilder::validate(Json::Value* invalid) const
+bool StreamWriterBuilder::validate(moosecontrib::Json::Value* invalid) const
 {
-  Json::Value my_invalid;
+  moosecontrib::Json::Value my_invalid;
   if (!invalid) invalid = &my_invalid;  // so we do not need to test for NULL
-  Json::Value& inv = *invalid;
+  moosecontrib::Json::Value& inv = *invalid;
   std::set<JSONCPP_STRING> valid_keys;
   getValidWriterKeys(&valid_keys);
   Value::Members keys = settings_.getMemberNames();
@@ -5273,7 +5284,7 @@ Value& StreamWriterBuilder::operator[](JSONCPP_STRING key)
   return settings_[key];
 }
 // static
-void StreamWriterBuilder::setDefaults(Json::Value* settings)
+void StreamWriterBuilder::setDefaults(moosecontrib::Json::Value* settings)
 {
   //! [StreamWriterBuilderDefaults]
   (*settings)["commentStyle"] = "All";
@@ -5300,6 +5311,7 @@ JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM& sout, Value const& root) {
 }
 
 } // namespace Json
+} // end namespace moosecontrib
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: src/lib_json/json_writer.cpp
