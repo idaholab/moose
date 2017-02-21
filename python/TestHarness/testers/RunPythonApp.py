@@ -1,9 +1,9 @@
 import os, re
 import util
+import unittest
 from Tester import Tester
 
 class RunPythonApp(Tester):
-
     @staticmethod
     def validParams():
         params = Tester.validParams()
@@ -19,7 +19,7 @@ class RunPythonApp(Tester):
 
     def getCommand(self, options):
         """
-        Returns the python script to execute
+        Returns the python command that executes unit tests
         """
         return os.path.join(self.specs['test_dir'], self.specs['input']) + ' ' + self.specs['cli_args']
 

@@ -8,7 +8,7 @@ class RunApp(Tester):
     @staticmethod
     def validParams():
         params = Tester.validParams()
-        params.addRequiredParam('input',      "The input file to use for this test.")
+        params.addParam('input',              "The input file to use for this test.")
         params.addParam('test_name',          "The name of the test - populated automatically")
         params.addParam('input_switch', '-i', "The default switch used for indicating an input to the executable")
         params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
@@ -56,6 +56,10 @@ class RunApp(Tester):
         if params.isValid('allow_deprecated_until') and params['allow_deprecated_until'] > time.localtime():
             self.specs['cli_args'].append('--allow-deprecated')
 
+        # Make sure that either input or command is supplied
+        if not (params.isValid('input') or params.isValid('command')):
+            raise Exception('Either "input" or "command" must be supplied for a RunApp test')
+
     def getInputFile(self):
         return self.specs['input'].strip()
 
@@ -95,7 +99,7 @@ class RunApp(Tester):
 
         # Just return an arbitrary command if one is supplied
         if specs.isValid('command'):
-            return specs['command']
+            return os.path.join(specs['test_dir'], specs['command']) + ' ' + ' '.join(specs['cli_args'])
 
         # Create the command line string to run
         command = ''
@@ -302,4 +306,3 @@ class RunApp(Tester):
             self.setStatus(self.success_message, self.bucket_success)
 
         return output
-
