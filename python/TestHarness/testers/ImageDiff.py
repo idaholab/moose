@@ -1,15 +1,13 @@
 import os
 import sys
 import util
-from RunPythonApp import RunPythonApp
+from RunApp import RunApp
 from mooseutils.ImageDiffer import ImageDiffer
 
-class ImageDiff(RunPythonApp):
-
-
+class ImageDiff(RunApp):
     @staticmethod
     def validParams():
-        params = RunPythonApp.validParams()
+        params = RunApp.validParams()
         params.addRequiredParam('imagediff', [], 'A list of files to compare against the gold.')
         params.addParam('gold_dir', 'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
         params.addParam('allowed', 0.98, "Absolute zero cutoff used in exodiff comparisons.")
@@ -19,14 +17,14 @@ class ImageDiff(RunPythonApp):
         return params
 
     def __init__(self, name, params):
-        RunPythonApp.__init__(self, name, params)
+        RunApp.__init__(self, name, params)
 
     def prepare(self, options):
         """
         Cleans up image files from previous execution
         """
-#        if self.specs['delete_output_before_running'] == True:
-#            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['imagediff'], self.specs['delete_output_folders'])
+        if self.specs['delete_output_before_running'] == True:
+            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['imagediff'], self.specs['delete_output_folders'])
 
     def processResults(self, moose_dir, retcode, options, output):
         """
@@ -34,7 +32,7 @@ class ImageDiff(RunPythonApp):
         """
 
         # Call base class processResults
-        output = RunPythonApp.processResults(self, moose_dir, retcode, options, output)
+        output = RunApp.processResults(self, moose_dir, retcode, options, output)
         if self.getStatus() == self.bucket_fail:
             return output
 

@@ -106,6 +106,7 @@ class RunApp(Tester):
 
         # Check for built application
         if not options.dry_run and not os.path.exists(specs['executable']):
+            print os.getcwd()
             print 'Application not found: ' + str(specs['executable'])
             sys.exit(1)
 
