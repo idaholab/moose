@@ -69,3 +69,13 @@ class TestHarnessTester(TestHarnessTestCase):
         e = cm.exception
         self.assertRegexpMatches(e.output, 'test_harness\.no_expect_err.*?FAILED \(NO EXPECTED ERR\)')
         self.assertRegexpMatches(e.output, 'test_harness\.no_expect_out.*?FAILED \(EXPECTED OUTPUT MISSING\)')
+
+    def testDuplicateOutputs(self):
+        """
+        Test for duplicate output files in the same directory
+        """
+        with self.assertRaises(subprocess.CalledProcessError) as cm:
+            self.runTests('-i', 'duplicate_outputs')
+
+        e = cm.exception
+        self.assertRegexpMatches(e.output, 'FATAL TEST HARNESS ERROR')
