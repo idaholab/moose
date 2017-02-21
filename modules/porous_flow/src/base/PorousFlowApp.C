@@ -77,6 +77,7 @@
 #include "PorousFlowPlasticHeatEnergy.h"
 #include "PorousFlowDesorpedMassTimeDerivative.h"
 #include "PorousFlowDesorpedMassVolumetricExpansion.h"
+#include "PorousFlowMassRadioactiveDecay.h"
 
 // BoundaryConditions
 #include "PorousFlowSink.h"
@@ -207,6 +208,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerKernel(PorousFlowPlasticHeatEnergy);
   registerKernel(PorousFlowDesorpedMassTimeDerivative);
   registerKernel(PorousFlowDesorpedMassVolumetricExpansion);
+  registerKernel(PorousFlowMassRadioactiveDecay);
 
   // BoundaryConditions
   registerBoundaryCondition(PorousFlowSink);
