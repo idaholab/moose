@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'volumetric_eigenstrain.i'
+    csvdiff = 'volumetric_eigenstrain_out.csv'
+  [../]
+[]
