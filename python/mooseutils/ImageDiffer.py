@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 import os
-import skimage.measure
-import matplotlib.pyplot as plt
 
 class ImageDiffer(object):
     """
@@ -116,6 +114,7 @@ class ImageDiffer(object):
             return
 
         # Compute the error
+        import skimage.measure
         self.__error = skimage.measure.compare_ssim(self.__data[0], self.__data[1], multichannel=True)
 
         # Report the error
@@ -138,6 +137,7 @@ class ImageDiffer(object):
             self.__addError('Failed to open ' + filename + ', the file does not exist.')
             return None
 
+        import matplotlib.pyplot as plt
         return plt.imread(filename)
 
     def __addError(self, err, msg=[]):
