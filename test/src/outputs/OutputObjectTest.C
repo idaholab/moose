@@ -44,14 +44,14 @@ OutputObjectTest::initialSetup()
   {
     OutputObjectTest * ptr = _app.getOutputWarehouse().getOutput<OutputObjectTest>(name());
     if (ptr == this)
-      mooseError2("getOutput test passed");
+      mooseError("getOutput test passed");
   }
 
   else if (_type == "getOutputs")
   {
     std::vector<Exodus *> ptrs = _app.getOutputWarehouse().getOutputs<Exodus>();
     if (ptrs.size() == 2 && ptrs[0]->name().compare("exodus") == 0 && ptrs[1]->name().compare("exodus2") == 0)
-      mooseError2("getOutputs test passed");
+      mooseError("getOutputs test passed");
   }
 
   else if (_type == "getOutputs-names")
@@ -61,16 +61,16 @@ OutputObjectTest::initialSetup()
     names.push_back("exodus");
     std::vector<Exodus *> ptrs = _app.getOutputWarehouse().getOutputs<Exodus>(names);
     if (ptrs.size() == 2 && ptrs[0]->name().compare("exodus2") == 0 && ptrs[1]->name().compare("exodus") == 0)
-      mooseError2("getOutputs-names test passed");
+      mooseError("getOutputs-names test passed");
   }
 
   else if (_type == "getOutputNames")
   {
     std::vector<OutputName> names = _app.getOutputWarehouse().getOutputNames<Exodus>();
     if (names.size() == 2 && names[0].compare("exodus") == 0 && names[1].compare("exodus2") == 0)
-      mooseError2("getOutputsNames test passed");
+      mooseError("getOutputsNames test passed");
   }
 
   else
-    mooseError2("You must specify a 'test_type'");
+    mooseError("You must specify a 'test_type'");
 }

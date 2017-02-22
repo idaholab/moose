@@ -69,7 +69,7 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object, THREAD_ID /*t
     _nodal_constraints.addObject(nc);
 
   else
-    mooseError2("Unknown type of Constraint object");
+    mooseError("Unknown type of Constraint object");
 }
 
 

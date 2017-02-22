@@ -59,13 +59,13 @@ Action::Action(InputParameters parameters) :
 std::string
 Action::getShortName() const
 {
-  mooseDeprecated2("getShortName() is deprecated.");
+  mooseDeprecated("getShortName() is deprecated.");
   return MooseUtils::shortName(_name);
 }
 
 std::string
 Action::getBaseName() const
 {
-  mooseDeprecated2("getBaseName() is deprecated.");
+  mooseDeprecated("getBaseName() is deprecated.");
   return MooseUtils::baseName(_name);
 }

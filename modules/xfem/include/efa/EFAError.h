@@ -16,5 +16,5 @@
 //This version just calls MooseError for error reporting, which is preferred if this is run
 //within the MOOSE environment:
 #include "MooseError.h"
-#define EFAError(...) mooseError2(__VA_ARGS__)
-#define EFAWarning(...) mooseWarning2(__VA_ARGS__)
+#define EFAError(...) mooseError(__VA_ARGS__)
+#define EFAWarning(...) mooseWarning(__VA_ARGS__)

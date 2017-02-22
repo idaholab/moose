@@ -67,7 +67,7 @@ BrineFluidProperties::getComponent(unsigned int component) const
       return *_halite_fp;
 
     default:
-      mooseError2("BrineFluidProperties::getComponent has been provided an incorrect component");
+      mooseError("BrineFluidProperties::getComponent has been provided an incorrect component");
   }
 }
 

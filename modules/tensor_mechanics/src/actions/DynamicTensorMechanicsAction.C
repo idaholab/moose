@@ -33,5 +33,5 @@ DynamicTensorMechanicsAction::getKernelType()
   if (_coord_system == Moose::COORD_XYZ)
     return "DynamicStressDivergenceTensors";
   else
-    mooseError2("Unsupported coordinate system");
+    mooseError("Unsupported coordinate system");
 }

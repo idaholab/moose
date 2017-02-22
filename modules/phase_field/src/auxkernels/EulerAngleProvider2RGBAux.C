@@ -67,7 +67,7 @@ EulerAngleProvider2RGBAux::precalculateValue()
       _value = RGBint;
   }
   else
-    mooseError2("Incorrect value for output_type in EulerAngleProvider2RGBAux");
+    mooseError("Incorrect value for output_type in EulerAngleProvider2RGBAux");
 }
 
 Real

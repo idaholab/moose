@@ -48,5 +48,5 @@ Real PolycrystalRandomIC::value(const Point & p)
     }
   }
 
-  mooseError2("Bad type passed in PolycrystalRandomIC");
+  mooseError("Bad type passed in PolycrystalRandomIC");
 }

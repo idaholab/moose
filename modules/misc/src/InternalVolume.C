@@ -76,10 +76,10 @@ InternalVolume::initialSetup()
         {
           Moose::CoordinateSystemType coord_sys = _fe_problem.getCoordSystem(*iter);
           if (_component != 0 && coord_sys == Moose::COORD_RSPHERICAL)
-            mooseError2("With spherical coordinates, the component must be 0 in InternalVolume.");
+            mooseError("With spherical coordinates, the component must be 0 in InternalVolume.");
 
           if (_component > 1 && coord_sys == Moose::COORD_RZ)
-            mooseError2("With cylindrical coordinates, the component must be 0 or 1 in InternalVolume.");
+            mooseError("With cylindrical coordinates, the component must be 0 or 1 in InternalVolume.");
         }
     }
   }

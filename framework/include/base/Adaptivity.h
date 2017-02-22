@@ -316,7 +316,7 @@ Adaptivity::setParam(const std::string &param_name, const T &param_value)
   else if (param_name == "recompute_markers_during_cycles")
     _recompute_markers_during_cycles = param_value;
   else
-    mooseError2("Invalid Param in adaptivity object");
+    mooseError("Invalid Param in adaptivity object");
 }
 #endif //LIBMESH_ENABLE_AMR
 

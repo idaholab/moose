@@ -44,5 +44,5 @@ NumVars::getValue()
       return _fe_problem.getAuxiliarySystem().sys().n_vars();
   }
 
-  mooseError2("Unknown system type!");
+  mooseError("Unknown system type!");
 }

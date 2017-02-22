@@ -59,9 +59,9 @@ Real
 TestCopyInitialSolution::getValue()
 {
   if (_value)
-    mooseError2("Solutions are equal, test passed!");
+    mooseError("Solutions are equal, test passed!");
   else
-    mooseError2("Solutions are not equal, the test failed!");
+    mooseError("Solutions are not equal, the test failed!");
 
   return 0.0;
 }

@@ -29,7 +29,7 @@ Eigenvalues::Eigenvalues(const InputParameters & parameters) :
     _nl_eigen(dynamic_cast<NonlinearEigenSystem *>(&_fe_problem.getNonlinearSystemBase()))
 {
   if (!_nl_eigen)
-    mooseError2("Given system is not a NonlinearEigenSystem \n");
+    mooseError("Given system is not a NonlinearEigenSystem \n");
 }
 
 void

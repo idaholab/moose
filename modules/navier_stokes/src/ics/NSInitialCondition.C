@@ -87,6 +87,6 @@ NSInitialCondition::value(const Point & /*p*/)
     return _initial_velocity(2);
 
   // If we got here, then the variable name was not one of the ones we know about.
-  mooseError2("Unrecognized variable: ", _var.name());
+  mooseError("Unrecognized variable: ", _var.name());
   return 0.;
 }

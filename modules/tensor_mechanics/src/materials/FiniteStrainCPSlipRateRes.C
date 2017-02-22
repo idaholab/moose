@@ -84,7 +84,7 @@ FiniteStrainCPSlipRateRes::solveStress()
     if (_use_line_search && rnorm > rnorm_prev && !lineSearchUpdateSlipRate(rnorm_prev, update))
     {
 #ifdef DEBUG
-      mooseWarning2("FiniteStrainCrystalPLasticity: Failed with line search");
+      mooseWarning("FiniteStrainCrystalPLasticity: Failed with line search");
 #endif
       _err_tol = true;
       return;
@@ -109,7 +109,7 @@ FiniteStrainCPSlipRateRes::solveStress()
   if (iter == _maxiter)
   {
 #ifdef DEBUG
-    mooseWarning2("FiniteStrainCPSlipRateRes: NR exceeds maximum iteration ", iter, " ", rnorm);
+    mooseWarning("FiniteStrainCPSlipRateRes: NR exceeds maximum iteration ", iter, " ", rnorm);
 #endif
     _err_tol = true;
     return;
@@ -346,7 +346,7 @@ FiniteStrainCPSlipRateRes::lineSearchUpdateSlipRate(const Real rnorm_prev, const
     return false;
   }
   else{
-    mooseError2("Line search meothod is not provided.");
+    mooseError("Line search meothod is not provided.");
     return false;
   }
 }

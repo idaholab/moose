@@ -65,7 +65,7 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters) :
     _displaced_target_mesh(false)
 {
   if (getParam<bool>("check_multiapp_execute_on") && (execFlags() != _multi_app->execFlags()))
-      mooseDoOnce(mooseWarning2("MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"));
+      mooseDoOnce(mooseWarning("MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"));
 }
 
 void
@@ -73,7 +73,7 @@ MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 {
   for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
     if (_multi_app->hasLocalApp(i) && !find_sys(_multi_app->appProblemBase(i).es(), var_name))
-      mooseError2("Cannot find variable ", var_name, " for ", name(), " Transfer");
+      mooseError("Cannot find variable ", var_name, " for ", name(), " Transfer");
 }
 
 

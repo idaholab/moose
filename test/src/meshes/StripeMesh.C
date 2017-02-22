@@ -62,7 +62,7 @@ StripeMesh::buildMesh()
 
     if (!e)
     {
-      mooseError2("Error getting element ", en, ". StripeMesh only works with ReplicatedMesh...");
+      mooseError("Error getting element ", en, ". StripeMesh only works with ReplicatedMesh...");
     }
     else
     {

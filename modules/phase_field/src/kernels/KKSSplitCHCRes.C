@@ -84,7 +84,7 @@ KKSSplitCHCRes::computeDFDC(PFFunctionType type)
       return 0.0;
   }
 
-  mooseError2("Invalid type passed in");
+  mooseError("Invalid type passed in");
 }
 
 Real

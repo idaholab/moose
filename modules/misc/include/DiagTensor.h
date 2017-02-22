@@ -41,7 +41,7 @@ public:
     {
       if (cmm.numEntries() != 9)
       {
-        mooseError2("Cannot create DiagTensor from ColumnMajorMatrix.  Wrong number of entries.");
+        mooseError("Cannot create DiagTensor from ColumnMajorMatrix.  Wrong number of entries.");
       }
     }
   explicit
@@ -54,7 +54,7 @@ public:
     {
       // test the length to make sure it's 3 long
       if (init_list.size() != 3)
-        mooseError2("please enter a vector with 3 entries.");
+        mooseError("please enter a vector with 3 entries.");
     }
 
   Real rowDot(const unsigned int r,
@@ -75,7 +75,7 @@ public:
       }
       else
       {
-        mooseError2( "Incorrect row" );
+        mooseError( "Incorrect row" );
       }
       return 0;
     }
@@ -123,7 +123,7 @@ public:
       }
       else
       {
-        mooseError2( "Invalid entry requested for DiagTensor" );
+        mooseError( "Invalid entry requested for DiagTensor" );
       }
       return 0;
     }
@@ -165,7 +165,7 @@ public:
       }
       if (!rVal)
       {
-        mooseError2( "Index must be 0, 1, or 2" );
+        mooseError( "Index must be 0, 1, or 2" );
       }
     return *rVal;
     }
@@ -192,7 +192,7 @@ public:
       }
       else
       {
-        mooseError2( "Invalid entry requested for DiagTensor" );
+        mooseError( "Invalid entry requested for DiagTensor" );
       }
     }
 
@@ -405,7 +405,7 @@ public:
   void fillFromInputVector(std::vector<Real> input)
     {
       if (input.size() != 3)
-        mooseError2("Please check the number of entries in the eigenstrain input vector");
+        mooseError("Please check the number of entries in the eigenstrain input vector");
       _xx = input[0];
       _yy = input[1];
       _zz = input[2];

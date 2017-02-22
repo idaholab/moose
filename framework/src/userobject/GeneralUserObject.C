@@ -77,11 +77,11 @@ GeneralUserObject::getVectorPostprocessorValueByName(const VectorPostprocessorNa
 void
 GeneralUserObject::threadJoin(const UserObject &)
 {
-  mooseError2("GeneralUserObjects do not execute using threads, this function does nothing and should not be used.");
+  mooseError("GeneralUserObjects do not execute using threads, this function does nothing and should not be used.");
 }
 
 void
 GeneralUserObject::subdomainSetup()
 {
-  mooseError2("GeneralUserObjects do not execute subdomainSetup method, this function does nothing and should not be used.");
+  mooseError("GeneralUserObjects do not execute subdomainSetup method, this function does nothing and should not be used.");
 }

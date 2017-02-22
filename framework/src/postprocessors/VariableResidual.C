@@ -27,7 +27,7 @@ VariableResidual::VariableResidual(const InputParameters & parameters)
     _var(_fe_problem.getVariable(_tid, getParam<VariableName>("variable")))
 {
   if (_var.kind() != Moose::VAR_NONLINEAR)
-    mooseError2(name(), ": Residual can be computed only for nonlinear variables.");
+    mooseError(name(), ": Residual can be computed only for nonlinear variables.");
 }
 
 void

@@ -139,7 +139,7 @@ private:
 template<typename T>
 T evaluate(Real /*t*/, const Point & /*p*/)
 {
-  mooseError2("The evaluate method is not defined for this type.");
+  mooseError("The evaluate method is not defined for this type.");
 }
 
 #endif // MOOOSEPARSEDFUNCTIONWRAPPER_H

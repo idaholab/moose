@@ -46,7 +46,7 @@ INSMomentumTractionForm::computeQpResidualViscousPart()
     break;
 
   default:
-    mooseError2("Unrecognized _component requested.");
+    mooseError("Unrecognized _component requested.");
   }
 
   // The viscous part, _mu * tau : grad(v)

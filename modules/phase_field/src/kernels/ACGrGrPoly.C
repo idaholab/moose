@@ -46,7 +46,7 @@ ACGrGrPoly::computeDFDOP(PFFunctionType type)
     }
 
     default:
-      mooseError2("Invalid type passed in");
+      mooseError("Invalid type passed in");
   }
 }
 

@@ -93,7 +93,7 @@ SlopeReconstructionBase::getElementSlope(dof_id_type elementid) const
     _rslope.find(elementid);
 
   if (pos == _rslope.end())
-    mooseError2("Reconstructed slope is not cached for element id '",
+    mooseError("Reconstructed slope is not cached for element id '",
        elementid, "' in ", __FUNCTION__);
 
   return pos->second;
@@ -107,7 +107,7 @@ SlopeReconstructionBase::getElementAverageValue(dof_id_type elementid) const
     _avars.find(elementid);
 
   if (pos == _avars.end())
-    mooseError2("Average variable values are not cached for element id '",
+    mooseError("Average variable values are not cached for element id '",
        elementid, "' in ", __FUNCTION__);
 
   return pos->second;
@@ -121,7 +121,7 @@ SlopeReconstructionBase::getBoundaryAverageValue(dof_id_type elementid, unsigned
     _bnd_avars.find(std::pair<dof_id_type, unsigned int>(elementid, side));
 
   if (pos == _bnd_avars.end())
-    mooseError2("Average variable values are not cached for element id '",
+    mooseError("Average variable values are not cached for element id '",
        elementid, "' and side '", side, "' in ", __FUNCTION__);
 
   return pos->second;
@@ -135,7 +135,7 @@ SlopeReconstructionBase::getSideCentroid(dof_id_type elementid, dof_id_type neig
     _side_centroid.find(std::pair<dof_id_type, dof_id_type>(elementid, neighborid));
 
   if (pos == _side_centroid.end())
-    mooseError2("Side centroid values are not cached for element id '",
+    mooseError("Side centroid values are not cached for element id '",
        elementid, "' and neighbor id '", neighborid, "' in ", __FUNCTION__);
 
   return pos->second;
@@ -149,7 +149,7 @@ SlopeReconstructionBase::getBoundarySideCentroid(dof_id_type elementid, unsigned
     _bnd_side_centroid.find(std::pair<dof_id_type, unsigned int>(elementid, side));
 
   if (pos == _bnd_side_centroid.end())
-    mooseError2("Boundary side centroid values are not cached for element id '",
+    mooseError("Boundary side centroid values are not cached for element id '",
        elementid, "' and side '", side, "' in ", __FUNCTION__);
 
   return pos->second;
@@ -163,7 +163,7 @@ SlopeReconstructionBase::getSideNormal(dof_id_type elementid, dof_id_type neighb
     _side_normal.find(std::pair<dof_id_type, dof_id_type>(elementid, neighborid));
 
   if (pos == _side_normal.end())
-    mooseError2("Side normal values are not cached for element id '",
+    mooseError("Side normal values are not cached for element id '",
        elementid, "' and neighbor id '", neighborid, "' in ", __FUNCTION__);
 
   return pos->second;
@@ -177,7 +177,7 @@ SlopeReconstructionBase::getBoundarySideNormal(dof_id_type elementid, unsigned i
     _bnd_side_normal.find(std::pair<dof_id_type, unsigned int>(elementid, side));
 
   if (pos == _bnd_side_normal.end())
-    mooseError2("Boundary side normal values are not cached for element id '",
+    mooseError("Boundary side normal values are not cached for element id '",
        elementid, "' and side '", side, "' in ", __FUNCTION__);
 
   return pos->second;
@@ -191,7 +191,7 @@ SlopeReconstructionBase::getSideArea(dof_id_type elementid, dof_id_type neighbor
     _side_area.find(std::pair<dof_id_type, dof_id_type>(elementid, neighborid));
 
   if (pos == _side_area.end())
-    mooseError2("Side area values are not cached for element id '",
+    mooseError("Side area values are not cached for element id '",
        elementid, "' and neighbor id '", neighborid, "' in ", __FUNCTION__);
 
   return pos->second;
@@ -205,7 +205,7 @@ SlopeReconstructionBase::getBoundarySideArea(dof_id_type elementid, unsigned int
     _bnd_side_area.find(std::pair<dof_id_type, unsigned int>(elementid, side));
 
   if (pos == _bnd_side_area.end())
-    mooseError2("Boundary side area values are not cached for element id '",
+    mooseError("Boundary side area values are not cached for element id '",
        elementid, "' and side '", side, "' in ", __FUNCTION__);
 
   return pos->second;

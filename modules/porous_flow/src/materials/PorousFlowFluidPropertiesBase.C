@@ -31,5 +31,5 @@ PorousFlowFluidPropertiesBase::PorousFlowFluidPropertiesBase(const InputParamete
 void
 PorousFlowFluidPropertiesBase::computeQpProperties()
 {
-  mooseError2("computeQpProperties() must be overriden in materials derived from PorousFlowFluidPropertiesBase");
+  mooseError("computeQpProperties() must be overriden in materials derived from PorousFlowFluidPropertiesBase");
 }

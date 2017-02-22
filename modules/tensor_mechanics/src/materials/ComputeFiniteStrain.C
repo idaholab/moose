@@ -200,6 +200,6 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
     }
 
     default:
-      mooseError2("ComputeFiniteStrain Error: Pass valid decomposition type: TaylorExpansion or EigenSolution.");
+      mooseError("ComputeFiniteStrain Error: Pass valid decomposition type: TaylorExpansion or EigenSolution.");
   }
 }
