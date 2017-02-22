@@ -41,12 +41,10 @@
 #  stress yz = 2 * 2.4e5 * 4e-6 / 2 = 0.96
 #  stress xz = 2 * 2.4e5 * 6e-6 / 2 = 1.44
 
-[GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-[]
 
 [Mesh]
   file = thermal_elastic.e
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
@@ -85,24 +83,73 @@
     x = '0     1     2'
     y = '100.0 100.0 500.0'
   [../]
+  [./ym_func]
+    type = PiecewiseLinear
+    x = '100 500'
+    y = '1e6 6e5'
+  [../]
+  [./pr_func]
+    type = PiecewiseLinear
+    x = '100 500'
+    y = '0   0.25'
+  [../]
 []
 
 [Variables]
+  [./disp_x]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+
+  [./disp_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+
+  [./disp_z]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 
   [./temp]
     order = FIRST
     family = LAGRANGE
     initial_condition = 100.0
   [../]
-
 []
 
-[Modules/TensorMechanics/Master]
-  [./all]
-    add_variables = true
-    generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_xz stress_yz'
-    strain = FINITE
-    block = '1 2 3 4 5 6 7'
+[AuxVariables]
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_xy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_xz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
@@ -111,7 +158,45 @@
     type = HeatConduction
     variable = temp
   [../]
+[]
 
+[AuxKernels]
+  [./stress_xx]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_xx
+    index = 0
+  [../]
+  [./stress_yy]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_yy
+    index = 1
+  [../]
+  [./stress_zz]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_zz
+    index = 2
+  [../]
+  [./stress_xy]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_xy
+    index = 3
+  [../]
+  [./stress_yz]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_yz
+    index = 4
+  [../]
+  [./stress_xz]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_xz
+    index = 5
+  [../]
 []
 
 [BCs]
@@ -276,34 +361,22 @@
 []
 
 [Materials]
-  [./youngs_modulus]
-    type = PiecewiseLinearInterpolationMaterial
-    x = '100 500'
-    y = '1e6 6e5'
-    property = youngs_modulus
-    variable = temp
+  [./stiffStuff1]
+    type = Elastic
     block = '1 2 3 4 5 6 7'
-  [../]
-  [./poissons_ratio]
-    type = PiecewiseLinearInterpolationMaterial
-    x = '100 500'
-    y = '0   0.25'
-    property = poissons_ratio
-    variable = temp
-    block = '1 2 3 4 5 6 7'
-  [../]
 
-  [./elasticity_tensor]
-    type = ComputeVariableIsotropicElasticityTensor
-    args = temp
-    youngs_modulus = youngs_modulus
-    poissons_ratio = poissons_ratio
-    block = '1 2 3 4 5 6 7'
-  [../]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
 
-  [./stress]
-    type = ComputeVariableElasticConstantStress
-    block = '1 2 3 4 5 6 7'
+    bulk_modulus = 0.333333333333333e6
+    shear_modulus = 0.5e6
+    youngs_modulus_function = ym_func
+    poissons_ratio_function = pr_func
+
+    temp = temp
+
+    increment_calculation = eigen
   [../]
 
   [./heat]
@@ -340,4 +413,5 @@
 
 [Outputs]
   exodus = true
+  file_base = thermal_elastic_out
 []
