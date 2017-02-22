@@ -220,6 +220,10 @@ ifneq (,$(findstring g++,$(cxx_compiler)))
 	libmesh_CXXFLAGS += -Woverlength-strings
 endif
 
+ifeq ($(MOOSE_PROFILE_MATERIALS),yes)
+  libmesh_CXXFLAGS += -DMOOSE_PROFILE_MATERIALS
+endif
+
 #
 # Fortran baggage
 #
