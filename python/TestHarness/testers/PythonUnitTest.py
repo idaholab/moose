@@ -1,6 +1,5 @@
 from RunApp import RunApp
 import os
-import util
 
 class PythonUnitTest(RunApp):
     @staticmethod
@@ -9,6 +8,7 @@ class PythonUnitTest(RunApp):
 
         # Input is optional in the base class. Make it required here
         params.addRequiredParam('input', "The python input file to use for this test.")
+        params.addParam('buffer', False, "Equivalent to passing -b or --buffer to the unittest.")
         # We don't want to check for any errors on the screen with unit tests
         params['errors'] = []
         return params
@@ -21,5 +21,8 @@ class PythonUnitTest(RunApp):
         Returns the python command that executes unit tests
         """
         module_name = os.path.splitext(self.specs['input'])[0]
+        cmd = 'python -m unittest '
+        if self.specs['buffer']:
+            cmd += '-b '
 
-        return 'python -m unittest ' + module_name + ' ' + ' '.join(self.specs['cli_args'])
+        return cmd + module_name + ' ' + ' '.join(self.specs['cli_args'])
