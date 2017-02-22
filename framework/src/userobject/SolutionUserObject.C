@@ -434,6 +434,12 @@ SolutionUserObject::initialSetup()
   _mesh_function = libmesh_make_unique<MeshFunction>(*_es, *_serialized_solution, _system->get_dof_map(), var_nums);
   _mesh_function->init();
 
+  // Tell the MeshFunctions that we might be querying them outside the
+  // mesh, so we can handle any errors at the MOOSE rather than at the
+  // libMesh level.
+  DenseVector<Number> default_values;
+  _mesh_function->enable_out_of_mesh_mode(default_values);
+
   // Build second MeshFunction for interpolation
   if (_interpolate_times)
   {
@@ -445,6 +451,7 @@ SolutionUserObject::initialSetup()
     // Create the MeshFunction for the second copy of the data
     _mesh_function2 = libmesh_make_unique<MeshFunction>(*_es2, *_serialized_solution2, _system2->get_dof_map(), var_nums);
     _mesh_function2->init();
+    _mesh_function2->enable_out_of_mesh_mode(default_values);
 
   }
 
