@@ -3543,6 +3543,8 @@ FEProblemBase::computeResidualType(const NumericVector<Number>& soln, NumericVec
 
   unsigned int n_threads = libMesh::n_threads();
 
+  _current_execute_on_flag = EXEC_LINEAR;
+
   // Random interface objects
   for (const auto & it : _random_data_objects)
     it.second->updateSeeds(EXEC_LINEAR);
@@ -3558,8 +3560,6 @@ FEProblemBase::computeResidualType(const NumericVector<Number>& soln, NumericVec
 
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh();
-
-
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
@@ -3589,6 +3589,8 @@ FEProblemBase::computeResidualType(const NumericVector<Number>& soln, NumericVec
   computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
 
   executeControls(EXEC_LINEAR);
+
+  _current_execute_on_flag = EXEC_NONE;
 
   _app.getOutputWarehouse().residualSetup();
 
