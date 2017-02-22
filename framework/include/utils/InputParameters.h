@@ -657,7 +657,7 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
 {
   mooseAssert(param, "Parameter is NULL");
 
-  if (_range_functions.find(short_name) == _range_functions.end() || !isParamValid(short_name))
+  if (_range_functions.count(short_name) == 0 || !isParamValid(short_name))
     return;
 
   /**
@@ -734,6 +734,7 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
     }
 
     // test function using the parameters determined above
+    fp.setEpsilon(0);
     UP_T result = fp.Eval(&parbuf[0]);
     if (fp.EvalError())
     {
@@ -768,6 +769,8 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
     oss << "Error parsing expression: " << _range_functions[short_name] << '\n';
     return;
   }
+
+  fp.setEpsilon(0);
 
   // We require a non-const value for the implicit upscaling of the parameter type
   std::vector<UP_T> value(1, param->set());
