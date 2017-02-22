@@ -142,8 +142,8 @@ class TestHarness:
     Recursively walks the current tree looking for tests to run
     Error codes:
     0x0  - Success
-    0x0* - Parser error
-    0x1* - TestHarness error
+    0x7F - Parser error (any flag in this range)
+    0x80 - TestHarness error
     """
     def findAndRunTests(self, find_only=False):
         self.error_code = 0x0
@@ -200,8 +200,6 @@ class TestHarness:
                                     self.warehouse.markAllObjectsInactive()
                                     continue
 
-                                self.checkForRaceConditionOutputs(testers, dirpath)
-
                                 # Clear out the testers, we won't need them to stick around in the warehouse
                                 self.warehouse.clear()
 
@@ -251,6 +249,10 @@ class TestHarness:
                                                 elif status == tester.bucket_deleted and self.options.extra_info:
                                                     self.handleTestStatus(tester)
                                             self.runner.jobSkipped(tester.parameters()['test_name'])
+
+                                    # See if any tests have colliding outputs
+                                    self.checkForRaceConditionOutputs(testers, dirpath)
+
                                 os.chdir(saved_cwd)
                                 sys.path.pop()
         except KeyboardInterrupt:
@@ -904,27 +906,42 @@ class TestHarness:
     def checkForRaceConditionOutputs(self, testers, dirpath):
         d = DependencyResolver()
 
+        # Create a dictionary of test_names to Tester objects
+        # We'll use this to retrieve the Tester objects by
+        # name to call additional methods while determining
+        # depedencies.
+        name_to_object = {}
         for tester in testers:
-            d.insertDependency(tester.getName(), tester.getPrereqs())
+            name_to_object[tester.getTestName()] = tester
 
+        # Now build up our tester dependencies
+        for tester in testers:
+            # Now we need to see which dependencies are real
+            # We don't really care about skipped tests, heavy tests, etc.
+            for name in tester.getPrereqs():
+                if not name_to_object[name].getRunnable():
+                    tester.setStatus('skipped dependency', tester.bucket_skip)
+
+            prereq_objects = [name_to_object[name] for name in tester.getPrereqs()]
+            d.insertDependency(tester, prereq_objects)
 
         try:
-            all_sets = d.getSortedValuesSets()
-            for independent_set in all_sets:
+            concurrent_tester_sets = d.getSortedValuesSets()
+            for concurrent_testers in concurrent_tester_sets:
                 output_files_in_dir = set()
-                for tester in testers:
-                    if tester.getName() not in independent_set:
-                        continue
+                for tester in concurrent_testers:
+                    if tester.getRunnable():
+                        output_files = tester.getOutputFiles()
+                        duplicate_files = output_files_in_dir.intersection(output_files)
+                        if len(duplicate_files):
+                            print 'Duplicate output files detected in directory:\n', dirpath, '\n\t', '\n\t'.join(duplicate_files)
+                            self.error_code = self.error_code | 0x80
+                        output_files_in_dir.update(output_files)
 
-                    output_files = tester.getOutputFiles()
-                    duplicate_files = output_files_in_dir.intersection(output_files)
-                    if len(duplicate_files):
-                        print 'Duplicate output files detected in directory:\n', dirpath, '\n\t', '\n\t'.join(duplicate_files)
-                        self.error_code = self.error_code | 0x80
-                    output_files_in_dir.update(output_files)
         except:
-            # Cyclic Dependency, we'll let RunParallel deal with that
-            self.error_code = self.error_code | 0x80
+            # Cyclic or invalid dependency, we'll let RunParallel deal with that
+            # That condition won't effect the output file check
+            pass
 
     def postRun(self, specs, timing):
         return

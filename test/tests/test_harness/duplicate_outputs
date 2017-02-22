@@ -1,4 +1,7 @@
 [Tests]
+  # We have a chain of dependencies in this set (a-d)
+  # a and d can run concurrently and output to the
+  # same file
   [./a]
     type = CheckFiles
     input = good.i
