@@ -23,8 +23,8 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrain::ComputeInstantaneousThe
     ComputeThermalExpansionEigenstrainBase(parameters),
     _temperature_old(coupledValueOld("temperature")),
     _thermal_expansion_function(getFunction("thermal_expansion_function")),
-    _thermal_strain(_incremental_form ? NULL : &declareProperty<Real>("InstantaneousThermalExpansionFunction_thermal_strain")),
-    _thermal_strain_old(_incremental_form ? NULL : &declarePropertyOld<Real>("InstantaneousThermalExpansionFunction_thermal_strain")),
+    _thermal_strain(declareProperty<Real>("InstantaneousThermalExpansionFunction_thermal_strain")),
+    _thermal_strain_old(declarePropertyOld<Real>("InstantaneousThermalExpansionFunction_thermal_strain")),
     _step_one(declareRestartableData<bool>("step_one", true))
 {
 }
@@ -32,8 +32,7 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrain::ComputeInstantaneousThe
 void
 ComputeInstantaneousThermalExpansionFunctionEigenstrain::initQpStatefulProperties()
 {
-  if (_thermal_strain)
-    (*_thermal_strain)[_qp] = 0;
+  _thermal_strain[_qp] = 0;
 }
 
 void
@@ -44,7 +43,7 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrain::computeThermalStrain(Re
 
   const Real & current_temp = _temperature[_qp];
 
-  const Real & old_thermal_strain = (_incremental_form ? (*_eigenstrain_old)[_qp](0,0) : (*_thermal_strain_old)[_qp]);
+  const Real & old_thermal_strain = _thermal_strain_old[_qp];
 
   const Real & old_temp = (_step_one ? _stress_free_temperature : _temperature_old[_qp]);
   const Real delta_T = current_temp - old_temp;
@@ -54,8 +53,7 @@ ComputeInstantaneousThermalExpansionFunctionEigenstrain::computeThermalStrain(Re
   const Real alpha_old_temp = _thermal_expansion_function.value(old_temp,p);
 
   thermal_strain = old_thermal_strain + delta_T * 0.5 * (alpha_current_temp + alpha_old_temp);
-  if (_thermal_strain)
-    (*_thermal_strain)[_qp] = thermal_strain;
+  _thermal_strain[_qp] = thermal_strain;
 
   instantaneous_cte = alpha_current_temp;
 }

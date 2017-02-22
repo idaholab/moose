@@ -23,9 +23,6 @@ protected:
 
   void subtractEigenstrainIncrementFromStrain(RankTwoTensor & strain);
 
-  const bool _stateful_displacements;
-  const bool _stateful_deformation_gradient;
-
   std::vector<const VariableGradient *> _grad_disp_old;
 
   MaterialProperty<RankTwoTensor> & _strain_rate;
@@ -33,7 +30,6 @@ protected:
   MaterialProperty<RankTwoTensor> & _rotation_increment;
 
   MaterialProperty<RankTwoTensor> & _deformation_gradient;
-  const MaterialProperty<RankTwoTensor> * _deformation_gradient_old;
 
   const MaterialProperty<RankTwoTensor> & _mechanical_strain_old;
   const MaterialProperty<RankTwoTensor> & _total_strain_old;

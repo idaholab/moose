@@ -18,7 +18,6 @@ InputParameters validParams<ComputeFiniteStrain>()
   params.addClassDescription("Compute a strain increment and rotation increment for finite strains.");
   MooseEnum decomposition_type("TaylorExpansion EigenSolution", "TaylorExpansion");
   params.addParam<MooseEnum>("decomposition_method", decomposition_type, "Methods to calculate the strain and rotation increments: " + decomposition_type.getRawNames());
-  params.set<bool>("stateful_deformation_gradient") = true;
   return params;
 }
 
