@@ -97,17 +97,6 @@ public:
   template <typename... Args>
   void mooseInfo(Args && ... args) const { moose::internal::mooseInfoStream(_console, std::forward<Args>(args)...); }
 
-  /// TODO: Delete these after all apps have been transitioned to the new "not
-  /// 2" versions of these functions.
-  template <typename... Args>
-  [[ noreturn ]] void mooseError2(Args && ... args) const { mooseError(std::forward<Args>(args)...); }
-  template <typename... Args>
-  void mooseWarning2(Args && ... args) const { mooseWarning(std::forward<Args>(args)...); }
-  template <typename... Args>
-  void mooseDeprecated2(Args && ... args) const { mooseDeprecated(std::forward<Args>(args)...); }
-  template <typename... Args>
-  void mooseInfo2(Args && ... args) const { mooseInfo(std::forward<Args>(args)...); }
-
 protected:
 
   /// The MooseApp this object is associated with
