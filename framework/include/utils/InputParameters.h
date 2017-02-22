@@ -733,9 +733,14 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
       }
     }
 
-    // test function using the parameters determined above
+    // ensure range-checked input file parameter comparison functions
+    // do absolute floating point comparisons instead of using a default epsilon.
+    auto tmp_eps = fp.epsilon();
     fp.setEpsilon(0);
     UP_T result = fp.Eval(&parbuf[0]);
+    fp.setEpsilon(tmp_eps);
+
+    // test function using the parameters determined above
     if (fp.EvalError())
     {
       oss << "Error evaluating expression: " << _range_functions[short_name] << '\n';
@@ -770,11 +775,14 @@ InputParameters::rangeCheck(const std::string & full_name, const std::string & s
     return;
   }
 
+  // ensure range-checked input file parameter comparison functions
+  // do absolute floating point comparisons instead of using a default epsilon.
+  auto tmp_eps = fp.epsilon();
   fp.setEpsilon(0);
-
   // We require a non-const value for the implicit upscaling of the parameter type
   std::vector<UP_T> value(1, param->set());
   UP_T result = fp.Eval(&value[0]);
+  fp.setEpsilon(tmp_eps);
 
   if (fp.EvalError())
   {
