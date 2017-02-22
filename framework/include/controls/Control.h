@@ -114,10 +114,10 @@ protected:
   void setControllableValueByName(const std::string & tag, const std::string & param_name, const T & value, bool warn_when_values_differ = false);
   ///@}
 
-private:
-
   /// A reference to the InputParameterWarehouse which is used for access the parameter objects
   InputParameterWarehouse & _input_parameter_warehouse;
+
+private:
 
   /// Helper method for retrieving controllable parameters
   template<typename T>
