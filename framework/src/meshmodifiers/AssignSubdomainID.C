@@ -19,12 +19,14 @@ template<>
 InputParameters validParams<AssignSubdomainID>()
 {
   InputParameters params = validParams<MeshModifier>();
+  params.addParam<SubdomainID>("original_subdomain_id", libMesh::Elem::invalid_subdomain_id, "If specified only elements of this SubdomainID will be assigned the new SubdomainID.  If ommitted then all elements are assigned the new ID.");
   params.addRequiredParam<SubdomainID>("subdomain_id", "New subdomain IDs of all elements");
   return params;
 }
 
 AssignSubdomainID::AssignSubdomainID(const InputParameters & parameters) :
     MeshModifier(parameters),
+    _original_subdomain_id(getParam<SubdomainID>("original_subdomain_id")),
     _subdomain_id(getParam<SubdomainID>("subdomain_id"))
 {
 }
@@ -41,6 +43,8 @@ AssignSubdomainID::modify()
   {
     auto elem = *elem_it;
 
-    elem->subdomain_id() = _subdomain_id;
+    if (_original_subdomain_id == libMesh::Elem::invalid_subdomain_id ||
+        elem->subdomain_id() == _original_subdomain_id)
+      elem->subdomain_id() = _subdomain_id;
   }
 }

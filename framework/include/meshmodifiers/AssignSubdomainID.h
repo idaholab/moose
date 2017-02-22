@@ -35,6 +35,9 @@ public:
 protected:
   virtual void modify() override;
 
+  /// Only elements with this subdomain ID will be reassigned
+  SubdomainID _original_subdomain_id;
+
   /// The subdomain ID to assign to every elemennt
   SubdomainID _subdomain_id;
 };

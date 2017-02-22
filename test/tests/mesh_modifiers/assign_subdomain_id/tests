@@ -4,4 +4,9 @@
     input = 'assign_subdomain_id.i'
     exodiff = 'assign_subdomain_id_out.e'
   [../]
+  [./reassign]
+    type = 'Exodiff'
+    input = 'reassign_subdomain_id.i'
+    exodiff = 'reassign_subdomain_id_out.e'
+  [../]
 []
