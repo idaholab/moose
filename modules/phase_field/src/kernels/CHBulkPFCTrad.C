@@ -32,5 +32,5 @@ CHBulkPFCTrad::computeGradDFDCons(PFFunctionType type)
     }
   }
 
-  mooseError2("Invalid type passed in");
+  mooseError("Invalid type passed in");
 }

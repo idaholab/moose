@@ -81,15 +81,15 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters) :
   if (_quadrature)
   {
     if (!parameters.isParamValid("paired_boundary"))
-      mooseError2(std::string("No 'paired_boundary' provided for ") + _name);
+      mooseError(std::string("No 'paired_boundary' provided for ") + _name);
   }
   else
   {
     if (!isCoupled("gap_distance"))
-      mooseError2(std::string("No 'gap_distance' provided for ") + _name);
+      mooseError(std::string("No 'gap_distance' provided for ") + _name);
 
     if (!isCoupled("gap_temp"))
-      mooseError2(std::string("No 'gap_temp' provided for ") + _name);
+      mooseError(std::string("No 'gap_temp' provided for ") + _name);
   }
 }
 
@@ -270,7 +270,7 @@ GapHeatTransfer::computeGapValues()
     else
     {
       if (_warnings)
-        mooseWarning2("No gap value information found for node ", qnode->id(), " on processor ", processor_id());
+        mooseWarning("No gap value information found for node ", qnode->id(), " on processor ", processor_id());
     }
   }
 

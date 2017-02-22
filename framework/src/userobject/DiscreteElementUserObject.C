@@ -39,17 +39,17 @@ DiscreteElementUserObject::initialize()
 void
 DiscreteElementUserObject::execute()
 {
-  mooseError2("DiscreteElementUserObjects must be called explicitly from Materials");
+  mooseError("DiscreteElementUserObjects must be called explicitly from Materials");
 }
 
 void
 DiscreteElementUserObject::finalize()
 {
-  mooseError2("DiscreteElementUserObjects must be called explicitly from Materials");
+  mooseError("DiscreteElementUserObjects must be called explicitly from Materials");
 }
 
 void
 DiscreteElementUserObject::threadJoin(const UserObject &)
 {
-  mooseError2("DiscreteElementUserObjects must be called explicitly from Materials");
+  mooseError("DiscreteElementUserObjects must be called explicitly from Materials");
 }

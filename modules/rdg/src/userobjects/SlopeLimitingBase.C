@@ -68,7 +68,7 @@ SlopeLimitingBase::getElementSlope(dof_id_type elementid) const
     _lslope.find(elementid);
 
   if (pos == _lslope.end())
-    mooseError2("Limited slope is not cached for element id '",
+    mooseError("Limited slope is not cached for element id '",
        elementid, "' in ", __FUNCTION__);
 
   return pos->second;

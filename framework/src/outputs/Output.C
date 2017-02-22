@@ -209,6 +209,6 @@ Output::isAdvanced()
 const OutputOnWarehouse &
 Output::advancedExecuteOn() const
 {
-  mooseError2("The output object ", name(), " is not an AdvancedOutput, use isAdvanced() to check.");
+  mooseError("The output object ", name(), " is not an AdvancedOutput, use isAdvanced() to check.");
   return _advanced_execute_on;
 }

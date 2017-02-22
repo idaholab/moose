@@ -120,7 +120,7 @@ public:
       }
     }
     if (!p)
-      mooseError2("Action with name being ", name, " does not exist");
+      mooseError("Action with name being ", name, " does not exist");
     return *p;
   }
 

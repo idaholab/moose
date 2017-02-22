@@ -276,7 +276,7 @@ public:
    */
   bool getParallelMeshOnCommandLine() const
   {
-    mooseDeprecated2("getParallelMeshOnCommandLine() is deprecated, call getDistributedMeshOnCommandLine() instead.");
+    mooseDeprecated("getParallelMeshOnCommandLine() is deprecated, call getDistributedMeshOnCommandLine() instead.");
     return getDistributedMeshOnCommandLine();
   }
 

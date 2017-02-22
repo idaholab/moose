@@ -50,7 +50,7 @@ LevelSetReinitializationMultiApp::initialSetup()
     Executioner * ex = _apps[0]->getExecutioner();
 
     if (!ex)
-      mooseError2("Executioner does not exist!");
+      mooseError("Executioner does not exist!");
 
     ex->init();
 
@@ -58,7 +58,7 @@ LevelSetReinitializationMultiApp::initialSetup()
 
     _level_set_problem = dynamic_cast<LevelSetReinitializationProblem *>(&appProblemBase(0));
     if (!_level_set_problem)
-      mooseError2("The Problem type must be LevelSetReinitializationProblem.");
+      mooseError("The Problem type must be LevelSetReinitializationProblem.");
   }
 }
 

@@ -253,7 +253,7 @@ CNSFVSlopeLimitingOneD::limitElementSlope() const
       break;
 
     default:
-      mooseError2("Unknown 1D TVD slope limiter scheme");
+      mooseError("Unknown 1D TVD slope limiter scheme");
       break;
   }
 

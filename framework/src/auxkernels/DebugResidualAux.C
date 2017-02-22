@@ -29,7 +29,7 @@ DebugResidualAux::DebugResidualAux(const InputParameters & parameters) :
     _residual_copy(_nl_sys.residualGhosted())
 {
   if (!_nodal)
-    mooseError2("Cannot use DebugResidualAux on elemental variables");
+    mooseError("Cannot use DebugResidualAux on elemental variables");
 }
 
 Real

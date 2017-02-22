@@ -329,7 +329,7 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
         // circumstances, so something must have gone seriously
         // wrong!
         if (!return_elem)
-          mooseError2("Error, Point not found in any of the active children!");
+          mooseError("Error, Point not found in any of the active children!");
 
         break; // out of while loop
       }
@@ -355,10 +355,10 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
       }
 
       else
-        mooseError2("We'll never get here!");
+        mooseError("We'll never get here!");
     } // if (cached_point.relative_fuzzy_equals(p))
     else
-      mooseError2("Cached Dirac point ", cached_point,
+      mooseError("Cached Dirac point ", cached_point,
                   " already exists with ID: ", id,
                   " and does not match point ", p);
 

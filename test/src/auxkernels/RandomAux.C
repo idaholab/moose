@@ -39,9 +39,9 @@ RandomAux::RandomAux(const InputParameters & params) :
   if (_random_uo)
   {
     if (isNodal())
-      mooseError2("Can't use an ElementUserObject with a nodal RandomAux");
+      mooseError("Can't use an ElementUserObject with a nodal RandomAux");
     else if (_generate_ints)
-      mooseError2("Can't get ints out of the RandomElementalUserObject");
+      mooseError("Can't get ints out of the RandomElementalUserObject");
   }
 }
 

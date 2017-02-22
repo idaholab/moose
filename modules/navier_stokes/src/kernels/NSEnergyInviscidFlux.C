@@ -107,7 +107,7 @@ NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
           << " _rhov_var_number=" << _rhov_var_number << "\n"
           << " _rhow_var_number=" << _rhow_var_number
           << std::endl;
-      mooseError2(oss.str());
+      mooseError(oss.str());
     }
   }
   else

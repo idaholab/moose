@@ -190,7 +190,7 @@ CNSFVRiemannInvariantBoundaryFlux::calcFlux(unsigned int iside,
     flux[4] = vdon1 * (rhoe1 + pres1);
   }
   else
-    mooseError2("Something is wrong in ", name(), ": ", __FUNCTION__, "\n",
+    mooseError("Something is wrong in ", name(), ": ", __FUNCTION__, "\n",
                 "ielem = ", ielem, "\n",
                 "iside = ", iside, "\n",
                 "mach1 = ", mach1, "\n");
@@ -710,7 +710,7 @@ CNSFVRiemannInvariantBoundaryFlux::calcJacobian(unsigned int iside,
     jac1(4, 4) =                         gamma * vdon1;
   }
   else
-    mooseError2("Something is wrong in ", name(), ": ", __FUNCTION__, "\n",
+    mooseError("Something is wrong in ", name(), ": ", __FUNCTION__, "\n",
                 "ielem = ", ielem, "\n",
                 "iside = ", iside, "\n",
                 "mach1 = ", mach1, "\n");

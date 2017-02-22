@@ -157,7 +157,7 @@ PenetrationAux::computeValue()
       case PA_MECH_STATUS:
         retVal = pinfo->_mech_status; break;
       default:
-        mooseError2("Unknown PA_ENUM");
+        mooseError("Unknown PA_ENUM");
     } // switch
 
   return retVal;

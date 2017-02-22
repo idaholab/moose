@@ -142,7 +142,7 @@ SolidMechanicsAction::act()
 
     if (!rz && !rspherical && _disp_x == "")
     {
-      mooseError2("disp_x must be specified");
+      mooseError("disp_x must be specified");
     }
 
     if (!rz && !rspherical)

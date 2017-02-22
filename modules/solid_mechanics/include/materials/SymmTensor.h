@@ -55,7 +55,7 @@ public:
   {
     if (cmm.numEntries() != 9)
     {
-      mooseError2("Cannot create SymmTensor from ColumnMajorMatrix.  Wrong number of entries.");
+      mooseError("Cannot create SymmTensor from ColumnMajorMatrix.  Wrong number of entries.");
     }
   }
 
@@ -71,7 +71,7 @@ public:
     // test the length to make sure it's 6 long
     if (init_list.size() != 6)
     {
-      mooseError2("SymmTensor initialization error: please enter a vector with 6 entries.");
+      mooseError("SymmTensor initialization error: please enter a vector with 6 entries.");
     }
   }
 
@@ -79,7 +79,7 @@ public:
   {
     if (input.size() != 6)
     {
-      mooseError2("SymmTensor error.  Input vector must have six entries.");
+      mooseError("SymmTensor error.  Input vector must have six entries.");
     }
     _xx = input[0];
     _yy = input[1];
@@ -107,7 +107,7 @@ public:
     }
     else
     {
-      mooseError2( "Incorrect row" );
+      mooseError( "Incorrect row" );
     }
     return 0;
   }
@@ -145,7 +145,7 @@ public:
     }
     else
     {
-      mooseError2( "Invalid entry requested for SymmTensor" );
+      mooseError( "Invalid entry requested for SymmTensor" );
     }
     return 0;
   }
@@ -271,7 +271,7 @@ public:
     }
     if (!rVal)
     {
-      mooseError2( "Index must be 0, 1, or 2" );
+      mooseError( "Index must be 0, 1, or 2" );
     }
     return *rVal;
   }
@@ -326,7 +326,7 @@ public:
     }
     if (!rVal)
     {
-      mooseError2( "Index must be 0, 1, or 2" );
+      mooseError( "Index must be 0, 1, or 2" );
     }
     return *rVal;
   }

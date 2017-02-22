@@ -46,13 +46,13 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters) :
 {
 
   if (!_axisValid && !_yaxisValid && !_xaxisValid)
-    mooseError2("In PiecewiseBilinear ", _name, ": None of axis, yaxis, or xaxis properly defined.  Allowable range is 0-2");
+    mooseError("In PiecewiseBilinear ", _name, ": None of axis, yaxis, or xaxis properly defined.  Allowable range is 0-2");
 
   if (_axisValid && (_yaxisValid || _xaxisValid))
-    mooseError2("In PiecewiseBilinear ", _name, ": Cannot define axis with either yaxis or xaxis");
+    mooseError("In PiecewiseBilinear ", _name, ": Cannot define axis with either yaxis or xaxis");
 
   if (_radial && (!_yaxisValid || !_xaxisValid))
-    mooseError2("In PiecewiseBilinear ", _name, ": yaxis and xaxis must be defined when radial = true");
+    mooseError("In PiecewiseBilinear ", _name, ": yaxis and xaxis must be defined when radial = true");
 
   std::vector<Real> x;
   std::vector<Real> y;
@@ -62,13 +62,13 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters) :
   if (!_data_file_name.empty())
   {
     if ( parameters.isParamValid("x") || parameters.isParamValid("y") || parameters.isParamValid("z") )
-      mooseError2("In PiecewiseBilinear: Cannot specify 'data_file' and 'x', 'y', or 'z' together.");
+      mooseError("In PiecewiseBilinear: Cannot specify 'data_file' and 'x', 'y', or 'z' together.");
     else
       parse( x, y, z );
   }
 
   else if ( !(parameters.isParamValid("x") && parameters.isParamValid("y") && parameters.isParamValid("z")) )
-      mooseError2("In PiecewiseBilinear: 'x' and 'y' and 'z' must be specified if any one is specified.");
+      mooseError("In PiecewiseBilinear: 'x' and 'y' and 'z' must be specified if any one is specified.");
 
   else
   {
@@ -78,7 +78,7 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters) :
 
     //check that size of z = (size of x)*(size of y)
     if (z_vec.size() != x.size()*y.size())
-      mooseError2("In PiecewiseBilinear: Size of z should be the size of x times the size of y.");
+      mooseError("In PiecewiseBilinear: Size of z should be the size of x times the size of y.");
 
     //reshape and populate z matrix
     z.reshape(y.size(),x.size());
@@ -131,7 +131,7 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
 {
   std::ifstream file(_data_file_name.c_str());
   if (!file.good())
-    mooseError2("In PiecewiseBilinear ", _name, ": Error opening file '" + _data_file_name + "'.");
+    mooseError("In PiecewiseBilinear ", _name, ": Error opening file '" + _data_file_name + "'.");
   std::string line;
   unsigned int linenum= 0;
   unsigned int itemnum = 0;
@@ -157,7 +157,7 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
     if (linenum == 1)
       num_cols = itemnum;
     else if (num_cols+1 != itemnum)
-      mooseError2("In PiecewiseBilinear ", _name, ": Read ", itemnum, " columns of data but expected ", num_cols+1,
+      mooseError("In PiecewiseBilinear ", _name, ": Read ", itemnum, " columns of data but expected ", num_cols+1,
                   " columns while reading line ", linenum, " of '", _data_file_name, "'.");
   }
 
@@ -186,5 +186,5 @@ PiecewiseBilinear::parse( std::vector<Real> & x,
   }
 
   if (data.size() != offset)
-    mooseError2("ERROR! Inconsistency in data read from '" + _data_file_name + "' for PiecewiseBilinear function.");
+    mooseError("ERROR! Inconsistency in data read from '" + _data_file_name + "' for PiecewiseBilinear function.");
 }

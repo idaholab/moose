@@ -83,5 +83,5 @@ TrackDiracFront::localElementConnectedToCurrentNode()
       return elem;
   }
 
-  mooseError2("Unable to locate a local element connected to this node!");
+  mooseError("Unable to locate a local element connected to this node!");
 }

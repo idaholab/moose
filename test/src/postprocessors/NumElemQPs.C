@@ -42,5 +42,5 @@ NumElemQPs::computeIntegral()
 Real
 NumElemQPs::computeQpIntegral()
 {
-  mooseError2("Unimplemented method");
+  mooseError("Unimplemented method");
 }

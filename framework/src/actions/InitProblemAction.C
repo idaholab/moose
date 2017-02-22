@@ -34,6 +34,6 @@ InitProblemAction::act()
   if (_problem.get())
     _problem->init();
   else
-    mooseError2("Problem doesn't exist in InitProblemAction!");
+    mooseError("Problem doesn't exist in InitProblemAction!");
 }
 

@@ -9,3 +9,6 @@ done
 
 # civet precheck regexp
 #'s/moose(Warning|Error|Deprecated|Info)( *\(((?!\) ?;).)+? *?) ?<< ?(.+?(?=\) ?;))/igs'
+
+# rename "2" funcs back to original non-"2" names
+#ag 'moose(Error|Warning|Info|Deprecated)2' -l | xargs sed -E -i '' 's/moose(Error|Warning|Info|Deprecated)2/moose\1/g''

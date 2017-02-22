@@ -37,7 +37,7 @@ PiecewiseConstant::getDirection(const std::string & direction)
   }
   else
   {
-    mooseError2("Unknown direction in PiecewiseConstant");
+    mooseError("Unknown direction in PiecewiseConstant");
   }
   return dir;
 }

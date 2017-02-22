@@ -21,7 +21,7 @@ PorousFlowNearestQp::PorousFlowNearestQp(const InputParameters & parameters) :
     _nearest_qp(declareProperty<unsigned>("PorousFlow_nearestqp_nodal"))
 {
   if (getParam<bool>("nodal_material") == false)
-    mooseError2("PorousFlowNearestQp must be a nodal material");
+    mooseError("PorousFlowNearestQp must be a nodal material");
 }
 
 void
