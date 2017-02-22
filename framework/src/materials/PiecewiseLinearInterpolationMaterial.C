@@ -40,10 +40,10 @@ PiecewiseLinearInterpolationMaterial::PiecewiseLinearInterpolationMaterial(const
   {
     if (! ((parameters.isParamValid("x")) &&
            (parameters.isParamValid("y"))))
-      mooseError2("In PiecewiseLinearInterpolationMaterial ", _name, ": Both 'x' and 'y' must be specified if either one is specified.");
+      mooseError("In PiecewiseLinearInterpolationMaterial ", _name, ": Both 'x' and 'y' must be specified if either one is specified.");
 
     if (parameters.isParamValid("xy_data"))
-      mooseError2("In PiecewiseLinearInterpolationMaterial ", _name, ": Cannot specify 'x', 'y', and 'xy_data' together.");
+      mooseError("In PiecewiseLinearInterpolationMaterial ", _name, ": Cannot specify 'x', 'y', and 'xy_data' together.");
 
     x = getParam<std::vector<Real> >("x");
     y = getParam<std::vector<Real> >("y");
@@ -53,7 +53,7 @@ PiecewiseLinearInterpolationMaterial::PiecewiseLinearInterpolationMaterial(const
     std::vector<Real> xy = getParam<std::vector<Real> >("xy_data");
     unsigned int xy_size = xy.size();
     if (xy_size % 2 != 0)
-      mooseError2("In PiecewiseLinearInterpolationMaterial ", _name, ": Length of data provided in 'xy_data' must be a multiple of 2.");
+      mooseError("In PiecewiseLinearInterpolationMaterial ", _name, ": Length of data provided in 'xy_data' must be a multiple of 2.");
 
     unsigned int x_size = xy_size/2;
     x.reserve(x_size);
@@ -71,7 +71,7 @@ PiecewiseLinearInterpolationMaterial::PiecewiseLinearInterpolationMaterial(const
   }
   catch (std::domain_error & e)
   {
-    mooseError2("In PiecewiseLinearInterpolationMaterial ", _name, ": ", e.what());
+    mooseError("In PiecewiseLinearInterpolationMaterial ", _name, ": ", e.what());
   }
 
   _property = &declareProperty<Real>(_prop_name);
