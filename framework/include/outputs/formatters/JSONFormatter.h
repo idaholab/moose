@@ -44,8 +44,8 @@ protected:
    * Gets the JSON entry for the specified path and creates it if it doesn't exist
    * @param full_path Path to the entry
    */
-  Json::Value _json;
-  Json::Value & getJson(const std::string & full_path);
+  moosecontrib::Json::Value _json;
+  moosecontrib::Json::Value & getJson(const std::string & full_path);
   bool _dump_mode;
 
   /**

@@ -45,11 +45,11 @@ JSONFormatter::splitPath(const std::string & long_name) const
   return paths;
 }
 
-Json::Value &
+moosecontrib::Json::Value &
 JSONFormatter::getJson(const std::string & full_path)
 {
   auto paths = splitPath(full_path);
-  Json::Value * next = &_json[paths[0]];
+  moosecontrib::Json::Value * next = &_json[paths[0]];
   for (auto pit = paths.begin() + 1; pit != paths.end(); ++pit)
     next = &((*next)[*pit]);
   return *next;
@@ -59,7 +59,7 @@ std::string
 JSONFormatter::printParams(const std::string & prefix, const std::string & fully_qualified_name,
                            InputParameters & params, short /*depth*/, const std::string & search_string, bool & found)
 {
-  Json::Value all_params;
+  moosecontrib::Json::Value all_params;
 
   for (auto & iter : params)
   {
@@ -68,7 +68,7 @@ JSONFormatter::printParams(const std::string & prefix, const std::string & fully
     if (params.isPrivate(iter.first) || name == "active" || (search_string != "" && search_string != iter.first) || haveSeenIt(prefix, iter.first))
       continue;
 
-    Json::Value param_json;
+    moosecontrib::Json::Value param_json;
     found = true;
 
     // Mark it as "seen"
@@ -124,7 +124,7 @@ JSONFormatter::printParams(const std::string & prefix, const std::string & fully
     param_json["description"] = doc;
     all_params[name] = param_json;
   }
-  Json::Value & json = getJson(fully_qualified_name);
+  moosecontrib::Json::Value & json = getJson(fully_qualified_name);
   json["full_path"] = fully_qualified_name;
   json["parameters"] = all_params;
   return std::string();
@@ -133,7 +133,7 @@ JSONFormatter::printParams(const std::string & prefix, const std::string & fully
 std::string
 JSONFormatter::printBlockOpen(const std::string & name, short /*depth*/, const std::string & doc)
 {
-  Json::Value & json = getJson(name);
+  moosecontrib::Json::Value & json = getJson(name);
   std::string docEscaped = doc;
   MooseUtils::escape(docEscaped);
   json["description"] = docEscaped;
