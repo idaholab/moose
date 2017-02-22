@@ -300,6 +300,10 @@ DTKInterpolationAdapter::get_element_topology(const Elem * elem)
 
   if (type == EDGE2)
     return DataTransferKit::DTK_LINE_SEGMENT;
+  else if (type == EDGE3)
+    return DataTransferKit::DTK_LINE_SEGMENT;
+  else if (type == EDGE4)
+    return DataTransferKit::DTK_LINE_SEGMENT;
   else if (type == TRI3)
     return DataTransferKit::DTK_TRIANGLE;
   else if (type == QUAD4)
