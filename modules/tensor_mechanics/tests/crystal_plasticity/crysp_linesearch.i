@@ -202,7 +202,3 @@
   file_base = crysp_lsearch_out
   exodus = true
 []
-
-[Problem]
-  use_legacy_uo_initialization = false
-[]

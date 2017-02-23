@@ -155,8 +155,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters) :
     _has_time_integrator(false),
     _has_exception(false),
     _current_execute_on_flag(EXEC_NONE),
-    _use_legacy_uo_aux_computation(_app.legacyUoAuxComputationDefault()),
-    _use_legacy_uo_initialization(_app.legacyUoInitializationDefault()),
     _error_on_jacobian_nonzero_reallocation(getParam<bool>("error_on_jacobian_nonzero_reallocation")),
     _force_restart(getParam<bool>("force_restart")),
     _fail_next_linear_convergence_check(false),
@@ -618,20 +616,9 @@ void FEProblemBase::initialSetup()
     _aux->compute(EXEC_INITIAL);
     Moose::setup_perf_log.pop("computeAux()", "Setup");
 
-    if (_use_legacy_uo_initialization)
-    {
-      _aux->compute(EXEC_TIMESTEP_BEGIN);
-      computeUserObjects(EXEC_TIMESTEP_END, Moose::ALL);
-    }
-
     // The only user objects that should be computed here are the initial UOs
     computeUserObjects(EXEC_INITIAL, Moose::POST_AUX);
 
-    if (_use_legacy_uo_initialization)
-    {
-      computeUserObjects(EXEC_TIMESTEP_BEGIN, Moose::ALL);
-      computeUserObjects(EXEC_LINEAR, Moose::ALL);
-    }
     Moose::setup_perf_log.pop("computeUserObjects()", "Setup");
   }
 
@@ -2494,8 +2481,7 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   const MooseObjectWarehouse<NodalUserObject> & nodal = _nodal_user_objects[group][type];
   const MooseObjectWarehouse<GeneralUserObject> & general = _general_user_objects[group][type];
 
-  if (!_use_legacy_uo_aux_computation && // This makes me die a little bit inside...
-      !elemental.hasActiveObjects() &&
+  if (!elemental.hasActiveObjects() &&
       !side.hasActiveObjects() &&
       !internal_side.hasActiveObjects() &&
       !nodal.hasActiveObjects() &&
@@ -2534,21 +2520,6 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 
   default:
     break;
-  }
-
-  // Legacy AuxKernel computation
-  if (_elemental_user_objects[Moose::ALL][type].hasActiveBlockObjects() ||
-      _internal_side_user_objects[Moose::ALL][type].hasActiveBlockObjects() ||
-      _side_user_objects[Moose::ALL][type].hasActiveBoundaryObjects() ||
-      _internal_side_user_objects[Moose::ALL][type].hasActiveObjects() ||
-      _nodal_user_objects[Moose::ALL][type].hasActiveBlockObjects() )
-  {
-    serializeSolution();
-    if (_displaced_problem != NULL)
-    _displaced_problem->updateMesh();
-
-    if (_use_legacy_uo_aux_computation)
-        _aux->compute(EXEC_LINEAR);
   }
 
   // Initialize Elemental/Side/InternalSideUserObjects

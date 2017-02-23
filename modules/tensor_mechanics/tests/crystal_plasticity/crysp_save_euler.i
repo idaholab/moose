@@ -256,10 +256,3 @@
     use_displaced_mesh = true
   [../]
 []
-
-[Problem]
-  use_legacy_uo_initialization = false
-[]
-
-
-

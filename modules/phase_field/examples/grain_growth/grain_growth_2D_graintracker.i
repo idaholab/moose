@@ -177,10 +177,6 @@
   [../]
 []
 
-[Problem]
-  use_legacy_uo_initialization = false
-[]
-
 [Outputs]
   exodus = true # Exodus file will be outputted
   csv = true

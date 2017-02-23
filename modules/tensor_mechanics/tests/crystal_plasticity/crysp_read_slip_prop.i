@@ -210,7 +210,3 @@
   file_base = crysp_read_slip_prop_out
   exodus = true
 []
-
-[Problem]
-  use_legacy_uo_initialization = false
-[]

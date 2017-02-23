@@ -205,7 +205,3 @@
   print_linear_residuals = true
   print_perf_log = true
 []
-
-[Problem]
-  use_legacy_uo_initialization = false
-[]
