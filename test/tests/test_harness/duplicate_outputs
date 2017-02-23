@@ -1,0 +1,35 @@
+[Tests]
+  # We have a chain of dependencies in this set (a-d)
+  # a and d can run concurrently and output to the
+  # same file
+  [./a]
+    type = CheckFiles
+    input = good.i
+    cli_args = 'Outputs/exodus=true'
+    check_files = 'good_out.e'
+  [../]
+
+  [./b]
+    type = CheckFiles
+    input = good.i
+    cli_args = 'Outputs/exodus=true'
+    check_files = 'good_out.e'
+    prereq = 'a'
+  [../]
+
+  [./c]
+    type = CheckFiles
+    input = good.i
+    cli_args = 'Outputs/exodus=true'
+    check_files = 'good_out.e'
+    prereq = 'b'
+  [../]
+
+  # Missing prereq with same check_files
+  [./d]
+    type = CheckFiles
+    input = good.i
+    cli_args = 'Outputs/exodus=true'
+    check_files = 'good_out.e'
+  [../]
+[]

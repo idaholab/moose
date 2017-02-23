@@ -1,26 +1,29 @@
-from RunApp import RunApp
+from FileTester import FileTester
 import util
 import os
 
-class CheckFiles(RunApp):
+class CheckFiles(FileTester):
 
     @staticmethod
     def validParams():
-        params = RunApp.validParams()
+        params = FileTester.validParams()
         params.addParam('check_files', [], "A list of files that MUST exist.")
         params.addParam('check_not_exists', [], "A list of files that must NOT exist.")
         params.addParam('file_expect_out', "A regular expression that must occur in all of the check files in order for the test to be considered passing.")
         return params
 
     def __init__(self, name, params):
-        RunApp.__init__(self, name, params)
+        FileTester.__init__(self, name, params)
 
-    def prepare(self, options):
-        if self.specs['delete_output_before_running'] == True:
-            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['check_files'] + self.specs['check_not_exists'], self.specs['delete_output_folders'])
+        # Make sure that either input or command is supplied
+        if not (params.isValid('check_files') or params.isValid('check_not_exists')):
+            raise Exception('Either "check_files" or "check_not_exists" must be supplied for a CheckFiles test')
+
+    def getOutputFiles(self):
+        return self.specs['check_files'] + self.specs['check_not_exists']
 
     def processResults(self, moose_dir, retcode, options, output):
-        output = RunApp.processResults(self, moose_dir, retcode, options, output)
+        output = FileTester.processResults(self, moose_dir, retcode, options, output)
 
         specs = self.specs
         if self.getStatus() == self.bucket_fail or specs['skip_checks']:

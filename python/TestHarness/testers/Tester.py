@@ -70,7 +70,6 @@ class Tester(MooseObject):
         self.should_execute = self.specs['should_execute']
         self.check_input = self.specs['check_input']
 
-
         ###### bucket status discriptions
         ## The following is a list of statuses possible in the TestHarness
         ##
@@ -113,6 +112,16 @@ class Tester(MooseObject):
         # Initialize the tester with a pending status
         self.setStatus('launched', self.bucket_pending)
 
+    def getTestName(self):
+        return self.specs['test_name']
+
+    def getPrereqs(self):
+        return self.specs['prereq']
+
+    def getRunnable(self):
+        status = self.getStatus()
+        return not (status == self.bucket_deleted or status == self.bucket_skip or status == self.bucket_silent)
+
     # Return text color based on bucket status. Return the
     # RESET color switch in the event of an unknown status
     def getColor(self, status):
@@ -123,6 +132,10 @@ class Tester(MooseObject):
     # Method to return the input file if applicable to this Tester
     def getInputFile(self):
         return None
+
+    # Method to return the output files if applicable to this Tester
+    def getOutputFiles(self):
+        return []
 
     # Method to return the successful message printed to stdout
     def getSuccessMessage(self):
@@ -212,7 +225,6 @@ class Tester(MooseObject):
     def processResults(self, moose_dir, retcode, options, output):
         return
 
-
     # This is the base level runnable check common to all Testers.  DO NOT override
     # this method in any of your derived classes.  Instead see "checkRunnable"
     def checkRunnableBase(self, options, checks, test_list=None):
@@ -221,14 +233,15 @@ class Tester(MooseObject):
         # Check if we only want to run failed tests
         if options.failed_tests:
             if self.specs['test_name'] not in test_list:
+                self.setStatus('not failed', self.bucket_silent)
                 return False
 
         # Are we running only tests in a specific group?
         if options.group <> 'ALL' and options.group not in self.specs['group']:
-            self.setStatus(reason, self.bucket_skip)
+            self.setStatus('unmatched group', self.bucket_silent)
             return False
         if options.not_group <> '' and options.not_group in self.specs['group']:
-            self.setStatus(reason, self.bucket_skip)
+            self.setStatus('unmatched group', self.bucket_silent)
             return False
 
         # Store regexp for matching tests if --re is used

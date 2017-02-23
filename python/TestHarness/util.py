@@ -386,3 +386,29 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
                     #
                     # TL;DR; Just pass...
                     pass
+
+# See http://code.activestate.com/recipes/576570-dependency-resolver/
+class DependencyResolver:
+    def __init__(self):
+        self.dependency_dict = {}
+
+    def insertDependency(self, key, values):
+        self.dependency_dict[key] = values
+
+    def getSortedValuesSets(self):
+        d = dict((k, set(self.dependency_dict[k])) for k in self.dependency_dict)
+        r = []
+        while d:
+            # values not in keys (items without dep)
+            t = set(i for v in d.values() for i in v) - set(d.keys())
+            # and keys without value (items without dep)
+            t.update(k for k, v in d.items() if not v)
+
+            if len(t) == 0 and len(d) > 0:
+              raise Exception("Cyclic or Invalid Dependency Detected!")
+
+            # can be done right away
+            r.append(t)
+            # and cleaned up
+            d = dict(((k, v-t) for k, v in d.items() if v))
+        return r
