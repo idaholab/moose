@@ -426,12 +426,5 @@ TensorMechanicsAction::getKernelParameters(std::string type)
   params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
   params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
-  // deprecated
-  if (parameters().isParamValid("temp"))
-  {
-    params.set<NonlinearVariableName>("temperature") = getParam<NonlinearVariableName>("temp");
-    mooseDeprecated("Use 'temperature' instead of 'temp'");
-  }
-
   return params;
 }
