@@ -193,11 +193,4 @@ mooseInfo(Args && ... args)
   moose::internal::mooseInfoStream(Moose::out, std::forward<Args>(args)...);
 }
 
-// TODO: Delete these after all apps have been transitioned to the new "not
-// 2" versions of these functions.
-template <typename... Args> [[ noreturn ]] void mooseError2(Args && ... args) { mooseError(std::forward<Args>(args)...); }
-template <typename... Args> void mooseWarning2(Args && ... args) { mooseWarning(std::forward<Args>(args)...); }
-template <typename... Args> void mooseDeprecated2(Args && ... args) { mooseDeprecated(std::forward<Args>(args)...); }
-template <typename... Args> void mooseInfo2(Args && ... args) { mooseInfo(std::forward<Args>(args)...); }
-
 #endif /* MOOSEERRORS_H */
