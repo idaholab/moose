@@ -1,17 +1,16 @@
+from FileTester import FileTester
 import os
-import sys
 import util
-from RunApp import RunApp
+import sys
 from mooseutils.ImageDiffer import ImageDiffer
 
-class ImageDiff(RunApp):
+class ImageDiff(FileTester):
+
     @staticmethod
     def validParams():
-        params = RunApp.validParams()
+        params = FileTester.validParams()
         params.addRequiredParam('imagediff', [], 'A list of files to compare against the gold.')
-        params.addParam('gold_dir', 'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
         params.addParam('allowed', 0.98, "Absolute zero cutoff used in exodiff comparisons.")
-        params.addParam('delete_output_before_running', True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
         params.addParam('allowed_linux', "Absolute zero cuttoff used for linux machines, if not provided 'allowed' is used.")
         params.addParam('allowed_darwin', "Absolute zero cuttoff used for Mac OS (Darwin) machines, if not provided 'allowed' is used.")
         # We don't want to check for any errors on the screen with this. If there are any real errors then the image test will fail.
@@ -19,14 +18,10 @@ class ImageDiff(RunApp):
         return params
 
     def __init__(self, name, params):
-        RunApp.__init__(self, name, params)
+        FileTester.__init__(self, name, params)
 
-    def prepare(self, options):
-        """
-        Cleans up image files from previous execution
-        """
-        if self.specs['delete_output_before_running'] == True:
-            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['imagediff'], self.specs['delete_output_folders'])
+    def getOutputFiles(self):
+        return self.specs['imagediff']
 
     def processResults(self, moose_dir, retcode, options, output):
         """
@@ -34,7 +29,7 @@ class ImageDiff(RunApp):
         """
 
         # Call base class processResults
-        output = RunApp.processResults(self, moose_dir, retcode, options, output)
+        output = FileTester.processResults(self, moose_dir, retcode, options, output)
         if self.getStatus() == self.bucket_fail:
             return output
 
@@ -50,7 +45,6 @@ class ImageDiff(RunApp):
 
             # Perform diff
             else:
-
                 output = 'Running ImageDiffer.py'
                 gold = os.path.join(specs['test_dir'], specs['gold_dir'], filename)
                 test = os.path.join(specs['test_dir'], filename)
@@ -69,7 +63,6 @@ class ImageDiff(RunApp):
                 if differ.fail():
                     self.setStatus('IMAGEDIFF', self.bucket_diff)
                     break
-
 
         # If status is still pending, then it is a passing test
         if self.getStatus() == self.bucket_pending:

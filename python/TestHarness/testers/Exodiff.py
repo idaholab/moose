@@ -1,17 +1,14 @@
-from RunApp import RunApp
+from FileTester import FileTester
 import util
 import os
 
-class Exodiff(RunApp):
+class Exodiff(FileTester):
 
     @staticmethod
     def validParams():
-        params = RunApp.validParams()
+        params = FileTester.validParams()
         params.addRequiredParam('exodiff',   [], "A list of files to exodiff.")
         params.addParam('exodiff_opts',      [], "Additional arguments to be passed to invocations of exodiff.")
-        params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
-        params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exodiff comparisons.")
-        params.addParam('rel_err',       5.5e-6, "Relative error value used in exodiff comparisons.")
         params.addParam('custom_cmp',            "Custom comparison file")
         params.addParam('use_old_floor',  False, "Use Exodiff old floor option")
         params.addParam('map',  True, "Use geometrical mapping to match up elements.  This is usually a good idea because it makes files comparable between runs with Serial and Parallel Mesh.")
@@ -19,11 +16,10 @@ class Exodiff(RunApp):
         return params
 
     def __init__(self, name, params):
-        RunApp.__init__(self, name, params)
+        FileTester.__init__(self, name, params)
 
-    def prepare(self, options):
-        if self.specs['delete_output_before_running'] == True:
-            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['exodiff'], self.specs['delete_output_folders'])
+    def getOutputFiles(self):
+        return self.specs['exodiff']
 
     def processResultsCommand(self, moose_dir, options):
         commands = []
@@ -48,7 +44,7 @@ class Exodiff(RunApp):
         return commands
 
     def processResults(self, moose_dir, retcode, options, output):
-        output = RunApp.processResults(self, moose_dir, retcode, options, output)
+        output = FileTester.processResults(self, moose_dir, retcode, options, output)
 
         if self.getStatus() == self.bucket_fail or self.specs['skip_checks']:
             return output
