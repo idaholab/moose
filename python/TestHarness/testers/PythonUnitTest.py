@@ -9,6 +9,7 @@ class PythonUnitTest(RunApp):
         # Input is optional in the base class. Make it required here
         params.addRequiredParam('input', "The python input file to use for this test.")
         params.addParam('buffer', False, "Equivalent to passing -b or --buffer to the unittest.")
+        params.addParam('separate', False, "Run each test in the file in a separate subprocess")
         # We don't want to check for any errors on the screen with unit tests
         params['errors'] = []
         return params
@@ -21,8 +22,13 @@ class PythonUnitTest(RunApp):
         Returns the python command that executes unit tests
         """
         module_name = os.path.splitext(self.specs['input'])[0]
-        cmd = 'python -m unittest '
+        use_buffer = " "
         if self.specs['buffer']:
-            cmd += '-b '
+            use_buffer = " -b "
 
-        return cmd + module_name + ' ' + ' '.join(self.specs['cli_args'])
+        if self.specs["separate"]:
+            cmd = self.specs['moose_dir'] + '/scripts/separate_unittests.py -f ' + module_name + use_buffer
+        else:
+            cmd = "python -m unittest" + use_buffer + "-v " + module_name
+
+        return cmd  + ' '.join(self.specs['cli_args'])
