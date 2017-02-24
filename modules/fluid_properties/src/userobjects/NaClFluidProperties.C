@@ -139,7 +139,7 @@ NaClFluidProperties::cp(Real pressure, Real temperature) const
 
   // Halite isobaric heat capapcity
   return 1148.81 + 0.551548 * (Tc - Tt) + 2.64309e-4 * (Tc - Tt) * (Tc - Tt) +
-	  r3 * pbar + r4 * pbar * pbar;
+          r3 * pbar + r4 * pbar * pbar;
 }
 
 Real

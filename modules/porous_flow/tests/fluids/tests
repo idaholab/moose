@@ -35,4 +35,10 @@
     csvdiff = 'co2.csv'
     rel_err = 1.0E-5
   [../]
+  [./simple_fluid]
+    type = 'CSVDiff'
+    input = 'simple_fluid.i'
+    csvdiff = 'simple_fluid.csv'
+    rel_err = 1.0E-5
+  [../]
 []

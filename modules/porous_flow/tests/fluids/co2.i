@@ -55,6 +55,7 @@
   [../]
   [./co2]
     type = PorousFlowSingleComponentFluid
+    temperature_unit = Celsius
     fp = co2
     phase = 0
   [../]

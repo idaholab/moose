@@ -1,11 +1,25 @@
-# Test MethaneFluidProperties
-# Reference data from Irvine Jr, T. F. and Liley, P. E. (1984) Steam and
-# Gas Tables with Computer Equations
-#
-# For temperature = 350K, the fluid properties should be:
-# density = 55.13 kg/m^3
-# viscosity = 0.01276 mPa.s
-# h = 708.5 kJ/kg
+# Test the properties calculated by the simple fluid Material
+# Pressure 10 MPa
+# Temperature = 300 K  (temperature unit = K)
+# Density should equal 1500*exp(1E7/1E9-2E-4*300)=1426.844 kg/m^3
+# Viscosity should equal 1.1E-3 Pa.s
+# Energy density should equal 4000 * 300 = 1.2E6 J/kg
+# Specific enthalpy should equal 5000 * 300 = 1.5E6 J/kg
+
+[Modules]
+  [./FluidProperties]
+    [./the_simple_fluid]
+      type = SimpleFluidProperties
+      thermal_expansion = 2.0E-4
+      cv = 4000.0
+      cp = 5000.0
+      bulk_modulus = 1.0E9
+      thermal_conductivity = 1.0
+      viscosity = 1.1E-3
+      density0 = 1500.0
+    [../]
+  [../]
+[]
 
 [Mesh]
   type = GeneratedMesh
@@ -20,7 +34,7 @@
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
-    porous_flow_vars = 'pp'
+    porous_flow_vars = 'pp T'
     number_fluid_phases = 1
     number_fluid_components = 1
   [../]
@@ -30,49 +44,37 @@
   [./pp]
     initial_condition = 10e6
   [../]
-[]
-
-[Kernels]
-  [./dummy]
-    type = Diffusion
-    variable = pp
+  [./T]
+    initial_condition = 300.0
   [../]
 []
 
-[AuxVariables]
-  [./temp]
-    initial_condition = 350.0
+[Kernels]
+  [./dummy_p]
+    type = Diffusion
+    variable = pp
+  [../]
+  [./dummy_T]
+    type = Diffusion
+    variable = T
   [../]
 []
 
 [Materials]
   [./temperature]
     type = PorousFlowTemperature
-    temperature = 'temp'
+    temperature = T
   [../]
   [./ppss]
     type = PorousFlow1PhaseP
     porepressure = pp
   [../]
-  [./methane]
+  [./simple_fluid]
     type = PorousFlowSingleComponentFluid
     temperature_unit = Kelvin
-    fp = methane
+    fp = the_simple_fluid
     phase = 0
   [../]
-[]
-
-[Modules]
-  [./FluidProperties]
-    [./methane]
-      type = MethaneFluidProperties
-    [../]
-  [../]
-[]
-
-[Executioner]
-  type = Steady
-  solve_type = Newton
 []
 
 [Postprocessors]
@@ -82,7 +84,7 @@
   [../]
   [./temperature]
     type = ElementIntegralVariablePostprocessor
-    variable = temp
+    variable = T
   [../]
   [./density]
     type = ElementIntegralMaterialProperty
@@ -92,14 +94,23 @@
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_viscosity_qp0'
   [../]
+  [./internal_energy]
+    type = ElementIntegralMaterialProperty
+    mat_prop = 'PorousFlow_fluid_phase_internal_energy_qp0'
+  [../]
   [./enthalpy]
     type = ElementIntegralMaterialProperty
     mat_prop = 'PorousFlow_fluid_phase_enthalpy_qp0'
   [../]
 []
 
+[Executioner]
+  type = Steady
+  solve_type = Newton
+[]
+
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = methane
+  file_base = simple_fluid
   csv = true
 []

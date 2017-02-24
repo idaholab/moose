@@ -39,7 +39,7 @@
 
 [AuxVariables]
   [./temp]
-    initial_condition = 50
+    initial_condition = 50.0
   [../]
 []
 
@@ -54,6 +54,7 @@
   [../]
   [./dens0]
     type = PorousFlowIdealGas
+    temperature_unit = Celsius
     molar_mass = 5e-3
     phase = 0
   [../]
