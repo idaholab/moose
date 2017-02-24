@@ -214,8 +214,8 @@ Water97FluidProperties::e(Real pressure, Real temperature) const
     default:
       mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
-  // Output in kJ/kg
-  return internal_energy / 1000.0;
+  // Output in J/kg
+  return internal_energy;
 }
 
 void
@@ -287,9 +287,8 @@ Water97FluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & 
   }
 
   e = this->e(pressure, temperature);
-  // Divide by 1000 as output in kJ/kg
-  de_dp = dinternal_energy_dp / 1000.0;
-  de_dT = dinternal_energy_dT / 1000.0;
+  de_dp = dinternal_energy_dp;
+  de_dT = dinternal_energy_dT;
 }
 
 void
@@ -394,8 +393,7 @@ Water97FluidProperties::cp(Real pressure, Real temperature) const
     default:
       mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
-  // Output in kJ/kg
-  return specific_heat / 1000.0;
+  return specific_heat;
 }
 
 Real
@@ -444,8 +442,7 @@ Water97FluidProperties::cv(Real pressure, Real temperature) const
     default:
       mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
-  // Output in kJ/kg
-  return specific_heat / 1000.0;
+  return specific_heat;
 }
 
 Real
@@ -602,8 +599,7 @@ Water97FluidProperties::s(Real pressure, Real temperature) const
     default:
       mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
-  // Output in kJ/kg
-  return entropy / 1000.0;
+  return entropy;
 }
 
 Real
@@ -647,8 +643,7 @@ Water97FluidProperties::h(Real pressure, Real temperature) const
     default:
       mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
-  // Output in kJ/kg
-  return enthalpy / 1000.0;
+  return enthalpy;
 }
 
 void
@@ -706,10 +701,9 @@ Water97FluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
     default:
       mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
-  // Output in kJ/kg
-  h = enthalpy / 1000.0;
-  dh_dp = denthalpy_dp / 1000.0;
-  dh_dT = denthalpy_dT / 1000.0;
+  h = enthalpy;
+  dh_dp = denthalpy_dp;
+  dh_dT = denthalpy_dT;
 }
 
 Real

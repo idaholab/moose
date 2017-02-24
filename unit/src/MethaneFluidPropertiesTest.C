@@ -87,11 +87,11 @@ MethaneFluidPropertiesTest::properties()
   Real T = 350.0;
 
   REL_TEST("density", _fp->rho(p, T), 55.13, 1.0e-3);
-  REL_TEST("enthalpy", _fp->h(p, T), 708.5, 1.0e-3);
-  REL_TEST("internal energy", _fp->e(p, T), 527.131, 1.0e-3);
-  REL_TEST("entropy", _fp->s(p, T), 11.30, 1.0e-3);
-  REL_TEST("cp", _fp->cp(p, T), 2.375, 1.0e-3);
-  REL_TEST("cv", _fp->cv(p, T), 1.857, 1.0e-3);
+  REL_TEST("enthalpy", _fp->h(p, T), 708.5e3, 1.0e-3);
+  REL_TEST("internal energy", _fp->e(p, T), 527.131e3, 1.0e-3);
+  REL_TEST("entropy", _fp->s(p, T), 11.30e3, 1.0e-3);
+  REL_TEST("cp", _fp->cp(p, T), 2.375e3, 1.0e-3);
+  REL_TEST("cv", _fp->cv(p, T), 1.857e3, 1.0e-3);
   REL_TEST("c", _fp->c(p, T), 481.7, 1.0e-3);
   REL_TEST("mu", _fp->mu(0.0, T), 0.01276e-3, 1.0e-3);
   REL_TEST("thermal conductivity", _fp->k(0.0, T), 0.04113, 1.0e-3);

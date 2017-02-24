@@ -34,13 +34,13 @@ public:
   virtual Real mu(Real density, Real temperature, Real xmass) const = 0;
   /// Dynamic viscosity and its derivatives wrt pressure, temperature and mass fraction
   virtual void mu_drhoTx(Real density, Real temperature, Real xmass, Real & mu, Real & dmu_dp, Real & dmu_dT, Real & dmu_dx) const = 0;
-  /// Enthalpy (kJ/kg)
+  /// Enthalpy (J/kg)
   virtual Real h(Real pressure, Real temperature, Real xmass) const = 0;
   /// Enthalpy and its derivatives wrt pressure, temperature and mass fraction
   virtual void h_dpTx(Real pressure, Real temperature, Real xmass, Real & h, Real & dh_dp, Real & dh_dT, Real & dh_dx) const = 0;
-  /// Isobaric specific heat capacity (kJ/kg/K)
+  /// Isobaric specific heat capacity (J/kg/K)
   virtual Real cp(Real pressure, Real temperature, Real xmass) const = 0;
-  /// Internal energy (kJ/kg)
+  /// Internal energy (J/kg)
   virtual Real e(Real pressure, Real temperature, Real xmass) const = 0;
   /// Internal energy and its derivatives wrt pressure, temperature and mass fraction
   virtual void e_dpTx(Real pressure, Real temperature, Real xmass, Real & e, Real & de_dp, Real & de_dT, Real & de_dx) const = 0;

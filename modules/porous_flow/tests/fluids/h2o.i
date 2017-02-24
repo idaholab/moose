@@ -40,7 +40,7 @@
 
 [AuxVariables]
   [./temp]
-    initial_condition = 26.85
+    initial_condition = 300.0
   [../]
 []
 
@@ -55,6 +55,7 @@
   [../]
   [./water]
     type = PorousFlowSingleComponentFluid
+    temperature_unit = Kelvin
     fp = water
     phase = 0
   [../]
