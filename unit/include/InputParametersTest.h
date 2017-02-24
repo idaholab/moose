@@ -26,6 +26,7 @@ class InputParametersTest : public CppUnit::TestFixture
   CPPUNIT_TEST( checkControlParamTypeError );
   CPPUNIT_TEST( checkControlParamValidError );
   CPPUNIT_TEST( checkSuppressedError );
+  CPPUNIT_TEST( checkRangeCheckedParam );
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -33,6 +34,7 @@ public:
   void setUp(){}
   void tearDown(){}
 
+  void checkRangeCheckedParam();
   void checkControlParamPrivateError();
   void checkControlParamTypeError();
   void checkControlParamValidError();

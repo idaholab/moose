@@ -37,6 +37,28 @@ InputParametersTest::checkControlParamPrivateError()
   }
 }
 
+// This tests for the bug https://github.com/idaholab/moose/issues/8586.
+// It makes sure that range-checked input file parameters comparison functions
+// do absolute floating point comparisons instead of using a default epsilon.
+void
+InputParametersTest::checkRangeCheckedParam()
+{
+  try
+  {
+    InputParameters params = emptyInputParameters();
+    params.addRangeCheckedParam<Real>("p", 1.000000000000001, "p = 1", "Some doc");
+    params.checkParams("");
+    CPPUNIT_ASSERT_MESSAGE("range checked input param failed to catch 1.000000000000001 != 1", false);
+  }
+  catch(const std::exception & e)
+  {
+    std::string msg(e.what());
+    if (msg.find("Range check failed for param") == std::string::npos)
+      CPPUNIT_ASSERT_MESSAGE("range check failed with unexpected error: " + msg, false);
+  }
+}
+
+
 void
 InputParametersTest::checkControlParamTypeError()
 {
