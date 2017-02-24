@@ -100,6 +100,7 @@
 #include "PotentialAdvection.h"
 #include "GhostAux.h"
 #include "FunctionGradAux.h"
+#include "CheckCurrentExecAux.h"
 
 #include "RobinBC.h"
 #include "InflowBC.h"
@@ -386,6 +387,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(VectorPostprocessorAux);
   registerAux(GhostAux);
   registerAux(FunctionGradAux);
+  registerAux(CheckCurrentExecAux);
 
   // Interface kernels
   registerInterfaceKernel(InterfaceDiffusion);
