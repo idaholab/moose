@@ -27,7 +27,7 @@ class PythonUnitTest(RunApp):
             use_buffer = " -b "
 
         if self.specs["separate"]:
-            cmd = self.specs['moose_dir'] + '/scripts/separate_unittests.py -f ' + module_name + use_buffer
+            cmd = os.path.join(self.specs['moose_dir'], 'scripts', 'separate_unittests.py') + ' -f ' + module_name + use_buffer
         else:
             cmd = "python -m unittest" + use_buffer + "-v " + module_name
 
