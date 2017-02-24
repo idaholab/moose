@@ -45,6 +45,7 @@ PointValue::execute()
   // Locate the element and store the id
   // We can't store the actual Element pointer here b/c PointLocatorBase returns a const Elem *
   std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
+  pl->enable_out_of_mesh_mode();
   const Elem * elem = (*pl)(_point_vec[0]);
 
   // Error if the element cannot be located

@@ -98,6 +98,10 @@ DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
     // can't skip building it just becuase our local _elements is
     // empty, it might be non-empty on some other processor!
     _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, mesh);
+
+    // We may be querying for points which are not in the semilocal
+    // part of a distributed mesh.
+    _point_locator->enable_out_of_mesh_mode();
   }
   else
   {
