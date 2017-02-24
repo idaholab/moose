@@ -11,7 +11,7 @@ template<>
 InputParameters validParams<PorousFlowFluidPropertiesBase>()
 {
   InputParameters params = validParams<PorousFlowMaterialBase>();
-  MooseEnum unit_choice("Kelvin=0 Celsius=1", "Celsius");
+  MooseEnum unit_choice("Kelvin=0 Celsius=1", "Kelvin");
   params.addParam<MooseEnum>("temperature_unit", unit_choice, "The unit of the temperature variable");
   params.addClassDescription("Base class for PorousFlow fluid materials");
   return params;

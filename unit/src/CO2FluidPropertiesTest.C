@@ -143,31 +143,31 @@ CO2FluidPropertiesTest::propertiesSW()
   Real p = 1.0e6;
   Real T = 280.0;
   REL_TEST("density", _fp->rho(p, T), 20.199, 1.0e-3);
-  REL_TEST("enthalpy", _fp->h(p, T), -26.385, 1.0e-3);
-  REL_TEST("internal energy", _fp->e(p, T), -75.892, 1.0e-3);
-  REL_TEST("entropy", _fp->s(p, T), -0.51326, 1.0e-3);
-  REL_TEST("cp", _fp->cp(p, T), 0.92518, 1.0e-3);
-  REL_TEST("cv", _fp->cv(p, T), 0.67092, 1.0e-3);
+  REL_TEST("enthalpy", _fp->h(p, T), -26.385e3, 1.0e-3);
+  REL_TEST("internal energy", _fp->e(p, T), -75.892e3, 1.0e-3);
+  REL_TEST("entropy", _fp->s(p, T), -0.51326e3, 1.0e-3);
+  REL_TEST("cp", _fp->cp(p, T), 0.92518e3, 1.0e-3);
+  REL_TEST("cv", _fp->cv(p, T), 0.67092e3, 1.0e-3);
   REL_TEST("c", _fp->c(p, T), 252.33, 1.0e-3);
 
   // Pressure = 1 MPa, temperature = 500 K
   T = 500.0;
   REL_TEST("density", _fp->rho(p, T), 10.664, 1.0e-3);
-  REL_TEST("enthalpy", _fp->h(p, T), 185.60, 1.0e-3);
-  REL_TEST("internal energy", _fp->e(p, T), 91.829, 1.0e-3);
-  REL_TEST("entropy", _fp->s(p, T), 0.04225, 1.0e-3);
-  REL_TEST("cp", _fp->cp(p, T), 1.0273, 1.0e-3);
-  REL_TEST("cv", _fp->cv(p, T), 0.82823, 1.0e-3);
+  REL_TEST("enthalpy", _fp->h(p, T), 185.60e3, 1.0e-3);
+  REL_TEST("internal energy", _fp->e(p, T), 91.829e3, 1.0e-3);
+  REL_TEST("entropy", _fp->s(p, T), 0.04225e3, 1.0e-3);
+  REL_TEST("cp", _fp->cp(p, T), 1.0273e3, 1.0e-3);
+  REL_TEST("cv", _fp->cv(p, T), 0.82823e3, 1.0e-3);
   REL_TEST("c", _fp->c(p, T), 339.81, 1.0e-3);
 
   // Pressure = 10 MPa, temperature = 500 K
   p = 10.0e6;
   REL_TEST("density", _fp->rho(p, T), 113.07, 1.0e-3);
-  REL_TEST("enthalpy", _fp->h(p, T), 157.01, 1.0e-3);
-  REL_TEST("internal energy", _fp->e(p, T), 68.569, 1.0e-3);
-  REL_TEST("entropy", _fp->s(p, T), -0.4383, 1.0e-3);
-  REL_TEST("cp", _fp->cp(p, T), 1.1624, 1.0e-3);
-  REL_TEST("cv", _fp->cv(p, T), 0.85516, 1.0e-3);
+  REL_TEST("enthalpy", _fp->h(p, T), 157.01e3, 1.0e-3);
+  REL_TEST("internal energy", _fp->e(p, T), 68.569e3, 1.0e-3);
+  REL_TEST("entropy", _fp->s(p, T), -0.4383e3, 1.0e-3);
+  REL_TEST("cp", _fp->cp(p, T), 1.1624e3, 1.0e-3);
+  REL_TEST("cv", _fp->cv(p, T), 0.85516e3, 1.0e-3);
   REL_TEST("c", _fp->c(p, T), 337.45, 1.0e-3);
 }
 

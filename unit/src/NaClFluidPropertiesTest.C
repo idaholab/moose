@@ -86,16 +86,16 @@ NaClFluidPropertiesTest::halite()
   REL_TEST("rho", _fp->rho(p0, T0), 2167.88, 1.0e-3);
   REL_TEST("rho", _fp->rho(p1, T1), 2116.0, 1.0e-3);
   REL_TEST("rho", _fp->rho(p2, T2), 2056.8, 1.0e-3);
-  REL_TEST("cp", _fp->cp(p0, T0), 0.865, 4.0e-2);
-  REL_TEST("cp", _fp->cp(p1, T1), 0.922, 4.0e-2);
-  REL_TEST("cp", _fp->cp(p2, T2), 0.979, 4.0e-2);
+  REL_TEST("cp", _fp->cp(p0, T0), 0.865e3, 4.0e-2);
+  REL_TEST("cp", _fp->cp(p1, T1), 0.922e3, 4.0e-2);
+  REL_TEST("cp", _fp->cp(p2, T2), 0.979e3, 4.0e-2);
 
   // Test enthalpy at the triple point pressure of water
   Real pt = 611.657;
 
   ABS_TEST("enthalpy", _fp->h(pt, 273.16), 0.0, 1.0e-3);
-  REL_TEST("enthalpy", _fp->h(pt, 573.15), 271.13, 1.0e-3);
-  REL_TEST("enthalpy", _fp->h(pt, 673.15), 366.55, 1.0e-3);
+  REL_TEST("enthalpy", _fp->h(pt, 573.15), 271.13e3, 1.0e-3);
+  REL_TEST("enthalpy", _fp->h(pt, 673.15), 366.55e3, 1.0e-3);
 
   // Thermal conductivity (function of T only)
   REL_TEST("k", _fp->k(p0, 323.15), 5.488, 1.0e-2);

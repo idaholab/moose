@@ -111,7 +111,7 @@ public:
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
    * @param xnacl NaCl mass fraction (-)
-   * @return enthalpy (kJ/kg)
+   * @return enthalpy (J/kg)
    */
   virtual Real h(Real pressure, Real temperature, Real xnacl) const override;
 
@@ -124,7 +124,7 @@ public:
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
    * @param xnacl NaCl mass fraction (-)
-   * @param[out] h enthalpy (kJ/kg)
+   * @param[out] h enthalpy (J/kg)
    * @param[out] dh_dp derivative of enthalpy wrt pressure
    * @param[out] dh_dT derivative of enthalpy wrt temperature
    * @param[out] dh_dx derivative of enthalpy wrt NaCl mass fraction
@@ -140,7 +140,7 @@ public:
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
    * @param xnacl NaCl mass fraction (-)
-   * @return isobaric heat capacity (kJ/kg/K)
+   * @return isobaric heat capacity (J/kg/K)
    */
   virtual Real cp(Real pressure, Real temperature, Real xnacl) const override;
 
@@ -151,7 +151,7 @@ public:
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
    * @param xnacl NaCl mass fraction (-)
-   * @return internal energy (kJ/kg)
+   * @return internal energy (J/kg)
    */
   virtual Real e(Real pressure, Real temperature, Real xnacl) const override;
 
@@ -164,7 +164,7 @@ public:
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
    * @param xnacl NaCl mass fraction (-)
-   * @param[out] e internal energy (kJ/kg)
+   * @param[out] e internal energy (J/kg)
    * @param[out] de_dp derivative of internal energy wrt pressure
    * @param[out] de_dT derivative of internal energy wrt temperature
    * @param[out] de_dx derivative of internal energy wrt NaCl mass fraction
