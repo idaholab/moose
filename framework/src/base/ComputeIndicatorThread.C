@@ -60,8 +60,13 @@ ComputeIndicatorThread::subdomainChanged()
   std::set<MooseVariable *> needed_moose_vars;
   _indicator_whs.updateVariableDependency(needed_moose_vars, _tid);
   _internal_side_indicators.updateVariableDependency(needed_moose_vars, _tid);
-
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+
+  std::set<unsigned int> needed_mat_props;
+  _indicator_whs.updateMatPropDependency(needed_mat_props, _tid);
+  _internal_side_indicators.updateMatPropDependency(needed_mat_props, _tid);
+  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
+
   _fe_problem.prepareMaterials(_subdomain, _tid);
 }
 
@@ -179,6 +184,7 @@ void
 ComputeIndicatorThread::post()
 {
   _fe_problem.clearActiveElementalMooseVariables(_tid);
+  _fe_problem.clearActiveMaterialProperties(_tid);
 }
 
 void

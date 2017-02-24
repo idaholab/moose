@@ -550,7 +550,7 @@ MooseObjectWarehouseBase<T>::updateMatPropDependencyHelper(std::set<unsigned int
 {
   for (auto & object : objects)
   {
-    const std::set<unsigned int> & mp_deps = object->getMatPropDependencies();
+    auto & mp_deps = object->getMatPropDependencies();
     needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
   }
 }

@@ -26,7 +26,6 @@ InputParameters validParams<MaterialTestIndicator>()
 
 MaterialTestIndicator::MaterialTestIndicator(const InputParameters & parameters) :
     Indicator(parameters),
-    MaterialPropertyInterface(this),
     _property(getMaterialProperty<Real>("property")),
     _qrule(_assembly.qRule()),
     _indicator_var(_sys.getVariable(_tid, name()))

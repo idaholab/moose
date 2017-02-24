@@ -29,6 +29,7 @@ InputParameters validParams<Indicator>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
   params += validParams<OutputInterface>();
+  params += validParams<MaterialPropertyInterface>();
 
   params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
@@ -47,6 +48,7 @@ Indicator::Indicator(const InputParameters & parameters) :
     UserObjectInterface(this),
     Restartable(parameters, "Indicators"),
     OutputInterface(parameters),
+    MaterialPropertyInterface(this, blockIDs()),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*parameters.get<SystemBase *>("_sys")),
