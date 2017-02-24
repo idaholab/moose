@@ -35,4 +35,11 @@
     expect_err = "Invalid NodalBC for eigenvalue problems, please use homogeneous Dirichlet."
     slepc = true
   [../]
+
+  [./no_slepc]
+    type = 'RunException'
+    input = 'gipm.i'
+    expect_err = "Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh."
+    slepc = false
+  [../]
 []

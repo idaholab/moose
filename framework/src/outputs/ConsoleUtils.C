@@ -206,7 +206,6 @@ outputSystemInformationHelper(const System & system)
   return oss.str();
 }
 
-
 std::string
 outputExecutionInformation(MooseApp & app, FEProblemBase & problem)
 {
@@ -233,7 +232,6 @@ outputExecutionInformation(MooseApp & app, FEProblemBase & problem)
   return oss.str();
 }
 
-
 std::string
 outputOutputInformation(MooseApp & app)
 {
@@ -256,24 +254,6 @@ outputOutputInformation(MooseApp & app)
         if (execute_on != adv_it.second)
           oss << "    " << std::setw(console_field_width-4) << adv_it.first + ":" <<  "\"" << adv_it.second << "\"\n";
     }
-  }
-
-  return oss.str();
-}
-
-
-std::string outputLegacyInformation(MooseApp & /*app*/, FEProblemBase & problem)
-{
-  std::stringstream oss;
-  oss << std::left;
-
-  if (problem.legacyUoAuxComputation() || problem.legacyUoInitialization())
-  {
-    oss << COLOR_RED << "LEGACY MODES ENABLED:" << COLOR_DEFAULT << '\n';
-    if (problem.legacyUoAuxComputation())
-      oss << COLOR_RED << "  Computing EXEC_LINEAR AuxKernel types when any UserObject type is executed." << COLOR_DEFAULT << '\n';
-    if (problem.legacyUoInitialization())
-      oss << COLOR_RED << "  Computing all UserObjects during initial setup." << COLOR_DEFAULT << '\n';
   }
 
   return oss.str();

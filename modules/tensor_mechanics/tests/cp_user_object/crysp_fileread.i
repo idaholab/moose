@@ -239,7 +239,3 @@
   file_base = crysp_fileread_out
   exodus = true
 []
-
-[Problem]
-  use_legacy_uo_initialization = false
-[]
