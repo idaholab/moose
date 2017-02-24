@@ -284,7 +284,7 @@ BrineFluidProperties::e(Real pressure, Real temperature, Real xnacl) const
   Real enthalpy = h(pressure, temperature, xnacl);
   Real density = rho(pressure, temperature, xnacl);
 
-  return enthalpy - pressure / density / 1000.0;
+  return enthalpy - pressure / density;
 }
 
 void

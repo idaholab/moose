@@ -124,17 +124,17 @@ BrineFluidPropertiesTest::properties()
   p0 = 10.0e6;
   T0 = 573.15;
 
-  REL_TEST("enthalpy", _fp->e(p0, T0, 0.0), 1330.0, 1.0e-2);
-  REL_TEST("enthalpy", _fp->e(p0, T0, 0.2), 1100.0, 1.0e-2);
-  REL_TEST("enthalpy", _fp->e(p0, T0, 0.364), 970.0, 1.0e-2);
+  REL_TEST("enthalpy", _fp->e(p0, T0, 0.0), 1330.0e3, 1.0e-2);
+  REL_TEST("enthalpy", _fp->e(p0, T0, 0.2), 1100.0e3, 1.0e-2);
+  REL_TEST("enthalpy", _fp->e(p0, T0, 0.364), 970.0e3, 1.0e-2);
 
   // cp
   p0 = 17.9e6;
   x0 = 0.01226;
 
-  REL_TEST("cp", _fp->cp(p0, 323.15, x0), 4.1, 1.0e-2);
-  REL_TEST("cp", _fp->cp(p0, 473.15, x0), 4.35, 1.0e-2);
-  REL_TEST("cp", _fp->cp(p0, 623.15, x0), 8.1, 1.0e-2);
+  REL_TEST("cp", _fp->cp(p0, 323.15, x0), 4.1e3, 1.0e-2);
+  REL_TEST("cp", _fp->cp(p0, 473.15, x0), 4.35e3, 1.0e-2);
+  REL_TEST("cp", _fp->cp(p0, 623.15, x0), 8.1e3, 1.0e-2);
 }
 
 void

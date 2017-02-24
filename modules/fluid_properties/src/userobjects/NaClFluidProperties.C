@@ -138,8 +138,8 @@ NaClFluidProperties::cp(Real pressure, Real temperature) const
   Real r4 = 5.29063e-8 - 9.63084e-11 * Tc + 6.50745e-13 * Tc * Tc;
 
   // Halite isobaric heat capapcity
-  return (1148.81 + 0.551548 * (Tc - Tt) + 2.64309e-4 * (Tc - Tt) * (Tc - Tt) +
-    r3 * pbar + r4 * pbar * pbar) / 1000.0;
+  return 1148.81 + 0.551548 * (Tc - Tt) + 2.64309e-4 * (Tc - Tt) * (Tc - Tt) +
+	  r3 * pbar + r4 * pbar * pbar;
 }
 
 Real
@@ -190,8 +190,8 @@ NaClFluidProperties::h(Real pressure, Real temperature) const
   Real pt = 611.657 * 1.0e-5;
 
   // Note: the enthalpy of halite is 0 at the triple point of water
-  return (8.7664e2 * (Tc - Tt) + 6.4139e-2 * (Tc * Tc - Tt * Tt) +
-    8.8101e-5 * (Tc * Tc * Tc - Tt * Tt * Tt) + 44.14 * (pbar - pt)) / 1000.0;
+  return 8.7664e2 * (Tc - Tt) + 6.4139e-2 * (Tc * Tc - Tt * Tt) +
+    8.8101e-5 * (Tc * Tc * Tc - Tt * Tt * Tt) + 44.14 * (pbar - pt);
 }
 
 void
@@ -207,11 +207,11 @@ NaClFluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & dh_
   Real pt = 611.657 * 1.0e-5;
 
   // Note: the enthalpy of halite is 0 at the triple point of water
-  h = (8.7664e2 * (Tc - Tt) + 6.4139e-2 * (Tc * Tc - Tt * Tt) +
-    8.8101e-5 * (Tc * Tc * Tc - Tt * Tt * Tt) + 44.14 * (pbar - pt)) / 1000.0;
+  h = 8.7664e2 * (Tc - Tt) + 6.4139e-2 * (Tc * Tc - Tt * Tt) +
+    8.8101e-5 * (Tc * Tc * Tc - Tt * Tt * Tt) + 44.14 * (pbar - pt);
 
-  dh_dp = 44.14 * 1.0e-5 / 1000.0;
-  dh_dT = (8.7664e2  + 2.0 * 6.4139e-2 * Tc + 3.0 * 8.8101e-5 * Tc * Tc) / 1000.0;
+  dh_dp = 44.14 * 1.0e-5;
+  dh_dT = 8.7664e2  + 2.0 * 6.4139e-2 * Tc + 3.0 * 8.8101e-5 * Tc * Tc;
 }
 
 Real

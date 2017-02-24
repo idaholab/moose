@@ -76,7 +76,7 @@ public:
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @return internal enerygy (kJ/kg)
+   * @return internal enerygy (J/kg)
    */
   virtual Real e(Real pressure, Real temperature) const override;
 
@@ -85,7 +85,7 @@ public:
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @param[out] e internal energy (kJ/kg)
+   * @param[out] e internal energy (J/kg)
    * @param[out] de_dp derivative of internal energy wrt pressure
    * @param[out] de_dT derivative of internal energy wrt temperature
    */
@@ -99,7 +99,7 @@ public:
    * @param[out] rho density (kg/m^3)
    * @param[out] drho_dp derivative of density wrt pressure
    * @param[out] drho_dT derivative of density wrt temperature
-   * @param[out] e internal energy (kJ/kg)
+   * @param[out] e internal energy (J/kg)
    * @param[out] de_dp derivative of internal energy wrt pressure
    * @param[out] de_dT derivative of internal energy wrt temperature
    */
@@ -121,7 +121,7 @@ public:
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @return cp (kJ/kg/K)
+   * @return cp (J/kg/K)
    */
   virtual Real cp(Real pressure, Real temperature) const override;
 
@@ -130,7 +130,7 @@ public:
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @return cv (kJ/kg/K)
+   * @return cv (J/kg/K)
    */
   virtual Real cv(Real pressure, Real temperature) const override;
 
@@ -176,7 +176,7 @@ public:
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @return s (kJ/kg/K)
+   * @return s (J/kg/K)
    */
   virtual Real s(Real pressure, Real temperature) const override;
 
@@ -187,7 +187,7 @@ public:
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @return h (kJ/kg)
+   * @return h (J/kg)
    */
   virtual Real h(Real pressure, Real temperature) const override;
 
@@ -198,7 +198,7 @@ public:
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @param[out] h (kJ/kg)
+   * @param[out] h (J/kg)
    * @param[out] dh_dp derivative of enthalpy wrt pressure
    * @param[out] dh_dT derivative of enthalpy wrt temperature
    */

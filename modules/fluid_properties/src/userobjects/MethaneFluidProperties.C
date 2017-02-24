@@ -71,7 +71,7 @@ MethaneFluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho, Rea
 Real
 MethaneFluidProperties::e(Real pressure, Real temperature) const
 {
-  return h(pressure, temperature) - _R * temperature / _Mch4 / 1000.0;
+  return h(pressure, temperature) - _R * temperature / _Mch4;
 }
 
 void
@@ -81,7 +81,7 @@ MethaneFluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & 
   Real enthalpy, enthalpy_dp, enthalpy_dT;
   h_dpT(pressure, temperature, enthalpy, enthalpy_dp, enthalpy_dT);
   de_dp = enthalpy_dp;
-  de_dT = enthalpy_dT - _R / _Mch4 / 1000.0;
+  de_dT = enthalpy_dT - _R / _Mch4;
 }
 
 void
@@ -124,13 +124,14 @@ MethaneFluidProperties::cp(Real /*pressure*/, Real temperature) const
   for (unsigned int i = 0; i < a.size(); ++i)
     specific_heat += a[i] * std::pow(temperature, i);
 
-  return specific_heat;
+  // convert to J/kg/K by multiplying by 1000
+  return specific_heat * 1000.0;
 }
 
 Real
 MethaneFluidProperties::cv(Real pressure, Real temperature) const
 {
-  return cp(pressure, temperature) - _R / _Mch4 / 1000.0;
+  return cp(pressure, temperature) - _R / _Mch4;
 }
 
 Real
@@ -200,7 +201,8 @@ MethaneFluidProperties::s(Real /*pressure*/, Real temperature) const
   for (unsigned int i = 1; i < a.size(); ++i)
     entropy += a[i] * std::pow(temperature, i) / static_cast<Real>(i);
 
-  return entropy;
+  // convert to J/kg/K by multiplying by 1000
+  return entropy * 1000.0;
 }
 
 Real
@@ -221,7 +223,8 @@ MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
   for (unsigned int i = 0; i < a.size(); ++i)
     enthalpy += a[i] * std::pow(temperature, i + 1) / (i + 1.0);
 
-  return enthalpy;
+  // convert to J/kg by multiplying by 1000
+  return enthalpy * 1000.0;
 }
 
 void
@@ -242,7 +245,8 @@ MethaneFluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
   for (unsigned int i = 0; i < a.size(); ++i)
     dhdt += a[i] * std::pow(temperature, i);
 
-  dh_dT = dhdt;
+  // convert to J/kg/K by multiplying by 1000
+  dh_dT = dhdt * 1000.0;
 }
 
 Real

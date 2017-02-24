@@ -551,8 +551,7 @@ CO2FluidProperties::e(Real pressure, Real temperature) const
   Real delta = density / _critical_density;
   Real tau = _critical_temperature / temperature;
 
-  // Divide by 1000 for kJ
-  return _Rco2 * temperature * tau * dphiSW_dt(delta, tau) / 1000.0;
+  return _Rco2 * temperature * tau * dphiSW_dt(delta, tau);
 }
 
 void
@@ -564,15 +563,14 @@ CO2FluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & de_d
   Real delta = density / _critical_density;
   Real tau = _critical_temperature / temperature;
 
-  // Divide by 1000 for kJ
-  e = _Rco2 * temperature * tau * dphiSW_dt(delta, tau) / 1000.0;
+  e = _Rco2 * temperature * tau * dphiSW_dt(delta, tau);
   Real dpdd = dphiSW_dd(delta, tau);
   Real d2pdd2 = d2phiSW_dd2(delta, tau);
   Real d2pddt = d2phiSW_ddt(delta, tau);
 
-  de_dp = tau * d2pddt / (density * (2.0 * dpdd + delta * d2pdd2)) / 1000.0;
+  de_dp = tau * d2pddt / (density * (2.0 * dpdd + delta * d2pdd2));
   de_dT = - _Rco2 * (delta * tau * d2pddt * (dpdd - tau * d2pddt) /
-    (2.0 * dpdd + delta * d2pdd2) + tau * tau * d2phiSW_dt2(delta, tau)) / 1000.0;
+		     (2.0 * dpdd + delta * d2pdd2) + tau * tau * d2phiSW_dt2(delta, tau));
 }
 
 void
@@ -611,8 +609,7 @@ CO2FluidProperties::cp(Real pressure, Real temperature) const
     delta * tau * d2phiSW_ddt(delta, tau), 2.0) / (2.0 * delta * dphiSW_dd(delta, tau) + delta * delta *
     d2phiSW_dd2(delta, tau));
 
-  // Divide by 1000 for kJ
-  return _Rco2 * heat_capacity / 1000.0;
+  return _Rco2 * heat_capacity;
 }
 
 Real
@@ -624,8 +621,7 @@ CO2FluidProperties::cv(Real pressure, Real temperature) const
   Real delta = density / _critical_density;
   Real tau = _critical_temperature / temperature;
 
-  // Divide by 1000 for kJ
-  return - _Rco2 * tau * tau * d2phiSW_dt2(delta, tau) / 1000.0;
+  return - _Rco2 * tau * tau * d2phiSW_dt2(delta, tau);
 }
 
 Real
@@ -677,8 +673,7 @@ CO2FluidProperties::s(Real pressure, Real temperature) const
   Real delta = density / _critical_density;
   Real tau = _critical_temperature / temperature;
 
-  // Divide by 1000 for kJ
-  return _Rco2 * (tau * dphiSW_dt(delta, tau) - phiSW(delta, tau)) / 1000.0;
+  return _Rco2 * (tau * dphiSW_dt(delta, tau) - phiSW(delta, tau));
 }
 
 Real
@@ -690,7 +685,7 @@ CO2FluidProperties::h(Real pressure, Real temperature) const
   Real delta = density / _critical_density;
   Real tau = _critical_temperature / temperature;
 
-  return _Rco2 * temperature * (tau * dphiSW_dt(delta, tau) + delta * dphiSW_dd(delta, tau)) / 1000.0;
+  return _Rco2 * temperature * (tau * dphiSW_dt(delta, tau) + delta * dphiSW_dd(delta, tau));
 }
 
 void
@@ -705,11 +700,10 @@ CO2FluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & dh_d
   Real d2pdd2 = d2phiSW_dd2(delta, tau);
   Real d2pddt = d2phiSW_ddt(delta, tau);
 
-  // Divide by 1000 for kJ
-  h = _Rco2 * temperature * (tau * dphiSW_dt(delta, tau) + delta * dpdd) / 1000.0;
-  dh_dp = (dpdd + delta * d2pdd2 + tau * d2pddt) / (density * (2.0 * dpdd + delta * d2pdd2)) / 1000.0;
-  dh_dT = (_Rco2 * delta * dpdd * (1.0 - tau * d2pddt / dpdd) * (1.0 - tau * d2pddt / dpdd) /
-    (2.0 + delta * d2pdd2 / dpdd) - _Rco2 * tau * tau * d2phiSW_dt2(delta, tau)) / 1000.0;
+  h = _Rco2 * temperature * (tau * dphiSW_dt(delta, tau) + delta * dpdd);
+  dh_dp = (dpdd + delta * d2pdd2 + tau * d2pddt) / (density * (2.0 * dpdd + delta * d2pdd2));
+  dh_dT = _Rco2 * delta * dpdd * (1.0 - tau * d2pddt / dpdd) * (1.0 - tau * d2pddt / dpdd) /
+    (2.0 + delta * d2pdd2 / dpdd) - _Rco2 * tau * tau * d2phiSW_dt2(delta, tau);
 }
 
 Real

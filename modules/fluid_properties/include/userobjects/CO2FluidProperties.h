@@ -279,7 +279,7 @@ public:
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @return internal energy (kJ/kg)
+   * @return internal energy (J/kg)
    */
   virtual Real e(Real pressure, Real temperature) const override;
   /// Internal energy and its derivatives wrt pressure and temperature
@@ -298,7 +298,7 @@ public:
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @return isobaric specific heat capacity (kJ/kg/K)
+   * @return isobaric specific heat capacity (J/kg/K)
    */
   virtual Real cp(Real pressure, Real temperature) const override;
 
@@ -308,7 +308,7 @@ public:
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @return isochoric specific heat capacity (kJ/kg/K)
+   * @return isochoric specific heat capacity (J/kg/K)
    */
   virtual Real cv(Real pressure, Real temperature) const override;
 
@@ -330,7 +330,7 @@ public:
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @return specific entropy (kJ/kg/K)
+   * @return specific entropy (J/kg/K)
    */
   virtual Real s(Real pressure, Real temperature) const override;
 
@@ -340,7 +340,7 @@ public:
    *
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
-   * @return specific enthalpy (kJ/kg)
+   * @return specific enthalpy (J/kg)
    */
   virtual Real h(Real p, Real T) const override;
 
