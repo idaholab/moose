@@ -380,11 +380,11 @@ EigenExecutionerBase::postExecute()
   else
   {
     s = normalizeSolution(_norm_execflag & (EXEC_TIMESTEP_END | EXEC_LINEAR));
-    if (std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
+    if (!MooseUtils::absoluteFuzzyEqual(s, 1.0))
       _console << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
   }
 
-  if ((!getParam<bool>("output_before_normalization")) || std::fabs(s-1.0)>std::numeric_limits<Real>::epsilon())
+  if ((!getParam<bool>("output_before_normalization")) || !MooseUtils::absoluteFuzzyEqual(s, 1.0))
   {
     _problem.timeStep()++;
     Real t = _problem.time();
@@ -407,7 +407,7 @@ EigenExecutionerBase::normalizeSolution(bool force)
     factor = _eigenvalue;
   Real scaling = factor/_normalization;
 
-  if (scaling != 1.0)
+  if (!MooseUtils::absoluteFuzzyEqual(scaling, 1.0))
   {
     //FIXME: we assume linear scaling here!
     _eigen_sys.scaleSystemSolution(MooseEigenSystem::EIGEN, scaling);
