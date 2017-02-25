@@ -1,32 +1,29 @@
 [Tests]
   [./mooseMessage]
-    type = RunPythonApp
+    type = PythonUnitTest
     input = 'test_mooseMessage.py'
-    unittest = true
+    buffer = True
   [../]
 
   [./mooseMessageDialog]
-    type = RunPythonApp
+    type = PythonUnitTest
     input = test_mooseMessageDialog.py
-    unittest = true
   [../]
 
   [./moose_data_frame]
-    type = RunPythonApp
+    type = PythonUnitTest
     input = test_MooseDataFrame.py
-    unittest = true
   [../]
 
   [./postprocessors]
-    type = RunPythonApp
+    type = PythonUnitTest
     input = test_PostprocessorReader.py
-    unittest = true
+    buffer = True
   [../]
 
   [./vector_postprocessors]
-    type = RunPythonApp
+    type = PythonUnitTest
     input = test_VectorPostprocessorReader.py
-    unittest = true
   [../]
 
 []
