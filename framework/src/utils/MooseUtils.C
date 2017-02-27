@@ -472,6 +472,9 @@ getRecoveryFileBase(const std::list<std::string> & checkpoint_files)
   // Loop through all possible files and store the newest
   for (const auto & cp_file : checkpoint_files)
   {
+    // Only look at the main checkpoint file, not the mesh, or restartable data files
+    if (hasExtension(cp_file, "xdr"))
+    {
       struct stat stats;
       stat(cp_file.c_str(), &stats);
 
@@ -484,6 +487,7 @@ getRecoveryFileBase(const std::list<std::string> & checkpoint_files)
 
       if (mod_time == newest_time)
         newest_restart_files.push_back(cp_file);
+    }
   }
 
   // Loop through all of the newest files according the number in the file name
