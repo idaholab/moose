@@ -590,6 +590,8 @@ void FEProblemBase::initialSetup()
 
   if (!_app.isRecovering())
   {
+    _current_execute_on_flag = EXEC_INITIAL;
+
     Moose::perf_log.push("execTransfers()", "Setup");
     execTransfers(EXEC_INITIAL);
     Moose::perf_log.pop("execTransfers()", "Setup");
@@ -602,11 +604,8 @@ void FEProblemBase::initialSetup()
     // We'll backup the Multiapp here
     backupMultiApps(EXEC_INITIAL);
     Moose::perf_log.pop("execMultiApps()", "Setup");
-  }
 
-  // Yak is currently relying on doing this after initial Transfers
-  if (!_app.isRecovering())
-  {
+    // Yak is currently relying on doing this after initial Transfers
     Moose::setup_perf_log.push("computeUserObjects()", "Setup");
 
     //TODO: user object evaluation could fail.
@@ -620,8 +619,9 @@ void FEProblemBase::initialSetup()
     computeUserObjects(EXEC_INITIAL, Moose::POST_AUX);
 
     Moose::setup_perf_log.pop("computeUserObjects()", "Setup");
-  }
 
+    _current_execute_on_flag = EXEC_NONE;
+  }
 
   // Here we will initialize the stateful properties once more since they may have been updated
   // during initialSetup by calls to computeProperties.
@@ -3619,6 +3619,7 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<
     for (const auto & it : _random_data_objects)
       it.second->updateSeeds(EXEC_NONLINEAR);
 
+    _current_execute_on_flag = EXEC_NONLINEAR;
     _currently_computing_jacobian = true;
 
     execTransfers(EXEC_NONLINEAR);
@@ -3650,6 +3651,7 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<
 
     _nl->computeJacobian(jacobian, kernel_type);
 
+    _current_execute_on_flag = EXEC_NONE;
     _currently_computing_jacobian = false;
     _has_jacobian = true;
   }
