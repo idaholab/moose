@@ -31,6 +31,7 @@
 #include "GeneralizedPlaneStrainOffDiag.h"
 #include "WeakPlaneStress.h"
 #include "PlasticHeatEnergy.h"
+#include "PhaseFieldFractureMechanicsOffDiag.h"
 
 #include "LinearElasticTruss.h"
 #include "FiniteStrainPlasticMaterial.h"
@@ -213,7 +214,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(StressDivergenceRZTensors);
   registerKernel(StressDivergenceRSphericalTensors);
   registerKernel(MomentBalancing);
-  registerKernel(StressDivergencePFFracTensors);
+  registerDeprecatedObject(StressDivergencePFFracTensors, "06/01/2017 09:00");
   registerKernel(PoroMechanicsCoupling);
   registerKernel(InertialForce);
   registerKernel(Gravity);
@@ -223,6 +224,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerKernel(GeneralizedPlaneStrainOffDiag);
   registerKernel(WeakPlaneStress);
   registerKernel(PlasticHeatEnergy);
+  registerKernel(PhaseFieldFractureMechanicsOffDiag);
 
   registerMaterial(LinearElasticTruss);
   registerMaterial(FiniteStrainPlasticMaterial);

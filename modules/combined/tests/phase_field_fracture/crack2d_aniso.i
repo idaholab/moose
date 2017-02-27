@@ -31,14 +31,17 @@
     variable = c
     beta = b
   [../]
+  [./TensorMechanics]
+    displacements = 'disp_x disp_y'
+  [../]
   [./solid_x]
-    type = StressDivergencePFFracTensors
+    type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_x
     component = 0
     c = c
   [../]
   [./solid_y]
-    type = StressDivergencePFFracTensors
+    type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_y
     component = 1
     c = c
