@@ -19,7 +19,6 @@
 #include "UserObject.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
-#include "MaterialPropertyInterface.h"
 #include "UserObjectInterface.h"
 #include "Coupleable.h"
 #include "MooseVariableDependencyInterface.h"
@@ -42,7 +41,6 @@ class NodalUserObject :
   public UserObject,
   public BlockRestrictable,
   public BoundaryRestrictable,
-  public MaterialPropertyInterface,
   public UserObjectInterface,
   public Coupleable,
   public MooseVariableDependencyInterface,
