@@ -31,6 +31,7 @@ class MooseApp;
 class Factory;
 class ActionFactory;
 class GlobalParamsAction;
+class JsonSyntaxTree;
 
 /**
  * Class for parsing input files. This class utilizes the GetPot library for actually tokenizing and parsing files. It is not
@@ -99,6 +100,11 @@ public:
    * Use MOOSE Factories to construct a full parse tree for documentation or echoing input.
    */
   void buildFullTree(const std::string &search_string);
+
+  /**
+   * Use MOOSE Factories to construct a parameter tree for documentation or echoing input.
+   */
+  void buildJsonSyntaxTree(JsonSyntaxTree & tree) const;
 
   /**
    * This function checks to see if there are unidentified variables in the input file (i.e. unused)

@@ -287,6 +287,12 @@ namespace MooseUtils
    */
   std::string getRecoveryFileBase(const std::list<std::string> & checkpoint_files);
 
+  /*
+   * Checks to see if a string matches a search string
+   * @param name The name to check
+   * @param search_string The search string to check name against
+   */
+  bool wildCardMatch(std::string name, std::string search_string);
 
   /**
    * This function will split the passed in string on a set of delimiters appending the substrings

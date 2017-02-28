@@ -93,7 +93,8 @@ InputFileFormatter::printParams(const std::string & /*prefix*/,
     }
 
     // See if we match the search string
-    if (wildCardMatch(iter.first, search_string) || wildCardMatch(value, search_string))
+    if (MooseUtils::wildCardMatch(iter.first, search_string) ||
+        MooseUtils::wildCardMatch(value, search_string))
     {
       // Don't print active if it is the default all, that means it's not in the input file - unless of course we are in dump mode
       if (!_dump_mode && iter.first == "active")

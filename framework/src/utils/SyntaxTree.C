@@ -15,6 +15,7 @@
 #include "SyntaxTree.h"
 
 #include "InputParameters.h"
+#include "MooseUtils.h"
 #include "Parser.h"
 
 #include <algorithm>
@@ -167,7 +168,7 @@ SyntaxTree::TreeNode::print(short depth, const std::string &search_string, bool 
     // Compare the block name, if it's matched we are going to pass an empty search string
     // which means match ALL parameters
     std::string local_search_string;
-    if (wildCardMatch(name, search_string))
+    if (MooseUtils::wildCardMatch(name, search_string))
       found = true;
     else
       local_search_string = search_string;
@@ -233,45 +234,4 @@ bool
 SyntaxTree::isLongNames() const
 {
   return _use_long_names;
-}
-
-bool
-SyntaxTree::wildCardMatch(std::string name, std::string search_string)
-{
-  // Assume that an empty string matches anything
-  if (search_string == "")
-    return true;
-
-  // transform to lower for case insenstive matching
-  std::transform(name.begin(), name.end(), name.begin(), (int(*)(int))std::toupper);
-  std::transform(search_string.begin(), search_string.end(), search_string.begin(), (int(*)(int))std::toupper);
-
-  // exact match!
-  if (search_string.find("*") == std::string::npos)
-    return search_string == name;
-
-  // wildcard
-  std::vector<std::string> tokens;
-  MooseUtils::tokenize(search_string, tokens, 1, "*");
-
-  size_t pos = 0;
-  for (unsigned int i=0; i<tokens.size() && pos != std::string::npos; ++i)
-  {
-    pos = name.find(tokens[i], pos);
-    // See if we have a leading wildcard
-    if (search_string[0] != '*' && i == 0 && pos != 0)
-      return false;
-  }
-
-  if (pos != std::string::npos && tokens.size() > 0)
-  {
-    // Now see if we have a trailing wildcard
-    size_t last_token_length = tokens.back().length();
-    if (*search_string.rbegin() == '*' || pos == name.size() - last_token_length)
-      return true;
-    else
-      return false;
-  }
-  else
-    return false;
 }
