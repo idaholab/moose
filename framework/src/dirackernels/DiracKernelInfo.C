@@ -123,7 +123,10 @@ DiracKernelInfo::findPoint(Point p, const MooseMesh& mesh)
   // CAN'T DO THIS if findPoint() is only called on some processors,
   // PointLocatorBase::build() is a 'parallel_only' method!
   if (_point_locator.get() == NULL)
-    _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, mesh);
+    {
+      _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, mesh);
+      _point_locator->enable_out_of_mesh_mode();
+    }
 
   // Check that the PointLocator is ready to start locating points.
   // So far I do not have any tests that trip this...
