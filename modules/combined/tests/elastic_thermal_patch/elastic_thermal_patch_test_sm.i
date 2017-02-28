@@ -46,15 +46,9 @@
 #  stress yz = 2 * 5e5 * 2e-6 / 2 = 1
 #  stress zx = 2 * 5e5 * 3e-6 / 2 = 1.5
 
-[GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
-  temperature = temp
-  order = FIRST
-  family = LAGRANGE
-[]
-
 [Mesh]
   file = elastic_thermal_patch_test.e
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Functions]
@@ -97,15 +91,23 @@
 
 [Variables]
   [./disp_x]
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   [./disp_y]
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   [./disp_z]
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   [./temp]
+    order = FIRST
+    family = LAGRANGE
     initial_condition = 117.56
   [../]
 []
@@ -137,10 +139,15 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
+[]
 
+[Kernels]
   [./heat]
     type = HeatConduction
     variable = temp
@@ -149,46 +156,40 @@
 
 [AuxKernels]
   [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx
-    index_i = 0
-    index_j = 0
+    index = 0
   [../]
   [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_yy
-    index_i = 1
-    index_j = 1
+    index = 1
   [../]
   [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_zz
-    index_i = 2
-    index_j = 2
+    index = 2
   [../]
   [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xy
-    index_i = 0
-    index_j = 1
+    index = 3
   [../]
   [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_yz
-    index_i = 1
-    index_j = 2
+    index = 4
   [../]
   [./stress_zx]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_zx
-    index_i = 2
-    index_j = 0
+    index = 5
   [../]
 []
 
@@ -354,38 +355,34 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./stiffStuff1]
+    type = Elastic
+    block = '1 2 3 4 5 6 7'
+
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+
     bulk_modulus = 0.333333333333333e6
     shear_modulus = 0.5e6
-  [../]
 
-  [./strain]
-    type = ComputeFiniteStrain
-    decomposition_method = EigenSolution
-    eigenstrain_names = eigenstrain
-  [../]
+    temp = temp
+    thermal_expansion = 1e-8
 
-  [./thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
-    stress_free_temperature = 117.56
-    thermal_expansion_coeff = 1e-8
-    incremental_form = true
-    eigenstrain_name = eigenstrain
-  [../]
-
-  [./stress]
-    type = ComputeFiniteStrainElasticStress
+    increment_calculation = eigen
   [../]
 
   [./heat]
     type = HeatConductionMaterial
+    block = '1 2 3 4 5 6 7'
+
     specific_heat = 1.0
     thermal_conductivity = 1.0
   [../]
 
   [./density]
     type = Density
+    block = '1 2 3 4 5 6 7'
     density = 1.0
     disp_x = disp_x
     disp_y = disp_y
@@ -401,6 +398,7 @@
 
   nl_rel_tol = 1e-12
   l_max_its = 20
+
   start_time = 0.0
   dt = 1.0
   num_steps = 2

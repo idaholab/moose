@@ -33,13 +33,11 @@
 #   br  = body force in r direction
 #   bz  = body force in z direction
 #
-[GlobalParams]
-  displacements = 'disp_x disp_y'
-  temperature = temp
-  volumetric_locking_correction = true
-  order = FIRST
-  family = LAGRANGE
-[]
+# This test is meant to exercise the Jacobian.  To that end, the body
+# force has been turned off.  This makes the results differ slightly
+# from the original values, but requires a correct Jacobian for minimal
+# iterations.  Iteration plotting is turned on to ensure that the
+# number of iterations needed does not increase.
 
 [Problem]
   coord_type = RZ
@@ -70,12 +68,18 @@
 
 [Variables]
   [./disp_x]
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   [./disp_y]
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   [./temp]
+    order = FIRST
+    family = LAGRANGE
     initial_condition = 117.56
   [../]
 []
@@ -107,17 +111,15 @@
   [../]
 []
 
+[SolidMechanics]
+  [./solid]
+    disp_r = disp_x
+    disp_z = disp_y
+    temp = temp
+  [../]
+[]
+
 [Kernels]
-  [./TensorMechanics]
-  [../]
-
-  [./body]
-    type = BodyForce
-    variable = disp_y
-    value = 1
-    function = body
-  [../]
-
   [./heat]
     type = HeatConduction
     variable = temp
@@ -126,46 +128,40 @@
 
 [AuxKernels]
   [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx
-    index_i = 0
-    index_j = 0
+    index = 0
   [../]
   [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_yy
-    index_i = 1
-    index_j = 1
+    index = 1
   [../]
   [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_zz
-    index_i = 2
-    index_j = 2
+    index = 2
   [../]
   [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xy
-    index_i = 0
-    index_j = 1
+    index = 3
   [../]
   [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_yz
-    index_i = 1
-    index_j = 2
+    index = 4
   [../]
   [./stress_zx]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_zx
-    index_i = 2
-    index_j = 0
+    index = 5
   [../]
 []
 
@@ -192,40 +188,41 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
-    lambda = 400000.0
+  [./stiffStuff1]
+    type = Elastic
+    block = 1
+
+    disp_r = disp_x
+    disp_z = disp_y
+
+    bulk_modulus = 666666.6666666667
     poissons_ratio = 0.25
-  [../]
 
-  [./strain]
-    type = ComputeAxisymmetricRZIncrementalStrain
-    eigenstrain_names = eigenstrain
-  [../]
-
-  [./thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
-    thermal_expansion_coeff = 1e-6
-    stress_free_temperature = 117.56
-    incremental_form = true
-    eigenstrain_name = eigenstrain
-  [../]
-
-  [./stress]
-    type = ComputeStrainIncrementBasedStress
+    temp = temp
+    thermal_expansion = 1e-6
   [../]
 
   [./heat]
     type = HeatConductionMaterial
+    block = 1
+
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
   [../]
 
   [./density]
     type = Density
+    block = 1
     density = 0.283
     disp_r = disp_x
     disp_z = disp_y
+  [../]
+[]
+
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
   [../]
 []
 
@@ -237,11 +234,14 @@
 
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'lu       101'
+
   line_search = 'none'
 
   nl_abs_tol = 1e-11
   nl_rel_tol = 1e-12
+
   l_max_its = 20
+
   start_time = 0.0
   dt = 1.0
   num_steps = 1
@@ -249,9 +249,11 @@
 []
 
 [Outputs]
-  file_base = elastic_thermal_patch_rz_out
+  file_base = elastic_thermal_patch_rz_smp_out
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
+    execute_on = 'initial timestep_end nonlinear'
+    nonlinear_residual_dt_divisor = 100
   [../]
 []

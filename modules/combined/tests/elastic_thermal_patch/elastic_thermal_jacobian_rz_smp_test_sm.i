@@ -1,12 +1,6 @@
 # This problem is intended to exercise the Jacobian for coupled RZ
 # problems.  Only two iterations should be needed.
 
-[GlobalParams]
-  volumetric_locking_correction = true
-  order = FIRST
-  family = LAGRANGE
-[]
-
 [Problem]
   coord_type = RZ
 []
@@ -36,12 +30,18 @@
 
 [Variables]
   [./disp_x]
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   [./disp_y]
+    order = FIRST
+    family = LAGRANGE
   [../]
 
   [./temp]
+    order = FIRST
+    family = LAGRANGE
     initial_condition = 117.56
   [../]
 []
@@ -73,12 +73,15 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y'
-    temperature = temp
+[SolidMechanics]
+  [./solid]
+    disp_r = disp_x
+    disp_z = disp_y
+    temp = temp
   [../]
+[]
 
+[Kernels]
   [./heat]
     type = HeatConduction
     variable = temp
@@ -87,46 +90,40 @@
 
 [AuxKernels]
   [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xx
-    index_i = 0
-    index_j = 0
+    index = 0
   [../]
   [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_yy
-    index_i = 1
-    index_j = 1
+    index = 1
   [../]
   [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_zz
-    index_i = 2
-    index_j = 2
+    index = 2
   [../]
   [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_xy
-    index_i = 0
-    index_j = 1
+    index = 3
   [../]
   [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_yz
-    index_i = 1
-    index_j = 2
+    index = 4
   [../]
   [./stress_zx]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = MaterialTensorAux
+    tensor = stress
     variable = stress_zx
-    index_i = 2
-    index_j = 0
+    index = 5
   [../]
 []
 
@@ -153,33 +150,24 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./stiffStuff1]
+    type = Elastic
+    block = 1
+
+    disp_r = disp_x
+    disp_z = disp_y
+
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-  [../]
 
-  [./strain]
-    type = ComputeAxisymmetricRZIncrementalStrain
-    displacements = 'disp_x disp_y'
-    eigenstrain_names = eigenstrain
-  [../]
-
-  [./thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
-    temperature = temp
-    stress_free_temperature = 117.56
-    thermal_expansion_coeff = 1e-6
-    incremental_form = true
-    eigenstrain_name = eigenstrain
-  [../]
-
-  [./stress]
-    type = ComputeStrainIncrementBasedStress
+    temp = temp
+    thermal_expansion = 1e-6
   [../]
 
   [./heat]
     type = HeatConductionMaterial
+    block = 1
+
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
   [../]
@@ -212,7 +200,9 @@
 
   nl_abs_tol = 1e-9
   nl_rel_tol = 1e-12
+
   l_max_its = 20
+
   start_time = 0.0
   dt = 1.0
   num_steps = 1

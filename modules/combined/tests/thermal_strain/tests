@@ -1,8 +1,17 @@
 [Tests]
-  [./test]
+  [./thermal_strain_test]
     type = 'Exodiff'
     input = 'thermal_strain_test.i'
-    exodiff = 'out.e'
+    exodiff = 'thermal_strain_test_out.e'
+    abs_zero = 1e-07
+    scale_refine = 1
+    max_parallel = 1
+  [../]
+
+  [./thermal_strain_test_sm]
+    type = 'Exodiff'
+    input = 'thermal_strain_test_sm.i'
+    exodiff = 'thermal_strain_test_sm_out.e'
     abs_zero = 1e-07
     scale_refine = 1
     max_parallel = 1
