@@ -230,6 +230,13 @@ class Tester(MooseObject):
     def checkRunnableBase(self, options, checks, test_list=None):
         reason = ''
 
+        # If --dry-run set the test status to pass and DO NOT return.
+        # This will allow additional checks to perform and report tests
+        # that would normally be skipped (and return as False).
+        if options.dry_run:
+            self.success_message = 'DRY RUN'
+            self.setStatus(self.success_message, self.bucket_success)
+
         # Check if we only want to run failed tests
         if options.failed_tests:
             if self.specs['test_name'] not in test_list:
