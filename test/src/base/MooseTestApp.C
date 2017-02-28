@@ -196,6 +196,7 @@
 #include "NumShapeSideUserObject.h"
 #include "DenomShapeSideUserObject.h"
 #include "GhostUserObject.h"
+#include "GetTransferUserObject.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -511,6 +512,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(NumShapeSideUserObject);
   registerUserObject(DenomShapeSideUserObject);
   registerUserObject(GhostUserObject);
+  registerUserObject(GetTransferUserObject);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
