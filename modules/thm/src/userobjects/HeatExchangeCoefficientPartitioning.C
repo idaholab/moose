@@ -22,7 +22,7 @@ HeatExchangeCoefficientPartitioning::~HeatExchangeCoefficientPartitioning()
 }
 
 Real
-HeatExchangeCoefficientPartitioning::getPartition(Real alpha_liquid, Real dalpha_liquid_dt) const
+HeatExchangeCoefficientPartitioning::getPartition(Real alpha_liquid, Real) const
 {
   if ((alpha_liquid < _lower))
     return - alpha_liquid * alpha_liquid / _lower / _lower + 2 * alpha_liquid / _lower;
@@ -36,7 +36,7 @@ HeatExchangeCoefficientPartitioning::getPartition(Real alpha_liquid, Real dalpha
 }
 
 Real
-HeatExchangeCoefficientPartitioning::getPartitionDer(Real alpha_liquid, Real dalpha_liquid_dt, Real area) const
+HeatExchangeCoefficientPartitioning::getPartitionDer(Real alpha_liquid, Real, Real) const
 {
   if ((alpha_liquid < _lower))
     return - 2 * alpha_liquid / _lower / _lower + 2 / _lower;
