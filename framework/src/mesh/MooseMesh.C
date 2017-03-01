@@ -2137,7 +2137,7 @@ MooseMesh::getGhostedBoundaryInflation() const
   return _ghosted_boundaries_inflation;
 }
 
-namespace // Anonymous namespace for helper
+namespace // Anonymous namespace for helpers
 {
   // A class for templated methods that expect output iterator
   // arguments, which adds objects to the Mesh.
@@ -2170,6 +2170,32 @@ namespace // Anonymous namespace for helper
     DistributedMesh & mesh;
   };
 
+  /**
+   * Specific weak ordering for Elem *'s to be used in a set.
+   * We use the id, but first sort by level.  This guarantees
+   * when traversing the set from beginning to end the lower
+   * level (parent) elements are encountered first.
+   *
+   * This was swiped from libMesh mesh_communication.C, and ought to be
+   * replaced with libMesh::CompareElemIdsByLevel just as soon as I refactor to
+   * create that - @roystgnr
+   */
+  struct CompareElemsByLevel
+  {
+    bool operator()(const Elem * a,
+                    const Elem * b) const
+    {
+      libmesh_assert (a);
+      libmesh_assert (b);
+      const unsigned int
+        al = a->level(), bl = b->level();
+      const dof_id_type
+        aid = a->id(),   bid = b->id();
+
+      return (al == bl) ? aid < bid : al < bl;
+    }
+  };
+
 } // anonymous namespace
 
 
@@ -2190,7 +2216,7 @@ MooseMesh::ghostGhostedBoundaries()
 
   mesh.get_boundary_info().build_side_list(elems, sides, ids);
 
-  std::set<const Elem *> boundary_elems_to_ghost;
+  std::set<const Elem *, CompareElemsByLevel> boundary_elems_to_ghost;
   std::set<Node *> connected_nodes_to_ghost;
 
   std::vector<const Elem*> family_tree;
@@ -2203,6 +2229,12 @@ MooseMesh::ghostGhostedBoundaries()
 
 #ifdef LIBMESH_ENABLE_AMR
       elem->family_tree(family_tree);
+      Elem * parent = elem->parent();
+      while (parent)
+      {
+        family_tree.push_back(parent);
+        parent = parent->parent();
+      }
 #else
       family_tree.clear();
       family_tree.push_back(elem);
