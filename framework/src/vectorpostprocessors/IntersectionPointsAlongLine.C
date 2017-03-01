@@ -63,6 +63,11 @@ IntersectionPointsAlongLine::execute()
   std::vector<LineSegment> segments;
 
   std::unique_ptr<PointLocatorBase> pl = _fe_problem.mesh().getPointLocator();
+
+  // We may not have any elements along the given line; if so then
+  // that shouldn't throw a libMesh error.
+  pl->enable_out_of_mesh_mode();
+
   Moose::elementsIntersectedByLine(_start, _end, _fe_problem.mesh(), *pl, intersected_elems, segments);
 
   const unsigned int num_elems = intersected_elems.size();
