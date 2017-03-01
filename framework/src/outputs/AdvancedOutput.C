@@ -596,7 +596,7 @@ AdvancedOutput<T>::initOutputList(OutputData & data)
   {
     // Check if variables are in both, which is invalid
     std::vector<std::string> tmp;
-    std::set_intersection(hide.begin(), hide.end(), avail.begin(), avail.end(), std::inserter(tmp, tmp.begin()));
+    std::set_intersection(hide.begin(), hide.end(), show.begin(), show.end(), std::inserter(tmp, tmp.begin()));
     if (!tmp.empty())
     {
       std::ostringstream oss;
