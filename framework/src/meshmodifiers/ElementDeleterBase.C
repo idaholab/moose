@@ -120,14 +120,6 @@ ElementDeleterBase::modify()
     std::vector<Parallel::Request> query_requests(my_n_proc-1),
                                    reply_requests(my_n_proc-1);
 
-    const MeshBase::const_element_iterator end = mesh.elements_end();
-    for (MeshBase::const_element_iterator elem_it = mesh.elements_begin(); elem_it != end; ++elem_it)
-    {
-      Elem * elem = *elem_it;
-      if (shouldDelete(elem))
-        deleteable_elems.insert(elem);
-    }
-
     // Make all requests
     for (processor_id_type p=0; p != my_n_proc; ++p)
     {
