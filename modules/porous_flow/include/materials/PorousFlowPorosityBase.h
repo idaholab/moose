@@ -31,9 +31,6 @@ protected:
   /// computed porosity at the nodes or quadpoints
   MaterialProperty<Real> & _porosity;
 
-  /// old value of porosity
-  MaterialProperty<Real> & _porosity_old;
-
   /// d(porosity)/d(PorousFlow variable)
   MaterialProperty<std::vector<Real>> & _dporosity_dvar;
 

@@ -20,6 +20,7 @@ InputParameters validParams<PorousFlowPorosityHMBiotModulus>()
 
 PorousFlowPorosityHMBiotModulus::PorousFlowPorosityHMBiotModulus(const InputParameters & parameters) :
     PorousFlowPorosityHM(parameters),
+    _porosity_old(_nodal_material ? getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal") : getMaterialPropertyOld<Real>("PorousFlow_porosity_qp")),
     _biot_modulus(getParam<Real>("constant_biot_modulus")),
     _fluid_bulk_modulus(getParam<Real>("constant_fluid_bulk_modulus")),
     _pf_old(_nodal_material ? getMaterialPropertyOld<Real>("PorousFlow_effective_fluid_pressure_nodal") : getMaterialPropertyOld<Real>("PorousFlow_effective_fluid_pressure_qp")),

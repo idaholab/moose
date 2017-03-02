@@ -73,9 +73,6 @@ protected:
   /// computed property of the phase
   MaterialProperty<std::vector<Real>> & _property;
 
-  /// old value of property of the phase
-  MaterialProperty<std::vector<Real>> * const _property_old;
-
   /// d(property)/d(PorousFlow variable)
   MaterialProperty<std::vector<std::vector<Real>>> & _dproperty_dvar;
 

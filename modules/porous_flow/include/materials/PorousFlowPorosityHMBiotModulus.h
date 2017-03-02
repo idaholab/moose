@@ -33,6 +33,9 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
+  /// old value of porosity
+  const MaterialProperty<Real> & _porosity_old;
+
   /// constant biot modulus
   const Real _biot_modulus;
 
