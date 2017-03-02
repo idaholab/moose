@@ -29,9 +29,6 @@ protected:
   /// Mass fraction matrix at quadpoint or nodes
   MaterialProperty<std::vector<std::vector<Real>>> & _mass_frac;
 
-  /// Old value of mass fraction matrix
-  MaterialProperty<std::vector<std::vector<Real>>> * const _mass_frac_old;
-
   /// Gradient of the mass fraction matrix at the quad points
   MaterialProperty<std::vector<std::vector<RealGradient>>> * const _grad_mass_frac;
 

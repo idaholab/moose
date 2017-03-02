@@ -49,9 +49,6 @@ protected:
   /// Matrix internal_energy at the nodes
   MaterialProperty<Real> & _en_nodal;
 
-  /// Old matrix internal_energy at the nodes
-  MaterialProperty<Real> & _en_nodal_old;
-
   /// d(matrix internal energy)/d(PorousFlow variable)
   MaterialProperty<std::vector<Real>> & _den_nodal_dvar;
 };
