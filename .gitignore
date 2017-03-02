@@ -73,6 +73,10 @@ temp_print_trace.*
 *.png
 *.gif
 *.tif
+*.jpg
+*.tiff
+*.ps
+*.bmp
 *.html
 *.xyz
 *Revision.h
@@ -180,3 +184,9 @@ docs/.moosedocs
 !docs/media/**/*.png
 !docs/media/**/*.gif
 !docs/tests/**/gold/*.html
+
+# Chigger
+!python/chigger/tests/**/gold/*.png
+!python/chigger/tests/input/*.e*
+!python/chigger/logos/*.png
+!python/chigger/contrib/*.xml

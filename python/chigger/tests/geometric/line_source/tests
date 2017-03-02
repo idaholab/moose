@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = ImageDiff
+    command = line_source.py
+    imagediff = 'line_source.png'
+    allowed_linux = 0.975
+  [../]
+[]

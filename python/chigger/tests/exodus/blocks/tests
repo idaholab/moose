@@ -1,0 +1,51 @@
+[Tests]
+  [./default]
+    type = ImageDiff
+    command = default.py
+    imagediff = 'default.png'
+  [../]
+  [./blocks]
+    type = ImageDiff
+    command = blocks.py
+    imagediff = 'blocks.png'
+  [../]
+  [./all_boundary]
+    type = ImageDiff
+    command = all_boundary.py
+    imagediff = 'all_boundary.png'
+    allowed_linux = 0.95
+  [../]
+  [./boundary]
+    type = ImageDiff
+    command = boundary.py
+    imagediff = 'boundary.png'
+  [../]
+  [./boundary_numeric]
+    type = ImageDiff
+    command = boundary_numeric.py
+    imagediff = 'boundary_numeric.png'
+  [../]
+  [./nodesets]
+    type = ImageDiff
+    command = nodesets.py
+    imagediff = 'nodesets.png'
+    allowed_linux = 0.97
+  [../]
+  [./all_nodesets]
+    type = ImageDiff
+    command = all_nodesets.py
+    imagediff = 'all_nodesets.png'
+    allowed_linux = 0.90
+  [../]
+  [./none]
+    type = ImageDiff
+    command = none.py
+    imagediff = 'none.png'
+  [../]
+  [./combo]
+    type = ImageDiff
+    command = combo.py
+    imagediff = 'combo.png'
+    allowed_linux = 0.95
+  [../]
+[]

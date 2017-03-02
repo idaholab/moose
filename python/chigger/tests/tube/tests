@@ -1,0 +1,8 @@
+[Tests]
+  [./tube]
+    # Test creating 3D tube from 1D part
+    type = ImageDiff
+    command = tube.py
+    imagediff = 'tube.png'
+  [../]
+[]

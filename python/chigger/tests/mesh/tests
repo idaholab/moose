@@ -1,0 +1,9 @@
+[Tests]
+  [./view_mesh]
+    type = ImageDiff
+    command = mesh.py
+    imagediff = 'mesh.png'
+    allowed_linux = 0.97
+    allowed_darwin = 0.97
+  [../]
+[]

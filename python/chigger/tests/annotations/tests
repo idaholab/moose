@@ -1,0 +1,36 @@
+[Tests]
+  [./image]
+    # Test displaying an image
+    type = ImageDiff
+    command = image_annotation.py
+    imagediff = 'image_annotation.png'
+  [../]
+
+  [./logo]
+    # Test displaying logos
+    type = ImageDiff
+    command = logo_annotation.py
+    imagediff = 'logo_annotation.png'
+  [../]
+
+  [./text]
+    # Test displaying text
+    type = ImageDiff
+    command = text_annotation.py
+    imagediff = 'text_annotation.png'
+  [../]
+
+  [./time]
+    # Test displaying time with TimeAnnotation
+    type = ImageDiff
+    command = time_annotation.py
+    imagediff = 'time_annotation.png'
+  [../]
+
+  [./time_change]
+    # Test displaying changing time
+    type = ImageDiff
+    command = time_annotation_change.py
+    imagediff = 'time_annotation_change_0.png time_annotation_change_9.png'
+  [../]
+[]
