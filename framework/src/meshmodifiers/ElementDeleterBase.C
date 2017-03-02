@@ -92,17 +92,24 @@ ElementDeleterBase::modify()
     typedef std::vector<std::pair<dof_id_type, unsigned int> > vec_type;
     std::vector<vec_type> queries(my_n_proc);
 
-    // Loop over the elements looking for those with remote neighbors
+    // Loop over the elements looking for those with remote neighbors.
+    // The ghost_elements iterators in libMesh need to be updated
+    // before we can use them safely here, so we'll test for
+    // ghost-vs-local manually.
     for (MeshBase::const_element_iterator
-           el  = mesh.ghost_elements_begin(),
-           end_el = mesh.ghost_elements_end();
+           el  = mesh.elements_begin(),
+           end_el = mesh.elements_end();
            el != end_el ; ++el)
     {
       const Elem* elem = *el;
+      const processor_id_type pid = elem->processor_id();
+      if (pid == my_proc_id)
+        continue;
+
       const unsigned int n_sides = elem->n_sides();
       for (unsigned int n=0; n != n_sides; ++n)
         if (elem->neighbor(n) == remote_elem)
-          queries[elem->processor_id()].push_back
+          queries[pid].push_back
             (std::make_pair(elem->id(), n));
     }
 
