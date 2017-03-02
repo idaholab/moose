@@ -97,23 +97,15 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 100.0
   [../]
 []

@@ -7,33 +7,33 @@
 
   [./thermomechanics]
     type = 'Exodiff'
-    input = 'thermo_mech_test.i'
+    input = 'thermo_mech.i'
     exodiff = 'thermo_mech_out.e'
     scale_refine = 1
-    prereq = 'thermomechanics_sm'
   [../]
 
   [./thermomechanics_SMP]
     type = 'Exodiff'
-    input = 'thermo_mech_smp_test.i'
+    input = 'thermo_mech_smp.i'
     exodiff = 'thermo_mech_smp_out.e'
-    custom_cmp = 'thermo_mech_test.cmp'
+    custom_cmp = 'thermo_mech.cmp'
     max_parallel = 1
-    prereq = 'thermomechanics_SMP_sm'
   [../]
 
   [./thermomechanics_sm]
     type = 'Exodiff'
-    input = 'thermo_mech_test_sm.i'
+    input = 'thermo_mech_sm.i'
     exodiff = 'thermo_mech_out.e'
     scale_refine = 1
+    prereq = 'thermomechanics'
   [../]
 
   [./thermomechanics_SMP_sm]
     type = 'Exodiff'
-    input = 'thermo_mech_smp_test_sm.i'
+    input = 'thermo_mech_smp_sm.i'
     exodiff = 'thermo_mech_smp_out.e'
-    custom_cmp = 'thermo_mech_test.cmp'
+    custom_cmp = 'thermo_mech.cmp'
     max_parallel = 1
+    prereq = 'thermomechanics_SMP'
   [../]
 []

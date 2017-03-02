@@ -1,26 +1,18 @@
+#Run with 4 procs
+
 [Mesh]
   file = cube.e
 []
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -29,7 +21,6 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    temp = temp
   [../]
 []
 
@@ -42,28 +33,26 @@
 
 [BCs]
   [./bottom_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
   [../]
-
   [./bottom_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
-
   [./bottom_z]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
   [../]
 
   [./bottom_temp]
-    type = PresetBC
+    type = DirichletBC
     variable = temp
     boundary = 1
     value = 10.0
@@ -103,34 +92,20 @@
   [../]
 []
 
-[Preconditioning]
-  [./SMP]
-    type = SMP
-    full = true
-  [../]
-[]
-
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
 
   nl_rel_tol = 1e-14
   l_tol = 1e-3
+
   l_max_its = 100
+
   dt = 1.0
   end_time = 1.0
 []
 
 [Outputs]
-  file_base = thermo_mech_smp_out
-  [./exodus]
-    type = Exodus
-    execute_on = 'initial timestep_end nonlinear'
-    nonlinear_residual_dt_divisor = 100
-  [../]
+  file_base = thermo_mech_out
+  exodus = true
 []

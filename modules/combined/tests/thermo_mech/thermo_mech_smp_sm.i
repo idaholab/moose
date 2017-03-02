@@ -1,10 +1,3 @@
-[GlobalParams]
-  temperature = temp
-  volumetric_locking_correction = true
-  order = FIRST
-  family = LAGRANGE
-[]
-
 [Mesh]
   file = cube.e
 []
@@ -12,10 +5,8 @@
 [Variables]
   [./disp_x]
   [../]
-
   [./disp_y]
   [../]
-
   [./disp_z]
   [../]
 
@@ -23,11 +14,16 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+[SolidMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    temp = temp
   [../]
+[]
 
+[Kernels]
   [./heat]
     type = HeatConduction
     variable = temp
@@ -41,14 +37,12 @@
     boundary = 1
     value = 0.0
   [../]
-
   [./bottom_y]
     type = PresetBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
-
   [./bottom_z]
     type = PresetBC
     variable = disp_z
@@ -65,37 +59,31 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./constant]
+    type = LinearIsotropicMaterial
+    block = 1
+
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    temp = temp
+
     youngs_modulus = 1.0
-    poissons_ratio = 0.3
+    poissons_ratio = .3
+    thermal_expansion = 1e-5
   [../]
 
-  [./strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y disp_z'
-    eigenstrain_names = eigenstrain
-  [../]
-
-  [./thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
-    stress_free_temperature = 0.0
-    thermal_expansion_coeff = 1e-5
-    eigenstrain_name = eigenstrain
-  [../]
-
-  [./stress]
-    type = ComputeLinearElasticStress
-  [../]
-
-  [./heat]
+  [./heat1]
     type = HeatConductionMaterial
+    block = 1
+
     specific_heat = 1.0
     thermal_conductivity = 1.0
   [../]
 
   [./density]
     type = Density
+    block = 1
     density = 1.0
     disp_x = disp_x
     disp_y = disp_y
@@ -112,8 +100,6 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = '-pc_type'
@@ -121,7 +107,9 @@
 
   nl_rel_tol = 1e-14
   l_tol = 1e-3
+
   l_max_its = 100
+
   dt = 1.0
   end_time = 1.0
 []

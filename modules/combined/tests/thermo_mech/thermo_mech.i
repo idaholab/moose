@@ -1,4 +1,9 @@
 #Run with 4 procs
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+  temperature = temp
+  volumetric_locking_correction = true
+[]
 
 [Mesh]
   file = cube.e
@@ -6,35 +11,20 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 
 [Kernels]
+  [./TensorMechanics]
+  [../]
+
   [./heat]
     type = HeatConduction
     variable = temp
@@ -48,14 +38,12 @@
     boundary = 1
     value = 0.0
   [../]
-
   [./bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
   [../]
-
   [./bottom_z]
     type = DirichletBC
     variable = disp_z
@@ -72,31 +60,33 @@
 []
 
 [Materials]
-  [./constant]
-    type = LinearIsotropicMaterial
-    block = 1
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    temp = temp
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1.0
-    poissons_ratio = .3
-    thermal_expansion = 1e-5
+    poissons_ratio = 0.3
+  [../]
+  [./strain]
+    type = ComputeSmallStrain
+    eigenstrain_names = eigenstrain
+  [../]
+  [./thermal_strain]
+    type = ComputeThermalExpansionEigenstrain
+    stress_free_temperature = 0.0
+    thermal_expansion_coeff = 1e-5
+    eigenstrain_name = eigenstrain
+  [../]
+  [./stress]
+    type = ComputeLinearElasticStress
   [../]
 
-  [./heat1]
+  [./heat]
     type = HeatConductionMaterial
-    block = 1
-
     specific_heat = 1.0
     thermal_conductivity = 1.0
   [../]
 
   [./density]
     type = Density
-    block = 1
     density = 1.0
     disp_x = disp_x
     disp_y = disp_y
@@ -106,18 +96,17 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   nl_rel_tol = 1e-14
   l_tol = 1e-3
+
   l_max_its = 100
+
   dt = 1.0
   end_time = 1.0
 []
 
 [Outputs]
-  file_base = thermo_mech_out
   exodus = true
 []

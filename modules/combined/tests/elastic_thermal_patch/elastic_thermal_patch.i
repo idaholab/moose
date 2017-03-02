@@ -49,8 +49,6 @@
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   temperature = temp
-  order = FIRST
-  family = LAGRANGE
 []
 
 [Mesh]
@@ -98,10 +96,8 @@
 [Variables]
   [./disp_x]
   [../]
-
   [./disp_y]
   [../]
-
   [./disp_z]
   [../]
 
@@ -110,85 +106,17 @@
   [../]
 []
 
-[AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
+[Modules/TensorMechanics/Master/All]
+  add_variables = true
+  strain = FINITE
+  eigenstrain_names = eigenstrain
+  generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
 []
 
 [Kernels]
-  [./TensorMechanics]
-  [../]
-
   [./heat]
     type = HeatConduction
     variable = temp
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yz
-    index_i = 1
-    index_j = 2
-  [../]
-  [./stress_zx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zx
-    index_i = 2
-    index_j = 0
   [../]
 []
 
@@ -359,13 +287,6 @@
     bulk_modulus = 0.333333333333333e6
     shear_modulus = 0.5e6
   [../]
-
-  [./strain]
-    type = ComputeFiniteStrain
-    decomposition_method = EigenSolution
-    eigenstrain_names = eigenstrain
-  [../]
-
   [./thermal_strain]
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 117.56
@@ -373,7 +294,6 @@
     incremental_form = true
     eigenstrain_name = eigenstrain
   [../]
-
   [./stress]
     type = ComputeFiniteStrainElasticStress
   [../]
@@ -395,12 +315,12 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   nl_rel_tol = 1e-12
+
   l_max_its = 20
+
   start_time = 0.0
   dt = 1.0
   num_steps = 2

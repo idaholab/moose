@@ -33,6 +33,11 @@
 #   br  = body force in r direction
 #   bz  = body force in z direction
 #
+# This test is meant to exercise the Jacobian.  To that end, the body
+# force has been turned off.  This makes the results differ slightly
+# from the original values, but requires a correct Jacobian for minimal
+# iterations.  Iteration plotting is turned on to ensure that the
+# number of iterations needed does not increase.
 
 [Problem]
   coord_type = RZ
@@ -63,18 +68,11 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 117.56
   [../]
 []
@@ -110,17 +108,11 @@
   [./solid]
     disp_r = disp_x
     disp_z = disp_y
+    temp = temp
   [../]
 []
 
 [Kernels]
-  [./body]
-    type = BodyForce
-    variable = disp_y
-    value = 1
-    function = body
-  [../]
-
   [./heat]
     type = HeatConduction
     variable = temp
@@ -133,36 +125,42 @@
     tensor = stress
     variable = stress_xx
     index = 0
+    execute_on = timestep_end
   [../]
   [./stress_yy]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_yy
     index = 1
+    execute_on = timestep_end
   [../]
   [./stress_zz]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_zz
     index = 2
+    execute_on = timestep_end
   [../]
   [./stress_xy]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_xy
     index = 3
+    execute_on = timestep_end
   [../]
   [./stress_yz]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_yz
     index = 4
+    execute_on = timestep_end
   [../]
   [./stress_zx]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_zx
     index = 5
+    execute_on = timestep_end
   [../]
 []
 
@@ -196,7 +194,7 @@
     disp_r = disp_x
     disp_z = disp_y
 
-    lambda = 400000.0
+    bulk_modulus = 666666.6666666667
     poissons_ratio = 0.25
 
     temp = temp
@@ -220,16 +218,16 @@
   [../]
 []
 
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    full = true
+  [../]
+[]
+
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-  petsc_options_iname = '-pc_type -ksp_gmres_restart'
-  petsc_options_value = 'lu       101'
-
-  line_search = 'none'
 
   nl_abs_tol = 1e-11
   nl_rel_tol = 1e-12
@@ -243,9 +241,11 @@
 []
 
 [Outputs]
-  file_base = elastic_thermal_patch_rz_out
+  file_base = elastic_thermal_patch_rz_smp_out
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
+    execute_on = 'initial timestep_end nonlinear'
+    nonlinear_residual_dt_divisor = 100
   [../]
 []

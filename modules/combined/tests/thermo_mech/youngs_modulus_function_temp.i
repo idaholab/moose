@@ -29,8 +29,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  order = FIRST
-  family = LAGRANGE
 []
 
 [Mesh]
@@ -174,21 +172,15 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-  petsc_options       = '-snes_ksp_ew'
-  petsc_options_iname = '-ksp_gmres_restart'
-  petsc_options_value = '101'
-
-  line_search = 'none'
 
   l_max_its = 30
   nl_max_its = 30
+
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-6
   l_tol = 1e-5
+
   start_time = 0.0
   end_time = 5
   dt = 1
@@ -213,6 +205,5 @@
 [Outputs]
   [./out]
     type = Exodus
-    file_base = youngs_modulus_function_temp_out
   [../]
 []

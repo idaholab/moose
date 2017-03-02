@@ -1,7 +1,7 @@
 [Tests]
   [./elastic_thermal_patch]
     type = 'Exodiff'
-    input = 'elastic_thermal_patch_test.i'
+    input = 'elastic_thermal_patch.i'
     exodiff = 'elastic_thermal_patch_out.e'
     abs_zero = 1e-08
     use_old_floor = True
@@ -10,7 +10,7 @@
 
   [./elastic_thermal_jacobian_rz_smp]
     type = 'Exodiff'
-    input = 'elastic_thermal_jacobian_rz_smp_test.i'
+    input = 'elastic_thermal_jacobian_rz_smp.i'
     exodiff = 'elastic_thermal_jacobian_rz_smp_out.e'
     custom_cmp = 'elastic_thermal_patch.cmp'
     use_old_floor = True
@@ -20,7 +20,7 @@
 
   [./elastic_thermal_patch_rz]
     type = 'Exodiff'
-    input = 'elastic_thermal_patch_rz_test.i'
+    input = 'elastic_thermal_patch_rz.i'
     exodiff = 'elastic_thermal_patch_rz_out.e'
     use_old_floor = True
     max_parallel = 1
@@ -29,7 +29,7 @@
 
   [./elastic_thermal_patch_rz_smp]
     type = 'Exodiff'
-    input = 'elastic_thermal_patch_rz_smp_test.i'
+    input = 'elastic_thermal_patch_rz_smp.i'
     exodiff = 'elastic_thermal_patch_rz_smp_out.e'
     custom_cmp = 'elastic_thermal_patch.cmp'
     use_old_floor = True
@@ -39,7 +39,7 @@
 
   [./elastic_thermal_patch_sm]
     type = 'Exodiff'
-    input = 'elastic_thermal_patch_test_sm.i'
+    input = 'elastic_thermal_patch_sm.i'
     exodiff = 'elastic_thermal_patch_out.e'
     abs_zero = 1e-08
     use_old_floor = True
@@ -47,7 +47,7 @@
 
   [./elastic_thermal_jacobian_rz_smp_sm]
     type = 'Exodiff'
-    input = 'elastic_thermal_jacobian_rz_smp_test_sm.i'
+    input = 'elastic_thermal_jacobian_rz_smp_sm.i'
     exodiff = 'elastic_thermal_jacobian_rz_smp_out.e'
     custom_cmp = 'elastic_thermal_patch.cmp'
     use_old_floor = True
@@ -56,7 +56,7 @@
 
   [./elastic_thermal_patch_rz_sm]
     type = 'Exodiff'
-    input = 'elastic_thermal_patch_rz_test_sm.i'
+    input = 'elastic_thermal_patch_rz_sm.i'
     exodiff = 'elastic_thermal_patch_rz_out.e'
     use_old_floor = True
     max_parallel = 1
@@ -64,7 +64,7 @@
 
   [./elastic_thermal_patch_rz_smp_sm]
     type = 'Exodiff'
-    input = 'elastic_thermal_patch_rz_smp_test_sm.i'
+    input = 'elastic_thermal_patch_rz_smp_sm.i'
     exodiff = 'elastic_thermal_patch_rz_smp_out.e'
     custom_cmp = 'elastic_thermal_patch.cmp'
     use_old_floor = True

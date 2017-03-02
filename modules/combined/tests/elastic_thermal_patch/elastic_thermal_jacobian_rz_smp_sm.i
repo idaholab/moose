@@ -30,18 +30,11 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 117.56
   [../]
 []
@@ -94,36 +87,42 @@
     tensor = stress
     variable = stress_xx
     index = 0
+    execute_on = timestep_end
   [../]
   [./stress_yy]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_yy
     index = 1
+    execute_on = timestep_end
   [../]
   [./stress_zz]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_zz
     index = 2
+    execute_on = timestep_end
   [../]
   [./stress_xy]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_xy
     index = 3
+    execute_on = timestep_end
   [../]
   [./stress_yz]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_yz
     index = 4
+    execute_on = timestep_end
   [../]
   [./stress_zx]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_zx
     index = 5
+    execute_on = timestep_end
   [../]
 []
 
@@ -189,14 +188,7 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-  petsc_options_iname = '-pc_type -ksp_gmres_restart'
-  petsc_options_value = 'lu       101'
-
-  line_search = 'none'
 
   nl_abs_tol = 1e-9
   nl_rel_tol = 1e-12

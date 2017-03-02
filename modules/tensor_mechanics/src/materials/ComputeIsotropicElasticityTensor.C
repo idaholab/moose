@@ -41,48 +41,48 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(const InputPa
   }
   else if (_youngs_modulus_set && _poissons_ratio_set)
   {
-    iso_const[0] = _youngs_modulus*_poissons_ratio/((1 + _poissons_ratio)*(1 - 2*_poissons_ratio));
-    iso_const[1] = _youngs_modulus/(2.0*(1 + _poissons_ratio));
+    iso_const[0] = _youngs_modulus * _poissons_ratio / ((1.0 + _poissons_ratio) * (1.0 - 2.0 * _poissons_ratio));
+    iso_const[1] = _youngs_modulus / (2.0 * (1.0 + _poissons_ratio));
   }
   else if (_shear_modulus_set && _bulk_modulus_set)
   {
-    iso_const[0] = _bulk_modulus - 2.0/3.0*_shear_modulus;
+    iso_const[0] = _bulk_modulus - 2.0 / 3.0 * _shear_modulus;
     iso_const[1] = _shear_modulus;
   }
   else if (_poissons_ratio_set && _bulk_modulus_set)
   {
-    iso_const[0] = 3.0*_bulk_modulus*_poissons_ratio/(1 + _poissons_ratio);
-    iso_const[1] = 3.0*_bulk_modulus*(1 - 2.0*_poissons_ratio)/(2*(1 + _poissons_ratio));
+    iso_const[0] = 3.0 * _bulk_modulus * _poissons_ratio / (1.0 + _poissons_ratio);
+    iso_const[1] = 3.0 * _bulk_modulus * (1.0 - 2.0 * _poissons_ratio) / (2.0 * (1.0 + _poissons_ratio));
   }
   else if (_lambda_set && _bulk_modulus_set)
   {
     iso_const[0] = _lambda;
-    iso_const[1] = 3.0*(_bulk_modulus - _lambda)/2.0;
+    iso_const[1] = 3.0 * (_bulk_modulus - _lambda) / 2.0;
   }
   else if (_shear_modulus_set && _youngs_modulus_set)
   {
-    iso_const[0] = _shear_modulus*(_youngs_modulus - 2.0*_shear_modulus)/(3.0*_shear_modulus - _youngs_modulus);
+    iso_const[0] = _shear_modulus * (_youngs_modulus - 2.0 * _shear_modulus) / (3.0 * _shear_modulus - _youngs_modulus);
     iso_const[1] = _shear_modulus;
   }
   else if (_shear_modulus_set && _poissons_ratio_set)
   {
-    iso_const[0] = 2.0*_shear_modulus*_poissons_ratio/(1 - 2.0*_poissons_ratio);
+    iso_const[0] = 2.0 * _shear_modulus * _poissons_ratio / (1.0 - 2.0 * _poissons_ratio);
     iso_const[1] = _shear_modulus;
   }
   else if (_youngs_modulus_set && _bulk_modulus_set)
   {
-    iso_const[0] = 3.0*_bulk_modulus*(3.0*_bulk_modulus - _youngs_modulus)/(9.0*_bulk_modulus - _youngs_modulus);
-    iso_const[1] = 3.0*_bulk_modulus*_youngs_modulus/(9.0*_bulk_modulus - _youngs_modulus);
+    iso_const[0] = 3.0 * _bulk_modulus * (3.0 * _bulk_modulus - _youngs_modulus) / (9.0 * _bulk_modulus - _youngs_modulus);
+    iso_const[1] = 3.0 * _bulk_modulus * _youngs_modulus / (9.0 * _bulk_modulus - _youngs_modulus);
   }
   else if (_lambda_set && _poissons_ratio_set)
   {
     iso_const[0] = _lambda;
-    iso_const[1] = _lambda*(1 - 2.0*_poissons_ratio)/(2.0*_poissons_ratio);
+    iso_const[1] = _lambda * (1.0 - 2.0 * _poissons_ratio) / (2.0 * _poissons_ratio);
   }
   else if (_lambda_set && _youngs_modulus_set)
   {
     iso_const[0] = _lambda;
-    iso_const[1] = (_youngs_modulus - 3.0*_lambda + std::sqrt(_youngs_modulus*_youngs_modulus + 9.0*_lambda*_lambda + 2.0*_youngs_modulus*_lambda))/4.0;
+    iso_const[1] = (_youngs_modulus - 3.0 * _lambda + std::sqrt(_youngs_modulus * _youngs_modulus + 9.0 * _lambda * _lambda + 2.0 * _youngs_modulus * _lambda)) / 4.0;
   }
   else
     mooseError("Incorrect combination of elastic properties in ComputeIsotropicElasticityTensor.");

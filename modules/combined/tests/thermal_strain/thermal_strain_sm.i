@@ -26,23 +26,13 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 117.56
   [../]
 []
@@ -277,11 +267,12 @@
 [Executioner]
   type = Transient
 
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   nl_abs_tol = 1e-10
+
   l_max_its = 20
+
   start_time = 0.0
   dt = 0.5
   num_steps = 2
@@ -289,7 +280,7 @@
 []
 
 [Outputs]
-  file_base = thermal_strain_test_sm_out
+  file_base = thermal_strain_out
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

@@ -12,8 +12,6 @@
 #  since this is a unit cube) is 1e-4.
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  order = FIRST
-  family = LAGRANGE
 []
 
 [Mesh]
@@ -31,10 +29,8 @@
 [Variables]
   [./disp_x]
   [../]
-
   [./disp_y]
   [../]
-
   [./disp_z]
   [../]
 
@@ -43,86 +39,47 @@
   [../]
 []
 
-[AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
+[Modules/TensorMechanics/Master]
+  use_displaced_mesh = true
+  add_variables = true
+  strain = SMALL
+  incremental = true
+  generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+
+  [./block1]
+    eigenstrain_names = eigenstrain1
+    block = 1
   [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
+  [./block2]
+    eigenstrain_names = eigenstrain2
+    block = 2
   [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
+  [./block3]
+    eigenstrain_names = eigenstrain3
+    block = 3
   [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
+  [./block4]
+    eigenstrain_names = eigenstrain4
+    block = 4
   [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
+  [./block5]
+    eigenstrain_names = eigenstrain5
+    block = 5
   [../]
-  [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
+  [./block6]
+    eigenstrain_names = eigenstrain6
+    block = 6
+  [../]
+  [./block7]
+    eigenstrain_names = eigenstrain7
+    block = 7
   [../]
 []
 
 [Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
-  [../]
-
   [./heat]
     type = HeatConduction
     variable = temp
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-  [../]
-  [./stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yz
-    index_i = 1
-    index_j = 2
-  [../]
-  [./stress_zx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zx
-    index_i = 2
-    index_j = 0
   [../]
 []
 
@@ -161,11 +118,6 @@
     bulk_modulus = 0.333333333333e6
     poissons_ratio = 0.0
   [../]
-  [./strain1]
-    type = ComputeIncrementalSmallStrain
-    block = 1
-    eigenstrain_names = eigenstrain1
-  [../]
   [./thermal_strain1]
     type = ComputeThermalExpansionEigenstrain
     block = 1
@@ -185,11 +137,6 @@
     block = 2
     bulk_modulus = 0.333333333333e6
     lambda = 0.0
-  [../]
-  [./strain2]
-    type = ComputeIncrementalSmallStrain
-    block = 2
-    eigenstrain_names = eigenstrain2
   [../]
   [./thermal_strain2]
     type = ComputeThermalExpansionEigenstrain
@@ -211,11 +158,6 @@
     youngs_modulus = 1e6
     poissons_ratio = 0.0
   [../]
-  [./strain3]
-    type = ComputeIncrementalSmallStrain
-    block = 3
-    eigenstrain_names = eigenstrain3
-  [../]
   [./thermal_strain3]
     type = ComputeThermalExpansionEigenstrain
     block = 3
@@ -235,11 +177,6 @@
     block = 4
     youngs_modulus = 1e6
     poissons_ratio = 0.0
-  [../]
-  [./strain4]
-    type = ComputeIncrementalSmallStrain
-    block = 4
-    eigenstrain_names = eigenstrain4
   [../]
   [./thermal_strain4]
     type = ComputeThermalExpansionEigenstrain
@@ -261,11 +198,6 @@
     youngs_modulus = 1e6
     lambda = 0.0
   [../]
-  [./strain5]
-    type = ComputeIncrementalSmallStrain
-    block = 5
-    eigenstrain_names = eigenstrain5
-  [../]
   [./thermal_strain5]
     type = ComputeThermalExpansionEigenstrain
     block = 5
@@ -286,11 +218,6 @@
     youngs_modulus = 1e6
     shear_modulus = 5e5
   [../]
-  [./strain6]
-    type = ComputeIncrementalSmallStrain
-    block = 6
-    eigenstrain_names = eigenstrain6
-  [../]
   [./thermal_strain6]
     type = ComputeThermalExpansionEigenstrain
     block = 6
@@ -310,11 +237,6 @@
     block = 7
     shear_modulus = 5e5
     poissons_ratio = 0.0
-  [../]
-  [./strain7]
-    type = ComputeIncrementalSmallStrain
-    block = 7
-    eigenstrain_names = eigenstrain7
   [../]
   [./thermal_strain7]
     type = ComputeThermalExpansionEigenstrain
@@ -349,11 +271,12 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
+
   nl_abs_tol = 1e-10
+
   l_max_its = 20
+
   start_time = 0.0
   dt = 0.5
   num_steps = 2
@@ -361,7 +284,7 @@
 []
 
 [Outputs]
-  file_base = thermal_strain_test_out
+  file_base = thermal_strain_out
   [./exodus]
     type = Exodus
     elemental_as_nodal = true

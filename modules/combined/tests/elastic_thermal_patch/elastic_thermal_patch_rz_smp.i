@@ -39,6 +39,11 @@
 # iterations.  Iteration plotting is turned on to ensure that the
 # number of iterations needed does not increase.
 
+[GlobalParams]
+  temperature = temp
+  volumetric_locking_correction = true
+[]
+
 [Problem]
   coord_type = RZ
 []
@@ -68,100 +73,28 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 117.56
   [../]
 []
 
-[AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-    disp_r = disp_x
-    disp_z = disp_y
-    temp = temp
-  [../]
+[Modules/TensorMechanics/Master/All]
+  displacements = 'disp_x disp_y'
+  add_variables = true
+  strain = SMALL
+  incremental = true
+  eigenstrain_names = eigenstrain
+  generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
 []
 
 [Kernels]
   [./heat]
     type = HeatConduction
     variable = temp
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
-  [../]
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-  [../]
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
-  [../]
-  [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xy
-    index = 3
-  [../]
-  [./stress_yz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yz
-    index = 4
-  [../]
-  [./stress_zx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zx
-    index = 5
   [../]
 []
 
@@ -188,24 +121,24 @@
 []
 
 [Materials]
-  [./stiffStuff1]
-    type = Elastic
-    block = 1
-
-    disp_r = disp_x
-    disp_z = disp_y
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     bulk_modulus = 666666.6666666667
     poissons_ratio = 0.25
-
-    temp = temp
-    thermal_expansion = 1e-6
+  [../]
+  [./thermal_strain]
+    type = ComputeThermalExpansionEigenstrain
+    thermal_expansion_coeff = 1e-6
+    stress_free_temperature = 117.56
+    incremental_form = true
+    eigenstrain_name = eigenstrain
+  [../]
+  [./stress]
+    type = ComputeStrainIncrementBasedStress
   [../]
 
   [./heat]
     type = HeatConductionMaterial
-    block = 1
-
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
   [../]
@@ -228,14 +161,7 @@
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-  petsc_options_iname = '-pc_type -ksp_gmres_restart'
-  petsc_options_value = 'lu       101'
-
-  line_search = 'none'
 
   nl_abs_tol = 1e-11
   nl_rel_tol = 1e-12
