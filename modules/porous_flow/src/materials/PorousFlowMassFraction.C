@@ -22,7 +22,6 @@ PorousFlowMassFraction::PorousFlowMassFraction(const InputParameters & parameter
     PorousFlowMaterialVectorBase(parameters),
 
     _mass_frac(_nodal_material ? declareProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_nodal") : declareProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_qp")),
-    _mass_frac_old(_nodal_material ? &declarePropertyOld<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_nodal") : nullptr),
     _grad_mass_frac(_nodal_material ? nullptr : &declareProperty<std::vector<std::vector<RealGradient>>>("PorousFlow_grad_mass_frac_qp")),
     _dmass_frac_dvar(_nodal_material ? declareProperty<std::vector<std::vector<std::vector<Real>>>>("dPorousFlow_mass_frac_nodal_dvar") : declareProperty<std::vector<std::vector<std::vector<Real>>>>("dPorousFlow_mass_frac_qp_dvar")),
 
