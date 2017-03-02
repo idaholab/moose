@@ -219,7 +219,7 @@ SystemBase::prepare(THREAD_ID tid)
   }
   else
   {
-    mooseWarning("Prepare is being called without calling setActiveElementalMooseVariables, you are probably missing a call to MooseVariableDependencyInterface::addMooseVariableDependency.");
+    mooseDoOnce(mooseWarning("Prepare is being called without calling setActiveElementalMooseVariables, you are probably missing a call to MooseVariableDependencyInterface::addMooseVariableDependency."));
     for (const auto & var : _vars[tid].variables())
       var->prepare();
   }

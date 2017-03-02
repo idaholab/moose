@@ -489,14 +489,14 @@ MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(std::set<MooseVariab
 {
   for (const auto & object : objects)
   {
-    std::shared_ptr<MooseVariableDependencyInterface> interface = std::dynamic_pointer_cast<MooseVariableDependencyInterface>(ptr);
+    std::shared_ptr<MooseVariableDependencyInterface> interface = std::dynamic_pointer_cast<MooseVariableDependencyInterface>(object);
     if (interface)
     {
       const std::set<MooseVariable *> & mv_deps = interface->getMooseVariableDependencies();
       needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
 
-    std::shared_ptr<MaterialPropertyInterface> material_interface = std::dynamic_pointer_cast<MaterialPropertyInterface>(ptr);
+    std::shared_ptr<MaterialPropertyInterface> material_interface = std::dynamic_pointer_cast<MaterialPropertyInterface>(object);
     if (material_interface)
     {
       const std::set<MooseVariable *> & mv_deps = material_interface->getMaterialMooseVariableDependencies();

@@ -33,7 +33,7 @@ public:
 
   /**
    * Retrieve the set of MooseVariables that _this_ object depends on.
-   * @return The MooseVariables that MUST be reinited before evaluating this object
+   * @return The MooseVariables that MUST be re-initialized before evaluating this object
    */
   const std::set<MooseVariable *> & getMooseVariableDependencies();
 
@@ -49,15 +49,8 @@ protected:
 
 private:
 
-  /// Name of the object (for error messages)
-  const std::string _mvdi_name;
-
   /// The set of variables that this object depends on.
   std::set<MooseVariable *> _moose_variable_dependencies;
-
-  /// A flag to produce a warning if the add method is not called.
-  bool _variable_dependency_added;
-
 };
 
 #endif // MOOSEVARIABLEDEPENDENCYINTERFACE_H

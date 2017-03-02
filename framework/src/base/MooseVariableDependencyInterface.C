@@ -16,24 +16,19 @@
 #include "MooseObject.h"
 #include "MooseError.h"
 
-MooseVariableDependencyInterface::MooseVariableDependencyInterface() :
-    _variable_dependency_added(false)
+MooseVariableDependencyInterface::MooseVariableDependencyInterface()
 {
-  mooseDeprecated("The constructor for MooseVariableDependencyInterface has been updated to accept the MooseObject as an argument.");
+  mooseDeprecated("The empty MaterialPropertyInterface constructor will be removed, please use the version that takes a MooseObject * as input.");
 }
 
-MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject * moose_object) :
-    _mvdi_name(moose_object->name()),
-    _variable_dependency_added(false)
+
+MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject * /*moose_object*/)
 {
 }
 
 const std::set<MooseVariable *> &
 MooseVariableDependencyInterface::getMooseVariableDependencies()
 {
-  if (!_variable_dependency_added)
-    mooseError("The object " << _mvdi_name << " is inheriting from MooseVariableDependencyInterface failed to add any variable dependencies, the 'addMooseVariableDependency' method must be called.");
-
   return _moose_variable_dependencies;
 }
 
@@ -41,13 +36,11 @@ MooseVariableDependencyInterface::getMooseVariableDependencies()
 void
 MooseVariableDependencyInterface::addMooseVariableDependency(MooseVariable * var)
 {
-  _variable_dependency_added = true;
   _moose_variable_dependencies.insert(var);
 }
 
 
 void MooseVariableDependencyInterface::addMooseVariableDependency(std::vector<MooseVariable *> vars)
 {
-  _variable_dependency_added = true;
   _moose_variable_dependencies.insert(vars.begin(), vars.end());
 }

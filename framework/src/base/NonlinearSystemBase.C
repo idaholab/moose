@@ -665,15 +665,11 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jaco
   jacobian.close();
   if (_constraints.hasActiveNodalConstraints())
   {
-<<<<<<< ceb49856d57483f63a6c6a92df89149bc8dd2c3e
-    const auto & ncs = _constraints.getActiveNodalConstraints();
-=======
     std::set<MooseVariable *> needed_moose_vars;
     _constraints.updateVariableDependency(needed_moose_vars, tid);
     _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, tid);
 
-    const std::vector<MooseSharedPointer<NodalConstraint> > & ncs = _constraints.getActiveNodalConstraints();
->>>>>>> Changes to due to name change with FEProblem and NonlinearSystem
+    const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
       std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
@@ -720,14 +716,11 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
 
     if (_constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
     {
-<<<<<<< ceb49856d57483f63a6c6a92df89149bc8dd2c3e
       const auto & constraints = _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
-=======
-      const std::vector<MooseSharedPointer<NodeFaceConstraint> > & constraints = _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+
       std::set<MooseVariable *> needed_moose_vars;
       _constraints.updateVariableDependency(needed_moose_vars, 0);
       _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, 0);
->>>>>>> Changes to due to name change with FEProblem and NonlinearSystem
 
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
