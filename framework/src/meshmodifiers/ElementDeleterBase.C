@@ -157,7 +157,7 @@ ElementDeleterBase::modify()
         const unsigned int side = q.second;
         const Elem * neighbor = elem->neighbor(side);
 
-        if (neighbor == NULL) // neighboring element was deleted!
+        if (neighbor == nullptr) // neighboring element was deleted!
           responses[p-1].push_back(std::make_pair(elem->id(), side));
       }
 
@@ -183,7 +183,9 @@ ElementDeleterBase::modify()
         Elem * elem = mesh.elem_ptr(r.first);
         const unsigned int side = r.second;
 
-        elem->set_neighbor(side, libmesh_nullptr);
+        libmesh_assert(elem->neighbor(side) == remote_elem);
+
+        elem->set_neighbor(side, nullptr);
       }
     }
 
