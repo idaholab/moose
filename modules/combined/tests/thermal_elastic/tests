@@ -4,4 +4,9 @@
     input = 'thermal_elastic.i'
     exodiff = 'thermal_elastic_out.e'
   [../]
+  [./test_tm]
+    type = 'Exodiff'
+    input = 'thermal_elastic_tm.i'
+    exodiff = 'thermal_elastic_tm_out.e'
+  [../]
 []
