@@ -23,7 +23,8 @@ template<>
 InputParameters validParams<ChangeOverTimestepPostprocessor>();
 
 /**
- * Computes the change in a post-processor over a time step.
+ * Computes the change in a post-processor value, or the magnitude of its
+ * relative change, over a time step.
  */
 class ChangeOverTimestepPostprocessor : public GeneralPostprocessor
 {
@@ -35,6 +36,9 @@ public:
   virtual Real getValue() override;
 
 protected:
+  /// option to compute the magnitude of relative change instead of change
+  const bool _compute_relative_change;
+
   /// current post-processor value
   const PostprocessorValue & _pps_value;
 
