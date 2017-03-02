@@ -47,20 +47,30 @@ PointValue::execute()
   std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
   const Elem * elem = (*pl)(_point_vec[0]);
 
-  // Error if the element cannot be located
-  if (!elem)
-    mooseError("No element located at ", _point_vec[0], " in PointValue Postprocessor named: ", name());
-
   // Store the element id and processor id that owns the located element
-  _elem_id = elem->id();
-  _root_id = elem->processor_id();
+  if (elem)
+  {
+    _elem_id = elem->id();
+    _root_id = elem->processor_id();
+  }
+  else
+  {
+    _root_id = DofObject::invalid_processor_id;
+    _elem_id = DofObject::invalid_id;
+  }
 }
 
 void
 PointValue::finalize()
 {
-  // Gather a consistent id for broadcasting the computed value
+  // Gather consistent ids for broadcasting the computed value
   gatherMin(_root_id);
+  gatherMin(_elem_id);
+
+  // Error if the element cannot be located
+  if (_elem_id == DofObject::invalid_id)
+    mooseError("No element located at ", _point_vec[0], " in PointValue Postprocessor named: ", name());
+
 
   // Compute the value at the point
   if (_root_id == processor_id())
