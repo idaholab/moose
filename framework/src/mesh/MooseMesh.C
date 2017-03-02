@@ -941,6 +941,11 @@ MooseMesh::getBoundaryIDs(const std::vector<BoundaryName> & boundary_name, bool 
   const std::map<BoundaryID, std::string> & nodeset_map = boundary_info.get_nodeset_name_map();
 
   std::set<BoundaryID> boundary_ids = boundary_info.get_boundary_ids();
+
+  // On a distributed mesh we may have boundary ids that only exist on
+  // other processors.
+  _communicator.set_union(boundary_ids);
+
   BoundaryID max_boundary_id = boundary_ids.empty() ? 0 : *(boundary_ids.rbegin());
 
   std::vector<BoundaryID> ids(boundary_name.size());
