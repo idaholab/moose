@@ -666,6 +666,11 @@ public:
   std::shared_ptr<MultiApp> getMultiApp(const std::string & multi_app_name);
 
   /**
+   * Get Transfers by ExecFlagType and direction
+   */
+  std::vector<std::shared_ptr<Transfer>> getTransfers(ExecFlagType type, MultiAppTransfer::DIRECTION direction) const;
+
+  /**
    * Execute MultiAppTransfers associate with execution flag and direction.
    * @param type The execution flag to execute.
    * @param direction The direction (to or from) to transfer.

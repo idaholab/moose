@@ -2810,6 +2810,13 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECT
     _console << COLOR_CYAN << "\nNo Transfers on " <<  Moose::stringify(type) << " To MultiApps\n" << COLOR_DEFAULT << std::endl;
 }
 
+std::vector<std::shared_ptr<Transfer>>
+FEProblemBase::getTransfers(ExecFlagType type, MultiAppTransfer::DIRECTION direction) const
+{
+  const MooseObjectWarehouse<Transfer> & wh = direction == MultiAppTransfer::TO_MULTIAPP ? _to_multi_app_transfers[type] : _from_multi_app_transfers[type];
+  return wh.getActiveObjects();
+}
+
 bool
 FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
 {

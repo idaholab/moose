@@ -1,0 +1,12 @@
+[Tests]
+  [./get_transfer_success]
+    type = 'RunApp'
+    input = 'master.i'
+  [../]
+  [./get_transfer_fail]
+    type = RunException
+    input = 'master.i'
+    expect_err = 'Number of transfers in GetTransferUserObject incorrect'
+    cli_args = 'Transfers/active='nearest_node''
+  [../]
+[]
