@@ -15,6 +15,8 @@
 #include "ElementDeleterBase.h"
 #include "MooseMesh.h"
 
+#include "libmesh/remote_elem.h"
+
 template<>
 InputParameters validParams<ElementDeleterBase>()
 {
@@ -57,9 +59,123 @@ ElementDeleterBase::modify()
     mesh.delete_elem(elem);
 
   /**
-   * Deleting nodes and elements leaves NULLs in the mesh datastructure. We need to get rid of those.
-   * For now, we'll call contract and notify the SetupMeshComplete Action that we need to re-prepare the
-   * mesh.
+   * If we are on a distributed mesh, we may have deleted elements
+   * which are remote_elem neighbors on other processors, and we need
+   * to make those neighbor links into NULL pointers (i.e. domain
+   * boundaries) instead.
+   */
+  if (!mesh.is_serial())
+  {
+    const processor_id_type my_n_proc  = mesh.n_processors();
+    const processor_id_type my_proc_id = mesh.processor_id();
+    typedef std::vector<std::pair<dof_id_type, unsigned int> > vec_type;
+    std::vector<vec_type> queries(my_n_proc);
+
+    // Loop over the elements looking for those with remote neighbors
+    for (MeshBase::const_element_iterator
+           el  = mesh.ghost_elements_begin(),
+           end_el = mesh.ghost_elements_end();
+           el != end_el ; ++el)
+    {
+      const Elem* elem = *el;
+      const unsigned int n_sides = elem->n_sides();
+      for (unsigned int n=0; n != n_sides; ++n)
+        if (elem->neighbor(n) == remote_elem)
+          queries[elem->processor_id()].push_back
+            (std::make_pair(elem->id(), n));
+    }
+
+    Parallel::MessageTag
+      queries_tag = mesh.comm().get_unique_tag(42),
+      replies_tag = mesh.comm().get_unique_tag(6*9);
+
+    std::vector<Parallel::Request> query_requests(my_n_proc-1),
+                                   reply_requests(my_n_proc-1);
+
+    const MeshBase::const_element_iterator end = mesh.elements_end();
+    for (MeshBase::const_element_iterator elem_it = mesh.elements_begin(); elem_it != end; ++elem_it)
+    {
+      Elem * elem = *elem_it;
+      if (shouldDelete(elem))
+        deleteable_elems.insert(elem);
+    }
+
+    // Make all requests
+    for (processor_id_type p=0; p != my_n_proc; ++p)
+    {
+      if (p == my_proc_id)
+        continue;
+
+      Parallel::Request &request =
+        query_requests[p - (p > my_proc_id)];
+
+      mesh.comm().send
+        (p, queries[p], request, queries_tag);
+    }
+
+    // Reply to all requests
+    std::vector<vec_type> responses(my_n_proc-1);
+
+    for (processor_id_type p=1; p != my_n_proc; ++p)
+    {
+      vec_type query;
+
+      Parallel::Status
+        status(mesh.comm().probe (Parallel::any_source, queries_tag));
+      const processor_id_type
+        source_pid = cast_int<processor_id_type>(status.source());
+
+      mesh.comm().receive
+        (source_pid, query, queries_tag);
+
+      Parallel::Request &request =
+        reply_requests[p-1];
+
+      for (const auto & q : query)
+      {
+        const Elem * elem = mesh.elem_ptr(q.first);
+        const unsigned int side = q.second;
+        const Elem * neighbor = elem->neighbor(side);
+
+        if (neighbor == NULL) // neighboring element was deleted!
+          responses[p-1].push_back(std::make_pair(elem->id(), side));
+      }
+
+      mesh.comm().send
+        (source_pid, responses[p-1], request, replies_tag);
+    }
+
+    // Process all incoming replies
+    for (processor_id_type p=1; p != my_n_proc; ++p)
+    {
+      Parallel::Status status
+        (this->comm().probe (Parallel::any_source, replies_tag));
+      const processor_id_type
+        source_pid = cast_int<processor_id_type>(status.source());
+
+      vec_type response;
+
+      this->comm().receive
+        (source_pid, response, replies_tag);
+
+      for (const auto & r : response)
+      {
+        Elem * elem = mesh.elem_ptr(r.first);
+        const unsigned int side = r.second;
+
+        elem->set_neighbor(side, libmesh_nullptr);
+      }
+    }
+
+    Parallel::wait (query_requests);
+    Parallel::wait (reply_requests);
+  }
+
+  /**
+   * If we are on a ReplicatedMesh, deleting nodes and elements leaves
+   * NULLs in the mesh datastructure. We ought to get rid of those.
+   * For now, we'll call contract and notify the SetupMeshComplete
+   * Action that we need to re-prepare the mesh.
    */
   mesh.contract();
   _mesh_ptr->needsPrepareForUse();
