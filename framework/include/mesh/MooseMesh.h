@@ -122,7 +122,10 @@ public:
 
   /**
    * Returns a const reference to a set of all user-specified
-   * boundary IDs.
+   * boundary IDs.  On a distributed mesh this will *only* include
+   * boundary IDs which exist on local or ghosted elements; a copy and
+   * a call to _communicator.set_union() will be necessary to get the
+   * global ID set.
    */
   const std::set<BoundaryID> & getBoundaryIDs() const;
 
