@@ -8,7 +8,7 @@
   [./test_hidden_shown]
     type = 'RunException'
     input = 'output_vars_hidden_shown_check.i'
-    expect_err = 'Output\(s\) specified to be both shown and hidden: nodal u'
+    expect_err = 'Output\(s\) specified to be both shown and hidden: u'
   [../]
 
   [./test_nonexistent]
@@ -29,5 +29,11 @@
     type = 'Exodiff'
     input = show_single_vars.i
     exodiff = show_single_vars_out.e
+  [../]
+
+  [./show_hide]
+    type = 'Exodiff'
+    input = show_hide.i
+    exodiff = show_hide_out.e
   [../]
 []
