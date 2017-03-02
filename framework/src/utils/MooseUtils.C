@@ -383,52 +383,25 @@ removeColor(std::string & msg)
 void
 indentMessage(const std::string & prefix, std::string & message, const char* color/*= COLOR_CYAN*/)
 {
-  /**
-   * First we need to see if the message we need to indent (with color) also contains color codes that span lines.
-   * The code matches all of the XTERM constants (see XTermConstants.h). If it does, then we'll work on formatting
-   * each colored multiline chunk one at a time with the right codes.
-   */
-  pcrecpp::RE re_color_piece("(\\33\\[3[0-7]m)([^\n]*\n.*\\33\\[3\\dm)", pcrecpp::DOTALL());
-  std::string color_code, string_piece;
+  // First we need to see if the message we need to indent (with color) also contains color codes that span lines.
+  // The code matches all of the XTERM constants (see XTermConstants.h). If it does, then we'll work on formatting
+  // each colored multiline chunk one at a time with the right codes.
   std::string colored_message;
-  pcrecpp::StringPiece input(message);
+  std::string curr_color = COLOR_DEFAULT; // tracks last color code before newline
+  std::string line, color_code;
 
-  bool initial_indent = false;
-  while (re_color_piece.FindAndConsume(&input, &color_code, &string_piece))
+  std::istringstream iss(message);
+  for (std::string line; std::getline(iss, line); ) // loop over each line
   {
-    // The colored prefix
-    std::string indent = color + prefix + ": " + color_code;
+    const static pcrecpp::RE match_color(".*(\\33\\[3\\dm)((?!\\33\\[3\\d)[^\n])*");
+    pcrecpp::StringPiece line_piece(line);
+    match_color.FindAndConsume(&line_piece, &color_code);
+    colored_message += color + prefix + ": " + curr_color + line + "\n";
 
-    // Indent all the lines in this section
-    const static pcrecpp::RE re("\n");
-    re.GlobalReplace(std::string("\n") + indent, &string_piece);
-
-    // Prepend indent string at the front of the message and assign to colored_message
-    colored_message += indent + string_piece;
-    initial_indent = true;
+    if (!color_code.empty())
+      curr_color = color_code; // remember last color of this line
   }
-
-  // Here we format the remainder of the message that doesn't have any multi-line color codes.
-
-  /**
-   * If we already colored part of the message we need to pick up where we left off. We'll
-   * do that by using the StringPiece objects buffer. It will have already thrown away part
-   * of string that it has reformatted.
-   */
-  input.CopyToString(&string_piece);
-
-  // No multiline coloring, so we termintate each prefix with default coloring
-  std::string indent = color + prefix + ": " + COLOR_DEFAULT;
-
-  // Indent all the lines until the final newline is encountered
-  const static pcrecpp::RE re("\n(?=.*\n)");
-  re.GlobalReplace(std::string("\n") + indent, &string_piece);
-
-  // Prepend indent string at the front of the message if it hasn't already been done
-  if (!initial_indent)
-    message = colored_message + indent + string_piece;
-  else
-    message = colored_message + string_piece;
+  message = colored_message;
 }
 
 std::list<std::string>
