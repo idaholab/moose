@@ -56,7 +56,28 @@ ElementDeleterBase::modify()
    *       but because the order of deletion might impact what happens to any existing sidesets or nodesets.
    */
   for (const auto & elem : deleteable_elems)
+  {
+    // On distributed meshes, we'll need neighbor links to be useable
+    // shortly, so we can't just leave dangling pointers.
+    //
+    // FIXME - this could be made AMR-aware and refactored into
+    // libMesh - roystgnr
+    unsigned int n_sides = elem->n_sides();
+    for (unsigned int n = 0; n != n_sides; ++n)
+    {
+      Elem * neighbor = elem->neighbor(n);
+      if (!neighbor || neighbor == remote_elem)
+        continue;
+
+      const unsigned int return_side =
+        neighbor->which_neighbor_am_i(elem);
+
+      if (neighbor->neighbor(return_side) == elem)
+        neighbor->set_neighbor(return_side, nullptr);
+    }
+
     mesh.delete_elem(elem);
+  }
 
   /**
    * If we are on a distributed mesh, we may have deleted elements
