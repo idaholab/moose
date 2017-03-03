@@ -16,10 +16,10 @@
 #define MATERIALPROPERTYINTERFACE_H
 
 // MOOSE includes
+#include "FEProblemBase.h"
 #include "MooseTypes.h"
 #include "MaterialProperty.h"
 #include "MaterialData.h"
-#include "FEProblem.h"
 #include "InputParameters.h"
 
 // Forward declarations

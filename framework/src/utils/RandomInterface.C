@@ -17,6 +17,7 @@
 #include "Assembly.h"
 #include "RandomData.h"
 #include "MooseRandom.h"
+#include "FEProblemBase.h"
 
 template<>
 InputParameters validParams<RandomInterface>()

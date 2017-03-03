@@ -16,7 +16,7 @@
 #define SWAPBACKSENTINEL_H
 
 // MOOSE includes
-#include "FEProblem.h"
+#include "FEProblemBase.h"
 
 /**
  * The "SwapBackSentinel" class's destructor guarantees that

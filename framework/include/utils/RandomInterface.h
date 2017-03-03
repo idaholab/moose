@@ -16,13 +16,13 @@
 #define RANDOMINTERFACE_H
 
 #include "InputParameters.h"
-#include "FEProblem.h"
 #include "ParallelUniqueId.h"
 
-class RandomInterface;
 class Assembly;
-class RandomData;
+class FEProblemBase;
 class MooseRandom;
+class RandomData;
+class RandomInterface;
 
 template<>
 InputParameters validParams<RandomInterface>();

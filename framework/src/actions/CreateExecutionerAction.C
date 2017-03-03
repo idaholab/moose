@@ -17,6 +17,7 @@
 #include "PetscSupport.h"
 #include "MooseApp.h"
 #include "Executioner.h"
+#include "FEProblem.h"
 
 template<>
 InputParameters validParams<CreateExecutionerAction>()
