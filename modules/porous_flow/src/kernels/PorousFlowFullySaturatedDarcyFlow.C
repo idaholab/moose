@@ -25,7 +25,7 @@ PorousFlowFullySaturatedDarcyFlow::PorousFlowFullySaturatedDarcyFlow(const Input
   if (_fluid_component >= _porousflow_dictator.numComponents())
     mooseError("PorousFlowFullySaturatedDarcyFlow: The dictator proclaims the number of fluid components is ", _porousflow_dictator.numComponents(), " whereas you set the fluid_component = ", _fluid_component, ".  Happyness equals perfection.");
 }
-	   
+
 Real PorousFlowFullySaturatedDarcyFlow::mobility() const
 {
   const unsigned ph = 0;

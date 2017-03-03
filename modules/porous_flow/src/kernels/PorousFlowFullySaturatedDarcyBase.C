@@ -73,7 +73,7 @@ PorousFlowFullySaturatedDarcyBase::computeQpOffDiagJacobian(unsigned int jvar)
   dflow += _permeability[_qp] * (_dgrad_p_dvar[_qp][ph][pvar] * _phi[_j][_qp]);
   return _grad_test[_i][_qp] * (dmob * flow + mob * dflow);
 }
-	   
+
 Real PorousFlowFullySaturatedDarcyBase::mobility() const
 {
   const unsigned ph = 0;

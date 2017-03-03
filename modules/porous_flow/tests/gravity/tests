@@ -51,4 +51,23 @@
     input = 'grav02f.i'
     exodiff = 'grav02f.e'
   [../]
+
+  [./fully_saturated_grav01a]
+    type = 'CSVDiff'
+    input = 'fully_saturated_grav01a.i'
+    csvdiff = 'fully_saturated_grav01a.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./fully_saturated_grav01b]
+    type = 'CSVDiff'
+    input = 'fully_saturated_grav01b.i'
+    csvdiff = 'fully_saturated_grav01b.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./fully_saturated_grav01c]
+    type = 'CSVDiff'
+    input = 'fully_saturated_grav01c.i'
+    csvdiff = 'fully_saturated_grav01c.csv'
+    rel_err = 1.0E-5
+  [../]
 []
