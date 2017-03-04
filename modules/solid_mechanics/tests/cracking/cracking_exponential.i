@@ -234,12 +234,12 @@
   nl_max_its = 10
   nl_rel_tol = 1e-9
 
-  nl_abs_tol = 1.e-8
+  nl_abs_tol = 5.e-8
 
   start_time = 0.0
-  dt = 0.005
-  #dtmin = 0.005
-  num_steps = 1200
+  dt = 0.02
+  dtmin = 0.02
+  num_steps = 300
 []
 
 [Outputs]
