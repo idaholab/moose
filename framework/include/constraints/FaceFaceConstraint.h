@@ -168,4 +168,4 @@ protected:
 };
 
 
-#endif /* FACEFACECONSTRAINT_H_ */
+#endif /* FACEFACECONSTRAINT_H */

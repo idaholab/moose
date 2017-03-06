@@ -40,4 +40,4 @@ protected:
   Function & _func;
 };
 
-#endif /* NODALL2ERROR_H_ */
+#endif /* NODALL2ERROR_H */

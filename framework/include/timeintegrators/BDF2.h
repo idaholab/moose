@@ -41,4 +41,4 @@ protected:
 };
 
 
-#endif /* BDF2_H_ */
+#endif /* BDF2_H */

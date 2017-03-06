@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DT2_H_
-#define DT2_H_
+#ifndef DT2_H
+#define DT2_H
 
 // MOOSE includes
 #include "TimeStepper.h"
@@ -67,4 +67,4 @@ protected:
 };
 
 
-#endif /* DT2_H_ */
+#endif /* DT2_H */

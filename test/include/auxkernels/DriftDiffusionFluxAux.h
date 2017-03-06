@@ -11,8 +11,8 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef DRIFTDIFFUSIONFLUXAUX_H_
-#define DRIFTDIFFUSIONFLUXAUX_H_
+#ifndef DRIFTDIFFUSIONFLUXAUX_H
+#define DRIFTDIFFUSIONFLUXAUX_H
 
 #include "AuxKernel.h"
 

@@ -31,4 +31,4 @@ public:
   Moose::WhichEigenPairs _which_eigen_pairs;
 };
 
-#endif /* SOLVERPARAMS_H_ */
+#endif /* SOLVERPARAMS_H */
