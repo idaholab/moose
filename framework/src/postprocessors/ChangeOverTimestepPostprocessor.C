@@ -11,38 +11,41 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#include "PercentChangePostprocessor.h"
+
+#include "ChangeOverTimestepPostprocessor.h"
 
 template<>
-InputParameters validParams<PercentChangePostprocessor>()
+InputParameters validParams<ChangeOverTimestepPostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor used for exit criterion");
+  params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor");
+  params.addParam<bool>("compute_relative_change", false, "Compute magnitude of relative change instead of change");
   return params;
 }
 
-PercentChangePostprocessor::PercentChangePostprocessor(const InputParameters & parameters) :
+ChangeOverTimestepPostprocessor::ChangeOverTimestepPostprocessor(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
-    _postprocessor(getPostprocessorValue("postprocessor")),
-    _postprocessor_old(getPostprocessorValueOld("postprocessor"))
-{
-  mooseDeprecated("PercentChangePostprocessor is deprecated: instead, ",
-    "please use ChangeOverTimestepPostprocessor using the parameter ",
-    "'compute_relative_change' set to 'true'");
-}
-
-void
-PercentChangePostprocessor::initialize()
+    _compute_relative_change(getParam<bool>("compute_relative_change")),
+    _pps_value(getPostprocessorValue("postprocessor")),
+    _pps_value_old(getPostprocessorValueOld("postprocessor"))
 {
 }
 
 void
-PercentChangePostprocessor::execute()
+ChangeOverTimestepPostprocessor::initialize()
+{
+}
+
+void
+ChangeOverTimestepPostprocessor::execute()
 {
 }
 
 Real
-PercentChangePostprocessor::getValue()
+ChangeOverTimestepPostprocessor::getValue()
 {
-  return std::fabs((std::fabs(_postprocessor) - std::fabs(_postprocessor_old)) * std::pow(std::fabs(_postprocessor), -1));
+  if (_compute_relative_change)
+    return std::fabs((std::fabs(_pps_value) - std::fabs(_pps_value_old)) * std::pow(std::fabs(_pps_value), -1));
+  else
+    return _pps_value - _pps_value_old;
 }
