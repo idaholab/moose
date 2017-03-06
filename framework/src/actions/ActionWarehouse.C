@@ -243,7 +243,7 @@ ActionWarehouse::printActionDependencySets() const
    */
   std::ostringstream oss;
 
-  const std::vector<std::set<std::string> > & ordered_names = _syntax.getSortedTaskSet();
+  const auto & ordered_names = _syntax.getSortedTaskSet();
   for (const auto & task_set : ordered_names)
   {
     oss << "[DBG][ACT] (" << COLOR_YELLOW;

@@ -29,6 +29,26 @@
 #include <exception>
 
 template <typename T>
+class DependencyResolverComparator;
+
+template <>
+class DependencyResolverComparator<std::string>
+{
+public:
+  bool operator()(const std::string & a, const std::string & b)
+  { return a < b; }
+};
+
+template <typename T>
+class DependencyResolverComparator<std::shared_ptr<T> >
+{
+public:
+  template <typename T1, typename T2>
+  bool operator()(const std::shared_ptr<T1> & a, const std::shared_ptr<T2> & b)
+  { return a->name() < b->name(); }
+};
+
+template <typename T>
 class DependencyResolver
 {
 public:
@@ -50,7 +70,7 @@ public:
    * Returns a vector of sets that represent dependency resolved values.  Items in the same
    * set have no dependence upon one and other.
    */
-  const std::vector<std::set<T> > & getSortedValuesSets();
+  const std::vector<std::set<T, DependencyResolverComparator<T> > > & getSortedValuesSets();
 
   /**
    * This function also returns dependency resolved values but with a simpler single vector interface.
@@ -75,10 +95,10 @@ private:
   std::multimap<T, T> _depends;
 
   /// Extra items that need to come out in the sorted list but contain no dependencies
-  std::set<T> _independent_items;
+  std::set<T, DependencyResolverComparator<T> > _independent_items;
 
   /// The sorted vector of sets
-  std::vector<std::set<T> > _ordered_items;
+  std::vector<std::set<T, DependencyResolverComparator<T> > > _ordered_items;
 
   /// The sorted vector (if requested)
   std::vector<T> _ordered_items_vector;
@@ -167,7 +187,7 @@ DependencyResolver<T>::addItem(const T & value)
 }
 
 template <typename T>
-const std::vector<std::set<T> > &
+const std::vector<std::set<T, DependencyResolverComparator<T> > > &
 DependencyResolver<T>::getSortedValuesSets()
 {
   /* Make a copy of the map to work on since we will remove values from the map*/
@@ -175,7 +195,7 @@ DependencyResolver<T>::getSortedValuesSets()
 
   //Build up a set of all keys in depends that have nothing depending on them,
   //and put it in the nodepends set.  These are the leaves of the dependency tree.
-  std::set<T> nodepends;
+  std::set<T, DependencyResolverComparator<T> > nodepends;
   for (typename std::multimap<T, T>::iterator i = depends.begin(); i != depends.end(); ++i)
   {
     T key=i->first;
@@ -193,7 +213,8 @@ DependencyResolver<T>::getSortedValuesSets()
   }
 
   //Remove items from _independent_items if they actually appear in depends
-  for (typename std::set<T>::iterator siter = _independent_items.begin(); siter != _independent_items.end();)
+  for (typename std::set<T, DependencyResolverComparator<T> >::iterator
+         siter = _independent_items.begin(); siter != _independent_items.end();)
   {
     T key=*siter;
     bool founditem=false;
@@ -215,12 +236,12 @@ DependencyResolver<T>::getSortedValuesSets()
   _ordered_items.clear();
 
   //Put the independent items into the first set in _ordered_items
-  std::set<T> next_set = _independent_items;
+  std::set<T, DependencyResolverComparator<T> > next_set = _independent_items;
 
   /* Topological Sort */
   while (!depends.empty())
   {
-    std::set<T> keys, values, difference, current_set;
+    std::set<T, DependencyResolverComparator<T> > keys, values, difference, current_set;
 
     /* Work with sets since set_difference doesn't always work properly with multi_map due
      * to duplicate keys
@@ -239,7 +260,7 @@ DependencyResolver<T>::getSortedValuesSets()
 
     /* This set difference creates a set of items that have no dependencies in the depend map*/
     std::set_difference(values.begin(), values.end(), keys.begin(), keys.end(),
-                        std::inserter(difference, difference.end()));
+                        std::inserter(difference, difference.end()), DependencyResolverComparator<T>());
 
     /* Now remove items from the temporary map that have been "resolved" */
     if (!difference.empty())
@@ -302,7 +323,8 @@ DependencyResolver<T>::getSortedValues()
 
   getSortedValuesSets();
 
-  typename std::vector<std::set<T> >::iterator iter = _ordered_items.begin();
+  typename std::vector<std::set<T, DependencyResolverComparator<T> > >::iterator
+    iter = _ordered_items.begin();
   for ( ; iter != _ordered_items.end(); ++iter)
     std::copy(iter->begin(), iter->end(), std::back_inserter(_ordered_items_vector));
 
@@ -324,14 +346,14 @@ DependencyResolver<T>::operator() (const T & a, const T & b)
    *  we want those values to come out first.  However, we need to make
    *  sure that we maintain strict weak ordering so we'll compare b_it first,
    *  which will return false for a_it < b_it and b_it < a_it when both values
-   *  are not in the oredered_items vector.
+   *  are not in the ordered_items vector.
    */
   if (b_it == _ordered_items_vector.end())
     return false;
   if (a_it == _ordered_items_vector.end())
     return true;
   else
-    return a_it < b_it;  // Yes - compare the iterators...
+    return DependencyResolverComparator<T>()(*a_it, *b_it);  // No, never compare the iterators...
 }
 
 #endif // DEPENDENCYRESOLVER_H
