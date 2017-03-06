@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import unittest
 import MooseDocs
@@ -42,3 +43,6 @@ class TestMooseObjectSyntax(MarkdownTestCase):
         md = '!subsystems /Not/A/Valid/System'
         html = self.convert(md)
         self.assertIn('<p></p>', html)
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

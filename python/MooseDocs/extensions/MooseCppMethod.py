@@ -28,7 +28,7 @@ class MooseCppMethod(MooseTextPatternBase):
         super(MooseCppMethod, self).__init__(self.CPP_RE, language='cpp', **kwargs)
         self._settings['method'] = None
 
-        # The executable path is required (this can't be reached b/c of check in MooseMarkdown)
+        # The executable path is required (this can't be reached b/c of check in MooseMarkdownExtension)
         if not executable:
             log.critical("The 'executable' must be provided to the MooseCppMethod object.")
             raise Exception('Critical Error')

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import unittest
 from MooseDocs.testing import MarkdownTestCase
@@ -51,3 +52,6 @@ class TestMooseObjectSyntax(MarkdownTestCase):
         self.assertIn('<h3 id="tutorials">Tutorials</h3>', html)
         self.assertIn('<ul style="max-height:350px;overflow-y:Scroll">', html)
         self.assertIn('<li><a href="https://github.com/idaholab/moose/blob/master/tutorials/darcy_thermo_mech/step02_darcy_pressure/include/kernels/DarcyPressure.h">tutorials/darcy_thermo_mech/step02_darcy_pressure/include/kernels/DarcyPressure.h</a></li>', html)
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

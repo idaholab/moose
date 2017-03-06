@@ -23,7 +23,7 @@ set to True (the default).
   {% endif %}
   <div class="section table-of-contents">
     <ul>
-      {% for text, id in current.contents() %}
+      {% for text, id in tableofcontents %}
         <li><a href="#{{id}}">{{text}}</a></li>
       {% endfor %}
     </ul>

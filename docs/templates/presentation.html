@@ -5,19 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{{title}}</title>
 
-    <link rel="stylesheet" href="css/reveal.css">
-    <link rel="stylesheet" href="css/theme/simple.css">
-    <link rel="stylesheet" href="css/moose.css">
+    <link type="text/css" rel="stylesheet" href="{{reveal_css|default('https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.4.1/css/reveal.min.css')}}">
+    <link type="text/css" rel="stylesheet" href="{{reveal_theme_css|default('https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.4.1/css/theme/simple.min.css')}}">
+    <link type="text/css" rel="stylesheet" href="{{materialize_css|default('https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css')}}"/>
+    <link type="text/css" rel="stylesheet" href="{{prism_css|default('https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/themes/prism.min.css')}}"/>
+    <link type="text/css" rel="stylesheet" href="{{reveal_highlight_css|default('https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.4.1/lib/css/zenburn.min.css')}}">
+    <link href="{{material_icons|default('https://fonts.googleapis.com/icon?family=Material+Icons')}}" rel="stylesheet">
 
-    <!-- Theme used for syntax highlighting of code -->
-    <link rel="stylesheet" href="lib/css/zenburn.css">
+    <link rel="stylesheet" type="text/css" href="{{fonts|default('https://fonts.googleapis.com/css?family=Roboto')}}">
+
+    {% if css|default(None) %}
+      <style type="text/css">
+      {% for filename in css %}
+        {{ insert_file(filename) }}
+      {% endfor %}
+      </style>
+    {% endif %}
 
     <!-- Printing and PDF exports -->
     <script>
       var link = document.createElement( 'link' );
       link.rel = 'stylesheet';
       link.type = 'text/css';
-      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? "{{reveal_pdf_css|default('https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.4.1/css/print/pdf.css')}}" : "{{reveal_paper_css|default('https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.4.1/css/print/paper.min.css')}}";
       document.getElementsByTagName( 'head' )[0].appendChild( link );
     </script>
   </head>
@@ -28,33 +38,36 @@
       </div>
     </div>
 
-    <script src="lib/js/head.min.js"></script>
-    <script src="js/reveal.js"></script>
+    <script type="text/javascript" src="{{reveal_head_js|default('https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.4.1/lib/js/head.min.js')}}"></script>
+    <script type="text/javascript" src="{{reveal_js|default('https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.4.1/js/reveal.min.js')}}"></script>
+
+    <script type="text/javascript" src="{{jquery_js|default('https://code.jquery.com/jquery-2.1.1.min.js')}}"></script>
+    <script type="text/javascript" src="{{materialize_js|default('https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js')}}"></script>
+    <script type="text/javascript" src="{{clipboard_js|default('https://cdn.rawgit.com/zenorocha/clipboard.js/master/dist/clipboard.min.js')}}"></script>
+
     <script>
       // More info https://github.com/hakimel/reveal.js#configuration
       Reveal.initialize({
       history: true,
 
       math: {
-      mathjax: 'https://cdn.mathjax.org/mathjax/latest/MathJax.js'
+      mathjax: "{{mathjax_js|default('http://cdn.mathjax.org/mathjax/latest/MathJax.js')}}"
       },
 
       // More info https://github.com/hakimel/reveal.js#dependencies
       dependencies: [
-      { src: 'plugin/markdown/marked.js' },
-      { src: 'plugin/markdown/markdown.js' },
-      { src: 'plugin/math/math.js', async: true },
-      { src: 'plugin/notes/notes.js', async: true },
-      { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+          { src: "{{reveal_math_js|default('https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.4.1/plugin/math/math.js')}}", async: true },
+          { src: "{{highlight_js|default('https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.4.1/plugin/highlight/highlight.min.js')}}", async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
       ]
       });
-
-      MathJax.Hub.Config({
-      tex2jax: {
-      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-      inlineMath: [['$','$'], ['\\(','\\)']]
-      }
-      });
     </script>
+
+    {% if scripts|default(None) %}
+    <script>
+      {% for filename in scripts %}
+        {{ insert_file(filename) }}
+      {% endfor %}
+    </script>
+    {% endif %}
   </body>
 </html>

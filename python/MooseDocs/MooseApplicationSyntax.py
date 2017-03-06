@@ -4,6 +4,7 @@ import collections
 import logging
 log = logging.getLogger(__name__)
 import MooseDocs
+import cPickle as pickle
 
 class MooseInfoBase(object):
     """
@@ -142,7 +143,7 @@ class MooseApplicationSyntax(object):
       paths[list]: Valid source directory to extract syntax.
       doxygen[str]: The URL to the doxygen page.
       doxygen_name_style[str]: 'upper' (classMyClassName) and 'lower' (class_my_class_name) Doxygen html class format switch.
-      group[str]: The name of the syntax group (i.e., the key used in the 'locations' configuration for MooseMarkdown)
+      group[str]: The name of the syntax group (i.e., the key used in the 'locations' configuration for MooseMarkdownExtension)
       name[str]: The display name for the syntax group (e.g., Phase Field)
       install[str]: The install directory for the generating stub markdown files
       generate[bool]: When True the call to 'check' will generate stub markdown pages.

@@ -13,7 +13,7 @@ class MooseCSS(BlockProcessor, MooseCommonExtension):
     Where <options> are key=value pairs.
     """
 
-    RE = re.compile(r'^!\ ?css(.*)')
+    RE = re.compile(r'^!css(.*)$', flags=re.MULTILINE)
     # If there are multiple css blocks on the same page then
     # they need to have different ids
     MATCHES_FOUND = 0

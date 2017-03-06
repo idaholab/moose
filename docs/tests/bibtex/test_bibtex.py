@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 import os
+import unittest
 import MooseDocs
 from MooseDocs.testing import MarkdownTestCase
 
@@ -55,3 +57,6 @@ class TestBibtexExtension(MarkdownTestCase):
     def testBibtexMacro(self):
         md = r'\cite{macroTestKey}\n\bibliography{docs/bib/macro_test.bib}'
         self.assertConvert('test_bibtex_macro.html', md)
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

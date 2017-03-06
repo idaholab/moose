@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import unittest
 from MooseDocs.testing import MarkdownTestCase
@@ -30,3 +31,6 @@ class TestMooseTextFile(MarkdownTestCase):
     def testTextBadFile(self):
         md = '!text test/tests/kernels/simple_diffusion/not_a_file.'
         self.assertConvert('test_TextBadFile.html', md)
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

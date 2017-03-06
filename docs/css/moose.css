@@ -1,5 +1,4 @@
 html {
-    font-family: GillSans, Calibri, Trebuchet, sans-serif;
     line-height: 1.75rem;
     color: rgba(0,0,0,1.0);
     font-size: large;
@@ -8,6 +7,14 @@ html {
 
 html, body {
   height: 100%;
+}
+
+.table-of-contents *,
+.moodr-bibliography *{
+  text-align: left;
+}
+.nav ul:not(.browser-default) li{
+  list-style-type: none;
 }
 
 .page-wrap {
@@ -453,21 +460,6 @@ footer.page-footer {
     border: 0px solid transparent;
 }
 
-
-/* Slide style */
-.reveal h1 {
-    font-size: 2em;
-}
-
-.reveal h2 {
-    font-size: 1.5em;
-}
-
-.reveal .slides > section {
-  text-align: left;
-}
-
-
 /* MOOSE Build status CSS */
 .boxed_job_status_Passed {
     vertical-align: middle;
@@ -530,4 +522,51 @@ footer.page-footer {
 
 #moose-markdown-content ul.collapsible li {
   list-style-type: none;
+}
+
+.reveal .slides{
+  position: relative;
+  text-align: left;
+}
+
+.reveal .slides not(.overview){
+  overflow: scroll;
+}
+
+.reveal h1 {
+    font-size:3rem;
+    font-weight:600;
+}
+
+.reveal h2 {
+    font-size:2.5rem;
+    font-weight:300;
+}
+
+.reveal h3 {
+    font-size:2.0rem;
+    font-weight:300;
+}
+
+.reveal h4 {
+    font-size:1.5rem;
+    font-weight:300;
+}
+
+.reveal p, .reveal a, .reveal li{
+    font-size:1.5rem;
+}
+
+.reveal pre{
+  font-size: 1.0rem;
+  line-height: normal;
+}
+
+.reveal ul:not(.browser-default) li{
+  list-style-type: disc;
+}
+
+.reveal section img{
+  border: none;
+  box-shadow: none;
 }

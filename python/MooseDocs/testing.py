@@ -21,6 +21,7 @@ class MarkdownTestCase(unittest.TestCase):
     """
     parser = None
     working_dir = os.getcwd()
+    TEMPLATE = False
 
 
     @classmethod
@@ -40,7 +41,7 @@ class MarkdownTestCase(unittest.TestCase):
 
         extensions, extension_configs = MooseDocs.get_markdown_extensions(config)
         cls.updateExtensionConfigs(extension_configs)
-        cls.parser = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
+        cls.parser = MooseDocs.MooseMarkdown(extensions=extensions, extension_configs=extension_configs)
         os.chdir(cwd)
 
     @classmethod
@@ -51,9 +52,11 @@ class MarkdownTestCase(unittest.TestCase):
         changing moosedocs.yml
         """
         if 'testBibtexMacro' in dir(cls):
-            if 'MooseDocs.extensions.MooseMarkdown' in extension_configs:
-                extension_configs['MooseDocs.extensions.MooseMarkdown']['macro_files'] =\
+            if 'MooseDocs.extensions.MooseMarkdownExtension' in extension_configs:
+                extension_configs['MooseDocs.extensions.MooseMarkdownExtension']['macro_files'] =\
                   ['docs/bib/macro_test_abbrev.bib']
+
+        extension_configs['MooseDocs.extensions.MooseMarkdownExtension']['template'] = cls.TEMPLATE
 
     def setUp(self):
         """

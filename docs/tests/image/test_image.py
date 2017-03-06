@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import unittest
 from MooseDocs.testing import MarkdownTestCase
@@ -22,3 +23,6 @@ class TestMooseImageFile(MarkdownTestCase):
     def testImageBadFile(self):
         md = '!image docs/media/not_a_file.png'
         self.assertConvert('test_ImageBadFile.html', md)
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
