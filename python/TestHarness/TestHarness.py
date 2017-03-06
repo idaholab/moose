@@ -239,7 +239,10 @@ class TestHarness:
                                             # This method spawns another process and allows this loop to continue looking for tests
                                             # RunParallel will call self.testOutputAndFinish when the test has completed running
                                             # This method will block when the maximum allowed parallel processes are running
-                                            self.runner.run(tester, command)
+                                            if self.options.dry_run:
+                                                self.handleTestStatus(tester)
+                                            else:
+                                                self.runner.run(tester, command)
                                         else: # This job is skipped - notify the runner
                                             status = tester.getStatus()
                                             if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
@@ -614,9 +617,12 @@ class TestHarness:
             elif self.options.pbs and self.options.processingPBS == True:
                 self.handleTestResult(tester, '', tester.getStatusMessage(), 0, 0, True)
 
-        # All other statuses will be testers that exited prematurely (according to the TestHarness) or were skipped
+        # All other statuses will be testers that exited prematurely (according to the TestHarness)
+        # So populate the result now based on status, and send the test to the result method to be
+        # printed to the screen
         else:
-            self.handleTestResult(tester, '', '', 0, 0, True)
+            result = tester.getStatusMessage()
+            self.handleTestResult(tester, '', result, 0, 0, True)
             test_completed = True
 
         return test_completed
@@ -636,14 +642,20 @@ class TestHarness:
         elif self.options.store_time:
             timing = self.getSolveTime(output)
 
-        # format the SKIP messages received, otherwise leave 'result' unmolested
-        if status == 'SKIP':
+        # format the SKIP messages received
+        if status == tester.bucket_skip:
             # Include caveats in skipped messages? Usefull to know when a scaled long "RUNNING..." test completes
             # but Exodiff is instructed to 'SKIP' on scaled tests.
             if len(caveats):
                 result = '[' + ', '.join(caveats).upper() + '] skipped (' + tester.getStatusMessage() + ')'
             else:
                 result = 'skipped (' + tester.getStatusMessage() + ')'
+
+        # result is normally populated by a tester object when a test has failed. But in this case
+        # checkRunnableBase determined the test a failure before it even ran. So we need to set the
+        # results here, so they are printed if the extra_info argument was supplied
+        elif status == tester.bucket_deleted:
+            result = tester.getStatusMessage()
 
         # Only add to the test_table if told to. We now have enough cases where we wish to print to the screen, but not
         # in the 'Final Test Results' area.
@@ -698,39 +710,54 @@ class TestHarness:
     def cleanup(self):
         # Print the results table again if a bunch of output was spewed to the screen between
         # tests as they were running
-        if self.options.verbose or (self.num_failed != 0 and not self.options.quiet):
+        if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
             print '\n\nFinal Test Results:\n' + ('-' * (TERM_COLS-1))
             for (test, output, result, timing, start, end) in sorted(self.test_table, key=lambda x: x[2], reverse=True):
                 print printResult(test, result, timing, start, end, self.options)
 
         time = clock() - self.start_time
-        print '-' * (TERM_COLS-1)
-        print 'Ran %d tests in %.1f seconds' % (self.num_passed+self.num_failed, time)
 
-        if self.num_passed:
-            summary = '<g>%d passed</g>'
-        else:
-            summary = '<b>%d passed</b>'
-        summary += ', <b>%d skipped</b>'
-        if self.num_pending:
-            summary += ', <c>%d pending</c>'
-        else:
-            summary += ', <b>%d pending</b>'
-        if self.num_failed:
-            summary += ', <r>%d FAILED</r>'
-        else:
-            summary += ', <b>%d failed</b>'
+        print '-' * (TERM_COLS-1)
 
         # Mask off TestHarness error codes to report parser errors
+        fatal_error = ''
         if self.error_code & Parser.getErrorCodeMask():
-            summary += ', <r>FATAL PARSER ERROR</r>'
+            fatal_error += ', <r>FATAL PARSER ERROR</r>'
         if self.error_code & ~Parser.getErrorCodeMask():
-            summary += ', <r>FATAL TEST HARNESS ERROR</r>'
+            fatal_error += ', <r>FATAL TEST HARNESS ERROR</r>'
 
-        print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
-                         colored=self.options.colored, code=self.options.code )
-        if self.options.pbs:
-            print '\nYour PBS batch file:', self.options.pbs
+        # Print a different footer when performing a dry run
+        if self.options.dry_run:
+            print 'Processed %d tests in %.1f seconds' % (self.num_passed+self.num_skipped, time)
+            summary = '<b>%d would run</b>'
+            summary += ', <b>%d would be skipped</b>'
+            summary += fatal_error
+            print colorText( summary % (self.num_passed, self.num_skipped),  "", html = True, \
+                             colored=self.options.colored, code=self.options.code )
+
+        else:
+            print 'Ran %d tests in %.1f seconds' % (self.num_passed+self.num_failed, time)
+
+            if self.num_passed:
+                summary = '<g>%d passed</g>'
+            else:
+                summary = '<b>%d passed</b>'
+            summary += ', <b>%d skipped</b>'
+            if self.num_pending:
+                summary += ', <c>%d pending</c>'
+            else:
+                summary += ', <b>%d pending</b>'
+            if self.num_failed:
+                summary += ', <r>%d FAILED</r>'
+            else:
+                summary += ', <b>%d failed</b>'
+            summary += fatal_error
+
+            print colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
+                             colored=self.options.colored, code=self.options.code )
+            if self.options.pbs:
+                print '\nYour PBS batch file:', self.options.pbs
+
         if self.file:
             self.file.close()
 

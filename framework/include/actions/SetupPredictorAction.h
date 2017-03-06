@@ -34,4 +34,4 @@ public:
 };
 
 
-#endif /* SETUPPREDICTORACTION_H_ */
+#endif /* SETUPPREDICTORACTION_H */

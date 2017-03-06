@@ -123,4 +123,4 @@ protected:
   virtual Real computeQpJacobian(Moose::DGJacobianType type) = 0;
 };
 
-#endif /* ELEMELEMCONSTRAINT_H_ */
+#endif /* ELEMELEMCONSTRAINT_H */

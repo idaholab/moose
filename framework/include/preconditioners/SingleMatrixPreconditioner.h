@@ -31,4 +31,4 @@ public:
   SingleMatrixPreconditioner(const InputParameters & params);
 };
 
-#endif /* SINGLEMATRIXPRECONDITIONER_H_ */
+#endif /* SINGLEMATRIXPRECONDITIONER_H */
