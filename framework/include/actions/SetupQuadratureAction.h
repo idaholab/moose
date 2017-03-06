@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef SETUPQUADRATUREACTION_H_
-#define SETUPQUADRATUREACTION_H_
+#ifndef SETUPQUADRATUREACTION_H
+#define SETUPQUADRATUREACTION_H
 
 #include "Action.h"
 // libMesh
@@ -43,4 +43,4 @@ protected:
 };
 
 
-#endif /* SETUPQUADRATUREACTION_H_ */
+#endif /* SETUPQUADRATUREACTION_H */

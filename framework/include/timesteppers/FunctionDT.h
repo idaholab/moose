@@ -57,4 +57,4 @@ protected:
   std::vector<Real> _time_knots;
 };
 
-#endif /* FUNCTIONDT_H_ */
+#endif /* FUNCTIONDT_H */

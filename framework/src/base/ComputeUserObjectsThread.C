@@ -141,7 +141,7 @@ ComputeUserObjectsThread::onBoundary(const Elem *elem, unsigned int side, Bounda
         std::vector<dof_id_type> & dof_indices = jvar->dofIndices();
 
         _fe_problem.prepareFaceShapes(jvar_id, _tid);
-;
+
         for (const auto & uo : objects)
         {
           std::shared_ptr<ShapeSideUserObject> shape_side_uo = std::dynamic_pointer_cast<ShapeSideUserObject>(uo);

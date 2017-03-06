@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef ADDFIELDSPLITACTION_H_
-#define ADDFIELDSPLITACTION_H_
+#ifndef ADDFIELDSPLITACTION_H
+#define ADDFIELDSPLITACTION_H
 
 #include "MooseObjectAction.h"
 
@@ -35,4 +35,4 @@ public:
 
 
 
-#endif /* ADDFIELDSPLITACTION_H_ */
+#endif /* ADDFIELDSPLITACTION_H */
