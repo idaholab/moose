@@ -10,8 +10,11 @@ template<>
 InputParameters validParams<GapConductanceConstraint>()
 {
   InputParameters params = validParams<FaceFaceConstraint>();
-  params.addRequiredParam<Real>("k", "Gap conductance");
+  params.addClassDescription("Computes the residual and Jacobian contributions for the 'Lagrange Multiplier' "
+                             "implementation of the thermal contact problem. For more information, see the "
+                             "detailed description here: http://tinyurl.com/gmmhbe9");
 
+  params.addRequiredParam<Real>("k", "Gap conductance");
   return params;
 }
 
@@ -26,16 +29,9 @@ GapConductanceConstraint::~GapConductanceConstraint()
 }
 
 Real
-GapConductanceConstraint::distance(const Point & a, const Point & b)
-{
-  Point diff = a - b;
-  return std::sqrt(diff * diff);
-}
-
-Real
 GapConductanceConstraint::computeQpResidual()
 {
-  Real l = distance(_phys_points_master[_qp], _phys_points_slave[_qp]);
+  Real l = (_phys_points_master[_qp] - _phys_points_slave[_qp]).norm();
   return (_k * (_u_master[_qp] - _u_slave[_qp]) / l - _lambda[_qp]) * _test[_i][_qp];
 }
 
@@ -59,7 +55,7 @@ GapConductanceConstraint::computeQpJacobian()
 Real
 GapConductanceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType jac_type)
 {
-  Real l = distance(_phys_points_master[_qp], _phys_points_slave[_qp]);
+  Real l = (_phys_points_master[_qp] - _phys_points_slave[_qp]).norm();
   switch (jac_type)
   {
   case Moose::MasterMaster: return  (_k / l) * _phi[_j][_qp] * _test_master[_i][_qp];
@@ -70,4 +66,3 @@ GapConductanceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType ja
   default: return 0;
   }
 }
-
