@@ -1,4 +1,4 @@
-# 2phase, 1 component, with solid displacements, time derivative of energy-density
+# 2phase, 1 component, with solid displacements, time derivative of energy-density, THM porosity wth _ensure_positive = true, and compressive strains
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -35,31 +35,31 @@
     type = RandomIC
     variable = disp_x
     min = -0.1
-    max = 0.1
+    max = 0.0
   [../]
   [./disp_y]
     type = RandomIC
     variable = disp_y
     min = -0.1
-    max = 0.1
+    max = 0.0
   [../]
   [./disp_z]
     type = RandomIC
     variable = disp_z
     min = -0.1
-    max = 0.1
+    max = 0.0
   [../]
   [./pgas]
     type = RandomIC
     variable = pgas
-    max = 1.0
+    max = 0.01
     min = 0.0
   [../]
   [./pwater]
     type = RandomIC
     variable = pwater
     max = 0.0
-    min = -1.0
+    min = -0.01
   [../]
   [./temp]
     type = RandomIC
@@ -131,11 +131,12 @@
     type = PorousFlowVolumetricStrain
   [../]
   [./porosity]
-    type = PorousFlowPorosityHM
+    type = PorousFlowPorosityTHM
     at_nodes = true
     porosity_zero = 0.7
+    thermal_expansion_coeff = 0.7
     biot_coefficient = 0.9
-    solid_bulk = 1
+    solid_bulk = 10
   [../]
   [./p_eff]
     type = PorousFlowEffectiveFluidPressure
@@ -168,8 +169,8 @@
   [../]
   [./internal_energy_fluids]
     type = PorousFlowJoiner
-    at_nodes = true
     include_old = true
+    at_nodes = true
     material_property = PorousFlow_fluid_phase_internal_energy_nodal
   [../]
   [./dens0]

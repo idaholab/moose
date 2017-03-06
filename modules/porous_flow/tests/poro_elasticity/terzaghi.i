@@ -252,6 +252,7 @@
   [../]
   [./porosity]
     type = PorousFlowPorosityHM
+    ensure_positive = false
     at_nodes = true
     porosity_zero = 0.1
     biot_coefficient = 0.6

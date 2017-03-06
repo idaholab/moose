@@ -132,10 +132,11 @@
   [../]
   [./porosity]
     type = PorousFlowPorosityTHM
+    ensure_positive = false
     at_nodes = true
     porosity_zero = 0.7
     thermal_expansion_coeff = 0.7
-    biot_coefficient = 0.5
+    biot_coefficient = 0.9
     solid_bulk = 1
   [../]
   [./p_eff]
