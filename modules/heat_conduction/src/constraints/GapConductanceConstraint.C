@@ -10,8 +10,11 @@ template<>
 InputParameters validParams<GapConductanceConstraint>()
 {
   InputParameters params = validParams<FaceFaceConstraint>();
-  params.addRequiredParam<Real>("k", "Gap conductance");
+  params.addClassDescription("Computes the residual and Jacobian contributions for the 'Lagrange Multiplier' "
+                             "implementation of the thermal contact problem. For more information, see the "
+                             "detailed description here: http://tinyurl.com/gmmhbe9");
 
+  params.addRequiredParam<Real>("k", "Gap conductance");
   return params;
 }
 
@@ -63,4 +66,3 @@ GapConductanceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType ja
   default: return 0;
   }
 }
-
