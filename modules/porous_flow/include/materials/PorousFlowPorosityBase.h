@@ -25,9 +25,6 @@ public:
   PorousFlowPorosityBase(const InputParameters & parameters);
 
 protected:
-  /// When calculating nodal porosity, use the strain at the nearest quadpoint to the node
-  const bool _strain_at_nearest_qp;
-
   /// computed porosity at the nodes or quadpoints
   MaterialProperty<Real> & _porosity;
 

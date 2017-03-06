@@ -8,7 +8,7 @@
 #ifndef POROUSFLOWPOROSITYTHM_H
 #define POROUSFLOWPOROSITYTHM_H
 
-#include "PorousFlowPorosityBase.h"
+#include "PorousFlowPorosityExponentialBase.h"
 
 //Forward Declarations
 class PorousFlowPorosityTHM;
@@ -20,14 +20,17 @@ InputParameters validParams<PorousFlowPorosityTHM>();
  * Material designed to provide the porosity in thermo-hydro-mechanical simulations
  * biot + (phi0 - biot)*exp(-vol_strain + coeff * effective_pressure + thermal_exp_coeff * temperature)
  */
-class PorousFlowPorosityTHM : public PorousFlowPorosityBase
+class PorousFlowPorosityTHM : public PorousFlowPorosityExponentialBase
 {
 public:
   PorousFlowPorosityTHM(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties() override;
-  virtual void computeQpProperties() override;
+  virtual Real atNegInfinityQp() const override;
+  virtual Real atZeroQp() const override;
+  virtual Real decayQp() const override;
+  virtual Real ddecayQp_dvar(unsigned pvar) const override;
+  virtual RealGradient ddecayQp_dgradvar(unsigned pvar) const override;
 
   /// porosity at zero strain and zero porepressure and zero temperature
   const VariableValue & _phi0;
