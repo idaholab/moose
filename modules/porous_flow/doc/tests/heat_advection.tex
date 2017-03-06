@@ -81,22 +81,34 @@ strong in the upwinding scheme implemented in the PorousFlow module.
 Nevertheless, MOOSE advects the smooth front with the correct
 velocity, as shown in Figure~\ref{heat_advection_1d.fig}.
 
+The sharp front is {\em not} maintained by MOOSE even when no
+upwinding is used.  In the case at hand, which uses a fully-saturated
+single-phase fluid, the {\tt FullySaturated} versions of the Kernels
+may be used in order to compare with the standard fully-upwinded
+Kernels.  The {\tt FullySaturated} Kernels do not employ any upwinding
+whatsoever, so less numerical
+diffusion is expected.  This is demonstrated in
+Figure~\ref{heat_advection_1d.fig}.  Two additional points may also be
+nocied: (1) the lack of upwinding has produced a ``bump'' in the
+temperature profile near the hotter side; (2) the lack of upwinding
+means the temperature profile moves slightly slower than it should.
+These two affects reduce as the mesh density is increased, however.
+
 \begin{figure}[htb]
 \begin{center}
 \begin{tabular}{cc}
 \includegraphics[width=7cm]{heat_advection_1d_0_1.pdf}  &
 \includegraphics[width=7cm]{heat_advection_1d_0_6.pdf}
 \end{tabular}
-\caption{Results of heat advection via a fluid in 1D.  The fluid
-  flows with constant Darcy velocity of $0.25$\,m.s$^{-1}$ to the
-  right, and this advects a temperature front at velocity
-  $1$\,m.s$^{-1}$ to the right.  This pictures above
-  that the numerical implementation of porous flow within
-  MOOSE diffuses sharp fronts, but advects them at the correct
-  velocity (notice the centre of
-  the front is at the correct position in each picture).  Left: temperature
-  $t=0.1$\,s.  Right: temperature
-  at $t=0.6$\,s.}
+\caption{Results of heat advection via a fluid in 1D.  The fluid flows
+  with constant Darcy velocity of $0.25$\,m.s$^{-1}$ to the right, and
+  this advects a temperature front at velocity $1$\,m.s$^{-1}$ to the
+  right.  The pictures above that the numerical implementation of
+  porous flow within MOOSE (including upwinding) diffuses sharp
+  fronts, but advects them at the correct velocity (notice the centre
+  of the upwinded front is at the correct position in each picture).
+  Less diffusion is experienced without upwinding.  Left: temperature
+  $t=0.1$\,s.  Right: temperature at $t=0.6$\,s.}
 \label{heat_advection_1d.fig}
 \end{center}
 \end{figure}

@@ -95,17 +95,18 @@ These are part of the automatic test suite.
 \begin{figure}[htb]
 \centering
 \includegraphics[width=15cm]{pressure_pulse_1d.pdf}
-\caption{Comparison between the MOOSE result (in dots), and the
-  exact analytic expression given by Eqn~(\ref{eqn.exact.pp}).  This
-  test had 10 elements in the $x$ direction, with $0\leq x \leq
-  100$\,m, and ran for a total of
-  10$^4$ seconds with 10 timesteps.  The parameters were $B=2$\,GPa,
-  $\kappa_{xx}=10^{-15}$\,m$^{2}$, $\mu=10^{-3}$\,Pa.s, $\phi=0.1$,
-  with initial pressure $P=2$\,MPa, and applied pressure $P=3$\,MPa at
-  $x=0$.  For greater spatial resolution and smaller timesteps the
-  agreement increases.  Both the multi-component single-phase simulation and the
-  2-phase fully-water-saturated simulation give identical results for
-  the water porepressure.}
+\caption{Comparison between the MOOSE result (in dots), and the exact
+  analytic expression given by Eqn~(\ref{eqn.exact.pp}).  This test
+  had 10 elements in the $x$ direction, with $0\leq x \leq 100$\,m,
+  and ran for a total of 10$^4$ seconds with 10 timesteps.  The
+  parameters were $B=2$\,GPa, $\kappa_{xx}=10^{-15}$\,m$^{2}$,
+  $\mu=10^{-3}$\,Pa.s, $\phi=0.1$, with initial pressure $P=2$\,MPa,
+  and applied pressure $P=3$\,MPa at $x=0$.  For greater spatial
+  resolution and smaller timesteps the agreement increases.  Both the
+  multi-component single-phase simulation (using the fully-saturated
+  non-upwinding Kernels and the partially-saturated full-upwinding
+  Kernels) and the 2-phase fully-water-saturated simulation give
+  identical results for the water porepressure.}
 \label{pressure_pulse.fig}
 \end{figure}
 
