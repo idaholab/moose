@@ -29,8 +29,6 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpJacobianSide(Moose::ConstraintJacobianType jac_type);
 
-  Real distance(const Point & a, const Point & b);
-
   Real _k;
 };
 

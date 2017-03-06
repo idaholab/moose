@@ -26,16 +26,9 @@ GapConductanceConstraint::~GapConductanceConstraint()
 }
 
 Real
-GapConductanceConstraint::distance(const Point & a, const Point & b)
-{
-  Point diff = a - b;
-  return std::sqrt(diff * diff);
-}
-
-Real
 GapConductanceConstraint::computeQpResidual()
 {
-  Real l = distance(_phys_points_master[_qp], _phys_points_slave[_qp]);
+  Real l = (_phys_points_master[_qp] - _phys_points_slave[_qp]).norm();
   return (_k * (_u_master[_qp] - _u_slave[_qp]) / l - _lambda[_qp]) * _test[_i][_qp];
 }
 
@@ -59,7 +52,7 @@ GapConductanceConstraint::computeQpJacobian()
 Real
 GapConductanceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType jac_type)
 {
-  Real l = distance(_phys_points_master[_qp], _phys_points_slave[_qp]);
+  Real l = (_phys_points_master[_qp] - _phys_points_slave[_qp]).norm();
   switch (jac_type)
   {
   case Moose::MasterMaster: return  (_k / l) * _phi[_j][_qp] * _test_master[_i][_qp];
