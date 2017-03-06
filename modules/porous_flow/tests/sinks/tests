@@ -52,6 +52,11 @@
     input = s09.i
     exodiff = s09.e
   [../]
+  [./s09_fully_saturated]
+    type = Exodiff
+    input = s09_fully_saturated.i
+    exodiff = s09_fully_saturated.e
+  [../]
 
   [./s10_left]
     type = Exodiff

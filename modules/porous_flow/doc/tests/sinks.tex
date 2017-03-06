@@ -424,6 +424,19 @@ strong in the upwinding scheme implemented in the PorousFlow module.
 Nevertheless, MOOSE advects the smooth front with the correct
 velocity, as shown in Figure~\ref{s09.fig}.
 
+The sharp front is {\em not} maintained by MOOSE even when no
+upwinding is used.  In the case at hand, which uses a fully-saturated
+single-phase fluid, the {\tt FullySaturated} versions of the Kernels
+may be used in order to compare with the standard fully-upwinded
+Kernels.  The {\tt FullySaturated} Kernels do not employ any upwinding
+whatsoever, so less numerical
+diffusion is expected.  This is demonstrated in
+Figure~\ref{s09.fig}.  Two additional points may also be
+nocied: (1) the lack of upwinding has produced a ``bump'' in the
+mass-fraction profile near the concentrated side; (2) the lack of upwinding
+means the temperature profile moves slightly slower than it should.
+These two affects reduce as the mesh density is increased, however.
+
 \begin{figure}[htb]
 \begin{center}
 \begin{tabular}{cc}
@@ -435,10 +448,10 @@ velocity, as shown in Figure~\ref{s09.fig}.
   illustrating that the numerical implementation of porous flow within
   MOOSE diffuses sharp fronts, but advects them at the correct
   velocity ($v=1$\,m.s$^{-1}$ in this case, and notice the centre of
-  the front is at the correct position in each picture).  Top left: mass fraction at
-  $t=0.1$\,s.  Top right: mass fraction
-  at $t=0.5$\,s.  Bottom: mass
-  fraction at $t=1.0$\,s.}
+  the front is at the correct position in each picture).  Less
+  diffusion is experienced when upwinding is not used.  Top left: mass
+  fraction at $t=0.1$\,s.  Top right: mass fraction at $t=0.5$\,s.
+  Bottom: mass fraction at $t=1.0$\,s.}
 \label{s09.fig}
 \end{center}
 \end{figure}

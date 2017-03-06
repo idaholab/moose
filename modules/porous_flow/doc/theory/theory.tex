@@ -1661,7 +1661,8 @@ Here $K$ is the bulk modulus of the drained porous skeleton: $1/K
 \label{poro.evolve.eqn}
 \end{equation}
 where $\phi_{0}$ is the porosity at zero porepressure, zero elastic
-strain and zero temperature. Note this porosity can become negative.
+strain and zero temperature. Note this porosity can become negative,
+and an option for ensuring positivity is detailed below.
 
 The evolution of porosity is motivated further in the appendix
 \hyperref[chap.evol.por]{Chapter~\ref*{chap.evol.por}}.
@@ -1669,11 +1670,54 @@ The evolution of porosity is motivated further in the appendix
 Without porepressure effects, the correct expression for porosity as a
 function of volumetric strain and temperature is
 \begin{equation}
-\phi = 1 + (\phi_{0} - 1)\times \exp \left(- \epsilon^{\mathrm{total}}_{ii} + \alpha_{T}T \right) \ .
+\phi = 1 + (\phi_{0} - 1)\times \exp \left(-
+\epsilon^{\mathrm{total}}_{ii} + \alpha_{T}T \right) \ .
+\label{poroTM.evolve.eqn}
 \end{equation}
 
 \textcolor{red}{These expressions may be modified to include the
   effects of plasticity.}
+
+The exponential expressions
+\hyperref[poro.evolve.eqn]{Eqn~(\ref*{poro.evolve.eqn})} and
+\hyperref[poroTM.evolve.eqn]{Eqn~(\ref*{poroTM.evolve.eqn})} can yield
+negative porosity values, which are unphysical.  To ensure positivity
+of $\phi$, PorousFlow offers the following option.  First write both
+equations in the form
+\begin{equation}
+\phi = A + (B - A) \exp(x) \ .
+\end{equation}
+In deriving specific forms for $A$, $B$ and $x$, above, it has been
+assumed that $x$ is small.  Since physically $1\geq A > B > 0$, for
+$x<0$ the porosity will be physically meaningful, but for $x\gg 0$,
+$\phi$ can become negative.  For example, for positive volumetric
+strain ($x<0$) the porosity is always physically meaningful.  However,
+when the porous material is squashed with negative and large
+volumetric strain ($x\gg 0$) the porosity can become negative.
+
+Define
+\begin{equation}
+C = \log(A/(A-B)) \ .
+\end{equation}
+Then, for $x>0$, the above expression for $\phi$ is replaced by
+\begin{equation}
+\phi = A + (B - A) \exp\left(C (1 - \exp(-x/C)) \right)  \geq 0 \ .
+\end{equation}
+At first glance this expression may appear rather obscure.  It has
+been constructed to satisfy the following requirements:
+\begin{enumerate}
+\item As $x\rightarrow 0$, $\phi\rightarrow B$, which is necessary for
+continuity at $x=0$.  
+\item As $x\rightarrow\infty$, $\phi\rightarrow 0$, which is
+  physically desireable.
+\item The expression is monotonically decreasing, which is both
+  physically desirable and computationally desirable (otherwise there
+  may be non-unique solutions in a PorousFlow simulation).
+\item Finally, at $x=0$,
+its derivative is $\phi' = B - A$, as desired from continuity of the
+derivative at $x=0$.
+\end{enumerate}
+
 
 \section{Relative permeability relationships}
 

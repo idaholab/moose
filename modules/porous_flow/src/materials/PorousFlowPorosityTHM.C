@@ -10,7 +10,7 @@
 template<>
 InputParameters validParams<PorousFlowPorosityTHM>()
 {
-  InputParameters params = validParams<PorousFlowPorosityBase>();
+  InputParameters params = validParams<PorousFlowPorosityExponentialBase>();
   params.addRequiredCoupledVar("porosity_zero", "The porosity at zero volumetric strain and zero temperature and zero effective porepressure");
   params.addRequiredParam<Real>("thermal_expansion_coeff", "Thermal expansion coefficient of the drained porous solid skeleton");
   params.addRangeCheckedParam<Real>("biot_coefficient", 1, "biot_coefficient>=0 & biot_coefficient<=1", "Biot coefficient");
@@ -21,7 +21,7 @@ InputParameters validParams<PorousFlowPorosityTHM>()
 }
 
 PorousFlowPorosityTHM::PorousFlowPorosityTHM(const InputParameters & parameters) :
-    PorousFlowPorosityBase(parameters),
+    PorousFlowPorosityExponentialBase(parameters),
 
     _phi0(_nodal_material ? coupledNodalValue("porosity_zero") : coupledValue("porosity_zero")),
     _biot(getParam<Real>("biot_coefficient")),
@@ -45,29 +45,39 @@ PorousFlowPorosityTHM::PorousFlowPorosityTHM(const InputParameters & parameters)
     _disp_var_num[i] = coupled("displacements", i);
 }
 
-void
-PorousFlowPorosityTHM::initQpStatefulProperties()
+Real
+PorousFlowPorosityTHM::atNegInfinityQp() const
 {
-  _porosity[_qp] = _phi0[_qp];
+  return _biot;
 }
 
-void
-PorousFlowPorosityTHM::computeQpProperties()
+Real
+PorousFlowPorosityTHM::atZeroQp() const
+{
+  return _phi0[_qp];
+}
+
+Real
+PorousFlowPorosityTHM::decayQp() const
 {
   // Note that in the following _strain[_qp] is evaluated at q quadpoint
   // So _porosity_nodal[_qp], which should be the nodal value of porosity
   // actually uses the strain at a quadpoint.  This
   // is OK for LINEAR elements, as strain is constant over the element anyway.
-
   const unsigned qp_to_use = (_nodal_material && (_bnd || _strain_at_nearest_qp) ? nearestQP(_qp) : _qp);
 
-  _porosity[_qp] = _biot + (_phi0[_qp] - _biot) * std::exp(-_vol_strain_qp[qp_to_use] + _coeff * _pf[_qp] + _exp_coeff * _temperature[_qp]);
+  return - _vol_strain_qp[qp_to_use] + _coeff * _pf[_qp] + _exp_coeff * _temperature[_qp];
+}
 
-  _dporosity_dvar[_qp].resize(_num_var);
-  for (unsigned int v = 0; v < _num_var; ++v)
-    _dporosity_dvar[_qp][v] = (_coeff * _dpf_dvar[_qp][v] + _exp_coeff * _dtemperature_dvar[_qp][v]) * (_porosity[_qp] - _biot);
+Real
+PorousFlowPorosityTHM::ddecayQp_dvar(unsigned pvar) const
+{
+  return _coeff * _dpf_dvar[_qp][pvar] + _exp_coeff * _dtemperature_dvar[_qp][pvar];
+}
 
-  _dporosity_dgradvar[_qp].resize(_num_var);
-  for (unsigned int v = 0; v < _num_var; ++v)
-    _dporosity_dgradvar[_qp][v] = - (_porosity[_qp] - _biot) * _dvol_strain_qp_dvar[qp_to_use][v];
+RealGradient
+PorousFlowPorosityTHM::ddecayQp_dgradvar(unsigned pvar) const
+{
+  const unsigned qp_to_use = (_nodal_material && (_bnd || _strain_at_nearest_qp) ? nearestQP(_qp) : _qp);
+  return - _dvol_strain_qp_dvar[qp_to_use][pvar];
 }
