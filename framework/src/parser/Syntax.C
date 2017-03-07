@@ -86,7 +86,7 @@ Syntax::getSortedTask()
   return _tasks.getSortedValues();
 }
 
-const std::vector<std::set<std::string> > &
+const std::vector<std::vector<std::string> > &
 Syntax::getSortedTaskSet()
 {
   return _tasks.getSortedValuesSets();
