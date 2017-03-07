@@ -42,7 +42,7 @@ public:
   void addDependencySets(const std::string & action_sets);
 
   const std::vector<std::string> & getSortedTask();
-  const std::vector<std::set<std::string, DependencyResolverComparator<std::string> > > & getSortedTaskSet();
+  const std::vector<std::vector<std::string> > & getSortedTaskSet();
 
   bool hasTask(const std::string & task);
 
