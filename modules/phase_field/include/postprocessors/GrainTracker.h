@@ -39,6 +39,7 @@ public:
     bool intersects_boundary;
     unsigned int id;
     Point centroid;
+    Status status;
   };
 
   struct CacheValues
@@ -66,9 +67,9 @@ public:
 
 protected:
   virtual void updateFieldInfo() override;
-  virtual Real getThreshold(std::size_t current_index, bool active_feature) const override;
+  virtual Real getThreshold(std::size_t current_index) const override;
   virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::size_t current_index,
-                                             FeatureData * & feature, unsigned int & new_id) override;
+                                             FeatureData * & feature, Status & status, unsigned int & new_id) override;
 
   void communicateHaloMap();
 

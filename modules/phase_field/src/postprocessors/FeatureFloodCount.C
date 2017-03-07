@@ -359,7 +359,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::size_t> & local_to
   // Now size the individual counts vectors based on the largest index seen per processor
   for (const auto & feature : _feature_sets)
     for (const auto & local_index_pair : feature._orig_ids)
-          // local index                                              // rank
+          // local index                                             // rank
       if (local_index_pair.second >= static_cast<std::size_t>(counts[local_index_pair.first]))
         counts[local_index_pair.first] = local_index_pair.second + 1;
 
@@ -373,7 +373,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::size_t> & local_to
   }
 
   // Finally populate the master vector
-  local_to_global_all.resize(globalsize);
+  local_to_global_all.resize(globalsize, FeatureFloodCount::invalid_size_t);
   for (const auto & feature : _feature_sets)
   {
     // Get the local indices from the feature and build a map
@@ -397,8 +397,11 @@ FeatureFloodCount::buildFeatureIdToLocalIndices(unsigned int max_id)
   _feature_id_to_local_index.assign(max_id + 1, invalid_size_t);
   for (auto feature_index = beginIndex(_feature_sets); feature_index < _feature_sets.size(); ++feature_index)
   {
-    mooseAssert(_feature_sets[feature_index]._id <= max_id, "Feature ID out of range");
-    _feature_id_to_local_index[_feature_sets[feature_index]._id] = feature_index;
+    if (_feature_sets[feature_index]._status != Status::INACTIVE)
+    {
+      mooseAssert(_feature_sets[feature_index]._id <= max_id, "Feature ID out of range(" << _feature_sets[feature_index]._id << ')');
+      _feature_id_to_local_index[_feature_sets[feature_index]._id] = feature_index;
+    }
   }
 }
 
@@ -457,32 +460,40 @@ FeatureFloodCount::scatterAndUpdateRanks()
      * feature sets into a flat structure maintaining order and update the internal IDs
      * with the proper global ID.
      */
-    unsigned int local_feature_count = 0;
     for (auto & list_ref : _partial_feature_sets)
     {
       for (auto & feature : list_ref)
       {
         mooseAssert(feature._orig_ids.size() == 1, "feature._orig_ids length doesn't make sense");
 
+        auto global_index = FeatureFloodCount::invalid_size_t;
         auto local_index = feature._orig_ids.begin()->second;
-        mooseAssert(local_index < _local_to_global_feature_map.size(), "local_id : "
-                    << local_index << " is out of range (" << _local_to_global_feature_map.size() << ')');
 
-        auto global_index = _local_to_global_feature_map[local_index];
-        if (global_index > largest_global_index)
-          largest_global_index = global_index;
+        if (local_index < _local_to_global_feature_map.size())
+          global_index = _local_to_global_feature_map[local_index];
 
-        // Set the correct global index
-        feature._id = global_index;
+        if (global_index != FeatureFloodCount::invalid_size_t)
+        {
+          if (global_index > largest_global_index)
+            largest_global_index = global_index;
 
-        // Move the feature into the correct place
-        _feature_sets[local_index] = std::move(feature);
+          // Set the correct global index
+          feature._id = global_index;
 
-        ++local_feature_count;
+          /**
+           * Important: Make sure we clear the local status if we received a valid global
+           * index for this feature. It's possible that we have a status of INVALID
+           * on the local processor because there was never any starting threshold found.
+           * However, the root processor wouldn't have sent an index if it didn't find
+           * a starting threshold connected to our local piece.
+           */
+          feature._status &= ~Status::INACTIVE;
+
+          // Move the feature into the correct place
+          _feature_sets[local_index] = std::move(feature);
+        }
       }
     }
-
-    mooseAssert(local_feature_count == _local_to_global_feature_map.size(), "Indexing error");
   }
   else
   {
@@ -823,12 +834,16 @@ FeatureFloodCount::mergeSets(bool use_periodic_boundary_info)
     std::set<dof_id_type> set_difference;
     for (auto & feature : _partial_feature_sets[map_num])
     {
-      // First we need to calculate the centroid now that we are doing merging all partial features
-      if (feature._vol_count != 0)
-        feature._centroid /= feature._vol_count;
+      // If after merging we still have an inactive feature, discard it
+      if (feature._status == Status::CLEAR)
+      {
+        // First we need to calculate the centroid now that we are doing merging all partial features
+        if (feature._vol_count != 0)
+          feature._centroid /= feature._vol_count;
 
-      _feature_sets.emplace_back(std::move(feature));
-      ++_feature_count;
+        _feature_sets.emplace_back(std::move(feature));
+        ++_feature_count;
+      }
     }
 
     // Record the feature numbers just for the current map
@@ -938,7 +953,8 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
 
   // See if the current entity either starts a new feature or continues an existing feature
   auto new_id = invalid_id;  // Writable reference to hold an optional id;
-  if (!isNewFeatureOrConnectedRegion(dof_object, current_index, feature, new_id))
+  Status status = Status::INACTIVE;  // Status is inactive until we find an entity above the starting threshold
+  if (!isNewFeatureOrConnectedRegion(dof_object, current_index, feature, status, new_id))
     return;
 
   /**
@@ -956,7 +972,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
   // New Feature (we need to create it and add it to our data structure)
   if (!feature)
   {
-    _partial_feature_sets[map_num].emplace_back(current_index, _feature_count++, processor_id());
+    _partial_feature_sets[map_num].emplace_back(current_index, _feature_count++, processor_id(), status);
 
     // Get a handle to the feature we will update (always the last feature in the data structure)
     feature = &_partial_feature_sets[map_num].back();
@@ -996,15 +1012,27 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
 }
 
 Real
-FeatureFloodCount::getThreshold(std::size_t /*current_index*/, bool active_feature) const
+FeatureFloodCount::getThreshold(std::size_t /*current_index*/) const
 {
-  return active_feature ? _step_connecting_threshold : _step_threshold;
+  return _step_threshold;
 }
 
-bool FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::size_t current_index, FeatureData * & feature, unsigned int & /*new_id*/)
+Real
+FeatureFloodCount::getConnectingThreshold(std::size_t /*current_index*/) const
 {
-  auto threshold = getThreshold(current_index, feature);
+  return _step_connecting_threshold;
+}
 
+bool
+FeatureFloodCount::compareValueWithThreshold(Real entity_value, Real threshold) const
+{
+  return ((_use_less_than_threshold_comparison && (entity_value >= threshold)) ||
+          (!_use_less_than_threshold_comparison && (entity_value <= threshold)));
+}
+
+bool FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::size_t current_index, FeatureData * & feature,
+                                                      Status & status, unsigned int & /*new_id*/)
+{
   // Get the value of the current variable for the current entity
   Real entity_value;
   if (_is_elemental)
@@ -1017,10 +1045,24 @@ bool FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_obje
   else
     entity_value = _vars[current_index]->getNodalValue(*static_cast<const Node *>(dof_object));
 
-  // This entity hasn't been marked, is it in a feature?  We must respect
-  // the user-selected value of _use_less_than_threshold_comparison.
-  return ((_use_less_than_threshold_comparison && (entity_value >= threshold)) ||
-          (!_use_less_than_threshold_comparison && (entity_value <= threshold)));
+  // If the value compares against our starting threshold, this is definitely part of a feature we'll keep
+  if (compareValueWithThreshold(entity_value, getThreshold(current_index)))
+  {
+    Status * status_ptr = &status;
+
+    if (feature)
+      status_ptr = &feature->_status;
+
+    // Update an existing feature's status or clear the flag on the passed in status
+    *status_ptr &= ~Status::INACTIVE;
+    return true;
+  }
+
+  /**
+   * If the value is _only_ above the connecting threshold, it's still part of a feature but possibly part
+   * of one that we'll discard if there is never any starting threshold encountered.
+   */
+  return compareValueWithThreshold(entity_value, getConnectingThreshold(current_index));
 }
 
 void
@@ -1241,6 +1283,15 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
 
   // Update the min feature id
   _min_entity_id = std::min(_min_entity_id, rhs._min_entity_id);
+
+  /**
+   * Combine the status flags: Currently we only expect to combine CLEAR and INACTIVE. Any other combination
+   * is currently a logic error. In this case of CLEAR and INACTIVE though, we want to make sure
+   * that CLEAR wins.
+   */
+  mooseAssert((_status & Status::MARKED & Status::DIRTY) == Status::CLEAR, "Flags in invalid state");
+  // Logical AND here to combine flags (INACTIVE & INACTIVE == INACTIVE, all other combos are CLEAR)
+  _status &= rhs._status;
 
   _vol_count += rhs._vol_count;
   _centroid += rhs._centroid;
