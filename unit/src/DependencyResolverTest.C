@@ -117,17 +117,17 @@ DependencyResolverTest::resolverSets()
   // First throw in an extra independent item
   _resolver.addItem("aa");
 
-  const std::vector<std::set<std::string> > & sets = _resolver.getSortedValuesSets();
+  const auto & sets = _resolver.getSortedValuesSets();
 
   CPPUNIT_ASSERT( sets.size() == 3 );
   CPPUNIT_ASSERT( sets[0].size() == 2);
-  CPPUNIT_ASSERT( sets[0].find("a") != sets[0].end() );
-  CPPUNIT_ASSERT( sets[0].find("aa") != sets[0].end() );
+  CPPUNIT_ASSERT( std::find(sets[0].begin(), sets[0].end(), "a") != sets[0].end() );
+  CPPUNIT_ASSERT( std::find(sets[0].begin(), sets[0].end(), "aa") != sets[0].end() );
 
   CPPUNIT_ASSERT( sets[1].size() == 2);
-  CPPUNIT_ASSERT( sets[0].find("b") != sets[1].end() );
-  CPPUNIT_ASSERT( sets[0].find("c") != sets[1].end() );
+  CPPUNIT_ASSERT( std::find(sets[1].begin(), sets[1].end(), "b") != sets[1].end() );
+  CPPUNIT_ASSERT( std::find(sets[1].begin(), sets[1].end(), "c") != sets[1].end() );
 
   CPPUNIT_ASSERT( sets[2].size() == 1);
-  CPPUNIT_ASSERT( sets[0].find("d") != sets[2].end() );
+  CPPUNIT_ASSERT( std::find(sets[2].begin(), sets[2].end(), "d") != sets[2].end() );
 }
