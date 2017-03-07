@@ -1,5 +1,6 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
+# GeneralizedPlaneStrain Action
 
-# GeneralizedPlaneStrain System
+Sets up a generalized plane strain model. This action can be generated using the
+[Modules/TensorMechanics/Master](../Master) action.
+
 !parameters /Modules/TensorMechanics/GeneralizedPlaneStrain
-

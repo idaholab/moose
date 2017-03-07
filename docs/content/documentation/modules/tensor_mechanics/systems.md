@@ -1,1 +1,1 @@
-!systems tensor_mechanics
+!systems groups=tensor_mechanics

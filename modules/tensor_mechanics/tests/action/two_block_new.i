@@ -25,14 +25,21 @@
 []
 
 [Modules/TensorMechanics/Master]
+  # parameters that apply to all subblocks are specified at this level. They
+  # can be overwritten in teh subblocks.
   add_variables = true
   strain = FINITE
   generate_output = 'stress_xx'
+
   [./block1]
+    # the `block` parameter is only valid insde a subblock.
     block = 1
   [../]
   [./block2]
     block = 2
+    # the `additional_generate_output` parameter is also only valid inside a
+    # subblock. Values specified here are appended to the `generate_output`
+    # parameter values.
     additional_generate_output = 'strain_yy'
   [../]
 []
