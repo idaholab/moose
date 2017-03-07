@@ -4,13 +4,11 @@
    input = 't_stress_crack_infinite_plate_2d.i'
    exodiff = 't_stress_crack_infinite_plate_out.e'
    abs_zero = 1e-7
-   max_parallel = 1 # nl_its and lin_its will not be the same in parallel and serial
  [../]
  [./3d]
    type = 'Exodiff'
    input = 't_stress_ellip_crack_3d.i'
    exodiff = 't_stress_ellip_crack_out.e'
    abs_zero = 1e-7
-   custom_cmp = 't_stress_ellip_crack_3d.cmp' # Ignore nl_its and lin_its
 [../]
 []
