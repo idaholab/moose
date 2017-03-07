@@ -43,8 +43,13 @@
       mark = REFINE
     [../]
   [../]
+
+  # this marker will tag every element for refinement, growing the problem
+  # exponentially with each timestep
   marker = uni
-  stop_time = 7.5
+
+  # avoid a refine after the final step
+  stop_time = 4.5
 []
 
 [Postprocessors]
@@ -52,45 +57,42 @@
     type = MemoryUsage
     mem_type = physical_memory
     value_type = total
-    execute_on = 'initial TIMESTEP_END nonlinear linear'
+    # by default MemoryUsage reports the peak value for the current timestep
+    # out of all samples that have been taken (at linear and non-linear iterations)
+    execute_on = 'INITIAL TIMESTEP_END NONLINEAR LINEAR'
   [../]
   [./virtual]
     type = MemoryUsage
     mem_type = virtual_memory
     value_type = total
-    execute_on = 'initial TIMESTEP_END'
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./page_faults]
     type = MemoryUsage
     mem_type = page_faults
     value_type = total
-    execute_on = 'initial TIMESTEP_END'
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./DOFs]
     type = NumDOFs
-    execute_on = 'initial TIMESTEP_END'
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./walltime]
     type = PerformanceData
     event = ALIVE
-    execute_on = 'initial TIMESTEP_END'
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
 []
 
 [Executioner]
   type = Transient
-
-  #solve_type = 'PJFNK'
-  #petsc_options_iname = '-pc_type -pc_hypre_type'
-  #petsc_options_value = 'hypre boomeramg'
-
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
   nl_abs_tol = 1e-10
 
-  num_steps = 8
+  num_steps = 5
   dt = 1
 []
 

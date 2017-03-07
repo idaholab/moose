@@ -27,6 +27,7 @@ template<>
 InputParameters validParams<MemoryUsage>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
+  params.addClassDescription("Memory usage statistics for the running simulation.");
   MooseEnum mem_type("virtual_memory physical_memory page_faults", "virtual_memory");
   params.addParam<MooseEnum>("mem_type", mem_type, "Memory metric to report.");
   MooseEnum value_type("total average max_process min_processs", "total");
