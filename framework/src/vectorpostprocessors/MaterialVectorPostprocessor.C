@@ -24,7 +24,7 @@ template<>
 InputParameters validParams<MaterialVectorPostprocessor>()
 {
   InputParameters params = validParams<ElementVectorPostprocessor>();
-  params.addRequiredParam<std::string>("material", "Material for which all properties will be recorded.");
+  params.addRequiredParam<MaterialName>("material", "Material for which all properties will be recorded.");
   params.addRequiredParam<std::vector<unsigned int>>("elem_ids", "Element IDs to print data for (others are ignored).");
   return params;
 }
@@ -35,7 +35,7 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
     _elem_ids(declareVector("elem_id")),
     _qp_ids(declareVector("qp_id"))
 {
-  auto & mat = getMaterialByName(getParam<std::string>("material"), true);
+  auto & mat = getMaterialByName(getParam<MaterialName>("material"), true);
   auto & prop_names = mat.getSuppliedItems();
   for (auto & prop : prop_names)
   {

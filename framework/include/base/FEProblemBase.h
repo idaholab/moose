@@ -990,7 +990,9 @@ public:
   const MaterialWarehouse & getDiscreteMaterialWarehouse() { return _discrete_materials; }
 
   /**
-   * Return a pointer to a Material object.  If no_warn is true, suppress warnings.
+   * Return a pointer to a Material object.  If no_warn is true, suppress
+   * warning about retrieving a material reference potentially during the
+   * material's calculation.
    *
    * This will return enabled or disabled objects, the main purpose is for iterative materials.
    */

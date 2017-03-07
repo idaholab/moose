@@ -17,12 +17,15 @@
 
 #include "ElementVectorPostprocessor.h"
 
-//Forward Declarations
 class MaterialVectorPostprocessor;
 
 template<>
 InputParameters validParams<MaterialVectorPostprocessor>();
 
+/// This postprocessor records all scalar material properties of the specified
+/// material object on specified elements at the indicated execution points
+/// (e.g. initial, timestep_begin, etc.).  Non-scalar properties are ignored
+/// with a warning.
 class MaterialVectorPostprocessor :
   public ElementVectorPostprocessor
 {
@@ -35,13 +38,29 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 private:
+  /// Sorts all data in the VectorPostProcessorValue objects so that output
+  /// from this postprocessor is ordered consistently across arbitrary number
+  /// of parallel jobs.
   void sortVecs();
 
+  /// Element ids to record material properties for.
   std::set<unsigned int> _elem_filter;
+
+  /// Column of element id info.
   VectorPostprocessorValue & _elem_ids;
+
+  /// Column of quadrature point indices.
   VectorPostprocessorValue & _qp_ids;
+
+  /// Columns for each (scalar) property of the material.
   std::vector<VectorPostprocessorValue *> _prop_vecs;
+
+  /// Reference to each material property - used to retrieve the actual
+  /// property values at every execution point.
   std::vector<const PropertyValue*> _prop_refs;
+
+  /// Names for every property in the material - used for determining if
+  /// properties are scalar or not.
   std::vector<std::string> _prop_names;
 };
 
