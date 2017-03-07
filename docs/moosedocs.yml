@@ -71,7 +71,6 @@ markdown_extensions:
                       - /Mesh/Partitioner
                       - /Mesh/MortarInterfaces
                       - /MeshModifiers
-                      - /Modules
                       - /MultiApps
                       - /NodalKernels
                       - /NodalNormals
@@ -120,12 +119,10 @@ markdown_extensions:
                       - /BCs
                       - /Kernels
                       - /Materials
-                      - /Modules
                       - /Postprocessors
                       - /ScalarKernels
                       - /UserObjects
                       - /VectorPostprocessors
-                      - /Modules
               - heat_conduction:
                   doxygen: http://mooseframework.org/docs/doxygen/modules/
                   paths:

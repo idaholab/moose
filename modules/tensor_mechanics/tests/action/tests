@@ -1,4 +1,10 @@
 [Tests]
+  [./two_block_new]
+    type = Exodiff
+    input = 'two_block_new.i'
+    exodiff = 'two_block_new_out.e'
+  [../]
+
   [./two_block]
     type = Exodiff
     input = 'two_block.i'

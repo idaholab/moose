@@ -9,6 +9,7 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "CommonTensorMechanicsAction.h"
 #include "TensorMechanicsAction.h"
 #include "LegacyTensorMechanicsAction.h"
 #include "DynamicTensorMechanicsAction.h"
@@ -378,6 +379,7 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.registerActionSyntax("PressureAction", "BCs/Pressure/*");
 
   syntax.registerActionSyntax("GeneralizedPlaneStrainAction", "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
+  syntax.registerActionSyntax("CommonTensorMechanicsAction", "Modules/TensorMechanics/Master");
   syntax.registerActionSyntax("TensorMechanicsAction", "Modules/TensorMechanics/Master/*");
 
   registerTask("validate_coordinate_systems", /*is_required=*/false);
@@ -390,6 +392,8 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(LegacyTensorMechanicsAction, "setup_mesh_complete");
   registerAction(LegacyTensorMechanicsAction, "validate_coordinate_systems");
   registerAction(LegacyTensorMechanicsAction, "add_kernel");
+
+  registerAction(CommonTensorMechanicsAction, "meta_action");
 
   registerAction(TensorMechanicsAction, "meta_action");
   registerAction(TensorMechanicsAction, "setup_mesh_complete");

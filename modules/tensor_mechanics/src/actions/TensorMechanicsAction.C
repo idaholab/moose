@@ -14,79 +14,26 @@
 #include "libmesh/string_to_enum.h"
 #include <algorithm>
 
-// map tensor name shortcuts to tensor material property names
-const std::map<std::string, std::string> TensorMechanicsAction::_ranktwoaux_table = {
-    {"strain", "total_strain"},
-    {"stress", "stress"},
-    {"elastic_strain", "elastic_strain"},
-    {"plastic_strain", "plastic_strain"},
-    {"creep_strain", "creep_strain"}};
-const std::vector<char> TensorMechanicsAction::_component_table = {'x', 'y', 'z'};
-// map aux variable name prefixes to RanTwoScalarAux option and list of permitted tensor name shortcuts
-const std::map<std::string, std::pair<std::string, std::vector<std::string>>> TensorMechanicsAction::_ranktwoscalaraux_table = {
-    {"vonmises", {"VonMisesStress", {"stress"}}},
-    {"hydrostatic", {"Hydrostatic", {"stress"}}},
-    {"max_principal", {"MaxPrincipal", {"stress"}}},
-    {"mid_principal", {"MidPrincipal", {"stress"}}},
-    {"min_principal", {"MinPrincipal", {"stress"}}},
-    {"equivalent", {"EquivalentPlasticStrain", {"plastic_strain", "creep_strain"}}},
-    {"firstinv", {"FirstInvariant", {"stress", "strain"}}},
-    {"secondinv", {"SecondInvariant", {"stress", "strain"}}},
-    {"thirdinv", {"ThirdInvariant", {"stress", "strain"}}}};
-
 template <>
 InputParameters
 validParams<TensorMechanicsAction>()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = validParams<TensorMechanicsActionBase>();
   params.addClassDescription("Set up stress divergence kernels with coordinate system aware logic");
-  params.addRequiredParam<std::vector<NonlinearVariableName>>("displacements", "The nonlinear displacement variables for the problem");
-  params.addParam<NonlinearVariableName>("temp", "The temperature"); // Deprecated
-  params.addParam<NonlinearVariableName>("temperature", "The temperature");
 
-  MooseEnum strainType("SMALL FINITE", "SMALL");
-  params.addParam<MooseEnum>("strain", strainType, "Strain formulation");
-  params.addParam<bool>("incremental", "Use incremental or total strain");
-
-  params.addParam<std::string>("base_name", "Material property base name");
-  params.addParam<bool>("volumetric_locking_correction", false, "Flag to correct volumetric locking");
-  params.addParam<bool>("use_finite_deform_jacobian", false, "Jacobian for corrotational finite strain");
-  params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
-  params.addParam<bool>("add_variables", false, "Add the displacement variables");
-  params.addParam<std::vector<MaterialPropertyName>>("eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
-
-  // Advanced
+  // parameters specified here only appear in the input file sub-blocks of the
+  // Master action, not in the common parameters area
   params.addParam<std::vector<SubdomainName>>("block", "The list of ids of the blocks (subdomain) that the stress divergence kernels will be applied to");
-  params.addParam<std::vector<AuxVariableName>>("save_in", "The displacement residuals");
-  params.addParam<std::vector<AuxVariableName>>("diag_save_in", "The displacement diagonal preconditioner terms");
-  params.addParamNamesToGroup("block save_in diag_save_in", "Advanced");
+  params.addParamNamesToGroup("block", "Advanced");
 
-  MooseEnum planarFormulationType("NONE PLANE_STRAIN GENERALIZED_PLANE_STRAIN", "NONE"); // PLANE_STRESS
-  params.addParam<MooseEnum>("planar_formulation", planarFormulationType, "Out-of-plane stress/strain formulation");
-  params.addParam<NonlinearVariableName>("scalar_out_of_plane_strain", "Scalar variable for the out-of-plane strain (in y direction for 1D Axisymmetric or in z direction for 2D Cartesian problems)");
-  params.addParam<FunctionName>("out_of_plane_pressure", "0", "Function used to prescribe pressure in the out-of-plane direction (y for 1D Axisymmetric or z for 2D Cartesian problems)");
-  params.addParam<Real>("pressure_factor", 1.0, "Scale factor applied to prescribed pressure");
-  params.addParamNamesToGroup("planar_formulation scalar_out_of_plane_strain out_of_plane_pressure pressure_factor", "Out-of-plane stress/strain");
-
-  // Output
-  std::string options = "";
-  for (auto & r2a : TensorMechanicsAction::_ranktwoaux_table)
-    for (unsigned int a = 0; a < 3; ++a)
-      for (unsigned int b = 0; b < 3; ++b)
-        options += (options == "" ? "" : " ") + r2a.first + '_' + TensorMechanicsAction::_component_table[a] + TensorMechanicsAction::_component_table[b];
-
-  for (auto & r2sa : TensorMechanicsAction::_ranktwoscalaraux_table)
-    for (auto & t : r2sa.second.second)
-      options += " " + r2sa.first + "_" + t;
-
-  MultiMooseEnum outputPropertiesType(options);
-  params.addParam<MultiMooseEnum>("generate_output", outputPropertiesType, "Add scalar quantity output for stress and/or strain");
+  params.addParam<MultiMooseEnum>("additional_generate_output", TensorMechanicsActionBase::outputPropertiesType(), "Add scalar quantity output for stress and/or strain (will be appended to the list in `generate_output`)");
+  params.addParamNamesToGroup("additional_generate_output", "Output");
 
   return params;
 }
 
 TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
-  : Action(params),
+  : TensorMechanicsActionBase(params),
     _displacements(getParam<std::vector<NonlinearVariableName>>("displacements")),
     _ndisp(_displacements.size()),
     _coupled_displacements(_ndisp),
@@ -95,8 +42,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _subdomain_ids(),
     _strain(getParam<MooseEnum>("strain").getEnum<Strain>()),
-    _planar_formulation(getParam<MooseEnum>("planar_formulation").getEnum<PlanarFormulation>()),
-    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names"))
+    _planar_formulation(getParam<MooseEnum>("planar_formulation").getEnum<PlanarFormulation>())
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -147,7 +93,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   if (_planar_formulation != PlanarFormulation::None && _ndisp != 2)
     mooseError("Plane strain only works in 2 dimensions");
 
-  // convert output vareiable names to lower case
+  // convert output variable names to lower case
   for (const auto & out : getParam<MultiMooseEnum>("generate_output"))
   {
     std::string lower(out);
@@ -221,7 +167,7 @@ TensorMechanicsAction::act()
   }
 
   //
-  // Add Stess and Strain Materials (optional)
+  // Add Strain Materials
   //
   else if (_current_task == "add_material")
   {
@@ -269,11 +215,10 @@ TensorMechanicsAction::act()
 
     // set material parameters
     auto params = _factory.getValidParams(type);
-    params.applyParameters(parameters(), {"displacements", "use_displaced_mesh", "eigenstrain_names", "scalar_out_of_plane_strain"});
+    params.applyParameters(parameters(), {"displacements", "use_displaced_mesh", "scalar_out_of_plane_strain"});
 
     params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
     params.set<bool>("use_displaced_mesh") = false;
-    params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") = _eigenstrain_names;
     if (isParamValid("scalar_out_of_plane_strain"))
       params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {getParam<NonlinearVariableName>("scalar_out_of_plane_strain")};
 
