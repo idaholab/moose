@@ -48,18 +48,20 @@
     G0_var = 'G0_pos'
     dG0_dstrain_var = 'dG0_pos_dstrain'
   [../]
+  [./DynamicTensorMechanics]
+    displacements = 'disp_x disp_y'
+    save_in = 'resid_x resid_y'
+  [../]
   [./solid_x]
-    type = StressDivergencePFFracTensors
+    type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_x
     component = 0
-    save_in = resid_x
     c = c
   [../]
   [./solid_y]
-    type = StressDivergencePFFracTensors
+    type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_y
     component = 1
-    save_in = resid_y
     c = c
   [../]
   [./dcdt]

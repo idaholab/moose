@@ -49,19 +49,22 @@
     G0_var = 'G0'
     dG0_dstrain_var = 'dG0_dstrain'
   [../]
+  [./TensorMechanics]
+    displacements = 'disp_x disp_y'
+    save_in = 'resid_x resid_y'
+    use_displaced_mesh = true
+  [../]
   [./solid_x]
-    type = StressDivergencePFFracTensors
+    type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_x
     component = 0
-    save_in = resid_x
     c = c
     use_displaced_mesh = true
   [../]
   [./solid_y]
-    type = StressDivergencePFFracTensors
+    type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_y
     component = 1
-    save_in = resid_y
     c = c
     use_displaced_mesh = true
   [../]
