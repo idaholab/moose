@@ -273,6 +273,8 @@ private:
   void checkExecutionStage();
 
   bool _has_stateful_property;
+
+  bool _overrides_init_stateful_props = true;
 };
 
 template<typename T>
