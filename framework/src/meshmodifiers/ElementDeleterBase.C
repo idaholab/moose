@@ -183,7 +183,7 @@ ElementDeleterBase::modify()
         Elem * elem = mesh.elem_ptr(r.first);
         const unsigned int side = r.second;
 
-        libmesh_assert(elem->neighbor(side) == remote_elem);
+        mooseAssert(elem->neighbor(side) == remote_elem, "element neighbor != remote_elem");
 
         elem->set_neighbor(side, nullptr);
       }
