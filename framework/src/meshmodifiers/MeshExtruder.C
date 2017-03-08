@@ -75,7 +75,11 @@ MeshExtruder::modify()
                                          elem_subdomain_id.get());
 
   // See if the user has requested specific sides for the top and bottom
-  const std::set<boundary_id_type> & side_ids = _mesh_ptr->getMesh().get_boundary_info().get_side_boundary_ids();
+  std::set<boundary_id_type> side_ids = _mesh_ptr->getMesh().get_boundary_info().get_side_boundary_ids();
+
+  // Handle distributed meshes: processors may not know all side ids
+  _communicator.set_union(side_ids);
+
   std::set<boundary_id_type>::reverse_iterator last_side_it = side_ids.rbegin();
 
   const boundary_id_type old_top = *last_side_it;
