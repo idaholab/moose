@@ -601,12 +601,12 @@ class TestHarness:
             print printResult(tester, tester.getStatusMessage(), 0, 0, 0, self.options)
 
         # Statuses generated when using PBS options
-        elif status == 'PBS':
+        elif status == tester.bucket_pbs:
             # TestHarness wants to check on a PBS job that was launched (qstat)
             if self.options.pbs and self.options.processingPBS == False:
                 self.buildPBSBatch(output, tester)
                 # This can potentially cause a failure (qstat issues), so handle that case separately
-                if tester.getStatus() == 'FAIL':
+                if status == tester.bucket_fail:
                     self.handleTestResult(tester, '', tester.getStatusMessage(), 0, 0, True)
                     test_completed = True
                 else:
@@ -681,7 +681,7 @@ class TestHarness:
             lines = output.split('\n');
 
             # Obtain color based on test status
-            color = tester.getColor(status)
+            color = tester.getColor()
 
             if output != '': # PBS Failures can result in empty output, so lets not print that stuff twice
                 test_name = colorText(tester.specs['test_name']  + ": ", color, colored=self.options.colored, code=self.options.code)
