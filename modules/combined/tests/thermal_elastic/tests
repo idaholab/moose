@@ -4,4 +4,10 @@
     input = 'thermal_elastic.i'
     exodiff = 'thermal_elastic_out.e'
   [../]
+  [./test_sm]
+    type = 'Exodiff'
+    input = 'thermal_elastic_sm.i'
+    exodiff = 'thermal_elastic_out.e'
+    prereq = test
+  [../]
 []

@@ -9,27 +9,71 @@
 template<>
 InputParameters validParams<ComputeVariableIsotropicElasticityTensor>()
 {
-  InputParameters params = validParams<ComputeIsotropicElasticityTensor>();
-  params.addClassDescription("Compute an isotropic elasticity tensor for elastic constants that change as a function of temperature");
-  params.addRequiredCoupledVar("temperature", "Coupled temperature");
-  params.addParam<bool>("store_old_elasticity_tensor", true, "Parameter to save the old elasticity tensor values, set to true when the elasticity tensor components change, i.e. with temperature");
+  InputParameters params = validParams<ComputeElasticityTensorBase>();
+  params.addClassDescription("Compute an isotropic elasticity tensor for elastic constants that change as a function of material properties");
+  params.addRequiredParam<MaterialPropertyName>("youngs_modulus", "Name of material defining the Young's Modulus");
+  params.addRequiredParam<MaterialPropertyName>("poissons_ratio", "Name of material defining the Poisson's Ratio");
+  params.addRequiredCoupledVar("args", "Variable dependence for the Young's Modulus and Poisson's Ratio materials");
   return params;
 }
 
 ComputeVariableIsotropicElasticityTensor::ComputeVariableIsotropicElasticityTensor(const InputParameters & parameters) :
-    ComputeIsotropicElasticityTensor(parameters),
-    _temperature(coupledValue("temperature")),
-    _elasticity_tensor_old(declarePropertyOld<RankFourTensor>(_elasticity_tensor_name))
+    ComputeElasticityTensorBase(parameters),
+    _elasticity_tensor_old(declarePropertyOld<RankFourTensor>(_elasticity_tensor_name)),
+    _youngs_modulus(getMaterialProperty<Real>("youngs_modulus")),
+    _poissons_ratio(getMaterialProperty<Real>("poissons_ratio")),
+    _num_args(coupledComponents("args")),
+    _dyoungs_modulus(_num_args),
+    _d2youngs_modulus(_num_args),
+    _dpoissons_ratio(_num_args),
+    _d2poissons_ratio(_num_args),
+    _delasticity_tensor(_num_args),
+    _d2elasticity_tensor(_num_args),
+    _isotropic_elastic_constants(2)
 {
-  if (_lambda_set && _shear_modulus_set)
+  // fetch prerequisite derivatives and build elasticity tensor derivatives and cross-derivatives
+  for (unsigned int i = 0; i < _num_args; ++i)
   {
-    _youngs_modulus = _shear_modulus * (3.0 * _lambda + 2.0 * _shear_modulus) / (_lambda + _shear_modulus);
-    _poissons_ratio = _lambda / (2.0 * (_lambda + _shear_modulus));
+    const VariableName & iname = getVar("args", i)->name();
+    _dyoungs_modulus[i] = &getMaterialPropertyDerivative<Real>("youngs_modulus", iname);
+    _dpoissons_ratio[i] = &getMaterialPropertyDerivative<Real>("poissons_ratio", iname);
+
+    _delasticity_tensor[i] = &declarePropertyDerivative<RankFourTensor>(_elasticity_tensor_name, iname);
+
+    _d2youngs_modulus[i].resize(_num_args);
+    _d2poissons_ratio[i].resize(_num_args);
+    _d2elasticity_tensor[i].resize(_num_args);
+
+    for (unsigned int j = i; j < _num_args; ++j)
+    {
+      const VariableName & jname = getVar("args", j)->name();
+      _d2youngs_modulus[i][j] = &getMaterialPropertyDerivative<Real>("youngs_modulus", iname, jname);
+      _d2poissons_ratio[i][j] = &getMaterialPropertyDerivative<Real>("poissons_ratio", iname, jname);
+      _d2elasticity_tensor[i][j] = &declarePropertyDerivative<RankFourTensor>(_elasticity_tensor_name, iname, jname);
+    }
   }
-  else if (_shear_modulus_set && _bulk_modulus_set)
+}
+
+void
+ComputeVariableIsotropicElasticityTensor::initialSetup()
+{
+  validateCoupling<Real>("youngs_modulus");
+  validateCoupling<Real>("poissons_ratio");
+  for (unsigned int i = 0; i < _num_args; ++i)
   {
-    _youngs_modulus = 9.0 * _bulk_modulus * _shear_modulus / (3.0 * _bulk_modulus + _shear_modulus);
-    _poissons_ratio = (3.0 * _bulk_modulus - 2.0 * _shear_modulus) / (2.0 * (3.0 * _bulk_modulus + _shear_modulus));
+    const VariableName & iname = getVar("args", i)->name();
+    if (_fe_problem.isMatPropRequested(propertyNameFirst(_elasticity_tensor_name, iname)))
+      mooseError("Derivative of elasticity tensor requested, but not yet implemented");
+    else
+      _delasticity_tensor[i] = nullptr;
+    for (unsigned int j = 0; j < _num_args; ++j)
+    {
+      const VariableName & jname = getVar("args", j)->name();
+      if (_fe_problem.isMatPropRequested(propertyNameSecond(_elasticity_tensor_name, iname, jname)))
+        mooseError("Second Derivative of elasticity tensor requested, but not yet implemented");
+      else
+        _d2elasticity_tensor[i][j] = nullptr;
+    }
   }
 }
 
@@ -41,25 +85,21 @@ ComputeVariableIsotropicElasticityTensor::initQpStatefulProperties()
 void
 ComputeVariableIsotropicElasticityTensor::computeQpElasticityTensor()
 {
-  Real youngs_modulus = _youngs_modulus;
-  //Create a nonphysical change in the young's modulus with temperature
-  if (MooseUtils::relativeFuzzyGreaterEqual(_temperature[_qp], 600.0))
-  {
-    youngs_modulus -= 100.0 * _temperature[_qp];
-    if (MooseUtils::relativeFuzzyLessThan(youngs_modulus, 1.0e3))
-      youngs_modulus = 1.0e3;
-  }
-
-  // Build the vector to pass into RankFourTensor to create the elasticity tensor
-  std::vector<Real> isotropic_elastic_constants(2);
-
   // lambda
-  isotropic_elastic_constants[0] = youngs_modulus * _poissons_ratio / ((1.0 + _poissons_ratio) * (1.0 - 2.0 * _poissons_ratio));
-
+  _isotropic_elastic_constants[0] = _youngs_modulus[_qp] * _poissons_ratio[_qp] / ((1.0 + _poissons_ratio[_qp]) * (1.0 - 2.0 * _poissons_ratio[_qp]));
   // shear modulus
-  isotropic_elastic_constants[1] = youngs_modulus / (2.0 * (1.0 + _poissons_ratio));
-  _Cijkl.fillFromInputVector(isotropic_elastic_constants, RankFourTensor::symmetric_isotropic);
+  _isotropic_elastic_constants[1] = _youngs_modulus[_qp] / (2.0 * (1.0 + _poissons_ratio[_qp]));
 
-  //Assign elasticity tensor at a given quad point
-  _elasticity_tensor[_qp] = _Cijkl;
+  _elasticity_tensor[_qp].fillFromInputVector(_isotropic_elastic_constants, RankFourTensor::symmetric_isotropic);
+
+  //Define derivatives of the elasticity tensor
+  for (unsigned int i = 0; i < _num_args; ++i)
+  {
+    if (_delasticity_tensor[i])
+      mooseError("Derivative of elasticity tensor requested, but not yet implemented");
+
+    for (unsigned int j = i; j < _num_args; ++j)
+      if (_d2elasticity_tensor[i][j])
+        mooseError("Second derivative of elasticity tensor requested, but not yet implemented");
+  }
 }

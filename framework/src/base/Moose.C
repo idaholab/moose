@@ -169,6 +169,7 @@
 #include "GenericConstantMaterial.h"
 #include "GenericConstantRankTwoTensor.h"
 #include "GenericFunctionMaterial.h"
+#include "PiecewiseLinearInterpolationMaterial.h"
 
 // PPS
 #include "AverageElementSize.h"
@@ -605,6 +606,7 @@ registerObjects(Factory & factory)
   registerMaterial(GenericConstantMaterial);
   registerMaterial(GenericConstantRankTwoTensor);
   registerMaterial(GenericFunctionMaterial);
+  registerMaterial(PiecewiseLinearInterpolationMaterial);
 
   // PPS
   registerPostprocessor(AverageElementSize);
