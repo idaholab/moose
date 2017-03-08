@@ -2352,7 +2352,22 @@ MooseMesh::getNodeList(boundary_id_type nodeset_id) const
   std::map<boundary_id_type, std::vector<dof_id_type> >::const_iterator it = _node_set_nodes.find(nodeset_id);
 
   if (it == _node_set_nodes.end())
-    mooseError("Unable to nodeset ID: ", nodeset_id, '.');
+  {
+    // On a distributed mesh we might not know about a remote nodeset,
+    // so we'll return an empty vector and hope the nodeset exists
+    // elsewhere.
+    if (!getMesh().is_serial())
+    {
+      static const std::vector<dof_id_type> empty_vec;
+      return empty_vec;
+    }
+    // On a replicated mesh we should know about every nodeset and if
+    // we're asked for one that doesn't exist then it must be a bug.
+    else
+    {
+      mooseError("Unable to nodeset ID: ", nodeset_id, '.');
+    }
+  }
 
   return it->second;
 }
