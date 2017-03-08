@@ -651,7 +651,7 @@ protected:
   /// If there is a nodal BC having diag_save_in
   bool _has_nodalbc_diag_save_in;
 
-  void getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs);
+  void getNodeDofs(dof_id_type node_id, std::vector<dof_id_type> & dofs);
 
   std::vector<dof_id_type> _var_all_dof_indices;
 };

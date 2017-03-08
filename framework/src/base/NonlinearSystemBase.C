@@ -1202,7 +1202,7 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual)
 }
 
 void
-NonlinearSystemBase::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs)
+NonlinearSystemBase::getNodeDofs(dof_id_type node_id, std::vector<dof_id_type> & dofs)
 {
   const Node & node = _mesh.nodeRef(node_id);
   unsigned int s = number();
