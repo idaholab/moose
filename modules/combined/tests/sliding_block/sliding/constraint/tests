@@ -8,6 +8,7 @@
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
+    skip = 'see #8649'
   [../]
 
   [./frictional_mu04_penalty]
