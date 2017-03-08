@@ -15,11 +15,7 @@ enum EConvHeatTransGeom
 enum EEndType
 {
   IN,                 ///< inlet
-  OUT,                ///< outlet
-  PRIMARY_IN,         ///< heat exchanger primary loop inlet
-  PRIMARY_OUT,        ///< heat exchanger primary loop outlet
-  SECONDARY_IN,       ///< heat exchanger secondary loop inlet
-  SECONDARY_OUT       ///< heat exchanger secondary loop outlet
+  OUT                 ///< outlet
 };
 
 enum EValveStatusType
