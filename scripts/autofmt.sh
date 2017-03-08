@@ -21,7 +21,7 @@ PARSE_EXTS=true
 FILE_EXTS=".C .h"
 
 # only format files in these directories
-DIRS_WHITELIST="framework/src framework/include"
+DIRS_WHITELIST="framework/include framework/src test/include test/src"
 
 ##################################################################
 # There should be no need to change anything below this line.

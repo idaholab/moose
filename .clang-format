@@ -5,7 +5,7 @@ ColumnLimit: 100
 UseTab: Never
 
 CommentPragmas: '^/'
-ReflowComments: false
+ReflowComments: true
 AlignTrailingComments: true
 SpacesBeforeTrailingComments: 1
 
