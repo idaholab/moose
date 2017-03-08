@@ -103,7 +103,6 @@
   [../]
 []
 
-
 [BCs]
   [./u_left_fix]
     type = PresetBC
@@ -139,10 +138,21 @@
 []
 
 [Materials]
+  [./youngs_modulus]
+    type = PiecewiseLinearInterpolationMaterial
+    xy_data = '0          10e+6
+               599.9999   10e+6
+               600        9.94e+6
+               99900      10e3'
+    property = youngs_modulus
+    variable = temp
+    block = 0
+  [../]
+
   [./elasticity_tensor]
     type = ComputeVariableIsotropicElasticityTensor
-    temperature = temp
-    youngs_modulus = 10.0e6
+    args = temp
+    youngs_modulus = youngs_modulus
     poissons_ratio = 0.0
     block = 0
   [../]
