@@ -1,0 +1,28 @@
+[Tests]
+  [./uniform]
+    type = 'CSVDiff'
+    input = 'distribution_pps.i'
+    csvdiff = 'distribution_pps_out.csv'
+  [../]
+  
+  [./above_max]
+    type = 'RunException'
+    input = 'distribution_pps.i'
+    cli_args = 'Postprocessors/value1/cdf_value=2 Outputs/csv=false'
+    expect_err = 'The cdf_value provided is out of range 0 to 1.'
+  [../]
+  
+  [./below_min]
+    type = 'RunException'
+    input = 'distribution_pps.i'
+    cli_args = 'Postprocessors/value1/cdf_value=-1.0 Outputs/csv=false'
+    expect_err = 'The cdf_value provided is out of range 0 to 1.'
+  [../]
+  
+  [./bound_error]
+    type = 'RunException'
+    input = 'distribution_pps.i'
+    cli_args = 'Distributions/uniform1/lower_bound=5  Outputs/csv=false'
+    expect_err = 'The lower bound is larger than the upper bound!'
+  [../]
+[]

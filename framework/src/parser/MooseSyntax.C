@@ -57,6 +57,8 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerSyntaxType("Functions/*", "FunctionName");
 
   registerSyntax("GlobalParamsAction", "GlobalParams");
+  
+  registerSyntax("AddDistributionAction", "Distributions/*");
 
   registerSyntax("SetupDebugAction", "Debug");
   registerSyntax("SetupResidualDebugAction", "Debug");

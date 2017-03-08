@@ -40,6 +40,7 @@
 #include "ElementH1Error.h"
 #include "Function.h"
 #include "NonlinearSystem.h"
+#include "Distribution.h"
 #include "PetscSupport.h"
 #include "RandomInterface.h"
 #include "RandomData.h"
@@ -1542,6 +1543,28 @@ FEProblemBase::getNonlinearSystem()
   mooseDeprecated("FEProblemBase::getNonlinearSystem() is deprecated, please use "
                   "FEProblemBase::getNonlinearSystemBase() \n");
   return *(dynamic_cast<NonlinearSystem *>(_nl));
+}
+
+void
+FEProblemBase::addDistribution(std::string type,
+                               const std::string & name,
+                               InputParameters parameters)
+{
+  setInputParametersFEProblem(parameters);
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    std::shared_ptr<Distribution> dist = _factory.create<Distribution>(type, name, parameters, tid);
+    _distributions.addObject(dist, tid);
+  }
+}
+
+Distribution &
+FEProblemBase::getDistribution(const std::string & name, THREAD_ID tid)
+{
+  if (!_distributions.hasActiveObject(name, tid))
+    mooseError("Unable to find distribution " + name);
+
+  return *(_distributions.getActiveObject(name, tid));
 }
 
 void
