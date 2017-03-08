@@ -310,8 +310,8 @@ MooseMesh::prepare(bool force)
 {
   if (dynamic_cast<DistributedMesh *>(&getMesh()) && !_is_nemesis)
   {
-    // Call prepare_for_use() and allow renumbering
-    getMesh().allow_renumbering(true);
+    // Call prepare_for_use() and don't mess with the renumbering
+    // setting
     if (force || _needs_prepare_for_use)
       getMesh().prepare_for_use();
   }
