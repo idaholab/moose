@@ -1,21 +1,26 @@
 BasedOnStyle: LLVM
-CommentPragmas: '^/'
-SpaceBeforeParens: ControlStatements
-SpacesBeforeTrailingComments: 1
-SpacesInSquareBrackets: false
+
 TabWidth: 2
-ColumnLimit: 0
+ColumnLimit: 100
 UseTab: Never
-PointerAlignment: Middle
-#ReflowComments: false
+
+CommentPragmas: '^/'
+ReflowComments: false
+AlignTrailingComments: true
+SpacesBeforeTrailingComments: 1
+
+SpaceBeforeParens: ControlStatements
+SpacesInSquareBrackets: false
 BreakBeforeBraces: Allman
-IndentCaseLabels: true
-#SortIncludes: false
-ConstructorInitializerAllOnOneLineOrOnePerLine: true
-ConstructorInitializerIndentWidth: 2
+PointerAlignment: Middle
+
 AllowShortBlocksOnASingleLine: false
-AllowShortFunctionsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
+
+IndentCaseLabels: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 2
 AlwaysBreakAfterDefinitionReturnType: TopLevel
 AlwaysBreakTemplateDeclarations: true
