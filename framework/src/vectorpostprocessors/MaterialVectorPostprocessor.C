@@ -37,6 +37,9 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
 {
   auto & mat = getMaterialByName(getParam<MaterialName>("material"), true);
   auto & prop_names = mat.getSuppliedItems();
+  if (mat.isBoundaryMaterial())
+      mooseError("boundary materials (i.e. ", _mat.name(), ") cannot be used with MaterialVectorPostprocessor");
+
   for (auto & prop : prop_names)
   {
     if (hasMaterialProperty<Real>(prop))
@@ -47,7 +50,7 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
       _prop_refs.push_back(&getMaterialProperty<int>(prop));
     else
     {
-      mooseWarning("property " + prop + " is of unsupported type and skipped by MaterialVectorPostProcessor");
+      mooseWarning("property " + prop + " is of unsupported type and skipped by MaterialVectorPostprocessor");
       continue;
     }
     _prop_vecs.push_back(&declareVector(prop));
