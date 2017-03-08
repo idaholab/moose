@@ -56,7 +56,28 @@ ElementDeleterBase::modify()
    *       but because the order of deletion might impact what happens to any existing sidesets or nodesets.
    */
   for (const auto & elem : deleteable_elems)
+  {
+    // On distributed meshes, we'll need neighbor links to be useable
+    // shortly, so we can't just leave dangling pointers.
+    //
+    // FIXME - this could be made AMR-aware and refactored into
+    // libMesh - roystgnr
+    unsigned int n_sides = elem->n_sides();
+    for (unsigned int n = 0; n != n_sides; ++n)
+    {
+      Elem * neighbor = elem->neighbor(n);
+      if (!neighbor || neighbor == remote_elem)
+        continue;
+
+      const unsigned int return_side =
+        neighbor->which_neighbor_am_i(elem);
+
+      if (neighbor->neighbor(return_side) == elem)
+        neighbor->set_neighbor(return_side, nullptr);
+    }
+
     mesh.delete_elem(elem);
+  }
 
   /**
    * If we are on a distributed mesh, we may have deleted elements
@@ -71,17 +92,24 @@ ElementDeleterBase::modify()
     typedef std::vector<std::pair<dof_id_type, unsigned int> > vec_type;
     std::vector<vec_type> queries(my_n_proc);
 
-    // Loop over the elements looking for those with remote neighbors
+    // Loop over the elements looking for those with remote neighbors.
+    // The ghost_elements iterators in libMesh need to be updated
+    // before we can use them safely here, so we'll test for
+    // ghost-vs-local manually.
     for (MeshBase::const_element_iterator
-           el  = mesh.ghost_elements_begin(),
-           end_el = mesh.ghost_elements_end();
+           el  = mesh.elements_begin(),
+           end_el = mesh.elements_end();
            el != end_el ; ++el)
     {
       const Elem* elem = *el;
+      const processor_id_type pid = elem->processor_id();
+      if (pid == my_proc_id)
+        continue;
+
       const unsigned int n_sides = elem->n_sides();
       for (unsigned int n=0; n != n_sides; ++n)
         if (elem->neighbor(n) == remote_elem)
-          queries[elem->processor_id()].push_back
+          queries[pid].push_back
             (std::make_pair(elem->id(), n));
     }
 
@@ -91,14 +119,6 @@ ElementDeleterBase::modify()
 
     std::vector<Parallel::Request> query_requests(my_n_proc-1),
                                    reply_requests(my_n_proc-1);
-
-    const MeshBase::const_element_iterator end = mesh.elements_end();
-    for (MeshBase::const_element_iterator elem_it = mesh.elements_begin(); elem_it != end; ++elem_it)
-    {
-      Elem * elem = *elem_it;
-      if (shouldDelete(elem))
-        deleteable_elems.insert(elem);
-    }
 
     // Make all requests
     for (processor_id_type p=0; p != my_n_proc; ++p)
@@ -137,7 +157,7 @@ ElementDeleterBase::modify()
         const unsigned int side = q.second;
         const Elem * neighbor = elem->neighbor(side);
 
-        if (neighbor == NULL) // neighboring element was deleted!
+        if (neighbor == nullptr) // neighboring element was deleted!
           responses[p-1].push_back(std::make_pair(elem->id(), side));
       }
 
@@ -163,7 +183,9 @@ ElementDeleterBase::modify()
         Elem * elem = mesh.elem_ptr(r.first);
         const unsigned int side = r.second;
 
-        elem->set_neighbor(side, libmesh_nullptr);
+        mooseAssert(elem->neighbor(side) == remote_elem, "element neighbor != remote_elem");
+
+        elem->set_neighbor(side, nullptr);
       }
     }
 
