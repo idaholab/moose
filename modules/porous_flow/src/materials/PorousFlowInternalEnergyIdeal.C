@@ -21,7 +21,6 @@ PorousFlowInternalEnergyIdeal::PorousFlowInternalEnergyIdeal(const InputParamete
 
     _cv(getParam<Real>("specific_heat_capacity")),
     _internal_energy(_nodal_material ? declareProperty<Real>("PorousFlow_fluid_phase_internal_energy_nodal" + _phase) : declareProperty<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase)),
-    _internal_energy_old(_nodal_material ? &declarePropertyOld<Real>("PorousFlow_fluid_phase_internal_energy_nodal" + _phase) : nullptr),
     _dinternal_energy_dp(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_nodal" + _phase, _pressure_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase, _pressure_variable_name)),
     _dinternal_energy_dt(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_nodal" + _phase, _temperature_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase, _temperature_variable_name))
 {

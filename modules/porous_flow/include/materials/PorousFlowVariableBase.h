@@ -45,9 +45,6 @@ protected:
   /// d(porepressure)/d(PorousFlow variable)
   MaterialProperty<std::vector<std::vector<Real>>> & _dporepressure_dvar;
 
-  /// Old values of nodal porepressure of the phases
-  MaterialProperty<std::vector<Real>> * const _porepressure_old;
-
   /// Grad(p) at the quadpoints
   MaterialProperty<std::vector<RealGradient>> * const _gradp_qp;
 
@@ -62,9 +59,6 @@ protected:
 
   /// d(saturation)/d(PorousFlow variable)
   MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_dvar;
-
-  /// Old value of nodal saturation of the phases
-  MaterialProperty<std::vector<Real>> * const _saturation_old;
 
   /// Grad(s) at the quadpoints
   MaterialProperty<std::vector<RealGradient>> * const _grads_qp;

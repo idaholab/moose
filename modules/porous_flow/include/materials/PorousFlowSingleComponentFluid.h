@@ -33,9 +33,6 @@ protected:
   /// Fluid phase density at the qps or nodes
   MaterialProperty<Real> & _density;
 
-  /// Old value of fluid phase density at the nodes
-  MaterialProperty<Real> * const _density_old;
-
   /// Derivative of fluid density wrt phase pore pressure at the qps or nodes
   MaterialProperty<Real> & _ddensity_dp;
 
@@ -54,9 +51,6 @@ protected:
   /// Fluid phase internal_energy at the qps or nodes
   MaterialProperty<Real> & _internal_energy;
 
-  /// Old value of fluid phase internal_energy at the nodes
-  MaterialProperty<Real> * const _internal_energy_old;
-
   /// Derivative of fluid internal_energy wrt phase pore pressure at the qps or nodes
   MaterialProperty<Real> & _dinternal_energy_dp;
 
@@ -65,9 +59,6 @@ protected:
 
   /// Fluid phase enthalpy at the qps or nodes
   MaterialProperty<Real> & _enthalpy;
-
-  /// Old value of fluid phase enthalpy at the nodes
-  MaterialProperty<Real> * const _enthalpy_old;
 
   /// Derivative of fluid enthalpy wrt phase pore pressure at the qps or nodes
   MaterialProperty<Real> & _denthalpy_dp;
