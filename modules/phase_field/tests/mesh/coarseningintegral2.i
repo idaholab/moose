@@ -5,7 +5,7 @@
   ny = 1
   xmin = -1
   ymin = -1
-  uniform_refine = 6
+  uniform_refine = 3
 []
 
 [Variables]
@@ -29,14 +29,32 @@
   [../]
 []
 
+[AuxVariables]
+  [./flip]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./flip]
+    type = FunctionAux
+    variable = flip
+    function = 'int(t/0.1)%4/3.0'
+  [../]
+[]
+
 [Adaptivity]
   [./Markers]
-    [./all]
-      type = UniformMarker
-      mark = COARSEN
+    [./alternate]
+      # with the AuxKernel above this alternates between coarsening and refinement
+      type = ValueThresholdMarker
+      variable = flip
+      refine = 0.55
+      coarsen = 0.45
     [../]
   [../]
-  marker = all
+  marker = alternate
 []
 
 [Postprocessors]
@@ -64,5 +82,5 @@
 [Outputs]
   csv = true
   exodus = true
-  execute_on = TIMESTEP_END
+  execute_on = 'initial timestep_end'
 []

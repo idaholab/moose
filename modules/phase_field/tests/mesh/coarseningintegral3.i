@@ -27,6 +27,12 @@
     variable = u
     tracker = comp
   [../]
+  [./extra_src]
+    # this adds an additional source to test this with dynamic variable evolution
+    type = BodyForce
+    variable = u
+    value = 2.5
+  [../]
 []
 
 [Adaptivity]

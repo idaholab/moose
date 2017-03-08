@@ -18,4 +18,14 @@
     input = 'coarseningintegral.i'
     csvdiff = 'coarseningintegral_out.csv'
   [../]
+  [./coarseningintegral2]
+    type = 'CSVDiff'
+    input = 'coarseningintegral2.i'
+    csvdiff = 'coarseningintegral2_out.csv'
+  [../]
+  [./coarseningintegral3]
+    type = 'CSVDiff'
+    input = 'coarseningintegral3.i'
+    csvdiff = 'coarseningintegral3_out.csv'
+  [../]
 []
