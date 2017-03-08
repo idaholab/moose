@@ -77,6 +77,9 @@ InputParameters validParams<MooseMesh>()
                              "REPLICATED: Always use libMesh::ReplicatedMesh "
                              "DEFAULT: Use libMesh::ReplicatedMesh unless --distributed-mesh is specified on the command line");
 
+  params.addParam<bool>("allow_renumbering", true,
+                        "If allow_renumbering=false, node and element numbers are kept fixed until deletion");
+
   params.addParam<bool>("nemesis", false,
                         "If nemesis=true and file=foo.e, actually reads "
                         "foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, "
@@ -216,6 +219,9 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
   }
   else
     _mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, dim);
+
+  if (!getParam<bool>("allow_renumbering"))
+    _mesh->allow_renumbering(false);
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
