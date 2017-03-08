@@ -24,8 +24,10 @@ class ContourFilter(ChiggerFilterBase):
     @staticmethod
     def getOptions():
         opt = ChiggerFilterBase.getOptions()
-        opt.add('count', 10, "The number of contours to be automatically generated between the specified range.", vtype=int)
-        opt.add('levels', None, "Explicitly define the contour levels, if this options is provided 'count' is ignored.", vtype=list)
+        opt.add('count', 10, "The number of contours to be automatically generated between the "
+                             "specified range.", vtype=int)
+        opt.add('levels', None, "Explicitly define the contour levels, if this options is "
+                                "provided 'count' is ignored.", vtype=list)
         return opt
 
     def __init__(self, **kwargs):
@@ -39,9 +41,11 @@ class ContourFilter(ChiggerFilterBase):
 
         varinfo = self._source.getCurrentVariableInformation()
         if varinfo.object_type != ExodusReader.NODAL:
-            raise mooseutils.MooseException('ContourFilter currently only works with nodal variables.')
+            raise mooseutils.MooseException('ContourFilter currently only works with nodal '
+                                            'variables.')
 
-        self._vtkfilter.SetInputArrayToProcess(0, 0, 0, vtk.vtkDataObject.FIELD_ASSOCIATION_POINTS, varinfo.name)
+        self._vtkfilter.SetInputArrayToProcess(0, 0, 0, vtk.vtkDataObject.FIELD_ASSOCIATION_POINTS,
+                                               varinfo.name)
 
         if self.isOptionValid('levels'):
             levels = self.getOption('levels')

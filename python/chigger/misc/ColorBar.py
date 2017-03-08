@@ -23,14 +23,16 @@ class ColorBar(base.ChiggerResult):
     """
     A generic colorbar.
 
-    The default colorbar in VTK, vtkScalarBarActor, tightly couples the tick marks with the bar width,
-    which makes it difficult to control either. This class decouples the colorbar and labels.
+    The default colorbar in VTK, vtkScalarBarActor, tightly couples the tick marks with the bar
+    width, which makes it difficult to control either. This class decouples the colorbar and labels.
     """
     @staticmethod
     def getOptions():
         opt = base.ChiggerResult.getOptions()
-        opt.add('location', 'right', "The location of the primary axis.", allow=['left', 'right', 'top', 'bottom'])
-        opt.add('colorbar_origin', None, "The position of the colorbar, relative to the viewport.", vtype=tuple)
+        opt.add('location', 'right', "The location of the primary axis.",
+                allow=['left', 'right', 'top', 'bottom'])
+        opt.add('colorbar_origin', None, "The position of the colorbar, relative to the viewport.",
+                vtype=tuple)
         opt.add('width', 0.05, "The width of the colorbar, relative to window.", vtype=float)
         opt.add('length', 0.5, "The height of the colorbar, relative to window.", vtype=float)
         opt += base.ColorMap.getOptions()
@@ -69,7 +71,9 @@ class ColorBar(base.ChiggerResult):
         # Error if the vtkRenderWindow is not set
         size = self._vtkrenderer.GetSize()
         if size == (0, 0):
-            raise mooseutils.MooseException('Calling update() prior to calling RenderWindow.update() is not supported for this object.')
+            raise mooseutils.MooseException('Calling update() prior to calling '
+                                            'RenderWindow.update() is not supported for this '
+                                            'object.')
 
         # Convenience names for the various sources
         plane, axis0, axis1 = self._sources
@@ -118,7 +122,8 @@ class ColorBar(base.ChiggerResult):
         pos = coord.GetComputedViewportValue(self._vtkrenderer)
 
         # Update the bar position
-        plane.setOptions(origin=[pos[0], pos[1], 0], point1=[p0[0], p0[1], 0], point2=[p1[0], p1[1], 0])
+        plane.setOptions(origin=[pos[0], pos[1], 0], point1=[p0[0], p0[1], 0],
+                         point2=[p1[0], p1[1], 0])
 
         # Set the colormap for the bar
         rng = self.getOption('cmap_range')

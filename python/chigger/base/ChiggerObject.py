@@ -50,14 +50,16 @@ class ChiggerObject(object):
         """
         Return True if the object requires an Update method call. (public)
         """
-        mooseutils.mooseDebug("{}.needsUpdate() = {}".format(self.__class__.__name__, self.__needs_update))
+        mooseutils.mooseDebug("{}.needsUpdate() = {}".format(self.__class__.__name__,
+                                                             self.__needs_update))
         return self.__needs_update
 
     def needsInitialize(self):
         """
         Return True if the object requires an _initialize method call. (public)
         """
-        mooseutils.mooseDebug("{}.needsInitialize() = {}".format(self.__class__.__name__, self.__needs_initialize))
+        mooseutils.mooseDebug("{}.needsInitialize() = {}".format(self.__class__.__name__,
+                                                                 self.__needs_initialize))
         return self.__needs_initialize
 
     def update(self, initialize=True, **kwargs):
@@ -117,7 +119,8 @@ class ChiggerObject(object):
         changed = [self.needsUpdate()] # default changed status to the current status
         if len(args) > 0:
             for sub in args:
-                if (self._options.hasOption(sub)) and isinstance(self.getOption(sub), utils.Options):
+                if (self._options.hasOption(sub)) and isinstance(self.getOption(sub),
+                                                                 utils.Options):
                     changed.append(self._options[sub].update(**kwargs))
                 elif isinstance(sub, utils.Options):
                     changed.append(self._options.update(sub))
@@ -131,7 +134,8 @@ class ChiggerObject(object):
 
     def updateOptions(self, *args):
         """
-        Apply the supplied option objects to this object and the contained ChiggerFilterSourceBase objects. (override)
+        Apply the supplied option objects to this object and the contained ChiggerFilterSourceBase
+        objects. (override)
 
         Inputs:
             see ChiggerResultBase
@@ -145,7 +149,7 @@ class ChiggerObject(object):
 
     def reset(self):
         """
-        Reset the initialization flag, so the _initialize method will be called again on next upate.
+        Reset initialization flag, so the _initialize method will be called again on next update.
         """
         self.__needs_initialize = True
 
@@ -191,4 +195,7 @@ class ChiggerObject(object):
         Returns: None
         """
         if self.needsUpdate():
-            raise mooseutils.MooseException('The "{}" method requires the {} be updated, please call "update" method first.'.format(inspect.stack()[1][3], self.__class__.__name__))
+            m = inspect.stack()[1][3]
+            n = self.__class__.__name__
+            raise mooseutils.MooseException('The "{}" method requires the {} be updated, please '
+                                            'call "update" method first.'.format(m, n))

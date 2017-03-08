@@ -25,7 +25,9 @@ class CubeSource(BaseType):
     @staticmethod
     def getOptions():
         opt = BaseType.getOptions()
-        opt.add("bounds", None, "The bounding box for the cube [xmin, xmax, ymin, ymax, zmin, zmax]. This will overwrite the 'lengths' and 'center' options.", vtype=list)
+        opt.add("bounds", None, "The bounding box for the cube [xmin, xmax, ymin, ymax, zmin, "
+                                "zmax]. This will overwrite the 'lengths' and 'center' options.",
+                vtype=list)
         opt.add('lengths', None, "The lengths of the cube in the x,y,z-directions.", vtype=list)
         opt.add('center', None, "The center of the box.", vtype=list)
         return opt

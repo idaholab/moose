@@ -30,12 +30,17 @@ class Line(base.ChiggerObject):
         opt.add('style', '-', "The line style.", allow=['none', '-'])
         opt.add('color', "The color of the line to plot.", vtype=list)
         opt.add('width', "The width of the line in Points.", vtype=int)
-        opt.add('corner', 'left-bottom', "The axis corner to place the line.", allow=['left-bottom', 'right-bottom', 'right-top', 'left-top'])
-        opt.add('marker', 'none', "Set the marker type.", allow=['none', 'cross', 'plus', 'square', 'circle', 'diamond'])
+        opt.add('corner', 'left-bottom', "The axis corner to place the line.",
+                allow=['left-bottom', 'right-bottom', 'right-top', 'left-top'])
+        opt.add('marker', 'none', "Set the marker type.",
+                allow=['none', 'cross', 'plus', 'square', 'circle', 'diamond'])
         opt.add('append', True, "Append new data to the existing data.")
-        opt.add('tracer', False, "Places both x and y tracing lines, (see 'xtracer' and 'ytracer').")
-        opt.add('xtracer', None, "Place a tracing line that follows the leading x-value (overrides 'tracer' option).", vtype=bool)
-        opt.add('ytracer', None, "Place a tracing line that follows the leading y-value (overrides 'tracer' option).", vtype=bool)
+        opt.add('tracer', False, "Places both x and y tracing lines, (see 'xtracer' and "
+                                 "'ytracer').")
+        opt.add('xtracer', None, "Place a tracing line that follows the leading x-value (overrides "
+                                 "'tracer' option).", vtype=bool)
+        opt.add('ytracer', None, "Place a tracing line that follows the leading y-value (overrides "
+                                 "'tracer' option).", vtype=bool)
 
         return opt
 

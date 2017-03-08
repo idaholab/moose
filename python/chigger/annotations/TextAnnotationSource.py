@@ -27,12 +27,14 @@ class TextAnnotationSource(base.ChiggerSourceBase):
         Return default options for this object.
         """
         opt = base.ChiggerSourceBase.getOptions()
-        opt.add('position', [0.5, 0.5], "The text position within the viewport, in relative coordinates.", vtype=tuple)
+        opt.add('position', [0.5, 0.5], "The text position within the viewport, in relative "
+                                        "coordinates.", vtype=tuple)
         opt += utils.FontOptions.get_options()
         return opt
 
     def __init__(self, **kwargs):
-        super(TextAnnotationSource, self).__init__(vtkactor_type=vtk.vtkActor2D, vtkmapper_type=vtk.vtkTextMapper, **kwargs)
+        super(TextAnnotationSource, self).__init__(vtkactor_type=vtk.vtkActor2D,
+                                                   vtkmapper_type=vtk.vtkTextMapper, **kwargs)
         self._vtkactor.GetPositionCoordinate().SetCoordinateSystemToNormalizedViewport()
 
     def update(self, **kwargs):

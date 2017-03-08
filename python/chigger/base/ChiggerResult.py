@@ -20,13 +20,15 @@ from .. import utils
 
 class ChiggerResult(ChiggerResultBase):
     """
-    A ChiggerResult object capable of attaching an arbitrary number of ChiggerFilterSourceBase objects to the vtkRenderer.
+    A ChiggerResult object capable of attaching an arbitrary number of ChiggerFilterSourceBase
+    objects to the vtkRenderer.
 
-    Any options supplied to this object are automatically passed down to the ChiggerFilterSourceBase objects contained by
-    this class, if the applicable. To have the settings of the contained source objects appear in this objects
-    option dump then simply add the settings to the static getOptions method of the derived class. This is not done
-    here because this class is designed to accept arbitrary ChiggerFilterSourceBase object which may have varying settings,
-    see ExodusResult for an example of a single type implementation based on this class.
+    Any options supplied to this object are automatically passed down to the ChiggerFilterSourceBase
+    objects contained by this class, if the applicable. To have the settings of the contained source
+    objects appear in this objects option dump then simply add the settings to the static getOptions
+    method of the derived class. This is not done here because this class is designed to accept
+    arbitrary ChiggerFilterSourceBase object which may have varying settings, see ExodusResult for
+    an example of a single type implementation based on this class.
 
     Inputs:
         *sources: A tuple of ChiggerFilterSourceBase object to render.
@@ -46,13 +48,16 @@ class ChiggerResult(ChiggerResultBase):
 
     def needsUpdate(self):
         """
-        Checks if this object or any of the contained ChiggerFilterSourceBase object require update. (override)
+        Checks if this object or any of the contained ChiggerFilterSourceBase object require update.
+        (override)
         """
-        return super(ChiggerResult, self).needsUpdate() or any([src.needsUpdate() for src in self._sources])
+        return super(ChiggerResult, self).needsUpdate() or \
+               any([src.needsUpdate() for src in self._sources])
 
     def updateOptions(self, *args):
         """
-        Apply the supplied option objects to this object and the contained ChiggerFilterSourceBase objects. (override)
+        Apply the supplied option objects to this object and the contained ChiggerFilterSourceBase
+        objects. (override)
 
         Inputs:
             see ChiggerResultBase
@@ -67,7 +72,8 @@ class ChiggerResult(ChiggerResultBase):
 
     def setOptions(self, *args, **kwargs):
         """
-        Apply the supplied options to this object and the contained ChiggerFilterSourceBase objects. (override)
+        Apply the supplied options to this object and the contained ChiggerFilterSourceBase objects.
+        (override)
 
         Inputs:
             see ChiggerResultBase
@@ -118,8 +124,8 @@ class ChiggerResult(ChiggerResultBase):
         """
         Return the min/max range for the selected variables and blocks/boundary/nodeset.
 
-        NOTE: For the range to be restricted by block/boundary/nodest the reader must have "squeeze=True", which
-              can be much slower.
+        NOTE: For the range to be restricted by block/boundary/nodest the reader must have
+              "squeeze=True", which can be much slower.
         """
         rngs = [src.getRange() for src in self._sources]
         return utils.get_min_max(*rngs)
@@ -139,7 +145,10 @@ class ChiggerResult(ChiggerResultBase):
         super(ChiggerResult, self).initialize()
         for src in self._sources:
             if not isinstance(src, self.SOURCE_TYPE):
-                raise mooseutils.MooseException('The supplied source type of {} must be of type {}.'.format(src.__class__.__name__, self.SOURCE_TYPE.__name__))
+                n = src.__class__.__name__
+                t = self.SOURCE_TYPE.__name__
+                msg = 'The supplied source type of {} must be of type {}.'.format(n, t)
+                raise mooseutils.MooseException(msg)
             src.setVTKRenderer(self._vtkrenderer)
             self._vtkrenderer.AddViewProp(src.getVTKActor())
 

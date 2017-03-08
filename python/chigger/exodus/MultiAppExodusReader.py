@@ -20,11 +20,12 @@ class MultiAppExodusReader(base.ChiggerObject):
     """
     A reader for MultiApp Exodus files.
 
-    This class is simply a wrapper that creates and ExodusReader object for each file found using glob from the
-    supplied pattern.
+    This class is simply a wrapper that creates and ExodusReader object for each file found using
+    glob from the supplied pattern.
 
     Inputs:
-        pattern[str]: A string containing a glob pattern for MultiApp ExodusII output files from MOOSE.
+        pattern[str]: A string containing a glob pattern for MultiApp ExodusII output files from
+                      MOOSE.
     """
 
     @staticmethod

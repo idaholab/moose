@@ -24,8 +24,11 @@ class ClipperFilterBase(ChiggerFilterBase):
     @staticmethod
     def getOptions():
         opt = ChiggerFilterBase.getOptions()
-        opt.add('normalized', True, "When True supplied position arguments are supplied in normalized coordinates (0-1) with respect to the object bounding box.")
-        opt.add('inside_out', False, "When True the clipping criteria is reversed (see vtkClipDataSet::SetInsideOut)")
+        opt.add('normalized', True, "When True supplied position arguments are supplied in "
+                                    "normalized coordinates (0-1) with respect to the object "
+                                    "bounding box.")
+        opt.add('inside_out', False, "When True the clipping criteria is reversed "
+                                     "(see vtkClipDataSet::SetInsideOut)")
         return opt
 
     def __init__(self, vtkclipfunction=None, **kwargs):

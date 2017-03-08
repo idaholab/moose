@@ -21,14 +21,17 @@ def get_options():
     """
     opt = Options()
     opt.add('visible', True, "Control the visibility of the legend.")
-    opt.add('background', "Set the legend background color (defaults to graph background color).", vtype=list)
+    opt.add('background', "Set the legend background color (defaults to graph background color).",
+            vtype=list)
     opt.add('opacity', 0, "The legend background opacity.")
     opt.add('label_color', [1, 1, 1], "The legend text color.")
     opt.add('label_font_size', "The legend label test size in points.", vtype=int)
     opt.add('point', "The location of the legend anchor point.", vtype=list)
-    opt.add('horizontal_alignment', 'right', "The horizontal alignment of the legend with respect to the anchor point.",
+    opt.add('horizontal_alignment', 'right', "The horizontal alignment of the legend with respect "
+                                             "to the anchor point.",
             vtype=str, allow=['left', 'center', 'right'])
-    opt.add('vertical_alignment', 'top', "The vertical alignment of the legend with respect to the anchor point.",
+    opt.add('vertical_alignment', 'top', "The vertical alignment of the legend with respect to the "
+                                         "anchor point.",
             vtype=str, allow=['top', 'bottom', 'center'])
     opt.add('border', False, "Show the legend border.")
     opt.add('border_color', [1, 1, 1], "The border color.")
@@ -70,9 +73,10 @@ def set_options(vtkchart, vtkrenderer, opt):
         loc = coord.GetComputedDisplayValue(vtkrenderer)
         legend.SetPoint(*loc)
     else:
-        legend.SetVerticalAlignment(eval('vtk.vtkChartLegend.' + opt['vertical_alignment'].upper()))
-        legend.SetHorizontalAlignment(eval('vtk.vtkChartLegend.' + opt['horizontal_alignment'].upper()))
-
+        legend.SetVerticalAlignment(eval('vtk.vtkChartLegend.' +
+                                         opt['vertical_alignment'].upper()))
+        legend.SetHorizontalAlignment(eval('vtk.vtkChartLegend.' +
+                                           opt['horizontal_alignment'].upper()))
 
     if opt.isOptionValid('border'):
         legend.GetPen().SetOpacity(opt['border_opacity'])

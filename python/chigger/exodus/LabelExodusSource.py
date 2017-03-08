@@ -33,7 +33,8 @@ class LabelExodusSource(base.ChiggerSource2D):
     def getOptions():
         opt = base.ChiggerSource2D().getOptions()
         opt += utils.FontOptions.get_options()
-        opt.add('label_type', 'variable', "Specify the type of label to create.", vtype=str, allow=['point', 'cell', 'variable'])
+        opt.add('label_type', 'variable', "Specify the type of label to create.", vtype=str,
+                allow=['point', 'cell', 'variable'])
         opt.setDefault('justification', 'center')
         opt.setDefault('vertical_justification', 'middle')
         return opt
@@ -42,13 +43,15 @@ class LabelExodusSource(base.ChiggerSource2D):
         super(LabelExodusSource, self).__init__(vtkmapper_type=vtk.vtkLabeledDataMapper, **kwargs)
 
         if not isinstance(exodus_source, ExodusSource):
-            raise mooseutils.MooseException('The supplied object of type {} must be a ExodusSource object.'.format(exodus_source.__class__.__name__))
+            msg = 'The supplied object of type {} must be a ExodusSource object.'
+            raise mooseutils.MooseException(msg.format(exodus_source.__class__.__name__))
 
         self._exodus_source = exodus_source
 
     def getVTKSource(self):
         """
-        Returns the vtkExtractBlock object used for pulling subdomsin/sideset/nodeset data from the reader. (override)
+        Returns the vtkExtractBlock object used for pulling subdomsin/sideset/nodeset data from the
+        reader. (override)
 
         Returns:
             vtk.vtkExtractBlock (see ChiggerFilterSourceBase)
@@ -71,7 +74,8 @@ class LabelExodusSource(base.ChiggerSource2D):
         # Update the required filters based on the label type.
         label_type = self.getOption('label_type')
         if label_type == 'cell':
-            self._required_filters = [filters.IdFilter(), filters.CellCenters(), filters.SelectVisiblePoints()]
+            self._required_filters = [filters.IdFilter(), filters.CellCenters(),
+                                      filters.SelectVisiblePoints()]
             self._vtkmapper.SetLabelModeToLabelIds()
         elif label_type == 'point':
             self._required_filters = [filters.IdFilter(), filters.SelectVisiblePoints()]

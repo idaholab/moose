@@ -31,13 +31,16 @@ class Graph(base.ChiggerResultBase):
         opt.add('color_scheme', "The VTK color scheme to utilize.", vtype=str)
         opt.add('xaxis', utils.AxisOptions.get_options(), "The settings for the x-axis.")
         opt.add('yaxis', utils.AxisOptions.get_options(), "The settings for the y-axis.")
-        opt.add('x2axis', utils.AxisOptions.get_options(), "The settings for the secondary x-axis (top).")
-        opt.add('y2axis', utils.AxisOptions.get_options(), "The settings for the secondary y-axis (right).")
+        opt.add('x2axis', utils.AxisOptions.get_options(), "The settings for the secondary "
+                                                           "x-axis (top).")
+        opt.add('y2axis', utils.AxisOptions.get_options(), "The settings for the secondary "
+                                                           "y-axis (right).")
         opt.add('legend', utils.LegendOptions.get_options(), "The settings for the graph legend.")
-        opt.add('hidden_border', None, "Adjust the border of hidden axis; useful if axis text is cut-off.", vtype=int)
+        opt.add('hidden_border', None, "Adjust the border of hidden axis; useful if axis text is "
+                                       "cut-off.", vtype=int)
         opt.add('lines', [], "A list of Line objects to display on the graph.")
 
-        # Remove the position from the axis options, it should not be available b/c this is set by the graph
+        # Remove position from axis options, it should not be available b/c this is set by the graph
         for ax in ['xaxis', 'yaxis', 'x2axis', 'y2axis']:
             opt[ax].pop('axis_position')
 
@@ -151,7 +154,8 @@ class Graph(base.ChiggerResultBase):
             n_lines = len(self._plots)
             n_colors = self._vtkcolorseries.GetNumberOfColors()
             if n_lines >= n_colors:
-                mooseutils.mooseWarning('The number of lines exceeds the number of available line colors.')
+                mooseutils.mooseWarning('The number of lines exceeds the number of available '
+                                        'line colors.')
 
             c = self._vtkcolorseries.GetColorRepeating(n_lines)
             b = self.getOption('background')

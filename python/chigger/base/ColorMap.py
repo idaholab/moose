@@ -48,9 +48,9 @@ class ColorMap(ChiggerObject):
     """
     Class for defining colormaps for use with ExodusResult objects.
 
-    If matplotlib is available this class first checks for the name in there. If it is not found there or
-    matplotlib is not available it loads the XML files from this repository, which are the XML files used
-    by Paraview for building colormaps.
+    If matplotlib is available this class first checks for the name in there. If it is not found
+    there or matplotlib is not available it loads the XML files from this repository, which are the
+    XML files used by Paraview for building colormaps.
     """
 
     @staticmethod

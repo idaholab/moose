@@ -19,7 +19,8 @@ class ChiggerSource(ChiggerFilterSourceBase):
     """
     The base class for all 3D objects.
 
-    All VTK settings that can be applied to the (VTKACTOR_TYPE and VTKMAPPER_TYPE) should be made in this class.
+    All VTK settings that can be applied to the (VTKACTOR_TYPE and VTKMAPPER_TYPE) should be made in
+    this class.
 
     Inputs:
         see ChiggerFilterSourceBase
@@ -62,13 +63,16 @@ class ChiggerSource(ChiggerFilterSourceBase):
             self._vtkactor.RotateY(y)
             self._vtkactor.RotateZ(z)
 
-        if self.isOptionValid('edges') and hasattr(self._vtkactor.GetProperty(), 'SetEdgeVisibility'):
+        if self.isOptionValid('edges') and \
+           hasattr(self._vtkactor.GetProperty(), 'SetEdgeVisibility'):
             self._vtkactor.GetProperty().SetEdgeVisibility(self.getOption('edges'))
 
-        if self.isOptionValid('edge_color') and hasattr(self._vtkactor.GetProperty(), 'SetEdgeColor'):
+        if self.isOptionValid('edge_color') and \
+           hasattr(self._vtkactor.GetProperty(), 'SetEdgeColor'):
             self._vtkactor.GetProperty().SetEdgeColor(self.getOption('edge_color'))
 
-        if self.isOptionValid('edge_width') and hasattr(self._vtkactor.GetProperty(), 'SetLineWidth'):
+        if self.isOptionValid('edge_width') and \
+           hasattr(self._vtkactor.GetProperty(), 'SetLineWidth'):
             self._vtkactor.GetProperty().SetLineWidth(self.getOption('edge_width'))
 
         if self.isOptionValid('opacity'):

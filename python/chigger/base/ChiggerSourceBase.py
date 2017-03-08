@@ -20,19 +20,17 @@ class ChiggerSourceBase(ChiggerObject):
     """
     A base class for creating "source" objects (in VTK something that uses an vtkActor).
 
-    The term "source" is used generically here to represent an entity that is represented with a vtkActor. Note, that
-    this class is even more generic in that the required bases (see VTKACTOR_TYPE and VTKMAPPER_TYPE) will allow for
-    both 2D and 3D actor/mappers.
+    The term "source" is used generically here to represent an entity that is represented with a
+    vtkActor. Note, that this class is even more generic in that the required bases (see
+    VTKACTOR_TYPE and VTKMAPPER_TYPE) will allow for both 2D and 3D actor/mappers.
 
+    Any Set/Get VTK methods that can be applied to the base types (see VTKACTOR_TYPE and
+    VTKMAPPER_TYPE) should be applied in this class, therefore the settings will then propagate to
+    all classes deriving from this, hopefully eliminating duplicate code and options.
 
-    Any Set/Get VTK methods that can be applied to the base types (see VTKACTOR_TYPE and VTKMAPPER_TYPE) should be
-    applied in this class, therefore the settings will then propagate to all classes deriving from this, hopefully
-    eliminating duplicate code and options.
-
-    Inputs:
-        vtkactor_type: The VTK actor type to build, must be an instance of VTKACTOR_TYPE
-        vtkmapper_type: The VTK mapper type to build, must be an instance of VTKMAPPER_TYPE
-        **kwargs: The key, value options for this object.
+    Inputs: vtkactor_type: The VTK actor type to build, must be an instance of VTKACTOR_TYPE
+    vtkmapper_type: The VTK mapper type to build, must be an instance of VTKMAPPER_TYPE **kwargs:
+    The key, value options for this object.
     """
     # The base class actor/mapper that this object to which ownership is restricted
     VTKACTOR_TYPE = vtk.vtkProp
@@ -49,12 +47,18 @@ class ChiggerSourceBase(ChiggerObject):
 
         self._vtkactor = vtkactor_type()
         if not isinstance(self._vtkactor, self.VTKACTOR_TYPE):
-            raise mooseutils.MooseException('The supplied actor is a {} but must be a {} type.'.format(type(self._vtkactor).__name__, self.VTKACTOR_TYPE.__name__))
+            n = type(self._vtkactor).__name__
+            t = self.VTKACTOR_TYPE.__name__
+            raise mooseutils.MooseException('The supplied actor is a {} but must be a {} '
+                                            'type.'.format(n, t))
 
         if vtkmapper_type:
             self._vtkmapper = vtkmapper_type()
             if not isinstance(self._vtkmapper, self.VTKMAPPER_TYPE):
-                raise mooseutils.MooseException('The supplied mapper is a {} but must be a {} type.'.format(type(self._vtkmapper).__name__, self.VTKMAPPER_TYPE.__name__))
+                n = type(self._vtkmapper).__name__
+                t = self.VTKMAPPER_TYPE.__name__
+                raise mooseutils.MooseException('The supplied mapper is a {} but must be a {} '
+                                                'type.'.format(n, t))
         else:
             self._vtkmapper = None
 
@@ -76,7 +80,8 @@ class ChiggerSourceBase(ChiggerObject):
         """
         Set the vtkRenderer object. (public)
 
-        Generally, this should not be used. This method is mainly for the ChiggerResult object to set.
+        Generally, this should not be used. This method is mainly for the ChiggerResult object to
+        set.
         """
         self._vtkrenderer = vtkrenderer
 

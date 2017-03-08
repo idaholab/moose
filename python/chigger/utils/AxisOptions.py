@@ -35,9 +35,10 @@ def get_options():
     opt.add('ticks_visible', True, "Control visibility of tickmarks on colorbar axis.")
     opt.add('axis_visible', True, "Control visibility of axis line on colorbar axis.")
     opt.add('labels_visible', True, "Control visibility of the numeric labels.")
-    opt.add('axis_position', 'left', "Set the axis position (left, right, top, bottom)", vtype=str, allow=['left', 'right', 'top', 'bottom'])
-    opt.add('axis_point1', [0, 0], 'The starting location of the axis, in absolute viewport coordinates.')
-    opt.add('axis_point2', [0, 0], 'The starting location of the axis, in absolute viewport coordinates.')
+    opt.add('axis_position', 'left', "Set the axis position (left, right, top, bottom)", vtype=str,
+            allow=['left', 'right', 'top', 'bottom'])
+    opt.add('axis_point1', [0, 0], 'Starting location of axis, in absolute viewport coordinates.')
+    opt.add('axis_point2', [0, 0], 'Ending location of axis, in absolute viewport coordinates.')
     return opt
 
 def set_options(vtkaxis, opt):
@@ -96,7 +97,8 @@ def set_options(vtkaxis, opt):
 
     # Set the position and points
     if opt.isOptionValid('axis_position'):
-        pos = {'left':vtk.vtkAxis.LEFT, 'right':vtk.vtkAxis.RIGHT, 'top':vtk.vtkAxis.TOP, 'bottom':vtk.vtkAxis.BOTTOM}
+        pos = {'left':vtk.vtkAxis.LEFT, 'right':vtk.vtkAxis.RIGHT, 'top':vtk.vtkAxis.TOP,
+               'bottom':vtk.vtkAxis.BOTTOM}
         vtkaxis.SetPosition(pos[opt['axis_position']])
 
     if opt.isOptionValid('axis_point1'):

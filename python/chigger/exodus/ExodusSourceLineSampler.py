@@ -34,7 +34,8 @@ class ExodusSourceLineSampler(geometric.LineSource):
         super(ExodusSourceLineSampler, self).__init__(**kwargs)
 
         if not isinstance(exodus_source, ExodusSource):
-            raise mooseutils.MooseException('The supplied object of type {} must be a ExodusSource object.'.format(exodus_source.__class__.__name__))
+            msg = 'The supplied object of type {} must be a ExodusSource object.'
+            raise mooseutils.MooseException(msg.format(exodus_source.__class__.__name__))
 
         self._distance = []
         self._exodus_source = exodus_source
@@ -70,7 +71,8 @@ class ExodusSourceLineSampler(geometric.LineSource):
 
         self._probe.PassCellArraysOn()
         self._probe.SetInputConnection(self.getVTKSource().GetOutputPort())
-        self._probe.SetSourceConnection(self._exodus_source.getFilters()[-1].getVTKFilter().GetOutputPort())
+        f = self._exodus_source.getFilters()[-1].getVTKFilter().GetOutputPort()
+        self._probe.SetSourceConnection(f)
 
     def getDistance(self):
         """
@@ -90,6 +92,7 @@ class ExodusSourceLineSampler(geometric.LineSource):
         if self._probe.GetOutput().GetPointData().HasArray(variable):
             y = self._probe.GetOutput().GetPointData().GetArray(variable)
         else:
-            mooseutils.mooseError('Unable to locate the variable, ' + variable + ', in the supplied source data.')
+            mooseutils.mooseError('Unable to locate the variable, ' + variable + \
+                                  ', in the supplied source data.')
             return []
         return [y.GetValue(i) for i in range(y.GetNumberOfTuples()+1)]

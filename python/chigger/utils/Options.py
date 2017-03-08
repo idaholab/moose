@@ -34,8 +34,8 @@ class Option(object):
     def __init__(self, *args, **kwargs):
 
         # Stored the supplied values
-        # NOTE: The default and value are private to keep them from the type checking being nullified
-        # if the values are just set directly.
+        # NOTE: The default and value are private to keep them from the type checking being
+        # nullified if the values are just set directly.
         if len(args) == 2:
             self.name = args[0]
             self.__value = None
@@ -62,11 +62,14 @@ class Option(object):
             for i in range(len(self.allow)):
                 try:
                     if not isinstance(self.allow[i], self.vtype) and self.vtype != Option.ANY:
-                        self.allow[i] = eval('{}({})'.format(self.vtype.__name__, str(self.allow[i])))
+                        self.allow[i] = eval('{}({})'.format(self.vtype.__name__,
+                                                             str(self.allow[i])))
 
                 except: #pylint: disable=bare-except
-                    msg = 'The type provided, {}, does not match the type of the allowed values, {} for the {} option.'.format(self.vtype.__name__, type(self.allow[i]).__name__, self.name)
-                    mooseutils.mooseWarning(msg)
+                    msg = 'The type provided, {}, does not match the type of the allowed ' + \
+                          'values, {} for the {} option.'
+                    mooseutils.mooseWarning(msg.format(self.vtype.__name__,
+                                                       type(self.allow[i]).__name__, self.name))
                     return
 
         # Try to set the value using the set method to test the type and if it is allowed
@@ -114,7 +117,8 @@ class Option(object):
         Set the value of the option with type checking.
 
         Inputs:
-            set_default[bool]: (default: False) When true the value passed in is also set to the default.
+            set_default[bool]: (default: False) When true the value passed in is also set to the
+                               default.
         """
 
         # None is always allowed
@@ -135,14 +139,15 @@ class Option(object):
                 try:
                     value = eval(self.vtype.__name__ + '(' + str(value) +')')
                 except: #pylint: disable=bare-except
-                    msg = '{} must be of type {} but {} provided.'.format(self.name, self.vtype.__name__, type(value).__name__)
-                    mooseutils.mooseWarning(msg)
+                    msg = '{} must be of type {} but {} provided.'
+                    mooseutils.mooseWarning(msg.format(self.name, self.vtype.__name__,
+                                                       type(value).__name__))
                     value = None
 
             # Check that the value is allowed
             if self.allow and (value != None) and (value not in self.allow):
-                msg = 'Attempting to set {} to a value of {} but only the following are allowed: {}'.format(self.name, value, self.allow)
-                mooseutils.mooseWarning(msg)
+                msg = 'Attempting to set {} to a value of {} but only the following are allowed: {}'
+                mooseutils.mooseWarning(msg.format(self.name, value, self.allow))
                 value = None
 
             self.__value = value
@@ -213,7 +218,8 @@ class Options(object):
         Inputs:
             name[str]: The name of the Option to retrieve
         """
-        return self.hasOption(name) and (self.__options[name].get() == self.__options[name].getDefault())
+        return self.hasOption(name) and \
+               (self.__options[name].get() == self.__options[name].getDefault())
 
     def setDefault(self, name, value):
         """
@@ -378,7 +384,8 @@ class Options(object):
             n = sum(table.column_widths[:-2])
             for i in range(len(table.table_data)):
                 table.table_data[i][-2] = '\n'.join(textwrap.wrap(table.table_data[i][-2], 24))
-                table.table_data[i][-1] = '\n'.join(textwrap.wrap(table.table_data[i][-1], width-(n+24)))
+                table.table_data[i][-1] = '\n'.join(textwrap.wrap(table.table_data[i][-1],
+                                                                  width-(n+24)))
             tables.append(table.table)
 
         tables = []
@@ -390,7 +397,8 @@ class Options(object):
         Takes an Options object and returns a string for building python scripts.
 
         Inputs:
-            kwargs: Key, value pairs provided will replace values in options with the string given in the value.
+            kwargs: Key, value pairs provided will replace values in options with the string given
+                    in the value.
         """
         output = []
         sub_output = dict()

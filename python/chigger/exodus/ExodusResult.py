@@ -36,7 +36,9 @@ class ExodusResult(base.ChiggerResult):
         elif isinstance(reader, MultiAppExodusReader):
             sources = [ExodusSource(r) for r in reader]
         else:
-            raise mooseutils.MooseException('The supplied object of type {} is not supported, only ExodusReader and MultiAppExodusReader objects may be utilized.'.format(reader.__class__.__name__))
+            raise mooseutils.MooseException('The supplied object of type {} is not supported, '
+                                            'only ExodusReader and MultiAppExodusReader objects '
+                                            'may be utilized.'.format(reader.__class__.__name__))
 
         # Supply the sources to the base class
         super(ExodusResult, self).__init__(*sources, **kwargs)

@@ -21,8 +21,10 @@ def get_options():
     opt = Options()
     opt.add('text_color', [1, 1, 1], "The text color.")
     opt.add('text_shadow', False, "Toggle text shadow.")
-    opt.add('justification', 'left', "Set the font justification.", allow=['left', 'center', 'right'])
-    opt.add('vertical_justification', 'bottom', "The vertical text justification.", allow=['bottom', 'middle', 'top'])
+    opt.add('justification', 'left', "Set the font justification.",
+            allow=['left', 'center', 'right'])
+    opt.add('vertical_justification', 'bottom', "The vertical text justification.",
+            allow=['bottom', 'middle', 'top'])
     opt.add('text_opacity', 1, "The text opacity.", vtype=float)
     opt.add('text', None, "The text to display.", vtype=str)
     opt.add('font_size', 24, "The text font size.", vtype=int)

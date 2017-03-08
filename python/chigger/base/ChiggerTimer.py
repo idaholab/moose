@@ -25,7 +25,8 @@ class ChiggerTimer(ChiggerObject):
     def getOptions():
         opt = ChiggerObject.getOptions()
         opt.add('duration', 1000, "The repeat interval, in milliseconds, of the timer.", vtype=int)
-        opt.add('count', None, "The maximum number of timer calls before terminating timer loop.", vtype=int)
+        opt.add('count', None, "The maximum number of timer calls before terminating timer loop.",
+                vtype=int)
         opt.add('terminate', False, "Terminate the VTK window when the 'count' is reached.")
         return opt
 

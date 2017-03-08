@@ -26,7 +26,8 @@ class TransformFilter(ChiggerFilterBase):
         return opt
 
     def __init__(self, **kwargs):
-        super(TransformFilter, self).__init__(vtkfilter_type=vtk.vtkTransformPolyDataFilter, **kwargs)
+        super(TransformFilter, self).__init__(vtkfilter_type=vtk.vtkTransformPolyDataFilter,
+                                              **kwargs)
         self.__transform = vtk.vtkTransform()
         self._vtkfilter.SetTransform(self.__transform)
 

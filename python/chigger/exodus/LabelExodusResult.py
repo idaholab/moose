@@ -37,4 +37,6 @@ class LabelExodusResult(base.ChiggerResult):
         for src in self._exodus_result:
             sources.append(LabelExodusSource(src, **kwargs))
 
-        super(LabelExodusResult, self).__init__(*sources, renderer=exodus_result.getVTKRenderer(), viewport=exodus_result.getOption('viewport'), vtkmapper_type=vtk.vtkLabeledDataMapper, **kwargs)
+        super(LabelExodusResult, self).__init__(*sources, renderer=exodus_result.getVTKRenderer(),
+                                                viewport=exodus_result.getOption('viewport'),
+                                                vtkmapper_type=vtk.vtkLabeledDataMapper, **kwargs)

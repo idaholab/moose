@@ -54,7 +54,8 @@ def copy_adaptive_exodus_test_files(testbase):
     """
     A helper for copying test Exodus files.
     """
-    basename = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tests', 'input', 'step10_micro_out.e'))
+    basename = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tests', 'input',
+                                            'step10_micro_out.e'))
     pattern = basename + '-s*'
 
     testfiles = []
@@ -128,7 +129,9 @@ def print_camera(camera, prefix='camera', precision=4):
         d = ''.join(['(', frmt, ', ', frmt, ', ', frmt, ')'])
         return d.format(*vec)
 
-    return [prefix + '.SetViewUp' + dump(precision, view_up), prefix + '.SetPosition' + dump(precision, position), prefix + '.SetFocalPoint' + dump(precision, focal)]
+    return [prefix + '.SetViewUp' + dump(precision, view_up), prefix + '.SetPosition' + \
+                                         dump(precision, position), prefix + '.SetFocalPoint' + \
+                                         dump(precision, focal)]
 
 def animate(pattern, output, delay=20, restart_delay=500, loop=True):
     """

@@ -32,13 +32,16 @@ class ImageAnnotation(base.ChiggerResult):
         Return the default options for this object.
         """
         opt = base.ChiggerResult.getOptions()
-        opt.add('position', (0.5, 0.5), "The position of the image center within the viewport, in relative coordinates.", vtype=tuple)
-        opt.add('width', 0.25, "The logo width as a fraction of the window width, this is ignored if 'scale' option is set.")
+        opt.add('position', (0.5, 0.5), "The position of the image center within the viewport, in "
+                                        "relative coordinates.", vtype=tuple)
+        opt.add('width', 0.25, "The logo width as a fraction of the window width, this is ignored "
+                               "if 'scale' option is set.")
         opt.add('horizontal_alignment', 'center', "The position horizontal position alignment.",
                 allow=['left', 'center', 'right'])
         opt.add('vertical_alignment', 'center', "The position vertical position alignment.",
                 allow=['bottom', 'center', 'top'])
-        opt.add('scale', None, "The scale of the image. (By default the image is scaled by the width.)", vtype=float)
+        opt.add('scale', None, "The scale of the image. (By default the image is scaled by the "
+                               "width.)", vtype=float)
         opt += ImageAnnotationSource.getOptions()
         return opt
 

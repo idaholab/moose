@@ -32,4 +32,7 @@ class ExodusResultLineSampler(ChiggerResult):
         for src in self._exodus_result:
             sources.append(ExodusSourceLineSampler(src, **kwargs))
 
-        super(ExodusResultLineSampler, self).__init__(*sources, renderer=exodus_result.getVTKRenderer(), viewport=exodus_result.getOption('viewport'), **kwargs)
+        super(ExodusResultLineSampler, self).__init__(*sources,
+                                                      renderer=exodus_result.getVTKRenderer(),
+                                                      viewport=exodus_result.getOption('viewport'),
+                                                      **kwargs)

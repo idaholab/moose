@@ -31,11 +31,15 @@ class ImageAnnotationSource(base.ChiggerSource):
         Return default options for this object.
         """
         opt = base.ChiggerSource.getOptions()
-        opt.add('filename', None, "The PNG file to read, this can be absolute or relative path to a PNG or just the name of a PNG located in the chigger/logos directory.", vtype=str)
+        opt.add('filename', None, "The PNG file to read, this can be absolute or relative path to "
+                                  "a PNG or just the name of a PNG located in the chigger/logos "
+                                  "directory.", vtype=str)
         return opt
 
     def __init__(self, **kwargs):
-        super(ImageAnnotationSource, self).__init__(vtkactor_type=vtk.vtkImageActor, vtkmapper_type=vtk.vtkImageSliceMapper, **kwargs)
+        super(ImageAnnotationSource, self).__init__(vtkactor_type=vtk.vtkImageActor,
+                                                    vtkmapper_type=vtk.vtkImageSliceMapper,
+                                                    **kwargs)
 
         self.__reader = vtk.vtkPNGReader()
 
@@ -54,7 +58,8 @@ class ImageAnnotationSource(base.ChiggerSource):
         if self.isOptionValid('filename'):
             filename = self.getOption('filename')
             if not os.path.exists(filename):
-                filename = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logos', os.path.basename(filename)))
+                filename = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logos',
+                                                        os.path.basename(filename)))
             if not os.path.exists(filename):
                 raise mooseutils.MooseException('Unable to locate image file: {}'.format(filename))
             self.__reader.SetFileName(filename)

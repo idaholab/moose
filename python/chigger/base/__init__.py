@@ -31,9 +31,10 @@ from ResultGroup import ResultGroup
 
 def create_single_source_result(source_type):
     """
-    In many cases only a single source object (ChiggerSourceBase) must be linked to a renderer (ChiggerResult), as is
-    the case for the annotations (e.g., TextAnnotation). To avoid creating nearly identical classes for each these
-    cases this function can be used to generate the class needed based on the type provided.
+    In many cases only a single source object (ChiggerSourceBase) must be linked to a renderer
+    (ChiggerResult), as is the case for the annotations (e.g., TextAnnotation). To avoid creating
+    nearly identical classes for each these cases this function can be used to generate the class
+    needed based on the type provided.
 
     Inputs:
         SOURCE_TYPE: The type of source to attach to a ChiggerResult object.

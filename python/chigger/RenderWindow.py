@@ -30,14 +30,18 @@ class RenderWindow(base.ChiggerObject):
     def getOptions():
         opt = base.ChiggerObject.getOptions()
 
-        opt.add('size', [960, 540], "The size of the window, expects a list of two items", vtype=list)
-        opt.add('style', 'interactive', "The interaction style.", allow=['interactive', 'modal', 'interactive2D'])
-        opt.add('test', False, "When True the interaction is disabled and the window closes immediately after rendering.")
+        opt.add('size', [960, 540], "The size of the window, expects a list of two items",
+                vtype=list)
+        opt.add('style', 'interactive', "The interaction style.",
+                allow=['interactive', 'modal', 'interactive2D'])
+        opt.add('test', False, "When True the interaction is disabled and the window closes "
+                               "immediately after rendering.")
         opt.add('offscreen', False, "Enable offscreen rendering.")
         opt.add('chigger', False, "Places a chigger logo in the lower left corner.")
         opt.add('smoothing', False, "Enable VTK render window smoothing options.")
         opt.add('multisamples', None, "Set the number of multi-samples.", vtype=int)
-        opt.add('antialiasing', 0, "Number of antialiasing frames to perform (set vtkRenderWindow::SetAAFrames).", vtype=int)
+        opt.add('antialiasing', 0, "Number of antialiasing frames to perform "
+                                   "(set vtkRenderWindow::SetAAFrames).", vtype=int)
 
         # Background settings
         background = misc.ChiggerBackground.getOptions()
@@ -83,7 +87,10 @@ class RenderWindow(base.ChiggerObject):
             if isinstance(result, base.ResultGroup):
                 self.append(*result.getResults())
             elif not isinstance(result, self.RESULT_TYPE):
-                raise mooseutils.MooseException('The supplied result type of {} must be of type {}.'.format(result.__class__.__name__, self.RESULT_TYPE.__name__))
+                n = result.__class__.__name__
+                t = self.RESULT_TYPE.__name__
+                msg = 'The supplied result type of {} must be of type {}.'.format(n, t)
+                raise mooseutils.MooseException(msg)
             self._results.append(result)
 
     def pop(self, *args):
@@ -121,7 +128,8 @@ class RenderWindow(base.ChiggerObject):
         Set the active result object for interaction.
         """
         if result not in self._results:
-            mooseutils.mooseError("The active result must be added to the RendererWindow prior to setting it as active.")
+            mooseutils.mooseError("The active result must be added to the RendererWindow prior to "
+                                  "setting it as active.")
             return
 
         self.__active = result
@@ -148,7 +156,9 @@ class RenderWindow(base.ChiggerObject):
 
             if timer:
                 if not isinstance(timer, base.ChiggerTimer):
-                    raise mooseutils.MooseException("The supplied timer of type {} must be a ChiggerTimer object.".format(type(timer).__name__))
+                    n = type(timer).__name__
+                    msg = "The supplied timer of type {} must be a ChiggerTimer object.".format(n)
+                    raise mooseutils.MooseException(msg)
                 self.__vtkinteractor.AddObserver('TimerEvent', timer.callback)
                 self.__vtkinteractor.CreateRepeatingTimer(timer.duration())
 
@@ -207,8 +217,8 @@ class RenderWindow(base.ChiggerObject):
         """
         Resets all the cameras.
 
-        Generally, this is not needed but in some cases when testing the camera needs to be reset for the image to
-        look correct.
+        Generally, this is not needed but in some cases when testing the camera needs to be reset
+        for the image to look correct.
         """
         for result in self._results:
             result.getVTKRenderer().ResetCamera()
@@ -230,7 +240,8 @@ class RenderWindow(base.ChiggerObject):
 
             style = self.getOption('style').lower()
             if style == 'interactive':
-                self.__vtkinteractor.SetInteractorStyle(base.KeyPressInteractorStyle(self.__vtkinteractor))
+                b = base.KeyPressInteractorStyle(self.__vtkinteractor)
+                self.__vtkinteractor.SetInteractorStyle(b)
             elif style == 'interactive2d':
                 self.__vtkinteractor.SetInteractorStyle(vtk.vtkInteractorStyleImage())
             elif style == 'modal':
@@ -256,7 +267,9 @@ class RenderWindow(base.ChiggerObject):
         # Extract the extensionq
         _, ext = os.path.splitext(filename)
         if ext not in writers:
-            mooseutils.mooseError("The filename must end with one of the following extensions: {}.".format(', '.join(writers.keys())))
+            w = ', '.join(writers.keys())
+            msg = "The filename must end with one of the following extensions: {}.".format(w)
+            mooseutils.mooseError(msg)
             return
 
         # Check that the directory exists

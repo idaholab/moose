@@ -19,7 +19,8 @@ class ChiggerSource2D(ChiggerFilterSourceBase):
     """
     The base class for all 2D objects.
 
-    All VTK settings that can be applied to the (VTKACTOR_TYPE and VTKMAPPER_TYPE) should be made in this class.
+    All VTK settings that can be applied to the (VTKACTOR_TYPE and VTKMAPPER_TYPE) should be made in
+    this class.
 
     Inputs:
         see ChiggerFilterSourceBase
@@ -36,7 +37,8 @@ class ChiggerSource2D(ChiggerFilterSourceBase):
         opt.add('color', "The color of the object.", vtype=list)
         return opt
 
-    def __init__(self, vtkactor_type=vtk.vtkActor2D, vtkmapper_type=vtk.vtkPolyDataMapper2D, **kwargs):
+    def __init__(self, vtkactor_type=vtk.vtkActor2D, vtkmapper_type=vtk.vtkPolyDataMapper2D,
+                 **kwargs):
         super(ChiggerSource2D, self).__init__(vtkactor_type, vtkmapper_type, **kwargs)
 
     def update(self, **kwargs):
