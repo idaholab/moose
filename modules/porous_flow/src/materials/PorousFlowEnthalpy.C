@@ -30,7 +30,6 @@ PorousFlowEnthalpy::PorousFlowEnthalpy(const InputParameters & parameters) :
     _ddensity_dt(_nodal_material ? getMaterialPropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" + Moose::stringify(_phase_num), _temperature_variable_name) : getMaterialPropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + Moose::stringify(_phase_num), _temperature_variable_name)),
 
     _enthalpy(_nodal_material ? declareProperty<Real>("PorousFlow_fluid_phase_enthalpy_nodal" + _phase) : declareProperty<Real>("PorousFlow_fluid_phase_enthalpy_qp" + _phase)),
-    _enthalpy_old(_nodal_material ? &declarePropertyOld<Real>("PorousFlow_fluid_phase_enthalpy_nodal" + _phase) : nullptr),
     _denthalpy_dp(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy_nodal" + _phase, _pressure_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy_qp" + _phase, _pressure_variable_name)),
     _denthalpy_dt(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy_nodal" + _phase, _temperature_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy_qp" + _phase, _temperature_variable_name))
 {

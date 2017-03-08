@@ -21,7 +21,6 @@ PorousFlowIdealGas::PorousFlowIdealGas(const InputParameters & parameters) :
 
     _molar_mass(getParam<Real>("molar_mass")),
     _density(_nodal_material ? declareProperty<Real>("PorousFlow_fluid_phase_density_nodal" + _phase) : declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + _phase)),
-    _density_old(_nodal_material ? &declarePropertyOld<Real>("PorousFlow_fluid_phase_density_nodal" + _phase) : nullptr),
     _ddensity_dp(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" + _phase, _pressure_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase, _pressure_variable_name)),
     _ddensity_dt(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" + _phase, _temperature_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase, _temperature_variable_name))
 {
