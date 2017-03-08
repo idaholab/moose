@@ -1877,7 +1877,7 @@ FEProblemBase::projectSolution()
 
 
 std::shared_ptr<Material>
-FEProblemBase::getMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID tid)
+FEProblemBase::getMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID tid, bool no_warn)
 {
   switch (type)
   {
@@ -1892,7 +1892,7 @@ FEProblemBase::getMaterial(std::string name, Moose::MaterialDataType type, THREA
   }
 
   std::shared_ptr<Material> material = _all_materials[type].getActiveObject(name, tid);
-  if (material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
+  if (!no_warn && material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
     mooseWarning("You are retrieving a Material object (", material->name(), "), but its compute flag is not set to true. This indicates that MOOSE is computing this property which may not be desired and produce un-expected results.");
 
   return material;

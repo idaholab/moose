@@ -990,11 +990,13 @@ public:
   const MaterialWarehouse & getDiscreteMaterialWarehouse() { return _discrete_materials; }
 
   /**
-   * Return a pointer to a Material object.
+   * Return a pointer to a Material object.  If no_warn is true, suppress
+   * warning about retrieving a material reference potentially during the
+   * material's calculation.
    *
    * This will return enabled or disabled objects, the main purpose is for iterative materials.
    */
-  std::shared_ptr<Material> getMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID tid = 0);
+  std::shared_ptr<Material> getMaterial(std::string name, Moose::MaterialDataType type, THREAD_ID tid = 0, bool no_warn = false);
 
   /*
    * Return a pointer to the MaterialData

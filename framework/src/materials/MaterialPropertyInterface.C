@@ -195,9 +195,9 @@ MaterialPropertyInterface::getMaterial(const std::string & name)
 
 
 Material &
-MaterialPropertyInterface::getMaterialByName(const std::string & name)
+MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_warn)
 {
-  std::shared_ptr<Material> discrete = _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid);
+  std::shared_ptr<Material> discrete = _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid, no_warn);
 
   // Check block compatibility
   if (!discrete->hasBlocks(_mi_block_ids))
