@@ -102,7 +102,6 @@
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_xz stress_yz'
     strain = FINITE
-    block = '1 2 3 4 5 6 7'
   [../]
 []
 
@@ -282,7 +281,6 @@
     y = '1e6 6e5'
     property = youngs_modulus
     variable = temp
-    block = '1 2 3 4 5 6 7'
   [../]
   [./poissons_ratio]
     type = PiecewiseLinearInterpolationMaterial
@@ -290,7 +288,6 @@
     y = '0   0.25'
     property = poissons_ratio
     variable = temp
-    block = '1 2 3 4 5 6 7'
   [../]
 
   [./elasticity_tensor]
@@ -298,17 +295,14 @@
     args = temp
     youngs_modulus = youngs_modulus
     poissons_ratio = poissons_ratio
-    block = '1 2 3 4 5 6 7'
   [../]
 
   [./stress]
     type = ComputeVariableElasticConstantStress
-    block = '1 2 3 4 5 6 7'
   [../]
 
   [./heat]
     type = HeatConductionMaterial
-    block = '1 2 3 4 5 6 7'
 
     specific_heat = 1.0
     thermal_conductivity = 1.0
@@ -316,7 +310,6 @@
 
   [./density]
     type = Density
-    block = '1 2 3 4 5 6 7'
     density = 1.0
     disp_x = disp_x
     disp_y = disp_y

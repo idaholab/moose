@@ -58,7 +58,7 @@ PiecewiseLinearInterpolationMaterial::PiecewiseLinearInterpolationMaterial(const
     unsigned int x_size = xy_size/2;
     x.reserve(x_size);
     y.reserve(x_size);
-    for (unsigned int i=0; i<xy_size/2; ++i)
+    for (unsigned int i = 0; i < xy_size / 2; ++i)
     {
       x.push_back(xy[i*2]);
       y.push_back(xy[i*2+1]);

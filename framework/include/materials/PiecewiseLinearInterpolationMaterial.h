@@ -38,10 +38,10 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
-  // Name of the property to be computed
+  /// Name of the property to be computed
   std::string _prop_name;
 
-  // Value of the coupled variable to be used as the abscissa in the piecewise linear interpolation
+  /// Value of the coupled variable to be used as the abscissa in the piecewise linear interpolation
   const VariableValue & _coupled_var;
 
   /// Material property to be calculated
