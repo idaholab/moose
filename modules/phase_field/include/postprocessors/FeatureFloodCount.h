@@ -113,23 +113,23 @@ public:
   struct FeatureData
   {
     FeatureData() :
-        FeatureData(std::numeric_limits<std::size_t>::max())
+        FeatureData(std::numeric_limits<std::size_t>::max(), Status::INACTIVE)
     {
     }
 
-    FeatureData(std::size_t var_index, unsigned int local_index, processor_id_type rank) :
-        FeatureData(var_index)
+    FeatureData(std::size_t var_index, unsigned int local_index, processor_id_type rank, Status status) :
+        FeatureData(var_index, status)
     {
       _orig_ids = { std::make_pair(rank, local_index) };
     }
 
-    FeatureData(std::size_t var_index) :
+    FeatureData(std::size_t var_index, Status status) :
         _var_index(var_index),
         _id(invalid_id),
         _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
         _vol_count(0),
-        _status(Status::CLEAR),
+        _status(status),
         _intersects_boundary(false)
     {
     }
@@ -285,10 +285,23 @@ protected:
   void flood(const DofObject * dof_object, std::size_t current_index, FeatureData * feature);
 
   /**
-   * Return a comparison threshold to use when inspecting an entity during the flood
+   * Return the starting comparison threshold to use when inspecting an entity during the flood
    * stage.
    */
-  virtual Real getThreshold(std::size_t current_index, bool active_feature) const;
+  virtual Real getThreshold(std::size_t current_index) const;
+
+  /**
+   * Return the "connecting" comparison threshold to use when inspecting an entity during the flood
+   * stage.
+   */
+  virtual Real getConnectingThreshold(std::size_t current_index) const;
+
+  /**
+   * This method is used to determine whether the current entity value is part of a feature or not.
+   * Comparisons can either be greater than or less than the threshold which is controlled via
+   * input parameter.
+   */
+  bool compareValueWithThreshold(Real entity_value, Real threshold) const;
 
   /**
    * Method called during the recursive flood routine that should return whether or not the current
@@ -296,7 +309,7 @@ protected:
    * of a new feature.
    */
   virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::size_t current_index,
-                                             FeatureData * & feature, unsigned int & new_id);
+                                             FeatureData * & feature, Status & status, unsigned int & new_id);
 
   ///@{
   /**

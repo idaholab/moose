@@ -25,6 +25,7 @@ void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature
   storeHelper(stream, feature.intersects_boundary, context);
   storeHelper(stream, feature.id, context);
   storeHelper(stream, feature.centroid, context);
+  storeHelper(stream, feature.status, context);
 }
 
 template<>
@@ -33,6 +34,7 @@ void dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature,
   loadHelper(stream, feature.intersects_boundary, context);
   loadHelper(stream, feature.id, context);
   loadHelper(stream, feature.centroid, context);
+  loadHelper(stream, feature.status, context);
 }
 
 template<>
@@ -166,20 +168,20 @@ GrainTracker::execute()
 }
 
 Real
-GrainTracker::getThreshold(std::size_t var_index, bool active_feature) const
+GrainTracker::getThreshold(std::size_t var_index) const
 {
   // If we are inspecting a reserve op parameter, we need to make sure
   // that there is an entity above the reserve_op threshold before
   // starting the flood of the feature.
-  if (!active_feature && var_index >= _reserve_op_index)
+  if (var_index >= _reserve_op_index)
     return _reserve_op_threshold;
   else
-    return FeatureFloodCount::getThreshold(var_index, active_feature);
+    return _step_threshold;
 }
 
 bool
 GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::size_t current_index,
-                                            FeatureData * & feature, unsigned int & new_id)
+                                            FeatureData * & feature, Status & status, unsigned int & new_id)
 {
   /**
    * When working with the EBSD reader we need to make sure that we get an accurate map
@@ -225,6 +227,9 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::s
       // Set the ID (EBSD ID)
       new_id = _consider_phase ? local_id : global_id;
 
+      // EBSD Grains are _always_ kept
+      status &= ~Status::INACTIVE;
+
       return true;
     }
     else
@@ -240,7 +245,7 @@ GrainTracker::isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::s
   }
   else
     // Just use normal variable inspection on subsequent steps
-    return FeatureFloodCount::isNewFeatureOrConnectedRegion(dof_object, current_index, feature, new_id);
+    return FeatureFloodCount::isNewFeatureOrConnectedRegion(dof_object, current_index, feature, status, new_id);
 }
 
 void
@@ -328,6 +333,7 @@ GrainTracker::broadcastAndUpdateGrainData()
                      partial_feature.intersects_boundary = feature._intersects_boundary;
                      partial_feature.id = feature._id;
                      partial_feature.centroid = feature._centroid;
+                     partial_feature.status = feature._status;
                      return partial_feature;
                    });
 
@@ -358,6 +364,8 @@ GrainTracker::broadcastAndUpdateGrainData()
         auto & grain = _feature_sets[_feature_id_to_local_index[partial_data.id]];
         grain._intersects_boundary = partial_data.intersects_boundary;
         grain._centroid = partial_data.centroid;
+        if (partial_data.status == Status::INACTIVE)
+          grain._status = Status::INACTIVE;
       }
     }
   }
