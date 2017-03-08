@@ -40,6 +40,13 @@ protected:
 
   ///Stores the total eigenstrain in the previous step (only for incremental form)
   MaterialProperty<RankTwoTensor> * _eigenstrain_old;
+
+  /**
+   * Helper function for models that compute the eigenstrain based on a volumetric
+   * strain.  This function computes the diagonal components of the eigenstrain tensor.
+   * param volumetric_strain The current volumetric strain to be applied
+   */
+  Real computeVolumetricStrainComponent(const Real volumetric_strain) const;
 };
 
 #endif //COMPUTEEIGENSTRAINBASE_H

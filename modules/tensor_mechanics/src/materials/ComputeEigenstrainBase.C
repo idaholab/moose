@@ -40,3 +40,16 @@ ComputeEigenstrainBase::computeQpProperties()
 {
   computeQpEigenstrain();
 }
+
+Real
+ComputeEigenstrainBase::computeVolumetricStrainComponent(const Real volumetric_strain) const
+{
+
+  Real volumetric_strain_comp = std::cbrt(volumetric_strain + 1.0) - 1.0;
+
+  // Convert to logarithmic strain to compute strains to exactly recover
+  // volumetric strain in finite strain models
+  volumetric_strain_comp = std::log(1.0 + volumetric_strain_comp);
+
+  return volumetric_strain_comp;
+}

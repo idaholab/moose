@@ -32,9 +32,10 @@ protected:
   Function & _thermal_expansion_function;
 
   /// Stores the thermal strain as a scalar for use in computing an incremental update to this.
-  /// Only used when _incremental_form is false (because we can use the old eigenstrain tensor in that case)
-  MaterialProperty<Real> * _thermal_strain;
-  MaterialProperty<Real> * _thermal_strain_old;
+  //@{
+  MaterialProperty<Real> & _thermal_strain;
+  MaterialProperty<Real> & _thermal_strain_old;
+  //@}
 
   /// Indicates whether we are on the first step, avoiding false positives when restarting
   bool & _step_one;
