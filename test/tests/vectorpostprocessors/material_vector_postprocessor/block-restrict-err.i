@@ -1,3 +1,5 @@
+# check that the simulation terminates with an error when you try to use this
+# on an element that isn't available/computed on a particular block.
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -44,7 +46,7 @@
   [./vpp]
     type = MaterialVectorPostprocessor
     material = 'mat'
-    elem_ids = '3 4 7 42 88'
+    elem_ids = '2112'
   [../]
 []
 

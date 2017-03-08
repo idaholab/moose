@@ -15,6 +15,7 @@
 #include "MaterialVectorPostprocessor.h"
 #include "Material.h"
 #include "IndirectSort.h"
+#include "MooseMesh.h"
 
 #include "libmesh/quadrature.h"
 
@@ -38,7 +39,14 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
   auto & mat = getMaterialByName(getParam<MaterialName>("material"), true);
   auto & prop_names = mat.getSuppliedItems();
   if (mat.isBoundaryMaterial())
-      mooseError("boundary materials (i.e. ", _mat.name(), ") cannot be used with MaterialVectorPostprocessor");
+      mooseError(name(), ": boundary materials (i.e. ", mat.name(), ") cannot be used");
+
+  for (auto & id : _elem_filter)
+  {
+    auto el = _mesh.getMesh().query_elem_ptr(id);
+    if (!el || !mat.hasBlocks(el->subdomain_id()))
+      mooseError(name(), ": material ", mat.name(), " is not defined on element ", id);
+  }
 
   for (auto & prop : prop_names)
   {
