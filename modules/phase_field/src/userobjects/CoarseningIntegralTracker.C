@@ -15,6 +15,7 @@ template<>
 InputParameters validParams<CoarseningIntegralTracker>()
 {
   InputParameters params = validParams<ElementUserObject>();
+  params.addClassDescription("Track the pre-coarsening integral of elements.");
   params.addRequiredCoupledVar("v", "variable to correct");
   return params;
 }

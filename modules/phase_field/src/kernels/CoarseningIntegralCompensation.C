@@ -12,6 +12,7 @@ template<>
 InputParameters validParams<CoarseningIntegralCompensation>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Apply a correction obtained by a CoarseningIntegralTracker to compensate for variable integrals due to mesh coarsening.");
   params.addRequiredParam<UserObjectName>("tracker", "Coarsening integral tracker user object");
   return params;
 }
