@@ -53,9 +53,6 @@ protected:
   /// Fluid phase enthalpy at the qps or nodes
   MaterialProperty<Real> & _enthalpy;
 
-  /// Old value of fluid phase enthalpy at the nodes
-  MaterialProperty<Real> * const _enthalpy_old;
-
   /// Derivative of fluid enthalpy wrt phase pore pressure at the qps or nodes
   MaterialProperty<Real> & _denthalpy_dp;
 

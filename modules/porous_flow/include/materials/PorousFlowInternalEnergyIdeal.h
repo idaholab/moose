@@ -34,9 +34,6 @@ protected:
   /// Fluid phase internal_energy at the qps or nodes
   MaterialProperty<Real> & _internal_energy;
 
-  /// Old value of fluid phase internal_energy at the nodes
-  MaterialProperty<Real> * const _internal_energy_old;
-
   /// Derivative of fluid internal_energy wrt phase pore pressure at the qps or nodes
   MaterialProperty<Real> & _dinternal_energy_dp;
 

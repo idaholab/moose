@@ -55,9 +55,6 @@ protected:
   /// Fluid phase density at the nodes or quadpoints
   MaterialProperty<Real> & _density;
 
-  /// Old fluid phase density at the nodes
-  MaterialProperty<Real> * const _density_old;
-
   /// Derivative of fluid density wrt phase pore pressure at the nodes or quadpoints
   MaterialProperty<Real> & _ddensity_dp;
 

@@ -28,7 +28,6 @@ PorousFlowTemperature::PorousFlowTemperature(const InputParameters & parameters)
 
     _temperature(_nodal_material ? declareProperty<Real>("PorousFlow_temperature_nodal") : declareProperty<Real>("PorousFlow_temperature_qp")),
     _dtemperature_dvar(_nodal_material ? declareProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar") : declareProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar")),
-    _temperature_old(_nodal_material ? &declarePropertyOld<Real>("PorousFlow_temperature_nodal") : nullptr),
     _grad_temperature(_nodal_material ? nullptr : &declareProperty<RealGradient>("PorousFlow_grad_temperature_qp")),
     _dgrad_temperature_dgradv(_nodal_material ? nullptr : &declareProperty<std::vector<Real>>("dPorousFlow_grad_temperature_qp_dgradvar")),
     _dgrad_temperature_dv(_nodal_material ? nullptr : &declareProperty<std::vector<RealGradient>>("dPorousFlow_grad_temperature_qp_dvar"))
