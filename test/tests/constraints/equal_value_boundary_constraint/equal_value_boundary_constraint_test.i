@@ -13,6 +13,7 @@
   nx = 6
   ny = 6
   elem_type = QUAD4
+  allow_renumbering = false
 []
 
 [Variables]
