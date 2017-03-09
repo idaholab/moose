@@ -1202,7 +1202,7 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual)
 }
 
 void
-NonlinearSystemBase::getNodeDofs(unsigned int node_id, std::vector<dof_id_type> & dofs)
+NonlinearSystemBase::getNodeDofs(dof_id_type node_id, std::vector<dof_id_type> & dofs)
 {
   const Node & node = _mesh.nodeRef(node_id);
   unsigned int s = number();
@@ -1279,13 +1279,29 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(GeometricSearchData & 
   {
     std::vector<dof_id_type> master_dofs;
     std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
-    for (const auto & dof : master_node_ids)
-      getNodeDofs(dof, master_dofs);
+    for (const auto & node_id : master_node_ids)
+    {
+      Node * node = _mesh.queryNodePtr(node_id);
+      if (node && node->processor_id() == this->processor_id())
+      {
+        getNodeDofs(node_id, master_dofs);
+      }
+    }
+
+    _communicator.allgather(master_dofs);
 
     std::vector<dof_id_type> slave_dofs;
     std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
-    for (const auto & dof : slave_node_ids)
-      getNodeDofs(dof, slave_dofs);
+    for (const auto & node_id : slave_node_ids)
+    {
+      Node * node = _mesh.queryNodePtr(node_id);
+      if (node && node->processor_id() == this->processor_id())
+      {
+        getNodeDofs(node_id, slave_dofs);
+      }
+    }
+
+    _communicator.allgather(slave_dofs);
 
     for (const auto & master_id : master_dofs)
       for (const auto & slave_id : slave_dofs)

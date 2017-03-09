@@ -77,6 +77,9 @@ InputParameters validParams<MooseMesh>()
                              "REPLICATED: Always use libMesh::ReplicatedMesh "
                              "DEFAULT: Use libMesh::ReplicatedMesh unless --distributed-mesh is specified on the command line");
 
+  params.addParam<bool>("allow_renumbering", true,
+                        "If allow_renumbering=false, node and element numbers are kept fixed until deletion");
+
   params.addParam<bool>("nemesis", false,
                         "If nemesis=true and file=foo.e, actually reads "
                         "foo.e.N.0, foo.e.N.1, ... foo.e.N.N-1, "
@@ -216,6 +219,9 @@ MooseMesh::MooseMesh(const InputParameters & parameters) :
   }
   else
     _mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, dim);
+
+  if (!getParam<bool>("allow_renumbering"))
+    _mesh->allow_renumbering(false);
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh) :
@@ -310,8 +316,8 @@ MooseMesh::prepare(bool force)
 {
   if (dynamic_cast<DistributedMesh *>(&getMesh()) && !_is_nemesis)
   {
-    // Call prepare_for_use() and allow renumbering
-    getMesh().allow_renumbering(true);
+    // Call prepare_for_use() and don't mess with the renumbering
+    // setting
     if (force || _needs_prepare_for_use)
       getMesh().prepare_for_use();
   }
@@ -2346,7 +2352,22 @@ MooseMesh::getNodeList(boundary_id_type nodeset_id) const
   std::map<boundary_id_type, std::vector<dof_id_type> >::const_iterator it = _node_set_nodes.find(nodeset_id);
 
   if (it == _node_set_nodes.end())
-    mooseError("Unable to nodeset ID: ", nodeset_id, '.');
+  {
+    // On a distributed mesh we might not know about a remote nodeset,
+    // so we'll return an empty vector and hope the nodeset exists
+    // elsewhere.
+    if (!getMesh().is_serial())
+    {
+      static const std::vector<dof_id_type> empty_vec;
+      return empty_vec;
+    }
+    // On a replicated mesh we should know about every nodeset and if
+    // we're asked for one that doesn't exist then it must be a bug.
+    else
+    {
+      mooseError("Unable to nodeset ID: ", nodeset_id, '.');
+    }
+  }
 
   return it->second;
 }

@@ -98,6 +98,10 @@ OversampleOutput::initOversample()
     mesh_refinement.uniformly_refine(_refinements);
   }
 
+  // We can't allow renumbering if we want to output multiple time
+  // steps to the same Exodus file
+  _mesh_ptr->getMesh().allow_renumbering(false);
+
   // Create the new EquationSystems
   _oversample_es = libmesh_make_unique<EquationSystems>(_mesh_ptr->getMesh());
   _es_ptr = _oversample_es.get();
