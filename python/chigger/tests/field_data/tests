@@ -1,0 +1,26 @@
+[Tests]
+  [./field_data]
+    type = RunApp
+    command = field_data.py
+    expect_out = "13.960"
+  [../]
+
+  [./current_field_data]
+    type = RunApp
+    command = current_field_data.py
+    expect_out = "0.0,\s14.\d+,\s14."
+  [../]
+
+  [./plot_field_data]
+    type = ImageDiff
+    command = plot_field_data.py
+    imagediff = 'plot_field_data.png'
+  [../]
+
+  [./plot_current_field_data]
+    type = ImageDiff
+    command = plot_current_field_data.py
+    imagediff = 'plot_current_field_data_0.png plot_current_field_data_4.png plot_current_field_data_9.png'
+    allowed_linux = 0.95
+[../]
+[]

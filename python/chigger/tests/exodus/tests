@@ -1,0 +1,6 @@
+[Tests]
+  [./reader]
+    type = PythonUnitTest
+    input = test_ExodusReader.py
+  [../]
+[]

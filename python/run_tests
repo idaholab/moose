@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-import sys, os
+import sys
+import os
 
 # Set the current working directory to the directory where this script is located
-os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))
+os.chdir(os.path.dirname(__file__))
 
 #### Set the name of the application here and moose directory relative to the application
 app_name = 'moose_python'
@@ -13,6 +14,8 @@ if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
 
 sys.path.append(os.path.join(MOOSE_DIR, 'python'))
+os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ':' + os.path.join(MOOSE_DIR, 'python')
+
 import path_tool
 path_tool.activate_module('TestHarness')
 

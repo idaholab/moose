@@ -1,0 +1,15 @@
+[Tests]
+  [./simple]
+    # Most basic example
+    type = ImageDiff
+    command = simple.py
+    imagediff = 'simple.png'
+  [../]
+
+  [./simple_camera]
+    # Use custom camera
+    type = ImageDiff
+    command = simple_camera.py
+    imagediff = 'simple_camera.png'
+  [../]
+[]

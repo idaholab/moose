@@ -1,0 +1,7 @@
+[Tests]
+  [./viewports]
+    type = ImageDiff
+    command = viewports.py
+    imagediff = 'viewports.png'
+  [../]
+[]
