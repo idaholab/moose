@@ -9,6 +9,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'glued_kin_sm'
+    skip = 'Reevaluate under PETSc 3.7.4. #8200'
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -31,6 +32,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'frictionless_kin_sm'
+    skip = 'Reevaluate under PETSc 3.7.4. #8200'
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -62,7 +64,8 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
-    prereq = 'mu_0_2_kin_sm'
+    #prereq = 'mu_0_2_kin_sm'  #Commented out because the prereq test is currently skipped #8200
+    skip = 'Reevaluate under PETSc 3.7.4. #8200'
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
@@ -132,6 +135,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    skip = 'Reevaluate under PETSc 3.7.4. #8200'
   [../]
   [./mu_0_2_pen_sm]
     type = 'CSVDiff'
