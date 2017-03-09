@@ -1,0 +1,29 @@
+[Tests]
+  [./default]
+    type = ImageDiff
+    command = line_sample_default.py
+    imagediff = 'line_sample_default.png'
+    allowed_linux = 0.95
+  [../]
+
+  [./line_sample]
+    type = ImageDiff
+    command = line_sample.py
+    imagediff = 'line_sample.png'
+    expect_out = '0.048\d*\s0.400' # Test the the sampled values are present
+    allowed_darwin = 0.92
+  [../]
+
+  [./line_sample_elem]
+    type = ImageDiff
+    command = line_sample_elem.py
+    imagediff = 'line_sample_elem.png'
+    allowed_linux = 0.97
+  [../]
+
+  [./line_sample_error]
+    type = RunException
+    command = line_sample_error.py
+    expect_err = "Unable to locate the variable, invalid_name, in the supplied source data."
+  [../]
+[]

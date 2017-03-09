@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = ImageDiff
+    command = color.py
+    imagediff = color.png
+  [../]
+[]

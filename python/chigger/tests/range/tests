@@ -1,0 +1,39 @@
+[Tests]
+  [./none]
+    type = ImageDiff
+    command = none.py
+    imagediff = 'none_0.png none_1.png'
+    allowed_linux = 0.97
+  [../]
+
+  [./min]
+    type = ImageDiff
+    command = min.py
+    imagediff = 'min_0.png min_4.png'
+    allowed_linux = 0.97
+    allowed_darwin = 0.97
+  [../]
+
+  [./max]
+    type = ImageDiff
+    command = max.py
+    imagediff = 'max_0.png max_1.png'
+  [../]
+
+  [./minmax]
+    type = ImageDiff
+    command = minmax.py
+    imagediff = 'minmax_0.png minmax_1.png'
+
+  [./range]
+    type = ImageDiff
+    command = range.py
+    imagediff = 'range_0.png range_1.png'
+  [../]
+
+  [./auto]
+    type = ImageDiff
+    command = auto.py
+    imagediff = 'auto_1.png auto_3.png auto_5.png'
+  [../]
+[]

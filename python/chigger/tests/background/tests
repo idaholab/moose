@@ -1,0 +1,12 @@
+[Tests]
+  [./solid]
+    type = ImageDiff
+    command = background.py
+    imagediff = background.png
+  [../]
+  [./gradient]
+    type = ImageDiff
+    command = gradient.py
+    imagediff = gradient.png
+  [../]
+[]

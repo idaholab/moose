@@ -1,0 +1,37 @@
+[Tests]
+  [./plane]
+    type = ImageDiff
+    command = clip.py
+    imagediff = 'clip.png'
+  [../]
+
+  [./clip_z]
+    type = ImageDiff
+    command = clip_z.py
+    imagediff = 'clip_z.png'
+  [../]
+
+  [./dual]
+    type = ImageDiff
+    command = dual.py
+    imagediff = dual.png
+  [../]
+
+  [./box]
+    type = ImageDiff
+    command = box_clip.py
+    imagediff = 'box_clip.png'
+  [../]
+
+  [./dynamic]
+    type = ImageDiff
+    command = clip_change.py
+    imagediff = 'clip_change0.png clip_change1.png clip_change2.png'
+  [../]
+
+  [./multiple]
+    type = ImageDiff
+    command = multiple_clips.py
+    imagediff = 'multiple_clips.png'
+  [../]
+[]

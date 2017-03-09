@@ -1,0 +1,61 @@
+[Tests]
+  [./standalone]
+    type = ImageDiff
+    command = colorbar.py
+    imagediff = 'colorbar.png'
+  [../]
+
+  [./standalone_horiz]
+    type = ImageDiff
+    command = colorbar_horiz.py
+    imagediff = 'colorbar_horiz.png'
+  [../]
+
+  [./exdous_default]
+    type = ImageDiff
+    command = exodus_colorbar.py
+    imagediff = 'exodus_colorbar.png'
+  [../]
+
+  [./left]
+    type = ImageDiff
+    command = colorbar_left.py
+    imagediff = 'colorbar_left.png'
+  [../]
+
+  [./top]
+    type = ImageDiff
+    command = colorbar_top.py
+    imagediff = 'colorbar_top.png'
+  [../]
+
+  [./bottom]
+    type = ImageDiff
+    command = colorbar_bottom.py
+    imagediff = 'colorbar_bottom.png'
+  [../]
+
+  [./common]
+    type = ImageDiff
+    command = common_colorbar.py
+    imagediff = 'common_colorbar.png'
+  [../]
+
+  [./common_horiz]
+    type = ImageDiff
+    command = common_colorbar_horiz.py
+    imagediff = 'common_colorbar_horiz.png'
+  [../]
+
+  [./dual]
+    type = ImageDiff
+    command = dual_colorbar.py
+    imagediff = 'dual_colorbar.png'
+  [../]
+
+  [./dual_horiz]
+    type = ImageDiff
+    command = dual_colorbar_horiz.py
+    imagediff = 'dual_colorbar_horiz.png'
+  [../]
+[]

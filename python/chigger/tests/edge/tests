@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = ImageDiff
+    command = edge.py
+    imagediff = 'edge.png'
+    allowed_linux = 0.94
+    allowed_darwin = 0.96
+  [../]
+[]

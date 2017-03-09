@@ -1,0 +1,59 @@
+[Tests]
+  [./default]
+    type = ImageDiff
+    command = line.py
+    imagediff = 'line.png'
+    allowed_linux = 0.94
+  [../]
+
+  [./single_point]
+    type = ImageDiff
+    command = single_point.py
+    imagediff = 'single_point.png'
+    allowed_linux = 0.94
+  [./
+
+  [./empty]
+    type = ImageDiff
+    command = empty.py
+    imagediff = 'empty.png'
+    allowed_linux = 0.935
+  [../]
+
+  [./color]
+    type = ImageDiff
+    command = color.py
+    imagediff = 'color.png'
+    allowed_linux = 0.94
+  [../]
+
+  [./legend]
+    type = ImageDiff
+    command = legend.py
+    imagediff = 'legend.png'
+    allowed_linux = 0.94
+    allowed_darwin = 0.96
+  [../]
+
+  [./update]
+    type = ImageDiff
+    command = update.py
+    imagediff = 'update_0.png update_1.png update_2.png update_3.png update_4.png update_5.png'
+    allowed_linux = 0.93
+  [../]
+
+  [./secondary]
+    type = ImageDiff
+    command = secondary.py
+    imagediff = 'secondary_initial.png secondary_0.png secondary_1.png secondary_2.png secondary_3.png'
+    allowed_linux = 0.94
+  [../]
+
+  [./tracer]
+    type = ImageDiff
+    command = tracer.py
+    imagediff = 'tracer_1.png tracer_3.png tracer_5.png'
+    allowed_darwin = 0.97
+    allowed_linux = 0.96
+  [../]
+[]
