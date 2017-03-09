@@ -486,13 +486,16 @@ petscSetDefaults(FEProblemBase & problem)
   SNES snes = petsc_solver->snes();
   KSP ksp;
   SNESGetKSP(snes, &ksp);
-  PCSide pcside = getPetscPCSide(nl.getPCSide());
+
 #if PETSC_VERSION_LESS_THAN(3, 2, 0)
+//pc_side is NOT set, PETSc will make the decision
   // PETSc 3.1.x-
-  KSPSetPreconditionerSide(ksp, pcside);
+  if (nl.getPCSide() != Moose::PCS_DEFAULT)
+    KSPSetPreconditionerSide(ksp, getPetscPCSide(nl.getPCSide()));
 #else
   // PETSc 3.2.x+
-  KSPSetPCSide(ksp, pcside);
+  if (nl.getPCSide() != Moose::PCS_DEFAULT)
+    KSPSetPCSide(ksp, getPetscPCSide(nl.getPCSide()));
 #endif
   SNESSetMaxLinearSolveFailures(snes, 1000000);
 

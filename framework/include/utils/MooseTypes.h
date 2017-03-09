@@ -221,7 +221,8 @@ enum PCSideType
 {
   PCS_LEFT,
   PCS_RIGHT,
-  PCS_SYMMETRIC
+  PCS_SYMMETRIC,
+  PCS_DEFAULT         ///< Use whatever we have in PETSc
 };
 
 /**

@@ -123,7 +123,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _splits(/*threaded=*/false),
     _increment_vec(NULL),
     _sln_diff(addVector("sln_diff", false, PARALLEL)),
-    _pc_side(Moose::PCS_RIGHT),
+    _pc_side(Moose::PCS_DEFAULT),
     _use_finite_differenced_preconditioner(false),
     _have_decomposition(false),
     _use_field_split_preconditioner(false),
@@ -2462,6 +2462,8 @@ NonlinearSystemBase::setPCSide(MooseEnum pcs)
     _pc_side = Moose::PCS_RIGHT;
   else if (pcs == "symmetric")
     _pc_side = Moose::PCS_SYMMETRIC;
+  else if (pcs == "default")
+    _pc_side = Moose::PCS_DEFAULT;
   else
     mooseError("Unknown PC side specified.");
 }
