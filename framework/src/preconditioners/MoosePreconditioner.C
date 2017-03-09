@@ -28,7 +28,7 @@ validParams<MoosePreconditioner>()
   InputParameters params = validParams<MooseObject>();
   params.addPrivateParam<FEProblemBase *>("_fe_problem_base");
 
-  MooseEnum pc_side("left right symmetric", "right");
+  MooseEnum pc_side("left right symmetric default", "default");
   params.addParam<MooseEnum>("pc_side", pc_side, "Preconditioning side");
   params.registerBase("MoosePreconditioner");
 
