@@ -10,9 +10,10 @@ fi
 
 echo '#!/bin/bash
 patch=$(git clang-format --diff)
-if [[ "$patch" == "no modified files to format" ]]; then
-    echo "passed"
+if [[ "$patch" =~ "no modified files to format" || "$patch" =~ "clang-format did not modify any files" ]]; then
+    echo "" > /dev/null
 else
+    echo ""
     echo "formatting fixes required" >&2
     echo ""
     echo "$patch"
