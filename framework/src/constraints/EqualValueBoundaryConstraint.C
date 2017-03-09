@@ -133,55 +133,61 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     }
   }
 
-  // Add elements connected to master node to Ghosted Elements.  These
-  // elements might have already been remoted, in which case we need
-  // to gather them back first.
   const auto & node_to_elem_map = _mesh.nodeToElemMap();
   auto node_to_elem_pair = node_to_elem_map.find(_master_node_vector[0]);
-  const bool found_elems = (node_to_elem_pair != node_to_elem_map.end());
 
+  bool found_elems = (node_to_elem_pair != node_to_elem_map.end());
+
+  // Add elements connected to master node to Ghosted Elements.
+
+  // On a distributed mesh, these elements might have already been
+  // remoted, in which case we need to gather them back first.
+  if (!_mesh.getMesh().is_serial())
+  {
 #ifndef NDEBUG
-  bool someone_found_elems = found_elems;
-  _mesh.getMesh().comm().max(someone_found_elems);
-  mooseAssert(someone_found_elems, "Missing entry in node to elem map");
+    bool someone_found_elems = found_elems;
+    _mesh.getMesh().comm().max(someone_found_elems);
+    mooseAssert(someone_found_elems, "Missing entry in node to elem map");
 #endif
 
-  std::set<Elem *, CompareElemsByLevel> master_elems_to_ghost;
-  std::set<Node *> nodes_to_ghost;
-  if (found_elems)
-  {
-    for (dof_id_type id : node_to_elem_pair->second)
+    std::set<Elem *, CompareElemsByLevel> master_elems_to_ghost;
+    std::set<Node *> nodes_to_ghost;
+    if (found_elems)
     {
-      Elem * elem = _mesh.queryElemPtr(id);
-      if (elem)
+      for (dof_id_type id : node_to_elem_pair->second)
       {
-        master_elems_to_ghost.insert(elem);
+        Elem * elem = _mesh.queryElemPtr(id);
+        if (elem)
+        {
+          master_elems_to_ghost.insert(elem);
 
-        const unsigned int n_nodes = elem->n_nodes();
-        for (unsigned int n=0; n != n_nodes; ++n)
-          nodes_to_ghost.insert(elem->node_ptr(n));
+          const unsigned int n_nodes = elem->n_nodes();
+          for (unsigned int n=0; n != n_nodes; ++n)
+            nodes_to_ghost.insert(elem->node_ptr(n));
+        }
       }
     }
+
+    // Send nodes first since elements need them
+    _mesh.getMesh().comm().allgather_packed_range
+      (&_mesh.getMesh(),
+       nodes_to_ghost.begin(), nodes_to_ghost.end(),
+       mesh_inserter_iterator<Node>(_mesh.getMesh()));
+
+    _mesh.getMesh().comm().allgather_packed_range
+      (&_mesh.getMesh(),
+       master_elems_to_ghost.begin(), master_elems_to_ghost.end(),
+       mesh_inserter_iterator<Elem>(_mesh.getMesh()));
+
+    _mesh.update(); // Rebuild node_to_elem_map
+
+    // Find elems again now that we know they're there
+    const auto & new_node_to_elem_map = _mesh.nodeToElemMap();
+    node_to_elem_pair = new_node_to_elem_map.find(_master_node_vector[0]);
+    found_elems = (node_to_elem_pair != new_node_to_elem_map.end());
   }
 
-  // Send nodes first since elements need them
-  _mesh.getMesh().comm().allgather_packed_range
-    (&_mesh.getMesh(),
-     nodes_to_ghost.begin(), nodes_to_ghost.end(),
-     mesh_inserter_iterator<Node>(_mesh.getMesh()));
-
-  _mesh.getMesh().comm().allgather_packed_range
-    (&_mesh.getMesh(),
-     master_elems_to_ghost.begin(), master_elems_to_ghost.end(),
-     mesh_inserter_iterator<Elem>(_mesh.getMesh()));
-
-  _mesh.update(); // Rebuild node_to_elem_map
-
-  // Find elems again now that we know they're there
-  const auto & new_node_to_elem_map = _mesh.nodeToElemMap();
-  node_to_elem_pair = new_node_to_elem_map.find(_master_node_vector[0]);
-
-  if (node_to_elem_pair == new_node_to_elem_map.end())
+  if (!found_elems)
     mooseError("Couldn't find any elements connected to master node");
 
   const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
