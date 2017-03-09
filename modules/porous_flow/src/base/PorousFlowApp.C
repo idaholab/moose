@@ -63,6 +63,8 @@
 #include "PorousFlowDiffusivityMillingtonQuirk.h"
 #include "PorousFlowSingleComponentFluid.h"
 #include "PorousFlowNearestQp.h"
+#include "PorousFlowConstantBiotModulus.h"
+#include "PorousFlowConstantThermalExpansionCoefficient.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
@@ -81,6 +83,7 @@
 #include "PorousFlowFullySaturatedDarcyBase.h"
 #include "PorousFlowFullySaturatedDarcyFlow.h"
 #include "PorousFlowFullySaturatedHeatAdvection.h"
+#include "PorousFlowFullySaturatedMassTimeDerivative.h"
 
 // BoundaryConditions
 #include "PorousFlowSink.h"
@@ -192,6 +195,9 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowDiffusivityMillingtonQuirk);
   registerMaterial(PorousFlowSingleComponentFluid);
   registerMaterial(PorousFlowNearestQp);
+  registerMaterial(PorousFlowConstantBiotModulus);
+  registerMaterial(PorousFlowConstantThermalExpansionCoefficient);
+
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);
@@ -210,6 +216,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerKernel(PorousFlowFullySaturatedDarcyBase);
   registerKernel(PorousFlowFullySaturatedDarcyFlow);
   registerKernel(PorousFlowFullySaturatedHeatAdvection);
+  registerKernel(PorousFlowFullySaturatedMassTimeDerivative);
 
   // BoundaryConditions
   registerBoundaryCondition(PorousFlowSink);
