@@ -360,6 +360,8 @@ template <typename T>
 MaterialProperty<T> &
 Material::declarePropertyOld(const std::string & prop_name)
 {
+  mooseDoOnce(mooseDeprecated("declarePropertyOld is deprecated and not needed anymore.\nUse "
+                              "getPropertyOld (only) if a reference is required in this class."));
   registerPropName(prop_name, false, Material::OLD);
   return _material_data->declarePropertyOld<T>(prop_name);
 }
@@ -368,6 +370,8 @@ template <typename T>
 MaterialProperty<T> &
 Material::declarePropertyOlder(const std::string & prop_name)
 {
+  mooseDoOnce(mooseDeprecated("declarePropertyOlder is deprecated and not needed anymore.  Use "
+                              "getPropertyOlder (only) if a reference is required in this class."));
   registerPropName(prop_name, false, Material::OLDER);
   return _material_data->declarePropertyOlder<T>(prop_name);
 }
