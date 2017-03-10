@@ -227,6 +227,14 @@ RankTwoTensor::column(const unsigned int c) const
   return result;
 }
 
+RankTwoTensor
+RankTwoTensor::rotated(const RealTensorValue & R) const
+{
+  RankTwoTensor result(*this);
+  result.rotate(R);
+  return result;
+}
+
 void
 RankTwoTensor::rotate(const RealTensorValue & R)
 {

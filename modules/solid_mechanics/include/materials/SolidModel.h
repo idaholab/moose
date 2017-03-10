@@ -105,32 +105,31 @@ protected:
   MaterialProperty<SymmTensor> & _stress;
 
 private:
-  MaterialProperty<SymmTensor> & _stress_old_prop;
+  const MaterialProperty<SymmTensor> & _stress_old_prop;
 
 protected:
   SymmTensor _stress_old;
 
   MaterialProperty<SymmTensor> & _total_strain;
-  MaterialProperty<SymmTensor> & _total_strain_old;
+  const MaterialProperty<SymmTensor> & _total_strain_old;
 
   MaterialProperty<SymmTensor> & _elastic_strain;
-  MaterialProperty<SymmTensor> & _elastic_strain_old;
+  const MaterialProperty<SymmTensor> & _elastic_strain_old;
 
   MaterialProperty<RealVectorValue> * _crack_flags;
-  MaterialProperty<RealVectorValue> * _crack_flags_old;
+  const MaterialProperty<RealVectorValue> * _crack_flags_old;
   RealVectorValue _crack_flags_local;
   MaterialProperty<RealVectorValue> * _crack_count;
-  MaterialProperty<RealVectorValue> * _crack_count_old;
+  const MaterialProperty<RealVectorValue> * _crack_count_old;
   MaterialProperty<ColumnMajorMatrix> * _crack_rotation;
-  MaterialProperty<ColumnMajorMatrix> * _crack_rotation_old;
+  const MaterialProperty<ColumnMajorMatrix> * _crack_rotation_old;
   MaterialProperty<RealVectorValue> * _crack_strain;
-  MaterialProperty<RealVectorValue> * _crack_strain_old;
+  const MaterialProperty<RealVectorValue> * _crack_strain_old;
   MaterialProperty<RealVectorValue> * _crack_max_strain;
-  MaterialProperty<RealVectorValue> * _crack_max_strain_old;
+  const MaterialProperty<RealVectorValue> * _crack_max_strain_old;
   ColumnMajorMatrix _principal_strain;
 
   MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
-  MaterialProperty<SymmElasticityTensor> & _elasticity_tensor_old;
   MaterialProperty<SymmElasticityTensor> & _Jacobian_mult;
 
   // Accumulate derivatives of strain tensors with respect to Temperature into this
@@ -148,7 +147,7 @@ protected:
 
   // These are used in calculation of the J integral
   MaterialProperty<Real> * _SED;
-  MaterialProperty<Real> * _SED_old;
+  const MaterialProperty<Real> * _SED_old;
   MaterialProperty<ColumnMajorMatrix> * _Eshelby_tensor;
   MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
 
@@ -228,10 +227,10 @@ protected:
   }
 
   template <typename T>
-  MaterialProperty<T> & createPropertyOld(const std::string & prop_name)
+  const MaterialProperty<T> & getPropertyOld(const std::string & prop_name)
   {
     std::string name(prop_name + _appended_property_name);
-    return declarePropertyOld<T>(name);
+    return getMaterialPropertyOld<T>(name);
   }
 
   virtual void checkElasticConstants();

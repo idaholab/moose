@@ -33,7 +33,7 @@ ComputeEigenstrainBase::ComputeEigenstrainBase(const InputParameters & parameter
     _eigenstrain_name(_base_name + getParam<std::string>("eigenstrain_name")),
     _incremental_form(getParam<bool>("incremental_form")),
     _eigenstrain(declareProperty<RankTwoTensor>(_eigenstrain_name)),
-    _eigenstrain_old(_incremental_form ? &declarePropertyOld<RankTwoTensor>(_eigenstrain_name)
+    _eigenstrain_old(_incremental_form ? &getMaterialPropertyOld<RankTwoTensor>(_eigenstrain_name)
                                        : NULL),
     _step_zero(declareRestartableData<bool>("step_zero", true))
 {

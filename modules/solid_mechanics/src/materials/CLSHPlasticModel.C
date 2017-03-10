@@ -29,9 +29,9 @@ CLSHPlasticModel::CLSHPlasticModel(const InputParameters & parameters)
     _c_alpha(parameters.get<Real>("c_alpha")),
     _c_beta(parameters.get<Real>("c_beta")),
     _hardening_variable(declareProperty<Real>("hardening_variable")),
-    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
+    _hardening_variable_old(getMaterialPropertyOld<Real>("hardening_variable")),
     _plastic_strain(declareProperty<SymmTensor>("plastic_strain")),
-    _plastic_strain_old(declarePropertyOld<SymmTensor>("plastic_strain"))
+    _plastic_strain_old(getMaterialPropertyOld<SymmTensor>("plastic_strain"))
 {
 }
 
@@ -39,7 +39,6 @@ void
 CLSHPlasticModel::initQpStatefulProperties()
 {
   _hardening_variable[_qp] = 0;
-  _hardening_variable_old[_qp] = 0;
   ReturnMappingModel::initQpStatefulProperties();
 }
 

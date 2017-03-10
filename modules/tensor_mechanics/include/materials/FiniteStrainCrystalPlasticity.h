@@ -298,15 +298,15 @@ protected:
   MooseEnum _lsrch_method;
 
   MaterialProperty<RankTwoTensor> & _fp;
-  MaterialProperty<RankTwoTensor> & _fp_old;
+  const MaterialProperty<RankTwoTensor> & _fp_old;
   MaterialProperty<RankTwoTensor> & _pk2;
-  MaterialProperty<RankTwoTensor> & _pk2_old;
+  const MaterialProperty<RankTwoTensor> & _pk2_old;
   MaterialProperty<RankTwoTensor> & _lag_e;
-  MaterialProperty<RankTwoTensor> & _lag_e_old;
+  const MaterialProperty<RankTwoTensor> & _lag_e_old;
   MaterialProperty<std::vector<Real>> & _gss;
-  MaterialProperty<std::vector<Real>> & _gss_old;
+  const MaterialProperty<std::vector<Real>> & _gss_old;
   MaterialProperty<Real> & _acc_slip;
-  MaterialProperty<Real> & _acc_slip_old;
+  const MaterialProperty<Real> & _acc_slip_old;
   MaterialProperty<RankTwoTensor> & _update_rot;
 
   const MaterialProperty<RankTwoTensor> & _deformation_gradient;

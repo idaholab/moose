@@ -35,7 +35,7 @@ PowerLawCreepModel::PowerLawCreepModel(const InputParameters & parameters)
     _gas_constant(parameters.get<Real>("gas_constant")),
     _start_time(getParam<Real>("start_time")),
     _creep_strain(declareProperty<SymmTensor>("creep_strain")),
-    _creep_strain_old(declarePropertyOld<SymmTensor>("creep_strain"))
+    _creep_strain_old(getMaterialPropertyOld<SymmTensor>("creep_strain"))
 {
 }
 

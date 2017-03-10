@@ -81,23 +81,23 @@ protected:
   void computeStress();
 
   MaterialProperty<std::vector<Real>> & _state_var;
-  MaterialProperty<std::vector<Real>> & _state_var_old;
+  const MaterialProperty<std::vector<Real>> & _state_var_old;
   MaterialProperty<SymmTensor> & _trial_stress;
-  MaterialProperty<SymmTensor> & _trial_stress_old;
+  const MaterialProperty<SymmTensor> & _trial_stress_old;
   MaterialProperty<SymmTensor> & _dev_trial_stress;
-  MaterialProperty<SymmTensor> & _dev_trial_stress_old;
+  const MaterialProperty<SymmTensor> & _dev_trial_stress_old;
   MaterialProperty<Real> & _ets;
-  MaterialProperty<Real> & _ets_old;
+  const MaterialProperty<Real> & _ets_old;
   MaterialProperty<SymmTensor> & _stress;
-  MaterialProperty<SymmTensor> & _stress_old;
+  const MaterialProperty<SymmTensor> & _stress_old;
   MaterialProperty<Real> & _creep_inc;
-  MaterialProperty<Real> & _creep_inc_old;
+  const MaterialProperty<Real> & _creep_inc_old;
   MaterialProperty<Real> & _total_creep;
-  MaterialProperty<Real> & _total_creep_old;
+  const MaterialProperty<Real> & _total_creep_old;
   MaterialProperty<Real> & _swell_inc;
-  MaterialProperty<Real> & _swell_inc_old;
+  const MaterialProperty<Real> & _swell_inc_old;
   MaterialProperty<Real> & _total_swell;
-  MaterialProperty<Real> & _total_swell_old;
+  const MaterialProperty<Real> & _total_swell_old;
 };
 
 #endif // ABAQUSCREEPMATERIAL_H

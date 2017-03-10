@@ -28,7 +28,6 @@ protected:
 
   const Real _orig_density;
   MaterialProperty<Real> & _density;
-  MaterialProperty<Real> & _density_old;
 };
 
 template <>

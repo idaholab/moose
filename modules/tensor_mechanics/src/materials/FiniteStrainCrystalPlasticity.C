@@ -120,19 +120,20 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParamete
     _lsrch_max_iter(getParam<unsigned int>("line_search_maxiter")),
     _lsrch_method(getParam<MooseEnum>("line_search_method")),
     _fp(declareProperty<RankTwoTensor>("fp")), // Plastic deformation gradient
-    _fp_old(declarePropertyOld<RankTwoTensor>(
+    _fp_old(getMaterialPropertyOld<RankTwoTensor>(
         "fp")), // Plastic deformation gradient of previous increment
     _pk2(declareProperty<RankTwoTensor>("pk2")), // 2nd Piola Kirchoff Stress
-    _pk2_old(declarePropertyOld<RankTwoTensor>(
+    _pk2_old(getMaterialPropertyOld<RankTwoTensor>(
         "pk2")), // 2nd Piola Kirchoff Stress of previous increment
     _lag_e(declareProperty<RankTwoTensor>("lage")), // Lagrangian strain
     _lag_e_old(
-        declarePropertyOld<RankTwoTensor>("lage")),  // Lagrangian strain of previous increment
-    _gss(declareProperty<std::vector<Real>>("gss")), // Slip system resistances
-    _gss_old(declarePropertyOld<std::vector<Real>>(
+        getMaterialPropertyOld<RankTwoTensor>("lage")), // Lagrangian strain of previous increment
+    _gss(declareProperty<std::vector<Real>>("gss")),    // Slip system resistances
+    _gss_old(getMaterialPropertyOld<std::vector<Real>>(
         "gss")),                                  // Slip system resistances of previous increment
     _acc_slip(declareProperty<Real>("acc_slip")), // Accumulated slip
-    _acc_slip_old(declarePropertyOld<Real>("acc_slip")), // Accumulated alip of previous increment
+    _acc_slip_old(
+        getMaterialPropertyOld<Real>("acc_slip")), // Accumulated alip of previous increment
     _update_rot(declareProperty<RankTwoTensor>(
         "update_rot")), // Rotation tensor considering material rotation and crystal orientation
     _deformation_gradient(getMaterialProperty<RankTwoTensor>("deformation_gradient")),
@@ -155,7 +156,6 @@ FiniteStrainCrystalPlasticity::FiniteStrainCrystalPlasticity(const InputParamete
     _slip_sys_props.resize(_nss * _num_slip_sys_props);
 
   _pk2_tmp.zero();
-  _pk2_tmp_old.zero();
   _delta_dfgrd.zero();
 
   _first_step_iter = false;
@@ -225,10 +225,9 @@ void
 FiniteStrainCrystalPlasticity::assignSlipSysRes()
 {
   _gss[_qp].resize(_nss);
-  _gss_old[_qp].resize(_nss);
 
   for (unsigned int i = 0; i < _nss; ++i)
-    _gss[_qp][i] = _gss_old[_qp][i] = _slip_sys_props(i);
+    _gss[_qp][i] = _slip_sys_props(i);
 }
 
 // Read initial slip system resistances  from .txt file. See test.
@@ -236,7 +235,6 @@ void
 FiniteStrainCrystalPlasticity::readFileInitSlipSysRes()
 {
   _gss[_qp].resize(_nss);
-  _gss_old[_qp].resize(_nss);
 
   MooseUtils::checkFileReadable(_slip_sys_res_prop_file_name);
 
@@ -259,7 +257,6 @@ FiniteStrainCrystalPlasticity::getInitSlipSysRes()
                "Specify input in .i file or in slip_sys_res_prop_file or in slip_sys_file");
 
   _gss[_qp].resize(_nss, 0.0);
-  _gss_old[_qp].resize(_nss, 0.0);
 
   unsigned int num_data_grp = 3; // Number of data per group e.g. start_slip_sys, end_slip_sys,
                                  // value

@@ -23,7 +23,7 @@ CappedWeakInclinedPlaneStressUpdate::CappedWeakInclinedPlaneStressUpdate(
   : CappedWeakPlaneStressUpdate(parameters),
     _n_input(getParam<RealVectorValue>("normal_vector")),
     _n(declareProperty<RealVectorValue>("weak_plane_normal")),
-    _n_old(declarePropertyOld<RealVectorValue>("weak_plane_normal")),
+    _n_old(getMaterialProperty<RealVectorValue>("weak_plane_normal")),
     _rot_n_to_z(RealTensorValue()),
     _rot_z_to_n(RealTensorValue()),
     _rotated_trial(RankTwoTensor()),

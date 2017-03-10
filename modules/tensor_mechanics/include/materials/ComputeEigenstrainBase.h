@@ -39,7 +39,7 @@ protected:
   MaterialProperty<RankTwoTensor> & _eigenstrain;
 
   ///Stores the total eigenstrain in the previous step (only for incremental form)
-  MaterialProperty<RankTwoTensor> * _eigenstrain_old;
+  const MaterialProperty<RankTwoTensor> * _eigenstrain_old;
 
   /**
    * Helper function for models that compute the eigenstrain based on a volumetric

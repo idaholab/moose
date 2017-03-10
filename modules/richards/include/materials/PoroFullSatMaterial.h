@@ -59,9 +59,6 @@ protected:
   /// volumetric strain = strain_ii
   MaterialProperty<Real> & _vol_strain;
 
-  /// old value of volumetric strain
-  MaterialProperty<Real> & _vol_strain_old;
-
   /// Biot coefficient
   MaterialProperty<Real> & _biot_coefficient;
 

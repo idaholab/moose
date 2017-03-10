@@ -24,11 +24,6 @@ ComputeCosseratStressBase::ComputeCosseratStressBase(const InputParameters & par
     _stress_couple(declareProperty<RankTwoTensor>("couple_stress")),
     _Jacobian_mult_couple(declareProperty<RankFourTensor>("couple_Jacobian_mult"))
 {
-  if (_store_stress_old)
-  {
-    declarePropertyOld<RankTwoTensor>("couple_stress");
-    declarePropertyOlder<RankTwoTensor>("couple_stress");
-  }
 }
 
 void

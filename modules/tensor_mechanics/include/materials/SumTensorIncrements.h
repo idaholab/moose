@@ -29,7 +29,7 @@ protected:
   unsigned int _num_property;
 
   MaterialProperty<RankTwoTensor> & _tensor;
-  MaterialProperty<RankTwoTensor> & _tensor_old;
+  const MaterialProperty<RankTwoTensor> & _tensor_old;
   MaterialProperty<RankTwoTensor> & _tensor_increment;
 
   std::vector<const MaterialProperty<RankTwoTensor> *> _coupled_tensor_increments;
