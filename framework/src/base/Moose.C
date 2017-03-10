@@ -858,6 +858,7 @@ addActionTypes(Syntax & syntax)
    * if those "Action"s  don't normally pick up parameters from the input file.
    */
 
+  // clang-format off
   /**************************/
   /**** Register Actions ****/
   /**************************/
@@ -918,6 +919,8 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_control",                  Control,                false);
   registerMooseObjectTask("add_partitioner",              MoosePartitioner,       false);
+
+  // clang-format on
 
   registerTask("dynamic_object_registration", false);
   registerTask("common_output", true);
