@@ -194,6 +194,7 @@
 #include "TimestepSize.h"
 #include "RunTime.h"
 #include "PerformanceData.h"
+#include "MemoryUsage.h"
 #include "NumElems.h"
 #include "NumNodes.h"
 #include "NumNonlinearIterations.h"
@@ -632,6 +633,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(TimestepSize);
   registerPostprocessor(RunTime);
   registerPostprocessor(PerformanceData);
+  registerPostprocessor(MemoryUsage);
   registerPostprocessor(NumElems);
   registerPostprocessor(NumNodes);
   registerPostprocessor(NumNonlinearIterations);
