@@ -12,8 +12,8 @@ InputParameters validParams<GeometricalComponent>()
   params.addParam<RealVectorValue>("offset", RealVectorValue(), "Offset of the origin for mesh generation");
   params.addRequiredParam<RealVectorValue>("orientation", "Orientation vector of the pipe");
   params.addParam<Real>("rotation", 0., "Rotation of the component (in degrees)");
-  params.addParam<std::vector<Real> >("length", "The lengths of the subsections of the geometric component along the main axis");
-  params.addParam<std::vector<unsigned int> >("n_elems", "The number of elements in each subsection along the main axis");
+  params.addRequiredParam<std::vector<Real> >("length", "The lengths of the subsections of the geometric component along the main axis");
+  params.addRequiredParam<std::vector<unsigned int> >("n_elems", "The number of elements in each subsection along the main axis");
 
   return params;
 }
@@ -48,16 +48,16 @@ GeometricalComponent::validateNSectionsConsistent(int n_lengths, int n_n_elems)
 
   if (!valid_inputs)
   {
-    std::string error = name() + ": Invalid input specification for GeometricalComponent. ";
+    std::string error = name() + ": Invalid input specification for GeometricalComponent:";
 
     if (!agreeing_inputs)
-      error += "The size of n_elems and length are not in agreement. ";
+      error += "\n  * The number of entries in the parameter 'length' does not equal the number of entries in the parameter 'n_elems'.";
 
     if (!specified_lengths)
-      error += "The array for length is not specified. ";
+      error += "\n  * There are zero entries for the parameter 'length'.";
 
     if (!specified_n_elems)
-      error += "The n_elems are not specified. ";
+      error += "\n  * There are zero entries for the parameter 'n_elems'.";
 
     mooseError(error);
   }
