@@ -1,0 +1,6 @@
+[Tests]
+  [./ParamsByType]
+    type = PythonUnitTest
+    input = test_ParamsByType.py
+  [../]
+[]

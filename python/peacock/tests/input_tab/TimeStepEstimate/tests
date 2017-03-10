@@ -1,0 +1,6 @@
+[Tests]
+  [./TimeStepEstimate]
+    type = PythonUnitTest
+    input = test_TimeStepEstimate.py
+  [../]
+[]

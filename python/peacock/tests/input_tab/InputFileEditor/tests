@@ -1,0 +1,6 @@
+[Tests]
+  [./InputFileEditor]
+    type = PythonUnitTest
+    input = test_InputFileEditor.py
+  [../]
+[]

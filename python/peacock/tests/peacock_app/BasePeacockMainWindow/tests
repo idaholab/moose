@@ -1,0 +1,6 @@
+[Tests]
+  [./BasePeacockMainWindow]
+    type = PythonUnitTest
+    input = test_BasePeacockMainWindow.py
+  [../]
+[]

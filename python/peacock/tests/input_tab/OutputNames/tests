@@ -1,0 +1,6 @@
+[Tests]
+  [./Outputnames]
+    type = PythonUnitTest
+    input = test_OutputNames.py
+  [../]
+[]

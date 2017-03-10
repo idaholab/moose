@@ -1,0 +1,7 @@
+[Tests]
+  [./InputFileEditorWithMesh]
+    type = PythonUnitTest
+    input = test_InputFileEditorWithMesh.py
+    separate = True
+  [../]
+[]

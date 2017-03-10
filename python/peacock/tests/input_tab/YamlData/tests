@@ -1,0 +1,6 @@
+[Tests]
+  [./YamlData]
+    type = PythonUnitTest
+    input = test_YamlData.py
+  [../]
+[]

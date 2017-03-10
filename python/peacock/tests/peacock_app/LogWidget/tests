@@ -1,0 +1,6 @@
+[Tests]
+  [./LogWidget]
+    type = PythonUnitTest
+    input = test_LogWidget.py
+  [../]
+[]

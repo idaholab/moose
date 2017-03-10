@@ -1,0 +1,6 @@
+[Tests]
+  [./ConsoleOutputViewerPlugin]
+    type = PythonUnitTest
+    input= test_ConsoleOutputViewerPlugin.py
+  [../]
+[]

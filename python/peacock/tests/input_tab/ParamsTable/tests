@@ -1,0 +1,6 @@
+[Tests]
+  [./ParamsTable]
+    type = PythonUnitTest
+    input = test_ParamsTable.py
+  [../]
+[]

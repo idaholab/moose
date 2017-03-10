@@ -1,0 +1,6 @@
+[Tests]
+  [./CheckVectorPostprocessor]
+    type = PythonUnitTest
+    input = test_check_vectorpostprocessor.py
+  [../]
+[]

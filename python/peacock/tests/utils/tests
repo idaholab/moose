@@ -1,0 +1,30 @@
+[Tests]
+  [./ExeLauncher]
+    type = PythonUnitTest
+    input = test_ExeLauncher.py
+  [../]
+  [./RecentlyUsedMenu]
+    type = PythonUnitTest
+    input = test_RecentlyUsedMenu.py
+  [../]
+  [./ExeFinder]
+    type = PythonUnitTest
+    input = test_ExeFinder.py
+  [../]
+  [./FileCache]
+    type = PythonUnitTest
+    input = test_FileCache.py
+  [../]
+  [./TerminalUtils]
+    type = PythonUnitTest
+    input = test_TerminalUtils.py
+  [../]
+  [./Widgetutils]
+    type = PythonUnitTest
+    input = test_WidgetUtils.py
+  [../]
+  [./loadstore]
+    type = PythonUnitTest
+    input = test_StoreLoadWidgetState.py
+  [../]
+[]

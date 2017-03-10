@@ -1,0 +1,6 @@
+[Tests]
+  [./SettingsWidget]
+    type = PythonUnitTest
+    input = test_SettingsWidget.py
+  [../]
+[]

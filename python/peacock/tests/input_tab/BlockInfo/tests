@@ -1,0 +1,6 @@
+[Tests]
+  [./BlockInfo]
+    type = PythonUnitTest
+    input = test_BlockInfo.py
+  [../]
+[]

@@ -1,0 +1,6 @@
+[Tests]
+  [./ExecuteSettings]
+    type = PythonUnitTest
+    input = test_ExecuteSettings.py
+  [../]
+[]

@@ -1,0 +1,6 @@
+[Tests]
+  [./CommentEditor]
+    type = PythonUnitTest
+    input = test_CommentEditor.py
+  [../]
+[]

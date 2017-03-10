@@ -1,0 +1,6 @@
+[Tests]
+  [./CheckMesh]
+    type = PythonUnitTest
+    input = test_check_mesh.py
+  [../]
+[]
