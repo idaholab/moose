@@ -2,6 +2,9 @@
   type = FileMesh
   file = rectangle.e
   dim = 2
+  # This test can only be run with renumering disabled, so the
+  # NodalVariableValue postprocessor's node id is well-defined.
+  allow_renumbering = false
 []
 
 [Variables]
