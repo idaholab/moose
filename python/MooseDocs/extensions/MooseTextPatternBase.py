@@ -31,7 +31,7 @@ class MooseTextPatternBase(MooseCommonExtension, Pattern):
         self._settings['repo_link'] = True
         self._settings['label'] = True
         self._settings['language'] = 'text'
-        self._settings['strip-extra-newlines'] = False
+        self._settings['strip-extra-newlines'] = True
         self._settings['prefix'] = ''
         self._settings['suffix'] = ''
         self._settings['indent'] = 0
