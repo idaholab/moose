@@ -133,3 +133,16 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
         self.assertRegexpMatches(e.output, 'test_harness\.deleted.*?deleted \(test deleted test\)')
+
+
+    def testDislpayRequired(self):
+        """
+        Test that the display required is working.
+        """
+        display = os.getenv('DISPLAY', None)
+        if display:
+            os.unsetenv('DISPLAY')
+
+        output = self.runTests('-i', 'display_required')
+        self.assertRegexpMatches(output, 'test_harness\.display_required.*?skipped\s\(NO DISPLAY\)')
+        os.putenv('DISPLAY', display)
