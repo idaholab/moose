@@ -1,8 +1,7 @@
 [Mesh]
   file = square-2x2-nodeids.e
-  # This test uses a NodalVariableValue postprocessor, which
-  # only works with ReplicatedMesh
-  parallel_type = replicated
+  # NodalVariableValue is not safe on renumbered meshes
+  allow_renumbering = false
 []
 
 [Variables]

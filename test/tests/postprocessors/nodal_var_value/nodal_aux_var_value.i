@@ -8,11 +8,9 @@
   ymin = 0
   ymax = 1
   elem_type = QUAD4
-  # This test can only be run with ReplicatedMesh since, in parallel with
-  # DistributedMesh, the nodes get renumbered and thus the
-  # NodalVariableValue postprocessor's output is necessarily
-  # different.
-  parallel_type = replicated
+  # This test can only be run with renumering disabled, so the
+  # NodalVariableValue postprocessor's node id is well-defined.
+  allow_renumbering = false
 []
 
 [Variables]
