@@ -1,0 +1,6 @@
+[Tests]
+  [./test_harness]
+    type = PythonUnitTest
+    input = test_TestHarness.py
+  [../]
+[]
