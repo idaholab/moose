@@ -88,10 +88,10 @@ You can include complete files from the repository using the `!text` syntax. For
 includes the complete code as shown.
 
 ```markdown
-!text framework/src/kernels/Diffusion.C max-height=200px strip-extra-newlines=True overflow-y=scroll
+!text framework/src/kernels/Diffusion.C max-height=200px overflow-y=scroll
 ```
 
-!text framework/src/kernels/Diffusion.C max-height=200px strip-extra-newlines=True overflow-y=scroll
+!text framework/src/kernels/Diffusion.C max-height=200px overflow-y=scroll
 
 ### Single Line Match
 It is possible to show a single line of a file by a snippet that allows the line to be located within
@@ -153,7 +153,7 @@ The following options may be passed to control how the output is formatted.
 | label                | True    | Include a label with the filename before the code content block. |
 | overflow-y           | Scroll  | The action to take when the text overflow the html container (see [overflow-y](http://www.w3schools.com/cssref/css3_pr_overflow-y.asp)). |
 | max-height           | 500px   | The maximum height of the code window (see [max-height](http://www.w3schools.com/cssref/pr_dim_max-height.asp)). |
-| strip-extra-newlines | False   | Remove excessive newlines from the included code. |
+| strip-extra-newlines | True    | Remove excessive newlines from the included code. |
 
 ---
 

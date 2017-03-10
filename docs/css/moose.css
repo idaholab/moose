@@ -6,6 +6,11 @@ html {
     text-align: justify;
 }
 
+/* make inline code snippets have a non-white background */
+code {
+  background: #f5f2f0;
+}
+
 html, body {
   height: 100%;
 }
