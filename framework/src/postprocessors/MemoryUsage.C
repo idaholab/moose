@@ -23,21 +23,25 @@
 #include <mach/mach.h>
 #endif
 
-template<>
-InputParameters validParams<MemoryUsage>()
+template <>
+InputParameters
+validParams<MemoryUsage>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addClassDescription("Memory usage statistics for the running simulation.");
   MooseEnum mem_type("virtual_memory physical_memory page_faults", "virtual_memory");
   params.addParam<MooseEnum>("mem_type", mem_type, "Memory metric to report.");
   MooseEnum value_type("total average max_process min_processs", "total");
-  params.addParam<MooseEnum>("value_type", value_type, "Aggregation method to apply to the requested memory metric.");
-  params.addParam<bool>("report_peak_value", true, "If the postprocessor is executed more than one during a time step, report the aggregated peak value.");
+  params.addParam<MooseEnum>("value_type", value_type,
+                             "Aggregation method to apply to the requested memory metric.");
+  params.addParam<bool>("report_peak_value", true, "If the postprocessor is executed more than one "
+                                                   "during a time step, report the aggregated peak "
+                                                   "value.");
   return params;
 }
 
-MemoryUsage::MemoryUsage(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+MemoryUsage::MemoryUsage(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _mem_type(getParam<MooseEnum>("mem_type").getEnum<MemType>()),
     _value_type(getParam<MooseEnum>("value_type").getEnum<ValueType>()),
     _report_peak_value(getParam<bool>("report_peak_value"))
@@ -59,6 +63,15 @@ MemoryUsage::initialize()
 void
 MemoryUsage::execute()
 {
+  // data entries are numbered according to their position in /proc/self/stat
+  enum StatItem
+  {
+    index_page_faults = 8,
+    index_virtual_size = 19,
+    index_resident_size = 20,
+    num = 21 // total number of entries read
+  };
+
   // inspect /proc
   std::ifstream stat_stream("/proc/self/stat", std::ios_base::in);
   std::array<unsigned long, 21> val;
@@ -67,25 +80,26 @@ MemoryUsage::execute()
     // if the proc filesystem file is found (Linux) read its contents
     std::string pid, comm, state;
     stat_stream >> pid >> comm >> state;
-    for (unsigned int i = 0; i < 21; ++i)
+    for (unsigned int i = 0; i < num; ++i)
       stat_stream >> val[i];
 
     // resident size is reported as number of pages in /proc
-    val[20] *= sysconf(_SC_PAGE_SIZE);
+    val[index_resident_size] *= sysconf(_SC_PAGE_SIZE);
   }
   else
   {
     // set all data entries to zero (if all else should fail)
     val.fill(0);
 
-    // obtain mach task info on mac OS
+// obtain mach task info on mac OS
 #ifdef __APPLE__
     struct task_basic_info t_info;
     mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
-    if (KERN_SUCCESS == task_info(mach_task_self(), TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&t_info),  &t_info_count))
+    if (KERN_SUCCESS == task_info(mach_task_self(), TASK_BASIC_INFO,
+                                  reinterpret_cast<task_info_t>(&t_info), &t_info_count))
     {
-      val[19] = t_info.virtual_size;
-      val[20] = t_info.resident_size;
+      val[index_virtual_size] = t_info.virtual_size;
+      val[index_resident_size] = t_info.resident_size;
     }
 #endif
   }
@@ -94,16 +108,16 @@ MemoryUsage::execute()
   switch (_mem_type)
   {
     case MemType::virtual_memory:
-      _value = val[19];
+      _value = val[index_virtual_size];
       break;
 
     case MemType::physical_memory:
-      _value = val[20];
+      _value = val[index_resident_size];
       break;
 
     case MemType::page_faults:
       // major page faults are currently only reported on Linux systems
-      _value = val[8];
+      _value = val[index_page_faults];
       break;
   }
 }
@@ -141,5 +155,3 @@ MemoryUsage::getValue()
 {
   return _report_peak_value ? _peak_value : _value;
 }
-
-#undef RUSAGE_AVAILABLE

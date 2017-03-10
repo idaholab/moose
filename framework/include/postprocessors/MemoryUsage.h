@@ -19,7 +19,7 @@
 
 class MemoryUsage;
 
-template<>
+template <>
 InputParameters validParams<MemoryUsage>();
 
 /**
@@ -38,13 +38,15 @@ public:
   virtual PostprocessorValue getValue() override;
 
 protected:
-  enum class MemType {
+  enum class MemType
+  {
     virtual_memory,
     physical_memory,
     page_faults
   } _mem_type;
 
-  enum class ValueType {
+  enum class ValueType
+  {
     total,
     average,
     max_process,
