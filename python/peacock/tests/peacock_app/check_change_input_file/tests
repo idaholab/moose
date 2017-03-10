@@ -1,0 +1,6 @@
+[Tests]
+  [./change_input]
+    type = PythonUnitTest
+    input = test_ChangeInputFile.py
+  [../]
+[]

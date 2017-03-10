@@ -1,0 +1,72 @@
+[Tests]
+  [./VTKWindowPlugin]
+    type = PythonUnitTest
+    input = test_VTKWindowPlugin.py
+    separate = True
+  [../]
+  [./FilePlugin]
+    type = PythonUnitTest
+    input = test_FilePlugin.py
+    separate = True
+  [../]
+  [./GoldDiffPlugin]
+    type = PythonUnitTest
+    input = test_GoldDiffPlugin.py
+    separate = True
+  [../]
+  [./VariablePlugin]
+    type = PythonUnitTest
+    input = test_VariablePlugin.py
+    separate = True
+  [../]
+  [./BackgroundPlugin]
+    type = PythonUnitTest
+    input = test_BackgroundPlugin.py
+    separate = True
+  [../]
+  [./ClipPlugin]
+    type = PythonUnitTest
+    input = test_ClipPlugin.py
+    separate = True
+  [../]
+  [./ContourPlugin]
+    type = PythonUnitTest
+    input = test_ContourPlugin.py
+    separate = True
+  [../]
+  [./BlockPlugin]
+    type = PythonUnitTest
+    input = test_BlockPlugin.py
+    separate = True
+  [../]
+  [./MeshPlugin]
+    type = PythonUnitTest
+    input = test_MeshPlugin.py
+    separate = True
+  [../]
+  [./MediaControlPlugin]
+    type = PythonUnitTest
+    input = test_MediaControlPlugin.py
+    separate = True
+  [../]
+  [./CameraPlugin]
+    type = PythonUnitTest
+    input = test_CameraPlugin.py
+    separate = True
+  [../]
+  [./OutputPlugin]
+    type = PythonUnitTest
+    input = test_OutputPlugin.py
+    separate = True
+  [../]
+  [./ExodusPluginManager]
+    type = PythonUnitTest
+    input = test_ExodusPluginManager.py
+    separate = True
+  [../]
+  [./ExodusViewer]
+    type = PythonUnitTest
+    input = test_ExodusViewer.py
+    separate = True
+  [../]
+[]

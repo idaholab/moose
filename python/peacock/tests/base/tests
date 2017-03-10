@@ -1,0 +1,6 @@
+[Tests]
+  [./PluginManager]
+     type = RunApp
+     command = test_PluginManager.py
+  [../]
+[]

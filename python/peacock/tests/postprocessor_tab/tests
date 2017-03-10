@@ -1,0 +1,66 @@
+[Tests]
+  [./FigurePlugin]
+    type = PythonUnitTest
+    input = test_FigurePlugin.py
+  [../]
+
+  [./LineSettingsWidget]
+    type = PythonUnitTest
+    input = test_LineSettingsWidget.py
+  [../]
+
+  [./LineGroupWidget_Postprocessor]
+    type = PythonUnitTest
+    input = test_LineGroupWidgetPostprocessor.py
+  [../]
+
+  [./LineGroupWidget_VectorPostprocessor]
+    type = PythonUnitTest
+    input = test_LineGroupWidgetVectorPostprocessor.py
+  [../]
+
+  [./PostprocessorSelectPlugin_Postprocessor]
+    type = PythonUnitTest
+    input = test_PostprocessorSelectPlugin.py
+  [../]
+
+  [./PostprocessorSelectPlugin_VectorPostprocessor]
+    type = PythonUnitTest
+    input = test_VectorPostprocessorSelectPlugin.py
+  [../]
+
+  [./AxesSettingsPlugin]
+    type = PythonUnitTest
+    input = test_AxesSettingsPlugin.py
+  [../]
+
+  [./AxisTabsPlugin]
+    type = PythonUnitTest
+    input = test_AxisTabsPlugin.py
+  [../]
+
+  [./MediaControlPlugin]
+    type = PythonUnitTest
+    input = test_MediaControlPlugin.py
+  [../]
+
+  [./PostprocessorPluginManager]
+    type = PythonUnitTest
+    input = test_PostprocessorPluginManager.py
+  [../]
+
+  [./PostprocessorViewer_Postprocessor]
+    type = PythonUnitTest
+    input = test_PostprocessorViewer.py
+  [../]
+
+  [./PostprocessorViewer_VectorPostprocessor]
+    type = PythonUnitTest
+    input = test_VectorPostprocessorViewer.py
+  [../]
+
+  [./Output]
+    type = PythonUnitTest
+    input = test_OutputPlugin.py
+  [../]
+[]
