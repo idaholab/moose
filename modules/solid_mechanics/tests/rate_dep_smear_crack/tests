@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'crack_one_elem.i'
     exodiff = 'crack_one_elem_out.e'
-    abs_zero = 1e-08
+    custom_cmp = 'crack_one_elem.cmp'
     scale_refine = 1
     allow_warnings = true
   [../]
