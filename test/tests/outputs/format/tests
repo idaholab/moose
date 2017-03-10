@@ -108,5 +108,6 @@
   [./json]
     type = 'PythonUnitTest'
     input = 'test_json.py'
+    recover = false
   [../]
 []
