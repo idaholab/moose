@@ -14,6 +14,9 @@ SpacesInSquareBrackets: false
 BreakBeforeBraces: Allman
 PointerAlignment: Middle
 
+BinPackParameters: false
+BinPackArguments: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
 AllowShortBlocksOnASingleLine: false
 AllowShortFunctionsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: false
@@ -21,7 +24,6 @@ AllowShortLoopsOnASingleLine: false
 
 SortIncludes: false
 IndentCaseLabels: true
-ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 2
 AlwaysBreakAfterDefinitionReturnType: TopLevel
 AlwaysBreakTemplateDeclarations: true
