@@ -28,8 +28,6 @@ class TestHarness:
     def buildAndRun(argv, app_name, moose_dir):
         if '--store-timing' in argv:
             harness = TestTimer(argv, app_name, moose_dir)
-        elif '--testharness-unittest' in argv:
-            harness = TestHarnessTester(argv, app_name, moose_dir)
         else:
             harness = TestHarness(argv, app_name, moose_dir)
 
@@ -1060,20 +1058,3 @@ class TestTimer(TestHarness):
         # Insert the data into the database
         cr.executemany('insert into timing values (?,?,?,?,?,?,?)', data)
         con.commit()
-
-class TestHarnessTester(object):
-    """
-    Class for running TestHarness unit tests.
-    """
-    def __init__(self, argv, *args):
-        self._argv = argv
-
-    def findAndRunTests(self):
-        """
-        Execute the unittests for the TestHarness.
-        """
-        location = os.path.join(os.path.dirname(__file__), 'unit_tests')
-        loader = unittest.TestLoader()
-        suite = loader.discover(location)#, pattern)
-        runner = unittest.TextTestRunner(verbosity=2)
-        self.error_code = int(not runner.run(suite).wasSuccessful())
