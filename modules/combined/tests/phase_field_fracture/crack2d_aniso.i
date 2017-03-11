@@ -55,7 +55,7 @@
     variable = b
   [../]
   [./pfintcoupled]
-    type = CHSplitVar
+    type = LaplacianSplit
     variable = b
     c = c
   [../]

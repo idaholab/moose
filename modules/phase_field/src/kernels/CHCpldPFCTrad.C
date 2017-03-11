@@ -10,13 +10,13 @@
 template<>
 InputParameters validParams<CHCpldPFCTrad>()
 {
-  InputParameters params = validParams<CHSplitVar>();
+  InputParameters params = validParams<LaplacianSplit>();
   params.addRequiredParam<MaterialPropertyName>("coeff_name", "Name of coefficient");
   return params;
 }
 
 CHCpldPFCTrad::CHCpldPFCTrad(const InputParameters & parameters) :
-    CHSplitVar(parameters),
+    LaplacianSplit(parameters),
     _coeff(getMaterialProperty<Real>("coeff_name"))
 {
 }
@@ -24,13 +24,13 @@ CHCpldPFCTrad::CHCpldPFCTrad(const InputParameters & parameters) :
 RealGradient
 CHCpldPFCTrad::precomputeQpResidual()
 {
-  RealGradient grad_cpldvar = CHSplitVar::precomputeQpResidual();
+  RealGradient grad_cpldvar = LaplacianSplit::precomputeQpResidual();
   return  _coeff[_qp] * grad_cpldvar;
 }
 
 Real
 CHCpldPFCTrad::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  Real grphi_grtst = CHSplitVar::computeQpOffDiagJacobian(jvar);
+  Real grphi_grtst = LaplacianSplit::computeQpOffDiagJacobian(jvar);
   return _coeff[_qp] * grphi_grtst;
 }
