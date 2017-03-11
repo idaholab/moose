@@ -5,38 +5,37 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "CHSplitVar.h"
+#include "LaplacianSplit.h"
 
-template<>
-InputParameters validParams<CHSplitVar>()
+template <>
+InputParameters
+validParams<LaplacianSplit>()
 {
   InputParameters params = validParams<KernelGrad>();
-  params.addClassDescription("Alternative Cahn-Hilliard split");
-  params.addRequiredCoupledVar("c", "Variable representing the laplacian of c");
+  params.addClassDescription("Split with a variable that holds the Laplacian of a phase field variable.");
+  params.addRequiredCoupledVar("c", "Field variable to take the Laplacian of");
   return params;
 }
 
-CHSplitVar::CHSplitVar(const InputParameters & parameters) :
-    KernelGrad(parameters),
-    _var_c(coupled("c")),
-    _grad_c(coupledGradient("c"))
+LaplacianSplit::LaplacianSplit(const InputParameters & parameters)
+  : KernelGrad(parameters), _var_c(coupled("c")), _grad_c(coupledGradient("c"))
 {
 }
 
 RealGradient
-CHSplitVar::precomputeQpResidual()
+LaplacianSplit::precomputeQpResidual()
 {
-  return  _grad_c[_qp]; // * _grad_test[_i][_qp]
+  return _grad_c[_qp]; // * _grad_test[_i][_qp]
 }
 
 RealGradient
-CHSplitVar::precomputeQpJacobian()
+LaplacianSplit::precomputeQpJacobian()
 {
   return 0.0;
 }
 
 Real
-CHSplitVar::computeQpOffDiagJacobian(unsigned int jvar)
+LaplacianSplit::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _var_c)
     return _grad_phi[_j][_qp] * _grad_test[_i][_qp];

@@ -35,7 +35,7 @@
 #include "CHSplitChemicalPotential.h"
 #include "CHSplitConcentration.h"
 #include "CHSplitFlux.h"
-#include "CHSplitVar.h"
+#include "LaplacianSplit.h"
 #include "CoefCoupledTimeDerivative.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledAllenCahn.h"
@@ -321,7 +321,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHSplitChemicalPotential);
   registerKernel(CHSplitConcentration);
   registerKernel(CHSplitFlux);
-  registerKernel(CHSplitVar);
+  registerKernel(LaplacianSplit);
   registerKernel(CoefCoupledTimeDerivative);
   registerKernel(ConservedLangevinNoise);
   registerKernel(CoupledAllenCahn);
@@ -360,7 +360,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);
   registerKernel(SwitchingFunctionPenalty);
-  registerDeprecatedObjectName(Reaction, "PFFracIntVar", "03/01/2017 00:00");
+  registerDeprecatedObjectName(LaplacianSplit, "CHSplitVar", "07/01/2017 00:00");
 
   registerInitialCondition(BimodalInverseSuperellipsoidsIC);
   registerInitialCondition(BimodalSuperellipsoidsIC);

@@ -5,28 +5,33 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef CHCPLDPFCTRAD_H
-#define CHCPLDPFCTRAD_H
+#ifndef LAPLACIANSPLIT_H
+#define LAPLACIANSPLIT_H
 
-#include "LaplacianSplit.h"
+#include "KernelGrad.h"
 
-//Forward Declarations
-class CHCpldPFCTrad;
+// Forward Declarations
+class LaplacianSplit;
 
-template<>
-InputParameters validParams<CHCpldPFCTrad>();
+template <>
+InputParameters validParams<LaplacianSplit>();
 
-class CHCpldPFCTrad : public LaplacianSplit
+/**
+ * Split with a variable that holds the Laplacian of the phase field.
+ */
+class LaplacianSplit : public KernelGrad
 {
 public:
-  CHCpldPFCTrad(const InputParameters & parameters);
+  LaplacianSplit(const InputParameters & parameters);
 
 protected:
   virtual RealGradient precomputeQpResidual();
+  virtual RealGradient precomputeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  const MaterialProperty<Real> & _coeff;
+  const unsigned int _var_c;
+  const VariableGradient & _grad_c;
 };
 
-#endif //CHCPLDPFCTRAD_H
+#endif // LAPLACIANSPLIT_H
