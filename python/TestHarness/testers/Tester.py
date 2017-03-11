@@ -50,9 +50,10 @@ class Tester(MooseObject):
         params.addParam('asio',          ['ALL'], "A test that runs only if ASIO is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
         params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
-        params.addParam('should_execute', True, 'Whether or not the executeable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation')
+        params.addParam('should_execute', True, 'Whether or not the executable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation')
         params.addParam('required_submodule', [], "A list of initialized submodules for which this test requires.")
         params.addParam('check_input',    False, "Check for correct input file syntax")
+        params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
 
         return params
 
@@ -357,6 +358,12 @@ class Tester(MooseObject):
                 reason = 'ENV VAR NOT SET'
                 self.setStatus(reason, self.bucket_skip)
                 return False
+
+        # Check for display
+        if self.specs['display_required'] and not os.getenv('DISPLAY', False):
+            reason = 'NO DISPLAY'
+            self.setStatus(reason, self.bucket_skip)
+            return False
 
         # Check the return values of the derived classes
         return self.checkRunnable(options)
