@@ -110,6 +110,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem, System & sy
     _current_solution(NULL),
     _residual_ghosted(addVector("residual_ghosted", false, GHOSTED)),
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
+    _solution_previous_nl(NULL),
     _residual_copy(*NumericVector<Number>::build(_communicator).release()),
     _u_dot(addVector("u_dot", true, GHOSTED)),
     _Re_time(addVector("Re_time", false, GHOSTED)),
@@ -183,6 +184,9 @@ NonlinearSystemBase::restoreSolutions()
 void
 NonlinearSystemBase::initialSetup()
 {
+  if (_fe_problem.needsPreviousNewtonIteration())
+    _solution_previous_nl = &addVector("u_previous_newton", true, GHOSTED);
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.initialSetup(tid);
@@ -2396,4 +2400,11 @@ NonlinearSystemBase::relativeSolutionDifferenceNorm()
   _sln_diff -= old_solution;
 
   return (_sln_diff.l2_norm() / current_solution.l2_norm());
+}
+
+void
+NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & soln)
+{
+  if (_solution_previous_nl)
+    *_solution_previous_nl = soln;
 }

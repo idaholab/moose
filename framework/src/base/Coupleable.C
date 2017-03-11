@@ -258,6 +258,32 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
+Coupleable::coupledValuePreviousNL(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name);
+
+  _c_fe_problem.needsPreviousNewtonIteration(true);
+  coupledCallback(var_name, true);
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+  {
+    if (_nodal)
+      return var->nodalSlnPreviousNL();
+    else
+      return var->slnPreviousNL();
+  }
+  else
+  {
+    if (_nodal)
+      return var->nodalSlnPreviousNLNeighbor();
+    else
+      return var->slnPreviousNLNeighbor();
+  }
+}
+
+const VariableValue &
 Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 {
   if (!isCoupled(var_name)) // Return default 0
@@ -368,6 +394,25 @@ Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp
     mooseError("Older values not available for explicit schemes");
 }
 
+const VariableGradient &
+Coupleable::coupledGradientPreviousNL(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_gradient;
+
+  _c_fe_problem.needsPreviousNewtonIteration(true);
+  coupledCallback(var_name, true);
+  if (_nodal)
+    mooseError("Nodal variables do not have gradients");
+
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+    return var->gradSlnPreviousNL();
+  else
+    return var->gradSlnPreviousNLNeighbor();
+}
+
 const VariableSecond &
 Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
 {
@@ -427,6 +472,24 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
     mooseError("Older values not available for explicit schemes");
 }
 
+const VariableSecond &
+Coupleable::coupledSecondPreviousNL(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_second;
+
+  _c_fe_problem.needsPreviousNewtonIteration(true);
+  coupledCallback(var_name, true);
+  if (_nodal)
+    mooseError("Nodal variables do not have second derivatives");
+
+  MooseVariable * var = getVar(var_name, comp);
+  if (!_coupleable_neighbor)
+    return var->secondSlnPreviousNL();
+  else
+    return var->secondSlnPreviousNLNeighbor();
+}
+
 const VariableValue &
 Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
 {
@@ -476,6 +539,22 @@ Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int co
   }
   else
     mooseError("Older values not available for explicit schemes");
+}
+
+const VariableValue &
+Coupleable::coupledNodalValuePreviousNL(const std::string & var_name, unsigned int comp)
+{
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name);
+
+  _c_fe_problem.needsPreviousNewtonIteration(true);
+  coupledCallback(var_name, true);
+  MooseVariable * var = getVar(var_name, comp);
+
+  if (!_coupleable_neighbor)
+    return var->nodalValuePreviousNL();
+  else
+    return var->nodalValuePreviousNLNeighbor();
 }
 
 const VariableValue &

@@ -142,6 +142,10 @@ public:
 
   virtual System & system() override { return _sys; }
 
+  virtual NumericVector<Number> * solutionPreviousNewton() override { return _solution_previous_nl; }
+
+  virtual void setPreviousNewtonSolution();
+
 protected:
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);
@@ -155,6 +159,8 @@ protected:
   const NumericVector<Number> * _current_solution;
   /// Serialized version of the solution vector
   NumericVector<Number> & _serialized_solution;
+  /// Solution vector of the previous nonlinear iterate
+  NumericVector<Number> * _solution_previous_nl;
   /// Time integrator
   std::shared_ptr<TimeIntegrator> _time_integrator;
   /// solution vector for u^dot

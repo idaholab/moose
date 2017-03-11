@@ -145,6 +145,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters) :
     _resurrector(NULL),
     _const_jacobian(false),
     _has_jacobian(false),
+    _needs_old_newton_iter(false),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(false),
@@ -3826,6 +3827,12 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
 
   }
 
+  if (_needs_old_newton_iter)
+  {
+    _nl->setPreviousNewtonSolution(old_soln);
+    _aux->setPreviousNewtonSolution();
+  }
+
   // MOOSE doesn't change the search_direction
   changed_search_direction = false;
 
@@ -4579,4 +4586,16 @@ FEProblemBase::needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)
   }
 
   return _block_mat_side_cache[tid][subdomain_id];
+}
+
+bool
+FEProblemBase::needsPreviousNewtonIteration()
+{
+  return _needs_old_newton_iter;
+}
+
+void
+FEProblemBase::needsPreviousNewtonIteration(bool state/* = true*/)
+{
+  _needs_old_newton_iter = state;
 }
