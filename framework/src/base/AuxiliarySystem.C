@@ -38,7 +38,9 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     SystemBase(subproblem, name, Moose::VAR_AUXILIARY),
     _fe_problem(subproblem),
     _sys(subproblem.es().add_system<TransientExplicitSystem>(name)),
+    _current_solution(NULL),
     _serialized_solution(*NumericVector<Number>::build(_fe_problem.comm()).release()),
+    _solution_previous_nl(NULL),
     _u_dot(addVector("u_dot", true, GHOSTED)),
     _need_serialized_solution(false)
 {
@@ -59,6 +61,9 @@ AuxiliarySystem::init()
 void
 AuxiliarySystem::initialSetup()
 {
+  if (_fe_problem.needsPreviousNewtonIteration())
+    _solution_previous_nl = &addVector("u_previous_newton", true, GHOSTED);
+
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _aux_scalar_storage.sort(tid);
@@ -503,4 +508,11 @@ bool
 AuxiliarySystem::needMaterialOnSide(BoundaryID bnd_id)
 {
   return _elemental_aux_storage.hasActiveBoundaryObjects(bnd_id);
+}
+
+void
+AuxiliarySystem::setPreviousNewtonSolution()
+{
+  // Evaluate aux variables to get the solution vector
+  compute(EXEC_LINEAR);
 }

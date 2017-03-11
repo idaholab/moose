@@ -75,7 +75,6 @@ namespace Moose {
   }
 } // namespace Moose
 
-
 NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string & name) :
     NonlinearSystemBase(fe_problem, fe_problem.es().add_system<TransientNonlinearImplicitSystem>(name), name),
     _transient_sys(fe_problem.es().get_system<TransientNonlinearImplicitSystem>(name))
@@ -111,7 +110,7 @@ NonlinearSystem::solve()
   // have dampers or if the FEProblemBase needs to update the solution,
   // which is also done during the linesearch postcheck.  It doesn't
   // hurt to do this multiple times, it is just setting a pointer.
-  if (_fe_problem.hasDampers() || _fe_problem.shouldUpdateSolution())
+  if (_fe_problem.hasDampers() || _fe_problem.shouldUpdateSolution() || _fe_problem.needsPreviousNewtonIteration())
     _transient_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
 
   if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)

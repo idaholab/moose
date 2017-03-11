@@ -120,6 +120,14 @@ protected:
   virtual const VariableValue & coupledValueOlder(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Returns value of previous Newton iterate of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue containing the older value of the coupled variable
+   */
+  virtual const VariableValue & coupledValuePreviousNL(const std::string & var_name, unsigned int comp = 0);
+
+  /**
    * Returns gradient of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -147,6 +155,14 @@ protected:
   virtual const VariableGradient & coupledGradientOlder(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Returns gradient of a coupled variable for previous Newton iterate
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the gradient of the coupled variable
+   */
+  virtual const VariableGradient & coupledGradientPreviousNL(const std::string & var_name, unsigned int comp = 0);
+
+  /**
    * Returns second derivative of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -172,6 +188,14 @@ protected:
    * @see Kernel::secondOlder
    */
   virtual const VariableSecond & coupledSecondOlder(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns second derivative of a coupled variable for the previous Newton iterate
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableSecond containing the second derivative of the coupled variable
+   */
+  virtual const VariableSecond & coupledSecondPreviousNL(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Time derivative of a coupled variable
@@ -214,6 +238,14 @@ protected:
    * @return Reference to a VariableValue containing the older value of the coupled variable
    */
   virtual const VariableValue & coupledNodalValueOlder(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns nodal values of a coupled variable for previous Newton iterate
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   */
+  virtual const VariableValue & coupledNodalValuePreviousNL(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Nodal values of time derivative of a coupled variable

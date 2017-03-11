@@ -147,6 +147,7 @@ public:
   virtual NumericVector<Number> & solution() = 0;
   virtual NumericVector<Number> & solutionOld() = 0;
   virtual NumericVector<Number> & solutionOlder() = 0;
+  virtual NumericVector<Number> * solutionPreviousNewton() = 0;
 
   virtual Number & duDotDu() { return _du_dot_du; }
   virtual NumericVector<Number> & solutionUDot() { return *_dummy_vec; }
