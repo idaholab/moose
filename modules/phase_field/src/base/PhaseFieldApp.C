@@ -36,6 +36,7 @@
 #include "CHSplitConcentration.h"
 #include "CHSplitFlux.h"
 #include "CHSplitVar.h"
+#include "CoarseningIntegralCompensation.h"
 #include "CoefCoupledTimeDerivative.h"
 #include "ConservedLangevinNoise.h"
 #include "CoupledAllenCahn.h"
@@ -180,6 +181,7 @@
  * AuxKernels
  */
 #include "BndsCalcAux.h"
+#include "CoarseningIntegralAux.h"
 #include "CrossTermGradientFreeEnergy.h"
 #include "EulerAngleVariables2RGBAux.h"
 #include "FeatureFloodCountAux.h"
@@ -201,6 +203,7 @@
 /*
  * User Objects
  */
+#include "CoarseningIntegralTracker.h"
 #include "ComputeExternalGrainForceAndTorque.h"
 #include "ComputeGrainCenterUserObject.h"
 #include "ComputeGrainForceAndTorque.h"
@@ -322,6 +325,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CHSplitConcentration);
   registerKernel(CHSplitFlux);
   registerKernel(CHSplitVar);
+  registerKernel(CoarseningIntegralCompensation);
   registerKernel(CoefCoupledTimeDerivative);
   registerKernel(ConservedLangevinNoise);
   registerKernel(CoupledAllenCahn);
@@ -446,6 +450,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerPostprocessor(PFCElementEnergyIntegral);
 
   registerAux(BndsCalcAux);
+  registerAux(CoarseningIntegralAux);
   registerAux(CrossTermGradientFreeEnergy);
   registerAux(EBSDReaderAvgDataAux);
   registerAux(EBSDReaderPointDataAux);
@@ -460,6 +465,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerAux(PFCRFFEnergyDensity);
   registerAux(TotalFreeEnergy);
 
+  registerUserObject(CoarseningIntegralTracker);
   registerUserObject(ComputeExternalGrainForceAndTorque);
   registerUserObject(ComputeGrainForceAndTorque);
   registerUserObject(ConservedMaskedNormalNoise);
