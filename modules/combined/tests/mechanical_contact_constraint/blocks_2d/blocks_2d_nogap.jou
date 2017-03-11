@@ -1,0 +1,16 @@
+brick x 0.6 y 2 z 1
+brick x 0.6 y 0.8 z 1
+volume 2 move {0.6}
+volume all move 0 0 -0.5
+surface 1 size 0.15
+surface 7 size 0.1
+mesh surface 1
+mesh surface 7
+sideset 1 curve 3
+sideset 2 curve 1
+sideset 3 curve 15
+sideset 4 curve 13
+block 1 surface 1
+block 2 surface 7
+block all element type QUAD4
+export mesh "blocks_2d_nogap.e" overwrite

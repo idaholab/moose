@@ -75,7 +75,7 @@ StressDivergence::computeResidual()
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         _avg_grad_test[_i][_component] += _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
 
-      _avg_grad_test[_i][_component] /= _current_elem->volume();
+      _avg_grad_test[_i][_component] /= _current_elem_volume;
     }
   }
 
@@ -140,7 +140,7 @@ StressDivergence::computeJacobian()
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         _avg_grad_test[_i][_component] += _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
 
-      _avg_grad_test[_i][_component] /= _current_elem->volume();
+      _avg_grad_test[_i][_component] /= _current_elem_volume;
     }
 
     _avg_grad_phi.resize(_phi.size());
@@ -153,7 +153,7 @@ StressDivergence::computeJacobian()
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           _avg_grad_phi[_i][component] += _grad_phi[_i][_qp](component) * _JxW[_qp] * _coord[_qp];
 
-        _avg_grad_phi[_i][component] /= _current_elem->volume();
+        _avg_grad_phi[_i][component] /= _current_elem_volume;
       }
     }
   }
@@ -249,7 +249,7 @@ StressDivergence::computeOffDiagJacobian(unsigned int jvar)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           _avg_grad_test[_i][_component] += _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
 
-        _avg_grad_test[_i][_component] /= _current_elem->volume();
+        _avg_grad_test[_i][_component] /= _current_elem_volume;
       }
 
       _avg_grad_phi.resize(_phi.size());
@@ -262,7 +262,7 @@ StressDivergence::computeOffDiagJacobian(unsigned int jvar)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
             _avg_grad_phi[_i][component] += _grad_phi[_i][_qp](component) * _JxW[_qp] * _coord[_qp];
 
-          _avg_grad_phi[_i][component] /= _current_elem->volume();
+          _avg_grad_phi[_i][component] /= _current_elem_volume;
         }
       }
     }

@@ -229,21 +229,6 @@
 
 []
 
-[Postprocessors]
-  [./_dt]
-    type = TimestepSize
-  [../]
-
-  [./nl_its]
-    type = NumNonlinearIterations
-  [../]
-
-  [./lin_its]
-    type = NumLinearIterations
-  [../]
-[]
-
-
 [Outputs]
   execute_on = 'timestep_end'
   file_base = t_stress_ellip_crack_out

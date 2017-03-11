@@ -9,6 +9,10 @@
 #   stress release.
 #
 
+[GlobalParams]
+  volumetric_locking_correction = false
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -270,7 +274,7 @@
     ref_damage_rate = 1e-2
     tol = 1e-5
     maxiter = 100
-    exponent = 1.0
+    exponent = 0.75
     nstate = 2
     intvar_incr_tol = 10.0 #large value to avoid cutback
   [../]
@@ -287,10 +291,11 @@
   line_search = 'none'
   nl_max_its = 20
   nl_rel_tol = 1.5e-11
+  nl_abs_tol = 1e-8
 
-  dt = 0.05
-  dtmin = 1e-3
-  num_steps = 30
+  dt = 0.01
+  dtmin = 0.01
+  end_time = 0.5
 []
 
 [Outputs]
