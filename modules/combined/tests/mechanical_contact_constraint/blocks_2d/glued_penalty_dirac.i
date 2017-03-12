@@ -1,6 +1,6 @@
 # This is a dirac (contact formulation) version of glued_penalty.i
 [Mesh]
-  file = blocks_2d.e
+  file = blocks_2d_nogap.e
   displacements = 'disp_x disp_y'
 []
 
@@ -93,7 +93,7 @@
     variable = disp_x
     boundary = 4
     #Initial gap is 0.01
-    value = -0.02
+    value = -0.01
   [../]
   [./right_y]
     type = FunctionPresetBC

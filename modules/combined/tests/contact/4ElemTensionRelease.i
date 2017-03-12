@@ -2,6 +2,9 @@
   file = 4ElemTensionRelease.e
   displacements = 'disp_x disp_y'
 []
+[GlobalParams]
+#  volumetric_locking_correction = false
+[]
 
 [Functions]
   [./up]
@@ -107,9 +110,9 @@
 
   l_max_its = 100
   nl_max_its = 10
-  dt = 0.1
-  dtmin = 0.1
-  num_steps = 30
+  dt = 0.2
+  dtmin = 0.2
+  end_time = 3
 
   [./Predictor]
     type = SimplePredictor
