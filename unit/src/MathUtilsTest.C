@@ -14,10 +14,10 @@
 
 #include "MathUtilsTest.h"
 
-//Moose includes
+// Moose includes
 #include "MathUtils.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION( MathUtilsTest );
+CPPUNIT_TEST_SUITE_REGISTRATION(MathUtilsTest);
 
 void
 MathUtilsTest::pow()

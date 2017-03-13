@@ -15,15 +15,15 @@
 #ifndef MATHUTILSTEST_H
 #define MATHUTILSTEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "GuardedHelperMacros.h"
 
 class MathUtilsTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( MathUtilsTest );
+  CPPUNIT_TEST_SUITE(MathUtilsTest);
 
-  CPPUNIT_TEST( pow );
+  CPPUNIT_TEST(pow);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -31,4 +31,4 @@ public:
   void pow();
 };
 
-#endif //MATHUTILSTEST_H
+#endif // MATHUTILSTEST_H

@@ -14,12 +14,14 @@
 namespace MathUtils
 {
 
-inline Real round(Real x)
+inline Real
+round(Real x)
 {
   return ::round(x); // use round from math.h
 }
 
-inline Real sign(Real x)
+inline Real
+sign(Real x)
 {
   return x >= 0.0 ? 1.0 : -1.0;
 }
@@ -34,4 +36,4 @@ Real pow(Real x, unsigned int e);
 
 } // namespace MathUtils
 
-#endif //MATHUTILS_H
+#endif // MATHUTILS_H
