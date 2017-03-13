@@ -25,8 +25,7 @@ validParams<ComputeFiniteStrain>()
   params.addClassDescription(
       "Compute a strain increment and rotation increment for finite strains.");
   params.addParam<MooseEnum>("decomposition_method", ComputeFiniteStrain::decompositionType(),
-                             "Methods to calculate the strain and rotation increments: " +
-                                 ComputeFiniteStrain::decompositionType().getRawNames());
+                             "Methods to calculate the strain and rotation increments");
   return params;
 }
 

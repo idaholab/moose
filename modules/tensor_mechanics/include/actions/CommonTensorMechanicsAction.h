@@ -11,18 +11,18 @@
 
 class CommonTensorMechanicsAction;
 
-template<>
+template <>
 InputParameters validParams<CommonTensorMechanicsAction>();
 
 /**
- * Store common tensormechanics parameters
+ * Store common tensor mechanics parameters
  */
 class CommonTensorMechanicsAction : public Action
 {
 public:
   CommonTensorMechanicsAction(const InputParameters & parameters);
 
-  virtual void act() override {};
+  virtual void act() override{};
 };
 
 #endif // COMMONTENSORMECHANICSACTION_H
