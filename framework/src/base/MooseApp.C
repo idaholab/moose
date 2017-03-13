@@ -18,9 +18,6 @@
 #include "MooseSyntax.h"
 #include "MooseInit.h"
 #include "Executioner.h"
-#include "InputFileFormatter.h"
-#include "YAMLFormatter.h"
-#include "JSONFormatter.h"
 #include "PetscSupport.h"
 #include "Conversion.h"
 #include "CommandLine.h"
@@ -36,6 +33,8 @@
 #include "MooseMesh.h"
 #include "FileOutput.h"
 #include "ConsoleUtils.h"
+#include "JsonSyntaxTree.h"
+#include "JsonInputFileFormatter.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -280,19 +279,19 @@ MooseApp::setupOptions()
   {
     Moose::perf_log.disable_logging();
 
-    _parser.initSyntaxFormatter(Parser::INPUT_FILE, true);
-
     // Get command line argument following --dump on command line
-    std::string dump_following_arg = getParam<std::string>("dump");
+    std::string following_arg = getParam<std::string>("dump");
 
-    // If the argument following --dump is non-existent or begins with
-    // a dash, call buildFullTree() with an empty string, otherwise
-    // pass the argument following --dump.
-    if (dump_following_arg.empty() || (dump_following_arg.find('-') == 0))
-      _parser.buildFullTree("");
-    else
-      _parser.buildFullTree(dump_following_arg);
+    // The argument following --dump is a parameter search string,
+    // which can be empty.
+    std::string param_search;
+    if (!following_arg.empty() && (following_arg.find('-') != 0))
+      param_search = following_arg;
 
+    JsonSyntaxTree tree(param_search);
+    _parser.buildJsonSyntaxTree(tree);
+    JsonInputFileFormatter formatter;
+    Moose::out << formatter.toString(tree.getRoot()) << "\n";
     _ready_to_exit = true;
   }
   else if (isParamValid("yaml"))
@@ -318,19 +317,19 @@ MooseApp::setupOptions()
   {
     Moose::perf_log.disable_logging();
 
-    _parser.initSyntaxFormatter(Parser::JSON, true);
-
     // Get command line argument following --json on command line
     std::string json_following_arg = getParam<std::string>("json");
 
-    // If the argument following --json is non-existent or begins with
-    // a dash, call buildFullTree() with an empty string, otherwise
-    // pass the argument following --json.
-    if (json_following_arg.empty() || (json_following_arg.find('-') == 0))
-      _parser.buildFullTree("");
-    else
-      _parser.buildFullTree(json_following_arg);
+    // The argument following --json is a parameter search string,
+    // which can be empty.
+    std::string search;
+    if (!json_following_arg.empty() && (json_following_arg.find('-') != 0))
+      search = json_following_arg;
 
+    JsonSyntaxTree tree(search);
+    _parser.buildJsonSyntaxTree(tree);
+
+    Moose::out << "**START JSON DATA**\n" << tree.getRoot() << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
   }
   else if (getParam<bool>("syntax"))

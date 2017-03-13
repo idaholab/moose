@@ -6,5 +6,6 @@
     expect_out = "FEProblem\nGeneratedMesh"
     input = 'IGNORED'
     input_switch = ''
+    display_required = True
   [../]
 []

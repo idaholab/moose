@@ -33,9 +33,9 @@
 #include "SyntaxTree.h"
 #include "InputFileFormatter.h"
 #include "YAMLFormatter.h"
-#include "JSONFormatter.h"
 #include "MooseTypes.h"
 #include "CommandLine.h"
+#include "JsonSyntaxTree.h"
 
 // libMesh includes
 #include "libmesh/getpot.h"
@@ -496,8 +496,6 @@ Parser::reorderHelper(std::vector<std::string> & section_names, const std::strin
   }
 }
 
-
-
 void
 Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)
 {
@@ -512,12 +510,91 @@ Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)
   case YAML:
     _syntax_formatter = new YAMLFormatter(dump_mode);
     break;
-  case JSON:
-    _syntax_formatter = new JSONFormatter(dump_mode);
-    break;
   default:
     mooseError("Unrecognized Syntax Formatter requested");
     break;
+  }
+}
+
+void
+Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
+{
+  std::vector<std::pair<std::string, Syntax::ActionInfo>> all_names;
+
+  for (const auto & iter : _syntax.getAssociatedActions())
+  {
+    Syntax::ActionInfo act_info = iter.second;
+    // If the task is NULL that means we need to figure out which task
+    // goes with this syntax for the purpose of building the Moose Object part of the tree.
+    // We will figure this out by asking the ActionFactory for the registration info.
+    if (act_info._task == "")
+      act_info._task = _action_factory.getTaskName(act_info._action);
+
+    all_names.push_back(std::pair<std::string, Syntax::ActionInfo>(iter.first, act_info));
+  }
+
+  for (const auto & act_names : all_names)
+  {
+    InputParameters action_obj_params = _action_factory.getValidParams(act_names.second._action);
+    root.addParameters("", act_names.first, false, act_names.second._action, act_names.second._task,
+                       true, &action_obj_params);
+
+    const std::string & task = act_names.second._task;
+    std::string act_name = act_names.first;
+
+    // We need to see if this action is inherited from MooseObjectAction
+    // If it is, then we will loop over all the Objects in MOOSE's Factory object to print them out
+    // if they have associated bases matching the current task.
+    if (action_obj_params.have_parameter<bool>("isObjectAction") &&
+        action_obj_params.get<bool>("isObjectAction"))
+    {
+      for (registeredMooseObjectIterator moose_obj = _factory.registeredObjectsBegin();
+           moose_obj != _factory.registeredObjectsEnd(); ++moose_obj)
+      {
+        InputParameters moose_obj_params = (moose_obj->second)();
+        // Now that we know that this is a MooseObjectAction we need to see if it has been
+        // restricted
+        // in any way by the user.
+        const std::vector<std::string> & buildable_types = action_obj_params.getBuildableTypes();
+
+        // See if the current Moose Object syntax belongs under this Action's block
+        if ((buildable_types.empty() || // Not restricted
+             std::find(buildable_types.begin(), buildable_types.end(), moose_obj->first) !=
+                 buildable_types.end()) &&                                 // Restricted but found
+            moose_obj_params.have_parameter<std::string>("_moose_base") && // Has a registered base
+            _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"),
+                                          task) &&           // and that base is associated
+            action_obj_params.mooseObjectSyntaxVisibility()) // and the Action says it's visible
+        {
+          std::string name;
+          size_t pos = 0;
+          bool is_action_params = false;
+          bool is_type = false;
+          if (act_name[act_name.size() - 1] == '*')
+          {
+            pos = act_name.size();
+
+            if (!action_obj_params.collapseSyntaxNesting())
+              name = act_name.substr(0, pos - 1) + moose_obj->first;
+            else
+            {
+              name = act_name.substr(0, pos - 1) + "/<type>/" + moose_obj->first;
+              is_action_params = true;
+            }
+          }
+          else
+          {
+            name = act_name + "/<type>/" + moose_obj->first;
+            is_type = true;
+          }
+
+          moose_obj_params.set<std::string>("type") = moose_obj->first;
+
+          root.addParameters(act_names.first, name, is_type, moose_obj->first, "", is_action_params,
+                             &moose_obj_params);
+        }
+      }
+    }
   }
 }
 
@@ -571,7 +648,7 @@ Parser::buildFullTree(const std::string & search_string)
         {
           std::string name;
           size_t pos = 0;
-          bool is_action_params = false;;
+          bool is_action_params = false;
           if (act_name[act_name.size()-1] == '*')
           {
             pos = act_name.size();
