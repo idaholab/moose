@@ -43,8 +43,7 @@ public:
   enum SyntaxFormatterType
   {
     INPUT_FILE,
-    YAML,
-    JSON
+    YAML
   };
 
   Parser(MooseApp & app, ActionWarehouse & action_wh);
