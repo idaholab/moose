@@ -7,44 +7,43 @@
 #ifndef FEATUREFLOODCOUNT_H
 #define FEATUREFLOODCOUNT_H
 
-#include "GeneralPostprocessor.h"
 #include "Coupleable.h"
+#include "GeneralPostprocessor.h"
+#include "InfixIterator.h"
 #include "MooseVariableDependencyInterface.h"
 #include "ZeroInterface.h"
-#include "InfixIterator.h"
 
-#include <list>
-#include <vector>
-#include <set>
 #include <iterator>
+#include <list>
+#include <set>
+#include <vector>
 
-#include "libmesh/periodic_boundaries.h"
 #include "libmesh/mesh_tools.h"
+#include "libmesh/periodic_boundaries.h"
 
 // External includes
 #include "bitmask_operators.h"
 
-//Forward Declarations
+// Forward Declarations
 class FeatureFloodCount;
 class MooseMesh;
 class MooseVariable;
 
-template<>
+template <>
 InputParameters validParams<FeatureFloodCount>();
 
 /**
- * This object will mark nodes or elements of continuous regions all with a unique number for the purpose of
- * counting or "coloring" unique regions in a solution.  It is designed to work with either a
- * single variable, or multiple variables.
+ * This object will mark nodes or elements of continuous regions all with a unique number for the
+ * purpose of counting or "coloring" unique regions in a solution.  It is designed to work with
+ * either a single variable, or multiple variables.
  *
  * Note:  When inspecting multiple variables, those variables must not have regions of interest
  *        that overlap or they will not be correctly colored.
  */
-class FeatureFloodCount :
-  public GeneralPostprocessor,
-  public Coupleable,
-  public MooseVariableDependencyInterface,
-  public ZeroInterface
+class FeatureFloodCount : public GeneralPostprocessor,
+                          public Coupleable,
+                          public MooseVariableDependencyInterface,
+                          public ZeroInterface
 {
 public:
   FeatureFloodCount(const InputParameters & parameters);
@@ -65,9 +64,9 @@ public:
   virtual bool doesFeatureIntersectBoundary(unsigned int feature_id) const;
 
   /**
-   * Returns a list of active unique feature ids for a particular element. The vector is indexed by variable number
-   * with each entry containing either an invalid size_t type (no feature active at that location) or a feature id
-   * if the variable is non-zero at that location.
+   * Returns a list of active unique feature ids for a particular element. The vector is indexed by
+   * variable number with each entry containing either an invalid size_t type (no feature active at
+   * that location) or a feature id if the variable is non-zero at that location.
    */
   virtual const std::vector<unsigned int> & getVarToFeatureVector(dof_id_type elem_id) const;
 
@@ -97,7 +96,8 @@ public:
   };
 
   // Retrieve field information
-  virtual Real getEntityValue(dof_id_type entity_id, FieldType field_type, std::size_t var_index=0) const;
+  virtual Real
+  getEntityValue(dof_id_type entity_id, FieldType field_type, std::size_t var_index = 0) const;
 
   inline bool isElemental() const { return _is_elemental; }
 
@@ -112,19 +112,19 @@ public:
 
   struct FeatureData
   {
-    FeatureData() :
-        FeatureData(std::numeric_limits<std::size_t>::max(), Status::INACTIVE)
+    FeatureData() : FeatureData(std::numeric_limits<std::size_t>::max(), Status::INACTIVE) {}
+
+    FeatureData(std::size_t var_index,
+                unsigned int local_index,
+                processor_id_type rank,
+                Status status)
+      : FeatureData(var_index, status)
     {
+      _orig_ids = {std::make_pair(rank, local_index)};
     }
 
-    FeatureData(std::size_t var_index, unsigned int local_index, processor_id_type rank, Status status) :
-        FeatureData(var_index, status)
-    {
-      _orig_ids = { std::make_pair(rank, local_index) };
-    }
-
-    FeatureData(std::size_t var_index, Status status) :
-        _var_index(var_index),
+    FeatureData(std::size_t var_index, Status status)
+      : _var_index(var_index),
         _id(invalid_id),
         _bboxes(1), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
@@ -134,13 +134,13 @@ public:
     {
     }
 
-    ///@{
-    /**
-     * We do not expect these objects to ever be copied. This is important
-     * since they are stored in standard containers directly. To enforce
-     * this, we are explicitly deleting the copy constructor, and copy
-     * assignment operator.
-     */
+///@{
+/**
+ * We do not expect these objects to ever be copied. This is important
+ * since they are stored in standard containers directly. To enforce
+ * this, we are explicitly deleting the copy constructor, and copy
+ * assignment operator.
+ */
 #ifdef __INTEL_COMPILER
     /**
      * 2016-07-14
@@ -222,16 +222,18 @@ public:
       }
       else
         // Sort based on processor independent information (mesh and variable info)
-        return _var_index < rhs._var_index || (_var_index == rhs._var_index && _min_entity_id < rhs._min_entity_id);
+        return _var_index < rhs._var_index ||
+               (_var_index == rhs._var_index && _min_entity_id < rhs._min_entity_id);
     }
 
     /// stream output operator
-    friend std::ostream & operator<< (std::ostream & out, const FeatureData & feature);
+    friend std::ostream & operator<<(std::ostream & out, const FeatureData & feature);
 
     /// Holds the ghosted ids for a feature (the ids which will be used for stitching
     std::set<dof_id_type> _ghosted_ids;
 
-    /// Holds the local ids in the interior of a feature. This data structure is only maintained on the local processor
+    /// Holds the local ids in the interior of a feature.
+    /// This data structure is only maintained on the local processor
     std::set<dof_id_type> _local_ids;
 
     /// Holds the ids surrounding the feature
@@ -246,11 +248,12 @@ public:
     /// An ID for this feature
     unsigned int _id;
 
-    /// The vector of bounding boxes completely enclosing this feature (multiple used with periodic constraints)
+    /// The vector of bounding boxes completely enclosing this feature
+    /// (multiple used with periodic constraints)
     std::vector<MeshTools::BoundingBox> _bboxes;
 
     /// Original processor/local ids
-    std::list<std::pair<processor_id_type, unsigned int> > _orig_ids;
+    std::list<std::pair<processor_id_type, unsigned int>> _orig_ids;
 
     /// The minimum entity seen in the _local_ids, used for sorting features
     dof_id_type _min_entity_id;
@@ -258,7 +261,8 @@ public:
     /// The count of entities contributing to the volume calculation
     std::size_t _vol_count;
 
-    /// The centroid of the feature (average of coordinates from entities participating in the volume calculation)
+    /// The centroid of the feature (average of coordinates from entities participating in
+    /// the volume calculation)
     Point _centroid;
 
     /// The status of a feature (used mostly in derived classes like the GrainTracker)
@@ -270,9 +274,9 @@ public:
 
 protected:
   /**
-   * This method is used to populate any of the data structures used for storing field data (nodal or elemental).
-   * It is called at the end of finalize and can make use of any of the data structures created during
-   * the execution of this postprocessor.
+   * This method is used to populate any of the data structures used for storing field data (nodal
+   * or elemental). It is called at the end of finalize and can make use of any of the data
+   * structures created during the execution of this postprocessor.
    */
   virtual void updateFieldInfo();
 
@@ -308,37 +312,50 @@ protected:
    * entity is part of the current feature (if one is being explored), or if it's the start
    * of a new feature.
    */
-  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object, std::size_t current_index,
-                                             FeatureData * & feature, Status & status, unsigned int & new_id);
+  virtual bool isNewFeatureOrConnectedRegion(const DofObject * dof_object,
+                                             std::size_t current_index,
+                                             FeatureData *& feature,
+                                             Status & status,
+                                             unsigned int & new_id);
 
   ///@{
   /**
-   * These two routines are utility routines used by the flood routine and by derived classes for visiting neighbors.
-   * Since the logic is different for the elemental versus nodal case it's easier to split them up.
+   * These two routines are utility routines used by the flood routine and by derived classes for
+   * visiting neighbors. Since the logic is different for the elemental versus nodal case it's
+   * easier to split them up.
    */
-  void visitNodalNeighbors(const Node * node, std::size_t current_index, FeatureData * feature, bool expand_halos_only);
-  void visitElementalNeighbors(const Elem * elem, std::size_t current_index, FeatureData * feature, bool expand_halos_only);
+  void visitNodalNeighbors(const Node * node,
+                           std::size_t current_index,
+                           FeatureData * feature,
+                           bool expand_halos_only);
+  void visitElementalNeighbors(const Elem * elem,
+                               std::size_t current_index,
+                               FeatureData * feature,
+                               bool expand_halos_only);
   ///@}
 
   /**
-   * The actual logic for visiting neighbors is abstracted out here. This method is templated to handle the Nodal
+   * The actual logic for visiting neighbors is abstracted out here. This method is templated to
+   * handle the Nodal
    * and Elemental cases together.
    */
-  template<typename T>
-  void visitNeighborsHelper(const T * curr_entity, std::vector<const T *> neighbor_entities, std::size_t current_index,
-                            FeatureData * feature, bool expand_halos_only);
+  template <typename T>
+  void visitNeighborsHelper(const T * curr_entity,
+                            std::vector<const T *> neighbor_entities,
+                            std::size_t current_index,
+                            FeatureData * feature,
+                            bool expand_halos_only);
 
   /**
-   * This routine uses the local flooded data to build up the local feature data structures (_feature_sets).
-   * This routine does not perform any communication so the _feature_sets data structure will only contain
-   * information from the local processor after calling this routine. Any existing data in the _feature_sets
-   * structure is destroyed by calling this routine.
-   *
+   * This routine uses the local flooded data to build up the local feature data structures
+   * (_feature_sets). This routine does not perform any communication so the _feature_sets data
+   * structure will only contain information from the local processor after calling this routine.
+   * Any existing data in the _feature_sets structure is destroyed by calling this routine.
    *
    * _feature_sets layout:
-   * The outer vector is sized to one when _single_map_mode == true, otherwise it is sized for the number
-   * of coupled variables. The inner list represents the flooded regions (local only after this call
-   * but fully populated after parallel communication and stitching).
+   * The outer vector is sized to one when _single_map_mode == true, otherwise it is sized for the
+   * number of coupled variables. The inner list represents the flooded regions (local only
+   * after this call but fully populated after parallel communication and stitching).
    */
   void prepareDataForTransfer();
 
@@ -359,8 +376,8 @@ protected:
   void mergeSets(bool use_periodic_boundary_info);
 
   /**
-   * This routine handles all of the serialization, communication and deserialization of the data structures
-   * containing FeatureData objects.
+   * This routine handles all of the serialization, communication and deserialization of the data
+   * structures containing FeatureData objects.
    */
   void communicateAndMerge();
 
@@ -370,28 +387,29 @@ protected:
   void sortAndLabel();
 
   /**
-   * Calls buildLocalToGlobalIndices to build the individual local to global indicies for each rank and
-   * scatters that information to all ranks. Finally, the non-master ranks update their own data
+   * Calls buildLocalToGlobalIndices to build the individual local to global indicies for each rank
+   * and scatters that information to all ranks. Finally, the non-master ranks update their own data
    * structures to reflect the global mappings.
    */
   void scatterAndUpdateRanks();
 
   /**
-   * This routine populates a stacked vector of local to global indices per rank and the associated count
-   * vector for scattering the vector to the ranks. The individual vectors can be different sizes. The ith
-   * vector will be distributed to the ith processor including the master rank.
+   * This routine populates a stacked vector of local to global indices per rank and the associated
+   * count vector for scattering the vector to the ranks. The individual vectors can be different
+   * sizes. The ith vector will be distributed to the ith processor including the master rank.
    * e.g.
    * [ ... n_0 ] [ ... n_1 ] ... [ ... n_m ]
    *
    * It is intended to be overridden in derived classes.
    */
-  virtual void buildLocalToGlobalIndices(std::vector<std::size_t> & local_to_global_all, std::vector<int> & counts) const;
+  virtual void buildLocalToGlobalIndices(std::vector<std::size_t> & local_to_global_all,
+                                         std::vector<int> & counts) const;
 
   /**
-   * This method builds a lookup map for retrieving the right local feature (by index) given a global
-   * index or id. max_id is passed to size the vector properly and may or may not be a globally consistent
-   * number. The assumption is that any id that is later queried from this object that is higher simply
-   * doesn't exist on the local processor.
+   * This method builds a lookup map for retrieving the right local feature (by index) given a
+   * global index or id. max_id is passed to size the vector properly and may or may not be a
+   * globally consistent number. The assumption is that any id that is later queried from this
+   * object that is higher simply doesn't exist on the local processor.
    */
   void buildFeatureIdToLocalIndices(unsigned int max_id);
 
@@ -414,11 +432,14 @@ protected:
   void updateRegionOffsets();
 
   /**
-   * This method detects whether two sets intersect without building a result set.  It exits as soon as
-   * any intersection is detected.
+   * This method detects whether two sets intersect without building a result set.
+   * It exits as soon as any intersection is detected.
    */
-  template<class InputIterator>
-  static inline bool setsIntersect(InputIterator first1, InputIterator last1, InputIterator first2, InputIterator last2)
+  template <class InputIterator>
+  static inline bool setsIntersect(InputIterator first1,
+                                   InputIterator last1,
+                                   InputIterator first2,
+                                   InputIterator last2)
   {
     while (first1 != last1 && first2 != last2)
     {
@@ -444,7 +465,8 @@ protected:
   const Real _threshold;
   Real _step_threshold;
 
-  /// The threshold above (or below) which neighboring entities are flooded (where regions can be extended but not started)
+  /// The threshold above (or below) which neighboring entities are flooded
+  /// (where regions can be extended but not started)
   const Real _connecting_threshold;
   Real _step_connecting_threshold;
 
@@ -463,10 +485,12 @@ protected:
 
   const bool _condense_map_info;
 
-  /// This variable is used to indicate whether or not we identify features with unique numbers on multiple maps
+  /// This variable is used to indicate whether or not we identify features with
+  /// unique numbers on multiple maps
   const bool _global_numbering;
 
-  /// This variable is used to indicate whether the maps will contain unique region information or just the variable numbers owning those regions
+  /// This variable is used to indicate whether the maps will contain unique region
+  /// information or just the variable numbers owning those regions
   const bool _var_index_mode;
 
   /// Indicates whether or not to communicate halo map information with all ranks
@@ -492,21 +516,23 @@ protected:
   const processor_id_type _n_procs;
 
   /**
-   * This variable keeps track of which nodes have been visited during execution.  We don't use the _feature_map
-   * for this since we don't want to explicitly store data for all the unmarked nodes in a serialized datastructures.
+   * This variable keeps track of which nodes have been visited during execution.  We don't use the
+   * _feature_map for this since we don't want to explicitly store data for all the unmarked nodes
+   * in a serialized datastructures.
    * This keeps our overhead down since this variable never needs to be communicated.
    */
-  std::vector<std::map<dof_id_type, bool> > _entities_visited;
+  std::vector<std::map<dof_id_type, bool>> _entities_visited;
 
   /**
-   * This map keeps track of which variables own which nodes.  We need a vector of them for multimap mode where
-   * multiple variables can own a single mode.  Note: This map is only populated when "show_var_coloring" is set
-   * to true.
+   * This map keeps track of which variables own which nodes.  We need a vector of them for multimap
+   * mode where multiple variables can own a single mode.
+   *
+   * Note: This map is only populated when "show_var_coloring" is set to true.
    */
-  std::vector<std::map<dof_id_type, int> > _var_index_maps;
+  std::vector<std::map<dof_id_type, int>> _var_index_maps;
 
   /// The data structure used to find neighboring elements give a node ID
-  std::vector< std::vector< const Elem * > > _nodes_to_elem_map;
+  std::vector<std::vector<const Elem *>> _nodes_to_elem_map;
 
   /// The number of features seen by this object per map
   std::vector<unsigned int> _feature_counts_per_map;
@@ -519,7 +545,7 @@ protected:
    * The data structure mirrors that found in _feature_sets, but contains
    * one additional vector indexed by processor id
    */
-  std::vector<std::list<FeatureData> > _partial_feature_sets;
+  std::vector<std::list<FeatureData>> _partial_feature_sets;
 
   /**
    * The data structure used to hold the globally unique features. The outer vector
@@ -528,10 +554,11 @@ protected:
   std::vector<FeatureData> _feature_sets;
 
   /**
-   * The feature maps contain the raw flooded node information and eventually the unique grain numbers.  We have a vector
-   * of them so we can create one per variable if that level of detail is desired.
+   * The feature maps contain the raw flooded node information and eventually the unique grain
+   * numbers.  We have a vector of them so we can create one per variable if that level of detail
+   * is desired.
    */
-  std::vector<std::map<dof_id_type, int> > _feature_maps;
+  std::vector<std::map<dof_id_type, int>> _feature_maps;
 
   /// The vector recording the local to global feature indices
   std::vector<std::size_t> _local_to_global_feature_map;
@@ -540,7 +567,7 @@ protected:
   std::vector<std::size_t> _feature_id_to_local_index;
 
   /// A pointer to the periodic boundary constraints object
-  PeriodicBoundaries *_pbs;
+  PeriodicBoundaries * _pbs;
 
   /// Average value of the domain which can optionally be used to find features in a field
   const PostprocessorValue & _element_average_value;
@@ -549,10 +576,10 @@ protected:
   std::map<dof_id_type, int> _ghosted_entity_ids;
 
   /**
-   * The data structure for looking up halos around features. The outer vector is for splitting out the
-   * information per variable. The inner map holds the actual halo information
+   * The data structure for looking up halos around features. The outer vector is for splitting out
+   * the information per variable. The inner map holds the actual halo information
    */
-  std::vector<std::map<dof_id_type, int> > _halo_ids;
+  std::vector<std::map<dof_id_type, int>> _halo_ids;
 
   /**
    * The data structure which is a list of nodes that are constrained to other nodes
@@ -560,10 +587,11 @@ protected:
    */
   std::multimap<dof_id_type, dof_id_type> _periodic_node_map;
 
-  /// The set of entities on the boundary of the domain used for determining if features intersect any boundary
+  /// The set of entities on the boundary of the domain used for determining
+  /// if features intersect any boundary
   std::set<dof_id_type> _all_boundary_entity_ids;
 
-  std::map<dof_id_type, std::vector<unsigned int> > _entity_var_to_features;
+  std::map<dof_id_type, std::vector<unsigned int>> _entity_var_to_features;
 
   std::vector<unsigned int> _empty_var_to_features;
 
@@ -574,12 +602,20 @@ protected:
   bool _is_master;
 };
 
-template<> void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);
-template<> void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context);
+template <>
+void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);
+template <>
+void dataStore(std::ostream & stream, MeshTools::BoundingBox & bbox, void * context);
 
-template<> void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context);
-template<> void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context);
+template <>
+void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context);
+template <>
+void dataLoad(std::istream & stream, MeshTools::BoundingBox & bbox, void * context);
 
-template<> struct enable_bitmask_operators<FeatureFloodCount::Status> { static const bool enable=true; };
+template <>
+struct enable_bitmask_operators<FeatureFloodCount::Status>
+{
+  static const bool enable = true;
+};
 
-#endif //FEATUREFLOODCOUNT_H
+#endif // FEATUREFLOODCOUNT_H
