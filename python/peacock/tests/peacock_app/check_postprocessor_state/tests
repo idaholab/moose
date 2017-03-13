@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = PythonUnitTest
+    input = test_postprocessor_state.py
+    platform = "DARWIN"
+  [../]
+[]

@@ -190,3 +190,11 @@ docs/.moosedocs
 !python/chigger/tests/input/*.e*
 !python/chigger/logos/*.png
 !python/chigger/contrib/*.xml
+
+# Peacock
+python/peacock/tests/exodus_tab/TestOutputPlugin_repr.py
+python/peacock/tests/input_tab/InputFileEditor/fsp_test.i
+python/peacock/tests/postprocessor_tab/TestPostprocessorPluginManager_test_script.py
+!python/peacock/tests/**/gold/*.png
+!python/peacock/icons/**/*.*
+!python/peacock/tests/**/input/*.*

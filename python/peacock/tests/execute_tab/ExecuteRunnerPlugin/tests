@@ -1,0 +1,7 @@
+[Tests]
+  [./ExecuteRunnerPlugin]
+    type = PythonUnitTest
+    input = test_ExecuteRunnerPlugin.py
+    display_required = True    
+  [../]
+[]

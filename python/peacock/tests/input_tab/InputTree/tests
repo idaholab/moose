@@ -1,0 +1,7 @@
+[Tests]
+  [./InputTree]
+    type = PythonUnitTest
+    input = test_InputTree.py
+    display_required = True
+  [../]
+[]

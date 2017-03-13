@@ -1,0 +1,7 @@
+[Tests]
+  [./InputTreeWriter]
+    type = PythonUnitTest
+    input = test_InputTreeWriter.py
+    display_required = True
+  [../]
+[]
