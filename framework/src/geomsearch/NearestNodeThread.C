@@ -18,6 +18,8 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
+#include <cmath>
+
 NearestNodeThread::NearestNodeThread(const MooseMesh & mesh,
                                      std::map<dof_id_type, std::vector<dof_id_type> > & neighbor_nodes) :
   _max_patch_percentage(0.0),
@@ -72,7 +74,17 @@ NearestNodeThread::operator() (const NodeIdRange & range)
     }
 
     if (closest_distance == std::numeric_limits<Real>::max())
+    {
+      for (unsigned int k=0; k<n_neighbor_nodes; k++)
+      {
+        const Node * cur_node = &_mesh.nodeRef(neighbor_nodes[k]);
+        if (isnan((*cur_node)(0)) ||
+            isnan((*cur_node)(1)) ||
+            isnan((*cur_node)(2)))
+          mooseError("Failure in NearestNodeThread because solution contans not-a-number entries");
+      }
       mooseError("Unable to find nearest node!");
+    }
 
     NearestNodeLocator::NearestNodeInfo & info = _nearest_node_info[node.id()];
 

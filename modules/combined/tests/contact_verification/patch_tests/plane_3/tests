@@ -8,7 +8,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
-    prereq = 'glued_kin_sm'
+    #prereq = 'glued_kin_sm' #the prereq test is also skipped
     skip = 'Reevaluate under PETSc 3.7.4. #8200'
   [../]
   [./glued_pen]
@@ -86,6 +86,7 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
+    skip = 'Reevaluate under PETSc 3.7.4. #8200'
   [../]
   [./glued_pen_sm]
     type = 'CSVDiff'
