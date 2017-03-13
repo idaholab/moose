@@ -23,10 +23,15 @@ validParams<TensorMechanicsAction>()
 
   // parameters specified here only appear in the input file sub-blocks of the
   // Master action, not in the common parameters area
-  params.addParam<std::vector<SubdomainName>>("block", "The list of ids of the blocks (subdomain) that the stress divergence kernels will be applied to");
+  params.addParam<std::vector<SubdomainName>>("block", "The list of ids of the blocks (subdomain) "
+                                                       "that the stress divergence kernels will be "
+                                                       "applied to");
   params.addParamNamesToGroup("block", "Advanced");
 
-  params.addParam<MultiMooseEnum>("additional_generate_output", TensorMechanicsActionBase::outputPropertiesType(), "Add scalar quantity output for stress and/or strain (will be appended to the list in `generate_output`)");
+  params.addParam<MultiMooseEnum>("additional_generate_output",
+                                  TensorMechanicsActionBase::outputPropertiesType(),
+                                  "Add scalar quantity output for stress and/or strain (will be "
+                                  "appended to the list in `generate_output`)");
   params.addParamNamesToGroup("additional_generate_output", "Output");
 
   return params;
@@ -84,10 +89,13 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _coupled_displacements[i] = _displacements[i];
 
   if (_save_in.size() != 0 && _save_in.size() != _ndisp)
-    mooseError("Number of save_in variables should equal to the number of displacement variables ", _ndisp);
+    mooseError("Number of save_in variables should equal to the number of displacement variables ",
+               _ndisp);
 
   if (_diag_save_in.size() != 0 && _diag_save_in.size() != _ndisp)
-    mooseError("Number of diag_save_in variables should equal to the number of displacement variables ", _ndisp);
+    mooseError(
+        "Number of diag_save_in variables should equal to the number of displacement variables ",
+        _ndisp);
 
   // plane strain consistency check
   if (_planar_formulation != PlanarFormulation::None && _ndisp != 2)
@@ -142,7 +150,8 @@ TensorMechanicsAction::act()
         action_params.set<Real>("factor") = getParam<Real>("pressure_factor");
 
       // Create and add the action to the warehouse
-      auto action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create(type, name() + "_gps", action_params));
+      auto action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(
+          _action_factory.create(type, name() + "_gps", action_params));
       _awh.addActionBlock(action);
     }
   }
@@ -180,14 +189,20 @@ TensorMechanicsAction::act()
     {
       std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
           {{Moose::COORD_XYZ, StrainAndIncrement::SmallTotal}, "ComputeSmallStrain"},
-          {{Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental}, "ComputeIncrementalSmallStrain"},
+          {{Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental},
+           "ComputeIncrementalSmallStrain"},
           {{Moose::COORD_XYZ, StrainAndIncrement::FiniteIncremental}, "ComputeFiniteStrain"},
           {{Moose::COORD_RZ, StrainAndIncrement::SmallTotal}, "ComputeAxisymmetricRZSmallStrain"},
-          {{Moose::COORD_RZ, StrainAndIncrement::SmallIncremental}, "ComputeAxisymmetricRZIncrementalStrain"},
-          {{Moose::COORD_RZ, StrainAndIncrement::FiniteIncremental}, "ComputeAxisymmetricRZFiniteStrain"},
-          {{Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallTotal}, "ComputeRSphericalSmallStrain"},
-          {{Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallIncremental}, "ComputeRSphericalIncrementalStrain"},
-          {{Moose::COORD_RSPHERICAL, StrainAndIncrement::FiniteIncremental}, "ComputeRSphericalFiniteStrain"}};
+          {{Moose::COORD_RZ, StrainAndIncrement::SmallIncremental},
+           "ComputeAxisymmetricRZIncrementalStrain"},
+          {{Moose::COORD_RZ, StrainAndIncrement::FiniteIncremental},
+           "ComputeAxisymmetricRZFiniteStrain"},
+          {{Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallTotal},
+           "ComputeRSphericalSmallStrain"},
+          {{Moose::COORD_RSPHERICAL, StrainAndIncrement::SmallIncremental},
+           "ComputeRSphericalIncrementalStrain"},
+          {{Moose::COORD_RSPHERICAL, StrainAndIncrement::FiniteIncremental},
+           "ComputeRSphericalFiniteStrain"}};
 
       auto type_it = type_map.find(std::make_pair(_coord_system, _strain_and_increment));
       if (type_it != type_map.end())
@@ -215,12 +230,14 @@ TensorMechanicsAction::act()
 
     // set material parameters
     auto params = _factory.getValidParams(type);
-    params.applyParameters(parameters(), {"displacements", "use_displaced_mesh", "scalar_out_of_plane_strain"});
+    params.applyParameters(parameters(),
+                           {"displacements", "use_displaced_mesh", "scalar_out_of_plane_strain"});
 
     params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
     params.set<bool>("use_displaced_mesh") = false;
     if (isParamValid("scalar_out_of_plane_strain"))
-      params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {getParam<NonlinearVariableName>("scalar_out_of_plane_strain")};
+      params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {
+          getParam<NonlinearVariableName>("scalar_out_of_plane_strain")};
 
     _problem->addMaterial(type, name() + "_strain", params);
   }
@@ -266,7 +283,8 @@ TensorMechanicsAction::actSubdomainChecks()
   if (_current_task == "validate_coordinate_systems")
   {
     // use either block restriction list or list of all subdomains in the mesh
-    const auto & check_subdomains = _subdomain_ids.empty() ? _problem->mesh().meshSubdomains() : _subdomain_ids;
+    const auto & check_subdomains =
+        _subdomain_ids.empty() ? _problem->mesh().meshSubdomains() : _subdomain_ids;
     if (check_subdomains.empty())
       mooseError("No subdomains found");
 
@@ -274,7 +292,8 @@ TensorMechanicsAction::actSubdomainChecks()
     _coord_system = _problem->getCoordSystem(*check_subdomains.begin());
     for (auto subdomain : check_subdomains)
       if (_problem->getCoordSystem(subdomain) != _coord_system)
-        mooseError("The TensorMechanics action requires all subdomains to have the same coordinate system.");
+        mooseError("The TensorMechanics action requires all subdomains to have the same coordinate "
+                   "system.");
   }
 }
 
@@ -335,7 +354,8 @@ TensorMechanicsAction::actOutputGeneration()
               params.set<MooseEnum>("scalar_type") = r2sa.second.first;
             }
             else
-              mooseError("Internal error. The permitted tensor shortcuts in '_ranktwoscalaraux_table' must be keys in the '_ranktwoaux_table'.");
+              mooseError("Internal error. The permitted tensor shortcuts in "
+                         "'_ranktwoscalaraux_table' must be keys in the '_ranktwoaux_table'.");
           }
 
       if (type != "")
@@ -368,10 +388,12 @@ TensorMechanicsAction::actGatherActionParameters()
       const auto size_after = _subdomain_id_union.size();
 
       if (size_after != size_before + added_size)
-        mooseError("The block restrictions in the TensorMechanics/Master actions must be non-overlapping.");
+        mooseError("The block restrictions in the TensorMechanics/Master actions must be "
+                   "non-overlapping.");
 
       if (added_size == 0 && actions.size() > 1)
-        mooseError("No TensorMechanics/Master action can be block unrestricted if more than one TensorMechanics/Master action is specified.");
+        mooseError("No TensorMechanics/Master action can be block unrestricted if more than one "
+                   "TensorMechanics/Master action is specified.");
     }
   }
 }
@@ -396,7 +418,8 @@ InputParameters
 TensorMechanicsAction::getKernelParameters(std::string type)
 {
   InputParameters params = _factory.getValidParams(type);
-  params.applyParameters(parameters(), {"displacements", "use_displaced_mesh", "save_in", "diag_save_in"});
+  params.applyParameters(parameters(),
+                         {"displacements", "use_displaced_mesh", "save_in", "diag_save_in"});
 
   params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
   params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;

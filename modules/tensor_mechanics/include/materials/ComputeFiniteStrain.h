@@ -19,6 +19,8 @@ public:
 
   virtual void computeProperties();
 
+  static MooseEnum decompositionType();
+
 protected:
   virtual void computeQpStrain();
   virtual void computeQpIncrements(RankTwoTensor & e, RankTwoTensor & r);
@@ -35,4 +37,4 @@ private:
   const DecompMethod _decomposition_method;
 };
 
-#endif //COMPUTEFINITESTRAIN_H
+#endif // COMPUTEFINITESTRAIN_H

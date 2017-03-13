@@ -11,18 +11,26 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ComputeFiniteStrain>()
+MooseEnum
+ComputeFiniteStrain::decompositionType()
+{
+  return MooseEnum("TaylorExpansion EigenSolution", "TaylorExpansion");
+}
+
+template <>
+InputParameters
+validParams<ComputeFiniteStrain>()
 {
   InputParameters params = validParams<ComputeIncrementalStrainBase>();
-  params.addClassDescription("Compute a strain increment and rotation increment for finite strains.");
-  MooseEnum decomposition_type("TaylorExpansion EigenSolution", "TaylorExpansion");
-  params.addParam<MooseEnum>("decomposition_method", decomposition_type, "Methods to calculate the strain and rotation increments: " + decomposition_type.getRawNames());
+  params.addClassDescription(
+      "Compute a strain increment and rotation increment for finite strains.");
+  params.addParam<MooseEnum>("decomposition_method", ComputeFiniteStrain::decompositionType(),
+                             "Methods to calculate the strain and rotation increments");
   return params;
 }
 
-ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters) :
-    ComputeIncrementalStrainBase(parameters),
+ComputeFiniteStrain::ComputeFiniteStrain(const InputParameters & parameters)
+  : ComputeIncrementalStrainBase(parameters),
     _Fhat(_fe_problem.getMaxQps()),
     _decomposition_method(getParam<MooseEnum>("decomposition_method").getEnum<DecompMethod>())
 {
@@ -36,11 +44,13 @@ ComputeFiniteStrain::computeProperties()
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     // Deformation gradient
-    RankTwoTensor A((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]); //Deformation gradient
-    RankTwoTensor Fbar((*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]); //Old Deformation gradient
+    RankTwoTensor A((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp],
+                    (*_grad_disp[2])[_qp]); // Deformation gradient
+    RankTwoTensor Fbar((*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp],
+                       (*_grad_disp_old[2])[_qp]); // Old Deformation gradient
 
     _deformation_gradient[_qp] = A;
-    _deformation_gradient[_qp].addIa(1.0);//Gauss point deformation gradient
+    _deformation_gradient[_qp].addIa(1.0); // Gauss point deformation gradient
 
     // A = gradU - gradUold
     A -= Fbar;
@@ -101,17 +111,20 @@ ComputeFiniteStrain::computeQpStrain()
   else
     _strain_rate[_qp].zero();
 
-  //Update strain in intermediate configuration
+  // Update strain in intermediate configuration
   _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
   _total_strain[_qp] = _total_strain_old[_qp] + total_strain_increment;
 
-  //Rotate strain to current configuration
-  _mechanical_strain[_qp] = _rotation_increment[_qp] * _mechanical_strain[_qp] * _rotation_increment[_qp].transpose();
-  _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
+  // Rotate strain to current configuration
+  _mechanical_strain[_qp] =
+      _rotation_increment[_qp] * _mechanical_strain[_qp] * _rotation_increment[_qp].transpose();
+  _total_strain[_qp] =
+      _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
 }
 
 void
-ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment, RankTwoTensor & rotation_increment)
+ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
+                                         RankTwoTensor & rotation_increment)
 {
   switch (_decomposition_method)
   {
@@ -130,44 +143,49 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
       // strain rate D from Taylor expansion, Chat = (-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
       total_strain_increment = -Cinv_I * 0.5 + Cinv_I * Cinv_I * 0.25;
 
-      const Real a[3] = {
-        invFhat(1, 2) - invFhat(2, 1),
-        invFhat(2, 0) - invFhat(0, 2),
-        invFhat(0, 1) - invFhat(1, 0)
-      };
+      const Real a[3] = {invFhat(1, 2) - invFhat(2, 1), invFhat(2, 0) - invFhat(0, 2),
+                         invFhat(0, 1) - invFhat(1, 0)};
 
       Real q = (a[0] * a[0] + a[1] * a[1] + a[2] * a[2]) / 4.0;
       Real trFhatinv_1 = invFhat.trace() - 1.0;
       const Real p = trFhatinv_1 * trFhatinv_1 / 4.0;
 
       // cos theta_a
-      const Real C1 = std::sqrt(p + 3.0 * std::pow(p, 2.0) * (1.0 - (p + q)) / std::pow(p + q, 2.0) - 2.0 * std::pow(p, 3.0) * (1.0 - (p + q)) / std::pow(p + q, 3.0));
+      const Real C1 =
+          std::sqrt(p + 3.0 * std::pow(p, 2.0) * (1.0 - (p + q)) / std::pow(p + q, 2.0) -
+                    2.0 * std::pow(p, 3.0) * (1.0 - (p + q)) / std::pow(p + q, 3.0));
 
       Real C2;
       if (q > 0.01)
         // (1-cos theta_a)/4q
         C2 = (1.0 - C1) / (4.0 * q);
       else
-        //alternate form for small q
-        C2 = 0.125 + q * 0.03125 * (std::pow(p, 2.0) - 12.0 * (p - 1.0)) / std::pow(p, 2.0)
-              + std::pow(q, 2.0) * (p - 2.0) * (std::pow(p, 2.0) - 10.0 * p + 32.0) / std::pow(p, 3.0)
-              + std::pow(q, 3.0) * (1104.0 - 992.0 * p + 376.0 * std::pow(p, 2.0) - 72.0 * std::pow(p, 3.0) + 5.0 * std::pow(p, 4.0)) / (512.0 * std::pow(p, 4.0));
+        // alternate form for small q
+        C2 =
+            0.125 + q * 0.03125 * (std::pow(p, 2.0) - 12.0 * (p - 1.0)) / std::pow(p, 2.0) +
+            std::pow(q, 2.0) * (p - 2.0) * (std::pow(p, 2.0) - 10.0 * p + 32.0) / std::pow(p, 3.0) +
+            std::pow(q, 3.0) *
+                (1104.0 - 992.0 * p + 376.0 * std::pow(p, 2.0) - 72.0 * std::pow(p, 3.0) +
+                 5.0 * std::pow(p, 4.0)) /
+                (512.0 * std::pow(p, 4.0));
 
-      const Real C3 = 0.5 * std::sqrt((p * q * (3.0 - q) + std::pow(p, 3.0) + std::pow(q, 2.0)) / std::pow(p + q, 3.0)); //sin theta_a/(2 sqrt(q))
+      const Real C3 = 0.5 * std::sqrt((p * q * (3.0 - q) + std::pow(p, 3.0) + std::pow(q, 2.0)) /
+                                      std::pow(p + q, 3.0)); // sin theta_a/(2 sqrt(q))
 
-      // Calculate incremental rotation. Note that this value is the transpose of that from Rashid, 93, so we transpose it before storing
+      // Calculate incremental rotation. Note that this value is the transpose of that from Rashid,
+      // 93, so we transpose it before storing
       RankTwoTensor R_incr;
       R_incr.addIa(C1);
       for (unsigned int i = 0; i < 3; ++i)
         for (unsigned int j = 0; j < 3; ++j)
-          R_incr(i,j) += C2 * a[i] * a[j];
+          R_incr(i, j) += C2 * a[i] * a[j];
 
-      R_incr(0,1) += C3 * a[2];
-      R_incr(0,2) -= C3 * a[1];
-      R_incr(1,0) -= C3 * a[2];
-      R_incr(1,2) += C3 * a[0];
-      R_incr(2,0) += C3 * a[1];
-      R_incr(2,1) -= C3 * a[0];
+      R_incr(0, 1) += C3 * a[2];
+      R_incr(0, 2) -= C3 * a[1];
+      R_incr(1, 0) -= C3 * a[2];
+      R_incr(1, 2) += C3 * a[0];
+      R_incr(2, 0) += C3 * a[1];
+      R_incr(2, 1) -= C3 * a[0];
 
       rotation_increment = R_incr.transpose();
       break;
@@ -189,16 +207,18 @@ ComputeFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
       N2.vectorOuterProduct(e_vector.column(1), e_vector.column(1));
       N3.vectorOuterProduct(e_vector.column(2), e_vector.column(2));
 
-      RankTwoTensor Uhat =  N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
+      RankTwoTensor Uhat = N1 * lambda1 + N2 * lambda2 + N3 * lambda3;
       RankTwoTensor invUhat(Uhat.inverse());
 
       rotation_increment = _Fhat[_qp] * invUhat;
 
-      total_strain_increment = N1 * std::log(lambda1) + N2 * std::log(lambda2) + N3 * std::log(lambda3);
+      total_strain_increment =
+          N1 * std::log(lambda1) + N2 * std::log(lambda2) + N3 * std::log(lambda3);
       break;
     }
 
     default:
-      mooseError("ComputeFiniteStrain Error: Pass valid decomposition type: TaylorExpansion or EigenSolution.");
+      mooseError("ComputeFiniteStrain Error: Pass valid decomposition type: TaylorExpansion or "
+                 "EigenSolution.");
   }
 }
