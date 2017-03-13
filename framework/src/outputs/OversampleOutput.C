@@ -20,6 +20,7 @@
 #include "MooseApp.h"
 
 // libMesh includes
+#include "libmesh/distributed_mesh.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/mesh_function.h"
 
