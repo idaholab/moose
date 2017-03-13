@@ -476,8 +476,33 @@ getPetscPCSide(Moose::PCSideType pcs)
   }
 }
 
+KSPNormType
+getPetscKSPNormType(Moose::MooseKSPNormType kspnorm)
+{
+  switch (kspnorm)
+  {
+  case Moose::KSPN_NONE: return KSP_NORM_NONE;
+  case Moose::KSPN_PRECONDITIONED: return  KSP_NORM_PRECONDITIONED;
+  case Moose::KSPN_UNPRECONDITIONED: return KSP_NORM_UNPRECONDITIONED;
+  case Moose::KSPN_NATURAL: return KSP_NORM_NATURAL;
+  case Moose::KSPN_DEFAULT: return KSP_NORM_DEFAULT;
+  default: mooseError("Unknown KSP norm type requested."); break;
+  }
+}
+
 void
-petscSetDefaults(FEProblemBase & problem)
+petscSetDefaultKSPNormType(FEProblemBase & problem)
+{
+  NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
+  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+  SNES snes = petsc_solver->snes();
+  KSP ksp;
+  SNESGetKSP(snes, &ksp);
+  KSPSetNormType(ksp, getPetscKSPNormType(nl.getMooseKSPNormType()));
+}
+
+void
+petscSetDefaultPCSide(FEProblemBase & problem)
 {
   // dig out Petsc solver
   NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
@@ -497,6 +522,18 @@ petscSetDefaults(FEProblemBase & problem)
   if (nl.getPCSide() != Moose::PCS_DEFAULT)
     KSPSetPCSide(ksp, getPetscPCSide(nl.getPCSide()));
 #endif
+}
+
+void
+petscSetDefaults(FEProblemBase & problem)
+{
+  // dig out Petsc solver
+  NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
+  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+  SNES snes = petsc_solver->snes();
+  KSP ksp;
+  SNESGetKSP(snes, &ksp);
+
   SNESSetMaxLinearSolveFailures(snes, 1000000);
 
 #if PETSC_VERSION_LESS_THAN(3, 0, 0)
@@ -518,6 +555,10 @@ petscSetDefaults(FEProblemBase & problem)
     CHKERRABORT(nl.comm().get(), ierr);
   }
 #endif
+
+  petscSetDefaultPCSide(problem);
+
+  petscSetDefaultKSPNormType(problem);
 }
 
 void
