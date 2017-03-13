@@ -8,15 +8,6 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
 [Functions]
   [./tdisp]
     type = ParsedFunction
@@ -24,9 +15,11 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
-    use_displaced_mesh = true
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    add_variables = true
+    decomposition_method = EigenSolution
   [../]
 []
 
@@ -63,10 +56,6 @@
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
   [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    decomposition_method = EigenSolution
-  [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
   [../]
@@ -81,22 +70,21 @@
 
 [Executioner]
   type = Transient
-  dt = 0.05
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname = -pc_hypre_type
   petsc_options_value = boomeramg
+
   nl_abs_tol = 1e-10
   nl_rel_step_tol = 1e-10
-  dtmax = 10.0
   nl_rel_tol = 1e-10
   ss_check_tol = 1e-10
-  end_time = 1
+
+  dt = 0.05
   dtmin = 0.05
-  num_steps = 10
   nl_abs_step_tol = 1e-10
+
+  num_steps = 10
 []
 
 [Outputs]
