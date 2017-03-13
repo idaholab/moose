@@ -7,14 +7,15 @@
 #include "CommonTensorMechanicsAction.h"
 #include "TensorMechanicsAction.h"
 
-template<>
-InputParameters validParams<CommonTensorMechanicsAction>()
+template <>
+InputParameters
+validParams<CommonTensorMechanicsAction>()
 {
   InputParameters params = validParams<TensorMechanicsActionBase>();
   return params;
 }
 
-CommonTensorMechanicsAction::CommonTensorMechanicsAction(const InputParameters & parameters) :
-    Action(parameters)
+CommonTensorMechanicsAction::CommonTensorMechanicsAction(const InputParameters & parameters)
+  : Action(parameters)
 {
 }
