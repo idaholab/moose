@@ -474,6 +474,9 @@ class TestHarness:
             for job in batch_list:
                 file = '/'.join(job[2].split('/')[:-2]) + '/' + job[3]
 
+                # Populate the input_file_name argument so augmentParameters can format the test_name
+                self.options.input_file_name = job[-1]
+
                 # Build a Warehouse to hold the MooseObjects
                 warehouse = Warehouse()
 
