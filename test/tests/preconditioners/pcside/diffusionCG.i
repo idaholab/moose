@@ -19,7 +19,7 @@
 [BCs]
   [./left]
     type = PenaltyDirichletBC
-    penalty = 1e5
+    penalty = 1e9
     variable = u
     boundary = 1
     value = 0
@@ -27,7 +27,7 @@
 
   [./right]
     type = PenaltyDirichletBC
-    penalty = 1e5
+    penalty = 1e9
     variable = u
     boundary = 2
     value = 1
@@ -39,8 +39,9 @@
 
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_type -ksp_pc_side'
-  petsc_options_value = 'hypre boomeramg cg left'
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_type -ksp_norm_type'
+  petsc_options_value = 'hypre boomeramg cg preconditioned'
+# We are using preconditioned norm because of PenaltyDirichletBC
 []
 
 [Outputs]
