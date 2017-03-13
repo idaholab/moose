@@ -63,6 +63,7 @@ GapValueAux::GapValueAux(const InputParameters & parameters) :
                 ") does not match order for paired_variable \"", _moose_var.name(), "\" (",
                 Utility::enum_to_string<Order>(pairedVarOrder), ")");
 
+  addMooseVariableDependency(&_moose_var);
 }
 
 Real

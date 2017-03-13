@@ -1,0 +1,9 @@
+[Tests]
+  [./aux_stateful_depend]
+    type = 'Exodiff'
+    input = 'aux_stateful_depend.i'
+    exodiff = 'aux_stateful_depend_out.e'
+    abs_zero = 1e-9
+    max_parallel = 1
+  [../]
+[]

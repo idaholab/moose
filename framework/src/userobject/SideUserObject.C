@@ -31,7 +31,7 @@ SideUserObject::SideUserObject(const InputParameters & parameters) :
     BoundaryRestrictableRequired(parameters, false), // false for applying to sidesets
     MaterialPropertyInterface(this, boundaryIDs()),
     Coupleable(this, false),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
     PostprocessorInterface(this),
@@ -48,7 +48,5 @@ SideUserObject::SideUserObject(const InputParameters & parameters) :
     _current_side_volume(_assembly.sideElemVolume())
 {
   // Keep track of which variables are coupled so we know what we depend on
-  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
+  addMooseVariableDependency(getCoupledMooseVars());
 }

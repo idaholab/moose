@@ -25,6 +25,7 @@
 ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
                                                    const MooseObjectWarehouse<AuxKernel> & storage) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+    _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _storage(storage)
 {
@@ -33,6 +34,7 @@ ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
 // Splitting Constructor
 ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+    _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
     _storage(x._storage)
 {
@@ -44,6 +46,11 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   const BndNode * bnode = *node_it;
 
   BoundaryID boundary_id = bnode->_bnd_id;
+
+  std::set<MooseVariable *> needed_moose_vars;
+  _storage.updateBoundaryVariableDependency(boundary_id, needed_moose_vars, _tid);
+  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+
 
   // prepare variables
   for (const auto & it : _aux_sys._nodal_vars[_tid])
@@ -80,6 +87,8 @@ ComputeNodalAuxBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
       var->insert(_aux_sys.solution());
     }
   }
+
+  _fe_problem.clearActiveElementalMooseVariables(_tid);
 }
 
 void

@@ -638,7 +638,12 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
   residual.close();
   if (_constraints.hasActiveNodalConstraints())
   {
+    std::set<MooseVariable *> needed_moose_vars;
+    _constraints.updateVariableDependency(needed_moose_vars, tid);
+    _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, tid);
+
     const auto & ncs = _constraints.getActiveNodalConstraints();
+
     for (const auto & nc : ncs)
     {
       std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
@@ -651,6 +656,7 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
         nc->computeResidual(residual);
       }
     }
+    _fe_problem.clearActiveElementalMooseVariables(tid);
     _fe_problem.addCachedResidualDirectly(residual, tid);
     residual.close();
   }
@@ -663,6 +669,10 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jaco
   jacobian.close();
   if (_constraints.hasActiveNodalConstraints())
   {
+    std::set<MooseVariable *> needed_moose_vars;
+    _constraints.updateVariableDependency(needed_moose_vars, tid);
+    _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, tid);
+
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
@@ -676,6 +686,7 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jaco
         nc->computeJacobian(jacobian);
       }
     }
+    _fe_problem.clearActiveElementalMooseVariables(tid);
     _fe_problem.addCachedJacobian(jacobian, tid);
     jacobian.close();
   }
@@ -711,6 +722,10 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
     {
       const auto & constraints = _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
 
+      std::set<MooseVariable *> needed_moose_vars;
+      _constraints.updateVariableDependency(needed_moose_vars, 0);
+      _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, 0);
+
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
@@ -744,6 +759,7 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
               }
           }
         }
+        _fe_problem.clearActiveElementalMooseVariables(0);
       }
     }
   }
@@ -797,6 +813,10 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     {
       const auto & constraints = _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
 
+      std::set<MooseVariable *> needed_moose_vars;
+      _constraints.updateVariableDependency(needed_moose_vars, 0);
+      _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, 0);
+
       for (unsigned int i=0; i<slave_nodes.size(); i++)
       {
         dof_id_type slave_node_num = slave_nodes[i];
@@ -843,6 +863,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
           }
         }
       }
+      _fe_problem.clearActiveElementalMooseVariables(0);
     }
     if (_assemble_constraints_separately)
     {
@@ -900,6 +921,10 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     {
       const auto & face_constraints = _constraints.getActiveFaceFaceConstraints(iface->_name);
 
+      std::set<MooseVariable *> needed_moose_vars;
+      _constraints.updateVariableDependency(needed_moose_vars, 0);
+      _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, 0);
+
       // go over elements on that interface
       const std::vector<Elem *> & elems = iface->_elems;
       for (const auto & elem : elems)
@@ -929,6 +954,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
       }
       _fe_problem.addCachedResidual(tid);
     }
+    _fe_problem.clearActiveElementalMooseVariables(0);
   }
 
   // go over element-element constraint interface
@@ -953,6 +979,10 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     {
       // ElemElemConstraint objects
       const auto & _element_constraints = _constraints.getActiveElemElemConstraints(it.first);
+
+      std::set<MooseVariable *> needed_moose_vars;
+      _constraints.updateVariableDependency(needed_moose_vars, 0);
+      _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, 0);
 
       // go over pair elements
       const std::list<std::pair<const Elem*, const Elem*> > & elem_pairs = elem_pair_loc.getElemPairs();
@@ -983,6 +1013,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
         _fe_problem.addCachedResidual(tid);
       }
     }
+    _fe_problem.clearActiveElementalMooseVariables(0);
   }
 }
 
@@ -1387,6 +1418,10 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
     {
       const auto & constraints = _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
 
+      std::set<MooseVariable *> needed_moose_vars;
+      _constraints.updateVariableDependency(needed_moose_vars, 0);
+      _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, 0);
+
       for (const auto & slave_node_num : slave_nodes)
       {
         Node & slave_node = _mesh.nodeRef(slave_node_num);
@@ -1480,6 +1515,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
           }
         }
       }
+      _fe_problem.clearActiveElementalMooseVariables(0);
     }
     if (_assemble_constraints_separately)
     {
@@ -1555,6 +1591,10 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
       // FaceFaceConstraint objects
       const auto & face_constraints = _constraints.getActiveFaceFaceConstraints(iface->_name);
 
+      std::set<MooseVariable *> needed_moose_vars;
+      _constraints.updateVariableDependency(needed_moose_vars, 0);
+      _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, 0);
+
       // go over elements on that interface
       const std::vector<Elem *> & elems = iface->_elems;
       for (const auto & elem : elems)
@@ -1580,6 +1620,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
 
         _fe_problem.addCachedJacobian(jacobian, tid);
       }
+      _fe_problem.clearActiveElementalMooseVariables(tid);
     }
   }
 
@@ -1605,6 +1646,10 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
     {
       // ElemElemConstraint objects
       const auto & _element_constraints = _constraints.getActiveElemElemConstraints(it.first);
+
+      std::set<MooseVariable *> needed_moose_vars;
+      _constraints.updateVariableDependency(needed_moose_vars, 0);
+      _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, 0);
 
       // go over pair elements
       const std::list<std::pair<const Elem*, const Elem*> > & elem_pairs = elem_pair_loc.getElemPairs();
@@ -1634,6 +1679,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
         }
         _fe_problem.addCachedJacobian(jacobian, tid);
       }
+      _fe_problem.clearActiveElementalMooseVariables(tid);
     }
   }
 }

@@ -12,38 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "NodalScalarKernel.h"
-#include "SystemBase.h"
-#include "Assembly.h"
+#include "AuxCoupledMaterial.h"
 
 template<>
-InputParameters validParams<NodalScalarKernel>()
+InputParameters validParams<AuxCoupledMaterial>()
 {
-  InputParameters params = validParams<ScalarKernel>();
-  params.addRequiredParam<std::vector<dof_id_type> >("nodes", "Node ids");
+  InputParameters params = validParams<Material>();
+  params.addRequiredCoupledVar("variable", "The variable to be coupled.");
   return params;
 }
 
-NodalScalarKernel::NodalScalarKernel(const InputParameters & parameters) :
-    ScalarKernel(parameters),
-    Coupleable(this, true),
-    MooseVariableDependencyInterface(this),
-    _node_ids(getParam<std::vector<dof_id_type> >("nodes"))
+AuxCoupledMaterial::AuxCoupledMaterial(const InputParameters & parameters) :
+    Material(parameters),
+    _variable(coupledNodalValue("variable")),
+    _mat_prop(declareProperty<Real>("mat_prop")),
+    _mat_prop_old(declarePropertyOld<Real>("mat_prop"))
 {
-  // Fill in the MooseVariable dependencies
-  addMooseVariableDependency(getCoupledMooseVars());
 }
 
 void
-NodalScalarKernel::reinit()
+AuxCoupledMaterial::initQpStatefulProperties()
 {
-  _subproblem.reinitNodes(_node_ids, _tid);        // compute variables at nodes
-  _assembly.prepareOffDiagScalar();
+  _mat_prop[_qp] = _variable[_qp];
 }
 
 void
-NodalScalarKernel::computeOffDiagJacobian(unsigned int jvar)
+AuxCoupledMaterial::computeQpProperties()
 {
-  if (jvar == _var.number())
-    computeJacobian();
 }

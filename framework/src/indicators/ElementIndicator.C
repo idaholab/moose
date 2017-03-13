@@ -40,6 +40,7 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters) :
     PostprocessorInterface(this),
     Coupleable(this, false),
     ScalarCoupleable(this),
+    MooseVariableDependencyInterface(this),
     MooseVariableInterface(this, false),
     MaterialPropertyInterface(this),
     ZeroInterface(parameters),
@@ -60,9 +61,6 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters) :
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu())
 {
-  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
-
+  addMooseVariableDependency(getCoupledMooseVars());
   addMooseVariableDependency(mooseVariable());
 }

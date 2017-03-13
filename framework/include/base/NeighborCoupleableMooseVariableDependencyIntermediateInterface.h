@@ -34,12 +34,10 @@ public:
   NeighborCoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object, bool nodal, bool neighbor_nodal) :
     NeighborCoupleable(moose_object, nodal, neighbor_nodal),
     ScalarCoupleable(moose_object),
-    NeighborMooseVariableInterface(moose_object, nodal)
+    NeighborMooseVariableInterface(moose_object, nodal),
+    MooseVariableDependencyInterface(moose_object)
   {
-    const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-    for (unsigned int i=0; i<coupled_vars.size(); i++)
-      addMooseVariableDependency(coupled_vars[i]);
-
+    addMooseVariableDependency(getCoupledMooseVars());
     addMooseVariableDependency(mooseVariable());
   }
 };

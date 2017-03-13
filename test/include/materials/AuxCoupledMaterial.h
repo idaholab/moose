@@ -11,37 +11,30 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+#ifndef AUXCOUPLEDMATERIAL_H
+#define AUXCOUPLEDMATERIAL_H
 
-#ifndef MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H
-#define MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H
+#include "Material.h"
 
-#include "MultiAppTransfer.h"
-#include "MooseVariableDependencyInterface.h"
-
-// Forward declarations
-class MultiAppVariableValueSamplePostprocessorTransfer;
+class AuxCoupledMaterial;
 
 template<>
-InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>();
+InputParameters validParams<AuxCoupledMaterial>();
 
 /**
- * Samples a variable's value in the Master domain at the point where
- * the MultiApp is.  Copies that value into a postprocessor in the
- * MultiApp.
+ * A material that couples a variable
  */
-class MultiAppVariableValueSamplePostprocessorTransfer :
-  public MultiAppTransfer,
-  public MooseVariableDependencyInterface
+class AuxCoupledMaterial : public Material
 {
 public:
-  MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters);
-
-  virtual void execute() override;
+  AuxCoupledMaterial(const InputParameters & parameters);
 
 protected:
-  PostprocessorName _postprocessor_name;
-  AuxVariableName _from_var_name;
-
+  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties();
+  const VariableValue & _variable;
+  MaterialProperty<Real> & _mat_prop;
+  MaterialProperty<Real> & _mat_prop_old;
 };
 
-#endif // MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H
+#endif // AUXCOUPLEDMATERIAL_H

@@ -30,7 +30,9 @@ class Elem;
 template<>
 InputParameters validParams<ElementalVariableValue>();
 
-class ElementalVariableValue : public GeneralPostprocessor
+class ElementalVariableValue :
+    public GeneralPostprocessor,
+    public MooseVariableDependencyInterface
 {
 public:
   ElementalVariableValue(const InputParameters & parameters);

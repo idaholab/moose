@@ -36,7 +36,7 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters) :
     MaterialPropertyInterface(this, blockIDs()),
     UserObjectInterface(this),
     Coupleable(this, false),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     TransientInterface(this),
     PostprocessorInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, false),
@@ -50,7 +50,5 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters) :
     _coord(_assembly.coordTransformation())
 {
   // Keep track of which variables are coupled so we know what we depend on
-  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
+  addMooseVariableDependency(getCoupledMooseVars());
 }

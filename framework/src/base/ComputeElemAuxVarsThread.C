@@ -54,18 +54,7 @@ ComputeElemAuxVarsThread::subdomainChanged()
   }
 
   std::set<MooseVariable *> needed_moose_vars;
-
-  if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
-  {
-    const std::vector<std::shared_ptr<AuxKernel>> & kernels = _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
-    for (const auto & aux : kernels)
-    {
-      aux->subdomainSetup();
-      const std::set<MooseVariable *> & mv_deps = aux->getMooseVariableDependencies();
-      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
-    }
-  }
-
+  _aux_kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
 }

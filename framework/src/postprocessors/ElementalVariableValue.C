@@ -27,6 +27,7 @@ InputParameters validParams<ElementalVariableValue>()
 
 ElementalVariableValue::ElementalVariableValue(const InputParameters & parameters) :
     GeneralPostprocessor(parameters),
+    MooseVariableDependencyInterface(this),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
     _element(_mesh.getMesh().query_elem_ptr(parameters.get<unsigned int>("elementid")))
@@ -34,6 +35,8 @@ ElementalVariableValue::ElementalVariableValue(const InputParameters & parameter
   // This class only works with ReplicatedMesh, since it relies on a
   // specific element numbering that we can't guarantee with DistributedMesh
   _mesh.errorIfDistributedMesh("ElementalVariableValue");
+
+  addMooseVariableDependency(&_subproblem.getVariable(_tid, _var_name));
 }
 
 Real
@@ -58,4 +61,3 @@ ElementalVariableValue::getValue()
 
   return value;
 }
-

@@ -18,6 +18,7 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "ParallelUniqueId.h"
+#include "MooseVariableDependencyInterface.h"
 
 // libMesh includes
 #include "libmesh/dof_map.h"
@@ -46,6 +47,7 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
     NeighborCoupleable(this, false, false),
     ScalarCoupleable(this),
     NeighborMooseVariableInterface(this, false),
+    MooseVariableDependencyInterface(this),
     _field_var(_sys.getVariable(_tid, name())),
 
     _current_elem(_assembly.elem()),
@@ -73,10 +75,7 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
     _u_neighbor(_var.slnNeighbor()),
     _grad_u_neighbor(_var.gradSlnNeighbor())
 {
-  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
-
+  addMooseVariableDependency(getCoupledMooseVars());
   addMooseVariableDependency(mooseVariable());
 }
 

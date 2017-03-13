@@ -38,9 +38,13 @@ public:
 
   virtual void onElement(const Elem * elem) override;
 
+  virtual void subdomainChanged() override;
+
   void join(const ComputeElemDampingThread & y);
 
   Real damping();
+
+  virtual void post() override;
 
 protected:
   Real _damping;

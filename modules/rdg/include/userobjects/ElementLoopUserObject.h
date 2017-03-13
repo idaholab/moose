@@ -48,7 +48,7 @@ InputParameters validParams<ElementLoopUserObject>();
  *      For example, in the workflow of a cell-centered finite volume method,
  *      two element-loops are required in a specific sequence in user objects:
  *
- *      First, an element-loop is requried to calculate the in-cell gradients of variables
+ *      First, an element-loop is required to calculate the in-cell gradients of variables
  *      using a piecewise linear reconstruction scheme.
  *
  *      Second, another element-loop is required to calculate the limited in-cell gradients of variables

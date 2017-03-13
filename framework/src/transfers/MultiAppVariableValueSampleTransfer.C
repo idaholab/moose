@@ -34,9 +34,11 @@ InputParameters validParams<MultiAppVariableValueSampleTransfer>()
 
 MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(const InputParameters & parameters) :
     MultiAppTransfer(parameters),
+    MooseVariableDependencyInterface(this),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
+  addMooseVariableDependency(&_fe_problem.getVariable(_tid, _from_var_name));
 }
 
 void

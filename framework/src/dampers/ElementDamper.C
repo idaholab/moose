@@ -32,6 +32,7 @@ InputParameters validParams<ElementDamper>()
 
 ElementDamper::ElementDamper(const InputParameters & parameters) :
     Damper(parameters),
+    MooseVariableDependencyInterface(this),
     MaterialPropertyInterface(this),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
@@ -48,6 +49,7 @@ ElementDamper::ElementDamper(const InputParameters & parameters) :
     _u(_var.sln()),
     _grad_u(_var.gradSln())
 {
+  addMooseVariableDependency(&_var);
 }
 
 Real

@@ -2007,7 +2007,7 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   std::set<MooseVariable *> needed_moose_vars;
 
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
-    _all_materials.updateVariableDependency(needed_moose_vars, tid);
+    _all_materials.updateBlockVariableDependency(blk_id, needed_moose_vars, tid);
 
   const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
   for (const auto & id : ids)
@@ -2557,6 +2557,9 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   if (general.hasActiveObjects())
   {
     const auto & objects = general.getActiveObjects();
+    std::set<MooseVariable *> needed_moose_vars;
+    general.updateVariableDependency(needed_moose_vars, 0);
+    setActiveElementalMooseVariables(needed_moose_vars, 0);
     for (const auto & obj : objects)
     {
       obj->initialize();
@@ -2567,6 +2570,7 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
       if (pp)
         _pps_data.storeValue(obj->name(), pp->getValue());
     }
+    clearActiveElementalMooseVariables(0);
   }
 
   Moose::perf_log.pop(compute_uo_tag, "Execution");
@@ -2795,13 +2799,18 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECT
     const auto & transfers = wh.getActiveObjects();
 
     _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << string_direction << "MultiApps" << COLOR_DEFAULT << std::endl;
+
+    std::set<MooseVariable *> needed_moose_vars;
+    _to_multi_app_transfers[type].updateVariableDependency(needed_moose_vars);
+    setActiveElementalMooseVariables(needed_moose_vars, 0);
+
     for (const auto & transfer : transfers)
     {
       Moose::perf_log.push(transfer->name(), "Transfers");
       transfer->execute();
       Moose::perf_log.pop(transfer->name(), "Transfers");
     }
-
+    clearActiveElementalMooseVariables(0);
     _console << "Waiting For Transfers To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator);
 

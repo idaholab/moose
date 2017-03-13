@@ -17,6 +17,7 @@
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "AuxKernel.h"
+#include "Material.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -49,6 +50,7 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
   // Reference to all boundary restricted AuxKernels for the current thread
   const auto & boundary_kernels = _storage.getActiveBoundaryObjects(_tid);
 
+
   for (const auto & belem : range)
   {
     const Elem * elem = belem->_elem;
@@ -57,6 +59,12 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
 
     if (elem->processor_id() == _problem.processor_id())
     {
+      std::set<MooseVariable *> needed_moose_vars;
+      _storage.updateBoundaryVariableDependency(boundary_id, needed_moose_vars, _tid);
+      if (_need_materials)
+        _problem.getMaterialWarehouse().updateBoundaryVariableDependency(boundary_id, needed_moose_vars, _tid);
+      _problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+
       // prepare variables
       for (const auto & it : _aux_sys._elem_vars[_tid])
       {
@@ -102,6 +110,7 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
       }
     }
   }
+  _problem.clearActiveElementalMooseVariables(_tid);
 }
 
 void

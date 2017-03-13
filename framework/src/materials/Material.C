@@ -60,7 +60,7 @@ Material::Material(const InputParameters & parameters) :
     BoundaryRestrictable(parameters, blockIDs(), false), // false for being _not_ nodal
     SetupInterface(this),
     Coupleable(this, false),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     ScalarCoupleable(this),
     FunctionInterface(this),
     UserObjectInterface(this),
@@ -98,9 +98,7 @@ Material::Material(const InputParameters & parameters) :
     _has_stateful_property(false)
 {
   // Fill in the MooseVariable dependencies
-  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
+  addMooseVariableDependency(getCoupledMooseVars());
 }
 
 void

@@ -37,4 +37,3 @@ FunctionAux::computeValue()
   else
     return _func.value(_t, _q_point[_qp]);
 }
-

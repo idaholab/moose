@@ -29,7 +29,7 @@ InternalSideUserObject::InternalSideUserObject(const InputParameters & parameter
     BlockRestrictable(parameters),
     TwoMaterialPropertyInterface(this, blockIDs()),
     NeighborCoupleable(this, false, false),
-    MooseVariableDependencyInterface(),
+    MooseVariableDependencyInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
     PostprocessorInterface(this),
@@ -47,9 +47,7 @@ InternalSideUserObject::InternalSideUserObject(const InputParameters & parameter
     _neighbor_elem(_assembly.neighbor())
 {
   // Keep track of which variables are coupled so we know what we depend on
-  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
+  addMooseVariableDependency(getCoupledMooseVars());
 }
 
 

@@ -30,7 +30,10 @@ InputParameters validParams<FindValueOnLine>();
  * The Postprocessor reports the distance from the start_point along the line
  * between start_point and end_point.
  */
-class FindValueOnLine : public GeneralPostprocessor, public Coupleable
+class FindValueOnLine :
+    public GeneralPostprocessor,
+    public Coupleable,
+    public MooseVariableDependencyInterface
 {
 public:
   FindValueOnLine(const InputParameters & parameters);

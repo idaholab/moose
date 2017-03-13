@@ -37,7 +37,8 @@ class InternalSideIndicator :
   public Indicator,
   public NeighborCoupleable,
   public ScalarCoupleable,
-  public NeighborMooseVariableInterface
+  public NeighborMooseVariableInterface,
+  public MooseVariableDependencyInterface
 {
 public:
 

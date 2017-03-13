@@ -20,6 +20,7 @@
 #include "ParallelUniqueId.h"
 #include "MaterialPropertyInterface.h"
 #include "MooseVariableBase.h"
+#include "MooseVariableDependencyInterface.h"
 
 //Forward Declarations
 class ElementDamper;
@@ -36,7 +37,8 @@ InputParameters validParams<ElementDamper>();
  */
 class ElementDamper :
   public Damper,
-  protected MaterialPropertyInterface
+  public MooseVariableDependencyInterface,
+  public MaterialPropertyInterface
 {
 public:
   ElementDamper(const InputParameters & parameters);

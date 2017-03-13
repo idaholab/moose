@@ -20,6 +20,7 @@
 #include "PostprocessorInterface.h"
 #include "Coupleable.h"
 #include "ScalarCoupleable.h"
+#include "MooseVariableDependencyInterface.h"
 #include "MooseVariableInterface.h"
 #include "MaterialPropertyInterface.h"
 #include "ZeroInterface.h"
@@ -37,6 +38,7 @@ class ElementIndicator :
   public PostprocessorInterface,
   public Coupleable,
   public ScalarCoupleable,
+  public MooseVariableDependencyInterface,
   public MooseVariableInterface,
   public MaterialPropertyInterface,
   public ZeroInterface

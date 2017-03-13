@@ -12,36 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H
-#define MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H
-
-#include "MultiAppTransfer.h"
 #include "MooseVariableDependencyInterface.h"
+#include "MooseObject.h"
+#include "MooseError.h"
 
-// Forward declarations
-class MultiAppVariableValueSamplePostprocessorTransfer;
-
-template<>
-InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>();
-
-/**
- * Samples a variable's value in the Master domain at the point where
- * the MultiApp is.  Copies that value into a postprocessor in the
- * MultiApp.
- */
-class MultiAppVariableValueSamplePostprocessorTransfer :
-  public MultiAppTransfer,
-  public MooseVariableDependencyInterface
+MooseVariableDependencyInterface::MooseVariableDependencyInterface()
 {
-public:
-  MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters);
+  mooseDeprecated("The empty MaterialPropertyInterface constructor will be removed, please use the version that takes a MooseObject * as input.");
+}
 
-  virtual void execute() override;
 
-protected:
-  PostprocessorName _postprocessor_name;
-  AuxVariableName _from_var_name;
+MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject * /*moose_object*/)
+{
+}
 
-};
+const std::set<MooseVariable *> &
+MooseVariableDependencyInterface::getMooseVariableDependencies()
+{
+  return _moose_variable_dependencies;
+}
 
-#endif // MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H
+
+void
+MooseVariableDependencyInterface::addMooseVariableDependency(MooseVariable * var)
+{
+  _moose_variable_dependencies.insert(var);
+}
+
+
+void MooseVariableDependencyInterface::addMooseVariableDependency(std::vector<MooseVariable *> vars)
+{
+  _moose_variable_dependencies.insert(vars.begin(), vars.end());
+}

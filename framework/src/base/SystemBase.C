@@ -210,19 +210,17 @@ SystemBase::prepare(THREAD_ID tid)
 {
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
-    const std::set<MooseVariable *> & active_elemental_moose_variables = _subproblem.getActiveElementalMooseVariables(tid);
-    const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-    for (const auto & var : vars)
+    for (const auto & var : _vars[tid].variables())
       var->clearDofIndices();
 
-    for (const auto & var : active_elemental_moose_variables)
+    for (const auto & var : _subproblem.getActiveElementalMooseVariables(tid))
       if (&(var->sys()) == this)
         var->prepare();
   }
   else
   {
-    const std::vector<MooseVariable *> & vars = _vars[tid].variables();
-    for (const auto & var : vars)
+    mooseDoOnce(mooseWarning("Prepare is being called without calling setActiveElementalMooseVariables, you are probably missing a call to MooseVariableDependencyInterface::addMooseVariableDependency."));
+    for (const auto & var : _vars[tid].variables())
       var->prepare();
   }
 }
