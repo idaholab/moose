@@ -1,3 +1,0 @@
-# TODO(rwcarlsen): Remove this after a while.
-*.C   merge=clang-format
-*.h   merge=clang-format
