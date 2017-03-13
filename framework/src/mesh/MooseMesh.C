@@ -2223,7 +2223,13 @@ MooseMesh::ghostGhostedBoundaries()
 
   DistributedMesh & mesh = dynamic_cast<DistributedMesh &>(getMesh());
 
-  mesh.clear_extra_ghost_elems();
+  // We would like to clear ghosted elements that were added by
+  // previous invocations of this method; however we can't do so
+  // simply without also clearing ghosted elements that were added by
+  // other code; e.g.  OversampleOutput.  So for now we'll just
+  // swallow the inefficiency that can come from leaving unnecessary
+  // elements ghosted after AMR.
+//  mesh.clear_extra_ghost_elems();
 
   mesh.get_boundary_info().build_side_list(elems, sides, ids);
 
