@@ -113,6 +113,24 @@ OversampleOutput::initOversample()
   // Reference the system from which we are copying
   EquationSystems & source_es = _problem_ptr->es();
 
+  // If we're going to be copying from that system later, we need to keep its
+  // original elements as ghost elements even if it gets grossly
+  // repartitioned, since we can't repartition the oversample mesh to
+  // match.
+  DistributedMesh * dist_mesh = dynamic_cast<DistributedMesh *>(&source_es.get_mesh());
+  if (dist_mesh)
+  {
+    for (MeshBase::element_iterator
+           it = dist_mesh->active_local_elements_begin(),
+           end = dist_mesh->active_local_elements_end();
+         it != end; ++it)
+    {
+      Elem * elem = *it;
+
+      dist_mesh->add_extra_ghost_elem(elem);
+    }
+  }
+
   // Initialize the _mesh_functions vector
   unsigned int num_systems = source_es.n_systems();
   _mesh_functions.resize(num_systems);
