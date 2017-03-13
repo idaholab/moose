@@ -2,5 +2,6 @@
   [./PluginManager]
      type = RunApp
      command = test_PluginManager.py
+     display_required = True
   [../]
 []

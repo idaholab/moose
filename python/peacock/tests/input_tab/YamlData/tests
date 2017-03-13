@@ -2,5 +2,6 @@
   [./YamlData]
     type = PythonUnitTest
     input = test_YamlData.py
+    display_required = True    
   [../]
 []

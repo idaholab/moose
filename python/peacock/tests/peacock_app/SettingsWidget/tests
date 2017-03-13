@@ -2,5 +2,6 @@
   [./SettingsWidget]
     type = PythonUnitTest
     input = test_SettingsWidget.py
+    display_required = True
   [../]
 []

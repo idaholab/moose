@@ -2,5 +2,6 @@
   [./CommentEditor]
     type = PythonUnitTest
     input = test_CommentEditor.py
+    display_required = True
   [../]
 []

@@ -2,5 +2,6 @@
   [./JobRunner]
     type = PythonUnitTest
     input = test_JobRunner.py
+    display_required = True
   [../]
 []

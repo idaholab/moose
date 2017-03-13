@@ -2,5 +2,6 @@
   [./ParamsByType]
     type = PythonUnitTest
     input = test_ParamsByType.py
+    display_required = True
   [../]
 []

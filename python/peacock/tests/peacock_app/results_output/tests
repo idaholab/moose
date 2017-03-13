@@ -3,5 +3,6 @@
     type = PythonUnitTest
     input = test_results_output.py
     separate = True
+    display_required = True
   [../]
 []

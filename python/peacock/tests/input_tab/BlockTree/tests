@@ -2,5 +2,6 @@
   [./BlockTree]
     type = PythonUnitTest
     input = test_BlockTree.py
+    display_required = True
   [../]
 []

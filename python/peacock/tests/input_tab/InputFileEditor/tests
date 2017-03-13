@@ -2,5 +2,6 @@
   [./InputFileEditor]
     type = PythonUnitTest
     input = test_InputFileEditor.py
+    display_required = True
   [../]
 []

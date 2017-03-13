@@ -3,5 +3,6 @@
     type = PythonUnitTest
     input = test_PeacockApp.py
     separate = True
+    display_required = True
   [../]
 []

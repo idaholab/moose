@@ -2,5 +2,6 @@
   [./CheckInputWidget]
     type = PythonUnitTest
     input = test_CheckInputWidget.py
+    display_required = True
   [../]
 []

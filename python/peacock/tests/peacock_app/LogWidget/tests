@@ -2,5 +2,6 @@
   [./LogWidget]
     type = PythonUnitTest
     input = test_LogWidget.py
+    display_required = True
   [../]
 []

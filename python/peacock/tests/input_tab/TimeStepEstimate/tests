@@ -2,5 +2,6 @@
   [./TimeStepEstimate]
     type = PythonUnitTest
     input = test_TimeStepEstimate.py
+    display_required = True
   [../]
 []

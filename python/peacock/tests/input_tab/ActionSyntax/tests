@@ -2,5 +2,6 @@
   [./ActionSyntax]
     type = PythonUnitTest
     input = test_ActionSyntax.py
+    display_required = True
   [../]
 []

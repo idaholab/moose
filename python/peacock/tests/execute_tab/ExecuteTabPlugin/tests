@@ -2,5 +2,6 @@
   [./ExecuteTabPlugin]
     type = PythonUnitTest
     input = test_ExecuteTabPlugin.py
+    display_required = True
   [../]
 []
