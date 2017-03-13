@@ -275,9 +275,9 @@ def moosedocs():
 
     # Pull LFS image files
     try:
-        subprocess.check_output(['git', 'lfs', 'pull'])
+        subprocess.check_output(['git', 'submodule', 'update', '--init', 'media'])
     except subprocess.CalledProcessError:
-        print "ERROR: Unable to run 'git lfs', it is likely not installed but required for the MOOSE documentation system."
+        print "ERROR: Unable to run 'git submodule update' for the media directory."
         sys.exit(1)
 
     # Execute command

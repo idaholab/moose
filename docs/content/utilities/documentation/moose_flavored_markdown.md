@@ -4,8 +4,6 @@ Documentation generated using MOOSE is generated using the [python-markdown](htt
 which includes the ability to use extensions from others as well as define custom extensions. This page outlines the
 extensions included as well as the custom syntax defined exclusively for documenting MOOSE source code.
 
----
-
 ## Extensions
 ### Symbol Conversion
 This package converts ASCII symbols for dashes, quotes, and ellipses to the correct html, for more information see the
@@ -60,19 +58,11 @@ The supported "types" for MOOSE are: "info", "note", "important, "warning", "dan
 !!! error "Optional Error Title"
     This is an error message.
 
----
-
 ## Automatic Links
 
-Moose Flavored Markdown is capable of automatically creating links based on Markdown filenames, which is
-especially useful when linking to generated pages. The syntax is identical to creating links as
-defined by [mkdocs], however the markdown path may be incomplete.
+Moose Flavored Markdown is capable of automatically creating links based on Markdown filenames, using an incomplete paths as follows:
 
-* `[/Diffusion.md]`: [/Diffusion.md]
-* `[/Kernels/index..md]`: [systems/Kernels/index.md]
 * `[Diffusion](/Diffusion.md)`: [Diffusion](/Diffusion.md)
-
----
 
 ## Including MOOSE Source Files
 It is possible to include complete or partial C++ or input files from the local MOOSE repository. The following sections detail the custom
@@ -123,9 +113,7 @@ the following limits the included code to the `computeQpResidual` method.
 !clang framework/src/kernels/Diffusion.C method=computeQpResidual
 ```
 
-<!--
 !clang framework/src/kernels/Diffusion.C method=computeQpResidual
--->
 
 !!! warning "Warning"
     This method uses the clang parser directly, which can be slow. Thus, in general source code should be
@@ -155,8 +143,6 @@ The following options may be passed to control how the output is formatted.
 | max-height           | 500px   | The maximum height of the code window (see [max-height](http://www.w3schools.com/cssref/pr_dim_max-height.asp)). |
 | strip-extra-newlines | True    | Remove excessive newlines from the included code. |
 
----
-
 ## MOOSE Syntax
 A set of special keywords exist for creating MOOSE specific links and tables within your markdown, each are explained below. Note, the
 examples below refer to documentation associated with Kernels and/or the Diffusion Kernel. This should be replaced by
@@ -168,8 +154,6 @@ the syntax for the system or object being documented.
 * `!childobjects /Kernels/Diffusion`: Create a list of objects that inherit from the supplied object.
 * `!subobjects /Kernels`: Creates a table of objects within the supplied system.
 * `!subsystems /Adaptivity`: Creates a table of sub-systems within the supplied system.
-
----
 
 ## Images
 !image docs/media/memory_logger-plot_multi.png width=30% padding-left=20px float=right caption=The [memory_logger](/memory_logger.md) is a utility that allows the user to track the memory use of a simulation.
@@ -225,8 +209,6 @@ A full slideshow example might be:
     docs/media/github*.png background-color=gray
     docs/media/memory_logger-plot_multi.png
 
----
-
 ## Figures
 When writing documentation it is customary to reference figures within text by number. To create a numbered figure use
 the `!figure` markdown syntax. This syntax operates nearly identically to the `!image` syntax with two exceptions.
@@ -243,8 +225,6 @@ Secondly, the "id" setting must be supplied. This defines the name to which the 
 
 Figures can be referenced with latex style reference commands. For example, using `\ref{fig:memory_logger}` results in a
 reference to Figure \ref{fig:memory_logger}. If an invalid "id" is supplied the reference will display question marks: \ref{fig:invalid_id}.
-
----
 
 ## Flow Charts
 The ability to include diagrams using [GraphViz](http://www.graphviz.org/) using the [dot]() language is provided.
@@ -273,9 +253,6 @@ graph {
     a -- b -- c;
     b -- d;
 }
-
-
----
 
 ## CSS Options
 
@@ -323,9 +300,6 @@ An empty new line, designates the end of the css block.
 !css font-size=smaller margin-left=70% color=red text-shadow=1px 1px 1px rgba(0,0,0,.4)
 Another paragraph modified by CSS.
 
-
----
-
 ## Build Status
 !buildstatus https://moosebuild.org/mooseframework/ float=right padding-left=10px
 
@@ -338,9 +312,6 @@ Currently this will only work with Civet CI services.
 ```
 !!! note
     Be sure to follow your !buildstatus extension with an empty new line.
-
-
----
 
 ## Bibliographies
 
