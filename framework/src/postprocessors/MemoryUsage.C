@@ -44,6 +44,8 @@ MemoryUsage::MemoryUsage(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mem_type(getParam<MooseEnum>("mem_type").getEnum<MemType>()),
     _value_type(getParam<MooseEnum>("value_type").getEnum<ValueType>()),
+    _value(0.0),
+    _peak_value(0.0),
     _report_peak_value(getParam<bool>("report_peak_value"))
 {
 }
@@ -144,6 +146,9 @@ MemoryUsage::finalize()
     case ValueType::min_process:
       gatherMin(_value);
       break;
+
+    default:
+      mooseError("Invalid value_type");
   }
 
   if (_value > _peak_value)
