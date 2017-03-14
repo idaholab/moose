@@ -35,17 +35,21 @@ public:
    * @param path The path of the action
    * @param is_type Whether this belongs to a "<type>" or not
    * @param action Name of the action
-   * @param task_name Task name associated with these parameters
    * @param is_action Wheter it is an action
    * @param params The InputParameters to add to the tree
    */
-  void addParameters(const std::string & parent_path,
+  bool addParameters(const std::string & parent_path,
                      const std::string & path,
                      bool is_type,
                      const std::string & action,
-                     const std::string & task_name,
                      bool is_action,
-                     InputParameters * params);
+                     InputParameters * params,
+                     const std::pair<std::string, int> & lineinfo);
+
+  void addActionTask(const std::string & path,
+                     const std::string & action,
+                     const std::string & task,
+                     const std::pair<std::string, int> & lineinfo);
 
   const moosecontrib::Json::Value & getRoot() const { return _root; }
 
