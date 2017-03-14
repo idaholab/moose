@@ -1,4 +1,6 @@
-# 1x1x1 unit cube with uniform pressure on top face
+# 1x1x1 unit cube with uniform pressure on top face for the case of small strain.
+#  This test does not have a solid mechanics analog because there is not an equvialent
+#  small strain with rotations strain calculator material in solid mechanics
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
@@ -22,7 +24,7 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
-    strain = FINITE
+    strain = SMALL
     incremental = true
     add_variables = true
     generate_output = 'stress_yy creep_strain_xx creep_strain_yy creep_strain_zz elastic_strain_yy'
@@ -124,7 +126,7 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options = '-snes_ksp'
+  petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-ksp_gmres_restart'
   petsc_options_value = '101'
 
@@ -135,17 +137,12 @@
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-6
   l_tol = 1e-5
-  start_time = 0.6
+  start_time = 0.0
   end_time = 1.0
-  num_steps = 12
+  num_steps = 10
   dt = 0.1
 []
 
 [Outputs]
-  file_base = power_law_creep_out
   exodus = true
-[]
-
-[Problem]
-  restart_file_base = power_law_creep_restart1_out_cp/0006
 []

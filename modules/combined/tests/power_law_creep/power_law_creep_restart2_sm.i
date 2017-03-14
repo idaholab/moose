@@ -1,26 +1,27 @@
 # 1x1x1 unit cube with uniform pressure on top face
 
 [Mesh]
-  file = 1x1x1_cube.e
-  displacements = 'x_disp y_disp z_disp'
+  type = GeneratedMesh
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
-  [./x_disp]
+  [./disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
-
-  [./y_disp]
+  [./disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-
-  [./z_disp]
+  [./disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./temp]
     order = FIRST
     family = LAGRANGE
@@ -33,22 +34,18 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./creep_strain_xx]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./creep_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./creep_strain_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./elastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
@@ -58,7 +55,6 @@
 [Functions]
   [./top_pull]
     type = PiecewiseLinear
-
     x = '0 1'
     y = '1 1'
   [../]
@@ -66,33 +62,17 @@
 
 [SolidMechanics]
   [./solid]
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
 [Kernels]
-  [./solid_x_ie]
-    type = SolidMechImplicitEuler
-    variable = x_disp
-  [../]
-
-  [./solid_y_ie]
-    type = SolidMechImplicitEuler
-    variable = y_disp
-  [../]
-
-  [./solid_z_ie]
-    type = SolidMechImplicitEuler
-    variable = z_disp
-  [../]
-
   [./heat]
     type = HeatConduction
     variable = temp
   [../]
-
   [./heat_ie]
     type = HeatConductionTimeDerivative
     variable = temp
@@ -101,98 +81,79 @@
 
 
 [AuxKernels]
-
   [./stress_yy]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_yy
     index = 1
   [../]
-
   [./creep_strain_xx]
     type = MaterialTensorAux
     tensor = creep_strain
     variable = creep_strain_xx
     index = 0
   [../]
-
   [./creep_strain_yy]
     type = MaterialTensorAux
     tensor = creep_strain
     variable = creep_strain_yy
     index = 1
   [../]
-
   [./creep_strain_zz]
     type = MaterialTensorAux
     tensor = creep_strain
     variable = creep_strain_zz
     index = 2
   [../]
-
   [./elastic_strain_yy]
     type = MaterialTensorAux
     tensor = elastic_strain
     variable = elastic_strain_yy
     index = 1
   [../]
-
 []
 
 
 [BCs]
-
   [./u_top_pull]
     type = Pressure
-    variable = y_disp
+    variable = disp_y
     component = 1
-    boundary = 5
+    boundary = top
     factor = -10.0e6
     function = top_pull
   [../]
 
   [./u_bottom_fix]
     type = DirichletBC
-    variable = y_disp
-    boundary = 3
+    variable = disp_y
+    boundary = bottom
     value = 0.0
   [../]
-
   [./u_yz_fix]
     type = DirichletBC
-    variable = x_disp
-    boundary = 4
+    variable = disp_x
+    boundary = left
     value = 0.0
   [../]
-
   [./u_xy_fix]
     type = DirichletBC
-    variable = z_disp
-    boundary = 2
+    variable = disp_z
+    boundary = back
     value = 0.0
   [../]
-
-  [./temp_top_fix]
+  [./temp_fix]
     type = DirichletBC
     variable = temp
-    boundary = 5
+    boundary = 'bottom top'
     value = 1000.0
   [../]
-
-  [./temp_bottom_fix]
-    type = DirichletBC
-    variable = temp
-    boundary = 3
-    value = 1000.0
-  [../]
-
 []
 
 [Materials]
-
   [./creep]
     type = PowerLawCreep
-    block = 1
+    block = 0
     youngs_modulus = 2.e11
     poissons_ratio = .3
     coefficient = 1.0e-15
@@ -201,58 +162,58 @@
     relative_tolerance = 1e-25
     absolute_tolerance = 1e-5
     max_its = 100
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     temp = temp
     output_iteration_info = false
+    formulation = Nonlinear3D
   [../]
 
   [./thermal]
     type = HeatConductionMaterial
-    block = 1
+    block = 0
     specific_heat = 1.0
     thermal_conductivity = 100.
   [../]
-
   [./density]
     type = Density
-    block = 1
+    block = 0
     density = 1.0
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
-
 []
 
 [Executioner]
   type = Transient
-#  petsc_options = '-snes_mf_operator -ksp_monitor -snes_ksp_ew'
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
 
   petsc_options = '-snes_ksp'
   petsc_options_iname = '-ksp_gmres_restart'
   petsc_options_value = '101'
 
-
   line_search = 'none'
 
-
-  l_max_its = 100
-  nl_max_its = 100
+  l_max_its = 20
+  nl_max_its = 20
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-6
   l_tol = 1e-5
-  start_time = 0.0
+  start_time = 0.6
   end_time = 1.0
-  num_steps = 10
-  dt = 1.e-1
+  num_steps = 12
+  dt = 0.1
 []
 
 [Outputs]
+  file_base = power_law_creep_out
   exodus = true
+[]
+
+[Problem]
+  restart_file_base = power_law_creep_restart1_out_cp/0006
 []
