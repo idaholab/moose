@@ -54,6 +54,10 @@ PointSamplerBase::initialize()
   // We do this here just in case it's been destroyed and recreated because of mesh adaptivity.
   _pl = _mesh.getPointLocator();
 
+  // We may not find a requested point on a distributed mesh, and
+  // that's okay.
+  _pl->enable_out_of_mesh_mode();
+
   // Reset the point arrays
   _found_points.assign(_points.size(), false);
 
