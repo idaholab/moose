@@ -1081,3 +1081,12 @@ RankTwoTensor::initialContraction(const RankFourTensor & b) const
 
   return result;
 }
+
+std::ostream &
+operator<<(std::ostream & os, const RankTwoTensor & tensor)
+{
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+      os << "T(" << i << ", " << j << ") = " << tensor(i,j) << '\n';
+  return os;
+}
