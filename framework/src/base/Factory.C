@@ -183,3 +183,11 @@ Factory::getConstructedObjects() const
     list.push_back(name);
   return list;
 }
+std::pair<std::string, int>
+Factory::getLineInfo(const std::string & name) const
+{
+  auto it = _name_to_line.find(name);
+  if (it == _name_to_line.end())
+    return std::make_pair("", -1);
+  return it->second;
+}

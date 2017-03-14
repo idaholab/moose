@@ -149,3 +149,11 @@ ActionFactory::getTasksByAction(const std::string & action) const
 
   return tasks;
 }
+std::pair<std::string, int>
+ActionFactory::getLineInfo(const std::string & name, const std::string & task) const
+{
+  auto iter = _name_to_line.find(std::make_pair(name, task));
+  if (iter == _name_to_line.end())
+    return std::make_pair("", -1);
+  return iter->second;
+}
