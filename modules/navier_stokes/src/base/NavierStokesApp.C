@@ -341,13 +341,14 @@ void
 NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
 #undef registerAction
-#define registerAction(type, action) action_factory.reg<type>(stringifyName(type), action)
+#define registerAction(type, action)                                                               \
+  action_factory.reg<type>(stringifyName(type), action, __FILE__, __LINE__)
 
   // Create the syntax
-  syntax.registerActionSyntax("AddNavierStokesVariablesAction", "Modules/NavierStokes/Variables");
-  syntax.registerActionSyntax("AddNavierStokesICsAction", "Modules/NavierStokes/ICs");
-  syntax.registerActionSyntax("AddNavierStokesKernelsAction", "Modules/NavierStokes/Kernels");
-  syntax.registerActionSyntax("AddNavierStokesBCsAction", "Modules/NavierStokes/BCs/*");
+  registerSyntax("AddNavierStokesVariablesAction", "Modules/NavierStokes/Variables");
+  registerSyntax("AddNavierStokesICsAction", "Modules/NavierStokes/ICs");
+  registerSyntax("AddNavierStokesKernelsAction", "Modules/NavierStokes/Kernels");
+  registerSyntax("AddNavierStokesBCsAction", "Modules/NavierStokes/BCs/*");
 
   // add variables action
   registerTask("add_navier_stokes_variables", /*is_required=*/false);

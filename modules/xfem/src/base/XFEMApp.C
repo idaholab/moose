@@ -97,5 +97,5 @@ XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(XFEMAction, "add_aux_variable");
   registerAction(XFEMAction, "add_aux_kernel");
 
-  syntax.registerActionSyntax("XFEMAction", "XFEM");
+  registerSyntax("XFEMAction", "XFEM");
 }

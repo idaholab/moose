@@ -156,14 +156,14 @@ SolidMechanicsApp__associateSyntax(Syntax & syntax, ActionFactory & action_facto
 void
 SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("SolidMechanicsAction", "SolidMechanics/*");
+  registerSyntax("SolidMechanicsAction", "SolidMechanics/*");
 
-  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral", "add_user_object");
-  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral", "add_aux_variable");
-  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral", "add_aux_kernel");
-  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral", "add_postprocessor");
-  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral", "add_vector_postprocessor");
-  syntax.registerActionSyntax("DomainIntegralAction", "DomainIntegral", "add_material");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_user_object");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_aux_variable");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_aux_kernel");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_postprocessor");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_vector_postprocessor");
+  registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_material");
 
   registerAction(SolidMechanicsAction, "add_kernel");
   registerAction(DomainIntegralAction, "add_user_object");

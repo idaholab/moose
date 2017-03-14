@@ -15,6 +15,7 @@
 #include "MooseSyntax.h"
 #include "Syntax.h"
 #include "Moose.h"
+#include "ActionFactory.h"
 
 namespace Moose
 {
@@ -27,131 +28,128 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
    * satisfied based on the syntax encountered for classes which are registered
    * to satisfy more than one task
    */
-  syntax.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
-  syntax.registerActionSyntax("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
-  syntax.registerActionSyntax("CopyNodalVarsAction", "AuxVariables/*", "check_copy_nodal_vars");
-  syntax.registerActionSyntax("CopyNodalVarsAction", "AuxVariables/*", "copy_nodal_aux_vars");
+  registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
+  registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
+  registerSyntaxTask("CopyNodalVarsAction", "AuxVariables/*", "check_copy_nodal_vars");
+  registerSyntaxTask("CopyNodalVarsAction", "AuxVariables/*", "copy_nodal_aux_vars");
 
-  syntax.registerActionSyntax("AddKernelAction", "Kernels/*", "add_kernel");
-  syntax.registerActionSyntax("AddNodalKernelAction", "NodalKernels/*", "add_nodal_kernel");
-  syntax.registerActionSyntax("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
-  syntax.registerActionSyntax("AddKernelAction", "Bounds/*", "add_aux_kernel");
+  registerSyntaxTask("AddKernelAction", "Kernels/*", "add_kernel");
+  registerSyntaxTask("AddNodalKernelAction", "NodalKernels/*", "add_nodal_kernel");
+  registerSyntaxTask("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
+  registerSyntaxTask("AddKernelAction", "Bounds/*", "add_aux_kernel");
 
-  syntax.registerActionSyntax("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
-  syntax.registerActionSyntax(
-      "AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
+  registerSyntaxTask("AddScalarKernelAction", "ScalarKernels/*", "add_scalar_kernel");
+  registerSyntaxTask("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
 
-  syntax.registerActionSyntax("AddBCAction", "BCs/*", "add_bc");
+  registerSyntaxTask("AddBCAction", "BCs/*", "add_bc");
 
-  syntax.registerActionSyntax("CreateProblemAction", "Problem");
-  syntax.registerActionSyntax("DynamicObjectRegistrationAction", "Problem");
-  syntax.registerActionSyntax("SetupMeshAction", "Mesh");
-  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh");
-  //  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "prepare_mesh");
-  //  syntax.registerActionSyntax("SetupMeshCompleteAction", "Mesh", "setup_mesh_complete");
-  syntax.registerActionSyntax("CreateDisplacedProblemAction", "Mesh");
-  syntax.registerActionSyntax("AddMeshModifierAction", "MeshModifiers/*");
-  syntax.registerActionSyntax("AddMortarInterfaceAction", "Mesh/MortarInterfaces/*");
+  registerSyntax("CreateProblemAction", "Problem");
+  registerSyntax("DynamicObjectRegistrationAction", "Problem");
+  registerSyntax("SetupMeshAction", "Mesh");
+  registerSyntax("SetupMeshCompleteAction", "Mesh");
+  //  registerSyntaxTask("SetupMeshCompleteAction", "Mesh", "prepare_mesh");
+  //  registerSyntaxTask("SetupMeshCompleteAction", "Mesh", "setup_mesh_complete");
+  registerSyntax("CreateDisplacedProblemAction", "Mesh");
+  registerSyntax("AddMeshModifierAction", "MeshModifiers/*");
+  registerSyntax("AddMortarInterfaceAction", "Mesh/MortarInterfaces/*");
 
-  syntax.registerActionSyntax("AddFunctionAction", "Functions/*");
+  registerSyntax("AddFunctionAction", "Functions/*");
   syntax.registerSyntaxType("Functions/*", "FunctionName");
 
-  syntax.registerActionSyntax("GlobalParamsAction", "GlobalParams");
+  registerSyntax("GlobalParamsAction", "GlobalParams");
 
-  syntax.registerActionSyntax("SetupDebugAction", "Debug");
-  syntax.registerActionSyntax("SetupResidualDebugAction", "Debug");
+  registerSyntax("SetupDebugAction", "Debug");
+  registerSyntax("SetupResidualDebugAction", "Debug");
 
   /// Variable/AuxVariable Actions
-  syntax.registerActionSyntax("AddVariableAction", "Variables/*");
+  registerSyntax("AddVariableAction", "Variables/*");
   syntax.registerSyntaxType("Variables/*", "VariableName");
   syntax.registerSyntaxType("Variables/*", "NonlinearVariableName");
   //  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_variable");
   //  syntax.registerActionSyntax("AddVariableAction", "Variables/*", "add_ic");
 
-  syntax.registerActionSyntax("AddICAction", "Variables/*/InitialCondition");
-
-  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*");
+  registerSyntax("AddICAction", "Variables/*/InitialCondition");
   syntax.registerSyntaxType("AuxVariables/*", "VariableName");
   syntax.registerSyntaxType("AuxVariables/*", "AuxVariableName");
   //  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_aux_variable");
   //  syntax.registerActionSyntax("AddAuxVariableAction", "AuxVariables/*", "add_ic");
 
-  syntax.registerActionSyntax("AddICAction", "AuxVariables/*/InitialCondition");
+  registerSyntax("AddICAction", "AuxVariables/*/InitialCondition");
 
-  syntax.registerActionSyntax("EmptyAction", "BCs/Periodic", "no_action"); // placeholder
-  syntax.registerActionSyntax("AddPeriodicBCAction", "BCs/Periodic/*");
+  registerSyntaxTask("EmptyAction", "BCs/Periodic", "no_action"); // placeholder
+  registerSyntax("AddPeriodicBCAction", "BCs/Periodic/*");
 
-  syntax.registerActionSyntax("AddInitialConditionAction", "ICs/*", "add_ic");
+  registerSyntaxTask("AddInitialConditionAction", "ICs/*", "add_ic");
 
-  syntax.registerActionSyntax("AddMaterialAction", "Materials/*");
+  registerSyntax("AddMaterialAction", "Materials/*");
 
-  syntax.registerActionSyntax("SetupPostprocessorDataAction", "Postprocessors/*");
-  syntax.registerActionSyntax("AddPostprocessorAction", "Postprocessors/*");
+  registerSyntax("SetupPostprocessorDataAction", "Postprocessors/*");
+  registerSyntax("AddPostprocessorAction", "Postprocessors/*");
   syntax.registerSyntaxType("Postprocessors/*", "PostprocessorName");
   syntax.registerSyntaxType("Postprocessors/*", "UserObjectName");
 
-  syntax.registerActionSyntax("AddVectorPostprocessorAction", "VectorPostprocessors/*");
+  registerSyntax("AddVectorPostprocessorAction", "VectorPostprocessors/*");
   syntax.registerSyntaxType("VectorPostprocessors/*", "VectorPostprocessorName");
 
-  syntax.registerActionSyntax("AddDamperAction", "Dampers/*");
+  registerSyntax("AddDamperAction", "Dampers/*");
 
-  syntax.registerActionSyntax("AddOutputAction", "Outputs/*");
-  syntax.registerActionSyntax("CommonOutputAction", "Outputs");
+  registerSyntax("AddOutputAction", "Outputs/*");
+  registerSyntax("CommonOutputAction", "Outputs");
 
   // Note: Preconditioner Actions will be built by this setup action
-  syntax.registerActionSyntax("SetupPreconditionerAction", "Preconditioning/*");
-  syntax.registerActionSyntax("AddFieldSplitAction", "Preconditioning/*/*");
+  registerSyntax("SetupPreconditionerAction", "Preconditioning/*");
+  registerSyntax("AddFieldSplitAction", "Preconditioning/*/*");
 
-  syntax.registerActionSyntax("DetermineSystemType", "Executioner");
-  syntax.registerActionSyntax("CreateExecutionerAction", "Executioner");
-  syntax.registerActionSyntax("SetupTimeStepperAction", "Executioner/TimeStepper");
-  syntax.registerActionSyntax("SetupTimeIntegratorAction", "Executioner/TimeIntegrator");
+  registerSyntax("DetermineSystemType", "Executioner");
+  registerSyntax("CreateExecutionerAction", "Executioner");
+  registerSyntax("SetupTimeStepperAction", "Executioner/TimeStepper");
+  registerSyntax("SetupTimeIntegratorAction", "Executioner/TimeIntegrator");
 
-  syntax.registerActionSyntax("SetupQuadratureAction", "Executioner/Quadrature");
-  syntax.registerActionSyntax("SetupPredictorAction", "Executioner/Predictor");
+  registerSyntax("SetupQuadratureAction", "Executioner/Quadrature");
+  registerSyntax("SetupPredictorAction", "Executioner/Predictor");
 #ifdef LIBMESH_ENABLE_AMR
-  syntax.registerActionSyntax("AdaptivityAction", "Executioner/Adaptivity");
+  registerSyntax("AdaptivityAction", "Executioner/Adaptivity");
 #endif
 
-  syntax.registerActionSyntax("PartitionerAction", "Mesh/Partitioner");
+  registerSyntax("PartitionerAction", "Mesh/Partitioner");
 
-  syntax.registerActionSyntax("AddDiracKernelAction", "DiracKernels/*");
+  registerSyntax("AddDiracKernelAction", "DiracKernels/*");
 
-  syntax.registerActionSyntax("AddDGKernelAction", "DGKernels/*");
+  registerSyntax("AddDGKernelAction", "DGKernels/*");
 
-  syntax.registerActionSyntax("AddInterfaceKernelAction", "InterfaceKernels/*");
+  registerSyntax("AddInterfaceKernelAction", "InterfaceKernels/*");
 
-  syntax.registerActionSyntax("AddConstraintAction", "Constraints/*");
+  registerSyntax("AddConstraintAction", "Constraints/*");
 
-  syntax.registerActionSyntax("AddUserObjectAction", "UserObjects/*");
+  registerSyntax("AddUserObjectAction", "UserObjects/*");
   syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
-  syntax.registerActionSyntax("AddControlAction", "Controls/*");
-  syntax.registerActionSyntax("AddBoundsVectorsAction", "Bounds");
+  registerSyntax("AddControlAction", "Controls/*");
+  registerSyntax("AddBoundsVectorsAction", "Bounds");
 
-  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals");
-  //  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_aux_variable");
-  //  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_postprocessor");
-  //  syntax.registerActionSyntax("AddNodalNormalsAction", "NodalNormals", "add_user_object");
+  registerSyntax("AddNodalNormalsAction", "NodalNormals");
+  //  registerSyntaxTask("AddNodalNormalsAction", "NodalNormals", "add_aux_variable");
+  //  registerSyntaxTask("AddNodalNormalsAction", "NodalNormals", "add_postprocessor");
+  //  registerSyntaxTask("AddNodalNormalsAction", "NodalNormals", "add_user_object");
 
   // Indicator
-  syntax.registerActionSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");
-  syntax.registerActionSyntax("AddIndicatorAction", "Adaptivity/Indicators/*");
+  registerSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");
+  registerSyntax("AddIndicatorAction", "Adaptivity/Indicators/*");
 
   // Marker
-  syntax.registerActionSyntax("AddElementalFieldAction", "Adaptivity/Markers/*");
-  syntax.registerActionSyntax("AddMarkerAction", "Adaptivity/Markers/*");
+  registerSyntax("AddElementalFieldAction", "Adaptivity/Markers/*");
+  registerSyntax("AddMarkerAction", "Adaptivity/Markers/*");
 
   // New Adaptivity System
-  syntax.registerActionSyntax("SetAdaptivityOptionsAction", "Adaptivity");
+  registerSyntax("SetAdaptivityOptionsAction", "Adaptivity");
 
   // Deprecated Block
-  syntax.registerActionSyntax("DeprecatedBlockAction", "DeprecatedBlock");
+  registerSyntax("DeprecatedBlockAction", "DeprecatedBlock");
 
   // Multi Apps
-  syntax.registerActionSyntax("AddMultiAppAction", "MultiApps/*");
+  registerSyntax("AddMultiAppAction", "MultiApps/*");
 
   // Transfers
-  syntax.registerActionSyntax("AddTransferAction", "Transfers/*");
+  registerSyntax("AddTransferAction", "Transfers/*");
 
   addActionTypes(syntax);
   registerActions(syntax, action_factory);

@@ -500,43 +500,32 @@ PhaseFieldApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 void
 PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("BicrystalBoundingBoxICAction",
-                              "ICs/PolycrystalICs/BicrystalBoundingBoxIC");
-  syntax.registerActionSyntax("BicrystalCircleGrainICAction",
-                              "ICs/PolycrystalICs/BicrystalCircleGrainIC");
-  syntax.registerActionSyntax("CHPFCRFFSplitKernelAction", "Kernels/CHPFCRFFSplitKernel");
-  syntax.registerActionSyntax("CHPFCRFFSplitVariablesAction", "Variables/CHPFCRFFSplitVariables");
-  syntax.registerActionSyntax("DisplacementGradientsAction",
-                              "Modules/PhaseField/DisplacementGradients");
-  syntax.registerActionSyntax("EmptyAction", "ICs/PolycrystalICs"); // placeholder
-  syntax.registerActionSyntax("EulerAngle2RGBAction", "Modules/PhaseField/EulerAngles2RGB");
-  syntax.registerActionSyntax("HHPFCRFFSplitKernelAction", "Kernels/HHPFCRFFSplitKernel");
-  syntax.registerActionSyntax("HHPFCRFFSplitVariablesAction", "Variables/HHPFCRFFSplitVariables");
-  syntax.registerActionSyntax("MatVecRealGradAuxKernelAction",
-                              "AuxKernels/MatVecRealGradAuxKernel");
-  syntax.registerActionSyntax("MaterialVectorAuxKernelAction",
-                              "AuxKernels/MaterialVectorAuxKernel");
-  syntax.registerActionSyntax("MaterialVectorGradAuxKernelAction",
-                              "AuxKernels/MaterialVectorGradAuxKernel");
-  syntax.registerActionSyntax("MortarPeriodicAction", "Modules/PhaseField/MortarPeriodicity/*");
-  syntax.registerActionSyntax("MultiAuxVariablesAction", "AuxVariables/MultiAuxVariables");
-  syntax.registerActionSyntax("PFCRFFKernelAction", "Kernels/PFCRFFKernel");
-  syntax.registerActionSyntax("PFCRFFVariablesAction", "Variables/PFCRFFVariables");
-  syntax.registerActionSyntax("PolycrystalElasticDrivingForceAction",
-                              "Kernels/PolycrystalElasticDrivingForce");
-  syntax.registerActionSyntax("PolycrystalHexGrainICAction",
-                              "ICs/PolycrystalICs/PolycrystalHexGrainIC");
-  syntax.registerActionSyntax("PolycrystalKernelAction", "Kernels/PolycrystalKernel");
-  syntax.registerActionSyntax("PolycrystalRandomICAction",
-                              "ICs/PolycrystalICs/PolycrystalRandomIC");
-  syntax.registerActionSyntax("PolycrystalStoredEnergyAction", "Kernels/PolycrystalStoredEnergy");
-  syntax.registerActionSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
-  syntax.registerActionSyntax("PolycrystalVoronoiICAction",
-                              "ICs/PolycrystalICs/PolycrystalVoronoiIC");
-  syntax.registerActionSyntax("ReconVarICAction", "ICs/PolycrystalICs/ReconVarIC");
-  syntax.registerActionSyntax("RigidBodyMultiKernelAction", "Kernels/RigidBodyMultiKernel");
-  syntax.registerActionSyntax("Tricrystal2CircleGrainsICAction",
-                              "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
+  registerSyntax("BicrystalBoundingBoxICAction", "ICs/PolycrystalICs/BicrystalBoundingBoxIC");
+  registerSyntax("BicrystalCircleGrainICAction", "ICs/PolycrystalICs/BicrystalCircleGrainIC");
+  registerSyntax("CHPFCRFFSplitKernelAction", "Kernels/CHPFCRFFSplitKernel");
+  registerSyntax("CHPFCRFFSplitVariablesAction", "Variables/CHPFCRFFSplitVariables");
+  registerSyntax("DisplacementGradientsAction", "Modules/PhaseField/DisplacementGradients");
+  registerSyntax("EmptyAction", "ICs/PolycrystalICs"); // placeholder
+  registerSyntax("EulerAngle2RGBAction", "Modules/PhaseField/EulerAngles2RGB");
+  registerSyntax("HHPFCRFFSplitKernelAction", "Kernels/HHPFCRFFSplitKernel");
+  registerSyntax("HHPFCRFFSplitVariablesAction", "Variables/HHPFCRFFSplitVariables");
+  registerSyntax("MatVecRealGradAuxKernelAction", "AuxKernels/MatVecRealGradAuxKernel");
+  registerSyntax("MaterialVectorAuxKernelAction", "AuxKernels/MaterialVectorAuxKernel");
+  registerSyntax("MaterialVectorGradAuxKernelAction", "AuxKernels/MaterialVectorGradAuxKernel");
+  registerSyntax("MortarPeriodicAction", "Modules/PhaseField/MortarPeriodicity/*");
+  registerSyntax("MultiAuxVariablesAction", "AuxVariables/MultiAuxVariables");
+  registerSyntax("PFCRFFKernelAction", "Kernels/PFCRFFKernel");
+  registerSyntax("PFCRFFVariablesAction", "Variables/PFCRFFVariables");
+  registerSyntax("PolycrystalElasticDrivingForceAction", "Kernels/PolycrystalElasticDrivingForce");
+  registerSyntax("PolycrystalHexGrainICAction", "ICs/PolycrystalICs/PolycrystalHexGrainIC");
+  registerSyntax("PolycrystalKernelAction", "Kernels/PolycrystalKernel");
+  registerSyntax("PolycrystalRandomICAction", "ICs/PolycrystalICs/PolycrystalRandomIC");
+  registerSyntax("PolycrystalStoredEnergyAction", "Kernels/PolycrystalStoredEnergy");
+  registerSyntax("PolycrystalVariablesAction", "Variables/PolycrystalVariables");
+  registerSyntax("PolycrystalVoronoiICAction", "ICs/PolycrystalICs/PolycrystalVoronoiIC");
+  registerSyntax("ReconVarICAction", "ICs/PolycrystalICs/ReconVarIC");
+  registerSyntax("RigidBodyMultiKernelAction", "Kernels/RigidBodyMultiKernel");
+  registerSyntax("Tricrystal2CircleGrainsICAction", "ICs/PolycrystalICs/Tricrystal2CircleGrainsIC");
 
   registerAction(BicrystalBoundingBoxICAction, "add_ic");
   registerAction(BicrystalCircleGrainICAction, "add_ic");
