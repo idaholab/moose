@@ -11,8 +11,8 @@ def find_app():
     """
     moose_dir = os.environ.get("MOOSE_DIR")
     if not moose_dir:
-        file_dir = os.dirname(os.path.abspath(__file__))
-        moose_dir = os.dirname(os.dirname(file_dir))
+        file_dir = os.path.dirname(os.path.abspath(__file__))
+        moose_dir = os.path.abspath(os.path.join(file_dir, "..", "..", "..", ".."))
     app_name = os.path.join(moose_dir, "test", "moose_test-%s" % os.environ.get("METHOD", "opt"))
     return app_name
 

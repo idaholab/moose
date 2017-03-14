@@ -14,6 +14,7 @@ if os.environ.has_key("MOOSE_DIR"):
 
 sys.path.append(os.path.join(MOOSE_DIR, 'python'))
 os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ':' + os.path.join(MOOSE_DIR, 'python')
+os.environ['MOOSE_DIR'] = MOOSE_DIR
 import path_tool
 path_tool.activate_module('TestHarness')
 
