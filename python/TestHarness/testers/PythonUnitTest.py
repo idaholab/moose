@@ -13,6 +13,7 @@ class PythonUnitTest(RunApp):
         # We don't want to check for any errors on the screen with unit tests
         params['errors'] = []
         params['valgrind'] = 'NONE'
+        params['recover'] = False
         return params
 
     def __init__(self, name, params):
