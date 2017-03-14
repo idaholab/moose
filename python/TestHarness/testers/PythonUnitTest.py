@@ -12,6 +12,7 @@ class PythonUnitTest(RunApp):
         params.addParam('separate', False, "Run each test in the file in a separate subprocess")
         # We don't want to check for any errors on the screen with unit tests
         params['errors'] = []
+        params['valgrind'] = 'NONE'
         return params
 
     def __init__(self, name, params):
