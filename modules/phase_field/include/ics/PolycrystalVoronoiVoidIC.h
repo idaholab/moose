@@ -1,3 +1,9 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef POLYCRYSTALVORONOIVOIDIC_H
 #define POLYCRYSTALVORONOIVOIDIC_H
 
@@ -20,41 +26,40 @@ class PolycrystalVoronoiVoidIC :
 public:
   PolycrystalVoronoiVoidIC(const InputParameters & parameters);
 
-private:
+  virtual void initialSetup() override;
 
-  MooseEnum _structure_type;
+  static InputParameters actionParameters();
 
-  unsigned int _op_num;
-  unsigned int _grain_num;
-  unsigned int _op_index;
+protected:
+  const MooseEnum _structure_type;
 
-  unsigned int _rand_seed;
+  const unsigned int _op_num;
+  const unsigned int _grain_num;
+  const unsigned int _op_index;
 
-  bool _columnar_3D;
+  const unsigned int _rand_seed;
 
-  virtual void initialSetup();
+  const bool _columnar_3D;
 
-  virtual void computeCircleCenters();
+  virtual void computeCircleCenters() override;
 
+  virtual Real value(const Point & p) override;
+  virtual RealGradient gradient(const Point & p) override;
+
+  virtual Real grainValueCalc(const Point & p);
   virtual void computeGrainCenters();
-
-  virtual Real value(const Point & p);
-
-  virtual Real grain_value_calc(const Point & p);
-
-  virtual RealGradient gradient(const Point & p);
 
   std::vector<Point> _centerpoints;
   std::vector<unsigned int> _assigned_op;
 
-  // define type for distance and point
+  /// Type for distance and point
   struct DistancePoint
   {
     Real d;
     unsigned int gr;
   };
 
-  // Sort the temp_centerpoints into order of magnitude
+  /// Sorts the temp_centerpoints into order of magnitude
   struct DistancePointComparator
   {
     bool operator () (const DistancePoint & a, const DistancePoint & b)
