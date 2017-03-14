@@ -20,6 +20,7 @@
 #include "MooseApp.h"
 
 // libMesh includes
+#include "libmesh/distributed_mesh.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/mesh_function.h"
 
@@ -95,6 +96,10 @@ OversampleOutput::initOversample()
   if (_oversample)
   {
     MeshRefinement mesh_refinement(_mesh_ptr->getMesh());
+
+    // We want original and refined partitioning to match so we can
+    // query from one to the other safely on distributed meshes.
+    _mesh_ptr->getMesh().skip_partitioning(true);
     mesh_refinement.uniformly_refine(_refinements);
   }
 
@@ -108,6 +113,24 @@ OversampleOutput::initOversample()
 
   // Reference the system from which we are copying
   EquationSystems & source_es = _problem_ptr->es();
+
+  // If we're going to be copying from that system later, we need to keep its
+  // original elements as ghost elements even if it gets grossly
+  // repartitioned, since we can't repartition the oversample mesh to
+  // match.
+  DistributedMesh * dist_mesh = dynamic_cast<DistributedMesh *>(&source_es.get_mesh());
+  if (dist_mesh)
+  {
+    for (MeshBase::element_iterator
+           it = dist_mesh->active_local_elements_begin(),
+           end = dist_mesh->active_local_elements_end();
+         it != end; ++it)
+    {
+      Elem * elem = *it;
+
+      dist_mesh->add_extra_ghost_elem(elem);
+    }
+  }
 
   // Initialize the _mesh_functions vector
   unsigned int num_systems = source_es.n_systems();
@@ -194,6 +217,8 @@ OversampleOutput::updateOversample()
         for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
           if ((*nd)->n_dofs(sys_num, var_num))
             dest_sys.solution->set((*nd)->dof_number(sys_num, var_num, 0), (*_mesh_functions[sys_num][var_num])(**nd - _position)); // 0 value is for component
+
+      dest_sys.solution->close();
     }
   }
 
