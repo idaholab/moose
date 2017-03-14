@@ -1,10 +1,22 @@
 # LinearCombinationFunction function test
 # See [Functions] block for a description of the tests
-[AuxKernels]
-  [./the_linear_combo]
-    type = FunctionAux
-    function = the_linear_combo
-    variable = the_linear_combo
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+  xmin = 0
+  xmax = 2
+  nx = 10
+[]
+
+[Variables]
+  [./dummy]
+  [../]
+[]
+
+[Kernels]
+  [./dummy_u]
+    type = TimeDerivative
+    variable = dummy
   [../]
 []
 
@@ -13,10 +25,12 @@
   [../]
 []
 
-[Executioner]
-  type = Transient
-  dt = 0.5
-  end_time = 1
+[AuxKernels]
+  [./the_linear_combo]
+    type = FunctionAux
+    variable = the_linear_combo
+    function = the_linear_combo
+  [../]
 []
 
 [Functions]
@@ -47,29 +61,6 @@
   [../]
 []
 
-[Kernels]
-  [./dummy_u]
-    type = TimeDerivative
-    variable = dummy
-  [../]
-[]
-
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 10
-  xmax = 2
-  xmin = 0
-[]
-
-[Outputs]
-  csv = true
-  execute_on = 'timestep_end'
-  exodus = false
-  file_base = lcf1
-  hide = 'dummy'
-[]
-
 [Postprocessors]
   [./should_be_zero]
     type = NodalL2Error
@@ -78,8 +69,17 @@
   [../]
 []
 
-[Variables]
-  [./dummy]
-  [../]
+[Executioner]
+  type = Transient
+  dt = 0.5
+  end_time = 1
+[]
+
+[Outputs]
+  execute_on = 'timestep_end'
+  file_base = lcf1
+  hide = 'dummy'
+  exodus = false
+  csv = true
 []
 

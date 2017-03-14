@@ -1,5 +1,21 @@
 import cStringIO
 
+def mergeWriteFirstLists(first, complete):
+    """
+    Add in elements from the list "complete" to the end
+    of the "first" if they are not already in "first"
+    Input:
+        first[list]: These elements will be first in the returned list
+        complete[list]: These elements will come after first
+    Return:
+        list: The elements in "complete" with elements in "first" first.
+    """
+    l = first[:]
+    for x in complete:
+        if x not in l:
+            l.append(x)
+    return l
+
 def inputTreeToString(root, sep="  "):
     """
     Main access point to write an InputTree to a string.
@@ -11,10 +27,11 @@ def inputTreeToString(root, sep="  "):
     output = cStringIO.StringIO()
     if root.comments:
         commentString(output, root.comments, 0, sep)
-    last_child = root.children_list[-1]
-    for child in root.children_list:
-        entry = root.children[child]
-        if entry.included:
+    children = mergeWriteFirstLists(root.children_write_first, root.children_list)
+    last_child = children[-1]
+    for child in children:
+        entry = root.children.get(child, None)
+        if entry and entry.included:
             writeToString(output, entry, 0, sep, child == last_child)
     return output.getvalue()
 
@@ -29,9 +46,10 @@ def writeToString(output, entry, indent, sep="  ", is_last=False):
     """
     nodeHeaderString(output, entry, indent, sep)
     nodeParamsString(output, entry, indent+1, sep)
-    for child in entry.children_list:
-        child_entry = entry.children[child]
-        if child_entry.included:
+    children = mergeWriteFirstLists(entry.children_write_first, entry.children_list)
+    for child in children:
+        child_entry = entry.children.get(child, None)
+        if child_entry and child_entry.included:
             writeToString(output, child_entry, indent+1, sep)
     nodeCloseString(output, entry, indent, sep, is_last)
 
@@ -69,14 +87,16 @@ def nodeCloseString(output, entry, indent, sep, is_last):
         output.write("[]\n\n")
 
 def nodeParamsString(output, entry, indent, sep, ignore_type=False):
-    for name in entry.parameters_list:
+    params = mergeWriteFirstLists(entry.parameters_write_first, entry.parameters_list)
+    for name in params:
         if ignore_type and name == "type":
-            continue
+            return
         info = entry.parameters[name]
         val = info.inputFileValue()
         comments = info.comments
         if info.value != info.default or info.user_added or info.set_in_input_file:
-            paramToString(output, name, val, comments, indent, sep)
+            paramToString(output, info.name, val, comments, indent, sep)
+
     type_info = entry.parameters.get("type")
     if entry.types and type_info:
         type_name = type_info.value

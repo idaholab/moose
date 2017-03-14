@@ -169,11 +169,17 @@ class Tests(Testing.PeacockTester):
         w = self.newWidget()
         v = w.tree.getBlockInfo("/Variables")
         b = w.tree.getBlockInfo("/Variables/u")
+        self.assertEqual(len(b.children_list), 1)
         nchilds = len(v.children_list)
         self.assertEqual(self.changed_count, 0)
         w.copyBlock(b)
         self.assertEqual(nchilds+1, len(v.children_list))
         self.assertEqual(self.changed_count, 1)
+        new_block = w.tree.getBlockInfo("/Variables/New_0")
+        self.assertEqual(len(new_block.children_list), 1)
+        self.assertEqual(["InitialCondition"], new_block.children_list)
+        item = w._path_item_map.get("/Variables/New_0/InitialCondition")
+        self.assertNotEqual(item, None)
 
         mock_exec.return_value = 0
         nchilds = len(v.children_list)
@@ -197,6 +203,12 @@ class Tests(Testing.PeacockTester):
         w.copyBlock(b)
         self.assertEqual(nchilds+1, len(v.children_list))
         self.assertEqual(self.changed_count, 3)
+        p = "/Variables/%s" % v.children_list[-1]
+        new_block = w.tree.getBlockInfo(p)
+        self.assertEqual(len(new_block.children_list), 1)
+        self.assertEqual(["InitialCondition"], new_block.children_list)
+        item = w._path_item_map.get("%s/InitialCondition" % p)
+        self.assertNotEqual(item, None)
 
         mock_exec.return_value = 0
         nchilds = len(v.children_list)

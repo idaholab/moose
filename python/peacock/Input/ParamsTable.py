@@ -9,7 +9,7 @@ class ParamsTable(QTableWidget, MooseWidget):
     """
     Holds a QTableWidget of parameters.
     There a different kinds of parameters.
-    1. Name: The name of the block. This doesn't show up in the normal YAML
+    1. Name: The name of the block. This doesn't show up in the normal JSON
         so has to be inserted manually.
     2. User added: This will be colored differently to highlight they are non standard parameters.
     3. Required parameters: If these are not set then this is not valid. These will be

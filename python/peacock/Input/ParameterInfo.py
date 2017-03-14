@@ -18,23 +18,23 @@ class ParameterInfo(object):
         self.options = []
         self.set_in_input_file = False
 
-    def setFromYaml(self, yaml):
+    def setFromData(self, data):
         """
-        Sets this attributes from a Yaml dict.
+        Sets this attributes from a Json dict.
         Input:
-            yaml[dict]: This is the dict description of the parameter as read from the YAML dump.
+            data[dict]: This is the dict description of the parameter as read from the JSON dump.
         """
-        self.default = yaml["default"]
+        self.default = data.get("default", "")
         if self.default is None:
             self.default = ""
-        self.cpp_type = yaml["cpp_type"]
-        self.description = yaml["description"]
-        self.group_name = yaml["group_name"]
+        self.cpp_type = data["cpp_type"]
+        self.description = data["description"]
+        self.group_name = data["group_name"]
         if not self.group_name:
             self.group_name = "Main"
-        self.required = yaml["required"]
-        self.name = yaml["name"]
-        self.options = yaml.get("options", "")
+        self.required = data["required"] == "Yes"
+        self.name = data["name"]
+        self.options = data.get("options", "")
         if self.options:
             self.options = self.options.strip().split()
         else:
@@ -68,7 +68,6 @@ class ParameterInfo(object):
         Return:
             bool
         """
-        # active doesn't seem to actually get set in the YAML so we have to special case it.
         return (self.isVectorType() or
             "Point" in self.cpp_type or
             self.user_added or

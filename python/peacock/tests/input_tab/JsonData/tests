@@ -1,0 +1,6 @@
+[Tests]
+  [./JsonData]
+    type = PythonUnitTest
+    input = test_JsonData.py
+  [../]
+[]

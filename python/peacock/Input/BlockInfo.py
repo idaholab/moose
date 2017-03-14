@@ -19,6 +19,7 @@ class BlockInfo(object):
         super(BlockInfo, self).__init__()
         self.parameters = {}
         self.parameters_list = []
+        self.parameters_write_first = []
         self.user_added = False
         self.star = False
         self.star_node = None
@@ -29,6 +30,7 @@ class BlockInfo(object):
         self.path = path
         self.children = {}
         self.children_list = []
+        self.children_write_first = []
         self.hard = hard
         self.description = ""
         self.parent = parent
@@ -267,6 +269,7 @@ class BlockInfo(object):
         new.parent = parent
         new.children = {}
         new.children_list = []
+        new.children_write_first = []
         for key in self.children_list:
             c = self.children[key]
             new.children_list.append(c.name)
@@ -281,6 +284,7 @@ class BlockInfo(object):
 
         new.parameters = {}
         new.parameters_list = []
+        new.parameters_write_first = []
 
         for key in self.parameters_list:
             p = self.parameters[key]
@@ -304,6 +308,7 @@ class BlockInfo(object):
             star_info[BlockInfo]: The star block
         """
         self.star_node = star_info
+        self.star = True
         star_info.parent = self
 
     def toolTip(self):

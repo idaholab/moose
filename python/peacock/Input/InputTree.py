@@ -76,6 +76,8 @@ class InputTree(object):
 
             for root_node in self.input_file.getTopNodes():
                 self._addInputFileNode(root_node)
+                if root_node not in self.root.children_write_first:
+                    self.root.children_write_first.append(root_node.name)
             return True
         return False
 
@@ -116,11 +118,15 @@ class InputTree(object):
             else:
                 param_info.value = param_value
             param_info.set_in_input_file = True
+            if param_info.name not in param_info.parent.parameters_write_first:
+                param_info.parent.parameters_write_first.append(param_info.name)
             param_info.comments = input_node.param_comments.get(param_name, "")
 
         for child_name in input_node.children_list:
             child_node = input_node.children[child_name]
             self._addInputFileNode(child_node)
+            if child_name not in entry.children_write_first:
+                entry.children_write_first.append(child_name)
 
     def getInputFileString(self):
         """

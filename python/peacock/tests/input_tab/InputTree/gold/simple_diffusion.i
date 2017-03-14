@@ -1,24 +1,13 @@
-[BCs]
-  [./left]
-    boundary = 'left'
-    type = DirichletBC
-    variable = u
-    value = 0
-  [../]
-  [./right]
-    boundary = 'right'
-    type = DirichletBC
-    variable = u
-    value = 1
-  [../]
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
 []
 
-[Executioner]
-  # Preconditioned JFNK (default)
-  type = Steady
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
-  solve_type = PJFNK
+[Variables]
+  [./u]
+  [../]
 []
 
 [Kernels]
@@ -28,19 +17,30 @@
   [../]
 []
 
-[Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
+[BCs]
+  [./left]
+    type = DirichletBC
+    variable = u
+    boundary = 'left'
+    value = 0
+  [../]
+  [./right]
+    type = DirichletBC
+    variable = u
+    boundary = 'right'
+    value = 1
+  [../]
+[]
+
+[Executioner]
+  # Preconditioned JFNK (default)
+  type = Steady
+  solve_type = PJFNK
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
   exodus = true
-[]
-
-[Variables]
-  [./u]
-  [../]
 []
 
