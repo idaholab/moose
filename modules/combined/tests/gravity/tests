@@ -1,43 +1,81 @@
 [Tests]
-  [./test]
+  [./xyz_hex8_sm]
     type = 'Exodiff'
-    input = 'gravity_test.i'
-    exodiff = 'out.e'
+    input = 'gravity_sm.i'
+    exodiff = 'gravity_out.e'
     abs_zero = 1e-09
     use_old_floor = True
   [../]
-
-  [./test_rz_quad8]
+  [./rz_quad8_sm]
     type = 'Exodiff'
-    input = 'gravity_rz_quad8_test.i'
-    exodiff = 'out_rz_quad8.e'
-    abs_zero = 1e-09
+    input = 'gravity_rz_quad8_sm.i'
+    exodiff = 'gravity_rz_quad8_out.e'
+    abs_zero = 1e-07
     use_old_floor = True
   [../]
-
-  [./test_rz]
+  [./rz_quad4_sm]
     type = 'Exodiff'
-    input = 'gravity_rz_test.i'
-    exodiff = 'out_rz.e'
-    abs_zero = 1e-08
+    input = 'gravity_rz_sm.i'
+    exodiff = 'gravity_rz_out.e'
+    abs_zero = 1e-07
     use_old_floor = True
   [../]
-
-  [./test_hex20]
+  [./xyz_hex20_sm]
     type = 'Exodiff'
-    input = 'gravity_hex20_test.i'
-    exodiff = 'out_hex20.e'
+    input = 'gravity_hex20_sm.i'
+    exodiff = 'gravity_hex20_out.e'
     abs_zero = 1e-09
     use_old_floor = True
     max_parallel = 1
   [../]
-
-  [./test_qp_select]
+  [./xyz_quad4_qp_select_sm]
     type = 'Exodiff'
-    input = 'gravity_qp_select.i'
-    exodiff = 'out_qp_select.e'
+    input = 'gravity_qp_select_sm.i'
+    exodiff = 'gravity_qp_select_out.e'
     abs_zero = 1e-09
     use_old_floor = True
-    max_parallel = 1            # -pc_type lu
+    max_parallel = 1
+  [../]
+  [./xyz_hex8]
+    type = 'Exodiff'
+    input = 'gravity.i'
+    exodiff = 'gravity_out.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+    prereq = 'xyz_hex8_sm'
+  [../]
+  [./rz_quad8]
+    type = 'Exodiff'
+    input = 'gravity_rz_quad8.i'
+    exodiff = 'gravity_rz_quad8_out.e'
+    abs_zero = 1e-07
+    use_old_floor = True
+    prereq = 'rz_quad8_sm'
+  [../]
+  [./rz_quad4]
+    type = 'Exodiff'
+    input = 'gravity_rz.i'
+    exodiff = 'gravity_rz_out.e'
+    abs_zero = 1e-07
+    use_old_floor = True
+    prereq = 'rz_quad4_sm'
+  [../]
+  [./xyz_hex20]
+    type = 'Exodiff'
+    input = 'gravity_hex20.i'
+    exodiff = 'gravity_hex20_out.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+    max_parallel = 1
+    prereq = 'xyz_hex20_sm'
+  [../]
+  [./xyz_quad4_qp_select]
+    type = 'Exodiff'
+    input = 'gravity_qp_select.i'
+    exodiff = 'gravity_qp_select_out.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+    max_parallel = 1
+    prereq = 'xyz_quad4_qp_select_sm'
   [../]
 []
