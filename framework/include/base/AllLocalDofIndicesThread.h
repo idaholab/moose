@@ -16,7 +16,7 @@
 #define ALLLOCALDOFINDICESTHREAD_H
 
 #include "Moose.h"
-#include "ParallelUniqueId.h"
+#include "MooseTypes.h"
 
 // libmesh includes
 #include "libmesh/elem_range.h"
