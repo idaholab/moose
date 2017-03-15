@@ -41,7 +41,6 @@ class ViewerBase(QtWidgets.QTabWidget, TabPlugin):
         for i in range(self.count()):
             self.widget(i).initialize(*args, **kwargs)
         self._data = args
-        self.setMinimumSize(self.size())
 
     def onClose(self):
         """

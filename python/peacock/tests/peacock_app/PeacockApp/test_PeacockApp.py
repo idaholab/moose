@@ -50,6 +50,12 @@ class Tests(Testing.PeacockTester):
         self.check_current_tab(tabs, self.result.tabName())
         self.check_result()
 
+    def testResultsNoOption(self):
+        self.create_app(["gold/out_transient.e"])
+        tabs = self.app.main_widget.tab_plugin
+        self.check_current_tab(tabs, self.result.tabName())
+        self.check_result()
+
     def check_postprocessor(self):
         fname = "peacock_postprocessor.png"
         Testing.remove_file(fname)
@@ -75,6 +81,18 @@ class Tests(Testing.PeacockTester):
         Testing.set_window_size(w.FigurePlugin)
         w.FigurePlugin.onWrite(fname)
         self.assertFalse(Testing.gold_diff(fname))
+
+    def testPostprocessor(self):
+        self.create_app(["-p", "../gold/out_transient.csv"])
+        tabs = self.app.main_widget.tab_plugin
+        self.check_current_tab(tabs, self.postprocessor.tabName())
+        self.check_postprocessor()
+
+    def testPostprocessorNoOption(self):
+        self.create_app(["../gold/out_transient.csv"])
+        tabs = self.app.main_widget.tab_plugin
+        self.check_current_tab(tabs, self.postprocessor.tabName())
+        self.check_postprocessor()
 
     def testAllCommandLine(self):
         d = os.getcwd()
