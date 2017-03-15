@@ -38,7 +38,6 @@ class ElementIndicator :
   public Coupleable,
   public ScalarCoupleable,
   public MooseVariableInterface,
-  public MaterialPropertyInterface,
   public ZeroInterface
 {
 public:

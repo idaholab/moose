@@ -111,6 +111,38 @@ public:
    */
   virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
 
+  /**
+   * Record and set the material properties required by the current computing thread.
+   * @param mat_prop_ids The set of material properties required by the current computing thread.
+   *
+   * @param tid The thread id
+   */
+  virtual void setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids, THREAD_ID tid);
+
+  /**
+   * Get the material properties required by the current computing thread.
+   *
+   * @param tid The thread id
+   */
+  virtual const std::set<unsigned int> & getActiveMaterialProperties(THREAD_ID tid);
+
+  /**
+   * Method to check whether or not a list of active material roperties has been set. This method
+   * is called by reinitMaterials to determine whether Material computeProperties methods need to be
+   * called. If the return is False, this check prevents unnecessary material property computation
+   * @param tid The thread id
+   *
+   * @return True if there has been a list of active material properties set, False otherwise
+   */
+  virtual bool hasActiveMaterialProperties(THREAD_ID tid);
+
+  /**
+   * Clear the active material properties. Should be called at the end of every computing thread
+   *
+   * @param tid The thread id
+   */
+  virtual void clearActiveMaterialProperties(THREAD_ID tid);
+
   virtual Assembly & assembly(THREAD_ID tid) = 0;
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
@@ -367,6 +399,9 @@ protected:
   /// Whether or not there is currently a list of active elemental moose variables
   /* This needs to remain <unsigned int> for threading purposes */
   std::vector<unsigned int> _has_active_elemental_moose_variables;
+
+  /// Set of material property ids that determine whether materials get reinited
+  std::vector<std::set<unsigned int>> _active_material_property_ids;
 
   /// nonlocal coupling requirement flag
   bool _requires_nonlocal_coupling;

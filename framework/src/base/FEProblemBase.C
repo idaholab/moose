@@ -2005,25 +2005,35 @@ void
 FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 {
   std::set<MooseVariable *> needed_moose_vars;
+  std::set<unsigned int> needed_mat_props;
 
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
+  {
     _all_materials.updateVariableDependency(needed_moose_vars, tid);
+    _all_materials.updateBlockMatPropDependency(blk_id, needed_mat_props, tid);
+  }
 
   const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
   for (const auto & id : ids)
+  {
     _materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
+    _materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid);
+  }
 
   const std::set<MooseVariable *> & current_active_elemental_moose_variables = getActiveElementalMooseVariables(tid);
   needed_moose_vars.insert(current_active_elemental_moose_variables.begin(), current_active_elemental_moose_variables.end());
 
-  if (!needed_moose_vars.empty())
-    setActiveElementalMooseVariables(needed_moose_vars, tid);
+  const std::set<unsigned int> & current_active_material_properties = getActiveMaterialProperties(tid);
+  needed_mat_props.insert(current_active_material_properties.begin(), current_active_material_properties.end());
+
+  setActiveElementalMooseVariables(needed_moose_vars, tid);
+  setActiveMaterialProperties(needed_mat_props, tid);
 }
 
 void
 FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (_all_materials.hasActiveBlockObjects(blk_id, tid))
+  if (hasActiveMaterialProperties(tid))
   {
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int n_points = _assembly[tid]->qRule()->n_points();
@@ -2044,7 +2054,7 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
 void
 FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (_all_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+  if (hasActiveMaterialProperties(tid))
   {
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
@@ -2066,7 +2076,7 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
 void
 FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (_all_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+  if (hasActiveMaterialProperties(tid))
   {
     // NOTE: this will not work with h-adaptivity
     const Elem * & neighbor = _assembly[tid]->neighbor();
@@ -2089,7 +2099,7 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
 void
 FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful)
 {
-  if (_all_materials.hasActiveBoundaryObjects(boundary_id, tid))
+  if (hasActiveMaterialProperties(tid))
   {
     const Elem * & elem = _assembly[tid]->elem();
     unsigned int side = _assembly[tid]->side();
@@ -3060,6 +3070,36 @@ FEProblemBase::clearActiveElementalMooseVariables(THREAD_ID tid)
 
   if (_displaced_problem)
     _displaced_problem->clearActiveElementalMooseVariables(tid);
+}
+
+void
+FEProblemBase::setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids, THREAD_ID tid)
+{
+  SubProblem::setActiveMaterialProperties(mat_prop_ids, tid);
+
+  if (_displaced_problem)
+    _displaced_problem->setActiveMaterialProperties(mat_prop_ids, tid);
+}
+
+const std::set<unsigned int> &
+FEProblemBase::getActiveMaterialProperties(THREAD_ID tid)
+{
+  return SubProblem::getActiveMaterialProperties(tid);
+}
+
+bool
+FEProblemBase::hasActiveMaterialProperties(THREAD_ID tid)
+{
+  return SubProblem::hasActiveMaterialProperties(tid);
+}
+
+void
+FEProblemBase::clearActiveMaterialProperties(THREAD_ID tid)
+{
+  SubProblem::clearActiveMaterialProperties(tid);
+
+  if (_displaced_problem)
+    _displaced_problem->clearActiveMaterialProperties(tid);
 }
 
 void

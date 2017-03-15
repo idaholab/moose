@@ -74,6 +74,13 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
 
         if (_need_materials)
         {
+          std::set<unsigned int> needed_mat_props;
+          for (const auto & aux : iter->second)
+          {
+            const std::set<unsigned int> & mp_deps = aux->getMatPropDependencies();
+            needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+          }
+          _problem.setActiveMaterialProperties(needed_mat_props, _tid);
           _problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
           _problem.reinitMaterialsBoundary(boundary_id, _tid);
         }
@@ -85,7 +92,10 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
           aux->compute();
 
         if (_need_materials)
+        {
           _problem.swapBackMaterialsFace(_tid);
+          _problem.clearActiveMaterialProperties(_tid);
+        }
 
         // Set active boundary id to invalid
         _problem.setCurrentBoundaryID(Moose::INVALID_BOUNDARY_ID);

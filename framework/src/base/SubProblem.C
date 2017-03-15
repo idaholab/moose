@@ -40,6 +40,7 @@ SubProblem::SubProblem(const InputParameters & parameters) :
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);
   _has_active_elemental_moose_variables.resize(n_threads);
+  _active_material_property_ids.resize(n_threads);
 }
 
 SubProblem::~SubProblem()
@@ -49,8 +50,11 @@ SubProblem::~SubProblem()
 void
 SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars, THREAD_ID tid)
 {
-  _has_active_elemental_moose_variables[tid] = 1;
-  _active_elemental_moose_variables[tid] = moose_vars;
+  if (!moose_vars.empty())
+  {
+    _has_active_elemental_moose_variables[tid] = 1;
+    _active_elemental_moose_variables[tid] = moose_vars;
+  }
 }
 
 const std::set<MooseVariable *> &
@@ -70,6 +74,31 @@ SubProblem::clearActiveElementalMooseVariables(THREAD_ID tid)
 {
   _has_active_elemental_moose_variables[tid] = 0;
   _active_elemental_moose_variables[tid].clear();
+}
+
+void
+SubProblem::setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids, THREAD_ID tid)
+{
+  if (!mat_prop_ids.empty())
+    _active_material_property_ids[tid] = mat_prop_ids;
+}
+
+const std::set<unsigned int> &
+SubProblem::getActiveMaterialProperties(THREAD_ID tid)
+{
+  return _active_material_property_ids[tid];
+}
+
+bool
+SubProblem::hasActiveMaterialProperties(THREAD_ID tid)
+{
+  return !_active_material_property_ids[tid].empty();
+}
+
+void
+SubProblem::clearActiveMaterialProperties(THREAD_ID tid)
+{
+  _active_material_property_ids[tid].clear();
 }
 
 std::set<SubdomainID>

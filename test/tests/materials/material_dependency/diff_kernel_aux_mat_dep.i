@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 1
+  ny = 1
 []
 
 [Variables]
@@ -14,7 +14,22 @@
   [./diff]
     type = MatDiffusion
     variable = u
-    prop_name = 'prop'
+    prop_name = 'diff'
+  [../]
+[]
+
+[AuxKernels]
+  [./error]
+    type = ElementLpNormAux
+    variable = error
+    coupled_variable = u
+  [../]
+[]
+
+[AuxVariables]
+  [./error]
+    family = MONOMIAL
+    order = FIRST
   [../]
 []
 
@@ -34,11 +49,13 @@
 []
 
 [Materials]
-  [./mat]
-    type = GenericConstantMaterial
-    prop_names = 'prop'
-    prop_values = 1
-    compute = false # testing that this produces warning because resetQpProperties is not re-defined
+  [./call_me_mat]
+    type = IncrementMaterial
+    prop_names = 'diff'
+    prop_values = '1'
+    block = 0
+    outputs = exodus
+    output_properties = 'mat_prop'
   [../]
 []
 

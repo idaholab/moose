@@ -11,32 +11,28 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+#ifndef INCREMENT_MATERIAL_H
+#define INCREMENT_MATERIAL_H
 
-#include "MaterialTestIndicator.h"
-#include "Assembly.h"
+#include "GenericConstantMaterial.h"
+
+class IncrementMaterial;
 
 template<>
-InputParameters validParams<MaterialTestIndicator>()
-{
-  InputParameters params = validParams<Indicator>();
-  params += validParams<MaterialPropertyInterface>();
-  params.addParam<MaterialPropertyName>("property", "The name of the material property to use for an indicator.");
-  return params;
-}
+InputParameters validParams<GenericConstantMaterial>();
 
-MaterialTestIndicator::MaterialTestIndicator(const InputParameters & parameters) :
-    Indicator(parameters),
-    _property(getMaterialProperty<Real>("property")),
-    _qrule(_assembly.qRule()),
-    _indicator_var(_sys.getVariable(_tid, name()))
+/**
+ * A material that tracks the number of times computeQpProperties has been called.
+ */
+class IncrementMaterial : public GenericConstantMaterial
 {
-}
+public:
+  IncrementMaterial(const InputParameters & parameters);
 
-void
-MaterialTestIndicator::computeIndicator()
-{
-  Real min = std::numeric_limits<Real>::max();
-  for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-    min = std::min(min, _property[qp]);
-  _indicator_var.setNodalValue(min);
-}
+protected:
+  virtual void computeQpProperties() override;
+  unsigned int _inc;
+  MaterialProperty<Real> & _mat_prop;
+};
+
+#endif

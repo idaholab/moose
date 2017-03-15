@@ -54,7 +54,7 @@ class DGKernel :
   public FunctionInterface,
   public UserObjectInterface,
   public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-  protected TwoMaterialPropertyInterface,
+  public TwoMaterialPropertyInterface,
   public Restartable,
   public ZeroInterface,
   public MeshChangedInterface
