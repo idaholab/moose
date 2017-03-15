@@ -8,12 +8,14 @@
 
 // MOOSE includes
 #include "FrictionalContactProblem.h"
-#include "NonlinearSystem.h"
+
+#include "AuxiliarySystem.h"
 #include "DisplacedProblem.h"
-#include "PenetrationLocator.h"
-#include "NearestNodeLocator.h"
 #include "MooseApp.h"
 #include "MooseMesh.h"
+#include "NearestNodeLocator.h"
+#include "NonlinearSystem.h"
+#include "PenetrationLocator.h"
 
 #include <limits>
 

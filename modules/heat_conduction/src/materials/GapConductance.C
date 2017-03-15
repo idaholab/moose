@@ -7,9 +7,11 @@
 
 // MOOSE includes
 #include "GapConductance.h"
-#include "PenetrationLocator.h"
+
 #include "Function.h"
 #include "MooseMesh.h"
+#include "PenetrationLocator.h"
+#include "SystemBase.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"

@@ -6,8 +6,10 @@
 /****************************************************************/
 
 #include "StressDivergenceTensorsTruss.h"
-#include "Material.h"
+
 #include "Assembly.h"
+#include "Material.h"
+#include "SystemBase.h"
 
 template<>
 InputParameters validParams<StressDivergenceTensorsTruss>()

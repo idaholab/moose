@@ -6,7 +6,9 @@
 /****************************************************************/
 
 #include "RichardsFullyUpwindFlux.h"
+
 #include "Assembly.h"
+#include "SystemBase.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"

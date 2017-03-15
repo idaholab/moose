@@ -7,7 +7,9 @@
 
 
 #include "Q2PPorepressureFlux.h"
+
 #include "Assembly.h"
+#include "SystemBase.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"
