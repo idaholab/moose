@@ -1,8 +1,0 @@
-[Tests]
-  [./SimpleDiffusion]
-    type = PythonUnitTest
-    input = test_simple_diffusion.py
-    platform = "DARWIN"
-    heavy = true
-  [../]
-[]
