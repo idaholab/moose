@@ -25,7 +25,7 @@ PorousFlowConstantThermalExpansionCoefficient::PorousFlowConstantThermalExpansio
     _drained_coefficient(getParam<Real>("drained_coefficient")),
     _porosity(_nodal_material ? getMaterialProperty<Real>("PorousFlow_porosity_nodal") : getMaterialProperty<Real>("PorousFlow_porosity_qp")),
     _coeff(_nodal_material ? declareProperty<Real>("PorousFlow_constant_thermal_expansion_coefficient_nodal") : declareProperty<Real>("PorousFlow_constant_thermal_expansion_coefficient_qp")),
-    _coeff_old(_nodal_material ? declarePropertyOld<Real>("PorousFlow_constant_thermal_expansion_coefficient_nodal") : declarePropertyOld<Real>("PorousFlow_constant_thermal_expansion_coefficient_qp"))
+    _coeff_old(_nodal_material ? getMaterialPropertyOld<Real>("PorousFlow_constant_thermal_expansion_coefficient_nodal") : getMaterialPropertyOld<Real>("PorousFlow_constant_thermal_expansion_coefficient_qp"))
 {
 }
 

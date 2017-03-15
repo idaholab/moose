@@ -41,11 +41,8 @@ Each nontrivial test in the test suite {\em has its own separate
 how to build a PorousFlow input file.
 
 Within this document, black text indicates funcionality that has been
-implemented and tested, \textcolor{blue}{blue text indicates
-  functionality that should be implemented by March 2017},
-\textcolor{red}{and red text indicates functionality that should be
-  implemented by December 2017}.
-}
+implemented and tested \textcolor{red}{and red text indicates
+  functionality that should be implemented by December 2017}.  }
 
 \tableofcontents
 
@@ -57,6 +54,253 @@ The equations for heat flow, fluid flow, solid mechanics, and chemical
 reactions are defined here.  Notation is introduced throughout, but
 summarised in \hyperref[ssec.notation]{Section~\ref*{ssec.notation}}.  The Lagrangian coordinate
 system is used since it co-moves with the mesh.
+
+
+\section{Notation}
+\label{ssec.notation}
+
+%%% Please try to keep this table ordered alphabetically
+\begin{longtable}{llp{10cm}}
+\hline
+{\bf Symbol} & {\bf Units} & {\bf Physical description} \\
+\hline\hline
+\endhead
+$A^{\species}$ & kg.kg$^{-1}$ & Mass of absorbed species $\species$
+per mass of rock grain material. \\
+$\mathcal{A}^{i}_{\phase}$ & symbolic & Chemical species $i$ in phase $\phase$ \\
+
+$A_{m}$ & m$^{2}$.L$^{-1}$ & specific reactive surface area for
+mineral $m$ \\
+
+$\alpha_{\phase,L}$ & m & Longitudional dispersivity of phase
+$\phase$. \\
+
+$\alpha_{\phase,T}$ & m & Transverse dispersivity of phase
+$\phase$. \\
+
+$\alpha_{B}$ & dimensionless & Biot coefficient.  I believe we can
+treat this as a constant Material parameter. \\
+
+$\alpha_{f}$ & K$^{-1}$ & Volumetric coefficient of thermal expansion
+of the fluid.  \\
+
+$\alpha_{T}$ & K$^{-1}$ & Volumetric coefficient of thermal expansion
+of the drained porous skeleton (ie, the porous rock without fluid, or
+which a fluid that is free to move in and out of the rock). \\
+
+${\mathbf b}$ & m.s$^{-2}$ & External force density acting on the
+porous solid.  This could be gravitational acceleration, or a
+load-density from a platten. \\
+
+$\phase$ & dimensionless & Index representing phase.  For example, $\phase$ might
+parameterise liquid ($\phase=0$), gas ($\phase=1$) and NAPL ($\phase=2$). \\
+
+$C_{R}$ & J.kg$^{-1}$.K$^{-1}$ & Specific heat capacity of rock
+grains. \\
+
+$C_{ijkl}$ & Pa & Drained compliance tensor of the porous solid (ie,
+inverse of $E_{ijkl}$). \\
+
+$C_{\phase}^{i}$ & moles per litre & concentration of species $i$ \\
+
+$C_{v}$ & J.kg$^{-1}$.K$^{-1}$ & Fluid specific heat capacity at
+constant volume. \\
+
+$C_{p}$ & J.kg$^{-1}$.K$^{-1}$ & Fluid specific heat capacity at
+constant pressure. \\
+
+$\massfrac_{\phase}^{\species}$ & kg.kg$^{-1}$ & Mass fraction of
+component $\species$ present in phase $\phase$. \\
+
+${\mathcal{D}}_{\phase}^{\species}$ & m$^{2}$.s$^{-1}$ & Fluid
+dispersion tensor for species $\species$ in phase $\phase$. \\
+
+$D_{\phase,L}^{\species}$ & m$^{2}$.s$^{-1}$ & Longitudional
+dispersion coefficient for species $\species$ in phase $\phase$. \\
+
+$D_{\phase,T}^{\species}$ & m$^{2}$.s$^{-1}$ & Transverse
+dispersion coefficient for species $\species$ in phase $\phase$. \\
+
+$d_{\phase}^{\species}$ & m$^{2}$.s$^{-1}$ & Molecular diffusion
+coefficient for component $\species$ in phase $\phase$. \\
+
+$\delta_{l \phase}$ & dimenionless & Kronecker delta, unity if $\phase
+=l$, else zero. \\
+
+$\energydens$ & J.m$^{-3}$ & Energy density of the rock-fluid
+system. \\
+
+$\energydens_{\phase}$ & J.kg$^{-1}$ & Internal energy of fluid phase
+$\phase$. In the simplest case this is just $c_{\phase}T$, where
+$c_{\phase}$ is the fluid's specific heat capacity.\\
+
+$\epsilon_{ij}$ & dimensionless & Strain tensor of the porous solid
+($(\nabla_{k}u_{l} + \nabla_{l}u_{k})/2$). \\
+
+$\epsilon^{\mathrm{elastic}}_{ij}$ & dimensionless & Elastic strain
+tensor of the porous solid.  The total strain $\epsilon =
+\epsilon^{\mathrm{elastic}} + \epsilon^{\mathrm{plastic}}$. \\
+
+$\epsilon^{\mathrm{plastic}}_{ij}$ & dimensionless & Plastic strain
+tensor of the porous solid.  The total strain $\epsilon =
+\epsilon^{\mathrm{elastic}} + \epsilon^{\mathrm{plastic}}$. \\
+
+$\eta$ & dimensionless & exponent in rate expression \\
+
+$E_{ijkl}$ & Pa & ``Drained'' elasticity tensor of the porous skeleton
+(ie, this enters the stress-strain relation when fluid is allowed to
+freely drain from the skeleton, or when the skeleton is dry). \\
+
+$\phi$ & dimensionless & Porosity of the solid. \\
+
+$\phi_{m}$ & dimensionless & volume fraction of mineral in solid \\
+
+$\flux$ & kg.s$^{-1}$.m$^{-2}$ & Fluid flux.  This is a sum of
+the advective (Darcy) flux, and a diffusive-and-dispersive flux. \\
+
+$\flux^{T}$ & J.s$^{-1}$.m$^{-2}$ & Heat flux.  This is a sum of heat
+conduction through the rock-fluid system, and convection with the
+fluid. \\
+
+${\mathbf g}$ & m.s$^{-2}$ & Acceleration due to gravity.  It is a
+vector pointing downwards (eg $(0, 0, -10)$). \\
+
+$\gamma_{\phase}^{i}$ & dimensionless & activity coefficient of
+species $i$ in phase $\phase$ \\
+
+$h_{\phase}$ & J.kg$^{-1}$ & Specific enthalpy of fluid phase
+$\phase$. In the simplest case this is just $c_{\phase}T$ where
+$c_{\phase}$ is the fluid's specific heat capacity.\\
+
+$H_{\species}$ & Pa & Henry coefficient for species $\species$ which
+describes the solutibility of the species in the aqueous phase. \\
+
+$I_{m}$ & mol.L$^{-1}$.s$^{-1}$ & mineral reaction rate \\
+
+$\species$ & dimensionless & Index representing species.  For example, $\species$
+might parameterise water ($\species=0$), air ($\species=1$), and H$_{2}$ ($\species=2$).  It
+parameterises things that cannot be dcomposed into other species, but
+can change phase.  For instance, sometimes it might be appropriate to
+consider air as a single species, while at other times it might be
+appropriate to consider it to be a mixture of nitrogen and oxygen
+($\species=0$ and $\species=1$, say). \\
+
+$k$ & m$^{2}$ & Permeability tensor of rock. \\
+
+$k_{\mathrm{r,}\phase}$ & dimensionless & Relative permeability of phase $\phase$.
+This is a nonlinear function of the independent variables.  Often it
+is just a function of the phase's saturation, but with Klinkenberg
+effects it will be a function of the gas pressure too.  In the
+single-phase, fully-saturated case it is unity.  \\
+
+$K$ & Pa & Bulk modulus of the drained porous skeleton.  I think in
+the anisotropic situation $1/K = = \delta_{ij}\delta_{kl}C_{ijkl}$. \\
+
+$K_{\phase}^{i}$ & depends on reaction & equilibrium constant for secondary species $i$ in
+phase $\phase$ \\
+
+$K_{f}$ & Pa & Bulk modulus of the fluid.  \\
+
+$k_{m}$ & mol.m$^{-2}$.s$^{-1}$ & mineral rate constant \\
+
+$\Lambda$ & s$^{-1}$ & Radioactive decay rate of a fluid species \\
+
+$\lambda$ & J.s$^{-1}$.m$^{-1}$.K$^{-1}$ & Thermal conductivity of
+the rock-fluid system (J.s$^{-1}$.m$^{-1}$.K$^{-1} =$
+kg.m.s$^{-3}$.K$^{-1}$).  It is a tensorial quantity to allow
+modelling of anisotropic situations, and is a function of the
+rock and fluid-phase's thermal conductivities\\
+
+$\lambda_{dry}$ & J.s$^{-1}$.m$^{-1}$.K$^{-1}$ & Thermal conductivity of
+the rock-fluid system when aqueous phase saturation is zero. \\
+
+$\lambda_{wet}$ & J.s$^{-1}$.m$^{-1}$.K$^{-1}$ & Thermal conductivity of
+the rock-fluid system when aqueous phase saturation is unity. \\
+
+$M$ & kg.m$^{-3}$ & Mass density \\
+
+$\mu$ & Pa.s & Dynamic viscosity measured in Pa.s or
+kg.m$^{-1}$.s$^{-1}$.  This is a nonlinear function of the independent
+variables. \\
+
+$\nu$ & dimensionless & Fraction of plastic-deformation energy that
+becomes heat energy.  Probably $\nu=1$ is correct. \\
+
+$\nu^{ij}_{\phase}$ & dimensionless & stoichiometric coefficent of
+basis species $j$ in equilibrium reaction for secondary species $j$ \\
+
+$\nabla$ & m$^{-1}$ & Spatial differential operator \\
+
+$\Omega_{m}$ & dimensionless & mineral saturation ratio \\
+
+
+$P$ & Pa & Fluid porepressure \\
+
+$P_{f}$ & Pa & Measure of porepressure used in the effective stress.
+Often this is chosen to be $\sum_{\phase}S_{\phase}P_{\phase}$. \\
+
+$P_{L}$ & Pa & Langmuir pressure \\
+
+$\Phi_{\phase}^{j}$ & moles per litre & Total concentration of basis
+species $j$ in phase $\phase$ \\
+
+$q$ & kg.m$^{-3}$.s$^{-1}$ & Fluid source \\
+
+$q^{j}$ & mol.L$^{-1}$.s$^{-1}$ & source of chemical species \\
+
+$q^{T}$ & J.m$^{-3}$.s$^{-1}$ & Heat source. \\
+
+$\rho$ & kg.m$^{-3}$ & Fluid density \\
+
+$\rho_{R}$ & kg.m$^{-3}$ & Grain density of the rock (so that
+$(1-\phi)\rho_{R}$ is the density of the dry porous rock). \\
+
+$\rho_{\mathrm{mat}}$ & kg.m$^{-3}$ & The mass-density of the
+fluid-filled porous solid $\rho_{\mathrm{mat}} = (1 - \phi)\rho^{R} +
+\phi\sum_{\phase}S_{\phase}\rho_{\phase}$. \\
+
+$\rho_{L}$ & kg.m$^{-3}$ & Langmuir density\\
+
+$S$ & dimensionless & Saturation \\
+
+$S_{l}$ & dimensionless & saturation of aqueous phase \\
+
+
+$\sigma^{\mathrm{tot}}_{ij}$ & Pa & Total stress.  An
+externally applied mechanical force will create a nonzero
+$\sigma^{\mathrm{tot}}$, and conversely, resolving
+$\sigma^{\mathrm{tot}}$ into forces yields the forces on nodes in the
+finite-element mesh. \\
+
+$\sigma^{\mathrm{eff}}_{ij}$ & Pa & Effective stress. \\
+
+$t$ & s & Time \\
+
+$T$ & K & Temperature. \\
+
+$\tau_{0}\tau_{\phase}$ & dimensionless & The phase tortuosity, which
+includes a porous-medium dependent factor $\tau_{0}$ and a coefficient
+$\tau_{\phase}=\tau_{\phase}(S_{\phase})$. \\
+
+$\tau_{L}$ & s & Langmuir desorption time constant \\
+
+$\theta$ & dimensionless & exponent in rate expression \\
+
+${\mathbf{u}}$ & m.s$^{-1}$ & Deformation vector of the porous solid. \\
+
+$\darcyvel$ & m.s$^{-1}$ & Darcy velocity (volume flux) \\
+
+${\mathbf v}_{s}$ & m.s$^{-1}$ & Velocity of the solid = $\partial
+{\mathbf u}/\partial t$, where ${\mathbf u}$ is the solid mechanical
+displacement vector of the porous solid. \\
+
+$\overline{V}_{m}$ & L.mol$^{-1}$ & molar volume \\
+\hline
+\caption{Notation introduced throughout
+  \hyperref[sec.physical.equations]{Section~\ref*{sec.physical.equations}}.}
+\label{table.notation}
+\end{longtable}
+
 
 \section{Fluid flow}
 
@@ -210,7 +454,7 @@ accurate enough, and there are more complicated alternatives.
 \hyperref[eos]{Chapter~\ref*{eos}} discusses various equations of state that include
 computations of Henry's coefficients.
 
-\item \textcolor{blue}{When a liquid and a gaseous phase exist, the
+\item \textcolor{red}{When a liquid and a gaseous phase exist, the
   simplest equation for vapour pressure is
 \begin{equation}
 P_{\mathrm{vapour}} = P_{\mathrm{sat}}(T) \ ,
@@ -721,241 +965,6 @@ for mineral $m$, and the exponents $\theta$ and $\eta$ are specific to
 each mineral reaction, but are often both taken to be unity. The rate
 constant $k_{m}$ (mole/(m$^{2}$ s)) is a function of temperature.  }
 
-\section{Notation}
-\label{ssec.notation}
-
-%%% Please try to keep this table ordered alphabetically
-\begin{longtable}{llp{10cm}}
-\hline
-{\bf Symbol} & {\bf Units} & {\bf Physical description} \\
-\hline\hline
-\endhead
-$A^{\species}$ & kg.kg$^{-1}$ & Mass of absorbed species $\species$
-per mass of rock grain material. \\
-$\mathcal{A}^{i}_{\phase}$ & symbolic & Chemical species $i$ in phase $\phase$ \\
-
-$A_{m}$ & m$^{2}$.L$^{-1}$ & specific reactive surface area for
-mineral $m$ \\
-
-$\alpha_{\phase,L}$ & m & Longitudional dispersivity of phase
-$\phase$. \\
-
-$\alpha_{\phase,T}$ & m & Transverse dispersivity of phase
-$\phase$. \\
-
-$\alpha_{B}$ & dimensionless & Biot coefficient.  I believe we can
-treat this as a constant Material parameter. \\
-
-$\alpha_{T}$ & K$^{-1}$ & Volumetric coefficient of thermal expansion
-of the drained porous skeleton (ie, the porous rock without fluid, or
-which a fluid that is free to move in and out of the rock). \\
-
-${\mathbf b}$ & m.s$^{-2}$ & External force density acting on the
-porous solid.  This could be gravitational acceleration, or a
-load-density from a platten. \\
-
-$\phase$ & dimensionless & Index representing phase.  For example, $\phase$ might
-parameterise liquid ($\phase=0$), gas ($\phase=1$) and NAPL ($\phase=2$). \\
-
-$C_{R}$ & J.kg$^{-1}$.K$^{-1}$ & Specific heat capacity of rock
-grains. \\
-
-$C_{ijkl}$ & Pa & Drained compliance tensor of the porous solid (ie,
-inverse of $E_{ijkl}$). \\
-
-$C_{\phase}^{i}$ & moles per litre & concentration of species $i$ \\
-
-$\massfrac_{\phase}^{\species}$ & kg.kg$^{-1}$ & Mass fraction of
-component $\species$ present in phase $\phase$. \\
-
-${\mathcal{D}}_{\phase}^{\species}$ & m$^{2}$.s$^{-1}$ & Fluid
-dispersion tensor for species $\species$ in phase $\phase$. \\
-
-$D_{\phase,L}^{\species}$ & m$^{2}$.s$^{-1}$ & Longitudional
-dispersion coefficient for species $\species$ in phase $\phase$. \\
-
-$D_{\phase,T}^{\species}$ & m$^{2}$.s$^{-1}$ & Transverse
-dispersion coefficient for species $\species$ in phase $\phase$. \\
-
-$d_{\phase}^{\species}$ & m$^{2}$.s$^{-1}$ & Molecular diffusion
-coefficient for component $\species$ in phase $\phase$. \\
-
-$\delta_{l \phase}$ & dimenionless & Kronecker delta, unity if $\phase
-=l$, else zero. \\
-
-$\energydens$ & J.m$^{-3}$ & Energy density of the rock-fluid
-system. \\
-
-$\energydens_{\phase}$ & J.kg$^{-1}$ & Internal energy of fluid phase
-$\phase$. In the simplest case this is just $c_{\phase}T$, where
-$c_{\phase}$ is the fluid's specific heat capacity.\\
-
-$\epsilon_{ij}$ & dimensionless & Strain tensor of the porous solid
-($(\nabla_{k}u_{l} + \nabla_{l}u_{k})/2$). \\
-
-$\epsilon^{\mathrm{elastic}}_{ij}$ & dimensionless & Elastic strain
-tensor of the porous solid.  The total strain $\epsilon =
-\epsilon^{\mathrm{elastic}} + \epsilon^{\mathrm{plastic}}$. \\
-
-$\epsilon^{\mathrm{plastic}}_{ij}$ & dimensionless & Plastic strain
-tensor of the porous solid.  The total strain $\epsilon =
-\epsilon^{\mathrm{elastic}} + \epsilon^{\mathrm{plastic}}$. \\
-
-$\eta$ & dimensionless & exponent in rate expression \\
-
-$E_{ijkl}$ & Pa & ``Drained'' elasticity tensor of the porous skeleton
-(ie, this enters the stress-strain relation when fluid is allowed to
-freely drain from the skeleton, or when the skeleton is dry). \\
-
-$\phi$ & dimensionless & Porosity of the solid. \\
-
-$\phi_{m}$ & dimensionless & volume fraction of mineral in solid \\
-
-$\flux$ & kg.s$^{-1}$.m$^{-2}$ & Fluid flux.  This is a sum of
-the advective (Darcy) flux, and a diffusive-and-dispersive flux. \\
-
-$\flux^{T}$ & J.s$^{-1}$.m$^{-2}$ & Heat flux.  This is a sum of heat
-conduction through the rock-fluid system, and convection with the
-fluid. \\
-
-${\mathbf g}$ & m.s$^{-2}$ & Acceleration due to gravity.  It is a
-vector pointing downwards (eg $(0, 0, -10)$). \\
-
-$\gamma_{\phase}^{i}$ & dimensionless & activity coefficient of
-species $i$ in phase $\phase$ \\
-
-$h_{\phase}$ & J.kg$^{-1}$ & Specific enthalpy of fluid phase
-$\phase$. In the simplest case this is just $c_{\phase}T$ where
-$c_{\phase}$ is the fluid's specific heat capacity.\\
-
-$H_{\species}$ & Pa & Henry coefficient for species $\species$ which
-describes the solutibility of the species in the aqueous phase. \\
-
-$I_{m}$ & mol.L$^{-1}$.s$^{-1}$ & mineral reaction rate \\
-
-$\species$ & dimensionless & Index representing species.  For example, $\species$
-might parameterise water ($\species=0$), air ($\species=1$), and H$_{2}$ ($\species=2$).  It
-parameterises things that cannot be dcomposed into other species, but
-can change phase.  For instance, sometimes it might be appropriate to
-consider air as a single species, while at other times it might be
-appropriate to consider it to be a mixture of nitrogen and oxygen
-($\species=0$ and $\species=1$, say). \\
-
-$k$ & m$^{2}$ & Permeability tensor of rock. \\
-
-$k_{\mathrm{r,}\phase}$ & dimensionless & Relative permeability of phase $\phase$.
-This is a nonlinear function of the independent variables.  Often it
-is just a function of the phase's saturation, but with Klinkenberg
-effects it will be a function of the gas pressure too.  In the
-single-phase, fully-saturated case it is unity.  \\
-
-$K$ & Pa & Bulk modulus of the drained porous skeleton.  I think in
-the anisotropic situation $1/K = = \delta_{ij}\delta_{kl}C_{ijkl}$. \\
-
-$K_{\phase}^{i}$ & depends on reaction & equilibrium constant for secondary species $i$ in
-phase $\phase$ \\
-
-$k_{m}$ & mol.m$^{-2}$.s$^{-1}$ & mineral rate constant \\
-
-$\Lambda$ & s$^{-1}$ & Radioactive decay rate of a fluid species \\
-
-$\lambda$ & J.s$^{-1}$.m$^{-1}$.K$^{-1}$ & Thermal conductivity of
-the rock-fluid system (J.s$^{-1}$.m$^{-1}$.K$^{-1} =$
-kg.m.s$^{-3}$.K$^{-1}$).  It is a tensorial quantity to allow
-modelling of anisotropic situations, and is a function of the
-rock and fluid-phase's thermal conductivities\\
-
-$\lambda_{dry}$ & J.s$^{-1}$.m$^{-1}$.K$^{-1}$ & Thermal conductivity of
-the rock-fluid system when aqueous phase saturation is zero. \\
-
-$\lambda_{wet}$ & J.s$^{-1}$.m$^{-1}$.K$^{-1}$ & Thermal conductivity of
-the rock-fluid system when aqueous phase saturation is unity. \\
-
-$M$ & kg.m$^{-3}$ & Mass density \\
-
-$\mu$ & Pa.s & Dynamic viscosity measured in Pa.s or
-kg.m$^{-1}$.s$^{-1}$.  This is a nonlinear function of the independent
-variables. \\
-
-$\nu$ & dimensionless & Fraction of plastic-deformation energy that
-becomes heat energy.  Probably $\nu=1$ is correct. \\
-
-$\nu^{ij}_{\phase}$ & dimensionless & stoichiometric coefficent of
-basis species $j$ in equilibrium reaction for secondary species $j$ \\
-
-$\nabla$ & m$^{-1}$ & Spatial differential operator \\
-
-$\Omega_{m}$ & dimensionless & mineral saturation ratio \\
-
-
-$P$ & Pa & Fluid porepressure \\
-
-$P_{f}$ & Pa & Measure of porepressure used in the effective stress.
-Often this is chosen to be $\sum_{\phase}S_{\phase}P_{\phase}$. \\
-
-$P_{L}$ & Pa & Langmuir pressure \\
-
-$\Phi_{\phase}^{j}$ & moles per litre & Total concentration of basis
-species $j$ in phase $\phase$ \\
-
-$q$ & kg.m$^{-3}$.s$^{-1}$ & Fluid source \\
-
-$q^{j}$ & mol.L$^{-1}$.s$^{-1}$ & source of chemical species \\
-
-$q^{T}$ & J.m$^{-3}$.s$^{-1}$ & Heat source. \\
-
-$\rho$ & kg.m$^{-3}$ & Fluid density \\
-
-$\rho_{R}$ & kg.m$^{-3}$ & Grain density of the rock (so that
-$(1-\phi)\rho_{R}$ is the density of the dry porous rock). \\
-
-$\rho_{\mathrm{mat}}$ & kg.m$^{-3}$ & The mass-density of the
-fluid-filled porous solid $\rho_{\mathrm{mat}} = (1 - \phi)\rho^{R} +
-\phi\sum_{\phase}S_{\phase}\rho_{\phase}$. \\
-
-$\rho_{L}$ & kg.m$^{-3}$ & Langmuir density\\
-
-$S$ & dimensionless & Saturation \\
-
-$S_{l}$ & dimensionless & saturation of aqueous phase \\
-
-
-$\sigma^{\mathrm{tot}}_{ij}$ & Pa & Total stress.  An
-externally applied mechanical force will create a nonzero
-$\sigma^{\mathrm{tot}}$, and conversely, resolving
-$\sigma^{\mathrm{tot}}$ into forces yields the forces on nodes in the
-finite-element mesh. \\
-
-$\sigma^{\mathrm{eff}}_{ij}$ & Pa & Effective stress. \\
-
-$t$ & s & Time \\
-
-$T$ & K & Temperature. \\
-
-$\tau_{0}\tau_{\phase}$ & dimensionless & The phase tortuosity, which
-includes a porous-medium dependent factor $\tau_{0}$ and a coefficient
-$\tau_{\phase}=\tau_{\phase}(S_{\phase})$. \\
-
-$\tau_{L}$ & s & Langmuir desorption time constant \\
-
-$\theta$ & dimensionless & exponent in rate expression \\
-
-${\mathbf{u}}$ & m.s$^{-1}$ & Deformation vector of the porous solid. \\
-
-$\darcyvel$ & m.s$^{-1}$ & Darcy velocity (volume flux) \\
-
-${\mathbf v}_{s}$ & m.s$^{-1}$ & Velocity of the solid = $\partial
-{\mathbf u}/\partial t$, where ${\mathbf u}$ is the solid mechanical
-displacement vector of the porous solid. \\
-
-$\overline{V}_{m}$ & L.mol$^{-1}$ & molar volume \\
-\hline
-\caption{Notation introduced throughout
-  \hyperref[sec.physical.equations]{Section~\ref*{sec.physical.equations}}.}
-\label{table.notation}
-\end{longtable}
-
-
 \section{Example use case: Single-phase single-component fully-saturated fluid}
 
 Since the number of phases and components is unity, the subscripts
@@ -1413,8 +1422,8 @@ obtain the following quantities:
 
 Simplified fluid properties:
 \begin{enumerate}
-\item density $\rho = \rho_{0}\exp(P/K - \alpha T)$, where $K$ (the
-  bulk modulus) and $\alpha$ (the thermal expansion coefficient) are
+\item density $\rho = \rho_{0}\exp(P/K_{f} - \alpha_{f} T)$, where $K_{f}$ (the
+  bulk modulus) and $\alpha_{f}$ (the thermal expansion coefficient) are
   constant.
 \item viscosity is constant
 \item internal energy $\energydens = C_{v}T$, where $C_{v}$ (the
@@ -1808,7 +1817,7 @@ tensors), and
 where $S_{\mathrm{aqueous}}$ is the aqueous phase saturation, and $n$
 is a user-defined exponent.
 
-\textcolor{blue}{The dependence of fluid thermal conductivity on temperature may be
+\textcolor{red}{The dependence of fluid thermal conductivity on temperature may be
 handled within the fluid property modules (to accommodate
 the kind of large changes that can occur when water flashes to
 steam).}  \textcolor{red}{The solid thermal
@@ -1842,6 +1851,7 @@ This ensures far superior numerical convergence, especially in
 situations where mass-fractions of phases are close to disappearing.
 
 \subsection{Lumping}
+\label{lumping.sec}
 
 Consider here just the fluid-flow equation, as the heat-energy
 equation is analogous.  The time-derivative term in
@@ -1942,6 +1952,7 @@ dependent on the volumetric strain evaluated at the closest quadpoint
 to the node.
 
 \subsection{Upwinding}
+\label{upwinding.sec}
 
 Upwinding is necessary\footnote{Eg, see PS Huyakorn and GF Pinder ``A
   new finite element technique for the solution of two-phase flow
@@ -2180,6 +2191,199 @@ R_{\mathrm{mech}} & \sim & V \ ,
 on the porepressure variable (or whatever MOOSE variable is associated
 to the fluid equation) would be appropriate.  Similarly, a scaling of
 around $10^{3}$ on the temperature variable would be appropriate.
+
+\section{Fully saturated formulations}
+
+In fully-saturated, single-phase simulations the upwinding described
+in \hyperref[upwinding.sec]{Section~\ref*{upwinding.sec}} is typically
+unnecessary.  Moreover, the standard PorousFlow Kernels are somewhat
+inefficient in the fully-saturated case since Material Properties such
+as relative permeabilities and saturations actually do not need to be
+computed.  PorousFlow offers some Kernels that may be used in this
+situation, as described below.  They also have some minor
+disadvantages that are described below.
+
+In fully-saturated, single-phase, single-component simulations, the
+mass lumping described in
+\hyperref[lumping.sec]{Section~\ref*{lumping.sec}} is typically
+unncessary.  More importantly, in many real-life situations, the time
+derivative of the fluid mass may be linearised, which leads to
+improved convergence.  PorousFlow offers a Kernel that may be used in
+this situation, as described below.  It too has some disadvantages and
+other unique features.
+
+\subsection{Non-upwinded flux Kernels for fully-saturated,
+  single-phase simulations}
+\label{nonupwinded.flux.sec}
+
+The following Kernels are available.
+\begin{enumerate}
+\item {\tt PorousFlowFullySaturatedDarcyBase} models $\nabla_{i}
+  \left( (\rho) k_{ij} (\nabla_{j} P - \rho g_{j}\right) / \mu$.  This
+  is fully-saturated, single-phase, single-component fluid flow.  No
+  upwinding is performed.  The initial multiplication by $\rho$ is
+  optional (indicated by the parenthases): the reason for this is
+  described in \hyperref[no_lump_sec]{Section~\ref*{no_lump_sec}}.
+\item {\tt PorousFlowFullySaturatedDarcyFlow} models $\nabla_{i}
+  \left( \massfrac^{\species} \rho k_{ij} (\nabla_{j} P - \rho g_{j}\right) / \mu$.  This is
+  fully-saturated, single-phase, multi-component fluid flow, for fluid
+  component $\species$.  No
+  upwinding is performed.
+\item {\tt PorousFlowFullySaturatedHeatAdvection} models $\nabla_{i}
+  \left( h \rho k_{ij} (\nabla_{j} P - \rho g_{j}\right) / \mu$.  This is
+  heat advection via fully-saturated, single-phase, multi-component fluid flow.  No
+  upwinding is performed.
+\end{enumerate}
+
+Note that no Kernel includes the relative permeability, for it is
+always unity.  This means that a RelativePermeability Material is not
+needed, which saves in computation time.  Similarly, the saturation
+does not need to be computed, and various Nodal Materials (such as the
+density evaluated at the nodes) do not need to be computed.  This
+makes input files smaller, and saves on computation time.  In a
+full-scale simulation, we have recorded computational saving of about
+4\%.
+
+Possibly the greatest advantage in using these Kernels is the reduced
+diffusion of fronts of temperature and fluid species.  The full
+upwinding used in the remainder of PorousFlow adds diffusion compared
+with the non upwinded case.  These effects are quantified by example
+in the documentation for the heat advection tests, and the
+documentation for sinks where the transport of a fluid component is
+explored.  An example is shown in
+\hyperref[eg_heat_advect.fig]{Figure~\ref*{eg_heat_advect.fig}}.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=8cm]{heat_advection_1d_0_6.eps}
+\caption{Heat advection via a fluid in 1D.  The fluid flows with a
+  constant velocity from the left to the right.  The initial
+  temperature distribution is a uniform 200\,K everywhere.  Then the
+  left-hand side is raised to 300\,K and fixed at that temperature.
+  This causes a front of 300\,K to move right.  Without any diffusion a
+  sharp front would advect from left to right.  The upwinding adds
+  diffusion, while no upwinding adds less diffusion.}
+\label{eg_heat_advect.fig}
+\end{figure}
+
+The disadvantage of using the FullySaturated Kernels is that the
+physics is no longer completely controlled.  The whole point of full
+upwinding is to ensure that no unphysical behaviour manifests itself,
+such as negative saturations or negative mass fractions.  It is clear
+from \hyperref[eg_heat_advect.fig]{Figure~\ref*{eg_heat_advect.fig}}
+that the temperature has risen slightly above 300\,K ahead of the front, which
+is unphysical.
+
+
+
+\subsection{Non-lumped time derivative of fluid mass for
+  fully-saturated, single-phase, single-component simulations}
+\label{no_lump_sec}
+
+Consider a fully-saturated, single-phase, single-component fluid in a
+THM simulation.  The time-derivatve terms from
+\hyperref[mass.cons.sp.eqn]{Eqn~(\ref*{mass.cons.sp.eqn})} are
+\begin{equation}
+\frac{\partial}{\partial t} \phi \rho + \phi\rho\dot{\epsilon}_{v} \ ,
+\end{equation}
+where $\dot{\epsilon}_{v} = \nabla\cdot {\mathbf v}_{s}$.  Using the
+THM evolution of porosity given by
+\hyperref[eqn.phi.dog]{Eqn~(\ref*{eqn.phi.dog})}, along with the
+assumption that the fluid bulk modulus, $K_{f}$, and its volumetric
+thermal expansion coefficient, $\alpha_{f}$, are constant with fluid
+density given by
+\begin{equation}
+\rho = \rho_{0}\exp(P/K_{f} - \alpha_{f} T) \ ,
+\end{equation}
+the time derivative terms may be written as
+\begin{equation}
+\rho \left( \frac{1}{M}\dot{P} + \alpha_{B}\dot{\epsilon}_{v} -
+A\dot{T} \right) \ .
+\end{equation}
+Here $M$ is the so-called Biot Modulus:
+\begin{equation}
+\frac{1}{M} = \frac{\phi}{K_{f}} + \frac{(1 - \alpha_{B})(\alpha_{B} -
+  \phi)}{K} \ ,
+\label{biot.mod.eqn}
+\end{equation}
+and $A$ is an effective volumetric thermal expansion coefficient:
+\begin{equation}
+A = (\alpha_{B} - \phi)\alpha_{T} + \phi\alpha_{f} \ .
+\label{therm.ex.eqn}
+\end{equation}
+Notice that disregarding the premultiplication by $\rho$, the above
+time-derivative terms would be linear in the variables $P$,
+displacement, and $T$, if $M$ and $A$ were constant.
+
+In standard poro-mechanics it is usual to calculate $M$ and $A$ at the
+initial stage of simulation, and keep them fixed forever afterwards.
+Of course this is an approximation since $M$ and $A$ were derived
+using the explicit assumption of a porosity that depended on $P$,
+$\epsilon_{v}$, and $T$, but it makes finding analytical solutions
+much easier.  Therefore, PorousFlow offers the following Materials and
+Kernels.  Using these Materials and Kernel allows immediate and precise
+comparison with analytical and numerical solutions of poro-mechanics.
+\begin{enumerate}
+\item {\tt PorousFlowConstantBiotModulus} Material, which computes $M$
+  given by \hyperref[biot.mod.eqn]{Eqn~(\ref*{biot.mod.eqn})} during the
+  initial stage of simulation, and keeps it fixed thereafter.  It
+  requires a Porosity Material, but that Material's Property is only
+  used during the initial computation.
+\item {\tt PorousFlowConstantThermalExpansionCoefficient} Material,
+  which computes $A$ given by
+  \hyperref[therm.ex.eqn]{Eqn~(\ref*{therm.ex.eqn})} during the the
+  initial stage of simulation, and keeps it fixed thereafter.  It
+  requires a Porosity Material, but that Material's Property is only
+  used during the initial computation.
+\item {\tt PorousFlowFullySaturatedMassTimeDerivative} Kernel, which
+  computes one of the following contributions, depending upon a
+  user-defined flag:
+\begin{enumerate}
+\item $(\rho) \dot{P}/M$ for fluid-flow-only problems;
+\item $(\rho)(\dot{P}/M - A\dot{T})$ for TH problems;
+\item $(\rho)(\dot{P}/M + \alpha_{B}\dot{\epsilon}_{v})$ for HM
+  problems;
+\item $(\rho)(\dot{P}/M + \alpha_{B}\dot{\epsilon}_{v} - A\dot{T})$
+  for THM problems.
+\end{enumerate}
+None of these employ lumping, which is largely unecessary in this
+single-phase, single-component situation.  This means only
+``quad-point'' Materials are needed.  In fact, when
+using the FullySaturated flow Kernels described in
+\hyperref[nonupwinded.flux.sec]{Sec~\ref*{nonupwinded.flux.sec}}, {\em
+  only} standard Materials evaluated at the quadpoints are needed, which saves
+on computation time and input-file length.
+
+In each case, the initial pre-multiplication by $\rho$ is optional
+(indicated by the parenthases around $\rho$) as
+described in the next paragraph.
+\end{enumerate}
+
+When the Kernel is pre-multiplied by $\rho$, which is the default,
+it is computing the time derivative of fluid mass.  This allows
+the Kernel to be easily used with the remainder of PorousFlow: the
+BCs, the Postprocessors, the AuxKernels, and the DiracKernels are all
+based on mass.
+
+When the pre-multiplication is not performed, they are computing the
+time derivative of fluid volume.  This has two great advantages:
+\begin{enumerate}
+\item the time-derivatives are linearised, resulting in excellent
+  nonlinear convergence;
+\item comparing with results from poro-mechanics theory is
+  straightforward.
+\end{enumerate}
+However, this means additional care must be taken.
+\begin{enumerate}
+\item The flow Kernel {\tt PorousFlowFullySaturatedDarcyBase} should
+  also not pre-multiply by density.
+\item The BCs, Postprocessors, AuxKernels, and DiracKernels must be
+  written in such a way to operate in the fluid-volume scenario rather
+  than the default fluid-mass scenario.
+\item The flag {\tt consistent\_with\_displaced\_mesh} should be set
+  to {\tt false} in the {\tt PorousFlowVolumetricStrain} Material.
+\end{enumerate}
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

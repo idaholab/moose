@@ -44,7 +44,7 @@ protected:
   const bool _multiply_by_density;
 
   /// Determines whether mechanical and/or thermal contributions should be added to the residual
-  const MooseEnum _simulation_type;
+  const enum SimulationTypeEnum {Hydro, ThermoHydro, HydroMechanical, ThermoHydroMechanical} _simulation_type;
 
   /// Whether thermal contributions should be added to the residual
   const bool _includes_thermal;

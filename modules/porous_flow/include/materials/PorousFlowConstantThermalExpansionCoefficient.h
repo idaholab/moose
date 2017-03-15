@@ -51,7 +51,7 @@ protected:
   MaterialProperty<Real> & _coeff;
 
   /// Old value of the volumetric thermal expansion coefficient.  This variable is necessary in order to keep the thermal expansion coefficient constant even if porosity is changing.
-  MaterialProperty<Real> & _coeff_old;
+  const MaterialProperty<Real> & _coeff_old;
 };
 
 #endif //POROUSFLOWCONSTANTTHERMALEXPANSIONCOEFFICIENT_H

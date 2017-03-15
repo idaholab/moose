@@ -11,7 +11,7 @@ template<>
 InputParameters validParams<PorousFlowFullySaturatedMassTimeDerivative>()
 {
   InputParameters params = validParams<TimeKernel>();
-  MooseEnum simulation_type("Hydro=0 ThermoHydro=1 HydroMechanical=2 ThermoHydroMechanical=3", "Hydro");
+  MooseEnum simulation_type("Hydro ThermoHydro HydroMechanical ThermoHydroMechanical", "Hydro");
   params.addParam<MooseEnum>("simulation_type", simulation_type, "The type of simulation.  For simulations involving Mechanical deformations, you will need to supply the correct Biot coefficient.  For simulations involving Thermal flows, you will need an associated ConstantThermalExpansionCoefficient Material");
   params.addRangeCheckedParam<Real>("biot_coefficient", 1.0, "biot_coefficient>=0 & biot_coefficient<=1", "Biot coefficient");
   params.addParam<bool>("multiply_by_density", true, "If true, then this Kernel is the time derivative of the fluid mass.  If false, then this Kernel is the derivative of the fluid volume (which is common in poro-mechanics)");
@@ -25,9 +25,9 @@ PorousFlowFullySaturatedMassTimeDerivative::PorousFlowFullySaturatedMassTimeDeri
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _var_is_porflow_var(_dictator.isPorousFlowVariable(_var.number())),
     _multiply_by_density(getParam<bool>("multiply_by_density")),
-    _simulation_type(getParam<MooseEnum>("simulation_type")),
-    _includes_thermal(_simulation_type == 1 || _simulation_type == 3),
-    _includes_mechanical(_simulation_type == 2  || _simulation_type == 3),
+    _simulation_type(getParam<MooseEnum>("simulation_type").getEnum<SimulationTypeEnum>()),
+    _includes_thermal(_simulation_type == ThermoHydro || _simulation_type == ThermoHydroMechanical),
+    _includes_mechanical(_simulation_type == HydroMechanical  || _simulation_type == ThermoHydroMechanical),
     _biot_coefficient(getParam<Real>("biot_coefficient")),
     _biot_modulus(getMaterialProperty<Real>("PorousFlow_constant_biot_modulus_qp")),
     _thermal_coeff(_includes_thermal ? &getMaterialProperty<Real>("PorousFlow_constant_thermal_expansion_coefficient_qp") : nullptr),
@@ -94,7 +94,7 @@ PorousFlowFullySaturatedMassTimeDerivative::computeQpJac(unsigned int pvar)
     volume += _biot_coefficient * (*_strain_rate)[_qp];
     dvolume += _biot_coefficient * (*_dstrain_rate_dvar)[_qp][pvar] * _grad_phi[_j][_qp];
   }
-  if (_multiply_by_density) 
+  if (_multiply_by_density)
     return _test[_i][_qp] * ((*_fluid_density)[_qp][phase] * dvolume + (*_dfluid_density_dvar)[_qp][phase][pvar] * _phi[_j][_qp] * volume);
   return _test[_i][_qp] * dvolume;
 }

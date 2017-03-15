@@ -51,7 +51,7 @@ protected:
   MaterialProperty<Real> & _biot_modulus;
 
   /// Old value of Biot modulus.  This variable is necessary in order to keep Biot modulus constant even if porosity is changing.
-  MaterialProperty<Real> & _biot_modulus_old;
+  const MaterialProperty<Real> & _biot_modulus_old;
 };
 
 #endif //POROUSFLOWCONSTANTBIOTMODULUS_H
