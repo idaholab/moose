@@ -2486,7 +2486,6 @@ NonlinearSystemBase::setMooseKSPNormType(MooseEnum kspnorm)
     mooseError("Unknown ksp norm type specified.");
 }
 
-
 bool
 NonlinearSystemBase::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 {

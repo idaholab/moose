@@ -31,7 +31,8 @@ validParams<MoosePreconditioner>()
   MooseEnum pc_side("left right symmetric default", "default");
   params.addParam<MooseEnum>("pc_side", pc_side, "Preconditioning side");
   MooseEnum ksp_norm("none preconditioned unpreconditioned natural default", "unpreconditioned");
-  params.addParam<MooseEnum>("ksp_norm", ksp_norm, "Sets the norm that is used for convergence testing");
+  params.addParam<MooseEnum>(
+      "ksp_norm", ksp_norm, "Sets the norm that is used for convergence testing");
   params.registerBase("MoosePreconditioner");
 
 #ifdef LIBMESH_HAVE_PETSC

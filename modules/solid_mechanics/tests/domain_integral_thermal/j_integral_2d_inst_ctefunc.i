@@ -216,6 +216,7 @@
   [./smp]
     type = SMP
     pc_side = left
+    ksp_norm = preconditioned
     full = true
   [../]
 []
