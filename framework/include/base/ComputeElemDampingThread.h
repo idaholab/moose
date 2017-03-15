@@ -24,8 +24,7 @@
 // Forward declarations
 class NonlinearSystemBase;
 class ElementDamper;
-template <typename T>
-class MooseObjectWarehouse;
+template <typename T> class MooseObjectWarehouse;
 
 
 
