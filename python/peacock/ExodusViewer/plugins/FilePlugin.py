@@ -22,6 +22,18 @@ class ExodusComboBox(QtWidgets.QComboBox):
             self.model().item(i).setEnabled(bool(glob.glob(self.itemData(i))))
         super(ExodusComboBox, self).showPopup()
 
+    def hasItem(self, full_file):
+        """
+        Return true if the file already exists.
+        """
+        return full_file in [self.itemData(i) for i in range(self.count())]
+
+    def itemIndex(self, full_file):
+        """
+        Return the index given the full filename.
+        """
+        return [self.itemData(i) for i in range(self.count())].index(full_file)
+
 
 class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
@@ -131,6 +143,8 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         if self.FileOpenDialog.exec_() == QtWidgets.QDialog.Accepted:
             filenames = [str(fname) for fname in list(self.FileOpenDialog.selectedFiles())]
+            if self.AvailableFiles.count() == 0:
+                self.initialize(filenames)
         else:
             return
 
@@ -142,16 +156,19 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         # Append the list of available files
         for full_file in filenames:
-            self.AvailableFiles.addItem(os.path.basename(full_file), full_file)
+            if not self.AvailableFiles.hasItem(full_file):
+                self.AvailableFiles.addItem(os.path.basename(full_file), full_file)
 
             # If the file exists, then update the current index to this new file
             if os.path.exists(full_file):
-                index = self.AvailableFiles.count() - 1
+                index = self.AvailableFiles.itemIndex(full_file)
 
         # Restore signals and update the index, if it changed
         self.AvailableFiles.blockSignals(False)
+
         if index != self.AvailableFiles.currentIndex():
             self.AvailableFiles.setCurrentIndex(index)
+
 
 def main(size=None):
     """
