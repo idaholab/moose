@@ -69,7 +69,7 @@ public:
   /**
    * Method to update the mesh due to modified cut planes
    */
-  virtual bool update(Real time);
+  virtual bool update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux);
 
   /**
    * Initialize the solution on newly created nodes
@@ -77,6 +77,7 @@ public:
   virtual void initSolution(NonlinearSystemBase & nl, AuxiliarySystem & aux);
 
   Node * getNodeFromUniqueID(unique_id_type uid);
+  Elem * getElemFromUniqueID(unique_id_type uid);
 
   void buildEFAMesh();
   bool markCuts(Real time);
@@ -86,7 +87,7 @@ public:
   bool markCutFacesByState();
   bool initCutIntersectionEdge(
       Point cut_origin, RealVectorValue cut_normal, Point & edge_p1, Point & edge_p2, Real & dist);
-  bool cutMeshWithEFA();
+  bool cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux);
   Point getEFANodeCoords(EFANode * CEMnode,
                          EFAElement * CEMElem,
                          const Elem * elem,
@@ -198,9 +199,38 @@ private:
   std::set<const Elem *> _state_marked_frags;
   std::map<const Elem *, unsigned int> _state_marked_elem_sides;
 
-  std::map<unique_id_type, unique_id_type> _new_node_to_parent_node;
-
   ElementFragmentAlgorithm _efa_mesh;
+
+  std::map<unique_id_type, std::vector<Real>> _new_node_solution;
+  std::map<unique_id_type, std::vector<Real>> _new_node_aux_solution;
+  std::map<unique_id_type, std::vector<Real>> _new_elem_solution;
+  std::map<unique_id_type, std::vector<Real>> _new_elem_aux_solution;
+  std::vector<Real> _stored_solution_scratch;
+  std::vector<unsigned int> _stored_solution_dofs_scratch;
+
+  void saveSolutionForNode(const Node * node_to_store_to,
+                           const Node * node_to_store_from,
+                           SystemBase & sys,
+                           std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                           const NumericVector<Number> & current_solution,
+                           const NumericVector<Number> & old_solution);
+
+  void saveSolutionForElement(const Elem * elem_to_store_to,
+                              const Elem * elem_to_store_from,
+                              SystemBase & sys,
+                              std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                              const NumericVector<Number> & current_solution,
+                              const NumericVector<Number> & old_solution);
+
+  void setElementSolution(SystemBase & sys,
+                          const std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                          NumericVector<Number> & current_solution,
+                          NumericVector<Number> & old_solution);
+
+  void setNodeSolution(SystemBase & sys,
+                       const std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                       NumericVector<Number> & current_solution,
+                       NumericVector<Number> & old_solution);
 };
 
 #endif // XFEM_H

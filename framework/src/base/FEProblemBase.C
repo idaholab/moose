@@ -4308,9 +4308,9 @@ void
 FEProblemBase::initXFEM(std::shared_ptr<XFEMInterface> xfem)
 {
   _xfem = xfem;
-  _xfem->setMesh(&_mesh.getMesh());
+  _xfem->setMesh(&_mesh);
   if (_displaced_mesh)
-    _xfem->setSecondMesh(&_displaced_mesh->getMesh());
+    _xfem->setSecondMesh(_displaced_mesh);
   _xfem->setMaterialData(&_material_data);
   _xfem->setBoundaryMaterialData(&_bnd_material_data);
 
@@ -4329,7 +4329,7 @@ FEProblemBase::updateMeshXFEM()
   bool updated = false;
   if (haveXFEM())
   {
-    updated = _xfem->update(_time);
+    updated = _xfem->update(_time, *_nl, *_aux);
     if (updated)
     {
       meshChanged();

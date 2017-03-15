@@ -189,7 +189,7 @@ XFEM::storeCrackTipOriginAndDirection()
 }
 
 bool
-XFEM::update(Real time)
+XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
 {
   bool mesh_changed = false;
 
@@ -198,7 +198,7 @@ XFEM::update(Real time)
   storeCrackTipOriginAndDirection();
 
   if (markCuts(time))
-    mesh_changed = cutMeshWithEFA();
+    mesh_changed = cutMeshWithEFA(nl, aux);
 
   if (mesh_changed)
   {
@@ -237,40 +237,29 @@ XFEM::update(Real time)
 }
 
 void
-XFEM::initSolution(NonlinearSystemBase & nl, AuxiliarySystem & /*aux*/)
+XFEM::initSolution(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 {
-  const std::vector<MooseVariable *> & nl_vars = nl.getVariables(0); // TODO pass in real thread id?
-
   nl.serializeSolution();
-  //  NumericVector<Number> & c_solution = *nl.sys().solution;
+  aux.serializeSolution();
   NumericVector<Number> & current_solution = *nl.system().current_local_solution;
   NumericVector<Number> & old_solution = nl.solutionOld();
+  NumericVector<Number> & current_aux_solution = *aux.system().current_local_solution;
+  NumericVector<Number> & old_aux_solution = aux.solutionOld();
 
-  for (std::map<unique_id_type, unique_id_type>::iterator nit = _new_node_to_parent_node.begin();
-       nit != _new_node_to_parent_node.end();
-       ++nit)
-  {
-    for (unsigned int ivar = 0; ivar < nl_vars.size(); ++ivar)
-    {
-      Node * new_node = getNodeFromUniqueID(nit->first);
-      Node * parent_node = getNodeFromUniqueID(nit->second);
-      Point new_point(*new_node);
-      Point parent_point(*parent_node);
-      if (new_point != parent_point)
-        mooseError("Points don't match");
-      unsigned int new_node_dof = new_node->dof_number(nl.number(), nl_vars[ivar]->number(), 0);
-      unsigned int parent_node_dof =
-          parent_node->dof_number(nl.number(), nl_vars[ivar]->number(), 0);
-      if (parent_node->processor_id() == _mesh->processor_id())
-      {
-        current_solution.set(new_node_dof, current_solution(parent_node_dof));
-        old_solution.set(new_node_dof, old_solution(parent_node_dof));
-      }
-    }
-  }
+  setNodeSolution(nl, _new_node_solution, current_solution, old_solution);
+  setElementSolution(nl, _new_elem_solution, current_solution, old_solution);
+  setNodeSolution(aux, _new_node_aux_solution, current_aux_solution, old_aux_solution);
+  setElementSolution(aux, _new_elem_aux_solution, current_aux_solution, old_aux_solution);
 
   current_solution.close();
   old_solution.close();
+  current_aux_solution.close();
+  old_aux_solution.close();
+
+  _new_node_solution.clear();
+  _new_node_aux_solution.clear();
+  _new_elem_solution.clear();
+  _new_elem_aux_solution.clear();
 }
 
 Node *
@@ -292,6 +281,27 @@ XFEM::getNodeFromUniqueID(unique_id_type uid)
   if (!matching_node)
     mooseError("Couldn't find node matching unique id: ", uid);
   return matching_node;
+}
+
+Elem *
+XFEM::getElemFromUniqueID(unique_id_type uid)
+{
+  Elem * matching_elem = NULL;
+  MeshBase::element_iterator elem_it = _mesh->elements_begin();
+  const MeshBase::element_iterator elem_end = _mesh->elements_end();
+
+  for (elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
+  {
+    Elem * elem = *elem_it;
+    if (elem->unique_id() == uid)
+    {
+      matching_elem = elem;
+      break;
+    }
+  }
+  if (!matching_elem)
+    mooseError("Couldn't find element matching unique id: ", uid);
+  return matching_elem;
 }
 
 void
@@ -944,14 +954,15 @@ XFEM::initCutIntersectionEdge(
 }
 
 bool
-XFEM::cutMeshWithEFA()
+XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 {
-  bool mesh_changed = false;
-
   std::map<unsigned int, Node *> efa_id_to_new_node;
   std::map<unsigned int, Node *> efa_id_to_new_node2;
   std::map<unsigned int, Elem *> efa_id_to_new_elem;
-  _new_node_to_parent_node.clear();
+  _new_node_solution.clear();
+  _new_node_aux_solution.clear();
+  _new_elem_solution.clear();
+  _new_elem_aux_solution.clear();
 
   _efa_mesh.updatePhysicalLinksAndFragments();
   // DEBUG
@@ -961,8 +972,26 @@ XFEM::cutMeshWithEFA()
   // DEBUG
   //_efa_mesh.printMesh();
 
-  // Add new nodes
   const std::vector<EFANode *> NewNodes = _efa_mesh.getNewNodes();
+  const std::vector<EFAElement *> NewElements = _efa_mesh.getChildElements();
+  const std::vector<EFAElement *> DeleteElements = _efa_mesh.getParentElements();
+
+  bool mesh_changed = (NewNodes.size() + NewElements.size() + DeleteElements.size() > 0);
+
+  // Prepare to cache solution on DOFs modified by XFEM
+  if (mesh_changed)
+  {
+    nl.serializeSolution();
+    aux.serializeSolution();
+  }
+  NumericVector<Number> & current_solution = *nl.system().current_local_solution;
+  NumericVector<Number> & old_solution = nl.solutionOld();
+  NumericVector<Number> & current_aux_solution = *aux.system().current_local_solution;
+  NumericVector<Number> & old_aux_solution = aux.solutionOld();
+
+  std::map<Node *, Node *> new_nodes_to_parents;
+
+  // Add new nodes
   for (unsigned int i = 0; i < NewNodes.size(); ++i)
   {
     unsigned int new_node_id = NewNodes[i]->id();
@@ -972,12 +1001,12 @@ XFEM::cutMeshWithEFA()
     Node * new_node = Node::build(*parent_node, _mesh->n_nodes()).release();
     new_node->processor_id() = parent_node->processor_id();
     _mesh->add_node(new_node);
-    _new_node_to_parent_node[new_node->unique_id()] = parent_node->unique_id();
+
+    new_nodes_to_parents[new_node] = parent_node;
 
     new_node->set_n_systems(parent_node->n_systems());
     efa_id_to_new_node.insert(std::make_pair(new_node_id, new_node));
     _console << "XFEM added new node: " << new_node->id() << "\n";
-    mesh_changed = true;
     if (_mesh2)
     {
       const Node * parent_node2 = _mesh2->node_ptr(parent_id);
@@ -991,8 +1020,6 @@ XFEM::cutMeshWithEFA()
   }
 
   // Add new elements
-  const std::vector<EFAElement *> NewElements = _efa_mesh.getChildElements();
-
   std::map<unsigned int, std::vector<const Elem *>> temporary_parent_children_map;
 
   for (unsigned int i = 0; i < NewElements.size(); ++i)
@@ -1027,6 +1054,27 @@ XFEM::cutMeshWithEFA()
         libmesh_node = _mesh->node_ptr(node_id);
 
       libmesh_elem->set_node(j) = libmesh_node;
+
+      // Store solution for all nodes affected by XFEM (even existing nodes)
+      if (parent_elem->is_semilocal(_mesh->processor_id()))
+      {
+        Node * solution_node = libmesh_node; // Node from which to store solution
+        if (new_nodes_to_parents.find(libmesh_node) != new_nodes_to_parents.end())
+          solution_node = new_nodes_to_parents[libmesh_node];
+
+        if ((_moose_mesh->isSemiLocal(solution_node)) ||
+            (solution_node->processor_id() == _mesh->processor_id()))
+        {
+          saveSolutionForNode(
+              libmesh_node, solution_node, nl, _new_node_solution, current_solution, old_solution);
+          saveSolutionForNode(libmesh_node,
+                              solution_node,
+                              aux,
+                              _new_node_aux_solution,
+                              current_aux_solution,
+                              old_aux_solution);
+        }
+      }
 
       Node * parent_node = parent_elem->get_node(j);
       std::vector<boundary_id_type> parent_node_boundary_ids =
@@ -1073,6 +1121,16 @@ XFEM::cutMeshWithEFA()
             (*_bnd_material_data)[0]->copy(*libmesh_elem, *parent_elem, side);
         }
       }
+
+      // Store solution for all elements affected by XFEM
+      saveSolutionForElement(
+          libmesh_elem, parent_elem, nl, _new_elem_solution, current_solution, old_solution);
+      saveSolutionForElement(libmesh_elem,
+                             parent_elem,
+                             aux,
+                             _new_elem_aux_solution,
+                             current_aux_solution,
+                             old_aux_solution);
     }
 
     // The crack tip origin map is stored before cut, thus the elem should be updated with new
@@ -1151,12 +1209,9 @@ XFEM::cutMeshWithEFA()
         _mesh2->boundary_info->add_edge(libmesh_elem2, edge, parent_elem_boundary_ids);
       }
     }
-
-    mesh_changed = true;
   }
 
   // delete elements
-  const std::vector<EFAElement *> DeleteElements = _efa_mesh.getParentElements();
   for (unsigned int i = 0; i < DeleteElements.size(); ++i)
   {
     Elem * elem_to_delete = _mesh->elem(DeleteElements[i]->id());
@@ -1591,6 +1646,171 @@ XFEM::getXFEMqRuleOnSurface(std::vector<Point> & intersection_points,
       }
       quad_pts[j + l] = Point(tsg_line[0], tsg_line[1], tsg_line[2]);
       quad_wts[j + l] = sg2[l][3] * jac;
+    }
+  }
+}
+
+void
+XFEM::saveSolutionForNode(const Node * node_to_store_to,
+                          const Node * node_to_store_from,
+                          SystemBase & sys,
+                          std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                          const NumericVector<Number> & current_solution,
+                          const NumericVector<Number> & old_solution)
+{
+  const std::vector<MooseVariable *> & vars = sys.getVariables(0);
+  _stored_solution_scratch.clear();
+  _stored_solution_scratch.reserve(2 * vars.size());
+  _stored_solution_dofs_scratch.clear();
+  _stored_solution_dofs_scratch.reserve(vars.size());
+  const std::set<SubdomainID> & sids = _moose_mesh->getNodeBlockIds(*node_to_store_from);
+  for (auto var : vars)
+  {
+    if (var->isNodal())
+    {
+      const std::set<SubdomainID> & var_subdomains = sys.getSubdomainsForVar(var->number());
+      std::set<SubdomainID> intersect;
+      set_intersection(var_subdomains.begin(),
+                       var_subdomains.end(),
+                       sids.begin(),
+                       sids.end(),
+                       std::inserter(intersect, intersect.begin()));
+      if (var_subdomains.empty() || !intersect.empty())
+      {
+        unsigned int node_dof = node_to_store_from->dof_number(sys.number(), var->number(), 0);
+        _stored_solution_dofs_scratch.push_back(node_dof);
+      }
+    }
+  }
+
+  for (auto dof : _stored_solution_dofs_scratch)
+    _stored_solution_scratch.push_back(current_solution(dof));
+
+  for (auto dof : _stored_solution_dofs_scratch)
+    _stored_solution_scratch.push_back(old_solution(dof));
+
+  stored_solution[node_to_store_to->unique_id()] = _stored_solution_scratch;
+  stored_solution[node_to_store_to->unique_id()].shrink_to_fit();
+}
+
+void
+XFEM::saveSolutionForElement(const Elem * elem_to_store_to,
+                             const Elem * elem_to_store_from,
+                             SystemBase & sys,
+                             std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                             const NumericVector<Number> & current_solution,
+                             const NumericVector<Number> & old_solution)
+{
+  const std::vector<MooseVariable *> & vars = sys.getVariables(0);
+  _stored_solution_scratch.clear();
+  _stored_solution_scratch.reserve(2 * vars.size());
+  _stored_solution_dofs_scratch.clear();
+  _stored_solution_dofs_scratch.reserve(vars.size());
+  SubdomainID sid = elem_to_store_from->subdomain_id();
+  for (auto var : vars)
+  {
+    if (!var->isNodal())
+    {
+      const std::set<SubdomainID> & var_subdomains = sys.getSubdomainsForVar(var->number());
+      if (var_subdomains.find(sid) != var_subdomains.end())
+      {
+        unsigned int elem_dof = elem_to_store_from->dof_number(sys.number(), var->number(), 0);
+        _stored_solution_dofs_scratch.push_back(elem_dof);
+      }
+    }
+  }
+
+  for (auto dof : _stored_solution_dofs_scratch)
+    _stored_solution_scratch.push_back(current_solution(dof));
+
+  for (auto dof : _stored_solution_dofs_scratch)
+    _stored_solution_scratch.push_back(old_solution(dof));
+
+  stored_solution[elem_to_store_to->unique_id()] = _stored_solution_scratch;
+  stored_solution[elem_to_store_to->unique_id()].shrink_to_fit();
+}
+
+void
+XFEM::setNodeSolution(SystemBase & sys,
+                      const std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                      NumericVector<Number> & current_solution,
+                      NumericVector<Number> & old_solution)
+{
+  const std::vector<MooseVariable *> & vars = sys.getVariables(0);
+  _stored_solution_dofs_scratch.reserve(vars.size());
+
+  for (auto nit = stored_solution.begin(); nit != stored_solution.end(); ++nit)
+  {
+    _stored_solution_dofs_scratch.clear();
+    Node * node = getNodeFromUniqueID(nit->first);
+    const std::vector<Real> & node_solution = nit->second;
+    if (node->processor_id() == _mesh->processor_id())
+    {
+      const std::set<SubdomainID> & sids = _moose_mesh->getNodeBlockIds(*node);
+
+      for (auto var : vars)
+      {
+        if (var->isNodal())
+        {
+          const std::set<SubdomainID> & var_subdomains = sys.getSubdomainsForVar(var->number());
+          std::set<SubdomainID> intersect;
+          set_intersection(var_subdomains.begin(),
+                           var_subdomains.end(),
+                           sids.begin(),
+                           sids.end(),
+                           std::inserter(intersect, intersect.begin()));
+          if (var_subdomains.empty() || !intersect.empty())
+          {
+            unsigned int node_dof = node->dof_number(sys.number(), var->number(), 0);
+            _stored_solution_dofs_scratch.push_back(node_dof);
+          }
+        }
+      }
+    }
+    for (unsigned int i = 0; i < _stored_solution_dofs_scratch.size(); ++i)
+    {
+      current_solution.set(_stored_solution_dofs_scratch[i], node_solution[i]);
+      old_solution.set(_stored_solution_dofs_scratch[i],
+                       node_solution[_stored_solution_dofs_scratch.size() + i]);
+    }
+  }
+}
+
+void
+XFEM::setElementSolution(SystemBase & sys,
+                         const std::map<unique_id_type, std::vector<Real>> & stored_solution,
+                         NumericVector<Number> & current_solution,
+                         NumericVector<Number> & old_solution)
+{
+  const std::vector<MooseVariable *> & vars = sys.getVariables(0);
+  _stored_solution_dofs_scratch.reserve(vars.size());
+
+  for (auto eit = stored_solution.begin(); eit != stored_solution.end(); ++eit)
+  {
+    _stored_solution_dofs_scratch.clear();
+    Elem * elem = getElemFromUniqueID(eit->first);
+    const std::vector<Real> & elem_solution = eit->second;
+    if (elem->processor_id() == _mesh->processor_id())
+    {
+      SubdomainID sid = elem->subdomain_id();
+      for (auto var : vars)
+      {
+        if (!var->isNodal())
+        {
+          const std::set<SubdomainID> & var_subdomains = sys.getSubdomainsForVar(var->number());
+          if (var_subdomains.find(sid) != var_subdomains.end())
+          {
+            unsigned int elem_dof = elem->dof_number(sys.number(), var->number(), 0);
+            _stored_solution_dofs_scratch.push_back(elem_dof);
+          }
+        }
+      }
+    }
+    for (unsigned int i = 0; i < _stored_solution_dofs_scratch.size(); ++i)
+    {
+      current_solution.set(_stored_solution_dofs_scratch[i], elem_solution[i]);
+      old_solution.set(_stored_solution_dofs_scratch[i],
+                       elem_solution[_stored_solution_dofs_scratch.size() + i]);
     }
   }
 }

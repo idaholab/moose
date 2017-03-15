@@ -19,6 +19,7 @@
 #include "MooseTypes.h"
 #include "MooseVariableBase.h"
 #include "InputParameters.h"
+#include "MooseMesh.h"
 
 class MooseApp;
 class AuxiliarySystem;
@@ -51,6 +52,8 @@ public:
       _fe_problem(params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
       _material_data(NULL),
       _bnd_material_data(NULL),
+      _moose_mesh(NULL),
+      _moose_mesh2(NULL),
       _mesh(NULL),
       _mesh2(NULL)
   {
@@ -64,12 +67,20 @@ public:
   /**
    * Set the pointer to the primary mesh that is modified by XFEM
    */
-  void setMesh(MeshBase * mesh) { _mesh = mesh; }
+  void setMesh(MooseMesh * mesh)
+  {
+    _moose_mesh = mesh;
+    _mesh = &mesh->getMesh();
+  }
 
   /**
    * Set the pointer to the secondary (displaced) mesh that is modified by XFEM
    */
-  void setSecondMesh(MeshBase * mesh2) { _mesh2 = mesh2; }
+  void setSecondMesh(MooseMesh * mesh2)
+  {
+    _moose_mesh2 = mesh2;
+    _mesh2 = &mesh2->getMesh();
+  }
 
   /**
    * Set the pointer to the MaterialData
@@ -90,7 +101,7 @@ public:
   /**
    * Method to update the mesh due to modified cut definitions
    */
-  virtual bool update(Real time) = 0;
+  virtual bool update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux) = 0;
 
   /**
    * Initialize the solution on newly created nodes
@@ -110,6 +121,8 @@ protected:
   std::vector<std::shared_ptr<MaterialData>> * _material_data;
   std::vector<std::shared_ptr<MaterialData>> * _bnd_material_data;
 
+  MooseMesh * _moose_mesh;
+  MooseMesh * _moose_mesh2;
   MeshBase * _mesh;
   MeshBase * _mesh2;
 };
