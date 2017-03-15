@@ -3,7 +3,9 @@
     type = 'CSVDiff'
     input = 'cyl3_template1.i'
     csvdiff = 'cyl3_glued_kin_check.csv cyl3_glued_kin_check_x_disp_0001.csv'
-    cli_args = 'Contact/leftright/model=glued Contact/leftright/formulation=kinematic Outputs/file_base=cyl3_glued_kin_out Outputs/chkfile/file_base=cyl3_glued_kin_check'
+    cli_args = 'Contact/leftright/model=glued Contact/leftright/formulation=kinematic
+                Outputs/file_base=cyl3_glued_kin_out Outputs/chkfile/file_base=cyl3_glued_kin_check
+                Executioner/petsc_options_iname="-pc_type -pc_factor_mat_solver_package" Executioner/petsc_options_value="lu superlu_dist"'
     rel_err = 1e-5
     abs_zero = 2e-6
     max_parallel = 1
@@ -14,7 +16,11 @@
     type = 'CSVDiff'
     input = 'cyl3_template1.i'
     csvdiff = 'cyl3_glued_pen_check.csv cyl3_glued_pen_check_x_disp_0001.csv'
-    cli_args = 'Contact/leftright/model=glued Contact/leftright/formulation=penalty Contact/leftright/normalize_penalty=true Outputs/file_base=cyl3_glued_pen_out Outputs/chkfile/file_base=cyl3_glued_pen_check'
+    cli_args = 'Contact/leftright/model=glued Contact/leftright/formulation=penalty
+                Contact/leftright/normalize_penalty=true
+                Outputs/chkfile/file_base=cyl3_glued_pen_check'
+                Executioner/petsc_options_iname="-pc_type -pc_factor_mat_solver_package"
+                Executioner/petsc_options_value="lu superlu_dist"'
     rel_err = 1e-5
     abs_zero = 2e-6
     max_parallel = 1
@@ -25,20 +31,27 @@
     type = 'CSVDiff'
     input = 'cyl3_template1.i'
     csvdiff = 'cyl3_frictionless_kin_check.csv cyl3_frictionless_kin_check_x_disp_0001.csv'
-    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=kinematic Outputs/file_base=cyl3_frictionless_kin_out Outputs/chkfile/file_base=cyl3_frictionless_kin_check'
+    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=kinematic
+                Outputs/file_base=cyl3_frictionless_kin_out Outputs/chkfile/file_base=cyl3_frictionless_kin_check
+                Executioner/petsc_options_iname="-pc_type -pc_factor_mat_solver_package -mat_superlu_dist_fact"
+                Executioner/petsc_options_value="lu superlu_dist SamePattern"'
     rel_err = 2e-5
     abs_zero = 1e-4
     max_parallel = 1
     superlu = true
     prereq = 'frictionless_kin_sm'
-    # This test is fails reliably on INTEL compilers with PETSc 3.7.4 too.
-    skip = 'Reevaluate under PETSc 3.7.4. #8200'
+    # This test is fails reliably on INTEL compilers with PETSc 3.7.4 and 3.7.5, so restrict the test to not INTEL
+    compiler = 'GCC CLANG'
+    petsc_version = '>=3.7.5'
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
     input = 'cyl3_template1.i'
     csvdiff = 'cyl3_frictionless_pen_check.csv cyl3_frictionless_pen_check_x_disp_0001.csv'
-    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=penalty Contact/leftright/normalize_penalty=true Outputs/file_base=cyl3_frictionless_pen_out Outputs/chkfile/file_base=cyl3_frictionless_pen_check'
+    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=penalty Contact/leftright/normalize_penalty=true
+                Outputs/file_base=cyl3_frictionless_pen_out Outputs/chkfile/file_base=cyl3_frictionless_pen_check
+                Executioner/petsc_options_iname="-pc_type -pc_factor_mat_solver_package"
+                Executioner/petsc_options_value="lu superlu_dist"'
     rel_err = 1e-5
     abs_zero = 2e-6
     max_parallel = 1
@@ -49,7 +62,11 @@
     type = 'CSVDiff'
     input = 'cyl3_template1.i'
     csvdiff = 'cyl3_frictionless_aug_check.csv cyl3_frictionless_aug_check_x_disp_0001.csv'
-    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange Contact/leftright/normalize_penalty=true Outputs/file_base=cyl3_frictionless_aug_out Outputs/chkfile/file_base=cyl3_frictionless_aug_check'
+    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange
+                Contact/leftright/normalize_penalty=true Outputs/file_base=cyl3_frictionless_aug_out
+                Outputs/chkfile/file_base=cyl3_frictionless_aug_check
+                Executioner/petsc_options_iname="-pc_type -pc_factor_mat_solver_package"
+                Executioner/petsc_options_value="lu superlu_dist"'
     rel_err = 1e-5
     abs_zero = 2e-6
     max_parallel = 1
@@ -68,7 +85,7 @@
     # This test is unstable on PETSc 3.7.4 with 64bit indices enabled.
     dof_id_bytes = 4
     # This test is fails reliably on INTEL compilers with PETSc 3.7.4 too.
-    skip = 'Reevaluate under PETSc 3.7.4. #8200'
+    petsc_version = '>=3.7.5'
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
@@ -142,7 +159,8 @@
     # This test is unstable on PETSc 3.7.4 with 64bit indices enabled.
     dof_id_bytes = 4
     # This test is fails reliably on INTEL compilers with PETSc 3.7.4 too.
-    skip = 'Reevaluate under PETSc 3.7.4. #8200'
+    skip = 'Reevaluate under PETSc 3.7.4. and PETSc 3.7.5 #8200'
+    prereq = 'mu_0_2_kin'
   [../]
   [./mu_0_2_pen_sm]
     type = 'CSVDiff'

@@ -289,8 +289,8 @@
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu     superlu_dist'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_superlu_dist_fact'
+  petsc_options_value = 'lu            superlu_dist               SamePattern'
 
   line_search = 'none'
 
