@@ -78,9 +78,9 @@ NearestNodeThread::operator() (const NodeIdRange & range)
       for (unsigned int k=0; k<n_neighbor_nodes; k++)
       {
         const Node * cur_node = &_mesh.nodeRef(neighbor_nodes[k]);
-        if (isnan((*cur_node)(0)) ||
-            isnan((*cur_node)(1)) ||
-            isnan((*cur_node)(2)))
+        if (std::isnan((*cur_node)(0)) ||
+            std::isnan((*cur_node)(1)) ||
+            std::isnan((*cur_node)(2)))
           mooseError("Failure in NearestNodeThread because solution contans not-a-number entries");
       }
       mooseError("Unable to find nearest node!");
