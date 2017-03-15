@@ -8,6 +8,7 @@ import vtk
 import time
 from PyQt5 import QtWidgets
 
+import chigger
 from peacock.ExodusViewer.plugins.VTKWindowPlugin import main
 from peacock.utils import Testing
 
@@ -109,7 +110,7 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
         """
 
         # The source and destination filenames
-        filename = '../../chigger/input/step10_micro_out.e'
+        filename = Testing.get_chigger_input('step10_micro_out.e')
         newfile = self._temp_file
 
         # Remove any existing files
@@ -143,6 +144,18 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
             os.remove(fname)
         self._window.onWindowRequiresUpdate()
         self.assertImage('testFilenameEmpty.png') # the window should be empty again
+
+    def testIteractorStyle(self):
+        """
+        Tests interaction style matches the mesh dimensionality
+        """
+        self._window.onFileChanged(self._filename)
+        self.assertIsNone(self._window._window.getOption('style'))
+        self.assertIsInstance(self._window._window.getVTKInteractor().GetInteractorStyle(), chigger.base.KeyPressInteractorStyle)
+
+        self._window.onFileChanged(Testing.get_chigger_input('displace.e'))
+        self.assertIsNone(self._window._window.getOption('style'))
+        self.assertIsInstance(self._window._window.getVTKInteractor().GetInteractorStyle(), vtk.vtkInteractorStyleImage)
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)
