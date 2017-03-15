@@ -5,9 +5,6 @@
 #   xx = yy = zz = 2000
 #   xy = 400
 #
-[GlobalParams]
-  temperature = temp
-[]
 
 [Problem]
   coord_type = RZ
@@ -43,13 +40,39 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master/All]
-  displacements = 'disp_x disp_y'
-  strain = SMALL
-  incremental = true
-  eigenstrain_names = eigenstrain
-  add_variables = true
-  generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
+[AuxVariables]
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_xy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_yz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_zx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[SolidMechanics]
+  [./solid]
+    disp_r = disp_x
+    disp_z = disp_y
+    use_displaced_mesh = false
+  [../]
 []
 
 [Kernels]
@@ -63,6 +86,45 @@
   [./heat]
     type = HeatConduction
     variable = temp
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_xx]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_xx
+    index = 0
+  [../]
+  [./stress_yy]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_yy
+    index = 1
+  [../]
+  [./stress_zz]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_zz
+    index = 2
+  [../]
+  [./stress_xy]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_xy
+    index = 3
+  [../]
+  [./stress_yz]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_yz
+    index = 4
+  [../]
+  [./stress_zx]
+    type = MaterialTensorAux
+    tensor = stress
+    variable = stress_zx
+    index = 5
   [../]
 []
 
@@ -89,30 +151,29 @@
 []
 
 [Materials]
-  [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+  [./stiffStuff1]
+    type = Elastic
+    block = 1
+
+    disp_r = disp_x
+    disp_z = disp_y
+
     youngs_modulus = 1e6
     poissons_ratio = 0.25
-  [../]
-  [./thermal_strain]
-    type = ComputeThermalExpansionEigenstrain
-    stress_free_temperature = 117.56
-    thermal_expansion_coeff = 0.0
-    eigenstrain_name = eigenstrain
-    incremental_form = true
-  [../]
-  [./stress]
-    type = ComputeStrainIncrementBasedStress
+
+    temp = temp
   [../]
 
   [./heat]
     type = HeatConductionMaterial
+    block = 1
     specific_heat = 0.116
     thermal_conductivity = 4.85e-4
   [../]
 
   [./density]
     type = Density
+    block = 1
     density = 0.283
     disp_r = disp_x
     disp_z = disp_y
