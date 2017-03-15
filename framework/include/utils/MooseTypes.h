@@ -222,9 +222,8 @@ enum PCSideType
   PCS_LEFT,
   PCS_RIGHT,
   PCS_SYMMETRIC,
-  PCS_DEFAULT         ///< Use whatever we have in PETSc
+  PCS_DEFAULT ///< Use whatever we have in PETSc
 };
-
 
 /**
  * Norm type for converge test
@@ -235,7 +234,7 @@ enum MooseKSPNormType
   KSPN_PRECONDITIONED,
   KSPN_UNPRECONDITIONED,
   KSPN_NATURAL,
-  KSPN_DEFAULT         ///< Use whatever we have in PETSc
+  KSPN_DEFAULT ///< Use whatever we have in PETSc
 };
 
 /**

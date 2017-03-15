@@ -481,12 +481,19 @@ getPetscKSPNormType(Moose::MooseKSPNormType kspnorm)
 {
   switch (kspnorm)
   {
-  case Moose::KSPN_NONE: return KSP_NORM_NONE;
-  case Moose::KSPN_PRECONDITIONED: return  KSP_NORM_PRECONDITIONED;
-  case Moose::KSPN_UNPRECONDITIONED: return KSP_NORM_UNPRECONDITIONED;
-  case Moose::KSPN_NATURAL: return KSP_NORM_NATURAL;
-  case Moose::KSPN_DEFAULT: return KSP_NORM_DEFAULT;
-  default: mooseError("Unknown KSP norm type requested."); break;
+    case Moose::KSPN_NONE:
+      return KSP_NORM_NONE;
+    case Moose::KSPN_PRECONDITIONED:
+      return KSP_NORM_PRECONDITIONED;
+    case Moose::KSPN_UNPRECONDITIONED:
+      return KSP_NORM_UNPRECONDITIONED;
+    case Moose::KSPN_NATURAL:
+      return KSP_NORM_NATURAL;
+    case Moose::KSPN_DEFAULT:
+      return KSP_NORM_DEFAULT;
+    default:
+      mooseError("Unknown KSP norm type requested.");
+      break;
   }
 }
 
@@ -494,7 +501,8 @@ void
 petscSetDefaultKSPNormType(FEProblemBase & problem)
 {
   NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
-  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+  PetscNonlinearSolver<Number> * petsc_solver =
+      dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
   SNES snes = petsc_solver->snes();
   KSP ksp;
   SNESGetKSP(snes, &ksp);
@@ -513,7 +521,7 @@ petscSetDefaultPCSide(FEProblemBase & problem)
   SNESGetKSP(snes, &ksp);
 
 #if PETSC_VERSION_LESS_THAN(3, 2, 0)
-//pc_side is NOT set, PETSc will make the decision
+  // pc_side is NOT set, PETSc will make the decision
   // PETSc 3.1.x-
   if (nl.getPCSide() != Moose::PCS_DEFAULT)
     KSPSetPreconditionerSide(ksp, getPetscPCSide(nl.getPCSide()));
@@ -529,7 +537,8 @@ petscSetDefaults(FEProblemBase & problem)
 {
   // dig out Petsc solver
   NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
-  PetscNonlinearSolver<Number> * petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+  PetscNonlinearSolver<Number> * petsc_solver =
+      dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
   SNES snes = petsc_solver->snes();
   KSP ksp;
   SNESGetKSP(snes, &ksp);
