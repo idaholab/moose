@@ -51,6 +51,7 @@ FindValueOnLine::initialize()
 {
   // We do this here just in case it's been destroyed and recreated becaue of mesh adaptivity.
   _pl = _mesh.getPointLocator();
+  _pl->enable_out_of_mesh_mode();
 }
 
 void
@@ -112,11 +113,19 @@ FindValueOnLine::getValueAtPoint(const Point & p)
 {
   const Elem * elem = (*_pl)(p);
 
-  // TODO: This PP won't work with distributed mesh
+  bool found_element = elem;
+  _communicator.max(found_element);
+
+  if (!found_element)
+  {
+    // there is no element
+    mooseError("No element found at the current search point. Please make sure the sampling line stays inside the mesh completely.");
+  }
+
+  Real value = 0;
+
   if (elem)
   {
-    Real value = 0;
-
     if (elem->processor_id() == processor_id())
     {
       // element is local
@@ -124,16 +133,11 @@ FindValueOnLine::getValueAtPoint(const Point & p)
       _subproblem.reinitElemPhys(elem, _point_vec, 0);
       value = _coupled_var->sln()[0];
     }
+  }
 
-    // broadcast value
-    _communicator.broadcast(value, elem->processor_id());
-    return value;
-  }
-  else
-  {
-    // there is no element
-    mooseError("No element found at the current search point. Please make sure the sampling line stays inside the mesh completely.");
-  }
+  // broadcast value
+  _communicator.broadcast(value, elem->processor_id());
+  return value;
 }
 
 PostprocessorValue

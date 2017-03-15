@@ -57,6 +57,8 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
 
       std::unique_ptr<PointLocatorBase> pl = from_mesh.getPointLocator();
 
+      pl->enable_out_of_mesh_mode();
+
       for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
       {
         Real value = -std::numeric_limits<Real>::max();

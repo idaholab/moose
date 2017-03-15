@@ -74,13 +74,16 @@ AddExtraNodeset::modify()
   unsigned int dim = _mesh_ptr->dimension();
   unsigned int n_nodes = coord.size() / dim;
 
+  UniquePtr<PointLocatorBase> locator = _mesh_ptr->getMesh().sub_point_locator();
+  locator->enable_out_of_mesh_mode();
+
   for (unsigned int i = 0; i < n_nodes; ++i)
   {
     Point p;
     for (unsigned int j = 0; j < dim; ++j)
       p(j) = coord[i*dim+j];
 
-    const Elem * elem = _mesh_ptr->getMesh().point_locator() (p);
+    const Elem * elem = (*locator)(p);
     if (!elem)
       mooseError("Unable to locate the following point within the domain, please check its coordinates:\n", p);
 
