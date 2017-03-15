@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys, os, inspect
+import sys, os
 
 # Set the current working directory to the directory where this script is located
 os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))

@@ -11,8 +11,15 @@ def find_app():
     """
     moose_dir = os.environ.get("MOOSE_DIR")
     if not moose_dir:
-        file_dir = os.path.dirname(os.path.abspath(__file__))
-        moose_dir = os.path.abspath(os.path.join(file_dir, "..", "..", "..", ".."))
+        p = subprocess.Popen('git rev-parse --show-cdup', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        p.wait()
+        if p.returncode == 0:
+            git_dir = p.communicate()[0]
+            moose_dir = os.path.abspath(os.path.join(os.getcwd(), git_dir)).rstrip()
+        else:
+            print("Could not find top level moose directory. Please set the MOOSE_DIR environment variable.")
+            sys.exit(1)
+
     app_name = os.path.join(moose_dir, "test", "moose_test-%s" % os.environ.get("METHOD", "opt"))
     return app_name
 
