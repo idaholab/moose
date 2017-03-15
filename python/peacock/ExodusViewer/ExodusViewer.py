@@ -13,6 +13,7 @@ from plugins.OutputPlugin import OutputPlugin
 from plugins.CameraPlugin import CameraPlugin
 from plugins.MediaControlPlugin import MediaControlPlugin
 from plugins.BlockPlugin import BlockPlugin
+import os
 
 class ExodusViewer(peacock.base.ViewerBase):
     """
@@ -42,6 +43,10 @@ class ExodusViewer(peacock.base.ViewerBase):
         options = kwargs.pop('cmd_line_options', None)
         if options:
             filenames += options.exodus
+            for arg in options.arguments:
+                if arg.endswith(".e"):
+                    filenames.append(os.path.abspath(arg))
+            options.exodus = filenames # so that we can switch to this tab automatically
 
         if len(filenames) == 0:
             return
