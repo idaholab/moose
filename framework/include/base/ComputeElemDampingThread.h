@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "ThreadedElementLoop.h"
-#include "MooseObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/elem_range.h"
@@ -25,6 +24,10 @@
 // Forward declarations
 class NonlinearSystemBase;
 class ElementDamper;
+template <typename T>
+class MooseObjectWarehouse;
+
+
 
 class ComputeElemDampingThread : public ThreadedElementLoop<ConstElemRange>
 {
