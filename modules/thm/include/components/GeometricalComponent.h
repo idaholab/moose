@@ -24,13 +24,13 @@ public:
   virtual void doBuildMesh();
   virtual void displaceMesh();
 
-  virtual Point getPosition() { return _position; }
-  virtual RealVectorValue getDirection() { return _dir; }
-  virtual Real getRotation() { return _rotation; }
+  virtual Point getPosition() const { return _position; }
+  virtual RealVectorValue getDirection() const { return _dir; }
+  virtual Real getRotation() const { return _rotation; }
 
-  virtual Real getNumNodes() { return _n_nodes; }
-  virtual Real getNumElems() { return _n_elem; }
-  virtual Real getLength() { return _length; }
+  virtual Real getNumNodes() const { return _n_nodes; }
+  virtual Real getNumElems() const { return _n_elem; }
+  virtual Real getLength() const { return _length; }
 
   virtual const std::vector<RELAP7::Connection> & getConnections(RELAP7::EEndType id) const;
 

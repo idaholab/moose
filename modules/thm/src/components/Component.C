@@ -143,12 +143,16 @@ Component::setSubdomainCoordSystem(unsigned int block_id, Moose::CoordinateSyste
 }
 
 void
-Component::aliasParam(const std::string & rname, const std::string & name, Component * comp/* = NULL*/)
+Component::aliasParam(const std::string & rname, const std::string & name)
 {
-  if (comp == NULL)
-    _param_alias_map[rname] = std::pair<Component *, std::string>(this, name);
-  else
-    _param_alias_map[rname] = std::pair<Component *, std::string>(comp, name);
+  _param_alias_map[rname] = std::pair<Component *, std::string>(this, name);
+}
+
+void
+Component::aliasParam(const std::string & rname, const std::string & name, const std::string & comp_name)
+{
+  Component * comp = const_cast<Component *>(&getComponentByName<Component>(comp_name));
+  _param_alias_map[rname] = std::pair<Component *, std::string>(comp, name);
 }
 
 void

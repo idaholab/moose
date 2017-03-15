@@ -82,9 +82,34 @@ public:
 
   virtual const std::string & getType() = 0;
 
-  virtual const std::vector<unsigned int> & getSubdomainIds() { return _subdomains; }
+  virtual const std::vector<unsigned int> & getSubdomainIds() const { return _subdomains; }
 
   virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() { return _coord_sys; }
+
+  /**
+   * Check that the component exists and has type T
+   * @tparam T the type of the component we are requesting
+   * @param name The parameter name that has the component name
+   * @return true if the component exists and has type T, false otherwise
+   */
+  template<typename T>
+  bool hasComponentByName(const std::string & name) const;
+
+  /**
+   * Return a reference to a component via a parameter name
+   * @tparam T the type of the component we are requesting
+   * @param name The parameter name that has the component name
+   */
+  template<typename T>
+  const T & getComponent(const std::string & name) const;
+
+  /**
+   * Return a reference to a component given its name
+   * @tparam T the type of the component we are requesting
+   * @param cname The name of the component
+   */
+  template<typename T>
+  const T & getComponentByName(const std::string & cname) const;
 
   /**
    * Get the ids associated with the component.  These can either be subdomain ids or boundary ids depending
@@ -92,7 +117,7 @@ public:
    *
    * @param piece The name of the piece of the component you are interested in.
    */
-  virtual std::vector<unsigned int> getIDs(std::string piece) = 0;
+  virtual std::vector<unsigned int> getIDs(std::string piece) const = 0;
 
   /**
    * Returns the variable associated with that part of the component.
@@ -101,7 +126,7 @@ public:
    *
    * @param piece The name of the piece of the component you are interested in.
    */
-  virtual std::string variableName(std::string piece) = 0;
+  virtual std::string variableName(std::string piece) const = 0;
 
   template<typename T>
   bool
@@ -115,8 +140,23 @@ public:
   void
   setRParam(const std::string & param_name, const T & value);
 
-  void aliasParam(const std::string & rname, const std::string & name, Component * comp = NULL);
+  /**
+   * Alias a component's input parameter
+   * @param rname The alias
+   * @param name The input parameter name being aliased
+   */
+  void aliasParam(const std::string & rname, const std::string & name);
+
+  /**
+   * Alias an input parameter of another (child) component.  Used by composite components.
+   * @param rname The alias
+   * @param name The input parameter name being aliased
+   * @param comp_name The name of the (child) component
+   */
+  void aliasParam(const std::string & rname, const std::string & name, const std::string & comp_name);
+
   void aliasVectorParam(const std::string & rname, const std::string & name, unsigned int pos, Component * comp = NULL);
+
   /**
    * Connect with control logic
    */
@@ -195,6 +235,39 @@ private:
   static unsigned int bc_ids;
 };
 
+
+template<typename T>
+bool
+Component::hasComponentByName(const std::string & name) const
+{
+  if (_sim.hasComponent(name))
+    return _sim.hasComponentOfType<T>(name);
+  else
+    return false;
+}
+
+template<typename T>
+const T &
+Component::getComponent(const std::string & pname) const
+{
+  const std::string & comp_name = getParam<std::string>(pname);
+  return getComponentByName<T>(comp_name);
+}
+
+template<typename T>
+const T &
+Component::getComponentByName(const std::string & comp_name) const
+{
+  if (_sim.hasComponent(comp_name))
+  {
+    if (_sim.hasComponentOfType<T>(comp_name))
+      return _sim.getComponentByName<T>(comp_name);
+    else
+      mooseError(name(), ": Requested component (", comp_name, ") have to be of type ", demangle(typeid(T).name()), ".");
+  }
+  else
+    mooseError(name(), ": Requesting a non-existing component (", comp_name, "). Typo?");
+}
 
 
 template<typename T>
