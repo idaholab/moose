@@ -15,10 +15,11 @@
 #ifndef COMPUTEREINITIALCONDITIONTHREAD_H
 #define COMPUTEREINITIALCONDITIONTHREAD_H
 
-#include "ParallelUniqueId.h"
+#include "MooseTypes.h"
 
 // libmesh
 #include "libmesh/elem_range.h"
+#include "libmesh/threads.h"
 
 class FEProblemBase;
 
