@@ -24,12 +24,6 @@ class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
         self.setup()
         self.LeftLayout.addStretch(1)
 
-    def initialize(self, *args, **kwargs):
-        """
-        Fixes the widget widths after they have appeared to allow VTK window to maximize space.
-        """
-        super(ExodusPluginManager, self).initialize(*args, **kwargs)
-
         # Set the width of the left-side widgets to that the VTK window gets the space
         width = 0
         for child in self._plugins.itervalues():
