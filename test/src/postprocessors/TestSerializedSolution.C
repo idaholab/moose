@@ -14,6 +14,10 @@
 
 #include "TestSerializedSolution.h"
 
+#include "SystemBase.h"
+
+#include "libmesh/numeric_vector.h"
+
 template<>
 InputParameters validParams<TestSerializedSolution>()
 {
