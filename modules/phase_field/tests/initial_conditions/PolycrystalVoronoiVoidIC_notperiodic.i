@@ -55,7 +55,5 @@
 []
 
 [Outputs]
-  file_base = notperiodic
   exodus = true
 []
-
