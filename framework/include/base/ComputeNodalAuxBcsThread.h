@@ -18,6 +18,11 @@
 // MOOSE includes
 #include "ThreadedNodeLoop.h"
 
+// Forward declarations
+template <typename T> class MooseObjectWarehouse;
+class AuxKernel;
+
+
 class ComputeNodalAuxBcsThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
