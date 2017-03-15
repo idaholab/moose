@@ -33,6 +33,7 @@ void
 PartitionerAction::act()
 {
   _mesh->setIsCustomPartitionerRequested(true);
+  _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
   std::shared_ptr<MoosePartitioner> mp =
       _factory.create<MoosePartitioner>(_type, _name, _moose_object_pars);
   _mesh->setCustomPartitioner(mp.get());
