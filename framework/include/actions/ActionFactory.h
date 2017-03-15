@@ -19,7 +19,7 @@
 #include <map>
 #include <set>
 
-#include "Action.h"
+#include "Action.h"  // Technically required for std::shared_ptr<Action>(Action*) constructor
 #include "InputParameters.h"
 
 
