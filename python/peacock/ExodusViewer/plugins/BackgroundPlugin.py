@@ -245,6 +245,7 @@ def main(size=None):
     return widget, widget.VTKWindowPlugin
 
 if __name__ == '__main__':
+    from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mug_blocks_out.e')
     widget, window = main()
