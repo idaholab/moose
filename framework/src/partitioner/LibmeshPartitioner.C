@@ -12,6 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "MooseMesh.h"
+
 #include "LibmeshPartitioner.h"
 #include "libmesh/linear_partitioner.h"
 #include "libmesh/centroid_partitioner.h"
@@ -19,6 +21,7 @@
 #include "libmesh/metis_partitioner.h"
 #include "libmesh/hilbert_sfc_partitioner.h"
 #include "libmesh/morton_sfc_partitioner.h"
+#include "libmesh/subdomain_partitioner.h"
 
 template <>
 InputParameters
@@ -35,11 +38,14 @@ validParams<LibmeshPartitioner>()
                              direction,
                              "Specifies the sort direction if using the centroid partitioner. "
                              "Available options: x, y, z, radial");
+  params.addParam<std::vector<std::vector<SubdomainName> > >("blocks", "Block is seperated by ;, and partition mesh block by block. ");
   return params;
 }
 
 LibmeshPartitioner::LibmeshPartitioner(const InputParameters & params)
   : MoosePartitioner(params), _partitioner_name(getParam<MooseEnum>("partitioner"))
+    _subdomain_blocks(getParam<std::vector<std::vector<SubdomainName> > >("blocks")),
+    _mesh(*getParam<MooseMesh *>("mesh"))
 {
   switch (_partitioner_name)
   {
@@ -61,6 +67,7 @@ LibmeshPartitioner::LibmeshPartitioner(const InputParameters & params)
 
       MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
+<<<<<<< 7c1207ab3de487513136105ba72ff5694f1e3793
       if (direction == "x")
         _partitioner = libmesh_make_unique<CentroidPartitioner>(CentroidPartitioner::X);
       else if (direction == "y")
@@ -76,6 +83,9 @@ LibmeshPartitioner::LibmeshPartitioner(const InputParameters & params)
       break;
     case 3: // morton_sfc
       _partitioner = libmesh_make_unique<MortonSFCPartitioner>();
+      break;
+    case 4: // subdomain_partitioner
+      _partitioner = libmesh_make_unique<SubdomainPartitioner>();
       break;
   }
 }
@@ -105,6 +115,7 @@ LibmeshPartitioner::clone() const
 
       MooseEnum direction = getParam<MooseEnum>("centroid_partitioner_direction");
 
+<<<<<<< 7c1207ab3de487513136105ba72ff5694f1e3793
       if (direction == "x")
         return libmesh_make_unique<CentroidPartitioner>(CentroidPartitioner::X);
       else if (direction == "y")
@@ -121,6 +132,9 @@ LibmeshPartitioner::clone() const
     case 3: // morton_sfc
       return libmesh_make_unique<MortonSFCPartitioner>();
       break;
+    case 4: // subdomain_partitioner
+      return libmesh_make_unique<LibmeshPartitioner>(parameters());
+      break;
   }
   // this cannot happen but I need to trick the compiler into
   // believing me
@@ -129,14 +143,51 @@ LibmeshPartitioner::clone() const
 }
 
 void
+LibmeshPartitioner::prepare_blocks_for_subdomain_partitioner(SubdomainPartitioner & subdomain_partitioner)
+{
+  auto group_begin = _subdomain_blocks.begin();
+  auto group_end = _subdomain_blocks.end();
+
+  subdomain_partitioner.chunks.clear();
+  for (auto group = group_begin; group != group_end; ++group)
+  {
+     std::set<subdomain_id_type> subdomain_ids;
+     auto subdomain_ids_vec = _mesh.getSubdomainIDs(*group);
+     auto subdomain_begin = subdomain_ids_vec.begin();
+     auto subdomain_end = subdomain_ids_vec.end();
+     for (auto subdomain_id = subdomain_begin; subdomain_id != subdomain_end; ++subdomain_id)
+     {
+       subdomain_ids.insert(*subdomain_id);
+     }
+     subdomain_partitioner.chunks.push_back(subdomain_ids);
+  }
+}
+
+void
 LibmeshPartitioner::partition(MeshBase & mesh, const unsigned int n)
 {
+  if (_partitioner_name == "subdomain_partitioner")
+  {
+    if (_partitioner.get())
+      prepare_blocks_for_subdomain_partitioner(dynamic_cast<SubdomainPartitioner&>(*_partitioner.get()));
+    else
+      mooseError("Paritioner is a NULL object");
+  }
+
   _partitioner->partition(mesh, n);
 }
 
 void
 LibmeshPartitioner::partition(MeshBase & mesh)
 {
+  if (_partitioner_name == "subdomain_partitioner")
+  {
+    if (_partitioner.get())
+      prepare_blocks_for_subdomain_partitioner(dynamic_cast<SubdomainPartitioner&>(*_partitioner.get()));
+    else
+      mooseError("Paritioner is a NULL object");
+  }
+
   _partitioner->partition(mesh);
 }
 
