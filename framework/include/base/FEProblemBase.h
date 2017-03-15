@@ -33,6 +33,7 @@
 #include "MaterialWarehouse.h"
 #include "MultiAppTransfer.h"
 #include "NonlinearSystem.h"
+#include "Postprocessor.h"
 
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
