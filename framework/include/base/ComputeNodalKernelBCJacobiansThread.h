@@ -18,10 +18,6 @@
 #include "MooseMesh.h"
 #include "ThreadedNodeLoop.h"
 
-// libMesh includes
-#include "libmesh/node_range.h"
-#include "libmesh/numeric_vector.h"
-
 class AuxiliarySystem;
 class NodalKernel;
 
