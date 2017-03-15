@@ -25,6 +25,7 @@
   [./vector_postprocessors]
     type = PythonUnitTest
     input = test_VectorPostprocessorReader.py
+    separate = True
   [../]
 
 []
