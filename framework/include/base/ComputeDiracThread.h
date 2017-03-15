@@ -16,11 +16,10 @@
 #define COMPUTEDIRACTHREAD_H
 
 // Moose Includes
-#include "ParallelUniqueId.h"
 #include "ThreadedElementLoop.h"
 
 // libMesh includes
-#include "libmesh/elem_range.h"
+#include "libmesh/stored_range.h"
 
 // Forward declarations
 class NonlinearSystemBase;
