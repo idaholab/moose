@@ -22,8 +22,9 @@
 #include "libmesh/stored_range.h"
 
 // Forward declarations
-class NonlinearSystemBase;
 class DiracKernel;
+template <typename T> class MooseObjectWarehouse;
+class NonlinearSystemBase;
 
 typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistElemRange;
 
