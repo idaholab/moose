@@ -17,11 +17,11 @@
 
 // MOOSE includes
 #include "ThreadedNodeLoop.h"
-#include "MooseObjectWarehouse.h"
 
 // Forward declarations
-class NonlinearSystemBase;
+template <typename T> class MooseObjectWarehouse;
 class NodalDamper;
+class NonlinearSystemBase;
 
 class ComputeNodalDampingThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
