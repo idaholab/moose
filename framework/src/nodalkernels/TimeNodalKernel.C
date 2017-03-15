@@ -13,7 +13,9 @@
 /****************************************************************/
 
 #include "TimeNodalKernel.h"
+
 #include "Assembly.h"
+#include "SystemBase.h"
 
 template<>
 InputParameters validParams<TimeNodalKernel>()

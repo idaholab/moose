@@ -17,6 +17,7 @@
 #include "EigenProblem.h"
 
 #include "Assembly.h"
+#include "AuxiliarySystem.h"
 #include "DisplacedProblem.h"
 #include "NonlinearEigenSystem.h"
 #include "SlepcSupport.h"

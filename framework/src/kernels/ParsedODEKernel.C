@@ -13,6 +13,9 @@
 /****************************************************************/
 
 #include "ParsedODEKernel.h"
+
+#include "SystemBase.h"
+
 #include "libmesh/fparser_ad.hh"
 
 template<>

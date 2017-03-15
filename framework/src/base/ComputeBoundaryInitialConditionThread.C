@@ -13,8 +13,10 @@
 /****************************************************************/
 
 #include "ComputeBoundaryInitialConditionThread.h"
-#include "InitialCondition.h"
+
 #include "Assembly.h"
+#include "InitialCondition.h"
+#include "SystemBase.h"
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(FEProblemBase & fe_problem) :
     ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem)

@@ -13,8 +13,10 @@
 /****************************************************************/
 
 #include "NodalBC.h"
-#include "MooseVariable.h"
+
 #include "Assembly.h"
+#include "MooseVariable.h"
+#include "SystemBase.h"
 
 template<>
 InputParameters validParams<NodalBC>()

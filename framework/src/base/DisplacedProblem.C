@@ -14,15 +14,17 @@
 
 // MOOSE includes
 #include "DisplacedProblem.h"
-#include "Problem.h"
-#include "SubProblem.h"
-#include "UpdateDisplacedMeshThread.h"
-#include "ResetDisplacedMeshThread.h"
+
+#include "Assembly.h"
+#include "AuxiliarySystem.h"
+#include "FEProblem.h"
 #include "MooseApp.h"
 #include "MooseMesh.h"
-#include "Assembly.h"
-#include "FEProblem.h"
 #include "NonlinearSystem.h"
+#include "Problem.h"
+#include "ResetDisplacedMeshThread.h"
+#include "SubProblem.h"
+#include "UpdateDisplacedMeshThread.h"
 
 // libMesh includes
 #include "libmesh/numeric_vector.h"

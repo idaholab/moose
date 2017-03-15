@@ -14,17 +14,18 @@
 
 // MOOSE includes
 #include "MultiApp.h"
+
 #include "AppFactory.h"
-#include "SetupInterface.h"
-#include "Executioner.h"
-#include "UserObject.h"
-#include "FEProblem.h"
-#include "OutputWarehouse.h"
-#include "AppFactory.h"
-#include "MooseUtils.h"
+#include "AuxiliarySystem.h"
 #include "Console.h"
-#include "RestartableDataIO.h"
+#include "Executioner.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
+#include "MooseUtils.h"
+#include "OutputWarehouse.h"
+#include "RestartableDataIO.h"
+#include "SetupInterface.h"
+#include "UserObject.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"

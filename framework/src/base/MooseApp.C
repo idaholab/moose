@@ -40,6 +40,7 @@
 #include "pcrecpp.h"
 
 // libMesh includes
+#include "libmesh/exodusII_io.h"
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/string_to_enum.h"
 

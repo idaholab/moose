@@ -14,6 +14,8 @@
 
 #include "VariableResidual.h"
 
+#include "NonlinearSystemBase.h"
+
 template<>
 InputParameters validParams<VariableResidual>()
 {

@@ -13,6 +13,8 @@
 /****************************************************************/
 
 #include "NearestNodeValueAux.h"
+
+#include "SystemBase.h"
 #include "NearestNodeLocator.h"
 
 template<>

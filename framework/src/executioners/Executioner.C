@@ -14,10 +14,12 @@
 
 // Moose includes
 #include "Executioner.h"
-#include "MooseMesh.h"
+
 #include "FEProblem.h"
 #include "MooseApp.h"
+#include "MooseMesh.h"
 #include "NonlinearSystem.h"
+#include "SlepcSupport.h"
 
 // C++ includes
 #include <vector>

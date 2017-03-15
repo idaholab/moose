@@ -14,13 +14,15 @@
 
 // MOOSE includes
 #include "TransientMultiApp.h"
-#include "TimeStepper.h"
-#include "LayeredSideFluxAverage.h"
+
 #include "AllLocalDofIndicesThread.h"
-#include "Output.h"
+#include "AuxiliarySystem.h"
 #include "Console.h"
-#include "Transient.h"
+#include "LayeredSideFluxAverage.h"
 #include "MooseMesh.h"
+#include "Output.h"
+#include "TimeStepper.h"
+#include "Transient.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"
