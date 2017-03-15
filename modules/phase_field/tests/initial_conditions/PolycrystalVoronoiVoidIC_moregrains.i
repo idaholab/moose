@@ -60,7 +60,5 @@
 []
 
 [Outputs]
-  file_base = moregrains
   exodus = true
 []
-

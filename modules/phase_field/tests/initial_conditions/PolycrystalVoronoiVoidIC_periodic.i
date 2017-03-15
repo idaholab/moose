@@ -63,7 +63,5 @@
 []
 
 [Outputs]
-  file_base = periodic
   exodus = true
 []
-

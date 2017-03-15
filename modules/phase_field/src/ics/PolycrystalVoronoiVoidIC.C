@@ -12,10 +12,6 @@ PolycrystalVoronoiVoidIC::actionParameters()
 {
   InputParameters params = validParams<MultiSmoothCircleIC>();
 
-  MooseEnum structure_options("grains voids");
-  params.addRequiredParam<MooseEnum>("structure_type",
-                                     structure_options,
-                                     "Which structure type is being initialized, grains or voids");
   params.addRequiredParam<unsigned int>("op_num", "Number of order parameters");
   params.addRequiredParam<unsigned int>(
       "grain_num", "Number of grains being represented by the order parameters");
@@ -33,6 +29,10 @@ InputParameters
 validParams<PolycrystalVoronoiVoidIC>()
 {
   InputParameters params = PolycrystalVoronoiVoidIC::actionParameters();
+  MooseEnum structure_options("grains voids");
+  params.addRequiredParam<MooseEnum>("structure_type",
+                                     structure_options,
+                                     "Which structure type is being initialized, grains or voids");
   params.addParam<unsigned int>(
       "op_index",
       0,
