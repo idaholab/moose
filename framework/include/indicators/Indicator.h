@@ -23,6 +23,7 @@
 #include "MooseVariableDependencyInterface.h"
 #include "Restartable.h"
 #include "OutputInterface.h"
+#include "MaterialPropertyInterface.h"
 
 // Forward Declarations
 class Indicator;
@@ -41,7 +42,8 @@ class Indicator :
   public UserObjectInterface,
   public MooseVariableDependencyInterface,
   public Restartable,
-  public OutputInterface
+  public OutputInterface,
+  public MaterialPropertyInterface
 {
 public:
   Indicator(const InputParameters & parameters);

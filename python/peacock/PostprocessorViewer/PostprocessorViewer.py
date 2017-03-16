@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from PyQt5 import QtWidgets
 
 import peacock
@@ -68,6 +68,10 @@ class PostprocessorViewer(peacock.base.ViewerBase):
         options = kwargs.pop('cmd_line_options', None)
         if options:
             filenames += options.postprocessors
+            for arg in options.arguments:
+                if arg.endswith(".csv"):
+                    filenames.append(os.path.abspath(arg))
+            options.postprocessors = filenames # so that we can switch to this tab automatically
 
         if len(filenames) == 0:
             return

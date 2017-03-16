@@ -11,32 +11,27 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#include "MaterialTestIndicator.h"
-#include "Assembly.h"
+#include "IncrementMaterial.h"
 
 template<>
-InputParameters validParams<MaterialTestIndicator>()
+InputParameters validParams<IncrementMaterial>()
 {
-  InputParameters params = validParams<Indicator>();
-  params += validParams<MaterialPropertyInterface>();
-  params.addParam<MaterialPropertyName>("property", "The name of the material property to use for an indicator.");
+  InputParameters params = validParams<GenericConstantMaterial>();
+  params.addClassDescription("Material that tracks the number of times computeQpProperties has been called.");
   return params;
 }
 
-MaterialTestIndicator::MaterialTestIndicator(const InputParameters & parameters) :
-    Indicator(parameters),
-    _property(getMaterialProperty<Real>("property")),
-    _qrule(_assembly.qRule()),
-    _indicator_var(_sys.getVariable(_tid, name()))
+IncrementMaterial::IncrementMaterial(const InputParameters & parameters) :
+    GenericConstantMaterial(parameters),
+    _inc(0),
+    _mat_prop(declareProperty<Real>("mat_prop"))
 {
 }
 
 void
-MaterialTestIndicator::computeIndicator()
+IncrementMaterial::computeQpProperties()
 {
-  Real min = std::numeric_limits<Real>::max();
-  for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
-    min = std::min(min, _property[qp]);
-  _indicator_var.setNodalValue(min);
+  GenericConstantMaterial::computeQpProperties();
+  _inc++;
+  _mat_prop[_qp] = _inc;
 }

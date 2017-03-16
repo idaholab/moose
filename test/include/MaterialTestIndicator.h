@@ -31,9 +31,7 @@ InputParameters validParams<MaterialTestIndicator>();
 /**
  * Computes the minimum element size.
  */
-class MaterialTestIndicator :
-    public Indicator,
-    public MaterialPropertyInterface
+class MaterialTestIndicator : public Indicator
 {
 public:
   MaterialTestIndicator(const InputParameters & params);

@@ -129,6 +129,15 @@ public:
    */
   const MaterialPropertyStorage & getMaterialPropertyStorage() const { return _storage; }
 
+  /**
+   * Wrapper for MaterialStorage::getPropertyId. Allows classes with a MaterialData object
+   * (i.e. MaterialPropertyInterface) to access material property IDs.
+   * @param prop_name The name of the material property
+   *
+   * @return An unsigned int corresponding to the property ID of the passed in prop_name
+   */
+  unsigned int getPropertyId(const std::string & prop_name) const { return _storage.getPropertyId(prop_name); }
+
 protected:
 
   /// Reference to the MaterialStorage class
@@ -167,7 +176,7 @@ MaterialData::haveProperty (const std::string & prop_name) const
   if (!_storage.hasProperty(prop_name))
     return false;
 
-  unsigned int prop_id = _storage.getPropertyId(prop_name);
+  unsigned int prop_id = getPropertyId(prop_name);
   if (prop_id >= _props.size())
     return false;           // the property id exists, but the property was not created in this instance of the material type
 
@@ -231,7 +240,7 @@ template<typename T>
 MaterialProperty<T> &
 MaterialData::getProperty(const std::string & name)
 {
-  auto prop_id = _storage.getPropertyId(name);
+  auto prop_id = getPropertyId(name);
   resizeProps<T>(prop_id);
   auto prop = dynamic_cast<MaterialProperty<T>*>(_props[prop_id]);
   if (!prop)

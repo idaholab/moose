@@ -179,6 +179,14 @@ public:
    */
   bool getMaterialPropertyCalled() const { return _get_material_property_called; }
 
+  /**
+   * Retrieve the set of material properties that _this_ object depends on.
+   *
+   * @return The IDs corresponding to the material properties that
+   * MUST be reinited before evaluating this object
+   */
+  const std::set<unsigned int> & getMatPropDependencies() const { return _material_property_dependencies; }
+
 protected:
   /// Parameters of the object with this interface
   const InputParameters & _mi_params;
@@ -237,6 +245,9 @@ protected:
 
   /// Storage vector for MaterialProperty<Real> default objects
   std::vector<std::unique_ptr<MaterialProperty<Real>>> _default_real_properties;
+
+  /// The set of material properties (as given by their IDs) that _this_ object depends on
+  std::set<unsigned int> _material_property_dependencies;
 
 private:
   /// An initialization routine needed for dual constructors
@@ -358,6 +369,8 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
   // Update the boolean flag.
   _get_material_property_called = true;
 
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
+
   return _material_data->getProperty<T>(name);
 }
 
@@ -373,6 +386,8 @@ MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyNa
   // mark property as requested
   markMatPropRequested(name);
 
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
+
   return _material_data->getPropertyOld<T>(name);
 }
 
@@ -387,6 +402,8 @@ MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialProperty
   // mark property as requested
   markMatPropRequested(name);
 
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
+
   return _material_data->getPropertyOlder<T>(name);
 }
 
@@ -399,6 +416,8 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
 
   if (!hasMaterialPropertyByName<T>(name))
     return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(NULL, std::set<SubdomainID>());
+
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
   return std::pair<const MaterialProperty<T> *, std::set<SubdomainID> >(&_material_data->getProperty<T>(name), _mi_feproblem.getMaterialPropertyBlocks(name));
 }

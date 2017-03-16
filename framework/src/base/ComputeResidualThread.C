@@ -69,7 +69,15 @@ ComputeResidualThread::subdomainChanged()
   _dg_kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _interface_kernels.updateBoundaryVariableDependency(needed_moose_vars, _tid);
 
+  // Update material dependencies
+  std::set<unsigned int> needed_mat_props;
+  _kernels.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
+  _integrated_bcs.updateBoundaryMatPropDependency(needed_mat_props, _tid);
+  _dg_kernels.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
+  _interface_kernels.updateBoundaryMatPropDependency(needed_mat_props, _tid);
+
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
 }
 
@@ -241,6 +249,7 @@ void
 ComputeResidualThread::post()
 {
   _fe_problem.clearActiveElementalMooseVariables(_tid);
+  _fe_problem.clearActiveMaterialProperties(_tid);
 }
 
 
