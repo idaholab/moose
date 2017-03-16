@@ -37,6 +37,7 @@ MooseObject::MooseObject(const InputParameters & parameters) :
     _name(getParam<std::string>("_object_name")),
     _enabled(getParam<bool>("enable"))
 {
+  mooseError("   as;lkdjf;laskdjfl;askdjf;laskd");
 }
 
 [[noreturn]] void
