@@ -15,7 +15,7 @@
 #ifndef MAXQPSTHREAD_H
 #define MAXQPSTHREAD_H
 
-#include "ParallelUniqueId.h"
+#include "MooseTypes.h"
 
 // libMesh includes
 #include "libmesh/elem_range.h"
