@@ -124,15 +124,6 @@ EFAElement::getLocalNodeIndex(EFANode * node) const
   return local_node_id;
 }
 
-std::vector<EFANode*>
-EFAElement::getCommonNodes(const EFAElement* other_elem) const
-{
-  std::set<EFANode*> e1nodes(_nodes.begin(), _nodes.end());
-  std::set<EFANode*> e2nodes(other_elem->_nodes.begin(), other_elem->_nodes.end());
-  std::vector<EFANode*> common_nodes = Efa::getCommonElems(e1nodes, e2nodes);
-  return common_nodes;
-}
-
 void
 EFAElement::setCrackTipSplit()
 {

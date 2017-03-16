@@ -233,6 +233,7 @@ EFAFragment2D::isEdgeInterior(unsigned int edge_id) const
     EFAError("in isEdgeInterior fragment must have host elem");
 
   bool edge_in_elem_edge = false;
+
   for (unsigned int i = 0; i < _host_elem->numEdges(); ++i)
   {
     if (_host_elem->getEdge(i)->containsEdge(*_boundary_edges[edge_id]))

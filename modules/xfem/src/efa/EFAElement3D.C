@@ -17,6 +17,7 @@
 #include "EFAFragment3D.h"
 #include "EFAFuncs.h"
 #include "EFAError.h"
+#include "XFEMFuncs.h"
 
 EFAElement3D::EFAElement3D(unsigned int eid, unsigned int n_nodes, unsigned int n_faces) :
     EFAElement(eid, n_nodes),
@@ -24,6 +25,31 @@ EFAElement3D::EFAElement3D(unsigned int eid, unsigned int n_nodes, unsigned int 
     _faces(_num_faces, NULL),
     _face_neighbors(_num_faces, {nullptr})
 {
+  if (_num_faces == 4)
+  {
+    _num_vertices = 4;
+    if (_num_nodes == 10)
+      _num_interior_face_nodes = 3;
+    else if (_num_nodes == 4)
+      _num_interior_face_nodes = 0;
+    else
+      EFAError("In EFAelement3D the supported TET element types are TET4 and TET10");
+  }
+  else if (_num_faces == 6)
+  {
+    _num_vertices = 8;
+    if (_num_nodes == 27)
+      _num_interior_face_nodes = 5;
+    else if (_num_nodes == 20)
+      _num_interior_face_nodes = 4;
+    else if (_num_nodes == 8)
+      _num_interior_face_nodes = 0;
+    else
+      EFAError("In EFAelement3D the supported HEX element types are HEX8, HEX20 and HEX27");
+  }
+  else
+    EFAError("In EFAelement3D the supported element types are TET4, TET10, HEX8, HEX20 and HEX27");
+  setLocalCoordinates ();
 }
 
 EFAElement3D::EFAElement3D(const EFAElement3D* from_elem, bool convert_to_local):
@@ -67,6 +93,10 @@ EFAElement3D::EFAElement3D(const EFAElement3D* from_elem, bool convert_to_local)
 
     // create element face connectivity array (IMPORTANT)
     findFacesAdjacentToFaces();
+
+    _local_node_coor = from_elem->_local_node_coor;
+    _num_interior_face_nodes = from_elem->_num_interior_face_nodes;
+    _num_vertices = from_elem->_num_vertices;
   }
   else
     EFAError("this EFAelement3D constructor only converts global nodes to local nodes");
@@ -108,6 +138,120 @@ EFAElement3D::~EFAElement3D()
   }
 }
 
+void
+EFAElement3D::setLocalCoordinates()
+{
+  if (_num_faces == 6)
+  {
+    /*
+    HEX27(HEX20):  7              18             6
+                   o--------------o--------------o
+                  /:             /              /|
+                 / :            /              / |
+                /  :           /              /  |
+             19/   :        25/            17/   |
+              o--------------o--------------o    |
+             /     :        /              /|    |
+            /    15o       /    23o       / |  14o
+           /       :      /              /  |   /|
+         4/        :   16/             5/   |  / |
+         o--------------o--------------o    | /  |
+         |         :    |   26         |    |/   |
+         |  24o    :    |    o         |  22o    |
+         |         :    |       10     |   /|    |
+         |        3o....|.........o....|../.|....o
+         |        .     |              | /  |   / 2
+         |       .    21|            13|/   |  /
+      12 o--------------o--------------o    | /
+         |     .        |              |    |/
+         |  11o         | 20o          |    o
+         |   .          |              |   / 9
+         |  .           |              |  /
+         | .            |              | /
+         |.             |              |/
+         o--------------o--------------o
+         0              8              1
+
+     */
+    _local_node_coor.resize(_num_nodes);
+    _local_node_coor[0] = EFAPoint(0.0, 0.0, 0.0);
+    _local_node_coor[1] = EFAPoint(1.0, 0.0, 0.0);
+    _local_node_coor[2] = EFAPoint(1.0, 1.0, 0.0);
+    _local_node_coor[3] = EFAPoint(0.0, 1.0, 0.0);
+    _local_node_coor[4] = EFAPoint(0.0, 0.0, 1.0);
+    _local_node_coor[5] = EFAPoint(1.0, 0.0, 1.0);
+    _local_node_coor[6] = EFAPoint(1.0, 1.0, 1.0);
+    _local_node_coor[7] = EFAPoint(0.0, 1.0, 1.0);
+
+    if (_num_nodes > 8)
+    {
+      _local_node_coor[8] = EFAPoint(0.5, 0.0, 0.0);
+      _local_node_coor[9] = EFAPoint(1.0, 0.5, 0.0);
+      _local_node_coor[10] = EFAPoint(0.5, 1.0, 0.0);
+      _local_node_coor[11] = EFAPoint(0.0, 0.5, 0.0);
+      _local_node_coor[12] = EFAPoint(0.0, 0.0, 0.5);
+      _local_node_coor[13] = EFAPoint(1.0, 0.0, 0.5);
+      _local_node_coor[14] = EFAPoint(1.0, 1.0, 0.5);
+      _local_node_coor[15] = EFAPoint(0.0, 1.0, 0.5);
+      _local_node_coor[16] = EFAPoint(0.5, 0.0, 1.0);
+      _local_node_coor[17] = EFAPoint(1.0, 0.5, 1.0);
+      _local_node_coor[18] = EFAPoint(0.5, 1.0, 1.0);
+      _local_node_coor[19] = EFAPoint(0.0, 0.5, 1.0);
+    }
+
+    if (_num_nodes > 20)
+    {
+      _local_node_coor[20] = EFAPoint(0.5, 0.5, 0.0);
+      _local_node_coor[21] = EFAPoint(0.5, 0.0, 0.5);
+      _local_node_coor[22] = EFAPoint(1.0, 0.5, 0.5);
+      _local_node_coor[23] = EFAPoint(0.5, 1.0, 0.5);
+      _local_node_coor[24] = EFAPoint(0.0, 0.5, 0.5);
+      _local_node_coor[25] = EFAPoint(0.5, 0.5, 1.0);
+      _local_node_coor[26] = EFAPoint(0.5, 0.5, 0.5);
+    }
+  }
+  else
+  {
+    /*
+                  3
+      TET10:      o
+                 /|\
+                / | \
+            7  /  |  \9
+              o   |   o
+             /    |8   \
+            /     o     \
+           /    6 |      \
+        0 o.....o.|.......o 2
+           \      |      /
+            \     |     /
+             \    |    /
+            4 o   |   o 5
+               \  |  /
+                \ | /
+                 \|/
+                  o
+                  1
+
+    */
+    _local_node_coor.resize(_num_nodes);
+    _local_node_coor[0] = EFAPoint(0.0, 0.0, 0.0);
+    _local_node_coor[1] = EFAPoint(1.0, 0.0, 0.0);
+    _local_node_coor[2] = EFAPoint(0.0, 1.0, 0.0);
+    _local_node_coor[3] = EFAPoint(0.0, 0.0, 1.0);
+
+    if (_num_nodes > 4)
+    {
+      _local_node_coor[4] = EFAPoint(0.5, 0.0, 0.0);
+      _local_node_coor[5] = EFAPoint(0.5, 0.5, 0.0);
+      _local_node_coor[6] = EFAPoint(0.0, 0.5, 0.0);
+      _local_node_coor[7] = EFAPoint(0.0, 0.0, 0.5);
+      _local_node_coor[8] = EFAPoint(0.5, 0.0, 0.5);
+      _local_node_coor[9] = EFAPoint(0.0, 0.5, 0.5);
+    }
+  }
+}
+
 unsigned int
 EFAElement3D::numFragments() const
 {
@@ -120,7 +264,7 @@ EFAElement3D::isPartial() const
   bool partial = false;
   if (_fragments.size() > 0)
   {
-    for (unsigned int i = 0; i < _num_nodes; ++i)
+    for (unsigned int i = 0; i < _num_vertices; ++i)
     {
       bool node_in_frag = false;
       for (unsigned int j = 0; j < _fragments.size(); ++j)
@@ -265,7 +409,7 @@ EFAElement3D::numInteriorNodes() const
 }
 
 bool
-EFAElement3D::overlaysElement(const EFAElement* other_elem) const
+EFAElement3D::overlaysElement(const EFAElement3D* other_elem) const
 {
   bool overlays = false;
   const EFAElement3D* other3d = dynamic_cast<const EFAElement3D*>(other_elem);
@@ -768,10 +912,69 @@ EFAElement3D::createChild(const std::set<EFAElement*> &CrackTipElements,
       childElem->setParent(this);
       _children.push_back(childElem);
 
+      std::vector<std::vector<EFANode*> > cut_plane_nodes;
+      for (unsigned int i = 0; i < this->getFragment(ichild)->numFaces(); ++i)
+      {
+        if (this->getFragment(ichild)->isFaceInterior(i))
+        {
+          EFAFace* face = this->getFragment(ichild)->getFace(i);
+          std::vector<EFANode*> node_line;
+          for (unsigned int j = 0; j < face->numNodes(); ++j)
+            node_line.push_back(face->getNode(j));
+          cut_plane_nodes.push_back(node_line);
+        }
+      }
+
+      std::vector<EFAPoint> cut_plane_points;
+
+      EFAPoint normal(0.0, 0.0, 0.0);
+      EFAPoint orig(0.0, 0.0, 0.0);
+
+      if (cut_plane_nodes.size())
+      {
+        for (unsigned int i = 0; i < cut_plane_nodes[0].size(); ++i)
+        {
+          std::vector<EFANode*> master_nodes;
+          std::vector<double> master_weights;
+
+          this->getMasterInfo(cut_plane_nodes[0][i], master_nodes, master_weights);
+          EFAPoint coor(0.0, 0.0, 0.0);
+          for (unsigned int i = 0; i < master_nodes.size(); ++i)
+          {
+            EFANode * local = this->createLocalNodeFromGlobalNode(master_nodes[i]);
+            coor += _local_node_coor[local->id()] * master_weights[i];
+          }
+          cut_plane_points.push_back(coor);
+        }
+        for (unsigned int i = 0; i < cut_plane_points.size(); ++i)
+          orig += cut_plane_points[i];
+        orig /= cut_plane_points.size();
+
+        EFAPoint center(0.0, 0.0, 0.0);
+        for (unsigned int i = 0; i < cut_plane_points.size(); ++i)
+          center += cut_plane_points[i];
+        center /= cut_plane_points.size();
+
+        for (unsigned int i = 0; i < cut_plane_points.size(); ++i)
+        {
+          unsigned int iplus1 = i < cut_plane_points.size() - 1 ? i + 1 : 0;
+          EFAPoint ray1 = cut_plane_points[i] - center;
+          EFAPoint ray2 = cut_plane_points[iplus1] - center;
+          normal += ray1.cross(ray2);
+        }
+        normal /= cut_plane_points.size();
+        Xfem::normalizePoint(normal);
+      }
+
       // get child element's nodes
       for (unsigned int j = 0; j < _num_nodes; ++j)
       {
-        if (_fragments[ichild]->containsNode(_nodes[j]))
+        EFAPoint p(0.0, 0.0, 0.0);
+        p = _local_node_coor[j];
+        EFAPoint origin_to_point = p - orig;
+        if (_fragments.size() == 1 && !shouldDuplicateForCrackTip(CrackTipElements))
+          childElem->setNode(j, _nodes[j]); // inherit parent's node
+        else if (origin_to_point * normal < Xfem::tol)
           childElem->setNode(j, _nodes[j]); // inherit parent's node
         else // parent element's node is not in fragment
         {
@@ -883,6 +1086,16 @@ EFAElement3D::connectNeighbors(std::map<unsigned int, EFANode*> &PermanentNodes,
               EFANode* childOfNeighborNode = neighborChildFace->getNode(neighborChildNodeIndex);
               mergeNodes(childNode, childOfNeighborNode, childOfNeighborElem, PermanentNodes, TempNodes);
             } // i
+
+            for (unsigned int m = 0; m < _num_interior_face_nodes; ++m)
+            {
+              unsigned int childNodeIndex = m;
+              unsigned int neighborChildNodeIndex = parent3d->getNeighborFaceInteriorNodeID(j, childNodeIndex, NeighborElem);
+
+              EFANode* childNode = _faces[j]->getInteriorFaceNode(childNodeIndex);
+              EFANode* childOfNeighborNode = neighborChildFace->getInteriorFaceNode(neighborChildNodeIndex);
+              mergeNodes(childNode, childOfNeighborNode, childOfNeighborElem, PermanentNodes, TempNodes);
+            } // m
           }
         } // l, loop over NeighborElem's children
       }
@@ -1126,29 +1339,36 @@ EFAElement3D::createFaces()
   int hex_local_node_indices[6][4] = {{0,3,2,1},{0,1,5,4},{1,2,6,5},{2,3,7,6},{3,0,4,7},{4,5,6,7}};
   int tet_local_node_indices[4][3] = {{0,2,1},{0,1,3},{1,2,3},{2,0,3}};
 
+  int hex_interior_face_node_indices[6][5] = {{8,9,10,11,20},{8,13,16,12,21},{9,14,17,13,22},{10,14,18,15,23},{11,15,19,12,24},{16,17,18,19,25}};
+  int tet_interior_face_node_indices[4][3] = {{4,5,6}, {4,7,8}, {5,8,9}, {6,7,9}};
+
   _faces = std::vector<EFAFace*>(_num_faces, NULL);
-  if (_num_nodes == 8)
+  if (_num_nodes == 8 || _num_nodes == 20 || _num_nodes == 27)
   {
     if (_num_faces != 6)
       EFAError("num_faces of hexes must be 6");
     for (unsigned int i = 0; i < _num_faces; ++i)
     {
-      _faces[i] = new EFAFace(4);
+      _faces[i] = new EFAFace(4, _num_interior_face_nodes);
       for (unsigned int j = 0; j < 4; ++j)
         _faces[i]->setNode(j, _nodes[hex_local_node_indices[i][j]]);
       _faces[i]->createEdges();
+      for (unsigned int k = 0; k < _num_interior_face_nodes; ++k)
+        _faces[i]->setInteriorFaceNode(k, _nodes[hex_interior_face_node_indices[i][k]]);
     }
   }
-  else if (_num_nodes == 4)
+  else if (_num_nodes == 4 || _num_nodes == 10)
   {
     if (_num_faces != 4)
       EFAError("num_faces of tets must be 4");
     for (unsigned int i = 0; i < _num_faces; ++i)
     {
-      _faces[i] = new EFAFace(3);
+      _faces[i] = new EFAFace(3, _num_interior_face_nodes);
       for (unsigned int j = 0; j < 3; ++j)
         _faces[i]->setNode(j, _nodes[tet_local_node_indices[i][j]]);
       _faces[i]->createEdges();
+      for (unsigned int k = 0; k < _num_interior_face_nodes; ++k)
+        _faces[i]->setInteriorFaceNode(k, _nodes[tet_interior_face_node_indices[i][k]]);
     }
   }
   else
@@ -1229,6 +1449,37 @@ EFAElement3D::getNeighborFaceNodeID(unsigned int face_id, unsigned int node_id,
     EFAError("getNeighborFaceNodeID: could not find neighbor face node id");
   return neigh_face_node_id;
 }
+
+unsigned int
+EFAElement3D::getNeighborFaceInteriorNodeID(unsigned int face_id, unsigned int node_id,
+                                    EFAElement3D* neighbor_elem) const
+{
+  // get the corresponding node_id on the corresponding face of neighbor_elem
+  bool found_id = false;
+  unsigned int neigh_face_node_id;
+  unsigned int common_face_id = getNeighborIndex(neighbor_elem);
+  if (common_face_id == face_id)
+  {
+    unsigned int neigh_face_id = neighbor_elem->getNeighborIndex(this);
+    EFAFace* neigh_face = neighbor_elem->getFace(neigh_face_id);
+
+    for (unsigned int i = 0; i < _num_interior_face_nodes; ++i)
+    {
+      if (_faces[face_id]->getInteriorFaceNode(node_id) == neigh_face->getInteriorFaceNode(i))
+      {
+        neigh_face_node_id = i;
+        found_id = true;
+        break;
+      }
+    }
+  }
+  else
+    EFAError("getNeighborFaceNodeID: neighbor_elem is not a neighbor on face_id");
+  if (!found_id)
+    EFAError("getNeighborFaceNodeID: could not find neighbor face node id");
+  return neigh_face_node_id;
+}
+
 
 unsigned int
 EFAElement3D::getNeighborFaceEdgeID(unsigned int face_id, unsigned int edge_id,
@@ -1739,4 +1990,13 @@ EFAElement3D::mapParametricCoordinateFrom2DTo3D(unsigned int face_id,
   }
   else
     EFAError("unknown element for 3D");
+}
+
+std::vector<EFANode*>
+EFAElement3D::getCommonNodes(const EFAElement3D* other_elem) const
+{
+  std::set<EFANode*> e1nodes(_nodes.begin(), _nodes.begin() + _num_vertices); // only account for corner nodes
+  std::set<EFANode*> e2nodes(other_elem->_nodes.begin(), other_elem->_nodes.begin() + _num_vertices);
+  std::vector<EFANode*> common_nodes = Efa::getCommonElems(e1nodes, e2nodes);
+  return common_nodes;
 }

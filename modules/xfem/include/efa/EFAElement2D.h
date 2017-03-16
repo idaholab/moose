@@ -9,6 +9,7 @@
 #define EFAELEMENT2D_H
 
 #include "EFAElement.h"
+#include "EFAPoint.h"
 
 class EFAEdge;
 class EFAFace;
@@ -32,7 +33,7 @@ private:
   std::vector<EFAFaceNode*> _interior_nodes;
   std::vector<std::vector<EFAElement2D*> >_edge_neighbors;
   std::vector<EFAFragment2D*> _fragments;
-
+  std::vector<EFAPoint> _local_node_coor;
 public:
 
   // override virtual methods in base class
@@ -46,7 +47,7 @@ public:
                              std::vector<double> &master_weights) const;
   virtual unsigned int numInteriorNodes() const;
 
-  virtual bool overlaysElement(const EFAElement* other_elem) const;
+  bool overlaysElement(const EFAElement2D* other_elem) const;
   virtual unsigned int getNeighborIndex(const EFAElement* neighbor_elem) const;
   virtual void clearNeighbors();
   virtual void setupNeighbors(std::map<EFANode*, std::set<EFAElement*> > &InverseConnectivityMap);
@@ -113,10 +114,13 @@ public:
                          std::map< unsigned int, EFANode*> &EmbeddedNodes);
   std::vector<EFAFragment2D*> branchingSplit(std::map<unsigned int, EFANode*> &EmbeddedNodes);
 
+  std::vector<EFANode*> getCommonNodes(const EFAElement2D* other_elem) const;
+
 private:
   // given the 1D parent coord of a point in an 2D element edge, translate it to 2D parametric coords
   void mapParametricCoordFrom1Dto2D(unsigned int edge_id, double xi_1d,
                                     std::vector<double> &para_coor) const;
+  void setLocalCoordinates();
 };
 
 #endif

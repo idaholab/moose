@@ -47,7 +47,6 @@ public:
   EFANode * createLocalNodeFromGlobalNode(const EFANode * global_node) const;
   EFANode * getGlobalNodeFromLocalNode(const EFANode * local_node) const;
   unsigned int getLocalNodeIndex(EFANode * node) const;
-  std::vector<EFANode*> getCommonNodes(const EFAElement* other_elem) const;
 
   void setCrackTipSplit();
   bool isCrackTipSplit() const;
@@ -76,7 +75,6 @@ public:
                              std::vector<double> &master_weights) const = 0;
   virtual unsigned int numInteriorNodes() const = 0;
 
-  virtual bool overlaysElement(const EFAElement* other_elem) const = 0;
   virtual unsigned int getNeighborIndex(const EFAElement * neighbor_elem) const = 0;
   virtual void clearNeighbors() = 0;
   virtual void setupNeighbors(std::map<EFANode*, std::set<EFAElement*> > &InverseConnectivityMap) = 0;
