@@ -30,61 +30,31 @@
 #
 
 [Mesh]
-  file = 1x1x1_cube.e
+  type = GeneratedMesh
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
+[]
+
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = FINITE
+    incremental = true
+    add_variables = true
+    generate_output = 'stress_yy plastic_strain_xx plastic_strain_yy plastic_strain_zz'
+  [../]
 []
 
 [Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-
   [./temp]
     order = FIRST
     family = LAGRANGE
   [../]
 []
-
-
-[AuxVariables]
-
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./total_strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./plastic_strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./plastic_strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-  [./plastic_strain_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-
-[]
-
 
 [Functions]
   [./top_pull]
@@ -104,14 +74,6 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-  [../]
-[]
-
 [Kernels]
   [./heat]
     type = HeatConduction
@@ -119,109 +81,63 @@
   [../]
 []
 
-[AuxKernels]
-
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-  [../]
-
-  [./total_strain_yy]
-    type = MaterialTensorAux
-    tensor = total_strain
-    variable = total_strain_yy
-    index = 1
-  [../]
-
-  [./plastic_strain_xx]
-    type = MaterialTensorAux
-    tensor = plastic_strain
-    variable = plastic_strain_xx
-    index = 0
-  [../]
-
-  [./plastic_strain_yy]
-    type = MaterialTensorAux
-    tensor = plastic_strain
-    variable = plastic_strain_yy
-    index = 1
-  [../]
-
-  [./plastic_strain_zz]
-    type = MaterialTensorAux
-    tensor = plastic_strain
-    variable = plastic_strain_zz
-    index = 2
-  [../]
-
-[]
-
-
 [BCs]
-
   [./y_pull_function]
     type = FunctionPresetBC
     variable = disp_y
-    boundary = 5
+    boundary = top
     function = top_pull
   [../]
-
   [./x_bot]
     type = PresetBC
     variable = disp_x
-    boundary = 4
+    boundary = left
     value = 0.0
   [../]
-
   [./y_bot]
     type = PresetBC
     variable = disp_y
-    boundary = 3
+    boundary = bottom
     value = 0.0
   [../]
-
   [./z_bot]
     type = PresetBC
     variable = disp_z
-    boundary = 2
+    boundary = back
     value = 0.0
   [../]
-
   [./temp]
     type = FunctionPresetBC
     variable = temp
     function = temp
-    boundary = 4
+    boundary = left
   [../]
 []
 
 [Materials]
-  [./vermont]
-    type = SolidModel
-    formulation = lINeaR
-    block = 1
-    youngs_modulus = 2e5
-    poissons_ratio = .3
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    constitutive_model = kentucky
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
+    block = 0
+    youngs_modulus = 2.0e5
+    poissons_ratio = 0.3
   [../]
-  [./kentucky]
-    type = IsotropicPlasticity
-    block = 1
-    yield_stress = 1e-6 # Should be ignored
-    yield_stress_function = yield
+  [./creep_plas]
+    type = ComputeReturnMappingStress
+    block = 0
+    return_mapping_models = 'plasticity'
+    max_iterations = 50
+    absolute_tolerance = 1e-05
+  [../]
+  [./plasticity]
+    type = IsotropicPlasticityStressUpdate
+    block = 0
     hardening_constant = 0
-    relative_tolerance = 1e-25
-    absolute_tolerance = 1e-5
-    temp = temp
+    yield_stress_function = yield
+    temperature = temp
   [../]
-  [./utah]
+  [./heat_conduction]
     type = HeatConductionMaterial
-    block = 1
+    block = 0
     specific_heat = 1
     thermal_conductivity = 1
   [../]
@@ -238,7 +154,6 @@
   petsc_options_value = '201                hypre    boomeramg      4'
 
   line_search = 'none'
-
 
   l_max_its = 100
   nl_max_its = 100

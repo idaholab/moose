@@ -3,7 +3,10 @@
 #
 # The problem is a one-dimensional creep analysis.  The top face has a
 #    pressure load that is a function of time.  The creep strain can be
-#    calculated analytically.  There is no lsh plasticity.
+#    calculated analytically.  There is no practical active linear
+#    isotropic plasticity because the yield stress for the plasticity
+#    model is set to 1e30 MPa, which will not be reached in this
+#    regression test.
 #
 # The analytic solution to this problem is:
 #
@@ -37,7 +40,11 @@
 #   ec = 1e-24*t^3 = 3.4012224e-11
 #
 [Mesh]
-  file = 1x1x1_cube.e
+  type = GeneratedMesh
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -46,31 +53,21 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
-
-  [./temp]
-    order = FIRST
-    family = LAGRANGE
-    initial_condition = 1000.0
-  [../]
 []
 
 [AuxVariables]
-
   [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./creep_strain_yy]
     order = CONSTANT
     family = MONOMIAL
@@ -91,18 +88,6 @@
     disp_z = disp_z
   [../]
 []
-
-[Kernels]
-  [./heat]
-    type = HeatConduction
-    variable = temp
-  [../]
-  [./heat_ie]
-    type = HeatConductionTimeDerivative
-    variable = temp
-  [../]
-[]
-
 
 [AuxKernels]
   [./stress_yy]
@@ -126,50 +111,38 @@
     type = Pressure
     variable = disp_y
     component = 1
-    boundary = 5
+    boundary = top
     function = pressure
   [../]
   [./u_bottom_fix]
     type = DirichletBC
     variable = disp_y
-    boundary = 3
+    boundary = bottom
     value = 0.0
   [../]
   [./u_yz_fix]
     type = DirichletBC
     variable = disp_x
-    boundary = 4
+    boundary = left
     value = 0.0
   [../]
   [./u_xy_fix]
     type = DirichletBC
     variable = disp_z
-    boundary = 2
+    boundary = back
     value = 0.0
-  [../]
-
-  [./temp_top_fix]
-    type = DirichletBC
-    variable = temp
-    boundary = 5
-    value = 1000.0
-  [../]
-  [./temp_bottom_fix]
-    type = DirichletBC
-    variable = temp
-    boundary = 3
-    value = 1000.0
   [../]
 []
 
 [Materials]
   [./creep_plas]
     type = PLC_LSH
-    block = 1
+    block = 0
     youngs_modulus = 2.8e7
     poissons_ratio = .3
     coefficient = 3.0e-24
     n_exponent = 4
+    m_exponent = 0
     activation_energy = 0
     relative_tolerance = 1.e-5
     max_its = 100
@@ -178,24 +151,7 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    temp = temp
     output_iteration_info = false
-  [../]
-
-  [./thermal]
-    type = HeatConductionMaterial
-    block = 1
-    specific_heat = 1.0
-    thermal_conductivity = 100.
-  [../]
-
-  [./density]
-    type = Density
-    block = 1
-    density = 1
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 
@@ -236,5 +192,6 @@
 []
 
 [Outputs]
+  file_base = combined_stress_prescribed_out
   exodus = true
 []

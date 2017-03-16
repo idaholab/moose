@@ -57,15 +57,12 @@
 #    e_tot(1) = 2.39826         (~0.04% error)
 #    e_tot(1.5) = 3.15663       (~0.36% error)
 #
-#
-#   Note that this test is not a completely correct representation of the analytical problem
-#     since the code does not set an initial condition for the stress.  Currently (21 Feb 2012),
-#     no capability exists for setting the initial condition of stress.  Until
-#     that is available, some error will be inherent in the solution. This error has been
-#     minimized by using a very small initial time increment.
-#
 [Mesh]
-  file = 1x1x1_cube.e
+  type = GeneratedMesh
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -74,41 +71,29 @@
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_y]
     order = FIRST
     family = LAGRANGE
   [../]
-
   [./disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
-
-  [./temp]
-    order = FIRST
-    family = LAGRANGE
-    initial_condition = 1000.0
-  [../]
 []
 
 [AuxVariables]
-
   [./stress_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./elastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./plastic_strain_yy]
     order = CONSTANT
     family = MONOMIAL
   [../]
-
   [./creep_strain_yy]
     order = CONSTANT
     family = MONOMIAL
@@ -131,18 +116,6 @@
   [../]
 []
 
-[Kernels]
-  [./heat]
-    type = HeatConduction
-    variable = temp
-  [../]
-  [./heat_ie]
-    type = HeatConductionTimeDerivative
-    variable = temp
-  [../]
-[]
-
-
 [AuxKernels]
   [./stress_yy]
     type = MaterialTensorAux
@@ -150,21 +123,18 @@
     tensor = stress
     index = 1
   [../]
-
   [./elastic_strain_yy]
     type = MaterialTensorAux
     variable = elastic_strain_yy
     tensor = elastic_strain
     index = 1
   [../]
-
   [./plastic_strain_yy]
     type = MaterialTensorAux
     variable = plastic_strain_yy
     tensor = plastic_strain
     index = 1
   [../]
-
   [./creep_strain_yy]
     type = MaterialTensorAux
     variable = creep_strain_yy
@@ -173,53 +143,39 @@
   [../]
 []
 
-
 [BCs]
   [./u_top_pull]
     type = Pressure
     variable = disp_y
     component = 1
-    boundary = 5
+    boundary = top
     factor = 1
     function = top_pull
   [../]
   [./u_bottom_fix]
     type = PresetBC
     variable = disp_y
-    boundary = 3
+    boundary = bottom
     value = 0.0
   [../]
   [./u_yz_fix]
     type = PresetBC
     variable = disp_x
-    boundary = 4
+    boundary = left
     value = 0.0
   [../]
   [./u_xy_fix]
     type = PresetBC
     variable = disp_z
-    boundary = 2
+    boundary = back
     value = 0.0
-  [../]
-
-  [./temp_top_fix]
-    type = PresetBC
-    variable = temp
-    boundary = 5
-    value = 1000.0
-  [../]
-  [./temp_bottom_fix]
-    type = PresetBC
-    variable = temp
-    boundary = 3
-    value = 1000.0
   [../]
 []
 
 [Materials]
   [./creep_plas]
     type = PLC_LSH
-    block = 1
+    block = 0
     youngs_modulus = 1e3
     poissons_ratio = .3
     coefficient = 0.5e-7
@@ -235,42 +191,22 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    temp = temp
     formulation = nonlinear3D
     output_iteration_info = false
-  [../]
-
-  [./thermal]
-    type = HeatConductionMaterial
-    block = 1
-    specific_heat = 1.0
-    thermal_conductivity = 100.
-  [../]
-  [./density]
-    type = Density
-    block = 1
-    density = 1
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
   [../]
 []
 
 [Executioner]
   type = Transient
 
-
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
   petsc_options = '-snes_ksp'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -sub_pc_type'
-  petsc_options_value = '101           asm      lu'
-
+  petsc_options_iname = '-ksp_gmres_restart'
+  petsc_options_value = '101'
 
   line_search = 'none'
-
 
   l_max_its = 20
   nl_max_its = 6
@@ -278,9 +214,8 @@
   nl_abs_tol = 1e-10
   l_tol = 1e-5
   start_time = 0.0
-  end_time = 1.4999999999
+  end_time = 1.5
 
-  dt = 0.001
   [./TimeStepper]
     type = FunctionDT
     time_t  = '0        0.5    1.0    1.5'
@@ -295,5 +230,6 @@
 []
 
 [Outputs]
+  file_base = combined_creep_plasticity_sm_out
   exodus = true
 []
