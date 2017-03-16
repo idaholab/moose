@@ -113,8 +113,7 @@ Syntax::registerActionSyntax(const std::string & action,
   action_info._task = task;
 
   _associated_actions.insert(std::make_pair(syntax, action_info));
-  if (!file.empty() && line >= 0)
-    _syntax_to_line.insert(std::make_pair(syntax, std::make_tuple(action, task, file, line)));
+  _syntax_to_line.addInfo(syntax, action, task, file, line);
 }
 
 void
@@ -249,16 +248,10 @@ Syntax::registerSyntaxType(const std::string & syntax, const std::string & type)
   _associated_types.insert(std::make_pair(syntax, type));
 }
 
-std::pair<std::string, int>
+FileLineInfo
 Syntax::getLineInfo(const std::string & syntax,
                     const std::string & action,
                     const std::string & task) const
 {
-  auto iters = _syntax_to_line.equal_range(syntax);
-  if (iters.first != iters.second)
-    for (auto && it = iters.first; it != iters.second; ++it)
-      if (std::get<0>(it->second) == action && std::get<1>(it->second) == task)
-        return std::make_pair(std::get<2>(it->second), std::get<3>(it->second));
-
-  return std::make_pair("", -1);
+  return _syntax_to_line.getInfo(syntax, action, task);
 }

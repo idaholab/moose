@@ -18,6 +18,7 @@
 #include <string>
 #include <map>
 #include "DependencyResolver.h"
+#include "FileLineInfo.h"
 
 /**
  * Holding syntax for parsing input files
@@ -116,10 +117,11 @@ public:
    * @param syntax Syntax name
    * @param action Action name
    * @param task Task name
+   * @return A FileLineInfo associated with the syntax/action/task triplet
    */
-  std::pair<std::string, int> getLineInfo(const std::string & syntax,
-                                          const std::string & action,
-                                          const std::string & task) const;
+  FileLineInfo getLineInfo(const std::string & syntax,
+                           const std::string & action,
+                           const std::string & task) const;
 
 protected:
   /// The list of registered tasks and a flag indicating whether or not they are required
@@ -138,8 +140,7 @@ protected:
   std::multimap<std::string, std::string> _associated_types;
 
   std::set<std::string> _deprecated_syntax;
-  typedef std::tuple<std::string, std::string, std::string, int> ActionTaskLineInfo;
-  std::multimap<std::string, ActionTaskLineInfo> _syntax_to_line;
+  FileLineInfoMap _syntax_to_line;
 };
 
 #endif // MOOSESYNTAX_H

@@ -589,8 +589,6 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
     const std::string & task = act_info._task;
     const std::string act_name = act_names.first;
     InputParameters action_obj_params = _action_factory.getValidParams(action);
-    // all_names.push_back(std::make_tuple(iter.first, act_info,
-    // _syntax.getLineInfo(act_info._action, act_info._task)));
     bool params_added = root.addParameters("",
                                            act_name,
                                            false,
@@ -602,7 +600,7 @@ Parser::buildJsonSyntaxTree(JsonSyntaxTree & root) const
     if (params_added)
     {
       auto tasks = _action_factory.getTasksByAction(action);
-      for (auto && t : tasks)
+      for (auto & t : tasks)
       {
         auto info = _action_factory.getLineInfo(action, t);
         root.addActionTask(act_name, action, t, info);

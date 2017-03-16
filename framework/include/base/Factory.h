@@ -22,6 +22,7 @@
 // MOOSE includes
 #include "MooseObject.h"
 #include "MooseTypes.h"
+#include "FileLineInfo.h"
 
 // Forward declarations
 class InputParameters;
@@ -171,15 +172,15 @@ public:
       else
         mooseError("Object '" + obj_name + "' already registered.");
     }
-    if (!file.empty() && line >= 0)
-      _name_to_line[obj_name] = std::make_pair(file, line);
+    _name_to_line.addInfo(obj_name, file, line);
     // TODO: Possibly store and print information about objects that are skipped here?
   }
   /**
    * Gets file and line information where an object was initially registered.
    * @param name Object name
+   * @return The FileLineInfo associated with name
    */
-  std::pair<std::string, int> getLineInfo(const std::string & name) const;
+  FileLineInfo getLineInfo(const std::string & name) const;
 
   /**
    * Register a deprecated object that expires
@@ -316,7 +317,7 @@ protected:
   /// Storage for pointers to the parameters objects
   std::map<std::string, paramsPtr> _name_to_params_pointer;
 
-  std::map<std::string, std::pair<std::string, int>> _name_to_line;
+  FileLineInfoMap _name_to_line;
 
   /// Storage for deprecated object experiation dates
   std::map<std::string, time_t> _deprecated_time;

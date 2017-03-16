@@ -21,6 +21,7 @@
 
 #include "Action.h" // Technically required for std::shared_ptr<Action>(Action*) constructor
 #include "InputParameters.h"
+#include "FileLineInfo.h"
 
 /**
  * Macros
@@ -86,16 +87,16 @@ public:
     build_info._unique_id = _unique_id++;
     _name_to_build_info.insert(std::make_pair(name, build_info));
     _task_to_action_map.insert(std::make_pair(task, name));
-    if (!file.empty() && line >= 0)
-      _name_to_line.insert(std::make_pair(std::make_pair(name, task), std::make_pair(file, line)));
+    _name_to_line.addInfo(name, task, file, line);
   }
 
   /**
    * Gets file and line information where an action was registered.
    * @param name Action name
    * @param task task name
+   * @return A FileLineInfo associated with the name/task pair
    */
-  std::pair<std::string, int> getLineInfo(const std::string & name, const std::string & task) const;
+  FileLineInfo getLineInfo(const std::string & name, const std::string & task) const;
 
   std::string getTaskName(const std::string & action);
 
@@ -134,7 +135,7 @@ protected:
 
   std::multimap<std::string, BuildInfo> _name_to_build_info;
 
-  std::map<std::pair<std::string, std::string>, std::pair<std::string, int>> _name_to_line;
+  FileLineInfoMap _name_to_line;
   std::multimap<std::string, std::string> _task_to_action_map;
 
   // TODO: I don't think we need this anymore

@@ -82,7 +82,7 @@ JsonSyntaxTree::addParameters(const std::string & parent,
                               const std::string & action,
                               bool is_action,
                               InputParameters * params,
-                              const std::pair<std::string, int> & lineinfo)
+                              const FileLineInfo & lineinfo)
 {
   moosecontrib::Json::Value all_params;
   if (action == "EmptyAction")
@@ -133,9 +133,8 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     json[action]["parameters"] = all_params;
     json[action]["description"] = params->getClassDescription();
     json[action]["action_path"] = path;
-    auto & fi = json[action]["file_info"];
-    if (lineinfo.second >= 0)
-      fi[lineinfo.first] = lineinfo.second;
+    if (lineinfo.isValid())
+      json[action]["file_info"][lineinfo.file()] = lineinfo.line();
   }
   else if (params)
   {
@@ -143,9 +142,8 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     json["syntax_path"] = path;
     json["parent_syntax"] = parent;
     json["description"] = params->getClassDescription();
-    auto & fi = json["file_info"];
-    if (lineinfo.second >= 0)
-      fi[lineinfo.first] = lineinfo.second;
+    if (lineinfo.isValid())
+      json["file_info"][lineinfo.file()] = lineinfo.line();
   }
   return true;
 }
@@ -220,13 +218,13 @@ JsonSyntaxTree::addSyntaxType(const std::string & path, const std::string type)
   }
 }
 
+void
 JsonSyntaxTree::addActionTask(const std::string & path,
                               const std::string & action,
                               const std::string & task_name,
-                              const std::pair<std::string, int> & lineinfo)
+                              const FileLineInfo & lineinfo)
 {
   moosecontrib::Json::Value & json = getJson("", path, false);
-  auto & fi = json[action]["tasks"][task_name]["file_info"];
-  if (lineinfo.second >= 0)
-    fi[lineinfo.first] = lineinfo.second;
+  if (lineinfo.isValid())
+    json[action]["tasks"][task_name]["file_info"][lineinfo.file()] = lineinfo.line();
 }
