@@ -17,7 +17,6 @@
 
 // libMesh includes
 #include "libmesh/perf_log.h"
-#include "libmesh/parallel.h"
 #include "libmesh/libmesh_common.h"
 #include "XTermConstants.h"
 
