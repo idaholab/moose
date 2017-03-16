@@ -1496,14 +1496,6 @@ protected:
   Moose::PetscSupport::PetscOptions _petsc_options;
 #endif // LIBMESH_HAVE_PETSC
 
-  /**
-   * Method for sorting the MooseVariables based on variable numbers
-   */
-  static bool sortMooseVariables(MooseVariable * a, MooseVariable * b)
-  {
-    return a->number() < b->number();
-  }
-
 private:
   bool _error_on_jacobian_nonzero_reallocation;
   bool _force_restart;
