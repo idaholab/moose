@@ -44,6 +44,9 @@ protected:
   /// Value of the coupled variable to be used as the abscissa in the piecewise linear interpolation
   const VariableValue & _coupled_var;
 
+  /// Factor to scale the ordinate values by (default = 1)
+  const Real _scale_factor;
+
   /// Material property to be calculated
   MaterialProperty<Real> * _property;
   /// First derivative of the material property wrt the coupled variable
