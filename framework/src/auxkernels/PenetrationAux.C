@@ -14,6 +14,7 @@
 
 // MOOSE includes
 #include "PenetrationAux.h"
+#include "PenetrationLocator.h"
 #include "DisplacedProblem.h"
 #include "MooseEnum.h"
 #include "MooseMesh.h"

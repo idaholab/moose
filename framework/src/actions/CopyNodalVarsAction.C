@@ -14,8 +14,10 @@
 
 // MOOSE includes
 #include "CopyNodalVarsAction.h"
-#include "FEProblem.h"
+
 #include "ActionWarehouse.h"
+#include "AuxiliarySystem.h"
+#include "FEProblem.h"
 #include "MooseApp.h"
 #include "NonlinearSystemBase.h"
 

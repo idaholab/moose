@@ -14,11 +14,13 @@
 
 // MOOSE includes
 #include "RestartableDataIO.h"
-#include "MooseUtils.h"
-#include "RestartableData.h"
+
+#include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "MooseApp.h"
+#include "MooseUtils.h"
 #include "NonlinearSystem.h"
+#include "RestartableData.h"
 
 #include <stdio.h>
 

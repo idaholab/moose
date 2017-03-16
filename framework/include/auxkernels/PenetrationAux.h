@@ -16,11 +16,11 @@
 #define PENETRATIONAUX_H
 
 #include "AuxKernel.h"
-#include "PenetrationLocator.h"
 
 
 //Forward Declarations
 class PenetrationAux;
+class PenetrationLocator;
 
 template<>
 InputParameters validParams<PenetrationAux>();

@@ -15,8 +15,11 @@
 #include "libmesh/libmesh_config.h"
 
 #include "EigenProblem.h"
-#include "DisplacedProblem.h"
+
 #include "Assembly.h"
+#include "AuxiliarySystem.h"
+#include "DisplacedProblem.h"
+#include "NonlinearEigenSystem.h"
 #include "SlepcSupport.h"
 
 #include "libmesh/system.h"

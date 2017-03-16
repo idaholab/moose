@@ -7,6 +7,8 @@
 
 // MOOSE includes
 #include "ReferenceResidualProblem.h"
+
+#include "AuxiliarySystem.h"
 #include "MooseApp.h"
 #include "MooseMesh.h"
 #include "NonlinearSystem.h"

@@ -8,8 +8,9 @@
 
 #include "Assembly.h"
 #include "Material.h"
-#include "SymmElasticityTensor.h"
 #include "MooseMesh.h"
+#include "SymmElasticityTensor.h"
+#include "SystemBase.h"
 
 #include "libmesh/quadrature.h"
 

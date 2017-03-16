@@ -17,7 +17,6 @@
 
 #include "AuxKernel.h"
 #include "FunctionParserUtils.h"
-#include "libmesh/fparser_ad.hh"
 
 //Forward Declarations
 class ParsedAux;

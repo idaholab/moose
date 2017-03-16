@@ -17,14 +17,16 @@
 
 // MOOSE includes
 #include "ThreadedNodeLoop.h"
-#include "MooseObjectWarehouse.h"
 
 // libMesh includes
 #include "libmesh/node_range.h"
 
 // Forward declarations
-class FEProblemBase;
 class AuxiliarySystem;
+class AuxKernel;
+class FEProblemBase;
+template <typename T>
+class MooseObjectWarehouse;
 
 class ComputeNodalAuxVarsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {

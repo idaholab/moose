@@ -16,8 +16,8 @@
 #define USEROBJECTINTERFACE_H
 
 // MOOSE includes
+#include "FEProblemBase.h"
 #include "ParallelUniqueId.h"
-#include "FEProblem.h"
 #include "UserObject.h"
 
 // Forward declarations

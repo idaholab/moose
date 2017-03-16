@@ -16,15 +16,15 @@
 #define COMPUTEDIRACTHREAD_H
 
 // Moose Includes
-#include "ParallelUniqueId.h"
 #include "ThreadedElementLoop.h"
 
 // libMesh includes
-#include "libmesh/elem_range.h"
+#include "libmesh/stored_range.h"
 
 // Forward declarations
-class NonlinearSystemBase;
 class DiracKernel;
+template <typename T> class MooseObjectWarehouse;
+class NonlinearSystemBase;
 
 typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistElemRange;
 

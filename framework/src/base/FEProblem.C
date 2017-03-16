@@ -13,7 +13,9 @@
 /****************************************************************/
 
 #include "FEProblem.h"
+
 #include "Assembly.h"
+#include "AuxiliarySystem.h"
 
 template<>
 InputParameters validParams<FEProblem>()

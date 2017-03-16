@@ -6,11 +6,13 @@
 /****************************************************************/
 
 #include "PorousFlowDarcyBase.h"
+
 #include "Assembly.h"
+#include "MooseMesh.h"
+#include "SystemBase.h"
+
 // libmesh includes
 #include "libmesh/quadrature.h"
-
-#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<PorousFlowDarcyBase>()

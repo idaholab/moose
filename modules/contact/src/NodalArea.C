@@ -7,7 +7,10 @@
 
 #include "NodalArea.h"
 
+#include "SystemBase.h"
+
 // libmesh includes
+#include "libmesh/numeric_vector.h"
 #include "libmesh/quadrature.h"
 
 template<>

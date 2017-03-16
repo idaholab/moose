@@ -15,6 +15,7 @@
 #include "AllLocalDofIndicesThread.h"
 
 #include "FEProblem.h"
+#include "ParallelUniqueId.h"
 
 // libmesh includes
 #include "libmesh/threads.h"

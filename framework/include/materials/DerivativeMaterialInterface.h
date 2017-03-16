@@ -14,6 +14,7 @@
 #ifndef DERIVATIVEMATERIALINTERFACE_H
 #define DERIVATIVEMATERIALINTERFACE_H
 
+#include "AuxiliarySystem.h"
 #include "Material.h"
 #include "MaterialProperty.h"
 #include "KernelBase.h"

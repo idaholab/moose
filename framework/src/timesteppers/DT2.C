@@ -14,9 +14,11 @@
 
 // MOOSE includes
 #include "DT2.h"
+
+#include "AuxiliarySystem.h"
 #include "FEProblem.h"
-#include "TimeIntegrator.h"
 #include "NonlinearSystemBase.h"
+#include "TimeIntegrator.h"
 
 //libMesh includes
 #include "libmesh/implicit_system.h"

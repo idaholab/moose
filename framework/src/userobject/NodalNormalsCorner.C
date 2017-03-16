@@ -14,7 +14,12 @@
 
 // MOOSE includes
 #include "NodalNormalsCorner.h"
+
+#include "AuxiliarySystem.h"
 #include "MooseMesh.h"
+
+// libMesh includes
+#include "libmesh/numeric_vector.h"
 
 Threads::spin_mutex nodal_normals_corner_mutex;
 

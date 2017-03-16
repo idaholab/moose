@@ -15,13 +15,12 @@
 #ifndef EIGENPROBLEM_H
 #define EIGENPROBLEM_H
 
-#include "libmesh/libmesh_config.h"
-
-
+// MOOSE Includes
 #include "FEProblemBase.h"
-#include "NonlinearEigenSystem.h"
 
+// Forward declarations
 class EigenProblem;
+class NonlinearEigenSystem;
 
 template<>
 InputParameters validParams<EigenProblem>();

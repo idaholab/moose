@@ -13,11 +13,12 @@
 /****************************************************************/
 
 #include "EigenExecutionerBase.h"
-#include "MooseEigenSystem.h"
 
-#include "MooseApp.h"
+#include "AuxiliarySystem.h"
 #include "DisplacedProblem.h"
 #include "FEProblem.h"
+#include "MooseApp.h"
+#include "MooseEigenSystem.h"
 
 template<>
 InputParameters validParams<EigenExecutionerBase>()

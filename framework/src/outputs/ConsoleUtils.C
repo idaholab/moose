@@ -14,14 +14,16 @@
 
 // MOOSE includes
 #include "ConsoleUtils.h"
-#include "MooseApp.h"
-#include "FEProblem.h"
-#include "SystemInfo.h"
-#include "Executioner.h"
+
+#include "AuxiliarySystem.h"
 #include "Conversion.h"
-#include "OutputWarehouse.h"
+#include "Executioner.h"
+#include "FEProblem.h"
+#include "MooseApp.h"
 #include "MooseMesh.h"
 #include "NonlinearSystem.h"
+#include "OutputWarehouse.h"
+#include "SystemInfo.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"

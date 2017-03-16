@@ -14,11 +14,12 @@
 
 #include "Adaptivity.h"
 
-#include "MooseMesh.h"
-#include "FEProblem.h"
-#include "NonlinearSystemBase.h"
+#include "AuxiliarySystem.h"
 #include "DisplacedProblem.h"
+#include "FEProblem.h"
 #include "FlagElementsThread.h"
+#include "MooseMesh.h"
+#include "NonlinearSystemBase.h"
 #include "UpdateErrorVectorsThread.h"
 
 // libMesh

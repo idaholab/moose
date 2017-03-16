@@ -28,6 +28,7 @@
 #include "libmesh/mesh_communication.h"
 #include "libmesh/parallel_mesh.h"
 #include "libmesh/periodic_boundary_base.h"
+#include "libmesh/fe_base.h"
 #include "libmesh/fe_interface.h"
 #include "libmesh/serial_mesh.h"
 #include "libmesh/mesh_inserter_iterator.h"

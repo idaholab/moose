@@ -14,6 +14,8 @@
 
 #include "NodalNormalsEvaluator.h"
 
+#include "AuxiliarySystem.h"
+
 Threads::spin_mutex nodal_normals_evaluator_mutex;
 
 template<>

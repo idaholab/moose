@@ -17,9 +17,9 @@
 #define COMPUTEELEMAUXBCSTHREAD_H
 
 // MOOSE includes
-#include "ParallelUniqueId.h"
 #include "MooseObjectWarehouse.h"
 #include "MooseMesh.h"
+#include "MooseTypes.h"
 
 // Forward declarations
 class FEProblemBase;

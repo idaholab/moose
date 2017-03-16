@@ -18,7 +18,9 @@
 #include <vector>
 
 #include "MooseApp.h"
-#include "InputParameters.h"
+
+// Forward declarations
+class InputParameters;
 
 /**
  * Macros
@@ -28,7 +30,7 @@
 /**
  * Typedef for function to build objects
  */
-typedef MooseApp * (*appBuildPtr)(InputParameters parameters);
+typedef MooseApp * (*appBuildPtr)(const InputParameters & parameters);
 
 /**
  * Typedef for validParams
@@ -44,7 +46,7 @@ typedef std::map<std::string, paramsPtr>::iterator registeredMooseAppIterator;
  * Build an object of type T
  */
 template<class T>
-MooseApp * buildApp(InputParameters parameters)
+MooseApp * buildApp(const InputParameters & parameters)
 {
   return new T(parameters);
 }

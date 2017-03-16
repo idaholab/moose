@@ -5,9 +5,11 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "StressDivergenceRZ.h"
+
 #include "Assembly.h"
 #include "Material.h"
 #include "SymmElasticityTensor.h"
+#include "SystemBase.h"
 
 #include "libmesh/quadrature.h"
 
