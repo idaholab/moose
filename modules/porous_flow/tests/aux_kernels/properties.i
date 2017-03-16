@@ -24,6 +24,16 @@
 []
 
 [AuxVariables]
+  [./x0_water]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 0.1
+  [../]
+  [./x0_gas]
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 0.8
+  [../]
   [./pressure_gas]
     order = CONSTANT
     family = MONOMIAL
@@ -47,16 +57,6 @@
   [./viscosity_gas]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./x0_water]
-    order = FIRST
-    family = LAGRANGE
-    initial_condition = 0.1
-  [../]
-  [./x0_gas]
-    order = FIRST
-    family = LAGRANGE
-    initial_condition = 0.8
   [../]
   [./x1_water]
     order = CONSTANT
