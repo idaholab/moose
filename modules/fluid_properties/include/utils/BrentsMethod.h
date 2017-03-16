@@ -8,7 +8,11 @@
 #ifndef BRENTSMETHOD_H
 #define BRENTSMETHOD_H
 
+// MOOSE includes
 #include "Moose.h"
+
+// C++ includes
+#include <functional>
 
 namespace BrentsMethod
 {
