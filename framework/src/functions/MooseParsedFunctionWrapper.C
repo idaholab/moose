@@ -13,7 +13,9 @@
 /****************************************************************/
 
 #include "MooseParsedFunctionWrapper.h"
+
 #include "FEProblem.h"
+#include "MooseVariableScalar.h"
 
 MooseParsedFunctionWrapper::MooseParsedFunctionWrapper(FEProblemBase & feproblem,
                                                        const std::string & function_str,

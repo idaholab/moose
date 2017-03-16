@@ -12,17 +12,20 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "MultiAppProjectionTransfer.h"
-#include "FEProblem.h"
+
+// MOOSE includes
 #include "AddVariableAction.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
+#include "SystemBase.h"
 
 // libMesh includes
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/mesh_function.h"
 #include "libmesh/mesh_tools.h"
+#include "libmesh/numeric_vector.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/sparse_matrix.h"

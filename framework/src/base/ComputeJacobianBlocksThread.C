@@ -13,12 +13,16 @@
 /****************************************************************/
 
 #include "ComputeJacobianBlocksThread.h"
+
+// MOOSE includes
+#include "DGKernel.h"
 #include "FEProblem.h"
 #include "KernelBase.h"
 #include "IntegratedBC.h"
-#include "DGKernel.h"
-// libmesh includes
+
+// libMesh includes
 #include "libmesh/threads.h"
+#include "libmesh/dof_map.h"
 
 ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(FEProblemBase & fe_problem,
                                                          std::vector<JacobianBlock *> & blocks)
