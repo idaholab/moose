@@ -17,6 +17,8 @@ validParams<PolycrystalVoronoiVoidICAction>()
   InputParameters params = validParams<Action>();
   params += PolycrystalVoronoiVoidIC::actionParameters();
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
+  params.suppressParameter<VariableName>("variable");
+
   return params;
 }
 
