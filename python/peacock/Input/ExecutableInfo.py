@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-from YamlData import YamlData
-from ActionSyntax import ActionSyntax
+from JsonData import JsonData
 from peacock.utils.FileCache import FileCache
 import os
 import cStringIO
@@ -9,21 +8,20 @@ from ParameterInfo import ParameterInfo
 
 class ExecutableInfo(object):
     """
-    Holds the Yaml and action syntax of an executable.
+    Holds the Json of an executable.
     """
     SETTINGS_KEY = "ExecutableInfo"
-    CACHE_VERSION = 2
+    CACHE_VERSION = 3
     def __init__(self, **kwds):
         super(ExecutableInfo, self).__init__(**kwds)
-        self.action_syntax = None
-        self.yaml_data = None
+        self.json_data = None
         self.path = None
         self.path_map = {}
 
     def setPath(self, new_path):
         """
         Executable path set property.
-        Will try to generate the yaml data and action syntax of the executable.
+        Will try to generate the json data of the executable.
         """
         if not new_path:
             return
@@ -34,8 +32,7 @@ class ExecutableInfo(object):
             if not fc.dirty:
                 return
 
-        self.yaml_data = None
-        self.action_syntax = None
+        self.json_data = None
         self.path = None
 
         use_cache = os.environ.get("PEACOCK_DISABLE_EXE_CACHE", "0") != "1"
@@ -46,11 +43,9 @@ class ExecutableInfo(object):
                 self.path = fc.path
                 return
 
-        syntax = ActionSyntax(fc.path)
-        yaml = YamlData(fc.path)
-        if syntax.app_path and yaml.app_path:
-            self.yaml_data = yaml
-            self.action_syntax = syntax
+        json_data = JsonData(fc.path)
+        if json_data.app_path:
+            self.json_data = json_data
             self.path = fc.path
             self._createPathMap()
             fc.add(self.toPickle())
@@ -60,80 +55,95 @@ class ExecutableInfo(object):
         Check if this is a valid object.
 
         Returns:
-            bool: Whether the executable has valid yaml and syntax
+            bool: Whether the executable has valid json
         """
-        return self.path != None and self.yaml_data != None and self.action_syntax != None
+        return self.path != None and self.json_data != None
 
     @staticmethod
     def clearCache():
         FileCache.clearAll(ExecutableInfo.SETTINGS_KEY)
 
     def toPickle(self):
-        return {"yaml_data": self.yaml_data.toPickle(),
-                "action_syntax": self.action_syntax.toPickle(),
+        return {"json_data": self.json_data.toPickle(),
                 "path_map": self.path_map,
                 "path": self.path,
                 }
 
     def fromPickle(self, data):
-        self.yaml_data = YamlData()
-        self.yaml_data.fromPickle(data["yaml_data"])
-        self.action_syntax = ActionSyntax()
-        self.action_syntax.fromPickle(data["action_syntax"])
+        self.json_data = JsonData()
+        self.json_data.fromPickle(data["json_data"])
         self.path_map = data["path_map"]
         self.path = data["path"]
 
-    def _createBasicInfo(self, parent, yaml):
-        full_name = yaml["name"]
-        info = BlockInfo(parent, full_name, self.action_syntax.isHardPath(full_name), yaml["description"])
+    def _createBasicInfo(self, parent, jdata, is_hard):
+        full_name = os.path.join(parent.path, jdata["name"])
+        info = BlockInfo(parent, full_name, is_hard, jdata.get("description", ""))
         return info
 
-    def _processChild(self, parent, yaml):
-        info = self._createBasicInfo(parent, yaml)
-        if yaml.get("subblocks"):
-            for child in yaml["subblocks"]:
-                child_info = self._processChild(info, child)
-                path = child["name"]
-                name = os.path.basename(path)
-                if child_info.name == "*":
-                    info.star_node = child_info
-                    info.star = True
-                elif child_info.name == "<type>":
-                    info.types = child_info.types
-                elif info.name == "<type>":
-                    info.types[name] = child_info
-                elif info.star and not child_info.hard:
-                    info.star_node.types[name] = child_info
-                else:
-                    info.children[name] = child_info
-                    info.children_list.append(name)
-                self.path_map[path] = child_info
+    def getDict(self, jdata, key):
+        d = jdata.get(key, {})
+        if not d:
+            d = {}
+        return d
 
-        if yaml.get("parameters"):
-            for param in yaml["parameters"]:
-                param_info = ParameterInfo(info, param["name"])
-                param_info.setFromYaml(param)
-                info.addParameter(param_info)
+    def _getCommonParameters(self, block):
+        actions = block.get("actions", {})
+        all_params = {}
+        for name, data in actions.iteritems():
+            all_params.update(self.getDict(data, "parameters"))
+        return all_params
+
+    def _processChild(self, parent, jdata, is_hard):
+        info = self._createBasicInfo(parent, jdata, is_hard)
+        for name, child in self.getDict(jdata, "subblocks").iteritems():
+            child["name"] = name
+            child_info = self._processChild(info, child, True & is_hard)
+            info.addChildBlock(child_info)
+            self.path_map[child_info.path] = child_info
+
+        for name, child in self.getDict(jdata, "types").iteritems():
+            child["name"] = name
+            child_info = self._processChild(info, child, False)
+            info.types[name] = child_info
+
+        if "star" in jdata:
+            jdata["star"]["name"] = "*"
+            star_node = self._processChild(info, jdata["star"], False)
+            info.setStarInfo(star_node)
+
+        for name, child in self.getDict(jdata, "subblock_types").iteritems():
+            child["name"] = name
+            child_info = self._processChild(info, child, False)
+            info.types[name] = child_info
+
+        common_params = self._getCommonParameters(jdata)
+        for name, param in common_params.iteritems():
+            param_info = ParameterInfo(info, name)
+            param_info.setFromData(param)
+            info.addParameter(param_info)
+
+        for name, param in self.getDict(jdata, "parameters").iteritems():
+            param_info = ParameterInfo(info, name)
+            param_info.setFromData(param)
+            info.addParameter(param_info)
         return info
 
-    def readFromFiles(self, yaml_file, syntax_file):
-        yaml_data = YamlData()
-        yaml_data.readFromFile(yaml_file)
-        syntax = ActionSyntax()
-        syntax.readFromFile(syntax_file)
+    def readFromFiles(self, json_file):
+        json_data = JsonData()
+        json_data.readFromFile(json_file)
 
         self.path = "From Files"
-        self.yaml_data = yaml_data
-        self.action_syntax = syntax
+        self.json_data = json_data
         self._createPathMap()
 
     def _createPathMap(self):
         self.path_map = {}
         self.root_info = BlockInfo(None, "/", False, "root node")
-        for child in self.yaml_data.yaml_data:
-            child_info = self._processChild(self.root_info, child)
-            self.root_info.addChildBlock(child_info)
-            self.path_map[child_info.path] = child_info
+        for name, block in self.json_data.json_data.iteritems():
+            block["name"] = name
+            block_info = self._processChild(self.root_info, block, True)
+            self.root_info.addChildBlock(block_info)
+            self.path_map[block_info.path] = block_info
         self.path_map["/"] = self.root_info
 
     def _dumpNode(self, output, entry, level, prefix='  ', only_hard=False):
@@ -158,7 +168,7 @@ class ExecutableInfo(object):
 
 if __name__ == '__main__':
     import sys
-    #import json
+    import json
     if len(sys.argv) < 2:
         print("Usage: <path_to_exe>")
         exit(1)
@@ -168,5 +178,8 @@ if __name__ == '__main__':
     #print(json.dumps(exe_info.path_map, indent=2))
     #print(exe_info.dumpDefaultTree(False))
     #print(exe_info.dump())
-    n = exe_info.path_map.get("/Variables")
-    print(n.dump(sep='\t'))
+    print("Keys: %s" % (sorted(exe_info.path_map.keys())))
+    from BlockInfo import BlockJsonEncoder
+    n = exe_info.path_map.get("/Executioner")
+    print(n.dump())
+    print(json.dumps(n, cls=BlockJsonEncoder, indent=2))

@@ -65,7 +65,7 @@ class InputFile(object):
         Return:
             list of paths of the root nodes. (/Mesh, /Executioner, etc)
         """
-        return [ self.root_node.children[c] for c in sorted(self.root_node.children_list) ]
+        return [ self.root_node.children[c] for c in self.root_node.children_list ]
 
     def isActive(self, node):
         """

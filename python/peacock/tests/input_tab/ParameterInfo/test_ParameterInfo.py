@@ -4,13 +4,13 @@ from peacock.Input.ParameterInfo import ParameterInfo
 import cStringIO
 
 class Tests(Testing.PeacockTester):
-    def createYaml(self,
+    def createData(self,
             name,
             default="",
             cpp_type="string",
             description="",
             group_name="",
-            required=True,
+            required="Yes",
             options="",
             ):
         return {"name": name,
@@ -46,8 +46,8 @@ class Tests(Testing.PeacockTester):
 
     def testBasic(self):
         p = ParameterInfo(None, "p0")
-        y = self.createYaml("p1", default="foo", cpp_type="some type", description="description", group_name="group", required=True)
-        p.setFromYaml(y)
+        y = self.createData("p1", default="foo", cpp_type="some type", description="description", group_name="group", required="Yes")
+        p.setFromData(y)
         y["default"] = "foo"
         self.checkParameter(p, "p1", value="foo", default="foo", cpp_type="some type", description="description", group_name="group", required=True)
 
@@ -65,29 +65,29 @@ class Tests(Testing.PeacockTester):
 
     def testTypes(self):
         p = ParameterInfo(None, "p0")
-        y = self.createYaml("p1", cpp_type="vector<string>", default=None)
-        p.setFromYaml(y)
+        y = self.createData("p1", cpp_type="vector<string>", default=None)
+        p.setFromData(y)
         self.assertEqual(p.needsQuotes(), True)
         self.assertEqual(p.isVectorType(), True)
         self.assertEqual(p.default, "")
         p.value = "foo"
         self.assertEqual(p.inputFileValue(), "'foo'")
 
-        y = self.createYaml("p1", cpp_type="bool", default="0")
-        p.setFromYaml(y)
+        y = self.createData("p1", cpp_type="bool", default="0")
+        p.setFromData(y)
         self.assertEqual(p.value, "false")
         self.assertEqual(p.default, "false")
         self.assertEqual(p.needsQuotes(), False)
         self.assertEqual(p.isVectorType(), False)
         self.assertEqual(p.inputFileValue(), "false")
 
-        y = self.createYaml("p1", cpp_type="bool", default="1")
-        p.setFromYaml(y)
+        y = self.createData("p1", cpp_type="bool", default="1")
+        p.setFromData(y)
         self.assertEqual(p.value, "true")
         self.assertEqual(p.default, "true")
 
-        y = self.createYaml("p1", cpp_type="bool")
-        p.setFromYaml(y)
+        y = self.createData("p1", cpp_type="bool")
+        p.setFromData(y)
         self.assertEqual(p.value, "false")
         self.assertEqual(p.default, "false")
 

@@ -4,36 +4,28 @@
 #
 # @Requirement F1.10
 # ##########################################################
-[BCs]
-  active = 'all'
-  [./all]
-    boundary = '0 1 2 3'
-    type = FunctionDirichletBC
-    variable = u
-    function = exact_fn
-  [../]
-  [./left]
-    boundary = '3'
-    type = DirichletBC
-    variable = u
-    value = 0
-  [../]
-  [./right]
-    boundary = '1'
-    type = DirichletBC
-    variable = u
-    value = 1
-  [../]
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  xmin = -1
+  xmax = 1
+  ymin = -1
+  ymax = 1
+  nx = 10
+  ny = 10
+  elem_type = QUAD4
 []
 
-[Executioner]
-  # Preconditioned JFNK (default)
-  type = Transient
-  dt = 0.1
-  num_steps = 5
-  scheme = implicit-euler
-  solve_type = PJFNK
-  start_time = 0.0
+[Variables]
+  active = 'u'
+  [./u]
+    order = FIRST
+    family = LAGRANGE
+    [./InitialCondition]
+      type = ConstantIC
+      value = 0
+    [../]
+  [../]
 []
 
 [Functions]
@@ -60,49 +52,57 @@
   [../]
   [./ffn]
     type = UserForcingFunction
-    function = forcing_fn
     variable = u
+    function = forcing_fn
   [../]
 []
 
-[Mesh]
-  type = GeneratedMesh
-  dim = 2
-  elem_type = QUAD4
-  nx = 10
-  ny = 10
-  xmax = 1
-  xmin = -1
-  ymax = 1
-  ymin = -1
-[]
-
-[Outputs]
-  execute_on = 'timestep_end'
-  exodus = true
-  file_base = out_transient
+[BCs]
+  active = 'all'
+  [./all]
+    type = FunctionDirichletBC
+    variable = u
+    boundary = '0 1 2 3'
+    function = exact_fn
+  [../]
+  [./left]
+    type = DirichletBC
+    variable = u
+    boundary = '3'
+    value = 0
+  [../]
+  [./right]
+    type = DirichletBC
+    variable = u
+    boundary = '1'
+    value = 1
+  [../]
 []
 
 [Postprocessors]
   [./l2_err]
     type = ElementL2Error
-    function = exact_fn
     variable = 'u'
+    function = exact_fn
   [../]
   [./dt]
     type = TimestepSize
   [../]
 []
 
-[Variables]
-  active = 'u'
-  [./u]
-    family = LAGRANGE
-    order = FIRST
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0
-    [../]
-  [../]
+[Executioner]
+  # Preconditioned JFNK (default)
+  type = Transient
+  scheme = implicit-euler
+  solve_type = PJFNK
+  start_time = 0.0
+  num_steps = 5
+  dt = 0.1
+[]
+
+[Outputs]
+  execute_on = 'timestep_end'
+  file_base = out_transient
+  exodus = true
 []
 
