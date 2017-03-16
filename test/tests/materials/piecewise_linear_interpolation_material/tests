@@ -4,10 +4,17 @@
     input = 'piecewise_linear_interpolation_material.i'
     exodiff = 'piecewise_linear_interpolation_material_out.e'
   [../]
+  [./test_scale_factor]
+    type = 'Exodiff'
+    input = 'piecewise_linear_interpolation_material.i'
+    prereq = test
+    cli_args = 'Materials/m2/scale_factor='2.0' Materials/m2/y='0 0.5''
+    exodiff = 'piecewise_linear_interpolation_material_out.e'
+  [../]
   [./test_err1]
     type = 'RunException'
     input = 'piecewise_linear_interpolation_material.i'
-    prereq = test
+    prereq = test_scale_factor
     cli_args = 'Materials/m2/xy_data='1 2''
     expect_err = "In PiecewiseLinearInterpolationMaterial m2: Cannot specify 'x', 'y', and 'xy_data' together."
   [../]
