@@ -7,6 +7,8 @@
 
 #include "TorqueReaction.h"
 
+#include "AuxiliarySystem.h"
+
 template<>
 InputParameters validParams<TorqueReaction>()
 {

@@ -15,9 +15,10 @@
 #ifndef THREADEDNODELOOP_H
 #define THREADEDNODELOOP_H
 
+#include "FEProblemBase.h"
 #include "ParallelUniqueId.h"
 #include "MooseMesh.h"
-#include "FEProblem.h"
+
 
 template<typename RangeType, typename IteratorType>
 class ThreadedNodeLoop

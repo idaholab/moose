@@ -14,10 +14,13 @@
 
 // MOOSE includes
 #include "NodalNormalsPreprocessor.h"
+
 #include "Assembly.h"
+#include "AuxiliarySystem.h"
 #include "MooseMesh.h"
 
 // libmesh includes
+#include "libmesh/numeric_vector.h"
 #include "libmesh/quadrature.h"
 
 Threads::spin_mutex nodal_normals_preprocessor_mutex;

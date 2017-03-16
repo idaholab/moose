@@ -1303,7 +1303,7 @@ FeatureFloodCount::FeatureData::boundingBoxesIntersect(const FeatureData & rhs) 
   // See if any of the bounding boxes in either FeatureData object intersect
   for (const auto & bbox_lhs : _bboxes)
     for (const auto & bbox_rhs : rhs._bboxes)
-      if (bbox_lhs.intersect(bbox_rhs))
+      if (bbox_lhs.intersects(bbox_rhs))
         return true;
 
   return false;
@@ -1430,7 +1430,7 @@ FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
   auto box_expanded = false;
   for (auto & bbox : _bboxes)
     for (auto j = beginIndex(rhs._bboxes); j < rhs._bboxes.size(); ++j)
-      if (bbox.intersect(rhs._bboxes[j]))
+      if (bbox.intersects(rhs._bboxes[j]))
       {
         updateBBoxExtremes(bbox, rhs._bboxes[j]);
         intersected_boxes[j] = true;

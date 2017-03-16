@@ -14,6 +14,8 @@
 
 #include "BoundaryRestrictableRequired.h"
 
+#include "InputParameters.h"
+
 template<>
 InputParameters validParams<BoundaryRestrictableRequired>()
 {

@@ -14,6 +14,8 @@
 
 #include "TiedValueConstraint.h"
 
+#include "SystemBase.h"
+
 // libMesh includes
 #include "libmesh/sparse_matrix.h"
 

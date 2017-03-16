@@ -22,6 +22,7 @@
 #include "InternalSideUserObject.h"
 #include "NodalUserObject.h"
 #include "SwapBackSentinel.h"
+#include "FEProblem.h"
 
 #include "libmesh/numeric_vector.h"
 

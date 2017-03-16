@@ -17,10 +17,12 @@
 #include "libmesh/libmesh_config.h"
 
 #include "Moose.h"
-#include "Factory.h"
-#include "PetscSupport.h"
+
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
+#include "AuxiliarySystem.h"
+#include "Factory.h"
+#include "PetscSupport.h"
 #include "Syntax.h"
 
 // objects that can be created by MOOSE

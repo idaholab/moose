@@ -21,9 +21,10 @@
 
 // MOOSE includes
 #include "MooseObject.h"
-#include "InputParameters.h"
 #include "MooseTypes.h"
-#include "ParallelUniqueId.h"
+
+// Forward declarations
+class InputParameters;
 
 /**
  * Macros

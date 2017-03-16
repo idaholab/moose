@@ -25,14 +25,16 @@
 #include "XFEMInterface.h"
 
 // libMesh
-#include "libmesh/quadrature_gauss.h"
-#include "libmesh/fe_interface.h"
-#include "libmesh/dof_map.h"
 #include "libmesh/coupling_matrix.h"
+#include "libmesh/dof_map.h"
 #include "libmesh/elem.h"
-#include "libmesh/node.h"
-#include "libmesh/sparse_matrix.h"
 #include "libmesh/equation_systems.h"
+#include "libmesh/fe_interface.h"
+#include "libmesh/node.h"
+#include "libmesh/quadrature_gauss.h"
+#include "libmesh/sparse_matrix.h"
+#include "libmesh/tensor_value.h"
+#include "libmesh/vector_value.h"
 
 Assembly::Assembly(SystemBase & sys, THREAD_ID tid) :
     _sys(sys),

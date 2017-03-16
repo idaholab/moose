@@ -14,8 +14,10 @@
 
 // MOOSE includes
 #include "NumVars.h"
-#include "SubProblem.h"
+
+#include "AuxiliarySystem.h"
 #include "NonlinearSystemBase.h"
+#include "SubProblem.h"
 
 template<>
 InputParameters validParams<NumVars>()

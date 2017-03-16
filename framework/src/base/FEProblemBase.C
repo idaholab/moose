@@ -12,7 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FEProblem.h"
+#include "FEProblemBase.h"
+
+#include "AuxiliarySystem.h"
 #include "MaterialPropertyStorage.h"
 #include "MooseEnum.h"
 #include "Resurrector.h"
@@ -37,6 +39,7 @@
 #include "Parser.h"
 #include "ElementH1Error.h"
 #include "Function.h"
+#include "NonlinearSystem.h"
 #include "PetscSupport.h"
 #include "RandomInterface.h"
 #include "RandomData.h"
@@ -1438,6 +1441,14 @@ FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
 
   return *(_functions.getActiveObject(name, tid));
 }
+
+
+NonlinearSystem & FEProblemBase::getNonlinearSystem()
+{
+  mooseDeprecated("FEProblemBase::getNonlinearSystem() is deprecated, please use FEProblemBase::getNonlinearSystemBase() \n");
+  return *(dynamic_cast<NonlinearSystem *>(_nl));
+}
+
 
 void
 FEProblemBase::addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains/* = NULL*/)

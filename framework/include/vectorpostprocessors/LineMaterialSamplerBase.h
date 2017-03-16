@@ -24,6 +24,7 @@
 #include "Assembly.h" // Assembly::qRule()
 #include "MooseMesh.h" // MooseMesh::getMesh()
 #include "SwapBackSentinel.h"
+#include "FEProblem.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h" // _qrule->n_points()

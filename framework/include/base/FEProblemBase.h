@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "SubProblem.h"
-#include "AuxiliarySystem.h"
 #include "GeometricSearchData.h"
 #include "PostprocessorData.h"
 #include "VectorPostprocessorData.h"
@@ -26,31 +25,32 @@
 #include "Restartable.h"
 #include "SolverParams.h"
 #include "PetscSupport.h"
-#include "SlepcSupport.h"
 #include "MooseApp.h"
 #include "ExecuteMooseObjectWarehouse.h"
 #include "AuxGroupExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
 #include "MultiAppTransfer.h"
-#include "NonlinearSystem.h"
+#include "Postprocessor.h"
 
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
+#include "libmesh/equation_systems.h"
 
 #include <unordered_map>
 
 // Forward declarations
+class AuxiliarySystem;
 class DisplacedProblem;
 class FEProblemBase;
 class MooseMesh;
 class NonlinearSystemBase;
+class NonlinearSystem;
 class RandomInterface;
 class RandomData;
 class MeshChangedInterface;
 class MultiMooseEnum;
 class MaterialPropertyStorage;
 class MaterialData;
-class VectorPostprocessorData;
 class MooseEnum;
 class Resurrector;
 class Assembly;
@@ -494,7 +494,7 @@ public:
 
   // NL /////
   NonlinearSystemBase & getNonlinearSystemBase() { return *_nl; }
-  virtual NonlinearSystem & getNonlinearSystem() { mooseDeprecated("FEProblemBase::getNonlinearSystem() is deprecated, please use FEProblemBase::getNonlinearSystemBase() \n"); return *(dynamic_cast<NonlinearSystem *>(_nl)); }
+  virtual NonlinearSystem & getNonlinearSystem();
   void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set< SubdomainID > * const active_subdomains = NULL);
   void addScalarVariable(const std::string & var_name, Order order, Real scale_factor = 1., const std::set< SubdomainID > * const active_subdomains = NULL);
   void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);

@@ -16,7 +16,7 @@
 #define ELEMENTLPNORMAUX_H
 
 // MOOSE includes
-#include "FunctionAux.h"
+#include "AuxKernel.h"
 
 // Forward declarations
 class ElementLpNormAux;

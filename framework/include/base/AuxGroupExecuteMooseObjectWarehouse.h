@@ -18,7 +18,6 @@
 
 // MOOSE includes
 #include "ExecuteMooseObjectWarehouse.h"
-#include "Postprocessor.h"
 
 class UserObject;
 

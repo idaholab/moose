@@ -14,6 +14,7 @@
 
 #include "AppFactory.h"
 #include "CommandLine.h"
+#include "InputParameters.h"
 
 AppFactory AppFactory::_instance = AppFactory();
 

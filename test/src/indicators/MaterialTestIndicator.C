@@ -13,7 +13,9 @@
 /****************************************************************/
 
 #include "MaterialTestIndicator.h"
+
 #include "Assembly.h"
+#include "SystemBase.h"
 
 template<>
 InputParameters validParams<MaterialTestIndicator>()
