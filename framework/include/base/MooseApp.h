@@ -332,7 +332,7 @@ public:
    * Get SystemInfo object
    * @return A pointer to the SystemInformation object
    */
-  SystemInfo * getSystemInfo() { return _sys_info.get(); }
+  const SystemInfo * getSystemInfo() const { return _sys_info.get(); }
 
   ///@{
   /**
