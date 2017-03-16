@@ -98,7 +98,7 @@ class ClusterLauncher:
         return jobs
 
     def createAndLaunchJob(self, template_dir, job_file, specs, options):
-        next_dir = getNextDirName(specs['job_name'], os.listdir('.'))
+        next_dir = getNextDirName(specs['job_name'], os.listdir(template_dir))
         os.mkdir(template_dir + next_dir)
 
         # Log it
