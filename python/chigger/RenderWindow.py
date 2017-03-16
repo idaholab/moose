@@ -49,7 +49,6 @@ class RenderWindow(base.ChiggerObject):
         background.pop('camera')
         background.pop('viewport')
         opt += background
-
         return opt
 
     def __init__(self, *args, **kwargs):
@@ -173,6 +172,24 @@ class RenderWindow(base.ChiggerObject):
         """
         super(RenderWindow, self).update(**kwargs)
 
+        # Setup interactor
+        if self.isOptionValid('test') and self.getOption('test'):
+            self.__vtkwindow.OffScreenRenderingOn()
+
+        elif self.isOptionValid('style'):
+            if self.__vtkinteractor is None:
+                self.__vtkinteractor = self.__vtkwindow.MakeRenderWindowInteractor()
+
+            style = self.getOption('style').lower()
+            self.setOption('style', None) # avoids calling this function unless it changes
+            if style == 'interactive':
+                b = base.KeyPressInteractorStyle(self.__vtkinteractor)
+                self.__vtkinteractor.SetInteractorStyle(b)
+            elif style == 'interactive2d':
+                self.__vtkinteractor.SetInteractorStyle(vtk.vtkInteractorStyleImage())
+            elif style == 'modal':
+                self.__vtkinteractor.SetInteractorStyle(vtk.vtkInteractorStyleUser())
+
         # Background settings
         self._results[0].updateOptions(self._options)
 
@@ -222,30 +239,6 @@ class RenderWindow(base.ChiggerObject):
         """
         for result in self._results:
             result.getVTKRenderer().ResetCamera()
-
-    def initialize(self):
-        """
-        Initialize the render window by creating the interactor.
-        """
-        super(RenderWindow, self).initialize()
-
-        if self.isOptionValid('test') and self.getOption('test'):
-            self.__vtkwindow.OffScreenRenderingOn()
-            return
-
-        # Create the vtkInteractor object
-        if self.isOptionValid('style'):
-            if self.__vtkinteractor is None:
-                self.__vtkinteractor = self.__vtkwindow.MakeRenderWindowInteractor()
-
-            style = self.getOption('style').lower()
-            if style == 'interactive':
-                b = base.KeyPressInteractorStyle(self.__vtkinteractor)
-                self.__vtkinteractor.SetInteractorStyle(b)
-            elif style == 'interactive2d':
-                self.__vtkinteractor.SetInteractorStyle(vtk.vtkInteractorStyleImage())
-            elif style == 'modal':
-                self.__vtkinteractor.SetInteractorStyle(vtk.vtkInteractorStyleUser())
 
     def write(self, filename):
         """
