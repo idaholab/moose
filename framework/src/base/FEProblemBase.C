@@ -87,6 +87,17 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/coupling_matrix.h"
 
+// Anonymous namespace for helper function
+namespace {
+/**
+ * Method for sorting the MooseVariables based on variable numbers
+ */
+bool sortMooseVariables(MooseVariable * a, MooseVariable * b)
+{
+  return a->number() < b->number();
+}
+}
+
 Threads::spin_mutex get_function_mutex;
 
 template <>
