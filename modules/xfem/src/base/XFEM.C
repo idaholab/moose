@@ -894,11 +894,11 @@ XFEM::cutMeshWithEFA()
 
   _efa_mesh.updatePhysicalLinksAndFragments();
   // DEBUG
-//  _efa_mesh.printMesh();
+  //_efa_mesh.printMesh();
 
   _efa_mesh.updateTopology();
   // DEBUG
-//  _efa_mesh.printMesh();
+  //_efa_mesh.printMesh();
 
   //Add new nodes
   const std::vector<EFANode*> NewNodes = _efa_mesh.getNewNodes();

@@ -9,6 +9,7 @@
 #define EFAELEMENT3D_H
 
 #include "EFAElement.h"
+#include "EFAPoint.h"
 
 class EFANode;
 class EFAFace;
@@ -32,6 +33,9 @@ private:
   std::vector<std::vector<EFAElement3D*> > _face_neighbors;
   std::vector<EFAFragment3D*> _fragments;
   std::vector<std::vector<EFAFace*> > _faces_adjacent_to_faces;
+  unsigned int _num_vertices;
+  unsigned int _num_interior_face_nodes;
+  std::vector<EFAPoint> _local_node_coor;
 
 public:
 
@@ -46,7 +50,7 @@ public:
                              std::vector<double> &master_weights) const;
   virtual unsigned int numInteriorNodes() const;
 
-  virtual bool overlaysElement(const EFAElement* other_elem) const;
+  bool overlaysElement(const EFAElement3D* other_elem) const;
   virtual unsigned int getNeighborIndex(const EFAElement* neighbor_elem) const;
   virtual void clearNeighbors();
   virtual void setupNeighbors(std::map<EFANode*, std::set<EFAElement*> > &InverseConnectivityMap);
@@ -94,6 +98,8 @@ public:
   std::vector<unsigned int> getCommonFaceID(const EFAElement3D* other_elem) const;
   unsigned int getNeighborFaceNodeID(unsigned int face_id, unsigned int node_id,
                                      EFAElement3D* neighbor_elem) const;
+  unsigned int getNeighborFaceInteriorNodeID(unsigned int face_id, unsigned int node_id,
+                                     EFAElement3D* neighbor_elem) const;
   unsigned int getNeighborFaceEdgeID(unsigned int face_id, unsigned int edg_id,
                                      EFAElement3D* neighbor_elem) const;
   void findFacesAdjacentToFaces();
@@ -121,6 +127,7 @@ public:
   void addFragFaceEdgeCut(unsigned int frag_face_id, unsigned int frag_edge_id, double position,
                           std::map<unsigned int, EFANode*> &EmbeddedNodes, bool add_to_neighbor,
                           bool add_to_adjacent);
+  std::vector<EFANode*> getCommonNodes(const EFAElement3D* other_elem) const;
 
 private:
 
@@ -129,6 +136,8 @@ private:
                             EFANode* from_node, EFANode* embedded_node, EFANode* &local_embedded);
   void mapParametricCoordinateFrom2DTo3D(unsigned int face_id, std::vector<double> &xi_2d,
                              std::vector<double> &xi_3d) const;
+
+  void setLocalCoordinates();
 };
 
 #endif

@@ -9,6 +9,7 @@
 
 #include "EFANode.h"
 #include "EFAError.h"
+#include "XFEMFuncs.h"
 
 EFAEdge::EFAEdge(EFANode * node1, EFANode * node2) :
     _edge_node1(node1),
@@ -16,6 +17,7 @@ EFAEdge::EFAEdge(EFANode * node1, EFANode * node2) :
 {
   _embedded_nodes.clear();
   _intersection_x.clear();
+  _edge_interior_node = NULL;
   consistencyCheck();
 }
 
@@ -194,7 +196,6 @@ EFAEdge::hasIntersection() const
 bool
 EFAEdge::hasIntersectionAtPosition(double position, EFANode * from_node) const
 {
-  double tol = 1.e-4;
   bool has_int = false;
   if (hasIntersection())
   {
@@ -208,7 +209,7 @@ EFAEdge::hasIntersectionAtPosition(double position, EFANode * from_node) const
 
     for (unsigned int i = 0; i < _embedded_nodes.size(); ++i)
     {
-      if (std::abs(tmp_intersection_x - _intersection_x[i]) < tol)
+      if (std::abs(tmp_intersection_x - _intersection_x[i]) < Xfem::tol)
       {
         has_int = true;
         break;
@@ -286,7 +287,6 @@ EFAEdge::getEmbeddedNodeIndex(double position, EFANode* from_node) const
 {
   bool have_index = false;
   unsigned int index;
-  const double tol = 1.e-4;
   if (hasIntersection())
   {
     double tmp_intersection_x = -1.0; // dist from edge_node1
@@ -299,7 +299,7 @@ EFAEdge::getEmbeddedNodeIndex(double position, EFANode* from_node) const
 
     for (unsigned int i = 0; i < _embedded_nodes.size(); ++i)
     {
-      if (std::abs(tmp_intersection_x - _intersection_x[i]) < tol)
+      if (std::abs(tmp_intersection_x - _intersection_x[i]) < Xfem::tol)
       {
         have_index = true;
         index = i;

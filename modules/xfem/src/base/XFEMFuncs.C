@@ -598,8 +598,17 @@ void i4vec_zero ( int n, int a[] )
 void normalizePoint(Point & p)
 {
   Real len = p.norm();
-  if (len != 0.0)
+  if (len > tol)
     p = (1.0/len)*p;
+  else
+    p.zero();
+}
+
+void normalizePoint(EFAPoint & p)
+{
+  Real len = p.norm();
+  if (len > tol)
+    p *= (1.0 / len);
 }
 
 } // namespace XFEM
