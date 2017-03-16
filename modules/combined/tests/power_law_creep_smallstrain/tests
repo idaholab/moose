@@ -1,8 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'power_law_creep_smallstrain_test.i'
-    exodiff = 'out.e'
-    abs_zero = 1e-09
-  [../]
-[]
