@@ -5,11 +5,13 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-// MOOSE includes
 #include "LevelSetMeshRefinementTransfer.h"
-#include "FEProblem.h"
-#include "MultiApp.h"
+
+// MOOSE includes
 #include "Adaptivity.h"
+#include "FEProblem.h"
+#include "MooseVariable.h"
+#include "MultiApp.h"
 
 template <>
 InputParameters
