@@ -15,9 +15,11 @@
 #include "MultiAppPostprocessorToAuxScalarTransfer.h"
 
 // MOOSE includes
-#include "MooseTypes.h"
 #include "FEProblem.h"
+#include "MooseTypes.h"
+#include "MooseVariableScalar.h"
 #include "MultiApp.h"
+#include "SystemBase.h"
 
 // libMesh includes
 #include "libmesh/meshfree_interpolation.h"

@@ -14,9 +14,11 @@
 
 // MOOSE Includes
 #include "BlockRestrictable.h"
-#include "Material.h"
+
 #include "FEProblem.h"
+#include "Material.h"
 #include "MooseMesh.h"
+#include "SystemBase.h"
 
 template <>
 InputParameters
