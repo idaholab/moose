@@ -1,25 +1,45 @@
 [Tests]
-  [./test]
+  [./power_law_creep_tm]
     type = 'Exodiff'
-    input = 'power_law_creep_test.i'
-    exodiff = 'power_law_creep_test_out.e'
+    input = 'power_law_creep.i'
+    exodiff = 'power_law_creep_out.e'
   [../]
-  [./test_tm]
+  [./power_law_creep_sm]
     type = 'Exodiff'
-    input = 'power_law_creep_test_tm.i'
-    exodiff = 'power_law_creep_test_tm_out.e'
+    input = 'power_law_creep_sm.i'
+    exodiff = 'power_law_creep_out.e'
+    prereq = 'power_law_creep_tm'
   [../]
-  [./testRestart1]
+  [./testRestart1_tm]
     type = 'RunApp'
     input = 'power_law_creep_restart1.i'
-    prereq = test
+    prereq = 'power_law_creep_sm'
     recover = false
   [../]
-  [./testRestart2]
+  [./testRestart2_tm]
     type = 'Exodiff'
     input = 'power_law_creep_restart2.i'
-    prereq = testRestart1
-    exodiff = 'power_law_creep_test_out.e'
+    prereq = 'testRestart1_tm'
+    exodiff = 'power_law_creep_out.e'
     exodiff_opts = '-TM'
+  [../]
+  [./testRestart1_sm]
+    type = 'RunApp'
+    input = 'power_law_creep_restart1_sm.i'
+    prereq = 'testRestart2_tm'
+    recover = false
+  [../]
+  [./testRestart2_sm]
+    type = 'Exodiff'
+    input = 'power_law_creep_restart2_sm.i'
+    prereq = 'testRestart1_sm'
+    exodiff = 'power_law_creep_out.e'
+    exodiff_opts = '-TM'
+  [../]
+
+  [./small_strain_tm]
+    type = Exodiff
+    input = 'power_law_creep_smallstrain.i'
+    exodiff = 'power_law_creep_smallstrain_out.e'
   [../]
 []
