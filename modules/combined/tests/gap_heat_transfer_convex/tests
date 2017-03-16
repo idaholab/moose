@@ -1,8 +1,15 @@
 [Tests]
+  [./test_sm]
+    type = 'Exodiff'
+    input = 'gap_heat_transfer_convex_sm.i'
+    exodiff = 'gap_heat_transfer_convex_out.e'
+    abs_zero = 1e-09
+  [../]
   [./test]
     type = 'Exodiff'
-    input = 'gap_heat_transfer_convex_test.i'
-    exodiff = 'out.e'
+    input = 'gap_heat_transfer_convex.i'
+    exodiff = 'gap_heat_transfer_convex_out.e'
     abs_zero = 1e-09
+    prereq = 'test_sm'
   [../]
 []
