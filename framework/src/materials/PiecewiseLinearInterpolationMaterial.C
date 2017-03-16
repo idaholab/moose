@@ -24,13 +24,15 @@ InputParameters validParams<PiecewiseLinearInterpolationMaterial>()
   params.addParam<std::vector<Real> >("x", "The abscissa values");
   params.addParam<std::vector<Real> >("y", "The ordinate values");
   params.addParam<std::vector<Real> >("xy_data", "All function data, supplied in abscissa, ordinate pairs");
+  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
   return params;
 }
 
 PiecewiseLinearInterpolationMaterial::PiecewiseLinearInterpolationMaterial(const InputParameters & parameters) :
     DerivativeMaterialInterface<Material>(parameters),
     _prop_name(getParam<std::string>("property")),
-    _coupled_var(coupledValue("variable"))
+    _coupled_var(coupledValue("variable")),
+    _scale_factor(getParam<Real>("scale_factor"))
 {
   std::vector<Real> x;
   std::vector<Real> y;
@@ -82,6 +84,6 @@ PiecewiseLinearInterpolationMaterial::PiecewiseLinearInterpolationMaterial(const
 void
 PiecewiseLinearInterpolationMaterial::computeQpProperties()
 {
-  (*_property)[_qp] = _linear_interp->sample(_coupled_var[_qp]);
-  (*_dproperty)[_qp] = _linear_interp->sampleDerivative(_coupled_var[_qp]);
+  (*_property)[_qp] = _scale_factor * _linear_interp->sample(_coupled_var[_qp]);
+  (*_dproperty)[_qp] = _scale_factor * _linear_interp->sampleDerivative(_coupled_var[_qp]);
 }
