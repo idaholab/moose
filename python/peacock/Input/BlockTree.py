@@ -253,6 +253,9 @@ class BlockTree(QTreeWidget, MooseWidget):
         if parent_item != self.root_item:
             default_flags = parent_item.flags()
             parent_item.setFlags(default_flags | Qt.ItemIsDropEnabled )
+        for child_name in block.children_list:
+            child = block.children[child_name]
+            self._newItem(new_child, child)
         return new_child
 
     def copyBlock(self, block):

@@ -1,37 +1,20 @@
-[BCs]
-  active = 'left_u right_u left_v'
-  [./left_u]
-    boundary = '1'
-    type = DirichletBC
-    variable = u
-    value = 0
-  [../]
-  [./right_u]
-    boundary = '2'
-    type = DirichletBC
-    variable = u
-    value = 100
-  [../]
-  [./left_v]
-    boundary = '1'
-    type = DirichletBC
-    variable = v
-    value = 0
-  [../]
-  [./right_v]
-    boundary = '2'
-    type = DirichletBC
-    variable = v
-    value = 0
-  [../]
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
 []
 
-[Executioner]
-  # This is setup automatically in MOOSE (SetupPBPAction.C)
-  # petsc_options = '-snes_mf_operator'
-  # petsc_options_iname = '-pc_type'
-  # petsc_options_value =  'asm'
-  type = Steady
+[Variables]
+  active = 'u v'
+  [./u]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./v]
+    order = FIRST
+    family = LAGRANGE
+  [../]
 []
 
 [Kernels]
@@ -42,8 +25,8 @@
   [../]
   [./conv_v]
     type = CoupledForce
-    v = 'u'
     variable = v
+    v = 'u'
   [../]
   [./diff_v]
     type = Diffusion
@@ -51,16 +34,40 @@
   [../]
 []
 
-[Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 2
-  ny = 2
+[BCs]
+  active = 'left_u right_u left_v'
+  [./left_u]
+    type = DirichletBC
+    variable = u
+    boundary = '1'
+    value = 0
+  [../]
+  [./right_u]
+    type = DirichletBC
+    variable = u
+    boundary = '2'
+    value = 100
+  [../]
+  [./left_v]
+    type = DirichletBC
+    variable = v
+    boundary = '1'
+    value = 0
+  [../]
+  [./right_v]
+    type = DirichletBC
+    variable = v
+    boundary = '2'
+    value = 0
+  [../]
 []
 
-[Outputs]
-  exodus = true
-  file_base = out
+[Executioner]
+  # This is setup automatically in MOOSE (SetupPBPAction.C)
+  # petsc_options = '-snes_mf_operator'
+  # petsc_options_iname = '-pc_type'
+  # petsc_options_value =  'asm'
+  type = Steady
 []
 
 [Preconditioning]
@@ -87,28 +94,21 @@
     [./u]
       # PETSc options for this subsolver
       # A prefix will be applied, so just put the options for this subsolver only
+      vars = 'u'
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre preonly'
-      vars = 'u'
     [../]
     [./v]
       # PETSc options for this subsolver
+      vars = 'v'
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre  preonly'
-      vars = 'v'
     [../]
   [../]
 []
 
-[Variables]
-  active = 'u v'
-  [./u]
-    family = LAGRANGE
-    order = FIRST
-  [../]
-  [./v]
-    family = LAGRANGE
-    order = FIRST
-  [../]
+[Outputs]
+  file_base = out
+  exodus = true
 []
 

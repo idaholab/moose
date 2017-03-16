@@ -53,7 +53,7 @@ class Tests(Testing.PeacockTester):
         self.assertIn("Partitioner", out)
         self.assertIn("Partitioner", out)
         self.assertIn("ScalarKernels", out)
-        self.assertIn("ODETimeDerivative", out)
+        self.assertNotIn("DirichletBC", out)
 
     def testPickle(self):
         exe_path = Testing.find_moose_test_exe()
@@ -65,13 +65,26 @@ class Tests(Testing.PeacockTester):
         e2.fromPickle(p)
         self.assertEqual(e2.path_map, e.path_map)
 
-    def testDump(self):
+    def checkPath(self, e, path, star, hard):
+        p = e.path_map.get(path)
+        self.assertNotEqual(p, None)
+        self.assertEqual(p.star, star)
+        self.assertEqual(p.hard, hard)
+
+    def testCombined(self):
         e = ExecutableInfo()
         e.setPath(Testing.find_moose_test_exe(dirname="modules/combined", exe_base="combined"))
-        p = e.path_map.get("/Preconditioning")
-        self.assertNotEqual(p, None)
-        self.assertEqual(p.star, True)
-        self.assertEqual(p.hard, True)
+        self.checkPath(e, "/Preconditioning", True, True)
+        self.checkPath(e, "/BCs", True, True)
+        self.checkPath(e, "/BCs/Pressure", True, True)
+        self.checkPath(e, "/SolidMechanics", True, True)
+        self.checkPath(e, "/Adaptivity", False, True)
+        self.checkPath(e, "/Adaptivity/Markers", True, True)
+        self.checkPath(e, "/GlobalParams", False, True)
+        self.checkPath(e, "/Mesh", False, True)
+        self.checkPath(e, "/AuxVariables", True, True)
+        self.checkPath(e, "/AuxVariables/*/InitialCondition", False, False)
+        self.checkPath(e, "/Variables/*/InitialCondition", False, False)
 
 if __name__ == '__main__':
     unittest.main()

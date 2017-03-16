@@ -1,7 +1,7 @@
 [Tests]
-  [./ActionSyntax]
+  [./JsonData]
     type = PythonUnitTest
-    input = test_ActionSyntax.py
+    input = test_JsonData.py
     display_required = True
   [../]
 []
