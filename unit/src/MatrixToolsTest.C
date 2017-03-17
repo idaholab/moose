@@ -13,6 +13,9 @@
 /****************************************************************/
 #include "MatrixToolsTest.h"
 
+// MOOSE includes
+#include "MooseException.h"
+
 CPPUNIT_TEST_SUITE_REGISTRATION(MatrixToolsTest);
 
 MatrixToolsTest::MatrixToolsTest() {}
