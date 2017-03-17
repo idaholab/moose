@@ -1251,31 +1251,28 @@ InputParameters::getParamHelper(const std::string & name, const InputParameters 
   return pars.get<T>(name);
 }
 
+// Declare specializations so we don't fall back on the generic
+// implementation, but the definition will be in InputParameters.C so
+// we won't need to bring in *MooseEnum header files here.
+template <>
+const MooseEnum &
+InputParameters::getParamHelper<MooseEnum>(const std::string & name,
+                                           const InputParameters & pars,
+                                           const MooseEnum*);
+
+template <>
+const MultiMooseEnum &
+InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
+                                                const InputParameters & pars,
+                                                const MultiMooseEnum*);
+
 template <typename T>
 const std::vector<T> &
 InputParameters::getParamHelper(const std::string & name,
                                 const InputParameters & pars,
-                                const std::vector<T> *)
+                                const std::vector<T>*)
 {
-  return pars.get<std::vector<T>>(name);
-}
-
-template <>
-inline const MooseEnum &
-InputParameters::getParamHelper<MooseEnum>(const std::string & name,
-                                           const InputParameters & pars,
-                                           const MooseEnum *)
-{
-  return pars.get<MooseEnum>(name);
-}
-
-template <>
-inline const MultiMooseEnum &
-InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
-                                                const InputParameters & pars,
-                                                const MultiMooseEnum *)
-{
-  return pars.get<MultiMooseEnum>(name);
+  return pars.get<std::vector<T> >(name);
 }
 
 InputParameters emptyInputParameters();
