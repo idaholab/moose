@@ -15,12 +15,17 @@
 #ifndef RESETDISPLACEDMESHTHREAD_H
 #define RESETDISPLACEDMESHTHREAD_H
 
-#include "libmesh/numeric_vector.h"
-
+// MOOSE includes
 #include "ThreadedNodeLoop.h"
 #include "MooseMesh.h"
 
+// libMesh includes
+#include "libmesh/node_range.h"
+#include "libmesh/numeric_vector.h"
+
+// Forward declarations
 class DisplacedProblem;
+class FEProblemBase;
 
 class ResetDisplacedMeshThread : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>
 {

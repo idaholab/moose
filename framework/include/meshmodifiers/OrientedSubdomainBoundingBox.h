@@ -16,6 +16,7 @@
 #define ORIENTEDSUBDOMAINBOUNDINGBOX_H
 
 // MOOSE includes
+#include "MooseEnum.h"
 #include "MeshModifier.h"
 #include "OrientedBoxInterface.h"
 

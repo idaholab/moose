@@ -17,7 +17,9 @@
 
 #include "InputParameters.h"
 
+// Forward declarations
 class FEProblemBase;
+class MooseObject;
 class TransientInterface;
 
 template <>

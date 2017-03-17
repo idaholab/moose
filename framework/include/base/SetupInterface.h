@@ -18,6 +18,8 @@
 #include "ExecStore.h"
 #include "MooseEnum.h"
 #include "InputParameters.h"
+#include "MooseTypes.h"
+#include "MultiMooseEnum.h"
 
 // Forward declarations
 class SetupInterface;

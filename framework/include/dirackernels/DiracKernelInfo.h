@@ -23,6 +23,7 @@
 
 #include <set>
 #include <map>
+#include <memory>
 
 // Forward declarations
 class MooseMesh;

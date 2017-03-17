@@ -24,8 +24,13 @@
 #include "MooseError.h"
 
 // Forward declarations
+class FEProblemBase;
+class InputParameters;
 class MooseParsedFunctionBase;
 class MooseParsedFunctionWrapper;
+
+template<typename T>
+InputParameters validParams();
 
 /**
  * Creates the 'vars' and 'vals' parameters used by all ParsedFunctions, the

@@ -24,6 +24,8 @@
 // libMesh includes
 #include "libmesh/libmesh_common.h" // Real
 
+using namespace libMesh;
+
 /**
  * Container for holding a function defined on a grid of arbitrary dimension.
  *

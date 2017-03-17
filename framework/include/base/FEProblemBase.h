@@ -29,6 +29,7 @@
 #include "ExecuteMooseObjectWarehouse.h"
 #include "AuxGroupExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
+#include "MooseVariableBase.h"
 #include "MultiAppTransfer.h"
 #include "Postprocessor.h"
 
@@ -79,6 +80,7 @@ class IntegratedBC;
 namespace libMesh
 {
 class CouplingMatrix;
+class NonlinearImplicitSystem;
 }
 
 template <>
