@@ -19,6 +19,15 @@
 #include "MooseVariableScalar.h"
 #include "InputParameters.h"
 
+// C++ includes
+#include <map>
+#include <string>
+#include <vector>
+
+// Forward declarations
+class FEProblemBase;
+class MooseObject;
+
 /**
  * Interface for objects that needs scalar coupling capabilities
  *

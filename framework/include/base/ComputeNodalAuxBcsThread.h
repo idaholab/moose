@@ -16,6 +16,7 @@
 #define COMPUTENODALAUXBCSTHREAD_H
 
 // MOOSE includes
+#include "MooseMesh.h"
 #include "ThreadedNodeLoop.h"
 
 // Forward declarations

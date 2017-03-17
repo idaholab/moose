@@ -18,6 +18,11 @@
 #include "MooseVariable.h"
 #include "InputParameters.h"
 
+// Forward declarations
+class Assembly;
+class MooseObject;
+class MooseVariable;
+
 /**
  * Interface for objects that need to get values of MooseVariables
  */

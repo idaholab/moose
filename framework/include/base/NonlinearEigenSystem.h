@@ -28,6 +28,7 @@
 
 // forward declarations
 class EigenProblem;
+class KernelBase;
 
 #if LIBMESH_HAVE_SLEPC
 

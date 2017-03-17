@@ -15,12 +15,13 @@
 #define DERIVATIVEMATERIALINTERFACE_H
 
 #include "AuxiliarySystem.h"
-#include "Material.h"
-#include "MaterialProperty.h"
-#include "KernelBase.h"
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
+#include "KernelBase.h"
+#include "Material.h"
+#include "MaterialProperty.h"
+#include "MooseVariable.h"
 #include "NonlinearSystem.h"
 
 // Forward declarations

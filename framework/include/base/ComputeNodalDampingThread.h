@@ -18,6 +18,9 @@
 // MOOSE includes
 #include "ThreadedNodeLoop.h"
 
+// libMesh includes
+#include "libmesh/node_range.h"
+
 // Forward declarations
 template <typename T>
 class MooseObjectWarehouse;
