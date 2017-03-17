@@ -21,16 +21,15 @@
 
 // MOOSE includes
 #include "MultiMooseEnum.h"
-#include "InputParameters.h"
 
 // libMesh includes
-#include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/petsc_macro.h"
 
 // Forward declarations
 class FEProblemBase;
 class NonlinearSystemBase;
 class CommandLine;
+class InputParameters;
 
 namespace Moose
 {

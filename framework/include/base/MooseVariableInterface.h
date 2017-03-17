@@ -15,8 +15,7 @@
 #ifndef MOOSEVARIABLEINTERFACE_H
 #define MOOSEVARIABLEINTERFACE_H
 
-#include "MooseVariable.h"
-#include "InputParameters.h"
+#include "MooseVariableBase.h"
 
 // Forward declarations
 class Assembly;

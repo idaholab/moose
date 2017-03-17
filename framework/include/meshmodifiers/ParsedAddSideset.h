@@ -19,9 +19,6 @@
 #include "AddSideSetsBase.h"
 #include "FunctionParserUtils.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
 // Forward declerations
 class ParsedAddSideset;
 

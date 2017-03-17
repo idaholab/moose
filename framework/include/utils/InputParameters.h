@@ -18,8 +18,6 @@
 // MOOSE includes
 #include "MooseError.h"
 #include "MooseTypes.h"
-#include "MooseEnum.h"
-#include "MultiMooseEnum.h"
 #include "MooseUtils.h"
 
 // libMesh includes
@@ -36,11 +34,13 @@ class FunctionParserBase
 #endif
 
 // Forward declarations
-class MooseObject;
 class Action;
-class Problem;
-class MooseApp;
 class InputParameters;
+class MooseApp;
+class MooseEnum;
+class MooseObject;
+class MultiMooseEnum;
+class Problem;
 
 /**
  * This is the templated validParams() function that every

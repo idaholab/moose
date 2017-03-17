@@ -17,8 +17,7 @@
 
 // MOOSE includes
 #include "FEProblemBase.h"
-#include "ParallelUniqueId.h"
-#include "UserObject.h"
+#include "MooseTypes.h"
 
 // Forward declarations
 class InputParameters;

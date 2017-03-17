@@ -15,9 +15,7 @@
 #ifndef NEIGHBORCOUPLEABLE_H
 #define NEIGHBORCOUPLEABLE_H
 
-#include "MooseVariable.h"
-#include "MooseVariableScalar.h"
-#include "InputParameters.h"
+#include "MooseVariableBase.h"
 #include "Coupleable.h"
 
 /**

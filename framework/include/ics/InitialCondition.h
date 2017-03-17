@@ -19,12 +19,12 @@
 #include "Coupleable.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
-#include "ParallelUniqueId.h"
 #include "Restartable.h"
 #include "BlockRestrictable.h"
 #include "DependencyResolverInterface.h"
 #include "BoundaryRestrictable.h"
 #include "ZeroInterface.h"
+#include "MooseTypes.h"
 
 // libMesh
 #include "libmesh/point.h"

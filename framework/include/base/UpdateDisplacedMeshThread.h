@@ -15,12 +15,13 @@
 #ifndef UPDATEDISPLACEDMESHTHREAD_H
 #define UPDATEDISPLACEDMESHTHREAD_H
 
+// MOOSE includes
+#include "MooseMesh.h"
 #include "ThreadedNodeLoop.h"
 
 // Forward declarations
 class DisplacedProblem;
 class UpdateDisplacedMeshThread;
-class MooseMesh;
 
 // libMesh forward declarations
 namespace libMesh

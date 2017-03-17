@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "DataIO.h"
-#include "Backup.h"
 
 // C++ includes
 #include <sstream>
@@ -25,6 +24,7 @@
 #include <list>
 
 // Forward declarations
+class Backup;
 class RestartableDatas;
 class RestartableDataValue;
 class FEProblemBase;

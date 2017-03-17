@@ -15,12 +15,12 @@
 #ifndef ZEROINTERFACE_H
 #define ZEROINTERFACE_H
 
-#include "InputParameters.h"
+#include "MooseTypes.h"
 #include "MooseVariableBase.h"
-#include "ParallelUniqueId.h"
 #include "libmesh/libmesh_common.h"
 
 class FEProblemBase;
+class InputParameters;
 
 /**
  * Interface to bring zero values inside objects

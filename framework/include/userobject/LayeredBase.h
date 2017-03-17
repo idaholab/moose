@@ -16,7 +16,6 @@
 #define LAYEREDBASE_H
 
 // MOOSE includes
-#include "InputParameters.h"
 #include "Moose.h"
 #include "MooseEnum.h"
 
@@ -27,6 +26,9 @@ class SubProblem;
 class UserObject;
 
 namespace libMesh { class Point; }
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<LayeredBase>();

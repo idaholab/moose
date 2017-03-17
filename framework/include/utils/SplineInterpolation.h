@@ -16,8 +16,6 @@
 #define SPLINEINTERPOLATION_H
 
 #include "SplineInterpolationBase.h"
-#include <fstream>
-#include <sstream>
 #include <string>
 
 /**

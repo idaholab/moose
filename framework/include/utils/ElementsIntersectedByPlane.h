@@ -17,9 +17,6 @@
 
 #include "Moose.h"
 
-// libMesh includes
-#include "libmesh/point.h"
-
 // forward declares
 class MooseMesh;
 

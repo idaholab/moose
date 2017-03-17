@@ -15,7 +15,6 @@
 #ifndef FUNCTIONPARSERUTILS_H
 #define FUNCTIONPARSERUTILS_H
 
-#include "InputParameters.h"
 #include "Moose.h"
 
 // libMesh includes
