@@ -60,8 +60,21 @@ private:
   /// PorousFlow Dictator UserObject
   const PorousFlowDictator & _dictator;
 
-  /// MooseEnum of properties that can be accessed
-  const MooseEnum & _property_enum;
+  /// enum of properties
+  enum PropertyEnum
+  {
+    PRESSURE,
+    SATURATION,
+    TEMPERATURE,
+    DENSITY,
+    VISCOSITY,
+    MASS_FRACTION,
+    RELPERM,
+    ENTHALPY,
+    INTERNAL_ENERGY
+  };
+
+  const PropertyEnum _property_enum;
 
   /// Phase index
   unsigned int _phase;
