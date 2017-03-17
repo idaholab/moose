@@ -6,7 +6,14 @@
 /****************************************************************/
 
 #include "PorousFlowMassTimeDerivative.h"
+
+// MOOSE includes
+#include "MooseVariable.h"
+
+// libMesh includes
 #include "libmesh/quadrature.h"
+
+// C++ includes
 #include <limits>
 
 template <>

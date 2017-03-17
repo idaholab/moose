@@ -6,12 +6,15 @@
 /****************************************************************/
 #include "StressDivergence.h"
 
+// MOOSE includes
 #include "Assembly.h"
 #include "Material.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "SymmElasticityTensor.h"
 #include "SystemBase.h"
 
+// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

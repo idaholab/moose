@@ -7,6 +7,7 @@
 #ifndef COMPUTEELASTICITYTENSORBASE_H
 #define COMPUTEELASTICITYTENSORBASE_H
 
+#include "DerivativeMaterialInterface.h"
 #include "Material.h"
 #include "RankFourTensor.h"
 

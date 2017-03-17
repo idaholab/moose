@@ -6,6 +6,9 @@
 /****************************************************************/
 #include "EqualGradientLagrangeInterface.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<EqualGradientLagrangeInterface>()

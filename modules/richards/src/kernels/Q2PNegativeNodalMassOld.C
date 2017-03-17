@@ -7,6 +7,10 @@
 
 #include "Q2PNegativeNodalMassOld.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
+// C++ includes
 #include <iostream>
 
 template <>

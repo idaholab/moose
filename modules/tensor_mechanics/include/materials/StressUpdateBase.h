@@ -7,9 +7,11 @@
 #ifndef STRESSUPDATEBASE_H
 #define STRESSUPDATEBASE_H
 
-#include "RankTwoTensor.h"
-#include "RankFourTensor.h"
 #include "Conversion.h"
+#include "InputParameters.h"
+#include "Material.h"
+#include "RankFourTensor.h"
+#include "RankTwoTensor.h"
 
 // Forward declaration
 class StressUpdateBase;

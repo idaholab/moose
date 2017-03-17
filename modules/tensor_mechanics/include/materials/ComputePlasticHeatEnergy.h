@@ -7,6 +7,7 @@
 #ifndef COMPUTEPLASTICHEATENERGY_H
 #define COMPUTEPLASTICHEATENERGY_H
 
+#include "DerivativeMaterialInterface.h"
 #include "Material.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"

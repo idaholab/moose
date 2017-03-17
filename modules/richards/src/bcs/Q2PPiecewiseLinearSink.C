@@ -7,6 +7,10 @@
 
 #include "Q2PPiecewiseLinearSink.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
+// C++ includes
 #include <iostream>
 
 template <>

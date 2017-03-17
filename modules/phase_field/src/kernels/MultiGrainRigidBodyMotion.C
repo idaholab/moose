@@ -5,7 +5,10 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "MultiGrainRigidBodyMotion.h"
+
+// MOOSE includes
 #include "GrainTrackerInterface.h"
+#include "MooseVariable.h"
 
 template <>
 InputParameters

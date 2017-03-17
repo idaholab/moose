@@ -6,8 +6,11 @@
 /****************************************************************/
 
 #include "GeneralizedPlaneStrain.h"
+
+// MOOSE includes
 #include "Assembly.h"
 #include "GeneralizedPlaneStrainUserObject.h"
+#include "MooseVariableScalar.h"
 
 template <>
 InputParameters

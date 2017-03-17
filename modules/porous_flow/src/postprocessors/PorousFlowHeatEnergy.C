@@ -7,7 +7,10 @@
 
 #include "PorousFlowHeatEnergy.h"
 
-// libmesh includes for qrule
+// MOOSE includes
+#include "MooseVariable.h"
+
+// libMesh includes for qrule
 #include "libmesh/quadrature.h"
 
 template <>

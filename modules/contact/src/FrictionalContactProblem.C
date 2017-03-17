@@ -5,13 +5,14 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-// MOOSE includes
 #include "FrictionalContactProblem.h"
 
+// MOOSE includes
 #include "AuxiliarySystem.h"
 #include "DisplacedProblem.h"
 #include "MooseApp.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "NearestNodeLocator.h"
 #include "NonlinearSystem.h"
 #include "PenetrationLocator.h"

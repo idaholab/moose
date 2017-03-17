@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "MooseTypes.h"
+#include "PermutationTensor.h"
 #include "RankFourTensor.h"
 
 namespace ElasticityTensorTools

@@ -7,6 +7,10 @@
 
 #include "RichardsLumpedMassChange.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
+// C++ includes
 #include <iostream>
 
 template <>

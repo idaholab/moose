@@ -7,6 +7,9 @@
 
 #include "PorousFlowHeatConduction.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<PorousFlowHeatConduction>()

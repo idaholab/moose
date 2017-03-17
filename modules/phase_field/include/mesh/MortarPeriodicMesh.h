@@ -9,6 +9,7 @@
 #define MORTARPERIODICMESH_H
 
 #include "GeneratedMesh.h"
+#include "MultiMooseEnum.h"
 
 class MortarPeriodicMesh;
 

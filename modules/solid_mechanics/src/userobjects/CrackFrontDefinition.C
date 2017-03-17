@@ -5,9 +5,11 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-// MOOSE includes
 #include "CrackFrontDefinition.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 
 // libMesh includes
 #include "libmesh/mesh_tools.h"

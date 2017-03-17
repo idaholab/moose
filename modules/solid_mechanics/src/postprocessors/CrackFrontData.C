@@ -6,10 +6,13 @@
 /****************************************************************/
 
 #include "CrackFrontData.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "SubProblem.h"
 
-// libMesh
+// libMesh includes
 #include "libmesh/boundary_info.h"
 
 template <>
