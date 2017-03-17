@@ -14,7 +14,10 @@
 
 #include "VolumeHistogram.h"
 
-// libmesh includes
+// MOOSE includes
+#include "MooseVariable.h"
+
+// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

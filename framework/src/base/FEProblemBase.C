@@ -82,6 +82,7 @@
 #include "NonlocalIntegratedBC.h"
 #include "ShapeElementUserObject.h"
 #include "ShapeSideUserObject.h"
+#include "MooseVariableScalar.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"

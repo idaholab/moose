@@ -81,6 +81,8 @@ StitchedMesh::StitchedMesh(const StitchedMesh & other_mesh)
 {
 }
 
+StitchedMesh::~StitchedMesh() {}
+
 MooseMesh &
 StitchedMesh::clone() const
 {

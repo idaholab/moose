@@ -13,6 +13,9 @@
 /****************************************************************/
 
 #include "MooseError.h"
+
+// MOOSE includes
+#include "InputParameters.h"
 #include "MooseParsedFunction.h"
 #include "MooseParsedFunctionWrapper.h"
 

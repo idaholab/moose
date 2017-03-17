@@ -14,8 +14,10 @@
 
 #include "ComputeBoundaryInitialConditionThread.h"
 
+// MOOSE includes
 #include "Assembly.h"
 #include "InitialCondition.h"
+#include "MooseVariable.h"
 #include "SystemBase.h"
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(

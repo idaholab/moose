@@ -12,9 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "ComputeNodalUserObjectsThread.h"
+
+// MOOSE includes
 #include "FEProblem.h"
+#include "MooseMesh.h"
 #include "NodalUserObject.h"
 
 // libmesh includes

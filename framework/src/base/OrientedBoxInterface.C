@@ -12,8 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "OrientedBoxInterface.h"
+
+// MOOSE includes
+#include "InputParameters.h"
+#include "MooseError.h"
 
 // libMesh incluces
 

@@ -13,8 +13,11 @@
 /****************************************************************/
 
 #include "ODEKernel.h"
-#include "SystemBase.h"
+
+// MOOSE includes
 #include "Assembly.h"
+#include "MooseVariableScalar.h"
+#include "SystemBase.h"
 
 template <>
 InputParameters

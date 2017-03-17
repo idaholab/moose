@@ -13,11 +13,14 @@
 /****************************************************************/
 
 #include "ComputeNodalAuxVarsThread.h"
-#include "AuxiliarySystem.h"
-#include "FEProblem.h"
-#include "AuxKernel.h"
 
-// libmesh includes
+// MOOSE includes
+#include "AuxiliarySystem.h"
+#include "AuxKernel.h"
+#include "FEProblem.h"
+#include "MooseMesh.h"
+
+// libMesh includes
 #include "libmesh/threads.h"
 
 ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(

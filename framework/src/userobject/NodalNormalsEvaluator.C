@@ -14,7 +14,9 @@
 
 #include "NodalNormalsEvaluator.h"
 
+// MOOSE includes
 #include "AuxiliarySystem.h"
+#include "MooseVariable.h"
 
 Threads::spin_mutex nodal_normals_evaluator_mutex;
 

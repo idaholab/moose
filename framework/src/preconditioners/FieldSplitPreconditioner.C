@@ -15,10 +15,13 @@
 #include "libmesh/petsc_macro.h"
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3, 3, 0)
 #include "FieldSplitPreconditioner.h"
+
+// MOOSE includes
 #include "FEProblem.h"
+#include "MooseEnum.h"
+#include "MooseVariable.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
-#include "MooseEnum.h"
 
 // libMesh Includes
 #include "libmesh/libmesh_common.h"

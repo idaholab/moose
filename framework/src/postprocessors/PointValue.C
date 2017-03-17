@@ -12,11 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "PointValue.h"
+
+// MOOSE includes
 #include "Function.h"
-#include "SubProblem.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
+#include "SubProblem.h"
 
 template <>
 InputParameters

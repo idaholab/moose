@@ -7,6 +7,14 @@
 
 #include "MatrixTools.h"
 
+// MOOSE includes
+#include "Conversion.h"
+#include "MooseError.h"
+#include "MooseException.h"
+
+// PETSc includes
+#include "petscblaslapack.h"
+
 #if PETSC_VERSION_LESS_THAN(3, 5, 0)
 extern "C" void FORTRAN_CALL(dgetri)(...); // matrix inversion routine from LAPACK
 #endif

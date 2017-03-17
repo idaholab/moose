@@ -13,10 +13,13 @@
 /****************************************************************/
 
 #include "NodalVariableValue.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "SubProblem.h"
 
-// libMesh
+// libMesh includes
 #include "libmesh/node.h"
 
 template <>

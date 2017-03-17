@@ -12,13 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "MultiAppUserObjectTransfer.h"
-#include "MooseTypes.h"
-#include "FEProblem.h"
+
+// MOOSE includes
 #include "DisplacedProblem.h"
-#include "MultiApp.h"
+#include "FEProblem.h"
 #include "MooseMesh.h"
+#include "MooseTypes.h"
+#include "MooseVariable.h"
+#include "MultiApp.h"
 #include "UserObject.h"
 
 // libMesh

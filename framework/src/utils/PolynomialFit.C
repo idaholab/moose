@@ -14,6 +14,9 @@
 
 #include "PolynomialFit.h"
 
+// C++ includes
+#include <fstream>
+
 extern "C" void FORTRAN_CALL(dgels)(...);
 
 int PolynomialFit::_file_number = 0;

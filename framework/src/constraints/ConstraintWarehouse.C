@@ -12,12 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "ConstraintWarehouse.h"
+
+// MOOSE includes
+#include "ElemElemConstraint.h"
+#include "FaceFaceConstraint.h"
+#include "MooseVariable.h"
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
-#include "FaceFaceConstraint.h"
-#include "ElemElemConstraint.h"
 
 ConstraintWarehouse::ConstraintWarehouse() : MooseObjectWarehouse<Constraint>(/*threaded=*/false) {}
 

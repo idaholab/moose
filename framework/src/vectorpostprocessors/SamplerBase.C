@@ -12,9 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "SamplerBase.h"
+
+// MOOSE includes
 #include "IndirectSort.h"
+#include "InputParameters.h"
+#include "MooseEnum.h"
+#include "MooseError.h"
 #include "VectorPostprocessor.h"
 
 template <>

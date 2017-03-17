@@ -13,10 +13,13 @@
 /****************************************************************/
 
 #include "IntegratedBC.h"
+
+// MOOSE includes
+#include "Assembly.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "MooseVariable.h"
-#include "Assembly.h"
+#include "MooseVariableScalar.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"

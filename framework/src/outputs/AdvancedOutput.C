@@ -17,18 +17,19 @@
 
 // MOOSE includes
 #include "AdvancedOutput.h"
-#include "FEProblem.h"
 #include "DisplacedProblem.h"
-#include "Postprocessor.h"
-#include "Restartable.h"
+#include "FEProblem.h"
 #include "FileMesh.h"
-#include "VectorPostprocessor.h"
-#include "MooseUtils.h"
+#include "FileOutput.h"
 #include "InfixIterator.h"
 #include "MooseApp.h"
-#include "PetscOutput.h"
-#include "FileOutput.h"
+#include "MooseUtils.h"
+#include "MooseVariable.h"
 #include "OversampleOutput.h"
+#include "PetscOutput.h"
+#include "Postprocessor.h"
+#include "Restartable.h"
+#include "VectorPostprocessor.h"
 
 // A function, only available in this file, for adding the AdvancedOutput parameters. This is
 // used to eliminate code duplication between the difference specializations of the validParams

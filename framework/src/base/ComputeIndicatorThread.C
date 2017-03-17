@@ -13,14 +13,16 @@
 /****************************************************************/
 #include "ComputeIndicatorThread.h"
 
+// MOOSE includes
 #include "AuxiliarySystem.h"
-#include "Problem.h"
 #include "FEProblem.h"
 #include "Indicator.h"
 #include "InternalSideIndicator.h"
+#include "MooseVariable.h"
+#include "Problem.h"
 #include "SwapBackSentinel.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/threads.h"
 
 ComputeIndicatorThread::ComputeIndicatorThread(FEProblemBase & fe_problem, bool finalize)

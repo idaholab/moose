@@ -13,8 +13,11 @@
 /****************************************************************/
 
 #include "NodalConstraint.h"
-#include "SystemBase.h"
+
+// MOOSE includes
 #include "Assembly.h"
+#include "MooseVariable.h"
+#include "SystemBase.h"
 
 // libMesh includes
 #include "libmesh/sparse_matrix.h"

@@ -13,8 +13,12 @@
 /****************************************************************/
 
 #include "InputParameters.h"
+
+// MOOSE includes
+#include "MooseEnum.h"
 #include "MooseTypes.h"
 #include "MooseUtils.h"
+#include "MultiMooseEnum.h"
 
 #include <cmath>
 

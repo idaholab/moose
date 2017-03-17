@@ -5,14 +5,24 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "RankTwoTensor.h"
-#include "MaterialProperty.h"
 
-// Any other includes here
-#include <vector>
-#include <ostream>
+// MOOSE includes
+#include "MaterialProperty.h"
+#include "MooseEnum.h"
+#include "MooseUtils.h"
+
+// libMesh includes
 #include "libmesh/libmesh.h"
-#include "libmesh/utility.h"
 #include "libmesh/tensor_value.h"
+#include "libmesh/utility.h"
+
+// PETSc includes
+#include <petscblaslapack.h>
+
+// C++ includes
+#include <iomanip>
+#include <ostream>
+#include <vector>
 
 template <>
 void

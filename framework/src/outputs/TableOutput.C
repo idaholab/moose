@@ -12,14 +12,16 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "TableOutput.h"
+
+// MOOSE includes
+#include "Conversion.h"
 #include "FEProblem.h"
-#include "Postprocessor.h"
-#include "PetscSupport.h"
 #include "Executioner.h"
 #include "MooseApp.h"
-#include "Conversion.h"
+#include "MooseVariableScalar.h"
+#include "PetscSupport.h"
+#include "Postprocessor.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"

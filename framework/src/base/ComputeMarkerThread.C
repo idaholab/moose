@@ -18,6 +18,7 @@
 #include "Problem.h"
 #include "FEProblem.h"
 #include "Marker.h"
+#include "MooseVariable.h"
 #include "SwapBackSentinel.h"
 
 // libmesh includes

@@ -18,6 +18,7 @@
 #include "FEProblem.h"
 #include "Material.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "SystemBase.h"
 
 template <>

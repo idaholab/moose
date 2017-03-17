@@ -13,9 +13,12 @@
 /****************************************************************/
 
 #include "TimeDerivative.h"
-#include "Assembly.h"
 
-// libmesh includes
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseVariable.h"
+
+// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>
