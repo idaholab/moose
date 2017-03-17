@@ -17,7 +17,6 @@
 
 // MOOSE includes
 #include "ThreadedNodeLoop.h"
-#include "MooseMesh.h"
 
 // libMesh includes
 #include "libmesh/node_range.h"
@@ -26,6 +25,7 @@
 // Forward declarations
 class DisplacedProblem;
 class FEProblemBase;
+class MooseMesh;
 
 class ResetDisplacedMeshThread : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>
 {

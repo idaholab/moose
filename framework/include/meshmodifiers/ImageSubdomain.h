@@ -19,9 +19,6 @@
 #include "MeshModifier.h"
 #include "ImageSampler.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
 // Forward declarations
 class ImageSubdomain;
 

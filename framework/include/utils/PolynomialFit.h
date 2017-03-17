@@ -16,8 +16,6 @@
 #define POLYNOMIALFIT_H
 
 #include <vector>
-#include <fstream>
-#include <sstream>
 #include <string>
 
 #include "Moose.h"

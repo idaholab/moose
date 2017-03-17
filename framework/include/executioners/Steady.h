@@ -16,13 +16,17 @@
 #define STEADY_H
 
 #include "Executioner.h"
-#include "InputParameters.h"
 
 // System includes
 #include <string>
 
+// Forward declarations
+class InputParameters;
 class Steady;
 class FEProblemBase;
+
+template <typename T>
+InputParameters validParams();
 
 template <>
 InputParameters validParams<Steady>();

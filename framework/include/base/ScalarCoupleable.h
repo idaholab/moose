@@ -15,9 +15,10 @@
 #ifndef SCALARCOUPLEABLE_H
 #define SCALARCOUPLEABLE_H
 
-#include "MooseVariable.h"
-#include "MooseVariableScalar.h"
-#include "InputParameters.h"
+#include "Moose.h"
+
+// MOOSE includes
+#include "MooseVariableBase.h"
 
 // C++ includes
 #include <map>
@@ -26,7 +27,9 @@
 
 // Forward declarations
 class FEProblemBase;
+class InputParameters;
 class MooseObject;
+class MooseVariableScalar;
 
 /**
  * Interface for objects that needs scalar coupling capabilities

@@ -15,16 +15,16 @@
 #ifndef MOOSEPARSEDFUNCTIONWRAPPER_H
 #define MOOSEPARSEDFUNCTIONWRAPPER_H
 
-// std includes
-#include <string>
-#include <vector>
-
 // MOOSE includes
-#include "ParallelUniqueId.h"
 #include "MooseError.h"
+#include "MooseTypes.h"
 
 // libMesh includes
 #include "libmesh/parsed_function.h"
+
+// C++ includes
+#include <string>
+#include <vector>
 
 // Forward declarations
 class FEProblemBase;

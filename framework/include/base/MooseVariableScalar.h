@@ -16,7 +16,6 @@
 #define MOOSEVARIABLESCALAR_H
 
 #include "MooseVariableBase.h"
-#include "ParallelUniqueId.h"
 
 // libMesh forward declarations
 namespace libMesh

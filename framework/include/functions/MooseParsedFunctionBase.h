@@ -20,7 +20,6 @@
 #include <memory>
 
 // MOOSE includes
-#include "InputParameters.h"
 #include "MooseError.h"
 
 // Forward declarations

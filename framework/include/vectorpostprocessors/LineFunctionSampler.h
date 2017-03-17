@@ -17,9 +17,9 @@
 
 #include "GeneralVectorPostprocessor.h"
 #include "SamplerBase.h"
-#include "Function.h"
 
 // Forward Declarations
+class Function;
 class LineFunctionSampler;
 
 template <>

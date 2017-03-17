@@ -18,9 +18,6 @@
 #include "HashMap.h"
 #include "MaterialProperty.h" // MaterialProperties
 
-// libMesh includes
-#include "libmesh/parallel.h"
-
 // C++ includes
 #include <string>
 #include <vector>
@@ -30,7 +27,11 @@
 // Forward Declarations
 namespace libMesh
 {
-class Elem;
+  class Elem;
+  namespace Parallel
+  {
+    class Communicator;
+  }
 }
 
 namespace MooseUtils

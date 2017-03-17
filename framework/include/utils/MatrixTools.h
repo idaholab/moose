@@ -8,9 +8,7 @@
 #define MATRIXTOOLS_H
 
 #include "MooseTypes.h"
-#include "PetscSupport.h"
-#include "Conversion.h"
-#include "petscblaslapack.h"
+#include <petsc.h>
 #include <vector>
 
 namespace MatrixTools
