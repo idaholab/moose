@@ -7,6 +7,10 @@
 
 #include "Q2PNodalMass.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
+// C++ includes
 #include <iostream>
 
 template <>

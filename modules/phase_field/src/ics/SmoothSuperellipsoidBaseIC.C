@@ -6,7 +6,10 @@
 /****************************************************************/
 
 #include "SmoothSuperellipsoidBaseIC.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 
 template <>
 InputParameters

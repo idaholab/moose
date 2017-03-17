@@ -7,8 +7,10 @@
 
 #include "StressDivergenceTensorsTruss.h"
 
+// MOOSE includes
 #include "Assembly.h"
 #include "Material.h"
+#include "MooseVariable.h"
 #include "SystemBase.h"
 
 template <>

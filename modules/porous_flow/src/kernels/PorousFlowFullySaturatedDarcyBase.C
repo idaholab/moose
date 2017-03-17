@@ -7,6 +7,9 @@
 
 #include "PorousFlowFullySaturatedDarcyBase.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<PorousFlowFullySaturatedDarcyBase>()

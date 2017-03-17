@@ -10,6 +10,9 @@
 
 #include "PresetNodalBC.h"
 
+// MOOSE includes
+#include "ColumnMajorMatrix.h"
+
 // Forward Declarations
 class DisplacementAboutAxis;
 class Function;

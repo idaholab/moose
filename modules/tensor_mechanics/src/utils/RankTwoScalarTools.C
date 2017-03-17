@@ -5,9 +5,11 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "MooseTypes.h"
-#include "RankTwoTensor.h"
 #include "RankTwoScalarTools.h"
+
+// MOOSE includes
+#include "MooseEnum.h"
+#include "RankTwoTensor.h"
 
 namespace RankTwoScalarTools
 {

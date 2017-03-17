@@ -6,8 +6,11 @@
 /****************************************************************/
 
 #include "RichardsMultiphaseProblem.h"
-#include "NonlinearSystem.h"
+
+// MOOSE includes
 #include "MooseMesh.h"
+#include "MooseVariable.h"
+#include "NonlinearSystem.h"
 
 template <>
 InputParameters

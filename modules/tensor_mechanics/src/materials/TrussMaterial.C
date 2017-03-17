@@ -6,11 +6,14 @@
 /****************************************************************/
 
 #include "TrussMaterial.h"
+
+// MOOSE includes
 #include "Material.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "NonlinearSystem.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/quadrature.h"
 
 template <>

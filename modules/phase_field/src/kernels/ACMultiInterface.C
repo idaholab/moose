@@ -6,6 +6,9 @@
 /****************************************************************/
 
 #include "ACMultiInterface.h"
+
+// MOOSE includes
+#include "MooseVariable.h"
 #include "NonlinearSystem.h"
 
 template <>

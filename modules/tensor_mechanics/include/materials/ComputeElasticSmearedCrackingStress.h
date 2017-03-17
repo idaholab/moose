@@ -7,6 +7,7 @@
 #ifndef COMPUTEELASTICSMEAREDCRACKINGSTRESS_H
 #define COMPUTEELASTICSMEAREDCRACKINGSTRESS_H
 
+#include "ColumnMajorMatrix.h"
 #include "ComputeStressBase.h"
 #include "Function.h"
 
