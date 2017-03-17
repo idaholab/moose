@@ -945,3 +945,17 @@ InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /
   oss << r_value;
   l_value = oss.str();
 }
+
+template <>
+const MooseEnum &
+InputParameters::getParamHelper<MooseEnum>(const std::string & name, const InputParameters & pars, const MooseEnum*)
+{
+  return pars.get<MooseEnum>(name);
+}
+
+template <>
+const MultiMooseEnum &
+InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name, const InputParameters & pars, const MultiMooseEnum*)
+{
+  return pars.get<MultiMooseEnum>(name);
+}
