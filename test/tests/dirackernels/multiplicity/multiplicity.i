@@ -53,7 +53,7 @@
     type = MaterialMultiPointSource
     variable = u1
     points = '0.2 0.3 0.0
-              0.7 0.5 0.0'
+              0.7 0.6 0.0'
   [../]
   [./material_source2]
     type = MaterialMultiPointSource
