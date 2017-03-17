@@ -13,6 +13,9 @@
 /****************************************************************/
 #include "ForcingFn.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<ForcingFn>()

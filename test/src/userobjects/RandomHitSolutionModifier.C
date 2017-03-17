@@ -13,8 +13,11 @@
 /****************************************************************/
 
 #include "RandomHitSolutionModifier.h"
-#include "RandomHitUserObject.h"
+
+// MOOSE includes
+#include "MooseVariable.h"
 #include "NonlinearSystemBase.h"
+#include "RandomHitUserObject.h"
 
 template <>
 InputParameters
