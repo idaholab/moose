@@ -5,6 +5,10 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "FileRangeBuilder.h"
+
+// MOOSE includes
+#include "InputParameters.h"
+
 #include "pcrecpp.h"
 #include "tinydir.h"
 

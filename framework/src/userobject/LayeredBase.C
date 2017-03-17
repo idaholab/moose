@@ -12,14 +12,17 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "LayeredBase.h"
-#include "UserObject.h"
-#include "SubProblem.h"
+
+// MOOSE includes
+#include "MooseEnum.h"
 #include "MooseMesh.h"
+#include "SubProblem.h"
+#include "UserObject.h"
 
 // libmesh includes
 #include "libmesh/mesh_tools.h"
+#include "libmesh/point.h"
 
 template <>
 InputParameters

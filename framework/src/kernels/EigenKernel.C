@@ -13,11 +13,14 @@
 /****************************************************************/
 
 #include "EigenKernel.h"
-#include "MooseEigenSystem.h"
-#include "MooseApp.h"
-#include "Executioner.h"
-#include "EigenExecutionerBase.h"
+
+// MOOSE includes
 #include "Assembly.h"
+#include "EigenExecutionerBase.h"
+#include "Executioner.h"
+#include "MooseApp.h"
+#include "MooseEigenSystem.h"
+#include "MooseVariable.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"

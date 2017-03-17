@@ -5,13 +5,20 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "RankFourTensor.h"
+
+// MOOSE includes
 #include "RankTwoTensor.h"
+#include "MooseEnum.h"
 #include "MooseException.h"
 #include "MatrixTools.h"
 #include "MaterialProperty.h"
+#include "PermutationTensor.h"
 
-// Any other includes here
+// libMesh includes
 #include "libmesh/utility.h"
+
+// C++ includes
+#include <iomanip>
 #include <ostream>
 
 template <>

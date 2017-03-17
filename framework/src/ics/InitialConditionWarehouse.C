@@ -12,7 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 #include "InitialConditionWarehouse.h"
+
+// MOOSE includes
 #include "InitialCondition.h"
+#include "MooseVariable.h"
 
 InitialConditionWarehouse::InitialConditionWarehouse()
   : MooseObjectWarehouseBase<InitialCondition>(),

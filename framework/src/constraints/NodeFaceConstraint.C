@@ -13,11 +13,14 @@
 /****************************************************************/
 
 #include "NodeFaceConstraint.h"
-#include "SystemBase.h"
-#include "PenetrationLocator.h"
-#include "MooseEnum.h"
+
+// MOOSE includes
 #include "Assembly.h"
+#include "MooseEnum.h"
 #include "MooseMesh.h"
+#include "MooseVariable.h"
+#include "PenetrationLocator.h"
+#include "SystemBase.h"
 
 // libMesh includes
 #include "libmesh/string_to_enum.h"

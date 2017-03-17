@@ -13,13 +13,15 @@
 /****************************************************************/
 #include "FlagElementsThread.h"
 
+// MOOSE includes
 #include "AuxiliarySystem.h"
-#include "Problem.h"
+#include "DisplacedProblem.h"
 #include "FEProblem.h"
 #include "Marker.h"
-#include "DisplacedProblem.h"
+#include "MooseVariable.h"
+#include "Problem.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/threads.h"
 
 // C++ includes

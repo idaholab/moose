@@ -13,9 +13,13 @@
 /****************************************************************/
 
 #include "YAMLFormatter.h"
-#include "Parser.h"
-#include "MooseEnum.h"
 
+// MOOSE includes
+#include "MooseEnum.h"
+#include "MultiMooseEnum.h"
+#include "Parser.h"
+
+// C++ includes
 #include <sstream>
 #include <vector>
 

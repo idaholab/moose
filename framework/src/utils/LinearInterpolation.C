@@ -14,8 +14,9 @@
 
 #include "LinearInterpolation.h"
 
-#include <stdexcept>
 #include <cassert>
+#include <fstream>
+#include <stdexcept>
 
 int LinearInterpolation::_file_number = 0;
 

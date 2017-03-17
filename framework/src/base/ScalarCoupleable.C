@@ -13,9 +13,12 @@
 /****************************************************************/
 
 #include "ScalarCoupleable.h"
+
+// MOOSE includes
+#include "FEProblem.h"
+#include "MooseVariableScalar.h"
 #include "Problem.h"
 #include "SubProblem.h"
-#include "FEProblem.h"
 
 ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
   : _sc_parameters(moose_object->parameters()),

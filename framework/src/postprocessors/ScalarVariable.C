@@ -13,6 +13,9 @@
 /****************************************************************/
 
 #include "ScalarVariable.h"
+
+// MOOSE includes
+#include "MooseVariableScalar.h"
 #include "SubProblem.h"
 
 template <>

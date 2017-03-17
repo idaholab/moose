@@ -13,10 +13,13 @@
 /****************************************************************/
 
 #include "NodalDamper.h"
-#include "SystemBase.h"
-#include "SubProblem.h"
+
+// MOOSE includes
 #include "Assembly.h"
 #include "FEProblem.h"
+#include "MooseVariable.h"
+#include "SubProblem.h"
+#include "SystemBase.h"
 
 // libMesh includes
 #include "libmesh/quadrature.h"

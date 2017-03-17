@@ -12,8 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseError.h"
 #include "MooseParsedFunctionBase.h"
+
+// MOOSE includes
+#include "InputParameters.h"
+#include "MooseError.h"
 #include "MooseParsedFunctionWrapper.h"
 
 template <>

@@ -18,6 +18,7 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
+#include "MooseVariable.h"
 #include "MultiApp.h"
 #include "SystemBase.h"
 

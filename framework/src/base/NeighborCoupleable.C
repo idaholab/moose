@@ -13,10 +13,12 @@
 /****************************************************************/
 
 #include "NeighborCoupleable.h"
-#include "Problem.h"
-#include "SubProblem.h"
+
 #include "FEProblem.h"
 #include "MooseError.h" // mooseDeprecated
+#include "MooseVariable.h"
+#include "Problem.h"
+#include "SubProblem.h"
 
 NeighborCoupleable::NeighborCoupleable(const MooseObject * moose_object,
                                        bool nodal,

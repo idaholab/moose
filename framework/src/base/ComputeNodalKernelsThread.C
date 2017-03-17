@@ -13,11 +13,15 @@
 /****************************************************************/
 
 #include "ComputeNodalKernelsThread.h"
+
+// MOOSE includes
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
+#include "MooseMesh.h"
+#include "MooseVariable.h"
 #include "NodalKernel.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/threads.h"
 
 ComputeNodalKernelsThread::ComputeNodalKernelsThread(

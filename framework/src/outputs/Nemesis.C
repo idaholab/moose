@@ -12,11 +12,13 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// MOOSE includes
 #include "Nemesis.h"
-#include "MooseApp.h"
+
+// MOOSE includes
 #include "FEProblem.h"
+#include "MooseApp.h"
 #include "MooseMesh.h"
+#include "MooseVariableScalar.h"
 
 // libMesh includes
 #include "libmesh/nemesis_io.h"

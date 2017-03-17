@@ -14,6 +14,8 @@
 
 #include "VariableResidual.h"
 
+// MOOSE includes
+#include "MooseVariable.h"
 #include "NonlinearSystemBase.h"
 
 template <>

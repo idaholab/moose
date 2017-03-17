@@ -13,9 +13,12 @@
 /****************************************************************/
 
 #include "SingleMatrixPreconditioner.h"
-#include "NonlinearSystem.h"
-#include "MooseUtils.h"
+
+// MOOSE includes
 #include "FEProblem.h"
+#include "MooseUtils.h"
+#include "MooseVariable.h"
+#include "NonlinearSystem.h"
 
 // libMesh includes
 #include "libmesh/coupling_matrix.h"

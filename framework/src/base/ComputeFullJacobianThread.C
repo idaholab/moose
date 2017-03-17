@@ -19,6 +19,8 @@
 #include "IntegratedBC.h"
 #include "DGKernel.h"
 #include "InterfaceKernel.h"
+#include "MooseVariable.h"
+#include "MooseVariableScalar.h"
 #include "NonlocalKernel.h"
 #include "NonlocalIntegratedBC.h"
 // libmesh includes
