@@ -47,6 +47,11 @@ def pp_1d_fully_saturated(fn):
     check_data(fn, correct_answer)
     return [correct_answer[1 + i] for i in range(10)]
 
+def pp_1d_fully_saturated_2(fn):
+    correct_answer = map(float, "10000,2795732.9559267,2439991.6439937,2202920.8455393,2078959.1115455,2026416.6558814,2007756.872924,2002037.7891179,2000487.1102026,2000108.1349692,2000026.3605354".split(","))
+    check_data(fn, correct_answer)
+    return [correct_answer[1 + i] for i in range(10)]
+
 def pp_1d_fully_saturated_3c(fn):
     correct_answer = map(float, "10000,2794613.7550861,2439232.0716679,2204918.7315799,2082276.6376567,2029069.062971,2009222.8198033,2002673.0623698,2000718.0463877,2000182.5948384,2000052.6383607".split(","))
     check_data(fn, correct_answer)
@@ -73,6 +78,7 @@ moosex5 = range(5, 105, 10)
 
 onephase = pp_1d("../../tests/pressure_pulse/gold/pressure_pulse_1d.csv")
 onephase_fully_saturated = pp_1d_fully_saturated("../../tests/pressure_pulse/gold/pressure_pulse_1d_fully_saturated.csv")
+onephase_fully_saturated_2 = pp_1d_fully_saturated_2("../../tests/pressure_pulse/gold/pressure_pulse_1d_fully_saturated_2.csv")
 onephase_3c_fully_saturated = pp_1d_fully_saturated_3c("../../tests/pressure_pulse/gold/pressure_pulse_1d_3comp_fully_saturated.csv")
 threecomp = pp_1d_3c("../../tests/pressure_pulse/gold/pressure_pulse_1d_3comp.csv")
 twophase = pp_1d_2p("../../tests/pressure_pulse/gold/pressure_pulse_1d_2phase.csv")
@@ -81,7 +87,7 @@ md = pp_1d_md("../../tests/pressure_pulse/gold/pressure_pulse_1d_MD.csv")
 plt.figure()
 plt.plot(xpoints, expected(xpoints), 'k-', linewidth = 3.0, label = 'expected (single phase)')
 plt.plot(moosex, onephase, 'rs', markersize = 10.0, label = 'MOOSE (one component)')
-plt.plot(moosex5, onephase_fully_saturated, 'bx', markersize = 13.0, label = 'MOOSE (fully saturated)')
+plt.plot(moosex5, onephase_fully_saturated_2, 'bx', markersize = 13.0, label = 'MOOSE (fully saturated)')
 plt.plot(moosex5, onephase_3c_fully_saturated, 'k*', markersize = 8.0, label = 'MOOSE (full sat, 3 comp)')
 plt.plot(moosex, threecomp, 'b^', label = 'MOOSE (3 component)')
 plt.plot(moosex, twophase, 'gx', markersize = 13.0, label = 'MOOSE (two phase)')

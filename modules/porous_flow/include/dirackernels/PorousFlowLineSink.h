@@ -85,7 +85,7 @@ protected:
   const bool _has_internal_energy;
 
   /// whether the flux  is a function of pressure or temperature
-  const MooseEnum _p_or_t;
+  const enum PorTchoice {pressure, temperature} _p_or_t;
 
   /// Whether the flux will be multiplied by the mass fraction
   const bool _use_mass_fraction;

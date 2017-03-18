@@ -28,21 +28,21 @@ PorousFlowPermeabilityExponential::PorousFlowPermeabilityExponential(const Input
     _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
     _dporosity_qp_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar")),
     _dporosity_qp_dgradvar(getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar")),
-    _poroperm_function(getParam<MooseEnum>("poroperm_function"))
+    _poroperm_function(getParam<MooseEnum>("poroperm_function").getEnum<PoropermFunction>())
 {
   switch (_poroperm_function)
   {
-    case 0: // log_k
+    case log_k:
       _AA = _A * std::log(10.0);
       _BB = std::pow(10.0, _B);
       break;
 
-    case 1: // ln_k
+    case ln_k:
       _AA = _A;
       _BB = std::exp(_B);
       break;
 
-    case 2: // exp_k
+    case exp_k:
       _AA = _A;
       _BB = _B;
       break;

@@ -230,7 +230,5 @@
 [Outputs]
   file_base = pressure_pulse_1d_3comp_fully_saturated
   print_linear_residuals = false
-  [./csv]
-    type = CSV
-  [../]
+  csv = true
 []

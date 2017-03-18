@@ -27,4 +27,10 @@
     csvdiff = 'heat03.csv'
     rel_err = 1.0E-5
   [../]
+  [./heat04]
+    type = 'CSVDiff'
+    input = 'heat04.i'
+    csvdiff = 'heat04.csv'
+    rel_err = 1.0E-5
+  [../]
 []

@@ -42,6 +42,9 @@ protected:
    */
   virtual Real dmobility(unsigned pvar) const;
 
+  /// If true then the mobility contains the fluid density, otherwise it doesn't
+  const bool _multiply_by_density;
+
   /// Permeability of porous material
   const MaterialProperty<RealTensorValue> & _permeability;
 

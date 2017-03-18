@@ -1,8 +1,10 @@
 # Pressure pulse in 1D with 1 phase - transient
+# using the PorousFlowFullySaturatedDarcyBase Kernel
+# and the PorousFlowFullySaturatedMassTimeDerivative Kernel
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 10
+  nx = 20
   xmin = 0
   xmax = 100
 []
@@ -19,15 +21,13 @@
 
 [Kernels]
   [./mass0]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 0
+    type = PorousFlowFullySaturatedMassTimeDerivative
     variable = pp
   [../]
   [./flux]
-    type = PorousFlowAdvectiveFlux
+    type = PorousFlowFullySaturatedDarcyBase
     variable = pp
     gravity = '0 0 0'
-    fluid_component = 0
   [../]
 []
 
@@ -41,42 +41,15 @@
 []
 
 [Materials]
-  [./temperature]
-    type = PorousFlowTemperature
-    at_nodes = true
-  [../]
   [./temperature_qp]
     type = PorousFlowTemperature
   [../]
-  [./ppss]
-    type = PorousFlow1PhaseP_VG
-    at_nodes = true
-    porepressure = pp
-    al = 1E-7
-    m = 0.5
-  [../]
   [./ppss_qp]
-    type = PorousFlow1PhaseP_VG
+    type = PorousFlow1PhaseP
     porepressure = pp
-    al = 1E-7
-    m = 0.5
   [../]
   [./massfrac]
     type = PorousFlowMassFraction
-    at_nodes = true
-  [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
-    at_nodes = true
-    density_P0 = 1000
-    bulk_modulus = 2E9
-    phase = 0
-  [../]
-  [./dens_all]
-    type = PorousFlowJoiner
-    include_old = true
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./dens0_qp]
     type = PorousFlowDensityConstBulk
@@ -91,34 +64,24 @@
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
-    at_nodes = true
     porosity = 0.1
+  [../]
+  [./biot_modulus]
+    type = PorousFlowConstantBiotModulus
+    fluid_bulk_modulus = 2E9
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1E-15 0 0 0 1E-15 0 0 0 1E-15'
   [../]
-  [./relperm]
-    type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
-    n = 0
-    phase = 0
-  [../]
-  [./relperm_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_relative_permeability_nodal
-  [../]
   [./visc0]
     type = PorousFlowViscosityConst
-    at_nodes = true
     viscosity = 1E-3
     phase = 0
   [../]
   [./visc_all]
     type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
+    material_property = PorousFlow_viscosity_qp
   [../]
 []
 
@@ -148,76 +111,70 @@
 []
 
 [Postprocessors]
-  [./p000]
+  [./p005]
     type = PointValue
     variable = pp
-    point = '0 0 0'
+    point = '5 0 0'
     execute_on = 'initial timestep_end'
   [../]
-  [./p010]
+  [./p015]
     type = PointValue
     variable = pp
-    point = '10 0 0'
+    point = '15 0 0'
     execute_on = 'initial timestep_end'
   [../]
-  [./p020]
+  [./p025]
     type = PointValue
     variable = pp
-    point = '20 0 0'
+    point = '25 0 0'
     execute_on = 'initial timestep_end'
   [../]
-  [./p030]
+  [./p035]
     type = PointValue
     variable = pp
-    point = '30 0 0'
+    point = '35 0 0'
     execute_on = 'initial timestep_end'
   [../]
-  [./p040]
+  [./p045]
     type = PointValue
     variable = pp
-    point = '40 0 0'
+    point = '45 0 0'
     execute_on = 'initial timestep_end'
   [../]
-  [./p050]
+  [./p055]
     type = PointValue
     variable = pp
-    point = '50 0 0'
+    point = '55 0 0'
     execute_on = 'initial timestep_end'
   [../]
-  [./p060]
+  [./p065]
     type = PointValue
     variable = pp
-    point = '60 0 0'
+    point = '65 0 0'
     execute_on = 'initial timestep_end'
   [../]
-  [./p070]
+  [./p075]
     type = PointValue
     variable = pp
-    point = '70 0 0'
+    point = '75 0 0'
     execute_on = 'initial timestep_end'
   [../]
-  [./p080]
+  [./p085]
     type = PointValue
     variable = pp
-    point = '80 0 0'
+    point = '85 0 0'
     execute_on = 'initial timestep_end'
   [../]
-  [./p090]
+  [./p095]
     type = PointValue
     variable = pp
-    point = '90 0 0'
-    execute_on = 'initial timestep_end'
-  [../]
-  [./p100]
-    type = PointValue
-    variable = pp
-    point = '100 0 0'
+    point = '95 0 0'
     execute_on = 'initial timestep_end'
   [../]
 []
 
 [Outputs]
-  file_base = pressure_pulse_1d
+  file_base = pressure_pulse_1d_fully_saturated_2
   print_linear_residuals = false
   csv = true
 []

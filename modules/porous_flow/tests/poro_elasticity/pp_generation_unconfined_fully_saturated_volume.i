@@ -1,24 +1,38 @@
 # A sample is constrained on all sides, except its top
 # and its boundaries are
 # also impermeable.  Fluid is pumped into the sample via a
-# volumetric source (ie kg/second per cubic meter), and the
+# volumetric source (ie m^3/second per cubic meter), and the
 # rise in the top surface, porepressure, and stress are observed.
 #
 # In the standard poromechanics scenario, the Biot Modulus is held
-# fixed and the source has units 1/time.  Then the expected result
+# fixed and the source has units 1/s.  Then the expected result
 # is
 # strain_zz = disp_z = BiotCoefficient*BiotModulus*s*t/((bulk + 4*shear/3) + BiotCoefficient^2*BiotModulus)
 # porepressure = BiotModulus*(s*t - BiotCoefficient*strain_zz)
 # stress_xx = (bulk - 2*shear/3)*strain_zz   (remember this is effective stress)
 # stress_zz = (bulk + 4*shear/3)*strain_zz   (remember this is effective stress)
 #
-# In porous_flow, however, the source has units kg/s/m^3 and the
-# Biot Modulus is not held fixed.  This means that disp_z, porepressure,
-# etc are not linear functions of t.  Nevertheless, the ratios remain
-# fixed:
+# In standard porous_flow, everything is based on mass, eg the source has
+# units kg/s/m^3.  This is discussed in the other pp_generation_unconfined
+# models.  In this test, we use the FullySaturated Kernel and set
+# multiply_by_density = false
+# meaning the fluid Kernel has units of volume, and the source, s, has units 1/time
+#
+# The ratios are:
 # stress_xx/strain_zz = (bulk - 2*shear/3) = 1 (for the parameters used here)
 # stress_zz/strain_zz = (bulk + 4*shear/3) = 4 (for the parameters used here)
 # porepressure/strain_zz = 13.3333333 (for the parameters used here)
+#
+# Expect
+# disp_z = 0.3*10*s*t/((2 + 4*1.5/3) + 0.3^2*10) = 0.612245*s*t
+# porepressure = 10*(s*t - 0.3*0.612245*s*t) = 8.163265*s*t
+# stress_xx = (2 - 2*1.5/3)*0.612245*s*t = 0.612245*s*t
+# stress_zz = (2 + 4*shear/3)*0.612245*s*t = 2.44898*s*t
+#
+# Finally, note that the volumetric strain has
+# consistent_with_displaced_mesh = false
+# which is needed when using the FullySaturated version of the Kernels
+# in order to generate the above results
 
 [Mesh]
   type = GeneratedMesh
@@ -116,21 +130,12 @@
     component = 2
     variable = disp_z
   [../]
-  [./poro_vol_exp]
-    type = PorousFlowMassVolumetricExpansion
-    variable = porepressure
-    fluid_component = 0
-  [../]
   [./mass0]
-    type = PorousFlowMassTimeDerivative
-    fluid_component = 0
+    type = PorousFlowFullySaturatedMassTimeDerivative
     variable = porepressure
-  [../]
-  [./flux]
-    type = PorousFlowAdvectiveFlux
-    variable = porepressure
-    gravity = '0 0 0'
-    fluid_component = 0
+    multiply_by_density = false
+    simulation_type = HydroMechanical
+    biot_coefficient = 0.3
   [../]
   [./source]
     type = UserForcingFunction
@@ -214,10 +219,6 @@
 
 
 [Materials]
-  [./temperature]
-    type = PorousFlowTemperature
-    at_nodes = true
-  [../]
   [./temperature_qp]
     type = PorousFlowTemperature
   [../]
@@ -237,42 +238,13 @@
   [./eff_fluid_pressure]
     type = PorousFlowEffectiveFluidPressure
   [../]
-  [./eff_fluid_pressure_nodal]
-    type = PorousFlowEffectiveFluidPressure
-    at_nodes = true
-  [../]
   [./vol_strain]
     type = PorousFlowVolumetricStrain
+    consistent_with_displaced_mesh = false
   [../]
   [./ppss]
-    type = PorousFlow1PhaseP_VG
+    type = PorousFlow1PhaseP
     porepressure = porepressure
-    al = 1 # unimportant in this fully-saturated test
-    m = 0.8   # unimportant in this fully-saturated test
-  [../]
-  [./ppss_nodal]
-    type = PorousFlow1PhaseP_VG
-    at_nodes = true
-    porepressure = porepressure
-    al = 1 # unimportant in this fully-saturated test
-    m = 0.8   # unimportant in this fully-saturated test
-  [../]
-  [./massfrac]
-    type = PorousFlowMassFraction
-    at_nodes = true
-  [../]
-  [./dens0]
-    type = PorousFlowDensityConstBulk
-    at_nodes = true
-    density_P0 = 1
-    bulk_modulus = 3.3333333333
-    phase = 0
-  [../]
-  [./dens_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    include_old = true
-    material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./dens0_qp]
     type = PorousFlowDensityConstBulk
@@ -286,68 +258,45 @@
     at_nodes = false
   [../]
   [./porosity]
-    type = PorousFlowPorosityHM
-    at_nodes = true
-    porosity_zero = 0.1
+    type = PorousFlowPorosityConst # the "const" is irrelevant here: all that uses Porosity is the BiotModulus, which just uses the initial value of porosity
+    porosity = 0.1
+  [../]
+  [./biot_modulus]
+    type = PorousFlowConstantBiotModulus
     biot_coefficient = 0.3
-    solid_bulk = 2
-  [../]
-  [./permeability]
-    type = PorousFlowPermeabilityConst
-    permeability = '1 0 0   0 1 0   0 0 1' # unimportant
-  [../]
-  [./relperm]
-    type = PorousFlowRelativePermeabilityCorey
-    at_nodes = true
-    n = 0 # unimportant in this fully-saturated situation
-    phase = 0
-  [../]
-  [./relperm_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_relative_permeability_nodal
-  [../]
-  [./visc0]
-    type = PorousFlowViscosityConst
-    at_nodes = true
-    viscosity = 1 # unimportant
-    phase = 0
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
+    fluid_bulk_modulus = 3.3333333333
+    solid_bulk_compliance = 0.5
   [../]
 []
 
 [Postprocessors]
   [./p0]
     type = PointValue
-    outputs = none
+    outputs = csv
     point = '0 0 0'
     variable = porepressure
   [../]
   [./zdisp]
     type = PointValue
-    outputs = none
+    outputs = csv
     point = '0 0 0.5'
     variable = disp_z
   [../]
   [./stress_xx]
     type = PointValue
-    outputs = none
+    outputs = csv
     point = '0 0 0'
     variable = stress_xx
   [../]
   [./stress_yy]
     type = PointValue
-    outputs = none
+    outputs = csv
     point = '0 0 0'
     variable = stress_yy
   [../]
   [./stress_zz]
     type = PointValue
-    outputs = none
+    outputs = csv
     point = '0 0 0'
     variable = stress_zz
   [../]
@@ -409,7 +358,7 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = pp_generation_unconfined
+  file_base = pp_generation_unconfined_fully_saturated_volume
   [./csv]
     type = CSV
   [../]

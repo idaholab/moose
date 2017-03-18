@@ -36,17 +36,17 @@ PorousFlowPermeabilityKozenyCarman::PorousFlowPermeabilityKozenyCarman(const Inp
     _porosity_qp(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
     _dporosity_qp_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar")),
     _dporosity_qp_dgradvar(getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar")),
-    _poroperm_function(getParam<MooseEnum>("poroperm_function"))
+    _poroperm_function(getParam<MooseEnum>("poroperm_function").getEnum<PoropermFunction>())
 {
   switch (_poroperm_function)
   {
-    case 0: // kozeny_carman_fd2
+    case kozeny_carman_fd2:
       if (!(parameters.isParamValid("f") && parameters.isParamValid("d")))
         mooseError("You must specify f and d in order to use kozeny_carman_fd2 in PorousFlowPermeabilityKozenyCarman");
       _A = _f * _d * _d;
       break;
 
-    case 1: // kozeny_carman_phi0
+    case kozeny_carman_phi0:
       if (!(parameters.isParamValid("k0") && parameters.isParamValid("phi0")))
         mooseError("You must specify k0 and phi0 in order to use kozeny_carman_phi0 in PorousFlowPermeabilityKozenyCarman");
       _A = _k0 * std::pow(1.0 - _phi0, _m)/std::pow(_phi0, _n);
