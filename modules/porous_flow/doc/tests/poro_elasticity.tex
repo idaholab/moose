@@ -1,17 +1,5 @@
 \documentclass[]{scrreprt}
 \usepackage{amsmath,amsfonts,graphicx}
-%\usepackage{multirow}
-%\usepackage{pslatex}
-%\usepackage{tabularx}
-%\usepackage{comment}
-%\usepackage{xspace}
-%\usepackage{array}
-
-%\usepackage{hyperref}
-
-%\usepackage{caption}
-%\DeclareCaptionFont{white}{\color{white}}
-%\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
 
 \def\species{\mathrm{sp}}
 \def\phase{\mathrm{ph}}
@@ -176,8 +164,132 @@ The PorousFlow Material {\tt PorousFlowPorosityHMBiotModulus} must be used.
 
 \chapter{Mandel's consolidation of a drained medium}
 
-This is documented at {\tt http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/TensorMechanicsBasics/PoroMechanics/}
-The PorousFlow Material {\tt PorousFlowPorosityHMBiotModulus} must be used.
+A sample's dimensions are $-a \leq x \leq a$ and $-b \leq y \leq b$,
+and it is in plane strain (no $z$ displacement).  It is squashed with
+constant normal force by impermeable, frictionless plattens on its top
+and bottom surfaces (at $y = \pm b$).  Fluid is allowed to leak out
+from its sides (at $x = \pm a$), but all other surfaces are
+impermeable.  This is called Mandel's problem and it is shown
+graphically in Fig~\ref{mandel_setup.fig}
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=8cm]{mandel_setup.pdf}
+\caption{The setup of the Mandel experiment: a force $F$ squashes a
+  porous material with impermeable plattens.  This causes fluid to
+  seep from the material.}
+\label{mandel_setup.fig}
+\end{center}
+\end{figure}
+
+The interesting feature of this problem (apart from that it can be
+solved analytically) is that the porepressure in the sample's center
+actually increases for a short time after application of the force.
+This is because the leakage of the fluid from the sample's sides
+causes an apparent softening of the material near those sides.  This
+means stress concentrates towards the sample's center which causes an
+increase in porepressure.  Of course, eventually the fluid totally
+drains from the sample, and the porepressure is zero.  As the fluid
+drains from the sample's sides the plattens move slowly towards each
+other. 
+
+The solution for porepressure and displacements is given in: AHD Cheng
+and E Detournay ``A direct boundary element method for plane strain
+poroelasticity'' International Journal of Numerical and Analytical
+Methods in Geomechanics 12 (1988) 551-572.  The solution involves
+rather lengthy infinite series, so I will not write it here.
+
+As is common in the literature, this is simulated by considering the
+quarter-sample, $0\leq x \leq a$ and $0\leq y\leq b$, with
+impermeable, roller BCs at $x=0$ and $y=0$ and $y=b$.  Porepressure is
+fixed at zero on $x=a$.  Porepressure and displacement are initialised
+to zero.  Then the top ($y=b$) is moved downwards with prescribed
+velocity, so that the total force that is induced by this downwards
+velocity is fixed.  The velocity is worked out by solving Mandel's
+problem analytically, and the total force is monitored in the
+simulation to check that it indeed remains constant.
+
+The simulations in the PorousFlow test suite use 10 elements in the
+$x$ direction and 1 in the $y$ direction.  Four types of simulation
+are run:
+\begin{enumerate}
+\item HM.  This uses standard PorousFlow Materials and Kernels, in
+  particular it uses the ``HM'' porosity relationship.  This is not
+  expected to agree perfectly with the analytical solutions because:
+  the solutions assume constant Biot modulus.
+\item constM.  This is identical to the HM case, save that it uses a
+  porosity evolution law that keeps the Biot modulus fixed.  It is
+  therefore expected to agree with the analytical solutions.
+\item FullSat.  This uses the FullySaturated versions of the fluid
+  mass time derivative and the fluid flux.  In this case the Biot
+  modulus is kept fixed, so it is expected to agree with the
+  analytical solutions.
+\item FullSatVol.  This uses the FullySaturated versions of the fluid
+  mass time derivative and the fluid flux, and does not multiply by
+  the fluid density.  Therefore this version is identical to what is
+  usually implemented in poro-elastic codes.  It is linear and
+  therefore converges in only one iteration.  In this case the Biot
+  modulus is kept fixed, so it is expected to agree with the
+  analytical solutions.
+\end{enumerate}
+Of course there are minor discrepancies between the last three and the
+analytical solution that are brought about through spatial and
+temporal discretisation errors.  The figures below present the
+results.
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=11cm]{mandel_ver_disp.pdf}
+\caption{The vertical displacement of the platten as a function of time.}
+\label{mandel_ver_disp.fig}
+\end{center}
+\end{figure}
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=11cm]{mandel_hor_disp.pdf}
+\caption{The horizontal displacement of the material at $(x,y) = (a,
+  b)$ as a function of time.}
+\label{mandel_hor_disp.fig}
+\end{center}
+\end{figure}
+
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=11cm]{mandel_HM.pdf}
+\caption{The porepressure at various points in the sample in the HM
+  model with $a=1$.}
+\label{mandel_HM.fig}
+\end{center}
+\end{figure}
+
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=11cm]{mandel_FSV.pdf}
+\caption{The porepressure at various points in the sample in the FullSatVol
+  model with $a=1$.}
+\label{mandel_FSV.fig}
+\end{center}
+\end{figure}
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=11cm]{mandel_force.pdf}
+\caption{The total downwards force on the platten as a function of
+  time.  This should be unity.}
+\label{mandel_force.fig}
+\end{center}
+\end{figure}
+
+
+
+
+
+
+
+
 
 \end{document}
 

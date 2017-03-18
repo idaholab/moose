@@ -12,6 +12,7 @@ InputParameters validParams<PorousFlowFullySaturatedDarcyBase>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<RealVectorValue>("gravity", "Gravitational acceleration vector downwards (m/s^2)");
+  params.addParam<bool>("multiply_by_density", true, "If true, then this Kernel is the fluid mass flux.  If false, then this Kernel is the fluid volume flux (which is common in poro-mechanics)");
   params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
   params.addClassDescription("Darcy flux suitable for models involving a fully-saturated, single phase, single component fluid.  No upwinding is used");
   return params;
@@ -19,6 +20,7 @@ InputParameters validParams<PorousFlowFullySaturatedDarcyBase>()
 
 PorousFlowFullySaturatedDarcyBase::PorousFlowFullySaturatedDarcyBase(const InputParameters & parameters) :
     Kernel(parameters),
+    _multiply_by_density(getParam<bool>("multiply_by_density")),
     _permeability(getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp")),
     _dpermeability_dvar(getMaterialProperty<std::vector<RealTensorValue>>("dPorousFlow_permeability_qp_dvar")),
     _dpermeability_dgradvar(getMaterialProperty<std::vector<std::vector<RealTensorValue>>>("dPorousFlow_permeability_qp_dgradvar")),
@@ -77,13 +79,17 @@ PorousFlowFullySaturatedDarcyBase::computeQpOffDiagJacobian(unsigned int jvar)
 Real PorousFlowFullySaturatedDarcyBase::mobility() const
 {
   const unsigned ph = 0;
-  return _density[_qp][ph] / _viscosity[_qp][ph];
+  Real mob = 1.0 / _viscosity[_qp][ph];
+  if (_multiply_by_density)
+    mob *= _density[_qp][ph];
+  return mob;
 }
 
 Real PorousFlowFullySaturatedDarcyBase::dmobility(unsigned pvar) const
 {
   const unsigned ph = 0;
-  Real dmob = _ddensity_dvar[_qp][ph][pvar] / _viscosity[_qp][ph];
-  dmob -= _ddensity_dvar[_qp][ph][pvar] * _dviscosity_dvar[_qp][ph][pvar] / std::pow(_viscosity[_qp][ph], 2);
+  Real dmob = - _dviscosity_dvar[_qp][ph][pvar] / std::pow(_viscosity[_qp][ph], 2);
+  if (_multiply_by_density)
+    dmob = _density[_qp][ph] * dmob + _ddensity_dvar[_qp][ph][pvar] / _viscosity[_qp][ph];
   return dmob;
 }

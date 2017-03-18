@@ -241,7 +241,5 @@
 [Outputs]
   file_base = pressure_pulse_1d_MD
   print_linear_residuals = false
-  [./csv]
-    type = CSV
-  [../]
+  csv = true
 []

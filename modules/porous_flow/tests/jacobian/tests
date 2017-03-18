@@ -59,6 +59,13 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
+  [./mass01_fully_saturated]
+    type = 'PetscJacobianTester'
+    input = 'mass01_fully_saturated.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+
   [./fflux01]
     type = 'PetscJacobianTester'
     input = 'fflux01.i'

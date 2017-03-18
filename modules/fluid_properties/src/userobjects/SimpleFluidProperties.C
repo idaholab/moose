@@ -15,7 +15,7 @@ InputParameters validParams<SimpleFluidProperties>()
   params.addParam<Real>("thermal_expansion", 2.14E-4, "Constant coefficient of thermal expansion (1/K)");
   params.addParam<Real>("cv", 4186.0, "Constant specific heat capacity at constant volume (J/kg/K)");
   params.addParam<Real>("cp", 4194.0, "Constant specific heat capacity at constant pressure (J/kg/K)");
-  params.addParam<Real>("bulk_modulus", 2.0E9, "Constant bulk modulus (Pa)");
+  params.addRangeCheckedParam<Real>("bulk_modulus", 2.0E9, "bulk_modulus>0", "Constant bulk modulus (Pa)");
   params.addParam<Real>("thermal_conductivity", 0.6, "Constant thermal conductivity (W/m/K)");
   params.addParam<Real>("specific_entropy", 300.0, "Constant specific entropy (J/kg/K)");
   params.addParam<Real>("viscosity", 1.0E-3, "Constant dynamic viscosity (Pa.s)");
