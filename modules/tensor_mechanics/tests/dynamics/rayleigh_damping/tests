@@ -13,4 +13,12 @@
     abs_zero = 1e-09
     compiler = 'GCC CLANG'
   [../]
+  [./newmark_material]
+    type = 'Exodiff'
+    input = 'rayleigh_newmark_material_dependent.i'
+    exodiff = 'rayleigh_newmark_out.e'
+    abs_zero = 1e-09
+    compiler = 'GCC CLANG'
+    prereq = 'newmark'
+  [../]
 []

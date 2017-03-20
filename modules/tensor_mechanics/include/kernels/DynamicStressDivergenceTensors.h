@@ -26,7 +26,7 @@ protected:
   const MaterialProperty<RankTwoTensor> & _stress_old;
 
   // Rayleigh damping parameter _zeta and HHT time integration parameter _alpha
-  const Real _zeta;
+  const MaterialProperty<Real> & _zeta;
   const Real _alpha;
   const bool _static_initialization;
 };
