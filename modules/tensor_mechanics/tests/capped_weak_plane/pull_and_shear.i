@@ -56,7 +56,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  use_displaced_mesh = false
   beta = 0.25 # Newmark time integration
   gamma = 0.5 # Newmark time integration
   eta = 1E3 #0.3E4 # higher values mean more damping via density
@@ -73,24 +72,26 @@
 
 [Kernels]
   [./DynamicTensorMechanics] # zeta*K*vel + K * disp
-    displacements = 'disp_x disp_y disp_z'
     zeta = 1E-2 # higher values mean more damping via stiffness
     alpha = 0 # better nonlinear convergence than for alpha>0
   [../]
   [./inertia_x] # M*accel + eta*M*vel
     type = InertialForce
+    use_displaced_mesh = false
     variable = disp_x
     velocity = vel_x
     acceleration = accel_x
   [../]
   [./inertia_y]
     type = InertialForce
+    use_displaced_mesh = false
     variable = disp_y
     velocity = vel_y
     acceleration = accel_y
   [../]
   [./inertia_z]
     type = InertialForce
+    use_displaced_mesh = false
     variable = disp_z
     velocity = vel_z
     acceleration = accel_z
@@ -550,4 +551,3 @@
   exodus = true
   csv = true
 []
-

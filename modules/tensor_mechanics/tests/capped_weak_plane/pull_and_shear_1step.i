@@ -31,7 +31,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  use_displaced_mesh = false
 []
 
 [Variables]
@@ -452,4 +451,3 @@
   file_base = pull_and_shear_1step
   exodus = true
 []
-

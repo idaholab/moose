@@ -17,6 +17,7 @@ InputParameters validParams<ComputeStrainBase>()
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
   params.addParam<bool>("volumetric_locking_correction", false, "Flag to correct volumetric locking");
   params.addParam<std::vector<MaterialPropertyName>>("eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
+  params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }
 
@@ -59,6 +60,9 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
 
   if (_ndisp == 1 && _volumetric_locking_correction)
     mooseError("Volumetric locking correction have to be set to false for 1-D problems.");
+
+  if (getParam<bool>("use_displaced_mesh"))
+    mooseError("The strain calculator needs to run on the undisplaced mesh.");
 }
 
 void
