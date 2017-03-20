@@ -1,16 +1,18 @@
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+  temperature = temp
+[]
+
 [Mesh]
-  file = gap_heat_transfer_convex_test.e
-  displacements = 'displ_x displ_y displ_z'
+  file = gap_heat_transfer_convex.e
 []
 
 [Functions]
-
   [./disp]
     type = PiecewiseLinear
     x = '0 2.0'
     y = '0 1.0'
   [../]
-
   [./temp]
     type = PiecewiseLinear
     x = '0     1'
@@ -19,24 +21,14 @@
 []
 
 [Variables]
-  [./displ_x]
-    order = FIRST
-    family = LAGRANGE
+  [./disp_x]
   [../]
-
-  [./displ_y]
-    order = FIRST
-    family = LAGRANGE
+  [./disp_y]
   [../]
-
-  [./displ_z]
-    order = FIRST
-    family = LAGRANGE
+  [./disp_z]
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 100
   [../]
 []
@@ -50,51 +42,43 @@
   [../]
 []
 
-[SolidMechanics]
-  [./solid]
-    disp_x = displ_x
-    disp_y = displ_y
-    disp_z = displ_z
-  [../]
+[Modules/TensorMechanics/Master/All]
+  volumetric_locking_correction = true
+  strain = FINITE
+  eigenstrain_names = eigenstrain
 []
 
-
 [Kernels]
-
   [./heat]
     type = HeatConduction
     variable = temp
   [../]
 []
 
-
 [BCs]
-
   [./move_right]
     type = FunctionDirichletBC
     boundary = '3'
-    variable = displ_x
+    variable = disp_x
     function = disp
   [../]
 
   [./fixed_x]
     type = DirichletBC
     boundary = '1'
-    variable = displ_x
+    variable = disp_x
     value = 0
   [../]
-
   [./fixed_y]
     type = DirichletBC
     boundary = '1 2 3 4'
-    variable = displ_y
+    variable = disp_y
     value = 0
   [../]
-
   [./fixed_z]
     type = DirichletBC
     boundary = '1 2 3 4'
-    variable = displ_z
+    variable = disp_z
     value = 0
   [../]
 
@@ -104,7 +88,6 @@
     variable = temp
     function = temp
   [../]
-
   [./temp_top]
     type = DirichletBC
     boundary = 4
@@ -114,20 +97,21 @@
 []
 
 [Materials]
-
-  [./dummy]
-    type = Elastic
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     block = '1 2'
-
-    disp_x = displ_x
-    disp_y = displ_y
-    disp_z = displ_z
-
     youngs_modulus = 1e6
-    poissons_ratio = .3
-
-    temp = temp
-    thermal_expansion = 0
+    poissons_ratio = 0.3
+  [../]
+  [./thermal_strain]
+    type = ComputeThermalExpansionEigenstrain
+    stress_free_temperature = 100
+    thermal_expansion_coeff = 0
+    incremental_form = true
+    eigenstrain_name = eigenstrain
+  [../]
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
   [../]
 
   [./heat1]
@@ -137,7 +121,6 @@
     specific_heat = 1.0
     thermal_conductivity = 1.0
   [../]
-
   [./heat2]
     type = HeatConductionMaterial
     block = 2
@@ -150,41 +133,21 @@
     type = Density
     block = '1 2'
     density = 1.0
-    disp_x = displ_x
-    disp_y = displ_y
-    disp_z = displ_z
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
-
 []
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
-
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-  petsc_options_value = '201                hypre    boomeramg      4'
-
-
-  line_search = 'none'
-
-
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-10
-
-  l_tol = 1e-3
-  l_max_its = 100
-
   start_time = 0.0
-  dt = 1e-1
+  dt = 0.1
   end_time = 2.0
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []

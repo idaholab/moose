@@ -88,13 +88,9 @@
 []
 
 [Variables]
-
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 100.0
   [../]
-
 []
 
 [Modules/TensorMechanics/Master]
@@ -110,7 +106,6 @@
     type = HeatConduction
     variable = temp
   [../]
-
 []
 
 [BCs]

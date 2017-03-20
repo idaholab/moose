@@ -1,35 +1,26 @@
+#Run with 4 procs
+
 [Mesh]
   file = cube.e
 []
 
 [Variables]
-  [./x_disp]
-    order = FIRST
-    family = LAGRANGE
+  [./disp_x]
   [../]
-
-  [./y_disp]
-    order = FIRST
-    family = LAGRANGE
+  [./disp_y]
   [../]
-
-  [./z_disp]
-    order = FIRST
-    family = LAGRANGE
+  [./disp_z]
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
 [SolidMechanics]
   [./solid]
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
-    temp = temp
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
@@ -42,28 +33,26 @@
 
 [BCs]
   [./bottom_x]
-    type = PresetBC
-    variable = x_disp
+    type = DirichletBC
+    variable = disp_x
     boundary = 1
     value = 0.0
   [../]
-
   [./bottom_y]
-    type = PresetBC
-    variable = y_disp
+    type = DirichletBC
+    variable = disp_y
     boundary = 1
     value = 0.0
   [../]
-
   [./bottom_z]
-    type = PresetBC
-    variable = z_disp
+    type = DirichletBC
+    variable = disp_z
     boundary = 1
     value = 0.0
   [../]
 
   [./bottom_temp]
-    type = PresetBC
+    type = DirichletBC
     variable = temp
     boundary = 1
     value = 10.0
@@ -75,9 +64,9 @@
     type = LinearIsotropicMaterial
     block = 1
 
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
     temp = temp
 
     youngs_modulus = 1.0
@@ -97,33 +86,19 @@
     type = Density
     block = 1
     density = 1.0
-    disp_x = x_disp
-    disp_y = y_disp
-    disp_z = z_disp
-  [../]
-[]
-
-[Preconditioning]
-  [./SMP]
-    type = SMP
-    full = true
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
   [../]
 []
 
 [Executioner]
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
-
   nl_rel_tol = 1e-14
-
   l_tol = 1e-3
+
   l_max_its = 100
 
   dt = 1.0
@@ -131,10 +106,6 @@
 []
 
 [Outputs]
-  file_base = out_smp
-  [./exodus]
-    type = Exodus
-    execute_on = 'initial timestep_end nonlinear'
-    nonlinear_residual_dt_divisor = 100
-  [../]
+  file_base = thermo_mech_out
+  exodus = true
 []
