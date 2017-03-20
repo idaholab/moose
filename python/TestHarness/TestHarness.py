@@ -188,74 +188,15 @@ class TestHarness:
                                 # Retrieve the tests from the warehouse
                                 testers = self.warehouse.getActiveObjects()
 
-                                # Augment the Testers with additional information directly from the TestHarness
-                                for tester in testers:
-                                    self.augmentParameters(file, tester)
+                                # Pass control to launchTest (refactored)
+                                self.launchTest(find_only, file, dirpath, testers)
 
-                                # Short circuit this loop if we've only been asked to parse Testers
-                                # Note: The warehouse will accumulate all testers in this mode
-                                if find_only:
-                                    self.warehouse.markAllObjectsInactive()
-                                    continue
-
-                                # Clear out the testers, we won't need them to stick around in the warehouse
-                                self.warehouse.clear()
-
-                                if self.options.enable_recover:
-                                    testers = self.appendRecoverableTests(testers)
-
-                                # Handle PBS tests.cluster file
-                                if self.options.pbs:
-                                    (tester, command) = self.createClusterLauncher(dirpath, testers)
-                                    if command is not None:
-                                        tester.setStatus('LAUNCHED', tester.bucket_pbs)
-                                        self.runner.run(tester, command)
-                                else:
-                                    # Go through the Testers and run them
-                                    for tester in testers:
-                                        # Double the alloted time for tests when running with the valgrind option
-                                        tester.setValgrindMode(self.options.valgrind_mode)
-
-                                        # When running in valgrind mode, we end up with a ton of output for each failed
-                                        # test.  Therefore, we limit the number of fails...
-                                        if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
-                                            tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
-                                        elif self.num_failed > self.options.max_fails:
-                                            tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
-                                        elif tester.parameters().isValid('error_code'):
-                                            tester.setStatus('Parser Error', tester.bucket_skip)
-                                        else:
-                                            should_run = tester.checkRunnableBase(self.options, self.checks, self.test_list)
-                                            # check for deprecated tuple
-                                            if type(should_run) == type(()):
-                                                (should_run, reason) = should_run
-                                                if not should_run:
-                                                    reason = 'deprected checkRunnableBase #8037'
-                                                    tester.setStatus(reason, tester.bucket_skip)
-                                        if should_run:
-                                            command = tester.getCommand(self.options)
-                                            # This method spawns another process and allows this loop to continue looking for tests
-                                            # RunParallel will call self.testOutputAndFinish when the test has completed running
-                                            # This method will block when the maximum allowed parallel processes are running
-                                            if self.options.dry_run:
-                                                self.handleTestStatus(tester)
-                                            else:
-                                                self.runner.run(tester, command)
-                                        else: # This job is skipped - notify the runner
-                                            status = tester.getStatus()
-                                            if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
-                                                if (self.options.report_skipped and status == tester.bucket_skip) \
-                                                   or status == tester.bucket_skip:
-                                                    self.handleTestStatus(tester)
-                                                elif status == tester.bucket_deleted and self.options.extra_info:
-                                                    self.handleTestStatus(tester)
-                                            self.runner.jobSkipped(tester.parameters()['test_name'])
-
-                                    # See if any tests have colliding outputs
-                                    self.checkForRaceConditionOutputs(testers, dirpath)
+                                # See if any tests have colliding outputs
+                                self.checkForRaceConditionOutputs(testers, dirpath)
 
                                 os.chdir(saved_cwd)
                                 sys.path.pop()
+
         except KeyboardInterrupt:
             if self.writeFailedTest != None:
                 self.writeFailedTest.close()
@@ -276,6 +217,70 @@ class TestHarness:
             self.error_code = self.error_code | 0x80
 
         return
+
+    def launchTest(self, find_only, file, dirpath, testers):
+        # Augment the Testers with additional information directly from the TestHarness
+        for tester in testers:
+            self.augmentParameters(file, tester)
+
+        # Short circuit this loop if we've only been asked to parse Testers
+        # Note: The warehouse will accumulate all testers in this mode
+        if find_only:
+            self.warehouse.markAllObjectsInactive()
+            return
+
+        # Clear out the testers, we won't need them to stick around in the warehouse
+        self.warehouse.clear()
+
+        if self.options.enable_recover:
+            testers = self.appendRecoverableTests(testers)
+
+        # Handle PBS tests.cluster file
+        if self.options.pbs:
+            (tester, command) = self.createClusterLauncher(dirpath, testers)
+            if command is not None:
+                tester.setStatus('LAUNCHED', tester.bucket_pbs)
+                self.runner.run(tester, command)
+        else:
+            # Go through the Testers and run them
+            for tester in testers:
+                # Double the alloted time for tests when running with the valgrind option
+                tester.setValgrindMode(self.options.valgrind_mode)
+
+                # When running in valgrind mode, we end up with a ton of output for each failed
+                # test.  Therefore, we limit the number of fails...
+                if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
+                    tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
+                elif self.num_failed > self.options.max_fails:
+                    tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
+                elif tester.parameters().isValid('error_code'):
+                    tester.setStatus('Parser Error', tester.bucket_skip)
+                else:
+                    should_run = tester.checkRunnableBase(self.options, self.checks, self.test_list)
+                    # check for deprecated tuple
+                    if type(should_run) == type(()):
+                        (should_run, reason) = should_run
+                        if not should_run:
+                            reason = 'deprected checkRunnableBase #8037'
+                            tester.setStatus(reason, tester.bucket_skip)
+                    if should_run:
+                        command = tester.getCommand(self.options)
+                        # This method spawns another process and allows this loop to continue looking for tests
+                        # RunParallel will call self.testOutputAndFinish when the test has completed running
+                        # This method will block when the maximum allowed parallel processes are running
+                        if self.options.dry_run:
+                            self.handleTestStatus(tester)
+                        else:
+                            self.runner.run(tester, command)
+                    else: # This job is skipped - notify the runner
+                        status = tester.getStatus()
+                        if status != tester.bucket_silent: # SILENT occurs when a user is using --re options
+                            if (self.options.report_skipped and status == tester.bucket_skip) \
+                               or status == tester.bucket_skip:
+                                self.handleTestStatus(tester)
+                            elif status == tester.bucket_deleted and self.options.extra_info:
+                                self.handleTestStatus(tester)
+                        self.runner.jobSkipped(tester.parameters()['test_name'])
 
     def createClusterLauncher(self, dirpath, testers):
         self.options.test_serial_number = 0
