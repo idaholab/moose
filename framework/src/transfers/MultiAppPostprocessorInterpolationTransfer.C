@@ -56,7 +56,9 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
 void
 MultiAppPostprocessorInterpolationTransfer::execute()
 {
+  #ifndef NDEBUG
   _console << "Beginning PostprocessorInterpolationTransfer " << name() << std::endl;
+  #endif
 
   switch (_direction)
   {
@@ -155,5 +157,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
     }
   }
 
+  #ifndef NDEBUG
   _console << "Finished PostprocessorInterpolationTransfer " << name() << std::endl;
+  #endif
 }

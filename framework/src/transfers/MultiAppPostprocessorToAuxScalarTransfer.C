@@ -43,7 +43,9 @@ MultiAppPostprocessorToAuxScalarTransfer::MultiAppPostprocessorToAuxScalarTransf
 void
 MultiAppPostprocessorToAuxScalarTransfer::execute()
 {
+  #ifndef NDEBUG
   _console << "Beginning PostprocessorToAuxScalarTransfer " << name() << std::endl;
+  #endif
 
   // Perform action based on the transfer direction
   switch (_direction)
@@ -105,5 +107,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
     }
   }
 
+  #ifndef NDEBUG
   _console << "Finished PostprocessorToAuxScalarTransfer " << name() << std::endl;
+  #endif
 }

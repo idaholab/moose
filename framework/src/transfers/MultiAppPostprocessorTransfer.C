@@ -48,7 +48,9 @@ MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParamete
 void
 MultiAppPostprocessorTransfer::execute()
 {
+  #ifndef NDEBUG
   _console << "Beginning PostprocessorTransfer " << name() << std::endl;
+  #endif
 
   switch (_direction)
   {
@@ -131,5 +133,7 @@ MultiAppPostprocessorTransfer::execute()
     }
   }
 
+  #ifndef NDEBUG
   _console << "Finished PostprocessorTransfer " << name() << std::endl;
+  #endif
 }

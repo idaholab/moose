@@ -60,7 +60,9 @@ MultiAppMeshFunctionTransfer::initialSetup()
 void
 MultiAppMeshFunctionTransfer::execute()
 {
-  Moose::out << "Beginning MeshFunctionTransfer " << name() << std::endl;
+  #ifndef NDEBUG
+  _console << "Beginning MeshFunctionTransfer " << name() << std::endl;
+  #endif
 
   getAppInfo();
 
@@ -415,5 +417,7 @@ MultiAppMeshFunctionTransfer::execute()
       send_ids[i_proc].wait();
   }
 
+  #ifndef NDEBUG
   _console << "Finished MeshFunctionTransfer " << name() << std::endl;
+  #endif
 }

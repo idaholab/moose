@@ -71,7 +71,9 @@ MultiAppNearestNodeTransfer::initialSetup()
 void
 MultiAppNearestNodeTransfer::execute()
 {
+  #ifndef NDEBUG
   _console << "Beginning NearestNodeTransfer " << name() << std::endl;
+  #endif
 
   getAppInfo();
 
@@ -493,7 +495,9 @@ MultiAppNearestNodeTransfer::execute()
     send_evals[i_proc].wait();
   }
 
+  #ifndef NDEBUG
   _console << "Finished NearestNodeTransfer " << name() << std::endl;
+  #endif
 }
 
 Node *

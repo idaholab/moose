@@ -42,7 +42,9 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
 void
 MultiAppVariableValueSamplePostprocessorTransfer::execute()
 {
+  #ifndef NDEBUG
   _console << "Beginning VariableValueSamplePostprocessorTransfer " << name() << std::endl;
+  #endif
 
   switch (_direction)
   {
@@ -96,5 +98,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
     }
   }
 
+  #ifndef NDEBUG
   _console << "Finished VariableValueSamplePostprocessorTransfer " << name() << std::endl;
+  #endif
 }

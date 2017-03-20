@@ -2815,7 +2815,9 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECT
   {
     const auto & transfers = wh.getActiveObjects();
 
+    #ifndef NDEBUG
     _console << COLOR_CYAN << "\nStarting Transfers on " <<  Moose::stringify(type) << string_direction << "MultiApps" << COLOR_DEFAULT << std::endl;
+    #endif
     for (const auto & transfer : transfers)
     {
       Moose::perf_log.push(transfer->name(), "Transfers");
@@ -2823,13 +2825,19 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECT
       Moose::perf_log.pop(transfer->name(), "Transfers");
     }
 
+    #ifndef NDEBUG
     _console << "Waiting For Transfers To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator);
 
     _console << COLOR_CYAN << "Transfers on " <<  Moose::stringify(type) << " Are Finished\n" << COLOR_DEFAULT << std::endl;
+    #endif
   }
   else if (_multi_apps[type].getActiveObjects().size())
+  {
+    #ifndef NDEBUG
     _console << COLOR_CYAN << "\nNo Transfers on " <<  Moose::stringify(type) << " To MultiApps\n" << COLOR_DEFAULT << std::endl;
+    #endif
+  }
 }
 
 std::vector<std::shared_ptr<Transfer>>
@@ -2855,22 +2863,28 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
   // Execute MultiApps
   if (multi_apps.size())
   {
+    #ifndef NDEBUG
     _console << COLOR_CYAN << "\nExecuting MultiApps on " <<  Moose::stringify(type) << COLOR_DEFAULT << std::endl;
+    #endif
 
     bool success = true;
 
     for (const auto & multi_app : multi_apps)
       success = multi_app->solveStep(_dt, _time, auto_advance);
 
+    #ifndef NDEBUG
     _console << "Waiting For Other Processors To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator);
+    #endif
 
     _communicator.max(success);
 
     if (!success)
       return false;
 
+    #ifndef NDEBUG
     _console << COLOR_CYAN << "Finished Executing MultiApps on " <<  Moose::stringify(type) << "\n" << COLOR_DEFAULT << std::endl;
+    #endif
   }
 
   // Execute Transfers _from_ MultiApps

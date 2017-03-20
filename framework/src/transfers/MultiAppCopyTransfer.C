@@ -106,7 +106,9 @@ MultiAppCopyTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from_
 void
 MultiAppCopyTransfer::execute()
 {
+  #ifndef NDEBUG
   _console << "Beginning MultiAppCopyTransfer " << name() << std::endl;
+  #endif
 
   if (_direction == TO_MULTIAPP)
   {
@@ -124,5 +126,7 @@ MultiAppCopyTransfer::execute()
         transfer(to_problem, _multi_app->appProblemBase(i));
   }
 
+  #ifndef NDEBUG
   _console << "Finished MultiAppCopyTransfer " << name() << std::endl;
+  #endif
 }
