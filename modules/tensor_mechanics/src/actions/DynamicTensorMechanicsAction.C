@@ -15,7 +15,7 @@ validParams<DynamicTensorMechanicsAction>()
 {
   InputParameters params = validParams<TensorMechanicsAction>();
   params.addClassDescription("Set up dynamic stress divergence kernels");
-  params.addParam<Real>("zeta", 0, "zeta parameter for the Rayleigh damping");
+  params.addParam<MaterialPropertyName>("zeta", 0.0, "Name of material property or a constant real number defining the zeta parameter for the Rayleigh damping.");
   params.addParam<Real>("alpha", 0, "alpha parameter for HHT time integration");
   params.addParam<bool>("static_initialization", false, "Set to true get the system to equillibrium under gravity by running a quasi-static analysis (by solving Ku = F) in the first time step.");
   return params;

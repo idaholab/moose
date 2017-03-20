@@ -34,9 +34,8 @@ private:
   const VariableValue & _accel_old;
   const Real _beta;
   const Real _gamma;
-  const Real _eta;
+  const MaterialProperty<Real> & _eta;
   const Real _alpha;
-
 };
 
 #endif //INERTIALFORCE_H
