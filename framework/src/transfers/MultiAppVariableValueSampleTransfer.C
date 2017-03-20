@@ -48,7 +48,9 @@ MultiAppVariableValueSampleTransfer::initialSetup()
 void
 MultiAppVariableValueSampleTransfer::execute()
 {
+  #ifndef NDEBUG
   _console << "Beginning VariableValueSampleTransfer " << name() << std::endl;
+  #endif
 
   switch (_direction)
   {
@@ -136,5 +138,7 @@ MultiAppVariableValueSampleTransfer::execute()
     }
   }
 
+  #ifndef NDEBUG
   _console << "Finished VariableValueSampleTransfer " << name() << std::endl;
+  #endif
 }

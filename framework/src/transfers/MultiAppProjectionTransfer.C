@@ -169,7 +169,9 @@ MultiAppProjectionTransfer::assembleL2(EquationSystems & es, const std::string &
 void
 MultiAppProjectionTransfer::execute()
 {
+  #ifndef NDEBUG
   _console << "Beginning projection transfer " << name() << std::endl;
+  #endif
 
   getAppInfo();
 
@@ -500,7 +502,9 @@ MultiAppProjectionTransfer::execute()
   if (_fixed_meshes)
     _qps_cached = true;
 
+  #ifndef NDEBUG
   _console << "Finished projection transfer " << name() << std::endl;
+  #endif
 }
 
 void

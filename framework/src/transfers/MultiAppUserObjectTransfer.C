@@ -59,7 +59,9 @@ MultiAppUserObjectTransfer::initialSetup()
 void
 MultiAppUserObjectTransfer::execute()
 {
+  #ifndef NDEBUG
   _console << "Beginning MultiAppUserObjectTransfer " << name() << std::endl;
+  #endif
 
   switch (_direction)
   {
@@ -168,7 +170,9 @@ MultiAppUserObjectTransfer::execute()
 
       unsigned int to_var_num = to_sys.variable_number(to_var.name());
 
+      #ifndef NDEBUG
       _console << "Transferring to: " << to_var.name() << std::endl;
+      #endif
 
       // EquationSystems & to_es = to_sys.get_equation_systems();
 
@@ -254,5 +258,7 @@ MultiAppUserObjectTransfer::execute()
     }
   }
 
+  #ifndef NDEBUG
   _console << "Finished MultiAppUserObjectTransfer " << name() << std::endl;
+  #endif
 }
