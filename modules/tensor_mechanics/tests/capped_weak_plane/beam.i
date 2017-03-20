@@ -15,7 +15,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  use_displaced_mesh = false
 []
 
 [Variables]
@@ -32,6 +31,7 @@
   [../]
   [./gravity_y]
     type = Gravity
+    use_displaced_mesh = false
     variable = disp_y
     value = -10
   [../]
@@ -442,4 +442,3 @@
   exodus = true
   csv = true
 []
-

@@ -5,8 +5,6 @@
 []
 
 [GlobalParams]
-  block = 0
-  use_displaced_mesh = false
   displacements = 'disp_x disp_y disp_z'
 []
 

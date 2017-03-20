@@ -6,8 +6,7 @@
 []
 
 [GlobalParams]
-  block = 0
-  use_displaced_mesh = false
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -21,7 +20,6 @@
 
 [Kernels]
   [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
   [../]
 []
 
@@ -67,7 +65,6 @@
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./mc]
     type = ComputeCappedWeakPlaneStress

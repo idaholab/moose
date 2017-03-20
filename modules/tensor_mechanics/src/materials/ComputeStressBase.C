@@ -15,6 +15,7 @@ InputParameters validParams<ComputeStressBase>()
   params.addParam<std::vector<FunctionName> >("initial_stress", "A list of functions describing the initial stress.  If provided, there must be 9 of these, corresponding to the xx, yx, zx, xy, yy, zy, xz, yz, zz components respectively.  If not provided, all components of the initial stress will be zero");
   params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
   params.addParam<bool>("store_stress_old", false, "Parameter which indicates whether the old stress state, required for the HHT time integration scheme and Rayleigh damping, needs to be stored");
+  params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }
 
@@ -46,6 +47,9 @@ ComputeStressBase::ComputeStressBase(const InputParameters & parameters) :
   _initial_stress.resize(num);
   for (unsigned i = 0; i < num; ++i)
     _initial_stress[i] = &getFunctionByName(fcn_names[i]);
+
+  if (getParam<bool>("use_displaced_mesh"))
+    mooseError("The stress calculator needs to run on the undisplaced mesh.");
 }
 
 void
