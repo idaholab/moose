@@ -544,7 +544,7 @@ FeatureFloodCount::scatterAndUpdateRanks()
   else
   {
     for (auto global_index : local_to_global_all)
-      if (global_index > largest_global_index)
+      if (global_index != FeatureFloodCount::invalid_size_t && global_index > largest_global_index)
         largest_global_index = global_index;
   }
 
