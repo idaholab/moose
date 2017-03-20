@@ -11,10 +11,10 @@
 #  expansion is 1e-6.  Therefore, the strain (and the displacement
 #  since this is a unit cube) is 1e-4.
 
-[Mesh]#Comment
+[Mesh]
   file = thermal_strain_test.e
   displacements = 'disp_x disp_y disp_z'
-[] # Mesh
+[]
 
 [Functions]
   [./tempFunc]
@@ -22,35 +22,22 @@
     x = '0. 1.'
     y = '117.56 217.56'
   [../]
-[] # Functions
+[]
 
 [Variables]
-
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 117.56
   [../]
-
-[] # Variables
+[]
 
 [AuxVariables]
-
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -75,8 +62,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-
-[] # AuxVariables
+[]
 
 [SolidMechanics]
   [./solid]
@@ -87,16 +73,13 @@
 []
 
 [Kernels]
-
   [./heat]
     type = HeatConduction
     variable = temp
   [../]
-
-[] # Kernels
+[]
 
 [AuxKernels]
-
   [./stress_xx]
     type = MaterialTensorAux
     tensor = stress
@@ -133,11 +116,9 @@
     variable = stress_zx
     index = 5
   [../]
-
-[] # AuxKernels
+[]
 
 [BCs]
-
   [./no_x]
     type = DirichletBC
     variable = disp_x
@@ -163,12 +144,9 @@
     boundary = '10 12'
     function = tempFunc
   [../]
-
-
-[] # BCs
+[]
 
 [Materials]
-
   [./stiffStuff1]
     type = Elastic
     block = 1
@@ -284,19 +262,12 @@
     disp_y = disp_y
     disp_z = disp_z
   [../]
-
-
-[] # Materials
+[]
 
 [Executioner]
-
   type = Transient
 
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
-
 
   nl_abs_tol = 1e-10
 
@@ -306,12 +277,12 @@
   dt = 0.5
   num_steps = 2
   end_time = 1.0
-[] # Executioner
+[]
 
 [Outputs]
-  file_base = out
+  file_base = thermal_strain_out
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
   [../]
-[] # Outputs
+[]

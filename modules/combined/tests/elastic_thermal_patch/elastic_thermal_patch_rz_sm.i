@@ -1,23 +1,55 @@
-# This problem is intended to exercise the Jacobian for coupled RZ
-# problems.  Only two iterations should be needed.
+#
+# This problem is modified from the Abaqus verification manual:
+#   "1.5.4 Patch test for axisymmetric elements"
+# The original stress solution is given as:
+#   xx = yy = zz = 2000
+#   xy = 400
+#
+# Here, E=1e6 and nu=0.25.
+# However, with a +100 degree change in temperature and a coefficient
+#   of thermal expansion of 1e-6, the solution becomes:
+#   xx = yy = zz = 1800
+#   xy = 400
+#   since
+#   E*(1-nu)/(1+nu)/(1-2*nu)*(1+2*nu/(1-nu))*(1e-3-1e-4) = 1800
+#
+# Also,
+#
+#   dSrr   dSrz   Srr-Stt
+#   ---- + ---- + ------- + br = 0
+#    dr     dz       r
+#
+# and
+#
+#   dSrz   Srz   dSzz
+#   ---- + --- + ---- + bz = 0
+#    dr     r     dz
+#
+# where
+#   Srr = stress in rr
+#   Szz = stress in zz
+#   Stt = stress in theta-theta
+#   Srz = stress in rz
+#   br  = body force in r direction
+#   bz  = body force in z direction
+#
 
 [Problem]
   coord_type = RZ
 []
 
-
-[Mesh]#Comment
+[Mesh]
   file = elastic_thermal_patch_rz_test.e
-[] # Mesh
+[]
 
 [Functions]
   [./ur]
     type = ParsedFunction
-    value = '0'
+    value = '1e-3*x'
   [../]
   [./uz]
     type = ParsedFunction
-    value = '0'
+    value = '1e-3*(x+y)'
   [../]
   [./body]
     type = ParsedFunction
@@ -27,30 +59,20 @@
     type = ParsedFunction
     value = '117.56+100*t'
   [../]
-[] # Functions
+[]
 
 [Variables]
-
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 117.56
   [../]
-
-[] # Variables
+[]
 
 [AuxVariables]
-
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -75,35 +97,30 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-
-[] # AuxVariables
+[]
 
 [SolidMechanics]
   [./solid]
     disp_r = disp_x
     disp_z = disp_y
-    temp = temp
   [../]
 []
 
 [Kernels]
-
-#  [./body]
-#    type = BodyForce
-#    variable = disp_y
-#    value = 1
-#    function = body
-#  [../]
+  [./body]
+    type = BodyForce
+    variable = disp_y
+    value = 1
+    function = body
+  [../]
 
   [./heat]
     type = HeatConduction
     variable = temp
   [../]
-
-[] # Kernels
+[]
 
 [AuxKernels]
-
   [./stress_xx]
     type = MaterialTensorAux
     tensor = stress
@@ -140,21 +157,19 @@
     variable = stress_zx
     index = 5
   [../]
-
-[] # AuxKernels
+[]
 
 [BCs]
-
   [./ur]
     type = FunctionPresetBC
     variable = disp_x
-    boundary = 1
+    boundary = 10
     function = ur
   [../]
   [./uz]
     type = FunctionPresetBC
     variable = disp_y
-    boundary = 2
+    boundary = 10
     function = uz
   [../]
 
@@ -164,11 +179,9 @@
     boundary = 10
     function = temp
   [../]
-
-[] # BCs
+[]
 
 [Materials]
-
   [./stiffStuff1]
     type = Elastic
     block = 1
@@ -176,7 +189,7 @@
     disp_r = disp_x
     disp_z = disp_y
 
-    youngs_modulus = 1e6
+    lambda = 400000.0
     poissons_ratio = 0.25
 
     temp = temp
@@ -198,39 +211,14 @@
     disp_r = disp_x
     disp_z = disp_y
   [../]
-
-[] # Materials
-
-[Preconditioning]
-#  [./FDP]
-#    type = FDP
-#    full = true
-#  [../]
-  [./SMP]
-    type = SMP
-    full = true
-  [../]
 []
 
 [Executioner]
-
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
-  petsc_options_iname = '-pc_type -ksp_gmres_restart'
-  petsc_options_value = 'lu       101'
-
-
-  line_search = 'none'
-
-
-  nl_abs_tol = 1e-9
+  nl_abs_tol = 1e-11
   nl_rel_tol = 1e-12
-
 
   l_max_its = 20
 
@@ -238,14 +226,12 @@
   dt = 1.0
   num_steps = 1
   end_time = 1.0
-[] # Executioner
+[]
 
 [Outputs]
-  file_base = out_jac_rz_smp
+  file_base = elastic_thermal_patch_rz_out
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
-    execute_on = 'initial timestep_end nonlinear'
-    nonlinear_residual_dt_divisor = 100
   [../]
-[] # Outputs
+[]

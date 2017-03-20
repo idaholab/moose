@@ -1,6 +1,6 @@
 # Patch Test
 
-# This test is designed to compute constant xx, yy, zz, xy, yz, and xz
+# This test is designed to compute constant xx, yy, zz, xy, yz, and zx
 #  stress on a set of irregular hexes.  The mesh is composed of one
 #  block with seven elements.  The elements form a unit cube with one
 #  internal element.  There is a nodeset for each exterior node.
@@ -8,8 +8,7 @@
 # The cube is displaced by 1e-6 units in x, 2e-6 in y, and 3e-6 in z.
 #  The faces are sheared as well (1e-6, 2e-6, and 3e-6 for xy, yz, and
 #  zx).  This gives a uniform strain/stress state for all six unique
-#  tensor components.  This displacement is again applied in the second
-#  step.
+#  tensor components.
 
 # With Young's modulus at 1e6 and Poisson's ratio at 0, the shear
 #  modulus is 5e5 (G=E/2/(1+nu)).  Therefore, for the mechanical strain,
@@ -22,172 +21,102 @@
 #  stress yz = 2 * 5e5 * 2e-6 / 2 = 1
 #  stress zx = 2 * 5e5 * 3e-6 / 2 = 1.5
 
-# Young's modulus is a function of temperature for this test.  The
-#  temperature changes from 100 to 500.  The Young's modulus drops
-#  due to that temperature change from 1e6 to 6e5.
+# However, we must also consider the thermal strain.
+# The temperature moves 100 degrees, and the coefficient of thermal
+#  expansion is 1e-8.  Therefore, the thermal strain (and the displacement
+#  since this is a unit cube) is 1e-6.
 
-# Poisson's ratio also is a function of temperature and changes from
-#  0 to 0.25.
-
-# At the end of the temperature ramp, E=6e5 and nu=0.25.  This gives
-#  G=2.4e=5.  lambda=E*nu/(1+nu)/(1-2*nu)=2.4E5.  The final stress
-#  is therefore
-
-#  stress xx = 2.4e5 * 12e-6 + 2*2.4e5*2e-6 = 3.84
-#  stress yy = 2.4e5 * 12e-6 + 2*2.4e5*4e-6 = 4.80
-#  stress zz = 2.4e5 * 12e-6 + 2*2.4e5*6e-6 = 5.76
-#  stress xy = 2 * 2.4e5 * 2e-6 / 2 = 0.48
+# Therefore, the overall effect is (at time 1, with a 50 degree delta):
+#
+#  stress xx = 1e6 * (1e-6-0.5e-6) = 0.5
+#  stress yy = 1e6 * (2e-6-0.5e-6) = 1.5
+#  stress zz = 1e6 * (3e-6-0.5e-6) = 2.5
+#  stress xy = 2 * 5e5 * 1e-6 / 2 = 0.5
 #             (2 * G   * gamma_xy / 2 = 2 * G * epsilon_xy)
-#  stress yz = 2 * 2.4e5 * 4e-6 / 2 = 0.96
-#  stress xz = 2 * 2.4e5 * 6e-6 / 2 = 1.44
+#  stress yz = 2 * 5e5 * 2e-6 / 2 = 1
+#  stress zx = 2 * 5e5 * 3e-6 / 2 = 1.5
+#
+# At time 2:
+#
+#  stress xx = 1e6 * (1e-6-1e-6) = 0
+#  stress yy = 1e6 * (2e-6-1e-6) = 1
+#  stress zz = 1e6 * (3e-6-1e-6) = 2
+#  stress xy = 2 * 5e5 * 1e-6 / 2 = 0.5
+#             (2 * G   * gamma_xy / 2 = 2 * G * epsilon_xy)
+#  stress yz = 2 * 5e5 * 2e-6 / 2 = 1
+#  stress zx = 2 * 5e5 * 3e-6 / 2 = 1.5
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+  temperature = temp
+[]
 
 [Mesh]
-  file = thermal_elastic.e
-  displacements = 'disp_x disp_y disp_z'
+  file = elastic_thermal_patch_test.e
 []
 
 [Functions]
-  [./ramp1]
+  [./rampConstant1]
     type = PiecewiseLinear
     x = '0. 1. 2.'
-    y = '0. 1. 2.'
+    y = '0. 1. 1.'
     scale_factor = 1e-6
   [../]
-  [./ramp2]
+  [./rampConstant2]
     type = PiecewiseLinear
     x = '0. 1. 2.'
-    y = '0. 1. 2.'
+    y = '0. 1. 1.'
     scale_factor = 2e-6
   [../]
-  [./ramp3]
+  [./rampConstant3]
     type = PiecewiseLinear
     x = '0. 1. 2.'
-    y = '0. 1. 2.'
+    y = '0. 1. 1.'
     scale_factor = 3e-6
   [../]
-  [./ramp4]
+  [./rampConstant4]
     type = PiecewiseLinear
     x = '0. 1. 2.'
-    y = '0. 1. 2.'
+    y = '0. 1. 1.'
     scale_factor = 4e-6
   [../]
-  [./ramp6]
+  [./rampConstant6]
     type = PiecewiseLinear
     x = '0. 1. 2.'
-    y = '0. 1. 2.'
+    y = '0. 1. 1.'
     scale_factor = 6e-6
   [../]
   [./tempFunc]
     type = PiecewiseLinear
-    x = '0     1     2'
-    y = '100.0 100.0 500.0'
-  [../]
-  [./ym_func]
-    type = PiecewiseLinear
-    x = '100 500'
-    y = '1e6 6e5'
-  [../]
-  [./pr_func]
-    type = PiecewiseLinear
-    x = '100 500'
-    y = '0   0.25'
+    x = '0. 2.'
+    y = '117.56 217.56'
   [../]
 []
 
 [Variables]
   [./disp_x]
   [../]
-
   [./disp_y]
   [../]
-
   [./disp_z]
   [../]
 
   [./temp]
-    initial_condition = 100.0
+    initial_condition = 117.56
   [../]
 []
 
-[AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[SolidMechanics]
-  [./solid]
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-  [../]
+[Modules/TensorMechanics/Master/All]
+  add_variables = true
+  strain = FINITE
+  eigenstrain_names = eigenstrain
+  generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx'
 []
 
 [Kernels]
   [./heat]
     type = HeatConduction
     variable = temp
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xx
-    index = 0
-  [../]
-  [./stress_yy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yy
-    index = 1
-  [../]
-  [./stress_zz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_zz
-    index = 2
-  [../]
-  [./stress_xy]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xy
-    index = 3
-  [../]
-  [./stress_yz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_yz
-    index = 4
-  [../]
-  [./stress_xz]
-    type = MaterialTensorAux
-    tensor = stress
-    variable = stress_xz
-    index = 5
   [../]
 []
 
@@ -202,39 +131,39 @@
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 1
-    function = ramp2
+    function = rampConstant2
   [../]
   [./node1_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 1
-    function = ramp3
+    function = rampConstant3
   [../]
 
   [./node2_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 2
-    function = ramp1
+    function = rampConstant1
   [../]
   [./node2_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 2
-    function = ramp2
+    function = rampConstant2
   [../]
   [./node2_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 2
-    function = ramp6
+    function = rampConstant6
   [../]
 
   [./node3_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 3
-    function = ramp1
+    function = rampConstant1
   [../]
   [./node3_y]
     type = DirichletBC
@@ -246,7 +175,7 @@
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 3
-    function = ramp3
+    function = rampConstant3
   [../]
 
   [./node4_x]
@@ -272,70 +201,70 @@
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 5
-    function = ramp1
+    function = rampConstant1
   [../]
   [./node5_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 5
-    function = ramp4
+    function = rampConstant4
   [../]
   [./node5_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 5
-    function = ramp3
+    function = rampConstant3
   [../]
 
   [./node6_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 6
-    function = ramp2
+    function = rampConstant2
   [../]
   [./node6_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 6
-    function = ramp4
+    function = rampConstant4
   [../]
   [./node6_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 6
-    function = ramp6
+    function = rampConstant6
   [../]
 
   [./node7_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 7
-    function = ramp2
+    function = rampConstant2
   [../]
   [./node7_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 7
-    function = ramp2
+    function = rampConstant2
   [../]
   [./node7_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 7
-    function = ramp3
+    function = rampConstant3
   [../]
 
   [./node8_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 8
-    function = ramp1
+    function = rampConstant1
   [../]
   [./node8_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 8
-    function = ramp2
+    function = rampConstant2
   [../]
   [./node8_z]
     type = DirichletBC
@@ -353,35 +282,30 @@
 []
 
 [Materials]
-  [./stiffStuff1]
-    type = Elastic
-    block = '1 2 3 4 5 6 7'
-
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-
+  [./elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
     bulk_modulus = 0.333333333333333e6
     shear_modulus = 0.5e6
-    youngs_modulus_function = ym_func
-    poissons_ratio_function = pr_func
-
-    temp = temp
-
-    increment_calculation = eigen
+  [../]
+  [./thermal_strain]
+    type = ComputeThermalExpansionEigenstrain
+    stress_free_temperature = 117.56
+    thermal_expansion_coeff = 1e-8
+    incremental_form = true
+    eigenstrain_name = eigenstrain
+  [../]
+  [./stress]
+    type = ComputeFiniteStrainElasticStress
   [../]
 
   [./heat]
     type = HeatConductionMaterial
-    block = '1 2 3 4 5 6 7'
-
     specific_heat = 1.0
     thermal_conductivity = 1.0
   [../]
 
   [./density]
     type = Density
-    block = '1 2 3 4 5 6 7'
     density = 1.0
     disp_x = disp_x
     disp_y = disp_y
@@ -393,17 +317,20 @@
   type = Transient
   solve_type = 'PJFNK'
 
-  nl_rel_tol = 1e-9
-  nl_abs_tol = 1e-9
+  nl_rel_tol = 1e-12
 
   l_max_its = 20
 
   start_time = 0.0
   dt = 1.0
+  num_steps = 2
   end_time = 2.0
 []
 
 [Outputs]
-  exodus = true
-  file_base = thermal_elastic_out
+  file_base = elastic_thermal_patch_out
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
 []

@@ -46,11 +46,10 @@
 #  stress yz = 2 * 5e5 * 2e-6 / 2 = 1
 #  stress zx = 2 * 5e5 * 3e-6 / 2 = 1.5
 
-
-[Mesh]#Comment
+[Mesh]
   file = elastic_thermal_patch_test.e
   displacements = 'disp_x disp_y disp_z'
-[] # Mesh
+[]
 
 [Functions]
   [./rampConstant1]
@@ -88,36 +87,22 @@
     x = '0. 2.'
     y = '117.56 217.56'
   [../]
-
-[] # Functions
+[]
 
 [Variables]
-
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 117.56
   [../]
-
-[] # Variables
+[]
 
 [AuxVariables]
-
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -142,8 +127,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-
-[] # AuxVariables
+[]
 
 [SolidMechanics]
   [./solid]
@@ -154,16 +138,13 @@
 []
 
 [Kernels]
-
   [./heat]
     type = HeatConduction
     variable = temp
   [../]
-
-[] # Kernels
+[]
 
 [AuxKernels]
-
   [./stress_xx]
     type = MaterialTensorAux
     tensor = stress
@@ -200,11 +181,9 @@
     variable = stress_zx
     index = 5
   [../]
-
-[] # AuxKernels
+[]
 
 [BCs]
-
   [./node1_x]
     type = DirichletBC
     variable = disp_x
@@ -363,11 +342,9 @@
     boundary = '10 12'
     function = tempFunc
   [../]
-
-[] # BCs
+[]
 
 [Materials]
-
   [./stiffStuff1]
     type = Elastic
     block = '1 2 3 4 5 6 7'
@@ -401,33 +378,25 @@
     disp_y = disp_y
     disp_z = disp_z
   [../]
-
-[] # Materials
+[]
 
 [Executioner]
-
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
-
-
-
   nl_rel_tol = 1e-12
-
   l_max_its = 20
 
   start_time = 0.0
   dt = 1.0
   num_steps = 2
   end_time = 2.0
-[] # Executioner
+[]
 
 [Outputs]
-  file_base = out
+  file_base = elastic_thermal_patch_out
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
   [../]
-[] # Outputs
+[]

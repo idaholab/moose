@@ -43,9 +43,9 @@
   coord_type = RZ
 []
 
-[Mesh]#Comment
+[Mesh]
   file = elastic_thermal_patch_rz_test.e
-[] # Mesh
+[]
 
 [Functions]
   [./ur]
@@ -64,30 +64,20 @@
     type = ParsedFunction
     value = '117.56+100*t'
   [../]
-[] # Functions
+[]
 
 [Variables]
-
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
-
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 
   [./temp]
-    order = FIRST
-    family = LAGRANGE
     initial_condition = 117.56
   [../]
-
-[] # Variables
+[]
 
 [AuxVariables]
-
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -112,8 +102,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-
-[] # AuxVariables
+[]
 
 [SolidMechanics]
   [./solid]
@@ -124,65 +113,58 @@
 []
 
 [Kernels]
-
-# Turned off to more fully test the full Jacobian
-#  [./body]
-#    type = BodyForce
-#    variable = disp_y
-#    value = 1
-#    function = body
-#  [../]
-
   [./heat]
     type = HeatConduction
     variable = temp
   [../]
-
-[] # Kernels
+[]
 
 [AuxKernels]
-
   [./stress_xx]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_xx
     index = 0
+    execute_on = timestep_end
   [../]
   [./stress_yy]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_yy
     index = 1
+    execute_on = timestep_end
   [../]
   [./stress_zz]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_zz
     index = 2
+    execute_on = timestep_end
   [../]
   [./stress_xy]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_xy
     index = 3
+    execute_on = timestep_end
   [../]
   [./stress_yz]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_yz
     index = 4
+    execute_on = timestep_end
   [../]
   [./stress_zx]
     type = MaterialTensorAux
     tensor = stress
     variable = stress_zx
     index = 5
+    execute_on = timestep_end
   [../]
-
-[] # AuxKernels
+[]
 
 [BCs]
-
   [./ur]
     type = FunctionPresetBC
     variable = disp_x
@@ -202,11 +184,9 @@
     boundary = 10
     function = temp
   [../]
-
-[] # BCs
+[]
 
 [Materials]
-
   [./stiffStuff1]
     type = Elastic
     block = 1
@@ -236,15 +216,9 @@
     disp_r = disp_x
     disp_z = disp_y
   [../]
-
-[] # Materials
+[]
 
 [Preconditioning]
-#  [./FDP]
-#    type = FDP
-#    full = true
-#  [../]
-
   [./SMP]
     type = SMP
     full = true
@@ -252,24 +226,11 @@
 []
 
 [Executioner]
-
   type = Transient
-
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
-
-  petsc_options_iname = '-pc_type -ksp_gmres_restart'
-  petsc_options_value = 'lu       101'
-
-
-  line_search = 'none'
-
 
   nl_abs_tol = 1e-11
   nl_rel_tol = 1e-12
-
 
   l_max_its = 20
 
@@ -277,14 +238,14 @@
   dt = 1.0
   num_steps = 1
   end_time = 1.0
-[] # Executioner
+[]
 
 [Outputs]
-  file_base = out_rz_smp
+  file_base = elastic_thermal_patch_rz_smp_out
   [./exodus]
     type = Exodus
     elemental_as_nodal = true
     execute_on = 'initial timestep_end nonlinear'
     nonlinear_residual_dt_divisor = 100
   [../]
-[] # Outputs
+[]
