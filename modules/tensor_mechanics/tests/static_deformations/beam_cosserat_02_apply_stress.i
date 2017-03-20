@@ -47,7 +47,7 @@
 []
 
 [GlobalParams]
-  use_displaced_mesh = false
+  #use_displaced_mesh = false
   displacements = 'disp_x disp_y disp_z'
   Cosserat_rotations = 'wc_x wc_y wc_z'
 []

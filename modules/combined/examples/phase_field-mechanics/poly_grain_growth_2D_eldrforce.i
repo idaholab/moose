@@ -15,7 +15,6 @@
   op_num = 8
   var_name_base = gr
   grain_num = 36
-  use_displaced_mesh = true
 []
 
 [Variables]
@@ -83,6 +82,7 @@
   [./PolycrystalElasticDrivingForce]
   [../]
   [./TensorMechanics]
+    use_displaced_mesh = true
     displacements = 'disp_x disp_y'
   [../]
 []
@@ -249,8 +249,7 @@
 [Preconditioning]
   [./SMP]
     type = SMP
-    off_diag_row = 'disp_x disp_y'
-    off_diag_column = 'disp_y disp_x'
+    coupled_groups = 'disp_x,disp_y'
   [../]
 []
 

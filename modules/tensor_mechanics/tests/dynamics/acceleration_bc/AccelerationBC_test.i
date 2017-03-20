@@ -25,7 +25,7 @@
 []
 
 [GlobalParams]
-  use_displaced_mesh = false
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -63,7 +63,6 @@
 
 [Kernels]
   [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
   [../]
   [./inertia_x]
     type = InertialForce
@@ -202,24 +201,19 @@
 [Materials]
   [./Elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '210e9 0'
   [../]
 
   [./strain]
     type = ComputeSmallStrain
-    block = 0
-    displacements = 'disp_x disp_y disp_z'
   [../]
 
   [./stress]
     type = ComputeLinearElasticStress
-    block = 0
   [../]
   [./density]
     type = GenericConstantMaterial
-    block = 0
     prop_names = 'density'
     prop_values = '7750'
   [../]
