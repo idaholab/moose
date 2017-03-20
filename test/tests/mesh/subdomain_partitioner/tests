@@ -1,0 +1,10 @@
+[Tests]
+  [./subdomain_partitioner]
+    type = 'Exodiff'
+    input = 'subdomain_partitioner.i'
+    exodiff = 'subdomain_partitioner_out.e'
+    platform = DARWIN
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+[]

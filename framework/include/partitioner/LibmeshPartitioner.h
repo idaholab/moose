@@ -24,7 +24,7 @@ class MooseMesh;
 
 namespace libMesh
 {
-  class SubdomainPartitioner;
+class SubdomainPartitioner;
 }
 
 template <>
@@ -39,14 +39,15 @@ public:
   virtual std::unique_ptr<Partitioner> clone() const;
   virtual void partition(MeshBase & mesh, const unsigned int n);
   virtual void partition(MeshBase & mesh);
-  virtual void prepare_blocks_for_subdomain_partitioner(SubdomainPartitioner & subdomain_partitioner);
+  virtual void
+  prepare_blocks_for_subdomain_partitioner(SubdomainPartitioner & subdomain_partitioner);
 
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n);
 
   std::unique_ptr<Partitioner> _partitioner;
   MooseEnum _partitioner_name;
-  const std::vector<std::vector<SubdomainName> > & _subdomain_blocks;
+  const std::vector<std::vector<SubdomainName>> & _subdomain_blocks;
   MooseMesh & _mesh;
 };
 
