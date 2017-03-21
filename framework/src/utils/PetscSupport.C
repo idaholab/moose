@@ -693,6 +693,58 @@ setSinglePetscOption(const std::string & name, const std::string & value)
     mooseError("Error setting PETSc option.");
 }
 
+void
+storeMooseNativeOptions(FEProblemBase & fe_problem)
+{
+   PetscOptions & moose_native_options = fe_problem.getMooseNativeOptions();
+   MooseApp & moose_app = fe_problem.getMooseApp();
+   InputParameters & moose_app_parameters = moose_app.parameters();
+   for (const auto & it : moose_app_parameters)
+   {
+     std::vector<std::string> syntaxs;
+     std::string orig_name = it.first;
+     syntaxs = moose_app_parameters.getSyntax(orig_name);
+     for (const auto & syntax : syntaxs)
+       moose_native_options.inames.push_back(syntax);
+   }
+}
+
+bool
+isUnusedPetscOptions(FEProblemBase & fe_problem)
+{
+#if !PETSC_VERSION_LESS_THAN(3,7,5)
+  PetscInt N=0, left=0;
+  PetscErrorCode ierr;
+  char ** names = 0, **values = 0;
+
+  PetscOptions & moose_native_options = fe_problem.getMooseNativeOptions();
+
+  ierr = PetscOptionsLeftOptions(NULL, &N, &names, &values);
+
+  left = N;
+  for (PetscInt i=0; i<N; i++)
+  {
+    for (const auto & moose_option : moose_native_options.inames)
+    {
+      std::string petsc_option_iname = std::string(names[i]);
+      std::string petsc_option_ivalue = std::string(values[i]);
+      if (moose_option.find(petsc_option_iname) != std::string::npos)
+      {
+        left--;
+        std::cout<<" petsc_option_iname "<< petsc_option_iname<<std::endl;
+      }
+      else
+        mooseWarning2("Unused petsc options: ", "-", petsc_option_iname, " value: ", petsc_option_ivalue, "\n");
+    }
+    ierr = PetscFree(names[i]);
+  }
+  ierr = PetscFree(names);
+  return left;
+#else
+  return false;
+#endif
+}
+
 
 } // Namespace PetscSupport
 } // Namespace MOOSE

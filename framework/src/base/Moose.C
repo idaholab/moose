@@ -269,6 +269,7 @@
 #ifdef LIBMESH_HAVE_FPARSER
 #include "Terminator.h"
 #endif
+#include "PetscOptionsChecker.h"
 
 // preconditioners
 #include "PhysicsBasedPreconditioner.h"
@@ -708,6 +709,7 @@ registerObjects(Factory & factory)
 #ifdef LIBMESH_HAVE_FPARSER
   registerUserObject(Terminator);
 #endif
+  registerUserObject(PetscOptionsChecker);
 
   // preconditioners
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");

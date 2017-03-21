@@ -114,6 +114,10 @@ void setSinglePetscOption(const std::string & name, const std::string & value = 
 
 void addPetscOptionsFromCommandline();
 
+void storeMooseNativeOptions(FEProblemBase & fe_problem);
+
+bool isUnusedPetscOptions(FEProblemBase & fe_problem);
+
 }
 }
 

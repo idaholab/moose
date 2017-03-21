@@ -485,6 +485,7 @@ public:
    * Retrieve a writable reference the PETSc options (used by PetscSupport)
    */
   Moose::PetscSupport::PetscOptions & getPetscOptions(){ return _petsc_options; }
+  Moose::PetscSupport::PetscOptions & getMooseNativeOptions(){ return _moose_native_options; }
 #endif //LIBMESH_HAVE_PETSC
 
   // Function /////
@@ -1344,6 +1345,7 @@ protected:
 #ifdef LIBMESH_HAVE_PETSC
   /// PETSc option storage
   Moose::PetscSupport::PetscOptions _petsc_options;
+  Moose::PetscSupport::PetscOptions _moose_native_options;
 #endif //LIBMESH_HAVE_PETSC
 
 /**
