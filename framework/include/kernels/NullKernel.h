@@ -19,7 +19,7 @@
 
 class NullKernel;
 
-template<>
+template <>
 InputParameters validParams<NullKernel>();
 
 /**

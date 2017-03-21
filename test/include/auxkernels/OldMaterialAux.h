@@ -21,7 +21,7 @@
 // Forward declarations
 class OldMaterialAux;
 
-template<>
+template <>
 InputParameters validParams<OldMaterialAux>();
 
 /**
@@ -31,7 +31,7 @@ class OldMaterialAux : public AuxKernel
 {
 public:
   OldMaterialAux(const InputParameters & parameters);
-  virtual ~OldMaterialAux(){}
+  virtual ~OldMaterialAux() {}
 
 protected:
   virtual Real computeValue();
@@ -39,7 +39,6 @@ protected:
 private:
   const MaterialProperty<Real> & _old;
   const MaterialProperty<Real> & _older;
-
 };
 
-#endif //OLDMATERIALAUX_H
+#endif // OLDMATERIALAUX_H

@@ -14,15 +14,15 @@
 
 #include "CachingPointSource.h"
 
-template<>
-InputParameters validParams<CachingPointSource>()
+template <>
+InputParameters
+validParams<CachingPointSource>()
 {
   InputParameters params = validParams<DiracKernel>();
   return params;
 }
 
-CachingPointSource::CachingPointSource(const InputParameters & parameters) :
-    DiracKernel(parameters)
+CachingPointSource::CachingPointSource(const InputParameters & parameters) : DiracKernel(parameters)
 {
 }
 
@@ -54,4 +54,3 @@ CachingPointSource::computeQpResidual()
   // to the ID of the point in this simple example.
   return -_test[_i][_qp] * static_cast<Real>(id);
 }
-

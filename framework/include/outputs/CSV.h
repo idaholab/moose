@@ -21,7 +21,7 @@
 // Forward declarations
 class CSV;
 
-template<>
+template <>
 InputParameters validParams<CSV>();
 
 /**
@@ -32,7 +32,6 @@ InputParameters validParams<CSV>();
 class CSV : public TableOutput
 {
 public:
-
   /**
    * Class constructor
    *
@@ -44,7 +43,6 @@ public:
   CSV(const InputParameters & parameters);
 
 protected:
-
   /**
    * Output the table to a *.csv file
    */
@@ -78,7 +76,6 @@ protected:
   virtual void outputVectorPostprocessors() override;
 
 private:
-
   /// Flag for aligning data in .csv file
   bool _align;
 

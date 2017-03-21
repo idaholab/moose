@@ -17,10 +17,10 @@
 
 #include "EigenKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class MaterialEigenKernel;
 
-template<>
+template <>
 InputParameters validParams<MaterialEigenKernel>();
 
 class MaterialEigenKernel : public EigenKernel
@@ -35,4 +35,4 @@ protected:
   const MaterialProperty<Real> & _mat;
 };
 
-#endif //MATERIALEIGENKERNEL_H
+#endif // MATERIALEIGENKERNEL_H

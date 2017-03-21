@@ -14,28 +14,24 @@
 
 #include "FluxBC.h"
 
-
-template<>
-InputParameters validParams<FluxBC>()
+template <>
+InputParameters
+validParams<FluxBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   return params;
 }
 
-
-FluxBC::FluxBC(const InputParameters & params) :
-    IntegratedBC(params)
-{
-}
+FluxBC::FluxBC(const InputParameters & params) : IntegratedBC(params) {}
 
 Real
 FluxBC::computeQpResidual()
 {
-  return - computeQpFluxResidual() * _normals[_qp] * _test[_i][_qp];
+  return -computeQpFluxResidual() * _normals[_qp] * _test[_i][_qp];
 }
 
 Real
 FluxBC::computeQpJacobian()
 {
-  return - computeQpFluxJacobian() * _normals[_qp] * _test[_i][_qp];
+  return -computeQpFluxJacobian() * _normals[_qp] * _test[_i][_qp];
 }

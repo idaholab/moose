@@ -12,7 +12,6 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-
 #include "libmesh/petsc_macro.h"
 #include "libmesh/libmesh_config.h"
 
@@ -352,8 +351,8 @@
 
 // Transfers
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
-  #include "MultiAppDTKUserObjectTransfer.h"
-  #include "MultiAppDTKInterpolationTransfer.h"
+#include "MultiAppDTKUserObjectTransfer.h"
+#include "MultiAppDTKInterpolationTransfer.h"
 #endif
 #include "MultiAppPostprocessorInterpolationTransfer.h"
 #include "MultiAppVariableValueSampleTransfer.h"
@@ -461,7 +460,8 @@
 
 #include <unistd.h>
 
-namespace Moose {
+namespace Moose
+{
 
 static bool registered = false;
 
@@ -713,7 +713,7 @@ registerObjects(Factory & factory)
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");
   registerNamedPreconditioner(FiniteDifferencePreconditioner, "FDP");
   registerNamedPreconditioner(SingleMatrixPreconditioner, "SMP");
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3, 3, 0)
   registerNamedPreconditioner(FieldSplitPreconditioner, "FSP");
 #endif
   // dampers
@@ -792,7 +792,7 @@ registerObjects(Factory & factory)
   registerPredictor(SimplePredictor);
   registerPredictor(AdamsPredictor);
 
-  // Transfers
+// Transfers
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
   registerTransfer(MultiAppDTKUserObjectTransfer);
   registerTransfer(MultiAppDTKInterpolationTransfer);
@@ -809,7 +809,7 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppProjectionTransfer);
   registerTransfer(MultiAppPostprocessorToAuxScalarTransfer);
 
-  // Outputs
+// Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
   registerOutput(Exodus);
 #endif
@@ -854,11 +854,14 @@ addActionTypes(Syntax & syntax)
 {
   /**
    * The second param here indicates whether the task must be satisfied or not for a successful run.
-   * If set to true, then the ActionWarehouse will attempt to create "Action"s automatically if they have
+   * If set to true, then the ActionWarehouse will attempt to create "Action"s automatically if they
+   * have
    * not been explicitly created by the parser or some other mechanism.
    *
-   * Note: Many of the actions in the "Minimal Problem" section are marked as false.  However, we can generally
-   * force creation of these "Action"s as needed by registering them to syntax that we expect to see even
+   * Note: Many of the actions in the "Minimal Problem" section are marked as false.  However, we
+   * can generally
+   * force creation of these "Action"s as needed by registering them to syntax that we expect to see
+   * even
    * if those "Action"s  don't normally pick up parameters from the input file.
    */
 
@@ -938,7 +941,7 @@ addActionTypes(Syntax & syntax)
   registerTask("execute_mesh_modifiers", false);
   registerTask("uniform_refine_mesh", false);
   registerTask("prepare_mesh", false);
-  registerTask("setup_mesh_complete", false);  // calls prepare
+  registerTask("setup_mesh_complete", false); // calls prepare
 
   registerTask("init_displaced_problem", false);
 
@@ -953,7 +956,7 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_quadrature", true);
 
   /// Additional Actions
-  registerTask("no_action", false);  // Used for Empty Action placeholders
+  registerTask("no_action", false); // Used for Empty Action placeholders
   registerTask("set_global_params", false);
   registerTask("setup_adaptivity", false);
   registerTask("meta_action", false);
@@ -977,73 +980,76 @@ addActionTypes(Syntax & syntax)
   /****** Dependencies ******/
   /**************************/
   /**
-   * The following is the default set of action dependencies for a basic MOOSE problem.  The formatting
-   * of this string is important.  Each line represents a set of dependencies that depend on the previous
+   * The following is the default set of action dependencies for a basic MOOSE problem.  The
+   * formatting
+   * of this string is important.  Each line represents a set of dependencies that depend on the
+   * previous
    * line.  Items on the same line have equal weight and can be executed in any order.
    *
    * Additional dependencies can be inserted later inside of user applications with calls to
    * ActionWarehouse::addDependency("task", "pre_req")
    */
-  syntax.addDependencySets(
-"(meta_action)"
-"(dynamic_object_registration)"
-"(common_output)"
-"(set_global_params)"
-"(setup_recover_file_base)"
-"(check_copy_nodal_vars)"
-"(setup_mesh)"
-"(add_partitioner)"
-"(init_mesh)"
-"(prepare_mesh)"
-"(add_mesh_modifier)"
-"(execute_mesh_modifiers)"
-"(add_mortar_interface)"
-"(uniform_refine_mesh)"
-"(setup_mesh_complete)"
-"(determine_system_type)"
-"(create_problem)"
-"(setup_time_integrator)"
-"(setup_executioner)"
-"(setup_time_stepper)"
-"(setup_predictor)"
-"(setup_postprocessor_data)"
-"(init_displaced_problem)"
-"(add_aux_variable, add_variable, add_elemental_field_variable)"
-"(setup_variable_complete)"
-"(setup_quadrature)"
-"(add_function)"
-"(add_periodic_bc)"
-"(add_user_object)"
-"(setup_function_complete)"
-"(setup_adaptivity)"
-"(set_adaptivity_options)"
-"(add_ic)"
-"(add_constraint, add_field_split)"
-"(add_preconditioning)"
-"(ready_to_init)"
-"(setup_dampers)"
-"(setup_residual_debug)"
-"(add_bounds_vectors)"
-"(add_multi_app)"
-"(add_transfer)"
-"(copy_nodal_vars, copy_nodal_aux_vars)"
-"(add_material)"
-"(setup_material_output)"
-"(init_problem)"
-"(setup_debug)"
-"(add_output)"
-"(add_postprocessor)"
-"(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this to be after material objects are created.
-"(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_nodal_kernel, add_dg_kernel, add_interface_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
-"(add_control)"
-"(check_output)"
-"(check_integrity)"
-);
-
+  syntax.addDependencySets("(meta_action)"
+                           "(dynamic_object_registration)"
+                           "(common_output)"
+                           "(set_global_params)"
+                           "(setup_recover_file_base)"
+                           "(check_copy_nodal_vars)"
+                           "(setup_mesh)"
+                           "(add_partitioner)"
+                           "(init_mesh)"
+                           "(prepare_mesh)"
+                           "(add_mesh_modifier)"
+                           "(execute_mesh_modifiers)"
+                           "(add_mortar_interface)"
+                           "(uniform_refine_mesh)"
+                           "(setup_mesh_complete)"
+                           "(determine_system_type)"
+                           "(create_problem)"
+                           "(setup_time_integrator)"
+                           "(setup_executioner)"
+                           "(setup_time_stepper)"
+                           "(setup_predictor)"
+                           "(setup_postprocessor_data)"
+                           "(init_displaced_problem)"
+                           "(add_aux_variable, add_variable, add_elemental_field_variable)"
+                           "(setup_variable_complete)"
+                           "(setup_quadrature)"
+                           "(add_function)"
+                           "(add_periodic_bc)"
+                           "(add_user_object)"
+                           "(setup_function_complete)"
+                           "(setup_adaptivity)"
+                           "(set_adaptivity_options)"
+                           "(add_ic)"
+                           "(add_constraint, add_field_split)"
+                           "(add_preconditioning)"
+                           "(ready_to_init)"
+                           "(setup_dampers)"
+                           "(setup_residual_debug)"
+                           "(add_bounds_vectors)"
+                           "(add_multi_app)"
+                           "(add_transfer)"
+                           "(copy_nodal_vars, copy_nodal_aux_vars)"
+                           "(add_material)"
+                           "(setup_material_output)"
+                           "(init_problem)"
+                           "(setup_debug)"
+                           "(add_output)"
+                           "(add_postprocessor)"
+                           "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
+                                                        // to be after material objects are created.
+                           "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, "
+                           "add_nodal_kernel, add_dg_kernel, add_interface_kernel, "
+                           "add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
+                           "(add_control)"
+                           "(check_output)"
+                           "(check_integrity)");
 }
 
 /**
- * Multiple Action class can be associated with a single input file section, in which case all associated Actions
+ * Multiple Action class can be associated with a single input file section, in which case all
+ * associated Actions
  * will be created and "acted" on when the associated input file section is seen.b *
  * Example:
  *  "setup_mesh" <-----------> SetupMeshAction <---------
@@ -1053,7 +1059,8 @@ addActionTypes(Syntax & syntax)
  * "setup_mesh_complete" <---> SetupMeshCompleteAction <-
  *
  *
- * Action classes can also be registered to act on more than one input file section for a different task
+ * Action classes can also be registered to act on more than one input file section for a different
+ * task
  * if similar logic can work in multiple cases
  *
  * Example:
@@ -1064,8 +1071,10 @@ addActionTypes(Syntax & syntax)
  * "add_aux_variable" <-                       -> [AuxVariables/ *]
  *
  *
- * Note: Placeholder "no_action" actions must be put in places where it is possible to match an object
- *       with a star or a more specific parent later on. (i.e. where one needs to negate the '*' matching
+ * Note: Placeholder "no_action" actions must be put in places where it is possible to match an
+ * object
+ *       with a star or a more specific parent later on. (i.e. where one needs to negate the '*'
+ * matching
  *       prematurely)
  */
 void
@@ -1074,7 +1083,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
 #undef registerAction
 #define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
-
 
   registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
 
@@ -1123,7 +1131,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddDGKernelAction, "add_dg_kernel");
   registerAction(AddInterfaceKernelAction, "add_interface_kernel");
   registerAction(AddBCAction, "add_bc");
-  registerAction(EmptyAction, "no_action");  // placeholder
+  registerAction(EmptyAction, "no_action"); // placeholder
   registerAction(AddPeriodicBCAction, "add_periodic_bc");
   registerAction(AddMaterialAction, "add_material");
   registerAction(AddPostprocessorAction, "add_postprocessor");
@@ -1179,7 +1187,7 @@ setSolverDefaults(FEProblemBase & problem)
 #ifdef LIBMESH_HAVE_PETSC
   // May be a touch expensive to create a new DM every time, but probably safer to do it this way
   Moose::PetscSupport::petscSetDefaults(problem);
-#endif //LIBMESH_HAVE_PETSC
+#endif // LIBMESH_HAVE_PETSC
 }
 
 MPI_Comm
@@ -1189,7 +1197,7 @@ swapLibMeshComm(MPI_Comm new_comm)
   MPI_Comm old_comm = PETSC_COMM_WORLD;
   PETSC_COMM_WORLD = new_comm;
   return old_comm;
-#endif //LIBMESH_HAVE_PETSC
+#endif // LIBMESH_HAVE_PETSC
 }
 
 void

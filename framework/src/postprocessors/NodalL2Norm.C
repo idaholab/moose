@@ -14,18 +14,19 @@
 
 #include "NodalL2Norm.h"
 
-template<>
-InputParameters validParams<NodalL2Norm>()
+template <>
+InputParameters
+validParams<NodalL2Norm>()
 {
   InputParameters params = validParams<NodalVariablePostprocessor>();
   params.set<bool>("unique_node_execute") = true;
   return params;
 }
 
-NodalL2Norm::NodalL2Norm(const InputParameters & parameters) :
-  NodalVariablePostprocessor(parameters),
-  _sum_of_squares(0.0)
-{}
+NodalL2Norm::NodalL2Norm(const InputParameters & parameters)
+  : NodalVariablePostprocessor(parameters), _sum_of_squares(0.0)
+{
+}
 
 void
 NodalL2Norm::initialize()
@@ -37,7 +38,7 @@ void
 NodalL2Norm::execute()
 {
   Real val = _u[_qp];
-  _sum_of_squares += val*val;
+  _sum_of_squares += val * val;
 }
 
 Real

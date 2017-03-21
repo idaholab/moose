@@ -25,54 +25,52 @@
 // C++ includes
 #include <limits.h>
 
-
 namespace // Anonymous namespace for helpers
 {
-  /**
-   * Specific weak ordering for Elem *'s to be used in a set.
-   * We use the id, but first sort by level.  This guarantees
-   * when traversing the set from beginning to end the lower
-   * level (parent) elements are encountered first.
-   *
-   * This was swiped from libMesh mesh_communication.C, and ought to be
-   * replaced with libMesh::CompareElemIdsByLevel just as soon as I refactor to
-   * create that - @roystgnr
-   */
-  struct CompareElemsByLevel
+/**
+ * Specific weak ordering for Elem *'s to be used in a set.
+ * We use the id, but first sort by level.  This guarantees
+ * when traversing the set from beginning to end the lower
+ * level (parent) elements are encountered first.
+ *
+ * This was swiped from libMesh mesh_communication.C, and ought to be
+ * replaced with libMesh::CompareElemIdsByLevel just as soon as I refactor to
+ * create that - @roystgnr
+ */
+struct CompareElemsByLevel
+{
+  bool operator()(const Elem * a, const Elem * b) const
   {
-    bool operator()(const Elem * a,
-                    const Elem * b) const
-    {
-      libmesh_assert (a);
-      libmesh_assert (b);
-      const unsigned int
-        al = a->level(), bl = b->level();
-      const dof_id_type
-        aid = a->id(),   bid = b->id();
+    libmesh_assert(a);
+    libmesh_assert(b);
+    const unsigned int al = a->level(), bl = b->level();
+    const dof_id_type aid = a->id(), bid = b->id();
 
-      return (al == bl) ? aid < bid : al < bl;
-    }
-  };
+    return (al == bl) ? aid < bid : al < bl;
+  }
+};
 
 } // anonymous namespace
 
-
-
-template<>
-InputParameters validParams<EqualValueBoundaryConstraint>()
+template <>
+InputParameters
+validParams<EqualValueBoundaryConstraint>()
 {
   InputParameters params = validParams<NodalConstraint>();
-  params.addParam<unsigned int>("master", std::numeric_limits<unsigned int>::max(), "The ID of the master node. If no ID is provided, first node of slave set is chosen.");
-  params.addParam<std::vector<unsigned int> >("slave_node_ids", "The IDs of the slave node");
+  params.addParam<unsigned int>(
+      "master",
+      std::numeric_limits<unsigned int>::max(),
+      "The ID of the master node. If no ID is provided, first node of slave set is chosen.");
+  params.addParam<std::vector<unsigned int>>("slave_node_ids", "The IDs of the slave node");
   params.addParam<BoundaryName>("slave", "NaN", "The boundary ID associated with the slave side");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
 }
 
-EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters) :
-    NodalConstraint(parameters),
+EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters)
+  : NodalConstraint(parameters),
     _master_node_id(getParam<unsigned int>("master")),
-    _slave_node_ids(getParam<std::vector<unsigned int> >("slave_node_ids")),
+    _slave_node_ids(getParam<std::vector<unsigned int>>("slave_node_ids")),
     _slave_node_set_id(getParam<BoundaryName>("slave")),
     _penalty(getParam<Real>("penalty"))
 {
@@ -98,30 +96,31 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_slave_node_set_id));
     std::vector<dof_id_type>::iterator in;
 
-    //Set master node to first node of the slave node set if no master node id is provided
+    // Set master node to first node of the slave node set if no master node id is provided
     //_master_node_vector defines master nodes in the base class
     if (_master_node_id == std::numeric_limits<unsigned int>::max())
     {
       in = std::min_element(nodelist.begin(), nodelist.end());
-      dof_id_type node_id = (in == nodelist.end()) ?
-        DofObject::invalid_id : *in;
+      dof_id_type node_id = (in == nodelist.end()) ? DofObject::invalid_id : *in;
       _communicator.min(node_id);
       _master_node_vector.push_back(node_id);
     }
     else
       _master_node_vector.push_back(_master_node_id);
 
-    //Fill in _connected_nodes, which defines slave nodes in the base class
+    // Fill in _connected_nodes, which defines slave nodes in the base class
     for (in = nodelist.begin(); in != nodelist.end(); ++in)
     {
-      if ((*in != _master_node_vector[0]) && (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id()))
+      if ((*in != _master_node_vector[0]) &&
+          (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id()))
         _connected_nodes.push_back(*in);
     }
   }
   else if ((_slave_node_ids.size() != 0) && (_slave_node_set_id == "NaN"))
   {
     if (_master_node_id == std::numeric_limits<unsigned int>::max())
-      _master_node_vector.push_back(_slave_node_ids[0]); //_master_node_vector defines master nodes in the base class
+      _master_node_vector.push_back(
+          _slave_node_ids[0]); //_master_node_vector defines master nodes in the base class
 
     // Fill in _connected_nodes, which defines slave nodes in the base class
     for (const auto & dof : _slave_node_ids)
@@ -162,22 +161,22 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
           master_elems_to_ghost.insert(elem);
 
           const unsigned int n_nodes = elem->n_nodes();
-          for (unsigned int n=0; n != n_nodes; ++n)
+          for (unsigned int n = 0; n != n_nodes; ++n)
             nodes_to_ghost.insert(elem->node_ptr(n));
         }
       }
     }
 
     // Send nodes first since elements need them
-    _mesh.getMesh().comm().allgather_packed_range
-      (&_mesh.getMesh(),
-       nodes_to_ghost.begin(), nodes_to_ghost.end(),
-       mesh_inserter_iterator<Node>(_mesh.getMesh()));
+    _mesh.getMesh().comm().allgather_packed_range(&_mesh.getMesh(),
+                                                  nodes_to_ghost.begin(),
+                                                  nodes_to_ghost.end(),
+                                                  mesh_inserter_iterator<Node>(_mesh.getMesh()));
 
-    _mesh.getMesh().comm().allgather_packed_range
-      (&_mesh.getMesh(),
-       master_elems_to_ghost.begin(), master_elems_to_ghost.end(),
-       mesh_inserter_iterator<Elem>(_mesh.getMesh()));
+    _mesh.getMesh().comm().allgather_packed_range(&_mesh.getMesh(),
+                                                  master_elems_to_ghost.begin(),
+                                                  master_elems_to_ghost.end(),
+                                                  mesh_inserter_iterator<Elem>(_mesh.getMesh()));
 
     _mesh.update(); // Rebuild node_to_elem_map
 

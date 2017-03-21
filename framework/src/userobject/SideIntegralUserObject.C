@@ -17,18 +17,18 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<SideIntegralUserObject>()
+template <>
+InputParameters
+validParams<SideIntegralUserObject>()
 {
   InputParameters params = validParams<SideUserObject>();
   return params;
 }
 
-SideIntegralUserObject::SideIntegralUserObject(const InputParameters & parameters) :
-    SideUserObject(parameters),
-    _qp(0),
-    _integral_value(0)
-{}
+SideIntegralUserObject::SideIntegralUserObject(const InputParameters & parameters)
+  : SideUserObject(parameters), _qp(0), _integral_value(0)
+{
+}
 
 void
 SideIntegralUserObject::initialize()
@@ -60,8 +60,7 @@ Real
 SideIntegralUserObject::computeIntegral()
 {
   Real sum = 0;
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
   return sum;
 }
-

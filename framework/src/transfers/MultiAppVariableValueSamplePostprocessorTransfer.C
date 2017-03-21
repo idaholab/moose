@@ -23,17 +23,21 @@
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 
-template<>
-InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>()
+template <>
+InputParameters
+validParams<MultiAppVariableValueSamplePostprocessorTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
-  params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor in the MultiApp to transfer the value to.  This should most likely be a Reporter Postprocessor.");
+  params.addRequiredParam<PostprocessorName>(
+      "postprocessor", "The name of the postprocessor in the MultiApp to transfer the value to.  "
+                       "This should most likely be a Reporter Postprocessor.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
   return params;
 }
 
-MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePostprocessorTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePostprocessorTransfer(
+    const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     _postprocessor_name(getParam<PostprocessorName>("postprocessor")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
@@ -59,7 +63,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
 
       pl->enable_out_of_mesh_mode();
 
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         Real value = -std::numeric_limits<Real>::max();
 
@@ -91,7 +95,8 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      mooseError("Can't transfer a variable value from a MultiApp to a Postprocessor in the Master.");
+      mooseError(
+          "Can't transfer a variable value from a MultiApp to a Postprocessor in the Master.");
       break;
     }
   }

@@ -20,8 +20,9 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ScalarLagrangeMultiplier>()
+template <>
+InputParameters
+validParams<ScalarLagrangeMultiplier>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier variable");
@@ -29,16 +30,12 @@ InputParameters validParams<ScalarLagrangeMultiplier>()
   return params;
 }
 
-ScalarLagrangeMultiplier::ScalarLagrangeMultiplier(const InputParameters & parameters) :
-    Kernel(parameters),
-    _lambda_var(coupledScalar("lambda")),
-    _lambda(coupledScalarValue("lambda"))
+ScalarLagrangeMultiplier::ScalarLagrangeMultiplier(const InputParameters & parameters)
+  : Kernel(parameters), _lambda_var(coupledScalar("lambda")), _lambda(coupledScalarValue("lambda"))
 {
 }
 
-ScalarLagrangeMultiplier::~ScalarLagrangeMultiplier()
-{
-}
+ScalarLagrangeMultiplier::~ScalarLagrangeMultiplier() {}
 
 Real
 ScalarLagrangeMultiplier::computeQpResidual()

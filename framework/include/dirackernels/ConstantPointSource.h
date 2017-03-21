@@ -18,10 +18,10 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ConstantPointSource;
 
-template<>
+template <>
 InputParameters validParams<ConstantPointSource>();
 
 /**
@@ -42,4 +42,4 @@ protected:
   Point _p;
 };
 
-#endif //CONSTANTPOINTSOURCE_H
+#endif // CONSTANTPOINTSOURCE_H

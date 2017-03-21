@@ -14,28 +14,28 @@
 
 #include "VacuumBC.h"
 
-template<>
-InputParameters validParams<VacuumBC>()
+template <>
+InputParameters
+validParams<VacuumBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addParam<Real>("alpha", 1, "No idea.");
   return params;
 }
 
-VacuumBC::VacuumBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
-    _alpha(getParam<Real>("alpha"))
-{}
+VacuumBC::VacuumBC(const InputParameters & parameters)
+  : IntegratedBC(parameters), _alpha(getParam<Real>("alpha"))
+{
+}
 
 Real
 VacuumBC::computeQpResidual()
 {
-  return _test[_i][_qp]*_alpha*_u[_qp]/2.;
+  return _test[_i][_qp] * _alpha * _u[_qp] / 2.;
 }
 
 Real
 VacuumBC::computeQpJacobian()
 {
-  return _test[_i][_qp]*_alpha*_phi[_j][_qp]/2.;
+  return _test[_i][_qp] * _alpha * _phi[_j][_qp] / 2.;
 }
-

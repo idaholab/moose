@@ -13,16 +13,17 @@
 /****************************************************************/
 #include "StatefulMaterial.h"
 
-template<>
-InputParameters validParams<StatefulMaterial>()
+template <>
+InputParameters
+validParams<StatefulMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addParam<Real>("initial_diffusivity", 0.5, "The Initial Diffusivity");
   return params;
 }
 
-StatefulMaterial::StatefulMaterial(const InputParameters & parameters) :
-    Material(parameters),
+StatefulMaterial::StatefulMaterial(const InputParameters & parameters)
+  : Material(parameters),
 
     // Get a parameter value for the diffusivity
     _initial_diffusivity(getParam<Real>("initial_diffusivity")),

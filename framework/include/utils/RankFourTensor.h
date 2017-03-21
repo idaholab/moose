@@ -26,7 +26,7 @@ class RankFourTensor;
  * Helper function template specialization to set an object to zero.
  * Needed by DerivativeMaterialInterface
  */
-template<>
+template <>
 void mooseSetToZero<RankFourTensor>(RankFourTensor & v);
 
 /**
@@ -98,43 +98,43 @@ public:
   void print(std::ostream & stm = Moose::out) const;
 
   /// copies values from a into this tensor
-  RankFourTensor & operator= (const RankFourTensor & a);
+  RankFourTensor & operator=(const RankFourTensor & a);
 
   /// C_ijkl*a_kl
-  RankTwoTensor operator* (const RankTwoTensor & a) const;
+  RankTwoTensor operator*(const RankTwoTensor & a) const;
 
   /// C_ijkl*a_kl
-  RealTensorValue operator* (const RealTensorValue & a) const;
+  RealTensorValue operator*(const RealTensorValue & a) const;
 
   /// C_ijkl*a
-  RankFourTensor operator* (const Real a) const;
+  RankFourTensor operator*(const Real a) const;
 
   /// C_ijkl *= a
-  RankFourTensor & operator*= (const Real a);
+  RankFourTensor & operator*=(const Real a);
 
   /// C_ijkl/a
-  RankFourTensor operator/ (const Real a) const;
+  RankFourTensor operator/(const Real a) const;
 
   /// C_ijkl /= a  for all i, j, k, l
-  RankFourTensor & operator/= (const Real a);
+  RankFourTensor & operator/=(const Real a);
 
   /// C_ijkl += a_ijkl  for all i, j, k, l
-  RankFourTensor & operator+= (const RankFourTensor & a);
+  RankFourTensor & operator+=(const RankFourTensor & a);
 
   /// C_ijkl + a_ijkl
-  RankFourTensor operator+ (const RankFourTensor & a) const;
+  RankFourTensor operator+(const RankFourTensor & a) const;
 
   /// C_ijkl -= a_ijkl
-  RankFourTensor & operator-= (const RankFourTensor & a);
+  RankFourTensor & operator-=(const RankFourTensor & a);
 
   /// C_ijkl - a_ijkl
-  RankFourTensor operator- (const RankFourTensor & a) const;
+  RankFourTensor operator-(const RankFourTensor & a) const;
 
   /// -C_ijkl
-  RankFourTensor operator- () const;
+  RankFourTensor operator-() const;
 
   /// C_ijpq*a_pqkl
-  RankFourTensor operator* (const RankFourTensor & a) const;
+  RankFourTensor operator*(const RankFourTensor & a) const;
 
   /// sqrt(C_ijkl*C_ijkl)
   Real L2norm() const;
@@ -171,9 +171,11 @@ public:
   RankFourTensor transposeMajor() const;
 
   /**
-   * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l = 3).
+   * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l =
+   * 3).
    * Fill method depends on size of input
-   * Input size = 2.  Then C_1111 = C_2222 = input[0], and C_1122 = input[1], and C_1212 = (input[0] - input[1])/2,
+   * Input size = 2.  Then C_1111 = C_2222 = input[0], and C_1122 = input[1], and C_1212 = (input[0]
+   * - input[1])/2,
    *                  and C_ijkl = C_jikl = C_ijlk = C_klij, and C_1211 = C_1222 = 0.
    * Input size = 9.  Then C_1111 = input[0], C_1112 = input[1], C_1122 = input[3],
    *                       C_1212 = input[4], C_1222 = input[5], C_1211 = input[6]
@@ -224,10 +226,12 @@ protected:
   * C_ijkl = C_ijlk, C_ijkl = C_jikl
   * @param input If all==true then this is
   *                C1111 C1122 C1133 C2222 C2233 C3333 C2323 C1313 C1212
-  *                In the isotropic case this is (la is first Lame constant, mu is second (shear) Lame constant)
+  *                In the isotropic case this is (la is first Lame constant, mu is second (shear)
+  * Lame constant)
   *                la+2mu la la la+2mu la la+2mu mu mu mu
   *              If all==false then this is
-  *                C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323 C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
+  *                C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323
+  * C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
   * @param all Determines the compoinents passed in vis the input parameter
   */
   void fillSymmetricFromInputVector(const std::vector<Real> & input, bool all);
@@ -298,22 +302,22 @@ protected:
    */
 
   void fillPrincipalFromInputVector(const std::vector<Real> & input);
-  template<class T>
+  template <class T>
   friend void dataStore(std::ostream &, T &, void *);
 
-  template<class T>
+  template <class T>
   friend void dataLoad(std::istream &, T &, void *);
 };
 
-template<>
+template <>
 void dataStore(std::ostream &, RankFourTensor &, void *);
 
-template<>
+template <>
 void dataLoad(std::istream &, RankFourTensor &, void *);
 
 inline RankFourTensor operator*(Real a, const RankFourTensor & b) { return b * a; }
 
-template<class T>
+template <class T>
 void
 RankFourTensor::rotate(const T & R)
 {
@@ -329,10 +333,10 @@ RankFourTensor::rotate(const T & R)
             for (unsigned int n = 0; n < N; ++n)
               for (unsigned int o = 0; o < N; ++o)
                 for (unsigned int p = 0; p < N; ++p)
-                  sum += R(i,m) * R(j,n) * R(k,o) * R(l,p) * old(m,n,o,p);
+                  sum += R(i, m) * R(j, n) * R(k, o) * R(l, p) * old(m, n, o, p);
 
           _vals[i][j][k][l] = sum;
         }
 }
 
-#endif //RANKFOURTENSOR_H
+#endif // RANKFOURTENSOR_H

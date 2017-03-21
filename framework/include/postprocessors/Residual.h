@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class Residual;
 
-template<>
+template <>
 InputParameters validParams<Residual>();
 
 class Residual : public GeneralPostprocessor

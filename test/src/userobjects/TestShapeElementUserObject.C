@@ -14,8 +14,9 @@
 
 #include "TestShapeElementUserObject.h"
 
-template<>
-InputParameters validParams<TestShapeElementUserObject>()
+template <>
+InputParameters
+validParams<TestShapeElementUserObject>()
 {
   InputParameters params = validParams<ShapeElementUserObject>();
   params.addCoupledVar("u", "first coupled variable");
@@ -25,8 +26,8 @@ InputParameters validParams<TestShapeElementUserObject>()
   return params;
 }
 
-TestShapeElementUserObject::TestShapeElementUserObject(const InputParameters & parameters) :
-    ShapeElementUserObject(parameters),
+TestShapeElementUserObject::TestShapeElementUserObject(const InputParameters & parameters)
+  : ShapeElementUserObject(parameters),
     _u_var(coupled("u")),
     _u_dofs(getParam<unsigned int>("u_dofs")),
     _v_var(coupled("v")),
@@ -53,7 +54,10 @@ TestShapeElementUserObject::executeJacobian(unsigned int jvar)
   {
     // internal testing to make sure the _phis are initialized, set flag on call
     if (_phi.size() != _u_dofs)
-      mooseError("Shape functions for u are initialized incorrectly. Expected ", _u_dofs, " DOFs, found ", _phi.size());
+      mooseError("Shape functions for u are initialized incorrectly. Expected ",
+                 _u_dofs,
+                 " DOFs, found ",
+                 _phi.size());
     _execute_mask |= 1;
   }
 

@@ -17,10 +17,9 @@
 
 #include "IntegratedBC.h"
 
-
 class NeumannBC;
 
-template<>
+template <>
 InputParameters validParams<NeumannBC>();
 
 /**
@@ -36,7 +35,6 @@ public:
    */
   NeumannBC(const InputParameters & parameters);
 
-
 protected:
   virtual Real computeQpResidual() override;
 
@@ -44,5 +42,4 @@ protected:
   const Real & _value;
 };
 
-
-#endif //NEUMANNBC_H
+#endif // NEUMANNBC_H

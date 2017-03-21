@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class Receiver;
 
-template<>
+template <>
 InputParameters validParams<Receiver>();
 
 /**
@@ -56,7 +56,6 @@ public:
   virtual void initialSetup() override;
 
 private:
-
   /// Flag for initializing the old value
   bool _initialize_old;
 
@@ -64,4 +63,4 @@ private:
   const PostprocessorValue & _my_value;
 };
 
-#endif //RECEIVER_H
+#endif // RECEIVER_H

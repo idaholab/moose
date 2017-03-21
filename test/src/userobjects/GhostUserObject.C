@@ -18,22 +18,26 @@
 // invalid_processor_id
 #include "libmesh/dof_object.h"
 
-template<>
-InputParameters validParams<GhostUserObject>()
+template <>
+InputParameters
+validParams<GhostUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addParam<unsigned int>("rank", DofObject::invalid_processor_id, "The rank for which the ghosted elements are recorded (Default: ALL)");
+  params.addParam<unsigned int>(
+      "rank",
+      DofObject::invalid_processor_id,
+      "The rank for which the ghosted elements are recorded (Default: ALL)");
 
   MultiMooseEnum setup_options(SetupInterface::getExecuteOptions());
   setup_options = "timestep_begin";
   params.set<MultiMooseEnum>("execute_on") = setup_options;
-  params.addClassDescription("User object to calculate ghosted elements on a single processor or the union across all processors.");
+  params.addClassDescription("User object to calculate ghosted elements on a single processor or "
+                             "the union across all processors.");
   return params;
 }
 
-GhostUserObject::GhostUserObject(const InputParameters & parameters) :
-    GeneralUserObject(parameters),
-    _rank(getParam<unsigned int>("rank"))
+GhostUserObject::GhostUserObject(const InputParameters & parameters)
+  : GeneralUserObject(parameters), _rank(getParam<unsigned int>("rank"))
 {
 }
 

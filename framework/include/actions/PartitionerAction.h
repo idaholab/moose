@@ -19,11 +19,10 @@
 
 class PartitionerAction;
 
-template<>
+template <>
 InputParameters validParams<PartitionerAction>();
 
-
-class PartitionerAction: public MooseObjectAction
+class PartitionerAction : public MooseObjectAction
 {
 public:
   PartitionerAction(InputParameters params);
@@ -31,4 +30,4 @@ public:
   virtual void act() override;
 };
 
-#endif //PartitionerAction_H
+#endif // PartitionerAction_H

@@ -31,87 +31,99 @@ namespace Moose
 namespace SlepcSupport
 {
 
-  InputParameters
-  getSlepcValidParams()
-  {
-    InputParameters params = emptyInputParameters();
+InputParameters
+getSlepcValidParams()
+{
+  InputParameters params = emptyInputParameters();
 
-    MooseEnum eigen_solve_type("POWER ARNOLDI KRYLOVSCHUR JACOBI_DAVIDSON");
-    params.addParam<MooseEnum>("eigen_solve_type", eigen_solve_type,
-                               "POWER: Power / Inverse / RQI "
-                               "ARNOLDI: Arnoldi "
-                               "KRYLOVSCHUR: Krylov-Schur "
-                               "JACOBI_DAVIDSON: Jacobi-Davidson ");
-   return params;
+  MooseEnum eigen_solve_type("POWER ARNOLDI KRYLOVSCHUR JACOBI_DAVIDSON");
+  params.addParam<MooseEnum>("eigen_solve_type",
+                             eigen_solve_type,
+                             "POWER: Power / Inverse / RQI "
+                             "ARNOLDI: Arnoldi "
+                             "KRYLOVSCHUR: Krylov-Schur "
+                             "JACOBI_DAVIDSON: Jacobi-Davidson ");
+  return params;
+}
+
+InputParameters
+getSlepcEigenProblemValidParams()
+{
+  InputParameters params = emptyInputParameters();
+
+  // We are solving a Non-Hermitian eigenvalue problem by default
+  MooseEnum eigen_problem_type("HERMITIAN NON_HERMITIAN GEN_HERMITIAN GEN_NON_HERMITIAN "
+                               "GEN_INDEFINITE POS_GEN_NON_HERMITIAN",
+                               "NON_HERMITIAN");
+  params.addParam<MooseEnum>(
+      "eigen_problem_type",
+      eigen_problem_type,
+      "Type of the eigenvalue problem we are solving "
+      "HERMITIAN: Hermitian "
+      "NON_HERMITIAN: Non-Hermitian "
+      "GEN_HERMITIAN: Generalized Hermitian "
+      "GEN_NON_HERMITIAN: Generalized Non-Hermitian "
+      "GEN_INDEFINITE: Generalized indefinite Hermitian "
+      "POS_GEN_NON_HERMITIAN: Generalized Non-Hermitian with positive (semi-)definite B");
+
+  // Which eigenvalues are we interested in
+  MooseEnum which_eigen_pairs("LARGEST_MAGNITUDE SMALLEST_MAGNITUDE LARGEST_REAL SMALLEST_REAL "
+                              "LARGEST_IMAGINARY SMALLEST_IMAGINARY TARGET_MAGNITUDE TARGET_REAL "
+                              "TARGET_IMAGINARY ALL_EIGENVALUES",
+                              "SMALLEST_MAGNITUDE");
+  params.addParam<MooseEnum>("which_eigen_pairs",
+                             which_eigen_pairs,
+                             "Which eigenvalue pairs to obtain from the solution "
+                             "LARGEST_MAGNITUDE "
+                             "SMALLEST_MAGNITUDE "
+                             "LARGEST_REAL "
+                             "SMALLEST_REAL "
+                             "LARGEST_IMAGINARY "
+                             "SMALLEST_IMAGINARY "
+                             "TARGET_MAGNITUDE "
+                             "TARGET_REAL "
+                             "TARGET_IMAGINARY "
+                             "ALL_EIGENVALUES ");
+  return params;
+}
+
+void
+storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputParameters & params)
+{
+  const std::string & eigen_problem_type = params.get<MooseEnum>("eigen_problem_type");
+  eigen_problem.solverParams()._eigen_problem_type =
+      Moose::stringToEnum<Moose::EigenProblemType>(eigen_problem_type);
+
+  const std::string & which_eigen_pairs = params.get<MooseEnum>("which_eigen_pairs");
+  eigen_problem.solverParams()._which_eigen_pairs =
+      Moose::stringToEnum<Moose::WhichEigenPairs>(which_eigen_pairs);
+}
+
+void
+storeSlepcOptions(FEProblemBase & fe_problem, const InputParameters & params)
+{
+  if (!(dynamic_cast<EigenProblem *>(&fe_problem)))
+    return;
+
+  if (params.isParamValid("solve_type"))
+  {
+    mooseError("Can not use \"solve_type\" for eigenvalue problems, please use "
+               "\"eigen_solve_type\" instead \n");
   }
 
-  InputParameters
-  getSlepcEigenProblemValidParams()
+  if (params.isParamValid("eigen_solve_type"))
   {
-    InputParameters params = emptyInputParameters();
-
-    // We are solving a Non-Hermitian eigenvalue problem by default
-    MooseEnum eigen_problem_type("HERMITIAN NON_HERMITIAN GEN_HERMITIAN GEN_NON_HERMITIAN GEN_INDEFINITE POS_GEN_NON_HERMITIAN", "NON_HERMITIAN");
-    params.addParam<MooseEnum>("eigen_problem_type", eigen_problem_type,
-                               "Type of the eigenvalue problem we are solving "
-                               "HERMITIAN: Hermitian "
-                               "NON_HERMITIAN: Non-Hermitian "
-                               "GEN_HERMITIAN: Generalized Hermitian "
-                               "GEN_NON_HERMITIAN: Generalized Non-Hermitian "
-                               "GEN_INDEFINITE: Generalized indefinite Hermitian "
-                               "POS_GEN_NON_HERMITIAN: Generalized Non-Hermitian with positive (semi-)definite B");
-
-
-    // Which eigenvalues are we interested in
-    MooseEnum which_eigen_pairs("LARGEST_MAGNITUDE SMALLEST_MAGNITUDE LARGEST_REAL SMALLEST_REAL LARGEST_IMAGINARY SMALLEST_IMAGINARY TARGET_MAGNITUDE TARGET_REAL TARGET_IMAGINARY ALL_EIGENVALUES", "SMALLEST_MAGNITUDE");
-    params.addParam<MooseEnum>("which_eigen_pairs", which_eigen_pairs,
-                               "Which eigenvalue pairs to obtain from the solution "
-                               "LARGEST_MAGNITUDE "
-                               "SMALLEST_MAGNITUDE "
-                               "LARGEST_REAL "
-                               "SMALLEST_REAL "
-                               "LARGEST_IMAGINARY "
-                               "SMALLEST_IMAGINARY "
-                               "TARGET_MAGNITUDE "
-                               "TARGET_REAL "
-                               "TARGET_IMAGINARY "
-                               "ALL_EIGENVALUES ");
-   return params;
+    const std::string & eigen_solve_type = params.get<MooseEnum>("eigen_solve_type");
+    fe_problem.solverParams()._eigen_solve_type =
+        Moose::stringToEnum<Moose::EigenSolveType>(eigen_solve_type);
   }
+}
 
-  void
-  storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputParameters & params)
+void
+setEigenProblemOptions(SolverParams & solver_params)
+{
+  switch (solver_params._eigen_problem_type)
   {
-    const std::string & eigen_problem_type = params.get<MooseEnum>("eigen_problem_type");
-    eigen_problem.solverParams()._eigen_problem_type = Moose::stringToEnum<Moose::EigenProblemType>(eigen_problem_type);
-
-    const std::string & which_eigen_pairs = params.get<MooseEnum>("which_eigen_pairs");
-    eigen_problem.solverParams()._which_eigen_pairs = Moose::stringToEnum<Moose::WhichEigenPairs>(which_eigen_pairs);
-  }
-
-  void
-  storeSlepcOptions(FEProblemBase & fe_problem, const InputParameters & params)
-  {
-    if (!(dynamic_cast<EigenProblem *>(&fe_problem)))
-      return;
-
-    if (params.isParamValid("solve_type"))
-    {
-      mooseError("Can not use \"solve_type\" for eigenvalue problems, please use \"eigen_solve_type\" instead \n");
-    }
-
-    if (params.isParamValid("eigen_solve_type"))
-    {
-      const std::string & eigen_solve_type = params.get<MooseEnum>("eigen_solve_type");
-      fe_problem.solverParams()._eigen_solve_type = Moose::stringToEnum<Moose::EigenSolveType>(eigen_solve_type);
-    }
-  }
-
-  void
-  setEigenProblemOptions(SolverParams & solver_params)
-  {
-    switch (solver_params._eigen_problem_type)
-    {
     case Moose::EPT_HERMITIAN:
       Moose::PetscSupport::setSinglePetscOption("-eps_hermitian");
       break;
@@ -138,22 +150,21 @@ namespace SlepcSupport
 
     default:
       mooseError("Unknown eigen solver type \n");
-    }
   }
+}
 
+void
+setSlepcOutputOptions()
+{
+  Moose::PetscSupport::setSinglePetscOption("-eps_monitor_conv");
+  Moose::PetscSupport::setSinglePetscOption("-eps_monitor");
+}
 
-  void
-  setSlepcOutputOptions()
+void
+setWhichEigenPairsOptions(SolverParams & solver_params)
+{
+  switch (solver_params._which_eigen_pairs)
   {
-    Moose::PetscSupport::setSinglePetscOption("-eps_monitor_conv");
-    Moose::PetscSupport::setSinglePetscOption("-eps_monitor");
-  }
-
-  void
-  setWhichEigenPairsOptions(SolverParams & solver_params)
-  {
-    switch (solver_params._which_eigen_pairs)
-    {
     case Moose::WEP_LARGEST_MAGNITUDE:
       Moose::PetscSupport::setSinglePetscOption("-eps_largest_magnitude");
       break;
@@ -196,14 +207,14 @@ namespace SlepcSupport
 
     default:
       mooseError("Unknown type of WhichEigenPairs \n");
-    }
   }
+}
 
-  void
-  setEigenSolverOptions(SolverParams & solver_params)
+void
+setEigenSolverOptions(SolverParams & solver_params)
+{
+  switch (solver_params._eigen_solve_type)
   {
-    switch (solver_params._eigen_solve_type)
-    {
     case Moose::EST_POWER:
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
       break;
@@ -222,19 +233,19 @@ namespace SlepcSupport
 
     default:
       mooseError("Unknown eigen solver type \n");
-    }
   }
+}
 
-  void
-  slepcSetOptions(FEProblemBase & problem)
-  {
-    Moose::PetscSupport::petscSetOptions(problem);
-    setEigenSolverOptions(problem.solverParams());
-    setEigenProblemOptions(problem.solverParams());
-    setWhichEigenPairsOptions(problem.solverParams());
-    setSlepcOutputOptions();
-    Moose::PetscSupport::addPetscOptionsFromCommandline();
-  }
+void
+slepcSetOptions(FEProblemBase & problem)
+{
+  Moose::PetscSupport::petscSetOptions(problem);
+  setEigenSolverOptions(problem.solverParams());
+  setEigenProblemOptions(problem.solverParams());
+  setWhichEigenPairsOptions(problem.solverParams());
+  setSlepcOutputOptions();
+  Moose::PetscSupport::addPetscOptionsFromCommandline();
+}
 
 } // namespace SlepcSupport
 } // namespace moose

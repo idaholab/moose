@@ -13,17 +13,18 @@
 /****************************************************************/
 #include "DiffTensorKernel.h"
 
-template<>
-InputParameters validParams<DiffTensorKernel>()
+template <>
+InputParameters
+validParams<DiffTensorKernel>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<FunctionName>("conductivity", "the name of the thermal conductivity function to utilize");
+  params.addRequiredParam<FunctionName>("conductivity",
+                                        "the name of the thermal conductivity function to utilize");
   return params;
 }
 
-DiffTensorKernel::DiffTensorKernel(const InputParameters & parameters) :
-    Kernel(parameters),
-    _k_comp(getFunction("conductivity"))
+DiffTensorKernel::DiffTensorKernel(const InputParameters & parameters)
+  : Kernel(parameters), _k_comp(getFunction("conductivity"))
 {
 }
 
@@ -49,13 +50,13 @@ DiffTensorKernel::computeConductivity(Real /*t*/, const Point & /*pt*/)
 
   // Build tensor for thermal conductivity
   RealTensorValue tensor;
-  tensor(0,0) = vector(0);
+  tensor(0, 0) = vector(0);
 
 #if LIBMESH_DIM > 1
-  tensor(1,1) = vector(1);
+  tensor(1, 1) = vector(1);
 #endif
 #if LIBMESH_DIM > 2
-  tensor(2,2) = vector(2);
+  tensor(2, 2) = vector(2);
 #endif
   return tensor;
 }

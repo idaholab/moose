@@ -23,8 +23,8 @@
 
 ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblemBase & problem,
                                                  const MooseObjectWarehouse<AuxKernel> & storage,
-                                                 bool need_materials) :
-    _problem(problem),
+                                                 bool need_materials)
+  : _problem(problem),
     _aux_sys(problem.getAuxiliarySystem()),
     _storage(storage),
     _need_materials(need_materials)
@@ -32,8 +32,9 @@ ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(FEProblemBase & problem,
 }
 
 // Splitting Constructor
-ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Threads::split /*split*/) :
-    _problem(x._problem),
+ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x,
+                                                 Threads::split /*split*/)
+  : _problem(x._problem),
     _aux_sys(x._aux_sys),
     _storage(x._storage),
     _need_materials(x._need_materials)
@@ -41,7 +42,7 @@ ComputeElemAuxBcsThread::ComputeElemAuxBcsThread(ComputeElemAuxBcsThread & x, Th
 }
 
 void
-ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
+ComputeElemAuxBcsThread::operator()(const ConstBndElemRange & range)
 {
   ParallelUniqueId puid;
   _tid = puid.id;
@@ -67,7 +68,7 @@ ComputeElemAuxBcsThread::operator() (const ConstBndElemRange & range)
       // Locate the AuxKernel objects for the current BoundaryID
       const auto iter = boundary_kernels.find(boundary_id);
 
-      if (iter != boundary_kernels.end() && !(iter->second.empty()) )
+      if (iter != boundary_kernels.end() && !(iter->second.empty()))
       {
         _problem.prepare(elem, _tid);
         _problem.reinitElemFace(elem, side, boundary_id, _tid);

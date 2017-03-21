@@ -19,13 +19,12 @@
 // Forward Declarations
 class ConvectionPrecompute;
 
-template<>
+template <>
 InputParameters validParams<ConvectionPrecompute>();
 
 class ConvectionPrecompute : public KernelValue
 {
 public:
-
   ConvectionPrecompute(const InputParameters & parameters);
 
 protected:

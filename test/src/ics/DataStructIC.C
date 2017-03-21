@@ -13,28 +13,28 @@
 /****************************************************************/
 #include "DataStructIC.h"
 
-template<>
-InputParameters validParams<DataStructIC>()
+template <>
+InputParameters
+validParams<DataStructIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   return params;
 }
 
-DataStructIC::DataStructIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
-    _mesh(_fe_problem.mesh())
+DataStructIC::DataStructIC(const InputParameters & parameters)
+  : InitialCondition(parameters), _mesh(_fe_problem.mesh())
 {
 }
 
-DataStructIC::~DataStructIC()
-{
-}
+DataStructIC::~DataStructIC() {}
 
 void
 DataStructIC::initialSetup()
 {
   MeshBase::const_element_iterator elem_end = _mesh.activeLocalElementsEnd();
-  for (MeshBase::const_element_iterator elem_it = _mesh.activeLocalElementsBegin(); elem_it != elem_end; ++elem_it)
+  for (MeshBase::const_element_iterator elem_it = _mesh.activeLocalElementsBegin();
+       elem_it != elem_end;
+       ++elem_it)
   {
     const Elem * current_elem = *elem_it;
 

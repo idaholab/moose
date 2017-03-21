@@ -17,19 +17,21 @@
 #include "FEProblem.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<RunTime>()
+template <>
+InputParameters
+validParams<RunTime>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   MooseEnum time_options("alive active");
-  params.addRequiredParam<MooseEnum>("time_type", time_options, "Whether to output the total elapsed or just the active time");
+  params.addRequiredParam<MooseEnum>(
+      "time_type", time_options, "Whether to output the total elapsed or just the active time");
   return params;
 }
 
-RunTime::RunTime(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
-    _time_type(getParam<MooseEnum>("time_type"))
-{}
+RunTime::RunTime(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters), _time_type(getParam<MooseEnum>("time_type"))
+{
+}
 
 Real
 RunTime::getValue()
@@ -44,4 +46,3 @@ RunTime::getValue()
 
   mooseError("Invalid Type");
 }
-

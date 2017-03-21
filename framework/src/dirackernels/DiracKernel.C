@@ -22,13 +22,14 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<DiracKernel>()
+template <>
+InputParameters
+validParams<DiracKernel>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<MaterialPropertyInterface>();
-  params.addRequiredParam<NonlinearVariableName>("variable",
-                                                 "The name of the variable that this kernel operates on");
+  params.addRequiredParam<NonlinearVariableName>(
+      "variable", "The name of the variable that this kernel operates on");
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
@@ -36,11 +37,12 @@ InputParameters validParams<DiracKernel>()
                         "Note that in the case this is true but no displacements are provided in "
                         "the Mesh block the undisplaced mesh will still be used.");
 
-  params.addParam<bool>("drop_duplicate_points",
-                        true,
-                        "By default points added to a DiracKernel are dropped if a point at the same location"
-                        "has been added before. If this option is set to false duplicate points are retained"
-                        "and contribute to residual and Jacobian.");
+  params.addParam<bool>(
+      "drop_duplicate_points",
+      true,
+      "By default points added to a DiracKernel are dropped if a point at the same location"
+      "has been added before. If this option is set to false duplicate points are retained"
+      "and contribute to residual and Jacobian.");
 
   params.addParamNamesToGroup("use_displaced_mesh drop_duplicate_points", "Advanced");
 
@@ -50,8 +52,8 @@ InputParameters validParams<DiracKernel>()
   return params;
 }
 
-DiracKernel::DiracKernel(const InputParameters & parameters) :
-    MooseObject(parameters),
+DiracKernel::DiracKernel(const InputParameters & parameters)
+  : MooseObject(parameters),
     SetupInterface(this),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     FunctionInterface(this),
@@ -95,7 +97,8 @@ DiracKernel::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
 
-  const std::vector<unsigned int> * multiplicities = _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
+  const std::vector<unsigned int> * multiplicities =
+      _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
   unsigned int local_qp = 0;
   Real multiplicity = 1.0;
 
@@ -118,7 +121,8 @@ DiracKernel::computeJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
 
-  const std::vector<unsigned int> * multiplicities = _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
+  const std::vector<unsigned int> * multiplicities =
+      _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
   unsigned int local_qp = 0;
   Real multiplicity = 1.0;
 
@@ -148,7 +152,8 @@ DiracKernel::computeOffDiagJacobian(unsigned int jvar)
   {
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
-    const std::vector<unsigned int> * multiplicities = _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
+    const std::vector<unsigned int> * multiplicities =
+        _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
     unsigned int local_qp = 0;
     Real multiplicity = 1.0;
 
@@ -160,8 +165,8 @@ DiracKernel::computeOffDiagJacobian(unsigned int jvar)
         if (!_drop_duplicate_points)
           multiplicity = (*multiplicities)[local_qp++];
 
-        for (_i=0; _i<_test.size(); _i++)
-          for (_j=0; _j<_phi.size(); _j++)
+        for (_i = 0; _i < _test.size(); _i++)
+          for (_j = 0; _j < _phi.size(); _j++)
             ke(_i, _j) += multiplicity * computeQpOffDiagJacobian(jvar);
       }
     }
@@ -242,7 +247,7 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
       _point_cache[id] = std::make_pair(elem, p);
 
       // ... and to the reverse cache.
-      std::vector<std::pair<Point, unsigned> > & points = _reverse_point_cache[elem];
+      std::vector<std::pair<Point, unsigned>> & points = _reverse_point_cache[elem];
       points.push_back(std::make_pair(p, id));
     }
 
@@ -310,11 +315,11 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
       else if (!active && contains_point)
       {
         // Get the list of active children
-        std::vector<const Elem*> active_children;
+        std::vector<const Elem *> active_children;
         cached_elem->active_family_tree(active_children);
 
         // Linear search through active children for the one that contains p
-        for (unsigned c=0; c<active_children.size(); ++c)
+        for (unsigned c = 0; c < active_children.size(); ++c)
           if (active_children[c]->contains_point(p))
           {
             updateCaches(cached_elem, active_children[c], p, id);
@@ -335,20 +340,20 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
       }
 
       else if (
-        // Is the Elem active but the point is not contained in it any
-        // longer?  (For example, did the Mesh move out from under
-        // it?)  Then we fall back to the expensive Point Locator
-        // lookup.  TODO: we could try and do something more optimized
-        // like checking if any of the active neighbors contains the
-        // point.  Update the caches.
-        (active && !contains_point) ||
+          // Is the Elem active but the point is not contained in it any
+          // longer?  (For example, did the Mesh move out from under
+          // it?)  Then we fall back to the expensive Point Locator
+          // lookup.  TODO: we could try and do something more optimized
+          // like checking if any of the active neighbors contains the
+          // point.  Update the caches.
+          (active && !contains_point) ||
 
-        // The Elem has been refined *and* the Mesh has moved out
-        // from under it, we fall back to doing the expensive Point
-        // Locator lookup.  TODO: We could try and look in the
-        // active children of this Elem's neighbors for the Point.
-        // Update the caches.
-        (!active && !contains_point))
+          // The Elem has been refined *and* the Mesh has moved out
+          // from under it, we fall back to doing the expensive Point
+          // Locator lookup.  TODO: We could try and look in the
+          // active children of this Elem's neighbors for the Point.
+          // Update the caches.
+          (!active && !contains_point))
       {
         i_need_find_point = true;
         break; // out of while loop
@@ -358,9 +363,12 @@ DiracKernel::addPointWithValidId(Point p, unsigned id)
         mooseError("We'll never get here!");
     } // if (cached_point.relative_fuzzy_equals(p))
     else
-      mooseError("Cached Dirac point ", cached_point,
-                  " already exists with ID: ", id,
-                  " and does not match point ", p);
+      mooseError("Cached Dirac point ",
+                 cached_point,
+                 " already exists with ID: ",
+                 id,
+                 " and does not match point ",
+                 p);
 
     // We only want one iteration of this while loop at maximum.
     i_found_it = false;
@@ -440,10 +448,7 @@ DiracKernel::subProblem()
 }
 
 void
-DiracKernel::updateCaches(const Elem* old_elem,
-                          const Elem* new_elem,
-                          Point p,
-                          unsigned id)
+DiracKernel::updateCaches(const Elem * old_elem, const Elem * new_elem, Point p, unsigned id)
 {
   // Update the point cache.  Remove old cached data, only cache
   // new_elem if it is non-NULL and local.
@@ -459,9 +464,7 @@ DiracKernel::updateCaches(const Elem* old_elem,
   {
     reverse_cache_t::mapped_type & points = it->second;
     {
-      reverse_cache_t::mapped_type::iterator
-        points_it = points.begin(),
-        points_end = points.end();
+      reverse_cache_t::mapped_type::iterator points_it = points.begin(), points_end = points.end();
 
       for (; points_it != points_end; ++points_it)
       {

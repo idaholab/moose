@@ -17,21 +17,20 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<NumElemQPs>()
+template <>
+InputParameters
+validParams<NumElemQPs>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
   return params;
 }
 
-NumElemQPs::NumElemQPs(const InputParameters & parameters) :
-    ElementIntegralPostprocessor(parameters)
+NumElemQPs::NumElemQPs(const InputParameters & parameters)
+  : ElementIntegralPostprocessor(parameters)
 {
 }
 
-NumElemQPs::~NumElemQPs()
-{
-}
+NumElemQPs::~NumElemQPs() {}
 
 Real
 NumElemQPs::computeIntegral()

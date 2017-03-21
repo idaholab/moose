@@ -19,7 +19,7 @@
 
 class CoupledDirichletBC;
 
-template<>
+template <>
 InputParameters validParams<CoupledDirichletBC>();
 
 /**

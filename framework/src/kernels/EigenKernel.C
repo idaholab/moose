@@ -22,18 +22,21 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<EigenKernel>()
+template <>
+InputParameters
+validParams<EigenKernel>()
 {
   InputParameters params = validParams<KernelBase>();
-  params.addParam<bool>("eigen", true, "Use for eigenvalue problem (true) or source problem (false)");
-  params.addParam<PostprocessorName>("eigen_postprocessor", 1.0, "The name of the postprocessor that provides the eigenvalue.");
+  params.addParam<bool>(
+      "eigen", true, "Use for eigenvalue problem (true) or source problem (false)");
+  params.addParam<PostprocessorName>(
+      "eigen_postprocessor", 1.0, "The name of the postprocessor that provides the eigenvalue.");
   params.registerBase("EigenKernel");
   return params;
 }
 
-EigenKernel::EigenKernel(const InputParameters & parameters) :
-    KernelBase(parameters),
+EigenKernel::EigenKernel(const InputParameters & parameters)
+  : KernelBase(parameters),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _eigen(getParam<bool>("eigen")),
@@ -43,7 +46,8 @@ EigenKernel::EigenKernel(const InputParameters & parameters) :
   // The name to the postprocessor storing the eigenvalue
   std::string eigen_pp_name;
 
-  // If the "eigen_postprocessor" is given, use it. The isParamValid does not work here because of the default value, which
+  // If the "eigen_postprocessor" is given, use it. The isParamValid does not work here because of
+  // the default value, which
   // you don't want to use if an EigenExecutioner exists.
   if (hasPostprocessor("eigen_postprocessor"))
     eigen_pp_name = getParam<PostprocessorName>("eigen_postprocessor");
@@ -103,7 +107,8 @@ EigenKernel::computeResidual()
 void
 EigenKernel::computeJacobian()
 {
-  if (!_is_implicit) return;
+  if (!_is_implicit)
+    return;
 
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   _local_ke.resize(ke.m(), ke.n());
@@ -122,11 +127,11 @@ EigenKernel::computeJacobian()
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i=0; i<rows; i++)
-      diag(i) = _local_ke(i,i);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i=0; i<_diag_save_in.size(); i++)
+    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }
 }
@@ -134,7 +139,8 @@ EigenKernel::computeJacobian()
 void
 EigenKernel::computeOffDiagJacobian(unsigned int jvar)
 {
-  if (!_is_implicit) return;
+  if (!_is_implicit)
+    return;
 
   if (jvar == _var.number())
     computeJacobian();
@@ -149,7 +155,8 @@ EigenKernel::computeOffDiagJacobian(unsigned int jvar)
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpOffDiagJacobian(jvar);
+          _local_ke(_i, _j) +=
+              _JxW[_qp] * _coord[_qp] * one_over_eigen * computeQpOffDiagJacobian(jvar);
 
     ke += _local_ke;
   }

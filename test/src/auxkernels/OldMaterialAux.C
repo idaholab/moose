@@ -14,16 +14,18 @@
 
 #include "OldMaterialAux.h"
 
-template<>
-InputParameters validParams<OldMaterialAux>()
+template <>
+InputParameters
+validParams<OldMaterialAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<MaterialPropertyName>("property_name", "The name of the material property to capture old and older values from");
+  params.addRequiredParam<MaterialPropertyName>(
+      "property_name", "The name of the material property to capture old and older values from");
   return params;
 }
 
-OldMaterialAux::OldMaterialAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+OldMaterialAux::OldMaterialAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _old(getMaterialPropertyOld<Real>("property_name")),
     _older(getMaterialPropertyOlder<Real>("property_name"))
 {

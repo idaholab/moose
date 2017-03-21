@@ -18,10 +18,10 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class BadCachingPointSource;
 
-template<>
+template <>
 InputParameters validParams<BadCachingPointSource>();
 
 /**
@@ -43,4 +43,4 @@ public:
   unsigned int _called;
 };
 
-#endif //BADCACHINGPOINTSOURCE_H
+#endif // BADCACHINGPOINTSOURCE_H

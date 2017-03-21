@@ -16,17 +16,17 @@
 #include "MooseMesh.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<NodalSum>()
+template <>
+InputParameters
+validParams<NodalSum>()
 {
   InputParameters params = validParams<NodalVariablePostprocessor>();
   params.set<bool>("unique_node_execute") = true;
   return params;
 }
 
-NodalSum::NodalSum(const InputParameters & parameters) :
-    NodalVariablePostprocessor(parameters),
-    _sum(0)
+NodalSum::NodalSum(const InputParameters & parameters)
+  : NodalVariablePostprocessor(parameters), _sum(0)
 {
 }
 

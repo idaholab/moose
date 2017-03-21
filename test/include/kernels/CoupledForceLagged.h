@@ -20,7 +20,7 @@
 // Forward Declaration
 class CoupledForceLagged;
 
-template<>
+template <>
 InputParameters validParams<CoupledForceLagged>();
 
 /**

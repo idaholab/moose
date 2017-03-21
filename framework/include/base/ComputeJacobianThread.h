@@ -31,7 +31,9 @@ class KernelWarehouse;
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeJacobianThread(FEProblemBase & fe_problem, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type = Moose::KT_ALL);
+  ComputeJacobianThread(FEProblemBase & fe_problem,
+                        SparseMatrix<Number> & jacobian,
+                        Moose::KernelType kernel_type = Moose::KT_ALL);
 
   // Splitting Constructor
   ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split);
@@ -74,4 +76,4 @@ protected:
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id);
 };
 
-#endif //COMPUTEJACOBIANTHREAD_H
+#endif // COMPUTEJACOBIANTHREAD_H

@@ -29,7 +29,7 @@
 const unsigned short FormattedTable::_column_width = 15;
 const unsigned short FormattedTable::_min_pps_width = 40;
 
-template<>
+template <>
 void
 dataStore(std::ostream & stream, FormattedTable & table, void * context)
 {
@@ -43,7 +43,7 @@ dataStore(std::ostream & stream, FormattedTable & table, void * context)
   storeHelper(stream, table._last_key, context);
 }
 
-template<>
+template <>
 void
 dataLoad(std::istream & stream, FormattedTable & table, void * context)
 {
@@ -52,7 +52,7 @@ dataLoad(std::istream & stream, FormattedTable & table, void * context)
   loadHelper(stream, table._column_names, context);
 
   table._stream_open = false;
-  //table.close();
+  // table.close();
 
   loadHelper(stream, table._last_key, context);
 }
@@ -79,16 +79,13 @@ FormattedTable::open(const std::string & file_name)
   _stream_open = true;
 }
 
-FormattedTable::FormattedTable() :
-    _stream_open(false),
-    _last_key(-1),
-    _output_time(true),
-    _csv_delimiter(","),
-    _csv_precision(14)
-{}
+FormattedTable::FormattedTable()
+  : _stream_open(false), _last_key(-1), _output_time(true), _csv_delimiter(","), _csv_precision(14)
+{
+}
 
-FormattedTable::FormattedTable(const FormattedTable & o) :
-    _column_names(o._column_names),
+FormattedTable::FormattedTable(const FormattedTable & o)
+  : _column_names(o._column_names),
     _output_file_name(""),
     _stream_open(o._stream_open),
     _last_key(o._last_key),
@@ -97,16 +94,13 @@ FormattedTable::FormattedTable(const FormattedTable & o) :
     _csv_precision(14)
 {
   if (_stream_open)
-    mooseError ("Copying a FormattedTable with an open stream is not supported");
+    mooseError("Copying a FormattedTable with an open stream is not supported");
 
   for (const auto & it : o._data)
     _data[it.first] = it.second;
 }
 
-FormattedTable::~FormattedTable()
-{
-  close();
-}
+FormattedTable::~FormattedTable() { close(); }
 
 bool
 FormattedTable::empty() const
@@ -135,28 +129,35 @@ FormattedTable::getLastData(const std::string & name)
 }
 
 void
-FormattedTable::printOmittedRow(std::ostream & out, std::map<std::string, unsigned short> & col_widths,
-                                std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end) const
+FormattedTable::printOmittedRow(std::ostream & out,
+                                std::map<std::string, unsigned short> & col_widths,
+                                std::set<std::string>::iterator & col_begin,
+                                std::set<std::string>::iterator & col_end) const
 {
   printNoDataRow(':', ' ', out, col_widths, col_begin, col_end);
 }
 
 void
-FormattedTable::printRowDivider(std::ostream & out, std::map<std::string, unsigned short> & col_widths,
-                                std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end) const
+FormattedTable::printRowDivider(std::ostream & out,
+                                std::map<std::string, unsigned short> & col_widths,
+                                std::set<std::string>::iterator & col_begin,
+                                std::set<std::string>::iterator & col_end) const
 {
   printNoDataRow('+', '-', out, col_widths, col_begin, col_end);
 }
 
 void
-FormattedTable::printNoDataRow(char intersect_char, char fill_char,
-                               std::ostream & out, std::map<std::string, unsigned short> & col_widths,
-                               std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end) const
+FormattedTable::printNoDataRow(char intersect_char,
+                               char fill_char,
+                               std::ostream & out,
+                               std::map<std::string, unsigned short> & col_widths,
+                               std::set<std::string>::iterator & col_begin,
+                               std::set<std::string>::iterator & col_end) const
 {
   out.fill(fill_char);
-  out << std::right << intersect_char << std::setw(_column_width+2) << intersect_char;
+  out << std::right << intersect_char << std::setw(_column_width + 2) << intersect_char;
   for (std::set<std::string>::iterator header = col_begin; header != col_end; ++header)
-    out << std::setw(col_widths[*header]+2) << intersect_char;
+    out << std::setw(col_widths[*header] + 2) << intersect_char;
   out << "\n";
 
   // Clear the fill character
@@ -177,7 +178,9 @@ FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries)
 }
 
 void
-FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries, const MooseEnum & suggested_term_width)
+FormattedTable::printTable(std::ostream & out,
+                           unsigned int last_n_entries,
+                           const MooseEnum & suggested_term_width)
 {
   unsigned short term_width;
 
@@ -204,7 +207,7 @@ FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries, cons
     while (curr_width < term_width && col_it != col_end)
     {
       curr_end = col_it;
-      col_widths[*col_it] = col_it->length() > _column_width ? col_it->length()+1 : _column_width;
+      col_widths[*col_it] = col_it->length() > _column_width ? col_it->length() + 1 : _column_width;
 
       curr_width += col_widths[*col_it] + 3;
       ++col_it;
@@ -212,7 +215,7 @@ FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries, cons
     }
     if (col_it != col_end && cols_in_group >= 2)
     {
-      //curr_width -= col_widths[*curr_end];
+      // curr_width -= col_widths[*curr_end];
       col_widths.erase(*curr_end);
       col_it = curr_end;
     }
@@ -225,19 +228,23 @@ FormattedTable::printTable(std::ostream & out, unsigned int last_n_entries, cons
 }
 
 void
-FormattedTable::printTablePiece(std::ostream & out, unsigned int last_n_entries, std::map<std::string, unsigned short> & col_widths,
-                                std::set<std::string>::iterator & col_begin, std::set<std::string>::iterator & col_end)
+FormattedTable::printTablePiece(std::ostream & out,
+                                unsigned int last_n_entries,
+                                std::map<std::string, unsigned short> & col_widths,
+                                std::set<std::string>::iterator & col_begin,
+                                std::set<std::string>::iterator & col_end)
 {
-  std::map<Real, std::map<std::string, Real> >::iterator i;
+  std::map<Real, std::map<std::string, Real>>::iterator i;
   std::set<std::string>::iterator header;
 
   /**
    * Print out the header row
    */
   printRowDivider(out, col_widths, col_begin, col_end);
-  out << "|" << std::setw(_column_width) << std::left << " time" << " |";
+  out << "|" << std::setw(_column_width) << std::left << " time"
+      << " |";
   for (header = col_begin; header != col_end; ++header)
-    out << " " << std::setw(col_widths[*header])  <<  *header << "|";
+    out << " " << std::setw(col_widths[*header]) << *header << "|";
   out << "\n";
   printRowDivider(out, col_widths, col_begin, col_end);
 
@@ -253,11 +260,11 @@ FormattedTable::printTablePiece(std::ostream & out, unsigned int last_n_entries,
       // Print a blank row to indicate that values have been ommited
       printOmittedRow(out, col_widths, col_begin, col_end);
 
-    for (int counter=0; counter < static_cast<int>(_data.size() - last_n_entries); ++counter)
+    for (int counter = 0; counter < static_cast<int>(_data.size() - last_n_entries); ++counter)
       ++i;
   }
   // Now print the remaining data rows
-  for ( ; i != _data.end(); ++i)
+  for (; i != _data.end(); ++i)
   {
     out << "|" << std::right << std::setw(_column_width) << std::scientific << i->first << " |";
     for (header = col_begin; header != col_end; ++header)
@@ -277,7 +284,8 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
   open(file_name);
   _output_file.seekp(0, std::ios::beg);
 
-  /* When the alignment option is set to true, the widths of the columns needs to be computed based on
+  /* When the alignment option is set to true, the widths of the columns needs to be computed based
+   * on
    * longest of the column name of the data supplied. This is done here by creating a map of the
    * widths for each of the columns, including time */
   std::map<std::string, unsigned int> width;
@@ -328,7 +336,7 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
         _output_file << _csv_delimiter;
 
       if (align)
-        _output_file << std::right <<  std::setw(width[col_name]) << col_name;
+        _output_file << std::right << std::setw(width[col_name]) << col_name;
       else
         _output_file << col_name;
       first = false;
@@ -347,7 +355,8 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
       if (_output_time)
       {
         if (align)
-          _output_file << std::setprecision(_csv_precision) << std::right <<  std::setw(width["time"]) << i.first;
+          _output_file << std::setprecision(_csv_precision) << std::right
+                       << std::setw(width["time"]) << i.first;
         else
           _output_file << std::setprecision(_csv_precision) << i.first;
         first = false;
@@ -363,9 +372,10 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
           first = false;
 
         if (align)
-          _output_file << std::setprecision(_csv_precision)  << std::right <<  std::setw(width[col_name]) << tmp[col_name];
+          _output_file << std::setprecision(_csv_precision) << std::right
+                       << std::setw(width[col_name]) << tmp[col_name];
         else
-          _output_file << std::setprecision(_csv_precision)  << tmp[col_name];
+          _output_file << std::setprecision(_csv_precision) << tmp[col_name];
       }
       _output_file << "\n";
     }
@@ -377,9 +387,10 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
 // const strings that the gnuplot generator needs
 namespace gnuplot
 {
-  const std::string before_terminal = "set terminal ";
-  const std::string before_ext      = "\nset output 'all";
-  const std::string after_ext       = "'\nset title 'All Postprocessors'\nset xlabel 'time'\nset ylabel 'values'\nplot";
+const std::string before_terminal = "set terminal ";
+const std::string before_ext = "\nset output 'all";
+const std::string after_ext =
+    "'\nset title 'All Postprocessors'\nset xlabel 'time'\nset ylabel 'values'\nplot";
 }
 
 void
@@ -440,13 +451,15 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
   std::ofstream gpfile;
   gpfile.open(gp_name.c_str(), std::ios::trunc | std::ios::out);
 
-  gpfile << gnuplot::before_terminal << terminal << gnuplot::before_ext << extension << gnuplot::after_ext;
+  gpfile << gnuplot::before_terminal << terminal << gnuplot::before_ext << extension
+         << gnuplot::after_ext;
 
   // plot all postprocessors in one plot
   int column = 2;
   for (const auto & col_name : _column_names)
   {
-    gpfile << " '" << dat_name << "' using 1:" << column << " title '" << col_name << "' with linespoints";
+    gpfile << " '" << dat_name << "' using 1:" << column << " title '" << col_name
+           << "' with linespoints";
     column++;
     if (column - 2 < static_cast<int>(_column_names.size()))
       gpfile << ", \\\n";
@@ -459,7 +472,8 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
   {
     gpfile << "set output '" << col_name << extension << "'\n";
     gpfile << "set ylabel '" << col_name << "'\n";
-    gpfile << "plot '" << dat_name << "' using 1:" << column << " title '" << col_name << "' with linespoints\n\n";
+    gpfile << "plot '" << dat_name << "' using 1:" << column << " title '" << col_name
+           << "' with linespoints\n\n";
     column++;
   }
 
@@ -467,15 +481,15 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
   gpfile.close();
 
   // Run the gnuplot script
-/* We aren't going to run gnuplot automatically
+  /* We aren't going to run gnuplot automatically
 
-  if (!system(NULL))
-    mooseError("No way to run gnuplot on this computer");
+    if (!system(NULL))
+      mooseError("No way to run gnuplot on this computer");
 
-  std::string command = "gnuplot " + gp_name;
-  if (system(command.c_str()))
-    mooseError("gnuplot command failed");
-*/
+    std::string command = "gnuplot " + gp_name;
+    if (system(command.c_str()))
+      mooseError("gnuplot command failed");
+  */
 }
 
 void
@@ -496,7 +510,7 @@ FormattedTable::getTermWidth(bool use_environment) const
 
   if (use_environment)
   {
-    char *pps_width = std::getenv("MOOSE_PPS_WIDTH");
+    char * pps_width = std::getenv("MOOSE_PPS_WIDTH");
     if (pps_width != NULL)
     {
       std::stringstream ss(pps_width);
@@ -509,7 +523,7 @@ FormattedTable::getTermWidth(bool use_environment) const
     {
       ioctl(0, TIOCGWINSZ, &w);
     }
-    catch(...)
+    catch (...)
     {
       // Something bad happened, make sure we have a sane value
       w.ws_col = std::numeric_limits<unsigned short>::max();

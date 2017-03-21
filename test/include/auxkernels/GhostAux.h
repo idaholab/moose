@@ -17,11 +17,11 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class GhostAux;
 class GhostUserObject;
 
-template<>
+template <>
 InputParameters validParams<GhostAux>();
 
 /**
@@ -40,4 +40,4 @@ protected:
   const GhostUserObject & _ghost_uo;
 };
 
-#endif //GHOSTAUX_H
+#endif // GHOSTAUX_H

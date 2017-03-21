@@ -33,8 +33,9 @@ class MultiApp;
 /**
  * Evaluates the specified UserObject and returns the result in a DTK FieldContainer.
  */
-class MultiAppDTKUserObjectEvaluator :
-  public DataTransferKit::FieldEvaluator<long unsigned int, DataTransferKit::FieldContainer<double> >
+class MultiAppDTKUserObjectEvaluator
+    : public DataTransferKit::FieldEvaluator<long unsigned int,
+                                             DataTransferKit::FieldContainer<double>>
 {
 public:
   MultiAppDTKUserObjectEvaluator(MultiApp & multi_app, const std::string & user_object_name);
@@ -43,9 +44,11 @@ public:
 
   typedef long unsigned int GlobalOrdinal;
 
-  DataTransferKit::FieldContainer<double> evaluate(const Teuchos::ArrayRCP<GlobalOrdinal>& bids, const Teuchos::ArrayRCP<double>& coords);
+  DataTransferKit::FieldContainer<double> evaluate(const Teuchos::ArrayRCP<GlobalOrdinal> & bids,
+                                                   const Teuchos::ArrayRCP<double> & coords);
 
-  Teuchos::RCP<DataTransferKit::GeometryManager<DataTransferKit::Box,GlobalOrdinal> > createSourceGeometry(const Teuchos::RCP<const Teuchos::Comm<int> >& comm);
+  Teuchos::RCP<DataTransferKit::GeometryManager<DataTransferKit::Box, GlobalOrdinal>>
+  createSourceGeometry(const Teuchos::RCP<const Teuchos::Comm<int>> & comm);
 
 private:
   /// The MultiAppUserObject object this object will be evaluating
@@ -58,6 +61,5 @@ private:
   Teuchos::ArrayRCP<GlobalOrdinal> _box_ids;
 };
 
-
-#endif //LIBMESH_TRILINOS_HAVE_DTK
-#endif //MULTIAPPDTKUSEROBJECTEVALUATOR_H
+#endif // LIBMESH_TRILINOS_HAVE_DTK
+#endif // MULTIAPPDTKUSEROBJECTEVALUATOR_H

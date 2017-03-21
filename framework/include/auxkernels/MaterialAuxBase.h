@@ -19,20 +19,19 @@
 #include "AuxKernel.h"
 
 // Forward declarations
-template<typename T= Real>
+template <typename T = Real>
 class MaterialAuxBase;
 
-template<>
-InputParameters validParams<MaterialAuxBase<> >();
+template <>
+InputParameters validParams<MaterialAuxBase<>>();
 
 /**
  * A base class for the various Material related AuxKernal objects
  */
-template<typename T>
+template <typename T>
 class MaterialAuxBase : public AuxKernel
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters for this object
@@ -56,20 +55,20 @@ private:
   const Real _offset;
 };
 
-template<typename T>
-MaterialAuxBase<T>::MaterialAuxBase(const InputParameters & parameters) :
-    AuxKernel(parameters),
+template <typename T>
+MaterialAuxBase<T>::MaterialAuxBase(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _prop(getMaterialProperty<T>("property")),
     _factor(getParam<Real>("factor")),
     _offset(getParam<Real>("offset"))
 {
 }
 
-template<typename T>
+template <typename T>
 Real
 MaterialAuxBase<T>::computeValue()
 {
   return _factor * getRealValue() + _offset;
 }
 
-#endif //MATERIALAUXBASE_H
+#endif // MATERIALAUXBASE_H

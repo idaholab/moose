@@ -22,7 +22,7 @@
 
 class BoxMarker;
 
-template<>
+template <>
 InputParameters validParams<BoxMarker>();
 
 class BoxMarker : public Marker

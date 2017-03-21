@@ -19,7 +19,7 @@
 
 class CreateProblemAction;
 
-template<>
+template <>
 InputParameters validParams<CreateProblemAction>();
 
 class CreateProblemAction : public MooseObjectAction

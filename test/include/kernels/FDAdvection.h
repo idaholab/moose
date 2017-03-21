@@ -19,22 +19,19 @@
 
 class FDAdvection;
 
-template<>
+template <>
 InputParameters validParams<FDAdvection>();
 
 class FDAdvection : public FDKernel
 {
 public:
-
   FDAdvection(const InputParameters & parameters);
 
 protected:
-
   virtual Real computeQpResidual();
 
 private:
-
   const VariableGradient & _grad_advector;
 };
 
-#endif //FDADVECTION_H
+#endif // FDADVECTION_H

@@ -19,7 +19,7 @@
 
 class OnOffDirichletBC;
 
-template<>
+template <>
 InputParameters validParams<OnOffDirichletBC>();
 
 /**

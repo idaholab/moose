@@ -19,7 +19,7 @@
 
 class CumulativeValuePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<CumulativeValuePostprocessor>();
 
 /**

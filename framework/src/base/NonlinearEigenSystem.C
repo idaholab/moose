@@ -12,9 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-
 #include "libmesh/libmesh_config.h"
-
 
 // moose includes
 #include "NonlinearEigenSystem.h"
@@ -31,7 +29,8 @@
 
 #if LIBMESH_HAVE_SLEPC
 
-namespace Moose {
+namespace Moose
+{
 
 void
 assemble_matrix(EquationSystems & es, const std::string & system_name)
@@ -39,21 +38,23 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   EigenProblem * p = es.parameters.get<EigenProblem *>("_eigen_problem");
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
 
-  p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_A, Moose::KT_NONEIGEN);
+  p->computeJacobian(
+      *eigen_system.current_local_solution.get(), *eigen_system.matrix_A, Moose::KT_NONEIGEN);
 
   if (eigen_system.generalized())
   {
     if (eigen_system.matrix_B)
-      p->computeJacobian(*eigen_system.current_local_solution.get(), *eigen_system.matrix_B, Moose::KT_EIGEN);
+      p->computeJacobian(
+          *eigen_system.current_local_solution.get(), *eigen_system.matrix_B, Moose::KT_EIGEN);
     else
       mooseError("It is a generalized eigenvalue problem but matrix B is empty\n");
   }
 }
-
 }
 
 NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const std::string & name)
-  : NonlinearSystemBase(eigen_problem, eigen_problem.es().add_system<TransientEigenSystem>(name), name),
+  : NonlinearSystemBase(
+        eigen_problem, eigen_problem.es().add_system<TransientEigenSystem>(name), name),
     _transient_sys(eigen_problem.es().get_system<TransientEigenSystem>(name)),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired())
 {
@@ -111,7 +112,7 @@ NumericVector<Number> &
 NonlinearEigenSystem::RHS()
 {
   mooseError("did not implement yet \n");
-  //return NULL;
+  // return NULL;
 }
 
 NonlinearSolver<Number> *
@@ -143,7 +144,8 @@ NonlinearEigenSystem::checkIntegrity()
     {
       std::shared_ptr<DirichletBC> nbc = std::dynamic_pointer_cast<DirichletBC>(nodal_bc);
       if (nbc && nbc->getParam<Real>("value"))
-        mooseError("Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
+        mooseError(
+            "Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
       else if (!nbc)
         mooseError("Invalid NodalBC for eigenvalue problems, please use homogeneous Dirichlet.");
     }
@@ -161,7 +163,8 @@ NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
 
 #else
 
-NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const std::string & /*name*/)
+NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem,
+                                           const std::string & /*name*/)
   : libMesh::ParallelObject(eigen_problem)
 {
   mooseError("Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh\n");

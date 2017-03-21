@@ -14,16 +14,18 @@
 
 #include "ElementIntegralVariableUserObject.h"
 
-template<>
-InputParameters validParams<ElementIntegralVariableUserObject>()
+template <>
+InputParameters
+validParams<ElementIntegralVariableUserObject>()
 {
   InputParameters params = validParams<ElementIntegralUserObject>();
   params.addRequiredCoupledVar("variable", "The name of the variable that this object operates on");
   return params;
 }
 
-ElementIntegralVariableUserObject::ElementIntegralVariableUserObject(const InputParameters & parameters) :
-    ElementIntegralUserObject(parameters),
+ElementIntegralVariableUserObject::ElementIntegralVariableUserObject(
+    const InputParameters & parameters)
+  : ElementIntegralUserObject(parameters),
     MooseVariableInterface(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable"))

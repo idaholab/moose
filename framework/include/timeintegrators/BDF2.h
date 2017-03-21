@@ -19,7 +19,7 @@
 
 class BDF2;
 
-template<>
+template <>
 InputParameters validParams<BDF2>();
 
 /**
@@ -39,6 +39,5 @@ public:
 protected:
   std::vector<Real> & _weight;
 };
-
 
 #endif /* BDF2_H */

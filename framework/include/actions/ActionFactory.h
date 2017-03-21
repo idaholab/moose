@@ -19,9 +19,8 @@
 #include <map>
 #include <set>
 
-#include "Action.h"  // Technically required for std::shared_ptr<Action>(Action*) constructor
+#include "Action.h" // Technically required for std::shared_ptr<Action>(Action*) constructor
 #include "InputParameters.h"
-
 
 /**
  * Macros
@@ -29,11 +28,12 @@
 #define stringifyName(name) #name
 #define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
 
-
-#define registerTask(name, is_required)                            syntax.registerTaskName(name, is_required)
-#define registerMooseObjectTask(name, moose_system, is_required)   syntax.registerTaskName(name, stringifyName(moose_system), is_required)
-#define appendMooseObjectTask(name, moose_system)                  syntax.appendTaskName(name, stringifyName(moose_system))
-#define addTaskDependency(action, depends_on)                      syntax.addDependency(action, depends_on)
+#define registerTask(name, is_required) syntax.registerTaskName(name, is_required)
+#define registerMooseObjectTask(name, moose_system, is_required)                                   \
+  syntax.registerTaskName(name, stringifyName(moose_system), is_required)
+#define appendMooseObjectTask(name, moose_system)                                                  \
+  syntax.appendTaskName(name, stringifyName(moose_system))
+#define addTaskDependency(action, depends_on) syntax.addDependency(action, depends_on)
 
 // Forward Declaration
 class MooseApp;
@@ -43,18 +43,17 @@ class MooseApp;
  */
 typedef std::shared_ptr<Action> (*buildActionPtr)(InputParameters parameters);
 
-
 /**
  * Typedef for validParams
  */
 typedef InputParameters (*paramsActionPtr)();
 
-
 /**
  * Build an object of type T
  */
-template<class T>
-std::shared_ptr<Action> buildAction(InputParameters parameters)
+template <class T>
+std::shared_ptr<Action>
+buildAction(InputParameters parameters)
 {
   return std::shared_ptr<Action>(new T(parameters));
 }
@@ -69,7 +68,7 @@ public:
 
   virtual ~ActionFactory();
 
-  template<typename T>
+  template <typename T>
   void reg(const std::string & name, const std::string & task)
   {
     BuildInfo build_info;
@@ -83,7 +82,8 @@ public:
 
   std::string getTaskName(const std::string & action);
 
-  std::shared_ptr<Action> create(const std::string & action, const std::string & action_name, InputParameters parameters);
+  std::shared_ptr<Action>
+  create(const std::string & action, const std::string & action_name, InputParameters parameters);
 
   InputParameters getValidParams(const std::string & name);
 
@@ -106,7 +106,9 @@ public:
   iterator end();
   const_iterator end() const;
 
-  std::pair<std::multimap<std::string, std::string>::const_iterator, std::multimap<std::string, std::string>::const_iterator> getActionsByTask(const std::string & task) const;
+  std::pair<std::multimap<std::string, std::string>::const_iterator,
+            std::multimap<std::string, std::string>::const_iterator>
+  getActionsByTask(const std::string & task) const;
 
   std::set<std::string> getTasksByAction(const std::string & action) const;
 
@@ -118,7 +120,7 @@ protected:
   std::multimap<std::string, std::string> _task_to_action_map;
 
   // TODO: I don't think we need this anymore
-  static unsigned int _unique_id;        ///< Unique ID for identifying multiple registrations
+  static unsigned int _unique_id; ///< Unique ID for identifying multiple registrations
 };
 
 #endif /* ACTIONFACTORY_H */

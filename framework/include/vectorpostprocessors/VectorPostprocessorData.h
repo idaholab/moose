@@ -15,7 +15,7 @@
 #ifndef VECTORPOSTPROCESSORDATA_H
 #define VECTORPOSTPROCESSORDATA_H
 
-//MOOSE includes
+// MOOSE includes
 #include "MooseTypes.h"
 #include "Restartable.h"
 
@@ -44,7 +44,8 @@ public:
    * @param vpp_name The name of the VectorPostprocessor
    * @param vector_name The name of the vector
    */
-  VectorPostprocessorValue & declareVector(const std::string & vpp_name, const std::string & vector_name);
+  VectorPostprocessorValue & declareVector(const std::string & vpp_name,
+                                           const std::string & vector_name);
 
   /**
    * Returns a true value if the VectorPostprocessor exists
@@ -57,7 +58,8 @@ public:
    * @param vector_name The name of the vector
    * @return The reference to the current value
    */
-  VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & vpp_name, const std::string & vector_name);
+  VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & vpp_name,
+                                                         const std::string & vector_name);
 
   /**
    * The the old value of an post-processor
@@ -65,12 +67,15 @@ public:
    * @param vector_name The name of the vector
    * @return The reference to the old value
    */
-  VectorPostprocessorValue & getVectorPostprocessorValueOld(const VectorPostprocessorName & vpp_name, const std::string & vector_name);
+  VectorPostprocessorValue &
+  getVectorPostprocessorValueOld(const VectorPostprocessorName & vpp_name,
+                                 const std::string & vector_name);
 
   /**
    * Get the map of names -> VectorPostprocessor values. Exposed for error checking.
    */
-//  const std::map<std::string, std::map<std::string, VectorPostprocessorValue*> > & values() const { return _values; }
+  //  const std::map<std::string, std::map<std::string, VectorPostprocessorValue*> > & values()
+  //  const { return _values; }
 
   /**
    * Check to see if a VPP has any vectors at all
@@ -81,7 +86,8 @@ public:
    * Get the map of vectors for a particular VectorPostprocessor
    * @param vpp_name The name of the VectorPostprocessor
    */
-  const std::map<std::string, VectorPostprocessorState> & vectors(const std::string & vpp_name) const;
+  const std::map<std::string, VectorPostprocessorState> &
+  vectors(const std::string & vpp_name) const;
 
   /**
    * Copy the current post-processor values into old (i.e. shift it "back in time")
@@ -89,13 +95,15 @@ public:
   void copyValuesBack();
 
 private:
-  VectorPostprocessorValue & getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name, const std::string & vector_name, bool get_current);
+  VectorPostprocessorValue & getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name,
+                                                          const std::string & vector_name,
+                                                          bool get_current);
 
   /// Values of the vector post-processor
-  std::map<std::string, std::map<std::string, VectorPostprocessorState> > _values;
+  std::map<std::string, std::map<std::string, VectorPostprocessorState>> _values;
 
   std::set<std::string> _requested_items;
   std::set<std::string> _supplied_items;
 };
 
-#endif //VECTORPOSTPROCESSORDATA_H
+#endif // VECTORPOSTPROCESSORDATA_H

@@ -16,20 +16,21 @@
 #include "NumAdaptivityCycles.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<NumAdaptivityCycles>()
+template <>
+InputParameters
+validParams<NumAdaptivityCycles>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-NumAdaptivityCycles::NumAdaptivityCycles(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters)
-{}
+NumAdaptivityCycles::NumAdaptivityCycles(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters)
+{
+}
 
 Real
 NumAdaptivityCycles::getValue()
 {
   return _fe_problem.getNumCyclesCompleted();
 }
-

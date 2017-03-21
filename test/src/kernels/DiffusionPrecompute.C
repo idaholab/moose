@@ -13,23 +13,20 @@
 /****************************************************************/
 #include "DiffusionPrecompute.h"
 
-
-template<>
-InputParameters validParams<DiffusionPrecompute>()
+template <>
+InputParameters
+validParams<DiffusionPrecompute>()
 {
   InputParameters p = validParams<KernelGrad>();
   return p;
 }
 
-
-DiffusionPrecompute::DiffusionPrecompute(const InputParameters & parameters) :
-    KernelGrad(parameters)
+DiffusionPrecompute::DiffusionPrecompute(const InputParameters & parameters)
+  : KernelGrad(parameters)
 {
 }
 
-DiffusionPrecompute::~DiffusionPrecompute()
-{
-}
+DiffusionPrecompute::~DiffusionPrecompute() {}
 
 RealGradient
 DiffusionPrecompute::precomputeQpResidual()
@@ -37,7 +34,6 @@ DiffusionPrecompute::precomputeQpResidual()
   // Note we do not multiple by the gradient of the test function.  That is done in the parent class
   return _grad_u[_qp];
 }
-
 
 RealGradient
 DiffusionPrecompute::precomputeQpJacobian()

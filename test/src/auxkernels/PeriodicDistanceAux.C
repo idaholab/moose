@@ -15,20 +15,20 @@
 #include "PeriodicDistanceAux.h"
 #include "GeneratedMesh.h"
 
-template<>
-InputParameters validParams<PeriodicDistanceAux>()
+template <>
+InputParameters
+validParams<PeriodicDistanceAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredParam<Point>("point", "Some point in the domain");
   return params;
 }
 
-PeriodicDistanceAux::PeriodicDistanceAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _point(getParam<Point>("point"))
+PeriodicDistanceAux::PeriodicDistanceAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _point(getParam<Point>("point"))
 {
   // Make sure the point is in the domain
-  for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     if (_point(i) < _mesh.getMinInDimension(i) || _point(i) > _mesh.getMaxInDimension(i))
     {
       _console << _mesh.getMinInDimension(i) << "\t" << _mesh.getMaxInDimension(i) << "\n";
@@ -36,9 +36,7 @@ PeriodicDistanceAux::PeriodicDistanceAux(const InputParameters & parameters) :
     }
 }
 
-PeriodicDistanceAux::~PeriodicDistanceAux()
-{
-}
+PeriodicDistanceAux::~PeriodicDistanceAux() {}
 
 Real
 PeriodicDistanceAux::computeValue()

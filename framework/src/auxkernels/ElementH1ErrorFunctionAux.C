@@ -19,16 +19,16 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ElementH1ErrorFunctionAux>()
+template <>
+InputParameters
+validParams<ElementH1ErrorFunctionAux>()
 {
   InputParameters params = validParams<ElementL2ErrorFunctionAux>();
   return params;
 }
 
-ElementH1ErrorFunctionAux::ElementH1ErrorFunctionAux(const InputParameters & parameters) :
-    ElementL2ErrorFunctionAux(parameters),
-    _grad_coupled_var(coupledGradient("coupled_variable"))
+ElementH1ErrorFunctionAux::ElementH1ErrorFunctionAux(const InputParameters & parameters)
+  : ElementL2ErrorFunctionAux(parameters), _grad_coupled_var(coupledGradient("coupled_variable"))
 {
 }
 
@@ -47,20 +47,20 @@ ElementH1ErrorFunctionAux::compute()
     summed_value += _JxW[_qp] * _coord[_qp] * val;
   }
 
-  _var.setNodalValue(std::pow(summed_value, 1./_p));
+  _var.setNodalValue(std::pow(summed_value, 1. / _p));
 }
 
 Real
 ElementH1ErrorFunctionAux::computeValue()
 {
   RealGradient graddiff = _func.gradient(_t, _q_point[_qp]) - _grad_coupled_var[_qp];
-  Real         funcdiff = _func.value(_t, _q_point[_qp]) - _coupled_var[_qp];
+  Real funcdiff = _func.value(_t, _q_point[_qp]) - _coupled_var[_qp];
 
   // Raise the absolute function value difference to the pth power
   Real val = std::pow(std::abs(funcdiff), _p);
 
   // Add all of the absolute gradient component differences to the pth power
-  for (unsigned int i=0; i<LIBMESH_DIM; ++i)
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     val += std::pow(std::abs(graddiff(i)), _p);
 
   return val;

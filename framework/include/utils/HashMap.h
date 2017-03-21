@@ -20,7 +20,7 @@
 
 #include <unordered_map>
 
-template<typename Key, typename T>
+template <typename Key, typename T>
 class HashMap : public std::unordered_map<Key, T>
 {
 public:
@@ -31,10 +31,7 @@ public:
     return std::unordered_map<Key, T>::operator[](k);
   }
 
-  inline bool contains(const Key & key)
-  {
-    return this->find(key) != this->end();
-  }
+  inline bool contains(const Key & key) { return this->find(key) != this->end(); }
 
 private:
   libMesh::Threads::spin_mutex spin_mutex;

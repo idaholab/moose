@@ -19,7 +19,7 @@ class FileRangeBuilder;
  * operate on ranges of files.  Adds several non-required parameters
  * that are parsed in the parseFileRange function.
  */
-template<>
+template <>
 InputParameters validParams<FileRangeBuilder>();
 
 /**
@@ -36,11 +36,11 @@ public:
   FileRangeBuilder(const InputParameters & params);
   virtual ~FileRangeBuilder() = default;
 
-  std::string fileSuffix(){ return _file_suffix; }
-  const std::vector<std::string> & filenames(){ return _filenames; }
+  std::string fileSuffix() { return _file_suffix; }
+  const std::vector<std::string> & filenames() { return _filenames; }
 
 protected:
-//  int status(){ return _status; }
+  //  int status(){ return _status; }
   void errorCheck();
 
   int _status;

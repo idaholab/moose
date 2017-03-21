@@ -19,7 +19,7 @@
 
 class BoundaryUserObject;
 
-template<>
+template <>
 InputParameters validParams<BoundaryUserObject>();
 
 /**

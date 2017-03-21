@@ -14,17 +14,18 @@
 
 #include "TimestepSetupFunction.h"
 
-template<>
-InputParameters validParams<TimestepSetupFunction>()
+template <>
+InputParameters
+validParams<TimestepSetupFunction>()
 {
   InputParameters params = validParams<Function>();
   return params;
 }
 
-TimestepSetupFunction::TimestepSetupFunction(const InputParameters & parameters) :
-    Function(parameters),
-    _local_timestep(declareRestartableData<unsigned int>("local_timestep", 0))
-{}
+TimestepSetupFunction::TimestepSetupFunction(const InputParameters & parameters)
+  : Function(parameters), _local_timestep(declareRestartableData<unsigned int>("local_timestep", 0))
+{
+}
 
 void
 TimestepSetupFunction::timestepSetup()

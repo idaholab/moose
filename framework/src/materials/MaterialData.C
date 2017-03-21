@@ -15,17 +15,12 @@
 #include "MaterialData.h"
 #include "Material.h"
 
-MaterialData::MaterialData(MaterialPropertyStorage & storage) :
-    _storage(storage),
-    _n_qpoints(0),
-    _swapped(false)
+MaterialData::MaterialData(MaterialPropertyStorage & storage)
+  : _storage(storage), _n_qpoints(0), _swapped(false)
 {
 }
 
-MaterialData::~MaterialData()
-{
-  release();
-}
+MaterialData::~MaterialData() { release(); }
 
 void
 MaterialData::release()
@@ -64,7 +59,7 @@ MaterialData::copy(const Elem & elem_to, const Elem & elem_from, unsigned int si
 }
 
 void
-MaterialData::swap(const Elem & elem, unsigned int side/* = 0*/)
+MaterialData::swap(const Elem & elem, unsigned int side /* = 0*/)
 {
   if (!_storage.hasStatefulProperties() || _swapped)
     return;
@@ -88,7 +83,7 @@ MaterialData::reset(const std::vector<std::shared_ptr<Material>> & mats)
 }
 
 void
-MaterialData::swapBack(const Elem & elem, unsigned int side/* = 0*/)
+MaterialData::swapBack(const Elem & elem, unsigned int side /* = 0*/)
 {
   if (_swapped && _storage.hasStatefulProperties())
   {

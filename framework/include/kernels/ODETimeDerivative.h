@@ -20,7 +20,7 @@
 // Forward Declaration
 class ODETimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<ODETimeDerivative>();
 
 class ODETimeDerivative : public ODETimeKernel
@@ -31,7 +31,6 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
-
 };
 
-#endif //ODETIMEDERIVATIVE_H
+#endif // ODETIMEDERIVATIVE_H

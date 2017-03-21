@@ -19,11 +19,12 @@
 
 class AddPeriodicBCAction;
 class MooseMesh;
-namespace libMesh {
+namespace libMesh
+{
 class PeriodicBoundaryBase;
 }
 
-template<>
+template <>
 InputParameters validParams<AddPeriodicBCAction>();
 
 /**

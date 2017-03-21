@@ -16,8 +16,9 @@
 #include "MooseApp.h"
 #include "Exodus.h"
 
-template<>
-InputParameters validParams<OutputObjectTest>()
+template <>
+InputParameters
+validParams<OutputObjectTest>()
 {
   MooseEnum type("getOutput getOutputs-names getOutputs getOutputNames");
   InputParameters params = validParams<Console>();
@@ -25,15 +26,12 @@ InputParameters validParams<OutputObjectTest>()
   return params;
 }
 
-OutputObjectTest::OutputObjectTest(const InputParameters & parameters) :
-    Console(parameters),
-    _type(getParam<MooseEnum>("test_type"))
+OutputObjectTest::OutputObjectTest(const InputParameters & parameters)
+  : Console(parameters), _type(getParam<MooseEnum>("test_type"))
 {
 }
 
-OutputObjectTest::~OutputObjectTest()
-{
-}
+OutputObjectTest::~OutputObjectTest() {}
 
 void
 OutputObjectTest::initialSetup()
@@ -50,7 +48,8 @@ OutputObjectTest::initialSetup()
   else if (_type == "getOutputs")
   {
     std::vector<Exodus *> ptrs = _app.getOutputWarehouse().getOutputs<Exodus>();
-    if (ptrs.size() == 2 && ptrs[0]->name().compare("exodus") == 0 && ptrs[1]->name().compare("exodus2") == 0)
+    if (ptrs.size() == 2 && ptrs[0]->name().compare("exodus") == 0 &&
+        ptrs[1]->name().compare("exodus2") == 0)
       mooseError("getOutputs test passed");
   }
 
@@ -60,7 +59,8 @@ OutputObjectTest::initialSetup()
     names.push_back("exodus2");
     names.push_back("exodus");
     std::vector<Exodus *> ptrs = _app.getOutputWarehouse().getOutputs<Exodus>(names);
-    if (ptrs.size() == 2 && ptrs[0]->name().compare("exodus2") == 0 && ptrs[1]->name().compare("exodus") == 0)
+    if (ptrs.size() == 2 && ptrs[0]->name().compare("exodus2") == 0 &&
+        ptrs[1]->name().compare("exodus") == 0)
       mooseError("getOutputs-names test passed");
   }
 

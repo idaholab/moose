@@ -23,15 +23,14 @@
 #include <string>
 #include <iostream>
 
-
-MooseEnum::MooseEnum(std::string names, std::string default_name, bool allow_out_of_range) :
-    MooseEnumBase(names, allow_out_of_range)
+MooseEnum::MooseEnum(std::string names, std::string default_name, bool allow_out_of_range)
+  : MooseEnumBase(names, allow_out_of_range)
 {
   *this = default_name;
 }
 
-MooseEnum::MooseEnum(const MooseEnum & other_enum) :
-    MooseEnumBase(other_enum),
+MooseEnum::MooseEnum(const MooseEnum & other_enum)
+  : MooseEnumBase(other_enum),
     _current_id(other_enum._current_id),
     _current_name(other_enum._current_name),
     _current_name_preserved(other_enum._current_name_preserved)
@@ -47,15 +46,9 @@ MooseEnum::withNamesFrom(const MooseEnumBase & other_enum)
 /**
  * Private constuctor for use by libmesh::Parameters
  */
-MooseEnum::MooseEnum() :
-    _current_id(INVALID_ID)
-{
-}
+MooseEnum::MooseEnum() : _current_id(INVALID_ID) {}
 
-MooseEnum::MooseEnum(const MooseEnumBase & other_enum) :
-    MooseEnumBase(other_enum)
-{
-}
+MooseEnum::MooseEnum(const MooseEnumBase & other_enum) : MooseEnumBase(other_enum) {}
 
 MooseEnum &
 MooseEnum::operator=(const std::string & name)
@@ -78,8 +71,10 @@ MooseEnum::operator=(const std::string & name)
 
   if (std::find(_names.begin(), _names.end(), upper) == _names.end())
   {
-    if (_out_of_range_index == 0)     // Are out of range values allowed?
-      mooseError(std::string("Invalid option \"") + upper + "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + _raw_names + "\".");
+    if (_out_of_range_index == 0) // Are out of range values allowed?
+      mooseError(std::string("Invalid option \"") + upper +
+                 "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + _raw_names +
+                 "\".");
     else
     {
       // Allow values assigned outside of the enumeration range
@@ -101,8 +96,10 @@ MooseEnum::operator==(const char * name) const
   std::string upper(name);
   std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
 
-  mooseAssert(_out_of_range_index != 0 || std::find(_names.begin(), _names.end(), upper) != _names.end(),
-              std::string("Invalid string comparison \"") + upper + "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + _raw_names + "\".");
+  mooseAssert(
+      _out_of_range_index != 0 || std::find(_names.begin(), _names.end(), upper) != _names.end(),
+      std::string("Invalid string comparison \"") + upper +
+          "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + _raw_names + "\".");
 
   return _current_name == upper;
 }
@@ -119,7 +116,8 @@ MooseEnum::operator==(int value) const
   return value == _current_id;
 }
 
-bool MooseEnum::operator!=(int value) const
+bool
+MooseEnum::operator!=(int value) const
 {
   return value != _current_id;
 }

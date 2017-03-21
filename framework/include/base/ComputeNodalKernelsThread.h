@@ -25,10 +25,12 @@ class FEProblemBase;
 class AuxiliarySystem;
 class NodalKernel;
 
-class ComputeNodalKernelsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+class ComputeNodalKernelsThread
+    : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelsThread(FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
+  ComputeNodalKernelsThread(FEProblemBase & fe_problem,
+                            const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
 
   // Splitting Constructor
   ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split split);
@@ -48,4 +50,4 @@ protected:
   unsigned int _num_cached;
 };
 
-#endif //COMPUTENODALKERNELSTHREAD_H
+#endif // COMPUTENODALKERNELSTHREAD_H

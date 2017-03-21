@@ -30,7 +30,9 @@ public:
    * @param nodal true if the variable is nodal
    * @param var_param_name the parameter name where we will find the coupled variable name
    */
-  MooseVariableInterface(const MooseObject * moose_object, bool nodal, std::string var_param_name = "variable");
+  MooseVariableInterface(const MooseObject * moose_object,
+                         bool nodal,
+                         std::string var_param_name = "variable");
 
   /**
    * Get the variable that this object is using.
@@ -166,6 +168,5 @@ protected:
 protected:
   Assembly * _mvi_assembly;
 };
-
 
 #endif /* MOOSEVARIABLEINTERFACE_H */

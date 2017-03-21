@@ -14,16 +14,16 @@
 
 #include "SideVectorPostprocessor.h"
 
-template<>
-InputParameters validParams<SideVectorPostprocessor>()
+template <>
+InputParameters
+validParams<SideVectorPostprocessor>()
 {
   InputParameters params = validParams<SideUserObject>();
   params += validParams<VectorPostprocessor>();
   return params;
 }
 
-SideVectorPostprocessor::SideVectorPostprocessor(const InputParameters & parameters) :
-    SideUserObject(parameters),
-    VectorPostprocessor(parameters)
-{}
-
+SideVectorPostprocessor::SideVectorPostprocessor(const InputParameters & parameters)
+  : SideUserObject(parameters), VectorPostprocessor(parameters)
+{
+}

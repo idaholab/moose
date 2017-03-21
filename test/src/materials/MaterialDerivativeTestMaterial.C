@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "MaterialDerivativeTestMaterial.h"
 
-template<>
-InputParameters validParams<MaterialDerivativeTestMaterial>()
+template <>
+InputParameters
+validParams<MaterialDerivativeTestMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("var1", "First nonlinear variable");
@@ -22,12 +23,13 @@ InputParameters validParams<MaterialDerivativeTestMaterial>()
   return params;
 }
 
-
-MaterialDerivativeTestMaterial::MaterialDerivativeTestMaterial(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+MaterialDerivativeTestMaterial::MaterialDerivativeTestMaterial(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
     _p(declareProperty<Real>("material_derivative_test_property")),
-    _dpdu(declarePropertyDerivative<Real>("material_derivative_test_property", getVar("var1", 0)->name())),
-    _dpdv(declarePropertyDerivative<Real>("material_derivative_test_property", getVar("var2", 0)->name())),
+    _dpdu(declarePropertyDerivative<Real>("material_derivative_test_property",
+                                          getVar("var1", 0)->name())),
+    _dpdv(declarePropertyDerivative<Real>("material_derivative_test_property",
+                                          getVar("var2", 0)->name())),
     _u(coupledValue("var1")),
     _v(coupledValue("var2"))
 {

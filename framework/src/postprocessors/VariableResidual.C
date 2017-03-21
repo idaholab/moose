@@ -16,11 +16,13 @@
 
 #include "NonlinearSystemBase.h"
 
-template<>
-InputParameters validParams<VariableResidual>()
+template <>
+InputParameters
+validParams<VariableResidual>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable to compute the residual for");
+  params.addRequiredParam<VariableName>("variable",
+                                        "The name of the variable to compute the residual for");
   return params;
 }
 

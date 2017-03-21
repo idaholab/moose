@@ -17,12 +17,11 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class GapValueAux;
 class PenetrationLocator;
 
-template<>
+template <>
 InputParameters validParams<GapValueAux>();
 
 class GapValueAux : public AuxKernel
@@ -37,11 +36,11 @@ protected:
 
   MooseVariable & _moose_var;
 
-  const NumericVector<Number> * & _serialized_solution;
+  const NumericVector<Number> *& _serialized_solution;
 
   const DofMap & _dof_map;
 
   const bool _warnings;
 };
 
-#endif //GAPVALUEAUX_H
+#endif // GAPVALUEAUX_H

@@ -19,7 +19,7 @@
 
 class ExplicitTVDRK2;
 
-template<>
+template <>
 InputParameters validParams<ExplicitTVDRK2>();
 
 /**
@@ -72,6 +72,5 @@ protected:
   /// Buffer to store non-time residual from the first stage.
   NumericVector<Number> & _residual_old;
 };
-
 
 #endif /* EXPLICITTVDRK2_H */

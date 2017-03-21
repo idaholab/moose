@@ -20,7 +20,7 @@
 
 class FunctionDT;
 
-template<>
+template <>
 InputParameters validParams<FunctionDT>();
 
 class FunctionDT : public TimeStepper

@@ -15,27 +15,23 @@
 #include "ImplicitEuler.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<ImplicitEuler>()
+template <>
+InputParameters
+validParams<ImplicitEuler>()
 {
   InputParameters params = validParams<TimeIntegrator>();
 
   return params;
 }
 
-ImplicitEuler::ImplicitEuler(const InputParameters & parameters) :
-    TimeIntegrator(parameters)
-{
-}
+ImplicitEuler::ImplicitEuler(const InputParameters & parameters) : TimeIntegrator(parameters) {}
 
-ImplicitEuler::~ImplicitEuler()
-{
-}
+ImplicitEuler::~ImplicitEuler() {}
 
 void
 ImplicitEuler::computeTimeDerivatives()
 {
-  _u_dot  = *_solution;
+  _u_dot = *_solution;
   _u_dot -= _solution_old;
   _u_dot *= 1 / _dt;
   _u_dot.close();

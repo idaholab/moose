@@ -37,7 +37,6 @@ indent(unsigned int spaces)
   return std::string(spaces, ' ');
 }
 
-
 std::string
 outputFrameworkInformation(MooseApp & app)
 {
@@ -47,15 +46,15 @@ outputFrameworkInformation(MooseApp & app)
   if (app.getSystemInfo() != NULL)
     oss << app.getSystemInfo()->getInfo();
 
-  oss << std::left
-      << "Parallelism:\n"
-      << std::setw(console_field_width) << "  Num Processors: " << static_cast<std::size_t>(app.n_processors()) << '\n'
-      << std::setw(console_field_width) << "  Num Threads: " << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
+  oss << std::left << "Parallelism:\n"
+      << std::setw(console_field_width)
+      << "  Num Processors: " << static_cast<std::size_t>(app.n_processors()) << '\n'
+      << std::setw(console_field_width)
+      << "  Num Threads: " << static_cast<std::size_t>(libMesh::n_threads()) << '\n'
       << '\n';
 
   return oss.str();
 }
-
 
 std::string
 outputMeshInformation(FEProblemBase & problem, bool verbose)
@@ -69,10 +68,12 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
   if (verbose)
   {
     oss << "Mesh: " << '\n'
-        << std::setw(console_field_width) << "  Parallel Type: " << (moose_mesh.isDistributedMesh() ? "distributed" : "replicated")
+        << std::setw(console_field_width)
+        << "  Parallel Type: " << (moose_mesh.isDistributedMesh() ? "distributed" : "replicated")
         << (moose_mesh.isParallelTypeForced() ? " (forced) " : "") << '\n'
         << std::setw(console_field_width) << "  Mesh Dimension: " << mesh.mesh_dimension() << '\n'
-        << std::setw(console_field_width) << "  Spatial Dimension: " << mesh.spatial_dimension() << '\n';
+        << std::setw(console_field_width) << "  Spatial Dimension: " << mesh.spatial_dimension()
+        << '\n';
   }
 
   oss << std::setw(console_field_width) << "  Nodes:" << '\n'
@@ -85,12 +86,13 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
   if (verbose)
   {
 
-    oss << std::setw(console_field_width) << "  Num Subdomains: "       << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
-        << std::setw(console_field_width) << "  Num Partitions: "       << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
+    oss << std::setw(console_field_width)
+        << "  Num Subdomains: " << static_cast<std::size_t>(mesh.n_subdomains()) << '\n'
+        << std::setw(console_field_width)
+        << "  Num Partitions: " << static_cast<std::size_t>(mesh.n_partitions()) << '\n';
     if (problem.n_processors() > 1)
-      oss << std::setw(console_field_width) << "  Partitioner: "       << moose_mesh.partitionerName()
-          << (moose_mesh.isPartitionerForced() ? " (forced) " : "")
-          << '\n';
+      oss << std::setw(console_field_width) << "  Partitioner: " << moose_mesh.partitionerName()
+          << (moose_mesh.isPartitionerForced() ? " (forced) " : "") << '\n';
   }
 
   oss << '\n';
@@ -98,20 +100,17 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
   return oss.str();
 }
 
-
 std::string
 outputAuxiliarySystemInformation(FEProblemBase & problem)
 {
   return outputSystemInformationHelper(problem.getAuxiliarySystem().system());
 }
 
-
 std::string
 outputNonlinearSystemInformation(FEProblemBase & problem)
 {
   return outputSystemInformationHelper(problem.getNonlinearSystemBase().system());
 }
-
 
 std::string
 outputSystemInformationHelper(const System & system)
@@ -127,19 +126,21 @@ outputSystemInformationHelper(const System & system)
     std::streampos begin_string_pos = oss.tellp();
     std::streampos curr_string_pos = begin_string_pos;
     oss << std::setw(console_field_width) << "  Variables: ";
-    for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+    for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
-      const VariableGroup &vg_description (system.variable_group(vg));
+      const VariableGroup & vg_description(system.variable_group(vg));
 
-      if (vg_description.n_variables() > 1) oss << "{ ";
-      for (unsigned int vn=0; vn<vg_description.n_variables(); vn++)
+      if (vg_description.n_variables() > 1)
+        oss << "{ ";
+      for (unsigned int vn = 0; vn < vg_description.n_variables(); vn++)
       {
         oss << "\"" << vg_description.name(vn) << "\" ";
         curr_string_pos = oss.tellp();
         insertNewline(oss, begin_string_pos, curr_string_pos);
       }
 
-      if (vg_description.n_variables() > 1) oss << "} ";
+      if (vg_description.n_variables() > 1)
+        oss << "} ";
     }
     oss << '\n';
 
@@ -147,22 +148,22 @@ outputSystemInformationHelper(const System & system)
     curr_string_pos = begin_string_pos;
     oss << std::setw(console_field_width) << "  Finite Element Types: ";
 #ifndef LIBMESH_ENABLE_INFINITE_ELEMENTS
-    for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+    for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
-      oss << "\""
-          << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().family)
+      oss << "\"" << libMesh::Utility::enum_to_string<FEFamily>(
+                         system.get_dof_map().variable_group(vg).type().family)
           << "\" ";
       curr_string_pos = oss.tellp();
       insertNewline(oss, begin_string_pos, curr_string_pos);
     }
     oss << '\n';
 #else
-    for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+    for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
-      oss << "\""
-          << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().family)
-          << "\", \""
-          << libMesh::Utility::enum_to_string<FEFamily>(system.get_dof_map().variable_group(vg).type().radial_family)
+      oss << "\"" << libMesh::Utility::enum_to_string<FEFamily>(
+                         system.get_dof_map().variable_group(vg).type().family)
+          << "\", \"" << libMesh::Utility::enum_to_string<FEFamily>(
+                             system.get_dof_map().variable_group(vg).type().radial_family)
           << "\" ";
       curr_string_pos = oss.tellp();
       insertNewline(oss, begin_string_pos, curr_string_pos);
@@ -172,10 +173,10 @@ outputSystemInformationHelper(const System & system)
     begin_string_pos = oss.tellp();
     curr_string_pos = begin_string_pos;
     oss << std::setw(console_field_width) << "  Infinite Element Mapping: ";
-    for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+    for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
-      oss << "\""
-          << libMesh::Utility::enum_to_string<InfMapType>(system.get_dof_map().variable_group(vg).type().inf_map)
+      oss << "\"" << libMesh::Utility::enum_to_string<InfMapType>(
+                         system.get_dof_map().variable_group(vg).type().inf_map)
           << "\" ";
       curr_string_pos = oss.tellp();
       insertNewline(oss, begin_string_pos, curr_string_pos);
@@ -186,7 +187,7 @@ outputSystemInformationHelper(const System & system)
     begin_string_pos = oss.tellp();
     curr_string_pos = begin_string_pos;
     oss << std::setw(console_field_width) << "  Approximation Orders: ";
-    for (unsigned int vg=0; vg<system.n_variable_groups(); vg++)
+    for (unsigned int vg = 0; vg < system.n_variable_groups(); vg++)
     {
 #ifndef LIBMESH_ENABLE_INFINITE_ELEMENTS
       oss << "\""
@@ -195,8 +196,8 @@ outputSystemInformationHelper(const System & system)
 #else
       oss << "\""
           << Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().order)
-          << "\", \""
-          << Utility::enum_to_string<Order>(system.get_dof_map().variable_group(vg).type().radial_order)
+          << "\", \"" << Utility::enum_to_string<Order>(
+                             system.get_dof_map().variable_group(vg).type().radial_order)
           << "\" ";
 #endif
       curr_string_pos = oss.tellp();
@@ -218,13 +219,16 @@ outputExecutionInformation(MooseApp & app, FEProblemBase & problem)
   Executioner * exec = app.getExecutioner();
 
   oss << "Execution Information:\n"
-      << std::setw(console_field_width) << "  Executioner: " << demangle(typeid(*exec).name()) << '\n';
+      << std::setw(console_field_width) << "  Executioner: " << demangle(typeid(*exec).name())
+      << '\n';
 
   std::string time_stepper = exec->getTimeStepperName();
   if (time_stepper != "")
     oss << std::setw(console_field_width) << "  TimeStepper: " << time_stepper << '\n';
 
-  oss << std::setw(console_field_width) << "  Solver Mode: " << Moose::stringify<Moose::SolveType>(problem.solverParams()._type) << '\n';
+  oss << std::setw(console_field_width)
+      << "  Solver Mode: " << Moose::stringify<Moose::SolveType>(problem.solverParams()._type)
+      << '\n';
 
   const std::string & pc_desc = problem.getPetscOptions().pc_description;
   if (!pc_desc.empty())
@@ -246,7 +250,8 @@ outputOutputInformation(MooseApp & app)
   {
     // Display the "execute_on" settings
     const MultiMooseEnum & execute_on = out->executeOn();
-    oss << "  " << std::setw(console_field_width-2) << out->name() <<  "\"" << execute_on << "\"\n";
+    oss << "  " << std::setw(console_field_width - 2) << out->name() << "\"" << execute_on
+        << "\"\n";
 
     // Display the advanced "execute_on" settings, only if they are different from "execute_on"
     if (out->isAdvanced())
@@ -254,7 +259,8 @@ outputOutputInformation(MooseApp & app)
       const OutputOnWarehouse & adv_on = out->advancedExecuteOn();
       for (const auto & adv_it : adv_on)
         if (execute_on != adv_it.second)
-          oss << "    " << std::setw(console_field_width-4) << adv_it.first + ":" <<  "\"" << adv_it.second << "\"\n";
+          oss << "    " << std::setw(console_field_width - 4) << adv_it.first + ":"
+              << "\"" << adv_it.second << "\"\n";
     }
   }
 
@@ -262,14 +268,14 @@ outputOutputInformation(MooseApp & app)
 }
 
 void
-insertNewline(std::stringstream &oss, std::streampos &begin, std::streampos &curr)
+insertNewline(std::stringstream & oss, std::streampos & begin, std::streampos & curr)
 {
-   if (curr - begin > console_line_length)
-   {
-     oss << "\n";
-     begin = oss.tellp();
-     oss << std::setw(console_field_width + 2) << "";  // "{ "
-   }
+  if (curr - begin > console_line_length)
+  {
+    oss << "\n";
+    begin = oss.tellp();
+    oss << std::setw(console_field_width + 2) << ""; // "{ "
+  }
 }
 
 } // ConsoleUtils namespace

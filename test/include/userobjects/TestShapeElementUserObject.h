@@ -17,10 +17,10 @@
 
 #include "ShapeElementUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class TestShapeElementUserObject;
 
-template<>
+template <>
 InputParameters validParams<TestShapeElementUserObject>();
 
 /**
@@ -29,8 +29,7 @@ InputParameters validParams<TestShapeElementUserObject>();
  * Do not use this as a starting point for developing your own ShapeElementUserObject
  * Use ExampleShapeElementUserObject instead!
  */
-class TestShapeElementUserObject :
-  public ShapeElementUserObject
+class TestShapeElementUserObject : public ShapeElementUserObject
 {
 public:
   TestShapeElementUserObject(const InputParameters & parameters);

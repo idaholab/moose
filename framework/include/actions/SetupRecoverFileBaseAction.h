@@ -21,7 +21,7 @@
 // Forward declerations
 class SetupRecoverFileBaseAction;
 
-template<>
+template <>
 InputParameters validParams<SetupRecoverFileBaseAction>();
 
 /**
@@ -39,4 +39,4 @@ public:
   virtual void act() override;
 };
 
-#endif //SETUPRECOVERFILEBASEACTION_H
+#endif // SETUPRECOVERFILEBASEACTION_H

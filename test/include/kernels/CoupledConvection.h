@@ -18,7 +18,7 @@
 
 class CoupledConvection;
 
-template<>
+template <>
 InputParameters validParams<CoupledConvection>();
 
 /**
@@ -40,4 +40,4 @@ private:
   const VariableGradient & _velocity_vector;
 };
 
-#endif //COUPLEDCONVECTION_H
+#endif // COUPLEDCONVECTION_H

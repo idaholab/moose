@@ -14,15 +14,16 @@
 
 #include "ElementL2Norm.h"
 
-template<>
-InputParameters validParams<ElementL2Norm>()
+template <>
+InputParameters
+validParams<ElementL2Norm>()
 {
   InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
   return params;
 }
 
-ElementL2Norm::ElementL2Norm(const InputParameters & parameters) :
-    ElementIntegralVariablePostprocessor(parameters)
+ElementL2Norm::ElementL2Norm(const InputParameters & parameters)
+  : ElementIntegralVariablePostprocessor(parameters)
 {
 }
 
@@ -36,6 +37,5 @@ Real
 ElementL2Norm::computeQpIntegral()
 {
   Real val = _u[_qp];
-  return val*val;
+  return val * val;
 }
-

@@ -14,8 +14,9 @@
 
 #include "RandomElementalUserObject.h"
 
-template<>
-InputParameters validParams<RandomElementalUserObject>()
+template <>
+InputParameters
+validParams<RandomElementalUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
 
@@ -25,8 +26,8 @@ InputParameters validParams<RandomElementalUserObject>()
   return params;
 }
 
-RandomElementalUserObject::RandomElementalUserObject(const InputParameters & parameters) :
-    ElementUserObject(parameters)
+RandomElementalUserObject::RandomElementalUserObject(const InputParameters & parameters)
+  : ElementUserObject(parameters)
 {
   /**
    * This call turns on Random Number generation for this object, it can be called either in
@@ -35,9 +36,7 @@ RandomElementalUserObject::RandomElementalUserObject(const InputParameters & par
   setRandomResetFrequency(EXEC_LINEAR);
 }
 
-RandomElementalUserObject::~RandomElementalUserObject()
-{
-}
+RandomElementalUserObject::~RandomElementalUserObject() {}
 
 void
 RandomElementalUserObject::initialize()
@@ -58,7 +57,7 @@ RandomElementalUserObject::finalize()
 }
 
 void
-RandomElementalUserObject::threadJoin(const UserObject &y)
+RandomElementalUserObject::threadJoin(const UserObject & y)
 {
   const RandomElementalUserObject & uo = static_cast<const RandomElementalUserObject &>(y);
 

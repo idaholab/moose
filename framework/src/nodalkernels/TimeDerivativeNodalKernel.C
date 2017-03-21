@@ -14,15 +14,16 @@
 
 #include "TimeDerivativeNodalKernel.h"
 
-template<>
-InputParameters validParams<TimeDerivativeNodalKernel>()
+template <>
+InputParameters
+validParams<TimeDerivativeNodalKernel>()
 {
   InputParameters params = validParams<NodalKernel>();
   return params;
 }
 
-TimeDerivativeNodalKernel::TimeDerivativeNodalKernel(const InputParameters & parameters) :
-    TimeNodalKernel(parameters)
+TimeDerivativeNodalKernel::TimeDerivativeNodalKernel(const InputParameters & parameters)
+  : TimeNodalKernel(parameters)
 {
 }
 

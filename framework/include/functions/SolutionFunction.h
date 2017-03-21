@@ -21,7 +21,7 @@
 class SolutionFunction;
 class SolutionUserObject;
 
-template<>
+template <>
 InputParameters validParams<SolutionFunction>();
 
 /** Function for reading a solution from file
@@ -32,7 +32,6 @@ InputParameters validParams<SolutionFunction>();
 class SolutionFunction : public Function
 {
 public:
-
   /** Constructor
    * @param parameters The input parameters for the function
    */
@@ -63,7 +62,6 @@ public:
   virtual void initialSetup() override;
 
 protected:
-
   /// Pointer to SolutionUserObject containing the solution of interest
   const SolutionUserObject * _solution_object_ptr;
 
@@ -80,4 +78,4 @@ protected:
   RealGradient _add_grad;
 };
 
-#endif //SOLUTIONFUNCTION_H
+#endif // SOLUTIONFUNCTION_H

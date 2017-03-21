@@ -23,7 +23,7 @@
 
 class Transform;
 
-template<>
+template <>
 InputParameters validParams<Transform>();
 
 class Transform : public MeshModifier

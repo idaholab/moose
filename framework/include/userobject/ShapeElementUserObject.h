@@ -18,10 +18,10 @@
 #include "ElementUserObject.h"
 #include "ShapeUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class ShapeElementUserObject;
 
-template<>
+template <>
 InputParameters validParams<ShapeElementUserObject>();
 
 /**
@@ -38,4 +38,4 @@ public:
   ShapeElementUserObject(const InputParameters & parameters);
 };
 
-#endif //SHAPEELEMENTUSEROBJECT_H
+#endif // SHAPEELEMENTUSEROBJECT_H

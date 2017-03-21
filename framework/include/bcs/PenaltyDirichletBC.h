@@ -19,7 +19,7 @@
 class PenaltyDirichletBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<PenaltyDirichletBC>();
 
 /**
@@ -32,7 +32,6 @@ InputParameters validParams<PenaltyDirichletBC>();
 class PenaltyDirichletBC : public IntegratedBC
 {
 public:
-
   PenaltyDirichletBC(const InputParameters & parameters);
 
 protected:

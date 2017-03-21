@@ -21,11 +21,12 @@
 // libMesh includes
 #include "libmesh/nemesis_io.h"
 
-template<>
-InputParameters validParams<Nemesis>()
+template <>
+InputParameters
+validParams<Nemesis>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<AdvancedOutput<OversampleOutput> >();
+  InputParameters params = validParams<AdvancedOutput<OversampleOutput>>();
   params += AdvancedOutput<OversampleOutput>::enableOutputTypes("scalar postprocessor input");
 
   // Add description for the Nemesis class
@@ -35,8 +36,8 @@ InputParameters validParams<Nemesis>()
   return params;
 }
 
-Nemesis::Nemesis(const InputParameters & parameters) :
-    AdvancedOutput<OversampleOutput>(parameters),
+Nemesis::Nemesis(const InputParameters & parameters)
+  : AdvancedOutput<OversampleOutput>(parameters),
     _nemesis_io_ptr(nullptr),
     _file_num(0),
     _nemesis_num(0),
@@ -44,9 +45,7 @@ Nemesis::Nemesis(const InputParameters & parameters) :
 {
 }
 
-Nemesis::~Nemesis()
-{
-}
+Nemesis::~Nemesis() {}
 
 void
 Nemesis::initialSetup()
@@ -142,7 +141,8 @@ Nemesis::output(const ExecFlagType & type)
   AdvancedOutput<OversampleOutput>::output(type);
 
   // Write the data
-  _nemesis_io_ptr->write_timestep(filename(), *_es_ptr, _nemesis_num, time() + _app.getGlobalTimeOffset());
+  _nemesis_io_ptr->write_timestep(
+      filename(), *_es_ptr, _nemesis_num, time() + _app.getGlobalTimeOffset());
   _nemesis_initialized = true;
 
   // Increment output call counter for the current file
@@ -158,15 +158,11 @@ Nemesis::filename()
 {
   // Append the .e extension on the base file name
   std::ostringstream output;
-  output << _file_base << ".e" ;
+  output << _file_base << ".e";
 
   // Add the _000x extension to the file
   if (_file_num > 1)
-    output << "-s"
-           << std::setw(_padding)
-           << std::setprecision(0)
-           << std::setfill('0')
-           << std::right
+    output << "-s" << std::setw(_padding) << std::setprecision(0) << std::setfill('0') << std::right
            << _file_num;
 
   // Return the filename

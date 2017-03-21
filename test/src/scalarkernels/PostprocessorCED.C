@@ -15,8 +15,9 @@
 #include "PostprocessorCED.h"
 #include "Assembly.h"
 
-template<>
-InputParameters validParams<PostprocessorCED>()
+template <>
+InputParameters
+validParams<PostprocessorCED>()
 {
   InputParameters params = validParams<ScalarKernel>();
   params.addRequiredParam<PostprocessorName>("pp_name", "");
@@ -25,16 +26,14 @@ InputParameters validParams<PostprocessorCED>()
   return params;
 }
 
-PostprocessorCED::PostprocessorCED(const InputParameters & parameters) :
-    ScalarKernel(parameters),
+PostprocessorCED::PostprocessorCED(const InputParameters & parameters)
+  : ScalarKernel(parameters),
     _value(getParam<Real>("value")),
     _pp_value(getPostprocessorValue("pp_name"))
 {
 }
 
-PostprocessorCED::~PostprocessorCED()
-{
-}
+PostprocessorCED::~PostprocessorCED() {}
 
 void
 PostprocessorCED::reinit()

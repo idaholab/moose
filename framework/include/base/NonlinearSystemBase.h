@@ -46,8 +46,10 @@ class Split;
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
-template <typename T> class SparseMatrix;
+template <typename T>
+class NumericVector;
+template <typename T>
+class SparseMatrix;
 }
 
 /**
@@ -55,8 +57,7 @@ template <typename T> class SparseMatrix;
  *
  * It is a part of FEProblemBase ;-)
  */
-class NonlinearSystemBase : public SystemBase,
-                            public ConsoleStreamInterface
+class NonlinearSystemBase : public SystemBase, public ConsoleStreamInterface
 {
 public:
   NonlinearSystemBase(FEProblemBase & problem, System & sys, const std::string & name);
@@ -103,7 +104,8 @@ public:
    * @param name The name of the integrator
    * @param parameters Integrator params
    */
-  void addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
+  void
+  addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a kernel
@@ -111,9 +113,10 @@ public:
    * @param name The name of the kernel
    * @param parameters Kernel parameters
    */
-  virtual void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  virtual void
+  addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
-  virtual void addEigenKernels(std::shared_ptr<KernelBase> /*kernel*/, THREAD_ID /*tid*/) {};
+  virtual void addEigenKernels(std::shared_ptr<KernelBase> /*kernel*/, THREAD_ID /*tid*/){};
 
   /**
    * Adds a NodalKernel
@@ -121,7 +124,9 @@ public:
    * @param name The name of the kernel
    * @param parameters Kernel parameters
    */
-  virtual void addNodalKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  virtual void addNodalKernel(const std::string & kernel_name,
+                              const std::string & name,
+                              InputParameters parameters);
 
   /**
    * Adds a scalar kernel
@@ -129,7 +134,9 @@ public:
    * @param name The name of the kernel
    * @param parameters Kernel parameters
    */
-  void addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  void addScalarKernel(const std::string & kernel_name,
+                       const std::string & name,
+                       InputParameters parameters);
 
   /**
    * Adds a boundary condition
@@ -137,7 +144,9 @@ public:
    * @param name The name of the boundary condition
    * @param parameters Boundary condition parameters
    */
-  void addBoundaryCondition(const std::string & bc_name, const std::string & name, InputParameters parameters);
+  void addBoundaryCondition(const std::string & bc_name,
+                            const std::string & name,
+                            InputParameters parameters);
 
   /**
    * Adds a Constraint
@@ -145,7 +154,8 @@ public:
    * @param name The name of the constraint
    * @param parameters Constraint parameters
    */
-  void addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
+  void
+  addConstraint(const std::string & c_name, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a Dirac kernel
@@ -153,7 +163,9 @@ public:
    * @param name The name of the Dirac kernel
    * @param parameters Dirac kernel parameters
    */
-  void addDiracKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  void addDiracKernel(const std::string & kernel_name,
+                      const std::string & name,
+                      InputParameters parameters);
 
   /**
    * Adds a DG kernel
@@ -161,7 +173,8 @@ public:
    * @param name The name of the DG kernel
    * @param parameters DG kernel parameters
    */
-  void addDGKernel(std::string dg_kernel_name, const std::string & name, InputParameters parameters);
+  void
+  addDGKernel(std::string dg_kernel_name, const std::string & name, InputParameters parameters);
 
   /**
    * Adds an interface kernel
@@ -169,7 +182,9 @@ public:
    * @param name The name of the interface kernel
    * @param parameters interface kernel parameters
    */
-  void addInterfaceKernel(std::string interface_kernel_name, const std::string & name, InputParameters parameters);
+  void addInterfaceKernel(std::string interface_kernel_name,
+                          const std::string & name,
+                          InputParameters parameters);
 
   /**
    * Adds a damper
@@ -177,7 +192,8 @@ public:
    * @param name The name of the damper
    * @param parameters Damper parameters
    */
-  void addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters);
+  void
+  addDamper(const std::string & damper_name, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a split
@@ -185,7 +201,8 @@ public:
    * @param name The name of the split
    * @param parameters Split parameters
    */
-  void addSplit(const std::string & split_name, const std::string & name, InputParameters parameters);
+  void
+  addSplit(const std::string & split_name, const std::string & name, InputParameters parameters);
 
   /**
    * Retrieves a split by name
@@ -205,7 +222,8 @@ public:
   /**
    * Add residual contributions from Constraints
    *
-   * @param residual - reference to the residual vector where constraint contributions will be computed
+   * @param residual - reference to the residual vector where constraint contributions will be
+   * computed
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
    */
   void constraintResiduals(NumericVector<Number> & residual, bool displaced);
@@ -220,14 +238,17 @@ public:
   /**
    * Finds the implicit sparsity graph between geometrically related dofs.
    */
-  void findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data,
-                                            std::map<dof_id_type, std::vector<dof_id_type> > & graph);
+  void
+  findImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data,
+                                       std::map<dof_id_type, std::vector<dof_id_type>> & graph);
 
   /**
-   * Adds entries to the Jacobian in the correct positions for couplings coming from dofs being coupled that
+   * Adds entries to the Jacobian in the correct positions for couplings coming from dofs being
+   * coupled that
    * are related geometrically (i.e. near each other across a gap).
    */
-  void addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jacobian, GeometricSearchData & geom_search_data);
+  void addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jacobian,
+                                           GeometricSearchData & geom_search_data);
 
   /**
    * Add jacobian contributions from Constraints
@@ -245,10 +266,12 @@ public:
    * Computes Jacobian
    * @param jacobian Jacobian is formed in here
    */
-  void computeJacobian(SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type = Moose::KT_ALL);
+  void computeJacobian(SparseMatrix<Number> & jacobian,
+                       Moose::KernelType kernel_type = Moose::KT_ALL);
 
   /**
-   * Computes several Jacobian blocks simultaneously, summing their contributions into smaller preconditioning matrices.
+   * Computes several Jacobian blocks simultaneously, summing their contributions into smaller
+   * preconditioning matrices.
    *
    * Used by Physics-based preconditioning
    *
@@ -262,8 +285,7 @@ public:
    * @param update The incremental update to the solution vector
    * @return returns The damping factor
    */
-  Real computeDamping(const NumericVector<Number> & solution,
-                      const NumericVector<Number> & update);
+  Real computeDamping(const NumericVector<Number> & solution, const NumericVector<Number> & update);
 
   /**
    * Computes the time derivative vector
@@ -284,7 +306,6 @@ public:
 
   virtual void setSolution(const NumericVector<Number> & soln);
 
-
   /**
    * Update active objects of Warehouses owned by NonlinearSystemBase
    */
@@ -293,14 +314,15 @@ public:
   /**
    * Set transient term used by residual and Jacobian evaluation.
    * @param udot transient term
-   * @note If the calling sequence for residual evaluation was changed, this could become an explicit argument.
+   * @note If the calling sequence for residual evaluation was changed, this could become an
+   * explicit argument.
    */
   virtual void setSolutionUDot(const NumericVector<Number> & udot);
 
   virtual NumericVector<Number> & solutionUDot() override;
   virtual NumericVector<Number> & residualVector(Moose::KernelType type) override;
 
-  virtual const NumericVector<Number> * & currentSolution() override { return _current_solution; }
+  virtual const NumericVector<Number> *& currentSolution() override { return _current_solution; }
 
   virtual void serializeSolution();
   virtual NumericVector<Number> & serializedSolution() override;
@@ -324,7 +346,10 @@ public:
    * If called with true this system will use a finite differenced form of
    * the Jacobian as the preconditioner
    */
-  void useFiniteDifferencedPreconditioner(bool use = true) { _use_finite_differenced_preconditioner = use; }
+  void useFiniteDifferencedPreconditioner(bool use = true)
+  {
+    _use_finite_differenced_preconditioner = use;
+  }
 
   /**
    * If called with a single string, it is used as the name of a the top-level decomposition split.
@@ -339,18 +364,27 @@ public:
   void useFieldSplitPreconditioner(bool use = true) { _use_field_split_preconditioner = use; }
 
   /**
-   * If called with true this will add entries into the jacobian to link together degrees of freedom that are found to
+   * If called with true this will add entries into the jacobian to link together degrees of freedom
+   * that are found to
    * be related through the geometric search system.
    *
-   * These entries are really only used by the Finite Difference Preconditioner and the constraint system right now.
+   * These entries are really only used by the Finite Difference Preconditioner and the constraint
+   * system right now.
    */
-  void addImplicitGeometricCouplingEntriesToJacobian(bool add = true) { _add_implicit_geometric_coupling_entries_to_jacobian = add; }
+  void addImplicitGeometricCouplingEntriesToJacobian(bool add = true)
+  {
+    _add_implicit_geometric_coupling_entries_to_jacobian = add;
+  }
 
   /**
    * Indicates whether to assemble residual and Jacobian after each constraint application.
-   * When true, enables "transitive" constraint application: subsequent constraints can use prior constraints' results.
+   * When true, enables "transitive" constraint application: subsequent constraints can use prior
+   * constraints' results.
    */
-  void assembleConstraintsSeparately(bool separately = true) { _assemble_constraints_separately = separately; }
+  void assembleConstraintsSeparately(bool separately = true)
+  {
+    _assemble_constraints_separately = separately;
+  }
 
   /**
    * Setup damping stuff (called before we actually start)
@@ -368,7 +402,8 @@ public:
    * @param tid Thread ID
    * @param damped_vars Set of variables for which increment is to be computed
    */
-  void reinitIncrementAtNodeForDampers(THREAD_ID tid, const std::set<MooseVariable *> & damped_vars);
+  void reinitIncrementAtNodeForDampers(THREAD_ID tid,
+                                       const std::set<MooseVariable *> & damped_vars);
 
   ///@{
   /// System Integrity Checks
@@ -446,13 +481,22 @@ public:
   const MooseObjectWarehouse<KernelBase> & getTimeKernelWarehouse() { return _time_kernels; }
   const MooseObjectWarehouse<KernelBase> & getNonTimeKernelWarehouse() { return _non_time_kernels; }
   const MooseObjectWarehouse<KernelBase> & getEigenKernelWarehouse() { return _eigen_kernels; }
-  const MooseObjectWarehouse<KernelBase> & getNonEigenKernelWarehouse() { return _non_eigen_kernels; }
+  const MooseObjectWarehouse<KernelBase> & getNonEigenKernelWarehouse()
+  {
+    return _non_eigen_kernels;
+  }
   const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
-  const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse() { return _interface_kernels; }
+  const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
+  {
+    return _interface_kernels;
+  }
   const MooseObjectWarehouse<DiracKernel> & getDiracKernelWarehouse() { return _dirac_kernels; }
   const MooseObjectWarehouse<NodalKernel> & getNodalKernelWarehouse(THREAD_ID tid);
   const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
-  const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() { return _element_dampers; }
+  const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse()
+  {
+    return _element_dampers;
+  }
   const MooseObjectWarehouse<NodalDamper> & getNodalDamperWarehouse() { return _nodal_dampers; }
   //@}
 
@@ -475,7 +519,10 @@ public:
 
   virtual System & system() override { return _sys; }
 
-  virtual NumericVector<Number> * solutionPreviousNewton() override { return _solution_previous_nl; }
+  virtual NumericVector<Number> * solutionPreviousNewton() override
+  {
+    return _solution_previous_nl;
+  }
 
   virtual void setPreviousNewtonSolution(const NumericVector<Number> & soln);
 
@@ -516,7 +563,6 @@ protected:
    */
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
   void enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian);
-
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
@@ -585,7 +631,6 @@ protected:
 
   /// Constraints storage object
   ConstraintWarehouse _constraints;
-
 
 protected:
   /// increment vector

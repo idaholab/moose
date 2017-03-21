@@ -28,10 +28,12 @@ class FEProblemBase;
 template <typename T>
 class MooseObjectWarehouse;
 
-class ComputeNodalAuxVarsThread : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+class ComputeNodalAuxVarsThread
+    : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalAuxVarsThread(FEProblemBase & fe_problem, const MooseObjectWarehouse<AuxKernel> & storage);
+  ComputeNodalAuxVarsThread(FEProblemBase & fe_problem,
+                            const MooseObjectWarehouse<AuxKernel> & storage);
   // Splitting Constructor
   ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split);
 
@@ -46,4 +48,4 @@ protected:
   const MooseObjectWarehouse<AuxKernel> & _storage;
 };
 
-#endif //COMPUTENODALAUXVARSTHREAD_H
+#endif // COMPUTENODALAUXVARSTHREAD_H

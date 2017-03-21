@@ -14,17 +14,15 @@
 
 #include "SelfAux.h"
 
-template<>
-InputParameters validParams<SelfAux>()
+template <>
+InputParameters
+validParams<SelfAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   return params;
 }
 
-SelfAux::SelfAux(const InputParameters & parameters) :
-    AuxKernel(parameters)
-{
-}
+SelfAux::SelfAux(const InputParameters & parameters) : AuxKernel(parameters) {}
 
 Real
 SelfAux::computeValue()

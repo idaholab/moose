@@ -15,16 +15,16 @@
 #include "AddInitialConditionAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddInitialConditionAction>()
+template <>
+InputParameters
+validParams<AddInitialConditionAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   return params;
 }
 
-
-AddInitialConditionAction::AddInitialConditionAction(InputParameters params) :
-    MooseObjectAction(params)
+AddInitialConditionAction::AddInitialConditionAction(InputParameters params)
+  : MooseObjectAction(params)
 {
 }
 

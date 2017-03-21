@@ -18,10 +18,10 @@
 // Moose Includes
 #include "ElementDamper.h"
 
-//Forward Declarations
+// Forward Declarations
 class MaxIncrement;
 
-template<>
+template <>
 InputParameters validParams<MaxIncrement>();
 
 /**
@@ -39,4 +39,4 @@ protected:
   Real _max_increment;
 };
 
-#endif //MAXINCREMENT_H
+#endif // MAXINCREMENT_H

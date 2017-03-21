@@ -30,7 +30,7 @@ class Executioner;
 class MooseApp;
 class Factory;
 
-template<>
+template <>
 InputParameters validParams<Action>();
 
 /**
@@ -77,13 +77,11 @@ public:
   const T & getParam(const std::string & name) const;
   ///@}
 
-  inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
+  inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
 
   void appendTask(const std::string & task) { _all_tasks.insert(task); }
 
-
 protected:
-
   /// Input parameters for the action
   InputParameters _pars;
 
@@ -134,7 +132,6 @@ protected:
 
   /// Convenience reference to an executioner
   std::shared_ptr<Executioner> & _executioner;
-
 };
 
 template <typename T>

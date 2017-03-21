@@ -16,10 +16,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class StatefulMaterial;
 
-template<>
+template <>
 InputParameters validParams<StatefulMaterial>();
 
 /**
@@ -45,4 +45,4 @@ private:
   MaterialProperty<Real> & _diffusivity_old;
 };
 
-#endif //STATEFULMATERIAL_H
+#endif // STATEFULMATERIAL_H

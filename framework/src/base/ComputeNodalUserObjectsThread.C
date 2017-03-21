@@ -20,22 +20,22 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalUserObject> & user_objects) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(
+    FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalUserObject> & user_objects)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _user_objects(user_objects)
 {
 }
 
 // Splitting Constructor
-ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x,
+                                                             Threads::split split)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _user_objects(x._user_objects)
 {
 }
 
-ComputeNodalUserObjectsThread::~ComputeNodalUserObjectsThread()
-{
-}
+ComputeNodalUserObjectsThread::~ComputeNodalUserObjectsThread() {}
 
 void
 ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
@@ -57,12 +57,14 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   }
 
   // Block Restricted
-  // NodalUserObjects may be block restricted, in this case by default the execute() method is called for
+  // NodalUserObjects may be block restricted, in this case by default the execute() method is
+  // called for
   // each subdomain that the node "belongs". This may be disabled in the NodalUserObject by setting
   // "unique_node_execute = true".
 
-  // To inforce the unique execution this vector is populated and checked if the unique flag is enabled.
-  std::vector<std::shared_ptr<NodalUserObject> > computed;
+  // To inforce the unique execution this vector is populated and checked if the unique flag is
+  // enabled.
+  std::vector<std::shared_ptr<NodalUserObject>> computed;
 
   const std::set<SubdomainID> & block_ids = _fe_problem.mesh().getNodeBlockIds(*node);
   for (const auto & block : block_ids)

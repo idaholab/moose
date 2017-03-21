@@ -17,10 +17,10 @@
 
 #include "SideAverageValue.h"
 
-//Forward Declarations
+// Forward Declarations
 class AxisymmetricCenterlineAverageValue;
 
-template<>
+template <>
 InputParameters validParams<AxisymmetricCenterlineAverageValue>();
 
 /**

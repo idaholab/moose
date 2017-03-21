@@ -21,7 +21,7 @@
 // Forward declerations
 class AssignSubdomainID;
 
-template<>
+template <>
 InputParameters validParams<AssignSubdomainID>();
 
 /**
@@ -39,4 +39,4 @@ protected:
   SubdomainID _subdomain_id;
 };
 
-#endif //ASSIGNSUBDOMAINID_H
+#endif // ASSIGNSUBDOMAINID_H

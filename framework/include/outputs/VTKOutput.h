@@ -22,26 +22,22 @@
 // Forward declerations
 class VTKOutput;
 
-template<>
+template <>
 InputParameters validParams<VTKOutput>();
 
 /**
  *
  */
-class VTKOutput :
-  public BasicOutput<OversampleOutput>
+class VTKOutput : public BasicOutput<OversampleOutput>
 {
 public:
-
   /**
    * Class constructor
    * @param parameters Object parameters
    */
   VTKOutput(const InputParameters & parameters);
 
-
 protected:
-
   /**
    * Perform the output of VTKOutput
    */
@@ -53,10 +49,8 @@ protected:
   virtual std::string filename() override;
 
 private:
-
   /// Flag for using binary compression
   bool _binary;
-
 };
 
-#endif //VTKOUTPUT_H
+#endif // VTKOUTPUT_H

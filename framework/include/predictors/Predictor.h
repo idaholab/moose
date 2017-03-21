@@ -26,18 +26,17 @@ class NonlinearSystemBase;
 
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
-template<>
+template <>
 InputParameters validParams<Predictor>();
 
 /**
  * Base class for predictors.
  */
-class Predictor :
-  public MooseObject,
-  public Restartable
+class Predictor : public MooseObject, public Restartable
 {
 public:
   Predictor(const InputParameters & parameters);

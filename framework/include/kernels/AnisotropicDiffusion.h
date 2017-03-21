@@ -19,7 +19,7 @@
 
 class AnisotropicDiffusion;
 
-template<>
+template <>
 InputParameters validParams<AnisotropicDiffusion>();
 
 /**
@@ -40,6 +40,5 @@ protected:
 
   RealTensorValue _k;
 };
-
 
 #endif /* ANISOTROPICDIFFUSION_H */

@@ -22,15 +22,13 @@ class TimeStepper;
 class FEProblemBase;
 class Transient;
 
-template<>
+template <>
 InputParameters validParams<TimeStepper>();
 
 /**
  * Base class for time stepping
  */
-class TimeStepper :
-  public MooseObject,
-  public Restartable
+class TimeStepper : public MooseObject, public Restartable
 {
 public:
   TimeStepper(const InputParameters & parameters);
@@ -62,7 +60,7 @@ public:
    * Called after computeStep() is called.
    * @return true if any type of sync point was hit, false otherwise
    */
-  virtual bool constrainStep(Real &dt);
+  virtual bool constrainStep(Real & dt);
 
   /**
    * Take a time step

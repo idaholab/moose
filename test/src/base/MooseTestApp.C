@@ -274,16 +274,15 @@
 // Indicators
 #include "MaterialTestIndicator.h"
 
-template<>
-InputParameters validParams<MooseTestApp>()
+template <>
+InputParameters
+validParams<MooseTestApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-
-MooseTestApp::MooseTestApp(const InputParameters & parameters):
-    MooseApp(parameters)
+MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   MooseTestApp::registerObjects(_factory);
@@ -292,12 +291,14 @@ MooseTestApp::MooseTestApp(const InputParameters & parameters):
   MooseTestApp::associateSyntax(_syntax, _action_factory);
 }
 
-MooseTestApp::~MooseTestApp()
-{
-}
+MooseTestApp::~MooseTestApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void MooseTestApp__registerApps() { MooseTestApp::registerApps(); }
+extern "C" void
+MooseTestApp__registerApps()
+{
+  MooseTestApp::registerApps();
+}
 void
 MooseTestApp::registerApps()
 {
@@ -305,7 +306,11 @@ MooseTestApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void MooseTestApp__registerObjects(Factory & factory) { MooseTestApp::registerObjects(factory); }
+extern "C" void
+MooseTestApp__registerObjects(Factory & factory)
+{
+  MooseTestApp::registerObjects(factory);
+}
 void
 MooseTestApp::registerObjects(Factory & factory)
 {
@@ -561,7 +566,11 @@ MooseTestApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void MooseTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { MooseTestApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+MooseTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  MooseTestApp::associateSyntax(syntax, action_factory);
+}
 void
 MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
@@ -578,7 +587,8 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   syntax.registerActionSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
   syntax.registerActionSyntax("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
-  syntax.registerActionSyntax("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
+  syntax.registerActionSyntax(
+      "AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
 
   registerAction(ApplyCoupledVariablesTestAction, "meta_action");
   syntax.registerActionSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");

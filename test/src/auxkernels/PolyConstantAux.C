@@ -13,18 +13,16 @@
 /****************************************************************/
 #include "PolyConstantAux.h"
 
-template<>
-InputParameters validParams<PolyConstantAux>()
+template <>
+InputParameters
+validParams<PolyConstantAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
   return params;
 }
 
-PolyConstantAux::PolyConstantAux(const InputParameters & parameters) :
-    AuxKernel(parameters)
-{}
-
+PolyConstantAux::PolyConstantAux(const InputParameters & parameters) : AuxKernel(parameters) {}
 
 Real
 PolyConstantAux::computeValue()
@@ -36,6 +34,5 @@ PolyConstantAux::computeValue()
   Real y = (*_current_node)(1);
   Real z = (*_current_node)(2);
   Real t = _t;
-  return a*x*x*x*y*t+b*y*y*z+e*x*y*z*z*z*z;
-
+  return a * x * x * x * y * t + b * y * y * z + e * x * y * z * z * z * z;
 }

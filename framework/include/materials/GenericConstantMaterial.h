@@ -17,11 +17,10 @@
 
 #include "Material.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class GenericConstantMaterial;
 
-template<>
+template <>
 InputParameters validParams<GenericConstantMaterial>();
 
 /**
@@ -49,4 +48,4 @@ protected:
   std::vector<MaterialProperty<Real> *> _properties;
 };
 
-#endif //GENERICCONSTANTMATERIAL_H
+#endif // GENERICCONSTANTMATERIAL_H

@@ -19,9 +19,8 @@
 
 class RestartableTypesChecker;
 
-template<>
+template <>
 InputParameters validParams<RestartableTypesChecker>();
-
 
 /**
  * User Object for testing Restartable data types
@@ -35,13 +34,12 @@ public:
   virtual void initialSetup();
   virtual void timestepSetup();
 
-  virtual void initialize() {};
+  virtual void initialize(){};
   virtual void execute();
-  virtual void finalize() {};
+  virtual void finalize(){};
 
   void checkData();
   void clearTypes();
 };
-
 
 #endif /* RESTARTABLETYPESCHECKER_H */

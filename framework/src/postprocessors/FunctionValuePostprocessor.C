@@ -14,12 +14,15 @@
 #include "FunctionValuePostprocessor.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<FunctionValuePostprocessor>()
+template <>
+InputParameters
+validParams<FunctionValuePostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<FunctionName>("function", "The function which supplies the postprocessor value.");
-  params.addParam<Point>("point", Point(), "A point in space to be given to the function Default: (0, 0, 0)");
+  params.addRequiredParam<FunctionName>("function",
+                                        "The function which supplies the postprocessor value.");
+  params.addParam<Point>(
+      "point", Point(), "A point in space to be given to the function Default: (0, 0, 0)");
   params.addParam<Real>("scale_factor", 1, "A scale factor to be applied to the function");
 
   params.declareControllable("point scale_factor");
@@ -27,8 +30,8 @@ InputParameters validParams<FunctionValuePostprocessor>()
   return params;
 }
 
-FunctionValuePostprocessor::FunctionValuePostprocessor(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+FunctionValuePostprocessor::FunctionValuePostprocessor(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _function(getFunction("function")),
     _point(getParam<Point>("point")),
     _scale_factor(getParam<Real>("scale_factor"))

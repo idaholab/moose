@@ -14,18 +14,20 @@
 
 #include "TestPostprocessor.h"
 
-template<>
-InputParameters validParams<TestPostprocessor>()
+template <>
+InputParameters
+validParams<TestPostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   MooseEnum test_type("grow use_older_value report_old");
   params.addRequiredParam<MooseEnum>("test_type", test_type, "The type of test to perform");
-  params.addParam<PostprocessorName>("report_name", "The name of the postprocessor value to report");
+  params.addParam<PostprocessorName>("report_name",
+                                     "The name of the postprocessor value to report");
   return params;
 }
 
-TestPostprocessor::TestPostprocessor(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+TestPostprocessor::TestPostprocessor(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _test_type(getParam<MooseEnum>("test_type")),
     _old_val(getPostprocessorValueOldByName(name())),
     _older_val(getPostprocessorValueOlderByName(name()))

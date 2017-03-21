@@ -21,7 +21,7 @@
 // Forward declarations
 class MultiAppUserObjectTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppUserObjectTransfer>();
 
 /**
@@ -29,8 +29,7 @@ InputParameters validParams<MultiAppUserObjectTransfer>();
  * the MultiApp is.  Copies that value into a postprocessor in the
  * MultiApp.
  */
-class MultiAppUserObjectTransfer :
-  public MultiAppTransfer
+class MultiAppUserObjectTransfer : public MultiAppTransfer
 {
 public:
   MultiAppUserObjectTransfer(const InputParameters & parameters);

@@ -18,10 +18,10 @@
 // MOOSE includes
 #include "AddVariableAction.h"
 
-//Forward declarations
+// Forward declarations
 class AddAuxVariableAction;
 
-template<>
+template <>
 InputParameters validParams<AddAuxVariableAction>();
 
 /**
@@ -30,7 +30,6 @@ InputParameters validParams<AddAuxVariableAction>();
 class AddAuxVariableAction : public AddVariableAction
 {
 public:
-
   /**
    * Class constructor
    */

@@ -21,7 +21,7 @@
 class FunctionSideIntegral;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionSideIntegral>();
 
 /**
@@ -41,4 +41,4 @@ protected:
   Function & _func;
 };
 
-#endif //FUNCTIONSIDEINTEGRAL_H
+#endif // FUNCTIONSIDEINTEGRAL_H

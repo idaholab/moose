@@ -17,10 +17,10 @@
 
 #include "DGKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class InterfaceKernel;
 
-template<>
+template <>
 InputParameters validParams<InterfaceKernel>();
 
 /**

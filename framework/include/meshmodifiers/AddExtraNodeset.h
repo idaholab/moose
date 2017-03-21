@@ -17,14 +17,13 @@
 
 #include "MeshModifier.h"
 
-//Forward Declaration
+// Forward Declaration
 class AddExtraNodeset;
 
-template<>
+template <>
 InputParameters validParams<AddExtraNodeset>();
 
-class AddExtraNodeset :
-  public MeshModifier
+class AddExtraNodeset : public MeshModifier
 {
 public:
   AddExtraNodeset(const InputParameters & params);

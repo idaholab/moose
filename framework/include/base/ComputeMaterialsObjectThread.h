@@ -71,4 +71,4 @@ protected:
   const bool _has_bnd_stateful_props;
 };
 
-#endif //COMPUTERESIDUALTHREAD_H
+#endif // COMPUTERESIDUALTHREAD_H

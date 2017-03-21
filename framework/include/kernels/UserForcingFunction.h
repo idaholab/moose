@@ -17,11 +17,11 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class UserForcingFunction;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<UserForcingFunction>();
 
 /**
@@ -32,7 +32,6 @@ InputParameters validParams<UserForcingFunction>();
 class UserForcingFunction : public Kernel
 {
 public:
-
   UserForcingFunction(const InputParameters & parameters);
 
 protected:
@@ -49,4 +48,4 @@ protected:
   Function & _func;
 };
 
-#endif //USERFORCINGFUNCTION_H
+#endif // USERFORCINGFUNCTION_H

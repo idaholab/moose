@@ -17,10 +17,10 @@
 #include "Kernel.h"
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class Diffusion0;
 
-template<>
+template <>
 InputParameters validParams<Diffusion0>();
 
 class Diffusion0 : public Kernel
@@ -37,4 +37,4 @@ private:
   Real _Ak, _Bk, _Ck;
 };
 
-#endif //DIFFUSION0_H
+#endif // DIFFUSION0_H

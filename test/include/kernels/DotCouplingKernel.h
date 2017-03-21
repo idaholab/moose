@@ -19,7 +19,7 @@
 
 class DotCouplingKernel;
 
-template<>
+template <>
 InputParameters validParams<DotCouplingKernel>();
 
 /**
@@ -38,6 +38,5 @@ protected:
   const VariableValue & _v_dot;
   const VariableValue & _dv_dot_dv;
 };
-
 
 #endif /* DOTCOUPLINGKERNEL_H */

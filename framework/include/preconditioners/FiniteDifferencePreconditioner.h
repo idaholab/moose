@@ -19,7 +19,7 @@
 
 class FiniteDifferencePreconditioner;
 
-template<>
+template <>
 InputParameters validParams<FiniteDifferencePreconditioner>();
 
 /**

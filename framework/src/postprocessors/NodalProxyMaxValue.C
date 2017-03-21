@@ -18,16 +18,16 @@
 // libMesh
 #include "libmesh/boundary_info.h"
 
-template<>
-InputParameters validParams<NodalProxyMaxValue>()
+template <>
+InputParameters
+validParams<NodalProxyMaxValue>()
 {
   InputParameters params = validParams<NodalVariablePostprocessor>();
   return params;
 }
 
-NodalProxyMaxValue::NodalProxyMaxValue(const InputParameters & parameters) :
-    NodalVariablePostprocessor(parameters),
-    _value(-std::numeric_limits<Real>::max())
+NodalProxyMaxValue::NodalProxyMaxValue(const InputParameters & parameters)
+  : NodalVariablePostprocessor(parameters), _value(-std::numeric_limits<Real>::max())
 {
 }
 
@@ -72,4 +72,3 @@ NodalProxyMaxValue::threadJoin(const UserObject & y)
     _node_id = pps._node_id;
   }
 }
-

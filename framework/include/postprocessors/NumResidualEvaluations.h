@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumResidualEvaluations;
 
-template<>
+template <>
 InputParameters validParams<NumResidualEvaluations>();
 
 /**
@@ -37,4 +37,4 @@ public:
   virtual Real getValue() override;
 };
 
-#endif //NUMRESIDUALEVALUATIONS_H
+#endif // NUMRESIDUALEVALUATIONS_H

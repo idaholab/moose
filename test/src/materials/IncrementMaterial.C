@@ -13,18 +13,18 @@
 /****************************************************************/
 #include "IncrementMaterial.h"
 
-template<>
-InputParameters validParams<IncrementMaterial>()
+template <>
+InputParameters
+validParams<IncrementMaterial>()
 {
   InputParameters params = validParams<GenericConstantMaterial>();
-  params.addClassDescription("Material that tracks the number of times computeQpProperties has been called.");
+  params.addClassDescription(
+      "Material that tracks the number of times computeQpProperties has been called.");
   return params;
 }
 
-IncrementMaterial::IncrementMaterial(const InputParameters & parameters) :
-    GenericConstantMaterial(parameters),
-    _inc(0),
-    _mat_prop(declareProperty<Real>("mat_prop"))
+IncrementMaterial::IncrementMaterial(const InputParameters & parameters)
+  : GenericConstantMaterial(parameters), _inc(0), _mat_prop(declareProperty<Real>("mat_prop"))
 {
 }
 

@@ -17,10 +17,10 @@
 
 #include "ShapeSideUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class DenomShapeSideUserObject;
 
-template<>
+template <>
 InputParameters validParams<DenomShapeSideUserObject>();
 
 /**
@@ -31,8 +31,7 @@ InputParameters validParams<DenomShapeSideUserObject>();
  * These Jacobian terms can be utilized by a Kernel that uses the integral in the
  * calculation of its residual.
  */
-class DenomShapeSideUserObject :
-  public ShapeSideUserObject
+class DenomShapeSideUserObject : public ShapeSideUserObject
 {
 public:
   DenomShapeSideUserObject(const InputParameters & parameters);

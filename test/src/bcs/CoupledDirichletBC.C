@@ -14,38 +14,37 @@
 
 #include "CoupledDirichletBC.h"
 
-template<>
-InputParameters validParams<CoupledDirichletBC>()
+template <>
+InputParameters
+validParams<CoupledDirichletBC>()
 {
   InputParameters params = validParams<DirichletBC>();
   params.addRequiredCoupledVar("v", "The coupled variable");
   return params;
 }
 
-CoupledDirichletBC::CoupledDirichletBC(const InputParameters & parameters) :
-    DirichletBC(parameters),
-    _v(coupledValue("v")),
-    _v_num(coupled("v")),
-    _c(1.0)
-{}
+CoupledDirichletBC::CoupledDirichletBC(const InputParameters & parameters)
+  : DirichletBC(parameters), _v(coupledValue("v")), _v_num(coupled("v")), _c(1.0)
+{
+}
 
 Real
 CoupledDirichletBC::computeQpResidual()
 {
-  return _c*_u[_qp] + _u[_qp]*_u[_qp] + _v[_qp]*_v[_qp] - _value;
+  return _c * _u[_qp] + _u[_qp] * _u[_qp] + _v[_qp] * _v[_qp] - _value;
 }
 
 Real
 CoupledDirichletBC::computeQpJacobian()
 {
-  return _c + 2.*_u[_qp];
+  return _c + 2. * _u[_qp];
 }
 
 Real
 CoupledDirichletBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_num)
-    return 2.*_v[_qp];
+    return 2. * _v[_qp];
   else
     return 0.;
 }

@@ -19,21 +19,23 @@
 #include "NonlinearSystemBase.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<NumVars>()
+template <>
+InputParameters
+validParams<NumVars>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
   MooseEnum system_options("nonlinear auxiliary", "nonlinear");
-  params.addParam<MooseEnum>("system", system_options, "The system for which you want to print the number of variables.");
+  params.addParam<MooseEnum>(
+      "system", system_options, "The system for which you want to print the number of variables.");
 
   return params;
 }
 
-NumVars::NumVars(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
-    _system(getParam<MooseEnum>("system"))
-{}
+NumVars::NumVars(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters), _system(getParam<MooseEnum>("system"))
+{
+}
 
 Real
 NumVars::getValue()

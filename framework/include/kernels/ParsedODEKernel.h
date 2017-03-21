@@ -18,18 +18,16 @@
 #include "ODEKernel.h"
 #include "FunctionParserUtils.h"
 
-//Forward Declarations
+// Forward Declarations
 class ParsedODEKernel;
 
-template<>
+template <>
 InputParameters validParams<ODEKernel>();
 
 /**
  *
  */
-class ParsedODEKernel :
-  public ODEKernel,
-  public FunctionParserUtils
+class ParsedODEKernel : public ODEKernel, public FunctionParserUtils
 {
 public:
   ParsedODEKernel(const InputParameters & parameters);
@@ -63,6 +61,5 @@ private:
   /// Vector to look up the internal coupled variable index into _arg_*  through the libMesh variable number
   std::vector<unsigned int> _arg_index;
 };
-
 
 #endif /* PARSEDODEKERNEL_H */

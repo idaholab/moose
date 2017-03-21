@@ -19,7 +19,7 @@
 
 class BreakBoundaryOnSubdomain;
 
-template<>
+template <>
 InputParameters validParams<BreakBoundaryOnSubdomain>();
 
 class BreakBoundaryOnSubdomain : public MeshModifier

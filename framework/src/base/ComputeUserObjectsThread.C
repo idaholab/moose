@@ -27,7 +27,8 @@
 #include "libmesh/numeric_vector.h"
 
 ComputeUserObjectsThread::ComputeUserObjectsThread(
-    FEProblemBase & problem, SystemBase & sys,
+    FEProblemBase & problem,
+    SystemBase & sys,
     const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
     const MooseObjectWarehouse<SideUserObject> & side_user_objects,
     const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects)

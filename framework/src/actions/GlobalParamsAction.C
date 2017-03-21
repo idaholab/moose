@@ -14,21 +14,19 @@
 
 #include "GlobalParamsAction.h"
 
-template<>
-InputParameters validParams<GlobalParamsAction>()
+template <>
+InputParameters
+validParams<GlobalParamsAction>()
 {
   InputParameters params = validParams<Action>();
   std::vector<std::string> blocks(1, "");
 
   /* GlobalParams should not have children or other standard public Action attributes */
-  params.addPrivateParam<std::vector<std::string> >("active", blocks);
+  params.addPrivateParam<std::vector<std::string>>("active", blocks);
   return params;
 }
 
-GlobalParamsAction::GlobalParamsAction(InputParameters params) :
-    Action(params)
-{
-}
+GlobalParamsAction::GlobalParamsAction(InputParameters params) : Action(params) {}
 
 void
 GlobalParamsAction::act()
@@ -40,4 +38,3 @@ GlobalParamsAction::remove(const std::string & name)
 {
   parameters().remove(name);
 }
-

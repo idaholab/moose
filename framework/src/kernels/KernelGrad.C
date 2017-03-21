@@ -20,18 +20,15 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<KernelGrad>()
+template <>
+InputParameters
+validParams<KernelGrad>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
-
-KernelGrad::KernelGrad(const InputParameters & parameters):
-    Kernel(parameters)
-{
-}
+KernelGrad::KernelGrad(const InputParameters & parameters) : Kernel(parameters) {}
 
 void
 KernelGrad::computeResidual()
@@ -44,7 +41,7 @@ KernelGrad::computeResidual()
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     RealGradient value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
-    for (_i = 0; _i < n_test; _i++)  // target for auto vectorization
+    for (_i = 0; _i < n_test; _i++) // target for auto vectorization
       _local_re(_i) += value * _grad_test[_i][_qp];
   }
 
@@ -81,7 +78,7 @@ KernelGrad::computeJacobian()
     const unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++) // target for auto vectorization
-      diag(i) = _local_ke(i,i);
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)

@@ -24,26 +24,33 @@
 #include "libmesh/system.h"
 #include "libmesh/radial_basis_interpolation.h"
 
-template<>
-InputParameters validParams<MultiAppPostprocessorInterpolationTransfer>()
+template <>
+InputParameters
+validParams<MultiAppPostprocessorInterpolationTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
-  params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
+  params.addRequiredParam<AuxVariableName>(
+      "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<PostprocessorName>("postprocessor", "The Postprocessor to interpolate.");
-  params.addParam<unsigned int>("num_points", 3, "The number of nearest points to use for interpolation.");
-  params.addParam<Real>("power", 2, "The polynomial power to use for calculation of the decay in the interpolation.");
+  params.addParam<unsigned int>(
+      "num_points", 3, "The number of nearest points to use for interpolation.");
+  params.addParam<Real>(
+      "power", 2, "The polynomial power to use for calculation of the decay in the interpolation.");
 
   MooseEnum interp_type("inverse_distance radial_basis", "inverse_distance");
 
   params.addParam<MooseEnum>("interp_type", interp_type, "The algorithm to use for interpolation.");
 
-  params.addParam<Real>("radius", -1, "Radius to use for radial_basis interpolation.  If negative then the radius is taken as the max distance between points.");
+  params.addParam<Real>("radius", -1, "Radius to use for radial_basis interpolation.  If negative "
+                                      "then the radius is taken as the max distance between "
+                                      "points.");
 
   return params;
 }
 
-MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTransfer(
+    const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     _postprocessor(getParam<PostprocessorName>("postprocessor")),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _num_points(getParam<unsigned int>("num_points")),
@@ -81,27 +88,26 @@ MultiAppPostprocessorInterpolationTransfer::execute()
           mooseError("Unknown interpolation type!");
       }
 
-      std::vector<Point>  &src_pts  (idi->get_source_points());
-      std::vector<Number> &src_vals (idi->get_source_vals());
+      std::vector<Point> & src_pts(idi->get_source_points());
+      std::vector<Number> & src_vals(idi->get_source_vals());
 
       std::vector<std::string> field_vars;
       field_vars.push_back(_to_var_name);
       idi->set_field_variables(field_vars);
 
       {
-        for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+        for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
         {
           if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
           {
             src_pts.push_back(_multi_app->position(i));
-            src_vals.push_back(_multi_app->appPostprocessorValue(i,_postprocessor));
+            src_vals.push_back(_multi_app->appPostprocessorValue(i, _postprocessor));
           }
         }
       }
 
       // We have only set local values - prepare for use by gathering remote gata
       idi->prepare_for_use();
-
 
       // Loop over the master nodes and set the value of the variable
       {

@@ -21,17 +21,15 @@
 // Forward declarations
 class Console;
 
-template<>
+template <>
 InputParameters validParams<Console>();
 
 /**
  * An output object for writing to the console (screen)
  */
-class Console :
-  public TableOutput
+class Console : public TableOutput
 {
 public:
-
   /**
    * Class constructor
    */
@@ -55,7 +53,8 @@ public:
    *
    * This method explicitly re-implements portions of AdvancedOutput::output, which is generally not
    * recommended. This is done here to get the output ordering desired. If additional output types
-   * (e.g., elemental or nodal) are required in the future this calls will need to be explicitly added
+   * (e.g., elemental or nodal) are required in the future this calls will need to be explicitly
+   * added
    * as well.
    */
   virtual void output(const ExecFlagType & type) override;
@@ -81,14 +80,14 @@ public:
    * Return system information flags
    */
   MultiMooseEnum & systemInfoFlags()
-    {
-      if (!_allow_changing_sysinfo_flag)
-        mooseError("accessing console system information flags is not allowed after console initial setup");
-      return _system_info_flags;
-    }
+  {
+    if (!_allow_changing_sysinfo_flag)
+      mooseError(
+          "accessing console system information flags is not allowed after console initial setup");
+    return _system_info_flags;
+  }
 
 protected:
-
   /**
    * Adds the printing of system information to the init() method
    */
@@ -112,7 +111,10 @@ protected:
   /**
    * Not implemented.
    */
-  virtual void outputVectorPostprocessors() override { mooseError("Can't currently output VectorPostprocessors to the screen"); };
+  virtual void outputVectorPostprocessors() override
+  {
+    mooseError("Can't currently output VectorPostprocessors to the screen");
+  };
 
   /**
    * Print system information
@@ -208,7 +210,6 @@ protected:
   unsigned int _precision;
 
 private:
-
   /**
    * Add a message to the output streams
    * @param message The message to add to the output streams

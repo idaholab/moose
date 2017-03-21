@@ -21,7 +21,7 @@
 
 class LinearInterpolationMaterial;
 
-template<>
+template <>
 InputParameters validParams<LinearInterpolationMaterial>();
 
 class LinearInterpolationMaterial : public Material
@@ -35,9 +35,9 @@ protected:
   virtual void computeQpProperties();
 
   bool _use_poly_fit;
-  LinearInterpolation *_linear_interp;
-  PolynomialFit *_poly_fit;
+  LinearInterpolation * _linear_interp;
+  PolynomialFit * _poly_fit;
   MaterialProperty<Real> & _property;
 };
 
-#endif //LINEARINTERPOLATIONMATERIAL_H
+#endif // LINEARINTERPOLATIONMATERIAL_H

@@ -18,10 +18,10 @@
 // Moose Includes
 #include "ElementDamper.h"
 
-//Forward Declarations
+// Forward Declarations
 class BoundingValueElementDamper;
 
-template<>
+template <>
 InputParameters validParams<BoundingValueElementDamper>();
 
 /**
@@ -42,4 +42,4 @@ protected:
   virtual Real computeQpDamping() override;
 };
 
-#endif //BOUNDINGVALUEELEMENTDAMPER_H
+#endif // BOUNDINGVALUEELEMENTDAMPER_H

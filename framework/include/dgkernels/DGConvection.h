@@ -19,7 +19,7 @@
 
 class DGConvection;
 
-template<>
+template <>
 InputParameters validParams<DGConvection>();
 
 class DGConvection : public DGKernel
@@ -34,4 +34,4 @@ protected:
   RealVectorValue _velocity;
 };
 
-#endif //DGCONVECTION_H
+#endif // DGCONVECTION_H

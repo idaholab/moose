@@ -17,8 +17,9 @@
 #include "IndirectSort.h"
 #include "VectorPostprocessor.h"
 
-template<>
-InputParameters validParams<SamplerBase>()
+template <>
+InputParameters
+validParams<SamplerBase>()
 {
   InputParameters params = emptyInputParameters();
 
@@ -28,8 +29,10 @@ InputParameters validParams<SamplerBase>()
   return params;
 }
 
-SamplerBase::SamplerBase(const InputParameters & parameters, VectorPostprocessor * vpp, const libMesh::Parallel::Communicator & comm) :
-    _sampler_params(parameters),
+SamplerBase::SamplerBase(const InputParameters & parameters,
+                         VectorPostprocessor * vpp,
+                         const libMesh::Parallel::Communicator & comm)
+  : _sampler_params(parameters),
     _vpp(vpp),
     _comm(comm),
     _sort_by(parameters.get<MooseEnum>("sort_by")),
@@ -72,11 +75,8 @@ SamplerBase::initialize()
   _z.clear();
   _id.clear();
 
-  std::for_each(_values.begin(), _values.end(),
-                [](VectorPostprocessorValue * vec)
-                {
-                  vec->clear();
-                });
+  std::for_each(
+      _values.begin(), _values.end(), [](VectorPostprocessorValue * vec) { vec->clear(); });
 }
 
 void
@@ -92,7 +92,7 @@ SamplerBase::finalize()
   std::vector<VectorPostprocessorValue *> vec_ptrs;
   vec_ptrs.reserve(_values.size() + NUM_ID_VECTORS);
   // Initialize the pointer vector with the position and ID vectors
-  vec_ptrs = { { &_x, &_y, &_z, &_id } };
+  vec_ptrs = {{&_x, &_y, &_z, &_id}};
   // Now extend the vector by all the remaining values vector before processing
   vec_ptrs.insert(vec_ptrs.end(), _values.begin(), _values.end());
 
@@ -105,12 +105,14 @@ SamplerBase::finalize()
   Moose::indirectSort(vec_ptrs[_sort_by]->begin(), vec_ptrs[_sort_by]->end(), sorted_indices);
 
   /**
-   * We now have one sorted vector. The remaining vectors need to be sorted according to that vector.
+   * We now have one sorted vector. The remaining vectors need to be sorted according to that
+   * vector.
    * We'll need a temporary vector to hold values as we map them according to the sorted indices.
    * After that, we'll swap the vector contents with the sorted vector to get the values
    * back into the original vector.
    */
-  // This vector is used as temp storage to sort each of the remaining vectors according to the first
+  // This vector is used as temp storage to sort each of the remaining vectors according to the
+  // first
   auto vector_length = sorted_indices.size();
   VectorPostprocessorValue tmp_vector(vector_length);
 
@@ -140,6 +142,6 @@ SamplerBase::threadJoin(const SamplerBase & y)
 
   _id.insert(_id.end(), y._id.begin(), y._id.end());
 
-  for (unsigned int i=0; i<_variable_names.size(); i++)
+  for (unsigned int i = 0; i < _variable_names.size(); i++)
     _values[i]->insert(_values[i]->end(), y._values[i]->begin(), y._values[i]->end());
 }

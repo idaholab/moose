@@ -17,11 +17,11 @@
 
 #include "NodalBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class FunctionDirichletBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionDirichletBC>();
 
 /**
@@ -45,4 +45,4 @@ protected:
   Function & _func;
 };
 
-#endif //FUNCTIONDIRICHLETBC_H
+#endif // FUNCTIONDIRICHLETBC_H

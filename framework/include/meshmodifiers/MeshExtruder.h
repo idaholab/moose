@@ -20,7 +20,7 @@
 
 class MeshExtruder;
 
-template<>
+template <>
 InputParameters validParams<MeshExtruder>();
 
 class MeshExtruder : public MeshModifier
@@ -38,7 +38,8 @@ protected:
   std::vector<unsigned int> _new_ids;
 
   /**
-   * This class is used during the mesh construction (extrusion) to set element ids as they are created.
+   * This class is used during the mesh construction (extrusion) to set element ids as they are
+   * created.
    */
   class QueryElemSubdomainID : public MeshTools::Generation::QueryElemSubdomainIDBase
   {
@@ -53,10 +54,10 @@ protected:
 
   private:
     /// Data structure for holding the old -> new id mapping based on the layer number
-    std::map<unsigned int, std::map<SubdomainID, unsigned int> > _layer_data;
+    std::map<unsigned int, std::map<SubdomainID, unsigned int>> _layer_data;
 
-    /// The total number of layers in the extrusion.  This is
-    /// currently only used for a sanity check in dbg mode.
+/// The total number of layers in the extrusion.  This is
+/// currently only used for a sanity check in dbg mode.
 #ifndef NDEBUG
     unsigned int _num_layers;
 #endif

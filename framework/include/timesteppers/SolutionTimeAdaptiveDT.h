@@ -21,7 +21,7 @@
 
 class SolutionTimeAdaptiveDT;
 
-template<>
+template <>
 InputParameters validParams<SolutionTimeAdaptiveDT>();
 
 /**

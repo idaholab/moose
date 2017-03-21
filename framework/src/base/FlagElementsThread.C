@@ -28,8 +28,8 @@
 FlagElementsThread::FlagElementsThread(FEProblemBase & fe_problem,
                                        std::vector<Number> & serialized_solution,
                                        unsigned int max_h_level,
-                                       const std::string & marker_name) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem),
+                                       const std::string & marker_name)
+  : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
     _displaced_problem(_fe_problem.getDisplacedProblem()),
     _aux_sys(fe_problem.getAuxiliarySystem()),
@@ -43,8 +43,8 @@ FlagElementsThread::FlagElementsThread(FEProblemBase & fe_problem,
 }
 
 // Splitting Constructor
-FlagElementsThread::FlagElementsThread(FlagElementsThread & x, Threads::split split) :
-    ThreadedElementLoop<ConstElemRange>(x, split),
+FlagElementsThread::FlagElementsThread(FlagElementsThread & x, Threads::split split)
+  : ThreadedElementLoop<ConstElemRange>(x, split),
     _fe_problem(x._fe_problem),
     _displaced_problem(x._displaced_problem),
     _aux_sys(x._aux_sys),
@@ -58,9 +58,10 @@ FlagElementsThread::FlagElementsThread(FlagElementsThread & x, Threads::split sp
 }
 
 void
-FlagElementsThread::onElement(const Elem *elem)
+FlagElementsThread::onElement(const Elem * elem)
 {
-  // By default do nothing, and only grab the marker from the solution if the current variable is active
+  // By default do nothing, and only grab the marker from the solution if the current variable is
+  // active
   // on the element subdomain.
   Marker::MarkerValue marker_value = Marker::DO_NOTHING;
   if (_field_var.activeOnSubdomain(elem->subdomain_id()))
@@ -71,7 +72,7 @@ FlagElementsThread::onElement(const Elem *elem)
     marker_value = static_cast<Marker::MarkerValue>(round(_serialized_solution[dof_number]));
 
     // Make sure we aren't masking an issue in the Marker system by rounding its values.
-    if (std::abs(marker_value - _serialized_solution[dof_number]) > TOLERANCE*TOLERANCE)
+    if (std::abs(marker_value - _serialized_solution[dof_number]) > TOLERANCE * TOLERANCE)
       mooseError("Invalid Marker value detected: ", _serialized_solution[dof_number]);
   }
 
@@ -86,7 +87,9 @@ FlagElementsThread::onElement(const Elem *elem)
   const_cast<Elem *>(elem)->set_refinement_flag((Elem::RefinementState)marker_value);
 
   if (_displaced_problem)
-    _displaced_problem->mesh().elemPtr(elem->id())->set_refinement_flag((Elem::RefinementState)marker_value);
+    _displaced_problem->mesh()
+        .elemPtr(elem->id())
+        ->set_refinement_flag((Elem::RefinementState)marker_value);
 }
 
 void

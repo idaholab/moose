@@ -14,16 +14,19 @@
 
 #include "SideIntegralVariablePostprocessor.h"
 
-template<>
-InputParameters validParams<SideIntegralVariablePostprocessor>()
+template <>
+InputParameters
+validParams<SideIntegralVariablePostprocessor>()
 {
   InputParameters params = validParams<SideIntegralPostprocessor>();
-  params.addRequiredCoupledVar("variable", "The name of the variable that this boundary condition applies to");
+  params.addRequiredCoupledVar("variable",
+                               "The name of the variable that this boundary condition applies to");
   return params;
 }
 
-SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(const InputParameters & parameters) :
-    SideIntegralPostprocessor(parameters),
+SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(
+    const InputParameters & parameters)
+  : SideIntegralPostprocessor(parameters),
     MooseVariableInterface(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable"))

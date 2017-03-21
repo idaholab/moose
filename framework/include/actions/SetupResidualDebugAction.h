@@ -20,7 +20,7 @@
 
 class SetupResidualDebugAction;
 
-template<>
+template <>
 InputParameters validParams<SetupResidualDebugAction>();
 
 /**
@@ -36,6 +36,5 @@ public:
 protected:
   std::vector<NonlinearVariableName> _show_var_residual;
 };
-
 
 #endif /* SETUPRESIDUALDEBUGACTION_H */

@@ -17,10 +17,10 @@
 
 #include "ElementAverageValue.h"
 
-//Forward Declarations
+// Forward Declarations
 class AverageElementSize;
 
-template<>
+template <>
 InputParameters validParams<AverageElementSize>();
 
 /**

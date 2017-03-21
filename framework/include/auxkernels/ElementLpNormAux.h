@@ -21,7 +21,7 @@
 // Forward declarations
 class ElementLpNormAux;
 
-template<>
+template <>
 InputParameters validParams<ElementLpNormAux>();
 
 /**

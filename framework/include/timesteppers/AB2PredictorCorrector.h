@@ -26,10 +26,11 @@ class AB2PredictorCorrector;
 
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
-template<>
+template <>
 InputParameters validParams<AB2PredictorCorrector>();
 
 /**

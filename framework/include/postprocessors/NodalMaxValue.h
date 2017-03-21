@@ -20,7 +20,7 @@
 // Forward Declarations
 class NodalMaxValue;
 
-template<>
+template <>
 InputParameters validParams<NodalMaxValue>();
 
 /**

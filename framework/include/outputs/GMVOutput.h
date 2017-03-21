@@ -22,24 +22,21 @@
 // Forward declarations
 class GMVOutput;
 
-template<>
+template <>
 InputParameters validParams<GMVOutput>();
 
 /**
  * Class for output data to the GMVOutputII format
  */
-class GMVOutput :
-  public BasicOutput<OversampleOutput>
+class GMVOutput : public BasicOutput<OversampleOutput>
 {
 public:
-
   /**
    * Class constructor
    */
   GMVOutput(const InputParameters & parameters);
 
 protected:
-
   /**
    * Overload the Output::output method, this is required for GMVOutput
    * output due to the method utilized for outputing
@@ -53,7 +50,6 @@ protected:
   virtual std::string filename() override;
 
 private:
-
   /// Flag for binary output
   bool _binary;
 };

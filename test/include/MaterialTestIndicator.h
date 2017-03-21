@@ -25,7 +25,7 @@
 // Forward Declarations
 class MaterialTestIndicator;
 
-template<>
+template <>
 InputParameters validParams<MaterialTestIndicator>();
 
 /**
@@ -37,7 +37,6 @@ public:
   MaterialTestIndicator(const InputParameters & params);
 
 protected:
-
   /// Computes the minimum element size based on the shear wave speed
   virtual void computeIndicator() override;
 
@@ -45,7 +44,7 @@ protected:
   const MaterialProperty<Real> & _property;
 
   /// The current quadrature rule
-  QBase * & _qrule;
+  QBase *& _qrule;
 
   /// The variable for storing indicator value
   MooseVariable & _indicator_var;

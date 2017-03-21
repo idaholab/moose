@@ -16,17 +16,19 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<AxisymmetricCenterlineAverageValue>()
+template <>
+InputParameters
+validParams<AxisymmetricCenterlineAverageValue>()
 {
   InputParameters params = validParams<SideAverageValue>();
   return params;
 }
 
-AxisymmetricCenterlineAverageValue::AxisymmetricCenterlineAverageValue(const InputParameters & parameters) :
-    SideAverageValue(parameters),
-    _volume(0)
-{}
+AxisymmetricCenterlineAverageValue::AxisymmetricCenterlineAverageValue(
+    const InputParameters & parameters)
+  : SideAverageValue(parameters), _volume(0)
+{
+}
 
 Real
 AxisymmetricCenterlineAverageValue::volume()
@@ -38,7 +40,7 @@ Real
 AxisymmetricCenterlineAverageValue::computeIntegral()
 {
   Real sum = 0;
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    sum += _JxW[_qp]*computeQpIntegral();
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    sum += _JxW[_qp] * computeQpIntegral();
   return sum;
 }

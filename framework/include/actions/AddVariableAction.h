@@ -25,18 +25,15 @@
 // Forward declerations
 class AddVariableAction;
 
-template<>
+template <>
 InputParameters validParams<AddVariableAction>();
 
 /**
  * Adds nonlinear variable
  */
-class AddVariableAction :
-  public Action,
-  public OutputInterface
+class AddVariableAction : public Action, public OutputInterface
 {
 public:
-
   /**
    * Class constructor
    */
@@ -57,7 +54,6 @@ public:
   static MooseEnum getNonlinearVariableOrders();
 
 protected:
-
   /**
    * Adds a nonlinear variable to the system.
    *

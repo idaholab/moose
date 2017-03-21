@@ -21,18 +21,18 @@
 #include "FEProblem.h"
 #include "AuxKernel.h"
 
-
 ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
-                                                   const MooseObjectWarehouse<AuxKernel> & storage) :
-    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+                                                   const MooseObjectWarehouse<AuxKernel> & storage)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _storage(storage)
 {
 }
 
 // Splitting Constructor
-ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+ComputeNodalAuxBcsThread::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x,
+                                                   Threads::split split)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
     _storage(x._storage)
 {

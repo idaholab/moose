@@ -44,17 +44,21 @@ public:
   /**
    * Write out the restartable data.
    */
-  void writeRestartableData(std::string base_file_name, const RestartableDatas & restartable_datas, std::set<std::string> & _recoverable_data);
+  void writeRestartableData(std::string base_file_name,
+                            const RestartableDatas & restartable_datas,
+                            std::set<std::string> & _recoverable_data);
 
   /**
-   * Read restartable data header to verify that we are restarting on the correct number of processors and threads.
+   * Read restartable data header to verify that we are restarting on the correct number of
+   * processors and threads.
    */
   void readRestartableDataHeader(std::string base_file_name);
 
   /**
    * Read the restartable data.
    */
-  void readRestartableData(const RestartableDatas & restartable_datas, const std::set<std::string> & _recoverable_data);
+  void readRestartableData(const RestartableDatas & restartable_datas,
+                           const std::set<std::string> & _recoverable_data);
 
   /**
    * Create a Backup for the current system.
@@ -70,12 +74,17 @@ private:
   /**
    * Serializes the data into the stream object.
    */
-  void serializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data, std::ostream & stream);
+  void
+  serializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data,
+                           std::ostream & stream);
 
   /**
    * Deserializes the data from the stream object.
    */
-  void deserializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data, std::istream & stream, const std::set<std::string> & recoverable_data);
+  void
+  deserializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data,
+                             std::istream & stream,
+                             const std::set<std::string> & recoverable_data);
 
   /**
    * Serializes the data for the Systems in FEProblemBase

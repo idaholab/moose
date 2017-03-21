@@ -90,7 +90,8 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a old VariableValue for the coupled variable
    */
-  virtual VariableValue & coupledScalarValueOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledScalarValueOld(const std::string & var_name,
+                                                unsigned int comp = 0);
 
   /**
    * Returns the older (two time steps previous) value of a scalar coupled variable
@@ -104,7 +105,8 @@ protected:
    * Time derivative of a scalar coupled variable with respect to the coefficients
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a VariableValue containing the time derivative of the coupled variable with respect to the coefficients
+   * @return Reference to a VariableValue containing the time derivative of the coupled variable
+   * with respect to the coefficients
    */
   virtual VariableValue & coupledScalarDotDu(const std::string & var_name, unsigned int comp = 0);
 
@@ -113,7 +115,7 @@ protected:
   FEProblemBase & _sc_fe_problem;
 
   /// Coupled vars whose values we provide
-  std::map<std::string, std::vector<MooseVariableScalar *> > _coupled_scalar_vars;
+  std::map<std::string, std::vector<MooseVariableScalar *>> _coupled_scalar_vars;
 
   /// Will hold the default value for optional coupled scalar variables.
   std::map<std::string, VariableValue *> _default_value;
@@ -141,7 +143,7 @@ protected:
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  MooseVariableScalar *getScalarVar(const std::string & var_name, unsigned int comp);
+  MooseVariableScalar * getScalarVar(const std::string & var_name, unsigned int comp);
 };
 
 #endif // SCALARCOUPLEABLE_H

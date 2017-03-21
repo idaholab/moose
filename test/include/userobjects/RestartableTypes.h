@@ -19,7 +19,7 @@
 
 class RestartableTypes;
 
-template<>
+template <>
 InputParameters validParams<RestartableTypes>();
 
 class Dummy
@@ -34,35 +34,35 @@ public:
   int _i;
 };
 
-template<>
+template <>
 inline void
-dataStore(std::ostream & stream, Dummy * & v, void * context)
+dataStore(std::ostream & stream, Dummy *& v, void * context)
 {
   dataStore(stream, v->_i, context);
 }
 
-template<>
+template <>
 inline void
-dataLoad(std::istream & stream, Dummy * & v, void * context)
+dataLoad(std::istream & stream, Dummy *& v, void * context)
 {
   dataLoad(stream, v->_i, context);
 }
 
-template<>
+template <>
 inline void
 dataStore(std::ostream & stream, Dummy & v, void * context)
 {
   dataStore(stream, v._i, context);
 }
 
-template<>
+template <>
 inline void
 dataLoad(std::istream & stream, Dummy & v, void * context)
 {
   dataLoad(stream, v._i, context);
 }
 
-template<>
+template <>
 inline void
 dataStore(std::ostream & stream, DummyNeedingContext & v, void * context)
 {
@@ -73,7 +73,7 @@ dataStore(std::ostream & stream, DummyNeedingContext & v, void * context)
   dataStore(stream, value, context);
 }
 
-template<>
+template <>
 inline void
 dataLoad(std::istream & stream, DummyNeedingContext & v, void * context)
 {
@@ -98,16 +98,16 @@ public:
   virtual void initialSetup();
   virtual void timestepSetup();
 
-  virtual void initialize() {};
+  virtual void initialize(){};
   virtual void execute();
-  virtual void finalize() {};
+  virtual void finalize(){};
 
 protected:
   int _context_int;
   Real & _real_data;
   std::vector<Real> & _vector_data;
-  std::vector<std::vector<Real> > & _vector_vector_data;
-  Dummy * & _pointer_data;
+  std::vector<std::vector<Real>> & _vector_vector_data;
+  Dummy *& _pointer_data;
   Dummy & _custom_data;
   DummyNeedingContext & _custom_with_context;
   std::set<Real> & _set_data;
@@ -115,6 +115,5 @@ protected:
   DenseVector<Real> & _dense_vector_data;
   DenseMatrix<Real> & _dense_matrix_data;
 };
-
 
 #endif /* RESTARTABLETYPES_H */

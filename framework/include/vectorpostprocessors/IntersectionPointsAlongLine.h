@@ -17,10 +17,10 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class IntersectionPointsAlongLine;
 
-template<>
+template <>
 InputParameters validParams<IntersectionPointsAlongLine>();
 
 /**

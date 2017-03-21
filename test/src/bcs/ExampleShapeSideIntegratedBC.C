@@ -14,19 +14,22 @@
 
 #include "ExampleShapeSideIntegratedBC.h"
 
-template<>
-InputParameters validParams<ExampleShapeSideIntegratedBC>()
+template <>
+InputParameters
+validParams<ExampleShapeSideIntegratedBC>()
 {
   InputParameters params = validParams<NonlocalIntegratedBC>();
-  params.addRequiredParam<UserObjectName>("num_user_object", "ShapeSideUserObject for computing integral component in numerator.");
-  params.addRequiredParam<UserObjectName>("denom_user_object", "ShapeSideUserObject for computing integral component in denominator.");
+  params.addRequiredParam<UserObjectName>(
+      "num_user_object", "ShapeSideUserObject for computing integral component in numerator.");
+  params.addRequiredParam<UserObjectName>(
+      "denom_user_object", "ShapeSideUserObject for computing integral component in denominator.");
   params.addRequiredCoupledVar("v", "Charge species.");
   params.addRequiredParam<Real>("Vb", "Initial potential applied to the boundary.");
   return params;
 }
 
-ExampleShapeSideIntegratedBC::ExampleShapeSideIntegratedBC(const InputParameters & parameters) :
-    NonlocalIntegratedBC(parameters),
+ExampleShapeSideIntegratedBC::ExampleShapeSideIntegratedBC(const InputParameters & parameters)
+  : NonlocalIntegratedBC(parameters),
     _num_shp(getUserObject<NumShapeSideUserObject>("num_user_object")),
     _num_shp_integral(_num_shp.getIntegral()),
     _num_shp_jacobian(_num_shp.getJacobian()),
@@ -43,13 +46,15 @@ ExampleShapeSideIntegratedBC::ExampleShapeSideIntegratedBC(const InputParameters
 Real
 ExampleShapeSideIntegratedBC::computeQpResidual()
 {
-  return _test[_i][_qp] * (_u[_qp] + _num_shp_integral - _Vb) / (_denom_shp_integral + std::numeric_limits<Real>::epsilon());
+  return _test[_i][_qp] * (_u[_qp] + _num_shp_integral - _Vb) /
+         (_denom_shp_integral + std::numeric_limits<Real>::epsilon());
 }
 
 Real
 ExampleShapeSideIntegratedBC::computeQpJacobian()
 {
-  return _test[_i][_qp] * (_phi[_j][_qp]) / (_denom_shp_integral + std::numeric_limits<Real>::epsilon());
+  return _test[_i][_qp] * (_phi[_j][_qp]) /
+         (_denom_shp_integral + std::numeric_limits<Real>::epsilon());
 }
 
 Real
@@ -57,25 +62,31 @@ ExampleShapeSideIntegratedBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_var)
   {
-    Real jac = _test[_i][_qp] * (_num_shp_jacobian[_v_dofs[_j]] * _denom_shp_integral - (_u[_qp] + _num_shp_integral - _Vb) * _denom_shp_jacobian[_v_dofs[_j]]) / (_denom_shp_integral * _denom_shp_integral + std::numeric_limits<Real>::epsilon());
+    Real jac = _test[_i][_qp] *
+               (_num_shp_jacobian[_v_dofs[_j]] * _denom_shp_integral -
+                (_u[_qp] + _num_shp_integral - _Vb) * _denom_shp_jacobian[_v_dofs[_j]]) /
+               (_denom_shp_integral * _denom_shp_integral + std::numeric_limits<Real>::epsilon());
     return jac;
   }
 
   return 0.0;
 }
 
-Real
-ExampleShapeSideIntegratedBC::computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
+Real ExampleShapeSideIntegratedBC::computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
 {
   return 0;
 }
 
 Real
-ExampleShapeSideIntegratedBC::computeQpNonlocalOffDiagJacobian(unsigned int jvar, dof_id_type dof_index)
+ExampleShapeSideIntegratedBC::computeQpNonlocalOffDiagJacobian(unsigned int jvar,
+                                                               dof_id_type dof_index)
 {
   if (jvar == _v_var)
   {
-    Real jac = _test[_i][_qp] * (_num_shp_jacobian[dof_index] * _denom_shp_integral - (_u[_qp] + _num_shp_integral - _Vb) * _denom_shp_jacobian[dof_index]) / (_denom_shp_integral * _denom_shp_integral + std::numeric_limits<Real>::epsilon());
+    Real jac = _test[_i][_qp] *
+               (_num_shp_jacobian[dof_index] * _denom_shp_integral -
+                (_u[_qp] + _num_shp_integral - _Vb) * _denom_shp_jacobian[dof_index]) /
+               (_denom_shp_integral * _denom_shp_integral + std::numeric_limits<Real>::epsilon());
     return jac;
   }
 

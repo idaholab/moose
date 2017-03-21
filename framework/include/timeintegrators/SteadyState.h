@@ -19,7 +19,7 @@
 
 class SteadyState;
 
-template<>
+template <>
 InputParameters validParams<SteadyState>();
 
 /**
@@ -37,8 +37,6 @@ public:
   virtual void postStep(NumericVector<Number> & residual);
 
 protected:
-
 };
-
 
 #endif /* STEADYSTATE_H */

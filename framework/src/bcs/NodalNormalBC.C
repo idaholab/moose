@@ -14,26 +14,24 @@
 
 #include "NodalNormalBC.h"
 
-template<>
-InputParameters validParams<NodalNormalBC>()
+template <>
+InputParameters
+validParams<NodalNormalBC>()
 {
   InputParameters params = validParams<NodalBC>();
   params.addCoupledVar("nx", "x-component of the normal");
   params.addCoupledVar("ny", "y-component of the normal");
   params.addCoupledVar("nz", "z-component of the normal");
 
-  params.set<std::vector<VariableName> >("nx") = {"nodal_normal_x"};
-  params.set<std::vector<VariableName> >("ny") = {"nodal_normal_y"};
-  params.set<std::vector<VariableName> >("nz") = {"nodal_normal_z"};
+  params.set<std::vector<VariableName>>("nx") = {"nodal_normal_x"};
+  params.set<std::vector<VariableName>>("ny") = {"nodal_normal_y"};
+  params.set<std::vector<VariableName>>("nz") = {"nodal_normal_z"};
 
   return params;
 }
 
-NodalNormalBC::NodalNormalBC(const InputParameters & parameters) :
-    NodalBC(parameters),
-    _nx(coupledValue("nx")),
-    _ny(coupledValue("ny")),
-    _nz(coupledValue("nz"))
+NodalNormalBC::NodalNormalBC(const InputParameters & parameters)
+  : NodalBC(parameters), _nx(coupledValue("nx")), _ny(coupledValue("ny")), _nz(coupledValue("nz"))
 {
 }
 

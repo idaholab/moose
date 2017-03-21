@@ -25,11 +25,10 @@
 /**
  * A base storage container for MooseObjects.
  */
-template<typename T>
+template <typename T>
 class MooseObjectWarehouseBase
 {
 public:
-
   /**
    * Constructor.
    * @param threaded When true (default) threaded storage is enabled.
@@ -53,22 +52,30 @@ public:
    * @param tid The thread id to retrieve objects from
    */
   const std::vector<std::shared_ptr<T>> & getObjects(THREAD_ID tid = 0) const;
-  const std::map<SubdomainID, std::vector<std::shared_ptr<T>>> & getBlockObjects(THREAD_ID tid = 0) const;
+  const std::map<SubdomainID, std::vector<std::shared_ptr<T>>> &
+  getBlockObjects(THREAD_ID tid = 0) const;
   const std::vector<std::shared_ptr<T>> & getBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
-  const std::map<BoundaryID, std::vector<std::shared_ptr<T>>> & getBoundaryObjects(THREAD_ID tid = 0) const;
-  const std::vector<std::shared_ptr<T>> & getBoundaryObjects(BoundaryID id, THREAD_ID tid = 0) const;
+  const std::map<BoundaryID, std::vector<std::shared_ptr<T>>> &
+  getBoundaryObjects(THREAD_ID tid = 0) const;
+  const std::vector<std::shared_ptr<T>> & getBoundaryObjects(BoundaryID id,
+                                                             THREAD_ID tid = 0) const;
   ///@}
 
   ///@{
   /**
-   * Retrieve complete vector to the active all/block/boundary restricted objects for a given thread.
+   * Retrieve complete vector to the active all/block/boundary restricted objects for a given
+   * thread.
    * @param tid The thread id to retrieve objects from
    */
   const std::vector<std::shared_ptr<T>> & getActiveObjects(THREAD_ID tid = 0) const;
-  const std::map<SubdomainID, std::vector<std::shared_ptr<T>>> & getActiveBlockObjects(THREAD_ID tid = 0) const;
-  const std::vector<std::shared_ptr<T>> & getActiveBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
-  const std::map<BoundaryID, std::vector<std::shared_ptr<T>>> & getActiveBoundaryObjects(THREAD_ID tid = 0) const;
-  const std::vector<std::shared_ptr<T>> & getActiveBoundaryObjects(BoundaryID id, THREAD_ID tid = 0) const;
+  const std::map<SubdomainID, std::vector<std::shared_ptr<T>>> &
+  getActiveBlockObjects(THREAD_ID tid = 0) const;
+  const std::vector<std::shared_ptr<T>> & getActiveBlockObjects(SubdomainID id,
+                                                                THREAD_ID tid = 0) const;
+  const std::map<BoundaryID, std::vector<std::shared_ptr<T>>> &
+  getActiveBoundaryObjects(THREAD_ID tid = 0) const;
+  const std::vector<std::shared_ptr<T>> & getActiveBoundaryObjects(BoundaryID id,
+                                                                   THREAD_ID tid = 0) const;
   ///@}
 
   ///@{
@@ -109,10 +116,16 @@ public:
   /**
    * Update variable dependency vector.
    */
-  void updateVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
-  void updateBlockVariableDependency(SubdomainID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
-  void updateBoundaryVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
-  void updateBoundaryVariableDependency(BoundaryID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid = 0) const;
+  void updateVariableDependency(std::set<MooseVariable *> & needed_moose_vars,
+                                THREAD_ID tid = 0) const;
+  void updateBlockVariableDependency(SubdomainID id,
+                                     std::set<MooseVariable *> & needed_moose_vars,
+                                     THREAD_ID tid = 0) const;
+  void updateBoundaryVariableDependency(std::set<MooseVariable *> & needed_moose_vars,
+                                        THREAD_ID tid = 0) const;
+  void updateBoundaryVariableDependency(BoundaryID id,
+                                        std::set<MooseVariable *> & needed_moose_vars,
+                                        THREAD_ID tid = 0) const;
   ///@}
 
   ///@{
@@ -120,19 +133,24 @@ public:
    * Update material property dependency vector.
    */
   void updateMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
-  void updateBlockMatPropDependency(SubdomainID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
-  void updateBoundaryMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
-  void updateBoundaryMatPropDependency(BoundaryID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
+  void updateBlockMatPropDependency(SubdomainID id,
+                                    std::set<unsigned int> & needed_mat_props,
+                                    THREAD_ID tid = 0) const;
+  void updateBoundaryMatPropDependency(std::set<unsigned int> & needed_mat_props,
+                                       THREAD_ID tid = 0) const;
+  void updateBoundaryMatPropDependency(BoundaryID id,
+                                       std::set<unsigned int> & needed_mat_props,
+                                       THREAD_ID tid = 0) const;
   ///@}
 
   /**
    * Populates a set of covered subdomains and the associated variable names.
    */
-  void subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables, THREAD_ID tid = 0) const;
-
+  void subdomainsCovered(std::set<SubdomainID> & subdomains_covered,
+                         std::set<std::string> & unique_variables,
+                         THREAD_ID tid = 0) const;
 
 protected:
-
   /// Convenience member storing the number of threads used for storage (1 or libMesh::n_threads)
   const THREAD_ID _num_threads;
 
@@ -157,7 +175,8 @@ protected:
   /**
    * Helper method for updating active vectors
    */
-  static void updateActiveHelper(std::vector<std::shared_ptr<T>> & active, const std::vector<std::shared_ptr<T>> & all);
+  static void updateActiveHelper(std::vector<std::shared_ptr<T>> & active,
+                                 const std::vector<std::shared_ptr<T>> & all);
 
   /**
    * Helper method for sorting vectors of objects.
@@ -180,13 +199,11 @@ protected:
    * Calls assert on thread id.
    */
   void checkThreadID(THREAD_ID tid) const;
-
 };
 
-
-template<typename T>
-MooseObjectWarehouseBase<T>::MooseObjectWarehouseBase(bool threaded /*=true*/) :
-    _num_threads(threaded ? libMesh::n_threads() : 1),
+template <typename T>
+MooseObjectWarehouseBase<T>::MooseObjectWarehouseBase(bool threaded /*=true*/)
+  : _num_threads(threaded ? libMesh::n_threads() : 1),
     _all_objects(_num_threads),
     _active_objects(_num_threads),
     _all_block_objects(_num_threads),
@@ -196,12 +213,12 @@ MooseObjectWarehouseBase<T>::MooseObjectWarehouseBase(bool threaded /*=true*/) :
 {
 }
 
-template<typename T>
+template <typename T>
 MooseObjectWarehouseBase<T>::~MooseObjectWarehouseBase()
 {
 }
 
-template<typename T>
+template <typename T>
 void
 MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid /*= 0*/)
 {
@@ -216,7 +233,8 @@ MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid 
     _active_objects[tid].push_back(object);
 
   // Perform casts to the Block/BoundaryRestrictable
-  std::shared_ptr<BoundaryRestrictable> bnd = std::dynamic_pointer_cast<BoundaryRestrictable>(object);
+  std::shared_ptr<BoundaryRestrictable> bnd =
+      std::dynamic_pointer_cast<BoundaryRestrictable>(object);
   std::shared_ptr<BlockRestrictable> blk = std::dynamic_pointer_cast<BlockRestrictable>(object);
 
   // Boundary Restricted
@@ -234,7 +252,8 @@ MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid 
   // Block Restricted
   else if (blk)
   {
-    const std::set<SubdomainID> & ids = blk->blockRestricted() ? blk->blockIDs() : blk->meshBlockIDs();
+    const std::set<SubdomainID> & ids =
+        blk->blockRestricted() ? blk->blockIDs() : blk->meshBlockIDs();
     for (std::set<SubdomainID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
     {
       _all_block_objects[tid][*it].push_back(object);
@@ -244,105 +263,109 @@ MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid 
   }
 }
 
-template<typename T>
+template <typename T>
 inline const std::vector<std::shared_ptr<T>> &
-MooseObjectWarehouseBase<T>::getObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getObjects(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   return _all_objects[tid];
 }
 
-template<typename T>
+template <typename T>
 inline const std::map<BoundaryID, std::vector<std::shared_ptr<T>>> &
-MooseObjectWarehouseBase<T>::getBoundaryObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getBoundaryObjects(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   return _all_boundary_objects[tid];
 }
 
-template<typename T>
+template <typename T>
 const std::vector<std::shared_ptr<T>> &
-MooseObjectWarehouseBase<T>::getBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getBoundaryObjects(BoundaryID id, THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   const auto iter = _all_boundary_objects[tid].find(id);
-  mooseAssert(iter != _all_boundary_objects[tid].end(), "Unable to located active boundary objects for the given id: " << id << ".");
+  mooseAssert(iter != _all_boundary_objects[tid].end(),
+              "Unable to located active boundary objects for the given id: " << id << ".");
   return iter->second;
 }
 
-template<typename T>
+template <typename T>
 inline const std::map<SubdomainID, std::vector<std::shared_ptr<T>>> &
-MooseObjectWarehouseBase<T>::getBlockObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getBlockObjects(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   return _all_block_objects[tid];
 }
 
-template<typename T>
+template <typename T>
 const std::vector<std::shared_ptr<T>> &
-MooseObjectWarehouseBase<T>::getBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getBlockObjects(SubdomainID id, THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   const auto iter = _all_block_objects[tid].find(id);
-  mooseAssert(iter != _all_block_objects[tid].end(), "Unable to located active block objects for the given id: " << id << ".");
+  mooseAssert(iter != _all_block_objects[tid].end(),
+              "Unable to located active block objects for the given id: " << id << ".");
   return iter->second;
 }
 
-template<typename T>
+template <typename T>
 inline const std::vector<std::shared_ptr<T>> &
-MooseObjectWarehouseBase<T>::getActiveObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveObjects(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   return _active_objects[tid];
 }
 
-template<typename T>
+template <typename T>
 inline const std::map<BoundaryID, std::vector<std::shared_ptr<T>>> &
-MooseObjectWarehouseBase<T>::getActiveBoundaryObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveBoundaryObjects(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   return _active_boundary_objects[tid];
 }
 
-template<typename T>
+template <typename T>
 const std::vector<std::shared_ptr<T>> &
-MooseObjectWarehouseBase<T>::getActiveBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveBoundaryObjects(BoundaryID id, THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   const auto iter = _active_boundary_objects[tid].find(id);
-  mooseAssert(iter != _active_boundary_objects[tid].end(), "Unable to located active boundary objects for the given id: " << id << ".");
+  mooseAssert(iter != _active_boundary_objects[tid].end(),
+              "Unable to located active boundary objects for the given id: " << id << ".");
   return iter->second;
 }
 
-template<typename T>
+template <typename T>
 inline const std::map<SubdomainID, std::vector<std::shared_ptr<T>>> &
-MooseObjectWarehouseBase<T>::getActiveBlockObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveBlockObjects(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   return _active_block_objects[tid];
 }
 
-template<typename T>
+template <typename T>
 const std::vector<std::shared_ptr<T>> &
-MooseObjectWarehouseBase<T>::getActiveBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveBlockObjects(SubdomainID id, THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   const auto iter = _active_block_objects[tid].find(id);
-  mooseAssert(iter != _active_block_objects[tid].end(), "Unable to located active block objects for the given id: " << id << ".");
+  mooseAssert(iter != _active_block_objects[tid].end(),
+              "Unable to located active block objects for the given id: " << id << ".");
   return iter->second;
 }
 
-template<typename T>
+template <typename T>
 bool
-MooseObjectWarehouseBase<T>::hasActiveObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::hasActiveObjects(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   return !_active_objects[tid].empty();
 }
 
-template<typename T>
+template <typename T>
 bool
-MooseObjectWarehouseBase<T>::hasActiveBlockObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::hasActiveBlockObjects(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   bool has_active_block_objects = false;
@@ -351,18 +374,18 @@ MooseObjectWarehouseBase<T>::hasActiveBlockObjects(THREAD_ID tid/* = 0*/) const
   return has_active_block_objects;
 }
 
-template<typename T>
+template <typename T>
 bool
-MooseObjectWarehouseBase<T>::hasActiveBlockObjects(SubdomainID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::hasActiveBlockObjects(SubdomainID id, THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   const auto iter = _active_block_objects[tid].find(id);
   return iter != _active_block_objects[tid].end();
 }
 
-template<typename T>
+template <typename T>
 bool
-MooseObjectWarehouseBase<T>::hasActiveBoundaryObjects(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::hasActiveBoundaryObjects(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   bool has_active_boundary_objects = false;
@@ -371,18 +394,18 @@ MooseObjectWarehouseBase<T>::hasActiveBoundaryObjects(THREAD_ID tid/* = 0*/) con
   return has_active_boundary_objects;
 }
 
-template<typename T>
+template <typename T>
 bool
-MooseObjectWarehouseBase<T>::hasActiveBoundaryObjects(BoundaryID id, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::hasActiveBoundaryObjects(BoundaryID id, THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   const auto iter = _active_boundary_objects[tid].find(id);
   return iter != _active_boundary_objects[tid].end();
 }
 
-template<typename T>
+template <typename T>
 bool
-MooseObjectWarehouseBase<T>::hasActiveObject(const std::string & name, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::hasActiveObject(const std::string & name, THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   for (const auto & object : _active_objects[tid])
@@ -391,9 +414,9 @@ MooseObjectWarehouseBase<T>::hasActiveObject(const std::string & name, THREAD_ID
   return false;
 }
 
-template<typename T>
+template <typename T>
 std::shared_ptr<T>
-MooseObjectWarehouseBase<T>::getActiveObject(const std::string & name, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveObject(const std::string & name, THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   for (const auto & object : _active_objects[tid])
@@ -402,18 +425,18 @@ MooseObjectWarehouseBase<T>::getActiveObject(const std::string & name, THREAD_ID
   mooseError("Unable to locate active object: ", name, ".");
 }
 
-template<typename T>
+template <typename T>
 std::set<SubdomainID>
-MooseObjectWarehouseBase<T>::getActiveBlocks(THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::getActiveBlocks(THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   std::set<SubdomainID> ids;
-  for (const auto & object_pair: _active_block_objects[tid])
+  for (const auto & object_pair : _active_block_objects[tid])
     ids.insert(object_pair.first);
   return ids;
 }
 
-template<typename T>
+template <typename T>
 void
 MooseObjectWarehouseBase<T>::updateActive(THREAD_ID tid /*= 0*/)
 {
@@ -428,23 +451,23 @@ MooseObjectWarehouseBase<T>::updateActive(THREAD_ID tid /*= 0*/)
     updateActiveHelper(_active_boundary_objects[tid][object_pair.first], object_pair.second);
 }
 
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateActiveHelper(std::vector<std::shared_ptr<T>> & active, const std::vector<std::shared_ptr<T>> & all)
+MooseObjectWarehouseBase<T>::updateActiveHelper(std::vector<std::shared_ptr<T>> & active,
+                                                const std::vector<std::shared_ptr<T>> & all)
 {
   // Clear the active list
   active.clear();
 
-  std::copy_if(all.begin(), all.end(), std::back_inserter(active),
-               [](const std::shared_ptr<T> & object)
-               {
-                 return object->enabled();
-               });
+  std::copy_if(all.begin(),
+               all.end(),
+               std::back_inserter(active),
+               [](const std::shared_ptr<T> & object) { return object->enabled(); });
 }
 
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::sort(THREAD_ID tid/* = 0*/)
+MooseObjectWarehouseBase<T>::sort(THREAD_ID tid /* = 0*/)
 {
   checkThreadID(tid);
 
@@ -460,25 +483,28 @@ MooseObjectWarehouseBase<T>::sort(THREAD_ID tid/* = 0*/)
   updateActive(tid);
 }
 
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::updateVariableDependency(std::set<MooseVariable *> & needed_moose_vars,
+                                                      THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveObjects(tid))
     updateVariableDependencyHelper(needed_moose_vars, _all_objects[tid]);
 }
 
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateBlockVariableDependency(SubdomainID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::updateBlockVariableDependency(
+    SubdomainID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBlockObjects(id, tid))
     updateVariableDependencyHelper(needed_moose_vars, getActiveBlockObjects(id, tid));
 }
 
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(
+    std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBoundaryObjects(tid))
   {
@@ -488,18 +514,19 @@ MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(std::set<MooseVari
   }
 }
 
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(BoundaryID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(
+    BoundaryID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBoundaryObjects(id, tid))
     updateVariableDependencyHelper(needed_moose_vars, getActiveBoundaryObjects(id, tid));
 }
 
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(std::set<MooseVariable *> & needed_moose_vars,
-                                                            const std::vector<std::shared_ptr<T>> & objects)
+MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(
+    std::set<MooseVariable *> & needed_moose_vars, const std::vector<std::shared_ptr<T>> & objects)
 {
   for (const auto & object : objects)
   {
@@ -508,45 +535,48 @@ MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(std::set<MooseVariab
   }
 }
 
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::updateMatPropDependency(std::set<unsigned int> & needed_mat_props,
+                                                     THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveObjects(tid))
     updateMatPropDependencyHelper(needed_mat_props, _all_objects[tid]);
 }
 
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateBlockMatPropDependency(SubdomainID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::updateBlockMatPropDependency(SubdomainID id,
+                                                          std::set<unsigned int> & needed_mat_props,
+                                                          THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBlockObjects(id, tid))
     updateMatPropDependencyHelper(needed_mat_props, getActiveBlockObjects(id, tid));
 }
 
-
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(
+    std::set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBoundaryObjects(tid))
     for (auto & active_bnd_object : _active_boundary_objects[tid])
       updateMatPropDependencyHelper(needed_mat_props, active_bnd_object.second);
 }
 
-
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(BoundaryID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid/* = 0*/) const
+MooseObjectWarehouseBase<T>::updateBoundaryMatPropDependency(
+    BoundaryID id, std::set<unsigned int> & needed_mat_props, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBoundaryObjects(id, tid))
     updateMatPropDependencyHelper(needed_mat_props, getActiveBoundaryObjects(id, tid));
 }
 
-
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateMatPropDependencyHelper(std::set<unsigned int> & needed_mat_props, const std::vector<std::shared_ptr<T>> & objects)
+MooseObjectWarehouseBase<T>::updateMatPropDependencyHelper(
+    std::set<unsigned int> & needed_mat_props, const std::vector<std::shared_ptr<T>> & objects)
 {
   for (auto & object : objects)
   {
@@ -555,10 +585,11 @@ MooseObjectWarehouseBase<T>::updateMatPropDependencyHelper(std::set<unsigned int
   }
 }
 
-
-template<typename T>
+template <typename T>
 void
-MooseObjectWarehouseBase<T>::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables, THREAD_ID tid/*=0*/) const
+MooseObjectWarehouseBase<T>::subdomainsCovered(std::set<SubdomainID> & subdomains_covered,
+                                               std::set<std::string> & unique_variables,
+                                               THREAD_ID tid /*=0*/) const
 {
   for (const auto & object : _active_objects[tid])
     unique_variables.insert(object->variable().name());
@@ -567,7 +598,7 @@ MooseObjectWarehouseBase<T>::subdomainsCovered(std::set<SubdomainID> & subdomain
     subdomains_covered.insert(object_pair.first);
 }
 
-template<typename T>
+template <typename T>
 void
 MooseObjectWarehouseBase<T>::sortHelper(std::vector<std::shared_ptr<T>> & objects)
 {
@@ -576,24 +607,31 @@ MooseObjectWarehouseBase<T>::sortHelper(std::vector<std::shared_ptr<T>> & object
     return;
 
   // Make sure the object is sortable
-  mooseAssert(std::dynamic_pointer_cast<DependencyResolverInterface>(objects[0]), "Objects must inhert from DependencyResolverInterface to be sorted.");
+  mooseAssert(std::dynamic_pointer_cast<DependencyResolverInterface>(objects[0]),
+              "Objects must inhert from DependencyResolverInterface to be sorted.");
 
   try
   {
     // Sort based on dependencies
     DependencyResolverInterface::sort<std::shared_ptr<T>>(objects);
   }
-  catch(CyclicDependencyException<std::shared_ptr<T>> & e)
+  catch (CyclicDependencyException<std::shared_ptr<T>> & e)
   {
-    DependencyResolverInterface::cyclicDependencyError<std::shared_ptr<T>>(e, "Cyclic dependency detected in object ordering");
+    DependencyResolverInterface::cyclicDependencyError<std::shared_ptr<T>>(
+        e, "Cyclic dependency detected in object ordering");
   }
 }
 
-template<typename T>
+template <typename T>
 inline void
 MooseObjectWarehouseBase<T>::checkThreadID(THREAD_ID libmesh_dbg_var(tid)) const
 {
-  mooseAssert(tid < _num_threads, "Attempting to access a thread id (" << tid << ") greater than the number allowed by the storage item (" << _num_threads << ")");
+  mooseAssert(tid < _num_threads,
+              "Attempting to access a thread id ("
+                  << tid
+                  << ") greater than the number allowed by the storage item ("
+                  << _num_threads
+                  << ")");
 }
 
 #endif // MOOSEOBJECTWAREHOUSEBASE_H

@@ -20,7 +20,7 @@
 
 class SplineFFn;
 
-template<>
+template <>
 InputParameters validParams<SplineFFn>();
 
 /**
@@ -37,6 +37,5 @@ protected:
 
   SplineFunction & _fn;
 };
-
 
 #endif /* SPLINEFFN_H */

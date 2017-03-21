@@ -26,14 +26,14 @@ class Transient;
 class TimeStepper;
 class FEProblemBase;
 
-template<>
+template <>
 InputParameters validParams<Transient>();
 
 /**
  * Transient executioners usually loop through a number of timesteps... calling solve()
  * for each timestep.
  */
-class Transient: public Executioner
+class Transient : public Executioner
 {
 public:
   /**
@@ -110,7 +110,7 @@ public:
   /**
    * Set the old time.
    */
-  virtual void setTimeOld(Real t){ _time_old = t; };
+  virtual void setTimeOld(Real t) { _time_old = t; };
 
   /**
    * Get the Relative L2 norm of the change in the solution.
@@ -121,7 +121,7 @@ public:
    * Pointer to the TimeStepper
    * @return Pointer to the time stepper for this Executioner
    */
-  TimeStepper * getTimeStepper(){ return _time_stepper.get(); }
+  TimeStepper * getTimeStepper() { return _time_stepper.get(); }
 
   /**
    * Set the timestepper to use.
@@ -201,10 +201,9 @@ public:
    * Get the number of Picard iterations performed
    * @return Number of Picard iterations performed
    */
-  //Because this returns the number of Picard iterations, rather than the current
-  //iteration count (which starts at 0), increment by 1.
-  Real numPicardIts() { return _picard_it+1; }
-
+  // Because this returns the number of Picard iterations, rather than the current
+  // iteration count (which starts at 0), increment by 1.
+  Real numPicardIts() { return _picard_it + 1; }
 
 protected:
   /**
@@ -279,7 +278,7 @@ protected:
    * Picard Related
    */
   /// Number of Picard iterations to perform
-  int  & _picard_it;
+  int & _picard_it;
   Real _picard_max_its;
   bool & _picard_converged;
   Real & _picard_initial_norm;
@@ -296,4 +295,4 @@ protected:
   void setupTimeIntegrator();
 };
 
-#endif //TRANSIENTEXECUTIONER_H
+#endif // TRANSIENTEXECUTIONER_H

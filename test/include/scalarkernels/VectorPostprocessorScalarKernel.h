@@ -15,13 +15,12 @@
 #ifndef VECTORPOSTPROCESSORSCALARKERNEL_H
 #define VECTORPOSTPROCESSORSCALARKERNEL_H
 
-
 #include "ODEKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class VectorPostprocessorScalarKernel;
 
-template<>
+template <>
 InputParameters validParams<VectorPostprocessorScalarKernel>();
 
 /**
@@ -41,6 +40,5 @@ protected:
 
   unsigned int _index;
 };
-
 
 #endif /* VECTORPOSTPROCESSORSCALARKERNEL_H */

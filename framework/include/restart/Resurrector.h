@@ -49,7 +49,6 @@ public:
   void restartRestartableData();
 
 protected:
-
   /// Reference to a FEProblemBase being restarted
   FEProblemBase & _fe_problem;
 

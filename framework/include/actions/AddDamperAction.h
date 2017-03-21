@@ -19,11 +19,10 @@
 
 class AddDamperAction;
 
-template<>
+template <>
 InputParameters validParams<AddDamperAction>();
 
-
-class AddDamperAction: public MooseObjectAction
+class AddDamperAction : public MooseObjectAction
 {
 public:
   AddDamperAction(InputParameters params);
@@ -31,4 +30,4 @@ public:
   virtual void act() override;
 };
 
-#endif //ADDDAMPERACTION_H
+#endif // ADDDAMPERACTION_H

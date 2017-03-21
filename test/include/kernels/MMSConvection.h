@@ -18,7 +18,7 @@
 
 class MMSConvection;
 
-template<>
+template <>
 InputParameters validParams<MMSConvection>();
 
 class MMSConvection : public Kernel
@@ -35,7 +35,6 @@ protected:
   Real _x;
   Real _y;
   Real _z;
-
 };
 
-#endif //MMSCONVECTION_H_
+#endif // MMSCONVECTION_H_

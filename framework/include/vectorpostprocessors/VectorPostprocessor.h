@@ -29,7 +29,7 @@ class VectorPostprocessor;
 class VectorPostprocessorData;
 class FEProblemBase;
 
-template<>
+template <>
 InputParameters validParams<VectorPostprocessor>();
 
 /**

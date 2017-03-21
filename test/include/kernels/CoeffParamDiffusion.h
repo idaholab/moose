@@ -20,7 +20,7 @@
 
 class CoeffParamDiffusion;
 
-template<>
+template <>
 InputParameters validParams<CoeffParamDiffusion>();
 
 class CoeffParamDiffusion : public Diffusion
@@ -30,7 +30,6 @@ public:
   virtual ~CoeffParamDiffusion();
 
 protected:
-
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 

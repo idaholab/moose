@@ -15,17 +15,16 @@
 #include "DetermineSystemType.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<DetermineSystemType>()
+template <>
+InputParameters
+validParams<DetermineSystemType>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   params.mooseObjectSyntaxVisibility(false);
   return params;
 }
 
-
-DetermineSystemType::DetermineSystemType(InputParameters parameters) :
-    MooseObjectAction(parameters)
+DetermineSystemType::DetermineSystemType(InputParameters parameters) : MooseObjectAction(parameters)
 {
 }
 
@@ -39,4 +38,3 @@ DetermineSystemType::act()
   if (_moose_object_pars.isParamValid("_eigen") && _moose_object_pars.get<bool>("_eigen"))
     _app.useNonlinear() = false;
 }
-

@@ -19,7 +19,7 @@
 class TEJumpBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<TEJumpBC>();
 
 /**
@@ -30,11 +30,11 @@ InputParameters validParams<TEJumpBC>();
 class TEJumpBC : public NodalBC
 {
 public:
-
   /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same constructor.
+   * Factory constructor, takes parameters so that all derived classes can be built using the same
+   * constructor.
    */
-  TEJumpBC( const InputParameters & parameters);
+  TEJumpBC(const InputParameters & parameters);
 
   virtual ~TEJumpBC() {}
 

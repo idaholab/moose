@@ -17,10 +17,10 @@
 
 #include "ElementAverageValue.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementAverageTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<ElementAverageTimeDerivative>();
 
 /**

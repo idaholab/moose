@@ -14,17 +14,19 @@
 
 #include "Receiver.h"
 
-template<>
-InputParameters validParams<Receiver>()
+template <>
+InputParameters
+validParams<Receiver>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addParam<Real>("default", "The default value");
-  params.addParam<bool>("initialize_old", true, "Initialize the old postprocessor value with the default value");
+  params.addParam<bool>(
+      "initialize_old", true, "Initialize the old postprocessor value with the default value");
   return params;
 }
 
-Receiver::Receiver(const InputParameters & params) :
-    GeneralPostprocessor(params),
+Receiver::Receiver(const InputParameters & params)
+  : GeneralPostprocessor(params),
     _initialize_old(getParam<bool>("initialize_old")),
     _my_value(getPostprocessorValueByName(name()))
 {
@@ -51,4 +53,3 @@ Receiver::initialSetup()
     }
   }
 }
-

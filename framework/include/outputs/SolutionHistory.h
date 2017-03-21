@@ -22,7 +22,7 @@
 // Forward declerations
 class SolutionHistory;
 
-template<>
+template <>
 InputParameters validParams<SolutionHistory>();
 
 /**
@@ -33,7 +33,6 @@ InputParameters validParams<SolutionHistory>();
 class SolutionHistory : public BasicOutput<FileOutput>
 {
 public:
-
   /**
    * Class constructor
    *

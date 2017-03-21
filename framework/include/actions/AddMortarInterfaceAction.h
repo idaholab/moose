@@ -19,7 +19,7 @@
 
 class AddMortarInterfaceAction;
 
-template<>
+template <>
 InputParameters validParams<AddMortarInterfaceAction>();
 
 /**

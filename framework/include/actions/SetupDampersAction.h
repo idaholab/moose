@@ -19,9 +19,8 @@
 
 class SetupDampersAction;
 
-template<>
+template <>
 InputParameters validParams<SetupDampersAction>();
-
 
 class SetupDampersAction : public Action
 {

@@ -21,7 +21,7 @@
 // Forward declerations
 class NumInternalSides;
 
-template<>
+template <>
 InputParameters validParams<NumInternalSides>();
 
 /**
@@ -44,4 +44,4 @@ private:
   unsigned int _count;
 };
 
-#endif //NUMINTERNALSIDES_H
+#endif // NUMINTERNALSIDES_H

@@ -22,7 +22,7 @@
 class SamplerBase;
 class VectorPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<SamplerBase>();
 
 /**
@@ -37,16 +37,18 @@ public:
    * @param vpp A pointer to the child object
    * @param comm The communicator of the child
    */
-  SamplerBase(const InputParameters & parameters, VectorPostprocessor * vpp, const libMesh::Parallel::Communicator & comm);
+  SamplerBase(const InputParameters & parameters,
+              VectorPostprocessor * vpp,
+              const libMesh::Parallel::Communicator & comm);
   virtual ~SamplerBase() = default;
 
 protected:
-
   /**
    * You MUST call this in the constructor of the child class and pass down the name
    * of the variables.
    *
-   * @param variable_names The names of the variables.  Note: The order of the variables sets the order of the values for addSample()
+   * @param variable_names The names of the variables.  Note: The order of the variables sets the
+   * order of the values for addSample()
    */
   void setupVariables(const std::vector<std::string> & variable_names);
 
@@ -77,7 +79,8 @@ protected:
    *
    * YOU MUST CALL THIS DURING threadJoin() in the child class!
    *
-   * @param y You must cast the UserObject to your child class type first then you can pass it in here.
+   * @param y You must cast the UserObject to your child class type first then you can pass it in
+   * here.
    */
   virtual void threadJoin(const SamplerBase & y);
 

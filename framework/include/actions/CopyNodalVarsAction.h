@@ -19,11 +19,10 @@
 
 class CopyNodalVarsAction;
 
-template<>
+template <>
 InputParameters validParams<CopyNodalVarsAction>();
 
-
-class CopyNodalVarsAction: public Action
+class CopyNodalVarsAction : public Action
 {
 public:
   CopyNodalVarsAction(InputParameters params);
@@ -31,4 +30,4 @@ public:
   virtual void act() override;
 };
 
-#endif //COPYNODALVARSACTION_H
+#endif // COPYNODALVARSACTION_H

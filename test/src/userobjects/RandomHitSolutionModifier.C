@@ -16,23 +16,26 @@
 #include "RandomHitUserObject.h"
 #include "NonlinearSystemBase.h"
 
-template<>
-InputParameters validParams<RandomHitSolutionModifier>()
+template <>
+InputParameters
+validParams<RandomHitSolutionModifier>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addRequiredParam<UserObjectName>("random_hits", "The name of the UserObject to use for the positions of the random hits");
+  params.addRequiredParam<UserObjectName>(
+      "random_hits", "The name of the UserObject to use for the positions of the random hits");
   params.addRequiredParam<VariableName>("modify", "The name of the variable to be modified");
   params.addRequiredParam<Real>("amount", "Amount to add at the random hit location");
   return params;
 }
 
-RandomHitSolutionModifier::RandomHitSolutionModifier(const InputParameters & parameters) :
-    GeneralUserObject(parameters),
+RandomHitSolutionModifier::RandomHitSolutionModifier(const InputParameters & parameters)
+  : GeneralUserObject(parameters),
     _random_hits(getUserObject<RandomHitUserObject>("random_hits")),
     _mesh(_subproblem.mesh()),
     _variable(_subproblem.getVariable(0, parameters.get<VariableName>("modify"))),
     _amount(parameters.get<Real>("amount"))
-{}
+{
+}
 
 void
 RandomHitSolutionModifier::execute()
@@ -43,8 +46,7 @@ RandomHitSolutionModifier::execute()
 
   _nodes_that_were_hit.resize(hits.size());
 
-
-  for (unsigned int i=0; i<hits.size(); i++)
+  for (unsigned int i = 0; i < hits.size(); i++)
   {
     const Point & hit = hits[i];
 
@@ -57,7 +59,7 @@ RandomHitSolutionModifier::execute()
       Node * closest_node = NULL;
 
       // Find the node on that element that is closest.
-      for (unsigned int n=0; n<elem->n_nodes(); n++)
+      for (unsigned int n = 0; n < elem->n_nodes(); n++)
       {
         Node * cur_node = elem->get_node(n);
         Real cur_distance = (hit - *cur_node).norm();

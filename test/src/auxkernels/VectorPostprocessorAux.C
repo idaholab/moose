@@ -14,20 +14,22 @@
 
 #include "VectorPostprocessorAux.h"
 
-template<>
-InputParameters validParams<VectorPostprocessorAux>()
+template <>
+InputParameters
+validParams<VectorPostprocessorAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
-  params.addRequiredParam<VectorPostprocessorName>("vpp", "The VectorPostprocessor to pull values out of");
+  params.addRequiredParam<VectorPostprocessorName>("vpp",
+                                                   "The VectorPostprocessor to pull values out of");
   params.addRequiredParam<std::string>("vector", "The vector to use from the VectorPostprocessor");
   params.addRequiredParam<unsigned int>("index", "The entry in the VectorPostprocessor to use");
 
   return params;
 }
 
-VectorPostprocessorAux::VectorPostprocessorAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+VectorPostprocessorAux::VectorPostprocessorAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _vpp(getVectorPostprocessorValue("vpp", getParam<std::string>("vector"))),
     _index(getParam<unsigned int>("index"))
 {

@@ -17,18 +17,19 @@
 #include "MooseApp.h"
 #include "Material.h"
 
-template<>
-InputParameters validParams<MaterialPropertyInterface>()
+template <>
+InputParameters
+validParams<MaterialPropertyInterface>()
 {
   InputParameters params = emptyInputParameters();
-  params.addPrivateParam<Moose::MaterialDataType>("_material_data_type"); // optionally force the type of MaterialData to utilize
+  params.addPrivateParam<Moose::MaterialDataType>(
+      "_material_data_type"); // optionally force the type of MaterialData to utilize
   return params;
 }
 
-
 // Standard construction
-MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object) :
-    _mi_params(moose_object->parameters()),
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object)
+  : _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
     _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem_base")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
@@ -41,8 +42,9 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 }
 
 // Block restricted
-MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object, const std::set<SubdomainID> & block_ids) :
-    _mi_params(moose_object->parameters()),
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
+                                                     const std::set<SubdomainID> & block_ids)
+  : _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
     _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem_base")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
@@ -55,8 +57,9 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 }
 
 // Boundary restricted
-MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object, const std::set<BoundaryID> & boundary_ids) :
-    _mi_params(moose_object->parameters()),
+MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
+                                                     const std::set<BoundaryID> & boundary_ids)
+  : _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
     _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem_base")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
@@ -71,8 +74,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 // Dual restricted
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
                                                      const std::set<SubdomainID> & block_ids,
-                                                     const std::set<BoundaryID> & boundary_ids) :
-    _mi_params(moose_object->parameters()),
+                                                     const std::set<BoundaryID> & boundary_ids)
+  : _mi_params(moose_object->parameters()),
     _mi_name(_mi_params.get<std::string>("_object_name")),
     _mi_feproblem(*_mi_params.get<FEProblemBase *>("_fe_problem_base")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
@@ -91,13 +94,16 @@ MaterialPropertyInterface::initializeMaterialPropertyInterface(const InputParame
   if (parameters.isParamValid("_material_data_type"))
     _material_data_type = parameters.get<Moose::MaterialDataType>("_material_data_type");
 
-  else if (!_mi_boundary_ids.empty() && std::find(_mi_boundary_ids.begin(), _mi_boundary_ids.end(), Moose::ANY_BOUNDARY_ID) == _mi_boundary_ids.end())
+  else if (!_mi_boundary_ids.empty() &&
+           std::find(_mi_boundary_ids.begin(), _mi_boundary_ids.end(), Moose::ANY_BOUNDARY_ID) ==
+               _mi_boundary_ids.end())
     _material_data_type = Moose::BOUNDARY_MATERIAL_DATA;
 
   else
     _material_data_type = Moose::BLOCK_MATERIAL_DATA;
 
-  _material_data = _mi_feproblem.getMaterialData(_material_data_type, parameters.get<THREAD_ID>("_tid"));
+  _material_data =
+      _mi_feproblem.getMaterialData(_material_data_type, parameters.get<THREAD_ID>("_tid"));
 }
 
 std::string
@@ -109,7 +115,7 @@ MaterialPropertyInterface::deducePropertyName(const std::string & name)
     return name;
 }
 
-template<>
+template <>
 const MaterialProperty<Real> *
 MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
 {
@@ -155,7 +161,8 @@ MaterialPropertyInterface::getMaterialPropertyBoundaryIDs(const std::string & na
   return _mi_feproblem.getMaterialPropertyBoundaryIDs(name);
 }
 
-std::vector<BoundaryName>MaterialPropertyInterface::getMaterialPropertyBoundaryNames(const std::string & name)
+std::vector<BoundaryName>
+MaterialPropertyInterface::getMaterialPropertyBoundaryNames(const std::string & name)
 {
   return _mi_feproblem.getMaterialPropertyBoundaryNames(name);
 }
@@ -186,24 +193,25 @@ MaterialPropertyInterface::statefulPropertiesAllowed(bool stateful_allowed)
   _stateful_allowed = stateful_allowed;
 }
 
-
 Material &
 MaterialPropertyInterface::getMaterial(const std::string & name)
 {
   return getMaterialByName(_mi_params.get<MaterialName>(name));
 }
 
-
 Material &
 MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_warn)
 {
-  std::shared_ptr<Material> discrete = _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid, no_warn);
+  std::shared_ptr<Material> discrete =
+      _mi_feproblem.getMaterial(name, _material_data_type, _mi_tid, no_warn);
 
   // Check block compatibility
   if (!discrete->hasBlocks(_mi_block_ids))
   {
     std::ostringstream oss;
-    oss << "The Material object '" << discrete->name() << "' is defined on blocks that are incompatible with the retrieving object '" << _mi_name << "':\n";
+    oss << "The Material object '" << discrete->name()
+        << "' is defined on blocks that are incompatible with the retrieving object '" << _mi_name
+        << "':\n";
     oss << "  " << discrete->name();
     for (const auto & sbd_id : discrete->blockIDs())
       oss << " " << sbd_id;
@@ -219,7 +227,9 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_w
   if (!discrete->hasBoundary(_mi_boundary_ids))
   {
     std::ostringstream oss;
-    oss << "The Material object '" << discrete->name() << "' is defined on boundaries that are incompatible with the retrieving object '" << _mi_name << "':\n";
+    oss << "The Material object '" << discrete->name()
+        << "' is defined on boundaries that are incompatible with the retrieving object '"
+        << _mi_name << "':\n";
     oss << "  " << discrete->name();
     for (const auto & bnd_id : discrete->boundaryIDs())
       oss << " " << bnd_id;
@@ -238,5 +248,6 @@ void
 MaterialPropertyInterface::checkExecutionStage()
 {
   if (_mi_feproblem.startedInitialSetup())
-    mooseError("Material properties must be retrieved during object construction to ensure correct problem integrity validation.");
+    mooseError("Material properties must be retrieved during object construction to ensure correct "
+               "problem integrity validation.");
 }

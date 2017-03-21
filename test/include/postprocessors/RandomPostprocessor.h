@@ -18,10 +18,10 @@
 #include "GeneralPostprocessor.h"
 #include "MooseRandom.h"
 
-//Forward Declarations
+// Forward Declarations
 class RandomPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<RandomPostprocessor>();
 
 /**
@@ -38,10 +38,9 @@ public:
   virtual Real getValue() override;
 
 private:
-
   const unsigned int _generator_id;
 
   MooseRandom & _random;
 };
 
-#endif //RANDOMPOSTPROCESSOR_H
+#endif // RANDOMPOSTPROCESSOR_H

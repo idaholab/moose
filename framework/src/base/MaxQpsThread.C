@@ -22,8 +22,11 @@
 LIBMESH_DEFINE_HASH_POINTERS
 #include "libmesh/quadrature.h"
 
-MaxQpsThread::MaxQpsThread(FEProblemBase & fe_problem, QuadratureType qtype, Order order, Order face_order) :
-    _fe_problem(fe_problem),
+MaxQpsThread::MaxQpsThread(FEProblemBase & fe_problem,
+                           QuadratureType qtype,
+                           Order order,
+                           Order face_order)
+  : _fe_problem(fe_problem),
     _qtype(qtype),
     _order(order),
     _face_order(face_order),
@@ -33,8 +36,8 @@ MaxQpsThread::MaxQpsThread(FEProblemBase & fe_problem, QuadratureType qtype, Ord
 }
 
 // Splitting Constructor
-MaxQpsThread::MaxQpsThread(MaxQpsThread & x, Threads::split /*split*/) :
-    _fe_problem(x._fe_problem),
+MaxQpsThread::MaxQpsThread(MaxQpsThread & x, Threads::split /*split*/)
+  : _fe_problem(x._fe_problem),
     _qtype(x._qtype),
     _order(x._order),
     _face_order(x._face_order),
@@ -44,7 +47,7 @@ MaxQpsThread::MaxQpsThread(MaxQpsThread & x, Threads::split /*split*/) :
 }
 
 void
-MaxQpsThread::operator() (const ConstElemRange & range)
+MaxQpsThread::operator()(const ConstElemRange & range)
 {
   ParallelUniqueId puid;
   _tid = puid.id;
@@ -58,15 +61,17 @@ MaxQpsThread::operator() (const ConstElemRange & range)
     {
       FEType fe_type(FIRST, LAGRANGE);
       unsigned int dim = elem->dim();
-      unsigned int side = 0;           // we assume that any element will have at least one side ;)
+      unsigned int side = 0; // we assume that any element will have at least one side ;)
 
-      // We cannot mess with the FE objects in Assembly, because we might need to request second derivatives
+      // We cannot mess with the FE objects in Assembly, because we might need to request second
+      // derivatives
       // later on. If we used them, we'd call reinit on them, thus making the call to request second
-      // derivatives harmful (i.e. leading to segfaults/asserts). Thus, we have to use a locally allocated object here.
-      std::unique_ptr<FEBase> fe (FEBase::build(dim, fe_type));
+      // derivatives harmful (i.e. leading to segfaults/asserts). Thus, we have to use a locally
+      // allocated object here.
+      std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
 
       // figure out the number of qps for volume
-      std::unique_ptr<QBase> qrule (QBase::build(_qtype, dim, _order));
+      std::unique_ptr<QBase> qrule(QBase::build(_qtype, dim, _order));
       fe->attach_quadrature_rule(qrule.get());
       fe->reinit(elem);
       if (qrule->n_points() > _max)
@@ -77,8 +82,9 @@ MaxQpsThread::operator() (const ConstElemRange & range)
         _max_shape_funcs = n_shape_funcs;
 
       // figure out the number of qps for the face
-      // NOTE: user might specify higher order rule for faces, thus possibly ending up with more qps than in the volume
-      std::unique_ptr<QBase> qrule_face (QBase::build(_qtype, dim - 1, _face_order));
+      // NOTE: user might specify higher order rule for faces, thus possibly ending up with more qps
+      // than in the volume
+      std::unique_ptr<QBase> qrule_face(QBase::build(_qtype, dim - 1, _face_order));
       fe->attach_quadrature_rule(qrule_face.get());
       fe->reinit(elem, side);
       if (qrule_face->n_points() > _max)

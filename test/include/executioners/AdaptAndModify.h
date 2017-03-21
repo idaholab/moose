@@ -20,13 +20,12 @@
 // Forward Declarations
 class AdaptAndModify;
 
-template<>
+template <>
 InputParameters validParams<AdaptAndModify>();
 
-class AdaptAndModify: public Transient
+class AdaptAndModify : public Transient
 {
 public:
-
   AdaptAndModify(const InputParameters & parameters);
 
   virtual void incrementStepOrReject();
@@ -37,4 +36,4 @@ protected:
   unsigned int _adapt_cycles;
 };
 
-#endif //ADAPTANDMODIFY_H
+#endif // ADAPTANDMODIFY_H

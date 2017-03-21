@@ -22,16 +22,15 @@ class EigenExecutionerBase;
 class MooseEigenSystem;
 class FEProblemBase;
 
-template<>
+template <>
 InputParameters validParams<EigenExecutionerBase>();
 
 /**
  * This class provides reusable routines for eigenvalue executioners.
  */
-class EigenExecutionerBase: public Executioner
+class EigenExecutionerBase : public Executioner
 {
 public:
-
   /**
    * Constructor
    *
@@ -66,22 +65,32 @@ public:
    * @param cheb_on To turn the Chebyshev acceleration on.
    * @param tol_eig Tolerance on the difference of the eigenvalue of two successive iterations.
    * @param echo True to make screen printouts.
-   * @param xdiff Name of the postprocessor evaluating the difference of the solution norm of two successive iterations.
+   * @param xdiff Name of the postprocessor evaluating the difference of the solution norm of two
+   * successive iterations.
    * @param tol_x Tolerance on the difference of the solution norm of two successive iterations.
    * @param k Eigenvalue, input as the initial guess.
    * @param initial_res The initial residual.
    */
-  virtual void inversePowerIteration(unsigned int min_iter, unsigned int max_iter, Real pfactor,
-                                     bool cheb_on, Real tol_eig, bool echo,
-                                     PostprocessorName xdiff, Real tol_x, Real & k, Real & initial_res);
+  virtual void inversePowerIteration(unsigned int min_iter,
+                                     unsigned int max_iter,
+                                     Real pfactor,
+                                     bool cheb_on,
+                                     Real tol_eig,
+                                     bool echo,
+                                     PostprocessorName xdiff,
+                                     Real tol_x,
+                                     Real & k,
+                                     Real & initial_res);
 
   /**
-   * Override this for actions that should take place before linear solve of each inverse power iteration
+   * Override this for actions that should take place before linear solve of each inverse power
+   * iteration
    */
   virtual void preIteration();
 
   /**
-   * Override this for actions that should take place after linear solve of each inverse power iteration
+   * Override this for actions that should take place after linear solve of each inverse power
+   * iteration
    */
   virtual void postIteration();
 
@@ -96,7 +105,7 @@ public:
    * @param force Force the re-evaluation of the postprocessor for normalization.
    * Returns the scaling factor just applied.
    */
-  virtual Real normalizeSolution(bool force=true);
+  virtual Real normalizeSolution(bool force = true);
 
   /**
    * Perform nonlinear solve with the initial guess of the solution
@@ -115,7 +124,6 @@ public:
   Real & eigenValue() { return _eigenvalue; }
 
 protected:
-
   /**
    * Print eigenvalue
    */
@@ -140,23 +148,25 @@ protected:
   class Chebyshev_Parameters
   {
   public:
-    Chebyshev_Parameters ();
-    void reinit ();
+    Chebyshev_Parameters();
+    void reinit();
 
-    const unsigned int n_iter;    // minimum number of accelerated iteration each cycle
-    const unsigned int fsmooth;   // number of unaccelerated iteration each cycle
-    unsigned int finit;           // number of unaccelerated iteration before Chebyshev
+    const unsigned int n_iter;  // minimum number of accelerated iteration each cycle
+    const unsigned int fsmooth; // number of unaccelerated iteration each cycle
+    unsigned int finit;         // number of unaccelerated iteration before Chebyshev
 
-    unsigned int lgac;            // doing acceleration or not
-    unsigned int icheb;           // number of acceleration in current cycle
-    unsigned int iter_begin;      // starting number of current acceleration cycle
-    double error_begin;           // starting flux error of current acceleration cycle
-    double flux_error_norm_old;   // flux error of previous power iteration
-    double ratio;                 // estimation of dominant ratio
-    double ratio_new;             // new estimated dominant ratio
-    unsigned int icho;            // improved ratio estimation
+    unsigned int lgac;          // doing acceleration or not
+    unsigned int icheb;         // number of acceleration in current cycle
+    unsigned int iter_begin;    // starting number of current acceleration cycle
+    double error_begin;         // starting flux error of current acceleration cycle
+    double flux_error_norm_old; // flux error of previous power iteration
+    double ratio;               // estimation of dominant ratio
+    double ratio_new;           // new estimated dominant ratio
+    unsigned int icho;          // improved ratio estimation
   };
-  void chebyshev(Chebyshev_Parameters & params, unsigned int iter, const PostprocessorValue * solution_diff);
+  void chebyshev(Chebyshev_Parameters & params,
+                 unsigned int iter,
+                 const PostprocessorValue * solution_diff);
 };
 
-#endif //EIGENEXECUTIONERBASE_H
+#endif // EIGENEXECUTIONERBASE_H

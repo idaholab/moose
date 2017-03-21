@@ -20,7 +20,7 @@
 // Forward Declaration
 class CoupledTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<CoupledTimeDerivative>();
 
 /**
@@ -41,4 +41,4 @@ protected:
   const unsigned int _v_var;
 };
 
-#endif //COUPLEDTIMEDERIVATIVE_H
+#endif // COUPLEDTIMEDERIVATIVE_H

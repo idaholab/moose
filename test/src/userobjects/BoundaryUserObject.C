@@ -14,26 +14,25 @@
 
 #include "BoundaryUserObject.h"
 
-template<>
-InputParameters validParams<BoundaryUserObject>()
+template <>
+InputParameters
+validParams<BoundaryUserObject>()
 {
   InputParameters params = validParams<SideUserObject>();
   params.addRequiredCoupledVar("variable", "the variable name");
-  params.addParam<std::vector<Real> >("factors", "factors for all boundary side sets");
+  params.addParam<std::vector<Real>>("factors", "factors for all boundary side sets");
   return params;
 }
 
-BoundaryUserObject::BoundaryUserObject(const InputParameters & parameters) :
-    SideUserObject(parameters),
-    _u(coupledValue("variable")),
-    _value(0.)
+BoundaryUserObject::BoundaryUserObject(const InputParameters & parameters)
+  : SideUserObject(parameters), _u(coupledValue("variable")), _value(0.)
 {
 
   std::vector<BoundaryID> ids(boundaryIDs().begin(), boundaryIDs().end());
 
   if (isParamValid("factors"))
   {
-    std::vector<Real> facs = getParam<std::vector<Real> >("factors");
+    std::vector<Real> facs = getParam<std::vector<Real>>("factors");
     if (facs.size() != ids.size())
       mooseError("number of factors is wrong");
     for (unsigned int i = 0; i < ids.size(); i++)
@@ -46,9 +45,7 @@ BoundaryUserObject::BoundaryUserObject(const InputParameters & parameters) :
   }
 }
 
-BoundaryUserObject::~BoundaryUserObject()
-{
-}
+BoundaryUserObject::~BoundaryUserObject() {}
 
 void
 BoundaryUserObject::initialize()

@@ -14,17 +14,16 @@
 
 #include "ElementVectorPostprocessor.h"
 
-template<>
-InputParameters validParams<ElementVectorPostprocessor>()
+template <>
+InputParameters
+validParams<ElementVectorPostprocessor>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params += validParams<VectorPostprocessor>();
   return params;
 }
 
-ElementVectorPostprocessor::ElementVectorPostprocessor(const InputParameters & parameters) :
-    ElementUserObject(parameters),
-    VectorPostprocessor(parameters)
+ElementVectorPostprocessor::ElementVectorPostprocessor(const InputParameters & parameters)
+  : ElementUserObject(parameters), VectorPostprocessor(parameters)
 {
 }
-

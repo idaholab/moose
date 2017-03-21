@@ -15,10 +15,7 @@
 #include "Syntax.h"
 #include "MooseUtils.h"
 
-
-Syntax::Syntax()
-{
-}
+Syntax::Syntax() {}
 
 void
 Syntax::registerTaskName(std::string task, bool is_required)
@@ -65,14 +62,14 @@ Syntax::addDependencySets(const std::string & action_sets)
   std::vector<std::string> sets, prev_names, tasks;
   MooseUtils::tokenize(action_sets, sets, 1, "()");
 
-  for (unsigned int i=0; i<sets.size(); ++i)
+  for (unsigned int i = 0; i < sets.size(); ++i)
   {
     tasks.clear();
     MooseUtils::tokenize(sets[i], tasks, 0, ", ");
-    for (unsigned int j=0; j<tasks.size(); ++j)
+    for (unsigned int j = 0; j < tasks.size(); ++j)
     {
       // Each line should depend on each item in the previous line
-      for (unsigned int k=0; k<prev_names.size(); ++k)
+      for (unsigned int k = 0; k < prev_names.size(); ++k)
         addDependency(tasks[j], prev_names[k]);
     }
     // Copy the the current items to the previous items for the next iteration
@@ -86,7 +83,7 @@ Syntax::getSortedTask()
   return _tasks.getSortedValues();
 }
 
-const std::vector<std::vector<std::string> > &
+const std::vector<std::vector<std::string>> &
 Syntax::getSortedTaskSet()
 {
   return _tasks.getSortedValuesSets();
@@ -105,7 +102,9 @@ Syntax::isActionRequired(const std::string & task)
 }
 
 void
-Syntax::registerActionSyntax(const std::string & action, const std::string & syntax, const std::string & task)
+Syntax::registerActionSyntax(const std::string & action,
+                             const std::string & syntax,
+                             const std::string & task)
 {
   ActionInfo action_info;
   action_info._action = action;
@@ -115,7 +114,9 @@ Syntax::registerActionSyntax(const std::string & action, const std::string & syn
 }
 
 void
-Syntax::replaceActionSyntax(const std::string & action, const std::string & syntax, const std::string & task)
+Syntax::replaceActionSyntax(const std::string & action,
+                            const std::string & syntax,
+                            const std::string & task)
 {
   _associated_actions.erase(syntax);
   registerActionSyntax(action, syntax, task);
@@ -153,14 +154,18 @@ std::string
 Syntax::isAssociated(const std::string & real_id, bool * is_parent)
 {
   /**
-   * This implementation assumes that wildcards can occur in the place of an entire token but not as part
-   * of a token (i.e.  'Variables/ * /InitialConditions' is valid but not 'Variables/Partial* /InitialConditions'.
-   * Since maps are ordered, a reverse traversal through the registered list will always select a more
+   * This implementation assumes that wildcards can occur in the place of an entire token but not as
+   * part
+   * of a token (i.e.  'Variables/ * /InitialConditions' is valid but not 'Variables/Partial*
+   * /InitialConditions'.
+   * Since maps are ordered, a reverse traversal through the registered list will always select a
+   * more
    * specific match before a wildcard match ('*' == char(42))
    */
   bool local_is_parent;
   if (is_parent == NULL)
-   is_parent = &local_is_parent;  // Just so we don't have to keep checking below when we want to set the value
+    is_parent = &local_is_parent; // Just so we don't have to keep checking below when we want to
+                                  // set the value
   std::multimap<std::string, ActionInfo>::reverse_iterator it;
   std::vector<std::string> real_elements, reg_elements;
   std::string return_value;
@@ -168,7 +173,7 @@ Syntax::isAssociated(const std::string & real_id, bool * is_parent)
   MooseUtils::tokenize(real_id, real_elements);
 
   *is_parent = false;
-  for (it=_associated_actions.rbegin(); it != _associated_actions.rend(); ++it)
+  for (it = _associated_actions.rbegin(); it != _associated_actions.rend(); ++it)
   {
     std::string reg_id = it->first;
     if (reg_id == real_id)
@@ -181,7 +186,7 @@ Syntax::isAssociated(const std::string & real_id, bool * is_parent)
     if (real_elements.size() <= reg_elements.size())
     {
       bool keep_going = true;
-      for (unsigned int j=0; keep_going && j<real_elements.size(); ++j)
+      for (unsigned int j = 0; keep_going && j < real_elements.size(); ++j)
       {
         if (real_elements[j] != reg_elements[j] && reg_elements[j] != std::string("*"))
           keep_going = false;
@@ -210,7 +215,8 @@ Syntax::isAssociated(const std::string & real_id, bool * is_parent)
     return std::string("");
 }
 
-std::pair<std::multimap<std::string, Syntax::ActionInfo>::iterator, std::multimap<std::string, Syntax::ActionInfo>::iterator>
+std::pair<std::multimap<std::string, Syntax::ActionInfo>::iterator,
+          std::multimap<std::string, Syntax::ActionInfo>::iterator>
 Syntax::getActions(const std::string & name)
 {
   return _associated_actions.equal_range(name);
@@ -219,10 +225,12 @@ Syntax::getActions(const std::string & name)
 bool
 Syntax::verifyMooseObjectTask(const std::string & base, const std::string & task) const
 {
-  std::pair<std::multimap<std::string, std::string>::const_iterator, std::multimap<std::string, std::string>::const_iterator> iters =
-    _moose_systems_to_tasks.equal_range(base);
+  std::pair<std::multimap<std::string, std::string>::const_iterator,
+            std::multimap<std::string, std::string>::const_iterator>
+      iters = _moose_systems_to_tasks.equal_range(base);
 
-  for (std::multimap<std::string, std::string>::const_iterator it = iters.first; it != iters.second; ++it)
+  for (std::multimap<std::string, std::string>::const_iterator it = iters.first; it != iters.second;
+       ++it)
     if (task == it->second)
       return true;
 

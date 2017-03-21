@@ -19,7 +19,7 @@
 
 class CheckCurrentExecAux;
 
-template<>
+template <>
 InputParameters validParams<CheckCurrentExecAux>();
 
 class CheckCurrentExecAux : public AuxKernel
@@ -33,4 +33,4 @@ protected:
   const FEProblemBase & _problem;
 };
 
-#endif //CHECKCURRENTEXECAUX_H
+#endif // CHECKCURRENTEXECAUX_H

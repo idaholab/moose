@@ -15,7 +15,6 @@
 #include "MooseError.h"
 #include "MooseUtils.h"
 
-
 namespace moose
 {
 namespace internal
@@ -25,18 +24,13 @@ std::string
 mooseMsgFmt(const std::string & msg, const std::string & title, const std::string & color)
 {
   std::ostringstream oss;
-  oss << "\n\n"
-      << color
-      << "\n\n" << title << "\n"
-      << msg
-      << COLOR_DEFAULT
-      << "\n\n";
+  oss << "\n\n" << color << "\n\n" << title << "\n" << msg << COLOR_DEFAULT << "\n\n";
   return oss.str();
 }
 
 static Threads::spin_mutex moose_err_lock;
 
-[[ noreturn ]] void
+[[noreturn]] void
 mooseErrorRaw(std::string msg, const std::string prefix)
 {
   msg = mooseMsgFmt(msg, "*** ERROR ***", COLOR_RED);
@@ -81,7 +75,9 @@ mooseErrorRaw(std::string msg, const std::string prefix)
 }
 
 void
-mooseStreamAll(std::ostringstream &) { }
+mooseStreamAll(std::ostringstream &)
+{
+}
 
 } // namespace internal
 } // namespace moose

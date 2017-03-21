@@ -15,13 +15,12 @@
 #ifndef IMPLICITODEY_H
 #define IMPLICITODEY_H
 
-
 #include "ODEKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ImplicitODEy;
 
-template<>
+template <>
 InputParameters validParams<ImplicitODEy>();
 
 /**
@@ -41,6 +40,5 @@ protected:
   unsigned int _x_var;
   VariableValue & _x;
 };
-
 
 #endif /* IMPLICITODEY_H */

@@ -17,10 +17,10 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class VolumePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<VolumePostprocessor>();
 
 /**

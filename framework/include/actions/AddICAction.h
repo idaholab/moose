@@ -19,9 +19,8 @@
 
 class AddICAction;
 
-template<>
+template <>
 InputParameters validParams<AddICAction>();
-
 
 class AddICAction : public MooseObjectAction
 {

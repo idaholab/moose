@@ -14,8 +14,9 @@
 
 #include "ScalePostprocessor.h"
 
-template<>
-InputParameters validParams<ScalePostprocessor>()
+template <>
+InputParameters
+validParams<ScalePostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<PostprocessorName>("value", "The postprocessor to be scaled");
@@ -23,8 +24,8 @@ InputParameters validParams<ScalePostprocessor>()
   return params;
 }
 
-ScalePostprocessor::ScalePostprocessor(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+ScalePostprocessor::ScalePostprocessor(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _value(getPostprocessorValue("value")),
     _scaling_factor(getParam<Real>("scaling_factor"))
 {

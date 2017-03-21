@@ -19,7 +19,7 @@
 
 class ElementIntegralMaterialProperty;
 
-template<>
+template <>
 InputParameters validParams<ElementIntegralMaterialProperty>();
 
 class ElementIntegralMaterialProperty : public ElementIntegralPostprocessor

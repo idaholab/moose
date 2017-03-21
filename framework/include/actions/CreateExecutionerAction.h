@@ -19,9 +19,8 @@
 
 class CreateExecutionerAction;
 
-template<>
+template <>
 InputParameters validParams<CreateExecutionerAction>();
-
 
 class CreateExecutionerAction : public MooseObjectAction
 {

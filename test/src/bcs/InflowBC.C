@@ -1,7 +1,8 @@
 #include "InflowBC.h"
 
-template<>
-InputParameters validParams<InflowBC>()
+template <>
+InputParameters
+validParams<InflowBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<RealVectorValue>("velocity", "The velocity vector");
@@ -9,12 +10,13 @@ InputParameters validParams<InflowBC>()
   return params;
 }
 
-InflowBC::InflowBC(const InputParameters & parameters) :
-  IntegratedBC(parameters),
+InflowBC::InflowBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
 
-  _velocity(getParam<RealVectorValue>("velocity")),
-  _inlet_conc(getParam<Real>("inlet_conc"))
-{}
+    _velocity(getParam<RealVectorValue>("velocity")),
+    _inlet_conc(getParam<Real>("inlet_conc"))
+{
+}
 
 Real
 InflowBC::computeQpResidual()

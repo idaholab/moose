@@ -33,7 +33,13 @@ class NearestNodeLocator;
 class PenetrationLocator : Restartable
 {
 public:
-  PenetrationLocator(SubProblem & subproblem, GeometricSearchData & geom_search_data, MooseMesh & mesh, const unsigned int master_id, const unsigned int slave_id, Order order, NearestNodeLocator & nearest_node);
+  PenetrationLocator(SubProblem & subproblem,
+                     GeometricSearchData & geom_search_data,
+                     MooseMesh & mesh,
+                     const unsigned int master_id,
+                     const unsigned int slave_id,
+                     Order order,
+                     NearestNodeLocator & nearest_node);
   ~PenetrationLocator();
   void detectPenetration();
 
@@ -54,9 +60,13 @@ public:
 
   SubProblem & _subproblem;
 
-  Real normDistance(const Elem & elem, const Elem & side, const Node & p0, Point & closest_point, RealVectorValue & normal);
+  Real normDistance(const Elem & elem,
+                    const Elem & side,
+                    const Node & p0,
+                    Point & closest_point,
+                    RealVectorValue & normal);
 
-  int intersect2D_Segments( Point S1P0, Point S1P1, Point S2P0, Point S2P1, Point* I0, Point* I1 );
+  int intersect2D_Segments(Point S1P0, Point S1P1, Point S2P0, Point S2P1, Point * I0, Point * I1);
   int inSegment(Point P, Point SP0, Point SP1);
 
   MooseMesh & _mesh;
@@ -66,29 +76,32 @@ public:
   FEType _fe_type;
 
   // One FE for each thread and for each dimension
-  std::vector<std::vector<FEBase *> > _fe;
+  std::vector<std::vector<FEBase *>> _fe;
 
   NearestNodeLocator & _nearest_node;
 
   /// Data structure of nodes and their associated penetration information
   std::map<dof_id_type, PenetrationInfo *> & _penetration_info;
 
-  std::set<dof_id_type> & _has_penetrated; // This is only hanging around for legacy code. Don't use it!
+  std::set<dof_id_type> &
+      _has_penetrated; // This is only hanging around for legacy code. Don't use it!
 
   void setCheckWhetherReasonable(bool state);
   void setUpdate(bool update);
   void setTangentialTolerance(Real tangential_tolerance);
   void setNormalSmoothingDistance(Real normal_smoothing_distance);
   void setNormalSmoothingMethod(std::string nsmString);
-  Real getTangentialTolerance() {return _tangential_tolerance;}
+  Real getTangentialTolerance() { return _tangential_tolerance; }
 
 protected:
   /// Check whether found candidates are reasonable
   bool _check_whether_reasonable;
-  bool & _update_location; // Update the penetration location for nodes found last time
-  Real _tangential_tolerance; // Tangential distance a node can be from a face and still be in contact
-  bool _do_normal_smoothing;  // Should we do contact normal smoothing?
-  Real _normal_smoothing_distance; // Distance from edge (in parametric coords) within which to perform normal smoothing
+  bool & _update_location;         // Update the penetration location for nodes found last time
+  Real _tangential_tolerance;      // Tangential distance a node can be from a face and still be in
+                                   // contact
+  bool _do_normal_smoothing;       // Should we do contact normal smoothing?
+  Real _normal_smoothing_distance; // Distance from edge (in parametric coords) within which to
+                                   // perform normal smoothing
   NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
 };
 
@@ -96,7 +109,7 @@ protected:
  * We have to have a specialization for this map because the PenetrationInfo
  * objects MUST get deleted before the ones are loaded from a file or it's a memory leak.
  */
-template<>
+template <>
 inline void
 dataLoad(std::istream & stream, std::map<dof_id_type, PenetrationInfo *> & m, void * context)
 {
@@ -110,7 +123,7 @@ dataLoad(std::istream & stream, std::map<dof_id_type, PenetrationInfo *> & m, vo
 
   // First read the size of the map
   unsigned int size = 0;
-  stream.read((char *) &size, sizeof(size));
+  stream.read((char *)&size, sizeof(size));
 
   for (unsigned int i = 0; i < size; i++)
   {
@@ -120,4 +133,4 @@ dataLoad(std::istream & stream, std::map<dof_id_type, PenetrationInfo *> & m, vo
   }
 }
 
-#endif //PENETRATIONLOCATOR_H
+#endif // PENETRATIONLOCATOR_H

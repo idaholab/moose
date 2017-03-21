@@ -17,10 +17,10 @@
 
 #include "SideIntegralVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class SideAverageValue;
 
-template<>
+template <>
 InputParameters validParams<SideAverageValue>();
 
 /**

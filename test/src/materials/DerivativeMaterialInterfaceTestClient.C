@@ -16,24 +16,39 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<DerivativeMaterialInterfaceTestClient>()
+template <>
+InputParameters
+validParams<DerivativeMaterialInterfaceTestClient>()
 {
   InputParameters params = validParams<Material>();
   params.addParam<MaterialPropertyName>("prop_name", "", "Name of the property to be retrieved");
   return params;
 }
 
-DerivativeMaterialInterfaceTestClient::DerivativeMaterialInterfaceTestClient(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+DerivativeMaterialInterfaceTestClient::DerivativeMaterialInterfaceTestClient(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
     _prop_name(getParam<MaterialPropertyName>("prop_name")),
     _by_name(_prop_name == ""),
-    _prop0(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "c") : getMaterialPropertyDerivative<Real>("prop_name", "c")), // fetch non-existing derivative
-    _prop1(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "a") : getMaterialPropertyDerivative<Real>("prop_name", "a")),
-    _prop2(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "b") : getMaterialPropertyDerivative<Real>("prop_name", "b")),
-    _prop3(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "a", "b") : getMaterialPropertyDerivative<Real>("prop_name", "a", "b")), // fetch alphabetically sorted (but declared unsorted)
-    _prop4(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "a", "c") : getMaterialPropertyDerivative<Real>("prop_name", "a", "c")),
-    _prop5(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "c", "b", "a") : getMaterialPropertyDerivative<Real>("prop_name", "c", "b", "a")), // fetch unsorted (declared unsorted, but differently unsorted)
+    _prop0(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "c")
+                    : getMaterialPropertyDerivative<Real>("prop_name",
+                                                          "c")), // fetch non-existing derivative
+    _prop1(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "a")
+                    : getMaterialPropertyDerivative<Real>("prop_name", "a")),
+    _prop2(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "b")
+                    : getMaterialPropertyDerivative<Real>("prop_name", "b")),
+    _prop3(_by_name
+               ? getMaterialPropertyDerivativeByName<Real>("prop", "a", "b")
+               : getMaterialPropertyDerivative<Real>(
+                     "prop_name", "a", "b")), // fetch alphabetically sorted (but declared unsorted)
+    _prop4(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "a", "c")
+                    : getMaterialPropertyDerivative<Real>("prop_name", "a", "c")),
+    _prop5(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "c", "b", "a")
+                    : getMaterialPropertyDerivative<Real>(
+                          "prop_name",
+                          "c",
+                          "b",
+                          "a")), // fetch unsorted (declared unsorted, but differently unsorted)
     _prop6(getDefaultMaterialProperty<dof_id_type>("elementid")) // check execution order
 {
 }
@@ -42,7 +57,7 @@ void
 DerivativeMaterialInterfaceTestClient::initialSetup()
 {
   if (!_by_name)
-   validateDerivativeMaterialPropertyBase<Real>("prop_name");
+    validateDerivativeMaterialPropertyBase<Real>("prop_name");
 }
 
 void
@@ -53,7 +68,8 @@ DerivativeMaterialInterfaceTestClient::computeQpProperties()
     if (_prop0[_qp] != 0.0)
       mooseError("Uninitialized non-existing derivative (should be a zero property).");
     if (_prop1[_qp] == 0.0)
-      mooseError("property1 stayed at its zero default value. This indicates a broken execution order.");
+      mooseError(
+          "property1 stayed at its zero default value. This indicates a broken execution order.");
     if (_prop1[_qp] != 1.0)
       mooseError("Unexpected DerivativeMaterial property1 value. ", _prop1[_qp]);
     if (_prop2[_qp] != 2.0)

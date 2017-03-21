@@ -18,17 +18,20 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<PointValue>()
+template <>
+InputParameters
+validParams<PointValue>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this postprocessor operates on.");
-  params.addRequiredParam<Point>("point", "The physical point where the solution will be evaluated.");
+  params.addRequiredParam<VariableName>(
+      "variable", "The name of the variable that this postprocessor operates on.");
+  params.addRequiredParam<Point>("point",
+                                 "The physical point where the solution will be evaluated.");
   return params;
 }
 
-PointValue::PointValue(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+PointValue::PointValue(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),
     _mesh(_subproblem.mesh()),
@@ -70,8 +73,8 @@ PointValue::finalize()
 
   // Error if the element cannot be located
   if (_elem_id == DofObject::invalid_id)
-    mooseError("No element located at ", _point_vec[0], " in PointValue Postprocessor named: ", name());
-
+    mooseError(
+        "No element located at ", _point_vec[0], " in PointValue Postprocessor named: ", name());
 
   // Compute the value at the point
   if (_root_id == processor_id())

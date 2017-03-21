@@ -19,9 +19,8 @@
 
 class AddNodalKernelAction;
 
-template<>
+template <>
 InputParameters validParams<AddNodalKernelAction>();
-
 
 class AddNodalKernelAction : public MooseObjectAction
 {

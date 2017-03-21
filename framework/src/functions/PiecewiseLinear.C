@@ -14,17 +14,15 @@
 
 #include "PiecewiseLinear.h"
 
-template<>
-InputParameters validParams<PiecewiseLinear>()
+template <>
+InputParameters
+validParams<PiecewiseLinear>()
 {
   InputParameters params = validParams<Piecewise>();
   return params;
 }
 
-PiecewiseLinear::PiecewiseLinear(const InputParameters & parameters) :
-  Piecewise(parameters)
-{
-}
+PiecewiseLinear::PiecewiseLinear(const InputParameters & parameters) : Piecewise(parameters) {}
 
 Real
 PiecewiseLinear::value(Real t, const Point & p)
@@ -32,11 +30,11 @@ PiecewiseLinear::value(Real t, const Point & p)
   Real func_value;
   if (_has_axis)
   {
-    func_value = _linear_interp->sample( p(_axis) );
+    func_value = _linear_interp->sample(p(_axis));
   }
   else
   {
-    func_value = _linear_interp->sample( t );
+    func_value = _linear_interp->sample(t);
   }
   return _scale_factor * func_value;
 }
@@ -47,11 +45,11 @@ PiecewiseLinear::timeDerivative(Real t, const Point & p)
   Real func_value;
   if (_has_axis)
   {
-    func_value = _linear_interp->sampleDerivative( p(_axis) );
+    func_value = _linear_interp->sampleDerivative(p(_axis));
   }
   else
   {
-    func_value = _linear_interp->sampleDerivative( t );
+    func_value = _linear_interp->sampleDerivative(t);
   }
   return _scale_factor * func_value;
 }
@@ -65,5 +63,6 @@ PiecewiseLinear::integral()
 Real
 PiecewiseLinear::average()
 {
-  return integral()/(_linear_interp->domain(_linear_interp->getSampleSize()-1)-_linear_interp->domain(0));
+  return integral() /
+         (_linear_interp->domain(_linear_interp->getSampleSize() - 1) - _linear_interp->domain(0));
 }

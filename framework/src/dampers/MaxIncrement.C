@@ -14,17 +14,17 @@
 
 #include "MaxIncrement.h"
 
-template<>
-InputParameters validParams<MaxIncrement>()
+template <>
+InputParameters
+validParams<MaxIncrement>()
 {
   InputParameters params = validParams<ElementDamper>();
   params.addRequiredParam<Real>("max_increment", "The maximum newton increment for the variable.");
   return params;
 }
 
-MaxIncrement::MaxIncrement(const InputParameters & parameters) :
-    ElementDamper(parameters),
-    _max_increment(parameters.get<Real>("max_increment"))
+MaxIncrement::MaxIncrement(const InputParameters & parameters)
+  : ElementDamper(parameters), _max_increment(parameters.get<Real>("max_increment"))
 {
 }
 

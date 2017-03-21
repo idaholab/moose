@@ -13,7 +13,7 @@
 
 class GenericConstantRankTwoTensor;
 
-template<>
+template <>
 InputParameters validParams<GenericConstantRankTwoTensor>();
 
 /**
@@ -31,4 +31,4 @@ protected:
   MaterialProperty<RankTwoTensor> & _prop;
 };
 
-#endif //GENERICCONSTANTRANKTWOTENSOR_H
+#endif // GENERICCONSTANTRANKTWOTENSOR_H

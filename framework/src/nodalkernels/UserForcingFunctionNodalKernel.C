@@ -16,17 +16,17 @@
 
 #include "Function.h"
 
-template<>
-InputParameters validParams<UserForcingFunctionNodalKernel>()
+template <>
+InputParameters
+validParams<UserForcingFunctionNodalKernel>()
 {
   InputParameters params = validParams<NodalKernel>();
   params.addRequiredParam<FunctionName>("function", "The forcing function");
   return params;
 }
 
-UserForcingFunctionNodalKernel::UserForcingFunctionNodalKernel(const InputParameters & parameters) :
-    NodalKernel(parameters),
-    _func(getFunction("function"))
+UserForcingFunctionNodalKernel::UserForcingFunctionNodalKernel(const InputParameters & parameters)
+  : NodalKernel(parameters), _func(getFunction("function"))
 {
 }
 

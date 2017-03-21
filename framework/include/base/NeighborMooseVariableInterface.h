@@ -51,7 +51,8 @@ protected:
   virtual const VariableValue & neighborValueOld();
 
   /**
-   * The older value of the variable this object is operating on evaluated on the "neighbor" element.
+   * The older value of the variable this object is operating on evaluated on the "neighbor"
+   * element.
    *
    * @return The reference to be stored off and used later.
    */
@@ -65,35 +66,40 @@ protected:
   virtual const VariableGradient & neighborGradient();
 
   /**
-   * The old gradient of the variable this object is operating on evaluated on the "neighbor" element.
+   * The old gradient of the variable this object is operating on evaluated on the "neighbor"
+   * element.
    *
    * @return The reference to be stored off and used later.
    */
   virtual const VariableGradient & neighborGradientOld();
 
   /**
-   * The older gradient of the variable this object is operating on evaluated on the "neighbor" element.
+   * The older gradient of the variable this object is operating on evaluated on the "neighbor"
+   * element.
    *
    * @return The reference to be stored off and used later.
    */
   virtual const VariableGradient & neighborGradientOlder();
 
   /**
-   * The second derivative of the variable this object is operating on evaluated on the "neighbor" element.
+   * The second derivative of the variable this object is operating on evaluated on the "neighbor"
+   * element.
    *
    * @return The reference to be stored off and used later.
    */
   virtual const VariableSecond & neighborSecond();
 
   /**
-   * The old second derivative of the variable this object is operating on evaluated on the "neighbor" element.
+   * The old second derivative of the variable this object is operating on evaluated on the
+   * "neighbor" element.
    *
    * @return The reference to be stored off and used later.
    */
   virtual const VariableSecond & neighborSecondOld();
 
   /**
-   * The older second derivative of the variable this object is operating on evaluated on the "neighbor" element.
+   * The older second derivative of the variable this object is operating on evaluated on the
+   * "neighbor" element.
    *
    * @return The reference to be stored off and used later.
    */

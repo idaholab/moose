@@ -22,7 +22,7 @@
 
 class CircleMarker;
 
-template<>
+template <>
 InputParameters validParams<CircleMarker>();
 
 class CircleMarker : public Marker

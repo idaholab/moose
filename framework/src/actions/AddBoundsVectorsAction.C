@@ -17,16 +17,14 @@
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 
-template<>
-InputParameters validParams<AddBoundsVectorsAction>()
+template <>
+InputParameters
+validParams<AddBoundsVectorsAction>()
 {
   return validParams<Action>();
 }
 
-AddBoundsVectorsAction::AddBoundsVectorsAction(InputParameters params) :
-    Action(params)
-{
-}
+AddBoundsVectorsAction::AddBoundsVectorsAction(InputParameters params) : Action(params) {}
 
 void
 AddBoundsVectorsAction::act()

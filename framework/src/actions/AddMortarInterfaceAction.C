@@ -17,19 +17,20 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<AddMortarInterfaceAction>()
+template <>
+InputParameters
+validParams<AddMortarInterfaceAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<BoundaryName>("master", "Master side ID");
   params.addRequiredParam<BoundaryName>("slave", "Slave side ID");
-  params.addRequiredParam<SubdomainName>("subdomain", "Subdomain name that is the mortar interface");
+  params.addRequiredParam<SubdomainName>("subdomain",
+                                         "Subdomain name that is the mortar interface");
 
   return params;
 }
 
-AddMortarInterfaceAction::AddMortarInterfaceAction(InputParameters parameters) :
-    Action(parameters)
+AddMortarInterfaceAction::AddMortarInterfaceAction(InputParameters parameters) : Action(parameters)
 {
 }
 
@@ -38,7 +39,13 @@ AddMortarInterfaceAction::act()
 {
   std::string iface_name = name();
 
-  _mesh->addMortarInterface(iface_name, getParam<BoundaryName>("master"), getParam<BoundaryName>("slave"), getParam<SubdomainName>("subdomain"));
+  _mesh->addMortarInterface(iface_name,
+                            getParam<BoundaryName>("master"),
+                            getParam<BoundaryName>("slave"),
+                            getParam<SubdomainName>("subdomain"));
   if (_displaced_mesh)
-    _displaced_mesh->addMortarInterface(iface_name, getParam<BoundaryName>("master"), getParam<BoundaryName>("slave"), getParam<SubdomainName>("subdomain"));
+    _displaced_mesh->addMortarInterface(iface_name,
+                                        getParam<BoundaryName>("master"),
+                                        getParam<BoundaryName>("slave"),
+                                        getParam<SubdomainName>("subdomain"));
 }

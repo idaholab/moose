@@ -19,7 +19,7 @@
 
 class MaterialDerivativeTestMaterial;
 
-template<>
+template <>
 InputParameters validParams<MaterialDerivativeTestMaterial>();
 
 /**
@@ -45,4 +45,4 @@ protected:
   const VariableValue & _v;
 };
 
-#endif //MATERIALDERIVATIVETESTMATERIAL_H
+#endif // MATERIALDERIVATIVETESTMATERIAL_H

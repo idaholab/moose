@@ -20,7 +20,7 @@
 // Forward Declarations
 class QuotientAux;
 
-template<>
+template <>
 InputParameters validParams<QuotientAux>();
 
 /**

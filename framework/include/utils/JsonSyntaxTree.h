@@ -39,8 +39,12 @@ public:
    * @param is_action Wheter it is an action
    * @param params The InputParameters to add to the tree
    */
-  void addParameters(const std::string & parent_path, const std::string & path, bool is_type,
-                     const std::string & action, const std::string & task_name, bool is_action,
+  void addParameters(const std::string & parent_path,
+                     const std::string & path,
+                     bool is_type,
+                     const std::string & action,
+                     const std::string & task_name,
+                     bool is_action,
                      InputParameters * params);
   const moosecontrib::Json::Value & getRoot() const { return _root; }
 
@@ -50,8 +54,8 @@ protected:
   std::string
   buildOutputString(const std::iterator_traits<InputParameters::iterator>::value_type & p);
   static std::vector<std::string> splitPath(const std::string & path);
-  moosecontrib::Json::Value & getJson(const std::string & parent, const std::string & path,
-                                      bool is_type);
+  moosecontrib::Json::Value &
+  getJson(const std::string & parent, const std::string & path, bool is_type);
   moosecontrib::Json::Value & getJson(const std::string & path);
   moosecontrib::Json::Value _root;
   std::string _search;

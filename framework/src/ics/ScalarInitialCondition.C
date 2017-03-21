@@ -17,19 +17,21 @@
 #include "FEProblem.h"
 #include "SystemBase.h"
 
-template<>
-InputParameters validParams<ScalarInitialCondition>()
+template <>
+InputParameters
+validParams<ScalarInitialCondition>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addParam<VariableName>("variable", "The variable this initial condition is supposed to provide values for.");
+  params.addParam<VariableName>(
+      "variable", "The variable this initial condition is supposed to provide values for.");
 
   params.registerBase("ScalarInitialCondition");
 
   return params;
 }
 
-ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameters) :
-    MooseObject(parameters),
+ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameters)
+  : MooseObject(parameters),
     ScalarCoupleable(this),
     FunctionInterface(this),
     DependencyResolverInterface(),
@@ -47,9 +49,7 @@ ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameter
     _depend_vars.insert(var->name());
 }
 
-ScalarInitialCondition::~ScalarInitialCondition()
-{
-}
+ScalarInitialCondition::~ScalarInitialCondition() {}
 
 const std::set<std::string> &
 ScalarInitialCondition::getRequestedItems()

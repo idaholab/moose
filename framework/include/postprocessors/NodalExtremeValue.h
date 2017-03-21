@@ -17,11 +17,11 @@
 
 #include "NodalVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NodalExtremeValue;
 
 // Input parameters
-template<>
+template <>
 InputParameters validParams<NodalExtremeValue>();
 
 /// A postprocessor for collecting the nodal min or max value

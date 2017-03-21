@@ -21,11 +21,10 @@
 
 class AdaptivityAction;
 
-template<>
+template <>
 InputParameters validParams<AdaptivityAction>();
 
-
-class AdaptivityAction: public Action
+class AdaptivityAction : public Action
 {
 public:
   AdaptivityAction(InputParameters params);
@@ -33,6 +32,6 @@ public:
   virtual void act() override;
 };
 
-#endif //LIBMESH_ENABLE_AMR
+#endif // LIBMESH_ENABLE_AMR
 
-#endif //ADAPTIVITYACTION_H
+#endif // ADAPTIVITYACTION_H

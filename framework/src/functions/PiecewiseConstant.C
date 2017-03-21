@@ -14,12 +14,14 @@
 
 #include "PiecewiseConstant.h"
 
-template<>
-InputParameters validParams<PiecewiseConstant>()
+template <>
+InputParameters
+validParams<PiecewiseConstant>()
 {
   InputParameters params = validParams<Piecewise>();
   MooseEnum direction("left right", "left");
-  params.addParam<MooseEnum>("direction", direction, "Direction to look to find value: " + direction.getRawNames());
+  params.addParam<MooseEnum>(
+      "direction", direction, "Direction to look to find value: " + direction.getRawNames());
   return params;
 }
 
@@ -42,10 +44,8 @@ PiecewiseConstant::getDirection(const std::string & direction)
   return dir;
 }
 
-
-PiecewiseConstant::PiecewiseConstant(const InputParameters & parameters) :
-  Piecewise(parameters),
-  _direction(getDirection(getParam<MooseEnum>("direction")))
+PiecewiseConstant::PiecewiseConstant(const InputParameters & parameters)
+  : Piecewise(parameters), _direction(getDirection(getParam<MooseEnum>("direction")))
 {
 }
 
@@ -64,29 +64,27 @@ PiecewiseConstant::value(Real t, const Point & p)
   const Real toler = 1e-14;
 
   // endpoint cases
-  if ( (_direction == LEFT  && x < (1+toler) * domain(0)) ||
-       (_direction == RIGHT && x < (1-toler) * domain(0)) )
+  if ((_direction == LEFT && x < (1 + toler) * domain(0)) ||
+      (_direction == RIGHT && x < (1 - toler) * domain(0)))
   {
     func_value = range(0);
     i = len;
   }
-  if ( (_direction == LEFT  && x > (1+toler) * domain(len-1)) ||
-       (_direction == RIGHT && x > (1-toler) * domain(len-1)) )
+  if ((_direction == LEFT && x > (1 + toler) * domain(len - 1)) ||
+      (_direction == RIGHT && x > (1 - toler) * domain(len - 1)))
   {
-    func_value = range(len-1);
+    func_value = range(len - 1);
     i = len;
   }
 
-  for ( ; i < len; ++i )
+  for (; i < len; ++i)
   {
-    if ( _direction == LEFT &&
-         x < (1+toler) * domain(i) )
+    if (_direction == LEFT && x < (1 + toler) * domain(i))
     {
-      func_value = range(i-1);
+      func_value = range(i - 1);
       break;
     }
-    else if ( (_direction == RIGHT &&
-               x < (1-toler) * domain(i)) )
+    else if ((_direction == RIGHT && x < (1 - toler) * domain(i)))
     {
       func_value = range(i);
       break;
@@ -112,8 +110,8 @@ PiecewiseConstant::integral()
   if (_direction == RIGHT)
     offset = 1;
 
-  for (unsigned i = 0; i < len-1; ++i)
-    sum += range(i+offset) * (domain(i+1) - domain(i));
+  for (unsigned i = 0; i < len - 1; ++i)
+    sum += range(i + offset) * (domain(i + 1) - domain(i));
 
   return _scale_factor * sum;
 }
@@ -121,5 +119,5 @@ PiecewiseConstant::integral()
 Real
 PiecewiseConstant::average()
 {
-  return integral()/(domain(functionSize()-1) - domain(0));
+  return integral() / (domain(functionSize() - 1) - domain(0));
 }

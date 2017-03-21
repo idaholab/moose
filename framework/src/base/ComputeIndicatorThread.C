@@ -23,9 +23,8 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeIndicatorThread::ComputeIndicatorThread(FEProblemBase & fe_problem,
-                                               bool finalize) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem),
+ComputeIndicatorThread::ComputeIndicatorThread(FEProblemBase & fe_problem, bool finalize)
+  : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _indicator_whs(_fe_problem.getIndicatorWarehouse()),
@@ -35,8 +34,8 @@ ComputeIndicatorThread::ComputeIndicatorThread(FEProblemBase & fe_problem,
 }
 
 // Splitting Constructor
-ComputeIndicatorThread::ComputeIndicatorThread(ComputeIndicatorThread & x, Threads::split split) :
-    ThreadedElementLoop<ConstElemRange>(x, split),
+ComputeIndicatorThread::ComputeIndicatorThread(ComputeIndicatorThread & x, Threads::split split)
+  : ThreadedElementLoop<ConstElemRange>(x, split),
     _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
     _indicator_whs(x._indicator_whs),
@@ -45,9 +44,7 @@ ComputeIndicatorThread::ComputeIndicatorThread(ComputeIndicatorThread & x, Threa
 {
 }
 
-ComputeIndicatorThread::~ComputeIndicatorThread()
-{
-}
+ComputeIndicatorThread::~ComputeIndicatorThread() {}
 
 void
 ComputeIndicatorThread::subdomainChanged()
@@ -71,7 +68,7 @@ ComputeIndicatorThread::subdomainChanged()
 }
 
 void
-ComputeIndicatorThread::onElement(const Elem *elem)
+ComputeIndicatorThread::onElement(const Elem * elem)
 {
   for (const auto & it : _aux_sys._elem_vars[_tid])
   {
@@ -93,7 +90,8 @@ ComputeIndicatorThread::onElement(const Elem *elem)
   {
     if (_indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
     {
-      const std::vector<std::shared_ptr<Indicator>> & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
+      const std::vector<std::shared_ptr<Indicator>> & indicators =
+          _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & indicator : indicators)
         indicator->computeIndicator();
     }
@@ -104,14 +102,16 @@ ComputeIndicatorThread::onElement(const Elem *elem)
   {
     if (_indicator_whs.hasActiveBlockObjects(_subdomain, _tid))
     {
-      const std::vector<std::shared_ptr<Indicator>> & indicators = _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
+      const std::vector<std::shared_ptr<Indicator>> & indicators =
+          _indicator_whs.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & indicator : indicators)
         indicator->finalize();
     }
 
     if (_internal_side_indicators.hasActiveBlockObjects(_subdomain, _tid))
     {
-      const std::vector<std::shared_ptr<InternalSideIndicator>> & internal_indicators = _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
+      const std::vector<std::shared_ptr<InternalSideIndicator>> & internal_indicators =
+          _internal_side_indicators.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & internal_indicator : internal_indicators)
         internal_indicator->finalize();
     }
@@ -129,12 +129,14 @@ ComputeIndicatorThread::onElement(const Elem *elem)
 }
 
 void
-ComputeIndicatorThread::onBoundary(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/)
+ComputeIndicatorThread::onBoundary(const Elem * /*elem*/,
+                                   unsigned int /*side*/,
+                                   BoundaryID /*bnd_id*/)
 {
 }
 
 void
-ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
+ComputeIndicatorThread::onInternalSide(const Elem * elem, unsigned int side)
 {
   if (_finalize) // If finalizing we only do something on the elements
     return;
@@ -143,11 +145,10 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
   const Elem * neighbor = elem->neighbor(side);
 
   // Get the global id of the element and the neighbor
-  const dof_id_type
-    elem_id = elem->id(),
-    neighbor_id = neighbor->id();
+  const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
 
-  if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+  if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
+      (neighbor->level() < elem->level()))
   {
     for (const auto & it : _aux_sys._elem_vars[_tid])
     {
@@ -165,10 +166,12 @@ ComputeIndicatorThread::onInternalSide(const Elem *elem, unsigned int side)
       SwapBackSentinel face_sentinel(_fe_problem, &FEProblemBase::swapBackMaterialsFace, _tid);
       _fe_problem.reinitMaterialsFace(block_id, _tid);
 
-      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblemBase::swapBackMaterialsNeighbor, _tid);
+      SwapBackSentinel neighbor_sentinel(
+          _fe_problem, &FEProblemBase::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-      const std::vector<std::shared_ptr<InternalSideIndicator>> & indicators = _internal_side_indicators.getActiveBlockObjects(block_id, _tid);
+      const std::vector<std::shared_ptr<InternalSideIndicator>> & indicators =
+          _internal_side_indicators.getActiveBlockObjects(block_id, _tid);
       for (const auto & indicator : indicators)
         indicator->computeIndicator();
     }

@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "WrongJacobianDiffusion.h"
 
-template<>
-InputParameters validParams<WrongJacobianDiffusion>()
+template <>
+InputParameters
+validParams<WrongJacobianDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("rfactor", 1.0, "Prefactor on the Residual");
@@ -23,10 +24,8 @@ InputParameters validParams<WrongJacobianDiffusion>()
   return params;
 }
 
-WrongJacobianDiffusion::WrongJacobianDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _rfactor(getParam<Real>("rfactor")),
-    _jfactor(getParam<Real>("jfactor"))
+WrongJacobianDiffusion::WrongJacobianDiffusion(const InputParameters & parameters)
+  : Kernel(parameters), _rfactor(getParam<Real>("rfactor")), _jfactor(getParam<Real>("jfactor"))
 {
 }
 

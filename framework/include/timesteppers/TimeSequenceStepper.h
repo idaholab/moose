@@ -19,7 +19,7 @@
 
 class TimeSequenceStepper;
 
-template<>
+template <>
 InputParameters validParams<TimeSequenceStepper>();
 
 /**
@@ -34,4 +34,4 @@ public:
   virtual void init() override;
 };
 
-#endif //TIMESEQUENCESTEPPER_H
+#endif // TIMESEQUENCESTEPPER_H

@@ -19,8 +19,9 @@
 // libMesh
 #include "libmesh/node.h"
 
-template<>
-InputParameters validParams<NodalVariableValue>()
+template <>
+InputParameters
+validParams<NodalVariableValue>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<VariableName>("variable", "The variable to be monitored");
@@ -29,8 +30,8 @@ InputParameters validParams<NodalVariableValue>()
   return params;
 }
 
-NodalVariableValue::NodalVariableValue(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+NodalVariableValue::NodalVariableValue(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
     _node_ptr(_mesh.getMesh().query_node_ptr(getParam<unsigned int>("nodeid"))),
@@ -46,7 +47,11 @@ NodalVariableValue::NodalVariableValue(const InputParameters & parameters) :
   _communicator.max(found_node_ptr);
 
   if (!found_node_ptr)
-    mooseError("Node #", getParam<unsigned int>("nodeid"), " specified in '", name(), "' not found in the mesh!");
+    mooseError("Node #",
+               getParam<unsigned int>("nodeid"),
+               " specified in '",
+               name(),
+               "' not found in the mesh!");
 }
 
 Real
@@ -61,4 +66,3 @@ NodalVariableValue::getValue()
 
   return _scale_factor * value;
 }
-

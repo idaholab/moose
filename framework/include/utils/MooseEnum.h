@@ -38,13 +38,15 @@ class MooseEnum : public MooseEnumBase
 {
 public:
   /**
-   * Constructor that takes a list of enumeration values, and a separate string to set a default for this instance
+   * Constructor that takes a list of enumeration values, and a separate string to set a default for
+   * this instance
    * @param names - a list of names for this enumeration
    * @param default_name - the default value for this enumeration instance
-   * @param allow_out_of_range - determines whether this enumeration will accept values outside of it's range of
+   * @param allow_out_of_range - determines whether this enumeration will accept values outside of
+   * it's range of
    *                       defined values.
    */
-  MooseEnum(std::string names, std::string default_name="", bool allow_out_of_range=false);
+  MooseEnum(std::string names, std::string default_name = "", bool allow_out_of_range = false);
 
   /**
    * Copy Constructor for use when creating vectors of MooseEnums
@@ -92,7 +94,7 @@ public:
    * @param name - a string representing one of the enumeration values.
    * @return A reference to this object for chaining
    */
-  MooseEnum & operator=(const std::string &name);
+  MooseEnum & operator=(const std::string & name);
 
   /**
    * IsValid
@@ -105,7 +107,11 @@ public:
   friend class libMesh::Parameters;
 
   /// Operator for printing to iostreams
-  friend std::ostream & operator<<(std::ostream & out, const MooseEnum & obj) { out << obj._current_name_preserved; return out; }
+  friend std::ostream & operator<<(std::ostream & out, const MooseEnum & obj)
+  {
+    out << obj._current_name_preserved;
+    return out;
+  }
 
   /// get the current value cast to the enum type T
   template <typename T>
@@ -116,7 +122,6 @@ protected:
   virtual void checkDeprecated() const override;
 
 private:
-
   /**
    * Private constructor for use by libmesh::Parameters
    */
@@ -140,11 +145,11 @@ template <typename T>
 T
 MooseEnum::getEnum() const
 {
-  #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
-    static_assert( std::is_enum<T>::value == true,
-      "The type requested from MooseEnum::getEnum must be an enum type!\n\n");
-  #endif
+#ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
+  static_assert(std::is_enum<T>::value == true,
+                "The type requested from MooseEnum::getEnum must be an enum type!\n\n");
+#endif
   return static_cast<T>(_current_id);
 }
 
-#endif //MOOSEENUM_H
+#endif // MOOSEENUM_H

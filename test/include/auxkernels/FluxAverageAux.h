@@ -17,11 +17,10 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class FluxAverageAux;
 
-template<>
+template <>
 InputParameters validParams<FluxAverageAux>();
 
 /**
@@ -50,7 +49,6 @@ protected:
 
   /// normals at quadrature points
   const MooseArray<Point> & _normals;
-
 };
 
-#endif //FLUXAVERAGEAUX_H
+#endif // FLUXAVERAGEAUX_H

@@ -18,7 +18,7 @@
 
 class MMSForcing;
 
-template<>
+template <>
 InputParameters validParams<MMSForcing>();
 
 class MMSForcing : public Kernel
@@ -40,4 +40,4 @@ private:
   Real _z;
 };
 
-#endif //MMSFORCING_H_
+#endif // MMSFORCING_H_

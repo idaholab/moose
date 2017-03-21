@@ -19,11 +19,10 @@
 #include "LinearInterpolation.h"
 #include "DerivativeMaterialInterface.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class PiecewiseLinearInterpolationMaterial;
 
-template<>
+template <>
 InputParameters validParams<PiecewiseLinearInterpolationMaterial>();
 
 /**
@@ -56,4 +55,4 @@ protected:
   std::unique_ptr<LinearInterpolation> _linear_interp;
 };
 
-#endif //PIECEWISELINEARINTERPOLATIONMATERIAL_H
+#endif // PIECEWISELINEARINTERPOLATIONMATERIAL_H

@@ -27,7 +27,7 @@ namespace libMesh
 class Elem;
 }
 
-template<>
+template <>
 InputParameters validParams<ElementalVariableValue>();
 
 class ElementalVariableValue : public GeneralPostprocessor
@@ -45,4 +45,4 @@ protected:
   Elem * _element;
 };
 
-#endif //ELEMENTALVARIABLEVALUE_H
+#endif // ELEMENTALVARIABLEVALUE_H

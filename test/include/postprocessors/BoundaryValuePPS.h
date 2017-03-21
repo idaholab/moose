@@ -20,7 +20,7 @@
 class BoundaryValuePPS;
 class BoundaryUserObject;
 
-template<>
+template <>
 InputParameters validParams<BoundaryValuePPS>();
 
 /**

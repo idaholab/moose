@@ -19,9 +19,8 @@
 
 class AddConstraintAction;
 
-template<>
+template <>
 InputParameters validParams<AddConstraintAction>();
-
 
 class AddConstraintAction : public MooseObjectAction
 {

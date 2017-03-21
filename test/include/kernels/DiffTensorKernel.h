@@ -21,7 +21,7 @@
 // Forward Declaration
 class DiffTensorKernel;
 
-template<>
+template <>
 InputParameters validParams<DiffTensorKernel>();
 
 /**
@@ -49,4 +49,4 @@ private:
   RealTensorValue computeConductivity(Real t, const Point & pt);
 };
 
-#endif //DIFFTENSORKERNEL_H
+#endif // DIFFTENSORKERNEL_H

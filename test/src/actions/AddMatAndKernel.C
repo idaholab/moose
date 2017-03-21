@@ -33,18 +33,15 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
-template<>
-InputParameters validParams<AddMatAndKernel>()
+template <>
+InputParameters
+validParams<AddMatAndKernel>()
 {
   InputParameters params = validParams<AddVariableAction>();
   return params;
 }
 
-
-AddMatAndKernel::AddMatAndKernel(const InputParameters & params) :
-    AddVariableAction(params)
-{
-}
+AddMatAndKernel::AddMatAndKernel(const InputParameters & params) : AddVariableAction(params) {}
 
 void
 AddMatAndKernel::act()

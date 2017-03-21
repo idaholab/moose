@@ -22,24 +22,23 @@
 
 #include "libmesh/dense_vector.h"
 
-//forward declarations
+// forward declarations
 class ScalarInitialCondition;
 class FeProblem;
 class SystemBase;
 class Assembly;
 class MooseVariableScalar;
 
-template<>
+template <>
 InputParameters validParams<ScalarInitialCondition>();
 
 /**
  * InitialConditions are objects that set the initial value of variables.
  */
-class ScalarInitialCondition :
-  public MooseObject,
-  public ScalarCoupleable,
-  public FunctionInterface,
-  public DependencyResolverInterface
+class ScalarInitialCondition : public MooseObject,
+                               public ScalarCoupleable,
+                               public FunctionInterface,
+                               public DependencyResolverInterface
 {
 public:
   /**
@@ -87,4 +86,4 @@ protected:
   std::set<std::string> _supplied_vars;
 };
 
-#endif //SCALARINITIALCONDITION_H
+#endif // SCALARINITIALCONDITION_H

@@ -14,22 +14,20 @@
 
 #include "NumInternalSides.h"
 
-template<>
-InputParameters validParams<NumInternalSides>()
+template <>
+InputParameters
+validParams<NumInternalSides>()
 {
   InputParameters params = validParams<InternalSidePostprocessor>();
   return params;
 }
 
-NumInternalSides::NumInternalSides(const InputParameters & parameters) :
-    InternalSidePostprocessor(parameters),
-    _count(0)
+NumInternalSides::NumInternalSides(const InputParameters & parameters)
+  : InternalSidePostprocessor(parameters), _count(0)
 {
 }
 
-NumInternalSides::~NumInternalSides()
-{
-}
+NumInternalSides::~NumInternalSides() {}
 
 void
 NumInternalSides::execute()
@@ -48,7 +46,6 @@ NumInternalSides::finalize()
 {
   gatherSum(_count);
 }
-
 
 PostprocessorValue
 NumInternalSides::getValue()

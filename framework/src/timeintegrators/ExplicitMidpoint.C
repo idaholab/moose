@@ -14,15 +14,13 @@
 
 #include "ExplicitMidpoint.h"
 
-template<>
-InputParameters validParams<ExplicitMidpoint>()
+template <>
+InputParameters
+validParams<ExplicitMidpoint>()
 {
   InputParameters params = validParams<ExplicitRK2>();
 
   return params;
 }
 
-ExplicitMidpoint::ExplicitMidpoint(const InputParameters & parameters) :
-    ExplicitRK2(parameters)
-{
-}
+ExplicitMidpoint::ExplicitMidpoint(const InputParameters & parameters) : ExplicitRK2(parameters) {}

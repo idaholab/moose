@@ -20,7 +20,7 @@
 // Forward Declaration
 class CoupledForce;
 
-template<>
+template <>
 InputParameters validParams<CoupledForce>();
 
 /**
@@ -43,4 +43,4 @@ private:
   const VariableValue & _v;
 };
 
-#endif //COUPLEDFORCE_H
+#endif // COUPLEDFORCE_H

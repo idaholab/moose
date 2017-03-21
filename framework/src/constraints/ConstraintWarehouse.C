@@ -19,11 +19,7 @@
 #include "FaceFaceConstraint.h"
 #include "ElemElemConstraint.h"
 
-ConstraintWarehouse::ConstraintWarehouse() :
-    MooseObjectWarehouse<Constraint>(/*threaded=*/false)
-{
-}
-
+ConstraintWarehouse::ConstraintWarehouse() : MooseObjectWarehouse<Constraint>(/*threaded=*/false) {}
 
 void
 ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object, THREAD_ID /*tid = 0*/)
@@ -42,7 +38,8 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object, THREAD_ID /*t
   {
     MooseMesh & mesh = nfc->getParam<FEProblemBase *>("_fe_problem_base")->mesh();
     unsigned int slave = mesh.getBoundaryID(nfc->getParam<BoundaryName>("slave"));
-    bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") && nfc->getParam<bool>("use_displaced_mesh");
+    bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") &&
+                     nfc->getParam<bool>("use_displaced_mesh");
 
     if (displaced)
       _displaced_node_face_constraints[slave].addObject(nfc);
@@ -72,18 +69,16 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object, THREAD_ID /*t
     mooseError("Unknown type of Constraint object");
 }
 
-
 const std::vector<std::shared_ptr<NodalConstraint>> &
 ConstraintWarehouse::getActiveNodalConstraints() const
 {
   return _nodal_constraints.getActiveObjects();
 }
 
-
 const std::vector<std::shared_ptr<NodeFaceConstraint>> &
 ConstraintWarehouse::getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced)
 {
-  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint> >::const_iterator it, end_it;
+  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>>::const_iterator it, end_it;
 
   if (displaced)
   {
@@ -97,24 +92,31 @@ ConstraintWarehouse::getActiveNodeFaceConstraints(BoundaryID boundary_id, bool d
     end_it = _node_face_constraints.end();
   }
 
-  mooseAssert(it != end_it, "Unable to locate storage for NodeFaceConstraint objects for the given boundary id: " << boundary_id);
+  mooseAssert(it != end_it,
+              "Unable to locate storage for NodeFaceConstraint objects for the given boundary id: "
+                  << boundary_id);
   return it->second.getActiveObjects();
 }
-
 
 const std::vector<std::shared_ptr<FaceFaceConstraint>> &
 ConstraintWarehouse::getActiveFaceFaceConstraints(const std::string & interface) const
 {
-  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint> >::const_iterator it = _face_face_constraints.find(interface);
-  mooseAssert(it != _face_face_constraints.end(), "Unable to locate storage for FaceFaceConstraint objects for the given interface: " << interface);
+  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint>>::const_iterator it =
+      _face_face_constraints.find(interface);
+  mooseAssert(it != _face_face_constraints.end(),
+              "Unable to locate storage for FaceFaceConstraint objects for the given interface: "
+                  << interface);
   return it->second.getActiveObjects();
 }
 
 const std::vector<std::shared_ptr<ElemElemConstraint>> &
 ConstraintWarehouse::getActiveElemElemConstraints(const InterfaceID interface_id) const
 {
-  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint> >::const_iterator it = _element_constraints.find(interface_id);
-  mooseAssert(it != _element_constraints.end(), "Unable to locate storage for ElemElemConstraint objects for the given interface id: " << interface_id);
+  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>>::const_iterator it =
+      _element_constraints.find(interface_id);
+  mooseAssert(it != _element_constraints.end(),
+              "Unable to locate storage for ElemElemConstraint objects for the given interface id: "
+                  << interface_id);
   return it->second.getActiveObjects();
 }
 
@@ -124,26 +126,26 @@ ConstraintWarehouse::hasActiveNodalConstraints() const
   return _nodal_constraints.hasActiveObjects();
 }
 
-
 bool
 ConstraintWarehouse::hasActiveFaceFaceConstraints(const std::string & interface) const
 {
-  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint> >::const_iterator it = _face_face_constraints.find(interface);
+  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint>>::const_iterator it =
+      _face_face_constraints.find(interface);
   return (it != _face_face_constraints.end() && it->second.hasActiveObjects());
 }
 
 bool
 ConstraintWarehouse::hasActiveElemElemConstraints(const InterfaceID interface_id) const
 {
-  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint> >::const_iterator it = _element_constraints.find(interface_id);
+  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>>::const_iterator it =
+      _element_constraints.find(interface_id);
   return (it != _element_constraints.end() && it->second.hasActiveObjects());
 }
-
 
 bool
 ConstraintWarehouse::hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const
 {
-  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint> >::const_iterator it, end_it;
+  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>>::const_iterator it, end_it;
 
   if (displaced)
   {
@@ -157,12 +159,10 @@ ConstraintWarehouse::hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool d
     end_it = _node_face_constraints.end();
   }
 
-  return(it != end_it && it->second.hasActiveObjects());
+  return (it != end_it && it->second.hasActiveObjects());
 }
 
-
-void
-ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
+void ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
 {
   MooseObjectWarehouse<Constraint>::updateActive();
   _nodal_constraints.updateActive();
@@ -181,9 +181,10 @@ ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
     it.second.updateActive();
 }
 
-
 void
-ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables, THREAD_ID/*tid=0*/) const
+ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covered,
+                                       std::set<std::string> & unique_variables,
+                                       THREAD_ID /*tid=0*/) const
 {
   for (const auto & it : _face_face_constraints)
   {

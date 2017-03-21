@@ -15,16 +15,14 @@
 #include "AddConstraintAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddConstraintAction>()
+template <>
+InputParameters
+validParams<AddConstraintAction>()
 {
   return validParams<MooseObjectAction>();
 }
 
-AddConstraintAction::AddConstraintAction(InputParameters params) :
-    MooseObjectAction(params)
-{
-}
+AddConstraintAction::AddConstraintAction(InputParameters params) : MooseObjectAction(params) {}
 
 void
 AddConstraintAction::act()

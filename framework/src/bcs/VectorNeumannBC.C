@@ -14,23 +14,23 @@
 
 #include "VectorNeumannBC.h"
 
-template<>
-InputParameters validParams<VectorNeumannBC>()
+template <>
+InputParameters
+validParams<VectorNeumannBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
-  params.addParam<RealVectorValue>("vector_value", RealVectorValue(), "vector this BC should act in");
+  params.addParam<RealVectorValue>(
+      "vector_value", RealVectorValue(), "vector this BC should act in");
   return params;
 }
 
-VectorNeumannBC::VectorNeumannBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
-    _value(getParam<RealVectorValue>("vector_value"))
-{}
+VectorNeumannBC::VectorNeumannBC(const InputParameters & parameters)
+  : IntegratedBC(parameters), _value(getParam<RealVectorValue>("vector_value"))
+{
+}
 
 Real
 VectorNeumannBC::computeQpResidual()
 {
-  return -_test[_i][_qp]*(_value*_normals[_qp]);
+  return -_test[_i][_qp] * (_value * _normals[_qp]);
 }
-
-

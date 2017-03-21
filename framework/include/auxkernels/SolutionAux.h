@@ -21,7 +21,7 @@
 class SolutionAux;
 class SolutionUserObject;
 
-template<>
+template <>
 InputParameters validParams<SolutionAux>();
 
 /** AuxKernal for reading a solution from file
@@ -32,7 +32,6 @@ InputParameters validParams<SolutionAux>();
 class SolutionAux : public AuxKernel
 {
 public:
-
   /** Constructor
    * @param parameters The input parameters for the kernel
    */
@@ -44,7 +43,6 @@ public:
   virtual void initialSetup() override;
 
 protected:
-
   /** Compute the value for the kernel
    * Computes a value for a node or element depending on the type of kernel,
    * it also uses the 'direct' flag to extract values based on the dof if the
@@ -69,4 +67,4 @@ protected:
   const Real _add_factor;
 };
 
-#endif //SOLUTIONAUX_H
+#endif // SOLUTIONAUX_H

@@ -21,8 +21,8 @@
 // libMesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblemBase & feproblem) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(feproblem),
+ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblemBase & feproblem)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(feproblem),
     _damping(1.0),
     _nl(feproblem.getNonlinearSystemBase()),
     _nodal_dampers(_nl.getNodalDamperWarehouse())
@@ -30,17 +30,16 @@ ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblemBase & feproblem) 
 }
 
 // Splitting Constructor
-ComputeNodalDampingThread::ComputeNodalDampingThread(ComputeNodalDampingThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+ComputeNodalDampingThread::ComputeNodalDampingThread(ComputeNodalDampingThread & x,
+                                                     Threads::split split)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _damping(1.0),
     _nl(x._nl),
     _nodal_dampers(x._nodal_dampers)
 {
 }
 
-ComputeNodalDampingThread::~ComputeNodalDampingThread()
-{
-}
+ComputeNodalDampingThread::~ComputeNodalDampingThread() {}
 
 void
 ComputeNodalDampingThread::onNode(ConstNodeRange::const_iterator & node_it)

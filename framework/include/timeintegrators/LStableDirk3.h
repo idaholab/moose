@@ -19,7 +19,7 @@
 
 class LStableDirk3;
 
-template<>
+template <>
 InputParameters validParams<LStableDirk3>();
 
 /**
@@ -32,7 +32,8 @@ InputParameters validParams<LStableDirk3>();
  * ------------------------------------------------------------------------------------------
  *             | (1/4)*(-6*gamma**2 + 16*gamma - 1)  (1/4)*(6*gamma**2 - 20*gamma + 5)  gamma
  *
- * where gamma = -sqrt(2)*cos(atan(sqrt(2)/4)/3)/2 + sqrt(6)*sin(atan(sqrt(2)/4)/3)/2 + 1  ~ .435866521508459
+ * where gamma = -sqrt(2)*cos(atan(sqrt(2)/4)/3)/2 + sqrt(6)*sin(atan(sqrt(2)/4)/3)/2 + 1  ~
+ * .435866521508459
  *
  * The stability function for this method is:
  * R(z) = (1.90128552647780115*z**2 + 2.46079651620301599*z - 8) /
@@ -79,6 +80,5 @@ protected:
   // 1.2084966491760099, -0.6443631706844688, 0.4358665215084589
   Real _a[3][3];
 };
-
 
 #endif /* LSTABLEDIRK3_H */

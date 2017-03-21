@@ -18,11 +18,14 @@
 
 const Real SplineInterpolationBase::_deriv_bound = std::numeric_limits<Real>::max();
 
-SplineInterpolationBase::SplineInterpolationBase()
-{}
+SplineInterpolationBase::SplineInterpolationBase() {}
 
 void
-SplineInterpolationBase::spline(const std::vector<Real> & x, const std::vector<Real> & y, std::vector<Real> & y2, Real yp1/* = _deriv_bound*/, Real ypn/* = _deriv_bound*/)
+SplineInterpolationBase::spline(const std::vector<Real> & x,
+                                const std::vector<Real> & y,
+                                std::vector<Real> & y2,
+                                Real yp1 /* = _deriv_bound*/,
+                                Real ypn /* = _deriv_bound*/)
 {
   auto n = x.size();
   if (n < 2)
@@ -45,7 +48,7 @@ SplineInterpolationBase::spline(const std::vector<Real> & x, const std::vector<R
     Real p = sig * y2[i - 1] + 2.0;
     y2[i] = (sig - 1.0) / p;
     u[i] = (y[i + 1] - y[i]) / (x[i + 1] - x[i]) - (y[i] - y[i - 1]) / (x[i] - x[i - 1]);
-    u[i] = (6.0 * u[i] / (x[i+1] - x[i - 1]) - sig * u[i - 1]) / p;
+    u[i] = (6.0 * u[i] / (x[i + 1] - x[i - 1]) - sig * u[i - 1]) / p;
   }
 
   Real qn, un;
@@ -64,7 +67,10 @@ SplineInterpolationBase::spline(const std::vector<Real> & x, const std::vector<R
 }
 
 void
-SplineInterpolationBase::findInterval(const std::vector<Real> & x, Real x_int, unsigned int & klo, unsigned int & khi) const
+SplineInterpolationBase::findInterval(const std::vector<Real> & x,
+                                      Real x_int,
+                                      unsigned int & klo,
+                                      unsigned int & khi) const
 {
   klo = 0;
   mooseAssert(x.size() >= 2, "You must have at least two knots to create a spline.");
@@ -80,7 +86,13 @@ SplineInterpolationBase::findInterval(const std::vector<Real> & x, Real x_int, u
 }
 
 void
-SplineInterpolationBase::computeCoeffs(const std::vector<Real> & x, unsigned int klo, unsigned int khi, Real x_int, Real & h, Real & a, Real & b) const
+SplineInterpolationBase::computeCoeffs(const std::vector<Real> & x,
+                                       unsigned int klo,
+                                       unsigned int khi,
+                                       Real x_int,
+                                       Real & h,
+                                       Real & a,
+                                       Real & b) const
 {
   h = x[khi] - x[klo];
   if (h == 0)
@@ -90,7 +102,10 @@ SplineInterpolationBase::computeCoeffs(const std::vector<Real> & x, unsigned int
 }
 
 Real
-SplineInterpolationBase::sample(const std::vector<Real> & x, const std::vector<Real> & y, const std::vector<Real> & y2, Real x_int) const
+SplineInterpolationBase::sample(const std::vector<Real> & x,
+                                const std::vector<Real> & y,
+                                const std::vector<Real> & y2,
+                                Real x_int) const
 {
   unsigned int klo, khi;
   findInterval(x, x_int, klo, khi);
@@ -98,11 +113,15 @@ SplineInterpolationBase::sample(const std::vector<Real> & x, const std::vector<R
   Real h, a, b;
   computeCoeffs(x, klo, khi, x_int, h, a, b);
 
-  return a * y[klo] + b * y[khi] + ((a*a*a - a) * y2[klo] + (b*b*b - b) * y2[khi]) * (h*h) / 6.0;
+  return a * y[klo] + b * y[khi] +
+         ((a * a * a - a) * y2[klo] + (b * b * b - b) * y2[khi]) * (h * h) / 6.0;
 }
 
 Real
-SplineInterpolationBase::sampleDerivative(const std::vector<Real> & x, const std::vector<Real> & y, const std::vector<Real> & y2, Real x_int) const
+SplineInterpolationBase::sampleDerivative(const std::vector<Real> & x,
+                                          const std::vector<Real> & y,
+                                          const std::vector<Real> & y2,
+                                          Real x_int) const
 {
   unsigned int klo, khi;
   findInterval(x, x_int, klo, khi);
@@ -110,11 +129,15 @@ SplineInterpolationBase::sampleDerivative(const std::vector<Real> & x, const std
   Real h, a, b;
   computeCoeffs(x, klo, khi, x_int, h, a, b);
 
-  return (y[khi] - y[klo]) / h - (((3.0 * a*a - 1.0) * y2[klo] + (3.0 * b*b - 1.0) * -y2[khi]) * h / 6.0);
+  return (y[khi] - y[klo]) / h -
+         (((3.0 * a * a - 1.0) * y2[klo] + (3.0 * b * b - 1.0) * -y2[khi]) * h / 6.0);
 }
 
 Real
-SplineInterpolationBase::sample2ndDerivative(const std::vector<Real> & x, const std::vector<Real> & /*y*/, const std::vector<Real> & y2, Real x_int) const
+SplineInterpolationBase::sample2ndDerivative(const std::vector<Real> & x,
+                                             const std::vector<Real> & /*y*/,
+                                             const std::vector<Real> & y2,
+                                             Real x_int) const
 {
   unsigned int klo, khi;
   findInterval(x, x_int, klo, khi);

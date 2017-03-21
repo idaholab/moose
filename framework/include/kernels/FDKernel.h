@@ -19,11 +19,10 @@
 
 class FDKernel;
 
-template<>
+template <>
 InputParameters validParams<FDKernel>();
 
-class FDKernel :
-  public Kernel
+class FDKernel : public Kernel
 {
 public:
   FDKernel(const InputParameters & parameters);
@@ -45,8 +44,10 @@ protected:
    * at element node i is perturbed by perturbation.
    * With perturbation = 0.0 we have the unperturbed residual.
    */
-  virtual DenseVector<Number>
-    perturbedResidual(unsigned int ivar, unsigned int i, Real perturbation_scale, Real& perturbation);
+  virtual DenseVector<Number> perturbedResidual(unsigned int ivar,
+                                                unsigned int i,
+                                                Real perturbation_scale,
+                                                Real & perturbation);
 
   Real _scale;
 };

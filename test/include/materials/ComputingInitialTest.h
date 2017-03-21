@@ -16,10 +16,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class ComputingInitialTest;
 
-template<>
+template <>
 InputParameters validParams<ComputingInitialTest>();
 
 /**
@@ -38,4 +38,4 @@ protected:
   MaterialProperty<Real> & _thermal_conductivity_old;
 };
 
-#endif //COMPUTINGINITIALTEST_H
+#endif // COMPUTINGINITIALTEST_H

@@ -17,10 +17,10 @@
 
 #include "ElementPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementIntegralPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ElementIntegralPostprocessor>();
 
 /**

@@ -15,17 +15,17 @@
 #include "ElementL2Difference.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<ElementL2Difference>()
+template <>
+InputParameters
+validParams<ElementL2Difference>()
 {
   InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
   params.addRequiredCoupledVar("other_variable", "The variable to compare to");
   return params;
 }
 
-ElementL2Difference::ElementL2Difference(const InputParameters & parameters) :
-    ElementIntegralVariablePostprocessor(parameters),
-    _other_var(coupledValue("other_variable"))
+ElementL2Difference::ElementL2Difference(const InputParameters & parameters)
+  : ElementIntegralVariablePostprocessor(parameters), _other_var(coupledValue("other_variable"))
 {
 }
 
@@ -38,6 +38,6 @@ ElementL2Difference::getValue()
 Real
 ElementL2Difference::computeQpIntegral()
 {
-  Real diff = _u[_qp]-_other_var[_qp];
-  return diff*diff;
+  Real diff = _u[_qp] - _other_var[_qp];
+  return diff * diff;
 }

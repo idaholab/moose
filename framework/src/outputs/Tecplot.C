@@ -21,18 +21,22 @@
 // libMesh includes
 #include "libmesh/tecplot_io.h"
 
-template<>
-InputParameters validParams<Tecplot>()
+template <>
+InputParameters
+validParams<Tecplot>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<BasicOutput<OversampleOutput> >();
+  InputParameters params = validParams<BasicOutput<OversampleOutput>>();
 
   // Add binary toggle
   params.addParam<bool>("binary", false, "Set Tecplot files to output in binary format");
   params.addParamNamesToGroup("binary", "Advanced");
 
   // Add optional parameter to turn on appending to ASCII files
-  params.addParam<bool>("ascii_append", false, "If true, append to an existing ASCII file rather than creating a new file each time");
+  params.addParam<bool>(
+      "ascii_append",
+      false,
+      "If true, append to an existing ASCII file rather than creating a new file each time");
 
   // Add description for the Tecplot class
   params.addClassDescription("Object for outputting data in the Tecplot format");
@@ -41,8 +45,8 @@ InputParameters validParams<Tecplot>()
   return params;
 }
 
-Tecplot::Tecplot(const InputParameters & parameters) :
-    BasicOutput<OversampleOutput>(parameters),
+Tecplot::Tecplot(const InputParameters & parameters)
+  : BasicOutput<OversampleOutput>(parameters),
     _binary(getParam<bool>("binary")),
     _ascii_append(getParam<bool>("ascii_append")),
     _first_time(declareRestartableData<bool>("first_time", true))
@@ -50,13 +54,12 @@ Tecplot::Tecplot(const InputParameters & parameters) :
 #ifndef LIBMESH_HAVE_TECPLOT_API
   if (_binary)
   {
-    mooseWarning("Teclplot binary output requested but not available, outputting ASCII format instead.");
+    mooseWarning(
+        "Teclplot binary output requested but not available, outputting ASCII format instead.");
     _binary = false;
   }
 #endif
 }
-
-
 
 void
 Tecplot::output(const ExecFlagType & /*type*/)
@@ -89,11 +92,7 @@ Tecplot::filename()
 
   // If not appending, put the padded time step in the filename.
   if (_binary || !_ascii_append)
-    output << "_"
-           << std::setw(_padding)
-           << std::setprecision(0)
-           << std::setfill('0')
-           << std::right
+    output << "_" << std::setw(_padding) << std::setprecision(0) << std::setfill('0') << std::right
            << _file_num;
 
   // .plt extension is for binary files

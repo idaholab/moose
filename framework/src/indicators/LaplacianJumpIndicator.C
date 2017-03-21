@@ -14,26 +14,23 @@
 
 #include "LaplacianJumpIndicator.h"
 
-template<>
-InputParameters validParams<LaplacianJumpIndicator>()
+template <>
+InputParameters
+validParams<LaplacianJumpIndicator>()
 {
   InputParameters params = validParams<InternalSideIndicator>();
   return params;
 }
 
-
-LaplacianJumpIndicator::LaplacianJumpIndicator(const InputParameters & parameters) :
-    InternalSideIndicator(parameters),
-    _second_u(second()),
-    _second_u_neighbor(neighborSecond())
+LaplacianJumpIndicator::LaplacianJumpIndicator(const InputParameters & parameters)
+  : InternalSideIndicator(parameters), _second_u(second()), _second_u_neighbor(neighborSecond())
 {
 }
-
 
 Real
 LaplacianJumpIndicator::computeQpIntegral()
 {
   Real jump = (_second_u[_qp].tr() - _second_u_neighbor[_qp].tr());
 
-  return jump*jump;
+  return jump * jump;
 }

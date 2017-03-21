@@ -20,7 +20,7 @@
 #include "NonlinearSystemBase.h"
 #include "TimeIntegrator.h"
 
-//libMesh includes
+// libMesh includes
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/nonlinear_solver.h"
@@ -30,9 +30,9 @@
 // C++ Includes
 #include <iomanip>
 
-
-template<>
-InputParameters validParams<DT2>()
+template <>
+InputParameters
+validParams<DT2>()
 {
   InputParameters params = validParams<TimeStepper>();
   params.addParam<Real>("dt", 1., "The initial time step size.");
@@ -43,8 +43,8 @@ InputParameters validParams<DT2>()
   return params;
 }
 
-DT2::DT2(const InputParameters & parameters) :
-    TimeStepper(parameters),
+DT2::DT2(const InputParameters & parameters)
+  : TimeStepper(parameters),
     _u_diff(NULL),
     _u1(NULL),
     _u2(NULL),
@@ -57,7 +57,8 @@ DT2::DT2(const InputParameters & parameters) :
     _e_tol(getParam<Real>("e_tol")),
     _e_max(getParam<Real>("e_max")),
     _max_increase(getParam<Real>("max_increase"))
-{}
+{
+}
 
 void
 DT2::preExecute()
@@ -123,7 +124,7 @@ DT2::step()
     nl_sys.current_local_solution->close();
     aux_sys.current_local_solution->close();
 
-    _dt = getCurrentDT() / 2;                 // cut the time step in half
+    _dt = getCurrentDT() / 2; // cut the time step in half
     _time = _time_old + _dt;
 
     // 1. step
@@ -182,7 +183,7 @@ DT2::step()
 
     if (!_converged)
     {
-      *nl_sys.current_local_solution= *_u1;
+      *nl_sys.current_local_solution = *_u1;
       nl.solutionOld() = *_u1;
       nl.solutionOlder() = *_u_saved;
 
@@ -210,7 +211,9 @@ Real
 DT2::computeDT()
 {
   Real curr_dt = getCurrentDT();
-  Real new_dt = curr_dt * std::pow(_e_tol / _error, 1.0 / _fe_problem.getNonlinearSystemBase().getTimeIntegrator()->order());
+  Real new_dt =
+      curr_dt * std::pow(_e_tol / _error,
+                         1.0 / _fe_problem.getNonlinearSystemBase().getTimeIntegrator()->order());
   if (new_dt / curr_dt > _max_increase)
     new_dt = curr_dt * _max_increase;
 
@@ -222,7 +225,7 @@ DT2::rejectStep()
 {
   if (_error >= _e_max)
     _console << "DT2Transient: Marking last solve not converged since |U2-U1|/max(|U2|,|U1|) = "
-               << _error << " >= e_max." << std::endl;
+             << _error << " >= e_max." << std::endl;
 
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   System & nl_sys = nl.system();

@@ -13,16 +13,17 @@
 /****************************************************************/
 #include "DoNotCopyParametersKernel.h"
 
-template<>
-InputParameters validParams<DoNotCopyParametersKernel>()
+template <>
+InputParameters
+validParams<DoNotCopyParametersKernel>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
 // This is the wrong constructor, don't to this!
-DoNotCopyParametersKernel::DoNotCopyParametersKernel(InputParameters parameters) :
-    Kernel(parameters)
+DoNotCopyParametersKernel::DoNotCopyParametersKernel(InputParameters parameters)
+  : Kernel(parameters)
 {
 }
 

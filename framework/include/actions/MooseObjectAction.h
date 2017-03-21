@@ -21,9 +21,8 @@
 
 class MooseObjectAction;
 
-template<>
+template <>
 InputParameters validParams<MooseObjectAction>();
-
 
 class MooseObjectAction : public Action
 {
@@ -41,7 +40,6 @@ public:
   const std::string & getMooseObjectType() const { return _type; }
 
 protected:
-
   /// The Object type that is being created
   std::string _type;
 

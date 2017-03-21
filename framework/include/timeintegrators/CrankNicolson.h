@@ -19,7 +19,7 @@
 
 class CrankNicolson;
 
-template<>
+template <>
 InputParameters validParams<CrankNicolson>();
 
 /**

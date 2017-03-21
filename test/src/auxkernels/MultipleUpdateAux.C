@@ -14,8 +14,9 @@
 
 #include "MultipleUpdateAux.h"
 
-template<>
-InputParameters validParams<MultipleUpdateAux>()
+template <>
+InputParameters
+validParams<MultipleUpdateAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
@@ -26,17 +27,15 @@ InputParameters validParams<MultipleUpdateAux>()
   return params;
 }
 
-MultipleUpdateAux::MultipleUpdateAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+MultipleUpdateAux::MultipleUpdateAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _nl_u(coupledValue("u")),
     _var1(writableCoupledValue("var1")),
     _var2(writableCoupledValue("var2"))
 {
 }
 
-MultipleUpdateAux::~MultipleUpdateAux()
-{
-}
+MultipleUpdateAux::~MultipleUpdateAux() {}
 
 Real
 MultipleUpdateAux::computeValue()

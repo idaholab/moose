@@ -20,7 +20,7 @@
 // Forward declartions
 class FunctionParserUtils;
 
-template<>
+template <>
 InputParameters validParams<FunctionParserUtils>();
 
 class FunctionParserUtils
@@ -64,4 +64,4 @@ protected:
   std::vector<Real> _func_params;
 };
 
-#endif //FUNCTIONPARSERUTILS_H
+#endif // FUNCTIONPARSERUTILS_H

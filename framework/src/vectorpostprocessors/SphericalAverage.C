@@ -17,19 +17,21 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<SphericalAverage>()
+template <>
+InputParameters
+validParams<SphericalAverage>()
 {
   InputParameters params = validParams<ElementVectorPostprocessor>();
   params.addParam<unsigned int>("bin_number", 50, "Number of histogram bins");
   params.addCoupledVar("variable", "Variables to average radially");
   params.addRequiredParam<Real>("radius", "Radius to average out to");
-  params.addParam<Real>("empty_bin_value", 0.0, "Value to assign to bins into which no datapoints fall");
+  params.addParam<Real>(
+      "empty_bin_value", 0.0, "Value to assign to bins into which no datapoints fall");
   return params;
 }
 
-SphericalAverage::SphericalAverage(const InputParameters & parameters) :
-    ElementVectorPostprocessor(parameters),
+SphericalAverage::SphericalAverage(const InputParameters & parameters)
+  : ElementVectorPostprocessor(parameters),
     _nbins(getParam<unsigned int>("bin_number")),
     _radius(getParam<Real>("radius")),
     _deltaR(_radius / _nbins),
@@ -99,7 +101,8 @@ SphericalAverage::finalize()
     gatherSum(*_average[j]);
 
     for (auto i = beginIndex(_counts); i < _nbins; ++i)
-      (*_average[j])[i] = _counts[i] > 0 ? (*_average[j])[i] / static_cast<Real>(_counts[i]) : _empty_bin_value;
+      (*_average[j])[i] =
+          _counts[i] > 0 ? (*_average[j])[i] / static_cast<Real>(_counts[i]) : _empty_bin_value;
   }
 }
 

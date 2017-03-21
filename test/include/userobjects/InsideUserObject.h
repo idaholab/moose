@@ -19,7 +19,7 @@
 
 class InsideUserObject;
 
-template<>
+template <>
 InputParameters validParams<InsideUserObject>();
 
 /**

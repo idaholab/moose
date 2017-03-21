@@ -14,8 +14,9 @@
 
 #include "CoupledGradAux.h"
 
-template<>
-InputParameters validParams<CoupledGradAux>()
+template <>
+InputParameters
+validParams<CoupledGradAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
@@ -26,20 +27,18 @@ InputParameters validParams<CoupledGradAux>()
   return params;
 }
 
-CoupledGradAux::CoupledGradAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+CoupledGradAux::CoupledGradAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _grad(getParam<RealGradient>("grad")),
     _coupled(coupled("coupled")),
     _coupled_grad(coupledGradient("coupled"))
 {
 }
 
-CoupledGradAux::~CoupledGradAux()
-{
-}
+CoupledGradAux::~CoupledGradAux() {}
 
 Real
 CoupledGradAux::computeValue()
 {
-  return _coupled_grad[_qp]*_grad;
+  return _coupled_grad[_qp] * _grad;
 }

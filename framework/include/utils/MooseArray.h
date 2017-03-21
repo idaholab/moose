@@ -18,39 +18,26 @@
 #include <vector>
 #include "MooseError.h"
 
-
-template<typename T>
+template <typename T>
 class MooseArray
 {
 public:
   /**
    * Default constructor.  Doesn't initialize anything.
    */
-  MooseArray() :
-    _data(NULL),
-    _size(0),
-    _allocated_size(0)
-  {}
+  MooseArray() : _data(NULL), _size(0), _allocated_size(0) {}
 
   /**
    * @param size The initial size of the array.
    */
-  explicit
-  MooseArray(const unsigned int size) :
-    _data(NULL),
-    _allocated_size(0)
-  {
-    resize(size);
-  }
+  explicit MooseArray(const unsigned int size) : _data(NULL), _allocated_size(0) { resize(size); }
 
   /**
    * @param size The initial size of the array.
    * @param default_value The default value to set.
    */
-  explicit
-  MooseArray(const unsigned int size, const T & default_value) :
-    _data(NULL),
-    _allocated_size(0)
+  explicit MooseArray(const unsigned int size, const T & default_value)
+    : _data(NULL), _allocated_size(0)
   {
     resize(size);
 
@@ -70,7 +57,7 @@ public:
   {
     if (_data != NULL)
     {
-      delete [] _data;
+      delete[] _data;
       _data = NULL;
       _allocated_size = _size = 0;
     }
@@ -188,7 +175,6 @@ public:
   std::vector<T> stdVector();
 
 private:
-
   /// Actual data pointer.
   T * _data;
 
@@ -199,26 +185,23 @@ private:
   unsigned int _allocated_size;
 };
 
-template<typename T>
-inline
-void
+template <typename T>
+inline void
 MooseArray<T>::setAllValues(const T & value)
 {
-  for (unsigned int i=0; i<_size; i++)
+  for (unsigned int i = 0; i < _size; i++)
     _data[i] = value;
 }
 
-template<typename T>
-inline
-void
+template <typename T>
+inline void
 MooseArray<T>::clear()
 {
   _size = 0;
 }
 
-template<typename T>
-inline
-void
+template <typename T>
+inline void
 MooseArray<T>::resize(const unsigned int size)
 {
   if (size <= _allocated_size)
@@ -229,16 +212,15 @@ MooseArray<T>::resize(const unsigned int size)
     mooseAssert(new_pointer, "Failed to allocate MooseArray memory!");
 
     if (_data != NULL)
-      delete [] _data;
+      delete[] _data;
     _data = new_pointer;
     _allocated_size = size;
     _size = size;
   }
 }
 
-template<typename T>
-inline
-void
+template <typename T>
+inline void
 MooseArray<T>::resize(const unsigned int size, const T & default_value)
 {
   if (size > _allocated_size)
@@ -248,52 +230,48 @@ MooseArray<T>::resize(const unsigned int size, const T & default_value)
 
     if (_data != NULL)
     {
-      for (unsigned int i=0; i<_size; i++)
+      for (unsigned int i = 0; i < _size; i++)
         new_pointer[i] = _data[i];
-      delete [] _data;
+      delete[] _data;
     }
 
     _data = new_pointer;
     _allocated_size = size;
   }
 
-  for (unsigned int i=_size; i<size; i++)
+  for (unsigned int i = _size; i < size; i++)
     _data[i] = default_value;
 
   _size = size;
 }
 
-template<typename T>
-inline
-unsigned int
+template <typename T>
+inline unsigned int
 MooseArray<T>::size() const
 {
   return _size;
 }
 
-template<typename T>
-inline
-T &
-MooseArray<T>::operator[](const unsigned int i)
+template <typename T>
+inline T & MooseArray<T>::operator[](const unsigned int i)
 {
-  mooseAssert(i < _size, "Access out of bounds in MooseArray (i: " << i << " size: " << _size << ")");
+  mooseAssert(i < _size,
+              "Access out of bounds in MooseArray (i: " << i << " size: " << _size << ")");
 
   return _data[i];
 }
 
-template<typename T>
-inline
-const T &
-MooseArray<T>::operator[](const unsigned int i) const
+template <typename T>
+inline const T & MooseArray<T>::operator[](const unsigned int i) const
 {
-  mooseAssert(i < _size, "Access out of bounds in MooseArray (i: " << i << " size: " << _size << ")");
+  mooseAssert(i < _size,
+              "Access out of bounds in MooseArray (i: " << i << " size: " << _size << ")");
 
   return _data[i];
 }
 
-template<typename T>
-inline
-void
+template <typename T>
+inline void
 MooseArray<T>::swap(MooseArray & rhs)
 {
   std::swap(_data, rhs._data);
@@ -301,9 +279,8 @@ MooseArray<T>::swap(MooseArray & rhs)
   std::swap(_allocated_size, rhs._allocated_size);
 }
 
-template<typename T>
-inline
-void
+template <typename T>
+inline void
 MooseArray<T>::shallowCopy(const MooseArray & rhs)
 {
   _data = rhs._data;
@@ -311,9 +288,8 @@ MooseArray<T>::shallowCopy(const MooseArray & rhs)
   _allocated_size = rhs._allocated_size;
 }
 
-template<typename T>
-inline
-void
+template <typename T>
+inline void
 MooseArray<T>::shallowCopy(std::vector<T> & rhs)
 {
   _data = &rhs[0];
@@ -321,31 +297,29 @@ MooseArray<T>::shallowCopy(std::vector<T> & rhs)
   _allocated_size = rhs.size();
 }
 
-template<typename T>
-inline
-MooseArray<T> &
+template <typename T>
+inline MooseArray<T> &
 MooseArray<T>::operator=(const std::vector<T> & rhs)
 {
   unsigned int rhs_size = rhs.size();
 
   resize(rhs_size);
 
-  for (unsigned int i=0; i<rhs_size; i++)
+  for (unsigned int i = 0; i < rhs_size; i++)
     _data[i] = rhs[i];
 
   return *this;
 }
 
-template<typename T>
-inline
-MooseArray<T> &
+template <typename T>
+inline MooseArray<T> &
 MooseArray<T>::operator=(const MooseArray<T> & rhs)
 {
-//  mooseError("Shouldn't be doing this!");
+  //  mooseError("Shouldn't be doing this!");
   resize(rhs._size);
-//  memcpy(_data,rhs._data,sizeof(T)*_size);
+  //  memcpy(_data,rhs._data,sizeof(T)*_size);
 
-  for (unsigned int i=0; i<_size; i++)
+  for (unsigned int i = 0; i < _size; i++)
     _data[i] = rhs._data[i];
 
   return *this;
@@ -355,16 +329,16 @@ template <class T>
 std::vector<T>
 MooseArray<T>::stdVector()
 {
-  return std::vector<T>(_data, _data+_size);
+  return std::vector<T>(_data, _data + _size);
 }
 
 template <class T>
 void
-freeDoubleMooseArray(MooseArray<MooseArray<T> > &a)
+freeDoubleMooseArray(MooseArray<MooseArray<T>> & a)
 {
   for (unsigned int i = 0; i < a.size(); i++)
     a[i].release();
   a.release();
 }
 
-#endif //ARRAY_H
+#endif // ARRAY_H

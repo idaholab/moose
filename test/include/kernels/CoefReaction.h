@@ -16,10 +16,10 @@
 
 #include "Reaction.h"
 
-//Forward Declarations
+// Forward Declarations
 class CoefReaction;
 
-template<>
+template <>
 InputParameters validParams<CoefReaction>();
 
 class CoefReaction : public Reaction
@@ -34,4 +34,4 @@ protected:
   Real _coef;
 };
 
-#endif //COEFREACTION_H
+#endif // COEFREACTION_H

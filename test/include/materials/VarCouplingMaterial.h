@@ -18,7 +18,7 @@
 
 class VarCouplingMaterial;
 
-template<>
+template <>
 InputParameters validParams<VarCouplingMaterial>();
 
 /**
@@ -38,7 +38,6 @@ protected:
   Real _coef;
   MaterialProperty<Real> & _diffusion;
   MaterialProperty<Real> * const _diffusion_old;
-
 };
 
-#endif //VARCOUPLINGMATERIAL_H
+#endif // VARCOUPLINGMATERIAL_H

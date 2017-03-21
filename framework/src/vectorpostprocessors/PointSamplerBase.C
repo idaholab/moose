@@ -19,27 +19,29 @@
 // libMesh includes
 #include "libmesh/mesh_tools.h"
 
-template<>
-InputParameters validParams<PointSamplerBase>()
+template <>
+InputParameters
+validParams<PointSamplerBase>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
 
   params += validParams<SamplerBase>();
 
-  params.addRequiredCoupledVar("variable", "The names of the variables that this VectorPostprocessor operates on");
+  params.addRequiredCoupledVar(
+      "variable", "The names of the variables that this VectorPostprocessor operates on");
 
   return params;
 }
 
-PointSamplerBase::PointSamplerBase(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
+PointSamplerBase::PointSamplerBase(const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     SamplerBase(parameters, this, _communicator),
     _mesh(_subproblem.mesh())
 {
   std::vector<std::string> var_names(_coupled_moose_vars.size());
 
-  for (unsigned int i=0; i<_coupled_moose_vars.size(); i++)
+  for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
     var_names[i] = _coupled_moose_vars[i]->name();
 
   // Initialize the datastructions in SamplerBase
@@ -62,11 +64,8 @@ PointSamplerBase::initialize()
   _found_points.assign(_points.size(), false);
 
   _point_values.resize(_points.size());
-  std::for_each(_point_values.begin(), _point_values.end(),
-                [](std::vector<Real> & vec)
-                {
-                  vec.clear();
-                });
+  std::for_each(
+      _point_values.begin(), _point_values.end(), [](std::vector<Real> & vec) { vec.clear(); });
 }
 
 void
