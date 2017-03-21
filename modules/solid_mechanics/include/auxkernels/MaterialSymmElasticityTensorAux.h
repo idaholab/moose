@@ -20,28 +20,25 @@
 #include "AuxKernel.h"
 #include "SymmElasticityTensor.h"
 
-//Forward declarations
+// Forward declarations
 class MaterialSymmElasticityTensorAux;
 class SymmElasticityTensor;
 
-template<>
+template <>
 InputParameters validParams<MaterialSymmElasticityTensorAux>();
 
 class MaterialSymmElasticityTensorAux : public AuxKernel
 {
 public:
-
   MaterialSymmElasticityTensorAux(const InputParameters & parameters);
 
 protected:
-
   virtual Real computeValue();
   std::string _tensor_matpro;
   int _index;
 
 private:
-
   const MaterialProperty<SymmElasticityTensor> & _tensor_prop;
 };
 
-#endif //MATERIALSYMMELASTICITYTENSORAUX_H
+#endif // MATERIALSYMMELASTICITYTENSORAUX_H

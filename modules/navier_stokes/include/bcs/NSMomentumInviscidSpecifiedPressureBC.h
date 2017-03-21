@@ -9,11 +9,10 @@
 
 #include "NSMomentumInviscidBC.h"
 
-
 // Forward Declarations
 class NSMomentumInviscidSpecifiedPressureBC;
 
-template<>
+template <>
 InputParameters validParams<NSMomentumInviscidSpecifiedPressureBC>();
 
 /**
@@ -25,10 +24,9 @@ class NSMomentumInviscidSpecifiedPressureBC : public NSMomentumInviscidBC
 public:
   NSMomentumInviscidSpecifiedPressureBC(const InputParameters & parameters);
 
-  virtual ~NSMomentumInviscidSpecifiedPressureBC(){}
+  virtual ~NSMomentumInviscidSpecifiedPressureBC() {}
 
 protected:
-
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);

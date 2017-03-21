@@ -13,7 +13,8 @@
 /**
  * ComputeVolumetricEigenstrain computes an eigenstrain that is defined by a set of scalar
  * material properties that summed together define the volumetric change.  This also
- * computes the derivatives of that eigenstrain with respect to a supplied set of variable dependencies.");
+ * computes the derivatives of that eigenstrain with respect to a supplied set of variable
+ * dependencies.");
  */
 class ComputeVolumetricEigenstrain : public DerivativeMaterialInterface<ComputeEigenstrainBase>
 {
@@ -40,7 +41,7 @@ protected:
   /// first derivatives of the elastic strain with respect to the args
   std::vector<MaterialProperty<RankTwoTensor> *> _delastic_strain;
   /// second derivatives of the elastic strain with respect to the args
-  std::vector<std::vector<MaterialProperty<RankTwoTensor> *> > _d2elastic_strain;
+  std::vector<std::vector<MaterialProperty<RankTwoTensor> *>> _d2elastic_strain;
 };
 
-#endif //COMPUTE_VOLUMETRIC_EIGENSTRAIN_H
+#endif // COMPUTE_VOLUMETRIC_EIGENSTRAIN_H

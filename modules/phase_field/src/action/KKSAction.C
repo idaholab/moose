@@ -9,20 +9,21 @@
 #include "Parser.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<KKSAction>()
+template <>
+InputParameters
+validParams<KKSAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<std::string>("c_name_base", "c", "base name of the concentration variables");
   params.addParam<std::string>("eta_name", "eta", "name of the order parameter");
-  params.addRequiredParam<std::vector<std::string> >("phase_names", "short names for the phases");
-  params.addRequiredParam<std::vector<std::string> >("c_names", "short names for the concentrations");
+  params.addRequiredParam<std::vector<std::string>>("phase_names", "short names for the phases");
+  params.addRequiredParam<std::vector<std::string>>("c_names",
+                                                    "short names for the concentrations");
   return params;
 }
 
-KKSAction::KKSAction(const InputParameters & params) :
-    Action(params)
-    // _z2(getParam<Real>("z2"))
+KKSAction::KKSAction(const InputParameters & params) : Action(params)
+// _z2(getParam<Real>("z2"))
 {
 }
 
@@ -43,4 +44,3 @@ KKSAction::act()
     _problem->addInitialCondition("BoundingBoxIC", "InitialCondition", poly_params);
   */
 }
-

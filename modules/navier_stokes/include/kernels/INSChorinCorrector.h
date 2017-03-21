@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSChorinCorrector;
 
-template<>
+template <>
 InputParameters validParams<INSChorinCorrector>();
 
 /**
@@ -24,7 +24,7 @@ class INSChorinCorrector : public Kernel
 public:
   INSChorinCorrector(const InputParameters & parameters);
 
-  virtual ~INSChorinCorrector(){}
+  virtual ~INSChorinCorrector() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -51,6 +51,5 @@ protected:
   // Parameters
   unsigned _component;
 };
-
 
 #endif // INSCHORINCORRECTOR_H

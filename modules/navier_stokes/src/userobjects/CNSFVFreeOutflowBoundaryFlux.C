@@ -7,28 +7,26 @@
 
 #include "CNSFVFreeOutflowBoundaryFlux.h"
 
-template<>
-InputParameters validParams<CNSFVFreeOutflowBoundaryFlux>()
+template <>
+InputParameters
+validParams<CNSFVFreeOutflowBoundaryFlux>()
 {
   InputParameters params = validParams<BoundaryFluxBase>();
 
   params.addClassDescription("A user object that computes the outflow boundary flux.");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-  "Name for fluid properties user object");
+                                          "Name for fluid properties user object");
 
   return params;
 }
 
 CNSFVFreeOutflowBoundaryFlux::CNSFVFreeOutflowBoundaryFlux(const InputParameters & parameters)
-  : BoundaryFluxBase(parameters),
-    _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
+  : BoundaryFluxBase(parameters), _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
 }
 
-CNSFVFreeOutflowBoundaryFlux::~CNSFVFreeOutflowBoundaryFlux()
-{
-}
+CNSFVFreeOutflowBoundaryFlux::~CNSFVFreeOutflowBoundaryFlux() {}
 
 void
 CNSFVFreeOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
@@ -39,7 +37,7 @@ CNSFVFreeOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
 {
   /// pass the inputs to local
 
-  Real rho1  = uvec1[0];
+  Real rho1 = uvec1[0];
   Real rhou1 = uvec1[1];
   Real rhov1 = uvec1[2];
   Real rhow1 = uvec1[3];
@@ -64,10 +62,10 @@ CNSFVFreeOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
 
   Real vdon1 = uadv1 * nx + vadv1 * ny + wadv1 * nz;
 
-  flux[0] = vdon1 *  rho1;
-  flux[1] = vdon1 *  rhou1 + pres1 * nx;
-  flux[2] = vdon1 *  rhov1 + pres1 * ny;
-  flux[3] = vdon1 *  rhow1 + pres1 * nz;
+  flux[0] = vdon1 * rho1;
+  flux[1] = vdon1 * rhou1 + pres1 * nx;
+  flux[2] = vdon1 * rhov1 + pres1 * ny;
+  flux[3] = vdon1 * rhow1 + pres1 * nz;
   flux[4] = vdon1 * (rhoe1 + pres1);
 }
 

@@ -9,7 +9,7 @@
 
 #include "Action.h"
 
-class RigidBodyMultiKernelAction: public Action
+class RigidBodyMultiKernelAction : public Action
 {
 public:
   RigidBodyMultiKernelAction(const InputParameters & params);
@@ -20,7 +20,7 @@ public:
   bool _implicit;
 };
 
-template<>
+template <>
 InputParameters validParams<RigidBodyMultiKernelAction>();
 
-#endif //RigidBodyMultiKernelAction_H
+#endif // RigidBodyMultiKernelAction_H

@@ -7,8 +7,9 @@
 #include "SingleGrainRigidBodyMotion.h"
 #include "GrainTrackerInterface.h"
 
-template<>
-InputParameters validParams<SingleGrainRigidBodyMotion>()
+template <>
+InputParameters
+validParams<SingleGrainRigidBodyMotion>()
 {
   InputParameters params = validParams<GrainRigidBodyMotionBase>();
   params.addClassDescription("Adds rigid mody motion to a single grain");
@@ -16,9 +17,8 @@ InputParameters validParams<SingleGrainRigidBodyMotion>()
   return params;
 }
 
-SingleGrainRigidBodyMotion::SingleGrainRigidBodyMotion(const InputParameters & parameters) :
-    GrainRigidBodyMotionBase(parameters),
-    _op_index(getParam<unsigned int>("op_index"))
+SingleGrainRigidBodyMotion::SingleGrainRigidBodyMotion(const InputParameters & parameters)
+  : GrainRigidBodyMotionBase(parameters), _op_index(getParam<unsigned int>("op_index"))
 {
 }
 
@@ -31,8 +31,8 @@ SingleGrainRigidBodyMotion::computeQpResidual()
 Real
 SingleGrainRigidBodyMotion::computeQpJacobian()
 {
-  return _velocity_advection * _grad_phi[_j][_qp] * _test[_i][_qp]
-         + _velocity_advection_jacobian * _grad_u[_qp] * _test[_i][_qp];
+  return _velocity_advection * _grad_phi[_j][_qp] * _test[_i][_qp] +
+         _velocity_advection_jacobian * _grad_u[_qp] * _test[_i][_qp];
 }
 
 Real
@@ -41,14 +41,14 @@ SingleGrainRigidBodyMotion::computeQpOffDiagJacobian(unsigned int /*jvar*/)
   return _velocity_advection_jacobian * _grad_u[_qp] * _test[_i][_qp];
 }
 
-Real
-SingleGrainRigidBodyMotion::computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
+Real SingleGrainRigidBodyMotion::computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
 {
   return _velocity_advection_jacobian * _grad_u[_qp] * _test[_i][_qp];
 }
 
 Real
-SingleGrainRigidBodyMotion::computeQpNonlocalOffDiagJacobian(unsigned int /*jvar*/, dof_id_type /*dof_index*/)
+SingleGrainRigidBodyMotion::computeQpNonlocalOffDiagJacobian(unsigned int /*jvar*/,
+                                                             dof_id_type /*dof_index*/)
 {
   return _velocity_advection_jacobian * _grad_u[_qp] * _test[_i][_qp];
 }
@@ -69,32 +69,38 @@ SingleGrainRigidBodyMotion::getUserObjectJacobian(unsigned int jvar, dof_id_type
 
     if (jvar == _c_var)
     {
-      force_jacobian(0) = _grain_force_c_jacobians[(6*grain_id+0)*_total_dofs+dof_index];
-      force_jacobian(1) = _grain_force_c_jacobians[(6*grain_id+1)*_total_dofs+dof_index];
-      force_jacobian(2) = _grain_force_c_jacobians[(6*grain_id+2)*_total_dofs+dof_index];
-      torque_jacobian(0) = _grain_force_c_jacobians[(6*grain_id+3)*_total_dofs+dof_index];
-      torque_jacobian(1) = _grain_force_c_jacobians[(6*grain_id+4)*_total_dofs+dof_index];
-      torque_jacobian(2) = _grain_force_c_jacobians[(6*grain_id+5)*_total_dofs+dof_index];
+      force_jacobian(0) = _grain_force_c_jacobians[(6 * grain_id + 0) * _total_dofs + dof_index];
+      force_jacobian(1) = _grain_force_c_jacobians[(6 * grain_id + 1) * _total_dofs + dof_index];
+      force_jacobian(2) = _grain_force_c_jacobians[(6 * grain_id + 2) * _total_dofs + dof_index];
+      torque_jacobian(0) = _grain_force_c_jacobians[(6 * grain_id + 3) * _total_dofs + dof_index];
+      torque_jacobian(1) = _grain_force_c_jacobians[(6 * grain_id + 4) * _total_dofs + dof_index];
+      torque_jacobian(2) = _grain_force_c_jacobians[(6 * grain_id + 5) * _total_dofs + dof_index];
     }
 
     for (unsigned int jvar_index = 0; jvar_index < _op_num; ++jvar_index)
       if (jvar == _vals_var[jvar_index])
       {
-        force_jacobian(0) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+0)*_total_dofs+dof_index];
-        force_jacobian(1) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+1)*_total_dofs+dof_index];
-        force_jacobian(2) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+2)*_total_dofs+dof_index];
-        torque_jacobian(0) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+3)*_total_dofs+dof_index];
-        torque_jacobian(1) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+4)*_total_dofs+dof_index];
-        torque_jacobian(2) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+5)*_total_dofs+dof_index];
+        force_jacobian(0) =
+            _grain_force_eta_jacobians[jvar_index][(6 * grain_id + 0) * _total_dofs + dof_index];
+        force_jacobian(1) =
+            _grain_force_eta_jacobians[jvar_index][(6 * grain_id + 1) * _total_dofs + dof_index];
+        force_jacobian(2) =
+            _grain_force_eta_jacobians[jvar_index][(6 * grain_id + 2) * _total_dofs + dof_index];
+        torque_jacobian(0) =
+            _grain_force_eta_jacobians[jvar_index][(6 * grain_id + 3) * _total_dofs + dof_index];
+        torque_jacobian(1) =
+            _grain_force_eta_jacobians[jvar_index][(6 * grain_id + 4) * _total_dofs + dof_index];
+        torque_jacobian(2) =
+            _grain_force_eta_jacobians[jvar_index][(6 * grain_id + 5) * _total_dofs + dof_index];
       }
 
     const auto force_jac = _mt / volume * force_jacobian;
-    const auto torque_jac = _mr / volume * torque_jacobian.cross(_current_elem->centroid() - centroid);
+    const auto torque_jac =
+        _mr / volume * torque_jacobian.cross(_current_elem->centroid() - centroid);
 
     _velocity_advection_jacobian = (force_jac + torque_jac);
   }
 }
-
 
 void
 SingleGrainRigidBodyMotion::calculateAdvectionVelocity()
@@ -109,7 +115,8 @@ SingleGrainRigidBodyMotion::calculateAdvectionVelocity()
     const auto volume = _grain_volumes[grain_id];
     const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
     const auto force = _mt / volume * _grain_forces[grain_id];
-    const auto torque = _mr / volume * (_grain_torques[grain_id].cross(_current_elem->centroid() - centroid));
+    const auto torque =
+        _mr / volume * (_grain_torques[grain_id].cross(_current_elem->centroid() - centroid));
 
     _velocity_advection = (force + torque);
   }

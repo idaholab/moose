@@ -10,10 +10,10 @@
 
 #include "PorousFlowPorosityBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowPorosityConst;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPorosityConst>();
 
 /**
@@ -35,4 +35,4 @@ protected:
   const VariableValue & _input_porosity;
 };
 
-#endif //POROUSFLOWPOROSITYCONST_H
+#endif // POROUSFLOWPOROSITYCONST_H

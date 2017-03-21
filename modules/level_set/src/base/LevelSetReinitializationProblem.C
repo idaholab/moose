@@ -7,20 +7,20 @@
 
 #include "LevelSetReinitializationProblem.h"
 
-template<>
-InputParameters validParams<LevelSetReinitializationProblem>()
+template <>
+InputParameters
+validParams<LevelSetReinitializationProblem>()
 {
   InputParameters params = validParams<FEProblem>();
-  params.addClassDescription("A specialied problem that has a method for resetting time for level set reinitialization execution.");
+  params.addClassDescription("A specialied problem that has a method for resetting time for level "
+                             "set reinitialization execution.");
   return params;
-
 }
 
-LevelSetReinitializationProblem::LevelSetReinitializationProblem(const InputParameters & parameters) :
-    FEProblem(parameters)
+LevelSetReinitializationProblem::LevelSetReinitializationProblem(const InputParameters & parameters)
+  : FEProblem(parameters)
 {
 }
-
 
 void
 LevelSetReinitializationProblem::resetTime()

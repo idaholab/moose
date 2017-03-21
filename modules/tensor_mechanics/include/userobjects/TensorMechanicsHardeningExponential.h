@@ -11,8 +11,7 @@
 
 class TensorMechanicsHardeningExponential;
 
-
-template<>
+template <>
 InputParameters validParams<TensorMechanicsHardeningExponential>();
 
 /**
@@ -23,7 +22,7 @@ InputParameters validParams<TensorMechanicsHardeningExponential>();
  */
 class TensorMechanicsHardeningExponential : public TensorMechanicsHardeningModel
 {
- public:
+public:
   TensorMechanicsHardeningExponential(const InputParameters & parameters);
 
   virtual Real value(Real intnl) const override;
@@ -32,7 +31,7 @@ class TensorMechanicsHardeningExponential : public TensorMechanicsHardeningModel
 
   virtual std::string modelName() const override;
 
- private:
+private:
   /// The value = _val_res + (val_0 - val_res)*exp(-rate*internal_parameter)
   Real _val_0;
 

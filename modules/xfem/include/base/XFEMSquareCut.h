@@ -13,7 +13,6 @@
 class XFEMSquareCut : public XFEMGeometricCut3D
 {
 public:
-
   XFEMSquareCut(std::vector<Real> square_nodes);
   ~XFEMSquareCut();
 

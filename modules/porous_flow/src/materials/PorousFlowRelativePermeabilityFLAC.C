@@ -7,18 +7,21 @@
 
 #include "PorousFlowRelativePermeabilityFLAC.h"
 
-template<>
-InputParameters validParams<PorousFlowRelativePermeabilityFLAC>()
+template <>
+InputParameters
+validParams<PorousFlowRelativePermeabilityFLAC>()
 {
   InputParameters params = validParams<PorousFlowRelativePermeabilityBase>();
-  params.addRequiredRangeCheckedParam<Real>("m", "m >= 0", "relperm = (1 + m)seff^m - m seff^(m+1)");
-  params.addClassDescription("This Material calculates relative permeability of a phase using a model inspired by FLAC");
+  params.addRequiredRangeCheckedParam<Real>(
+      "m", "m >= 0", "relperm = (1 + m)seff^m - m seff^(m+1)");
+  params.addClassDescription(
+      "This Material calculates relative permeability of a phase using a model inspired by FLAC");
   return params;
 }
 
-PorousFlowRelativePermeabilityFLAC::PorousFlowRelativePermeabilityFLAC(const InputParameters & parameters) :
-    PorousFlowRelativePermeabilityBase(parameters),
-    _m(getParam<Real>("m"))
+PorousFlowRelativePermeabilityFLAC::PorousFlowRelativePermeabilityFLAC(
+    const InputParameters & parameters)
+  : PorousFlowRelativePermeabilityBase(parameters), _m(getParam<Real>("m"))
 {
 }
 

@@ -6,15 +6,13 @@
 /****************************************************************/
 #include "VolumetricModel.h"
 
-template<>
-InputParameters validParams<VolumetricModel>()
+template <>
+InputParameters
+validParams<VolumetricModel>()
 {
   return validParams<Material>();
 }
 
-VolumetricModel::VolumetricModel(const InputParameters & parameters ):
-  Material( parameters )
-{}
+VolumetricModel::VolumetricModel(const InputParameters & parameters) : Material(parameters) {}
 
 VolumetricModel::~VolumetricModel() {}
-

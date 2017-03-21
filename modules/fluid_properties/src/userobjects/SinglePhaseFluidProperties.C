@@ -7,22 +7,21 @@
 
 #include "SinglePhaseFluidProperties.h"
 
-template<>
-InputParameters validParams<SinglePhaseFluidProperties>()
+template <>
+InputParameters
+validParams<SinglePhaseFluidProperties>()
 {
   InputParameters params = validParams<FluidProperties>();
 
   return params;
 }
 
-SinglePhaseFluidProperties::SinglePhaseFluidProperties(const InputParameters & parameters) :
-    FluidProperties(parameters)
+SinglePhaseFluidProperties::SinglePhaseFluidProperties(const InputParameters & parameters)
+  : FluidProperties(parameters)
 {
 }
 
-SinglePhaseFluidProperties::~SinglePhaseFluidProperties()
-{
-}
+SinglePhaseFluidProperties::~SinglePhaseFluidProperties() {}
 
 Real
 SinglePhaseFluidProperties::gamma(Real v, Real u) const

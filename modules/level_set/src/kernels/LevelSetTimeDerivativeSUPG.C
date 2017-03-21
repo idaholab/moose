@@ -7,17 +7,19 @@
 
 #include "LevelSetTimeDerivativeSUPG.h"
 
-template<>
-InputParameters validParams<LevelSetTimeDerivativeSUPG>()
+template <>
+InputParameters
+validParams<LevelSetTimeDerivativeSUPG>()
 {
   InputParameters params = validParams<TimeDerivative>();
-  params.addClassDescription("SUPG stablization terms for the time derivative of the level set equation.");
-  params += validParams<LevelSetVelocityInterface<> >();
+  params.addClassDescription(
+      "SUPG stablization terms for the time derivative of the level set equation.");
+  params += validParams<LevelSetVelocityInterface<>>();
   return params;
 }
 
-LevelSetTimeDerivativeSUPG::LevelSetTimeDerivativeSUPG(const InputParameters & parameters) :
-    LevelSetVelocityInterface<TimeDerivative>(parameters)
+LevelSetTimeDerivativeSUPG::LevelSetTimeDerivativeSUPG(const InputParameters & parameters)
+  : LevelSetVelocityInterface<TimeDerivative>(parameters)
 {
 }
 

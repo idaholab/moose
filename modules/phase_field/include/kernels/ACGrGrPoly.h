@@ -9,10 +9,10 @@
 
 #include "ACGrGrBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class ACGrGrPoly;
 
-template<>
+template <>
 InputParameters validParams<ACGrGrPoly>();
 
 /**
@@ -32,4 +32,4 @@ protected:
   const MaterialProperty<Real> & _gamma;
 };
 
-#endif //ACGRGRPOLY_H
+#endif // ACGRGRPOLY_H

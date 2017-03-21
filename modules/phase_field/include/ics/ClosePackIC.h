@@ -13,7 +13,7 @@
 // Forward declarations
 class ClosePackIC;
 
-template<>
+template <>
 InputParameters validParams<ClosePackIC>();
 
 /**
@@ -35,4 +35,4 @@ protected:
   const Real _radius;
 };
 
-#endif //CLOSEPACKIC_H
+#endif // CLOSEPACKIC_H

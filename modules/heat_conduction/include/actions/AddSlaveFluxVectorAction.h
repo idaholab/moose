@@ -19,7 +19,7 @@ public:
   virtual void act();
 };
 
-template<>
+template <>
 InputParameters validParams<AddSlaveFluxVectorAction>();
 
 #endif // ADDSLAVEFLUXVECTORACTION_H

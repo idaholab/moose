@@ -10,17 +10,15 @@
 #include "Action.h"
 #include "MooseTypes.h"
 
-class CavityPressurePPAction: public Action
+class CavityPressurePPAction : public Action
 {
 public:
   CavityPressurePPAction(InputParameters params);
 
   virtual void act();
-
 };
 
-template<>
+template <>
 InputParameters validParams<CavityPressurePPAction>();
-
 
 #endif // CAVITYPRESSUREPPACTION_H

@@ -12,7 +12,7 @@
 // Forward Declarations
 class Air;
 
-template<>
+template <>
 InputParameters validParams<Air>();
 
 // Class for Air with constant properties
@@ -43,4 +43,4 @@ protected:
   Real _mu;
 };
 
-#endif //AIR_H
+#endif // AIR_H

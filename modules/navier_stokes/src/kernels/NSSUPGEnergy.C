@@ -14,14 +14,12 @@ InputParameters
 validParams<NSSUPGEnergy>()
 {
   InputParameters params = validParams<NSSUPGBase>();
-  params.addClassDescription("Compute residual and Jacobian terms form the SUPG terms in the energy equation.");
+  params.addClassDescription(
+      "Compute residual and Jacobian terms form the SUPG terms in the energy equation.");
   return params;
 }
 
-NSSUPGEnergy::NSSUPGEnergy(const InputParameters & parameters)
-  : NSSUPGBase(parameters)
-{
-}
+NSSUPGEnergy::NSSUPGEnergy(const InputParameters & parameters) : NSSUPGBase(parameters) {}
 
 Real
 NSSUPGEnergy::computeQpResidual()
@@ -46,13 +44,11 @@ NSSUPGEnergy::computeQpResidual()
   Real U_grad_phi = vel * _grad_test[_i][_qp];
 
   // Vector object of momentum equation strong residuals
-  RealVectorValue Ru(_strong_residuals[_qp][1],
-                     _strong_residuals[_qp][2],
-                     _strong_residuals[_qp][3]);
+  RealVectorValue Ru(
+      _strong_residuals[_qp][1], _strong_residuals[_qp][2], _strong_residuals[_qp][3]);
 
   // 1.) The mass-residual term:
-  Real mass_coeff =
-      (0.5 * (gam - 1.0) * velmag2 - _enthalpy[_qp]) * U_grad_phi;
+  Real mass_coeff = (0.5 * (gam - 1.0) * velmag2 - _enthalpy[_qp]) * U_grad_phi;
 
   mass_term = _tauc[_qp] * mass_coeff * _strong_residuals[_qp][0];
 
@@ -143,7 +139,8 @@ NSSUPGEnergy::computeJacobianHelper(unsigned var)
         //
         // Art. Diffusion matrix for tauc-proportional term = (0.5*(gam-1.)*velmag2 - H)*C_m
         //
-        RealTensorValue mass_mat = (0.5 * (gam - 1.) * velmag2 - _enthalpy[_qp]) * _calC[_qp][m_local];
+        RealTensorValue mass_mat =
+            (0.5 * (gam - 1.) * velmag2 - _enthalpy[_qp]) * _calC[_qp][m_local];
         mass_term = _tauc[_qp] * grad_test_i * (mass_mat * grad_phi_j);
 
         // Don't even need to break, no other cases to fall through to...

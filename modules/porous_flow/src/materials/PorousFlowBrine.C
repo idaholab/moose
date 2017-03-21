@@ -7,33 +7,80 @@
 
 #include "PorousFlowBrine.h"
 
-template<>
-InputParameters validParams<PorousFlowBrine>()
+template <>
+InputParameters
+validParams<PorousFlowBrine>()
 {
   InputParameters params = validParams<PorousFlowFluidPropertiesBase>();
   params.addCoupledVar("xnacl", 0, "The salt mass fraction in the brine (kg/kg)");
-  params.addClassDescription("This Material calculates fluid properties for brine at the quadpoints or nodes");
+  params.addClassDescription(
+      "This Material calculates fluid properties for brine at the quadpoints or nodes");
   return params;
 }
 
-PorousFlowBrine::PorousFlowBrine(const InputParameters & parameters) :
-    PorousFlowFluidPropertiesBase(parameters),
+PorousFlowBrine::PorousFlowBrine(const InputParameters & parameters)
+  : PorousFlowFluidPropertiesBase(parameters),
 
-    _density(_nodal_material ? declareProperty<Real>("PorousFlow_fluid_phase_density_nodal" + _phase) : declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + _phase)),
-    _ddensity_dp(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" + _phase, _pressure_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase, _pressure_variable_name)),
-    _ddensity_dT(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" + _phase, _temperature_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase, _temperature_variable_name)),
+    _density(_nodal_material
+                 ? declareProperty<Real>("PorousFlow_fluid_phase_density_nodal" + _phase)
+                 : declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + _phase)),
+    _ddensity_dp(_nodal_material
+                     ? declarePropertyDerivative<Real>(
+                           "PorousFlow_fluid_phase_density_nodal" + _phase, _pressure_variable_name)
+                     : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase,
+                                                       _pressure_variable_name)),
+    _ddensity_dT(
+        _nodal_material
+            ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" + _phase,
+                                              _temperature_variable_name)
+            : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase,
+                                              _temperature_variable_name)),
 
-    _viscosity(_nodal_material ? declareProperty<Real>("PorousFlow_viscosity_nodal" + _phase) : declareProperty<Real>("PorousFlow_viscosity_qp" + _phase)),
-    _dviscosity_dp(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_viscosity_nodal" + _phase, _pressure_variable_name) : declarePropertyDerivative<Real>("PorousFlow_viscosity_qp" + _phase, _pressure_variable_name)),
-    _dviscosity_dT(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_viscosity_nodal" + _phase, _temperature_variable_name) : declarePropertyDerivative<Real>("PorousFlow_viscosity_qp" + _phase, _temperature_variable_name)),
+    _viscosity(_nodal_material ? declareProperty<Real>("PorousFlow_viscosity_nodal" + _phase)
+                               : declareProperty<Real>("PorousFlow_viscosity_qp" + _phase)),
+    _dviscosity_dp(_nodal_material
+                       ? declarePropertyDerivative<Real>("PorousFlow_viscosity_nodal" + _phase,
+                                                         _pressure_variable_name)
+                       : declarePropertyDerivative<Real>("PorousFlow_viscosity_qp" + _phase,
+                                                         _pressure_variable_name)),
+    _dviscosity_dT(_nodal_material
+                       ? declarePropertyDerivative<Real>("PorousFlow_viscosity_nodal" + _phase,
+                                                         _temperature_variable_name)
+                       : declarePropertyDerivative<Real>("PorousFlow_viscosity_qp" + _phase,
+                                                         _temperature_variable_name)),
 
-    _internal_energy(_nodal_material ? declareProperty<Real>("PorousFlow_fluid_phase_internal_energy" + _phase) : declareProperty<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase)),
-    _dinternal_energy_dp(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy" + _phase, _pressure_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase, _pressure_variable_name)),
-    _dinternal_energy_dT(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy" + _phase, _temperature_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase, _temperature_variable_name)),
+    _internal_energy(
+        _nodal_material
+            ? declareProperty<Real>("PorousFlow_fluid_phase_internal_energy" + _phase)
+            : declareProperty<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase)),
+    _dinternal_energy_dp(
+        _nodal_material
+            ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy" + _phase,
+                                              _pressure_variable_name)
+            : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase,
+                                              _pressure_variable_name)),
+    _dinternal_energy_dT(
+        _nodal_material
+            ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy" + _phase,
+                                              _temperature_variable_name)
+            : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_internal_energy_qp" + _phase,
+                                              _temperature_variable_name)),
 
-    _enthalpy(_nodal_material ? declareProperty<Real>("PorousFlow_fluid_phase_enthalpy" + _phase) : declareProperty<Real>("PorousFlow_fluid_phase_enthalpy_qp" + _phase)),
-    _denthalpy_dp(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy" + _phase, _pressure_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy_qp" + _phase, _pressure_variable_name)),
-    _denthalpy_dT(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy" + _phase, _temperature_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy_qp" + _phase, _temperature_variable_name)),
+    _enthalpy(_nodal_material
+                  ? declareProperty<Real>("PorousFlow_fluid_phase_enthalpy" + _phase)
+                  : declareProperty<Real>("PorousFlow_fluid_phase_enthalpy_qp" + _phase)),
+    _denthalpy_dp(
+        _nodal_material
+            ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy" + _phase,
+                                              _pressure_variable_name)
+            : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy_qp" + _phase,
+                                              _pressure_variable_name)),
+    _denthalpy_dT(
+        _nodal_material
+            ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy" + _phase,
+                                              _temperature_variable_name)
+            : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy_qp" + _phase,
+                                              _temperature_variable_name)),
 
     _xnacl(_nodal_material ? coupledNodalValue("xnacl") : coupledValue("xnacl"))
 {
@@ -53,9 +100,12 @@ PorousFlowBrine::PorousFlowBrine(const InputParameters & parameters) :
 void
 PorousFlowBrine::initQpStatefulProperties()
 {
-  _density[_qp] = _brine_fp->rho(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k, _xnacl[_qp]);
-  _internal_energy[_qp] = _brine_fp->e(_porepressure[_qp][_phase_num], _temperature[_qp]  + _t_c2k, _xnacl[_qp]);
-  _enthalpy[_qp] = _brine_fp->h(_porepressure[_qp][_phase_num], _temperature[_qp]  + _t_c2k, _xnacl[_qp]);
+  _density[_qp] =
+      _brine_fp->rho(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k, _xnacl[_qp]);
+  _internal_energy[_qp] =
+      _brine_fp->e(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k, _xnacl[_qp]);
+  _enthalpy[_qp] =
+      _brine_fp->h(_porepressure[_qp][_phase_num], _temperature[_qp] + _t_c2k, _xnacl[_qp]);
 }
 
 void
@@ -64,7 +114,8 @@ PorousFlowBrine::computeQpProperties()
   // Density and derivatives wrt pressure and temperature at the nodes
   Real Tk = _temperature[_qp] + _t_c2k;
   Real rho, drho_dp, drho_dT, drho_dx;
-  _brine_fp->rho_dpTx(_porepressure[_qp][_phase_num], Tk, _xnacl[_qp], rho, drho_dp, drho_dT, drho_dx);
+  _brine_fp->rho_dpTx(
+      _porepressure[_qp][_phase_num], Tk, _xnacl[_qp], rho, drho_dp, drho_dT, drho_dx);
   _density[_qp] = rho;
   _ddensity_dp[_qp] = drho_dp;
   _ddensity_dT[_qp] = drho_dT;

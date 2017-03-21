@@ -11,7 +11,7 @@
 
 class CrystalPlasticitySlipResistance;
 
-template<>
+template <>
 InputParameters validParams<CrystalPlasticitySlipResistance>();
 
 /**
@@ -21,7 +21,7 @@ InputParameters validParams<CrystalPlasticitySlipResistance>();
  */
 class CrystalPlasticitySlipResistance : public CrystalPlasticityUOBase
 {
- public:
+public:
   CrystalPlasticitySlipResistance(const InputParameters & parameters);
 
   virtual bool calcSlipResistance(unsigned int qp, std::vector<Real> & val) const = 0;

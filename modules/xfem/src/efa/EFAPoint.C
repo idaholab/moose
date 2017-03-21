@@ -9,27 +9,26 @@
 #include <cmath>
 #include "EFAError.h"
 
-EFAPoint::EFAPoint(const double x, const double y, const double z) :
-    _x(x),
-    _y(y),
-    _z(z)
-{
-}
+EFAPoint::EFAPoint(const double x, const double y, const double z) : _x(x), _y(y), _z(z) {}
 
 double
-EFAPoint::operator () (const unsigned int i) const
+EFAPoint::operator()(const unsigned int i) const
 {
   switch (i)
   {
-    case 0 : return _x;
-    case 1 : return _y;
-    case 2 : return _z;
-    default : EFAError("EFAPoint: Out of index range.");
+    case 0:
+      return _x;
+    case 1:
+      return _y;
+    case 2:
+      return _z;
+    default:
+      EFAError("EFAPoint: Out of index range.");
   }
 }
 
 EFAPoint &
-EFAPoint::operator /= (const double a)
+EFAPoint::operator/=(const double a)
 {
   _x /= a;
   _y /= a;
@@ -38,7 +37,7 @@ EFAPoint::operator /= (const double a)
 }
 
 EFAPoint &
-EFAPoint::operator *= (const double a)
+EFAPoint::operator*=(const double a)
 {
   _x *= a;
   _y *= a;
@@ -47,7 +46,7 @@ EFAPoint::operator *= (const double a)
 }
 
 EFAPoint &
-EFAPoint::operator += (const EFAPoint & point)
+EFAPoint::operator+=(const EFAPoint & point)
 {
   _x += point._x;
   _y += point._y;
@@ -55,26 +54,24 @@ EFAPoint::operator += (const EFAPoint & point)
   return *this;
 }
 
-EFAPoint
-EFAPoint::operator * (const double a)
+EFAPoint EFAPoint::operator*(const double a)
 {
   return EFAPoint(this->_x * a, this->_y * a, this->_z * a);
 }
 
-double
-EFAPoint::operator * (const EFAPoint & point)
+double EFAPoint::operator*(const EFAPoint & point)
 {
   return this->_x * point._x + this->_y * point._y + this->_z * point._z;
 }
 
 EFAPoint
-EFAPoint::operator + (const EFAPoint & point)
+EFAPoint::operator+(const EFAPoint & point)
 {
   return EFAPoint(this->_x + point._x, this->_y + point._y, this->_z + point._z);
 }
 
 EFAPoint
-EFAPoint::operator - (const EFAPoint & point)
+EFAPoint::operator-(const EFAPoint & point)
 {
   return EFAPoint(this->_x - point._x, this->_y - point._y, this->_z - point._z);
 }

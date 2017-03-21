@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSPPENALTY
 #define RICHARDSPPENALTY
 
@@ -14,7 +13,7 @@
 // Forward Declarations
 class RichardsPPenalty;
 
-template<>
+template <>
 InputParameters validParams<RichardsPPenalty>();
 
 /**
@@ -24,9 +23,7 @@ InputParameters validParams<RichardsPPenalty>();
 class RichardsPPenalty : public Kernel
 {
 public:
-
   RichardsPPenalty(const InputParameters & parameters);
-
 
 protected:
   virtual Real computeQpResidual();
@@ -34,7 +31,6 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-
   /// Kernel = a*(_lower - variable) for variable<lower and zero otherwise
   Real _a;
 
@@ -45,4 +41,4 @@ private:
   unsigned int _lower_var_num;
 };
 
-#endif //RICHARDSPPENALTY
+#endif // RICHARDSPPENALTY

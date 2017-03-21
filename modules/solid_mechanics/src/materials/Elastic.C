@@ -6,25 +6,22 @@
 /****************************************************************/
 #include "Elastic.h"
 
-template<>
-InputParameters validParams<Elastic>()
+template <>
+InputParameters
+validParams<Elastic>()
 {
   InputParameters params = validParams<SolidModel>();
   return params;
 }
 
-Elastic::Elastic( const InputParameters & parameters)
-  :SolidModel(parameters)
+Elastic::Elastic(const InputParameters & parameters) : SolidModel(parameters)
 {
 
   createConstitutiveModel("ElasticModel");
-
 }
 
 ////////////////////////////////////////////////////////////////////////
 
-Elastic::~Elastic()
-{
-}
+Elastic::~Elastic() {}
 
 ////////////////////////////////////////////////////////////////////////

@@ -8,8 +8,9 @@
 
 #include "SimpleEigenStrainMaterial.h"
 
-template<>
-InputParameters validParams<SimpleEigenStrainMaterial>()
+template <>
+InputParameters
+validParams<SimpleEigenStrainMaterial>()
 {
   InputParameters params = validParams<EigenStrainBaseMaterial>();
   params.addClassDescription("Compute a concentration dependent isotropic Eigenstrain");
@@ -19,15 +20,18 @@ InputParameters validParams<SimpleEigenStrainMaterial>()
   return params;
 }
 
-SimpleEigenStrainMaterial::SimpleEigenStrainMaterial(const InputParameters & parameters) :
-    EigenStrainBaseMaterial(parameters),
+SimpleEigenStrainMaterial::SimpleEigenStrainMaterial(const InputParameters & parameters)
+  : EigenStrainBaseMaterial(parameters),
     _epsilon0(getParam<Real>("epsilon0")),
     _c0(getParam<Real>("c0"))
 {
-  mooseDeprecated("SimpleEigenStrainMaterial is deprecated. Refer to http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Deprecations/SimpleEigenStrainMaterial to convert this input file.");
+  mooseDeprecated("SimpleEigenStrainMaterial is deprecated. Refer to "
+                  "http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Deprecations/"
+                  "SimpleEigenStrainMaterial to convert this input file.");
 }
 
-void SimpleEigenStrainMaterial::computeEigenStrain()
+void
+SimpleEigenStrainMaterial::computeEigenStrain()
 {
   _eigenstrain[_qp].zero();
   _eigenstrain[_qp].addIa(_epsilon0 * (_c[_qp] - _c0));
@@ -40,7 +44,8 @@ void SimpleEigenStrainMaterial::computeEigenStrain()
   _d2elastic_strain_dc2[_qp].zero();
 }
 
-void SimpleEigenStrainMaterial::computeQpElasticityTensor()
+void
+SimpleEigenStrainMaterial::computeQpElasticityTensor()
 {
   _Jacobian_mult[_qp] = _elasticity_tensor[_qp] = _Cijkl;
 

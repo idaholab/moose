@@ -26,7 +26,7 @@ protected:
   const unsigned int _component;
 };
 
-template<>
+template <>
 InputParameters validParams<HomogenizedHeatConduction>();
 
-#endif //HOMOGENIZEDHEATCONDUCTION_H
+#endif // HOMOGENIZEDHEATCONDUCTION_H

@@ -13,13 +13,13 @@
 // Forward Declarations
 class CHPFCRFFSplitKernelAction;
 
-template<>
+template <>
 InputParameters validParams<CHPFCRFFSplitKernelAction>();
 
 /**
  * \todo Needs documentation.
  */
-class CHPFCRFFSplitKernelAction: public Action
+class CHPFCRFFSplitKernelAction : public Action
 {
 public:
   CHPFCRFFSplitKernelAction(const InputParameters & params);
@@ -32,4 +32,4 @@ private:
   const NonlinearVariableName _n_name;
 };
 
-#endif //CHPFCRFFSPLITKERNELACTION_H
+#endif // CHPFCRFFSPLITKERNELACTION_H

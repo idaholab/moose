@@ -38,4 +38,4 @@ protected:
   RankFourTensor _Cijkl;
 };
 
-#endif //COMPUTEISOTROPICELASTICITYTENSOR_H
+#endif // COMPUTEISOTROPICELASTICITYTENSOR_H

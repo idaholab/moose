@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSFULLYUPWINDFLUX
 #define RICHARDSFULLYUPWINDFLUX
 
@@ -19,7 +18,7 @@
 // Forward Declarations
 class RichardsFullyUpwindFlux;
 
-template<>
+template <>
 InputParameters validParams<RichardsFullyUpwindFlux>();
 
 /**
@@ -47,12 +46,9 @@ InputParameters validParams<RichardsFullyUpwindFlux>();
 class RichardsFullyUpwindFlux : public Kernel
 {
 public:
-
   RichardsFullyUpwindFlux(const InputParameters & parameters);
 
-
 protected:
-
   /**
    * Note that this is not the complete residual for the quadpoint
    * In computeResidual we sum over the quadpoints and then add
@@ -109,16 +105,16 @@ protected:
   const RichardsRelPerm & _relperm_UO;
 
   /// viscosities
-  const MaterialProperty<std::vector<Real> > &_viscosity;
+  const MaterialProperty<std::vector<Real>> & _viscosity;
 
   /// permeability*(grad(pressure) - density*gravity)  (a vector of these in the multiphase case)
-  const MaterialProperty<std::vector<RealVectorValue> > & _flux_no_mob;
+  const MaterialProperty<std::vector<RealVectorValue>> & _flux_no_mob;
 
   /// d(_flux_no_mob)/d(variable)
-  const MaterialProperty<std::vector<std::vector<RealVectorValue> > > & _dflux_no_mob_dv;
+  const MaterialProperty<std::vector<std::vector<RealVectorValue>>> & _dflux_no_mob_dv;
 
   /// d(_flux_no_mob)/d(grad(variable))
-  const MaterialProperty<std::vector<std::vector<RealTensorValue> > > & _dflux_no_mob_dgradv;
+  const MaterialProperty<std::vector<std::vector<RealTensorValue>>> & _dflux_no_mob_dgradv;
 
   /// number of nodes in this element
   unsigned int _num_nodes;
@@ -133,7 +129,7 @@ protected:
    * d(_mobility)/d(variable_ph)  (variable_ph is the variable for phase=ph)
    * These are used in the jacobian calculations
    */
-  std::vector<std::vector<Real> > _dmobility_dv;
+  std::vector<std::vector<Real>> _dmobility_dv;
 
   /**
    * Holds the values of pressures at all the nodes of the element
@@ -144,4 +140,4 @@ protected:
   std::vector<const VariableValue *> _ps_at_nodes;
 };
 
-#endif //RICHARDSFULLYUPWINDFLUX
+#endif // RICHARDSFULLYUPWINDFLUX

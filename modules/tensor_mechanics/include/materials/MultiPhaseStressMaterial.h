@@ -14,7 +14,7 @@ class MultiPhaseStressMaterial;
 class RankTwoTensor;
 class RankFourTensor;
 
-template<>
+template <>
 InputParameters validParams<MultiPhaseStressMaterial>();
 
 /**
@@ -49,4 +49,4 @@ protected:
   MaterialProperty<RankFourTensor> & _dstress_dstrain;
 };
 
-#endif //MULTIPHASESTRESSMATERIAL_H
+#endif // MULTIPHASESTRESSMATERIAL_H

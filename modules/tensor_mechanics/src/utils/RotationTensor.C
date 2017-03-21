@@ -7,15 +7,9 @@
 #include "RotationTensor.h"
 #include "libmesh/libmesh.h"
 
-RotationTensor::RotationTensor(Axis axis, Real angle)
-{
-  update(axis, angle);
-}
+RotationTensor::RotationTensor(Axis axis, Real angle) { update(axis, angle); }
 
-RotationTensor::RotationTensor(const RealVectorValue & euler_angles)
-{
-  update(euler_angles);
-}
+RotationTensor::RotationTensor(const RealVectorValue & euler_angles) { update(euler_angles); }
 
 void
 RotationTensor::update(Axis axis, Real angle)
@@ -28,7 +22,7 @@ RotationTensor::update(Axis axis, Real angle)
   const Real s = std::sin(angle * libMesh::pi / 180.0);
   const Real c = std::cos(angle * libMesh::pi / 180.0);
 
-  //assemble row wise
+  // assemble row wise
   _coords[0] = a * RealVectorValue(1.0, -c, -c);
   _coords[1] = a * RealVectorValue(0.0, 0.0, s);
   _coords[2] = a * RealVectorValue(0.0, -s, 0.0);
@@ -60,15 +54,15 @@ RotationTensor::update(const RealVectorValue & euler_angles)
   // doing a Z1, X2, Z3 rotation
   // RealTensorValue is formed row-wise
 
-  _coords[0] = c1 * c3 - c2 * s1 * s3;  //R11
-  _coords[3] = -c1 * s3 - c2 * c3 * s1; //R12
-  _coords[6] = s1 * s2;                 //R13
+  _coords[0] = c1 * c3 - c2 * s1 * s3;  // R11
+  _coords[3] = -c1 * s3 - c2 * c3 * s1; // R12
+  _coords[6] = s1 * s2;                 // R13
 
-  _coords[1] = c3 * s1 + c1 * c2 * s3; //R21
-  _coords[4] = c1 * c2 * c3 - s1 * s3; //R22
-  _coords[7] = -c1 * s2;               //R23
+  _coords[1] = c3 * s1 + c1 * c2 * s3; // R21
+  _coords[4] = c1 * c2 * c3 - s1 * s3; // R22
+  _coords[7] = -c1 * s2;               // R23
 
-  _coords[2] = s2 * s3; //R31
-  _coords[5] = c3 * s2; //R32
-  _coords[8] = c2;      //R33
+  _coords[2] = s2 * s3; // R31
+  _coords[5] = c3 * s2; // R32
+  _coords[8] = c2;      // R33
 }

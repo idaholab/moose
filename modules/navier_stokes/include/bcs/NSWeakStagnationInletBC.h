@@ -11,7 +11,7 @@
 
 class NSWeakStagnationInletBC;
 
-template<>
+template <>
 InputParameters validParams<NSWeakStagnationInletBC>();
 
 /**
@@ -26,7 +26,6 @@ public:
   virtual ~NSWeakStagnationInletBC();
 
 protected:
-
 };
 
 #endif

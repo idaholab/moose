@@ -12,7 +12,7 @@
 
 class SharpInterfaceForcing;
 
-template<>
+template <>
 InputParameters validParams<SharpInterfaceForcing>();
 
 /**
@@ -21,7 +21,6 @@ InputParameters validParams<SharpInterfaceForcing>();
 class SharpInterfaceForcing : public Kernel
 {
 public:
-
   SharpInterfaceForcing(const InputParameters & parameters);
 
 protected:
@@ -32,4 +31,4 @@ protected:
   Real _amplitude;
 };
 
-#endif //SHARPINTERFACEFORCING_H
+#endif // SHARPINTERFACEFORCING_H

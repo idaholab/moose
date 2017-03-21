@@ -10,10 +10,10 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowPermeabilityExponential;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPermeabilityExponential>();
 
 /**
@@ -56,7 +56,7 @@ protected:
   const MaterialProperty<std::vector<RealGradient>> & _dporosity_qp_dgradvar;
 
   /// Name of porosity-permeability relationship
-  const enum PoropermFunction {log_k, ln_k, exp_k} _poroperm_function;
+  const enum PoropermFunction { log_k, ln_k, exp_k } _poroperm_function;
 
   /// Empirical constant AA in k = k_ijk * BB * exp(AA * phi)
   Real _AA;
@@ -65,4 +65,4 @@ protected:
   Real _BB;
 };
 
-#endif //POROUSFLOWPERMEABILITYEXPONENTIAL_H
+#endif // POROUSFLOWPERMEABILITYEXPONENTIAL_H

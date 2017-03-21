@@ -36,16 +36,17 @@
 // Transfers
 #include "LevelSetMeshRefinementTransfer.h"
 
-template<>
-InputParameters validParams<LevelSetApp>()
+template <>
+InputParameters
+validParams<LevelSetApp>()
 {
   InputParameters params = validParams<MooseApp>();
-  params.addClassDescription("Application containing object necessary to solve the level set equation.");
+  params.addClassDescription(
+      "Application containing object necessary to solve the level set equation.");
   return params;
 }
 
-LevelSetApp::LevelSetApp(InputParameters parameters) :
-    MooseApp(parameters)
+LevelSetApp::LevelSetApp(InputParameters parameters) : MooseApp(parameters)
 {
   srand(processor_id());
 

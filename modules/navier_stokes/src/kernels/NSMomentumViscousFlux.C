@@ -11,15 +11,14 @@ InputParameters
 validParams<NSMomentumViscousFlux>()
 {
   InputParameters params = validParams<NSKernel>();
-  params.addClassDescription("Derived instance of the NSViscousFluxBase class for the momentum equations.");
+  params.addClassDescription(
+      "Derived instance of the NSViscousFluxBase class for the momentum equations.");
   params.addRequiredParam<unsigned int>("component", "");
   return params;
 }
 
 NSMomentumViscousFlux::NSMomentumViscousFlux(const InputParameters & parameters)
-  : NSKernel(parameters),
-    _component(getParam<unsigned int>("component")),
-    _vst_derivs(*this)
+  : NSKernel(parameters), _component(getParam<unsigned int>("component")), _vst_derivs(*this)
 {
 }
 
@@ -30,9 +29,7 @@ NSMomentumViscousFlux::computeQpResidual()
   const RealTensorValue & vst = _viscous_stress_tensor[_qp];
 
   // _component'th column of vst...
-  RealVectorValue vec(vst(0, _component),
-                      vst(1, _component),
-                      vst(2, _component));
+  RealVectorValue vec(vst(0, _component), vst(1, _component), vst(2, _component));
 
   // ... dotted with grad(phi), note: sign is positive as this term was -div(tau) on the lhs
   return vec * _grad_test[_i][_qp];

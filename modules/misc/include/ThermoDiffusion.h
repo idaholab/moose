@@ -35,7 +35,7 @@
 class ThermoDiffusion : public Kernel
 {
 public:
-  ThermoDiffusion( const InputParameters & parameters);
+  ThermoDiffusion(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -45,20 +45,20 @@ protected:
   /**
    * @brief Computes contribution from grad( T ) / T^2 term.
    */
-  virtual Real computeQpOffDiagJacobian( unsigned int jvar );
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
   RealGradient thermoDiffusionVelocity() const;
 
   const VariableValue & _temperature;
   const VariableGradient & _grad_temperature;
-  const MaterialProperty< Real > & _mass_diffusivity;
-  const MaterialProperty< Real > & _heat_of_transport;
+  const MaterialProperty<Real> & _mass_diffusivity;
+  const MaterialProperty<Real> & _heat_of_transport;
   const Real _gas_constant;
   const unsigned int _temperature_index;
 };
 
-template<>
-InputParameters validParams< ThermoDiffusion >();
+template <>
+InputParameters validParams<ThermoDiffusion>();
 
 #endif // THERMODIFFUSION_H

@@ -10,10 +10,10 @@
 
 #include "LaplacianSplit.h"
 
-//Forward Declarations
+// Forward Declarations
 class CHCpldPFCTrad;
 
-template<>
+template <>
 InputParameters validParams<CHCpldPFCTrad>();
 
 class CHCpldPFCTrad : public LaplacianSplit
@@ -29,4 +29,4 @@ private:
   const MaterialProperty<Real> & _coeff;
 };
 
-#endif //CHCPLDPFCTRAD_H
+#endif // CHCPLDPFCTRAD_H

@@ -9,10 +9,10 @@
 
 #include "SplitCHCRes.h"
 
-//Forward Declarations
+// Forward Declarations
 class SplitCHMath;
 
-template<>
+template <>
 InputParameters validParams<SplitCHMath>();
 
 /// The couple, SplitCHMath and SplitCHWRes, splits the CH equation by replacing chemical potential with 'w'.
@@ -25,4 +25,4 @@ protected:
   virtual Real computeDFDC(PFFunctionType type);
 };
 
-#endif //SPLITCHMATH_H
+#endif // SPLITCHMATH_H

@@ -11,10 +11,10 @@
 #include "RankFourTensor.h"
 #include "Conversion.h"
 
-//Forward declaration
+// Forward declaration
 class StressUpdateBase;
 
-template<>
+template <>
 InputParameters validParams<StressUpdateBase>();
 
 /**
@@ -52,4 +52,4 @@ protected:
   const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
 };
 
-#endif //STRESSUPDATEBASE_H
+#endif // STRESSUPDATEBASE_H

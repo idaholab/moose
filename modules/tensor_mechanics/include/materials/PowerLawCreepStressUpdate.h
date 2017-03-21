@@ -52,7 +52,7 @@ protected:
   MaterialProperty<RankTwoTensor> & _creep_strain_old;
 };
 
-template<>
+template <>
 InputParameters validParams<PowerLawCreepStressUpdate>();
 
-#endif //RECOMPUTERADIALRETURNPOWERLAWCREEP_H
+#endif // RECOMPUTERADIALRETURNPOWERLAWCREEP_H

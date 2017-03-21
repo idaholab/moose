@@ -7,20 +7,23 @@
 
 #include "LevelSetVolume.h"
 
-template<>
-InputParameters validParams<LevelSetVolume>()
+template <>
+InputParameters
+validParams<LevelSetVolume>()
 {
   InputParameters params = validParams<ElementVariablePostprocessor>();
-  params.addClassDescription("Compute the area or volume of the region inside or outside of a level set contour.");
-  params.addParam<Real>("threshold", 0.0, "The level set threshold to consider for computing area/volume.");
+  params.addClassDescription(
+      "Compute the area or volume of the region inside or outside of a level set contour.");
+  params.addParam<Real>(
+      "threshold", 0.0, "The level set threshold to consider for computing area/volume.");
 
   MooseEnum loc("inside=0 outside=1", "inside");
   params.addParam<MooseEnum>("location", loc, "The location of the area/volume to be computed.");
   return params;
 }
 
-LevelSetVolume::LevelSetVolume(const InputParameters & parameters) :
-    ElementVariablePostprocessor(parameters),
+LevelSetVolume::LevelSetVolume(const InputParameters & parameters)
+  : ElementVariablePostprocessor(parameters),
     _threshold(getParam<Real>("threshold")),
     _inside(getParam<MooseEnum>("location") == "inside")
 {
@@ -42,14 +45,14 @@ LevelSetVolume::execute()
   if (_inside)
   {
     for (_qp = 0; _qp < n; ++_qp)
-    if (_u[_qp] <= _threshold)
-      cnt++;
+      if (_u[_qp] <= _threshold)
+        cnt++;
   }
   else
   {
     for (_qp = 0; _qp < n; ++_qp)
-    if (_u[_qp] > _threshold)
-      cnt++;
+      if (_u[_qp] > _threshold)
+        cnt++;
   }
   _volume += cnt / n * _current_elem_volume;
 }
@@ -59,7 +62,6 @@ LevelSetVolume::finalize()
 {
   gatherSum(_volume);
 }
-
 
 Real
 LevelSetVolume::getValue()

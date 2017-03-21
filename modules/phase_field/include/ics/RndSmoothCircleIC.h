@@ -12,7 +12,7 @@
 // Forward Declarations
 class RndSmoothCircleIC;
 
-template<>
+template <>
 InputParameters validParams<RndSmoothCircleIC>();
 
 /**
@@ -31,4 +31,4 @@ private:
   const Real _variation_outvalue;
 };
 
-#endif //RNDSMOOTHCIRCLEIC_H
+#endif // RNDSMOOTHCIRCLEIC_H

@@ -9,10 +9,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class MollifiedLangmuirMaterial;
 
-template<>
+template <>
 InputParameters validParams<MollifiedLangmuirMaterial>();
 
 /**
@@ -64,4 +64,4 @@ private:
   MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
 };
 
-#endif //MOLLFIEDLANGMUIRMATERIAL_H
+#endif // MOLLFIEDLANGMUIRMATERIAL_H

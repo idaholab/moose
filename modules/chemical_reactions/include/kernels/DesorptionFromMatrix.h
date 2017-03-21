@@ -13,7 +13,7 @@
 // Forward Declarations
 class DesorptionFromMatrix;
 
-template<>
+template <>
 InputParameters validParams<DesorptionFromMatrix>();
 
 /**
@@ -43,4 +43,4 @@ protected:
   const MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
 };
 
-#endif //DESORPTIONFROMMATRIX
+#endif // DESORPTIONFROMMATRIX

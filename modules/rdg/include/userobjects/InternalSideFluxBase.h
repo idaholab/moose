@@ -13,7 +13,7 @@
 // Forward Declarations
 class InternalSideFluxBase;
 
-template<>
+template <>
 InputParameters validParams<InternalSideFluxBase>();
 
 /**
@@ -112,16 +112,15 @@ public:
                             DenseMatrix<Real> & jac2) const = 0;
 
 protected:
-
   mutable unsigned int _cached_elem_id;
   mutable unsigned int _cached_neig_id;
 
   /// flux vector of this side
-  mutable std::vector<std::vector<Real> > _flux;
+  mutable std::vector<std::vector<Real>> _flux;
   /// Jacobian matrix contribution to the "left" cell
-  mutable std::vector<DenseMatrix<Real> > _jac1;
+  mutable std::vector<DenseMatrix<Real>> _jac1;
   /// Jacobian matrix contribution to the "right" cell
-  mutable std::vector<DenseMatrix<Real> > _jac2;
+  mutable std::vector<DenseMatrix<Real>> _jac2;
 
 private:
   static Threads::spin_mutex _mutex;

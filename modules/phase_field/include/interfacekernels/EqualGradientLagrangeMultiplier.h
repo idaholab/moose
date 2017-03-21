@@ -11,8 +11,8 @@
 
 class EqualGradientLagrangeMultiplier;
 
-template<>
-  InputParameters validParams<EqualGradientLagrangeMultiplier>();
+template <>
+InputParameters validParams<EqualGradientLagrangeMultiplier>();
 
 /**
  * Lagrange multiplier "FaceKernel" that is used in conjunction with
@@ -43,5 +43,4 @@ protected:
   const Real _jacobian_fill;
 };
 
-
-#endif //EQUALGRADIENTLAGRANGEMULTIPLIER_H
+#endif // EQUALGRADIENTLAGRANGEMULTIPLIER_H

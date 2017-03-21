@@ -3,10 +3,10 @@
 
 #include "CHBulk.h"
 
-//Forward Declarations
+// Forward Declarations
 class CHBulkPFCTrad;
 
-template<>
+template <>
 InputParameters validParams<CHBulkPFCTrad>();
 
 class CHBulkPFCTrad : public CHBulk<Real>
@@ -23,4 +23,4 @@ private:
   const MaterialProperty<Real> & _b;
 };
 
-#endif //CHBULKPFCTRAD_H
+#endif // CHBULKPFCTRAD_H

@@ -13,7 +13,7 @@
 
 class PorousFlowTemperature;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowTemperature>();
 
 /**
@@ -59,4 +59,4 @@ protected:
   MaterialProperty<std::vector<RealGradient>> * const _dgrad_temperature_dv;
 };
 
-#endif //POROUSFLOWTEMPERATURE_H
+#endif // POROUSFLOWTEMPERATURE_H

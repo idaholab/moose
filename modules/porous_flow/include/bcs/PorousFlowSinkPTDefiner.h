@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWSINKPTDEFINER_H
 #define POROUSFLOWSINKPTDEFINER_H
 
@@ -14,7 +13,7 @@
 // Forward Declarations
 class PorousFlowSinkPTDefiner;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowSinkPTDefiner>();
 
 /**
@@ -25,7 +24,6 @@ InputParameters validParams<PorousFlowSinkPTDefiner>();
 class PorousFlowSinkPTDefiner : public PorousFlowSink
 {
 public:
-
   PorousFlowSinkPTDefiner(const InputParameters & parameters);
 
 protected:
@@ -48,4 +46,4 @@ protected:
   virtual Real dptVar(unsigned pvar) const;
 };
 
-#endif //POROUSFLOWSINKPTDEFINER_H
+#endif // POROUSFLOWSINKPTDEFINER_H

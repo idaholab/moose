@@ -13,7 +13,7 @@
 class NSTemperatureAux;
 class IdealGasFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<NSTemperatureAux>();
 
 /**

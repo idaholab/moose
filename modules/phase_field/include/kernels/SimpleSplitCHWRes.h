@@ -11,7 +11,7 @@
 
 class SimpleSplitCHWRes;
 
-template<>
+template <>
 InputParameters validParams<SimpleSplitCHWRes>();
 
 /**
@@ -30,4 +30,4 @@ protected:
   const MaterialProperty<Real> & _M;
 };
 
-#endif //SIMPLESPLITCHWRES_H
+#endif // SIMPLESPLITCHWRES_H

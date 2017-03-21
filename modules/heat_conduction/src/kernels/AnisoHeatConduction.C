@@ -8,17 +8,17 @@
 #include "AnisoHeatConduction.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<AnisoHeatConduction>()
+template <>
+InputParameters
+validParams<AnisoHeatConduction>()
 {
   InputParameters params = validParams<Kernel>();
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
-AnisoHeatConduction::AnisoHeatConduction(const InputParameters & parameters) :
-  Kernel(parameters),
-  _dim(_subproblem.mesh().dimension())
+AnisoHeatConduction::AnisoHeatConduction(const InputParameters & parameters)
+  : Kernel(parameters), _dim(_subproblem.mesh().dimension())
 {
   _k_i[0] = _k_i[1] = _k_i[2] = NULL;
   _k_i_dT[0] = _k_i_dT[1] = _k_i_dT[2] = NULL;
@@ -40,7 +40,6 @@ AnisoHeatConduction::AnisoHeatConduction(const InputParameters & parameters) :
 
   if (hasMaterialProperty<Real>("thermal_conductivity_z_dT"))
     _k_i_dT[2] = &getMaterialProperty<Real>("thermal_conductivity_z_dT");
-
 
   if (!_k_i[0])
     mooseError("No thermal conductivity was defined");
@@ -68,22 +67,22 @@ Real
 AnisoHeatConduction::computeQpResidual()
 {
   Real r(0);
-//   r = _k[_qp]*Diffusion::computeQpResidual();
-//   if (!libmesh_isnan(r))
-//   {
-//   }
-//   else
-//   {
-//     Moose::err << "NaN found at " << __LINE__ << " in " << __FILE__ << "!\n"
-//               << "Processor: " << libMesh::processor_id() << "\n"
-//               << "_k[_qp]: " << _k[_qp] << "\n"
-//               << "Diffusion resid: " << Diffusion::computeQpResidual() << "\n"
-//               << "Elem: " << _current_elem->id() << "\n"
-//               << "Qp: " << _qp << "\n"
-//               << "Qpoint: " << _q_point[_qp] << "\n"
-//               << std::endl;
-//   }
-//   return r;
+  //   r = _k[_qp]*Diffusion::computeQpResidual();
+  //   if (!libmesh_isnan(r))
+  //   {
+  //   }
+  //   else
+  //   {
+  //     Moose::err << "NaN found at " << __LINE__ << " in " << __FILE__ << "!\n"
+  //               << "Processor: " << libMesh::processor_id() << "\n"
+  //               << "_k[_qp]: " << _k[_qp] << "\n"
+  //               << "Diffusion resid: " << Diffusion::computeQpResidual() << "\n"
+  //               << "Elem: " << _current_elem->id() << "\n"
+  //               << "Qp: " << _qp << "\n"
+  //               << "Qpoint: " << _q_point[_qp] << "\n"
+  //               << std::endl;
+  //   }
+  //   return r;
   for (unsigned i(0); i < _dim; ++i)
   {
     r += _grad_test[_i][_qp](i) * (*_k_i[i])[_qp] * _grad_u[_qp](i);
@@ -98,12 +97,11 @@ AnisoHeatConduction::computeQpJacobian()
   for (unsigned i(0); i < _dim; ++i)
   {
     jac += _grad_test[_i][_qp](i) * (*_k_i[i])[_qp] * _grad_phi[_j][_qp](i);
-    if ( _k_i_dT[i] )
+    if (_k_i_dT[i])
     {
       jac += (*_k_i_dT[i])[_qp] * _phi[_j][_qp] *
-        (_grad_test[_i][_qp](i) * (*_k_i[i])[_qp] * _grad_u[_qp](i));
+             (_grad_test[_i][_qp](i) * (*_k_i[i])[_qp] * _grad_u[_qp](i));
     }
   }
   return jac;
 }
-

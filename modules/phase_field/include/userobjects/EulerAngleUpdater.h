@@ -9,13 +9,13 @@
 
 #include "EulerAngleProvider.h"
 
-//Forward declaration
+// Forward declaration
 class EulerAngleUpdater;
 class RotationTensor;
 class GrainTrackerInterface;
 class GrainForceAndTorqueInterface;
 
-template<>
+template <>
 InputParameters validParams<EulerAngleUpdater>();
 
 /**
@@ -26,7 +26,8 @@ InputParameters validParams<EulerAngleUpdater>();
  * Step2: Obtain the torque acting on the grains at current time Step
  * Step3: Calculate the angular velocities around global axes
  * Step4: Calculate change in euler angles due to torque and corresponding rotation matrix(R1)
- * Step5: Calculate final rotation matrix, R = R1 * R0, determines the final position of any rotated vector
+ * Step5: Calculate final rotation matrix, R = R1 * R0, determines the final position of any rotated
+ * vector
  * Step6: Back-calculate the euler angles from the final rotation matrix
  * Step7: Ensure euler angles comply with Bunge definitions
  */
@@ -56,4 +57,4 @@ protected:
   std::vector<EulerAngles> _angles_old;
 };
 
-#endif //EULERANGLEUPDATER_H
+#endif // EULERANGLEUPDATER_H

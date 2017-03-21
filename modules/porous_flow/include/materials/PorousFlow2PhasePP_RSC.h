@@ -11,10 +11,10 @@
 #include "PorousFlow2PhasePP.h"
 #include "PorousFlowRogersStallybrassClements.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlow2PhasePP_RSC;
 
-template<>
+template <>
 InputParameters validParams<PorousFlow2PhasePP_RSC>();
 
 /**
@@ -47,4 +47,4 @@ protected:
   const Real _scale;
 };
 
-#endif //POROUSFLOW2PHASEPP_RSC_H
+#endif // POROUSFLOW2PHASEPP_RSC_H

@@ -11,22 +11,28 @@ InputParameters
 validParams<ComputeLinearElasticPFFractureStress>()
 {
   InputParameters params = validParams<ComputeStressBase>();
-  params.addClassDescription("Phase-field fracture model energy contribution to fracture for elasticity and undamaged stress under compressive strain");
+  params.addClassDescription("Phase-field fracture model energy contribution to fracture for "
+                             "elasticity and undamaged stress under compressive strain");
   params.addRequiredCoupledVar("c", "Order parameter for damage");
   params.addParam<Real>("kdamage", 1e-6, "Stiffness of damaged matrix");
-  params.addParam<MaterialPropertyName>("F_name", "E_el", "Name of material property storing the elastic energy");
+  params.addParam<MaterialPropertyName>(
+      "F_name", "E_el", "Name of material property storing the elastic energy");
   return params;
 }
 
-ComputeLinearElasticPFFractureStress::ComputeLinearElasticPFFractureStress(const InputParameters & parameters)
+ComputeLinearElasticPFFractureStress::ComputeLinearElasticPFFractureStress(
+    const InputParameters & parameters)
   : ComputeStressBase(parameters),
     _c(coupledValue("c")),
     _kdamage(getParam<Real>("kdamage")),
     _F(declareProperty<Real>(getParam<MaterialPropertyName>("F_name"))),
-    _dFdc(declarePropertyDerivative<Real>(getParam<MaterialPropertyName>("F_name"), getVar("c", 0)->name())),
-    _d2Fdc2(declarePropertyDerivative<Real>(getParam<MaterialPropertyName>("F_name"), getVar("c", 0)->name(), getVar("c", 0)->name())),
+    _dFdc(declarePropertyDerivative<Real>(getParam<MaterialPropertyName>("F_name"),
+                                          getVar("c", 0)->name())),
+    _d2Fdc2(declarePropertyDerivative<Real>(
+        getParam<MaterialPropertyName>("F_name"), getVar("c", 0)->name(), getVar("c", 0)->name())),
     _d2Fdcdstrain(declareProperty<RankTwoTensor>("d2Fdcdstrain")),
-    _dstress_dc(declarePropertyDerivative<RankTwoTensor>(_base_name + "stress", getVar("c", 0)->name()))
+    _dstress_dc(
+        declarePropertyDerivative<RankTwoTensor>(_base_name + "stress", getVar("c", 0)->name()))
 {
 }
 

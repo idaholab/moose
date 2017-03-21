@@ -7,16 +7,17 @@
 
 #include "ElementLoopUserObject.h"
 
-template<>
-InputParameters validParams<ElementLoopUserObject>()
+template <>
+InputParameters
+validParams<ElementLoopUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params += validParams<BlockRestrictable>();
   return params;
 }
 
-ElementLoopUserObject::ElementLoopUserObject(const InputParameters & parameters) :
-    GeneralUserObject(parameters),
+ElementLoopUserObject::ElementLoopUserObject(const InputParameters & parameters)
+  : GeneralUserObject(parameters),
     BlockRestrictable(parameters),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
@@ -36,8 +37,8 @@ ElementLoopUserObject::ElementLoopUserObject(const InputParameters & parameters)
     addMooseVariableDependency(coupled_vars[i]);
 }
 
-ElementLoopUserObject::ElementLoopUserObject(ElementLoopUserObject & x, Threads::split /*split*/) :
-    GeneralUserObject(x.parameters()),
+ElementLoopUserObject::ElementLoopUserObject(ElementLoopUserObject & x, Threads::split /*split*/)
+  : GeneralUserObject(x.parameters()),
     BlockRestrictable(x.parameters()),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
@@ -57,9 +58,7 @@ ElementLoopUserObject::ElementLoopUserObject(ElementLoopUserObject & x, Threads:
     addMooseVariableDependency(coupled_vars[i]);
 }
 
-ElementLoopUserObject::~ElementLoopUserObject()
-{
-}
+ElementLoopUserObject::~ElementLoopUserObject() {}
 
 void
 ElementLoopUserObject::initialize()
@@ -101,7 +100,9 @@ ElementLoopUserObject::execute()
         std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(elem, side);
 
         if (boundary_ids.size() > 0)
-          for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+          for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
+               it != boundary_ids.end();
+               ++it)
             onBoundary(elem, side, *it);
 
         if (elem->neighbor(side) != NULL)
@@ -109,7 +110,9 @@ ElementLoopUserObject::execute()
           if (this->hasBlocks(elem->neighbor(side)->subdomain_id()))
             onInternalSide(elem, side);
           if (boundary_ids.size() > 0)
-            for (std::vector<BoundaryID>::iterator it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
+            for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
+                 it != boundary_ids.end();
+                 ++it)
               onInterface(elem, side, *it);
         }
       } // sides
@@ -155,7 +158,7 @@ ElementLoopUserObject::onBoundary(const Elem * /*elem*/, unsigned int side, Boun
 }
 
 void
-ElementLoopUserObject::onInternalSide(const Elem *elem, unsigned int side)
+ElementLoopUserObject::onInternalSide(const Elem * elem, unsigned int side)
 {
   _current_elem = elem;
   // Pointer to the neighbor we are currently working on.
@@ -166,20 +169,26 @@ ElementLoopUserObject::onInternalSide(const Elem *elem, unsigned int side)
   const dof_id_type neighbor_id = _current_neighbor->id();
 
   // TODO: add if-statement to check if this needs to be executed
-  if ((_current_neighbor->active() && (_current_neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (_current_neighbor->level() < elem->level()))
+  if ((_current_neighbor->active() && (_current_neighbor->level() == elem->level()) &&
+       (elem_id < neighbor_id)) ||
+      (_current_neighbor->level() < elem->level()))
   {
     computeInternalSide();
   }
 
-  if (!_have_interface_elems && (_current_elem->processor_id() != _current_neighbor->processor_id()))
+  if (!_have_interface_elems &&
+      (_current_elem->processor_id() != _current_neighbor->processor_id()))
   {
-    // if my current neighbor is on another processor store the current element ID for later communication
+    // if my current neighbor is on another processor store the current element ID for later
+    // communication
     _interface_elem_ids.insert(_current_elem->id());
   }
 }
 
 void
-ElementLoopUserObject::onInterface(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/)
+ElementLoopUserObject::onInterface(const Elem * /*elem*/,
+                                   unsigned int /*side*/,
+                                   BoundaryID /*bnd_id*/)
 {
 }
 

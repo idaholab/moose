@@ -11,7 +11,7 @@
 
 class MortarPeriodicAction;
 
-template<>
+template <>
 InputParameters validParams<MortarPeriodicAction>();
 
 /**

@@ -12,7 +12,7 @@
 // Forward Declarations
 class SmoothCircleIC;
 
-template<>
+template <>
 InputParameters validParams<SmoothCircleIC>();
 
 /**
@@ -36,4 +36,4 @@ protected:
   Point _center;
 };
 
-#endif //SMOOTHCIRCLEIC_H
+#endif // SMOOTHCIRCLEIC_H

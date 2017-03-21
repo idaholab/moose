@@ -10,10 +10,10 @@
 // MOOSE includes
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class NSEnthalpyAux;
 
-template<>
+template <>
 InputParameters validParams<NSEnthalpyAux>();
 
 /**

@@ -19,10 +19,9 @@ validParams<NSEnergyInviscidSpecifiedNormalFlowBC>()
   return params;
 }
 
-NSEnergyInviscidSpecifiedNormalFlowBC::NSEnergyInviscidSpecifiedNormalFlowBC(const InputParameters & parameters)
-  : NSEnergyInviscidBC(parameters),
-    _pressure(coupledValue(NS::pressure)),
-    _un(getParam<Real>("un"))
+NSEnergyInviscidSpecifiedNormalFlowBC::NSEnergyInviscidSpecifiedNormalFlowBC(
+    const InputParameters & parameters)
+  : NSEnergyInviscidBC(parameters), _pressure(coupledValue(NS::pressure)), _un(getParam<Real>("un"))
 {
 }
 
@@ -51,6 +50,5 @@ Real
 NSEnergyInviscidSpecifiedNormalFlowBC::computeJacobianHelper(unsigned var_number)
 {
   // For specified u.n, term "A" is zero, see base class for details.
-  return qpJacobianTermB(var_number, _un) +
-         qpJacobianTermC(var_number, _un);
+  return qpJacobianTermB(var_number, _un) + qpJacobianTermC(var_number, _un);
 }

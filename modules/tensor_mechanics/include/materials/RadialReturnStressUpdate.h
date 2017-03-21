@@ -9,10 +9,10 @@
 
 #include "StressUpdateBase.h"
 
-//Forward declaration
+// Forward declaration
 class RadialReturnStressUpdate;
 
-template<>
+template <>
 InputParameters validParams<RadialReturnStressUpdate>();
 
 /**
@@ -40,10 +40,10 @@ public:
                             RankTwoTensor & stress_new) override;
 
 protected:
-  virtual void computeStressInitialize(Real /*effectiveTrialStress*/){}
+  virtual void computeStressInitialize(Real /*effectiveTrialStress*/) {}
   virtual void iterationInitialize(Real /*scalar*/) {}
-  virtual Real computeResidual(Real /*effectiveTrialStress*/, Real /*scalar*/) {return 0;}
-  virtual Real computeDerivative(Real /*effectiveTrialStress*/, Real /*scalar*/) {return 0;}
+  virtual Real computeResidual(Real /*effectiveTrialStress*/, Real /*scalar*/) { return 0; }
+  virtual Real computeDerivative(Real /*effectiveTrialStress*/, Real /*scalar*/) { return 0; }
   virtual void iterationFinalize(Real /*scalar*/) {}
   virtual void computeStressFinalize(const RankTwoTensor & /*inelasticStrainIncrement*/) {}
   virtual Real getIsotropicShearModulus();
@@ -56,4 +56,4 @@ protected:
   const Real _absolute_tolerance;
 };
 
-#endif //RECOMPUTERADIALRETURN_H
+#endif // RECOMPUTERADIALRETURN_H

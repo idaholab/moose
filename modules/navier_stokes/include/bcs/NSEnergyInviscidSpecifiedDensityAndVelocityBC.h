@@ -12,9 +12,8 @@
 // Forward Declarations
 class NSEnergyInviscidSpecifiedDensityAndVelocityBC;
 
-template<>
+template <>
 InputParameters validParams<NSEnergyInviscidSpecifiedDensityAndVelocityBC>();
-
 
 /**
  * The inviscid energy BC term with specified density and velocity components.
@@ -25,7 +24,7 @@ class NSEnergyInviscidSpecifiedDensityAndVelocityBC : public NSEnergyInviscidBC
 public:
   NSEnergyInviscidSpecifiedDensityAndVelocityBC(const InputParameters & parameters);
 
-  virtual ~NSEnergyInviscidSpecifiedDensityAndVelocityBC(){}
+  virtual ~NSEnergyInviscidSpecifiedDensityAndVelocityBC() {}
 
 protected:
   virtual Real computeQpResidual();

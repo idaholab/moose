@@ -5,20 +5,23 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "SoretDiffusion.h"
-template<>
-InputParameters validParams<SoretDiffusion>()
+template <>
+InputParameters
+validParams<SoretDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Add Soret effect to Split formulation Cahn-Hilliard Kernel");
   params.addRequiredCoupledVar("T", "Temperature");
   params.addCoupledVar("c", "Concentration");
-  params.addRequiredParam<MaterialPropertyName>("diff_name", "The diffusivity used with the kernel");
-  params.addParam<MaterialPropertyName>("Q_name", "Qheat", "The material name for the heat of transport");
+  params.addRequiredParam<MaterialPropertyName>("diff_name",
+                                                "The diffusivity used with the kernel");
+  params.addParam<MaterialPropertyName>(
+      "Q_name", "Qheat", "The material name for the heat of transport");
   return params;
 }
 
-SoretDiffusion::SoretDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
+SoretDiffusion::SoretDiffusion(const InputParameters & parameters)
+  : Kernel(parameters),
     _T_var(coupled("T")),
     _T(coupledValue("T")),
     _grad_T(coupledGradient("T")),
@@ -54,7 +57,8 @@ SoretDiffusion::computeQpOffDiagJacobian(unsigned int jvar)
   // T Off-Diagonal Jacobian
   if (_T_var == jvar)
     return _D[_qp] * _Q[_qp] * _c[_qp] * _grad_test[_i][_qp] *
-           (_grad_phi[_j][_qp] - 2.0 * _grad_T[_qp] * _phi[_j][_qp] / _T[_qp]) / (_kB * _T[_qp] * _T[_qp]);
+           (_grad_phi[_j][_qp] - 2.0 * _grad_T[_qp] * _phi[_j][_qp] / _T[_qp]) /
+           (_kB * _T[_qp] * _T[_qp]);
 
   return 0.0;
 }
@@ -63,5 +67,6 @@ Real
 SoretDiffusion::computeQpCJacobian()
 {
   // Calculate the Jacobian for the c variable
-  return _D[_qp] * _Q[_qp] * _phi[_j][_qp] * _grad_T[_qp] / (_kB * _T[_qp] * _T[_qp]) * _grad_test[_i][_qp];
+  return _D[_qp] * _Q[_qp] * _phi[_j][_qp] * _grad_T[_qp] / (_kB * _T[_qp] * _T[_qp]) *
+         _grad_test[_i][_qp];
 }

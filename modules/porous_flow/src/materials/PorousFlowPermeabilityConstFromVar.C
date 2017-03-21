@@ -7,8 +7,9 @@
 
 #include "PorousFlowPermeabilityConstFromVar.h"
 
-template<>
-InputParameters validParams<PorousFlowPermeabilityConstFromVar>()
+template <>
+InputParameters
+validParams<PorousFlowPermeabilityConstFromVar>()
 {
   InputParameters params = validParams<PorousFlowPermeabilityBase>();
   params.addRequiredCoupledVar("perm_xx", "The xx component of the permeability tensor");
@@ -20,12 +21,14 @@ InputParameters validParams<PorousFlowPermeabilityConstFromVar>()
   params.addCoupledVar("perm_yz", 0.0, "The yz component of the permeability tensor");
   params.addCoupledVar("perm_zx", 0.0, "The zx component of the permeability tensor");
   params.addCoupledVar("perm_zy", 0.0, "The zy component of the permeability tensor");
-  params.addClassDescription("This Material calculates the permeability tensor given by the input variables");
+  params.addClassDescription(
+      "This Material calculates the permeability tensor given by the input variables");
   return params;
 }
 
-PorousFlowPermeabilityConstFromVar::PorousFlowPermeabilityConstFromVar(const InputParameters & parameters) :
-    PorousFlowPermeabilityBase(parameters),
+PorousFlowPermeabilityConstFromVar::PorousFlowPermeabilityConstFromVar(
+    const InputParameters & parameters)
+  : PorousFlowPermeabilityBase(parameters),
     _perm_xx(coupledValue("perm_xx")),
     _perm_xy(coupledValue("perm_xy")),
     _perm_xz(coupledValue("perm_xz")),
@@ -41,9 +44,15 @@ PorousFlowPermeabilityConstFromVar::PorousFlowPermeabilityConstFromVar(const Inp
 void
 PorousFlowPermeabilityConstFromVar::computeQpProperties()
 {
-  RealTensorValue permeability(_perm_xx[_qp], _perm_xy[_qp], _perm_xz[_qp],
-    _perm_yx[_qp], _perm_yy[_qp], _perm_yz[_qp],
-    _perm_zx[_qp], _perm_zy[_qp], _perm_zz[_qp]);
+  RealTensorValue permeability(_perm_xx[_qp],
+                               _perm_xy[_qp],
+                               _perm_xz[_qp],
+                               _perm_yx[_qp],
+                               _perm_yy[_qp],
+                               _perm_yz[_qp],
+                               _perm_zx[_qp],
+                               _perm_zy[_qp],
+                               _perm_zz[_qp]);
 
   _permeability_qp[_qp] = permeability;
   _dpermeability_qp_dvar[_qp].resize(_num_var, RealTensorValue());

@@ -7,43 +7,80 @@
 
 #include "PorousFlowFullySaturatedMassTimeDerivative.h"
 
-template<>
-InputParameters validParams<PorousFlowFullySaturatedMassTimeDerivative>()
+template <>
+InputParameters
+validParams<PorousFlowFullySaturatedMassTimeDerivative>()
 {
   InputParameters params = validParams<TimeKernel>();
   MooseEnum simulation_type("Hydro ThermoHydro HydroMechanical ThermoHydroMechanical", "Hydro");
-  params.addParam<MooseEnum>("simulation_type", simulation_type, "The type of simulation.  For simulations involving Mechanical deformations, you will need to supply the correct Biot coefficient.  For simulations involving Thermal flows, you will need an associated ConstantThermalExpansionCoefficient Material");
-  params.addRangeCheckedParam<Real>("biot_coefficient", 1.0, "biot_coefficient>=0 & biot_coefficient<=1", "Biot coefficient");
-  params.addParam<bool>("multiply_by_density", true, "If true, then this Kernel is the time derivative of the fluid mass.  If false, then this Kernel is the derivative of the fluid volume (which is common in poro-mechanics)");
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
-  params.addClassDescription("Fully-saturated version of the single-component, single-phase fluid mass derivative wrt time");
+  params.addParam<MooseEnum>("simulation_type",
+                             simulation_type,
+                             "The type of simulation.  For simulations involving Mechanical "
+                             "deformations, you will need to supply the correct Biot coefficient.  "
+                             "For simulations involving Thermal flows, you will need an associated "
+                             "ConstantThermalExpansionCoefficient Material");
+  params.addRangeCheckedParam<Real>(
+      "biot_coefficient", 1.0, "biot_coefficient>=0 & biot_coefficient<=1", "Biot coefficient");
+  params.addParam<bool>(
+      "multiply_by_density", true, "If true, then this Kernel is the time derivative of the fluid "
+                                   "mass.  If false, then this Kernel is the derivative of the "
+                                   "fluid volume (which is common in poro-mechanics)");
+  params.addRequiredParam<UserObjectName>(
+      "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addClassDescription("Fully-saturated version of the single-component, single-phase fluid "
+                             "mass derivative wrt time");
   return params;
 }
 
-PorousFlowFullySaturatedMassTimeDerivative::PorousFlowFullySaturatedMassTimeDerivative(const InputParameters & parameters) :
-    TimeKernel(parameters),
+PorousFlowFullySaturatedMassTimeDerivative::PorousFlowFullySaturatedMassTimeDerivative(
+    const InputParameters & parameters)
+  : TimeKernel(parameters),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _var_is_porflow_var(_dictator.isPorousFlowVariable(_var.number())),
     _multiply_by_density(getParam<bool>("multiply_by_density")),
     _simulation_type(getParam<MooseEnum>("simulation_type").getEnum<SimulationTypeEnum>()),
     _includes_thermal(_simulation_type == ThermoHydro || _simulation_type == ThermoHydroMechanical),
-    _includes_mechanical(_simulation_type == HydroMechanical  || _simulation_type == ThermoHydroMechanical),
+    _includes_mechanical(_simulation_type == HydroMechanical ||
+                         _simulation_type == ThermoHydroMechanical),
     _biot_coefficient(getParam<Real>("biot_coefficient")),
     _biot_modulus(getMaterialProperty<Real>("PorousFlow_constant_biot_modulus_qp")),
-    _thermal_coeff(_includes_thermal ? &getMaterialProperty<Real>("PorousFlow_constant_thermal_expansion_coefficient_qp") : nullptr),
-    _fluid_density(_multiply_by_density ? &getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp") : nullptr),
-    _dfluid_density_dvar(_multiply_by_density ? &getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_fluid_phase_density_qp_dvar") : nullptr),
+    _thermal_coeff(
+        _includes_thermal
+            ? &getMaterialProperty<Real>("PorousFlow_constant_thermal_expansion_coefficient_qp")
+            : nullptr),
+    _fluid_density(
+        _multiply_by_density
+            ? &getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp")
+            : nullptr),
+    _dfluid_density_dvar(_multiply_by_density
+                             ? &getMaterialProperty<std::vector<std::vector<Real>>>(
+                                   "dPorousFlow_fluid_phase_density_qp_dvar")
+                             : nullptr),
     _pp(getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_qp")),
     _pp_old(getMaterialPropertyOld<std::vector<Real>>("PorousFlow_porepressure_qp")),
-    _dpp_dvar(getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_porepressure_qp_dvar")),
-    _temperature(_includes_thermal ? &getMaterialProperty<Real>("PorousFlow_temperature_qp") : nullptr),
-    _temperature_old(_includes_thermal ? &getMaterialPropertyOld<Real>("PorousFlow_temperature_qp") : nullptr),
-    _dtemperature_dvar(_includes_thermal ? &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar") : nullptr),
-    _strain_rate(_includes_mechanical ? &getMaterialProperty<Real>("PorousFlow_volumetric_strain_rate_qp") : nullptr),
-    _dstrain_rate_dvar(_includes_mechanical ? &getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_volumetric_strain_rate_qp_dvar") : nullptr)
+    _dpp_dvar(
+        getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_porepressure_qp_dvar")),
+    _temperature(_includes_thermal ? &getMaterialProperty<Real>("PorousFlow_temperature_qp")
+                                   : nullptr),
+    _temperature_old(_includes_thermal ? &getMaterialPropertyOld<Real>("PorousFlow_temperature_qp")
+                                       : nullptr),
+    _dtemperature_dvar(
+        _includes_thermal
+            ? &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar")
+            : nullptr),
+    _strain_rate(_includes_mechanical
+                     ? &getMaterialProperty<Real>("PorousFlow_volumetric_strain_rate_qp")
+                     : nullptr),
+    _dstrain_rate_dvar(_includes_mechanical
+                           ? &getMaterialProperty<std::vector<RealGradient>>(
+                                 "dPorousFlow_volumetric_strain_rate_qp_dvar")
+                           : nullptr)
 {
   if (_dictator.numComponents() != 1 || _dictator.numPhases() != 1)
-    mooseError("PorousFlowFullySaturatedMassTimeDerivative is only applicable to single-phase, single-component fluid-flow problems.  The Dictator proclaims that you have more than one phase or more than one fluid component.  The Dictator does not take such mistakes lightly");
+    mooseError("PorousFlowFullySaturatedMassTimeDerivative is only applicable to single-phase, "
+               "single-component fluid-flow problems.  The Dictator proclaims that you have more "
+               "than one phase or more than one fluid component.  The Dictator does not take such "
+               "mistakes lightly");
 }
 
 Real
@@ -95,6 +132,7 @@ PorousFlowFullySaturatedMassTimeDerivative::computeQpJac(unsigned int pvar)
     dvolume += _biot_coefficient * (*_dstrain_rate_dvar)[_qp][pvar] * _grad_phi[_j][_qp];
   }
   if (_multiply_by_density)
-    return _test[_i][_qp] * ((*_fluid_density)[_qp][phase] * dvolume + (*_dfluid_density_dvar)[_qp][phase][pvar] * _phi[_j][_qp] * volume);
+    return _test[_i][_qp] * ((*_fluid_density)[_qp][phase] * dvolume +
+                             (*_dfluid_density_dvar)[_qp][phase][pvar] * _phi[_j][_qp] * volume);
   return _test[_i][_qp] * dvolume;
 }

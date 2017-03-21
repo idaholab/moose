@@ -11,15 +11,16 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<MaterialVectorGradAuxKernelAction>()
+template <>
+InputParameters
+validParams<MaterialVectorGradAuxKernelAction>()
 {
   InputParameters params = validParams<MaterialVectorAuxKernelAction>();
   return params;
 }
 
-MaterialVectorGradAuxKernelAction::MaterialVectorGradAuxKernelAction(const InputParameters & params) :
-    MaterialVectorAuxKernelAction(params)
+MaterialVectorGradAuxKernelAction::MaterialVectorGradAuxKernelAction(const InputParameters & params)
+  : MaterialVectorAuxKernelAction(params)
 {
 }
 

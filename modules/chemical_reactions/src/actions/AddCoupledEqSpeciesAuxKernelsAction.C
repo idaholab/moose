@@ -24,19 +24,22 @@
 // Regular expression includes
 #include "pcrecpp.h"
 
-template<>
-InputParameters validParams<AddCoupledEqSpeciesAuxKernelsAction>()
+template <>
+InputParameters
+validParams<AddCoupledEqSpeciesAuxKernelsAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<std::string>("reactions", "The list of aqueous equilibrium reactions");
-  params.addParam<std::vector<std::string> >("secondary_species", "The list of aqueous equilibrium species to be output as aux variables");
+  params.addParam<std::vector<std::string>>(
+      "secondary_species", "The list of aqueous equilibrium species to be output as aux variables");
   return params;
 }
 
-AddCoupledEqSpeciesAuxKernelsAction::AddCoupledEqSpeciesAuxKernelsAction(const InputParameters & params) :
-    Action(params),
+AddCoupledEqSpeciesAuxKernelsAction::AddCoupledEqSpeciesAuxKernelsAction(
+    const InputParameters & params)
+  : Action(params),
     _reactions(getParam<std::string>("reactions")),
-    _secondary_species(getParam<std::vector<std::string> >("secondary_species"))
+    _secondary_species(getParam<std::vector<std::string>>("secondary_species"))
 {
 }
 
@@ -51,20 +54,23 @@ AddCoupledEqSpeciesAuxKernelsAction::act()
       aux_species.insert(_secondary_species[k]);
 
     // Getting ready for the parsing system
-    pcrecpp::RE re_reactions("(.*?)"                     // the reaction network (any character until the equilibrium coefficient appears)
-                             "\\s"                       // word boundary
-                               "("                       // start capture
-                                 "-?"                    // optional minus sign
-                                   "\\d+(?:\\.\\d*)?"    // digits followed by optional decimal and more 0 or more digits
-                               ")"
-                             "\\b"                       // word boundary
-                             "(?:\\s+|$)"                // eat the whitespace
-                             , pcrecpp::RE_Options().set_extended(true));
+    pcrecpp::RE re_reactions(
+        "(.*?)" // the reaction network (any character until the equilibrium coefficient appears)
+        "\\s"   // word boundary
+        "("     // start capture
+        "-?"    // optional minus sign
+        "\\d+(?:\\.\\d*)?" // digits followed by optional decimal and more 0 or more digits
+        ")"
+        "\\b"        // word boundary
+        "(?:\\s+|$)" // eat the whitespace
+        ,
+        pcrecpp::RE_Options().set_extended(true));
 
     pcrecpp::RE re_terms("(\\S+)");
-    pcrecpp::RE re_coeff_and_species("(?: \\(? (.*?) \\)? )"  // match the leading coefficent
-                                     "([A-Za-z].*)"           // match the species
-                                     , pcrecpp::RE_Options().set_extended(true));
+    pcrecpp::RE re_coeff_and_species("(?: \\(? (.*?) \\)? )" // match the leading coefficent
+                                     "([A-Za-z].*)"          // match the species
+                                     ,
+                                     pcrecpp::RE_Options().set_extended(true));
 
     pcrecpp::StringPiece input(_reactions);
     pcrecpp::StringPiece single_reaction, term;
@@ -72,8 +78,8 @@ AddCoupledEqSpeciesAuxKernelsAction::act()
 
     std::vector<string> eq_species;
     std::vector<Real> eq_const;
-    std::vector<std::vector<Real> > stos;
-    std::vector<std::vector<VariableName> > primary_species_involved;
+    std::vector<std::vector<Real>> stos;
+    std::vector<std::vector<VariableName>> primary_species_involved;
 
     unsigned int n_reactions = 0;
 
@@ -140,19 +146,21 @@ AddCoupledEqSpeciesAuxKernelsAction::act()
       primary_species_involved.push_back(local_species_list);
     }
 
-    if (n_reactions == 0) mooseError("No equilibrium reaction provided!");
+    if (n_reactions == 0)
+      mooseError("No equilibrium reaction provided!");
     // End parsing
 
     for (unsigned int j = 0; j < n_reactions; ++j)
     {
-      // Adding the AqueousEquilibriumRxnAux auxkernel for the list of eq species read in from the input file
+      // Adding the AqueousEquilibriumRxnAux auxkernel for the list of eq species read in from the
+      // input file
       if (aux_species.find(eq_species[j]) != aux_species.end())
       {
         InputParameters params_eq = _factory.getValidParams("AqueousEquilibriumRxnAux");
         params_eq.set<AuxVariableName>("variable") = eq_species[j];
         params_eq.set<Real>("log_k") = eq_const[j];
-        params_eq.set<std::vector<Real> >("sto_v") = stos[j];
-        params_eq.set<std::vector<VariableName> >("v") = primary_species_involved[j];
+        params_eq.set<std::vector<Real>>("sto_v") = stos[j];
+        params_eq.set<std::vector<VariableName>>("v") = primary_species_involved[j];
         _problem->addAuxKernel("AqueousEquilibriumRxnAux", "aux_" + eq_species[j], params_eq);
 
         _console << "aux_" + eq_species[j] << "\n";

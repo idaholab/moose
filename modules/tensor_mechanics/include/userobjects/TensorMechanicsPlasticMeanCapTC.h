@@ -10,11 +10,9 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-
 class TensorMechanicsPlasticMeanCapTC;
 
-
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticMeanCapTC>();
 
 /**
@@ -28,26 +26,42 @@ InputParameters validParams<TensorMechanicsPlasticMeanCapTC>();
  */
 class TensorMechanicsPlasticMeanCapTC : public TensorMechanicsPlasticModel
 {
- public:
+public:
   TensorMechanicsPlasticMeanCapTC(const InputParameters & parameters);
 
-  virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const override;
+  virtual void activeConstraints(const std::vector<Real> & f,
+                                 const RankTwoTensor & stress,
+                                 Real intnl,
+                                 const RankFourTensor & Eijkl,
+                                 std::vector<bool> & act,
+                                 RankTwoTensor & returned_stress) const override;
 
   virtual bool useCustomReturnMap() const override;
 
   virtual bool useCustomCTO() const override;
 
-  virtual bool returnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
-                         Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
-                         std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
+  virtual bool returnMap(const RankTwoTensor & trial_stress,
+                         Real intnl_old,
+                         const RankFourTensor & E_ijkl,
+                         Real ep_plastic_tolerance,
+                         RankTwoTensor & returned_stress,
+                         Real & returned_intnl,
+                         std::vector<Real> & dpm,
+                         RankTwoTensor & delta_dp,
+                         std::vector<Real> & yf,
                          bool & trial_stress_inadmissible) const override;
 
-  virtual RankFourTensor consistentTangentOperator(const RankTwoTensor & trial_stress, Real intnl_old, const RankTwoTensor & stress, Real intnl,
-                                                   const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const override;
+  virtual RankFourTensor
+  consistentTangentOperator(const RankTwoTensor & trial_stress,
+                            Real intnl_old,
+                            const RankTwoTensor & stress,
+                            Real intnl,
+                            const RankFourTensor & E_ijkl,
+                            const std::vector<Real> & cumulative_pm) const override;
 
   virtual std::string modelName() const override;
 
- protected:
+protected:
   /// max iters for custom return map loop
   const unsigned _max_iters;
 
@@ -85,7 +99,8 @@ class TensorMechanicsPlasticMeanCapTC : public TensorMechanicsPlasticModel
    */
   Real hardPotential(const RankTwoTensor & stress, Real intnl) const override;
 
-  virtual RankTwoTensor dhardPotential_dstress(const RankTwoTensor & stress, Real intnl) const override;
+  virtual RankTwoTensor dhardPotential_dstress(const RankTwoTensor & stress,
+                                               Real intnl) const override;
 
   virtual Real dhardPotential_dintnl(const RankTwoTensor & stress, Real intnl) const override;
 

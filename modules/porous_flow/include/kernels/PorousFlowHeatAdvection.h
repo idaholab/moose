@@ -12,7 +12,7 @@
 
 class PorousFlowHeatAdvection;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowHeatAdvection>();
 
 /**

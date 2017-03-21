@@ -70,4 +70,4 @@ protected:
   unsigned mapVarNumber(unsigned var);
 };
 
-#endif //NSKERNEL_H
+#endif // NSKERNEL_H

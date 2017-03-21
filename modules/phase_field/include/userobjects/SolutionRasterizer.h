@@ -9,10 +9,10 @@
 
 #include "SolutionUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class SolutionRasterizer;
 
-template<>
+template <>
 InputParameters validParams<SolutionRasterizer>();
 
 /**
@@ -44,4 +44,4 @@ protected:
   Real _threshold;
 };
 
-#endif //SOLUTIONRASTERIZER_H
+#endif // SOLUTIONRASTERIZER_H

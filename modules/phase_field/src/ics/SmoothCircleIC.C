@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "SmoothCircleIC.h"
 
-template<>
-InputParameters validParams<SmoothCircleIC>()
+template <>
+InputParameters
+validParams<SmoothCircleIC>()
 {
   InputParameters params = validParams<SmoothCircleBaseIC>();
   params.addClassDescription("Circle with a smooth interface");
@@ -18,8 +19,8 @@ InputParameters validParams<SmoothCircleIC>()
   return params;
 }
 
-SmoothCircleIC::SmoothCircleIC(const InputParameters & parameters) :
-    SmoothCircleBaseIC(parameters),
+SmoothCircleIC::SmoothCircleIC(const InputParameters & parameters)
+  : SmoothCircleBaseIC(parameters),
     _x1(parameters.get<Real>("x1")),
     _y1(parameters.get<Real>("y1")),
     _z1(parameters.get<Real>("z1")),
@@ -33,7 +34,6 @@ SmoothCircleIC::computeCircleRadii()
 {
   _radii = {_radius};
 }
-
 
 void
 SmoothCircleIC::computeCircleCenters()

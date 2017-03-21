@@ -14,14 +14,13 @@
 // Forward Declarations
 class PolycrystalElasticDrivingForceAction;
 
-template<>
+template <>
 InputParameters validParams<PolycrystalElasticDrivingForceAction>();
 /**
  * Action that adds the elastic driving force for each order parameter
  */
-class PolycrystalElasticDrivingForceAction:
-  public Action,
-  public DerivativeMaterialPropertyNameInterface
+class PolycrystalElasticDrivingForceAction : public Action,
+                                             public DerivativeMaterialPropertyNameInterface
 {
 public:
   PolycrystalElasticDrivingForceAction(const InputParameters & params);
@@ -38,4 +37,4 @@ private:
   std::string _elasticity_tensor_name;
 };
 
-#endif //POLYCRYSTALELASTICDRIVINGFORCEACTION_H
+#endif // POLYCRYSTALELASTICDRIVINGFORCEACTION_H

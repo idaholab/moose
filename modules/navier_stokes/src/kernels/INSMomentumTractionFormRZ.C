@@ -6,16 +6,19 @@
 /****************************************************************/
 #include "INSMomentumTractionFormRZ.h"
 
-template<>
-InputParameters validParams<INSMomentumTractionFormRZ>()
+template <>
+InputParameters
+validParams<INSMomentumTractionFormRZ>()
 {
   InputParameters params = validParams<INSMomentumTractionForm>();
-  params.addClassDescription("This class computes additional momentum equation residual and Jacobian contributions for the incompressible Navier-Stokes momentum equation in RZ (axisymmetric cylindrical) coordinates.");
+  params.addClassDescription("This class computes additional momentum equation residual and "
+                             "Jacobian contributions for the incompressible Navier-Stokes momentum "
+                             "equation in RZ (axisymmetric cylindrical) coordinates.");
   return params;
 }
 
-INSMomentumTractionFormRZ::INSMomentumTractionFormRZ(const InputParameters & parameters) :
-    INSMomentumTractionForm(parameters)
+INSMomentumTractionFormRZ::INSMomentumTractionFormRZ(const InputParameters & parameters)
+  : INSMomentumTractionForm(parameters)
 {
 }
 

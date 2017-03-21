@@ -13,12 +13,10 @@
 class XFEMCircleCut : public XFEMGeometricCut3D
 {
 public:
-
   XFEMCircleCut(std::vector<Real> square_nodes);
   ~XFEMCircleCut();
 
 private:
-
   std::vector<Point> _vertices;
   Real _radius;
   Real _angle;

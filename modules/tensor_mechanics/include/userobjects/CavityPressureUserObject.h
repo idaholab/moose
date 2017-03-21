@@ -12,10 +12,9 @@
 class CavityPressureUserObject : public GeneralUserObject
 {
 public:
-
   CavityPressureUserObject(const InputParameters & parameters);
 
-  virtual ~CavityPressureUserObject(){}
+  virtual ~CavityPressureUserObject() {}
 
   virtual void initialSetup() {}
 
@@ -31,7 +30,6 @@ public:
   Real getValue(const std::string & quantity) const;
 
 protected:
-
   Real & _cavity_pressure;
   Real & _n0; // The initial number of moles of gas.
 
@@ -50,12 +48,10 @@ protected:
   Real _start_time;
   const Real _startup_time;
 
-
   bool & _initialized;
-
 };
 
-template<>
+template <>
 InputParameters validParams<CavityPressureUserObject>();
 
-#endif //CAVITYRESSUREPOSTPROCESSOR_H
+#endif // CAVITYRESSUREPOSTPROCESSOR_H

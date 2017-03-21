@@ -9,10 +9,10 @@
 
 #include "GBAnisotropyBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class GBWidthAnisotropy;
 
-template<>
+template <>
 InputParameters validParams<GBWidthAnisotropy>();
 
 /**
@@ -33,4 +33,4 @@ private:
   const Real _kappa;
 };
 
-#endif //GBWIDTHANISOTROPY_H
+#endif // GBWIDTHANISOTROPY_H

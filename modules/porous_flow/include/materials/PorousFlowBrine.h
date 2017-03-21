@@ -13,7 +13,7 @@
 
 class PorousFlowBrine;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowBrine>();
 
 /**
@@ -75,4 +75,4 @@ protected:
   const VariableValue & _xnacl;
 };
 
-#endif //POROUSFLOWBRINE_H
+#endif // POROUSFLOWBRINE_H

@@ -13,7 +13,7 @@
 
 class PorousFlowRelativePermeabilityFLAC;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowRelativePermeabilityFLAC>();
 
 /**
@@ -34,4 +34,4 @@ protected:
   const Real _m;
 };
 
-#endif //POROUSFLOWRELATIVEPERMEABILITYFLAC_H
+#endif // POROUSFLOWRELATIVEPERMEABILITYFLAC_H

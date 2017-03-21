@@ -7,33 +7,34 @@
 
 #include "SlopeReconstructionMultiD.h"
 
-template<>
-InputParameters validParams<SlopeReconstructionMultiD>()
+template <>
+InputParameters
+validParams<SlopeReconstructionMultiD>()
 {
   InputParameters params = validParams<SlopeReconstructionBase>();
 
-  params.addRequiredParam<std::vector<BoundaryName> >("boundary_list",
-  "List of boundary IDs");
+  params.addRequiredParam<std::vector<BoundaryName>>("boundary_list", "List of boundary IDs");
 
-  params.addRequiredParam<std::vector<UserObjectName> >("boundary_condition_user_object_list",
-  "List of boundary condition user object names");
+  params.addRequiredParam<std::vector<UserObjectName>>(
+      "boundary_condition_user_object_list", "List of boundary condition user object names");
 
   return params;
 }
 
-SlopeReconstructionMultiD::SlopeReconstructionMultiD(const InputParameters & parameters) :
-    SlopeReconstructionBase(parameters)
+SlopeReconstructionMultiD::SlopeReconstructionMultiD(const InputParameters & parameters)
+  : SlopeReconstructionBase(parameters)
 {
-  const std::vector<BoundaryName> & bnd_name =
-    getParam<std::vector<BoundaryName> >("boundary_list");
+  const std::vector<BoundaryName> & bnd_name = getParam<std::vector<BoundaryName>>("boundary_list");
 
   const std::vector<UserObjectName> & bc_uo_name =
-    getParam<std::vector<UserObjectName> >("boundary_condition_user_object_list");
+      getParam<std::vector<UserObjectName>>("boundary_condition_user_object_list");
 
   if (bnd_name.size() != bc_uo_name.size())
     mooseError("Number of boundaries NOT equal to number of BCUserObject names:",
-                "\nNumber of boundaries is ", bnd_name.size(),
-                "\nNumber of BCUserObject is ", bc_uo_name.size() );
+               "\nNumber of boundaries is ",
+               bnd_name.size(),
+               "\nNumber of BCUserObject is ",
+               bc_uo_name.size());
 
   for (unsigned int i = 0; i < bnd_name.size(); i++)
   {

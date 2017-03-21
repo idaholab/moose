@@ -10,10 +10,10 @@
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowEffectiveStressCoupling;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowEffectiveStressCoupling>();
 
 /**
@@ -27,7 +27,7 @@ class PorousFlowEffectiveStressCoupling : public Kernel
 public:
   PorousFlowEffectiveStressCoupling(const InputParameters & parameters);
 
- protected:
+protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
@@ -48,4 +48,4 @@ public:
   const MaterialProperty<std::vector<Real>> & _dpf_dvar;
 };
 
-#endif //POROUSFLOWEFFECTIVESTRESSCOUPLING_H
+#endif // POROUSFLOWEFFECTIVESTRESSCOUPLING_H

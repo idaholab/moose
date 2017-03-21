@@ -6,19 +6,22 @@
 /****************************************************************/
 #include "ConstantAnisotropicMobility.h"
 
-template<>
-InputParameters validParams<ConstantAnisotropicMobility>()
+template <>
+InputParameters
+validParams<ConstantAnisotropicMobility>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription("Provide a constant mobility tensor value");
-  params.addRequiredParam<MaterialPropertyName>("M_name", "Name of the mobility tensor porperty to generate");
-  params.addRequiredRangeCheckedParam<std::vector<Real> >("tensor", "tensor_size=9", "Tensor values");
+  params.addRequiredParam<MaterialPropertyName>("M_name",
+                                                "Name of the mobility tensor porperty to generate");
+  params.addRequiredRangeCheckedParam<std::vector<Real>>(
+      "tensor", "tensor_size=9", "Tensor values");
   return params;
 }
 
-ConstantAnisotropicMobility::ConstantAnisotropicMobility(const InputParameters & parameters) :
-    Material(parameters),
-    _M_values(getParam<std::vector<Real> >("tensor")),
+ConstantAnisotropicMobility::ConstantAnisotropicMobility(const InputParameters & parameters)
+  : Material(parameters),
+    _M_values(getParam<std::vector<Real>>("tensor")),
     _M_name(getParam<MaterialPropertyName>("M_name")),
     _M(declareProperty<RealTensorValue>(_M_name))
 {
@@ -31,5 +34,5 @@ ConstantAnisotropicMobility::initialSetup()
   for (unsigned int qp = 0; qp < _M.size(); ++qp)
     for (unsigned int a = 0; a < LIBMESH_DIM; ++a)
       for (unsigned int b = 0; b < LIBMESH_DIM; ++b)
-        _M[qp](a,b) = _M_values[a*3 + b];
+        _M[qp](a, b) = _M_values[a * 3 + b];
 }

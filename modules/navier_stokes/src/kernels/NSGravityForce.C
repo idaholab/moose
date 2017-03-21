@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "NSGravityForce.h"
 
-template<>
-InputParameters validParams<NSGravityForce>()
+template <>
+InputParameters
+validParams<NSGravityForce>()
 {
   InputParameters params = validParams<NSKernel>();
   params.addClassDescription("This class computes the gravity force contribution.");
@@ -17,9 +18,8 @@ InputParameters validParams<NSGravityForce>()
   return params;
 }
 
-NSGravityForce::NSGravityForce(const InputParameters & parameters) :
-    NSKernel(parameters),
-    _acceleration(getParam<Real>("acceleration"))
+NSGravityForce::NSGravityForce(const InputParameters & parameters)
+  : NSKernel(parameters), _acceleration(getParam<Real>("acceleration"))
 {
 }
 
@@ -30,7 +30,8 @@ NSGravityForce::computeQpResidual()
   return -_rho[_qp] * _acceleration * _test[_i][_qp];
 }
 
-Real NSGravityForce::computeQpJacobian()
+Real
+NSGravityForce::computeQpJacobian()
 {
   return 0.0;
 }

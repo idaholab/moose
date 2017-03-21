@@ -9,7 +9,7 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-//Forward declaration
+// Forward declaration
 class EulerAngleUpdaterCheck;
 class EulerAngleUpdater;
 class EulerAngleProvider;
@@ -17,7 +17,7 @@ class GrainTrackerInterface;
 class GrainForceAndTorqueInterface;
 class RotationTensor;
 
-template<>
+template <>
 InputParameters validParams<EulerAngleUpdaterCheck>();
 
 /**
@@ -48,4 +48,4 @@ protected:
   std::vector<RealVectorValue> _angles_old;
 };
 
-#endif //EULERANGLEUPDATERCHECK_H
+#endif // EULERANGLEUPDATERCHECK_H

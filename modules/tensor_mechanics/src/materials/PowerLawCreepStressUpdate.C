@@ -8,11 +8,14 @@
 
 #include "Function.h"
 
-template<>
-InputParameters validParams<PowerLawCreepStressUpdate>()
+template <>
+InputParameters
+validParams<PowerLawCreepStressUpdate>()
 {
   InputParameters params = validParams<RadialReturnStressUpdate>();
-  params.addClassDescription("This class uses the discrete material in a radial return isotropic power law creep model.  This class can be used in conjunction with other creep and plasticity materials for more complex simulations.");
+  params.addClassDescription("This class uses the discrete material in a radial return isotropic "
+                             "power law creep model.  This class can be used in conjunction with "
+                             "other creep and plasticity materials for more complex simulations.");
 
   // Linear strain hardening parameters
   params.addRequiredParam<Real>("coefficient", "Leading coefficent in power-law equation");
@@ -26,9 +29,8 @@ InputParameters validParams<PowerLawCreepStressUpdate>()
   return params;
 }
 
-
-PowerLawCreepStressUpdate::PowerLawCreepStressUpdate(const InputParameters & parameters) :
-    RadialReturnStressUpdate(parameters),
+PowerLawCreepStressUpdate::PowerLawCreepStressUpdate(const InputParameters & parameters)
+  : RadialReturnStressUpdate(parameters),
     _coefficient(parameters.get<Real>("coefficient")),
     _n_exponent(parameters.get<Real>("n_exponent")),
     _m_exponent(parameters.get<Real>("m_exponent")),
@@ -50,8 +52,7 @@ PowerLawCreepStressUpdate::initQpStatefulProperties()
   _creep_strain_old[_qp].zero();
 }
 
-void
-PowerLawCreepStressUpdate::computeStressInitialize(Real /*effectiveTrialStress*/)
+void PowerLawCreepStressUpdate::computeStressInitialize(Real /*effectiveTrialStress*/)
 {
   _shear_modulus = getIsotropicShearModulus();
 
@@ -69,14 +70,17 @@ Real
 PowerLawCreepStressUpdate::computeResidual(Real effectiveTrialStress, Real scalar)
 {
   return _coefficient * std::pow(effectiveTrialStress - 3 * _shear_modulus * scalar, _n_exponent) *
-      _exponential * _exp_time - scalar / _dt;
+             _exponential * _exp_time -
+         scalar / _dt;
 }
 
 Real
 PowerLawCreepStressUpdate::computeDerivative(Real effectiveTrialStress, Real scalar)
 {
   return -3 * _coefficient * _shear_modulus * _n_exponent *
-      std::pow(effectiveTrialStress - 3 * _shear_modulus * scalar, _n_exponent - 1) * _exponential * _exp_time - 1 / _dt;
+             std::pow(effectiveTrialStress - 3 * _shear_modulus * scalar, _n_exponent - 1) *
+             _exponential * _exp_time -
+         1 / _dt;
 }
 
 void

@@ -13,7 +13,7 @@
 
 class PorousFlowDarcyBase;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowDarcyBase>();
 
 /**
@@ -52,7 +52,11 @@ protected:
    */
   virtual Real dmobility(unsigned nodenum, unsigned phase, unsigned pvar) const;
 
-  enum JacRes { CALCULATE_RESIDUAL=0, CALCULATE_JACOBIAN=1 };
+  enum JacRes
+  {
+    CALCULATE_RESIDUAL = 0,
+    CALCULATE_JACOBIAN = 1
+  };
 
   /**
    * Full upwinding of both the residual and Jacobians.

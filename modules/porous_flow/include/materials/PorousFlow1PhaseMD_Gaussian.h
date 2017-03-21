@@ -10,10 +10,10 @@
 
 #include "PorousFlowVariableBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlow1PhaseMD_Gaussian;
 
-template<>
+template <>
 InputParameters validParams<PorousFlow1PhaseMD_Gaussian>();
 
 /**
@@ -64,4 +64,4 @@ protected:
   virtual void buildPS();
 };
 
-#endif //POROUSFLOW1PHASEMD_GAUSSIAN_H
+#endif // POROUSFLOW1PHASEMD_GAUSSIAN_H

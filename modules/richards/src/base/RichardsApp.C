@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "RichardsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
@@ -95,7 +94,7 @@
 #include "Q2PNodalMass.h"
 #include "Q2PNegativeNodalMassOld.h"
 
-  // BoundaryConditions
+// BoundaryConditions
 #include "RichardsExcav.h"
 #include "RichardsPiecewiseLinearSink.h"
 #include "RichardsHalfGaussianSink.h"
@@ -104,15 +103,15 @@
 // Problems
 #include "RichardsMultiphaseProblem.h"
 
-template<>
-InputParameters validParams<RichardsApp>()
+template <>
+InputParameters
+validParams<RichardsApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-RichardsApp::RichardsApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+RichardsApp::RichardsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   RichardsApp::registerObjects(_factory);
@@ -121,9 +120,7 @@ RichardsApp::RichardsApp(const InputParameters & parameters) :
   RichardsApp::associateSyntax(_syntax, _action_factory);
 }
 
-RichardsApp::~RichardsApp()
-{
-}
+RichardsApp::~RichardsApp() {}
 
 void
 RichardsApp::registerApps()

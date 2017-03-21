@@ -11,12 +11,12 @@
 #include "EulerAngleProvider.h"
 #include "GrainTracker.h"
 
-//Forward Declarations
+// Forward Declarations
 class OutputEulerAngles;
 class GrainTracker;
 class EulerAngleProvider;
 
-template<>
+template <>
 InputParameters validParams<OutputEulerAngles>();
 
 /**
@@ -44,4 +44,4 @@ protected:
   Real _value;
 };
 
-#endif //OUTPUTEULERANGLES_H
+#endif // OUTPUTEULERANGLES_H

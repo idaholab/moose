@@ -9,14 +9,11 @@
 
 #include "NSKernel.h"
 
-
 // ForwardDeclarations
 class NSMomentumInviscidFlux;
 
-template<>
+template <>
 InputParameters validParams<NSMomentumInviscidFlux>();
-
-
 
 /**
  * The inviscid flux (convective + pressure terms) for the
@@ -25,7 +22,6 @@ InputParameters validParams<NSMomentumInviscidFlux>();
 class NSMomentumInviscidFlux : public NSKernel
 {
 public:
-
   NSMomentumInviscidFlux(const InputParameters & parameters);
 
 protected:

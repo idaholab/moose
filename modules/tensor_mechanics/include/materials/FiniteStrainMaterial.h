@@ -43,4 +43,4 @@ protected:
   MaterialProperty<RankTwoTensor> & _deformation_gradient;
 };
 
-#endif //FINITESTRAINMATERIAL_H
+#endif // FINITESTRAINMATERIAL_H

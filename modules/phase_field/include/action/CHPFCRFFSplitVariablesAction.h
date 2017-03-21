@@ -10,16 +10,16 @@
 #include "InputParameters.h"
 #include "Action.h"
 
-//Forward Declarations
+// Forward Declarations
 class CHPFCRFFSplitVariablesAction;
 
-template<>
+template <>
 InputParameters validParams<CHPFCRFFSplitVariablesAction>();
 
 /**
  * Automatically generates all the L variables for the RFF phase field crystal model.
  */
-class CHPFCRFFSplitVariablesAction: public Action
+class CHPFCRFFSplitVariablesAction : public Action
 {
 public:
   CHPFCRFFSplitVariablesAction(const InputParameters & params);
@@ -33,4 +33,4 @@ private:
   const AuxVariableName _n_name;
 };
 
-#endif //CHPFCRFFSPLITVARIABLESACTION_H
+#endif // CHPFCRFFSPLITVARIABLESACTION_H

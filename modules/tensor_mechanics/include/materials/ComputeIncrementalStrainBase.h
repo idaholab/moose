@@ -37,4 +37,4 @@ protected:
   std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains_old;
 };
 
-#endif //COMPUTEINCREMENTALSTRAINBASE_H
+#endif // COMPUTEINCREMENTALSTRAINBASE_H

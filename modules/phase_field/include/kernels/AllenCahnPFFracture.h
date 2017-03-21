@@ -11,7 +11,7 @@
 #include "JvarMapInterface.h"
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class AllenCahnPFFracture;
 class RankTwoTensor;
 
@@ -58,4 +58,4 @@ protected:
   const MaterialProperty<RankTwoTensor> & _d2Fdcdstrain;
   //@}
 };
-#endif //ALLENCAHNPFFRACTURE_H
+#endif // ALLENCAHNPFFRACTURE_H

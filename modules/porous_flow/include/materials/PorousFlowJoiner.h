@@ -10,10 +10,10 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowJoiner;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowJoiner>();
 
 /**
@@ -89,4 +89,4 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dphase_property_dt;
 };
 
-#endif //POROUSFLOWJOINER_H
+#endif // POROUSFLOWJOINER_H

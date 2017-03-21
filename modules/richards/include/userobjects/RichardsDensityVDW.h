@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSDENSITYVDW_H
 #define RICHARDSDENSITYVDW_H
 
@@ -13,8 +12,7 @@
 
 class RichardsDensityVDW;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsDensityVDW>();
 
 /**
@@ -58,7 +56,6 @@ public:
   Real d2density(Real p) const;
 
 protected:
-
   /// van der Waals a
   Real _a;
 
@@ -85,7 +82,6 @@ protected:
 
   /// (1/_molar_mass)*d(density)/dP at P=0
   Real _slope0;
-
 
   /**
    * Density according to the van der Waals expression

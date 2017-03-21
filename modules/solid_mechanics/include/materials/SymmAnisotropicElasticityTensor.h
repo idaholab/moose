@@ -9,7 +9,6 @@
 
 #include "SymmElasticityTensor.h"
 
-
 class SymmAnisotropicElasticityTensor : public SymmElasticityTensor
 {
 public:
@@ -84,14 +83,13 @@ public:
   void show_r_matrix();
 
 protected:
-
-  DenseMatrix<Real> _dmat; // 9 x 9 Material Matrix
-  DenseMatrix<Real> _qdmat; // Rotated Material Matrix
-  DenseMatrix<Real> _dt; // 6 x 6 Material Matrix
-  DenseMatrix<Real> _qdt; // Rotated Material Matrix
-  DenseMatrix<Real> _r; // Rotational Matrix
-  DenseMatrix<Real> _q; // Q = R (dyadic) R
-  DenseMatrix<Real> _qt; // Q Transpose
+  DenseMatrix<Real> _dmat;        // 9 x 9 Material Matrix
+  DenseMatrix<Real> _qdmat;       // Rotated Material Matrix
+  DenseMatrix<Real> _dt;          // 6 x 6 Material Matrix
+  DenseMatrix<Real> _qdt;         // Rotated Material Matrix
+  DenseMatrix<Real> _r;           // Rotational Matrix
+  DenseMatrix<Real> _q;           // Q = R (dyadic) R
+  DenseMatrix<Real> _qt;          // Q Transpose
   std::vector<Real> _euler_angle; // Stores Euler angeles
 
   DenseMatrix<Real> _trans_d6_to_d9;
@@ -116,7 +114,6 @@ protected:
    */
 
   virtual void calculateEntries(unsigned int qp);
-
 };
 
-#endif //ANISOTROPICELASTICITYTENSOR_H
+#endif // ANISOTROPICELASTICITYTENSOR_H

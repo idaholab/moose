@@ -12,7 +12,7 @@
 
 class CNSFVMachAux;
 
-template<>
+template <>
 InputParameters validParams<CNSFVMachAux>();
 
 /**
@@ -21,12 +21,10 @@ InputParameters validParams<CNSFVMachAux>();
 class CNSFVMachAux : public AuxKernel
 {
 public:
-
   CNSFVMachAux(const InputParameters & parameters);
   virtual ~CNSFVMachAux() {}
 
 protected:
-
   virtual Real computeValue();
 
   const MaterialProperty<Real> & _mach;

@@ -13,7 +13,7 @@
 
 class PorousFlowRelativePermeabilityBW;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowRelativePermeabilityBW>();
 
 /**
@@ -47,4 +47,4 @@ protected:
   const Real _c;
 };
 
-#endif //POROUSFLOWRELATIVEPERMEABILITYBW_H
+#endif // POROUSFLOWRELATIVEPERMEABILITYBW_H

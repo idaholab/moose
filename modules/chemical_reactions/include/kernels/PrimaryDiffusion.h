@@ -9,10 +9,10 @@
 #ifndef PRIMARYDIFFUSION_H
 #define PRIMARYDIFFUSION_H
 
-//Forward Declarations
+// Forward Declarations
 class PrimaryDiffusion;
 
-template<>
+template <>
 InputParameters validParams<PrimaryDiffusion>();
 
 /**
@@ -32,4 +32,4 @@ protected:
   const MaterialProperty<Real> & _diffusivity;
 };
 
-#endif //PRIMARYDIFFUSION_H
+#endif // PRIMARYDIFFUSION_H

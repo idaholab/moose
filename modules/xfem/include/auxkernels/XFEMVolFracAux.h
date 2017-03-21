@@ -18,7 +18,6 @@ class XFEM;
 class XFEMVolFracAux : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -34,7 +33,7 @@ private:
   MooseSharedPointer<XFEM> _xfem;
 };
 
-template<>
+template <>
 InputParameters validParams<XFEMVolFracAux>();
 
-#endif //XFEMVOLFRACAUX_H
+#endif // XFEMVOLFRACAUX_H

@@ -10,15 +10,14 @@
 #include "NonlocalKernel.h"
 #include "GrainForceAndTorqueInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class GrainRigidBodyMotionBase;
 class GrainTrackerInterface;
 
-template<>
+template <>
 InputParameters validParams<GrainRigidBodyMotionBase>();
 
-class GrainRigidBodyMotionBase :
-    public NonlocalKernel
+class GrainRigidBodyMotionBase : public NonlocalKernel
 
 {
 public:
@@ -62,7 +61,7 @@ protected:
   const std::vector<RealGradient> & _grain_forces;
   const std::vector<RealGradient> & _grain_torques;
   const std::vector<Real> & _grain_force_c_jacobians;
-  const std::vector<std::vector<Real> > & _grain_force_eta_jacobians;
+  const std::vector<std::vector<Real>> & _grain_force_eta_jacobians;
 
   /// constant value corresponding to grain translation
   const Real _mt;
@@ -85,4 +84,4 @@ protected:
   std::vector<unsigned int> _grain_ids;
 };
 
-#endif //GRAINRIGIDBODYMOTIONBASE_H
+#endif // GRAINRIGIDBODYMOTIONBASE_H

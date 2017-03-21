@@ -13,7 +13,7 @@
 
 class PorousFlowFluidPropertiesBase;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowFluidPropertiesBase>();
 
 /**
@@ -47,4 +47,4 @@ protected:
   const Real _R;
 };
 
-#endif //POROUSFLOWFLUIDPROPERTIESBASE_H
+#endif // POROUSFLOWFLUIDPROPERTIESBASE_H

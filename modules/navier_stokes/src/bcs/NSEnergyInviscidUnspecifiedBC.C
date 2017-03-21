@@ -19,8 +19,7 @@ validParams<NSEnergyInviscidUnspecifiedBC>()
 }
 
 NSEnergyInviscidUnspecifiedBC::NSEnergyInviscidUnspecifiedBC(const InputParameters & parameters)
-  : NSEnergyInviscidBC(parameters),
-    _pressure(coupledValue(NS::pressure))
+  : NSEnergyInviscidBC(parameters), _pressure(coupledValue(NS::pressure))
 {
 }
 
@@ -62,7 +61,6 @@ NSEnergyInviscidUnspecifiedBC::computeJacobianHelper(unsigned var_number)
 
   // When both u.n and pressure are unspecified, all 3 Jacobian terms apply.
   // See base class for details.
-  return qpJacobianTermA(var_number, _pressure[_qp]) +
-         qpJacobianTermB(var_number, un) +
+  return qpJacobianTermA(var_number, _pressure[_qp]) + qpJacobianTermB(var_number, un) +
          qpJacobianTermC(var_number, un);
 }

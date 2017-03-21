@@ -9,10 +9,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class GBEvolutionBase;
 
-template<>
+template <>
 InputParameters validParams<GBEvolutionBase>();
 
 class GBEvolutionBase : public Material
@@ -50,4 +50,4 @@ protected:
   const Real _JtoeV;
 };
 
-#endif //GBEVOLUTIONBASE_H
+#endif // GBEVOLUTIONBASE_H

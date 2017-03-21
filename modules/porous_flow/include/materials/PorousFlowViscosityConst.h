@@ -12,7 +12,7 @@
 
 class PorousFlowViscosityConst;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowViscosityConst>();
 
 /**
@@ -33,4 +33,4 @@ protected:
   MaterialProperty<Real> & _viscosity;
 };
 
-#endif //POROUSFLOWVISCOSITYCONST_H
+#endif // POROUSFLOWVISCOSITYCONST_H

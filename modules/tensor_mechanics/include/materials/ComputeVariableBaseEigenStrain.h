@@ -13,11 +13,12 @@
 
 class ComputeVariableBaseEigenStrain;
 
-template<>
+template <>
 InputParameters validParams<ComputeVariableBaseEigenStrain>();
 
 /**
- * ComputeVariableBaseEigenstrain computes an Eigenstrain based on a real tensor value material property base (a),
+ * ComputeVariableBaseEigenstrain computes an Eigenstrain based on a real tensor value material
+ * property base (a),
  * a real material property prefactor (p) and a rank two tensor offset tensor (b)
  * p * a + b
  */

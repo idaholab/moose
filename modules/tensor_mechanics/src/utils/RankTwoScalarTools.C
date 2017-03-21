@@ -15,11 +15,19 @@ namespace RankTwoScalarTools
 MooseEnum
 scalarOptions()
 {
-  return MooseEnum("VonMisesStress EquivalentPlasticStrain Hydrostatic L2norm MaxPrincipal MidPrincipal MinPrincipal VolumetricStrain FirstInvariant SecondInvariant ThirdInvariant AxialStress HoopStress RadialStress TriaxialityStress Direction");
+  return MooseEnum("VonMisesStress EquivalentPlasticStrain Hydrostatic L2norm MaxPrincipal "
+                   "MidPrincipal MinPrincipal VolumetricStrain FirstInvariant SecondInvariant "
+                   "ThirdInvariant AxialStress HoopStress RadialStress TriaxialityStress "
+                   "Direction");
 }
 
 Real
-getQuantity(const RankTwoTensor & tensor, const MooseEnum scalar_type, const Point & point1, const Point & point2, const Point & curr_point, Point & direction)
+getQuantity(const RankTwoTensor & tensor,
+            const MooseEnum scalar_type,
+            const Point & point1,
+            const Point & point2,
+            const Point & curr_point,
+            Point & direction)
 {
   Real val = 0.0;
 
@@ -75,7 +83,8 @@ getQuantity(const RankTwoTensor & tensor, const MooseEnum scalar_type, const Poi
       val = directionValueTensor(tensor, direction);
       break;
     default:
-      mooseError("RankTwoScalarAux Error: Pass valid scalar type - " + scalarOptions().getRawNames());
+      mooseError("RankTwoScalarAux Error: Pass valid scalar type - " +
+                 scalarOptions().getRawNames());
   }
 
   return val;
@@ -184,7 +193,7 @@ maxPrinciple(const RankTwoTensor & r2tensor)
 Real
 midPrinciple(const RankTwoTensor & r2tensor)
 {
-  return  calcEigenValues(r2tensor, 1);
+  return calcEigenValues(r2tensor, 1);
 }
 
 Real
@@ -205,7 +214,10 @@ calcEigenValues(const RankTwoTensor & r2tensor, unsigned int index)
 }
 
 Real
-axialStress(const RankTwoTensor & stress, const Point & point1, const Point & point2, Point & direction)
+axialStress(const RankTwoTensor & stress,
+            const Point & point1,
+            const Point & point2,
+            Point & direction)
 {
   Point axis = point2 - point1;
   axis /= axis.norm();
@@ -222,7 +234,11 @@ axialStress(const RankTwoTensor & stress, const Point & point1, const Point & po
 }
 
 Real
-hoopStress(const RankTwoTensor & stress, const Point & point1, const Point & point2, const Point & curr_point, Point & direction)
+hoopStress(const RankTwoTensor & stress,
+           const Point & point1,
+           const Point & point2,
+           const Point & curr_point,
+           Point & direction)
 {
   // Calculate the cross of the normal to the axis of rotation from the current
   // location and the axis of rotation
@@ -244,7 +260,11 @@ hoopStress(const RankTwoTensor & stress, const Point & point1, const Point & poi
 }
 
 Real
-radialStress(const RankTwoTensor & stress, const Point & point1, const Point & point2, const Point & curr_point, Point & direction)
+radialStress(const RankTwoTensor & stress,
+             const Point & point1,
+             const Point & point2,
+             const Point & curr_point,
+             Point & direction)
 {
   Point radial_norm;
   normalPositionVector(point1, point2, curr_point, radial_norm);
@@ -262,14 +282,17 @@ radialStress(const RankTwoTensor & stress, const Point & point1, const Point & p
 }
 
 void
-normalPositionVector(const Point & point1, const Point & point2, const Point & curr_point, Point & normalPosition)
+normalPositionVector(const Point & point1,
+                     const Point & point2,
+                     const Point & curr_point,
+                     Point & normalPosition)
 {
   // Find the nearest point on the axis of rotation (defined by point2 - point1)
   // to the current position, e.g. the normal to the axis of rotation at the
   // current position
   Point axis_rotation = point2 - point1;
   Point positionWRTpoint1 = point1 - curr_point;
-  Real projection =  (axis_rotation * positionWRTpoint1) / axis_rotation.norm_sq();
+  Real projection = (axis_rotation * positionWRTpoint1) / axis_rotation.norm_sq();
   Point normal = point1 - projection * axis_rotation;
 
   // Calculate the direction normal to the plane formed by the axis of rotation
@@ -294,5 +317,4 @@ triaxialityStress(const RankTwoTensor & stress)
 {
   return hydrostatic(stress) / vonMisesStress(stress);
 }
-
 }

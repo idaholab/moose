@@ -11,7 +11,7 @@
 
 class NavierStokesApp;
 
-template<>
+template <>
 InputParameters validParams<NavierStokesApp>();
 
 class NavierStokesApp : public MooseApp

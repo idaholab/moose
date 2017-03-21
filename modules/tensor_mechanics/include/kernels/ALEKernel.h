@@ -12,7 +12,7 @@
 
 class ALEKernel;
 
-template<>
+template <>
 InputParameters validParams<ALEKernel>();
 
 class ALEKernel : public Kernel
@@ -36,4 +36,4 @@ protected:
   ///@}
 };
 
-#endif //ALEKERNEL_H
+#endif // ALEKERNEL_H

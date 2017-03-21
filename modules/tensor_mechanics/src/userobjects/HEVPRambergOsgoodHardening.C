@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "HEVPRambergOsgoodHardening.h"
 
-template<>
-InputParameters validParams<HEVPRambergOsgoodHardening>()
+template <>
+InputParameters
+validParams<HEVPRambergOsgoodHardening>()
 {
   InputParameters params = validParams<HEVPStrengthUOBase>();
   params.addParam<Real>("yield_stress", "Yield strength");
@@ -18,8 +19,8 @@ InputParameters validParams<HEVPRambergOsgoodHardening>()
   return params;
 }
 
-HEVPRambergOsgoodHardening::HEVPRambergOsgoodHardening(const InputParameters & parameters) :
-    HEVPStrengthUOBase(parameters),
+HEVPRambergOsgoodHardening::HEVPRambergOsgoodHardening(const InputParameters & parameters)
+  : HEVPStrengthUOBase(parameters),
     _sig0(getParam<Real>("yield_stress")),
     _peeq0(getParam<Real>("reference_plastic_strain")),
     _exponent(getParam<Real>("hardening_exponent"))
@@ -29,17 +30,19 @@ HEVPRambergOsgoodHardening::HEVPRambergOsgoodHardening(const InputParameters & p
 bool
 HEVPRambergOsgoodHardening::computeValue(unsigned int qp, Real & val) const
 {
-  val = _sig0 * std::pow(_intvar[qp]/_peeq0 + 1.0, _exponent);
+  val = _sig0 * std::pow(_intvar[qp] / _peeq0 + 1.0, _exponent);
   return true;
 }
 
 bool
-HEVPRambergOsgoodHardening::computeDerivative(unsigned int qp, const std::string & coupled_var_name, Real & val) const
+HEVPRambergOsgoodHardening::computeDerivative(unsigned int qp,
+                                              const std::string & coupled_var_name,
+                                              Real & val) const
 {
   val = 0;
 
   if (_intvar_prop_name == coupled_var_name)
-    val = _sig0 * _exponent/ _peeq0 * std::pow(_intvar[qp]/_peeq0 + 1.0, _exponent - 1.0);
+    val = _sig0 * _exponent / _peeq0 * std::pow(_intvar[qp] / _peeq0 + 1.0, _exponent - 1.0);
 
   return true;
 }

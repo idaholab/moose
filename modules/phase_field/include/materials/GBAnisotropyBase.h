@@ -9,10 +9,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class GBAnisotropyBase;
 
-template<>
+template <>
 InputParameters validParams<GBAnisotropyBase>();
 
 /**
@@ -42,11 +42,11 @@ protected:
 
   const VariableValue & _T;
 
-  std::vector<std::vector<Real> > _sigma;
-  std::vector<std::vector<Real> > _mob;
-  std::vector<std::vector<Real> > _Q;
-  std::vector<std::vector<Real> > _kappa_gamma;
-  std::vector<std::vector<Real> > _a_g2;
+  std::vector<std::vector<Real>> _sigma;
+  std::vector<std::vector<Real>> _mob;
+  std::vector<std::vector<Real>> _Q;
+  std::vector<std::vector<Real>> _kappa_gamma;
+  std::vector<std::vector<Real>> _a_g2;
 
   MaterialProperty<Real> & _kappa;
   MaterialProperty<Real> & _gamma;
@@ -68,4 +68,4 @@ protected:
   std::vector<const VariableGradient *> _grad_vals;
 };
 
-#endif //GBANISOTROPYBASE_H
+#endif // GBANISOTROPYBASE_H

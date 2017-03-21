@@ -11,7 +11,7 @@
 
 class SolidMechanicsApp;
 
-template<>
+template <>
 InputParameters validParams<SolidMechanicsApp>();
 
 class SolidMechanicsApp : public MooseApp

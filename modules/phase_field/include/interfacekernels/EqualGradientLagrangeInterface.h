@@ -11,7 +11,7 @@
 
 class EqualGradientLagrangeInterface;
 
-template<>
+template <>
 InputParameters validParams<EqualGradientLagrangeInterface>();
 
 /**

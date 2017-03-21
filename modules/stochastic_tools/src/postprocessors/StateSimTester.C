@@ -18,7 +18,8 @@ validParams<StateSimTester>()
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<UserObjectName>("state_sim_runner", "The StateSimRunner to test.");
   MooseEnum system_enum("SYNCTIMES", "SYNCTIMES");
-  params.addParam<MooseEnum>("test_type", system_enum, "The value for testing (SYNCTIMES). Default == SYNCTIMES");
+  params.addParam<MooseEnum>(
+      "test_type", system_enum, "The value for testing (SYNCTIMES). Default == SYNCTIMES");
   return params;
 }
 

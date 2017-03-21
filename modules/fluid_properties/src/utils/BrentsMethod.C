@@ -11,7 +11,7 @@
 namespace BrentsMethod
 {
 void
-bracket(std::function<Real (Real)> const & f, Real & x1, Real & x2)
+bracket(std::function<Real(Real)> const & f, Real & x1, Real & x2)
 {
   Real f1, f2;
   // Factor to scale the interval by
@@ -48,13 +48,14 @@ bracket(std::function<Real (Real)> const & f, Real & x1, Real & x2)
       /// Increment counter
       iter++;
       if (iter >= n)
-        mooseError("No bracketing interval found by BrentsMethod::bracket after ", n, " iterations");
+        mooseError(
+            "No bracketing interval found by BrentsMethod::bracket after ", n, " iterations");
     }
   }
 }
 
 Real
-root(std::function<Real (Real)> const & f, Real x1, Real x2, Real tol)
+root(std::function<Real(Real)> const & f, Real x1, Real x2, Real tol)
 {
   Real a = x1, b = x2, c = x2, d = 0.0, e = 0.0, min1, min2;
   Real fa = f(a);
@@ -143,7 +144,7 @@ root(std::function<Real (Real)> const & f, Real x1, Real x2, Real tol)
       b += d;
     else
     {
-      Real sgn = (xm >= 0.0 ? std::abs(tol1) : - std::abs(tol1));
+      Real sgn = (xm >= 0.0 ? std::abs(tol1) : -std::abs(tol1));
       b += sgn;
     }
 

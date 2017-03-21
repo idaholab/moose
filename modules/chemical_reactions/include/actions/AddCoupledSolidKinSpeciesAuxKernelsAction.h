@@ -11,7 +11,7 @@
 
 class AddCoupledSolidKinSpeciesAuxKernelsAction;
 
-template<>
+template <>
 InputParameters validParams<AddCoupledSolidKinSpeciesAuxKernelsAction>();
 
 class AddCoupledSolidKinSpeciesAuxKernelsAction : public Action

@@ -9,7 +9,7 @@
 
 #include "Action.h"
 
-class MaterialVectorAuxKernelAction: public Action
+class MaterialVectorAuxKernelAction : public Action
 {
 public:
   MaterialVectorAuxKernelAction(const InputParameters & params);
@@ -33,7 +33,7 @@ protected:
   const unsigned int _num_prop;
 };
 
-template<>
+template <>
 InputParameters validParams<MaterialVectorAuxKernelAction>();
 
-#endif //MATERIALVECTORAUXKERNELACTION_H
+#endif // MATERIALVECTORAUXKERNELACTION_H

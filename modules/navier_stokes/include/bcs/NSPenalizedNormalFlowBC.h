@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSPenalizedNormalFlowBC;
 
-template<>
+template <>
 InputParameters validParams<NSPenalizedNormalFlowBC>();
 
 /**

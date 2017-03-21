@@ -20,8 +20,8 @@
  * \tparam T Type of the diffusion coefficient parameter. This can be Real for
  *           isotropic diffusion or RealTensorValue for the general anisotropic case.
  */
-template<typename T>
-class MatDiffusionBase : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >
+template <typename T>
+class MatDiffusionBase : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
   MatDiffusionBase(const InputParameters & parameters);
@@ -56,20 +56,22 @@ protected:
   const VariableGradient & _grad_conc;
 };
 
-template<typename T>
+template <typename T>
 InputParameters
 MatDiffusionBase<T>::validParams()
 {
   InputParameters params = ::validParams<Kernel>();
   params.addParam<MaterialPropertyName>("D_name", "D", "The name of the diffusivity");
   params.addCoupledVar("args", "Vector of arguments of the diffusivity");
-  params.addCoupledVar("conc", "Coupled concentration variable for kernel to operate on; if this is not specified, the kernel's nonlinear variable will be used as usual");
+  params.addCoupledVar("conc", "Coupled concentration variable for kernel to operate on; if this "
+                               "is not specified, the kernel's nonlinear variable will be used as "
+                               "usual");
   return params;
 }
 
-template<typename T>
-MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >(parameters),
+template <typename T>
+MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _D(getMaterialProperty<T>("D_name")),
     _dDdc(getMaterialPropertyDerivative<T>("D_name", _var.name())),
     _dDdarg(_coupled_moose_vars.size()),
@@ -82,21 +84,21 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters) :
     _dDdarg[i] = &getMaterialPropertyDerivative<T>("D_name", _coupled_moose_vars[i]->name());
 }
 
-template<typename T>
+template <typename T>
 void
 MatDiffusionBase<T>::initialSetup()
 {
   validateNonlinearCoupling<Real>("D_name");
 }
 
-template<typename T>
+template <typename T>
 Real
 MatDiffusionBase<T>::computeQpResidual()
 {
   return _D[_qp] * _grad_conc[_qp] * _grad_test[_i][_qp];
 }
 
-template<typename T>
+template <typename T>
 Real
 MatDiffusionBase<T>::computeQpJacobian()
 {
@@ -107,7 +109,7 @@ MatDiffusionBase<T>::computeQpJacobian()
   return sum;
 }
 
-template<typename T>
+template <typename T>
 Real
 MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 {
@@ -121,10 +123,10 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   return sum;
 }
 
-template<typename T>
+template <typename T>
 Real
 MatDiffusionBase<T>::computeQpCJacobian()
 {
   return _D[_qp] * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }
-#endif //MATDIFFUSIONBASE_H
+#endif // MATDIFFUSIONBASE_H

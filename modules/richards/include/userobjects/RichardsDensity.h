@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSDENSITY_H
 #define RICHARDSDENSITY_H
 
@@ -13,8 +12,7 @@
 
 class RichardsDensity;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsDensity>();
 
 /**
@@ -51,7 +49,6 @@ public:
    * @param p porepressure
    */
   virtual Real d2density(Real p) const = 0;
-
 };
 
 #endif // RICHARDSDENSITY_H

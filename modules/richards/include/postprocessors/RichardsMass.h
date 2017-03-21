@@ -5,24 +5,23 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSMASS_H
 #define RICHARDSMASS_H
 
 #include "ElementIntegralVariablePostprocessor.h"
 #include "RichardsVarNames.h"
 
-//Forward Declarations
+// Forward Declarations
 class RichardsMass;
 
-template<>
+template <>
 InputParameters validParams<RichardsMass>();
 
 /**
  * This postprocessor computes the fluid mass by integrating the density over the volume
  *
  */
-class RichardsMass: public ElementIntegralVariablePostprocessor
+class RichardsMass : public ElementIntegralVariablePostprocessor
 {
 public:
   RichardsMass(const InputParameters & parameters);
@@ -37,7 +36,7 @@ protected:
   unsigned int _pvar;
 
   /// Mass, or vector of masses in multicomponent situation
-  const MaterialProperty<std::vector<Real> > & _mass;
+  const MaterialProperty<std::vector<Real>> & _mass;
 };
 
 #endif

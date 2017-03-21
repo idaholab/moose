@@ -9,10 +9,10 @@
 
 #include "ACBulk.h"
 
-//Forward Declarations
+// Forward Declarations
 class AllenCahn;
 
-template<>
+template <>
 InputParameters validParams<AllenCahn>();
 
 /**
@@ -38,4 +38,4 @@ protected:
   std::vector<const MaterialProperty<Real> *> _d2FdEtadarg;
 };
 
-#endif //ALLENCAHN_H
+#endif // ALLENCAHN_H

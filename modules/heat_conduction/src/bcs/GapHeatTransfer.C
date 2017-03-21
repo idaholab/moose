@@ -15,34 +15,48 @@
 
 Threads::spin_mutex slave_flux_mutex;
 
-template<>
-InputParameters validParams<GapHeatTransfer>()
+template <>
+InputParameters
+validParams<GapHeatTransfer>()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<IntegratedBC>();
-  params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
+  params.addParam<std::string>(
+      "appended_property_name", "", "Name appended to material properties to make them unique");
 
   // Common
   params.addParam<Real>("min_gap", 1.0e-6, "A minimum gap size");
   params.addParam<Real>("max_gap", 1.0e6, "A maximum gap size");
 
-  //Deprecated parameter
+  // Deprecated parameter
   MooseEnum coord_types("default XYZ cyl", "default");
-  params.addDeprecatedParam<MooseEnum>("coord_type", coord_types, "Gap calculation type (default or XYZ).","The functionality of this parameter is replaced by 'gap_geometry_type'.");
+  params.addDeprecatedParam<MooseEnum>(
+      "coord_type",
+      coord_types,
+      "Gap calculation type (default or XYZ).",
+      "The functionality of this parameter is replaced by 'gap_geometry_type'.");
 
   MooseEnum gap_geom_types("PLATE CYLINDER SPHERE");
-  params.addParam<MooseEnum>("gap_geometry_type", gap_geom_types, "Gap calculation type. Choices are: "+gap_geom_types.getRawNames());
+  params.addParam<MooseEnum>("gap_geometry_type",
+                             gap_geom_types,
+                             "Gap calculation type. Choices are: " + gap_geom_types.getRawNames());
 
-  params.addParam<RealVectorValue>("cylinder_axis_point_1", "Start point for line defining cylindrical axis");
-  params.addParam<RealVectorValue>("cylinder_axis_point_2", "End point for line defining cylindrical axis");
+  params.addParam<RealVectorValue>("cylinder_axis_point_1",
+                                   "Start point for line defining cylindrical axis");
+  params.addParam<RealVectorValue>("cylinder_axis_point_2",
+                                   "End point for line defining cylindrical axis");
   params.addParam<RealVectorValue>("sphere_origin", "Origin for sphere geometry");
 
   // Quadrature based
-  params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp should NOT be provided (and will be ignored) however paired_boundary IS then required.");
+  params.addParam<bool>("quadrature", false, "Whether or not to do Quadrature point based gap heat "
+                                             "transfer.  If this is true then gap_distance and "
+                                             "gap_temp should NOT be provided (and will be "
+                                             "ignored) however paired_boundary IS then required.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
-  params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
+  params.addParam<bool>(
+      "warnings", false, "Whether to output warning messages concerning nodes not being found");
 
   // Node based options
   params.addCoupledVar("gap_distance", "Distance across the gap");
@@ -51,14 +65,16 @@ InputParameters validParams<GapHeatTransfer>()
   return params;
 }
 
-GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters) :
-    IntegratedBC(parameters),
+GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _gap_geometry_params_set(false),
     _gap_geometry_type(GapConductance::PLATE),
     _quadrature(getParam<bool>("quadrature")),
     _slave_flux(!_quadrature ? &_sys.getVector("slave_flux") : NULL),
-    _gap_conductance(getMaterialProperty<Real>("gap_conductance" + getParam<std::string>("appended_property_name"))),
-    _gap_conductance_dT(getMaterialProperty<Real>("gap_conductance" + getParam<std::string>("appended_property_name") + "_dT")),
+    _gap_conductance(getMaterialProperty<Real>("gap_conductance" +
+                                               getParam<std::string>("appended_property_name"))),
+    _gap_conductance_dT(getMaterialProperty<Real>(
+        "gap_conductance" + getParam<std::string>("appended_property_name") + "_dT")),
     _min_gap(getParam<Real>("min_gap")),
     _max_gap(getParam<Real>("max_gap")),
     _gap_temp(0),
@@ -73,9 +89,12 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters) :
     _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
     _gap_distance_value(_quadrature ? _zero : coupledValue("gap_distance")),
     _gap_temp_value(_quadrature ? _zero : coupledValue("gap_temp")),
-    _penetration_locator(!_quadrature ? NULL : &getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"),
-                                                                                getParam<std::vector<BoundaryName> >("boundary")[0],
-                                                                                Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
+    _penetration_locator(
+        !_quadrature ? NULL
+                     : &getQuadraturePenetrationLocator(
+                           parameters.get<BoundaryName>("paired_boundary"),
+                           getParam<std::vector<BoundaryName>>("boundary")[0],
+                           Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
     _warnings(getParam<bool>("warnings"))
 {
   if (_quadrature)
@@ -99,7 +118,8 @@ GapHeatTransfer::computeResidual()
   if (!_gap_geometry_params_set)
   {
     _gap_geometry_params_set = true;
-    GapConductance::setGapGeometryParameters(_pars, _assembly.coordSystem(), _gap_geometry_type, _p1, _p2);
+    GapConductance::setGapGeometryParameters(
+        _pars, _assembly.coordSystem(), _gap_geometry_type, _p1, _p2);
   }
 
   IntegratedBC::computeResidual();
@@ -115,7 +135,8 @@ GapHeatTransfer::computeQpResidual()
 
   Real grad_t = (_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance[_qp];
 
-  // This is keeping track of this residual contribution so it can be used as the flux on the other side of the gap.
+  // This is keeping track of this residual contribution so it can be used as the flux on the other
+  // side of the gap.
   if (!_quadrature)
   {
     Threads::spin_mutex::scoped_lock lock(slave_flux_mutex);
@@ -140,7 +161,9 @@ GapHeatTransfer::computeQpJacobian()
   if (!_has_info)
     return 0;
 
-  return _test[_i][_qp] * ((_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance_dT[_qp] + _edge_multiplier * _gap_conductance[_qp]) * _phi[_j][_qp];
+  return _test[_i][_qp] * ((_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance_dT[_qp] +
+                           _edge_multiplier * _gap_conductance[_qp]) *
+         _phi[_j][_qp];
 }
 
 Real
@@ -205,7 +228,7 @@ GapHeatTransfer::computeQpOffDiagJacobian(unsigned jvar)
     const Point & normal(_normals[_qp]);
 
     const Real dgap = dgapLength(-normal(coupled_component));
-    dRdx = -(_u[_qp]-_gap_temp)*_edge_multiplier*_gap_conductance[_qp]/gapL * dgap;
+    dRdx = -(_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance[_qp] / gapL * dgap;
   }
   return _test[_i][_qp] * dRdx * _phi[_j][_qp];
 }
@@ -256,7 +279,7 @@ GapHeatTransfer::computeGapValues()
       _has_info = true;
 
       Elem * slave_side = pinfo->_side;
-      std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
+      std::vector<std::vector<Real>> & slave_side_phi = pinfo->_side_phi;
       _gap_temp = _variable->getValue(slave_side, slave_side_phi);
 
       Real tangential_tolerance = _penetration_locator->getTangentialTolerance();
@@ -270,10 +293,14 @@ GapHeatTransfer::computeGapValues()
     else
     {
       if (_warnings)
-        mooseWarning("No gap value information found for node ", qnode->id(), " on processor ", processor_id());
+        mooseWarning("No gap value information found for node ",
+                     qnode->id(),
+                     " on processor ",
+                     processor_id());
     }
   }
 
   Point current_point(_q_point[_qp]);
-  GapConductance::computeGapRadii(_gap_geometry_type, current_point, _p1, _p2, _gap_distance, _normals[_qp], _r1, _r2, _radius);
+  GapConductance::computeGapRadii(
+      _gap_geometry_type, current_point, _p1, _p2, _gap_distance, _normals[_qp], _r1, _r2, _radius);
 }

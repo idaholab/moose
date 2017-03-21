@@ -54,15 +54,15 @@
 #include "XFEMApp.h"
 #endif
 
-template<>
-InputParameters validParams<ModulesApp>()
+template <>
+InputParameters
+validParams<ModulesApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-ModulesApp::ModulesApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+ModulesApp::ModulesApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   ModulesApp::registerObjects(_factory);
@@ -71,12 +71,14 @@ ModulesApp::ModulesApp(const InputParameters & parameters) :
   ModulesApp::associateSyntax(_syntax, _action_factory);
 }
 
-ModulesApp::~ModulesApp()
-{
-}
+ModulesApp::~ModulesApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void ModulesApp__registerApps() { ModulesApp::registerApps(); }
+extern "C" void
+ModulesApp__registerApps()
+{
+  ModulesApp::registerApps();
+}
 void
 ModulesApp::registerApps()
 {
@@ -84,7 +86,11 @@ ModulesApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void ModulesApp__registerObjects(Factory & factory) { ModulesApp::registerObjects(factory); }
+extern "C" void
+ModulesApp__registerObjects(Factory & factory)
+{
+  ModulesApp::registerObjects(factory);
+}
 void
 ModulesApp::registerObjects(Factory & factory)
 {
@@ -121,7 +127,7 @@ ModulesApp::registerObjects(Factory & factory)
 #endif
 
 #ifdef POROUS_FLOW_ENABLED
-    PorousFlowApp::registerObjects(factory);
+  PorousFlowApp::registerObjects(factory);
 #endif
 
 #ifdef RICHARDS_ENABLED
@@ -146,7 +152,11 @@ ModulesApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void ModulesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { ModulesApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+ModulesApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  ModulesApp::associateSyntax(syntax, action_factory);
+}
 void
 ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {

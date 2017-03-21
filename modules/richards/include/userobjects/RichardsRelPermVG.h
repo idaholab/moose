@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSRELPERMVG_H
 #define RICHARDSRELPERMVG_H
 
@@ -13,8 +12,7 @@
 
 class RichardsRelPermVG;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsRelPermVG>();
 
 /**
@@ -45,13 +43,11 @@ public:
   Real d2relperm(Real seff) const;
 
 protected:
-
   /// immobile saturation
   Real _simm;
 
   /// van Genuchten m parameter
   Real _m;
-
 };
 
 #endif // RICHARDSRELPERMVG_H

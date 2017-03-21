@@ -15,7 +15,7 @@
 // Forward declarations
 class LevelSetForcingFunctionSUPG;
 
-template<>
+template <>
 InputParameters validParams<LevelSetForcingFunctionSUPG>();
 
 /**
@@ -24,7 +24,6 @@ InputParameters validParams<LevelSetForcingFunctionSUPG>();
 class LevelSetForcingFunctionSUPG : public LevelSetVelocityInterface<UserForcingFunction>
 {
 public:
-
   LevelSetForcingFunctionSUPG(const InputParameters & parameters);
 
 protected:

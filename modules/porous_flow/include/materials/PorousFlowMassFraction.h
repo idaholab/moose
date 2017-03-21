@@ -10,10 +10,10 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowMassFraction;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowMassFraction>();
 
 /**
@@ -62,4 +62,4 @@ protected:
   std::vector<const VariableGradient *> _grad_mf_vars;
 };
 
-#endif //POROUSFLOWMASSFRACTION_H
+#endif // POROUSFLOWMASSFRACTION_H

@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSMassBC;
 
-template<>
+template <>
 InputParameters validParams<NSMassBC>();
 
 /**

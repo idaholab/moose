@@ -36,15 +36,15 @@
 #include "ElectricalConductivity.h"
 #include "JouleHeatingSource.h"
 
-template<>
-InputParameters validParams<HeatConductionApp>()
+template <>
+InputParameters
+validParams<HeatConductionApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-HeatConductionApp::HeatConductionApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+HeatConductionApp::HeatConductionApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   HeatConductionApp::registerObjects(_factory);
@@ -53,12 +53,14 @@ HeatConductionApp::HeatConductionApp(const InputParameters & parameters) :
   HeatConductionApp::associateSyntax(_syntax, _action_factory);
 }
 
-HeatConductionApp::~HeatConductionApp()
-{
-}
+HeatConductionApp::~HeatConductionApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void HeatConductionApp__registerApps() { HeatConductionApp::registerApps(); }
+extern "C" void
+HeatConductionApp__registerApps()
+{
+  HeatConductionApp::registerApps();
+}
 void
 HeatConductionApp::registerApps()
 {
@@ -66,7 +68,11 @@ HeatConductionApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void HeatConductionApp__registerObjects(Factory & factory) { HeatConductionApp::registerObjects(factory); }
+extern "C" void
+HeatConductionApp__registerObjects(Factory & factory)
+{
+  HeatConductionApp::registerObjects(factory);
+}
 void
 HeatConductionApp::registerObjects(Factory & factory)
 {
@@ -99,7 +105,11 @@ HeatConductionApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void HeatConductionApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { HeatConductionApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+HeatConductionApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  HeatConductionApp::associateSyntax(syntax, action_factory);
+}
 void
 HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
@@ -110,16 +120,17 @@ HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   registerAction(AddSlaveFluxVectorAction, "add_slave_flux_vector");
   syntax.registerActionSyntax("AddSlaveFluxVectorAction", "ThermalContact/*");
 
+  syntax.registerActionSyntax("ThermalContactAuxBCsAction", "ThermalContact/*", "add_aux_kernel");
+  syntax.registerActionSyntax(
+      "ThermalContactAuxVarsAction", "ThermalContact/*", "add_aux_variable");
+  syntax.registerActionSyntax("ThermalContactBCsAction", "ThermalContact/*", "add_bc");
+  syntax.registerActionSyntax(
+      "ThermalContactDiracKernelsAction", "ThermalContact/*", "add_dirac_kernel");
+  syntax.registerActionSyntax("ThermalContactMaterialsAction", "ThermalContact/*", "add_material");
 
-  syntax.registerActionSyntax("ThermalContactAuxBCsAction",       "ThermalContact/*", "add_aux_kernel");
-  syntax.registerActionSyntax("ThermalContactAuxVarsAction",      "ThermalContact/*", "add_aux_variable");
-  syntax.registerActionSyntax("ThermalContactBCsAction",          "ThermalContact/*", "add_bc");
-  syntax.registerActionSyntax("ThermalContactDiracKernelsAction", "ThermalContact/*", "add_dirac_kernel");
-  syntax.registerActionSyntax("ThermalContactMaterialsAction",    "ThermalContact/*", "add_material");
-
-  registerAction(ThermalContactAuxBCsAction,       "add_aux_kernel");
-  registerAction(ThermalContactAuxVarsAction,      "add_aux_variable");
-  registerAction(ThermalContactBCsAction,          "add_bc");
+  registerAction(ThermalContactAuxBCsAction, "add_aux_kernel");
+  registerAction(ThermalContactAuxVarsAction, "add_aux_variable");
+  registerAction(ThermalContactBCsAction, "add_bc");
   registerAction(ThermalContactDiracKernelsAction, "add_dirac_kernel");
-  registerAction(ThermalContactMaterialsAction,    "add_material");
+  registerAction(ThermalContactMaterialsAction, "add_material");
 }

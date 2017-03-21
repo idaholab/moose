@@ -12,7 +12,7 @@
 
 class PorousFlowDiffusivityConst;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowDiffusivityConst>();
 
 /// Material designed to provide constant tortuosity and diffusion coefficents
@@ -28,4 +28,4 @@ protected:
   const std::vector<Real> _input_tortuosity;
 };
 
-#endif //POROUSFLOWDIFFUSIVITYCONST_H
+#endif // POROUSFLOWDIFFUSIVITYCONST_H

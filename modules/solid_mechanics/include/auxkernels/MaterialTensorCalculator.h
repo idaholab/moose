@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef MATERIALTENSORCALCULATOR_H
 #define MATERIALTENSORCALCULATOR_H
 
@@ -15,13 +14,12 @@
 
 class MaterialTensorCalculator;
 
-template<>
+template <>
 InputParameters validParams<MaterialTensorCalculator>();
 
 class MaterialTensorCalculator
 {
 public:
-
   enum QUANTITY_ENUM
   {
     COMPONENT,
@@ -58,7 +56,7 @@ protected:
 public:
   Real getTensorQuantity(const SymmTensor & tensor,
                          const Point & curr_point,
-                         RealVectorValue &direction);
+                         RealVectorValue & direction);
 };
 
-#endif //MATERIALTENSORCALCULATOR_H
+#endif // MATERIALTENSORCALCULATOR_H

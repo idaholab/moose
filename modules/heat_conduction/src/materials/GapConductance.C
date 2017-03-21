@@ -16,13 +16,15 @@
 // libMesh includes
 #include "libmesh/string_to_enum.h"
 
-template<>
-InputParameters validParams<GapConductance>()
+template <>
+InputParameters
+validParams<GapConductance>()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = validParams<Material>();
-  params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
+  params.addParam<std::string>(
+      "appended_property_name", "", "Name appended to material properties to make them unique");
 
   params.addRequiredCoupledVar("variable", "Temperature variable");
 
@@ -30,43 +32,69 @@ InputParameters validParams<GapConductance>()
   params.addCoupledVar("gap_distance", "Distance across the gap");
   params.addCoupledVar("gap_temp", "Temperature on the other side of the gap");
   params.addParam<Real>("gap_conductivity", 1.0, "The thermal conductivity of the gap material");
-  params.addParam<FunctionName>("gap_conductivity_function", "Thermal conductivity of the gap material as a function.  Multiplied by gap_conductivity.");
-  params.addCoupledVar("gap_conductivity_function_variable", "Variable to be used in the gap_conductivity_function in place of time");
-
+  params.addParam<FunctionName>(
+      "gap_conductivity_function",
+      "Thermal conductivity of the gap material as a function.  Multiplied by gap_conductivity.");
+  params.addCoupledVar("gap_conductivity_function_variable",
+                       "Variable to be used in the gap_conductivity_function in place of time");
 
   // Quadrature based
-  params.addParam<bool>("quadrature", false, "Whether or not to do quadrature point based gap heat transfer.  If this is true then gap_distance and gap_temp should NOT be provided (and will be ignored); however, paired_boundary and variable are then required.");
+  params.addParam<bool>("quadrature", false, "Whether or not to do quadrature point based gap heat "
+                                             "transfer.  If this is true then gap_distance and "
+                                             "gap_temp should NOT be provided (and will be "
+                                             "ignored); however, paired_boundary and variable are "
+                                             "then required.");
   params.addParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
-  params.addParam<bool>("warnings", false, "Whether to output warning messages concerning nodes not being found");
+  params.addParam<bool>(
+      "warnings", false, "Whether to output warning messages concerning nodes not being found");
 
   // Common
-  params.addRangeCheckedParam<Real>("min_gap", 1e-6, "min_gap>=0", "A minimum gap (denominator) size");
-  params.addRangeCheckedParam<Real>("max_gap", 1e6, "max_gap>=0", "A maximum gap (denominator) size");
+  params.addRangeCheckedParam<Real>(
+      "min_gap", 1e-6, "min_gap>=0", "A minimum gap (denominator) size");
+  params.addRangeCheckedParam<Real>(
+      "max_gap", 1e6, "max_gap>=0", "A maximum gap (denominator) size");
 
-  //Deprecated parameter
+  // Deprecated parameter
   MooseEnum coord_types("default XYZ");
-  params.addDeprecatedParam<MooseEnum>("coord_type", coord_types, "Gap calculation type (default or XYZ).","The functionality of this parameter is replaced by 'gap_geometry_type'.");
+  params.addDeprecatedParam<MooseEnum>(
+      "coord_type",
+      coord_types,
+      "Gap calculation type (default or XYZ).",
+      "The functionality of this parameter is replaced by 'gap_geometry_type'.");
 
   MooseEnum gap_geom_types("PLATE CYLINDER SPHERE");
-  params.addParam<MooseEnum>("gap_geometry_type", gap_geom_types, "Gap calculation type. Choices are: "+gap_geom_types.getRawNames());
+  params.addParam<MooseEnum>("gap_geometry_type",
+                             gap_geom_types,
+                             "Gap calculation type. Choices are: " + gap_geom_types.getRawNames());
 
-  params.addParam<RealVectorValue>("cylinder_axis_point_1", "Start point for line defining cylindrical axis");
-  params.addParam<RealVectorValue>("cylinder_axis_point_2", "End point for line defining cylindrical axis");
+  params.addParam<RealVectorValue>("cylinder_axis_point_1",
+                                   "Start point for line defining cylindrical axis");
+  params.addParam<RealVectorValue>("cylinder_axis_point_2",
+                                   "End point for line defining cylindrical axis");
   params.addParam<RealVectorValue>("sphere_origin", "Origin for sphere geometry");
 
   params.addParam<Real>("stefan_boltzmann", 5.669e-8, "The Stefan-Boltzmann constant");
-  params.addRangeCheckedParam<Real>("emissivity_1", 0.0, "emissivity_1>=0 & emissivity_1<=1", "The emissivity of the fuel surface");
-  params.addRangeCheckedParam<Real>("emissivity_2", 0.0, "emissivity_2>=0 & emissivity_2<=1", "The emissivity of the cladding surface");
+  params.addRangeCheckedParam<Real>("emissivity_1",
+                                    0.0,
+                                    "emissivity_1>=0 & emissivity_1<=1",
+                                    "The emissivity of the fuel surface");
+  params.addRangeCheckedParam<Real>("emissivity_2",
+                                    0.0,
+                                    "emissivity_2>=0 & emissivity_2<=1",
+                                    "The emissivity of the cladding surface");
 
-
-  params.addParam<bool>("use_displaced_mesh", true, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+  params.addParam<bool>("use_displaced_mesh", true, "Whether or not this object should use the "
+                                                    "displaced mesh for computation.  Note that in "
+                                                    "the case this is true but no displacements "
+                                                    "are provided in the Mesh block the "
+                                                    "undisplaced mesh will still be used.");
 
   return params;
 }
 
-GapConductance::GapConductance(const InputParameters & parameters) :
-    Material(parameters),
+GapConductance::GapConductance(const InputParameters & parameters)
+  : Material(parameters),
     _appended_property_name(getParam<std::string>("appended_property_name")),
     _temp(coupledValue("variable")),
     _gap_geometry_params_set(false),
@@ -80,17 +108,23 @@ GapConductance::GapConductance(const InputParameters & parameters) :
     _has_info(false),
     _gap_distance_value(_quadrature ? _zero : coupledValue("gap_distance")),
     _gap_temp_value(_quadrature ? _zero : coupledValue("gap_temp")),
-    _gap_conductance(declareProperty<Real>("gap_conductance"+_appended_property_name)),
-    _gap_conductance_dT(declareProperty<Real>("gap_conductance"+_appended_property_name + "_dT")),
+    _gap_conductance(declareProperty<Real>("gap_conductance" + _appended_property_name)),
+    _gap_conductance_dT(declareProperty<Real>("gap_conductance" + _appended_property_name + "_dT")),
     _gap_conductivity(getParam<Real>("gap_conductivity")),
-    _gap_conductivity_function(isParamValid("gap_conductivity_function") ? &getFunction("gap_conductivity_function") : NULL),
-    _gap_conductivity_function_variable(isCoupled("gap_conductivity_function_variable") ? &coupledValue("gap_conductivity_function_variable") : NULL),
+    _gap_conductivity_function(isParamValid("gap_conductivity_function")
+                                   ? &getFunction("gap_conductivity_function")
+                                   : NULL),
+    _gap_conductivity_function_variable(isCoupled("gap_conductivity_function_variable")
+                                            ? &coupledValue("gap_conductivity_function_variable")
+                                            : NULL),
     _stefan_boltzmann(getParam<Real>("stefan_boltzmann")),
-    _emissivity(getParam<Real>("emissivity_1") != 0.0 && getParam<Real>("emissivity_2") != 0.0 ?
-                 1.0 / getParam<Real>("emissivity_1") + 1.0 / getParam<Real>("emissivity_2") - 1 : 0.0),
+    _emissivity(getParam<Real>("emissivity_1") != 0.0 && getParam<Real>("emissivity_2") != 0.0
+                    ? 1.0 / getParam<Real>("emissivity_1") + 1.0 / getParam<Real>("emissivity_2") -
+                          1
+                    : 0.0),
     _min_gap(getParam<Real>("min_gap")),
     _max_gap(getParam<Real>("max_gap")),
-    _temp_var(_quadrature ? getVar("variable",0) : NULL),
+    _temp_var(_quadrature ? getVar("variable", 0) : NULL),
     _penetration_locator(NULL),
     _serialized_solution(_quadrature ? &_temp_var->sys().currentSolution() : NULL),
     _dof_map(_quadrature ? &_temp_var->sys().dofMap() : NULL),
@@ -112,22 +146,27 @@ GapConductance::GapConductance(const InputParameters & parameters) :
 
   if (_quadrature)
   {
-    _penetration_locator = &_subproblem.geomSearchData().getQuadraturePenetrationLocator(parameters.get<BoundaryName>("paired_boundary"),
-                                                                                         getParam<std::vector<BoundaryName> >("boundary")[0],
-                                                                                         Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
+    _penetration_locator = &_subproblem.geomSearchData().getQuadraturePenetrationLocator(
+        parameters.get<BoundaryName>("paired_boundary"),
+        getParam<std::vector<BoundaryName>>("boundary")[0],
+        Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));
   }
 }
 
-void GapConductance::setGapGeometryParameters(const InputParameters & params,
-                                              const Moose::CoordinateSystemType coord_sys,
-                                              GAP_GEOMETRY & gap_geometry_type,
-                                              Point & p1, Point & p2)
+void
+GapConductance::setGapGeometryParameters(const InputParameters & params,
+                                         const Moose::CoordinateSystemType coord_sys,
+                                         GAP_GEOMETRY & gap_geometry_type,
+                                         Point & p1,
+                                         Point & p2)
 {
   if (params.isParamSetByUser("gap_geometry_type"))
   {
-    gap_geometry_type = GapConductance::GAP_GEOMETRY(int(params.get<MooseEnum>("gap_geometry_type")));
+    gap_geometry_type =
+        GapConductance::GAP_GEOMETRY(int(params.get<MooseEnum>("gap_geometry_type")));
     if (params.isParamSetByUser("coord_type"))
-      ::mooseError("Deprecated parameter 'coord_type' cannot be used together with 'gap_geometry_type' in GapConductance");
+      ::mooseError("Deprecated parameter 'coord_type' cannot be used together with "
+                   "'gap_geometry_type' in GapConductance");
   }
   else if (params.isParamSetByUser("coord_type"))
   {
@@ -156,40 +195,49 @@ void GapConductance::setGapGeometryParameters(const InputParameters & params,
   if (gap_geometry_type == GapConductance::PLATE)
   {
     if (coord_sys == Moose::COORD_RSPHERICAL)
-      ::mooseError("'gap_geometry_type = PLATE' cannot be used with models having a spherical coordinate system.");
+      ::mooseError("'gap_geometry_type = PLATE' cannot be used with models having a spherical "
+                   "coordinate system.");
   }
   else if (gap_geometry_type == GapConductance::CYLINDER)
   {
     if (coord_sys == Moose::COORD_XYZ)
     {
-      if (!params.isParamValid("cylinder_axis_point_1") || !params.isParamValid("cylinder_axis_point_2"))
-        ::mooseError("For 'gap_geometry_type = CYLINDER' to be used with a Cartesian model, 'cylinder_axis_point_1' and 'cylinder_axis_point_2' must be specified.");
+      if (!params.isParamValid("cylinder_axis_point_1") ||
+          !params.isParamValid("cylinder_axis_point_2"))
+        ::mooseError("For 'gap_geometry_type = CYLINDER' to be used with a Cartesian model, "
+                     "'cylinder_axis_point_1' and 'cylinder_axis_point_2' must be specified.");
       p1 = params.get<RealVectorValue>("cylinder_axis_point_1");
       p2 = params.get<RealVectorValue>("cylinder_axis_point_2");
     }
     else if (coord_sys == Moose::COORD_RZ)
     {
-      if (params.isParamValid("cylinder_axis_point_1") || params.isParamValid("cylinder_axis_point_2"))
-        ::mooseError("The 'cylinder_axis_point_1' and 'cylinder_axis_point_2' cannot be specified with axisymmetric models.  The y-axis is used as the cylindrical axis of symmetry.");
-      p1 = Point(0,0,0);
-      p2 = Point(0,1,0);
+      if (params.isParamValid("cylinder_axis_point_1") ||
+          params.isParamValid("cylinder_axis_point_2"))
+        ::mooseError("The 'cylinder_axis_point_1' and 'cylinder_axis_point_2' cannot be specified "
+                     "with axisymmetric models.  The y-axis is used as the cylindrical axis of "
+                     "symmetry.");
+      p1 = Point(0, 0, 0);
+      p2 = Point(0, 1, 0);
     }
     else if (coord_sys == Moose::COORD_RSPHERICAL)
-      ::mooseError("'gap_geometry_type = CYLINDER' cannot be used with models having a spherical coordinate system.");
+      ::mooseError("'gap_geometry_type = CYLINDER' cannot be used with models having a spherical "
+                   "coordinate system.");
   }
   else if (gap_geometry_type == GapConductance::SPHERE)
   {
     if (coord_sys == Moose::COORD_XYZ || coord_sys == Moose::COORD_RZ)
     {
       if (!params.isParamValid("sphere_origin"))
-        ::mooseError("For 'gap_geometry_type = SPHERE' to be used with a Cartesian or axisymmetric model, 'sphere_origin' must be specified.");
+        ::mooseError("For 'gap_geometry_type = SPHERE' to be used with a Cartesian or axisymmetric "
+                     "model, 'sphere_origin' must be specified.");
       p1 = params.get<RealVectorValue>("sphere_origin");
     }
     else if (coord_sys == Moose::COORD_RSPHERICAL)
     {
       if (params.isParamValid("sphere_origin"))
-        ::mooseError("The 'sphere_origin' cannot be specified with spherical models.  x=0 is used as the spherical origin.");
-      p1 = Point(0,0,0);
+        ::mooseError("The 'sphere_origin' cannot be specified with spherical models.  x=0 is used "
+                     "as the spherical origin.");
+      p1 = Point(0, 0, 0);
     }
   }
 }
@@ -234,13 +282,11 @@ GapConductance::h_conduction()
   return gapK() / gapLength(_gap_geometry_type, _radius, _r1, _r2, _min_gap, _max_gap);
 }
 
-
 Real
 GapConductance::dh_conduction()
 {
   return 0.0;
 }
-
 
 Real
 GapConductance::h_radiation()
@@ -266,8 +312,9 @@ GapConductance::h_radiation()
   if (_emissivity == 0.0)
     return 0.0;
 
-  const Real temp_func = (_temp[_qp] * _temp[_qp] + _gap_temp * _gap_temp) * (_temp[_qp] + _gap_temp);
-  return _stefan_boltzmann*temp_func/_emissivity;
+  const Real temp_func =
+      (_temp[_qp] * _temp[_qp] + _gap_temp * _gap_temp) * (_temp[_qp] + _gap_temp);
+  return _stefan_boltzmann * temp_func / _emissivity;
 }
 
 Real
@@ -276,20 +323,24 @@ GapConductance::dh_radiation()
   if (_emissivity == 0.0)
     return 0.0;
 
-  const Real temp_func = 3*_temp[_qp]*_temp[_qp] + _gap_temp * (2*_temp[_qp] + _gap_temp);
-  return _stefan_boltzmann*temp_func/_emissivity;
+  const Real temp_func = 3 * _temp[_qp] * _temp[_qp] + _gap_temp * (2 * _temp[_qp] + _gap_temp);
+  return _stefan_boltzmann * temp_func / _emissivity;
 }
 
 Real
 GapConductance::gapLength(const GapConductance::GAP_GEOMETRY & gap_geom,
-                          Real radius, Real r1, Real r2, Real min_gap, Real max_gap)
+                          Real radius,
+                          Real r1,
+                          Real r2,
+                          Real min_gap,
+                          Real max_gap)
 {
   if (gap_geom == GapConductance::CYLINDER)
     return gapCyl(radius, r1, r2, min_gap, max_gap);
   else if (gap_geom == GapConductance::SPHERE)
     return gapSphere(radius, r1, r2, min_gap, max_gap);
   else
-    return gapRect(r2-r1, min_gap, max_gap);
+    return gapRect(r2 - r1, min_gap, max_gap);
 }
 
 Real
@@ -320,7 +371,8 @@ GapConductance::gapK()
   if (_gap_conductivity_function)
   {
     if (_gap_conductivity_function_variable)
-      gap_conductivity *= _gap_conductivity_function->value((*_gap_conductivity_function_variable)[_qp], _q_point[_qp]);
+      gap_conductivity *= _gap_conductivity_function->value(
+          (*_gap_conductivity_function_variable)[_qp], _q_point[_qp]);
     else
       gap_conductivity *= _gap_conductivity_function->value(_t, _q_point[_qp]);
   }
@@ -352,26 +404,32 @@ GapConductance::computeGapValues()
       _has_info = true;
 
       Elem * slave_side = pinfo->_side;
-      std::vector<std::vector<Real> > & slave_side_phi = pinfo->_side_phi;
+      std::vector<std::vector<Real>> & slave_side_phi = pinfo->_side_phi;
       std::vector<dof_id_type> slave_side_dof_indices;
 
       _dof_map->dof_indices(slave_side, slave_side_dof_indices, _temp_var->number());
 
       for (unsigned int i = 0; i < slave_side_dof_indices.size(); ++i)
       {
-        //The zero index is because we only have one point that the phis are evaluated at
+        // The zero index is because we only have one point that the phis are evaluated at
         _gap_temp += slave_side_phi[i][0] * (*(*_serialized_solution))(slave_side_dof_indices[i]);
       }
     }
     else
     {
       if (_warnings)
-        mooseWarning("No gap value information found for node ", qnode->id(), " on processor ", processor_id(), " at coordinate ", Point(*qnode));
+        mooseWarning("No gap value information found for node ",
+                     qnode->id(),
+                     " on processor ",
+                     processor_id(),
+                     " at coordinate ",
+                     Point(*qnode));
     }
   }
 
   Point current_point(_q_point[_qp]);
-  computeGapRadii(_gap_geometry_type, current_point, _p1, _p2, _gap_distance, _normals[_qp], _r1, _r2, _radius);
+  computeGapRadii(
+      _gap_geometry_type, current_point, _p1, _p2, _gap_distance, _normals[_qp], _r1, _r2, _radius);
 }
 
 void
@@ -414,7 +472,6 @@ GapConductance::computeGapRadii(const GapConductance::GAP_GEOMETRY gap_geometry_
     }
     else
       ::mooseError("Issue with cylindrical flux calc. normals.\n");
-
   }
   else if (gap_geometry_type == GapConductance::SPHERE)
   {

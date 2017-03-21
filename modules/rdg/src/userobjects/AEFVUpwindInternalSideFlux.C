@@ -7,22 +7,22 @@
 
 #include "AEFVUpwindInternalSideFlux.h"
 
-template<>
-InputParameters validParams<AEFVUpwindInternalSideFlux>()
+template <>
+InputParameters
+validParams<AEFVUpwindInternalSideFlux>()
 {
   InputParameters params = validParams<InternalSideFluxBase>();
-  params.addClassDescription("Upwind numerical flux scheme for the advection equation using a cell-centered finite volume method.");
+  params.addClassDescription("Upwind numerical flux scheme for the advection equation using a "
+                             "cell-centered finite volume method.");
   return params;
 }
 
-AEFVUpwindInternalSideFlux::AEFVUpwindInternalSideFlux(const InputParameters & parameters) :
-    InternalSideFluxBase(parameters)
+AEFVUpwindInternalSideFlux::AEFVUpwindInternalSideFlux(const InputParameters & parameters)
+  : InternalSideFluxBase(parameters)
 {
 }
 
-AEFVUpwindInternalSideFlux::~AEFVUpwindInternalSideFlux()
-{
-}
+AEFVUpwindInternalSideFlux::~AEFVUpwindInternalSideFlux() {}
 
 void
 AEFVUpwindInternalSideFlux::calcFlux(unsigned int /*iside*/,

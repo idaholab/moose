@@ -7,21 +7,27 @@
 #include "ComputeThermalExpansionEigenstrainBase.h"
 #include "RankTwoTensor.h"
 
-template<>
-InputParameters validParams<ComputeThermalExpansionEigenstrainBase>()
+template <>
+InputParameters
+validParams<ComputeThermalExpansionEigenstrainBase>()
 {
   InputParameters params = validParams<ComputeEigenstrainBase>();
   params.addCoupledVar("temperature", "Coupled temperature");
-  params.addDeprecatedParam<Real>("stress_free_reference_temperature", "Reference temperature for thermal eigenstrain calculation", "'stress_free_temperature' has replaced this parameter");
-  params.addParam<Real>("stress_free_temperature", "Reference temperature for thermal eigenstrain calculation");
+  params.addDeprecatedParam<Real>("stress_free_reference_temperature",
+                                  "Reference temperature for thermal eigenstrain calculation",
+                                  "'stress_free_temperature' has replaced this parameter");
+  params.addParam<Real>("stress_free_temperature",
+                        "Reference temperature for thermal eigenstrain calculation");
 
   return params;
 }
 
-ComputeThermalExpansionEigenstrainBase::ComputeThermalExpansionEigenstrainBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<ComputeEigenstrainBase>(parameters),
+ComputeThermalExpansionEigenstrainBase::ComputeThermalExpansionEigenstrainBase(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<ComputeEigenstrainBase>(parameters),
     _temperature(coupledValue("temperature")),
-    _deigenstrain_dT(declarePropertyDerivative<RankTwoTensor>(_eigenstrain_name, getVar("temperature",0)->name()))
+    _deigenstrain_dT(declarePropertyDerivative<RankTwoTensor>(_eigenstrain_name,
+                                                              getVar("temperature", 0)->name()))
 {
   if (isParamValid("stress_free_temperature"))
     _stress_free_temperature = getParam<Real>("stress_free_temperature");
@@ -44,4 +50,3 @@ ComputeThermalExpansionEigenstrainBase::computeQpEigenstrain()
   _deigenstrain_dT[_qp].zero();
   _deigenstrain_dT[_qp].addIa(-instantaneous_cte);
 }
-

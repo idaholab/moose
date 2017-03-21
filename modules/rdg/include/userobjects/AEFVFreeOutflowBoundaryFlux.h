@@ -13,7 +13,7 @@
 // Forward Declarations
 class AEFVFreeOutflowBoundaryFlux;
 
-template<>
+template <>
 InputParameters validParams<AEFVFreeOutflowBoundaryFlux>();
 
 /**
@@ -24,7 +24,6 @@ InputParameters validParams<AEFVFreeOutflowBoundaryFlux>();
 class AEFVFreeOutflowBoundaryFlux : public BoundaryFluxBase
 {
 public:
-
   AEFVFreeOutflowBoundaryFlux(const InputParameters & parameters);
   virtual ~AEFVFreeOutflowBoundaryFlux();
 
@@ -41,7 +40,6 @@ public:
                             DenseMatrix<Real> & jac1) const override;
 
 protected:
-
 };
 
 #endif

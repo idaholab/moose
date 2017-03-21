@@ -6,20 +6,22 @@
 /****************************************************************/
 #include "ThermalConductivity.h"
 
-template<>
-InputParameters validParams<ThermalConductivity>()
+template <>
+InputParameters
+validParams<ThermalConductivity>()
 {
   InputParameters params = validParams<SideAverageValue>();
   params.addRequiredParam<Real>("dx", "Length between sides of sample in length_scale");
-  params.addRequiredParam<PostprocessorName>("flux", "Heat flux out of 'cold' boundary in solution units, should always be positive");
+  params.addRequiredParam<PostprocessorName>(
+      "flux", "Heat flux out of 'cold' boundary in solution units, should always be positive");
   params.addRequiredParam<PostprocessorName>("T_hot", "Temperature on 'hot' boundary in K");
   params.addParam<Real>("length_scale", 1e-8, "lengthscale of the solution, default is 1e-8");
   params.addParam<Real>("k0", 0.0, "Initial value of the thermal conductivity");
   return params;
 }
 
-ThermalConductivity::ThermalConductivity(const InputParameters & parameters) :
-    SideAverageValue(parameters),
+ThermalConductivity::ThermalConductivity(const InputParameters & parameters)
+  : SideAverageValue(parameters),
     _dx(getParam<Real>("dx")),
     _flux(getPostprocessorValue("flux")),
     _T_hot(getPostprocessorValue("T_hot")),
@@ -44,5 +46,5 @@ ThermalConductivity::getValue()
   if (_step_zero)
     return _k0;
   else
-    return Th_cond / _length_scale; //In W/(m-K)
+    return Th_cond / _length_scale; // In W/(m-K)
 }

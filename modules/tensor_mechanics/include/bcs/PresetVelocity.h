@@ -9,7 +9,6 @@
 
 #include "PresetNodalBC.h"
 
-
 class PresetVelocity : public PresetNodalBC
 {
 public:
@@ -23,7 +22,7 @@ protected:
   Function & _function;
 };
 
-template<>
+template <>
 InputParameters validParams<PresetVelocity>();
 
 #endif /* PRESETVELOCITY_H */

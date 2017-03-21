@@ -12,38 +12,45 @@
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
-template<>
-InputParameters validParams<NSEnergyInviscidBC>()
+template <>
+InputParameters
+validParams<NSEnergyInviscidBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
-  params.addClassDescription("This class corresponds to the inviscid part of the 'natural' boundary condition for the energy equation.");
+  params.addClassDescription("This class corresponds to the inviscid part of the 'natural' "
+                             "boundary condition for the energy equation.");
   params.addRequiredCoupledVar(NS::temperature, "temperature");
   return params;
 }
 
-NSEnergyInviscidBC::NSEnergyInviscidBC(const InputParameters & parameters) :
-    NSIntegratedBC(parameters),
+NSEnergyInviscidBC::NSEnergyInviscidBC(const InputParameters & parameters)
+  : NSIntegratedBC(parameters),
     _temperature(coupledValue(NS::temperature)),
     // Object for computing deriviatives of pressure
     _pressure_derivs(*this)
 {
 }
 
-Real NSEnergyInviscidBC::qpResidualHelper(Real pressure, Real un)
+Real
+NSEnergyInviscidBC::qpResidualHelper(Real pressure, Real un)
 {
   return (_rho_E[_qp] + pressure) * un * _test[_i][_qp];
 }
 
-Real NSEnergyInviscidBC::qpResidualHelper(Real rho, RealVectorValue u, Real /*pressure*/)
+Real
+NSEnergyInviscidBC::qpResidualHelper(Real rho, RealVectorValue u, Real /*pressure*/)
 {
-  // return (rho*(cv*_temperature[_qp] + 0.5*u.norm_sq()) + pressure) * (u*_normals[_qp]) * _test[_i][_qp];
+  // return (rho*(cv*_temperature[_qp] + 0.5*u.norm_sq()) + pressure) * (u*_normals[_qp]) *
+  // _test[_i][_qp];
   // We can also expand pressure in terms of rho... does this make a difference?
   // Then we don't use the input pressure value.
-  return rho * (_fp.gamma() * _fp.cv() * _temperature[_qp] + 0.5 * u.norm_sq()) * (u * _normals[_qp]) * _test[_i][_qp];
+  return rho * (_fp.gamma() * _fp.cv() * _temperature[_qp] + 0.5 * u.norm_sq()) *
+         (u * _normals[_qp]) * _test[_i][_qp];
 }
 
 // (U4+p) * d(u.n)/dX
-Real NSEnergyInviscidBC::qpJacobianTermA(unsigned var_number, Real pressure)
+Real
+NSEnergyInviscidBC::qpJacobianTermA(unsigned var_number, Real pressure)
 {
   Real result = 0.0;
 
@@ -61,7 +68,7 @@ Real NSEnergyInviscidBC::qpJacobianTermA(unsigned var_number, Real pressure)
     case 1:
     case 2:
     case 3: // momentums
-      result = _normals[_qp](var_number-1);
+      result = _normals[_qp](var_number - 1);
       break;
 
     case 4: // energy
@@ -79,10 +86,11 @@ Real NSEnergyInviscidBC::qpJacobianTermA(unsigned var_number, Real pressure)
 }
 
 // d(U4)/dX * (u.n)
-Real NSEnergyInviscidBC::qpJacobianTermB(unsigned var_number, Real un)
+Real
+NSEnergyInviscidBC::qpJacobianTermB(unsigned var_number, Real un)
 {
   Real result = 0.0;
-  switch ( var_number )
+  switch (var_number)
   {
     case 0: // density
     case 1:

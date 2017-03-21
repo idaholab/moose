@@ -10,11 +10,11 @@
 
 #include "ScalarKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class GeneralizedPlaneStrain;
 class GeneralizedPlaneStrainUserObject;
 
-template<>
+template <>
 InputParameters validParams<GeneralizedPlaneStrain>();
 
 class GeneralizedPlaneStrain : public ScalarKernel
@@ -28,4 +28,4 @@ public:
 
   const GeneralizedPlaneStrainUserObject & _gps;
 };
-#endif //GENERALIZEDPLANESTRAIN_H
+#endif // GENERALIZEDPLANESTRAIN_H

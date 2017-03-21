@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSSpecificVolumeAux;
 
-template<>
+template <>
 InputParameters validParams<NSSpecificVolumeAux>();
 
 /**

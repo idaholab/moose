@@ -23,8 +23,7 @@ validParams<NSEnergyInviscidFlux>()
 }
 
 NSEnergyInviscidFlux::NSEnergyInviscidFlux(const InputParameters & parameters)
-  : NSKernel(parameters),
-    _enthalpy(coupledValue(NS::enthalpy))
+  : NSKernel(parameters), _enthalpy(coupledValue(NS::enthalpy))
 {
 }
 
@@ -74,7 +73,8 @@ NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
 
     // Derivative wrt density
     if (jvar == _rho_var_number)
-      return -((0.5 * (gam - 1) * V2 - _enthalpy[_qp]) * _phi[_j][_qp] * (vel * _grad_test[_i][_qp]));
+      return -((0.5 * (gam - 1) * V2 - _enthalpy[_qp]) * _phi[_j][_qp] *
+               (vel * _grad_test[_i][_qp]));
 
     // Derivatives wrt momentums
     else if ((jvar == _rhou_var_number) || (jvar == _rhov_var_number) || (jvar == _rhow_var_number))
@@ -105,8 +105,7 @@ NSEnergyInviscidFlux::computeQpOffDiagJacobian(unsigned int jvar)
           << " _rho_var_number =" << _rho_var_number << "\n"
           << " _rhou_var_number=" << _rhou_var_number << "\n"
           << " _rhov_var_number=" << _rhov_var_number << "\n"
-          << " _rhow_var_number=" << _rhow_var_number
-          << std::endl;
+          << " _rhow_var_number=" << _rhow_var_number << std::endl;
       mooseError(oss.str());
     }
   }

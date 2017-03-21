@@ -12,7 +12,7 @@
 
 class CHSplitConcentration;
 
-template<>
+template <>
 InputParameters validParams<CHSplitConcentration>();
 
 /**

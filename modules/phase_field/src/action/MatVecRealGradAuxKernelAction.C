@@ -9,33 +9,42 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<MatVecRealGradAuxKernelAction>()
+template <>
+InputParameters
+validParams<MatVecRealGradAuxKernelAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<unsigned int>("op_num", "Value that specifies the number of grains to create");
-  params.addRequiredParam<std::vector<std::string> >("var_name_base", "Vector specifies the base name of the variables");
-  params.addRequiredParam<std::vector<MaterialPropertyName> >("property", "the scalar material property names");
-  params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
+  params.addRequiredParam<unsigned int>("op_num",
+                                        "Value that specifies the number of grains to create");
+  params.addRequiredParam<std::vector<std::string>>(
+      "var_name_base", "Vector specifies the base name of the variables");
+  params.addRequiredParam<std::vector<MaterialPropertyName>>("property",
+                                                             "the scalar material property names");
+  params.addParam<bool>(
+      "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   params.addRequiredParam<unsigned int>("dim", "the dimensions of the mesh");
-  params.addParam<AuxVariableName>("divergence_variable", "Name of divergence variable to generate kernels for");
-  params.addParam<MaterialPropertyName>("divergence_property", "Scalar material property name for divergence variable");
+  params.addParam<AuxVariableName>("divergence_variable",
+                                   "Name of divergence variable to generate kernels for");
+  params.addParam<MaterialPropertyName>("divergence_property",
+                                        "Scalar material property name for divergence variable");
   return params;
 }
 
-MatVecRealGradAuxKernelAction::MatVecRealGradAuxKernelAction(const InputParameters & params) :
-    Action(params),
+MatVecRealGradAuxKernelAction::MatVecRealGradAuxKernelAction(const InputParameters & params)
+  : Action(params),
     _div_var(getParam<AuxVariableName>("divergence_variable")),
-    _prop(getParam<std::vector<MaterialPropertyName> >("property")),
+    _prop(getParam<std::vector<MaterialPropertyName>>("property")),
     _div_prop(getParam<MaterialPropertyName>("divergence_property"))
 {
-  mooseDeprecated("Use 'MaterialVectorAuxKernel' or 'MaterialVectorGradAuxKernel' action instead depending on data_type of MaterialProperty<std::vector<data_type> >");
+  mooseDeprecated("Use 'MaterialVectorAuxKernel' or 'MaterialVectorGradAuxKernel' action instead "
+                  "depending on data_type of MaterialProperty<std::vector<data_type> >");
 }
 
 void
 MatVecRealGradAuxKernelAction::act()
 {
-  const std::vector<std::string> var_name_base = getParam<std::vector<std::string> >("var_name_base");
+  const std::vector<std::string> var_name_base =
+      getParam<std::vector<std::string>>("var_name_base");
 
   const unsigned int op_num = getParam<unsigned int>("op_num");
   const unsigned int dim = getParam<unsigned int>("dim");

@@ -7,17 +7,19 @@
 
 #include "VariableGradientMaterial.h"
 
-template<>
-InputParameters validParams<VariableGradientMaterial>()
+template <>
+InputParameters
+validParams<VariableGradientMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addCoupledVar("variable", "Variable to compute the gradient magnitude of");
-  params.addRequiredParam<MaterialPropertyName>("prop", "Material property to store the gradient magnitude in");
+  params.addRequiredParam<MaterialPropertyName>(
+      "prop", "Material property to store the gradient magnitude in");
   return params;
 }
 
-VariableGradientMaterial::VariableGradientMaterial(const InputParameters & parameters) :
-    Material(parameters),
+VariableGradientMaterial::VariableGradientMaterial(const InputParameters & parameters)
+  : Material(parameters),
     _grad(coupledGradient("variable")),
     _prop(declareProperty<Real>(getParam<MaterialPropertyName>("prop")))
 {

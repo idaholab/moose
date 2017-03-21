@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef Q2PPOREPRESSUREFLUX
 #define Q2PPOREPRESSUREFLUX
 
@@ -17,7 +16,7 @@
 // Forward Declarations
 class Q2PPorepressureFlux;
 
-template<>
+template <>
 InputParameters validParams<Q2PPorepressureFlux>();
 
 /**
@@ -46,12 +45,9 @@ InputParameters validParams<Q2PPorepressureFlux>();
 class Q2PPorepressureFlux : public Kernel
 {
 public:
-
   Q2PPorepressureFlux(const InputParameters & parameters);
 
-
 protected:
-
   /**
    * Note that this is not the complete residual for the quadpoint
    * In computeResidual we sum over the quadpoints and then add
@@ -126,4 +122,4 @@ protected:
   std::vector<Real> _dmobility_ds;
 };
 
-#endif //Q2PPOREPRESSUREFLUX
+#endif // Q2PPOREPRESSUREFLUX

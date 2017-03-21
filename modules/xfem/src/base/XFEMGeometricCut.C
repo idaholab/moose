@@ -7,17 +7,12 @@
 
 #include "XFEMGeometricCut.h"
 
-XFEMGeometricCut::XFEMGeometricCut(Real t0, Real t1) :
-    _t_start(t0),
-    _t_end(t1)
-{
-}
+XFEMGeometricCut::XFEMGeometricCut(Real t0, Real t1) : _t_start(t0), _t_end(t1) {}
 
-XFEMGeometricCut::~XFEMGeometricCut()
-{
-}
+XFEMGeometricCut::~XFEMGeometricCut() {}
 
-Real XFEMGeometricCut::cutFraction(Real time)
+Real
+XFEMGeometricCut::cutFraction(Real time)
 {
   Real fraction = 0.0;
   if (time >= _t_start)
@@ -30,7 +25,8 @@ Real XFEMGeometricCut::cutFraction(Real time)
   return fraction;
 }
 
-Real XFEMGeometricCut::crossProduct2D(Real ax, Real ay, Real bx, Real by)
+Real
+XFEMGeometricCut::crossProduct2D(Real ax, Real ay, Real bx, Real by)
 {
   return (ax * by - bx * ay);
 }

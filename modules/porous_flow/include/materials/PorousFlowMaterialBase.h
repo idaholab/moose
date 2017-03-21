@@ -13,7 +13,7 @@
 
 class PorousFlowMaterialBase;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowMaterialBase>();
 
 /**
@@ -36,4 +36,4 @@ protected:
   const std::string _phase;
 };
 
-#endif //POROUSFLOWMATERIALBASE_H
+#endif // POROUSFLOWMATERIALBASE_H

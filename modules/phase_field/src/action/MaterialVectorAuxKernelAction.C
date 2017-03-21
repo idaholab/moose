@@ -9,23 +9,28 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<MaterialVectorAuxKernelAction>()
+template <>
+InputParameters
+validParams<MaterialVectorAuxKernelAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<unsigned int>("grain_num", "Value that specifies the number of grains to create aux kernels for.");
-  params.addRequiredParam<std::vector<std::string> >("variable_base", "Vector specifies the base name of the variables.");
-  params.addRequiredParam<std::vector<MaterialPropertyName> >("property", "The material property names.");
-  params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels.");
+  params.addRequiredParam<unsigned int>(
+      "grain_num", "Value that specifies the number of grains to create aux kernels for.");
+  params.addRequiredParam<std::vector<std::string>>(
+      "variable_base", "Vector specifies the base name of the variables.");
+  params.addRequiredParam<std::vector<MaterialPropertyName>>("property",
+                                                             "The material property names.");
+  params.addParam<bool>(
+      "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels.");
   return params;
 }
 
-MaterialVectorAuxKernelAction::MaterialVectorAuxKernelAction(const InputParameters & params) :
-    Action(params),
+MaterialVectorAuxKernelAction::MaterialVectorAuxKernelAction(const InputParameters & params)
+  : Action(params),
     _grain_num(getParam<unsigned int>("grain_num")),
-    _var_name_base(getParam<std::vector<std::string> >("variable_base")),
+    _var_name_base(getParam<std::vector<std::string>>("variable_base")),
     _num_var(_var_name_base.size()),
-    _prop(getParam<std::vector<MaterialPropertyName> >("property")),
+    _prop(getParam<std::vector<MaterialPropertyName>>("property")),
     _num_prop(_prop.size())
 {
 }

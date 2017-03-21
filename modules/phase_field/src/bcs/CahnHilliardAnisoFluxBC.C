@@ -6,15 +6,17 @@
 /****************************************************************/
 #include "CahnHilliardAnisoFluxBC.h"
 
-template<>
-InputParameters validParams<CahnHilliardAnisoFluxBC>()
+template <>
+InputParameters
+validParams<CahnHilliardAnisoFluxBC>()
 {
   InputParameters params = CahnHilliardFluxBCBase<RealTensorValue>::validParams();
-  params.addClassDescription("Cahn-Hilliard fixed flux boundary condition using a tensorial (anisotropic) mobility");
+  params.addClassDescription(
+      "Cahn-Hilliard fixed flux boundary condition using a tensorial (anisotropic) mobility");
   return params;
 }
 
-CahnHilliardAnisoFluxBC::CahnHilliardAnisoFluxBC(const InputParameters & parameters) :
-    CahnHilliardFluxBCBase<RealTensorValue>(parameters)
+CahnHilliardAnisoFluxBC::CahnHilliardAnisoFluxBC(const InputParameters & parameters)
+  : CahnHilliardFluxBCBase<RealTensorValue>(parameters)
 {
 }

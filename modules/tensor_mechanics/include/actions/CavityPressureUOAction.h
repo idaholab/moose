@@ -10,7 +10,7 @@
 #include "Action.h"
 #include "MooseTypes.h"
 
-class CavityPressureUOAction: public Action
+class CavityPressureUOAction : public Action
 {
 public:
   CavityPressureUOAction(const InputParameters & params);
@@ -25,8 +25,7 @@ public:
   const Real _startup_time;
 };
 
-template<>
+template <>
 InputParameters validParams<CavityPressureUOAction>();
-
 
 #endif

@@ -19,7 +19,9 @@ public:
 
 protected:
   virtual void computeYieldStress(unsigned qp);
-  virtual void computeStressInitialize(unsigned qp, Real effectiveTrialStress, const SymmElasticityTensor & elasticityTensor);
+  virtual void computeStressInitialize(unsigned qp,
+                                       Real effectiveTrialStress,
+                                       const SymmElasticityTensor & elasticityTensor);
 
   virtual Real computeHardeningValue(unsigned qp, Real scalar);
   virtual Real computeHardeningDerivative(unsigned qp, Real scalar);
@@ -35,7 +37,7 @@ protected:
   Real _hf_fraction;
 };
 
-template<>
+template <>
 InputParameters validParams<IsotropicTempDepHardening>();
 
 #endif // ISOTROPICTEMPDEPHARDENING_H

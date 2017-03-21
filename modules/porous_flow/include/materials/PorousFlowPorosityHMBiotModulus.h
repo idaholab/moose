@@ -10,10 +10,10 @@
 
 #include "PorousFlowPorosityHM.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowPorosityHMBiotModulus;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPorosityHMBiotModulus>();
 
 /**
@@ -55,4 +55,4 @@ protected:
   const MaterialProperty<std::vector<RealGradient>> & _dvol_strain_rate_qp_dvar;
 };
 
-#endif //POROUSFLOWPOROSITYHMBIOTMODULUS_H
+#endif // POROUSFLOWPOROSITYHMBIOTMODULUS_H

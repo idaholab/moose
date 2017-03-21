@@ -8,8 +8,9 @@
 #include "StagnationTemperatureAux.h"
 #include "SinglePhaseFluidProperties.h"
 
-template<>
-InputParameters validParams<StagnationTemperatureAux>()
+template <>
+InputParameters
+validParams<StagnationTemperatureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("e", "Specific internal energy");
@@ -20,8 +21,8 @@ InputParameters validParams<StagnationTemperatureAux>()
   return params;
 }
 
-StagnationTemperatureAux::StagnationTemperatureAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+StagnationTemperatureAux::StagnationTemperatureAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _specific_volume(coupledValue("v")),
     _specific_internal_energy(coupledValue("e")),
     _velocity(coupledValue("vel")),

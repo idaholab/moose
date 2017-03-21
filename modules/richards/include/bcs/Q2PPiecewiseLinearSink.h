@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef Q2PPIECEWISELINEARSINK
 #define Q2PPIECEWISELINEARSINK
 
@@ -15,11 +14,10 @@
 #include "RichardsDensity.h"
 #include "RichardsRelPerm.h"
 
-
 // Forward Declarations
 class Q2PPiecewiseLinearSink;
 
-template<>
+template <>
 InputParameters validParams<Q2PPiecewiseLinearSink>();
 
 /**
@@ -37,7 +35,6 @@ InputParameters validParams<Q2PPiecewiseLinearSink>();
 class Q2PPiecewiseLinearSink : public IntegratedBC
 {
 public:
-
   Q2PPiecewiseLinearSink(const InputParameters & parameters);
 
 protected:
@@ -106,8 +103,6 @@ protected:
 
   /// d(_nodal_relperm)/d(saturation)
   std::vector<Real> _dnodal_relperm_ds;
-
-
 
   /// calculates the nodal values of pressure, mobility, and derivatives thereof
   void prepareNodalValues();

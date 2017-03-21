@@ -9,8 +9,9 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ComputeAxisymmetric1DSmallStrain>()
+template <>
+InputParameters
+validParams<ComputeAxisymmetric1DSmallStrain>()
 {
   InputParameters params = validParams<Compute1DSmallStrain>();
   params.addClassDescription("Compute a small strain in an Axisymmetric 1D problem");
@@ -20,10 +21,13 @@ InputParameters validParams<ComputeAxisymmetric1DSmallStrain>()
   return params;
 }
 
-ComputeAxisymmetric1DSmallStrain::ComputeAxisymmetric1DSmallStrain(const InputParameters & parameters) :
-    Compute1DSmallStrain(parameters),
+ComputeAxisymmetric1DSmallStrain::ComputeAxisymmetric1DSmallStrain(
+    const InputParameters & parameters)
+  : Compute1DSmallStrain(parameters),
     _scalar_out_of_plane_strain_coupled(isCoupledScalar("scalar_out_of_plane_strain")),
-    _scalar_out_of_plane_strain(_scalar_out_of_plane_strain_coupled ? coupledScalarValue("scalar_out_of_plane_strain") : _zero),
+    _scalar_out_of_plane_strain(_scalar_out_of_plane_strain_coupled
+                                    ? coupledScalarValue("scalar_out_of_plane_strain")
+                                    : _zero),
     _out_of_plane_strain_coupled(isCoupled("out_of_plane_strain")),
     _out_of_plane_strain(_out_of_plane_strain_coupled ? coupledValue("out_of_plane_strain") : _zero)
 {

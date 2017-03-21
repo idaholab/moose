@@ -14,7 +14,7 @@ class RankTwoTensor;
 class RankFourTensor;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<GeneralizedPlaneStrainUserObject>();
 
 class GeneralizedPlaneStrainUserObject : public ElementUserObject

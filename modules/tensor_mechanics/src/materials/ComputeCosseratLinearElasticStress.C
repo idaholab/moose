@@ -6,16 +6,19 @@
 /****************************************************************/
 #include "ComputeCosseratLinearElasticStress.h"
 
-template<>
-InputParameters validParams<ComputeCosseratLinearElasticStress>()
+template <>
+InputParameters
+validParams<ComputeCosseratLinearElasticStress>()
 {
   InputParameters params = validParams<ComputeCosseratStressBase>();
-  params.addClassDescription("Compute Cosserat stress and couple-stress elasticity for small strains");
+  params.addClassDescription(
+      "Compute Cosserat stress and couple-stress elasticity for small strains");
   return params;
 }
 
-ComputeCosseratLinearElasticStress::ComputeCosseratLinearElasticStress(const InputParameters & parameters) :
-    ComputeCosseratStressBase(parameters)
+ComputeCosseratLinearElasticStress::ComputeCosseratLinearElasticStress(
+    const InputParameters & parameters)
+  : ComputeCosseratStressBase(parameters)
 {
 }
 

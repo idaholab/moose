@@ -9,26 +9,25 @@
 
 #include "TensorMechanicsPlasticModel.h"
 
-
 class TensorMechanicsPlasticSimpleTester;
 
-
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticSimpleTester>();
 
 /**
  * Class that can be used for testing multi-surface plasticity models.
- * Yield function = a*stress_yy + b*stress_zz + c*stress_xx + d*(stress_xy + stress_yx)/2 + e*(stress_xz + stress_zx)/2 + f*(stress_yz + stress_zy)/2 - strength
+ * Yield function = a*stress_yy + b*stress_zz + c*stress_xx + d*(stress_xy + stress_yx)/2 +
+ * e*(stress_xz + stress_zx)/2 + f*(stress_yz + stress_zy)/2 - strength
  * No hardening/softening.  Associative.
  */
 class TensorMechanicsPlasticSimpleTester : public TensorMechanicsPlasticModel
 {
- public:
+public:
   TensorMechanicsPlasticSimpleTester(const InputParameters & parameters);
 
   virtual std::string modelName() const override;
 
- protected:
+protected:
   Real yieldFunction(const RankTwoTensor & stress, Real intnl) const override;
 
   RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const override;

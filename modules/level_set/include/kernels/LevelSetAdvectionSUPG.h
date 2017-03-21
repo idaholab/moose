@@ -15,7 +15,7 @@
 // Forward declarations
 class LevelSetAdvectionSUPG;
 
-template<>
+template <>
 InputParameters validParams<LevelSetAdvectionSUPG>();
 
 /**
@@ -24,7 +24,6 @@ InputParameters validParams<LevelSetAdvectionSUPG>();
 class LevelSetAdvectionSUPG : public LevelSetVelocityInterface<Kernel>
 {
 public:
-
   LevelSetAdvectionSUPG(const InputParameters & parameters);
 
 protected:
@@ -32,4 +31,4 @@ protected:
   Real computeQpJacobian() override;
 };
 
-#endif //LEVELSETADVECTIONSUPG_H
+#endif // LEVELSETADVECTIONSUPG_H

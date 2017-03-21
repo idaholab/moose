@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSMassRZ;
 
-template<>
+template <>
 InputParameters validParams<INSMassRZ>();
 
 /**
@@ -26,7 +26,7 @@ class INSMassRZ : public INSMass
 {
 public:
   INSMassRZ(const InputParameters & parameters);
-  virtual ~INSMassRZ(){}
+  virtual ~INSMassRZ() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -35,6 +35,5 @@ protected:
   // Coupled values
   const VariableValue & _u_vel;
 };
-
 
 #endif // INSMASSRZ_H

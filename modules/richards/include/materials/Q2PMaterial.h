@@ -5,16 +5,15 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef Q2PMATERIAL_H
 #define Q2PMATERIAL_H
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class Q2PMaterial;
 
-template<>
+template <>
 InputParameters validParams<Q2PMaterial>();
 
 /**
@@ -26,7 +25,6 @@ public:
   Q2PMaterial(const InputParameters & parameters);
 
 protected:
-
   /// porosity as entered by the user
   Real _material_por;
 
@@ -51,4 +49,4 @@ protected:
   virtual void computeQpProperties();
 };
 
-#endif //Q2PMATERIAL_H
+#endif // Q2PMATERIAL_H

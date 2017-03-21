@@ -11,26 +11,25 @@
 #include "SlopeReconstructionMultiD.h"
 #include "SinglePhaseFluidProperties.h"
 
-//Forward Declarations
+// Forward Declarations
 class CNSFVGreenGaussSlopeReconstruction;
 
-template<>
+template <>
 InputParameters validParams<CNSFVGreenGaussSlopeReconstruction>();
 
 /**
- * A user object that performs Green-Gauss slope reconstruction to get the slopes of the P0 primitive variables
+ * A user object that performs Green-Gauss slope reconstruction to get the slopes of the P0
+ * primitive variables
  */
 class CNSFVGreenGaussSlopeReconstruction : public SlopeReconstructionMultiD
 {
 public:
-
   CNSFVGreenGaussSlopeReconstruction(const InputParameters & parameters);
 
   /// compute the slope of the cell
   virtual void reconstructElementSlope();
 
 protected:
-
   /// the input density
   MooseVariable * _rho;
   /// the input x-momentum

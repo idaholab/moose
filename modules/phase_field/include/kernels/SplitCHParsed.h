@@ -11,10 +11,10 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class SplitCHParsed;
 
-template<>
+template <>
 InputParameters validParams<SplitCHParsed>();
 
 /**
@@ -23,7 +23,7 @@ InputParameters validParams<SplitCHParsed>();
  * This is the split operator variant.
  * \see CHParsed
  */
-class SplitCHParsed : public DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHCRes> >
+class SplitCHParsed : public DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHCRes>>
 {
 public:
   SplitCHParsed(const InputParameters & parameters);

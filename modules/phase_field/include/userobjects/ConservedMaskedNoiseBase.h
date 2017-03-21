@@ -11,10 +11,10 @@
 
 #include <unordered_map>
 
-//Forward Declarations
+// Forward Declarations
 class ConservedMaskedNoiseBase;
 
-template<>
+template <>
 InputParameters validParams<ConservedMaskedNoiseBase>();
 
 /**
@@ -47,5 +47,4 @@ protected:
   const MaterialProperty<Real> & _mask;
 };
 
-
-#endif //CONSERVEDMASKEDNOISEBASE_H
+#endif // CONSERVEDMASKEDNOISEBASE_H

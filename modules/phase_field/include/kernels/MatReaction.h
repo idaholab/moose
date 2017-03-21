@@ -14,14 +14,14 @@
 // Forward Declaration
 class MatReaction;
 
-template<>
+template <>
 InputParameters validParams<MatReaction>();
 
 /**
  * This kernel adds to the residual a contribution of \f$ -L*v \f$ where \f$ L \f$ is a material
  * property and \f$ v \f$ is a variable (nonlinear or coupled).
  */
-class MatReaction : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >
+class MatReaction : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
   MatReaction(const InputParameters & parameters);
@@ -64,4 +64,4 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dLdarg;
 };
 
-#endif //MATREACTION_H
+#endif // MATREACTION_H

@@ -18,10 +18,10 @@
 #include "ElementIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class PFCElementEnergyIntegral;
 
-template<>
+template <>
 InputParameters validParams<PFCElementEnergyIntegral>();
 
 /**
@@ -30,9 +30,7 @@ InputParameters validParams<PFCElementEnergyIntegral>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class PFCElementEnergyIntegral :
-  public ElementIntegralPostprocessor,
-  public MooseVariableInterface
+class PFCElementEnergyIntegral : public ElementIntegralPostprocessor, public MooseVariableInterface
 {
 public:
   PFCElementEnergyIntegral(const InputParameters & parameters);

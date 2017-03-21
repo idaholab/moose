@@ -8,23 +8,29 @@
 #include "MultiSmoothCircleIC.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<MultiSmoothCircleIC>()
+template <>
+InputParameters
+validParams<MultiSmoothCircleIC>()
 {
   InputParameters params = validParams<SmoothCircleBaseIC>();
   params.addClassDescription("Random distribution of smooth circles with given minimum spacing");
   params.addRequiredParam<unsigned int>("numbub", "The number of bubbles to place");
-  params.addRequiredParam<Real>("bubspac", "minimum spacing of bubbles, measured from center to center");
+  params.addRequiredParam<Real>("bubspac",
+                                "minimum spacing of bubbles, measured from center to center");
   params.addParam<unsigned int>("numtries", 1000, "The number of tries");
   params.addRequiredParam<Real>("radius", "Mean radius value for the circles");
-  params.addParam<Real>("radius_variation", 0.0, "Plus or minus fraction of random variation in the bubble radius for uniform, standard deviation for normal");
+  params.addParam<Real>("radius_variation", 0.0, "Plus or minus fraction of random variation in "
+                                                 "the bubble radius for uniform, standard "
+                                                 "deviation for normal");
   MooseEnum rand_options("uniform normal none", "none");
-  params.addParam<MooseEnum>("radius_variation_type", rand_options, "Type of distribution that random circle radii will follow");
+  params.addParam<MooseEnum>("radius_variation_type",
+                             rand_options,
+                             "Type of distribution that random circle radii will follow");
   return params;
 }
 
-MultiSmoothCircleIC::MultiSmoothCircleIC(const InputParameters & parameters) :
-    SmoothCircleBaseIC(parameters),
+MultiSmoothCircleIC::MultiSmoothCircleIC(const InputParameters & parameters)
+  : SmoothCircleBaseIC(parameters),
     _numbub(getParam<unsigned int>("numbub")),
     _bubspac(getParam<Real>("bubspac")),
     _max_num_tries(getParam<unsigned int>("numtries")),
@@ -37,7 +43,7 @@ MultiSmoothCircleIC::MultiSmoothCircleIC(const InputParameters & parameters) :
 void
 MultiSmoothCircleIC::initialSetup()
 {
-  //Set up domain bounds with mesh tools
+  // Set up domain bounds with mesh tools
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
     _bottom_left(i) = _mesh.getMinInDimension(i);
@@ -47,7 +53,8 @@ MultiSmoothCircleIC::initialSetup()
 
   // a variation is provided, but the type is set to 'none'
   if (_radius_variation > 0.0 && _radius_variation_type == 2)
-    mooseError("If radius_variation > 0.0, you must pass in a radius_variation_type in MultiSmoothCircleIC");
+    mooseError("If radius_variation > 0.0, you must pass in a radius_variation_type in "
+               "MultiSmoothCircleIC");
 
   SmoothCircleBaseIC::initialSetup();
 }
@@ -89,9 +96,9 @@ MultiSmoothCircleIC::computeCircleCenters()
       num_tries++;
 
       RealTensorValue ran;
-      ran(0,0) = _random.rand(_tid);
-      ran(1,1) = _random.rand(_tid);
-      ran(2,2) = _random.rand(_tid);
+      ran(0, 0) = _random.rand(_tid);
+      ran(1, 1) = _random.rand(_tid);
+      ran(2, 2) = _random.rand(_tid);
 
       _centers[i] = _bottom_left + ran * _range;
 
@@ -102,13 +109,15 @@ MultiSmoothCircleIC::computeCircleCenters()
       // accept the position of the new center
       goto accept;
 
-      // retry a new position until tries are exhausted
-      fail: continue;
+    // retry a new position until tries are exhausted
+    fail:
+      continue;
     }
 
     if (num_tries == _max_num_tries)
       mooseError("Too many tries in MultiSmoothCircleIC");
 
-    accept: continue;
+  accept:
+    continue;
   }
 }

@@ -6,15 +6,16 @@
 /****************************************************************/
 #include "MatDiffusion.h"
 
-template<>
-InputParameters validParams<MatDiffusion>()
+template <>
+InputParameters
+validParams<MatDiffusion>()
 {
   InputParameters params = MatDiffusionBase<Real>::validParams();
-  params.addClassDescription("Diffusion equation Kernel that takes an isotropic Diffusivity from a material property");
+  params.addClassDescription(
+      "Diffusion equation Kernel that takes an isotropic Diffusivity from a material property");
   return params;
 }
 
-MatDiffusion::MatDiffusion(const InputParameters & parameters) :
-    MatDiffusionBase<Real>(parameters)
+MatDiffusion::MatDiffusion(const InputParameters & parameters) : MatDiffusionBase<Real>(parameters)
 {
 }

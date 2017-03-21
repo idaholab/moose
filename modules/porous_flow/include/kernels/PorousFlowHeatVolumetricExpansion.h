@@ -14,7 +14,7 @@
 // Forward Declarations
 class PorousFlowHeatVolumetricExpansion;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowHeatVolumetricExpansion>();
 
 /**
@@ -100,9 +100,10 @@ protected:
    * Derivative of volumetric-strain part of the residual with respect to the Variable
    * with variable number jvar.
    * This is used by both computeQpJacobian and computeQpOffDiagJacobian
-   * @param jvar take the derivative of the volumetric-strain part of the residual wrt this variable number
+   * @param jvar take the derivative of the volumetric-strain part of the residual wrt this variable
+   * number
    */
   Real computedVolQpJac(unsigned int jvar);
 };
 
-#endif //POROUSFLOWHEATVOLUMETRICEXPANSION_H
+#endif // POROUSFLOWHEATVOLUMETRICEXPANSION_H

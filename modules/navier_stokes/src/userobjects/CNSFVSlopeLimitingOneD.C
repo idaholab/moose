@@ -7,29 +7,27 @@
 
 #include "CNSFVSlopeLimitingOneD.h"
 
-template<>
-InputParameters validParams<CNSFVSlopeLimitingOneD>()
+template <>
+InputParameters
+validParams<CNSFVSlopeLimitingOneD>()
 {
   InputParameters params = validParams<SlopeLimitingBase>();
 
-  params.addClassDescription("A use object that serves as base class for slope limiting to get the limited slopes of cell average variables in 1-D.");
+  params.addClassDescription("A use object that serves as base class for slope limiting to get the "
+                             "limited slopes of cell average variables in 1-D.");
 
-  params.addRequiredCoupledVar("rho",
-  "Density at P0 (constant monomial)");
+  params.addRequiredCoupledVar("rho", "Density at P0 (constant monomial)");
 
-  params.addRequiredCoupledVar("rhou",
-  "X-momentum at P0 (constant monomial)");
+  params.addRequiredCoupledVar("rhou", "X-momentum at P0 (constant monomial)");
 
-  params.addRequiredCoupledVar("rhoe",
-  "Total energy at P0 (constant monomial)");
+  params.addRequiredCoupledVar("rhoe", "Total energy at P0 (constant monomial)");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-  "Name for fluid properties user object");
+                                          "Name for fluid properties user object");
 
   MooseEnum scheme("none minmod mc superbee", "none");
 
-  params.addParam<MooseEnum>("scheme", scheme,
-  "Slope limiting scheme");
+  params.addParam<MooseEnum>("scheme", scheme, "Slope limiting scheme");
 
   return params;
 }
@@ -47,7 +45,7 @@ CNSFVSlopeLimitingOneD::CNSFVSlopeLimitingOneD(const InputParameters & parameter
 std::vector<RealGradient>
 CNSFVSlopeLimitingOneD::limitElementSlope() const
 {
-  const Elem* elem = _current_elem;
+  const Elem * elem = _current_elem;
 
   /// index of conserved variable
   unsigned int iv;
@@ -77,7 +75,7 @@ CNSFVSlopeLimitingOneD::limitElementSlope() const
   xc[0] = elem->centroid()(0);
 
   /// array for the cell-average values in the current cell and its neighbors
-  std::vector <std::vector<Real> > ucell(nsten, std::vector<Real>(nvars, 0.0));
+  std::vector<std::vector<Real>> ucell(nsten, std::vector<Real>(nvars, 0.0));
 
   /// array to store the central and one-sided slopes
   /// where the first should be central slope
@@ -97,14 +95,14 @@ CNSFVSlopeLimitingOneD::limitElementSlope() const
   ///                  ---------------
   ///                  x_{i+1} - x_{i}
 
-  std::vector <std::vector<Real> > sigma(nsten, std::vector<Real>(nvars, 0.0));
+  std::vector<std::vector<Real>> sigma(nsten, std::vector<Real>(nvars, 0.0));
 
   /// get the cell-average conserved variables in the central cell
   /// iv = 0: rho
   /// iv = 1: rhou
   /// iv = 2: rhoe
 
-  Real rho  = _rho->getElementalValue(elem);
+  Real rho = _rho->getElementalValue(elem);
   Real rhou = _rhou->getElementalValue(elem);
   Real rhoe = _rhoe->getElementalValue(elem);
 
@@ -134,7 +132,7 @@ CNSFVSlopeLimitingOneD::limitElementSlope() const
     /// when the current element is an internal cell
     if (elem->neighbor(is) != NULL)
     {
-      const Elem* neig = elem->neighbor(is);
+      const Elem * neig = elem->neighbor(is);
 
       xc[in] = neig->centroid()(0);
 
@@ -143,7 +141,7 @@ CNSFVSlopeLimitingOneD::limitElementSlope() const
       /// iv = 1: rhou
       /// iv = 2: rhoe
 
-      rho  = _rho->getElementalValue(neig);
+      rho = _rho->getElementalValue(neig);
       rhou = _rhou->getElementalValue(neig);
       rhoe = _rhoe->getElementalValue(neig);
 

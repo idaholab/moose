@@ -8,17 +8,19 @@
 #include "INSMomentumNoBCBCLaplaceForm.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<INSMomentumNoBCBCLaplaceForm>()
+template <>
+InputParameters
+validParams<INSMomentumNoBCBCLaplaceForm>()
 {
   InputParameters params = validParams<INSMomentumNoBCBCBase>();
 
-  params.addClassDescription("This class implements the 'No BC' boundary condition based on the 'Laplace' form of the viscous stress tensor.");
+  params.addClassDescription("This class implements the 'No BC' boundary condition based on the "
+                             "'Laplace' form of the viscous stress tensor.");
   return params;
 }
 
-INSMomentumNoBCBCLaplaceForm::INSMomentumNoBCBCLaplaceForm(const InputParameters & parameters) :
-    INSMomentumNoBCBCBase(parameters)
+INSMomentumNoBCBCLaplaceForm::INSMomentumNoBCBCLaplaceForm(const InputParameters & parameters)
+  : INSMomentumNoBCBCBase(parameters)
 {
 }
 
@@ -51,4 +53,3 @@ INSMomentumNoBCBCLaplaceForm::computeQpOffDiagJacobian(unsigned jvar)
   else
     return 0.;
 }
-

@@ -13,10 +13,10 @@
 #include "DiracKernel.h"
 #include "PenetrationLocator.h"
 
-//Forward Declarations
+// Forward Declarations
 class SlaveConstraint;
 
-template<>
+template <>
 InputParameters validParams<SlaveConstraint>();
 
 class SlaveConstraint : public DiracKernel
@@ -29,7 +29,6 @@ public:
   virtual Real computeQpJacobian();
 
 protected:
-
   Real nodalArea(PenetrationInfo & pinfo);
 
   const unsigned int _component;
@@ -58,4 +57,4 @@ protected:
   const NumericVector<Number> * _aux_solution;
 };
 
-#endif //SLAVECONSTRAINT_H
+#endif // SLAVECONSTRAINT_H

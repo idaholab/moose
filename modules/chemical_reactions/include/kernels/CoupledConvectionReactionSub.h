@@ -9,10 +9,10 @@
 #ifndef COUPLEDCONVECTIONREACTIONSUB_H
 #define COUPLEDCONVECTIONREACTIONSUB_H
 
-//Forward Declarations
+// Forward Declarations
 class CoupledConvectionReactionSub;
 
-template<>
+template <>
 InputParameters validParams<CoupledConvectionReactionSub>();
 
 /**
@@ -58,4 +58,4 @@ private:
   std::vector<const VariableGradient *> _grad_vals;
 };
 
-#endif //COUPLEDCONVECTIONREACTIONSUB_H
+#endif // COUPLEDCONVECTIONREACTIONSUB_H

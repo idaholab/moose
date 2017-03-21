@@ -10,10 +10,10 @@
 
 #include "SlopeReconstructionBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class CNSFVNoSlopeReconstruction;
 
-template<>
+template <>
 InputParameters validParams<CNSFVNoSlopeReconstruction>();
 
 /**
@@ -22,7 +22,6 @@ InputParameters validParams<CNSFVNoSlopeReconstruction>();
 class CNSFVNoSlopeReconstruction : public SlopeReconstructionBase
 {
 public:
-
   CNSFVNoSlopeReconstruction(const InputParameters & parameters);
 
   /// compute the slope of the cell

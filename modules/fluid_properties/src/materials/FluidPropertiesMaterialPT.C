@@ -7,19 +7,21 @@
 
 #include "FluidPropertiesMaterialPT.h"
 
-template<>
-InputParameters validParams<FluidPropertiesMaterialPT>()
+template <>
+InputParameters
+validParams<FluidPropertiesMaterialPT>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("pressure", "Fluid pressure (Pa)");
   params.addRequiredCoupledVar("temperature", "Fluid temperature (C)");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
-  params.addClassDescription("Material properties for a fluid using the (pressure, temperature) formulation");
+  params.addClassDescription(
+      "Material properties for a fluid using the (pressure, temperature) formulation");
   return params;
 }
 
-FluidPropertiesMaterialPT::FluidPropertiesMaterialPT(const InputParameters & parameters) :
-    Material(parameters),
+FluidPropertiesMaterialPT::FluidPropertiesMaterialPT(const InputParameters & parameters)
+  : Material(parameters),
     _pressure(coupledValue("pressure")),
     _temperature(coupledValue("temperature")),
 
@@ -37,9 +39,7 @@ FluidPropertiesMaterialPT::FluidPropertiesMaterialPT(const InputParameters & par
 {
 }
 
-FluidPropertiesMaterialPT::~FluidPropertiesMaterialPT()
-{
-}
+FluidPropertiesMaterialPT::~FluidPropertiesMaterialPT() {}
 
 void
 FluidPropertiesMaterialPT::computeQpProperties()

@@ -13,12 +13,13 @@
 // Forward Declaration
 class SusceptibilityTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<SusceptibilityTimeDerivative>();
 /**
  * This calculates the time derivative for a variable multiplied by a generalized susceptibility
  **/
-class SusceptibilityTimeDerivative : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative> >
+class SusceptibilityTimeDerivative
+    : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
 {
 public:
   SusceptibilityTimeDerivative(const InputParameters & parameters);
@@ -39,4 +40,4 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dChidarg;
 };
 
-#endif //SUSCEPTIBILITYTIMEDERIVATIVE_H
+#endif // SUSCEPTIBILITYTIMEDERIVATIVE_H

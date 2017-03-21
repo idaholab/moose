@@ -12,13 +12,13 @@
 
 class KKSAction;
 
-template<>
+template <>
 InputParameters validParams<KKSAction>();
 
 /**
  * Automatically generates all variables and kernels to set up a KKS phase field simulation
  */
-class KKSAction: public Action
+class KKSAction : public Action
 {
 public:
   KKSAction(const InputParameters & params);
@@ -28,4 +28,4 @@ private:
   std::string _c_name_base;
 };
 
-#endif //KKSACTION_H
+#endif // KKSACTION_H

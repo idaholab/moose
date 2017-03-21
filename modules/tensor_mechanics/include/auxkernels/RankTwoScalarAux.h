@@ -12,7 +12,7 @@
 
 class RankTwoScalarAux;
 
-template<>
+template <>
 InputParameters validParams<RankTwoScalarAux>();
 
 /**
@@ -47,4 +47,4 @@ protected:
   Point _input_direction;
 };
 
-#endif //RANKTWOSCALARAUX_H
+#endif // RANKTWOSCALARAUX_H

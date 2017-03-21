@@ -13,7 +13,7 @@
 // Forward Declarations
 class FluidProperties;
 
-template<>
+template <>
 InputParameters validParams<FluidProperties>();
 
 class FluidProperties : public GeneralUserObject

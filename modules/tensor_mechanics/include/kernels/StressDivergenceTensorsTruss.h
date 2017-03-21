@@ -9,10 +9,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class StressDivergenceTensorsTruss;
 
-template<>
+template <>
 InputParameters validParams<StressDivergenceTensorsTruss>();
 
 class StressDivergenceTensorsTruss : public Kernel
@@ -45,4 +45,4 @@ private:
   const std::vector<RealGradient> * _orientation;
 };
 
-#endif //STRESSDIVERGENCETENSORSTRUSS_H
+#endif // STRESSDIVERGENCETENSORSTRUSS_H

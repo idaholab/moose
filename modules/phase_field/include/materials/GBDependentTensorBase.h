@@ -13,7 +13,7 @@
 
 class GBDependentTensorBase;
 
-template<>
+template <>
 InputParameters validParams<GBDependentTensorBase>();
 /**
  * Base class to define GB dependent properties

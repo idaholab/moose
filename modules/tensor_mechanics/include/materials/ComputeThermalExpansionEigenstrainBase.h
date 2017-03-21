@@ -13,14 +13,15 @@
 class ComputeThermalExpansionEigenstrainBase;
 class RankTwoTensor;
 
-template<>
+template <>
 InputParameters validParams<ComputeThermalExpansionEigenstrainBase>();
 
 /**
  * ComputeThermalExpansionEigenstrainBase is a base class for all models that
  * compute eigenstrains due to thermal expansion of a material.
  */
-class ComputeThermalExpansionEigenstrainBase : public DerivativeMaterialInterface<ComputeEigenstrainBase>
+class ComputeThermalExpansionEigenstrainBase
+    : public DerivativeMaterialInterface<ComputeEigenstrainBase>
 {
 public:
   ComputeThermalExpansionEigenstrainBase(const InputParameters & parameters);

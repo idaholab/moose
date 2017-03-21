@@ -98,15 +98,15 @@
 // Functions
 #include "MovingPlanarFront.h"
 
-template<>
-InputParameters validParams<PorousFlowApp>()
+template <>
+InputParameters
+validParams<PorousFlowApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-PorousFlowApp::PorousFlowApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+PorousFlowApp::PorousFlowApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   TensorMechanicsApp::registerObjects(_factory);
@@ -121,12 +121,14 @@ PorousFlowApp::PorousFlowApp(const InputParameters & parameters) :
   PorousFlowApp::associateSyntax(_syntax, _action_factory);
 }
 
-PorousFlowApp::~PorousFlowApp()
-{
-}
+PorousFlowApp::~PorousFlowApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void PorousFlowApp__registerApps() { PorousFlowApp::registerApps(); }
+extern "C" void
+PorousFlowApp__registerApps()
+{
+  PorousFlowApp::registerApps();
+}
 void
 PorousFlowApp::registerApps()
 {
@@ -134,7 +136,11 @@ PorousFlowApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void PorousFlowApp__registerObjects(Factory & factory) { PorousFlowApp::registerObjects(factory); }
+extern "C" void
+PorousFlowApp__registerObjects(Factory & factory)
+{
+  PorousFlowApp::registerObjects(factory);
+}
 void
 PorousFlowApp::registerObjects(Factory & factory)
 {
@@ -198,7 +204,6 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowConstantBiotModulus);
   registerMaterial(PorousFlowConstantThermalExpansionCoefficient);
 
-
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);
   registerKernel(PorousFlowMassTimeDerivative);
@@ -233,7 +238,11 @@ PorousFlowApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void PorousFlowApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { PorousFlowApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+PorousFlowApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  PorousFlowApp::associateSyntax(syntax, action_factory);
+}
 void
 PorousFlowApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {

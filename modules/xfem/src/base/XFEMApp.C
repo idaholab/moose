@@ -21,14 +21,14 @@
 #include "XFEMSingleVariableConstraint.h"
 #include "XFEMPressure.h"
 
-template<>
-InputParameters validParams<XFEMApp>()
+template <>
+InputParameters
+validParams<XFEMApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
-XFEMApp::XFEMApp(const InputParameters &parameters) :
-    MooseApp(parameters)
+XFEMApp::XFEMApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -43,12 +43,14 @@ XFEMApp::XFEMApp(const InputParameters &parameters) :
   XFEMApp::associateSyntax(_syntax, _action_factory);
 }
 
-XFEMApp::~XFEMApp()
-{
-}
+XFEMApp::~XFEMApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void XFEMApp__registerApps() { XFEMApp::registerApps(); }
+extern "C" void
+XFEMApp__registerApps()
+{
+  XFEMApp::registerApps();
+}
 void
 XFEMApp::registerApps()
 {
@@ -56,37 +58,44 @@ XFEMApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void XFEMApp__registerObjects(Factory & factory) { XFEMApp::registerObjects(factory); }
+extern "C" void
+XFEMApp__registerObjects(Factory & factory)
+{
+  XFEMApp::registerObjects(factory);
+}
 void
 XFEMApp::registerObjects(Factory & factory)
 {
-  //AuxKernels
+  // AuxKernels
   registerAux(XFEMVolFracAux);
   registerAux(XFEMCutPlaneAux);
   registerAux(XFEMMarkerAux);
 
-  //Constraints
+  // Constraints
   registerConstraint(XFEMSingleVariableConstraint);
 
-  //UserObjects
+  // UserObjects
   registerUserObject(XFEMMarkerUserObject);
   registerUserObject(XFEMMaterialTensorMarkerUserObject);
 
-  //DiracKernels
+  // DiracKernels
   registerDiracKernel(XFEMPressure);
 }
 
 // External entry point for dynamic syntax association
-extern "C" void XFEMApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { XFEMApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+XFEMApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  XFEMApp::associateSyntax(syntax, action_factory);
+}
 void
 XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   registerTask("setup_xfem", false);
   registerAction(XFEMAction, "setup_xfem");
-  syntax.addDependency("setup_xfem","setup_adaptivity");
+  syntax.addDependency("setup_xfem", "setup_adaptivity");
   registerAction(XFEMAction, "add_aux_variable");
   registerAction(XFEMAction, "add_aux_kernel");
 
   syntax.registerActionSyntax("XFEMAction", "XFEM");
-
 }

@@ -39,20 +39,20 @@ protected:
   /// first derivatives of the Young's Modulus with respect to the args
   std::vector<const MaterialProperty<Real> *> _dyoungs_modulus;
   /// second derivatives of the Young's Modulus with respect to the args
-  std::vector<std::vector<const MaterialProperty<Real> *> > _d2youngs_modulus;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _d2youngs_modulus;
 
   /// first derivatives of the Poisson's Ratio with respect to the args
   std::vector<const MaterialProperty<Real> *> _dpoissons_ratio;
   /// second derivatives of the Poisson's Ratio with respect to the args
-  std::vector<std::vector<const MaterialProperty<Real> *> > _d2poissons_ratio;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _d2poissons_ratio;
 
   /// first derivatives of the elasticity tensor with respect to the args
   std::vector<MaterialProperty<RankFourTensor> *> _delasticity_tensor;
   /// second derivatives of the elasticity tensor with respect to the args
-  std::vector<std::vector<MaterialProperty<RankFourTensor> *> > _d2elasticity_tensor;
+  std::vector<std::vector<MaterialProperty<RankFourTensor> *>> _d2elasticity_tensor;
 
   /// Vector of elastic constants to create the elasticity tensor (member to avoid memory churn)
   std::vector<Real> _isotropic_elastic_constants;
 };
 
-#endif //COMPUTEVARIABLEISOTROPICELASTICITYTENSOR_H
+#endif // COMPUTEVARIABLEISOTROPICELASTICITYTENSOR_H

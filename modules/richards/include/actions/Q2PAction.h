@@ -11,7 +11,7 @@
 
 class Q2PAction;
 
-template<>
+template <>
 InputParameters validParams<Q2PAction>();
 
 class Q2PAction : public Action
@@ -43,4 +43,4 @@ private:
   bool _no_mass_calculations;
 };
 
-#endif //Q2PACTION_H
+#endif // Q2PACTION_H

@@ -5,28 +5,27 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef TIEDVALUECONSTRAINT_H
 #define TIEDVALUECONSTRAINT_H
 
-//MOOSE includes
+// MOOSE includes
 #include "NodeFaceConstraint.h"
 
-//Forward Declarations
+// Forward Declarations
 class OneDContactConstraint;
 
-template<>
+template <>
 InputParameters validParams<OneDContactConstraint>();
 
 /**
- * A OneDContactConstraint forces the value of a variable to be the same on both sides of an interface.
+ * A OneDContactConstraint forces the value of a variable to be the same on both sides of an
+ * interface.
  */
-class OneDContactConstraint :
-  public NodeFaceConstraint
+class OneDContactConstraint : public NodeFaceConstraint
 {
 public:
   OneDContactConstraint(const InputParameters & parameters);
-  virtual ~OneDContactConstraint(){}
+  virtual ~OneDContactConstraint() {}
 
   virtual void timestepSetup();
   virtual void jacobianSetup();
@@ -40,6 +39,7 @@ public:
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
 
   bool shouldApply();
+
 protected:
   NumericVector<Number> & _residual_copy;
 

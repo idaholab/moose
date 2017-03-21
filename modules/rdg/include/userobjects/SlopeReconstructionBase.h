@@ -11,10 +11,10 @@
 #include "BCUserObject.h"
 #include "ElementLoopUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class SlopeReconstructionBase;
 
-template<>
+template <>
 InputParameters validParams<SlopeReconstructionBase>();
 
 /**
@@ -24,7 +24,6 @@ InputParameters validParams<SlopeReconstructionBase>();
 class SlopeReconstructionBase : public ElementLoopUserObject
 {
 public:
-
   SlopeReconstructionBase(const InputParameters & parameters);
 
   virtual void initialize();
@@ -40,7 +39,8 @@ public:
   virtual const std::vector<Real> & getElementAverageValue(dof_id_type elementid) const;
 
   /// accessor function call to get boundary average variable values
-  virtual const std::vector<Real> & getBoundaryAverageValue(dof_id_type elementid, unsigned int side) const;
+  virtual const std::vector<Real> & getBoundaryAverageValue(dof_id_type elementid,
+                                                            unsigned int side) const;
 
   /// accessor function call to get cached internal side centroid
   virtual const Point & getSideCentroid(dof_id_type elementid, dof_id_type neighborid) const;
@@ -70,13 +70,13 @@ protected:
   virtual void deserialize(std::vector<std::string> & serialized_buffers);
 
   /// store the reconstructed slopes into this map indexed by element ID
-  std::map<dof_id_type, std::vector<RealGradient> > _rslope;
+  std::map<dof_id_type, std::vector<RealGradient>> _rslope;
 
   /// store the average variable values into this map indexed by element ID
-  std::map<dof_id_type, std::vector<Real> > _avars;
+  std::map<dof_id_type, std::vector<Real>> _avars;
 
   /// store the boundary average variable values into this map indexed by pair of element ID and local side ID
-  std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real> > _bnd_avars;
+  std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _bnd_avars;
 
   /// store the side centroid into this map indexed by pair of element ID and neighbor ID
   std::map<std::pair<dof_id_type, dof_id_type>, Point> _side_centroid;
@@ -98,18 +98,18 @@ protected:
 
   /// required data for face assembly
   const MooseArray<Point> & _q_point_face;
-  QBase * & _qrule_face;
+  QBase *& _qrule_face;
   const MooseArray<Real> & _JxW_face;
   const MooseArray<Point> & _normals_face;
 
   /// current side of the current element
   unsigned int & _side;
 
-  const Elem * & _side_elem;
+  const Elem *& _side_elem;
   const Real & _side_volume;
 
   /// the neighboring element
-  const Elem * & _neighbor_elem;
+  const Elem *& _neighbor_elem;
 
   /// flag to indicated if side geometry info is cached
   bool _side_geoinfo_cached;

@@ -11,7 +11,7 @@
 #include "ComputeElasticityTensorBase.h"
 #include "GrainDataTracker.h"
 
-//Forward Declarations
+// Forward Declarations
 class ComputePolycrystalElasticityTensor;
 class EulerAngleProvider;
 
@@ -39,10 +39,10 @@ protected:
   std::vector<const VariableValue *> _vals;
 
   /// vector of elasticity tensor material properties
-  std::vector< MaterialProperty<RankFourTensor> *> _D_elastic_tensor;
+  std::vector<MaterialProperty<RankFourTensor> *> _D_elastic_tensor;
 
   /// Conversion factor from J to eV
   const Real _JtoeV;
 };
 
-#endif //COMPUTEPOLYCRYSTALELASTICITYTENSOR_H
+#endif // COMPUTEPOLYCRYSTALELASTICITYTENSOR_H

@@ -7,22 +7,26 @@
 
 #include "SolutionRasterizer.h"
 
-template<>
-InputParameters validParams<SolutionRasterizer>()
+template <>
+InputParameters
+validParams<SolutionRasterizer>()
 {
   InputParameters params = validParams<SolutionUserObject>();
-  params.addClassDescription("Process an XYZ file of atomic coordinates and filter atoms via threshold or map variable values.");
+  params.addClassDescription("Process an XYZ file of atomic coordinates and filter atoms via "
+                             "threshold or map variable values.");
   params.addRequiredParam<FileName>("xyz_input", "XYZ input file.");
   params.addRequiredParam<FileName>("xyz_output", "XYZ output file.");
-  params.addRequiredParam<std::string>("variable", "Variable from the mesh file to use for mapping to or filtering of the atoms.");
+  params.addRequiredParam<std::string>(
+      "variable", "Variable from the mesh file to use for mapping to or filtering of the atoms.");
   MooseEnum modeEnum("MAP FILTER", "MAP");
   params.addParam<MooseEnum>("raster_mode", modeEnum, "Rasterization mode (MAP|FILTER).");
-  params.addParam<Real>("threshold", "Accept atoms with a variable value above this threshold in FILTER mode.");
+  params.addParam<Real>("threshold",
+                        "Accept atoms with a variable value above this threshold in FILTER mode.");
   return params;
 }
 
-SolutionRasterizer::SolutionRasterizer(const InputParameters & parameters) :
-    SolutionUserObject(parameters),
+SolutionRasterizer::SolutionRasterizer(const InputParameters & parameters)
+  : SolutionUserObject(parameters),
     _xyz_input(getParam<FileName>("xyz_input")),
     _xyz_output(getParam<FileName>("xyz_output")),
     _variable(getParam<std::string>("variable")),
@@ -41,7 +45,8 @@ void
 SolutionRasterizer::initialSetup()
 {
   // only execute once
-  if (_initialized) return;
+  if (_initialized)
+    return;
 
   // initialize parent class
   SolutionUserObject::initialSetup();
@@ -63,7 +68,8 @@ SolutionRasterizer::initialSetup()
       // dump header
       stream_out << line << '\n';
 
-      // get length of line 0 - the amount of space we have to replace the atom count at the end of filtering
+      // get length of line 0 - the amount of space we have to replace the atom count at the end of
+      // filtering
       if (current_line == 0)
         len0 = line.size();
     }
@@ -75,10 +81,10 @@ SolutionRasterizer::initialSetup()
         switch (_raster_mode)
         {
           case 0: // MAP
-            stream_out << line << ' ' << pointValue(0.0, Point(x,y,z), _variable) << '\n';
+            stream_out << line << ' ' << pointValue(0.0, Point(x, y, z), _variable) << '\n';
             break;
           case 1: // FILTER
-            if (pointValue(0.0, Point(x,y,z), _variable) > _threshold)
+            if (pointValue(0.0, Point(x, y, z), _variable) > _threshold)
             {
               stream_out << line << '\n';
               nfilter++;

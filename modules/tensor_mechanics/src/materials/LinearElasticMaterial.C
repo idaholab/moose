@@ -14,27 +14,31 @@
  * simplified to specify HCP, monoclinic, cubic, etc as needed.
  */
 
-template<>
-InputParameters validParams<LinearElasticMaterial>()
+template <>
+InputParameters
+validParams<LinearElasticMaterial>()
 {
   InputParameters params = validParams<TensorMechanicsMaterial>();
   params.addParam<Real>("thermal_expansion_coeff", 0, "Thermal expansion coefficient in 1/K");
   params.addParam<Real>("T0", 300, "Reference temperature for thermal expansion in K");
   params.addCoupledVar("T", 300, "Temperature in Kelvin");
-  params.addParam<std::vector<Real> >("applied_strain_vector", "Applied strain: e11, e22, e33, e23, e13, e12");
+  params.addParam<std::vector<Real>>("applied_strain_vector",
+                                     "Applied strain: e11, e22, e33, e23, e13, e12");
   return params;
 }
 
-LinearElasticMaterial::LinearElasticMaterial(const InputParameters & parameters) :
-    TensorMechanicsMaterial(parameters),
+LinearElasticMaterial::LinearElasticMaterial(const InputParameters & parameters)
+  : TensorMechanicsMaterial(parameters),
     _T(coupledValue("T")),
     _T0(getParam<Real>("T0")),
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff")),
-    _applied_strain_vector(getParam<std::vector<Real> >("applied_strain_vector"))
+    _applied_strain_vector(getParam<std::vector<Real>>("applied_strain_vector"))
 {
-  mooseDeprecated("LinearElasticMaterial is deprecated. Refer to http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Deprecations/LinearElasticMaterial to convert this input file.");
+  mooseDeprecated("LinearElasticMaterial is deprecated. Refer to "
+                  "http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Deprecations/"
+                  "LinearElasticMaterial to convert this input file.");
 
-  //Initialize applied strain tensor from input vector
+  // Initialize applied strain tensor from input vector
   if (_applied_strain_vector.size() == 6)
     _applied_strain_tensor.fillFromInputVector(_applied_strain_vector);
   else
@@ -44,7 +48,7 @@ LinearElasticMaterial::LinearElasticMaterial(const InputParameters & parameters)
 void
 LinearElasticMaterial::computeQpStrain()
 {
-  //strain = (grad_disp + grad_disp^T)/2
+  // strain = (grad_disp + grad_disp^T)/2
   RankTwoTensor grad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
 
   _elastic_strain[_qp] = (grad_tensor + grad_tensor.transpose()) / 2.0;
@@ -54,7 +58,7 @@ LinearElasticMaterial::computeQpStrain()
 void
 LinearElasticMaterial::computeQpStress()
 {
-  //Calculation and Apply stress free strain
+  // Calculation and Apply stress free strain
   RankTwoTensor stress_free_strain = computeStressFreeStrain();
 
   // add the stress free strain on here
@@ -70,11 +74,11 @@ LinearElasticMaterial::computeQpStress()
 RankTwoTensor
 LinearElasticMaterial::computeStressFreeStrain()
 {
-  //Apply thermal expansion
+  // Apply thermal expansion
   RankTwoTensor stress_free_strain;
   stress_free_strain.addIa(-_thermal_expansion_coeff * (_T[_qp] - _T0));
 
-  //Apply uniform applied strain
+  // Apply uniform applied strain
   if (_applied_strain_vector.size() == 6)
     stress_free_strain += _applied_strain_tensor;
 

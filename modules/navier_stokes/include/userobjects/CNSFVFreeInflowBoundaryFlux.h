@@ -15,7 +15,7 @@
 // Forward Declarations
 class CNSFVFreeInflowBoundaryFlux;
 
-template<>
+template <>
 InputParameters validParams<CNSFVFreeInflowBoundaryFlux>();
 
 /**
@@ -24,7 +24,6 @@ InputParameters validParams<CNSFVFreeInflowBoundaryFlux>();
 class CNSFVFreeInflowBoundaryFlux : public BoundaryFluxBase
 {
 public:
-
   CNSFVFreeInflowBoundaryFlux(const InputParameters & parameters);
   virtual ~CNSFVFreeInflowBoundaryFlux();
 
@@ -41,7 +40,6 @@ public:
                             DenseMatrix<Real> & jac1) const;
 
 protected:
-
   const BCUserObject & _bc_uo;
   const SinglePhaseFluidProperties & _fp;
 };

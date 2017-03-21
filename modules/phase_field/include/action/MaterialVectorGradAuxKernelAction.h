@@ -9,7 +9,7 @@
 
 #include "MaterialVectorAuxKernelAction.h"
 
-class MaterialVectorGradAuxKernelAction: public MaterialVectorAuxKernelAction
+class MaterialVectorGradAuxKernelAction : public MaterialVectorAuxKernelAction
 {
 public:
   MaterialVectorGradAuxKernelAction(const InputParameters & params);
@@ -17,7 +17,7 @@ public:
   virtual void act();
 };
 
-template<>
+template <>
 InputParameters validParams<MaterialVectorGradAuxKernelAction>();
 
-#endif //MATERIALVECTORGRADAUXKERNELACTION_H
+#endif // MATERIALVECTORGRADAUXKERNELACTION_H

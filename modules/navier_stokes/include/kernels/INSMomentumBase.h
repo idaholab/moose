@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSMomentumBase;
 
-template<>
+template <>
 InputParameters validParams<INSMomentumBase>();
 
 /**
@@ -33,7 +33,7 @@ class INSMomentumBase : public Kernel
 public:
   INSMomentumBase(const InputParameters & parameters);
 
-  virtual ~INSMomentumBase(){}
+  virtual ~INSMomentumBase() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -73,6 +73,5 @@ protected:
   unsigned _component;
   bool _integrate_p_by_parts;
 };
-
 
 #endif

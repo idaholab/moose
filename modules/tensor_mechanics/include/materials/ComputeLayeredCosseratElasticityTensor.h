@@ -34,4 +34,4 @@ protected:
   MaterialProperty<RankFourTensor> & _elastic_flexural_rigidity_tensor;
 };
 
-#endif //COMPUTELAYEREDCOSSERATELASTICITYTENSOR_H
+#endif // COMPUTELAYEREDCOSSERATELASTICITYTENSOR_H

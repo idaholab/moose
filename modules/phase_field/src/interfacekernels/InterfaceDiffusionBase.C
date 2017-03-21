@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "InterfaceDiffusionBase.h"
 
-template<>
-InputParameters validParams<InterfaceDiffusionBase>()
+template <>
+InputParameters
+validParams<InterfaceDiffusionBase>()
 {
   InputParameters params = validParams<InterfaceKernel>();
   params.addParam<Real>("D", 1.0, "Diffusion coefficient");
@@ -15,9 +16,7 @@ InputParameters validParams<InterfaceDiffusionBase>()
   return params;
 }
 
-InterfaceDiffusionBase::InterfaceDiffusionBase(const InputParameters & parameters) :
-    InterfaceKernel(parameters),
-    _D(getParam<Real>("D")),
-    _D_neighbor(getParam<Real>("D_neighbor"))
+InterfaceDiffusionBase::InterfaceDiffusionBase(const InputParameters & parameters)
+  : InterfaceKernel(parameters), _D(getParam<Real>("D")), _D_neighbor(getParam<Real>("D_neighbor"))
 {
 }

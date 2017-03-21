@@ -11,7 +11,7 @@
 
 class DerivativeSumMaterial;
 
-template<>
+template <>
 InputParameters validParams<DerivativeSumMaterial>();
 
 class DerivativeSumMaterial : public DerivativeFunctionMaterialBase
@@ -35,13 +35,13 @@ protected:
   std::vector<const MaterialProperty<Real> *> _summand_F;
 
   /// Derivatives of the summands with respect to arg[i]
-  std::vector<std::vector<const MaterialProperty<Real> *> > _summand_dF;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _summand_dF;
 
   /// Second derivatives of the summands.
-  std::vector<std::vector<std::vector<const MaterialProperty<Real> *> > > _summand_d2F;
+  std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>> _summand_d2F;
 
   /// Third derivatives of the summands.
-  std::vector<std::vector<std::vector<std::vector<const MaterialProperty<Real> *> > > > _summand_d3F;
+  std::vector<std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>>> _summand_d3F;
 };
 
-#endif //DERIVATIVESUMMATERIAL_H
+#endif // DERIVATIVESUMMATERIAL_H

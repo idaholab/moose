@@ -4,11 +4,12 @@
 #include "ConservedNoiseBase.h"
 #include "ConservedNormalNoiseVeneer.h"
 
-//Forward delcarations
+// Forward delcarations
 class ConservedNormalNoise;
 
-template<>
-InputParameters validParams<ConservedNormalNoise>()
+template <>
+InputParameters
+validParams<ConservedNormalNoise>()
 {
   return validParams<ConservedNoiseBase>();
 }
@@ -23,9 +24,10 @@ InputParameters validParams<ConservedNormalNoise>()
 class ConservedNormalNoise : public ConservedNormalNoiseVeneer<ConservedNoiseBase>
 {
 public:
-
-  ConservedNormalNoise(const InputParameters & parameters) :
-      ConservedNormalNoiseVeneer<ConservedNoiseBase>(parameters) {}
+  ConservedNormalNoise(const InputParameters & parameters)
+    : ConservedNormalNoiseVeneer<ConservedNoiseBase>(parameters)
+  {
+  }
 };
 
-#endif //CONSERVEDNORMALNOISE_H
+#endif // CONSERVEDNORMALNOISE_H

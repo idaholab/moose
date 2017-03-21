@@ -37,22 +37,21 @@ private:
   T & _data;
 };
 
-
 template <class T>
-NSPressureDerivs<T>::NSPressureDerivs(T & x) :
-    _data(x)
+NSPressureDerivs<T>::NSPressureDerivs(T & x) : _data(x)
 {
 }
 
 template <class T>
-Real NSPressureDerivs<T>::get_grad(unsigned i)
+Real
+NSPressureDerivs<T>::get_grad(unsigned i)
 {
   // Convenience vars
   const Real u = _data._u_vel[_data._qp];
   const Real v = _data._v_vel[_data._qp];
   const Real w = _data._w_vel[_data._qp];
 
-  const Real vel2 = (u*u + v*v + w*w);
+  const Real vel2 = (u * u + v * v + w * w);
   const Real gam = _data._fp.gamma();
 
   switch (i)
@@ -79,7 +78,8 @@ Real NSPressureDerivs<T>::get_grad(unsigned i)
 }
 
 template <class T>
-Real NSPressureDerivs<T>::get_hess(unsigned i, unsigned j)
+Real
+NSPressureDerivs<T>::get_hess(unsigned i, unsigned j)
 {
   // Convenience variables
   const Real U0 = _data._rho[_data._qp];
@@ -87,7 +87,7 @@ Real NSPressureDerivs<T>::get_hess(unsigned i, unsigned j)
   const Real u = _data._u_vel[_data._qp];
   const Real v = _data._v_vel[_data._qp];
   const Real w = _data._w_vel[_data._qp];
-  const Real vel2 = (u*u + v*v + w*w);
+  const Real vel2 = (u * u + v * v + w * w);
 
   // Save some typing...
   const Real gam = _data._fp.gamma();
@@ -115,7 +115,7 @@ Real NSPressureDerivs<T>::get_hess(unsigned i, unsigned j)
     case 6: // rho*u, rho*u
       return tmp;
 
-      // Row 2
+    // Row 2
     case 10: // rho*v, rho
       return -tmp * v;
 

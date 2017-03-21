@@ -9,8 +9,9 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
-template<>
-InputParameters validParams<BicrystalBoundingBoxICAction>()
+template <>
+InputParameters
+validParams<BicrystalBoundingBoxICAction>()
 {
   InputParameters params = validParams<Action>();
   params.addClassDescription("Bicrystal using a bounding box");
@@ -25,8 +26,8 @@ InputParameters validParams<BicrystalBoundingBoxICAction>()
   return params;
 }
 
-BicrystalBoundingBoxICAction::BicrystalBoundingBoxICAction(const InputParameters & params) :
-    Action(params),
+BicrystalBoundingBoxICAction::BicrystalBoundingBoxICAction(const InputParameters & params)
+  : Action(params),
     _var_name_base(getParam<std::string>("var_name_base")),
     _op_num(getParam<unsigned int>("op_num"))
 {
@@ -65,6 +66,7 @@ BicrystalBoundingBoxICAction::act()
     }
 
     // Add initial condition
-    _problem->addInitialCondition("BoundingBoxIC", "BicrystalBoundingBoxIC_" + Moose::stringify(op), poly_params);
+    _problem->addInitialCondition(
+        "BoundingBoxIC", "BicrystalBoundingBoxIC_" + Moose::stringify(op), poly_params);
   }
 }

@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSChorinPredictor;
 
-template<>
+template <>
 InputParameters validParams<INSChorinPredictor>();
 
 /**
@@ -24,7 +24,7 @@ class INSChorinPredictor : public Kernel
 public:
   INSChorinPredictor(const InputParameters & parameters);
 
-  virtual ~INSChorinPredictor(){}
+  virtual ~INSChorinPredictor() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -98,6 +98,5 @@ protected:
     STAR = 2
   };
 };
-
 
 #endif // INSCHORINPREDICTOR_H

@@ -9,8 +9,9 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
-template<>
-InputParameters validParams<BicrystalCircleGrainICAction>()
+template <>
+InputParameters
+validParams<BicrystalCircleGrainICAction>()
 {
   InputParameters params = validParams<Action>();
   params.addClassDescription("Bicrystal with a circular grain and an embedding outer grain");
@@ -20,13 +21,15 @@ InputParameters validParams<BicrystalCircleGrainICAction>()
   params.addRequiredParam<Real>("x", "The x coordinate of the circle grain center");
   params.addRequiredParam<Real>("y", "The y coordinate of the circle grain center");
   params.addParam<Real>("z", 0.0, "The z coordinate of the circle grain center");
-  params.addParam<Real>("int_width", 0.0, "The interfacial width of the void surface.  Defaults to sharp interface");
-  params.addParam<bool>("3D_sphere", true, "in 3D, whether the smaller grain is a spheres or columnar grain");
+  params.addParam<Real>(
+      "int_width", 0.0, "The interfacial width of the void surface.  Defaults to sharp interface");
+  params.addParam<bool>(
+      "3D_sphere", true, "in 3D, whether the smaller grain is a spheres or columnar grain");
   return params;
 }
 
-BicrystalCircleGrainICAction::BicrystalCircleGrainICAction(const InputParameters & params) :
-    Action(params),
+BicrystalCircleGrainICAction::BicrystalCircleGrainICAction(const InputParameters & params)
+  : Action(params),
     _var_name_base(getParam<std::string>("var_name_base")),
     _op_num(getParam<unsigned int>("op_num")),
     _radius(getParam<Real>("radius")),
@@ -66,12 +69,13 @@ BicrystalCircleGrainICAction::act()
     }
     else
     {
-      //Values for matrix grain
+      // Values for matrix grain
       poly_params.set<Real>("invalue") = 0.0;
       poly_params.set<Real>("outvalue") = 1.0;
     }
 
     // Add initial condition
-    _problem->addInitialCondition("SmoothCircleIC", "BicrystalCircleGrainIC_" + Moose::stringify(op), poly_params);
+    _problem->addInitialCondition(
+        "SmoothCircleIC", "BicrystalCircleGrainIC_" + Moose::stringify(op), poly_params);
   }
 }

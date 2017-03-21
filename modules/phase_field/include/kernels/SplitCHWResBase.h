@@ -17,8 +17,8 @@
  * equation in a general way that can be templated to a scalar or
  * tensor mobility.
  */
-template<typename T>
-class SplitCHWResBase : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >
+template <typename T>
+class SplitCHWResBase : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
   SplitCHWResBase(const InputParameters & parameters);
@@ -37,13 +37,13 @@ private:
   std::vector<const MaterialProperty<T> *> _dmobdarg;
 };
 
-template<typename T>
-SplitCHWResBase<T>::SplitCHWResBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >(parameters),
+template <typename T>
+SplitCHWResBase<T>::SplitCHWResBase(const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _mob_name(getParam<MaterialPropertyName>("mob_name")),
     _mob(getMaterialProperty<T>("mob_name"))
 {
-  //Get number of coupled variables
+  // Get number of coupled variables
   unsigned int nvar = _coupled_moose_vars.size();
 
   // reserve space for derivatives
@@ -54,32 +54,33 @@ SplitCHWResBase<T>::SplitCHWResBase(const InputParameters & parameters) :
     _dmobdarg[i] = &getMaterialPropertyDerivative<T>(_mob_name, _coupled_moose_vars[i]->name());
 }
 
-template<typename T>
+template <typename T>
 InputParameters
 SplitCHWResBase<T>::validParams()
 {
   InputParameters params = ::validParams<Kernel>();
-  params.addClassDescription("Split formulation Cahn-Hilliard Kernel for the chemical potential variable");
+  params.addClassDescription(
+      "Split formulation Cahn-Hilliard Kernel for the chemical potential variable");
   params.addParam<MaterialPropertyName>("mob_name", "mobtemp", "The mobility used with the kernel");
   params.addCoupledVar("args", "Vector of arguments of the mobility");
   return params;
 }
 
-template<typename T>
+template <typename T>
 Real
 SplitCHWResBase<T>::computeQpResidual()
 {
   return _mob[_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 }
 
-template<typename T>
+template <typename T>
 Real
 SplitCHWResBase<T>::computeQpJacobian()
 {
   return _mob[_qp] * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }
 
-template<typename T>
+template <typename T>
 Real
 SplitCHWResBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 {
@@ -89,4 +90,4 @@ SplitCHWResBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   return (*_dmobdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 }
 
-#endif //SPLITCHWRESBASE_H
+#endif // SPLITCHWRESBASE_H

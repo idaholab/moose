@@ -7,16 +7,17 @@
 #include "MultiGrainRigidBodyMotion.h"
 #include "GrainTrackerInterface.h"
 
-template<>
-InputParameters validParams<MultiGrainRigidBodyMotion>()
+template <>
+InputParameters
+validParams<MultiGrainRigidBodyMotion>()
 {
   InputParameters params = validParams<GrainRigidBodyMotionBase>();
   params.addClassDescription("Adds rigid mody motion to grains");
   return params;
 }
 
-MultiGrainRigidBodyMotion::MultiGrainRigidBodyMotion(const InputParameters & parameters) :
-    GrainRigidBodyMotionBase(parameters)
+MultiGrainRigidBodyMotion::MultiGrainRigidBodyMotion(const InputParameters & parameters)
+  : GrainRigidBodyMotionBase(parameters)
 {
 }
 
@@ -29,9 +30,9 @@ MultiGrainRigidBodyMotion::computeQpResidual()
 Real
 MultiGrainRigidBodyMotion::computeQpJacobian()
 {
-  if (_var.number() == _c_var) //Requires c jacobian
-    return _velocity_advection * _grad_phi[_j][_qp] * _test[_i][_qp]
-           + _velocity_advection_jacobian * _grad_c[_qp] * _test[_i][_qp];
+  if (_var.number() == _c_var) // Requires c jacobian
+    return _velocity_advection * _grad_phi[_j][_qp] * _test[_i][_qp] +
+           _velocity_advection_jacobian * _grad_c[_qp] * _test[_i][_qp];
 
   return 0.0;
 }
@@ -39,24 +40,24 @@ MultiGrainRigidBodyMotion::computeQpJacobian()
 Real
 MultiGrainRigidBodyMotion::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _c_var) //Requires c jacobian
-    return _velocity_advection * _grad_phi[_j][_qp] * _test[_i][_qp]
-           + _velocity_advection_jacobian * _grad_c[_qp] * _test[_i][_qp];
+  if (jvar == _c_var) // Requires c jacobian
+    return _velocity_advection * _grad_phi[_j][_qp] * _test[_i][_qp] +
+           _velocity_advection_jacobian * _grad_c[_qp] * _test[_i][_qp];
   else
     return _velocity_advection_jacobian * _grad_c[_qp] * _test[_i][_qp];
 }
 
-Real
-MultiGrainRigidBodyMotion::computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
+Real MultiGrainRigidBodyMotion::computeQpNonlocalJacobian(dof_id_type /*dof_index*/)
 {
-  if (_var.number() == _c_var) //Requires c jacobian
+  if (_var.number() == _c_var) // Requires c jacobian
     return _velocity_advection_jacobian * _grad_c[_qp] * _test[_i][_qp];
 
   return 0.0;
 }
 
 Real
-MultiGrainRigidBodyMotion::computeQpNonlocalOffDiagJacobian(unsigned int /* jvar */, dof_id_type /* dof_index */)
+MultiGrainRigidBodyMotion::computeQpNonlocalOffDiagJacobian(unsigned int /* jvar */,
+                                                            dof_id_type /* dof_index */)
 {
   return _velocity_advection_jacobian * _grad_c[_qp] * _test[_i][_qp];
 }
@@ -79,27 +80,34 @@ MultiGrainRigidBodyMotion::getUserObjectJacobian(unsigned int jvar, dof_id_type 
 
       if (jvar == _c_var)
       {
-        force_jacobian(0) = _grain_force_c_jacobians[(6*grain_id+0)*_total_dofs+dof_index];
-        force_jacobian(1) = _grain_force_c_jacobians[(6*grain_id+1)*_total_dofs+dof_index];
-        force_jacobian(2) = _grain_force_c_jacobians[(6*grain_id+2)*_total_dofs+dof_index];
-        torque_jacobian(0) = _grain_force_c_jacobians[(6*grain_id+3)*_total_dofs+dof_index];
-        torque_jacobian(1) = _grain_force_c_jacobians[(6*grain_id+4)*_total_dofs+dof_index];
-        torque_jacobian(2) = _grain_force_c_jacobians[(6*grain_id+5)*_total_dofs+dof_index];
+        force_jacobian(0) = _grain_force_c_jacobians[(6 * grain_id + 0) * _total_dofs + dof_index];
+        force_jacobian(1) = _grain_force_c_jacobians[(6 * grain_id + 1) * _total_dofs + dof_index];
+        force_jacobian(2) = _grain_force_c_jacobians[(6 * grain_id + 2) * _total_dofs + dof_index];
+        torque_jacobian(0) = _grain_force_c_jacobians[(6 * grain_id + 3) * _total_dofs + dof_index];
+        torque_jacobian(1) = _grain_force_c_jacobians[(6 * grain_id + 4) * _total_dofs + dof_index];
+        torque_jacobian(2) = _grain_force_c_jacobians[(6 * grain_id + 5) * _total_dofs + dof_index];
       }
 
       for (unsigned int jvar_index = 0; jvar_index < _op_num; ++jvar_index)
         if (jvar == _vals_var[jvar_index])
         {
-          force_jacobian(0) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+0)*_total_dofs+dof_index];
-          force_jacobian(1) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+1)*_total_dofs+dof_index];
-          force_jacobian(2) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+2)*_total_dofs+dof_index];
-          torque_jacobian(0) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+3)*_total_dofs+dof_index];
-          torque_jacobian(1) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+4)*_total_dofs+dof_index];
-          torque_jacobian(2) = _grain_force_eta_jacobians[jvar_index][(6*grain_id+5)*_total_dofs+dof_index];
+          force_jacobian(0) =
+              _grain_force_eta_jacobians[jvar_index][(6 * grain_id + 0) * _total_dofs + dof_index];
+          force_jacobian(1) =
+              _grain_force_eta_jacobians[jvar_index][(6 * grain_id + 1) * _total_dofs + dof_index];
+          force_jacobian(2) =
+              _grain_force_eta_jacobians[jvar_index][(6 * grain_id + 2) * _total_dofs + dof_index];
+          torque_jacobian(0) =
+              _grain_force_eta_jacobians[jvar_index][(6 * grain_id + 3) * _total_dofs + dof_index];
+          torque_jacobian(1) =
+              _grain_force_eta_jacobians[jvar_index][(6 * grain_id + 4) * _total_dofs + dof_index];
+          torque_jacobian(2) =
+              _grain_force_eta_jacobians[jvar_index][(6 * grain_id + 5) * _total_dofs + dof_index];
         }
 
       const auto force_jac = _mt / volume * force_jacobian;
-      const auto torque_jac = _mr / volume * torque_jacobian.cross(_current_elem->centroid() - centroid);
+      const auto torque_jac =
+          _mr / volume * torque_jacobian.cross(_current_elem->centroid() - centroid);
 
       _velocity_advection_jacobian += (force_jac + torque_jac);
     }
@@ -121,7 +129,8 @@ MultiGrainRigidBodyMotion::calculateAdvectionVelocity()
       const auto volume = _grain_volumes[grain_id];
       const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
       const auto force = _mt / volume * _grain_forces[grain_id];
-      const auto torque = _mr / volume * (_grain_torques[grain_id].cross(_current_elem->centroid() - centroid));
+      const auto torque =
+          _mr / volume * (_grain_torques[grain_id].cross(_current_elem->centroid() - centroid));
 
       _velocity_advection += (force + torque);
     }

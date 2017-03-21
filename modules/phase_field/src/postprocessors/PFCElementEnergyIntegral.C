@@ -7,17 +7,19 @@
 
 #include "PFCElementEnergyIntegral.h"
 
-template<>
-InputParameters validParams<PFCElementEnergyIntegral>()
+template <>
+InputParameters
+validParams<PFCElementEnergyIntegral>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this object operates on");
+  params.addRequiredParam<VariableName>("variable",
+                                        "The name of the variable that this object operates on");
   params.addParam<Real>("temp", 1833.0, "Temperature of simulation");
   return params;
 }
 
-PFCElementEnergyIntegral::PFCElementEnergyIntegral(const InputParameters & parameters) :
-    ElementIntegralPostprocessor(parameters),
+PFCElementEnergyIntegral::PFCElementEnergyIntegral(const InputParameters & parameters)
+  : ElementIntegralPostprocessor(parameters),
     MooseVariableInterface(this, false),
     _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
     _u(_var.sln()),

@@ -8,20 +8,22 @@
 #include "EulerAngleProvider.h"
 #include "Assembly.h"
 
-template<>
-InputParameters validParams<GrainTextureVectorPostprocessor>()
+template <>
+InputParameters
+validParams<GrainTextureVectorPostprocessor>()
 {
   InputParameters params = validParams<ElementVectorPostprocessor>();
   params += validParams<SamplerBase>();
   params.addClassDescription("Gives out info on the grain boundary properties");
-  params.addRequiredParam<UserObjectName>("euler_angle_provider", "The EulerAngleProvider User object");
+  params.addRequiredParam<UserObjectName>("euler_angle_provider",
+                                          "The EulerAngleProvider User object");
   params.addRequiredCoupledVar("unique_grains", "The grain number");
   params.addRequiredParam<unsigned int>("grain_num", "the number of grains");
   return params;
 }
 
-GrainTextureVectorPostprocessor::GrainTextureVectorPostprocessor(const InputParameters & parameters) :
-    ElementVectorPostprocessor(parameters),
+GrainTextureVectorPostprocessor::GrainTextureVectorPostprocessor(const InputParameters & parameters)
+  : ElementVectorPostprocessor(parameters),
     SamplerBase(parameters, this, _communicator),
     _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
     _unique_grains(coupledValue("unique_grains")),
@@ -48,19 +50,23 @@ GrainTextureVectorPostprocessor::initialize()
 void
 GrainTextureVectorPostprocessor::execute()
 {
-  _sample[0] = _unique_grains[0] + 1; // Index starts at 0, but we want to display first grain as grain 1.
+  _sample[0] =
+      _unique_grains[0] + 1; // Index starts at 0, but we want to display first grain as grain 1.
 
   const EulerAngles & angle = _euler.getEulerAngles(_unique_grains[0]);
   _sample[1] = angle.phi1; // Get the Z   rotation
   _sample[2] = angle.Phi;  // Get the X'  rotation
   _sample[3] = angle.phi2; // Get the Z'' rotation
-  SamplerBase::addSample(_current_elem->centroid() /* x,y,z coordinates of elem centroid */, _current_elem->id(), _sample);
+  SamplerBase::addSample(_current_elem->centroid() /* x,y,z coordinates of elem centroid */,
+                         _current_elem->id(),
+                         _sample);
 }
 
 void
 GrainTextureVectorPostprocessor::threadJoin(const UserObject & y)
 {
-  const GrainTextureVectorPostprocessor & vpp = static_cast<const GrainTextureVectorPostprocessor &>(y);
+  const GrainTextureVectorPostprocessor & vpp =
+      static_cast<const GrainTextureVectorPostprocessor &>(y);
   SamplerBase::threadJoin(vpp);
 }
 

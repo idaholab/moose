@@ -9,10 +9,8 @@
 
 #include <sstream>
 
-EFANode::EFANode(unsigned int nid, N_CATEGORY ncat, EFANode* nparent) :
-    _category(ncat),
-    _id(nid),
-    _parent(nparent)
+EFANode::EFANode(unsigned int nid, N_CATEGORY ncat, EFANode * nparent)
+  : _category(ncat), _id(nid), _parent(nparent)
 {
 }
 
@@ -22,11 +20,11 @@ EFANode::idCatString()
   std::ostringstream s;
   s << _id;
   if (_category == N_CATEGORY_EMBEDDED)
-    s<<"e";
+    s << "e";
   else if (_category == N_CATEGORY_TEMP)
-    s<<"t";
+    s << "t";
   else
-    s<<" ";
+    s << " ";
   return s.str();
 }
 
@@ -42,7 +40,7 @@ EFANode::category() const
   return _category;
 }
 
-EFANode*
+EFANode *
 EFANode::parent() const
 {
   return _parent;

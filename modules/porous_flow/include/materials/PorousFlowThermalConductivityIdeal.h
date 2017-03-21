@@ -12,13 +12,14 @@
 
 class PorousFlowThermalConductivityIdeal;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowThermalConductivityIdeal>();
 
 /**
  * This material computes thermal conductivity for a PorousMedium - fluid
  * system, by using
- * Thermal conductivity = dry_thermal_conductivity + S^exponent * (wet_thermal_conductivity - dry_thermal_conductivity),
+ * Thermal conductivity = dry_thermal_conductivity + S^exponent * (wet_thermal_conductivity -
+ * dry_thermal_conductivity),
  * where S is the aqueous saturation.
  */
 class PorousFlowThermalConductivityIdeal : public PorousFlowMaterialVectorBase

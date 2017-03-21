@@ -21,4 +21,4 @@ protected:
   virtual void computeProperties() override;
 };
 
-#endif //COMPUTESMALLSTRAIN_H
+#endif // COMPUTESMALLSTRAIN_H

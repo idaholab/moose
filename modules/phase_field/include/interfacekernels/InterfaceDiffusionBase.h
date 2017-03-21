@@ -11,7 +11,7 @@
 
 class InterfaceDiffusionBase;
 
-template<>
+template <>
 InputParameters validParams<InterfaceDiffusionBase>();
 
 /**

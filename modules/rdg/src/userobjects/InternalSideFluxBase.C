@@ -10,16 +10,17 @@
 // Static mutex definition
 Threads::spin_mutex InternalSideFluxBase::_mutex;
 
-template<>
-InputParameters validParams<InternalSideFluxBase>()
+template <>
+InputParameters
+validParams<InternalSideFluxBase>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.addClassDescription("A base class for computing and caching internal side flux.");
   return params;
 }
 
-InternalSideFluxBase::InternalSideFluxBase(const InputParameters & parameters) :
-    GeneralUserObject(parameters)
+InternalSideFluxBase::InternalSideFluxBase(const InputParameters & parameters)
+  : GeneralUserObject(parameters)
 {
   _flux.resize(libMesh::n_threads());
   _jac1.resize(libMesh::n_threads());
@@ -58,13 +59,7 @@ InternalSideFluxBase::getFlux(unsigned int iside,
     _cached_elem_id = ielem;
     _cached_neig_id = ineig;
 
-    calcFlux(iside,
-             ielem,
-             ineig,
-             uvec1,
-             uvec2,
-             dwave,
-             _flux[tid]);
+    calcFlux(iside, ielem, ineig, uvec1, uvec2, dwave, _flux[tid]);
   }
   return _flux[tid];
 }
@@ -85,14 +80,7 @@ InternalSideFluxBase::getJacobian(Moose::DGResidualType type,
     _cached_elem_id = ielem;
     _cached_neig_id = ineig;
 
-    calcJacobian(iside,
-                 ielem,
-                 ineig,
-                 uvec1,
-                 uvec2,
-                 dwave,
-                 _jac1[tid],
-                 _jac2[tid]);
+    calcJacobian(iside, ielem, ineig, uvec1, uvec2, dwave, _jac1[tid], _jac2[tid]);
   }
 
   if (type == Moose::Element)

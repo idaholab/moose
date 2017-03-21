@@ -11,7 +11,7 @@
 
 class InternalVolume;
 
-template<>
+template <>
 InputParameters validParams<InternalVolume>();
 
 /**
@@ -28,7 +28,7 @@ InputParameters validParams<InternalVolume>();
 class InternalVolume : public SideIntegralPostprocessor
 {
 public:
-  InternalVolume( const InputParameters & parameters);
+  InternalVolume(const InputParameters & parameters);
 
   void initialSetup();
 
@@ -41,4 +41,4 @@ protected:
   const Real _addition;
 };
 
-#endif //INTERNALVOLUME_H
+#endif // INTERNALVOLUME_H

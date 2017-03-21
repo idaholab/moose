@@ -24,4 +24,4 @@ protected:
   virtual void computeProperties() override;
 };
 
-#endif //COMPUTERSPHERICALSMALLSTRAIN_H
+#endif // COMPUTERSPHERICALSMALLSTRAIN_H

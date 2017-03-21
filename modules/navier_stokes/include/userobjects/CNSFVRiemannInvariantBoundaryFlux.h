@@ -15,7 +15,7 @@
 // Forward Declarations
 class CNSFVRiemannInvariantBoundaryFlux;
 
-template<>
+template <>
 InputParameters validParams<CNSFVRiemannInvariantBoundaryFlux>();
 
 /**
@@ -24,7 +24,6 @@ InputParameters validParams<CNSFVRiemannInvariantBoundaryFlux>();
 class CNSFVRiemannInvariantBoundaryFlux : public BoundaryFluxBase
 {
 public:
-
   CNSFVRiemannInvariantBoundaryFlux(const InputParameters & parameters);
   virtual ~CNSFVRiemannInvariantBoundaryFlux();
 
@@ -41,7 +40,6 @@ public:
                             DenseMatrix<Real> & jac1) const;
 
 protected:
-
   const BCUserObject & _bc_uo;
   const SinglePhaseFluidProperties & _fp;
 };

@@ -7,30 +7,28 @@
 
 #include "CNSFVCharacteristicBCUserObject.h"
 
-template<>
-InputParameters validParams<CNSFVCharacteristicBCUserObject>()
+template <>
+InputParameters
+validParams<CNSFVCharacteristicBCUserObject>()
 {
   InputParameters params = validParams<BCUserObject>();
 
-  params.addClassDescription("A user object that computes the ghost cell values based on the characteristic boundary condition.");
+  params.addClassDescription("A user object that computes the ghost cell values based on the "
+                             "characteristic boundary condition.");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-  "Name for fluid properties user object");
+                                          "Name for fluid properties user object");
 
-  params.addRequiredParam<Real>("infinity_density",
-  "Infinity density");
+  params.addRequiredParam<Real>("infinity_density", "Infinity density");
 
   params.addRequiredParam<Real>("infinity_x_velocity",
-  "Infinity velocity component in x-direction");
+                                "Infinity velocity component in x-direction");
 
-  params.addParam<Real>("infinity_y_velocity", 0.,
-  "Infinity velocity component in y-direction");
+  params.addParam<Real>("infinity_y_velocity", 0., "Infinity velocity component in y-direction");
 
-  params.addParam<Real>("infinity_z_velocity", 0.,
-  "Infinity velocity component in z-direction");
+  params.addParam<Real>("infinity_z_velocity", 0., "Infinity velocity component in z-direction");
 
-  params.addRequiredParam<Real>("infinity_pressure",
-  "Infinity pressure");
+  params.addRequiredParam<Real>("infinity_pressure", "Infinity pressure");
 
   return params;
 }
@@ -54,7 +52,7 @@ CNSFVCharacteristicBCUserObject::getGhostCellValue(unsigned int iside,
 {
   /// pass the inputs to local
 
-  Real rho1  = uvec1[0];
+  Real rho1 = uvec1[0];
   Real rhou1 = uvec1[1];
   Real rhov1 = uvec1[2];
   Real rhow1 = uvec1[3];
@@ -84,11 +82,9 @@ CNSFVCharacteristicBCUserObject::getGhostCellValue(unsigned int iside,
     urigh[1] = _inf_rho * _inf_uadv;
     urigh[2] = _inf_rho * _inf_vadv;
     urigh[3] = _inf_rho * _inf_wadv;
-    urigh[4] = _inf_rho * (_fp.e(_inf_pres, _inf_rho) +
-                           0.5 * (_inf_uadv * _inf_uadv +
-                                  _inf_vadv * _inf_vadv +
-                                  _inf_wadv * _inf_wadv));
-
+    urigh[4] =
+        _inf_rho * (_fp.e(_inf_pres, _inf_rho) +
+                    0.5 * (_inf_uadv * _inf_uadv + _inf_vadv * _inf_vadv + _inf_wadv * _inf_wadv));
   }
   else if (mach1 >= 0. && mach1 < 1.)
   {
@@ -103,9 +99,7 @@ CNSFVCharacteristicBCUserObject::getGhostCellValue(unsigned int iside,
     urigh[2] = rhov1;
     urigh[3] = rhow1;
     urigh[4] = rho1 * _fp.e(_inf_pres, rho1) +
-               0.5 * (rhou1 * rhou1 +
-                      rhov1 * rhov1 +
-                      rhow1 * rhow1) / rho1;
+               0.5 * (rhou1 * rhou1 + rhov1 * rhov1 + rhow1 * rhow1) / rho1;
   }
   else if (mach1 <= -1.)
   {
@@ -119,13 +113,11 @@ CNSFVCharacteristicBCUserObject::getGhostCellValue(unsigned int iside,
     urigh[1] = _inf_rho * _inf_uadv;
     urigh[2] = _inf_rho * _inf_vadv;
     urigh[3] = _inf_rho * _inf_wadv;
-    urigh[4] = _inf_rho * (_fp.e(_inf_pres, _inf_rho) +
-                           0.5 * (_inf_uadv * _inf_uadv +
-                                  _inf_vadv * _inf_vadv +
-                                  _inf_wadv * _inf_wadv));
-
+    urigh[4] =
+        _inf_rho * (_fp.e(_inf_pres, _inf_rho) +
+                    0.5 * (_inf_uadv * _inf_uadv + _inf_vadv * _inf_vadv + _inf_wadv * _inf_wadv));
   }
-  else if (mach1 >=  1.)
+  else if (mach1 >= 1.)
   {
     /// supersonic outflow case
     ///   -- extrapolate pressure
@@ -140,10 +132,20 @@ CNSFVCharacteristicBCUserObject::getGhostCellValue(unsigned int iside,
     urigh[4] = rhoe1;
   }
   else
-    mooseError("Something is wrong in ", name(), ": ", __FUNCTION__, "\n",
-                "ielem = ", ielem, "\n",
-                "iside = ", iside, "\n",
-                "mach1 = ", mach1, "\n");
+    mooseError("Something is wrong in ",
+               name(),
+               ": ",
+               __FUNCTION__,
+               "\n",
+               "ielem = ",
+               ielem,
+               "\n",
+               "iside = ",
+               iside,
+               "\n",
+               "mach1 = ",
+               mach1,
+               "\n");
 
   return urigh;
 }

@@ -11,7 +11,7 @@
 
 class DiscreteNucleationInserter;
 
-template<>
+template <>
 InputParameters validParams<DiscreteNucleationInserter>();
 
 /**
@@ -37,7 +37,7 @@ public:
   typedef std::vector<NucleusLocation> NucleusList;
 
   const NucleusList & getNucleusList() const { return _global_nucleus_list; }
-  bool isMapUpdateRequired() const {return _changes_made > 0; }
+  bool isMapUpdateRequired() const { return _changes_made > 0; }
 
 protected:
   /// Nucleation rate density (should be a material property implementing nucleation theory)
@@ -59,4 +59,4 @@ protected:
   bool _insert_test;
 };
 
-#endif //DISCRETENUCLEATIONINSERTER_H
+#endif // DISCRETENUCLEATIONINSERTER_H

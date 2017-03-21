@@ -7,17 +7,18 @@
 
 #include "LevelSetForcingFunctionSUPG.h"
 
-template<>
-InputParameters validParams<LevelSetForcingFunctionSUPG>()
+template <>
+InputParameters
+validParams<LevelSetForcingFunctionSUPG>()
 {
   InputParameters params = validParams<UserForcingFunction>();
   params.addClassDescription("The SUPG stablization term for a forcing function.");
-  params += validParams<LevelSetVelocityInterface<> >();
+  params += validParams<LevelSetVelocityInterface<>>();
   return params;
 }
 
-LevelSetForcingFunctionSUPG::LevelSetForcingFunctionSUPG(const InputParameters & parameters) :
-    LevelSetVelocityInterface<UserForcingFunction>(parameters)
+LevelSetForcingFunctionSUPG::LevelSetForcingFunctionSUPG(const InputParameters & parameters)
+  : LevelSetVelocityInterface<UserForcingFunction>(parameters)
 {
 }
 

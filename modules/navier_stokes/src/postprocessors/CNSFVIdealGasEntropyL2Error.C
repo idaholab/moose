@@ -7,21 +7,21 @@
 
 #include "CNSFVIdealGasEntropyL2Error.h"
 
-template<>
-InputParameters validParams<CNSFVIdealGasEntropyL2Error>()
+template <>
+InputParameters
+validParams<CNSFVIdealGasEntropyL2Error>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
 
-  params.addClassDescription("A PostProcessor object to calculate the L2 error of ideal gas entropy production for the CNS equations.");
+  params.addClassDescription("A PostProcessor object to calculate the L2 error of ideal gas "
+                             "entropy production for the CNS equations.");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-  "Name for fluid properties user object");
+                                          "Name for fluid properties user object");
 
-  params.addRequiredParam<Real>("infinity_density",
-  "Infinity density");
+  params.addRequiredParam<Real>("infinity_density", "Infinity density");
 
-  params.addRequiredParam<Real>("infinity_pressure",
-  "Infinity pressure");
+  params.addRequiredParam<Real>("infinity_pressure", "Infinity pressure");
 
   return params;
 }
@@ -45,9 +45,7 @@ CNSFVIdealGasEntropyL2Error::getValue()
 Real
 CNSFVIdealGasEntropyL2Error::computeQpIntegral()
 {
-  Real diff = (_pres[_qp] / _inf_pres)
-            * std::pow(_inf_rho / _rho[_qp], _fp.gamma(0., 0.))
-            - 1.;
+  Real diff = (_pres[_qp] / _inf_pres) * std::pow(_inf_rho / _rho[_qp], _fp.gamma(0., 0.)) - 1.;
 
   return diff * diff;
 }

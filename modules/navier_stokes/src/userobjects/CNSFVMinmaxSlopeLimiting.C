@@ -7,11 +7,13 @@
 
 #include "CNSFVMinmaxSlopeLimiting.h"
 
-template<>
-InputParameters validParams<CNSFVMinmaxSlopeLimiting>()
+template <>
+InputParameters
+validParams<CNSFVMinmaxSlopeLimiting>()
 {
   InputParameters params = validParams<SlopeLimitingBase>();
-  params.addClassDescription("A user object that performs the min-max slope limiting to get the limited slopes of cell average variables.");
+  params.addClassDescription("A user object that performs the min-max slope limiting to get the "
+                             "limited slopes of cell average variables.");
   return params;
 }
 
@@ -23,7 +25,7 @@ CNSFVMinmaxSlopeLimiting::CNSFVMinmaxSlopeLimiting(const InputParameters & param
 std::vector<RealGradient>
 CNSFVMinmaxSlopeLimiting::limitElementSlope() const
 {
-  const Elem* elem = _current_elem;
+  const Elem * elem = _current_elem;
 
   /// current element id
   dof_id_type _elementID = elem->id();
@@ -55,7 +57,7 @@ CNSFVMinmaxSlopeLimiting::limitElementSlope() const
   /// initialize local cache for reconstructed element gradients
   std::vector<RealGradient> rugrad(nvars, RealGradient(0., 0., 0.));
   /// initialize local cache for element slope limitor values
-  std::vector <std::vector<Real> > limit(nside + 1, std::vector<Real>(nvars, 1.));
+  std::vector<std::vector<Real>> limit(nside + 1, std::vector<Real>(nvars, 1.));
 
   Real dij = 0.;
 
@@ -85,8 +87,10 @@ CNSFVMinmaxSlopeLimiting::limitElementSlope() const
 
     for (unsigned int iv = 0; iv < nvars; iv++)
     {
-      if (uelem[iv] < umin[iv]) umin[iv] = uelem[iv];
-      if (uelem[iv] > umax[iv]) umax[iv] = uelem[iv];
+      if (uelem[iv] < umin[iv])
+        umin[iv] = uelem[iv];
+      if (uelem[iv] > umax[iv])
+        umax[iv] = uelem[iv];
     }
   }
 

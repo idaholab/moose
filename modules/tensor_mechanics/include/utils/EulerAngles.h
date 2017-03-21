@@ -28,4 +28,4 @@ public:
   void random(MooseRandom & random);
 };
 
-#endif //EULERANGLES_H
+#endif // EULERANGLES_H

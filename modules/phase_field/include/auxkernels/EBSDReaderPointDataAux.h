@@ -10,10 +10,10 @@
 #include "AuxKernel.h"
 #include "EBSDReader.h"
 
-//Forward Declarations
+// Forward Declarations
 class EBSDReaderPointDataAux;
 
-template<>
+template <>
 InputParameters validParams<EBSDReaderPointDataAux>();
 
 /**
@@ -41,4 +41,4 @@ protected:
   Real _value;
 };
 
-#endif //EBSDREADERPOINTDATAAUX_H
+#endif // EBSDREADERPOINTDATAAUX_H

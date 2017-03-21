@@ -13,30 +13,31 @@
 // libMesh
 #include "libmesh/mesh_tools.h"
 
-template<>
-InputParameters validParams<LevelSetReinitializationMultiApp>()
+template <>
+InputParameters
+validParams<LevelSetReinitializationMultiApp>()
 {
   InputParameters params = validParams<MultiApp>();
-  params.addClassDescription("MultiApp capable of performing repeated complete solves for level set reinitialization.");
-  params.addParam<unsigned int>("interval", 1, "Time step interval when to perform reinitialization.");
+  params.addClassDescription(
+      "MultiApp capable of performing repeated complete solves for level set reinitialization.");
+  params.addParam<unsigned int>(
+      "interval", 1, "Time step interval when to perform reinitialization.");
 
-  params.suppressParameter<std::vector<Point> >("positions");
-  params.suppressParameter<std::vector<FileName> >("positions_file");
+  params.suppressParameter<std::vector<Point>>("positions");
+  params.suppressParameter<std::vector<FileName>>("positions_file");
   params.suppressParameter<bool>("output_in_position");
   params.suppressParameter<Real>("reset_time");
-  params.suppressParameter<std::vector<unsigned int> >("reset_apps");
+  params.suppressParameter<std::vector<unsigned int>>("reset_apps");
   params.suppressParameter<Real>("move_time");
-  params.suppressParameter<std::vector<unsigned int> >("move_apps");
-  params.suppressParameter<std::vector<Point> >("move_positions");
+  params.suppressParameter<std::vector<unsigned int>>("move_apps");
+  params.suppressParameter<std::vector<Point>>("move_positions");
 
   return params;
 }
 
-
-LevelSetReinitializationMultiApp::LevelSetReinitializationMultiApp(const InputParameters & parameters):
-    MultiApp(parameters),
-    _level_set_problem(NULL),
-    _interval(getParam<unsigned int>("interval"))
+LevelSetReinitializationMultiApp::LevelSetReinitializationMultiApp(
+    const InputParameters & parameters)
+  : MultiApp(parameters), _level_set_problem(NULL), _interval(getParam<unsigned int>("interval"))
 {
 }
 
@@ -63,7 +64,9 @@ LevelSetReinitializationMultiApp::initialSetup()
 }
 
 bool
-LevelSetReinitializationMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool /*auto_advance*/)
+LevelSetReinitializationMultiApp::solveStep(Real /*dt*/,
+                                            Real /*target_time*/,
+                                            bool /*auto_advance*/)
 {
   // Do nothing if not on interval
   if ((_fe_problem.timeStep() % _interval) != 0)

@@ -6,15 +6,15 @@
 #include "StateSimTester.h"
 #include "StateSimRunner.h"
 
-template<>
-InputParameters validParams<StochasticToolsApp>()
+template <>
+InputParameters
+validParams<StochasticToolsApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-StochasticToolsApp::StochasticToolsApp(InputParameters parameters) :
-    MooseApp(parameters)
+StochasticToolsApp::StochasticToolsApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   StochasticToolsApp::registerObjects(_factory);
@@ -23,12 +23,14 @@ StochasticToolsApp::StochasticToolsApp(InputParameters parameters) :
   StochasticToolsApp::associateSyntax(_syntax, _action_factory);
 }
 
-StochasticToolsApp::~StochasticToolsApp()
-{
-}
+StochasticToolsApp::~StochasticToolsApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void StochasticToolsApp__registerApps() { StochasticToolsApp::registerApps(); }
+extern "C" void
+StochasticToolsApp__registerApps()
+{
+  StochasticToolsApp::registerApps();
+}
 void
 StochasticToolsApp::registerApps()
 {
@@ -36,7 +38,11 @@ StochasticToolsApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void StochasticToolsApp__registerObjects(Factory & factory) { StochasticToolsApp::registerObjects(factory); }
+extern "C" void
+StochasticToolsApp__registerObjects(Factory & factory)
+{
+  StochasticToolsApp::registerObjects(factory);
+}
 void
 StochasticToolsApp::registerObjects(Factory & factory)
 {
@@ -45,7 +51,11 @@ StochasticToolsApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void StochasticToolsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { StochasticToolsApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+StochasticToolsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  StochasticToolsApp::associateSyntax(syntax, action_factory);
+}
 void
 StochasticToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {

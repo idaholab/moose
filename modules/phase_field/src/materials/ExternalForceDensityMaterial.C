@@ -7,41 +7,45 @@
 #include "ExternalForceDensityMaterial.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<ExternalForceDensityMaterial>()
+template <>
+InputParameters
+validParams<ExternalForceDensityMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription("Providing external applied force density to grains");
   params.addParam<FunctionName>("force_x", 0.0, "The forcing function in x direction.");
   params.addParam<FunctionName>("force_y", 0.0, "The forcing function in y direction.");
   params.addParam<FunctionName>("force_z", 0.0, "The forcing function in z direction.");
-  params.addRequiredCoupledVarWithAutoBuild("etas", "var_name_base", "op_num", "Array of coupled order parameters");
+  params.addRequiredCoupledVarWithAutoBuild(
+      "etas", "var_name_base", "op_num", "Array of coupled order parameters");
   params.addCoupledVar("c", "Concentration field");
   params.addParam<Real>("k", 1.0, "stiffness constant multiplier");
   return params;
 }
 
-ExternalForceDensityMaterial::ExternalForceDensityMaterial(const InputParameters & parameters) :
-   DerivativeMaterialInterface<Material>(parameters),
-   _force_x(getFunction("force_x")),
-   _force_y(getFunction("force_y")),
-   _force_z(getFunction("force_z")),
-   _c(coupledValue("c")),
-   _c_name(getVar("c", 0)->name()),
-   _k(getParam<Real>("k")),
-   _op_num(coupledComponents("etas")), //determine number of grains from the number of names passed in.
-   _vals(_op_num), //Size variable arrays
-   _vals_name(_op_num),
-   _dF(declareProperty<std::vector<RealGradient> >("force_density_ext")),
-   _dFdc(declarePropertyDerivative<std::vector<RealGradient> >("force_density_ext", _c_name)),
-   _dFdeta(_op_num)
+ExternalForceDensityMaterial::ExternalForceDensityMaterial(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
+    _force_x(getFunction("force_x")),
+    _force_y(getFunction("force_y")),
+    _force_z(getFunction("force_z")),
+    _c(coupledValue("c")),
+    _c_name(getVar("c", 0)->name()),
+    _k(getParam<Real>("k")),
+    _op_num(coupledComponents(
+        "etas")),   // determine number of grains from the number of names passed in.
+    _vals(_op_num), // Size variable arrays
+    _vals_name(_op_num),
+    _dF(declareProperty<std::vector<RealGradient>>("force_density_ext")),
+    _dFdc(declarePropertyDerivative<std::vector<RealGradient>>("force_density_ext", _c_name)),
+    _dFdeta(_op_num)
 {
-  //Loop through grains and load coupled variables into the arrays
+  // Loop through grains and load coupled variables into the arrays
   for (unsigned int i = 0; i < _op_num; ++i)
   {
     _vals[i] = &coupledValue("etas", i);
     _vals_name[i] = getVar("etas", i)->name();
-    _dFdeta[i] = &declarePropertyDerivative<std::vector<RealGradient> >("force_density_ext", _vals_name[i]);
+    _dFdeta[i] =
+        &declarePropertyDerivative<std::vector<RealGradient>>("force_density_ext", _vals_name[i]);
   }
 }
 

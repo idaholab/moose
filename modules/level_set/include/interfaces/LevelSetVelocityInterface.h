@@ -13,24 +13,23 @@
 #include "MooseVariableBase.h"
 #include "Kernel.h"
 
-template<typename T = Kernel>
+template <typename T = Kernel>
 class LevelSetVelocityInterface;
 
-template<>
-InputParameters validParams<LevelSetVelocityInterface<> >();
+template <>
+InputParameters validParams<LevelSetVelocityInterface<>>();
 
 /**
  * A helper class for defining the velocity as coupled variables
  * for the levelset equation.
  */
-template<class T>
+template <class T>
 class LevelSetVelocityInterface : public T
 {
 public:
   LevelSetVelocityInterface(const InputParameters & parameters);
 
 protected:
-
   /**
    * This method should be called when the velocity vector needs to be updated, this is not
    * done automatically to avoid populating a vector that is not used.
@@ -55,8 +54,7 @@ protected:
   RealVectorValue _velocity;
 };
 
-
-template<class T>
+template <class T>
 void
 LevelSetVelocityInterface<T>::computeQpVelocity()
 {
@@ -65,9 +63,9 @@ LevelSetVelocityInterface<T>::computeQpVelocity()
   _velocity(2) = _velocity_z[T::_qp];
 }
 
-template<class T>
-LevelSetVelocityInterface<T>::LevelSetVelocityInterface(const InputParameters & parameters) :
-    T(parameters),
+template <class T>
+LevelSetVelocityInterface<T>::LevelSetVelocityInterface(const InputParameters & parameters)
+  : T(parameters),
     _velocity_x(T::coupledValue("velocity_x")),
     _velocity_y(T::coupledValue("velocity_y")),
     _velocity_z(T::coupledValue("velocity_z")),

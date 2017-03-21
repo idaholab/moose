@@ -10,11 +10,11 @@
 #include "AuxKernel.h"
 #include "FeatureFloodCount.h"
 
-//Forward Declarations
+// Forward Declarations
 class FeatureFloodCountAux;
 class GrainTrackerInterface;
 
-template<>
+template <>
 InputParameters validParams<FeatureFloodCountAux>();
 
 /**
@@ -48,4 +48,4 @@ protected:
   Real _value;
 };
 
-#endif //FEATUREFLOODCOUNTAUX_H
+#endif // FEATUREFLOODCOUNTAUX_H

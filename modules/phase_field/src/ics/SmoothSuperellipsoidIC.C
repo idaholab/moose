@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "SmoothSuperellipsoidIC.h"
 
-template<>
-InputParameters validParams<SmoothSuperellipsoidIC>()
+template <>
+InputParameters
+validParams<SmoothSuperellipsoidIC>()
 {
   InputParameters params = validParams<SmoothSuperellipsoidBaseIC>();
   params.addClassDescription("Superellipsoid with a smooth interface");
@@ -21,8 +22,8 @@ InputParameters validParams<SmoothSuperellipsoidIC>()
   return params;
 }
 
-SmoothSuperellipsoidIC::SmoothSuperellipsoidIC(const InputParameters & parameters) :
-    SmoothSuperellipsoidBaseIC(parameters),
+SmoothSuperellipsoidIC::SmoothSuperellipsoidIC(const InputParameters & parameters)
+  : SmoothSuperellipsoidBaseIC(parameters),
     _x1(parameters.get<Real>("x1")),
     _y1(parameters.get<Real>("y1")),
     _z1(parameters.get<Real>("z1")),

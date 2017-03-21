@@ -6,17 +6,19 @@
 /****************************************************************/
 #include "ReconPhaseVarIC.h"
 
-template<>
-InputParameters validParams<ReconPhaseVarIC>()
+template <>
+InputParameters
+validParams<ReconPhaseVarIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-  params.addRequiredParam<UserObjectName>("ebsd_reader", "The EBSDReader object holding the EBSD data");
+  params.addRequiredParam<UserObjectName>("ebsd_reader",
+                                          "The EBSDReader object holding the EBSD data");
   params.addRequiredParam<unsigned int>("phase", "EBSD phase number this variable is to represent");
   return params;
 }
 
-ReconPhaseVarIC::ReconPhaseVarIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+ReconPhaseVarIC::ReconPhaseVarIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _mesh(_fe_problem.mesh()),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
     _phase(getParam<unsigned int>("phase")),
@@ -32,7 +34,8 @@ ReconPhaseVarIC::value(const Point & /*p*/)
     mooseError("_current_node is reporting NULL");
 
   // Make sure the _current_node is in the _node_to_phase_weight_map (return error if not in map)
-  std::map<dof_id_type, std::vector<Real> >::const_iterator it = _node_to_phase_weight_map.find(_current_node->id());
+  std::map<dof_id_type, std::vector<Real>>::const_iterator it =
+      _node_to_phase_weight_map.find(_current_node->id());
   if (it == _node_to_phase_weight_map.end())
     mooseError("The following node id is not in the node map: ", _current_node->id());
 

@@ -30,6 +30,7 @@ d2EffectiveSaturation(Real pc, Real shift, Real scale)
 {
   Real x = (pc - shift) / scale;
   Real ex = std::exp(x);
-  return (0.75 * ex * ex * std::pow(1.0 + ex, -2.5) - 0.5 * ex * std::pow(1.0 + ex, -1.5)) / scale / scale;
+  return (0.75 * ex * ex * std::pow(1.0 + ex, -2.5) - 0.5 * ex * std::pow(1.0 + ex, -1.5)) / scale /
+         scale;
 }
 }

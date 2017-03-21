@@ -10,13 +10,13 @@
 
 #include "Action.h"
 
-//Forward Declarations
+// Forward Declarations
 class HHPFCRFFSplitKernelAction;
 
-template<>
+template <>
 InputParameters validParams<HHPFCRFFSplitKernelAction>();
 
-class HHPFCRFFSplitKernelAction: public Action
+class HHPFCRFFSplitKernelAction : public Action
 {
 public:
   HHPFCRFFSplitKernelAction(const InputParameters & params);
@@ -29,4 +29,4 @@ protected:
   const VariableName _n_name;
 };
 
-#endif //HHPFCRFFSPLITKERNELACTION_H
+#endif // HHPFCRFFSPLITKERNELACTION_H

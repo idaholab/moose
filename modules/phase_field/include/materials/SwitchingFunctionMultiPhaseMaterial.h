@@ -13,7 +13,7 @@
 // Forward Declarations
 class SwitchingFunctionMultiPhaseMaterial;
 
-template<>
+template <>
 InputParameters validParams<SwitchingFunctionMultiPhaseMaterial>();
 
 /**
@@ -50,7 +50,7 @@ protected:
   /// Switching function and derivatives
   MaterialProperty<Real> & _prop_h;
   std::vector<MaterialProperty<Real> *> _prop_dh;
-  std::vector<std::vector<MaterialProperty<Real> *> > _prop_d2h;
+  std::vector<std::vector<MaterialProperty<Real> *>> _prop_d2h;
 };
 
-#endif //SWITCHINGFUNCTIONMULTIPHASEMATERIAL_H
+#endif // SWITCHINGFUNCTIONMULTIPHASEMATERIAL_H

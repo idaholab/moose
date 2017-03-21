@@ -13,13 +13,15 @@
 // Forward Declaration
 class CoupledSusceptibilityTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<CoupledSusceptibilityTimeDerivative>();
 
 /**
- * This calculates a modified coupled time derivative that multiply the time derivative of a coupled variable by a function of the variables
+ * This calculates a modified coupled time derivative that multiply the time derivative of a coupled
+ *variable by a function of the variables
  **/
-class CoupledSusceptibilityTimeDerivative : public DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative> >
+class CoupledSusceptibilityTimeDerivative
+    : public DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative>>
 {
 public:
   CoupledSusceptibilityTimeDerivative(const InputParameters & parameters);
@@ -40,4 +42,4 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dFdarg;
 };
 
-#endif //COUPLEDSUSCEPTIBILITYTIMEDERIVATIVE_H
+#endif // COUPLEDSUSCEPTIBILITYTIMEDERIVATIVE_H

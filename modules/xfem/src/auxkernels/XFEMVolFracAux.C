@@ -9,15 +9,15 @@
 
 #include "XFEM.h"
 
-template<>
-InputParameters validParams<XFEMVolFracAux>()
+template <>
+InputParameters
+validParams<XFEMVolFracAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   return params;
 }
 
-XFEMVolFracAux::XFEMVolFracAux(const InputParameters & parameters) :
-    AuxKernel(parameters)
+XFEMVolFracAux::XFEMVolFracAux(const InputParameters & parameters) : AuxKernel(parameters)
 {
   if (isNodal())
     mooseError("XFEMVolFracAux must be run on an element variable");

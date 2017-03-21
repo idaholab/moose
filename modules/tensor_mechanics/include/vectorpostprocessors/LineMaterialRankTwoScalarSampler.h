@@ -11,10 +11,10 @@
 #include "LineMaterialSamplerBase.h"
 #include "RankTwoTensor.h"
 
-//Forward Declarations
+// Forward Declarations
 class LineMaterialRankTwoScalarSampler;
 
-template<>
+template <>
 InputParameters validParams<LineMaterialRankTwoScalarSampler>();
 
 /**
@@ -22,8 +22,7 @@ InputParameters validParams<LineMaterialRankTwoScalarSampler>();
  * in all elements that are intersected by a user-defined line.  It provides
  * access to the full set of options for reducing the RankTwoTensor to a scalar
  */
-class LineMaterialRankTwoScalarSampler :
-  public LineMaterialSamplerBase<RankTwoTensor>
+class LineMaterialRankTwoScalarSampler : public LineMaterialSamplerBase<RankTwoTensor>
 {
 public:
   /**
@@ -51,4 +50,4 @@ protected:
   Point _direction;
 };
 
-#endif //LINEMATERIALRANKTWOSCALARSAMPLER_H
+#endif // LINEMATERIALRANKTWOSCALARSAMPLER_H

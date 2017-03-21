@@ -34,4 +34,4 @@ protected:
   const VariableValue & _disp_old_0;
 };
 
-#endif //COMPUTEAXISYMMETRICRZFINITESTRAIN_H
+#endif // COMPUTEAXISYMMETRICRZFINITESTRAIN_H

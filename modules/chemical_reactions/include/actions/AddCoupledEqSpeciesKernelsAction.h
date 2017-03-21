@@ -11,7 +11,7 @@
 
 class AddCoupledEqSpeciesKernelsAction;
 
-template<>
+template <>
 InputParameters validParams<AddCoupledEqSpeciesKernelsAction>();
 
 class AddCoupledEqSpeciesKernelsAction : public Action

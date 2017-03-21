@@ -12,7 +12,7 @@
 
 class PorousFlowAdvectiveFlux;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowAdvectiveFlux>();
 
 /**

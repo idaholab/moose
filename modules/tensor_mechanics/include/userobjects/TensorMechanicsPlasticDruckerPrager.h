@@ -12,7 +12,7 @@
 
 class TensorMechanicsPlasticDruckerPrager;
 
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticDruckerPrager>();
 
 /**
@@ -24,7 +24,7 @@ InputParameters validParams<TensorMechanicsPlasticDruckerPrager>();
  */
 class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
 {
- public:
+public:
   TensorMechanicsPlasticDruckerPrager(const InputParameters & parameters);
 
   virtual std::string modelName() const override;
@@ -39,7 +39,11 @@ class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
    * bbb (friction) and bbb_flow (dilation) are computed using the same function,
    * onlyB, and this parameter tells that function whether to compute bbb or bbb_flow
    */
-  enum FrictionDilation { friction = 0, dilation = 1 };
+  enum FrictionDilation
+  {
+    friction = 0,
+    dilation = 1
+  };
 
   /**
    * Calculate bbb or bbb_flow
@@ -56,7 +60,8 @@ class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
    * @param bbb either bbb or bbb_flow, depending on fd
    */
   void donlyB(Real intnl, int fd, Real & dbbb) const;
- protected:
+
+protected:
   /// Hardening model for cohesion
   const TensorMechanicsHardeningModel & _mc_cohesion;
 
@@ -68,15 +73,18 @@ class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
 
   virtual Real yieldFunction(const RankTwoTensor & stress, Real intnl) const override;
 
-  virtual RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const override;
+  virtual RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress,
+                                               Real intnl) const override;
 
   virtual Real dyieldFunction_dintnl(const RankTwoTensor & stress, Real intnl) const override;
 
   virtual RankTwoTensor flowPotential(const RankTwoTensor & stress, Real intnl) const override;
 
-  virtual RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress, Real intnl) const override;
+  virtual RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress,
+                                                Real intnl) const override;
 
-  virtual RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, Real intnl) const override;
+  virtual RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress,
+                                              Real intnl) const override;
 
   /**
    * The parameters aaa and bbb are chosen to closely match the Mohr-Coulomb
@@ -97,7 +105,7 @@ class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
   /// Function that's used in dyieldFunction_dstress and flowPotential
   virtual RankTwoTensor df_dsig(const RankTwoTensor & stress, Real bbb) const;
 
- private:
+private:
   Real _aaa;
   Real _bbb;
   Real _bbb_flow;
@@ -127,7 +135,8 @@ class TensorMechanicsPlasticDruckerPrager : public TensorMechanicsPlasticModel
    * aaa = k
    * bbb = -alpha/3
    * @param intnl The internal parameter
-   * @param fd If fd == frction then the friction angle is used to set bbb, otherwise the dilation angle is used
+   * @param fd If fd == frction then the friction angle is used to set bbb, otherwise the dilation
+   * angle is used
    * @param[out] bbb The Drucker-Prager bbb quantity
    */
   void initializeB(Real intnl, int fd, Real & bbb) const;

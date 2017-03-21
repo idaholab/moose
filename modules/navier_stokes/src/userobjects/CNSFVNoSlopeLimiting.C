@@ -7,8 +7,9 @@
 
 #include "CNSFVNoSlopeLimiting.h"
 
-template<>
-InputParameters validParams<CNSFVNoSlopeLimiting>()
+template <>
+InputParameters
+validParams<CNSFVNoSlopeLimiting>()
 {
   InputParameters params = validParams<SlopeLimitingBase>();
   params.addClassDescription("A user object that does no slope limiting in multi-dimensions.");

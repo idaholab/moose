@@ -9,10 +9,10 @@
 
 #include "SideAverageValue.h"
 
-//Forward Declarations
+// Forward Declarations
 class ThermalConductivity;
 
-template<>
+template <>
 InputParameters validParams<ThermalConductivity>();
 
 /**
@@ -40,4 +40,4 @@ private:
   bool & _step_zero;
 };
 
-#endif //THERMALCONDUCTIVITY_H
+#endif // THERMALCONDUCTIVITY_H

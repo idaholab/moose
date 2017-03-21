@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWHALFGAUSSIANSINK_H
 #define POROUSFLOWHALFGAUSSIANSINK_H
 
@@ -14,7 +13,7 @@
 // Forward Declarations
 class PorousFlowHalfGaussianSink;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowHalfGaussianSink>();
 
 /**
@@ -29,7 +28,6 @@ InputParameters validParams<PorousFlowHalfGaussianSink>();
 class PorousFlowHalfGaussianSink : public PorousFlowSinkPTDefiner
 {
 public:
-
   PorousFlowHalfGaussianSink(const InputParameters & parameters);
 
 protected:
@@ -47,4 +45,4 @@ protected:
   virtual Real dmultiplier_dvar(unsigned int pvar) const override;
 };
 
-#endif //POROUSFLOWHALFGAUSSIANSINK_H
+#endif // POROUSFLOWHALFGAUSSIANSINK_H

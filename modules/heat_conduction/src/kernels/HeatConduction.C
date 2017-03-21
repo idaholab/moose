@@ -8,27 +8,32 @@
 #include "HeatConduction.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<HeatConductionKernel>()
+template <>
+InputParameters
+validParams<HeatConductionKernel>()
 {
   InputParameters params = validParams<Diffusion>();
-  params.addClassDescription("Computes residual/Jacobian contribution for $(k \\nabla T, \\nabla \\psi)$ term.");
-  params.addParam<MaterialPropertyName>("diffusion_coefficient",
-                                        "thermal_conductivity",
-                                        "Property name of the diffusivity (Default: thermal_conductivity)");
-  params.addParam<MaterialPropertyName>("diffusion_coefficient_dT",
-                                        "thermal_conductivity_dT",
-                                        "Property name of the derivative of the diffusivity with respect "
-                                        "to the variable (Default: thermal_conductivity_dT)");
+  params.addClassDescription(
+      "Computes residual/Jacobian contribution for $(k \\nabla T, \\nabla \\psi)$ term.");
+  params.addParam<MaterialPropertyName>(
+      "diffusion_coefficient",
+      "thermal_conductivity",
+      "Property name of the diffusivity (Default: thermal_conductivity)");
+  params.addParam<MaterialPropertyName>(
+      "diffusion_coefficient_dT",
+      "thermal_conductivity_dT",
+      "Property name of the derivative of the diffusivity with respect "
+      "to the variable (Default: thermal_conductivity_dT)");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
-HeatConductionKernel::HeatConductionKernel(const InputParameters & parameters) :
-    Diffusion(parameters),
+HeatConductionKernel::HeatConductionKernel(const InputParameters & parameters)
+  : Diffusion(parameters),
     _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient")),
-    _diffusion_coefficient_dT(hasMaterialProperty<Real>("diffusion_coefficient_dT") ?
-                              &getMaterialProperty<Real>("diffusion_coefficient_dT") : NULL)
+    _diffusion_coefficient_dT(hasMaterialProperty<Real>("diffusion_coefficient_dT")
+                                  ? &getMaterialProperty<Real>("diffusion_coefficient_dT")
+                                  : NULL)
 {
 }
 

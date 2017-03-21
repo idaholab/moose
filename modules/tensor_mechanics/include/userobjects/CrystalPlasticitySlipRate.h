@@ -12,7 +12,7 @@
 
 class CrystalPlasticitySlipRate;
 
-template<>
+template <>
 InputParameters validParams<CrystalPlasticitySlipRate>();
 
 /**
@@ -22,14 +22,15 @@ InputParameters validParams<CrystalPlasticitySlipRate>();
  */
 class CrystalPlasticitySlipRate : public CrystalPlasticityUOBase
 {
- public:
+public:
   CrystalPlasticitySlipRate(const InputParameters & parameters);
 
-  virtual void calcFlowDirection(unsigned int qp, std::vector<RankTwoTensor> & flow_direction) const = 0;
+  virtual void calcFlowDirection(unsigned int qp,
+                                 std::vector<RankTwoTensor> & flow_direction) const = 0;
   virtual bool calcSlipRate(unsigned qp, Real dt, std::vector<Real> & val) const = 0;
   virtual bool calcSlipRateDerivative(unsigned qp, Real dt, std::vector<Real> & val) const = 0;
 
- protected:
+protected:
   virtual void getSlipSystems();
 
   virtual void readFileFlowRateParams();

@@ -18,27 +18,26 @@ class ReturnMappingModel;
 class CombinedCreepPlasticity : public ConstitutiveModel
 {
 public:
-  CombinedCreepPlasticity( const InputParameters & parameters);
+  CombinedCreepPlasticity(const InputParameters & parameters);
   virtual ~CombinedCreepPlasticity() {}
 
-
   /// Compute the stress (sigma += deltaSigma)
-  virtual void computeStress( const Elem & current_elem,
-                              unsigned qp,
-                              const SymmElasticityTensor & elasticityTensor,
-                              const SymmTensor & stress_old,
-                              SymmTensor & strain_increment,
-                              SymmTensor & stress_new );
+  virtual void computeStress(const Elem & current_elem,
+                             unsigned qp,
+                             const SymmElasticityTensor & elasticityTensor,
+                             const SymmTensor & stress_old,
+                             SymmTensor & strain_increment,
+                             SymmTensor & stress_new);
 
   virtual bool modifyStrainIncrement(const Elem & current_elem,
                                      unsigned qp,
                                      SymmTensor & strain_increment,
                                      SymmTensor & d_strain_dT);
-protected:
 
+protected:
   virtual void initialSetup();
 
-  std::map<SubdomainID, std::vector<MooseSharedPointer<ReturnMappingModel> > > _submodels;
+  std::map<SubdomainID, std::vector<MooseSharedPointer<ReturnMappingModel>>> _submodels;
 
   unsigned int _max_its;
   bool _output_iteration_info;
@@ -46,10 +45,9 @@ protected:
   Real _absolute_tolerance;
 
 private:
-
 };
 
-template<>
+template <>
 InputParameters validParams<CombinedCreepPlasticity>();
 
 #endif // MATERIALDRIVER_H

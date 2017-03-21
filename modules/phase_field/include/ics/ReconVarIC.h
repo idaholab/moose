@@ -14,7 +14,7 @@
 class ReconVarIC;
 class EBSDReader;
 
-template<>
+template <>
 InputParameters validParams<ReconVarIC>();
 
 /**
@@ -49,7 +49,7 @@ private:
   std::vector<Point> _centerpoints;
   std::vector<unsigned int> _assigned_op;
 
-  const std::map<dof_id_type, std::vector<Real> > & _node_to_grain_weight_map;
+  const std::map<dof_id_type, std::vector<Real>> & _node_to_grain_weight_map;
 };
 
-#endif //RECONVARIC_H
+#endif // RECONVARIC_H

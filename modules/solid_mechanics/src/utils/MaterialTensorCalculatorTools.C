@@ -23,17 +23,17 @@ component(const SymmTensor & symm_tensor, unsigned int index, RealVectorValue & 
   if (index < 3)
     direction(index) = 1.0;
 
-  else if (index == 3)//xy
+  else if (index == 3) // xy
   {
     direction(0) = std::sqrt(0.5);
     direction(1) = direction(0);
   }
-  else if (index == 4)//yz
+  else if (index == 4) // yz
   {
     direction(1) = std::sqrt(0.5);
     direction(2) = direction(1);
   }
-  else if (index == 5)//zx
+  else if (index == 5) // zx
   {
     direction(0) = std::sqrt(0.5);
     direction(2) = direction(0);
@@ -46,10 +46,9 @@ vonMisesStress(const SymmTensor & symm_stress)
 {
   Real value = std::pow(symm_stress.xx() - symm_stress.yy(), 2) +
                std::pow(symm_stress.yy() - symm_stress.zz(), 2) +
-               std::pow(symm_stress.zz() - symm_stress.xx(), 2) + 6 * (
-               std::pow(symm_stress.xy(), 2) +
-               std::pow(symm_stress.yz(), 2) +
-               std::pow(symm_stress.zx(), 2));
+               std::pow(symm_stress.zz() - symm_stress.xx(), 2) +
+               6 * (std::pow(symm_stress.xy(), 2) + std::pow(symm_stress.yz(), 2) +
+                    std::pow(symm_stress.zx(), 2));
   return std::sqrt(value / 2.0);
 }
 
@@ -69,10 +68,9 @@ Real
 volumetricStrain(const SymmTensor & symm_strain)
 {
   Real value = symm_strain.trace();
-  value +=  symm_strain.xx() * symm_strain.yy() +
-            symm_strain.yy() * symm_strain.zz() +
-            symm_strain.zz() * symm_strain.xx() +
-            symm_strain.xx() * symm_strain.yy() * symm_strain.zz();
+  value += symm_strain.xx() * symm_strain.yy() + symm_strain.yy() * symm_strain.zz() +
+           symm_strain.zz() * symm_strain.xx() +
+           symm_strain.xx() * symm_strain.yy() * symm_strain.zz();
   return value;
 }
 
@@ -85,12 +83,9 @@ firstInvariant(const SymmTensor & symm_tensor)
 Real
 secondInvariant(const SymmTensor & symm_tensor)
 {
-  Real value = symm_tensor.xx() * symm_tensor.yy() +
-               symm_tensor.yy() * symm_tensor.zz() +
-               symm_tensor.zz() * symm_tensor.xx() -
-               symm_tensor.xy() * symm_tensor.xy() -
-               symm_tensor.yz() * symm_tensor.yz() -
-               symm_tensor.zx() * symm_tensor.zx();
+  Real value = symm_tensor.xx() * symm_tensor.yy() + symm_tensor.yy() * symm_tensor.zz() +
+               symm_tensor.zz() * symm_tensor.xx() - symm_tensor.xy() * symm_tensor.xy() -
+               symm_tensor.yz() * symm_tensor.yz() - symm_tensor.zx() * symm_tensor.zx();
 
   return value;
 }
@@ -133,18 +128,21 @@ minPrinciple(const SymmTensor & symm_tensor, RealVectorValue & direction)
 Real
 calcPrincipleValues(const SymmTensor & symm_tensor, unsigned int index, RealVectorValue & direction)
 {
-  ColumnMajorMatrix eval(3,1);
-  ColumnMajorMatrix evec(3,3);
+  ColumnMajorMatrix eval(3, 1);
+  ColumnMajorMatrix evec(3, 3);
   symm_tensor.columnMajorMatrix().eigen(eval, evec);
   // Eigen computes low to high.  We want high first.
-  direction(0) = evec(0,index);
-  direction(1) = evec(1,index);
-  direction(2) = evec(2,index);
+  direction(0) = evec(0, index);
+  direction(1) = evec(1, index);
+  direction(2) = evec(2, index);
   return eval(index);
 }
 
 Real
-axialStress(const SymmTensor & symm_stress, const Point & point1, const Point & point2, RealVectorValue & direction)
+axialStress(const SymmTensor & symm_stress,
+            const Point & point1,
+            const Point & point2,
+            RealVectorValue & direction)
 {
   Point axis = point2 - point1;
   axis /= axis.norm();
@@ -161,7 +159,11 @@ axialStress(const SymmTensor & symm_stress, const Point & point1, const Point & 
 }
 
 Real
-hoopStress(const SymmTensor & symm_stress, const Point & point1, const Point & point2, const Point & curr_point, RealVectorValue & direction)
+hoopStress(const SymmTensor & symm_stress,
+           const Point & point1,
+           const Point & point2,
+           const Point & curr_point,
+           RealVectorValue & direction)
 {
   // Calculate the cross of the normal to the axis of rotation from the current
   // location and the axis of rotation
@@ -184,7 +186,11 @@ hoopStress(const SymmTensor & symm_stress, const Point & point1, const Point & p
 }
 
 Real
-radialStress(const SymmTensor & symm_stress, const Point & point1, const Point & point2, const Point & curr_point, RealVectorValue & direction)
+radialStress(const SymmTensor & symm_stress,
+             const Point & point1,
+             const Point & point2,
+             const Point & curr_point,
+             RealVectorValue & direction)
 {
   Point radial_norm;
   normalPositionVector(point1, point2, curr_point, radial_norm);
@@ -202,14 +208,17 @@ radialStress(const SymmTensor & symm_stress, const Point & point1, const Point &
 }
 
 void
-normalPositionVector(const Point & point1, const Point & point2, const Point & curr_point, Point & normalPosition)
+normalPositionVector(const Point & point1,
+                     const Point & point2,
+                     const Point & curr_point,
+                     Point & normalPosition)
 {
   // Find the nearest point on the axis of rotation (defined by point2 - point1)
   // to the current position, e.g. the normal to the axis of rotation at the
   // current position
   Point axis_rotation = point2 - point1;
   Point positionWRTpoint1 = point1 - curr_point;
-  Real projection =  (axis_rotation * positionWRTpoint1) / axis_rotation.norm_sq();
+  Real projection = (axis_rotation * positionWRTpoint1) / axis_rotation.norm_sq();
   Point normal = point1 - projection * axis_rotation;
 
   // Calculate the direction normal to the plane formed by the axis of rotation
@@ -236,5 +245,4 @@ triaxialityStress(const SymmTensor & symm_stress)
   Real val = hydrostatic(symm_stress) / vonMisesStress(symm_stress);
   return val;
 }
-
 }

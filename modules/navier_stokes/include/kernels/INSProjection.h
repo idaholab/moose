@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSProjection;
 
-template<>
+template <>
 InputParameters validParams<INSProjection>();
 
 /**
@@ -27,7 +27,7 @@ class INSProjection : public Kernel
 public:
   INSProjection(const InputParameters & parameters);
 
-  virtual ~INSProjection(){}
+  virtual ~INSProjection() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -54,6 +54,5 @@ protected:
   // Parameters
   unsigned _component;
 };
-
 
 #endif // INSPROJECTION_H

@@ -12,7 +12,7 @@
 
 class PorousFlowDiffusivityMillingtonQuirk;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowDiffusivityMillingtonQuirk>();
 
 /**
@@ -39,4 +39,4 @@ protected:
   const MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_qp_dvar;
 };
 
-#endif //POROUSFLOWDIFFUSIVITYMILLINGTONQUIRK_H
+#endif // POROUSFLOWDIFFUSIVITYMILLINGTONQUIRK_H

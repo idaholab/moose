@@ -13,7 +13,7 @@
 class NSThermalBC;
 class IdealGasFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<NSThermalBC>();
 
 class NSThermalBC : public NodalBC
@@ -37,4 +37,4 @@ protected:
   const IdealGasFluidProperties & _fp;
 };
 
-#endif //NSTHERMALBC_H
+#endif // NSTHERMALBC_H

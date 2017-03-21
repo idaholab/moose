@@ -15,7 +15,7 @@
 // Forward declarations
 class LevelSetAdvection;
 
-template<>
+template <>
 InputParameters validParams<LevelSetAdvection>();
 
 /**
@@ -25,17 +25,14 @@ InputParameters validParams<LevelSetAdvection>();
  * where \vec{v} is the interface velocity that is a set of
  * coupled variables.
  */
-class LevelSetAdvection :
-  public LevelSetVelocityInterface<Kernel>
+class LevelSetAdvection : public LevelSetVelocityInterface<Kernel>
 {
 public:
-
   LevelSetAdvection(const InputParameters & parameters);
 
 protected:
-
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 };
 
-#endif //LEVELSETADVECTION_H
+#endif // LEVELSETADVECTION_H

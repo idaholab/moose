@@ -10,21 +10,27 @@
 
 #include "libmesh/string_to_enum.h"
 
-template<>
-InputParameters validParams<DisplacementGradientsAction>()
+template <>
+InputParameters
+validParams<DisplacementGradientsAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addClassDescription("Set up variables, kernels, and materials for a the displacement gradients and their elastic free energy derivatives for non-split Cahn-Hilliard problems.");
-  params.addRequiredParam<std::vector<VariableName> >("displacements", "Vector of displacement variables");
-  params.addRequiredParam<std::vector<VariableName> >("displacement_gradients", "Vector of displacement gradient variables");
-  params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to the displacement gradient variables");
+  params.addClassDescription("Set up variables, kernels, and materials for a the displacement "
+                             "gradients and their elastic free energy derivatives for non-split "
+                             "Cahn-Hilliard problems.");
+  params.addRequiredParam<std::vector<VariableName>>("displacements",
+                                                     "Vector of displacement variables");
+  params.addRequiredParam<std::vector<VariableName>>("displacement_gradients",
+                                                     "Vector of displacement gradient variables");
+  params.addParam<Real>(
+      "scaling", 1.0, "Specifies a scaling factor to apply to the displacement gradient variables");
   return params;
 }
 
-DisplacementGradientsAction::DisplacementGradientsAction(const InputParameters & params) :
-    Action(params),
-    _displacements(getParam<std::vector<VariableName> >("displacements")),
-    _displacement_gradients(getParam<std::vector<VariableName> >("displacement_gradients"))
+DisplacementGradientsAction::DisplacementGradientsAction(const InputParameters & params)
+  : Action(params),
+    _displacements(getParam<std::vector<VariableName>>("displacements")),
+    _displacement_gradients(getParam<std::vector<VariableName>>("displacement_gradients"))
 {
 }
 
@@ -49,15 +55,16 @@ DisplacementGradientsAction::act()
   else if (_current_task == "add_material")
   {
     InputParameters params = _factory.getValidParams("StrainGradDispDerivatives");
-    params.set<std::vector<VariableName> >("displacement_gradients") = _displacement_gradients;
-    params.set<std::vector<SubdomainName> >("block") = {"0"}; // TODO: add parameter for this
+    params.set<std::vector<VariableName>>("displacement_gradients") = _displacement_gradients;
+    params.set<std::vector<SubdomainName>>("block") = {"0"}; // TODO: add parameter for this
     _problem->addMaterial("StrainGradDispDerivatives", "strain_grad_disp_derivatives", params);
   }
   else if (_current_task == "add_kernel")
   {
     unsigned int ndisp = _displacements.size();
     if (ndisp * ndisp != ngrad)
-      mooseError("Number of displacement gradient variables must be the square of the number of displacement variables.");
+      mooseError("Number of displacement gradient variables must be the square of the number of "
+                 "displacement variables.");
 
     // Loop through the displacements
     unsigned int i = 0;
@@ -66,9 +73,10 @@ DisplacementGradientsAction::act()
       {
         InputParameters params = _factory.getValidParams("GradientComponent");
         params.set<NonlinearVariableName>("variable") = _displacement_gradients[i];
-        params.set<std::vector<VariableName> >("v") = {_displacements[j]};
+        params.set<std::vector<VariableName>>("v") = {_displacements[j]};
         params.set<unsigned int>("component") = k;
-        _problem->addKernel("GradientComponent", _displacement_gradients[i] + "_grad_kernel", params);
+        _problem->addKernel(
+            "GradientComponent", _displacement_gradients[i] + "_grad_kernel", params);
         ++i;
       }
   }

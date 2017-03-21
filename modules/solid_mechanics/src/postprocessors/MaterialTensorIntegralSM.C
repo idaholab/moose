@@ -10,8 +10,9 @@
 #include "SymmTensor.h"
 #include "MaterialTensorCalculator.h"
 
-template<>
-InputParameters validParams<MaterialTensorIntegralSM>()
+template <>
+InputParameters
+validParams<MaterialTensorIntegralSM>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
   params += validParams<MaterialTensorCalculator>();
@@ -20,10 +21,10 @@ InputParameters validParams<MaterialTensorIntegralSM>()
   return params;
 }
 
-MaterialTensorIntegralSM::MaterialTensorIntegralSM(const InputParameters & parameters) :
-    ElementIntegralPostprocessor(parameters),
+MaterialTensorIntegralSM::MaterialTensorIntegralSM(const InputParameters & parameters)
+  : ElementIntegralPostprocessor(parameters),
     _material_tensor_calculator(parameters),
-    _tensor( getMaterialProperty<SymmTensor>( getParam<std::string>("tensor") ) )
+    _tensor(getMaterialProperty<SymmTensor>(getParam<std::string>("tensor")))
 {
 }
 
@@ -31,7 +32,5 @@ Real
 MaterialTensorIntegralSM::computeQpIntegral()
 {
   RealVectorValue direction;
-  return _material_tensor_calculator.getTensorQuantity(_tensor[_qp],
-                                                       _q_point[_qp],
-                                                       direction);
+  return _material_tensor_calculator.getTensorQuantity(_tensor[_qp], _q_point[_qp], direction);
 }

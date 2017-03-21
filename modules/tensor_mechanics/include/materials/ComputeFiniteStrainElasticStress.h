@@ -26,4 +26,4 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress_old;
 };
 
-#endif //COMPUTEFINITESTRAINELASTICSTRESS_H
+#endif // COMPUTEFINITESTRAINELASTICSTRESS_H

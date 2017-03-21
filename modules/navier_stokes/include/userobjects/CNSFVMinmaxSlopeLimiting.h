@@ -10,19 +10,19 @@
 
 #include "SlopeLimitingBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class CNSFVMinmaxSlopeLimiting;
 
-template<>
+template <>
 InputParameters validParams<CNSFVMinmaxSlopeLimiting>();
 
 /**
- * A user object that performs the min-max slope limiting to get the limited slopes of cell average variables
+ * A user object that performs the min-max slope limiting to get the limited slopes of cell average
+ * variables
  */
 class CNSFVMinmaxSlopeLimiting : public SlopeLimitingBase
 {
 public:
-
   CNSFVMinmaxSlopeLimiting(const InputParameters & parameters);
 
   /// compute the limited slope of the cell

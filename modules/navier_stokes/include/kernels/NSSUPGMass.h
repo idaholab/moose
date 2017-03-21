@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSSUPGMass;
 
-template<>
+template <>
 InputParameters validParams<NSSUPGMass>();
 
 /**
@@ -36,4 +36,4 @@ private:
   Real computeJacobianHelper(unsigned var);
 };
 
-#endif //NSSUPGMASS_H
+#endif // NSSUPGMASS_H

@@ -6,15 +6,17 @@
 /****************************************************************/
 #include "CahnHilliardFluxBC.h"
 
-template<>
-InputParameters validParams<CahnHilliardFluxBC>()
+template <>
+InputParameters
+validParams<CahnHilliardFluxBC>()
 {
   InputParameters params = CahnHilliardFluxBCBase<Real>::validParams();
-  params.addClassDescription("Cahn-Hilliard fixed flux boundary condition using a scalar (isotropic) mobility");
+  params.addClassDescription(
+      "Cahn-Hilliard fixed flux boundary condition using a scalar (isotropic) mobility");
   return params;
 }
 
-CahnHilliardFluxBC::CahnHilliardFluxBC(const InputParameters & parameters) :
-    CahnHilliardFluxBCBase<Real>(parameters)
+CahnHilliardFluxBC::CahnHilliardFluxBC(const InputParameters & parameters)
+  : CahnHilliardFluxBCBase<Real>(parameters)
 {
 }

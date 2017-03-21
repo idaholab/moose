@@ -20,7 +20,7 @@
 
 class StressDivergencePFFracTensors;
 
-template<>
+template <>
 InputParameters validParams<StressDivergencePFFracTensors>();
 
 class StressDivergencePFFracTensors : public DerivativeMaterialInterface<StressDivergenceTensors>
@@ -36,4 +36,4 @@ protected:
   const MaterialProperty<RankTwoTensor> & _d_stress_dc;
 };
 
-#endif //STRESSDIVERGENCEPFFRACTENSORS_H
+#endif // STRESSDIVERGENCEPFFRACTENSORS_H

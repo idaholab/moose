@@ -6,23 +6,21 @@
 /****************************************************************/
 #include "HeatConductionBC.h"
 
-template<>
-InputParameters validParams<HeatConductionBC>()
+template <>
+InputParameters
+validParams<HeatConductionBC>()
 {
   InputParameters params = validParams<FluxBC>();
 
   return params;
 }
 
-HeatConductionBC::HeatConductionBC(const InputParameters & parameters) :
-    FluxBC(parameters),
-    _k(getMaterialProperty<Real>("thermal_conductivity"))
+HeatConductionBC::HeatConductionBC(const InputParameters & parameters)
+  : FluxBC(parameters), _k(getMaterialProperty<Real>("thermal_conductivity"))
 {
 }
 
-HeatConductionBC::~HeatConductionBC()
-{
-}
+HeatConductionBC::~HeatConductionBC() {}
 
 RealGradient
 HeatConductionBC::computeQpFluxResidual()
@@ -35,5 +33,3 @@ HeatConductionBC::computeQpFluxJacobian()
 {
   return -_k[_qp] * _grad_phi[_j][_qp];
 }
-
-

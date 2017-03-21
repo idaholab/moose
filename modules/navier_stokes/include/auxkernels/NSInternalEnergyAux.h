@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSInternalEnergyAux;
 
-template<>
+template <>
 InputParameters validParams<NSInternalEnergyAux>();
 
 /**

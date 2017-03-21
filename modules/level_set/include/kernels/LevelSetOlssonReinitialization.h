@@ -14,21 +14,18 @@
 // Forward declarations
 class LevelSetOlssonReinitialization;
 
-template<>
+template <>
 InputParameters validParams<LevelSetOlssonReinitialization>();
 
 /**
  * Implements the re-initialization equation proposed by Olsson et. al. (2007).
  */
-class LevelSetOlssonReinitialization :
-  public Kernel
+class LevelSetOlssonReinitialization : public Kernel
 {
 public:
-
   LevelSetOlssonReinitialization(const InputParameters & parameters);
 
 protected:
-
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 

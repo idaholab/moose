@@ -12,7 +12,7 @@
 // Forward Declarations
 class BarrierFunctionMaterial;
 
-template<>
+template <>
 InputParameters validParams<BarrierFunctionMaterial>();
 
 /**
@@ -37,4 +37,4 @@ protected:
   bool _well_only;
 };
 
-#endif //BARRIERFUNCTIONMATERIAL_H
+#endif // BARRIERFUNCTIONMATERIAL_H

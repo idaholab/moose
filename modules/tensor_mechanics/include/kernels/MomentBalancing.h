@@ -9,12 +9,12 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class MomentBalancing;
 class RankFourTensor;
 class RankTwoTensor;
 
-template<>
+template <>
 InputParameters validParams<MomentBalancing>();
 
 /**
@@ -62,4 +62,4 @@ protected:
   std::vector<unsigned int> _disp_var;
 };
 
-#endif //MOMENTBALANCING_H
+#endif // MOMENTBALANCING_H

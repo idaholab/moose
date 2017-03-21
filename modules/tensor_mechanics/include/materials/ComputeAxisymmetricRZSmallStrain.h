@@ -23,4 +23,4 @@ protected:
   virtual Real computeStrainZZ() override;
 };
 
-#endif //COMPUTEAXISYMMETRICRZSMALLSTRAIN_H
+#endif // COMPUTEAXISYMMETRICRZSMALLSTRAIN_H

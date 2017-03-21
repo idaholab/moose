@@ -11,7 +11,7 @@
 
 class AddNavierStokesKernelsAction;
 
-template<>
+template <>
 InputParameters validParams<AddNavierStokesKernelsAction>();
 
 /**

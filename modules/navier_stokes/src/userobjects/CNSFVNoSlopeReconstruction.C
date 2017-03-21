@@ -7,11 +7,13 @@
 
 #include "CNSFVNoSlopeReconstruction.h"
 
-template<>
-InputParameters validParams<CNSFVNoSlopeReconstruction>()
+template <>
+InputParameters
+validParams<CNSFVNoSlopeReconstruction>()
 {
   InputParameters params = validParams<SlopeReconstructionBase>();
-  params.addClassDescription("A user object that does no slope reconstruction in multi-dimensions.");
+  params.addClassDescription(
+      "A user object that does no slope reconstruction in multi-dimensions.");
   return params;
 }
 

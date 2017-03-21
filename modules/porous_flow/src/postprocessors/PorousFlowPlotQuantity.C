@@ -5,28 +5,26 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "PorousFlowPlotQuantity.h"
 #include "PorousFlowSumQuantity.h"
 
-template<>
-InputParameters validParams<PorousFlowPlotQuantity>()
+template <>
+InputParameters
+validParams<PorousFlowPlotQuantity>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<UserObjectName>("uo", "PorousFlowSumQuantity user object name that holds the required information");
+  params.addRequiredParam<UserObjectName>(
+      "uo", "PorousFlowSumQuantity user object name that holds the required information");
 
   return params;
 }
 
-PorousFlowPlotQuantity::PorousFlowPlotQuantity(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
-    _total_mass(getUserObject<PorousFlowSumQuantity>("uo"))
+PorousFlowPlotQuantity::PorousFlowPlotQuantity(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters), _total_mass(getUserObject<PorousFlowSumQuantity>("uo"))
 {
 }
 
-PorousFlowPlotQuantity::~PorousFlowPlotQuantity()
-{
-}
+PorousFlowPlotQuantity::~PorousFlowPlotQuantity() {}
 
 void
 PorousFlowPlotQuantity::initialize()
@@ -43,4 +41,3 @@ PorousFlowPlotQuantity::getValue()
 {
   return _total_mass.getValue();
 }
-

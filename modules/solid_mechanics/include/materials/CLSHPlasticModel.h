@@ -18,10 +18,11 @@ public:
   CLSHPlasticModel(const InputParameters & parameters);
 
 protected:
-
   virtual void initStatefulProperties(unsigned n_points);
 
-  virtual void computeStressInitialize(unsigned qp, Real effectiveTrialStress, const SymmElasticityTensor & elasticityTensor);
+  virtual void computeStressInitialize(unsigned qp,
+                                       Real effectiveTrialStress,
+                                       const SymmElasticityTensor & elasticityTensor);
   virtual Real computeResidual(unsigned qp, Real effectiveTrialStress, Real scalar);
   virtual Real computeDerivative(unsigned qp, Real effectiveTrialStress, Real scalar);
   virtual void iterationFinalize(unsigned qp, Real scalar);
@@ -41,10 +42,9 @@ protected:
   MaterialProperty<Real> & _hardening_variable_old;
   MaterialProperty<SymmTensor> & _plastic_strain;
   MaterialProperty<SymmTensor> & _plastic_strain_old;
-
 };
 
-template<>
+template <>
 InputParameters validParams<CLSHPlasticModel>();
 
-#endif //CLSHPLASTICMODEL_H
+#endif // CLSHPLASTICMODEL_H

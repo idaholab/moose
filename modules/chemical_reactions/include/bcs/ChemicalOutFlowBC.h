@@ -9,10 +9,10 @@
 
 #include "IntegratedBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class ChemicalOutFlowBC;
 
-template<>
+template <>
 InputParameters validParams<ChemicalOutFlowBC>();
 
 /**
@@ -35,4 +35,4 @@ private:
   const MaterialProperty<Real> & _porosity;
 };
 
-#endif //CHEMICALOUTFLOWBC_H
+#endif // CHEMICALOUTFLOWBC_H

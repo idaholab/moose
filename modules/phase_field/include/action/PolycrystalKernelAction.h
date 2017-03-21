@@ -13,7 +13,7 @@
  * Action that sets up ACGrGrPoly, ACInterface, TimeDerivative, and ACGBPoly
  * kernels.
  */
-class PolycrystalKernelAction: public Action
+class PolycrystalKernelAction : public Action
 {
 public:
   PolycrystalKernelAction(const InputParameters & params);
@@ -31,7 +31,7 @@ protected:
   const bool _implicit;
 };
 
-template<>
+template <>
 InputParameters validParams<PolycrystalKernelAction>();
 
-#endif //POLYCRYSTALKERNELACTION_H
+#endif // POLYCRYSTALKERNELACTION_H

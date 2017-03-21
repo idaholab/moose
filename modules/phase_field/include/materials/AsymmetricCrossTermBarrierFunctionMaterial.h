@@ -12,7 +12,7 @@
 // Forward Declarations
 class AsymmetricCrossTermBarrierFunctionMaterial;
 
-template<>
+template <>
 InputParameters validParams<AsymmetricCrossTermBarrierFunctionMaterial>();
 
 /**
@@ -35,4 +35,4 @@ protected:
   ///@}
 };
 
-#endif //ASYMMETRICCROSSTERMBARRIERFUNCTIONMATERIAL_H
+#endif // ASYMMETRICCROSSTERMBARRIERFUNCTIONMATERIAL_H

@@ -8,27 +8,41 @@
 #include "BimodalSuperellipsoidsIC.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<BimodalSuperellipsoidsIC>()
+template <>
+InputParameters
+validParams<BimodalSuperellipsoidsIC>()
 {
   InputParameters params = validParams<SpecifiedSmoothSuperellipsoidIC>();
-  params.addClassDescription("Bimodal size distribution of large particles (specified in input file) and small particles (placed randomly outside the larger particles)");
+  params.addClassDescription("Bimodal size distribution of large particles (specified in input "
+                             "file) and small particles (placed randomly outside the larger "
+                             "particles)");
   params.addRequiredParam<unsigned int>("npart", "The number of random (small) particles to place");
-  params.addRequiredParam<Real>("small_spac", "minimum spacing between small particles, measured from closest edge to closest edge");
-  params.addRequiredParam<Real>("large_spac", "minimum spacing between large and small particles, measured from closest edge to closest edge");
-  params.addRequiredParam<Real>("small_a", "Mean semiaxis a value for the randomly placed (small) superellipsoids");
-  params.addRequiredParam<Real>("small_b", "Mean semiaxis b value for the randomly placed (small) superellipsoids");
-  params.addRequiredParam<Real>("small_c", "Mean semiaxis c value for the randomly placed (small) superellipsoids");
-  params.addRequiredParam<Real>("small_n", "Exponent n for the randomly placed (small) superellipsoids");
-  params.addParam<Real>("size_variation", 0.0, "Plus or minus fraction of random variation in the semiaxes for uniform, standard deviation for normal");
-  MooseEnum rand_options("uniform normal none","none");
-  params.addParam<MooseEnum>("size_variation_type", rand_options, "Type of distribution that random semiaxes will follow");
-  params.addParam<unsigned int>("numtries", 1000, "The number of tries to place the random particles");
+  params.addRequiredParam<Real>(
+      "small_spac",
+      "minimum spacing between small particles, measured from closest edge to closest edge");
+  params.addRequiredParam<Real>("large_spac", "minimum spacing between large and small particles, "
+                                              "measured from closest edge to closest edge");
+  params.addRequiredParam<Real>(
+      "small_a", "Mean semiaxis a value for the randomly placed (small) superellipsoids");
+  params.addRequiredParam<Real>(
+      "small_b", "Mean semiaxis b value for the randomly placed (small) superellipsoids");
+  params.addRequiredParam<Real>(
+      "small_c", "Mean semiaxis c value for the randomly placed (small) superellipsoids");
+  params.addRequiredParam<Real>("small_n",
+                                "Exponent n for the randomly placed (small) superellipsoids");
+  params.addParam<Real>("size_variation", 0.0, "Plus or minus fraction of random variation in the "
+                                               "semiaxes for uniform, standard deviation for "
+                                               "normal");
+  MooseEnum rand_options("uniform normal none", "none");
+  params.addParam<MooseEnum>(
+      "size_variation_type", rand_options, "Type of distribution that random semiaxes will follow");
+  params.addParam<unsigned int>(
+      "numtries", 1000, "The number of tries to place the random particles");
   return params;
 }
 
-BimodalSuperellipsoidsIC::BimodalSuperellipsoidsIC(const InputParameters & parameters) :
-    SpecifiedSmoothSuperellipsoidIC(parameters),
+BimodalSuperellipsoidsIC::BimodalSuperellipsoidsIC(const InputParameters & parameters)
+  : SpecifiedSmoothSuperellipsoidIC(parameters),
     _npart(getParam<unsigned int>("npart")),
     _small_spac(getParam<Real>("small_spac")),
     _large_spac(getParam<Real>("large_spac")),
@@ -54,7 +68,8 @@ BimodalSuperellipsoidsIC::initialSetup()
   _range = _top_right - _bottom_left;
 
   if (_size_variation_type == 2 && _size_variation > 0.0)
-    mooseError("If size_variation > 0.0, you must pass in a size_variation_type in BimodalSuperellipsoidsIC");
+    mooseError("If size_variation > 0.0, you must pass in a size_variation_type in "
+               "BimodalSuperellipsoidsIC");
 
   SmoothSuperellipsoidBaseIC::initialSetup();
 }
@@ -83,9 +98,9 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidSemiaxes()
       case 0: // Random distrubtion, maintaining constant shape
       {
         Real rand_num = _random.rand(_tid);
-        _as[i] = _small_a*(1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
-        _bs[i] = _small_b*(1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
-        _cs[i] = _small_c*(1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
+        _as[i] = _small_a * (1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
+        _bs[i] = _small_b * (1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
+        _cs[i] = _small_c * (1.0 + (1.0 - 2.0 * rand_num) * _size_variation);
         break;
       }
       case 1: // Normal distribution of semiaxis size, maintaining constant shape
@@ -146,9 +161,9 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
       num_tries++;
 
       RealTensorValue ran;
-      ran(0,0) = _random.rand(_tid);
-      ran(1,1) = _random.rand(_tid);
-      ran(2,2) = _random.rand(_tid);
+      ran(0, 0) = _random.rand(_tid);
+      ran(1, 1) = _random.rand(_tid);
+      ran(2, 2) = _random.rand(_tid);
 
       _centers[i] = _bottom_left + ran * _range;
 
@@ -164,20 +179,21 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
         const Real dist = dist_vec.norm();
 
         // First calculate rmn1 = r1^(-n), replacing sin, cos functions with distances
-        Real rmn1 = (std::pow(std::abs(dist_vec(0) / dist / _as[j]), _ns[j])
-                   + std::pow(std::abs(dist_vec(1) / dist / _bs[j]), _ns[j])
-                   + std::pow(std::abs(dist_vec(2) / dist / _cs[j]), _ns[j]));
+        Real rmn1 = (std::pow(std::abs(dist_vec(0) / dist / _as[j]), _ns[j]) +
+                     std::pow(std::abs(dist_vec(1) / dist / _bs[j]), _ns[j]) +
+                     std::pow(std::abs(dist_vec(2) / dist / _cs[j]), _ns[j]));
         // Then calculate r1 from rmn1
-        const Real r1 = std::pow(rmn1, (-1.0/_ns[j]));
+        const Real r1 = std::pow(rmn1, (-1.0 / _ns[j]));
 
         // Now calculate the distance r2 from the center of the randomly placed
         // superellipsoid to its outside edge in the same manner
-        Real rmn2 = (std::pow(std::abs(dist_vec(0) / dist / _as[i]), _ns[i])
-                   + std::pow(std::abs(dist_vec(1) / dist / _bs[i]), _ns[i])
-                   + std::pow(std::abs(dist_vec(2) / dist / _cs[i]), _ns[i]));
-        const Real r2 = std::pow(rmn2, (-1.0/_ns[i]));
+        Real rmn2 = (std::pow(std::abs(dist_vec(0) / dist / _as[i]), _ns[i]) +
+                     std::pow(std::abs(dist_vec(1) / dist / _bs[i]), _ns[i]) +
+                     std::pow(std::abs(dist_vec(2) / dist / _cs[i]), _ns[i]));
+        const Real r2 = std::pow(rmn2, (-1.0 / _ns[i]));
 
-        // Calculate the distance between the edges (first in the list are the large then come the small)
+        // Calculate the distance between the edges (first in the list are the large then come the
+        // small)
         if ((dist - r1 - r2) < (j < _x_positions.size() ? _large_spac : _small_spac))
           goto fail;
       }
@@ -185,13 +201,15 @@ BimodalSuperellipsoidsIC::computeSuperellipsoidCenters()
       // accept the position of the new center
       goto accept;
 
-      // retry a new position until tries are exhausted
-      fail: continue;
+    // retry a new position until tries are exhausted
+    fail:
+      continue;
     }
 
     if (num_tries == _max_num_tries)
       mooseError("Too many tries in MultiSmoothCircleIC");
 
-    accept: continue;
+  accept:
+    continue;
   }
 }

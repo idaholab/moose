@@ -13,17 +13,18 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ComputeRSphericalFiniteStrain>()
+template <>
+InputParameters
+validParams<ComputeRSphericalFiniteStrain>()
 {
   InputParameters params = validParams<ComputeFiniteStrain>();
-  params.addClassDescription("Compute a strain increment and rotation increment for finite strains in 1D spherical symmetry problems.");
+  params.addClassDescription("Compute a strain increment and rotation increment for finite strains "
+                             "in 1D spherical symmetry problems.");
   return params;
 }
 
-ComputeRSphericalFiniteStrain::ComputeRSphericalFiniteStrain(const InputParameters & parameters) :
-    ComputeFiniteStrain(parameters),
-    _disp_old_0(coupledValueOld("displacements", 0))
+ComputeRSphericalFiniteStrain::ComputeRSphericalFiniteStrain(const InputParameters & parameters)
+  : ComputeFiniteStrain(parameters), _disp_old_0(coupledValueOld("displacements", 0))
 {
 }
 
@@ -51,19 +52,19 @@ ComputeRSphericalFiniteStrain::computeProperties()
     // Step through calculating the current and old deformation gradients
     // Only diagonal components are nonzero because this is a 1D material
     // Note: x_disp is the radial displacement
-    A(0,0) = (*_grad_disp[0])[_qp](0);
-    Fbar(0,0) = (*_grad_disp_old[0])[_qp](0);
+    A(0, 0) = (*_grad_disp[0])[_qp](0);
+    Fbar(0, 0) = (*_grad_disp_old[0])[_qp](0);
 
     // The polar and azimuthal strains are functions of radial displacement
     if (!MooseUtils::relativeFuzzyEqual(_q_point[_qp](0), 0.0))
     {
-      A(1,1) = (*_disp[0])[_qp] / _q_point[_qp](0);
-      Fbar(1,1) = _disp_old_0[_qp] / _q_point[_qp](0);
+      A(1, 1) = (*_disp[0])[_qp] / _q_point[_qp](0);
+      Fbar(1, 1) = _disp_old_0[_qp] / _q_point[_qp](0);
     }
 
     // The polar and azimuthal strains are equalivalent in this 1D problem
-    A(2,2) = A(1,1);
-    Fbar(2,2) = Fbar(1,1);
+    A(2, 2) = A(1, 1);
+    Fbar(2, 2) = Fbar(1, 1);
 
     // Gauss point deformation gradient
     _deformation_gradient[_qp] = A;

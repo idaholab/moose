@@ -21,7 +21,7 @@ public:
   virtual void execute();
   virtual void finalize();
 
-  Real nodalArea( const Node * node ) const;
+  Real nodalArea(const Node * node) const;
 
 protected:
   virtual Real computeQpIntegral();
@@ -37,7 +37,7 @@ protected:
   NumericVector<Number> & _aux_solution;
 };
 
-template<>
+template <>
 InputParameters validParams<NodalArea>();
 
 #endif

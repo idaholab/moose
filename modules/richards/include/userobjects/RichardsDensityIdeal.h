@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSDENSITYIDEAL_H
 #define RICHARDSDENSITYIDEAL_H
 
@@ -13,8 +12,7 @@
 
 class RichardsDensityIdeal;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsDensityIdeal>();
 
 /**
@@ -42,7 +40,6 @@ public:
   Real d2density(Real /*p*/) const;
 
 protected:
-
   /// density = _slope*(p - _p0)
   Real _slope;
 

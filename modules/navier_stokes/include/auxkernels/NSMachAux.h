@@ -14,7 +14,7 @@
 class NSMachAux;
 class IdealGasFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<NSMachAux>();
 
 /**

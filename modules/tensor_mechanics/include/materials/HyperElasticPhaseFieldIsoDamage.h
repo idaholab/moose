@@ -11,18 +11,20 @@
 
 class HyperElasticPhaseFieldIsoDamage;
 
-template<>
+template <>
 InputParameters validParams<HyperElasticPhaseFieldIsoDamage>();
 
 /**
  * This class solves visco plastic model based on isotropically damaged stress
  * The damage parameter is obtained from phase field fracture kernel
- * Computes undamaged elastic strain energy and associated tensors used in phase field fracture kernel
+ * Computes undamaged elastic strain energy and associated tensors used in phase field fracture
+ * kernel
  */
 class HyperElasticPhaseFieldIsoDamage : public FiniteStrainHyperElasticViscoPlastic
 {
 public:
-  HyperElasticPhaseFieldIsoDamage (const InputParameters & parameters);
+  HyperElasticPhaseFieldIsoDamage(const InputParameters & parameters);
+
 protected:
   /// This function computes PK2 stress
   virtual void computePK2StressAndDerivative();

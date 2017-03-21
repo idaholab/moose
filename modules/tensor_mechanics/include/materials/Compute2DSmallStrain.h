@@ -25,4 +25,4 @@ protected:
   virtual Real computeStrainZZ() = 0;
 };
 
-#endif //COMPUTE2DSMALLSTRAIN_H
+#endif // COMPUTE2DSMALLSTRAIN_H

@@ -11,10 +11,10 @@
 #include "IntegratedBC.h"
 #include "BoundaryFluxBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class CNSFVBC;
 
-template<>
+template <>
 InputParameters validParams<CNSFVBC>();
 
 /**
@@ -42,12 +42,10 @@ InputParameters validParams<CNSFVBC>();
 class CNSFVBC : public IntegratedBC
 {
 public:
-
   CNSFVBC(const InputParameters & parameters);
   virtual ~CNSFVBC() {}
 
 protected:
-
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
@@ -59,14 +57,14 @@ protected:
   /// "2" denotes the "ghost" state
 
   /// piecewise constant variable values in host cells
-  const VariableValue &  _rhoc1;
+  const VariableValue & _rhoc1;
   const VariableValue & _rhouc1;
   const VariableValue & _rhovc1;
   const VariableValue & _rhowc1;
   const VariableValue & _rhoec1;
 
   /// extrapolated variable values at side center
-  const MaterialProperty<Real> &  _rho1;
+  const MaterialProperty<Real> & _rho1;
   const MaterialProperty<Real> & _rhou1;
   const MaterialProperty<Real> & _rhov1;
   const MaterialProperty<Real> & _rhow1;
@@ -75,7 +73,7 @@ protected:
   /// fluid properties object
   const BoundaryFluxBase & _flux;
 
-  unsigned int  _rho_var;
+  unsigned int _rho_var;
   unsigned int _rhou_var;
   unsigned int _rhov_var;
   unsigned int _rhow_var;

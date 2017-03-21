@@ -10,10 +10,10 @@
 #include "LangevinNoise.h"
 #include "ConservedNoiseBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class ConservedLangevinNoise;
 
-template<>
+template <>
 InputParameters validParams<LangevinNoise>();
 
 class ConservedLangevinNoise : public LangevinNoise
@@ -22,11 +22,11 @@ public:
   ConservedLangevinNoise(const InputParameters & parameters);
 
 protected:
-  virtual void residualSetup() {};
+  virtual void residualSetup(){};
   virtual Real computeQpResidual();
 
 private:
   const ConservedNoiseInterface & _noise;
 };
 
-#endif //CONSERVEDLANGEVINNOISE_H
+#endif // CONSERVEDLANGEVINNOISE_H

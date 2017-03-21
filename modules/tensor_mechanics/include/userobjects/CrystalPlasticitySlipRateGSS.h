@@ -12,7 +12,7 @@
 
 class CrystalPlasticitySlipRateGSS;
 
-template<>
+template <>
 InputParameters validParams<CrystalPlasticitySlipRateGSS>();
 
 /**
@@ -20,25 +20,26 @@ InputParameters validParams<CrystalPlasticitySlipRateGSS>();
  */
 class CrystalPlasticitySlipRateGSS : public CrystalPlasticitySlipRate
 {
- public:
+public:
   CrystalPlasticitySlipRateGSS(const InputParameters & parameters);
 
   virtual bool calcSlipRate(unsigned int qp, Real dt, std::vector<Real> & val) const;
   virtual bool calcSlipRateDerivative(unsigned int qp, Real /*dt*/, std::vector<Real> & val) const;
-  virtual void calcFlowDirection(unsigned int qp, std::vector<RankTwoTensor> & flow_direction) const;
+  virtual void calcFlowDirection(unsigned int qp,
+                                 std::vector<RankTwoTensor> & flow_direction) const;
 
- protected:
+protected:
   virtual void readFileFlowRateParams();
   virtual void getFlowRateParams();
 
-  const MaterialProperty<std::vector<Real> > & _mat_prop_state_var;
+  const MaterialProperty<std::vector<Real>> & _mat_prop_state_var;
 
   const MaterialProperty<RankTwoTensor> & _pk2;
 
   DenseVector<Real> _a0;
   DenseVector<Real> _xm;
 
-  const MaterialProperty<std::vector<RankTwoTensor> > & _flow_direction;
+  const MaterialProperty<std::vector<RankTwoTensor>> & _flow_direction;
 };
 
 #endif // CRYSTALPLASTICITYSLIPRATEGSS_H

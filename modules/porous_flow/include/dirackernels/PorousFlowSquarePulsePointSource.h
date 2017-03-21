@@ -12,7 +12,7 @@
 
 class PorousFlowSquarePulsePointSource;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowSquarePulsePointSource>();
 
 /**
@@ -42,4 +42,4 @@ protected:
   const Real _end_time;
 };
 
-#endif //POROUSFLOWSQUAREPULSEPOINTSOURCE_H
+#endif // POROUSFLOWSQUAREPULSEPOINTSOURCE_H

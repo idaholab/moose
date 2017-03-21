@@ -11,10 +11,10 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 
-//Forward Declarations
+// Forward Declarations
 class InclusionProperties;
 
-template<>
+template <>
 InputParameters validParams<InclusionProperties>();
 
 /**
@@ -50,7 +50,6 @@ private:
   /// Kolosov's first constant
   Real _kappa;
 
-
   /**
    * Interior stress and strain values are constant so they only need to be
    * calculated once
@@ -65,4 +64,4 @@ private:
   MaterialProperty<Real> & _elastic_energy;
 };
 
-#endif //INCLUSIONPROPERTIES_H
+#endif // INCLUSIONPROPERTIES_H

@@ -10,10 +10,10 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowConstantThermalExpansionCoefficient;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowConstantThermalExpansionCoefficient>();
 
 /**
@@ -54,4 +54,4 @@ protected:
   const MaterialProperty<Real> & _coeff_old;
 };
 
-#endif //POROUSFLOWCONSTANTTHERMALEXPANSIONCOEFFICIENT_H
+#endif // POROUSFLOWCONSTANTTHERMALEXPANSIONCOEFFICIENT_H

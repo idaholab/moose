@@ -47,12 +47,12 @@ validParams<TensorMechanicsActionBase>()
   params.addParam<bool>("incremental", "Use incremental or total strain");
 
   params.addParam<std::string>("base_name", "Material property base name");
-  params.addParam<bool>("volumetric_locking_correction", false,
-                        "Flag to correct volumetric locking");
-  params.addParam<bool>("use_finite_deform_jacobian", false,
-                        "Jacobian for corrotational finite strain");
-  params.addParam<bool>("use_displaced_mesh", false,
-                        "Whether to use displaced mesh in the kernels");
+  params.addParam<bool>(
+      "volumetric_locking_correction", false, "Flag to correct volumetric locking");
+  params.addParam<bool>(
+      "use_finite_deform_jacobian", false, "Jacobian for corrotational finite strain");
+  params.addParam<bool>(
+      "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   params.addParam<bool>("add_variables", false, "Add the displacement variables");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
@@ -61,20 +61,22 @@ validParams<TensorMechanicsActionBase>()
   params.addParam<std::vector<AuxVariableName>>("save_in", "The displacement residuals");
   params.addParam<std::vector<AuxVariableName>>("diag_save_in",
                                                 "The displacement diagonal preconditioner terms");
-  params.addParam<MooseEnum>("decomposition_method", ComputeFiniteStrain::decompositionType(),
+  params.addParam<MooseEnum>("decomposition_method",
+                             ComputeFiniteStrain::decompositionType(),
                              "Methods to calculate the finite strain and rotation increments");
   params.addParamNamesToGroup("save_in diag_save_in", "Advanced");
 
   // Planar Formulation
   MooseEnum planarFormulationType("NONE PLANE_STRAIN GENERALIZED_PLANE_STRAIN",
                                   "NONE"); // PLANE_STRESS
-  params.addParam<MooseEnum>("planar_formulation", planarFormulationType,
-                             "Out-of-plane stress/strain formulation");
+  params.addParam<MooseEnum>(
+      "planar_formulation", planarFormulationType, "Out-of-plane stress/strain formulation");
   params.addParam<NonlinearVariableName>("scalar_out_of_plane_strain",
                                          "Scalar variable for the out-of-plane strain (in y "
                                          "direction for 1D Axisymmetric or in z direction for 2D "
                                          "Cartesian problems)");
-  params.addParam<FunctionName>("out_of_plane_pressure", "0",
+  params.addParam<FunctionName>("out_of_plane_pressure",
+                                "0",
                                 "Function used to prescribe pressure in the out-of-plane direction "
                                 "(y for 1D Axisymmetric or z for 2D Cartesian problems)");
   params.addParam<Real>("pressure_factor", 1.0, "Scale factor applied to prescribed pressure");

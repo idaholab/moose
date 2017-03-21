@@ -10,7 +10,7 @@
 #include "KernelValue.h"
 #include "RankTwoTensor.h"
 
-//Forward Declarations
+// Forward Declarations
 class PFFracBulkRate;
 
 template <>
@@ -56,4 +56,4 @@ protected:
   Real _visco;
 };
 
-#endif //PFFRACBULKRATE_H
+#endif // PFFRACBULKRATE_H

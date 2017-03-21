@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSMomentumNoBCBCBase;
 
-template<>
+template <>
 InputParameters validParams<INSMomentumNoBCBCBase>();
 
 /**
@@ -30,7 +30,7 @@ class INSMomentumNoBCBCBase : public IntegratedBC
 public:
   INSMomentumNoBCBCBase(const InputParameters & parameters);
 
-  virtual ~INSMomentumNoBCBCBase(){}
+  virtual ~INSMomentumNoBCBCBase() {}
 
 protected:
   // Coupled variables
@@ -57,6 +57,5 @@ protected:
   unsigned _component;
   bool _integrate_p_by_parts;
 };
-
 
 #endif

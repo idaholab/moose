@@ -11,7 +11,7 @@
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
-class ContactPressureAuxAction: public Action
+class ContactPressureAuxAction : public Action
 {
 public:
   ContactPressureAuxAction(const InputParameters & params);
@@ -24,7 +24,7 @@ private:
   const MooseEnum _order;
 };
 
-template<>
+template <>
 InputParameters validParams<ContactPressureAuxAction>();
 
 #endif

@@ -12,7 +12,6 @@
 class ConvectiveFluxFunction : public IntegratedBC
 {
 public:
-
   ConvectiveFluxFunction(const InputParameters & parameters);
   virtual ~ConvectiveFluxFunction() {}
 
@@ -25,7 +24,7 @@ protected:
   Function * const _coef_func;
 };
 
-template<>
+template <>
 InputParameters validParams<ConvectiveFluxFunction>();
 
-#endif //CONVECTIVEFLUXFUNCTION_H
+#endif // CONVECTIVEFLUXFUNCTION_H

@@ -9,14 +9,13 @@
 
 #include "Material.h"
 
-
 /**
  * Compute density, which may changed based on a deforming mesh.
  */
 class Density : public Material
 {
 public:
-  Density( const InputParameters & params);
+  Density(const InputParameters & params);
 
   virtual void initStatefulProperties(unsigned n_points);
 
@@ -36,7 +35,7 @@ protected:
   MaterialProperty<Real> & _density_old;
 };
 
-template<>
+template <>
 InputParameters validParams<Density>();
 
 #endif // DENSITY_H

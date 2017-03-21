@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef Q2PSATURATIONFLUX
 #define Q2PSATURATIONFLUX
 
@@ -17,7 +16,7 @@
 // Forward Declarations
 class Q2PSaturationFlux;
 
-template<>
+template <>
 InputParameters validParams<Q2PSaturationFlux>();
 
 /**
@@ -46,12 +45,9 @@ InputParameters validParams<Q2PSaturationFlux>();
 class Q2PSaturationFlux : public Kernel
 {
 public:
-
   Q2PSaturationFlux(const InputParameters & parameters);
 
-
 protected:
-
   /**
    * Note that this is not the complete residual for the quadpoint
    * In computeResidual we sum over the quadpoints and then add
@@ -130,7 +126,6 @@ protected:
    * These are used in the jacobian calculations
    */
   std::vector<Real> _dmobility_ds;
-
 };
 
-#endif //Q2PSATURATIONFLUX
+#endif // Q2PSATURATIONFLUX

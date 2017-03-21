@@ -37,15 +37,14 @@ private:
   T & _data;
 };
 
-
 template <class T>
-NSTemperatureDerivs<T>::NSTemperatureDerivs(T & x) :
-    _data(x)
+NSTemperatureDerivs<T>::NSTemperatureDerivs(T & x) : _data(x)
 {
 }
 
 template <class T>
-Real NSTemperatureDerivs<T>::get_grad(unsigned i)
+Real
+NSTemperatureDerivs<T>::get_grad(unsigned i)
 {
   // Convenience vars
   const Real U0 = _data._rho[_data._qp];
@@ -55,7 +54,7 @@ Real NSTemperatureDerivs<T>::get_grad(unsigned i)
   const Real U4 = _data._rho_E[_data._qp];
 
   const Real rho2 = U0 * U0;
-  const Real mom2 = U1*U1 + U2*U2 + U3*U3;
+  const Real mom2 = U1 * U1 + U2 * U2 + U3 * U3;
   const Real tmp = -1.0 / rho2 / _data._fp.cv();
 
   switch (i)
@@ -82,7 +81,8 @@ Real NSTemperatureDerivs<T>::get_grad(unsigned i)
 }
 
 template <class T>
-Real NSTemperatureDerivs<T>::get_hess(unsigned i, unsigned j)
+Real
+NSTemperatureDerivs<T>::get_hess(unsigned i, unsigned j)
 {
   // Convenience vars
   const Real U0 = _data._rho[_data._qp];
@@ -94,7 +94,7 @@ Real NSTemperatureDerivs<T>::get_hess(unsigned i, unsigned j)
   const Real rho2 = U0 * U0;
   const Real rho3 = rho2 * U0;
   const Real rho4 = rho3 * U0;
-  const Real mom2 = U1*U1 + U2*U2 + U3*U3;
+  const Real mom2 = U1 * U1 + U2 * U2 + U3 * U3;
 
   const Real cv = _data._fp.cv();
   const Real tmp = -1.0 / rho2 / cv;

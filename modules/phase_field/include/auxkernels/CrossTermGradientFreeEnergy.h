@@ -9,10 +9,10 @@
 
 #include "TotalFreeEnergyBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class CrossTermGradientFreeEnergy;
 
-template<>
+template <>
 InputParameters validParams<CrossTermGradientFreeEnergy>();
 
 /**
@@ -26,7 +26,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  std::vector<std::vector<const MaterialProperty<Real> *> > _kappas;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _kappas;
 };
 
-#endif //CROSSTERMGRADIENTFREEENERGY_H
+#endif // CROSSTERMGRADIENTFREEENERGY_H

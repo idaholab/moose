@@ -13,7 +13,7 @@
 
 class PorousFlowFullySaturatedDarcyBase;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowFullySaturatedDarcyBase>();
 
 /**

@@ -9,8 +9,9 @@
 #include "NSEnthalpyAux.h"
 #include "NS.h"
 
-template<>
-InputParameters validParams<NSEnthalpyAux>()
+template <>
+InputParameters
+validParams<NSEnthalpyAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
@@ -23,8 +24,8 @@ InputParameters validParams<NSEnthalpyAux>()
   return params;
 }
 
-NSEnthalpyAux::NSEnthalpyAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+NSEnthalpyAux::NSEnthalpyAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _rho(coupledValue(NS::density)),
     _rhoE(coupledValue(NS::total_energy)),
     _pressure(coupledValue(NS::pressure))

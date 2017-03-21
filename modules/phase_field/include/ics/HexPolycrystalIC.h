@@ -13,7 +13,7 @@
 // Forward Declarations
 class HexPolycrystalIC;
 
-template<>
+template <>
 InputParameters validParams<HexPolycrystalIC>();
 
 /**
@@ -33,4 +33,4 @@ private:
   MooseRandom _random;
 };
 
-#endif //HEXPOLYCRYSTALIC_H
+#endif // HEXPOLYCRYSTALIC_H

@@ -12,7 +12,8 @@
 #include "RankTwoTensor.h"
 
 /**
- * ComputeEigenstrain computes an Eigenstrain that is a function of a single variable defined by a base tensor and a scalar function defined in a Derivative Material.
+ * ComputeEigenstrain computes an Eigenstrain that is a function of a single variable defined by a
+ * base tensor and a scalar function defined in a Derivative Material.
  */
 class ComputeEigenstrain : public ComputeEigenstrainBase
 {
@@ -27,4 +28,4 @@ protected:
   RankTwoTensor _eigen_base_tensor;
 };
 
-#endif //COMPUTEEIGENSTRAIN_H
+#endif // COMPUTEEIGENSTRAIN_H

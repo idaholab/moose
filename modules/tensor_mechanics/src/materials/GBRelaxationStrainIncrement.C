@@ -7,22 +7,25 @@
 #include "GBRelaxationStrainIncrement.h"
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<GBRelaxationStrainIncrement>()
+template <>
+InputParameters
+validParams<GBRelaxationStrainIncrement>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription("Compute strain increment based on lattice relaxation at GB");
   params.addParam<MaterialPropertyName>("prefactor_name", "Name of perfactor property");
   params.addParam<MaterialPropertyName>("gb_normal_name", "Name of GB normal property");
-  params.addParam<MaterialPropertyName>("property_name", "Name of GB relaxation strain increment property");
+  params.addParam<MaterialPropertyName>("property_name",
+                                        "Name of GB relaxation strain increment property");
   return params;
 }
 
-GBRelaxationStrainIncrement::GBRelaxationStrainIncrement(const InputParameters & parameters) :
-  DerivativeMaterialInterface<Material>(parameters),
-  _prefactor(getMaterialProperty<Real>("prefactor_name")),
-  _gb_normal_tensor(getMaterialProperty<RankTwoTensor>("gb_normal_name")),
-  _strain_increment(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("property_name")))
+GBRelaxationStrainIncrement::GBRelaxationStrainIncrement(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
+    _prefactor(getMaterialProperty<Real>("prefactor_name")),
+    _gb_normal_tensor(getMaterialProperty<RankTwoTensor>("gb_normal_name")),
+    _strain_increment(
+        declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("property_name")))
 {
 }
 

@@ -26,7 +26,7 @@ private:
   MooseSharedPointer<XFEM> _xfem;
 };
 
-template<>
+template <>
 InputParameters validParams<XFEMMarkerAux>();
 
-#endif //XFEMMARKERAUX_H
+#endif // XFEMMARKERAUX_H

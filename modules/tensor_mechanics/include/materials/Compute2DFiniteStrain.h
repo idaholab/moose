@@ -33,4 +33,4 @@ protected:
   virtual Real computeGradDispZZOld() = 0;
 };
 
-#endif //COMPUTE2DFINITESTRAIN_H
+#endif // COMPUTE2DFINITESTRAIN_H

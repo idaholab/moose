@@ -10,10 +10,10 @@
 #include "PlasticHeatEnergy.h"
 #include "PorousFlowDictator.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowPlasticHeatEnergy;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPlasticHeatEnergy>();
 
 /**
@@ -49,4 +49,4 @@ protected:
   const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
 };
 
-#endif //POROUSFLOWPLASTICHEATENERGY_H
+#endif // POROUSFLOWPLASTICHEATENERGY_H

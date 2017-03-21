@@ -19,8 +19,7 @@ class MooseObject;
  * Material properties get fully described using this structure, including their dependent
  * variables and derivation state.
  */
-class FunctionMaterialPropertyDescriptor :
-  public DerivativeMaterialPropertyNameInterface
+class FunctionMaterialPropertyDescriptor : public DerivativeMaterialPropertyNameInterface
 {
 public:
   /*
@@ -44,7 +43,8 @@ public:
   FunctionMaterialPropertyDescriptor(const FunctionMaterialPropertyDescriptor &);
 
   /// construct a vector of FunctionMaterialPropertyDescriptors from a vector of strings
-  static std::vector<FunctionMaterialPropertyDescriptor> parseVector(const std::vector<std::string> &, MooseObject *);
+  static std::vector<FunctionMaterialPropertyDescriptor>
+  parseVector(const std::vector<std::string> &, MooseObject *);
 
   /// get the fparser symbol name
   const std::string & getSymbolName() const { return _fparser_name; };
@@ -53,10 +53,7 @@ public:
   void setSymbolName(const std::string & n) { _fparser_name = n; };
 
   /// get the property name
-  const std::string getPropertyName() const
-  {
-    return propertyName(_base_name, _derivative_vars);
-  };
+  const std::string getPropertyName() const { return propertyName(_base_name, _derivative_vars); };
 
   /// get the property reference
   const MaterialProperty<Real> & value() const;

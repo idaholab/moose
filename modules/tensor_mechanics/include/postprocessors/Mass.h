@@ -9,17 +9,17 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class Mass;
 
-template<>
+template <>
 InputParameters validParams<Mass>();
 
 /**
  * This postprocessor computes the mass by integrating the density over the volume.
  */
 
-class Mass: public ElementIntegralVariablePostprocessor
+class Mass : public ElementIntegralVariablePostprocessor
 {
 public:
   Mass(const InputParameters & parameters);
@@ -29,4 +29,4 @@ protected:
   const MaterialProperty<Real> & _density;
 };
 
-#endif //MASS_H
+#endif // MASS_H

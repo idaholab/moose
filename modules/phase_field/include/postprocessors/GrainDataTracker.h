@@ -33,10 +33,8 @@ protected:
   std::vector<T> _grain_data;
 };
 
-
 template <typename T>
-GrainDataTracker<T>::GrainDataTracker(const InputParameters & parameters) :
-    GrainTracker(parameters)
+GrainDataTracker<T>::GrainDataTracker(const InputParameters & parameters) : GrainTracker(parameters)
 {
 }
 

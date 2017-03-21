@@ -14,7 +14,7 @@
 // Forward Declarations
 class PorousFlowHeatConduction;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowHeatConduction>();
 
 /**
@@ -49,4 +49,4 @@ protected:
   const MaterialProperty<std::vector<Real>> & _dgrad_t_dgradvar;
 };
 
-#endif //POROUSFLOWHEATCONDUCTION_H
+#endif // POROUSFLOWHEATCONDUCTION_H

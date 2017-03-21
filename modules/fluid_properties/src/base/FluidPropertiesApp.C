@@ -29,15 +29,15 @@
 
 #include "AddFluidPropertiesAction.h"
 
-template<>
-InputParameters validParams<FluidPropertiesApp>()
+template <>
+InputParameters
+validParams<FluidPropertiesApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-FluidPropertiesApp::FluidPropertiesApp(InputParameters parameters) :
-    MooseApp(parameters)
+FluidPropertiesApp::FluidPropertiesApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   FluidPropertiesApp::registerObjects(_factory);
@@ -46,9 +46,7 @@ FluidPropertiesApp::FluidPropertiesApp(InputParameters parameters) :
   FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
 }
 
-FluidPropertiesApp::~FluidPropertiesApp()
-{
-}
+FluidPropertiesApp::~FluidPropertiesApp() {}
 
 // External entry point for dynamic application loading
 extern "C" void
@@ -101,7 +99,8 @@ FluidPropertiesApp__associateSyntax(Syntax & syntax, ActionFactory & action_fact
 void
 FluidPropertiesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("AddFluidPropertiesAction", "Modules/FluidProperties/*", "add_fluid_properties");
+  syntax.registerActionSyntax(
+      "AddFluidPropertiesAction", "Modules/FluidProperties/*", "add_fluid_properties");
 
   registerMooseObjectTask("add_fluid_properties", FluidProperties, false);
 

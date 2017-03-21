@@ -10,11 +10,11 @@
 
 #include "NodalPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class TorqueReaction;
 class AuxiliarySystem;
 
-template<>
+template <>
 InputParameters validParams<TorqueReaction>();
 
 /*
@@ -55,4 +55,4 @@ protected:
   Real _sum;
 };
 
-#endif //TORQUEREACTION_H
+#endif // TORQUEREACTION_H

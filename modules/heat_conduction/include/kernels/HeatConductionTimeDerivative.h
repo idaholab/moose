@@ -14,7 +14,7 @@
 // Forward Declarations
 class HeatConductionTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<HeatConductionTimeDerivative>();
 
 /**
@@ -42,4 +42,4 @@ protected:
   const MaterialProperty<Real> & _density;
 };
 
-#endif //HEATCONDUCTIONTIMEDERIVATIVE_H
+#endif // HEATCONDUCTIONTIMEDERIVATIVE_H

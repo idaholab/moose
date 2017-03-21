@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSPressurePoisson;
 
-template<>
+template <>
 InputParameters validParams<INSPressurePoisson>();
 
 /**
@@ -27,7 +27,7 @@ class INSPressurePoisson : public Kernel
 public:
   INSPressurePoisson(const InputParameters & parameters);
 
-  virtual ~INSPressurePoisson(){}
+  virtual ~INSPressurePoisson() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -47,6 +47,5 @@ protected:
   // Material properties
   Real _rho;
 };
-
 
 #endif // INSPRESSUREPOISSON_H

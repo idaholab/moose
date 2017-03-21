@@ -7,8 +7,9 @@
 
 #include "CNSFVMachAux.h"
 
-template<>
-InputParameters validParams<CNSFVMachAux>()
+template <>
+InputParameters
+validParams<CNSFVMachAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addClassDescription("An aux kernel for calculating Mach number.");
@@ -16,8 +17,7 @@ InputParameters validParams<CNSFVMachAux>()
 }
 
 CNSFVMachAux::CNSFVMachAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
-    _mach(getMaterialProperty<Real>("mach_number"))
+  : AuxKernel(parameters), _mach(getMaterialProperty<Real>("mach_number"))
 {
 }
 

@@ -11,7 +11,7 @@
 
 class ComputeCappedWeakPlaneCosseratStress;
 
-template<>
+template <>
 InputParameters validParams<ComputeCappedWeakPlaneCosseratStress>();
 
 /**
@@ -23,8 +23,7 @@ InputParameters validParams<ComputeCappedWeakPlaneCosseratStress>();
  * E(i,i,j,k) = 0 except if k=j
  * E(0,0,i,j) = E(1,1,i,j)
  */
-class ComputeCappedWeakPlaneCosseratStress :
-  public ComputeCappedWeakPlaneStress
+class ComputeCappedWeakPlaneCosseratStress : public ComputeCappedWeakPlaneStress
 {
 public:
   ComputeCappedWeakPlaneCosseratStress(const InputParameters & parameters);
@@ -49,13 +48,27 @@ protected:
 
   virtual void initialiseReturnProcess() override;
 
-  virtual void consistentTangentOperator(const RankTwoTensor & stress_trial, Real p_trial, Real q_trial, const RankTwoTensor & stress, Real p, Real q, Real gaE, const f_and_derivs & smoothed_q, RankFourTensor & cto) const override;
+  virtual void consistentTangentOperator(const RankTwoTensor & stress_trial,
+                                         Real p_trial,
+                                         Real q_trial,
+                                         const RankTwoTensor & stress,
+                                         Real p,
+                                         Real q,
+                                         Real gaE,
+                                         const f_and_derivs & smoothed_q,
+                                         RankFourTensor & cto) const override;
 
-  virtual void setStressAfterReturn(const RankTwoTensor & stress_trial, Real p_ok, Real q_ok, Real gaE, const std::vector<Real> & intnl, const f_and_derivs & smoothed_q, RankTwoTensor & stress) const override;
+  virtual void setStressAfterReturn(const RankTwoTensor & stress_trial,
+                                    Real p_ok,
+                                    Real q_ok,
+                                    Real gaE,
+                                    const std::vector<Real> & intnl,
+                                    const f_and_derivs & smoothed_q,
+                                    RankTwoTensor & stress) const override;
 
   virtual RankTwoTensor dqdstress(const RankTwoTensor & stress) const override;
 
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
 
-#endif //COMPUTECAPPEDWEAKPLANECOSSERATSTRESS_H
+#endif // COMPUTECAPPEDWEAKPLANECOSSERATSTRESS_H

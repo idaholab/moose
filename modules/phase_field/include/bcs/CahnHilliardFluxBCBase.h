@@ -16,8 +16,9 @@
  * class must be templated on the mobility type, which can be either a scalar (Real)
  * or a tensor (RealValueTensor).
  */
-template<typename T>
-class CahnHilliardFluxBCBase : public DerivativeMaterialInterface<JvarMapIntegratedBCInterface<IntegratedBC> >
+template <typename T>
+class CahnHilliardFluxBCBase
+    : public DerivativeMaterialInterface<JvarMapIntegratedBCInterface<IntegratedBC>>
 {
 public:
   CahnHilliardFluxBCBase(const InputParameters & parameters);
@@ -38,9 +39,9 @@ protected:
   std::vector<const MaterialProperty<T> *> _dMdarg;
 };
 
-template<typename T>
-CahnHilliardFluxBCBase<T>::CahnHilliardFluxBCBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapIntegratedBCInterface<IntegratedBC> >(parameters),
+template <typename T>
+CahnHilliardFluxBCBase<T>::CahnHilliardFluxBCBase(const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapIntegratedBCInterface<IntegratedBC>>(parameters),
     _flux(getParam<RealGradient>("flux")),
     _M(getMaterialProperty<T>("mob_name")),
     _dMdw(getMaterialPropertyDerivative<T>("mob_name", _var.name()))
@@ -56,7 +57,7 @@ CahnHilliardFluxBCBase<T>::CahnHilliardFluxBCBase(const InputParameters & parame
     _dMdarg[i] = &getMaterialPropertyDerivative<T>("mob_name", _coupled_moose_vars[i]->name());
 }
 
-template<typename T>
+template <typename T>
 InputParameters
 CahnHilliardFluxBCBase<T>::validParams()
 {
@@ -68,35 +69,36 @@ CahnHilliardFluxBCBase<T>::validParams()
   return params;
 }
 
-template<typename T>
+template <typename T>
 void
 CahnHilliardFluxBCBase<T>::initialSetup()
 {
   validateNonlinearCoupling<Real>("mob_name");
 }
 
-template<typename T>
+template <typename T>
 Real
 CahnHilliardFluxBCBase<T>::computeQpResidual()
 {
   return (_flux - _M[_qp] * _grad_u[_qp]) * _normals[_qp] * _test[_i][_qp];
 }
 
-template<typename T>
+template <typename T>
 Real
 CahnHilliardFluxBCBase<T>::computeQpJacobian()
 {
-  return  -(_M[_qp] * _grad_phi[_j][_qp] + _phi[_j][_qp] * _dMdw[_qp] * _grad_u[_qp])  * _normals[_qp] * _test[_i][_qp];
+  return -(_M[_qp] * _grad_phi[_j][_qp] + _phi[_j][_qp] * _dMdw[_qp] * _grad_u[_qp]) *
+         _normals[_qp] * _test[_i][_qp];
 }
 
-template<typename T>
+template <typename T>
 Real
 CahnHilliardFluxBCBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
   const unsigned int cvar = mapJvarToCvar(jvar);
 
-  return -_phi[_j][_qp] * (*_dMdarg[cvar])[_qp] * _grad_u[_qp]  * _normals[_qp] * _test[_i][_qp];
+  return -_phi[_j][_qp] * (*_dMdarg[cvar])[_qp] * _grad_u[_qp] * _normals[_qp] * _test[_i][_qp];
 }
 
-#endif //CAHNHILLIARDFLUXBCBASE_H
+#endif // CAHNHILLIARDFLUXBCBASE_H

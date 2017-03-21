@@ -7,27 +7,30 @@
 
 #include "LevelSetOlssonVortex.h"
 
-template<>
-InputParameters validParams<LevelSetOlssonVortex>()
+template <>
+InputParameters
+validParams<LevelSetOlssonVortex>()
 {
   MooseEnum rtype("instantaneous=0 cosine=1", "instantaneous");
   MooseEnum comp("x=0 y=1 z=2");
 
   InputParameters params = validParams<Function>();
-  params.addClassDescription("A function for creating vortex velocity fields for level set equation benchmark problems.");
-  params.addParam<MooseEnum>("reverse_type", rtype, "The time of reversal to enforce (instantaneous or cosine).");
+  params.addClassDescription(
+      "A function for creating vortex velocity fields for level set equation benchmark problems.");
+  params.addParam<MooseEnum>(
+      "reverse_type", rtype, "The time of reversal to enforce (instantaneous or cosine).");
   params.addParam<Real>("reverse_time", 2, "Total time for complete vortex reversal.");
   params.addRequiredParam<MooseEnum>("component", comp, "The component of velocity to return.");
 
   return params;
 }
 
-LevelSetOlssonVortex::LevelSetOlssonVortex(const InputParameters & parameters) :
-  Function(parameters),
-  _reverse_time(getParam<Real>("reverse_time")),
-  _reverse_type(getParam<MooseEnum>("reverse_type")),
-  _component(getParam<MooseEnum>("component")),
-  _pi(libMesh::pi)
+LevelSetOlssonVortex::LevelSetOlssonVortex(const InputParameters & parameters)
+  : Function(parameters),
+    _reverse_time(getParam<Real>("reverse_time")),
+    _reverse_type(getParam<MooseEnum>("reverse_type")),
+    _component(getParam<MooseEnum>("component")),
+    _pi(libMesh::pi)
 {
 }
 

@@ -14,12 +14,13 @@
 // Forward Declarations
 class PorousFlowMassRadioactiveDecay;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowMassRadioactiveDecay>();
 
 /**
  * Kernel = _decay_rate * masscomponent
- * where mass_component = porosity*sum_phases(density_phase*saturation_phase*massfrac_phase^component)
+ * where mass_component =
+ * porosity*sum_phases(density_phase*saturation_phase*massfrac_phase^component)
  * It is lumped to the nodes
  */
 class PorousFlowMassRadioactiveDecay : public TimeKernel
@@ -88,4 +89,4 @@ protected:
   Real computeQpJac(unsigned int pvar);
 };
 
-#endif //POROUSFLOWMASSRADIOACTIVEDECAY_H
+#endif // POROUSFLOWMASSRADIOACTIVEDECAY_H

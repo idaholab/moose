@@ -12,14 +12,17 @@
 // Forward Declarations
 class BimodalInverseSuperellipsoidsIC;
 
-template<>
+template <>
 InputParameters validParams<BimodalInverseSuperellipsoidsIC>();
 
 /**
- * BimodalInverseSuperellipsoidsIC takes a specified number of superellipsoids, each with given parameters
+ * BimodalInverseSuperellipsoidsIC takes a specified number of superellipsoids, each with given
+ *parameters
  * These are intended to be the larger particles. Then the IC creates a specified number
- * of particles at random locations. These are the smaller particles. Unlike in the parent class, the smaller
- * particles are embedded inside the larger particles, which is why this IC is referred to as Inverse.
+ * of particles at random locations. These are the smaller particles. Unlike in the parent class,
+ *the smaller
+ * particles are embedded inside the larger particles, which is why this IC is referred to as
+ *Inverse.
  **/
 class BimodalInverseSuperellipsoidsIC : public BimodalSuperellipsoidsIC
 {
@@ -33,4 +36,4 @@ public:
   virtual void computeSuperellipsoidCenters();
 };
 
-#endif //BIMODALINVERSESUPERELLIPSOIDSIC_H
+#endif // BIMODALINVERSESUPERELLIPSOIDSIC_H

@@ -34,4 +34,4 @@ protected:
   MaterialProperty<RankTwoTensor> & _dstress_dc;
 };
 
-#endif //COMPUTELINEARELASTICPFFRACTURESTRESS_H
+#endif // COMPUTELINEARELASTICPFFRACTURESTRESS_H

@@ -9,10 +9,10 @@
 
 #include "GrainRigidBodyMotionBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class MultiGrainRigidBodyMotion;
 
-template<>
+template <>
 InputParameters validParams<MultiGrainRigidBodyMotion>();
 
 class MultiGrainRigidBodyMotion : public GrainRigidBodyMotionBase
@@ -32,4 +32,4 @@ protected:
   virtual void getUserObjectJacobian(unsigned int jvar, dof_id_type dof_index);
 };
 
-#endif //MULTIGRAINRIGIDBODYMOTION_H
+#endif // MULTIGRAINRIGIDBODYMOTION_H

@@ -9,19 +9,18 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class GrainForcesPostprocessor;
 class GrainForceAndTorqueInterface;
 
-template<>
+template <>
 InputParameters validParams<GrainForcesPostprocessor>();
 
 /**
  *  GrainForcesPostprocessor is a type of VectorPostprocessor that outputs the
  *  force and torque values calculated in UserObjects.
  */
-class GrainForcesPostprocessor :
-  public GeneralVectorPostprocessor
+class GrainForcesPostprocessor : public GeneralVectorPostprocessor
 {
 public:
   GrainForcesPostprocessor(const InputParameters & parameters);
@@ -44,4 +43,4 @@ protected:
   unsigned int _grain_num;
 };
 
-#endif //GRAINFORCESPOSTPROCESSOR_H
+#endif // GRAINFORCESPOSTPROCESSOR_H

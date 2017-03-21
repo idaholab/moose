@@ -6,16 +6,20 @@
 /****************************************************************/
 #include "INSMomentumLaplaceFormRZ.h"
 
-template<>
-InputParameters validParams<INSMomentumLaplaceFormRZ>()
+template <>
+InputParameters
+validParams<INSMomentumLaplaceFormRZ>()
 {
   InputParameters params = validParams<INSMomentumLaplaceForm>();
-  params.addClassDescription("This class computes additional momentum equation residual and Jacobian contributions for the incompressible Navier-Stokes momentum equation in RZ (axisymmetric cylindrical) coordinates, using the 'Laplace' form of the governing equations.");
+  params.addClassDescription("This class computes additional momentum equation residual and "
+                             "Jacobian contributions for the incompressible Navier-Stokes momentum "
+                             "equation in RZ (axisymmetric cylindrical) coordinates, using the "
+                             "'Laplace' form of the governing equations.");
   return params;
 }
 
-INSMomentumLaplaceFormRZ::INSMomentumLaplaceFormRZ(const InputParameters & parameters) :
-    INSMomentumLaplaceForm(parameters)
+INSMomentumLaplaceFormRZ::INSMomentumLaplaceFormRZ(const InputParameters & parameters)
+  : INSMomentumLaplaceForm(parameters)
 {
 }
 

@@ -12,7 +12,6 @@
 class CoupledConvectiveFlux : public IntegratedBC
 {
 public:
-
   CoupledConvectiveFlux(const InputParameters & parameters);
   virtual ~CoupledConvectiveFlux() {}
 
@@ -24,7 +23,7 @@ protected:
   const Real _coefficient;
 };
 
-template<>
+template <>
 InputParameters validParams<CoupledConvectiveFlux>();
 
-#endif //COUPLEDCONVECTIVEFLUX_H
+#endif // COUPLEDCONVECTIVEFLUX_H

@@ -13,7 +13,7 @@
 
 class DomainIntegralAction;
 
-template<>
+template <>
 InputParameters validParams<DomainIntegralAction>();
 
 class DomainIntegralAction : public Action
@@ -24,6 +24,7 @@ public:
   ~DomainIntegralAction();
 
   virtual void act();
+
 protected:
   enum INTEGRAL
   {
@@ -81,4 +82,4 @@ protected:
   std::vector<unsigned int> _ring_vec;
 };
 
-#endif //DOMAININTEGRALACTION_H
+#endif // DOMAININTEGRALACTION_H

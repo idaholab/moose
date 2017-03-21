@@ -13,7 +13,7 @@
 
 class PorousFlowFullySaturatedMassTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowFullySaturatedMassTimeDerivative>();
 
 /**
@@ -44,7 +44,12 @@ protected:
   const bool _multiply_by_density;
 
   /// Determines whether mechanical and/or thermal contributions should be added to the residual
-  const enum SimulationTypeEnum {Hydro, ThermoHydro, HydroMechanical, ThermoHydroMechanical} _simulation_type;
+  const enum SimulationTypeEnum {
+    Hydro,
+    ThermoHydro,
+    HydroMechanical,
+    ThermoHydroMechanical
+  } _simulation_type;
 
   /// Whether thermal contributions should be added to the residual
   const bool _includes_thermal;
@@ -90,7 +95,6 @@ protected:
 
   /// Derivative of strain rate wrt the PorousFlow variables
   const MaterialProperty<std::vector<RealGradient>> * const _dstrain_rate_dvar;
-
 };
 
 #endif // POROUSFLOWFULLYSATURATEDMASSTIMEDERIVATIVE_H
