@@ -20,7 +20,6 @@
 #include <sstream>
 #include <string>
 
-
 /**
  * This class interpolates tabulated functions with cubic splines
  *
@@ -39,14 +38,20 @@ public:
    *
    * If yp1, ypn are not specified or greater or equal that _deriv_bound, we use natural spline
    */
-  SplineInterpolation(const std::vector<Real> & x, const std::vector<Real> & y, Real yp1 = _deriv_bound, Real ypn = _deriv_bound);
+  SplineInterpolation(const std::vector<Real> & x,
+                      const std::vector<Real> & y,
+                      Real yp1 = _deriv_bound,
+                      Real ypn = _deriv_bound);
 
   virtual ~SplineInterpolation() = default;
 
   /**
    * Set the x-, y- values and first derivatives
    */
-  void setData(const std::vector<Real> & x, const std::vector<Real> & y, Real yp1 = _deriv_bound, Real ypn = _deriv_bound);
+  void setData(const std::vector<Real> & x,
+               const std::vector<Real> & y,
+               Real yp1 = _deriv_bound,
+               Real ypn = _deriv_bound);
 
   void errorCheck();
 
@@ -64,10 +69,17 @@ public:
    * This function will dump GNUPLOT input files that can be run to show the data points and
    * function fits
    */
-  void dumpSampleFile(std::string base_name, std::string x_label="X", std::string y_label="Y", float xmin=0, float xmax=0, float ymin=0, float ymax=0);
+  void dumpSampleFile(std::string base_name,
+                      std::string x_label = "X",
+                      std::string y_label = "Y",
+                      float xmin = 0,
+                      float xmax = 0,
+                      float ymin = 0,
+                      float ymax = 0);
 
   /**
-   * This function returns the size of the array holding the points, i.e. the number of sample points
+   * This function returns the size of the array holding the points, i.e. the number of sample
+   * points
    */
   unsigned int getSampleSize();
 
@@ -87,4 +99,4 @@ protected:
   static int _file_number;
 };
 
-#endif //LINEARINTERPOLATION_H
+#endif // LINEARINTERPOLATION_H

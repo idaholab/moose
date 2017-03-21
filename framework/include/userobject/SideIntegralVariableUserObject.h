@@ -18,10 +18,10 @@
 #include "SideIntegralUserObject.h"
 #include "MooseVariableInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class SideIntegralVariableUserObject;
 
-template<>
+template <>
 InputParameters validParams<SideIntegralVariableUserObject>();
 
 /**
@@ -30,9 +30,7 @@ InputParameters validParams<SideIntegralVariableUserObject>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class SideIntegralVariableUserObject :
-  public SideIntegralUserObject,
-  public MooseVariableInterface
+class SideIntegralVariableUserObject : public SideIntegralUserObject, public MooseVariableInterface
 {
 public:
   SideIntegralVariableUserObject(const InputParameters & parameters);

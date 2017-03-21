@@ -13,14 +13,14 @@
 
 class ACInterface;
 
-template<>
+template <>
 InputParameters validParams<ACInterface>();
 
 /**
  * Compute the Allen-Cahn interface term with the weak form residual
  * \f$ \left( \kappa_i \nabla\eta_i, \nabla (L_i \psi) \right) \f$
  */
-class ACInterface : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel> >
+class ACInterface : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
   ACInterface(const InputParameters & parameters);
@@ -59,7 +59,7 @@ protected:
   /// @{ Mobility derivative w.r.t. other coupled variables
   std::vector<const MaterialProperty<Real> *> _dLdarg;
   std::vector<const MaterialProperty<Real> *> _d2Ldargdop;
-  std::vector<std::vector<const MaterialProperty<Real> *> > _d2Ldarg2;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _d2Ldarg2;
   /// @}
 
   /// kappa derivative w.r.t. other coupled variables
@@ -69,4 +69,4 @@ protected:
   std::vector<const VariableGradient *> _gradarg;
 };
 
-#endif //ACInterface_H
+#endif // ACInterface_H

@@ -11,26 +11,25 @@
 #include "SlopeReconstructionMultiD.h"
 #include "SinglePhaseFluidProperties.h"
 
-//Forward Declarations
+// Forward Declarations
 class CNSFVLeastSquaresSlopeReconstruction;
 
-template<>
+template <>
 InputParameters validParams<CNSFVLeastSquaresSlopeReconstruction>();
 
 /**
- * A user object that performs the least-squares slope reconstruction to get the slopes of the P0 primitive variables
+ * A user object that performs the least-squares slope reconstruction to get the slopes of the P0
+ * primitive variables
  */
 class CNSFVLeastSquaresSlopeReconstruction : public SlopeReconstructionMultiD
 {
 public:
-
   CNSFVLeastSquaresSlopeReconstruction(const InputParameters & parameters);
 
   /// compute the slope of the cell
   virtual void reconstructElementSlope();
 
 protected:
-
   /// the input density
   MooseVariable * _rho;
   /// the input x-momentum

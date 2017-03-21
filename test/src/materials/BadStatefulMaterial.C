@@ -14,18 +14,22 @@
 
 #include "BadStatefulMaterial.h"
 
-template<>
-InputParameters validParams<BadStatefulMaterial>()
+template <>
+InputParameters
+validParams<BadStatefulMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addParam<bool>("declare_only_older", false, "Whether or not to declare the old or older property");
+  params.addParam<bool>(
+      "declare_only_older", false, "Whether or not to declare the old or older property");
   return params;
 }
 
-BadStatefulMaterial::BadStatefulMaterial(const InputParameters & parameters) :
-    Material(parameters),
-    _prop_old(getParam<bool>("declare_only_older") ? declarePropertyOlder<Real>("property") : declarePropertyOld<Real>("property"))
-{}
+BadStatefulMaterial::BadStatefulMaterial(const InputParameters & parameters)
+  : Material(parameters),
+    _prop_old(getParam<bool>("declare_only_older") ? declarePropertyOlder<Real>("property")
+                                                   : declarePropertyOld<Real>("property"))
+{
+}
 
 void
 BadStatefulMaterial::initQpStatefulProperties()

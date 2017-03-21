@@ -9,11 +9,11 @@
 
 #include "BodyForce.h"
 
-//Forward Declarations
+// Forward Declarations
 class MaskedBodyForce;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<MaskedBodyForce>();
 
 /**
@@ -25,7 +25,6 @@ InputParameters validParams<MaskedBodyForce>();
 class MaskedBodyForce : public BodyForce
 {
 public:
-
   MaskedBodyForce(const InputParameters & parameters);
 
 protected:

@@ -17,10 +17,10 @@
 
 #include "InterfaceKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class InterfaceDiffusion;
 
-template<>
+template <>
 InputParameters validParams<InterfaceDiffusion>();
 
 /**

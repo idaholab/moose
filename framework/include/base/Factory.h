@@ -30,77 +30,78 @@ class InputParameters;
  * Macros
  */
 #define stringifyName(name) #name
-#define registerObject(name)                          factory.reg<name>(stringifyName(name))
-#define registerNamedObject(obj, name)                factory.reg<obj>(name)
-#define registerDeprecatedObject(name, time)          factory.regDeprecated<name>(stringifyName(name), time)
-#define registerDeprecatedObjectName(obj, name, time) factory.regReplaced<obj>(stringifyName(obj), name, time)
+#define registerObject(name) factory.reg<name>(stringifyName(name))
+#define registerNamedObject(obj, name) factory.reg<obj>(name)
+#define registerDeprecatedObject(name, time) factory.regDeprecated<name>(stringifyName(name), time)
+#define registerDeprecatedObjectName(obj, name, time)                                              \
+  factory.regReplaced<obj>(stringifyName(obj), name, time)
 
 // for backward compatibility
-#define registerKernel(name)                        registerObject(name)
-#define registerNodalKernel(name)                   registerObject(name)
-#define registerBoundaryCondition(name)             registerObject(name)
-#define registerAux(name)                           registerObject(name)
-#define registerAuxKernel(name)                     registerObject(name)
-#define registerMaterial(name)                      registerObject(name)
-#define registerPostprocessor(name)                 registerObject(name)
-#define registerVectorPostprocessor(name)           registerObject(name)
-#define registerInitialCondition(name)              registerObject(name)
-#define registerDamper(name)                        registerObject(name)
-#define registerDiracKernel(name)                   registerObject(name)
-#define registerDGKernel(name)                      registerObject(name)
-#define registerInterfaceKernel(name)               registerObject(name)
-#define registerExecutioner(name)                   registerObject(name)
-#define registerFunction(name)                      registerObject(name)
-#define registerMesh(name)                          registerObject(name)
-#define registerMeshModifier(name)                  registerObject(name)
-#define registerConstraint(name)                    registerObject(name)
-#define registerScalarKernel(name)                  registerObject(name)
-#define registerUserObject(name)                    registerObject(name)
-#define registerPreconditioner(name)                registerObject(name)
-#define registerIndicator(name)                     registerObject(name)
-#define registerMarker(name)                        registerObject(name)
-#define registerProblem(name)                       registerObject(name)
-#define registerMultiApp(name)                      registerObject(name)
-#define registerTransfer(name)                      registerObject(name)
-#define registerTimeStepper(name)                   registerObject(name)
-#define registerTimeIntegrator(name)                registerObject(name)
-#define registerPredictor(name)                     registerObject(name)
-#define registerSplit(name)                         registerObject(name)
-#define registerOutput(name)                        registerObject(name)
-#define registerControl(name)                       registerObject(name)
-#define registerPartitioner(name)                   registerObject(name)
+#define registerKernel(name) registerObject(name)
+#define registerNodalKernel(name) registerObject(name)
+#define registerBoundaryCondition(name) registerObject(name)
+#define registerAux(name) registerObject(name)
+#define registerAuxKernel(name) registerObject(name)
+#define registerMaterial(name) registerObject(name)
+#define registerPostprocessor(name) registerObject(name)
+#define registerVectorPostprocessor(name) registerObject(name)
+#define registerInitialCondition(name) registerObject(name)
+#define registerDamper(name) registerObject(name)
+#define registerDiracKernel(name) registerObject(name)
+#define registerDGKernel(name) registerObject(name)
+#define registerInterfaceKernel(name) registerObject(name)
+#define registerExecutioner(name) registerObject(name)
+#define registerFunction(name) registerObject(name)
+#define registerMesh(name) registerObject(name)
+#define registerMeshModifier(name) registerObject(name)
+#define registerConstraint(name) registerObject(name)
+#define registerScalarKernel(name) registerObject(name)
+#define registerUserObject(name) registerObject(name)
+#define registerPreconditioner(name) registerObject(name)
+#define registerIndicator(name) registerObject(name)
+#define registerMarker(name) registerObject(name)
+#define registerProblem(name) registerObject(name)
+#define registerMultiApp(name) registerObject(name)
+#define registerTransfer(name) registerObject(name)
+#define registerTimeStepper(name) registerObject(name)
+#define registerTimeIntegrator(name) registerObject(name)
+#define registerPredictor(name) registerObject(name)
+#define registerSplit(name) registerObject(name)
+#define registerOutput(name) registerObject(name)
+#define registerControl(name) registerObject(name)
+#define registerPartitioner(name) registerObject(name)
 
-#define registerNamedKernel(obj, name)              registerNamedObject(obj, name)
-#define registerNamedNodalKernel(obj, name)         registerNamedObject(obj, name)
-#define registerNamedBoundaryCondition(obj, name)   registerNamedObject(obj, name)
-#define registerNamedAux(obj, name)                 registerNamedObject(obj, name)
-#define registerNamedAuxKernel(name)                registerNamedObject(obj, name)
-#define registerNamedMaterial(obj, name)            registerNamedObject(obj, name)
-#define registerNamedPostprocessor(obj, name)       registerNamedObject(obj, name)
+#define registerNamedKernel(obj, name) registerNamedObject(obj, name)
+#define registerNamedNodalKernel(obj, name) registerNamedObject(obj, name)
+#define registerNamedBoundaryCondition(obj, name) registerNamedObject(obj, name)
+#define registerNamedAux(obj, name) registerNamedObject(obj, name)
+#define registerNamedAuxKernel(name) registerNamedObject(obj, name)
+#define registerNamedMaterial(obj, name) registerNamedObject(obj, name)
+#define registerNamedPostprocessor(obj, name) registerNamedObject(obj, name)
 #define registerNamedVectorPostprocessor(obj, name) registerNamedObject(obj, name)
-#define registerNamedInitialCondition(obj, name)    registerNamedObject(obj, name)
-#define registerNamedDamper(obj, name)              registerNamedObject(obj, name)
-#define registerNamedDiracKernel(obj, name)         registerNamedObject(obj, name)
-#define registerNamedDGKernel(obj, name)            registerNamedObject(obj, name)
-#define registerNamedExecutioner(obj, name)         registerNamedObject(obj, name)
-#define registerNamedFunction(obj, name)            registerNamedObject(obj, name)
-#define registerNamedMesh(obj, name)                registerNamedObject(obj, name)
-#define registerNamedMeshModifier(name)             registerNamedObject(obj, name)
-#define registerNamedConstraint(obj, name)          registerNamedObject(obj, name)
-#define registerNamedUserObject(obj, name)          registerNamedObject(obj, name)
-#define registerNamedPreconditioner(obj, name)      registerNamedObject(obj, name)
-#define registerNamedIndicator(obj, name)           registerNamedObject(obj, name)
-#define registerNamedMarker(obj, name)              registerNamedObject(obj, name)
-#define registerNamedProblem(obj, name)             registerNamedObject(obj, name)
-#define registerNamedMultiApp(obj, name)            registerNamedObject(obj, name)
-#define registerNamedTransfer(obj, name)            registerNamedObject(obj, name)
-#define registerNamedTimeStepper(obj, name)         registerNamedObject(obj, name)
-#define registerNamedTimeIntegrator(obj, name)      registerNamedObject(obj, name)
-#define registerNamedPredictor(obj, name)           registerNamedObject(obj, name)
-#define registerNamedSplit(obj, name)               registerNamedObject(obj, name)
-#define registerNamedOutput(obj, name)              registerNamedObject(obj, name)
-#define registerNamedControl(obj, name)             registerNamedObject(obj, name)
-#define registerNamedPartitioner(obj, name)         registerNamedObject(obj, name)
+#define registerNamedInitialCondition(obj, name) registerNamedObject(obj, name)
+#define registerNamedDamper(obj, name) registerNamedObject(obj, name)
+#define registerNamedDiracKernel(obj, name) registerNamedObject(obj, name)
+#define registerNamedDGKernel(obj, name) registerNamedObject(obj, name)
+#define registerNamedExecutioner(obj, name) registerNamedObject(obj, name)
+#define registerNamedFunction(obj, name) registerNamedObject(obj, name)
+#define registerNamedMesh(obj, name) registerNamedObject(obj, name)
+#define registerNamedMeshModifier(name) registerNamedObject(obj, name)
+#define registerNamedConstraint(obj, name) registerNamedObject(obj, name)
+#define registerNamedUserObject(obj, name) registerNamedObject(obj, name)
+#define registerNamedPreconditioner(obj, name) registerNamedObject(obj, name)
+#define registerNamedIndicator(obj, name) registerNamedObject(obj, name)
+#define registerNamedMarker(obj, name) registerNamedObject(obj, name)
+#define registerNamedProblem(obj, name) registerNamedObject(obj, name)
+#define registerNamedMultiApp(obj, name) registerNamedObject(obj, name)
+#define registerNamedTransfer(obj, name) registerNamedObject(obj, name)
+#define registerNamedTimeStepper(obj, name) registerNamedObject(obj, name)
+#define registerNamedTimeIntegrator(obj, name) registerNamedObject(obj, name)
+#define registerNamedPredictor(obj, name) registerNamedObject(obj, name)
+#define registerNamedSplit(obj, name) registerNamedObject(obj, name)
+#define registerNamedOutput(obj, name) registerNamedObject(obj, name)
+#define registerNamedControl(obj, name) registerNamedObject(obj, name)
+#define registerNamedPartitioner(obj, name) registerNamedObject(obj, name)
 
 /**
  * alias to wrap shared pointer type
@@ -125,8 +126,9 @@ using registeredMooseObjectIterator = std::map<std::string, paramsPtr>::iterator
 /**
  * Build an object of type T
  */
-template<class T>
-MooseObjectPtr buildObject(const InputParameters & parameters)
+template <class T>
+MooseObjectPtr
+buildObject(const InputParameters & parameters)
 {
   return MooseObjectPtr(new T(parameters));
 }
@@ -144,18 +146,21 @@ public:
    * Register a new object
    * @param obj_name Name of the object to register
    */
-  template<typename T>
+  template <typename T>
   void reg(const std::string & obj_name)
   {
 
     /*
-     * If _registerable_objects has been set the user has requested that we only register some subset
-     * of the objects for a dynamically loaded application. The objects listed in *this* application's
+     * If _registerable_objects has been set the user has requested that we only register some
+     * subset
+     * of the objects for a dynamically loaded application. The objects listed in *this*
+     * application's
      * registerObjects() method will have already been registered before that member was set.
      *
      * If _registerable_objects is empty, the factory is unrestricted
      */
-    if (_registerable_objects.empty() || _registerable_objects.find(obj_name) != _registerable_objects.end())
+    if (_registerable_objects.empty() ||
+        _registerable_objects.find(obj_name) != _registerable_objects.end())
     {
       if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
       {
@@ -173,7 +178,7 @@ public:
    * @param obj_name The name of the object to register
    * @param t_str String containing the expiration date for the object
    */
-  template<typename T>
+  template <typename T>
   void regDeprecated(const std::string & obj_name, const std::string t_str)
   {
     // Register the name
@@ -189,7 +194,7 @@ public:
    * @param name The name of the object that is deprecated
    * @param t_str String containing the expiration date for the object
    */
-  template<typename T>
+  template <typename T>
   void regReplaced(const std::string & obj_name, const std::string & name, const std::string t_str)
   {
     // Register the name
@@ -215,8 +220,11 @@ public:
    * @param print_deprecated controls the deprecated message
    * @return The created object
    */
-  std::shared_ptr<MooseObject> create(const std::string & obj_name, const std::string & name, InputParameters parameters,
-                                      THREAD_ID tid = 0, bool print_deprecated = true);
+  std::shared_ptr<MooseObject> create(const std::string & obj_name,
+                                      const std::string & name,
+                                      InputParameters parameters,
+                                      THREAD_ID tid = 0,
+                                      bool print_deprecated = true);
 
   /**
    * Build an object (must be registered)
@@ -226,21 +234,25 @@ public:
    * @param tid The thread id that this copy will be created for
    * @return The created object
    */
-  template<typename T>
-  std::shared_ptr<T>
-  create(const std::string & obj_name, const std::string & name, InputParameters parameters, THREAD_ID tid = 0)
+  template <typename T>
+  std::shared_ptr<T> create(const std::string & obj_name,
+                            const std::string & name,
+                            InputParameters parameters,
+                            THREAD_ID tid = 0)
   {
-    std::shared_ptr<T> new_object = std::dynamic_pointer_cast<T>(create(obj_name, name, parameters, tid, false));
+    std::shared_ptr<T> new_object =
+        std::dynamic_pointer_cast<T>(create(obj_name, name, parameters, tid, false));
     if (!new_object)
-      mooseError("We expected to create an object of type '" + demangle(typeid(T).name())
-                 + "'.\nInstead we received a parameters object for type '" + obj_name
-                 + "'.\nDid you call the wrong \"add\" method in your Action?");
+      mooseError("We expected to create an object of type '" + demangle(typeid(T).name()) +
+                 "'.\nInstead we received a parameters object for type '" + obj_name +
+                 "'.\nDid you call the wrong \"add\" method in your Action?");
 
     return new_object;
   }
 
   /**
-   * Calling this object with a non-empty vector will cause this factory to ignore registrations from any object
+   * Calling this object with a non-empty vector will cause this factory to ignore registrations
+   * from any object
    * not contained within the list.
    * @param names a vector containing the names of objects that this factory will register
    */
@@ -262,7 +274,6 @@ public:
   std::vector<std::string> getConstructedObjects() const;
 
 protected:
-
   /**
    * Parse time string (mm/dd/yyyy HH:MM)
    * @param t_str String with the object expiration date, this must be in the form mm/dd/yyyy HH:MM

@@ -19,9 +19,8 @@
 // Forward Declaration
 class DefaultPostprocessorDiffusion;
 
-template<>
+template <>
 InputParameters validParams<DefaultPostprocessorDiffusion>();
-
 
 class DefaultPostprocessorDiffusion : public Kernel
 {
@@ -34,4 +33,4 @@ protected:
   const PostprocessorValue & _pps_value;
 };
 
-#endif //DEFAULTPOSTPROCESSORDIFFUSION_H
+#endif // DEFAULTPOSTPROCESSORDIFFUSION_H

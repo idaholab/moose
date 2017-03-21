@@ -11,7 +11,7 @@
 
 class RadialDisplacementSphereAux;
 
-template<>
+template <>
 InputParameters validParams<RadialDisplacementSphereAux>();
 
 /**
@@ -43,4 +43,4 @@ protected:
   RealVectorValue _origin;
 };
 
-#endif //RADIALDISPLACEMENTSPHEREAUX_H
+#endif // RADIALDISPLACEMENTSPHEREAUX_H

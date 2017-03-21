@@ -9,20 +9,22 @@
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
-template<>
-InputParameters validParams<NSEnergyWeakStagnationBC>()
+template <>
+InputParameters
+validParams<NSEnergyWeakStagnationBC>()
 {
   InputParameters params = validParams<NSWeakStagnationBaseBC>();
   params.addClassDescription("The inviscid energy BC term with specified normal flow.");
   return params;
 }
 
-NSEnergyWeakStagnationBC::NSEnergyWeakStagnationBC(const InputParameters & parameters) :
-    NSWeakStagnationBaseBC(parameters)
+NSEnergyWeakStagnationBC::NSEnergyWeakStagnationBC(const InputParameters & parameters)
+  : NSWeakStagnationBaseBC(parameters)
 {
 }
 
-Real NSEnergyWeakStagnationBC::computeQpResidual()
+Real
+NSEnergyWeakStagnationBC::computeQpResidual()
 {
   // Compute stagnation values
   Real T_s = 0.0, p_s = 0.0, rho_s = 0.0;
@@ -41,13 +43,15 @@ Real NSEnergyWeakStagnationBC::computeQpResidual()
   return rhoH_s * std::sqrt(velmag2) * this->sdotn() * _test[_i][_qp];
 }
 
-Real NSEnergyWeakStagnationBC::computeQpJacobian()
+Real
+NSEnergyWeakStagnationBC::computeQpJacobian()
 {
   // TODO
   return 0.0;
 }
 
-Real NSEnergyWeakStagnationBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
+Real
+NSEnergyWeakStagnationBC::computeQpOffDiagJacobian(unsigned /*jvar*/)
 {
   // TODO
   return 0.0;

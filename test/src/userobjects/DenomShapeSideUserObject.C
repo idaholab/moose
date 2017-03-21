@@ -15,16 +15,17 @@
 #include "DenomShapeSideUserObject.h"
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<DenomShapeSideUserObject>()
+template <>
+InputParameters
+validParams<DenomShapeSideUserObject>()
 {
   InputParameters params = validParams<ShapeSideUserObject>();
   params.addRequiredCoupledVar("u", "Charged specie density.");
   return params;
 }
 
-DenomShapeSideUserObject::DenomShapeSideUserObject(const InputParameters & parameters) :
-    ShapeSideUserObject(parameters),
+DenomShapeSideUserObject::DenomShapeSideUserObject(const InputParameters & parameters)
+  : ShapeSideUserObject(parameters),
     _u_value(coupledValue("u")),
     _u_var(coupled("u")),
     _grad_u(coupledGradient("u"))
@@ -83,7 +84,8 @@ DenomShapeSideUserObject::threadJoin(const UserObject & y)
 
   if (_fe_problem.currentlyComputingJacobian())
   {
-    mooseAssert(_jacobian_storage.size() == shp_uo._jacobian_storage.size(), "Jacobian storage size is inconsistent across threads");
+    mooseAssert(_jacobian_storage.size() == shp_uo._jacobian_storage.size(),
+                "Jacobian storage size is inconsistent across threads");
     for (unsigned int i = 0; i < _jacobian_storage.size(); ++i)
       _jacobian_storage[i] += shp_uo._jacobian_storage[i];
   }

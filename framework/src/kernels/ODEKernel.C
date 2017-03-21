@@ -16,17 +16,15 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 
-template<>
-InputParameters validParams<ODEKernel>()
+template <>
+InputParameters
+validParams<ODEKernel>()
 {
   InputParameters params = validParams<ScalarKernel>();
   return params;
 }
 
-ODEKernel::ODEKernel(const InputParameters & parameters) :
-    ScalarKernel(parameters)
-{
-}
+ODEKernel::ODEKernel(const InputParameters & parameters) : ScalarKernel(parameters) {}
 
 void
 ODEKernel::reinit()

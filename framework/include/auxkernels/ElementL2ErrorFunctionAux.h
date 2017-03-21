@@ -21,7 +21,7 @@
 // Forward declarations
 class ElementL2ErrorFunctionAux;
 
-template<>
+template <>
 InputParameters validParams<ElementL2ErrorFunctionAux>();
 
 /**

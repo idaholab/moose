@@ -5,22 +5,21 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "CoefTimeDerivative.h"
 
-template<>
-InputParameters validParams<CoefTimeDerivative>()
+template <>
+InputParameters
+validParams<CoefTimeDerivative>()
 {
   InputParameters params = validParams<TimeDerivative>();
   params.addParam<Real>("Coefficient", 1, "The coefficient for the time derivative kernel");
   return params;
 }
 
-
 CoefTimeDerivative::CoefTimeDerivative(const InputParameters & parameters)
-    :TimeDerivative(parameters),
-     _coef(getParam<Real>("Coefficient"))
-{}
+  : TimeDerivative(parameters), _coef(getParam<Real>("Coefficient"))
+{
+}
 
 Real
 CoefTimeDerivative::computeQpResidual()
@@ -35,4 +34,3 @@ CoefTimeDerivative::computeQpJacobian()
 {
   return _coef * TimeDerivative::computeQpJacobian();
 }
-

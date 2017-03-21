@@ -19,7 +19,7 @@ public:
   CahnHilliardAniso(const InputParameters & parameters);
 };
 
-template<>
+template <>
 InputParameters validParams<CahnHilliardAniso>();
 
 #endif // CAHNHILLIARDANISO_H

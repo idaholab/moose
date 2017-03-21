@@ -22,19 +22,21 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
-template<>
-InputParameters validParams<AddSecondarySpeciesAction>()
+template <>
+InputParameters
+validParams<AddSecondarySpeciesAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::vector<AuxVariableName> >("secondary_species", "The list of secondary species to add");
-  params.addParam<std::vector<std::string> >("kin_reactions", "The list of solid kinetic reactions");
+  params.addParam<std::vector<AuxVariableName>>("secondary_species",
+                                                "The list of secondary species to add");
+  params.addParam<std::vector<std::string>>("kin_reactions", "The list of solid kinetic reactions");
   return params;
 }
 
-AddSecondarySpeciesAction::AddSecondarySpeciesAction(const InputParameters & params) :
-    Action(params),
-    _vars(getParam<std::vector<AuxVariableName> >("secondary_species")),
-    _reactions(getParam<std::vector<std::string> >("kin_reactions"))
+AddSecondarySpeciesAction::AddSecondarySpeciesAction(const InputParameters & params)
+  : Action(params),
+    _vars(getParam<std::vector<AuxVariableName>>("secondary_species")),
+    _reactions(getParam<std::vector<std::string>>("kin_reactions"))
 {
 }
 

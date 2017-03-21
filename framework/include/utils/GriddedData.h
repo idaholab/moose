@@ -68,7 +68,7 @@ public:
    * Yields the grid.
    * grid[i] = a vector of Reals that define the i_th axis of the grid.
    */
-  void getGrid(std::vector<std::vector<Real> > & grid);
+  void getGrid(std::vector<std::vector<Real>> & grid);
 
   /**
    * Yields the values defined at the grid points.
@@ -77,20 +77,26 @@ public:
 
   /**
    * Evaluates the function at a given grid point.
-   * For instance, evaluateFcn({n,m}) = value at (grid[0][n], grid[1][m]), for a function defined on a 2D grid
+   * For instance, evaluateFcn({n,m}) = value at (grid[0][n], grid[1][m]), for a function defined on
+   * a 2D grid
    */
   Real evaluateFcn(const std::vector<unsigned int> & ijk);
 
 private:
   unsigned int _dim;
   std::vector<int> _axes;
-  std::vector<std::vector<Real> > _grid;
+  std::vector<std::vector<Real>> _grid;
   std::vector<Real> _fcn;
   std::vector<unsigned int> _step;
 
-  void parse(unsigned int & dim, std::vector<int> & axes, std::vector<std::vector<Real> > & grid, std::vector<Real> & f, std::vector<unsigned int> & step, std::string file_name);
+  void parse(unsigned int & dim,
+             std::vector<int> & axes,
+             std::vector<std::vector<Real>> & grid,
+             std::vector<Real> & f,
+             std::vector<unsigned int> & step,
+             std::string file_name);
   bool getSignificantLine(std::ifstream & file_stream, std::string & line);
   void splitToRealVec(const std::string & input_string, std::vector<Real> & output_vec);
 };
 
-#endif //GRIDDEDDATA_H
+#endif // GRIDDEDDATA_H

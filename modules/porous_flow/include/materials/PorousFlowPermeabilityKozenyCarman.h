@@ -10,10 +10,10 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowPermeabilityKozenyCarman;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPermeabilityKozenyCarman>();
 
 /**
@@ -69,10 +69,10 @@ protected:
   const MaterialProperty<std::vector<RealGradient>> & _dporosity_qp_dgradvar;
 
   /// Name of porosity-permeability relationship
-  const enum PoropermFunction {kozeny_carman_fd2, kozeny_carman_phi0} _poroperm_function;
+  const enum PoropermFunction { kozeny_carman_fd2, kozeny_carman_phi0 } _poroperm_function;
 
   /// Multiplying factor in k = k_ijk * A * phi^n / (1 - phi)^m
   Real _A;
 };
 
-#endif //POROUSFLOWPERMEABILITYKOZENYCARMAN_H
+#endif // POROUSFLOWPERMEABILITYKOZENYCARMAN_H

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef MATERIALTENSORAUX_H
 #define MATERIALTENSORAUX_H
 
@@ -15,13 +14,13 @@
 class MaterialTensorAux;
 class SymmTensor;
 
-template<>
+template <>
 InputParameters validParams<MaterialTensorAux>();
 
 class MaterialTensorAux : public AuxKernel
 {
 public:
-  MaterialTensorAux( const InputParameters & parameters);
+  MaterialTensorAux(const InputParameters & parameters);
 
   virtual ~MaterialTensorAux() {}
 

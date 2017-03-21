@@ -11,7 +11,7 @@
 
 class TensorMechanicsPlasticOrthotropic;
 
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticOrthotropic>();
 
 /**

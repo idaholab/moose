@@ -11,7 +11,7 @@
 
 class ChemicalReactionsApp;
 
-template<>
+template <>
 InputParameters validParams<ChemicalReactionsApp>();
 
 class ChemicalReactionsApp : public MooseApp

@@ -19,22 +19,29 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
-template<>
-InputParameters validParams<AddNavierStokesICsAction>()
+template <>
+InputParameters
+validParams<AddNavierStokesICsAction>()
 {
   InputParameters params = validParams<NSAction>();
 
-  params.addClassDescription("This class allows us to have a section of the input file like the following which automatically adds initial conditions for all the required nonlinear and auxiliary variables.");
-  params.addRequiredParam<Real>("initial_pressure", "The initial pressure, assumed constant everywhere");
-  params.addRequiredParam<Real>("initial_temperature", "The initial temperature, assumed constant everywhere");
-  params.addRequiredParam<RealVectorValue>("initial_velocity", "The initial velocity, assumed constant everywhere");
-  params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
+  params.addClassDescription("This class allows us to have a section of the input file like the "
+                             "following which automatically adds initial conditions for all the "
+                             "required nonlinear and auxiliary variables.");
+  params.addRequiredParam<Real>("initial_pressure",
+                                "The initial pressure, assumed constant everywhere");
+  params.addRequiredParam<Real>("initial_temperature",
+                                "The initial temperature, assumed constant everywhere");
+  params.addRequiredParam<RealVectorValue>("initial_velocity",
+                                           "The initial velocity, assumed constant everywhere");
+  params.addRequiredParam<UserObjectName>("fluid_properties",
+                                          "The name of the user object for fluid properties");
 
   return params;
 }
 
-AddNavierStokesICsAction::AddNavierStokesICsAction(InputParameters parameters) :
-    NSAction(parameters),
+AddNavierStokesICsAction::AddNavierStokesICsAction(InputParameters parameters)
+  : NSAction(parameters),
     _initial_pressure(getParam<Real>("initial_pressure")),
     _initial_temperature(getParam<Real>("initial_temperature")),
     _initial_velocity(getParam<RealVectorValue>("initial_velocity")),
@@ -42,9 +49,7 @@ AddNavierStokesICsAction::AddNavierStokesICsAction(InputParameters parameters) :
 {
 }
 
-AddNavierStokesICsAction::~AddNavierStokesICsAction()
-{
-}
+AddNavierStokesICsAction::~AddNavierStokesICsAction() {}
 
 void
 AddNavierStokesICsAction::act()
@@ -58,7 +63,7 @@ AddNavierStokesICsAction::act()
 }
 
 void
-AddNavierStokesICsAction::addICs (std::vector<std::string> & names)
+AddNavierStokesICsAction::addICs(std::vector<std::string> & names)
 {
   for (const auto & name : names)
   {

@@ -12,10 +12,10 @@
 #include "MaterialData.h"
 #include "PorousFlowDictator.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowMaterial;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowMaterial>();
 
 class PorousFlowMaterial : public Material
@@ -54,4 +54,4 @@ protected:
   unsigned nearestQP(unsigned nodenum) const;
 };
 
-#endif //POROUSFLOWMATERIAL_H
+#endif // POROUSFLOWMATERIAL_H

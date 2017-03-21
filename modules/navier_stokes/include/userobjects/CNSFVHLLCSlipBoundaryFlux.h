@@ -15,7 +15,7 @@
 // Forward Declarations
 class CNSFVHLLCSlipBoundaryFlux;
 
-template<>
+template <>
 InputParameters validParams<CNSFVHLLCSlipBoundaryFlux>();
 
 /**
@@ -24,7 +24,6 @@ InputParameters validParams<CNSFVHLLCSlipBoundaryFlux>();
 class CNSFVHLLCSlipBoundaryFlux : public BoundaryFluxBase
 {
 public:
-
   CNSFVHLLCSlipBoundaryFlux(const InputParameters & parameters);
   virtual ~CNSFVHLLCSlipBoundaryFlux();
 
@@ -41,7 +40,6 @@ public:
                             DenseMatrix<Real> & jac1) const;
 
 protected:
-
   const BCUserObject & _bc_uo;
   const SinglePhaseFluidProperties & _fp;
 };

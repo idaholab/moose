@@ -16,9 +16,9 @@
 #include "BoundaryUserObject.h"
 #include "BoundaryValuePPS.h"
 
-
-template<>
-InputParameters validParams<BoundaryValuePPS>()
+template <>
+InputParameters
+validParams<BoundaryValuePPS>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<UserObjectName>("user_object", "The name of the user object");
@@ -26,16 +26,14 @@ InputParameters validParams<BoundaryValuePPS>()
   return params;
 }
 
-BoundaryValuePPS::BoundaryValuePPS(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+BoundaryValuePPS::BoundaryValuePPS(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _uo(getUserObject<BoundaryUserObject>("user_object")),
     _value(0.)
 {
 }
 
-BoundaryValuePPS::~BoundaryValuePPS()
-{
-}
+BoundaryValuePPS::~BoundaryValuePPS() {}
 
 void
 BoundaryValuePPS::initialize()

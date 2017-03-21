@@ -7,33 +7,51 @@
 #include "TensorMechanicsPlasticMeanCapTC.h"
 #include "libmesh/utility.h"
 
-template<>
-InputParameters validParams<TensorMechanicsPlasticMeanCapTC>()
+template <>
+InputParameters
+validParams<TensorMechanicsPlasticMeanCapTC>()
 {
   InputParameters params = validParams<TensorMechanicsPlasticModel>();
-  params.addRangeCheckedParam<unsigned>("max_iterations", 10, "max_iterations>0", "Maximum iterations for custom MeanCapTC return map");
-  params.addParam<bool>("use_custom_returnMap", true, "Whether to use the custom MeanCapTC returnMap algorithm.");
-  params.addParam<bool>("use_custom_cto", true, "Whether to use the custom consistent tangent operator computations.");
-  params.addRequiredParam<UserObjectName>("tensile_strength", "A TensorMechanicsHardening UserObject that defines hardening of the mean-cap tensile strength (it will typically be positive).  Yield function = trace(stress) - tensile_strength for trace(stress)>tensile_strength.");
-  params.addRequiredParam<UserObjectName>("compressive_strength", "A TensorMechanicsHardening UserObject that defines hardening of the mean-cap compressive strength.  This should always be less than tensile_strength (it will typically be negative).  Yield function = - (trace(stress) - compressive_strength) for trace(stress)<compressive_strength.");
-  params.addClassDescription("Associative mean-cap tensile and compressive plasticity with hardening/softening");
+  params.addRangeCheckedParam<unsigned>("max_iterations",
+                                        10,
+                                        "max_iterations>0",
+                                        "Maximum iterations for custom MeanCapTC return map");
+  params.addParam<bool>(
+      "use_custom_returnMap", true, "Whether to use the custom MeanCapTC returnMap algorithm.");
+  params.addParam<bool>("use_custom_cto",
+                        true,
+                        "Whether to use the custom consistent tangent operator computations.");
+  params.addRequiredParam<UserObjectName>("tensile_strength",
+                                          "A TensorMechanicsHardening UserObject that defines "
+                                          "hardening of the mean-cap tensile strength (it will "
+                                          "typically be positive).  Yield function = trace(stress) "
+                                          "- tensile_strength for trace(stress)>tensile_strength.");
+  params.addRequiredParam<UserObjectName>(
+      "compressive_strength", "A TensorMechanicsHardening UserObject that defines hardening of the "
+                              "mean-cap compressive strength.  This should always be less than "
+                              "tensile_strength (it will typically be negative).  Yield function = "
+                              "- (trace(stress) - compressive_strength) for "
+                              "trace(stress)<compressive_strength.");
+  params.addClassDescription(
+      "Associative mean-cap tensile and compressive plasticity with hardening/softening");
 
   return params;
 }
 
-TensorMechanicsPlasticMeanCapTC::TensorMechanicsPlasticMeanCapTC(const InputParameters & parameters) :
-    TensorMechanicsPlasticModel(parameters),
+TensorMechanicsPlasticMeanCapTC::TensorMechanicsPlasticMeanCapTC(const InputParameters & parameters)
+  : TensorMechanicsPlasticModel(parameters),
     _max_iters(getParam<unsigned>("max_iterations")),
     _use_custom_returnMap(getParam<bool>("use_custom_returnMap")),
     _use_custom_cto(getParam<bool>("use_custom_cto")),
     _strength(getUserObject<TensorMechanicsHardeningModel>("tensile_strength")),
     _c_strength(getUserObject<TensorMechanicsHardeningModel>("compressive_strength"))
 {
-  // cannot check the following for all values of the internal parameter, but this will catch most errors
+  // cannot check the following for all values of the internal parameter, but this will catch most
+  // errors
   if (_strength.value(0) <= _c_strength.value(0))
-    mooseError("MeanCapTC: tensile strength (which is usually positive) must not be less than compressive strength (which is usually negative)");
+    mooseError("MeanCapTC: tensile strength (which is usually positive) must not be less than "
+               "compressive strength (which is usually negative)");
 }
-
 
 Real
 TensorMechanicsPlasticMeanCapTC::yieldFunction(const RankTwoTensor & stress, Real intnl) const
@@ -54,14 +72,15 @@ TensorMechanicsPlasticMeanCapTC::yieldFunction(const RankTwoTensor & stress, Rea
 }
 
 RankTwoTensor
-TensorMechanicsPlasticMeanCapTC::dyieldFunction_dstress(const RankTwoTensor & stress, Real intnl) const
+TensorMechanicsPlasticMeanCapTC::dyieldFunction_dstress(const RankTwoTensor & stress,
+                                                        Real intnl) const
 {
   return df_dsig(stress, intnl);
 }
 
-
 Real
-TensorMechanicsPlasticMeanCapTC::dyieldFunction_dintnl(const RankTwoTensor & stress, Real intnl) const
+TensorMechanicsPlasticMeanCapTC::dyieldFunction_dintnl(const RankTwoTensor & stress,
+                                                       Real intnl) const
 {
   const Real tr = stress.trace();
   const Real t_str = tensile_strength(intnl);
@@ -74,7 +93,9 @@ TensorMechanicsPlasticMeanCapTC::dyieldFunction_dintnl(const RankTwoTensor & str
 
   const Real dt = dtensile_strength(intnl);
   const Real dc = dcompressive_strength(intnl);
-  return (dc - dt) / libMesh::pi * std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) + 1.0 / (t_str - c_str) * std::cos(libMesh::pi * (tr - c_str) / (t_str - c_str)) * ((tr - c_str) * dt - (tr - t_str) * dc );
+  return (dc - dt) / libMesh::pi * std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) +
+         1.0 / (t_str - c_str) * std::cos(libMesh::pi * (tr - c_str) / (t_str - c_str)) *
+             ((tr - c_str) * dt - (tr - t_str) * dc);
 }
 
 RankTwoTensor
@@ -89,7 +110,7 @@ TensorMechanicsPlasticMeanCapTC::df_dsig(const RankTwoTensor & stress, Real intn
   if (tr <= c_str)
     return -stress.dtrace();
 
-  return - std::cos(libMesh::pi * (tr - c_str) / (t_str - c_str)) * stress.dtrace();
+  return -std::cos(libMesh::pi * (tr - c_str) / (t_str - c_str)) * stress.dtrace();
 }
 
 RankTwoTensor
@@ -99,7 +120,8 @@ TensorMechanicsPlasticMeanCapTC::flowPotential(const RankTwoTensor & stress, Rea
 }
 
 RankFourTensor
-TensorMechanicsPlasticMeanCapTC::dflowPotential_dstress(const RankTwoTensor & stress, Real intnl) const
+TensorMechanicsPlasticMeanCapTC::dflowPotential_dstress(const RankTwoTensor & stress,
+                                                        Real intnl) const
 {
   const Real tr = stress.trace();
   const Real t_str = tensile_strength(intnl);
@@ -110,11 +132,13 @@ TensorMechanicsPlasticMeanCapTC::dflowPotential_dstress(const RankTwoTensor & st
   if (tr <= c_str)
     return RankFourTensor();
 
-  return libMesh::pi / (t_str - c_str) * std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) * stress.dtrace().outerProduct(stress.dtrace());
+  return libMesh::pi / (t_str - c_str) * std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) *
+         stress.dtrace().outerProduct(stress.dtrace());
 }
 
 RankTwoTensor
-TensorMechanicsPlasticMeanCapTC::dflowPotential_dintnl(const RankTwoTensor & stress, Real intnl) const
+TensorMechanicsPlasticMeanCapTC::dflowPotential_dintnl(const RankTwoTensor & stress,
+                                                       Real intnl) const
 {
   const Real tr = stress.trace();
   const Real t_str = tensile_strength(intnl);
@@ -127,7 +151,8 @@ TensorMechanicsPlasticMeanCapTC::dflowPotential_dintnl(const RankTwoTensor & str
 
   const Real dt = dtensile_strength(intnl);
   const Real dc = dcompressive_strength(intnl);
-  return std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) * stress.dtrace() * libMesh::pi / Utility::pow<2>(t_str - c_str) * ((tr - t_str) * dc - (tr - c_str) * dt);
+  return std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) * stress.dtrace() * libMesh::pi /
+         Utility::pow<2>(t_str - c_str) * ((tr - t_str) * dc - (tr - c_str) * dt);
 }
 
 Real
@@ -138,17 +163,21 @@ TensorMechanicsPlasticMeanCapTC::hardPotential(const RankTwoTensor & stress, Rea
   const Real t_str = tensile_strength(intnl);
 
   if (tr >= t_str)
-    return -1.0; // this will serve to *increase* the internal parameter (so internal parameter will be a measure of volumetric strain)
+    return -1.0; // this will serve to *increase* the internal parameter (so internal parameter will
+                 // be a measure of volumetric strain)
 
   const Real c_str = compressive_strength(intnl);
   if (tr <= c_str)
-    return 1.0; // this will serve to *decrease* the internal parameter (so internal parameter will be a measure of volumetric strain)
+    return 1.0; // this will serve to *decrease* the internal parameter (so internal parameter will
+                // be a measure of volumetric strain)
 
-  return std::cos(libMesh::pi * (tr - c_str) / (t_str - c_str)); // this interpolates C2 smoothly between 1 and -1
+  return std::cos(libMesh::pi * (tr - c_str) /
+                  (t_str - c_str)); // this interpolates C2 smoothly between 1 and -1
 }
 
 RankTwoTensor
-TensorMechanicsPlasticMeanCapTC::dhardPotential_dstress(const RankTwoTensor & stress, Real intnl) const
+TensorMechanicsPlasticMeanCapTC::dhardPotential_dstress(const RankTwoTensor & stress,
+                                                        Real intnl) const
 {
   const Real tr = stress.trace();
   const Real t_str = tensile_strength(intnl);
@@ -159,11 +188,13 @@ TensorMechanicsPlasticMeanCapTC::dhardPotential_dstress(const RankTwoTensor & st
   if (tr <= c_str)
     return RankTwoTensor();
 
-  return - std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) * libMesh::pi / (t_str - c_str) * stress.dtrace();
+  return -std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) * libMesh::pi / (t_str - c_str) *
+         stress.dtrace();
 }
 
 Real
-TensorMechanicsPlasticMeanCapTC::dhardPotential_dintnl(const RankTwoTensor & stress, Real intnl) const
+TensorMechanicsPlasticMeanCapTC::dhardPotential_dintnl(const RankTwoTensor & stress,
+                                                       Real intnl) const
 {
   const Real tr = stress.trace();
   const Real t_str = tensile_strength(intnl);
@@ -176,7 +207,8 @@ TensorMechanicsPlasticMeanCapTC::dhardPotential_dintnl(const RankTwoTensor & str
 
   const Real dt = dtensile_strength(intnl);
   const Real dc = dcompressive_strength(intnl);
-  return - std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) * libMesh::pi / Utility::pow<2>(t_str - c_str) * ((tr - t_str) * dc - (tr - c_str) * dt);
+  return -std::sin(libMesh::pi * (tr - c_str) / (t_str - c_str)) * libMesh::pi /
+         Utility::pow<2>(t_str - c_str) * ((tr - t_str) * dc - (tr - c_str) * dt);
 }
 
 Real
@@ -204,7 +236,12 @@ TensorMechanicsPlasticMeanCapTC::dcompressive_strength(const Real internal_param
 }
 
 void
-TensorMechanicsPlasticMeanCapTC::activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const
+TensorMechanicsPlasticMeanCapTC::activeConstraints(const std::vector<Real> & f,
+                                                   const RankTwoTensor & stress,
+                                                   Real intnl,
+                                                   const RankFourTensor & Eijkl,
+                                                   std::vector<bool> & act,
+                                                   RankTwoTensor & returned_stress) const
 {
   act.assign(1, false);
 
@@ -233,7 +270,7 @@ TensorMechanicsPlasticMeanCapTC::activeConstraints(const std::vector<Real> & f, 
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)
       for (unsigned k = 0; k < 3; ++k)
-             n(i, j) += dirn * Eijkl(i, j, k, k);
+        n(i, j) += dirn * Eijkl(i, j, k, k);
 
   // returned_stress = stress - gamma*n
   // and taking the trace of this and using
@@ -249,13 +286,28 @@ TensorMechanicsPlasticMeanCapTC::activeConstraints(const std::vector<Real> & f, 
 }
 
 bool
-TensorMechanicsPlasticMeanCapTC::returnMap(const RankTwoTensor & trial_stress, Real intnl_old, const RankFourTensor & E_ijkl,
-                                    Real ep_plastic_tolerance, RankTwoTensor & returned_stress, Real & returned_intnl,
-                                    std::vector<Real> & dpm, RankTwoTensor & delta_dp, std::vector<Real> & yf,
-                                    bool & trial_stress_inadmissible) const
+TensorMechanicsPlasticMeanCapTC::returnMap(const RankTwoTensor & trial_stress,
+                                           Real intnl_old,
+                                           const RankFourTensor & E_ijkl,
+                                           Real ep_plastic_tolerance,
+                                           RankTwoTensor & returned_stress,
+                                           Real & returned_intnl,
+                                           std::vector<Real> & dpm,
+                                           RankTwoTensor & delta_dp,
+                                           std::vector<Real> & yf,
+                                           bool & trial_stress_inadmissible) const
 {
   if (!(_use_custom_returnMap))
-    return TensorMechanicsPlasticModel::returnMap(trial_stress, intnl_old, E_ijkl, ep_plastic_tolerance, returned_stress, returned_intnl, dpm, delta_dp, yf, trial_stress_inadmissible);
+    return TensorMechanicsPlasticModel::returnMap(trial_stress,
+                                                  intnl_old,
+                                                  E_ijkl,
+                                                  ep_plastic_tolerance,
+                                                  returned_stress,
+                                                  returned_intnl,
+                                                  dpm,
+                                                  delta_dp,
+                                                  yf,
+                                                  trial_stress_inadmissible);
 
   yf.resize(1);
 
@@ -294,19 +346,22 @@ TensorMechanicsPlasticMeanCapTC::returnMap(const RankTwoTensor & trial_stress, R
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 3; ++j)
       for (unsigned k = 0; k < 3; ++k)
-             n(i, j) += dirn * E_ijkl(i, j, k, k);
+        n(i, j) += dirn * E_ijkl(i, j, k, k);
   const Real n_trace = n.trace();
 
   // Perform a Newton-Raphson to find dpm when
-  // residual = trial_stress.trace() - tensile_strength(intnl) - dpm * n.trace()  [for tensile_failure=true]
+  // residual = trial_stress.trace() - tensile_strength(intnl) - dpm * n.trace()  [for
+  // tensile_failure=true]
   // or
-  // residual = trial_stress.trace() - compressive_strength(intnl) - dpm * n.trace()  [for tensile_failure=false]
+  // residual = trial_stress.trace() - compressive_strength(intnl) - dpm * n.trace()  [for
+  // tensile_failure=false]
   Real trial_trace = trial_stress.trace();
   Real residual;
   Real jac;
   dpm[0] = 0;
   unsigned int iter = 0;
-  do {
+  do
+  {
     if (tensile_failure)
     {
       residual = trial_trace - tensile_strength(intnl_old + dpm[0]) - dpm[0] * n_trace;
@@ -317,11 +372,11 @@ TensorMechanicsPlasticMeanCapTC::returnMap(const RankTwoTensor & trial_stress, R
       residual = trial_trace - compressive_strength(intnl_old - dpm[0]) - dpm[0] * n_trace;
       jac = -dcompressive_strength(intnl_old - dpm[0]) - n_trace;
     }
-    dpm[0] += -residual/jac;
+    dpm[0] += -residual / jac;
     if (iter > _max_iters) // not converging
       return false;
     iter++;
-  } while (residual*residual > _f_tol*_f_tol);
+  } while (residual * residual > _f_tol * _f_tol);
 
   // set the returned values
   yf[0] = 0;
@@ -333,11 +388,17 @@ TensorMechanicsPlasticMeanCapTC::returnMap(const RankTwoTensor & trial_stress, R
 }
 
 RankFourTensor
-TensorMechanicsPlasticMeanCapTC::consistentTangentOperator(const RankTwoTensor & trial_stress, Real intnl_old, const RankTwoTensor & stress, Real intnl,
-                                                    const RankFourTensor & E_ijkl, const std::vector<Real> & cumulative_pm) const
+TensorMechanicsPlasticMeanCapTC::consistentTangentOperator(
+    const RankTwoTensor & trial_stress,
+    Real intnl_old,
+    const RankTwoTensor & stress,
+    Real intnl,
+    const RankFourTensor & E_ijkl,
+    const std::vector<Real> & cumulative_pm) const
 {
   if (!_use_custom_cto)
-    return TensorMechanicsPlasticModel::consistentTangentOperator(trial_stress, intnl_old, stress, intnl, E_ijkl, cumulative_pm);
+    return TensorMechanicsPlasticModel::consistentTangentOperator(
+        trial_stress, intnl_old, stress, intnl, E_ijkl, cumulative_pm);
 
   Real df_dq;
   Real alpha;

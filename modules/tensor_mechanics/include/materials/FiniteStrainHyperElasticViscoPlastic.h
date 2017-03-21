@@ -15,7 +15,7 @@
 
 class FiniteStrainHyperElasticViscoPlastic;
 
-template<>
+template <>
 InputParameters validParams<FiniteStrainHyperElasticViscoPlastic>();
 
 /**
@@ -31,7 +31,7 @@ InputParameters validParams<FiniteStrainHyperElasticViscoPlastic>();
 class FiniteStrainHyperElasticViscoPlastic : public ComputeStressBase
 {
 public:
-  FiniteStrainHyperElasticViscoPlastic (const InputParameters & parameters);
+  FiniteStrainHyperElasticViscoPlastic(const InputParameters & parameters);
 
 protected:
   /**
@@ -46,14 +46,17 @@ protected:
 
   /// This function initializes properties for each user object
   template <typename T>
-  void initProp(const std::vector<UserObjectName> &, unsigned int, std::vector<MaterialProperty<T> *> &);
+  void
+  initProp(const std::vector<UserObjectName> &, unsigned int, std::vector<MaterialProperty<T> *> &);
 
   /**
    * This function initializes old for stateful properties associated with user object
    * Only user objects that update internal variables have an associated old property
    **/
   template <typename T>
-  void initPropOld(const std::vector<UserObjectName> &, unsigned int, std::vector<MaterialProperty<T> *> &);
+  void initPropOld(const std::vector<UserObjectName> &,
+                   unsigned int,
+                   std::vector<MaterialProperty<T> *> &);
 
   /// This function initializes user objects
   template <typename T>
@@ -195,11 +198,11 @@ protected:
   const MaterialProperty<RankTwoTensor> & _deformation_gradient_old;
   const MaterialProperty<RankTwoTensor> & _rotation_increment;
 
-  std::vector< MaterialProperty<Real> * > _flow_rate_prop;
-  std::vector< MaterialProperty<Real> * > _strength_prop;
-  std::vector< MaterialProperty<Real> * > _int_var_stateful_prop;
-  std::vector< MaterialProperty<Real> * > _int_var_stateful_prop_old;
-  std::vector< MaterialProperty<Real> * > _int_var_rate_prop;
+  std::vector<MaterialProperty<Real> *> _flow_rate_prop;
+  std::vector<MaterialProperty<Real> *> _strength_prop;
+  std::vector<MaterialProperty<Real> *> _int_var_stateful_prop;
+  std::vector<MaterialProperty<Real> *> _int_var_stateful_prop_old;
+  std::vector<MaterialProperty<Real> *> _int_var_rate_prop;
   std::vector<Real> _int_var_old;
 
   RankTwoTensor _dfgrd_tmp;
@@ -220,8 +223,8 @@ protected:
   DenseVector<Real> _resid;
 
   /// Jacobian variables
-  std::vector< DenseVector<Real> > _dintvarrate_dflowrate;
-  std::vector< DenseVector<Real> > _dintvar_dflowrate_tmp;
+  std::vector<DenseVector<Real>> _dintvarrate_dflowrate;
+  std::vector<DenseVector<Real>> _dintvar_dflowrate_tmp;
 
   DenseMatrix<Real> _dintvarrate_dintvar;
   DenseMatrix<Real> _dintvar_dintvarrate;
@@ -235,4 +238,4 @@ protected:
   Real _dt_substep;
 };
 
-#endif //FINITESTRAINHYPERELASTICVISCOPLASTIC_H
+#endif // FINITESTRAINHYPERELASTICVISCOPLASTIC_H

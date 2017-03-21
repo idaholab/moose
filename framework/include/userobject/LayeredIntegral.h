@@ -19,14 +19,15 @@
 #include "ElementIntegralVariableUserObject.h"
 #include "LayeredBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class LayeredIntegral;
 
-template<>
+template <>
 InputParameters validParams<LayeredIntegral>();
 
 /**
- * This UserObject computes volume integrals of a variable storing partial sums for the specified number of intervals in a direction (x,y,z).c
+ * This UserObject computes volume integrals of a variable storing partial sums for the specified
+ * number of intervals in a direction (x,y,z).c
  */
 class LayeredIntegral : public ElementIntegralVariableUserObject, public LayeredBase
 {

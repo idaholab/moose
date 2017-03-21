@@ -19,7 +19,7 @@
 
 class ExplicitMidpoint;
 
-template<>
+template <>
 InputParameters validParams<ExplicitMidpoint>();
 
 /**
@@ -41,10 +41,9 @@ public:
 
 protected:
   /// Method coefficient overrides
-  virtual Real a() const  { return .5; }
+  virtual Real a() const { return .5; }
   virtual Real b1() const { return 0.; }
   virtual Real b2() const { return 1.; }
 };
-
 
 #endif /* EXPLICITMIDPOINT_H */

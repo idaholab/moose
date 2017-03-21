@@ -23,11 +23,11 @@
 
 // Forward declarations
 class DiracKernel;
-template <typename T> class MooseObjectWarehouse;
+template <typename T>
+class MooseObjectWarehouse;
 class NonlinearSystemBase;
 
 typedef StoredRange<std::set<const Elem *>::const_iterator, const Elem *> DistElemRange;
-
 
 class ComputeDiracThread : public ThreadedElementLoop<DistElemRange>
 {
@@ -55,4 +55,4 @@ protected:
   const MooseObjectWarehouse<DiracKernel> & _dirac_kernels;
 };
 
-#endif //COMPUTEDIRACTHREAD_H
+#endif // COMPUTEDIRACTHREAD_H

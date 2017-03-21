@@ -32,11 +32,13 @@ validParams<MemoryUsage>()
   MooseEnum mem_type("virtual_memory physical_memory page_faults", "virtual_memory");
   params.addParam<MooseEnum>("mem_type", mem_type, "Memory metric to report.");
   MooseEnum value_type("total average max_process min_processs", "total");
-  params.addParam<MooseEnum>("value_type", value_type,
-                             "Aggregation method to apply to the requested memory metric.");
-  params.addParam<bool>("report_peak_value", true, "If the postprocessor is executed more than one "
-                                                   "during a time step, report the aggregated peak "
-                                                   "value.");
+  params.addParam<MooseEnum>(
+      "value_type", value_type, "Aggregation method to apply to the requested memory metric.");
+  params.addParam<bool>("report_peak_value",
+                        true,
+                        "If the postprocessor is executed more than one "
+                        "during a time step, report the aggregated peak "
+                        "value.");
   return params;
 }
 
@@ -97,8 +99,10 @@ MemoryUsage::execute()
 #ifdef __APPLE__
     struct task_basic_info t_info;
     mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
-    if (KERN_SUCCESS == task_info(mach_task_self(), TASK_BASIC_INFO,
-                                  reinterpret_cast<task_info_t>(&t_info), &t_info_count))
+    if (KERN_SUCCESS == task_info(mach_task_self(),
+                                  TASK_BASIC_INFO,
+                                  reinterpret_cast<task_info_t>(&t_info),
+                                  &t_info_count))
     {
       val[index_virtual_size] = t_info.virtual_size;
       val[index_resident_size] = t_info.resident_size;

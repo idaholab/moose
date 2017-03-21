@@ -13,7 +13,7 @@
  * Interface class ("Veneer") to provide generator methods for derivative
  * material property names, and guarded getMaterialPropertyPointer calls
  */
-template<class T>
+template <class T>
 class DerivativeKernelInterface : public DerivativeMaterialInterface<T>
 {
 public:
@@ -27,21 +27,22 @@ protected:
   std::string _F_name;
 };
 
-template<class T>
-DerivativeKernelInterface<T>::DerivativeKernelInterface(const InputParameters & parameters) :
-    DerivativeMaterialInterface<T>(parameters),
+template <class T>
+DerivativeKernelInterface<T>::DerivativeKernelInterface(const InputParameters & parameters)
+  : DerivativeMaterialInterface<T>(parameters),
     _nvar(this->_coupled_moose_vars.size()),
     _F_name(this->template getParam<std::string>("f_name"))
 {
 }
 
-template<class T>
+template <class T>
 InputParameters
 DerivativeKernelInterface<T>::validParams()
 {
   InputParameters params = ::validParams<T>();
-  params.addRequiredParam<std::string>("f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
+  params.addRequiredParam<std::string>(
+      "f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
   return params;
 }
 
-#endif //DERIVATIVEKERNELINTERFACE_H
+#endif // DERIVATIVEKERNELINTERFACE_H

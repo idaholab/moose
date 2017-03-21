@@ -17,11 +17,11 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class TimeExtremeValue;
 
 // Input parameters
-template<>
+template <>
 InputParameters validParams<TimeExtremeValue>();
 
 /// A postprocessor for reporting the max/min value of another postprocessor over time

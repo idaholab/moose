@@ -13,7 +13,7 @@
 // Forward Declarations
 class NSEnergyViscousFlux;
 
-template<>
+template <>
 InputParameters validParams<NSEnergyViscousFlux>();
 
 /**

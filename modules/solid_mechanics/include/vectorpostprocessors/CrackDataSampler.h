@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef CRACK_DATA_SAMPLER_H
 #define CRACK_DATA_SAMPLER_H
 
@@ -13,10 +12,10 @@
 #include "CrackFrontDefinition.h"
 #include "SamplerBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class CrackDataSampler;
 
-template<>
+template <>
 InputParameters validParams<CrackDataSampler>();
 
 /**
@@ -24,9 +23,7 @@ InputParameters validParams<CrackDataSampler>();
  *  domain integrals, printed along with positions and angles along the crack front
  */
 
-class CrackDataSampler :
-  public GeneralVectorPostprocessor,
-  public SamplerBase
+class CrackDataSampler : public GeneralVectorPostprocessor, public SamplerBase
 {
 public:
   /**
@@ -55,7 +52,7 @@ public:
 protected:
   const CrackFrontDefinition * const _crack_front_definition;
 
-  MooseEnum  _position_type;
+  MooseEnum _position_type;
 
   /// The vector of PostprocessorValue objects that are used to get the values of the domain integral postprocessors
   std::vector<const PostprocessorValue *> _domain_integral_postprocessor_values;

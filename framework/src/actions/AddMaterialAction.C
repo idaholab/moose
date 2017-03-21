@@ -15,16 +15,14 @@
 #include "AddMaterialAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddMaterialAction>()
+template <>
+InputParameters
+validParams<AddMaterialAction>()
 {
   return validParams<MooseObjectAction>();
 }
 
-AddMaterialAction::AddMaterialAction(InputParameters params) :
-    MooseObjectAction(params)
-{
-}
+AddMaterialAction::AddMaterialAction(InputParameters params) : MooseObjectAction(params) {}
 
 void
 AddMaterialAction::act()

@@ -10,26 +10,35 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ComputeAxisymmetric1DFiniteStrain>()
+template <>
+InputParameters
+validParams<ComputeAxisymmetric1DFiniteStrain>()
 {
   InputParameters params = validParams<Compute1DFiniteStrain>();
-  params.addClassDescription("Compute a strain increment and rotation increment for finite strains in an axisymmetric 1D problem");
+  params.addClassDescription("Compute a strain increment and rotation increment for finite strains "
+                             "in an axisymmetric 1D problem");
   params.addCoupledVar("scalar_out_of_plane_strain", "Scalar variable for axisymmetric 1D problem");
   params.addCoupledVar("out_of_plane_strain", "Nonlinear variable for axisymmetric 1D problem");
 
   return params;
 }
 
-ComputeAxisymmetric1DFiniteStrain::ComputeAxisymmetric1DFiniteStrain(const InputParameters & parameters) :
-    Compute1DFiniteStrain(parameters),
+ComputeAxisymmetric1DFiniteStrain::ComputeAxisymmetric1DFiniteStrain(
+    const InputParameters & parameters)
+  : Compute1DFiniteStrain(parameters),
     _disp_old_0(coupledValueOld("displacements", 0)),
     _out_of_plane_strain_coupled(isCoupled("out_of_plane_strain")),
-    _out_of_plane_strain(_out_of_plane_strain_coupled ? coupledValue("out_of_plane_strain") : _zero),
-    _out_of_plane_strain_old(_out_of_plane_strain_coupled ? coupledValueOld("out_of_plane_strain") : _zero),
+    _out_of_plane_strain(_out_of_plane_strain_coupled ? coupledValue("out_of_plane_strain")
+                                                      : _zero),
+    _out_of_plane_strain_old(_out_of_plane_strain_coupled ? coupledValueOld("out_of_plane_strain")
+                                                          : _zero),
     _scalar_out_of_plane_strain_coupled(isCoupledScalar("scalar_out_of_plane_strain")),
-    _scalar_out_of_plane_strain(_scalar_out_of_plane_strain_coupled ? coupledScalarValue("scalar_out_of_plane_strain") : _zero),
-    _scalar_out_of_plane_strain_old(_scalar_out_of_plane_strain_coupled ? coupledScalarValueOld("scalar_out_of_plane_strain") : _zero)
+    _scalar_out_of_plane_strain(_scalar_out_of_plane_strain_coupled
+                                    ? coupledScalarValue("scalar_out_of_plane_strain")
+                                    : _zero),
+    _scalar_out_of_plane_strain_old(_scalar_out_of_plane_strain_coupled
+                                        ? coupledScalarValueOld("scalar_out_of_plane_strain")
+                                        : _zero)
 {
   if (_out_of_plane_strain_coupled && _scalar_out_of_plane_strain_coupled)
     mooseError("Must define only one of out_of_plane_strain or scalar_out_of_plane_strain");

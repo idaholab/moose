@@ -33,17 +33,17 @@ class DependencyResolverComparator
 {
 public:
   DependencyResolverComparator(const std::vector<T> & original_order)
-    : _original_order(original_order) {}
+    : _original_order(original_order)
+  {
+  }
 
-  bool operator() (const T & a, const T & b) const
+  bool operator()(const T & a, const T & b) const
   {
     auto a_it = std::find(_original_order.begin(), _original_order.end(), a);
     auto b_it = std::find(_original_order.begin(), _original_order.end(), b);
 
-    mooseAssert(a_it != _original_order.end(),
-                "Bad DependencyResolverComparator request");
-    mooseAssert(b_it != _original_order.end(),
-                "Bad DependencyResolverComparator request");
+    mooseAssert(a_it != _original_order.end(), "Bad DependencyResolverComparator request");
+    mooseAssert(b_it != _original_order.end(), "Bad DependencyResolverComparator request");
 
     /**
      * Compare the iterators based on their original ordering.
@@ -55,7 +55,6 @@ private:
   const std::vector<T> & _original_order;
 };
 
-
 template <typename T>
 class DependencyResolver
 {
@@ -65,7 +64,8 @@ public:
   ~DependencyResolver() {}
 
   /**
-   * Insert a dependency pair - the first value or the "key" depends on the second value or the "value"
+   * Insert a dependency pair - the first value or the "key" depends on the second value or the
+   * "value"
    */
   void insertDependency(const T & key, const T & value);
 
@@ -78,25 +78,27 @@ public:
    * Returns a vector of sets that represent dependency resolved values.  Items in the same
    * subvector have no dependence upon one and other.
    */
-  const std::vector<std::vector<T> > & getSortedValuesSets();
+  const std::vector<std::vector<T>> & getSortedValuesSets();
 
   /**
-   * This function also returns dependency resolved values but with a simpler single vector interface.
-   * Some information may be lost as values at the same level that don't depend on one and other can't
+   * This function also returns dependency resolved values but with a simpler single vector
+   * interface.
+   * Some information may be lost as values at the same level that don't depend on one and other
+   * can't
    * be represented in a single vector.  This isn't a problem in practice though.
    */
   const std::vector<T> & getSortedValues();
 
-  bool operator() (const T & a, const T & b);
+  bool operator()(const T & a, const T & b);
 
 private:
   /**
    * Helper classes for returning only keys or values in an iterator format
    */
-  template<typename map_type>
+  template <typename map_type>
   class key_iterator;
 
-  template<typename map_type>
+  template <typename map_type>
   class value_iterator;
 
   /// This is our main data structure a multimap that contains any number of dependencies in a key = value format
@@ -111,36 +113,30 @@ private:
   std::vector<T> _ordering_vector;
 
   /// The sorted vector of sets
-  std::vector<std::vector<T> > _ordered_items;
+  std::vector<std::vector<T>> _ordered_items;
 
   /// The sorted vector (if requested)
   std::vector<T> _ordered_items_vector;
 };
 
-template<typename T>
+template <typename T>
 class CyclicDependencyException : public std::runtime_error
 {
 public:
-  CyclicDependencyException(const std::string &error, const std::multimap<T, T> & cyclic_items) throw() :
-      runtime_error(error),
-      _cyclic_items(cyclic_items)
-    {
-    }
+  CyclicDependencyException(const std::string & error,
+                            const std::multimap<T, T> & cyclic_items) throw()
+    : runtime_error(error), _cyclic_items(cyclic_items)
+  {
+  }
 
-  CyclicDependencyException(const CyclicDependencyException & e) throw() :
-      runtime_error(e),
-      _cyclic_items(e._cyclic_items)
-    {
-    }
+  CyclicDependencyException(const CyclicDependencyException & e) throw()
+    : runtime_error(e), _cyclic_items(e._cyclic_items)
+  {
+  }
 
-  ~CyclicDependencyException() throw()
-    {
-    }
+  ~CyclicDependencyException() throw() {}
 
-  const std::multimap<T, T> & getCyclicDependencies() const
-    {
-      return _cyclic_items;
-    }
+  const std::multimap<T, T> & getCyclicDependencies() const { return _cyclic_items; }
 
 private:
   std::multimap<T, T> _cyclic_items;
@@ -150,37 +146,30 @@ private:
  * Helper class definitions
  */
 template <typename T>
-template<typename map_type>
+template <typename map_type>
 class DependencyResolver<T>::key_iterator : public map_type::iterator
 {
 public:
   typedef typename map_type::iterator map_iterator;
   typedef typename map_iterator::value_type::first_type key_type;
 
-  key_iterator(const map_iterator& other) : map_type::iterator(other) {} ;
+  key_iterator(const map_iterator & other) : map_type::iterator(other){};
 
-  key_type& operator *()
-    {
-      return map_type::iterator::operator*().first;
-    }
+  key_type & operator*() { return map_type::iterator::operator*().first; }
 };
 
 template <typename T>
-template<typename map_type>
+template <typename map_type>
 class DependencyResolver<T>::value_iterator : public map_type::iterator
 {
 public:
   typedef typename map_type::iterator map_iterator;
   typedef typename map_iterator::value_type::second_type value_type;
 
-  value_iterator(const map_iterator& other) : map_type::iterator(other) {} ;
+  value_iterator(const map_iterator & other) : map_type::iterator(other){};
 
-  value_type& operator *()
-    {
-      return map_type::iterator::operator*().second;
-    }
+  value_type & operator*() { return map_type::iterator::operator*().second; }
 };
-
 
 /**
  * DependencyResolver class definitions
@@ -203,7 +192,7 @@ DependencyResolver<T>::addItem(const T & value)
 }
 
 template <typename T>
-const std::vector<std::vector<T> > &
+const std::vector<std::vector<T>> &
 DependencyResolver<T>::getSortedValuesSets()
 {
   /* Make a copy of the map to work on since we will remove values from the map*/
@@ -212,14 +201,14 @@ DependencyResolver<T>::getSortedValuesSets()
   // Use the original ordering for ordering subvectors
   DependencyResolverComparator<T> comp(_ordering_vector);
 
-  //Build up a set of all keys in depends that have nothing depending on them,
-  //and put it in the nodepends set.  These are the leaves of the dependency tree.
+  // Build up a set of all keys in depends that have nothing depending on them,
+  // and put it in the nodepends set.  These are the leaves of the dependency tree.
   std::set<T> nodepends;
   for (typename std::multimap<T, T>::iterator i = depends.begin(); i != depends.end(); ++i)
   {
-    T key=i->first;
+    T key = i->first;
 
-    bool founditem=false;
+    bool founditem = false;
     for (typename std::multimap<T, T>::iterator i2 = depends.begin(); i2 != depends.end(); ++i2)
     {
       if (i2->second == key)
@@ -232,11 +221,11 @@ DependencyResolver<T>::getSortedValuesSets()
       nodepends.insert(key);
   }
 
-  //Remove items from _independent_items if they actually appear in depends
+  // Remove items from _independent_items if they actually appear in depends
   for (auto siter = _independent_items.begin(); siter != _independent_items.end();)
   {
-    T key=*siter;
-    bool founditem=false;
+    T key = *siter;
+    bool founditem = false;
     for (typename std::multimap<T, T>::iterator i2 = depends.begin(); i2 != depends.end(); ++i2)
     {
       if (i2->first == key || i2->second == key)
@@ -254,8 +243,8 @@ DependencyResolver<T>::getSortedValuesSets()
   /* Clear the ordered items vector */
   _ordered_items.clear();
 
-  //Put the independent items into the first set in _ordered_items
-  std::vector<T> next_set (_independent_items);
+  // Put the independent items into the first set in _ordered_items
+  std::vector<T> next_set(_independent_items);
 
   /* Topological Sort */
   while (!depends.empty())
@@ -263,24 +252,29 @@ DependencyResolver<T>::getSortedValuesSets()
     /* Work with sets since set_difference doesn't always work properly with multi_map due
      * to duplicate keys
      */
-    std::set<T, DependencyResolverComparator<T> > keys
-      (typename DependencyResolver<T>::template key_iterator<std::multimap<T, T> >(depends.begin()),
-       typename DependencyResolver<T>::template key_iterator<std::multimap<T, T> >(depends.end()),
-       comp);
+    std::set<T, DependencyResolverComparator<T>> keys(
+        typename DependencyResolver<T>::template key_iterator<std::multimap<T, T>>(depends.begin()),
+        typename DependencyResolver<T>::template key_iterator<std::multimap<T, T>>(depends.end()),
+        comp);
 
-    std::set<T, DependencyResolverComparator<T> > values
-      (typename DependencyResolver<T>::template value_iterator<std::multimap<T, T> >(depends.begin()),
-       typename DependencyResolver<T>::template value_iterator<std::multimap<T, T> >(depends.end()),
-       comp);
+    std::set<T, DependencyResolverComparator<T>> values(
+        typename DependencyResolver<T>::template value_iterator<std::multimap<T, T>>(
+            depends.begin()),
+        typename DependencyResolver<T>::template value_iterator<std::multimap<T, T>>(depends.end()),
+        comp);
 
     std::vector<T> current_set(next_set);
     next_set.clear();
 
     /* This set difference creates a set of items that have no dependencies in the depend map*/
-    std::set<T, DependencyResolverComparator<T> > difference(comp);
+    std::set<T, DependencyResolverComparator<T>> difference(comp);
 
-    std::set_difference(values.begin(), values.end(), keys.begin(), keys.end(),
-                        std::inserter(difference, difference.end()), comp);
+    std::set_difference(values.begin(),
+                        values.end(),
+                        keys.begin(),
+                        keys.end(),
+                        std::inserter(difference, difference.end()),
+                        comp);
 
     /* Now remove items from the temporary map that have been "resolved" */
     if (!difference.empty())
@@ -290,7 +284,7 @@ DependencyResolver<T>::getSortedValuesSets()
         if (difference.find(iter->second) != difference.end())
         {
           T key = iter->first;
-          depends.erase(iter++);   // post increment to maintain a valid iterator
+          depends.erase(iter++); // post increment to maintain a valid iterator
 
           // If the item is at the end of a dependency chain (by being in nodepends) AND
           // is not still in the depends map because it still has another unresolved link
@@ -308,9 +302,10 @@ DependencyResolver<T>::getSortedValuesSets()
     else
     {
 
-    /* If the last set difference was empty but there are still items that haven't come out then there is
-     * a cyclic dependency somewhere in the map
-     */
+      /* If the last set difference was empty but there are still items that haven't come out then
+       * there is
+       * a cyclic dependency somewhere in the map
+       */
       if (!depends.empty())
       {
         std::ostringstream oss;
@@ -343,7 +338,7 @@ DependencyResolver<T>::getSortedValues()
 
   getSortedValuesSets();
 
-  for ( auto subset : _ordered_items )
+  for (auto subset : _ordered_items)
     std::copy(subset.begin(), subset.end(), std::back_inserter(_ordered_items_vector));
 
   return _ordered_items_vector;
@@ -351,13 +346,15 @@ DependencyResolver<T>::getSortedValues()
 
 template <typename T>
 bool
-DependencyResolver<T>::operator() (const T & a, const T & b)
+DependencyResolver<T>::operator()(const T & a, const T & b)
 {
   if (_ordered_items_vector.empty())
     getSortedValues();
 
-  typename std::vector<T>::const_iterator a_it = std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), a);
-  typename std::vector<T>::const_iterator b_it = std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), b);
+  typename std::vector<T>::const_iterator a_it =
+      std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), a);
+  typename std::vector<T>::const_iterator b_it =
+      std::find(_ordered_items_vector.begin(), _ordered_items_vector.end(), b);
 
   /**
    * It's possible that a and/or b are not in the resolver in which case
@@ -371,11 +368,11 @@ DependencyResolver<T>::operator() (const T & a, const T & b)
   if (a_it == _ordered_items_vector.end())
     return true;
   else
- /**
-  * Compare the iterators.  Users sometime fail to state all their
-  * items' dependencies, but do introduce dependant items only after
-  * the items they depended on; this preserves that sorting.
-  */
+    /**
+     * Compare the iterators.  Users sometime fail to state all their
+     * items' dependencies, but do introduce dependant items only after
+     * the items they depended on; this preserves that sorting.
+     */
     return a_it < b_it;
 }
 

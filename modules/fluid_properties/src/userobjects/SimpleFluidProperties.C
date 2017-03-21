@@ -7,26 +7,33 @@
 
 #include "SimpleFluidProperties.h"
 
-template<>
-InputParameters validParams<SimpleFluidProperties>()
+template <>
+InputParameters
+validParams<SimpleFluidProperties>()
 {
   InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
   params.addParam<Real>("molar_mass", 1.8E-2, "Constant molar mass of the fluid (kg/mol)");
-  params.addParam<Real>("thermal_expansion", 2.14E-4, "Constant coefficient of thermal expansion (1/K)");
-  params.addParam<Real>("cv", 4186.0, "Constant specific heat capacity at constant volume (J/kg/K)");
-  params.addParam<Real>("cp", 4194.0, "Constant specific heat capacity at constant pressure (J/kg/K)");
-  params.addRangeCheckedParam<Real>("bulk_modulus", 2.0E9, "bulk_modulus>0", "Constant bulk modulus (Pa)");
+  params.addParam<Real>(
+      "thermal_expansion", 2.14E-4, "Constant coefficient of thermal expansion (1/K)");
+  params.addParam<Real>(
+      "cv", 4186.0, "Constant specific heat capacity at constant volume (J/kg/K)");
+  params.addParam<Real>(
+      "cp", 4194.0, "Constant specific heat capacity at constant pressure (J/kg/K)");
+  params.addRangeCheckedParam<Real>(
+      "bulk_modulus", 2.0E9, "bulk_modulus>0", "Constant bulk modulus (Pa)");
   params.addParam<Real>("thermal_conductivity", 0.6, "Constant thermal conductivity (W/m/K)");
   params.addParam<Real>("specific_entropy", 300.0, "Constant specific entropy (J/kg/K)");
   params.addParam<Real>("viscosity", 1.0E-3, "Constant dynamic viscosity (Pa.s)");
   params.addParam<Real>("density0", 1000.0, "Density at zero pressure and zero temperature");
   params.addParam<Real>("henry_constant", 0.0, "Henry constant for dissolution in water");
-  params.addClassDescription("Fluid properties for a simple fluid.  density=density0 * exp(P / bulk_modulus - thermal_expansion * T), internal_energy = cv * T, enthalpy = cp * T");
+  params.addClassDescription("Fluid properties for a simple fluid.  density=density0 * exp(P / "
+                             "bulk_modulus - thermal_expansion * T), internal_energy = cv * T, "
+                             "enthalpy = cp * T");
   return params;
 }
 
-SimpleFluidProperties::SimpleFluidProperties(const InputParameters & parameters) :
-    SinglePhaseFluidPropertiesPT(parameters),
+SimpleFluidProperties::SimpleFluidProperties(const InputParameters & parameters)
+  : SinglePhaseFluidPropertiesPT(parameters),
     _molar_mass(getParam<Real>("molar_mass")),
     _thermal_expansion(getParam<Real>("thermal_expansion")),
     _cv(getParam<Real>("cv")),
@@ -40,9 +47,7 @@ SimpleFluidProperties::SimpleFluidProperties(const InputParameters & parameters)
 {
 }
 
-SimpleFluidProperties::~SimpleFluidProperties()
-{
-}
+SimpleFluidProperties::~SimpleFluidProperties() {}
 
 Real
 SimpleFluidProperties::molarMass() const
@@ -50,23 +55,14 @@ SimpleFluidProperties::molarMass() const
   return _molar_mass;
 }
 
-Real
-SimpleFluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
+Real SimpleFluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
 {
   return _thermal_expansion;
 }
 
-Real
-SimpleFluidProperties::cp(Real /*pressure*/, Real /*temperature*/) const
-{
-  return _cp;
-}
+Real SimpleFluidProperties::cp(Real /*pressure*/, Real /*temperature*/) const { return _cp; }
 
-Real
-SimpleFluidProperties::cv(Real /*pressure*/, Real /*temperature*/) const
-{
-  return _cv;
-}
+Real SimpleFluidProperties::cv(Real /*pressure*/, Real /*temperature*/) const { return _cv; }
 
 Real
 SimpleFluidProperties::c(Real pressure, Real temperature) const
@@ -74,14 +70,12 @@ SimpleFluidProperties::c(Real pressure, Real temperature) const
   return std::sqrt(_bulk_modulus / rho(pressure, temperature));
 }
 
-Real
-SimpleFluidProperties::k(Real /*pressure*/, Real /*temperature*/) const
+Real SimpleFluidProperties::k(Real /*pressure*/, Real /*temperature*/) const
 {
   return _thermal_conductivity;
 }
 
-Real
-SimpleFluidProperties::s(Real /*pressure*/, Real /*temperature*/) const
+Real SimpleFluidProperties::s(Real /*pressure*/, Real /*temperature*/) const
 {
   return _specific_entropy;
 }
@@ -93,13 +87,13 @@ SimpleFluidProperties::rho(Real pressure, Real temperature) const
 }
 
 void
-SimpleFluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
+SimpleFluidProperties::rho_dpT(
+    Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   rho = this->rho(pressure, temperature);
   drho_dp = rho / _bulk_modulus;
-  drho_dT = - _thermal_expansion * rho;
+  drho_dT = -_thermal_expansion * rho;
 }
-
 
 Real
 SimpleFluidProperties::e(Real /*pressure*/, Real temperature) const
@@ -108,7 +102,8 @@ SimpleFluidProperties::e(Real /*pressure*/, Real temperature) const
 }
 
 void
-SimpleFluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
+SimpleFluidProperties::e_dpT(
+    Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
   e = this->e(pressure, temperature);
   de_dp = 0.0;
@@ -116,7 +111,14 @@ SimpleFluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & d
 }
 
 void
-SimpleFluidProperties::rho_e_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT, Real & e, Real & de_dp, Real & de_dT) const
+SimpleFluidProperties::rho_e_dpT(Real pressure,
+                                 Real temperature,
+                                 Real & rho,
+                                 Real & drho_dp,
+                                 Real & drho_dT,
+                                 Real & e,
+                                 Real & de_dp,
+                                 Real & de_dT) const
 {
   Real density, ddensity_dp, ddensity_dT;
   rho_dpT(pressure, temperature, density, ddensity_dp, ddensity_dT);
@@ -131,14 +133,11 @@ SimpleFluidProperties::rho_e_dpT(Real pressure, Real temperature, Real & rho, Re
   de_dT = denergy_dT;
 }
 
-Real
-SimpleFluidProperties::mu(Real /*density*/, Real /*temperature*/) const
-{
-  return _viscosity;
-}
+Real SimpleFluidProperties::mu(Real /*density*/, Real /*temperature*/) const { return _viscosity; }
 
 void
-SimpleFluidProperties::mu_drhoT(Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
+SimpleFluidProperties::mu_drhoT(
+    Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
 {
   mu = this->mu(density, temperature);
   dmu_drho = 0.0;
@@ -152,15 +151,12 @@ SimpleFluidProperties::h(Real /*pressure*/, Real temperature) const
 }
 
 void
-SimpleFluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
+SimpleFluidProperties::h_dpT(
+    Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   h = this->h(pressure, temperature);
   dh_dp = 0.0;
   dh_dT = _cp;
 }
 
-Real
-SimpleFluidProperties::henryConstant(Real /*temperature*/) const
-{
-  return _henry_constant;
-}
+Real SimpleFluidProperties::henryConstant(Real /*temperature*/) const { return _henry_constant; }

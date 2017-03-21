@@ -11,17 +11,17 @@
 #include "CrackFrontDefinition.h"
 #include "SymmTensor.h"
 
-//Forward Declarations
+// Forward Declarations
 class InteractionIntegral;
 
-template<>
+template <>
 InputParameters validParams<InteractionIntegral>();
 
 /**
  * This postprocessor computes the Interaction Integral
  *
  */
-class InteractionIntegral: public ElementIntegralPostprocessor
+class InteractionIntegral : public ElementIntegralPostprocessor
 {
 public:
   InteractionIntegral(const InputParameters & parameters);
@@ -56,4 +56,4 @@ protected:
   Real _poissons_ratio;
 };
 
-#endif //INTERACTIONINTEGRAL_H
+#endif // INTERACTIONINTEGRAL_H

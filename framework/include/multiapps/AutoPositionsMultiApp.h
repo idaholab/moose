@@ -19,15 +19,13 @@
 
 class AutoPositionsMultiApp;
 
-template<>
+template <>
 InputParameters validParams<AutoPositionsMultiApp>();
 
 /**
  * Automatically generates Sub-App positions from positions in the master app's mesh.
  */
-class AutoPositionsMultiApp :
-  public TransientMultiApp,
-  public BoundaryRestrictable
+class AutoPositionsMultiApp : public TransientMultiApp, public BoundaryRestrictable
 {
 public:
   AutoPositionsMultiApp(const InputParameters & parameters);

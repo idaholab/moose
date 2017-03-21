@@ -20,7 +20,7 @@
 class TransientMultiApp;
 class Transient;
 
-template<>
+template <>
 InputParameters validParams<TransientMultiApp>();
 
 /**
@@ -28,19 +28,19 @@ InputParameters validParams<TransientMultiApp>();
  * In particular, this is important because TransientMultiApps
  * will be taken into account in the time step selection process.
  */
-class TransientMultiApp :
-  public MultiApp
+class TransientMultiApp : public MultiApp
 {
 public:
   TransientMultiApp(const InputParameters & parameters);
 
   virtual ~TransientMultiApp();
 
-  virtual NumericVector<Number> & appTransferVector(unsigned int app, std::string var_name) override;
+  virtual NumericVector<Number> & appTransferVector(unsigned int app,
+                                                    std::string var_name) override;
 
   virtual void initialSetup() override;
 
-  virtual bool solveStep(Real dt, Real target_time, bool auto_advance=true) override;
+  virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
   virtual void advanceStep() override;
 
@@ -87,7 +87,7 @@ private:
   /// The DoFs associated with all of the currently transferred variables.
   std::set<dof_id_type> _transferred_dofs;
 
-  std::vector<std::map<std::string, unsigned int> > _output_file_numbers;
+  std::vector<std::map<std::string, unsigned int>> _output_file_numbers;
 
   bool _auto_advance;
 
@@ -104,20 +104,11 @@ private:
 class MultiAppSolveFailure : public std::runtime_error
 {
 public:
-  MultiAppSolveFailure(const std::string &error) throw() :
-      runtime_error(error)
-  {
-  }
+  MultiAppSolveFailure(const std::string & error) throw() : runtime_error(error) {}
 
-  MultiAppSolveFailure(const MultiAppSolveFailure & e) throw() :
-      runtime_error(e)
-  {
-  }
+  MultiAppSolveFailure(const MultiAppSolveFailure & e) throw() : runtime_error(e) {}
 
-  ~MultiAppSolveFailure() throw()
-  {
-  }
+  ~MultiAppSolveFailure() throw() {}
 };
-
 
 #endif // TRANSIENTMULTIAPP_H

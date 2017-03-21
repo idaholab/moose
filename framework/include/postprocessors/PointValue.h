@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class PointValue;
 
-template<>
+template <>
 InputParameters validParams<PointValue>();
 
 /**
@@ -60,7 +60,6 @@ public:
   virtual void finalize() override;
 
 protected:
-
   /// The variable from which a values is to be extracted
   MooseVariable & _var;
 

@@ -12,13 +12,13 @@
 
 class XFEMApp;
 
-template<>
+template <>
 InputParameters validParams<XFEMApp>();
 
 class XFEMApp : public MooseApp
 {
 public:
-  XFEMApp(const InputParameters &parameters);
+  XFEMApp(const InputParameters & parameters);
   virtual ~XFEMApp();
 
   static void registerApps();

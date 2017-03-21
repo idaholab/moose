@@ -9,10 +9,10 @@
 
 #include "ACBulk.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSMultiACBulkBase;
 
-template<>
+template <>
 InputParameters validParams<KKSMultiACBulkBase>();
 
 /**
@@ -47,7 +47,7 @@ protected:
   std::vector<const MaterialProperty<Real> *> _prop_Fj;
 
   /// Derivatives of the free energy functions (needed for off-diagonal Jacobians)
-  std::vector<std::vector<const MaterialProperty<Real> *> > _prop_dFjdarg;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _prop_dFjdarg;
 
   /// switching function names
   std::vector<MaterialPropertyName> _hj_names;
@@ -62,7 +62,7 @@ protected:
   std::vector<const MaterialProperty<Real> *> _prop_d2hjdetai2;
 
   /// Second derivatives of the switching functions (needed for off-diagonal Jacobians)
-  std::vector<std::vector<const MaterialProperty<Real> *> > _prop_d2hjdetaidarg;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _prop_d2hjdetaidarg;
 };
 
-#endif //KKSMULTIACBULKBASE_H
+#endif // KKSMULTIACBULKBASE_H

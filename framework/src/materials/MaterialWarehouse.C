@@ -17,27 +17,29 @@
 #include "Material.h"
 
 void
-MaterialWarehouse::addObjects(std::shared_ptr<Material> block, std::shared_ptr<Material> neighbor, std::shared_ptr<Material> face, THREAD_ID tid /*=0*/)
+MaterialWarehouse::addObjects(std::shared_ptr<Material> block,
+                              std::shared_ptr<Material> neighbor,
+                              std::shared_ptr<Material> face,
+                              THREAD_ID tid /*=0*/)
 {
   MooseObjectWarehouse<Material>::addObject(block, tid);
   _neighbor_materials.addObject(neighbor, tid);
   _face_materials.addObject(face, tid);
 }
 
-
-const MooseObjectWarehouse<Material> &
-MaterialWarehouse::operator[](Moose::MaterialDataType data_type) const
+const MooseObjectWarehouse<Material> & MaterialWarehouse::
+operator[](Moose::MaterialDataType data_type) const
 {
   switch (data_type)
   {
-  case Moose::NEIGHBOR_MATERIAL_DATA:
-    return _neighbor_materials;
-    break;
-  case Moose::FACE_MATERIAL_DATA:
-    return _face_materials;
-    break;
-  default:
-    return *this;
+    case Moose::NEIGHBOR_MATERIAL_DATA:
+      return _neighbor_materials;
+      break;
+    case Moose::FACE_MATERIAL_DATA:
+      return _face_materials;
+      break;
+    default:
+      return *this;
   }
 }
 

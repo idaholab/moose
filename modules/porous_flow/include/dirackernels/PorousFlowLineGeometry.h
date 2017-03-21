@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWLINEGEOMETRY_H
 #define POROUSFLOWLINEGEOMETRY_H
 
@@ -13,7 +12,7 @@
 
 class PorousFlowLineGeometry;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowLineGeometry>();
 
 /**
@@ -22,7 +21,6 @@ InputParameters validParams<PorousFlowLineGeometry>();
 class PorousFlowLineGeometry : public DiracKernel
 {
 public:
-
   /**
    * Creates a new PorousFlowLineGeometry
    * This reads the file containing the lines of the form
@@ -71,4 +69,4 @@ protected:
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
 };
 
-#endif //POROUSFLOWLINEGEOMETRY_H
+#endif // POROUSFLOWLINEGEOMETRY_H

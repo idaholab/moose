@@ -9,11 +9,12 @@
 
 class LevelSetReinitializationProblem;
 
-template<>
+template <>
 InputParameters validParams<LevelSetReinitializationProblem>();
 
 /**
- * A Problem object to perform level set equation reinitialization implementation, mainly implementing
+ * A Problem object to perform level set equation reinitialization implementation, mainly
+ * implementing
  * a method to reset the state of the simulation so a solve can be performed again.
  */
 class LevelSetReinitializationProblem : public FEProblem

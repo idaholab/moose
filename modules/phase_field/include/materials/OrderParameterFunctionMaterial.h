@@ -13,7 +13,7 @@
 // Forward Declarations
 class OrderParameterFunctionMaterial;
 
-template<>
+template <>
 InputParameters validParams<OrderParameterFunctionMaterial>();
 
 /**
@@ -45,4 +45,4 @@ protected:
   MaterialProperty<Real> & _prop_d2f;
 };
 
-#endif //ORDERPARAMETERFUNCTIONMATERIAL_H
+#endif // ORDERPARAMETERFUNCTIONMATERIAL_H

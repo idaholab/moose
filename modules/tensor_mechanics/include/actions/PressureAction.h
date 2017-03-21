@@ -9,7 +9,7 @@
 
 #include "Action.h"
 
-class PressureAction: public Action
+class PressureAction : public Action
 {
 public:
   PressureAction(const InputParameters & params);
@@ -21,7 +21,7 @@ private:
   const std::string _disp_x;
   const std::string _disp_y;
   const std::string _disp_z;
-  std::vector<std::vector<AuxVariableName> > _save_in_vars;
+  std::vector<std::vector<AuxVariableName>> _save_in_vars;
   std::vector<bool> _has_save_in_vars;
 
   const Real _factor;
@@ -33,7 +33,7 @@ protected:
   bool _use_displaced_mesh;
 };
 
-template<>
+template <>
 InputParameters validParams<PressureAction>();
 
-#endif //PRESSUREACTION_H
+#endif // PRESSUREACTION_H

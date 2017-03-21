@@ -14,19 +14,21 @@
 
 #include "OneDEqualValueConstraintBC.h"
 
-template<>
-InputParameters validParams<OneDEqualValueConstraintBC>()
+template <>
+InputParameters
+validParams<OneDEqualValueConstraintBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier");
   params.addRequiredParam<unsigned int>("component", "Component of the Lagrange multiplier");
-  params.addRequiredParam<Real>("vg", "Variation of the constraint g wrt this surface (+1 or -1). Note: g = value1 - value2 = 0 ");
+  params.addRequiredParam<Real>(
+      "vg",
+      "Variation of the constraint g wrt this surface (+1 or -1). Note: g = value1 - value2 = 0 ");
   return params;
 }
 
-
-OneDEqualValueConstraintBC::OneDEqualValueConstraintBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
+OneDEqualValueConstraintBC::OneDEqualValueConstraintBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _lambda(coupledScalarValue("lambda")),
     _lambda_var_number(coupledScalar("lambda")),
     _component(getParam<unsigned int>("component")),

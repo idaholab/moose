@@ -14,34 +14,35 @@
 
 #include "ConsoleMessageKernel.h"
 
-template<>
-InputParameters validParams<ConsoleMessageKernel>()
+template <>
+InputParameters
+validParams<ConsoleMessageKernel>()
 {
   InputParameters params = validParams<CoefDiffusion>();
   return params;
 }
 
-ConsoleMessageKernel::ConsoleMessageKernel(const InputParameters & parameters) :
-  CoefDiffusion(parameters)
+ConsoleMessageKernel::ConsoleMessageKernel(const InputParameters & parameters)
+  : CoefDiffusion(parameters)
 {
   _console << "ConsoleMessageKernel - Constructing object.\n";
 }
 
-ConsoleMessageKernel::~ConsoleMessageKernel()
-{
-}
+ConsoleMessageKernel::~ConsoleMessageKernel() {}
 
 void
 ConsoleMessageKernel::initialSetup()
 {
-  _console << "ConsoleMessageKernel::initalSetup - time = " << _t << "; t_step = " << _t_step << '\n';
+  _console << "ConsoleMessageKernel::initalSetup - time = " << _t << "; t_step = " << _t_step
+           << '\n';
   constMethod();
 }
 
 void
 ConsoleMessageKernel::timestepSetup()
 {
-  _console << "ConsoleMessageKernel::timestepSetup - time = " << _t << "; t_step = " << _t_step << '\n';
+  _console << "ConsoleMessageKernel::timestepSetup - time = " << _t << "; t_step = " << _t_step
+           << '\n';
 }
 
 void

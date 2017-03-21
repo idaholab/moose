@@ -20,7 +20,7 @@
 // Forward Declaration
 class Reaction;
 
-template<>
+template <>
 InputParameters validParams<Reaction>();
 
 class Reaction : public Kernel
@@ -31,6 +31,5 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
-
 };
-#endif //REACTION_H
+#endif // REACTION_H

@@ -15,17 +15,17 @@
 #include "AssignSubdomainID.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<AssignSubdomainID>()
+template <>
+InputParameters
+validParams<AssignSubdomainID>()
 {
   InputParameters params = validParams<MeshModifier>();
   params.addRequiredParam<SubdomainID>("subdomain_id", "New subdomain IDs of all elements");
   return params;
 }
 
-AssignSubdomainID::AssignSubdomainID(const InputParameters & parameters) :
-    MeshModifier(parameters),
-    _subdomain_id(getParam<SubdomainID>("subdomain_id"))
+AssignSubdomainID::AssignSubdomainID(const InputParameters & parameters)
+  : MeshModifier(parameters), _subdomain_id(getParam<SubdomainID>("subdomain_id"))
 {
 }
 

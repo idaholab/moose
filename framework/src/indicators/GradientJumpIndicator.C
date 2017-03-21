@@ -14,24 +14,23 @@
 
 #include "GradientJumpIndicator.h"
 
-template<>
-InputParameters validParams<GradientJumpIndicator>()
+template <>
+InputParameters
+validParams<GradientJumpIndicator>()
 {
   InputParameters params = validParams<InternalSideIndicator>();
   return params;
 }
 
-
-GradientJumpIndicator::GradientJumpIndicator(const InputParameters & parameters) :
-    InternalSideIndicator(parameters)
+GradientJumpIndicator::GradientJumpIndicator(const InputParameters & parameters)
+  : InternalSideIndicator(parameters)
 {
 }
-
 
 Real
 GradientJumpIndicator::computeQpIntegral()
 {
-  Real jump = (_grad_u[_qp] - _grad_u_neighbor[_qp])*_normals[_qp];
+  Real jump = (_grad_u[_qp] - _grad_u_neighbor[_qp]) * _normals[_qp];
 
-  return jump*jump;
+  return jump * jump;
 }

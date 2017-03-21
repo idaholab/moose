@@ -29,4 +29,4 @@ protected:
   MaterialProperty<RankTwoTensor> & _extra_stress;
 };
 
-#endif //COMPUTEEXTRASTRESSBASE_H
+#endif // COMPUTEEXTRASTRESSBASE_H

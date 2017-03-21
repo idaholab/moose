@@ -7,22 +7,25 @@
 #include "SumTensorIncrements.h"
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<SumTensorIncrements>()
+template <>
+InputParameters
+validParams<SumTensorIncrements>()
 {
   InputParameters params = validParams<Material>();
   params.addClassDescription("Compute tensor property by summing tensor increments");
   params.addRequiredParam<MaterialPropertyName>("tensor_name", "Name of strain property");
-  params.addParam<std::vector<MaterialPropertyName> >("coupled_tensor_increment_names", "Name of strain increment properties");
+  params.addParam<std::vector<MaterialPropertyName>>("coupled_tensor_increment_names",
+                                                     "Name of strain increment properties");
   return params;
 }
 
-SumTensorIncrements::SumTensorIncrements(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
-    _property_names(getParam<std::vector<MaterialPropertyName> >("coupled_tensor_increment_names")),
+SumTensorIncrements::SumTensorIncrements(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
+    _property_names(getParam<std::vector<MaterialPropertyName>>("coupled_tensor_increment_names")),
     _tensor(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("tensor_name"))),
     _tensor_old(declarePropertyOld<RankTwoTensor>(getParam<MaterialPropertyName>("tensor_name"))),
-    _tensor_increment(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("tensor_name") + "_increment"))
+    _tensor_increment(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("tensor_name") +
+                                                     "_increment"))
 {
   _num_property = _property_names.size();
 

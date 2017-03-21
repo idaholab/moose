@@ -18,16 +18,17 @@
 // libMesh includes
 #include "libmesh/numeric_vector.h"
 
-template<>
-InputParameters validParams<AdamsPredictor>()
+template <>
+InputParameters
+validParams<AdamsPredictor>()
 {
   InputParameters params = validParams<Predictor>();
   params.addParam<int>("order", 2, "The maximum reachable order of the Adams-Bashforth Predictor");
   return params;
 }
 
-AdamsPredictor::AdamsPredictor(const InputParameters & parameters) :
-    Predictor(parameters),
+AdamsPredictor::AdamsPredictor(const InputParameters & parameters)
+  : Predictor(parameters),
     _order(getParam<int>("order")),
     _current_old_solution(_nl.addVector("AB2_current_old_solution", true, GHOSTED)),
     _older_solution(_nl.addVector("AB2_older_solution", true, GHOSTED)),
@@ -57,7 +58,7 @@ AdamsPredictor::timestepSetup()
   _current_old_solution.localize(_older_solution);
   // Set current old solution to hold what it says.
   (_nl.solutionOld()).localize(_current_old_solution);
-  //Same thing for dt
+  // Same thing for dt
   _dt_older = _dtstorage;
   _dtstorage = _dt_old;
 }

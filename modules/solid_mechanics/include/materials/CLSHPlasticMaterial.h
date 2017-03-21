@@ -18,10 +18,9 @@ public:
   CLSHPlasticMaterial(const InputParameters & parameters);
 
 protected:
-
 };
 
-template<>
+template <>
 InputParameters validParams<CLSHPlasticMaterial>();
 
-#endif //CLSHPLASTICMATERIAL_H
+#endif // CLSHPLASTICMATERIAL_H

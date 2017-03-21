@@ -18,15 +18,21 @@
 #include "SystemBase.h"
 #include "MooseVariable.h"
 
-template<>
-InputParameters validParams<BoundaryCondition>()
+template <>
+InputParameters
+validParams<BoundaryCondition>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
   params += validParams<BoundaryRestrictableRequired>();
 
-  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this boundary condition applies to");
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+  params.addRequiredParam<NonlinearVariableName>(
+      "variable", "The name of the variable that this boundary condition applies to");
+  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the "
+                                                     "displaced mesh for computation.  Note that "
+                                                     "in the case this is true but no "
+                                                     "displacements are provided in the Mesh block "
+                                                     "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   params.declareControllable("enable");
@@ -35,8 +41,8 @@ InputParameters validParams<BoundaryCondition>()
   return params;
 }
 
-BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool nodal) :
-    MooseObject(parameters),
+BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool nodal)
+  : MooseObject(parameters),
     BoundaryRestrictableRequired(parameters, nodal),
     SetupInterface(this),
     FunctionInterface(this),

@@ -24,7 +24,7 @@
 // Forward declarations
 class Postprocessor;
 
-template<>
+template <>
 InputParameters validParams<Postprocessor>();
 
 /**

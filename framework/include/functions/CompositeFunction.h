@@ -20,7 +20,7 @@
 
 class CompositeFunction;
 
-template<>
+template <>
 InputParameters validParams<CompositeFunction>();
 
 /**
@@ -37,7 +37,6 @@ public:
 private:
   const Real _scale_factor;
   std::vector<Function *> _f;
-
 };
 
-#endif //COMPOSITE_H
+#endif // COMPOSITE_H

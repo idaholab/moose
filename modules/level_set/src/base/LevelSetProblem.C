@@ -8,19 +8,18 @@
 #include "LevelSetProblem.h"
 #include "MultiAppTransfer.h"
 
-template<>
-InputParameters validParams<LevelSetProblem>()
+template <>
+InputParameters
+validParams<LevelSetProblem>()
 {
   InputParameters params = validParams<FEProblem>();
-  params.addClassDescription("A specilized problem class that adds a custom call to MultiAppTransfer execution to transfer adaptivity for the level set reinitialization.");
+  params.addClassDescription("A specilized problem class that adds a custom call to "
+                             "MultiAppTransfer execution to transfer adaptivity for the level set "
+                             "reinitialization.");
   return params;
-
 }
 
-LevelSetProblem::LevelSetProblem(const InputParameters & parameters) :
-    FEProblem(parameters)
-{
-}
+LevelSetProblem::LevelSetProblem(const InputParameters & parameters) : FEProblem(parameters) {}
 
 void
 LevelSetProblem::adaptMesh()
@@ -35,7 +34,7 @@ LevelSetProblem::adaptMesh()
 
     execMultiAppTransfers(EXEC_CUSTOM, MultiAppTransfer::TO_MULTIAPP);
 
-    _console << "Adaptivity step " << i+1 << " of " << cycles_per_step << '\n';
+    _console << "Adaptivity step " << i + 1 << " of " << cycles_per_step << '\n';
     // Markers were already computed once by Executioner
     if (_adaptivity.getRecomputeMarkersFlag() && i > 0)
       computeMarkers();

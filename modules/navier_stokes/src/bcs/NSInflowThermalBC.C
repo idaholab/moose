@@ -10,23 +10,26 @@
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
-template<>
-InputParameters validParams<NSInflowThermalBC>()
+template <>
+InputParameters
+validParams<NSInflowThermalBC>()
 {
   InputParameters params = validParams<NodalBC>();
 
-  params.addClassDescription("This class is used on a boundary where the incoming flow values (rho, u, v, T) are all completely specified.");
+  params.addClassDescription("This class is used on a boundary where the incoming flow values "
+                             "(rho, u, v, T) are all completely specified.");
   // Boundary condition values, all required except for velocity which defaults to zero.
   params.addRequiredParam<Real>("specified_rho", "Density of incoming flow");
   params.addRequiredParam<Real>("specified_temperature", "Temperature of incoming flow");
   params.addParam<Real>("specified_velocity_magnitude", 0., "Velocity magnitude of incoming flow");
-  params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
+  params.addRequiredParam<UserObjectName>("fluid_properties",
+                                          "The name of the user object for fluid properties");
 
   return params;
 }
 
-NSInflowThermalBC::NSInflowThermalBC(const InputParameters & parameters) :
-    NodalBC(parameters),
+NSInflowThermalBC::NSInflowThermalBC(const InputParameters & parameters)
+  : NodalBC(parameters),
     _specified_rho(getParam<Real>("specified_rho")),
     _specified_temperature(getParam<Real>("specified_temperature")),
     _specified_velocity_magnitude(getParam<Real>("specified_velocity_magnitude")),
@@ -45,5 +48,7 @@ NSInflowThermalBC::computeQpResidual()
   //
   // ***at a no-slip wall*** this further reduces to (no coupling to velocity variables):
   // rho*E - rho*cv*T = 0
-  return _u[_qp] - _specified_rho * (_fp.cv() * _specified_temperature + 0.5 * _specified_velocity_magnitude * _specified_velocity_magnitude);
+  return _u[_qp] -
+         _specified_rho * (_fp.cv() * _specified_temperature +
+                           0.5 * _specified_velocity_magnitude * _specified_velocity_magnitude);
 }

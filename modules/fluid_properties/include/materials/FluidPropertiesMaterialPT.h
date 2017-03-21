@@ -13,7 +13,7 @@
 
 class FluidPropertiesMaterialPT;
 
-template<>
+template <>
 InputParameters validParams<FluidPropertiesMaterialPT>();
 
 /**

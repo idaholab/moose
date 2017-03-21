@@ -18,7 +18,7 @@
 
 class PolyCoupledDirichletBC;
 
-template<>
+template <>
 InputParameters validParams<PolyCoupledDirichletBC>();
 
 class PolyCoupledDirichletBC : public NodalBC
@@ -26,12 +26,12 @@ class PolyCoupledDirichletBC : public NodalBC
 public:
   PolyCoupledDirichletBC(const InputParameters & parameters);
 
-  virtual ~PolyCoupledDirichletBC(){}
+  virtual ~PolyCoupledDirichletBC() {}
 
 protected:
   virtual Real computeQpResidual();
 
-  Real _value; //Multiplier on the boundary
+  Real _value; // Multiplier on the boundary
 };
 
-#endif //POLYCOUPLEDDIRICHLETBC_H
+#endif // POLYCOUPLEDDIRICHLETBC_H

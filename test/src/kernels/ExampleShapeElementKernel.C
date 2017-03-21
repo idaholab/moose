@@ -14,17 +14,19 @@
 
 #include "ExampleShapeElementKernel.h"
 
-template<>
-InputParameters validParams<ExampleShapeElementKernel>()
+template <>
+InputParameters
+validParams<ExampleShapeElementKernel>()
 {
   InputParameters params = validParams<NonlocalKernel>();
-  params.addRequiredParam<UserObjectName>("user_object", "Name of an ExampleShapeElementUserObject");
+  params.addRequiredParam<UserObjectName>("user_object",
+                                          "Name of an ExampleShapeElementUserObject");
   params.addRequiredCoupledVar("v", "coupled variable");
   return params;
 }
 
-ExampleShapeElementKernel::ExampleShapeElementKernel(const InputParameters & parameters) :
-    NonlocalKernel(parameters),
+ExampleShapeElementKernel::ExampleShapeElementKernel(const InputParameters & parameters)
+  : NonlocalKernel(parameters),
     _shp(getUserObject<ExampleShapeElementUserObject>("user_object")),
     _shp_integral(_shp.getIntegral()),
     _shp_jacobian(_shp.getJacobian()),
@@ -62,7 +64,8 @@ ExampleShapeElementKernel::computeQpNonlocalJacobian(dof_id_type dof_index)
 }
 
 Real
-ExampleShapeElementKernel::computeQpNonlocalOffDiagJacobian(unsigned int jvar, dof_id_type dof_index)
+ExampleShapeElementKernel::computeQpNonlocalOffDiagJacobian(unsigned int jvar,
+                                                            dof_id_type dof_index)
 {
   if (jvar == _v_var)
     return _test[_i][_qp] * _shp_jacobian[dof_index];

@@ -23,7 +23,7 @@
 class BoundaryRestrictable;
 class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<BoundaryRestrictable>();
 
 /**
@@ -36,7 +36,6 @@ InputParameters validParams<BoundaryRestrictable>();
 class BoundaryRestrictable
 {
 public:
-
   /// A flag changing the behavior of hasBoundary
   enum TEST_TYPE
   {
@@ -61,7 +60,9 @@ public:
    * @param block_ids The block ids that the object is restricted to
    * @param nodal True indicates that the object is operating on nodesets, false for sidesets
    */
-  BoundaryRestrictable(const InputParameters & parameters, const std::set<SubdomainID> & block_ids, bool nodal);
+  BoundaryRestrictable(const InputParameters & parameters,
+                       const std::set<SubdomainID> & block_ids,
+                       bool nodal);
 
   /**
    * Empty class destructor
@@ -115,7 +116,7 @@ public:
    * match those of the object
    * @return True if the all of the given ids are found within the ids for this object
    */
-  bool hasBoundary(std::vector<BoundaryID> ids, TEST_TYPE type=ALL) const;
+  bool hasBoundary(std::vector<BoundaryID> ids, TEST_TYPE type = ALL) const;
 
   /**
    * Test if the supplied set of boundary ids are valid for this object
@@ -127,12 +128,13 @@ public:
    * @return True if the all of the given ids are found within the ids for this object
    * \see isSubset
    */
-  bool hasBoundary(std::set<BoundaryID> ids, TEST_TYPE type=ALL) const;
+  bool hasBoundary(std::set<BoundaryID> ids, TEST_TYPE type = ALL) const;
 
   /**
    * Test if the class boundary ids are a subset of the supplied objects
    * @param ids A std::set of boundaries to check
-   * @return True if all of the boundary ids for this class are found within the given ids (opposite of hasBoundary)
+   * @return True if all of the boundary ids for this class are found within the given ids (opposite
+   * of hasBoundary)
    * \see hasBoundary
    */
   bool isBoundarySubset(std::set<BoundaryID> ids) const;
@@ -140,7 +142,8 @@ public:
   /*
    * Test if the class boundary ids are a subset of the supplied objects
    * @param ids A std::set of Boundary IDs to check
-   * @return True if all of the boundary ids for this class are found within the given ids (opposite of hasBoundary)
+   * @return True if all of the boundary ids for this class are found within the given ids (opposite
+   * of hasBoundary)
    * \see hasBoundary
    */
   bool isBoundarySubset(std::vector<BoundaryID> ids) const;
@@ -155,7 +158,8 @@ public:
    * @param prop_name the name of the property to query
    * @return true if the property exists for all boundary ids of the object, otherwise false
    */
-  template<typename T> bool hasBoundaryMaterialProperty(const std::string & prop_name) const;
+  template <typename T>
+  bool hasBoundaryMaterialProperty(const std::string & prop_name) const;
 
   /**
    * Returns true if this object has been restricted to a boundary
@@ -169,9 +173,7 @@ public:
    */
   const std::set<BoundaryID> & meshBoundaryIDs() const;
 
-
 private:
-
   /// Pointer to FEProblemBase
   FEProblemBase * _bnd_feproblem;
 
@@ -211,7 +213,6 @@ private:
   void initializeBoundaryRestrictable(const InputParameters & parameters);
 
 protected:
-
   /**
    * A helper method to avoid circular #include problems.
    * @see hasBoundaryMaterialProperty
@@ -222,12 +223,14 @@ protected:
   const BoundaryID & _current_boundary_id;
 };
 
-template<typename T>
+template <typename T>
 bool
 BoundaryRestrictable::hasBoundaryMaterialProperty(const std::string & prop_name) const
 {
-  // If you get here the supplied property is defined on all boundaries, but is still subject existence in the MateialData class
-  return hasBoundaryMaterialPropertyHelper(prop_name) && _bnd_material_data->haveProperty<T>(prop_name);
+  // If you get here the supplied property is defined on all boundaries, but is still subject
+  // existence in the MateialData class
+  return hasBoundaryMaterialPropertyHelper(prop_name) &&
+         _bnd_material_data->haveProperty<T>(prop_name);
 }
 
 #endif // BOUNDARYRESTRICTABLE_H

@@ -17,17 +17,19 @@
 #include "Assembly.h"
 #include "SystemBase.h"
 
-template<>
-InputParameters validParams<MaterialTestIndicator>()
+template <>
+InputParameters
+validParams<MaterialTestIndicator>()
 {
   InputParameters params = validParams<Indicator>();
   params += validParams<MaterialPropertyInterface>();
-  params.addParam<MaterialPropertyName>("property", "The name of the material property to use for an indicator.");
+  params.addParam<MaterialPropertyName>(
+      "property", "The name of the material property to use for an indicator.");
   return params;
 }
 
-MaterialTestIndicator::MaterialTestIndicator(const InputParameters & parameters) :
-    Indicator(parameters),
+MaterialTestIndicator::MaterialTestIndicator(const InputParameters & parameters)
+  : Indicator(parameters),
     _property(getMaterialProperty<Real>("property")),
     _qrule(_assembly.qRule()),
     _indicator_var(_sys.getVariable(_tid, name()))

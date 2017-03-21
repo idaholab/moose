@@ -21,10 +21,11 @@
 // libmesh includes
 #include "libmesh/sparse_matrix.h"
 
-ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(FEProblemBase & fe_problem,
-                                                                     const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
-                                                                     SparseMatrix<Number> & jacobian) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(
+    FEProblemBase & fe_problem,
+    const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
+    SparseMatrix<Number> & jacobian)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _nodal_kernels(nodal_kernels),
     _jacobian(jacobian),
@@ -33,8 +34,9 @@ ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(FEProblemBa
 }
 
 // Splitting Constructor
-ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(ComputeNodalKernelJacobiansThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(
+    ComputeNodalKernelJacobiansThread & x, Threads::split split)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
     _nodal_kernels(x._nodal_kernels),
     _jacobian(x._jacobian),
@@ -53,7 +55,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
 {
   const Node * node = *node_it;
 
-  std::vector<std::pair<MooseVariable *, MooseVariable *> > & ce = _fe_problem.couplingEntries(_tid);
+  std::vector<std::pair<MooseVariable *, MooseVariable *>> & ce = _fe_problem.couplingEntries(_tid);
   for (const auto & it : ce)
   {
     MooseVariable & ivariable = *(it.first);
@@ -63,7 +65,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
     unsigned int jvar = jvariable.number();
 
     // The NodalKernels that are active and are coupled to the jvar in question
-    std::vector<std::shared_ptr<NodalKernel> > active_involved_kernels;
+    std::vector<std::shared_ptr<NodalKernel>> active_involved_kernels;
 
     const std::set<SubdomainID> & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
     for (const auto & block : block_ids)

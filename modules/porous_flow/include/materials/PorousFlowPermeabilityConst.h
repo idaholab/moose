@@ -10,10 +10,10 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowPermeabilityConst;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPermeabilityConst>();
 
 /**
@@ -31,4 +31,4 @@ protected:
   const RealTensorValue _input_permeability;
 };
 
-#endif //POROUSFLOWPERMEABILITYCONST_H
+#endif // POROUSFLOWPERMEABILITYCONST_H

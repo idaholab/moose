@@ -18,7 +18,7 @@
 
 class MMSReaction;
 
-template<>
+template <>
 InputParameters validParams<MMSReaction>();
 
 class MMSReaction : public Kernel
@@ -33,4 +33,4 @@ protected:
   unsigned int _mesh_dimension;
 };
 
-#endif //MMSREACTION_H_
+#endif // MMSREACTION_H_

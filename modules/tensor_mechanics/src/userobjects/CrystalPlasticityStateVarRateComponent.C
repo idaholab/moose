@@ -6,15 +6,18 @@
 /****************************************************************/
 #include "CrystalPlasticityStateVarRateComponent.h"
 
-template<>
-InputParameters validParams<CrystalPlasticityStateVarRateComponent>()
+template <>
+InputParameters
+validParams<CrystalPlasticityStateVarRateComponent>()
 {
   InputParameters params = validParams<CrystalPlasticityUOBase>();
-  params.addClassDescription("Crystal plasticity state variable evolution rate component base class.  Override the virtual functions in your class");
+  params.addClassDescription("Crystal plasticity state variable evolution rate component base "
+                             "class.  Override the virtual functions in your class");
   return params;
 }
 
-CrystalPlasticityStateVarRateComponent::CrystalPlasticityStateVarRateComponent(const InputParameters & parameters) :
-    CrystalPlasticityUOBase(parameters)
+CrystalPlasticityStateVarRateComponent::CrystalPlasticityStateVarRateComponent(
+    const InputParameters & parameters)
+  : CrystalPlasticityUOBase(parameters)
 {
 }

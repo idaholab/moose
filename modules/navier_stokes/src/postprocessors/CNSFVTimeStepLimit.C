@@ -10,11 +10,13 @@
 
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<CNSFVTimeStepLimit>()
+template <>
+InputParameters
+validParams<CNSFVTimeStepLimit>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
-  params.addClassDescription("A PostProcessor object to calculate the allowable time step size for the CNS equations.");
+  params.addClassDescription(
+      "A PostProcessor object to calculate the allowable time step size for the CNS equations.");
   params.addParam<Real>("cfl", 0.8, "CFL number");
   return params;
 }
@@ -28,9 +30,7 @@ CNSFVTimeStepLimit::CNSFVTimeStepLimit(const InputParameters & parameters)
 {
 }
 
-CNSFVTimeStepLimit::~CNSFVTimeStepLimit()
-{
-}
+CNSFVTimeStepLimit::~CNSFVTimeStepLimit() {}
 
 void
 CNSFVTimeStepLimit::initialize()

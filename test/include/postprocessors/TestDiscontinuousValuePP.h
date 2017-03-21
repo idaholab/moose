@@ -17,11 +17,11 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class TestDiscontinuousValuePP;
 class SolutionUserObject;
 
-template<>
+template <>
 InputParameters validParams<TestDiscontinuousValuePP>();
 
 /**
@@ -35,11 +35,11 @@ public:
 
   virtual ~TestDiscontinuousValuePP(){};
 
-  virtual void initialize() {};
+  virtual void initialize(){};
 
-  virtual void execute() {};
+  virtual void execute(){};
 
-  virtual void finalize() {};
+  virtual void finalize(){};
 
   /// initialSetup gets the pointer to the solution UO
   virtual void initialSetup();
@@ -47,7 +47,6 @@ public:
   virtual Real getValue();
 
 protected:
-
   /// The variable name from which a values is to be extracted
   const VariableName & _variable_name;
 

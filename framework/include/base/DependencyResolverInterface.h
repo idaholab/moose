@@ -30,7 +30,6 @@
 class DependencyResolverInterface
 {
 public:
-
   /**
    * Constructor.
    */
@@ -49,19 +48,17 @@ public:
   /**
    * Given a vector, sort using the getRequested/SuppliedItems sets.
    */
-  template<typename T>
-  static
-  void sort(typename std::vector<T> & vector);
+  template <typename T>
+  static void sort(typename std::vector<T> & vector);
 
   /**
    * A helper method for cyclic errors.
    */
-  template<typename T>
-  static
-  void cyclicDependencyError(CyclicDependencyException<T> & e, const std::string & header);
+  template <typename T>
+  static void cyclicDependencyError(CyclicDependencyException<T> & e, const std::string & header);
 };
 
-template<typename T>
+template <typename T>
 void
 DependencyResolverInterface::sort(typename std::vector<T> & vector)
 {
@@ -70,7 +67,7 @@ DependencyResolverInterface::sort(typename std::vector<T> & vector)
   typename std::vector<T>::iterator start = vector.begin();
   typename std::vector<T>::iterator end = vector.end();
 
-  for (typename std::vector<T>::iterator iter = start; iter != end ; ++iter)
+  for (typename std::vector<T>::iterator iter = start; iter != end; ++iter)
   {
     const std::set<std::string> & requested_items = (*iter)->getRequestedItems();
 
@@ -82,8 +79,11 @@ DependencyResolverInterface::sort(typename std::vector<T> & vector)
       const std::set<std::string> & supplied_items = (*iter2)->getSuppliedItems();
 
       std::set<std::string> intersect;
-      std::set_intersection(requested_items.begin(), requested_items.end(), supplied_items.begin(),
-                            supplied_items.end(), std::inserter(intersect, intersect.end()));
+      std::set_intersection(requested_items.begin(),
+                            requested_items.end(),
+                            supplied_items.begin(),
+                            supplied_items.end(),
+                            std::inserter(intersect, intersect.end()));
 
       // If the intersection isn't empty then there is a dependency here
       if (!intersect.empty())
@@ -95,19 +95,19 @@ DependencyResolverInterface::sort(typename std::vector<T> & vector)
   std::stable_sort(start, end, resolver);
 }
 
-
-template<typename T>
+template <typename T>
 void
-DependencyResolverInterface::cyclicDependencyError(CyclicDependencyException<T> & e, const std::string & header)
+DependencyResolverInterface::cyclicDependencyError(CyclicDependencyException<T> & e,
+                                                   const std::string & header)
 {
   std::ostringstream oss;
 
   oss << header << ":\n";
   const typename std::multimap<T, T> & depends = e.getCyclicDependencies();
   for (typename std::multimap<T, T>::const_iterator it = depends.begin(); it != depends.end(); ++it)
-    oss << (static_cast<T>(it->first))->name() << " -> " << (static_cast<T>(it->second))->name() << "\n";
+    oss << (static_cast<T>(it->first))->name() << " -> " << (static_cast<T>(it->second))->name()
+        << "\n";
   mooseError(oss.str());
-
 }
 
 #endif // DEPENDENCYRESOLVERINTERFACE_H

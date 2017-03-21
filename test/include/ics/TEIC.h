@@ -25,7 +25,7 @@
 // Forward Declarations
 class TEIC;
 
-template<>
+template <>
 InputParameters validParams<TEIC>();
 
 /**
@@ -34,7 +34,6 @@ InputParameters validParams<TEIC>();
 class TEIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *
@@ -54,4 +53,4 @@ protected:
   Real _slope;
 };
 
-#endif //TEIC_H
+#endif // TEIC_H

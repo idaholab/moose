@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSRELPERM_H
 #define RICHARDSRELPERM_H
 
@@ -13,8 +12,7 @@
 
 class RichardsRelPerm;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsRelPerm>();
 
 /**
@@ -53,7 +51,6 @@ public:
    * @param seff effective saturation
    */
   virtual Real d2relperm(Real seff) const = 0;
-
 };
 
 #endif // RICHARDSRELPERM_H

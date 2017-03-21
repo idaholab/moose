@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "ParsedMaterial.h"
 
-template<>
-InputParameters validParams<ParsedMaterial>()
+template <>
+InputParameters
+validParams<ParsedMaterial>()
 {
   InputParameters params = validParams<ParsedMaterialHelper>();
   params += validParams<ParsedMaterialBase>();
@@ -15,14 +16,14 @@ InputParameters validParams<ParsedMaterial>()
   return params;
 }
 
-ParsedMaterial::ParsedMaterial(const InputParameters & parameters) :
-    ParsedMaterialHelper(parameters, USE_MOOSE_NAMES),
-    ParsedMaterialBase(parameters)
+ParsedMaterial::ParsedMaterial(const InputParameters & parameters)
+  : ParsedMaterialHelper(parameters, USE_MOOSE_NAMES), ParsedMaterialBase(parameters)
 {
   // Build function and optimize
   functionParse(_function,
-                _constant_names, _constant_expressions,
-                getParam<std::vector<std::string> >("material_property_names"),
-                _tol_names, _tol_values);
+                _constant_names,
+                _constant_expressions,
+                getParam<std::vector<std::string>>("material_property_names"),
+                _tol_names,
+                _tol_values);
 }
-

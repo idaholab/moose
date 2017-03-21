@@ -14,8 +14,9 @@
 
 #include "SplineFFn.h"
 
-template<>
-InputParameters validParams<SplineFFn>()
+template <>
+InputParameters
+validParams<SplineFFn>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<FunctionName>("function", "The name of the spline function");
@@ -23,15 +24,12 @@ InputParameters validParams<SplineFFn>()
   return params;
 }
 
-SplineFFn::SplineFFn(const InputParameters & parameters) :
-    Kernel(parameters),
-    _fn(dynamic_cast<SplineFunction &>(getFunction("function")))
+SplineFFn::SplineFFn(const InputParameters & parameters)
+  : Kernel(parameters), _fn(dynamic_cast<SplineFunction &>(getFunction("function")))
 {
 }
 
-SplineFFn::~SplineFFn()
-{
-}
+SplineFFn::~SplineFFn() {}
 
 Real
 SplineFFn::computeQpResidual()

@@ -11,7 +11,7 @@
 
 class InterfaceDiffusionBoundaryTerm;
 
-template<>
+template <>
 InputParameters validParams<InterfaceDiffusionBoundaryTerm>();
 
 /**

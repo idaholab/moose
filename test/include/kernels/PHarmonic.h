@@ -16,10 +16,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class PHarmonic;
 
-template<>
+template <>
 InputParameters validParams<PHarmonic>();
 
 /**
@@ -30,7 +30,6 @@ InputParameters validParams<PHarmonic>();
 class PHarmonic : public Kernel
 {
 public:
-
   PHarmonic(const InputParameters & parameters);
 
 protected:
@@ -40,4 +39,4 @@ protected:
   Real _p;
 };
 
-#endif //PHARMONIC_H
+#endif // PHARMONIC_H

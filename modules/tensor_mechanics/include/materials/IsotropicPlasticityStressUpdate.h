@@ -64,7 +64,7 @@ protected:
   const VariableValue & _temperature;
 };
 
-template<>
+template <>
 InputParameters validParams<IsotropicPlasticityStressUpdate>();
 
-#endif //ISOTROPICPLASTICITYSTRESSUPDATE_H
+#endif // ISOTROPICPLASTICITYSTRESSUPDATE_H

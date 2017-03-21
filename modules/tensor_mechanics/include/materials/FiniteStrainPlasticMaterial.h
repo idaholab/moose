@@ -13,7 +13,7 @@
 
 class FiniteStrainPlasticMaterial;
 
-template<>
+template <>
 InputParameters validParams<FiniteStrainPlasticMaterial>();
 
 /**
@@ -55,16 +55,25 @@ protected:
    * @param eqvpstrain_old  The equivalent plastic strain at the previous "time" step
    * @param plastic_strain_old  The value of plastic strain at the previous "time" step
    * @param delta_d  The total strain increment for this "time" step
-   * @param E_ijkl   The elasticity tensor.  If no plasiticity then sig_new = sig_old + E_ijkl*delta_d
+   * @param E_ijkl   The elasticity tensor.  If no plasiticity then sig_new = sig_old +
+   * E_ijkl*delta_d
    * @param sig      The stress after returning to the yield surface   (this is an output variable)
-   * @param eqvpstrain  The equivalent plastic strain after returning to the yield surface (this is an output variable)
-   * @param plastic_strain   The value of plastic strain after returning to the yield surface (this is an output variable)
+   * @param eqvpstrain  The equivalent plastic strain after returning to the yield surface (this is
+   * an output variable)
+   * @param plastic_strain   The value of plastic strain after returning to the yield surface (this
+   * is an output variable)
    * Note that this algorithm doesn't do any rotations.  In order to find the
-   * final stress and plastic_strain, sig and plastic_strain must be rotated using _rotation_increment.
+   * final stress and plastic_strain, sig and plastic_strain must be rotated using
+   * _rotation_increment.
    */
-  virtual void returnMap(const RankTwoTensor & sig_old, const Real eqvpstrain_old, const RankTwoTensor & plastic_strain_old,
-                         const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & sig,
-                         Real & eqvpstrain, RankTwoTensor & plastic_strain);
+  virtual void returnMap(const RankTwoTensor & sig_old,
+                         const Real eqvpstrain_old,
+                         const RankTwoTensor & plastic_strain_old,
+                         const RankTwoTensor & delta_d,
+                         const RankFourTensor & E_ijkl,
+                         RankTwoTensor & sig,
+                         Real & eqvpstrain,
+                         RankTwoTensor & plastic_strain);
 
   /**
    * Calculates the yield function
@@ -73,7 +82,6 @@ protected:
    * @return equivalentstress - yield_stress
    */
   virtual Real yieldFunction(const RankTwoTensor & stress, const Real yield_stress);
-
 
   /**
    * Derivative of yieldFunction with respect to the stress
@@ -110,7 +118,10 @@ protected:
    * @param flow_incr consistency parameter
    * @param dresid_dsig the required derivative (this is an output variable)
    */
-  virtual void getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr, RankFourTensor & dresid_dsig);
+  virtual void getJac(const RankTwoTensor & sig,
+                      const RankFourTensor & E_ijkl,
+                      Real flow_incr,
+                      RankFourTensor & dresid_dsig);
 
   /**
    * yield stress as a function of equivalent plastic strain.
@@ -124,4 +135,4 @@ protected:
   Real getdYieldStressdPlasticStrain(const Real equivalent_plastic_strain);
 };
 
-#endif //FINITESTRAINPLASTICMATERIAL_H
+#endif // FINITESTRAINPLASTICMATERIAL_H

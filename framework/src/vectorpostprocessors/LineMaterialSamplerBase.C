@@ -14,15 +14,17 @@
 
 #include "LineMaterialSamplerBase.h"
 
-template<>
-InputParameters validParams<LineMaterialSamplerBase<Real> >()
+template <>
+InputParameters
+validParams<LineMaterialSamplerBase<Real>>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
   params += validParams<SamplerBase>();
   params += validParams<BlockRestrictable>();
   params.addRequiredParam<Point>("start", "The beginning of the line");
   params.addRequiredParam<Point>("end", "The end of the line");
-  params.addRequiredParam<std::vector<std::string> >("property", "Name of the material property to be output along a line");
+  params.addRequiredParam<std::vector<std::string>>(
+      "property", "Name of the material property to be output along a line");
 
   return params;
 }

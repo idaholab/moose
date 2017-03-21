@@ -8,17 +8,20 @@
 // MOOSE includes
 #include "LevelSetAdvection.h"
 
-template<>
-InputParameters validParams<LevelSetAdvection>()
+template <>
+InputParameters
+validParams<LevelSetAdvection>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Implements the level set advection equation: $\\vec{v}\\cdot\\nabla u = 0$, where the weak form is $(\\psi_i, \\vec{v}\\cdot\\nabla u) = 0$.");
-  params += validParams<LevelSetVelocityInterface<> >();
+  params.addClassDescription("Implements the level set advection equation: $\\vec{v}\\cdot\\nabla "
+                             "u = 0$, where the weak form is $(\\psi_i, \\vec{v}\\cdot\\nabla u) = "
+                             "0$.");
+  params += validParams<LevelSetVelocityInterface<>>();
   return params;
 }
 
-LevelSetAdvection::LevelSetAdvection(const InputParameters & parameters) :
-    LevelSetVelocityInterface<Kernel>(parameters)
+LevelSetAdvection::LevelSetAdvection(const InputParameters & parameters)
+  : LevelSetVelocityInterface<Kernel>(parameters)
 {
 }
 

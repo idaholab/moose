@@ -19,17 +19,20 @@
 // libMesh includes
 #include "libmesh/sparse_matrix.h"
 
-template<>
-InputParameters validParams<NodalConstraint>()
+template <>
+InputParameters
+validParams<NodalConstraint>()
 {
   InputParameters params = validParams<Constraint>();
-  MooseEnum formulationtype ("penalty kinematic", "penalty");
-  params.addParam<MooseEnum>("formulation", formulationtype, "Formulation used to calculate constraint - penalty or kinematic.");
+  MooseEnum formulationtype("penalty kinematic", "penalty");
+  params.addParam<MooseEnum>("formulation",
+                             formulationtype,
+                             "Formulation used to calculate constraint - penalty or kinematic.");
   return params;
 }
 
-NodalConstraint::NodalConstraint(const InputParameters & parameters) :
-    Constraint(parameters),
+NodalConstraint::NodalConstraint(const InputParameters & parameters)
+  : Constraint(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, true),
     _u_slave(_var.nodalSlnNeighbor()),
     _u_master(_var.nodalSln())
@@ -115,8 +118,10 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
         case Moose::Kinematic:
           Kee(_j, _j) = 0.;
           Ken(_j, _i) += jacobian(slavedof[_i], masterdof[_j]) * _weights[_j];
-          Kne(_i, _j) += -jacobian(slavedof[_i], masterdof[_j]) / masterdof.size() + computeQpJacobian(Moose::SlaveMaster);
-          Knn(_i, _i) += -jacobian(slavedof[_i], slavedof[_i]) / masterdof.size() + computeQpJacobian(Moose::SlaveSlave);
+          Kne(_i, _j) += -jacobian(slavedof[_i], masterdof[_j]) / masterdof.size() +
+                         computeQpJacobian(Moose::SlaveMaster);
+          Knn(_i, _i) += -jacobian(slavedof[_i], slavedof[_i]) / masterdof.size() +
+                         computeQpJacobian(Moose::SlaveSlave);
           break;
       }
     }

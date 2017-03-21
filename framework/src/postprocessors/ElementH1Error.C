@@ -15,15 +15,12 @@
 #include "ElementH1Error.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<ElementH1Error>()
+template <>
+InputParameters
+validParams<ElementH1Error>()
 {
   InputParameters params = validParams<ElementW1pError>();
   return params;
 }
 
-ElementH1Error::ElementH1Error(const InputParameters & parameters) :
-    ElementW1pError(parameters)
-{
-}
-
+ElementH1Error::ElementH1Error(const InputParameters & parameters) : ElementW1pError(parameters) {}

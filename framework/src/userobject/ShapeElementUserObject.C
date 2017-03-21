@@ -14,15 +14,16 @@
 
 #include "ShapeElementUserObject.h"
 
-template<>
-InputParameters validParams<ShapeElementUserObject>()
+template <>
+InputParameters
+validParams<ShapeElementUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params += ShapeUserObject<ElementUserObject>::validParams();
   return params;
 }
 
-ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameters) :
-    ShapeUserObject<ElementUserObject>(parameters, ShapeType::Element)
+ShapeElementUserObject::ShapeElementUserObject(const InputParameters & parameters)
+  : ShapeUserObject<ElementUserObject>(parameters, ShapeType::Element)
 {
 }

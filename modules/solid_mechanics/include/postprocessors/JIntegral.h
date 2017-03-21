@@ -10,17 +10,17 @@
 #include "ElementIntegralPostprocessor.h"
 #include "CrackFrontDefinition.h"
 
-//Forward Declarations
+// Forward Declarations
 class JIntegral;
 
-template<>
+template <>
 InputParameters validParams<JIntegral>();
 
 /**
  * This postprocessor computes the J-Integral
  *
  */
-class JIntegral: public ElementIntegralPostprocessor
+class JIntegral : public ElementIntegralPostprocessor
 {
 public:
   JIntegral(const InputParameters & parameters);
@@ -44,4 +44,4 @@ protected:
   Real _youngs_modulus;
 };
 
-#endif //JINTEGRAL3D_H
+#endif // JINTEGRAL3D_H

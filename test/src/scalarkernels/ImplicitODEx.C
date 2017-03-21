@@ -14,24 +14,21 @@
 
 #include "ImplicitODEx.h"
 
-template<>
-InputParameters validParams<ImplicitODEx>()
+template <>
+InputParameters
+validParams<ImplicitODEx>()
 {
   InputParameters params = validParams<ODEKernel>();
   params.addCoupledVar("y", "Y");
   return params;
 }
 
-ImplicitODEx::ImplicitODEx(const InputParameters & parameters) :
-    ODEKernel(parameters),
-    _y_var(coupledScalar("y")),
-    _y(coupledScalarValue("y"))
+ImplicitODEx::ImplicitODEx(const InputParameters & parameters)
+  : ODEKernel(parameters), _y_var(coupledScalar("y")), _y(coupledScalarValue("y"))
 {
 }
 
-ImplicitODEx::~ImplicitODEx()
-{
-}
+ImplicitODEx::~ImplicitODEx() {}
 
 Real
 ImplicitODEx::computeQpResidual()

@@ -10,17 +10,16 @@
 #include "ConstitutiveModel.h"
 #include "SymmElasticityTensor.h"
 
-
 #include "petscsys.h"
 #include "petscblaslapack.h"
 
-#if PETSC_VERSION_LESS_THAN(3,5,0)
-extern "C" void FORTRAN_CALL(dgetri) ( ... ); // matrix inversion routine from LAPACK
+#if PETSC_VERSION_LESS_THAN(3, 5, 0)
+extern "C" void FORTRAN_CALL(dgetri)(...); // matrix inversion routine from LAPACK
 #endif
 
 class RateDepSmearCrackModel;
 
-template<>
+template <>
 InputParameters validParams<RateDepSmearCrackModel>();
 
 /**
@@ -31,20 +30,19 @@ InputParameters validParams<RateDepSmearCrackModel>();
 class RateDepSmearCrackModel : public ConstitutiveModel
 {
 public:
-  RateDepSmearCrackModel( const InputParameters & parameters);
+  RateDepSmearCrackModel(const InputParameters & parameters);
 
   virtual ~RateDepSmearCrackModel();
 
 protected:
+  virtual void computeStress(const Elem & current_elem,
+                             unsigned qp,
+                             const SymmElasticityTensor & elasticity_tensor,
+                             const SymmTensor & stress_old,
+                             SymmTensor & strain_increment,
+                             SymmTensor & stress_new);
 
-  virtual void computeStress( const Elem & current_elem,
-                              unsigned qp,
-                              const SymmElasticityTensor & elasticity_tensor,
-                              const SymmTensor & stress_old,
-                              SymmTensor & strain_increment,
-                              SymmTensor & stress_new );
-
-  virtual void initStatefulProperties( unsigned int n_points );
+  virtual void initStatefulProperties(unsigned int n_points);
 
   virtual void initVariables();
 
@@ -96,22 +94,21 @@ protected:
 
   int matrixInversion(std::vector<Real> & A, int n) const;
 
-  Real _ref_damage_rate;///reference damage rate
-  unsigned int _nstate;///Number of state variables
+  Real _ref_damage_rate; ///reference damage rate
+  unsigned int _nstate;  ///Number of state variables
   Real _exponent;
-  unsigned int _maxiter;///Maximum number of Newton Raphson iteration
-  Real _tol;///Relative tolerance factor for convergence of the Newton Raphson solve
-  Real _zero_tol;///Tolerance for zero.
-  Real _intvar_incr_tol;///Allowable relative increment size of state variables (dv)
-  bool _input_rndm_scale_var;///Flag to specify scaling parameter to generate random stress
-  Real _rndm_scale_var;///Variable value
+  unsigned int _maxiter; ///Maximum number of Newton Raphson iteration
+  Real _tol;             ///Relative tolerance factor for convergence of the Newton Raphson solve
+  Real _zero_tol;        ///Tolerance for zero.
+  Real _intvar_incr_tol; ///Allowable relative increment size of state variables (dv)
+  bool _input_rndm_scale_var; ///Flag to specify scaling parameter to generate random stress
+  Real _rndm_scale_var;       ///Variable value
 
+  MaterialProperty<std::vector<Real>> & _intvar;
+  MaterialProperty<std::vector<Real>> & _intvar_old;
 
-  MaterialProperty< std::vector<Real> > &_intvar;
-  MaterialProperty< std::vector<Real> > &_intvar_old;
-
-  MaterialProperty<SymmTensor> &_stress_undamaged;
-  MaterialProperty<SymmTensor> &_stress_undamaged_old;
+  MaterialProperty<SymmTensor> & _stress_undamaged;
+  MaterialProperty<SymmTensor> & _stress_undamaged_old;
 
   std::vector<Real> _intvar_incr;
   std::vector<Real> _intvar_tmp, _intvar_old_tmp;
@@ -119,16 +116,14 @@ protected:
   std::vector<Real> _jac;
   std::vector<Real> _dvar;
 
-
   SymmElasticityTensor _elasticity;
   SymmTensor _stress_old, _dstrain, _stress_new;
   SymmTensor _stress0, _dstress0;
-  bool _nconv;///Convergence flag
+  bool _nconv; ///Convergence flag
   unsigned int _qp;
-  bool _err_tol;///Flag to indicate that increment size has exceeded tolerance and needs cutback
+  bool _err_tol; ///Flag to indicate that increment size has exceeded tolerance and needs cutback
 
 private:
-
 };
 
-#endif //RATEDEPSMEARCRACKMODEL
+#endif // RATEDEPSMEARCRACKMODEL

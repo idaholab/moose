@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef Q2PSATURATIONDIFFUSION
 #define Q2PSATURATIONDIFFUSION
 
@@ -18,7 +17,7 @@
 // Forward Declarations
 class Q2PSaturationDiffusion;
 
-template<>
+template <>
 InputParameters validParams<Q2PSaturationDiffusion>();
 
 /**
@@ -28,12 +27,9 @@ InputParameters validParams<Q2PSaturationDiffusion>();
 class Q2PSaturationDiffusion : public Kernel
 {
 public:
-
   Q2PSaturationDiffusion(const InputParameters & parameters);
 
-
 protected:
-
   virtual Real computeQpResidual();
 
   virtual Real computeQpJacobian();
@@ -61,4 +57,4 @@ protected:
   Real _diffusivity;
 };
 
-#endif //Q2PSATURATIONDIFFUSION
+#endif // Q2PSATURATIONDIFFUSION

@@ -11,13 +11,14 @@
 
 /**
  * FiniteStrainCrystalPlasticity uses the multiplicative decomposition of deformation gradient
- * and solves the PK2 stress residual equation at the intermediate configuration to evolve the material state.
+ * and solves the PK2 stress residual equation at the intermediate configuration to evolve the
+ * material state.
  * The internal variables are updated using an interative predictor-corrector algorithm.
  * Backward Euler integration rule is used for the rate equations.
  */
 class FiniteStrainCrystalPlasticity;
 
-template<>
+template <>
 InputParameters validParams<FiniteStrainCrystalPlasticity>();
 
 class FiniteStrainCrystalPlasticity : public ComputeStressBase
@@ -55,13 +56,13 @@ protected:
    */
   virtual void getSlipIncrements();
 
-  //Override to modify slip system resistance evolution
+  // Override to modify slip system resistance evolution
   /**
    * This function updates the slip system resistances.
    */
   virtual void update_slip_system_resistance();
 
-  //Old function: Kept to avoid code break in computeQpStress
+  // Old function: Kept to avoid code break in computeQpStress
   /**
    * This function updates the slip system resistances.
    */
@@ -168,12 +169,12 @@ protected:
   /**
    * This function calculate stress residual.
    */
-  virtual void calcResidual( RankTwoTensor & );
+  virtual void calcResidual(RankTwoTensor &);
 
   /**
    * This function calculate jacobian.
    */
-  virtual void calcJacobian( RankFourTensor & );
+  virtual void calcJacobian(RankFourTensor &);
 
   /**
    * This function calculate the tangent moduli for preconditioner.
@@ -293,7 +294,7 @@ protected:
   ///Line search bisection method maximum iteration number
   unsigned int _lsrch_max_iter;
 
-  //Line search method
+  // Line search method
   MooseEnum _lsrch_method;
 
   MaterialProperty<RankTwoTensor> & _fp;
@@ -302,8 +303,8 @@ protected:
   MaterialProperty<RankTwoTensor> & _pk2_old;
   MaterialProperty<RankTwoTensor> & _lag_e;
   MaterialProperty<RankTwoTensor> & _lag_e_old;
-  MaterialProperty<std::vector<Real> > & _gss;
-  MaterialProperty<std::vector<Real> > & _gss_old;
+  MaterialProperty<std::vector<Real>> & _gss;
+  MaterialProperty<std::vector<Real>> & _gss_old;
   MaterialProperty<Real> & _acc_slip;
   MaterialProperty<Real> & _acc_slip_old;
   MaterialProperty<RankTwoTensor> & _update_rot;
@@ -340,7 +341,7 @@ protected:
 
   bool _read_from_slip_sys_file;
 
-  bool _err_tol;///Flag to check whether convergence is achieved
+  bool _err_tol; ///Flag to check whether convergence is achieved
 
   ///Used for substepping; Uniformly divides the increment in deformation gradient
   RankTwoTensor _delta_dfgrd, _dfgrd_tmp_old;
@@ -350,4 +351,4 @@ protected:
   bool _first_step_iter, _last_step_iter, _first_substep;
 };
 
-#endif //FINITESTRAINCRYSTALPLASTICITY_H
+#endif // FINITESTRAINCRYSTALPLASTICITY_H

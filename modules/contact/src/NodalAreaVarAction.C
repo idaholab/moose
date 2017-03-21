@@ -12,8 +12,9 @@
 #include "MooseApp.h"
 #include "libmesh/string_to_enum.h"
 
-template<>
-InputParameters validParams<NodalAreaVarAction>()
+template <>
+InputParameters
+validParams<NodalAreaVarAction>()
 {
   MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
@@ -22,10 +23,7 @@ InputParameters validParams<NodalAreaVarAction>()
   return params;
 }
 
-NodalAreaVarAction::NodalAreaVarAction(const InputParameters & params) :
-  Action(params)
-{
-}
+NodalAreaVarAction::NodalAreaVarAction(const InputParameters & params) : Action(params) {}
 
 void
 NodalAreaVarAction::act()
@@ -33,5 +31,4 @@ NodalAreaVarAction::act()
   _problem->addAuxVariable("nodal_area_" + _name,
                            FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
                                   Utility::string_to_enum<FEFamily>("LAGRANGE")));
-
 }

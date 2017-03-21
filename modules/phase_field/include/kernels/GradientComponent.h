@@ -11,7 +11,7 @@
 
 class GradientComponent;
 
-template<>
+template <>
 InputParameters validParams<GradientComponent>();
 
 class GradientComponent : public Kernel
@@ -34,4 +34,4 @@ protected:
   const unsigned int _component;
 };
 
-#endif //GRADIENTCOMPONENT_H
+#endif // GRADIENTCOMPONENT_H

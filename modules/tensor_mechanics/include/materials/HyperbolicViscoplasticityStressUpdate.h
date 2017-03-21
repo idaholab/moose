@@ -65,7 +65,7 @@ protected:
   MaterialProperty<RankTwoTensor> & _plastic_strain_old;
 };
 
-template<>
+template <>
 InputParameters validParams<HyperbolicViscoplasticityStressUpdate>();
 
-#endif //RECOMPUTERADIALRETURNHYPERBOLICVISCOPLASTICITY_H
+#endif // RECOMPUTERADIALRETURNHYPERBOLICVISCOPLASTICITY_H

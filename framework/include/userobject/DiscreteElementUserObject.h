@@ -21,11 +21,10 @@
 // Forward Declarations
 class DiscreteElementUserObject;
 
-template<>
+template <>
 InputParameters validParams<DiscreteElementUserObject>();
 
-class DiscreteElementUserObject :
-  public ElementUserObject
+class DiscreteElementUserObject : public ElementUserObject
 {
 public:
   DiscreteElementUserObject(const InputParameters & parameters);
@@ -33,10 +32,10 @@ public:
   virtual void initialize() override;
 
   /// @{ Block all methods that are not used in explicitly called UOs
-  virtual void execute() override; // libmesh_final;
-  virtual void finalize() override; // libmesh_final;
+  virtual void execute() override;                      // libmesh_final;
+  virtual void finalize() override;                     // libmesh_final;
   virtual void threadJoin(const UserObject &) override; // libmesh_final;
   /// @}
 };
 
-#endif //DISCRETEELEMENTUSEROBJECT_H
+#endif // DISCRETEELEMENTUSEROBJECT_H

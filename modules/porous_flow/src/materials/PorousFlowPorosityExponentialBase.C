@@ -7,18 +7,30 @@
 
 #include "PorousFlowPorosityExponentialBase.h"
 
-template<>
-InputParameters validParams<PorousFlowPorosityExponentialBase>()
+template <>
+InputParameters
+validParams<PorousFlowPorosityExponentialBase>()
 {
   InputParameters params = validParams<PorousFlowPorosityBase>();
-  params.addParam<bool>("strain_at_nearest_qp", false, "When calculating nodal porosity that depends on strain, use the strain at the nearest quadpoint.  This adds a small extra computational burden, and is not necessary for simulations involving only linear lagrange elements.  If you set this to true, you will also want to set the same parameter to true for related Kernels and Materials");
-  params.addParam<bool>("ensure_positive", true, "Modify the usual exponential relationships that governs porosity so that porosity is always positive");
-  params.addClassDescription("Base class Material for porosity that is computed via an exponential relationship with coupled variables (strain, porepressure, temperature)");
+  params.addParam<bool>("strain_at_nearest_qp",
+                        false,
+                        "When calculating nodal porosity that depends on strain, use the strain at "
+                        "the nearest quadpoint.  This adds a small extra computational burden, and "
+                        "is not necessary for simulations involving only linear lagrange elements. "
+                        " If you set this to true, you will also want to set the same parameter to "
+                        "true for related Kernels and Materials");
+  params.addParam<bool>("ensure_positive", true, "Modify the usual exponential relationships that "
+                                                 "governs porosity so that porosity is always "
+                                                 "positive");
+  params.addClassDescription("Base class Material for porosity that is computed via an exponential "
+                             "relationship with coupled variables (strain, porepressure, "
+                             "temperature)");
   return params;
 }
 
-PorousFlowPorosityExponentialBase::PorousFlowPorosityExponentialBase(const InputParameters & parameters) :
-    PorousFlowPorosityBase(parameters),
+PorousFlowPorosityExponentialBase::PorousFlowPorosityExponentialBase(
+    const InputParameters & parameters)
+  : PorousFlowPorosityBase(parameters),
     _strain_at_nearest_qp(getParam<bool>("strain_at_nearest_qp")),
     _ensure_positive(getParam<bool>("ensure_positive"))
 {
@@ -77,7 +89,7 @@ PorousFlowPorosityExponentialBase::computeQpProperties()
   else
   {
     const Real c = std::log(a / (a - b));
-    const Real expx = std::exp(- decay / c);
+    const Real expx = std::exp(-decay / c);
     // note that at decay = 0, we have expx = 1, so porosity = a + b - a = b
     // and at decay = infinity, expx = 0, so porosity = a + (b - a) * a / (a - b) = 0
     _porosity[_qp] = a + (b - a) * std::exp(c * (1.0 - expx));

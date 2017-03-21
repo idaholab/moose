@@ -10,10 +10,10 @@
 #include "TotalFreeEnergyBase.h"
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSGlobalFreeEnergy;
 
-template<>
+template <>
 InputParameters validParams<KKSGlobalFreeEnergy>();
 
 /**
@@ -40,4 +40,4 @@ protected:
   std::vector<const MaterialProperty<Real> *> _kappas;
 };
 
-#endif //KKSGLOBALFREEENERGY_H
+#endif // KKSGLOBALFREEENERGY_H

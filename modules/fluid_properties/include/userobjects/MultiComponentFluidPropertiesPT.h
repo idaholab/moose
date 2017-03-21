@@ -13,7 +13,7 @@
 
 class MultiComponentFluidPropertiesPT;
 
-template<>
+template <>
 InputParameters validParams<MultiComponentFluidPropertiesPT>();
 
 /**
@@ -29,21 +29,45 @@ public:
   /// Density (kg/m^3)
   virtual Real rho(Real pressure, Real temperature, Real xmass) const = 0;
   /// Density and its derivatives wrt pressure, temperature and mass fraction
-  virtual void rho_dpTx(Real pressure, Real temperature, Real xmass, Real & rho, Real & drho_dp, Real & drho_dT, Real & drho_dx) const = 0;
+  virtual void rho_dpTx(Real pressure,
+                        Real temperature,
+                        Real xmass,
+                        Real & rho,
+                        Real & drho_dp,
+                        Real & drho_dT,
+                        Real & drho_dx) const = 0;
   /// Dynamic viscosity (Pa s)
   virtual Real mu(Real density, Real temperature, Real xmass) const = 0;
   /// Dynamic viscosity and its derivatives wrt pressure, temperature and mass fraction
-  virtual void mu_drhoTx(Real density, Real temperature, Real xmass, Real & mu, Real & dmu_dp, Real & dmu_dT, Real & dmu_dx) const = 0;
+  virtual void mu_drhoTx(Real density,
+                         Real temperature,
+                         Real xmass,
+                         Real & mu,
+                         Real & dmu_dp,
+                         Real & dmu_dT,
+                         Real & dmu_dx) const = 0;
   /// Enthalpy (J/kg)
   virtual Real h(Real pressure, Real temperature, Real xmass) const = 0;
   /// Enthalpy and its derivatives wrt pressure, temperature and mass fraction
-  virtual void h_dpTx(Real pressure, Real temperature, Real xmass, Real & h, Real & dh_dp, Real & dh_dT, Real & dh_dx) const = 0;
+  virtual void h_dpTx(Real pressure,
+                      Real temperature,
+                      Real xmass,
+                      Real & h,
+                      Real & dh_dp,
+                      Real & dh_dT,
+                      Real & dh_dx) const = 0;
   /// Isobaric specific heat capacity (J/kg/K)
   virtual Real cp(Real pressure, Real temperature, Real xmass) const = 0;
   /// Internal energy (J/kg)
   virtual Real e(Real pressure, Real temperature, Real xmass) const = 0;
   /// Internal energy and its derivatives wrt pressure, temperature and mass fraction
-  virtual void e_dpTx(Real pressure, Real temperature, Real xmass, Real & e, Real & de_dp, Real & de_dT, Real & de_dx) const = 0;
+  virtual void e_dpTx(Real pressure,
+                      Real temperature,
+                      Real xmass,
+                      Real & e,
+                      Real & de_dp,
+                      Real & de_dT,
+                      Real & de_dx) const = 0;
   /// Thermal conductivity (W/m/K)
   virtual Real k(Real pressure, Real temperature, Real xmass) const = 0;
   /// Get UserObject for specified component

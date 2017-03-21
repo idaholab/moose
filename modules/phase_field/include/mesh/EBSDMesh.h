@@ -13,7 +13,7 @@
 
 class EBSDMesh;
 
-template<>
+template <>
 InputParameters validParams<EBSDMesh>();
 
 /**
@@ -27,7 +27,8 @@ public:
 
   virtual void buildMesh();
 
-  struct EBSDMeshGeometry {
+  struct EBSDMeshGeometry
+  {
     // grid spacing
     std::array<Real, 3> d;
     // grid origin
@@ -53,4 +54,4 @@ protected:
   EBSDMeshGeometry _geometry;
 };
 
-#endif //EBSDMESH_H
+#endif // EBSDMESH_H

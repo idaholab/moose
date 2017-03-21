@@ -9,7 +9,7 @@
  * \see ConservedUniformNoise
  * \see ConservedMaskedUniformNoise
  */
-template<class T>
+template <class T>
 class ConservedUniformNoiseVeneer : public T
 {
 public:
@@ -19,18 +19,17 @@ protected:
   Real getQpRandom();
 };
 
-
-template<class T>
-ConservedUniformNoiseVeneer<T>::ConservedUniformNoiseVeneer(const InputParameters & parameters) :
-    T(parameters)
+template <class T>
+ConservedUniformNoiseVeneer<T>::ConservedUniformNoiseVeneer(const InputParameters & parameters)
+  : T(parameters)
 {
 }
 
-template<class T>
+template <class T>
 Real
 ConservedUniformNoiseVeneer<T>::getQpRandom()
 {
   return 2.0 * this->getRandomReal() - 1.0;
 }
 
-#endif //CONSERVEDUNIFORMNOISEVENEER_H
+#endif // CONSERVEDUNIFORMNOISEVENEER_H

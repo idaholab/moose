@@ -11,7 +11,7 @@
 
 class HEVPLinearHardening;
 
-template<>
+template <>
 InputParameters validParams<HEVPLinearHardening>();
 
 /**

@@ -18,21 +18,20 @@
 // STL includes
 #include <iostream>
 
-MooseObjectParameterName::MooseObjectParameterName(const MooseObjectName & obj_name, std::string param) :
-    MooseObjectName(obj_name),
-    _parameter(param)
+MooseObjectParameterName::MooseObjectParameterName(const MooseObjectName & obj_name,
+                                                   std::string param)
+  : MooseObjectName(obj_name), _parameter(param)
 {
 }
 
-MooseObjectParameterName::MooseObjectParameterName(std::string name) :
-    MooseObjectName()
+MooseObjectParameterName::MooseObjectParameterName(std::string name) : MooseObjectName()
 {
   // The tag precedes the :: (this is used in _moose_base::name and control_tag::name conventions)
   std::size_t idx = name.find("::");
   if (idx != std::string::npos)
   {
     _tag = name.substr(0, idx);
-    name.erase(0, idx+2);
+    name.erase(0, idx + 2);
     _separator = "::";
   }
 
@@ -40,7 +39,7 @@ MooseObjectParameterName::MooseObjectParameterName(std::string name) :
   idx = name.rfind("/");
   if (idx != std::string::npos)
   {
-    _parameter = name.substr(idx+1);
+    _parameter = name.substr(idx + 1);
     name.erase(idx);
   }
   else // if a slash isn't located then the entire name must be the parameter
@@ -53,7 +52,7 @@ MooseObjectParameterName::MooseObjectParameterName(std::string name) :
   idx = name.rfind("/");
   if (idx != std::string::npos)
   {
-    _name = name.substr(idx+1);
+    _name = name.substr(idx + 1);
     name.erase(idx);
     _tag = name;
   }
@@ -65,7 +64,7 @@ MooseObjectParameterName::MooseObjectParameterName(std::string name) :
   // Handle asterisks
   if (_tag == "*")
     _tag = "";
-  if (_name== "*")
+  if (_name == "*")
     _name = "";
 
   // Set the combined name for sorting
@@ -75,9 +74,8 @@ MooseObjectParameterName::MooseObjectParameterName(std::string name) :
 bool
 MooseObjectParameterName::operator==(const MooseObjectParameterName & rhs) const
 {
-  if ( (_name == rhs._name || _name.empty() || rhs._name.empty() ) &&
-       (_tag  == rhs._tag  || _tag.empty()  || rhs._tag.empty() ) &&
-       (_parameter  == rhs._parameter) )
+  if ((_name == rhs._name || _name.empty() || rhs._name.empty()) &&
+      (_tag == rhs._tag || _tag.empty() || rhs._tag.empty()) && (_parameter == rhs._parameter))
   {
     return true;
   }
@@ -87,8 +85,8 @@ MooseObjectParameterName::operator==(const MooseObjectParameterName & rhs) const
 bool
 MooseObjectParameterName::operator==(const MooseObjectName & rhs) const
 {
-  if ( (_name == rhs._name || _name.empty() || rhs._name.empty() ) &&
-       (_tag  == rhs._tag  || _tag.empty()  || rhs._tag.empty() ) )
+  if ((_name == rhs._name || _name.empty() || rhs._name.empty()) &&
+      (_tag == rhs._tag || _tag.empty() || rhs._tag.empty()))
   {
     return true;
   }
@@ -98,13 +96,13 @@ MooseObjectParameterName::operator==(const MooseObjectName & rhs) const
 bool
 MooseObjectParameterName::operator!=(const MooseObjectParameterName & rhs) const
 {
-  return !( *this == rhs );
+  return !(*this == rhs);
 }
 
 bool
 MooseObjectParameterName::operator!=(const MooseObjectName & rhs) const
 {
-  return !( *this == rhs );
+  return !(*this == rhs);
 }
 
 bool

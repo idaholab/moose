@@ -16,8 +16,9 @@
 #include "Factory.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<Problem>()
+template <>
+InputParameters
+validParams<Problem>()
 {
   InputParameters params;
   params += validParams<MooseObject>();
@@ -25,14 +26,12 @@ InputParameters validParams<Problem>()
   return params;
 }
 
-Problem::Problem(const InputParameters & parameters) :
-    MooseObject(parameters),
+Problem::Problem(const InputParameters & parameters)
+  : MooseObject(parameters),
     _cli_option_found(false),
     _color_output(false),
     _termination_requested(false)
 {
 }
 
-Problem::~Problem()
-{
-}
+Problem::~Problem() {}

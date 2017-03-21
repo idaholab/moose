@@ -39,7 +39,7 @@ protected:
   const std::vector<dof_id_type> & _var_dofs;
 };
 
-template<>
+template <>
 InputParameters validParams<SimpleTestShapeElementKernel>();
 
-#endif //SIMPLETESTSHAPEELEMENTKERNEL_H
+#endif // SIMPLETESTSHAPEELEMENTKERNEL_H

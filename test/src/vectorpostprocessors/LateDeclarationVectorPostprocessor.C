@@ -14,18 +14,20 @@
 
 #include "LateDeclarationVectorPostprocessor.h"
 
-template<>
-InputParameters validParams<LateDeclarationVectorPostprocessor>()
+template <>
+InputParameters
+validParams<LateDeclarationVectorPostprocessor>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
 
-  params.addRequiredParam<VectorPostprocessorValue>("value", "The vector value this object will have.");
+  params.addRequiredParam<VectorPostprocessorValue>("value",
+                                                    "The vector value this object will have.");
   return params;
 }
 
-LateDeclarationVectorPostprocessor::LateDeclarationVectorPostprocessor(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
-    _value(nullptr)
+LateDeclarationVectorPostprocessor::LateDeclarationVectorPostprocessor(
+    const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters), _value(nullptr)
 {
 }
 

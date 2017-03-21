@@ -7,23 +7,27 @@
 #include "LinearIsoElasticPFDamage.h"
 #include "libmesh/utility.h"
 
-template<>
-InputParameters validParams<LinearIsoElasticPFDamage>()
+template <>
+InputParameters
+validParams<LinearIsoElasticPFDamage>()
 {
   InputParameters params = validParams<ComputeStressBase>();
-  params.addClassDescription("Phase-field fracture model energy contribution to damage growth-isotropic elasticity and undamaged stress under compressive strain");
-  params.addRequiredCoupledVar("c","Order parameter for damage");
-  params.addParam<Real>("kdamage",1e-6,"Stiffness of damaged matrix");
+  params.addClassDescription("Phase-field fracture model energy contribution to damage "
+                             "growth-isotropic elasticity and undamaged stress under compressive "
+                             "strain");
+  params.addRequiredCoupledVar("c", "Order parameter for damage");
+  params.addParam<Real>("kdamage", 1e-6, "Stiffness of damaged matrix");
 
   return params;
 }
 
-LinearIsoElasticPFDamage::LinearIsoElasticPFDamage(const InputParameters & parameters) :
-    ComputeStressBase(parameters),
+LinearIsoElasticPFDamage::LinearIsoElasticPFDamage(const InputParameters & parameters)
+  : ComputeStressBase(parameters),
     _c(coupledValue("c")),
     _kdamage(getParam<Real>("kdamage")),
     _G0_pos(declareProperty<Real>("G0_pos")),
-    _dstress_dc(declarePropertyDerivative<RankTwoTensor>(_base_name + "stress", getVar("c", 0)->name())),
+    _dstress_dc(
+        declarePropertyDerivative<RankTwoTensor>(_base_name + "stress", getVar("c", 0)->name())),
     _dG0_pos_dstrain(declareProperty<RankTwoTensor>("dG0_pos_dstrain")),
     _etens(LIBMESH_DIM),
     _epos(LIBMESH_DIM),
@@ -31,7 +35,8 @@ LinearIsoElasticPFDamage::LinearIsoElasticPFDamage(const InputParameters & param
 {
 }
 
-void LinearIsoElasticPFDamage::computeQpStress()
+void
+LinearIsoElasticPFDamage::computeQpStress()
 {
   updateVar();
   updateJacobian();
@@ -40,9 +45,9 @@ void LinearIsoElasticPFDamage::computeQpStress()
 void
 LinearIsoElasticPFDamage::updateVar()
 {
-  //Isotropic elasticity is assumed
-  Real lambda = _elasticity_tensor[_qp](0,0,1,1);
-  Real mu = _elasticity_tensor[_qp](0,1,0,1);
+  // Isotropic elasticity is assumed
+  Real lambda = _elasticity_tensor[_qp](0, 0, 1, 1);
+  Real mu = _elasticity_tensor[_qp](0, 1, 0, 1);
   Real c = _c[_qp];
   Real xfac = _kdamage;
   if (c < 1.0)
@@ -50,11 +55,11 @@ LinearIsoElasticPFDamage::updateVar()
 
   _mechanical_strain[_qp].symmetricEigenvaluesEigenvectors(_eigval, _eigvec);
 
-  //Tensors of outerproduct of eigen vectors
+  // Tensors of outerproduct of eigen vectors
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        _etens[i](j,k) = _eigvec(j,i) * _eigvec(k,i);
+        _etens[i](j, k) = _eigvec(j, i) * _eigvec(k, i);
 
   Real etr = 0.0;
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
@@ -66,11 +71,13 @@ LinearIsoElasticPFDamage::updateVar()
   RankTwoTensor stress0pos, stress0neg;
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
-    stress0pos += _etens[i] * (lambda * etrpos + 2.0 * mu * (std::abs(_eigval[i]) + _eigval[i]) / 2.0);
-    stress0neg += _etens[i] * (lambda * etrneg + 2.0 * mu * (std::abs(_eigval[i]) - _eigval[i]) / 2.0);
+    stress0pos +=
+        _etens[i] * (lambda * etrpos + 2.0 * mu * (std::abs(_eigval[i]) + _eigval[i]) / 2.0);
+    stress0neg +=
+        _etens[i] * (lambda * etrneg + 2.0 * mu * (std::abs(_eigval[i]) - _eigval[i]) / 2.0);
   }
 
-  //Damage associated with positive component of stress
+  // Damage associated with positive component of stress
   _stress[_qp] = stress0pos * xfac - stress0neg;
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)

@@ -25,7 +25,6 @@ class MooseVariable;
 class PenetrationThread
 {
 public:
-
   PenetrationThread(SubProblem & subproblem,
                     const MooseMesh & mesh,
                     BoundaryID master_boundary,
@@ -37,10 +36,10 @@ public:
                     bool do_normal_smoothing,
                     Real normal_smoothing_distance,
                     PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
-                    std::vector<std::vector<FEBase *> > & fes,
+                    std::vector<std::vector<FEBase *>> & fes,
                     FEType & fe_type,
                     NearestNodeLocator & nearest_node,
-                    const std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
+                    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
                     std::vector<dof_id_type> & elem_list,
                     std::vector<unsigned short int> & side_list,
                     std::vector<boundary_id_type> & id_list);
@@ -48,7 +47,7 @@ public:
   // Splitting Constructor
   PenetrationThread(PenetrationThread & x, Threads::split split);
 
-  void operator() (const NodeIdRange & range);
+  void operator()(const NodeIdRange & range);
 
   void join(const PenetrationThread & other);
 
@@ -72,13 +71,13 @@ protected:
   MooseVariable * _nodal_normal_y;
   MooseVariable * _nodal_normal_z;
 
-  std::vector<std::vector<FEBase *> > & _fes;
+  std::vector<std::vector<FEBase *>> & _fes;
 
   FEType & _fe_type;
 
   NearestNodeLocator & _nearest_node;
 
-  const std::map<dof_id_type, std::vector<dof_id_type> > & _node_to_elem_map;
+  const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
 
   std::vector<dof_id_type> & _elem_list;
   std::vector<unsigned short int> & _side_list;
@@ -103,92 +102,66 @@ protected:
     EDGE_AND_COMMON_NODE
   };
 
-  CompeteInteractionResult
-  competeInteractions(PenetrationInfo * pi1,
-                      PenetrationInfo * pi2);
+  CompeteInteractionResult competeInteractions(PenetrationInfo * pi1, PenetrationInfo * pi2);
 
-  CommonEdgeResult
-  interactionsOffCommonEdge(PenetrationInfo * pi1,
-                            PenetrationInfo * pi2);
+  CommonEdgeResult interactionsOffCommonEdge(PenetrationInfo * pi1, PenetrationInfo * pi2);
 
-  bool
-  findRidgeContactPoint(Point &contact_point,
-                        Real & tangential_distance,
-                        const Node * & closest_node,
-                        unsigned int &index,
-                        Point &contact_point_ref,
-                        std::vector<PenetrationInfo*> &p_info,
-                        const unsigned int index1,
-                        const unsigned int index2);
+  bool findRidgeContactPoint(Point & contact_point,
+                             Real & tangential_distance,
+                             const Node *& closest_node,
+                             unsigned int & index,
+                             Point & contact_point_ref,
+                             std::vector<PenetrationInfo *> & p_info,
+                             const unsigned int index1,
+                             const unsigned int index2);
 
-  void
-  getSideCornerNodes(Elem* side,
-                     std::vector<Node*> &corner_nodes);
+  void getSideCornerNodes(Elem * side, std::vector<Node *> & corner_nodes);
 
-  bool
-  restrictPointToSpecifiedEdgeOfFace(Point& p,
-                                     const Node * & closest_node,
-                                     const Elem* side,
-                                     const std::vector<Node*> &edge_nodes);
-  bool
-  restrictPointToFace(Point& p,
-                      const Node * & closest_node,
-                      const Elem* side);
+  bool restrictPointToSpecifiedEdgeOfFace(Point & p,
+                                          const Node *& closest_node,
+                                          const Elem * side,
+                                          const std::vector<Node *> & edge_nodes);
+  bool restrictPointToFace(Point & p, const Node *& closest_node, const Elem * side);
 
-  bool
-  isFaceReasonableCandidate(const Elem * master_elem,
-                            const Elem * side,
-                            FEBase * fe,
-                            const Point * slave_point,
-                            const Real tangential_tolerance);
+  bool isFaceReasonableCandidate(const Elem * master_elem,
+                                 const Elem * side,
+                                 FEBase * fe,
+                                 const Point * slave_point,
+                                 const Real tangential_tolerance);
 
-  void
-  smoothNormal(PenetrationInfo* info,
-               std::vector<PenetrationInfo*> & p_info);
+  void smoothNormal(PenetrationInfo * info, std::vector<PenetrationInfo *> & p_info);
 
+  void getSmoothingFacesAndWeights(PenetrationInfo * info,
+                                   std::vector<PenetrationInfo *> & edge_face_info,
+                                   std::vector<Real> & edge_face_weights,
+                                   std::vector<PenetrationInfo *> & p_info);
+  void getSmoothingEdgeNodesAndWeights(const Point & p,
+                                       const Elem * side,
+                                       std::vector<std::vector<const Node *>> & edge_nodes,
+                                       std::vector<Real> & edge_face_weights);
 
-  void
-  getSmoothingFacesAndWeights(PenetrationInfo* info,
-                              std::vector<PenetrationInfo*> &edge_face_info,
-                              std::vector<Real> &edge_face_weights,
-                              std::vector<PenetrationInfo*> & p_info);
-  void
-  getSmoothingEdgeNodesAndWeights(const Point& p,
-                                  const Elem* side,
-                                  std::vector<std::vector<const Node*> > &edge_nodes,
-                                  std::vector<Real> &edge_face_weights);
+  void getInfoForFacesWithCommonNodes(const Node * slave_node,
+                                      const std::set<dof_id_type> & elems_to_exclude,
+                                      const std::vector<const Node *> edge_nodes,
+                                      std::vector<PenetrationInfo *> & face_info_comm_edge,
+                                      std::vector<PenetrationInfo *> & p_info);
 
-  void
-  getInfoForFacesWithCommonNodes(const Node* slave_node,
-                                 const std::set<dof_id_type> &elems_to_exclude,
-                                 const std::vector<const Node*> edge_nodes,
-                                 std::vector<PenetrationInfo*> &face_info_comm_edge,
-                                 std::vector<PenetrationInfo*> & p_info);
+  void getInfoForElem(std::vector<PenetrationInfo *> & thisElemInfo,
+                      std::vector<PenetrationInfo *> & p_info,
+                      const Elem * elem);
 
-  void
-  getInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo,
-                 std::vector<PenetrationInfo*> &p_info,
-                 const Elem* elem);
+  void createInfoForElem(std::vector<PenetrationInfo *> & thisElemInfo,
+                         std::vector<PenetrationInfo *> & p_info,
+                         const Node * slave_node,
+                         const Elem * elem,
+                         const std::vector<const Node *> & nodes_that_must_be_on_side,
+                         const bool check_whether_reasonable = false);
 
-  void
-  createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo,
-                    std::vector<PenetrationInfo*> &p_info,
-                    const Node* slave_node,
-                    const Elem* elem,
-                    const std::vector<const Node*> &nodes_that_must_be_on_side,
-                    const bool check_whether_reasonable = false);
+  void getSidesOnMasterBoundary(std::vector<unsigned int> & sides, const Elem * const elem);
 
-  void
-  getSidesOnMasterBoundary(std::vector<unsigned int> &sides,
-                           const Elem *const elem);
+  void computeSlip(FEBase & fe, PenetrationInfo & info);
 
-  void
-  computeSlip( FEBase & fe,
-               PenetrationInfo & info );
-
-  void
-  switchInfo( PenetrationInfo * & info,
-              PenetrationInfo * & infoNew );
+  void switchInfo(PenetrationInfo *& info, PenetrationInfo *& infoNew);
 
   struct RidgeData
   {
@@ -208,4 +181,4 @@ protected:
   };
 };
 
-#endif //PENETRATIONTHREAD_H
+#endif // PENETRATIONTHREAD_H

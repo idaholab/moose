@@ -9,11 +9,10 @@
 
 #include "NSMomentumInviscidBC.h"
 
-
 // Forward Declarations
 class NSMomentumInviscidNoPressureImplicitFlowBC;
 
-template<>
+template <>
 InputParameters validParams<NSMomentumInviscidNoPressureImplicitFlowBC>();
 
 /**

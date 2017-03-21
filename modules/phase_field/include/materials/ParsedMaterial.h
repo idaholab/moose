@@ -14,7 +14,7 @@
 // Forward Declarations
 class ParsedMaterial;
 
-template<>
+template <>
 InputParameters validParams<ParsedMaterial>();
 
 /**
@@ -27,4 +27,4 @@ public:
   ParsedMaterial(const InputParameters & parameters);
 };
 
-#endif //PARSEDMATERIAL_H
+#endif // PARSEDMATERIAL_H

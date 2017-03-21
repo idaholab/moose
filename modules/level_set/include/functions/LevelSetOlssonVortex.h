@@ -13,7 +13,7 @@
 // Forward declarations
 class LevelSetOlssonVortex;
 
-template<>
+template <>
 InputParameters validParams<LevelSetOlssonVortex>();
 
 /**
@@ -22,7 +22,6 @@ InputParameters validParams<LevelSetOlssonVortex>();
 class LevelSetOlssonVortex : public Function
 {
 public:
-
   LevelSetOlssonVortex(const InputParameters & parameters);
 
   Real value(Real t, const Point & p) override;
@@ -30,7 +29,6 @@ public:
   RealVectorValue vectorValue(Real t, const Point & p) override;
 
 protected:
-
   /// Total time for the velocity field to complete reverse
   const Real & _reverse_time;
 

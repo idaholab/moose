@@ -10,10 +10,10 @@
 
 #include "PorousFlowMaterial.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowNearestQp;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowNearestQp>();
 
 /**
@@ -32,4 +32,4 @@ protected:
   MaterialProperty<unsigned int> & _nearest_qp;
 };
 
-#endif //POROUSFLOWNEARESTQP_H
+#endif // POROUSFLOWNEARESTQP_H

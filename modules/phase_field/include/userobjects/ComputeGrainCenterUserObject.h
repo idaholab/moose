@@ -9,10 +9,10 @@
 
 #include "ElementUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class ComputeGrainCenterUserObject;
 
-template<>
+template <>
 InputParameters validParams<ComputeGrainCenterUserObject>();
 
 /**
@@ -43,4 +43,4 @@ protected:
   ///@}
 };
 
-#endif //COMPUTEGRAINCENTERUSEROBJECT_H
+#endif // COMPUTEGRAINCENTERUSEROBJECT_H

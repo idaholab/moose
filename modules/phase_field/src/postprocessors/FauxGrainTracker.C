@@ -8,17 +8,19 @@
 #include "FauxGrainTracker.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<FauxGrainTracker>()
+template <>
+InputParameters
+validParams<FauxGrainTracker>()
 {
   InputParameters params = validParams<GrainTrackerInterface>();
-  params.addClassDescription("Fake grain tracker object for cases where the number of grains is equal to the number of order parameters.");
+  params.addClassDescription("Fake grain tracker object for cases where the number of grains is "
+                             "equal to the number of order parameters.");
 
   return params;
 }
 
-FauxGrainTracker::FauxGrainTracker(const InputParameters & parameters) :
-    FeatureFloodCount(parameters),
+FauxGrainTracker::FauxGrainTracker(const InputParameters & parameters)
+  : FeatureFloodCount(parameters),
     GrainTrackerInterface(),
     _grain_count(0),
     _n_vars(_vars.size()),
@@ -32,12 +34,12 @@ FauxGrainTracker::FauxGrainTracker(const InputParameters & parameters) :
   _empty_var_to_features.resize(_n_vars, FeatureFloodCount::invalid_id);
 }
 
-FauxGrainTracker::~FauxGrainTracker()
-{
-}
+FauxGrainTracker::~FauxGrainTracker() {}
 
 Real
-FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::FieldType field_type, std::size_t var_idx) const
+FauxGrainTracker::getEntityValue(dof_id_type entity_id,
+                                 FeatureFloodCount::FieldType field_type,
+                                 std::size_t var_idx) const
 {
   if (var_idx == FeatureFloodCount::invalid_size_t)
     var_idx = 0;
@@ -61,7 +63,8 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::Field
     case FieldType::CENTROID:
     {
       if (_periodic_node_map.size())
-        mooseDoOnce(mooseWarning("Centroids are not correct when using periodic boundaries, contact the MOOSE team"));
+        mooseDoOnce(mooseWarning(
+            "Centroids are not correct when using periodic boundaries, contact the MOOSE team"));
 
       // If this element contains the centroid of one of features, return it's index
       const auto * elem_ptr = _mesh.elemPtr(entity_id);
@@ -76,7 +79,8 @@ FauxGrainTracker::getEntityValue(dof_id_type entity_id, FeatureFloodCount::Field
       return 0;
     }
 
-    // We don't want to error here because this should be a drop in replacement for the real grain tracker.
+    // We don't want to error here because this should be a drop in replacement for the real grain
+    // tracker.
     // Instead we'll just return zero and continue
     default:
       return 0;
@@ -120,7 +124,8 @@ Point
 FauxGrainTracker::getGrainCentroid(unsigned int grain_index) const
 {
   const auto grain_center = _centroid.find(grain_index);
-  mooseAssert(grain_center != _centroid.end(), "Grain " << grain_index << " does not exist in data structure");
+  mooseAssert(grain_center != _centroid.end(),
+              "Grain " << grain_index << " does not exist in data structure");
 
   return grain_center->second;
 }
@@ -145,11 +150,13 @@ FauxGrainTracker::execute()
   Moose::perf_log.push("execute()", "FauxGrainTracker");
 
   const MeshBase::element_iterator end = _mesh.getMesh().active_local_elements_end();
-  for (MeshBase::element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
+  for (MeshBase::element_iterator el = _mesh.getMesh().active_local_elements_begin(); el != end;
+       ++el)
   {
     const Elem * current_elem = *el;
 
-    // Loop over elements or nodes and populate the data structure with the first variable with a value above a threshold
+    // Loop over elements or nodes and populate the data structure with the first variable with a
+    // value above a threshold
     if (_is_elemental)
     {
       std::vector<Point> centroid(1, current_elem->centroid());
@@ -158,14 +165,15 @@ FauxGrainTracker::execute()
       auto entity = current_elem->id();
       auto map_it = _entity_var_to_features.lower_bound(entity);
       if (map_it == _entity_var_to_features.end() || map_it->first != entity)
-        map_it = _entity_var_to_features.emplace_hint(map_it, entity, std::vector<unsigned int>(_n_vars, FeatureFloodCount::invalid_id));
+        map_it = _entity_var_to_features.emplace_hint(
+            map_it, entity, std::vector<unsigned int>(_n_vars, FeatureFloodCount::invalid_id));
 
       for (auto var_num = beginIndex(_vars); var_num < _n_vars; ++var_num)
       {
         auto entity_value = _vars[var_num]->sln()[0];
 
-        if ((_use_less_than_threshold_comparison && (entity_value >= _threshold))
-            || (!_use_less_than_threshold_comparison && (entity_value <= _threshold)))
+        if ((_use_less_than_threshold_comparison && (entity_value >= _threshold)) ||
+            (!_use_less_than_threshold_comparison && (entity_value <= _threshold)))
         {
           _entity_id_to_var_num[current_elem->id()] = var_num;
           _variables_used.insert(var_num);
@@ -188,8 +196,8 @@ FauxGrainTracker::execute()
         for (auto var_num = beginIndex(_vars); var_num < _n_vars; ++var_num)
         {
           auto entity_value = _vars[var_num]->getNodalValue(*current_node);
-          if ((_use_less_than_threshold_comparison && (entity_value >= _threshold))
-              || (!_use_less_than_threshold_comparison && (entity_value <= _threshold)))
+          if ((_use_less_than_threshold_comparison && (entity_value >= _threshold)) ||
+              (!_use_less_than_threshold_comparison && (entity_value <= _threshold)))
           {
             _entity_id_to_var_num[current_node->id()] = var_num;
             _variables_used.insert(var_num);
@@ -238,12 +246,12 @@ FauxGrainTracker::finalize()
         grain_data[2] = centroid->second(1);
         grain_data[3] = centroid->second(2);
       }
-        // combine centers & volumes from all MPI ranks
-        gatherSum(vol_count);
-        gatherSum(grain_data);
-        _volume[var_num] = grain_data[0];
-        _centroid[var_num] = {grain_data[1], grain_data[2], grain_data[3]};
-        _centroid[var_num] /= vol_count;
+      // combine centers & volumes from all MPI ranks
+      gatherSum(vol_count);
+      gatherSum(grain_data);
+      _volume[var_num] = grain_data[0];
+      _centroid[var_num] = {grain_data[1], grain_data[2], grain_data[3]};
+      _centroid[var_num] /= vol_count;
     }
 
   Moose::perf_log.pop("finalize()", "FauxGrainTracker");

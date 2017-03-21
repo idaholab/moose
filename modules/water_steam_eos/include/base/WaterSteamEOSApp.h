@@ -11,7 +11,7 @@
 
 class WaterSteamEOSApp;
 
-template<>
+template <>
 InputParameters validParams<WaterSteamEOSApp>();
 
 class WaterSteamEOSApp : public MooseApp

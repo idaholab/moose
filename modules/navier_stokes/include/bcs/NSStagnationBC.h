@@ -14,7 +14,7 @@ class NSStagnationBC;
 class IdealGasFluidProperties;
 
 // Specialization required of all user-level Moose objects
-template<>
+template <>
 InputParameters validParams<NSStagnationBC>();
 
 /**

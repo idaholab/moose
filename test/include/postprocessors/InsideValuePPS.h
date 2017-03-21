@@ -20,7 +20,7 @@
 class InsideValuePPS;
 class InsideUserObject;
 
-template<>
+template <>
 InputParameters validParams<InsideValuePPS>();
 
 /**

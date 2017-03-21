@@ -29,8 +29,8 @@
 // libMesh forward declarations
 namespace libMesh
 {
-  class Node;
-  class Elem;
+class Node;
+class Elem;
 }
 
 /**
@@ -41,18 +41,14 @@ namespace libMesh
 class ElementPairLocator
 {
 public:
-
-  ElementPairLocator(unsigned int interface_id) :
-      _elem_pairs(NULL)
+  ElementPairLocator(unsigned int interface_id) : _elem_pairs(NULL)
   {
     _interface_id = interface_id;
   }
 
-  virtual ~ElementPairLocator()
-  {
-  }
+  virtual ~ElementPairLocator() {}
 
-  typedef std::list<std::pair<const Elem*, const Elem*> > ElementPairList;
+  typedef std::list<std::pair<const Elem *, const Elem *>> ElementPairList;
 
   virtual void reinit(){};
 
@@ -61,13 +57,15 @@ public:
   const ElementPairList & getElemPairs() const
   {
     if (_elem_pairs == NULL)
-      mooseError("_elem_pairs has not yet been initialized and it needs to be initialized by a derived class");
+      mooseError("_elem_pairs has not yet been initialized and it needs to be initialized by a "
+                 "derived class");
     return *_elem_pairs;
   }
 
-  const ElementPairInfo & getElemPairInfo(std::pair<const Elem*, const Elem*> elem_pair) const
+  const ElementPairInfo & getElemPairInfo(std::pair<const Elem *, const Elem *> elem_pair) const
   {
-    std::map<std::pair<const Elem*, const Elem*>, ElementPairInfo>::const_iterator it = _element_pair_info.find(elem_pair);
+    std::map<std::pair<const Elem *, const Elem *>, ElementPairInfo>::const_iterator it =
+        _element_pair_info.find(elem_pair);
     if (it == _element_pair_info.end())
       mooseError("Could not find ElemenPairInfo for specified element pair");
     return it->second;
@@ -75,7 +73,7 @@ public:
 
 protected:
   const ElementPairList * _elem_pairs;
-  std::map<std::pair<const Elem*, const Elem*>, ElementPairInfo> _element_pair_info;
+  std::map<std::pair<const Elem *, const Elem *>, ElementPairInfo> _element_pair_info;
   unsigned int _interface_id;
 };
 

@@ -19,14 +19,13 @@
 
 class MMSConstantAux;
 
-template<>
+template <>
 InputParameters validParams<MMSConstantAux>();
 
 class MMSConstantAux : public AuxKernel
 {
 public:
-
- MMSConstantAux(const InputParameters & parameters);
+  MMSConstantAux(const InputParameters & parameters);
 
   virtual ~MMSConstantAux() {}
 
@@ -36,4 +35,4 @@ protected:
   unsigned int _mesh_dimension;
 };
 
-#endif //MMSCONSTANTAUX_H
+#endif // MMSCONSTANTAUX_H

@@ -20,15 +20,13 @@
 
 class PostprocessorDT;
 
-template<>
+template <>
 InputParameters validParams<PostprocessorDT>();
 
 /**
  * Computes the value of dt based on a postprocessor value
  */
-class PostprocessorDT :
-    public TimeStepper,
-    public PostprocessorInterface
+class PostprocessorDT : public TimeStepper, public PostprocessorInterface
 {
 public:
   PostprocessorDT(const InputParameters & parameters);
@@ -47,6 +45,5 @@ protected:
   /// Factor added to the postprocessor value
   const Real & _factor;
 };
-
 
 #endif /* POSTPROCESSORDT_H */

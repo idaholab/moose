@@ -25,8 +25,9 @@
 #include "libmesh/system.h"
 #include "libmesh/eigen_solver.h"
 
-template<>
-InputParameters validParams<EigenProblem>()
+template <>
+InputParameters
+validParams<EigenProblem>()
 {
   InputParameters params = validParams<FEProblemBase>();
   params.addParam<unsigned int>("n_eigen_pairs", 1, "The number of eigen pairs");
@@ -37,8 +38,8 @@ InputParameters validParams<EigenProblem>()
   return params;
 }
 
-EigenProblem::EigenProblem(const InputParameters & parameters) :
-    FEProblemBase(parameters),
+EigenProblem::EigenProblem(const InputParameters & parameters)
+  : FEProblemBase(parameters),
     _n_eigen_pairs_required(getParam<unsigned int>("n_eigen_pairs")),
     _generalized_eigenvalue_problem(false),
     _nl_eigen(new NonlinearEigenSystem(*this, "eigen0"))
@@ -51,7 +52,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters) :
   // i.e. the number of requested eigenpairs nev and the number
   // of basis vectors ncv used in the solution algorithm. Note that
   // ncv >= nev must hold and ncv >= 2*nev is recommended.
-  es().parameters.set<unsigned int>("eigenpairs")    = _n_eigen_pairs_required;
+  es().parameters.set<unsigned int>("eigenpairs") = _n_eigen_pairs_required;
   es().parameters.set<unsigned int>("basis vectors") = getParam<unsigned int>("n_basis_vectors");
 
   newAssemblyArray(*_nl_eigen);
@@ -84,43 +85,45 @@ EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
 {
   switch (eigen_problem_type)
   {
-  case Moose::EPT_HERMITIAN:
-    _nl_eigen->sys().set_eigenproblem_type(libMesh::HEP);
-    _generalized_eigenvalue_problem = false;
-    break;
+    case Moose::EPT_HERMITIAN:
+      _nl_eigen->sys().set_eigenproblem_type(libMesh::HEP);
+      _generalized_eigenvalue_problem = false;
+      break;
 
-  case Moose::EPT_NON_HERMITIAN:
-    _nl_eigen->sys().set_eigenproblem_type(libMesh::NHEP);
-    _generalized_eigenvalue_problem = false;
-    break;
+    case Moose::EPT_NON_HERMITIAN:
+      _nl_eigen->sys().set_eigenproblem_type(libMesh::NHEP);
+      _generalized_eigenvalue_problem = false;
+      break;
 
-  case Moose::EPT_GEN_HERMITIAN:
-    _nl_eigen->sys().set_eigenproblem_type(libMesh::GHEP);
-    _generalized_eigenvalue_problem = true;
-    break;
+    case Moose::EPT_GEN_HERMITIAN:
+      _nl_eigen->sys().set_eigenproblem_type(libMesh::GHEP);
+      _generalized_eigenvalue_problem = true;
+      break;
 
-  case Moose::EPT_GEN_INDEFINITE:
-    _nl_eigen->sys().set_eigenproblem_type(libMesh::GHIEP);
-    _generalized_eigenvalue_problem = true;
-    break;
+    case Moose::EPT_GEN_INDEFINITE:
+      _nl_eigen->sys().set_eigenproblem_type(libMesh::GHIEP);
+      _generalized_eigenvalue_problem = true;
+      break;
 
-  case Moose::EPT_GEN_NON_HERMITIAN:
-    _nl_eigen->sys().set_eigenproblem_type(libMesh::GNHEP);
-    _generalized_eigenvalue_problem = true;
-    break;
+    case Moose::EPT_GEN_NON_HERMITIAN:
+      _nl_eigen->sys().set_eigenproblem_type(libMesh::GNHEP);
+      _generalized_eigenvalue_problem = true;
+      break;
 
-  case Moose::EPT_POS_GEN_NON_HERMITIAN:
-    mooseError("libMesh does not support EPT_POS_GEN_NON_HERMITIAN currently \n");
-    break;
+    case Moose::EPT_POS_GEN_NON_HERMITIAN:
+      mooseError("libMesh does not support EPT_POS_GEN_NON_HERMITIAN currently \n");
+      break;
 
-  default:
-    mooseError("Unknown eigen solver type \n");
+    default:
+      mooseError("Unknown eigen solver type \n");
   }
 }
 #endif
 
 void
-EigenProblem::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type)
+EigenProblem::computeJacobian(const NumericVector<Number> & soln,
+                              SparseMatrix<Number> & jacobian,
+                              Moose::KernelType kernel_type)
 {
   // to avoid computing residual
   solverParams()._type = Moose::ST_NEWTON;
@@ -143,8 +146,8 @@ EigenProblem::solve()
 #endif
   if (_solve)
   {
-     _nl->solve();
-     _nl->update();
+    _nl->solve();
+    _nl->update();
   }
 
   // sync solutions in displaced problem

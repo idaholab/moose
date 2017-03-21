@@ -17,10 +17,10 @@
 
 #include "SidePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class SideIntegralPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<SideIntegralPostprocessor>();
 
 /**

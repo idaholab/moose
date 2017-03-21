@@ -7,16 +7,17 @@
 
 #include "Water97FluidProperties.h"
 
-template<>
-InputParameters validParams<Water97FluidProperties>()
+template <>
+InputParameters
+validParams<Water97FluidProperties>()
 {
   InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
   params.addClassDescription("Fluid properties for water and steam (H2O) using IAPWS-IF97");
   return params;
 }
 
-Water97FluidProperties::Water97FluidProperties(const InputParameters & parameters) :
-    SinglePhaseFluidPropertiesPT(parameters),
+Water97FluidProperties::Water97FluidProperties(const InputParameters & parameters)
+  : SinglePhaseFluidPropertiesPT(parameters),
     _Mh2o(18.015e-3),
     _Rw(461.526),
     _p_critical(22.064e6),
@@ -27,9 +28,7 @@ Water97FluidProperties::Water97FluidProperties(const InputParameters & parameter
 {
 }
 
-Water97FluidProperties::~Water97FluidProperties()
-{
-}
+Water97FluidProperties::~Water97FluidProperties() {}
 
 Real
 Water97FluidProperties::molarMass() const
@@ -106,7 +105,8 @@ Water97FluidProperties::rho(Real pressure, Real temperature) const
 }
 
 void
-Water97FluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
+Water97FluidProperties::rho_dpT(
+    Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   Real pi, tau, ddensity_dp, ddensity_dT;
 
@@ -120,9 +120,9 @@ Water97FluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho, Rea
       pi = pressure / _p_star[0];
       tau = _T_star[0] / temperature;
       Real dgdp = dgamma1_dpi(pi, tau);
-      ddensity_dp = - d2gamma1_dpi2(pi, tau) / (_Rw * temperature * dgdp * dgdp);
-      ddensity_dT = - pressure * (dgdp - tau * d2gamma1_dpitau(pi, tau)) / (_Rw * pi *
-        temperature * temperature * dgdp * dgdp);
+      ddensity_dp = -d2gamma1_dpi2(pi, tau) / (_Rw * temperature * dgdp * dgdp);
+      ddensity_dT = -pressure * (dgdp - tau * d2gamma1_dpitau(pi, tau)) /
+                    (_Rw * pi * temperature * temperature * dgdp * dgdp);
       break;
     }
 
@@ -131,9 +131,9 @@ Water97FluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho, Rea
       pi = pressure / _p_star[1];
       tau = _T_star[1] / temperature;
       Real dgdp = dgamma2_dpi(pi, tau);
-      ddensity_dp = - d2gamma2_dpi2(pi, tau) / (_Rw * temperature * dgdp * dgdp);
-      ddensity_dT = - pressure * (dgdp - tau * d2gamma2_dpitau(pi, tau)) / (_Rw * pi *
-        temperature * temperature * dgdp * dgdp);
+      ddensity_dp = -d2gamma2_dpi2(pi, tau) / (_Rw * temperature * dgdp * dgdp);
+      ddensity_dT = -pressure * (dgdp - tau * d2gamma2_dpitau(pi, tau)) /
+                    (_Rw * pi * temperature * temperature * dgdp * dgdp);
       break;
     }
 
@@ -147,7 +147,7 @@ Water97FluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho, Rea
       Real d2pdd2 = d2phi3_ddelta2(delta, tau);
       ddensity_dp = 1.0 / (_Rw * temperature * delta * (2.0 * dpdd + delta * d2pdd2));
       ddensity_dT = density * (tau * d2phi3_ddeltatau(delta, tau) - dpdd) / temperature /
-        (2.0 * dpdd + delta * d2pdd2);
+                    (2.0 * dpdd + delta * d2pdd2);
       break;
     }
 
@@ -156,9 +156,9 @@ Water97FluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho, Rea
       pi = pressure / _p_star[4];
       tau = _T_star[4] / temperature;
       Real dgdp = dgamma5_dpi(pi, tau);
-      ddensity_dp = - d2gamma5_dpi2(pi, tau) / (_Rw * temperature * dgdp * dgdp);
-      ddensity_dT = - pressure * (dgdp - tau * d2gamma5_dpitau(pi, tau)) / (_Rw * pi *
-        temperature * temperature * dgdp * dgdp);
+      ddensity_dp = -d2gamma5_dpi2(pi, tau) / (_Rw * temperature * dgdp * dgdp);
+      ddensity_dT = -pressure * (dgdp - tau * d2gamma5_dpitau(pi, tau)) /
+                    (_Rw * pi * temperature * temperature * dgdp * dgdp);
       break;
     }
 
@@ -183,15 +183,15 @@ Water97FluidProperties::e(Real pressure, Real temperature) const
     case 1:
       pi = pressure / _p_star[0];
       tau = _T_star[0] / temperature;
-      internal_energy = _Rw * temperature * (tau * dgamma1_dtau(pi, tau)
-        - pi * dgamma1_dpi(pi, tau));
+      internal_energy =
+          _Rw * temperature * (tau * dgamma1_dtau(pi, tau) - pi * dgamma1_dpi(pi, tau));
       break;
 
     case 2:
       pi = pressure / _p_star[1];
       tau = _T_star[1] / temperature;
-      internal_energy = _Rw * temperature * (tau * dgamma2_dtau(pi, tau)
-        - pi * dgamma2_dpi(pi, tau));
+      internal_energy =
+          _Rw * temperature * (tau * dgamma2_dtau(pi, tau) - pi * dgamma2_dpi(pi, tau));
       break;
 
     case 3:
@@ -207,8 +207,8 @@ Water97FluidProperties::e(Real pressure, Real temperature) const
     case 5:
       pi = pressure / _p_star[4];
       tau = _T_star[4] / temperature;
-      internal_energy = _Rw * temperature * (tau * dgamma5_dtau(pi, tau)
-        - pi * dgamma5_dpi(pi, tau));
+      internal_energy =
+          _Rw * temperature * (tau * dgamma5_dtau(pi, tau) - pi * dgamma5_dpi(pi, tau));
       break;
 
     default:
@@ -219,7 +219,8 @@ Water97FluidProperties::e(Real pressure, Real temperature) const
 }
 
 void
-Water97FluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
+Water97FluidProperties::e_dpT(
+    Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
   Real pi, tau, dinternal_energy_dp, dinternal_energy_dT;
 
@@ -233,10 +234,10 @@ Water97FluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & 
       tau = _T_star[0] / temperature;
       Real dgdp = dgamma1_dpi(pi, tau);
       Real d2gdpt = d2gamma1_dpitau(pi, tau);
-      dinternal_energy_dp = _Rw * temperature * (tau * d2gdpt - dgdp - pi *
-        d2gamma1_dpi2(pi, tau)) / _p_star[0];
-      dinternal_energy_dT = _Rw * (pi * tau * d2gdpt - tau * tau *
-        d2gamma1_dtau2(pi, tau) - pi * dgdp);
+      dinternal_energy_dp =
+          _Rw * temperature * (tau * d2gdpt - dgdp - pi * d2gamma1_dpi2(pi, tau)) / _p_star[0];
+      dinternal_energy_dT =
+          _Rw * (pi * tau * d2gdpt - tau * tau * d2gamma1_dtau2(pi, tau) - pi * dgdp);
       break;
     }
 
@@ -246,10 +247,10 @@ Water97FluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & 
       tau = _T_star[1] / temperature;
       Real dgdp = dgamma2_dpi(pi, tau);
       Real d2gdpt = d2gamma2_dpitau(pi, tau);
-      dinternal_energy_dp = _Rw * temperature * (tau * d2gdpt - dgdp - pi *
-        d2gamma2_dpi2(pi, tau)) / _p_star[1];
-      dinternal_energy_dT = _Rw * (pi * tau * d2gdpt - tau * tau *
-        d2gamma2_dtau2(pi, tau) - pi * dgdp);
+      dinternal_energy_dp =
+          _Rw * temperature * (tau * d2gdpt - dgdp - pi * d2gamma2_dpi2(pi, tau)) / _p_star[1];
+      dinternal_energy_dT =
+          _Rw * (pi * tau * d2gdpt - tau * tau * d2gamma2_dtau2(pi, tau) - pi * dgdp);
       break;
     }
 
@@ -262,10 +263,12 @@ Water97FluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & 
       Real dpdd = dphi3_ddelta(delta, tau);
       Real d2pddt = d2phi3_ddeltatau(delta, tau);
       Real d2pdd2 = d2phi3_ddelta2(delta, tau);
-      dinternal_energy_dp = _T_star[2] * d2pddt / _rho_critical / (2.0 * temperature *
-        delta * dpdd + temperature * delta * delta * d2pdd2);
-      dinternal_energy_dT = - _Rw * (delta * tau * d2pddt * (dpdd - tau * d2pddt) /
-        (2.0 * dpdd + delta * d2pdd2) + tau * tau * d2phi3_dtau2(delta, tau));
+      dinternal_energy_dp =
+          _T_star[2] * d2pddt / _rho_critical /
+          (2.0 * temperature * delta * dpdd + temperature * delta * delta * d2pdd2);
+      dinternal_energy_dT =
+          -_Rw * (delta * tau * d2pddt * (dpdd - tau * d2pddt) / (2.0 * dpdd + delta * d2pdd2) +
+                  tau * tau * d2phi3_dtau2(delta, tau));
       break;
     }
 
@@ -275,10 +278,10 @@ Water97FluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & 
       tau = _T_star[4] / temperature;
       Real dgdp = dgamma5_dpi(pi, tau);
       Real d2gdpt = d2gamma5_dpitau(pi, tau);
-      dinternal_energy_dp = _Rw * temperature * (tau * d2gdpt - dgdp - pi *
-        d2gamma5_dpi2(pi, tau)) / _p_star[4];
-      dinternal_energy_dT = _Rw * (pi * tau * d2gdpt - tau * tau *
-        d2gamma5_dtau2(pi, tau) - pi * dgdp);
+      dinternal_energy_dp =
+          _Rw * temperature * (tau * d2gdpt - dgdp - pi * d2gamma5_dpi2(pi, tau)) / _p_star[4];
+      dinternal_energy_dT =
+          _Rw * (pi * tau * d2gdpt - tau * tau * d2gamma5_dtau2(pi, tau) - pi * dgdp);
       break;
     }
 
@@ -292,7 +295,14 @@ Water97FluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & 
 }
 
 void
-Water97FluidProperties::rho_e_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT, Real & e, Real & de_dp, Real & de_dT) const
+Water97FluidProperties::rho_e_dpT(Real pressure,
+                                  Real temperature,
+                                  Real & rho,
+                                  Real & drho_dp,
+                                  Real & drho_dT,
+                                  Real & e,
+                                  Real & de_dp,
+                                  Real & de_dT) const
 {
   rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
   e_dpT(pressure, temperature, e, de_dp, de_dT);
@@ -311,16 +321,18 @@ Water97FluidProperties::c(Real pressure, Real temperature) const
       pi = pressure / _p_star[0];
       tau = _T_star[0] / temperature;
       speed2 = _Rw * temperature * std::pow(dgamma1_dpi(pi, tau), 2.0) /
-        (std::pow(dgamma1_dpi(pi, tau) - tau * d2gamma1_dpitau(pi, tau), 2.0) /
-        (tau * tau * d2gamma1_dtau2(pi, tau)) - d2gamma1_dpi2(pi, tau));
+               (std::pow(dgamma1_dpi(pi, tau) - tau * d2gamma1_dpitau(pi, tau), 2.0) /
+                    (tau * tau * d2gamma1_dtau2(pi, tau)) -
+                d2gamma1_dpi2(pi, tau));
       break;
 
     case 2:
       pi = pressure / _p_star[1];
       tau = _T_star[1] / temperature;
       speed2 = _Rw * temperature * std::pow(pi * dgamma2_dpi(pi, tau), 2.0) /
-        ((- pi * pi * d2gamma2_dpi2(pi, tau)) + std::pow(pi * dgamma2_dpi(pi, tau) -
-        tau * pi * d2gamma2_dpitau(pi, tau), 2.0) / (tau * tau * d2gamma2_dtau2(pi, tau)));
+               ((-pi * pi * d2gamma2_dpi2(pi, tau)) +
+                std::pow(pi * dgamma2_dpi(pi, tau) - tau * pi * d2gamma2_dpitau(pi, tau), 2.0) /
+                    (tau * tau * d2gamma2_dtau2(pi, tau)));
       break;
 
     case 3:
@@ -329,9 +341,12 @@ Water97FluidProperties::c(Real pressure, Real temperature) const
       Real density3 = densityRegion3(pressure, temperature);
       delta = density3 / _rho_critical;
       tau = _T_star[2] / temperature;
-      speed2 = _Rw * temperature * (2.0 * delta * dphi3_ddelta(delta, tau) +
-        delta * delta * d2phi3_ddelta2(delta, tau) - std::pow(delta * dphi3_ddelta(delta, tau) -
-        delta * tau * d2phi3_ddeltatau(delta, tau), 2.0) / (tau * tau * d2phi3_dtau2(delta, tau)));
+      speed2 =
+          _Rw * temperature *
+          (2.0 * delta * dphi3_ddelta(delta, tau) + delta * delta * d2phi3_ddelta2(delta, tau) -
+           std::pow(delta * dphi3_ddelta(delta, tau) - delta * tau * d2phi3_ddeltatau(delta, tau),
+                    2.0) /
+               (tau * tau * d2phi3_dtau2(delta, tau)));
       break;
     }
 
@@ -339,8 +354,9 @@ Water97FluidProperties::c(Real pressure, Real temperature) const
       pi = pressure / _p_star[4];
       tau = _T_star[4] / temperature;
       speed2 = _Rw * temperature * std::pow(pi * dgamma5_dpi(pi, tau), 2.0) /
-        ((- pi * pi * d2gamma5_dpi2(pi, tau)) + std::pow(pi * dgamma5_dpi(pi, tau) -
-        tau * pi * d2gamma5_dpitau(pi, tau), 2.0) / (tau * tau * d2gamma5_dtau2(pi, tau)));
+               ((-pi * pi * d2gamma5_dpi2(pi, tau)) +
+                std::pow(pi * dgamma5_dpi(pi, tau) - tau * pi * d2gamma5_dpitau(pi, tau), 2.0) /
+                    (tau * tau * d2gamma5_dtau2(pi, tau)));
       break;
 
     default:
@@ -362,13 +378,13 @@ Water97FluidProperties::cp(Real pressure, Real temperature) const
     case 1:
       pi = pressure / _p_star[0];
       tau = _T_star[0] / temperature;
-      specific_heat = - _Rw * tau * tau * d2gamma1_dtau2(pi, tau);
+      specific_heat = -_Rw * tau * tau * d2gamma1_dtau2(pi, tau);
       break;
 
     case 2:
       pi = pressure / _p_star[1];
       tau = _T_star[1] / temperature;
-      specific_heat = - _Rw * tau * tau * d2gamma2_dtau2(pi, tau);
+      specific_heat = -_Rw * tau * tau * d2gamma2_dtau2(pi, tau);
       break;
 
     case 3:
@@ -377,17 +393,20 @@ Water97FluidProperties::cp(Real pressure, Real temperature) const
       Real density3 = densityRegion3(pressure, temperature);
       delta = density3 / _rho_critical;
       tau = _T_star[2] / temperature;
-      specific_heat = _Rw * (- tau * tau * d2phi3_dtau2(delta, tau) +
-        (delta * dphi3_ddelta(delta, tau) - delta * tau * d2phi3_ddeltatau(delta, tau)) *
-        (delta * dphi3_ddelta(delta, tau) - delta * tau * d2phi3_ddeltatau(delta, tau)) /
-        (2.0 * delta * dphi3_ddelta(delta, tau) + delta * delta * d2phi3_ddelta2(delta, tau)));
+      specific_heat =
+          _Rw *
+          (-tau * tau * d2phi3_dtau2(delta, tau) +
+           (delta * dphi3_ddelta(delta, tau) - delta * tau * d2phi3_ddeltatau(delta, tau)) *
+               (delta * dphi3_ddelta(delta, tau) - delta * tau * d2phi3_ddeltatau(delta, tau)) /
+               (2.0 * delta * dphi3_ddelta(delta, tau) +
+                delta * delta * d2phi3_ddelta2(delta, tau)));
       break;
     }
 
     case 5:
       pi = pressure / _p_star[4];
       tau = _T_star[4] / temperature;
-      specific_heat = - _Rw * tau * tau * d2gamma5_dtau2(pi, tau);
+      specific_heat = -_Rw * tau * tau * d2gamma5_dtau2(pi, tau);
       break;
 
     default:
@@ -408,17 +427,17 @@ Water97FluidProperties::cv(Real pressure, Real temperature) const
     case 1:
       pi = pressure / _p_star[0];
       tau = _T_star[0] / temperature;
-      specific_heat = _Rw * (- tau * tau * d2gamma1_dtau2(pi, tau) +
-        std::pow(dgamma1_dpi(pi, tau) - tau * d2gamma1_dpitau(pi, tau), 2) /
-        d2gamma1_dpi2(pi, tau));
+      specific_heat = _Rw * (-tau * tau * d2gamma1_dtau2(pi, tau) +
+                             std::pow(dgamma1_dpi(pi, tau) - tau * d2gamma1_dpitau(pi, tau), 2) /
+                                 d2gamma1_dpi2(pi, tau));
       break;
 
     case 2:
       pi = pressure / _p_star[1];
       tau = _T_star[1] / temperature;
-      specific_heat = _Rw * (- tau * tau * d2gamma2_dtau2(pi, tau) +
-        std::pow(dgamma2_dpi(pi, tau) - tau * d2gamma2_dpitau(pi, tau), 2) /
-        d2gamma2_dpi2(pi, tau));
+      specific_heat = _Rw * (-tau * tau * d2gamma2_dtau2(pi, tau) +
+                             std::pow(dgamma2_dpi(pi, tau) - tau * d2gamma2_dpitau(pi, tau), 2) /
+                                 d2gamma2_dpi2(pi, tau));
       break;
 
     case 3:
@@ -427,16 +446,16 @@ Water97FluidProperties::cv(Real pressure, Real temperature) const
       Real density3 = densityRegion3(pressure, temperature);
       delta = density3 / _rho_critical;
       tau = _T_star[2] / temperature;
-      specific_heat = _Rw * (- tau * tau * d2phi3_dtau2(delta, tau));
+      specific_heat = _Rw * (-tau * tau * d2phi3_dtau2(delta, tau));
       break;
     }
 
     case 5:
       pi = pressure / _p_star[4];
       tau = _T_star[4] / temperature;
-      specific_heat = _Rw * (- tau * tau * d2gamma5_dtau2(pi, tau) +
-        std::pow(dgamma5_dpi(pi, tau) - tau * d2gamma5_dpitau(pi, tau), 2) /
-        d2gamma5_dpi2(pi, tau));
+      specific_heat = _Rw * (-tau * tau * d2gamma5_dtau2(pi, tau) +
+                             std::pow(dgamma5_dpi(pi, tau) - tau * d2gamma5_dpitau(pi, tau), 2) /
+                                 d2gamma5_dpi2(pi, tau));
       break;
 
     default:
@@ -450,12 +469,13 @@ Water97FluidProperties::mu(Real density, Real temperature) const
 {
   // Constants from Release on the IAPWS Formulation 2008 for the Viscosity of
   // Ordinary Water Substance
-  const std::vector<int> I {0, 1, 2, 3, 0, 1, 2, 3, 5, 0, 1, 2, 3, 4, 0, 1, 0, 3, 4, 3, 5};
-  const std::vector<int> J {0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 4, 4, 5, 6, 6};
-  const std::vector<Real> H0 {1.67752, 2.20462, 0.6366564, -0.241605};
-  const std::vector<Real> H1 {5.20094e-1, 8.50895e-2, -1.08374, -2.89555e-1, 2.22531e-1,
-    9.99115e-1, 1.88797, 1.26613, 1.20573e-1, -2.81378e-1, -9.06851e-1, -7.72479e-1, -4.89837e-1,
-    -2.57040e-1, 1.61913e-1, 2.57399e-1, -3.25372e-2, 6.98452e-2, 8.72102e-3, -4.35673e-3, -5.93264e-4};
+  const std::vector<int> I{0, 1, 2, 3, 0, 1, 2, 3, 5, 0, 1, 2, 3, 4, 0, 1, 0, 3, 4, 3, 5};
+  const std::vector<int> J{0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 4, 4, 5, 6, 6};
+  const std::vector<Real> H0{1.67752, 2.20462, 0.6366564, -0.241605};
+  const std::vector<Real> H1{
+      5.20094e-1, 8.50895e-2, -1.08374,    -2.89555e-1, 2.22531e-1,  9.99115e-1,  1.88797,
+      1.26613,    1.20573e-1, -2.81378e-1, -9.06851e-1, -7.72479e-1, -4.89837e-1, -2.57040e-1,
+      1.61913e-1, 2.57399e-1, -3.25372e-2, 6.98452e-2,  8.72102e-3,  -4.35673e-3, -5.93264e-4};
 
   Real mu_star = 1.e-6;
   Real rhobar = density / _rho_critical;
@@ -480,16 +500,18 @@ Water97FluidProperties::mu(Real density, Real temperature) const
 }
 
 void
-Water97FluidProperties::mu_drhoT(Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
+Water97FluidProperties::mu_drhoT(
+    Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
 {
   // Constants from Release on the IAPWS Formulation 2008 for the Viscosity of
   // Ordinary Water Substance
-  const std::vector<int> I {0, 1, 2, 3, 0, 1, 2, 3, 5, 0, 1, 2, 3, 4, 0, 1, 0, 3, 4, 3, 5};
-  const std::vector<int> J {0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 4, 4, 5, 6, 6};
-  const std::vector<Real> H0 {1.67752, 2.20462, 0.6366564, -0.241605};
-  const std::vector<Real> H1 {5.20094e-1, 8.50895e-2, -1.08374, -2.89555e-1, 2.22531e-1,
-    9.99115e-1, 1.88797, 1.26613, 1.20573e-1, -2.81378e-1, -9.06851e-1, -7.72479e-1, -4.89837e-1,
-    -2.57040e-1, 1.61913e-1, 2.57399e-1, -3.25372e-2, 6.98452e-2, 8.72102e-3, -4.35673e-3, -5.93264e-4};
+  const std::vector<int> I{0, 1, 2, 3, 0, 1, 2, 3, 5, 0, 1, 2, 3, 4, 0, 1, 0, 3, 4, 3, 5};
+  const std::vector<int> J{0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 4, 4, 5, 6, 6};
+  const std::vector<Real> H0{1.67752, 2.20462, 0.6366564, -0.241605};
+  const std::vector<Real> H1{
+      5.20094e-1, 8.50895e-2, -1.08374,    -2.89555e-1, 2.22531e-1,  9.99115e-1,  1.88797,
+      1.26613,    1.20573e-1, -2.81378e-1, -9.06851e-1, -7.72479e-1, -4.89837e-1, -2.57040e-1,
+      1.61913e-1, 2.57399e-1, -3.25372e-2, 6.98452e-2,  8.72102e-3,  -4.35673e-3, -5.93264e-4};
 
   Real mu_star = 1.0e-6;
   Real rhobar = density / _rho_critical;
@@ -509,7 +531,8 @@ Water97FluidProperties::mu_drhoT(Real density, Real temperature, Real & mu, Real
   for (unsigned int i = 0; i < H1.size(); ++i)
   {
     sum1 += std::pow(1.0 / Tbar - 1.0, I[i]) * H1[i] * std::pow(rhobar - 1.0, J[i]);
-    dsum1_drho += std::pow(1.0 / Tbar - 1.0, I[i]) * H1[i] * J[i] * std::pow(rhobar - 1.0, J[i] - 1);
+    dsum1_drho +=
+        std::pow(1.0 / Tbar - 1.0, I[i]) * H1[i] * J[i] * std::pow(rhobar - 1.0, J[i] - 1);
   }
 
   Real mu1 = std::exp(rhobar * sum1);
@@ -522,7 +545,7 @@ Water97FluidProperties::mu_drhoT(Real density, Real temperature, Real & mu, Real
   Real mu2T = this->mu(density, temperature + Teps);
 
   // Viscosity and its derivatives are then
-  mu =  mu_star * mu0 * mu1;
+  mu = mu_star * mu0 * mu1;
   dmu_drho = mu_star * mu0 * dmu1_drho * drhobar_drho;
   dmu_dT = (mu2T - mu) / Teps;
 }
@@ -534,7 +557,7 @@ Water97FluidProperties::k(Real density, Real temperature) const
   // different to the critical values used in IAPWS-IF97
   Real Tbar = temperature / 647.26;
   Real rhobar = density / 317.7;
-  std::vector<Real> a {0.0102811, 0.0299621, 0.0156146, -0.00422464};
+  std::vector<Real> a{0.0102811, 0.0299621, 0.0156146, -0.00422464};
 
   // Ideal gas component
   Real sum0 = 0.0;
@@ -545,8 +568,8 @@ Water97FluidProperties::k(Real density, Real temperature) const
   Real lambda0 = std::sqrt(Tbar) * sum0;
 
   // The contribution due to finite density
-  Real lambda1 = -0.39707 + 0.400302 * rhobar + 1.06 * std::exp(-0.171587 *
-    std::pow(rhobar + 2.392190, 2.0));
+  Real lambda1 =
+      -0.39707 + 0.400302 * rhobar + 1.06 * std::exp(-0.171587 * std::pow(rhobar + 2.392190, 2.0));
 
   // Critical enhancement
   Real DeltaT = std::abs(Tbar - 1.0) + 0.00308976;
@@ -554,9 +577,10 @@ Water97FluidProperties::k(Real density, Real temperature) const
   Real S = (Tbar >= 1.0 ? 1.0 / DeltaT : 10.0932 / std::pow(DeltaT, 0.6));
 
   Real lambda2 = (0.0701309 / std::pow(Tbar, 10.0) + 0.011852) * std::pow(rhobar, 1.8) *
-    std::exp(0.642857 * (1.0 - std::pow(rhobar, 2.8))) + 0.00169937 * S *
-    std::pow(rhobar, Q) * std::exp((Q / (1.0 + Q)) * (1.0 - std::pow(rhobar, 1.0 + Q))) -
-    1.02 * std::exp(-4.11717 * std::pow(Tbar, 1.5) - 6.17937 / std::pow(rhobar, 5.0));
+                     std::exp(0.642857 * (1.0 - std::pow(rhobar, 2.8))) +
+                 0.00169937 * S * std::pow(rhobar, Q) *
+                     std::exp((Q / (1.0 + Q)) * (1.0 - std::pow(rhobar, 1.0 + Q))) -
+                 1.02 * std::exp(-4.11717 * std::pow(Tbar, 1.5) - 6.17937 / std::pow(rhobar, 5.0));
 
   return lambda0 + lambda1 + lambda2;
 }
@@ -587,7 +611,7 @@ Water97FluidProperties::s(Real pressure, Real temperature) const
       density3 = densityRegion3(pressure, temperature);
       delta = density3 / _rho_critical;
       tau = _T_star[2] / temperature;
-      entropy = _Rw * (tau *  dphi3_dtau(delta, tau) - phi3(delta, tau));
+      entropy = _Rw * (tau * dphi3_dtau(delta, tau) - phi3(delta, tau));
       break;
 
     case 5:
@@ -629,8 +653,8 @@ Water97FluidProperties::h(Real pressure, Real temperature) const
       Real density3 = densityRegion3(pressure, temperature);
       delta = density3 / _rho_critical;
       tau = _T_star[2] / temperature;
-      enthalpy = _Rw * temperature * (tau *  dphi3_dtau(delta, tau) +
-        delta *  dphi3_ddelta(delta, tau));
+      enthalpy =
+          _Rw * temperature * (tau * dphi3_dtau(delta, tau) + delta * dphi3_ddelta(delta, tau));
       break;
     }
 
@@ -647,7 +671,8 @@ Water97FluidProperties::h(Real pressure, Real temperature) const
 }
 
 void
-Water97FluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
+Water97FluidProperties::h_dpT(
+    Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   Real enthalpy, pi, tau, delta, denthalpy_dp, denthalpy_dT;
 
@@ -660,7 +685,7 @@ Water97FluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
       tau = _T_star[0] / temperature;
       enthalpy = _Rw * _T_star[0] * dgamma1_dtau(pi, tau);
       denthalpy_dp = _Rw * _T_star[0] * d2gamma1_dpitau(pi, tau) / _p_star[0];
-      denthalpy_dT = - _Rw * tau * tau * d2gamma1_dtau2(pi, tau);
+      denthalpy_dT = -_Rw * tau * tau * d2gamma1_dtau2(pi, tau);
       break;
 
     case 2:
@@ -668,7 +693,7 @@ Water97FluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
       tau = _T_star[1] / temperature;
       enthalpy = _Rw * _T_star[1] * dgamma2_dtau(pi, tau);
       denthalpy_dp = _Rw * _T_star[1] * d2gamma2_dpitau(pi, tau) / _p_star[1];
-      denthalpy_dT = - _Rw * tau * tau * d2gamma2_dtau2(pi, tau);
+      denthalpy_dT = -_Rw * tau * tau * d2gamma2_dtau2(pi, tau);
       break;
 
     case 3:
@@ -680,13 +705,12 @@ Water97FluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
       Real dpdd = dphi3_ddelta(delta, tau);
       Real d2pddt = d2phi3_ddeltatau(delta, tau);
       Real d2pdd2 = d2phi3_ddelta2(delta, tau);
-      enthalpy = _Rw * temperature * (tau *  dphi3_dtau(delta, tau) +
-        delta * dpdd);
+      enthalpy = _Rw * temperature * (tau * dphi3_dtau(delta, tau) + delta * dpdd);
       denthalpy_dp = (d2pddt + dpdd + delta * d2pdd2) / _rho_critical /
-        (2.0 * delta * dpdd + delta * delta * d2pdd2);
+                     (2.0 * delta * dpdd + delta * delta * d2pdd2);
       denthalpy_dT = _Rw * delta * dpdd * (1.0 - tau * d2pddt / dpdd) *
-        (1.0 - tau * d2pddt / dpdd) / (2.0 + delta * d2pdd2 / dpdd) -
-        _Rw * tau * tau * d2phi3_dtau2(delta, tau);
+                         (1.0 - tau * d2pddt / dpdd) / (2.0 + delta * d2pdd2 / dpdd) -
+                     _Rw * tau * tau * d2phi3_dtau2(delta, tau);
       break;
     }
 
@@ -695,7 +719,7 @@ Water97FluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
       tau = _T_star[4] / temperature;
       enthalpy = _Rw * _T_star[4] * dgamma5_dtau(pi, tau);
       denthalpy_dp = _Rw * _T_star[4] * d2gamma5_dpitau(pi, tau) / _p_star[4];
-      denthalpy_dT = - _Rw * tau * tau * d2gamma5_dtau2(pi, tau);
+      denthalpy_dT = -_Rw * tau * tau * d2gamma5_dtau2(pi, tau);
       break;
 
     default:
@@ -706,8 +730,7 @@ Water97FluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
   dh_dT = denthalpy_dT;
 }
 
-Real
-Water97FluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
+Real Water97FluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
 {
   mooseError("Water97FluidProperties::beta not implemented yet");
   return 0.0;
@@ -719,11 +742,20 @@ Water97FluidProperties::pSat(Real temperature) const
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 273.15 K <= t <= 647.096 K
   if (temperature < 273.15 || temperature > _T_critical)
-    mooseError("Water97FluidProperties::pSat: Temperature is outside range 273.15 K <= T <= 647.096 K");
+    mooseError(
+        "Water97FluidProperties::pSat: Temperature is outside range 273.15 K <= T <= 647.096 K");
 
   // Constants for region 4 (the saturation curve up to the critical point)
-  const std::vector<Real> n4 {0.11670521452767e4, -0.72421316703206e6, -0.17073846940092e2, 0.12020824702470e5,
-    -0.32325550322333e7, 0.14915108613530e2, -0.48232657361591e4, 0.40511340542057e6, -0.238555575678490, 0.65017534844798e3};
+  const std::vector<Real> n4{0.11670521452767e4,
+                             -0.72421316703206e6,
+                             -0.17073846940092e2,
+                             0.12020824702470e5,
+                             -0.32325550322333e7,
+                             0.14915108613530e2,
+                             -0.48232657361591e4,
+                             0.40511340542057e6,
+                             -0.238555575678490,
+                             0.65017534844798e3};
 
   Real theta, theta2, a, b, c, p;
   theta = temperature + n4[8] / (temperature - n4[9]);
@@ -742,11 +774,20 @@ Water97FluidProperties::TSat(Real pressure) const
   // Check whether the input pressure is within the region of validity of this equation.
   // Valid for 611.213 Pa <= p <= 22.064 MPa
   if (pressure < 611.23 || pressure > _p_critical)
-    mooseError("Water97FluidProperties::TSat: Pressure is outside range 611.213 Pa <= p <= 22.064 MPa");
+    mooseError(
+        "Water97FluidProperties::TSat: Pressure is outside range 611.213 Pa <= p <= 22.064 MPa");
 
   // Constants for region 4 (the saturation curve up to the critical point)
-  const std::vector<Real> n4 {0.11670521452767e4, -0.72421316703206e6, -0.17073846940092e2, 0.12020824702470e5,
-    -0.32325550322333e7, 0.14915108613530e2, -0.48232657361591e4, 0.40511340542057e6, -0.238555575678490, 0.65017534844798e3};
+  const std::vector<Real> n4{0.11670521452767e4,
+                             -0.72421316703206e6,
+                             -0.17073846940092e2,
+                             0.12020824702470e5,
+                             -0.32325550322333e7,
+                             0.14915108613530e2,
+                             -0.48232657361591e4,
+                             0.40511340542057e6,
+                             -0.238555575678490,
+                             0.65017534844798e3};
 
   Real beta, beta2, e, f, g, d;
   beta = std::pow(pressure / 1.e6, 0.25);
@@ -765,13 +806,17 @@ Water97FluidProperties::b23p(Real temperature) const
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 623.15 K <= t <= 863.15 K
   if (temperature < 623.15 || temperature > 863.15)
-    mooseError("Water97FluidProperties::b23p: Temperature is outside range of 623.15 K <= T <= 863.15 K");
+    mooseError(
+        "Water97FluidProperties::b23p: Temperature is outside range of 623.15 K <= T <= 863.15 K");
 
   // Constants for the boundary between regions 2 and 3
-  const std::vector<Real> n23 {0.34805185628969e3, -0.11671859879975e1, 0.10192970039326e-2, 0.57254459862746e3,
-    0.13918839778870e2};
+  const std::vector<Real> n23{0.34805185628969e3,
+                              -0.11671859879975e1,
+                              0.10192970039326e-2,
+                              0.57254459862746e3,
+                              0.13918839778870e2};
 
-  return (n23[0] + n23[1] * temperature  + n23[2] * temperature * temperature) * 1.e6;
+  return (n23[0] + n23[1] * temperature + n23[2] * temperature * temperature) * 1.e6;
 }
 
 Real
@@ -780,11 +825,15 @@ Water97FluidProperties::b23T(Real pressure) const
   // Check whether the input pressure is within the region of validity of this equation.
   // Valid for 16.529 MPa <= p <= 100 MPa
   if (pressure < 16.529e6 || pressure > 100.0e6)
-    mooseError("Water97FluidProperties::b23T: Pressure is outside range 16.529 MPa <= p <= 100 MPa");
+    mooseError(
+        "Water97FluidProperties::b23T: Pressure is outside range 16.529 MPa <= p <= 100 MPa");
 
   // Constants for the boundary between regions 2 and 3
-  const std::vector<Real> n23 {0.34805185628969e3, -0.11671859879975e1, 0.10192970039326e-2,
-    0.57254459862746e3, 0.13918839778870e2};
+  const std::vector<Real> n23{0.34805185628969e3,
+                              -0.11671859879975e1,
+                              0.10192970039326e-2,
+                              0.57254459862746e3,
+                              0.13918839778870e2};
 
   return n23[3] + std::sqrt((pressure / 1.e6 - n23[4]) / n23[2]);
 }
@@ -827,7 +876,7 @@ Water97FluidProperties::inRegion(Real pressure, Real temperature) const
   else if (temperature > 863.15 && temperature <= 1073.15)
     region = 2;
   else
-   region = 5;
+    region = 5;
 
   return region;
 }
@@ -847,7 +896,7 @@ Water97FluidProperties::dgamma1_dpi(Real pi, Real tau) const
 {
   Real sum = 0.0;
   for (unsigned int i = 0; i < _n1.size(); ++i)
-    sum += - _n1[i] * _I1[i] * std::pow(7.1 - pi, _I1[i] - 1) * std::pow(tau - 1.222, _J1[i]);
+    sum += -_n1[i] * _I1[i] * std::pow(7.1 - pi, _I1[i] - 1) * std::pow(tau - 1.222, _J1[i]);
 
   return sum;
 }
@@ -857,7 +906,8 @@ Water97FluidProperties::d2gamma1_dpi2(Real pi, Real tau) const
 {
   Real sum = 0.0;
   for (unsigned int i = 0; i < _n1.size(); ++i)
-    sum += _n1[i] * _I1[i] * (_I1[i] - 1) * std::pow(7.1 - pi, _I1[i] - 2) * std::pow(tau - 1.222, _J1[i]);
+    sum += _n1[i] * _I1[i] * (_I1[i] - 1) * std::pow(7.1 - pi, _I1[i] - 2) *
+           std::pow(tau - 1.222, _J1[i]);
 
   return sum;
 }
@@ -877,7 +927,8 @@ Water97FluidProperties::d2gamma1_dtau2(Real pi, Real tau) const
 {
   Real dg = 0.0;
   for (unsigned int i = 0; i < _n1.size(); ++i)
-    dg += _n1[i] * _J1[i] * (_J1[i] - 1) * std::pow(7.1 - pi, _I1[i]) * std::pow(tau - 1.222, _J1[i] - 2);
+    dg += _n1[i] * _J1[i] * (_J1[i] - 1) * std::pow(7.1 - pi, _I1[i]) *
+          std::pow(tau - 1.222, _J1[i] - 2);
 
   return dg;
 }
@@ -887,7 +938,8 @@ Water97FluidProperties::d2gamma1_dpitau(Real pi, Real tau) const
 {
   Real dg = 0.0;
   for (unsigned int i = 0; i < _n1.size(); ++i)
-    dg += - _n1[i] * _I1[i] * _J1[i] * std::pow(7.1 - pi, _I1[i] - 1) * std::pow(tau - 1.222, _J1[i] - 1);
+    dg += -_n1[i] * _I1[i] * _J1[i] * std::pow(7.1 - pi, _I1[i] - 1) *
+          std::pow(tau - 1.222, _J1[i] - 1);
 
   return dg;
 }
@@ -928,7 +980,7 @@ Real
 Water97FluidProperties::d2gamma2_dpi2(Real pi, Real tau) const
 {
   // Ideal gas part of the Gibbs free energy
-  Real dg0 = - 1.0 / pi / pi;
+  Real dg0 = -1.0 / pi / pi;
 
   // Residual part of the Gibbs free energy
   Real dgr = 0.0;
@@ -1011,7 +1063,7 @@ Water97FluidProperties::d2phi3_ddelta2(Real delta, Real tau) const
   for (unsigned int i = 1; i < _n3.size(); ++i)
     sum += _n3[i] * _I3[i] * (_I3[i] - 1) * std::pow(delta, _I3[i] - 2) * std::pow(tau, _J3[i]);
 
-  return - _n3[0] / delta / delta + sum;
+  return -_n3[0] / delta / delta + sum;
 }
 
 Real
@@ -1080,7 +1132,7 @@ Real
 Water97FluidProperties::d2gamma5_dpi2(Real pi, Real tau) const
 {
   // Ideal gas part of the Gibbs free energy
-  Real dg0 = - 1.0 / pi / pi;
+  Real dg0 = -1.0 / pi / pi;
 
   // Residual part of the Gibbs free energy
   Real dgr = 0.0;
@@ -1140,7 +1192,7 @@ unsigned int
 Water97FluidProperties::subregion3(Real pressure, Real temperature) const
 {
   Real pMPa = pressure / 1.0e6;
-  const Real P3cd  = 19.00881189173929;
+  const Real P3cd = 19.00881189173929;
   unsigned int subregion = 0;
 
   if (pMPa > 40.0 && pMPa <= 100.0)
@@ -1328,20 +1380,54 @@ Water97FluidProperties::tempXY(Real pressure, subregionEnum xy) const
 {
   Real pi = pressure / 1.0e6;
 
-  const std::vector<std::vector<int> > I {{0, 1, 2, -1, -2}, {0, 1, 2, 3}, {0, 1, 2, 3, 4}, {0, 1, 2, 3, 4}, {0, 1, 2, 3, 4},
-                       {0, 1, 2, 3}, {0, 1, 2, -1, -2}, {0, 1, 2, 3}, {0, 1, 2, 3}, {0, 1, 2, 3, 4}, {0, 1, 2, -1, -2}};
+  const std::vector<std::vector<int>> I{{0, 1, 2, -1, -2},
+                                        {0, 1, 2, 3},
+                                        {0, 1, 2, 3, 4},
+                                        {0, 1, 2, 3, 4},
+                                        {0, 1, 2, 3, 4},
+                                        {0, 1, 2, 3},
+                                        {0, 1, 2, -1, -2},
+                                        {0, 1, 2, 3},
+                                        {0, 1, 2, 3},
+                                        {0, 1, 2, 3, 4},
+                                        {0, 1, 2, -1, -2}};
 
-  const std::vector<std::vector<Real> > n {{0.154793642129415e4, -0.187661219490113e3, 0.213144632222113e2, -0.191887498864292e4, 0.918419702359447e3},
-                        {0.585276966696349e3, 0.278233532206915e1, -0.127283549295878e-1, 0.159090746562729e-3},
-                        {-0.249284240900418e5, 0.428143584791546e4, -0.269029173140130e3, 0.751608051114157e1, -0.787105249910383e-1},
-                        {0.584814781649163e3, -0.616179320924617, 0.260763050899562, -0.587071076864459e-2, 0.515308185433082e-4},
-                        {0.617229772068439e3, -0.770600270141675e1, 0.697072596851896, -0.157391839848015e-1, 0.137897492684194e-3},
-                        {0.535339483742384e3, 0.761978122720128e1, -0.158365725441648, 0.192871054508108e-2},
-                        {0.969461372400213e3, -0.332500170441278e3, 0.642859598466067e2, 0.773845935768222e3, -0.152313732937084e4},
-                        {0.565603648239126e3, 0.529062258221222e1, -0.102020639611016, 0.122240301070145e-2},
-                        {0.584561202520006e3, -0.102961025163669e1, 0.243293362700452, -0.294905044740799e-2},
-                        {0.528199646263062e3, 0.890579602135307e1, -0.222814134903755, 0.286791682263697e-2},
-                        {0.728052609145380e1, 0.973505869861952e2, 0.147370491183191e2, 0.329196213998375e3, 0.873371668682417e3}};
+  const std::vector<std::vector<Real>> n{
+      {0.154793642129415e4,
+       -0.187661219490113e3,
+       0.213144632222113e2,
+       -0.191887498864292e4,
+       0.918419702359447e3},
+      {0.585276966696349e3, 0.278233532206915e1, -0.127283549295878e-1, 0.159090746562729e-3},
+      {-0.249284240900418e5,
+       0.428143584791546e4,
+       -0.269029173140130e3,
+       0.751608051114157e1,
+       -0.787105249910383e-1},
+      {0.584814781649163e3,
+       -0.616179320924617,
+       0.260763050899562,
+       -0.587071076864459e-2,
+       0.515308185433082e-4},
+      {0.617229772068439e3,
+       -0.770600270141675e1,
+       0.697072596851896,
+       -0.157391839848015e-1,
+       0.137897492684194e-3},
+      {0.535339483742384e3, 0.761978122720128e1, -0.158365725441648, 0.192871054508108e-2},
+      {0.969461372400213e3,
+       -0.332500170441278e3,
+       0.642859598466067e2,
+       0.773845935768222e3,
+       -0.152313732937084e4},
+      {0.565603648239126e3, 0.529062258221222e1, -0.102020639611016, 0.122240301070145e-2},
+      {0.584561202520006e3, -0.102961025163669e1, 0.243293362700452, -0.294905044740799e-2},
+      {0.528199646263062e3, 0.890579602135307e1, -0.222814134903755, 0.286791682263697e-2},
+      {0.728052609145380e1,
+       0.973505869861952e2,
+       0.147370491183191e2,
+       0.329196213998375e3,
+       0.873371668682417e3}};
 
   // Choose the constants based on the string xy
   unsigned int row;
@@ -1391,7 +1477,7 @@ Water97FluidProperties::tempXY(Real pressure, subregionEnum xy) const
     for (unsigned int i = 0; i < n[row].size(); ++i)
       sum += n[row][i] * std::pow(std::log(pi), I[row][i]);
   else if (xy == EF)
-      sum += 3.727888004 * (pi - _p_critical / 1.0e6) + _T_critical;
+    sum += 3.727888004 * (pi - _p_critical / 1.0e6) + _T_critical;
   else
     for (unsigned int i = 0; i < n[row].size(); ++i)
       sum += n[row][i] * std::pow(pi, I[row][i]);
@@ -1400,12 +1486,14 @@ Water97FluidProperties::tempXY(Real pressure, subregionEnum xy) const
 }
 
 Real
-Water97FluidProperties::subregionVolume(Real pi, Real theta, Real a, Real b, Real c, Real d, Real e, unsigned int sid) const
+Water97FluidProperties::subregionVolume(
+    Real pi, Real theta, Real a, Real b, Real c, Real d, Real e, unsigned int sid) const
 {
   Real sum = 0.0;
 
   for (unsigned int i = 0; i < _n3s[sid].size(); ++i)
-    sum += _n3s[sid][i] * std::pow(std::pow(pi - a, c), _I3s[sid][i]) * std::pow(std::pow(theta - b, d), _J3s[sid][i]);
+    sum += _n3s[sid][i] * std::pow(std::pow(pi - a, c), _I3s[sid][i]) *
+           std::pow(std::pow(theta - b, d), _J3s[sid][i]);
 
   return std::pow(sum, e);
 }
@@ -1449,8 +1537,7 @@ Water97FluidProperties::densityRegion3(Real pressure, Real temperature) const
   return 1.0 / volume;
 }
 
-Real
-Water97FluidProperties::henryConstant(Real /*temperature*/) const
+Real Water97FluidProperties::henryConstant(Real /*temperature*/) const
 {
   mooseError("Water97FluidProperties::henryConstant() not defined");
   return 0.0;

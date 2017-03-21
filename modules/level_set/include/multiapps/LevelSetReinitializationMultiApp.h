@@ -15,11 +15,12 @@ class LevelSetReinitializationMultiApp;
 class LevelSetReinitializationProblem;
 class Executioner;
 
-template<>
+template <>
 InputParameters validParams<LevelSetReinitializationMultiApp>();
 
 /**
- * MultiApp that performs a time reset prior to solving, this enables the level set reinitialization to
+ * MultiApp that performs a time reset prior to solving, this enables the level set reinitialization
+ * to
  * solve repeatedly.
  */
 class LevelSetReinitializationMultiApp : public MultiApp
@@ -29,10 +30,9 @@ public:
 
   virtual void initialSetup() override;
   virtual void advanceStep() override {}
-  virtual bool solveStep(Real dt, Real target_time, bool auto_advance=true) override;
+  virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
 protected:
-
   /// Access to the level set specific problem to allow for the resetTime() method to be called.
   LevelSetReinitializationProblem * _level_set_problem;
 

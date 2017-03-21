@@ -5,20 +5,18 @@
 
 class OutflowBC;
 
-template<>
+template <>
 InputParameters validParams<OutflowBC>();
 
 class OutflowBC : public IntegratedBC
 {
 public:
-
   OutflowBC(const InputParameters & parameters);
 
 protected:
-
   RealVectorValue _velocity;
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
 
-#endif //OUTFLOWBC_H
+#endif // OUTFLOWBC_H

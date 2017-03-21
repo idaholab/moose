@@ -13,7 +13,7 @@
 
 class ComputeCappedDruckerPragerStress;
 
-template<>
+template <>
 InputParameters validParams<ComputeCappedDruckerPragerStress>();
 
 /**
@@ -55,8 +55,7 @@ InputParameters validParams<ComputeCappedDruckerPragerStress>();
  * ComputeMultiPlasticityStress with DruckerPrager and MeanCap(s)
  * user objects.
  */
-class ComputeCappedDruckerPragerStress :
-  public PQPlasticModel
+class ComputeCappedDruckerPragerStress : public PQPlasticModel
 {
 public:
   ComputeCappedDruckerPragerStress(const InputParameters & parameters);
@@ -90,8 +89,11 @@ protected:
    * Otherwise (and at the very end after return-map) _stress_return_type
    * is set to nothing_special.
    */
-  enum class StressReturnType {
-    nothing_special, no_compression, no_tension
+  enum class StressReturnType
+  {
+    nothing_special,
+    no_compression,
+    no_tension
   } _stress_return_type;
 
   /**
@@ -104,17 +106,43 @@ protected:
   /// trial value of q
   Real _in_q_trial;
 
-  virtual void yieldFunctionValues(Real p, Real q, const std::vector<Real> & intnl, std::vector<Real> & yf) const override;
+  virtual void yieldFunctionValues(Real p,
+                                   Real q,
+                                   const std::vector<Real> & intnl,
+                                   std::vector<Real> & yf) const override;
 
-  virtual void computeAllQ(Real p, Real q, const std::vector<Real> & intnl, std::vector<f_and_derivs> & all_q) const override;
+  virtual void computeAllQ(Real p,
+                           Real q,
+                           const std::vector<Real> & intnl,
+                           std::vector<f_and_derivs> & all_q) const override;
 
-  virtual void preReturnMap(Real p_trial, Real q_trial, const RankTwoTensor & stress_trial, const std::vector<Real> & intnl_old, const std::vector<Real> & yf) override;
+  virtual void preReturnMap(Real p_trial,
+                            Real q_trial,
+                            const RankTwoTensor & stress_trial,
+                            const std::vector<Real> & intnl_old,
+                            const std::vector<Real> & yf) override;
 
-  virtual void initialiseVars(Real p_trial, Real q_trial, const std::vector<Real> & intnl_old, Real & p, Real & q, Real & gaE, std::vector<Real> & intnl) const override;
+  virtual void initialiseVars(Real p_trial,
+                              Real q_trial,
+                              const std::vector<Real> & intnl_old,
+                              Real & p,
+                              Real & q,
+                              Real & gaE,
+                              std::vector<Real> & intnl) const override;
 
-  virtual void setIntnlValues(Real p_trial, Real q_trial, Real p, Real q, const std::vector<Real> & intnl_old, std::vector<Real> & intnl) const override;
+  virtual void setIntnlValues(Real p_trial,
+                              Real q_trial,
+                              Real p,
+                              Real q,
+                              const std::vector<Real> & intnl_old,
+                              std::vector<Real> & intnl) const override;
 
-  virtual void setIntnlDerivatives(Real p_trial, Real q_trial, Real p, Real q, const std::vector<Real> & intnl, std::vector<std::vector<Real> > & dintnl) const override;
+  virtual void setIntnlDerivatives(Real p_trial,
+                                   Real q_trial,
+                                   Real p,
+                                   Real q,
+                                   const std::vector<Real> & intnl,
+                                   std::vector<std::vector<Real>> & dintnl) const override;
 
   virtual void computePQ(const RankTwoTensor & stress, Real & p, Real & q) const override;
 
@@ -124,9 +152,23 @@ protected:
 
   virtual void setEppEqq(const RankFourTensor & Eijkl, Real & Epp, Real & Eqq) const override;
 
-  virtual void setStressAfterReturn(const RankTwoTensor & stress_trial, Real p_ok, Real q_ok, Real gaE, const std::vector<Real> & intnl, const f_and_derivs & smoothed_q, RankTwoTensor & stress) const override;
+  virtual void setStressAfterReturn(const RankTwoTensor & stress_trial,
+                                    Real p_ok,
+                                    Real q_ok,
+                                    Real gaE,
+                                    const std::vector<Real> & intnl,
+                                    const f_and_derivs & smoothed_q,
+                                    RankTwoTensor & stress) const override;
 
-  virtual void consistentTangentOperator(const RankTwoTensor & stress_trial, Real p_trial, Real q_trial, const RankTwoTensor & stress, Real p, Real q, Real gaE, const f_and_derivs & smoothed_q, RankFourTensor & cto) const override;
+  virtual void consistentTangentOperator(const RankTwoTensor & stress_trial,
+                                         Real p_trial,
+                                         Real q_trial,
+                                         const RankTwoTensor & stress,
+                                         Real p,
+                                         Real q,
+                                         Real gaE,
+                                         const f_and_derivs & smoothed_q,
+                                         RankFourTensor & cto) const override;
 
   virtual RankTwoTensor dpdstress(const RankTwoTensor & stress) const override;
 
@@ -137,4 +179,4 @@ protected:
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const override;
 };
 
-#endif //COMPUTECAPPEDDRUCKERPRAGERSTRESS_H
+#endif // COMPUTECAPPEDDRUCKERPRAGERSTRESS_H

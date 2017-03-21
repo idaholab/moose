@@ -9,10 +9,10 @@
 
 #include "ACBulk.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSACBulkBase;
 
-template<>
+template <>
 InputParameters validParams<KKSACBulkBase>();
 
 /**
@@ -63,4 +63,4 @@ protected:
   std::vector<const VariableGradient *> _grad_args;
 };
 
-#endif //KKSACBULKBASE_H
+#endif // KKSACBULKBASE_H

@@ -19,7 +19,7 @@
 class FunctionPenaltyDirichletBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionPenaltyDirichletBC>();
 
 /**
@@ -32,9 +32,9 @@ InputParameters validParams<FunctionPenaltyDirichletBC>();
 class FunctionPenaltyDirichletBC : public IntegratedBC
 {
 public:
-
   /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same constructor.
+   * Factory constructor, takes parameters so that all derived classes can be built using the same
+   * constructor.
    */
   FunctionPenaltyDirichletBC(const InputParameters & parameters);
 

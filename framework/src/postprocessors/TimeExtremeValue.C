@@ -17,28 +17,32 @@
 #include <algorithm>
 #include <limits>
 
-template<>
-InputParameters validParams<TimeExtremeValue>()
+template <>
+InputParameters
+validParams<TimeExtremeValue>()
 {
   // Define the min/max enumeration
   MooseEnum type_options("max=0 min=1 abs_max=2 abs_min=3", "max");
 
   // Define the parameters
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addParam<MooseEnum>("value_type", type_options,
+  params.addParam<MooseEnum>("value_type",
+                             type_options,
                              "Type of extreme value to return."
                              "'max' returns the maximum value."
                              "'min' returns the minimum value."
                              "'abs_max' returns the maximum absolute value."
                              "'abs_min' returns the minimum absolute value.");
-  params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor used for reporting time extreme values");
-  params.addClassDescription("A postprocessor for reporting the extreme value of another postprocessor over time.");
+  params.addRequiredParam<PostprocessorName>(
+      "postprocessor", "The name of the postprocessor used for reporting time extreme values");
+  params.addClassDescription(
+      "A postprocessor for reporting the extreme value of another postprocessor over time.");
 
   return params;
 }
 
-TimeExtremeValue::TimeExtremeValue(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+TimeExtremeValue::TimeExtremeValue(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _postprocessor(getPostprocessorValue("postprocessor")),
     _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
     _value(declareRestartableData<Real>("value"))
@@ -56,7 +60,7 @@ TimeExtremeValue::TimeExtremeValue(const InputParameters & parameters) :
         break;
 
       case ABS_MAX:
-         // the max absolute value of anything is greater than or equal to 0
+        // the max absolute value of anything is greater than or equal to 0
         _value = 0;
         break;
 

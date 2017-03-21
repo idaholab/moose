@@ -13,16 +13,16 @@
 
 class CNSFVRiemannInvariantBCUserObject;
 
-template<>
+template <>
 InputParameters validParams<CNSFVRiemannInvariantBCUserObject>();
 
 /**
- * A user object that computes the ghost cell values based on the Riemann invariant boundary condition
+ * A user object that computes the ghost cell values based on the Riemann invariant boundary
+ * condition
  */
 class CNSFVRiemannInvariantBCUserObject : public BCUserObject
 {
 public:
-
   CNSFVRiemannInvariantBCUserObject(const InputParameters & parameters);
 
   virtual std::vector<Real> getGhostCellValue(unsigned int iside,
@@ -31,7 +31,6 @@ public:
                                               const RealVectorValue & dwave) const;
 
 protected:
-
   const SinglePhaseFluidProperties & _fp;
 
   Real _inf_rho;

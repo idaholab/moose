@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSMomentumInviscidSpecifiedNormalFlowBC;
 
-template<>
+template <>
 InputParameters validParams<NSMomentumInviscidSpecifiedNormalFlowBC>();
 
 /**

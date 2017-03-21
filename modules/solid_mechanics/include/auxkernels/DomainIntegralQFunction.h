@@ -16,7 +16,6 @@
 class DomainIntegralQFunction : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -28,7 +27,7 @@ public:
 protected:
   virtual void initialSetup();
   virtual Real computeValue();
-  void  projectToFrontAtPoint(Real & dist_to_front, Real & dist_along_tangent);
+  void projectToFrontAtPoint(Real & dist_to_front, Real & dist_along_tangent);
 
 private:
   const Real _j_integral_radius_inner;
@@ -40,7 +39,7 @@ private:
   bool _is_point_on_intersecting_boundary;
 };
 
-template<>
+template <>
 InputParameters validParams<DomainIntegralQFunction>();
 
-#endif //DOMAININTEGRALQFUNCTION_H
+#endif // DOMAININTEGRALQFUNCTION_H

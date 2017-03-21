@@ -6,16 +6,18 @@
 /****************************************************************/
 #include "InterfaceDiffusionFluxMatch.h"
 
-template<>
-InputParameters validParams<InterfaceDiffusionFluxMatch>()
+template <>
+InputParameters
+validParams<InterfaceDiffusionFluxMatch>()
 {
   InputParameters params = validParams<InterfaceDiffusionBase>();
-  params.addClassDescription("Enforce flux continuity between two different variables across a subdomain boundary");
+  params.addClassDescription(
+      "Enforce flux continuity between two different variables across a subdomain boundary");
   return params;
 }
 
-InterfaceDiffusionFluxMatch::InterfaceDiffusionFluxMatch(const InputParameters & parameters) :
-    InterfaceDiffusionBase(parameters)
+InterfaceDiffusionFluxMatch::InterfaceDiffusionFluxMatch(const InputParameters & parameters)
+  : InterfaceDiffusionBase(parameters)
 {
 }
 
@@ -23,7 +25,8 @@ Real
 InterfaceDiffusionFluxMatch::computeQpResidual(Moose::DGResidualType type)
 {
   // equal gradients means difference is zero
-  Real res = _D * _grad_u[_qp] * _normals[_qp] - _D_neighbor * _grad_neighbor_value[_qp] * _normals[_qp];
+  Real res =
+      _D * _grad_u[_qp] * _normals[_qp] - _D_neighbor * _grad_neighbor_value[_qp] * _normals[_qp];
 
   switch (type)
   {

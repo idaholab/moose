@@ -20,7 +20,7 @@
 
 class SideSetsAroundSubdomain;
 
-template<>
+template <>
 InputParameters validParams<SideSetsAroundSubdomain>();
 
 /**
@@ -29,9 +29,7 @@ InputParameters validParams<SideSetsAroundSubdomain>();
  * Optionally, only adds faces that have a normal
  * equal to specified normal up to a tolerance
  */
-class SideSetsAroundSubdomain :
-  public AddSideSetsBase,
-  public BlockRestrictable
+class SideSetsAroundSubdomain : public AddSideSetsBase, public BlockRestrictable
 {
 public:
   SideSetsAroundSubdomain(const InputParameters & parameters);

@@ -10,10 +10,10 @@
 #include "Diffusion.h"
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class HeatConductionKernel;
 
-template<>
+template <>
 InputParameters validParams<HeatConductionKernel>();
 
 /**
@@ -25,7 +25,6 @@ InputParameters validParams<HeatConductionKernel>();
 class HeatConductionKernel : public Diffusion
 {
 public:
-
   HeatConductionKernel(const InputParameters & parameters);
 
 protected:
@@ -38,4 +37,4 @@ private:
   const MaterialProperty<Real> * const _diffusion_coefficient_dT;
 };
 
-#endif //HEATCONDUCTIONKERNEL_H
+#endif // HEATCONDUCTIONKERNEL_H

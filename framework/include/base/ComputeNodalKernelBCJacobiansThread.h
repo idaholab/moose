@@ -21,13 +21,17 @@
 class AuxiliarySystem;
 class NodalKernel;
 
-class ComputeNodalKernelBCJacobiansThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+class ComputeNodalKernelBCJacobiansThread
+    : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelBCJacobiansThread(FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels,  SparseMatrix<Number> & jacobian);
+  ComputeNodalKernelBCJacobiansThread(FEProblemBase & fe_problem,
+                                      const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
+                                      SparseMatrix<Number> & jacobian);
 
   // Splitting Constructor
-  ComputeNodalKernelBCJacobiansThread(ComputeNodalKernelBCJacobiansThread & x, Threads::split split);
+  ComputeNodalKernelBCJacobiansThread(ComputeNodalKernelBCJacobiansThread & x,
+                                      Threads::split split);
 
   virtual void pre() override;
 
@@ -46,4 +50,4 @@ protected:
   unsigned int _num_cached;
 };
 
-#endif //COMPUTENODALKERNELBCJACOBIANSTHREAD_H
+#endif // COMPUTENODALKERNELBCJACOBIANSTHREAD_H

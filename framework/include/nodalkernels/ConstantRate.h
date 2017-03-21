@@ -17,10 +17,10 @@
 
 #include "NodalKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ConstantRate;
 
-template<>
+template <>
 InputParameters validParams<ConstantRate>();
 
 /**

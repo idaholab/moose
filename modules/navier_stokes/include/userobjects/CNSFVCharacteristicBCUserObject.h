@@ -13,7 +13,7 @@
 
 class CNSFVCharacteristicBCUserObject;
 
-template<>
+template <>
 InputParameters validParams<CNSFVCharacteristicBCUserObject>();
 
 /**
@@ -22,7 +22,6 @@ InputParameters validParams<CNSFVCharacteristicBCUserObject>();
 class CNSFVCharacteristicBCUserObject : public BCUserObject
 {
 public:
-
   CNSFVCharacteristicBCUserObject(const InputParameters & parameters);
 
   virtual std::vector<Real> getGhostCellValue(unsigned int iside,
@@ -31,7 +30,6 @@ public:
                                               const RealVectorValue & dwave) const;
 
 protected:
-
   const SinglePhaseFluidProperties & _fp;
 
   Real _inf_rho;

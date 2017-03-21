@@ -19,7 +19,7 @@
 
 class AlphaCED;
 
-template<>
+template <>
 InputParameters validParams<AlphaCED>();
 
 /**

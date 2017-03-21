@@ -24,22 +24,31 @@
 #include "libmesh/equation_systems.h"
 #include "libmesh/mesh_function.h"
 
-
-template<>
-InputParameters validParams<OversampleOutput>()
+template <>
+InputParameters
+validParams<OversampleOutput>()
 {
 
   // Get the parameters from the parent object
   InputParameters params = validParams<FileOutput>();
-  params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling (refinement levels beyond any uniform refinements)");
-  params.addParam<Point>("position", "Set a positional offset, this vector will get added to the nodal coordinates to move the domain.");
+  params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling "
+                                                  "(refinement levels beyond any uniform "
+                                                  "refinements)");
+  params.addParam<Point>("position", "Set a positional offset, this vector will get added to the "
+                                     "nodal coordinates to move the domain.");
   params.addParam<MeshFileName>("file", "The name of the mesh file to read, for oversampling");
 
   // **** DEPRECATED AND REMOVED PARAMETERS ****
-  params.addDeprecatedParam<bool>("oversample", false, "Set to true to enable oversampling",
-                                  "This parameter is no longer active, simply set 'refinements' to a value greater than zero to evoke oversampling");
-  params.addDeprecatedParam<bool>("append_oversample", false, "Append '_oversample' to the output file base",
-                                  "This parameter is no longer operational, to append '_oversample' utilize the output block name or 'file_base'");
+  params.addDeprecatedParam<bool>("oversample",
+                                  false,
+                                  "Set to true to enable oversampling",
+                                  "This parameter is no longer active, simply set 'refinements' to "
+                                  "a value greater than zero to evoke oversampling");
+  params.addDeprecatedParam<bool>("append_oversample",
+                                  false,
+                                  "Append '_oversample' to the output file base",
+                                  "This parameter is no longer operational, to append "
+                                  "'_oversample' utilize the output block name or 'file_base'");
 
   // 'Oversampling' Group
   params.addParamNamesToGroup("refinements position file", "Oversampling");
@@ -47,10 +56,10 @@ InputParameters validParams<OversampleOutput>()
   return params;
 }
 
-OversampleOutput::OversampleOutput(const InputParameters & parameters) :
-    FileOutput(parameters),
-    _mesh_ptr(getParam<bool>("use_displaced") ?
-              &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
+OversampleOutput::OversampleOutput(const InputParameters & parameters)
+  : FileOutput(parameters),
+    _mesh_ptr(getParam<bool>("use_displaced") ? &_problem_ptr->getDisplacedProblem()->mesh()
+                                              : &_problem_ptr->mesh()),
     _refinements(getParam<unsigned int>("refinements")),
     _oversample(_refinements > 0 || isParamValid("file")),
     _change_position(isParamValid("position")),
@@ -89,7 +98,9 @@ OversampleOutput::initOversample()
 
   // Re-position the oversampled mesh
   if (_change_position)
-    for (MeshBase::node_iterator nd = _mesh_ptr->getMesh().nodes_begin(); nd != _mesh_ptr->getMesh().nodes_end(); ++nd)
+    for (MeshBase::node_iterator nd = _mesh_ptr->getMesh().nodes_begin();
+         nd != _mesh_ptr->getMesh().nodes_end();
+         ++nd)
       *(*nd) += _position;
 
   // Perform the mesh refinement
@@ -121,10 +132,10 @@ OversampleOutput::initOversample()
   DistributedMesh * dist_mesh = dynamic_cast<DistributedMesh *>(&source_es.get_mesh());
   if (dist_mesh)
   {
-    for (MeshBase::element_iterator
-           it = dist_mesh->active_local_elements_begin(),
-           end = dist_mesh->active_local_elements_end();
-         it != end; ++it)
+    for (MeshBase::element_iterator it = dist_mesh->active_local_elements_begin(),
+                                    end = dist_mesh->active_local_elements_end();
+         it != end;
+         ++it)
     {
       Elem * elem = *it;
 
@@ -153,7 +164,8 @@ OversampleOutput::initOversample()
       _serialized_solution = NumericVector<Number>::build(_communicator);
       _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
 
-      // Need to pull down a full copy of this vector on every processor so we can get values in parallel
+      // Need to pull down a full copy of this vector on every processor so we can get values in
+      // parallel
       source_sys.solution->localize(*_serialized_solution);
 
       // Add the variables to the system... simultaneously creating MeshFunctions for them.
@@ -202,9 +214,11 @@ OversampleOutput::updateOversample()
       for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
       {
 
-        // If the mesh has change the MeshFunctions need to be re-built, otherwise simply clear it for re-initialization
+        // If the mesh has change the MeshFunctions need to be re-built, otherwise simply clear it
+        // for re-initialization
         if (!_mesh_functions[sys_num][var_num] || _oversample_mesh_changed)
-          _mesh_functions[sys_num][var_num] = libmesh_make_unique<MeshFunction>(source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
+          _mesh_functions[sys_num][var_num] = libmesh_make_unique<MeshFunction>(
+              source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
         else
           _mesh_functions[sys_num][var_num]->clear();
 
@@ -213,16 +227,21 @@ OversampleOutput::updateOversample()
       }
 
       // Now loop over the nodes of the oversampled mesh setting values for each variable.
-      for (MeshBase::const_node_iterator nd = _mesh_ptr->localNodesBegin(); nd != _mesh_ptr->localNodesEnd(); ++nd)
+      for (MeshBase::const_node_iterator nd = _mesh_ptr->localNodesBegin();
+           nd != _mesh_ptr->localNodesEnd();
+           ++nd)
         for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
           if ((*nd)->n_dofs(sys_num, var_num))
-            dest_sys.solution->set((*nd)->dof_number(sys_num, var_num, 0), (*_mesh_functions[sys_num][var_num])(**nd - _position)); // 0 value is for component
+            dest_sys.solution->set(
+                (*nd)->dof_number(sys_num, var_num, 0),
+                (*_mesh_functions[sys_num][var_num])(**nd - _position)); // 0 value is for component
 
       dest_sys.solution->close();
     }
   }
 
-  // Set this to false so that new output files are not created, since the oversampled mesh doesn't actually change
+  // Set this to false so that new output files are not created, since the oversampled mesh doesn't
+  // actually change
   _oversample_mesh_changed = false;
 }
 
@@ -249,7 +268,8 @@ OversampleOutput::cloneMesh()
   else
   {
     if (_app.isRecovering())
-      mooseWarning("Recovering or Restarting with Oversampling may not work (especially with adapted meshes)!!  Refs #2295");
+      mooseWarning("Recovering or Restarting with Oversampling may not work (especially with "
+                   "adapted meshes)!!  Refs #2295");
 
     _cloned_mesh_ptr.reset(&(_problem_ptr->mesh().clone()));
   }

@@ -5,17 +5,15 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef DASHPOTBC_H
 #define DASHPOTBC_H
 
 #include "IntegratedBC.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class DashpotBC;
 
-template<>
+template <>
 InputParameters validParams<DashpotBC>();
 
 /**
@@ -49,4 +47,4 @@ private:
   const VariableValue & _disp_z_dot;
 };
 
-#endif //DASHPOTBC_H
+#endif // DASHPOTBC_H

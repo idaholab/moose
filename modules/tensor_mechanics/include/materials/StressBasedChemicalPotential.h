@@ -13,7 +13,7 @@
 
 class StressBasedChemicalPotential;
 
-template<>
+template <>
 InputParameters validParams<StressBasedChemicalPotential>();
 
 /**

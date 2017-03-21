@@ -11,7 +11,7 @@
 
 class ModulesApp;
 
-template<>
+template <>
 InputParameters validParams<ModulesApp>();
 
 class ModulesApp : public MooseApp

@@ -6,15 +6,17 @@
 /****************************************************************/
 #include "CrystalPlasticitySlipResistance.h"
 
-template<>
-InputParameters validParams<CrystalPlasticitySlipResistance>()
+template <>
+InputParameters
+validParams<CrystalPlasticitySlipResistance>()
 {
   InputParameters params = validParams<CrystalPlasticityUOBase>();
-  params.addClassDescription("Crystal plasticity slip resistance base class.  Override the virtual functions in your class");
+  params.addClassDescription("Crystal plasticity slip resistance base class.  Override the virtual "
+                             "functions in your class");
   return params;
 }
 
-CrystalPlasticitySlipResistance::CrystalPlasticitySlipResistance(const InputParameters & parameters) :
-    CrystalPlasticityUOBase(parameters)
+CrystalPlasticitySlipResistance::CrystalPlasticitySlipResistance(const InputParameters & parameters)
+  : CrystalPlasticityUOBase(parameters)
 {
 }

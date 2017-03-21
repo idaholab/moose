@@ -19,7 +19,7 @@
 // Forward Declaration
 class NanAtCountKernel;
 
-template<>
+template <>
 InputParameters validParams<NanAtCountKernel>();
 
 /**
@@ -44,4 +44,4 @@ private:
   unsigned int _count;
 };
 
-#endif //NANATCOUNTKERNEL_H
+#endif // NANATCOUNTKERNEL_H

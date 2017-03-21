@@ -18,23 +18,22 @@
 #include "libmesh/elem.h"
 #include "libmesh/node.h"
 
-XFEMCutElem3D::XFEMCutElem3D(Elem* elem, const EFAElement3D * const CEMelem, unsigned int n_qpoints) :
-    XFEMCutElem(elem, n_qpoints),
-    _efa_elem3d(CEMelem, true)
+XFEMCutElem3D::XFEMCutElem3D(Elem * elem,
+                             const EFAElement3D * const CEMelem,
+                             unsigned int n_qpoints)
+  : XFEMCutElem(elem, n_qpoints), _efa_elem3d(CEMelem, true)
 {
   computePhysicalVolumeFraction();
   computeMomentFittingWeights();
 }
 
-XFEMCutElem3D::~XFEMCutElem3D()
-{
-}
+XFEMCutElem3D::~XFEMCutElem3D() {}
 
 Point
-XFEMCutElem3D::getNodeCoordinates(EFANode* CEMnode, MeshBase* displaced_mesh) const
+XFEMCutElem3D::getNodeCoordinates(EFANode * CEMnode, MeshBase * displaced_mesh) const
 {
   Point node_coor(0.0, 0.0, 0.0);
-  std::vector<EFANode*> master_nodes;
+  std::vector<EFANode *> master_nodes;
   std::vector<Point> master_points;
   std::vector<double> master_weights;
 
@@ -43,7 +42,7 @@ XFEMCutElem3D::getNodeCoordinates(EFANode* CEMnode, MeshBase* displaced_mesh) co
   {
     if (master_nodes[i]->category() == EFANode::N_CATEGORY_LOCAL_INDEX)
     {
-      Node* node = _nodes[master_nodes[i]->id()];
+      Node * node = _nodes[master_nodes[i]->id()];
       if (displaced_mesh)
         node = displaced_mesh->node_ptr(node->id());
       Point node_p((*node)(0), (*node)(1), (*node)(2));
@@ -53,7 +52,7 @@ XFEMCutElem3D::getNodeCoordinates(EFANode* CEMnode, MeshBase* displaced_mesh) co
       mooseError("master nodes must be local");
   }
   for (unsigned int i = 0; i < master_nodes.size(); ++i)
-    node_coor += master_weights[i]*master_points[i];
+    node_coor += master_weights[i] * master_points[i];
   return node_coor;
 }
 
@@ -63,43 +62,43 @@ XFEMCutElem3D::computePhysicalVolumeFraction()
   Real frag_vol = 0.0;
 
   // collect fragment info needed by polyhedron_volume_3d()
-  std::vector<std::vector<unsigned int> > frag_face_indices;
-  std::vector<EFANode*> frag_nodes;
+  std::vector<std::vector<unsigned int>> frag_face_indices;
+  std::vector<EFANode *> frag_nodes;
   _efa_elem3d.getFragment(0)->getNodeInfo(frag_face_indices, frag_nodes);
   int face_num = frag_face_indices.size();
   int node_num = frag_nodes.size();
 
   int order_max = 0;
-  int *order = new int[face_num];
+  int * order = new int[face_num];
   for (int i = 0; i < face_num; ++i)
   {
-    if (frag_face_indices[i].size() > (unsigned int) order_max)
+    if (frag_face_indices[i].size() > (unsigned int)order_max)
       order_max = frag_face_indices[i].size();
     order[i] = frag_face_indices[i].size();
   }
 
-  double *coord = new double[3*node_num];
+  double * coord = new double[3 * node_num];
   for (unsigned int i = 0; i < frag_nodes.size(); ++i)
   {
     Point p = getNodeCoordinates(frag_nodes[i]);
-    coord[3*i + 0] = p(0);
-    coord[3*i + 1] = p(1);
-    coord[3*i + 2] = p(2);
+    coord[3 * i + 0] = p(0);
+    coord[3 * i + 1] = p(1);
+    coord[3 * i + 2] = p(2);
   }
 
-  int *node = new int[face_num*order_max];
-  Xfem::i4vec_zero(face_num*order_max, node);
+  int * node = new int[face_num * order_max];
+  Xfem::i4vec_zero(face_num * order_max, node);
   for (int i = 0; i < face_num; ++i)
     for (unsigned int j = 0; j < frag_face_indices[i].size(); ++j)
-      node[order_max*i + j] = frag_face_indices[i][j];
+      node[order_max * i + j] = frag_face_indices[i][j];
 
   // compute fragment volume and volume fraction
   frag_vol = Xfem::polyhedron_volume_3d(coord, order_max, face_num, node, node_num, order);
-  _physical_volfrac = frag_vol/_elem_volume;
+  _physical_volfrac = frag_vol / _elem_volume;
 
-  delete [] order;
-  delete [] coord;
-  delete [] node;
+  delete[] order;
+  delete[] coord;
+  delete[] node;
 }
 
 void
@@ -110,16 +109,16 @@ XFEMCutElem3D::computeMomentFittingWeights()
 }
 
 Point
-XFEMCutElem3D::getCutPlaneOrigin(unsigned int plane_id, MeshBase* displaced_mesh) const
+XFEMCutElem3D::getCutPlaneOrigin(unsigned int plane_id, MeshBase * displaced_mesh) const
 {
   Point orig(0.0, 0.0, 0.0);
-  std::vector<std::vector<EFANode*> > cut_plane_nodes;
+  std::vector<std::vector<EFANode *>> cut_plane_nodes;
   for (unsigned int i = 0; i < _efa_elem3d.getFragment(0)->numFaces(); ++i)
   {
     if (_efa_elem3d.getFragment(0)->isFaceInterior(i))
     {
-      EFAFace* face = _efa_elem3d.getFragment(0)->getFace(i);
-      std::vector<EFANode*> node_line;
+      EFAFace * face = _efa_elem3d.getFragment(0)->getFace(i);
+      std::vector<EFANode *> node_line;
       for (unsigned int j = 0; j < face->numNodes(); ++j)
         node_line.push_back(face->getNode(j));
       cut_plane_nodes.push_back(node_line);
@@ -141,16 +140,16 @@ XFEMCutElem3D::getCutPlaneOrigin(unsigned int plane_id, MeshBase* displaced_mesh
 }
 
 Point
-XFEMCutElem3D::getCutPlaneNormal(unsigned int plane_id, MeshBase* displaced_mesh) const
+XFEMCutElem3D::getCutPlaneNormal(unsigned int plane_id, MeshBase * displaced_mesh) const
 {
   Point normal(0.0, 0.0, 0.0);
-  std::vector<std::vector<EFANode*> > cut_plane_nodes;
+  std::vector<std::vector<EFANode *>> cut_plane_nodes;
   for (unsigned int i = 0; i < _efa_elem3d.getFragment(0)->numFaces(); ++i)
   {
     if (_efa_elem3d.getFragment(0)->isFaceInterior(i))
     {
-      EFAFace* face = _efa_elem3d.getFragment(0)->getFace(i);
-      std::vector<EFANode*> node_line;
+      EFAFace * face = _efa_elem3d.getFragment(0)->getFace(i);
+      std::vector<EFANode *> node_line;
       for (unsigned int j = 0; j < face->numNodes(); ++j)
         node_line.push_back(face->getNode(j));
       cut_plane_nodes.push_back(node_line);
@@ -183,20 +182,23 @@ XFEMCutElem3D::getCutPlaneNormal(unsigned int plane_id, MeshBase* displaced_mesh
 }
 
 void
-XFEMCutElem3D::getCrackTipOriginAndDirection(unsigned /*tip_id*/, Point & /*origin*/, Point & /*direction*/) const
+XFEMCutElem3D::getCrackTipOriginAndDirection(unsigned /*tip_id*/,
+                                             Point & /*origin*/,
+                                             Point & /*direction*/) const
 {
-  //TODO: not implemented for 3D
+  // TODO: not implemented for 3D
   mooseError("getCrackTipOriginAndDirection not yet implemented for XFEMCutElem3D");
 }
 
 void
-XFEMCutElem3D::getFragmentFaces(std::vector<std::vector<Point> > &/*frag_faces*/, MeshBase* /*displaced_mesh*/) const
+XFEMCutElem3D::getFragmentFaces(std::vector<std::vector<Point>> & /*frag_faces*/,
+                                MeshBase * /*displaced_mesh*/) const
 {
-  //TODO: not implemented for 3D
+  // TODO: not implemented for 3D
   mooseError("getFragmentFaces not yet implemented for XFEMCutElem3D");
 }
 
-const EFAElement*
+const EFAElement *
 XFEMCutElem3D::getEFAElement() const
 {
   return &_efa_elem3d;
@@ -213,16 +215,19 @@ XFEMCutElem3D::numCutPlanes() const
 }
 
 void
-XFEMCutElem3D::getIntersectionInfo(unsigned int plane_id, Point & normal, std::vector<Point> & intersectionPoints, MeshBase* displaced_mesh) const
+XFEMCutElem3D::getIntersectionInfo(unsigned int plane_id,
+                                   Point & normal,
+                                   std::vector<Point> & intersectionPoints,
+                                   MeshBase * displaced_mesh) const
 {
   intersectionPoints.clear();
-  std::vector<std::vector<EFANode*> > cut_plane_nodes;
+  std::vector<std::vector<EFANode *>> cut_plane_nodes;
   for (unsigned int i = 0; i < _efa_elem3d.getFragment(0)->numFaces(); ++i)
   {
     if (_efa_elem3d.getFragment(0)->isFaceInterior(i))
     {
-      EFAFace* face = _efa_elem3d.getFragment(0)->getFace(i);
-      std::vector<EFANode*> node_line;
+      EFAFace * face = _efa_elem3d.getFragment(0)->getFace(i);
+      std::vector<EFANode *> node_line;
       for (unsigned int j = 0; j < face->numNodes(); ++j)
         node_line.push_back(face->getNode(j));
       cut_plane_nodes.push_back(node_line);

@@ -33,7 +33,7 @@ class Elem;
 class QBase;
 }
 
-template<>
+template <>
 InputParameters validParams<ElementLoopUserObject>();
 
 /**
@@ -41,7 +41,8 @@ InputParameters validParams<ElementLoopUserObject>();
  *
  * Notes:
  *
- *   1. this class is designed to enable more than one element-loop in the execution of user objects.
+ *   1. this class is designed to enable more than one element-loop in the execution of user
+ * objects.
  *      It is necessary because in many numerical schemes, the data required in one element-loop
  *      should be pre-computed from another element-loop.
  *
@@ -51,18 +52,17 @@ InputParameters validParams<ElementLoopUserObject>();
  *      First, an element-loop is requried to calculate the in-cell gradients of variables
  *      using a piecewise linear reconstruction scheme.
  *
- *      Second, another element-loop is required to calculate the limited in-cell gradients of variables
+ *      Second, another element-loop is required to calculate the limited in-cell gradients of
+ * variables
  *      based on the reconstructed gradients from the element and its face-neighboring elements.
  */
-class ElementLoopUserObject :
-    public GeneralUserObject,
-    public BlockRestrictable,
-    public Coupleable,
-    public MooseVariableDependencyInterface,
-    public ZeroInterface
+class ElementLoopUserObject : public GeneralUserObject,
+                              public BlockRestrictable,
+                              public Coupleable,
+                              public MooseVariableDependencyInterface,
+                              public ZeroInterface
 {
 public:
-
   ElementLoopUserObject(const InputParameters & parameters);
   ElementLoopUserObject(ElementLoopUserObject & x, Threads::split split);
   virtual ~ElementLoopUserObject();
@@ -72,10 +72,10 @@ public:
   virtual void finalize();
 
   virtual void pre();
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
-  virtual void onInterface(const Elem *elem, unsigned int side, BoundaryID bnd_id);
+  virtual void onElement(const Elem * elem);
+  virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id);
+  virtual void onInternalSide(const Elem * elem, unsigned int side);
+  virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id);
   virtual void post();
   virtual void subdomainChanged();
   virtual bool keepGoing() { return true; }
@@ -95,7 +95,7 @@ protected:
   const Elem * _current_neighbor;
 
   const MooseArray<Point> & _q_point;
-  QBase * & _qrule;
+  QBase *& _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 

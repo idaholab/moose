@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSDENSITYCONSTBULK_H
 #define RICHARDSDENSITYCONSTBULK_H
 
@@ -13,8 +12,7 @@
 
 class RichardsDensityConstBulk;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsDensityConstBulk>();
 
 /**
@@ -44,7 +42,6 @@ public:
   Real d2density(Real p) const;
 
 protected:
-
   /// density = _dens0*exp(p/_bulk)
   Real _dens0;
 

@@ -20,17 +20,19 @@
 // Forward declarations
 class FEProblemBase;
 
-class ComputeBoundaryInitialConditionThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+class ComputeBoundaryInitialConditionThread
+    : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
   ComputeBoundaryInitialConditionThread(FEProblemBase & fe_problem);
 
   // Splitting Constructor
-  ComputeBoundaryInitialConditionThread(ComputeBoundaryInitialConditionThread & x, Threads::split split);
+  ComputeBoundaryInitialConditionThread(ComputeBoundaryInitialConditionThread & x,
+                                        Threads::split split);
 
   void onNode(ConstBndNodeRange::const_iterator & nd);
 
   void join(const ComputeBoundaryInitialConditionThread & /*y*/);
 };
 
-#endif //COMPUTEBOUNDARYINITIALCONDITIONTHREAD_H
+#endif // COMPUTEBOUNDARYINITIALCONDITIONTHREAD_H

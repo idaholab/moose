@@ -21,7 +21,7 @@
 // Forward Declarations
 class SideIntegralUserObject;
 
-template<>
+template <>
 InputParameters validParams<SideIntegralUserObject>();
 
 /**

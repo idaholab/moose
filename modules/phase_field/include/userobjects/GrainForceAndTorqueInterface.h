@@ -18,7 +18,7 @@ public:
   virtual const std::vector<RealGradient> & getForceValues() const = 0;
   virtual const std::vector<RealGradient> & getTorqueValues() const = 0;
   virtual const std::vector<Real> & getForceCJacobians() const = 0;
-  virtual const std::vector<std::vector<Real> > & getForceEtaJacobians() const = 0;
+  virtual const std::vector<std::vector<Real>> & getForceEtaJacobians() const = 0;
 };
 
-#endif //GRAINFORCEANDTORQUEINTERFACE_H
+#endif // GRAINFORCEANDTORQUEINTERFACE_H

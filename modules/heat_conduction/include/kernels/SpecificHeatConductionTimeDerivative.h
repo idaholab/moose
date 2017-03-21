@@ -15,7 +15,7 @@
 // Forward Declarations
 class SpecificHeatConductionTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<SpecificHeatConductionTimeDerivative>();
 
 /**
@@ -26,7 +26,8 @@ InputParameters validParams<SpecificHeatConductionTimeDerivative>();
  * where \f$ \rho \f$ and \f$ c_p \f$ are material properties for "density" and
  * "specific_heat", respectively.
  */
-class SpecificHeatConductionTimeDerivative : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
+class SpecificHeatConductionTimeDerivative
+    : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
 {
 public:
   SpecificHeatConductionTimeDerivative(const InputParameters & parameters);
@@ -49,4 +50,4 @@ protected:
   ///@}
 };
 
-#endif //SPECIFICHEATCONDUCTIONTIMEDERIVATIVE_H
+#endif // SPECIFICHEATCONDUCTIONTIMEDERIVATIVE_H

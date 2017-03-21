@@ -15,18 +15,16 @@
 #include "SimplePredictor.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<SimplePredictor>()
+template <>
+InputParameters
+validParams<SimplePredictor>()
 {
   InputParameters params = validParams<Predictor>();
 
   return params;
 }
 
-SimplePredictor::SimplePredictor(const InputParameters & parameters) :
-    Predictor(parameters)
-{
-}
+SimplePredictor::SimplePredictor(const InputParameters & parameters) : Predictor(parameters) {}
 
 bool
 SimplePredictor::shouldApply()
@@ -49,7 +47,8 @@ SimplePredictor::apply(NumericVector<Number> & sln)
   // Save the original stream flags
   std::ios_base::fmtflags out_flags = Moose::out.flags();
 
-  _console << "  Applying predictor with scale factor = " << std::fixed << std::setprecision(2) << _scale << std::endl;
+  _console << "  Applying predictor with scale factor = " << std::fixed << std::setprecision(2)
+           << _scale << std::endl;
 
   // Restore the flags
   Moose::out.flags(out_flags);

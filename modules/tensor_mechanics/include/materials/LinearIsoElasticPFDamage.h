@@ -40,4 +40,4 @@ protected:
   RankTwoTensor _eigvec;
 };
 
-#endif //LINEARISOELASTICPFDAMAGE_H
+#endif // LINEARISOELASTICPFDAMAGE_H

@@ -31,4 +31,4 @@ protected:
   const VariableValue & _disp_old_0;
 };
 
-#endif //COMPUTERSPHERICALINCREMENTALSTRAIN_H
+#endif // COMPUTERSPHERICALINCREMENTALSTRAIN_H

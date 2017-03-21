@@ -19,9 +19,8 @@
 
 class AddDGKernelAction;
 
-template<>
+template <>
 InputParameters validParams<AddDGKernelAction>();
-
 
 class AddDGKernelAction : public MooseObjectAction
 {

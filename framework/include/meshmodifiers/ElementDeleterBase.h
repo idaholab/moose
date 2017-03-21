@@ -19,7 +19,7 @@
 
 class ElementDeleterBase;
 
-template<>
+template <>
 InputParameters validParams<ElementDeleterBase>();
 
 /**

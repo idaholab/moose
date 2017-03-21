@@ -13,7 +13,7 @@
 // Forward Declarations
 class DesorptionToPorespace;
 
-template<>
+template <>
 InputParameters validParams<DesorptionToPorespace>();
 
 /**
@@ -44,4 +44,4 @@ protected:
   const MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
 };
 
-#endif //DESORPTIONTOPORESPACE
+#endif // DESORPTIONTOPORESPACE

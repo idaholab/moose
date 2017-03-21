@@ -21,7 +21,7 @@ validParams<StateSimRunner>()
 StateSimRunner::StateSimRunner(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _model_path("model_path"),
-    _state_sim(100, parameters.get<unsigned int>("seed")), //todo max time step
+    _state_sim(100, parameters.get<unsigned int>("seed")), // todo max time step
     _next_state_time(-1),
     _ran_state_sim(false)
 {

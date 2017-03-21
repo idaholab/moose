@@ -37,4 +37,4 @@ private:
   RankTwoTensor _applied_strain_tensor;
 };
 
-#endif //LINEARELASTICMATERIAL_H
+#endif // LINEARELASTICMATERIAL_H

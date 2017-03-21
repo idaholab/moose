@@ -11,10 +11,10 @@
 #include "GrainTrackerInterface.h"
 #include "GrainForceAndTorqueInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class GrainAdvectionAux;
 
-template<>
+template <>
 InputParameters validParams<GrainAdvectionAux>();
 
 /**
@@ -54,4 +54,4 @@ private:
   MooseEnum _component;
 };
 
-#endif //GRAINADVECTIONAUXAUX_H
+#endif // GRAINADVECTIONAUXAUX_H

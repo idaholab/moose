@@ -17,11 +17,10 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class VectorPostprocessorAux;
 
-template<>
+template <>
 InputParameters validParams<VectorPostprocessorAux>();
 
 /**
@@ -30,7 +29,6 @@ InputParameters validParams<VectorPostprocessorAux>();
 class VectorPostprocessorAux : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -47,4 +45,4 @@ protected:
   unsigned int _index;
 };
 
-#endif //VECTORPOSTPROCESSORAUX_H
+#endif // VECTORPOSTPROCESSORAUX_H

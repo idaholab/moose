@@ -14,7 +14,8 @@
 #include "DerivativeMaterialInterface.h"
 
 /**
- * VolumeDeformGradCorrectedStress transforms the Cauchy stress calculated in the previous configuration to its configuration
+ * VolumeDeformGradCorrectedStress transforms the Cauchy stress calculated in the previous
+ *configuration to its configuration
  **/
 class VolumeDeformGradCorrectedStress : public DerivativeMaterialInterface<Material>
 {

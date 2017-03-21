@@ -10,7 +10,8 @@
 #include "ComputeRotatedElasticityTensorBase.h"
 
 /**
- * ComputeElasticityTensor defines an elasticity tensor material object as a function of concentration field.
+ * ComputeElasticityTensor defines an elasticity tensor material object as a function of
+ * concentration field.
  */
 class ComputeConcentrationDependentElasticityTensor : public ComputeRotatedElasticityTensorBase
 {
@@ -32,4 +33,4 @@ protected:
   MaterialProperty<RankFourTensor> & _delasticity_tensor_dc;
 };
 
-#endif //COMPUTECONCENTRATIONDEPENDENTELASTICITYTENSOR_H
+#endif // COMPUTECONCENTRATIONDEPENDENTELASTICITYTENSOR_H

@@ -5,18 +5,16 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROFULLSATTIMEDERIVATIVE_H
 #define POROFULLSATTIMEDERIVATIVE_H
 
 #include "DerivativeMaterialInterface.h"
 #include "TimeDerivative.h"
 
-
 // Forward Declarations
 class PoroFullSatTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<PoroFullSatTimeDerivative>();
 
 /**
@@ -27,7 +25,6 @@ InputParameters validParams<PoroFullSatTimeDerivative>();
 class PoroFullSatTimeDerivative : public DerivativeMaterialInterface<TimeDerivative>
 {
 public:
-
   PoroFullSatTimeDerivative(const InputParameters & parameters);
 
 protected:
@@ -38,7 +35,6 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-
   /// old value of porepressure
   const VariableValue & _u_old;
 
@@ -67,4 +63,4 @@ private:
   const MaterialProperty<Real> & _done_over_biot_modulus_dep;
 };
 
-#endif //POROFULLSATTIMEDERIVATIVE_H
+#endif // POROFULLSATTIMEDERIVATIVE_H

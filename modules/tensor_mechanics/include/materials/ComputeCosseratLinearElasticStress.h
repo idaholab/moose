@@ -25,4 +25,4 @@ protected:
   virtual void computeQpStress();
 };
 
-#endif //COMPUTECOSSERATLINEARELASTICSTRESS_H
+#endif // COMPUTECOSSERATLINEARELASTICSTRESS_H

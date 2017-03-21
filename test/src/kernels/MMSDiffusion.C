@@ -15,18 +15,18 @@
 #include "MMSDiffusion.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<MMSDiffusion>()
+template <>
+InputParameters
+validParams<MMSDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
-
-MMSDiffusion::MMSDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
-    _mesh_dimension(_mesh.dimension())
-{}
+MMSDiffusion::MMSDiffusion(const InputParameters & parameters)
+  : Kernel(parameters), _mesh_dimension(_mesh.dimension())
+{
+}
 
 Real
 MMSDiffusion::computeQpResidual()
@@ -38,18 +38,17 @@ MMSDiffusion::computeQpResidual()
   if (_mesh_dimension == 3)
   {
     Real z = _q_point[_qp](2);
-    Real u = std::sin(a*x*y*z*t);
-    return _grad_test[_i][_qp]*(u*u-2*u+2)*_grad_u[_qp];
-    //We multiplied by our k(u).
+    Real u = std::sin(a * x * y * z * t);
+    return _grad_test[_i][_qp] * (u * u - 2 * u + 2) * _grad_u[_qp];
+    // We multiplied by our k(u).
   }
   else
   {
     Real z = 1.0;
-    Real u = std::sin(a*x*y*z*t);
-    return _grad_test[_i][_qp]*(u*u-2*u+2)*_grad_u[_qp];
-    //We multiplied by our k(u).
+    Real u = std::sin(a * x * y * z * t);
+    return _grad_test[_i][_qp] * (u * u - 2 * u + 2) * _grad_u[_qp];
+    // We multiplied by our k(u).
   }
-
 }
 
 Real
@@ -62,15 +61,15 @@ MMSDiffusion::computeQpJacobian()
   if (_mesh_dimension == 3)
   {
     Real z = _q_point[_qp](2);
-    Real u = std::sin(a*x*y*z*t);
-    return _grad_test[_i][_qp]*(u*u-2*u+2)*_grad_phi[_j][_qp];
-    //We multiplied by our k(u).
+    Real u = std::sin(a * x * y * z * t);
+    return _grad_test[_i][_qp] * (u * u - 2 * u + 2) * _grad_phi[_j][_qp];
+    // We multiplied by our k(u).
   }
   else
   {
     Real z = 1.0;
-    Real u = std::sin(a*x*y*z*t);
-    return _grad_test[_i][_qp]*(u*u-2*u+2)*_grad_phi[_j][_qp];
-    //We multiplied by our k(u).
+    Real u = std::sin(a * x * y * z * t);
+    return _grad_test[_i][_qp] * (u * u - 2 * u + 2) * _grad_phi[_j][_qp];
+    // We multiplied by our k(u).
   }
 }

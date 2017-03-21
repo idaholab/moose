@@ -13,7 +13,7 @@
 
 class CNSFVPressureIC;
 
-template<>
+template <>
 InputParameters validParams<CNSFVPressureIC>();
 
 /**

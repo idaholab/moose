@@ -6,18 +6,20 @@
 /****************************************************************/
 #include "SimpleSplitCHWRes.h"
 
-template<>
-InputParameters validParams<SimpleSplitCHWRes>()
+template <>
+InputParameters
+validParams<SimpleSplitCHWRes>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Gradient energy for split Cahn-Hilliard equation with constant Mobility");
-  params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used with the kernel, should be a constant value");
+  params.addClassDescription(
+      "Gradient energy for split Cahn-Hilliard equation with constant Mobility");
+  params.addParam<MaterialPropertyName>(
+      "mob_name", "M", "The mobility used with the kernel, should be a constant value");
   return params;
 }
 
-SimpleSplitCHWRes::SimpleSplitCHWRes(const InputParameters & parameters) :
-    Kernel(parameters),
-    _M(getMaterialProperty<Real>("mob_name"))
+SimpleSplitCHWRes::SimpleSplitCHWRes(const InputParameters & parameters)
+  : Kernel(parameters), _M(getMaterialProperty<Real>("mob_name"))
 {
 }
 

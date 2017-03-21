@@ -18,9 +18,8 @@
 
 class CoupledKernelValueTest;
 
-template<>
+template <>
 InputParameters validParams<CoupledKernelValueTest>();
-
 
 class CoupledKernelValueTest : public KernelValue
 {
@@ -36,6 +35,5 @@ protected:
   const VariableValue & _var2;
   unsigned int _var2_num;
 };
-
 
 #endif /* COUPLEDKERNELVALUETEST_H */

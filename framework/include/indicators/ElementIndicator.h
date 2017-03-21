@@ -28,17 +28,16 @@
 class ElementIndicator;
 class MooseVariable;
 
-template<>
+template <>
 InputParameters validParams<ElementIndicator>();
 
-class ElementIndicator :
-  public Indicator,
-  public TransientInterface,
-  public PostprocessorInterface,
-  public Coupleable,
-  public ScalarCoupleable,
-  public MooseVariableInterface,
-  public ZeroInterface
+class ElementIndicator : public Indicator,
+                         public TransientInterface,
+                         public PostprocessorInterface,
+                         public Coupleable,
+                         public ScalarCoupleable,
+                         public MooseVariableInterface,
+                         public ZeroInterface
 {
 public:
   ElementIndicator(const InputParameters & parameters);
@@ -46,13 +45,13 @@ public:
 protected:
   MooseVariable & _field_var;
 
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
   /// Volume of the current element
   const Real & _current_elem_volume;
 
   unsigned int _qp;
-  const MooseArray< Point > & _q_point;
-  QBase * & _qrule;
+  const MooseArray<Point> & _q_point;
+  QBase *& _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 

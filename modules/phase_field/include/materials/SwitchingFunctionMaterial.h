@@ -12,7 +12,7 @@
 // Forward Declarations
 class SwitchingFunctionMaterial;
 
-template<>
+template <>
 InputParameters validParams<SwitchingFunctionMaterial>();
 
 /**
@@ -34,4 +34,4 @@ protected:
   MooseEnum _h_order;
 };
 
-#endif //SWITCHINGFUNCTIONMATERIAL_H
+#endif // SWITCHINGFUNCTIONMATERIAL_H

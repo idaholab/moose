@@ -20,9 +20,9 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalKernelsThread::ComputeNodalKernelsThread(FEProblemBase & fe_problem,
-                                                     const MooseObjectWarehouse<NodalKernel> & nodal_kernels) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+ComputeNodalKernelsThread::ComputeNodalKernelsThread(
+    FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _nodal_kernels(nodal_kernels),
     _num_cached(0)
@@ -30,8 +30,9 @@ ComputeNodalKernelsThread::ComputeNodalKernelsThread(FEProblemBase & fe_problem,
 }
 
 // Splitting Constructor
-ComputeNodalKernelsThread::ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+ComputeNodalKernelsThread::ComputeNodalKernelsThread(ComputeNodalKernelsThread & x,
+                                                     Threads::split split)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
     _nodal_kernels(x._nodal_kernels),
     _num_cached(0)

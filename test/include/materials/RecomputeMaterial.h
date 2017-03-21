@@ -20,7 +20,7 @@
 // Forward declarations
 class RecomputeMaterial;
 
-template<>
+template <>
 InputParameters validParams<RecomputeMaterial>();
 
 /**

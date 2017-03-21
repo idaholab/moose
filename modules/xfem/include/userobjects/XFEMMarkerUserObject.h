@@ -18,7 +18,6 @@ class XFEM;
 class XFEMMarkerUserObject : public ElementUserObject
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -29,11 +28,11 @@ public:
 
   virtual void initialize();
   virtual void execute();
-  virtual void threadJoin(const UserObject &y);
+  virtual void threadJoin(const UserObject & y);
   virtual void finalize();
 
 protected:
-  virtual bool doesElementCrack(RealVectorValue &direction);
+  virtual bool doesElementCrack(RealVectorValue & direction);
 
 private:
   MooseMesh & _mesh;
@@ -45,7 +44,7 @@ private:
   std::map<unsigned int, unsigned int> _marked_elem_sides;
 };
 
-template<>
+template <>
 InputParameters validParams<XFEMMarkerUserObject>();
 
-#endif //XFEMMARKERUSEROBJECT_H
+#endif // XFEMMARKERUSEROBJECT_H

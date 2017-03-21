@@ -19,7 +19,7 @@
 
 class TestCopyInitialSolution;
 
-template<>
+template <>
 InputParameters validParams<TestCopyInitialSolution>();
 
 /**
@@ -37,6 +37,5 @@ public:
 protected:
   bool _value;
 };
-
 
 #endif

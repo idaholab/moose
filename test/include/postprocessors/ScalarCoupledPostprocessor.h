@@ -20,7 +20,7 @@
 
 class ScalarCoupledPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ScalarCoupledPostprocessor>();
 
 /**
@@ -38,4 +38,4 @@ protected:
   const VariableValue & _u;
 };
 
-#endif //SCALARCOUPLEDPOSTPROCESSOR_H
+#endif // SCALARCOUPLEDPOSTPROCESSOR_H

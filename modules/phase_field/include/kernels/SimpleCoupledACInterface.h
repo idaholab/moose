@@ -11,7 +11,7 @@
 
 class SimpleCoupledACInterface;
 
-template<>
+template <>
 InputParameters validParams<SimpleCoupledACInterface>();
 
 /**
@@ -36,4 +36,4 @@ protected:
   unsigned int _v_var;
 };
 
-#endif //SIMPLECOUPLEDACINTERFACE_H
+#endif // SIMPLECOUPLEDACINTERFACE_H

@@ -7,22 +7,22 @@
 
 #include "AEFVFreeOutflowBoundaryFlux.h"
 
-template<>
-InputParameters validParams<AEFVFreeOutflowBoundaryFlux>()
+template <>
+InputParameters
+validParams<AEFVFreeOutflowBoundaryFlux>()
 {
   InputParameters params = validParams<BoundaryFluxBase>();
-  params.addClassDescription("Free outflow BC based boundary flux user object for the advection equation using a cell-centered finite volume method.");
+  params.addClassDescription("Free outflow BC based boundary flux user object for the advection "
+                             "equation using a cell-centered finite volume method.");
   return params;
 }
 
-AEFVFreeOutflowBoundaryFlux::AEFVFreeOutflowBoundaryFlux(const InputParameters & parameters) :
-    BoundaryFluxBase(parameters)
+AEFVFreeOutflowBoundaryFlux::AEFVFreeOutflowBoundaryFlux(const InputParameters & parameters)
+  : BoundaryFluxBase(parameters)
 {
 }
 
-AEFVFreeOutflowBoundaryFlux::~AEFVFreeOutflowBoundaryFlux()
-{
-}
+AEFVFreeOutflowBoundaryFlux::~AEFVFreeOutflowBoundaryFlux() {}
 
 void
 AEFVFreeOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,

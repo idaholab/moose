@@ -9,10 +9,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class LangmuirMaterial;
 
-template<>
+template <>
 InputParameters validParams<LangmuirMaterial>();
 
 /**
@@ -56,4 +56,4 @@ private:
   MaterialProperty<Real> & _dmass_rate_from_matrix_dp;
 };
 
-#endif //LANGMUIRMATERIAL_H
+#endif // LANGMUIRMATERIAL_H

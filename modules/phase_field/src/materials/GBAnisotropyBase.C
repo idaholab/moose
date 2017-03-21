@@ -8,24 +8,33 @@
 #include "GBAnisotropyBase.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<GBAnisotropyBase>()
+template <>
+InputParameters
+validParams<GBAnisotropyBase>()
 {
   InputParameters params = validParams<Material>();
   params.addCoupledVar("T", 300.0, "Temperature in Kelvin");
   params.addParam<Real>("length_scale", 1.0e-9, "Length scale in m, where default is nm");
   params.addParam<Real>("time_scale", 1.0e-9, "Time scale in s, where default is ns");
-  params.addParam<Real>("molar_volume_value", 7.11e-6, "molar volume of material in m^3/mol, by default it's the value of copper");
-  params.addParam<Real>("delta_sigma", 0.1, "factor determining inclination dependence of GB energy");
-  params.addParam<Real>("delta_mob", 0.1, "factor determining inclination dependence of GB mobility");
-  params.addRequiredParam<FileName>("Anisotropic_GB_file_name", "Name of the file containing: 1)GB mobility prefactor; 2) GB migration activation energy; 3)GB energy");
-  params.addRequiredParam<bool>("inclination_anisotropy", "The GB anisotropy ininclination would be considered if true");
-  params.addRequiredCoupledVarWithAutoBuild("v", "var_name_base", "op_num", "Array of coupled variables");
+  params.addParam<Real>("molar_volume_value",
+                        7.11e-6,
+                        "molar volume of material in m^3/mol, by default it's the value of copper");
+  params.addParam<Real>(
+      "delta_sigma", 0.1, "factor determining inclination dependence of GB energy");
+  params.addParam<Real>(
+      "delta_mob", 0.1, "factor determining inclination dependence of GB mobility");
+  params.addRequiredParam<FileName>("Anisotropic_GB_file_name",
+                                    "Name of the file containing: 1)GB mobility prefactor; 2) GB "
+                                    "migration activation energy; 3)GB energy");
+  params.addRequiredParam<bool>("inclination_anisotropy",
+                                "The GB anisotropy ininclination would be considered if true");
+  params.addRequiredCoupledVarWithAutoBuild(
+      "v", "var_name_base", "op_num", "Array of coupled variables");
   return params;
 }
 
-GBAnisotropyBase::GBAnisotropyBase(const InputParameters & parameters) :
-    Material(parameters),
+GBAnisotropyBase::GBAnisotropyBase(const InputParameters & parameters)
+  : Material(parameters),
     _mesh_dimension(_mesh.dimension()),
     _length_scale(getParam<Real>("length_scale")),
     _time_scale(getParam<Real>("time_scale")),
@@ -43,7 +52,7 @@ GBAnisotropyBase::GBAnisotropyBase(const InputParameters & parameters) :
     _entropy_diff(declareProperty<Real>("entropy_diff")),
     _act_wGB(declareProperty<Real>("act_wGB")),
     _tgrad_corr_mult(declareProperty<Real>("tgrad_corr_mult")),
-    _kb(8.617343e-5), // Boltzmann constant in eV/K
+    _kb(8.617343e-5),      // Boltzmann constant in eV/K
     _JtoeV(6.24150974e18), // Joule to eV conversion
     _mu_qp(0.0),
     _op_num(coupledComponents("v")),
@@ -93,7 +102,7 @@ GBAnisotropyBase::GBAnisotropyBase(const InputParameters & parameters) :
       _sigma[i] = row; // unit: J/m^2
 
     else if (i < 2 * _op_num)
-      _mob[i-_op_num] = row; // unit: m^4/(J*s)
+      _mob[i - _op_num] = row; // unit: m^4/(J*s)
 
     else
       _Q[i - 2 * _op_num] = row; // unit: eV
@@ -131,26 +140,30 @@ GBAnisotropyBase::computeQpProperties()
 
         Real a = (*_grad_vals[m])[_qp](0) - (*_grad_vals[n])[_qp](0);
         Real b = (*_grad_vals[m])[_qp](1) - (*_grad_vals[n])[_qp](1);
-        Real ab = a*a + b*b + 1.0e-7; // for the sake of numerical convergence, the smaller the more accurate, but more difficult to converge
+        Real ab = a * a + b * b + 1.0e-7; // for the sake of numerical convergence, the smaller the
+                                          // more accurate, but more difficult to converge
 
-        Real cos_2phi = cos_phi*(a*a - b*b) / ab + sin_phi * 2.0 * a * b / ab;
+        Real cos_2phi = cos_phi * (a * a - b * b) / ab + sin_phi * 2.0 * a * b / ab;
         Real cos_4phi = 2.0 * cos_2phi * cos_2phi - 1.0;
 
         f_sigma = 1.0 + _delta_sigma * cos_4phi;
         f_mob = 1.0 + _delta_mob * cos_4phi;
 
         Real g2 = _a_g2[n][m] * f_sigma;
-        Real y = -5.288 * g2*g2*g2*g2 - 0.09364 * g2*g2*g2 + 9.965 * g2*g2 - 8.183 * g2 + 2.007;
+        Real y = -5.288 * g2 * g2 * g2 * g2 - 0.09364 * g2 * g2 * g2 + 9.965 * g2 * g2 -
+                 8.183 * g2 + 2.007;
         gamma_value = 1.0 / y;
       }
 
-      Val = (100000.0 * ((*_vals[m])[_qp]) * ((*_vals[m])[_qp]) + 0.01) * (100000.0 * ((*_vals[n])[_qp]) * ((*_vals[n])[_qp]) + 0.01);
+      Val = (100000.0 * ((*_vals[m])[_qp]) * ((*_vals[m])[_qp]) + 0.01) *
+            (100000.0 * ((*_vals[n])[_qp]) * ((*_vals[n])[_qp]) + 0.01);
 
       sum_val += Val;
-      sum_kappa += _kappa_gamma[m][n] * f_sigma*Val;
+      sum_kappa += _kappa_gamma[m][n] * f_sigma * Val;
       sum_gamma += gamma_value * Val;
       // Following comes from substituting Eq. (36c) from the paper into (36b)
-      sum_L += Val * _mob[m][n] * std::exp(-_Q[m][n] / (_kb * _T[_qp])) * f_mob * _mu_qp * _a_g2[n][m] / _sigma[m][n];
+      sum_L += Val * _mob[m][n] * std::exp(-_Q[m][n] / (_kb * _T[_qp])) * f_mob * _mu_qp *
+               _a_g2[n][m] / _sigma[m][n];
     }
   }
 
@@ -159,8 +172,9 @@ GBAnisotropyBase::computeQpProperties()
   _L[_qp] = sum_L / sum_val;
   _mu[_qp] = _mu_qp;
 
-  _molar_volume[_qp] = _M_V / (_length_scale*_length_scale*_length_scale); // m^3/mol converted to ls^3/mol
-  _entropy_diff[_qp] = 9.5 * _JtoeV; // J/(K mol) converted to eV(K mol)
-  _act_wGB[_qp] = 0.5e-9 / _length_scale; // 0.5 nm
-  _tgrad_corr_mult[_qp] = _mu[_qp] * 9.0/8.0;
+  _molar_volume[_qp] =
+      _M_V / (_length_scale * _length_scale * _length_scale); // m^3/mol converted to ls^3/mol
+  _entropy_diff[_qp] = 9.5 * _JtoeV;                          // J/(K mol) converted to eV(K mol)
+  _act_wGB[_qp] = 0.5e-9 / _length_scale;                     // 0.5 nm
+  _tgrad_corr_mult[_qp] = _mu[_qp] * 9.0 / 8.0;
 }

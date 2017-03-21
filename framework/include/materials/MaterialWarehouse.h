@@ -22,9 +22,11 @@
 class Material;
 
 /**
- * Material objects are special in that they have additional objects created automatically (see FEProblemBase::addMaterial).
+ * Material objects are special in that they have additional objects created automatically (see
+ * FEProblemBase::addMaterial).
  *
- * This class specializes the base class to acount for the additional Neightbor and face objects that may
+ * This class specializes the base class to acount for the additional Neightbor and face objects
+ * that may
  * exist.
  */
 class MaterialWarehouse : public MooseObjectWarehouse<Material>
@@ -34,7 +36,8 @@ public:
 
   ///@{
   /**
-   * Convenience methods for calling object setup methods that handle the extra neighbor and face objects.
+   * Convenience methods for calling object setup methods that handle the extra neighbor and face
+   * objects.
    */
   virtual void initialSetup(THREAD_ID tid = 0) const;
   virtual void timestepSetup(THREAD_ID tid = 0) const;
@@ -49,7 +52,10 @@ public:
   /**
    * A special method unique to this class for adding Block, Neighbor, and Face material objects.
    */
-  void addObjects(std::shared_ptr<Material> block, std::shared_ptr<Material> neighbor, std::shared_ptr<Material> face, THREAD_ID tid = 0);
+  void addObjects(std::shared_ptr<Material> block,
+                  std::shared_ptr<Material> neighbor,
+                  std::shared_ptr<Material> face,
+                  THREAD_ID tid = 0);
 
 protected:
   /// Stroage for neighbor material objects (Block are stored in the base class)

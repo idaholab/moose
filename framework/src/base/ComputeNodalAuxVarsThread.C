@@ -20,17 +20,18 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(FEProblemBase & fe_problem,
-                                                     const MooseObjectWarehouse<AuxKernel> & storage) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(
+    FEProblemBase & fe_problem, const MooseObjectWarehouse<AuxKernel> & storage)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _storage(storage)
 {
 }
 
 // Splitting Constructor
-ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x,
+                                                     Threads::split split)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
     _storage(x._storage)
 {
@@ -53,7 +54,8 @@ ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
   // Get a map of all active block restricted AuxKernel objects
   const auto & block_kernels = _storage.getActiveBlockObjects(_tid);
 
-  // Loop over all SubdomainIDs for the curnent node, if an AuxKernel is active on this block then compute it.
+  // Loop over all SubdomainIDs for the curnent node, if an AuxKernel is active on this block then
+  // compute it.
   const auto & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
   for (const auto & block : block_ids)
   {

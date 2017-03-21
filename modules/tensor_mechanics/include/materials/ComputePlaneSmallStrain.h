@@ -30,4 +30,4 @@ private:
   const VariableValue & _out_of_plane_strain;
 };
 
-#endif //COMPUTEPLANESMALLSTRAIN_H
+#endif // COMPUTEPLANESMALLSTRAIN_H

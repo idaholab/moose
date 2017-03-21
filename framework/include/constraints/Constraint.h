@@ -15,7 +15,7 @@
 #ifndef CONSTRAINT_H
 #define CONSTRAINT_H
 
-//MOOSE includes
+// MOOSE includes
 #include "MooseObject.h"
 #include "SetupInterface.h"
 #include "FunctionInterface.h"
@@ -26,29 +26,28 @@
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class Assembly;
 class Constraint;
 class MooseVariable;
 class SubProblem;
 class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<Constraint>();
 
 /**
  * Base class for all Constraint types
  */
-class Constraint :
-  public MooseObject,
-  public SetupInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public TransientInterface,
-  protected GeometricSearchInterface,
-  public Restartable,
-  public ZeroInterface,
-  public MeshChangedInterface
+class Constraint : public MooseObject,
+                   public SetupInterface,
+                   public FunctionInterface,
+                   public UserObjectInterface,
+                   public TransientInterface,
+                   protected GeometricSearchInterface,
+                   public Restartable,
+                   public ZeroInterface,
+                   public MeshChangedInterface
 {
 public:
   Constraint(const InputParameters & parameters);

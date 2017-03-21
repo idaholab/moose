@@ -12,7 +12,7 @@
 
 class PorousFlowRelativePermeabilityCorey;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowRelativePermeabilityCorey>();
 
 /**
@@ -35,4 +35,4 @@ protected:
   const Real _n;
 };
 
-#endif //POROUSFLOWRELATIVEPERMEABILITYCOREY_H
+#endif // POROUSFLOWRELATIVEPERMEABILITYCOREY_H

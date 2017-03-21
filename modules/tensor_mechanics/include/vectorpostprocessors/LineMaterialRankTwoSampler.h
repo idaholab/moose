@@ -11,18 +11,17 @@
 #include "LineMaterialSamplerBase.h"
 #include "RankTwoTensor.h"
 
-//Forward Declarations
+// Forward Declarations
 class LineMaterialRankTwoSampler;
 
-template<>
+template <>
 InputParameters validParams<LineMaterialRankTwoSampler>();
 
 /**
  * This class samples components of RankTwoTensor material properties for the integration points
  * in all elements that are intersected by a user-defined line.
  */
-class LineMaterialRankTwoSampler :
-  public LineMaterialSamplerBase<RankTwoTensor>
+class LineMaterialRankTwoSampler : public LineMaterialSamplerBase<RankTwoTensor>
 {
 public:
   /**
@@ -45,4 +44,4 @@ public:
   const unsigned int _j;
 };
 
-#endif //LINEMATERIALRANKTWOSAMPLER
+#endif // LINEMATERIALRANKTWOSAMPLER

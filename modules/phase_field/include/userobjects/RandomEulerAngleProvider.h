@@ -10,11 +10,11 @@
 #include "EulerAngleProvider.h"
 #include "MooseRandom.h"
 
-//Forward declaration
+// Forward declaration
 class RandomEulerAngleProvider;
 class GrainTrackerInterface;
 
-template<>
+template <>
 InputParameters validParams<RandomEulerAngleProvider>();
 
 /**
@@ -39,4 +39,4 @@ protected:
   MooseRandom _random;
 };
 
-#endif //RANDOMEULERANGLEPROVIDER_H
+#endif // RANDOMEULERANGLEPROVIDER_H

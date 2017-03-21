@@ -23,16 +23,15 @@
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 
-
-template<>
-InputParameters validParams<FDKernel>()
+template <>
+InputParameters
+validParams<FDKernel>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
-FDKernel::FDKernel(const InputParameters & parameters) :
-    Kernel(parameters)
+FDKernel::FDKernel(const InputParameters & parameters) : Kernel(parameters)
 {
   _scale = 1.490116119384766e-08; // HACK: sqrt of the machine epsilon for double precision
 #ifdef LIBMESH_HAVE_PETSC
@@ -41,14 +40,17 @@ FDKernel::FDKernel(const InputParameters & parameters) :
 }
 
 DenseVector<Number>
-FDKernel::perturbedResidual(unsigned int varnum, unsigned int perturbationj, Real perturbation_scale, Real& perturbation)
+FDKernel::perturbedResidual(unsigned int varnum,
+                            unsigned int perturbationj,
+                            Real perturbation_scale,
+                            Real & perturbation)
 {
   DenseVector<Number> re;
   re.resize(_var.dofIndices().size());
   re.zero();
 
-  MooseVariable& var = _sys.getVariable(_tid,varnum);
-  var.computePerturbedElemValues(perturbationj,perturbation_scale,perturbation);
+  MooseVariable & var = _sys.getVariable(_tid, varnum);
+  var.computePerturbedElemValues(perturbationj, perturbation_scale, perturbation);
   precalculateResidual();
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -74,12 +76,12 @@ FDKernel::computeOffDiagJacobian(unsigned int jvar_index)
 
   // FIXME: pull out the already computed element residual instead of recomputing it
   Real h;
-  DenseVector<Number> re = perturbedResidual(_var.number(),0,0.0,h);
+  DenseVector<Number> re = perturbedResidual(_var.number(), 0, 0.0, h);
   for (_j = 0; _j < _phi.size(); _j++)
   {
-    DenseVector<Number> p_re = perturbedResidual(jvar_index,_j,_scale,h);
+    DenseVector<Number> p_re = perturbedResidual(jvar_index, _j, _scale, h);
     for (_i = 0; _i < _test.size(); _i++)
-      local_ke(_i,_j) = (p_re(_i) - re(_i))/h;
+      local_ke(_i, _j) = (p_re(_i) - re(_i)) / h;
   }
   ke += local_ke;
 
@@ -90,7 +92,7 @@ FDKernel::computeOffDiagJacobian(unsigned int jvar_index)
     {
       unsigned int rows = ke.m();
       DenseVector<Number> diag(rows);
-      for (unsigned int i=0; i<rows; i++)
+      for (unsigned int i = 0; i < rows; i++)
         diag(i) = _local_ke(i, i);
 
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
@@ -114,4 +116,3 @@ FDKernel::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
     ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
   */
 }
-

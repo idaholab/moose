@@ -45,9 +45,12 @@ public:
    * Access methods for active objects.
    */
   const std::vector<std::shared_ptr<NodalConstraint>> & getActiveNodalConstraints() const;
-  const std::vector<std::shared_ptr<FaceFaceConstraint>> & getActiveFaceFaceConstraints(const std::string & interface) const;
-  const std::vector<std::shared_ptr<ElemElemConstraint>> & getActiveElemElemConstraints(InterfaceID interface_id) const;
-  const std::vector<std::shared_ptr<NodeFaceConstraint>> & getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced);
+  const std::vector<std::shared_ptr<FaceFaceConstraint>> &
+  getActiveFaceFaceConstraints(const std::string & interface) const;
+  const std::vector<std::shared_ptr<ElemElemConstraint>> &
+  getActiveElemElemConstraints(InterfaceID interface_id) const;
+  const std::vector<std::shared_ptr<NodeFaceConstraint>> &
+  getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced);
   ///@}
 
   ///@{
@@ -63,7 +66,9 @@ public:
   /**
    * Update supplied subdomain and variable coverate containters.
    */
-  void subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables, THREAD_ID tid = 0) const;
+  void subdomainsCovered(std::set<SubdomainID> & subdomains_covered,
+                         std::set<std::string> & unique_variables,
+                         THREAD_ID tid = 0) const;
 
   /**
    * Update the various active lists.
@@ -71,21 +76,20 @@ public:
   void updateActive(THREAD_ID tid = 0);
 
 protected:
-
   /// NodalConstraint objects
   MooseObjectWarehouse<NodalConstraint> _nodal_constraints;
 
   /// NodeFaceConstraint objects (non-displaced)
-  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint> > _node_face_constraints;
+  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>> _node_face_constraints;
 
   /// NodeFaceConstraint objects (displaced)
-  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint> > _displaced_node_face_constraints;
+  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>> _displaced_node_face_constraints;
 
   /// FaceFaceConstraints
-  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint> > _face_face_constraints;
+  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint>> _face_face_constraints;
 
   /// ElemElemConstraints
-  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint> > _element_constraints;
+  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>> _element_constraints;
 };
 
 #endif // CONSTRAINTWAREHOUSE_H

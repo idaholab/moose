@@ -12,8 +12,9 @@
 #include "MooseApp.h"
 #include "libmesh/string_to_enum.h"
 
-template<>
-InputParameters validParams<ContactPenetrationVarAction>()
+template <>
+InputParameters
+validParams<ContactPenetrationVarAction>()
 {
   MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
@@ -22,8 +23,8 @@ InputParameters validParams<ContactPenetrationVarAction>()
   return params;
 }
 
-ContactPenetrationVarAction::ContactPenetrationVarAction(const InputParameters & params) :
-  Action(params)
+ContactPenetrationVarAction::ContactPenetrationVarAction(const InputParameters & params)
+  : Action(params)
 {
 }
 
@@ -31,7 +32,8 @@ void
 ContactPenetrationVarAction::act()
 {
   if (!_problem->getDisplacedProblem())
-    mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the Mesh block.");
+    mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
+               "Mesh block.");
 
   _problem->addAuxVariable("penetration",
                            FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),

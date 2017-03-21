@@ -23,12 +23,16 @@ class SubProblem;
 class MooseMesh;
 
 /**
- * Finds the nearest node to each node in boundary1 to each node in boundary2 and the other way around.
+ * Finds the nearest node to each node in boundary1 to each node in boundary2 and the other way
+ * around.
  */
 class NearestNodeLocator : public Restartable
 {
 public:
-  NearestNodeLocator(SubProblem & subproblem, MooseMesh & mesh, BoundaryID boundary1, BoundaryID boundary2);
+  NearestNodeLocator(SubProblem & subproblem,
+                     MooseMesh & mesh,
+                     BoundaryID boundary1,
+                     BoundaryID boundary2);
 
   ~NearestNodeLocator();
 
@@ -92,7 +96,7 @@ public:
   bool _first;
   std::vector<dof_id_type> _slave_nodes;
 
-  std::map<dof_id_type, std::vector<dof_id_type> > _neighbor_nodes;
+  std::map<dof_id_type, std::vector<dof_id_type>> _neighbor_nodes;
 
   // The following parameter controls the patch size that is searched for each nearest neighbor
   static const unsigned int _patch_size;
@@ -101,4 +105,4 @@ public:
   Real _max_patch_percentage;
 };
 
-#endif //NEARESTNODELOCATOR_H
+#endif // NEARESTNODELOCATOR_H

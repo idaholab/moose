@@ -19,7 +19,7 @@
 
 class TimestepSetupFunction;
 
-template<>
+template <>
 InputParameters validParams<TimestepSetupFunction>();
 
 class TimestepSetupFunction : public Function
@@ -30,8 +30,9 @@ public:
   virtual Real value(Real t, const Point & p);
 
   virtual void timestepSetup();
+
 private:
-  unsigned int &  _local_timestep;
+  unsigned int & _local_timestep;
 };
 
-#endif //TIMESTEPSETUPFUNCTION_H
+#endif // TIMESTEPSETUPFUNCTION_H

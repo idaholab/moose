@@ -28,16 +28,14 @@ operator, (const ExpressionBuilder::EBTermList & largs, const ExpressionBuilder:
   return list;
 }
 
-
 std::ostream &
-operator<< (std::ostream & os, const ExpressionBuilder::EBTerm & term)
+operator<<(std::ostream & os, const ExpressionBuilder::EBTerm & term)
 {
   if (term._root != NULL)
     return os << *term._root;
   else
     return os << "[NULL]";
 }
-
 
 std::string
 ExpressionBuilder::EBSymbolNode::stringify() const
@@ -56,7 +54,7 @@ ExpressionBuilder::EBTempIDNode::stringify() const
 std::string
 ExpressionBuilder::EBUnaryFuncTermNode::stringify() const
 {
-  const char * name[] = { "sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh" };
+  const char * name[] = {"sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh"};
   std::ostringstream s;
   s << name[_type] << '(' << *_subnode << ')';
   return s.str();
@@ -65,10 +63,10 @@ ExpressionBuilder::EBUnaryFuncTermNode::stringify() const
 std::string
 ExpressionBuilder::EBUnaryOpTermNode::stringify() const
 {
-  const char * name[] = { "-", "!" };
+  const char * name[] = {"-", "!"};
   std::ostringstream s;
 
-  s <<  name[_type];
+  s << name[_type];
 
   if (_subnode->precedence() > precedence())
     s << '(' << *_subnode << ')';
@@ -81,7 +79,7 @@ ExpressionBuilder::EBUnaryOpTermNode::stringify() const
 std::string
 ExpressionBuilder::EBBinaryFuncTermNode::stringify() const
 {
-  const char * name[] = { "min", "max", "atan2", "hypot", "plog" };
+  const char * name[] = {"min", "max", "atan2", "hypot", "plog"};
   std::ostringstream s;
   s << name[_type] << '(' << *_left << ',' << *_right << ')';
   return s.str();
@@ -90,7 +88,7 @@ ExpressionBuilder::EBBinaryFuncTermNode::stringify() const
 std::string
 ExpressionBuilder::EBBinaryOpTermNode::stringify() const
 {
-  const char * name[] = { "+", "-", "*", "/", "%", "^", "<", ">", "<=", ">=", "=", "!=" };
+  const char * name[] = {"+", "-", "*", "/", "%", "^", "<", ">", "<=", ">=", "=", "!="};
   std::ostringstream s;
 
   if (_left->precedence() > precedence())
@@ -102,10 +100,9 @@ ExpressionBuilder::EBBinaryOpTermNode::stringify() const
 
   // these operators are left associative at equal precedence
   // (this matters for -,/,&,^ but not for + and *)
-  if (_right->precedence() > precedence() || (
-        _right->precedence() == precedence() && (
-          _type == SUB || _type == DIV || _type == MOD || _type == POW
-        )))
+  if (_right->precedence() > precedence() ||
+      (_right->precedence() == precedence() &&
+       (_type == SUB || _type == DIV || _type == MOD || _type == POW)))
     s << '(' << *_right << ')';
   else
     s << *_right;
@@ -118,15 +115,22 @@ ExpressionBuilder::EBBinaryOpTermNode::precedence() const
 {
   switch (_type)
   {
-    case ADD: case SUB:
+    case ADD:
+    case SUB:
       return 6;
-    case MUL: case DIV: case MOD:
+    case MUL:
+    case DIV:
+    case MOD:
       return 5;
     case POW:
       return 2;
-    case LESS: case GREATER: case LESSEQ: case GREATEREQ:
+    case LESS:
+    case GREATER:
+    case LESSEQ:
+    case GREATEREQ:
       return 8;
-    case EQ: case NOTEQ:
+    case EQ:
+    case NOTEQ:
       return 9;
   }
 
@@ -136,28 +140,28 @@ ExpressionBuilder::EBBinaryOpTermNode::precedence() const
 std::string
 ExpressionBuilder::EBTernaryFuncTermNode::stringify() const
 {
-  const char * name[] = { "if" };
+  const char * name[] = {"if"};
   std::ostringstream s;
   s << name[_type] << '(' << *_left << ',' << *_middle << ',' << *_right << ')';
   return s.str();
 }
 
 ExpressionBuilder::EBFunction &
-ExpressionBuilder::EBFunction::operator() (const ExpressionBuilder::EBTerm & arg)
+ExpressionBuilder::EBFunction::operator()(const ExpressionBuilder::EBTerm & arg)
 {
   this->_eval_arguments = {arg};
   return *this;
 }
 
 ExpressionBuilder::EBFunction &
-ExpressionBuilder::EBFunction::operator() (const ExpressionBuilder::EBTermList & args)
+ExpressionBuilder::EBFunction::operator()(const ExpressionBuilder::EBTermList & args)
 {
   this->_eval_arguments = EBTermList(args);
   return *this;
 }
 
 ExpressionBuilder::EBFunction &
-ExpressionBuilder::EBFunction::operator= (const ExpressionBuilder::EBTerm & term)
+ExpressionBuilder::EBFunction::operator=(const ExpressionBuilder::EBTerm & term)
 {
   this->_arguments = this->_eval_arguments;
   this->_term = term;
@@ -165,7 +169,7 @@ ExpressionBuilder::EBFunction::operator= (const ExpressionBuilder::EBTerm & term
 }
 
 ExpressionBuilder::EBFunction &
-ExpressionBuilder::EBFunction::operator= (const ExpressionBuilder::EBFunction & func)
+ExpressionBuilder::EBFunction::operator=(const ExpressionBuilder::EBFunction & func)
 {
   this->_arguments = this->_eval_arguments;
   this->_term = EBTerm(func);
@@ -232,60 +236,69 @@ ExpressionBuilder::EBFunction::substitute(const EBSubstitutionRuleList & rules)
   return _term.substitute(rules);
 }
 
+#define UNARY_FUNC_IMPLEMENT(op, OP)                                                               \
+  ExpressionBuilder::EBTerm op(const ExpressionBuilder::EBTerm & term)                             \
+  {                                                                                                \
+    mooseAssert(term._root != NULL, "Empty term provided as argument of function " #op "()");      \
+    return ExpressionBuilder::EBTerm(new ExpressionBuilder::EBUnaryFuncTermNode(                   \
+        term.cloneRoot(), ExpressionBuilder::EBUnaryFuncTermNode::OP));                            \
+  }
+UNARY_FUNC_IMPLEMENT(sin, SIN)
+UNARY_FUNC_IMPLEMENT(cos, COS)
+UNARY_FUNC_IMPLEMENT(tan, TAN)
+UNARY_FUNC_IMPLEMENT(abs, ABS)
+UNARY_FUNC_IMPLEMENT(log, LOG)
+UNARY_FUNC_IMPLEMENT(log2, LOG2)
+UNARY_FUNC_IMPLEMENT(log10, LOG10)
+UNARY_FUNC_IMPLEMENT(exp, EXP)
+UNARY_FUNC_IMPLEMENT(sinh, SINH)
+UNARY_FUNC_IMPLEMENT(cosh, COSH)
 
-#define UNARY_FUNC_IMPLEMENT(op,OP) \
-ExpressionBuilder::EBTerm op (const ExpressionBuilder::EBTerm & term) { \
-  mooseAssert(term._root != NULL, "Empty term provided as argument of function " #op "()"); \
-  return ExpressionBuilder::EBTerm( \
-    new ExpressionBuilder::EBUnaryFuncTermNode(term.cloneRoot(), ExpressionBuilder::EBUnaryFuncTermNode::OP) \
-  ); \
-}
-UNARY_FUNC_IMPLEMENT(sin,SIN)
-UNARY_FUNC_IMPLEMENT(cos,COS)
-UNARY_FUNC_IMPLEMENT(tan,TAN)
-UNARY_FUNC_IMPLEMENT(abs,ABS)
-UNARY_FUNC_IMPLEMENT(log,LOG)
-UNARY_FUNC_IMPLEMENT(log2,LOG2)
-UNARY_FUNC_IMPLEMENT(log10,LOG10)
-UNARY_FUNC_IMPLEMENT(exp,EXP)
-UNARY_FUNC_IMPLEMENT(sinh,SINH)
-UNARY_FUNC_IMPLEMENT(cosh,COSH)
-
-#define BINARY_FUNC_IMPLEMENT(op,OP) \
-ExpressionBuilder::EBTerm op (const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & right) { \
-  mooseAssert(left._root != NULL, "Empty term provided as first argument of function " #op "()"); \
-  mooseAssert(right._root != NULL, "Empty term provided as second argument of function " #op "()"); \
-  return ExpressionBuilder::EBTerm( \
-    new ExpressionBuilder::EBBinaryFuncTermNode(left.cloneRoot(), right.cloneRoot(), ExpressionBuilder::EBBinaryFuncTermNode::OP) \
-  ); \
-}
-BINARY_FUNC_IMPLEMENT(min,MIN)
-BINARY_FUNC_IMPLEMENT(max,MAX)
-BINARY_FUNC_IMPLEMENT(atan2,ATAN2)
-BINARY_FUNC_IMPLEMENT(hypot,HYPOT)
-BINARY_FUNC_IMPLEMENT(plog,PLOG)
+#define BINARY_FUNC_IMPLEMENT(op, OP)                                                              \
+  ExpressionBuilder::EBTerm op(const ExpressionBuilder::EBTerm & left,                             \
+                               const ExpressionBuilder::EBTerm & right)                            \
+  {                                                                                                \
+    mooseAssert(left._root != NULL,                                                                \
+                "Empty term provided as first argument of function " #op "()");                    \
+    mooseAssert(right._root != NULL,                                                               \
+                "Empty term provided as second argument of function " #op "()");                   \
+    return ExpressionBuilder::EBTerm(new ExpressionBuilder::EBBinaryFuncTermNode(                  \
+        left.cloneRoot(), right.cloneRoot(), ExpressionBuilder::EBBinaryFuncTermNode::OP));        \
+  }
+BINARY_FUNC_IMPLEMENT(min, MIN)
+BINARY_FUNC_IMPLEMENT(max, MAX)
+BINARY_FUNC_IMPLEMENT(atan2, ATAN2)
+BINARY_FUNC_IMPLEMENT(hypot, HYPOT)
+BINARY_FUNC_IMPLEMENT(plog, PLOG)
 
 // this is a function in ExpressionBuilder (pow) but an operator in FParser (^)
-ExpressionBuilder::EBTerm pow(const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & right) {
-  mooseAssert(left._root != NULL, "Empty term for base of pow()"); \
-  mooseAssert(right._root != NULL, "Empty term for exponent of pow()"); \
-  return ExpressionBuilder::EBTerm(
-    new ExpressionBuilder::EBBinaryOpTermNode(
-      left.cloneRoot(), right.cloneRoot(), ExpressionBuilder::EBBinaryOpTermNode::POW
-    )
-  );
+ExpressionBuilder::EBTerm
+pow(const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & right)
+{
+  mooseAssert(left._root != NULL, "Empty term for base of pow()");
+  mooseAssert(right._root != NULL, "Empty term for exponent of pow()");
+  return ExpressionBuilder::EBTerm(new ExpressionBuilder::EBBinaryOpTermNode(
+      left.cloneRoot(), right.cloneRoot(), ExpressionBuilder::EBBinaryOpTermNode::POW));
 }
 
-#define TERNARY_FUNC_IMPLEMENT(op,OP) \
-ExpressionBuilder::EBTerm op (const ExpressionBuilder::EBTerm & left, const ExpressionBuilder::EBTerm & middle, const ExpressionBuilder::EBTerm & right) { \
-  mooseAssert(left._root != NULL, "Empty term provided as first argument of the ternary function " #op "()"); \
-  mooseAssert(middle._root != NULL, "Empty term provided as second argument of the ternary function " #op "()"); \
-  mooseAssert(right._root != NULL, "Empty term provided as third argument of the ternary function " #op "()"); \
-  return ExpressionBuilder::EBTerm( \
-    new ExpressionBuilder::EBTernaryFuncTermNode(left.cloneRoot(), middle.cloneRoot(), right.cloneRoot(), ExpressionBuilder::EBTernaryFuncTermNode::OP) \
-  ); \
-}
-TERNARY_FUNC_IMPLEMENT(conditional,CONDITIONAL)
+#define TERNARY_FUNC_IMPLEMENT(op, OP)                                                             \
+  ExpressionBuilder::EBTerm op(const ExpressionBuilder::EBTerm & left,                             \
+                               const ExpressionBuilder::EBTerm & middle,                           \
+                               const ExpressionBuilder::EBTerm & right)                            \
+  {                                                                                                \
+    mooseAssert(left._root != NULL,                                                                \
+                "Empty term provided as first argument of the ternary function " #op "()");        \
+    mooseAssert(middle._root != NULL,                                                              \
+                "Empty term provided as second argument of the ternary function " #op "()");       \
+    mooseAssert(right._root != NULL,                                                               \
+                "Empty term provided as third argument of the ternary function " #op "()");        \
+    return ExpressionBuilder::EBTerm(new ExpressionBuilder::EBTernaryFuncTermNode(                 \
+        left.cloneRoot(),                                                                          \
+        middle.cloneRoot(),                                                                        \
+        right.cloneRoot(),                                                                         \
+        ExpressionBuilder::EBTernaryFuncTermNode::OP));                                            \
+  }
+TERNARY_FUNC_IMPLEMENT(conditional, CONDITIONAL)
 
 unsigned int
 ExpressionBuilder::EBUnaryTermNode::substitute(const EBSubstitutionRuleList & rules)
@@ -345,9 +358,7 @@ unsigned int
 ExpressionBuilder::EBTernaryTermNode::substitute(const EBSubstitutionRuleList & rules)
 {
   unsigned int nrule = rules.size();
-  bool left_success   = false,
-       middle_success = false,
-       right_success  = false;
+  bool left_success = false, middle_success = false, right_success = false;
   EBTermNode * replace;
 
   for (unsigned int i = 0; i < nrule; ++i)
@@ -426,7 +437,8 @@ ExpressionBuilder::EBTerm::substitute(const EBSubstitutionRuleList & rules)
   return _root->substitute(rules);
 }
 
-ExpressionBuilder::EBTermSubstitution::EBTermSubstitution(const EBTerm & find, const EBTerm & replace)
+ExpressionBuilder::EBTermSubstitution::EBTermSubstitution(const EBTerm & find,
+                                                          const EBTerm & replace)
 {
   // the expression we want to substitute (has to be a symbol node)
   const EBSymbolNode * find_root = dynamic_cast<const EBSymbolNode *>(find.getRoot());
@@ -454,7 +466,8 @@ ExpressionBuilder::EBTermNode *
 ExpressionBuilder::EBLogPlogSubstitution::substitute(const EBUnaryFuncTermNode & node) const
 {
   if (node._type == EBUnaryFuncTermNode::LOG)
-    return new EBBinaryFuncTermNode(node.getSubnode()->clone(), _epsilon->clone(), EBBinaryFuncTermNode::PLOG);
+    return new EBBinaryFuncTermNode(
+        node.getSubnode()->clone(), _epsilon->clone(), EBBinaryFuncTermNode::PLOG);
   else
     return NULL;
 }

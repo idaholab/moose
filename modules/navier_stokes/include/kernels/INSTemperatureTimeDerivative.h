@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSTemperatureTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<INSTemperatureTimeDerivative>();
 
 /**
@@ -25,7 +25,7 @@ class INSTemperatureTimeDerivative : public TimeDerivative
 public:
   INSTemperatureTimeDerivative(const InputParameters & parameters);
 
-  virtual ~INSTemperatureTimeDerivative(){}
+  virtual ~INSTemperatureTimeDerivative() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -36,6 +36,5 @@ protected:
   Real _rho;
   Real _cp;
 };
-
 
 #endif // INSTEMPERATURETIMEDERIVATIVE_H

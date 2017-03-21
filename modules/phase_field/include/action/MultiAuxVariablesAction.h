@@ -13,7 +13,7 @@
  * Automatically generates all auxvariables given vectors telling it the names
  * and how many to create
  */
-class MultiAuxVariablesAction: public AddAuxVariableAction
+class MultiAuxVariablesAction : public AddAuxVariableAction
 {
 public:
   MultiAuxVariablesAction(InputParameters params);
@@ -37,7 +37,7 @@ protected:
   const unsigned int _data_size;
 };
 
-template<>
+template <>
 InputParameters validParams<MultiAuxVariablesAction>();
 
-#endif //MULTIAUXVARIABLESACTION_H
+#endif // MULTIAUXVARIABLESACTION_H

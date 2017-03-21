@@ -18,15 +18,14 @@
 #include "FEProblem.h"
 #include "MooseError.h" // mooseDeprecated
 
-NeighborCoupleable::NeighborCoupleable(const MooseObject * moose_object, bool nodal, bool neighbor_nodal) :
-    Coupleable(moose_object, nodal),
-    _neighbor_nodal(neighbor_nodal)
+NeighborCoupleable::NeighborCoupleable(const MooseObject * moose_object,
+                                       bool nodal,
+                                       bool neighbor_nodal)
+  : Coupleable(moose_object, nodal), _neighbor_nodal(neighbor_nodal)
 {
 }
 
-NeighborCoupleable::~NeighborCoupleable()
-{
-}
+NeighborCoupleable::~NeighborCoupleable() {}
 
 const VariableValue &
 NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned int comp)

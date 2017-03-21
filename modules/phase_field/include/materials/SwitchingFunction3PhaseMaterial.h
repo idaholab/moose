@@ -10,10 +10,10 @@
 #include "DerivativeParsedMaterialHelper.h"
 #include "ExpressionBuilder.h"
 
-//Forward Declarations
+// Forward Declarations
 class SwitchingFunction3PhaseMaterial;
 
-template<>
+template <>
 InputParameters validParams<SwitchingFunction3PhaseMaterial>();
 
 /**
@@ -34,4 +34,4 @@ protected:
   EBTerm _eta_k;
 };
 
-#endif //SWITCHINGFUNCTION3PHASEMATERIAL_H
+#endif // SWITCHINGFUNCTION3PHASEMATERIAL_H

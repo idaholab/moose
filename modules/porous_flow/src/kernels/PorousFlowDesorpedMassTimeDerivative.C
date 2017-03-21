@@ -8,18 +8,22 @@
 #include "PorousFlowDesorpedMassTimeDerivative.h"
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<PorousFlowDesorpedMassTimeDerivative>()
+template <>
+InputParameters
+validParams<PorousFlowDesorpedMassTimeDerivative>()
 {
   InputParameters params = validParams<TimeKernel>();
-  params.addRequiredParam<UserObjectName>("PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
-  params.addRequiredCoupledVar("conc_var", "The variable that represents the concentration of desorped species");
+  params.addRequiredParam<UserObjectName>(
+      "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names.");
+  params.addRequiredCoupledVar(
+      "conc_var", "The variable that represents the concentration of desorped species");
   params.addClassDescription("Desorped component mass derivative wrt time.");
   return params;
 }
 
-PorousFlowDesorpedMassTimeDerivative::PorousFlowDesorpedMassTimeDerivative(const InputParameters & parameters) :
-    TimeKernel(parameters),
+PorousFlowDesorpedMassTimeDerivative::PorousFlowDesorpedMassTimeDerivative(
+    const InputParameters & parameters)
+  : TimeKernel(parameters),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _conc_var_number(coupled("conc_var")),
     _conc(coupledValue("conc_var")),
@@ -27,7 +31,8 @@ PorousFlowDesorpedMassTimeDerivative::PorousFlowDesorpedMassTimeDerivative(const
     _porosity(getMaterialProperty<Real>("PorousFlow_porosity_qp")),
     _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_qp")),
     _dporosity_dvar(getMaterialProperty<std::vector<Real>>("dPorousFlow_porosity_qp_dvar")),
-    _dporosity_dgradvar(getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar"))
+    _dporosity_dgradvar(
+        getMaterialProperty<std::vector<RealGradient>>("dPorousFlow_porosity_qp_dgradvar"))
 {
 }
 

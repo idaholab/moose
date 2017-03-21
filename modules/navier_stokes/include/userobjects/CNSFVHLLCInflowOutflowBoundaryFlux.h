@@ -14,16 +14,16 @@
 // Forward Declarations
 class CNSFVHLLCInflowOutflowBoundaryFlux;
 
-template<>
+template <>
 InputParameters validParams<CNSFVHLLCInflowOutflowBoundaryFlux>();
 
 /**
- * A user object that computes inflow/outflow boundary flux using the HLLC approximate Riemann solver
+ * A user object that computes inflow/outflow boundary flux using the HLLC approximate Riemann
+ * solver
  */
 class CNSFVHLLCInflowOutflowBoundaryFlux : public BoundaryFluxBase
 {
 public:
-
   CNSFVHLLCInflowOutflowBoundaryFlux(const InputParameters & parameters);
   virtual ~CNSFVHLLCInflowOutflowBoundaryFlux();
 
@@ -40,7 +40,6 @@ public:
                             DenseMatrix<Real> & jac1) const;
 
 protected:
-
   const SinglePhaseFluidProperties & _fp;
 
   Real _inf_rho;

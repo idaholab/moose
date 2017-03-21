@@ -7,8 +7,9 @@
 #include "PresetAcceleration.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<PresetAcceleration>()
+template <>
+InputParameters
+validParams<PresetAcceleration>()
 {
   InputParameters params = validParams<NodalBC>();
   params.addClassDescription("Prescribe acceleration on a given boundary in a given direction");
@@ -20,9 +21,8 @@ InputParameters validParams<PresetAcceleration>()
   return params;
 }
 
-
-PresetAcceleration::PresetAcceleration(const InputParameters & parameters) :
-    PresetNodalBC(parameters),
+PresetAcceleration::PresetAcceleration(const InputParameters & parameters)
+  : PresetNodalBC(parameters),
     _u_old(valueOld()),
     _scale_factor(parameters.get<Real>("scale_factor")),
     _function(getFunction("function")),
@@ -38,5 +38,6 @@ PresetAcceleration::computeQpValue()
   Real accel = _function.value(_t, *_current_node);
 
   // Integrate acceleration using Newmark time integration to get displacement
-  return _u_old[_qp] + _dt * _vel_old[_qp] + ((0.5 - _beta) * _accel_old[_qp] + _beta * accel) * _dt * _dt;
+  return _u_old[_qp] + _dt * _vel_old[_qp] +
+         ((0.5 - _beta) * _accel_old[_qp] + _beta * accel) * _dt * _dt;
 }

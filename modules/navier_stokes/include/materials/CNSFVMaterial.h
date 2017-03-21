@@ -14,7 +14,7 @@
 
 class CNSFVMaterial;
 
-template<>
+template <>
 InputParameters validParams<CNSFVMaterial>();
 
 /**
@@ -42,12 +42,10 @@ InputParameters validParams<CNSFVMaterial>();
 class CNSFVMaterial : public Material
 {
 public:
-
   CNSFVMaterial(const InputParameters & parameters);
   virtual ~CNSFVMaterial();
 
 protected:
-
   virtual void computeQpProperties();
 
   // piecewise constant conserved variables

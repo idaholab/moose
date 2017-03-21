@@ -17,11 +17,10 @@
 #include "Material.h"
 #include "MaterialProperty.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class MTMaterial;
 
-template<>
+template <>
 InputParameters validParams<MTMaterial>();
 
 /**
@@ -39,4 +38,4 @@ protected:
   Real _value;
 };
 
-#endif //DIFF1MATERIAL_H
+#endif // DIFF1MATERIAL_H

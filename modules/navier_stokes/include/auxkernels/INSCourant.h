@@ -9,10 +9,10 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class INSCourant;
 
-template<>
+template <>
 InputParameters validParams<INSCourant>();
 
 /**
@@ -32,4 +32,4 @@ protected:
   const VariableValue & _w_vel;
 };
 
-#endif //INSCOURANT_H
+#endif // INSCOURANT_H

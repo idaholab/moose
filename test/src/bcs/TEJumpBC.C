@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "TEJumpBC.h"
 
-template<>
-InputParameters validParams<TEJumpBC>()
+template <>
+InputParameters
+validParams<TEJumpBC>()
 {
   InputParameters params = validParams<NodalBC>();
   params.addParam<Real>("value", 0.0, "The value the variable should have on the boundary");
@@ -23,15 +24,13 @@ InputParameters validParams<TEJumpBC>()
   return params;
 }
 
-TEJumpBC::TEJumpBC(const InputParameters & parameters) :
-    NodalBC(parameters),
-    _t_jump(getParam<Real>("t_jump")),
-    _slope(getParam<Real>("slope"))
+TEJumpBC::TEJumpBC(const InputParameters & parameters)
+  : NodalBC(parameters), _t_jump(getParam<Real>("t_jump")), _slope(getParam<Real>("slope"))
 {
 }
 
 Real
 TEJumpBC::computeQpResidual()
 {
-  return _u[_qp] - (atan((_t - _t_jump)*libMesh::pi * _slope));
+  return _u[_qp] - (atan((_t - _t_jump) * libMesh::pi * _slope));
 }

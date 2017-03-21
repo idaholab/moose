@@ -19,8 +19,9 @@
 // libMesh includes
 #include "libmesh/sparse_matrix.h"
 
-template<>
-InputParameters validParams<UserObject>()
+template <>
+InputParameters
+validParams<UserObject>()
 {
   InputParameters params = validParams<MooseObject>();
 
@@ -28,7 +29,11 @@ InputParameters validParams<UserObject>()
   params += validParams<SetupInterface>();
   params.set<MultiMooseEnum>("execute_on") = "timestep_end";
 
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the "
+                                                     "displaced mesh for computation.  Note that "
+                                                     "in the case this is true but no "
+                                                     "displacements are provided in the Mesh block "
+                                                     "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   params.declareControllable("enable");
@@ -38,8 +43,8 @@ InputParameters validParams<UserObject>()
   return params;
 }
 
-UserObject::UserObject(const InputParameters & parameters) :
-    MooseObject(parameters),
+UserObject::UserObject(const InputParameters & parameters)
+  : MooseObject(parameters),
     SetupInterface(this),
     FunctionInterface(this),
     Restartable(parameters, "UserObjects"),
@@ -53,9 +58,7 @@ UserObject::UserObject(const InputParameters & parameters) :
 {
 }
 
-UserObject::~UserObject()
-{
-}
+UserObject::~UserObject() {}
 
 void
 UserObject::load(std::ifstream & /*stream*/)

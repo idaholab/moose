@@ -19,17 +19,17 @@
 #include "ImageSubdomain.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ImageSubdomain>()
+template <>
+InputParameters
+validParams<ImageSubdomain>()
 {
   InputParameters params = validParams<MeshModifier>();
   params += validParams<ImageSampler>();
   return params;
 }
 
-ImageSubdomain::ImageSubdomain(const InputParameters & parameters) :
-    MeshModifier(parameters),
-    ImageSampler(parameters)
+ImageSubdomain::ImageSubdomain(const InputParameters & parameters)
+  : MeshModifier(parameters), ImageSampler(parameters)
 {
 }
 
@@ -46,8 +46,11 @@ ImageSubdomain::modify()
   // Reference the the libMesh::MeshBase
   MeshBase & mesh = _mesh_ptr->getMesh();
 
-  // Loop over the elements and sample the image at the element centroid and use the value for the subdomain id
-  for (MeshBase::element_iterator el = mesh.active_elements_begin(); el != mesh.active_elements_end(); ++el)
+  // Loop over the elements and sample the image at the element centroid and use the value for the
+  // subdomain id
+  for (MeshBase::element_iterator el = mesh.active_elements_begin();
+       el != mesh.active_elements_end();
+       ++el)
   {
     SubdomainID id = static_cast<SubdomainID>(round(sample((*el)->centroid())));
     (*el)->subdomain_id() = id;

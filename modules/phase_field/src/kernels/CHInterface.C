@@ -6,15 +6,14 @@
 /****************************************************************/
 #include "CHInterface.h"
 
-template<>
-InputParameters validParams<CHInterface>()
+template <>
+InputParameters
+validParams<CHInterface>()
 {
   InputParameters params = CHInterfaceBase<Real>::validParams();
-  params.addClassDescription("Gradient energy Cahn-Hilliard Kernel with a scalar (isotropic) mobility");
+  params.addClassDescription(
+      "Gradient energy Cahn-Hilliard Kernel with a scalar (isotropic) mobility");
   return params;
 }
 
-CHInterface::CHInterface(const InputParameters & parameters) :
-    CHInterfaceBase<Real>(parameters)
-{
-}
+CHInterface::CHInterface(const InputParameters & parameters) : CHInterfaceBase<Real>(parameters) {}

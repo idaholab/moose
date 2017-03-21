@@ -6,23 +6,24 @@
 /****************************************************************/
 #include "INSMassRZ.h"
 
-template<>
-InputParameters validParams<INSMassRZ>()
+template <>
+InputParameters
+validParams<INSMassRZ>()
 {
   InputParameters params = validParams<INSMass>();
-  params.addClassDescription("This class computes the mass equation residual and Jacobian contributions for the incompressible Navier-Stokes momentum equation in RZ coordinates.");
+  params.addClassDescription("This class computes the mass equation residual and Jacobian "
+                             "contributions for the incompressible Navier-Stokes momentum equation "
+                             "in RZ coordinates.");
   return params;
 }
 
-
-
-INSMassRZ::INSMassRZ(const InputParameters & parameters) :
-    INSMass(parameters),
-    _u_vel(coupledValue("u"))
+INSMassRZ::INSMassRZ(const InputParameters & parameters)
+  : INSMass(parameters), _u_vel(coupledValue("u"))
 {
 }
 
-Real INSMassRZ::computeQpResidual()
+Real
+INSMassRZ::computeQpResidual()
 {
   // Base class residual contribution
   Real res_base = INSMass::computeQpResidual();
@@ -36,10 +37,8 @@ Real INSMassRZ::computeQpResidual()
   return res_base;
 }
 
-
-
-
-Real INSMassRZ::computeQpOffDiagJacobian(unsigned jvar)
+Real
+INSMassRZ::computeQpOffDiagJacobian(unsigned jvar)
 {
   // Base class jacobian contribution
   Real jac_base = INSMass::computeQpOffDiagJacobian(jvar);

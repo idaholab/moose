@@ -7,8 +7,9 @@
 
 #include "StiffenedGasFluidProperties.h"
 
-template<>
-InputParameters validParams<StiffenedGasFluidProperties>()
+template <>
+InputParameters
+validParams<StiffenedGasFluidProperties>()
 {
   InputParameters params = validParams<SinglePhaseFluidProperties>();
 
@@ -24,8 +25,8 @@ InputParameters validParams<StiffenedGasFluidProperties>()
   return params;
 }
 
-StiffenedGasFluidProperties::StiffenedGasFluidProperties(const InputParameters & parameters) :
-    SinglePhaseFluidProperties(parameters),
+StiffenedGasFluidProperties::StiffenedGasFluidProperties(const InputParameters & parameters)
+  : SinglePhaseFluidProperties(parameters),
     _gamma(getParam<Real>("gamma")),
     _cv(getParam<Real>("cv")),
     _q(getParam<Real>("q")),
@@ -40,9 +41,7 @@ StiffenedGasFluidProperties::StiffenedGasFluidProperties(const InputParameters &
   _cp = _cv * _gamma;
 }
 
-StiffenedGasFluidProperties::~StiffenedGasFluidProperties()
-{
-}
+StiffenedGasFluidProperties::~StiffenedGasFluidProperties() {}
 
 Real
 StiffenedGasFluidProperties::pressure(Real v, Real u) const
@@ -59,32 +58,16 @@ StiffenedGasFluidProperties::temperature(Real v, Real u) const
 Real
 StiffenedGasFluidProperties::c(Real v, Real u) const
 {
-  return std::sqrt(_gamma * (this->pressure(v, u)  + _p_inf) * v);
+  return std::sqrt(_gamma * (this->pressure(v, u) + _p_inf) * v);
 }
 
-Real
-StiffenedGasFluidProperties::cp(Real, Real) const
-{
-  return _cp;
-}
+Real StiffenedGasFluidProperties::cp(Real, Real) const { return _cp; }
 
-Real
-StiffenedGasFluidProperties::cv(Real, Real) const
-{
-  return _cv;
-}
+Real StiffenedGasFluidProperties::cv(Real, Real) const { return _cv; }
 
-Real
-StiffenedGasFluidProperties::mu(Real, Real) const
-{
-  return _mu;
-}
+Real StiffenedGasFluidProperties::mu(Real, Real) const { return _mu; }
 
-Real
-StiffenedGasFluidProperties::k(Real, Real) const
-{
-  return _k;
-}
+Real StiffenedGasFluidProperties::k(Real, Real) const { return _k; }
 
 Real
 StiffenedGasFluidProperties::s(Real v, Real u) const
@@ -98,11 +81,12 @@ StiffenedGasFluidProperties::s(Real v, Real u) const
 }
 
 void
-StiffenedGasFluidProperties::dp_duv(Real v, Real u, Real & dp_dv, Real & dp_du, Real & dT_dv, Real & dT_du) const
+StiffenedGasFluidProperties::dp_duv(
+    Real v, Real u, Real & dp_dv, Real & dp_du, Real & dT_dv, Real & dT_du) const
 {
-  dp_dv = - (_gamma - 1) * (u - _q) / v / v;
+  dp_dv = -(_gamma - 1) * (u - _q) / v / v;
   dp_du = (_gamma - 1) / v;
-  dT_dv = - _p_inf / _cv;
+  dT_dv = -_p_inf / _cv;
   dT_du = 1 / _cv;
 }
 
@@ -116,22 +100,31 @@ StiffenedGasFluidProperties::rho_e_ps(Real pressure, Real entropy, Real & rho, R
 }
 
 void
-StiffenedGasFluidProperties::rho_e_dps(Real pressure, Real entropy, Real & rho, Real & drho_dp, Real & drho_ds, Real & e, Real & de_dp, Real & de_ds) const
+StiffenedGasFluidProperties::rho_e_dps(Real pressure,
+                                       Real entropy,
+                                       Real & rho,
+                                       Real & drho_dp,
+                                       Real & drho_ds,
+                                       Real & e,
+                                       Real & de_dp,
+                                       Real & de_ds) const
 {
   // compute rho(p, T(p,s)) and e(p, rho(p, T(p,s)))
   this->rho_e_ps(pressure, entropy, rho, e);
 
   // compute temperature
-  const Real aux = (entropy - _q_prime + _cv * std::log(std::pow(pressure + _p_inf, _gamma - 1))) / _cv;
+  const Real aux =
+      (entropy - _q_prime + _cv * std::log(std::pow(pressure + _p_inf, _gamma - 1))) / _cv;
   const Real T = std::pow(std::exp(aux), 1 / _gamma);
 
   // dT/dp
-  const Real dT_dp = 1.0 / _gamma * std::pow(std::exp(aux), 1.0 / _gamma - 1.0)
-    * std::exp(aux) / std::pow(pressure + _p_inf, _gamma - 1.0)
-    * (_gamma - 1.0) * std::pow(pressure + _p_inf, _gamma - 2.0);
+  const Real dT_dp = 1.0 / _gamma * std::pow(std::exp(aux), 1.0 / _gamma - 1.0) * std::exp(aux) /
+                     std::pow(pressure + _p_inf, _gamma - 1.0) * (_gamma - 1.0) *
+                     std::pow(pressure + _p_inf, _gamma - 2.0);
 
   // dT/ds
-  const Real dT_ds = 1.0 / _gamma * std::pow(std::exp(aux), 1.0 / _gamma - 1.0) * std::exp(aux) / _cv;
+  const Real dT_ds =
+      1.0 / _gamma * std::pow(std::exp(aux), 1.0 / _gamma - 1.0) * std::exp(aux) / _cv;
 
   // Drho/Dp = d/dp[rho(p, T(p,s))] = drho/dp + drho/dT * dT/dp
   Real drho_dp_partial, drho_dT;
@@ -162,7 +155,7 @@ StiffenedGasFluidProperties::beta(Real pressure, Real temperature) const
 
   Real rho, drho_dp, drho_dT;
   rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
-  return - drho_dT / rho;
+  return -drho_dT / rho;
 }
 
 void
@@ -175,17 +168,20 @@ StiffenedGasFluidProperties::rho_e(Real pressure, Real temperature, Real & rho, 
 Real
 StiffenedGasFluidProperties::rho(Real pressure, Real temperature) const
 {
-  mooseAssert(((_gamma - 1) * _cv * temperature) != 0.0, "Invalid gamma or cv or temperature detected!");
+  mooseAssert(((_gamma - 1) * _cv * temperature) != 0.0,
+              "Invalid gamma or cv or temperature detected!");
   return (pressure + _p_inf) / ((_gamma - 1) * _cv * temperature);
 }
 
 void
-StiffenedGasFluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
+StiffenedGasFluidProperties::rho_dpT(
+    Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  mooseAssert(((_gamma - 1) * _cv * temperature) != 0.0, "Invalid gamma or cv or temperature detected!");
+  mooseAssert(((_gamma - 1) * _cv * temperature) != 0.0,
+              "Invalid gamma or cv or temperature detected!");
   rho = (pressure + _p_inf) / ((_gamma - 1) * _cv * temperature);
   drho_dp = 1. / ((_gamma - 1) * _cv * temperature);
-  drho_dT = - (pressure + _p_inf) / ((_gamma - 1) * _cv * temperature * temperature);
+  drho_dT = -(pressure + _p_inf) / ((_gamma - 1) * _cv * temperature * temperature);
 }
 
 void
@@ -202,12 +198,13 @@ StiffenedGasFluidProperties::e(Real pressure, Real rho) const
 }
 
 void
-StiffenedGasFluidProperties::e_dprho(Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const
+StiffenedGasFluidProperties::e_dprho(
+    Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const
 {
   mooseAssert((_gamma - 1) * rho != 0., "Invalid gamma or density detected!");
   e = this->e(pressure, rho);
   de_dp = 1. / ((_gamma - 1) * rho);
-  de_drho = - (pressure + _gamma * _p_inf) / ((_gamma - 1) * rho * rho);
+  de_drho = -(pressure + _gamma * _p_inf) / ((_gamma - 1) * rho * rho);
 }
 
 Real
@@ -217,31 +214,31 @@ StiffenedGasFluidProperties::h(Real, Real temperature) const
 }
 
 void
-StiffenedGasFluidProperties::h_dpT(Real, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
+StiffenedGasFluidProperties::h_dpT(
+    Real, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   h = _gamma * _cv * temperature + _q;
   dh_dp = 0;
   dh_dT = _gamma * _cv;
 }
 
-
 Real
 StiffenedGasFluidProperties::p_from_h_s(Real h, Real s) const
 {
-  return std::pow((h - _q) / (_gamma * _cv), _gamma / (_gamma-1)) * std::exp((_q_prime - s) / ((_gamma - 1) * _cv)) - _p_inf;
+  return std::pow((h - _q) / (_gamma * _cv), _gamma / (_gamma - 1)) *
+             std::exp((_q_prime - s) / ((_gamma - 1) * _cv)) -
+         _p_inf;
 }
 
 Real
 StiffenedGasFluidProperties::dpdh_from_h_s(Real h, Real s) const
 {
-  return _gamma / (_gamma - 1.0) / (_gamma * _cv) * std::pow((h - _q) / (_gamma * _cv), 1.0 / (_gamma - 1.0)) * std::exp((_q_prime - s) / ((_gamma - 1.0) * _cv));
+  return _gamma / (_gamma - 1.0) / (_gamma * _cv) *
+         std::pow((h - _q) / (_gamma * _cv), 1.0 / (_gamma - 1.0)) *
+         std::exp((_q_prime - s) / ((_gamma - 1.0) * _cv));
 }
 
-Real
-StiffenedGasFluidProperties::gamma(Real, Real) const
-{
-  return _gamma;
-}
+Real StiffenedGasFluidProperties::gamma(Real, Real) const { return _gamma; }
 
 Real
 StiffenedGasFluidProperties::c2_from_p_rho(Real pressure, Real rho) const

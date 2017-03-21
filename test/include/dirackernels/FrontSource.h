@@ -20,10 +20,10 @@
 
 #include "TrackDiracFront.h"
 
-//Forward Declarations
+// Forward Declarations
 class FrontSource;
 
-template<>
+template <>
 InputParameters validParams<FrontSource>();
 
 /**
@@ -44,4 +44,4 @@ protected:
   const TrackDiracFront & _front_tracker;
 };
 
-#endif //FRONTSOURCE_H
+#endif // FRONTSOURCE_H

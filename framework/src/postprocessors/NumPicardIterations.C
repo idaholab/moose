@@ -17,16 +17,16 @@
 #include "Transient.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<NumPicardIterations>()
+template <>
+InputParameters
+validParams<NumPicardIterations>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-NumPicardIterations::NumPicardIterations(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
-    _transient_executioner(NULL)
+NumPicardIterations::NumPicardIterations(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters), _transient_executioner(NULL)
 {
 }
 
@@ -36,7 +36,8 @@ NumPicardIterations::initialize()
   _transient_executioner = dynamic_cast<Transient *>(_app.getExecutioner());
   if (!_transient_executioner)
   {
-    mooseError("The NumPicardIterations Postprocessor can only be used with a Transient Executioner");
+    mooseError(
+        "The NumPicardIterations Postprocessor can only be used with a Transient Executioner");
   }
 }
 
@@ -45,4 +46,3 @@ NumPicardIterations::getValue()
 {
   return _transient_executioner->numPicardIts();
 }
-

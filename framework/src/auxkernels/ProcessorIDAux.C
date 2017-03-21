@@ -14,17 +14,15 @@
 
 #include "ProcessorIDAux.h"
 
-template<>
-InputParameters validParams<ProcessorIDAux>()
+template <>
+InputParameters
+validParams<ProcessorIDAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   return params;
 }
 
-ProcessorIDAux::ProcessorIDAux(const InputParameters & parameters) :
-    AuxKernel(parameters)
-{
-}
+ProcessorIDAux::ProcessorIDAux(const InputParameters & parameters) : AuxKernel(parameters) {}
 
 Real
 ProcessorIDAux::computeValue()

@@ -15,24 +15,22 @@
 #include "BDF2.h"
 #include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<BDF2>()
+template <>
+InputParameters
+validParams<BDF2>()
 {
   InputParameters params = validParams<TimeIntegrator>();
 
   return params;
 }
 
-BDF2::BDF2(const InputParameters & parameters) :
-    TimeIntegrator(parameters),
-    _weight(declareRestartableData<std::vector<Real> >("weight"))
+BDF2::BDF2(const InputParameters & parameters)
+  : TimeIntegrator(parameters), _weight(declareRestartableData<std::vector<Real>>("weight"))
 {
   _weight.resize(3);
 }
 
-BDF2::~BDF2()
-{
-}
+BDF2::~BDF2() {}
 
 void
 BDF2::preStep()
@@ -40,7 +38,7 @@ BDF2::preStep()
   if (_t_step > 1)
   {
     Real sum = _dt + _dt_old;
-    _weight[0] =  1. + _dt / sum;
+    _weight[0] = 1. + _dt / sum;
     _weight[1] = -sum / _dt_old;
     _weight[2] = _dt * _dt / _dt_old / sum;
   }
@@ -51,7 +49,7 @@ BDF2::computeTimeDerivatives()
 {
   if (_t_step == 1)
   {
-    _u_dot  = *_solution;
+    _u_dot = *_solution;
     _u_dot -= _solution_old;
     _u_dot *= 1 / _dt;
     _u_dot.close();

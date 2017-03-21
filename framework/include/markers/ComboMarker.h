@@ -22,7 +22,7 @@ class ComboMarker;
 /**
  * Combines multiple marker fields.  The most conservative wins.
  */
-template<>
+template <>
 InputParameters validParams<ComboMarker>();
 
 class ComboMarker : public Marker

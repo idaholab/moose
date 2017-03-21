@@ -11,8 +11,9 @@
 
 #include "libmesh/string_to_enum.h"
 
-template<>
-InputParameters validParams<ContactPressureAux>()
+template <>
+InputParameters
+validParams<ContactPressureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
@@ -21,18 +22,17 @@ InputParameters validParams<ContactPressureAux>()
   return params;
 }
 
-ContactPressureAux::ContactPressureAux(const InputParameters & params) :
-    AuxKernel(params),
+ContactPressureAux::ContactPressureAux(const InputParameters & params)
+  : AuxKernel(params),
     _nodal_area(coupledValue("nodal_area")),
-    _penetration_locator(getPenetrationLocator(getParam<BoundaryName>("paired_boundary"),
-                         getParam<std::vector<BoundaryName> >("boundary")[0],
-                         Utility::string_to_enum<Order>(getParam<MooseEnum>("order"))))
+    _penetration_locator(
+        getPenetrationLocator(getParam<BoundaryName>("paired_boundary"),
+                              getParam<std::vector<BoundaryName>>("boundary")[0],
+                              Utility::string_to_enum<Order>(getParam<MooseEnum>("order"))))
 {
 }
 
-ContactPressureAux::~ContactPressureAux()
-{
-}
+ContactPressureAux::~ContactPressureAux() {}
 
 Real
 ContactPressureAux::computeValue()

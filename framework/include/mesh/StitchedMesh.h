@@ -21,7 +21,7 @@
 
 class StitchedMesh;
 
-template<>
+template <>
 InputParameters validParams<StitchedMesh>();
 
 /**

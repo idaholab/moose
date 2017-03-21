@@ -14,14 +14,12 @@
 
 #include "GeneralDamper.h"
 
-template<>
-InputParameters validParams<GeneralDamper>()
+template <>
+InputParameters
+validParams<GeneralDamper>()
 {
   InputParameters params = validParams<Damper>();
   return params;
 }
 
-GeneralDamper::GeneralDamper(const InputParameters & parameters) :
-    Damper(parameters)
-{
-}
+GeneralDamper::GeneralDamper(const InputParameters & parameters) : Damper(parameters) {}

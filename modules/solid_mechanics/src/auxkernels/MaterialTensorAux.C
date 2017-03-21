@@ -5,12 +5,12 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "MaterialTensorAux.h"
 #include "SymmTensor.h"
 
-template<>
-InputParameters validParams<MaterialTensorAux>()
+template <>
+InputParameters
+validParams<MaterialTensorAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params += validParams<MaterialTensorCalculator>();
@@ -19,8 +19,8 @@ InputParameters validParams<MaterialTensorAux>()
   return params;
 }
 
-MaterialTensorAux::MaterialTensorAux( const InputParameters & parameters) :
-    AuxKernel(parameters),
+MaterialTensorAux::MaterialTensorAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _material_tensor_calculator(parameters),
     _tensor(getMaterialProperty<SymmTensor>("tensor")),
     _has_qp_select(isParamValid("qp_select")),
@@ -49,8 +49,7 @@ MaterialTensorAux::computeValue()
   else
     qp_call = _qp;
 
-  Real value = _material_tensor_calculator.getTensorQuantity(_tensor[qp_call],
-                                                             _q_point[qp_call],
-                                                             direction);
+  Real value =
+      _material_tensor_calculator.getTensorQuantity(_tensor[qp_call], _q_point[qp_call], direction);
   return value;
 }

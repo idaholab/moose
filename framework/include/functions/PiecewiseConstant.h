@@ -20,7 +20,7 @@
 // Forward declarations
 class PiecewiseConstant;
 
-template<>
+template <>
 InputParameters validParams<PiecewiseConstant>();
 
 /**
@@ -53,12 +53,13 @@ public:
   virtual Real average() override;
 
 private:
-  enum DirectionEnum {
+  enum DirectionEnum
+  {
     LEFT = 0,
     RIGHT,
     UNDEFINED
   };
-  DirectionEnum getDirection( const std::string & direction );
+  DirectionEnum getDirection(const std::string & direction);
 
   const DirectionEnum _direction;
 };

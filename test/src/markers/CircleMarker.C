@@ -14,24 +14,27 @@
 
 #include "CircleMarker.h"
 
-template<>
-InputParameters validParams<CircleMarker>()
+template <>
+InputParameters
+validParams<CircleMarker>()
 {
   InputParameters params = validParams<Marker>();
   params.addRequiredParam<Point>("point", "The center of the circle.");
-  params.addRequiredParam<Real>("radius", "Distance from the center of the circle to mark elements");
+  params.addRequiredParam<Real>("radius",
+                                "Distance from the center of the circle to mark elements");
 
   MooseEnum marker_states = Marker::markerStates();
 
-  params.addRequiredParam<MooseEnum>("inside", marker_states, "How to mark elements inside the circle.");
-  params.addRequiredParam<MooseEnum>("outside", marker_states, "How to mark elements outside the circle.");
+  params.addRequiredParam<MooseEnum>(
+      "inside", marker_states, "How to mark elements inside the circle.");
+  params.addRequiredParam<MooseEnum>(
+      "outside", marker_states, "How to mark elements outside the circle.");
 
   return params;
 }
 
-
-CircleMarker::CircleMarker(const InputParameters & parameters) :
-    Marker(parameters),
+CircleMarker::CircleMarker(const InputParameters & parameters)
+  : Marker(parameters),
     _inside((MarkerValue)(int)parameters.get<MooseEnum>("inside")),
     _outside((MarkerValue)(int)parameters.get<MooseEnum>("outside")),
     _p(getParam<Point>("point")),
@@ -44,10 +47,8 @@ CircleMarker::computeElementMarker()
 {
   Point centroid = _current_elem->centroid();
 
-  if ((centroid-_p).size() < _r)
+  if ((centroid - _p).size() < _r)
     return _inside;
 
   return _outside;
 }
-
-

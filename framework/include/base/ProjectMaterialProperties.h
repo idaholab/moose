@@ -31,7 +31,8 @@ class ProjectMaterialProperties : public ThreadedElementLoop<ConstElemPointerRan
 {
 public:
   ProjectMaterialProperties(bool refine,
-                            FEProblemBase & fe_problem, NonlinearSystemBase & sys,
+                            FEProblemBase & fe_problem,
+                            NonlinearSystemBase & sys,
                             std::vector<std::shared_ptr<MaterialData>> & material_data,
                             std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
                             MaterialPropertyStorage & material_props,
@@ -63,4 +64,4 @@ protected:
   bool _need_internal_side_material;
 };
 
-#endif //PROJECTMATERIALPROPERTIES_H
+#endif // PROJECTMATERIALPROPERTIES_H

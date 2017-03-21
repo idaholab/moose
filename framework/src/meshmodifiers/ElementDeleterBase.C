@@ -17,16 +17,18 @@
 
 #include "libmesh/remote_elem.h"
 
-template<>
-InputParameters validParams<ElementDeleterBase>()
+template <>
+InputParameters
+validParams<ElementDeleterBase>()
 {
   InputParameters params = validParams<MeshModifier>();
   return params;
 }
 
-ElementDeleterBase::ElementDeleterBase(const InputParameters & parameters) :
-    MeshModifier(parameters)
-{}
+ElementDeleterBase::ElementDeleterBase(const InputParameters & parameters)
+  : MeshModifier(parameters)
+{
+}
 
 void
 ElementDeleterBase::modify()
@@ -53,7 +55,8 @@ ElementDeleterBase::modify()
    * Delete all of the elements
    *
    * TODO: We need to sort these not because they have to be deleted in a certain order in libMesh,
-   *       but because the order of deletion might impact what happens to any existing sidesets or nodesets.
+   *       but because the order of deletion might impact what happens to any existing sidesets or
+   * nodesets.
    */
   for (const auto & elem : deleteable_elems)
   {
@@ -69,8 +72,7 @@ ElementDeleterBase::modify()
       if (!neighbor || neighbor == remote_elem)
         continue;
 
-      const unsigned int return_side =
-        neighbor->which_neighbor_am_i(elem);
+      const unsigned int return_side = neighbor->which_neighbor_am_i(elem);
 
       if (neighbor->neighbor(return_side) == elem)
         neighbor->set_neighbor(return_side, nullptr);
@@ -87,69 +89,59 @@ ElementDeleterBase::modify()
    */
   if (!mesh.is_serial())
   {
-    const processor_id_type my_n_proc  = mesh.n_processors();
+    const processor_id_type my_n_proc = mesh.n_processors();
     const processor_id_type my_proc_id = mesh.processor_id();
-    typedef std::vector<std::pair<dof_id_type, unsigned int> > vec_type;
+    typedef std::vector<std::pair<dof_id_type, unsigned int>> vec_type;
     std::vector<vec_type> queries(my_n_proc);
 
     // Loop over the elements looking for those with remote neighbors.
     // The ghost_elements iterators in libMesh need to be updated
     // before we can use them safely here, so we'll test for
     // ghost-vs-local manually.
-    for (MeshBase::const_element_iterator
-           el  = mesh.elements_begin(),
-           end_el = mesh.elements_end();
-           el != end_el ; ++el)
+    for (MeshBase::const_element_iterator el = mesh.elements_begin(), end_el = mesh.elements_end();
+         el != end_el;
+         ++el)
     {
-      const Elem* elem = *el;
+      const Elem * elem = *el;
       const processor_id_type pid = elem->processor_id();
       if (pid == my_proc_id)
         continue;
 
       const unsigned int n_sides = elem->n_sides();
-      for (unsigned int n=0; n != n_sides; ++n)
+      for (unsigned int n = 0; n != n_sides; ++n)
         if (elem->neighbor(n) == remote_elem)
-          queries[pid].push_back
-            (std::make_pair(elem->id(), n));
+          queries[pid].push_back(std::make_pair(elem->id(), n));
     }
 
-    Parallel::MessageTag
-      queries_tag = mesh.comm().get_unique_tag(42),
-      replies_tag = mesh.comm().get_unique_tag(6*9);
+    Parallel::MessageTag queries_tag = mesh.comm().get_unique_tag(42),
+                         replies_tag = mesh.comm().get_unique_tag(6 * 9);
 
-    std::vector<Parallel::Request> query_requests(my_n_proc-1),
-                                   reply_requests(my_n_proc-1);
+    std::vector<Parallel::Request> query_requests(my_n_proc - 1), reply_requests(my_n_proc - 1);
 
     // Make all requests
-    for (processor_id_type p=0; p != my_n_proc; ++p)
+    for (processor_id_type p = 0; p != my_n_proc; ++p)
     {
       if (p == my_proc_id)
         continue;
 
-      Parallel::Request &request =
-        query_requests[p - (p > my_proc_id)];
+      Parallel::Request & request = query_requests[p - (p > my_proc_id)];
 
-      mesh.comm().send
-        (p, queries[p], request, queries_tag);
+      mesh.comm().send(p, queries[p], request, queries_tag);
     }
 
     // Reply to all requests
-    std::vector<vec_type> responses(my_n_proc-1);
+    std::vector<vec_type> responses(my_n_proc - 1);
 
-    for (processor_id_type p=1; p != my_n_proc; ++p)
+    for (processor_id_type p = 1; p != my_n_proc; ++p)
     {
       vec_type query;
 
-      Parallel::Status
-        status(mesh.comm().probe (Parallel::any_source, queries_tag));
-      const processor_id_type
-        source_pid = cast_int<processor_id_type>(status.source());
+      Parallel::Status status(mesh.comm().probe(Parallel::any_source, queries_tag));
+      const processor_id_type source_pid = cast_int<processor_id_type>(status.source());
 
-      mesh.comm().receive
-        (source_pid, query, queries_tag);
+      mesh.comm().receive(source_pid, query, queries_tag);
 
-      Parallel::Request &request =
-        reply_requests[p-1];
+      Parallel::Request & request = reply_requests[p - 1];
 
       for (const auto & q : query)
       {
@@ -158,25 +150,21 @@ ElementDeleterBase::modify()
         const Elem * neighbor = elem->neighbor(side);
 
         if (neighbor == nullptr) // neighboring element was deleted!
-          responses[p-1].push_back(std::make_pair(elem->id(), side));
+          responses[p - 1].push_back(std::make_pair(elem->id(), side));
       }
 
-      mesh.comm().send
-        (source_pid, responses[p-1], request, replies_tag);
+      mesh.comm().send(source_pid, responses[p - 1], request, replies_tag);
     }
 
     // Process all incoming replies
-    for (processor_id_type p=1; p != my_n_proc; ++p)
+    for (processor_id_type p = 1; p != my_n_proc; ++p)
     {
-      Parallel::Status status
-        (this->comm().probe (Parallel::any_source, replies_tag));
-      const processor_id_type
-        source_pid = cast_int<processor_id_type>(status.source());
+      Parallel::Status status(this->comm().probe(Parallel::any_source, replies_tag));
+      const processor_id_type source_pid = cast_int<processor_id_type>(status.source());
 
       vec_type response;
 
-      this->comm().receive
-        (source_pid, response, replies_tag);
+      this->comm().receive(source_pid, response, replies_tag);
 
       for (const auto & r : response)
       {
@@ -189,8 +177,8 @@ ElementDeleterBase::modify()
       }
     }
 
-    Parallel::wait (query_requests);
-    Parallel::wait (reply_requests);
+    Parallel::wait(query_requests);
+    Parallel::wait(reply_requests);
   }
 
   /**

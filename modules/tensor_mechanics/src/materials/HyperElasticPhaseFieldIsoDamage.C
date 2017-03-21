@@ -7,23 +7,26 @@
 #include "HyperElasticPhaseFieldIsoDamage.h"
 #include "libmesh/utility.h"
 
-template<>
-InputParameters validParams<HyperElasticPhaseFieldIsoDamage>()
+template <>
+InputParameters
+validParams<HyperElasticPhaseFieldIsoDamage>()
 {
   InputParameters params = validParams<FiniteStrainHyperElasticViscoPlastic>();
   params.addParam<bool>("numerical_stiffness", false, "Flag for numerical stiffness");
   params.addParam<Real>("damage_stiffness", 1e-8, "Avoid zero after complete damage");
   params.addParam<Real>("zero_tol", 1e-12, "Tolerance for numerical zero");
-  params.addParam<Real>("zero_perturb", 1e-8, "Perturbation value when strain value less than numerical zero");
+  params.addParam<Real>(
+      "zero_perturb", 1e-8, "Perturbation value when strain value less than numerical zero");
   params.addParam<Real>("perturbation_scale_factor", 1e-5, "Perturbation scale factor");
   params.addRequiredCoupledVar("c", "Damage variable");
-  params.addClassDescription("Computes damaged stress and energy in the intermediate configuration assuming isotropy");
+  params.addClassDescription(
+      "Computes damaged stress and energy in the intermediate configuration assuming isotropy");
 
   return params;
 }
 
-HyperElasticPhaseFieldIsoDamage::HyperElasticPhaseFieldIsoDamage(const InputParameters & parameters) :
-    FiniteStrainHyperElasticViscoPlastic(parameters),
+HyperElasticPhaseFieldIsoDamage::HyperElasticPhaseFieldIsoDamage(const InputParameters & parameters)
+  : FiniteStrainHyperElasticViscoPlastic(parameters),
     _num_stiffness(getParam<bool>("numerical_stiffness")),
     _kdamage(getParam<Real>("damage_stiffness")),
     _zero_tol(getParam<Real>("zero_tol")),
@@ -33,7 +36,8 @@ HyperElasticPhaseFieldIsoDamage::HyperElasticPhaseFieldIsoDamage(const InputPara
     _save_state(false),
     _G0(declareProperty<Real>(_base_name + "G0")),
     _dG0_dstrain(declareProperty<RankTwoTensor>(_base_name + "dG0_dstrain")),
-    _dstress_dc(declarePropertyDerivative<RankTwoTensor>(_base_name + "stress", getVar("c", 0)->name())),
+    _dstress_dc(
+        declarePropertyDerivative<RankTwoTensor>(_base_name + "stress", getVar("c", 0)->name())),
     _etens(LIBMESH_DIM)
 {
 }
@@ -73,7 +77,7 @@ HyperElasticPhaseFieldIsoDamage::computeDamageStress()
   Real mu = _elasticity_tensor[_qp](0, 1, 0, 1);
 
   Real c = _c[_qp];
-  Real xfac = Utility::pow<2>(1.0-c) + _kdamage;
+  Real xfac = Utility::pow<2>(1.0 - c) + _kdamage;
 
   std::vector<Real> w;
   RankTwoTensor evec;
@@ -86,8 +90,8 @@ HyperElasticPhaseFieldIsoDamage::computeDamageStress()
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     etr += w[i];
 
-  Real etrpos=(std::abs(etr)+etr)/2.0;
-  Real etrneg=(std::abs(etr)-etr)/2.0;
+  Real etrpos = (std::abs(etr) + etr) / 2.0;
+  Real etrneg = (std::abs(etr) - etr) / 2.0;
 
   RankTwoTensor pk2pos, pk2neg;
 
@@ -112,7 +116,7 @@ HyperElasticPhaseFieldIsoDamage::computeDamageStress()
     _G0[_qp] += lambda * Utility::pow<2>(etrpos) / 2.0;
 
     _dG0_dee = pk2pos;
-    _dpk2_dc = -pk2pos * (2.0 * (1.0-c));
+    _dpk2_dc = -pk2pos * (2.0 * (1.0 - c));
   }
 }
 

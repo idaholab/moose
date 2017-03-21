@@ -11,7 +11,7 @@
 
 class HEVPEqvPlasticStrain;
 
-template<>
+template <>
 InputParameters validParams<HEVPEqvPlasticStrain>();
 
 /**

@@ -15,17 +15,19 @@
 #include "AssignElementSubdomainID.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<AssignElementSubdomainID>()
+template <>
+InputParameters
+validParams<AssignElementSubdomainID>()
 {
   InputParameters params = validParams<MeshModifier>();
-  params.addRequiredParam<std::vector<SubdomainID> >("subdomain_ids", "New subdomain IDs of all elements");
-  params.addParam<std::vector<dof_id_type> >("element_ids", "New subdomain IDs of all elements");
+  params.addRequiredParam<std::vector<SubdomainID>>("subdomain_ids",
+                                                    "New subdomain IDs of all elements");
+  params.addParam<std::vector<dof_id_type>>("element_ids", "New subdomain IDs of all elements");
   return params;
 }
 
-AssignElementSubdomainID::AssignElementSubdomainID(const InputParameters & parameters) :
-    MeshModifier(parameters)
+AssignElementSubdomainID::AssignElementSubdomainID(const InputParameters & parameters)
+  : MeshModifier(parameters)
 {
 }
 
@@ -39,13 +41,13 @@ AssignElementSubdomainID::modify()
   // Reference the the libMesh::MeshBase
   MeshBase & mesh = _mesh_ptr->getMesh();
 
-  std::vector<SubdomainID> bids = getParam<std::vector<SubdomainID> >("subdomain_ids");
+  std::vector<SubdomainID> bids = getParam<std::vector<SubdomainID>>("subdomain_ids");
 
   // Generate a list of elements to which new subdomain IDs are to be assigned
   std::vector<Elem *> elements;
   if (isParamValid("element_ids"))
   {
-    std::vector<dof_id_type> elemids = getParam<std::vector<dof_id_type> >("element_ids");
+    std::vector<dof_id_type> elemids = getParam<std::vector<dof_id_type>>("element_ids");
     for (const auto & dof : elemids)
     {
       Elem * elem = mesh.query_elem_ptr(dof);
@@ -58,7 +60,7 @@ AssignElementSubdomainID::modify()
   else
   {
     bool has_warned_remapping = false;
-    MeshBase::const_element_iterator       el     = mesh.elements_begin();
+    MeshBase::const_element_iterator el = mesh.elements_begin();
     const MeshBase::const_element_iterator end_el = mesh.elements_end();
     for (dof_id_type e = 0; el != end_el; ++el, ++e)
     {
@@ -75,9 +77,10 @@ AssignElementSubdomainID::modify()
   if (bids.size() != elements.size())
     mooseError(" Size of subdomain_ids is not consistent with the number of elements");
 
-  // Assign new subdomain IDs and make sure elements in different types are not assigned with the same subdomain ID
-  std::map<ElemType, std::set<SubdomainID> > type2blocks;
-  for (dof_id_type e = 0; e<elements.size(); ++e)
+  // Assign new subdomain IDs and make sure elements in different types are not assigned with the
+  // same subdomain ID
+  std::map<ElemType, std::set<SubdomainID>> type2blocks;
+  for (dof_id_type e = 0; e < elements.size(); ++e)
   {
     Elem * elem = elements[e];
     ElemType type = elem->type();

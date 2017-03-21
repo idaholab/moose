@@ -21,13 +21,15 @@ class PiecewiseBilinear;
 class ColumnMajorMatrix;
 class BilinearInterpolation;
 
-template<>
+template <>
 InputParameters validParams<PiecewiseBilinear>();
 
 /**
  * PiecewiseBilinear reads from a file the information necessary to build the vectors x and y and
- * the ColumnMajorMatrix z, and then sends those (along with a sample point) to BilinearInterpolation.
- * See BilinearInterpolation in moose/src/utils for a description of how that works...it is a 2D linear
+ * the ColumnMajorMatrix z, and then sends those (along with a sample point) to
+ * BilinearInterpolation.
+ * See BilinearInterpolation in moose/src/utils for a description of how that works...it is a 2D
+ * linear
  * interpolation algorithm.  The format of the data file must be the following:
  *
  * 1,2
@@ -46,8 +48,10 @@ InputParameters validParams<PiecewiseBilinear>();
  *
  *     z has to be x.size() by y.size()
  *
- * PiecewisBilinear also sends samples to BilinearInterpolation.  These samples are the z-coordinate of the current
- * integration point, and the current value of time.  The name of the file that contains this data has to be included
+ * PiecewisBilinear also sends samples to BilinearInterpolation.  These samples are the z-coordinate
+ * of the current
+ * integration point, and the current value of time.  The name of the file that contains this data
+ * has to be included
  * in the function block of the inpute file like this...data_file = example.csv.
  */
 class PiecewiseBilinear : public Function
@@ -75,10 +79,7 @@ private:
   const Real _scale_factor;
   const bool _radial;
 
-
-  void parse( std::vector<Real> & x,
-              std::vector<Real> & y,
-              ColumnMajorMatrix & z);
+  void parse(std::vector<Real> & x, std::vector<Real> & y, ColumnMajorMatrix & z);
 };
 
-#endif //PIECEWISEBILINEAR_H
+#endif // PIECEWISEBILINEAR_H

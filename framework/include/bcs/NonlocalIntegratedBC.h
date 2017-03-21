@@ -19,14 +19,15 @@
 
 class NonlocalIntegratedBC;
 
-template<>
+template <>
 InputParameters validParams<NonlocalIntegratedBC>();
 
 /**
  * NonlocalIntegratedBC is used for solving integral terms in integro-differential equations.
  * Integro-differential equations includes spatial integral terms over variables in the domain.
  * In this case the jacobian calculation is not restricted to local dofs of an element, it requires
- * additional contributions from all the dofs in the domain. NonlocalIntegratedBC adds capability to consider
+ * additional contributions from all the dofs in the domain. NonlocalIntegratedBC adds capability to
+ * consider
  * nonlocal jacobians in addition to the local jacobians.
  */
 class NonlocalIntegratedBC : public IntegratedBC
@@ -58,7 +59,10 @@ public:
 protected:
   /// Compute this IntegratedBC's contribution to the Jacobian corresponding to nolocal dof at the current quadrature point
   virtual Real computeQpNonlocalJacobian(dof_id_type /*dof_index*/) { return 0; }
-  virtual Real computeQpNonlocalOffDiagJacobian(unsigned int /*jvar*/, dof_id_type /*dof_index*/) { return 0; }
+  virtual Real computeQpNonlocalOffDiagJacobian(unsigned int /*jvar*/, dof_id_type /*dof_index*/)
+  {
+    return 0;
+  }
 
   /// Optimization option for getting jocobinas from userobject once per dof
   virtual void getUserObjectJacobian(unsigned int /*jvar*/, dof_id_type /*dof_index*/) {}

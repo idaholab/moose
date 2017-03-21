@@ -12,10 +12,10 @@
 
 class CavityPressureAction;
 
-template<>
+template <>
 InputParameters validParams<CavityPressureAction>();
 
-class CavityPressureAction: public Action
+class CavityPressureAction : public Action
 {
 public:
   CavityPressureAction(const InputParameters & params);

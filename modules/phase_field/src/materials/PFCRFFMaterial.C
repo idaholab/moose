@@ -6,16 +6,18 @@
 /****************************************************************/
 #include "PFCRFFMaterial.h"
 
-template<>
-InputParameters validParams<PFCRFFMaterial>()
+template <>
+InputParameters
+validParams<PFCRFFMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addRequiredParam<unsigned int>("num_L", "specifies the number of complex L variables will be solved for");
+  params.addRequiredParam<unsigned int>(
+      "num_L", "specifies the number of complex L variables will be solved for");
   return params;
 }
 
-PFCRFFMaterial::PFCRFFMaterial(const InputParameters & parameters) :
-    Material(parameters),
+PFCRFFMaterial::PFCRFFMaterial(const InputParameters & parameters)
+  : Material(parameters),
     _M(declareProperty<Real>("M")),
     _alpha_R_0(declareProperty<Real>("alpha_R_0")),
     _alpha_I_0(declareProperty<Real>("alpha_I_0")),
@@ -51,49 +53,48 @@ PFCRFFMaterial::computeQpProperties()
   if (_num_L == 3)
   {
     // alpha constants
-    _alpha_R_0[_qp] =  2.352788316033853;
-    _alpha_I_0[_qp] =  0.0;
+    _alpha_R_0[_qp] = 2.352788316033853;
+    _alpha_I_0[_qp] = 0.0;
     _alpha_R_1[_qp] = -4.371217046300305;
-    _alpha_I_1[_qp] =  6.153993830413678;
+    _alpha_I_1[_qp] = 6.153993830413678;
     _alpha_R_2[_qp] = -4.371217046300305;
     _alpha_I_2[_qp] = -6.153993830413678;
 
     // A constants
-    _A_R_0[_qp] =  -1.254832460194660e2;
-    _A_I_0[_qp] =   4.141043034348927e-15;
-    _A_R_1[_qp] =  24.798843718179786;
-    _A_I_1[_qp] =  37.678064436502760;
-    _A_R_2[_qp] =  24.798843718179786;
+    _A_R_0[_qp] = -1.254832460194660e2;
+    _A_I_0[_qp] = 4.141043034348927e-15;
+    _A_R_1[_qp] = 24.798843718179786;
+    _A_I_1[_qp] = 37.678064436502760;
+    _A_R_2[_qp] = 24.798843718179786;
     _A_I_2[_qp] = -37.678064436502760;
   }
   else if (_num_L == 5)
   {
     // alpha constants
-    _alpha_R_0[_qp] =  2.429134088464706;
-    _alpha_I_0[_qp] =  0.0;
+    _alpha_R_0[_qp] = 2.429134088464706;
+    _alpha_I_0[_qp] = 0.0;
     _alpha_R_1[_qp] = -3.972333899872749;
-    _alpha_I_1[_qp] =  6.499130135847140;
+    _alpha_I_1[_qp] = 6.499130135847140;
     _alpha_R_2[_qp] = -3.972333899872749;
     _alpha_I_2[_qp] = -6.499130135847140;
     _alpha_R_3[_qp] = -18.943264072194637;
-    _alpha_I_3[_qp] =  9.349446845430961;
+    _alpha_I_3[_qp] = 9.349446845430961;
     _alpha_R_4[_qp] = -18.943264072194637;
     _alpha_I_4[_qp] = -9.349446845430961;
 
     // A constants
     _A_R_0[_qp] = -1.282478656880326e02;
-    _A_I_0[_qp] =  9.910190130869531e-15;
-    _A_R_1[_qp] =  34.212475550662354;
-    _A_I_1[_qp] =  42.274652746493430;
-    _A_R_2[_qp] =  34.212475550666770;
+    _A_I_0[_qp] = 9.910190130869531e-15;
+    _A_R_1[_qp] = 34.212475550662354;
+    _A_I_1[_qp] = 42.274652746493430;
+    _A_R_2[_qp] = 34.212475550666770;
     _A_I_2[_qp] = -42.274652746496530;
-    _A_R_3[_qp] =  10.501019149011636;
+    _A_R_3[_qp] = 10.501019149011636;
     _A_I_3[_qp] = -2.363585468012575;
-    _A_R_4[_qp] =  10.501019149026910;
-    _A_I_4[_qp] =  2.363585467971611;
+    _A_R_4[_qp] = 10.501019149026910;
+    _A_I_4[_qp] = 2.363585467971611;
   }
 }
-
 
 /*
   _alpha_R_0[_qp] =  2.412;

@@ -9,10 +9,10 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class KineticDisPreRateAux;
 
-template<>
+template <>
 InputParameters validParams<KineticDisPreRateAux>();
 
 /**
@@ -57,4 +57,4 @@ protected:
   std::vector<const VariableValue *> _vals;
 };
 
-#endif //KINETICDISPRERATEAUX_H
+#endif // KINETICDISPRERATEAUX_H

@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSStagnationTemperatureBC;
 
-template<>
+template <>
 InputParameters validParams<NSStagnationTemperatureBC>();
 
 /**

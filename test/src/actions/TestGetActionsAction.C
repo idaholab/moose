@@ -20,18 +20,17 @@
 
 #include <libmesh/parallel_implementation.h>
 
-template<>
-InputParameters validParams<TestGetActionsAction>()
+template <>
+InputParameters
+validParams<TestGetActionsAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addClassDescription("An action demonstrating how an action can interact with other actions");
+  params.addClassDescription(
+      "An action demonstrating how an action can interact with other actions");
   return params;
 }
 
-TestGetActionsAction::TestGetActionsAction(const InputParameters & params) :
-    Action(params)
-{
-}
+TestGetActionsAction::TestGetActionsAction(const InputParameters & params) : Action(params) {}
 
 void
 TestGetActionsAction::act()
@@ -43,7 +42,7 @@ TestGetActionsAction::act()
   for (auto i = beginIndex(actions); i < actions.size(); ++i)
   {
     if (i > 0)
-      if (actions[i]->name() < actions[i-1]->name())
+      if (actions[i]->name() < actions[i - 1]->name())
         mooseError("actions are not sorted properly");
     auto action = &_awh.getAction<AddMaterialAction>(actions[i]->name());
     if (actions[i] != action)
@@ -59,13 +58,17 @@ TestGetActionsAction::act()
       auto size = actions.size();
       comm.receive(pid, size);
       if (size != actions.size())
-        mooseError("error occurs during getting actions, sizes of actions on master and rank ", pid, " are different");
+        mooseError("error occurs during getting actions, sizes of actions on master and rank ",
+                   pid,
+                   " are different");
       for (auto i = beginIndex(actions); i < actions.size(); ++i)
       {
         std::string action_name;
         comm.receive(pid, action_name);
         if (action_name != actions[i]->name())
-          mooseError("error occurs during getting actions, action names are inconsistent on master and rank ", pid);
+          mooseError("error occurs during getting actions, action names are inconsistent on master "
+                     "and rank ",
+                     pid);
       }
     }
   }

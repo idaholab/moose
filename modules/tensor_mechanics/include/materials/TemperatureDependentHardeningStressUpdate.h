@@ -41,7 +41,7 @@ protected:
   Real _hf_fraction;
 };
 
-template<>
+template <>
 InputParameters validParams<TemperatureDependentHardeningStressUpdate>();
 
-#endif //TEMPERATUREDEPENDENTHARDENINGSTRESSUPDATE_H
+#endif // TEMPERATUREDEPENDENTHARDENINGSTRESSUPDATE_H

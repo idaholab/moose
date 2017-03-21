@@ -19,7 +19,7 @@
 
 class ValueThresholdMarker;
 
-template<>
+template <>
 InputParameters validParams<ValueThresholdMarker>();
 
 class ValueThresholdMarker : public QuadraturePointMarker

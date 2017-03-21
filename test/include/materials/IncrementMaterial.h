@@ -18,7 +18,7 @@
 
 class IncrementMaterial;
 
-template<>
+template <>
 InputParameters validParams<GenericConstantMaterial>();
 
 /**

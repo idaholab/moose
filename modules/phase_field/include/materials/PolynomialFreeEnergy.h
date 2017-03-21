@@ -7,14 +7,14 @@
 // Forward Declarations
 class PolynomialFreeEnergy;
 
-template<>
+template <>
 InputParameters validParams<PolynomialFreeEnergy>();
 
 /**
- * Derivative free energy material defining polynomial free energies for single component materials, with derivatives from ExpressionBuilder
+ * Derivative free energy material defining polynomial free energies for single component materials,
+ * with derivatives from ExpressionBuilder
  */
-class PolynomialFreeEnergy : public DerivativeParsedMaterialHelper,
-                             public ExpressionBuilder
+class PolynomialFreeEnergy : public DerivativeParsedMaterialHelper, public ExpressionBuilder
 {
 public:
   PolynomialFreeEnergy(const InputParameters & parameters);
@@ -33,4 +33,4 @@ protected:
   MooseEnum _order;
 };
 
-#endif //POLYNOMIALFREEENERGY_H
+#endif // POLYNOMIALFREEENERGY_H

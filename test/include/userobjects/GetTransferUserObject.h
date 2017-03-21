@@ -17,10 +17,10 @@
 
 #include "GeneralUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class GetTransferUserObject;
 
-template<>
+template <>
 InputParameters validParams<GetTransferUserObject>();
 
 class GetTransferUserObject : public GeneralUserObject

@@ -14,7 +14,7 @@
 
 class StateSimRunner;
 
-template<>
+template <>
 InputParameters validParams<StateSimRunner>();
 
 /**
@@ -27,10 +27,10 @@ public:
 
   virtual void initialize() override;
   virtual void execute() override;
-  virtual void finalize()override;
+  virtual void finalize() override;
 
   Real getValue() const;
-  //Real getValue() const { return 0; }
+  // Real getValue() const { return 0; }
 
 protected:
   std::string _model_path;

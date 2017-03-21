@@ -14,8 +14,9 @@
 
 #include "CoupledTimeDerivative.h"
 
-template<>
-InputParameters validParams<CoupledTimeDerivative>()
+template <>
+InputParameters
+validParams<CoupledTimeDerivative>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Time derivative Kernel that acts on a coupled variable");
@@ -23,11 +24,8 @@ InputParameters validParams<CoupledTimeDerivative>()
   return params;
 }
 
-CoupledTimeDerivative::CoupledTimeDerivative(const InputParameters & parameters) :
-    Kernel(parameters),
-    _v_dot(coupledDot("v")),
-    _dv_dot(coupledDotDu("v")),
-    _v_var(coupled("v"))
+CoupledTimeDerivative::CoupledTimeDerivative(const InputParameters & parameters)
+  : Kernel(parameters), _v_dot(coupledDot("v")), _dv_dot(coupledDotDu("v")), _v_var(coupled("v"))
 {
 }
 

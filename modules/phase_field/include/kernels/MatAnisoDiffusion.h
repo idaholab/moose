@@ -20,7 +20,7 @@ public:
   MatAnisoDiffusion(const InputParameters & parameters);
 };
 
-template<>
+template <>
 InputParameters validParams<MatAnisoDiffusion>();
 
-#endif //MATANISODIFFUSION_H
+#endif // MATANISODIFFUSION_H

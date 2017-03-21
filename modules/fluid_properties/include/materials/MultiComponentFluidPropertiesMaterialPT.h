@@ -13,7 +13,7 @@
 
 class MultiComponentFluidPropertiesMaterialPT;
 
-template<>
+template <>
 InputParameters validParams<MultiComponentFluidPropertiesMaterialPT>();
 
 /**

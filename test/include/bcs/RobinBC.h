@@ -17,10 +17,9 @@
 
 #include "IntegratedBC.h"
 
-
 class RobinBC;
 
-template<>
+template <>
 InputParameters validParams<RobinBC>();
 
 class RobinBC : public IntegratedBC
@@ -33,5 +32,4 @@ protected:
   virtual Real computeQpJacobian();
 };
 
-
-#endif //ROBINBC_H
+#endif // ROBINBC_H

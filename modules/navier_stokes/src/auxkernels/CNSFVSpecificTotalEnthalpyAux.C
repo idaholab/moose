@@ -7,8 +7,9 @@
 
 #include "CNSFVSpecificTotalEnthalpyAux.h"
 
-template<>
-InputParameters validParams<CNSFVSpecificTotalEnthalpyAux>()
+template <>
+InputParameters
+validParams<CNSFVSpecificTotalEnthalpyAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addClassDescription("An aux kernel for calculating specific total enthalpy.");
@@ -16,8 +17,7 @@ InputParameters validParams<CNSFVSpecificTotalEnthalpyAux>()
 }
 
 CNSFVSpecificTotalEnthalpyAux::CNSFVSpecificTotalEnthalpyAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
-    _enth(getMaterialProperty<Real>("enthalpy"))
+  : AuxKernel(parameters), _enth(getMaterialProperty<Real>("enthalpy"))
 {
 }
 

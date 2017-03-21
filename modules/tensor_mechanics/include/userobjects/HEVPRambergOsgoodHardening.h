@@ -11,7 +11,7 @@
 
 class HEVPRambergOsgoodHardening;
 
-template<>
+template <>
 InputParameters validParams<HEVPRambergOsgoodHardening>();
 
 /**

@@ -7,11 +7,13 @@
 #include "RndBoundingBoxIC.h"
 #include "MooseRandom.h"
 
-template<>
-InputParameters validParams<RndBoundingBoxIC>()
+template <>
+InputParameters
+validParams<RndBoundingBoxIC>()
 {
   InputParameters params = validParams<InitialCondition>();
-  params.addClassDescription("Random noise with different min/max inside/outside of a bounding box");
+  params.addClassDescription(
+      "Random noise with different min/max inside/outside of a bounding box");
 
   params.addRequiredParam<Real>("x1", "The x coordinate of the lower left-hand corner of the box");
   params.addRequiredParam<Real>("y1", "The y coordinate of the lower left-hand corner of the box");
@@ -29,8 +31,8 @@ InputParameters validParams<RndBoundingBoxIC>()
   return params;
 }
 
-RndBoundingBoxIC::RndBoundingBoxIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+RndBoundingBoxIC::RndBoundingBoxIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _x1(parameters.get<Real>("x1")),
     _y1(parameters.get<Real>("y1")),
     _z1(parameters.get<Real>("z1")),
@@ -53,7 +55,7 @@ RndBoundingBoxIC::RndBoundingBoxIC(const InputParameters & parameters) :
 Real
 RndBoundingBoxIC::value(const Point & p)
 {
-  //Random number between 0 and 1
+  // Random number between 0 and 1
   Real rand_num = MooseRandom::rand();
 
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)

@@ -48,4 +48,4 @@ protected:
   MaterialProperty<RankTwoTensor> & _curvature_increment;
 };
 
-#endif //COMPUTECOSSERATINCREMENTALSMALLSTRAIN_H
+#endif // COMPUTECOSSERATINCREMENTALSMALLSTRAIN_H

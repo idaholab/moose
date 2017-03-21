@@ -20,7 +20,8 @@
 #include <iterator>
 
 /**
- * This class produces produces a yaml dump of the InputFileParameters that is machine parsable by any YAML formatter.
+ * This class produces produces a yaml dump of the InputFileParameters that is machine parsable by
+ * any YAML formatter.
  */
 class YAMLFormatter : public SyntaxTree
 {
@@ -31,20 +32,26 @@ public:
   virtual std::string postscript() const override;
 
   virtual std::string preTraverse(short depth) const override;
-  virtual std::string printBlockOpen(const std::string &name, short depth, const std::string & doc) override;
-  virtual std::string printBlockClose(const std::string &name, short depth) const override;
-  virtual std::string printParams(const std::string &prefix, const std::string &fully_qualified_name, InputParameters &params, short depth, const std::string &search_string, bool &found) override;
+  virtual std::string
+  printBlockOpen(const std::string & name, short depth, const std::string & doc) override;
+  virtual std::string printBlockClose(const std::string & name, short depth) const override;
+  virtual std::string printParams(const std::string & prefix,
+                                  const std::string & fully_qualified_name,
+                                  InputParameters & params,
+                                  short depth,
+                                  const std::string & search_string,
+                                  bool & found) override;
 
 protected:
   bool _dump_mode;
-
 
   /**
    * Method for building an output string that accounts for specific types (e.g., Point)
    * @param output Reference to the output string
    * @param iter InputParameters iterator that is being output
    */
-  void buildOutputString(std::ostringstream & output, const std::iterator_traits<InputParameters::iterator>::value_type & p);
+  void buildOutputString(std::ostringstream & output,
+                         const std::iterator_traits<InputParameters::iterator>::value_type & p);
 };
 
 #endif /* YAMLFORMATTER_H */

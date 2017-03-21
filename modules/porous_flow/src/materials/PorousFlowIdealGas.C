@@ -7,8 +7,9 @@
 
 #include "PorousFlowIdealGas.h"
 
-template<>
-InputParameters validParams<PorousFlowIdealGas>()
+template <>
+InputParameters
+validParams<PorousFlowIdealGas>()
 {
   InputParameters params = validParams<PorousFlowFluidPropertiesBase>();
   params.addRequiredParam<Real>("molar_mass", "The molar mass of the Ideal gas (kg/mol)");
@@ -16,13 +17,24 @@ InputParameters validParams<PorousFlowIdealGas>()
   return params;
 }
 
-PorousFlowIdealGas::PorousFlowIdealGas(const InputParameters & parameters) :
-    PorousFlowFluidPropertiesBase(parameters),
+PorousFlowIdealGas::PorousFlowIdealGas(const InputParameters & parameters)
+  : PorousFlowFluidPropertiesBase(parameters),
 
     _molar_mass(getParam<Real>("molar_mass")),
-    _density(_nodal_material ? declareProperty<Real>("PorousFlow_fluid_phase_density_nodal" + _phase) : declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + _phase)),
-    _ddensity_dp(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" + _phase, _pressure_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase, _pressure_variable_name)),
-    _ddensity_dt(_nodal_material ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" + _phase, _temperature_variable_name) : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase, _temperature_variable_name))
+    _density(_nodal_material
+                 ? declareProperty<Real>("PorousFlow_fluid_phase_density_nodal" + _phase)
+                 : declareProperty<Real>("PorousFlow_fluid_phase_density_qp" + _phase)),
+    _ddensity_dp(_nodal_material
+                     ? declarePropertyDerivative<Real>(
+                           "PorousFlow_fluid_phase_density_nodal" + _phase, _pressure_variable_name)
+                     : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase,
+                                                       _pressure_variable_name)),
+    _ddensity_dt(
+        _nodal_material
+            ? declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" + _phase,
+                                              _temperature_variable_name)
+            : declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase,
+                                              _temperature_variable_name))
 {
 }
 
@@ -56,5 +68,5 @@ Real
 PorousFlowIdealGas::dDensity_dT(Real pressure, Real temperature, Real molar_mass) const
 {
   Real tk = temperature + _t_c2k;
-  return - pressure * molar_mass / (_R * tk * tk);
+  return -pressure * molar_mass / (_R * tk * tk);
 }

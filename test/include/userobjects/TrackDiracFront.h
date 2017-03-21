@@ -18,10 +18,10 @@
 #include "NodalUserObject.h"
 #include "libmesh/id_types.h"
 
-//Forward Declarations
+// Forward Declarations
 class TrackDiracFront;
 
-template<>
+template <>
 InputParameters validParams<TrackDiracFront>();
 
 /**
@@ -56,7 +56,7 @@ public:
   virtual void threadJoin(const UserObject & y);
   virtual void finalize();
 
-  const std::vector<std::pair<Elem *, Point> > & getDiracPoints() const { return _dirac_points; }
+  const std::vector<std::pair<Elem *, Point>> & getDiracPoints() const { return _dirac_points; }
 
 protected:
   /**
@@ -65,9 +65,9 @@ protected:
    */
   Elem * localElementConnectedToCurrentNode();
 
-  std::vector<std::pair<Elem *, Point> > _dirac_points;
+  std::vector<std::pair<Elem *, Point>> _dirac_points;
 
   const VariableValue & _var_value;
 };
 
-#endif //TRACKDIRACFRONT_H
+#endif // TRACKDIRACFRONT_H

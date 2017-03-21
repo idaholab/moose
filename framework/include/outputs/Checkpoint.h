@@ -26,7 +26,7 @@
 class Checkpoint;
 class MaterialPropertyStorage;
 
-template<>
+template <>
 InputParameters validParams<Checkpoint>();
 
 /**
@@ -50,7 +50,6 @@ struct CheckpointFileNames
 class Checkpoint : public BasicOutput<FileOutput>
 {
 public:
-
   /**
    * Class constructor
    * @param parameters
@@ -75,11 +74,9 @@ public:
   std::string directory();
 
 protected:
-
   void updateCheckpointFiles(CheckpointFileNames file_struct);
 
 private:
-
   /// Max no. of output files to store
   unsigned int _num_files;
 
@@ -111,4 +108,4 @@ private:
   std::deque<CheckpointFileNames> _file_names;
 };
 
-#endif //CHECKPOINT_H
+#endif // CHECKPOINT_H

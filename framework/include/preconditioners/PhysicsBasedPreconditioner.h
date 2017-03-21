@@ -29,28 +29,29 @@
 class NonlinearSystemBase;
 class PhysicsBasedPreconditioner;
 
-template<>
+template <>
 InputParameters validParams<PhysicsBasedPreconditioner>();
 
 /**
  * Implements a segregated solve preconditioner.
  */
-class PhysicsBasedPreconditioner :
-    public MoosePreconditioner,
-    public Preconditioner<Number>
+class PhysicsBasedPreconditioner : public MoosePreconditioner, public Preconditioner<Number>
 {
 public:
   /**
    *  Constructor. Initializes PhysicsBasedPreconditioner data structures
    */
-  PhysicsBasedPreconditioner (const InputParameters & params);
-  virtual ~PhysicsBasedPreconditioner ();
+  PhysicsBasedPreconditioner(const InputParameters & params);
+  virtual ~PhysicsBasedPreconditioner();
 
   /**
-   * Add a diagonal system + possibly off-diagonals ones as well, also specifying type of preconditioning
+   * Add a diagonal system + possibly off-diagonals ones as well, also specifying type of
+   * preconditioning
    */
   // FIXME: use better name
-  void addSystem(unsigned int var, std::vector<unsigned int> off_diag, PreconditionerType type = AMG_PRECOND);
+  void addSystem(unsigned int var,
+                 std::vector<unsigned int> off_diag,
+                 PreconditionerType type = AMG_PRECOND);
 
   /**
    * Computes the preconditioned vector "y" based on input "x".
@@ -87,7 +88,7 @@ protected:
   /// Which preconditioner to use for each solve.
   std::vector<PreconditionerType> _pre_type;
   /// Holds which off diagonal blocks to compute.
-  std::vector<std::vector<unsigned int> > _off_diag;
+  std::vector<std::vector<unsigned int>> _off_diag;
 
   /**
    * Holds pointers to the off-diagonal matrices.
@@ -96,7 +97,7 @@ protected:
    * This is really just for convenience so we don't have
    * to keep looking this thing up through it's name.
    */
-  std::vector<std::vector<SparseMatrix<Number> *> > _off_diag_mats;
+  std::vector<std::vector<SparseMatrix<Number> *>> _off_diag_mats;
 };
 
-#endif //PHYSICSBASEDPRECONDITIONER_H
+#endif // PHYSICSBASEDPRECONDITIONER_H

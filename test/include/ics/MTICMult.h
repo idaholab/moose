@@ -18,7 +18,7 @@
 
 class MTICMult;
 
-template<>
+template <>
 InputParameters validParams<MTICMult>();
 
 /**
@@ -36,6 +36,5 @@ protected:
   const VariableValue & _var1;
   Real _factor;
 };
-
 
 #endif /* MTICMULT_H */

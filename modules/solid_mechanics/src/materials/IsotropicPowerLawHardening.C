@@ -10,13 +10,15 @@
 
 /**
 * Isotropic power law hardening material model. Before yield, the stress is youngs modulus * strain.
-* After yielding, the stress is K* pow(strain, n) where K is the strength coefficient,  n is the strain
+* After yielding, the stress is K* pow(strain, n) where K is the strength coefficient,  n is the
+*strain
 * hardening exponent and strain is the total strain.
 * Yield stress is the point of intersection of these two curves.
 **/
 
-template<>
-InputParameters validParams<IsotropicPowerLawHardening>()
+template <>
+InputParameters
+validParams<IsotropicPowerLawHardening>()
 {
   InputParameters params = validParams<IsotropicPlasticity>();
 
@@ -28,30 +30,34 @@ InputParameters validParams<IsotropicPowerLawHardening>()
   params.suppressParameter<Real>("hardening_constant");
   params.suppressParameter<FunctionName>("hardening_function");
 
-  params.addRequiredParam<Real>("strength_coefficient", "The strength coefficient (K) for power law hardening");
-  params.addRequiredParam<Real>("strain_hardening_exponent", "The strain hardening exponent (n) for power law hardening");
+  params.addRequiredParam<Real>("strength_coefficient",
+                                "The strength coefficient (K) for power law hardening");
+  params.addRequiredParam<Real>("strain_hardening_exponent",
+                                "The strain hardening exponent (n) for power law hardening");
   return params;
 }
 
-
-IsotropicPowerLawHardening::IsotropicPowerLawHardening( const InputParameters & parameters)
-  :IsotropicPlasticity(parameters),
-  _K(parameters.get<Real>("strength_coefficient")),
-  _n(parameters.get<Real>("strain_hardening_exponent"))
+IsotropicPowerLawHardening::IsotropicPowerLawHardening(const InputParameters & parameters)
+  : IsotropicPlasticity(parameters),
+    _K(parameters.get<Real>("strength_coefficient")),
+    _n(parameters.get<Real>("strain_hardening_exponent"))
 {
 }
 
 void
 IsotropicPowerLawHardening::computeYieldStress(unsigned /*qp*/)
 {
-  _yield_stress = std::pow(_K/pow(_youngs_modulus, _n), 1.0/(1.0-_n));
+  _yield_stress = std::pow(_K / pow(_youngs_modulus, _n), 1.0 / (1.0 - _n));
 }
 
 void
-IsotropicPowerLawHardening::computeStressInitialize(unsigned qp, Real effectiveTrialStress, const SymmElasticityTensor & elasticityTensor)
+IsotropicPowerLawHardening::computeStressInitialize(unsigned qp,
+                                                    Real effectiveTrialStress,
+                                                    const SymmElasticityTensor & elasticityTensor)
 {
   _effectiveTrialStress = effectiveTrialStress;
-  const SymmIsotropicElasticityTensor * eT = dynamic_cast<const SymmIsotropicElasticityTensor*>(&elasticityTensor);
+  const SymmIsotropicElasticityTensor * eT =
+      dynamic_cast<const SymmIsotropicElasticityTensor *>(&elasticityTensor);
   if (!eT)
   {
     mooseError("IsotropicPowerLawHardening requires a SymmIsotropicElasticityTensor");
@@ -68,9 +74,10 @@ Real
 IsotropicPowerLawHardening::computeHardeningDerivative(unsigned /*qp*/, Real scalar)
 {
   Real stress = _effectiveTrialStress - 3.0 * _shear_modulus * scalar;
-  Real slope = std::pow(stress, 1.0/_n -1.0) / _n  * (1.0 / std::pow(_K, 1.0/_n)) - 1.0/_youngs_modulus;
+  Real slope = std::pow(stress, 1.0 / _n - 1.0) / _n * (1.0 / std::pow(_K, 1.0 / _n)) -
+               1.0 / _youngs_modulus;
 
-  slope = 1.0/slope;
+  slope = 1.0 / slope;
 
   return slope;
 }

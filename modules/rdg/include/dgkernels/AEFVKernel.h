@@ -13,7 +13,7 @@
 
 class AEFVKernel;
 
-template<>
+template <>
 InputParameters validParams<AEFVKernel>();
 
 /**
@@ -42,12 +42,10 @@ InputParameters validParams<AEFVKernel>();
 class AEFVKernel : public DGKernel
 {
 public:
-
   AEFVKernel(const InputParameters & parameters);
   virtual ~AEFVKernel();
 
 protected:
-
   virtual Real computeQpResidual(Moose::DGResidualType type);
   virtual Real computeQpJacobian(Moose::DGJacobianType type);
 
@@ -58,12 +56,12 @@ protected:
   // "2" denotes the "right" state
 
   /// piecewise constant variable values in cells
-  const VariableValue &  _uc1;
-  const VariableValue &  _uc2;
+  const VariableValue & _uc1;
+  const VariableValue & _uc2;
 
   /// extrapolated variable values at side center
-  const MaterialProperty<Real> &  _u1;
-  const MaterialProperty<Real> &  _u2;
+  const MaterialProperty<Real> & _u1;
+  const MaterialProperty<Real> & _u2;
 
   /// flux user object
   const InternalSideFluxBase & _flux;

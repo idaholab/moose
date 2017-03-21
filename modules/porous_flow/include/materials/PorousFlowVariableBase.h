@@ -13,7 +13,7 @@
 
 class PorousFlowVariableBase;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowVariableBase>();
 
 /**
@@ -70,4 +70,4 @@ protected:
   MaterialProperty<std::vector<std::vector<RealGradient>>> * const _dgrads_qp_dv;
 };
 
-#endif //POROUSFLOWVARIABLEBASE_H
+#endif // POROUSFLOWVARIABLEBASE_H

@@ -14,38 +14,48 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<GeneralizedPlaneStrainOffDiag>()
+template <>
+InputParameters
+validParams<GeneralizedPlaneStrainOffDiag>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Generalized Plane Strain kernel to provide contribution of the out-of-plane strain to other kernels");
-  params.addRequiredParam<std::vector<NonlinearVariableName> >("displacements", "Variable for the displacements");
+  params.addClassDescription("Generalized Plane Strain kernel to provide contribution of the "
+                             "out-of-plane strain to other kernels");
+  params.addRequiredParam<std::vector<NonlinearVariableName>>("displacements",
+                                                              "Variable for the displacements");
   params.addParam<NonlinearVariableName>("temperature", "Variable for the temperature");
-  params.addCoupledVar("scalar_out_of_plane_strain", "Scalar variable for generalized plane strain");
+  params.addCoupledVar("scalar_out_of_plane_strain",
+                       "Scalar variable for generalized plane strain");
   params.addParam<std::string>("base_name", "Material property base name");
-  params.addParam<std::vector<MaterialPropertyName>>("eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
 
   return params;
 }
 
-GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParameters & parameters) :
-   DerivativeMaterialInterface<Kernel>(parameters),
-   _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-   _Jacobian_mult(getMaterialProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
-   _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
-   _deigenstrain_dT(_eigenstrain_names.size()),
-   _scalar_out_of_plane_strain_var(coupledScalar("scalar_out_of_plane_strain")),
-   _temp_var(isParamValid("temperature") ? &_subproblem.getVariable(_tid, getParam<NonlinearVariableName>("temperature")) : NULL)
+GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Kernel>(parameters),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _Jacobian_mult(getMaterialProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
+    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
+    _deigenstrain_dT(_eigenstrain_names.size()),
+    _scalar_out_of_plane_strain_var(coupledScalar("scalar_out_of_plane_strain")),
+    _temp_var(isParamValid("temperature")
+                  ? &_subproblem.getVariable(_tid, getParam<NonlinearVariableName>("temperature"))
+                  : NULL)
 {
-  const std::vector<NonlinearVariableName> & nl_vnames(getParam<std::vector<NonlinearVariableName> >("displacements"));
+  const std::vector<NonlinearVariableName> & nl_vnames(
+      getParam<std::vector<NonlinearVariableName>>("displacements"));
   if (nl_vnames.size() > 2)
-    mooseError("GeneralizedPlaneStrainOffDiag only works for 1D axisymmetric or 2D Cartesian generalized plane strain cases!");
+    mooseError("GeneralizedPlaneStrainOffDiag only works for 1D axisymmetric or 2D Cartesian "
+               "generalized plane strain cases!");
 
   for (unsigned int i = 0; i < nl_vnames.size(); ++i)
     _disp_var.push_back(&_subproblem.getVariable(_tid, nl_vnames[i]));
 
   for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
-    _deigenstrain_dT[i] = &getMaterialPropertyDerivative<RankTwoTensor>(_base_name + _eigenstrain_names[i], _temp_var->name());
+    _deigenstrain_dT[i] = &getMaterialPropertyDerivative<RankTwoTensor>(
+        _base_name + _eigenstrain_names[i], _temp_var->name());
 }
 
 void
@@ -65,7 +75,8 @@ GeneralizedPlaneStrainOffDiag::computeOffDiagJacobianScalar(unsigned int jvar)
 }
 
 void
-GeneralizedPlaneStrainOffDiag::computeDispOffDiagJacobianScalar(unsigned int component, unsigned int jvar)
+GeneralizedPlaneStrainOffDiag::computeDispOffDiagJacobianScalar(unsigned int component,
+                                                                unsigned int jvar)
 {
   if (jvar == _scalar_out_of_plane_strain_var)
   {
@@ -77,8 +88,18 @@ GeneralizedPlaneStrainOffDiag::computeDispOffDiagJacobianScalar(unsigned int com
       for (_j = 0; _j < jv.order(); ++_j)
         for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
         {
-          ken(_i, _j) += _JxW[_qp] * _coord[_qp] * _Jacobian_mult[_qp](_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction, component, component) * _grad_test[_i][_qp](component);
-          kne(_j, _i) += _JxW[_qp] * _coord[_qp] * _Jacobian_mult[_qp](_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction, component, component) * _grad_test[_i][_qp](component);
+          ken(_i, _j) += _JxW[_qp] * _coord[_qp] *
+                         _Jacobian_mult[_qp](_scalar_out_of_plane_strain_direction,
+                                             _scalar_out_of_plane_strain_direction,
+                                             component,
+                                             component) *
+                         _grad_test[_i][_qp](component);
+          kne(_j, _i) += _JxW[_qp] * _coord[_qp] *
+                         _Jacobian_mult[_qp](_scalar_out_of_plane_strain_direction,
+                                             _scalar_out_of_plane_strain_direction,
+                                             component,
+                                             component) *
+                         _grad_test[_i][_qp](component);
         }
   }
 }
@@ -96,6 +117,10 @@ GeneralizedPlaneStrainOffDiag::computeTempOffDiagJacobianScalar(unsigned int jva
       for (_j = 0; _j < jv.order(); ++_j)
         for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
           for (unsigned int ies = 0; ies < n_eigenstrains; ++ies)
-            kne(_j, _i) += _JxW[_qp] * _coord[_qp] * (_Jacobian_mult[_qp] * (*_deigenstrain_dT[ies])[_qp])(_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction) * _test[_i][_qp];
+            kne(_j, _i) +=
+                _JxW[_qp] * _coord[_qp] *
+                (_Jacobian_mult[_qp] * (*_deigenstrain_dT[ies])[_qp])(
+                    _scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction) *
+                _test[_i][_qp];
   }
 }

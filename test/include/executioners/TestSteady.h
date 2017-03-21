@@ -18,7 +18,7 @@
 
 class TestSteady;
 
-template<>
+template <>
 InputParameters validParams<TestSteady>();
 
 /**
@@ -36,7 +36,6 @@ public:
   virtual void execute();
 
 private:
-
   /// The type of test that this object is to perform
   MooseEnum _test_type;
 

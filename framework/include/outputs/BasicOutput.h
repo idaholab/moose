@@ -27,16 +27,16 @@ class InputParameters;
  * Each output class (e.g., Exodus) should inherit from this base class. At a minimum, the pure
  * virtual methods for the various types of output must be defined in the child class.
  *
- * There are four possible base classes for this method: Output, PetscOutput, FileOutput, OversampleOutput that
+ * There are four possible base classes for this method: Output, PetscOutput, FileOutput,
+ * OversampleOutput that
  * are explicitly instatiated in the source file.
  *
  * @see Exodus Console CSV
  */
-template<class T>
+template <class T>
 class BasicOutput : public T
 {
 public:
-
   /**
    * Class constructor
    *
@@ -47,9 +47,7 @@ public:
    */
   BasicOutput(const InputParameters & parameters) : T(parameters) {}
 
-
 protected:
-
   /**
    * Overload to call the output() method at the correct time
    */

@@ -23,13 +23,12 @@
 // Forward Declarations
 class PointSamplerBase;
 
-template<>
+template <>
 InputParameters validParams<PointSamplerBase>();
 
-class PointSamplerBase :
-  public GeneralVectorPostprocessor,
-  public CoupleableMooseVariableDependencyIntermediateInterface,
-  protected SamplerBase
+class PointSamplerBase : public GeneralVectorPostprocessor,
+                         public CoupleableMooseVariableDependencyIntermediateInterface,
+                         protected SamplerBase
 {
 public:
   PointSamplerBase(const InputParameters & parameters);
@@ -42,10 +41,12 @@ public:
 
 protected:
   /**
-   * Find the local element that contains the point.  This will attempt to use a cached element to speed things up.
+   * Find the local element that contains the point.  This will attempt to use a cached element to
+   * speed things up.
    *
    * @param p The point in physical space
-   * @return The Elem containing the point or NULL if this processor doesn't contain an element that contains this point.
+   * @return The Elem containing the point or NULL if this processor doesn't contain an element that
+   * contains this point.
    */
   const Elem * getLocalElemContainingPoint(const Point & p);
 
@@ -59,7 +60,7 @@ protected:
   std::vector<Real> _ids;
 
   /// Vector of values per point
-  std::vector<std::vector<Real> > _point_values;
+  std::vector<std::vector<Real>> _point_values;
 
   /// Whether or not the Point was found on this processor (short because bool and char don't work with MPI wrappers)
   std::vector<short> _found_points;

@@ -40,7 +40,10 @@ public:
    * Returns the current nonlinear iteration number.  In libmesh, this is
    * updated during the nonlinear solve, so it should be up-to-date.
    */
-  virtual unsigned int getCurrentNonlinearIterationNumber() override { return _transient_sys.get_current_nonlinear_iteration_number(); }
+  virtual unsigned int getCurrentNonlinearIterationNumber() override
+  {
+    return _transient_sys.get_current_nonlinear_iteration_number();
+  }
 
   virtual void setupFiniteDifferencedPreconditioner() override;
 
@@ -52,11 +55,20 @@ public:
 
   virtual NumericVector<Number> & RHS() override { return *_transient_sys.rhs; }
 
-  virtual NonlinearSolver<Number> * nonlinearSolver() override { return _transient_sys.nonlinear_solver.get(); }
+  virtual NonlinearSolver<Number> * nonlinearSolver() override
+  {
+    return _transient_sys.nonlinear_solver.get();
+  }
 
-  virtual NumericVector<Number> & solutionOld() override { return *_transient_sys.old_local_solution; }
+  virtual NumericVector<Number> & solutionOld() override
+  {
+    return *_transient_sys.old_local_solution;
+  }
 
-  virtual NumericVector<Number> & solutionOlder() override { return *_transient_sys.older_local_solution; }
+  virtual NumericVector<Number> & solutionOlder() override
+  {
+    return *_transient_sys.older_local_solution;
+  }
 
   virtual TransientNonlinearImplicitSystem & sys() { return _transient_sys; }
 

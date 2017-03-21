@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumAdaptivityCycles;
 
-template<>
+template <>
 InputParameters validParams<NumAdaptivityCycles>();
 
 /**
@@ -37,4 +37,4 @@ public:
   virtual Real getValue() override;
 };
 
-#endif //NUMADAPTIVITYCYCLES_H
+#endif // NUMADAPTIVITYCYCLES_H

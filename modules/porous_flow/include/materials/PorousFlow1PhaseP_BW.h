@@ -11,10 +11,10 @@
 #include "PorousFlow1PhaseP.h"
 #include "PorousFlowBroadbridgeWhite.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlow1PhaseP_BW;
 
-template<>
+template <>
 InputParameters validParams<PorousFlow1PhaseP_BW>();
 
 /**
@@ -49,4 +49,4 @@ protected:
   const Real _las;
 };
 
-#endif //POROUSFLOW1PHASEP_BW_H
+#endif // POROUSFLOW1PHASEP_BW_H

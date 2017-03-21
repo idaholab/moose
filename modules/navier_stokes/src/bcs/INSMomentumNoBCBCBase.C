@@ -8,8 +8,9 @@
 #include "INSMomentumNoBCBCBase.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<INSMomentumNoBCBCBase>()
+template <>
+InputParameters
+validParams<INSMomentumNoBCBCBase>()
 {
   InputParameters params = validParams<IntegratedBC>();
 
@@ -24,16 +25,18 @@ InputParameters validParams<INSMomentumNoBCBCBase>()
   params.addRequiredParam<Real>("mu", "dynamic viscosity");
   params.addRequiredParam<Real>("rho", "density");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
-  params.addRequiredParam<unsigned>("component", "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
-  params.addParam<bool>("integrate_p_by_parts", true, "Allows simulations to be run with pressure BC if set to false");
+  params.addRequiredParam<unsigned>(
+      "component",
+      "0,1,2 depending on if we are solving the x,y,z component of the momentum equation");
+  params.addParam<bool>("integrate_p_by_parts",
+                        true,
+                        "Allows simulations to be run with pressure BC if set to false");
 
   return params;
 }
 
-
-
-INSMomentumNoBCBCBase::INSMomentumNoBCBCBase(const InputParameters & parameters) :
-    IntegratedBC(parameters),
+INSMomentumNoBCBCBase::INSMomentumNoBCBCBase(const InputParameters & parameters)
+  : IntegratedBC(parameters),
 
     // Coupled variables
     _u_vel(coupledValue("u")),

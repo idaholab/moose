@@ -13,7 +13,7 @@
 
 class PQPlasticModel;
 
-template<>
+template <>
 InputParameters validParams<PQPlasticModel>();
 
 /**
@@ -24,8 +24,7 @@ InputParameters validParams<PQPlasticModel>();
  * directions only depend on two parameters, p and q, that
  * are themselves functions of stress
  */
-class PQPlasticModel :
-  public ComputeStressBase
+class PQPlasticModel : public ComputeStressBase
 {
 public:
   PQPlasticModel(const InputParameters & parameters, unsigned num_yf, unsigned num_intnl);
@@ -65,8 +64,10 @@ protected:
   const Real _f_tol2;
 
   /// The type of tangent operator to return.  tangent operator = d(stress_rate)/d(strain_rate).
-  enum class TangentOperatorEnum {
-    elastic, nonlinear
+  enum class TangentOperatorEnum
+  {
+    elastic,
+    nonlinear
   } _tangent_operator_type;
 
   /**
@@ -89,13 +90,13 @@ protected:
   MaterialProperty<RankTwoTensor> & _plastic_strain_old;
 
   /// internal parameters.  intnl[0] = shear.  intnl[1] = tensile.
-  MaterialProperty<std::vector<Real> > & _intnl;
+  MaterialProperty<std::vector<Real>> & _intnl;
 
   /// old values of internal parameters
-  MaterialProperty<std::vector<Real> > & _intnl_old;
+  MaterialProperty<std::vector<Real>> & _intnl_old;
 
   /// yield functions
-  MaterialProperty<std::vector<Real> > & _yf;
+  MaterialProperty<std::vector<Real>> & _yf;
 
   /// Number of Newton-Raphson iterations used in the return-map
   MaterialProperty<Real> & _iter;
@@ -125,7 +126,7 @@ protected:
   std::vector<Real> _intnl_ok;
 
   /// _dintnl[i][j] = d(intnl[i])/d(variable j), where variable0=p and variable1=q
-  std::vector<std::vector<Real> > _dintnl;
+  std::vector<std::vector<Real>> _dintnl;
 
   /// elasticity tensor in p direction
   Real _Epp;
@@ -139,19 +140,13 @@ protected:
     std::vector<Real> df;
     std::vector<Real> df_di;
     std::vector<Real> dg;
-    std::vector<std::vector<Real> > d2g;
-    std::vector<std::vector<Real> > d2g_di;
+    std::vector<std::vector<Real>> d2g;
+    std::vector<std::vector<Real>> d2g_di;
 
-    f_and_derivs(): f_and_derivs(0, 0)
-    {}
+    f_and_derivs() : f_and_derivs(0, 0) {}
 
-    f_and_derivs(unsigned num_var, unsigned num_intnl):
-      f(0.0),
-      df(num_var),
-      df_di(num_intnl),
-      dg(num_var),
-      d2g(num_var),
-      d2g_di(num_var)
+    f_and_derivs(unsigned num_var, unsigned num_intnl)
+      : f(0.0), df(num_var), df_di(num_intnl), dg(num_var), d2g(num_var), d2g_di(num_var)
     {
       for (unsigned i = 0; i < num_var; ++i)
       {
@@ -160,10 +155,7 @@ protected:
       }
     }
 
-    bool operator < (const f_and_derivs & fd) const
-    {
-      return f < fd.f;
-    }
+    bool operator<(const f_and_derivs & fd) const { return f < fd.f; }
   };
 
   /**
@@ -206,7 +198,8 @@ protected:
 
   /**
    * Calculates _dp_dpt, _dp_dqt, etc for the (sub)strain increment
-   * @param elastic_only whether this was an elastic step: if so then the updates to _dp_dpt, etc are fairly trivial
+   * @param elastic_only whether this was an elastic step: if so then the updates to _dp_dpt, etc
+   * are fairly trivial
    * @param p_trial the trial value of p for this (sub)strain increment
    * @param q_trial the trial value of q for this (sub)strain increment
    * @param p the returned value of p for this (sub)strain increment
@@ -216,28 +209,49 @@ protected:
    * @param smoothed_q contains the yield function and derivatives evaluated at (p, q)
    * @param step_size size of this (sub)strain increment
    */
-  void dVardTrial(bool elastic_only, Real p_trial, Real q_trial, Real p, Real q, Real gaE, const std::vector<Real> & intnl, const f_and_derivs & smoothed_q, Real step_size);
+  void dVardTrial(bool elastic_only,
+                  Real p_trial,
+                  Real q_trial,
+                  Real p,
+                  Real q,
+                  Real gaE,
+                  const std::vector<Real> & intnl,
+                  const f_and_derivs & smoothed_q,
+                  Real step_size);
 
   /**
    * Performs a line-search to find (p, q)
-   * Upon entry, this assumes that _rhs contains the Newton-Raphson full step (ie nrStep should have been called)
+   * Upon entry, this assumes that _rhs contains the Newton-Raphson full step (ie nrStep should have
+   * been called)
    * Upon exit, _rhs will contain the updated _rhs values ready for the next Newton-Raphson step,
    * Also _all_q and _intnl will be calculated at the new (p, q)
    * @param res2 the residual-squared, both as an input and output
-   * @param gaE Upon input the value of gaE predicted from Newton Raphson.  Upon exit this will hold the value coming from the line-search
-   * @param p Upon input the value of p predicted from Newton Raphson.  Upon exit this will be p coming from the line-search
-   * @param q Upon input the value of q predicted from Newton Raphson.  Upon exit this will be q coming from the line-search
+   * @param gaE Upon input the value of gaE predicted from Newton Raphson.  Upon exit this will hold
+   * the value coming from the line-search
+   * @param p Upon input the value of p predicted from Newton Raphson.  Upon exit this will be p
+   * coming from the line-search
+   * @param q Upon input the value of q predicted from Newton Raphson.  Upon exit this will be q
+   * coming from the line-search
    * @param p_trial Trial value of p for this (sub)strain increment
    * @param q_trial Trial value of q for this (sub)strain increment
-   * @param smoothed_q Upon input, the value of the smoothed yield function and derivatives at the prior-to-Newton configuration.  Upon exit this is evaluated at the new (p, q, intnl)
+   * @param smoothed_q Upon input, the value of the smoothed yield function and derivatives at the
+   * prior-to-Newton configuration.  Upon exit this is evaluated at the new (p, q, intnl)
    * @param intnl_ok The value of _intnl from either the start of this (sub)strain increment
    */
-  int lineSearch(Real & res2, Real & gaE, Real & p, Real & q, Real p_trial, Real q_trial, f_and_derivs & smoothed_q, const std::vector<Real> & intnl_ok);
+  int lineSearch(Real & res2,
+                 Real & gaE,
+                 Real & p,
+                 Real & q,
+                 Real p_trial,
+                 Real q_trial,
+                 f_and_derivs & smoothed_q,
+                 const std::vector<Real> & intnl_ok);
 
   /**
    * Performs a Newton-Raphson step to attempt to zero _rhs
    * Upon return, _rhs will contain the solution.
-   * @param smoothed_q The value of the smoothed yield function and derivatives prior to this Newton-Raphson step
+   * @param smoothed_q The value of the smoothed yield function and derivatives prior to this
+   * Newton-Raphson step
    * @param p_trial The trial value of p for this (sub)strain increment
    * @param q_trial The trial value of q for this (sub)strain increment
    * @param p The current value of p during the Newton-Raphson process
@@ -256,27 +270,32 @@ protected:
    * @param p The current value of p during the Newton-Raphson process
    * @param q The current value of q during the Newton-Raphson process
    * @param gaE The current value of ga during the Newton-Raphson process
-   * @param smoothed_q Holds the current value of yield function and derivatives evaluated at (p, q, _intnl)
+   * @param smoothed_q Holds the current value of yield function and derivatives evaluated at (p, q,
+   * _intnl)
    */
-  Real calculateRHS(Real p_trial, Real q_trial, Real p, Real q, Real gaE, const f_and_derivs & smoothed_q);
+  Real calculateRHS(
+      Real p_trial, Real q_trial, Real p, Real q, Real gaE, const f_and_derivs & smoothed_q);
 
   /**
    * Derivative of -RHS with respect to the variables, placed
    * into an array ready for solving the linear system using
    * LAPACK gsev
-   * @param smoothed_q Holds the current value of yield function and derivatives evaluated at (p, q, _intnl)
+   * @param smoothed_q Holds the current value of yield function and derivatives evaluated at (p, q,
+   * _intnl)
    * @param dintnl The derivatives of the internal parameters wrt p and q
    * @param gaE The current value of ga during the Newton-Raphson process
    * @param jac The outputted derivatives
    */
-  void dnRHSdVar(const f_and_derivs & smoothed_q, const std::vector<std::vector<Real> > & dintnl, Real gaE, std::array<double, _num_rhs * _num_rhs> & jac) const;
+  void dnRHSdVar(const f_and_derivs & smoothed_q,
+                 const std::vector<std::vector<Real>> & dintnl,
+                 Real gaE,
+                 std::array<double, _num_rhs * _num_rhs> & jac) const;
 
   /**
    * Performs any necessary cleaning-up, then throw MooseException(message)
    * @param message The message to using in MooseException
    */
   virtual void errorHandler(const std::string & message);
-
 
   /// derivative of Variable with respect to trial variable (used in consistent-tangent-operator calculation)
   Real _dgaE_dpt;
@@ -316,7 +335,10 @@ protected:
    * @param intnl The internal parameters
    * @param[out] yf The yield function values
    */
-  virtual void yieldFunctionValues(Real p, Real q, const std::vector<Real> & intnl, std::vector<Real> & yf) const = 0;
+  virtual void yieldFunctionValues(Real p,
+                                   Real q,
+                                   const std::vector<Real> & intnl,
+                                   std::vector<Real> & yf) const = 0;
 
   /**
    * Completely fills all_q with correct values.  These values are:
@@ -331,7 +353,10 @@ protected:
    * @param intnl The internal parameters
    * @param[out] all_q All the desired quantities
    */
-  virtual void computeAllQ(Real p, Real q, const std::vector<Real> & intnl, std::vector<f_and_derivs> & all_q) const = 0;
+  virtual void computeAllQ(Real p,
+                           Real q,
+                           const std::vector<Real> & intnl,
+                           std::vector<f_and_derivs> & all_q) const = 0;
 
   /**
    * Derived classes may employ this function to record stuff or do
@@ -343,7 +368,11 @@ protected:
    * @param intnl_old Old value of the internal parameters.
    * @param yf The yield functions at (p_trial, q_trial, intnl_old)
    */
-  virtual void preReturnMap(Real p_trial, Real q_trial, const RankTwoTensor & stress_trial, const std::vector<Real> & intnl_old, const std::vector<Real> & yf);
+  virtual void preReturnMap(Real p_trial,
+                            Real q_trial,
+                            const RankTwoTensor & stress_trial,
+                            const std::vector<Real> & intnl_old,
+                            const std::vector<Real> & yf);
 
   /**
    * Sets (p, q, gaE, intnl) at "good guesses" of the solution to the Return-Map algorithm.
@@ -361,7 +390,13 @@ protected:
    * @param gaE[out] The "good guess" value of gaE.  Default = 0
    * @param intnl[out] The "good guess" value of the internal parameters
    */
-  virtual void initialiseVars(Real p_trial, Real q_trial, const std::vector<Real> & intnl_old, Real & p, Real & q, Real & gaE, std::vector<Real> & intnl) const;
+  virtual void initialiseVars(Real p_trial,
+                              Real q_trial,
+                              const std::vector<Real> & intnl_old,
+                              Real & p,
+                              Real & q,
+                              Real & gaE,
+                              std::vector<Real> & intnl) const;
 
   /**
    * Sets the internal parameters based on the trial values of
@@ -375,7 +410,12 @@ protected:
    * @param intnl_old Old value of internal parameters
    * @param intnl[out] The value of internal parameters to be set
    */
-  virtual void setIntnlValues(Real p_trial, Real q_trial, Real p, Real q, const std::vector<Real> & intnl_old, std::vector<Real> & intnl) const = 0;
+  virtual void setIntnlValues(Real p_trial,
+                              Real q_trial,
+                              Real p,
+                              Real q,
+                              const std::vector<Real> & intnl_old,
+                              std::vector<Real> & intnl) const = 0;
 
   /**
    * Sets the derivatives of internal parameters, based on the trial values of
@@ -387,9 +427,15 @@ protected:
    * @param p Current value of p
    * @param q Current value of q
    * @param intnl The current value of the internal parameters
-   * @param dintnl The derivatives dintnl[i][j] = d(intnl[i])/d(variable j), where variable0=p and variable1=q
+   * @param dintnl The derivatives dintnl[i][j] = d(intnl[i])/d(variable j), where variable0=p and
+   * variable1=q
    */
-  virtual void setIntnlDerivatives(Real p_trial, Real q_trial, Real p, Real q, const std::vector<Real> & intnl, std::vector<std::vector<Real> > & dintnl) const = 0;
+  virtual void setIntnlDerivatives(Real p_trial,
+                                   Real q_trial,
+                                   Real p,
+                                   Real q,
+                                   const std::vector<Real> & intnl,
+                                   std::vector<std::vector<Real>> & dintnl) const = 0;
 
   /**
    * Computes p and q, given stress.  Derived classes must
@@ -435,10 +481,17 @@ protected:
    * @param p_ok Returned value of p
    * @param q_ok Returned value of q
    * @param gaE Value of gaE induced by the return (gaE = gamma * Epp)
-   * @param smoothed_q Holds the current value of yield function and derivatives evaluated at (p_ok, q_ok, _intnl)
+   * @param smoothed_q Holds the current value of yield function and derivatives evaluated at (p_ok,
+   * q_ok, _intnl)
    * @param stress[out] The returned value of the stress tensor
    */
-  virtual void setStressAfterReturn(const RankTwoTensor & stress_trial, Real p_ok, Real q_ok, Real gaE, const std::vector<Real> & intnl, const f_and_derivs & smoothed_q, RankTwoTensor & stress) const;
+  virtual void setStressAfterReturn(const RankTwoTensor & stress_trial,
+                                    Real p_ok,
+                                    Real q_ok,
+                                    Real gaE,
+                                    const std::vector<Real> & intnl,
+                                    const f_and_derivs & smoothed_q,
+                                    RankTwoTensor & stress) const;
 
   /**
    * Calculates the consistent tangent operator.
@@ -456,7 +509,15 @@ protected:
    * @param smoothed_q contains the yield function and derivatives evaluated at (p, q)
    * @param[out] cto The consistent tangent operator
    */
-  virtual void consistentTangentOperator(const RankTwoTensor & stress_trial, Real p_trial, Real q_trial, const RankTwoTensor & stress, Real p, Real q, Real gaE, const f_and_derivs & smoothed_q, RankFourTensor & cto) const;
+  virtual void consistentTangentOperator(const RankTwoTensor & stress_trial,
+                                         Real p_trial,
+                                         Real q_trial,
+                                         const RankTwoTensor & stress,
+                                         Real p,
+                                         Real q,
+                                         Real gaE,
+                                         const f_and_derivs & smoothed_q,
+                                         RankFourTensor & cto) const;
 
   /**
    * d(p)/d(stress)
@@ -489,7 +550,6 @@ protected:
    * @return d2(q)/d(stress)/d(stress)
    */
   virtual RankFourTensor d2qdstress2(const RankTwoTensor & stress) const = 0;
-
 };
 
-#endif //PQPLASTICMODEL_H
+#endif // PQPLASTICMODEL_H

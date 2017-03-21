@@ -49,7 +49,6 @@ public:
   virtual void computeJacobianBlock(unsigned int jvar) override;
 };
 
-
 /**
  * Base class ("Veneer") that implements the actual mapping from 'jvar' in
  * into the _coupled_moose_vars array.
@@ -81,11 +80,9 @@ private:
   friend class JvarMapIntegratedBCInterface<T>;
 };
 
-
-template<class T>
-JvarMapInterfaceBase<T>::JvarMapInterfaceBase(const InputParameters & parameters) :
-    T(parameters),
-    _jvar_map(this->_fe_problem.getNonlinearSystemBase().nVariables(), -1)
+template <class T>
+JvarMapInterfaceBase<T>::JvarMapInterfaceBase(const InputParameters & parameters)
+  : T(parameters), _jvar_map(this->_fe_problem.getNonlinearSystemBase().nVariables(), -1)
 {
   auto nvar = this->_coupled_moose_vars.size();
 
@@ -103,32 +100,31 @@ JvarMapInterfaceBase<T>::JvarMapInterfaceBase(const InputParameters & parameters
   _jvar_map[this->_var.number()] = 0;
 }
 
-template<class T>
+template <class T>
 unsigned int
 JvarMapInterfaceBase<T>::mapJvarToCvar(unsigned int jvar)
 {
-  mooseAssert(jvar < _jvar_map.size(), "Calling mapJvarToCvar for an invalid Moose variable number. Maybe an AuxVariable?");
+  mooseAssert(jvar < _jvar_map.size(),
+              "Calling mapJvarToCvar for an invalid Moose variable number. Maybe an AuxVariable?");
   int cit = _jvar_map[jvar];
 
   mooseAssert(cit >= 0, "Calling mapJvarToCvar for a variable not coupled to this kernel.");
   return cit;
 }
 
-
-template<class T>
-JvarMapKernelInterface<T>::JvarMapKernelInterface(const InputParameters & parameters) :
-    JvarMapInterfaceBase<T>(parameters)
+template <class T>
+JvarMapKernelInterface<T>::JvarMapKernelInterface(const InputParameters & parameters)
+  : JvarMapInterfaceBase<T>(parameters)
 {
 }
 
-template<class T>
-JvarMapIntegratedBCInterface<T>::JvarMapIntegratedBCInterface(const InputParameters & parameters) :
-    JvarMapInterfaceBase<T>(parameters)
+template <class T>
+JvarMapIntegratedBCInterface<T>::JvarMapIntegratedBCInterface(const InputParameters & parameters)
+  : JvarMapInterfaceBase<T>(parameters)
 {
 }
 
-
-template<class T>
+template <class T>
 void
 JvarMapKernelInterface<T>::computeOffDiagJacobian(unsigned int jvar)
 {
@@ -140,7 +136,7 @@ JvarMapKernelInterface<T>::computeOffDiagJacobian(unsigned int jvar)
   T::computeOffDiagJacobian(jvar);
 }
 
-template<class T>
+template <class T>
 void
 JvarMapIntegratedBCInterface<T>::computeJacobianBlock(unsigned int jvar)
 {
@@ -152,4 +148,4 @@ JvarMapIntegratedBCInterface<T>::computeJacobianBlock(unsigned int jvar)
   T::computeJacobianBlock(jvar);
 }
 
-#endif //JVARMAPINTERFACE_H
+#endif // JVARMAPINTERFACE_H

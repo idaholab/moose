@@ -21,22 +21,20 @@
 #include "MaterialPropertyInterface.h"
 #include "MooseVariableBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementDamper;
 class SubProblem;
 class SystemBase;
 class MooseVariable;
 class Assembly;
 
-template<>
+template <>
 InputParameters validParams<ElementDamper>();
 
 /**
  * Base class for deriving element dampers
  */
-class ElementDamper :
-  public Damper,
-  protected MaterialPropertyInterface
+class ElementDamper : public Damper, protected MaterialPropertyInterface
 {
 public:
   ElementDamper(const InputParameters & parameters);
@@ -50,7 +48,6 @@ public:
    * Get the variable this damper is acting on
    */
   MooseVariable * getVariable() { return &_var; }
-
 
 protected:
   /**
@@ -71,14 +68,14 @@ protected:
   MooseVariable & _var;
 
   /// Current element
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
 
   /// Quadrature point index
   unsigned int _qp;
   /// Quadrature points
-  const MooseArray< Point > & _q_point;
+  const MooseArray<Point> & _q_point;
   /// Quadrature rule
-  QBase * & _qrule;
+  QBase *& _qrule;
   /// Transformed Jacobian weights
   const MooseArray<Real> & _JxW;
 
@@ -90,4 +87,4 @@ protected:
   const VariableGradient & _grad_u;
 };
 
-#endif //ELEMENTDAMPER_H
+#endif // ELEMENTDAMPER_H

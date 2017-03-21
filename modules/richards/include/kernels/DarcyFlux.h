@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef DARCYFLUX
 #define DARCYFLUX
 
@@ -14,7 +13,7 @@
 // Forward Declarations
 class DarcyFlux;
 
-template<>
+template <>
 InputParameters validParams<DarcyFlux>();
 
 /**
@@ -24,9 +23,7 @@ InputParameters validParams<DarcyFlux>();
 class DarcyFlux : public Kernel
 {
 public:
-
   DarcyFlux(const InputParameters & parameters);
-
 
 protected:
   virtual Real computeQpResidual();
@@ -40,7 +37,7 @@ protected:
   Real _fluid_viscosity;
 
   /// Material permeability
-  const MaterialProperty<RealTensorValue> &_permeability;
+  const MaterialProperty<RealTensorValue> & _permeability;
 };
 
-#endif //DARCYFLUX
+#endif // DARCYFLUX

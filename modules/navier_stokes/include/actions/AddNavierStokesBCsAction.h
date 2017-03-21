@@ -11,7 +11,7 @@
 
 class AddNavierStokesBCsAction;
 
-template<>
+template <>
 InputParameters validParams<AddNavierStokesBCsAction>();
 
 /**

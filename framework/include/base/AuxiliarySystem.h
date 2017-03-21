@@ -33,7 +33,8 @@ class AuxKernel;
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
 /**
@@ -55,7 +56,10 @@ public:
   virtual void jacobianSetup();
   virtual void updateActive(THREAD_ID tid);
 
-  virtual void addVariable(const std::string & var_name, const FEType & type, Real scale_factor, const std::set<SubdomainID> * const active_subdomains = NULL) override;
+  virtual void addVariable(const std::string & var_name,
+                           const FEType & type,
+                           Real scale_factor,
+                           const std::set<SubdomainID> * const active_subdomains = NULL) override;
 
   /**
    * Add a time integrator
@@ -63,7 +67,8 @@ public:
    * @param name The name of the integrator
    * @param parameters Integrator params
    */
-  void addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
+  void
+  addTimeIntegrator(const std::string & type, const std::string & name, InputParameters parameters);
 
   /**
    * Adds an auxiliary kernel
@@ -71,7 +76,8 @@ public:
    * @param name The name of the kernel
    * @param parameters Parameters for this kernel
    */
-  void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  void
+  addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
   /**
    * Adds a scalar kernel
@@ -79,12 +85,19 @@ public:
    * @param name The name of the kernel
    * @param parameters Kernel parameters
    */
-  void addScalarKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  void addScalarKernel(const std::string & kernel_name,
+                       const std::string & name,
+                       InputParameters parameters);
 
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) override;
-  virtual void reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
+  virtual void
+  reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
 
-  virtual const NumericVector<Number> * & currentSolution() override { _current_solution = _sys.current_local_solution.get(); return _current_solution; }
+  virtual const NumericVector<Number> *& currentSolution() override
+  {
+    _current_solution = _sys.current_local_solution.get();
+    return _current_solution;
+  }
 
   virtual NumericVector<Number> & solutionUDot() override;
 
@@ -114,12 +127,14 @@ public:
    *
    * @param vector_name The name of the vector.
    * @param project Whether or not to project this vector when doing mesh refinement.
-   *                If the vector is just going to be recomputed then there is no need to project it.
+   *                If the vector is just going to be recomputed then there is no need to project
+   * it.
    * @param type What type of parallel vector.  This is usually either PARALLEL or GHOSTED.
    *             GHOSTED is needed if you are going to be accessing off-processor entries.
    *             The ghosting pattern is the same as the solution vector.
    */
-  NumericVector<Number> & addVector(const std::string & vector_name, const bool project, const ParallelType type) override;
+  NumericVector<Number> &
+  addVector(const std::string & vector_name, const bool project, const ParallelType type) override;
 
   /**
    * Get the minimum quadrature order for evaluating elemental auxiliary variables
@@ -142,7 +157,10 @@ public:
 
   virtual System & system() override { return _sys; }
 
-  virtual NumericVector<Number> * solutionPreviousNewton() override { return _solution_previous_nl; }
+  virtual NumericVector<Number> * solutionPreviousNewton() override
+  {
+    return _solution_previous_nl;
+  }
 
   virtual void setPreviousNewtonSolution();
 
@@ -170,8 +188,8 @@ protected:
   bool _need_serialized_solution;
 
   // Variables
-  std::vector<std::map<std::string, MooseVariable *> > _nodal_vars;
-  std::vector<std::map<std::string, MooseVariable *> > _elem_vars;
+  std::vector<std::map<std::string, MooseVariable *>> _nodal_vars;
+  std::vector<std::map<std::string, MooseVariable *>> _elem_vars;
 
   // Storage for AuxScalarKernel objects
   ExecuteMooseObjectWarehouse<AuxScalarKernel> _aux_scalar_storage;

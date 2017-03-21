@@ -19,7 +19,7 @@
 
 class TimeSequenceStepperFailTest;
 
-template<>
+template <>
 InputParameters validParams<TimeSequenceStepperFailTest>();
 
 /**

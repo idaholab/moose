@@ -5,7 +5,7 @@
 
 class RandomMaterial;
 
-template<>
+template <>
 InputParameters validParams<RandomMaterial>();
 
 class RandomMaterial : public Material
@@ -19,4 +19,4 @@ protected:
   MaterialProperty<unsigned long> & _rand_long;
 };
 
-#endif //RANDOMMATERIAL_H
+#endif // RANDOMMATERIAL_H

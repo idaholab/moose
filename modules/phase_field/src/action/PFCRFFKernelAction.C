@@ -10,8 +10,9 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
-template<>
-InputParameters validParams<PFCRFFKernelAction>()
+template <>
+InputParameters
+validParams<PFCRFFKernelAction>()
 {
   InputParameters params = validParams<HHPFCRFFSplitKernelAction>();
   params.addParam<Real>("a", 1.0, "Parameter in the Taylor series expansion");
@@ -20,8 +21,8 @@ InputParameters validParams<PFCRFFKernelAction>()
   return params;
 }
 
-PFCRFFKernelAction::PFCRFFKernelAction(const InputParameters & params) :
-    HHPFCRFFSplitKernelAction(params)
+PFCRFFKernelAction::PFCRFFKernelAction(const InputParameters & params)
+  : HHPFCRFFSplitKernelAction(params)
 {
 }
 
@@ -42,7 +43,7 @@ PFCRFFKernelAction::act()
   // CHPFCRFF kernel
   poly_params = _factory.getValidParams("CHPFCRFF");
   poly_params.set<NonlinearVariableName>("variable") = _n_name;
-  poly_params.set<std::vector<VariableName> >("v") = real_v;
+  poly_params.set<std::vector<VariableName>>("v") = real_v;
   poly_params.applyParameters(parameters());
   _problem->addKernel("CHPFCRFF", "CH_bulk_n", poly_params);
 

@@ -14,21 +14,22 @@
 
 #include "MaterialRealVectorValueAux.h"
 
-template<>
-InputParameters validParams<MaterialRealVectorValueAux>()
+template <>
+InputParameters
+validParams<MaterialRealVectorValueAux>()
 {
-  InputParameters params = validParams<MaterialAuxBase<> >();
+  InputParameters params = validParams<MaterialAuxBase<>>();
   params.addParam<unsigned int>("component", 0, "The vector component to consider for this kernel");
 
   return params;
 }
 
-MaterialRealVectorValueAux::MaterialRealVectorValueAux(const InputParameters & parameters) :
-    MaterialAuxBase<RealVectorValue>(parameters),
-    _component(getParam<unsigned int>("component"))
+MaterialRealVectorValueAux::MaterialRealVectorValueAux(const InputParameters & parameters)
+  : MaterialAuxBase<RealVectorValue>(parameters), _component(getParam<unsigned int>("component"))
 {
   if (_component > LIBMESH_DIM)
-    mooseError("The component ", _component, " does not exist for ", LIBMESH_DIM, " dimensional problems");
+    mooseError(
+        "The component ", _component, " does not exist for ", LIBMESH_DIM, " dimensional problems");
 }
 
 Real

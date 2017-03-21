@@ -15,17 +15,17 @@
 #include "FunctionPresetBC.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<FunctionPresetBC>()
+template <>
+InputParameters
+validParams<FunctionPresetBC>()
 {
   InputParameters params = validParams<PresetNodalBC>();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   return params;
 }
 
-FunctionPresetBC::FunctionPresetBC(const InputParameters & parameters) :
-    PresetNodalBC(parameters),
-    _func(getFunction("function"))
+FunctionPresetBC::FunctionPresetBC(const InputParameters & parameters)
+  : PresetNodalBC(parameters), _func(getFunction("function"))
 {
 }
 
@@ -34,4 +34,3 @@ FunctionPresetBC::computeQpValue()
 {
   return _func.value(_t, *_current_node);
 }
-

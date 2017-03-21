@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSTemperature;
 
-template<>
+template <>
 InputParameters validParams<INSTemperature>();
 
 /**
@@ -24,7 +24,7 @@ class INSTemperature : public Kernel
 public:
   INSTemperature(const InputParameters & parameters);
 
-  virtual ~INSTemperature(){}
+  virtual ~INSTemperature() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -46,6 +46,5 @@ protected:
   Real _k;
   Real _cp;
 };
-
 
 #endif // INSTEMPERATURE_H

@@ -11,7 +11,7 @@
 
 class PhaseFieldApp;
 
-template<>
+template <>
 InputParameters validParams<PhaseFieldApp>();
 
 class PhaseFieldApp : public MooseApp

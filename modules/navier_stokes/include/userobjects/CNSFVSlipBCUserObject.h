@@ -13,7 +13,7 @@
 
 class CNSFVSlipBCUserObject;
 
-template<>
+template <>
 InputParameters validParams<CNSFVSlipBCUserObject>();
 
 /**
@@ -22,7 +22,6 @@ InputParameters validParams<CNSFVSlipBCUserObject>();
 class CNSFVSlipBCUserObject : public BCUserObject
 {
 public:
-
   CNSFVSlipBCUserObject(const InputParameters & parameters);
 
   virtual std::vector<Real> getGhostCellValue(unsigned int iside,
@@ -31,7 +30,6 @@ public:
                                               const RealVectorValue & dwave) const;
 
 protected:
-
   const SinglePhaseFluidProperties & _fp;
 };
 

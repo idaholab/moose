@@ -14,7 +14,7 @@
 // Forward Declarations
 class PorousFlowEnergyTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowEnergyTimeDerivative>();
 
 /**
@@ -105,4 +105,4 @@ protected:
   Real computeQpJac(unsigned int pvar) const;
 };
 
-#endif //POROUSFLOWENERGYTIMEDERIVATIVE_H
+#endif // POROUSFLOWENERGYTIMEDERIVATIVE_H

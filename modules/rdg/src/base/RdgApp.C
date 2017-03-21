@@ -25,15 +25,15 @@
 #include "AEFVUpwindInternalSideFlux.h"
 #include "AEFVFreeOutflowBoundaryFlux.h"
 
-template<>
-InputParameters validParams<RdgApp>()
+template <>
+InputParameters
+validParams<RdgApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-RdgApp::RdgApp(InputParameters parameters) :
-    MooseApp(parameters)
+RdgApp::RdgApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   RdgApp::registerObjects(_factory);
@@ -42,12 +42,14 @@ RdgApp::RdgApp(InputParameters parameters) :
   RdgApp::associateSyntax(_syntax, _action_factory);
 }
 
-RdgApp::~RdgApp()
-{
-}
+RdgApp::~RdgApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void RdgApp__registerApps() { RdgApp::registerApps(); }
+extern "C" void
+RdgApp__registerApps()
+{
+  RdgApp::registerApps();
+}
 void
 RdgApp::registerApps()
 {
@@ -55,7 +57,11 @@ RdgApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void RdgApp__registerObjects(Factory & factory) { RdgApp::registerObjects(factory); }
+extern "C" void
+RdgApp__registerObjects(Factory & factory)
+{
+  RdgApp::registerObjects(factory);
+}
 void
 RdgApp::registerObjects(Factory & factory)
 {
@@ -76,7 +82,11 @@ RdgApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void RdgApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { RdgApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+RdgApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  RdgApp::associateSyntax(syntax, action_factory);
+}
 void
 RdgApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {

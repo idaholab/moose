@@ -14,16 +14,15 @@
 
 #include "RobinBC.h"
 
-template<>
-InputParameters validParams<RobinBC>()
+template <>
+InputParameters
+validParams<RobinBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   return params;
 }
 
-RobinBC::RobinBC(const InputParameters & parameters) :
-    IntegratedBC(parameters)
-{}
+RobinBC::RobinBC(const InputParameters & parameters) : IntegratedBC(parameters) {}
 
 Real
 RobinBC::computeQpResidual()

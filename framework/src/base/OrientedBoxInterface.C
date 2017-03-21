@@ -17,21 +17,26 @@
 
 // libMesh incluces
 
-template<>
-InputParameters validParams<OrientedBoxInterface>()
+template <>
+InputParameters
+validParams<OrientedBoxInterface>()
 {
   InputParameters params = emptyInputParameters();
-  params.addRequiredParam<Point>("center", "The center (many people spell this 'center') of the box.");
+  params.addRequiredParam<Point>("center",
+                                 "The center (many people spell this 'center') of the box.");
   params.addRequiredParam<Real>("width", "The width of the box");
   params.addRequiredParam<Real>("length", "The length of the box");
   params.addRequiredParam<Real>("height", "The height of the box");
-  params.addRequiredParam<RealVectorValue>("width_direction", "The direction along which the width is oriented.");
-  params.addRequiredParam<RealVectorValue>("length_direction", "The direction along which the length is oriented (must be perpendicular to width_direction).");
+  params.addRequiredParam<RealVectorValue>("width_direction",
+                                           "The direction along which the width is oriented.");
+  params.addRequiredParam<RealVectorValue>("length_direction",
+                                           "The direction along which the length is oriented (must "
+                                           "be perpendicular to width_direction).");
   return params;
 }
 
-OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters) :
-    _center(parameters.get<Point>("center"))
+OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters)
+  : _center(parameters.get<Point>("center"))
 {
   const std::string & name = parameters.get<std::string>("_object_name");
 
@@ -67,12 +72,11 @@ OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters) :
     mooseError("Length of length_direction vector is zero in ", name);
   l /= len;
 
-  if (w*l > 1E-10)
+  if (w * l > 1E-10)
     mooseError("width_direction and length_direction are not perpendicular in ", name);
 
   // The rotation matrix!
   _rot_matrix = new RealTensorValue(w, l, w.cross(l));
-
 }
 
 OrientedBoxInterface::~OrientedBoxInterface()

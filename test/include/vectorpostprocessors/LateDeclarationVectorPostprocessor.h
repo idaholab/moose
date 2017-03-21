@@ -17,10 +17,10 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class LateDeclarationVectorPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<LateDeclarationVectorPostprocessor>();
 
 class LateDeclarationVectorPostprocessor : public GeneralVectorPostprocessor

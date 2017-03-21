@@ -17,17 +17,15 @@
 #include "MooseTypes.h"
 #include "MooseUtils.h"
 
-template<>
-InputParameters validParams<AddICAction>()
+template <>
+InputParameters
+validParams<AddICAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   return params;
 }
 
-AddICAction::AddICAction(InputParameters params) :
-    MooseObjectAction(params)
-{
-}
+AddICAction::AddICAction(InputParameters params) : MooseObjectAction(params) {}
 
 void
 AddICAction::act()
@@ -36,7 +34,7 @@ AddICAction::act()
   MooseUtils::tokenize<std::string>(getParam<std::string>("parser_syntax"), elements);
 
   // The variable name will be the second to last element in the path name
-  std::string & var_name = elements[elements.size()-2];
+  std::string & var_name = elements[elements.size() - 2];
   _moose_object_pars.set<VariableName>("variable") = var_name;
   _problem->addInitialCondition(_type, var_name, _moose_object_pars);
 }

@@ -7,11 +7,13 @@
 
 #include "AEFVBC.h"
 
-template<>
-InputParameters validParams<AEFVBC>()
+template <>
+InputParameters
+validParams<AEFVBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
-  params.addClassDescription("A boundary condition kernel for the advection equation using a cell-centered finite volume method.");
+  params.addClassDescription("A boundary condition kernel for the advection equation using a "
+                             "cell-centered finite volume method.");
   MooseEnum component("concentration");
   params.addParam<MooseEnum>("component", component, "Choose one of the equations");
   params.addRequiredCoupledVar("u", "Name of the variable to use");
@@ -19,8 +21,8 @@ InputParameters validParams<AEFVBC>()
   return params;
 }
 
-AEFVBC::AEFVBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
+AEFVBC::AEFVBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _component(getParam<MooseEnum>("component")),
     _uc1(coupledValue("u")),
     _u1(getMaterialProperty<Real>("u")),

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSSEFFPRIMEAUX_H
 #define RICHARDSSEFFPRIMEAUX_H
 
@@ -13,16 +12,16 @@
 
 #include "RichardsSeff.h"
 
-//Forward Declarations
+// Forward Declarations
 class RichardsSeffPrimeAux;
 
-template<>
+template <>
 InputParameters validParams<RichardsSeffPrimeAux>();
 
 /**
  * Calculates derivative of effective saturation wrt a specified porepressure
  */
-class RichardsSeffPrimeAux: public AuxKernel
+class RichardsSeffPrimeAux : public AuxKernel
 {
 public:
   RichardsSeffPrimeAux(const InputParameters & parameters);

@@ -5,23 +5,21 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef BODYFORCEVOID_H
 #define BODYFORCEVOID_H
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class BodyForceVoid;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<BodyForceVoid>();
 
 class BodyForceVoid : public Kernel
 {
 public:
-
   BodyForceVoid(const InputParameters & parameters);
 
 protected:

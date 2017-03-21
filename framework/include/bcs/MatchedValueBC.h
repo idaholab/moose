@@ -17,10 +17,10 @@
 
 #include "NodalBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class MatchedValueBC;
 
-template<>
+template <>
 InputParameters validParams<MatchedValueBC>();
 
 /**
@@ -41,4 +41,4 @@ protected:
   unsigned int _v_num;
 };
 
-#endif //MATCHEDVALUEBC_H
+#endif // MATCHEDVALUEBC_H

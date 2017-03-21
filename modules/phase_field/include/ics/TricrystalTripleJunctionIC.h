@@ -12,7 +12,7 @@
 // Forward Declarations
 class TricrystalTripleJunctionIC;
 
-template<>
+template <>
 InputParameters validParams<TricrystalTripleJunctionIC>();
 
 /**
@@ -51,4 +51,4 @@ protected:
   Real _tan_theta2;
 };
 
-#endif //TRICRYSTALTRIPLEJUNCTIONIC_H
+#endif // TRICRYSTALTRIPLEJUNCTIONIC_H

@@ -12,7 +12,7 @@
 
 class PorousFlowEnthalpy;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowEnthalpy>();
 
 /**

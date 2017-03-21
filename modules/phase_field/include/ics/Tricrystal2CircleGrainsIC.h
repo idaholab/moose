@@ -12,7 +12,7 @@
 // Forward Declarations
 class Tricrystal2CircleGrainsIC;
 
-template<>
+template <>
 InputParameters validParams<Tricrystal2CircleGrainsIC>();
 
 /**
@@ -36,4 +36,4 @@ protected:
   Point _range;
 };
 
-#endif //TRICRYSTAL2CIRCLEGRAINSIC_H
+#endif // TRICRYSTAL2CIRCLEGRAINSIC_H

@@ -7,22 +7,20 @@
 
 #include "PorousFlowSumQuantity.h"
 
-template<>
-InputParameters validParams<PorousFlowSumQuantity>()
+template <>
+InputParameters
+validParams<PorousFlowSumQuantity>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   return params;
 }
 
-PorousFlowSumQuantity::PorousFlowSumQuantity(const InputParameters & parameters) :
-    GeneralUserObject(parameters),
-    _total(0.0)
+PorousFlowSumQuantity::PorousFlowSumQuantity(const InputParameters & parameters)
+  : GeneralUserObject(parameters), _total(0.0)
 {
 }
 
-PorousFlowSumQuantity::~PorousFlowSumQuantity()
-{
-}
+PorousFlowSumQuantity::~PorousFlowSumQuantity() {}
 
 void
 PorousFlowSumQuantity::zero()
@@ -57,4 +55,3 @@ PorousFlowSumQuantity::getValue() const
 {
   return _total;
 }
-

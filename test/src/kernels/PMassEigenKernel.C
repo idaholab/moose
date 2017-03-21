@@ -13,17 +13,17 @@
 /****************************************************************/
 #include "PMassEigenKernel.h"
 
-template<>
-InputParameters validParams<PMassEigenKernel>()
+template <>
+InputParameters
+validParams<PMassEigenKernel>()
 {
   InputParameters params = validParams<EigenKernel>();
   params.addRangeCheckedParam<Real>("p", 2.0, "p>=1.0", "The exponent p");
   return params;
 }
 
-PMassEigenKernel::PMassEigenKernel(const InputParameters & parameters) :
-    EigenKernel(parameters),
-    _p(getParam<Real>("p")-2.0)
+PMassEigenKernel::PMassEigenKernel(const InputParameters & parameters)
+  : EigenKernel(parameters), _p(getParam<Real>("p") - 2.0)
 {
 }
 
@@ -36,6 +36,6 @@ PMassEigenKernel::computeQpResidual()
 Real
 PMassEigenKernel::computeQpJacobian()
 {
-  //Note: this jacobian evaluation is not exact when p!=2.
+  // Note: this jacobian evaluation is not exact when p!=2.
   return -std::pow(std::fabs(_phi[_j][_qp]), _p) * _phi[_j][_qp] * _test[_i][_qp];
 }

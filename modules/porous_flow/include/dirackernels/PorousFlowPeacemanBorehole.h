@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWPEACEMANBOREHOLE_H
 #define POROUSFLOWPEACEMANBOREHOLE_H
 
@@ -13,7 +12,7 @@
 
 class PorousFlowPeacemanBorehole;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPeacemanBorehole>();
 
 /**
@@ -22,7 +21,6 @@ InputParameters validParams<PorousFlowPeacemanBorehole>();
 class PorousFlowPeacemanBorehole : public PorousFlowLineSink
 {
 public:
-
   /**
    * Creates a new PorousFlowPeacemanBorehole
    * This reads the file containing the lines of the form
@@ -35,12 +33,13 @@ public:
 
 protected:
   /**
-   * If positive then the borehole acts as a sink (producion well) for porepressure > borehole pressure, and does nothing otherwise
-   * If negative then the borehole acts as a source (injection well) for porepressure < borehole pressure, and does nothing otherwise
+   * If positive then the borehole acts as a sink (producion well) for porepressure > borehole
+   * pressure, and does nothing otherwise
+   * If negative then the borehole acts as a source (injection well) for porepressure < borehole
+   * pressure, and does nothing otherwise
    * The flow rate to/from the borehole is multiplied by |character|, so usually character = +/- 1
    */
   Function & _character;
-
 
   /// bottomhole pressure of borehole
   const Real _p_bot;
@@ -71,13 +70,20 @@ protected:
 
   /**
    * Calculates Peaceman's form of the borehole well constant
-   * Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and Modeling, 3 (2008) 375-388
+   * Z Chen, Y Zhang, Well flow models for various numerical methods, Int J Num Analysis and
+   * Modeling, 3 (2008) 375-388
    */
-  Real wellConstant(const RealTensorValue & perm, const RealTensorValue & rot, const Real & half_len, const Elem * ele, const Real & rad) const;
+  Real wellConstant(const RealTensorValue & perm,
+                    const RealTensorValue & rot,
+                    const Real & half_len,
+                    const Elem * ele,
+                    const Real & rad) const;
 
   Real computeQpBaseOutflow(unsigned current_dirac_ptid) const override;
-  void computeQpBaseOutflowJacobian(unsigned jvar, unsigned current_dirac_ptid, Real & outflow, Real & outflowp) const override;
-
+  void computeQpBaseOutflowJacobian(unsigned jvar,
+                                    unsigned current_dirac_ptid,
+                                    Real & outflow,
+                                    Real & outflowp) const override;
 };
 
-#endif //POROUSFLOWPEACEMANBOREHOLE_H
+#endif // POROUSFLOWPEACEMANBOREHOLE_H

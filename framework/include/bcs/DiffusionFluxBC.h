@@ -19,7 +19,7 @@
 
 class DiffusionFluxBC;
 
-template<>
+template <>
 InputParameters validParams<DiffusionFluxBC>();
 
 /**

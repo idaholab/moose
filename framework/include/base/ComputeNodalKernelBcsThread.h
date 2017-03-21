@@ -21,10 +21,12 @@
 class AuxiliarySystem;
 class NodalKernel;
 
-class ComputeNodalKernelBcsThread : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+class ComputeNodalKernelBcsThread
+    : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  ComputeNodalKernelBcsThread(FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
+  ComputeNodalKernelBcsThread(FEProblemBase & fe_problem,
+                              const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
   // Splitting Constructor
   ComputeNodalKernelBcsThread(ComputeNodalKernelBcsThread & x, Threads::split split);
 
@@ -39,8 +41,8 @@ protected:
 
   const MooseObjectWarehouse<NodalKernel> & _nodal_kernels;
 
-  //Number of contributions cached up
+  // Number of contributions cached up
   unsigned int _num_cached;
 };
 
-#endif //COMPUTENODALKERNELBCSTHREAD_H
+#endif // COMPUTENODALKERNELBCSTHREAD_H

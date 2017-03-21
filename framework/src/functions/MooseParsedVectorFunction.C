@@ -15,8 +15,9 @@
 #include "MooseParsedVectorFunction.h"
 #include "MooseParsedFunctionWrapper.h"
 
-template<>
-InputParameters validParams<MooseParsedVectorFunction>()
+template <>
+InputParameters
+validParams<MooseParsedVectorFunction>()
 {
   InputParameters params = validParams<Function>();
   params += validParams<MooseParsedFunctionBase>();
@@ -26,8 +27,8 @@ InputParameters validParams<MooseParsedVectorFunction>()
   return params;
 }
 
-MooseParsedVectorFunction::MooseParsedVectorFunction(const InputParameters & parameters) :
-    Function(parameters),
+MooseParsedVectorFunction::MooseParsedVectorFunction(const InputParameters & parameters)
+  : Function(parameters),
     MooseParsedFunctionBase(parameters),
     _vector_value(verifyFunction(std::string("{") + getParam<std::string>("value_x") + "}{" +
                                  getParam<std::string>("value_y") + "}{" +
@@ -56,6 +57,7 @@ MooseParsedVectorFunction::initialSetup()
     if (isParamValid("_tid"))
       tid = getParam<THREAD_ID>("_tid");
 
-    _function_ptr = libmesh_make_unique<MooseParsedFunctionWrapper>(_pfb_feproblem, _vector_value, _vars, _vals, tid);
+    _function_ptr = libmesh_make_unique<MooseParsedFunctionWrapper>(
+        _pfb_feproblem, _vector_value, _vars, _vals, tid);
   }
 }

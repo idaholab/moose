@@ -31,4 +31,4 @@ protected:
   const VariableValue & _out_of_plane_strain_old;
 };
 
-#endif //COMPUTEPLANEFINITESTRAIN_H
+#endif // COMPUTEPLANEFINITESTRAIN_H

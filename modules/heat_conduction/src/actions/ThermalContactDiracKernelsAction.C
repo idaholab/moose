@@ -8,22 +8,28 @@
 #include "Factory.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<ThermalContactDiracKernelsAction>()
+template <>
+InputParameters
+validParams<ThermalContactDiracKernelsAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
   params.addRequiredParam<BoundaryName>("master", "The master surface");
   params.addRequiredParam<BoundaryName>("slave", "The slave surface");
-  params.addParam<Real>("tangential_tolerance", "Tangential distance to extend edges of contact surfaces");
-  params.addParam<Real>("normal_smoothing_distance", "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method","Method to use to smooth normals (edge_based|nodal_normal_based)");
-  params.addParam<bool>("quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
+  params.addParam<Real>("tangential_tolerance",
+                        "Tangential distance to extend edges of contact surfaces");
+  params.addParam<Real>(
+      "normal_smoothing_distance",
+      "Distance from edge in parametric coordinates over which to smooth contact normal");
+  params.addParam<std::string>("normal_smoothing_method",
+                               "Method to use to smooth normals (edge_based|nodal_normal_based)");
+  params.addParam<bool>(
+      "quadrature", false, "Whether or not to use quadrature point based gap heat transfer");
   return params;
 }
 
-ThermalContactDiracKernelsAction::ThermalContactDiracKernelsAction(const InputParameters & params) :
-  Action(params)
+ThermalContactDiracKernelsAction::ThermalContactDiracKernelsAction(const InputParameters & params)
+  : Action(params)
 {
 }
 
@@ -46,12 +52,11 @@ ThermalContactDiracKernelsAction::act()
     }
     if (isParamValid("normal_smoothing_method"))
     {
-      params.set<std::string>("normal_smoothing_method") = getParam<std::string>("normal_smoothing_method");
+      params.set<std::string>("normal_smoothing_method") =
+          getParam<std::string>("normal_smoothing_method");
     }
 
-    _problem->addDiracKernel("GapHeatPointSourceMaster",
-                             "GapHeatPointSourceMaster_"+_name,
-                             params);
+    _problem->addDiracKernel(
+        "GapHeatPointSourceMaster", "GapHeatPointSourceMaster_" + _name, params);
   }
 }
-

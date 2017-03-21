@@ -38,27 +38,25 @@ class SystemBase;
 class BoundaryCondition;
 class Assembly;
 
-template<>
+template <>
 InputParameters validParams<BoundaryCondition>();
 
 /**
  * Base class for creating new types of boundary conditions.
  */
-class BoundaryCondition :
-  public MooseObject,
-  public BoundaryRestrictableRequired,
-  public SetupInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public TransientInterface,
-  public PostprocessorInterface,
-  public GeometricSearchInterface,
-  public Restartable,
-  public ZeroInterface,
-  public MeshChangedInterface
+class BoundaryCondition : public MooseObject,
+                          public BoundaryRestrictableRequired,
+                          public SetupInterface,
+                          public FunctionInterface,
+                          public UserObjectInterface,
+                          public TransientInterface,
+                          public PostprocessorInterface,
+                          public GeometricSearchInterface,
+                          public Restartable,
+                          public ZeroInterface,
+                          public MeshChangedInterface
 {
 public:
-
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
@@ -81,16 +79,17 @@ public:
   /**
    * Hook for turning the boundary condition on and off.
    *
-   * It is not safe to use variable values in this function, since (a) this is not called inside a quadrature loop,
+   * It is not safe to use variable values in this function, since (a) this is not called inside a
+   * quadrature loop,
    * (b) reinit() is not called, thus the variables values are not computed.
-   * NOTE: In NodalBC-derived classes, we can use the variable values, since renitNodeFace() was called before calling
+   * NOTE: In NodalBC-derived classes, we can use the variable values, since renitNodeFace() was
+   * called before calling
    * this method. However, one has to index into the values manually, i.e. not using _qp.
    * @return true if the boundary condition should be applied, otherwise false
    */
   virtual bool shouldApply();
 
 protected:
-
   /// Reference to SubProblem
   SubProblem & _subproblem;
 

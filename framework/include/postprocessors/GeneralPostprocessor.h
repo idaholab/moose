@@ -22,7 +22,7 @@
 // Forward Declarations
 class GeneralPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<GeneralPostprocessor>();
 
 /**
@@ -30,16 +30,16 @@ InputParameters validParams<GeneralPostprocessor>();
  * base class Postprocessor object along with adding MooseObject to the inheritance tree.
  * GeneralPostprocessors have dependency resolution enabled with other GeneralPostprocessors.
  */
-class GeneralPostprocessor :
-  public GeneralUserObject,
-  public Postprocessor
+class GeneralPostprocessor : public GeneralUserObject, public Postprocessor
 {
 public:
   GeneralPostprocessor(const InputParameters & parameters);
 
   /**
-   * This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
-   * Finalize is not required for Postprocessor implementations since work may be done in getValue().
+   * This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to
+   * do MPI communication!
+   * Finalize is not required for Postprocessor implementations since work may be done in
+   * getValue().
    */
   virtual void finalize() override {}
 };

@@ -14,8 +14,9 @@
 
 #include "CoupledAux.h"
 
-template<>
-InputParameters validParams<CoupledAux>()
+template <>
+InputParameters
+validParams<CoupledAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
@@ -23,13 +24,15 @@ InputParameters validParams<CoupledAux>()
 
   params.addRequiredCoupledVar("coupled", "Coupled Value for Calculation");
 
-  params.addParam<Real>("value", 0.0, "A value to use in the binary arithmetic operation of this coupled auxkernel");
-  params.addParam<MooseEnum>("operator", operators, "The binary operator to use in the calculation");
+  params.addParam<Real>(
+      "value", 0.0, "A value to use in the binary arithmetic operation of this coupled auxkernel");
+  params.addParam<MooseEnum>(
+      "operator", operators, "The binary operator to use in the calculation");
   return params;
 }
 
-CoupledAux::CoupledAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+CoupledAux::CoupledAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _value(getParam<Real>("value")),
     _operator(getParam<MooseEnum>("operator")),
     _coupled(coupled("coupled")),
@@ -41,15 +44,15 @@ Real
 CoupledAux::computeValue()
 {
   if (_operator == "+")
-    return _coupled_val[_qp]+_value;
+    return _coupled_val[_qp] + _value;
   else if (_operator == "-")
-    return _coupled_val[_qp]-_value;
+    return _coupled_val[_qp] - _value;
   else if (_operator == "*")
-    return _coupled_val[_qp]*_value;
+    return _coupled_val[_qp] * _value;
   else if (_operator == "/")
-    // We are going to do division for this operation
-    // This is useful for testing evalutation order
-    // when we attempt to divide by zero!
+  // We are going to do division for this operation
+  // This is useful for testing evalutation order
+  // when we attempt to divide by zero!
   {
     if (_coupled_val[_qp] == 0)
       mooseError("Floating point exception in coupled_value");

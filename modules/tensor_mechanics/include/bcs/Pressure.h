@@ -12,7 +12,7 @@
 class Function;
 class Pressure;
 
-template<>
+template <>
 InputParameters validParams<Pressure>();
 
 /**
@@ -38,4 +38,4 @@ protected:
   const Real _alpha;
 };
 
-#endif //PRESSURE_H
+#endif // PRESSURE_H

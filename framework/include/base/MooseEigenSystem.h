@@ -34,7 +34,8 @@ public:
    * @param name The name of the kernel.
    * @param parameters Kernel parameters.
    */
-  virtual void addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
+  virtual void
+  addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
   /**
    * Mark a variable as a variable of the eigen system
@@ -103,7 +104,6 @@ public:
   bool containsEigenKernel() const;
 
 protected:
-
   std::set<VariableName> _eigen_var_names;
   bool _all_eigen_vars;
   std::set<dof_id_type> _eigen_var_indices;

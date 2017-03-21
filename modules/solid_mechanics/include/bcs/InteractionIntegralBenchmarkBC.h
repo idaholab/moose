@@ -5,20 +5,19 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef INTERACTIONINTEGRALBENCHMARKBC_H
 #define INTERACTIONINTEGRALBENCHMARKBC_H
 
 #include "PresetNodalBC.h"
 #include "CrackFrontDefinition.h"
 
-//Forward Declarations
+// Forward Declarations
 class InteractionIntegralBenchmarkBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<InteractionIntegralBenchmarkBC>();
-void addInteractionIntegralBenchmarkBCParams(InputParameters& params);
+void addInteractionIntegralBenchmarkBCParams(InputParameters & params);
 
 /**
  * Implements a boundary condition that enforces a displacement field around a
@@ -51,4 +50,4 @@ protected:
   Function & _kiii_function;
 };
 
-#endif //INTERACTIONINTEGRALBENCHMARKBC_H
+#endif // INTERACTIONINTEGRALBENCHMARKBC_H

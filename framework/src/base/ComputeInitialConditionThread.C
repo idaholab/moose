@@ -16,18 +16,19 @@
 #include "FEProblem.h"
 #include "InitialCondition.h"
 
-ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblemBase & fe_problem) :
-    _fe_problem(fe_problem)
+ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblemBase & fe_problem)
+  : _fe_problem(fe_problem)
 {
 }
 
-ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialConditionThread & x, Threads::split /*split*/) :
-    _fe_problem(x._fe_problem)
+ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialConditionThread & x,
+                                                             Threads::split /*split*/)
+  : _fe_problem(x._fe_problem)
 {
 }
 
 void
-ComputeInitialConditionThread::operator() (const ConstElemRange & range)
+ComputeInitialConditionThread::operator()(const ConstElemRange & range)
 {
   ParallelUniqueId puid;
   _tid = puid.id;
@@ -49,7 +50,6 @@ ComputeInitialConditionThread::operator() (const ConstElemRange & range)
     }
   }
 }
-
 
 void
 ComputeInitialConditionThread::join(const ComputeInitialConditionThread & /*y*/)

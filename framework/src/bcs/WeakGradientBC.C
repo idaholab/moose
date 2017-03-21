@@ -14,27 +14,24 @@
 
 #include "WeakGradientBC.h"
 
-template<>
-InputParameters validParams<WeakGradientBC>()
+template <>
+InputParameters
+validParams<WeakGradientBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   return params;
 }
 
-WeakGradientBC::WeakGradientBC(const InputParameters & parameters) :
-    IntegratedBC(parameters)
-{}
+WeakGradientBC::WeakGradientBC(const InputParameters & parameters) : IntegratedBC(parameters) {}
 
 Real
 WeakGradientBC::computeQpResidual()
 {
-  return (_grad_u[_qp]*_normals[_qp])*_test[_i][_qp];
+  return (_grad_u[_qp] * _normals[_qp]) * _test[_i][_qp];
 }
 
 Real
 WeakGradientBC::computeQpJacobian()
 {
-  return (_grad_phi[_j][_qp]*_normals[_qp])*_test[_i][_qp];
+  return (_grad_phi[_j][_qp] * _normals[_qp]) * _test[_i][_qp];
 }
-
-

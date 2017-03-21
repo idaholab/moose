@@ -21,26 +21,31 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
-template<>
-InputParameters validParams<AddCoupledSolidKinSpeciesKernelsAction>()
+template <>
+InputParameters
+validParams<AddCoupledSolidKinSpeciesKernelsAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addRequiredParam<std::vector<NonlinearVariableName> >("primary_species", "The list of primary species to add");
-  params.addRequiredParam<std::vector<std::string> >("kin_reactions", "The list of solid kinetic reactions");
+  params.addRequiredParam<std::vector<NonlinearVariableName>>("primary_species",
+                                                              "The list of primary species to add");
+  params.addRequiredParam<std::vector<std::string>>("kin_reactions",
+                                                    "The list of solid kinetic reactions");
   return params;
 }
 
-AddCoupledSolidKinSpeciesKernelsAction::AddCoupledSolidKinSpeciesKernelsAction(const InputParameters & params) :
-    Action(params),
-    _vars(getParam<std::vector<NonlinearVariableName> >("primary_species")),
-    _reactions(getParam<std::vector<std::string> >("kin_reactions"))
+AddCoupledSolidKinSpeciesKernelsAction::AddCoupledSolidKinSpeciesKernelsAction(
+    const InputParameters & params)
+  : Action(params),
+    _vars(getParam<std::vector<NonlinearVariableName>>("primary_species")),
+    _reactions(getParam<std::vector<std::string>>("kin_reactions"))
 {
 }
 
 void
 AddCoupledSolidKinSpeciesKernelsAction::act()
 {
-  _console << "Solid kinetic reaction list:" << "\n";
+  _console << "Solid kinetic reaction list:"
+           << "\n";
   for (unsigned int i = 0; i < _reactions.size(); ++i)
     _console << _reactions[i] << "\n";
 
@@ -96,7 +101,7 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
           if (rxn_vars[m] == _vars[i])
           {
             weight.push_back(stos[m]);
-            _console << "weight for " << rxn_vars[m] <<" : " << weight[weight.size() - 1] << "\n";
+            _console << "weight for " << rxn_vars[m] << " : " << weight[weight.size() - 1] << "\n";
           }
         }
 
@@ -106,11 +111,13 @@ AddCoupledSolidKinSpeciesKernelsAction::act()
         // Building kernels for solid kinetic species
         InputParameters params_kin = _factory.getValidParams("CoupledBEKinetic");
         params_kin.set<NonlinearVariableName>("variable") = _vars[i];
-        params_kin.set<std::vector<Real> >("weight") = weight;
-        params_kin.set<std::vector<VariableName> >("v") = coupled_var;
-        _problem->addKernel("CoupledBEKinetic", _vars[i] + "_" + solid_kin_species[j] + "_kin", params_kin);
+        params_kin.set<std::vector<Real>>("weight") = weight;
+        params_kin.set<std::vector<VariableName>>("v") = coupled_var;
+        _problem->addKernel(
+            "CoupledBEKinetic", _vars[i] + "_" + solid_kin_species[j] + "_kin", params_kin);
 
-        _console << _vars[i] << "_" << solid_kin_species[j] << "_kin" << "\n";
+        _console << _vars[i] << "_" << solid_kin_species[j] << "_kin"
+                 << "\n";
       }
     }
     _console << '\n';

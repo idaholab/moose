@@ -28,8 +28,8 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem, Moose::KernelType type) :
-    ThreadedElementLoop<ConstElemRange>(fe_problem),
+ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem, Moose::KernelType type)
+  : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _nl(fe_problem.getNonlinearSystemBase()),
     _kernel_type(type),
     _num_cached(0),
@@ -41,8 +41,8 @@ ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem, Moose::
 }
 
 // Splitting Constructor
-ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split) :
-    ThreadedElementLoop<ConstElemRange>(x, split),
+ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split)
+  : ThreadedElementLoop<ConstElemRange>(x, split),
     _nl(x._nl),
     _kernel_type(x._kernel_type),
     _num_cached(0),
@@ -53,9 +53,7 @@ ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads:
 {
 }
 
-ComputeResidualThread::~ComputeResidualThread()
-{
-}
+ComputeResidualThread::~ComputeResidualThread() {}
 
 void
 ComputeResidualThread::subdomainChanged()
@@ -82,7 +80,7 @@ ComputeResidualThread::subdomainChanged()
 }
 
 void
-ComputeResidualThread::onElement(const Elem *elem)
+ComputeResidualThread::onElement(const Elem * elem)
 {
   _fe_problem.prepare(elem, _tid);
   _fe_problem.reinitElem(elem, _tid);
@@ -96,28 +94,28 @@ ComputeResidualThread::onElement(const Elem *elem)
   const MooseObjectWarehouse<KernelBase> * warehouse;
   switch (_kernel_type)
   {
-  case Moose::KT_ALL:
-    warehouse = &_nl.getKernelWarehouse();
-    break;
+    case Moose::KT_ALL:
+      warehouse = &_nl.getKernelWarehouse();
+      break;
 
-  case Moose::KT_TIME:
-    warehouse = &_nl.getTimeKernelWarehouse();
-    break;
+    case Moose::KT_TIME:
+      warehouse = &_nl.getTimeKernelWarehouse();
+      break;
 
-  case Moose::KT_NONTIME:
-    warehouse = &_nl.getNonTimeKernelWarehouse();
-    break;
+    case Moose::KT_NONTIME:
+      warehouse = &_nl.getNonTimeKernelWarehouse();
+      break;
 
-  case Moose::KT_EIGEN:
-    warehouse = &_nl.getEigenKernelWarehouse();
-    break;
+    case Moose::KT_EIGEN:
+      warehouse = &_nl.getEigenKernelWarehouse();
+      break;
 
-  case Moose::KT_NONEIGEN:
-    warehouse = &_nl.getNonEigenKernelWarehouse();
-    break;
+    case Moose::KT_NONEIGEN:
+      warehouse = &_nl.getNonEigenKernelWarehouse();
+      break;
 
-  default:
-    mooseError("Unknown Kernel Type \n");
+    default:
+      mooseError("Unknown Kernel Type \n");
   }
 
   if (warehouse->hasActiveBlockObjects(_subdomain, _tid))
@@ -129,7 +127,7 @@ ComputeResidualThread::onElement(const Elem *elem)
 }
 
 void
-ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+ComputeResidualThread::onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
   if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
   {
@@ -159,7 +157,7 @@ ComputeResidualThread::onBoundary(const Elem *elem, unsigned int side, BoundaryI
 }
 
 void
-ComputeResidualThread::onInterface(const Elem *elem, unsigned int side, BoundaryID bnd_id)
+ComputeResidualThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
   if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, _tid))
   {
@@ -195,7 +193,7 @@ ComputeResidualThread::onInterface(const Elem *elem, unsigned int side, Boundary
 }
 
 void
-ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
+ComputeResidualThread::onInternalSide(const Elem * elem, unsigned int side)
 {
   if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
@@ -203,11 +201,10 @@ ComputeResidualThread::onInternalSide(const Elem *elem, unsigned int side)
     const Elem * neighbor = elem->neighbor(side);
 
     // Get the global id of the element and the neighbor
-    const dof_id_type
-      elem_id = elem->id(),
-      neighbor_id = neighbor->id();
+    const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
 
-    if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) || (neighbor->level() < elem->level()))
+    if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
+        (neighbor->level() < elem->level()))
     {
       _fe_problem.reinitNeighbor(elem, side, _tid);
 
@@ -251,7 +248,6 @@ ComputeResidualThread::post()
   _fe_problem.clearActiveElementalMooseVariables(_tid);
   _fe_problem.clearActiveMaterialProperties(_tid);
 }
-
 
 void
 ComputeResidualThread::join(const ComputeResidualThread & /*y*/)

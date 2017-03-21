@@ -13,13 +13,13 @@
 // Forward Declarations
 class ReconVarICAction;
 
-template<>
+template <>
 InputParameters validParams<ReconVarICAction>();
 
 /**
  * Action to set up initial conditions for a set of order parameters using EBSDReader data
  */
-class ReconVarICAction: public Action
+class ReconVarICAction : public Action
 {
 public:
   ReconVarICAction(const InputParameters & params);
@@ -31,4 +31,4 @@ private:
   const std::string _var_name_base;
 };
 
-#endif //RECONVARICACTION_H
+#endif // RECONVARICACTION_H

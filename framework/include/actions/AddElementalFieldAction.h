@@ -19,9 +19,8 @@
 
 class AddElementalFieldAction;
 
-template<>
+template <>
 InputParameters validParams<AddElementalFieldAction>();
-
 
 class AddElementalFieldAction : public Action
 {

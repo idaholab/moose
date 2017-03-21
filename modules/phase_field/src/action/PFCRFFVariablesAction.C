@@ -13,23 +13,31 @@
 
 #include "libmesh/string_to_enum.h"
 
-template<>
-InputParameters validParams<PFCRFFVariablesAction>()
+template <>
+InputParameters
+validParams<PFCRFFVariablesAction>()
 {
   InputParameters params = validParams<Action>();
   MooseEnum familyEnum = AddVariableAction::getNonlinearVariableFamilies();
-  params.addParam<MooseEnum>("family", familyEnum, "Specifies the family of FE shape functions to use for the L variables");
+  params.addParam<MooseEnum>(
+      "family",
+      familyEnum,
+      "Specifies the family of FE shape functions to use for the L variables");
   MooseEnum orderEnum = AddVariableAction::getNonlinearVariableOrders();
-  params.addParam<MooseEnum>("order", orderEnum,  "Specifies the order of the FE shape function to use for the L variables");
+  params.addParam<MooseEnum>(
+      "order",
+      orderEnum,
+      "Specifies the order of the FE shape function to use for the L variables");
   params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to the L variables");
-  params.addRequiredParam<unsigned int>("num_L", "specifies the number of complex L variables will be solved for");
+  params.addRequiredParam<unsigned int>(
+      "num_L", "specifies the number of complex L variables will be solved for");
   params.addRequiredParam<std::string>("L_name_base", "Base name for the complex L variables");
 
   return params;
 }
 
-PFCRFFVariablesAction::PFCRFFVariablesAction(const InputParameters & params) :
-    Action(params),
+PFCRFFVariablesAction::PFCRFFVariablesAction(const InputParameters & params)
+  : Action(params),
     _num_L(getParam<unsigned int>("num_L")),
     _L_name_base(getParam<std::string>("L_name_base"))
 {
@@ -40,8 +48,7 @@ PFCRFFVariablesAction::act()
 {
 #ifdef DEBUG
   Moose::err << "Inside the PFCRFFVariablesAction Object\n";
-  Moose::err << "VariableBase: " << _L_name_base
-             << "\torder: " << getParam<MooseEnum>("order")
+  Moose::err << "VariableBase: " << _L_name_base << "\torder: " << getParam<MooseEnum>("order")
              << "\tfamily: " << getParam<MooseEnum>("family") << std::endl;
 #endif
 
@@ -62,10 +69,11 @@ PFCRFFVariablesAction::act()
     {
       // Create imaginary L variable IF l > 0
       std::string imag_name = L_name + "_imag";
-      _problem->addVariable(imag_name,
-                            FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                                   Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
-                            getParam<Real>("scaling"));
+      _problem->addVariable(
+          imag_name,
+          FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
+                 Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
+          getParam<Real>("scaling"));
     }
   }
 }

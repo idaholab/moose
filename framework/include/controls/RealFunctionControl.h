@@ -22,7 +22,7 @@
 class RealFunctionControl;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<RealFunctionControl>();
 
 /**
@@ -31,7 +31,6 @@ InputParameters validParams<RealFunctionControl>();
 class RealFunctionControl : public Control
 {
 public:
-
   /**
    * Class constructor
    * @param parameters Input parameters for this Control object
@@ -41,7 +40,6 @@ public:
   virtual void execute() override;
 
 private:
-
   /// The function to execute
   Function & _function;
 

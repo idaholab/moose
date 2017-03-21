@@ -13,7 +13,7 @@
 /**
  * Bicrystal using a bounding box
  */
-class BicrystalBoundingBoxICAction: public Action
+class BicrystalBoundingBoxICAction : public Action
 {
 public:
   BicrystalBoundingBoxICAction(const InputParameters & params);
@@ -25,7 +25,7 @@ private:
   const unsigned int _op_num;
 };
 
-template<>
+template <>
 InputParameters validParams<BicrystalBoundingBoxICAction>();
 
-#endif //BICRYSTALBOUNDINGBOXICACTION_H
+#endif // BICRYSTALBOUNDINGBOXICACTION_H

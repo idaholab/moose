@@ -10,12 +10,12 @@
 
 #include "ACBulk.h"
 
-//Forward Declarations
+// Forward Declarations
 class ACGrGrElasticDrivingForce;
 class RankTwoTensor;
 class RankFourTensor;
 
-template<>
+template <>
 InputParameters validParams<ACGrGrElasticDrivingForce>();
 
 /**
@@ -36,4 +36,4 @@ private:
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
 };
 
-#endif //ACGRGRELASTICDRIVINGFORCE_H
+#endif // ACGRGRELASTICDRIVINGFORCE_H

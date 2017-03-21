@@ -11,25 +11,30 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<DiscreteNucleation>()
+template <>
+InputParameters
+validParams<DiscreteNucleation>()
 {
   InputParameters params = validParams<DerivativeFunctionMaterialBase>();
   params.addClassDescription("Free energy contribution for nucleating discrete particles");
-  params.addRequiredCoupledVar("op_names", "List of variables to force to a target concentration value");
+  params.addRequiredCoupledVar("op_names",
+                               "List of variables to force to a target concentration value");
   params.addRequiredParam<UserObjectName>("map", "DiscreteNucleationMap user object");
-  params.addRequiredParam<std::vector<Real> >("op_values", "List of target concentration values");
+  params.addRequiredParam<std::vector<Real>>("op_values", "List of target concentration values");
   params.addParam<Real>("penalty", 20.0, "Penalty factor for enforcing the target concentrations");
   MooseEnum penalty_mode("MATCH MIN MAX", "MATCH");
-  params.addParam<MooseEnum>("penalty_mode", penalty_mode, "Match the target concentration or take it as a minimum or maximum concentration target");
+  params.addParam<MooseEnum>(
+      "penalty_mode",
+      penalty_mode,
+      "Match the target concentration or take it as a minimum or maximum concentration target");
   return params;
 }
 
-DiscreteNucleation::DiscreteNucleation(const InputParameters & params) :
-    DerivativeFunctionMaterialBase(params),
+DiscreteNucleation::DiscreteNucleation(const InputParameters & params)
+  : DerivativeFunctionMaterialBase(params),
     _nvar(coupledComponents("op_names")),
     _op_index(_nvar),
-    _op_values(getParam<std::vector<Real> >("op_values")),
+    _op_values(getParam<std::vector<Real>>("op_values")),
     _penalty(getParam<Real>("penalty")),
     _penalty_mode(getParam<MooseEnum>("penalty_mode")),
     _map(getUserObject<DiscreteNucleationMap>("map"))

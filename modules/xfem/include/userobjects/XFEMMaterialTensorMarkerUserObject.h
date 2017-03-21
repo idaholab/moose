@@ -13,14 +13,14 @@
 
 class XFEMMaterialTensorMarkerUserObject;
 
-template<>
+template <>
 InputParameters validParams<XFEMMaterialTensorMarkerUserObject>();
 
 class XFEMMaterialTensorMarkerUserObject : public XFEMMarkerUserObject
 {
 public:
   XFEMMaterialTensorMarkerUserObject(const InputParameters & parameters);
-  virtual ~XFEMMaterialTensorMarkerUserObject(){}
+  virtual ~XFEMMaterialTensorMarkerUserObject() {}
 
 protected:
   MaterialTensorCalculator _material_tensor_calculator;
@@ -29,7 +29,7 @@ protected:
   bool _average;
   Real _random_range;
 
-  virtual bool doesElementCrack(RealVectorValue &direction);
+  virtual bool doesElementCrack(RealVectorValue & direction);
 };
 
 #endif // XFEMMATERIALTENSORMARKERUSEROBJECT_H

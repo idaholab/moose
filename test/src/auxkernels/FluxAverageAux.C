@@ -14,8 +14,9 @@
 
 #include "FluxAverageAux.h"
 
-template<>
-InputParameters validParams<FluxAverageAux>()
+template <>
+InputParameters
+validParams<FluxAverageAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
@@ -25,8 +26,8 @@ InputParameters validParams<FluxAverageAux>()
   return params;
 }
 
-FluxAverageAux::FluxAverageAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+FluxAverageAux::FluxAverageAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _diffusivity(getParam<Real>("diffusivity")),
     _coupled_gradient(coupledGradient("coupled")),
     _coupled_var(*(getCoupledVars().find("coupled")->second)[0]),
@@ -37,5 +38,5 @@ FluxAverageAux::FluxAverageAux(const InputParameters & parameters) :
 Real
 FluxAverageAux::computeValue()
 {
-  return _diffusivity*_coupled_gradient[_qp]*_normals[_qp];
+  return _diffusivity * _coupled_gradient[_qp] * _normals[_qp];
 }

@@ -7,8 +7,9 @@
 
 #include "CNSFVPressureAux.h"
 
-template<>
-InputParameters validParams<CNSFVPressureAux>()
+template <>
+InputParameters
+validParams<CNSFVPressureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addClassDescription("An aux kernel for calculating pressure.");
@@ -16,8 +17,7 @@ InputParameters validParams<CNSFVPressureAux>()
 }
 
 CNSFVPressureAux::CNSFVPressureAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
-    _pres(getMaterialProperty<Real>("pressure"))
+  : AuxKernel(parameters), _pres(getMaterialProperty<Real>("pressure"))
 {
 }
 

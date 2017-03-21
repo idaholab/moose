@@ -19,7 +19,7 @@
 
 class TotalVariableValue;
 
-template<>
+template <>
 InputParameters validParams<TotalVariableValue>();
 
 /**

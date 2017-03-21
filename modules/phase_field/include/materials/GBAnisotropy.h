@@ -9,10 +9,10 @@
 
 #include "GBAnisotropyBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class GBAnisotropy;
 
-template<>
+template <>
 InputParameters validParams<GBAnisotropy>();
 
 /**
@@ -29,4 +29,4 @@ private:
   const Real _wGB;
 };
 
-#endif //GBANISOTROPY_H
+#endif // GBANISOTROPY_H

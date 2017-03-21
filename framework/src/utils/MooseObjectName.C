@@ -18,16 +18,14 @@
 // STL includes
 #include <iostream>
 
-MooseObjectName::MooseObjectName(const std::string & tag, const std::string & name, const std::string & separator) :
-    _tag(tag),
-    _name(name),
-    _combined(tag + name),
-    _separator(separator)
+MooseObjectName::MooseObjectName(const std::string & tag,
+                                 const std::string & name,
+                                 const std::string & separator)
+  : _tag(tag), _name(name), _combined(tag + name), _separator(separator)
 {
 }
 
-MooseObjectName::MooseObjectName(std::string name) :
-    _separator("::")
+MooseObjectName::MooseObjectName(std::string name) : _separator("::")
 {
   // Tags may be separated by a :: or the last /
   std::size_t idx0 = name.find("::");
@@ -37,14 +35,14 @@ MooseObjectName::MooseObjectName(std::string name) :
   if (idx0 != std::string::npos)
   {
     _tag = name.substr(0, idx0);
-    _name = name.erase(0, idx0+2);
+    _name = name.erase(0, idx0 + 2);
   }
 
   // Case when a / is found
   else if (idx1 != std::string::npos)
   {
     _tag = name.substr(0, idx1);
-    _name = name.erase(0, idx1+2);
+    _name = name.erase(0, idx1 + 2);
     _separator = "/";
   }
 
@@ -53,27 +51,20 @@ MooseObjectName::MooseObjectName(std::string name) :
     _name = name;
 
   _combined = _tag + _name;
-
 }
 
-MooseObjectName::MooseObjectName() :
-    _separator("/")
-{
-}
+MooseObjectName::MooseObjectName() : _separator("/") {}
 
-MooseObjectName::MooseObjectName(const MooseObjectName & rhs) :
-    _tag(rhs._tag),
-    _name(rhs._name),
-    _combined(rhs._combined),
-    _separator(rhs._separator)
+MooseObjectName::MooseObjectName(const MooseObjectName & rhs)
+  : _tag(rhs._tag), _name(rhs._name), _combined(rhs._combined), _separator(rhs._separator)
 {
 }
 
 bool
 MooseObjectName::operator==(const MooseObjectName & rhs) const
 {
-  if ( (_name == rhs._name || _name.empty() || rhs._name.empty() ) &&
-       (_tag  == rhs._tag  || _tag.empty()  || rhs._tag.empty() ) )
+  if ((_name == rhs._name || _name.empty() || rhs._name.empty()) &&
+      (_tag == rhs._tag || _tag.empty() || rhs._tag.empty()))
   {
     return true;
   }
@@ -83,7 +74,7 @@ MooseObjectName::operator==(const MooseObjectName & rhs) const
 bool
 MooseObjectName::operator!=(const MooseObjectName & rhs) const
 {
-  return !( *this == rhs );
+  return !(*this == rhs);
 }
 
 bool

@@ -25,7 +25,7 @@
 // Forward declerations
 class ParsedSubdomainMeshModifier;
 
-template<>
+template <>
 InputParameters validParams<ParsedSubdomainMeshModifier>();
 
 /**
@@ -34,7 +34,6 @@ InputParameters validParams<ParsedSubdomainMeshModifier>();
 class ParsedSubdomainMeshModifier : public MeshModifier, public FunctionParserUtils
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters
@@ -57,4 +56,4 @@ private:
   ADFunctionPtr _func_F;
 };
 
-#endif //SUBDOMAINBOUDINGBOX_H
+#endif // SUBDOMAINBOUDINGBOX_H

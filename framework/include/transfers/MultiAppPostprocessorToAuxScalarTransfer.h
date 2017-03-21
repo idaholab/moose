@@ -21,14 +21,13 @@
 // Forward declerations
 class MultiAppPostprocessorToAuxScalarTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppPostprocessorToAuxScalarTransfer>();
 
 /**
  * Copies the value of a Postprocessor from one app to a scalar AuxVariable in another.
  */
-class MultiAppPostprocessorToAuxScalarTransfer :
-  public MultiAppTransfer
+class MultiAppPostprocessorToAuxScalarTransfer : public MultiAppTransfer
 {
 public:
   MultiAppPostprocessorToAuxScalarTransfer(const InputParameters & parameters);
@@ -39,7 +38,6 @@ public:
   virtual void execute() override;
 
 protected:
-
   /// The name of the postprocessor that the transfer originates
   PostprocessorName _from_pp_name;
 

@@ -14,17 +14,17 @@
 
 #include "PolynomialFit.h"
 
-extern "C" void FORTRAN_CALL(dgels) ( ... );
+extern "C" void FORTRAN_CALL(dgels)(...);
 
 int PolynomialFit::_file_number = 0;
 
-PolynomialFit::PolynomialFit(std::vector<Real> x, std::vector<Real> y, unsigned int order, bool truncate_order) :
-    _x(x),
-    _y(y),
-    _order(order),
-    _truncate_order(truncate_order)
+PolynomialFit::PolynomialFit(std::vector<Real> x,
+                             std::vector<Real> y,
+                             unsigned int order,
+                             bool truncate_order)
+  : _x(x), _y(y), _order(order), _truncate_order(truncate_order)
 {
-  if (_truncate_order)  // && (_x.size() / 10) < _order)
+  if (_truncate_order) // && (_x.size() / 10) < _order)
   {
     if (_x.size() == 1)
       _order = 0;
@@ -35,10 +35,10 @@ PolynomialFit::PolynomialFit(std::vector<Real> x, std::vector<Real> y, unsigned 
       if (_order > order)
         _order = order;
     }
-
   }
   else if (_x.size() < order)
-    throw std::domain_error("Polynomial Fit requires an order less than the size of the input vector");
+    throw std::domain_error(
+        "Polynomial Fit requires an order less than the size of the input vector");
 }
 
 void
@@ -52,18 +52,18 @@ void
 PolynomialFit::fillMatrix()
 {
   unsigned int num_rows = _x.size();
-  unsigned int num_cols = _order+1;
-  _matrix.resize(num_rows*num_cols);
+  unsigned int num_cols = _order + 1;
+  _matrix.resize(num_rows * num_cols);
 
-  for (unsigned int col=0; col<=_order; ++col)
+  for (unsigned int col = 0; col <= _order; ++col)
   {
-    for (unsigned int row=0; row < num_rows; ++row)
+    for (unsigned int row = 0; row < num_rows; ++row)
     {
       Real value = 1;
-      for (unsigned int i=0; i < col; ++i)
+      for (unsigned int i = 0; i < col; ++i)
         value *= _x[row];
 
-      _matrix[(col*num_rows)+row] = value;
+      _matrix[(col * num_rows) + row] = value;
     }
   }
 }
@@ -77,29 +77,50 @@ PolynomialFit::doLeastSquares()
   int num_rhs = 1;
   int buffer_size = -1;
   Real opt_buffer_size;
-  Real *buffer;
+  Real * buffer;
   int return_value = 0;
 
   // Must copy _y because the call to dgels destroys the original values
   std::vector<Real> rhs = _y;
 
-  FORTRAN_CALL(dgels)(&mode, &num_rows, &num_coeff, &num_rhs, &_matrix[0], &num_rows, &rhs[0], &num_rows, &opt_buffer_size, &buffer_size, &return_value);
+  FORTRAN_CALL(dgels)
+  (&mode,
+   &num_rows,
+   &num_coeff,
+   &num_rhs,
+   &_matrix[0],
+   &num_rows,
+   &rhs[0],
+   &num_rows,
+   &opt_buffer_size,
+   &buffer_size,
+   &return_value);
   if (return_value)
     throw std::runtime_error("Call to Fortran routine 'dgels' returned non-zero exit code");
 
-  buffer_size = (int) opt_buffer_size;
+  buffer_size = (int)opt_buffer_size;
 
   buffer = new Real[buffer_size];
-  FORTRAN_CALL(dgels)(&mode, &num_rows, &num_coeff, &num_rhs, &_matrix[0], &num_rows, &rhs[0], &num_rows, buffer, &buffer_size, &return_value);
-  delete [] buffer;
+  FORTRAN_CALL(dgels)
+  (&mode,
+   &num_rows,
+   &num_coeff,
+   &num_rhs,
+   &_matrix[0],
+   &num_rows,
+   &rhs[0],
+   &num_rows,
+   buffer,
+   &buffer_size,
+   &return_value);
+  delete[] buffer;
 
   if (return_value)
     throw std::runtime_error("Call to Fortran routine 'dgels' returned non-zero exit code");
 
   _coeffs.resize(num_coeff);
-  for (int i=0; i<num_coeff; ++i)
+  for (int i = 0; i < num_coeff; ++i)
     _coeffs[i] = rhs[i];
-
 }
 
 Real
@@ -109,16 +130,22 @@ PolynomialFit::sample(Real x)
   Real value = 0;
 
   Real curr_x = 1;
-  for (unsigned int i=0; i<size; ++i)
+  for (unsigned int i = 0; i < size; ++i)
   {
-    value += _coeffs[i]*curr_x;
+    value += _coeffs[i] * curr_x;
     curr_x *= x;
   }
   return value;
 }
 
 void
-PolynomialFit::dumpSampleFile(std::string base_name, std::string x_label, std::string y_label, float xmin, float xmax, float ymin, float ymax)
+PolynomialFit::dumpSampleFile(std::string base_name,
+                              std::string x_label,
+                              std::string y_label,
+                              float xmin,
+                              float xmax,
+                              float ymin,
+                              float ymax)
 {
   std::stringstream filename, filename_pts;
   const unsigned char fill_character = '0';
@@ -152,13 +179,13 @@ PolynomialFit::dumpSampleFile(std::string base_name, std::string x_label, std::s
   out << "set key left top\n"
       << "f(x)=";
 
-  for (unsigned int i = 0; i<_coeffs.size(); ++i)
+  for (unsigned int i = 0; i < _coeffs.size(); ++i)
   {
     if (i)
       out << "+";
 
     out << _coeffs[i];
-    for (unsigned int j = 0; j<i; ++j)
+    for (unsigned int j = 0; j < i; ++j)
       out << "*x";
   }
   out << "\nplot f(x) with lines, '" << filename_pts.str() << "' using 1:2 title \"Points\"\n";
@@ -168,7 +195,7 @@ PolynomialFit::dumpSampleFile(std::string base_name, std::string x_label, std::s
 
   out.open(filename_pts.str().c_str());
   /* Next dump the data points into a seperate file */
-  for (unsigned int i = 0; i<_x.size(); ++i)
+  for (unsigned int i = 0; i < _x.size(); ++i)
     out << _x[i] << " " << _y[i] << "\n";
   out << std::endl;
 
@@ -182,7 +209,7 @@ PolynomialFit::getSampleSize()
   return _x.size();
 }
 
-const std::vector<Real>&
+const std::vector<Real> &
 PolynomialFit::getCoefficients()
 {
   return _coeffs;

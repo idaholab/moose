@@ -14,24 +14,21 @@
 
 #include "ImplicitODEy.h"
 
-template<>
-InputParameters validParams<ImplicitODEy>()
+template <>
+InputParameters
+validParams<ImplicitODEy>()
 {
   InputParameters params = validParams<ODEKernel>();
   params.addCoupledVar("x", "X");
   return params;
 }
 
-ImplicitODEy::ImplicitODEy(const InputParameters & parameters) :
-    ODEKernel(parameters),
-    _x_var(coupledScalar("x")),
-    _x(coupledScalarValue("x"))
+ImplicitODEy::ImplicitODEy(const InputParameters & parameters)
+  : ODEKernel(parameters), _x_var(coupledScalar("x")), _x(coupledScalarValue("x"))
 {
 }
 
-ImplicitODEy::~ImplicitODEy()
-{
-}
+ImplicitODEy::~ImplicitODEy() {}
 
 Real
 ImplicitODEy::computeQpResidual()

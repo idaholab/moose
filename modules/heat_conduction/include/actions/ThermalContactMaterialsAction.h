@@ -12,12 +12,12 @@
 class ThermalContactMaterialsAction : public Action
 {
 public:
-  ThermalContactMaterialsAction( const InputParameters & params);
-  virtual ~ThermalContactMaterialsAction(){}
+  ThermalContactMaterialsAction(const InputParameters & params);
+  virtual ~ThermalContactMaterialsAction() {}
   virtual void act();
 };
 
-template<>
+template <>
 InputParameters validParams<ThermalContactMaterialsAction>();
 
 #endif

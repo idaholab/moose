@@ -17,11 +17,11 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class RandomAux;
 class RandomElementalUserObject;
 
-template<>
+template <>
 InputParameters validParams<RandomAux>();
 
 /**
@@ -37,8 +37,8 @@ public:
 protected:
   virtual Real computeValue();
 
-  const RandomElementalUserObject *_random_uo;
+  const RandomElementalUserObject * _random_uo;
   bool _generate_ints;
 };
 
-#endif //RANDOMAUX_H
+#endif // RANDOMAUX_H

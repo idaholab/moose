@@ -17,16 +17,17 @@
 
 #include "KernelBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class EigenKernel;
 class MooseEigenSystem;
 
-template<>
+template <>
 InputParameters validParams<EigenKernel>();
 
 /**
  * The behavior of this kernel is controlled by one problem-wise global parameter
- *    eigen_on_current - bool, to indicate if this kernel is operating on the current solution or old solution
+ *    eigen_on_current - bool, to indicate if this kernel is operating on the current solution or
+ * old solution
  * This kernel also obtain the postprocessor for eigenvalue by one problem-wise global parameter
  *    eigen_postprocessor - string, the name of the postprocessor to obtain the eigenvalue
  */
@@ -65,4 +66,4 @@ protected:
   const Real * _eigenvalue;
 };
 
-#endif //EIGENKERNEL_H
+#endif // EIGENKERNEL_H

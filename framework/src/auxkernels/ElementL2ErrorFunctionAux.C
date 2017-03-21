@@ -16,17 +16,17 @@
 #include "ElementL2ErrorFunctionAux.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<ElementL2ErrorFunctionAux>()
+template <>
+InputParameters
+validParams<ElementL2ErrorFunctionAux>()
 {
   InputParameters params = validParams<ElementLpNormAux>();
   params.addRequiredParam<FunctionName>("function", "Function representing the exact solution");
   return params;
 }
 
-ElementL2ErrorFunctionAux::ElementL2ErrorFunctionAux(const InputParameters & parameters) :
-    ElementLpNormAux(parameters),
-    _func(getFunction("function"))
+ElementL2ErrorFunctionAux::ElementL2ErrorFunctionAux(const InputParameters & parameters)
+  : ElementLpNormAux(parameters), _func(getFunction("function"))
 {
 }
 

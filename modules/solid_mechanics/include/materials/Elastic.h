@@ -12,15 +12,13 @@
 class Elastic : public SolidModel
 {
 public:
-  Elastic( const InputParameters & parameters);
+  Elastic(const InputParameters & parameters);
   virtual ~Elastic();
 
 protected:
-
 };
 
-template<>
+template <>
 InputParameters validParams<Elastic>();
-
 
 #endif

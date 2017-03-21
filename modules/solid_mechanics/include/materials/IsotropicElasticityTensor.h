@@ -66,7 +66,6 @@ public:
   virtual ~IsotropicElasticityTensor() {}
 
 protected:
-
   bool _lambda_set, _mu_set, _E_set, _nu_set, _k_set;
 
   Real _lambda, _mu, _E, _nu, _k;
@@ -91,4 +90,4 @@ protected:
   Real isotropicEntry(const unsigned int i, const unsigned j, const unsigned k, const unsigned l);
 };
 
-#endif //ISOTROPICELASTICITYTENSOR_H
+#endif // ISOTROPICELASTICITYTENSOR_H

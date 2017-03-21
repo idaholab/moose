@@ -15,8 +15,9 @@
 #include "Postprocessor.h"
 #include "UserObject.h"
 
-template<>
-InputParameters validParams<Postprocessor>()
+template <>
+InputParameters
+validParams<Postprocessor>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<OutputInterface>();
@@ -26,8 +27,7 @@ InputParameters validParams<Postprocessor>()
   return params;
 }
 
-Postprocessor::Postprocessor(const InputParameters & parameters) :
-    OutputInterface(parameters),
-    _pp_name(parameters.get<std::string>("_object_name"))
+Postprocessor::Postprocessor(const InputParameters & parameters)
+  : OutputInterface(parameters), _pp_name(parameters.get<std::string>("_object_name"))
 {
 }

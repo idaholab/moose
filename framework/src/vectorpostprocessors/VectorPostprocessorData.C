@@ -15,8 +15,8 @@
 #include "VectorPostprocessorData.h"
 #include "FEProblem.h"
 
-VectorPostprocessorData::VectorPostprocessorData(FEProblemBase & fe_problem) :
-    Restartable("values", "VectorPostprocessorData", fe_problem, 0)
+VectorPostprocessorData::VectorPostprocessorData(FEProblemBase & fe_problem)
+  : Restartable("values", "VectorPostprocessorData", fe_problem, 0)
 {
 }
 
@@ -27,7 +27,8 @@ VectorPostprocessorData::hasVectorPostprocessor(const std::string & name)
 }
 
 VectorPostprocessorValue &
-VectorPostprocessorData::getVectorPostprocessorValue(const VectorPostprocessorName & vpp_name, const std::string & vector_name)
+VectorPostprocessorData::getVectorPostprocessorValue(const VectorPostprocessorName & vpp_name,
+                                                     const std::string & vector_name)
 {
   _requested_items.emplace(vpp_name + "::" + vector_name);
 
@@ -35,16 +36,17 @@ VectorPostprocessorData::getVectorPostprocessorValue(const VectorPostprocessorNa
 }
 
 VectorPostprocessorValue &
-VectorPostprocessorData::getVectorPostprocessorValueOld(const VectorPostprocessorName & vpp_name, const std::string & vector_name)
+VectorPostprocessorData::getVectorPostprocessorValueOld(const VectorPostprocessorName & vpp_name,
+                                                        const std::string & vector_name)
 {
   _requested_items.emplace(vpp_name + "::" + vector_name);
 
   return getVectorPostprocessorHelper(vpp_name, vector_name, false);
 }
 
-
 VectorPostprocessorValue &
-VectorPostprocessorData::declareVector(const std::string & vpp_name, const std::string & vector_name)
+VectorPostprocessorData::declareVector(const std::string & vpp_name,
+                                       const std::string & vector_name)
 {
   _supplied_items.emplace(vpp_name + "::" + vector_name);
 
@@ -52,7 +54,9 @@ VectorPostprocessorData::declareVector(const std::string & vpp_name, const std::
 }
 
 VectorPostprocessorValue &
-VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name, const std::string & vector_name, bool get_current)
+VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name,
+                                                      const std::string & vector_name,
+                                                      bool get_current)
 {
   // Intentional use of RHS brackets on a std::map to do a multilevel retrieve or insert
   auto & vec_struct = _values[vpp_name][vector_name];
@@ -60,8 +64,10 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
   if (!vec_struct.current)
   {
     mooseAssert(!vec_struct.old, "Uninitialized pointers in VectorPostprocessor Data");
-    vec_struct.current = &declareRestartableDataWithObjectName<VectorPostprocessorValue>(vpp_name + "_" + vector_name, "values");
-    vec_struct.old = &declareRestartableDataWithObjectName<VectorPostprocessorValue>(vpp_name + "_" + vector_name, "values_old");
+    vec_struct.current = &declareRestartableDataWithObjectName<VectorPostprocessorValue>(
+        vpp_name + "_" + vector_name, "values");
+    vec_struct.old = &declareRestartableDataWithObjectName<VectorPostprocessorValue>(
+        vpp_name + "_" + vector_name, "values_old");
   }
 
   return get_current ? *vec_struct.current : *vec_struct.old;

@@ -19,9 +19,8 @@
 // Forward Declaration
 class PPSDiffusion;
 
-template<>
+template <>
 InputParameters validParams<PPSDiffusion>();
-
 
 class PPSDiffusion : public Kernel
 {
@@ -34,4 +33,4 @@ protected:
   const PostprocessorValue & _pps_value;
 };
 
-#endif //PPSDIFFUSION_H
+#endif // PPSDIFFUSION_H

@@ -17,22 +17,18 @@
 // libMesh includes
 #include "libmesh/numeric_vector.h"
 
-template<>
-InputParameters validParams<SteadyState>()
+template <>
+InputParameters
+validParams<SteadyState>()
 {
   InputParameters params = validParams<TimeIntegrator>();
 
   return params;
 }
 
-SteadyState::SteadyState(const InputParameters & parameters) :
-    TimeIntegrator(parameters)
-{
-}
+SteadyState::SteadyState(const InputParameters & parameters) : TimeIntegrator(parameters) {}
 
-SteadyState::~SteadyState()
-{
-}
+SteadyState::~SteadyState() {}
 
 void
 SteadyState::computeTimeDerivatives()

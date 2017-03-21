@@ -13,7 +13,7 @@
 // Forward Declarations
 class AEFVUpwindInternalSideFlux;
 
-template<>
+template <>
 InputParameters validParams<AEFVUpwindInternalSideFlux>();
 
 /**
@@ -24,7 +24,6 @@ InputParameters validParams<AEFVUpwindInternalSideFlux>();
 class AEFVUpwindInternalSideFlux : public InternalSideFluxBase
 {
 public:
-
   AEFVUpwindInternalSideFlux(const InputParameters & parameters);
   virtual ~AEFVUpwindInternalSideFlux();
 
@@ -46,7 +45,6 @@ public:
                             DenseMatrix<Real> & jac2) const override;
 
 protected:
-
 };
 
 #endif

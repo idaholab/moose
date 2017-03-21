@@ -10,16 +10,15 @@
 #include "Kernel.h"
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class InertialForce;
 
-template<>
+template <>
 InputParameters validParams<InertialForce>();
 
 class InertialForce : public Kernel
 {
 public:
-
   InertialForce(const InputParameters & parameters);
 
 protected:
@@ -38,4 +37,4 @@ private:
   const Real _alpha;
 };
 
-#endif //INERTIALFORCE_H
+#endif // INERTIALFORCE_H

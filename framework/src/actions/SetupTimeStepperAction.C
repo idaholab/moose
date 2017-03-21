@@ -17,16 +17,17 @@
 #include "Factory.h"
 #include "TimeStepper.h"
 
-template<>
-InputParameters validParams<SetupTimeStepperAction>()
+template <>
+InputParameters
+validParams<SetupTimeStepperAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
 
   return params;
 }
 
-SetupTimeStepperAction::SetupTimeStepperAction(InputParameters parameters) :
-    MooseObjectAction(parameters)
+SetupTimeStepperAction::SetupTimeStepperAction(InputParameters parameters)
+  : MooseObjectAction(parameters)
 {
 }
 
@@ -41,7 +42,8 @@ SetupTimeStepperAction::act()
 
     _moose_object_pars.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
     _moose_object_pars.set<Transient *>("_executioner") = transient;
-    std::shared_ptr<TimeStepper> ts = _factory.create<TimeStepper>(_type, "TimeStepper", _moose_object_pars);
+    std::shared_ptr<TimeStepper> ts =
+        _factory.create<TimeStepper>(_type, "TimeStepper", _moose_object_pars);
     transient->setTimeStepper(ts);
   }
 }

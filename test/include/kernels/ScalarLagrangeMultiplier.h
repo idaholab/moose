@@ -18,11 +18,12 @@
 
 class ScalarLagrangeMultiplier;
 
-template<>
+template <>
 InputParameters validParams<ScalarLagrangeMultiplier>();
 
 /**
- * Implements coupling of Lagrange multiplier (as a scalar variable) to a simple constraint of type (g(u) - c = 0)
+ * Implements coupling of Lagrange multiplier (as a scalar variable) to a simple constraint of type
+ * (g(u) - c = 0)
  */
 class ScalarLagrangeMultiplier : public Kernel
 {

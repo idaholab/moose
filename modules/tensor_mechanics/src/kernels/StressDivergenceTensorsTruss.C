@@ -11,13 +11,17 @@
 #include "Material.h"
 #include "SystemBase.h"
 
-template<>
-InputParameters validParams<StressDivergenceTensorsTruss>()
+template <>
+InputParameters
+validParams<StressDivergenceTensorsTruss>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Kernel for truss element");
-  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
-  params.addCoupledVar("displacements", "The string of displacements suitable for the problem statement");
+  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction "
+                                                     "the variable this kernel acts in. (0 for x, "
+                                                     "1 for y, 2 for z)");
+  params.addCoupledVar("displacements",
+                       "The string of displacements suitable for the problem statement");
   params.addCoupledVar("temp", "The temperature"); // Deprecated
   params.addCoupledVar("temperature", "The temperature");
   params.addCoupledVar("area", "Cross-sectional area of truss element");
@@ -26,8 +30,8 @@ InputParameters validParams<StressDivergenceTensorsTruss>()
   return params;
 }
 
-StressDivergenceTensorsTruss::StressDivergenceTensorsTruss(const InputParameters & parameters) :
-    Kernel(parameters),
+StressDivergenceTensorsTruss::StressDivergenceTensorsTruss(const InputParameters & parameters)
+  : Kernel(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _axial_stress(getMaterialPropertyByName<Real>(_base_name + "axial_stress")),
     _e_over_l(getMaterialPropertyByName<Real>(_base_name + "e_over_l")),
@@ -49,7 +53,7 @@ StressDivergenceTensorsTruss::StressDivergenceTensorsTruss(const InputParameters
 void
 StressDivergenceTensorsTruss::initialSetup()
 {
-  _orientation = &_subproblem.assembly(_tid).getFE(FEType(),1)->get_dxyzdxi();
+  _orientation = &_subproblem.assembly(_tid).getFE(FEType(), 1)->get_dxyzdxi();
 }
 
 void
@@ -105,7 +109,7 @@ StressDivergenceTensorsTruss::computeJacobian()
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; ++i)
-      diag(i) = _local_ke(i,i);
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (unsigned int i = 0; i < _diag_save_in.size(); ++i)
@@ -137,7 +141,7 @@ StressDivergenceTensorsTruss::computeOffDiagJacobian(unsigned int jvar)
       for (unsigned int i = 0; i < _test.size(); ++i)
         for (unsigned int j = 0; j < _phi.size(); ++j)
           ke(i, j) += (i == j ? 1 : -1) * computeStiffness(_component, coupled_component);
-    else if ( false ) // Need some code here for coupling with temperature
+    else if (false) // Need some code here for coupling with temperature
     {
     }
   }

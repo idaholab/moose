@@ -18,7 +18,7 @@
 
 class PostprocessorCED;
 
-template<>
+template <>
 InputParameters validParams<PostprocessorCED>();
 
 /**
@@ -45,6 +45,5 @@ protected:
   Real _value;
   const PostprocessorValue & _pp_value;
 };
-
 
 #endif /* POSTPROCESSORCED_H */

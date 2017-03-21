@@ -14,16 +14,17 @@
 
 #include "TimeSequenceStepperFailTest.h"
 
-template<>
-InputParameters validParams<TimeSequenceStepperFailTest>()
+template <>
+InputParameters
+validParams<TimeSequenceStepperFailTest>()
 {
   InputParameters params = validParams<TimeSequenceStepper>();
   return params;
 }
 
-TimeSequenceStepperFailTest::TimeSequenceStepperFailTest(const InputParameters & parameters) :
-    TimeSequenceStepper(parameters),
-    _original_time_sequence(getParam<std::vector<Real> >("time_sequence"))
+TimeSequenceStepperFailTest::TimeSequenceStepperFailTest(const InputParameters & parameters)
+  : TimeSequenceStepper(parameters),
+    _original_time_sequence(getParam<std::vector<Real>>("time_sequence"))
 {
 }
 
@@ -40,10 +41,11 @@ TimeSequenceStepperFailTest::converged()
   mooseAssert(_original_time_sequence.size() > 1, "Must have at least two sequence points!");
 
   if (_t_step == 1 && MooseUtils::absoluteFuzzyEqual(_time, _original_time_sequence[1]))
-    {
-      mooseDoOnce(Moose::out << "TimeSequenceStepperFailTest: Simulating failed solve of first timestep.\n");
-      return false;
-    }
+  {
+    mooseDoOnce(
+        Moose::out << "TimeSequenceStepperFailTest: Simulating failed solve of first timestep.\n");
+    return false;
+  }
 
   return TimeStepper::converged();
 }

@@ -12,7 +12,7 @@
 
 class PorousFlowMatrixInternalEnergy;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowMatrixInternalEnergy>();
 
 /**

@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSEnergyInviscidFlux;
 
-template<>
+template <>
 InputParameters validParams<NSEnergyInviscidFlux>();
 
 class NSEnergyInviscidFlux : public NSKernel

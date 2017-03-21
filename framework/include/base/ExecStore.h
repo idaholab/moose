@@ -27,12 +27,12 @@
  * Currently we can do only Post-processors and AuxKernels, but this
  * object will help to extend the other subsystems.
  */
-template<typename T>
+template <typename T>
 class ExecStore
 {
 public:
-  ExecStore() :
-      _obj_initial(libMesh::n_threads()),
+  ExecStore()
+    : _obj_initial(libMesh::n_threads()),
       _obj_linear(libMesh::n_threads()),
       _obj_nonlinear(libMesh::n_threads()),
       _obj_timestep_end(libMesh::n_threads()),
@@ -46,19 +46,23 @@ public:
    * @param type
    * @return
    */
-  std::vector<T> &
-  operator()(ExecFlagType type)
+  std::vector<T> & operator()(ExecFlagType type)
   {
     switch (type)
     {
-    case EXEC_INITIAL: return _obj_initial;
-    case EXEC_TIMESTEP_END: return _obj_timestep_end;
-    case EXEC_TIMESTEP_BEGIN: return _obj_timestep_begin;
-    case EXEC_NONLINEAR: return _obj_nonlinear;
-    case EXEC_CUSTOM: return _obj_custom;
-    case EXEC_LINEAR:
-    default:
-      return _obj_linear;
+      case EXEC_INITIAL:
+        return _obj_initial;
+      case EXEC_TIMESTEP_END:
+        return _obj_timestep_end;
+      case EXEC_TIMESTEP_BEGIN:
+        return _obj_timestep_begin;
+      case EXEC_NONLINEAR:
+        return _obj_nonlinear;
+      case EXEC_CUSTOM:
+        return _obj_custom;
+      case EXEC_LINEAR:
+      default:
+        return _obj_linear;
     }
   }
 

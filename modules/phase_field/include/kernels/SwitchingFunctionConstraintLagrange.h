@@ -14,7 +14,7 @@
 // Forward Declarations
 class SwitchingFunctionConstraintLagrange;
 
-template<>
+template <>
 InputParameters validParams<SwitchingFunctionConstraintLagrange>();
 
 /**
@@ -49,4 +49,4 @@ protected:
   Real _epsilon;
 };
 
-#endif //SWITCHINGFUNCTIONCONSTRAINTLAGRANGE_H
+#endif // SWITCHINGFUNCTIONCONSTRAINTLAGRANGE_H

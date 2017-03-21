@@ -23,9 +23,12 @@
 
 // Forward Declarations
 class ConstantIC;
-namespace libMesh { class Point; }
+namespace libMesh
+{
+class Point;
+}
 
-template<>
+template <>
 InputParameters validParams<ConstantIC>();
 
 /**
@@ -34,7 +37,6 @@ InputParameters validParams<ConstantIC>();
 class ConstantIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *
@@ -48,4 +50,4 @@ protected:
   Real _value;
 };
 
-#endif //CONSTANTIC_H
+#endif // CONSTANTIC_H

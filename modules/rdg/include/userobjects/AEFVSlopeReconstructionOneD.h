@@ -10,10 +10,10 @@
 
 #include "SlopeReconstructionOneD.h"
 
-//Forward Declarations
+// Forward Declarations
 class AEFVSlopeReconstructionOneD;
 
-template<>
+template <>
 InputParameters validParams<AEFVSlopeReconstructionOneD>();
 
 /**
@@ -29,14 +29,12 @@ InputParameters validParams<AEFVSlopeReconstructionOneD>();
 class AEFVSlopeReconstructionOneD : public SlopeReconstructionOneD
 {
 public:
-
   AEFVSlopeReconstructionOneD(const InputParameters & parameters);
 
   /// compute the slope of the cell
   virtual void reconstructElementSlope() override;
 
 protected:
-
 };
 
 #endif

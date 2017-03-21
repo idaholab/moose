@@ -14,15 +14,15 @@
 
 #include "ODETimeDerivative.h"
 
-template<>
-InputParameters validParams<ODETimeDerivative>()
+template <>
+InputParameters
+validParams<ODETimeDerivative>()
 {
   InputParameters params = validParams<ODETimeKernel>();
   return params;
 }
 
-ODETimeDerivative::ODETimeDerivative(const InputParameters & parameters) :
-    ODETimeKernel(parameters)
+ODETimeDerivative::ODETimeDerivative(const InputParameters & parameters) : ODETimeKernel(parameters)
 {
 }
 
@@ -40,4 +40,3 @@ ODETimeDerivative::computeQpJacobian()
   else
     return 0;
 }
-

@@ -13,7 +13,7 @@
 
 class PorousFlowRelativePermeabilityVG;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowRelativePermeabilityVG>();
 
 /**
@@ -53,4 +53,4 @@ protected:
   const Real _cub3;
 };
 
-#endif //POROUSFLOWRELATIVEPERMEABILITYVG_H
+#endif // POROUSFLOWRELATIVEPERMEABILITYVG_H

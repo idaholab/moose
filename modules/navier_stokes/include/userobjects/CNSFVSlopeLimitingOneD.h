@@ -11,26 +11,25 @@
 #include "SlopeLimitingBase.h"
 #include "SinglePhaseFluidProperties.h"
 
-//Forward Declarations
+// Forward Declarations
 class CNSFVSlopeLimitingOneD;
 
-template<>
+template <>
 InputParameters validParams<CNSFVSlopeLimitingOneD>();
 
 /**
- * A use object that serves as base class for slope limiting to get the limited slopes of cell average variables in 1-D
+ * A use object that serves as base class for slope limiting to get the limited slopes of cell
+ * average variables in 1-D
  */
 class CNSFVSlopeLimitingOneD : public SlopeLimitingBase
 {
 public:
-
   CNSFVSlopeLimitingOneD(const InputParameters & parameters);
 
   /// compute the limited slope of the cell
   virtual std::vector<RealGradient> limitElementSlope() const;
 
 protected:
-
   /// the input density
   MooseVariable * _rho;
   /// the input x-momentum

@@ -14,8 +14,9 @@
 
 #include "RandomHitUserObject.h"
 
-template<>
-InputParameters validParams<RandomHitUserObject>()
+template <>
+InputParameters
+validParams<RandomHitUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
   params.addRequiredParam<unsigned int>("num_hits", "The number of 'hits' every timestep");
@@ -23,8 +24,8 @@ InputParameters validParams<RandomHitUserObject>()
   return params;
 }
 
-RandomHitUserObject::RandomHitUserObject(const InputParameters & parameters) :
-    GeneralUserObject(parameters),
+RandomHitUserObject::RandomHitUserObject(const InputParameters & parameters)
+  : GeneralUserObject(parameters),
     _num_hits(parameters.get<unsigned int>("num_hits")),
     _hit_positions(_num_hits)
 {
@@ -35,7 +36,7 @@ bool
 RandomHitUserObject::elementWasHit(const Elem * elem) const
 {
   bool was_hit = false;
-  for (unsigned int i=0; i<_num_hits; i++)
+  for (unsigned int i = 0; i < _num_hits; i++)
   {
     was_hit = elem->contains_point(_hit_positions[i]);
     if (was_hit)
@@ -48,7 +49,7 @@ RandomHitUserObject::elementWasHit(const Elem * elem) const
 void
 RandomHitUserObject::execute()
 {
-  for (unsigned int i=0; i<_num_hits; i++)
+  for (unsigned int i = 0; i < _num_hits; i++)
   {
     Real rand_x = _random.rand();
     Real rand_y = _random.rand();

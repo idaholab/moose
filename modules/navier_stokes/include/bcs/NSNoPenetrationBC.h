@@ -11,7 +11,7 @@
 
 class NSNoPenetrationBC;
 
-template<>
+template <>
 InputParameters validParams<NSNoPenetrationBC>();
 
 /**
@@ -25,7 +25,6 @@ public:
   virtual ~NSNoPenetrationBC();
 
 protected:
-
 };
 
 #endif

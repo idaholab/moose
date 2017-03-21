@@ -16,17 +16,15 @@
 #include "SystemBase.h"
 #include "Assembly.h"
 
-template<>
-InputParameters validParams<ODETimeKernel>()
+template <>
+InputParameters
+validParams<ODETimeKernel>()
 {
   InputParameters params = validParams<ODEKernel>();
   return params;
 }
 
-ODETimeKernel::ODETimeKernel(const InputParameters & parameters) :
-    ODEKernel(parameters)
-{
-}
+ODETimeKernel::ODETimeKernel(const InputParameters & parameters) : ODEKernel(parameters) {}
 
 void
 ODETimeKernel::computeResidual()

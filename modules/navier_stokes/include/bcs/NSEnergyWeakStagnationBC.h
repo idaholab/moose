@@ -12,9 +12,8 @@
 // Forward Declarations
 class NSEnergyWeakStagnationBC;
 
-template<>
+template <>
 InputParameters validParams<NSEnergyWeakStagnationBC>();
-
 
 /**
  * The inviscid energy BC term with specified normal flow.

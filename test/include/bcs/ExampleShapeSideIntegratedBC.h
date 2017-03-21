@@ -46,7 +46,7 @@ protected:
   Real _Vb;
 };
 
-template<>
+template <>
 InputParameters validParams<ExampleShapeSideIntegratedBC>();
 
-#endif //EXAMPLESHAPESIDEINTEGRATEDBC_H
+#endif // EXAMPLESHAPESIDEINTEGRATEDBC_H

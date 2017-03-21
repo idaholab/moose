@@ -19,7 +19,7 @@
 
 class ExplicitRK2;
 
-template<>
+template <>
 InputParameters validParams<ExplicitRK2>();
 
 /**
@@ -88,6 +88,5 @@ protected:
   virtual Real b1() const = 0;
   virtual Real b2() const = 0;
 };
-
 
 #endif /* EXPLICITRK2_H */

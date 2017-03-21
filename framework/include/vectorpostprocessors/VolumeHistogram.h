@@ -19,7 +19,7 @@
 
 class VolumeHistogram;
 
-template<>
+template <>
 InputParameters validParams<VolumeHistogram>();
 
 /**
@@ -66,4 +66,4 @@ protected:
   VectorPostprocessorValue & _volume;
 };
 
-#endif //VOLUMEHISTOGRAM_H
+#endif // VOLUMEHISTOGRAM_H

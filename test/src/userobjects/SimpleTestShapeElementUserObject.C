@@ -15,18 +15,18 @@
 #include "SimpleTestShapeElementUserObject.h"
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<SimpleTestShapeElementUserObject>()
+template <>
+InputParameters
+validParams<SimpleTestShapeElementUserObject>()
 {
   InputParameters params = validParams<ShapeElementUserObject>();
   params.addRequiredCoupledVar("u", "intergral variable");
   return params;
 }
 
-SimpleTestShapeElementUserObject::SimpleTestShapeElementUserObject(const InputParameters & parameters) :
-    ShapeElementUserObject(parameters),
-    _u_value(coupledValue("u")),
-    _u_var(coupled("u"))
+SimpleTestShapeElementUserObject::SimpleTestShapeElementUserObject(
+    const InputParameters & parameters)
+  : ShapeElementUserObject(parameters), _u_value(coupledValue("u")), _u_var(coupled("u"))
 {
 }
 
@@ -79,13 +79,15 @@ SimpleTestShapeElementUserObject::finalize()
 void
 SimpleTestShapeElementUserObject::threadJoin(const UserObject & y)
 {
-  const SimpleTestShapeElementUserObject & shp_uo = dynamic_cast<const SimpleTestShapeElementUserObject &>(y);
+  const SimpleTestShapeElementUserObject & shp_uo =
+      dynamic_cast<const SimpleTestShapeElementUserObject &>(y);
 
   _integral += shp_uo._integral;
 
   if (_fe_problem.currentlyComputingJacobian())
   {
-    mooseAssert(_jacobian_storage.size() == shp_uo._jacobian_storage.size(), "Jacobian storage size is inconsistent across threads");
+    mooseAssert(_jacobian_storage.size() == shp_uo._jacobian_storage.size(),
+                "Jacobian storage size is inconsistent across threads");
     for (unsigned int i = 0; i < _jacobian_storage.size(); ++i)
       _jacobian_storage[i] += shp_uo._jacobian_storage[i];
   }

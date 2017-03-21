@@ -7,23 +7,27 @@
 #include "RadialDisplacementCylinderAux.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<RadialDisplacementCylinderAux>()
+template <>
+InputParameters
+validParams<RadialDisplacementCylinderAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addClassDescription("Compute the radial component of the displacement vector for cylindrical models.");
-  params.addRequiredCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addParam<RealVectorValue>("origin", "Origin of cylinder axis of rotation for 2D and 3D Cartesian models");
-  params.addParam<RealVectorValue>("axis_vector", "Vector defining direction of cylindrical axis (3D Cartesian models)");
+  params.addClassDescription(
+      "Compute the radial component of the displacement vector for cylindrical models.");
+  params.addRequiredCoupledVar(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
+  params.addParam<RealVectorValue>(
+      "origin", "Origin of cylinder axis of rotation for 2D and 3D Cartesian models");
+  params.addParam<RealVectorValue>(
+      "axis_vector", "Vector defining direction of cylindrical axis (3D Cartesian models)");
   params.set<bool>("use_displaced_mesh") = false;
 
   return params;
 }
 
-RadialDisplacementCylinderAux::RadialDisplacementCylinderAux(const InputParameters & parameters) :
-  AuxKernel(parameters),
-  _ndisp(coupledComponents("displacements")),
-  _disp_vals(_ndisp)
+RadialDisplacementCylinderAux::RadialDisplacementCylinderAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _ndisp(coupledComponents("displacements")), _disp_vals(_ndisp)
 {
   const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();
   const auto & sbd_begin = *subdomains.begin();
@@ -32,7 +36,8 @@ RadialDisplacementCylinderAux::RadialDisplacementCylinderAux(const InputParamete
     if (sbd == sbd_begin)
       _coord_system = _subproblem.getCoordSystem(sbd);
     else if (_subproblem.getCoordSystem(sbd) != _coord_system)
-      mooseError("RadialDisplacementCylinderAux requires that all subdomains have the same coordinate type");
+      mooseError("RadialDisplacementCylinderAux requires that all subdomains have the same "
+                 "coordinate type");
   }
 
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -45,7 +50,8 @@ RadialDisplacementCylinderAux::RadialDisplacementCylinderAux(const InputParamete
     mooseError("RadialDisplacmentCylinderAux is not applicable for 1D Cartesian models");
 
   else if (!(_coord_system == Moose::COORD_XYZ || _coord_system == Moose::COORD_RZ))
-    mooseError("RadialDisplacementCylinderAux can only be used with Cartesian or axisymmetric coordinate systems");
+    mooseError("RadialDisplacementCylinderAux can only be used with Cartesian or axisymmetric "
+               "coordinate systems");
 
   if (isParamValid("origin"))
   {
@@ -86,13 +92,16 @@ RadialDisplacementCylinderAux::computeValue()
     case Moose::COORD_XYZ:
     {
       RealVectorValue rad_vec;
-      const RealVectorValue disp_vec((*_disp_vals[0])[_qp], (*_disp_vals[1])[_qp], (_ndisp == 3 ? (*_disp_vals[2])[_qp] : 0.0));
+      const RealVectorValue disp_vec((*_disp_vals[0])[_qp],
+                                     (*_disp_vals[1])[_qp],
+                                     (_ndisp == 3 ? (*_disp_vals[2])[_qp] : 0.0));
 
       if (_ndisp == 2)
         rad_vec = current_point - _origin;
       else if (_ndisp == 3)
       {
-        // t is the distance along the axis from point 1 to 2 to the point nearest to the current point.
+        // t is the distance along the axis from point 1 to 2 to the point nearest to the current
+        // point.
         const RealVectorValue p1pc(current_point - _origin);
         const Real t = p1pc * _axis_vector;
 

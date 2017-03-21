@@ -5,17 +5,16 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef POROUSFLOWDARCYVELOCITYCOMPONENT_H
 #define POROUSFLOWDARCYVELOCITYCOMPONENT_H
 
 #include "AuxKernel.h"
 #include "PorousFlowDictator.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowDarcyVelocityComponent;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowDarcyVelocityComponent>();
 
 /**
@@ -28,7 +27,7 @@ InputParameters validParams<PorousFlowDarcyVelocityComponent>();
  * and w_j is the fluid weight
  * This is measured in m^3 . s^-1 . m^-2
  */
-class PorousFlowDarcyVelocityComponent: public AuxKernel
+class PorousFlowDarcyVelocityComponent : public AuxKernel
 {
 public:
   PorousFlowDarcyVelocityComponent(const InputParameters & parameters);

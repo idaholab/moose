@@ -14,12 +14,13 @@
 // Forward Declarations
 class PorousFlowMassTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowMassTimeDerivative>();
 
 /**
  * Kernel = (mass_component - mass_component_old)/dt
- * where mass_component = porosity*sum_phases(density_phase*saturation_phase*massfrac_phase^component)
+ * where mass_component =
+ * porosity*sum_phases(density_phase*saturation_phase*massfrac_phase^component)
  * It is lumped to the nodes
  */
 class PorousFlowMassTimeDerivative : public TimeKernel
@@ -97,4 +98,4 @@ protected:
   Real computeQpJac(unsigned int pvar);
 };
 
-#endif //POROUSFLOWMASSTIMEDERIVATIVE_H
+#endif // POROUSFLOWMASSTIMEDERIVATIVE_H

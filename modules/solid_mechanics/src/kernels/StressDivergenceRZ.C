@@ -13,11 +13,14 @@
 
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<StressDivergenceRZ>()
+template <>
+InputParameters
+validParams<StressDivergenceRZ>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for r, 1 for z)");
+  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction "
+                                                     "the variable this kernel acts in. (0 for r, "
+                                                     "1 for z)");
   params.addCoupledVar("disp_r", "The r displacement");
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature");
@@ -27,23 +30,23 @@ InputParameters validParams<StressDivergenceRZ>()
   return params;
 }
 
-
 StressDivergenceRZ::StressDivergenceRZ(const InputParameters & parameters)
-  :Kernel(parameters),
-   _stress(getMaterialProperty<SymmTensor>("stress")),
-   _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult")),
-   _d_stress_dT(getMaterialProperty<SymmTensor>("d_stress_dT")),
-   _component(getParam<unsigned int>("component")),
-   _rdisp_coupled(isCoupled("disp_r")),
-   _zdisp_coupled(isCoupled("disp_z")),
-   _temp_coupled(isCoupled("temp")),
-   _rdisp_var(_rdisp_coupled ? coupled("disp_r") : 0),
-   _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
-   _temp_var(_temp_coupled ? coupled("temp") : 0),
-   _avg_grad_test(_test.size(), std::vector<Real>(3, 0.0)),
-   _avg_grad_phi(_phi.size(), std::vector<Real>(3, 0.0)),
-   _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
-{}
+  : Kernel(parameters),
+    _stress(getMaterialProperty<SymmTensor>("stress")),
+    _Jacobian_mult(getMaterialProperty<SymmElasticityTensor>("Jacobian_mult")),
+    _d_stress_dT(getMaterialProperty<SymmTensor>("d_stress_dT")),
+    _component(getParam<unsigned int>("component")),
+    _rdisp_coupled(isCoupled("disp_r")),
+    _zdisp_coupled(isCoupled("disp_z")),
+    _temp_coupled(isCoupled("temp")),
+    _rdisp_var(_rdisp_coupled ? coupled("disp_r") : 0),
+    _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
+    _temp_var(_temp_coupled ? coupled("temp") : 0),
+    _avg_grad_test(_test.size(), std::vector<Real>(3, 0.0)),
+    _avg_grad_phi(_phi.size(), std::vector<Real>(3, 0.0)),
+    _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
+{
+}
 
 void
 StressDivergenceRZ::computeResidual()
@@ -63,10 +66,12 @@ StressDivergenceRZ::computeResidual()
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
         if (_component == 0)
-          _avg_grad_test[_i][_component] += (_grad_test[_i][_qp](_component) + _test[_i][_qp] / _q_point[_qp](0)) * _JxW[_qp] * _coord[_qp];
+          _avg_grad_test[_i][_component] +=
+              (_grad_test[_i][_qp](_component) + _test[_i][_qp] / _q_point[_qp](0)) * _JxW[_qp] *
+              _coord[_qp];
         else
-          _avg_grad_test[_i][_component] += _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
-
+          _avg_grad_test[_i][_component] +=
+              _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
       }
       _avg_grad_test[_i][_component] /= _current_elem_volume;
     }
@@ -93,23 +98,23 @@ StressDivergenceRZ::computeQpResidual()
   Real div(0);
   if (_component == 0)
   {
-    div =
-      _grad_test[_i][_qp](0)            * _stress[_qp].xx() +
-//    0                                 * _stress[_qp].yy() +
-    + _test[_i][_qp] / _q_point[_qp](0) * _stress[_qp].zz() +
-    + _grad_test[_i][_qp](1)            * _stress[_qp].xy();
+    div = _grad_test[_i][_qp](0) * _stress[_qp].xx() +
+          //    0                                 * _stress[_qp].yy() +
+          +_test[_i][_qp] / _q_point[_qp](0) * _stress[_qp].zz() +
+          +_grad_test[_i][_qp](1) * _stress[_qp].xy();
 
     // volumetric locking correction
     if (_volumetric_locking_correction)
-      div += (_avg_grad_test[_i][0] - _grad_test[_i][_qp](0) - _test[_i][_qp] / _q_point[_qp](0)) * (_stress[_qp].trace()) / 3.0;
+      div += (_avg_grad_test[_i][0] - _grad_test[_i][_qp](0) - _test[_i][_qp] / _q_point[_qp](0)) *
+             (_stress[_qp].trace()) / 3.0;
   }
   else if (_component == 1)
   {
     div =
-//    0                      * _stress[_qp].xx() +
-      _grad_test[_i][_qp](1) * _stress[_qp].yy() +
-//    0                      * _stress[_qp].zz() +
-      _grad_test[_i][_qp](0) * _stress[_qp].xy();
+        //    0                      * _stress[_qp].xx() +
+        _grad_test[_i][_qp](1) * _stress[_qp].yy() +
+        //    0                      * _stress[_qp].zz() +
+        _grad_test[_i][_qp](0) * _stress[_qp].xy();
 
     // volumetric locking correction
     if (_volumetric_locking_correction)
@@ -141,10 +146,12 @@ StressDivergenceRZ::computeJacobian()
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
         if (_component == 0)
-          _avg_grad_test[_i][_component] += (_grad_test[_i][_qp](_component) + _test[_i][_qp] / _q_point[_qp](0)) * _JxW[_qp] * _coord[_qp];
+          _avg_grad_test[_i][_component] +=
+              (_grad_test[_i][_qp](_component) + _test[_i][_qp] / _q_point[_qp](0)) * _JxW[_qp] *
+              _coord[_qp];
         else
-          _avg_grad_test[_i][_component] += _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
-
+          _avg_grad_test[_i][_component] +=
+              _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
       }
       _avg_grad_test[_i][_component] /= _current_elem_volume;
     }
@@ -159,7 +166,9 @@ StressDivergenceRZ::computeJacobian()
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         {
           if (component == 0)
-            _avg_grad_phi[_i][component] += (_grad_phi[_i][_qp](component) + _phi[_i][_qp] / _q_point[_qp](0)) * _JxW[_qp] * _coord[_qp];
+            _avg_grad_phi[_i][component] +=
+                (_grad_phi[_i][_qp](component) + _phi[_i][_qp] / _q_point[_qp](0)) * _JxW[_qp] *
+                _coord[_qp];
           else
             _avg_grad_phi[_i][component] += _grad_phi[_i][_qp](component) * _JxW[_qp] * _coord[_qp];
         }
@@ -180,8 +189,8 @@ StressDivergenceRZ::computeJacobian()
   {
     unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
-    for (unsigned int i=0; i<rows; i++)
-      diag(i) = _local_ke(i,i);
+    for (unsigned int i = 0; i < rows; i++)
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
@@ -192,39 +201,39 @@ StressDivergenceRZ::computeJacobian()
 Real
 StressDivergenceRZ::computeQpJacobian()
 {
-  return calculateJacobian( _component, _component );
+  return calculateJacobian(_component, _component);
 }
 
 Real
-StressDivergenceRZ::calculateJacobian( unsigned int ivar, unsigned int jvar )
+StressDivergenceRZ::calculateJacobian(unsigned int ivar, unsigned int jvar)
 {
   // B^T_i * C * B_j
   SymmTensor test, phi;
   if (ivar == 0)
   {
     test.xx() = _grad_test[_i][_qp](0);
-    test.xy() = 0.5*_grad_test[_i][_qp](1);
+    test.xy() = 0.5 * _grad_test[_i][_qp](1);
     test.zz() = _test[_i][_qp] / _q_point[_qp](0);
   }
   else
   {
-    test.xy() = 0.5*_grad_test[_i][_qp](0);
+    test.xy() = 0.5 * _grad_test[_i][_qp](0);
     test.yy() = _grad_test[_i][_qp](1);
   }
   if (jvar == 0)
   {
-    phi.xx()  = _grad_phi[_j][_qp](0);
-    phi.xy()  = 0.5*_grad_phi[_j][_qp](1);
-    phi.zz()  = _phi[_j][_qp] / _q_point[_qp](0);
+    phi.xx() = _grad_phi[_j][_qp](0);
+    phi.xy() = 0.5 * _grad_phi[_j][_qp](1);
+    phi.zz() = _phi[_j][_qp] / _q_point[_qp](0);
   }
   else
   {
-    phi.xy()  = 0.5*_grad_phi[_j][_qp](0);
-    phi.yy()  = _grad_phi[_j][_qp](1);
+    phi.xy() = 0.5 * _grad_phi[_j][_qp](0);
+    phi.yy() = _grad_phi[_j][_qp](1);
   }
 
-  SymmTensor tmp( _Jacobian_mult[_qp] * phi );
-  Real first_term( test.doubleContraction( tmp ) );
+  SymmTensor tmp(_Jacobian_mult[_qp] * phi);
+  Real first_term(test.doubleContraction(tmp));
   Real val = 0.0;
   // volumetric locking correction
   // K = Bbar^T_i * C * Bbar^T_j where Bbar = B + Bvol
@@ -240,14 +249,17 @@ StressDivergenceRZ::calculateJacobian( unsigned int ivar, unsigned int jvar )
     new_phi(1) = _grad_phi[_j][_qp](1);
 
     // Bvol^T_i * C * Bvol_j
-    val += _Jacobian_mult[_qp].sum_3x3() * (_avg_grad_test[_i][ivar] - new_test(ivar)) * (_avg_grad_phi[_j][jvar] - new_phi(jvar)) / 3.0;
+    val += _Jacobian_mult[_qp].sum_3x3() * (_avg_grad_test[_i][ivar] - new_test(ivar)) *
+           (_avg_grad_phi[_j][jvar] - new_phi(jvar)) / 3.0;
 
     // B^T_i * C * Bvol_j
     RealGradient sum_3x1 = _Jacobian_mult[_qp].sum_3x1();
     if (ivar == 0 && jvar == 0)
-      val += (sum_3x1(0) * test.xx() +  sum_3x1(2) * test.zz()) * (_avg_grad_phi[_j][0] - new_phi(0));
+      val +=
+          (sum_3x1(0) * test.xx() + sum_3x1(2) * test.zz()) * (_avg_grad_phi[_j][0] - new_phi(0));
     else if (ivar == 0 && jvar == 1)
-      val += (sum_3x1(0) * test.xx() +  sum_3x1(2) * test.zz()) * (_avg_grad_phi[_j][1] - new_phi(1));
+      val +=
+          (sum_3x1(0) * test.xx() + sum_3x1(2) * test.zz()) * (_avg_grad_phi[_j][1] - new_phi(1));
     else if (ivar == 1 && jvar == 0)
       val += sum_3x1(1) * test.yy() * (_avg_grad_phi[_j][0] - new_phi(0));
     else
@@ -281,10 +293,12 @@ StressDivergenceRZ::computeOffDiagJacobian(unsigned int jvar)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         {
           if (_component == 0)
-            _avg_grad_test[_i][_component] += (_grad_test[_i][_qp](_component) + _test[_i][_qp] / _q_point[_qp](0)) * _JxW[_qp] * _coord[_qp];
+            _avg_grad_test[_i][_component] +=
+                (_grad_test[_i][_qp](_component) + _test[_i][_qp] / _q_point[_qp](0)) * _JxW[_qp] *
+                _coord[_qp];
           else
-            _avg_grad_test[_i][_component] += _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
-
+            _avg_grad_test[_i][_component] +=
+                _grad_test[_i][_qp](_component) * _JxW[_qp] * _coord[_qp];
         }
         _avg_grad_test[_i][_component] /= _current_elem_volume;
       }
@@ -299,9 +313,12 @@ StressDivergenceRZ::computeOffDiagJacobian(unsigned int jvar)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           {
             if (component == 0)
-              _avg_grad_phi[_i][component] += (_grad_phi[_i][_qp](component) + _phi[_i][_qp] / _q_point[_qp](0)) * _JxW[_qp] * _coord[_qp];
+              _avg_grad_phi[_i][component] +=
+                  (_grad_phi[_i][_qp](component) + _phi[_i][_qp] / _q_point[_qp](0)) * _JxW[_qp] *
+                  _coord[_qp];
             else
-              _avg_grad_phi[_i][component] += _grad_phi[_i][_qp](component) * _JxW[_qp] * _coord[_qp];
+              _avg_grad_phi[_i][component] +=
+                  _grad_phi[_i][_qp](component) * _JxW[_qp] * _coord[_qp];
           }
 
           _avg_grad_phi[_i][component] /= _current_elem_volume;
@@ -322,26 +339,26 @@ Real
 StressDivergenceRZ::computeQpOffDiagJacobian(unsigned int jvar)
 {
 
-  if ( _rdisp_coupled && jvar == _rdisp_var )
+  if (_rdisp_coupled && jvar == _rdisp_var)
   {
-    return calculateJacobian( _component, 0 );
+    return calculateJacobian(_component, 0);
   }
-  else if ( _zdisp_coupled && jvar == _zdisp_var )
+  else if (_zdisp_coupled && jvar == _zdisp_var)
   {
-    return calculateJacobian( _component, 1 );
+    return calculateJacobian(_component, 1);
   }
-  else if ( _temp_coupled && jvar == _temp_var )
+  else if (_temp_coupled && jvar == _temp_var)
   {
     SymmTensor test;
     if (_component == 0)
     {
       test.xx() = _grad_test[_i][_qp](0);
-      test.xy() = 0.5*_grad_test[_i][_qp](1);
+      test.xy() = 0.5 * _grad_test[_i][_qp](1);
       test.zz() = _test[_i][_qp] / _q_point[_qp](0);
     }
     else
     {
-      test.xy() = 0.5*_grad_test[_i][_qp](0);
+      test.xy() = 0.5 * _grad_test[_i][_qp](0);
       test.yy() = _grad_test[_i][_qp](1);
     }
     return _d_stress_dT[_qp].doubleContraction(test) * _phi[_j][_qp];

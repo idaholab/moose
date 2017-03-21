@@ -28,15 +28,15 @@
 #include "RdgApp.h"
 #include "LevelSetApp.h"
 
-template<>
-InputParameters validParams<CombinedApp>()
+template <>
+InputParameters
+validParams<CombinedApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-CombinedApp::CombinedApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+CombinedApp::CombinedApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   CombinedApp::registerObjects(_factory);
@@ -45,12 +45,14 @@ CombinedApp::CombinedApp(const InputParameters & parameters) :
   CombinedApp::associateSyntax(_syntax, _action_factory);
 }
 
-CombinedApp::~CombinedApp()
-{
-}
+CombinedApp::~CombinedApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void CombinedApp__registerApps() { CombinedApp::registerApps(); }
+extern "C" void
+CombinedApp__registerApps()
+{
+  CombinedApp::registerApps();
+}
 void
 CombinedApp::registerApps()
 {
@@ -58,7 +60,11 @@ CombinedApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void CombinedApp__registerObjects(Factory & factory) { CombinedApp::registerObjects(factory); }
+extern "C" void
+CombinedApp__registerObjects(Factory & factory)
+{
+  CombinedApp::registerObjects(factory);
+}
 void
 CombinedApp::registerObjects(Factory & factory)
 {
@@ -81,7 +87,11 @@ CombinedApp::registerObjects(Factory & factory)
 }
 
 // External entry point for dynamic syntax association
-extern "C" void CombinedApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { CombinedApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+CombinedApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  CombinedApp::associateSyntax(syntax, action_factory);
+}
 void
 CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {

@@ -18,7 +18,7 @@
 
 class ThrowMaterial;
 
-template<>
+template <>
 InputParameters validParams<ThrowMaterial>();
 
 /**

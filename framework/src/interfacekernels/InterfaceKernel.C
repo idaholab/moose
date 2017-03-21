@@ -18,8 +18,9 @@
 // libMesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<InterfaceKernel>()
+template <>
+InputParameters
+validParams<InterfaceKernel>()
 {
   InputParameters params = validParams<DGKernel>();
   params.addRequiredCoupledVar("neighbor_var", "The variable on the other side of the interface.");
@@ -27,15 +28,16 @@ InputParameters validParams<InterfaceKernel>()
   return params;
 }
 
-InterfaceKernel::InterfaceKernel(const InputParameters & parameters) :
-    DGKernel(parameters),
+InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
+  : DGKernel(parameters),
     _neighbor_var(*getVar("neighbor_var", 0)),
     _neighbor_value(_neighbor_var.slnNeighbor()),
     _grad_neighbor_value(_neighbor_var.gradSlnNeighbor())
 {
   if (!parameters.isParamValid("boundary"))
   {
-    mooseError("In order to use an interface kernel, you must specify a boundary where it will live.");
+    mooseError(
+        "In order to use an interface kernel, you must specify a boundary where it will live.");
   }
 }
 
@@ -55,26 +57,33 @@ InterfaceKernel::computeElemNeighResidual(Moose::DGResidualType type)
     is_elem = false;
 
   const VariableTestValue & test_space = is_elem ? _test : _test_neighbor;
-  DenseVector<Number> & re = is_elem ? _assembly.residualBlock(_var.number()) :
-                                       _assembly.residualBlockNeighbor(_neighbor_var.number());
+  DenseVector<Number> & re = is_elem ? _assembly.residualBlock(_var.number())
+                                     : _assembly.residualBlockNeighbor(_neighbor_var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
       re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual(type);
-
 }
 
 void
 InterfaceKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
 {
-  const VariableTestValue & test_space = ( type == Moose::ElementElement || type == Moose::ElementNeighbor ) ?
-                                         _test : _test_neighbor;
-  const VariableTestValue & loc_phi = ( type == Moose::ElementElement || type == Moose::NeighborElement ) ?
-                                       _phi : _phi_neighbor;
-  DenseMatrix<Number> & Kxx = type == Moose::ElementElement ? _assembly.jacobianBlock(_var.number(), _var.number()) :
-                              type == Moose::ElementNeighbor ? _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _neighbor_var.number()) :
-                              type == Moose::NeighborElement ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _neighbor_var.number(), _var.number()) :
-                              _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _neighbor_var.number(), _neighbor_var.number());
+  const VariableTestValue & test_space =
+      (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
+  const VariableTestValue & loc_phi =
+      (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
+  DenseMatrix<Number> & Kxx =
+      type == Moose::ElementElement
+          ? _assembly.jacobianBlock(_var.number(), _var.number())
+          : type == Moose::ElementNeighbor
+                ? _assembly.jacobianBlockNeighbor(
+                      Moose::ElementNeighbor, _var.number(), _neighbor_var.number())
+                : type == Moose::NeighborElement
+                      ? _assembly.jacobianBlockNeighbor(
+                            Moose::NeighborElement, _neighbor_var.number(), _var.number())
+                      : _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor,
+                                                        _neighbor_var.number(),
+                                                        _neighbor_var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
@@ -89,21 +98,26 @@ InterfaceKernel::computeJacobian()
   computeElemNeighJacobian(Moose::NeighborNeighbor);
 }
 
-
 void
 InterfaceKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar)
 {
-  const VariableTestValue & test_space = ( type == Moose::ElementElement || type == Moose::ElementNeighbor ) ?
-                                         _test : _test_neighbor;
-  const VariableTestValue & loc_phi = ( type == Moose::ElementElement || type == Moose::NeighborElement ) ?
-                                       _phi : _phi_neighbor;
-  DenseMatrix<Number> & Kxx = type == Moose::ElementElement ? _assembly.jacobianBlock(_var.number(), jvar) :
-                              type == Moose::ElementNeighbor ? _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar) :
-                              type == Moose::NeighborElement ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _neighbor_var.number(), jvar) :
-                              _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _neighbor_var.number(), jvar);
+  const VariableTestValue & test_space =
+      (type == Moose::ElementElement || type == Moose::ElementNeighbor) ? _test : _test_neighbor;
+  const VariableTestValue & loc_phi =
+      (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
+  DenseMatrix<Number> & Kxx =
+      type == Moose::ElementElement
+          ? _assembly.jacobianBlock(_var.number(), jvar)
+          : type == Moose::ElementNeighbor
+                ? _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar)
+                : type == Moose::NeighborElement
+                      ? _assembly.jacobianBlockNeighbor(
+                            Moose::NeighborElement, _neighbor_var.number(), jvar)
+                      : _assembly.jacobianBlockNeighbor(
+                            Moose::NeighborNeighbor, _neighbor_var.number(), jvar);
 
   // Prevent calling of Jacobian computation if jvar doesn't lie in the current block
-  if ( (Kxx.m() == test_space.size()) && (Kxx.n() == loc_phi.size()) )
+  if ((Kxx.m() == test_space.size()) && (Kxx.n() == loc_phi.size()))
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       for (_i = 0; _i < test_space.size(); _i++)
         for (_j = 0; _j < loc_phi.size(); _j++)

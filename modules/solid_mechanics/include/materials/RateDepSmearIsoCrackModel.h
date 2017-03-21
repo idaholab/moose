@@ -9,10 +9,9 @@
 
 #include "RateDepSmearCrackModel.h"
 
-
 class RateDepSmearIsoCrackModel;
 
-template<>
+template <>
 InputParameters validParams<RateDepSmearIsoCrackModel>();
 
 /**
@@ -22,13 +21,12 @@ InputParameters validParams<RateDepSmearIsoCrackModel>();
 class RateDepSmearIsoCrackModel : public RateDepSmearCrackModel
 {
 public:
-  RateDepSmearIsoCrackModel( const InputParameters & parameters);
+  RateDepSmearIsoCrackModel(const InputParameters & parameters);
 
   virtual ~RateDepSmearIsoCrackModel();
 
 protected:
-
-  virtual void initStatefulProperties( unsigned int n_points );
+  virtual void initStatefulProperties(unsigned int n_points);
   virtual void initVariables();
   /**
    * This function calculates rate of damage based on energy
@@ -38,8 +36,8 @@ protected:
   virtual void calcJacobian();
   virtual void postSolveStress();
 
-  Real _crit_energy;///Required parameter
-  Real _kfail;///Used to avoid non-positive definiteness
+  Real _crit_energy; ///Required parameter
+  Real _kfail;       ///Used to avoid non-positive definiteness
   Real _upper_lim_damage;
 
   MaterialProperty<Real> & _energy;
@@ -52,7 +50,6 @@ protected:
   ColumnMajorMatrix _dstrain_diag, _dstrain_diag_pos, _dstrain_diag_neg, _dstrain_evec;
 
 private:
-
 };
 
-#endif //RATEDEPSMEARCRACKMODEL
+#endif // RATEDEPSMEARCRACKMODEL

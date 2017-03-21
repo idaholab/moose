@@ -7,30 +7,27 @@
 
 #include "CNSFVPressureIC.h"
 
-template<>
-InputParameters validParams<CNSFVPressureIC>()
+template <>
+InputParameters
+validParams<CNSFVPressureIC>()
 {
   InputParameters params = validParams<InitialCondition>();
 
-  params.addClassDescription("An initial condition object for computing pressure from conserved variables.");
+  params.addClassDescription(
+      "An initial condition object for computing pressure from conserved variables.");
 
-  params.addRequiredCoupledVar("rho",
-  "Conserved variable: rho");
+  params.addRequiredCoupledVar("rho", "Conserved variable: rho");
 
-  params.addRequiredCoupledVar("rhou",
-  "Conserved variable: rhou");
+  params.addRequiredCoupledVar("rhou", "Conserved variable: rhou");
 
-  params.addCoupledVar("rhov",
-  "Conserved variable: rhov");
+  params.addCoupledVar("rhov", "Conserved variable: rhov");
 
-  params.addCoupledVar("rhow",
-  "Conserved variable: rhow");
+  params.addCoupledVar("rhow", "Conserved variable: rhow");
 
-  params.addRequiredCoupledVar("rhoe",
-  "Conserved variable: rhoe");
+  params.addRequiredCoupledVar("rhoe", "Conserved variable: rhoe");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-  "Name for fluid properties user object");
+                                          "Name for fluid properties user object");
   return params;
 }
 
@@ -45,19 +42,16 @@ CNSFVPressureIC::CNSFVPressureIC(const InputParameters & parameters)
 {
 }
 
-CNSFVPressureIC::~CNSFVPressureIC()
-{
-}
+CNSFVPressureIC::~CNSFVPressureIC() {}
 
 Real
 CNSFVPressureIC::value(const Point & /*p*/)
 {
   Real v = 1. / _rho[_qp];
 
-  Real e = _rhoe[_qp] * v -
-           0.5 * v * v * (_rhou[_qp] * _rhou[_qp] +
-                          _rhov[_qp] * _rhov[_qp] +
-                          _rhow[_qp] * _rhow[_qp]);
+  Real e =
+      _rhoe[_qp] * v -
+      0.5 * v * v * (_rhou[_qp] * _rhou[_qp] + _rhov[_qp] * _rhov[_qp] + _rhow[_qp] * _rhow[_qp]);
 
   return _fp.pressure(v, e);
 }

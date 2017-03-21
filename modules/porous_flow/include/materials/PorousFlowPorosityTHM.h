@@ -10,15 +10,16 @@
 
 #include "PorousFlowPorosityExponentialBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowPorosityTHM;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPorosityTHM>();
 
 /**
  * Material designed to provide the porosity in thermo-hydro-mechanical simulations
- * biot + (phi0 - biot)*exp(-vol_strain + coeff * effective_pressure + thermal_exp_coeff * temperature)
+ * biot + (phi0 - biot)*exp(-vol_strain + coeff * effective_pressure + thermal_exp_coeff *
+ * temperature)
  */
 class PorousFlowPorosityTHM : public PorousFlowPorosityExponentialBase
 {
@@ -72,4 +73,4 @@ protected:
   const MaterialProperty<std::vector<Real>> & _dtemperature_dvar;
 };
 
-#endif //POROUSFLOWPOROSITYTHM_H
+#endif // POROUSFLOWPOROSITYTHM_H

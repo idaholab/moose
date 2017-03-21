@@ -10,8 +10,9 @@
 
 #include "PiecewiseLinear.h"
 
-template<>
-InputParameters validParams<IsotropicTempDepHardening>()
+template <>
+InputParameters
+validParams<IsotropicTempDepHardening>()
 {
   InputParameters params = validParams<IsotropicPlasticity>();
 
@@ -23,16 +24,20 @@ InputParameters validParams<IsotropicTempDepHardening>()
   params.suppressParameter<Real>("hardening_constant");
   params.suppressParameter<FunctionName>("hardening_function");
 
-  params.addRequiredParam<std::vector<FunctionName> >("hardening_functions", "List of functions of true stress as function of plastic strain at different temperatures");
-  params.addRequiredParam<std::vector<Real> >("temperatures", "List of temperatures corresponding to the functions listed in 'hardening_functions'");
+  params.addRequiredParam<std::vector<FunctionName>>(
+      "hardening_functions",
+      "List of functions of true stress as function of plastic strain at different temperatures");
+  params.addRequiredParam<std::vector<Real>>(
+      "temperatures",
+      "List of temperatures corresponding to the functions listed in 'hardening_functions'");
 
   return params;
 }
 
-IsotropicTempDepHardening::IsotropicTempDepHardening(const InputParameters & parameters) :
-    IsotropicPlasticity(parameters),
-    _hardening_functions_names(getParam<std::vector<FunctionName> >("hardening_functions")),
-    _hf_temperatures(getParam<std::vector<Real> >("temperatures"))
+IsotropicTempDepHardening::IsotropicTempDepHardening(const InputParameters & parameters)
+  : IsotropicPlasticity(parameters),
+    _hardening_functions_names(getParam<std::vector<FunctionName>>("hardening_functions")),
+    _hf_temperatures(getParam<std::vector<Real>>("temperatures"))
 {
   const unsigned int len = _hardening_functions_names.size();
   if (len < 2)
@@ -41,19 +46,22 @@ IsotropicTempDepHardening::IsotropicTempDepHardening(const InputParameters & par
 
   const unsigned int len_temps = _hf_temperatures.size();
   if (len != len_temps)
-    mooseError("The vector of hardening function temperatures must have the same length as the vector of temperature dependent hardening functions.");
+    mooseError("The vector of hardening function temperatures must have the same length as the "
+               "vector of temperature dependent hardening functions.");
 
-  //Check that the temperatures are strictly increasing
+  // Check that the temperatures are strictly increasing
   for (unsigned int i = 1; i < len_temps; ++i)
   {
-    if (_hf_temperatures[i] <= _hf_temperatures[i-1])
-      mooseError("The temperature dependent hardening functions and corresponding temperatures should be listed in order of increasing temperature.");
+    if (_hf_temperatures[i] <= _hf_temperatures[i - 1])
+      mooseError("The temperature dependent hardening functions and corresponding temperatures "
+                 "should be listed in order of increasing temperature.");
   }
 
   std::vector<Real> yield_stress_vec;
   for (unsigned int i = 0; i < len; ++i)
   {
-    PiecewiseLinear * const f = dynamic_cast<PiecewiseLinear*>(&getFunctionByName(_hardening_functions_names[i]));
+    PiecewiseLinear * const f =
+        dynamic_cast<PiecewiseLinear *>(&getFunctionByName(_hardening_functions_names[i]));
     if (!f)
       mooseError("Function ", _hardening_functions_names[i], " not found in ", name());
 
@@ -62,16 +70,20 @@ IsotropicTempDepHardening::IsotropicTempDepHardening(const InputParameters & par
     yield_stress_vec.push_back(f->value(0.0, Point()));
   }
 
-  _interp_yield_stress = MooseSharedPointer<LinearInterpolation>(new LinearInterpolation(_hf_temperatures, yield_stress_vec));
+  _interp_yield_stress = MooseSharedPointer<LinearInterpolation>(
+      new LinearInterpolation(_hf_temperatures, yield_stress_vec));
 
   _scalar_plastic_strain = &declareProperty<Real>("scalar_plastic_strain");
   _scalar_plastic_strain_old = &declarePropertyOld<Real>("scalar_plastic_strain");
 }
 
 void
-IsotropicTempDepHardening::computeStressInitialize(unsigned qp, Real effectiveTrialStress, const SymmElasticityTensor & elasticityTensor)
+IsotropicTempDepHardening::computeStressInitialize(unsigned qp,
+                                                   Real effectiveTrialStress,
+                                                   const SymmElasticityTensor & elasticityTensor)
 {
-  const SymmIsotropicElasticityTensor * eT = dynamic_cast<const SymmIsotropicElasticityTensor*>(&elasticityTensor);
+  const SymmIsotropicElasticityTensor * eT =
+      dynamic_cast<const SymmIsotropicElasticityTensor *>(&elasticityTensor);
   if (!eT)
     mooseError("IsotropicPlasticity requires a SymmIsotropicElasticityTensor");
 
@@ -91,12 +103,12 @@ IsotropicTempDepHardening::initializeHardeningFunctions(unsigned qp)
   {
     for (unsigned int i = 0; i < _hf_temperatures.size() - 1; ++i)
     {
-      if (temp >= _hf_temperatures[i] && temp < _hf_temperatures[i+1])
+      if (temp >= _hf_temperatures[i] && temp < _hf_temperatures[i + 1])
       {
         _hf_index_lo = i;
         _hf_index_hi = i + 1;
         Real temp_lo = _hf_temperatures[i];
-        Real temp_hi = _hf_temperatures[i+1];
+        Real temp_hi = _hf_temperatures[i + 1];
         _hf_fraction = (temp - temp_lo) / (temp_hi - temp_lo);
       }
     }
@@ -125,8 +137,9 @@ IsotropicTempDepHardening::computeHardeningValue(unsigned qp, Real scalar)
 {
   const Real strain = (*_scalar_plastic_strain_old)[qp] + scalar;
 
-  const Real stress = (1.0 - _hf_fraction) * _hardening_functions[_hf_index_lo]->value(strain, Point())
-                      + _hf_fraction * _hardening_functions[_hf_index_hi]->value(strain, Point());
+  const Real stress =
+      (1.0 - _hf_fraction) * _hardening_functions[_hf_index_lo]->value(strain, Point()) +
+      _hf_fraction * _hardening_functions[_hf_index_hi]->value(strain, Point());
 
   return stress - _yield_stress;
 }
@@ -136,8 +149,10 @@ IsotropicTempDepHardening::computeHardeningDerivative(unsigned qp, Real /*scalar
 {
   const Real strain_old = (*_scalar_plastic_strain_old)[qp];
 
-  const Real derivative = (1.0 - _hf_fraction) * _hardening_functions[_hf_index_lo]->timeDerivative(strain_old, Point())
-                          + _hf_fraction * _hardening_functions[_hf_index_hi]->timeDerivative(strain_old, Point());
+  const Real derivative =
+      (1.0 - _hf_fraction) *
+          _hardening_functions[_hf_index_lo]->timeDerivative(strain_old, Point()) +
+      _hf_fraction * _hardening_functions[_hf_index_hi]->timeDerivative(strain_old, Point());
 
   return derivative;
 }
@@ -147,5 +162,6 @@ IsotropicTempDepHardening::computeYieldStress(unsigned qp)
 {
   _yield_stress = _interp_yield_stress->sample(_temperature[qp]);
   if (_yield_stress <= 0.0)
-    mooseError("The yield stress must be greater than zero, but during the simulation your yield stress became less than zero.");
+    mooseError("The yield stress must be greater than zero, but during the simulation your yield "
+               "stress became less than zero.");
 }

@@ -14,8 +14,9 @@
 #include "DGFunctionConvectionDirichletBC.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<DGFunctionConvectionDirichletBC>()
+template <>
+InputParameters
+validParams<DGFunctionConvectionDirichletBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addParam<Real>("value", 0.0, "The value the variable should have on the boundary");
@@ -26,8 +27,8 @@ InputParameters validParams<DGFunctionConvectionDirichletBC>()
   return params;
 }
 
-DGFunctionConvectionDirichletBC::DGFunctionConvectionDirichletBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
+DGFunctionConvectionDirichletBC::DGFunctionConvectionDirichletBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _func(getFunction("function")),
     _x(getParam<Real>("x")),
     _y(getParam<Real>("y")),
@@ -65,9 +66,8 @@ DGFunctionConvectionDirichletBC::computeQpJacobian()
   }
   else
   {
-    r -= (_velocity *_normals[_qp]) * _test[_j][_qp] * _test[_i][_qp];
+    r -= (_velocity * _normals[_qp]) * _test[_j][_qp] * _test[_i][_qp];
   }
 
   return r;
-
 }

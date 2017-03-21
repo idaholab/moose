@@ -12,7 +12,7 @@
 
 class TimeStepMaterial;
 
-template<>
+template <>
 InputParameters validParams<TimeStepMaterial>();
 
 /**
@@ -31,4 +31,4 @@ protected:
   MaterialProperty<Real> & _prop_time_step;
 };
 
-#endif //TIMESTEPMATERIAL_H
+#endif // TIMESTEPMATERIAL_H

@@ -20,7 +20,7 @@
 // Forward Declarations
 class ScalarConstantIC;
 
-template<>
+template <>
 InputParameters validParams<ScalarConstantIC>();
 
 /**
@@ -29,7 +29,6 @@ InputParameters validParams<ScalarConstantIC>();
 class ScalarConstantIC : public ScalarInitialCondition
 {
 public:
-
   /**
    * Constructor
    *
@@ -43,4 +42,4 @@ protected:
   Real _value;
 };
 
-#endif //CONSTANTIC_H
+#endif // CONSTANTIC_H

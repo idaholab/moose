@@ -19,7 +19,7 @@
 
 class StripeMesh;
 
-template<>
+template <>
 InputParameters validParams<StripeMesh>();
 
 /**
@@ -39,8 +39,7 @@ public:
   virtual void buildMesh();
 
 protected:
-  unsigned int _n_stripes;                      ///< number of stripes
+  unsigned int _n_stripes; ///< number of stripes
 };
-
 
 #endif /* STRIPEMESH_H_ */

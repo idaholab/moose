@@ -12,11 +12,12 @@
 // Forward Declarations
 class MultiSmoothSuperellipsoidIC;
 
-template<>
+template <>
 InputParameters validParams<MultiSmoothSuperellipsoidIC>();
 
 /**
- * MultismoothSuperellipsoidIC creates multiple SmoothSuperellipsoid (number = numbub) that are randomly
+ * MultismoothSuperellipsoidIC creates multiple SmoothSuperellipsoid (number = numbub) that are
+ * randomly
  * positioned around the domain, with a minimum spacing equal to bubspac
  */
 class MultiSmoothSuperellipsoidIC : public SmoothSuperellipsoidBaseIC
@@ -57,4 +58,4 @@ protected:
   std::vector<Real> _semiaxis_c_variation;
 };
 
-#endif //MULTISMOOTHSUPERELLIPSOIDIC_H
+#endif // MULTISMOOTHSUPERELLIPSOIDIC_H

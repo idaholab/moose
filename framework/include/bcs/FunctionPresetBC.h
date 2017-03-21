@@ -17,11 +17,11 @@
 
 #include "PresetNodalBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class FunctionPresetBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionPresetBC>();
 
 /**
@@ -43,4 +43,4 @@ protected:
   Function & _func;
 };
 
-#endif //FUNCTIONPRESETBC_H
+#endif // FUNCTIONPRESETBC_H

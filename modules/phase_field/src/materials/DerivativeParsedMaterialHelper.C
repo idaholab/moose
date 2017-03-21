@@ -13,24 +13,29 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<DerivativeParsedMaterialHelper>()
+template <>
+InputParameters
+validParams<DerivativeParsedMaterialHelper>()
 {
   InputParameters params = validParams<ParsedMaterialHelper>();
   params.addClassDescription("Parsed Function Material with automatic derivatives.");
-  params.addDeprecatedParam<bool>("third_derivatives", "Flag to indicate if third derivatives are needed", "Use derivative_order instead.");
+  params.addDeprecatedParam<bool>("third_derivatives",
+                                  "Flag to indicate if third derivatives are needed",
+                                  "Use derivative_order instead.");
   params.addParam<unsigned int>("derivative_order", 3, "Maximum order of derivatives taken");
 
   return params;
 }
 
 DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const InputParameters & parameters,
-                                                               VariableNameMappingMode map_mode) :
-    ParsedMaterialHelper(parameters, map_mode),
+                                                               VariableNameMappingMode map_mode)
+  : ParsedMaterialHelper(parameters, map_mode),
     //_derivative_order(getParam<unsigned int>("derivative_order"))
     _dmatvar_base("matpropautoderiv"),
     _dmatvar_index(0),
-    _derivative_order(isParamValid("third_derivatives") ? (getParam<bool>("third_derivatives") ? 3 : 2) : getParam<unsigned int>("derivative_order"))
+    _derivative_order(isParamValid("third_derivatives")
+                          ? (getParam<bool>("third_derivatives") ? 3 : 2)
+                          : getParam<unsigned int>("derivative_order"))
 {
 }
 
@@ -53,7 +58,9 @@ ParsedMaterialHelper::MatPropDescriptorList::iterator
 DerivativeParsedMaterialHelper::findMatPropDerivative(const FunctionMaterialPropertyDescriptor & m)
 {
   std::string name = m.getPropertyName();
-  for (MatPropDescriptorList::iterator i = _mat_prop_descriptors.begin(); i != _mat_prop_descriptors.end(); ++i)
+  for (MatPropDescriptorList::iterator i = _mat_prop_descriptors.begin();
+       i != _mat_prop_descriptors.end();
+       ++i)
     if (i->getPropertyName() == name)
       return i;
 
@@ -67,9 +74,11 @@ void
 DerivativeParsedMaterialHelper::assembleDerivatives()
 {
   // need to check for zero derivatives here, otherwise at least one order is generated
-  if (_derivative_order < 1) return;
+  if (_derivative_order < 1)
+    return;
 
-  // if we are not on thread 0 we fetch all data from the thread 0 copy that already did all the work
+  // if we are not on thread 0 we fetch all data from the thread 0 copy that already did all the
+  // work
   if (_tid > 0)
   {
     // get the master object from thread 0
@@ -77,13 +86,15 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
     const MooseObjectWarehouse<Material> & warehouse = material_warehouse[_material_data_type];
 
     MooseSharedPointer<DerivativeParsedMaterialHelper> master =
-      MooseSharedNamespace::dynamic_pointer_cast<DerivativeParsedMaterialHelper>(warehouse.getActiveObject(name()));
+        MooseSharedNamespace::dynamic_pointer_cast<DerivativeParsedMaterialHelper>(
+            warehouse.getActiveObject(name()));
 
     // copy parsers and declare properties
     for (unsigned int i = 0; i < master->_derivatives.size(); ++i)
     {
       Derivative newderivative;
-      newderivative.first = &declarePropertyDerivative<Real>(_F_name, master->_derivatives[i].darg_names);
+      newderivative.first =
+          &declarePropertyDerivative<Real>(_F_name, master->_derivatives[i].darg_names);
       newderivative.second = ADFunctionPtr(new ADFunction(*master->_derivatives[i].second));
       _derivatives.push_back(newderivative);
     }
@@ -108,7 +119,8 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   {
     QueueItem current = queue.front();
 
-    // all permutations of one set of derivatives are equal, so we make sure to generate only one each
+    // all permutations of one set of derivatives are equal, so we make sure to generate only one
+    // each
     unsigned int first = current._dargs.empty() ? 0 : current._dargs.back();
 
     // add necessary derivative steps
@@ -130,11 +142,13 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
           MatPropDescriptorList::iterator m = findMatPropDerivative(matderivative);
           if (m == _mat_prop_descriptors.end())
           {
-            // construct new variable name for the material property derivative as base name + number
+            // construct new variable name for the material property derivative as base name +
+            // number
             std::string newvarname = _dmatvar_base + Moose::stringify(_dmatvar_index++);
             matderivative.setSymbolName(newvarname);
 
-            // loop over all queue items to register the new dmatvar variable (includes 'current' which is popped below)
+            // loop over all queue items to register the new dmatvar variable (includes 'current'
+            // which is popped below)
             for (std::deque<QueueItem>::iterator k = queue.begin(); k != queue.end(); ++k)
             {
               k->_F->AddVariable(newvarname);
@@ -153,7 +167,8 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
       // build derivative
       newitem._F = ADFunctionPtr(new ADFunction(*current._F));
       if (newitem._F->AutoDiff(_variable_names[i]) != -1)
-        mooseError("Failed to take order ", newitem._dargs.size(), " derivative in material ", _name);
+        mooseError(
+            "Failed to take order ", newitem._dargs.size(), " derivative in material ", _name);
 
       // optimize and compile
       if (!_disable_fpoptimizer)

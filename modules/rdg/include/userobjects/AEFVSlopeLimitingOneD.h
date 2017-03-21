@@ -10,10 +10,10 @@
 
 #include "SlopeLimitingBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class AEFVSlopeLimitingOneD;
 
-template<>
+template <>
 InputParameters validParams<AEFVSlopeLimitingOneD>();
 
 /**
@@ -25,14 +25,12 @@ InputParameters validParams<AEFVSlopeLimitingOneD>();
 class AEFVSlopeLimitingOneD : public SlopeLimitingBase
 {
 public:
-
   AEFVSlopeLimitingOneD(const InputParameters & parameters);
 
   /// compute the limited slope of the cell
   virtual std::vector<RealGradient> limitElementSlope() const override;
 
 protected:
-
   /// the input variable
   MooseVariable * _u;
 

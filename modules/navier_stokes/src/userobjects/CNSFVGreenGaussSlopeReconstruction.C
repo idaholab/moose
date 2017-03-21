@@ -7,35 +7,33 @@
 
 #include "CNSFVGreenGaussSlopeReconstruction.h"
 
-template<>
-InputParameters validParams<CNSFVGreenGaussSlopeReconstruction>()
+template <>
+InputParameters
+validParams<CNSFVGreenGaussSlopeReconstruction>()
 {
   InputParameters params = validParams<SlopeReconstructionMultiD>();
 
-  params.addClassDescription("A user object that performs Green-Gauss slope reconstruction to get the slopes of the P0 primitive variables.");
+  params.addClassDescription("A user object that performs Green-Gauss slope reconstruction to get "
+                             "the slopes of the P0 primitive variables.");
 
-  params.addRequiredCoupledVar("rho",
-  "Density at P0 (constant monomial)");
+  params.addRequiredCoupledVar("rho", "Density at P0 (constant monomial)");
 
-  params.addRequiredCoupledVar("rhou",
-  "X-momentum at P0 (constant monomial)");
+  params.addRequiredCoupledVar("rhou", "X-momentum at P0 (constant monomial)");
 
-  params.addCoupledVar("rhov",
-  "Y-momentum at P0 (constant monomial)");
+  params.addCoupledVar("rhov", "Y-momentum at P0 (constant monomial)");
 
-  params.addCoupledVar("rhow",
-  "Z-momentum at P0 (constant monomial)");
+  params.addCoupledVar("rhow", "Z-momentum at P0 (constant monomial)");
 
-  params.addRequiredCoupledVar("rhoe",
-  "Total energy at P0 (constant monomial)");
+  params.addRequiredCoupledVar("rhoe", "Total energy at P0 (constant monomial)");
 
   params.addRequiredParam<UserObjectName>("fluid_properties",
-  "Name for fluid properties user object");
+                                          "Name for fluid properties user object");
 
   return params;
 }
 
-CNSFVGreenGaussSlopeReconstruction::CNSFVGreenGaussSlopeReconstruction(const InputParameters & parameters)
+CNSFVGreenGaussSlopeReconstruction::CNSFVGreenGaussSlopeReconstruction(
+    const InputParameters & parameters)
   : SlopeReconstructionMultiD(parameters),
     _rho(getVar("rho", 0)),
     _rhou(getVar("rhou", 0)),
@@ -76,12 +74,12 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
   Point dcent = Point(0., 0., 0.);
 
   /// vector for the cell-average values in the central cell and its neighbors
-  std::vector <std::vector<Real> > ucell(nside + 1, std::vector<Real>(nvars, 0.));
+  std::vector<std::vector<Real>> ucell(nside + 1, std::vector<Real>(nvars, 0.));
 
   /// get average conserved variables in the central cell
   /// and convert them into primitive variables
 
-  Real rhoc  = _rho->getElementalValue(elem);
+  Real rhoc = _rho->getElementalValue(elem);
   Real rhomc = 1. / rhoc;
   Real rhouc = _rhou->getElementalValue(elem);
   Real rhovc = 0.;
@@ -95,9 +93,9 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
   ucell[0][1] = rhouc * rhomc;
   ucell[0][2] = rhovc * rhomc;
   ucell[0][3] = rhowc * rhomc;
-  Real eintc  = rhoec * rhomc - 0.5 * (ucell[0][1] * ucell[0][1] +
-                                       ucell[0][2] * ucell[0][2] +
-                                       ucell[0][3] * ucell[0][3]);
+  Real eintc =
+      rhoec * rhomc -
+      0.5 * (ucell[0][1] * ucell[0][1] + ucell[0][2] * ucell[0][2] + ucell[0][3] * ucell[0][3]);
   ucell[0][0] = _fp.pressure(rhomc, eintc);
   ucell[0][4] = _fp.temperature(rhomc, eintc);
 
@@ -105,9 +103,9 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
   _avars[elemID] = ucell[0];
 
   /// centroid distances of element-side (ES) and neighbor-side (NS)
-  Real dES   = 0.;
-  Real dNS   = 0.;
-  Real wESN  = 0.;
+  Real dES = 0.;
+  Real dNS = 0.;
+  Real wESN = 0.;
 
   bool bndElem = false;
 
@@ -121,7 +119,7 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
 
     if (elem->neighbor(is) != NULL)
     {
-      const Elem* neig = elem->neighbor(is);
+      const Elem * neig = elem->neighbor(is);
       dof_id_type neigID = neig->id();
 
       if (_side_geoinfo_cached)
@@ -155,8 +153,7 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
         ucell[in][3] = _rhow->getElementalValue(neig) * v;
 
       Real e = _rhoe->getElementalValue(neig) * v -
-               0.5 * (ucell[in][1] * ucell[in][1] +
-                      ucell[in][2] * ucell[in][2] +
+               0.5 * (ucell[in][1] * ucell[in][1] + ucell[in][2] * ucell[in][2] +
                       ucell[in][3] * ucell[in][3]);
 
       ucell[in][0] = _fp.pressure(v, e);
@@ -171,7 +168,7 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
       dNS = std::sqrt(dcent * dcent);
 
       /// distance weight
-      wESN = dES/(dES+dNS);
+      wESN = dES / (dES + dNS);
 
       /// cache the average variable values of neighbor element
       _avars[neigID] = ucell[in];
@@ -210,13 +207,12 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
       {
         BoundaryID currentID = bndID[ib];
 
-        std::map<BoundaryID, UserObjectName>::const_iterator pos =
-          _bnd_uo_name_map.find(currentID);
+        std::map<BoundaryID, UserObjectName>::const_iterator pos = _bnd_uo_name_map.find(currentID);
 
         if (pos != _bnd_uo_name_map.end())
         {
           const BCUserObject & bcuo =
-            GeneralUserObject::_fe_problem.getUserObject<BCUserObject>(pos->second);
+              GeneralUserObject::_fe_problem.getUserObject<BCUserObject>(pos->second);
 
           std::vector<Real> uvec1 = {rhoc, rhouc, rhovc, rhowc, rhoec};
 
@@ -224,7 +220,7 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
 
           /// convert into primitive variables
 
-          Real rhog  = ucell[in][0];
+          Real rhog = ucell[in][0];
           Real rhoug = ucell[in][1];
           Real rhovg = ucell[in][2];
           Real rhowg = ucell[in][3];
@@ -236,9 +232,9 @@ CNSFVGreenGaussSlopeReconstruction::reconstructElementSlope()
           ucell[in][2] = rhovg * rhomg;
           ucell[in][3] = rhowg * rhomg;
 
-          Real eintg = rhoeg * rhomg - 0.5 * (ucell[in][1] * ucell[in][1] +
-                                              ucell[in][2] * ucell[in][2] +
-                                              ucell[in][3] * ucell[in][3]);
+          Real eintg = rhoeg * rhomg -
+                       0.5 * (ucell[in][1] * ucell[in][1] + ucell[in][2] * ucell[in][2] +
+                              ucell[in][3] * ucell[in][3]);
 
           ucell[in][0] = _fp.pressure(rhomg, eintg);
           ucell[in][4] = _fp.temperature(rhomg, eintg);

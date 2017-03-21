@@ -42,14 +42,15 @@ public:
   void addDependencySets(const std::string & action_sets);
 
   const std::vector<std::string> & getSortedTask();
-  const std::vector<std::vector<std::string> > & getSortedTaskSet();
+  const std::vector<std::vector<std::string>> & getSortedTaskSet();
 
   bool hasTask(const std::string & task);
 
   bool isActionRequired(const std::string & task);
 
   // Registration function for associating Moose Actions with syntax
-  void registerActionSyntax(const std::string & action, const std::string & syntax,
+  void registerActionSyntax(const std::string & action,
+                            const std::string & syntax,
                             const std::string & task = "");
 
   /**
@@ -57,10 +58,13 @@ public:
    *  Note: This function will remove all actions associated with this piece of syntax _NOT_ just
    *        a single match of some kind
    */
-  void replaceActionSyntax(const std::string & action, const std::string & syntax, const std::string & task);
+  void replaceActionSyntax(const std::string & action,
+                           const std::string & syntax,
+                           const std::string & task);
 
   /**
-   * This method deprecates previously registered syntax. You should use the exact form that you want deprecated
+   * This method deprecates previously registered syntax. You should use the exact form that you
+   * want deprecated
    * in the passed in parameter.
    */
   void deprecateActionSyntax(const std::string & syntax);
@@ -77,10 +81,14 @@ public:
    */
   std::string isAssociated(const std::string & real_id, bool * is_parent);
 
-  std::pair<std::multimap<std::string, ActionInfo>::iterator, std::multimap<std::string, ActionInfo>::iterator>
+  std::pair<std::multimap<std::string, ActionInfo>::iterator,
+            std::multimap<std::string, ActionInfo>::iterator>
   getActions(const std::string & name);
 
-  const std::multimap<std::string, ActionInfo> & getAssociatedActions() const { return _associated_actions; }
+  const std::multimap<std::string, ActionInfo> & getAssociatedActions() const
+  {
+    return _associated_actions;
+  }
 
   bool verifyMooseObjectTask(const std::string & base, const std::string & task) const;
 
@@ -99,6 +107,5 @@ protected:
 
   std::set<std::string> _deprecated_syntax;
 };
-
 
 #endif // MOOSESYNTAX_H

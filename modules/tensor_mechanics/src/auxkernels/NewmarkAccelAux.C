@@ -6,22 +6,23 @@
 /****************************************************************/
 #include "NewmarkAccelAux.h"
 
-template<>
-InputParameters validParams<NewmarkAccelAux>()
+template <>
+InputParameters
+validParams<NewmarkAccelAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-    params.addRequiredCoupledVar("displacement","displacement variable");
-    params.addRequiredCoupledVar("velocity","velocity variable");
-    params.addRequiredParam<Real>("beta","beta parameter");
+  params.addRequiredCoupledVar("displacement", "displacement variable");
+  params.addRequiredCoupledVar("velocity", "velocity variable");
+  params.addRequiredParam<Real>("beta", "beta parameter");
   return params;
 }
 
-NewmarkAccelAux::NewmarkAccelAux(const InputParameters & parameters) :
-  AuxKernel(parameters),
-   _disp_old(coupledValueOld("displacement")),
-   _disp(coupledValue("displacement")),
-   _vel_old(coupledValueOld("velocity")),
-   _beta(getParam<Real>("beta"))
+NewmarkAccelAux::NewmarkAccelAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _disp_old(coupledValueOld("displacement")),
+    _disp(coupledValue("displacement")),
+    _vel_old(coupledValueOld("velocity")),
+    _beta(getParam<Real>("beta"))
 {
 }
 
@@ -35,7 +36,7 @@ NewmarkAccelAux::computeValue()
   if (_dt == 0)
     return accel_old;
 
-  //Calculates acceeleration using Newmark time integration method
-  return 1.0 / _beta * (  (_disp[_qp] - _disp_old[_qp]) / (_dt * _dt)
-                        - _vel_old[_qp] / _dt - accel_old * (0.5 - _beta));
+  // Calculates acceeleration using Newmark time integration method
+  return 1.0 / _beta * ((_disp[_qp] - _disp_old[_qp]) / (_dt * _dt) - _vel_old[_qp] / _dt -
+                        accel_old * (0.5 - _beta));
 }

@@ -36,7 +36,6 @@ public:
   virtual ~IsotropicElasticityTensorRZ() {}
 
 protected:
-
   /**
    * Fill in the matrix.
    */
@@ -48,7 +47,6 @@ protected:
    * These are based on Michael Tonks's's notes
    */
   void calculateLameCoefficients();
-
 };
 
-#endif //ISOTROPICELASTICITYTENSORRZ_H
+#endif // ISOTROPICELASTICITYTENSORRZ_H

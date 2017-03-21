@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSSATAUX_H
 #define RICHARDSSATAUX_H
 
@@ -13,16 +12,16 @@
 
 #include "RichardsSat.h"
 
-//Forward Declarations
+// Forward Declarations
 class RichardsSatAux;
 
-template<>
+template <>
 InputParameters validParams<RichardsSatAux>();
 
 /**
  * Fluid Saturation as a function of effective saturation
  */
-class RichardsSatAux: public AuxKernel
+class RichardsSatAux : public AuxKernel
 {
 public:
   RichardsSatAux(const InputParameters & parameters);

@@ -12,7 +12,7 @@
 // Forward Declarations
 class PolycrystalRandomIC;
 
-template<>
+template <>
 InputParameters validParams<PolycrystalRandomIC>();
 
 /**
@@ -31,4 +31,4 @@ private:
   const unsigned int _typ;
 };
 
-#endif //POLYCRYSTALRANDOMIC_H
+#endif // POLYCRYSTALRANDOMIC_H

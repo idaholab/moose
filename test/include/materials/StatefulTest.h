@@ -16,10 +16,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class StatefulTest;
 
-template<>
+template <>
 InputParameters validParams<StatefulTest>();
 
 /**
@@ -47,4 +47,4 @@ protected:
   std::vector<MaterialProperty<Real> *> _properties_older;
 };
 
-#endif //STATEFULTEST_H
+#endif // STATEFULTEST_H

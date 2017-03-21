@@ -21,25 +21,29 @@
 
 #include <numeric>
 
-template<>
-InputParameters validParams<MaterialVectorPostprocessor>()
+template <>
+InputParameters
+validParams<MaterialVectorPostprocessor>()
 {
   InputParameters params = validParams<ElementVectorPostprocessor>();
-  params.addRequiredParam<MaterialName>("material", "Material for which all properties will be recorded.");
-  params.addRequiredParam<std::vector<unsigned int>>("elem_ids", "Element IDs to print data for (others are ignored).");
+  params.addRequiredParam<MaterialName>("material",
+                                        "Material for which all properties will be recorded.");
+  params.addRequiredParam<std::vector<unsigned int>>(
+      "elem_ids", "Element IDs to print data for (others are ignored).");
   return params;
 }
 
-MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters & parameters) :
-    ElementVectorPostprocessor(parameters),
-    _elem_filter(getParam<std::vector<unsigned int>>("elem_ids").begin(), getParam<std::vector<unsigned int>>("elem_ids").end()),
+MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters & parameters)
+  : ElementVectorPostprocessor(parameters),
+    _elem_filter(getParam<std::vector<unsigned int>>("elem_ids").begin(),
+                 getParam<std::vector<unsigned int>>("elem_ids").end()),
     _elem_ids(declareVector("elem_id")),
     _qp_ids(declareVector("qp_id"))
 {
   auto & mat = getMaterialByName(getParam<MaterialName>("material"), true);
   auto & prop_names = mat.getSuppliedItems();
   if (mat.isBoundaryMaterial())
-      mooseError(name(), ": boundary materials (i.e. ", mat.name(), ") cannot be used");
+    mooseError(name(), ": boundary materials (i.e. ", mat.name(), ") cannot be used");
 
   for (auto & id : _elem_filter)
   {
@@ -58,7 +62,8 @@ MaterialVectorPostprocessor::MaterialVectorPostprocessor(const InputParameters &
       _prop_refs.push_back(&getMaterialProperty<int>(prop));
     else
     {
-      mooseWarning("property " + prop + " is of unsupported type and skipped by MaterialVectorPostprocessor");
+      mooseWarning("property " + prop +
+                   " is of unsupported type and skipped by MaterialVectorPostprocessor");
       continue;
     }
     _prop_vecs.push_back(&declareVector(prop));
@@ -140,7 +145,8 @@ MaterialVectorPostprocessor::sortVecs()
   ind.resize(_elem_ids.size());
   std::iota(ind.begin(), ind.end(), 0);
   std::sort(ind.begin(), ind.end(), [&](size_t a, size_t b) -> bool {
-    if (_elem_ids[a] == _elem_ids[b]) {
+    if (_elem_ids[a] == _elem_ids[b])
+    {
       return _qp_ids[a] < _qp_ids[b];
     }
     return _elem_ids[a] < _elem_ids[b];
@@ -151,4 +157,3 @@ MaterialVectorPostprocessor::sortVecs()
   for (auto vec : _prop_vecs)
     Moose::applyIndices(*vec, ind);
 }
-

@@ -16,26 +16,33 @@
 #include "Conversion.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<SubdomainBoundingBox>()
+template <>
+InputParameters
+validParams<SubdomainBoundingBox>()
 {
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 
   InputParameters params = validParams<MeshModifier>();
-  params.addRequiredParam<RealVectorValue>("bottom_left", "The bottom left point (in x,y,z with spaces in-between).");
-  params.addRequiredParam<RealVectorValue>("top_right", "The bottom left point (in x,y,z with spaces in-between).");
-  params.addRequiredParam<SubdomainID>("block_id", "Subdomain id to set for inside/outside the bounding box");
-  params.addParam<SubdomainName>("block_name", "Subdomain name to set for inside/outside the bounding box (optional)");
-  params.addParam<MooseEnum>("location", location, "Control of where the subdomain id is to be set");
+  params.addRequiredParam<RealVectorValue>(
+      "bottom_left", "The bottom left point (in x,y,z with spaces in-between).");
+  params.addRequiredParam<RealVectorValue>(
+      "top_right", "The bottom left point (in x,y,z with spaces in-between).");
+  params.addRequiredParam<SubdomainID>("block_id",
+                                       "Subdomain id to set for inside/outside the bounding box");
+  params.addParam<SubdomainName>(
+      "block_name", "Subdomain name to set for inside/outside the bounding box (optional)");
+  params.addParam<MooseEnum>(
+      "location", location, "Control of where the subdomain id is to be set");
 
   return params;
 }
 
-SubdomainBoundingBox::SubdomainBoundingBox(const InputParameters & parameters) :
-    MeshModifier(parameters),
+SubdomainBoundingBox::SubdomainBoundingBox(const InputParameters & parameters)
+  : MeshModifier(parameters),
     _location(parameters.get<MooseEnum>("location")),
     _block_id(parameters.get<SubdomainID>("block_id")),
-    _bounding_box(parameters.get<RealVectorValue>("bottom_left"), parameters.get<RealVectorValue>("top_right"))
+    _bounding_box(parameters.get<RealVectorValue>("bottom_left"),
+                  parameters.get<RealVectorValue>("top_right"))
 {
 }
 
@@ -50,7 +57,9 @@ SubdomainBoundingBox::modify()
   MeshBase & mesh = _mesh_ptr->getMesh();
 
   // Loop over the elements
-  for (MeshBase::element_iterator el = mesh.active_elements_begin(); el != mesh.active_elements_end(); ++el)
+  for (MeshBase::element_iterator el = mesh.active_elements_begin();
+       el != mesh.active_elements_end();
+       ++el)
   {
     bool contains = _bounding_box.contains_point((*el)->centroid());
     if (contains && _location == "INSIDE")

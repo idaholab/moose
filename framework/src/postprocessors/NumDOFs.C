@@ -17,17 +17,21 @@
 
 #include "libmesh/system.h"
 
-template<>
-InputParameters validParams<NumDOFs>()
+template <>
+InputParameters
+validParams<NumDOFs>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   MooseEnum system_enum("NL AUX ALL", "ALL");
-  params.addParam<MooseEnum>("system", system_enum, "The system(s) to retrieve the number of DOFs from (NL, AUX, ALL). Default == ALL");
+  params.addParam<MooseEnum>(
+      "system",
+      system_enum,
+      "The system(s) to retrieve the number of DOFs from (NL, AUX, ALL). Default == ALL");
   return params;
 }
 
-NumDOFs::NumDOFs(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+NumDOFs::NumDOFs(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _system_enum(parameters.get<MooseEnum>("system").getEnum<SystemEnum>()),
     _system_pointer(NULL),
     _es_pointer(NULL)

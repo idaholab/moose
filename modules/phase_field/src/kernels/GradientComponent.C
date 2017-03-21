@@ -6,18 +6,21 @@
 /****************************************************************/
 #include "GradientComponent.h"
 
-template<>
-InputParameters validParams<GradientComponent>()
+template <>
+InputParameters
+validParams<GradientComponent>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Set the kernel variable to a specified component of the gradient of a coupled variable.");
+  params.addClassDescription(
+      "Set the kernel variable to a specified component of the gradient of a coupled variable.");
   params.addRequiredCoupledVar("v", "Coupled variable to match gradient component of");
-  params.addRequiredParam<unsigned int>("component", "Component of the gradient of the coupled variable v");
+  params.addRequiredParam<unsigned int>("component",
+                                        "Component of the gradient of the coupled variable v");
   return params;
 }
 
-GradientComponent::GradientComponent(const InputParameters & parameters) :
-    Kernel(parameters),
+GradientComponent::GradientComponent(const InputParameters & parameters)
+  : Kernel(parameters),
     _v_var(coupled("v")),
     _grad_v(coupledGradient("v")),
     _component(getParam<unsigned int>("component"))

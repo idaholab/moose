@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "ThumbIC.h"
 
-template<>
-InputParameters validParams<ThumbIC>()
+template <>
+InputParameters
+validParams<ThumbIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addClassDescription("Thumb shaped bicrystal for grain boundary mobility tests");
@@ -19,8 +20,8 @@ InputParameters validParams<ThumbIC>()
   return params;
 }
 
-ThumbIC::ThumbIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+ThumbIC::ThumbIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _xcoord(parameters.get<Real>("xcoord")),
     _width(parameters.get<Real>("width")),
     _height(parameters.get<Real>("height")),
@@ -43,14 +44,14 @@ ThumbIC::value(const Point & p)
 
     rad = sqrt(rad);
 
-    if (rad <= _width/2.0)
+    if (rad <= _width / 2.0)
       value = _invalue;
     else
       value = _outvalue;
   }
   else
   {
-    if (p(0) > _xcoord - _width/2.0 && p(0) < _xcoord + _width/2.0)
+    if (p(0) > _xcoord - _width / 2.0 && p(0) < _xcoord + _width / 2.0)
       value = _invalue;
     else
       value = _outvalue;

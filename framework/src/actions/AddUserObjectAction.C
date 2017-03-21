@@ -15,16 +15,14 @@
 #include "AddUserObjectAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddUserObjectAction>()
+template <>
+InputParameters
+validParams<AddUserObjectAction>()
 {
   return validParams<MooseObjectAction>();
 }
 
-AddUserObjectAction::AddUserObjectAction(InputParameters params) :
-    MooseObjectAction(params)
-{
-}
+AddUserObjectAction::AddUserObjectAction(InputParameters params) : MooseObjectAction(params) {}
 
 void
 AddUserObjectAction::act()

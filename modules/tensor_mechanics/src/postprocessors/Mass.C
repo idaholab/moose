@@ -10,17 +10,17 @@
 //
 #include "Mass.h"
 
-template<>
-InputParameters validParams<Mass>()
+template <>
+InputParameters
+validParams<Mass>()
 {
   InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
-Mass::Mass(const InputParameters & parameters) :
-    ElementIntegralVariablePostprocessor(parameters),
-    _density(getMaterialProperty<Real>("density"))
+Mass::Mass(const InputParameters & parameters)
+  : ElementIntegralVariablePostprocessor(parameters), _density(getMaterialProperty<Real>("density"))
 {
 }
 

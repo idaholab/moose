@@ -12,7 +12,7 @@
 
 class PorousFlowRelativePermeabilityConst;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowRelativePermeabilityConst>();
 
 /**
@@ -32,4 +32,4 @@ protected:
   const Real _relperm;
 };
 
-#endif //POROUSFLOWRELATIVEPERMEABILITYCONST_H
+#endif // POROUSFLOWRELATIVEPERMEABILITYCONST_H

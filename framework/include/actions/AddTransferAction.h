@@ -19,9 +19,8 @@
 
 class AddTransferAction;
 
-template<>
+template <>
 InputParameters validParams<AddTransferAction>();
-
 
 class AddTransferAction : public MooseObjectAction
 {

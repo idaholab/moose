@@ -9,25 +9,25 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class GrainCentersPostprocessor;
 class ComputeGrainCenterUserObject;
 
-template<>
+template <>
 InputParameters validParams<GrainCentersPostprocessor>();
 
 /**
- *  GrainCentersPostprocessor is a type of VectorPostprocessor that outputs center and volume of grains
+ *  GrainCentersPostprocessor is a type of VectorPostprocessor that outputs center and volume of
+ * grains
  *  calculated in GrainCenterUserObject.
  */
-class GrainCentersPostprocessor :
-  public GeneralVectorPostprocessor
+class GrainCentersPostprocessor : public GeneralVectorPostprocessor
 {
 public:
   GrainCentersPostprocessor(const InputParameters & parameters);
 
   virtual ~GrainCentersPostprocessor() {}
-  virtual void initialize() {};
+  virtual void initialize(){};
   virtual void execute();
 
 protected:
@@ -44,4 +44,4 @@ protected:
   unsigned int _total_grains;
 };
 
-#endif //GRAINCENTERSPOSTPROCESSOR_H
+#endif // GRAINCENTERSPOSTPROCESSOR_H

@@ -14,15 +14,13 @@
 
 #include "Heun.h"
 
-template<>
-InputParameters validParams<Heun>()
+template <>
+InputParameters
+validParams<Heun>()
 {
   InputParameters params = validParams<ExplicitRK2>();
 
   return params;
 }
 
-Heun::Heun(const InputParameters & parameters) :
-    ExplicitRK2(parameters)
-{
-}
+Heun::Heun(const InputParameters & parameters) : ExplicitRK2(parameters) {}

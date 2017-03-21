@@ -65,20 +65,21 @@ public:
    * @param param_name the name of the parameter
    * @param param_value the value of parameter
    */
-  template<typename T>
+  template <typename T>
   void setParam(const std::string & param_name, const T & param_value);
 
   /**
    * Set the error estimator
    *
-   * @param error_estimator_name the name of the error estimator (currently: Laplacian, Kelly, and PatchRecovery)
+   * @param error_estimator_name the name of the error estimator (currently: Laplacian, Kelly, and
+   * PatchRecovery)
    */
   void setErrorEstimator(const MooseEnum & error_estimator_name);
 
   /**
    * Set the error norm (FIXME: improve description)
    */
-  void setErrorNorm(SystemNorm &sys_norm);
+  void setErrorNorm(SystemNorm & sys_norm);
 
   /**
    *
@@ -110,7 +111,7 @@ public:
    * Set the number of cycles_per_step
    * @param num The number of cycles per step to execute
    */
-  void setCyclesPerStep(const unsigned int & num){ _cycles_per_step = num; }
+  void setCyclesPerStep(const unsigned int & num) { _cycles_per_step = num; }
 
   /**
    * Pull out the _recompute_markers_during_cycles flag previously set through the AdaptivityAction
@@ -123,7 +124,7 @@ public:
    * Set the flag to recompute markers during adaptivity cycles
    * @param flag The flag to recompute markers
    */
-  void setRecomputeMarkersFlag(const bool flag){ _recompute_markers_during_cycles = flag; }
+  void setRecomputeMarkersFlag(const bool flag) { _recompute_markers_during_cycles = flag; }
 
   /**
    * Adapts the mesh based on the error estimator used
@@ -145,7 +146,7 @@ public:
    * MooseMesh object. No solution projection is performed in this
    * version.
    */
-  static void uniformRefine(MooseMesh *mesh);
+  static void uniformRefine(MooseMesh * mesh);
 
   /**
    * Performs uniform refinement on the meshes in the current
@@ -179,7 +180,8 @@ public:
   void setUseNewSystem();
 
   /**
-   * Sets the name of the field variable to actually use to flag elements for refinement / coarsening.
+   * Sets the name of the field variable to actually use to flag elements for refinement /
+   * coarsening.
    * This must be a CONSTANT, MONOMIAL Auxiliary Variable Name that contains values
    * corresponding to libMesh::Elem::RefinementState.
    *
@@ -188,7 +190,8 @@ public:
   void setMarkerVariableName(std::string marker_field);
 
   /**
-   * Sets the name of the field variable to actually use to flag elements for initial refinement / coarsening.
+   * Sets the name of the field variable to actually use to flag elements for initial refinement /
+   * coarsening.
    * This must be a CONSTANT, MONOMIAL Auxiliary Variable Name that contains values
    * corresponding to libMesh::Elem::RefinementState.
    *
@@ -286,12 +289,12 @@ protected:
   bool _recompute_markers_during_cycles;
 
   /// Stores pointers to ErrorVectors associated with indicator field names
-  std::map<std::string, std::unique_ptr<ErrorVector> > _indicator_field_to_error_vector;
+  std::map<std::string, std::unique_ptr<ErrorVector>> _indicator_field_to_error_vector;
 };
 
-template<typename T>
+template <typename T>
 void
-Adaptivity::setParam(const std::string &param_name, const T &param_value)
+Adaptivity::setParam(const std::string & param_name, const T & param_value)
 {
   if (param_name == "refine fraction")
   {
@@ -318,6 +321,6 @@ Adaptivity::setParam(const std::string &param_name, const T &param_value)
   else
     mooseError("Invalid Param in adaptivity object");
 }
-#endif //LIBMESH_ENABLE_AMR
+#endif // LIBMESH_ENABLE_AMR
 
 #endif /* ADAPTIVITY_H */

@@ -43,7 +43,7 @@ enum class ShapeType
  * \warning It is up to the user to ensure _fe_problem.currentlyComputingJacobian()
  *          returns true before utilizing the shape functions.
  */
-template<typename T>
+template <typename T>
 class ShapeUserObject : public T
 {
 public:
@@ -55,13 +55,17 @@ public:
   /**
    * Returns the set of variables a Jacobian has been requested for
    */
-  const std::set<MooseVariable *> & jacobianMooseVariables() const { return _jacobian_moose_variables; }
+  const std::set<MooseVariable *> & jacobianMooseVariables() const
+  {
+    return _jacobian_moose_variables;
+  }
 
   /**
    * This function will be called with the shape functions for jvar initialized. It
    * can be used to compute Jacobian contributions of the by implementing executeJacobian.
    */
-  virtual void executeJacobianWrapper(unsigned int jvar, const std::vector<dof_id_type> & dof_indices);
+  virtual void executeJacobianWrapper(unsigned int jvar,
+                                      const std::vector<dof_id_type> & dof_indices);
 
   static InputParameters validParams();
 
@@ -97,17 +101,19 @@ private:
   std::set<MooseVariable *> _jacobian_moose_variables;
 };
 
-template<typename T>
-ShapeUserObject<T>::ShapeUserObject(const InputParameters & parameters, ShapeType type) :
-    T(parameters),
+template <typename T>
+ShapeUserObject<T>::ShapeUserObject(const InputParameters & parameters, ShapeType type)
+  : T(parameters),
     _phi(type == ShapeType::Element ? this->_assembly.phi() : this->_assembly.phiFace()),
-    _grad_phi(type == ShapeType::Element ? this->_assembly.gradPhi() : this->_assembly.gradPhiFace()),
+    _grad_phi(type == ShapeType::Element ? this->_assembly.gradPhi()
+                                         : this->_assembly.gradPhiFace()),
     _compute_jacobians(MooseObject::getParam<bool>("compute_jacobians"))
 {
-  mooseWarning("Jacobian calculation in UserObjects is an experimental capability with a potentially unstable interface.");
+  mooseWarning("Jacobian calculation in UserObjects is an experimental capability with a "
+               "potentially unstable interface.");
 }
 
-template<typename T>
+template <typename T>
 InputParameters
 ShapeUserObject<T>::validParams()
 {
@@ -117,7 +123,7 @@ ShapeUserObject<T>::validParams()
   return params;
 }
 
-template<typename T>
+template <typename T>
 unsigned int
 ShapeUserObject<T>::coupled(const std::string & var_name, unsigned int comp)
 {
@@ -131,9 +137,10 @@ ShapeUserObject<T>::coupled(const std::string & var_name, unsigned int comp)
   return T::coupled(var_name, comp);
 }
 
-template<typename T>
+template <typename T>
 void
-ShapeUserObject<T>::executeJacobianWrapper(unsigned int jvar, const std::vector<dof_id_type> & dof_indices)
+ShapeUserObject<T>::executeJacobianWrapper(unsigned int jvar,
+                                           const std::vector<dof_id_type> & dof_indices)
 {
   for (_j = 0; _j < _phi.size(); ++_j)
   {
@@ -142,4 +149,4 @@ ShapeUserObject<T>::executeJacobianWrapper(unsigned int jvar, const std::vector<
   }
 }
 
-#endif //SHAPEUSEROBJECT_H
+#endif // SHAPEUSEROBJECT_H

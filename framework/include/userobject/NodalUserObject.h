@@ -30,24 +30,23 @@
 // Forward Declarations
 class NodalUserObject;
 
-template<>
+template <>
 InputParameters validParams<NodalUserObject>();
 
 /**
  * A user object that runs over all the nodes and does an aggregation
  * step to compute a single value.
  */
-class NodalUserObject :
-  public UserObject,
-  public BlockRestrictable,
-  public BoundaryRestrictable,
-  public UserObjectInterface,
-  public Coupleable,
-  public MooseVariableDependencyInterface,
-  public TransientInterface,
-  protected PostprocessorInterface,
-  public RandomInterface,
-  public ZeroInterface
+class NodalUserObject : public UserObject,
+                        public BlockRestrictable,
+                        public BoundaryRestrictable,
+                        public UserObjectInterface,
+                        public Coupleable,
+                        public MooseVariableDependencyInterface,
+                        public TransientInterface,
+                        protected PostprocessorInterface,
+                        public RandomInterface,
+                        public ZeroInterface
 {
 public:
   NodalUserObject(const InputParameters & parameters);
@@ -64,7 +63,7 @@ protected:
   const unsigned int _qp;
 
   /// Reference to current node pointer
-  const Node * & _current_node;
+  const Node *& _current_node;
 
   // Flag for enable/disabling multiple execute calls on nodes that share block ids
   const bool & _unique_node_execute;

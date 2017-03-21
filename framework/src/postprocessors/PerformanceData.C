@@ -17,22 +17,29 @@
 #include "FEProblem.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<PerformanceData>()
+template <>
+InputParameters
+validParams<PerformanceData>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
-  MooseEnum column_options("n_calls total_time average_time total_time_with_sub average_time_with_sub percent_of_active_time percent_of_active_time_with_sub", "total_time_with_sub");
+  MooseEnum column_options("n_calls total_time average_time total_time_with_sub "
+                           "average_time_with_sub percent_of_active_time "
+                           "percent_of_active_time_with_sub",
+                           "total_time_with_sub");
 
-  params.addParam<MooseEnum>("column", column_options, "The column you want the value of (Default: total_time_with_sub).");
+  params.addParam<MooseEnum>(
+      "column", column_options, "The column you want the value of (Default: total_time_with_sub).");
   params.addParam<std::string>("category", "Execution", "The category or \"Header\" for the event");
-  params.addRequiredParam<std::string>("event", "The name or \"label\" of the event (\"ALIVE\" and \"ACTIVE\" are also valid events, category and column are ignored for these cases).");
+  params.addRequiredParam<std::string>("event", "The name or \"label\" of the event (\"ALIVE\" and "
+                                                "\"ACTIVE\" are also valid events, category and "
+                                                "column are ignored for these cases).");
 
   return params;
 }
 
-PerformanceData::PerformanceData(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+PerformanceData::PerformanceData(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _column(getParam<MooseEnum>("column").getEnum<PerfLogCols>()),
     _category(getParam<std::string>("category")),
     _event(getParam<std::string>("event"))

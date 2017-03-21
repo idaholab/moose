@@ -39,7 +39,7 @@ public:
   // Splitting Constructor
   MaxQpsThread(MaxQpsThread & x, Threads::split split);
 
-  void operator() (const ConstElemRange & range);
+  void operator()(const ConstElemRange & range);
 
   void join(const MaxQpsThread & y);
 
@@ -63,4 +63,4 @@ protected:
   unsigned int _max_shape_funcs;
 };
 
-#endif //MAXQPSTHREAD_H
+#endif // MAXQPSTHREAD_H

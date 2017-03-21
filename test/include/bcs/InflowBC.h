@@ -5,21 +5,19 @@
 
 class InflowBC;
 
-template<>
+template <>
 InputParameters validParams<InflowBC>();
 
 class InflowBC : public IntegratedBC
 {
 public:
-
   InflowBC(const InputParameters & parameters);
 
 protected:
-
   RealVectorValue _velocity;
   Real _inlet_conc;
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
 
-#endif //INFLOWBC_H
+#endif // INFLOWBC_H

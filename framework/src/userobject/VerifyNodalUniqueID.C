@@ -17,16 +17,18 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<VerifyNodalUniqueID>()
+template <>
+InputParameters
+validParams<VerifyNodalUniqueID>()
 {
   InputParameters params = validParams<NodalUserObject>();
   return params;
 }
 
-VerifyNodalUniqueID::VerifyNodalUniqueID(const InputParameters & parameters) :
-    NodalUserObject(parameters)
-{}
+VerifyNodalUniqueID::VerifyNodalUniqueID(const InputParameters & parameters)
+  : NodalUserObject(parameters)
+{
+}
 
 // This object can't test every possible scenario.  For instance, it can't detect recycled ids
 // It's only designed to make sure that all ids are unique in any given
@@ -48,7 +50,7 @@ VerifyNodalUniqueID::execute()
 }
 
 void
-VerifyNodalUniqueID::threadJoin(const UserObject &y)
+VerifyNodalUniqueID::threadJoin(const UserObject & y)
 {
   const VerifyNodalUniqueID & uo = static_cast<const VerifyNodalUniqueID &>(y);
 

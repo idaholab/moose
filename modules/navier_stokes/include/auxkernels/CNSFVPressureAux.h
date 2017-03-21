@@ -12,7 +12,7 @@
 
 class CNSFVPressureAux;
 
-template<>
+template <>
 InputParameters validParams<CNSFVPressureAux>();
 
 /**
@@ -21,12 +21,10 @@ InputParameters validParams<CNSFVPressureAux>();
 class CNSFVPressureAux : public AuxKernel
 {
 public:
-
   CNSFVPressureAux(const InputParameters & parameters);
   virtual ~CNSFVPressureAux() {}
 
 protected:
-
   virtual Real computeValue();
 
   const MaterialProperty<Real> & _pres;

@@ -24,19 +24,22 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/point_locator_base.h"
 
-template<>
-InputParameters validParams<SideSetsFromPoints>()
+template <>
+InputParameters
+validParams<SideSetsFromPoints>()
 {
   InputParameters params = validParams<AddSideSetsBase>();
-  params.addRequiredParam<std::vector<BoundaryName> >("new_boundary", "The name of the boundary to create");
-  params.addRequiredParam<std::vector<Point> >("points", "A list of points from which to start painting sidesets");
+  params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
+                                                     "The name of the boundary to create");
+  params.addRequiredParam<std::vector<Point>>(
+      "points", "A list of points from which to start painting sidesets");
   return params;
 }
 
-SideSetsFromPoints::SideSetsFromPoints(const InputParameters & parameters) :
-    AddSideSetsBase(parameters),
-    _boundary_names(getParam<std::vector<BoundaryName> >("new_boundary")),
-    _points(getParam<std::vector<Point> >("points"))
+SideSetsFromPoints::SideSetsFromPoints(const InputParameters & parameters)
+  : AddSideSetsBase(parameters),
+    _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary")),
+    _points(getParam<std::vector<Point>>("points"))
 {
   if (_points.size() != _boundary_names.size())
     mooseError("point list and boundary list are not the same length");

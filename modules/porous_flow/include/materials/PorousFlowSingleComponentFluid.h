@@ -13,7 +13,7 @@
 
 class PorousFlowSingleComponentFluid;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowSingleComponentFluid>();
 
 /**
@@ -70,4 +70,4 @@ protected:
   const SinglePhaseFluidPropertiesPT & _fp;
 };
 
-#endif //POROUSFLOWSINGLECOMPONENTFLUID_H
+#endif // POROUSFLOWSINGLECOMPONENTFLUID_H

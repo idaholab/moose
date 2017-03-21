@@ -18,27 +18,26 @@
 #include "Adaptivity.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<SetupMeshCompleteAction>()
+template <>
+InputParameters
+validParams<SetupMeshCompleteAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params) :
-    Action(params)
-{
-}
+SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params) : Action(params) {}
 
 bool
-SetupMeshCompleteAction::completeSetup(MooseMesh *mesh)
+SetupMeshCompleteAction::completeSetup(MooseMesh * mesh)
 {
   bool prepared = mesh->prepared();
 
   if (!prepared)
     mesh->prepare();
 
-  // Clear the modifiers, they are not used again during the simulation after the mesh has been completed
+  // Clear the modifiers, they are not used again during the simulation after the mesh has been
+  // completed
   _app.clearMeshModifiers();
 
   return prepared;

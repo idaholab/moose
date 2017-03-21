@@ -13,19 +13,20 @@
 class XFEMGeometricCut2D : public XFEMGeometricCut
 {
 public:
-
   XFEMGeometricCut2D(Real x0, Real y0, Real x1, Real y1, Real t_start, Real t_end);
   ~XFEMGeometricCut2D();
 
   virtual bool active(Real time);
 
-  virtual bool cutElementByGeometry(const Elem* elem, std::vector<CutEdge> & cut_edges, Real time);
-  virtual bool cutElementByGeometry(const Elem* elem, std::vector<CutFace> & cut_faces, Real time);
+  virtual bool cutElementByGeometry(const Elem * elem, std::vector<CutEdge> & cut_edges, Real time);
+  virtual bool cutElementByGeometry(const Elem * elem, std::vector<CutFace> & cut_faces, Real time);
 
-  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point> > & frag_edges,
-                            std::vector<CutEdge> & cut_edges, Real time);
-  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point> > & frag_faces,
-                            std::vector<CutFace> & cut_faces, Real time);
+  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
+                                     std::vector<CutEdge> & cut_edges,
+                                     Real time);
+  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
+                                     std::vector<CutFace> & cut_faces,
+                                     Real time);
 
 protected:
   bool IntersectSegmentWithCutLine(const Point & segment_point1,

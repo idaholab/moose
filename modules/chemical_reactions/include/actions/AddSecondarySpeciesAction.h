@@ -11,7 +11,7 @@
 
 class AddSecondarySpeciesAction;
 
-template<>
+template <>
 InputParameters validParams<AddSecondarySpeciesAction>();
 
 class AddSecondarySpeciesAction : public Action

@@ -13,19 +13,25 @@
 
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<FeatureVolumeVectorPostprocessor>()
+template <>
+InputParameters
+validParams<FeatureVolumeVectorPostprocessor>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
 
-  params.addRequiredParam<UserObjectName>("flood_counter", "The FeatureFloodCount UserObject to get values from.");
-  params.addParam<bool>("single_feature_per_element", false, "Set this Boolean if you wish to use an element based volume where"
-                        " the dominant order parameter determines the feature that accumulates the entire element volume");
+  params.addRequiredParam<UserObjectName>("flood_counter",
+                                          "The FeatureFloodCount UserObject to get values from.");
+  params.addParam<bool>("single_feature_per_element",
+                        false,
+                        "Set this Boolean if you wish to use an element based volume where"
+                        " the dominant order parameter determines the feature that accumulates the "
+                        "entire element volume");
   return params;
 }
 
-FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
+FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
+    const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters),
     MooseVariableDependencyInterface(),
     _single_feature_per_elem(getParam<bool>("single_feature_per_element")),
     _feature_counter(getUserObject<FeatureFloodCount>("flood_counter")),
@@ -58,7 +64,7 @@ FeatureVolumeVectorPostprocessor::execute()
   const auto num_features = _feature_counter.getTotalFeatureCount();
 
   // Reset the variable index and intersect bounds vectors
-  _var_num.assign(num_features, -1); // Invalid
+  _var_num.assign(num_features, -1);           // Invalid
   _intersects_bounds.assign(num_features, -1); // Invalid
   for (auto feature_num = beginIndex(_var_num); feature_num < num_features; ++feature_num)
   {
@@ -66,7 +72,8 @@ FeatureVolumeVectorPostprocessor::execute()
     if (var_num != FeatureFloodCount::invalid_id)
       _var_num[feature_num] = var_num;
 
-    _intersects_bounds[feature_num] = static_cast<unsigned int>(_feature_counter.doesFeatureIntersectBoundary(feature_num));
+    _intersects_bounds[feature_num] =
+        static_cast<unsigned int>(_feature_counter.doesFeatureIntersectBoundary(feature_num));
   }
 
   // Reset the volume vector
@@ -105,12 +112,16 @@ FeatureVolumeVectorPostprocessor::getFeatureVolume(unsigned int feature_id) cons
 }
 
 void
-FeatureVolumeVectorPostprocessor::accumulateVolumes(const Elem * elem, const std::vector<unsigned int> & var_to_features, std::size_t libmesh_dbg_var(num_features))
+FeatureVolumeVectorPostprocessor::accumulateVolumes(
+    const Elem * elem,
+    const std::vector<unsigned int> & var_to_features,
+    std::size_t libmesh_dbg_var(num_features))
 {
   unsigned int dominant_feature_id = FeatureFloodCount::invalid_id;
   Real max_var_value = std::numeric_limits<Real>::lowest();
 
-  for (auto var_index = beginIndex(var_to_features); var_index < var_to_features.size(); ++var_index)
+  for (auto var_index = beginIndex(var_to_features); var_index < var_to_features.size();
+       ++var_index)
   {
     // Only sample "active" variables
     if (var_to_features[var_index] != FeatureFloodCount::invalid_id)

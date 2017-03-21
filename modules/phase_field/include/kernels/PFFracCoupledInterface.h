@@ -9,10 +9,10 @@
 
 #include "KernelGrad.h"
 
-//Forward Declarations
+// Forward Declarations
 class PFFracCoupledInterface;
 
-template<>
+template <>
 InputParameters validParams<PFFracCoupledInterface>();
 
 /**
@@ -24,7 +24,6 @@ InputParameters validParams<PFFracCoupledInterface>();
 class PFFracCoupledInterface : public KernelGrad
 {
 public:
-
   PFFracCoupledInterface(const InputParameters & parameters);
 
 protected:
@@ -37,4 +36,4 @@ protected:
   unsigned int _c_var;
 };
 
-#endif //PFFRACCOUPLEDINTERFACE_H
+#endif // PFFRACCOUPLEDINTERFACE_H

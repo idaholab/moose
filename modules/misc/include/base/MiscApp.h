@@ -11,7 +11,7 @@
 
 class MiscApp;
 
-template<>
+template <>
 InputParameters validParams<MiscApp>();
 
 class MiscApp : public MooseApp

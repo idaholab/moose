@@ -7,19 +7,22 @@
 
 #include "PorousFlowViscosityConst.h"
 
-template<>
-InputParameters validParams<PorousFlowViscosityConst>()
+template <>
+InputParameters
+validParams<PorousFlowViscosityConst>()
 {
   InputParameters params = validParams<PorousFlowFluidPropertiesBase>();
-  params.addRequiredParam<Real>("viscosity", "The viscosity, which is assumed constant for this material");
+  params.addRequiredParam<Real>("viscosity",
+                                "The viscosity, which is assumed constant for this material");
   params.addClassDescription("This Material calculates the viscosity assuming it is constant");
   return params;
 }
 
-PorousFlowViscosityConst::PorousFlowViscosityConst(const InputParameters & parameters) :
-    PorousFlowFluidPropertiesBase(parameters),
+PorousFlowViscosityConst::PorousFlowViscosityConst(const InputParameters & parameters)
+  : PorousFlowFluidPropertiesBase(parameters),
     _input_viscosity(getParam<Real>("viscosity")),
-    _viscosity(_nodal_material ? declareProperty<Real>("PorousFlow_viscosity_nodal" + _phase) : declareProperty<Real>("PorousFlow_viscosity_qp" + _phase))
+    _viscosity(_nodal_material ? declareProperty<Real>("PorousFlow_viscosity_nodal" + _phase)
+                               : declareProperty<Real>("PorousFlow_viscosity_qp" + _phase))
 {
 }
 

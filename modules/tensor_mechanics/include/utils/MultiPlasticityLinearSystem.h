@@ -11,7 +11,7 @@
 
 class MultiPlasticityLinearSystem;
 
-template<>
+template <>
 InputParameters validParams<MultiPlasticityLinearSystem>();
 
 /**
@@ -73,7 +73,8 @@ InputParameters validParams<MultiPlasticityLinearSystem>();
  * provided in the NR step are:
  * the 6 components of stress (it is assumed to be symmetric)
  * the plasticity multipliers, pm, belonging to linearly independent surfaces
- * the internal parameters, intnl, belonging to models with at least one linearly-independent surface
+ * the internal parameters, intnl, belonging to models with at least one linearly-independent
+ * surface
  *
  *
  * THE CONSTRAINTS AND RHS
@@ -81,11 +82,14 @@ InputParameters validParams<MultiPlasticityLinearSystem>();
  * The variables calculated by calculateConstraints and
  * calculateRHS are:
  * epp = pm*r - E_inv*(trial_stress - stress) = pm*r - delta_dp
- * f = yield function    [all the active constraints, including the deactivated_due_to_ld.  The latter ones will not be put into the linear system]
+ * f = yield function    [all the active constraints, including the deactivated_due_to_ld.  The
+ * latter ones will not be put into the linear system]
  * ic = intnl - intnl_old + pm*h   [only for models that contain active surfaces]
  *
- * Here pm*r = sum_{active_alpha} pm[alpha]*r[alpha].  Note that this contains all the "active" surfaces,
- *             even the ones that have been deactivated_due_to_ld.  in calculateConstraints, etc, r is a
+ * Here pm*r = sum_{active_alpha} pm[alpha]*r[alpha].  Note that this contains all the "active"
+ * surfaces,
+ *             even the ones that have been deactivated_due_to_ld.  in calculateConstraints, etc, r
+ * is a
  *             std::vector containing only all the active flow directions (including
  *             deactivated_due_to_ld, but not the "not active").
  * f = all the "active" surfaces, even the ones that have been deactivated_due_to_ld.  However, the
@@ -99,7 +103,8 @@ InputParameters validParams<MultiPlasticityLinearSystem>();
  *             "not active" or deactivated_due_to_ld, then this ic is not included in the RHS
  *
  * The RHS is
- * rhs = -(epp(0,0), epp(1,0), epp(1,1), epp(2,0), epp(2,1), epp(2,2), f[0], f[1], ..., f[_num_active_f], ic[0], ic[1], ..., ic[num_active_ic])
+ * rhs = -(epp(0,0), epp(1,0), epp(1,1), epp(2,0), epp(2,1), epp(2,2), f[0], f[1], ...,
+ * f[_num_active_f], ic[0], ic[1], ..., ic[num_active_ic])
  * Notice the appearance of only the i>=j "epp" components.
  *
  *
@@ -111,26 +116,25 @@ InputParameters validParams<MultiPlasticityLinearSystem>();
  * ( depp_dstress   depp_dpm  depp_dintnl )
  * (  df_dstress       0      df_dintnl   )
  * ( dic_dstress    dic_dpm   dic_dintnl  )
- * For the "epp" terms, only the i>=j components are kept in the RHS, so only these terms are kept here too
+ * For the "epp" terms, only the i>=j components are kept in the RHS, so only these terms are kept
+ * here too
  */
-class MultiPlasticityLinearSystem:
-  public MultiPlasticityRawComponentAssembler
+class MultiPlasticityLinearSystem : public MultiPlasticityRawComponentAssembler
 {
 public:
   MultiPlasticityLinearSystem(const MooseObject * moose_object);
 
 protected:
-
   /// Tolerance on the minimum ratio of singular values before flow-directions are deemed linearly dependent
   Real _svd_tol;
 
   /// Minimum value of the _f_tol parameters for the Yield Function User Objects
   Real _min_f_tol;
 
-
   /**
    * The constraints.  These are set to zero (or <=0 in the case of the yield functions)
-   * by the Newton-Raphson process, except in the case of linear-dependence which complicates things.
+   * by the Newton-Raphson process, except in the case of linear-dependence which complicates
+   * things.
    * @param stress The stress
    * @param intnl_old old values of the internal parameters
    * @param intnl internal parameters
@@ -142,16 +146,28 @@ protected:
    * @param[out] ic Active internal-parameter constraint
    * @param active The active constraints.
    */
-  virtual void calculateConstraints(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & f, std::vector<RankTwoTensor> & r, RankTwoTensor & epp, std::vector<Real> & ic, const std::vector<bool> & active);
-
+  virtual void calculateConstraints(const RankTwoTensor & stress,
+                                    const std::vector<Real> & intnl_old,
+                                    const std::vector<Real> & intnl,
+                                    const std::vector<Real> & pm,
+                                    const RankTwoTensor & delta_dp,
+                                    std::vector<Real> & f,
+                                    std::vector<RankTwoTensor> & r,
+                                    RankTwoTensor & epp,
+                                    std::vector<Real> & ic,
+                                    const std::vector<bool> & active);
 
   /**
    * Calculate the RHS which is
-   * rhs = -(epp(0,0), epp(1,0), epp(1,1), epp(2,0), epp(2,1), epp(2,2), f[0], f[1], ..., f[num_f], ic[0], ic[1], ..., ic[num_ic])
+   * rhs = -(epp(0,0), epp(1,0), epp(1,1), epp(2,0), epp(2,1), epp(2,2), f[0], f[1], ..., f[num_f],
+   * ic[0], ic[1], ..., ic[num_ic])
    *
-   * Note that the 'epp' components only contain the upper diagonal.  These contain flow directions and plasticity-multipliers for all active surfaces, even the deactivated_due_to_ld surfaces.
+   * Note that the 'epp' components only contain the upper diagonal.  These contain flow directions
+   * and plasticity-multipliers for all active surfaces, even the deactivated_due_to_ld surfaces.
    * Note that the 'f' components only contain the active and not deactivated_due_to_ld surfaces
-   * Note that the 'ic' components only contain the internal constraints for models which contain active and not deactivated_due_to_ld surfaces.  They contain hardening-potentials and plasticity-multipliers for the active surfaces, even the deactivated_due_to_ld surfaces
+   * Note that the 'ic' components only contain the internal constraints for models which contain
+   * active and not deactivated_due_to_ld surfaces.  They contain hardening-potentials and
+   * plasticity-multipliers for the active surfaces, even the deactivated_due_to_ld surfaces
    *
    * @param stress The stress
    * @param intnl_old old values of the internal parameters
@@ -160,15 +176,32 @@ protected:
    * @param delta_dp Change in plastic strain incurred so far during the return
    * @param[out] rhs the rhs
    * @param active The active constraints.
-   * @param eliminate_ld Check for linear dependence of constraints and put the results into deactivated_due_to_ld.  Usually this should be true, but for certain debug operations it should be false
-   * @param[out] deactivated_due_to_ld constraints deactivated due to linear-dependence of flow directions
+   * @param eliminate_ld Check for linear dependence of constraints and put the results into
+   * deactivated_due_to_ld.  Usually this should be true, but for certain debug operations it should
+   * be false
+   * @param[out] deactivated_due_to_ld constraints deactivated due to linear-dependence of flow
+   * directions
    */
-  virtual void calculateRHS(const RankTwoTensor & stress, const std::vector<Real> & intnl_old, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankTwoTensor & delta_dp, std::vector<Real> & rhs, const std::vector<bool> & active, bool eliminate_ld, std::vector<bool> & deactivated_due_to_ld);
+  virtual void calculateRHS(const RankTwoTensor & stress,
+                            const std::vector<Real> & intnl_old,
+                            const std::vector<Real> & intnl,
+                            const std::vector<Real> & pm,
+                            const RankTwoTensor & delta_dp,
+                            std::vector<Real> & rhs,
+                            const std::vector<bool> & active,
+                            bool eliminate_ld,
+                            std::vector<bool> & deactivated_due_to_ld);
 
   /**
    * d(rhs)/d(dof)
    */
-  virtual void calculateJacobian(const RankTwoTensor & stress, const std::vector<Real> & intnl, const std::vector<Real> & pm, const RankFourTensor & E_inv, const std::vector<bool> & active, const std::vector<bool> & deactivated_due_to_ld, std::vector<std::vector<Real> > & jac);
+  virtual void calculateJacobian(const RankTwoTensor & stress,
+                                 const std::vector<Real> & intnl,
+                                 const std::vector<Real> & pm,
+                                 const RankFourTensor & E_inv,
+                                 const std::vector<bool> & active,
+                                 const std::vector<bool> & deactivated_due_to_ld,
+                                 std::vector<std::vector<Real>> & jac);
 
   /**
    * Performs one Newton-Raphson step.  The purpose here is to find the
@@ -178,22 +211,28 @@ protected:
    * @param intnl    Current value of the internal variables
    * @param pm  Current value of the plasticity multipliers (consistency parameters)
    * @param E_inv inverse of the elasticity tensor
-   * @param delta_dp  Current value of the plastic-strain increment (ie plastic_strain - plastic_strain_old)
+   * @param delta_dp  Current value of the plastic-strain increment (ie plastic_strain -
+   * plastic_strain_old)
    * @param[out] dstress The change in stress for a full Newton step
    * @param[out] dpm The change in all plasticity multipliers for a full Newton step
    * @param[out] dintnl The change in all internal variables for a full Newton step
    * @param active The active constraints
-   * @param[out] deactivated_due_to_ld The constraints deactivated due to linear-dependence of the flow directions
+   * @param[out] deactivated_due_to_ld The constraints deactivated due to linear-dependence of the
+   * flow directions
    */
-  virtual void nrStep(const RankTwoTensor & stress, const std::vector<Real> & intnl_old,
-                      const std::vector<Real> & intnl, const std::vector<Real> & pm,
-                      const RankFourTensor & E_inv, const RankTwoTensor & delta_dp,
-                      RankTwoTensor & dstress, std::vector<Real> & dpm, std::vector<Real> & dintnl,
-                      const std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld);
+  virtual void nrStep(const RankTwoTensor & stress,
+                      const std::vector<Real> & intnl_old,
+                      const std::vector<Real> & intnl,
+                      const std::vector<Real> & pm,
+                      const RankFourTensor & E_inv,
+                      const RankTwoTensor & delta_dp,
+                      RankTwoTensor & dstress,
+                      std::vector<Real> & dpm,
+                      std::vector<Real> & dintnl,
+                      const std::vector<bool> & active,
+                      std::vector<bool> & deactivated_due_to_ld);
 
-
- private:
-
+private:
   /**
    * Performs a singular-value decomposition of r and returns the singular values
    *
@@ -213,17 +252,23 @@ protected:
   /**
    * Performs a number of singular-value decompositions
    * to check for linear-dependence of the active directions "r"
-   * If linear dependence is found, then deactivated_due_to_ld will contain 'true' entries where surfaces need to be deactivated_due_to_ld
+   * If linear dependence is found, then deactivated_due_to_ld will contain 'true' entries where
+   * surfaces need to be deactivated_due_to_ld
    * @param stress the current stress
    * @param intnl the current values of internal parameters
    * @param f Active yield function values
-   * @param r the flow directions that for those yield functions that are active upon entry to this function
+   * @param r the flow directions that for those yield functions that are active upon entry to this
+   * function
    * @param active true if active
-   * @param[out] deactivated_due_to_ld Yield functions deactivated due to linearly-dependent flow directions
+   * @param[out] deactivated_due_to_ld Yield functions deactivated due to linearly-dependent flow
+   * directions
    */
-  virtual void eliminateLinearDependence(const RankTwoTensor & stress, const std::vector<Real> & intnl,
-                                         const std::vector<Real> & f, const std::vector<RankTwoTensor> & r,
-                                         const std::vector<bool> & active, std::vector<bool> & deactivated_due_to_ld);
+  virtual void eliminateLinearDependence(const RankTwoTensor & stress,
+                                         const std::vector<Real> & intnl,
+                                         const std::vector<Real> & f,
+                                         const std::vector<RankTwoTensor> & r,
+                                         const std::vector<bool> & active,
+                                         std::vector<bool> & deactivated_due_to_ld);
 };
 
-#endif //MULTIPLASTICITYLINEARSYSTEM_H
+#endif // MULTIPLASTICITYLINEARSYSTEM_H

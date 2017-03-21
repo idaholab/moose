@@ -11,7 +11,7 @@
 
 class RichardsApp;
 
-template<>
+template <>
 InputParameters validParams<RichardsApp>();
 
 /**

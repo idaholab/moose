@@ -14,7 +14,7 @@
 // Forward Declarations
 class PorousFlowDesorpedMassTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowDesorpedMassTimeDerivative>();
 
 /**
@@ -63,4 +63,4 @@ protected:
   Real computeQpJac(unsigned int jvar) const;
 };
 
-#endif //POROUSFLOWDESORPEDMASSTIMEDERIVATIVE_H
+#endif // POROUSFLOWDESORPEDMASSTIMEDERIVATIVE_H

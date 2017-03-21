@@ -7,8 +7,9 @@
 
 #include "LinearElasticTruss.h"
 
-template<>
-InputParameters validParams<LinearElasticTruss>()
+template <>
+InputParameters
+validParams<LinearElasticTruss>()
 {
   InputParameters params = validParams<TrussMaterial>();
   params.addParam<Real>("thermal_expansion_coeff", 0.0, "Thermal expansion coefficient in 1/K");
@@ -17,8 +18,8 @@ InputParameters validParams<LinearElasticTruss>()
   return params;
 }
 
-LinearElasticTruss::LinearElasticTruss(const InputParameters & parameters) :
-    TrussMaterial(parameters),
+LinearElasticTruss::LinearElasticTruss(const InputParameters & parameters)
+  : TrussMaterial(parameters),
     _T(coupledValue("temperature")),
     _T0(getParam<Real>("temperature_ref")),
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff"))

@@ -7,8 +7,9 @@
 #include "MaskedBodyForce.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<MaskedBodyForce>()
+template <>
+InputParameters
+validParams<MaskedBodyForce>()
 {
   InputParameters params = validParams<BodyForce>();
   params.addClassDescription("Kernel that defines a body force modified by a material mask");
@@ -16,15 +17,13 @@ InputParameters validParams<MaskedBodyForce>()
   return params;
 }
 
-MaskedBodyForce::MaskedBodyForce(const InputParameters & parameters) :
-    BodyForce(parameters),
-    _mask(getMaterialProperty<Real>("mask"))
+MaskedBodyForce::MaskedBodyForce(const InputParameters & parameters)
+  : BodyForce(parameters), _mask(getMaterialProperty<Real>("mask"))
 {
 }
 
 Real
 MaskedBodyForce::computeQpResidual()
 {
-  return BodyForce::computeQpResidual()*_mask[_qp];
+  return BodyForce::computeQpResidual() * _mask[_qp];
 }
-

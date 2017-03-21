@@ -19,17 +19,16 @@
 // libMesh
 #include "libmesh/mesh_tools.h"
 
-template<>
-InputParameters validParams<FullSolveMultiApp>()
+template <>
+InputParameters
+validParams<FullSolveMultiApp>()
 {
   InputParameters params = validParams<MultiApp>();
   return params;
 }
 
-
-FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters):
-    MultiApp(parameters),
-    _solved(false)
+FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters)
+  : MultiApp(parameters), _solved(false)
 {
 }
 
@@ -45,7 +44,7 @@ FullSolveMultiApp::initialSetup()
     _executioners.resize(_my_num_apps);
 
     // Grab Executioner from each app
-    for (unsigned int i=0; i<_my_num_apps; i++)
+    for (unsigned int i = 0; i < _my_num_apps; i++)
     {
       MooseApp * app = _apps[i];
       Executioner * ex = app->getExecutioner();
@@ -78,10 +77,11 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
 
   int rank;
   int ierr;
-  ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
+  ierr = MPI_Comm_rank(_orig_comm, &rank);
+  mooseCheckMPIErr(ierr);
 
   bool last_solve_converged = true;
-  for (unsigned int i=0; i<_my_num_apps; i++)
+  for (unsigned int i = 0; i < _my_num_apps; i++)
   {
     Executioner * ex = _executioners[i];
     ex->execute();

@@ -17,10 +17,10 @@
 
 #include "AuxScalarKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ExplicitODE;
 
-template<>
+template <>
 InputParameters validParams<ExplicitODE>();
 
 /**

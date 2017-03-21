@@ -8,20 +8,21 @@
 // MOOSE includes
 #include "LevelSetOlssonBubble.h"
 
-template<>
+template <>
 InputParameters
 validParams<LevelSetOlssonBubble>()
 {
   InputParameters params = validParams<Function>();
   params.addClassDescription("Implementation of 'bubble' ranging from 0 to 1.");
-  params.addParam<RealVectorValue>("center", RealVectorValue(0.5, 0.5, 0), "The center of the bubble.");
+  params.addParam<RealVectorValue>(
+      "center", RealVectorValue(0.5, 0.5, 0), "The center of the bubble.");
   params.addParam<Real>("radius", 0.15, "The radius of the bubble.");
   params.addParam<Real>("epsilon", 0.01, "The interface thickness.");
   return params;
 }
 
-LevelSetOlssonBubble::LevelSetOlssonBubble(const InputParameters & parameters):
-    Function(parameters),
+LevelSetOlssonBubble::LevelSetOlssonBubble(const InputParameters & parameters)
+  : Function(parameters),
     _center(getParam<RealVectorValue>("center")),
     _radius(getParam<Real>("radius")),
     _epsilon(getParam<Real>("epsilon"))

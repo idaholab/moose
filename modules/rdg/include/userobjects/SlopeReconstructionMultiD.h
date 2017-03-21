@@ -10,10 +10,10 @@
 
 #include "SlopeReconstructionBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class SlopeReconstructionMultiD;
 
-template<>
+template <>
 InputParameters validParams<SlopeReconstructionMultiD>();
 
 /**
@@ -23,11 +23,9 @@ InputParameters validParams<SlopeReconstructionMultiD>();
 class SlopeReconstructionMultiD : public SlopeReconstructionBase
 {
 public:
-
   SlopeReconstructionMultiD(const InputParameters & parameters);
 
 protected:
-
   /// store the pair of boundary ID and user object name
   std::map<BoundaryID, UserObjectName> _bnd_uo_name_map;
 };

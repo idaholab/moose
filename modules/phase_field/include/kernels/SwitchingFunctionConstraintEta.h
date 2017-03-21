@@ -13,7 +13,7 @@
 // Forward Declarations
 class SwitchingFunctionConstraintEta;
 
-template<>
+template <>
 InputParameters validParams<SwitchingFunctionConstraintEta>();
 
 /**
@@ -43,4 +43,4 @@ protected:
   unsigned int _lambda_var;
 };
 
-#endif //SWITCHINGFUNCTIONCONSTRAINTETA_H
+#endif // SWITCHINGFUNCTIONCONSTRAINTETA_H

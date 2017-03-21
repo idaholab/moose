@@ -12,7 +12,7 @@
 
 class FluidPropertiesApp;
 
-template<>
+template <>
 InputParameters validParams<FluidPropertiesApp>();
 
 class FluidPropertiesApp : public MooseApp

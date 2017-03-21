@@ -9,24 +9,31 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 
-template<>
-InputParameters validParams<ComputeStrainBase>()
+template <>
+InputParameters
+validParams<ComputeStrainBase>()
 {
   InputParameters params = validParams<Material>();
-  params.addRequiredCoupledVar("displacements", "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
-  params.addParam<bool>("volumetric_locking_correction", false, "Flag to correct volumetric locking");
-  params.addParam<std::vector<MaterialPropertyName>>("eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
+  params.addRequiredCoupledVar(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
+  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define "
+                                            "multiple mechanics material systems on the same "
+                                            "block, i.e. for multiple phases");
+  params.addParam<bool>(
+      "volumetric_locking_correction", false, "Flag to correct volumetric locking");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
   params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }
 
-ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
     _grad_disp(3),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _mechanical_strain(declareProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain")),
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
@@ -42,7 +49,8 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters) :
 
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
-    mooseError("The number of variables supplied in 'displacements' must match the mesh dimension.");
+    mooseError(
+        "The number of variables supplied in 'displacements' must match the mesh dimension.");
 
   // fetch coupled variables and gradients (as stateful properties if necessary)
   for (unsigned int i = 0; i < _ndisp; ++i)

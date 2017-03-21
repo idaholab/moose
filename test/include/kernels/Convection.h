@@ -19,8 +19,7 @@
 // Forward Declaration
 class Convection;
 
-
-template<>
+template <>
 InputParameters validParams<Convection>();
 
 class Convection : public Kernel

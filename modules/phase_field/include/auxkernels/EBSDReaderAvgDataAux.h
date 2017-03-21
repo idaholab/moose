@@ -10,12 +10,12 @@
 #include "AuxKernel.h"
 #include "EBSDAccessFunctors.h"
 
-//Forward Declarations
+// Forward Declarations
 class EBSDReaderAvgDataAux;
 class EBSDReader;
 class GrainTrackerInterface;
 
-template<>
+template <>
 InputParameters validParams<EBSDReaderAvgDataAux>();
 
 /**
@@ -47,4 +47,4 @@ protected:
   Real _value;
 };
 
-#endif //EBSDREADERAVGDATAAUX_H
+#endif // EBSDREADERAVGDATAAUX_H

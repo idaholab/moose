@@ -16,21 +16,28 @@
 #include "TestDiscontinuousValuePP.h"
 #include "SolutionUserObject.h"
 
-template<>
-InputParameters validParams<TestDiscontinuousValuePP>()
+template <>
+InputParameters
+validParams<TestDiscontinuousValuePP>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   MooseEnum gradient_components("x=0 y=1 z=2", "x");
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this postprocessor operates on.");
-  params.addRequiredParam<Point>("point", "The physical point where the solution will be evaluated.");
-  params.addParam<bool>("evaluate_gradient", false, "Option to evaluate gradient instead of value. If this is true, gradient_component must be selected.");
-  params.addParam<MooseEnum>("gradient_component", gradient_components, "Component of gradient to be evaluated");
-  params.addRequiredParam<UserObjectName>("solution", "The SolutionUserObject to extract data from.");
+  params.addRequiredParam<VariableName>(
+      "variable", "The name of the variable that this postprocessor operates on.");
+  params.addRequiredParam<Point>("point",
+                                 "The physical point where the solution will be evaluated.");
+  params.addParam<bool>("evaluate_gradient", false, "Option to evaluate gradient instead of value. "
+                                                    "If this is true, gradient_component must be "
+                                                    "selected.");
+  params.addParam<MooseEnum>(
+      "gradient_component", gradient_components, "Component of gradient to be evaluated");
+  params.addRequiredParam<UserObjectName>("solution",
+                                          "The SolutionUserObject to extract data from.");
   return params;
 }
 
-TestDiscontinuousValuePP::TestDiscontinuousValuePP(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+TestDiscontinuousValuePP::TestDiscontinuousValuePP(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _variable_name(getParam<VariableName>("variable")),
     _point(getParam<Point>("point")),
     _evaluate_gradient(getParam<bool>("evaluate_gradient")),
@@ -44,14 +51,13 @@ TestDiscontinuousValuePP::initialSetup()
   _solution_object_ptr = &getUserObject<SolutionUserObject>("solution");
 }
 
-
 Real
 TestDiscontinuousValuePP::getValue()
 {
   if (_evaluate_gradient)
   {
     std::map<const Elem *, RealGradient> grad_map =
-      _solution_object_ptr->discontinuousPointValueGradient(_t, _point, _variable_name);
+        _solution_object_ptr->discontinuousPointValueGradient(_t, _point, _variable_name);
     // If more than one then simply average
     Real grad = 0.0;
     for (auto & k : grad_map)
@@ -61,7 +67,7 @@ TestDiscontinuousValuePP::getValue()
   else
   {
     std::map<const Elem *, Real> value_map =
-      _solution_object_ptr->discontinuousPointValue(_t, _point, _variable_name);
+        _solution_object_ptr->discontinuousPointValue(_t, _point, _variable_name);
     // If more than one then simply average
     Real value = 0.0;
     for (auto & k : value_map)

@@ -31,19 +31,18 @@ class MooseMesh;
 class SubProblem;
 class Assembly;
 
-template<>
+template <>
 InputParameters validParams<Indicator>();
 
-class Indicator :
-  public MooseObject,
-  public BlockRestrictable,
-  public SetupInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public MooseVariableDependencyInterface,
-  public Restartable,
-  public OutputInterface,
-  public MaterialPropertyInterface
+class Indicator : public MooseObject,
+                  public BlockRestrictable,
+                  public SetupInterface,
+                  public FunctionInterface,
+                  public UserObjectInterface,
+                  public MooseVariableDependencyInterface,
+                  public Restartable,
+                  public OutputInterface,
+                  public MaterialPropertyInterface
 {
 public:
   Indicator(const InputParameters & parameters);
@@ -63,13 +62,12 @@ public:
    * This will allow you to sum up error from multiple places and then do something like take the
    * square root of it in this function.
    */
-  virtual void finalize() {};
+  virtual void finalize(){};
 
   SubProblem & subProblem() { return _subproblem; }
 
   // TODO: Fixme
   bool isActive() const { return true; }
-
 
 protected:
   SubProblem & _subproblem;

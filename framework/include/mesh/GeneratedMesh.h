@@ -19,7 +19,7 @@
 
 class GeneratedMesh;
 
-template<>
+template <>
 InputParameters validParams<GeneratedMesh>();
 
 /**

@@ -12,7 +12,7 @@
 
 class SolidMechanicsAction;
 
-template<>
+template <>
 InputParameters validParams<SolidMechanicsAction>();
 
 class SolidMechanicsAction : public Action
@@ -31,6 +31,5 @@ private:
   const Real _zeta;
   const Real _alpha;
 };
-
 
 #endif

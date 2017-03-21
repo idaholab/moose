@@ -12,7 +12,7 @@
 
 class LevelSetApp;
 
-template<>
+template <>
 InputParameters validParams<LevelSetApp>();
 
 class LevelSetApp : public MooseApp

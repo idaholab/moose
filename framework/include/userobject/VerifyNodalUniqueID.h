@@ -21,7 +21,7 @@
 // Forward Declarations
 class VerifyNodalUniqueID;
 
-template<>
+template <>
 InputParameters validParams<VerifyNodalUniqueID>();
 
 class VerifyNodalUniqueID : public NodalUserObject
@@ -38,4 +38,4 @@ protected:
   std::vector<dof_id_type> _all_ids;
 };
 
-#endif //VERIFYNODALUNIQUEID_H
+#endif // VERIFYNODALUNIQUEID_H

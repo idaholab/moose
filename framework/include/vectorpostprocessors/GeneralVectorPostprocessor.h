@@ -22,7 +22,7 @@
 // Forward Declarations
 class GeneralVectorPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<GeneralVectorPostprocessor>();
 
 /**
@@ -30,9 +30,7 @@ InputParameters validParams<GeneralVectorPostprocessor>();
  * the base class VectorPostprocessor object along with adding
  * MooseObject to the inheritance tree.
  */
-class GeneralVectorPostprocessor :
-  public GeneralUserObject,
-  public VectorPostprocessor
+class GeneralVectorPostprocessor : public GeneralUserObject, public VectorPostprocessor
 {
 public:
   GeneralVectorPostprocessor(const InputParameters & parameters);

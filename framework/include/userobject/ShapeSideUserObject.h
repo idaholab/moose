@@ -18,10 +18,10 @@
 #include "SideUserObject.h"
 #include "ShapeUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class ShapeSideUserObject;
 
-template<>
+template <>
 InputParameters validParams<ShapeSideUserObject>();
 
 /**
@@ -38,4 +38,4 @@ public:
   ShapeSideUserObject(const InputParameters & parameters);
 };
 
-#endif //SHAPESIDEUSEROBJECT_H
+#endif // SHAPESIDEUSEROBJECT_H

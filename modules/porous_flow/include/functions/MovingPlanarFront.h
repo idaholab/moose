@@ -14,7 +14,7 @@
 // Forward Declarations
 class MovingPlanarFront;
 
-template<>
+template <>
 InputParameters validParams<MovingPlanarFront>();
 
 /**
@@ -25,8 +25,7 @@ InputParameters validParams<MovingPlanarFront>();
  * This Function may be used to define the geometry of an underground excavation,
  * probably in conjunction with a predefined sideset.
  */
-class MovingPlanarFront : public Function,
-                          protected FunctionInterface
+class MovingPlanarFront : public Function, protected FunctionInterface
 {
 public:
   MovingPlanarFront(const InputParameters & parameters);
@@ -62,4 +61,4 @@ protected:
   RealVectorValue _front_normal;
 };
 
-#endif //MOVINGPLANARFRONT_H
+#endif // MOVINGPLANARFRONT_H

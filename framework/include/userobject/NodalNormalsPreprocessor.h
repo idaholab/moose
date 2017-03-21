@@ -26,16 +26,14 @@
 class NodalNormalsPreprocessor;
 class AuxiliarySystem;
 
-template<>
+template <>
 InputParameters validParams<NodalNormalsPreprocessor>();
 
 /**
  * An ElementUserObject that prepares MOOSE for computing nodal
  * normals.
  */
-class NodalNormalsPreprocessor :
-  public ElementUserObject,
-  public BoundaryRestrictable
+class NodalNormalsPreprocessor : public ElementUserObject, public BoundaryRestrictable
 {
 public:
   NodalNormalsPreprocessor(const InputParameters & parameters);
@@ -49,15 +47,17 @@ public:
    * Forces object to be stored as a block object.
    *
    * This object inherits from BoundaryRestrictable to utilize the "boundary" parameter and other
-   * methods that come with this interface class. However, this object is an ElementUserObject and must
+   * methods that come with this interface class. However, this object is an ElementUserObject and
+   * must
    * execute on each element (see ComputeUserObjectsThread::onElement).
    *
-   * The MooseObjectWarehouseBase object that stores the objects uses this method to determine whether
-   * the object should be stored as boundary or block. Since this object needs to execute on elements, it must
+   * The MooseObjectWarehouseBase object that stores the objects uses this method to determine
+   * whether
+   * the object should be stored as boundary or block. Since this object needs to execute on
+   * elements, it must
    * be stored as a block object, overloading this method to always return false has such effect.
    */
   virtual bool boundaryRestricted() override { return false; }
-
 
 protected:
   AuxiliarySystem & _aux;
@@ -67,6 +67,5 @@ protected:
 
   const VariablePhiGradient & _grad_phi;
 };
-
 
 #endif /* NODALNORMALSPREPROCESSOR_H */

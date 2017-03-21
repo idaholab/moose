@@ -19,9 +19,8 @@
 
 class AddFunctionAction;
 
-template<>
+template <>
 InputParameters validParams<AddFunctionAction>();
-
 
 /**
  * This class parses functions in the [Functions] block and creates them.
@@ -34,4 +33,4 @@ public:
   virtual void act() override;
 };
 
-#endif //ADDFUNCTIONACTION_H
+#endif // ADDFUNCTIONACTION_H

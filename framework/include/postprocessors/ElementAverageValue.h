@@ -17,10 +17,10 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementAverageValue;
 
-template<>
+template <>
 InputParameters validParams<ElementAverageValue>();
 
 /**

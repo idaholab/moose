@@ -14,20 +14,22 @@
 
 #include "CoupledScalarAux.h"
 
-template<>
-InputParameters validParams<CoupledScalarAux>()
+template <>
+InputParameters
+validParams<CoupledScalarAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
   params.addCoupledVar("coupled", 2.71828, "Coupled Scalar Value for Calculation");
 
-  params.addParam<unsigned int>("component", 0, "The individual component of the scalar variable to output");
+  params.addParam<unsigned int>(
+      "component", 0, "The individual component of the scalar variable to output");
 
   return params;
 }
 
-CoupledScalarAux::CoupledScalarAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+CoupledScalarAux::CoupledScalarAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _coupled_val(coupledScalarValue("coupled")),
     _component(getParam<unsigned int>("component"))
 {

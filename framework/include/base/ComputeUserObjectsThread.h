@@ -24,7 +24,8 @@
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
 /**
@@ -33,11 +34,12 @@ template <typename T> class NumericVector;
 class ComputeUserObjectsThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeUserObjectsThread(FEProblemBase & problem,
-                           SystemBase & sys,
-                           const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
-                           const MooseObjectWarehouse<SideUserObject> & side_user_objects,
-                           const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects);
+  ComputeUserObjectsThread(
+      FEProblemBase & problem,
+      SystemBase & sys,
+      const MooseObjectWarehouse<ElementUserObject> & elemental_user_objects,
+      const MooseObjectWarehouse<SideUserObject> & side_user_objects,
+      const MooseObjectWarehouse<InternalSideUserObject> & internal_side_user_objects);
   // Splitting Constructor
   ComputeUserObjectsThread(ComputeUserObjectsThread & x, Threads::split);
 
@@ -52,7 +54,7 @@ public:
   void join(const ComputeUserObjectsThread & /*y*/);
 
 protected:
-  const NumericVector<Number>& _soln;
+  const NumericVector<Number> & _soln;
 
   ///@{
   /// Storage for UserObjects (see FEProblemBase::computeUserObjects)
@@ -62,4 +64,4 @@ protected:
   ///@}
 };
 
-#endif //COMPUTEUSEROBJECTSTHREAD_H
+#endif // COMPUTEUSEROBJECTSTHREAD_H

@@ -12,7 +12,8 @@ InputParameters
 validParams<LaplacianSplit>()
 {
   InputParameters params = validParams<KernelGrad>();
-  params.addClassDescription("Split with a variable that holds the Laplacian of a phase field variable.");
+  params.addClassDescription(
+      "Split with a variable that holds the Laplacian of a phase field variable.");
   params.addRequiredCoupledVar("c", "Field variable to take the Laplacian of");
   return params;
 }

@@ -33,7 +33,7 @@ enum XFEM_QRULE
   MOMENT_FITTING,
   DIRECT
 };
-} //namespace Xfem
+} // namespace Xfem
 
 class XFEMCutElem;
 class XFEMGeometricCut;
@@ -49,19 +49,16 @@ class EFAElement3D;
  * a phantom node approach for XFEM
  */
 
-
 // ------------------------------------------------------------
 // XFEM class definition
 class XFEM : public XFEMInterface
 {
 public:
-
-  explicit
-  XFEM(const InputParameters & params);
+  explicit XFEM(const InputParameters & params);
 
   ~XFEM();
 
-  void addGeometricCut(XFEMGeometricCut* geometric_cut);
+  void addGeometricCut(XFEMGeometricCut * geometric_cut);
 
   void addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal);
   void addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal, unsigned int marked_side);
@@ -87,34 +84,32 @@ public:
   bool markCutEdgesByState(Real time);
   bool markCutFacesByGeometry(Real time);
   bool markCutFacesByState();
-  bool initCutIntersectionEdge(Point cut_origin,
-                               RealVectorValue cut_normal,
-                               Point &edge_p1,
-                               Point &edge_p2,
-                               Real &dist);
+  bool initCutIntersectionEdge(
+      Point cut_origin, RealVectorValue cut_normal, Point & edge_p1, Point & edge_p2, Real & dist);
   bool cutMeshWithEFA();
-  Point getEFANodeCoords(EFANode* CEMnode,
-                         EFAElement* CEMElem,
-                         const Elem *elem,
-                         MeshBase* displaced_mesh = NULL) const;
+  Point getEFANodeCoords(EFANode * CEMnode,
+                         EFAElement * CEMElem,
+                         const Elem * elem,
+                         MeshBase * displaced_mesh = NULL) const;
 
   /**
    * Get the volume fraction of an element that is physical
    */
-  Real getPhysicalVolumeFraction(const Elem* elem) const;
+  Real getPhysicalVolumeFraction(const Elem * elem) const;
 
   /**
    * Get specified component of normal or origin for cut plane for a given element
    */
-  Real getCutPlane(const Elem* elem,
+  Real getCutPlane(const Elem * elem,
                    const Xfem::XFEM_CUTPLANE_QUANTITY quantity,
                    unsigned int plane_id) const;
 
-  bool isElemAtCrackTip(const Elem* elem) const;
-  bool isElemCut(const Elem* elem, XFEMCutElem *&xfce) const;
-  bool isElemCut(const Elem* elem) const;
-  void getFragmentFaces(const Elem* elem, std::vector<std::vector<Point> > &frag_faces,
-                      bool displaced_mesh = false) const;
+  bool isElemAtCrackTip(const Elem * elem) const;
+  bool isElemCut(const Elem * elem, XFEMCutElem *& xfce) const;
+  bool isElemCut(const Elem * elem) const;
+  void getFragmentFaces(const Elem * elem,
+                        std::vector<std::vector<Point>> & frag_faces,
+                        bool displaced_mesh = false) const;
   void storeCrackTipOriginAndDirection();
 
   void correctCrackExtensionDirection(const Elem * elem,
@@ -127,45 +122,54 @@ public:
                                       unsigned int & edge_id_keep,
                                       Point & normal_keep);
 
-  void getCrackTipOrigin(std::map<unsigned int, const Elem*> & elem_id_crack_tip, std::vector<Point> &  crack_front_points);
-  //void update_crack_propagation_direction(const Elem* elem, Point direction);
-  //void clear_crack_propagation_direction();
+  void getCrackTipOrigin(std::map<unsigned int, const Elem *> & elem_id_crack_tip,
+                         std::vector<Point> & crack_front_points);
+  // void update_crack_propagation_direction(const Elem* elem, Point direction);
+  // void clear_crack_propagation_direction();
   /**
    * Set and get xfem cut data and type
    */
-  std::vector<Real>& getXFEMCutData();
-  void setXFEMCutData(std::vector<Real> &cut_data);
+  std::vector<Real> & getXFEMCutData();
+  void setXFEMCutData(std::vector<Real> & cut_data);
   std::string & getXFEMCutType();
   void setXFEMCutType(std::string & cut_type);
   Xfem::XFEM_QRULE & getXFEMQRule();
   void setXFEMQRule(std::string & xfem_qrule);
   void setCrackGrowthMethod(bool use_crack_growth_increment, Real crack_growth_increment);
-  virtual bool getXFEMWeights(MooseArray<Real> &weights, const Elem * elem, QBase * qrule, const MooseArray<Point> & q_points);
-  virtual const ElementPairLocator::ElementPairList * getXFEMCutElemPairs() const {return & _sibling_elems;}
-  virtual const ElementPairLocator::ElementPairList * getXFEMDisplacedCutElemPairs() const {return & _sibling_displaced_elems;}
+  virtual bool getXFEMWeights(MooseArray<Real> & weights,
+                              const Elem * elem,
+                              QBase * qrule,
+                              const MooseArray<Point> & q_points);
+  virtual const ElementPairLocator::ElementPairList * getXFEMCutElemPairs() const
+  {
+    return &_sibling_elems;
+  }
+  virtual const ElementPairLocator::ElementPairList * getXFEMDisplacedCutElemPairs() const
+  {
+    return &_sibling_displaced_elems;
+  }
   virtual void getXFEMIntersectionInfo(const Elem * elem,
                                        unsigned int plane_id,
-                                       Point & normal, std::vector<Point> & intersectionPoints,
+                                       Point & normal,
+                                       std::vector<Point> & intersectionPoints,
                                        bool displaced_mesh = false) const;
   virtual void getXFEMqRuleOnLine(std::vector<Point> & intersection_points,
                                   std::vector<Point> & quad_pts,
                                   std::vector<Real> & quad_wts) const;
   virtual void getXFEMqRuleOnSurface(std::vector<Point> & intersection_points,
-                                  std::vector<Point> & quad_pts,
-                                  std::vector<Real> & quad_wts) const;
-  bool has_secondary_cut(){return _has_secondary_cut;}
+                                     std::vector<Point> & quad_pts,
+                                     std::vector<Real> & quad_wts) const;
+  bool has_secondary_cut() { return _has_secondary_cut; }
 
 private:
-
-  void getFragmentEdges(const Elem* elem,
-                        EFAElement2D* CEMElem,
-                        std::vector<std::vector<Point> > &frag_edges) const;
-  void getFragmentFaces(const Elem* elem,
-                        EFAElement3D* CEMElem,
-                        std::vector<std::vector<Point> > &frag_faces) const;
+  void getFragmentEdges(const Elem * elem,
+                        EFAElement2D * CEMElem,
+                        std::vector<std::vector<Point>> & frag_edges) const;
+  void getFragmentFaces(const Elem * elem,
+                        EFAElement3D * CEMElem,
+                        std::vector<std::vector<Point>> & frag_faces) const;
 
 private:
-
   /**
    * XFEM cut type and data
    */
@@ -181,18 +185,18 @@ private:
 
   std::vector<XFEMGeometricCut *> _geometric_cuts;
 
-  std::map<unique_id_type, XFEMCutElem*> _cut_elem_map;
-  std::set<const Elem*> _crack_tip_elems;
+  std::map<unique_id_type, XFEMCutElem *> _cut_elem_map;
+  std::set<const Elem *> _crack_tip_elems;
   ElementPairLocator::ElementPairList _sibling_elems;
   ElementPairLocator::ElementPairList _sibling_displaced_elems;
 
-  std::map<const Elem*, std::vector<Point> > _elem_crack_origin_direction_map;
+  std::map<const Elem *, std::vector<Point>> _elem_crack_origin_direction_map;
 
-  //std::map<const Elem*, Point> _crack_propagation_direction_map;
+  // std::map<const Elem*, Point> _crack_propagation_direction_map;
 
-  std::map<const Elem*, RealVectorValue> _state_marked_elems;
-  std::set<const Elem*> _state_marked_frags;
-  std::map<const Elem*, unsigned int> _state_marked_elem_sides;
+  std::map<const Elem *, RealVectorValue> _state_marked_elems;
+  std::set<const Elem *> _state_marked_frags;
+  std::map<const Elem *, unsigned int> _state_marked_elem_sides;
 
   std::map<unique_id_type, unique_id_type> _new_node_to_parent_node;
 

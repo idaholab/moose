@@ -21,9 +21,9 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(FEProblemBase & fe_problem,
-                                                         const MooseObjectWarehouse<NodalKernel> & nodal_kernels) :
-    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(
+    FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _nodal_kernels(nodal_kernels),
     _num_cached(0)
@@ -31,8 +31,9 @@ ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(FEProblemBase & fe_prob
 }
 
 // Splitting Constructor
-ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(ComputeNodalKernelBcsThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(ComputeNodalKernelBcsThread & x,
+                                                         Threads::split split)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
     _nodal_kernels(x._nodal_kernels),
     _num_cached(0)
@@ -73,7 +74,7 @@ ComputeNodalKernelBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
     }
   }
 
-  if (_num_cached == 20) //cache 20 nodes worth before adding into the residual
+  if (_num_cached == 20) // cache 20 nodes worth before adding into the residual
   {
     _num_cached = 0;
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);

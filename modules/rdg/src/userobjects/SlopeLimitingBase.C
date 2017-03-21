@@ -13,23 +13,24 @@
 // Static mutex definition
 Threads::spin_mutex SlopeLimitingBase::_mutex;
 
-template<>
-InputParameters validParams<SlopeLimitingBase>()
+template <>
+InputParameters
+validParams<SlopeLimitingBase>()
 {
   InputParameters params = validParams<ElementLoopUserObject>();
-  params.addClassDescription("Base class for slope limiting to limit the slopes of cell average variables.");
+  params.addClassDescription(
+      "Base class for slope limiting to limit the slopes of cell average variables.");
 
-  params.addParam<bool>("include_bc", true,
-  "Indicate whether to include bc, default = true");
+  params.addParam<bool>("include_bc", true, "Indicate whether to include bc, default = true");
 
   params.addRequiredParam<UserObjectName>("slope_reconstruction",
-  "Name for slope reconstruction user object");
+                                          "Name for slope reconstruction user object");
 
   return params;
 }
 
-SlopeLimitingBase::SlopeLimitingBase(const InputParameters & parameters) :
-    ElementLoopUserObject(parameters),
+SlopeLimitingBase::SlopeLimitingBase(const InputParameters & parameters)
+  : ElementLoopUserObject(parameters),
     _include_bc(getParam<bool>("include_bc")),
     _rslope(getUserObject<SlopeReconstructionBase>("slope_reconstruction")),
     _q_point_face(_assembly.qPointsFace()),
@@ -54,8 +55,7 @@ SlopeLimitingBase::initialize()
 void
 SlopeLimitingBase::threadJoin(const UserObject & y)
 {
-  const SlopeLimitingBase & pps =
-    static_cast<const SlopeLimitingBase &>(y);
+  const SlopeLimitingBase & pps = static_cast<const SlopeLimitingBase &>(y);
 
   _lslope.insert(pps._lslope.begin(), pps._lslope.end());
 }
@@ -64,12 +64,10 @@ const std::vector<RealGradient> &
 SlopeLimitingBase::getElementSlope(dof_id_type elementid) const
 {
   Threads::spin_mutex::scoped_lock lock(_mutex);
-  std::map<dof_id_type, std::vector<RealGradient> >::const_iterator pos =
-    _lslope.find(elementid);
+  std::map<dof_id_type, std::vector<RealGradient>>::const_iterator pos = _lslope.find(elementid);
 
   if (pos == _lslope.end())
-    mooseError("Limited slope is not cached for element id '",
-       elementid, "' in ", __FUNCTION__);
+    mooseError("Limited slope is not cached for element id '", elementid, "' in ", __FUNCTION__);
 
   return pos->second;
 }
@@ -89,7 +87,7 @@ SlopeLimitingBase::serialize(std::string & serialized_buffer)
 
   // First store the number of elements to send
   unsigned int size = _interface_elem_ids.size();
-  oss.write((char *) &size, sizeof(size));
+  oss.write((char *)&size, sizeof(size));
 
   for (auto it = _interface_elem_ids.begin(); it != _interface_elem_ids.end(); ++it)
   {
@@ -107,20 +105,21 @@ SlopeLimitingBase::deserialize(std::vector<std::string> & serialized_buffers)
   // The input string stream used for deserialization
   std::istringstream iss;
 
-  mooseAssert(serialized_buffers.size() == _app.n_processors(), "Unexpected size of serialized_buffers: " << serialized_buffers.size());
+  mooseAssert(serialized_buffers.size() == _app.n_processors(),
+              "Unexpected size of serialized_buffers: " << serialized_buffers.size());
 
   for (auto rank = decltype(_app.n_processors())(0); rank < serialized_buffers.size(); ++rank)
   {
     if (rank == processor_id())
       continue;
 
-    iss.str(serialized_buffers[rank]);    // populate the stream with a new buffer
-    iss.clear();                          // reset the string stream state
+    iss.str(serialized_buffers[rank]); // populate the stream with a new buffer
+    iss.clear();                       // reset the string stream state
 
     // Load the communicated data into all of the other processors' slots
 
     unsigned int size = 0;
-    iss.read((char *) &size, sizeof(size));
+    iss.read((char *)&size, sizeof(size));
 
     for (unsigned int i = 0; i < size; i++)
     {
@@ -131,7 +130,7 @@ SlopeLimitingBase::deserialize(std::vector<std::string> & serialized_buffers)
       loadHelper(iss, value, this);
 
       // merge the data we received from other procs
-      _lslope.insert(std::pair<dof_id_type, std::vector<RealGradient> >(key, value));
+      _lslope.insert(std::pair<dof_id_type, std::vector<RealGradient>>(key, value));
     }
   }
 }
@@ -148,7 +147,10 @@ SlopeLimitingBase::finalize()
 
     recv_buffers.reserve(_app.n_processors());
     serialize(send_buffers[0]);
-    comm().allgather_packed_range((void *)(nullptr), send_buffers.begin(), send_buffers.end(), std::back_inserter(recv_buffers));
+    comm().allgather_packed_range((void *)(nullptr),
+                                  send_buffers.begin(),
+                                  send_buffers.end(),
+                                  std::back_inserter(recv_buffers));
     deserialize(recv_buffers);
   }
 }

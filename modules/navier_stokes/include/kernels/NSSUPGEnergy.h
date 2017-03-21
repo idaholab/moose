@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSSUPGEnergy;
 
-template<>
+template <>
 InputParameters validParams<NSSUPGEnergy>();
 
 /**

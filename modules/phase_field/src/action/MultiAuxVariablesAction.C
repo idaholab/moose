@@ -9,22 +9,29 @@
 #include "Conversion.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<MultiAuxVariablesAction>()
+template <>
+InputParameters
+validParams<MultiAuxVariablesAction>()
 {
   InputParameters params = validParams<AddAuxVariableAction>();
-  params.addClassDescription("Set up auxvariables for components of MaterialProperty<std::vector<data_type> > for polycrystal sample.");
-  params.addRequiredParam<unsigned int>("grain_num", "Specifies the number of grains to create the aux varaivles for.");
-  params.addRequiredParam<std::vector<std::string> >("variable_base", "Vector that specifies the base name of the variables.");
+  params.addClassDescription("Set up auxvariables for components of "
+                             "MaterialProperty<std::vector<data_type> > for polycrystal sample.");
+  params.addRequiredParam<unsigned int>(
+      "grain_num", "Specifies the number of grains to create the aux varaivles for.");
+  params.addRequiredParam<std::vector<std::string>>(
+      "variable_base", "Vector that specifies the base name of the variables.");
   MultiMooseEnum data_type("Real RealGradient", "Real");
-  params.addRequiredParam<MultiMooseEnum>("data_type", data_type, "Specifying data type of the materials property, variables are created accordingly");
+  params.addRequiredParam<MultiMooseEnum>(
+      "data_type",
+      data_type,
+      "Specifying data type of the materials property, variables are created accordingly");
   return params;
 }
 
-MultiAuxVariablesAction::MultiAuxVariablesAction(InputParameters params) :
-    AddAuxVariableAction(params),
+MultiAuxVariablesAction::MultiAuxVariablesAction(InputParameters params)
+  : AddAuxVariableAction(params),
     _grain_num(getParam<unsigned int>("grain_num")),
-    _var_name_base(getParam<std::vector<std::string> >("variable_base")),
+    _var_name_base(getParam<std::vector<std::string>>("variable_base")),
     _num_var(_var_name_base.size()),
     _data_type(getParam<MultiMooseEnum>("data_type")),
     _data_size(_data_type.size())
@@ -51,7 +58,8 @@ MultiAuxVariablesAction::act()
       /// for exatrcting data from MaterialProperty<std::vector<Real> >
       if (_data_type[val] == "Real")
       {
-        //Create variable names with variable name base followed by the order parameter it applies to.
+        // Create variable names with variable name base followed by the order parameter it applies
+        // to.
         std::string var_name = _var_name_base[val] + Moose::stringify(gr);
 
         if (blocks.empty())
@@ -67,7 +75,7 @@ MultiAuxVariablesAction::act()
            * The name of the variable is the variable name base followed by
            * the order parameter and a suffix mentioning dimension it applies to.
            */
-          std::string var_name = _var_name_base[val] + Moose::stringify(gr) + "_" + suffix[x] ;
+          std::string var_name = _var_name_base[val] + Moose::stringify(gr) + "_" + suffix[x];
 
           if (blocks.empty())
             _problem->addAuxVariable(var_name, _fe_type);

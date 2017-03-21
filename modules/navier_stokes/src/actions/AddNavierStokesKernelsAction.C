@@ -12,24 +12,25 @@
 // MOOSE includes
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddNavierStokesKernelsAction>()
+template <>
+InputParameters
+validParams<AddNavierStokesKernelsAction>()
 {
   InputParameters params = validParams<NSAction>();
-  params.addClassDescription("This class allows us to have a section of the input file like the following which automatically adds Kernels and AuxKernels for all the required nonlinear and auxiliary variables.");
-  params.addRequiredParam<UserObjectName>("fluid_properties", "The name of the user object for fluid properties");
+  params.addClassDescription("This class allows us to have a section of the input file like the "
+                             "following which automatically adds Kernels and AuxKernels for all "
+                             "the required nonlinear and auxiliary variables.");
+  params.addRequiredParam<UserObjectName>("fluid_properties",
+                                          "The name of the user object for fluid properties");
   return params;
 }
 
-AddNavierStokesKernelsAction::AddNavierStokesKernelsAction(InputParameters parameters) :
-    NSAction(parameters),
-    _fp_name(getParam<UserObjectName>("fluid_properties"))
+AddNavierStokesKernelsAction::AddNavierStokesKernelsAction(InputParameters parameters)
+  : NSAction(parameters), _fp_name(getParam<UserObjectName>("fluid_properties"))
 {
 }
 
-AddNavierStokesKernelsAction::~AddNavierStokesKernelsAction()
-{
-}
+AddNavierStokesKernelsAction::~AddNavierStokesKernelsAction() {}
 
 void
 AddNavierStokesKernelsAction::act()
@@ -69,8 +70,6 @@ AddNavierStokesKernelsAction::act()
     addNSVelocityAux(component);
 }
 
-
-
 void
 AddNavierStokesKernelsAction::addNSSUPGMass()
 {
@@ -86,14 +85,10 @@ AddNavierStokesKernelsAction::addNSSUPGMass()
   _problem->addKernel(kernel_type, "rho_supg", params);
 }
 
-
-
 void
 AddNavierStokesKernelsAction::addNSSUPGMomentum(unsigned int component)
 {
-  const static std::string momentums[3] = {NS::momentum_x,
-                                           NS::momentum_y,
-                                           NS::momentum_z};
+  const static std::string momentums[3] = {NS::momentum_x, NS::momentum_y, NS::momentum_z};
 
   const std::string kernel_type = "NSSUPGMomentum";
   InputParameters params = _factory.getValidParams(kernel_type);
@@ -110,8 +105,6 @@ AddNavierStokesKernelsAction::addNSSUPGMomentum(unsigned int component)
   _problem->addKernel(kernel_type, momentums[component] + std::string("_supg"), params);
 }
 
-
-
 void
 AddNavierStokesKernelsAction::addNSSUPGEnergy()
 {
@@ -127,8 +120,6 @@ AddNavierStokesKernelsAction::addNSSUPGEnergy()
   _problem->addKernel(kernel_type, "rhoE_supg", params);
 }
 
-
-
 void
 AddNavierStokesKernelsAction::addNSSpecificVolumeAux()
 {
@@ -142,8 +133,6 @@ AddNavierStokesKernelsAction::addNSSpecificVolumeAux()
 
   _problem->addAuxKernel(kernel_type, "specific_volume_auxkernel", params);
 }
-
-
 
 void
 AddNavierStokesKernelsAction::addNSInternalEnergyAux()
@@ -162,7 +151,6 @@ AddNavierStokesKernelsAction::addNSInternalEnergyAux()
 
   _problem->addAuxKernel(kernel_type, "internal_energy_auxkernel", params);
 }
-
 
 void
 AddNavierStokesKernelsAction::addNSMachAux()
@@ -184,8 +172,6 @@ AddNavierStokesKernelsAction::addNSMachAux()
   _problem->addAuxKernel(kernel_type, "mach_auxkernel", params);
 }
 
-
-
 void
 AddNavierStokesKernelsAction::addNSEnthalpyAux()
 {
@@ -202,18 +188,12 @@ AddNavierStokesKernelsAction::addNSEnthalpyAux()
   _problem->addAuxKernel(kernel_type, "enthalpy_auxkernel", params);
 }
 
-
-
 void
 AddNavierStokesKernelsAction::addNSVelocityAux(unsigned int component)
 {
   const std::string kernel_type = "NSVelocityAux";
-  const static std::string velocities[3] = {NS::velocity_x,
-                                            NS::velocity_y,
-                                            NS::velocity_z};
-  const static std::string momentums[3] = {NS::momentum_x,
-                                           NS::momentum_y,
-                                           NS::momentum_z};
+  const static std::string velocities[3] = {NS::velocity_x, NS::velocity_y, NS::velocity_z};
+  const static std::string momentums[3] = {NS::momentum_x, NS::momentum_y, NS::momentum_z};
 
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<AuxVariableName>("variable") = velocities[component];
@@ -226,14 +206,11 @@ AddNavierStokesKernelsAction::addNSVelocityAux(unsigned int component)
   _problem->addAuxKernel(kernel_type, velocities[component] + "_auxkernel", params);
 }
 
-
-
 void
 AddNavierStokesKernelsAction::addPressureOrTemperatureAux(const std::string & kernel_type)
 {
   InputParameters params = _factory.getValidParams(kernel_type);
-  std::string var_name =
-    (kernel_type == "NSPressureAux" ? NS::pressure : NS::temperature);
+  std::string var_name = (kernel_type == "NSPressureAux" ? NS::pressure : NS::temperature);
   params.set<AuxVariableName>("variable") = var_name;
 
   // coupled variables
@@ -243,8 +220,6 @@ AddNavierStokesKernelsAction::addPressureOrTemperatureAux(const std::string & ke
 
   _problem->addAuxKernel(kernel_type, var_name + "_auxkernel", params);
 }
-
-
 
 void
 AddNavierStokesKernelsAction::addNSMassInviscidFlux()
@@ -256,14 +231,10 @@ AddNavierStokesKernelsAction::addNSMassInviscidFlux()
   _problem->addKernel(kernel_type, "rho_if", params);
 }
 
-
-
 void
 AddNavierStokesKernelsAction::addNSMomentumInviscidFlux(unsigned int component)
 {
-  const static std::string momentums[3] = {NS::momentum_x,
-                                           NS::momentum_y,
-                                           NS::momentum_z};
+  const static std::string momentums[3] = {NS::momentum_x, NS::momentum_y, NS::momentum_z};
   const std::string kernel_type = "NSMomentumInviscidFlux";
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = momentums[component];
@@ -276,8 +247,6 @@ AddNavierStokesKernelsAction::addNSMomentumInviscidFlux(unsigned int component)
   // Add the Kernel
   _problem->addKernel(kernel_type, momentums[component] + std::string("if"), params);
 }
-
-
 
 void
 AddNavierStokesKernelsAction::addNSEnergyInviscidFlux()
@@ -294,10 +263,8 @@ AddNavierStokesKernelsAction::addNSEnergyInviscidFlux()
   _problem->addKernel(kernel_type, "rhoE_if", params);
 }
 
-
-
 void
-AddNavierStokesKernelsAction::setCommonParams (InputParameters & params)
+AddNavierStokesKernelsAction::setCommonParams(InputParameters & params)
 {
   // coupled variables
   params.set<CoupledName>(NS::density) = {NS::density};
@@ -311,10 +278,8 @@ AddNavierStokesKernelsAction::setCommonParams (InputParameters & params)
   params.set<UserObjectName>("fluid_properties") = _fp_name;
 }
 
-
-
 void
-AddNavierStokesKernelsAction::coupleVelocities (InputParameters & params)
+AddNavierStokesKernelsAction::coupleVelocities(InputParameters & params)
 {
   params.set<CoupledName>(NS::velocity_x) = {NS::velocity_x};
 
@@ -325,10 +290,8 @@ AddNavierStokesKernelsAction::coupleVelocities (InputParameters & params)
     params.set<CoupledName>(NS::velocity_z) = {NS::velocity_z};
 }
 
-
-
 void
-AddNavierStokesKernelsAction::coupleMomentums (InputParameters & params)
+AddNavierStokesKernelsAction::coupleMomentums(InputParameters & params)
 {
   params.set<CoupledName>(NS::momentum_x) = {NS::momentum_x};
 

@@ -19,7 +19,7 @@
 
 class Diffusion;
 
-template<>
+template <>
 InputParameters validParams<Diffusion>();
 
 /**
@@ -36,6 +36,5 @@ protected:
 
   virtual Real computeQpJacobian() override;
 };
-
 
 #endif /* DIFFUSION_H */

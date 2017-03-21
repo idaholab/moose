@@ -21,7 +21,7 @@
 // Forward Declarations
 class VerifyElementUniqueID;
 
-template<>
+template <>
 InputParameters validParams<VerifyElementUniqueID>();
 
 class VerifyElementUniqueID : public ElementUserObject
@@ -38,4 +38,4 @@ protected:
   std::vector<dof_id_type> _all_ids;
 };
 
-#endif //VERIFYELEMENTUNIQUEID_H
+#endif // VERIFYELEMENTUNIQUEID_H

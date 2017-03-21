@@ -10,7 +10,8 @@
 #include "ComputeExtraStressBase.h"
 
 /**
- * ComputeEigenstrain computes an Eigenstrain that is a function of a single variable defined by a base tensor and a scalar function defined in a Derivative Material.
+ * ComputeEigenstrain computes an Eigenstrain that is a function of a single variable defined by a
+ * base tensor and a scalar function defined in a Derivative Material.
  */
 class ComputeExtraStressConstant : public ComputeExtraStressBase
 {
@@ -25,4 +26,4 @@ protected:
   RankTwoTensor _extra_stress_tensor;
 };
 
-#endif //COMPUTEEXTRASTRESSCONSTANT_H
+#endif // COMPUTEEXTRASTRESSCONSTANT_H

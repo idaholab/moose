@@ -12,7 +12,7 @@
 
 class HEVPInternalVarUOBase;
 
-template<>
+template <>
 InputParameters validParams<HEVPInternalVarUOBase>();
 
 /**

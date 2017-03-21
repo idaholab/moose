@@ -31,4 +31,4 @@ protected:
   Function * const _prefactor_function;
 };
 
-#endif //COMPUTEELASTICITYTENSORBASE_H
+#endif // COMPUTEELASTICITYTENSORBASE_H

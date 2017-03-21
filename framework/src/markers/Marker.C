@@ -18,15 +18,19 @@
 #include "Assembly.h"
 #include "MooseVariable.h"
 
-
-template<>
-InputParameters validParams<Marker>()
+template <>
+InputParameters
+validParams<Marker>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
   params += validParams<OutputInterface>();
 
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the "
+                                                     "displaced mesh for computation.  Note that "
+                                                     "in the case this is true but no "
+                                                     "displacements are provided in the Mesh block "
+                                                     "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   params.registerBase("Marker");
@@ -34,8 +38,8 @@ InputParameters validParams<Marker>()
   return params;
 }
 
-Marker::Marker(const InputParameters & parameters) :
-    MooseObject(parameters),
+Marker::Marker(const InputParameters & parameters)
+  : MooseObject(parameters),
     BlockRestrictable(parameters),
     SetupInterface(this),
     DependencyResolverInterface(),

@@ -12,20 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-
 #ifndef MATERIALCOPYUSEROBJECT_H
 #define MATERIALCOPYUSEROBJECT_H
 
 #include "GeneralUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class MaterialCopyUserObject;
 
-template<>
+template <>
 InputParameters validParams<MaterialCopyUserObject>();
 
-class MaterialCopyUserObject :
-  public GeneralUserObject
+class MaterialCopyUserObject : public GeneralUserObject
 {
 public:
   MaterialCopyUserObject(const InputParameters & parameters);
@@ -35,14 +33,14 @@ public:
   /**
    * Called before execute() is ever called so that data can be cleared.
    */
-  virtual void initialize(){}
+  virtual void initialize() {}
 
   /**
    * Compute the hit positions for this timestep
    */
   virtual void execute();
 
-  virtual void finalize(){}
+  virtual void finalize() {}
 
 protected:
   MooseMesh & _mesh;

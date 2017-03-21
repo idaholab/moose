@@ -14,7 +14,7 @@
 
 class PorousFlowDispersiveFlux;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowDispersiveFlux>();
 
 /**
@@ -61,7 +61,7 @@ protected:
   const MaterialProperty<std::vector<Real>> & _dporosity_qp_dvar;
 
   /// Tortuosity tau_0 * tau_{alpha} for fluid phase alpha
-  const MaterialProperty<std::vector<Real>>& _tortuosity;
+  const MaterialProperty<std::vector<Real>> & _tortuosity;
 
   /// Derivative of tortuosity wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<Real>>> & _dtortuosity_dvar;
@@ -124,4 +124,4 @@ protected:
   const std::vector<Real> _disp_trans;
 };
 
-#endif //POROUSFLOWDISPERSIVEFLUX_H
+#endif // POROUSFLOWDISPERSIVEFLUX_H

@@ -21,15 +21,14 @@
 // Forward Declarations
 class LineMaterialRealSampler;
 
-template<>
+template <>
 InputParameters validParams<LineMaterialRealSampler>();
 
 /**
  * This class samples Real material properties for the integration points
  * in all elements that are intersected by a user-defined line.
  */
-class LineMaterialRealSampler :
-  public LineMaterialSamplerBase<Real>
+class LineMaterialRealSampler : public LineMaterialSamplerBase<Real>
 {
 public:
   /**

@@ -7,31 +7,36 @@
 #include "SpecifiedSmoothSuperellipsoidIC.h"
 #include "MooseRandom.h"
 
-template<>
-InputParameters validParams<SpecifiedSmoothSuperellipsoidIC>()
+template <>
+InputParameters
+validParams<SpecifiedSmoothSuperellipsoidIC>()
 {
   InputParameters params = validParams<SmoothSuperellipsoidBaseIC>();
-  params.addClassDescription("Multiple smooth superellipsoids with manually specified center points; semiaxes a,b,c; and exponents n");
-  params.addRequiredParam<std::vector<Real> >("x_positions", "The x-coordinate for each superellipsoid center");
-  params.addRequiredParam<std::vector<Real> >("y_positions", "The y-coordinate for each superellipsoid center");
-  params.addRequiredParam<std::vector<Real> >("z_positions", "The z-coordinate for each superellipsoid center");
-  params.addRequiredParam<std::vector<Real> >("as", "Semiaxis a for each superellipsoid");
-  params.addRequiredParam<std::vector<Real> >("bs", "Semiaxis b for each superellipsoid");
-  params.addRequiredParam<std::vector<Real> >("cs", "Semiaxis c for each superellipsoid");
-  params.addRequiredParam<std::vector<Real> >("ns", "Exponent n for each superellipsoid");
+  params.addClassDescription("Multiple smooth superellipsoids with manually specified center "
+                             "points; semiaxes a,b,c; and exponents n");
+  params.addRequiredParam<std::vector<Real>>("x_positions",
+                                             "The x-coordinate for each superellipsoid center");
+  params.addRequiredParam<std::vector<Real>>("y_positions",
+                                             "The y-coordinate for each superellipsoid center");
+  params.addRequiredParam<std::vector<Real>>("z_positions",
+                                             "The z-coordinate for each superellipsoid center");
+  params.addRequiredParam<std::vector<Real>>("as", "Semiaxis a for each superellipsoid");
+  params.addRequiredParam<std::vector<Real>>("bs", "Semiaxis b for each superellipsoid");
+  params.addRequiredParam<std::vector<Real>>("cs", "Semiaxis c for each superellipsoid");
+  params.addRequiredParam<std::vector<Real>>("ns", "Exponent n for each superellipsoid");
 
   return params;
 }
 
-SpecifiedSmoothSuperellipsoidIC::SpecifiedSmoothSuperellipsoidIC(const InputParameters & parameters) :
-    SmoothSuperellipsoidBaseIC(parameters),
-    _x_positions(getParam<std::vector<Real> >("x_positions")),
-    _y_positions(getParam<std::vector<Real> >("y_positions")),
-    _z_positions(getParam<std::vector<Real> >("z_positions")),
-    _input_as(getParam<std::vector<Real> >("as")),
-    _input_bs(getParam<std::vector<Real> >("bs")),
-    _input_cs(getParam<std::vector<Real> >("cs")),
-    _input_ns(getParam<std::vector<Real> >("ns"))
+SpecifiedSmoothSuperellipsoidIC::SpecifiedSmoothSuperellipsoidIC(const InputParameters & parameters)
+  : SmoothSuperellipsoidBaseIC(parameters),
+    _x_positions(getParam<std::vector<Real>>("x_positions")),
+    _y_positions(getParam<std::vector<Real>>("y_positions")),
+    _z_positions(getParam<std::vector<Real>>("z_positions")),
+    _input_as(getParam<std::vector<Real>>("as")),
+    _input_bs(getParam<std::vector<Real>>("bs")),
+    _input_cs(getParam<std::vector<Real>>("cs")),
+    _input_ns(getParam<std::vector<Real>>("ns"))
 {
 }
 

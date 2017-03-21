@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "NanAtCountKernel.h"
 
-template<>
-InputParameters validParams<NanAtCountKernel>()
+template <>
+InputParameters
+validParams<NanAtCountKernel>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<unsigned int>("count", "Will return a Nan during this residual count");
@@ -23,9 +24,8 @@ InputParameters validParams<NanAtCountKernel>()
   return params;
 }
 
-
-NanAtCountKernel::NanAtCountKernel(const InputParameters & parameters) :
-    Kernel(parameters),
+NanAtCountKernel::NanAtCountKernel(const InputParameters & parameters)
+  : Kernel(parameters),
     _count_to_nan(getParam<unsigned int>("count")),
     _print_count(getParam<bool>("print_count")),
     _count(0)

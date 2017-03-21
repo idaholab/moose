@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "ElasticEnergyAux.h"
 
-template<>
-InputParameters validParams<ElasticEnergyAux>()
+template <>
+InputParameters
+validParams<ElasticEnergyAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addClassDescription("Compute the local elastic energy");
@@ -15,9 +16,9 @@ InputParameters validParams<ElasticEnergyAux>()
   return params;
 }
 
-ElasticEnergyAux::ElasticEnergyAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+ElasticEnergyAux::ElasticEnergyAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _elastic_strain(getMaterialProperty<RankTwoTensor>(_base_name + "elastic_strain"))
 {

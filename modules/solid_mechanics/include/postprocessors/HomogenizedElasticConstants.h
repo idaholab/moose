@@ -9,13 +9,13 @@
 
 #include "ElementAverageValue.h"
 
-//Forward Declarations
+// Forward Declarations
 class HomogenizedElasticConstants;
 class ColumnMajorMatrix;
 class SymmElasticityTensor;
 class SymmTensor;
 
-template<>
+template <>
 InputParameters validParams<HomogenizedElasticConstants>();
 
 /**
@@ -68,4 +68,4 @@ private:
   Real _integral_value;
 };
 
-#endif //HOMOGENIZEDELASTICCONSTANTS_H
+#endif // HOMOGENIZEDELASTICCONSTANTS_H

@@ -16,24 +16,23 @@
 // forward declatration
 class ParsedMaterialHelper;
 
-template<>
+template <>
 InputParameters validParams<ParsedMaterialHelper>();
 
 /**
  * Helper class to perform the parsing and optimization of the
  * function expression.
  */
-class ParsedMaterialHelper :
-  public FunctionMaterialBase,
-  public FunctionParserUtils
+class ParsedMaterialHelper : public FunctionMaterialBase, public FunctionParserUtils
 {
 public:
-  enum VariableNameMappingMode {
-    USE_MOOSE_NAMES, USE_PARAM_NAMES
+  enum VariableNameMappingMode
+  {
+    USE_MOOSE_NAMES,
+    USE_PARAM_NAMES
   };
 
-  ParsedMaterialHelper(const InputParameters & parameters,
-                       VariableNameMappingMode map_mode);
+  ParsedMaterialHelper(const InputParameters & parameters, VariableNameMappingMode map_mode);
 
   void functionParse(const std::string & function_expression);
   void functionParse(const std::string & function_expression,
@@ -79,4 +78,4 @@ protected:
   const VariableNameMappingMode _map_mode;
 };
 
-#endif //PARSEDMATERIALHELPER_H
+#endif // PARSEDMATERIALHELPER_H

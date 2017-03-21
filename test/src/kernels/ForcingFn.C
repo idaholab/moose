@@ -13,27 +13,24 @@
 /****************************************************************/
 #include "ForcingFn.h"
 
-template<>
-InputParameters validParams<ForcingFn>()
+template <>
+InputParameters
+validParams<ForcingFn>()
 {
   return validParams<Kernel>();
 }
 
-
-ForcingFn::ForcingFn(const InputParameters & parameters) :
-    Kernel(parameters)
-{
-}
+ForcingFn::ForcingFn(const InputParameters & parameters) : Kernel(parameters) {}
 
 Real
 ForcingFn::funcValue()
 {
-//  Point pt = _qrule->get_points()[_qp];
+  //  Point pt = _qrule->get_points()[_qp];
   Point pt = _q_point[_qp];
 
-//  return (pt(0)*pt(0) + pt(1)*pt(1));
+  //  return (pt(0)*pt(0) + pt(1)*pt(1));
   if (_var.number() == 0)
-    return (pt(0)*pt(0) + pt(1)*pt(1));
+    return (pt(0) * pt(0) + pt(1) * pt(1));
   else
     return -4;
 }

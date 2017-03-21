@@ -39,4 +39,4 @@ protected:
   MaterialProperty<RankFourTensor> & _d2elasticity_tensor_dc2;
 };
 
-#endif //EIGENSTRAINBASEMATERIAL_H
+#endif // EIGENSTRAINBASEMATERIAL_H

@@ -9,15 +9,15 @@
 
 #include "XFEM.h"
 
-template<>
-InputParameters validParams<XFEMMarkerAux>()
+template <>
+InputParameters
+validParams<XFEMMarkerAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   return params;
 }
 
-XFEMMarkerAux::XFEMMarkerAux(const InputParameters & parameters) :
-    AuxKernel(parameters)
+XFEMMarkerAux::XFEMMarkerAux(const InputParameters & parameters) : AuxKernel(parameters)
 {
   FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
   if (fe_problem == NULL)

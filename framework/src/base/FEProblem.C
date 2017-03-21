@@ -17,17 +17,19 @@
 #include "Assembly.h"
 #include "AuxiliarySystem.h"
 
-template<>
-InputParameters validParams<FEProblem>()
+template <>
+InputParameters
+validParams<FEProblem>()
 {
   InputParameters params = validParams<FEProblemBase>();
   return params;
 }
 
-FEProblem::FEProblem(const InputParameters & parameters) :
-    FEProblemBase(parameters),
+FEProblem::FEProblem(const InputParameters & parameters)
+  : FEProblemBase(parameters),
     _use_nonlinear(getParam<bool>("use_nonlinear")),
-    _nl_sys(_use_nonlinear ? (new NonlinearSystem(*this, "nl0")) : (new MooseEigenSystem(*this, "eigen0")))
+    _nl_sys(_use_nonlinear ? (new NonlinearSystem(*this, "nl0"))
+                           : (new MooseEigenSystem(*this, "eigen0")))
 {
   _nl = _nl_sys;
   _aux = new AuxiliarySystem(*this, "aux0");

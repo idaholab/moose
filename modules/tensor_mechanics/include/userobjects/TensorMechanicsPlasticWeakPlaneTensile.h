@@ -10,11 +10,9 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-
 class TensorMechanicsPlasticWeakPlaneTensile;
 
-
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensile>();
 
 /**
@@ -23,14 +21,19 @@ InputParameters validParams<TensorMechanicsPlasticWeakPlaneTensile>();
  */
 class TensorMechanicsPlasticWeakPlaneTensile : public TensorMechanicsPlasticModel
 {
- public:
+public:
   TensorMechanicsPlasticWeakPlaneTensile(const InputParameters & parameters);
 
-  virtual void activeConstraints(const std::vector<Real> & f, const RankTwoTensor & stress, Real intnl, const RankFourTensor & Eijkl, std::vector<bool> & act, RankTwoTensor & returned_stress) const override;
+  virtual void activeConstraints(const std::vector<Real> & f,
+                                 const RankTwoTensor & stress,
+                                 Real intnl,
+                                 const RankFourTensor & Eijkl,
+                                 std::vector<bool> & act,
+                                 RankTwoTensor & returned_stress) const override;
 
   virtual std::string modelName() const override;
 
- protected:
+protected:
   /// Yield function = _a * stress_zz - _strength;
   const Real _a;
 

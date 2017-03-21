@@ -12,7 +12,7 @@
 // Forward Declaration
 class PrimaryTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<PrimaryTimeDerivative>();
 
 /**

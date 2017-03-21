@@ -9,10 +9,10 @@
 
 #include "ACBulk.h"
 
-//Forward Declarations
+// Forward Declarations
 class ACGrGrBase;
 
-template<>
+template <>
 InputParameters validParams<ACGrGrBase>();
 
 /**
@@ -37,4 +37,4 @@ protected:
   const VariableGradient * _grad_T;
 };
 
-#endif //ACGRGRBASE_H
+#endif // ACGRGRBASE_H

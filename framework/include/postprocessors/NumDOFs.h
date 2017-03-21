@@ -17,7 +17,7 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumDOFs;
 
 // libMesh forward declarations
@@ -27,7 +27,7 @@ class System;
 class EquationSystems;
 }
 
-template<>
+template <>
 InputParameters validParams<NumDOFs>();
 
 class NumDOFs : public GeneralPostprocessor
@@ -53,4 +53,4 @@ protected:
   const EquationSystems * _es_pointer;
 };
 
-#endif //NUMDOFS_H
+#endif // NUMDOFS_H

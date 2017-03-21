@@ -19,9 +19,8 @@
 
 class AddScalarKernelAction;
 
-template<>
+template <>
 InputParameters validParams<AddScalarKernelAction>();
-
 
 class AddScalarKernelAction : public MooseObjectAction
 {

@@ -18,17 +18,15 @@
 #include "Factory.h"
 #include "Control.h"
 
-template<>
-InputParameters validParams<AddControlAction>()
+template <>
+InputParameters
+validParams<AddControlAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
   return params;
 }
 
-AddControlAction::AddControlAction(InputParameters parameters) :
-    MooseObjectAction(parameters)
-{
-}
+AddControlAction::AddControlAction(InputParameters parameters) : MooseObjectAction(parameters) {}
 
 void
 AddControlAction::act()

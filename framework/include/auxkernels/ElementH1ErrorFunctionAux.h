@@ -21,7 +21,7 @@
 // Forward declarations
 class ElementH1ErrorFunctionAux;
 
-template<>
+template <>
 InputParameters validParams<ElementH1ErrorFunctionAux>();
 
 /**

@@ -16,19 +16,19 @@
  */
 class StateProcessor
 {
-  public:
-    //with default value
-    StateProcessor(unsigned int max_time_step, int seed = 0);
-    void setMaxTime(unsigned int time_step);
+public:
+  // with default value
+  StateProcessor(unsigned int max_time_step, int seed = 0);
+  void setMaxTime(unsigned int time_step);
 
-    unsigned int nextTime();
-    unsigned int process(unsigned int time_step);
+  unsigned int nextTime();
+  unsigned int process(unsigned int time_step);
 
-  private:
-    unsigned int _max_time_step;
-    std::vector<unsigned int> _ev_times;
+private:
+  unsigned int _max_time_step;
+  std::vector<unsigned int> _ev_times;
 
-    void addEv(unsigned int time_step);
+  void addEv(unsigned int time_step);
 };
 
 #endif

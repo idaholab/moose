@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef Q2PPIECEWISELINEARSINKFLUX_H
 #define Q2PPIECEWISELINEARSINKFLUX_H
 
@@ -16,10 +15,10 @@
 
 class Function;
 
-//Forward Declarations
+// Forward Declarations
 class Q2PPiecewiseLinearSinkFlux;
 
-template<>
+template <>
 InputParameters validParams<Q2PPiecewiseLinearSinkFlux>();
 
 /**
@@ -31,8 +30,7 @@ InputParameters validParams<Q2PPiecewiseLinearSinkFlux>();
  * and if density and viscosity are given, this integrand is multiplied by density*knn/viscosity,
  *      where knn is n.permeability.n where n is the normal to the boundary
  */
-class Q2PPiecewiseLinearSinkFlux:
-  public SideIntegralPostprocessor
+class Q2PPiecewiseLinearSinkFlux : public SideIntegralPostprocessor
 {
 public:
   Q2PPiecewiseLinearSinkFlux(const InputParameters & parameters);

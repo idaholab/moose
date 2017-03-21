@@ -13,7 +13,7 @@
 
 class CNSFVEntropyProductionAux;
 
-template<>
+template <>
 InputParameters validParams<CNSFVEntropyProductionAux>();
 
 /**
@@ -22,12 +22,10 @@ InputParameters validParams<CNSFVEntropyProductionAux>();
 class CNSFVEntropyProductionAux : public AuxKernel
 {
 public:
-
   CNSFVEntropyProductionAux(const InputParameters & parameters);
   virtual ~CNSFVEntropyProductionAux() {}
 
 protected:
-
   virtual Real computeValue();
 
   const SinglePhaseFluidProperties & _fp;

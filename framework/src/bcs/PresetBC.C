@@ -14,20 +14,18 @@
 
 #include "PresetBC.h"
 
-template<>
-InputParameters validParams<PresetBC>()
+template <>
+InputParameters
+validParams<PresetBC>()
 {
   InputParameters p = validParams<NodalBC>();
   p.addRequiredParam<Real>("value", "Value of the BC");
   return p;
 }
 
-
-PresetBC::PresetBC(const InputParameters & parameters) :
-  PresetNodalBC(parameters),
-  _value(getParam<Real>("value"))
+PresetBC::PresetBC(const InputParameters & parameters)
+  : PresetNodalBC(parameters), _value(getParam<Real>("value"))
 {
-
 }
 
 Real
@@ -35,4 +33,3 @@ PresetBC::computeQpValue()
 {
   return _value;
 }
-

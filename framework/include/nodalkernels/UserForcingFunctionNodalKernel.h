@@ -17,11 +17,11 @@
 
 #include "NodalKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class UserForcingFunctionNodalKernel;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<UserForcingFunctionNodalKernel>();
 
 /**

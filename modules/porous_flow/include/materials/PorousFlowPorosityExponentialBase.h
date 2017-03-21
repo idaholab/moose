@@ -10,10 +10,10 @@
 
 #include "PorousFlowPorosityBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowPorosityExponentialBase;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPorosityExponentialBase>();
 
 /**
@@ -70,4 +70,4 @@ protected:
   const bool _ensure_positive;
 };
 
-#endif //POROUSFLOWPOROSITYEXPONENTIALBASE_H
+#endif // POROUSFLOWPOROSITYEXPONENTIALBASE_H

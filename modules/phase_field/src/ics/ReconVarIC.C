@@ -8,21 +8,25 @@
 #include "EBSDReader.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ReconVarIC>()
+template <>
+InputParameters
+validParams<ReconVarIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<UserObjectName>("ebsd_reader", "The EBSDReader GeneralUserObject");
   params.addParam<unsigned int>("phase", "EBSD phase number to be assigned to this grain");
-  params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order parameters to create");
+  params.addRequiredParam<unsigned int>("op_num",
+                                        "Specifies the number of order parameters to create");
   params.addRequiredParam<unsigned int>("op_index", "The index for the current order parameter");
   params.addParam<bool>("all_op_elemental", false, "");
-  params.addParam<bool>("advanced_op_assignment", false, "Enable advanced grain to op assignment (avoid invalid graph coloring)");
+  params.addParam<bool>("advanced_op_assignment",
+                        false,
+                        "Enable advanced grain to op assignment (avoid invalid graph coloring)");
   return params;
 }
 
-ReconVarIC::ReconVarIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+ReconVarIC::ReconVarIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _mesh(_fe_problem.mesh()),
     _ebsd_reader(getUserObject<EBSDReader>("ebsd_reader")),
     _consider_phase(isParamValid("phase")),
@@ -39,11 +43,12 @@ void
 ReconVarIC::initialSetup()
 {
   // number of grains this ICs deals with
-  _grain_num = _consider_phase ?_ebsd_reader.getGrainNum(_phase) : _ebsd_reader.getGrainNum();
+  _grain_num = _consider_phase ? _ebsd_reader.getGrainNum(_phase) : _ebsd_reader.getGrainNum();
 
   // We do not want to have more order parameters than grains. That would leave some unused.
   if (_op_num > _grain_num)
-    mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger than the number of grains (grain_num)");
+    mooseError("ERROR in PolycrystalReducedIC: Number of order parameters (op_num) can't be larger "
+               "than the number of grains (grain_num)");
 
   if (!_advanced_op_assignment)
   {
@@ -71,7 +76,8 @@ ReconVarIC::initialSetup()
       entity_to_grain.insert(std::pair<dof_id_type, unsigned int>((*el)->id(), index));
     }
 
-    auto grain_neighbor_graph = PolycrystalICTools::buildGrainAdjacencyGraph(entity_to_grain, _mesh, _grain_num, true);
+    auto grain_neighbor_graph =
+        PolycrystalICTools::buildGrainAdjacencyGraph(entity_to_grain, _mesh, _grain_num, true);
 
     _assigned_op = PolycrystalICTools::assignOpsToGrains(grain_neighbor_graph, _grain_num, _op_num);
   }
@@ -103,15 +109,18 @@ ReconVarIC::value(const Point & /*p*/)
     mooseError("The following node id is reporting a NULL condition: ", _current_node->id());
 
   // Make sure the _current_node is in the node_to_grain_weight_map (return error if not in map)
-  std::map<dof_id_type, std::vector<Real> >::const_iterator it = _node_to_grain_weight_map.find(_current_node->id());
+  std::map<dof_id_type, std::vector<Real>>::const_iterator it =
+      _node_to_grain_weight_map.find(_current_node->id());
 
   if (it == _node_to_grain_weight_map.end())
     mooseError("The following node id is not in the node map: ", _current_node->id());
 
-  // Increment through all grains at node_index (these are global IDs if consider_phase is false and local IDs otherwise)
+  // Increment through all grains at node_index (these are global IDs if consider_phase is false and
+  // local IDs otherwise)
   for (unsigned int index = 0; index < _grain_num; ++index)
   {
-    // If the current order parameter index (_op_index) is equal to the assigned index (_assigned_op),
+    // If the current order parameter index (_op_index) is equal to the assigned index
+    // (_assigned_op),
     // set the value from node_to_grain_weight_map
     Real value = (it->second)[_consider_phase ? _ebsd_reader.getGlobalID(_phase, index) : index];
     if (_assigned_op[index] == _op_index && value > 0.0)

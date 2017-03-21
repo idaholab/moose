@@ -10,10 +10,10 @@
 
 #include "SlopeReconstructionBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class SlopeReconstructionOneD;
 
-template<>
+template <>
 InputParameters validParams<SlopeReconstructionOneD>();
 
 /**
@@ -23,7 +23,6 @@ InputParameters validParams<SlopeReconstructionOneD>();
 class SlopeReconstructionOneD : public SlopeReconstructionBase
 {
 public:
-
   SlopeReconstructionOneD(const InputParameters & parameters);
 };
 

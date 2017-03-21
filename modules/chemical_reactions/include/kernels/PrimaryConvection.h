@@ -12,7 +12,7 @@
 // Forward Declaration
 class PrimaryConvection;
 
-template<>
+template <>
 InputParameters validParams<PrimaryConvection>();
 
 /**
@@ -36,4 +36,4 @@ private:
   const VariableGradient & _grad_p;
 };
 
-#endif //PRIMARYCONVECTION_H
+#endif // PRIMARYCONVECTION_H

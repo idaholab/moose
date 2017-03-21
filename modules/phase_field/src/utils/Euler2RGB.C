@@ -39,7 +39,8 @@
  *           RGB = red*256^2 + green*256 + blue (where red, green, and blue
  *           are integer values between 0 and 255)
  */
-Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, unsigned int sym)
+Point
+euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int phase, unsigned int sym)
 {
   // Define Constants
   const Real pi = libMesh::pi;
@@ -66,7 +67,7 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
   Real g[3][3] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
   Real hkl[3] = {0.0, 0.0, 0.0};
   Real S[3][3] = {{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}};
-  const Real (*SymOps)[3][3];
+  const Real(*SymOps)[3][3];
 
   Point RGB;
 
@@ -93,83 +94,58 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
   };
 
   // Define symmetry operators for each of the seven crystal systems
-  const Real SymOpsCubic [24][3][3] = {
-    {{ 1,  0,  0}, { 0,  1,  0}, { 0,  0,  1}},
-    {{ 0,  0,  1}, { 1,  0,  0}, { 0,  1,  0}},
-    {{ 0,  1,  0}, { 0,  0,  1}, { 1,  0,  0}},
-    {{ 0, -1,  0}, { 0,  0,  1}, {-1,  0,  0}},
-    {{ 0, -1,  0}, { 0,  0, -1}, { 1,  0,  0}},
-    {{ 0,  1,  0}, { 0,  0, -1}, {-1,  0,  0}},
-    {{ 0,  0, -1}, { 1,  0,  0}, { 0, -1,  0}},
-    {{ 0,  0, -1}, {-1,  0,  0}, { 0,  1,  0}},
-    {{ 0,  0,  1}, {-1,  0,  0}, { 0, -1,  0}},
-    {{-1,  0,  0}, { 0,  1,  0}, { 0,  0, -1}},
-    {{-1,  0,  0}, { 0, -1,  0}, { 0,  0,  1}},
-    {{ 1,  0,  0}, { 0, -1,  0}, { 0,  0, -1}},
-    {{ 0,  0, -1}, { 0, -1,  0}, {-1,  0,  0}},
-    {{ 0,  0,  1}, { 0, -1,  0}, { 1,  0,  0}},
-    {{ 0,  0,  1}, { 0,  1,  0}, {-1,  0,  0}},
-    {{ 0,  0, -1}, { 0,  1,  0}, { 1,  0,  0}},
-    {{-1,  0,  0}, { 0,  0, -1}, { 0, -1,  0}},
-    {{ 1,  0,  0}, { 0,  0, -1}, { 0,  1,  0}},
-    {{ 1,  0,  0}, { 0,  0,  1}, { 0, -1,  0}},
-    {{-1,  0,  0}, { 0,  0,  1}, { 0,  1,  0}},
-    {{ 0, -1,  0}, {-1,  0,  0}, { 0,  0, -1}},
-    {{ 0,  1,  0}, {-1,  0,  0}, { 0,  0, -1}},
-    {{ 0,  1,  0}, { 1,  0,  0}, { 0,  0, -1}},
-    {{ 0, -1,  0}, { 1,  0,  0}, { 0,  0,  1}}
-  };
+  const Real SymOpsCubic[24][3][3] = {
+      {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},    {{0, 0, 1}, {1, 0, 0}, {0, 1, 0}},
+      {{0, 1, 0}, {0, 0, 1}, {1, 0, 0}},    {{0, -1, 0}, {0, 0, 1}, {-1, 0, 0}},
+      {{0, -1, 0}, {0, 0, -1}, {1, 0, 0}},  {{0, 1, 0}, {0, 0, -1}, {-1, 0, 0}},
+      {{0, 0, -1}, {1, 0, 0}, {0, -1, 0}},  {{0, 0, -1}, {-1, 0, 0}, {0, 1, 0}},
+      {{0, 0, 1}, {-1, 0, 0}, {0, -1, 0}},  {{-1, 0, 0}, {0, 1, 0}, {0, 0, -1}},
+      {{-1, 0, 0}, {0, -1, 0}, {0, 0, 1}},  {{1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+      {{0, 0, -1}, {0, -1, 0}, {-1, 0, 0}}, {{0, 0, 1}, {0, -1, 0}, {1, 0, 0}},
+      {{0, 0, 1}, {0, 1, 0}, {-1, 0, 0}},   {{0, 0, -1}, {0, 1, 0}, {1, 0, 0}},
+      {{-1, 0, 0}, {0, 0, -1}, {0, -1, 0}}, {{1, 0, 0}, {0, 0, -1}, {0, 1, 0}},
+      {{1, 0, 0}, {0, 0, 1}, {0, -1, 0}},   {{-1, 0, 0}, {0, 0, 1}, {0, 1, 0}},
+      {{0, -1, 0}, {-1, 0, 0}, {0, 0, -1}}, {{0, 1, 0}, {-1, 0, 0}, {0, 0, -1}},
+      {{0, 1, 0}, {1, 0, 0}, {0, 0, -1}},   {{0, -1, 0}, {1, 0, 0}, {0, 0, 1}}};
 
-  const Real SymOpsHexagonal[12][3][3] = {
-    {{   1,  0, 0}, { 0,    1, 0}, {0, 0,  1}},
-    {{-0.5,  a, 0}, {-a, -0.5, 0}, {0, 0,  1}},
-    {{-0.5, -a, 0}, { a, -0.5, 0}, {0, 0,  1}},
-    {{ 0.5,  a, 0}, {-a,  0.5, 0}, {0, 0,  1}},
-    {{  -1,  0, 0}, { 0,   -1, 0}, {0, 0,  1}},
-    {{ 0.5, -a, 0}, { a,  0.5, 0}, {0, 0,  1}},
-    {{-0.5, -a, 0}, {-a,  0.5, 0}, {0, 0, -1}},
-    {{   1,  0, 0}, { 0,   -1, 0}, {0, 0, -1}},
-    {{-0.5,  a, 0}, { a,  0.5, 0}, {0, 0, -1}},
-    {{ 0.5,  a, 0}, { a, -0.5, 0}, {0, 0, -1}},
-    {{  -1,  0, 0}, { 0,    1, 0}, {0, 0, -1}},
-    {{ 0.5, -a, 0}, {-a, -0.5, 0}, {0, 0, -1}}
-  };
+  const Real SymOpsHexagonal[12][3][3] = {{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+                                          {{-0.5, a, 0}, {-a, -0.5, 0}, {0, 0, 1}},
+                                          {{-0.5, -a, 0}, {a, -0.5, 0}, {0, 0, 1}},
+                                          {{0.5, a, 0}, {-a, 0.5, 0}, {0, 0, 1}},
+                                          {{-1, 0, 0}, {0, -1, 0}, {0, 0, 1}},
+                                          {{0.5, -a, 0}, {a, 0.5, 0}, {0, 0, 1}},
+                                          {{-0.5, -a, 0}, {-a, 0.5, 0}, {0, 0, -1}},
+                                          {{1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+                                          {{-0.5, a, 0}, {a, 0.5, 0}, {0, 0, -1}},
+                                          {{0.5, a, 0}, {a, -0.5, 0}, {0, 0, -1}},
+                                          {{-1, 0, 0}, {0, 1, 0}, {0, 0, -1}},
+                                          {{0.5, -a, 0}, {-a, -0.5, 0}, {0, 0, -1}}};
 
-  const Real SymOpsTetragonal [8][3][3] = {
-    {{ 1,  0, 0}, { 0,  1, 0}, {0, 0,  1}},
-    {{-1,  0, 0}, { 0,  1, 0}, {0, 0, -1}},
-    {{ 1,  0, 0}, { 0, -1, 0}, {0, 0, -1}},
-    {{-1,  0, 0}, { 0, -1, 0}, {0, 0,  1}},
-    {{ 0,  1, 0}, {-1,  0, 0}, {0, 0,  1}},
-    {{ 0, -1, 0}, { 1,  0, 0}, {0, 0,  1}},
-    {{ 0,  1, 0}, { 1,  0, 0}, {0, 0, -1}},
-    {{ 0, -1, 0}, {-1,  0, 0}, {0, 0, -1}}
-  };
+  const Real SymOpsTetragonal[8][3][3] = {{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+                                          {{-1, 0, 0}, {0, 1, 0}, {0, 0, -1}},
+                                          {{1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+                                          {{-1, 0, 0}, {0, -1, 0}, {0, 0, 1}},
+                                          {{0, 1, 0}, {-1, 0, 0}, {0, 0, 1}},
+                                          {{0, -1, 0}, {1, 0, 0}, {0, 0, 1}},
+                                          {{0, 1, 0}, {1, 0, 0}, {0, 0, -1}},
+                                          {{0, -1, 0}, {-1, 0, 0}, {0, 0, -1}}};
 
-  const Real SymOpsTrigonal [6][3][3] = {
-    {{   1,  0, 0}, { 0,    1, 0}, {0, 0,  1}},
-    {{-0.5,  a, 0}, {-a, -0.5, 0}, {0, 0,  1}},
-    {{-0.5, -a, 0}, { a, -0.5, 0}, {0, 0,  1}},
-    {{ 0.5,  a, 0}, { a, -0.5, 0}, {0, 0, -1}},
-    {{  -1,  0, 0}, { 0,    1, 0}, {0, 0,  1}},
-    {{ 0.5, -a, 0}, {-a, -0.5, 0}, {0, 0, -1}}
-  };
+  const Real SymOpsTrigonal[6][3][3] = {{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+                                        {{-0.5, a, 0}, {-a, -0.5, 0}, {0, 0, 1}},
+                                        {{-0.5, -a, 0}, {a, -0.5, 0}, {0, 0, 1}},
+                                        {{0.5, a, 0}, {a, -0.5, 0}, {0, 0, -1}},
+                                        {{-1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+                                        {{0.5, -a, 0}, {-a, -0.5, 0}, {0, 0, -1}}};
 
-  const Real SymOpsOrthorhombic [4][3][3] = {
-    {{ 1, 0, 0}, {0,  1, 0}, {0, 0,  1}},
-    {{-1, 0, 0}, {0,  1, 0}, {0, 0, -1}},
-    {{ 1, 0, 0}, {0, -1, 0}, {0, 0,  1}},
-    {{-1, 0, 0}, {0, -1, 0}, {0, 0,  1}}
-  };
+  const Real SymOpsOrthorhombic[4][3][3] = {{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+                                            {{-1, 0, 0}, {0, 1, 0}, {0, 0, -1}},
+                                            {{1, 0, 0}, {0, -1, 0}, {0, 0, 1}},
+                                            {{-1, 0, 0}, {0, -1, 0}, {0, 0, 1}}};
 
-  const Real SymOpsMonoclinic [2][3][3] = {
-    {{ 1, 0, 0}, {0, 1, 0}, {0, 0,  1}},
-    {{-1, 0, 0}, {0, 1, 0}, {0, 0, -1}}
-  };
+  const Real SymOpsMonoclinic[2][3][3] = {{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+                                          {{-1, 0, 0}, {0, 1, 0}, {0, 0, -1}}};
 
-  const Real SymOpsTriclinic [1][3][3] = {
-    {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}
-  };
+  const Real SymOpsTriclinic[1][3][3] = {{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}};
 
   // Assign parameters based on crystal class (sym)
   // Load cubic parameters (class 432)
@@ -177,9 +153,9 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
   {
     nsym = 24;
     SymOps = SymOpsCubic;
-    eta_min =  0 * (pi / 180);
+    eta_min = 0 * (pi / 180);
     eta_max = 45 * (pi / 180);
-    chi_min =  0 * (pi / 180);
+    chi_min = 0 * (pi / 180);
     chi_max = std::acos(std::sqrt(1.0 / (2.0 + (std::tan(Utility::pow<2>(eta_max))))));
   }
 
@@ -188,9 +164,9 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
   {
     nsym = 12;
     SymOps = SymOpsHexagonal;
-    eta_min =  0 * (pi / 180);
+    eta_min = 0 * (pi / 180);
     eta_max = 30 * (pi / 180);
-    chi_min =  0 * (pi / 180);
+    chi_min = 0 * (pi / 180);
     chi_max = pi / 2;
   }
 
@@ -199,9 +175,9 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
   {
     nsym = 8;
     SymOps = SymOpsTetragonal;
-    eta_min =  0 * (pi / 180);
+    eta_min = 0 * (pi / 180);
     eta_max = 45 * (pi / 180);
-    chi_min =  0 * (pi / 180);
+    chi_min = 0 * (pi / 180);
     chi_max = pi / 2;
   }
 
@@ -210,9 +186,9 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
   {
     nsym = 6;
     SymOps = SymOpsTrigonal;
-    eta_min =  0 * (pi / 180);
+    eta_min = 0 * (pi / 180);
     eta_max = 60 * (pi / 180);
-    chi_min =  0 * (pi / 180);
+    chi_min = 0 * (pi / 180);
     chi_max = pi / 2;
   }
 
@@ -221,9 +197,9 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
   {
     nsym = 4;
     SymOps = SymOpsOrthorhombic;
-    eta_min =  0 * (pi / 180);
+    eta_min = 0 * (pi / 180);
     eta_max = 90 * (pi / 180);
-    chi_min =  0 * (pi / 180);
+    chi_min = 0 * (pi / 180);
     chi_max = pi / 2;
   }
 
@@ -232,10 +208,10 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
   {
     nsym = 2;
     SymOps = SymOpsMonoclinic;
-    eta_min =   0 * (pi / 180);
+    eta_min = 0 * (pi / 180);
     eta_max = 180 * (pi / 180);
-    chi_min =   0 * (pi / 180);
-    chi_max =  pi / 2;
+    chi_min = 0 * (pi / 180);
+    chi_max = pi / 2;
   }
 
   //  Load triclinic parameters (class 1)
@@ -243,10 +219,10 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
   {
     nsym = 1;
     SymOps = SymOpsTriclinic;
-    eta_min =   0 * (pi / 180);
+    eta_min = 0 * (pi / 180);
     eta_max = 360 * (pi / 180);
-    chi_min =   0 * (pi / 180);
-    chi_max =  pi / 2;
+    chi_min = 0 * (pi / 180);
+    chi_max = pi / 2;
   }
 
   // Accomodate non-conforming (bad) data points
@@ -268,15 +244,15 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
   else
   {
     // Construct 3X3 orientation matrix
-    g[0][0] =  std::cos(phi1) * std::cos(phi2) - std::sin(phi1) * std::cos(PHI) * std::sin(phi2);
-    g[0][1] =  std::sin(phi1) * std::cos(phi2) + std::cos(phi1) * std::cos(PHI) * std::sin(phi2);
-    g[0][2] =  std::sin(phi2) * std::sin(PHI);
+    g[0][0] = std::cos(phi1) * std::cos(phi2) - std::sin(phi1) * std::cos(PHI) * std::sin(phi2);
+    g[0][1] = std::sin(phi1) * std::cos(phi2) + std::cos(phi1) * std::cos(PHI) * std::sin(phi2);
+    g[0][2] = std::sin(phi2) * std::sin(PHI);
     g[1][0] = -std::cos(phi1) * std::sin(phi2) - std::sin(phi1) * std::cos(PHI) * std::cos(phi2);
     g[1][1] = -std::sin(phi1) * std::sin(phi2) + std::cos(phi1) * std::cos(PHI) * std::cos(phi2);
-    g[1][2] =  std::cos(phi2) * std::sin(PHI);
-    g[2][0] =  std::sin(phi1) * std::sin(PHI);
+    g[1][2] = std::cos(phi2) * std::sin(PHI);
+    g[2][0] = std::sin(phi1) * std::sin(PHI);
     g[2][1] = -std::cos(phi1) * std::sin(PHI);
-    g[2][2] =  std::cos(PHI);
+    g[2][2] = std::cos(PHI);
 
     // Loop to sort Euler angles into standard stereographic triangle (SST)
     index = 0;
@@ -320,7 +296,7 @@ Point euler2RGB(unsigned int sd, Real phi1, Real PHI, Real phi2, unsigned int ph
 
     //  Calculate the RGB color values and make adjustments to maximize colorspace
     red = std::abs(1.0 - (chi / chi_max2));
-    blue = std::abs((eta - eta_min) / (eta_max -  eta_min));
+    blue = std::abs((eta - eta_min) / (eta_max - eta_min));
     green = 1.0 - blue;
 
     blue = blue * (chi / chi_max2);

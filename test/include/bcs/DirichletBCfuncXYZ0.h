@@ -17,10 +17,10 @@
 #include "NodalBC.h"
 #include "UsrFunc.h"
 
-//Forward Declarations
+// Forward Declarations
 class DirichletBCfuncXYZ0;
 
-template<>
+template <>
 InputParameters validParams<DirichletBCfuncXYZ0>();
 
 /**
@@ -29,7 +29,6 @@ InputParameters validParams<DirichletBCfuncXYZ0>();
 class DirichletBCfuncXYZ0 : public NodalBC
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -54,4 +53,4 @@ private:
   Real _omega0;
 };
 
-#endif //DIRICHLETBCFUNCXYZ0_H
+#endif // DIRICHLETBCFUNCXYZ0_H

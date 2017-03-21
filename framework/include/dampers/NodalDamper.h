@@ -21,22 +21,20 @@
 #include "MaterialPropertyInterface.h"
 #include "MooseVariableBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class NodalDamper;
 class SubProblem;
 class SystemBase;
 class MooseVariable;
 class Assembly;
 
-template<>
+template <>
 InputParameters validParams<NodalDamper>();
 
 /**
  * Base class for deriving nodal dampers
  */
-class NodalDamper :
-  public Damper,
-  protected MaterialPropertyInterface
+class NodalDamper : public Damper, protected MaterialPropertyInterface
 {
 public:
   NodalDamper(const InputParameters & parameters);
@@ -50,7 +48,6 @@ public:
    * Get the variable this damper is acting on
    */
   MooseVariable * getVariable() { return &_var; }
-
 
 protected:
   /**
@@ -71,7 +68,7 @@ protected:
   MooseVariable & _var;
 
   /// Current node
-  const Node * & _current_node;
+  const Node *& _current_node;
 
   /// Quadrature point index
   unsigned int _qp;
@@ -82,4 +79,4 @@ protected:
   const VariableValue & _u;
 };
 
-#endif //NODALDAMPER_H
+#endif // NODALDAMPER_H

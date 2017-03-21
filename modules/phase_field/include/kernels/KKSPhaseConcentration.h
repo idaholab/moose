@@ -10,10 +10,10 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSPhaseConcentration;
 
-template<>
+template <>
 InputParameters validParams<KKSPhaseConcentration>();
 
 /**
@@ -56,4 +56,4 @@ private:
   const MaterialProperty<Real> & _prop_dh;
 };
 
-#endif //KKSPHASECONCENTRATION_H
+#endif // KKSPHASECONCENTRATION_H

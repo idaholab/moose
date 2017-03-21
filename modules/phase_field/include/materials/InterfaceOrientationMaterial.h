@@ -9,10 +9,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class InterfaceOrientationMaterial;
 
-template<>
+template <>
 InputParameters validParams<InterfaceOrientationMaterial>();
 
 /**
@@ -43,4 +43,4 @@ private:
   const VariableGradient & _grad_op;
 };
 
-#endif //INTERFACEORIENTATIONMATERIAL_H
+#endif // INTERFACEORIENTATIONMATERIAL_H

@@ -17,18 +17,18 @@
 
 #include "IntegratedBC.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class DGFunctionDiffusionDirichletBC;
 
-template<>
+template <>
 InputParameters validParams<DGFunctionDiffusionDirichletBC>();
 
 /**
  * Implements a simple BC for DG
  *
  * BC derived from diffusion problem that can handle:
- * \f$ { \nabla u \cdot n_e} [v] + \epsilon { \nabla v \cdot n_e } [u] + (\frac{\sigma}{|e|} \cdot [u][v]) \f$
+ * \f$ { \nabla u \cdot n_e} [v] + \epsilon { \nabla v \cdot n_e } [u] + (\frac{\sigma}{|e|} \cdot
+ * [u][v]) \f$
  *
  * \f$ [a] = [ a_1 - a_2 ] \f$
  * \f$ {a} = 0.5 * (a_1 + a_2) \f$
@@ -36,7 +36,6 @@ InputParameters validParams<DGFunctionDiffusionDirichletBC>();
 class DGFunctionDiffusionDirichletBC : public IntegratedBC
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -55,4 +54,4 @@ private:
   const MaterialProperty<Real> & _diff;
 };
 
-#endif //DGFUNCTIONDIFFUSIONDIRICHLETBC_H
+#endif // DGFUNCTIONDIFFUSIONDIRICHLETBC_H

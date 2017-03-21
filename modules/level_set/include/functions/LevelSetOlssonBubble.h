@@ -13,7 +13,7 @@
 
 class LevelSetOlssonBubble;
 
-template<>
+template <>
 InputParameters validParams<LevelSetOlssonBubble>();
 
 /**
@@ -22,7 +22,6 @@ InputParameters validParams<LevelSetOlssonBubble>();
 class LevelSetOlssonBubble : public Function
 {
 public:
-
   LevelSetOlssonBubble(const InputParameters & parameters);
 
   virtual Real value(Real /*t*/, const Point & p) override;
@@ -30,7 +29,6 @@ public:
   virtual RealGradient gradient(Real /*t*/, const Point & p) override;
 
 protected:
-
   /// The 'center' of the bubble
   const RealVectorValue & _center;
 

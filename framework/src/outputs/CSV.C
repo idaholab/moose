@@ -17,15 +17,21 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<CSV>()
+template <>
+InputParameters
+validParams<CSV>()
 {
   // Get the parameters from the parent object
   InputParameters params = validParams<TableOutput>();
 
   // Options for aligning csv output with whitespace padding
-  params.addParam<bool>("align", false, "Align the outputted csv data by padding the numbers with trailing whitespace");
-  params.addParam<std::string>("delimiter", "Assign the delimiter (default is ','"); // default not included because peacock didn't parse ','
+  params.addParam<bool>(
+      "align",
+      false,
+      "Align the outputted csv data by padding the numbers with trailing whitespace");
+  params.addParam<std::string>(
+      "delimiter", "Assign the delimiter (default is ','"); // default not included because peacock
+                                                            // didn't parse ','
   params.addParam<unsigned int>("precision", 14, "Set the output precision");
 
   // Suppress unused parameters
@@ -35,8 +41,8 @@ InputParameters validParams<CSV>()
   return params;
 }
 
-CSV::CSV(const InputParameters & parameters) :
-    TableOutput(parameters),
+CSV::CSV(const InputParameters & parameters)
+  : TableOutput(parameters),
     _align(getParam<bool>("align")),
     _precision(getParam<unsigned int>("precision")),
     _set_delimiter(isParamValid("delimiter")),
@@ -107,7 +113,8 @@ CSV::output(const ExecFlagType & type)
     {
       std::ostringstream output;
       output << _file_base << "_" << MooseUtils::shortName(it.first);
-      output << "_" << std::setw(_padding) << std::setprecision(0) << std::setfill('0') << std::right << timeStep() << ".csv";
+      output << "_" << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
+             << std::right << timeStep() << ".csv";
 
       if (_set_delimiter)
         it.second.setDelimiter(_delimiter);

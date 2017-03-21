@@ -11,7 +11,7 @@
 
 class NSAction;
 
-template<>
+template <>
 InputParameters validParams<NSAction>();
 
 /**

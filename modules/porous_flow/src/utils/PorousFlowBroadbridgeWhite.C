@@ -13,28 +13,28 @@ namespace PorousFlowBroadbridgeWhite
 Real
 LambertW(Real z)
 {
-/* Lambert W function.
-   Was ~/C/LambertW.c written K M Briggs Keith dot Briggs at bt dot com 97 May 21.
-   Revised KMB 97 Nov 20; 98 Feb 11, Nov 24, Dec 28; 99 Jan 13; 00 Feb 23; 01 Apr 09
+  /* Lambert W function.
+     Was ~/C/LambertW.c written K M Briggs Keith dot Briggs at bt dot com 97 May 21.
+     Revised KMB 97 Nov 20; 98 Feb 11, Nov 24, Dec 28; 99 Jan 13; 00 Feb 23; 01 Apr 09
 
-   Computes Lambert W function, principal branch.
-   See LambertW1.c for -1 branch.
+     Computes Lambert W function, principal branch.
+     See LambertW1.c for -1 branch.
 
-   Returned value W(z) satisfies W(z)*exp(W(z))=z
-   test data...
-      W(1)= 0.5671432904097838730
-      W(2)= 0.8526055020137254914
-      W(20)=2.2050032780240599705
-   To solve (a+b*R)*exp(-c*R)-d=0 for R, use
-   R=-(b*W(-exp(-a*c/b)/b*d*c)+a*c)/b/c
+     Returned value W(z) satisfies W(z)*exp(W(z))=z
+     test data...
+        W(1)= 0.5671432904097838730
+        W(2)= 0.8526055020137254914
+        W(20)=2.2050032780240599705
+     To solve (a+b*R)*exp(-c*R)-d=0 for R, use
+     R=-(b*W(-exp(-a*c/b)/b*d*c)+a*c)/b/c
 
-   Test:
-     gcc -DTESTW LambertW.c -o LambertW -lm && LambertW
-   Library:
-     gcc -O3 -c LambertW.c
+     Test:
+       gcc -DTESTW LambertW.c -o LambertW -lm && LambertW
+     Library:
+       gcc -O3 -c LambertW.c
 
-   Modified trivially by Andy to use MOOSE things
-*/
+     Modified trivially by Andy to use MOOSE things
+  */
   mooseAssert(z > 0, "LambertW function in RichardsSeff1BWsmall called with negative argument");
 
   const Real eps = 4.0e-16; //, em1=0.3678794411714423215955237701614608;
@@ -66,7 +66,7 @@ LambertW(Real z)
   if (z < 1.0)
   {
     /* series near 0 */
-    p = std::sqrt(2.0 * (2.7182818284590452353602874713526625 * z  + 1.0));
+    p = std::sqrt(2.0 * (2.7182818284590452353602874713526625 * z + 1.0));
     w = -1.0 + p * (1.0 + p * (-0.333333333333333333333 + p * 0.152777777777777777777777));
   }
   else
@@ -115,7 +115,8 @@ d2EffectiveSaturation(Real pressure, Real c, Real sn, Real ss, Real las)
     return 0.0;
   const Real x = (c - 1.0) * std::exp(c - 1.0 - c * pressure / las);
   const Real lamw = LambertW(x);
-  return - (ss - sn) * Utility::pow<3>(c) / Utility::pow<2>(las) * lamw * (1.0 - 2.0 * lamw)/Utility::pow<5>(1.0 + lamw);
+  return -(ss - sn) * Utility::pow<3>(c) / Utility::pow<2>(las) * lamw * (1.0 - 2.0 * lamw) /
+         Utility::pow<5>(1.0 + lamw);
 }
 
 Real
@@ -158,8 +159,9 @@ d2RelativePermeability(Real s, Real c, Real sn, Real ss, Real kn, Real ks)
     return 0.0;
 
   const Real coef = (ks - kn) * (c - 1.0);
-  const Real th = (s - sn)/(ss - sn);
-  const Real krelpp = coef * (2.0 / (c - th) + 4.0 * th / Utility::pow<2>(c - th) + 2.0 * Utility::pow<2>(th) / Utility::pow<3>(c - th));
+  const Real th = (s - sn) / (ss - sn);
+  const Real krelpp = coef * (2.0 / (c - th) + 4.0 * th / Utility::pow<2>(c - th) +
+                              2.0 * Utility::pow<2>(th) / Utility::pow<3>(c - th));
   return krelpp / Utility::pow<2>(ss - sn);
 }
 }

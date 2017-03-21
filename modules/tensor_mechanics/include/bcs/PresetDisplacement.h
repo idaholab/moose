@@ -33,7 +33,7 @@ protected:
   const Real _beta;
 };
 
-template<>
+template <>
 InputParameters validParams<PresetDisplacement>();
 
 #endif /* PRESETDISPLACEMENT_H */

@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "PolyCoupledDirichletBC.h"
 
-template<>
-InputParameters validParams<PolyCoupledDirichletBC>()
+template <>
+InputParameters
+validParams<PolyCoupledDirichletBC>()
 {
   InputParameters params = validParams<NodalBC>();
   params.set<bool>("_integrated") = false;
@@ -23,16 +24,17 @@ InputParameters validParams<PolyCoupledDirichletBC>()
   return params;
 }
 
-PolyCoupledDirichletBC::PolyCoupledDirichletBC(const InputParameters & parameters) :
-    NodalBC(parameters),
-    //Grab the parameter for the multiplier.
+PolyCoupledDirichletBC::PolyCoupledDirichletBC(const InputParameters & parameters)
+  : NodalBC(parameters),
+    // Grab the parameter for the multiplier.
     _value(getParam<Real>("value"))
-{}
+{
+}
 
 Real
 PolyCoupledDirichletBC::computeQpResidual()
 {
-  //We define all our variables here along with our function.
+  // We define all our variables here along with our function.
   Real a = libMesh::pi;
   Real b = 3;
   Real e = 4;
@@ -40,8 +42,8 @@ PolyCoupledDirichletBC::computeQpResidual()
   Real y = (*_current_node)(1);
   Real z = (*_current_node)(2);
   Real t = _t;
-  Real u = a*x*x*x*y*t+b*y*y*z+e*x*y*z*z*z*z;
+  Real u = a * x * x * x * y * t + b * y * y * z + e * x * y * z * z * z * z;
 
-  //Our function gets added here.
-  return _u[_qp]-(u);
+  // Our function gets added here.
+  return _u[_qp] - (u);
 }

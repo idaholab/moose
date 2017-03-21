@@ -21,11 +21,12 @@
 // Forward Declarations
 class LayeredSideAverage;
 
-template<>
+template <>
 InputParameters validParams<LayeredSideAverage>();
 
 /**
- * This UserObject computes side averages of a variable storing partial sums for the specified number of intervals in a direction (x,y,z).c
+ * This UserObject computes side averages of a variable storing partial sums for the specified
+ * number of intervals in a direction (x,y,z).c
  */
 class LayeredSideAverage : public LayeredSideIntegral
 {

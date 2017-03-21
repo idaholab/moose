@@ -13,7 +13,7 @@
 // Forward Declarations
 class NSEnergyInviscidBC;
 
-template<>
+template <>
 InputParameters validParams<NSEnergyInviscidBC>();
 
 /**
@@ -92,7 +92,8 @@ protected:
   // Each of these terms, when differentiated, leads to
   // multiple terms due to the product rule:
   // (1) d/dX (rho*cv*T*(u.n))      = cv * (d(rho)/dX*T*(u.n) + rho*d(T)/dX*(u.n) + rho*T*d(u.n)/dX)
-  // (2) d/dX (rho*0.5*|u|^2*(u.n)) = 0.5 * (d(rho)/dX*|u|^2*(u.n) + rho*d(|u|^2)/dX*(u.n) + rho*|u|^2*d(u.n)/dX)
+  // (2) d/dX (rho*0.5*|u|^2*(u.n)) = 0.5 * (d(rho)/dX*|u|^2*(u.n) + rho*d(|u|^2)/dX*(u.n) +
+  // rho*|u|^2*d(u.n)/dX)
   // (3) d/dX (p*(u.n)) = d(p)/dx*(u.n) + p*d(u.n)/dX
 };
 

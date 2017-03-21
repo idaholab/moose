@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "Advection0.h"
 
-template<>
-InputParameters validParams<Advection0>()
+template <>
+InputParameters
+validParams<Advection0>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -29,8 +30,7 @@ InputParameters validParams<Advection0>()
   return params;
 }
 
-Advection0::Advection0(const InputParameters & parameters) :
-    Kernel(parameters)
+Advection0::Advection0(const InputParameters & parameters) : Kernel(parameters)
 {
   _Au = getParam<Real>("Au");
   _Bu = getParam<Real>("Bu");
@@ -45,7 +45,8 @@ Real
 Advection0::computeQpResidual()
 {
   VectorValue<Number> vel(_Au + _Bu * _q_point[_qp](0) + _Cu * _q_point[_qp](1),
-                          _Av + _Bv * _q_point[_qp](0) + _Cv * _q_point[_qp](1), 0.0);
+                          _Av + _Bv * _q_point[_qp](0) + _Cv * _q_point[_qp](1),
+                          0.0);
   return -_test[_i][_qp] * vel * _grad_u[_qp];
 }
 
@@ -53,6 +54,7 @@ Real
 Advection0::computeQpJacobian()
 {
   VectorValue<Number> vel(_Au + _Bu * _q_point[_qp](0) + _Cu * _q_point[_qp](1),
-                          _Av + _Bv * _q_point[_qp](0) + _Cv * _q_point[_qp](1), 0.0);
+                          _Av + _Bv * _q_point[_qp](0) + _Cv * _q_point[_qp](1),
+                          0.0);
   return -_test[_i][_qp] * vel * _grad_phi[_j][_qp];
 }

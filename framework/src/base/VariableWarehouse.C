@@ -17,9 +17,7 @@
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
 
-VariableWarehouse::VariableWarehouse()
-{
-}
+VariableWarehouse::VariableWarehouse() {}
 
 VariableWarehouse::~VariableWarehouse()
 {
@@ -47,20 +45,21 @@ VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
 }
 
 void
-VariableWarehouse::addBoundaryVar(BoundaryID bnd, MooseVariable *var)
+VariableWarehouse::addBoundaryVar(BoundaryID bnd, MooseVariable * var)
 {
   _boundary_vars[bnd].insert(var);
 }
 
 void
-VariableWarehouse::addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariable *var)
+VariableWarehouse::addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariable * var)
 {
   for (const auto & bid : boundary_ids)
     addBoundaryVar(bid, var);
 }
 
 void
-VariableWarehouse::addBoundaryVars(const std::set<BoundaryID> & boundary_ids, const std::map<std::string, std::vector<MooseVariable *> > & vars)
+VariableWarehouse::addBoundaryVars(const std::set<BoundaryID> & boundary_ids,
+                                   const std::map<std::string, std::vector<MooseVariable *>> & vars)
 {
   for (const auto & bid : boundary_ids)
     for (const auto & it : vars)

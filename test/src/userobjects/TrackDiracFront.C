@@ -15,19 +15,20 @@
 #include "TrackDiracFront.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<TrackDiracFront>()
+template <>
+InputParameters
+validParams<TrackDiracFront>()
 {
   InputParameters params = validParams<NodalUserObject>();
 
-  params.addRequiredCoupledVar("var", "Wherever this variable is close to 0.5 a Dirac point will be generated");
+  params.addRequiredCoupledVar(
+      "var", "Wherever this variable is close to 0.5 a Dirac point will be generated");
 
   return params;
 }
 
-TrackDiracFront::TrackDiracFront(const InputParameters & parameters) :
-    NodalUserObject(parameters),
-    _var_value(coupledValue("var"))
+TrackDiracFront::TrackDiracFront(const InputParameters & parameters)
+  : NodalUserObject(parameters), _var_value(coupledValue("var"))
 {
 }
 
@@ -49,7 +50,7 @@ TrackDiracFront::execute()
 }
 
 void
-TrackDiracFront::threadJoin(const UserObject &y)
+TrackDiracFront::threadJoin(const UserObject & y)
 {
   const TrackDiracFront & tdf = static_cast<const TrackDiracFront &>(y);
 
@@ -60,20 +61,22 @@ TrackDiracFront::threadJoin(const UserObject &y)
 void
 TrackDiracFront::finalize()
 {
-  // Nothing to do because we were careful to only record _local_ information - so no MPI communication is necessary
+  // Nothing to do because we were careful to only record _local_ information - so no MPI
+  // communication is necessary
 }
 
 Elem *
 TrackDiracFront::localElementConnectedToCurrentNode()
 {
-  const std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map = _mesh.nodeToElemMap();
+  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
   auto node_to_elem_pair = node_to_elem_map.find(_current_node->id());
   mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Node missing in node to elem map");
   const std::vector<dof_id_type> & connected_elems = node_to_elem_pair->second;
 
   auto pid = processor_id(); // This processor id
 
-  // Look through all of the elements connected to this node and find one owned by the local processor
+  // Look through all of the elements connected to this node and find one owned by the local
+  // processor
   for (auto elem_id : connected_elems)
   {
     Elem * elem = _mesh.elemPtr(elem_id);

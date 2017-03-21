@@ -39,7 +39,6 @@ class FEProblemBase;
 class MooseParsedFunctionWrapper
 {
 public:
-
   /**
    * Class constructor
    * @param feproblem Reference to the FEProblemBase object (provides access to Postprocessors)
@@ -48,10 +47,10 @@ public:
    * @param vals A vector of variable values, matching the variables defined in vars
    */
   MooseParsedFunctionWrapper(FEProblemBase & feproblem,
-                              const std::string & function_str,
-                              const std::vector<std::string> & vars,
-                              const std::vector<std::string> & vals,
-                              const THREAD_ID tid = 0);
+                             const std::string & function_str,
+                             const std::vector<std::string> & vars,
+                             const std::vector<std::string> & vals,
+                             const THREAD_ID tid = 0);
 
   /**
    * Class destruction
@@ -65,7 +64,7 @@ public:
    * Within the source two specializations exists for returning a scalar or vector; template
    * specialization was utilized to allow for generic expansion.
    */
-  template<typename T>
+  template <typename T>
   T evaluate(Real t, const Point & p);
 
   /**
@@ -81,7 +80,6 @@ public:
   Real evaluateDot(Real t, const Point & p);
 
 private:
-
   /// Reference to the FEProblemBase object
   FEProblemBase & _feproblem;
 
@@ -136,8 +134,9 @@ private:
 /**
  * The general evaluation method is not defined.
  */
-template<typename T>
-T evaluate(Real /*t*/, const Point & /*p*/)
+template <typename T>
+T
+evaluate(Real /*t*/, const Point & /*p*/)
 {
   mooseError("The evaluate method is not defined for this type.");
 }

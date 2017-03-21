@@ -14,7 +14,7 @@
  * Automatically generates ic for polycrystal hexagonal grain structure. Must
  * have squared number of grains and periodic BCs.
  */
-class PolycrystalHexGrainICAction: public Action
+class PolycrystalHexGrainICAction : public Action
 {
 public:
   PolycrystalHexGrainICAction(const InputParameters & params);
@@ -30,7 +30,7 @@ private:
   const Real _perturbation_percent;
 };
 
-template<>
+template <>
 InputParameters validParams<PolycrystalHexGrainICAction>();
 
-#endif //POLYCRYSTALHEXGRAINICACTION_H
+#endif // POLYCRYSTALHEXGRAINICACTION_H

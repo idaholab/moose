@@ -13,13 +13,13 @@
 
 class PFCRFFEnergyDensity;
 
-template<>
+template <>
 InputParameters validParams<PFCRFFEnergyDensity>();
 
 class PFCRFFEnergyDensity : public AuxKernel
 {
 public:
-   PFCRFFEnergyDensity( const InputParameters & parameters);
+  PFCRFFEnergyDensity(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
@@ -35,4 +35,4 @@ protected:
   Real _tol;
 };
 
-#endif //PFCRFF_ENERGY_DENSITY_H
+#endif // PFCRFF_ENERGY_DENSITY_H

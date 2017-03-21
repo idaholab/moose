@@ -10,10 +10,10 @@
 
 #include "SlopeLimitingBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class CNSFVNoSlopeLimiting;
 
-template<>
+template <>
 InputParameters validParams<CNSFVNoSlopeLimiting>();
 
 /**
@@ -22,7 +22,6 @@ InputParameters validParams<CNSFVNoSlopeLimiting>();
 class CNSFVNoSlopeLimiting : public SlopeLimitingBase
 {
 public:
-
   CNSFVNoSlopeLimiting(const InputParameters & parameters);
 
   /// compute the limited slope of the cell

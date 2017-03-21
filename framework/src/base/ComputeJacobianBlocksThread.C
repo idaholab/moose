@@ -20,28 +20,27 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(FEProblemBase & fe_problem, std::vector<JacobianBlock*> & blocks) :
-    ComputeFullJacobianThread(fe_problem, blocks[0]->_jacobian /* have to pass something */),
+ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(FEProblemBase & fe_problem,
+                                                         std::vector<JacobianBlock *> & blocks)
+  : ComputeFullJacobianThread(fe_problem, blocks[0]->_jacobian /* have to pass something */),
     _blocks(blocks)
 {
 }
 
 // Splitting Constructor
-ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(ComputeJacobianBlocksThread & x, Threads::split split) :
-    ComputeFullJacobianThread(x, split),
-    _blocks(x._blocks)
+ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(ComputeJacobianBlocksThread & x,
+                                                         Threads::split split)
+  : ComputeFullJacobianThread(x, split), _blocks(x._blocks)
 {
 }
 
-ComputeJacobianBlocksThread::~ComputeJacobianBlocksThread()
-{
-}
-
+ComputeJacobianBlocksThread::~ComputeJacobianBlocksThread() {}
 
 void
 ComputeJacobianBlocksThread::postElement(const Elem * elem)
 {
-  std::vector<dof_id_type> dof_indices; // Do this out here to avoid creating and destroying it thousands of times
+  std::vector<dof_id_type>
+      dof_indices; // Do this out here to avoid creating and destroying it thousands of times
 
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
@@ -50,6 +49,7 @@ ComputeJacobianBlocksThread::postElement(const Elem * elem)
     const DofMap & dof_map = block->_precond_system.get_dof_map();
     dof_map.dof_indices(elem, dof_indices);
 
-    _fe_problem.addJacobianBlock(block->_jacobian, block->_ivar, block->_jvar, dof_map, dof_indices, _tid);
+    _fe_problem.addJacobianBlock(
+        block->_jacobian, block->_ivar, block->_jvar, dof_map, dof_indices, _tid);
   }
 }

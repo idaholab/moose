@@ -9,7 +9,7 @@
 
 #include "Action.h"
 
-class MatVecRealGradAuxKernelAction: public Action
+class MatVecRealGradAuxKernelAction : public Action
 {
 public:
   MatVecRealGradAuxKernelAction(const InputParameters & params);
@@ -22,7 +22,7 @@ protected:
   const MaterialPropertyName _div_prop;
 };
 
-template<>
+template <>
 InputParameters validParams<MatVecRealGradAuxKernelAction>();
 
-#endif //MATVECREALGRADAUXKERNELACTION_H
+#endif // MATVECREALGRADAUXKERNELACTION_H

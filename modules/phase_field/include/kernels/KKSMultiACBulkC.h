@@ -9,10 +9,10 @@
 
 #include "KKSMultiACBulkBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSMultiACBulkC;
 
-template<>
+template <>
 InputParameters validParams<KKSMultiACBulkC>();
 
 /**
@@ -42,7 +42,7 @@ protected:
   const MaterialProperty<Real> & _prop_d2F1dc12;
   /// Mixed partial derivatives of the free energy function wrt c1 and
   /// any other coupled variables \f$ \frac {d^2}{dc_1 dv} F_1 \f$
-  std::vector<const MaterialProperty<Real>* > _prop_d2F1dc1darg;
+  std::vector<const MaterialProperty<Real> *> _prop_d2F1dc1darg;
 };
 
-#endif //KKSMULTIACBULKC_H
+#endif // KKSMULTIACBULKC_H

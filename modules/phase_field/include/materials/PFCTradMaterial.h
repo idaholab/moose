@@ -9,10 +9,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class PFCTradMaterial;
 
-template<>
+template <>
 InputParameters validParams<PFCTradMaterial>();
 
 class PFCTradMaterial : public Material
@@ -37,4 +37,4 @@ private:
   MaterialProperty<Real> & _C8;
 };
 
-#endif //PFCTRADMATERIAL_H
+#endif // PFCTRADMATERIAL_H

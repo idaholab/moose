@@ -17,7 +17,6 @@
 
 #include "libmesh/libmesh_config.h"
 
-
 #include "SystemBase.h"
 #include "NonlinearSystemBase.h"
 #include "KernelBase.h"
@@ -71,18 +70,28 @@ public:
    *
    * @return The number of converged eigenvalues
    */
-  virtual unsigned int getNumConvergedEigenvalues() const { return _transient_sys.get_n_converged(); };
+  virtual unsigned int getNumConvergedEigenvalues() const
+  {
+    return _transient_sys.get_n_converged();
+  };
 
   virtual NonlinearSolver<Number> * nonlinearSolver() override;
 
-  virtual NumericVector<Number> & solutionOld() override { return *_transient_sys.old_local_solution; }
+  virtual NumericVector<Number> & solutionOld() override
+  {
+    return *_transient_sys.old_local_solution;
+  }
 
-  virtual NumericVector<Number> & solutionOlder() override { return *_transient_sys.older_local_solution; }
+  virtual NumericVector<Number> & solutionOlder() override
+  {
+    return *_transient_sys.older_local_solution;
+  }
 
   virtual TransientEigenSystem & sys() { return _transient_sys; }
 
   /**
-   * For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or Neumann)
+   * For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or
+   * Neumann)
    * boundary conditions are not allowed.
    */
   void checkIntegrity();
@@ -90,7 +99,8 @@ public:
   /**
    * Return the Nth converged eigenvalue.
    *
-   * @return The Nth converged eigenvalue as a complex number, i.e. the first and the second number is the real and the imaginary part of
+   * @return The Nth converged eigenvalue as a complex number, i.e. the first and the second number
+   * is the real and the imaginary part of
    * the eigenvalue, respectively.
    */
   virtual const std::pair<Real, Real> getNthConvergedEigenvalue(dof_id_type n);
@@ -100,7 +110,10 @@ public:
    *
    * @return all converged eigenvalues as complex numbers
    */
-  virtual const std::vector<std::pair<Real, Real>> & getAllConvergedEigenvalues() { return _eigen_values; }
+  virtual const std::vector<std::pair<Real, Real>> & getAllConvergedEigenvalues()
+  {
+    return _eigen_values;
+  }
 
 protected:
   TransientEigenSystem & _transient_sys;
@@ -122,7 +135,7 @@ public:
    */
   bool converged() { return false; }
 
-  void checkIntegrity() { }
+  void checkIntegrity() {}
 };
 
 #endif

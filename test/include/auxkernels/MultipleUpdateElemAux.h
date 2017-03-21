@@ -19,7 +19,7 @@
 
 class MultipleUpdateElemAux;
 
-template<>
+template <>
 InputParameters validParams<MultipleUpdateElemAux>();
 
 /**

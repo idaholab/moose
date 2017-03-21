@@ -10,10 +10,10 @@
 
 #include "PorousFlowPorosityExponentialBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class PorousFlowPorosityHM;
 
-template<>
+template <>
 InputParameters validParams<PorousFlowPorosityHM>();
 
 /**
@@ -63,4 +63,4 @@ protected:
   const MaterialProperty<std::vector<Real>> & _dpf_dvar;
 };
 
-#endif //POROUSFLOWPOROSITYHM_H
+#endif // POROUSFLOWPOROSITYHM_H

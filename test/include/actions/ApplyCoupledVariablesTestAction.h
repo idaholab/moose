@@ -21,7 +21,7 @@
 // Forward declerations
 class ApplyCoupledVariablesTestAction;
 
-template<>
+template <>
 InputParameters validParams<ApplyCoupledVariablesTestAction>();
 
 /**
@@ -30,7 +30,6 @@ InputParameters validParams<ApplyCoupledVariablesTestAction>();
 class ApplyCoupledVariablesTestAction : public Action
 {
 public:
-
   /**
    * Class constructor
    */
@@ -47,4 +46,4 @@ public:
   virtual void act();
 };
 
-#endif //APPLYCOUPLEDVARIABLESTESTACTION_H
+#endif // APPLYCOUPLEDVARIABLESTESTACTION_H

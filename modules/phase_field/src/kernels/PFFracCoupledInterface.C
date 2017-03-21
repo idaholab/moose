@@ -6,20 +6,22 @@
 /****************************************************************/
 #include "PFFracCoupledInterface.h"
 
-template<>
-InputParameters validParams<PFFracCoupledInterface>()
+template <>
+InputParameters
+validParams<PFFracCoupledInterface>()
 {
   InputParameters params = validParams<KernelGrad>();
-  params.addClassDescription("Phase-field fracture residual for beta variable: Contribution from gradient of damage order parameter");
+  params.addClassDescription("Phase-field fracture residual for beta variable: Contribution from "
+                             "gradient of damage order parameter");
   params.addRequiredCoupledVar("c", "Order parameter for damage");
   return params;
 }
 
-PFFracCoupledInterface::PFFracCoupledInterface(const InputParameters & parameters):
-  KernelGrad(parameters),
-  _c(coupledValue("c")),
-  _grad_c(coupledGradient("c")),
-  _c_var(coupled("c"))
+PFFracCoupledInterface::PFFracCoupledInterface(const InputParameters & parameters)
+  : KernelGrad(parameters),
+    _c(coupledValue("c")),
+    _grad_c(coupledGradient("c")),
+    _c_var(coupled("c"))
 {
 }
 

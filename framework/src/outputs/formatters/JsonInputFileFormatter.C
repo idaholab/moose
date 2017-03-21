@@ -30,7 +30,8 @@ JsonInputFileFormatter::toString(const moosecontrib::Json::Value & root)
 }
 
 void
-JsonInputFileFormatter::addLine(const std::string & line, size_t max_line_len,
+JsonInputFileFormatter::addLine(const std::string & line,
+                                size_t max_line_len,
                                 const std::string & comment)
 {
   if (line.empty() && comment.empty())
@@ -71,7 +72,8 @@ JsonInputFileFormatter::addLine(const std::string & line, size_t max_line_len,
 }
 
 void
-JsonInputFileFormatter::addBlock(const std::string & name, const moosecontrib::Json::Value & block,
+JsonInputFileFormatter::addBlock(const std::string & name,
+                                 const moosecontrib::Json::Value & block,
                                  bool toplevel)
 {
   addLine("");

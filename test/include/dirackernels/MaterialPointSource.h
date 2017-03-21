@@ -18,10 +18,10 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class MaterialPointSource;
 
-template<>
+template <>
 InputParameters validParams<MaterialPointSource>();
 
 /**
@@ -43,4 +43,4 @@ protected:
   const MaterialProperty<Real> * _value;
 };
 
-#endif //MATERIALPOINTSOURCE_H
+#endif // MATERIALPOINTSOURCE_H

@@ -11,7 +11,7 @@
 
 class TensorMechanicsHardeningPowerRule;
 
-template<>
+template <>
 InputParameters validParams<TensorMechanicsHardeningPowerRule>();
 
 /**
@@ -21,7 +21,7 @@ InputParameters validParams<TensorMechanicsHardeningPowerRule>();
  */
 class TensorMechanicsHardeningPowerRule : public TensorMechanicsHardeningModel
 {
- public:
+public:
   TensorMechanicsHardeningPowerRule(const InputParameters & parameters);
 
   virtual Real value(Real intnl) const override;
@@ -30,7 +30,7 @@ class TensorMechanicsHardeningPowerRule : public TensorMechanicsHardeningModel
 
   virtual std::string modelName() const override;
 
- private:
+private:
   /// The value = value_0 * (p / epsilon0 + 1)^{exponent})
   const Real _value_0;
 

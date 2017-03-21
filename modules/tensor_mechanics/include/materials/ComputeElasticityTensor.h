@@ -24,4 +24,4 @@ protected:
   RankFourTensor _Cijkl;
 };
 
-#endif //COMPUTEELASTICITYTENSOR_H
+#endif // COMPUTEELASTICITYTENSOR_H

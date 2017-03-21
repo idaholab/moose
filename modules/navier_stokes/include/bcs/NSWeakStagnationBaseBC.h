@@ -12,11 +12,9 @@
 // Forward Declarations
 class NSWeakStagnationBaseBC;
 
-
 // Specialization required of all user-level Moose objects
-template<>
+template <>
 InputParameters validParams<NSWeakStagnationBaseBC>();
-
 
 /**
  * This is the base class for "weakly-imposed" stagnation boundary
@@ -31,7 +29,7 @@ public:
   NSWeakStagnationBaseBC(const InputParameters & parameters);
 
   // Destructor, better be virtual
-  virtual ~NSWeakStagnationBaseBC(){}
+  virtual ~NSWeakStagnationBaseBC() {}
 
 protected:
   /**
@@ -72,6 +70,5 @@ protected:
   // normal vector
   Real sdotn();
 };
-
 
 #endif

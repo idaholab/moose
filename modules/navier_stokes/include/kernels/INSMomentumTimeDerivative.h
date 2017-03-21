@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSMomentumTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<INSMomentumTimeDerivative>();
 
 /**
@@ -25,7 +25,7 @@ class INSMomentumTimeDerivative : public TimeDerivative
 public:
   INSMomentumTimeDerivative(const InputParameters & parameters);
 
-  virtual ~INSMomentumTimeDerivative(){}
+  virtual ~INSMomentumTimeDerivative() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -35,6 +35,5 @@ protected:
   // Parameters
   Real _rho;
 };
-
 
 #endif // INSMOMENTUMTIMEDERIVATIVE_H

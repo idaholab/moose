@@ -14,9 +14,8 @@
 // Forward Declarations
 class NSEnergyViscousBC;
 
-template<>
+template <>
 InputParameters validParams<NSEnergyViscousBC>();
-
 
 /**
  * This class corresponds to the viscous part of the "natural"
@@ -46,7 +45,7 @@ protected:
   const VariableGradient & _grad_temperature;
 
   // Material properties
-  const MaterialProperty<Real>& _thermal_conductivity;
+  const MaterialProperty<Real> & _thermal_conductivity;
 
   // An object for computing viscous stress tensor derivatives.
   // Constructed via a reference to ourself so we can access all of our data.

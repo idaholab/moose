@@ -11,10 +11,10 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSSplitCHCRes;
 
-template<>
+template <>
 InputParameters validParams<KKSSplitCHCRes>();
 
 /**
@@ -29,7 +29,7 @@ InputParameters validParams<KKSSplitCHCRes>();
  * The user picks one phase free energy \f$ F_a \f$ (f_base) and its corresponding
  * phase concentration \f$ c_a \f$
  */
-class KKSSplitCHCRes : public DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHBase> >
+class KKSSplitCHCRes : public DerivativeMaterialInterface<JvarMapKernelInterface<SplitCHBase>>
 {
 public:
   KKSSplitCHCRes(const InputParameters & parameters);
@@ -72,4 +72,4 @@ private:
   const VariableValue & _w;
 };
 
-#endif //KKSSPLITCHCRES_H
+#endif // KKSSPLITCHCRES_H

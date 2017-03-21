@@ -13,7 +13,7 @@
 
 class HEVPFlowRateUOBase;
 
-template<>
+template <>
 InputParameters validParams<HEVPFlowRateUOBase>();
 
 /**
@@ -28,7 +28,8 @@ public:
   virtual bool computeValue(unsigned int, Real &) const = 0;
   virtual bool computeDirection(unsigned int, RankTwoTensor &) const = 0;
   virtual bool computeDerivative(unsigned int, const std::string &, Real &) const = 0;
-  virtual bool computeTensorDerivative(unsigned int, const std::string &, RankTwoTensor &) const = 0;
+  virtual bool
+  computeTensorDerivative(unsigned int, const std::string &, RankTwoTensor &) const = 0;
 
 protected:
   std::string _strength_prop_name;

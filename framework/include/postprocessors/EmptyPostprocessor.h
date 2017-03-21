@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class EmptyPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<EmptyPostprocessor>();
 
 class EmptyPostprocessor : public GeneralPostprocessor

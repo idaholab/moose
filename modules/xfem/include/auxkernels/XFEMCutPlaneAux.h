@@ -30,7 +30,7 @@ private:
   unsigned int _plane_id;
 };
 
-template<>
+template <>
 InputParameters validParams<XFEMCutPlaneAux>();
 
-#endif //XFEMCUTPLANEAUX_H
+#endif // XFEMCUTPLANEAUX_H

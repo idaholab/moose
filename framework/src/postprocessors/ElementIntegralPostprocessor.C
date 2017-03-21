@@ -17,18 +17,18 @@
 // libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ElementIntegralPostprocessor>()
+template <>
+InputParameters
+validParams<ElementIntegralPostprocessor>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
   return params;
 }
 
-ElementIntegralPostprocessor::ElementIntegralPostprocessor(const InputParameters & parameters) :
-    ElementPostprocessor(parameters),
-    _qp(0),
-    _integral_value(0)
-{}
+ElementIntegralPostprocessor::ElementIntegralPostprocessor(const InputParameters & parameters)
+  : ElementPostprocessor(parameters), _qp(0), _integral_value(0)
+{
+}
 
 void
 ElementIntegralPostprocessor::initialize()
@@ -61,8 +61,7 @@ ElementIntegralPostprocessor::computeIntegral()
 {
   Real sum = 0;
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
   return sum;
 }
-

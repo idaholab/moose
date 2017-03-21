@@ -9,10 +9,10 @@
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class PFMobility;
 
-template<>
+template <>
 InputParameters validParams<PFMobility>();
 
 class PFMobility : public Material
@@ -32,4 +32,4 @@ private:
   Real _kappa;
 };
 
-#endif //PFMOBILITY_H
+#endif // PFMOBILITY_H

@@ -27,37 +27,57 @@
 // libMesh includes
 #include "libmesh/mesh_tools.h"
 
-template<>
-InputParameters validParams<TransientMultiApp>()
+template <>
+InputParameters
+validParams<TransientMultiApp>()
 {
   InputParameters params = validParams<MultiApp>();
   params += validParams<TransientInterface>();
 
-  params.addParam<bool>("sub_cycling", false, "Set to true to allow this MultiApp to take smaller timesteps than the rest of the simulation.  More than one timestep will be performed for each 'master' timestep");
+  params.addParam<bool>("sub_cycling", false, "Set to true to allow this MultiApp to take smaller "
+                                              "timesteps than the rest of the simulation.  More "
+                                              "than one timestep will be performed for each "
+                                              "'master' timestep");
 
-  params.addParam<bool>("interpolate_transfers", false, "Only valid when sub_cycling.  This allows transferred values to be interpolated over the time frame the MultiApp is executing over when sub_cycling");
+  params.addParam<bool>("interpolate_transfers", false, "Only valid when sub_cycling.  This allows "
+                                                        "transferred values to be interpolated "
+                                                        "over the time frame the MultiApp is "
+                                                        "executing over when sub_cycling");
 
-  params.addParam<bool>("detect_steady_state", false, "If true then while sub_cycling a steady state check will be done.  In this mode output will only be done once the MultiApp reaches the target time or steady state is reached");
+  params.addParam<bool>(
+      "detect_steady_state", false, "If true then while sub_cycling a steady state check will be "
+                                    "done.  In this mode output will only be done once the "
+                                    "MultiApp reaches the target time or steady state is reached");
 
-  params.addParam<Real>("steady_state_tol", 1e-8, "The relative difference between the new solution and the old solution that will be considered to be at steady state");
+  params.addParam<Real>("steady_state_tol", 1e-8, "The relative difference between the new "
+                                                  "solution and the old solution that will be "
+                                                  "considered to be at steady state");
 
   params.addParam<bool>("output_sub_cycles", false, "If true then every sub-cycle will be output.");
-  params.addParam<bool>("print_sub_cycles", true, "Toggle the display of sub-cycles on the screen.");
+  params.addParam<bool>(
+      "print_sub_cycles", true, "Toggle the display of sub-cycles on the screen.");
 
-  params.addParam<unsigned int>("max_failures", 0, "Maximum number of solve failures tolerated while sub_cycling.");
+  params.addParam<unsigned int>(
+      "max_failures", 0, "Maximum number of solve failures tolerated while sub_cycling.");
 
-  params.addParam<bool>("tolerate_failure", false, "If true this MultiApp won't participate in dt decisions and will always be fast-forwarded to the current time.");
+  params.addParam<bool>("tolerate_failure", false, "If true this MultiApp won't participate in dt "
+                                                   "decisions and will always be fast-forwarded to "
+                                                   "the current time.");
 
-  params.addParam<bool>("catch_up", false, "If true this will allow failed solves to attempt to 'catch up' using smaller timesteps.");
+  params.addParam<bool>(
+      "catch_up",
+      false,
+      "If true this will allow failed solves to attempt to 'catch up' using smaller timesteps.");
 
-  params.addParam<Real>("max_catch_up_steps", 2, "Maximum number of steps to allow an app to take when trying to catch back up after a failed solve.");
+  params.addParam<Real>("max_catch_up_steps", 2, "Maximum number of steps to allow an app to take "
+                                                 "when trying to catch back up after a failed "
+                                                 "solve.");
 
   return params;
 }
 
-
-TransientMultiApp::TransientMultiApp(const InputParameters & parameters):
-    MultiApp(parameters),
+TransientMultiApp::TransientMultiApp(const InputParameters & parameters)
+  : MultiApp(parameters),
     _sub_cycling(getParam<bool>("sub_cycling")),
     _interpolate_transfers(getParam<bool>("interpolate_transfers")),
     _detect_steady_state(getParam<bool>("detect_steady_state")),
@@ -74,11 +94,15 @@ TransientMultiApp::TransientMultiApp(const InputParameters & parameters):
 {
   // Transfer interpolation only makes sense for sub-cycling solves
   if (_interpolate_transfers && !_sub_cycling)
-    mooseError("MultiApp ", name(), " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
+    mooseError("MultiApp ",
+               name(),
+               " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
 
   // Subcycling overrides catch up, we don't want to confuse users by allowing them to set both.
   if (_sub_cycling && _catch_up)
-    mooseError("MultiApp ", name(), " sub_cycling and catch_up cannot both be set to true simultaneously.");
+    mooseError("MultiApp ",
+               name(),
+               " sub_cycling and catch_up cannot both be set to true simultaneously.");
 }
 
 TransientMultiApp::~TransientMultiApp()
@@ -102,7 +126,8 @@ TransientMultiApp::~TransientMultiApp()
 NumericVector<Number> &
 TransientMultiApp::appTransferVector(unsigned int app, std::string var_name)
 {
-  if (std::find(_transferred_vars.begin(), _transferred_vars.end(), var_name) == _transferred_vars.end())
+  if (std::find(_transferred_vars.begin(), _transferred_vars.end(), var_name) ==
+      _transferred_vars.end())
     _transferred_vars.push_back(var_name);
 
   if (_interpolate_transfers)
@@ -125,7 +150,7 @@ TransientMultiApp::initialSetup()
   {
     _transient_executioners.resize(_my_num_apps);
     // Grab Transient Executioners from each app
-    for (unsigned int i=0; i<_my_num_apps; i++)
+    for (unsigned int i = 0; i < _my_num_apps; i++)
       setupApp(i);
   }
 
@@ -143,7 +168,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
   _console << "Solving MultiApp " << name() << std::endl;
 
-// "target_time" must always be in global time
+  // "target_time" must always be in global time
   target_time += _app.getGlobalTimeOffset();
 
   MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
@@ -154,9 +179,10 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   {
     int rank;
     int ierr;
-    ierr = MPI_Comm_rank(_orig_comm, &rank); mooseCheckMPIErr(ierr);
+    ierr = MPI_Comm_rank(_orig_comm, &rank);
+    mooseCheckMPIErr(ierr);
 
-    for (unsigned int i=0; i<_my_num_apps; i++)
+    for (unsigned int i = 0; i < _my_num_apps; i++)
     {
 
       FEProblemBase & problem = appProblemBase(_first_local_app + i);
@@ -166,7 +192,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       // The App might have a different local time from the rest of the problem
       Real app_time_offset = _apps[i]->getGlobalTimeOffset();
 
-      if ((ex->getTime() + app_time_offset) + 2e-14 >= target_time) // Maybe this MultiApp was already solved
+      if ((ex->getTime() + app_time_offset) + 2e-14 >=
+          target_time) // Maybe this MultiApp was already solved
         continue;
 
       if (_sub_cycling)
@@ -197,12 +224,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         }
 
         // Disable/enable output for sub cycling
-        problem.allowOutput(_output_sub_cycles); // disables all outputs, including console
+        problem.allowOutput(_output_sub_cycles);         // disables all outputs, including console
         problem.allowOutput<Console>(_print_sub_cycles); // re-enables Console to print, if desired
 
-        ex->setTargetTime(target_time-app_time_offset);
+        ex->setTargetTime(target_time - app_time_offset);
 
-//      unsigned int failures = 0;
+        //      unsigned int failures = 0;
 
         bool at_steady = false;
 
@@ -212,7 +239,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         bool local_first = _first;
 
         // Now do all of the solves we need
-        while ((!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time) || !ex->lastSolveConverged())
+        while ((!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time) ||
+               !ex->lastSolveConverged())
         {
           if (local_first != true)
             ex->incrementStepOrReject();
@@ -247,10 +275,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
             for (const auto & dof : _transferred_dofs)
             {
-              solution.set(dof, (transfer_old(dof) * one_minus_step_percent) + (transfer(dof) * step_percent));
-//            solution.set(dof, transfer_old(dof));
-//            solution.set(dof, transfer(dof));
-//            solution.set(dof, 1);
+              solution.set(dof,
+                           (transfer_old(dof) * one_minus_step_percent) +
+                               (transfer(dof) * step_percent));
+              //            solution.set(dof, transfer_old(dof));
+              //            solution.set(dof, transfer(dof));
+              //            solution.set(dof, 1);
             }
 
             solution.close();
@@ -262,7 +292,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
           if (!converged)
           {
-            mooseWarning("While sub_cycling ", name(), _first_local_app+i, " failed to converge!\n");
+            mooseWarning(
+                "While sub_cycling ", name(), _first_local_app + i, " failed to converge!\n");
 
             _failures++;
 
@@ -285,11 +316,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
             at_steady = true;
 
-            // Indicate that the next output call (occurs in ex->endStep()) should output, regardless of intervals etc...
+            // Indicate that the next output call (occurs in ex->endStep()) should output,
+            // regardless of intervals etc...
             problem.forceOutput();
 
             // Clean up the end
-            ex->endStep(target_time-app_time_offset);
+            ex->endStep(target_time - app_time_offset);
             ex->postStep();
           }
           else
@@ -299,7 +331,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           }
         }
 
-        // If we were looking for a steady state, but didn't reach one, we still need to output one more time, regardless of interval
+        // If we were looking for a steady state, but didn't reach one, we still need to output one
+        // more time, regardless of interval
         if (!at_steady)
           problem.outputStep(EXEC_FORCED);
 
@@ -307,7 +340,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       else if (_tolerate_failure)
       {
         ex->takeStep(dt);
-        ex->endStep(target_time-app_time_offset);
+        ex->endStep(target_time - app_time_offset);
         ex->postStep();
       }
       else
@@ -333,7 +366,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
           if (!ex->lastSolveConverged())
           {
-            mooseWarning(name(), _first_local_app+i, " failed to converge!\n");
+            mooseWarning(name(), _first_local_app + i, " failed to converge!\n");
 
             if (_catch_up)
             {
@@ -343,11 +376,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
               unsigned int catch_up_step = 0;
 
-              Real catch_up_dt = dt/2;
+              Real catch_up_dt = dt / 2;
 
               while (!caught_up && catch_up_step < _max_catch_up_steps)
               {
-                Moose::err << "Solving " << name() << "catch up step " << catch_up_step << std::endl;
+                Moose::err << "Solving " << name() << "catch up step " << catch_up_step
+                           << std::endl;
                 ex->incrementStepOrReject();
 
                 ex->computeDT();
@@ -355,7 +389,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
                 if (ex->lastSolveConverged())
                 {
-                  if (ex->getTime() + app_time_offset + ex->timestepTol()*std::abs(ex->getTime()) >= target_time)
+                  if (ex->getTime() + app_time_offset +
+                          ex->timestepTol() * std::abs(ex->getTime()) >=
+                      target_time)
                   {
                     problem.outputStep(EXEC_FORCED);
                     caught_up = true;
@@ -375,20 +411,17 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
             }
           }
         }
-        else
-          if (!ex->lastSolveConverged())
-            throw MultiAppSolveFailure(name() + " failed to converge");
+        else if (!ex->lastSolveConverged())
+          throw MultiAppSolveFailure(name() + " failed to converge");
       }
 
       // Re-enable all output (it may of been disabled by sub-cycling)
       problem.allowOutput(true);
-
     }
 
     _first = false;
 
     _console << "Successfully Solved MultiApp " << name() << "." << std::endl;
-
   }
   catch (MultiAppSolveFailure & e)
   {
@@ -409,9 +442,9 @@ TransientMultiApp::advanceStep()
 {
   if (!_auto_advance && !_sub_cycling)
   {
-    for (unsigned int i=0; i<_my_num_apps; i++)
+    for (unsigned int i = 0; i < _my_num_apps; i++)
     {
-      /*FEProblemBase * problem =*/ appProblemBase(_first_local_app + i);
+      /*FEProblemBase * problem =*/appProblemBase(_first_local_app + i);
       Transient * ex = _transient_executioners[i];
 
       ex->endStep();
@@ -439,7 +472,7 @@ TransientMultiApp::computeDT()
   {
     MPI_Comm swapped = Moose::swapLibMeshComm(_my_comm);
 
-    for (unsigned int i=0; i<_my_num_apps; i++)
+    for (unsigned int i = 0; i < _my_num_apps; i++)
     {
       Transient * ex = _transient_executioners[i];
       ex->computeDT();
@@ -452,23 +485,26 @@ TransientMultiApp::computeDT()
     Moose::swapLibMeshComm(swapped);
   }
 
-  if (_tolerate_failure) // Bow out of the timestep selection dance, we do this down here because we need to call computeConstrainedDT at least once for these executioners...
+  if (_tolerate_failure) // Bow out of the timestep selection dance, we do this down here because we
+                         // need to call computeConstrainedDT at least once for these
+                         // executioners...
     return std::numeric_limits<Real>::max();
-
 
   _communicator.min(smallest_dt);
   return smallest_dt;
 }
 
-void
-TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: Note that we are passing in time but also grabbing it below
+void TransientMultiApp::resetApp(
+    unsigned int global_app,
+    Real /*time*/) // FIXME: Note that we are passing in time but also grabbing it below
 {
   if (hasLocalApp(global_app))
   {
     unsigned int local_app = globalAppToLocal(global_app);
 
     // Grab the current time the App is at so we can start the new one at the same place
-    Real time = _transient_executioners[local_app]->getTime() + _apps[local_app]->getGlobalTimeOffset();
+    Real time =
+        _transient_executioners[local_app]->getTime() + _apps[local_app]->getGlobalTimeOffset();
 
     // Reset the Multiapp
     MultiApp::resetApp(global_app, time);
@@ -477,7 +513,7 @@ TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: N
 
     // Setup the app, disable the output so that the initial condition does not output
     // When an app is reset the initial condition was effectively already output before reset
-    FEProblemBase & problem = appProblemBase(local_app );
+    FEProblemBase & problem = appProblemBase(local_app);
     problem.allowOutput(false);
     setupApp(local_app, time);
     problem.allowOutput(true);
@@ -487,8 +523,7 @@ TransientMultiApp::resetApp(unsigned int global_app, Real /*time*/)  // FIXME: N
   }
 }
 
-void
-TransientMultiApp::setupApp(unsigned int i, Real /*time*/)  // FIXME: Should we be passing time?
+void TransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should we be passing time?
 {
   MooseApp * app = _apps[i];
   Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
@@ -501,7 +536,8 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/)  // FIXME: Should we 
   // Update the file numbers for the outputs from the parent application
   app->getOutputWarehouse().setFileNumbers(_app.getOutputFileNumbers());
 
-  // Call initialization method of Executioner (Note, this preforms the output of the initial time step, if desired)
+  // Call initialization method of Executioner (Note, this preforms the output of the initial time
+  // step, if desired)
   ex->init();
 
   if (_interpolate_transfers)

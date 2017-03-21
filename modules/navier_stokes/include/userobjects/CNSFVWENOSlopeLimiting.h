@@ -10,14 +10,15 @@
 
 #include "SlopeLimitingBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class CNSFVWENOSlopeLimiting;
 
-template<>
+template <>
 InputParameters validParams<CNSFVWENOSlopeLimiting>();
 
 /**
- * A user object that performs WENO slope limiting to get the limited slopes of cell average variables in multi-dimensions
+ * A user object that performs WENO slope limiting to get the limited slopes of cell average
+ * variables in multi-dimensions
  *
  * Reference article
  *
@@ -30,14 +31,12 @@ InputParameters validParams<CNSFVWENOSlopeLimiting>();
 class CNSFVWENOSlopeLimiting : public SlopeLimitingBase
 {
 public:
-
   CNSFVWENOSlopeLimiting(const InputParameters & parameters);
 
   /// compute the limited slope of the cell
   virtual std::vector<RealGradient> limitElementSlope() const;
 
 protected:
-
   /// linear weight
   Real _lweig;
   /// decay power

@@ -15,10 +15,7 @@ validParams<NSMassInviscidFlux>()
   return params;
 }
 
-NSMassInviscidFlux::NSMassInviscidFlux(const InputParameters & parameters)
-  : NSKernel(parameters)
-{
-}
+NSMassInviscidFlux::NSMassInviscidFlux(const InputParameters & parameters) : NSKernel(parameters) {}
 
 Real
 NSMassInviscidFlux::computeQpResidual()

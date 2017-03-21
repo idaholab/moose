@@ -14,16 +14,17 @@
 
 #include "ScalarVarBC.h"
 
-template<>
-InputParameters validParams<ScalarVarBC>()
+template <>
+InputParameters
+validParams<ScalarVarBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredCoupledVar("alpha", "The scalar variable coupled in");
   return params;
 }
 
-ScalarVarBC::ScalarVarBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
+ScalarVarBC::ScalarVarBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _alpha_var(coupledScalar("alpha")),
     _alpha(coupledScalarValue("alpha"))
 {

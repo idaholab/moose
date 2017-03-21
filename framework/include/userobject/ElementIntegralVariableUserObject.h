@@ -18,10 +18,10 @@
 #include "ElementIntegralUserObject.h"
 #include "MooseVariableInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementIntegralVariableUserObject;
 
-template<>
+template <>
 InputParameters validParams<ElementIntegralVariableUserObject>();
 
 /**
@@ -30,9 +30,8 @@ InputParameters validParams<ElementIntegralVariableUserObject>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class ElementIntegralVariableUserObject :
-  public ElementIntegralUserObject,
-  public MooseVariableInterface
+class ElementIntegralVariableUserObject : public ElementIntegralUserObject,
+                                          public MooseVariableInterface
 {
 public:
   ElementIntegralVariableUserObject(const InputParameters & parameters);

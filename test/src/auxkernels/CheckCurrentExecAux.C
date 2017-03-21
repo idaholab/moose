@@ -14,16 +14,16 @@
 
 #include "CheckCurrentExecAux.h"
 
-template<>
-InputParameters validParams<CheckCurrentExecAux>()
+template <>
+InputParameters
+validParams<CheckCurrentExecAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   return params;
 }
 
-CheckCurrentExecAux::CheckCurrentExecAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _problem(*parameters.get<FEProblemBase *>("_fe_problem_base"))
+CheckCurrentExecAux::CheckCurrentExecAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _problem(*parameters.get<FEProblemBase *>("_fe_problem_base"))
 {
 }
 

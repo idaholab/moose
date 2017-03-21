@@ -12,14 +12,15 @@
 // Forward Declarations
 class BimodalSuperellipsoidsIC;
 
-template<>
+template <>
 InputParameters validParams<BimodalSuperellipsoidsIC>();
 
 /**
  * BimodalSuperellipsoidsIC takes a specified number of superellipsoids, each with given parameters
  * These are intended to be the larger particles. Then the IC creates a specified number
  * of particles at random locations. These are the smaller particles. As each random particle
- * is placed, it it checked to make sure it does not collide with previously placed particles (either
+ * is placed, it it checked to make sure it does not collide with previously placed particles
+ * (either
  * large or small ones). Variables to describe the specified (larger) superellipsoids are inherited
  * from the parent class.
  */
@@ -54,4 +55,4 @@ protected:
   Point _range;
 };
 
-#endif //BIMODALSUPERELLIPSOIDSIC_H
+#endif // BIMODALSUPERELLIPSOIDSIC_H

@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSSUPGMomentum;
 
-template<>
+template <>
 InputParameters validParams<NSSUPGMomentum>();
 
 /**
@@ -41,4 +41,4 @@ private:
   Real computeJacobianHelper(unsigned int var);
 };
 
-#endif //NSSUPGMOMENTUM_H
+#endif // NSSUPGMOMENTUM_H

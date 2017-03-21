@@ -27,7 +27,7 @@ class MultiAppTransfer;
 class MooseMesh;
 class MultiApp;
 
-template<>
+template <>
 InputParameters validParams<MultiAppTransfer>();
 
 /**

@@ -20,7 +20,7 @@
 // Forward Declarations
 class AverageNodalVariableValue;
 
-template<>
+template <>
 InputParameters validParams<AverageNodalVariableValue>();
 
 class AverageNodalVariableValue : public NodalVariablePostprocessor
@@ -40,4 +40,4 @@ protected:
   unsigned int _n;
 };
 
-#endif //AVERAGENODALVARIABLEVALUE_H
+#endif // AVERAGENODALVARIABLEVALUE_H

@@ -8,26 +8,32 @@
 
 #include "Function.h"
 
-template<>
-InputParameters validParams<HyperbolicViscoplasticityStressUpdate>()
+template <>
+InputParameters
+validParams<HyperbolicViscoplasticityStressUpdate>()
 {
   InputParameters params = validParams<RadialReturnStressUpdate>();
-  params.addClassDescription("This class uses the discrete material for a hyperbolic sine viscoplasticity model in which the effective plastic strain is solved for using a creep approach.");
+  params.addClassDescription("This class uses the discrete material for a hyperbolic sine "
+                             "viscoplasticity model in which the effective plastic strain is "
+                             "solved for using a creep approach.");
 
   // Linear strain hardening parameters
-  params.addRequiredParam<Real>("yield_stress", "The point at which plastic strain begins accumulating");
+  params.addRequiredParam<Real>("yield_stress",
+                                "The point at which plastic strain begins accumulating");
   params.addRequiredParam<Real>("hardening_constant", "Hardening slope");
 
   // Viscoplasticity constitutive equation parameters
-  params.addRequiredParam<Real>("c_alpha", "Viscoplasticity coefficient, scales the hyperbolic function");
-  params.addRequiredParam<Real>("c_beta", "Viscoplasticity coefficient inside the hyperbolic sin function");
+  params.addRequiredParam<Real>("c_alpha",
+                                "Viscoplasticity coefficient, scales the hyperbolic function");
+  params.addRequiredParam<Real>("c_beta",
+                                "Viscoplasticity coefficient inside the hyperbolic sin function");
 
   return params;
 }
 
-
-HyperbolicViscoplasticityStressUpdate::HyperbolicViscoplasticityStressUpdate(const InputParameters & parameters) :
-    RadialReturnStressUpdate(parameters),
+HyperbolicViscoplasticityStressUpdate::HyperbolicViscoplasticityStressUpdate(
+    const InputParameters & parameters)
+  : RadialReturnStressUpdate(parameters),
     _yield_stress(parameters.get<Real>("yield_stress")),
     _hardening_constant(parameters.get<Real>("hardening_constant")),
     _c_alpha(parameters.get<Real>("c_alpha")),
@@ -43,7 +49,8 @@ HyperbolicViscoplasticityStressUpdate::HyperbolicViscoplasticityStressUpdate(con
 void
 HyperbolicViscoplasticityStressUpdate::initQpStatefulProperties()
 {
-  //set a default non-physical value to catch uninitalized yield condition--could cause problems later on
+  // set a default non-physical value to catch uninitalized yield condition--could cause problems
+  // later on
   _yield_condition = -1.0;
   _hardening_variable[_qp] = 0.0;
   _hardening_variable_old[_qp] = 0.0;
@@ -65,21 +72,23 @@ HyperbolicViscoplasticityStressUpdate::computeResidual(Real effectiveTrialStress
 {
   Real residual = 0.0;
 
-  mooseAssert(_yield_condition != -1., "the yield stress was not updated by computeStressInitialize");
+  mooseAssert(_yield_condition != -1.,
+              "the yield stress was not updated by computeStressInitialize");
 
   if (_yield_condition > 0.0)
   {
-    Real xflow = _c_beta * (effectiveTrialStress - (3.0 * _shear_modulus * scalar) - _hardening_variable[_qp] - _yield_stress);
+    Real xflow = _c_beta * (effectiveTrialStress - (3.0 * _shear_modulus * scalar) -
+                            _hardening_variable[_qp] - _yield_stress);
     Real xphi = _c_alpha * std::sinh(xflow);
     _xphidp = -3.0 * _shear_modulus * _c_alpha * _c_beta * std::cosh(xflow);
     _xphir = -_c_alpha * _c_beta * std::cosh(xflow);
-    residual = xphi - scalar/_dt;
+    residual = xphi - scalar / _dt;
   }
   return residual;
 }
 
-Real
-HyperbolicViscoplasticityStressUpdate::computeDerivative(Real /*effectiveTrialStress*/, Real /*scalar*/)
+Real HyperbolicViscoplasticityStressUpdate::computeDerivative(Real /*effectiveTrialStress*/,
+                                                              Real /*scalar*/)
 {
   Real derivative = 1.0;
   if (_yield_condition > 0.0)
@@ -96,7 +105,8 @@ HyperbolicViscoplasticityStressUpdate::iterationFinalize(Real scalar)
 }
 
 void
-HyperbolicViscoplasticityStressUpdate::computeStressFinalize(const RankTwoTensor & plasticStrainIncrement)
+HyperbolicViscoplasticityStressUpdate::computeStressFinalize(
+    const RankTwoTensor & plasticStrainIncrement)
 {
   _plastic_strain[_qp] += plasticStrainIncrement;
 }

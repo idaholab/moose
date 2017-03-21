@@ -19,11 +19,12 @@
 #include "libmesh/equation_systems.h"
 #include "libmesh/gmv_io.h"
 
-template<>
-InputParameters validParams<GMVOutput>()
+template <>
+InputParameters
+validParams<GMVOutput>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<BasicOutput<OversampleOutput> >();
+  InputParameters params = validParams<BasicOutput<OversampleOutput>>();
 
   // Advanced file options
   params.addParam<bool>("binary", true, "Output the file in binary format");
@@ -36,9 +37,8 @@ InputParameters validParams<GMVOutput>()
   return params;
 }
 
-GMVOutput::GMVOutput(const InputParameters & parameters) :
-    BasicOutput<OversampleOutput>(parameters),
-    _binary(getParam<bool>("binary"))
+GMVOutput::GMVOutput(const InputParameters & parameters)
+  : BasicOutput<OversampleOutput>(parameters), _binary(getParam<bool>("binary"))
 {
 }
 
@@ -55,12 +55,7 @@ GMVOutput::filename()
 {
   // Append the padded time step to the file base
   std::ostringstream output;
-  output << _file_base
-         << "_"
-         << std::setw(_padding)
-         << std::setprecision(0)
-         << std::setfill('0')
-         << std::right
-         << _file_num;
+  output << _file_base << "_" << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
+         << std::right << _file_num;
   return output.str() + ".gmv";
 }

@@ -19,7 +19,7 @@
 // Forward Declaration
 class ExceptionKernel;
 
-template<>
+template <>
 InputParameters validParams<ExceptionKernel>();
 
 /**
@@ -34,7 +34,8 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  enum WhenType {
+  enum WhenType
+  {
     RESIDUAL = 0,
     JACOBIAN,
     INITIAL_CONDITION

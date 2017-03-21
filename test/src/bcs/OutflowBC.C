@@ -1,19 +1,21 @@
 #include "OutflowBC.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<OutflowBC>()
+template <>
+InputParameters
+validParams<OutflowBC>()
 {
-    InputParameters params = validParams<IntegratedBC>();
-    params.addRequiredParam<RealVectorValue>("velocity", "The velocity vector");
-    return params;
+  InputParameters params = validParams<IntegratedBC>();
+  params.addRequiredParam<RealVectorValue>("velocity", "The velocity vector");
+  return params;
 }
 
-OutflowBC::OutflowBC(const InputParameters & parameters) :
-  IntegratedBC(parameters),
+OutflowBC::OutflowBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
 
-  _velocity(getParam<RealVectorValue>("velocity"))
-{}
+    _velocity(getParam<RealVectorValue>("velocity"))
+{
+}
 
 Real
 OutflowBC::computeQpResidual()

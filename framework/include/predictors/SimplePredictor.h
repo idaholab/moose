@@ -19,7 +19,7 @@
 
 class SimplePredictor;
 
-template<>
+template <>
 InputParameters validParams<SimplePredictor>();
 
 /**

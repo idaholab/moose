@@ -17,11 +17,10 @@
 
 #include "IntegratedBC.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class WeakGradientBC;
 
-template<>
+template <>
 InputParameters validParams<WeakGradientBC>();
 
 /**
@@ -31,7 +30,6 @@ InputParameters validParams<WeakGradientBC>();
 class WeakGradientBC : public IntegratedBC
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -43,4 +41,4 @@ protected:
   virtual Real computeQpJacobian() override;
 };
 
-#endif //WEAKGRADIENTBC_H
+#endif // WEAKGRADIENTBC_H

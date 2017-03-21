@@ -17,11 +17,10 @@
 
 #include "Material.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class GenericFunctionMaterial;
 
-template<>
+template <>
 InputParameters validParams<GenericFunctionMaterial>();
 
 /**
@@ -52,7 +51,6 @@ protected:
   std::vector<Function *> _functions;
 
 private:
-
   /**
    * A helper method for evaluating the functions
    */
@@ -62,4 +60,4 @@ private:
   bool _enable_stateful;
 };
 
-#endif //GENERICFUNCTIONMATERIAL_H
+#endif // GENERICFUNCTIONMATERIAL_H

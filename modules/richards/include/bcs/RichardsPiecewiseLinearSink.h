@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSPIECEWISELINEARSINK
 #define RICHARDSPIECEWISELINEARSINK
 
@@ -17,11 +16,10 @@
 #include "RichardsRelPerm.h"
 #include "RichardsSeff.h"
 
-
 // Forward Declarations
 class RichardsPiecewiseLinearSink;
 
-template<>
+template <>
 InputParameters validParams<RichardsPiecewiseLinearSink>();
 
 /**
@@ -40,7 +38,6 @@ InputParameters validParams<RichardsPiecewiseLinearSink>();
 class RichardsPiecewiseLinearSink : public IntegratedBC
 {
 public:
-
   RichardsPiecewiseLinearSink(const InputParameters & parameters);
 
 protected:
@@ -105,7 +102,7 @@ protected:
    * d(_nodal_density)/d(variable_ph)  (variable_ph is the variable for phase=ph)
    * These are used in the jacobian calculations if _fully_upwind = true
    */
-  std::vector<std::vector<Real> > _dnodal_density_dv;
+  std::vector<std::vector<Real>> _dnodal_density_dv;
 
   /**
    * nodal values of relative permeability
@@ -117,16 +114,16 @@ protected:
    * d(_nodal_relperm)/d(variable_ph)  (variable_ph is the variable for phase=ph)
    * These are used in the jacobian calculations if _fully_upwind = true
    */
-  std::vector<std::vector<Real> > _dnodal_relperm_dv;
+  std::vector<std::vector<Real>> _dnodal_relperm_dv;
 
   /// porepressure values (only the _pvar component is used)
-  const MaterialProperty<std::vector<Real> > & _pp;
+  const MaterialProperty<std::vector<Real>> & _pp;
 
   /// d(porepressure_i)/d(variable_j)
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dv;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dpp_dv;
 
   /// viscosity (only the _pvar component is used)
-  const MaterialProperty<std::vector<Real> > & _viscosity;
+  const MaterialProperty<std::vector<Real>> & _viscosity;
 
   /// permeability
   const MaterialProperty<RealTensorValue> & _permeability;
@@ -135,29 +132,29 @@ protected:
    * derivative of effective saturation wrt variables
    * only _dseff_dv[_pvar][i] is used for i being all variables
    */
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dseff_dv;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dseff_dv;
 
   /// relative permeability (only the _pvar component is used)
-  const MaterialProperty<std::vector<Real> > & _rel_perm;
+  const MaterialProperty<std::vector<Real>> & _rel_perm;
 
   /// d(relperm_i)/d(variable_j)
-  const MaterialProperty<std::vector<std::vector<Real> > > & _drel_perm_dv;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _drel_perm_dv;
 
   /// fluid density (only the _pvar component is used)
-  const MaterialProperty<std::vector<Real> > & _density;
+  const MaterialProperty<std::vector<Real>> & _density;
 
   /// d(density_i)/d(variable_j)
-  const MaterialProperty<std::vector<std::vector<Real> > > & _ddensity_dv;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _ddensity_dv;
 
   /**
    * Holds the values of pressures at all the nodes of the element
    * Only used if _fully_upwind = true
    * Eg:
    * _ps_at_nodes[_pvar] is a pointer to this variable's nodal porepressure values
-   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i] = porepressure of pressure-variable _pvar at node i
+   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i] = porepressure of pressure-variable _pvar at
+   * node i
    */
   std::vector<const VariableValue *> _ps_at_nodes;
-
 
   /// calculates the nodal values of pressure, mobility, and derivatives thereof
   void prepareNodalValues();
@@ -166,4 +163,4 @@ protected:
   Real jac(unsigned int wrt_num);
 };
 
-#endif //RichardsPiecewiseLinearSink
+#endif // RichardsPiecewiseLinearSink

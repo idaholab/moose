@@ -9,21 +9,26 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
-template<>
-InputParameters validParams<ReconVarICAction>()
+template <>
+InputParameters
+validParams<ReconVarICAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addClassDescription("Action to set up initial conditions for a set of order parameters using EBSDReader data");
+  params.addClassDescription(
+      "Action to set up initial conditions for a set of order parameters using EBSDReader data");
   params.addRequiredParam<UserObjectName>("ebsd_reader", "The EBSDReader GeneralUserObject");
-  params.addRequiredParam<unsigned int>("op_num", "Specifies the number of order parameters to create");
+  params.addRequiredParam<unsigned int>("op_num",
+                                        "Specifies the number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<unsigned int>("phase", "EBSD phase number to be assigned to this grain");
-  params.addParam<bool>("advanced_op_assignment", false, "Enable advanced grain to op assignment (avoid invalid graph coloring)");
+  params.addParam<bool>("advanced_op_assignment",
+                        false,
+                        "Enable advanced grain to op assignment (avoid invalid graph coloring)");
   return params;
 }
 
-ReconVarICAction::ReconVarICAction(const InputParameters & params) :
-    Action(params),
+ReconVarICAction::ReconVarICAction(const InputParameters & params)
+  : Action(params),
     _op_num(getParam<unsigned int>("op_num")),
     _var_name_base(getParam<std::string>("var_name_base"))
 {
@@ -52,7 +57,8 @@ ReconVarICAction::act()
         poly_params.set<unsigned int>("phase") = getParam<unsigned int>("phase");
 
       // Add initial condition
-      _problem->addInitialCondition("ReconVarIC", "Initialize_op_" + Moose::stringify(op), poly_params);
+      _problem->addInitialCondition(
+          "ReconVarIC", "Initialize_op_" + Moose::stringify(op), poly_params);
     }
 
     // Add the elemental op

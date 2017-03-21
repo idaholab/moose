@@ -19,7 +19,7 @@
 
 class ErrorFractionMarker;
 
-template<>
+template <>
 InputParameters validParams<ErrorFractionMarker>();
 
 class ErrorFractionMarker : public IndicatorMarker

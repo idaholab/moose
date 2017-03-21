@@ -25,7 +25,7 @@ public:
                              const SymmElasticityTensor & elasticityTensor,
                              const SymmTensor & stress_old,
                              SymmTensor & strain_increment,
-                             SymmTensor & stress_new );
+                             SymmTensor & stress_new);
 
   void computeStress(const Elem & /*current_elem*/,
                      unsigned qp,
@@ -33,14 +33,18 @@ public:
                      const SymmTensor & stress_old,
                      SymmTensor & strain_increment,
                      SymmTensor & stress_new,
-                     SymmTensor & inelastic_strain_increment );
+                     SymmTensor & inelastic_strain_increment);
 
 protected:
   virtual void computeStressInitialize(unsigned /*qp*/,
                                        Real /*effectiveTrialStress*/,
-                                       const SymmElasticityTensor & /*elasticityTensor*/) {}
+                                       const SymmElasticityTensor & /*elasticityTensor*/)
+  {
+  }
   virtual void computeStressFinalize(unsigned /*qp*/,
-                                     const SymmTensor & /*inelasticStrainIncrement*/) {}
+                                     const SymmTensor & /*inelasticStrainIncrement*/)
+  {
+  }
 
   virtual void iterationInitialize(unsigned /*qp*/, Real /*scalar*/) {}
   virtual Real computeResidual(unsigned qp, Real effectiveTrialStress, Real scalar) = 0;
@@ -57,7 +61,7 @@ protected:
 private:
 };
 
-template<>
+template <>
 InputParameters validParams<ReturnMappingModel>();
 
 #endif // RETURNMAPPINGMODEL_H

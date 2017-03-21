@@ -51,7 +51,7 @@ protected:
   Real getIsotropicLameLambda();
 };
 
-template<>
+template <>
 InputParameters validParams<IsotropicPowerLawHardeningStressUpdate>();
 
-#endif //ISOTROPICPOWERLAWHARDENINGSTRESSUPDATE_H
+#endif // ISOTROPICPOWERLAWHARDENINGSTRESSUPDATE_H

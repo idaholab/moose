@@ -8,8 +8,9 @@
 #include "SpecificEnthalpyAux.h"
 #include "SinglePhaseFluidProperties.h"
 
-template<>
-InputParameters validParams<SpecificEnthalpyAux>()
+template <>
+InputParameters
+validParams<SpecificEnthalpyAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("p", "Pressure");
@@ -19,8 +20,8 @@ InputParameters validParams<SpecificEnthalpyAux>()
   return params;
 }
 
-SpecificEnthalpyAux::SpecificEnthalpyAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+SpecificEnthalpyAux::SpecificEnthalpyAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _pressure(coupledValue("p")),
     _temperature(coupledValue("T")),
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))

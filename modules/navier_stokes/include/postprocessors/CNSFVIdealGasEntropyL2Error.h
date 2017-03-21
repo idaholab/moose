@@ -11,20 +11,19 @@
 #include "ElementIntegralPostprocessor.h"
 #include "SinglePhaseFluidProperties.h"
 
-//Forward Declarations
+// Forward Declarations
 class CNSFVIdealGasEntropyL2Error;
 
-template<>
+template <>
 InputParameters validParams<CNSFVIdealGasEntropyL2Error>();
 
 /**
- * A PostProcessor object to calculate the L2 error of ideal gas entropy production for the CNS equations
+ * A PostProcessor object to calculate the L2 error of ideal gas entropy production for the CNS
+ * equations
  */
-class CNSFVIdealGasEntropyL2Error :
-  public ElementIntegralPostprocessor
+class CNSFVIdealGasEntropyL2Error : public ElementIntegralPostprocessor
 {
 public:
-
   CNSFVIdealGasEntropyL2Error(const InputParameters & parameters);
 
   /**
@@ -33,7 +32,6 @@ public:
   virtual Real getValue();
 
 protected:
-
   virtual Real computeQpIntegral();
 
   const SinglePhaseFluidProperties & _fp;

@@ -7,8 +7,9 @@
 
 #include "MethaneFluidProperties.h"
 
-template<>
-InputParameters validParams<MethaneFluidProperties>()
+template <>
+InputParameters
+validParams<MethaneFluidProperties>()
 {
   InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
   params.addParam<Real>("beta", 0, "Coefficient of thermal expansion");
@@ -16,8 +17,8 @@ InputParameters validParams<MethaneFluidProperties>()
   return params;
 }
 
-MethaneFluidProperties::MethaneFluidProperties(const InputParameters & parameters) :
-    SinglePhaseFluidPropertiesPT(parameters),
+MethaneFluidProperties::MethaneFluidProperties(const InputParameters & parameters)
+  : SinglePhaseFluidPropertiesPT(parameters),
     _Mch4(16.0425e-3),
     _p_critical(4.5992e6),
     _T_critical(190.564),
@@ -26,9 +27,7 @@ MethaneFluidProperties::MethaneFluidProperties(const InputParameters & parameter
 {
 }
 
-MethaneFluidProperties::~MethaneFluidProperties()
-{
-}
+MethaneFluidProperties::~MethaneFluidProperties() {}
 
 Real
 MethaneFluidProperties::molarMass() const
@@ -61,11 +60,12 @@ MethaneFluidProperties::rho(Real pressure, Real temperature) const
 }
 
 void
-MethaneFluidProperties::rho_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
+MethaneFluidProperties::rho_dpT(
+    Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   rho = this->rho(pressure, temperature);
   drho_dp = _Mch4 / (_R * temperature);
-  drho_dT = - pressure * _Mch4 / (_R * temperature * temperature);
+  drho_dT = -pressure * _Mch4 / (_R * temperature * temperature);
 }
 
 Real
@@ -75,7 +75,8 @@ MethaneFluidProperties::e(Real pressure, Real temperature) const
 }
 
 void
-MethaneFluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
+MethaneFluidProperties::e_dpT(
+    Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
   e = this->e(pressure, temperature);
   Real enthalpy, enthalpy_dp, enthalpy_dT;
@@ -85,7 +86,14 @@ MethaneFluidProperties::e_dpT(Real pressure, Real temperature, Real & e, Real & 
 }
 
 void
-MethaneFluidProperties::rho_e_dpT(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT, Real & e, Real & de_dp, Real & de_dT) const
+MethaneFluidProperties::rho_e_dpT(Real pressure,
+                                  Real temperature,
+                                  Real & rho,
+                                  Real & drho_dp,
+                                  Real & drho_dT,
+                                  Real & e,
+                                  Real & de_dp,
+                                  Real & de_dT) const
 {
   Real density, ddensity_dp, ddensity_dT;
   rho_dpT(pressure, temperature, density, ddensity_dp, ddensity_dT);
@@ -117,8 +125,7 @@ MethaneFluidProperties::cp(Real /*pressure*/, Real temperature) const
   if (temperature < 755.0)
     a = {1.9165258, -1.09269e-3, 8.696605e-6, -5.2291144e-9, 0.0, 0.0, 0.0};
   else
-    a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11,
-      -7.1345169e-15, 0.0};
+    a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0};
 
   Real specific_heat = 0.0;
   for (unsigned int i = 0; i < a.size(); ++i)
@@ -141,8 +148,8 @@ MethaneFluidProperties::mu(Real /*density*/, Real temperature) const
   if (temperature <= 200.0 || temperature >= 1000.0)
     mooseError("Temperature ", temperature, "K out of range (200K, 1000K) in ", name(), ":mu()");
 
-  const std::vector<Real> a {2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11,
-    -2.7237166e-14};
+  const std::vector<Real> a{
+      2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11, -2.7237166e-14};
 
   Real viscosity = 0.0;
   for (unsigned int i = 0; i < a.size(); ++i)
@@ -152,10 +159,11 @@ MethaneFluidProperties::mu(Real /*density*/, Real temperature) const
 }
 
 void
-MethaneFluidProperties::mu_drhoT(Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
+MethaneFluidProperties::mu_drhoT(
+    Real density, Real temperature, Real & mu, Real & dmu_drho, Real & dmu_dT) const
 {
-  const std::vector<Real> a {2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11,
-    -2.7237166e-14};
+  const std::vector<Real> a{
+      2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11, -2.7237166e-14};
 
   mu = this->mu(density, temperature);
   dmu_drho = 0.0;
@@ -173,8 +181,13 @@ MethaneFluidProperties::k(Real /*pressure*/, Real temperature) const
   if (temperature <= 200.0 || temperature >= 1000.0)
     mooseError("Temperature ", temperature, "K out of range (200K, 1000K) in ", name(), ":k()");
 
-  const std::vector<Real> a {-1.3401499e-2, 3.663076e-4, -1.82248608e-6, 5.93987998e-9, -9.1405505e-12,
-    6.7896889e-15, -1.95048736e-18};
+  const std::vector<Real> a{-1.3401499e-2,
+                            3.663076e-4,
+                            -1.82248608e-6,
+                            5.93987998e-9,
+                            -9.1405505e-12,
+                            6.7896889e-15,
+                            -1.95048736e-18};
 
   Real kt = 0.0;
   for (unsigned int i = 0; i < a.size(); ++i)
@@ -194,8 +207,7 @@ MethaneFluidProperties::s(Real /*pressure*/, Real temperature) const
   if (temperature < 755.0)
     a = {1.9165258, -1.09269e-3, 8.696605e-6, -5.2291144e-9, 0.0, 0.0, 0.0};
   else
-    a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11,
-      -7.1345169e-15, 0.0};
+    a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0};
 
   Real entropy = a[0] * std::log(temperature);
   for (unsigned int i = 1; i < a.size(); ++i)
@@ -216,8 +228,7 @@ MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
   if (temperature < 755.0)
     a = {1.9165258, -1.09269e-3, 8.696605e-6, -5.2291144e-9, 0.0, 0.0, 0.0};
   else
-    a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11,
-      -7.1345169e-15, 0.0};
+    a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0};
 
   Real enthalpy = 0.0;
   for (unsigned int i = 0; i < a.size(); ++i)
@@ -228,7 +239,8 @@ MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
 }
 
 void
-MethaneFluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
+MethaneFluidProperties::h_dpT(
+    Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   h = this->h(pressure, temperature);
   // Enthalpy doesn't depend on pressure
@@ -238,8 +250,7 @@ MethaneFluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
   if (temperature < 755.0)
     a = {1.9165258, -1.09269e-3, 8.696605e-6, -5.2291144e-9, 0.0, 0.0, 0.0};
   else
-    a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11,
-      -7.1345169e-15, 0.0};
+    a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0};
 
   Real dhdt = 0.0;
   for (unsigned int i = 0; i < a.size(); ++i)
@@ -249,11 +260,7 @@ MethaneFluidProperties::h_dpT(Real pressure, Real temperature, Real & h, Real & 
   dh_dT = dhdt * 1000.0;
 }
 
-Real
-MethaneFluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
-{
-  return _beta;
-}
+Real MethaneFluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const { return _beta; }
 
 Real
 MethaneFluidProperties::henryConstant(Real temperature) const

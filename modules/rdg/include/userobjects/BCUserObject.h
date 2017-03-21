@@ -12,7 +12,7 @@
 
 class BCUserObject;
 
-template<>
+template <>
 InputParameters validParams<BCUserObject>();
 
 /**
