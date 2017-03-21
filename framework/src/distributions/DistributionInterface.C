@@ -17,8 +17,9 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-template<>
-InputParameters validParams<DistributionInterface>()
+template <>
+InputParameters
+validParams<DistributionInterface>()
 {
   return emptyInputParameters();
 }

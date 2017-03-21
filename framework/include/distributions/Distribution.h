@@ -21,15 +21,13 @@
 
 class Distribution;
 
-template<>
+template <>
 InputParameters validParams<Distribution>();
 
 /**
  * All Distributions should inherit from this class
  */
-class Distribution :
-  public MooseObject,
-  public Restartable
+class Distribution : public MooseObject, public Restartable
 {
 public:
   Distribution(const InputParameters & parameters);

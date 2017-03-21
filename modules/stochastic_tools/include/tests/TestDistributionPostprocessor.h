@@ -19,7 +19,7 @@
 class TestDistributionPostprocessor;
 class Distribution;
 
-template<>
+template <>
 InputParameters validParams<TestDistributionPostprocessor>();
 
 /**

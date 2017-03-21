@@ -23,7 +23,7 @@
 class Distribution;
 class DistributionInterface;
 
-template<>
+template <>
 InputParameters validParams<DistributionInterface>();
 
 /**

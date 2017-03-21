@@ -15,8 +15,9 @@
 #include "Distribution.h"
 #include "MooseRandom.h"
 
-template<>
-InputParameters validParams<Distribution>()
+template <>
+InputParameters
+validParams<Distribution>()
 {
   InputParameters params = validParams<MooseObject>();
   params.addParam<unsigned int>("seed", 10318691, "Random number generator seed");

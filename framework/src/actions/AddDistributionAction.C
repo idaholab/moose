@@ -15,16 +15,14 @@
 #include "AddDistributionAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddDistributionAction>()
+template <>
+InputParameters
+validParams<AddDistributionAction>()
 {
   return validParams<MooseObjectAction>();
 }
 
-AddDistributionAction::AddDistributionAction(InputParameters params)
-  : MooseObjectAction(params)
-{
-}
+AddDistributionAction::AddDistributionAction(InputParameters params) : MooseObjectAction(params) {}
 
 void
 AddDistributionAction::act()

@@ -14,10 +14,12 @@
 
 #include "UniformDistribution.h"
 
-template<>
-InputParameters validParams<UniformDistribution>()
+template <>
+InputParameters
+validParams<UniformDistribution>()
 {
   InputParameters params = validParams<Distribution>();
+  params.addClassDescription("Continuous uniform distribution.");
   params.addParam<Real>("lower_bound", 0.0, "Distribution lower bound");
   params.addParam<Real>("upper_bound", 1.0, "Distribution upper bound");
   return params;
@@ -32,9 +34,7 @@ UniformDistribution::UniformDistribution(const InputParameters & parameters)
     mooseError("The lower bound is larger than the upper bound!");
 }
 
-UniformDistribution::~UniformDistribution()
-{
-}
+UniformDistribution::~UniformDistribution() {}
 
 Real
 UniformDistribution::pdf(const Real & x)
@@ -64,4 +64,3 @@ UniformDistribution::inverseCdf(const Real & y)
   else
     return y * (_upper_bound - _lower_bound) + _lower_bound;
 }
-
