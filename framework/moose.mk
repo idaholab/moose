@@ -179,13 +179,22 @@ clobberall:: clobber
         done
 
 # clang_complete builds a clang configuration file for various clang-based autocompletion plugins
-clang_complete:
+.clang_complete::
 	@echo "Building .clang_complete file"
 	@echo "-xc++" > .clang_complete
 	@echo "-std=c++11" >> .clang_complete
 	@for item in $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $(ADDITIONAL_INCLUDES); do \
           echo $$item >> .clang_complete;  \
         done
+
+compile_commands_all_srcfiles := $(moose_srcfiles) $(srcfiles)
+compile_commands.json::
+	@echo $(CURDIR) > .compile_commands.json
+	@echo $(libmesh_CXX) >> .compile_commands.json
+	@echo $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $(ADDITIONAL_INCLUDES) >> .compile_commands.json
+	@echo $(compile_commands_all_srcfiles) >> .compile_commands.json
+	@ $(FRAMEWORK_DIR)/scripts/compile_commands.py < .compile_commands.json > compile_commands.json
+	@rm .compile_commands.json
 
 # Debugging stuff
 echo_include:
