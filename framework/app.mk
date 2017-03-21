@@ -186,3 +186,5 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object)
 
 # Clang static analyzer
 sa:: $(app_analyzer)
+
+compile_commands_all_srcfiles += $(srcfiles)
