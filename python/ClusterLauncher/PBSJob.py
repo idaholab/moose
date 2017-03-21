@@ -1,7 +1,7 @@
 from FactorySystem import InputParameters
 from Job import Job
 
-import os, sys, subprocess, shutil, re
+import os, sys, subprocess, shutil, re, errno
 
 class PBSJob(Job):
     def validParams():
@@ -61,17 +61,23 @@ class PBSJob(Job):
         for file in os.listdir('../'):
             if os.path.isfile('../' + file) and file != job_file and \
                (not params.isValid('no_copy') or file not in params['no_copy']) and \
-               (not params.isValid('no_copy_pattern') or pattern.match(file) is None):
+               (not params.isValid('no_copy_pattern') or pattern.match(file) is None) and \
+               not os.path.exists(file) and \
+               os.path.splitext(file)[1] != '':
                 shutil.copy('../' + file, '.')
 
         # Copy directories
         if params.isValid('copy_files'):
             for file in params['copy_files'].split():
-                print file
                 if os.path.isfile('../' + file):
-                    shutil.copy('../' + file, '.')
+                    if not os.path.exists(file):
+                        shutil.copy('../' + file, '.')
                 elif os.path.isdir('../' + file):
-                    shutil.copytree('../' + file, file)
+                    try:
+                        shutil.copytree('../' + file, file)
+                    except OSError, ex:
+                        if ex.errno == errno.EEXIST: pass
+                        else: raise
 
     def prepareJobScript(self):
         f = open(self.specs['template_script'], 'r')
