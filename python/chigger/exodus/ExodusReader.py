@@ -15,7 +15,6 @@
 import os
 import collections
 import bisect
-
 import vtk
 
 import mooseutils

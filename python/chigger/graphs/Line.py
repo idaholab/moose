@@ -119,9 +119,6 @@ class Line(base.ChiggerObject):
     def update(self, **kwargs):
         """
         Update the line object because of data of settings changed.
-
-        Users should not need to call this method, it should be called automatically. To update
-        the data use the 'UpdateData' method.
         """
         super(Line, self).update(**kwargs)
 
@@ -132,7 +129,6 @@ class Line(base.ChiggerObject):
         # Get the x,y data and reset to None so that data doesn't append over and over
         x = self.getOption('x')
         y = self.getOption('y')
-        self.setOptions(x=None, y=None)
         if (x and y) and (len(x) == len(y)):
             for i in range(len(x)): #pylint: disable=consider-using-enumerate
                 array = vtk.vtkVariantArray()
