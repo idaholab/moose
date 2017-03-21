@@ -19,6 +19,7 @@ validParams<StateSimTester>()
   params.addRequiredParam<UserObjectName>("state_sim_runner", "The StateSimRunner to test.");
   MooseEnum system_enum("SYNCTIMES", "SYNCTIMES");
   params.addParam<MooseEnum>("test_type", system_enum, "The value for testing (SYNCTIMES). Default == SYNCTIMES");
+
   return params;
 }
 
@@ -39,4 +40,5 @@ StateSimTester::getValue()
     default:
       return -1;
   }
+  return -1;
 }
